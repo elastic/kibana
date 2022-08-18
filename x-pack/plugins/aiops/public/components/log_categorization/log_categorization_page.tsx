@@ -9,9 +9,11 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import rison from 'rison-node';
 import { merge, lastValueFrom } from 'rxjs';
 import moment from 'moment';
+import { cloneDeep } from 'lodash';
 import type { SavedSearch } from '@kbn/discover-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { Filter, Query } from '@kbn/es-query';
 import {
   EuiButton,
   EuiSpacer,
@@ -31,21 +33,22 @@ import {
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiFormRow,
+  EuiLoadingContent,
 } from '@elastic/eui';
-import {
-  // SEARCH_QUERY_LANGUAGE,
-  // SearchQueryLanguage,
-  SavedSearchSavedObject,
-} from '../../application/utils/search_utils';
+
 import { useAiOpsKibana } from '../../kibana_context';
 import { API_ENDPOINT } from '../../../common/api';
 import { FullTimeRangeSelector } from '../full_time_range_selector';
 import { DatePickerWrapper } from '../date_picker_wrapper';
-import { useTimefilter } from '../../hooks/use_time_filter';
 import { TimeBuckets } from '../../../common/time_buckets';
 import { MiniHistogram } from '../mini_histogram';
 import { DocumentCountChart } from '../document_count_content/document_count_chart';
 import { useEuiTheme } from '../../hooks/use_eui_theme';
+import { useData } from '../../hooks/use_data';
+import { SearchPanel } from '../search_panel';
+import { SearchQueryLanguage, SavedSearchSavedObject } from '../../application/utils/search_utils';
+import { useUrlState /* , usePageUrlState, AppStateKey*/ } from '../../hooks/url_state';
+import { restorableDefaults } from '../explain_log_rate_spikes/explain_log_rate_spikes_app_state';
 
 export interface LogCategorizationPageProps {
   /** The data view to analyze. */
@@ -81,9 +84,14 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
       data,
     },
   } = useAiOpsKibana();
+  // const [aiopsListState, setAiopsListState] = usePageUrlState(AppStateKey, restorableDefaults);
+  const [aiopsListState, setAiopsListState] = useState(restorableDefaults);
+  const [globalState, setGlobalState] = useUrlState('_g');
   const [field, setField] = useState<string | undefined>();
   const [categories, setCategories] = useState<Category[] | null>(null);
   const [selection, setSelection] = useState<Category[]>([]);
+  const [currentSavedSearch, setCurrentSavedSearch] = useState(savedSearch);
+  const [loading, setLoading] = useState(false);
   const [eventRate, setEventRate] = useState<
     Array<{
       key: number;
@@ -104,9 +112,57 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
     });
   }, [uiSettings]);
 
+  useEffect(() => {
+    if (savedSearch) {
+      setCurrentSavedSearch(savedSearch);
+    }
+  }, [savedSearch]);
+
+  const setSearchParams = useCallback(
+    (searchParams: {
+      searchQuery: Query['query'];
+      searchString: Query['query'];
+      queryLanguage: SearchQueryLanguage;
+      filters: Filter[];
+    }) => {
+      // When the user loads saved search and then clear or modify the query
+      // we should remove the saved search and replace it with the index pattern id
+      if (currentSavedSearch !== null) {
+        setCurrentSavedSearch(null);
+      }
+
+      setAiopsListState({
+        ...aiopsListState,
+        searchQuery: searchParams.searchQuery,
+        searchString: searchParams.searchString,
+        searchQueryLanguage: searchParams.queryLanguage,
+        filters: searchParams.filters,
+      });
+    },
+    [currentSavedSearch, aiopsListState, setAiopsListState]
+  );
+
+  const {
+    // documentStats,
+    timefilter,
+    earliest,
+    latest,
+    searchQueryLanguage,
+    searchString,
+    searchQuery,
+  } = useData(
+    { currentDataView: dataView, currentSavedSearch },
+    aiopsListState,
+    setGlobalState,
+    undefined // currentSelectedChangePoint
+  );
+
   const fields = dataView.fields
-    .getByType('string')
-    .filter(({ displayName }) => !['_id', '_index'].includes(displayName))
+    // .getByType('string')
+    .filter(
+      ({ displayName, esTypes }) =>
+        esTypes && esTypes.includes('text') && !['_id', '_index'].includes(displayName)
+    )
     .map(({ displayName }) => ({
       label: displayName,
     }));
@@ -117,12 +173,8 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
     }
   }, [fields]);
 
-  const timefilter = useTimefilter({
-    timeRangeSelector: dataView?.timeFieldName !== undefined,
-    autoRefreshSelector: true,
-  });
-
   const loadCategories = useCallback(async () => {
+    setLoading(true);
     setCategories(null);
     const { title: index, timeFieldName: timeField } = dataView;
 
@@ -134,14 +186,41 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
     if (timefilterActiveBounds === undefined) {
       return;
     }
-    const from = timefilterActiveBounds.min?.valueOf();
-    const to = timefilterActiveBounds.max?.valueOf();
 
     const BAR_TARGET = 20;
     _timeBuckets.setInterval('auto');
     _timeBuckets.setBounds(timefilterActiveBounds);
     _timeBuckets.setBarTarget(BAR_TARGET);
     const intervalMs = _timeBuckets.getInterval()?.asMilliseconds();
+
+    const query = cloneDeep(searchQuery);
+    if (query.bool === undefined) {
+      query.bool = {};
+    }
+    if (query.bool.must === undefined) {
+      query.bool.must = [];
+      if (query.match_all !== undefined) {
+        query.bool.must.push({ match_all: query.match_all });
+        delete query.match_all;
+      }
+    }
+
+    if (query.multi_match !== undefined) {
+      query.bool.should = {
+        multi_match: query.multi_match,
+      };
+      delete query.multi_match;
+    }
+
+    query.bool.must.push({
+      range: {
+        [timeField]: {
+          gte: earliest,
+          lte: latest,
+          format: 'epoch_millis',
+        },
+      },
+    });
 
     const erResp = await lastValueFrom(
       data.search.search<
@@ -160,33 +239,7 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
           index,
           size: 0,
           body: {
-            query: {
-              bool: {
-                must: [
-                  {
-                    range: {
-                      [timeField]: {
-                        gte: from,
-                        lte: to,
-                        format: 'epoch_millis',
-                      },
-                    },
-                  },
-                  {
-                    bool: {
-                      must: [
-                        {
-                          match_all: {},
-                        },
-                      ],
-                    },
-                  },
-                ],
-              },
-            },
-            _source: {
-              excludes: [],
-            },
+            query,
             aggs: {
               eventRate: {
                 date_histogram: {
@@ -194,8 +247,8 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
                   fixed_interval: `${intervalMs}ms`,
                   min_doc_count: 0,
                   extended_bounds: {
-                    min: from,
-                    max: to,
+                    min: earliest,
+                    max: latest,
                   },
                 },
               },
@@ -216,8 +269,9 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
       index,
       field,
       timeField,
-      from,
-      to,
+      from: earliest,
+      to: latest,
+      query: searchQuery,
       intervalMs,
     });
     const resp = await fetch<Category[]>({ path: API_ENDPOINT.CATEGORIZE, method: 'POST', body });
@@ -234,11 +288,12 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
       return acc;
     }, {} as SparkLinesPerCategory);
     setSparkLines(gg);
-  }, [fetch, field, dataView, timefilter, _timeBuckets, data]);
+    setLoading(false);
+  }, [fetch, field, dataView, timefilter, _timeBuckets, data, searchQuery, earliest, latest]);
 
-  useEffect(() => {
-    loadCategories();
-  }, [loadCategories, fetch, field, dataView, timefilter]);
+  // useEffect(() => {
+  //   loadCategories();
+  // }, [loadCategories, fetch, field, dataView, timefilter]);
 
   useEffect(() => {
     const timeUpdateSubscription = merge(
@@ -278,6 +333,7 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
     const _a = rison.encode({
       columns: [],
       filters: [
+        ...aiopsListState.filters,
         {
           query: {
             bool: {
@@ -298,8 +354,8 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
       index: dataView.id,
       interval: 'auto',
       query: {
-        language: 'kuery',
-        query: '',
+        language: aiopsListState.searchQueryLanguage,
+        query: aiopsListState.searchString,
       },
       sort: [['timestamp', 'desc']],
       viewMode: 'documents',
@@ -492,9 +548,20 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
       <EuiSpacer />
       <EuiFlexGroup gutterSize="none">
         <EuiFlexItem>
+          <SearchPanel
+            dataView={dataView}
+            searchString={searchString ?? ''}
+            searchQuery={searchQuery}
+            searchQueryLanguage={searchQueryLanguage}
+            setSearchParams={setSearchParams}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup gutterSize="none">
+        <EuiFlexItem grow={false} style={{ minWidth: '410px' }}>
           <EuiFormRow label="Category field">
             <EuiComboBox
-              compressed={true}
               options={fields}
               onChange={onFieldChange}
               selectedOptions={field === undefined ? undefined : [{ label: field }]}
@@ -502,6 +569,17 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
             />
           </EuiFormRow>
         </EuiFlexItem>
+        <EuiFlexItem grow={false} style={{ marginTop: 'auto' }}>
+          <EuiButton
+            disabled={field === undefined}
+            onClick={() => {
+              loadCategories();
+            }}
+          >
+            Run categorization
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem />
       </EuiFlexGroup>
       {/* <EuiHorizontalRule /> */}
       {eventRate.length ? (
@@ -524,6 +602,7 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
           <EuiSpacer />
         </>
       ) : null}
+      {loading === true ? <EuiLoadingContent lines={10} /> : null}
       {categories !== null ? (
         <>
           {selection.length > 0 ? (
@@ -549,18 +628,6 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
             isSelectable={true}
             selection={selectionValue}
             itemId="key"
-            // search={{
-            //   box: {
-            //     incremental: true,
-            //   },
-            //   filters,
-            // }}
-            // onTableChange={onTableChange}
-            // pagination={pagination}
-            // sorting={sorting}
-            // rowProps={(item) => ({
-            //   'data-test-subj': `mlSpacesManagementTable-${currentTabId} row-${item.id}`,
-            // })}
             rowProps={(category) => {
               return {
                 onClick: () => {

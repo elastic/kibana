@@ -13,6 +13,7 @@ export const categorizeSchema = schema.object({
   timeField: schema.string(),
   to: schema.number(),
   from: schema.number(),
+  query: schema.any(),
   intervalMs: schema.maybe(schema.number()),
 });
 
