@@ -30,17 +30,17 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
           functionName: 'lambda-python-1',
           coldStart: true,
           billedDuration: 4000,
-          timeout: 2000,
-          coldStartDuration: 1000,
-          faasDuration: 3000,
+          timeout: 10000,
+          coldStartDuration: 4000,
+          faasDuration: 4000,
         },
         {
           functionName: 'lambda-python-2',
           coldStart: false,
           billedDuration: 4000,
-          timeout: 2000,
+          timeout: 10000,
           coldStartDuration: 0,
-          faasDuration: 3000,
+          faasDuration: 4000,
         },
       ];
 
@@ -72,15 +72,15 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
           .generator((timestamp) =>
             instance
               .appMetrics({
-                'system.memory.actual.free': 800,
-                'system.memory.total': 1000,
+                'system.memory.actual.free': 94371840, // ~0.08 gb
+                'system.memory.total': 536870912, // 0.5gb
                 'system.cpu.total.norm.pct': 0.6,
                 'system.process.cpu.total.norm.pct': 0.7,
                 'faas.id': `arn:aws:lambda:us-west-2:123456789012:function:${functionName}`,
                 'faas.coldstart': coldStart,
                 'faas.trigger.type': 'other',
                 'faas.billed_duration': billedDuration,
-                'faas.timeout': faasDuration,
+                'faas.timeout': timeout,
                 'faas.coldstart_duration': coldStartDuration,
                 'faas.duration': faasDuration,
               })

@@ -19,7 +19,7 @@ const chartBase: ChartBase = {
   title: i18n.translate('xpack.apm.agentMetrics.serverless.computeUsage', {
     defaultMessage: 'Compute usage',
   }),
-  key: 'cold_start',
+  key: 'compute_usage',
   type: 'linemark',
   yUnit: 'number',
   series: {
@@ -35,9 +35,11 @@ const computeUsageScript = {
   lang: 'painless',
   source: `
     if(doc.containsKey('${METRIC_SYSTEM_TOTAL_MEMORY}') && doc.containsKey('${FAAS_BILLED_DURATION}')){
-      double faasBilledDurationValue =  doc['${FAAS_BILLED_DURATION}'].value;
-      double totalMemoryValue = doc['${METRIC_SYSTEM_TOTAL_MEMORY}'].value;
-      return totalMemoryValue * faasBilledDurationValue
+      double faasBilledDurationValueMs =  doc['${FAAS_BILLED_DURATION}'].value;
+      double totalMemoryValueBytes = doc['${METRIC_SYSTEM_TOTAL_MEMORY}'].value;
+      double bytesMsResult = totalMemoryValueBytes * faasBilledDurationValueMs;
+      double gigabytesSecondsResult = bytesMsResult / (1024L*1024L*1024L*1000L);
+      return gigabytesSecondsResult;
     }
     
     return null;

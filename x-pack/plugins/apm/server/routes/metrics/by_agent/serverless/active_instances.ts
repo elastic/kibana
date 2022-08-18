@@ -20,7 +20,7 @@ import { getMetricsDateHistogramParams } from '../../../../lib/helpers/metrics';
 import { Setup } from '../../../../lib/helpers/setup_request';
 import { GenericMetricsChart } from '../../fetch_and_transform_metrics';
 
-export async function getConcurrentInvocations({
+export async function getActiveInstances({
   environment,
   kuery,
   setup,
@@ -36,6 +36,14 @@ export async function getConcurrentInvocations({
   end: number;
 }): Promise<GenericMetricsChart> {
   const { apmEventClient, config } = setup;
+
+  const aggs = {
+    activeInstances: {
+      cardinality: {
+        field: SERVICE_NODE_NAME,
+      },
+    },
+  };
 
   const params = {
     apm: {
@@ -55,51 +63,43 @@ export async function getConcurrentInvocations({
         },
       },
       aggs: {
-        concurrentInvocations: {
-          terms: {
-            field: SERVICE_NODE_NAME,
-            // TODO: check if size 10 is enough
-          },
-          aggs: {
-            timeseriesData: {
-              date_histogram: getMetricsDateHistogramParams({
-                start,
-                end,
-                metricsInterval: config.metricsInterval,
-              }),
-            },
-          },
+        ...aggs,
+        timeseriesData: {
+          date_histogram: getMetricsDateHistogramParams({
+            start,
+            end,
+            metricsInterval: config.metricsInterval,
+          }),
+          aggs,
         },
       },
     },
   };
 
   const { aggregations } = await apmEventClient.search(
-    'get_concurrent_invocattions',
+    'get_active_instances',
     params
   );
 
   return {
-    title: i18n.translate(
-      'xpack.apm.agentMetrics.serverless.concurrentInvocations',
-      { defaultMessage: 'Concurrent invocations' }
-    ),
-    key: 'concurrent_invocations',
+    title: i18n.translate('xpack.apm.agentMetrics.serverless.activeInstances', {
+      defaultMessage: 'Active instances',
+    }),
+    key: 'active_instances',
     yUnit: 'number',
-    series:
-      aggregations?.concurrentInvocations.buckets.map((bucket, i) => {
-        const { key, timeseriesData, doc_count: docCount } = bucket;
-        return {
-          title: key as string,
-          key: key as string,
-          type: 'linemark',
-          color: getVizColorForIndex(i, theme),
-          overallValue: docCount,
-          data: timeseriesData.buckets.map((timeseriesBucket) => ({
+    series: [
+      {
+        title: 'Active instances',
+        key: 'active_instances',
+        type: 'linemark',
+        color: getVizColorForIndex(0, theme),
+        overallValue: aggregations?.activeInstances.value ?? 0,
+        data:
+          aggregations?.timeseriesData.buckets.map((timeseriesBucket) => ({
             x: timeseriesBucket.key,
             y: timeseriesBucket.doc_count,
-          })),
-        };
-      }) || [],
+          })) || [],
+      },
+    ],
   };
 }

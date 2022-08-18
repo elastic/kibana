@@ -6,29 +6,28 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FAAS_COLDSTART_DURATION } from '../../../../../common/elasticsearch_fieldnames';
+import { FAAS_COLDSTART } from '../../../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../../../lib/helpers/setup_request';
 import { fetchAndTransformMetrics } from '../../fetch_and_transform_metrics';
 import { ChartBase } from '../../types';
 
 const chartBase: ChartBase = {
-  title: i18n.translate('xpack.apm.agentMetrics.serverless.coldStartDuration', {
-    defaultMessage: 'Cold start duration',
+  title: i18n.translate('xpack.apm.agentMetrics.serverless.coldStart', {
+    defaultMessage: 'Cold start',
   }),
-  key: 'cold_start_duration',
+  key: 'cold_start_count',
   type: 'linemark',
   yUnit: 'number',
   series: {
     coldStart: {
-      title: i18n.translate(
-        'xpack.apm.agentMetrics.serverless.coldStartDuration',
-        { defaultMessage: 'Cold start duration' }
-      ),
+      title: i18n.translate('xpack.apm.agentMetrics.serverless.coldStart', {
+        defaultMessage: 'Cold start',
+      }),
     },
   },
 };
 
-export function getColdStartDuration({
+export function getColdStartCount({
   environment,
   kuery,
   setup,
@@ -54,8 +53,8 @@ export function getColdStartDuration({
     start,
     end,
     chartBase,
-    aggs: { coldStart: { avg: { field: FAAS_COLDSTART_DURATION } } },
-    additionalFilters: [{ exists: { field: FAAS_COLDSTART_DURATION } }],
-    operationName: 'get_cold_start_duration',
+    aggs: { coldStart: { sum: { field: FAAS_COLDSTART } } },
+    additionalFilters: [{ term: { [FAAS_COLDSTART]: true } }],
+    operationName: 'get_cold_start_count',
   });
 }

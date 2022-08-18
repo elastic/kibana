@@ -49,12 +49,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     'Serverless metrics charts when data is loaded',
     { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
     () => {
-      const MEMORY_TOTAL = 1000;
-      const MEMORY_FREE = 800;
-      const BILLED_DURATION_MS = 1000;
-      const FAAS_TIMEOUT_MS = 2000;
+      const MEMORY_TOTAL = 536870912; // 0.5gb;
+      const MEMORY_FREE = 94371840; // ~0.08 gb;
+      const BILLED_DURATION_MS = 4000;
+      const FAAS_TIMEOUT_MS = 10000;
       const COLD_START_PYTHON = true;
-      const COLD_START_DURATION_PYTHON = 3000;
+      const COLD_START_DURATION_PYTHON = 4000;
       const COLD_START_NODE = false;
       const COLD_START_DURATION_NODE = 0;
       const FAAS_DURATION = 4000;
@@ -148,16 +148,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         it('returns all metrics chart', () => {
           expect(metrics.charts.length).to.be.greaterThan(0);
           expect(metrics.charts.map(({ title }) => title).sort()).to.eql([
+            'Active instances',
             'Avg. Duration',
             'Cold start',
+            'Cold start duration',
             'Compute usage',
-            'Concurrent invocations',
             'System memory usage',
           ]);
         });
 
         it('returns correct overallValue on avg duration chart', () => {
-          const metric = metrics.charts.find((chart) => chart.title === 'Avg. Duration');
+          const metric = metrics.charts.find((chart) => chart.key === 'avg_duration');
           expect(metric).not.to.be.empty();
           const billedDurationSeries = metric?.series.find(
             ({ title }) => title === 'Billed Duration'
@@ -173,13 +174,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('returns correct overallValue on Cold start chart', () => {
-          const metric = metrics.charts.find((chart) => chart.title === 'Cold start');
+          const metric = metrics.charts.find((chart) => chart.key === 'cold_start_duration');
           expect(metric).not.to.be.empty();
           expect(metric?.series[0].overallValue).to.equal(COLD_START_DURATION_PYTHON);
         });
 
         it('returns correct overallValue on System memory usage chart', () => {
-          const metric = metrics.charts.find((chart) => chart.title === 'System memory usage');
+          const metric = metrics.charts.find((chart) => chart.key === 'memory_usage_chart');
           expect(metric).not.to.be.empty();
 
           const memoryValue = roundNumber(1 - MEMORY_FREE / MEMORY_TOTAL);
@@ -195,16 +196,23 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('returns correct overallValue on Compute usage chart', () => {
-          const metric = metrics.charts.find((chart) => chart.title === 'Compute usage');
+          const metric = metrics.charts.find((chart) => chart.key === 'compute_usage');
           expect(metric).not.to.be.empty();
-          expect(metric?.series[0].overallValue).to.equal(MEMORY_TOTAL * BILLED_DURATION_MS);
+          const bytesMs = MEMORY_TOTAL * BILLED_DURATION_MS;
+          const gbSecs = bytesMs / (1024 * 1024 * 1024 * 1000);
+          expect(metric?.series[0].overallValue).to.equal(gbSecs);
         });
 
-        it('returns correct overallValue on Concurrent invocations chart', () => {
-          const metric = metrics.charts.find((chart) => chart.title === 'Concurrent invocations');
+        it('returns correct overallValue on Active instances chart', () => {
+          const metric = metrics.charts.find((chart) => chart.key === 'active_instances');
           expect(metric).not.to.be.empty();
-          expect(metric?.series[0].title).to.equal('instance-python');
-          expect(metric?.series[0].overallValue).to.equal(15);
+          expect(metric?.series[0].overallValue).to.equal(1);
+        });
+
+        it('returns correct overallValue on cold start count chart', () => {
+          const metric = metrics.charts.find((chart) => chart.key === 'cold_start_count');
+          expect(metric).not.to.be.empty();
+          expect(metric?.series[0].overallValue).to.equal(30);
         });
       });
 
@@ -223,25 +231,25 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         it('returns all metrics chart', () => {
           expect(metrics.charts.length).to.be.greaterThan(0);
           expect(metrics.charts.map(({ title }) => title).sort()).to.eql([
+            'Active instances',
             'Avg. Duration',
             'Cold start',
+            'Cold start duration',
             'Compute usage',
-            'Concurrent invocations',
             'System memory usage',
           ]);
         });
 
         it('returns correct overallValue on Cold start chart', () => {
-          const metric = metrics.charts.find((chart) => chart.title === 'Cold start');
+          const metric = metrics.charts.find((chart) => chart.key === 'cold_start_duration');
           expect(metric).not.to.be.empty();
           expect(metric?.series[0].overallValue).to.equal(COLD_START_DURATION_NODE);
         });
 
-        it('returns correct overallValue on Concurrent invocations chart', () => {
-          const metric = metrics.charts.find((chart) => chart.title === 'Concurrent invocations');
+        it('returns correct overallValue on cold start count chart', () => {
+          const metric = metrics.charts.find((chart) => chart.key === 'cold_start_count');
           expect(metric).not.to.be.empty();
-          expect(metric?.series[0].title).to.equal('instance-node');
-          expect(metric?.series[0].overallValue).to.equal(15);
+          expect(metric?.series).to.be.empty();
         });
       });
     }

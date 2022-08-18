@@ -11,7 +11,8 @@ import { getDuration } from './duration';
 import { getColdStartDuration } from './cold_start_duration';
 import { getMemoryChartData } from '../shared/memory';
 import { getComputeUsage } from './compute_usage';
-import { getConcurrentInvocations } from './concurrent_invocations';
+import { getActiveInstances } from './active_instances';
+import { getColdStartCount } from './cold_start_count';
 
 export function getServerlessAgentMetricCharts({
   environment,
@@ -42,9 +43,10 @@ export function getServerlessAgentMetricCharts({
     return await Promise.all([
       getDuration({ ...options, serviceNodeName }),
       getColdStartDuration({ ...options, serviceNodeName }),
+      getColdStartCount({ ...options, serviceNodeName }),
       getMemoryChartData({ ...options, serviceNodeName }),
       getComputeUsage({ ...options, serviceNodeName }),
-      getConcurrentInvocations(options),
+      getActiveInstances(options),
     ]);
   });
 }
