@@ -18,17 +18,17 @@ import {
 import { useChartTheme } from '@kbn/observability-plugin/public';
 import { Chart, Partition, Settings, Datum } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { IndexLifecyclePhaseSelectOption } from '../../../../../common/storage_explorer_types';
-import { useApmParams } from '../../../../hooks/use_apm_params';
-import { useTimeRange } from '../../../../hooks/use_time_range';
-import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
-import { useProgressiveFetcher } from '../../../../hooks/use_progressive_fetcher';
-import { useApmRouter } from '../../../../hooks/use_apm_router';
-import { asInteger } from '../../../../../common/utils/formatters/formatters';
-import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
-import { asDynamicBytes } from '../../../../../common/utils/formatters';
-import { getComparisonEnabled } from '../../../shared/time_comparison/get_comparison_enabled';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { IndexLifecyclePhaseSelectOption } from '../../../../../../common/storage_explorer_types';
+import { useApmParams } from '../../../../../hooks/use_apm_params';
+import { useTimeRange } from '../../../../../hooks/use_time_range';
+import { FETCH_STATUS } from '../../../../../hooks/use_fetcher';
+import { useProgressiveFetcher } from '../../../../../hooks/use_progressive_fetcher';
+import { useApmRouter } from '../../../../../hooks/use_apm_router';
+import { asInteger } from '../../../../../../common/utils/formatters/formatters';
+import { NOT_AVAILABLE_LABEL } from '../../../../../../common/i18n';
+import { asDynamicBytes } from '../../../../../../common/utils/formatters';
+import { getComparisonEnabled } from '../../../../shared/time_comparison/get_comparison_enabled';
+import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
 
 interface Props {
   serviceName: string;
