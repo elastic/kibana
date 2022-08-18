@@ -8,6 +8,7 @@
 import uuid from 'uuid';
 import { range } from 'lodash';
 import { RuleType } from '@kbn/alerting-plugin/server';
+import { ALERT_ACTION_GROUP, ALERT_INSTANCE_ID } from '@kbn/rule-data-utils';
 import {
   DEFAULT_INSTANCES_TO_GENERATE,
   ALERTING_EXAMPLE_APP_ID,
@@ -55,6 +56,7 @@ export const alertType: RuleType<
   defaultActionGroupId: DEFAULT_ACTION_GROUP,
   minimumLicenseRequired: 'basic',
   isExportable: true,
+  useLegacyAlerts: false,
   async executor({
     services,
     params: { instances = DEFAULT_INSTANCES_TO_GENERATE, thresholds },
@@ -65,14 +67,9 @@ export const alertType: RuleType<
     range(instances)
       .map(() => uuid.v4())
       .forEach((id: string) => {
-        services.alertFactory
-          .create(id)
-          .replaceState({ triggerdOnCycle: count })
-          .scheduleActions(getTShirtSizeByIdAndThreshold(id, thresholds));
-
         services.alertsClient.create({
-          id,
-          actionGroup: getTShirtSizeByIdAndThreshold(id, thresholds),
+          [ALERT_INSTANCE_ID]: id,
+          [ALERT_ACTION_GROUP]: getTShirtSizeByIdAndThreshold(id, thresholds),
           triggerdOnCycle: count,
         });
       });

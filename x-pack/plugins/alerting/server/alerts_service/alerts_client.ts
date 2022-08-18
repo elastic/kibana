@@ -162,7 +162,7 @@ export class AlertsClient implements IAlertsClient {
       throw new Error(`Can't create new alerts after calling getRecoveredAlerts()!`);
     }
 
-    if (this.createdAlerts.find((a) => a.id === alert.id)) {
+    if (this.createdAlerts.find(({ [ALERT_INSTANCE_ID]: id }) => id === alert[ALERT_INSTANCE_ID])) {
       throw new Error(`Can't create alert multiple times!`);
     }
 
@@ -203,6 +203,7 @@ export class AlertsClient implements IAlertsClient {
   }
 
   public update(id: string, updatedAlert: Partial<AlertSchema>) {
+    this.options.logger.info(`updating alert ${id}`);
     // Make sure we're updating something that exists
     const existingAlert = this.existingAlerts.find(
       ({ [ALERT_INSTANCE_ID]: alertId }) => id === alertId
@@ -260,7 +261,7 @@ export class AlertsClient implements IAlertsClient {
     const esClient = await this.options.elasticsearchClientPromise;
     await esClient.bulk({
       body: this.preparedAlerts.flatMap((alert) => [
-        { index: { _id: alert.uuid, _index: DEFAULT_ALERTS_INDEX, require_alias: false } },
+        { index: { _id: alert[ALERT_UUID], _index: DEFAULT_ALERTS_INDEX, require_alias: false } },
         alert,
       ]),
     });
@@ -322,18 +323,18 @@ export class AlertsClient implements IAlertsClient {
     for (const alert of this.createdAlerts) {
       // Look for this alert in existing alerts
       const existingAlert = this.existingAlerts.find(
-        ({ [ALERT_INSTANCE_ID]: id }) => id === alert.id
+        ({ [ALERT_INSTANCE_ID]: id }) => id === alert[ALERT_INSTANCE_ID]
       );
       if (existingAlert) {
-        // Copy over start time and uuid and update duration
+        // Copy over start time and update duration
         const durationInMs =
-          new Date(currentTime).valueOf() - new Date(existingAlert.start as string).valueOf();
-        const duration = existingAlert.start ? millisToNanos(durationInMs) : undefined;
+          new Date(currentTime).valueOf() -
+          new Date(existingAlert[ALERT_START] as string).valueOf();
+        const duration = existingAlert[ALERT_START] ? millisToNanos(durationInMs) : undefined;
         this.preparedAlerts.push({
           ...alert,
-          ...(existingAlert.start ? { [ALERT_START]: existingAlert.start } : {}),
+          ...(existingAlert[ALERT_START] ? { [ALERT_START]: existingAlert[ALERT_START] } : {}),
           ...(duration !== undefined ? { [ALERT_DURATION]: duration } : {}),
-          ...(existingAlert.uuid ? { [ALERT_UUID]: existingAlert.uuid } : {}),
           [EVENT_ACTION]: 'active',
         });
       } else {
@@ -387,14 +388,20 @@ export class AlertsClient implements IAlertsClient {
       for (const alert of recoveredAlerts) {
         // Look for updates to this alert
         const updatedAlert = this.updatedAlerts.find(
-          ({ [ALERT_INSTANCE_ID]: id }) => id === alert.id
+          ({ [ALERT_INSTANCE_ID]: id }) => id === alert[ALERT_INSTANCE_ID]
         );
+
+        const durationInMs =
+          new Date(currentTime).valueOf() - new Date(alert[ALERT_START] as string).valueOf();
+        const duration = alert[ALERT_START] ? millisToNanos(durationInMs) : undefined;
+
         if (updatedAlert) {
           this.preparedAlerts.push({
             ...alert,
             ...updatedAlert,
             [ALERT_ACTION_GROUP]: this.options.ruleType.recoveryActionGroup.id,
             [ALERT_STATUS]: 'recovered',
+            [ALERT_DURATION]: duration,
             [ALERT_END]: currentTime,
             [EVENT_ACTION]: 'recovered',
           });
@@ -408,13 +415,14 @@ export class AlertsClient implements IAlertsClient {
             ...alert,
             [ALERT_ACTION_GROUP]: this.options.ruleType.recoveryActionGroup.id,
             [ALERT_STATUS]: 'recovered',
+            [ALERT_DURATION]: duration,
             [ALERT_END]: currentTime,
             [EVENT_ACTION]: 'recovered',
           });
 
           if (this.options.ruleType.doesSetRecoveryContext) {
             this.options.logger.debug(
-              `rule ${this.ruleLogPrefix} has no recovery context specified for recovered alert ${alert.id}`
+              `rule ${this.ruleLogPrefix} has no recovery context specified for recovered alert ${alert[ALERT_UUID]}`
             );
           }
         }
@@ -423,14 +431,15 @@ export class AlertsClient implements IAlertsClient {
   }
 
   private logAlerts(eventLogger: AlertingEventLogger, metricsStore: RuleRunMetricsStore) {
-    const activeAlerts = this.createdAlerts.filter(
+    this.options.logger.info(`logging alerts to event log`);
+    const activeAlerts = this.preparedAlerts.filter(
       ({ [ALERT_STATUS]: status }) => status === 'active'
     );
-    const newAlerts = this.createdAlerts.filter(
+    const newAlerts = this.preparedAlerts.filter(
       ({ [ALERT_STATUS]: status, [ALERT_DURATION]: duration }) =>
         status === 'active' && duration === '0'
     );
-    const recoveredAlerts = this.createdAlerts.filter(
+    const recoveredAlerts = this.preparedAlerts.filter(
       ({ [ALERT_STATUS]: status }) => status === 'recovered'
     );
 
