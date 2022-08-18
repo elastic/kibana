@@ -127,6 +127,7 @@ export const TopNFunctionsTable = ({
       name: i18n.translate('xpack.profiling.functionsView.rankColumnLabel', {
         defaultMessage: 'Rank',
       }),
+      align: 'right',
     },
     {
       field: TopNFunctionSortField.Frame,
@@ -154,6 +155,7 @@ export const TopNFunctionsTable = ({
       name: i18n.translate('xpack.profiling.functionsView.samplesColumnLabel', {
         defaultMessage: 'Samples',
       }),
+      align: 'right',
     },
     {
       field: TopNFunctionSortField.ExclusiveCPU,
@@ -163,6 +165,7 @@ export const TopNFunctionsTable = ({
       render: (_, { exclusiveCPU, diff }) => {
         return <CPUStat cpu={exclusiveCPU} diffCPU={diff?.exclusiveCPU} />;
       },
+      align: 'right',
     },
     {
       field: TopNFunctionSortField.InclusiveCPU,
@@ -172,6 +175,7 @@ export const TopNFunctionsTable = ({
       render: (_, { inclusiveCPU, diff }) => {
         return <CPUStat cpu={inclusiveCPU} diffCPU={diff?.inclusiveCPU} />;
       },
+      align: 'right',
     },
   ];
 
