@@ -11,7 +11,7 @@ import ReactDOM from 'react-dom';
 import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-let isOpenConfirmPanel = true;
+let isOpenConfirmPanel = false;
 
 export const showConfirmPanel = ({
   onConfirm,

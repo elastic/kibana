@@ -17,11 +17,18 @@ export const usePersistedDataView = (dataView: DataView) => {
 
   const persistDataView = useCallback(async () => {
     try {
-      return await services.dataViews.createAndSave({
+      const response = await services.dataViews.createAndSave({
         id: dataView.id,
         title: dataView.title,
         timeFieldName: dataView.timeFieldName,
       });
+
+      const message = i18n.translate('discover.dataViewPersist.message', {
+        defaultMessage: "Saved '{dataViewName}'",
+        values: { dataViewName: response.getName() },
+      });
+      services.toastNotifications.addSuccess(message);
+      return response;
     } catch (error) {
       services.toastNotifications.addDanger({
         title: i18n.translate('discover.dataViewPersistError.title', {
