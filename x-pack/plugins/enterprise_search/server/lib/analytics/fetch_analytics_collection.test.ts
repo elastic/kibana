@@ -8,8 +8,6 @@
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { ANALYTICS_COLLECTIONS_INDEX } from '../..';
 import { fetchAnalyticsCollectionByName } from './fetch_analytics_collection';
-import { addAnalyticsCollection } from './add_analytics_collection';
-import { ErrorCode } from '@kbn/enterprise-search-plugin/common/types/error_codes';
 import { setupAnalyticsCollectionIndex } from './setup_indices';
 
 jest.mock('./setup_indices', () => ({
