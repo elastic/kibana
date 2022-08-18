@@ -22,6 +22,7 @@ export async function getHostedPolicies(
   // get the agent policies for those ids
   const agentPolicies = await agentPolicyService.getByIDs(soClient, Array.from(policyIdsToGet), {
     fields: ['is_managed'],
+    ignoreMissing: true,
   });
   const hostedPolicies = agentPolicies.reduce<Record<string, boolean>>((acc, policy) => {
     acc[policy.id] = policy.is_managed;

@@ -101,6 +101,95 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
+    describe('POST /api/fleet/package_policies/_bulk_get', async function () {
+      let agentPolicyId: string;
+      let packagePolicyId: string;
+
+      before(async function () {
+        if (!server.enabled) {
+          return;
+        }
+
+        const { body: agentPolicyResponse } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Test policy',
+            namespace: 'default',
+          });
+        agentPolicyId = agentPolicyResponse.item.id;
+
+        const { body: packagePolicyResponse } = await supertest
+          .post(`/api/fleet/package_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'filetest-1',
+            description: '',
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            enabled: true,
+            output_id: '',
+            inputs: [],
+            package: {
+              name: 'filetest',
+              title: 'For File Tests',
+              version: '0.1.0',
+            },
+          });
+        packagePolicyId = packagePolicyResponse.item.id;
+      });
+
+      after(async function () {
+        if (!server.enabled) {
+          return;
+        }
+
+        await supertest
+          .post(`/api/fleet/agent_policies/delete`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ agentPolicyId })
+          .expect(200);
+
+        await supertest
+          .post(`/api/fleet/package_policies/delete`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ packagePolicyIds: [packagePolicyId] })
+          .expect(200);
+      });
+
+      it('should succeed with valid ids', async function () {
+        const {
+          body: { items },
+        } = await supertest
+          .post(`/api/fleet/package_policies/_bulk_get`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ ids: [packagePolicyId] })
+          .expect(200);
+
+        expect(items.length).eql(1);
+      });
+
+      it('should return 404 with invvalid ids', async function () {
+        await supertest
+          .post(`/api/fleet/package_policies/_bulk_get`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ ids: ['invalid-id-i-do-not-exists'] })
+          .expect(404);
+      });
+
+      it('should succeed with mixed valid ids and invalid ids and ignoreMissing flag ', async function () {
+        const {
+          body: { items },
+        } = await supertest
+          .post(`/api/fleet/package_policies/_bulk_get`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ ids: [packagePolicyId, 'invalid-id-i-do-not-exists'], ignoreMissing: true })
+          .expect(200);
+
+        expect(items.length).eql(1);
+      });
+    });
+
     describe('get orphaned policies', () => {
       let agentPolicyId: string;
       let packagePolicyId: string;

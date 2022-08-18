@@ -14,13 +14,14 @@ import type {
   FullAgentPolicyInput,
 } from '../models';
 
-import type { ListResult, ListWithKuery } from './common';
+import type { BulkGetResult, ListResult, ListWithKuery } from './common';
 
 export interface GetPackagePoliciesRequest {
   query: ListWithKuery;
 }
 
 export type GetPackagePoliciesResponse = ListResult<PackagePolicy>;
+export type BulkGetPackagePoliciesResponse = BulkGetResult<PackagePolicy>;
 
 export interface GetOnePackagePolicyRequest {
   params: {

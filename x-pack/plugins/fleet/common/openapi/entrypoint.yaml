@@ -82,6 +82,8 @@ paths:
     $ref: 'paths/agent_policies@{agent_policy_id}.yaml'
   '/agent_policies/{agentPolicyId}/copy':
     $ref: 'paths/agent_policies@{agent_policy_id}@copy.yaml'
+  /agent_policies/_bulk_get:
+    $ref: paths/agent_policies@_bulk_get.yaml
   /agent_policies/delete:
     $ref: paths/agent_policies@delete.yaml
   # Data streams endpoints
@@ -99,6 +101,8 @@ paths:
   #  Package policies endpoints
   /package_policies:
     $ref: paths/package_policies.yaml
+  /package_policies/_bulk_get:
+    $ref: paths/package_policies@_bulk_get.yaml
   /package_policies/delete:
     $ref: paths/package_policies@delete.yaml
   /package_policies/upgrade:

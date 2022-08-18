@@ -138,8 +138,8 @@ describe('When calling package policy', () => {
 
     // Set the routeConfig and routeHandler to the Create API
     beforeEach(() => {
-      [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
-        path.startsWith(PACKAGE_POLICY_API_ROUTES.CREATE_PATTERN)
+      [routeConfig, routeHandler] = routerMock.post.mock.calls.find(
+        ([{ path }]) => path === PACKAGE_POLICY_API_ROUTES.CREATE_PATTERN
       )!;
     });
 

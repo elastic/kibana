@@ -22,4 +22,9 @@ export const ListWithKuerySchema = schema.object({
   ),
 });
 
+export const BulkRequestBodySchema = schema.object({
+  ids: schema.arrayOf(schema.string(), { minSize: 1 }),
+  ignoreMissing: schema.maybe(schema.boolean()),
+});
+
 export type ListWithKuery = TypeOf<typeof ListWithKuerySchema>;
