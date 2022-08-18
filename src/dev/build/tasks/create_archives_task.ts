@@ -28,7 +28,7 @@ export const CreateArchives: Task = {
       const destination = build.getPlatformArchivePath(platform);
 
       log.info('archiving', source, 'to', destination);
-
+      const compressionLevel = config.isRelease ? 9 : 6;
       await mkdirp(Path.dirname(destination));
 
       switch (Path.extname(destination)) {
@@ -41,7 +41,7 @@ export const CreateArchives: Task = {
               destination,
               archiverOptions: {
                 zlib: {
-                  level: 9,
+                  level: compressionLevel,
                 },
               },
               createRootDirectory: true,
@@ -60,7 +60,7 @@ export const CreateArchives: Task = {
               archiverOptions: {
                 gzip: true,
                 gzipOptions: {
-                  level: 9,
+                  level: compressionLevel,
                 },
               },
               createRootDirectory: true,
