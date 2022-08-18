@@ -414,6 +414,8 @@ Observability::
 Platform::
 * Migrations wait for index status green if create index returns acknowledged=false or shardsAcknowledged=false {kibana-pull}136605[#136605]
 * Fixes CSV generator to include unmapped fields in the search source {kibana-pull}132972[#132972]
+Security::
+Fixes keyboard and screen reader navigation for the spaces selector {kibana-pull}134454[#134454]
 
 //////////////////
 
