@@ -6,7 +6,29 @@
  */
 import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { millisToNanos } from '@kbn/event-log-plugin/server';
-import { cloneDeep } from 'lodash';
+import {
+  ALERT_ACTION_GROUP,
+  ALERT_ACTION_SUBGROUP,
+  ALERT_DURATION,
+  ALERT_END,
+  ALERT_INSTANCE_ID,
+  ALERT_LAST_NOTIFIED_DATE,
+  ALERT_RULE_CATEGORY,
+  ALERT_RULE_CONSUMER,
+  ALERT_RULE_EXECUTION_UUID,
+  ALERT_RULE_NAME,
+  ALERT_RULE_PRODUCER,
+  ALERT_RULE_TAGS,
+  ALERT_RULE_TYPE_ID,
+  ALERT_RULE_UUID,
+  ALERT_START,
+  ALERT_STATUS,
+  ALERT_UUID,
+  ALERT_WORKFLOW_STATUS,
+  EVENT_ACTION,
+  TIMESTAMP,
+} from '@kbn/rule-data-utils';
+import { cloneDeep, omit } from 'lodash';
 import uuid from 'uuid';
 import { parseDuration } from '../lib';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
@@ -33,6 +55,7 @@ interface AlertsClientParams {
 }
 export class AlertsClient implements IAlertsClient {
   private rule: AlertRuleSchema | null = null;
+  private ruleLogPrefix: string | null = null;
 
   private hasCalledGetRecoveredAlerts: boolean = false;
   private reachedAlertLimit: boolean = false;
@@ -55,8 +78,19 @@ export class AlertsClient implements IAlertsClient {
 
   constructor(private readonly options: AlertsClientParams) {}
 
-  public setRuleData(rule: AlertRuleSchema) {
-    this.rule = rule;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public setRuleData(rule: any) {
+    this.rule = {
+      [ALERT_RULE_CATEGORY]: this.options.ruleType.name,
+      [ALERT_RULE_CONSUMER]: rule.consumer,
+      [ALERT_RULE_EXECUTION_UUID]: rule.executionId,
+      [ALERT_RULE_NAME]: rule.name,
+      [ALERT_RULE_PRODUCER]: this.options.ruleType.producer,
+      [ALERT_RULE_TAGS]: rule.tags,
+      [ALERT_RULE_TYPE_ID]: this.options.ruleType.id,
+      [ALERT_RULE_UUID]: rule.id,
+    };
+    this.ruleLogPrefix = `${this.options.ruleType.id}:${rule.id}: '${rule.name}'`;
   }
 
   public hasReachedAlertLimit() {
@@ -92,7 +126,7 @@ export class AlertsClient implements IAlertsClient {
                     // Using .keyword because index mapping is set to dynamic = true
                     // so rule.id is auto-mapped as text. Update when we're using an actual
                     // index mapping
-                    'rule.id.keyword': ruleId,
+                    [`${ALERT_RULE_UUID}.keyword`]: ruleId,
                   },
                 },
                 {
@@ -100,7 +134,7 @@ export class AlertsClient implements IAlertsClient {
                     // Using .keyword because index mapping is set to dynamic = true
                     // so rule.id is auto-mapped as text. Update when we're using an actual
                     // index mapping
-                    'rule.execution.id.keyword': previousRuleExecutionUuid,
+                    [`${ALERT_RULE_EXECUTION_UUID}.keyword`]: previousRuleExecutionUuid,
                   },
                 },
               ],
@@ -140,9 +174,9 @@ export class AlertsClient implements IAlertsClient {
     // Fill in rule information
     this.createdAlerts.push({
       ...alert,
-      status: 'active',
-      rule: this.rule,
-      '@timestamp': new Date().toISOString(),
+      ...this.rule,
+      [ALERT_STATUS]: 'active',
+      [TIMESTAMP]: new Date().toISOString(),
     });
   }
 
@@ -152,38 +186,54 @@ export class AlertsClient implements IAlertsClient {
 
   public getRecoveredAlerts(): AlertSchema[] {
     this.hasCalledGetRecoveredAlerts = true;
-    if (this.options.ruleType.autoRecoverAlerts || !this.options.ruleType.doesSetRecoveryContext) {
+    if (!this.options.ruleType.autoRecoverAlerts || !this.options.ruleType.doesSetRecoveryContext) {
       this.options.logger.debug(
         `Set doesSetRecoveryContext and autoRecoverAlerts to true on rule type to get access to recovered alerts.`
       );
       return [];
     }
-    return [];
+
+    // Return a copy so existing alerts cannot be accidentally mutated
+    return cloneDeep(
+      this.existingAlerts.filter(
+        ({ [ALERT_INSTANCE_ID]: id1 }) =>
+          !this.createdAlerts.some(({ [ALERT_INSTANCE_ID]: id2 }) => id2 === id1)
+      )
+    );
   }
 
   public update(id: string, updatedAlert: Partial<AlertSchema>) {
     // Make sure we're updating something that exists
-    const existingAlert = this.existingAlerts.find(({ id: alertId }) => id === alertId);
+    const existingAlert = this.existingAlerts.find(
+      ({ [ALERT_INSTANCE_ID]: alertId }) => id === alertId
+    );
     if (existingAlert) {
       // Make sure we're not allowing updates to fields that shouldn't be updated
       // by the rule type
-      const {
-        id: alertId,
-        uuid: alertUuid,
-        status,
-        start,
-        duration,
-        end,
-        actionGroup,
-        actionSubGroup,
-        rule,
-        ...restAlert
-      } = updatedAlert;
+      const alert = omit(updatedAlert, [
+        ALERT_INSTANCE_ID,
+        ALERT_UUID,
+        ALERT_STATUS,
+        ALERT_START,
+        ALERT_DURATION,
+        ALERT_END,
+        ALERT_ACTION_GROUP,
+        ALERT_ACTION_SUBGROUP,
+        ALERT_LAST_NOTIFIED_DATE,
+        ALERT_RULE_CATEGORY,
+        ALERT_RULE_CONSUMER,
+        ALERT_RULE_EXECUTION_UUID,
+        ALERT_RULE_NAME,
+        ALERT_RULE_PRODUCER,
+        ALERT_RULE_TAGS,
+        ALERT_RULE_TYPE_ID,
+        ALERT_RULE_UUID,
+      ]);
 
       this.updatedAlerts.push({
         ...existingAlert,
-        ...restAlert,
-        '@timestamp': new Date().toISOString(),
+        ...alert,
+        [TIMESTAMP]: new Date().toISOString(),
       });
     } else {
       this.options.logger.warn(`trying to update alert with ${id} which does not exist`);
@@ -271,7 +321,9 @@ export class AlertsClient implements IAlertsClient {
     // Active alerts
     for (const alert of this.createdAlerts) {
       // Look for this alert in existing alerts
-      const existingAlert = this.existingAlerts.find(({ id }) => id === alert.id);
+      const existingAlert = this.existingAlerts.find(
+        ({ [ALERT_INSTANCE_ID]: id }) => id === alert.id
+      );
       if (existingAlert) {
         // Copy over start time and uuid and update duration
         const durationInMs =
@@ -279,29 +331,29 @@ export class AlertsClient implements IAlertsClient {
         const duration = existingAlert.start ? millisToNanos(durationInMs) : undefined;
         this.preparedAlerts.push({
           ...alert,
-          ...(existingAlert.start ? { start: existingAlert.start } : {}),
-          ...(duration !== undefined ? { duration } : {}),
-          ...(existingAlert.uuid ? { uuid: existingAlert.uuid } : {}),
-          action: 'active',
+          ...(existingAlert.start ? { [ALERT_START]: existingAlert.start } : {}),
+          ...(duration !== undefined ? { [ALERT_DURATION]: duration } : {}),
+          ...(existingAlert.uuid ? { [ALERT_UUID]: existingAlert.uuid } : {}),
+          [EVENT_ACTION]: 'active',
         });
       } else {
         // Add current time as start time, seed duration with '0' and generate uuid
         this.preparedAlerts.push({
           ...alert,
-          start: currentTime,
-          duration: '0',
-          uuid: uuid.v4(),
+          [ALERT_START]: currentTime,
+          [ALERT_DURATION]: '0',
+          [ALERT_UUID]: uuid.v4(),
 
           // adding these because lifecycle executor adds these
-          workflowStatus: 'open',
-          action: 'new',
+          [ALERT_WORKFLOW_STATUS]: 'open',
+          [EVENT_ACTION]: 'new',
         });
       }
     }
 
     if (this.createdAlerts.length > 0) {
       this.options.logger.debug(
-        `rule ${this.options.ruleType.id}:${this.rule?.id}: '${this.rule?.name}' has ${
+        `rule ${this.ruleLogPrefix} has ${
           this.createdAlerts.length
         } active alerts: ${JSON.stringify(
           this.createdAlerts.map(({ id, actionGroup }) => ({
@@ -316,12 +368,13 @@ export class AlertsClient implements IAlertsClient {
     if (shouldRecover) {
       this.options.logger.info('calculating recovery alerts');
       const recoveredAlerts = this.existingAlerts.filter(
-        ({ id: id1 }) => !this.createdAlerts.some(({ id: id2 }) => id2 === id1)
+        ({ [ALERT_INSTANCE_ID]: id1 }) =>
+          !this.createdAlerts.some(({ [ALERT_INSTANCE_ID]: id2 }) => id2 === id1)
       );
 
       if (recoveredAlerts.length > 0) {
         this.options.logger.debug(
-          `rule ${this.options.ruleType.id}:${this.rule?.id}: '${this.rule?.name}' has ${
+          `rule ${this.ruleLogPrefix} has ${
             recoveredAlerts.length
           } recovered alerts: ${JSON.stringify(
             recoveredAlerts.map(({ id }) => ({ instanceId: id }))
@@ -333,15 +386,17 @@ export class AlertsClient implements IAlertsClient {
 
       for (const alert of recoveredAlerts) {
         // Look for updates to this alert
-        const updatedAlert = this.updatedAlerts.find(({ id }) => id === alert.id);
+        const updatedAlert = this.updatedAlerts.find(
+          ({ [ALERT_INSTANCE_ID]: id }) => id === alert.id
+        );
         if (updatedAlert) {
           this.preparedAlerts.push({
             ...alert,
             ...updatedAlert,
-            actionGroup: this.options.ruleType.recoveryActionGroup.id,
-            status: 'recovered',
-            end: currentTime,
-            action: 'recovered',
+            [ALERT_ACTION_GROUP]: this.options.ruleType.recoveryActionGroup.id,
+            [ALERT_STATUS]: 'recovered',
+            [ALERT_END]: currentTime,
+            [EVENT_ACTION]: 'recovered',
           });
         } else {
           // TODO - This alert has recovered but there are no updates to it
@@ -351,15 +406,15 @@ export class AlertsClient implements IAlertsClient {
           //         fields that might not be relevant anymore
           this.preparedAlerts.push({
             ...alert,
-            actionGroup: this.options.ruleType.recoveryActionGroup.id,
-            status: 'recovered',
-            end: currentTime,
-            action: 'recovered',
+            [ALERT_ACTION_GROUP]: this.options.ruleType.recoveryActionGroup.id,
+            [ALERT_STATUS]: 'recovered',
+            [ALERT_END]: currentTime,
+            [EVENT_ACTION]: 'recovered',
           });
 
           if (this.options.ruleType.doesSetRecoveryContext) {
             this.options.logger.debug(
-              `rule ${this.options.ruleType.id}:${this.rule?.id}: '${this.rule?.name}' has no recovery context specified for recovered alert ${alert.id}`
+              `rule ${this.ruleLogPrefix} has no recovery context specified for recovered alert ${alert.id}`
             );
           }
         }
@@ -368,50 +423,52 @@ export class AlertsClient implements IAlertsClient {
   }
 
   private logAlerts(eventLogger: AlertingEventLogger, metricsStore: RuleRunMetricsStore) {
-    const activeAlerts = this.createdAlerts.filter(({ status }) => status === 'active');
-    const newAlerts = this.createdAlerts.filter(
-      ({ status, duration }) => status === 'active' && duration === '0'
+    const activeAlerts = this.createdAlerts.filter(
+      ({ [ALERT_STATUS]: status }) => status === 'active'
     );
-    const recoveredAlerts = this.createdAlerts.filter(({ status }) => status === 'recovered');
+    const newAlerts = this.createdAlerts.filter(
+      ({ [ALERT_STATUS]: status, [ALERT_DURATION]: duration }) =>
+        status === 'active' && duration === '0'
+    );
+    const recoveredAlerts = this.createdAlerts.filter(
+      ({ [ALERT_STATUS]: status }) => status === 'recovered'
+    );
 
     metricsStore.setNumberOfNewAlerts(newAlerts.length);
     metricsStore.setNumberOfActiveAlerts(activeAlerts.length);
     metricsStore.setNumberOfRecoveredAlerts(recoveredAlerts.length);
 
     for (const alert of this.preparedAlerts) {
-      const { id, actionGroup, actionSubgroup, start, duration, end, status } = alert;
       let message: string = '';
       let action: string = '';
 
-      if (status === 'recovered') {
+      if (alert[ALERT_STATUS] === 'recovered') {
         action = EVENT_LOG_ACTIONS.recoveredInstance;
-        message = `${this.options.ruleType.id}:${this.rule?.id}: '${this.rule?.name}' alert '${id}' has recovered`;
-      } else if (status === 'active') {
-        if (duration === '0') {
+        message = `${this.ruleLogPrefix} alert '${alert[ALERT_INSTANCE_ID]}' has recovered`;
+      } else if (alert[ALERT_STATUS] === 'active') {
+        if (alert[ALERT_DURATION] === '0') {
           action = EVENT_LOG_ACTIONS.newInstance;
-          message = `${this.options.ruleType.id}:${this.rule?.id}: '${this.rule?.name}' created new alert: '${id}'`;
+          message = `${this.ruleLogPrefix} created new alert: '${alert[ALERT_INSTANCE_ID]}'`;
         } else {
           action = EVENT_LOG_ACTIONS.activeInstance;
-          message = `${this.options.ruleType.id}:${this.rule?.id}: '${
-            this.rule?.name
-          }' active alert: '${id}' in ${
-            actionSubgroup
-              ? `actionGroup(subgroup): '${actionGroup}(${actionSubgroup})'`
-              : `actionGroup: '${actionGroup}'`
+          message = `${this.ruleLogPrefix} active alert: '${alert[ALERT_INSTANCE_ID]}' in ${
+            alert[ALERT_ACTION_SUBGROUP]
+              ? `actionGroup(subgroup): '${alert[ALERT_ACTION_GROUP]}(${alert[ALERT_ACTION_SUBGROUP]})'`
+              : `actionGroup: '${alert[ALERT_ACTION_GROUP]}'`
           }`;
         }
       }
 
       eventLogger.logAlert({
         action,
-        id,
-        group: actionGroup,
-        subgroup: actionSubgroup,
+        id: alert[ALERT_INSTANCE_ID],
+        group: alert[ALERT_ACTION_GROUP],
+        subgroup: alert[ALERT_ACTION_SUBGROUP],
         message,
         state: {
-          start,
-          end,
-          duration,
+          start: alert[ALERT_START],
+          end: alert[ALERT_END],
+          duration: alert[ALERT_DURATION],
         },
       });
     }

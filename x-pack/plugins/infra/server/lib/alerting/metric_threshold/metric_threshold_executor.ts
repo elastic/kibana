@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { ALERT_ACTION_GROUP, ALERT_INSTANCE_ID, ALERT_REASON } from '@kbn/rule-data-utils';
 import { isEqual } from 'lodash';
 import {
   ActionGroupIdsOf,
@@ -94,8 +94,8 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         const reason = buildInvalidQueryAlertReason(params.filterQueryText);
 
         alertsClient.create({
-          id: UNGROUPED_FACTORY_KEY,
-          actionGroup: actionGroupId,
+          [ALERT_INSTANCE_ID]: UNGROUPED_FACTORY_KEY,
+          [ALERT_ACTION_GROUP]: actionGroupId,
           [ALERT_REASON]: reason,
           group: UNGROUPED_FACTORY_KEY,
           alertState: stateToAlertMessage[AlertStates.ERROR],
@@ -225,8 +225,8 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
             : FIRED_ACTIONS.id;
         scheduledActionsCount++;
         alertsClient.create({
-          id: `${group}`,
-          actionGroup: actionGroupId,
+          [ALERT_INSTANCE_ID]: `${group}`,
+          [ALERT_ACTION_GROUP]: actionGroupId,
           [ALERT_REASON]: reason,
           group,
           alertState: stateToAlertMessage[nextState],
@@ -248,7 +248,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
 
     const recoveredAlerts = alertsClient.getRecoveredAlerts();
     for (const alert of recoveredAlerts) {
-      alertsClient.update(alert.id, {
+      alertsClient.update(alert[ALERT_INSTANCE_ID], {
         group: alert.id,
         alertState: stateToAlertMessage[AlertStates.OK],
         timestamp: startedAt.toISOString(),

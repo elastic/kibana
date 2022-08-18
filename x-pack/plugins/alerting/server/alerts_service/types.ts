@@ -5,28 +5,50 @@
  * 2.0.
  */
 
+import {
+  ALERT_ACTION_GROUP,
+  ALERT_ACTION_SUBGROUP,
+  ALERT_DURATION,
+  ALERT_END,
+  ALERT_INSTANCE_ID,
+  ALERT_LAST_NOTIFIED_DATE,
+  ALERT_RULE_CATEGORY,
+  ALERT_RULE_CONSUMER,
+  ALERT_RULE_EXECUTION_UUID,
+  ALERT_RULE_NAME,
+  ALERT_RULE_PRODUCER,
+  ALERT_RULE_TAGS,
+  ALERT_RULE_TYPE_ID,
+  ALERT_RULE_UUID,
+  ALERT_START,
+  ALERT_STATUS,
+  ALERT_UUID,
+  TIMESTAMP,
+} from '@kbn/rule-data-utils';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyAlertSchema = any;
 
+// Using rule registry fields for now
 export interface AlertRuleSchema {
-  id: string;
-  name: string;
-  consumer: string;
-  type: string; // ruleTypeId
-  execution: {
-    id: string;
-  };
+  [ALERT_RULE_CATEGORY]: string;
+  [ALERT_RULE_CONSUMER]: string;
+  [ALERT_RULE_EXECUTION_UUID]: string;
+  [ALERT_RULE_NAME]: string;
+  [ALERT_RULE_PRODUCER]: string;
+  [ALERT_RULE_TAGS]: string[];
+  [ALERT_RULE_TYPE_ID]: string;
+  [ALERT_RULE_UUID]: string;
 }
 
 // This schema is just for testing
 // These are the fields the alerting framework would need
 interface BaseAlertSchema {
-  id: string; // alert id
-  actionGroup: string; // action group id
-  actionSubgroup?: string; // optional action subgroup id
+  [ALERT_INSTANCE_ID]: string; // alert id
+  [ALERT_ACTION_GROUP]: string; // action group id
+  [ALERT_ACTION_SUBGROUP]?: string; // optional action subgroup id
 }
 
 // When rule types create alerts, they must fill in the required fields in the
@@ -35,16 +57,16 @@ export type CreateAlertSchema = BaseAlertSchema & AnyAlertSchema;
 
 // When the alerts client writes out alert documents, it will take the fields
 // specified by the rule type on create and add a timestamp, rule information and status
-export type AlertSchema = CreateAlertSchema & {
-  status: string;
-  uuid?: string;
-  start?: string;
-  duration?: string;
-  end?: string;
-  rule: AlertRuleSchema;
-  '@timestamp': string;
-  lastNotified: string;
-};
+export type AlertSchema = CreateAlertSchema &
+  AlertRuleSchema & {
+    [ALERT_STATUS]: string;
+    [ALERT_UUID]?: string;
+    [ALERT_START]?: string;
+    [ALERT_DURATION]?: string;
+    [ALERT_END]?: string;
+    [TIMESTAMP]: string;
+    [ALERT_LAST_NOTIFIED_DATE]: string;
+  };
 
 export interface IAlertsClient {
   /**

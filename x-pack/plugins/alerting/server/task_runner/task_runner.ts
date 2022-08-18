@@ -551,9 +551,11 @@ export class TaskRunner<
     this.alertsClient.setRuleData({
       id: rule.id,
       name: rule.name,
+      tags: rule.tags,
       consumer: rule.consumer,
       type: this.ruleType.id,
-      execution: { id: this.executionId },
+      spaceId,
+      executionId: this.executionId,
     });
 
     if (apm.currentTransaction) {
