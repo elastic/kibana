@@ -141,7 +141,7 @@ Adds stale status reporting for Kibana {kibana-pull}132613[#132613]
 
 Observability::
 * Adds Beta label to Infrastructure tab {kibana-pull}136710[#136710]
-* Create and add Rule Alerts Summary as a sharable component to the O11y Rule Details {kibana-pull}135805[#135805]
+* Creates and adds Rule Alerts Summary as a sharable component to the O11y Rule Details {kibana-pull}135805[#135805]
 * Rule Details Page - Use RuleStatusPanel from triggersActionsUI {kibana-pull}135643[#135643]
 * Cases permissions can be customized to prevent a user from deleting Cases entities (cases themselves, and attachments/comments) {kibana-pull}135487[#135487]
 * Top erroneous transactions {kibana-pull}134929[#134929]
