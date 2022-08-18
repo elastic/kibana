@@ -404,6 +404,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   // Current upgrades
   const { abortUpgrade, currentUpgrades, refreshUpgrades } = useCurrentUpgrades(fetchData);
 
+  const [refreshActionStatus, setRefreshActionStatus] = useState(false);
+
   const columns = [
     {
       field: HOSTNAME_FIELD,
@@ -626,7 +628,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           <EuiSpacer size="l" />
         </React.Fragment>
       ))}
-      <ActionStatusCallout />
+      <ActionStatusCallout refreshActionStatus={refreshActionStatus} />
       {/* Search and filter bar */}
       <SearchAndFilterBar
         agentPolicies={agentPolicies}
@@ -647,9 +649,10 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         selectionMode={selectionMode}
         currentQuery={kuery}
         selectedAgents={selectedAgents}
-        refreshAgents={({ refreshTags = false }: { refreshTags?: boolean } = {}) =>
-          Promise.all([fetchData({ refreshTags }), refreshUpgrades()])
-        }
+        refreshAgents={({ refreshTags = false }: { refreshTags?: boolean } = {}) => {
+          setRefreshActionStatus(!refreshActionStatus);
+          Promise.all([fetchData({ refreshTags }), refreshUpgrades()]);
+        }}
         onClickAddAgent={() => setEnrollmentFlyoutState({ isOpen: true })}
         onClickAddFleetServer={onClickAddFleetServer}
         visibleAgents={agents}

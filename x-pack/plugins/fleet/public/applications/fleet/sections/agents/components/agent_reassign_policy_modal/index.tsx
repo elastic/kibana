@@ -77,7 +77,6 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
         : await sendPostBulkAgentReassign({
             policy_id: selectedAgentPolicyId,
             agents: Array.isArray(agents) ? agents.map((agent) => agent.id) : agents,
-            // batchSize: 4000,
           });
       if (res.error) {
         throw res.error;
@@ -91,7 +90,7 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
         }
       );
       const submittedMessage = i18n.translate(
-        'xpack.fleet.agentReassignPolicy.successSingleNotificationTitle',
+        'xpack.fleet.agentReassignPolicy.submittedNotificationTitle',
         {
           defaultMessage: 'Agent policy reassign submitted',
         }

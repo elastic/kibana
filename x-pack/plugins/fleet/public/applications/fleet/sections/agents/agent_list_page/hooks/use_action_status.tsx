@@ -12,7 +12,7 @@ import { sendGetActionStatus, useStartServices } from '../../../../hooks';
 
 import type { CurrentAction } from '../../../../types';
 
-const POLL_INTERVAL = 10 * 1000; // 2 minutes
+const POLL_INTERVAL = 30 * 1000;
 
 export function useActionStatus() {
   const [currentActions, setCurrentActions] = useState<CurrentAction[]>([]);

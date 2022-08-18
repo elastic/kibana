@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiCallOut,
@@ -19,8 +19,14 @@ import {
 import type { CurrentAction } from '../../../../types';
 import { useActionStatus } from '../hooks';
 
-export const ActionStatusCallout: React.FunctionComponent = ({}) => {
-  const { currentActions } = useActionStatus();
+export const ActionStatusCallout: React.FunctionComponent<{ refreshActionStatus: boolean }> = ({
+  refreshActionStatus,
+}) => {
+  const { currentActions, refreshActions } = useActionStatus();
+
+  useEffect(() => {
+    refreshActions();
+  }, [refreshActionStatus, refreshActions]);
 
   const actionNames: { [key: string]: string } = {
     POLICY_REASSIGN: 'Reassign',

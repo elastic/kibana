@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
-import type { CoreSetup } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
+import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
+import type { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
   TaskManagerStartContract,
@@ -17,11 +16,9 @@ import moment from 'moment';
 
 import { appContextService } from '../app_context';
 
-import type { Agent } from '../../types';
-
-import { runActionAsyncWithRetry } from './crud';
-
-import { reassignBatch } from './reassign';
+import { ReassignActionRunner } from './reassign_action_runner';
+import { UnenrollActionRunner } from './unenroll_action_runner';
+import { UpgradeActionRunner } from './upgrade_action_runner';
 
 export enum BulkActionTaskType {
   REASSIGN_RETRY = 'fleet:reassign_action:retry',
@@ -48,31 +45,28 @@ export class BulkActionsResolver {
             taskInstance,
             getDeps,
             async (esClient: ElasticsearchClient, soClient: SavedObjectsClient, options: any) =>
-              await runActionAsyncWithRetry(
+              await new ReassignActionRunner(
                 esClient,
-                options,
-                async (
-                  agents: Agent[],
-                  actionId: string,
-                  total?: number,
-                  newAgentPolicyId?: string
-                ) =>
-                  await reassignBatch(
-                    soClient,
-                    esClient,
-                    { newAgentPolicyId: newAgentPolicyId!, actionId },
-                    agents,
-                    {},
-                    undefined,
-                    true,
-                    total
-                  )
-              )
+                soClient,
+                options.newAgentPolicyId
+              ).runActionAsyncWithRetry(options)
           );
         case BulkActionTaskType.UNENROLL_RETRY:
-
+          return createRetryTask(
+            taskInstance,
+            getDeps,
+            async (esClient: ElasticsearchClient, soClient: SavedObjectsClient, options: any) =>
+              await new UnenrollActionRunner(esClient, soClient).runActionAsyncWithRetry(options)
+          );
         case BulkActionTaskType.UPGRADE_RETRY:
-
+          return createRetryTask(
+            taskInstance,
+            getDeps,
+            async (esClient: ElasticsearchClient, soClient: SavedObjectsClient, options: any) =>
+              await new UpgradeActionRunner(esClient, soClient, options).runActionAsyncWithRetry(
+                options
+              )
+          );
         default:
           throw new Error('Unknown task type: ' + taskType);
       }
