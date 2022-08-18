@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import { PluginSetupContract, RuleType } from '@kbn/alerting-plugin/server';
+import { AlertSchema } from '@kbn/alerting-plugin/server/alerts_service/types';
 import { Comparator, METRIC_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
 import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/http_api';
 import { InfraBackendLibs } from '../../infra_types';
@@ -88,6 +89,19 @@ export async function registerMetricThresholdRuleType(
     actionGroups: [FIRED_ACTIONS, WARNING_ACTIONS, NO_DATA_ACTIONS],
     minimumLicenseRequired: 'basic',
     isExportable: true,
+    useLegacyAlerts: false,
+    getContext: (alert: AlertSchema) => {
+      return {
+        group: alert.group,
+        alertState: alert.alertState,
+        reason: alert.reason,
+        timestamp: alert.timestamp,
+        value: alert.value,
+        metric: alert.metric,
+        threshold: alert.threshold,
+        viewInAppUrl: alert.viewInAppUrl,
+      };
+    },
     executor: createMetricThresholdExecutor(libs),
     doesSetRecoveryContext: true,
     actionVariables: {

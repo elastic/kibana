@@ -26,6 +26,7 @@ export interface CreateAlertFactoryOpts<
   alerts: Record<string, Alert<State, Context>>;
   logger: Logger;
   maxAlerts: number;
+  useLegacyAlerts?: boolean;
   canSetRecoveryContext?: boolean;
 }
 
@@ -38,6 +39,7 @@ export function createAlertFactory<
   logger,
   maxAlerts,
   canSetRecoveryContext = false,
+  useLegacyAlerts = true,
 }: CreateAlertFactoryOpts<State, Context>) {
   // Keep track of which alerts we started with so we can determine which have recovered
   const originalAlerts = cloneDeep(alerts);
@@ -51,6 +53,12 @@ export function createAlertFactory<
   let isDone = false;
   return {
     create: (id: string): PublicAlert<State, Context, ActionGroupIds> => {
+      if (!useLegacyAlerts) {
+        throw new Error(
+          `Can't create alert in AlertFactory because rule type is not using legacy alerts`
+        );
+      }
+
       if (isDone) {
         throw new Error(`Can't create new alerts after calling done() in AlertsFactory.`);
       }

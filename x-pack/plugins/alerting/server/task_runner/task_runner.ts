@@ -69,7 +69,7 @@ import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event
 import { SearchMetrics } from '../lib/types';
 import { loadRule } from './rule_loader';
 import { logAlerts } from './log_alerts';
-// import { AlertsClient } from '../alerts_service/alerts_client';
+import { AlertsClient } from '../alerts_service/alerts_client';
 import { scheduleActionsForAlerts } from './schedule_actions_for_alerts';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
@@ -260,6 +260,7 @@ export class TaskRunner<
         alertInstances: alertRawInstances = {},
         alertTypeState: ruleTypeState = {},
         previousStartedAt,
+        previousExecutionUuid,
       },
     } = this.taskInstance;
 
@@ -281,9 +282,20 @@ export class TaskRunner<
     const ruleType = this.ruleTypeRegistry.get(ruleTypeId);
 
     const alerts: Record<string, Alert<State, Context>> = {};
-    for (const id in alertRawInstances) {
-      if (alertRawInstances.hasOwnProperty(id)) {
-        alerts[id] = new Alert<State, Context>(id, alertRawInstances[id]);
+    if (this.ruleType.useLegacyAlerts) {
+      // Deserialize alerts from task document
+      for (const id in alertRawInstances) {
+        if (alertRawInstances.hasOwnProperty(id)) {
+          alerts[id] = new Alert<State, Context>(id, alertRawInstances[id]);
+        }
+      }
+    } else {
+      // Query for alerts from previous execution only if auto-recovering
+      if (previousExecutionUuid && this.ruleType.autoRecoverAlerts) {
+        this.alertsClient.loadExistingAlerts({
+          ruleId,
+          previousRuleExecutionUuid: previousExecutionUuid,
+        });
       }
     }
     const originalAlerts = cloneDeep(alerts);
@@ -319,6 +331,7 @@ export class TaskRunner<
       alerts,
       logger: this.logger,
       maxAlerts: this.maxAlerts,
+      useLegacyAlerts: this.ruleType.useLegacyAlerts,
       canSetRecoveryContext: ruleType.doesSetRecoveryContext ?? false,
     });
     let updatedRuleTypeState: void | Record<string, unknown>;
@@ -347,9 +360,8 @@ export class TaskRunner<
             scopedClusterClient: wrappedScopedClusterClient.client(),
             alertsClient: this.alertsClient.getExecutorServices(),
             /**
-             * Deprecate alertFactory
-             * Could update alertFactory to act as a pass through to the alerts client
-             * until we can onboard all rules
+             * Deprecate alertFactory and remove when all rules are onboarded to
+             * the alertsClient
              */
             alertFactory,
 
@@ -388,7 +400,7 @@ export class TaskRunner<
       );
     } catch (err) {
       // Check if this error is due to reaching the alert limit
-      if (alertFactory.hasReachedAlertLimit()) {
+      if (alertFactory.hasReachedAlertLimit() || this.alertsClient.hasReachedAlertLimit()) {
         this.logger.warn(
           `rule execution generated greater than ${this.maxAlerts} alerts: ${ruleLabel}`
         );
@@ -424,86 +436,94 @@ export class TaskRunner<
     ruleRunMetricsStore.setTotalSearchDurationMs(searchMetrics.totalSearchDurationMs);
     ruleRunMetricsStore.setEsSearchDurationMs(searchMetrics.esSearchDurationMs);
 
-    await this.alertsClient.writeAlerts();
-
-    /**
-     * processAlerts and logAlerts should eventually be replaced by
-     * alertsClient.writeAlerts
-     */
-    const { newAlerts, activeAlerts, recoveredAlerts } = processAlerts<
-      State,
-      Context,
-      ActionGroupIds,
-      RecoveryActionGroupId
-    >({
-      alerts,
-      existingAlerts: originalAlerts,
-      hasReachedAlertLimit: alertFactory.hasReachedAlertLimit(),
-      alertLimit: this.maxAlerts,
-    });
-
-    logAlerts({
-      logger: this.logger,
-      alertingEventLogger: this.alertingEventLogger,
-      newAlerts,
-      activeAlerts,
-      recoveredAlerts,
-      ruleLogPrefix: ruleLabel,
-      ruleRunMetricsStore,
-      canSetRecoveryContext: ruleType.doesSetRecoveryContext ?? false,
-      shouldPersistAlerts: this.shouldLogAndScheduleActionsForAlerts(),
-    });
-
     await rulesClient.clearExpiredSnoozes({ id: rule.id });
-
     const ruleIsSnoozed = isRuleSnoozed(rule);
-    if (!ruleIsSnoozed && this.shouldLogAndScheduleActionsForAlerts()) {
-      const mutedAlertIdsSet = new Set(mutedInstanceIds);
+    const mutedAlertIdsSet = new Set(mutedInstanceIds);
+    const alertsToReturn: Record<string, RawAlertInstance> = {};
 
-      /**
-       * With alerts client, we would want to decouple action scheduling
-       * We would want to store the a lastNotifiedTime on the alert document
-       * so during action scheduling:
-       * - alertsClient.getAlerts - get active and recovered alerts
-       * - look at lastNotifiedTime on each alert to determine whether we want to
-       *   schedule an action for it based on throttle/mute/snooze settings
-       * - if we want to schedule an action, update the alert doc with new lastNotifiedTime
-       * - alternatively, if configured, schedule a summary notification with
-       *   the alert data.
-       */
-      await scheduleActionsForAlerts<State, Context, ActionGroupIds, RecoveryActionGroupId>({
-        activeAlerts,
-        recoveryActionGroup: this.ruleType.recoveryActionGroup,
-        recoveredAlerts,
-        executionHandler,
-        mutedAlertIdsSet,
-        logger: this.logger,
-        ruleLabel,
-        ruleRunMetricsStore,
-        throttle,
-        notifyWhen,
-      });
-    } else {
-      if (ruleIsSnoozed) {
-        this.logger.debug(`no scheduling of actions for rule ${ruleLabel}: rule is snoozed.`);
-      }
-      if (!this.shouldLogAndScheduleActionsForAlerts()) {
-        this.logger.debug(
-          `no scheduling of actions for rule ${ruleLabel}: rule execution has been cancelled.`
-        );
-        // Usage counter for telemetry
-        // This keeps track of how many times action executions were skipped after rule
-        // execution completed successfully after the execution timeout
-        // This can occur when rule executors do not short circuit execution in response
-        // to timeout
-        this.countUsageOfActionExecutionAfterRuleCancellation();
-      }
+    let shouldScheduleActions: boolean = true;
+    if (ruleIsSnoozed) {
+      shouldScheduleActions = false;
+      this.logger.debug(`no scheduling of actions for rule ${ruleLabel}: rule is snoozed.`);
+    }
+    if (!this.shouldLogAndScheduleActionsForAlerts()) {
+      shouldScheduleActions = false;
+      this.logger.debug(
+        `no scheduling of actions for rule ${ruleLabel}: rule execution has been cancelled.`
+      );
+      // Usage counter for telemetry
+      // This keeps track of how many times action executions were skipped after rule
+      // execution completed successfully after the execution timeout
+      // This can occur when rule executors do not short circuit execution in response
+      // to timeout
+      this.countUsageOfActionExecutionAfterRuleCancellation();
     }
 
-    const alertsToReturn: Record<string, RawAlertInstance> = {};
-    for (const id in activeAlerts) {
-      if (activeAlerts.hasOwnProperty(id)) {
-        alertsToReturn[id] = activeAlerts[id].toRaw();
+    if (this.ruleType.useLegacyAlerts) {
+      const { newAlerts, activeAlerts, recoveredAlerts } = processAlerts<
+        State,
+        Context,
+        ActionGroupIds,
+        RecoveryActionGroupId
+      >({
+        alerts,
+        existingAlerts: originalAlerts,
+        hasReachedAlertLimit: alertFactory.hasReachedAlertLimit(),
+        alertLimit: this.maxAlerts,
+      });
+
+      logAlerts({
+        logger: this.logger,
+        alertingEventLogger: this.alertingEventLogger,
+        newAlerts,
+        activeAlerts,
+        recoveredAlerts,
+        ruleLogPrefix: ruleLabel,
+        ruleRunMetricsStore,
+        canSetRecoveryContext: ruleType.doesSetRecoveryContext ?? false,
+        shouldPersistAlerts: this.shouldLogAndScheduleActionsForAlerts(),
+      });
+
+      if (shouldScheduleActions) {
+        await scheduleActionsForAlerts<State, Context, ActionGroupIds, RecoveryActionGroupId>({
+          activeAlerts,
+          recoveryActionGroup: this.ruleType.recoveryActionGroup,
+          recoveredAlerts,
+          executionHandler,
+          mutedAlertIdsSet,
+          logger: this.logger,
+          ruleLabel,
+          ruleRunMetricsStore,
+          throttle,
+          notifyWhen,
+        });
+      }
+
+      for (const id in activeAlerts) {
+        if (activeAlerts.hasOwnProperty(id)) {
+          alertsToReturn[id] = activeAlerts[id].toRaw();
+        }
+      }
+    } else {
+      await this.alertsClient.writeAlerts(
+        this.shouldLogAndScheduleActionsForAlerts()
+          ? { eventLogger: this.alertingEventLogger, metricsStore: ruleRunMetricsStore }
+          : undefined
+      );
+
+      if (shouldScheduleActions) {
+        /**
+         * This doesn't do anything yet
+         * We want to schedule actions for active and recovered
+         * alerts and then update the lastNotified time on the
+         * alert which would be another bulk update
+         */
+        await this.alertsClient.scheduleActions({
+          metricsStore: ruleRunMetricsStore,
+          mutedAlertIds: mutedAlertIdsSet,
+          throttle,
+          notifyWhen,
+        });
       }
     }
 
@@ -569,8 +589,6 @@ export class TaskRunner<
       schedule: taskSchedule,
     } = this.taskInstance;
 
-    const { previousExecutionUuid } = originalState;
-
     // Initially use consumer as stored inside the task instance
     // Replace this with consumer as read from the rule saved object after
     // we successfully read the rule SO. This allows us to populate a consumer
@@ -595,14 +613,6 @@ export class TaskRunner<
     this.logger.debug(`executing rule ${this.ruleType.id}:${ruleId} at ${runDateString}`);
 
     const namespace = this.context.spaceIdToNamespace(spaceId);
-
-    // Query for alerts from previous execution
-    if (previousExecutionUuid) {
-      this.alertsClient.loadExistingAlerts({
-        ruleId,
-        previousRuleExecutionUuid: previousExecutionUuid,
-      });
-    }
 
     this.alertingEventLogger.initialize({
       ruleId,

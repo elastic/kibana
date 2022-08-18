@@ -176,12 +176,26 @@ export interface RuleType<
   ruleTaskTimeout?: string;
   cancelAlertsOnRuleTimeout?: boolean;
   doesSetRecoveryContext?: boolean;
+
+  /**
+   * Uses legacy framework alerts, which are persisted via task document state
+   * Defaults to true. Set to false to opt into framework alerts as data.
+   */
+  useLegacyAlerts?: boolean;
+
+  /**
+   * Used when useLegacyAlerts = false. Determines whether framework should
+   * automatically make recovery determination. Defaults to true.
+   */
   autoRecoverAlerts?: boolean;
-  // For framework alerts as data, we want to store everything inside the alert
-  // document but for backwards compatibility with existing action variables, we want
-  // to be able to pull out context and state variables from the alert document
-  // Allow rule types to specify mapping function
-  getContextAndState?: (alert: AlertSchema) => { context: InstanceContext; state: InstanceState };
+
+  /**
+   * Used when useLegacyAlerts = false. For framework alerts as data, alert context
+   * is stored inside the alert document but for backwards compatibility with existing
+   * action variables, we want to be able to extract context variables from the alert
+   * document. This allows rule types to specify a mapping function.
+   */
+  getContext?: (alert: AlertSchema) => InstanceContext;
 }
 export type UntypedRuleType = RuleType<
   RuleTypeParams,

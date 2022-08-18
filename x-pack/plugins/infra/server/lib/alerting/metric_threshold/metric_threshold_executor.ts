@@ -71,14 +71,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
     const { criteria } = params;
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
     const logger = createScopedLogger(libs.logger, 'metricThresholdRule', { alertId, executionId });
-    const { alertWithLifecycle, savedObjectsClient } = services;
-    const alertFactory: MetricThresholdAlertFactory = (id, reason) =>
-      alertWithLifecycle({
-        id,
-        fields: {
-          [ALERT_REASON]: reason,
-        },
-      });
+    const { alertsClient, savedObjectsClient } = services;
 
     const {
       sourceId,
@@ -99,8 +92,11 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         const timestamp = startedAt.toISOString();
         const actionGroupId = FIRED_ACTIONS.id; // Change this to an Error action group when able
         const reason = buildInvalidQueryAlertReason(params.filterQueryText);
-        const alert = alertFactory(UNGROUPED_FACTORY_KEY, reason);
-        alert.scheduleActions(actionGroupId, {
+
+        alertsClient.create({
+          id: UNGROUPED_FACTORY_KEY,
+          actionGroup: actionGroupId,
+          [ALERT_REASON]: reason,
           group: UNGROUPED_FACTORY_KEY,
           alertState: stateToAlertMessage[AlertStates.ERROR],
           reason,
@@ -109,6 +105,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
           value: null,
           metric: mapToConditionsLookup(criteria, (c) => c.metric),
         });
+
         return {
           lastRunTimestamp: startedAt.valueOf(),
           missingGroups: [],
@@ -226,9 +223,11 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
             : nextState === AlertStates.WARNING
             ? WARNING_ACTIONS.id
             : FIRED_ACTIONS.id;
-        const alert = alertFactory(`${group}`, reason);
         scheduledActionsCount++;
-        alert.scheduleActions(actionGroupId, {
+        alertsClient.create({
+          id: `${group}`,
+          actionGroup: actionGroupId,
+          [ALERT_REASON]: reason,
           group,
           alertState: stateToAlertMessage[nextState],
           reason,
@@ -247,20 +246,16 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       }
     }
 
-    const { getRecoveredAlerts } = services.alertFactory.done();
-    const recoveredAlerts = getRecoveredAlerts();
+    const recoveredAlerts = alertsClient.getRecoveredAlerts();
     for (const alert of recoveredAlerts) {
-      const recoveredAlertId = alert.getId();
-      const viewInAppUrl = getViewInAppUrl(libs.basePath, LINK_TO_METRICS_EXPLORER);
-      const context = {
-        group: recoveredAlertId,
+      alertsClient.update(alert.id, {
+        group: alert.id,
         alertState: stateToAlertMessage[AlertStates.OK],
         timestamp: startedAt.toISOString(),
-        viewInAppUrl,
+        viewInAppUrl: getViewInAppUrl(libs.basePath, LINK_TO_METRICS_EXPLORER),
         threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
         metric: mapToConditionsLookup(criteria, (c) => c.metric),
-      };
-      alert.setContext(context);
+      });
     }
 
     const stopTime = Date.now();

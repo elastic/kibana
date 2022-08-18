@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
+import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyAlertSchema = any;
 
@@ -23,16 +26,7 @@ export interface AlertRuleSchema {
 interface BaseAlertSchema {
   id: string; // alert id
   actionGroup: string; // action group id
-  actionSubGroup?: string; // optional action subgroup id
-}
-
-interface BaseAlertSchema {
-  id: string; // alert id
-  actionGroup: string; // action group id
-  actionSubGroup?: string; // optional action subgroup id
-  status: string;
-  rule: AlertRuleSchema;
-  '@timestamp': string;
+  actionSubgroup?: string; // optional action subgroup id
 }
 
 // When rule types create alerts, they must fill in the required fields in the
@@ -49,6 +43,7 @@ export type AlertSchema = CreateAlertSchema & {
   end?: string;
   rule: AlertRuleSchema;
   '@timestamp': string;
+  lastNotified: string;
 };
 
 export interface IAlertsClient {
@@ -66,7 +61,7 @@ export interface IAlertsClient {
    * Get alerts matching given rule ID and rule execution uuid
    * - Allow specifying a different index than the default (for security alerts)
    */
-  loadExistingAlerts(params: LoadExistingAlertsParams): Promise<AlertSchema[]>;
+  loadExistingAlerts(params: LoadExistingAlertsParams): Promise<void>;
 
   /**
    * Creates new alert document
@@ -101,7 +96,12 @@ export interface IAlertsClient {
    * Writes all alerts to default index.
    * Handles logging to event log as well
    */
-  writeAlerts(): void;
+  writeAlerts(params?: WriteAlertParams): void;
+
+  /**
+   * This might not belong on the AlertsClient but putting it here for now
+   */
+  scheduleActions(params: ScheduleActionsParams): void;
 
   /**
    * Returns subset of functions available to rule executors
@@ -119,6 +119,18 @@ export interface LoadExistingAlertsParams {
   ruleId: string;
   previousRuleExecutionUuid: string;
   alertsIndex?: string;
+}
+
+export interface WriteAlertParams {
+  eventLogger: AlertingEventLogger;
+  metricsStore: RuleRunMetricsStore;
+}
+
+export interface ScheduleActionsParams {
+  mutedAlertIds: Set<string>;
+  throttle: string | null;
+  notifyWhen: string | null;
+  metricsStore: RuleRunMetricsStore;
 }
 
 export const DEFAULT_ALERTS_INDEX = '.alerts-default';

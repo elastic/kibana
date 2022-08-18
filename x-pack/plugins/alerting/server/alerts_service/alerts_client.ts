@@ -8,6 +8,10 @@ import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { millisToNanos } from '@kbn/event-log-plugin/server';
 import { cloneDeep } from 'lodash';
 import uuid from 'uuid';
+import { parseDuration } from '../lib';
+import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
+import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
+import { EVENT_LOG_ACTIONS } from '../plugin';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import {
   IAlertsClient,
@@ -17,6 +21,8 @@ import {
   AlertSchema,
   CreateAlertSchema,
   AlertRuleSchema,
+  WriteAlertParams,
+  ScheduleActionsParams,
 } from './types';
 
 interface AlertsClientParams {
@@ -61,7 +67,7 @@ export class AlertsClient implements IAlertsClient {
     ruleId,
     previousRuleExecutionUuid,
     alertsIndex,
-  }: LoadExistingAlertsParams): Promise<AlertSchema[]> {
+  }: LoadExistingAlertsParams): Promise<void> {
     this.options.logger.info(
       `loadExistingAlerts rule id ${ruleId}, execution ${previousRuleExecutionUuid}`
     );
@@ -108,13 +114,16 @@ export class AlertsClient implements IAlertsClient {
       this.options.logger.error(
         `Error searching for alerts from previous execution - ${err.message}`
       );
-      throw err;
     }
-
-    return [];
   }
 
   public create(alert: CreateAlertSchema) {
+    if (this.options.ruleType.useLegacyAlerts) {
+      throw new Error(
+        `Can't create alert in AlertsClient because rule type is using legacy alerts`
+      );
+    }
+
     if (this.hasCalledGetRecoveredAlerts) {
       throw new Error(`Can't create new alerts after calling getRecoveredAlerts()!`);
     }
@@ -144,14 +153,45 @@ export class AlertsClient implements IAlertsClient {
   public getRecoveredAlerts(): AlertSchema[] {
     this.hasCalledGetRecoveredAlerts = true;
     if (this.options.ruleType.autoRecoverAlerts || !this.options.ruleType.doesSetRecoveryContext) {
+      this.options.logger.debug(
+        `Set doesSetRecoveryContext and autoRecoverAlerts to true on rule type to get access to recovered alerts.`
+      );
       return [];
     }
     return [];
   }
 
-  public update(id: string, updatedAlert: Partial<AlertSchema>) {}
+  public update(id: string, updatedAlert: Partial<AlertSchema>) {
+    // Make sure we're updating something that exists
+    const existingAlert = this.existingAlerts.find(({ id: alertId }) => id === alertId);
+    if (existingAlert) {
+      // Make sure we're not allowing updates to fields that shouldn't be updated
+      // by the rule type
+      const {
+        id: alertId,
+        uuid: alertUuid,
+        status,
+        start,
+        duration,
+        end,
+        actionGroup,
+        actionSubGroup,
+        rule,
+        ...restAlert
+      } = updatedAlert;
 
-  public async writeAlerts() {
+      this.updatedAlerts.push({
+        ...existingAlert,
+        ...restAlert,
+        '@timestamp': new Date().toISOString(),
+      });
+    } else {
+      this.options.logger.warn(`trying to update alert with ${id} which does not exist`);
+      // need to throw error?
+    }
+  }
+
+  public async writeAlerts(params?: WriteAlertParams) {
     this.options.logger.info(`writeAlerts`);
     this.options.logger.info(`${this.existingAlerts.length} existing alerts`);
     this.options.logger.info(`${this.createdAlerts.length} created alerts`);
@@ -175,7 +215,45 @@ export class AlertsClient implements IAlertsClient {
       ]),
     });
 
-    // TODO - write event log documents
+    if (params) {
+      this.logAlerts(params.eventLogger, params.metricsStore);
+    }
+  }
+
+  // TODO
+  public scheduleActions(params: ScheduleActionsParams) {
+    const { metricsStore, throttle, notifyWhen, mutedAlertIds } = params;
+    // const throttleMills = throttle ? parseDuration(throttle) : 0;
+
+    // for (const alert of this.preparedAlerts) {
+    //   let executeAction = true;
+    //   const muted = mutedAlertIds.has(alert.id);
+
+    //   // TODO - would need to recreate the logic for determining throttling
+    //   // including whether the action group changed
+    //   const throttled = false;
+
+    //   if (throttled || muted) {
+    //     executeAction = false;
+    //     this.options.logger.debug(
+    //       `skipping scheduling of actions for '${alert.id}' in rule ${this.options.ruleType.id}:${
+    //         this.rule?.id
+    //       }: '${this.rule?.name}': rule is ${muted ? 'muted' : 'throttled'}`
+    //     );
+    //   } else if (
+    //     notifyWhen === 'onActionGroupChange' /* &&
+    //     !alert.scheduledActionGroupOrSubgroupHasChanged()*/
+    //   ) {
+    //     executeAction = false;
+    //     this.options.logger.debug(
+    //       `skipping scheduling of actions for '${alert.id}' in rule ${this.options.ruleType.id}:${this.rule?.id}: '${this.rule?.name}': alert is active but action group has not changed`
+    //     );
+    //   }
+
+    //   if (executeAction /* && alert.hasScheduledActions()*/) {
+
+    //   }
+    // }
   }
 
   public getExecutorServices(): PublicAlertsClient {
@@ -204,6 +282,7 @@ export class AlertsClient implements IAlertsClient {
           ...(existingAlert.start ? { start: existingAlert.start } : {}),
           ...(duration !== undefined ? { duration } : {}),
           ...(existingAlert.uuid ? { uuid: existingAlert.uuid } : {}),
+          action: 'active',
         });
       } else {
         // Add current time as start time, seed duration with '0' and generate uuid
@@ -212,8 +291,25 @@ export class AlertsClient implements IAlertsClient {
           start: currentTime,
           duration: '0',
           uuid: uuid.v4(),
+
+          // adding these because lifecycle executor adds these
+          workflowStatus: 'open',
+          action: 'new',
         });
       }
+    }
+
+    if (this.createdAlerts.length > 0) {
+      this.options.logger.debug(
+        `rule ${this.options.ruleType.id}:${this.rule?.id}: '${this.rule?.name}' has ${
+          this.createdAlerts.length
+        } active alerts: ${JSON.stringify(
+          this.createdAlerts.map(({ id, actionGroup }) => ({
+            instanceId: id,
+            actionGroup,
+          }))
+        )}`
+      );
     }
 
     // Recovered alerts
@@ -222,6 +318,16 @@ export class AlertsClient implements IAlertsClient {
       const recoveredAlerts = this.existingAlerts.filter(
         ({ id: id1 }) => !this.createdAlerts.some(({ id: id2 }) => id2 === id1)
       );
+
+      if (recoveredAlerts.length > 0) {
+        this.options.logger.debug(
+          `rule ${this.options.ruleType.id}:${this.rule?.id}: '${this.rule?.name}' has ${
+            recoveredAlerts.length
+          } recovered alerts: ${JSON.stringify(
+            recoveredAlerts.map(({ id }) => ({ instanceId: id }))
+          )}`
+        );
+      }
 
       this.options.logger.info(`recoveredAlerts ${recoveredAlerts.length}`);
 
@@ -235,6 +341,7 @@ export class AlertsClient implements IAlertsClient {
             actionGroup: this.options.ruleType.recoveryActionGroup.id,
             status: 'recovered',
             end: currentTime,
+            action: 'recovered',
           });
         } else {
           // TODO - This alert has recovered but there are no updates to it
@@ -247,9 +354,66 @@ export class AlertsClient implements IAlertsClient {
             actionGroup: this.options.ruleType.recoveryActionGroup.id,
             status: 'recovered',
             end: currentTime,
+            action: 'recovered',
           });
+
+          if (this.options.ruleType.doesSetRecoveryContext) {
+            this.options.logger.debug(
+              `rule ${this.options.ruleType.id}:${this.rule?.id}: '${this.rule?.name}' has no recovery context specified for recovered alert ${alert.id}`
+            );
+          }
         }
       }
+    }
+  }
+
+  private logAlerts(eventLogger: AlertingEventLogger, metricsStore: RuleRunMetricsStore) {
+    const activeAlerts = this.createdAlerts.filter(({ status }) => status === 'active');
+    const newAlerts = this.createdAlerts.filter(
+      ({ status, duration }) => status === 'active' && duration === '0'
+    );
+    const recoveredAlerts = this.createdAlerts.filter(({ status }) => status === 'recovered');
+
+    metricsStore.setNumberOfNewAlerts(newAlerts.length);
+    metricsStore.setNumberOfActiveAlerts(activeAlerts.length);
+    metricsStore.setNumberOfRecoveredAlerts(recoveredAlerts.length);
+
+    for (const alert of this.preparedAlerts) {
+      const { id, actionGroup, actionSubgroup, start, duration, end, status } = alert;
+      let message: string = '';
+      let action: string = '';
+
+      if (status === 'recovered') {
+        action = EVENT_LOG_ACTIONS.recoveredInstance;
+        message = `${this.options.ruleType.id}:${this.rule?.id}: '${this.rule?.name}' alert '${id}' has recovered`;
+      } else if (status === 'active') {
+        if (duration === '0') {
+          action = EVENT_LOG_ACTIONS.newInstance;
+          message = `${this.options.ruleType.id}:${this.rule?.id}: '${this.rule?.name}' created new alert: '${id}'`;
+        } else {
+          action = EVENT_LOG_ACTIONS.activeInstance;
+          message = `${this.options.ruleType.id}:${this.rule?.id}: '${
+            this.rule?.name
+          }' active alert: '${id}' in ${
+            actionSubgroup
+              ? `actionGroup(subgroup): '${actionGroup}(${actionSubgroup})'`
+              : `actionGroup: '${actionGroup}'`
+          }`;
+        }
+      }
+
+      eventLogger.logAlert({
+        action,
+        id,
+        group: actionGroup,
+        subgroup: actionSubgroup,
+        message,
+        state: {
+          start,
+          end,
+          duration,
+        },
+      });
     }
   }
 }
