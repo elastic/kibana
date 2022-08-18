@@ -1,7 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`Route renders 1`] = `
-<Route>
-  <MatchPropagator />
-</Route>
-`;
