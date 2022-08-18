@@ -36,7 +36,6 @@ export function extractWarnings(
     warnings.push(timedOut);
   }
 
-  const shardFailures: SearchResponseWarning[] = [];
   if (rawResponse._shards && rawResponse._shards.failed) {
     const isShardFailure = true;
     const message = i18n.translate(
@@ -56,12 +55,12 @@ export function extractWarnings(
 
     if (rawResponse._shards.failures) {
       rawResponse._shards.failures?.forEach((f) => {
-        shardFailures.push({ type: f.reason.type, isShardFailure, message, text });
+        warnings.push({ type: f.reason.type, isShardFailure, message, text });
       });
     } else {
-      shardFailures.push({ type: 'generic_shard_warning', isShardFailure, message, text });
+      warnings.push({ type: 'generic_shard_warning', isShardFailure, message, text });
     }
   }
 
-  return [...warnings, ...shardFailures];
+  return warnings;
 }
