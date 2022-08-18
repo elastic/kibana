@@ -244,6 +244,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
             ...(isPopulatedObject(runtimeMappings) && isLatestTransform(transformConfig)
               ? { runtimeFieldMap: runtimeMappings }
               : {}),
+            allowNoIndex: true,
           },
           false,
           true

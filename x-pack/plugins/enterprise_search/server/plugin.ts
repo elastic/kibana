@@ -46,6 +46,7 @@ import {
 
 import { registerAppSearchRoutes } from './routes/app_search';
 import { registerEnterpriseSearchRoutes } from './routes/enterprise_search';
+import { registerAnalyticsRoutes } from './routes/enterprise_search/analytics';
 import { registerConfigDataRoute } from './routes/enterprise_search/config_data';
 import { registerConnectorRoutes } from './routes/enterprise_search/connectors';
 import { registerCrawlerRoutes } from './routes/enterprise_search/crawler/crawler';
@@ -168,6 +169,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     // Enterprise Search Routes
     registerConnectorRoutes(dependencies);
     registerCrawlerRoutes(dependencies);
+    registerAnalyticsRoutes(dependencies);
 
     getStartServices().then(([, { security: securityStart }]) => {
       registerCreateAPIKeyRoute(dependencies, securityStart);

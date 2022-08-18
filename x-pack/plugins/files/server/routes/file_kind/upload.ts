@@ -50,7 +50,7 @@ export const handler: FileKindsRequestHandler<Params, unknown, Body> = async (
     }
     throw e;
   }
-  const body: Response = { ok: true, size: file.size! };
+  const body: Response = { ok: true, size: file.data.size! };
   return res.ok({ body });
 };
 

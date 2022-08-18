@@ -154,6 +154,31 @@ export const createCustomRuleEnabled = (
       headers: { 'kbn-xsrf': 'cypress-creds' },
       failOnStatusCode: false,
     });
+  } else if (rule.dataSource.type === 'dataView') {
+    cy.request({
+      method: 'POST',
+      url: 'api/detection_engine/rules',
+      body: {
+        rule_id: ruleId,
+        risk_score: parseInt(rule.riskScore, 10),
+        description: rule.description,
+        interval,
+        name: rule.name,
+        severity: rule.severity.toLocaleLowerCase(),
+        type: 'query',
+        from: 'now-50000h',
+        index: [],
+        data_view_id: rule.dataSource.dataView,
+        query: rule.customQuery,
+        language: 'kuery',
+        enabled: true,
+        tags: ['rule1'],
+        max_signals: maxSignals,
+        building_block_type: rule.buildingBlockType,
+      },
+      headers: { 'kbn-xsrf': 'cypress-creds' },
+      failOnStatusCode: false,
+    });
   }
 };
 
