@@ -43,7 +43,8 @@ export const ALERT_STATUS = {
 export const LOCAL_STORAGE_DISPLAY_OPTIONS_KEY = 'sessionView:displayOptions';
 export const MOUSE_EVENT_PLACEHOLDER = { stopPropagation: () => undefined } as React.MouseEvent;
 export const DEBOUNCE_TIMEOUT = 500;
-export const DEFAULT_TTY_PLAYSPEED_MS = 40; // milli seconds per line of tty output.
+export const DEFAULT_TTY_PLAYSPEED_MS = 80; // milli seconds per line of tty output.
+export const DEFAULT_TTY_FONT_SIZE = 11;
 
 // when showing the count of alerts in details panel tab, if the number
 // exceeds ALERT_COUNT_THRESHOLD we put a + next to it, e.g  999+
