@@ -89,7 +89,7 @@ you make the necessary updates after you upgrade to 8.4.0.
 [%collapsible]
 ====
 *Details* +
-The ability to authenticate interactive users authenticating with ApiKey has been deprecated, and will be removed in a future version. For more information, refer to {kibana-pull}136422[#136422].
+The ability to authenticate interactive users with ApiKey via a web browser has been deprecated, and will be removed in a future version. For more information, refer to {kibana-pull}136422[#136422].
 
 *Impact* +
 To authenticate interactive users, use <<kibana-authentication,another authentication method>>. 
