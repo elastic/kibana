@@ -18,7 +18,8 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { loadFieldStats } from '../../services';
-import { FieldStats, FieldStatsProps } from './field_stats';
+import FieldStats from './field_stats';
+import type { FieldStatsProps } from './field_stats';
 
 jest.mock('../../services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({}),

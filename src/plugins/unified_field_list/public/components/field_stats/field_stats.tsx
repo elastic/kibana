@@ -581,10 +581,14 @@ class ErrorBoundary extends React.Component<{}, { hasError: boolean }> {
  * @param props
  * @constructor
  */
-export const FieldStats: React.FC<FieldStatsProps> = (props) => {
+const FieldStats: React.FC<FieldStatsProps> = (props) => {
   return (
     <ErrorBoundary>
       <FieldStatsComponent {...props} />
     </ErrorBoundary>
   );
 };
+
+// Necessary for React.lazy
+// eslint-disable-next-line import/no-default-export
+export default FieldStats;
