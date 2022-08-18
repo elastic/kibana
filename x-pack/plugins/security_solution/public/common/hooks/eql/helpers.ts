@@ -16,8 +16,6 @@ import type { BaseHit, EqlSearchResponse } from '../../../../common/detection_en
 
 type EqlAggBuckets = Record<string, { timestamp: string; total: number }>;
 
-export const EQL_QUERY_EVENT_SIZE = 100;
-
 /**
  * Calculates which 2 min bucket segment, event should be sorted into
  * @param eventTimestamp The event to be bucketed timestamp

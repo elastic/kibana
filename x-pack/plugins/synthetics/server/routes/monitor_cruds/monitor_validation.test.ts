@@ -56,6 +56,7 @@ describe('validateMonitor', () => {
     testCommonFields = {
       [ConfigKey.MONITOR_TYPE]: DataStream.ICMP,
       [ConfigKey.NAME]: 'test-monitor-name',
+      [ConfigKey.CONFIG_ID]: 'test-monitor-id',
       [ConfigKey.ENABLED]: true,
       [ConfigKey.TAGS]: testTags,
       [ConfigKey.SCHEDULE]: testSchedule,
@@ -434,6 +435,7 @@ function getJsonPayload() {
     '    "TLSv1.2"' +
     '  ],' +
     '  "name": "test-monitor-name",' +
+    '  "config_id": "test-monitor-id",' +
     '  "namespace": "testnamespace",' +
     '  "locations": [{' +
     '    "id": "eu-west-01",' +

@@ -9,62 +9,13 @@ import { kea, MakeLogicType } from 'kea';
 
 import { Meta } from '../../../../../common/types';
 import { HttpError, Status } from '../../../../../common/types/api';
-import { ConnectorStatus, SyncStatus } from '../../../../../common/types/connectors';
 import { ElasticsearchIndexWithIngestion } from '../../../../../common/types/indices';
 import { DEFAULT_META } from '../../../shared/constants';
 import { flashAPIErrors, clearFlashMessages } from '../../../shared/flash_messages';
 import { updateMetaPageIndex } from '../../../shared/table_pagination';
 import { FetchIndicesAPILogic } from '../../api/index/fetch_indices_api_logic';
-
-export const enum IngestionMethod {
-  CONNECTOR,
-  CRAWLER,
-  API,
-}
-
-export const enum IngestionStatus {
-  CONNECTED,
-  ERROR,
-  SYNC_ERROR,
-  INCOMPLETE,
-}
-
-export interface ViewSearchIndex extends ElasticsearchIndexWithIngestion {
-  ingestionMethod: IngestionMethod;
-  ingestionStatus: IngestionStatus;
-  lastUpdated: Date | 'never' | null;
-}
-
-function getIngestionMethod(index?: ElasticsearchIndexWithIngestion): IngestionMethod {
-  if (index?.connector) {
-    return IngestionMethod.CONNECTOR;
-  }
-  if (index?.crawler) {
-    return IngestionMethod.CRAWLER;
-  }
-  return IngestionMethod.API;
-}
-
-function getIngestionStatus(
-  index: ElasticsearchIndexWithIngestion,
-  ingestionMethod: IngestionMethod
-): IngestionStatus {
-  if (ingestionMethod === IngestionMethod.API) {
-    return IngestionStatus.CONNECTED;
-  }
-  if (ingestionMethod === IngestionMethod.CONNECTOR) {
-    if (index.connector?.sync_status === SyncStatus.ERROR) {
-      return IngestionStatus.SYNC_ERROR;
-    }
-    if (index.connector?.status === ConnectorStatus.CONNECTED) {
-      return IngestionStatus.CONNECTED;
-    }
-    if (index.connector?.status === ConnectorStatus.ERROR) {
-      return IngestionStatus.ERROR;
-    }
-  }
-  return IngestionStatus.INCOMPLETE;
-}
+import { ElasticsearchViewIndex } from '../../types';
+import { indexToViewIndex } from '../../utils/indices';
 
 export interface IndicesActions {
   apiError(error: HttpError): HttpError;
@@ -92,11 +43,13 @@ export interface IndicesActions {
   }): { meta: Meta; returnHiddenIndices: boolean; searchQuery?: string };
   makeRequest: typeof FetchIndicesAPILogic.actions.makeRequest;
   onPaginate(newPageIndex: number): { newPageIndex: number };
+  setIsFirstRequest(): boolean;
 }
 export interface IndicesValues {
   data: typeof FetchIndicesAPILogic.values.data;
   hasNoIndices: boolean;
-  indices: ViewSearchIndex[];
+  indices: ElasticsearchViewIndex[];
+  isFirstRequest: boolean;
   isLoading: boolean;
   meta: Meta;
   status: typeof FetchIndicesAPILogic.values.status;
@@ -110,6 +63,7 @@ export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
       searchQuery,
     }),
     onPaginate: (newPageIndex) => ({ newPageIndex }),
+    setIsFirstRequest: () => true,
   },
   connect: {
     actions: [FetchIndicesAPILogic, ['makeRequest', 'apiSuccess', 'apiError']],
@@ -125,6 +79,14 @@ export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
   }),
   path: ['enterprise_search', 'content', 'indices_logic'],
   reducers: () => ({
+    isFirstRequest: [
+      true,
+      {
+        apiError: () => false,
+        apiSuccess: () => false,
+        setIsFirstRequest: () => true,
+      },
+    ],
     meta: [
       DEFAULT_META,
       {
@@ -142,21 +104,11 @@ export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
     ],
     indices: [
       () => [selectors.data],
-      (data) =>
-        data?.indices
-          ? data.indices.map((index: ElasticsearchIndexWithIngestion) => ({
-              ...index,
-              ingestionMethod: getIngestionMethod(index),
-              ingestionStatus: getIngestionStatus(index, getIngestionMethod(index)),
-              lastUpdated: index.connector ? index.connector.last_synced ?? 'never' : null,
-            }))
-          : [],
+      (data) => (data?.indices ? data.indices.map(indexToViewIndex) : []),
     ],
     isLoading: [
-      () => [selectors.status],
-      (status) => {
-        return status === Status.LOADING;
-      },
+      () => [selectors.status, selectors.isFirstRequest],
+      (status, isFirstRequest) => [Status.LOADING, Status.IDLE].includes(status) && isFirstRequest,
     ],
   }),
 });

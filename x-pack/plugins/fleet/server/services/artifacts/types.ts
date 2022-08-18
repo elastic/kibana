@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ListResult } from '../../../common';
+import type { ListResult } from '../../../common/types';
 import type { ListWithKuery } from '../../types';
 
 export interface NewArtifact {

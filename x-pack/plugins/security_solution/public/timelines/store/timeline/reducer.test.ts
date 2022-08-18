@@ -56,7 +56,7 @@ import type { TimelineById } from './types';
 import { Direction } from '../../../../common/search_strategy';
 import type { FilterManager } from '@kbn/data-plugin/public';
 
-jest.mock('../../../common/components/url_state/normalize_time_range');
+jest.mock('../../../common/utils/normalize_time_range');
 jest.mock('../../../common/utils/default_date_settings', () => {
   const actual = jest.requireActual('../../../common/utils/default_date_settings');
   return {

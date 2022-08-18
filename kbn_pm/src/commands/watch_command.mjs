@@ -13,10 +13,10 @@ export const command = {
   name: 'watch',
   description: 'Runs a build in the Bazel built packages and keeps watching them for changes',
   flagsHelp: `
-    --offline            Run the installation process without consulting online resources. This is useful and',
-                          sometimes necessary for using bootstrap on an airplane for instance. The local caches',
-                          will be used exclusively, including a yarn-registry local mirror which is created and',
-                          maintained by successful online bootstrap executions.',
+    --offline            Run the installation process without consulting online resources. This is useful and
+                          sometimes necessary for using bootstrap on an airplane for instance. The local caches
+                          will be used exclusively, including a yarn-registry local mirror which is created and
+                          maintained by successful online bootstrap executions.
   `,
   reportTimings: {
     group: 'scripts/kbn watch',

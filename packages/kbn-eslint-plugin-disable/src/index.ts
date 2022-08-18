@@ -7,6 +7,7 @@
  */
 
 import { NoNakedESLintDisableRule } from './rules/no_naked_eslint_disable';
+import { NoProtectedESLintDisableRule } from './rules/no_protected_eslint_disable';
 
 /**
  * Custom ESLint rules, add `'@kbn/eslint-plugin-disable'` to your eslint config to use them
@@ -14,4 +15,5 @@ import { NoNakedESLintDisableRule } from './rules/no_naked_eslint_disable';
  */
 export const rules = {
   no_naked_eslint_disable: NoNakedESLintDisableRule,
+  no_protected_eslint_disable: NoProtectedESLintDisableRule,
 };

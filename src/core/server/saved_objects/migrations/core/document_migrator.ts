@@ -47,16 +47,19 @@ import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
 import Semver from 'semver';
 import type { Logger } from '@kbn/logging';
-import { SavedObjectUnsanitizedDoc } from '../../serialization';
-import {
+import type {
   SavedObjectsMigrationVersion,
   SavedObjectsNamespaceType,
+} from '@kbn/core-saved-objects-common';
+import type {
+  SavedObjectUnsanitizedDoc,
   SavedObjectsType,
-} from '../../types';
+  ISavedObjectTypeRegistry,
+  SavedObjectMigrationFn,
+  SavedObjectMigrationMap,
+} from '@kbn/core-saved-objects-server';
 import { MigrationLogger } from './migration_logger';
 import { TransformSavedObjectDocumentError } from '.';
-import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
-import { SavedObjectMigrationFn, SavedObjectMigrationMap } from '../types';
 import { DEFAULT_NAMESPACE_STRING, SavedObjectsUtils } from '../../service/lib/utils';
 import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 

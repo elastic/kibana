@@ -18,25 +18,39 @@ import {
   EuiSpacer,
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
 } from '@elastic/eui';
+
 import { CronEditor, Frequency } from '@kbn/es-ui-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 
 import { Status } from '../../../../../../common/types/api';
+import { ConnectorStatus } from '../../../../../../common/types/connectors';
+import { ConnectorIndex } from '../../../../../../common/types/indices';
+import { generateEncodedPath } from '../../../../shared/encode_path_params';
+import { EuiButtonTo } from '../../../../shared/react_router_helpers';
 import { UnsavedChangesPrompt } from '../../../../shared/unsaved_changes_prompt';
 import { UpdateConnectorSchedulingApiLogic } from '../../../api/connector_package/update_connector_scheduling_api_logic';
-import { FetchIndexApiLogic } from '../../../api/index/fetch_index_api_logic';
+
+import { SEARCH_INDEX_TAB_PATH } from '../../../routes';
+import { IngestionStatus } from '../../../types';
+import { isConnectorIndex } from '../../../utils/indices';
+
+import { IndexViewLogic } from '../index_view_logic';
+
+import { SearchIndexTabId } from '../search_index';
 
 import { ConnectorSchedulingLogic } from './connector_scheduling_logic';
 
 export const ConnectorSchedulingComponent: React.FC = () => {
-  const { data } = useValues(FetchIndexApiLogic);
+  const { index, ingestionStatus } = useValues(IndexViewLogic);
   const { status } = useValues(UpdateConnectorSchedulingApiLogic);
   const { makeRequest } = useActions(UpdateConnectorSchedulingApiLogic);
   const { hasChanges } = useValues(ConnectorSchedulingLogic);
   const { setHasChanges } = useActions(ConnectorSchedulingLogic);
 
-  const schedulingInput = data?.connector?.scheduling;
+  // Need to do this ugly casting because we can't check this after the below typecheck, because useState can't be used after an if
+  const schedulingInput = (index as ConnectorIndex)?.connector?.scheduling;
   const [scheduling, setScheduling] = useState(schedulingInput);
   const [fieldToPreferredValueMap, setFieldToPreferredValueMap] = useState({});
   const [simpleCron, setSimpleCron] = useState<{
@@ -47,28 +61,57 @@ export const ConnectorSchedulingComponent: React.FC = () => {
     frequency: schedulingInput?.interval ? cronToFrequency(schedulingInput.interval) : 'HOUR',
   });
 
-  const editor = scheduling && (
-    <CronEditor
-      fieldToPreferredValueMap={fieldToPreferredValueMap}
-      cronExpression={simpleCron.expression}
-      frequency={simpleCron.frequency}
-      onChange={({
-        cronExpression: expression,
-        frequency,
-        fieldToPreferredValueMap: newFieldToPreferredValueMap,
-      }) => {
-        setSimpleCron({
-          expression,
-          frequency,
-        });
-        setFieldToPreferredValueMap(newFieldToPreferredValueMap);
-        setScheduling({ ...scheduling, interval: expression });
-        setHasChanges(true);
-      }}
-    />
-  );
+  if (!isConnectorIndex(index)) {
+    return <></>;
+  }
 
-  return scheduling ? (
+  if (
+    index.connector.status === ConnectorStatus.CREATED ||
+    index.connector.status === ConnectorStatus.NEEDS_CONFIGURATION
+  ) {
+    return (
+      <>
+        <EuiSpacer />
+        <EuiCallOut
+          iconType="iInCircle"
+          title={i18n.translate(
+            'xpack.enterpriseSearch.content.indices.connectorScheduling.notConnected.title',
+            {
+              defaultMessage: 'Configure your connector to schedule a sync',
+            }
+          )}
+        >
+          <EuiText size="s">
+            {i18n.translate(
+              'xpack.enterpriseSearch.content.indices.connectorScheduling.notConnected.description',
+              {
+                defaultMessage:
+                  'Configure and deploy your connector, then return here to set your sync schedule. This schedule will dictate the interval that the connector will sync with your data source for updated documents.',
+              }
+            )}
+          </EuiText>
+          <EuiSpacer size="s" />
+          <EuiButtonTo
+            to={generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
+              indexName: index.name,
+              tabId: SearchIndexTabId.CONFIGURATION,
+            })}
+            fill
+            size="s"
+          >
+            {i18n.translate(
+              'xpack.enterpriseSearch.content.indices.connectorScheduling.notConnected.button.label',
+              {
+                defaultMessage: 'Configure',
+              }
+            )}
+          </EuiButtonTo>
+        </EuiCallOut>
+      </>
+    );
+  }
+
+  return (
     <>
       <UnsavedChangesPrompt
         hasUnsavedChanges={hasChanges}
@@ -78,14 +121,26 @@ export const ConnectorSchedulingComponent: React.FC = () => {
         )}
       />
       <EuiSpacer />
-      <EuiPanel hasShadow={false} hasBorder>
+      <EuiPanel hasShadow={false} hasBorder className="schedulingPanel">
         <EuiFlexGroup direction="column">
+          {ingestionStatus === IngestionStatus.ERROR ? (
+            <EuiCallOut
+              color="warning"
+              iconType="alert"
+              title={i18n.translate(
+                'xpack.enterpriseSearch.content.indices.connectorScheduling.error.title',
+                { defaultMessage: 'Review your connector configuration for reported errors.' }
+              )}
+            />
+          ) : (
+            <></>
+          )}
           <EuiFlexItem>
             <EuiSwitch
               checked={scheduling.enabled}
               label={i18n.translate(
                 'xpack.enterpriseSearch.content.indices.connectorScheduling.switch.label',
-                { defaultMessage: 'Keep this source in sync' }
+                { defaultMessage: 'Enable recurring syncs with the following schedule' }
               )}
               onChange={(e) => {
                 setScheduling({ ...scheduling, enabled: e.target.checked });
@@ -95,26 +150,40 @@ export const ConnectorSchedulingComponent: React.FC = () => {
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText size="s">
-              {scheduling.enabled
-                ? i18n.translate(
-                    'xpack.enterpriseSearch.content.indices.connectorScheduling.switch.enabled.description',
-                    {
-                      defaultMessage:
-                        'This source will automatically be kept in sync according to the schedule set below.',
-                    }
-                  )
-                : i18n.translate(
-                    'xpack.enterpriseSearch.content.indices.connectorScheduling.switch.disabled.description',
-                    { defaultMessage: 'Source content will not be kept in sync.' }
-                  )}
+              {i18n.translate(
+                'xpack.enterpriseSearch.content.indices.connectorScheduling.configured.description',
+                {
+                  defaultMessage:
+                    'Your connector is configured and deployed. Configure a one-time sync by clicking the Sync button, or enable a recurring sync schedule. ',
+                }
+              )}
             </EuiText>
           </EuiFlexItem>
-          <EuiFlexItem>{editor}</EuiFlexItem>
+          <EuiFlexItem>
+            <CronEditor
+              fieldToPreferredValueMap={fieldToPreferredValueMap}
+              cronExpression={simpleCron.expression}
+              frequency={simpleCron.frequency}
+              onChange={({
+                cronExpression: expression,
+                frequency,
+                fieldToPreferredValueMap: newFieldToPreferredValueMap,
+              }) => {
+                setSimpleCron({
+                  expression,
+                  frequency,
+                });
+                setFieldToPreferredValueMap(newFieldToPreferredValueMap);
+                setScheduling({ ...scheduling, interval: expression });
+                setHasChanges(true);
+              }}
+            />
+          </EuiFlexItem>
           <EuiFlexItem>
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
-                  disabled={!hasChanges || status === Status.LOADING || !data?.connector?.id}
+                  disabled={!hasChanges || status === Status.LOADING}
                   onClick={() => {
                     setScheduling(schedulingInput);
                     setSimpleCron({
@@ -134,10 +203,8 @@ export const ConnectorSchedulingComponent: React.FC = () => {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
-                  disabled={!hasChanges || status === Status.LOADING || !data?.connector?.id}
-                  onClick={() =>
-                    makeRequest({ connectorId: data?.connector?.id ?? '', scheduling })
-                  }
+                  disabled={!hasChanges || status === Status.LOADING}
+                  onClick={() => makeRequest({ connectorId: index.connector.id, scheduling })}
                 >
                   {i18n.translate(
                     'xpack.enterpriseSearch.content.indices.connectorScheduling.saveButton.label',
@@ -150,8 +217,6 @@ export const ConnectorSchedulingComponent: React.FC = () => {
         </EuiFlexGroup>
       </EuiPanel>
     </>
-  ) : (
-    <></>
   );
 };
 

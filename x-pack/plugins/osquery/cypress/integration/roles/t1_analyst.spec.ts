@@ -50,7 +50,6 @@ describe('T1 Analyst - READ + runSavedQueries ', () => {
     cy.contains('select * from uptime');
     cy.wait(1000);
     cy.react('EuiTableBody').first().react('DefaultItemAction').first().click();
-    selectAllAgents();
     cy.contains(SAVED_QUERY_ID);
     submitQuery();
     checkResults();

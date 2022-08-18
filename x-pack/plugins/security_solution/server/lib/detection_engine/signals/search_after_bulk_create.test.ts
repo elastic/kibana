@@ -7,8 +7,6 @@
 
 import {
   sampleEmptyDocSearchResults,
-  sampleRuleGuid,
-  mockLogger,
   repeatedSearchResultsWithSortId,
   repeatedSearchResultsWithNoSortId,
   sampleDocSearchResultsNoSortIdNoHits,
@@ -28,7 +26,7 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { getCompleteRuleMock, getQueryRuleParams } from '../schemas/rule_schemas.mock';
 import { bulkCreateFactory } from '../rule_types/factories/bulk_create_factory';
 import { wrapHitsFactory } from '../rule_types/factories/wrap_hits_factory';
-import { mockBuildRuleMessage } from './__mocks__/build_rule_message.mock';
+import { ruleExecutionLogMock } from '../rule_monitoring/mocks';
 import type { BuildReasonMessage } from './reason_formatters';
 import type { QueryRuleParams } from '../schemas/rule_schemas';
 import { createPersistenceServicesMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
@@ -48,8 +46,6 @@ import {
 import { SERVER_APP_ID } from '../../../../common/constants';
 import type { CommonAlertFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 
-const buildRuleMessage = mockBuildRuleMessage;
-
 describe('searchAfterAndBulkCreate', () => {
   let mockService: RuleExecutorServicesMock;
   let mockPersistenceServices: jest.Mocked<PersistenceServices>;
@@ -58,6 +54,7 @@ describe('searchAfterAndBulkCreate', () => {
   let wrapHits: WrapHits;
   let inputIndexPattern: string[] = [];
   let listClient = listMock.getListClient();
+  const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
   const someGuids = Array.from({ length: 13 }).map(() => uuid.v4());
   const sampleParams = getQueryRuleParams();
   const queryCompleteRule = getCompleteRuleMock<QueryRuleParams>(sampleParams);
@@ -78,6 +75,7 @@ describe('searchAfterAndBulkCreate', () => {
   };
   sampleParams.maxSignals = 30;
   let tuple: RuleRangeTuple;
+
   beforeEach(() => {
     jest.clearAllMocks();
     buildReasonMessage = jest.fn().mockResolvedValue('some alert reason message');
@@ -86,21 +84,19 @@ describe('searchAfterAndBulkCreate', () => {
     inputIndexPattern = ['auditbeat-*'];
     mockService = alertsMock.createRuleExecutorServices();
     tuple = getRuleRangeTuples({
-      logger: mockLogger,
       previousStartedAt: new Date(),
       startedAt: new Date(),
       from: sampleParams.from,
       to: sampleParams.to,
       interval: '5m',
       maxSignals: sampleParams.maxSignals,
-      buildRuleMessage,
+      ruleExecutionLogger,
     }).tuples[0];
     mockPersistenceServices = createPersistenceServicesMock();
     bulkCreate = bulkCreateFactory(
-      mockLogger,
       mockPersistenceServices.alertWithPersistence,
-      buildRuleMessage,
-      false
+      false,
+      ruleExecutionLogger
     );
     wrapHits = wrapHitsFactory({
       completeRule: queryCompleteRule,
@@ -127,6 +123,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
       errors: {},
+      alertsWereTruncated: false,
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -144,6 +141,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
       errors: {},
+      alertsWereTruncated: false,
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -161,6 +159,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
       errors: {},
+      alertsWereTruncated: false,
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -178,6 +177,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
       errors: {},
+      alertsWereTruncated: false,
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -205,14 +205,12 @@ describe('searchAfterAndBulkCreate', () => {
       listClient,
       exceptionsList: [exceptionItem],
       services: mockService,
-      logger: mockLogger,
+      ruleExecutionLogger,
       eventsTelemetry: undefined,
-      id: sampleRuleGuid,
       inputIndexPattern,
       pageSize: 1,
       filter: defaultFilter,
       buildReasonMessage,
-      buildRuleMessage,
       bulkCreate,
       wrapHits,
       runtimeMappings: undefined,
@@ -239,6 +237,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
       errors: {},
+      alertsWereTruncated: false,
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -256,6 +255,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
       errors: {},
+      alertsWereTruncated: false,
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -273,6 +273,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
       errors: {},
+      alertsWereTruncated: false,
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -299,14 +300,12 @@ describe('searchAfterAndBulkCreate', () => {
       listClient,
       exceptionsList: [exceptionItem],
       services: mockService,
-      logger: mockLogger,
+      ruleExecutionLogger,
       eventsTelemetry: undefined,
-      id: sampleRuleGuid,
       inputIndexPattern,
       pageSize: 1,
       filter: defaultFilter,
       buildReasonMessage,
-      buildRuleMessage,
       bulkCreate,
       wrapHits,
       runtimeMappings: undefined,
@@ -349,6 +348,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
       errors: {},
+      alertsWereTruncated: false,
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -375,14 +375,12 @@ describe('searchAfterAndBulkCreate', () => {
       listClient,
       exceptionsList: [exceptionItem],
       services: mockService,
-      logger: mockLogger,
+      ruleExecutionLogger,
       eventsTelemetry: undefined,
-      id: sampleRuleGuid,
       inputIndexPattern,
       pageSize: 1,
       filter: defaultFilter,
       buildReasonMessage,
-      buildRuleMessage,
       bulkCreate,
       wrapHits,
       runtimeMappings: undefined,
@@ -436,14 +434,12 @@ describe('searchAfterAndBulkCreate', () => {
       listClient,
       exceptionsList: [exceptionItem],
       services: mockService,
-      logger: mockLogger,
+      ruleExecutionLogger,
       eventsTelemetry: undefined,
-      id: sampleRuleGuid,
       inputIndexPattern,
       pageSize: 1,
       filter: defaultFilter,
       buildReasonMessage,
-      buildRuleMessage,
       bulkCreate,
       wrapHits,
       runtimeMappings: undefined,
@@ -480,6 +476,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
       errors: {},
+      alertsWereTruncated: false,
     });
     mockService.scopedClusterClient.asCurrentUser.search
       .mockResolvedValueOnce(
@@ -506,14 +503,12 @@ describe('searchAfterAndBulkCreate', () => {
       listClient,
       exceptionsList: [],
       services: mockService,
-      logger: mockLogger,
+      ruleExecutionLogger,
       eventsTelemetry: undefined,
-      id: sampleRuleGuid,
       inputIndexPattern,
       pageSize: 1,
       filter: defaultFilter,
       buildReasonMessage,
-      buildRuleMessage,
       bulkCreate,
       wrapHits,
       runtimeMappings: undefined,
@@ -563,14 +558,12 @@ describe('searchAfterAndBulkCreate', () => {
       listClient,
       exceptionsList: [exceptionItem],
       services: mockService,
-      logger: mockLogger,
+      ruleExecutionLogger,
       eventsTelemetry: undefined,
-      id: sampleRuleGuid,
       inputIndexPattern,
       pageSize: 1,
       filter: defaultFilter,
       buildReasonMessage,
-      buildRuleMessage,
       bulkCreate,
       wrapHits,
       runtimeMappings: undefined,
@@ -613,6 +606,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
       errors: {},
+      alertsWereTruncated: false,
     });
 
     const exceptionItem = getExceptionListItemSchemaMock();
@@ -633,14 +627,12 @@ describe('searchAfterAndBulkCreate', () => {
       listClient,
       exceptionsList: [exceptionItem],
       services: mockService,
-      logger: mockLogger,
+      ruleExecutionLogger,
       eventsTelemetry: undefined,
-      id: sampleRuleGuid,
       inputIndexPattern,
       pageSize: 1,
       filter: defaultFilter,
       buildReasonMessage,
-      buildRuleMessage,
       bulkCreate,
       wrapHits,
       runtimeMappings: undefined,
@@ -683,6 +675,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
       errors: {},
+      alertsWereTruncated: false,
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -705,14 +698,12 @@ describe('searchAfterAndBulkCreate', () => {
       listClient,
       exceptionsList: [],
       services: mockService,
-      logger: mockLogger,
+      ruleExecutionLogger,
       eventsTelemetry: undefined,
-      id: sampleRuleGuid,
       inputIndexPattern,
       pageSize: 1,
       filter: defaultFilter,
       buildReasonMessage,
-      buildRuleMessage,
       bulkCreate,
       wrapHits,
       runtimeMappings: undefined,
@@ -754,14 +745,12 @@ describe('searchAfterAndBulkCreate', () => {
       tuple,
       completeRule: queryCompleteRule,
       services: mockService,
-      logger: mockLogger,
+      ruleExecutionLogger,
       eventsTelemetry: undefined,
-      id: sampleRuleGuid,
       inputIndexPattern,
       pageSize: 1,
       filter: defaultFilter,
       buildReasonMessage,
-      buildRuleMessage,
       bulkCreate,
       wrapHits,
       runtimeMappings: undefined,
@@ -802,14 +791,12 @@ describe('searchAfterAndBulkCreate', () => {
       tuple,
       completeRule: queryCompleteRule,
       services: mockService,
-      logger: mockLogger,
+      ruleExecutionLogger,
       eventsTelemetry: undefined,
-      id: sampleRuleGuid,
       inputIndexPattern,
       pageSize: 1,
       filter: defaultFilter,
       buildReasonMessage,
-      buildRuleMessage,
       bulkCreate,
       wrapHits,
       runtimeMappings: undefined,
@@ -861,6 +848,7 @@ describe('searchAfterAndBulkCreate', () => {
           statusCode: 500,
         },
       },
+      alertsWereTruncated: false,
     });
 
     mockService.scopedClusterClient.asCurrentUser.bulk.mockResponseOnce(bulkItem); // adds the response with errors we are testing
@@ -880,6 +868,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
       errors: {},
+      alertsWereTruncated: false,
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -897,6 +886,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
       errors: {},
+      alertsWereTruncated: false,
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -914,6 +904,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
       errors: {},
+      alertsWereTruncated: false,
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -928,14 +919,12 @@ describe('searchAfterAndBulkCreate', () => {
         listClient,
         exceptionsList: [],
         services: mockService,
-        logger: mockLogger,
+        ruleExecutionLogger,
         eventsTelemetry: undefined,
-        id: sampleRuleGuid,
         inputIndexPattern,
         pageSize: 1,
         filter: defaultFilter,
         buildReasonMessage,
-        buildRuleMessage,
         bulkCreate,
         wrapHits,
         runtimeMappings: undefined,
@@ -964,6 +953,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
       errors: {},
+      alertsWereTruncated: false,
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -981,6 +971,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
       errors: {},
+      alertsWereTruncated: false,
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -998,6 +989,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
       errors: {},
+      alertsWereTruncated: false,
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -1014,14 +1006,12 @@ describe('searchAfterAndBulkCreate', () => {
       listClient,
       exceptionsList: [],
       services: mockService,
-      logger: mockLogger,
+      ruleExecutionLogger,
       eventsTelemetry: undefined,
-      id: sampleRuleGuid,
       inputIndexPattern,
       pageSize: 1,
       filter: defaultFilter,
       buildReasonMessage,
-      buildRuleMessage,
       bulkCreate,
       wrapHits,
       runtimeMappings: undefined,

@@ -23,6 +23,7 @@ export const useStyles = () => {
 
     const treeViewContainer: CSSObject = {
       height: '600px',
+      width: '288px',
       overflowY: 'auto',
     };
 

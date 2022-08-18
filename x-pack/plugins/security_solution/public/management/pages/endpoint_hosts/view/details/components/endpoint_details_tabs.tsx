@@ -18,10 +18,6 @@ export enum EndpointDetailsTabsTypes {
   activityLog = 'activity_log',
 }
 
-export type EndpointDetailsTabsId =
-  | EndpointDetailsTabsTypes.overview
-  | EndpointDetailsTabsTypes.activityLog;
-
 interface EndpointDetailsTabs {
   id: string;
   name: string;

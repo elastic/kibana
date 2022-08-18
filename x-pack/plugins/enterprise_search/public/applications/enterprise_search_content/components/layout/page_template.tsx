@@ -23,9 +23,10 @@ export const EnterpriseSearchContentPageTemplate: React.FC<PageTemplateProps> = 
     <EnterpriseSearchPageTemplateWrapper
       {...pageTemplateProps}
       solutionNav={{
-        name: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAME,
         items: useEnterpriseSearchNav(),
+        name: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAME,
       }}
+      restrictWidth
       setPageChrome={pageChrome && <SetEnterpriseSearchChrome trail={pageChrome} />}
     >
       {pageViewTelemetry && (

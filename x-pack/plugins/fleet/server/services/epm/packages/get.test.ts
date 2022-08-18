@@ -13,7 +13,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { PACKAGES_SAVED_OBJECT_TYPE, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../common';
-import type { PackagePolicySOAttributes, RegistryPackage } from '../../../../common';
+import type { PackagePolicySOAttributes, RegistryPackage } from '../../../../common/types';
 
 import * as Registry from '../registry';
 
@@ -363,6 +363,32 @@ describe('When using EPM `get` services', () => {
             savedObjectsClient: soClient,
             pkgName: 'my-package',
             pkgVersion: '1.0.0',
+            skipArchive: true,
+          })
+        ).resolves.toMatchObject({
+          latestVersion: '1.0.0',
+          status: 'not_installed',
+        });
+
+        expect(MockRegistry.getRegistryPackage).not.toHaveBeenCalled();
+      });
+
+      // when calling the get package endpoint without a package version we
+      // were previously incorrectly getting the info from archive
+      it('avoids loading archive when skipArchive = true and no version supplied', async () => {
+        const soClient = savedObjectsClientMock.create();
+        soClient.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+        MockRegistry.fetchInfo.mockResolvedValue({
+          name: 'my-package',
+          version: '1.0.0',
+          assets: [],
+        } as unknown as RegistryPackage);
+
+        await expect(
+          getPackageInfo({
+            savedObjectsClient: soClient,
+            pkgName: 'my-package',
+            pkgVersion: '',
             skipArchive: true,
           })
         ).resolves.toMatchObject({

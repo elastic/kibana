@@ -42,6 +42,13 @@ describe('browser normalizers', () => {
         status: LocationStatus.GA,
       },
     ];
+    const privateLocations: Locations = [
+      {
+        id: 'germany',
+        label: 'Germany',
+        isServiceManaged: false,
+      },
+    ];
     const monitors: ProjectBrowserMonitor[] = [
       {
         id: 'test-id-1',
@@ -91,6 +98,7 @@ describe('browser normalizers', () => {
         params,
         playwrightOptions,
         locations: ['us_central', 'us_east'],
+        privateLocations: ['Germany'],
         tags: ['tag3', 'tag4'],
         ignoreHTTPSErrors: false,
         apmServiceName: 'bean-service',
@@ -100,6 +108,7 @@ describe('browser normalizers', () => {
     it('properly normalizes browser monitor', () => {
       const actual = normalizeProjectMonitors({
         locations,
+        privateLocations,
         monitors,
         projectId,
         namespace: 'test-space',
@@ -224,6 +233,11 @@ describe('browser normalizers', () => {
               label: 'Test Location',
               url: 'test-url',
               status: 'ga',
+            },
+            {
+              id: 'germany',
+              isServiceManaged: false,
+              label: 'Germany',
             },
           ],
           name: 'test-name-3',

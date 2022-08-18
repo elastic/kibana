@@ -17,10 +17,10 @@ import type {
   DownloadSource,
   PreconfiguredAgentPolicy,
   PreconfiguredPackage,
-  PreconfigurationError,
   PackagePolicy,
-} from '../../common';
-import { PRECONFIGURATION_LATEST_KEYWORD } from '../../common';
+} from '../../common/types';
+import type { PreconfigurationError } from '../../common/constants';
+import { PRECONFIGURATION_LATEST_KEYWORD } from '../../common/constants';
 import { PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE } from '../constants';
 
 import { escapeSearchQueryPhrase } from './saved_object';
@@ -157,8 +157,8 @@ export async function ensurePreconfiguredPackagesAndPolicies(
           policy
         );
 
-        const newFields = {
-          defaultDownloadSourceId: defaultDownloadSource.id,
+        const newFields: Partial<AgentPolicy> = {
+          download_source_id: defaultDownloadSource.id,
           ...fields,
         };
         if (hasChanged) {

@@ -6,6 +6,7 @@
  */
 
 import { emsWorldLayerId } from '../../../../../../common/constants';
+import { getDefaultStaticProperties } from '../../../../styles/vector/vector_style_defaults';
 
 jest.mock('../../../../../kibana_services', () => {
   return {
@@ -54,7 +55,6 @@ describe('createLayerDescriptor', () => {
             applyGlobalTime: true,
             id: '12345',
             indexPatternId: 'apm_static_index_pattern_id',
-            indexPatternTitle: 'traces-apm*,logs-apm*,metrics-apm*,apm-*',
             metrics: [
               {
                 field: 'transaction.duration.us',
@@ -82,6 +82,7 @@ describe('createLayerDescriptor', () => {
       style: {
         isTimeAware: true,
         properties: {
+          ...getDefaultStaticProperties(),
           fillColor: {
             options: {
               color: 'Green to Red',
@@ -98,69 +99,11 @@ describe('createLayerDescriptor', () => {
             },
             type: 'DYNAMIC',
           },
-          icon: {
-            options: {
-              value: 'marker',
-            },
-            type: 'STATIC',
-          },
-          iconOrientation: {
-            options: {
-              orientation: 0,
-            },
-            type: 'STATIC',
-          },
-          iconSize: {
-            options: {
-              size: 6,
-            },
-            type: 'STATIC',
-          },
-          labelText: {
-            options: {
-              value: '',
-            },
-            type: 'STATIC',
-          },
-          labelBorderColor: {
-            options: {
-              color: '#FFFFFF',
-            },
-            type: 'STATIC',
-          },
-          labelBorderSize: {
-            options: {
-              size: 'SMALL',
-            },
-          },
-          labelColor: {
-            options: {
-              color: '#000000',
-            },
-            type: 'STATIC',
-          },
-          labelSize: {
-            options: {
-              size: 14,
-            },
-            type: 'STATIC',
-          },
           lineColor: {
             options: {
               color: '#3d3d3d',
             },
             type: 'STATIC',
-          },
-          lineWidth: {
-            options: {
-              size: 1,
-            },
-            type: 'STATIC',
-          },
-          symbolizeAs: {
-            options: {
-              value: 'circle',
-            },
           },
         },
         type: 'VECTOR',
@@ -253,6 +196,7 @@ describe('createLayerDescriptor', () => {
       style: {
         isTimeAware: true,
         properties: {
+          ...getDefaultStaticProperties(),
           fillColor: {
             options: {
               color: 'Green to Red',
@@ -269,18 +213,6 @@ describe('createLayerDescriptor', () => {
             },
             type: 'DYNAMIC',
           },
-          icon: {
-            options: {
-              value: 'marker',
-            },
-            type: 'STATIC',
-          },
-          iconOrientation: {
-            options: {
-              orientation: 0,
-            },
-            type: 'STATIC',
-          },
           iconSize: {
             options: {
               field: {
@@ -296,51 +228,11 @@ describe('createLayerDescriptor', () => {
             },
             type: 'DYNAMIC',
           },
-          labelText: {
-            options: {
-              value: '',
-            },
-            type: 'STATIC',
-          },
-          labelBorderColor: {
-            options: {
-              color: '#FFFFFF',
-            },
-            type: 'STATIC',
-          },
-          labelBorderSize: {
-            options: {
-              size: 'SMALL',
-            },
-          },
-          labelColor: {
-            options: {
-              color: '#000000',
-            },
-            type: 'STATIC',
-          },
-          labelSize: {
-            options: {
-              size: 14,
-            },
-            type: 'STATIC',
-          },
           lineColor: {
             options: {
               color: '#3d3d3d',
             },
             type: 'STATIC',
-          },
-          lineWidth: {
-            options: {
-              size: 1,
-            },
-            type: 'STATIC',
-          },
-          symbolizeAs: {
-            options: {
-              value: 'circle',
-            },
           },
         },
         type: 'VECTOR',

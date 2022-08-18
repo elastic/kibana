@@ -95,25 +95,32 @@ export class ResourceInstaller {
    */
   public async installCommonResources(): Promise<void> {
     await this.installWithTimeout('common resources shared between all indices', async () => {
-      const { getResourceName } = this.options;
+      const { getResourceName, logger } = this.options;
 
-      // We can install them in parallel
-      await Promise.all([
-        this.createOrUpdateLifecyclePolicy({
-          name: getResourceName(DEFAULT_ILM_POLICY_ID),
-          body: defaultLifecyclePolicy,
-        }),
+      try {
+        // We can install them in parallel
+        await Promise.all([
+          this.createOrUpdateLifecyclePolicy({
+            name: getResourceName(DEFAULT_ILM_POLICY_ID),
+            body: defaultLifecyclePolicy,
+          }),
 
-        this.createOrUpdateComponentTemplate({
-          name: getResourceName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
-          body: technicalComponentTemplate,
-        }),
+          this.createOrUpdateComponentTemplate({
+            name: getResourceName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
+            body: technicalComponentTemplate,
+          }),
 
-        this.createOrUpdateComponentTemplate({
-          name: getResourceName(ECS_COMPONENT_TEMPLATE_NAME),
-          body: ecsComponentTemplate,
-        }),
-      ]);
+          this.createOrUpdateComponentTemplate({
+            name: getResourceName(ECS_COMPONENT_TEMPLATE_NAME),
+            body: ecsComponentTemplate,
+          }),
+        ]);
+      } catch (err) {
+        logger.error(
+          `Error installing common resources in RuleRegistry ResourceInstaller - ${err.message}`
+        );
+        throw err;
+      }
     });
   }
 
@@ -375,6 +382,9 @@ export class ResourceInstaller {
         },
       });
     } catch (err) {
+      logger.error(
+        `Error creating index ${initialIndexName} as the write index for alias ${primaryNamespacedAlias} in RuleRegistry ResourceInstaller: ${err.message}`
+      );
       // If the index already exists and it's the write index for the alias,
       // something else created it so suppress the error. If it's not the write
       // index, that's bad, throw an error.
@@ -460,6 +470,9 @@ export class ResourceInstaller {
         return createConcreteIndexInfo({});
       }
 
+      logger.error(
+        `Error fetching concrete indices for ${indexPatternForBackingIndices} in RuleRegistry ResourceInstaller - ${err.message}`
+      );
       // A non-404 error is a real problem so we re-throw.
       throw err;
     }

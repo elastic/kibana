@@ -13,9 +13,8 @@ import React from 'react';
 import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
 
 import { UserProfileAPIClient } from '..';
-import type { UserData } from '../../../common';
+import type { UserProfileData } from '../../../common';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
-import { UserAvatar } from '../../components';
 import { UserAPIClient } from '../../management';
 import { securityMock } from '../../mocks';
 import { Providers } from '../account_management_app';
@@ -62,7 +61,7 @@ describe('useUserProfileForm', () => {
   });
 
   it('should initialise form with values from user profile', () => {
-    const data: UserData = {
+    const data: UserProfileData = {
       avatar: {},
     };
     const { result } = renderHook(() => useUserProfileForm({ user, data }), { wrapper });
@@ -86,7 +85,7 @@ describe('useUserProfileForm', () => {
   });
 
   it('should initialise form with values from user avatar if present', () => {
-    const data: UserData = {
+    const data: UserProfileData = {
       avatar: {
         imageUrl: 'avatar.png',
       },
@@ -106,7 +105,7 @@ describe('useUserProfileForm', () => {
   });
 
   it('should update initials when full name changes', async () => {
-    const data: UserData = {};
+    const data: UserProfileData = {};
     const { result } = renderHook(() => useUserProfileForm({ user, data }), { wrapper });
 
     await act(async () => {
@@ -118,7 +117,7 @@ describe('useUserProfileForm', () => {
   });
 
   it('should save user and user profile when submitting form', async () => {
-    const data: UserData = {};
+    const data: UserProfileData = {};
     const { result } = renderHook(() => useUserProfileForm({ user, data }), { wrapper });
 
     await act(async () => {
@@ -138,7 +137,7 @@ describe('useUserProfileForm', () => {
       },
     };
 
-    const data: UserData = {};
+    const data: UserProfileData = {};
     const { result } = renderHook(() => useUserProfileForm({ user, data }), { wrapper });
 
     await act(async () => {
@@ -149,7 +148,7 @@ describe('useUserProfileForm', () => {
   });
 
   it('should add toast after submitting form successfully', async () => {
-    const data: UserData = {};
+    const data: UserProfileData = {};
     const { result } = renderHook(() => useUserProfileForm({ user, data }), { wrapper });
 
     await act(async () => {
@@ -160,7 +159,7 @@ describe('useUserProfileForm', () => {
   });
 
   it('should add toast after submitting form failed', async () => {
-    const data: UserData = {};
+    const data: UserProfileData = {};
     const { result } = renderHook(() => useUserProfileForm({ user, data }), { wrapper });
 
     coreStart.http.post.mockRejectedValue(new Error('Error'));
@@ -173,7 +172,7 @@ describe('useUserProfileForm', () => {
   });
 
   it('should set initial values to current values after submitting form successfully', async () => {
-    const data: UserData = {};
+    const data: UserProfileData = {};
     const { result } = renderHook(() => useUserProfileForm({ user, data }), { wrapper });
 
     await act(async () => {
@@ -186,7 +185,7 @@ describe('useUserProfileForm', () => {
 
   describe('User Avatar Form', () => {
     it('should display if the User is not a cloud user', () => {
-      const data: UserData = {};
+      const data: UserProfileData = {};
 
       const nonCloudUser = mockAuthenticatedUser({ elastic_cloud_user: false });
 
@@ -205,11 +204,11 @@ describe('useUserProfileForm', () => {
         </Providers>
       );
 
-      expect(testWrapper.exists(UserAvatar)).toBeTruthy();
+      expect(testWrapper.exists('UserAvatar')).toBeTruthy();
     });
 
     it('should not display if the User is a cloud user', () => {
-      const data: UserData = {};
+      const data: UserProfileData = {};
 
       const cloudUser = mockAuthenticatedUser({ elastic_cloud_user: true });
 
@@ -228,7 +227,7 @@ describe('useUserProfileForm', () => {
         </Providers>
       );
 
-      expect(testWrapper.exists(UserAvatar)).toBeFalsy();
+      expect(testWrapper.exists('UserAvatar')).toBeFalsy();
     });
   });
 });

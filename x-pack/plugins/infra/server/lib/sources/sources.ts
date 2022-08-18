@@ -10,7 +10,11 @@ import { constant, identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { failure } from 'io-ts/lib/PathReporter';
 import { inRange } from 'lodash';
-import { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
+import {
+  SavedObject,
+  SavedObjectsClientContract,
+  SavedObjectsErrorHelpers,
+} from '@kbn/core/server';
 import {
   InfraSavedSourceConfiguration,
   InfraSource,
@@ -72,7 +76,7 @@ export class InfraSources {
           : Promise.reject(err)
       )
       .catch((err) =>
-        savedObjectsClient.errors.isNotFoundError(err)
+        SavedObjectsErrorHelpers.isNotFoundError(err)
           ? Promise.resolve({
               id: sourceId,
               version: undefined,

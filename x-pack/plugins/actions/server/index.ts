@@ -26,6 +26,8 @@ export type {
 } from './types';
 
 export type {
+  CasesWebhookActionTypeId,
+  CasesWebhookActionParams,
   EmailActionTypeId,
   EmailActionParams,
   IndexActionTypeId,

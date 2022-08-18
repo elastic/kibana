@@ -8,13 +8,15 @@
 
 import deepEqual from 'fast-deep-equal';
 
+import { lazyLoadReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
 import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
+
 import { TIME_SLIDER_CONTROL } from '../..';
 import { ControlEmbeddable, DataControlField, IEditableControlFactory } from '../../types';
 import {
   createOptionsListExtract,
   createOptionsListInject,
-} from '../../../common/control_types/options_list/options_list_persistable_state';
+} from '../../../common/options_list/options_list_persistable_state';
 import { TimeSliderControlEmbeddableInput } from '../../../common/control_types/time_slider/types';
 import { TimeSliderStrings } from './time_slider_strings';
 
@@ -27,9 +29,12 @@ export class TimesliderEmbeddableFactory
   constructor() {}
 
   public async create(initialInput: TimeSliderControlEmbeddableInput, parent?: IContainer) {
+    const reduxEmbeddablePackage = await lazyLoadReduxEmbeddablePackage();
     const { TimeSliderControlEmbeddable } = await import('./time_slider_embeddable');
 
-    return Promise.resolve(new TimeSliderControlEmbeddable(initialInput, {}, parent));
+    return Promise.resolve(
+      new TimeSliderControlEmbeddable(reduxEmbeddablePackage, initialInput, {}, parent)
+    );
   }
 
   public presaveTransformFunction = (

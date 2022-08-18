@@ -19,7 +19,7 @@ import type {
   GetOneOutputResponse,
   GetOutputsResponse,
   PostLogstashApiKeyResponse,
-} from '../../../common';
+} from '../../../common/types';
 import { outputService } from '../../services/output';
 import { defaultIngestErrorHandler, FleetUnauthorizedError } from '../../errors';
 import { agentPolicyService } from '../../services';

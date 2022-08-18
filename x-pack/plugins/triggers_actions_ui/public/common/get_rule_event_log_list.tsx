@@ -7,8 +7,13 @@
 
 import React from 'react';
 import { RuleEventLogList } from '../application/sections';
-import type { RuleEventLogListProps } from '../application/sections/rule_details/components/rule_event_log_list';
+import type {
+  RuleEventLogListProps,
+  RuleEventLogListOptions,
+} from '../application/sections/rule_details/components/rule_event_log_list';
 
-export const getRuleEventLogListLazy = (props: RuleEventLogListProps) => {
+export const getRuleEventLogListLazy = <T extends RuleEventLogListOptions = 'default'>(
+  props: RuleEventLogListProps<T>
+) => {
   return <RuleEventLogList {...props} />;
 };

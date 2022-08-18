@@ -20,10 +20,11 @@ import type { Observable } from 'rxjs';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { UserAvatar } from '@kbn/user-profile-components';
 
-import type { UserAvatarData } from '../../common';
+import type { UserProfileAvatarData } from '../../common';
 import { getUserDisplayName, isUserAnonymous } from '../../common/model';
-import { useCurrentUser, UserAvatar, useUserProfile } from '../components';
+import { useCurrentUser, useUserProfile } from '../components';
 
 export interface UserMenuLink {
   label: string;
@@ -47,7 +48,7 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
   const userMenuLinks = useObservable(userMenuLinks$, []);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const userProfile = useUserProfile<{ avatar: UserAvatarData }>('avatar');
+  const userProfile = useUserProfile<{ avatar: UserProfileAvatarData }>('avatar');
   const currentUser = useCurrentUser(); // User profiles do not exist for anonymous users so need to fetch current user as well
 
   const displayName = currentUser.value ? getUserDisplayName(currentUser.value) : '';
@@ -64,9 +65,9 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
       data-test-subj="userMenuButton"
       style={{ lineHeight: 'normal' }}
     >
-      {currentUser.value && userProfile.value ? (
+      {userProfile.value ? (
         <UserAvatar
-          user={currentUser.value}
+          user={userProfile.value.user}
           avatar={userProfile.value.data.avatar}
           size="s"
           data-test-subj="userMenuAvatar"

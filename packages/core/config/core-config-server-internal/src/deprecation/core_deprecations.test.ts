@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getDeprecationsForGlobalSettings } from '../test_utils';
+import { getDeprecationsForGlobalSettings } from '@kbn/core-test-helpers-deprecations-getters';
 import { coreDeprecationProvider } from './core_deprecations';
 
 const initialEnv = { ...process.env };

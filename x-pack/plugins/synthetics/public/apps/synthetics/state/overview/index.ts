@@ -11,7 +11,7 @@ import { MonitorOverviewResult } from '../../../../../common/runtime_types';
 
 import { IHttpSerializedFetchError, serializeHttpFetchError } from '../utils/http_error';
 
-import { MonitorOverviewFlyoutConfig, MonitorOverviewPageState } from './models';
+import { MonitorOverviewPageState, MonitorOverviewFlyoutConfig } from './models';
 import {
   fetchMonitorOverviewAction,
   quietFetchOverviewAction,

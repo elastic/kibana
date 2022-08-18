@@ -15,12 +15,12 @@ import type { Query } from '@kbn/es-query';
 import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { queryFilterToAst } from '@kbn/data-plugin/common';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import { IndexPattern } from '../../../../types';
 import { updateColumnParam } from '../../layer_helpers';
 import type { OperationDefinition } from '..';
 import type { BaseIndexPatternColumn } from '../column_types';
 import { FilterPopover } from './filter_popover';
-import type { IndexPattern } from '../../../types';
-import { NewBucketButton, DragDropBuckets, DraggableBucketContainer } from '../shared_components';
+import { DragDropBuckets, DraggableBucketContainer, NewBucketButton } from '../shared_components';
 
 const generateId = htmlIdGenerator();
 const OPERATION_NAME = 'filters';
@@ -171,6 +171,8 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'n
       </EuiFormRow>
     );
   },
+
+  getMaxPossibleNumValues: (column) => column.params.filters.length,
 };
 
 export const FilterList = ({
