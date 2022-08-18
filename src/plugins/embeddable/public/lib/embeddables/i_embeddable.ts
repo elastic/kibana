@@ -143,6 +143,12 @@ export interface IEmbeddable<
   updateInput(changes: Partial<I>): void;
 
   /**
+   * Updates output state with the given changes.
+   * @param changes
+   */
+  updateOutput(changes: Partial<O>): void;
+
+  /**
    * Returns an observable which will be notified when input state changes.
    */
   getInput$(): Readonly<Observable<I>>;
