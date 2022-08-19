@@ -56,7 +56,8 @@ const defaultProps = {
   messageVariables: [],
 };
 
-describe('JiraParamsFields renders', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/139062
+describe.skip('JiraParamsFields renders', () => {
   const useGetIssueTypesResponse = {
     isLoading: false,
     issueTypes: [
