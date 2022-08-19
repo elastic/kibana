@@ -13,16 +13,39 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Suspicious CertUtil Commands",
-  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
-  "query": "process where event.type == \"start\" and\n  (process.name : \"certutil.exe\" or process.pe.original_file_name == \"CertUtil.exe\") and \n  process.args : (\"?decode\", \"?encode\", \"?urlcache\", \"?verifyctl\", \"?encodehex\", \"?decodehex\", \"?exportPFX\")\n",
+  "note": "",
+  "query": "process where event.type == \"start\" and\n  (process.name : \"certutil.exe\" or process.pe.original_file_name == \"CertUtil.exe\") and\n  process.args : (\"?decode\", \"?encode\", \"?urlcache\", \"?verifyctl\", \"?encodehex\", \"?decodehex\", \"?exportPFX\")\n",
   "references": [
     "https://twitter.com/Moriarty_Meng/status/984380793383370752",
     "https://twitter.com/egre55/status/1087685529016193025",
     "https://www.sysadmins.lv/blog-en/certutil-tips-and-tricks-working-with-x509-file-format.aspx",
     "https://docs.microsoft.com/en-us/archive/blogs/pki/basic-crl-checking-with-certutil"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.args",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.name",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.pe.original_file_name",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 47,
   "rule_id": "fd70c98a-c410-42dc-a2e3-761c71848acf",
+  "setup": "If enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.",
   "severity": "medium",
   "tags": [
     "Elastic",
@@ -52,5 +75,5 @@
   "timeline_title": "Comprehensive Process Timeline",
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 14
+  "version": 16
 }
