@@ -25,7 +25,7 @@ export const getChartType = (series: Series, type: PANEL_TYPES): SeriesType => {
   }
 
   if (type === PANEL_TYPES.TOP_N) {
-    return 'bar_horizontal';
+    return SeriesTypes.BAR_HORIZONTAL;
   }
 
   if (series.stacked !== 'none' && series.stacked !== 'percent') {

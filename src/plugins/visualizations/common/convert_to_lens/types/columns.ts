@@ -57,7 +57,7 @@ export interface ColumnWithReferences<Op extends OperationWithReferences, Params
   references: string[];
 }
 
-export type FitlersColumn = ColumnWithSourceField<'filters', FiltersParams>;
+export type FitlersColumn = BaseColumn<'filters', FiltersParams>;
 export type RangeColumn = ColumnWithSourceField<'range', RangeParams>;
 export type TermsColumn = ColumnWithSourceField<'terms', TermsParams>;
 export type DateHistogramColumn = ColumnWithSourceField<'date_histogram', DateHistogramParams>;

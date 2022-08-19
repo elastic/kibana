@@ -18,6 +18,7 @@ import { getDataViewsStart } from '../../services';
 import { getDataSourceInfo } from '../lib/datasource';
 import { getColumns } from '../lib/series/new.columns';
 import { getLayers, getYExtents } from '../lib/configurations/xy';
+import { convertToFiltersColumn } from '../lib/convert';
 
 export const convertToLens = async (
   model: Panel
@@ -48,6 +49,15 @@ export const convertToLens = async (
     }
 
     columns.push(...seriesColumns);
+
+    if (series.split_mode === 'filters' || series.split_mode === 'filter') {
+      const filterColumn = convertToFiltersColumn(series, true);
+      if (!filterColumn) {
+        return null;
+      }
+      columns.push(filterColumn);
+    }
+
     const layerId = uuid();
     layers[layerIdx] = { indexPatternId, layerId, columns, columnOrder: [] }; // TODO: update later.
   }
