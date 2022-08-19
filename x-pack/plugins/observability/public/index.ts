@@ -27,7 +27,6 @@ export type {
 export {
   enableInspectEsQueries,
   enableComparisonByDefault,
-  enableInfrastructureView,
   enableServiceGroups,
   enableNewSyntheticsView,
   apmServiceGroupMaxNumberOfServices,
