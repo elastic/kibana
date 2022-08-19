@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import { Storage } from '../../services/kibana_utils';
 import { NotificationsStart } from '../../services/core';
 import { panelStorageErrorStrings } from '../../dashboard_strings';
