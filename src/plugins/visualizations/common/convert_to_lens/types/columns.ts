@@ -109,11 +109,5 @@ export type AnyColumnWithReferences =
 
 export type Column = AnyColumnWithReferences | AnyColumnWithSourceField;
 
-export type PercentileColumnWithMeta = PercentileColumn & {
-  meta: { reference: `${string}.${number}` };
-};
-export type PercentileRanksColumnWithMeta = PercentileRanksColumn & {
-  meta: { reference: `${string}.${number}` };
-};
-
-export type ColumnWithMeta = PercentileColumnWithMeta | PercentileRanksColumnWithMeta;
+export type ColumnWithMeta<Col extends Column, Meta extends {} | undefined = undefined> = Col &
+  (Meta extends undefined ? undefined : { meta: Meta });

@@ -9,18 +9,18 @@
 import type { DataView } from '@kbn/data-views-plugin/common';
 import {
   Column,
-  ColumnWithMeta,
   Operations,
-  PercentileColumnWithMeta,
   PercentileParams,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import type { Metric, Percentile, Series } from '../../../../common/types';
 import { createColumn } from './column';
+import { CommonPercentileColumnWithMeta, PercentileColumnWithMeta } from './types';
 
 export const isPercentileColumnWithMeta = (
-  column: Column | ColumnWithMeta
+  column: Column | CommonPercentileColumnWithMeta
 ): column is PercentileColumnWithMeta =>
-  column.operationType === Operations.PERCENTILE && Boolean((column as ColumnWithMeta).meta);
+  column.operationType === Operations.PERCENTILE &&
+  Boolean((column as CommonPercentileColumnWithMeta).meta);
 
 export const convertToPercentileParams = (value?: string | number): PercentileParams | null =>
   value !== undefined && !isNaN(Number(value))
