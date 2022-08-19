@@ -30,16 +30,7 @@ import { NetworkRouteType } from './types';
 import { NETWORK_PATH } from '../../../../common/constants';
 
 export const NetworkRoutes = React.memo<NetworkRoutesProps>(
-  ({
-    type,
-    to,
-    filterQuery,
-    isInitializing,
-    from,
-    indexPattern,
-    indexNames,
-    setQuery,
-  }) => {
+  ({ type, to, filterQuery, isInitializing, from, indexPattern, indexNames, setQuery }) => {
     const networkAnomaliesFilterQuery = {
       bool: {
         should: [
