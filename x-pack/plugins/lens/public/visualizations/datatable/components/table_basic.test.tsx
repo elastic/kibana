@@ -739,7 +739,9 @@ describe('DatatableComponent', () => {
     it('enables pagination', async () => {
       const { data, args } = sampleArgs();
 
-      args.pageSize = 10;
+      data.rows = new Array(10).fill({ a: 'shoes', b: 1588024800000, c: 3 });
+
+      args.pageSize = 2;
 
       const wrapper = mount(
         <DatatableComponent
@@ -775,14 +777,7 @@ describe('DatatableComponent', () => {
     it('resets page position if rows change so page will be empty', async () => {
       const { data, args } = sampleArgs();
 
-      data.rows = [
-        { a: 'shoes', b: 1588024800000, c: 3 },
-        { a: 'shoes', b: 1588024800000, c: 3 },
-        { a: 'shoes', b: 1588024800000, c: 3 },
-        { a: 'shoes', b: 1588024800000, c: 3 },
-        { a: 'shoes', b: 1588024800000, c: 3 },
-        { a: 'shoes', b: 1588024800000, c: 3 },
-      ];
+      data.rows = new Array(10).fill({ a: 'shoes', b: 1588024800000, c: 3 });
 
       args.pageSize = 2;
 
@@ -809,17 +804,7 @@ describe('DatatableComponent', () => {
       wrapper.setProps({
         data: {
           ...data,
-          rows: [
-            { a: 'shoes', b: 1588024800000, c: 3 },
-            { a: 'shoes', b: 1588024800000, c: 3 },
-            { a: 'shoes', b: 1588024800000, c: 3 },
-            { a: 'shoes', b: 1588024800000, c: 3 },
-            { a: 'shoes', b: 1588024800000, c: 3 },
-            { a: 'shoes', b: 1588024800000, c: 3 },
-            { a: 'shoes', b: 1588024800000, c: 3 },
-            { a: 'shoes', b: 1588024800000, c: 3 },
-            { a: 'shoes', b: 1588024800000, c: 3 },
-          ],
+          rows: new Array(20).fill({ a: 'shoes', b: 1588024800000, c: 3 }),
         },
       });
 
@@ -831,11 +816,7 @@ describe('DatatableComponent', () => {
       wrapper.setProps({
         data: {
           ...data,
-          rows: [
-            { a: 'shoes', b: 1588024800000, c: 3 },
-            { a: 'shoes', b: 1588024800000, c: 3 },
-            { a: 'shoes', b: 1588024800000, c: 3 },
-          ],
+          rows: new Array(3).fill({ a: 'shoes', b: 1588024800000, c: 3 }),
         },
       });
 
