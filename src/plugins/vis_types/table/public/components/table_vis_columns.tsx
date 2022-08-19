@@ -36,7 +36,7 @@ export const createGridColumns = (
   columnsWidth: TableVisUiState['colWidth'],
   fireEvent: IInterpreterRenderHandlers['event'],
   closeCellPopover?: Function,
-  onChangePage?: (pageIndex: number) => void,
+  onChangePage?: (pageIndex: number) => void
 ) => {
   const onFilterClick = (data: FilterCellData, negate: boolean) => {
     // switch back to first page on filtering so we don't render an empty page

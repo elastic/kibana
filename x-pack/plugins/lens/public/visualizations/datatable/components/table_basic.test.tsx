@@ -783,7 +783,7 @@ describe('DatatableComponent', () => {
         { a: 'shoes', b: 1588024800000, c: 3 },
         { a: 'shoes', b: 1588024800000, c: 3 },
         { a: 'shoes', b: 1588024800000, c: 3 },
-      ]
+      ];
 
       const wrapper = mount(
         <DatatableComponent

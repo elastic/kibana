@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import  { ReactNode } from 'react';
+import { ReactNode } from 'react';
 import { EuiDataGridColumnCellActionProps } from '@elastic/eui';
 
 import { createGridColumns } from './table_vis_columns';

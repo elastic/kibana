@@ -65,7 +65,7 @@ describe('TableVisBasic', () => {
     );
     expect(comp).toMatchSnapshot();
   });
- 
+
   it('should sort rows by column and pass the sorted rows for consumers', () => {
     (createTableVisCell as jest.Mock).mockClear();
     const uiStateProps = {

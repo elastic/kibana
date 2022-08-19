@@ -78,7 +78,7 @@ export const TableVisBasic = memo(
       columnsWidth,
       fireEvent,
       dataGridRef.current?.closeCellPopover,
-      pagination?.onChangePage,
+      pagination?.onChangePage
     );
 
     // Sorting config
