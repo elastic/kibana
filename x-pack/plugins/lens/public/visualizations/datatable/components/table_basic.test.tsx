@@ -772,6 +772,78 @@ describe('DatatableComponent', () => {
       expect(updatedConfig?.pageSize).toBe(args.pageSize);
     });
 
+    it('resets page position if rows change so page will be empty', async () => {
+      const { data, args } = sampleArgs();
+
+      data.rows = [
+        { a: 'shoes', b: 1588024800000, c: 3 },
+        { a: 'shoes', b: 1588024800000, c: 3 },
+        { a: 'shoes', b: 1588024800000, c: 3 },
+        { a: 'shoes', b: 1588024800000, c: 3 },
+        { a: 'shoes', b: 1588024800000, c: 3 },
+        { a: 'shoes', b: 1588024800000, c: 3 },
+      ];
+
+      args.pageSize = 2;
+
+      const wrapper = mount(
+        <DatatableComponent
+          data={data}
+          args={args}
+          formatFactory={(x) => x as unknown as IFieldFormat}
+          dispatchEvent={onDispatchEvent}
+          getType={jest.fn()}
+          paletteService={chartPluginMock.createPaletteRegistry()}
+          uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+          renderMode="edit"
+          interactive
+          renderComplete={renderComplete}
+        />
+      );
+      const newIndex = 3;
+      act(() => wrapper.find(EuiDataGrid).prop('pagination')?.onChangePage(newIndex));
+      wrapper.update();
+
+      expect(wrapper.find(EuiDataGrid).prop('pagination')?.pageIndex).toBe(newIndex);
+
+      wrapper.setProps({
+        data: {
+          ...data,
+          rows: [
+            { a: 'shoes', b: 1588024800000, c: 3 },
+            { a: 'shoes', b: 1588024800000, c: 3 },
+            { a: 'shoes', b: 1588024800000, c: 3 },
+            { a: 'shoes', b: 1588024800000, c: 3 },
+            { a: 'shoes', b: 1588024800000, c: 3 },
+            { a: 'shoes', b: 1588024800000, c: 3 },
+            { a: 'shoes', b: 1588024800000, c: 3 },
+            { a: 'shoes', b: 1588024800000, c: 3 },
+            { a: 'shoes', b: 1588024800000, c: 3 },
+          ],
+        },
+      });
+
+      await waitForWrapperUpdate(wrapper);
+
+      // keeps existing page if more data is added
+      expect(wrapper.find(EuiDataGrid).prop('pagination')?.pageIndex).toBe(newIndex);
+
+      wrapper.setProps({
+        data: {
+          ...data,
+          rows: [
+            { a: 'shoes', b: 1588024800000, c: 3 },
+            { a: 'shoes', b: 1588024800000, c: 3 },
+            { a: 'shoes', b: 1588024800000, c: 3 },
+          ],
+        },
+      });
+
+      await waitForWrapperUpdate(wrapper);
+      // resets to the last page if the current page becomes out of bounds
+      expect(wrapper.find(EuiDataGrid).prop('pagination')?.pageIndex).toBe(1);
+    });
+
     it('disables pagination by default', async () => {
       const { data, args } = sampleArgs();
 
