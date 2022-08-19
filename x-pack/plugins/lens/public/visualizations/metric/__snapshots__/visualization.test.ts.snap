@@ -57,7 +57,7 @@ Object {
       ],
       "dataTestSubj": "lnsMetric_maxDimensionPanel",
       "enableDimensionEditor": true,
-      "enableFormatSelector": true,
+      "enableFormatSelector": false,
       "filterOperations": [Function],
       "formatSelectorOptions": Object {
         "disableExtraOptions": true,

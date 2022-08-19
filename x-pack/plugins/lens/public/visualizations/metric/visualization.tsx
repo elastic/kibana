@@ -346,7 +346,7 @@ export const getMetricVisualization = ({
           supportsMoreColumns: !props.state.maxAccessor,
           filterOperations: isSupportedMetric,
           enableDimensionEditor: true,
-          enableFormatSelector: true,
+          enableFormatSelector: false,
           formatSelectorOptions: formatterOptions,
           supportStaticValue: true,
           required: false,
