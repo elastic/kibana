@@ -25,7 +25,7 @@ import {
   SumColumn,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { TSVB_METRIC_TYPES } from '../../../../common/enums';
-import { Metric, Series } from '../../../../common/types';
+import { Metric, MetricType, Series } from '../../../../common/types';
 import {
   getFilterRatioFormula,
   getFormulaFromMetric,
@@ -40,24 +40,24 @@ import { convertToMovingAverageParams } from './moving_average';
 import { convertToPercentileParams } from './percentile';
 import { convertToPercentileRankParams } from './percentile_rank';
 
-type PipelineAggregation =
+type MetricAggregationWithoutParams =
   | typeof Operations.AVERAGE
   | typeof Operations.COUNT
   | typeof Operations.UNIQUE_COUNT
   | typeof Operations.COUNTER_RATE
   | typeof Operations.MAX
   | typeof Operations.MIN
-  | typeof Operations.SUM
+  | typeof Operations.SUM;
+
+type MetricAggregation =
+  | MetricAggregationWithoutParams
   | typeof Operations.LAST_VALUE
   | typeof Operations.PERCENTILE
   | typeof Operations.PERCENTILE_RANK;
 
-type PipelineAggregationColumnWithParams =
-  | PercentileColumn
-  | PercentileRanksColumn
-  | LastValueColumn;
+type MetricAggregationColumnWithParams = PercentileColumn | PercentileRanksColumn | LastValueColumn;
 
-type PipelineAggregationColumnWithoutParams =
+type MetricAggregationColumnWithoutParams =
   | AvgColumn
   | CountColumn
   | CardinalityColumn
@@ -66,9 +66,9 @@ type PipelineAggregationColumnWithoutParams =
   | MinColumn
   | SumColumn;
 
-type PipelineAggregationColumn =
-  | PipelineAggregationColumnWithoutParams
-  | PipelineAggregationColumnWithParams;
+type MetricAggregationColumn =
+  | MetricAggregationColumnWithoutParams
+  | MetricAggregationColumnWithParams;
 
 type ParentPipelineAggregation =
   | typeof Operations.MOVING_AVERAGE
@@ -77,7 +77,7 @@ type ParentPipelineAggregation =
 
 type ParentPipelineAggColumn = MovingAverageColumn | DerivativeColumn | CumulativeSumColumn;
 
-const SUPPORTED_PARENT_PIPELINE_AGGS: PipelineAggregation[] = [
+const SUPPORTED_METRICS_AGGS_WITHOUT_PARAMS: MetricAggregationWithoutParams[] = [
   Operations.AVERAGE,
   Operations.COUNT,
   Operations.UNIQUE_COUNT,
@@ -85,27 +85,66 @@ const SUPPORTED_PARENT_PIPELINE_AGGS: PipelineAggregation[] = [
   Operations.MAX,
   Operations.MIN,
   Operations.SUM,
+];
+
+const SUPPORTED_METRIC_AGGS: MetricAggregation[] = [
+  ...SUPPORTED_METRICS_AGGS_WITHOUT_PARAMS,
   Operations.LAST_VALUE,
   Operations.PERCENTILE,
   Operations.PERCENTILE_RANK,
 ];
 
-const isSupportedAggregation = (agg: string): agg is PipelineAggregation => {
-  return (SUPPORTED_PARENT_PIPELINE_AGGS as string[]).includes(agg);
+const isSupportedAggregation = (agg: string): agg is MetricAggregation => {
+  return (SUPPORTED_METRIC_AGGS as string[]).includes(agg);
 };
 
-export const convertPipelineAggToColumn = (
+const isSupportedAggregationWithoutParams = (
+  agg: string
+): agg is MetricAggregationWithoutParams => {
+  return (SUPPORTED_METRICS_AGGS_WITHOUT_PARAMS as string[]).includes(agg);
+};
+
+export const convertMetricAggregationColumnWithoutParams = (
+  aggregation: MetricType,
+  series: Series,
+  metric: Metric,
+  dataView: DataView
+): MetricAggregationColumnWithoutParams | null => {
+  const supportedAgg = SUPPORTED_METRICS[aggregation];
+  if (!supportedAgg) {
+    return null;
+  }
+  if (!isSupportedAggregationWithoutParams(supportedAgg.name)) {
+    return null;
+  }
+
+  const sourceField = aggregation !== 'count' && metric.field ? metric.field : 'document';
+
+  const field = dataView.getFieldByName(sourceField);
+  if (!field && aggregation !== 'count') {
+    return null;
+  }
+
+  return {
+    operationType: supportedAgg.name,
+    sourceField,
+    ...createColumn(series, metric, field),
+    params: {},
+  } as MetricAggregationColumnWithoutParams;
+};
+
+export const convertMetricAggregationToColumn = (
   aggregation: SupportedMetric,
   series: Series,
-  parentPipelineMetric: Metric,
+  metric: Metric,
   dataView: DataView,
   meta?: number
-): PipelineAggregationColumn | null => {
+): MetricAggregationColumn | null => {
   if (!isSupportedAggregation(aggregation.name)) {
     return null;
   }
 
-  const field = dataView.getFieldByName(parentPipelineMetric.field ?? 'document');
+  const field = dataView.getFieldByName(metric.field ?? 'document');
   if (!field) {
     return null;
   }
@@ -116,7 +155,7 @@ export const convertPipelineAggToColumn = (
       ? {
           operationType: aggregation.name,
           sourceField: field.name,
-          ...createColumn(series, parentPipelineMetric, field),
+          ...createColumn(series, metric, field),
           params,
         }
       : null;
@@ -128,7 +167,7 @@ export const convertPipelineAggToColumn = (
       ? {
           operationType: aggregation.name,
           sourceField: field.name,
-          ...createColumn(series, parentPipelineMetric, field),
+          ...createColumn(series, metric, field),
           params,
         }
       : null;
@@ -138,12 +177,7 @@ export const convertPipelineAggToColumn = (
     return null;
   }
 
-  return {
-    operationType: aggregation.name,
-    sourceField: field.name,
-    ...createColumn(series, parentPipelineMetric, field),
-    params: {},
-  } as PipelineAggregationColumnWithoutParams;
+  return convertMetricAggregationColumnWithoutParams(aggregation.name, series, metric, dataView);
 };
 
 export const computeParentPipelineColumns = (
@@ -171,7 +205,7 @@ export const computeParentPipelineColumns = (
     return createFormulaColumn(formula, series, currentMetric);
   }
 
-  const pipelineAggColumn = convertPipelineAggToColumn(
+  const metricAggregationColumn = convertMetricAggregationToColumn(
     pipelineAgg,
     series,
     subFunctionMetric,
@@ -179,14 +213,14 @@ export const computeParentPipelineColumns = (
     meta
   );
 
-  if (!pipelineAggColumn) {
+  if (!metricAggregationColumn) {
     return null;
   }
 
   return [
-    pipelineAggColumn,
+    metricAggregationColumn,
     createParentPipelineAggregationColumn(aggregation, series, currentMetric, [
-      pipelineAggColumn.columnId,
+      metricAggregationColumn.columnId,
     ]),
   ];
 };

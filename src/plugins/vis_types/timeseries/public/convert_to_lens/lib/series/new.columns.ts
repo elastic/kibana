@@ -21,8 +21,9 @@ import {
   convertOtherAggsToFormulaColumn,
   convertFilterRatioToFormulaColumn,
   convertToLastValueColumn,
+  convertToStaticValueColumn,
+  convertMetricAggregationColumnWithoutParams,
 } from '../convert';
-import { convertToStaticValueColumn } from '../convert/static_value';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 
@@ -92,6 +93,15 @@ export const getColumns = (
     }
     case 'static': {
       const column = convertToStaticValueColumn(series, metrics, visibleSeriesCount);
+      return getValidColumns(column);
+    }
+    default: {
+      const column = convertMetricAggregationColumnWithoutParams(
+        aggregation,
+        series,
+        metrics[metricIdx],
+        dataView
+      );
       return getValidColumns(column);
     }
   }
