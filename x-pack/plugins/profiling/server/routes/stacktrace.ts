@@ -27,7 +27,6 @@ import {
 } from '../../common/profiling';
 import { ProfilingESClient } from '../utils/create_profiling_es_client';
 import { withProfilingSpan } from '../utils/with_profiling_span';
-import { getDocs } from './compat';
 import { DownsampledEventsIndex } from './downsampling';
 import { logExecutionLatency } from './logger';
 import { ProjectTimeQuery } from './query';
@@ -405,11 +404,14 @@ export async function mgetExecutables({
   // Create a lookup map StackFrameID -> StackFrame.
   let exeFound = 0;
   await logExecutionLatency(logger, 'processing data', async () => {
-    const docs = getDocs(resExecutables);
+    const docs = resExecutables.docs;
     for (const exe of docs) {
+      if ('error' in exe) {
+        continue;
+      }
       if (exe.found) {
         executables.set(exe._id, {
-          FileName: exe._source[ProfilingESField.ExecutableFileName],
+          FileName: exe._source!.Executable.file.name,
         });
         exeFound++;
       } else {
