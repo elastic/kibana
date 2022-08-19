@@ -25,6 +25,8 @@ export const convertToLens = async (
   const dataViews = getDataViewsStart();
   const columns = [];
   const layers: Record<number, Layer> = {};
+  const seriesNum = model.series.filter((series) => !series.hidden).length;
+
   // handle multiple layers/series
   for (const [layerIdx, series] of model.series.entries()) {
     if (series.hidden) {
@@ -40,7 +42,7 @@ export const convertToLens = async (
     );
 
     // handle multiple metrics
-    const seriesColumns = getColumns(series, indexPattern!);
+    const seriesColumns = getColumns(series, indexPattern!, seriesNum);
     if (!seriesColumns) {
       return null;
     }

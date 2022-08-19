@@ -22,6 +22,7 @@ import {
   convertFilterRatioToFormulaColumn,
   convertToLastValueColumn,
 } from '../convert';
+import { convertToStaticValueColumn } from '../convert/static_value';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 
@@ -41,7 +42,11 @@ const getValidColumns = (columns: Array<Column | null> | Column | null | undefin
   return columns ? [columns] : null;
 };
 
-export const getColumns = (series: Series, dataView: DataView): Column[] | null => {
+export const getColumns = (
+  series: Series,
+  dataView: DataView,
+  visibleSeriesCount: number
+): Column[] | null => {
   const { metrics } = getSeriesAgg(series.metrics);
   const metricIdx = metrics.length - 1;
   const aggregation = metrics[metricIdx].type;
@@ -83,6 +88,10 @@ export const getColumns = (series: Series, dataView: DataView): Column[] | null 
     }
     case 'top_hit': {
       const column = convertToLastValueColumn(series, metrics, dataView);
+      return getValidColumns(column);
+    }
+    case 'static': {
+      const column = convertToStaticValueColumn(series, metrics, visibleSeriesCount);
       return getValidColumns(column);
     }
   }

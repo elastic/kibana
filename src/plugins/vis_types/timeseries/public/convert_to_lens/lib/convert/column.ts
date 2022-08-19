@@ -20,7 +20,7 @@ import { getTimeScale } from '../metrics';
 export const createColumn = (
   series: Series,
   metric: Metric,
-  field: DataViewField,
+  field?: DataViewField,
   isBucketed: boolean = false,
   isSplit: boolean = false
 ): Omit<BaseColumn<Operation, unknown>, 'operationType' | 'params'> => ({
