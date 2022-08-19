@@ -376,19 +376,19 @@ const Time = ({ timestamp }: { timestamp: string }) => (
   <time dateTime={timestamp}>{moment(timestamp).format(dateFmtString(timestamp))}</time>
 );
 
-const SECONDS_STRING = i18n.translate('xpack.observability.synthetics.monitorDetail.seconds', {
+const SECONDS_STRING = i18n.translate('xpack.synthetics.monitorDetail.seconds', {
   defaultMessage: 'seconds',
 });
 
-const MINUTES_STRING = i18n.translate('xpack.observability.synthetics.monitorDetail.minutes', {
+const MINUTES_STRING = i18n.translate('xpack.synthetics.monitorDetail.minutes', {
   defaultMessage: 'minutes',
 });
 
-const HOURS_STRING = i18n.translate('xpack.observability.synthetics.monitorDetail.hours', {
+const HOURS_STRING = i18n.translate('xpack.synthetics.monitorDetail.hours', {
   defaultMessage: 'hours',
 });
 
-const DAYS_STRING = i18n.translate('xpack.observability.synthetics.monitorDetail.days', {
+const DAYS_STRING = i18n.translate('xpack.synthetics.monitorDetail.days', {
   defaultMessage: 'days',
 });
 
