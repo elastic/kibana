@@ -69,6 +69,7 @@ export interface BrowserField {
   type: string;
   esTypes?: string[];
   subType?: IFieldSubType;
+  readFromDocValues: boolean;
   runtimeField?: RuntimeField;
 }
 
