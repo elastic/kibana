@@ -29,19 +29,24 @@ const createLangWorkerConfig = (lang) => {
       minimizer: [
         new TerserPlugin({
           cache: false,
+          extractComments: false,
           parallel: false,
           sourceMap: false,
-          terserOptions: {
-            compress: true,
-            mangle: true,
-            comments: 'some',
-            ecma: 2021,
-            dead_code: true,
-            keep_classnames: true,
-            toplevel: false,
-          },
-          minify: async (file, _sourceMap, minimizerOptions) => {
-            return require('@swc/core').minify(file, minimizerOptions.terserOptions);
+          minify: async (file) => {
+            return require('@swc/core').minify(file, {
+              compress: {
+                ecma: 2020,
+                dead_code: true,
+                keep_classnames: true,
+              },
+              mangle: {
+                keep_classnames: true,
+                topLevel: false,
+              },
+              format: {
+                comments: 'some',
+              },
+            });
           },
         }),
       ],

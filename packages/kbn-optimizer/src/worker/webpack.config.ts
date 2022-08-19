@@ -25,9 +25,6 @@ import { BundleMetricsPlugin } from './bundle_metrics_plugin';
 import { EmitStatsPlugin } from './emit_stats_plugin';
 import { PopulateBundleCachePlugin } from './populate_bundle_cache_plugin';
 
-const IS_CODE_COVERAGE = !!process.env.CODE_COVERAGE;
-const ISTANBUL_PRESET_PATH = require.resolve('@kbn/babel-preset/istanbul_preset');
-const BABEL_PRESET_PATH = require.resolve('@kbn/babel-preset/webpack_preset');
 const DLL_MANIFEST = JSON.parse(Fs.readFileSync(UiSharedDepsNpm.dllManifestPath, 'utf8'));
 
 const nodeModulesButNotKbnPackages = (path: string) => {
@@ -223,13 +220,16 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
           test: /\.(js|tsx?)$/,
           exclude: /node_modules/,
           use: {
-            loader: 'babel-loader',
+            loader: 'swc-loader',
             options: {
-              babelrc: false,
-              envName: worker.dist ? 'production' : 'development',
-              presets: IS_CODE_COVERAGE
-                ? [ISTANBUL_PRESET_PATH, BABEL_PRESET_PATH]
-                : [BABEL_PRESET_PATH],
+              jsc: {
+                target: 'es2021',
+                loose: true,
+                parser: {
+                  syntax: 'typescript',
+                  tsx: true,
+                },
+              },
             },
           },
         },
@@ -291,19 +291,22 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
           extractComments: false,
           parallel: false,
           sourceMap: false,
-          terserOptions: {
-            compress: true,
-            mangle: true,
-            comments: 'some',
-            ecma: 2021,
-            dead_code: true,
-            keep_classnames: true,
-            toplevel: false,
-          },
-          // @ts-expect-error
-          minify: async (file, _sourceMap, minimizerOptions) => {
+          minify: async (file: string) => {
             // eslint-disable-next-line @typescript-eslint/no-var-requires
-            return require('@swc/core').minify(file, minimizerOptions.terserOptions);
+            return require('@swc/core').minify(file, {
+              compress: {
+                ecma: 2020,
+                dead_code: true,
+                keep_classnames: true,
+              },
+              mangle: {
+                keep_classnames: true,
+                topLevel: false,
+              },
+              format: {
+                comments: 'some',
+              },
+            });
           },
         }),
       ],
