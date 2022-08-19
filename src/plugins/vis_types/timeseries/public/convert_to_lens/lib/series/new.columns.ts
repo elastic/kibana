@@ -20,6 +20,7 @@ import {
   convertToCumulativeSumColumns,
   convertOtherAggsToFormulaColumn,
   convertFilterRatioToFormulaColumn,
+  convertToLastValueColumn,
 } from '../convert';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
@@ -79,6 +80,10 @@ export const getColumns = (series: Series, dataView: DataView): Column[] | null 
     case 'sum_bucket': {
       const formulaColumn = convertOtherAggsToFormulaColumn(aggregation, series, metrics);
       return getValidColumns(formulaColumn);
+    }
+    case 'top_hit': {
+      const column = convertToLastValueColumn(series, metrics, dataView);
+      return getValidColumns(column);
     }
   }
 

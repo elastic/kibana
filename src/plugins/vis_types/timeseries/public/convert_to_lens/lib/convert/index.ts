@@ -13,3 +13,4 @@ export { convertMathToFormulaColumn, convertOtherAggsToFormulaColumn } from './f
 export { convertParentPipelineAggToColumns } from './parent_pipeline';
 export { convertToCumulativeSumColumns } from './cumulative_sum';
 export { convertFilterRatioToFormulaColumn } from './filter_ratio';
+export { convertToLastValueColumn } from './last_value';
