@@ -7,7 +7,10 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { PercentileColumn, PercentileParams } from '@kbn/visualizations-plugin/common';
+import {
+  PercentileColumn,
+  PercentileParams,
+} from '@kbn/visualizations-plugin/common/convert_to_lens';
 import type { Metric, Percentile, Series } from '../../../../common/types';
 import { createColumn } from './column';
 

@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { BaseColumn, Operation, DataType, Column } from '@kbn/visualizations-plugin/common';
+import {
+  BaseColumn,
+  Operation,
+  DataType,
+  Column,
+} from '@kbn/visualizations-plugin/common/convert_to_lens';
 import uuid from 'uuid';
 import type { Metric, Series } from '../../../../common/types';
 import { ConvertToColumnsFn } from '../../types';
@@ -15,11 +20,11 @@ import { getTimeScale } from '../metrics';
 export const createColumn = (
   series: Series,
   metric: Metric,
-  field: DataViewField,
+  field?: DataViewField,
   isBucketed: boolean = false
 ): Omit<BaseColumn<Operation, unknown>, 'operationType' | 'params'> => ({
   columnId: uuid(),
-  dataType: field.type as DataType,
+  dataType: (field?.type as DataType) ?? undefined,
   label: series.label,
   isBucketed,
   window: metric.window?.toString(),

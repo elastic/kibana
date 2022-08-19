@@ -44,7 +44,7 @@ export const getPercentileRankSeries = (
 type TimeScaleValue = `1${TimeScaleUnit}`;
 
 const isTimeScaleValue = (unit: string): unit is TimeScaleValue => {
-  const supportedTimeScales: TimeScaleValue[] = ['1s', '1m', '1h', '1d'];
+  const supportedTimeScales: TimeScaleValue[] = ['1ms', '1s', '1m', '1h', '1d'];
   return supportedTimeScales.includes(unit as TimeScaleValue);
 };
 

@@ -18,7 +18,7 @@ export type DataType =
   | 'geo_shape'
   | 'murmur3';
 
-export type TimeScaleUnit = 's' | 'm' | 'h' | 'd';
+export type TimeScaleUnit = 'ms' | 's' | 'm' | 'h' | 'd';
 
 export type SortingHint = 'version';
 

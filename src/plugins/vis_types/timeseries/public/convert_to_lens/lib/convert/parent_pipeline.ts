@@ -23,7 +23,7 @@ import {
   PercentileColumn,
   PercentileRanksColumn,
   SumColumn,
-} from '@kbn/visualizations-plugin/common';
+} from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import { Metric, Series } from '../../../../common/types';
 import {
@@ -168,7 +168,7 @@ export const computeParentPipelineColumns = (
       return null;
     }
     const formula = `${aggFormula}(${script})`;
-    return createFormulaColumn(formula, series, currentMetric, dataView);
+    return createFormulaColumn(formula, series, currentMetric);
   }
 
   const pipelineAggColumn = convertPipelineAggToColumn(
@@ -185,7 +185,7 @@ export const computeParentPipelineColumns = (
 
   return [
     pipelineAggColumn,
-    createPipelineAggregationColumn(aggregation, series, currentMetric, dataView, [
+    createParentPipelineAggregationColumn(aggregation, series, currentMetric, [
       pipelineAggColumn.columnId,
     ]),
   ];
@@ -198,6 +198,7 @@ const convertMovingAvgOrDerivativeToColumns = (
   metrics: Metric[],
   dataView: DataView
 ) => {
+  console.log('here');
   //  percentile value is derived from the field Id. It has the format xxx-xxx-xxx-xxx[percentile]
   const [fieldId, meta] = currentMetric?.field?.split('[') ?? [];
   const subFunctionMetric = metrics.find((metric) => metric.id === fieldId);
@@ -226,7 +227,7 @@ const convertMovingAvgOrDerivativeToColumns = (
       return null;
     }
 
-    return createFormulaColumn(formula, series, currentMetric, dataView);
+    return createFormulaColumn(formula, series, currentMetric);
   } else {
     const agg = SUPPORTED_METRICS[aggregation];
     if (!agg) {
@@ -261,13 +262,13 @@ export const convertParentPipelineAggToColumns = (
       dataView
     );
   }
+  return null;
 };
 
-export const createPipelineAggregationColumn = (
+export const createParentPipelineAggregationColumn = (
   aggregation: ParentPipelineAggregation,
   series: Series,
   metric: Metric,
-  dataView: DataView,
   references: string[] = []
 ) => {
   const params =
@@ -276,15 +277,10 @@ export const createPipelineAggregationColumn = (
     return null;
   }
 
-  const field = dataView.getFieldByName(metric.field ?? 'document');
-  if (!field) {
-    return null;
-  }
-
   return {
     operationType: aggregation,
     references,
-    ...createColumn(series, metric, field),
+    ...createColumn(series, metric),
     params,
   } as ParentPipelineAggColumn;
 };

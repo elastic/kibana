@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { MovingAverageParams } from '@kbn/visualizations-plugin/common';
+import { MovingAverageParams } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { Metric } from '../../../../common/types';
 
 export const convertToMovingAverageParams = ({ window }: Metric): MovingAverageParams => ({

@@ -49,7 +49,7 @@ export const convertToCumulativeSumColumns = (
       return null;
     }
 
-    return createFormulaColumn(formula, series, currentMetric, dataView);
+    return createFormulaColumn(formula, series, currentMetric);
   } else {
     const agg = SUPPORTED_METRICS[METRIC_TYPES.CUMULATIVE_SUM];
     if (!agg) {

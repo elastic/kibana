@@ -7,7 +7,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { FormulaColumn, FormulaParams } from '@kbn/visualizations-plugin/common';
+import { FormulaColumn, FormulaParams } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import type { Metric, Series } from '../../../../common/types';
 import { getFormulaEquivalent } from '../metrics';
 import { createColumn } from './column';
@@ -19,23 +19,17 @@ const convertToFormulaParams = (formula: string): FormulaParams | null => ({
 export const createFormulaColumn = (
   mathScript: string,
   series: Series,
-  metric: Metric,
-  dataView: DataView
+  metric: Metric
 ): FormulaColumn | null => {
   const params = convertToFormulaParams(mathScript);
   if (!params) {
     return null;
   }
 
-  const field = dataView.getFieldByName(metric.field ?? 'document');
-  if (!field) {
-    return null;
-  }
-
   return {
     operationType: 'formula',
     references: [],
-    ...createColumn(series, metric, field),
+    ...createColumn(series, metric),
     params,
   };
 };
@@ -125,5 +119,5 @@ export const convertMathToFormulaColumn = (
     return null;
   }
 
-  return createFormulaColumn(script, series, mathMetric, dataView);
+  return createFormulaColumn(script, series, mathMetric);
 };

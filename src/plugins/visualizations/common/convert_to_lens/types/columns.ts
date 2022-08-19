@@ -37,7 +37,7 @@ export interface BaseColumn<OperationType extends Operation, Params = undefined>
   operationType: OperationType;
   label?: string;
   isBucketed: boolean;
-  dataType: DataType;
+  dataType?: DataType;
   timeScale?: TimeScaleUnit; // ?
   timeShift?: string;
   window?: string;
