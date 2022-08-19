@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Column } from '@kbn/visualizations-plugin/common';
+import { Column } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Series } from '../../../../common/types';
 import { getSeriesAgg } from './get_series_agg';

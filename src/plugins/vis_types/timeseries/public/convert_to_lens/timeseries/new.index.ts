@@ -6,14 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { Layer, NavigateToLensContext } from '@kbn/visualizations-plugin/common';
+import { Position } from '@elastic/charts';
+import {
+  Layer,
+  NavigateToLensContext,
+  XYConfiguration,
+} from '@kbn/visualizations-plugin/common/convert_to_lens';
 import uuid from 'uuid';
 import { Panel } from '../../../common/types';
 import { getDataViewsStart } from '../../services';
 import { getDataSourceInfo } from '../lib/datasource';
 import { getColumns } from '../lib/series/new.columns';
+import { getLayers, getYExtents } from '../lib/configurations/xy';
 
-export const convertToLens = async (model: Panel): Promise<NavigateToLensContext | null> => {
+export const convertToLens = async (
+  model: Panel
+): Promise<NavigateToLensContext<XYConfiguration> | null> => {
   const dataViews = getDataViewsStart();
   const columns = [];
   const layers: Record<number, Layer> = {};
@@ -43,9 +51,28 @@ export const convertToLens = async (model: Panel): Promise<NavigateToLensContext
     layers[layerIdx] = { indexPatternId, layerId, columns, columnOrder: [] }; // TODO: update later.
   }
 
+  const extents = getYExtents(model);
+
   return {
     layers,
     type: 'lnsXY',
-    configuration: {},
+    configuration: {
+      layers: getLayers(layers, model),
+      fillOpacity: Number(model.series[0].fill) ?? 0.3,
+      legend: {
+        isVisible: Boolean(model.show_legend),
+        showSingleSeries: Boolean(model.show_legend),
+        position: (model.legend_position as Position) ?? Position.Right,
+        shouldTruncate: Boolean(model.truncate_legend),
+        maxLines: model.max_lines_legend ?? 1,
+      },
+      gridlinesVisibilitySettings: {
+        x: Boolean(model.show_grid),
+        yLeft: Boolean(model.show_grid),
+        yRight: Boolean(model.show_grid),
+      },
+      yLeftExtent: extents.yLeftExtent,
+      yRightExtent: extents.yRightExtent,
+    },
   };
 };

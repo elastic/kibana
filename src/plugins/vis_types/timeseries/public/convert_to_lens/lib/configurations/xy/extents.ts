@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { Panel, Series } from '../../../../common/types';
+import { AxisExtentConfig } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import type { Panel, Series } from '../../../../../common/types';
 
 const lowerBoundShouldBeZero = (
   lowerBound: number | null,
@@ -45,7 +46,12 @@ const getLowerValue = (
  * In Lens, we only allow 2 axis, one left and one right. We need an assumption here.
  * We will transfer in Lens the  "collapsed" axes with both bounds.
  */
-export const getYExtents = (model: Panel) => {
+export const getYExtents = (
+  model: Panel
+): {
+  yLeftExtent?: AxisExtentConfig;
+  yRightExtent?: AxisExtentConfig;
+} => {
   let lowerBoundLeft: number | null = null;
   let upperBoundLeft: number | null = null;
   let lowerBoundRight: number | null = null;

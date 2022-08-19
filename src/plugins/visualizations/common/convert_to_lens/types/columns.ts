@@ -37,7 +37,8 @@ export interface BaseColumn<OperationType extends Operation, Params = undefined>
   operationType: OperationType;
   label?: string;
   isBucketed: boolean;
-  dataType?: DataType;
+  isSplit: boolean;
+  dataType: DataType;
   timeScale?: TimeScaleUnit; // ?
   timeShift?: string;
   window?: string;
@@ -107,3 +108,12 @@ export type AnyColumnWithReferences =
   | StaticValueColumn;
 
 export type Column = AnyColumnWithReferences | AnyColumnWithSourceField;
+
+export type PercentileColumnWithMeta = PercentileColumn & {
+  meta: { reference: `${string}.${number}` };
+};
+export type PercentileRanksColumnWithMeta = PercentileRanksColumn & {
+  meta: { reference: `${string}.${number}` };
+};
+
+export type ColumnWithMeta = PercentileColumnWithMeta | PercentileRanksColumnWithMeta;
