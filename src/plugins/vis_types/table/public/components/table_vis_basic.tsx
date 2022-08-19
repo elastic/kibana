@@ -67,6 +67,9 @@ export const TableVisBasic = memo(
       [visConfig.autoFitRowToContent]
     );
 
+    // Pagination config
+    const pagination = usePagination(visConfig, rows.length);
+
     // Columns config
     const gridColumns = createGridColumns(
       columns,
@@ -74,11 +77,10 @@ export const TableVisBasic = memo(
       formattedColumns,
       columnsWidth,
       fireEvent,
-      dataGridRef.current?.closeCellPopover
+      dataGridRef.current?.closeCellPopover,
+      pagination?.onChangePage,
     );
 
-    // Pagination config
-    const pagination = usePagination(visConfig, rows.length);
     // Sorting config
     const sortingColumns = useMemo(
       () =>

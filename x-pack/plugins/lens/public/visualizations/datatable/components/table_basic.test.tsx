@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { ReactWrapper, shallow, mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { EuiDataGrid } from '@elastic/eui';
+import { EuiDataGrid, EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import { IAggType } from '@kbn/data-plugin/public';
 import { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { VisualizationContainer } from '../../../visualization_container';
@@ -770,6 +770,62 @@ describe('DatatableComponent', () => {
       expect(updatedConfig).toBeTruthy();
       expect(updatedConfig?.pageIndex).toBe(newIndex);
       expect(updatedConfig?.pageSize).toBe(args.pageSize);
+    });
+
+    test('it resets page to 0 on executing gilter', async () => {
+      const { data, args } = sampleArgs();
+
+      args.pageSize = 2;
+      data.rows = [
+        { a: 'shoes', b: 1588024800000, c: 3 },
+        { a: 'shoes', b: 1588024800000, c: 3 },
+        { a: 'shoes', b: 1588024800000, c: 3 },
+        { a: 'shoes', b: 1588024800000, c: 3 },
+        { a: 'shoes', b: 1588024800000, c: 3 },
+        { a: 'shoes', b: 1588024800000, c: 3 },
+      ]
+
+      const wrapper = mount(
+        <DatatableComponent
+          data={data}
+          args={args}
+          formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+          dispatchEvent={onDispatchEvent}
+          getType={jest.fn(() => ({ type: 'buckets' } as IAggType))}
+          paletteService={chartPluginMock.createPaletteRegistry()}
+          uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+          renderMode="edit"
+          interactive
+          renderComplete={renderComplete}
+        />
+      );
+
+      const paginationConfig = wrapper.find(EuiDataGrid).prop('pagination');
+
+      // trigger new page
+      const newIndex = 3;
+      act(() => paginationConfig?.onChangePage(newIndex));
+      wrapper.update();
+
+      expect(wrapper.find(EuiDataGrid).prop('pagination')!.pageIndex).toBe(newIndex);
+      const columns = wrapper.find(EuiDataGrid).prop('columns')!;
+      // call `onClick` of passed down react component of first cell action
+      (
+        (
+          columns[0].cellActions![0] as unknown as (
+            props: EuiDataGridColumnCellActionProps
+          ) => ReactNode
+        )({
+          rowIndex: 0,
+          columnId: 'a',
+          colIndex: 0,
+          isExpanded: true,
+          Component: () => null,
+        }) as unknown as { props: { onClick: () => void } }
+      ).props!.onClick();
+
+      await waitForWrapperUpdate(wrapper);
+      expect(wrapper.find(EuiDataGrid).prop('pagination')!.pageIndex).toBe(0);
     });
 
     it('disables pagination by default', async () => {
