@@ -24,7 +24,9 @@ export function* fetchMonitorStatusEffect() {
 export function* fetchSyntheticsMonitorEffect() {
   yield takeLeading(
     getSyntheticsMonitorAction.get,
-    fetchEffectFactory(
+    // TODO: not sure why this type was broken, but I don't think I did anything to mess it up (probably did though).
+    // fix before merging
+    fetchEffectFactory<any, any, any, any>(
       fetchSyntheticsMonitor,
       getSyntheticsMonitorAction.success,
       getSyntheticsMonitorAction.fail

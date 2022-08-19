@@ -14,10 +14,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { MonitorOverviewItem } from '../../../../../../../common/runtime_types';
 import { useMonitorEnableHandler } from '../../../../hooks/use_monitor_enable_handler';
-import { quietFetchOverviewAction } from '../../../../state/overview/actions';
+import { quietFetchOverviewAction, setFlyoutConfig } from '../../../../state/overview/actions';
 import { selectOverviewState } from '../../../../state/overview/selectors';
 import { useEditMonitorLocator } from '../../hooks/use_edit_monitor_locator';
 import { useMonitorDetailLocator } from '../../hooks/use_monitor_detail_locator';
+import { useLocationName } from '../../../../hooks';
 
 interface ActionContainerProps {
   boxShadow: string;
@@ -36,19 +37,26 @@ const ActionContainer = styled.div<ActionContainerProps>`
   ${({ boxShadow }) => boxShadow}
 `;
 
+function StandardContainer({ children }: any) {
+  return <>{children}</>;
+}
+
 export function ActionsPopover({
   isPopoverOpen,
   setIsPopoverOpen,
   monitor,
+  position,
 }: {
   isPopoverOpen: boolean;
   monitor: MonitorOverviewItem;
   setIsPopoverOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  position: 'relative' | 'default';
 }) {
   const theme = useTheme();
   const euiShadow = useEuiShadow('l');
   const dispatch = useDispatch();
   const { pageState } = useSelector(selectOverviewState);
+  const locationName = useLocationName({ locationId: monitor.location.id });
 
   const detailUrl = useMonitorDetailLocator({
     monitorId: monitor.id,
@@ -85,8 +93,10 @@ export function ActionsPopover({
     }
   }, [setEnableLabel, status, isEnabled, monitor.isEnabled]);
 
+  const Container = position === 'relative' ? ActionContainer : StandardContainer;
+
   return (
-    <ActionContainer boxShadow={euiShadow}>
+    <Container boxShadow={euiShadow}>
       <EuiPopover
         button={
           <EuiButtonIcon
@@ -117,14 +127,17 @@ export function ActionsPopover({
                   icon: 'sortRight',
                   href: detailUrl,
                 },
-                // not rendering this for now because it requires the detail flyout
-                // which is not merged yet. Also, this needs to be rendered conditionally,
-                // the actions menu can be opened within the flyout so there is no point in showing this
-                // if the user is already in the flyout.
-                // {
-                //   name: 'Quick inspect',
-                //   icon: 'inspect',
-                // },
+                {
+                  name: 'Quick inspect',
+                  icon: 'inspect',
+                  disabled: !locationName,
+                  onClick: () => {
+                    if (locationName) {
+                      dispatch(setFlyoutConfig({ monitorId: monitor.id, location: locationName }));
+                      setIsPopoverOpen(false);
+                    }
+                  },
+                },
                 // not rendering this for now because the manual test flyout is
                 // still in the design phase
                 // {
@@ -149,7 +162,7 @@ export function ActionsPopover({
           ]}
         />
       </EuiPopover>
-    </ActionContainer>
+    </Container>
   );
 }
 

@@ -70,7 +70,7 @@ export const MetricItem = ({
         >
           <Chart>
             <Settings
-              onElementClick={() => monitorId && locationName && onClick(monitorId, locationName)}
+              onElementClick={() => monitor.id && locationName && onClick(monitor.id, locationName)}
               baseTheme={DARK_THEME}
             />
             <Metric
@@ -102,6 +102,7 @@ export const MetricItem = ({
               monitor={monitor}
               isPopoverOpen={isPopoverOpen}
               setIsPopoverOpen={setIsPopoverOpen}
+              position="relative"
             />
           )}
         </EuiPanel>

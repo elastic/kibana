@@ -11,7 +11,6 @@ import {
   EuiBasicTable,
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonIcon,
   EuiErrorBoundary,
   EuiFlexGroup,
   EuiFlexItem,
@@ -30,7 +29,8 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FETCH_STATUS, useEsSearch, useFetcher } from '@kbn/observability-plugin/public';
 import moment from 'moment';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { capitalize } from 'lodash';
 import styled from 'styled-components';
 import { ClientPluginsStart } from '../../../../../../plugin';
@@ -39,6 +39,8 @@ import { fetchSyntheticsMonitor } from '../../../../state/monitor_summary/api';
 import { useStatusByLocation } from '../../../../hooks/use_status_by_location';
 import { MonitorEnabled } from '../../management/monitor_list_table/monitor_enabled';
 import { Ping } from '../../../../../../../common/runtime_types';
+import { ActionsPopover } from './actions_popover';
+import { selectOverviewState } from '../../../../state';
 
 export function MonitorDetailFlyout(props: {
   id: string;
@@ -47,6 +49,17 @@ export function MonitorDetailFlyout(props: {
   onEnabledChange: () => void;
 }) {
   const { id } = props;
+  const state = useSelector(selectOverviewState);
+
+  const monitor = useMemo(() => {
+    const { pages } = state.data;
+    const pageKeys = Object.keys(pages);
+    for (const key of pageKeys) {
+      const m = pages[key].filter((f) => f.id === id)[0];
+      if (m) return m;
+    }
+  }, [id, state.data]);
+
   const theme = useEuiTheme();
   const [location, setLocation] = useState<string>(props.location);
   const { observability } = useKibana<ClientPluginsStart>().services;
@@ -56,6 +69,7 @@ export function MonitorDetailFlyout(props: {
     error,
     status,
   } = useFetcher(() => fetchSyntheticsMonitor(id), [id]);
+  const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
 
   const monitorDetail = useMonitorDetail(id, location);
   const locationStatuses = useStatusByLocation(id);
@@ -74,12 +88,14 @@ export function MonitorDetailFlyout(props: {
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiButtonIcon
-                  iconType="boxesHorizontal"
-                  onClick={() => {
-                    throw Error('not implemented');
-                  }}
-                />
+                {monitor && (
+                  <ActionsPopover
+                    isPopoverOpen={isActionsPopoverOpen}
+                    monitor={monitor}
+                    setIsPopoverOpen={setIsActionsPopoverOpen}
+                    position="default"
+                  />
+                )}
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="s" />
