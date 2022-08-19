@@ -87,7 +87,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
     const canUseMaps = kibana.services.application.capabilities.maps.show;
 
     const tabsFilters = useMemo(() => {
-      if (tabName === NetworkRouteType.alerts) {
+      if (tabName === NetworkRouteType.events) {
         return filters.length > 0
           ? [...filters, ...filterNetworkExternalAlertData]
           : filterNetworkExternalAlertData;
@@ -95,7 +95,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
       return filters;
     }, [tabName, filters]);
 
-    const narrowDateRange = useCallback<UpdateDateRange>(
+    const updateDateRange = useCallback<UpdateDateRange>(
       ({ x }) => {
         if (!x) {
           return;
@@ -198,7 +198,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                   filterQuery={filterQuery}
                   from={from}
                   indexNames={selectedPatterns}
-                  narrowDateRange={narrowDateRange}
+                  updateDateRange={updateDateRange}
                   setQuery={setQuery}
                   skip={isInitializing || filterQuery === undefined}
                   to={to}
@@ -220,7 +220,6 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                     indexPattern={indexPattern}
                     indexNames={selectedPatterns}
                     setQuery={setQuery}
-                    setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
                     type={networkModel.NetworkType.page}
                     to={to}
                   />

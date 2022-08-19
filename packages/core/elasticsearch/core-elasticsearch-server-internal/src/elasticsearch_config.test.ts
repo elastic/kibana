@@ -13,7 +13,7 @@ import {
 } from './elasticsearch_config.test.mocks';
 
 import { ElasticsearchConfig, config } from './elasticsearch_config';
-import { getDeprecationsFor } from '@kbn/core-config-server-internal';
+import { getDeprecationsFor } from '@kbn/core-test-helpers-deprecations-getters';
 
 const CONFIG_PATH = 'elasticsearch';
 

@@ -6,7 +6,8 @@
  */
 
 import type { DataViewBase } from '@kbn/es-query';
-import type { NarrowDateRange } from '../../../common/components/ml/types';
+import type { Optional } from 'utility-types';
+
 import type { ESTermQuery } from '../../../../common/typed_json';
 
 import type { NavTab } from '../../../common/components/navigation/types';
@@ -14,14 +15,11 @@ import type { FlowTargetSourceDest } from '../../../../common/search_strategy/se
 import type { networkModel } from '../../store';
 import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 
-import type { SetAbsoluteRangeDatePicker } from '../types';
-
 export interface QueryTabBodyProps extends Pick<GlobalTimeArgs, 'setQuery' | 'deleteQuery'> {
   endDate: string;
   filterQuery?: string | ESTermQuery;
   indexNames: string[];
   ip?: string;
-  narrowDateRange?: NarrowDateRange;
   skip: boolean;
   startDate: string;
   type: networkModel.NetworkType;
@@ -49,7 +47,6 @@ export type NetworkRoutesProps = GlobalTimeArgs & {
   filterQuery?: string | ESTermQuery;
   indexPattern: DataViewBase;
   indexNames: string[];
-  setAbsoluteRangeDatePicker: SetAbsoluteRangeDatePicker;
 };
 
 export enum NetworkRouteType {
@@ -58,21 +55,10 @@ export enum NetworkRouteType {
   anomalies = 'anomalies',
   tls = 'tls',
   http = 'http',
-  alerts = 'events', // changed officially to events in #136427
+  events = 'events',
 }
 
-export type KeyNetworkNavTabWithoutMlPermission = NetworkRouteType.dns &
-  NetworkRouteType.flows &
-  NetworkRouteType.http &
-  NetworkRouteType.tls &
-  NetworkRouteType.alerts;
-
-type KeyNetworkNavTabWithMlPermission = KeyNetworkNavTabWithoutMlPermission &
-  NetworkRouteType.anomalies;
-
-type KeyNetworkNavTab = KeyNetworkNavTabWithoutMlPermission | KeyNetworkNavTabWithMlPermission;
-
-export type NetworkNavTab = Record<KeyNetworkNavTab, NavTab>;
+export type NetworkNavTab = Optional<Record<`${NetworkRouteType}`, NavTab>, 'anomalies'>;
 
 export type GetNetworkRoutePath = (
   capabilitiesFetched: boolean,

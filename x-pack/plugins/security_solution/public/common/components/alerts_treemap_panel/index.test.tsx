@@ -18,6 +18,7 @@ import {
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
 import { ChartContextMenu } from '../../../detections/pages/detection_engine/chart_panels/chart_context_menu';
 import { ChartSelect } from '../../../detections/pages/detection_engine/chart_panels/chart_select';
+import { TREEMAP } from '../../../detections/pages/detection_engine/chart_panels/chart_select/translations';
 import { TestProviders } from '../../mock/test_providers';
 import type { Props } from '.';
 import { AlertsTreemapPanel } from '.';
@@ -64,7 +65,7 @@ const defaultProps: Props = {
       setStackByField1={jest.fn()}
     />
   ),
-
+  inspectTitle: TREEMAP,
   isPanelExpanded: true,
   filters: [
     {
