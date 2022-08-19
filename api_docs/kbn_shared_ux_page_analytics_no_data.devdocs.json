@@ -227,7 +227,13 @@
         "signature": [
           "KibanaDependencies",
           " & ",
-          "KibanaNoDataPageKibanaDependencies"
+          "KibanaDependencies",
+          " & ",
+          "NoDataViewsPromptKibanaDependencies",
+          " & ",
+          "KibanaDependencies",
+          " & ",
+          "RedirectAppLinksKibanaDependencies"
         ],
         "path": "node_modules/@kbn/shared-ux-page-analytics-no-data-types/index.d.ts",
         "deprecated": false,
@@ -245,7 +251,13 @@
         "signature": [
           "Services",
           " & ",
-          "KibanaNoDataPageServices"
+          "Services",
+          " & ",
+          "Services",
+          " & ",
+          "RedirectAppLinksServices",
+          " & ",
+          "NoDataViewsPromptServices"
         ],
         "path": "node_modules/@kbn/shared-ux-page-analytics-no-data-types/index.d.ts",
         "deprecated": false,

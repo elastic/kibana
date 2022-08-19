@@ -7966,10 +7966,6 @@
               {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/pointseries/index.ts"
-              },
-              {
-                "plugin": "visTypeXy",
-                "path": "src/plugins/vis_types/xy/public/expression_functions/xy_vis_fn.ts"
               }
             ]
           }
@@ -18404,10 +18400,6 @@
               {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/pointseries/index.ts"
-              },
-              {
-                "plugin": "visTypeXy",
-                "path": "src/plugins/vis_types/xy/public/expression_functions/xy_vis_fn.ts"
               }
             ]
           }
@@ -30224,10 +30216,6 @@
               {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/pointseries/index.ts"
-              },
-              {
-                "plugin": "visTypeXy",
-                "path": "src/plugins/vis_types/xy/public/expression_functions/xy_vis_fn.ts"
               }
             ]
           }
@@ -34915,14 +34903,6 @@
           {
             "plugin": "canvas",
             "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/table.ts"
-          },
-          {
-            "plugin": "visTypeXy",
-            "path": "src/plugins/vis_types/xy/public/expression_functions/xy_vis_fn.ts"
-          },
-          {
-            "plugin": "visTypeXy",
-            "path": "src/plugins/vis_types/xy/public/expression_functions/xy_vis_fn.ts"
           }
         ],
         "initialIsOpen": false
