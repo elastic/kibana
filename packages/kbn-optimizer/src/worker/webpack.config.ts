@@ -301,6 +301,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
               },
               mangle: {
                 keep_classnames: true,
+                keep_private_props: true,
                 topLevel: false,
               },
               format: {
