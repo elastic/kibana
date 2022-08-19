@@ -81,7 +81,6 @@ const getContainerMetaByPath = (filters: FilterItem[], pathInArray: number[]) =>
 const getParentFilterPath = (pathInArray: number[]) =>
   pathInArray.slice(0, -1).join(PATH_SEPARATOR);
 
-// @todo - please add tests for that function
 export const normalizeFilters = (filters: FilterItem[]) => {
   const doRecursive = (f: FilterItem, parent: FilterItem) => {
     if (Array.isArray(f)) {
@@ -169,34 +168,34 @@ export const removeFilter = (filters: Filter[], path: string) => {
   return normalizeFilters(newFilters);
 };
 
-const addFilterThenRemoveFilter = (
-  filters: Filter[],
-  filter: FilterItem,
-  from: string,
-  to: string,
-  conditionalType: ConditionTypes
-) => {
-  const newFiltersWithFilter = addFilter(filters, filter, to, conditionalType);
-  return removeFilter(newFiltersWithFilter, from);
-};
-
-const removeFilterThenAddFilter = (
-  filters: Filter[],
-  filter: FilterItem,
-  from: string,
-  to: string,
-  conditionalType: ConditionTypes
-) => {
-  const newFiltersWithoutFilter = removeFilter(filters, from);
-  return addFilter(newFiltersWithoutFilter, filter, to, conditionalType);
-};
-
 export const moveFilter = (
   filters: Filter[],
   from: string,
   to: string,
   conditionalType: ConditionTypes
 ) => {
+  const addFilterThenRemoveFilter = (
+    source: Filter[],
+    addedFilter: FilterItem,
+    pathFrom: string,
+    pathTo: string,
+    conditional: ConditionTypes
+  ) => {
+    const newFiltersWithFilter = addFilter(source, addedFilter, pathTo, conditional);
+    return removeFilter(newFiltersWithFilter, pathFrom);
+  };
+
+  const removeFilterThenAddFilter = (
+    source: Filter[],
+    removableFilter: FilterItem,
+    pathFrom: string,
+    pathTo: string,
+    conditional: ConditionTypes
+  ) => {
+    const newFiltersWithoutFilter = removeFilter(source, pathFrom);
+    return addFilter(newFiltersWithoutFilter, removableFilter, pathTo, conditional);
+  };
+
   const newFilters = cloneDeep(filters);
   const movingFilter = getFilterByPath(newFilters, from);
 
@@ -241,13 +240,13 @@ export const updateFilter = (
 
   if (field && operator && params) {
     if (Array.isArray(params)) {
-      filter = updateArrayParams(filter, operator, params);
+      filter = updateWithIsOneOfOperator(filter, operator, params);
     } else {
-      filter = updateParams(filter, operator, params);
+      filter = updateWithIsOperator(filter, operator, params);
     }
   } else if (field && operator) {
     if (operator.type === 'exists') {
-      filter = updateOperatorWithExistsType(filter, operator);
+      filter = updateWithExistsOperator(filter, operator);
     } else {
       filter = updateOperator(filter, operator);
     }
@@ -287,11 +286,11 @@ function updateOperator(filter: Filter, operator?: Operator) {
       params: { ...filter.meta.params, query: undefined },
       value: undefined,
     },
-    query: { match_phrase: { ...filter!.query?.match_phrase, [filter.meta.key!]: undefined } },
+    query: { match_phrase: { field: filter.meta.key } },
   };
 }
 
-function updateOperatorWithExistsType(filter: Filter, operator?: Operator) {
+function updateWithExistsOperator(filter: Filter, operator?: Operator) {
   return {
     ...filter,
     meta: {
@@ -301,11 +300,15 @@ function updateOperatorWithExistsType(filter: Filter, operator?: Operator) {
       params: undefined,
       value: 'exists',
     },
-    query: { exists: { ...filter!.query?.exists, [filter.meta.key!]: undefined } },
+    query: { exists: { field: filter.meta.key } },
   };
 }
 
-function updateParams(filter: Filter, operator?: Operator, params?: Filter['meta']['params']) {
+function updateWithIsOperator(
+  filter: Filter,
+  operator?: Operator,
+  params?: Filter['meta']['params']
+) {
   return {
     ...filter,
     meta: {
@@ -318,7 +321,7 @@ function updateParams(filter: Filter, operator?: Operator, params?: Filter['meta
   };
 }
 
-function updateArrayParams(
+function updateWithIsOneOfOperator(
   filter: Filter,
   operator?: Operator,
   params?: Array<Filter['meta']['params']>
