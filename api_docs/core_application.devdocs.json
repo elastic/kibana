@@ -2168,7 +2168,7 @@
             "section": "def-public.AppStatus",
             "text": "AppStatus"
           },
-          " | undefined; tooltip?: string | undefined; searchable?: boolean | undefined; deepLinks?: ",
+          " | undefined; searchable?: boolean | undefined; deepLinks?: ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -2184,7 +2184,7 @@
             "section": "def-public.AppNavLinkStatus",
             "text": "AppNavLinkStatus"
           },
-          " | undefined; defaultPath?: string | undefined; }"
+          " | undefined; defaultPath?: string | undefined; tooltip?: string | undefined; }"
         ],
         "path": "src/core/public/application/types.ts",
         "deprecated": false,
