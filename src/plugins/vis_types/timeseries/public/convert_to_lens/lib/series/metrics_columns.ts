@@ -43,7 +43,7 @@ const getValidColumns = (columns: Array<Column | null> | Column | null | undefin
   return columns ? [columns] : null;
 };
 
-export const getColumns = (
+export const getMetricsColumns = (
   series: Series,
   dataView: DataView,
   visibleSeriesCount: number

@@ -16,9 +16,8 @@ import uuid from 'uuid';
 import { Panel } from '../../../common/types';
 import { getDataViewsStart } from '../../services';
 import { getDataSourceInfo } from '../lib/datasource';
-import { getColumns } from '../lib/series/new.columns';
+import { getMetricsColumns, getFiltersOrTermColumns } from '../lib/series';
 import { getLayers, getYExtents } from '../lib/configurations/xy';
-import { convertToFiltersColumn } from '../lib/convert';
 
 export const convertToLens = async (
   model: Panel
@@ -43,20 +42,19 @@ export const convertToLens = async (
     );
 
     // handle multiple metrics
-    const seriesColumns = getColumns(series, indexPattern!, seriesNum);
-    if (!seriesColumns) {
+    const metricsColumns = getMetricsColumns(series, indexPattern!, seriesNum);
+    if (!metricsColumns) {
       return null;
     }
 
-    columns.push(...seriesColumns);
+    columns.push(...metricsColumns);
 
-    if (series.split_mode === 'filters' || series.split_mode === 'filter') {
-      const filterColumn = convertToFiltersColumn(series, true);
-      if (!filterColumn) {
-        return null;
-      }
-      columns.push(filterColumn);
+    const filtersOrTermColumns = getFiltersOrTermColumns(series);
+    if (filtersOrTermColumns === null) {
+      return null;
     }
+
+    columns.push(...filtersOrTermColumns);
 
     const layerId = uuid();
     layers[layerIdx] = { indexPatternId, layerId, columns, columnOrder: [] }; // TODO: update later.
