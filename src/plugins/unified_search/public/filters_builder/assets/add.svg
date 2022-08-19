@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="27px" height="40px" viewBox="0 0 27 40" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <title>plus</title>
+    <title>add</title>
     <defs>
         <filter x="-28.4%" y="-17.1%" width="156.8%" height="134.3%" filterUnits="objectBoundingBox" id="filter-1">
             <feOffset dx="0" dy="1" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
@@ -17,7 +17,7 @@
         </linearGradient>
     </defs>
     <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <g id="plus" filter="url(#filter-1)" transform="translate(4.000000, 4.500000)">
+        <g id="add" filter="url(#filter-1)" transform="translate(4.000000, 4.500000)">
             <g id="circle" transform="translate(1.000000, 13.500000)" fill="url(#linearGradient-2)">
                 <path d="M0,9 C0,13.97 4.03,18 9,18 L9,18 C13.97,18 18,13.97 18,9 L18,9 C18,4.029 13.97,0 9,0 L9,0 C4.03,0 0,4.029 0,9"></path>
             </g>
