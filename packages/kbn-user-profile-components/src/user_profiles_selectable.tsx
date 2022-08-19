@@ -6,11 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type {
-  EuiSelectableOption,
-  EuiSelectableProps,
-  EuiSelectableSearchProps,
-} from '@elastic/eui';
+import type { EuiSelectableOption, EuiSelectableProps } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -37,15 +33,14 @@ import { UserAvatar } from './user_avatar';
  */
 export interface UserProfilesSelectableProps
   extends Pick<
-      EuiSelectableProps,
-      | 'height'
-      | 'singleSelection'
-      | 'loadingMessage'
-      | 'noMatchesMessage'
-      | 'emptyMessage'
-      | 'errorMessage'
-    >,
-    Pick<EuiSelectableSearchProps<{}>, 'inputRef'> {
+    EuiSelectableProps,
+    | 'height'
+    | 'singleSelection'
+    | 'loadingMessage'
+    | 'noMatchesMessage'
+    | 'emptyMessage'
+    | 'errorMessage'
+  > {
   /**
    * List of users to be rendered as suggestions.
    */
@@ -79,9 +74,14 @@ export interface UserProfilesSelectableProps
   isLoading?: boolean;
 
   /**
-   * Placeholder text for search box.
+   * Placeholder text of search field.
    */
   searchPlaceholder?: string;
+
+  /**
+   * Identifier of search field.
+   */
+  searchInputId?: string;
 
   /**
    * Returns text for selected status.
@@ -112,9 +112,9 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
   emptyMessage,
   errorMessage,
   searchPlaceholder,
+  searchInputId,
   selectedStatusMessage,
   clearButtonLabel,
-  inputRef,
 }) => {
   const [displayedOptions, setDisplayedOptions] = useState<SelectableOption[]>([]);
 
@@ -249,7 +249,7 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
         onChange: onSearchChange,
         isLoading,
         isClearable: !isLoading,
-        inputRef,
+        id: searchInputId,
       }}
       isPreFiltered
       listProps={{ onFocusBadge: false }}

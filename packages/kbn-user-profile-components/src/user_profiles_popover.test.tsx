@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import React from 'react';
 
 import { UserProfilesPopover } from './user_profiles_popover';
@@ -79,6 +79,7 @@ describe('UserProfilesPopover', () => {
         closePopover={[MockFunction]}
         display="inline-block"
         hasArrow={true}
+        initialFocus="#searchInput_generated-id"
         isOpen={false}
         ownFocus={true}
         panelPaddingSize="none"
@@ -102,7 +103,7 @@ describe('UserProfilesPopover', () => {
                 },
               ]
             }
-            inputRef={[Function]}
+            searchInputId="searchInput_generated-id"
             selectedOptions={
               Array [
                 Object {
@@ -123,21 +124,24 @@ describe('UserProfilesPopover', () => {
     `);
   });
 
-  it('gives focus to the input box', async () => {
+  it('should set `initialFocus` and `searchInputId` props correctly', async () => {
     const [firstOption, secondOption] = userProfiles;
-    const wrapper = mount(
+    const wrapper = shallow(
       <UserProfilesPopover
         title="Title"
         button={<button>Toggle</button>}
         closePopover={jest.fn()}
-        isOpen
         selectableProps={{
           selectedOptions: [firstOption],
           defaultOptions: [secondOption],
         }}
+        isOpen
       />
     );
 
-    expect(wrapper.find('input[type="search"]').is(':focus')).toBe(true);
+    expect(wrapper.find('EuiPopover').prop('initialFocus')).toBe('#searchInput_generated-id');
+    expect(wrapper.find('UserProfilesSelectable').prop('searchInputId')).toBe(
+      'searchInput_generated-id'
+    );
   });
 });

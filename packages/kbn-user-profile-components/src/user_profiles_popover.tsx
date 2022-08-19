@@ -7,9 +7,9 @@
  */
 
 import type { EuiPopoverProps, EuiContextMenuPanelProps } from '@elastic/eui';
-import { FunctionComponent, useCallback, useEffect, useState } from 'react';
+import { FunctionComponent } from 'react';
 import React from 'react';
-import { EuiPopover, EuiContextMenuPanel } from '@elastic/eui';
+import { EuiPopover, EuiContextMenuPanel, useGeneratedHtmlId } from '@elastic/eui';
 
 import { UserProfilesSelectable, UserProfilesSelectableProps } from './user_profiles_selectable';
 
@@ -38,22 +38,15 @@ export const UserProfilesPopover: FunctionComponent<UserProfilesPopoverProps> = 
   selectableProps,
   ...popoverProps
 }) => {
-  const [inputElement, setInputElement] = useState<HTMLInputElement | null>(null);
-
-  const setInputRef = useCallback((node: HTMLInputElement | null) => {
-    setInputElement(node);
-  }, []);
-
-  useEffect(() => {
-    inputElement?.focus();
-  }, [inputElement]);
-
-  const initialFocus = inputElement ? inputElement : undefined;
+  const searchInputId = useGeneratedHtmlId({
+    prefix: 'searchInput',
+    conditionalId: selectableProps.searchInputId,
+  });
 
   return (
-    <EuiPopover panelPaddingSize="none" initialFocus={initialFocus} {...popoverProps}>
+    <EuiPopover panelPaddingSize="none" initialFocus={`#${searchInputId}`} {...popoverProps}>
       <EuiContextMenuPanel title={title}>
-        <UserProfilesSelectable inputRef={setInputRef} {...selectableProps} />
+        <UserProfilesSelectable {...selectableProps} searchInputId={searchInputId} />
       </EuiContextMenuPanel>
     </EuiPopover>
   );
