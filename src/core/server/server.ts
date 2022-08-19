@@ -23,7 +23,8 @@ import {
 } from '@kbn/core-config-server-internal';
 import { NodeService, nodeConfig } from '@kbn/core-node-server-internal';
 import { AnalyticsService } from '@kbn/core-analytics-server-internal';
-import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-server';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { EnvironmentService, pidConfig } from '@kbn/core-environment-server-internal';
 import {
   ExecutionContextService,
@@ -402,7 +403,7 @@ export class Server {
     startTransaction?.end();
 
     this.uptimePerStep.start = { start: startStartUptime, end: process.uptime() };
-    analyticsStart.reportEvent(KIBANA_STARTED_EVENT, { uptime_per_step: this.uptimePerStep });
+    this.reportKibanaStartedEvents(analyticsStart);
 
     return this.coreStart;
   }
@@ -464,6 +465,11 @@ export class Server {
     }
   }
 
+  /**
+   * Register the legacy KIBANA_STARTED_EVENT.
+   * @param analyticsSetup The {@link AnalyticsServiceSetup}
+   * @private
+   */
   private registerKibanaStartedEventType(analyticsSetup: AnalyticsServiceSetup) {
     analyticsSetup.registerEventType<{ uptime_per_step: UptimeSteps }>({
       eventType: KIBANA_STARTED_EVENT,
@@ -549,6 +555,35 @@ export class Server {
           },
         },
       },
+    });
+  }
+
+  /**
+   * Reports the new and legacy KIBANA_STARTED_EVENT.
+   * @param analyticsStart The {@link AnalyticsServiceStart}.
+   * @private
+   */
+  private reportKibanaStartedEvents(analyticsStart: AnalyticsServiceStart) {
+    // Report the legacy KIBANA_STARTED_EVENT.
+    analyticsStart.reportEvent(KIBANA_STARTED_EVENT, { uptime_per_step: this.uptimePerStep });
+
+    const ups = this.uptimePerStep;
+
+    const toMs = (sec: number) => Math.round(sec * 1000);
+    // Report the metric-shaped KIBANA_STARTED_EVENT.
+    reportPerformanceMetricEvent(analyticsStart, {
+      eventName: KIBANA_STARTED_EVENT,
+      duration: toMs(ups.start!.end - ups.constructor!.start),
+      key1: 'time_to_constructor',
+      value1: toMs(ups.constructor!.start),
+      key2: 'constructor_time',
+      value2: toMs(ups.constructor!.end - ups.constructor!.start),
+      key3: 'preboot_time',
+      value3: toMs(ups.preboot!.end - ups.preboot!.start),
+      key4: 'setup_time',
+      value4: toMs(ups.setup!.end - ups.setup!.start),
+      key5: 'start_time',
+      value5: toMs(ups.start!.end - ups.start!.start),
     });
   }
 }

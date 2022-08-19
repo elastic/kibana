@@ -13,7 +13,7 @@ GCS_BUCKET="gs://kibana-performance/scalability-tests"
 .buildkite/scripts/bootstrap.sh
 
 echo "--- Extract APM metrics"
-scalabilityJourneys=("login" "promotion_tracking_dashboard")
+scalabilityJourneys=("login" "ecommerce_dashboard" "flight_dashboard" "web_logs_dashboard" "promotion_tracking_dashboard" "many_fields_discover")
 
 for i in "${scalabilityJourneys[@]}"; do
     JOURNEY_NAME="${i}"
@@ -34,8 +34,8 @@ mkdir "${BUILD_ID}"
 tar -czf "${BUILD_ID}/scalability_traces.tar.gz" -C target scalability_traces
 buildkite-agent artifact upload "${BUILD_ID}/scalability_traces.tar.gz"
 # Upload Kibana build, plugins, commit sha and traces to the bucket
-buildkite-agent artifact download kibana-default.tar.gz ./"${BUILD_ID}"
-buildkite-agent artifact download kibana-default-plugins.tar.gz ./"${BUILD_ID}"
+download_artifact kibana-default.tar.gz ./"${BUILD_ID}"
+download_artifact kibana-default-plugins.tar.gz ./"${BUILD_ID}"
 echo "${BUILDKITE_COMMIT}" > "${BUILD_ID}/KIBANA_COMMIT_HASH"
 gsutil -m cp -r "${BUILD_ID}" "${GCS_BUCKET}"
 echo "--- Update reference to the latest CI build"

@@ -224,7 +224,7 @@ export class AnomalyTimelineStateService extends StateService {
         switchMap(([selectedJobs, severity, bucketInterval]) => {
           return from(
             this.anomalyTimelineService.loadOverallData(
-              selectedJobs!,
+              selectedJobs,
               undefined,
               bucketInterval!,
               severity

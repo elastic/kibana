@@ -14,7 +14,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
 import React from 'react';
-import { enableInfrastructureView } from '@kbn/observability-plugin/public';
 import {
   isMobileAgentName,
   isJavaAgentName,
@@ -155,7 +154,7 @@ export function isMetricsTabHidden({
   );
 }
 
-export function isJVMsTabHidden({
+export function isMetricsJVMsTabHidden({
   agentName,
   runtimeName,
 }: {
@@ -176,8 +175,6 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
     plugins,
     capabilities
   );
-
-  const showInfraTab = core.uiSettings.get<boolean>(enableInfrastructureView);
 
   const router = useApmRouter();
 
@@ -255,9 +252,9 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         query,
       }),
       label: i18n.translate('xpack.apm.serviceDetails.nodesTabLabel', {
-        defaultMessage: 'JVMs',
+        defaultMessage: 'Metrics',
       }),
-      hidden: isJVMsTabHidden({ agentName, runtimeName }),
+      hidden: isMetricsJVMsTabHidden({ agentName, runtimeName }),
     },
     {
       key: 'infrastructure',
@@ -269,8 +266,6 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.home.infraTabLabel', {
         defaultMessage: 'Infrastructure',
       }),
-
-      hidden: !showInfraTab,
     },
     {
       key: 'service-map',

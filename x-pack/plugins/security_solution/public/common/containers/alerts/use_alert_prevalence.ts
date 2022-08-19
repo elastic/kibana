@@ -42,7 +42,7 @@ export const useAlertPrevalence = ({
   const timelineTime = useDeepEqualSelector((state) =>
     inputsSelectors.timelineTimeRangeSelector(state)
   );
-  const globalTime = useGlobalTime();
+  const globalTime = useGlobalTime(false);
 
   const { to, from } = timelineId === TimelineId.active ? timelineTime : globalTime;
   const [initialQuery] = useState(() =>

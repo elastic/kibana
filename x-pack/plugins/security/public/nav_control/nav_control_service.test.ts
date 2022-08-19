@@ -77,11 +77,11 @@ describe('SecurityNavControlService', () => {
       <div>
         <div>
           <div
-            class="euiPopover euiPopover--anchorDownRight"
+            class="euiPopover emotion-euiPopover"
             id="headerUserMenu"
           >
             <div
-              class="euiPopover__anchor"
+              class="euiPopover__anchor css-16vtueo-render"
             >
               <button
                 aria-controls="headerUserMenu"
