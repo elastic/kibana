@@ -177,10 +177,19 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     [dispatchEvent]
   );
 
-  const handleFilterClick = useMemo(
-    () => (isInteractive ? createGridFilterHandler(firstTableRef, onClickValue) : undefined),
-    [firstTableRef, onClickValue, isInteractive]
-  );
+  const handleFilterClick = useMemo(() => {
+    const handler = isInteractive
+      ? createGridFilterHandler(firstTableRef, onClickValue)
+      : undefined;
+    if (handler) {
+      const wrappedHandler: typeof handler = (...args) => {
+        // update pagination
+        onChangePage(0);
+        return handler(...args);
+      };
+      return wrappedHandler;
+    }
+  }, [firstTableRef, onClickValue, isInteractive, onChangePage]);
 
   const handleTransposedColumnClick = useMemo(
     () =>
