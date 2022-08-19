@@ -239,8 +239,7 @@ describe('Combined Queries', () => {
     ).toBeNull();
   });
 
-  test('No Data Provider & No kqlQuery & isEventViewer is true', () => {
-    const isEventViewer = true;
+  test('No Data Provider & No kqlQuery', () => {
     expect(
       combineQueries({
         config,
@@ -250,7 +249,6 @@ describe('Combined Queries', () => {
         filters: [],
         kqlQuery: { query: '', language: 'kuery' },
         kqlMode: 'search',
-        isEventViewer,
       })
     ).toEqual({
       filterQuery: '{"bool":{"must":[],"filter":[],"should":[],"must_not":[]}}',
@@ -258,7 +256,6 @@ describe('Combined Queries', () => {
   });
 
   test('No Data Provider & No kqlQuery & with Filters', () => {
-    const isEventViewer = true;
     expect(
       combineQueries({
         config,
@@ -293,7 +290,6 @@ describe('Combined Queries', () => {
         ],
         kqlQuery: { query: '', language: 'kuery' },
         kqlMode: 'search',
-        isEventViewer,
       })
     ).toEqual({
       filterQuery:
