@@ -175,7 +175,7 @@ export function FilterItem({
         >
           <EuiDraggable
             spacing="m"
-            key={path}
+            key={JSON.stringify(filter)}
             index={index}
             draggableId={`${path}`}
             customDragHandle={true}
@@ -190,12 +190,7 @@ export function FilterItem({
                 className={cx({ [cursorReturnKey]: dropTarget === path && !hideOr })}
               >
                 <EuiFlexItem>
-                  <EuiPanel
-                    color={color}
-                    paddingSize={'none'}
-                    hasShadow={false}
-                    key={JSON.stringify(filter)}
-                  >
+                  <EuiPanel color={color} paddingSize={'none'} hasShadow={false}>
                     <EuiFlexGroup
                       gutterSize="m"
                       responsive={false}
