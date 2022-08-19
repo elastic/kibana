@@ -11,13 +11,13 @@ tags: ['kibana', 'dev', 'contributor', 'operations', 'idm', 'packages']
 The size of the Kibana repository has surpassed almost all other Typescript projects on Github, and the Javascript tooling ecosystem is inadequate. AppEx Operations team has done a lot of work over the years to close these gaps and keep up with our codebase's growth. Still, significant steps are necessary to provide a more efficient development experience. The AppEx Operations team is leading an effort to migrate to Bazel, which among other things, will provide remote caching and incremental builds. This initiative should drastically improve the productivity of Kibana contributors by minimizing what needs to be built, both locally and in CI, and providing faster and more thorough feedback.
 
 <DocCallOut color="warning">
-  This document represents the target of the IDM project and not the currently implemented features. See [What works now?][status] for information about current implementation status.
+  This document represents the target of the IDM project and not the currently implemented features. See [What works now?][status] for information about the current implementation status.
 </DocCallOut>
 
 ## Goals
 
 - Use packages as a core unit of code used throughout the repository
-- Packages have well defined boundaries, a single responsibility, and are easily reusable and shareable across the repository when desired
+- Packages have well-defined boundaries, a single responsibility, and are easily reusable and shareable across the repository when desired
 - Support organizing the repository by domain
 - Allow developers and CI to benefit from a remote cache and incremental builds for all development/validation/build tasks
 
@@ -26,13 +26,13 @@ The size of the Kibana repository has surpassed almost all other Typescript proj
 These are some of the terms we are using to describe parts of this initiative:
 
 Build Tasks/Tasks
-: We refer to any task/command that is executed as part of developement or CI as a "build task" or just "task"
+: We refer to any task/command that is executed as part of development or CI as a "build task" or just "task".
 
 Package
 : Packages can be installed from NPM, or implemented in the repository. Local packages are structured in a specific way detailed in the [Package Structure](#package-structure) section.
 
 Incremental tasks
-: The ability to execute the minimal set of build tasks necessary by inspecting the files which have changed and utilizing local+remote caches
+: The ability to execute the minimal set of build tasks necessary by inspecting the files which have changed and utilizing local+remote caches.
 
 ## Package Structure
 
@@ -41,52 +41,52 @@ Every package has:
   - a type, see [Package Types](#package-types)
   - dependencies on other packages in the repo or from NPM declared in their `kibana.jsonc` file and updated automatically
   - configuration files like `BUILD.bazel`, `jest.config.js`, `package.json`, etc. which are automatically generated when necessary from the `kibana.jsonc` file.
-  - a single interface. When you import a package you get it's one and only interface. Packages don't have sub-imports, or sub-modules.
+  - a single interface. When you import a package you get its one (and only) interface. Packages don't have sub-imports or sub-modules.
   - the ability to include jest tests alongside the code
 
 ## Package Types
-
-Every package is of one of the following types. Using package types allows us to have many different packages and pre-defined build tasks, restrictions, and unique config for each package type. There is currently a proposal to add a new `test-helpers` package type, and we expect more package types to be defined in the future.
+Package types allow us to have many different packages, pre-defined build tasks, restrictions, and unique configurations for each package type. Every package is one of the following types:
 
 `shared-common`
 : These packages can be imported from all other packages.
 
 `shared-browser`
-: These packages can be imported from `shared-browser` and `plugin-browser` packages. Storybooks may be included in package of type `shared-browser`.
+: These packages can be imported from `shared-browser` and `plugin-browser` packages. `shared-browser` packages may include Storybooks.
 
 `shared-server`
 : These packages can be imported from `shared-server` and `plugin-server` packages.
 
 `shared-scss`
-: These packages can be imported by `shared-browser` and `plugin-browser` packages. Instead of an `index.ts` file these pacakges have an `index.scss` file which will be exposed to consumers of this package.
+: These packages can be imported by `shared-browser` and `plugin-browser` packages, and expose an `index.scss` file to consumers instead of an `index.ts` file.
 
 `plugin-browser`
-: These packages expose types to other packages via a root `types.ts` file, `import type` statements must be used when importing. Module IDs must end with `-plugin-browser`.
+: These packages expose types to other packages via a root `types.ts` file.  Module IDs must end with `-plugin-browser`. Consumers must use `import type` statements.
 
 `plugin-server`
-: These packages expose types to other packages via a root `types.ts` file, `import type` statements must be used when importing. Module IDs must end with `-plugin-server`.
+: These packages expose types to other packages via a root `types.ts` file. Module IDs must end with `-plugin-server`. Consumers must use `import type` statements.
 
 `functional-test`
-: These packages can not be imported by other packages and expose one or more functional testing configurations, including API integration tests. Having this separate means that iterating on functional tests will not need to rebuild the application and updating the application will usually not rebuild the tests.
+: These packages expose one or more functional testing configurations, including API integration tests, and can not be imported by other packages. Separating functional and integration tests allows us to iterate on tests without rebuilding the application. Similarly, iterating and updating the application should mostly mean the tests don't need to rebuild.
 
-
+There is currently a proposal to add a new `test-helpers` package type, and we expect more package types to be defined in the future if and when the need arises.
+ 
 ## Phases
 
-We're planning to implement the full package system described in phases. Currently, those phases look like this:
+We're planning to implement the full package system in phases. Currently, those phases look like this:
 
 ### Phase 1: Ground preparation
 
 **status:** ✅ complete
 
-This phase is about identifying issues that would prevent a migration for teams in order to provide adequate time for them before they have the need to migrate.
+This phase is about identifying issues that would prevent a migration for teams to provide adequate time for them before they need to migrate.
 
  - Migrate all plugins to use module IDs
- - Find instances of ESLint being disabled and illegal cross-boundary imports are used; create issues for teams to address
+ - Find instances where ESLint is disabled and illegal cross-boundary imports are used; create issues for teams to address
  - Prevent naked eslint-disable
  - Prevent disabling specific ESLint rules
  - Windows development is not supported
- - Rewrite @kbn/pm using native Node.js to remove its build step. Anything outside of bootstrap like clean and reset commands will move to different packages.
- - Document how to break up packages into smaller pieces
+ - Rewrite `@kbn/pm` using native Node.js to remove its build step. Anything outside of bootstrap, like clean and reset commands, will move to different packages.
+ - Document how to break up packages into smaller units of code
 
 ### Phase 2: Legacy packages migration
 
@@ -94,9 +94,9 @@ This phase is about identifying issues that would prevent a migration for teams 
 
 This phase is about migrating the existing legacy packages to one of the [package types](#package-types).
 
-  - Add kibana.json files to existing packages
-  - Auto generating configuration files based on the `kibana.jsonc` manifest
-  - Discover dependencies used in packages automatically
+  - Add `kibana.json` files to existing packages
+  - Auto-generate configuration files based on `kibana.jsonc` manifests
+  - Automate package dependency discovery
 
 ### Phase 3: Double down on DX
 
@@ -116,13 +116,13 @@ This phase is all about supporting the creation of plugin-browser and plugin-ser
   - Extracting Webpack config from @kbn/optimizer to work on a single bundle inside Bazel
   - Update plugin discovery to find and differentiate between legacy plugins and plugin-browser/server packages
   - ESLint rules to validate imports into and out of plugin-browser and plugin-server packages
-  - Finish the migration of core to packages and reflect with the core team (and possibly the Shared UX team) around what we should recommend for plugin authors before we start to migrate legacy plugins to the package system
+  - Finish the migration of core to packages and reflect with the core team (and possibly the Shared UX team) on what we should recommend for plugin authors before we start to migrate legacy plugins to the package system
   - Documentation, documentation, documentation
   - How do 3rd party plugins migrate to the new system?
 
 ### Phase 5: Legacy plugins migration
 
-This phase is all about having the solution teams migrating their legacy plugins into packages.
+This phase is all about having the solution teams migrate their legacy plugins into packages.
 
   - Identify the order of plugins that can be migrated
   - Identify and communicate what needs to be done by teams
@@ -137,40 +137,40 @@ This phase is about finalizing the rough edges and making sure every piece of co
   - Extend the package development tooling to support 3rd party package development and allow packages to participate in the benefits of Bazel within the `plugins` directory.
   - Ability for 3rd party packages to require specific versions of specific packages from NPM
   - Automatically build the components that need changes
-  - Build package artifacts that can be installed in Kibana distributables
+  - Build package artifacts that can be installed in a Kibana distributable
 
 
 ## FAQ
 
 ### Is it time for me to start creating packages?
 
-Probably not. The Shared UX and Core teams are currently our Guinea Pig teams and they're experiencing the pain of living on the bleeding edge. If you want to create a single package you are welcome to, but for now it's probably best that you wait until Operations reached out to your team.
+Probably not. The Shared UX and Core teams are currently our "Guinea Pig" teams and they're experiencing the pain of living on the bleeding edge. If you want to create a single package you are welcome to, but for now, it's probably best that you wait until Operations reached out to your team.
 
 ### How do circular dependencies work?
 
-By breaking the repository into packages we not be able to support cross-package circular dependency.
+By breaking the repository into packages we can't support cross-package circular dependencies.
 
-Imagine trying to build the types for `@kbn/a`, which depend on the types for `@kbn/b`. If `@kbn/b` also depends on the types for `@kbn/a` there is no way to build the types for eather package because they form a circular dependency.
+For example, imagine trying to build the types for `@kbn/a` that depend on the types for `@kbn/b`. If `@kbn/b` also depends on the types for `@kbn/a` there's a circular dependency meaning there isn't a way to build the types for either.
 
-If you cause a circular dependency in the task graph Bazel will produce a pretty great error message explaining where the cycle is.
+If you cause a circular dependency in the task graph, Bazel will produce a pretty great error message explaining where the cycle is.
 
-So far, the solution to resolving circular dependencies has always been to break out some component which is causing the circular dependency into a separate package. Packages are light weight, and are very easy to create ([work in progress][status]) so please feel comfortable creating more packages.
+The solution to resolving a circular dependency has, thus far, been to break out the component causing it, into a separate package. Packages are lightweight and are very easy to create ([work in progress][status]) so please feel comfortable creating more packages as you need to.
 
 ### How do we name packages?
 
 There are a few package naming rules:
  - all packages must use the `@kbn/` namespace
- - `plugin-browser` packages must end with `-plugin-browser`
- - `plugin-server` packages must end with `-plugin-server`
- - be considerate of the fact that we are operating in a global namespace and avoid overly generic names
+ - `plugin-browser`-type packages must end with `-plugin-browser`
+ - `plugin-server- type packages must end with `-plugin-server`
+ - considering that we operate in a global namespace, avoid overly generic names
 
-Other than these rules, it's up to you what the best name for your package is.
+Other than these rules, it's up to you and your team to decide on an appropriate name for your package.
 
 <DocCallOut color="primary">
-  Keep the single responsibility principle in mind, if there isn't a clear name for your package it might mean that it includes too many things and should be split into multiple smaller packages with explicit purposes.
+  Keep the single responsibility principle in mind. A good indication that a package contains too much is that naming it isn’t easy. In such cases, consider splitting it into multiple, smaller packages with their specific purpose.
 </DocCallOut>
 
-The shared-ux team makes a lot of packages containing a single component which is widely shared and provides a lot of helpers and types for other packages to consume, the shared-ux team has used the following naming scheme:
+The shared-ux team makes a lot of packages, each containing a single, widely shared component along with helpers and types, for other packages to consume. The shared-ux team has used the following naming scheme:
 
 ```
 /{domain}/{componentName}
@@ -191,15 +191,15 @@ The `@kbn/{team}-{domain}-{component}(-{type})?` style naming scheme is also fol
 
 ### Where do I put my package?
 
-The only rule the package system enforces is that packages can't live inside of other packages. Additionally, for licensing purposes it's probably best to keep SSPL licensed code in the `packages` or `src` directories and Elastic licensed code in the `x-pack` directory.
+The only rule the package system enforces is that packages can't live inside of other packages. Additionally, for licensing purposes, it's probably best to keep SSPL licensed code in the `packages` or `src` directories and Elastic licensed code in the `x-pack` directory.
 
-Otherise, you can put your packages wherever you like. It's probably best that you don't put them in the current `packages` directory as it's huge and only getting bigger with time.
+Otherwise, you can put your packages wherever you like. It's probably best that you don't put them in the current `packages` directory as it's huge and only getting bigger with time.
 
 To define a new directory where packages will live you will need to edit the [`BAZEL_PACKAGE_DIRS`][pkgDirs] const. This list points to all the directories where packages can live in the repository and includes the current list of locations where packages are being created.
 
 ### What works now?
 
-Today we have a basic package generator that produces legacy package definitions. We're done laying the groundwork now and have both the Core and Shared UX teams playing guinea pig. You can use the legacy package generator with `node scripts/generate package` and create a package, but it's not the right time for more teams to start migrating large portions of their code to packages.
+Today we have a simplistic package generator that produces legacy package definitions. We've finished laying the groundwork and have both the Core and Shared UX teams experimenting with it. You can use the legacy package generator with `node scripts/generate package` and create a package, however, we don’t recommend other teams to start migrating large portions of their code to packages just yet.
 
 We're now entering Phase 2 of the plan, more details about the phases of our plan can be found [above](#phases)
 
