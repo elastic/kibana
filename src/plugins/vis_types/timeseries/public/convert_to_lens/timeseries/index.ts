@@ -12,7 +12,7 @@ import { getDataSourceInfo } from '../lib/datasource';
 import { getSeries } from '../lib/series';
 import { getFieldsForTerms } from '../../../common/fields_utils';
 import { ConvertTsvbToLensVisualization } from '../types';
-import { convertChartType, getYExtents } from '../lib/xy';
+import { getChartType, getYExtents } from '../lib/configurations/xy';
 import { getLayerConfiguration } from '../lib/layers';
 import { isSplitWithDateHistogram } from '../lib/split_chart';
 
@@ -58,7 +58,7 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model) => {
       return null;
     }
 
-    const chartType = convertChartType(layer);
+    const chartType = getChartType(layer, model.type);
 
     layersConfiguration[layerIdx] = getLayerConfiguration(
       indexPatternId,

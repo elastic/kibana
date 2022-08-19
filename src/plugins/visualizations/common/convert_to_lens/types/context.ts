@@ -7,6 +7,7 @@
  */
 
 import { Column } from './columns';
+import { Configuration } from './configurations';
 
 export interface Layer {
   indexPatternId: string;
@@ -15,8 +16,8 @@ export interface Layer {
   columnOrder: string[];
 }
 
-export interface NavigateToLensContext {
+export interface NavigateToLensContext<T extends Configuration> {
   layers: Record<string, Layer>;
   type: string;
-  configuration: unknown;
+  configuration: T;
 }

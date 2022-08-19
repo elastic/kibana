@@ -7,13 +7,13 @@
  */
 
 import { METRIC_TYPES } from '@kbn/data-plugin/public';
-import { Operation, Operations } from '@kbn/visualizations-plugin/common';
+import { Operation, Operations } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { MetricType } from '../../../../common/types';
 import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 
 interface Agg {
   isFormula?: false;
-};
+}
 
 interface AggWithFormula {
   isFormula: true;

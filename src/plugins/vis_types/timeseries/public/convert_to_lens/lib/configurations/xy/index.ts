@@ -6,9 +6,6 @@
  * Side Public License, v 1.
  */
 
-export * from './common';
-export * from './params';
-export * from './operations';
-export * from './columns';
-export * from './context';
-export * from './configurations';
+export * from './layers';
+export * from './extents';
+export * from './chart_type';

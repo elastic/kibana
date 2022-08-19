@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Column } from '@kbn/visualizations-plugin/common';
+import { Column } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { NavigateToLensContext } from '@kbn/visualizations-plugin/public';
 import type { Metric, Panel, Series } from '../../common/types';

@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './extents';
-export * from './chart_type';
+export * from './xy';

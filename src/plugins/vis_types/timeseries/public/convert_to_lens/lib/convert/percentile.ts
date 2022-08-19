@@ -8,11 +8,19 @@
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import {
-  PercentileColumn,
+  Column,
+  ColumnWithMeta,
+  Operations,
+  PercentileColumnWithMeta,
   PercentileParams,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import type { Metric, Percentile, Series } from '../../../../common/types';
 import { createColumn } from './column';
+
+export const isPercentileColumnWithMeta = (
+  column: Column | ColumnWithMeta
+): column is PercentileColumnWithMeta =>
+  column.operationType === Operations.PERCENTILE && Boolean((column as ColumnWithMeta).meta);
 
 export const convertToPercentileParams = (value?: string | number): PercentileParams | null =>
   value !== undefined && !isNaN(Number(value))
@@ -25,8 +33,9 @@ const convertToPercentileColumn = (
   percentile: Percentile,
   series: Series,
   metric: Metric,
-  dataView: DataView
-): PercentileColumn | null => {
+  dataView: DataView,
+  index: number
+): PercentileColumnWithMeta | null => {
   const params = convertToPercentileParams(percentile.value);
   if (!params) {
     return null;
@@ -42,6 +51,9 @@ const convertToPercentileColumn = (
     sourceField: field.name,
     ...createColumn(series, metric, field),
     params,
+    meta: {
+      reference: `${metric.id}.${index}`,
+    },
   };
 };
 
@@ -49,7 +61,7 @@ export const convertToPercentileColumns = (
   series: Series,
   metric: Metric,
   dataView: DataView
-): PercentileColumn[] => {
+): PercentileColumnWithMeta[] => {
   const { percentiles } = metric;
 
   if (!percentiles) {
@@ -57,6 +69,6 @@ export const convertToPercentileColumns = (
   }
 
   return percentiles
-    .map((p) => convertToPercentileColumn(p, series, metric, dataView))
-    .filter((p): p is PercentileColumn => Boolean(p));
+    .map((p, index) => convertToPercentileColumn(p, series, metric, dataView, index))
+    .filter((p): p is PercentileColumnWithMeta => Boolean(p));
 };

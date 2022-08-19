@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { TimeScaleUnit } from '@kbn/visualizations-plugin/common';
+import { TimeScaleUnit } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import type { Metric, MetricType } from '../../../../common/types';
 import { getFormulaFromMetric, SUPPORTED_METRICS } from './supported_metrics';
 import { getFilterRatioFormula } from './filter_ratio_formula';
