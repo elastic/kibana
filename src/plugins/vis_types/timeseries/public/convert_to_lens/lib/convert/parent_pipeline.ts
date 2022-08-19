@@ -198,7 +198,6 @@ const convertMovingAvgOrDerivativeToColumns = (
   metrics: Metric[],
   dataView: DataView
 ) => {
-  console.log('here');
   //  percentile value is derived from the field Id. It has the format xxx-xxx-xxx-xxx[percentile]
   const [fieldId, meta] = currentMetric?.field?.split('[') ?? [];
   const subFunctionMetric = metrics.find((metric) => metric.id === fieldId);
