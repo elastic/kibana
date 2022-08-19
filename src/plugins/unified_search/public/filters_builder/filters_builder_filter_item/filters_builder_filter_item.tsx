@@ -99,10 +99,10 @@ export function FilterItem({
     (selectedOperator: Operator) => {
       dispatch({
         type: 'updateFilter',
-        payload: { path, field, operator: selectedOperator, params },
+        payload: { path, field, operator: selectedOperator },
       });
     },
-    [dispatch, path, field, params]
+    [dispatch, path, field]
   );
 
   const onHandleParamsChange = useCallback(
