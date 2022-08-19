@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { ResolverSchema } from '../../../../../../common/endpoint/types';
-
 /**
  * Represents a time range filter
  */
