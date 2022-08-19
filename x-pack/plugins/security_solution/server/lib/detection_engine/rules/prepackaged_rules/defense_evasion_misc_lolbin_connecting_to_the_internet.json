@@ -16,6 +16,28 @@
   "references": [
     "https://www.iana.org/assignments/iana-ipv4-special-registry/iana-ipv4-special-registry.xhtml"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "destination.ip",
+      "type": "ip"
+    },
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.entity_id",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.name",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 21,
   "rule_id": "63e65ec3-43b1-45b0-8f2d-45b34291dc44",
   "severity": "low",
@@ -37,7 +59,7 @@
       "technique": [
         {
           "id": "T1218",
-          "name": "Signed Binary Proxy Execution",
+          "name": "System Binary Proxy Execution",
           "reference": "https://attack.mitre.org/techniques/T1218/"
         }
       ]
@@ -53,5 +75,5 @@
     }
   ],
   "type": "eql",
-  "version": 9
+  "version": 11
 }

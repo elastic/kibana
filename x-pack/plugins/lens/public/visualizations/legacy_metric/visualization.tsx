@@ -14,8 +14,8 @@ import { ThemeServiceStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { ColorMode, CustomPaletteState } from '@kbn/charts-plugin/common';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
+import { IconChartMetric } from '@kbn/chart-icons';
 import { getSuggestions } from './metric_suggestions';
-import { LensIconChartMetric } from '../../assets/chart_metric';
 import { Visualization, OperationMetadata, DatasourceLayers } from '../../types';
 import type { MetricState } from '../../../common/types';
 import { layerTypes } from '../../../common';
@@ -181,7 +181,7 @@ export const getLegacyMetricVisualization = ({
   visualizationTypes: [
     {
       id: 'lnsMetric',
-      icon: LensIconChartMetric,
+      icon: IconChartMetric,
       label: i18n.translate('xpack.lens.legacyMetric.label', {
         defaultMessage: 'Legacy Metric',
       }),
@@ -208,7 +208,7 @@ export const getLegacyMetricVisualization = ({
 
   getDescription() {
     return {
-      icon: LensIconChartMetric,
+      icon: IconChartMetric,
       label: i18n.translate('xpack.lens.legacyMetric.label', {
         defaultMessage: 'Legacy Metric',
       }),
