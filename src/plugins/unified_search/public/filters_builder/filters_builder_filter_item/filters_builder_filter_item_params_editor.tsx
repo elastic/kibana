@@ -16,6 +16,7 @@ import {
   RangeValueInput,
   isRangeParams,
 } from '../../filter_bar/filter_editor';
+import { getFieldValidityAndErrorMessage } from '../../filter_bar/filter_editor/lib';
 
 interface ParamsEditorProps<TParams = unknown> {
   dataView: DataView;
@@ -50,12 +51,17 @@ export function ParamsEditor<TParams = unknown>({
     [onHandleParamsUpdate]
   );
 
+  const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(
+    field!,
+    typeof params === 'string' ? params : undefined
+  );
+
   switch (operator?.type) {
     case 'exists':
       return null;
     case 'phrase':
       return (
-        <EuiFormRow fullWidth>
+        <EuiFormRow fullWidth isInvalid={isInvalid} error={errorMessage}>
           <PhraseValueInput
             compressed
             indexPattern={dataView}
