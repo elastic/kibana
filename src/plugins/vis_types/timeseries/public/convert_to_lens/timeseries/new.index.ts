@@ -26,8 +26,7 @@ export const convertToLens = async (
   const columns = [];
   const layers: Record<number, Layer> = {};
   // handle multiple layers/series
-  for (let layerIdx = 0; layerIdx < model.series.length; layerIdx++) {
-    const series = model.series[layerIdx];
+  for (const [layerIdx, series] of model.series.entries()) {
     if (series.hidden) {
       continue;
     }
