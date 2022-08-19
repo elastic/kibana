@@ -183,7 +183,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       : undefined;
     if (handler) {
       const wrappedHandler: typeof handler = (...args) => {
-        // update pagination
+        // switch to first page before filtering to work around EuiDataGrid bug (see https://github.com/elastic/kibana/issues/139126)
         onChangePage(0);
         return handler(...args);
       };
