@@ -24,6 +24,12 @@ const hit = {
   _index: 'index',
   fields: {
     message: 'foo',
+    agg_metric: {
+      min: 150,
+      max: 1000,
+      sum: 5000,
+      value_count: 10,
+    },
   },
 };
 
@@ -62,5 +68,16 @@ describe('formatFieldValue', () => {
     expect(formatFieldValue('foo', hit, services.fieldFormats)).toBe('formatted:foo');
     expect(services.fieldFormats.getDefaultInstance).toHaveBeenCalledWith('string');
     expect(convertMock).toHaveBeenCalledWith('foo', 'html', { field: undefined, hit });
+  });
+
+  it('should call object formatter if aggregate_metric_double field is specified', () => {
+    const formatterForFieldMock = dataViewMock.getFormatterForField as jest.Mock;
+    const convertMock = jest.fn((value: unknown) => `formatted:${value}`);
+    formatterForFieldMock.mockReturnValue({ convert: convertMock });
+    const field = dataViewMock.fields.getByName('agg_metric');
+    expect(
+      formatFieldValue(hit.fields.agg_metric, hit, services.fieldFormats, dataViewMock, field)
+    ).toMatchInlineSnapshot(`"formatted:[object Object]"`);
+    expect(services.fieldFormats.getDefaultInstance).toHaveBeenCalledWith('object');
   });
 });

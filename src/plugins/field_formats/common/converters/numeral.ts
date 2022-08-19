@@ -35,9 +35,6 @@ export abstract class NumeralFormat extends FieldFormat {
     if (val === -Infinity) return '-∞';
     if (val === +Infinity) return '+∞';
     if (typeof val !== 'number') {
-      if (typeof val === 'object') {
-        return JSON.stringify(val);
-      }
       val = parseFloat(val);
     }
 

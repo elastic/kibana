@@ -62,6 +62,16 @@ const fields = [
     filterable: true,
     aggregatable: true,
   },
+  {
+    name: 'agg_metric',
+    type: 'number',
+    displayName: 'agg_metric',
+    esTypes: ['aggregate_metric_double'],
+    searchable: true,
+    scripted: false,
+    filterable: true,
+    aggregatable: true,
+  },
 ] as DataView['fields'];
 
 export const buildDataViewMock = ({

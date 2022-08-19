@@ -8,7 +8,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type {
   FieldFormatsContentType,
@@ -50,6 +50,13 @@ export function formatFieldValue(
     // string formatter to format that field.
     return fieldFormats
       .getDefaultInstance(KBN_FIELD_TYPES.STRING)
+      .convert(value, usedContentType, converterOptions);
+  }
+
+  // format aggregate_metric_double field values
+  if (field.esTypes?.includes(ES_FIELD_TYPES.AGGREGATE_METRIC_DOUBLE)) {
+    return fieldFormats
+      .getDefaultInstance(KBN_FIELD_TYPES.OBJECT)
       .convert(value, usedContentType, converterOptions);
   }
 
