@@ -219,7 +219,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
   },
   timeScalingMode: 'optional',
   filterable: true,
-  windowable: true,
+  canReduceTimeRange: true,
   documentation: {
     section: 'elasticsearch',
     signature: i18n.translate('xpack.lens.indexPattern.count.signature', {

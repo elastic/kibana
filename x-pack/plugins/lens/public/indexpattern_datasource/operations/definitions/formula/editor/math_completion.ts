@@ -260,7 +260,7 @@ function getArgumentSuggestions(
         list.push('shift');
       }
     }
-    if (operation.windowable) {
+    if (operation.canReduceTimeRange) {
       if (!namedArguments.find((arg) => arg.name === 'reducedTimeRange')) {
         list.push('reducedTimeRange');
       }

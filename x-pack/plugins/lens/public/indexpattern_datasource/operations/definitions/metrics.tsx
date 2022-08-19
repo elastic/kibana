@@ -215,7 +215,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         getColumnReducedTimeRangeError(layer, columnId, indexPattern),
       ]),
     filterable: true,
-    windowable: true,
+    canReduceTimeRange: true,
     documentation: {
       section: 'elasticsearch',
       signature: i18n.translate('xpack.lens.indexPattern.metric.signature', {

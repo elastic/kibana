@@ -522,7 +522,7 @@ export function getFunctionSignatureLabel(
         defaultMessage: '[shift]?: string',
       });
     }
-    if (def.windowable) {
+    if (def.canReduceTimeRange) {
       extraArgs += i18n.translate('xpack.lens.formula.reducedTimeRangeExtraArguments', {
         defaultMessage: '[reducedTimeRange]?: string',
       });

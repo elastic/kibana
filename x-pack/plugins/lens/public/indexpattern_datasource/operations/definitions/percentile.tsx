@@ -87,7 +87,7 @@ export const percentileOperation: OperationDefinition<
   ],
   filterable: true,
   shiftable: true,
-  windowable: true,
+  canReduceTimeRange: true,
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type: fieldType }) => {
     if (supportedFieldTypes.includes(fieldType) && aggregatable && !aggregationRestrictions) {
       return {

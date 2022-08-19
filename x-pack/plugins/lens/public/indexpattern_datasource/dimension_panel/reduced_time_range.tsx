@@ -74,7 +74,7 @@ export function ReducedTimeRange({
     (c) => c.operationType === 'date_histogram'
   );
   if (
-    !selectedOperation.windowable ||
+    !selectedOperation.canReduceTimeRange ||
     (!selectedColumn.reducedTimeRange && (hasDateHistogram || !indexPattern.timeFieldName))
   ) {
     return null;

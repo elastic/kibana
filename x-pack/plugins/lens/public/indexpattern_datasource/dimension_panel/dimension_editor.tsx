@@ -922,7 +922,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
             },
             {
               dataTestSubj: 'indexPattern-reducedTimeRange-enable',
-              inlineElement: selectedOperationDefinition.windowable ? (
+              inlineElement: selectedOperationDefinition.canReduceTimeRange ? (
                 <ReducedTimeRange
                   selectedColumn={selectedColumn}
                   columnId={columnId}

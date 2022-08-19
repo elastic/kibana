@@ -226,7 +226,7 @@ export const lastValueOperation: OperationDefinition<
     };
   },
   filterable: true,
-  windowable: true,
+  canReduceTimeRange: true,
   shiftable: true,
   toEsAggsFn: (column, columnId, indexPattern) => {
     const initialArgs = {
