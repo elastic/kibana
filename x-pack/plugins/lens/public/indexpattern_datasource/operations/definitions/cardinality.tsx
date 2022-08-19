@@ -109,7 +109,11 @@ export const cardinalityOperation: OperationDefinition<
   shiftable: true,
   canReduceTimeRange: true,
   getDefaultLabel: (column, indexPattern) =>
-    ofName(getSafeName(column.sourceField, indexPattern), column.timeShift, column.reducedTimeRange),
+    ofName(
+      getSafeName(column.sourceField, indexPattern),
+      column.timeShift,
+      column.reducedTimeRange
+    ),
   buildColumn({ field, previousColumn }, columnParams) {
     return {
       label: ofName(field.displayName, previousColumn?.timeShift, previousColumn?.reducedTimeRange),

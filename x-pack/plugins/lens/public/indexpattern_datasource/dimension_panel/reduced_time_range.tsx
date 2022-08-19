@@ -21,7 +21,11 @@ import type { IndexPatternLayer } from '../types';
 import type { IndexPattern } from '../../types';
 import { reducedTimeRangeOptions } from '../reduced_time_range_utils';
 
-export function setReducedTimeRange(columnId: string, layer: IndexPatternLayer, reducedTimeRange: string | undefined) {
+export function setReducedTimeRange(
+  columnId: string,
+  layer: IndexPatternLayer,
+  reducedTimeRange: string | undefined
+) {
   const trimmedReducedTimeRange = reducedTimeRange?.trim();
   const currentColumn = layer.columns[columnId];
   const label = currentColumn.customLabel

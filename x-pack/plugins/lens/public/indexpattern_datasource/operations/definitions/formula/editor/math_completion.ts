@@ -29,7 +29,10 @@ import type { GenericOperationDefinition } from '../..';
 import { getFunctionSignatureLabel, getHelpTextContent } from './formula_help';
 import { hasFunctionFieldArgument } from '../validation';
 import { timeShiftOptions, timeShiftOptionOrder } from '../../../../time_shift_utils';
-import { reducedTimeRangeOptionOrder, reducedTimeRangeOptions } from '../../../../reduced_time_range_utils';
+import {
+  reducedTimeRangeOptionOrder,
+  reducedTimeRangeOptions,
+} from '../../../../reduced_time_range_utils';
 
 export enum SUGGESTION_TYPE {
   FIELD = 'field',
@@ -460,7 +463,12 @@ export function getSuggestion(
       break;
     case SUGGESTION_TYPE.NAMED_ARGUMENT:
       kind = monaco.languages.CompletionItemKind.Keyword;
-      if (label === 'kql' || label === 'lucene' || label === 'shift' || label === 'reducedTimeRange') {
+      if (
+        label === 'kql' ||
+        label === 'lucene' ||
+        label === 'shift' ||
+        label === 'reducedTimeRange'
+      ) {
         command = TRIGGER_SUGGESTION_COMMAND;
         insertText = `${label}='$0'`;
         insertTextRules = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
