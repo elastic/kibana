@@ -28,11 +28,17 @@ const createLangWorkerConfig = (lang) => {
     optimization: {
       minimizer: [
         new TerserPlugin({
+          cache: false,
+          parallel: false,
+          sourceMap: false,
           terserOptions: {
-            compress: { passes: 2 },
-            keep_classnames: true,
+            compress: true,
             mangle: true,
-            sourceMap: false,
+            comments: 'some',
+            ecma: 2021,
+            dead_code: true,
+            keep_classnames: true,
+            toplevel: false,
           },
           minify: async (file, _sourceMap, minimizerOptions) => {
             return require('@swc/core').minify(file, minimizerOptions.terserOptions);
