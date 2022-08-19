@@ -18,6 +18,7 @@ import {
   convertMathToFormulaColumn,
   convertParentPipelineAggToColumns,
   convertToCumulativeSumColumns,
+  convertOtherAggsToFormulaColumn,
 } from '../convert';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
@@ -55,7 +56,7 @@ export const getColumns = (series: Series, dataView: DataView): Column[] | null 
       return convertMetricsToColumns(series, metrics, dataView, convertToPercentileRankColumns);
     }
     case 'math':
-      const formulaColumn = convertMathToFormulaColumn(series, metrics, dataView);
+      const formulaColumn = convertMathToFormulaColumn(series, metrics);
       return formulaColumn ? [formulaColumn] : null;
 
     case 'moving_average':
@@ -65,6 +66,14 @@ export const getColumns = (series: Series, dataView: DataView): Column[] | null 
     case 'cumulative_sum':
       const cumulativeSumColumns = convertToCumulativeSumColumns(series, metrics, dataView);
       return getValidColumns(cumulativeSumColumns);
+    case 'positive_only':
+    case 'avg_bucket':
+    case 'max_bucket':
+    case 'min_bucket':
+    case 'sum_bucket': {
+      const otherFormulaColumn = convertOtherAggsToFormulaColumn(aggregation, series, metrics);
+      return getValidColumns(otherFormulaColumn);
+    }
   }
 
   return [];

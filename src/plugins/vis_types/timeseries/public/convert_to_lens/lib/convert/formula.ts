@@ -6,11 +6,19 @@
  * Side Public License, v 1.
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
+import { METRIC_TYPES } from '@kbn/data-plugin/public';
 import { FormulaColumn, FormulaParams } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import type { Metric, Series } from '../../../../common/types';
-import { getFormulaEquivalent } from '../metrics';
+import { getFormulaEquivalent, getSiblingPipelineSeriesFormula } from '../metrics';
 import { createColumn } from './column';
+
+type OtherFormulaAggregations =
+  | typeof TSVB_METRIC_TYPES.POSITIVE_ONLY
+  | typeof METRIC_TYPES.AVG_BUCKET
+  | typeof METRIC_TYPES.MAX_BUCKET
+  | typeof METRIC_TYPES.MIN_BUCKET
+  | typeof METRIC_TYPES.SUM_BUCKET;
 
 const convertToFormulaParams = (formula: string): FormulaParams | null => ({
   formula,
@@ -71,8 +79,7 @@ const convertFormulaScriptForAggs = (
 
 export const convertMathToFormulaColumn = (
   series: Series,
-  metrics: Metric[],
-  dataView: DataView
+  metrics: Metric[]
 ): FormulaColumn | null => {
   // find the metric idx that has math expression
   const mathMetric = metrics.find((metric) => metric.type === 'math');
@@ -120,4 +127,18 @@ export const convertMathToFormulaColumn = (
   }
 
   return createFormulaColumn(script, series, mathMetric);
+};
+
+export const convertOtherAggsToFormulaColumn = (
+  aggregation: OtherFormulaAggregations,
+  series: Series,
+  metrics: Metric[]
+): FormulaColumn | null => {
+  const currentMetric = metrics[metrics.length - 1];
+
+  const formula = getSiblingPipelineSeriesFormula(aggregation, currentMetric, metrics);
+  if (!formula) {
+    return null;
+  }
+  return createFormulaColumn(formula, series, currentMetric);
 };
