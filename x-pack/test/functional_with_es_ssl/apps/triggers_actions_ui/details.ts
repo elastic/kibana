@@ -477,6 +477,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         expect(await testSubjects.exists('addNewActionConnectorActionGroup-0')).to.eql(true);
         expect(await testSubjects.exists('addNewActionConnectorActionGroup-1')).to.eql(true);
+
+        // delete connector
+        await pageObjects.common.navigateToApp('triggersActions');
+        // refresh to see alert
+        await browser.refresh();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        // verify content
+        await testSubjects.existOrFail('rulesList');
+
+        await pageObjects.triggersActionsUI.changeTabs('connectorsTab');
+        await pageObjects.triggersActionsUI.searchConnectors('new connector');
+        await testSubjects.click('deleteConnector');
+        await testSubjects.existOrFail('deleteIdsConfirmation');
+        await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
+        await testSubjects.missingOrFail('deleteIdsConfirmation');
       });
     });
 
