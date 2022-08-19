@@ -59,8 +59,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     }
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/138295
-  describe.skip('lens metric', () => {
+  describe('lens metric', () => {
     it('should render a metric', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
@@ -94,7 +93,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         {
           title: '97.220.3.248',
           subtitle: 'Average of bytes',
-          extraText: '19.76K',
+          extraText: 'Average of bytes 19.76K',
           value: '19.76K',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: false,
@@ -102,7 +101,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         {
           title: '169.228.188.120',
           subtitle: 'Average of bytes',
-          extraText: '18.99K',
+          extraText: 'Average of bytes 18.99K',
           value: '18.99K',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: false,
@@ -110,7 +109,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         {
           title: '78.83.247.30',
           subtitle: 'Average of bytes',
-          extraText: '17.25K',
+          extraText: 'Average of bytes 17.25K',
           value: '17.25K',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: false,
@@ -118,7 +117,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         {
           title: '226.82.228.233',
           subtitle: 'Average of bytes',
-          extraText: '15.69K',
+          extraText: 'Average of bytes 15.69K',
           value: '15.69K',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: false,
@@ -126,7 +125,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         {
           title: '93.28.27.24',
           subtitle: 'Average of bytes',
-          extraText: '15.61K',
+          extraText: 'Average of bytes 15.61K',
           value: '15.61K',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: false,
@@ -134,7 +133,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         {
           title: 'Other',
           subtitle: 'Average of bytes',
-          extraText: '5.72K',
+          extraText: 'Average of bytes 5.72K',
           value: '5.72K',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: false,
@@ -158,7 +157,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const title = '93.28.27.24';
       await clickMetric(title);
 
-      retry.try(async () => {
+      await retry.try(async () => {
         const labels = await filterBar.getFiltersLabel();
         expect(labels.length).to.be(1);
         expect(labels[0]).to.be(`ip: ${title}`);
@@ -174,6 +173,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
 
       const colorPicker = await testSubjects.find('euiColorPickerAnchor');
+
+      await colorPicker.clearValue();
       await colorPicker.type('#000000');
 
       await PageObjects.lens.waitForVisualization('mtrVis');
@@ -212,10 +213,40 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.waitForVisualization('mtrVis');
 
       expect((await getMetricData()).map(({ color }) => color)).to.eql(expectedDynamicColors); // colors shouldn't change
+
+      await PageObjects.lens.closePaletteEditor();
+      await PageObjects.lens.closeDimensionEditor();
+    });
+
+    it('makes visualization scrollable if too tall', async () => {
+      await PageObjects.lens.removeDimension('lnsMetric_breakdownByDimensionPanel');
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsMetric_breakdownByDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+        keepOpen: true,
+      });
+
+      await testSubjects.setValue('lnsMetric_max_cols', '1');
+
+      await PageObjects.lens.waitForVisualization('mtrVis');
+
+      await PageObjects.lens.closeDimensionEditor();
+
+      const tiles = await getMetricTiles();
+      const lastTile = tiles[tiles.length - 1];
+
+      const initialPosition = await lastTile.getPosition();
+      await lastTile.scrollIntoViewIfNecessary();
+      const scrolledPosition = await lastTile.getPosition();
+      expect(scrolledPosition.y).to.be.below(initialPosition.y);
     });
 
     it("doesn't error with empty formula", async () => {
-      await PageObjects.lens.closePaletteEditor();
+      await PageObjects.lens.openDimensionEditor(
+        'lnsMetric_primaryMetricDimensionPanel > lns-dimensionTrigger'
+      );
 
       await PageObjects.lens.switchToFormula();
       await PageObjects.lens.typeFormula('');
