@@ -115,7 +115,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   firstTableRef.current = firstLocalTable;
 
   useEffect(() => {
-    if (!pagination) return;
+    if (!pagination?.pageIndex && !pagination?.pageSize) return;
     const lastPageIndex = Math.ceil(firstLocalTable.rows.length / pagination.pageSize) - 1;
     /**
      * When the underlying data changes, there might be a case when actual pagination page
@@ -131,7 +131,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         pageSize: pag.pageSize,
       };
     });
-  }, [pagination, firstLocalTable.rows.length]);
+  }, [pagination?.pageIndex, pagination?.pageSize, firstLocalTable.rows.length]);
 
   const untransposedDataRef = useRef(props.untransposedData);
   untransposedDataRef.current = props.untransposedData;
