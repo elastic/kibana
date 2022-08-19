@@ -14,6 +14,7 @@ import {
   Settings,
   StackMode,
   timeFormatter,
+  Tooltip,
   TooltipInfo,
   XYChartElementEvent,
 } from '@elastic/charts';
@@ -28,6 +29,8 @@ import { SubChart } from './subchart';
 function SubchartTooltip({
   highlightedSubchart,
 }: TooltipInfo & { highlightedSubchart: TopNSubchart }) {
+  // max tooltip width - 2 * padding (16px)
+  const width = 224;
   return (
     <EuiPanel>
       <SubChart
@@ -36,8 +39,9 @@ function SubchartTooltip({
         category={highlightedSubchart.Category}
         percentage={highlightedSubchart.Percentage}
         data={highlightedSubchart.Series}
-        height={200}
-        width={400}
+        height={128}
+        width={width}
+        showAxes={false}
       />
     </EuiPanel>
   );
@@ -70,11 +74,6 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
     <Chart size={{ height }}>
       <Settings
         showLegend={false}
-        tooltip={{
-          customTooltip: highlightedSubchart
-            ? (props) => <SubchartTooltip {...props} highlightedSubchart={highlightedSubchart} />
-            : () => <></>,
-        }}
         brushAxis={BrushAxis.X}
         onBrushEnd={(brushEvent) => {
           const rangeFrom = new Date(brushEvent.x![0]).toISOString();
@@ -94,6 +93,13 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
         onElementOut={() => {
           onSampleOut();
         }}
+      />
+      <Tooltip
+        customTooltip={
+          highlightedSubchart
+            ? (props) => <SubchartTooltip {...props} highlightedSubchart={highlightedSubchart} />
+            : () => <></>
+        }
       />
       {charts.map((chart) => (
         <HistogramBarSeries

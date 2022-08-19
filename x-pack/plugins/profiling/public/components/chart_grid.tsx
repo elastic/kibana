@@ -29,6 +29,7 @@ function printSubCharts(subcharts: TopNSubchart[], maximum: number) {
           percentage={subchart.Percentage}
           height={200}
           data={subchart.Series}
+          showAxes
         />
       </EuiPanel>
     </EuiFlexItem>
