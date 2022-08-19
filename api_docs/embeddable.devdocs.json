@@ -8424,6 +8424,38 @@
           },
           {
             "parentPluginId": "embeddable",
+            "id": "def-public.IEmbeddable.updateOutput",
+            "type": "Function",
+            "tags": [],
+            "label": "updateOutput",
+            "description": [
+              "\nUpdates output state with the given changes."
+            ],
+            "signature": [
+              "(changes: Partial<O>) => void"
+            ],
+            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.IEmbeddable.updateOutput.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "changes",
+                "description": [],
+                "signature": [
+                  "Partial<O>"
+                ],
+                "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "embeddable",
             "id": "def-public.IEmbeddable.getInput$",
             "type": "Function",
             "tags": [],

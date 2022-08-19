@@ -3933,7 +3933,7 @@
             "signature": [
               "(soClient: ",
               "SavedObjectsClientContract",
-              ", ids: string[], options?: { fields?: string[] | undefined; }) => Promise<",
+              ", ids: string[], options?: { fields?: string[] | undefined; withPackagePolicies?: boolean | undefined; ignoreMissing?: boolean | undefined; }) => Promise<",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -3981,7 +3981,7 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "{ fields?: string[] | undefined; }"
+                  "{ fields?: string[] | undefined; withPackagePolicies?: boolean | undefined; ignoreMissing?: boolean | undefined; }"
                 ],
                 "path": "x-pack/plugins/fleet/server/services/agent_policy.ts",
                 "deprecated": false
@@ -5312,7 +5312,7 @@
             "signature": [
               "(soClient: ",
               "SavedObjectsClientContract",
-              ", ids: string[]) => Promise<",
+              ", ids: string[], options?: { ignoreMissing?: boolean | undefined; } | undefined) => Promise<",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -5352,6 +5352,31 @@
                 "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
                 "deprecated": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "fleet",
+                "id": "def-server.PackagePolicyServiceInterface.getByIDs.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "fleet",
+                    "id": "def-server.PackagePolicyServiceInterface.getByIDs.$3.ignoreMissing",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "ignoreMissing",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                    "deprecated": false
+                  }
+                ]
               }
             ],
             "returnComment": []
@@ -9768,7 +9793,7 @@
             "label": "install_source",
             "description": [],
             "signature": [
-              "\"upload\" | \"registry\" | \"bundled\""
+              "\"registry\" | \"upload\" | \"bundled\""
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false
@@ -9918,7 +9943,7 @@
             "label": "installSource",
             "description": [],
             "signature": [
-              "\"upload\" | \"registry\" | \"bundled\""
+              "\"registry\" | \"upload\" | \"bundled\""
             ],
             "path": "x-pack/plugins/fleet/common/types/rest_spec/epm.ts",
             "deprecated": false
@@ -14294,6 +14319,16 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-common.AGENT_POLICY_API_ROUTES.BULK_GET_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "BULK_GET_PATTERN",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/constants/routes.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-common.AGENT_POLICY_API_ROUTES.INFO_PATTERN",
             "type": "string",
             "tags": [],
@@ -15637,6 +15672,16 @@
             "type": "string",
             "tags": [],
             "label": "LIST_PATTERN",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/constants/routes.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.PACKAGE_POLICY_API_ROUTES.BULK_GET_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "BULK_GET_PATTERN",
             "description": [],
             "path": "x-pack/plugins/fleet/common/constants/routes.ts",
             "deprecated": false

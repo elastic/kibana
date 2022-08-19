@@ -4003,7 +4003,7 @@
           "AbstractSourceDescriptor",
           " & { id: string; indexPatternId: string; geoField?: string | undefined; applyGlobalQuery: boolean; applyGlobalTime: boolean; applyForceRefresh: boolean; } & { metrics: ",
           "AggDescriptor",
-          "[]; } & { indexPatternTitle?: string | undefined; term: string; whereQuery?: ",
+          "[]; } & { term: string; whereQuery?: ",
           "Query",
           " | undefined; size?: number | undefined; type: ",
           {
