@@ -5,10 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import React from 'react';
+import { withSuspense } from '@kbn/shared-ux-utility';
 
-import { FiltersBuilder } from './filters_builder';
+/**
+ * The Lazily-loaded `FiltersBuilder` component.  Consumers should use `React.Suspense` or
+ * the withSuspense` HOC to load this component.
+ */
+export const FiltersBuilderLazy = React.lazy(() => import('./filters_builder'));
 
-export type { FiltersBuilderProps } from './filters_builder';
-// React.lazy support
-// eslint-disable-next-line import/no-default-export
-export default FiltersBuilder;
+/**
+ * A `FiltersBuilder` component that is wrapped by the `withSuspense` HOC. This component can
+ * be used directly by consumers and will load the `FiltersBuilderLazy` component lazily with
+ * a predefined fallback and error boundary.
+ */
+export const FiltersBuilder = withSuspense(FiltersBuilderLazy);
