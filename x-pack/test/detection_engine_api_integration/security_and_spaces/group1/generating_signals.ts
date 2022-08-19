@@ -1019,7 +1019,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
             [ALERT_WORKFLOW_STATUS]: 'open',
-            [ALERT_REASON]: `event created high alert Signal Testing Query.`,
+            [ALERT_REASON]: `event with process sshd, created high alert Signal Testing Query.`,
             [ALERT_RULE_UUID]: fullSignal[ALERT_RULE_UUID],
             [ALERT_ORIGINAL_TIME]: fullSignal[ALERT_ORIGINAL_TIME],
             [ALERT_DEPTH]: 1,
