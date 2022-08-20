@@ -56,8 +56,10 @@ export class FilterBarService extends FtrService {
    * @param key field name
    */
   public async removeFilter(key: string): Promise<void> {
-    await this.testSubjects.click(`~filter & ~filter-key-${key}`);
-    await this.testSubjects.click(`deleteFilter`);
+    await this.retry.try(async () => {
+      await this.testSubjects.click(`~filter & ~filter-key-${key}`);
+      await this.testSubjects.click(`deleteFilter`);
+    });
     await this.header.awaitGlobalLoadingIndicatorHidden();
   }
 
