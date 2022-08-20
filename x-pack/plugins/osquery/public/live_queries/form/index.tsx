@@ -70,7 +70,7 @@ const StyledEuiCard = styled(EuiCard)`
 
   .euiText {
     margin-top: 0;
-    color: ${(props) => props.theme.eui.euiTextSubduedColor};
+    // color: ${(props) => props.theme.eui.euiTextSubduedColor};
   }
 
   > button[role='switch'] {
@@ -102,7 +102,7 @@ const StyledEuiCard = styled(EuiCard)`
 const StyledEuiAccordion = styled(EuiAccordion)`
   ${({ isDisabled }: { isDisabled?: boolean }) => isDisabled && 'display: none;'}
   .euiAccordion__button {
-    color: ${({ theme }) => theme.eui.euiColorPrimary};
+    // color: ${({ theme }) => theme.eui.euiColorPrimary};
   }
 `;
 

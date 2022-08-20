@@ -27,6 +27,8 @@ import type { StartPlugins } from '../../types';
 
 interface OsqueryActionProps {
   agentId?: string;
+  query?: string;
+  savedQueryId?: string;
   formType: 'steps' | 'simple';
   hideAgentsField?: boolean;
   addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
@@ -34,6 +36,8 @@ interface OsqueryActionProps {
 
 const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({
   agentId,
+  query,
+  savedQueryId,
   formType = 'simple',
   hideAgentsField,
   addToTimeline,
@@ -54,7 +58,7 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({
   const { osqueryAvailable, agentFetched, isLoading, policyFetched, policyLoading, agentData } =
     useIsOsqueryAvailable(agentId);
 
-  if (!agentId || (agentFetched && !agentData)) {
+  if (agentId && agentFetched && !agentData) {
     return emptyPrompt;
   }
 
@@ -85,7 +89,7 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({
     return <EuiLoadingContent lines={10} />;
   }
 
-  if (!osqueryAvailable) {
+  if (agentId && !osqueryAvailable) {
     return (
       <EuiEmptyPrompt
         icon={<OsqueryIcon />}
@@ -96,7 +100,7 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({
     );
   }
 
-  if (agentData?.status !== 'online') {
+  if (agentId && agentData?.status !== 'online') {
     return (
       <EuiEmptyPrompt
         icon={<OsqueryIcon />}
@@ -113,6 +117,8 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({
       agentId={agentId}
       hideAgentsField={hideAgentsField}
       addToTimeline={addToTimeline}
+      query={query}
+      savedQueryId={savedQueryId}
     />
   );
 };
