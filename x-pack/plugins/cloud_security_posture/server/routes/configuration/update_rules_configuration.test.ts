@@ -10,7 +10,7 @@ import {
   defineUpdateRulesConfigRoute,
   PackagePolicyRuleUpdatePayload,
   setVarToPackagePolicy,
-  updatePackagePolicy,
+  updatePackagePolicyVars,
   updateRulesById,
   UpdateRulesConfigBodySchema,
   updateRulesConfigurationHandler,
@@ -209,7 +209,7 @@ describe('Update rules configuration API', () => {
 
     packagePolicyServiceMock.update.mockReturnValue(Promise.resolve(packagePolicyMock));
 
-    const updatedPackagePolicy = await updatePackagePolicy({
+    const updatedPackagePolicy = await updatePackagePolicyVars({
       rules: enabledRules.map((rule) => ({ id: rule.id, enabled: rule.attributes.enabled })),
       packagePolicy: packagePolicyMock,
       soClient: soClientMock,
@@ -239,7 +239,7 @@ describe('Update rules configuration API', () => {
     packagePolicyMock.vars!.foo = { ...dummyVar };
     packagePolicyServiceMock.update.mockReturnValue(Promise.resolve(packagePolicyMock));
 
-    const updatedPackagePolicy = await updatePackagePolicy({
+    const updatedPackagePolicy = await updatePackagePolicyVars({
       rules: enabledRules.map((rule) => ({ id: rule.id, enabled: rule.attributes.enabled })),
       packagePolicy: packagePolicyMock,
       soClient: soClientMock,

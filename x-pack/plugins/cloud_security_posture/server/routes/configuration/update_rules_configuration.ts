@@ -23,7 +23,7 @@ import {
   CSP_RULE_SAVED_OBJECT_TYPE,
   UPDATE_RULES_CONFIG_ROUTE_PATH,
 } from '../../../common/constants';
-import { CspApiRequestHandlerContext, CspRouter, CspRequestHandler } from '../../types';
+import type { CspApiRequestHandlerContext, CspRouter, CspRequestHandler } from '../../types';
 
 export type UpdateRulesConfigBodySchema = TypeOf<typeof updateRulesConfigurationBodySchema>;
 
@@ -150,7 +150,7 @@ const getAllPackagePolicyRules = async (
  * Updates the package policy vars object with a new value for the runtimeCfg key
  * @internal
  * */
-export const updatePackagePolicy = async ({
+export const updatePackagePolicyVars = async ({
   rules = [],
   packagePolicyService,
   packagePolicy,
@@ -252,7 +252,7 @@ export const updateRulesById = async (
     const packagePolicy = await packagePolicyService.get(soClient, packagePolicyId);
     if (!packagePolicy) throw new Error('Missing package policy');
 
-    const updatedPolicy = await updatePackagePolicy({
+    const updatedPolicy = await updatePackagePolicyVars({
       rules: next.map((rule) => ({ id: rule.id, enabled: rule.attributes.enabled })),
       soClient,
       packagePolicyService,
