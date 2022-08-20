@@ -59,7 +59,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const handleHideConfirmationModal = useCallback(() => setShowConfirmationModal(false), []);
 
-  const { data: { agentPoliciesById } = {} } = useAgentPolicies();
+  const { data = { agentPoliciesById: {} } } = useAgentPolicies();
 
   const cancelButtonProps = useRouterNavigate(`packs/${editMode ? defaultValue?.id : ''}`);
 
@@ -153,13 +153,13 @@ const PackFormComponent: React.FC<PackFormProps> = ({
       reduce(
         policyIds,
         (acc, policyId) => {
-          const agentPolicy = agentPoliciesById && agentPoliciesById[policyId];
+          const agentPolicy = data.agentPoliciesById && data.agentPoliciesById[policyId];
 
           return acc + (agentPolicy?.agents ?? 0);
         },
         0
       ),
-    [policyIds, agentPoliciesById]
+    [policyIds, data.agentPoliciesById]
   );
 
   const handleNameChange = useCallback(
@@ -204,7 +204,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
             <CommonUseField
               path="policy_ids"
               component={PolicyIdComboBoxField}
-              agentPoliciesById={agentPoliciesById}
+              agentPoliciesById={data.agentPoliciesById}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

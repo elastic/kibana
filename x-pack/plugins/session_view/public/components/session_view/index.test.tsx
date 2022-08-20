@@ -165,9 +165,10 @@ describe('SessionView component', () => {
         });
 
         render();
-        await waitForApiCall();
 
-        expect(renderResult.queryByTestId('sessionView:TTYPlayerToggle')).toBeTruthy();
+        await waitFor(() => {
+          expect(renderResult.queryByTestId('sessionView:TTYPlayerToggle')).toBeTruthy();
+        });
       });
 
       it('should NOT show tty player button, if session has no output', async () => {
@@ -186,9 +187,10 @@ describe('SessionView component', () => {
         });
 
         render();
-        await waitForApiCall();
 
-        expect(renderResult.queryByTestId('sessionView:TTYPlayerToggle')).toBeFalsy();
+        await waitFor(() => {
+          expect(renderResult.queryByTestId('sessionView:TTYPlayerToggle')).toBeFalsy();
+        });
       });
     });
   });

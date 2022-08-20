@@ -66,7 +66,6 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   const { data: hasActionResultsPrivileges } = useActionResultsPrivileges();
 
   const {
-    // @ts-expect-error update types
     data: { aggregations },
   } = useActionResults({
     actionId,

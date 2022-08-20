@@ -40,7 +40,6 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
   const [isLive, setIsLive] = useState(true);
   const { data: hasActionResultsPrivileges } = useActionResultsPrivileges();
   const {
-    // @ts-expect-error update types
     data: { aggregations, edges },
   } = useActionResults({
     actionId,
@@ -53,6 +52,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     skip: !hasActionResultsPrivileges,
   });
   if (expired) {
+    // @ts-expect-error update types
     edges.forEach((edge) => {
       if (!edge.fields?.completed_at && edge.fields) {
         edge.fields['error.keyword'] = edge.fields.error = [
