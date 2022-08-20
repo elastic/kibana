@@ -1216,5 +1216,16 @@ describe('MetricVisComponent', function () {
         },
       });
     });
+
+    it('ignores suffix formatting', () => {
+      const { primary, secondary } = getFormattedMetrics(0.23939, 11.2, {
+        id: 'suffix',
+        params: {
+          id: 'percent',
+        },
+      });
+      expect(primary).toBe('23.94%');
+      expect(secondary).toBe('1.12K%');
+    });
   });
 });

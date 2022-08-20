@@ -25,6 +25,7 @@ import { GROUP_ID, LENS_METRIC_ID } from './constants';
 import { DimensionEditor } from './dimension_editor';
 import { Toolbar } from './toolbar';
 import { generateId } from '../../id_generator';
+import { FormatSelectorOptions } from '../../indexpattern_datasource/dimension_panel/format_selector';
 
 export const DEFAULT_MAX_COLUMNS = 3;
 
@@ -266,6 +267,10 @@ export const getMetricVisualization = ({
 
     const isBucketed = (op: OperationMetadata) => op.isBucketed;
 
+    const formatterOptions: FormatSelectorOptions = {
+      disableExtraOptions: true,
+    };
+
     return {
       groups: [
         {
@@ -291,7 +296,8 @@ export const getMetricVisualization = ({
           supportsMoreColumns: !props.state.metricAccessor,
           filterOperations: isSupportedDynamicMetric,
           enableDimensionEditor: true,
-          supportFieldFormat: false,
+          enableFormatSelector: true,
+          formatSelectorOptions: formatterOptions,
           required: true,
         },
         {
@@ -316,7 +322,8 @@ export const getMetricVisualization = ({
           supportsMoreColumns: !props.state.secondaryMetricAccessor,
           filterOperations: isSupportedDynamicMetric,
           enableDimensionEditor: true,
-          supportFieldFormat: false,
+          enableFormatSelector: true,
+          formatSelectorOptions: formatterOptions,
           required: false,
         },
         {
@@ -339,7 +346,8 @@ export const getMetricVisualization = ({
           supportsMoreColumns: !props.state.maxAccessor,
           filterOperations: isSupportedMetric,
           enableDimensionEditor: true,
-          supportFieldFormat: false,
+          enableFormatSelector: false,
+          formatSelectorOptions: formatterOptions,
           supportStaticValue: true,
           required: false,
           groupTooltip: i18n.translate('xpack.lens.metric.maxTooltip', {
@@ -365,7 +373,8 @@ export const getMetricVisualization = ({
           supportsMoreColumns: !props.state.breakdownByAccessor,
           filterOperations: isBucketed,
           enableDimensionEditor: true,
-          supportFieldFormat: false,
+          enableFormatSelector: true,
+          formatSelectorOptions: formatterOptions,
           required: false,
         },
       ],
