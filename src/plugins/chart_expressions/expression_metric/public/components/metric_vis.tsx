@@ -160,16 +160,11 @@ const getColor = (
   data: Datatable,
   rowNumber: number
 ) => {
-  let minBound = paletteParams.rangeMin;
-  let maxBound = paletteParams.rangeMax;
-
   const { min, max } = getDataBoundsForPalette(accessors, data, rowNumber);
-  minBound = min;
-  maxBound = max;
 
   return getPaletteService().get(CUSTOM_PALETTE)?.getColorForValue?.(value, paletteParams, {
-    min: minBound,
-    max: maxBound,
+    min,
+    max,
   });
 };
 
