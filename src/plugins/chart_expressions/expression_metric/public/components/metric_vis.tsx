@@ -80,7 +80,10 @@ const getMetricFormatter = (
   columns: Datatable['columns']
 ) => {
   const serializedFieldFormat = getFormatByAccessor(accessor, columns);
-  const formatId = serializedFieldFormat?.id ?? 'number';
+  const formatId =
+    (serializedFieldFormat?.id === 'suffix'
+      ? serializedFieldFormat.params?.id
+      : serializedFieldFormat?.id) ?? 'number';
 
   if (
     !['number', 'currency', 'percent', 'bytes', 'duration', 'string', 'null'].includes(formatId)
