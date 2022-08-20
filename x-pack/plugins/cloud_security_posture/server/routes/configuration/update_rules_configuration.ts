@@ -6,17 +6,17 @@
  */
 import { schema as rt, TypeOf } from '@kbn/config-schema';
 import yaml from 'js-yaml';
-import { PackagePolicy, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
+import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import type {
   ElasticsearchClient,
   SavedObject,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import produce from 'immer';
-import { unset } from 'lodash';
 import type { PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
+import { unset } from 'lodash';
+import produce from 'immer';
 import { createCspRuleSearchFilterByPackagePolicy } from '../../../common/utils/helpers';
 import type { CspRule, CspRulesConfiguration } from '../../../common/schemas';
 import {
@@ -86,23 +86,16 @@ export const createRulesConfig = (
 });
 
 /* @internal */
-export const setVarToPackagePolicy = (
+export const getUpdatedPackagePolicy = (
   packagePolicy: PackagePolicy,
   runtimeCfg: string
-): PackagePolicy => {
-  const configFile: PackagePolicyConfigRecord = {
-    runtimeCfg: { type: 'yaml', value: runtimeCfg },
-  };
-  const updatedPackagePolicy = produce(packagePolicy, (draft) => {
+): PackagePolicy =>
+  produce(packagePolicy, (draft) => {
     unset(draft, 'id');
-    if (draft.vars) {
-      draft.vars.runtimeCfg = configFile.runtimeCfg;
-    } else {
-      draft.vars = configFile;
-    }
+
+    if (!draft.vars) draft.vars = {};
+    draft.vars.runtimeCfg = { type: 'yaml', value: runtimeCfg };
   });
-  return updatedPackagePolicy;
-};
 
 /**
  * gets all rules of a package policy with fields required for runtime config
@@ -158,6 +151,9 @@ export const updatePackagePolicyVars = async ({
   soClient,
   user,
 }: {
+  /**
+   * Override existing rules with a new value for the 'enabled' key
+   */
   rules?: UpdateRulesConfigBodySchema['rules'];
   packagePolicyService: PackagePolicyServiceInterface;
   packagePolicy: PackagePolicy;
@@ -167,7 +163,7 @@ export const updatePackagePolicyVars = async ({
 }): Promise<PackagePolicy> => {
   const packagePolicyRules = await getAllPackagePolicyRules(soClient, packagePolicy, rules);
 
-  const updatedPolicy = setVarToPackagePolicy(
+  const updatedPolicy = getUpdatedPackagePolicy(
     packagePolicy,
     yaml.safeDump(createRulesConfig(packagePolicyRules))
   );
@@ -223,10 +219,7 @@ export const getPartialSavedObjectRulesById = async (
     },
   }));
 
-  return {
-    current,
-    next,
-  };
+  return { current, next };
 };
 
 /**
@@ -294,7 +287,7 @@ export const updateRulesConfigurationHandler: CspRequestHandler<
   } catch (e) {
     const error = transformError(e);
     cspContext.logger.error(
-      `Failed to update rules configuration on package policy ${error.message}`
+      `Failed to update rules configuration on package policy - ${error.message}`
     );
 
     return response.customError({

@@ -9,7 +9,7 @@ import {
   createRulesConfig,
   defineUpdateRulesConfigRoute,
   PackagePolicyRuleUpdatePayload,
-  setVarToPackagePolicy,
+  getUpdatedPackagePolicy,
   updatePackagePolicyVars,
   updateRulesById,
   UpdateRulesConfigBodySchema,
@@ -82,7 +82,7 @@ describe('Update rules configuration API', () => {
       package_policy_id: packagePolicyMock.id,
       rules: enabledRules.map(({ id, attributes }) => ({ id, enabled: attributes.enabled })),
     };
-    packagePolicyMock.vars = { dataYaml: { type: 'yaml' } };
+    packagePolicyMock.vars = { runtimeCfg: { type: 'yaml' } };
 
     return {
       responseMock,
@@ -168,7 +168,7 @@ describe('Update rules configuration API', () => {
     packagePolicy.vars = { runtimeCfg: { type: 'yaml' } };
 
     const runtimeCfg = 'runtime_cfg:\n  activated_rules:\n  cis_k8s:\n    - 1.1.1\n    - 1.1.2\n';
-    const updatedPackagePolicy = setVarToPackagePolicy(packagePolicy, runtimeCfg);
+    const updatedPackagePolicy = getUpdatedPackagePolicy(packagePolicy, runtimeCfg);
     expect(updatedPackagePolicy.vars).toEqual({ runtimeCfg: { type: 'yaml', value: runtimeCfg } });
   });
 
@@ -176,7 +176,7 @@ describe('Update rules configuration API', () => {
     const packagePolicy = createPackagePolicyMock();
 
     const runtimeCfg = 'runtime_cfg:\n  activated_rules:\n  cis_k8s:\n    - 1.1.1\n    - 1.1.2\n';
-    const updatedPackagePolicy = setVarToPackagePolicy(packagePolicy, runtimeCfg);
+    const updatedPackagePolicy = getUpdatedPackagePolicy(packagePolicy, runtimeCfg);
     expect(updatedPackagePolicy.vars).toEqual({ runtimeCfg: { type: 'yaml', value: runtimeCfg } });
   });
 
@@ -249,6 +249,7 @@ describe('Update rules configuration API', () => {
     });
 
     expect(updatedPackagePolicy.vars!.foo).toEqual(dummyVar);
+    expect(updatedPackagePolicy.vars!.runtimeCfg).toBeDefined();
   });
 
   it('attempts to rollback rules saved-object when package policy update failed', async () => {
