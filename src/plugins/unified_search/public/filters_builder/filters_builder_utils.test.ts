@@ -16,9 +16,14 @@ import {
   FilterItem,
   removeFilter,
   moveFilter,
+  normalizeFilters,
 } from './filters_builder_utils';
 
-import { getFiltersMock } from './__mock__/filters';
+import {
+  getDataAfterNormalized,
+  getDataThatNeedsNormalized,
+  getFiltersMock,
+} from './__mock__/filters';
 
 describe('filters_builder_utils', () => {
   let filters: Filter[];
@@ -236,6 +241,14 @@ describe('filters_builder_utils', () => {
       const filtersAfterMovingFilter = moveFilter(filters, '0', '2', ConditionTypes.AND);
       const filterObtainedAfterFilterMovingFilters = getFilterByPath(filtersAfterMovingFilter, '2');
       expect(filterBeforeMoving).toEqual(filterObtainedAfterFilterMovingFilters);
+    });
+  });
+
+  describe('normalizeFilters', () => {
+    test('should normalize filter after removed filter', () => {
+      const dataNeedsNormalized = getDataThatNeedsNormalized();
+      const dataAfterNormalized = getDataAfterNormalized();
+      expect(normalizeFilters(dataNeedsNormalized)).toEqual(dataAfterNormalized);
     });
   });
 });
