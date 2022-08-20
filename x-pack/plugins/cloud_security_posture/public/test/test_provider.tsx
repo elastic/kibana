@@ -16,6 +16,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { discoverPluginMock } from '@kbn/discover-plugin/public/mocks';
+import { fleetMock } from '@kbn/fleet-plugin/public/mocks';
 import type { CspClientPluginStartDeps } from '../types';
 
 interface CspAppDeps {
@@ -31,6 +32,7 @@ export const TestProvider: React.FC<Partial<CspAppDeps>> = ({
     unifiedSearch: unifiedSearchPluginMock.createStartContract(),
     charts: chartPluginMock.createStartContract(),
     discover: discoverPluginMock.createStartContract(),
+    fleet: fleetMock.createStartMock(),
   },
   params = coreMock.createAppMountParameters(),
   children,

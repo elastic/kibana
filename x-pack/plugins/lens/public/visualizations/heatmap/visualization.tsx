@@ -11,11 +11,11 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { Ast } from '@kbn/interpreter';
 import { Position } from '@elastic/charts';
+import { IconChartHeatmap } from '@kbn/chart-icons';
 import { CUSTOM_PALETTE, PaletteRegistry, CustomPaletteParams } from '@kbn/coloring';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
-import { HeatmapIcon } from '@kbn/expression-heatmap-plugin/public';
 import type { OperationMetadata, Visualization } from '../../types';
 import type { HeatmapVisualizationState } from './types';
 import { getSuggestions } from './suggestions';
@@ -105,7 +105,7 @@ export const getHeatmapVisualization = ({
   visualizationTypes: [
     {
       id: 'heatmap',
-      icon: HeatmapIcon,
+      icon: IconChartHeatmap,
       label: i18n.translate('xpack.lens.heatmapVisualization.heatmapLabel', {
         defaultMessage: 'Heat map',
       }),
@@ -160,7 +160,7 @@ export const getHeatmapVisualization = ({
   getConfiguration({ state, frame, layerId }) {
     const datasourceLayer = frame.datasourceLayers[layerId];
 
-    const originalOrder = datasourceLayer.getTableSpec().map(({ columnId }) => columnId);
+    const originalOrder = datasourceLayer?.getTableSpec().map(({ columnId }) => columnId);
     if (!originalOrder) {
       return { groups: [] };
     }
@@ -312,7 +312,7 @@ export const getHeatmapVisualization = ({
     const datasource = datasourceLayers[state.layerId];
     const datasourceExpression = datasourceExpressionsByLayers[state.layerId];
 
-    const originalOrder = datasource.getTableSpec().map(({ columnId }) => columnId);
+    const originalOrder = datasource?.getTableSpec().map(({ columnId }) => columnId);
     // When we add a column it could be empty, and therefore have no order
 
     if (!originalOrder || !state.valueAccessor) {
@@ -402,7 +402,7 @@ export const getHeatmapVisualization = ({
     const datasource = datasourceLayers[state.layerId];
     const datasourceExpression = datasourceExpressionsByLayers[state.layerId];
 
-    const originalOrder = datasource.getTableSpec().map(({ columnId }) => columnId);
+    const originalOrder = datasource?.getTableSpec().map(({ columnId }) => columnId);
     // When we add a column it could be empty, and therefore have no order
 
     if (!originalOrder) {
@@ -513,7 +513,7 @@ export const getHeatmapVisualization = ({
     const hasArrayValues = rows.some((row) => Array.isArray(row[state.valueAccessor!]));
 
     const datasource = frame.datasourceLayers[state.layerId];
-    const operation = datasource.getOperationForColumnId(state.valueAccessor);
+    const operation = datasource?.getOperationForColumnId(state.valueAccessor);
 
     return hasArrayValues
       ? [

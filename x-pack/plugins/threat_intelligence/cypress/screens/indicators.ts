@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+export const BREADCRUMBS = '[data-test-subj="breadcrumbs"]';
+
+export const LEADING_BREADCRUMB = '[data-test-subj="breadcrumb first"]';
+
+export const ENDING_BREADCRUMB = '[data-test-subj="breadcrumb last"]';
+
 export const DEFAULT_LAYOUT_TITLE = `[data-test-subj="tiDefaultPageLayoutTitle"]`;
 
 export const INDICATORS_TABLE = `[data-test-subj="tiIndicatorsTable"]`;
@@ -22,8 +28,6 @@ export const FLYOUT_JSON = `[data-test-subj="tiFlyoutJsonCodeBlock"]`;
 export const FILTERS_GLOBAL_CONTAINER = '[data-test-subj="filters-global-container"]';
 
 export const TIME_RANGE_PICKER = `[data-test-subj="superDatePickerToggleQuickMenuButton"]`;
-
-export const TIME_RANGE_LAST_YEAR = `[data-test-subj="superDatePickerCommonlyUsed_Last_1 year"]`;
 
 export const QUERY_INPUT = `[data-test-subj="iocListPageQueryInput"]`;
 

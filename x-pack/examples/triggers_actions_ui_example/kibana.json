@@ -13,7 +13,8 @@
     "data",
     "alerting",
     "developerExamples",
-    "kibanaReact"
+    "kibanaReact",
+    "cases"
   ],
   "optionalPlugins": [],
   "requiredBundles": []

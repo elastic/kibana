@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
 import { useAlertsLocalStorage } from './alerts_local_storage';
+import { RESET_GROUP_BY_FIELDS } from '../../../../common/components/chart_settings_popover/configurations/default/translations';
+import { CHART_SETTINGS_POPOVER_ARIA_LABEL } from '../../../../common/components/chart_settings_popover/translations';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { TestProviders } from '../../../../common/mock';
@@ -112,6 +114,14 @@ const defaultProps = {
   updateDateRangeCallback: jest.fn(),
 };
 
+const resetGroupByFields = () => {
+  const menuButton = screen.getByRole('button', { name: CHART_SETTINGS_POPOVER_ARIA_LABEL });
+  fireEvent.click(menuButton);
+
+  const resetMenuItem = screen.getByRole('button', { name: RESET_GROUP_BY_FIELDS });
+  fireEvent.click(resetMenuItem);
+};
+
 describe('ChartPanels', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -160,6 +170,86 @@ describe('ChartPanels', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('alerts-histogram-panel')).toBeInTheDocument();
+    });
+  });
+
+  describe(`'Reset group by fields' context menu action`, () => {
+    describe('Group by', () => {
+      const alertViewSelections = ['trend', 'table', 'treemap'];
+
+      alertViewSelections.forEach((alertViewSelection) => {
+        test(`it resets the 'Group by' field to the default value, even if the user has triggered validation errors, when 'alertViewSelection' is '${alertViewSelection}'`, async () => {
+          (useAlertsLocalStorage as jest.Mock).mockReturnValue({
+            ...defaultAlertSettings,
+            alertViewSelection,
+          });
+
+          const defaultValue = 'kibana.alert.rule.name';
+          const invalidValue = 'an invalid value';
+
+          render(
+            <TestProviders>
+              <ChartPanels {...defaultProps} />
+            </TestProviders>
+          );
+
+          const initialValue = screen.getAllByTestId('comboBoxInput')[0]; // EuiComboBox does NOT render the current selection via it's input; it uses this div
+          expect(initialValue).toHaveTextContent(defaultValue);
+
+          // update the EuiComboBox input to an invalid value:
+          const searchInput = screen.getAllByTestId('comboBoxSearchInput')[0]; // the actual <input /> controlled by EuiComboBox
+          fireEvent.change(searchInput, { target: { value: invalidValue } });
+
+          const afterInvalidInput = screen.getAllByTestId('comboBoxInput')[0];
+          expect(afterInvalidInput).toHaveTextContent(invalidValue); // the 'Group by' EuiComboBox is now in the "error state"
+
+          resetGroupByFields(); // invoke the `Reset group by fields` context menu action
+
+          await waitFor(() => {
+            const afterReset = screen.getAllByTestId('comboBoxInput')[0];
+            expect(afterReset).toHaveTextContent(defaultValue); // back to the default
+          });
+        });
+      });
+    });
+
+    describe('Group by top', () => {
+      const justTableAndTreemap = ['table', 'treemap'];
+
+      justTableAndTreemap.forEach((alertViewSelection) => {
+        test(`it resets the 'Group by top' field to the default value, even if the user has triggered validation errors, when 'alertViewSelection' is '${alertViewSelection}'`, async () => {
+          (useAlertsLocalStorage as jest.Mock).mockReturnValue({
+            ...defaultAlertSettings,
+            alertViewSelection,
+          });
+
+          const defaultValue = 'host.name';
+          const invalidValue = 'an-invalid-value';
+
+          render(
+            <TestProviders>
+              <ChartPanels {...defaultProps} />
+            </TestProviders>
+          );
+
+          const initialValue = screen.getAllByTestId('comboBoxInput')[1]; // EuiComboBox does NOT render the current selection via it's input; it uses this div
+          expect(initialValue).toHaveTextContent(defaultValue);
+
+          // update the EuiComboBox input to an invalid value:
+          const searchInput = screen.getAllByTestId('comboBoxSearchInput')[1]; // the actual <input /> controlled by EuiComboBox
+          fireEvent.change(searchInput, { target: { value: invalidValue } });
+
+          const afterInvalidInput = screen.getAllByTestId('comboBoxInput')[1];
+          expect(afterInvalidInput).toHaveTextContent(invalidValue); // the 'Group by top' EuiComboBox is now in the "error state"
+
+          resetGroupByFields(); // invoke the `Reset group by fields` context menu action
+
+          await waitFor(() => {
+            const afterReset = screen.getAllByTestId('comboBoxInput')[1];
+            expect(afterReset).toHaveTextContent(defaultValue); // back to the default
+          });
+        });
+      });
     });
   });
 

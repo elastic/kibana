@@ -70,7 +70,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async assertExpectedText(selector: string, test: (value?: string) => boolean) {
       let actualText: string | undefined;
 
-      await retry.waitForWithTimeout('assertExpectedText', 1000, async () => {
+      await retry.waitForWithTimeout('assertExpectedText', 5000, async () => {
         actualText = await find.byCssSelector(selector).then((el) => el.getVisibleText());
         return test(actualText);
       });
@@ -1079,20 +1079,20 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param title - expected title
      * @param count - expected count of metric
      */
-    async assertMetric(title: string, count: string) {
+    async assertLegacyMetric(title: string, count: string) {
       await this.assertExactText('[data-test-subj="metric_label"]', title);
       await this.assertExactText('[data-test-subj="metric_value"]', count);
     },
 
-    async clickMetric() {
+    async clickLegacyMetric() {
       await testSubjects.click('metric_label');
     },
 
-    async setMetricDynamicColoring(coloringType: 'none' | 'labels' | 'background') {
-      await testSubjects.click('lnsMetric_dynamicColoring_groups_' + coloringType);
+    async setLegacyMetricDynamicColoring(coloringType: 'none' | 'labels' | 'background') {
+      await testSubjects.click('lnsLegacyMetric_dynamicColoring_groups_' + coloringType);
     },
 
-    async getMetricStyle() {
+    async getLegacyMetricStyle() {
       const el = await testSubjects.find('metric_value');
       const styleString = await el.getAttribute('style');
       return styleString.split(';').reduce<Record<string, string>>((memo, cssLine) => {

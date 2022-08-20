@@ -148,6 +148,35 @@ export class TaskStore {
   }
 
   /**
+   * Bulk schedules a task.
+   *
+   * @param tasks - The tasks being scheduled.
+   */
+  public async bulkSchedule(taskInstances: TaskInstance[]): Promise<ConcreteTaskInstance[]> {
+    const objects = taskInstances.map((taskInstance) => {
+      this.definitions.ensureHas(taskInstance.taskType);
+      return {
+        type: 'task',
+        attributes: taskInstanceToAttributes(taskInstance),
+        id: taskInstance.id,
+      };
+    });
+
+    let savedObjects;
+    try {
+      savedObjects = await this.savedObjectsRepository.bulkCreate<SerializedConcreteTaskInstance>(
+        objects,
+        { refresh: false }
+      );
+    } catch (e) {
+      this.errors$.next(e);
+      throw e;
+    }
+
+    return savedObjects.saved_objects.map((so) => savedObjectToConcreteTaskInstance(so));
+  }
+
+  /**
    * Fetches a list of scheduled tasks with default sorting.
    *
    * @param opts - The query options used to filter tasks

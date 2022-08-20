@@ -418,9 +418,9 @@ describe('Navigation Breadcrumbs', () => {
         expect(breadcrumbs).toEqual(null);
       });
 
-      test('should return Admin breadcrumbs when supplied endpoints pageName', () => {
+      test('should return Endpoints breadcrumbs when supplied endpoints pageName', () => {
         const breadcrumbs = getBreadcrumbsForRoute(
-          getMockObject(SecurityPageName.administration, '/endpoints', undefined),
+          getMockObject(SecurityPageName.endpoints, '/endpoints', undefined),
           getSecuritySolutionUrl,
           false
         );
@@ -741,9 +741,9 @@ describe('Navigation Breadcrumbs', () => {
         expect(breadcrumbs).toEqual(null);
       });
 
-      test('should return Admin breadcrumbs when supplied endpoints pageName', () => {
+      test('should return Endpoints breadcrumbs when supplied endpoints pageName', () => {
         const breadcrumbs = getBreadcrumbsForRoute(
-          getMockObject(SecurityPageName.administration, '/endpoints', undefined),
+          getMockObject(SecurityPageName.endpoints, '/', undefined),
           getSecuritySolutionUrl,
           true
         );
@@ -753,6 +753,22 @@ describe('Navigation Breadcrumbs', () => {
           manageBreadcrumbs,
           {
             text: 'Endpoints',
+            href: '',
+          },
+        ]);
+      });
+
+      test('should return Admin breadcrumbs when supplied admin pageName', () => {
+        const breadcrumbs = getBreadcrumbsForRoute(
+          getMockObject(SecurityPageName.administration, '/', undefined),
+          getSecuritySolutionUrl,
+          true
+        );
+
+        expect(breadcrumbs).toEqual([
+          securityBreadCrumb,
+          {
+            text: 'Manage',
             href: '',
           },
         ]);

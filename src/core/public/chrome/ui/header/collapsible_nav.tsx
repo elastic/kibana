@@ -93,6 +93,7 @@ const overviewIDs = [
   'observability-overview',
   'securitySolutionUI:get_started',
   'management',
+  'enterpriseSearch',
 ];
 
 export function CollapsibleNav({

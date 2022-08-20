@@ -47,9 +47,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('App filter panel meets a11y requirements', async () => {
       await (await find.byCssSelector('[data-text="App"]')).click();
       await a11y.testAppSnapshot();
+      await (await find.byCssSelector('[data-text="App"]')).click(); // Close the popover
     });
 
-    it('Session management filtered by applications meets a11y requirements', async () => {
+    // https://github.com/elastic/kibana/issues/128009
+    it.skip('Session management filtered by applications meets a11y requirements', async () => {
       await (await find.byCssSelector('[title="dashboards"]')).click();
       await a11y.testAppSnapshot();
     });
@@ -71,7 +73,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('Session management delete panel from actions pop-over meets a11y requirements ', async () => {
+    // No delete button appears to exist
+    it.skip('Session management delete panel from actions pop-over meets a11y requirements ', async () => {
       await testSubjects.click('cancelEditName');
       await testSubjects.click('sessionManagementActionsCol');
       await testSubjects.click('sessionManagementPopoverAction-delete');
