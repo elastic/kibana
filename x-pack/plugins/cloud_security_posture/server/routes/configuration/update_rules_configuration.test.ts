@@ -4,37 +4,99 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { savedObjectsClientMock, httpServiceMock, httpServerMock } from '@kbn/core/server/mocks';
+import { httpServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 import {
   createRulesConfig,
   defineUpdateRulesConfigRoute,
-  getCspRules,
+  PackagePolicyRuleUpdatePayload,
   setVarToPackagePolicy,
-  updateAgentConfiguration,
+  updatePackagePolicy,
+  updateRulesById,
+  UpdateRulesConfigBodySchema,
+  updateRulesConfigurationHandler,
 } from './update_rules_configuration';
-
 import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
-import { createPackagePolicyServiceMock } from '@kbn/fleet-plugin/server/mocks';
-
-import { CSP_RULE_SAVED_OBJECT_TYPE } from '../../../common/constants';
-import type { CspRule } from '../../../common/schemas';
-
-import {
-  ElasticsearchClient,
-  SavedObjectsClientContract,
-  SavedObjectsFindResponse,
-} from '@kbn/core/server';
+import type { KibanaRequest, SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
 import { Chance } from 'chance';
-import { PackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
-import { mockAuthenticatedUser } from '@kbn/security-plugin/common/model/authenticated_user.mock';
-import { DeepPartial } from 'utility-types';
 import { createCspRequestHandlerContextMock } from '../../mocks';
+import { CspRequestHandlerContext } from '../../types';
+import { CspRule } from '../../../common/schemas';
 
 describe('Update rules configuration API', () => {
-  let mockEsClient: jest.Mocked<ElasticsearchClient>;
-  let mockSoClient: jest.Mocked<SavedObjectsClientContract>;
   const chance = new Chance();
+
+  /**
+   * rules that differ only in their 'enabled' value
+   */
+  const setupRules = () => {
+    const regoRulesIds = ['1.1.1', '1.1.2'];
+    const ids: string[] = chance.unique(chance.string, regoRulesIds.length);
+    const disabledRules: Array<SavedObject<PackagePolicyRuleUpdatePayload>> = Array.from(
+      { length: ids.length },
+      (_, i) => ({
+        id: ids[i],
+        type: 'csp_rue',
+        references: [],
+        attributes: {
+          enabled: false,
+          metadata: { benchmark: { id: 'cis_k8s' }, rego_rule_id: regoRulesIds[i] },
+        },
+      })
+    );
+    const enabledRules: Array<SavedObject<PackagePolicyRuleUpdatePayload>> = disabledRules.map(
+      (rule) => ({
+        ...rule,
+        attributes: { ...rule.attributes, enabled: true },
+      })
+    );
+    return { enabledRules, disabledRules };
+  };
+
+  const setupMocks = async () => {
+    const { enabledRules, disabledRules } = setupRules();
+    const responseMock = httpServerMock.createResponseFactory();
+    const requestMock = {
+      ...httpServerMock.createKibanaRequest<void, void, UpdateRulesConfigBodySchema>(),
+    };
+    const contextMock = createCspRequestHandlerContextMock();
+    const packagePolicyMock = createPackagePolicyMock();
+    const cspContext = await contextMock.csp;
+    const {
+      soClient: soClientMock,
+      packagePolicyService: packagePolicyServiceMock,
+      esClient: esClientMock,
+    } = cspContext;
+
+    cspContext.soClient.bulkGet.mockReturnValue(Promise.resolve({ saved_objects: disabledRules }));
+    cspContext.soClient.find.mockReturnValue(
+      Promise.resolve({
+        saved_objects: disabledRules,
+        total: disabledRules.length,
+        per_page: 10,
+        page: 1,
+      } as SavedObjectsFindResponse<CspRule>)
+    );
+    packagePolicyServiceMock.get.mockReturnValue(Promise.resolve(packagePolicyMock));
+
+    requestMock.body = {
+      package_policy_id: packagePolicyMock.id,
+      rules: enabledRules.map(({ id, attributes }) => ({ id, enabled: attributes.enabled })),
+    };
+    packagePolicyMock.vars = { dataYaml: { type: 'yaml' } };
+
+    return {
+      responseMock,
+      requestMock,
+      contextMock,
+      packagePolicyMock,
+      soClientMock,
+      esClientMock,
+      packagePolicyServiceMock,
+      cspContext,
+      disabledRules,
+      enabledRules,
+    };
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -57,14 +119,11 @@ describe('Update rules configuration API', () => {
 
     const [_, handler] = router.post.mock.calls[0];
 
-    const mockContext = createCspRequestHandlerContextMock();
-    const mockResponse = httpServerMock.createResponseFactory();
-    const mockRequest = httpServerMock.createKibanaRequest();
-    const [context, req, res] = [mockContext, mockRequest, mockResponse];
+    const { contextMock, responseMock, requestMock } = await setupMocks();
 
-    await handler(context, req, res);
+    await handler(contextMock, requestMock as KibanaRequest, responseMock);
 
-    expect(res.forbidden).toHaveBeenCalledTimes(0);
+    expect(responseMock.forbidden).toHaveBeenCalledTimes(0);
   });
 
   it('should reject to a user without fleet.all privilege', async () => {
@@ -73,110 +132,34 @@ describe('Update rules configuration API', () => {
     defineUpdateRulesConfigRoute(router);
     const [_, handler] = router.post.mock.calls[0];
 
-    const mockContext = createCspRequestHandlerContextMock();
-    const mockResponse = httpServerMock.createResponseFactory();
-    const mockRequest = httpServerMock.createKibanaRequest();
-    const [context, req, res] = [mockContext, mockRequest, mockResponse];
+    const { contextMock, responseMock, requestMock } = await setupMocks();
 
-    await handler(context, req, res);
+    contextMock.fleet = {
+      authz: { fleet: { all: false } },
+    } as Awaited<CspRequestHandlerContext['fleet']>;
 
-    expect(res.forbidden).toHaveBeenCalledTimes(0);
-  });
+    await handler(contextMock, requestMock as KibanaRequest, responseMock);
 
-  it('validate getCspRules input parameters', async () => {
-    const packagePolicy = createPackagePolicyMock();
-    mockSoClient = savedObjectsClientMock.create();
-    mockSoClient.find.mockResolvedValueOnce({} as SavedObjectsFindResponse);
-    await getCspRules(mockSoClient, packagePolicy);
-    expect(mockSoClient.find).toBeCalledTimes(1);
-    expect(mockSoClient.find).toHaveBeenCalledWith(
-      expect.objectContaining({ type: CSP_RULE_SAVED_OBJECT_TYPE })
-    );
+    expect(responseMock.forbidden).toHaveBeenCalledTimes(1);
   });
 
   it('create csp rules config based on activated csp rules', async () => {
-    const cspRules: DeepPartial<SavedObjectsFindResponse<CspRule>> = {
-      page: 1,
-      per_page: 1000,
-      total: 2,
-      saved_objects: [
-        {
-          type: 'csp_rule',
-          attributes: {
-            enabled: true,
-            metadata: {
-              rego_rule_id: 'cis_1_1_1',
-              benchmark: { id: 'cis_k8s' },
-            },
-          },
-        },
-        {
-          type: 'csp_rule',
-          attributes: {
-            enabled: false,
-            metadata: {
-              rego_rule_id: 'cis_1_1_2',
-              benchmark: { id: 'cis_k8s' },
-            },
-          },
-        },
-        {
-          type: 'csp_rule',
-          attributes: {
-            enabled: true,
-            metadata: {
-              rego_rule_id: 'cis_1_1_3',
-              benchmark: { id: 'cis_k8s' },
-            },
-          },
-        },
-      ],
-    };
-    const cspConfig = await createRulesConfig(cspRules as SavedObjectsFindResponse<CspRule>);
+    const { enabledRules } = await setupMocks();
+
+    const cspConfig = await createRulesConfig(enabledRules);
     expect(cspConfig).toMatchObject({
-      runtime_cfg: { activated_rules: { cis_k8s: ['cis_1_1_1', 'cis_1_1_3'] } },
+      runtime_cfg: {
+        activated_rules: {
+          cis_k8s: enabledRules.map((rule) => rule.attributes.metadata.rego_rule_id),
+        },
+      },
     });
   });
 
   it('create empty csp rules config when all rules are disabled', async () => {
-    const cspRules: DeepPartial<SavedObjectsFindResponse<CspRule>> = {
-      page: 1,
-      per_page: 1000,
-      total: 2,
-      saved_objects: [
-        {
-          type: 'csp_rule',
-          attributes: {
-            enabled: false,
-            metadata: {
-              rego_rule_id: 'cis_1_1_1',
-              benchmark: { id: 'cis_k8s' },
-            },
-          },
-        },
-        {
-          type: 'csp_rule',
-          attributes: {
-            enabled: false,
-            metadata: {
-              rego_rule_id: 'cis_1_1_2',
-              benchmark: { id: 'cis_k8s' },
-            },
-          },
-        },
-        {
-          type: 'csp_rule',
-          attributes: {
-            enabled: false,
-            metadata: {
-              rego_rule_id: 'cis_1_1_3',
-              benchmark: { id: 'cis_k8s' },
-            },
-          },
-        },
-      ],
-    };
-    const cspConfig = await createRulesConfig(cspRules as SavedObjectsFindResponse<CspRule>);
+    const { disabledRules } = await setupMocks();
+
+    const cspConfig = await createRulesConfig(disabledRules);
     expect(cspConfig).toMatchObject({ runtime_cfg: { activated_rules: {} } });
   });
 
@@ -197,193 +180,149 @@ describe('Update rules configuration API', () => {
     expect(updatedPackagePolicy.vars).toEqual({ runtimeCfg: { type: 'yaml', value: runtimeCfg } });
   });
 
+  it('updates saved-object rules', async () => {
+    const {
+      enabledRules,
+      requestMock,
+      packagePolicyMock,
+      soClientMock,
+      packagePolicyServiceMock,
+      cspContext,
+    } = await setupMocks();
+
+    packagePolicyServiceMock.update.mockReturnValue(Promise.resolve(packagePolicyMock));
+
+    await updateRulesById(cspContext, requestMock.body);
+
+    expect(soClientMock.bulkUpdate).toBeCalledWith(enabledRules);
+  });
+
   it('verify that the API for updating package policy was invoked', async () => {
-    mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
-    mockSoClient = savedObjectsClientMock.create();
-    const mockPackagePolicyService = createPackagePolicyServiceMock();
+    const {
+      enabledRules,
+      esClientMock,
+      soClientMock,
+      packagePolicyMock,
+      packagePolicyServiceMock,
+      cspContext,
+    } = await setupMocks();
 
-    mockPackagePolicyService.update.mockImplementation(
-      (
-        soClient: SavedObjectsClientContract,
-        esClient: ElasticsearchClient,
-        id: string,
-        packagePolicyUpdate: UpdatePackagePolicy
-      ): Promise<PackagePolicy> => {
-        // @ts-expect-error 2322
-        return packagePolicyUpdate;
-      }
+    packagePolicyServiceMock.update.mockReturnValue(Promise.resolve(packagePolicyMock));
+
+    const updatedPackagePolicy = await updatePackagePolicy({
+      rules: enabledRules.map((rule) => ({ id: rule.id, enabled: rule.attributes.enabled })),
+      packagePolicy: packagePolicyMock,
+      soClient: soClientMock,
+      esClient: esClientMock.asCurrentUser,
+      packagePolicyService: packagePolicyServiceMock,
+      user: cspContext.user,
+    });
+
+    expect(packagePolicyServiceMock.update).toHaveBeenCalled();
+    const { id, ...updatedPackagePolicyWithoutRevisionId } = updatedPackagePolicy;
+    expect(packagePolicyServiceMock.update.mock.calls[0][3]).toMatchObject(
+      updatedPackagePolicyWithoutRevisionId
     );
-
-    const cspRules: DeepPartial<SavedObjectsFindResponse<CspRule>> = {
-      page: 1,
-      per_page: 1000,
-      total: 2,
-      saved_objects: [
-        {
-          type: 'csp_rule',
-          attributes: {
-            enabled: false,
-            metadata: {
-              rego_rule_id: 'cis_1_1_1',
-              benchmark: { id: 'cis_k8s' },
-            },
-          },
-        },
-        {
-          type: 'csp_rule',
-          attributes: {
-            enabled: false,
-            metadata: {
-              rego_rule_id: 'cis_1_1_2',
-              benchmark: { id: 'cis_k8s' },
-            },
-          },
-        },
-        {
-          type: 'csp_rule',
-          attributes: {
-            enabled: false,
-            metadata: {
-              rego_rule_id: 'cis_1_1_3',
-              benchmark: { id: 'cis_k8s' },
-            },
-          },
-        },
-      ],
-    };
-    mockSoClient.find.mockResolvedValueOnce(cspRules as SavedObjectsFindResponse<CspRule>);
-
-    const mockPackagePolicy = createPackagePolicyMock();
-    mockPackagePolicy.vars = { runtimeCfg: { type: 'foo' } };
-    const packagePolicyId1 = chance.guid();
-    mockPackagePolicy.id = packagePolicyId1;
-
-    const user = null;
-
-    const updatePackagePolicy = await updateAgentConfiguration(
-      mockPackagePolicyService,
-      mockPackagePolicy,
-      mockEsClient,
-      mockSoClient,
-      user
-    );
-
-    expect(updatePackagePolicy.vars!.runtimeCfg).toHaveProperty('value');
-    expect(updatePackagePolicy.vars!.runtimeCfg).toMatchObject({ type: 'yaml' });
-    expect(mockPackagePolicyService.update).toBeCalledTimes(1);
-    expect(mockPackagePolicyService.update.mock.calls[0][2]).toEqual(packagePolicyId1);
   });
 
-  it('validate updateAgentConfiguration not override vars', async () => {
-    mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
-    mockSoClient = savedObjectsClientMock.create();
-    const mockPackagePolicyService = createPackagePolicyServiceMock();
+  it("updates to package policy vars doesn't override unknown vars", async () => {
+    const {
+      enabledRules,
+      esClientMock,
+      soClientMock,
+      packagePolicyMock,
+      packagePolicyServiceMock,
+      cspContext,
+    } = await setupMocks();
 
-    const cspRules: DeepPartial<SavedObjectsFindResponse<CspRule>> = {
-      page: 1,
-      per_page: 1000,
-      total: 2,
-      saved_objects: [
-        {
-          type: 'csp_rule',
-          attributes: {
-            enabled: false,
-            metadata: {
-              rego_rule_id: 'cis_1_1_1',
-              benchmark: { id: 'cis_k8s' },
-            },
-          },
-        },
-        {
-          type: 'csp_rule',
-          attributes: {
-            enabled: false,
-            metadata: {
-              rego_rule_id: 'cis_1_1_2',
-              benchmark: { id: 'cis_k8s' },
-            },
-          },
-        },
-        {
-          type: 'csp_rule',
-          attributes: {
-            enabled: false,
-            metadata: {
-              rego_rule_id: 'cis_1_1_3',
-              benchmark: { id: 'cis_k8s' },
-            },
-          },
-        },
-      ],
-    };
-    mockSoClient.find.mockResolvedValueOnce(cspRules as SavedObjectsFindResponse<CspRule>);
+    const dummyVar = { type: 'ymal', value: 'foo ' };
+    packagePolicyMock.vars!.foo = { ...dummyVar };
+    packagePolicyServiceMock.update.mockReturnValue(Promise.resolve(packagePolicyMock));
 
-    const mockPackagePolicy = createPackagePolicyMock();
-    const packagePolicyId1 = chance.guid();
-    const user = null;
-    mockPackagePolicy.id = packagePolicyId1;
-    mockPackagePolicy.vars = { foo: {}, runtimeCfg: { type: 'yaml' } };
+    const updatedPackagePolicy = await updatePackagePolicy({
+      rules: enabledRules.map((rule) => ({ id: rule.id, enabled: rule.attributes.enabled })),
+      packagePolicy: packagePolicyMock,
+      soClient: soClientMock,
+      esClient: esClientMock.asCurrentUser,
+      packagePolicyService: packagePolicyServiceMock,
+      user: cspContext.user,
+    });
 
-    mockPackagePolicyService.update.mockImplementation(
-      (
-        soClient: SavedObjectsClientContract,
-        esClient: ElasticsearchClient,
-        id: string,
-        packagePolicyUpdate: UpdatePackagePolicy
-      ): Promise<PackagePolicy> => {
-        // @ts-expect-error 2322
-        return packagePolicyUpdate;
-      }
-    );
-
-    const updatedPackagePolicy = await updateAgentConfiguration(
-      mockPackagePolicyService,
-      mockPackagePolicy,
-      mockEsClient,
-      mockSoClient,
-      user
-    );
-
-    expect(mockPackagePolicyService.update).toBeCalledTimes(1);
-    expect(updatedPackagePolicy.vars).toHaveProperty('foo');
+    expect(updatedPackagePolicy.vars!.foo).toEqual(dummyVar);
   });
 
-  it('validate updateAgentConfiguration passes user to the package update method', async () => {
-    mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
-    mockSoClient = savedObjectsClientMock.create();
+  it('attempts to rollback rules saved-object when package policy update failed', async () => {
+    const {
+      disabledRules,
+      enabledRules,
+      soClientMock,
+      requestMock,
+      packagePolicyServiceMock,
+      cspContext,
+    } = await setupMocks();
 
-    const mockPackagePolicyService = createPackagePolicyServiceMock();
-    const mockPackagePolicy = createPackagePolicyMock();
-    const user = mockAuthenticatedUser();
+    packagePolicyServiceMock.update.mockReturnValue(Promise.reject('some error'));
 
-    const cspRules: DeepPartial<SavedObjectsFindResponse<CspRule>> = {
-      page: 1,
-      per_page: 1000,
-      total: 2,
-      saved_objects: [
-        {
-          type: 'csp_rule',
-          attributes: {
-            enabled: false,
-            metadata: {
-              rego_rule_id: 'cis_1_1_1',
-              benchmark: { id: 'cis_k8s' },
-            },
-          },
-        },
-      ],
-    };
-    mockSoClient.find.mockResolvedValueOnce(cspRules as SavedObjectsFindResponse<CspRule>);
+    try {
+      await updateRulesById(cspContext, requestMock.body);
+    } catch (e) {
+      expect(soClientMock.bulkUpdate).toHaveBeenNthCalledWith(1, enabledRules);
+      expect(soClientMock.bulkUpdate).toHaveBeenNthCalledWith(2, disabledRules);
+    }
+  });
 
-    mockPackagePolicy.vars = { runtimeCfg: { type: 'yaml' } };
+  it('updates package policy as authenticated user', async () => {
+    const { packagePolicyMock, requestMock, packagePolicyServiceMock, cspContext } =
+      await setupMocks();
 
-    await updateAgentConfiguration(
-      mockPackagePolicyService,
-      mockPackagePolicy,
-      mockEsClient,
-      mockSoClient,
-      user
-    );
-    expect(mockPackagePolicyService.update.mock.calls[0][4]).toMatchObject({ user });
+    packagePolicyServiceMock.update.mockReturnValue(Promise.resolve(packagePolicyMock));
+
+    await updateRulesById(cspContext, requestMock.body);
+
+    expect(packagePolicyServiceMock.update.mock.calls[0][4]).toMatchObject({
+      user: cspContext.user,
+    });
+  });
+
+  it('handles failed rules saved object update', async () => {
+    const { responseMock, soClientMock, requestMock, contextMock } = await setupMocks();
+
+    const message = 'some error';
+    soClientMock.bulkUpdate.mockReturnValue(Promise.reject(message));
+
+    try {
+      await updateRulesConfigurationHandler(
+        contextMock as unknown as CspRequestHandlerContext,
+        requestMock,
+        responseMock
+      );
+    } catch (e) {
+      expect(responseMock.customError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message,
+        })
+      );
+    }
+  });
+
+  it('handles failed rules package policy update', async () => {
+    const { responseMock, packagePolicyServiceMock, requestMock, contextMock } = await setupMocks();
+
+    const message = 'some error';
+    packagePolicyServiceMock.update.mockReturnValue(Promise.reject(message));
+
+    try {
+      await updateRulesConfigurationHandler(
+        contextMock as unknown as CspRequestHandlerContext,
+        requestMock,
+        responseMock
+      );
+    } catch (e) {
+      expect(responseMock.customError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message,
+        })
+      );
+    }
   });
 });

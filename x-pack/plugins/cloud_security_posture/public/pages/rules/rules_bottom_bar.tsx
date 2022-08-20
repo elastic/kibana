@@ -24,7 +24,7 @@ export const RulesBottomBar = ({ onSave, onCancel, isLoading }: RulesBottomBarPr
   >
     <EuiFlexGroup justifyContent="flexEnd">
       <EuiFlexItem grow={false}>
-        <EuiButton size="m" iconType="cross" isLoading={isLoading} onClick={onCancel} color="ghost">
+        <EuiButton size="m" iconType="cross" disabled={isLoading} onClick={onCancel} color="ghost">
           <FormattedMessage
             id="xpack.csp.rules.rulesBottomBar.cancelButtonLabel"
             defaultMessage="Cancel"
