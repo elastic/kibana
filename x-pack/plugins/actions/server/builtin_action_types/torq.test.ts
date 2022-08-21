@@ -18,7 +18,7 @@ import {
   ActionTypeSecretsType,
   getActionType,
   TorqActionType,
-} from './webhook';
+} from './torq';
 
 import * as utils from './lib/axios_utils';
 
@@ -67,31 +67,25 @@ describe('secrets validation', () => {
       token: 'jfi2fji3ofeaiw34if',
     };
     expect(validateSecrets(actionType, secrets)).toEqual(secrets);
-  }); // TODO: continue from here
-
-  test('fails when secret user is provided, but password is omitted', () => {
-    expect(() => {
-      validateSecrets(actionType, { user: 'bob' });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: both user and password must be specified"`
-    );
   });
 
-  test('succeeds when basic authentication credentials are omitted', () => {
-    expect(validateSecrets(actionType, {})).toEqual({ password: null, user: null });
+  test('fails when secret token is not provided', () => {
+    expect(() => {
+      validateSecrets(actionType, { });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type secrets: token is required"`
+    );
   });
 });
 
 describe('config validation', () => {
   const defaultValues: Record<string, string | null> = {
-    headers: null,
-    method: 'post',
+
   };
 
-  test('config validation passes when only required fields are provided', () => {
+  test('config validation passes with an appropriate endpoint', () => {
     const config: Record<string, string | boolean> = {
-      url: 'http://mylisteningserver:9200/endpoint',
-      hasAuth: true,
+      webhook_integration_url: 'https://hooks.torq.io/v1/test',
     };
     expect(validateConfig(actionType, config)).toEqual({
       ...defaultValues,
@@ -99,101 +93,33 @@ describe('config validation', () => {
     });
   });
 
-  test('config validation passes when valid methods are provided', () => {
-    ['post', 'put'].forEach((method) => {
-      const config: Record<string, string | boolean> = {
-        url: 'http://mylisteningserver:9200/endpoint',
-        method,
-        hasAuth: true,
-      };
-      expect(validateConfig(actionType, config)).toEqual({
-        ...defaultValues,
-        ...config,
-      });
-    });
-  });
-
-  test('should validate and throw error when method on config is invalid', () => {
+  test('should validate and throw error when an invalid URL is provided', () => {
     const config: Record<string, string> = {
-      url: 'http://mylisteningserver:9200/endpoint',
-      method: 'https',
+      webhook_integration_url: 'iamnotavalidurl',
     };
     expect(() => {
       validateConfig(actionType, config);
-    }).toThrowErrorMatchingInlineSnapshot(`
-"error validating action type config: [method]: types that failed validation:
-- [method.0]: expected value to equal [post]
-- [method.1]: expected value to equal [put]"
-`);
-  });
-
-  test('config validation passes when a url is specified', () => {
-    const config: Record<string, string | boolean> = {
-      url: 'http://mylisteningserver:9200/endpoint',
-      hasAuth: true,
-    };
-    expect(validateConfig(actionType, config)).toEqual({
-      ...defaultValues,
-      ...config,
-    });
+    }).toThrowErrorMatchingInlineSnapshot(`"error validating action type config: error configuring send to Torq action: unable to parse url: TypeError: Invalid URL: iamnotavalidurl"`);
   });
 
   test('config validation failed when a url is invalid', () => {
     const config: Record<string, string> = {
-      url: 'example.com/do-something',
+      webhook_integration_url: 'example.com/do-something',
     };
     expect(() => {
       validateConfig(actionType, config);
     }).toThrowErrorMatchingInlineSnapshot(
-      '"error validating action type config: error configuring webhook action: unable to parse url: TypeError: Invalid URL: example.com/do-something"'
+      '"error validating action type config: error configuring send to Torq action: unable to parse url: TypeError: Invalid URL: example.com/do-something"'
     );
   });
 
-  test('config validation passes when valid headers are provided', () => {
-    // any for testing
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const config: Record<string, any> = {
-      url: 'http://mylisteningserver:9200/endpoint',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      hasAuth: true,
-    };
-    expect(validateConfig(actionType, config)).toEqual({
-      ...defaultValues,
-      ...config,
-    });
-  });
-
-  test('should validate and throw error when headers on config is invalid', () => {
+  test('fails when URL is not a Torq webhook endpoint', () => {
     const config: Record<string, string> = {
-      url: 'http://mylisteningserver:9200/endpoint',
-      headers: 'application/json',
+      webhook_integration_url: 'http://mylisteningserver:9200/endpoint',
     };
     expect(() => {
       validateConfig(actionType, config);
-    }).toThrowErrorMatchingInlineSnapshot(`
-"error validating action type config: [headers]: types that failed validation:
-- [headers.0]: could not parse record value from json input
-- [headers.1]: expected value to equal [null]"
-`);
-  });
-
-  test('config validation passes when kibana config url does not present in allowedHosts', () => {
-    // any for testing
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const config: Record<string, any> = {
-      url: 'http://mylisteningserver.com:9200/endpoint',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      hasAuth: true,
-    };
-
-    expect(validateConfig(actionType, config)).toEqual({
-      ...defaultValues,
-      ...config,
-    });
+    }).toThrowErrorMatchingInlineSnapshot(`"error validating action type config: error configuring send to Torq action: url must begin with https://hooks.torq.io"`);
   });
 
   test('config validation returns an error if the specified URL isnt added to allowedHosts', () => {
@@ -210,16 +136,13 @@ describe('config validation', () => {
     // any for testing
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const config: Record<string, any> = {
-      url: 'http://mylisteningserver.com:9200/endpoint',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      webhook_integration_url: 'http://mylisteningserver.com:9200/endpoint',
     };
 
     expect(() => {
       validateConfig(actionType, config);
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: error configuring webhook action: target url is not present in allowedHosts"`
+      `"error validating action type config: error configuring send to Torq action: target url is not present in allowedHosts"`
     );
   });
 });
@@ -260,62 +183,60 @@ describe('execute()', () => {
     });
   });
 
-  test('execute with username/password sends request with basic auth', async () => {
+  test('execute with token happy flow', async () => {
     const config: ActionTypeConfigType = {
-      url: 'https://abc.def/my-webhook',
-      method: WebhookMethods.POST,
-      headers: {
-        aheader: 'a value',
-      },
-      hasAuth: true,
+      webhook_integration_url: 'https://hooks.torq.io/v1/test',
     };
     await actionType.executor({
       actionId: 'some-id',
       services,
       config,
-      secrets: { user: 'abc', password: '123' },
+      secrets: { token: "1234" },
       params: { body: 'some data' },
     });
 
     delete requestMock.mock.calls[0][0].configurationUtilities;
-    expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
-      Object {
-        "auth": Object {
-          "password": "123",
-          "username": "abc",
-        },
-        "axios": undefined,
-        "data": "some data",
-        "headers": Object {
-          "aheader": "a value",
-        },
-        "logger": Object {
-          "context": Array [],
-          "debug": [MockFunction] {
-            "calls": Array [
-              Array [
-                "response from webhook action \\"some-id\\": [HTTP 200] ",
-              ],
+    expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(
+    `Object {
+      "axios": undefined,
+      "data": "some data",
+      "headers": Object {
+        "X-Torq-Token": "1234",
+      },
+      "logger": Object {
+        "context": Array [],
+        "debug": [MockFunction] {
+          "calls": Array [
+            Array [
+              "torq action result: {\\"tag\\":\\"ok\\",\\"value\\":{\\"status\\":200,\\"statusText\\":\\"\\",\\"data\\":\\"\\",\\"headers\\":[],\\"config\\":{}}}",
             ],
-            "results": Array [
-              Object {
-                "type": "return",
-                "value": undefined,
-              },
+            Array [
+              "response from Torq action \\"some-id\\": [HTTP 200] ",
             ],
-          },
-          "error": [MockFunction],
-          "fatal": [MockFunction],
-          "get": [MockFunction],
-          "info": [MockFunction],
-          "log": [MockFunction],
-          "trace": [MockFunction],
-          "warn": [MockFunction],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+          ],
         },
-        "method": "post",
-        "url": "https://abc.def/my-webhook",
-      }
-    `);
+        "error": [MockFunction],
+        "fatal": [MockFunction],
+        "get": [MockFunction],
+        "info": [MockFunction],
+        "log": [MockFunction],
+        "trace": [MockFunction],
+        "warn": [MockFunction],
+      },
+      "method": "post",
+      "params": Object {},
+      "url": "https://hooks.torq.io/v1/test",
+    }`);
   });
 
   test('execute with exception maxContentLength size exceeded should log the proper error', async () => {

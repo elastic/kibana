@@ -16,7 +16,7 @@ import { getRetryAfterIntervalFromHeaders } from './lib/http_rersponse_retry_hea
 import { nullableType } from './lib/nullable';
 import { isOk, promiseResult, Result } from './lib/result_type';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
-import { ActionsConfigurationUtilities } from '../actions_config';
+import { ActionsConfigurationUtilities, getActionsConfigurationUtilities } from '../actions_config';
 import { request } from './lib/axios_utils';
 import * as crypto from 'crypto';
 import { renderMustacheString } from '../lib/mustache_renderer';
@@ -52,7 +52,11 @@ const secretSchemaProps = {
 };
 const SecretsSchema = schema.object(secretSchemaProps, {
   validate: (secrets) => {
-
+    if (!secrets.token) {
+      return i18n.translate('xpack.actions.builtin.torq.secrets.tokenRequiredErrorMessage', {
+        defaultMessage: 'token is required',
+      });
+    }
   },
 });
 
@@ -100,7 +104,7 @@ function renderParameterTemplates(
 ): ActionParamsType {
   if (!params.body) return params;
   return {
-    body: renderMustacheString(params.body, variables, 'json'),
+    body: renderMustacheString(params.body, variables, 'json'), // TODO: add default template here
   };
 }
 
@@ -109,8 +113,9 @@ function validateActionTypeConfig(
   configObject: ActionTypeConfigType
 ) {
   const configuredUrl = configObject.webhook_integration_url;
+  let configureUrlObj: URL;
   try {
-    new URL(configuredUrl);
+    configureUrlObj = new URL(configuredUrl);
   } catch (err) {
     return i18n.translate('xpack.actions.builtin.torq.torqConfigurationErrorNoHostname', {
       defaultMessage: 'error configuring send to Torq action: unable to parse url: {err}',
@@ -128,6 +133,12 @@ function validateActionTypeConfig(
       values: {
         message: allowListError.message,
       },
+    });
+  }
+
+  if (configureUrlObj.hostname !== 'hooks.torq.io') {
+    return i18n.translate('xpack.actions.builtin.torq.torqConfigurationErrorInvalidHostname', {
+      defaultMessage: 'error configuring send to Torq action: url must begin with https://hooks.torq.io',
     });
   }
 }
@@ -148,18 +159,23 @@ export async function executor(
   const token = secrets.token;
 
   const axiosInstance = axios.create();
-
   const result: Result<AxiosResponse, AxiosError<{ message: string }>> = await promiseResult(
-    axiosInstance.request({
+    request({
+      axios: axiosInstance,
       url: webhook_integration_url,
       method: 'post',
       headers: {
-        "X-Signature": crypto.createHmac('sha256', token).update(data).digest('hex'),
+        // "X-Signature": crypto.createHmac('sha256', token || "").update(data || "").digest('hex'),
+        "X-Torq-Token": token || "",
       },
       params: {},
       data,
+      configurationUtilities,
+      logger,
     })
   );
+
+  logger.debug(`torq action result: ${JSON.stringify(result)}`);
 
   if (isOk(result)) {
     const {
