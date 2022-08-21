@@ -11,6 +11,7 @@ import type {
   GetAgentPoliciesResponseItem,
   GetPackagesResponse,
   GetAgentsResponse,
+  BulkGetPackagePoliciesResponse,
 } from '@kbn/fleet-plugin/common/types/rest_spec';
 import type {
   GetHostPolicyResponse,
@@ -143,6 +144,13 @@ const endpointListApiPathHandlerMocks = ({
       };
     },
 
+    // List of Policies (package policies) for onboarding
+    [`${INGEST_API_PACKAGE_POLICIES}/_bulk_get`]: (): BulkGetPackagePoliciesResponse => {
+      return {
+        items: endpointPackagePolicies,
+      };
+    },
+
     // List of Agents using Endpoint
     [INGEST_API_FLEET_AGENTS]: (): GetAgentsResponse => {
       return {
@@ -197,6 +205,17 @@ export const setEndpointListApiMockImplementation: (
 
   // Setup handling of GET requests
   mockedHttpService.get.mockImplementation(async (...args) => {
+    const [path] = args;
+    if (typeof path === 'string') {
+      if (apiHandlers[path]) {
+        return apiHandlers[path]();
+      }
+    }
+
+    throw new Error(`MOCK: api request does not have a mocked handler: ${path}`);
+  });
+
+  mockedHttpService.post.mockImplementation(async (...args) => {
     const [path] = args;
     if (typeof path === 'string') {
       if (apiHandlers[path]) {

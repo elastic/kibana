@@ -101,6 +101,7 @@ export type {
   UpgradePackagePolicyResponseItem,
   UpgradePackagePolicyBaseResponse,
   UpgradePackagePolicyDryRunResponseItem,
+  BulkGetPackagePoliciesResponse,
   // Models
   Agent,
   AgentStatus,
