@@ -168,7 +168,7 @@
     },
     {
       "groupName": "react-query",
-      "packageNames": ["react-query"],
+      "packageNames": ["@tanstack/react-query", "@tanstack/react-query-devtools"],
       "reviewers": [
         "team:response-ops",
         "team:kibana-cloud-security-posture",

@@ -171,7 +171,7 @@ describe('CaseView', () => {
     const queryClientSpy = jest.spyOn(appMockRenderer.queryClient, 'invalidateQueries');
     const result = appMockRenderer.render(<CaseView {...caseViewProps} />);
     userEvent.click(result.getByTestId('case-refresh'));
-    expect(queryClientSpy).toHaveBeenCalledWith('case');
+    expect(queryClientSpy).toHaveBeenCalledWith(['case']);
   });
 
   describe('when a `refreshRef` prop is provided', () => {
@@ -203,7 +203,7 @@ describe('CaseView', () => {
     it('should refresh actions and comments', async () => {
       refreshRef!.current!.refreshCase();
       await waitFor(() => {
-        expect(queryClientSpy).toHaveBeenCalledWith(CASE_VIEW_CACHE_KEY);
+        expect(queryClientSpy).toHaveBeenCalledWith([CASE_VIEW_CACHE_KEY]);
       });
     });
   });

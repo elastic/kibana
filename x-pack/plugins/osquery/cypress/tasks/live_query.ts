@@ -8,7 +8,7 @@
 import { LIVE_QUERY_EDITOR } from '../screens/live_query';
 
 export const DEFAULT_QUERY = 'select * from processes;';
-export const BIG_QUERY = 'select * from processes, users limit 200;';
+export const BIG_QUERY = 'select * from processes, users limit 110;';
 
 export const selectAllAgents = () => {
   cy.react('AgentsTable').find('input').should('not.be.disabled');
