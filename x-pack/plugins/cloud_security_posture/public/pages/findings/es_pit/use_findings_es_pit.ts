@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useRef, useState } from 'react';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { CSP_LATEST_FINDINGS_DATA_VIEW, ES_PIT_ROUTE_PATH } from '../../../../common/constants';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { FINDINGS_PIT_KEEP_ALIVE } from '../constants';

@@ -204,8 +204,7 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
               <EuiDescriptionListDescription>
                 <FormattedMessage
                   id="xpack.security.management.users.editUserPage.changePasswordDescription"
-                  defaultMessage="The user will not be able to log in using their previous
-                    password."
+                  defaultMessage="The user will not be able to log in using their previous password."
                 />
               </EuiDescriptionListDescription>
             </EuiDescriptionList>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useCallback } from 'react';
-import { useQuery, useQueryClient } from 'react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { getPrePackagedRulesStatus } from './api';
 import * as i18n from './translations';
@@ -62,9 +62,8 @@ export const useInvalidatePrePackagedRulesStatus = () => {
   const queryClient = useQueryClient();
 
   return useCallback(() => {
-    queryClient.invalidateQueries(PRE_PACKAGED_RULES_STATUS_QUERY_KEY, {
-      refetchActive: true,
-      refetchInactive: false,
+    queryClient.invalidateQueries([PRE_PACKAGED_RULES_STATUS_QUERY_KEY], {
+      refetchType: 'active',
     });
   }, [queryClient]);
 };

@@ -15,7 +15,7 @@ import {
   EuiModalHeaderTitle,
 } from '@elastic/eui';
 import styled from 'styled-components';
-import { QueryClientProvider } from 'react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { Case, CaseStatusWithAllStatus } from '../../../../common/ui/types';
 import * as i18n from '../../../common/translations';
 import { AllCasesList } from '../all_cases_list';

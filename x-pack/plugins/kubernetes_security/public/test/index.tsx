@@ -8,7 +8,7 @@
 import React, { memo, ReactNode, useMemo } from 'react';
 import { createMemoryHistory, MemoryHistory } from 'history';
 import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
-import { QueryClient, QueryClientProvider, setLogger } from 'react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Router } from 'react-router-dom';
 import { History } from 'history';
 import useObservable from 'react-use/lib/useObservable';
@@ -19,15 +19,6 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
-
-// hide react-query output in console
-setLogger({
-  error: () => {},
-  // eslint-disable-next-line no-console
-  log: console.log,
-  // eslint-disable-next-line no-console
-  warn: console.warn,
-});
 
 /**
  * Mocked app root context renderer
@@ -112,6 +103,14 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
         // prevent jest did not exit errors
         cacheTime: Infinity,
       },
+    },
+    // hide react-query output in console
+    logger: {
+      error: () => {},
+      // eslint-disable-next-line no-console
+      log: console.log,
+      // eslint-disable-next-line no-console
+      warn: console.warn,
     },
   });
 

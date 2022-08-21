@@ -18,8 +18,6 @@ describe('DynamicTreeView component', () => {
   let mockedContext: AppContextTestRender;
   let mockedApi: AppContextTestRender['coreStart']['http']['get'];
 
-  const waitForApiCall = () => waitFor(() => expect(mockedApi).toHaveBeenCalled());
-
   const defaultProps = {
     globalFilter: {
       startDate: Date.now().toString(),
@@ -69,8 +67,9 @@ describe('DynamicTreeView component', () => {
     it('should show loading state while retrieving empty data and hide it when settled', async () => {
       render();
       expect(renderResult.queryByText(/loading/i)).toBeInTheDocument();
-      await waitForApiCall();
-      expect(renderResult.queryByText(/loading/i)).not.toBeInTheDocument();
+      await waitFor(() => {
+        expect(renderResult.queryByText(/loading/i)).not.toBeInTheDocument();
+      });
     });
   });
 
@@ -92,39 +91,42 @@ describe('DynamicTreeView component', () => {
       render({
         tree,
       });
-      await waitForApiCall();
 
-      expect(mockedApi).toHaveBeenCalledWith(
-        '/internal/kubernetes_security/multi_terms_aggregate',
-        {
-          query: {
-            groupBys: `[{"field":"${key}"},{"field":"orchestrator.cluster.name","missing":""}]`,
-            index: '*-logs',
-            page: 0,
-            perPage: 50,
-            query: '{"bool":{"filter":[],"must":[],"must_not":[],"should":[]}}',
-          },
-        }
-      );
+      await waitFor(() => {
+        expect(mockedApi).toHaveBeenCalledWith(
+          '/internal/kubernetes_security/multi_terms_aggregate',
+          {
+            query: {
+              groupBys: `[{"field":"${key}"},{"field":"orchestrator.cluster.name","missing":""}]`,
+              index: '*-logs',
+              page: 0,
+              perPage: 50,
+              query: '{"bool":{"filter":[],"must":[],"must_not":[],"should":[]}}',
+            },
+          }
+        );
+      });
     });
 
     it('should render the parent level based on api response', async () => {
       render({
         tree,
       });
-      await waitForApiCall();
 
-      ['awp-demo-gke-main', 'awp-demo-gke-test'].forEach((cluster) => {
-        expect(renderResult.queryByText(cluster)).toBeInTheDocument();
+      await waitFor(() => {
+        ['awp-demo-gke-main', 'awp-demo-gke-test'].forEach((cluster) => {
+          expect(renderResult.queryByText(cluster)).toBeInTheDocument();
+        });
       });
     });
 
     it('should trigger a callback when tree node is clicked', async () => {
       const callback = jest.fn();
       render({ tree, onSelect: callback });
-      await waitForApiCall();
 
-      renderResult.getByRole('button', { name: 'awp-demo-gke-main' }).click();
+      await waitFor(() => {
+        renderResult.getByRole('button', { name: 'awp-demo-gke-main' }).click();
+      });
 
       expect(callback).toHaveBeenCalled();
     });
@@ -156,37 +158,43 @@ describe('DynamicTreeView component', () => {
 
     it('should make a children api call with filter when parent is expanded', async () => {
       render({ tree });
-      await waitForApiCall();
-      renderResult.getByRole('button', { name: parent }).click();
+      await waitFor(() => {
+        renderResult.getByRole('button', { name: parent }).click();
+      });
 
       mockedApi.mockResolvedValueOnce(nodeResponseMock);
 
-      await waitForApiCall();
-      expect(mockedApi).toHaveBeenCalledWith('/internal/kubernetes_security/aggregate', {
-        query: {
-          groupBy: 'node',
-          index: '*-logs',
-          page: 0,
-          perPage: 50,
-          query: `{"bool":{"filter":[{"term":{"orchestrator.cluster.id":"${parent}"}}],"must":[],"must_not":[],"should":[]}}`,
-        },
+      await waitFor(() => {
+        expect(mockedApi).toHaveBeenCalledWith('/internal/kubernetes_security/aggregate', {
+          query: {
+            groupBy: 'node',
+            index: '*-logs',
+            page: 0,
+            perPage: 50,
+            query: `{"bool":{"filter":[{"term":{"orchestrator.cluster.id":"${parent}"}}],"must":[],"must_not":[],"should":[]}}`,
+          },
+        });
       });
     });
 
     it('should render children when parent is expanded based on api request', async () => {
       render({ tree });
-      await waitForApiCall();
 
-      renderResult.getByRole('button', { name: parent }).click();
-
-      mockedApi.mockResolvedValueOnce(nodeResponseMock);
+      await waitFor(() => {
+        expect(renderResult.getByRole('button', { name: parent })).toBeTruthy();
+        mockedApi.mockResolvedValueOnce(nodeResponseMock);
+        renderResult.getByRole('button', { name: parent }).click();
+      });
 
       // check if children has loading state
-      expect(renderResult.queryByText(/loading/i)).toBeInTheDocument();
-      await waitForApiCall();
+      await waitFor(() => {
+        expect(renderResult.queryByText(/loading/i)).toBeInTheDocument();
+      });
 
-      ['default', 'kube-system', 'production', 'qa', 'staging'].forEach((node) => {
-        expect(renderResult.queryByText(node)).toBeInTheDocument();
+      await waitFor(() => {
+        ['default', 'kube-system', 'production', 'qa', 'staging'].forEach((node) => {
+          expect(renderResult.queryByText(node)).toBeInTheDocument();
+        });
       });
     });
   });

@@ -7,7 +7,7 @@
 
 import { EuiSwitch, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 
@@ -55,7 +55,7 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
   const { isLoading, mutateAsync } = useUpdatePack({
     options: {
       onSuccess: (response) => {
-        queryClient.invalidateQueries(PACKS_ID);
+        queryClient.invalidateQueries([PACKS_ID]);
         setErrorToast();
         toasts.addSuccess(
           response?.data?.attributes.enabled

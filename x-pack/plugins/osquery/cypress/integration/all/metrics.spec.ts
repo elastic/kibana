@@ -46,7 +46,7 @@ describe('ALL - Inventory', () => {
 
     cy.getBySel('comboBoxInput').first().click();
     cy.wait(500);
-    cy.getBySel('comboBoxInput').first().type('{downArrow}{enter}');
+    cy.getBySel('comboBoxInput').first().type('saved{downArrow}{enter}');
 
     submitQuery();
     checkResults();

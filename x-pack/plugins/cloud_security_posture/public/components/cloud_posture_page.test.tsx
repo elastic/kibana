@@ -18,7 +18,7 @@ import { TestProvider } from '../test/test_provider';
 import { coreMock } from '@kbn/core/public/mocks';
 import { render, screen } from '@testing-library/react';
 import React, { ComponentProps } from 'react';
-import { UseQueryResult } from 'react-query';
+import { UseQueryResult } from '@tanstack/react-query';
 import { CloudPosturePage } from './cloud_posture_page';
 import { NoDataPage } from '@kbn/kibana-react-plugin/public';
 import { useCspSetupStatusApi } from '../common/api/use_setup_status_api';
