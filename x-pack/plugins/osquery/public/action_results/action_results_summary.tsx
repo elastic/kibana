@@ -52,7 +52,6 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     skip: !hasActionResultsPrivileges,
   });
   if (expired) {
-    // @ts-expect-error update types
     edges.forEach((edge) => {
       if (!edge.fields?.completed_at && edge.fields) {
         edge.fields['error.keyword'] = edge.fields.error = [
