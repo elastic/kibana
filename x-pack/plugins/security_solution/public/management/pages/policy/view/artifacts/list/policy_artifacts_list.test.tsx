@@ -101,7 +101,7 @@ describe('Policy details artifacts list', () => {
     await render();
     await waitFor(() => {
       expect(renderResult.getAllByTestId('artifacts-collapsed-list-card')).toHaveLength(1);
-    })
+    });
 
     userEvent.click(
       renderResult.getByTestId('artifacts-collapsed-list-card-header-expandCollapse')
