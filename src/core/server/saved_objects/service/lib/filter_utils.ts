@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import { get, cloneDeep } from 'lodash';
 import * as esKuery from '@kbn/es-query';
 import { SavedObjectsErrorHelpers } from './errors';
