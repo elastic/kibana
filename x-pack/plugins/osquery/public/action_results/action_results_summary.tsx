@@ -40,6 +40,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
   const [isLive, setIsLive] = useState(true);
   const { data: hasActionResultsPrivileges } = useActionResultsPrivileges();
   const {
+    // @ts-expect-error update types
     data: { aggregations, edges },
   } = useActionResults({
     actionId,
