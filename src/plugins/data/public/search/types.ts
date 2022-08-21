@@ -99,10 +99,29 @@ export interface SearchServiceStartDependencies {
   indexPatterns: DataViewsContract;
 }
 
+/**
+ * Format of warnings of failed shards or internal ES timeouts that surface from search responses
+ * @public
+ */
 export interface SearchResponseWarning {
+  /**
+   * type:  for handling the warning in logic
+   */
   type: 'timed_out' | 'generic_shard_warning' | estypes.ShardFailure['reason']['reason'];
+  /**
+   * isTimeout: true for general internal ES timeout warning
+   */
   isTimeout?: boolean;
+  /**
+   * isTimeout: true for shard-specific internal ES warning
+   */
   isShardFailure?: boolean;
+  /**
+   * message: failure reason from ES
+   */
   message: string;
+  /**
+   * text: human-friendly error message
+   */
   text?: string;
 }
