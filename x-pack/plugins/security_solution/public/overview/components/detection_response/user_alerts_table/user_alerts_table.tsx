@@ -101,11 +101,13 @@ const getTableColumns: GetTableColumns = (handleClick) => [
   {
     field: 'userName',
     name: i18n.USER_ALERTS_USERNAME_COLUMN,
-    truncateText: true,
-    textOnly: true,
     'data-test-subj': 'userSeverityAlertsTable-userName',
     render: (userName: string) => (
-      <EuiToolTip title={i18n.OPEN_USER_DETAIL_TOOLTIP} content={userName}>
+      <EuiToolTip
+        title={i18n.OPEN_USER_DETAIL_TOOLTIP}
+        content={userName}
+        anchorClassName="eui-textTruncate"
+      >
         <UserDetailsLink userName={userName} />
       </EuiToolTip>
     ),

@@ -12,7 +12,7 @@ import { Spaces } from '../../../../scenarios';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME, getUrlPrefix } from '../../../../../common/lib';
 
-import { createEsDocuments } from './create_test_data';
+import { createEsDocumentsWithGroups } from '../lib/create_test_data';
 
 const INDEX_THRESHOLD_TIME_SERIES_QUERY_URL = 'api/triggers_actions_ui/data/_time_series_query';
 
@@ -60,7 +60,13 @@ export default function timeSeriesQueryEndpointTests({ getService }: FtrProvider
       await esTestIndexTool.setup();
       // To browse the documents created, comment out esTestIndexTool.destroy() in below, then:
       //   curl http://localhost:9220/.kibaka-alerting-test-data/_search?size=100 | json
-      await createEsDocuments(es, esTestIndexTool, START_DATE, INTERVALS, INTERVAL_MILLIS);
+      await createEsDocumentsWithGroups({
+        es,
+        esTestIndexTool,
+        endDate: START_DATE,
+        intervals: INTERVALS,
+        intervalMillis: INTERVAL_MILLIS,
+      });
     });
 
     after(async () => {

@@ -32,7 +32,6 @@ NPM_MODULE_EXTRA_FILES = [
   "jest_integration_node/jest-preset.js",
   "jest_node/jest-preset.js",
   "jest.config.js",
-  "README.md",
   "package.json",
 ]
 
@@ -134,6 +133,7 @@ jsts_transpiler(
   name = "target_node",
   srcs = SRCS,
   build_pkg_name = package_name(),
+  root_input_dir = "src",
 )
 
 ts_config(

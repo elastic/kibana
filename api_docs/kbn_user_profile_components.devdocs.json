@@ -187,7 +187,7 @@
           },
           " extends Omit<",
           "EuiAvatarProps",
-          ", \"type\" | \"color\" | \"name\" | \"iconColor\" | \"iconType\" | \"iconSize\" | \"initials\" | \"initialsLength\" | \"imageUrl\">"
+          ", \"type\" | \"color\" | \"iconColor\" | \"name\" | \"iconType\" | \"iconSize\" | \"initials\" | \"initialsLength\" | \"imageUrl\">"
         ],
         "path": "packages/kbn-user-profile-components/src/user_avatar.tsx",
         "deprecated": false,
@@ -269,6 +269,18 @@
             "label": "uid",
             "description": [
               "\nUnique ID for of the user profile."
+            ],
+            "path": "packages/kbn-user-profile-components/src/user_profile.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/user-profile-components",
+            "id": "def-common.UserProfile.enabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "enabled",
+            "description": [
+              "\nIndicates whether user profile is enabled or not."
             ],
             "path": "packages/kbn-user-profile-components/src/user_profile.ts",
             "deprecated": false

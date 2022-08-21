@@ -12,6 +12,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer, EuiLoadingChart } from '
 import styled from 'styled-components';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { useDispatch, useSelector } from 'react-redux';
+import type { DataViewBase } from '@kbn/es-query';
 import { eventsViewerSelector } from '../../../../common/components/events_viewer/selectors';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -63,7 +64,7 @@ interface PreviewHistogramProps {
   addNoiseWarning: () => void;
   spaceId: string;
   ruleType: Type;
-  index: string[];
+  indexPattern: DataViewBase;
   advancedOptions?: AdvancedPreviewOptions;
 }
 
@@ -75,7 +76,7 @@ export const PreviewHistogram = ({
   addNoiseWarning,
   spaceId,
   ruleType,
-  index,
+  indexPattern,
   advancedOptions,
 }: PreviewHistogramProps) => {
   const dispatch = useDispatch();
@@ -91,7 +92,6 @@ export const PreviewHistogram = ({
     () => (advancedOptions ? advancedOptions.timeframeEnd.toISOString() : formatDate(to)),
     [to, advancedOptions]
   );
-  const alertsEndDate = useMemo(() => formatDate(to), [to]);
   const isEqlRule = useMemo(() => ruleType === 'eql', [ruleType]);
   const isMlRule = useMemo(() => ruleType === 'machine_learning', [ruleType]);
 
@@ -100,7 +100,7 @@ export const PreviewHistogram = ({
     startDate,
     endDate,
     spaceId,
-    index,
+    indexPattern,
     ruleType,
   });
 
@@ -119,7 +119,7 @@ export const PreviewHistogram = ({
 
   const {
     browserFields,
-    indexPattern,
+    indexPattern: selectedIndexPattern,
     runtimeMappings,
     dataViewId: selectedDataViewId,
     loading: isLoadingIndexPattern,
@@ -214,14 +214,19 @@ export const PreviewHistogram = ({
             dataProviders,
             deletedEventIds,
             disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
-            end: alertsEndDate,
+            // Fix for https://github.com/elastic/kibana/issues/135511, until we start writing proper
+            // simulated @timestamp values to the preview alerts. The preview alerts will have @timestamp values
+            // close to the server's `now` time, but the client clock could be out of sync with the server. So we
+            // avoid computing static dates for this time range filter and instead pass in a small relative time window.
+            end: 'now+5m',
+            start: 'now-5m',
             entityType: 'events',
             filters: [],
             globalFullScreen,
             hasAlertsCrud: false,
             id: TimelineId.rulePreview,
             indexNames: [`${DEFAULT_PREVIEW_INDEX}-${spaceId}`],
-            indexPattern,
+            indexPattern: selectedIndexPattern,
             isLive: false,
             isLoadingIndexPattern,
             itemsPerPage,
@@ -233,7 +238,6 @@ export const PreviewHistogram = ({
             runtimeMappings,
             setQuery: () => {},
             sort,
-            start: startDate,
             tGridEventRenderedViewEnabled,
             type: 'embedded',
             leadingControlColumns: getPreviewTableControlColumn(1.5),

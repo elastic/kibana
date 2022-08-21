@@ -40,7 +40,7 @@ const KibanaInstance = ({ data, alerts }: { data: any; alerts: any }) => {
   const showRules =
     data.metrics.kibana_instance_rule_executions &&
     data.metrics.kibana_instance_rule_executions.length &&
-    data.metrics.kibana_instance_rule_executions[0].indices_found.metricbeat;
+    data.metrics.kibana_instance_rule_executions[0].indices_found.ecs;
 
   return (
     <EuiPage>

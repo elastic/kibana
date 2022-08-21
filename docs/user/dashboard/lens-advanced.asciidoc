@@ -16,7 +16,9 @@ Before you begin, you should be familiar with the <<kibana-concepts-analysts>>.
 
 Add the sample ecommerce data, and create and set up the dashboard.
 
-. Go to the *Home* page, then click *Try sample data*.
+. On the home page, click *Try sample data*.
+
+. Click *Other sample data sets*. 
 
 . On the *Sample eCommerce orders* card, click *Add data*.
 
