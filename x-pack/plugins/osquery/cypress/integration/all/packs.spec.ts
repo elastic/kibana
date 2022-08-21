@@ -245,7 +245,7 @@ describe('ALL - Packs', () => {
     });
   });
 
-  describe.skip('Validate that agent is getting removed from pack if we remove agent', () => {
+  describe('Validate that agent is getting removed from pack if we remove agent', () => {
     beforeEach(() => {
       login();
     });
