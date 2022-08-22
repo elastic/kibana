@@ -48,7 +48,6 @@ export const convertToLens = async (
   model: Panel
 ): Promise<NavigateToLensContext<XYConfiguration> | null> => {
   const dataViews = getDataViewsStart();
-  const columns = [];
   const extendedLayers: Record<number, ExtendedLayer> = {};
   const seriesNum = model.series.filter((series) => !series.hidden).length;
 
@@ -71,16 +70,19 @@ export const convertToLens = async (
     if (!metricsColumns) {
       return null;
     }
-    columns.push(...metricsColumns);
 
     const filtersOrTermColumns = getFiltersOrTermColumns(series);
     if (filtersOrTermColumns === null) {
       return null;
     }
-    columns.push(...filtersOrTermColumns);
 
     const layerId = uuid();
-    extendedLayers[layerIdx] = { indexPatternId, layerId, columns, columnOrder: [] }; // TODO: update later.
+    extendedLayers[layerIdx] = {
+      indexPatternId,
+      layerId,
+      columns: [...metricsColumns, ...filtersOrTermColumns],
+      columnOrder: [],
+    }; // TODO: update later.
   }
 
   const extents = getYExtents(model);
