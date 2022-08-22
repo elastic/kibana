@@ -11,6 +11,7 @@ import { useFilters, UseFiltersValue } from './use_filters';
 
 import { useHistory, useLocation } from 'react-router-dom';
 import { Filter } from '@kbn/es-query';
+import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
 
 jest.mock('react-router-dom', () => ({
   useLocation: jest.fn().mockReturnValue({
@@ -20,24 +21,16 @@ jest.mock('react-router-dom', () => ({
 }));
 
 describe('useFilters()', () => {
-  let hookResult: RenderHookResult<unknown, UseFiltersValue, Renderer<unknown>>;
+  let hookResult: RenderHookResult<{}, UseFiltersValue, Renderer<unknown>>;
   let mockRef: ReturnType<typeof mockUseKibanaForFilters>;
-
-  const renderUseFiltersHook = async () => {
-    await act(async () => {
-      hookResult = renderHook(() => useFilters());
-    });
-  };
 
   describe('when mounted', () => {
     beforeEach(async () => {
       mockRef = mockUseKibanaForFilters();
 
-      await renderUseFiltersHook();
-    });
-
-    it('should try to fetch available fields', () => {
-      expect(mockRef.getFieldsForWildcard).toHaveBeenCalled();
+      hookResult = renderHook(() => useFilters(), {
+        wrapper: TestProvidersComponent,
+      });
     });
 
     it('should have valid initial filterQuery value', () => {
@@ -51,7 +44,9 @@ describe('useFilters()', () => {
             '?indicators=(filterQuery:(language:kuery,query:%27threat.indicator.type%20:%20"file"%20%27),filters:!(),timeRange:(from:now/d,to:now/d))',
         });
 
-        await renderUseFiltersHook();
+        hookResult = renderHook(() => useFilters(), {
+          wrapper: TestProvidersComponent,
+        });
 
         expect(hookResult.result.current.filterQuery).toMatchObject({
           language: 'kuery',
@@ -66,7 +61,9 @@ describe('useFilters()', () => {
     beforeEach(async () => {
       mockRef = mockUseKibanaForFilters();
 
-      await renderUseFiltersHook();
+      hookResult = renderHook(() => useFilters(), {
+        wrapper: TestProvidersComponent,
+      });
 
       (useHistory as jest.Mock).mockReturnValue({ replace: historyReplace });
 
