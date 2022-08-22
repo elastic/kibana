@@ -176,11 +176,11 @@ export const getLegacyMetricVisualization = ({
   paletteService: PaletteRegistry;
   theme: ThemeServiceStart;
 }): Visualization<MetricState> => ({
-  id: 'lnsMetric',
+  id: 'lnsLegacyMetric',
 
   visualizationTypes: [
     {
-      id: 'lnsMetric',
+      id: 'lnsLegacyMetric',
       icon: IconChartMetric,
       label: i18n.translate('xpack.lens.legacyMetric.label', {
         defaultMessage: 'Legacy Metric',
