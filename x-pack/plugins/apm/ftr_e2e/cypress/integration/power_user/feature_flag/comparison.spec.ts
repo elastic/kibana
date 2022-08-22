@@ -39,7 +39,7 @@ describe('Comparison feature flag', () => {
       cy.get('[data-test-subj="comparisonSelect"]').should('not.be.disabled');
     });
 
-    it('shows the comparison feature enabled in services overview', () => {
+    it('shows the comparison feature enabled in dependencies overview', () => {
       cy.visitKibana('/app/apm/dependencies');
       cy.get('input[type="checkbox"]#comparison').should('be.checked');
       cy.get('[data-test-subj="comparisonSelect"]').should('not.be.disabled');

@@ -8,11 +8,11 @@
   "videosFolder": "./cypress/videos",
   "viewportHeight": 900,
   "viewportWidth": 1440,
-  "video": true,
+  "video": false,
   "screenshotOnRunFailure": true,
   "experimentalSessionAndOrigin": true,
   "retries": {
-    "runMode": 2,
+    "runMode": 0,
     "openMode": 0
   }
 }
