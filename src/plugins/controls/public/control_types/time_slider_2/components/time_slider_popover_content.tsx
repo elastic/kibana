@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { Ref } from 'react';
 import { EuiDualRange } from '@elastic/eui';
 import { EuiRangeTick } from '@elastic/eui/src/components/form/range/range_ticks';
 
@@ -16,6 +16,7 @@ interface Props {
   ticks: EuiRangeTick[];
   timeRangeMin: number;
   timeRangeMax: number;
+  rangeRef?: Ref<EuiDualRange>;
 }
 
 export function TimeSliderPopoverContent(props: Props) {
@@ -25,6 +26,7 @@ export function TimeSliderPopoverContent(props: Props) {
 
   return (
     <EuiDualRange
+      ref={props.rangeRef}
       fullWidth={true}
       value={props.value}
       onChange={onChange}

@@ -6,11 +6,17 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useRef } from 'react';
 import { Observable, Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiInputPopover } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiInputPopover,
+  EuiDualRange,
+} from '@elastic/eui';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 import { timeSliderReducers } from '../time_slider_reducers';
 import { TimeSliderReduxState } from '../types';
@@ -46,6 +52,8 @@ export const TimeSlider: FC<Props> = (props) => {
     return state.explicitInput.value;
   });
 
+  const rangeRef = useRef<EuiDualRange>(null);
+
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isPaused, setIsPaused] = useState(true);
   const [timeoutId, setTimeoutId] = useState<number | undefined>(undefined);
@@ -54,6 +62,10 @@ export const TimeSlider: FC<Props> = (props) => {
   const togglePopover = useCallback(() => {
     setIsPopoverOpen(!isPopoverOpen);
   }, [isPopoverOpen, setIsPopoverOpen]);
+
+  const onPanelResize = (width?: number) => {
+    rangeRef.current?.onResize(width);
+  };
 
   const playNextFrame = () => {
     // advance to next frame
@@ -160,8 +172,10 @@ export const TimeSlider: FC<Props> = (props) => {
           anchorPosition="downCenter"
           disableFocusTrap
           attachToAnchor={false}
+          onPanelResize={onPanelResize}
         >
           <TimeSliderPopoverContent
+            rangeRef={rangeRef}
             value={[from, to]}
             onChange={props.onChange}
             ticks={ticks}
