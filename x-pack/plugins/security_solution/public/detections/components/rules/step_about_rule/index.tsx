@@ -26,7 +26,6 @@ import {
   Form,
   getUseField,
   UseField,
-  UseMultiFields,
   useForm,
   useFormData,
 } from '../../../../shared_imports';
@@ -42,14 +41,11 @@ import { MarkdownEditorForm } from '../../../../common/components/markdown_edito
 import { SeverityField } from '../severity_mapping';
 import { RiskScoreField } from '../risk_score_mapping';
 import { AutocompleteField } from '../autocomplete_field';
-import type { BrowserField } from '../../../../common/containers/source';
 import { useFetchIndex } from '../../../../common/containers/source';
 import { isThreatMatchRule } from '../../../../../common/detection_engine/utils';
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useRuleIndices } from '../../../containers/detection_engine/rules/use_rule_indices';
-import { AlertGroupingInput } from '../grouping_input';
-import { aggregatableFields } from '../step_define_rule';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -154,22 +150,6 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
       watch: ['severity', 'timestampOverride'],
     });
 
-  const [aggFields, setAggregatableFields] = useState<BrowserField[]>([]);
-
-  useEffect(() => {
-    const { fields } = indexPattern;
-    /**
-     * Typecasting to BrowserField because fields is
-     * typed as DataViewFieldBase[] which does not have
-     * the 'aggregatable' property, however the type is incorrect
-     *
-     * fields does contain elements with the aggregatable property.
-     * We will need to determine where these types are defined and
-     * figure out where the discrepency is.
-     */
-    setAggregatableFields(aggregatableFields(fields as BrowserField[]));
-  }, [indexPattern]);
-
   useEffect(() => {
     const formSeverityValue = formSeverity?.value;
     if (formSeverityValue != null && formSeverityValue !== severityValue) {
@@ -208,11 +188,6 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
       didCancel = true;
     };
   }, [getData, setForm]);
-
-  const AlertGroupingInputChildren = useCallback(
-    ({ groupBy }) => <AlertGroupingInput browserFields={aggFields} groupBy={groupBy} />,
-    [aggFields]
-  );
 
   return isReadOnlyView ? (
     <StepContentWrapper data-test-subj="aboutStep" addPadding={addPadding}>
@@ -429,16 +404,6 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 placeholder: '',
               }}
             />
-            <EuiSpacer size="l" />
-            <UseMultiFields
-              fields={{
-                groupBy: {
-                  path: 'alertGrouping.groupBy',
-                },
-              }}
-            >
-              {AlertGroupingInputChildren}
-            </UseMultiFields>
             {!!formTimestampOverride && formTimestampOverride !== '@timestamp' && (
               <>
                 <CommonUseField

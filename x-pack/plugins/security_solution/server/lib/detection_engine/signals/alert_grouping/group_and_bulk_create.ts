@@ -107,8 +107,10 @@ export const groupAndBulkCreate = async ({
       // - also, should we sort first by severity?
 
       // TODO: remove this type assertion once threat_match grouping is implemented
-      const groupByFields =
-        (completeRule.ruleParams as QueryRuleParams).alertGrouping?.groupBy ?? [];
+      // Default to host.name for now
+      const groupByFields = (completeRule.ruleParams as QueryRuleParams).alertGrouping?.groupBy ?? [
+        'host.name',
+      ];
 
       if (groupByFields.length === 0) {
         return createSearchAfterReturnType({

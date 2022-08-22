@@ -32,7 +32,4 @@ export const stepAboutDefaultValue: AboutStepRule = {
   timestampOverride: '',
   threat: threatDefault,
   note: '',
-  alertGrouping: {
-    groupBy: [],
-  },
 };

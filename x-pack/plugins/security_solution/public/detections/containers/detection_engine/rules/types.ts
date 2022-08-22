@@ -173,7 +173,7 @@ export const RuleSchema = t.intersection([
     uuid: t.string,
     version: t.number,
     execution_summary: RuleExecutionSummary,
-    alertGrouping,
+    alert_grouping: alertGrouping,
   }),
 ]);
 

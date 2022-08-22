@@ -134,7 +134,7 @@ export const typeSpecificSnakeToCamel = (params: CreateTypeSpecific): TypeSpecif
         query: params.query ?? '',
         filters: params.filters,
         savedId: params.saved_id,
-        alertGrouping: params.alertGrouping,
+        alertGrouping: params.alert_grouping,
       };
     }
     case 'saved_query': {
@@ -238,7 +238,7 @@ const patchQueryParams = (
     query: params.query ?? existingRule.query,
     filters: params.filters ?? existingRule.filters,
     savedId: params.saved_id ?? existingRule.savedId,
-    alertGrouping: params.alertGrouping,
+    alertGrouping: params.alert_grouping ?? existingRule.alertGrouping,
   };
 };
 
@@ -553,7 +553,7 @@ export const typeSpecificCamelToSnake = (params: TypeSpecificRuleParams): Respon
         query: params.query,
         filters: params.filters,
         saved_id: params.savedId,
-        alertGrouping: params.alertGrouping,
+        alert_grouping: params.alertGrouping,
       };
     }
     case 'saved_query': {

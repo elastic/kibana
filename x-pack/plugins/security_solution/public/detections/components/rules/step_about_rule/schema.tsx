@@ -295,24 +295,6 @@ export const schema: FormSchema<AboutStepRule> = {
     ),
     labelAppend: OptionalFieldLabel,
   },
-  alertGrouping: {
-    groupBy: {
-      type: FIELD_TYPES.TEXT,
-      label: i18n.translate(
-        'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.groupBy',
-        {
-          defaultMessage: 'Group by field',
-        }
-      ),
-      helpText: i18n.translate(
-        'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldGroupByHelpText',
-        {
-          defaultMessage: 'Choose a field from the source event to group by when creating alerts.',
-        }
-      ),
-      labelAppend: OptionalFieldLabel,
-    },
-  },
 };
 
 export const threatIndicatorPathRequiredSchemaValue = {

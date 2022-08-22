@@ -296,7 +296,7 @@ const queryRuleParams = {
     data_view_id,
     filters,
     saved_id,
-    alertGrouping,
+    alert_grouping: alertGrouping,
   },
   defaultable: {
     query,
