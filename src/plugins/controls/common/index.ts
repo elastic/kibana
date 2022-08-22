@@ -27,6 +27,7 @@ export {
   persistableControlGroupInputIsEqual,
   getDefaultControlGroupInput,
 } from './control_group/control_group_persistence';
+
 export {
   DEFAULT_CONTROL_WIDTH,
   DEFAULT_CONTROL_STYLE,
@@ -34,8 +35,6 @@ export {
 
 // Control Type exports
 export { OPTIONS_LIST_CONTROL, type OptionsListEmbeddableInput } from './options_list/types';
-export {
-  type RangeSliderEmbeddableInput,
-  RANGE_SLIDER_CONTROL,
-} from './control_types/range_slider/types';
+export { type RangeSliderEmbeddableInput, RANGE_SLIDER_CONTROL } from './range_slider/types';
+
 export { TIME_SLIDER_CONTROL } from './control_types/time_slider/types';

@@ -6,8 +6,14 @@
  * Side Public License, v 1.
  */
 
-export { RANGE_SLIDER_CONTROL } from '../../../common/control_types/range_slider/types';
-export { RangeSliderEmbeddableFactory } from './range_slider_embeddable_factory';
+import { DataControlInput } from '../types';
 
-export type { RangeSliderEmbeddable } from './range_slider_embeddable';
-export type { RangeSliderEmbeddableInput } from '../../../common/control_types/range_slider/types';
+export const RANGE_SLIDER_CONTROL = 'rangeSliderControl';
+
+export type RangeValue = [string, string];
+
+export interface RangeSliderEmbeddableInput extends DataControlInput {
+  value: RangeValue;
+}
+
+export type RangeSliderInputWithType = Partial<RangeSliderEmbeddableInput> & { type: string };

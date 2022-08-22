@@ -12,10 +12,9 @@ import {
 } from '@kbn/embeddable-plugin/common';
 import { SavedObjectReference } from '@kbn/core/types';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
-import { RangeSliderEmbeddableInput } from './types';
+import { RangeSliderInputWithType } from './types';
 
-type RangeSliderInputWithType = Partial<RangeSliderEmbeddableInput> & { type: string };
-const dataViewReferenceName = 'optionsListDataView';
+const dataViewReferenceName = 'rangeSliderDataView';
 
 export const createRangeSliderInject = (): EmbeddablePersistableStateService['inject'] => {
   return (state: EmbeddableStateWithType, references: SavedObjectReference[]) => {

@@ -10,26 +10,40 @@ import deepEqual from 'fast-deep-equal';
 
 import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
 import { lazyLoadReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
+import { i18n } from '@kbn/i18n';
 
-import { ControlEmbeddable, DataControlField, IEditableControlFactory } from '../../types';
-import { RangeSliderEmbeddableInput, RANGE_SLIDER_CONTROL } from './types';
 import {
   createRangeSliderExtract,
   createRangeSliderInject,
-} from '../../../common/control_types/range_slider/range_slider_persistable_state';
-import { RangeSliderStrings } from './range_slider_strings';
+} from '../../../common/range_slider/range_slider_persistable_state';
+import { ControlEmbeddable, DataControlField, IEditableControlFactory } from '../../types';
+import { RangeSliderEmbeddableInput, RANGE_SLIDER_CONTROL } from '../types';
 
 export class RangeSliderEmbeddableFactory
   implements EmbeddableFactoryDefinition, IEditableControlFactory<RangeSliderEmbeddableInput>
 {
   public type = RANGE_SLIDER_CONTROL;
+
+  public getDisplayName = () =>
+    i18n.translate('controls.rangeSlider.displayName', {
+      defaultMessage: 'Range slider',
+    });
+
+  public getDescription = () =>
+    i18n.translate('controls.rangeSlider.description', {
+      defaultMessage: 'Add a control for selecting a range of field values.',
+    });
+
+  public getIconType = () => 'controlsHorizontal';
+
   public canCreateNew = () => false;
 
-  constructor() {}
+  public isEditable = () => Promise.resolve(false);
 
   public async create(initialInput: RangeSliderEmbeddableInput, parent?: IContainer) {
     const reduxEmbeddablePackage = await lazyLoadReduxEmbeddablePackage();
     const { RangeSliderEmbeddable } = await import('./range_slider_embeddable');
+
     return Promise.resolve(
       new RangeSliderEmbeddable(reduxEmbeddablePackage, initialInput, {}, parent)
     );
@@ -47,6 +61,7 @@ export class RangeSliderEmbeddableFactory
       // if the field name or data view id has changed in this editing session, selected values are invalid, so reset them.
       newInput.value = ['', ''];
     }
+
     return newInput;
   };
 
@@ -55,12 +70,6 @@ export class RangeSliderEmbeddableFactory
       dataControlField.compatibleControlTypes.push(this.type);
     }
   };
-
-  public isEditable = () => Promise.resolve(false);
-
-  public getDisplayName = () => RangeSliderStrings.getDisplayName();
-  public getIconType = () => 'controlsHorizontal';
-  public getDescription = () => RangeSliderStrings.getDescription();
 
   public inject = createRangeSliderInject();
   public extract = createRangeSliderExtract();
