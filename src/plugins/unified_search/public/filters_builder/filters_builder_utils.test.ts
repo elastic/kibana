@@ -21,6 +21,7 @@ import {
 
 import {
   getDataAfterNormalized,
+  getDataThatNeedNotNormalized,
   getDataThatNeedsNormalized,
   getFiltersMock,
 } from './__mock__/filters';
@@ -249,6 +250,12 @@ describe('filters_builder_utils', () => {
       const dataNeedsNormalized = getDataThatNeedsNormalized();
       const dataAfterNormalized = getDataAfterNormalized();
       expect(normalizeFilters(dataNeedsNormalized)).toEqual(dataAfterNormalized);
+    });
+
+    test('should not normalize filter after removed filter', () => {
+      const dataNeedNotNormalized = getDataThatNeedNotNormalized();
+      const dataAfterNormalized = getDataThatNeedNotNormalized();
+      expect(normalizeFilters(dataNeedNotNormalized)).toEqual(dataAfterNormalized);
     });
   });
 });
