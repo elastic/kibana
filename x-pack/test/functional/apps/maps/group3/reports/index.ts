@@ -52,7 +52,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.reporting.clickGenerateReportButton();
 
       const percentDiff = await measurePngDifference('geo_map_report');
-      expect(percentDiff).to.be.lessThan(0.09);
+      expect(percentDiff).to.be.lessThan(0.12);
 
       await reporting.teardownEcommerce();
     });
@@ -64,7 +64,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.reporting.clickGenerateReportButton();
 
       const percentDiff = await measurePngDifference('example_map_report');
-      expect(percentDiff).to.be.lessThan(0.09);
+      expect(percentDiff).to.be.lessThan(0.12);
     });
   });
 }
