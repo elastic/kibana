@@ -9,4 +9,4 @@
 export * from './get_series';
 export * from './get_series_agg';
 export * from './metrics_columns';
-export * from './split_columns';
+export * from './buckets_columns';

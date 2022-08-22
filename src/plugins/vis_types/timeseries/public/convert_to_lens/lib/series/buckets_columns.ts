@@ -40,11 +40,12 @@ export const isSplitWithDateHistogram = (
   return splitWithDateHistogram;
 };
 
-export const getSplitColumns = (
+export const getBucketColumns = (
   model: Panel,
   series: Series,
   columns: Column[],
-  dataView: DataView
+  dataView: DataView,
+  isSplit: boolean = false
 ) => {
   if (series.split_mode === 'filters' || series.split_mode === 'filter') {
     const filterColumn = convertToFiltersColumn(series, true);
@@ -73,7 +74,7 @@ export const getSplitColumns = (
       return [dateHistogramColumn];
     }
 
-    const termsColumns = converToTermsColumns(splitFields, series, columns, dataView);
+    const termsColumns = converToTermsColumns(splitFields, series, columns, dataView, isSplit);
     return getValidColumns(termsColumns);
   }
   return [];

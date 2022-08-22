@@ -16,7 +16,7 @@ import uuid from 'uuid';
 import { Panel } from '../../../common/types';
 import { getDataViewsStart } from '../../services';
 import { getDataSourceInfo } from '../lib/datasource';
-import { getMetricsColumns, getSplitColumns } from '../lib/series';
+import { getMetricsColumns, getBucketColumns } from '../lib/series';
 import { getLayers, getYExtents } from '../lib/configurations/xy';
 import {
   Layer as ExtendedLayer,
@@ -75,8 +75,8 @@ export const convertToLens = async (
       return null;
     }
 
-    const filtersOrTermColumns = getSplitColumns(model, series, metricsColumns, indexPattern!);
-    if (filtersOrTermColumns === null) {
+    const bucketsColumns = getBucketColumns(model, series, metricsColumns, indexPattern!, true);
+    if (bucketsColumns === null) {
       return null;
     }
 
@@ -84,9 +84,9 @@ export const convertToLens = async (
     extendedLayers[layerIdx] = {
       indexPatternId,
       layerId,
-      columns: [...metricsColumns, dateHistogramColumn, ...filtersOrTermColumns],
+      columns: [...metricsColumns, dateHistogramColumn, ...bucketsColumns],
       columnOrder: [],
-    }; // TODO: update later.
+    };
   }
 
   const extents = getYExtents(model);

@@ -32,7 +32,7 @@ const getOrderByWithAgg = (series: Series, columns: Column[]): OrderByWithAgg | 
         sourceField: 'document',
         columnId,
         isBucketed: true,
-        isSplit: true,
+        isSplit: false,
         dataType: 'number',
         params: {},
       },
@@ -82,7 +82,8 @@ export const converToTermsColumn = (
   termField: string,
   series: Series,
   columns: Column[],
-  dataView: DataView
+  dataView: DataView,
+  isSplit: boolean = false
 ): TermsColumn | null => {
   const field = dataView.getFieldByName(termField);
 
@@ -101,7 +102,7 @@ export const converToTermsColumn = (
     dataType: (field.type as DataType) ?? undefined,
     sourceField: field.name,
     isBucketed: true,
-    isSplit: true,
+    isSplit,
     params,
   };
 };
@@ -110,7 +111,8 @@ export const converToTermsColumns = (
   termFields: string[],
   series: Series,
   columns: Column[],
-  dataView: DataView
+  dataView: DataView,
+  isSplit: boolean = false
 ): Array<TermsColumn | null> => {
-  return termFields.map((field) => converToTermsColumn(field, series, columns, dataView));
+  return termFields.map((field) => converToTermsColumn(field, series, columns, dataView, isSplit));
 };
