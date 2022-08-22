@@ -47,6 +47,8 @@ export const actionStatusRequestHandler = function (
   unknown,
   SecuritySolutionRequestHandlerContext
 > {
+  const logger = endpointContext.logFactory.get('actionStatusApi');
+
   return async (context, req, res) => {
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
     const agentIDs: string[] = Array.isArray(req.query.agent_ids)
@@ -56,6 +58,7 @@ export const actionStatusRequestHandler = function (
     const response = await getPendingActionsSummary(
       esClient,
       endpointContext.service.getEndpointMetadataService(),
+      logger,
       agentIDs,
       endpointContext.experimentalFeatures.pendingActionResponsesWithAck
     );

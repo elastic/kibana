@@ -5,246 +5,109 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
-import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { getActionList } from '..';
 import type { EndpointMetadataService } from '../metadata';
-import type {
-  EndpointAction,
-  EndpointActionResponse,
-  EndpointPendingActions,
-  LogsEndpointActionResponse,
-} from '../../../../common/endpoint/types';
+import type { ActionDetails, EndpointPendingActions } from '../../../../common/endpoint/types';
 import { ACTIONS_SEARCH_PAGE_SIZE } from './constants';
-import { catchAndWrapError } from '../../utils';
-import { hasAckInResponse, hasNoEndpointResponse, hasNoFleetResponse } from './utils';
-import { ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN } from '../../../../common/endpoint/constants';
 
 const PENDING_ACTION_RESPONSE_MAX_LAPSED_TIME = 300000; // 300k ms === 5 minutes
 
+/**
+ * Returns an array containing the pending action summary for each of the Agent IDs provided on input
+ */
 export const getPendingActionsSummary = async (
   esClient: ElasticsearchClient,
   metadataService: EndpointMetadataService,
+  logger: Logger,
   /** The Fleet Agent IDs to be checked */
   agentIDs: string[],
   isPendingActionResponsesWithAckEnabled: boolean
 ): Promise<EndpointPendingActions[]> => {
-  // retrieve the unexpired actions for the given hosts
-  const recentActions = await esClient
-    .search<EndpointAction>(
-      {
-        index: AGENT_ACTIONS_INDEX,
-        size: ACTIONS_SEARCH_PAGE_SIZE,
-        from: 0,
-        body: {
-          query: {
-            bool: {
-              filter: [
-                { term: { type: 'INPUT_ACTION' } }, // actions that are directed at agent children
-                { term: { input_type: 'endpoint' } }, // filter for agent->endpoint actions
-                { range: { expiration: { gte: 'now' } } }, // that have not expired yet
-                { terms: { agents: agentIDs } }, // for the requested agent IDs
-              ],
-            },
-          },
-        },
-      },
-      { ignore: [404] }
-    )
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    .then((result) => result?.hits?.hits?.map((a) => a._source!) || [])
-    .catch(catchAndWrapError);
-
-  // retrieve any responses to those action IDs from these agents
-  const responses = await fetchActionResponses(
+  const { data: unExpiredActionList } = await getActionList({
     esClient,
-    metadataService,
-    recentActions.map((a) => a.action_id),
-    agentIDs
-  );
+    unExpiredOnly: true,
+    elasticAgentIds: agentIDs,
+    pageSize: ACTIONS_SEARCH_PAGE_SIZE,
+    logger,
+  });
+
+  // Store a map of `agent_id => array of actions`
+  const unExpiredByAgentId: Record<string, ActionDetails[]> = unExpiredActionList.reduce<
+    Record<string, ActionDetails[]>
+  >((byAgentMap, action) => {
+    for (const agent of action.agents) {
+      if (!byAgentMap[agent]) {
+        byAgentMap[agent] = [];
+      }
+
+      byAgentMap[agent].push(action);
+    }
+
+    return byAgentMap;
+  }, {});
 
   const pending: EndpointPendingActions[] = [];
 
-  for (const agentId of agentIDs) {
-    const agentResponses = responses[agentId];
+  let endpointMetadataLastUpdated: Record<string, Date> | undefined;
 
-    // get response actionIds for responses with ACKs from the fleet agent
-    const ackResponseActionIdList: string[] = agentResponses
-      .filter(hasAckInResponse)
-      .map((response) => response.action_id);
-
-    // actions Ids that are indexed in new endpoint response index
-    const indexedActionIds = await hasEndpointResponseDoc({
-      agentId,
-      actionIds: ackResponseActionIdList,
-      esClient,
-    });
-
-    const pendingActions: EndpointAction[] = recentActions.filter((action) => {
-      return ackResponseActionIdList.includes(action.action_id) // if has ack
-        ? hasNoEndpointResponse({ action, agentId, indexedActionIds }) // then find responses in new index
-        : hasNoFleetResponse({
-            // else use the legacy way
-            action,
-            agentId,
-            agentResponses,
-          });
-    });
+  for (const agentID of agentIDs) {
+    const agentPendingActions: EndpointPendingActions['pending_actions'] = {};
 
     pending.push({
-      agent_id: agentId,
-      pending_actions: pendingActions
-        .map((a) => a.data.command)
-        .reduce((acc, cur) => {
-          if (!isPendingActionResponsesWithAckEnabled) {
-            acc[cur] = 0; // set pending counts to 0 when FF is disabled
-          } else {
-            // else do the usual counting
-            if (cur in acc) {
-              acc[cur] += 1;
-            } else {
-              acc[cur] = 1;
-            }
-          }
-
-          return acc;
-        }, {} as EndpointPendingActions['pending_actions']),
+      agent_id: agentID,
+      pending_actions: agentPendingActions,
     });
-  }
 
-  return pending;
-};
+    const agentUnexpiredActions = unExpiredByAgentId[agentID] ?? [];
 
-/**
- * Returns a string of action ids for search result
- *
- * @param esClient
- * @param actionIds
- * @param agentId
- */
-const hasEndpointResponseDoc = async ({
-  actionIds,
-  agentId,
-  esClient,
-}: {
-  actionIds: string[];
-  agentId: string;
-  esClient: ElasticsearchClient;
-}): Promise<string[]> => {
-  const response = await esClient
-    .search<LogsEndpointActionResponse>(
-      {
-        index: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
-        size: ACTIONS_SEARCH_PAGE_SIZE,
-        body: {
-          query: {
-            bool: {
-              filter: [{ terms: { action_id: actionIds } }, { term: { agent_id: agentId } }],
-            },
-          },
-        },
-      },
-      { ignore: [404] }
-    )
-    .then((result) => result?.hits?.hits?.map((a) => a._source?.EndpointActions.action_id) || [])
-    .catch(catchAndWrapError);
-  return response.filter((action): action is string => action !== undefined);
-};
-
-/**
- * Returns back a map of elastic Agent IDs to array of action responses that have a response.
- *
- * @param esClient
- * @param metadataService
- * @param actionIds
- * @param agentIds
- */
-const fetchActionResponses = async (
-  esClient: ElasticsearchClient,
-  metadataService: EndpointMetadataService,
-  actionIds: string[],
-  agentIds: string[]
-): Promise<Record<string, EndpointActionResponse[]>> => {
-  const actionResponsesByAgentId: Record<string, EndpointActionResponse[]> = agentIds.reduce(
-    (acc, agentId) => {
-      acc[agentId] = [];
-      return acc;
-    },
-    {} as Record<string, EndpointActionResponse[]>
-  );
-
-  const actionResponses = await esClient
-    .search<EndpointActionResponse>(
-      {
-        index: AGENT_ACTIONS_RESULTS_INDEX,
-        size: ACTIONS_SEARCH_PAGE_SIZE,
-        from: 0,
-        body: {
-          query: {
-            bool: {
-              filter: [
-                { terms: { action_id: actionIds } }, // get results for these actions
-                { terms: { agent_id: agentIds } }, // ONLY responses for the agents we are interested in (ignore others)
-              ],
-            },
-          },
-        },
-      },
-      { ignore: [404] }
-    )
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    .then((result) => result?.hits?.hits?.map((a) => a._source!) || [])
-    .catch(catchAndWrapError);
-
-  if (actionResponses.length === 0) {
-    return actionResponsesByAgentId;
-  }
-
-  // Get the latest docs from the metadata data-stream for the Elastic Agent IDs in the action responses
-  // This will be used determine if we should withhold the action id from the returned list in cases where
-  // the Endpoint might not yet have sent an updated metadata document (which would be representative of
-  // the state of the endpoint post-action)
-  const latestEndpointMetadataDocs = await metadataService.findHostMetadataForFleetAgents(
-    esClient,
-    agentIds
-  );
-
-  // Object of Elastic Agent Ids to event created date
-  const endpointLastEventCreated: Record<string, Date> = latestEndpointMetadataDocs.reduce(
-    (acc, endpointMetadata) => {
-      acc[endpointMetadata.elastic.agent.id] = new Date(endpointMetadata.event.created);
-      return acc;
-    },
-    {} as Record<string, Date>
-  );
-
-  for (const actionResponse of actionResponses) {
-    const actionCommand = actionResponse.action_data.command;
-
-    // We only (possibly) withhold fleet action responses for `isolate` and `unisolate`.
-    // All others should just return the responses and not wait until a metadata
-    // document update is received.
-    if (actionCommand === 'unisolate' || actionCommand === 'isolate') {
-      const lastEndpointMetadataEventTimestamp = endpointLastEventCreated[actionResponse.agent_id];
-      const actionCompletedAtTimestamp = new Date(actionResponse.completed_at);
-
-      // If enough time has lapsed in checking for updated Endpoint metadata doc so that we don't keep
-      // checking it forever.
-      // It uses the `@timestamp` in order to ensure we are looking at times that were set by the server
-      const enoughTimeHasLapsed =
-        Date.now() - new Date(actionResponse['@timestamp']).getTime() >
-        PENDING_ACTION_RESPONSE_MAX_LAPSED_TIME;
-
-      if (
-        !lastEndpointMetadataEventTimestamp ||
-        enoughTimeHasLapsed ||
-        lastEndpointMetadataEventTimestamp > actionCompletedAtTimestamp
+    for (const unExpiredAction of agentUnexpiredActions) {
+      if (!unExpiredAction.isCompleted) {
+        // Add the command to the list of pending actions, but set it to zero if the
+        // `pendingActionResponsesWithAck` feature flag is false.
+        // Otherwise, just increment the count for this command
+        agentPendingActions[unExpiredAction.command] = !isPendingActionResponsesWithAckEnabled
+          ? 0
+          : (agentPendingActions[unExpiredAction.command] ?? 0) + 1;
+      } else if (
+        unExpiredAction.wasSuccessful &&
+        (unExpiredAction.command === 'isolate' || unExpiredAction.command === 'unisolate')
       ) {
-        actionResponsesByAgentId[actionResponse.agent_id].push(actionResponse);
+        // For Isolate and Un-Isolate, we want to ensure that the isolation status being reported in the
+        // endpoint metadata was received after the action was completed. This is to ensure that the
+        // isolation status being reported in the UI remains as accurate as possible.
+
+        // If the metadata documents for all agents has not yet been retrieved, do it now
+        if (!endpointMetadataLastUpdated) {
+          endpointMetadataLastUpdated = (
+            await metadataService.findHostMetadataForFleetAgents(esClient, agentIDs)
+          ).reduce((acc, endpointMetadata) => {
+            acc[endpointMetadata.elastic.agent.id] = new Date(endpointMetadata.event.created);
+            return acc;
+          }, {} as Record<string, Date>);
+        }
+
+        const lastEndpointMetadataEventTimestamp = endpointMetadataLastUpdated[agentID];
+        const actionCompletedAtTimestamp = new Date(unExpiredAction.completedAt ?? Date.now());
+        const enoughTimeHasLapsed =
+          Date.now() - actionCompletedAtTimestamp.getTime() >
+          PENDING_ACTION_RESPONSE_MAX_LAPSED_TIME;
+
+        // If an endpoint metadata update was not received after the action completed,
+        // and we are still within the lapse time of waiting for it, then show this action
+        // as pending.
+        if (
+          !enoughTimeHasLapsed &&
+          lastEndpointMetadataEventTimestamp &&
+          lastEndpointMetadataEventTimestamp < actionCompletedAtTimestamp
+        ) {
+          agentPendingActions[unExpiredAction.command] = !isPendingActionResponsesWithAckEnabled
+            ? 0
+            : (agentPendingActions[unExpiredAction.command] ?? 0) + 1;
+        }
       }
-    } else {
-      actionResponsesByAgentId[actionResponse.agent_id].push(actionResponse);
     }
   }
 
-  return actionResponsesByAgentId;
+  return pending;
 };

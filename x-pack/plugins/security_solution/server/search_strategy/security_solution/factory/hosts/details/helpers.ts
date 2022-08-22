@@ -185,6 +185,7 @@ export const getHostEndpoint = async (
       ? getPendingActionsSummary(
           esClient.asInternalUser,
           endpointMetadataService,
+          logger,
           [fleetAgentId],
           endpointContext.experimentalFeatures.pendingActionResponsesWithAck
         )
