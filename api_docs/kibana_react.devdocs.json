@@ -1723,8 +1723,7 @@
         "id": "def-public.RedirectAppLinks",
         "type": "Function",
         "tags": [
-          "deprecated",
-          "kbn-shared-ux-components"
+          "deprecated"
         ],
         "label": "RedirectAppLinks",
         "description": [
