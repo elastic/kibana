@@ -44,26 +44,26 @@ describe('RulesTableUtilityBar', () => {
   });
 
   it('renders correct pagination label according to pagination data', () => {
-        const wrapper = mount(
-          <TestProviders>
-            <RulesTableUtilityBar
-              canBulkEdit
-              onRefresh={jest.fn()}
-              pagination={{
-                page: 1,
-                perPage: 10,
-                total: 21,
-              }}
-              numberSelectedItems={1}
-              onGetBulkItemsPopoverContent={jest.fn()}
-              isAutoRefreshOn={true}
-              onRefreshSwitch={jest.fn()}
-              onToggleSelectAll={jest.fn()}
-            />
-          </TestProviders>
-        );
-        expect(wrapper.find('[data-test-subj="showingRules"]').at(0).text()).toEqual("Showing 1-10 of 21 rules");
-      }
+    const wrapper = mount(
+      <TestProviders>
+        <RulesTableUtilityBar
+          canBulkEdit
+          onRefresh={jest.fn()}
+          pagination={{
+            page: 1,
+            perPage: 10,
+            total: 21,
+          }}
+          numberSelectedItems={1}
+          onGetBulkItemsPopoverContent={jest.fn()}
+          isAutoRefreshOn={true}
+          onRefreshSwitch={jest.fn()}
+          onToggleSelectAll={jest.fn()}
+        />
+      </TestProviders>
+    );
+    expect(wrapper.find('[data-test-subj="showingRules"]').at(0).text()).toEqual(
+      'Showing 1-10 of 21 rules'
     );
   });
 
@@ -194,72 +194,72 @@ describe('RulesTableUtilityBar', () => {
       expect(mockSwitch).not.toHaveBeenCalled();
     });
   });
-});
 
-describe('getShowingRulesParams creates correct label when', () => {
-  it('there are 0 rules to display', () => {
-    const pagination = {
-      page: 1,
-      perPage: 10,
-      total: 0,
-    };
-    const [firstInPage, lastInPage] = getShowingRulesParams(pagination);
-    expect(firstInPage).toEqual(0);
-    expect(lastInPage).toEqual(0);
-  });
+  describe('getShowingRulesParams creates correct label when', () => {
+    it('there are 0 rules to display', () => {
+      const pagination = {
+        page: 1,
+        perPage: 10,
+        total: 0,
+      };
+      const [firstInPage, lastInPage] = getShowingRulesParams(pagination);
+      expect(firstInPage).toEqual(0);
+      expect(lastInPage).toEqual(0);
+    });
 
-  it('there is 1 rule to display', () => {
-    const pagination = {
-      page: 1,
-      perPage: 10,
-      total: 1,
-    };
-    const [firstInPage, lastInPage] = getShowingRulesParams(pagination);
-    expect(firstInPage).toEqual(1);
-    expect(lastInPage).toEqual(1);
-  });
+    it('there is 1 rule to display', () => {
+      const pagination = {
+        page: 1,
+        perPage: 10,
+        total: 1,
+      };
+      const [firstInPage, lastInPage] = getShowingRulesParams(pagination);
+      expect(firstInPage).toEqual(1);
+      expect(lastInPage).toEqual(1);
+    });
 
-  it('the table displays the first page, and rules per page is less than total rules', () => {
-    const pagination = {
-      page: 1,
-      perPage: 10,
-      total: 21,
-    };
-    const [firstInPage, lastInPage] = getShowingRulesParams(pagination);
-    expect(firstInPage).toEqual(1);
-    expect(lastInPage).toEqual(10);
-  });
+    it('the table displays the first page, and rules per page is less than total rules', () => {
+      const pagination = {
+        page: 1,
+        perPage: 10,
+        total: 21,
+      };
+      const [firstInPage, lastInPage] = getShowingRulesParams(pagination);
+      expect(firstInPage).toEqual(1);
+      expect(lastInPage).toEqual(10);
+    });
 
-  it('the table displays the first page, and rules per page is greater than total rules', () => {
-    const pagination = {
-      page: 1,
-      perPage: 10,
-      total: 8,
-    };
-    const [firstInPage, lastInPage] = getShowingRulesParams(pagination);
-    expect(firstInPage).toEqual(1);
-    expect(lastInPage).toEqual(8);
-  });
+    it('the table displays the first page, and rules per page is greater than total rules', () => {
+      const pagination = {
+        page: 1,
+        perPage: 10,
+        total: 8,
+      };
+      const [firstInPage, lastInPage] = getShowingRulesParams(pagination);
+      expect(firstInPage).toEqual(1);
+      expect(lastInPage).toEqual(8);
+    });
 
-  it('the table displays the second page, and rules per page is less than total rules', () => {
-    const pagination = {
-      page: 2,
-      perPage: 10,
-      total: 31,
-    };
-    const [firstInPage, lastInPage] = getShowingRulesParams(pagination);
-    expect(firstInPage).toEqual(11);
-    expect(lastInPage).toEqual(20);
-  });
+    it('the table displays the second page, and rules per page is less than total rules', () => {
+      const pagination = {
+        page: 2,
+        perPage: 10,
+        total: 31,
+      };
+      const [firstInPage, lastInPage] = getShowingRulesParams(pagination);
+      expect(firstInPage).toEqual(11);
+      expect(lastInPage).toEqual(20);
+    });
 
-  it('the table displays the last page, displaying the remaining rules', () => {
-    const pagination = {
-      page: 2,
-      perPage: 100,
-      total: 101,
-    };
-    const [firstInPage, lastInPage] = getShowingRulesParams(pagination);
-    expect(firstInPage).toEqual(101);
-    expect(lastInPage).toEqual(101);
+    it('the table displays the last page, displaying the remaining rules', () => {
+      const pagination = {
+        page: 2,
+        perPage: 100,
+        total: 101,
+      };
+      const [firstInPage, lastInPage] = getShowingRulesParams(pagination);
+      expect(firstInPage).toEqual(101);
+      expect(lastInPage).toEqual(101);
+    });
   });
 });
