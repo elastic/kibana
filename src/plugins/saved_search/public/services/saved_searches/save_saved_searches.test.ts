@@ -13,6 +13,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 import { saveSavedSearch } from './save_saved_searches';
 import type { SavedSearch } from './types';
+import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 
 describe('saveSavedSearch', () => {
   let savedObjectsClient: SavedObjectsStart['client'];
@@ -118,6 +119,40 @@ describe('saveSavedSearch', () => {
         timeRestore: false,
       },
       { references: [] }
+    );
+  });
+
+  test('should call savedObjectsTagging.ui.updateTagsReferences', async () => {
+    const savedObjectsTagging = {
+      ui: {
+        updateTagsReferences: jest.fn((_, tags) => tags),
+      },
+    } as unknown as SavedObjectsTaggingApi;
+    await saveSavedSearch(
+      { ...savedSearch, tags: ['tag-1', 'tag-2'] },
+      {},
+      savedObjectsClient,
+      savedObjectsTagging
+    );
+
+    expect(savedObjectsTagging.ui.updateTagsReferences).toHaveBeenCalledWith(
+      [],
+      ['tag-1', 'tag-2']
+    );
+    expect(savedObjectsClient.update).toHaveBeenCalledWith(
+      'search',
+      'id',
+      {
+        columns: [],
+        description: '',
+        grid: {},
+        isTextBasedQuery: false,
+        hideChart: false,
+        kibanaSavedObjectMeta: { searchSourceJSON: '{}' },
+        sort: [],
+        title: 'title',
+      },
+      { references: ['tag-1', 'tag-2'] }
     );
   });
 });
