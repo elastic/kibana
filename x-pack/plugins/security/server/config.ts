@@ -238,7 +238,7 @@ export const ConfigSchema = schema.object({
   }),
   authc: schema.object({
     selector: schema.object({ enabled: schema.maybe(schema.boolean()) }),
-    accessAgreement: schema.maybe(schema.object({message: schema.string()})),
+    accessAgreement: schema.maybe(schema.object({ message: schema.string() })),
     providers: schema.oneOf([schema.arrayOf(schema.string()), providersConfigSchema], {
       defaultValue: {
         basic: {
@@ -331,9 +331,10 @@ export function createConfig(
       ? [...new Set(config.authc.providers as Array<keyof ProvidersConfigType>)].reduce(
           (legacyProviders, providerType, order) => {
             legacyProviders[providerType] = {
-              [providerType]: providerType === 'saml' || providerType === 'oidc' ?
-                { enabled: true, showInSelector: true, order, ...config.authc[providerType] } :
-                { enabled: true, showInSelector: true, order },
+              [providerType]:
+                providerType === 'saml' || providerType === 'oidc'
+                  ? { enabled: true, showInSelector: true, order, ...config.authc[providerType] }
+                  : { enabled: true, showInSelector: true, order },
             };
 
             return legacyProviders;
@@ -341,7 +342,7 @@ export function createConfig(
           {} as Record<string, unknown>
         )
       : config.authc.providers
-    ) as ProvidersConfigType;
+  ) as ProvidersConfigType;
 
   const updatedProvidersWithAccessAgreement: Record<string, object> = {};
 
@@ -358,11 +359,11 @@ export function createConfig(
       const hasLocalAccessAgreement: boolean = !!accessAgreement?.message;
       const globalAccessAgreement = config.authc?.accessAgreement?.message;
 
-      let currType = {
+      const currType = {
         ...updatedProvidersWithAccessAgreement[type],
         [name]: {
           ...providerGroup[name],
-        }
+        },
       };
 
       if (!hasLocalAccessAgreement) {
@@ -370,18 +371,17 @@ export function createConfig(
           currType[name] = {
             ...currType[name],
             accessAgreement: {
-              message: globalAccessAgreement
-            }
-          }
+              message: globalAccessAgreement,
+            },
+          };
         }
       }
 
-      updatedProvidersWithAccessAgreement[type] = currType
+      updatedProvidersWithAccessAgreement[type] = currType;
 
       if (!enabled) {
         delete providerGroup![name];
       } else {
-
         const hasAccessAgreement: boolean = hasLocalAccessAgreement || !!globalAccessAgreement;
 
         sortedProviders.push({

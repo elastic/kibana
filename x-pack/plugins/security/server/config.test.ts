@@ -1791,14 +1791,13 @@ describe('createConfig()', () => {
 
   describe('Global accessAgreement', () => {
     it('should not override local access agreement', () => {
-
       const resultConfig = createConfig(
         ConfigSchema.validate({
           authc: {
             accessAgreement: { message: 'foo' },
             providers: {
               basic: {
-                basic1: { order: 0, accessAgreement: { message: 'bar' }},
+                basic1: { order: 0, accessAgreement: { message: 'bar' } },
               },
               saml: {
                 saml1: { order: 1, realm: 'saml1', accessAgreement: { message: 'baz' } },
@@ -1806,7 +1805,7 @@ describe('createConfig()', () => {
               },
               oidc: {
                 oidc1: { order: 3, realm: 'oidc1' },
-                oidc2: { order: 4, realm: 'oidc2', accessAgreement: { message: 'qux' }}
+                oidc2: { order: 4, realm: 'oidc2', accessAgreement: { message: 'qux' } },
               },
             },
           },
