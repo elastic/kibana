@@ -263,7 +263,7 @@ describe('IndicesLogic', () => {
       expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledTimes(1);
       expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledWith({});
     });
-    it('calls flashAPIErrors on deletError', () => {
+    it('calls flashAPIErrors on deleteError', () => {
       IndicesLogic.actions.deleteError({} as HttpError);
       expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledTimes(1);
       expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledWith({});
