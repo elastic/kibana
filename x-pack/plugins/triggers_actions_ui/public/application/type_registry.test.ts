@@ -79,9 +79,11 @@ describe('get()', () => {
         "actionConnectorFields": null,
         "actionParamsFields": Object {
           "$$typeof": Symbol(react.lazy),
-          "_ctor": [Function],
-          "_result": null,
-          "_status": -1,
+          "_init": [Function],
+          "_payload": Object {
+            "_result": [Function],
+            "_status": -1,
+          },
         },
         "iconClass": "test",
         "id": "my-action-type-snapshot",
