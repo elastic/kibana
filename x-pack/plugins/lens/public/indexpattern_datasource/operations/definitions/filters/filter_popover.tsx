@@ -32,29 +32,6 @@ export const FilterPopover = ({
 }) => {
   const inputRef = React.useRef<HTMLInputElement>();
 
-  // The following code is to prevent an <ESCAPE> keypress
-  // from propagating.
-  //
-  // TODO - It looks like EUI should be handling this
-  // (see https://github.com/elastic/eui/commit/ad97583b0d644690379f72c7a20879cfadb16e7a)
-  const popoverRef = React.useRef<EuiPopover>(null);
-  let panelElement: HTMLDivElement;
-  const panelRefCallback = (element: HTMLDivElement) => {
-    const listener = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        event.stopPropagation();
-        panelElement.removeEventListener('keydown', listener);
-        popoverRef.current?.closePopover();
-      }
-    };
-
-    if (element) {
-      panelElement = element;
-      panelElement.addEventListener('keydown', listener);
-    }
-  };
-  // End <ESCAPE> handling code
-
   const setFilterLabel = (label: string) => setFilter({ ...filter, label });
   const setFilterQuery = (input: Query) => setFilter({ ...filter, input });
 
@@ -70,14 +47,12 @@ export const FilterPopover = ({
 
   return (
     <EuiPopover
-      ref={popoverRef}
-      panelRef={panelRefCallback}
       data-test-subj="indexPattern-filters-existingFilterContainer"
       anchorClassName="eui-fullWidth"
       panelClassName="lnsIndexPatternDimensionEditor__filtersEditor"
       isOpen={isOpen}
       ownFocus
-      closePopover={() => triggerClose()}
+      closePopover={triggerClose}
       button={button}
     >
       <QueryInput
@@ -96,7 +71,7 @@ export const FilterPopover = ({
         onChange={setFilterLabel}
         placeholder={getPlaceholder(filter.input.query)}
         inputRef={inputRef}
-        onSubmit={() => triggerClose()}
+        onSubmit={triggerClose}
         dataTestSubj="indexPattern-filters-label"
       />
     </EuiPopover>
