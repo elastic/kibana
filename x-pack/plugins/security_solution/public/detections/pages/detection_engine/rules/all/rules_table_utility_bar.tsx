@@ -26,8 +26,14 @@ import {
 import * as i18n from '../translations';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useRulesTableContext } from './rules_table/rules_table_context';
-import { getShowingRulesParams } from '../utils';
-import type { Pagination } from '../types';
+import type { PaginationOptions } from '../../../../containers/detection_engine/rules/types';
+
+export const getShowingRulesParams = ({ page, perPage, total: totalRules }: PaginationOptions) => {
+  const firstInPage = totalRules === 0 ? 0 : (page - 1) * perPage + 1;
+  const lastInPage = page * perPage > totalRules ? totalRules : page * perPage;
+
+  return [firstInPage, lastInPage, totalRules] as const;
+};
 
 interface RulesTableUtilityBarProps {
   canBulkEdit: boolean;
@@ -38,7 +44,7 @@ interface RulesTableUtilityBarProps {
   onRefresh: () => void;
   onRefreshSwitch: (checked: boolean) => void;
   onToggleSelectAll: () => void;
-  pagination: Pagination;
+  pagination: PaginationOptions;
   isBulkActionInProgress?: boolean;
   hasDisabledActions?: boolean;
 }
