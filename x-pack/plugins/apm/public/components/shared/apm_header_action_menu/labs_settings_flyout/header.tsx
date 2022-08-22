@@ -41,8 +41,15 @@ export function Header({ isLabsChecked, onChangeLabs }: Props) {
           <EuiFlexItem>
             <EuiFormFieldset legend={{ children: 'labs:apm-ui' }}>
               <EuiSwitch
-                showLabel={false}
-                label=""
+                label={
+                  isLabsChecked
+                    ? i18n.translate('xpack.apm.labs.checked', {
+                        defaultMessage: 'On',
+                      })
+                    : i18n.translate('xpack.apm.labs.unchecked', {
+                        defaultMessage: 'Off',
+                      })
+                }
                 checked={isLabsChecked}
                 onChange={(e) => onChangeLabs(e.target.checked)}
               />

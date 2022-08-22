@@ -9,8 +9,7 @@ import { useMemo, useState } from 'react';
 import { FieldState } from '@kbn/advanced-settings-plugin/public';
 import { toEditableConfig } from '@kbn/advanced-settings-plugin/public';
 import { IUiSettingsClient } from '@kbn/core/public';
-
-type EditableConfig = Record<string, ReturnType<typeof toEditableConfig>>;
+import { isEmpty } from 'lodash';
 
 function getEditableConfig({
   settingsKeys,
@@ -23,7 +22,7 @@ function getEditableConfig({
     return {};
   }
   const uiSettingsDefinition = uiSettings.getAll();
-  const config: EditableConfig = {};
+  const config: Record<string, ReturnType<typeof toEditableConfig>> = {};
 
   settingsKeys.forEach((key) => {
     const settingDef = uiSettingsDefinition?.[key];
@@ -43,13 +42,20 @@ function getEditableConfig({
 
 export function useApmEditableSettings(settingsKeys: string[]) {
   const { services } = useKibana();
+  const { uiSettings } = services;
+  const [isSaving, setIsSaving] = useState(false);
+  const [forceReloadSettings, setForceReloadSettings] = useState(0);
   const [unsavedChanges, setUnsavedChanges] = useState<
     Record<string, FieldState>
   >({});
 
-  const settingsEditableConfig = useMemo(() => {
-    return getEditableConfig({ settingsKeys, uiSettings: services.uiSettings });
-  }, [services.uiSettings, settingsKeys]);
+  const settingsEditableConfig = useMemo(
+    () => {
+      return getEditableConfig({ settingsKeys, uiSettings });
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [uiSettings, settingsKeys, forceReloadSettings]
+  );
 
   function handleFieldChange(key: string, fieldState: FieldState) {
     setUnsavedChanges((state) => {
@@ -66,9 +72,42 @@ export function useApmEditableSettings(settingsKeys: string[]) {
     });
   }
 
+  function cleanUnsavedChanges() {
+    setUnsavedChanges({});
+  }
+
+  async function saveAll() {
+    if (uiSettings && !isEmpty(unsavedChanges)) {
+      try {
+        setIsSaving(true);
+        let reloadPage = false;
+        const arr = Object.entries(unsavedChanges).map(([key, fieldState]) => {
+          if (!reloadPage) {
+            reloadPage = settingsEditableConfig[key].requiresPageReload;
+          }
+          return uiSettings.set(key, fieldState.value);
+        });
+
+        await Promise.all(arr);
+        setForceReloadSettings((state) => ++state);
+        cleanUnsavedChanges();
+        if (reloadPage) {
+          window.location.reload();
+        }
+      } catch (e) {
+        // TODO: do something here
+      } finally {
+        setIsSaving(false);
+      }
+    }
+  }
+
   return {
     settingsEditableConfig,
     unsavedChanges,
     handleFieldChange,
+    saveAll,
+    isSaving,
+    cleanUnsavedChanges,
   };
 }

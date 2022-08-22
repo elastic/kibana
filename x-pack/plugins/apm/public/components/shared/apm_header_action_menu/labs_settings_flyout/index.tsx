@@ -17,8 +17,6 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { LazyField } from '@kbn/advanced-settings-plugin/public';
-import { IToasts } from '@kbn/core-notifications-browser';
-import { DocLinks } from '@kbn/doc-links';
 import { i18n } from '@kbn/i18n';
 import {
   apmOperationsTab,
@@ -28,6 +26,7 @@ import {
 } from '@kbn/observability-plugin/common';
 import { isEmpty } from 'lodash';
 import React, { useState } from 'react';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmEditableSettings } from '../../../../hooks/use_apm_editable_settings';
 import { Header } from './header';
 
@@ -39,10 +38,17 @@ const experimentalFeatureKeys = [
 ];
 
 export function LabsSettingsFlyout() {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
+  const { docLinks, notifications } = useApmPluginContext().core;
   const [isLabsChecked, setIsLabsChecked] = useState(false);
-  const { handleFieldChange, settingsEditableConfig, unsavedChanges } =
-    useApmEditableSettings(experimentalFeatureKeys);
+  const {
+    handleFieldChange,
+    settingsEditableConfig,
+    unsavedChanges,
+    saveAll,
+    isSaving,
+    cleanUnsavedChanges,
+  } = useApmEditableSettings(experimentalFeatureKeys);
 
   function toggleFlyoutVisibility() {
     setIsOpen((state) => !state);
@@ -54,6 +60,11 @@ export function LabsSettingsFlyout() {
     experimentalFeatureKeys.forEach((experimentalKey) => {
       handleFieldChange(experimentalKey, { value: checked });
     });
+  }
+
+  function handelCancel() {
+    cleanUnsavedChanges();
+    toggleFlyoutVisibility();
   }
 
   return (
@@ -80,8 +91,8 @@ export function LabsSettingsFlyout() {
                       setting={editableConfig}
                       handleChange={handleFieldChange}
                       enableSaving
-                      docLinks={{} as DocLinks}
-                      toasts={{} as IToasts}
+                      docLinks={docLinks.links}
+                      toasts={notifications.toasts}
                       unsavedChanges={unsavedChanges[settingKey]}
                     />
                     <EuiHorizontalRule />
@@ -93,7 +104,7 @@ export function LabsSettingsFlyout() {
           <EuiFlyoutFooter>
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty>
+                <EuiButtonEmpty onClick={handelCancel}>
                   {i18n.translate('xpack.apm.labs.cancel', {
                     defaultMessage: 'Cancel',
                   })}
@@ -102,7 +113,9 @@ export function LabsSettingsFlyout() {
               <EuiFlexItem grow={false}>
                 <EuiButton
                   fill
+                  isLoading={isSaving}
                   disabled={!isLabsChecked && isEmpty(unsavedChanges)}
+                  onClick={saveAll}
                 >
                   {i18n.translate('xpack.apm.labs.reload', {
                     defaultMessage: 'Reload to apply changes',

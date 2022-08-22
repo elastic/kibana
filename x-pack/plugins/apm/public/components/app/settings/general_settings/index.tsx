@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { EuiButton } from '@elastic/eui';
 import { LazyField } from '@kbn/advanced-settings-plugin/public';
-import { IToasts } from '@kbn/core-notifications-browser';
-import { DocLinks } from '@kbn/doc-links';
+import { i18n } from '@kbn/i18n';
 import {
   apmLabsButton,
   apmProgressiveLoading,
@@ -16,7 +16,9 @@ import {
   enableComparisonByDefault,
   enableInspectEsQueries,
 } from '@kbn/observability-plugin/common';
+import { isEmpty } from 'lodash';
 import React from 'react';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmEditableSettings } from '../../../../hooks/use_apm_editable_settings';
 
 const apmSettingsKeys = [
@@ -29,8 +31,18 @@ const apmSettingsKeys = [
 ];
 
 export function GeneralSettings() {
-  const { handleFieldChange, settingsEditableConfig, unsavedChanges } =
-    useApmEditableSettings(apmSettingsKeys);
+  const { docLinks, notifications } = useApmPluginContext().core;
+  const {
+    handleFieldChange,
+    settingsEditableConfig,
+    unsavedChanges,
+    saveAll,
+    isSaving,
+  } = useApmEditableSettings(apmSettingsKeys);
+
+  async function handleSave() {
+    await saveAll();
+  }
 
   return (
     <>
@@ -42,12 +54,22 @@ export function GeneralSettings() {
             setting={editableConfig}
             handleChange={handleFieldChange}
             enableSaving
-            docLinks={{} as DocLinks}
-            toasts={{} as IToasts}
+            docLinks={docLinks.links}
+            toasts={notifications.toasts}
             unsavedChanges={unsavedChanges[settingKey]}
           />
         );
       })}
+      <EuiButton
+        fill
+        isLoading={isSaving}
+        disabled={isEmpty(unsavedChanges)}
+        onClick={handleSave}
+      >
+        {i18n.translate('xpack.apm.labs.reload', {
+          defaultMessage: 'Reload to apply changes',
+        })}
+      </EuiButton>
     </>
   );
 }

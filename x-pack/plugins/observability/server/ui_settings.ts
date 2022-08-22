@@ -232,7 +232,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     }),
     schema: schema.boolean(),
     value: false,
-    requiresPageReload: false,
+    requiresPageReload: true,
     type: 'boolean',
   },
 };
