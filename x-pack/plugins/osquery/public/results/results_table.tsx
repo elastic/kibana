@@ -28,6 +28,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { createContext, useEffect, useState, useCallback, useContext, useMemo } from 'react';
 
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
+import type { ECSMapping } from '../../common/schemas/common';
 import { useAllResults } from './use_all_results';
 import type { ResultEdges } from '../../common/search_strategy';
 import { Direction } from '../../common/search_strategy';
@@ -48,7 +49,7 @@ interface ResultsTableComponentProps {
   actionId: string;
   selectedAgent?: string;
   agentIds?: string[];
-  ecsMapping?: Record<string, { field?: string; value?: string }>;
+  ecsMapping?: ECSMapping;
   endDate?: string;
   startDate?: string;
   addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;

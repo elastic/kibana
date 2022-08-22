@@ -8,27 +8,20 @@
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiFormRow, EuiComboBox } from '@elastic/eui';
+import { EuiFormRow, EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
 import { useController } from 'react-hook-form';
-import type { IFormFieldProps } from './types';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-type Props = IFormFieldProps<string[]>;
-
-export const ComboBoxField = ({
-  euiFieldProps = {},
-  name,
-  label,
-  labelAppend,
-  idAria,
-  helpText,
-  ...rest
-}: Props) => {
+interface VersionFieldProps {
+  euiFieldProps?: Record<string, unknown>;
+}
+export const VersionField = ({ euiFieldProps = {} }: VersionFieldProps) => {
   const {
     field: { onChange, value },
     fieldState: { error },
   } = useController({
-    name,
+    name: 'version',
     defaultValue: [],
     rules: {},
   });
@@ -52,15 +45,29 @@ export const ComboBoxField = ({
 
   return (
     <EuiFormRow
-      label={label}
-      labelAppend={labelAppend}
-      helpText={typeof helpText === 'function' ? helpText() : helpText}
+      label={
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <FormattedMessage
+              id="xpack.osquery.pack.queryFlyoutForm.versionFieldLabel"
+              defaultMessage="Minimum Osquery version"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
+      labelAppend={
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            <FormattedMessage
+              id="xpack.osquery.queryFlyoutForm.versionFieldOptionalLabel"
+              defaultMessage="(optional)"
+            />
+          </EuiText>
+        </EuiFlexItem>
+      }
       error={error?.message}
       isInvalid={hasError}
       fullWidth
-      // eslint-disable-next-line react-perf/jsx-no-new-array-as-prop
-      describedByIds={idAria ? [idAria] : undefined}
-      {...rest}
     >
       <EuiComboBox
         isInvalid={hasError}

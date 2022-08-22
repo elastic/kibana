@@ -41,14 +41,6 @@ export interface PackQueryFormData {
   ecs_mapping: EcsMappingFormField[];
 }
 
-export type PackQueryECSMapping = Record<
-  string,
-  {
-    field?: string;
-    value?: string;
-  }
->;
-
 const deserializer = (payload: PackSOQueryFormData): PackQueryFormData =>
   ({
     id: payload.id,

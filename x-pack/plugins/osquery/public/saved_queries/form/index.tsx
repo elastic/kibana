@@ -17,13 +17,8 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import {
-  createFormIdFieldValidations,
-  intervalFieldValidations,
-} from '../../packs/queries/validations';
-import { ComboBoxField, NumberField } from '../../form';
+import { IntervalField, QueryIdField, QueryDescriptionField, VersionField } from '../../form';
 import { PlatformCheckBoxGroupField } from '../../packs/queries/platform_checkbox_group_field';
-import { TextField } from '../../form';
 import { ALL_OSQUERY_VERSIONS_OPTIONS } from '../../packs/queries/constants';
 import { Field, getUseField } from '../../shared_imports';
 import { ECSMappingEditorField } from '../../packs/queries/lazy_ecs_mapping_editor_field';
@@ -85,24 +80,12 @@ const SavedQueryFormComponent: React.FC<SavedQueryFormProps> = ({
 
   return (
     <>
-      <TextField
-        name="id"
-        label={i18n.translate('xpack.osquery.pack.queryFlyoutForm.idFieldLabel', {
-          defaultMessage: 'ID',
-        })}
-        euiFieldProps={euiFieldProps}
-        rules={idSet && createFormIdFieldValidations(idSet)}
-      />
+      <QueryIdField idSet={idSet} euiFieldProps={euiFieldProps} />
+
       <EuiSpacer />
-      <TextField
-        name="description"
-        label={i18n.translate('xpack.osquery.pack.form.descriptionFieldLabel', {
-          defaultMessage: 'Description (optional)',
-        })}
-        euiFieldProps={euiFieldProps}
-      />
+      <QueryDescriptionField euiFieldProps={euiFieldProps} />
       <EuiSpacer />
-      <CodeEditorField name={'query'} euiFieldProps={euiFieldProps} />
+      <CodeEditorField euiFieldProps={euiFieldProps} />
       <EuiSpacer size="xl" />
       <EuiFlexGroup>
         <EuiFlexItem>
@@ -140,44 +123,9 @@ const SavedQueryFormComponent: React.FC<SavedQueryFormProps> = ({
       <EuiSpacer />
       <EuiFlexGroup>
         <EuiFlexItem>
-          <NumberField
-            name="interval"
-            defaultValue={3600}
-            label={i18n.translate('xpack.osquery.pack.queryFlyoutForm.intervalFieldLabel', {
-              defaultMessage: 'Interval (s)',
-            })}
-            validation={intervalFieldValidations}
-            euiFieldProps={intervalEuiFieldProps}
-          />
+          <IntervalField euiFieldProps={intervalEuiFieldProps} />
           <EuiSpacer size="m" />
-          <ComboBoxField
-            name="version"
-            label={
-              (
-                <EuiFlexGroup gutterSize="s">
-                  <EuiFlexItem grow={false}>
-                    <FormattedMessage
-                      id="xpack.osquery.pack.queryFlyoutForm.versionFieldLabel"
-                      defaultMessage="Minimum Osquery version"
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              ) as unknown as string
-            }
-            euiFieldProps={versionEuiFieldProps}
-            labelAppend={
-              (
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued">
-                    <FormattedMessage
-                      id="xpack.osquery.queryFlyoutForm.versionFieldOptionalLabel"
-                      defaultMessage="(optional)"
-                    />
-                  </EuiText>
-                </EuiFlexItem>
-              ) as unknown as string
-            }
-          />
+          <VersionField euiFieldProps={versionEuiFieldProps} />
         </EuiFlexItem>
         <EuiFlexItem>
           <PlatformCheckBoxGroupField euiFieldProps={euiFieldProps} />

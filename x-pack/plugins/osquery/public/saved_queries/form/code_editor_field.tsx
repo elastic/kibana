@@ -22,19 +22,20 @@ const StyledEuiCodeBlock = styled(EuiCodeBlock)`
 
 interface CodeEditorFieldProps {
   euiFieldProps?: Record<string, unknown>;
-  name: string;
   labelAppend?: string;
   helpText?: string;
 }
 
 const CodeEditorFieldComponent: React.FC<CodeEditorFieldProps> = ({
   euiFieldProps,
-  name: fieldName,
   labelAppend,
   helpText,
 }) => {
-  const { field, fieldState } = useController({
-    name: fieldName,
+  const {
+    field: { onChange, value },
+    fieldState: { error },
+  } = useController({
+    name: 'query',
     rules: {
       required: {
         message: i18n.translate('xpack.osquery.pack.queryFlyoutForm.emptyQueryError', {
@@ -53,12 +54,9 @@ const CodeEditorFieldComponent: React.FC<CodeEditorFieldProps> = ({
     defaultValue: '',
   });
 
-  const { onChange, value } = field;
-  const { error } = fieldState;
-
   return (
     <EuiFormRow
-      label={'Query'}
+      label="Query"
       labelAppend={!isEmpty(labelAppend) ? labelAppend : <OsquerySchemaLink />}
       helpText={helpText}
       isInvalid={!!error?.message}

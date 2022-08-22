@@ -12,7 +12,7 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiFormRow, EuiComboBox, EuiTextColor, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
-import type { IFormField } from '../../form/types';
+import { useController } from 'react-hook-form';
 import type { PackSavedObject } from '../../packs/types';
 
 const TextTruncate = styled.div`
@@ -20,12 +20,12 @@ const TextTruncate = styled.div`
   text-overflow: ellipsis;
 `;
 
-interface Props extends IFormField<string[]> {
+interface Props {
   fieldProps?: {
     packsData?: PackSavedObject[];
   };
   idAria?: string;
-  error?: string;
+  queryType: string;
 }
 
 interface PackOption {
@@ -34,14 +34,26 @@ interface PackOption {
   description?: string;
 }
 
-export const PacksComboBoxField = ({
-  fieldProps = {},
-  value,
-  onChange,
-  idAria,
-  error,
-  ...rest
-}: Props) => {
+export const PacksComboBoxField = ({ queryType, fieldProps = {}, idAria, ...rest }: Props) => {
+  const {
+    field: { value, onChange },
+    fieldState,
+  } = useController({
+    name: 'packId',
+    rules: {
+      required: {
+        message: i18n.translate(
+          'xpack.osquery.pack.queryFlyoutForm.osqueryPackMissingErrorMessage',
+          {
+            defaultMessage: 'Pack is a required field',
+          }
+        ),
+        value: queryType === 'pack',
+      },
+    },
+    defaultValue: [],
+  });
+  const error = fieldState.error?.message;
   const [selectedOptions, setSelectedOptions] = useState<
     Array<EuiComboBoxOptionOption<PackOption>>
   >([]);
@@ -73,12 +85,6 @@ export const PacksComboBoxField = ({
       })) ?? [],
     [fieldProps?.packsData]
   );
-
-  // const onSearchComboChange = useCallback((option: string) => {
-  //   if (option !== undefined) {
-  //     // field.clearErrors(VALIDATION_TYPES.ARRAY_ITEM);
-  //   }
-  // }, []); // field
 
   const renderOption = useCallback(
     ({ value: option }) => (
@@ -113,9 +119,11 @@ export const PacksComboBoxField = ({
 
   return (
     <EuiFormRow
-      label={'Pack'}
+      label={i18n.translate('xpack.osquery.liveQuery.queryForm.packQueryTypeLabel', {
+        defaultMessage: `Pack`,
+      })}
       error={error}
-      isInvalid={typeof error === 'string'}
+      isInvalid={!!error}
       fullWidth
       // eslint-disable-next-line react-perf/jsx-no-new-array-as-prop
       describedByIds={idAria ? [idAria] : undefined}
@@ -127,7 +135,6 @@ export const PacksComboBoxField = ({
         })}
         selectedOptions={selectedOptions}
         onChange={handlePackChange}
-        // onSearchChange={onSearchComboChange} // TODO DO WE STILL NEED THIS?
         data-test-subj="select-live-pack"
         fullWidth
         // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop

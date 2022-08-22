@@ -12,10 +12,6 @@ import { i18n } from '@kbn/i18n';
 import { AgentsTable } from '../../agents/agents_table';
 import type { AgentSelection } from '../../agents/types';
 
-interface IProps {
-  name: string;
-}
-
 const checkAgentsLength = (agentsSelection: AgentSelection) => {
   if (!isEmpty(agentsSelection)) {
     const isValid = !!(
@@ -37,16 +33,17 @@ const checkAgentsLength = (agentsSelection: AgentSelection) => {
   });
 };
 
-const AgentsTableFieldComponent: React.FC<IProps> = ({ name }) => {
-  const { field, fieldState } = useController({
-    name,
+const AgentsTableFieldComponent: React.FC<{}> = () => {
+  const {
+    field: { onChange, value },
+    fieldState: { error },
+  } = useController({
+    name: 'agentSelection',
     rules: {
       validate: checkAgentsLength,
     },
     defaultValue: {},
   });
-  const { onChange, value } = field;
-  const { error } = fieldState;
 
   return <AgentsTable agentSelection={value} onChange={onChange} error={error?.message} />;
 };

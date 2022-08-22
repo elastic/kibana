@@ -13,10 +13,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useController } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
-import type { IFormFieldProps } from '../../form/types';
+import type { FormFieldProps } from '../../form/types';
 import { PlatformIcon } from './platforms/platform_icon';
 
-type Props = Omit<IFormFieldProps<string[]>, 'name' | 'label'>;
+type Props = Omit<FormFieldProps<string[]>, 'name' | 'label'>;
 
 export const PlatformCheckBoxGroupField = (props: Props) => {
   const { euiFieldProps = {}, idAria, helpText, ...rest } = props;
@@ -81,7 +81,6 @@ export const PlatformCheckBoxGroupField = (props: Props) => {
     []
   );
 
-  // const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
   const [checkboxIdToSelectedMap, setCheckboxIdToSelectedMap] = useState<Record<string, boolean>>(
     () =>
       (options as EuiCheckboxGroupOption[]).reduce((acc, option) => {

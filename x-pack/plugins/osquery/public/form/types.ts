@@ -6,6 +6,7 @@
  */
 
 import type React from 'react';
+import type { ReactNode } from 'react';
 
 export interface IFormField<T> {
   name: string;
@@ -14,10 +15,10 @@ export interface IFormField<T> {
   onBlur?: () => void;
 }
 
-export interface IFormFieldProps<T> {
+export interface FormFieldProps<T> {
   name: string;
   label: string | Element;
-  labelAppend?: string;
+  labelAppend?: ReactNode;
   helpText?: string | (() => React.ReactNode);
   idAria?: string;
   euiFieldProps?: Record<string, unknown>;

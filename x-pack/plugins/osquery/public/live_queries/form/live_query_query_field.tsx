@@ -23,20 +23,21 @@ const StyledEuiCodeBlock = styled(EuiCodeBlock)`
 interface LiveQueryQueryFieldProps {
   disabled?: boolean;
   commands?: EuiCodeEditorProps['commands'];
-  name: string;
   queryType: string;
 }
 
 const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
-  name: fieldName,
   disabled,
   commands,
   queryType,
 }) => {
   const permissions = useKibana().services.application.capabilities.osquery;
 
-  const { field, fieldState } = useController({
-    name: fieldName,
+  const {
+    field: { onChange, value },
+    fieldState: { error },
+  } = useController({
+    name: 'query',
     rules: {
       required: {
         message: i18n.translate('xpack.osquery.pack.queryFlyoutForm.emptyQueryError', {
@@ -54,8 +55,6 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
     },
     defaultValue: '',
   });
-  const { onChange, value } = field;
-  const { error } = fieldState;
 
   return (
     <EuiFormRow

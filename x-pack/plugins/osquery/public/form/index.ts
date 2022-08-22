@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export { ComboBoxField } from './combo_box_field';
-export { TextField } from './text_field';
-export { NumberField } from './number_field';
+export { VersionField } from './version_field';
+export { QueryDescriptionField } from './query_description_field';
+export { IntervalField } from './interval_field';
+export { QueryIdField } from './query_id_field';
 export type { IFormField } from './types';

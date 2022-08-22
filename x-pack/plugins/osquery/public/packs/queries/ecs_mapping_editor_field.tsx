@@ -58,6 +58,14 @@ export interface EcsMappingFormField {
   };
 }
 
+export type EcsMappingSerialized = Record<
+  string,
+  {
+    field?: string;
+    value?: string;
+  }
+>;
+
 const typeMap = {
   binary: 'binary',
   half_float: 'number',
@@ -147,9 +155,13 @@ interface ECSComboboxFieldProps extends IFormField<string> {
   error?: string;
 }
 
-const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = (props) => {
-  const { euiFieldProps = {}, idAria, onChange, value, error } = props;
-
+const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
+  euiFieldProps = {},
+  idAria,
+  onChange,
+  value,
+  error,
+}) => {
   const [selectedOptions, setSelected] = useState<Array<EuiComboBoxOptionOption<ECSSchemaOption>>>(
     []
   );
@@ -229,7 +241,6 @@ const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = (props) => {
     return ECSSchemaOptions.filter(({ label }) => !currentFormECSFieldValues.includes(label));
   }, [watchedEcsMapping]);
 
-  // raczej nie ok
   useEffect(() => {
     // @ts-expect-error update types
     setSelected(() => {
@@ -592,7 +603,6 @@ export const ECSMappingEditorForm: React.FC<ECSMappingEditorFormProps> = ({
   isLastItem,
   index,
   onDelete,
-  onAppend,
 }) => {
   const ecsFieldValidator = (value: string, ecsMapping: EcsMappingFormField[]) => {
     const ecsCurrentMapping = ecsMapping[index].result.value;
@@ -853,8 +863,8 @@ export const ECSMappingEditorField = React.memo(
             ?.map((selectItem: { type: string; name: string; alias?: string }) => {
               if (selectItem.type === 'identifier') {
                 /*
-                  select * from routes, uptime;
-                */
+                select * from routes, uptime;
+              */
                 if (ast?.result.length === 1 && selectItem.name === '*') {
                   return reduce(
                     astOsqueryTables,
@@ -879,8 +889,8 @@ export const ECSMappingEditorField = React.memo(
                 }
 
                 /*
-                  select i.*, p.resident_size, p.user_time, p.system_time, time.minutes as counter from osquery_info i, processes p, time where p.pid = i.pid;
-                */
+                select i.*, p.resident_size, p.user_time, p.system_time, time.minutes as counter from osquery_info i, processes p, time where p.pid = i.pid;
+              */
 
                 const [table, column] = selectItem.name.includes('.')
                   ? selectItem.name?.split('.')
@@ -924,18 +934,18 @@ export const ECSMappingEditorField = React.memo(
               }
 
               /*
-                SELECT pid, uid, name, ROUND((
-                  (user_time + system_time) / (cpu_time.tsb - cpu_time.itsb)
-                ) * 100, 2) AS percentage
-                FROM processes, (
-                SELECT (
-                  SUM(user) + SUM(nice) + SUM(system) + SUM(idle) * 1.0) AS tsb,
-                  SUM(COALESCE(idle, 0)) + SUM(COALESCE(iowait, 0)) AS itsb
-                  FROM cpu_time
-                ) AS cpu_time
-                ORDER BY user_time+system_time DESC
-                LIMIT 5;
-              */
+              SELECT pid, uid, name, ROUND((
+                (user_time + system_time) / (cpu_time.tsb - cpu_time.itsb)
+              ) * 100, 2) AS percentage
+              FROM processes, (
+              SELECT (
+                SUM(user) + SUM(nice) + SUM(system) + SUM(idle) * 1.0) AS tsb,
+                SUM(COALESCE(idle, 0)) + SUM(COALESCE(iowait, 0)) AS itsb
+                FROM cpu_time
+              ) AS cpu_time
+              ORDER BY user_time+system_time DESC
+              LIMIT 5;
+            */
 
               if (selectItem.type === 'function' && selectItem.alias) {
                 return [

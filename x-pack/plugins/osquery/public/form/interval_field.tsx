@@ -9,23 +9,21 @@ import React, { useCallback, useMemo } from 'react';
 import { useController } from 'react-hook-form';
 import type { EuiFieldNumberProps } from '@elastic/eui';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
-import type { IFormFieldProps } from './types';
+import { i18n } from '@kbn/i18n';
 
-interface IProps extends IFormFieldProps<number> {
-  validation: Record<string, unknown>;
+interface IntervalFieldProps {
+  euiFieldProps?: Record<string, unknown>;
 }
 
-export const NumberField = (props: IProps) => {
-  const { name, defaultValue, validation, helpText, label, labelAppend, idAria, euiFieldProps } =
-    props;
+export const IntervalField = ({ euiFieldProps }: IntervalFieldProps) => {
   const {
     field: { onChange, value },
     fieldState: { error },
   } = useController({
-    name,
-    defaultValue: defaultValue || 0,
+    name: 'interval',
+    defaultValue: 3600,
     rules: {
-      ...validation,
+      ...intervalFieldValidations,
     },
   });
   const handleChange = useCallback(
@@ -39,14 +37,12 @@ export const NumberField = (props: IProps) => {
 
   return (
     <EuiFormRow
-      label={label}
-      labelAppend={labelAppend}
-      helpText={typeof helpText === 'function' ? helpText() : helpText}
+      label={i18n.translate('xpack.osquery.pack.queryFlyoutForm.intervalFieldLabel', {
+        defaultMessage: 'Interval (s)',
+      })}
       error={error?.message}
       isInvalid={hasError}
       fullWidth
-      // eslint-disable-next-line react-perf/jsx-no-new-array-as-prop
-      describedByIds={idAria ? [idAria] : undefined}
     >
       <EuiFieldNumber
         isInvalid={hasError}
@@ -59,4 +55,26 @@ export const NumberField = (props: IProps) => {
       />
     </EuiFormRow>
   );
+};
+
+const intervalFieldValidations = {
+  required: {
+    message: i18n.translate('xpack.osquery.pack.queryFlyoutForm.intervalFieldMinNumberError', {
+      defaultMessage: 'A positive interval value is required',
+    }),
+    value: true,
+  },
+  min: {
+    message: i18n.translate('xpack.osquery.pack.queryFlyoutForm.intervalFieldMinNumberError', {
+      defaultMessage: 'A positive interval value is required',
+    }),
+    value: 1,
+  },
+  max: {
+    message: i18n.translate('xpack.osquery.pack.queryFlyoutForm.intervalFieldMaxNumberError', {
+      defaultMessage: 'An interval value must be lower than {than}',
+      values: { than: 604800 },
+    }),
+    value: 604800,
+  },
 };

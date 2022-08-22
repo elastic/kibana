@@ -16,7 +16,6 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiButton,
-  EuiText,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -24,7 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { FormProvider } from 'react-hook-form';
 
 import { isEmpty, map } from 'lodash';
-import { createFormIdFieldValidations, intervalFieldValidations } from './validations';
+import { QueryIdField, IntervalField } from '../../form';
 import { defaultEcsFormData } from './ecs_mapping_editor_field';
 import { CodeEditorField } from '../../saved_queries/form/code_editor_field';
 import { PlatformCheckBoxGroupField } from './platform_checkbox_group_field';
@@ -38,7 +37,7 @@ import { usePackQueryForm } from './use_pack_query_form';
 import { SavedQueriesDropdown } from '../../saved_queries/saved_queries_dropdown';
 import { ECSMappingEditorField } from './lazy_ecs_mapping_editor_field';
 import { useKibana } from '../../common/lib/kibana';
-import { NumberField, TextField, ComboBoxField } from '../../form';
+import { VersionField } from '../../form';
 
 interface QueryFlyoutProps {
   uniqueQueryIds: string[];
@@ -134,43 +133,18 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
               <EuiSpacer />
             </>
           ) : null}
-          <TextField
-            name="id"
-            label={i18n.translate('xpack.osquery.pack.queryFlyoutForm.idFieldLabel', {
-              defaultMessage: 'ID',
-            })}
-            rules={createFormIdFieldValidations(idSet)}
-          />
+          <QueryIdField idSet={idSet} />
           <EuiSpacer />
-          <CodeEditorField name={'query'} />
+          <CodeEditorField />
           <EuiSpacer />
           <EuiFlexGroup>
             <EuiFlexItem>
-              <NumberField
-                name="interval"
-                defaultValue={3600}
-                label={i18n.translate('xpack.osquery.pack.queryFlyoutForm.intervalFieldLabel', {
-                  defaultMessage: 'Interval (s)',
-                })}
-                validation={intervalFieldValidations}
+              <IntervalField
                 // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
                 euiFieldProps={{ append: 's' }}
               />
               <EuiSpacer />
-              <ComboBoxField
-                name="version"
-                label={
-                  (
-                    <EuiFlexGroup gutterSize="s">
-                      <EuiFlexItem grow={false}>
-                        <FormattedMessage
-                          id="xpack.osquery.pack.queryFlyoutForm.versionFieldLabel"
-                          defaultMessage="Minimum Osquery version"
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  ) as unknown as string
-                }
+              <VersionField
                 // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
                 euiFieldProps={{
                   noSuggestions: false,
@@ -181,18 +155,6 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
                   options: ALL_OSQUERY_VERSIONS_OPTIONS,
                   onCreateOption: undefined,
                 }}
-                labelAppend={
-                  (
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="xs" color="subdued">
-                        <FormattedMessage
-                          id="xpack.osquery.queryFlyoutForm.versionFieldOptionalLabel"
-                          defaultMessage="(optional)"
-                        />
-                      </EuiText>
-                    </EuiFlexItem>
-                  ) as unknown as string
-                }
               />
             </EuiFlexItem>
             <EuiFlexItem>

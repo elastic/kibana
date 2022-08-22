@@ -58,25 +58,3 @@ export const createFormIdFieldValidations = (ids: Set<string>) => ({
     return isPatternValid || isUnique;
   },
 });
-
-export const intervalFieldValidations = {
-  required: {
-    message: i18n.translate('xpack.osquery.pack.queryFlyoutForm.intervalFieldMinNumberError', {
-      defaultMessage: 'A positive interval value is required',
-    }),
-    value: true,
-  },
-  min: {
-    message: i18n.translate('xpack.osquery.pack.queryFlyoutForm.intervalFieldMinNumberError', {
-      defaultMessage: 'A positive interval value is required',
-    }),
-    value: 1,
-  },
-  max: {
-    message: i18n.translate('xpack.osquery.pack.queryFlyoutForm.intervalFieldMaxNumberError', {
-      defaultMessage: 'An interval value must be lower than {than}',
-      values: { than: 604800 },
-    }),
-    value: 604800,
-  },
-};
