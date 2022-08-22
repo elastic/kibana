@@ -146,7 +146,7 @@ describe('Update rules configuration API', () => {
   it('create csp rules config based on activated csp rules', async () => {
     const { enabledRules } = await setupMocks();
 
-    const cspConfig = await createRulesConfig(enabledRules);
+    const cspConfig = createRulesConfig(enabledRules);
     expect(cspConfig).toMatchObject({
       runtime_cfg: {
         activated_rules: {
@@ -159,7 +159,7 @@ describe('Update rules configuration API', () => {
   it('create empty csp rules config when all rules are disabled', async () => {
     const { disabledRules } = await setupMocks();
 
-    const cspConfig = await createRulesConfig(disabledRules);
+    const cspConfig = createRulesConfig(disabledRules);
     expect(cspConfig).toMatchObject({ runtime_cfg: { activated_rules: {} } });
   });
 
