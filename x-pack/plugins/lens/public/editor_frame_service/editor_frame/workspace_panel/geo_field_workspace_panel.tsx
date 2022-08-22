@@ -10,9 +10,9 @@ import { EuiPageContentBody, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { UiActionsStart, VISUALIZE_GEO_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import { GlobeIllustration } from '@kbn/chart-icons';
 import { getVisualizeGeoFieldMessage } from '../../../utils';
 import { DragDrop } from '../../../drag_drop';
-import { GlobeIllustration } from '../../../assets/globe_illustration';
 import { APP_ID } from '../../../../common/constants';
 import './geo_field_workspace_panel.scss';
 

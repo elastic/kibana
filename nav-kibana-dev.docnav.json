@@ -94,6 +94,9 @@
         },
         {
           "id": "kibDevKeyConceptsNavigation"
+        },
+        {
+          "id": "kibDevDocsEmbeddables"
         }
       ]
     },
@@ -429,6 +432,9 @@
         },
         {
           "id": "kibVisualizationsPluginApi"
+        },
+        {
+          "id": "kibDevDocsOpsTest"
         }
       ]
     },
@@ -563,6 +569,9 @@
             },
             {
               "id": "kibDevDocsOpsManagedVscodeConfigCli"
+            },
+            {
+              "id": "kibDevDocsOpsTest"
             }
           ]
         }
