@@ -275,8 +275,11 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
   // auto-update
   useEffect(() => {
     startFetch();
+  }, [startFetch]);
+
+  useEffect(() => {
     return cancelFetch;
-  }, [startFetch, cancelFetch]);
+  }, [cancelFetch]);
 
   return useMemo(
     () => ({

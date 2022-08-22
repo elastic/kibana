@@ -320,8 +320,11 @@ export function useFieldStatsSearchStrategy(
   // auto-update
   useEffect(() => {
     startFetch();
+  }, [startFetch]);
+
+  useEffect(() => {
     return cancelFetch;
-  }, [startFetch, cancelFetch]);
+  }, [cancelFetch]);
 
   return {
     progress: fetchState,
