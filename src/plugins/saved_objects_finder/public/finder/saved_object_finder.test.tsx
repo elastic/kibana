@@ -677,7 +677,7 @@ describe('SavedObjectsFinder', () => {
             uiSettings: core.uiSettings,
             savedObjectsManagement,
             savedObjectsPlugin,
-            savedObjectsTagging,
+            savedObjectsTagging: undefined,
           }}
           showFilter={true}
           savedObjectMetaData={metaDataConfig}
@@ -1184,7 +1184,7 @@ describe('SavedObjectsFinder', () => {
             uiSettings: core.uiSettings,
             savedObjectsManagement,
             savedObjectsPlugin,
-            savedObjectsTagging,
+            savedObjectsTagging: undefined,
           }}
           savedObjectMetaData={metaDataConfig}
         />
