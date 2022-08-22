@@ -9,6 +9,7 @@ SOURCE_FILES = glob(
   [
     "src/**/*.ts",
     "src/**/*.tsx",
+    "src/**/*.mdx",
   ],
   exclude = [
     "**/*.test.*",
@@ -42,6 +43,8 @@ RUNTIME_DEPS = [
   "@npm//react-router-dom",
   "@npm//react-use",
   "@npm//rxjs",
+  "//packages/kbn-shared-ux-utility",
+  "//packages/kbn-test-jest-helpers",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -60,12 +63,15 @@ TYPES_DEPS = [
   "@npm//@types/react-router-dom",
   "@npm//react-use",
   "@npm//rxjs",
+  "//packages/kbn-shared-ux-utility:npm_module_types",
+  "//packages/shared-ux/router/types:npm_module_types",
 ]
 
 jsts_transpiler(
   name = "target_node",
   srcs = SRCS,
   build_pkg_name = package_name(),
+  root_input_dir = "src",
 )
 
 jsts_transpiler(
@@ -74,7 +80,7 @@ jsts_transpiler(
   build_pkg_name = package_name(),
   root_input_dir = "src",
   web = True,
-    additional_args = [
+  additional_args = [
     "--copy-files",
     "--quiet"
   ],
