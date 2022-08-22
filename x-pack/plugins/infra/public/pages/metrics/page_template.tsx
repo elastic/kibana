@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
-import { KibanaPageTemplateProps } from '@kbn/shared-ux-components';
+import type { NoDataConfig } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
 import {
   noMetricIndicesPromptDescription,
@@ -33,7 +33,7 @@ export const MetricsPageTemplate: React.FC<MetricsPageTemplateProps> = ({
     },
   } = useKibanaContextForPlugin();
 
-  const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = hasData
+  const noDataConfig: NoDataConfig | undefined = hasData
     ? undefined
     : {
         solution: i18n.translate('xpack.infra.metrics.noDataConfig.solutionName', {

@@ -173,7 +173,6 @@ export function createLayerDescriptor({
             type: SOURCE_TYPES.ES_TERM_SOURCE,
             id: joinId,
             indexPatternId: APM_INDEX_PATTERN_ID,
-            indexPatternTitle: APM_INDEX_PATTERN_TITLE, // TODO look up from APM_OSS.indexPattern
             term: 'client.geo.country_iso_code',
             metrics: [metricsDescriptor],
             whereQuery: apmSourceQuery,

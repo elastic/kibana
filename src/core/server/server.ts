@@ -45,6 +45,10 @@ import {
 import { MetricsService, opsConfig } from '@kbn/core-metrics-server-internal';
 import { CapabilitiesService } from '@kbn/core-capabilities-server-internal';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
+import {
+  savedObjectsConfig,
+  savedObjectsMigrationConfig,
+} from '@kbn/core-saved-objects-base-server-internal';
 import { CoreApp } from './core_app';
 import { I18nService } from './i18n';
 import { HttpResourcesService } from './http_resources';
@@ -53,9 +57,8 @@ import { UiSettingsService } from './ui_settings';
 import { PluginsService, config as pluginsConfig } from './plugins';
 import { SavedObjectsService } from './saved_objects';
 // do not try to shorten the import to `./status`, it will break server test mocking
-import { StatusService } from './status/status_service';
 
-import { savedObjectsConfig, savedObjectsMigrationConfig } from './saved_objects';
+import { StatusService } from './status/status_service';
 import { config as uiSettingsConfig } from './ui_settings';
 import { config as statusConfig } from './status';
 import { config as i18nConfig } from './i18n';
