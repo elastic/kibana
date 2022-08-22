@@ -1083,49 +1083,49 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           it('should change throttle if actions list in payload is empty', async () => {
-              // create a new action
-              const hookAction = await createWebHookAction();
+            // create a new action
+            const hookAction = await createWebHookAction();
 
-              const defaultRuleAction = {
-                id: hookAction.id,
-                action_type_id: '.webhook',
-                group: 'default',
-                params: {
-                  body: '{"test":"a default action"}',
-                },
-              };
-  
-              const ruleId = 'ruleId';
-              const createdRule = await createRule(supertest, log, {
-                ...getSimpleRule(ruleId),
-                actions: [defaultRuleAction],
-                throttle: '8h',
-              });
-  
-              const { body } = await postBulkAction()
-                .send({
-                  ids: [createdRule.id],
-                  action: BulkAction.edit,
-                  [BulkAction.edit]: [
-                    {
-                      type: BulkActionEditType.add_rule_actions,
-                      value: {
-                        throttle: '1h',
-                        actions: [],
-                      },
+            const defaultRuleAction = {
+              id: hookAction.id,
+              action_type_id: '.webhook',
+              group: 'default',
+              params: {
+                body: '{"test":"a default action"}',
+              },
+            };
+
+            const ruleId = 'ruleId';
+            const createdRule = await createRule(supertest, log, {
+              ...getSimpleRule(ruleId),
+              actions: [defaultRuleAction],
+              throttle: '8h',
+            });
+
+            const { body } = await postBulkAction()
+              .send({
+                ids: [createdRule.id],
+                action: BulkAction.edit,
+                [BulkAction.edit]: [
+                  {
+                    type: BulkActionEditType.add_rule_actions,
+                    value: {
+                      throttle: '1h',
+                      actions: [],
                     },
-                  ],
-                })
-                .expect(200);
-  
-              // Check that the updated rule is returned with the response
-              expect(body.attributes.results.updated[0].throttle).to.be('1h');
-  
-              // Check that the updates have been persisted
-              const { body: readRule } = await fetchRule(ruleId).expect(200);
-  
-              expect(readRule.throttle).to.eql('1h');
-          })
+                  },
+                ],
+              })
+              .expect(200);
+
+            // Check that the updated rule is returned with the response
+            expect(body.attributes.results.updated[0].throttle).to.be('1h');
+
+            // Check that the updates have been persisted
+            const { body: readRule } = await fetchRule(ruleId).expect(200);
+
+            expect(readRule.throttle).to.eql('1h');
+          });
         });
 
         describe('prebuilt rules', () => {
@@ -1202,7 +1202,10 @@ export default ({ getService }: FtrProviderContext): void => {
           casesForEmptyActions.forEach(({ payloadThrottle }) => {
             it(`throttle is set to NOTIFICATION_THROTTLE_NO_ACTIONS, if payload throttle="${payloadThrottle}" and actions list is empty`, async () => {
               const ruleId = 'ruleId';
-              const createdRule = await createRule(supertest, log, { ...getSimpleRule(ruleId), throttle: '8h' });
+              const createdRule = await createRule(supertest, log, {
+                ...getSimpleRule(ruleId),
+                throttle: '8h',
+              });
 
               const { body } = await postBulkAction()
                 .send({
