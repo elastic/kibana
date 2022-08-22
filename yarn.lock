@@ -3377,6 +3377,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-saved-objects-base-server-internal@link:bazel-bin/packages/core/saved-objects/core-saved-objects-base-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-saved-objects-base-server-mocks@link:bazel-bin/packages/core/saved-objects/core-saved-objects-base-server-mocks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-saved-objects-browser-internal@link:bazel-bin/packages/core/saved-objects/core-saved-objects-browser-internal":
   version "0.0.0"
   uid ""
@@ -3394,6 +3402,10 @@
   uid ""
 
 "@kbn/core-saved-objects-server@link:bazel-bin/packages/core/saved-objects/core-saved-objects-server":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-saved-objects-utils-server@link:bazel-bin/packages/core/saved-objects/core-saved-objects-utils-server":
   version "0.0.0"
   uid ""
 
@@ -7347,6 +7359,14 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__core-saved-objects-base-server-internal@link:bazel-bin/packages/core/saved-objects/core-saved-objects-base-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-saved-objects-base-server-mocks@link:bazel-bin/packages/core/saved-objects/core-saved-objects-base-server-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__core-saved-objects-browser-internal@link:bazel-bin/packages/core/saved-objects/core-saved-objects-browser-internal/npm_module_types":
   version "0.0.0"
   uid ""
@@ -7364,6 +7384,10 @@
   uid ""
 
 "@types/kbn__core-saved-objects-server@link:bazel-bin/packages/core/saved-objects/core-saved-objects-server/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-saved-objects-utils-server@link:bazel-bin/packages/core/saved-objects/core-saved-objects-utils-server/npm_module_types":
   version "0.0.0"
   uid ""
 
