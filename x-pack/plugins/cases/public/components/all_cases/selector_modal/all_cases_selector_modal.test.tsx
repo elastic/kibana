@@ -12,7 +12,7 @@ import { AllCasesSelectorModal } from '.';
 import { TestProviders } from '../../../common/mock';
 import { AllCasesList } from '../all_cases_list';
 
-jest.mock('../all_cases_list');
+jest.mock('../all_cases_list', () => ({ AllCasesList: jest.fn().mockReturnValue(<></>) }));
 
 const onRowClick = jest.fn();
 const defaultProps = {
@@ -57,8 +57,7 @@ describe('AllCasesSelectorModal', () => {
       </TestProviders>
     );
 
-    // @ts-ignore idk what this mock style is but it works ¯\_(ツ)_/¯
-    expect(AllCasesList.type.mock.calls[0][0]).toEqual(
+    expect((AllCasesList as unknown as jest.Mock).mock.calls[0][0]).toEqual(
       expect.objectContaining({
         hiddenStatuses: fullProps.hiddenStatuses,
         isSelectorView: true,
