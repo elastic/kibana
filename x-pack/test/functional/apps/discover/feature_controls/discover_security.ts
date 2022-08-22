@@ -37,6 +37,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const logstashIndexName = 'logstash-2015.09.22';
 
   async function setDiscoverTimeRange() {
+    await PageObjects.header.waitUntilLoadingHasFinished();
     await PageObjects.timePicker.setDefaultAbsoluteRange();
   }
 
@@ -574,6 +575,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           }
         );
 
+        // switch back to the default index
         await browser.goBack();
         await PageObjects.discover.selectIndexPattern('logstash-*');
       });
