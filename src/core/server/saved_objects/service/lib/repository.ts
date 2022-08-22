@@ -60,17 +60,31 @@ import type {
   SavedObjectsRawDocSource,
   ISavedObjectTypeRegistry,
 } from '@kbn/core-saved-objects-server';
-import { getRootPropertiesObjects, IndexMapping } from '../../mappings';
+import {
+  SavedObjectsErrorHelpers,
+  type DecoratedError,
+} from '@kbn/core-saved-objects-utils-server';
+import {
+  ALL_NAMESPACES_STRING,
+  FIND_DEFAULT_PAGE,
+  FIND_DEFAULT_PER_PAGE,
+  SavedObjectsUtils,
+} from '@kbn/core-saved-objects-utils-server';
+import {
+  SavedObjectsSerializer,
+  SavedObjectsTypeValidator,
+  decodeRequestVersion,
+  encodeVersion,
+  encodeHitVersion,
+  getRootPropertiesObjects,
+  LEGACY_URL_ALIAS_TYPE,
+  type IndexMapping,
+} from '@kbn/core-saved-objects-base-server-internal';
 import { PointInTimeFinder } from './point_in_time_finder';
 import { createRepositoryEsClient, RepositoryEsClient } from './repository_es_client';
 import { getSearchDsl } from './search_dsl';
 import { includedFields } from './included_fields';
-import { SavedObjectsErrorHelpers, DecoratedError } from './errors';
-import { decodeRequestVersion, encodeVersion, encodeHitVersion } from '../../version';
 import { IKibanaMigrator } from '../../migrations';
-import { SavedObjectsSerializer } from '../../serialization';
-import { LEGACY_URL_ALIAS_TYPE } from '../../object_types';
-import { SavedObjectsTypeValidator } from '../../validation';
 import { internalBulkResolve, InternalBulkResolveError } from './internal_bulk_resolve';
 import { validateConvertFilterToKueryNode } from './filter_utils';
 import { validateAndConvertAggregations } from './aggregations';
@@ -86,12 +100,6 @@ import {
   isLeft,
   isRight,
 } from './internal_utils';
-import {
-  ALL_NAMESPACES_STRING,
-  FIND_DEFAULT_PAGE,
-  FIND_DEFAULT_PER_PAGE,
-  SavedObjectsUtils,
-} from './utils';
 import { collectMultiNamespaceReferences } from './collect_multi_namespace_references';
 import { updateObjectsSpaces } from './update_objects_spaces';
 import { getIndexForType } from './get_index_for_type';

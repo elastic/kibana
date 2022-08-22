@@ -15,6 +15,13 @@
     "https://seclists.org/oss-sec/2022/q1/80",
     "https://haxx.in/files/blasty-vs-pkexec.c"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "file.path",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 73,
   "rule_id": "8da41fc9-7735-4b24-9cc6-c78dfc9fc9c9",
   "severity": "high",
@@ -66,5 +73,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 3
 }

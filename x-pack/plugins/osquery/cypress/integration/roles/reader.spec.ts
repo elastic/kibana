@@ -27,6 +27,7 @@ describe('Reader - only READ', () => {
   it('should not be able to add nor run saved queries', () => {
     navigateTo('/app/osquery/saved_queries');
     cy.waitForReact(1000);
+    cy.getBySel('pagination-button-next').click();
     cy.contains(SAVED_QUERY_ID);
     cy.contains('Add saved query').should('be.disabled');
     cy.react('PlayButtonComponent', {

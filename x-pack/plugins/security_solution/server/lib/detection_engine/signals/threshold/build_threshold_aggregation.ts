@@ -10,11 +10,11 @@ import { shouldFilterByCardinality } from './utils';
 
 export const buildThresholdMultiBucketAggregation = ({
   threshold,
-  timestampField,
+  aggregatableTimestampField,
   sortKeys,
 }: {
   threshold: ThresholdNormalized;
-  timestampField: string;
+  aggregatableTimestampField: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   sortKeys: Record<string, any> | undefined;
 }) => {
@@ -34,12 +34,12 @@ export const buildThresholdMultiBucketAggregation = ({
       aggs: {
         max_timestamp: {
           max: {
-            field: timestampField,
+            field: aggregatableTimestampField,
           },
         },
         min_timestamp: {
           min: {
-            field: timestampField,
+            field: aggregatableTimestampField,
           },
         },
         ...(shouldFilterByCardinality(threshold)
@@ -74,19 +74,19 @@ export const buildThresholdMultiBucketAggregation = ({
 
 export const buildThresholdSingleBucketAggregation = ({
   threshold,
-  timestampField,
+  aggregatableTimestampField,
 }: {
   threshold: ThresholdNormalized;
-  timestampField: string;
+  aggregatableTimestampField: string;
 }) => ({
   max_timestamp: {
     max: {
-      field: timestampField,
+      field: aggregatableTimestampField,
     },
   },
   min_timestamp: {
     min: {
-      field: timestampField,
+      field: aggregatableTimestampField,
     },
   },
   ...(shouldFilterByCardinality(threshold)

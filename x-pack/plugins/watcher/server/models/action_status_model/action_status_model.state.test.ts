@@ -117,25 +117,6 @@ describe('ActionStatusModel states', () => {
       });
       expect(clientActionStatusModel.state).toBe(ACTION_STATES.ERROR);
     });
-
-    it(`isn't ackable`, () => {
-      const clientActionStatusModel = createModelWithActions({
-        ack: {
-          state: 'ackable',
-          timestamp: '2017-03-01T00:00:00.000Z',
-        },
-        last_successful_execution: {
-          timestamp: '2017-03-01T00:00:00.000Z',
-        },
-        last_execution: {
-          timestamp: '2017-03-02T00:00:00.000Z',
-        },
-        last_throttle: {},
-      });
-
-      expect(clientActionStatusModel.state).toBe(ACTION_STATES.ERROR);
-      expect(clientActionStatusModel.isAckable).toBe(false);
-    });
   });
 
   describe(`ACTION_STATES.OK`, () => {
@@ -148,13 +129,36 @@ describe('ActionStatusModel states', () => {
       expect(clientActionStatusModel.state).toBe(ACTION_STATES.OK);
     });
 
-    it(`isn't ackable`, () => {
+    it(`is set when lastSuccessfulExecution is equal to lastExecution`, () => {
       const clientActionStatusModel = createModelWithActions({
-        ack: { state: 'awaits_successful_execution' },
+        ack: {
+          state: 'ackable',
+        },
+        last_successful_execution: {
+          timestamp: '2017-03-01T00:00:00.000Z',
+        },
+        last_execution: {
+          timestamp: '2017-03-01T00:00:00.000Z',
+        },
+        last_throttle: {},
       });
-
       expect(clientActionStatusModel.state).toBe(ACTION_STATES.OK);
-      expect(clientActionStatusModel.isAckable).toBe(false);
+    });
+
+    it(`is set when lastSuccessfulExecution is greater than lastExecution`, () => {
+      const clientActionStatusModel = createModelWithActions({
+        ack: {
+          state: 'ackable',
+        },
+        last_successful_execution: {
+          timestamp: '2017-03-02T00:00:00.000Z',
+        },
+        last_execution: {
+          timestamp: '2017-03-01T00:00:00.000Z',
+        },
+        last_throttle: {},
+      });
+      expect(clientActionStatusModel.state).toBe(ACTION_STATES.OK);
     });
   });
 
@@ -183,21 +187,6 @@ describe('ActionStatusModel states', () => {
         },
       });
       expect(clientActionStatusModel.state).toBe(ACTION_STATES.ACKNOWLEDGED);
-    });
-
-    it(`isn't ackable`, () => {
-      const clientActionStatusModel = createModelWithActions({
-        ack: {
-          state: 'acked',
-          timestamp: '2017-03-01T00:00:00.000Z',
-        },
-        last_execution: {
-          timestamp: '2017-03-01T00:00:00.000Z',
-        },
-      });
-
-      expect(clientActionStatusModel.state).toBe(ACTION_STATES.ACKNOWLEDGED);
-      expect(clientActionStatusModel.isAckable).toBe(false);
     });
   });
 
@@ -230,75 +219,6 @@ describe('ActionStatusModel states', () => {
         },
       });
       expect(clientActionStatusModel.state).toBe(ACTION_STATES.THROTTLED);
-    });
-
-    it(`is ackable`, () => {
-      const clientActionStatusModel = createModelWithActions({
-        ack: {
-          state: 'ackable',
-        },
-        last_throttle: {
-          timestamp: '2017-03-01T00:00:00.000Z',
-        },
-        last_execution: {
-          timestamp: '2017-03-01T00:00:00.000Z',
-        },
-      });
-
-      expect(clientActionStatusModel.state).toBe(ACTION_STATES.THROTTLED);
-      expect(clientActionStatusModel.isAckable).toBe(true);
-    });
-  });
-
-  describe(`ACTION_STATES.FIRING`, () => {
-    it(`is set when lastSuccessfulExecution is equal to lastExecution`, () => {
-      const clientActionStatusModel = createModelWithActions({
-        ack: {
-          state: 'ackable',
-        },
-        last_successful_execution: {
-          timestamp: '2017-03-01T00:00:00.000Z',
-        },
-        last_execution: {
-          timestamp: '2017-03-01T00:00:00.000Z',
-        },
-        last_throttle: {},
-      });
-      expect(clientActionStatusModel.state).toBe(ACTION_STATES.FIRING);
-    });
-
-    it(`is set when lastSuccessfulExecution is greater than lastExecution`, () => {
-      const clientActionStatusModel = createModelWithActions({
-        ack: {
-          state: 'ackable',
-        },
-        last_successful_execution: {
-          timestamp: '2017-03-02T00:00:00.000Z',
-        },
-        last_execution: {
-          timestamp: '2017-03-01T00:00:00.000Z',
-        },
-        last_throttle: {},
-      });
-      expect(clientActionStatusModel.state).toBe(ACTION_STATES.FIRING);
-    });
-
-    it(`is ackable`, () => {
-      const clientActionStatusModel = createModelWithActions({
-        ack: {
-          state: 'ackable',
-        },
-        last_successful_execution: {
-          timestamp: '2017-03-01T00:00:00.000Z',
-        },
-        last_execution: {
-          timestamp: '2017-03-01T00:00:00.000Z',
-        },
-        last_throttle: {},
-      });
-
-      expect(clientActionStatusModel.state).toBe(ACTION_STATES.FIRING);
-      expect(clientActionStatusModel.isAckable).toBe(true);
     });
   });
 
