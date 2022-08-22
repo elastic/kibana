@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import type { Metric } from '../../../../common/types';
 import { getSeries } from './get_series';
 
@@ -17,7 +18,7 @@ describe('getSeries', () => {
         field: 'day_of_week_i',
       },
     ] as Metric[];
-    const config = getSeries(metric, 1)!.metrics;
+    const config = getSeries(metric, 1, 'everything', '')!.metrics;
     expect(config).toStrictEqual([
       {
         agg: 'average',
@@ -44,7 +45,7 @@ describe('getSeries', () => {
         },
       },
     ] as Metric[];
-    const config = getSeries(metric, 1)!.metrics;
+    const config = getSeries(metric, 1, 'everything', '')!.metrics;
     expect(config).toStrictEqual([
       {
         agg: 'formula',
@@ -71,7 +72,7 @@ describe('getSeries', () => {
         field: '123456',
       },
     ] as Metric[];
-    const config = getSeries(metric, 1)!.metrics;
+    const config = getSeries(metric, 1, 'everything', '')!.metrics;
     expect(config).toStrictEqual([
       {
         agg: 'formula',
@@ -97,7 +98,7 @@ describe('getSeries', () => {
         field: '123456',
       },
     ] as Metric[];
-    const config = getSeries(metric, 1)!.metrics;
+    const config = getSeries(metric, 1, 'everything', '')!.metrics;
     expect(config).toStrictEqual([
       {
         agg: 'formula',
@@ -122,7 +123,7 @@ describe('getSeries', () => {
         field: '123456',
       },
     ] as Metric[];
-    const config = getSeries(metric, 1)!.metrics;
+    const config = getSeries(metric, 1, 'everything', '')!.metrics;
     expect(config).toStrictEqual([
       {
         agg: 'cumulative_sum',
@@ -147,7 +148,7 @@ describe('getSeries', () => {
         field: '123456',
       },
     ] as Metric[];
-    const config = getSeries(metric, 1)!.metrics;
+    const config = getSeries(metric, 1, 'everything', '')!.metrics;
     expect(config).toStrictEqual([
       {
         agg: 'formula',
@@ -174,7 +175,7 @@ describe('getSeries', () => {
         unit: '1m',
       },
     ] as Metric[];
-    const config = getSeries(metric, 1)!.metrics;
+    const config = getSeries(metric, 1, 'everything', '')!.metrics;
     expect(config).toStrictEqual([
       {
         agg: 'differences',
@@ -202,7 +203,7 @@ describe('getSeries', () => {
         window: 6,
       },
     ] as Metric[];
-    const config = getSeries(metric, 1)!.metrics;
+    const config = getSeries(metric, 1, 'everything', '')!.metrics;
     expect(config).toStrictEqual([
       {
         agg: 'moving_average',
@@ -246,7 +247,7 @@ describe('getSeries', () => {
         window: 6,
       },
     ] as Metric[];
-    const config = getSeries(metric, 1)!.metrics;
+    const config = getSeries(metric, 1, 'everything', '')!.metrics;
     expect(config).toStrictEqual([
       {
         agg: 'formula',
@@ -293,7 +294,7 @@ describe('getSeries', () => {
         ],
       },
     ] as Metric[];
-    const config = getSeries(metric, 1)!.metrics;
+    const config = getSeries(metric, 1, 'everything', '')!.metrics;
     expect(config).toStrictEqual([
       {
         agg: 'percentile',
@@ -335,7 +336,7 @@ describe('getSeries', () => {
         colors: ['rgba(211,96,134,1)', 'rgba(155,33,230,1)', '#68BC00'],
       },
     ] as Metric[];
-    const config = getSeries(metric, 1)!.metrics;
+    const config = getSeries(metric, 1, 'everything', '')!.metrics;
     expect(config).toStrictEqual([
       {
         agg: 'percentile_rank',
@@ -377,7 +378,7 @@ describe('getSeries', () => {
         order_by: 'timestamp',
       },
     ] as Metric[];
-    const config = getSeries(metric, 1)!.metrics;
+    const config = getSeries(metric, 1, 'everything', '')!.metrics;
     expect(config).toStrictEqual([
       {
         agg: 'last_value',
@@ -405,7 +406,7 @@ describe('getSeries', () => {
         function: 'mean',
       },
     ] as Metric[];
-    const config = getSeries(metric, 1)!;
+    const config = getSeries(metric, 1, 'everything', '')!;
     expect(config).toStrictEqual({
       metrics: [
         {
@@ -430,7 +431,7 @@ describe('getSeries', () => {
         size: 2,
       },
     ] as Metric[];
-    const config = getSeries(metric, 1);
+    const config = getSeries(metric, 1, 'everything', '');
     expect(config).toBeNull();
   });
 
@@ -442,7 +443,7 @@ describe('getSeries', () => {
         value: '10',
       },
     ] as Metric[];
-    const config = getSeries(metric, 1);
+    const config = getSeries(metric, 1, 'everything', '');
     expect(config).toBeNull();
   });
 
@@ -454,7 +455,7 @@ describe('getSeries', () => {
         value: '10',
       },
     ] as Metric[];
-    const config = getSeries(metric, 2)!.metrics;
+    const config = getSeries(metric, 2, 'everything', '')!.metrics;
     expect(config).toStrictEqual([
       {
         agg: 'static_value',
@@ -521,7 +522,7 @@ describe('getSeries', () => {
         ],
       },
     ] as Metric[];
-    const config = getSeries(metric, 1)!.metrics;
+    const config = getSeries(metric, 1, 'everything', '')!.metrics;
     expect(config).toStrictEqual([
       {
         agg: 'formula',
@@ -572,7 +573,7 @@ describe('getSeries', () => {
         ],
       },
     ] as Metric[];
-    const config = getSeries(metric, 1)!.metrics;
+    const config = getSeries(metric, 1, 'everything', '')!.metrics;
     expect(config).toStrictEqual([
       {
         agg: 'formula',

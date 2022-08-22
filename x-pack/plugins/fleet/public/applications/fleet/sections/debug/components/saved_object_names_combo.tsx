@@ -6,7 +6,7 @@
  */
 
 import React, { forwardRef, useImperativeHandle } from 'react';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { EuiComboBox } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';

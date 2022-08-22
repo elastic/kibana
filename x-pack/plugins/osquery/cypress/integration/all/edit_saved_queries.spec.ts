@@ -26,6 +26,7 @@ describe('ALL - Edit saved query', () => {
   });
 
   it('by changing ecs mappings and platforms', () => {
+    cy.getBySel('pagination-button-next').click();
     cy.react('CustomItemAction', {
       props: { index: 1, item: { attributes: { id: SAVED_QUERY_ID } } },
     }).click();
