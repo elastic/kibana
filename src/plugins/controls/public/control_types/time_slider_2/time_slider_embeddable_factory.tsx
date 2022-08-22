@@ -11,7 +11,7 @@ import { lazyLoadReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/pu
 import {
   createOptionsListExtract,
   createOptionsListInject,
-} from '../../../common/control_types/options_list/options_list_persistable_state';
+} from '../../../common/options_list/options_list_persistable_state';
 import { TIME_SLIDER_CONTROL } from '../..';
 import { ControlInput, IEditableControlFactory } from '../../types';
 import { TimeSliderStrings } from '../time_slider/time_slider_strings';
