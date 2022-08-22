@@ -29,11 +29,6 @@ import type { UserProfileWithAvatar } from './user_avatar';
 import { UserAvatar } from './user_avatar';
 
 /**
- * The string value to use for the input's name property
- */
-export const USER_PROFILES_SELECTABLE_NAME = 'userProfilesSearchBox' as const;
-
-/**
  * Props of {@link UserProfilesSelectable} component
  */
 export interface UserProfilesSelectableProps
@@ -248,7 +243,6 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
         onChange: onSearchChange,
         isLoading,
         isClearable: !isLoading,
-        name: USER_PROFILES_SELECTABLE_NAME,
       }}
       isPreFiltered
       listProps={{ onFocusBadge: false }}
@@ -262,12 +256,7 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
           <EuiPanel hasShadow={false} paddingSize="s">
             {search}
             <EuiSpacer size="s" />
-            <EuiFlexGroup
-              alignItems="center"
-              justifyContent="spaceBetween"
-              responsive={false}
-              gutterSize="none"
-            >
+            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiText size="xs" color="subdued">
                   {selectedStatusMessage ? (
