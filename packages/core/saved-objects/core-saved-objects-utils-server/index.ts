@@ -6,5 +6,12 @@
  * Side Public License, v 1.
  */
 
-export { typeRegistryMock } from './saved_objects_type_registry.mock';
-export { serializerMock } from './serializer.mock';
+export { mergeSavedObjectMigrationMaps } from './src/merge_migration_maps';
+export { SavedObjectsErrorHelpers, type DecoratedError } from './src/saved_objects_error_helpers';
+export {
+  SavedObjectsUtils,
+  ALL_NAMESPACES_STRING,
+  DEFAULT_NAMESPACE_STRING,
+  FIND_DEFAULT_PAGE,
+  FIND_DEFAULT_PER_PAGE,
+} from './src/saved_objects_utils';

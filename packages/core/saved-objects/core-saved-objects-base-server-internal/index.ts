@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { LEGACY_URL_ALIAS_TYPE, type LegacyUrlAlias } from './legacy_alias';
+export { LEGACY_URL_ALIAS_TYPE, type LegacyUrlAlias } from './src/legacy_alias';
 export {
   getProperty,
   getRootProperties,
@@ -15,15 +15,15 @@ export {
   type IndexMapping,
   type IndexMappingMeta,
   type SavedObjectsTypeMappingDefinitions,
-} from './mappings';
-export { SavedObjectsSerializer } from './serialization';
-export { SavedObjectsTypeValidator } from './validation';
-export { decodeRequestVersion, decodeVersion, encodeVersion, encodeHitVersion } from './version';
+} from './src/mappings';
+export { SavedObjectsSerializer } from './src/serialization';
+export { SavedObjectsTypeValidator } from './src/validation';
+export { decodeRequestVersion, decodeVersion, encodeVersion, encodeHitVersion } from './src/version';
 export {
   savedObjectsConfig,
   savedObjectsMigrationConfig,
   SavedObjectConfig,
   type SavedObjectsConfigType,
   type SavedObjectsMigrationConfigType,
-} from './saved_objects_config';
-export { SavedObjectTypeRegistry } from './saved_objects_type_registry';
+} from './src/saved_objects_config';
+export { SavedObjectTypeRegistry } from './src/saved_objects_type_registry';
