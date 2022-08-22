@@ -91,7 +91,7 @@ describe('getParentPipelineSeries', () => {
       {
         field: 'AvgTicketPrice',
         id: '04558549-f19f-4a87-9923-27df8b81af3e',
-        type: 'std_deviation',
+        type: 'sum_of_squares_bucket',
       },
       {
         field: '04558549-f19f-4a87-9923-27df8b81af3e',

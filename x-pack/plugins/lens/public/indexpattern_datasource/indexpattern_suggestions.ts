@@ -178,10 +178,8 @@ function getEmptyLayersSuggestionsForVisualizeCharts(
     if (!indexPattern) return [];
 
     const newId = generateId();
-    let newLayer: IndexPatternLayer | undefined;
-    if (indexPattern.timeFieldName) {
-      newLayer = createNewTimeseriesLayerWithMetricAggregationFromVizEditor(indexPattern, layer);
-    }
+    const newLayer: IndexPatternLayer | undefined =
+      createNewLayerWithMetricAggregationFromVizEditor(indexPattern, layer);
     if (newLayer) {
       const suggestion = buildSuggestion({
         state,
@@ -197,13 +195,13 @@ function getEmptyLayersSuggestionsForVisualizeCharts(
   return suggestions;
 }
 
-function createNewTimeseriesLayerWithMetricAggregationFromVizEditor(
+function createNewLayerWithMetricAggregationFromVizEditor(
   indexPattern: IndexPattern,
   layer: VisualizeEditorLayersContext
 ): IndexPatternLayer | undefined {
-  const { timeFieldName, splitMode, splitFilters, metrics, timeInterval, dropPartialBuckets } =
+  const { splitMode, splitFilters, metrics, timeInterval, dropPartialBuckets, xMode, xFieldName } =
     layer;
-  const dateField = indexPattern.getFieldByName(timeFieldName!);
+  const xField = xFieldName ? indexPattern.getFieldByName(xFieldName) : undefined;
 
   const splitFields = layer.splitFields
     ? (layer.splitFields
@@ -213,10 +211,10 @@ function createNewTimeseriesLayerWithMetricAggregationFromVizEditor(
 
   // generate the layer for split by terms
   if (splitMode === 'terms' && splitFields?.length) {
-    return getSplitByTermsLayer(indexPattern, splitFields, dateField, layer);
+    return getSplitByTermsLayer(indexPattern, splitFields, xField, xMode, layer);
     // generate the layer for split by filters
   } else if (splitMode?.includes('filter') && splitFilters && splitFilters.length) {
-    return getSplitByFiltersLayer(indexPattern, dateField, layer);
+    return getSplitByFiltersLayer(indexPattern, xField, xMode, layer);
   } else {
     const copyMetricsArray = [...metrics];
     const computedLayer = computeLayerFromContext(
@@ -231,11 +229,15 @@ function createNewTimeseriesLayerWithMetricAggregationFromVizEditor(
       return computedLayer;
     }
 
+    if (!xField || !xMode) {
+      return computedLayer;
+    }
+
     return insertNewColumn({
-      op: 'date_histogram',
+      op: xMode,
       layer: computedLayer,
       columnId: generateId(),
-      field: dateField,
+      field: xField,
       indexPattern,
       visualizationGroups: [],
       columnParams: {

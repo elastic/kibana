@@ -111,6 +111,7 @@ import {
   toAbsoluteDates,
   boundsDescendingRaw,
   getResponseInspectorStats,
+  calcAutoIntervalLessThan,
   // tabify
   tabifyAggResponse,
   tabifyGetColumns,
@@ -217,6 +218,7 @@ export const search = {
     termsAggFilter,
     toAbsoluteDates,
     boundsDescendingRaw,
+    calcAutoIntervalLessThan,
   },
   getResponseInspectorStats,
   tabifyAggResponse,
