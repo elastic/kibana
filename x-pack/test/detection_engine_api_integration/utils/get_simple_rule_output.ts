@@ -44,6 +44,19 @@ export const getBaseSimpleRuleOutput = (ruleId = 'rule-1', enabled = false) => (
   id: 'id',
   updated_at: '2020-07-08T16:36:32.377Z',
   created_at: '2020-07-08T16:36:32.377Z',
+  building_block_type: undefined,
+  note: undefined,
+  license: undefined,
+  outcome: undefined,
+  alias_target_id: undefined,
+  alias_purpose: undefined,
+  timeline_id: undefined,
+  timeline_title: undefined,
+  meta: undefined,
+  rule_name_override: undefined,
+  timestamp_override: undefined,
+  timestamp_override_fallback_disabled: undefined,
+  namespace: undefined,
 });
 
 const getQueryRuleOutput = (ruleId = 'rule-1', enabled = false): FullResponseSchema => ({
@@ -52,6 +65,9 @@ const getQueryRuleOutput = (ruleId = 'rule-1', enabled = false): FullResponseSch
   language: 'kuery',
   query: 'user.name: root or user.name: admin',
   type: 'query',
+  data_view_id: undefined,
+  filters: undefined,
+  saved_id: undefined,
 });
 
 export const getSimpleRuleOutput = (ruleId = 'rule-1', enabled = false) => {

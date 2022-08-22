@@ -8,6 +8,6 @@
 import { getSimpleRuleOutput } from './get_simple_rule_output';
 
 export const resolveSimpleRuleOutput = (ruleId = 'rule-1', enabled = false) => ({
-  outcome: 'exactMatch',
   ...getSimpleRuleOutput(ruleId, enabled),
+  outcome: 'exactMatch',
 });
