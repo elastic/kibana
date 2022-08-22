@@ -149,7 +149,7 @@ export const requestIndexFieldSearch = async (
             });
           })
         )
-      ).map((response) => response.fields);
+      ).map((response) => response.fields || []);
       indexFields = await formatIndexFields(beatFields, fieldDescriptor, patternList);
     }
   }
