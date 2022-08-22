@@ -2,7 +2,7 @@ load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_DIRNAME = "router"
+PKG_DIRNAME = "impl"
 PKG_REQUIRE_NAME = "@kbn/shared-ux-router"
 
 SOURCE_FILES = glob(
@@ -72,7 +72,12 @@ jsts_transpiler(
   name = "target_web",
   srcs = SRCS,
   build_pkg_name = package_name(),
+  root_input_dir = "src",
   web = True,
+    additional_args = [
+    "--copy-files",
+    "--quiet"
+  ],
 )
 
 ts_config(
