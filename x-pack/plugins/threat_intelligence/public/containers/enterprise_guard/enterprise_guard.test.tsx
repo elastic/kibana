@@ -7,7 +7,7 @@
 
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { ThreatIntelligenceSecuritySolutionContext } from '../../types';
+import { SecuritySolutionPluginContext } from '../../types';
 import { SecuritySolutionContext } from '../security_solution_context';
 import { EnterpriseGuard } from './enterprise_guard';
 
@@ -19,7 +19,7 @@ describe('<EnterpriseGuard />', () => {
           value={
             {
               licenseService: { isEnterprise: jest.fn().mockReturnValue(true) },
-            } as unknown as ThreatIntelligenceSecuritySolutionContext
+            } as unknown as SecuritySolutionPluginContext
           }
         >
           <EnterpriseGuard>
@@ -39,7 +39,7 @@ describe('<EnterpriseGuard />', () => {
           value={
             {
               licenseService: { isEnterprise: jest.fn().mockReturnValue(false) },
-            } as unknown as ThreatIntelligenceSecuritySolutionContext
+            } as unknown as SecuritySolutionPluginContext
           }
         >
           <EnterpriseGuard fallback={<div>fallback for non enterprise</div>}>

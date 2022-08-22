@@ -14,9 +14,14 @@ describe('createPrebuiltSavedObjectsSchema', () => {
     ).toThrow();
   });
 
-  it.each([['hostRiskScoreDashboards']])('should allow template %p', async (template) => {
-    expect(createPrebuiltSavedObjectsSchema.params.validate({ template_name: template })).toEqual({
-      template_name: template,
-    });
-  });
+  it.each([['hostRiskScoreDashboards', 'userRiskScoreDashboards']])(
+    'should allow template %p',
+    async (template) => {
+      expect(createPrebuiltSavedObjectsSchema.params.validate({ template_name: template })).toEqual(
+        {
+          template_name: template,
+        }
+      );
+    }
+  );
 });
