@@ -12,8 +12,11 @@ import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
 import { IndicatorsBarChartWrapper } from './indicators_barchart_wrapper';
 import { DEFAULT_TIME_RANGE } from '../../hooks/use_filters/utils';
+import { useFilters } from '../../hooks/use_filters';
 
-const mockIndexPatterns: DataView = {
+jest.mock('../../hooks/use_filters');
+
+const mockIndexPattern: DataView = {
   fields: [
     {
       name: '@timestamp',
@@ -25,13 +28,26 @@ const mockIndexPatterns: DataView = {
     } as DataViewField,
   ],
 } as DataView;
+
 const mockTimeRange: TimeRange = DEFAULT_TIME_RANGE;
 
+const stub = () => {};
+
 describe('<IndicatorsBarChartWrapper />', () => {
+  beforeEach(() => {
+    (useFilters as jest.MockedFunction<typeof useFilters>).mockReturnValue({
+      filters: [],
+      filterQuery: { language: 'kuery', query: '' },
+      filterManager: {} as any,
+      handleSavedQuery: stub,
+      handleSubmitQuery: stub,
+      handleSubmitTimeRange: stub,
+    });
+  });
   it('should render barchart and field selector dropdown', () => {
     const component = render(
       <TestProvidersComponent>
-        <IndicatorsBarChartWrapper indexPattern={mockIndexPatterns} timeRange={mockTimeRange} />
+        <IndicatorsBarChartWrapper indexPattern={mockIndexPattern} timeRange={mockTimeRange} />
       </TestProvidersComponent>
     );
 

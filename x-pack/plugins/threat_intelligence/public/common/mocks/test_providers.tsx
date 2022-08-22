@@ -14,6 +14,7 @@ import type { IStorage } from '@kbn/kibana-utils-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { BehaviorSubject } from 'rxjs';
+import { getSecuritySolutionContextMock } from './mock_security_context';
 import { mockUiSetting } from './mock_kibana_ui_setting';
 import { KibanaContext } from '../../hooks/use_kibana';
 import { SecuritySolutionPluginContext } from '../../types';
@@ -95,22 +96,7 @@ const coreServiceMock = {
   uiSettings: { get: jest.fn().mockImplementation(mockUiSetting) },
 };
 
-const mockSecurityContext: SecuritySolutionPluginContext = {
-  getFiltersGlobalComponent:
-    () =>
-    ({ children }) =>
-      <div>{children}</div>,
-  licenseService: {
-    isEnterprise() {
-      return true;
-    },
-  },
-  sourcererDataView: {
-    browserFields: {},
-    selectedPatterns: [],
-    indexPattern: { fields: [], title: '' },
-  },
-};
+const mockSecurityContext: SecuritySolutionPluginContext = getSecuritySolutionContextMock();
 
 export const mockedServices = {
   ...coreServiceMock,
