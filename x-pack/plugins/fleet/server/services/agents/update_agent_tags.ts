@@ -54,11 +54,14 @@ export async function updateAgentTags(
     if (res.total <= batchSize) {
       givenAgents = res.agents;
     } else {
-      return await new UpdateAgentTagsActionRunner(esClient, soClient, {
+      return await new UpdateAgentTagsActionRunner(
+        esClient,
+        soClient,
         tagsToAdd,
-        tagsToRemove,
-      }).runActionAsyncWithRetry({
+        tagsToRemove
+      ).runActionAsyncWithRetry({
         ...options,
+        batchSize,
         totalAgents: res.total,
       });
     }
@@ -69,8 +72,7 @@ export async function updateAgentTags(
     esClient,
     givenAgents,
     outgoingErrors,
-    tagsToAdd,
-    tagsToRemove,
+    { tagsToAdd, tagsToRemove },
     'agentIds' in options ? options.agentIds : undefined
   );
 }

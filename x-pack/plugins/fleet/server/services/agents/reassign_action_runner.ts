@@ -54,6 +54,12 @@ export class ReassignActionRunner extends ActionRunner {
   protected getActionType() {
     return BulkActionTaskType.REASSIGN_RETRY;
   }
+
+  protected getActionParams(): { [key: string]: any } {
+    return {
+      newAgentPolilcyId: this.newAgentPolicyId,
+    };
+  }
 }
 
 export async function reassignBatch(

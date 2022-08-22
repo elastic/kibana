@@ -37,6 +37,10 @@ export abstract class ActionRunner {
     total?: number
   ): Promise<{ items: BulkActionResult[] }>;
 
+  protected getActionParams(): { [key: string]: any } {
+    return {};
+  }
+
   public async runActionAsyncWithRetry(options: {
     kuery: string;
     showInactive?: boolean;
@@ -87,6 +91,7 @@ export abstract class ActionRunner {
         const taskId = await appContextService.getBulkActionsResolver()!.run(
           {
             ...options,
+            ...this.getActionParams(),
             pitId: this.pitId!,
             searchAfter: this.searchAfter,
             actionId: this.actionId!,
@@ -180,7 +185,7 @@ export abstract class ActionRunner {
       const currentResults = await this.processBatch(currentAgents, searchAfter, res.total);
       results = { items: results.items.concat(currentResults.items) };
       allAgentsProcessed += currentAgents.length;
-      //   if (allAgentsProcessed > 200) throw new Error('simulating error after batch processed ' + searchAfter);
+      // if (allAgentsProcessed > 200) throw new Error('simulating error after batch processed ' + searchAfter);
     }
 
     await closePointInTime(esClient, pitId);

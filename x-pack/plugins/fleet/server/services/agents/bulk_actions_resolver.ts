@@ -77,7 +77,8 @@ export class BulkActionsResolver {
               await new UpdateAgentTagsActionRunner(
                 esClient,
                 soClient,
-                options
+                options.tagsToAdd,
+                options.tagsToRemove
               ).runActionAsyncWithRetry(options)
           );
         default:

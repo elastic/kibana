@@ -104,6 +104,7 @@ export async function sendUpgradeAgentsActions(
     } else {
       return await new UpgradeActionRunner(esClient, soClient, options).runActionAsyncWithRetry({
         ...options,
+        batchSize,
         totalAgents: res.total,
       });
     }

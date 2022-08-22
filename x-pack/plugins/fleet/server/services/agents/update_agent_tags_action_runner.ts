@@ -25,12 +25,13 @@ export class UpdateAgentTagsActionRunner extends ActionRunner {
   constructor(
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClientContract,
-    options: { tagsToAdd: string[]; tagsToRemove: string[] }
+    tagsToAdd: string[],
+    tagsToRemove: string[]
   ) {
     super(esClient);
     this.soClient = soClient;
-    this.tagsToAdd = options.tagsToAdd;
-    this.tagsToRemove = options.tagsToRemove;
+    this.tagsToAdd = tagsToAdd;
+    this.tagsToRemove = tagsToRemove;
   }
 
   protected async processAgents(
@@ -43,8 +44,7 @@ export class UpdateAgentTagsActionRunner extends ActionRunner {
       this.esClient,
       agents,
       {},
-      this.tagsToAdd,
-      this.tagsToRemove,
+      { tagsToAdd: this.tagsToAdd, tagsToRemove: this.tagsToRemove },
       undefined,
       true
     );
@@ -53,6 +53,13 @@ export class UpdateAgentTagsActionRunner extends ActionRunner {
   protected getActionType() {
     return BulkActionTaskType.UPDATE_AGENT_TAGS_RETRY;
   }
+
+  protected getActionParams(): { [key: string]: any } {
+    return {
+      tagsToAdd: this.tagsToAdd,
+      tagsToRemove: this.tagsToRemove,
+    };
+  }
 }
 
 export async function updateTagsBatch(
@@ -60,8 +67,10 @@ export async function updateTagsBatch(
   esClient: ElasticsearchClient,
   givenAgents: Agent[],
   outgoingErrors: Record<Agent['id'], Error>,
-  tagsToAdd: string[],
-  tagsToRemove: string[],
+  options: {
+    tagsToAdd: string[];
+    tagsToRemove: string[];
+  },
   agentIds?: string[],
   skipSuccess?: boolean
 ): Promise<{ items: BulkActionResult[] }> {
@@ -77,18 +86,18 @@ export async function updateTagsBatch(
   const getNewTags = (agent: Agent): string[] => {
     const existingTags = agent.tags ?? [];
 
-    if (tagsToAdd.length === 1 && tagsToRemove.length === 1) {
-      const removableTagIndex = existingTags.indexOf(tagsToRemove[0]);
+    if (options.tagsToAdd.length === 1 && options.tagsToRemove.length === 1) {
+      const removableTagIndex = existingTags.indexOf(options.tagsToRemove[0]);
       if (removableTagIndex > -1) {
         const newTags = uniq([
           ...existingTags.slice(0, removableTagIndex),
-          tagsToAdd[0],
+          options.tagsToAdd[0],
           ...existingTags.slice(removableTagIndex + 1),
         ]);
         return newTags;
       }
     }
-    return uniq(difference(existingTags, tagsToRemove).concat(tagsToAdd));
+    return uniq(difference(existingTags, options.tagsToRemove).concat(options.tagsToAdd));
   };
 
   await bulkUpdateAgents(

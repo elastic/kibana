@@ -211,6 +211,14 @@ export default function (providerContext: FtrProviderContext) {
 
       expect(unenrolledBody).to.eql({});
 
+      const promise = new Promise((resolve, reject) => {
+        setTimeout(() => {
+          resolve({});
+        }, 100);
+      });
+
+      await promise;
+
       const { body } = await supertest.get(`/api/fleet/agents`);
       expect(body.total).to.eql(0);
     });

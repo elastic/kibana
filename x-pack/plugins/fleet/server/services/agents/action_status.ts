@@ -26,7 +26,7 @@ export async function getActionStatuses(
 
   let actions = _actions.filter((action) => cancelledActionIds.indexOf(action.actionId) < 0);
 
-  // Fetch acknowledged result for every upgrade action
+  // Fetch acknowledged result for every action
   actions = await pMap(
     actions,
     async (action) => {
@@ -46,16 +46,14 @@ export async function getActionStatuses(
         },
       });
 
-      const nbAgents = action.total ?? action.nbAgents;
-
-      const complete = nbAgents <= count;
+      const complete = count === action.total;
 
       return {
         ...action,
-        nbAgents,
         nbAgentsAck: count,
         complete,
         timedOut: !complete && action.timedOut,
+        failed: action.total - action.nbAgents,
       };
     },
     { concurrency: 20 }

@@ -123,6 +123,7 @@ export async function reassignAgents(
         newAgentPolicyId
       ).runActionAsyncWithRetry({
         ...options,
+        batchSize,
         totalAgents: res.total,
       });
     }

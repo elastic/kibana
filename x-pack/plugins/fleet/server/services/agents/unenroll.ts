@@ -86,6 +86,7 @@ export async function unenrollAgents(
   } else {
     return await new UnenrollActionRunner(esClient, soClient).runActionAsyncWithRetry({
       ...options,
+      batchSize,
       totalAgents: res.total,
     });
   }
