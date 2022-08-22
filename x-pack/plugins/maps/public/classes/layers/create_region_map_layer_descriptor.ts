@@ -37,7 +37,6 @@ export interface CreateRegionMapLayerDescriptorParams {
   termsSize?: number;
   colorSchema: string;
   indexPatternId?: string;
-  indexPatternTitle?: string;
   metricAgg: string;
   metricFieldName?: string;
 }
@@ -65,7 +64,6 @@ export function createRegionMapLayerDescriptor({
   termsSize,
   colorSchema,
   indexPatternId,
-  indexPatternTitle,
   metricAgg,
   metricFieldName,
 }: CreateRegionMapLayerDescriptorParams): LayerDescriptor | null {
@@ -87,7 +85,6 @@ export function createRegionMapLayerDescriptor({
     type: SOURCE_TYPES.ES_TERM_SOURCE,
     id: joinId,
     indexPatternId,
-    indexPatternTitle: indexPatternTitle ? indexPatternTitle : indexPatternId,
     term: termsFieldName,
     metrics: [metricsDescriptor],
     applyGlobalQuery: true,

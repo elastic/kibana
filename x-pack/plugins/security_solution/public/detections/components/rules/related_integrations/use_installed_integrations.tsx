@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import type { InstalledIntegrationArray } from '../../../../../common/detection_engine/schemas/common';
 import { fetchInstalledIntegrations } from '../../../containers/detection_engine/rules/api';
 // import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
