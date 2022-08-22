@@ -483,5 +483,25 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         '{\n\t"query":\n{\n\t"match_all":\n\t{}\n}\n}'
       );
     });
+
+    it('8.5.0 doesnt fail upgrade when an ES Query rule is not parsable', async () => {
+      const response = await es.get<{
+        alert: {
+          params: {
+            esQuery: string;
+          };
+        };
+      }>(
+        {
+          index: '.kibana',
+          id: 'alert:f0d13f4d-35ae-4554-897a-6392e97bb84c',
+        },
+        { meta: true }
+      );
+      expect(response.statusCode).to.eql(200);
+      expect(response.body._source?.alert?.params?.esQuery).to.eql(
+        '{"query":}'
+      );
+    });
   });
 }

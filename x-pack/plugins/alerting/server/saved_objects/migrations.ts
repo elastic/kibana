@@ -40,7 +40,7 @@ interface AlertLogMeta extends LogMeta {
 }
 
 type AlertMigration = (
-  doc: SavedObjectUnsanitizedDoc<RawRule>
+  doc: SavedObjectUnsanitizedDoc<RawRule>, context: SavedObjectMigrationContext
 ) => SavedObjectUnsanitizedDoc<RawRule>;
 
 function createEsoMigration(
@@ -758,7 +758,7 @@ function addSecuritySolutionAADRuleTypeTags(
 }
 
 function stripOutRuntimeFieldsInOldESQuery(
-  doc: SavedObjectUnsanitizedDoc<RawRule>
+  doc: SavedObjectUnsanitizedDoc<RawRule>, context: SavedObjectMigrationContext
 ): SavedObjectUnsanitizedDoc<RawRule> {
   const isESDSLrule =
     isEsQueryRuleType(doc) && !isSerializedSearchSource(doc.attributes.params.searchConfiguration);
@@ -782,8 +782,15 @@ function stripOutRuntimeFieldsInOldESQuery(
           }
         : doc;
     } catch (err) {
-      throw new Error(
-        `unable to migrate invalid query: "${doc.attributes.params.esQuery}" - query must be JSON`
+      // Instead of failing the upgrade when an unparsable rule is encountered, we log that the rule caouldn't be migrated and
+      // as a result legacy parameters might cause the rule to behave differently if it is, in fact, still running at all
+      context.log.error<AlertLogMeta>(
+        `unable to migrate and remove legacy runtime fields in rule ${doc.id} due to invalid query: "${doc.attributes.params.esQuery}" - query must be JSON`,
+        {
+          migrations: {
+            alertDocument: doc,
+          },
+        }
       );
     }
   }
@@ -997,8 +1004,8 @@ function removeInternalTags(
 }
 
 function pipeMigrations(...migrations: AlertMigration[]): AlertMigration {
-  return (doc: SavedObjectUnsanitizedDoc<RawRule>) =>
-    migrations.reduce((migratedDoc, nextMigration) => nextMigration(migratedDoc), doc);
+  return (doc: SavedObjectUnsanitizedDoc<RawRule>, context: SavedObjectMigrationContext) =>
+    migrations.reduce((migratedDoc, nextMigration) => nextMigration(migratedDoc, context), doc);
 }
 
 function mapSearchSourceMigrationFunc(
