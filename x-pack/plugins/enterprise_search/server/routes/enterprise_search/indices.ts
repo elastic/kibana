@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 
 import { ErrorCode } from '../../../common/types/error_codes';
+import { deleteConnectorById } from '../../lib/connectors/delete_connector';
 
 import { fetchConnectorByIndexName, fetchConnectors } from '../../lib/connectors/fetch_connectors';
 import { fetchCrawlerByIndexName, fetchCrawlers } from '../../lib/crawler/fetch_crawlers';
@@ -107,6 +108,52 @@ export function registerIndexRoutes({ router, log }: RouteDependencies) {
         const index = await fetchIndex(client, indexName);
         return response.ok({
           body: index,
+          headers: { 'content-type': 'application/json' },
+        });
+      } catch (error) {
+        if (isIndexNotFoundException(error)) {
+          return createError({
+            errorCode: ErrorCode.INDEX_NOT_FOUND,
+            message: 'Could not find index',
+            response,
+            statusCode: 404,
+          });
+        }
+
+        throw error;
+      }
+    })
+  );
+
+  router.delete(
+    {
+      path: '/internal/enterprise_search/indices/{indexName}',
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const indexName = decodeURIComponent(request.params.indexName);
+      const { client } = (await context.core).elasticsearch;
+
+      try {
+        const connector = await fetchConnectorByIndexName(client, indexName);
+        const crawler = await fetchCrawlerByIndexName(client, indexName);
+
+        if (connector) {
+          await deleteConnectorById(client, connector.id);
+        }
+
+        if (crawler) {
+          // do nothing for now because we don't have a way to delete a crawler yet
+        }
+
+        await client.asCurrentUser.indices.delete({ index: indexName });
+
+        return response.ok({
+          body: {},
           headers: { 'content-type': 'application/json' },
         });
       } catch (error) {
