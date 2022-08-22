@@ -13,7 +13,7 @@ import type {
   SavedObjectsImportRetry,
 } from '@kbn/core-saved-objects-common';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { SavedObjectsErrorHelpers } from '../../service';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
 import { checkConflicts } from './check_conflicts';
 
 jest.mock('uuid', () => ({
