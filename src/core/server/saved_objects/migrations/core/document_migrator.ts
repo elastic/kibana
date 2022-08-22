@@ -43,7 +43,7 @@
 
 import Boom from '@hapi/boom';
 import uuidv5 from 'uuid/v5';
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import _ from 'lodash';
 import Semver from 'semver';
 import type { Logger } from '@kbn/logging';
@@ -58,10 +58,13 @@ import type {
   SavedObjectMigrationFn,
   SavedObjectMigrationMap,
 } from '@kbn/core-saved-objects-server';
+import { DEFAULT_NAMESPACE_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
+import {
+  type LegacyUrlAlias,
+  LEGACY_URL_ALIAS_TYPE,
+} from '@kbn/core-saved-objects-base-server-internal';
 import { MigrationLogger } from './migration_logger';
 import { TransformSavedObjectDocumentError } from '.';
-import { DEFAULT_NAMESPACE_STRING, SavedObjectsUtils } from '../../service/lib/utils';
-import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 
 const DEFAULT_MINIMUM_CONVERT_VERSION = '8.0.0';
 
