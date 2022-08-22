@@ -293,7 +293,6 @@ export class CommonPageObject extends FtrService {
         }
         if (appName === 'discover') {
           await this.browser.setLocalStorageItem('data.autocompleteFtuePopover', 'true');
-          await this.browser.setLocalStorageItem('data.newDataViewMenu', 'true');
         }
         return currentUrl;
       });

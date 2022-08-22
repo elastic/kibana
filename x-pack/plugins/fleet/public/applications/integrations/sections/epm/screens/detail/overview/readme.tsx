@@ -43,11 +43,11 @@ export function Readme({
   return (
     <Fragment>
       {markdown !== undefined ? (
-        <ReactMarkdown
-          transformImageUri={handleImageUri}
-          renderers={markdownRenderers}
-          source={markdown}
-        />
+        <EuiText grow={true}>
+          <ReactMarkdown transformImageUri={handleImageUri} components={markdownRenderers}>
+            {markdown}
+          </ReactMarkdown>
+        </EuiText>
       ) : (
         <EuiText>
           {/* simulates a long page of text loading */}

@@ -6,6 +6,7 @@
  */
 
 import { SavedObjectReference } from '@kbn/core/server';
+import { CaseAssignees } from '../../../common/api/cases/assignee';
 import {
   CasePostRequest,
   CaseSettings,
@@ -35,6 +36,9 @@ export interface BuilderParameters {
   };
   tags: {
     parameters: { payload: { tags: string[] } };
+  };
+  assignees: {
+    parameters: { payload: { assignees: CaseAssignees } };
   };
   pushed: {
     parameters: {

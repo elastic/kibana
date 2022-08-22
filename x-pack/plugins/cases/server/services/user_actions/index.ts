@@ -27,12 +27,16 @@ import {
   isCommentUserAction,
 } from '../../../common/utils/user_actions';
 import {
+  ActionOperationValues,
   Actions,
   ActionTypes,
+  ActionTypeValues,
   CaseAttributes,
   CaseUserActionAttributes,
   CaseUserActionAttributesWithoutConnectorId,
   CaseUserActionResponse,
+  CaseUserProfile,
+  CaseAssignees,
   CommentRequest,
   NONE_CONNECTOR_ID,
   User,
@@ -53,13 +57,19 @@ import {
 } from '../../common/constants';
 import { findConnectorIdReference } from '../transform';
 import { buildFilter, combineFilters, arraysDifference } from '../../client/utils';
-import { BuilderParameters, BuilderReturnValue, CommonArguments, CreateUserAction } from './types';
+import {
+  BuilderParameters,
+  BuilderReturnValue,
+  CommonArguments,
+  CreateUserAction,
+  UserActionParameters,
+} from './types';
 import { BuilderFactory } from './builder_factory';
 import { defaultSortField, isCommentRequestTypeExternalReferenceSO } from '../../common/utils';
 import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import { injectPersistableReferencesToSO } from '../../attachment_framework/so_references';
 import { IndexRefresh } from '../types';
-import { isStringArray } from './type_guards';
+import { isAssigneesArray, isStringArray } from './type_guards';
 
 interface GetCaseUserActionArgs extends ClientArgs {
   caseId: string;
@@ -92,6 +102,11 @@ interface GetUserActionItemByDifference extends CommonUserActionArgs {
   newValue: unknown;
 }
 
+interface TypedUserActionDiffedItems<T> extends GetUserActionItemByDifference {
+  originalValue: T[];
+  newValue: T[];
+}
+
 interface BulkCreateBulkUpdateCaseUserActions extends ClientArgs, IndexRefresh {
   originalCases: Array<SavedObject<CaseAttributes>>;
   updatedCases: Array<SavedObjectsUpdateResponse<CaseAttributes>>;
@@ -105,6 +120,10 @@ interface BulkCreateAttachmentUserAction extends Omit<CommonUserActionArgs, 'own
 type CreateUserActionClient<T extends keyof BuilderParameters> = CreateUserAction<T> &
   CommonUserActionArgs &
   IndexRefresh;
+
+type CreatePayloadFunction<Item, ActionType extends ActionTypeValues> = (
+  items: Item[]
+) => UserActionParameters<ActionType>['payload'];
 
 export class CaseUserActionService {
   private static readonly userActionFieldsAllowed: Set<string> = new Set(Object.keys(ActionTypes));
@@ -120,55 +139,26 @@ export class CaseUserActionService {
     });
   }
 
-  private getUserActionItemByDifference({
-    field,
-    originalValue,
-    newValue,
-    caseId,
-    owner,
-    user,
-  }: GetUserActionItemByDifference): BuilderReturnValue[] {
+  private getUserActionItemByDifference(
+    params: GetUserActionItemByDifference
+  ): BuilderReturnValue[] {
+    const { field, originalValue, newValue, caseId, owner, user } = params;
+
     if (!CaseUserActionService.userActionFieldsAllowed.has(field)) {
       return [];
-    }
-
-    if (field === ActionTypes.tags && isStringArray(originalValue) && isStringArray(newValue)) {
-      const tagsUserActionBuilder = this.builderFactory.getBuilder(ActionTypes.tags);
-      const compareValues = arraysDifference(originalValue, newValue);
-      const userActions = [];
-
-      if (compareValues && compareValues.addedItems.length > 0) {
-        const tagAddUserAction = tagsUserActionBuilder?.build({
-          action: Actions.add,
-          caseId,
-          user,
-          owner,
-          payload: { tags: compareValues.addedItems },
-        });
-
-        if (tagAddUserAction) {
-          userActions.push(tagAddUserAction);
-        }
-      }
-
-      if (compareValues && compareValues.deletedItems.length > 0) {
-        const tagsDeleteUserAction = tagsUserActionBuilder?.build({
-          action: Actions.delete,
-          caseId,
-          user,
-          owner,
-          payload: { tags: compareValues.deletedItems },
-        });
-
-        if (tagsDeleteUserAction) {
-          userActions.push(tagsDeleteUserAction);
-        }
-      }
-
-      return userActions;
-    }
-
-    if (isUserActionType(field) && newValue != null) {
+    } else if (
+      field === ActionTypes.assignees &&
+      isAssigneesArray(originalValue) &&
+      isAssigneesArray(newValue)
+    ) {
+      return this.buildAssigneesUserActions({ ...params, originalValue, newValue });
+    } else if (
+      field === ActionTypes.tags &&
+      isStringArray(originalValue) &&
+      isStringArray(newValue)
+    ) {
+      return this.buildTagsUserActions({ ...params, originalValue, newValue });
+    } else if (isUserActionType(field) && newValue != null) {
       const userActionBuilder = this.builderFactory.getBuilder(ActionTypes[field]);
       const fieldUserAction = userActionBuilder?.build({
         caseId,
@@ -181,6 +171,85 @@ export class CaseUserActionService {
     }
 
     return [];
+  }
+
+  private buildAssigneesUserActions(params: TypedUserActionDiffedItems<CaseUserProfile>) {
+    const createPayload: CreatePayloadFunction<CaseUserProfile, typeof ActionTypes.assignees> = (
+      items: CaseAssignees
+    ) => ({ assignees: items });
+
+    return this.buildAddDeleteUserActions(params, createPayload, ActionTypes.assignees);
+  }
+
+  private buildTagsUserActions(params: TypedUserActionDiffedItems<string>) {
+    const createPayload: CreatePayloadFunction<string, typeof ActionTypes.tags> = (
+      items: string[]
+    ) => ({
+      tags: items,
+    });
+
+    return this.buildAddDeleteUserActions(params, createPayload, ActionTypes.tags);
+  }
+
+  private buildAddDeleteUserActions<Item, ActionType extends ActionTypeValues>(
+    params: TypedUserActionDiffedItems<Item>,
+    createPayload: CreatePayloadFunction<Item, ActionType>,
+    actionType: ActionType
+  ) {
+    const { originalValue, newValue } = params;
+    const compareValues = arraysDifference(originalValue, newValue);
+
+    const addUserAction = this.buildUserAction({
+      commonArgs: params,
+      actionType,
+      action: Actions.add,
+      createPayload,
+      modifiedItems: compareValues?.addedItems,
+    });
+    const deleteUserAction = this.buildUserAction({
+      commonArgs: params,
+      actionType,
+      action: Actions.delete,
+      createPayload,
+      modifiedItems: compareValues?.deletedItems,
+    });
+
+    return [
+      ...(addUserAction ? [addUserAction] : []),
+      ...(deleteUserAction ? [deleteUserAction] : []),
+    ];
+  }
+
+  private buildUserAction<Item, ActionType extends ActionTypeValues>({
+    commonArgs,
+    actionType,
+    action,
+    createPayload,
+    modifiedItems,
+  }: {
+    commonArgs: CommonUserActionArgs;
+    actionType: ActionType;
+    action: ActionOperationValues;
+    createPayload: CreatePayloadFunction<Item, ActionType>;
+    modifiedItems?: Item[] | null;
+  }) {
+    const userActionBuilder = this.builderFactory.getBuilder(actionType);
+
+    if (!userActionBuilder || !modifiedItems || modifiedItems.length <= 0) {
+      return;
+    }
+
+    const { caseId, owner, user } = commonArgs;
+
+    const userAction = userActionBuilder.build({
+      action,
+      caseId,
+      user,
+      owner,
+      payload: createPayload(modifiedItems),
+    });
+
+    return userAction;
   }
 
   public async bulkCreateCaseDeletion({

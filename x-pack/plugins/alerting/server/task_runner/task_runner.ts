@@ -42,7 +42,6 @@ import {
 import { asErr, asOk, map, promiseResult, resolveErr, Resultable } from '../lib/result_type';
 import { getExecutionDurationPercentiles, getExecutionSuccessRatio } from '../lib/monitoring';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
-import { EVENT_LOG_ACTIONS } from '../plugin';
 import { isAlertSavedObjectNotFoundError, isEsUnavailableError } from '../lib/is_alerting_error';
 import { partiallyUpdateAlert } from '../saved_objects';
 import {
@@ -57,8 +56,6 @@ import { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_regi
 import { getEsErrorMessage } from '../lib/errors';
 import { InMemoryMetrics, IN_MEMORY_METRICS } from '../monitoring';
 import {
-  GenerateNewAndRecoveredAlertEventsParams,
-  LogActiveAndRecoveredAlertsParams,
   RuleTaskInstance,
   RuleTaskRunResult,
   ScheduleActionsForRecoveredAlertsParams,
@@ -72,6 +69,7 @@ import { wrapSearchSourceClient } from '../lib/wrap_search_source_client';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { SearchMetrics } from '../lib/types';
 import { loadRule } from './rule_loader';
+import { logAlerts } from './log_alerts';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -110,6 +108,7 @@ export class TaskRunner<
   private readonly executionId: string;
   private readonly ruleTypeRegistry: RuleTypeRegistry;
   private readonly inMemoryMetrics: InMemoryMetrics;
+  private readonly maxAlerts: number;
   private alertingEventLogger: AlertingEventLogger;
   private usageCounter?: UsageCounter;
   private searchAbortController: AbortController;
@@ -140,6 +139,7 @@ export class TaskRunner<
     this.cancelled = false;
     this.executionId = uuid.v4();
     this.inMemoryMetrics = inMemoryMetrics;
+    this.maxAlerts = context.maxAlerts;
     this.alertingEventLogger = new AlertingEventLogger(this.context.eventLogger);
   }
 
@@ -230,22 +230,26 @@ export class TaskRunner<
     executionHandler: ExecutionHandler<ActionGroupIds | RecoveryActionGroupId>,
     ruleRunMetricsStore: RuleRunMetricsStore
   ) {
-    const {
-      actionGroup,
-      subgroup: actionSubgroup,
-      context,
-      state,
-    } = alert.getScheduledActionOptions()!;
-    alert.updateLastScheduledActions(actionGroup, actionSubgroup);
-    alert.unscheduleActions();
-    return executionHandler({
-      actionGroup,
-      actionSubgroup,
-      context,
-      state,
-      alertId,
-      ruleRunMetricsStore,
-    });
+    if (alert.hasScheduledActions()) {
+      const {
+        actionGroup,
+        subgroup: actionSubgroup,
+        context,
+        state,
+      } = alert.getScheduledActionOptions()!;
+      alert.updateLastScheduledActions(actionGroup, actionSubgroup);
+      alert.unscheduleActions();
+      return executionHandler({
+        actionGroup,
+        actionSubgroup,
+        context,
+        state,
+        alertId,
+        ruleRunMetricsStore,
+      });
+    }
+
+    return Promise.resolve();
   }
 
   private async executeRule(
@@ -257,7 +261,7 @@ export class TaskRunner<
     spaceId: string
   ): Promise<RuleTaskStateAndMetrics> {
     const {
-      alertTypeId,
+      alertTypeId: ruleTypeId,
       consumer,
       schedule,
       throttle,
@@ -281,6 +285,8 @@ export class TaskRunner<
       },
     } = this.taskInstance;
 
+    const ruleRunMetricsStore = new RuleRunMetricsStore();
+
     const executionHandler = this.getExecutionHandler(
       ruleId,
       rule.name,
@@ -294,7 +300,7 @@ export class TaskRunner<
     );
 
     const namespace = this.context.spaceIdToNamespace(spaceId);
-    const ruleType = this.ruleTypeRegistry.get(alertTypeId);
+    const ruleType = this.ruleTypeRegistry.get(ruleTypeId);
 
     const alerts: Record<string, Alert<State, Context>> = {};
     for (const id in alertRawInstances) {
@@ -327,6 +333,16 @@ export class TaskRunner<
       searchSourceClient,
     });
 
+    const alertFactory = createAlertFactory<
+      State,
+      Context,
+      WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
+    >({
+      alerts,
+      logger: this.logger,
+      maxAlerts: this.maxAlerts,
+      canSetRecoveryContext: ruleType.doesSetRecoveryContext ?? false,
+    });
     let updatedRuleTypeState: void | Record<string, unknown>;
     try {
       const ctx = {
@@ -351,15 +367,7 @@ export class TaskRunner<
             searchSourceClient: wrappedSearchSourceClient.searchSourceClient,
             uiSettingsClient: this.context.uiSettings.asScopedToClient(savedObjectsClient),
             scopedClusterClient: wrappedScopedClusterClient.client(),
-            alertFactory: createAlertFactory<
-              State,
-              Context,
-              WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
-            >({
-              alerts,
-              logger: this.logger,
-              canSetRecoveryContext: ruleType.doesSetRecoveryContext ?? false,
-            }),
+            alertFactory,
             shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
             shouldStopExecution: () => this.cancelled,
           },
@@ -393,15 +401,23 @@ export class TaskRunner<
         })
       );
     } catch (err) {
-      this.alertingEventLogger.setExecutionFailed(
-        `rule execution failure: ${ruleLabel}`,
-        err.message
-      );
-      this.logger.error(err, {
-        tags: [this.ruleType.id, ruleId, 'rule-run-failed'],
-        error: { stack_trace: err.stack },
-      });
-      throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Execute, err);
+      // Check if this error is due to reaching the alert limit
+      if (alertFactory.hasReachedAlertLimit()) {
+        this.logger.warn(
+          `rule execution generated greater than ${this.maxAlerts} alerts: ${ruleLabel}`
+        );
+        ruleRunMetricsStore.setHasReachedAlertLimit(true);
+      } else {
+        this.alertingEventLogger.setExecutionFailed(
+          `rule execution failure: ${ruleLabel}`,
+          err.message
+        );
+        this.logger.error(err, {
+          tags: [this.ruleType.id, ruleId, 'rule-run-failed'],
+          error: { stack_trace: err.stack },
+        });
+        throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Execute, err);
+      }
     }
 
     this.alertingEventLogger.setExecutionSucceeded(`rule executed: ${ruleLabel}`);
@@ -417,7 +433,6 @@ export class TaskRunner<
         scopedClusterClientMetrics.esSearchDurationMs +
         searchSourceClientMetrics.esSearchDurationMs,
     };
-    const ruleRunMetricsStore = new RuleRunMetricsStore();
 
     ruleRunMetricsStore.setNumSearches(searchMetrics.numSearches);
     ruleRunMetricsStore.setTotalSearchDurationMs(searchMetrics.totalSearchDurationMs);
@@ -428,26 +443,24 @@ export class TaskRunner<
       Context,
       ActionGroupIds,
       RecoveryActionGroupId
-    >(alerts, originalAlerts);
-
-    logActiveAndRecoveredAlerts({
-      logger: this.logger,
-      activeAlerts,
-      recoveredAlerts,
-      ruleLabel,
-      canSetRecoveryContext: ruleType.doesSetRecoveryContext ?? false,
+    >({
+      alerts,
+      existingAlerts: originalAlerts,
+      hasReachedAlertLimit: alertFactory.hasReachedAlertLimit(),
+      alertLimit: this.maxAlerts,
     });
 
-    if (this.shouldLogAndScheduleActionsForAlerts()) {
-      generateNewAndRecoveredAlertEvents({
-        alertingEventLogger: this.alertingEventLogger,
-        newAlerts,
-        activeAlerts,
-        recoveredAlerts,
-        ruleLabel,
-        ruleRunMetricsStore,
-      });
-    }
+    logAlerts({
+      logger: this.logger,
+      alertingEventLogger: this.alertingEventLogger,
+      newAlerts,
+      activeAlerts,
+      recoveredAlerts,
+      ruleLogPrefix: ruleLabel,
+      ruleRunMetricsStore,
+      canSetRecoveryContext: ruleType.doesSetRecoveryContext ?? false,
+      shouldPersistAlerts: this.shouldLogAndScheduleActionsForAlerts(),
+    });
 
     await rulesClient.clearExpiredSnoozes({ id: rule.id });
 
@@ -796,86 +809,6 @@ export class TaskRunner<
   }
 }
 
-function generateNewAndRecoveredAlertEvents<
-  State extends AlertInstanceState,
-  Context extends AlertInstanceContext,
-  ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
->(
-  params: GenerateNewAndRecoveredAlertEventsParams<
-    State,
-    Context,
-    ActionGroupIds,
-    RecoveryActionGroupId
-  >
-) {
-  const { alertingEventLogger, activeAlerts, newAlerts, recoveredAlerts, ruleRunMetricsStore } =
-    params;
-  const activeAlertIds = Object.keys(activeAlerts);
-  const recoveredAlertIds = Object.keys(recoveredAlerts);
-  const newAlertIds = Object.keys(newAlerts);
-
-  if (apm.currentTransaction) {
-    apm.currentTransaction.addLabels({
-      alerting_new_alerts: newAlertIds.length,
-    });
-  }
-
-  ruleRunMetricsStore.setNumberOfActiveAlerts(activeAlertIds.length);
-  ruleRunMetricsStore.setNumberOfNewAlerts(newAlertIds.length);
-  ruleRunMetricsStore.setNumberOfRecoveredAlerts(recoveredAlertIds.length);
-
-  for (const id of recoveredAlertIds) {
-    const { group: actionGroup, subgroup: actionSubgroup } =
-      recoveredAlerts[id].getLastScheduledActions() ?? {};
-    const state = recoveredAlerts[id].getState();
-    const message = `${params.ruleLabel} alert '${id}' has recovered`;
-
-    alertingEventLogger.logAlert({
-      action: EVENT_LOG_ACTIONS.recoveredInstance,
-      id,
-      group: actionGroup,
-      subgroup: actionSubgroup,
-      message,
-      state,
-    });
-  }
-
-  for (const id of newAlertIds) {
-    const { actionGroup, subgroup: actionSubgroup } =
-      activeAlerts[id].getScheduledActionOptions() ?? {};
-    const state = activeAlerts[id].getState();
-    const message = `${params.ruleLabel} created new alert: '${id}'`;
-    alertingEventLogger.logAlert({
-      action: EVENT_LOG_ACTIONS.newInstance,
-      id,
-      group: actionGroup,
-      subgroup: actionSubgroup,
-      message,
-      state,
-    });
-  }
-
-  for (const id of activeAlertIds) {
-    const { actionGroup, subgroup: actionSubgroup } =
-      activeAlerts[id].getScheduledActionOptions() ?? {};
-    const state = activeAlerts[id].getState();
-    const message = `${params.ruleLabel} active alert: '${id}' in ${
-      actionSubgroup
-        ? `actionGroup(subgroup): '${actionGroup}(${actionSubgroup})'`
-        : `actionGroup: '${actionGroup}'`
-    }`;
-    alertingEventLogger.logAlert({
-      action: EVENT_LOG_ACTIONS.activeInstance,
-      id,
-      group: actionGroup,
-      subgroup: actionSubgroup,
-      message,
-      state,
-    });
-  }
-}
-
 async function scheduleActionsForRecoveredAlerts<
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext,
@@ -915,54 +848,6 @@ async function scheduleActionsForRecoveredAlerts<
         ruleRunMetricsStore,
       });
       alert.scheduleActions(recoveryActionGroup.id);
-    }
-  }
-}
-
-function logActiveAndRecoveredAlerts<
-  State extends AlertInstanceState,
-  Context extends AlertInstanceContext,
-  ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
->(
-  params: LogActiveAndRecoveredAlertsParams<State, Context, ActionGroupIds, RecoveryActionGroupId>
-) {
-  const { logger, activeAlerts, recoveredAlerts, ruleLabel, canSetRecoveryContext } = params;
-  const activeAlertIds = Object.keys(activeAlerts);
-  const recoveredAlertIds = Object.keys(recoveredAlerts);
-
-  if (apm.currentTransaction) {
-    apm.currentTransaction.addLabels({
-      alerting_active_alerts: activeAlertIds.length,
-      alerting_recovered_alerts: recoveredAlertIds.length,
-    });
-  }
-
-  if (activeAlertIds.length > 0) {
-    logger.debug(
-      `rule ${ruleLabel} has ${activeAlertIds.length} active alerts: ${JSON.stringify(
-        activeAlertIds.map((alertId) => ({
-          instanceId: alertId,
-          actionGroup: activeAlerts[alertId].getScheduledActionOptions()?.actionGroup,
-        }))
-      )}`
-    );
-  }
-  if (recoveredAlertIds.length > 0) {
-    logger.debug(
-      `rule ${ruleLabel} has ${recoveredAlertIds.length} recovered alerts: ${JSON.stringify(
-        recoveredAlertIds
-      )}`
-    );
-
-    if (canSetRecoveryContext) {
-      for (const id of recoveredAlertIds) {
-        if (!recoveredAlerts[id].hasContext()) {
-          logger.debug(
-            `rule ${ruleLabel} has no recovery context specified for recovered alert ${id}`
-          );
-        }
-      }
     }
   }
 }

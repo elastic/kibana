@@ -35,6 +35,7 @@ const DEFAULT_VALUES = {
   isWaitingForSync: false,
   lastUpdated: null,
   localSyncNowValue: false,
+  recheckIndexLoading: false,
   syncStatus: null,
 };
 
@@ -52,6 +53,7 @@ describe('IndexViewLogic', () => {
   const { mount: fetchIndexMount } = new LogicMounter(FetchIndexApiLogic);
   const indexNameLogic = new LogicMounter(IndexNameLogic);
   const { mount } = new LogicMounter(IndexViewLogic);
+  const { flashSuccessToast } = mockFlashMessageHelpers;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -132,6 +134,15 @@ describe('IndexViewLogic', () => {
         expect(IndexViewLogic.actions.createNewFetchIndexTimeout).toHaveBeenCalled();
         expect(IndexViewLogic.actions.fetchCrawlerData).not.toHaveBeenCalled();
       });
+      it('should flash success if recheckFetchIndexLoading', () => {
+        IndexViewLogic.actions.resetRecheckIndexLoading = jest.fn();
+        IndexNameLogic.actions.setIndexName('api');
+        IndexViewLogic.actions.recheckIndex();
+        FetchIndexApiLogic.actions.apiSuccess(apiIndex);
+
+        expect(IndexViewLogic.actions.createNewFetchIndexTimeout).toHaveBeenCalled();
+        expect(flashSuccessToast).toHaveBeenCalled();
+      });
     });
 
     describe('fetchIndex.apiError', () => {
@@ -192,6 +203,28 @@ describe('IndexViewLogic', () => {
       jest.advanceTimersByTime(2);
       await nextTick();
       expect(IndexViewLogic.actions.fetchIndex).toHaveBeenCalled();
+    });
+  });
+
+  describe('recheckIndexLoading', () => {
+    it('should be set to true on recheckIndex', () => {
+      IndexViewLogic.actions.recheckIndex();
+      expect(IndexViewLogic.values).toEqual(
+        expect.objectContaining({
+          ...DEFAULT_VALUES,
+          recheckIndexLoading: true,
+        })
+      );
+    });
+    it('should be set to false on resetRecheckIndexLoading', () => {
+      IndexViewLogic.actions.recheckIndex();
+      IndexViewLogic.actions.resetRecheckIndexLoading();
+      expect(IndexViewLogic.values).toEqual(
+        expect.objectContaining({
+          ...DEFAULT_VALUES,
+          recheckIndexLoading: false,
+        })
+      );
     });
   });
 
