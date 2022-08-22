@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
+import PropTypes from 'prop-types';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useDispatch, useSelector } from 'react-redux';
@@ -52,9 +53,7 @@ export const RefreshControl = () => {
   );
 };
 
-// Omitting because of type conflicts caused by different versions of @types/prop-types in codebase
-
-// RefreshControl.propTypes = {
-//   doRefresh: PropTypes.func.isRequired,
-//   inFlight: PropTypes.bool,
-// };
+RefreshControl.propTypes = {
+  doRefresh: PropTypes.func.isRequired,
+  inFlight: PropTypes.bool,
+};

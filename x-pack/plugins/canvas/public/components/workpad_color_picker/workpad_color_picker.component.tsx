@@ -37,7 +37,4 @@ export const WorkpadColorPicker = (props: Props) => {
   );
 };
 
-// Omitting because of type conflicts caused by different versions of @types/prop-types in codebase
-// Conflict caused by use of react-redux connect to infer type elsewhere
-
-// WorkpadColorPicker.propTypes = ColorPickerPopover.propTypes;
+WorkpadColorPicker.propTypes = ColorPickerPopover.propTypes;
