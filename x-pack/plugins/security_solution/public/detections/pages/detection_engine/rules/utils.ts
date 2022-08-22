@@ -71,7 +71,7 @@ export const getTrailingBreadcrumbs = (
 };
 
 export const getShowingRulesParams = ({ page, perPage, total: totalRules }: Pagination) => {
-  const firstInPage = (page - 1) * perPage + 1;
+  const firstInPage = totalRules === 0 ? 0 : (page - 1) * perPage + 1;
   const lastInPage = page * perPage > totalRules ? totalRules : page * perPage;
 
   return [firstInPage, lastInPage, totalRules] as const;

@@ -9,8 +9,10 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 
-import { AllRulesUtilityBar } from './utility_bar';
+import { AllRulesUtilityBar } from './rules_table_utility_bar';
 import { TestProviders } from '../../../../../common/mock';
+
+jest.mock('./rules_table/rules_table_context');
 
 describe('AllRules', () => {
   it('renders AllRulesUtilityBar total rules and selected rules', () => {
@@ -28,7 +30,6 @@ describe('AllRules', () => {
           onGetBulkItemsPopoverContent={jest.fn()}
           isAutoRefreshOn={true}
           onRefreshSwitch={jest.fn()}
-          hasBulkActions
         />
       </TestProviders>
     );
@@ -43,6 +44,7 @@ describe('AllRules', () => {
 
   describe('renders correct pagination label when', () => {
     it.each([
+      [0, 0, 0, 'Showing 0-0 of 0 rules'],
       [1, 1, 1, 'Showing 1-1 of 1 rule'],
       [1, 10, 21, 'Showing 1-10 of 21 rules'],
       [1, 10, 8, 'Showing 1-8 of 8 rules'],
@@ -68,35 +70,11 @@ describe('AllRules', () => {
               onGetBulkItemsPopoverContent={jest.fn()}
               isAutoRefreshOn={true}
               onRefreshSwitch={jest.fn()}
-              hasBulkActions
             />
           </TestProviders>
         );
         expect(wrapper.find('[data-test-subj="showingRules"]').at(0).text()).toEqual(label);
       }
-    );
-  });
-
-  it('does not render total selected and bulk actions when "hasBulkActions" is false', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <AllRulesUtilityBar
-          canBulkEdit
-          onRefresh={jest.fn()}
-          totalExceptionLists={7}
-          numberSelectedItems={1}
-          onGetBulkItemsPopoverContent={jest.fn()}
-          isAutoRefreshOn={true}
-          onRefreshSwitch={jest.fn()}
-          hasBulkActions={false}
-        />
-      </TestProviders>
-    );
-
-    expect(wrapper.find('[data-test-subj="showingRules"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="tableBulkActions"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="showingExceptionLists"]').at(0).text()).toEqual(
-      'Showing 7 lists'
     );
   });
 
@@ -115,7 +93,6 @@ describe('AllRules', () => {
           onGetBulkItemsPopoverContent={jest.fn()}
           isAutoRefreshOn={true}
           onRefreshSwitch={jest.fn()}
-          hasBulkActions
         />
       </TestProviders>
     );
@@ -138,7 +115,6 @@ describe('AllRules', () => {
           onGetBulkItemsPopoverContent={jest.fn()}
           isAutoRefreshOn={true}
           onRefreshSwitch={jest.fn()}
-          hasBulkActions
         />
       </TestProviders>
     );
@@ -162,7 +138,6 @@ describe('AllRules', () => {
           onGetBulkItemsPopoverContent={jest.fn()}
           isAutoRefreshOn={true}
           onRefreshSwitch={jest.fn()}
-          hasBulkActions
         />
       </TestProviders>
     );
@@ -188,7 +163,6 @@ describe('AllRules', () => {
           onGetBulkItemsPopoverContent={jest.fn()}
           isAutoRefreshOn={true}
           onRefreshSwitch={mockSwitch}
-          hasBulkActions
         />
       </TestProviders>
     );
@@ -216,7 +190,6 @@ describe('AllRules', () => {
           onGetBulkItemsPopoverContent={jest.fn()}
           isAutoRefreshOn={true}
           onRefreshSwitch={mockSwitch}
-          hasBulkActions
         />
       </TestProviders>
     );

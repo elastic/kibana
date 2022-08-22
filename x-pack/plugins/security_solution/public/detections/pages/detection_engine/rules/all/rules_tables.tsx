@@ -31,7 +31,7 @@ import { showRulesTable } from './helpers';
 import { useRulesTableContext } from './rules_table/rules_table_context';
 import { useAsyncConfirmation } from './rules_table/use_async_confirmation';
 import { RulesTableFilters } from './rules_table_filters/rules_table_filters';
-import { AllRulesUtilityBar } from './utility_bar';
+import { AllRulesUtilityBar } from './rules_table_utility_bar';
 import { useBulkActionsDryRun } from './bulk_actions/use_bulk_actions_dry_run';
 import { useBulkActionsConfirmation } from './bulk_actions/use_bulk_actions_confirmation';
 import { useBulkEditFormFlyout } from './bulk_actions/use_bulk_edit_form_flyout';
@@ -145,7 +145,6 @@ export const RulesTables = React.memo<RulesTableProps>(
     } = useBulkEditFormFlyout();
 
     const selectedItemsCount = isAllSelected ? pagination.total : selectedRuleIds.length;
-    const hasPagination = pagination.total > pagination.perPage;
 
     const { isBulkActionsDryRunLoading, executeBulkActionsDryRun } = useBulkActionsDryRun();
 
@@ -334,7 +333,6 @@ export const RulesTables = React.memo<RulesTableProps>(
           <>
             <AllRulesUtilityBar
               canBulkEdit={hasPermissions}
-              hasPagination={hasPagination}
               pagination={pagination}
               numberSelectedItems={selectedItemsCount}
               onGetBulkItemsPopoverContent={getBulkItemsPopoverContent}
@@ -345,7 +343,6 @@ export const RulesTables = React.memo<RulesTableProps>(
               onToggleSelectAll={toggleSelectAll}
               isBulkActionInProgress={isBulkActionsDryRunLoading || loadingRulesAction != null}
               hasDisabledActions={loadingRulesAction != null}
-              hasBulkActions
             />
             <EuiBasicTable
               itemId="id"

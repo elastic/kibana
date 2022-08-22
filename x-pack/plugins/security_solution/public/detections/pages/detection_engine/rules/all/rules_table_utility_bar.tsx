@@ -25,7 +25,7 @@ import {
 } from '../../../../../common/components/utility_bar';
 import * as i18n from '../translations';
 import { useKibana } from '../../../../../common/lib/kibana';
-import { useRulesTableContextOptional } from './rules_table/rules_table_context';
+import { useRulesTableContext } from './rules_table/rules_table_context';
 import { getShowingRulesParams } from '../utils';
 import type { Pagination } from '../types';
 
@@ -38,10 +38,7 @@ interface AllRulesUtilityBarProps {
   onRefresh?: () => void;
   onRefreshSwitch?: (checked: boolean) => void;
   onToggleSelectAll?: () => void;
-  pagination?: Pagination;
-  totalExceptionLists?: number;
-  hasBulkActions: boolean;
-  hasPagination?: boolean;
+  pagination: Pagination;
   isBulkActionInProgress?: boolean;
   hasDisabledActions?: boolean;
 }
@@ -57,14 +54,11 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
     onRefreshSwitch,
     onToggleSelectAll,
     pagination,
-    totalExceptionLists,
-    hasBulkActions = true,
-    hasPagination,
     isBulkActionInProgress,
     hasDisabledActions,
   }) => {
     const { timelines } = useKibana().services;
-    const rulesTableContext = useRulesTableContextOptional();
+    const rulesTableContext = useRulesTableContext();
     const isAnyRuleSelected = numberSelectedItems > 0;
 
     const handleGetBulkItemsPopoverContent = useCallback(
@@ -129,73 +123,44 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
       <UtilityBar border>
         <UtilityBarSection>
           <UtilityBarGroup>
-            {hasBulkActions && pagination ? (
-              <UtilityBarText dataTestSubj="showingRules">
-                {i18n.SHOWING_RULES(...getShowingRulesParams(pagination))}
-              </UtilityBarText>
-            ) : (
-              <UtilityBarText dataTestSubj="showingExceptionLists">
-                {i18n.SHOWING_EXCEPTION_LISTS(totalExceptionLists ?? 0)}
-              </UtilityBarText>
-            )}
+            <UtilityBarText dataTestSubj="showingRules">
+              {i18n.SHOWING_RULES(...getShowingRulesParams(pagination))}
+            </UtilityBarText>
           </UtilityBarGroup>
+          <>
+            <UtilityBarGroup data-test-subj="tableBulkActions">
+              <UtilityBarText dataTestSubj="selectedRules">
+                {i18n.SELECTED_RULES(numberSelectedItems)}
+              </UtilityBarText>
 
-          {hasBulkActions ? (
-            <>
-              <UtilityBarGroup data-test-subj="tableBulkActions">
-                <UtilityBarText dataTestSubj="selectedRules">
-                  {i18n.SELECTED_RULES(numberSelectedItems)}
-                </UtilityBarText>
-
-                {canBulkEdit && onToggleSelectAll && hasPagination && pagination && (
-                  <UtilityBarAction
-                    disabled={hasDisabledActions}
-                    dataTestSubj="selectAllRules"
-                    iconType={isAllSelected ? 'cross' : 'pagesSelect'}
-                    iconSide="left"
-                    onClick={onToggleSelectAll}
-                  >
-                    {isAllSelected ? i18n.CLEAR_SELECTION : i18n.SELECT_ALL_RULES(pagination.total)}
-                  </UtilityBarAction>
-                )}
-
-                {canBulkEdit && (
-                  <UtilityBarAction
-                    disabled={hasDisabledActions}
-                    inProgress={isBulkActionInProgress}
-                    dataTestSubj="bulkActions"
-                    iconSide="right"
-                    iconType="arrowDown"
-                    popoverPanelPaddingSize="none"
-                    popoverContent={handleGetBulkItemsPopoverContent}
-                  >
-                    {i18n.BATCH_ACTIONS}
-                  </UtilityBarAction>
-                )}
-
+              {canBulkEdit && onToggleSelectAll && (
                 <UtilityBarAction
                   disabled={hasDisabledActions}
-                  dataTestSubj="refreshRulesAction"
+                  dataTestSubj="selectAllRules"
+                  iconType={isAllSelected ? 'cross' : 'pagesSelect'}
                   iconSide="left"
-                  iconType="refresh"
-                  onClick={onRefresh}
+                  onClick={onToggleSelectAll}
                 >
-                  {i18n.REFRESH}
+                  {isAllSelected ? i18n.CLEAR_SELECTION : i18n.SELECT_ALL_RULES(pagination.total)}
                 </UtilityBarAction>
+              )}
+
+              {canBulkEdit && (
                 <UtilityBarAction
                   disabled={hasDisabledActions}
-                  dataTestSubj="refreshSettings"
+                  inProgress={isBulkActionInProgress}
+                  dataTestSubj="bulkActions"
                   iconSide="right"
                   iconType="arrowDown"
-                  popoverContent={handleGetRefreshSettingsPopoverContent}
+                  popoverPanelPaddingSize="none"
+                  popoverContent={handleGetBulkItemsPopoverContent}
                 >
-                  {i18n.REFRESH_RULE_POPOVER_LABEL}
+                  {i18n.BATCH_ACTIONS}
                 </UtilityBarAction>
-              </UtilityBarGroup>
-            </>
-          ) : (
-            <UtilityBarGroup>
+              )}
+
               <UtilityBarAction
+                disabled={hasDisabledActions}
                 dataTestSubj="refreshRulesAction"
                 iconSide="left"
                 iconType="refresh"
@@ -203,17 +168,24 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
               >
                 {i18n.REFRESH}
               </UtilityBarAction>
+              <UtilityBarAction
+                disabled={hasDisabledActions}
+                dataTestSubj="refreshSettings"
+                iconSide="right"
+                iconType="arrowDown"
+                popoverContent={handleGetRefreshSettingsPopoverContent}
+              >
+                {i18n.REFRESH_RULE_POPOVER_LABEL}
+              </UtilityBarAction>
             </UtilityBarGroup>
-          )}
+          </>
         </UtilityBarSection>
-        {rulesTableContext && (
-          <UtilityBarSection dataTestSubj="refreshRulesStatus">
-            {timelines.getLastUpdated({
-              showUpdating: rulesTableContext.state.isFetching,
-              updatedAt: rulesTableContext.state.lastUpdated,
-            })}
-          </UtilityBarSection>
-        )}
+        <UtilityBarSection dataTestSubj="refreshRulesStatus">
+          {timelines.getLastUpdated({
+            showUpdating: rulesTableContext.state.isFetching,
+            updatedAt: rulesTableContext.state.lastUpdated,
+          })}
+        </UtilityBarSection>
       </UtilityBar>
     );
   }
