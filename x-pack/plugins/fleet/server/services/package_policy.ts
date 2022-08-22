@@ -121,7 +121,7 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
         throw new IngestManagerError('You cannot add APM to a policy using a logstash output');
       }
     }
-    await validateIsNotHostedPolicy(soClient, packagePolicy.policy_id);
+    await validateIsNotHostedPolicy(soClient, packagePolicy.policy_id, options?.force);
 
     // trailing whitespace causes issues creating API keys
     packagePolicy.name = packagePolicy.name.trim();
