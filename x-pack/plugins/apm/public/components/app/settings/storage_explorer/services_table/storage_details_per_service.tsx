@@ -106,7 +106,14 @@ export function StorageDetailsPerService({
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem>
               <EuiTitle size="xxs">
-                <h4>Service storage details</h4>
+                <h4>
+                  {i18n.translate(
+                    'xpack.apm.settings.storageExplorer.serviceDetails.title',
+                    {
+                      defaultMessage: 'Service storage details',
+                    }
+                  )}
+                </h4>
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -129,7 +136,7 @@ export function StorageDetailsPerService({
                 <Chart size={{ height: 200 }}>
                   <Settings theme={chartTheme} showLegend />
                   <Partition
-                    id="pieByPR"
+                    id="storageExplorerSizeByProcessorType"
                     data={data.processorEventStats}
                     valueAccessor={(d) => d.size ?? 0}
                     valueFormatter={(d: number) =>

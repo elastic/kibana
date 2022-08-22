@@ -161,7 +161,7 @@ export function ServicesTable({ indexLifecyclePhase }: Props) {
               {i18n.translate(
                 'xpack.apm.settings.storageExplorer.table.samplingColumnName',
                 {
-                  defaultMessage: 'Sampling',
+                  defaultMessage: 'Sample rate',
                 }
               )}{' '}
               <EuiIcon
@@ -183,8 +183,7 @@ export function ServicesTable({ indexLifecyclePhase }: Props) {
             content={i18n.translate(
               'xpack.apm.settings.storageExplorer.table.sizeColumnDescription',
               {
-                defaultMessage:
-                  'Estimated size for both primary and replica shards calculated by prorating the total size of the indices by the number of documents returned.',
+                defaultMessage: `The estimated storage size per service. This estimate includes primary and replica shards and is calculated by prorating the total size of your indices by the service's document count divided by the total number of documents.`,
               }
             )}
           >
@@ -286,7 +285,7 @@ export function ServicesTable({ indexLifecyclePhase }: Props) {
           : i18n.translate(
               'xpack.apm.settings.storageExplorer.table.noResults',
               {
-                defaultMessage: 'No errors found associated with transactions',
+                defaultMessage: 'No data found',
               }
             )
       }
