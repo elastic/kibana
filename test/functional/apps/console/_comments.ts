@@ -46,7 +46,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       }
 
-      describe('with single line comments', async () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/138160
+      describe.skip('with single line comments', async () => {
         await runTests(
           [
             {
