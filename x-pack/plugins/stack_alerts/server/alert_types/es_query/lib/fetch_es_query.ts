@@ -26,13 +26,18 @@ export async function fetchEsQuery(
 ) {
   const { scopedClusterClient, logger } = services;
   const esClient = scopedClusterClient.asCurrentUser;
-  const { parsedQuery, dateStart, dateEnd } = getSearchParams(params);
+  const {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    parsedQuery: { query, fields, runtime_mappings },
+    dateStart,
+    dateEnd,
+  } = getSearchParams(params);
 
   const filter = timestamp
     ? {
         bool: {
           filter: [
-            parsedQuery.query,
+            query,
             {
               bool: {
                 must_not: [
@@ -56,9 +61,9 @@ export async function fetchEsQuery(
           ],
         },
       }
-    : parsedQuery.query;
+    : query;
 
-  const query = buildSortedEventsQuery({
+  const sortedQuery = buildSortedEventsQuery({
     index: params.index,
     from: dateStart,
     to: dateEnd,
@@ -68,11 +73,15 @@ export async function fetchEsQuery(
     searchAfterSortId: undefined,
     timeField: params.timeField,
     track_total_hits: true,
+    fields,
+    runtime_mappings,
   });
 
-  logger.debug(`es query rule ${ES_QUERY_ID}:${ruleId} "${name}" query - ${JSON.stringify(query)}`);
+  logger.debug(
+    `es query rule ${ES_QUERY_ID}:${ruleId} "${name}" query - ${JSON.stringify(sortedQuery)}`
+  );
 
-  const { body: searchResult } = await esClient.search(query, { meta: true });
+  const { body: searchResult } = await esClient.search(sortedQuery, { meta: true });
 
   logger.debug(
     ` es query rule ${ES_QUERY_ID}:${ruleId} "${name}" result - ${JSON.stringify(searchResult)}`
