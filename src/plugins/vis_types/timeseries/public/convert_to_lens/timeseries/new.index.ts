@@ -20,29 +20,14 @@ import { getMetricsColumns, getSplitColumns } from '../lib/series';
 import { getLayers, getYExtents } from '../lib/configurations/xy';
 import {
   Layer as ExtendedLayer,
-  ColumnWithMeta,
-  Column,
   convertToDateHistogramColumn,
+  excludeMetaFromColumn,
 } from '../lib/convert';
-
-const isColumnWithMeta = (column: Column): column is ColumnWithMeta => {
-  if ((column as ColumnWithMeta).meta) {
-    return true;
-  }
-  return false;
-};
 
 const excludeMetaFromLayers = (layers: Record<string, ExtendedLayer>): Record<string, Layer> => {
   const newLayers: Record<string, Layer> = {};
   Object.entries(layers).forEach(([layerId, layer]) => {
-    const columns = layer.columns.map((column) => {
-      if (isColumnWithMeta(column)) {
-        const { meta, ...rest } = column;
-        return rest;
-      }
-      return column;
-    });
-
+    const columns = layer.columns.map(excludeMetaFromColumn);
     newLayers[layerId] = { ...layer, columns };
   });
 
@@ -90,7 +75,7 @@ export const convertToLens = async (
       return null;
     }
 
-    const filtersOrTermColumns = getSplitColumns(model, series, indexPattern!);
+    const filtersOrTermColumns = getSplitColumns(model, series, metricsColumns, indexPattern!);
     if (filtersOrTermColumns === null) {
       return null;
     }

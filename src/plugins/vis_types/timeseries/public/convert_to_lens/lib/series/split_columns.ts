@@ -9,7 +9,13 @@
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { Series, Panel } from '../../../../common/types';
 import { getFieldsForTerms } from '../../../../common/fields_utils';
-import { convertToFiltersColumn, convertToDateHistogramColumn } from '../convert';
+import {
+  Column,
+  convertToFiltersColumn,
+  convertToDateHistogramColumn,
+  converToTermsColumns,
+} from '../convert';
+import { getValidColumns } from './columns';
 
 export const isSplitWithDateHistogram = (
   series: Series,
@@ -34,7 +40,12 @@ export const isSplitWithDateHistogram = (
   return splitWithDateHistogram;
 };
 
-export const getSplitColumns = (model: Panel, series: Series, dataView: DataView) => {
+export const getSplitColumns = (
+  model: Panel,
+  series: Series,
+  columns: Column[],
+  dataView: DataView
+) => {
   if (series.split_mode === 'filters' || series.split_mode === 'filter') {
     const filterColumn = convertToFiltersColumn(series, true);
     if (!filterColumn) {
@@ -61,6 +72,9 @@ export const getSplitColumns = (model: Panel, series: Series, dataView: DataView
       }
       return [dateHistogramColumn];
     }
+
+    const termsColumns = converToTermsColumns(splitFields, series, columns, dataView);
+    return getValidColumns(termsColumns);
   }
   return [];
 };

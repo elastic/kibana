@@ -11,16 +11,16 @@ import {
   Operation,
   DataType,
   Column,
-  ColumnWithMeta,
+  ColumnWithMeta as GenericColumnWithMeta,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import uuid from 'uuid';
 import type { Metric, Series } from '../../../../common/types';
 import { ConvertToColumnsFn } from '../../types';
 import { getTimeScale } from '../metrics';
-import { Meta } from './types';
+import { ColumnWithMeta, Meta } from './types';
 
 type GeneralColumn = Omit<BaseColumn<Operation, unknown>, 'operationType' | 'params'>;
-type GeneralColumnWithMeta = ColumnWithMeta<GeneralColumn, Meta>;
+type GeneralColumnWithMeta = GenericColumnWithMeta<GeneralColumn, Meta>;
 
 export const createColumn = (
   series: Series,
@@ -46,3 +46,18 @@ export const convertMetricsToColumns = <C extends Column>(
   dataView: DataView,
   convertToFn: ConvertToColumnsFn<C>
 ) => metrics.flatMap((metric) => convertToFn(series, metric, dataView));
+
+export const isColumnWithMeta = (column: Column): column is ColumnWithMeta => {
+  if ((column as ColumnWithMeta).meta) {
+    return true;
+  }
+  return false;
+};
+
+export const excludeMetaFromColumn = (column: Column) => {
+  if (isColumnWithMeta(column)) {
+    const { meta, ...rest } = column;
+    return rest;
+  }
+  return column;
+};
