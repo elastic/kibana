@@ -35,9 +35,6 @@ const mockLayer = {
   isVisible: () => {
     return true;
   },
-  isShowTooltip: () => {
-    return true;
-  },
   canShowTooltip: () => {
     return true;
   },
