@@ -35,7 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
 
-    it(`Should return 500 when package policy id does not exist`, async () => {
+    it(`Should return 404 when package policy id does not exist`, async () => {
       const packagePolicyId = chance.guid();
 
       const { body: response } = await supertest
@@ -43,10 +43,14 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .send({
           package_policy_id: packagePolicyId,
+          rules: [],
         })
-        .expect(500);
-      expect(response.error).to.be('Internal Server Error');
-      expect(response.message).to.be(`Package policy ${packagePolicyId} not found`);
+        .expect(404);
+
+      expect(response.error).to.be('Not Found');
+      expect(response.message).to.be(
+        `Saved object [ingest-package-policies/${packagePolicyId}] not found`
+      );
     });
 
     it(`Should return 200 for existing package policy id`, async () => {
@@ -74,6 +78,7 @@ export default function ({ getService }: FtrProviderContext) {
         .post(`/internal/cloud_security_posture/update_rules_config`)
         .set('kbn-xsrf', 'xxxx')
         .send({
+          rules: [],
           package_policy_id: postPackageResponse.item.id,
         })
         .expect(200);
