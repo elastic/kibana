@@ -162,18 +162,18 @@ export const getPieVisualization = ({
             {
               ...baseProps,
               groupId: 'groups',
-              groupLabel: i18n.translate('xpack.lens.pie.treemapGroupLabel', {
-                defaultMessage: 'Primary metric',
+              groupLabel: i18n.translate('xpack.lens.pie.primaryAxisLabel', {
+                defaultMessage: 'Primary axis',
               }),
               accessors: (sortedColumns.length > 0 ? [sortedColumns[0]] : []) || [],
               dimensionEditorGroupLabel: i18n.translate(
-                'xpack.lens.pie.treemapDimensionGroupLabel',
+                'xpack.lens.pie.primaryAxisDimansionLabel',
                 {
-                  defaultMessage: 'Horizontal axis',
+                  defaultMessage: 'Primary axis',
                 }
               ),
               supportsMoreColumns: sortedColumns.length === 0,
-              dataTestSubj: 'lnsPie_primaryMetricGroupByDimensionPanel',
+              dataTestSubj: 'lnsPie_primaryAxisGroupByDimensionPanel',
               requiredMinDimensionCount: 1,
             },
             {
@@ -181,17 +181,17 @@ export const getPieVisualization = ({
               groupId: 'groups',
               required: false,
               accessors: (sortedColumns.length > 1 ? [sortedColumns[1]] : []) || [],
-              groupLabel: i18n.translate('xpack.lens.pie.treemapGroupLabel', {
-                defaultMessage: 'Secondary metric',
+              groupLabel: i18n.translate('xpack.lens.pie.secondaryAxisLabel', {
+                defaultMessage: 'Secondary axis',
               }),
               dimensionEditorGroupLabel: i18n.translate(
-                'xpack.lens.pie.treemapDimensionGroupLabel',
+                'xpack.lens.pie.secondaryAxisDimentionLabel',
                 {
-                  defaultMessage: 'Secondary metric',
+                  defaultMessage: 'Secondary axis',
                 }
               ),
               supportsMoreColumns: sortedColumns.length < 2,
-              dataTestSubj: 'lnsPie_secondaryMetricGroupByDimensionPanel',
+              dataTestSubj: 'lnsPie_secondaryAxisGroupByDimensionPanel',
             },
           ];
         default:
@@ -230,8 +230,10 @@ export const getPieVisualization = ({
       dataTestSubj: 'lnsPie_sizeByDimensionPanel',
     });
 
+    const groups = getSliceByGroup();
+
     return {
-      groups: [getSliceByGroup(), getMetricGroup()].flat(),
+      groups: [...(Array.isArray(groups) ? groups : [groups]), getMetricGroup()],
     };
   },
 

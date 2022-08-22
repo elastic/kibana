@@ -424,7 +424,7 @@ export function LayerPanel(
                   ) : null
                 }
                 labelType="legend"
-                key={group.groupId}
+                key={group.groupId + groupIndex}
                 isInvalid={isMissing}
                 error={isMissing ? isMissingError : []}
               >
