@@ -143,7 +143,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         overwrites: { tags: ['tag', 'tagtag', 'taggity tag'] },
       });
       await refreshAlertsList();
-      await pageObjects.triggersActionsUI.searchAlerts('tag');
+      await pageObjects.triggersActionsUI.searchAlerts(`${createdAlert.name} tag`);
 
       const searchResults = await pageObjects.triggersActionsUI.getAlertsList();
       expect(searchResults.length).to.equal(1);
