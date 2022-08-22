@@ -39,6 +39,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await PageObjects.timePicker.setDefaultAbsoluteRange();
   }
 
+  async function openDiscover() {
+    await PageObjects.common.navigateToApp('discover');
+    await PageObjects.common.waitForTopNavToBeVisible();
+    await PageObjects.discover.selectIndexPattern('logstash-*');
+  }
+
   describe('discover feature controls security', () => {
     before(async () => {
       await kibanaServer.importExport.load(
@@ -208,8 +214,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       beforeEach(async () => {
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.common.waitForTopNavToBeVisible();
+        await openDiscover();
       });
 
       after(async () => {
@@ -223,8 +228,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`doesn't show save button`, async () => {
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.common.waitForTopNavToBeVisible();
         await testSubjects.existOrFail('discoverNewButton', { timeout: 10000 });
         await testSubjects.missingOrFail('discoverSaveButton');
       });
@@ -234,8 +237,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`doesn't show visualize button`, async () => {
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.common.waitForTopNavToBeVisible();
         await PageObjects.discover.selectIndexPattern('logstash-*');
         await setDiscoverTimeRange();
         await PageObjects.discover.waitForDocTableLoadingComplete();
@@ -307,8 +308,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       beforeEach(async () => {
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.common.waitForTopNavToBeVisible();
+        await openDiscover();
       });
 
       after(async () => {
@@ -322,8 +322,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`doesn't show save button`, async () => {
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.common.waitForTopNavToBeVisible();
         await testSubjects.existOrFail('discoverNewButton', { timeout: 10000 });
         await testSubjects.missingOrFail('discoverSaveButton');
       });
@@ -333,8 +331,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`doesn't show visualize button`, async () => {
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.common.waitForTopNavToBeVisible();
         await setDiscoverTimeRange();
         await PageObjects.discover.waitForDocTableLoadingComplete();
         await PageObjects.discover.clickFieldListItem('bytes');
@@ -415,6 +411,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.common.waitForTopNavToBeVisible();
         await setDiscoverTimeRange();
+        await PageObjects.discover.waitForDocTableLoadingComplete();
         await PageObjects.discover.clickFieldListItem('bytes');
         await PageObjects.discover.expectFieldListItemVisualize('bytes');
       });
@@ -530,6 +527,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await security.role.delete('discover_only_data_views_role');
         await security.user.delete('discover_only_data_views_user');
+        await kibanaServer.savedObjects.cleanStandardList();
       });
 
       it('allows to access only via a permitted index alias', async () => {
@@ -544,6 +542,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.discover.selectIndexPattern('alias-logstash-discover');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await setDiscoverTimeRange();
+        await PageObjects.discover.waitForDocTableLoadingComplete();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await testSubjects.missingOrFail('discoverNoResultsCheckIndices');
         await PageObjects.discover.waitForDocTableLoadingComplete();
