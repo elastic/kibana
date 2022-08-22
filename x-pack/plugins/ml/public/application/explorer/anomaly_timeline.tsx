@@ -217,6 +217,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
               defaultMessage="Attach to case"
             />
           ),
+          'data-test-subj': 'mlAnomalyTimelinePanelAttachToCaseButton',
         });
 
         panels.push({

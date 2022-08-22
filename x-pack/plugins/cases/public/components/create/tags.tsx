@@ -31,13 +31,13 @@ const TagsComponent: React.FC<Props> = ({ isLoading }) => {
       path="tags"
       componentProps={{
         idAria: 'caseTags',
-        'data-test-subj': 'caseTags',
         euiFieldProps: {
           fullWidth: true,
           placeholder: '',
           disabled: isLoading || isLoadingTags,
           options,
           noSuggestions: false,
+          'data-test-subj': 'caseTags',
         },
       }}
     />

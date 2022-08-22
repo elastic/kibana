@@ -368,6 +368,10 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.anomaliesTable.assertTableRowsCount(10);
         });
 
+        it('attaches swim lane embeddable to a case', async () => {
+          await ml.anomalyExplorer.attachSwimLaneToCase('viewBy');
+        });
+
         it('adds swim lane embeddable to a dashboard', async () => {
           // should be the last step because it navigates away from the Anomaly Explorer page
           await ml.testExecution.logTestStep(
