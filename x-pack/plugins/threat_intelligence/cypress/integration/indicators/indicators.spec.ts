@@ -20,23 +20,24 @@ import {
   INDICATOR_TYPE_CELL,
   EMPTY_STATE,
   FIELD_SELECTOR,
+  BREADCRUMBS,
+  LEADING_BREADCRUMB,
+  ENDING_BREADCRUMB,
+  FIELD_BROWSER,
+  FIELD_BROWSER_MODAL,
 } from '../../screens/indicators';
 import { login } from '../../tasks/login';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
+import { selectRange } from '../../tasks/select_range';
 
 before(() => {
   login();
 });
 
-/**
- * Time range extended to 15 years back to ensure fixtures are showing up correctly
- * TODO: https://github.com/elastic/security-team/issues/4595
- */
-const THREAT_INTELLIGENCE_15Y_DATA =
-  '/app/security/threat_intelligence?indicators=(filterQuery:(language:kuery,query:%27%27),filters:!(),timeRange:(from:now-15y/d,to:now))';
+const THREAT_INTELLIGENCE = '/app/security/threat_intelligence/indicators';
 
 const URL_WITH_CONTRADICTORY_FILTERS =
-  '/app/security/threat_intelligence?indicators=(filterQuery:(language:kuery,query:%27%27),filters:!((%27$state%27:(store:appState),meta:(alias:!n,disabled:!f,index:%27%27,key:threat.indicator.type,negate:!f,params:(query:file),type:phrase),query:(match_phrase:(threat.indicator.type:file))),(%27$state%27:(store:appState),meta:(alias:!n,disabled:!f,index:%27%27,key:threat.indicator.type,negate:!f,params:(query:url),type:phrase),query:(match_phrase:(threat.indicator.type:url)))),timeRange:(from:now/d,to:now/d))';
+  '/app/security/threat_intelligence/indicators?indicators=(filterQuery:(language:kuery,query:%27%27),filters:!((%27$state%27:(store:appState),meta:(alias:!n,disabled:!f,index:%27%27,key:threat.indicator.type,negate:!f,params:(query:file),type:phrase),query:(match_phrase:(threat.indicator.type:file))),(%27$state%27:(store:appState),meta:(alias:!n,disabled:!f,index:%27%27,key:threat.indicator.type,negate:!f,params:(query:url),type:phrase),query:(match_phrase:(threat.indicator.type:url)))),timeRange:(from:now/d,to:now/d))';
 
 describe('Indicators', () => {
   before(() => {
@@ -48,10 +49,18 @@ describe('Indicators', () => {
 
   describe('Indicators page basics', () => {
     before(() => {
-      cy.visit(THREAT_INTELLIGENCE_15Y_DATA);
+      cy.visit(THREAT_INTELLIGENCE);
+
+      selectRange();
     });
 
     it('should render the basic page elements', () => {
+      cy.get(BREADCRUMBS).should('exist');
+
+      cy.get(LEADING_BREADCRUMB).should('have.text', 'Security');
+
+      cy.get(ENDING_BREADCRUMB).should('have.text', 'Intelligence');
+
       cy.get(DEFAULT_LAYOUT_TITLE).should('have.text', 'Indicators');
 
       cy.get(INDICATORS_TABLE).should('exist');
@@ -81,7 +90,9 @@ describe('Indicators', () => {
 
   describe('Indicator page search', () => {
     before(() => {
-      cy.visit(THREAT_INTELLIGENCE_15Y_DATA);
+      cy.visit(THREAT_INTELLIGENCE);
+
+      selectRange();
     });
 
     it('should narrow the results to url indicators when respective KQL search is executed', () => {
@@ -112,10 +123,12 @@ describe('Indicators', () => {
     });
 
     describe('No items match search criteria', () => {
-      before(() =>
+      before(() => {
         // Contradictory filter set
-        cy.visit(URL_WITH_CONTRADICTORY_FILTERS)
-      );
+        cy.visit(URL_WITH_CONTRADICTORY_FILTERS);
+
+        selectRange();
+      });
 
       it('should not display the table when contractictory filters are set', () => {
         cy.get(FLYOUT_TABLE).should('not.exist');
@@ -136,6 +149,22 @@ describe('Indicators', () => {
         .should('have.value', threatIndicatorIp);
 
       cy.get(`${FIELD_SELECTOR}`).should('have.value', threatIndicatorIp);
+    });
+  });
+
+  describe('Field browser', () => {
+    before(() => {
+      cy.visit(THREAT_INTELLIGENCE);
+
+      selectRange();
+    });
+
+    describe('when field browser is triggered', () => {
+      it('should render proper modal window', () => {
+        cy.get(FIELD_BROWSER).last().click({ force: true });
+
+        cy.get(FIELD_BROWSER_MODAL).should('be.visible');
+      });
     });
   });
 });

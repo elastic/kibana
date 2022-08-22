@@ -13,6 +13,8 @@ import { Moment } from 'moment';
 import {
   EuiCodeBlock,
   EuiFlexGroup,
+  EuiToolTip,
+  EuiIcon,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
@@ -25,7 +27,7 @@ import {
 } from '@elastic/eui';
 
 import { PAGINATION } from '../../../../../common/constants';
-import { WatchStatus, SectionError, Error } from '../../../components';
+import { ActionStateBadge, WatchStateBadge, SectionError, Error } from '../../../components';
 import { useLoadWatchHistory, useLoadWatchHistoryDetail } from '../../../lib/api';
 import { WatchDetailsContext } from '../watch_details_context';
 
@@ -120,7 +122,8 @@ export const ExecutionHistoryPanel = () => {
         defaultMessage: 'Trigger time',
       }),
       sortable: true,
-      truncateText: true,
+      truncateText: false,
+      // TODO: Once we convert the client-side models to TS, this should be a WatchHistoryItemModel.
       render: (startTime: Moment, item: any) => {
         const formattedDate = startTime.format();
         return (
@@ -135,18 +138,79 @@ export const ExecutionHistoryPanel = () => {
     },
     {
       field: 'watchStatus.state',
-      name: i18n.translate('xpack.watcher.sections.watchHistory.watchTable.stateHeader', {
-        defaultMessage: 'State',
-      }),
+      name: (
+        <EuiToolTip
+          content={i18n.translate(
+            'xpack.watcher.sections.watchHistory.watchTable.stateHeader.tooltipText',
+            {
+              defaultMessage: 'Active or error state.',
+            }
+          )}
+        >
+          <span>
+            {i18n.translate('xpack.watcher.sections.watchHistory.watchTable.stateHeader', {
+              defaultMessage: 'State',
+            })}{' '}
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </span>
+        </EuiToolTip>
+      ),
       sortable: true,
       truncateText: true,
-      render: (state: string) => <WatchStatus status={state} />,
+      render: (state: string) => <WatchStateBadge state={state} />,
+    },
+    {
+      field: 'startTime',
+      name: (
+        <EuiToolTip
+          content={i18n.translate(
+            'xpack.watcher.sections.watchHistory.watchTable.metConditionHeader.tooltipText',
+            {
+              defaultMessage: 'Whether the condition was met and action taken.',
+            }
+          )}
+        >
+          <span>
+            {i18n.translate('xpack.watcher.sections.watchHistory.watchTable.metConditionHeader', {
+              defaultMessage: 'Condition met',
+            })}{' '}
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </span>
+        </EuiToolTip>
+      ),
+      sortable: true,
+      truncateText: true,
+      // TODO: Once we convert the client-side models to TS, this should be a WatchHistoryItemModel.
+      render: (startTime: Moment, item: any) => {
+        const {
+          watchStatus: { lastExecution },
+        } = item;
+
+        if (startTime.isSame(lastExecution)) {
+          return <EuiIcon color="green" type="check" />;
+        }
+      },
     },
     {
       field: 'watchStatus.comment',
-      name: i18n.translate('xpack.watcher.sections.watchHistory.watchTable.commentHeader', {
-        defaultMessage: 'Comment',
-      }),
+      name: (
+        <EuiToolTip
+          content={i18n.translate(
+            'xpack.watcher.sections.watchHistory.watchTable.commentHeader.tooltipText',
+            {
+              defaultMessage:
+                'Whether the action was throttled, acknowledged, or failed to execute.',
+            }
+          )}
+        >
+          <span>
+            {i18n.translate('xpack.watcher.sections.watchHistory.watchTable.commentHeader', {
+              defaultMessage: 'Comment',
+            })}{' '}
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </span>
+        </EuiToolTip>
+      ),
       sortable: true,
       truncateText: true,
     },
@@ -202,16 +266,38 @@ export const ExecutionHistoryPanel = () => {
             defaultMessage: 'Name',
           }),
           sortable: true,
-          truncateText: true,
+          truncateText: false,
         },
         {
           field: 'state',
-          name: i18n.translate('xpack.watcher.sections.watchHistory.watchActionStatusTable.state', {
-            defaultMessage: 'State',
-          }),
+          name: (
+            <EuiToolTip
+              content={i18n.translate(
+                'xpack.watcher.sections.watchHistory.watchActionStatusTable.state.tooltipText',
+                {
+                  defaultMessage: 'OK, acknowledged, throttled, or error.',
+                }
+              )}
+            >
+              <span>
+                {i18n.translate(
+                  'xpack.watcher.sections.watchHistory.watchActionStatusTable.state',
+                  {
+                    defaultMessage: 'State',
+                  }
+                )}{' '}
+                <EuiIcon
+                  size="s"
+                  color="subdued"
+                  type="questionInCircle"
+                  className="eui-alignTop"
+                />
+              </span>
+            </EuiToolTip>
+          ),
           sortable: true,
           truncateText: true,
-          render: (state: string) => <WatchStatus status={state} />,
+          render: (state: string) => <ActionStateBadge state={state} />,
         },
       ];
 
