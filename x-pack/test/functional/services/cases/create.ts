@@ -80,11 +80,11 @@ export function CasesCreateViewServiceProvider(
     },
 
     async setCaseTitle(title: string) {
-      await testSubjects.setValue('caseTitle', title);
+      await testSubjects.setValue('input', title);
     },
 
     async setCaseTags(tag: string) {
-      await comboBox.setCustom('caseTags', tag);
+      await comboBox.setCustom('comboBoxInput', tag);
     },
 
     async assertCreateCaseFlyoutVisible(expectVisible = true) {

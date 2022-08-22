@@ -19,11 +19,13 @@ const TitleComponent: React.FC<Props> = ({ isLoading }) => (
     path="title"
     componentProps={{
       idAria: 'caseTitle',
+      'data-test-subj': 'caseTitle',
       euiFieldProps: {
         autoFocus: true,
         fullWidth: true,
         disabled: isLoading,
-        'data-test-subj': 'caseTitle',
+        // TODO set a custom test subj
+        // 'data-test-subj': 'caseTitleInput',
       },
     }}
   />
