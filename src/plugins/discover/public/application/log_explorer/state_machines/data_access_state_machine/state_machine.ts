@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { assign, createMachine, InterpreterFrom } from 'xstate';
+import { createMachine, InterpreterFrom } from 'xstate';
 import {
   hasEmptyBottomChunk,
   hasEmptyTopChunk,
+  hasFullBottomChunk,
+  hasFullTopChunk,
   hasLoadedBottomChunk,
   hasLoadedTopChunk,
   isWithinLoadedChunks,
@@ -45,7 +47,6 @@ export const dataAccessStateMachine = createMachine<
         initial: 'uninitialized',
         states: {
           loadingAround: {
-            entry: 'resetChunks',
             invoke: {
               src: 'loadAround',
               id: 'loadAround',
@@ -65,17 +66,22 @@ export const dataAccessStateMachine = createMachine<
               },
               timeRangeChanged: {
                 actions: 'updateTimeRange',
+                target: 'loadingAround',
+                internal: false,
               },
-              columnsChanged: {},
+              columnsChanged: {
+                target: 'loadingAround',
+                internal: false,
+              },
             },
           },
           loaded: {
             type: 'parallel',
             states: {
               top: {
-                initial: 'start',
+                initial: 'unknown',
                 states: {
-                  start: {
+                  unknown: {
                     always: [
                       {
                         cond: 'hasLoadedTopChunk',
@@ -98,20 +104,35 @@ export const dataAccessStateMachine = createMachine<
                     },
                   },
                   loaded: {
-                    on: {
-                      visibleEntriesChanged: {
-                        cond: 'areVisibleEntriesNearStart',
-                        target: '#logExplorerDocuments.loadingTop',
+                    initial: 'unknown',
+                    states: {
+                      unknown: {
+                        always: [
+                          {
+                            cond: 'hasFullTopChunk',
+                            target: 'full',
+                          },
+                          { target: 'partial' },
+                        ],
                       },
+                      full: {
+                        on: {
+                          visibleEntriesChanged: {
+                            cond: 'areVisibleEntriesNearStart',
+                            target: '#logExplorerDocuments.loadingTop',
+                          },
+                        },
+                      },
+                      partial: {},
                     },
                   },
                   empty: {},
                 },
               },
               bottom: {
-                initial: 'start',
+                initial: 'unknown',
                 states: {
-                  start: {
+                  unknown: {
                     always: [
                       {
                         cond: 'hasLoadedBottomChunk',
@@ -134,11 +155,26 @@ export const dataAccessStateMachine = createMachine<
                     },
                   },
                   loaded: {
-                    on: {
-                      visibleEntriesChanged: {
-                        cond: 'areVisibleEntriesNearEnd',
-                        target: '#logExplorerDocuments.loadingBottom',
+                    initial: 'unknown',
+                    states: {
+                      unknown: {
+                        always: [
+                          {
+                            cond: 'hasFullBottomChunk',
+                            target: 'full',
+                          },
+                          { target: 'partial' },
+                        ],
                       },
+                      full: {
+                        on: {
+                          visibleEntriesChanged: {
+                            cond: 'areVisibleEntriesNearEnd',
+                            target: '#logExplorerDocuments.loadingBottom',
+                          },
+                        },
+                      },
+                      partial: {},
                     },
                   },
                   empty: {},
@@ -400,13 +436,6 @@ export const dataAccessStateMachine = createMachine<
         states: {
           uninitialized: {
             on: {
-              timeRangeChanged: {
-                actions: 'updateTimeRange',
-                target: 'loading',
-              },
-              columnsChanged: {
-                target: 'loading',
-              },
               load: {
                 target: 'loading',
               },
@@ -425,16 +454,17 @@ export const dataAccessStateMachine = createMachine<
               loadHistogramFailed: {},
             },
           },
-          loaded: {
-            on: {
-              timeRangeChanged: {
-                actions: 'updateTimeRange',
-                target: 'loading',
-              },
-              columnsChanged: {
-                target: 'loading',
-              },
-            },
+          loaded: {},
+        },
+        on: {
+          timeRangeChanged: {
+            actions: 'updateTimeRange',
+            target: '.loading',
+            internal: false,
+          },
+          columnsChanged: {
+            target: '.loading',
+            internal: false,
           },
         },
       },
@@ -457,15 +487,6 @@ export const dataAccessStateMachine = createMachine<
   },
   {
     actions: {
-      resetChunks: assign((context) => ({
-        ...context,
-        topChunk: {
-          status: 'uninitialized' as const,
-        },
-        bottomChunk: {
-          status: 'uninitialized' as const,
-        },
-      })),
       updateChunksFromLoadAround,
       updateChunksFromLoadBefore,
       updateChunksFromLoadAfter,
@@ -484,6 +505,8 @@ export const dataAccessStateMachine = createMachine<
       hasEmptyBottomChunk,
       hasLoadedTopChunk,
       hasLoadedBottomChunk,
+      hasFullTopChunk,
+      hasFullBottomChunk,
       isWithinLoadedChunks,
       startTimestampExtendsLoadedTop: constantGuard(false),
       startTimestampReducesLoadedTop: constantGuard(false),

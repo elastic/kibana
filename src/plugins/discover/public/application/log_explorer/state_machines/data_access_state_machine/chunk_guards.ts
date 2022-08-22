@@ -22,6 +22,18 @@ export const hasLoadedBottomChunk: ConditionPredicate<LogExplorerContext, LogExp
   event
 ) => context.bottomChunk.status === 'loaded';
 
+export const hasFullTopChunk: ConditionPredicate<LogExplorerContext, LogExplorerEvent> = (
+  context
+) =>
+  context.topChunk.status === 'loaded' &&
+  context.topChunk.entries.length >= context.topChunk.chunkSize;
+
+export const hasFullBottomChunk: ConditionPredicate<LogExplorerContext, LogExplorerEvent> = (
+  context
+) =>
+  context.bottomChunk.status === 'loaded' &&
+  context.bottomChunk.entries.length >= context.bottomChunk.chunkSize;
+
 export const hasEmptyTopChunk: ConditionPredicate<LogExplorerContext, LogExplorerEvent> = (
   context,
   event

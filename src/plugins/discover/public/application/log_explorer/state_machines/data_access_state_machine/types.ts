@@ -19,6 +19,7 @@ export interface LogExplorerContext {
   configuration: {
     chunkSize: number;
     minimumChunkOverscan: number;
+    maximumRowCount: number;
   };
   dataView: DataView;
   position: LogExplorerPosition;
@@ -36,7 +37,11 @@ export interface LogExplorerContext {
 
 export type LogExplorerQuery = Query | AggregateQuery;
 
-export type LogExplorerLoadedChunkStateValue = 'empty' | 'loaded' | 'failed';
+export type LogExplorerLoadedChunkStateValue =
+  | 'empty'
+  | 'loaded'
+  | { loaded: 'partial' | 'full' }
+  | 'failed';
 
 export type LogExplorerDocumentsStateValue =
   | 'uninitialized' // not used yet, but there's a setting that disables automatic initial search
