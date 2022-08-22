@@ -28,6 +28,7 @@ export class DashboardPanelActionsService extends FtrService {
   private readonly header = this.ctx.getPageObject('header');
   private readonly common = this.ctx.getPageObject('common');
   private readonly dashboard = this.ctx.getPageObject('dashboard');
+  private readonly retry = this.ctx.getService('retry');
 
   async findContextMenu(parent?: WebElementWrapper) {
     return parent
@@ -193,8 +194,10 @@ export class DashboardPanelActionsService extends FtrService {
     const libraryNotification = parent
       ? await this.testSubjects.findDescendant(LIBRARY_NOTIFICATION_TEST_SUBJ, parent)
       : await this.testSubjects.find(LIBRARY_NOTIFICATION_TEST_SUBJ);
-    await libraryNotification.click();
-    await this.testSubjects.click('libraryNotificationUnlinkButton');
+    await this.retry.try(async () => {
+      await libraryNotification.click();
+      await this.testSubjects.click('libraryNotificationUnlinkButton');
+    });
   }
 
   async saveToLibrary(newTitle: string, parent?: WebElementWrapper) {
