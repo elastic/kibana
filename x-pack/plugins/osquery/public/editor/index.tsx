@@ -8,13 +8,11 @@
 import React, { useEffect, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 
-// eslint-disable-next-line import/no-commonjs
-require('brace/theme/tomorrow');
-
 import type { EuiCodeEditorProps } from '../shared_imports';
 import { EuiCodeEditor } from '../shared_imports';
 
 import './osquery_mode';
+import 'brace/theme/tomorrow';
 
 const EDITOR_SET_OPTIONS = {
   enableBasicAutocompletion: true,
