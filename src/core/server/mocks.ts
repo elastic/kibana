@@ -23,6 +23,7 @@ import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { metricsServiceMock } from '@kbn/core-metrics-server-mocks';
 import { capabilitiesServiceMock } from '@kbn/core-capabilities-server-mocks';
+import { typeRegistryMock as savedObjectsTypeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import type {
   PluginInitializerContext,
   CoreSetup,
@@ -34,7 +35,6 @@ import type {
 import { httpResourcesMock } from './http_resources/http_resources_service.mock';
 import { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
 import { savedObjectsClientMock } from './saved_objects/service/saved_objects_client.mock';
-import { typeRegistryMock as savedObjectsTypeRegistryMock } from './saved_objects/saved_objects_type_registry.mock';
 import { renderingMock } from './rendering/rendering_service.mock';
 import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 import { SharedGlobalConfig } from './plugins';
@@ -47,12 +47,12 @@ export { configServiceMock, configDeprecationsMock } from '@kbn/config-mocks';
 export { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 export { httpServerMock, sessionStorageMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 export { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+export { typeRegistryMock as savedObjectsTypeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 export { httpResourcesMock } from './http_resources/http_resources_service.mock';
 export { savedObjectsRepositoryMock } from './saved_objects/service/lib/repository.mock';
 export { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
 export { savedObjectsClientMock } from './saved_objects/service/saved_objects_client.mock';
 export { migrationMocks } from './saved_objects/migrations/mocks';
-export { typeRegistryMock as savedObjectsTypeRegistryMock } from './saved_objects/saved_objects_type_registry.mock';
 export { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 export { metricsServiceMock } from '@kbn/core-metrics-server-mocks';
 export { renderingMock } from './rendering/rendering_service.mock';
