@@ -12,7 +12,6 @@ import {
   rangeQuery,
 } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { uniq } from 'lodash';
 import { Setup } from '../../../lib/helpers/setup_request';
 import {
   PROCESSOR_EVENT,
@@ -21,6 +20,7 @@ import {
   TIER,
   TRANSACTION_SAMPLED,
   AGENT_NAME,
+  INDEX,
 } from '../../../../common/elasticsearch_fieldnames';
 import {
   IndexLifecyclePhaseSelectOption,
@@ -29,6 +29,10 @@ import {
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { ApmPluginRequestHandlerContext } from '../../typings';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
+import {
+  getTotalIndicesStats,
+  getEstimatedSizeForDocumentsInIndex,
+} from './get_indices_stats';
 
 export async function getDocCountPerProcessorEvent({
   setup,
@@ -51,13 +55,7 @@ export async function getDocCountPerProcessorEvent({
 }) {
   const { apmEventClient } = setup;
 
-  const {
-    indices: { transaction, span, metric, error },
-  } = setup;
-  const index = uniq([transaction, span, metric, error]).join();
-  const esClient = (await context.core).elasticsearch.client;
-  const indicesStats = (await esClient.asCurrentUser.indices.stats({ index }))
-    .indices;
+  const allIndicesStats = await getTotalIndicesStats({ context, setup });
 
   const response = await apmEventClient.search(
     'get_doc_count_per_processor_event',
@@ -110,7 +108,7 @@ export async function getDocCountPerProcessorEvent({
                   },
                   indices: {
                     terms: {
-                      field: '_index',
+                      field: INDEX,
                       size: 500,
                     },
                   },
@@ -119,10 +117,9 @@ export async function getDocCountPerProcessorEvent({
                       field: SERVICE_ENVIRONMENT,
                     },
                   },
-                  processor_event: {
-                    terms: {
-                      field: PROCESSOR_EVENT,
-                      size: 10,
+                  transactions: {
+                    filter: {
+                      term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction },
                     },
                     aggs: {
                       sampled_transactions: {
@@ -144,37 +141,26 @@ export async function getDocCountPerProcessorEvent({
 
   const serviceStats = response.aggregations?.sample.services.buckets.map(
     (bucket) => {
-      const serviceName = bucket.key as string;
-      const environments = bucket.environments.buckets.map(
-        ({ key }) => key as string
-      );
-
-      const sampledTransactionDocs = bucket.processor_event.buckets.find(
-        (x) => x.key === 'transaction'
-      )?.sampled_transactions.buckets[0].doc_count;
-
-      const estimatedSize = indicesStats
+      const estimatedSize = allIndicesStats
         ? bucket.indices.buckets.reduce((prev, curr) => {
-            const indexName = curr.key as string;
-            const indexDocCountForQuery = curr.doc_count;
-
-            const indexStats = indicesStats[indexName];
-            const indexSize = indexStats?.total?.store?.size_in_bytes;
-            const indexTotalDocCount = indexStats?.total?.docs?.count;
-
             return (
               prev +
-              (indexSize && indexTotalDocCount
-                ? (indexDocCountForQuery / indexTotalDocCount) * indexSize
-                : 0)
+              getEstimatedSizeForDocumentsInIndex({
+                allIndicesStats,
+                indexName: curr.key as string,
+                numberOfDocs: curr.doc_count,
+              })
             );
           }, 0)
-        : undefined;
+        : 0;
 
       return {
-        serviceName,
-        environments,
-        sampledTransactionDocs,
+        serviceName: bucket.key as string,
+        environments: bucket.environments.buckets.map(
+          ({ key }) => key as string
+        ),
+        sampledTransactionDocs:
+          bucket.transactions.sampled_transactions.buckets[0]?.doc_count,
         size: estimatedSize,
         agentName: bucket.sample.hits.hits[0]?._source.agent.name as AgentName,
       };
@@ -183,7 +169,3 @@ export async function getDocCountPerProcessorEvent({
 
   return serviceStats ?? [];
 }
-
-export type DocCountPerProcessorEventResponse = Awaited<
-  ReturnType<typeof getDocCountPerProcessorEvent>
->;

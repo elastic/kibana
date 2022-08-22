@@ -150,3 +150,4 @@ export const FAAS_TRIGGER_TYPE = 'faas.trigger.type';
 
 // Metadata
 export const TIER = '_tier';
+export const INDEX = '_index';

@@ -17,6 +17,7 @@ import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
   TIER,
+  INDEX,
 } from '../../../../common/elasticsearch_fieldnames';
 import {
   IndexLifecyclePhaseSelectOption,
@@ -97,7 +98,7 @@ export async function getStorageDetailsForService({
                 aggs: {
                   indices: {
                     terms: {
-                      field: '_index',
+                      field: INDEX,
                       size: 500,
                     },
                   },

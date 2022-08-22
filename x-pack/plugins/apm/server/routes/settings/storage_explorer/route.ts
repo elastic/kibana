@@ -10,10 +10,8 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
 import { getSearchAggregatedTransactions } from '../../../lib/helpers/transactions';
 import { setupRequest } from '../../../lib/helpers/setup_request';
-import { getDocCountPerProcessorEvent } from './get_doc_count_per_processor_event';
 import { indexLifecyclePhaseRt } from '../../../../common/storage_explorer_types';
 import { getServiceStatistics } from './get_service_statistics';
-import { getTotalTransactionsPerService } from './get_total_transactions_per_service';
 import {
   probabilityRt,
   environmentRt,
@@ -38,7 +36,6 @@ const storageExplorerRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{
-    totalSizeInBytes?: number;
     serviceStatistics: Array<{
       serviceName: string;
       environments: string[];
@@ -49,6 +46,7 @@ const storageExplorerRoute = createApmServerRoute({
   }> => {
     const setup = await setupRequest(resources);
     const { params, context } = resources;
+
     const {
       query: {
         indexLifecyclePhase,
@@ -63,36 +61,19 @@ const storageExplorerRoute = createApmServerRoute({
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       apmEventClient: setup.apmEventClient,
       config: setup.config,
-      kuery: '',
+      kuery,
     });
 
-    const [docCountPerProcessorEvent, totalTransactionsPerService] =
-      await Promise.all([
-        getDocCountPerProcessorEvent({
-          setup,
-          context,
-          indexLifecyclePhase,
-          probability,
-          environment,
-          kuery,
-          start,
-          end,
-        }),
-        getTotalTransactionsPerService({
-          setup,
-          searchAggregatedTransactions,
-          indexLifecyclePhase,
-          probability,
-          environment,
-          kuery,
-          start,
-          end,
-        }),
-      ]);
-
-    const serviceStatistics = getServiceStatistics({
-      docCountPerProcessorEvent,
-      totalTransactionsPerService,
+    const serviceStatistics = await getServiceStatistics({
+      setup,
+      context,
+      indexLifecyclePhase,
+      probability,
+      environment,
+      kuery,
+      start,
+      end,
+      searchAggregatedTransactions,
     });
 
     return {
@@ -131,6 +112,7 @@ const storageExplorerServiceDetailsRoute = createApmServerRoute({
   }> => {
     const setup = await setupRequest(resources);
     const { params, context } = resources;
+
     const {
       path: { serviceName },
       query: {

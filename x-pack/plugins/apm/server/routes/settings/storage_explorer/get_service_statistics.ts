@@ -4,17 +4,57 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { DocCountPerProcessorEventResponse } from './get_doc_count_per_processor_event';
+import { getDocCountPerProcessorEvent } from './get_doc_count_per_processor_event';
+import { ApmPluginRequestHandlerContext } from '../../typings';
+import { Setup } from '../../../lib/helpers/setup_request';
+import { IndexLifecyclePhaseSelectOption } from '../../../../common/storage_explorer_types';
+import { getTotalTransactionsPerService } from './get_total_transactions_per_service';
 
-export function getServiceStatistics({
-  docCountPerProcessorEvent,
-  totalTransactionsPerService,
+export async function getServiceStatistics({
+  setup,
+  context,
+  indexLifecyclePhase,
+  probability,
+  start,
+  end,
+  environment,
+  kuery,
+  searchAggregatedTransactions,
 }: {
-  docCountPerProcessorEvent: DocCountPerProcessorEventResponse;
-  totalTransactionsPerService: Record<string, number>;
-  totalApmDocs?: number;
-  totalSizeInBytes?: number;
+  setup: Setup;
+  context: ApmPluginRequestHandlerContext;
+  indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
+  probability: number;
+  start: number;
+  end: number;
+  environment: string;
+  kuery: string;
+  searchAggregatedTransactions: boolean;
 }) {
+  const [docCountPerProcessorEvent, totalTransactionsPerService] =
+    await Promise.all([
+      getDocCountPerProcessorEvent({
+        setup,
+        context,
+        indexLifecyclePhase,
+        probability,
+        environment,
+        kuery,
+        start,
+        end,
+      }),
+      getTotalTransactionsPerService({
+        setup,
+        searchAggregatedTransactions,
+        indexLifecyclePhase,
+        probability,
+        environment,
+        kuery,
+        start,
+        end,
+      }),
+    ]);
+
   const serviceStatistics = docCountPerProcessorEvent.map(
     ({ serviceName, sampledTransactionDocs, ...rest }) => {
       const sampling =
@@ -28,7 +68,6 @@ export function getServiceStatistics({
       return {
         ...rest,
         serviceName,
-        sampledTransactionDocs,
         sampling,
       };
     }
