@@ -83,10 +83,14 @@ export const mapFiltersToKueryNode = ({
   }
 
   if (searchText && searchText !== '') {
+    // if the searchText includes quotes, treat it as an exact match query
+    const value = searchText.match(/["'`](.*?)["'`]/g)
+      ? nodeTypes.literal.buildNode(searchText, true)
+      : nodeTypes.wildcard.buildNode(searchText);
     filterKueryNode.push(
       nodeBuilder.or([
-        nodeBuilder.is('alert.attributes.name', nodeTypes.literal.buildNode(searchText, true)),
-        nodeBuilder.is('alert.attributes.tags', nodeTypes.literal.buildNode(searchText, true)),
+        nodeBuilder.is('alert.attributes.name', value),
+        nodeBuilder.is('alert.attributes.tags', value),
       ])
     );
   }

@@ -167,7 +167,55 @@ describe('mapFiltersToKueryNode', () => {
     expect(
       toElasticsearchQuery(
         mapFiltersToKueryNode({
-          searchText: 'fo',
+          searchText: 'fo*',
+        }) as KueryNode
+      )
+    ).toMatchInlineSnapshot(`
+      Object {
+        "bool": Object {
+          "minimum_should_match": 1,
+          "should": Array [
+            Object {
+              "bool": Object {
+                "minimum_should_match": 1,
+                "should": Array [
+                  Object {
+                    "query_string": Object {
+                      "fields": Array [
+                        "alert.attributes.name",
+                      ],
+                      "query": "fo*",
+                    },
+                  },
+                ],
+              },
+            },
+            Object {
+              "bool": Object {
+                "minimum_should_match": 1,
+                "should": Array [
+                  Object {
+                    "query_string": Object {
+                      "fields": Array [
+                        "alert.attributes.tags",
+                      ],
+                      "query": "fo*",
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      }
+    `);
+  });
+
+  test('should handle exact match search Text on rule name and tag', () => {
+    expect(
+      toElasticsearchQuery(
+        mapFiltersToKueryNode({
+          searchText: '"fo"',
         }) as KueryNode
       )
     ).toMatchInlineSnapshot(`
@@ -181,7 +229,7 @@ describe('mapFiltersToKueryNode', () => {
                 "should": Array [
                   Object {
                     "match_phrase": Object {
-                      "alert.attributes.name": "fo",
+                      "alert.attributes.name": "\\"fo\\"",
                     },
                   },
                 ],
@@ -193,7 +241,7 @@ describe('mapFiltersToKueryNode', () => {
                 "should": Array [
                   Object {
                     "match_phrase": Object {
-                      "alert.attributes.tags": "fo",
+                      "alert.attributes.tags": "\\"fo\\"",
                     },
                   },
                 ],
