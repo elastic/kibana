@@ -388,6 +388,12 @@ export type {
   ISavedObjectsSerializer,
   SavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server';
+export {
+  SavedObjectsErrorHelpers,
+  SavedObjectsUtils,
+  mergeSavedObjectMigrationMaps,
+} from '@kbn/core-saved-objects-utils-server';
+export { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
 
 export type {
   SavedObjectsRepository,
@@ -396,14 +402,7 @@ export type {
   SavedObjectsImporter,
   SavedObjectsImportError,
 } from './saved_objects';
-export {
-  SavedObjectsClient,
-  SavedObjectsErrorHelpers,
-  SavedObjectsSerializer,
-  SavedObjectTypeRegistry,
-  SavedObjectsUtils,
-  mergeSavedObjectMigrationMaps,
-} from './saved_objects';
+export { SavedObjectsClient } from './saved_objects';
 
 export type {
   IUiSettingsClient,
