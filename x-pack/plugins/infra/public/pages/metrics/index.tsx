@@ -20,11 +20,12 @@ import { HelpCenterContent } from '../../components/help_center_content';
 import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
 import {
   MetricsExplorerOptionsContainer,
+  useMetricsExplorerOptionsContainerContext,
   DEFAULT_METRICS_EXPLORER_VIEW_STATE,
 } from './metrics_explorer/hooks/use_metrics_explorer_options';
 import { WithMetricsExplorerOptionsUrlState } from '../../containers/metrics_explorer/with_metrics_explorer_options_url_state';
 import { WithSource } from '../../containers/with_source';
-import { Source } from '../../containers/metrics_source';
+import { SourceProvider } from '../../containers/metrics_source';
 import { MetricsExplorerPage } from './metrics_explorer';
 import { SnapshotPage } from './inventory_view';
 import { MetricDetail } from './metric_detail';
@@ -65,7 +66,7 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
 
   return (
     <EuiErrorBoundary>
-      <Source.Provider sourceId="default">
+      <SourceProvider sourceId="default">
         <AlertPrefillProvider>
           <WaffleOptionsProvider>
             <WaffleTimeProvider>
@@ -109,7 +110,7 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                       render={(props) => (
                         <WithSource>
                           {({ configuration, createDerivedIndexPattern }) => (
-                            <MetricsExplorerOptionsContainer.Provider>
+                            <MetricsExplorerOptionsContainer>
                               <WithMetricsExplorerOptionsUrlState />
                               {configuration ? (
                                 <PageContent
@@ -119,7 +120,7 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                               ) : (
                                 <SourceLoadingPage />
                               )}
-                            </MetricsExplorerOptionsContainer.Provider>
+                            </MetricsExplorerOptionsContainer>
                           )}
                         </WithSource>
                       )}
@@ -132,7 +133,7 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
             </WaffleTimeProvider>
           </WaffleOptionsProvider>
         </AlertPrefillProvider>
-      </Source.Provider>
+      </SourceProvider>
     </EuiErrorBoundary>
   );
 };
@@ -142,7 +143,7 @@ const PageContent = (props: {
   createDerivedIndexPattern: CreateDerivedIndexPattern;
 }) => {
   const { createDerivedIndexPattern, configuration } = props;
-  const { options } = useContext(MetricsExplorerOptionsContainer.Context);
+  const { options } = useMetricsExplorerOptionsContainerContext();
 
   return (
     <SavedViewProvider

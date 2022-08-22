@@ -12,7 +12,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
-import { createPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
+import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { i18n } from '@kbn/i18n';
 
 import type { AppMountParameters } from '@kbn/core/public';
@@ -39,7 +39,7 @@ const BUTTON_ADD_DATA = i18n.translate('xpack.securitySolution.globalHeader.butt
  */
 export const GlobalHeader = React.memo(
   ({ setHeaderActionMenu }: { setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'] }) => {
-    const portalNode = useMemo(() => createPortalNode(), []);
+    const portalNode = useMemo(() => createHtmlPortalNode(), []);
     const {
       theme,
       http: {

@@ -38,7 +38,9 @@ jest.mock('../../containers', () => ({
   useTimelineEvents: jest.fn(),
 }));
 
-jest.mock('./tabs_content');
+jest.mock('./tabs_content', () => ({
+  TabsContent: () => <div data-test-subj="tabs-content" />,
+}));
 
 jest.mock('../../../common/lib/kibana');
 const originalKibanaLib = jest.requireActual('../../../common/lib/kibana');

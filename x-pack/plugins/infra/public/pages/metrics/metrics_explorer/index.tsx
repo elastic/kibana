@@ -7,7 +7,7 @@
 
 import { EuiErrorBoundary } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useContext } from 'react';
+import React, { useEffect } from 'react';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { MetricsSourceConfigurationProperties } from '../../../../common/metrics_sources';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
@@ -16,7 +16,7 @@ import { NoData } from '../../../components/empty_states';
 import { MetricsExplorerCharts } from './components/charts';
 import { MetricsExplorerToolbar } from './components/toolbar';
 import { useMetricsExplorerState } from './hooks/use_metric_explorer_state';
-import { Source } from '../../../containers/metrics_source';
+import { useSourceContext } from '../../../containers/metrics_source';
 import { useSavedViewContext } from '../../../containers/saved_view/saved_view';
 import { MetricsPageTemplate } from '../page_template';
 import { metricsExplorerTitle } from '../../../translations';
@@ -51,7 +51,7 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
   useTrackPageview({ app: 'infra_metrics', path: 'metrics_explorer' });
   useTrackPageview({ app: 'infra_metrics', path: 'metrics_explorer', delay: 15000 });
 
-  const { metricIndicesExist } = useContext(Source.Context);
+  const { metricIndicesExist } = useSourceContext();
   useEffect(() => {
     if (currentView) {
       onViewStateChange(currentView);

@@ -53,7 +53,9 @@ const defaultProps = {
 };
 
 jest.mock('../../containers/use_update_comment');
-jest.mock('./timestamp');
+jest.mock('./timestamp', () => ({
+  UserActionTimestamp: () => <></>,
+}));
 jest.mock('../../common/lib/kibana');
 
 const useUpdateCommentMock = useUpdateComment as jest.Mock;

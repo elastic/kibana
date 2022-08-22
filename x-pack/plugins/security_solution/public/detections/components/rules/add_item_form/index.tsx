@@ -99,7 +99,6 @@ export const AddItem = ({
 
   const updateItem = useCallback(
     (event: ChangeEvent<HTMLInputElement>, index: number) => {
-      event.persist();
       const values = field.value as string[];
       const value = event.target.value;
       field.setValue([...values.slice(0, index), value, ...values.slice(index + 1)]);

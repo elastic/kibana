@@ -107,8 +107,8 @@ const MonitoringApp: React.FC<{
           uiSettings={core.uiSettings}
         >
           <HeaderActionMenuContext.Provider value={{ setHeaderActionMenu, theme$ }}>
-            <MonitoringTimeContainer.Provider>
-              <BreadcrumbContainer.Provider history={history}>
+            <MonitoringTimeContainer>
+              <BreadcrumbContainer history={history}>
                 <Router history={history}>
                   <Switch>
                     <Route path="/access-denied" component={AccessDeniedPage} />
@@ -336,8 +336,8 @@ const MonitoringApp: React.FC<{
                     />
                   </Switch>
                 </Router>
-              </BreadcrumbContainer.Provider>
-            </MonitoringTimeContainer.Provider>
+              </BreadcrumbContainer>
+            </MonitoringTimeContainer>
           </HeaderActionMenuContext.Provider>
         </GlobalStateProvider>
       </ExternalConfigContext.Provider>

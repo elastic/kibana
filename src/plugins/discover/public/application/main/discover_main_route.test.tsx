@@ -22,7 +22,7 @@ import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_
 import { findTestSubject } from '@elastic/eui/lib/test';
 jest.mock('./discover_main_app', () => {
   return {
-    DiscoverMainApp: jest.fn(),
+    DiscoverMainApp: jest.fn().mockReturnValue(<></>),
   };
 });
 

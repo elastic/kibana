@@ -17,7 +17,7 @@ import { isPipelineMonitoringSupportedInVersion } from '../../../lib/logstash/pi
 import { PipelineListing } from '../../../components/logstash/pipeline_listing/pipeline_listing';
 import { LogstashTemplate } from './logstash_template';
 import { useTable } from '../../hooks/use_table';
-import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
+import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 
 export const LogStashPipelinesPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
@@ -43,7 +43,7 @@ export const LogStashPipelinesPage: React.FC<ComponentProps> = ({ clusters }) =>
     defaultMessage: 'Logstash pipelines',
   });
 
-  const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
+  const { generate: generateBreadcrumbs } = useBreadcrumbContainerContext();
 
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();

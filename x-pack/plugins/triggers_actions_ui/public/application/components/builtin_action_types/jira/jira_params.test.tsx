@@ -16,7 +16,7 @@ jest.mock('../../../../common/lib/kibana');
 
 jest.mock('./use_get_issue_types');
 jest.mock('./use_get_fields_by_issue_type');
-jest.mock('./search_issues');
+jest.mock('./search_issues', () => ({ SearchIssues: () => <></> }));
 
 const useGetIssueTypesMock = useGetIssueTypes as jest.Mock;
 const useGetFieldsByIssueTypeMock = useGetFieldsByIssueType as jest.Mock;
