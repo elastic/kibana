@@ -11,8 +11,4 @@ export { SavedObjectsClientProvider } from './scoped_client_provider';
 
 export type { ISavedObjectsClientProvider } from './scoped_client_provider';
 
-export { SavedObjectsErrorHelpers } from './errors';
-
-export { SavedObjectsUtils } from './utils';
-
 export { getIndexForType } from './get_index_for_type';

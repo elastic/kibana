@@ -23,9 +23,12 @@ import type { HttpConfigType, InternalHttpServiceSetup } from '@kbn/core-http-se
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { ElasticsearchConfigType } from '@kbn/core-elasticsearch-server-internal';
 import type { MetricsServiceSetup, OpsMetrics } from '@kbn/core-metrics-server';
-import { SavedObjectsServiceStart, SavedObjectTypeRegistry } from '..';
+import {
+  LEGACY_URL_ALIAS_TYPE,
+  type SavedObjectsConfigType,
+} from '@kbn/core-saved-objects-base-server-internal';
 
-import { SavedObjectsConfigType } from '../saved_objects/saved_objects_config';
+import { SavedObjectsServiceStart, SavedObjectTypeRegistry } from '..';
 import type {
   CoreServicesUsageData,
   CoreUsageData,
@@ -36,7 +39,6 @@ import type {
 } from './types';
 import { isConfigured } from './is_configured';
 import { coreUsageStatsType } from './core_usage_stats';
-import { LEGACY_URL_ALIAS_TYPE } from '../saved_objects/object_types';
 import { CORE_USAGE_STATS_TYPE } from './constants';
 import { CoreUsageStatsClient } from './core_usage_stats_client';
 import { CoreIncrementUsageCounter } from './types';

@@ -8,7 +8,7 @@
 
 import { schema, ValidationError } from '@kbn/config-schema';
 
-import { SavedObjectsErrorHelpers } from '../../saved_objects';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
 import type { InternalUiSettingsRouter } from '../internal_types';
 import { CannotOverrideError } from '../ui_settings_errors';
 

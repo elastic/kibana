@@ -7,7 +7,7 @@
  */
 
 import type { SavedObjectsMappingProperties } from '@kbn/core-saved-objects-server';
-import { IndexMapping } from '../../mappings';
+import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 
 /**
  * Merges the active mappings and the source mappings while disabling the

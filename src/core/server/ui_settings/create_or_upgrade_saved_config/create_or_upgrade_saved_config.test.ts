@@ -10,7 +10,7 @@ import {
   mockTransform,
   mockGetUpgradeableConfig,
 } from './create_or_upgrade_saved_config.test.mock';
-import { SavedObjectsErrorHelpers } from '../../saved_objects';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
 import { savedObjectsClientMock } from '../../saved_objects/service/saved_objects_client.mock';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
