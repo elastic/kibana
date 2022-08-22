@@ -119,6 +119,8 @@ export function createStore<E extends IEmbeddable = IEmbeddable, S extends State
       map((value) => diff(store.getState().input, value)),
       filter((patch) => !isEmpty(patch))
     )
+    // @ts-ignore TypeScript thinks 'dispatch' is never available
+    // This is caused by using @reduxjs-toolkit internal types that aren't really meant for public consumption
     .subscribe((patch) => store.dispatch(input.actions.update(patch)));
 
   output$
@@ -126,6 +128,8 @@ export function createStore<E extends IEmbeddable = IEmbeddable, S extends State
       map((value) => diff(store.getState().output, value)),
       filter((patch) => !isEmpty(patch))
     )
+    // @ts-ignore TypeScript thinks 'dispatch' is never available
+    // This is caused by using @reduxjs-toolkit internal types that aren't really meant for public consumption
     .subscribe((patch) => store.dispatch(output.actions.update(patch)));
 
   return store;
