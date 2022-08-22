@@ -10,7 +10,7 @@ jest.mock('./pit_params');
 jest.mock('./query_params');
 jest.mock('./sorting_params');
 
-import { typeRegistryMock } from '../../../saved_objects_type_registry.mock';
+import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import * as pitParamsNS from './pit_params';
 import * as queryParamsNS from './query_params';
 import { getSearchDsl } from './search_dsl';
