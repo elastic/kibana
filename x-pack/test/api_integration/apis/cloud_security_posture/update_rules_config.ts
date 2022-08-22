@@ -46,7 +46,7 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(500);
       expect(response.error).to.be('Internal Server Error');
-      expect(response.message).to.be(`Package policy Id '${packagePolicyId}' does not exist`);
+      expect(response.message).to.be(`Package policy ${packagePolicyId} not found`);
     });
 
     it(`Should return 200 for existing package policy id`, async () => {
