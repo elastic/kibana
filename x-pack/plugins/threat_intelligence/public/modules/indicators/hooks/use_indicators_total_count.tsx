@@ -13,20 +13,20 @@ import {
 } from '@kbn/data-plugin/common';
 import { useKibana } from '../../../hooks/use_kibana';
 import { RawIndicatorsResponse } from './use_indicators';
-import { DEFAULT_THREAT_INDEX_KEY } from '../../../../common/constants';
+import { useSourcererDataView } from './use_sourcerer_data_view';
 
 export const useIndicatorsTotalCount = () => {
   const {
     services: {
       data: { search: searchService },
-      uiSettings,
     },
   } = useKibana();
   const [count, setCount] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
+  const { selectedPatterns } = useSourcererDataView();
+
   useEffect(() => {
-    const defaultThreatIndex = uiSettings.get<string[]>(DEFAULT_THREAT_INDEX_KEY);
     const query = {
       bool: {
         must: [
@@ -49,7 +49,7 @@ export const useIndicatorsTotalCount = () => {
     };
     const req = {
       params: {
-        index: defaultThreatIndex,
+        index: selectedPatterns,
         body: {
           size: 0,
           query,
@@ -69,7 +69,7 @@ export const useIndicatorsTotalCount = () => {
           }
         },
       });
-  }, [searchService, uiSettings]);
+  }, [searchService, selectedPatterns]);
 
   return { count, isLoading };
 };
