@@ -50,9 +50,14 @@ import {
   USER,
 } from '@kbn/lists-plugin/common/constants.mock';
 import { of } from 'rxjs';
+import { getExceptionFilterFromExceptions } from '../../containers/detection_engine/exceptions/api';
 
 jest.mock('../../../timelines/containers/api', () => ({
   getTimelineTemplate: jest.fn(),
+}));
+
+jest.mock('../../containers/detection_engine/exceptions/api', () => ({
+  getExceptionFilterFromExceptions: jest.fn(),
 }));
 
 jest.mock('../../../common/lib/kibana');
@@ -244,6 +249,7 @@ describe('alert actions', () => {
     };
 
     (getTimelineTemplate as jest.Mock).mockResolvedValue(mockTimelineResult);
+    (getExceptionFilterFromExceptions as jest.Mock).mockResolvedValue({ filter: [] });
 
     clock = sinon.useFakeTimers(unix);
   });
@@ -628,6 +634,59 @@ describe('alert actions', () => {
           },
         });
         mockGetExceptions.mockResolvedValue([getExceptionListItemSchemaMock()]);
+        (getExceptionFilterFromExceptions as jest.Mock).mockResolvedValue({
+          filter: [
+            {
+              meta: {
+                alias: 'Exceptions',
+                disabled: false,
+                negate: true,
+              },
+              query: {
+                bool: {
+                  should: [
+                    {
+                      bool: {
+                        filter: [
+                          {
+                            nested: {
+                              path: 'some.parentField',
+                              query: {
+                                bool: {
+                                  minimum_should_match: 1,
+                                  should: [
+                                    {
+                                      match_phrase: {
+                                        'some.parentField.nested.field': 'some value',
+                                      },
+                                    },
+                                  ],
+                                },
+                              },
+                              score_mode: 'none',
+                            },
+                          },
+                          {
+                            bool: {
+                              minimum_should_match: 1,
+                              should: [
+                                {
+                                  match_phrase: {
+                                    'some.not.nested.field': 'some value',
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          ],
+        });
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: ecsDataMockWithNoTemplateTimeline,
@@ -781,6 +840,7 @@ describe('alert actions', () => {
             ],
           },
         });
+
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: ecsDataMockWithTemplateTimeline,
