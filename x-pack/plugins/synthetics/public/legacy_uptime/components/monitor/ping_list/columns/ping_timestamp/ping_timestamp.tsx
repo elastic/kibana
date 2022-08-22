@@ -7,7 +7,7 @@
 
 import React, { useContext, useEffect, useState } from 'react';
 import useIntersection from 'react-use/lib/useIntersection';
-import styled from 'styled-components';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
 import { useInProgressImage } from './use_in_progress_image';
@@ -23,11 +23,9 @@ import { StepImageCaption } from './step_image_caption';
 import { StepImagePopover } from './step_image_popover';
 import { formatCaptionContent } from './translations';
 
-const StepDiv = styled.div`
-  figure.euiImage {
-    div.stepArrowsFullScreen {
-      display: none;
-    }
+const StepDiv = euiStyled.div`
+  figcaption {
+    display: none;
   }
 `;
 

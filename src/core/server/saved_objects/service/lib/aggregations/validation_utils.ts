@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IndexMapping } from '../../../mappings';
+import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import { fieldDefined, hasFilterKeyError } from '../filter_utils';
 
 /**
