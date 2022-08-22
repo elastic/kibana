@@ -42,14 +42,15 @@ function renderTime(date, aggregationInterval) {
   }
 }
 
-function showLinksMenuForItem(item, showViewSeriesLink) {
+function showLinksMenuForItem(item, showViewSeriesLink, sourceIndicesWithGeoFields) {
   const canConfigureRules = isRuleSupported(item.source) && checkPermission('canUpdateJob');
   return (
     canConfigureRules ||
     (showViewSeriesLink && item.isTimeSeriesViewRecord) ||
     item.entityName === 'mlcategory' ||
     item.customUrls !== undefined ||
-    item.detector.includes(ML_JOB_AGGREGATION.LAT_LONG)
+    item.detector.includes(ML_JOB_AGGREGATION.LAT_LONG) ||
+    item.sourceIndices(sourceIndex => sourceIndicesWithGeoFields.includes(sourceIndex))
   );
 }
 
@@ -65,7 +66,8 @@ export function getColumns(
   itemIdToExpandedRowMap,
   toggleRow,
   filter,
-  influencerFilter
+  influencerFilter,
+  sourceIndicesWithGeoFields
 ) {
   const columns = [
     {
@@ -307,7 +309,7 @@ export function getColumns(
     });
   }
 
-  const showLinks = items.some((item) => showLinksMenuForItem(item, showViewSeriesLink));
+  const showLinks = items.some((item) => showLinksMenuForItem(item, showViewSeriesLink, sourceIndicesWithGeoFields));
 
   if (showLinks === true) {
     columns.push({
@@ -316,7 +318,7 @@ export function getColumns(
         defaultMessage: 'Actions',
       }),
       render: (item) => {
-        if (showLinksMenuForItem(item, showViewSeriesLink) === true) {
+        if (showLinksMenuForItem(item, showViewSeriesLink, sourceIndicesWithGeoFields) === true) {
           return (
             <LinksMenu
               anomaly={item}
@@ -325,6 +327,7 @@ export function getColumns(
               isAggregatedData={isAggregatedData}
               interval={interval}
               showRuleEditorFlyout={showRuleEditorFlyout}
+              sourceIndicesWithGeoFields={sourceIndicesWithGeoFields}
             />
           );
         } else {

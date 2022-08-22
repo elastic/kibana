@@ -8,6 +8,7 @@
 import React, { FC, useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
 import {
   htmlIdGenerator,
   EuiCallOut,
@@ -55,6 +56,7 @@ import {
   OverallSwimlaneData,
   AppStateSelectedCells,
 } from './explorer_utils';
+import { getDataViewIdFromName } from '../util/index_utils';
 import { AnomalyTimeline } from './anomaly_timeline';
 import { FILTER_ACTION, FilterAction } from './explorer_constants';
 // Explorer Charts
@@ -73,6 +75,7 @@ import type { ExplorerState } from './reducers';
 import type { TimeBuckets } from '../util/time_buckets';
 import { useToastNotificationService } from '../services/toast_notification_service';
 import { useMlKibana, useMlLocator } from '../contexts/kibana';
+import { useMlContext } from '../contexts/ml';
 import { useAnomalyExplorerContext } from './anomaly_explorer_context';
 import {
   AnomalyExplorerPanelsState,
@@ -262,6 +265,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
   const htmlIdGen = useMemo(() => htmlIdGenerator(), []);
 
   const [language, updateLanguage] = useState<string>(DEFAULT_QUERY_LANG);
+  const [sourceIndicesWithGeoFields, setSourceIndicesWithGeoFields] = useState<string[]>([]);
 
   const filterSettings = useObservable(
     anomalyExplorerCommonStateService.getFilterSettings$(),
@@ -350,6 +354,8 @@ export const Explorer: FC<ExplorerUIProps> = ({
   } = useMlKibana();
   const { euiTheme } = useEuiTheme();
   const mlLocator = useMlLocator();
+  const context = useMlContext();
+  const dataViewsService = context.dataViewsContract;
 
   const {
     annotations,
@@ -418,6 +424,46 @@ export const Explorer: FC<ExplorerUIProps> = ({
     tableData.anomalies?.length > 0;
 
   const hasActiveFilter = isDefined(swimLaneSeverity);
+  const selectedJobIds = Array.isArray(selectedJobs) ? selectedJobs.map((job) => job.id) : [];
+
+  // TODO: need to create a map with jobId: sourceIndices[] so that we can compare against anomaly in the columns links bit
+  useEffect(() => {
+    if (!noJobsSelected) {
+      // could move this function to explorer_utils
+      async function checkIfSourceIndicesHaveGeoField() {
+        let sourceIndices: string[] = [];
+        let sourceIndicesWithGeoFields = [];
+        // let sourceIndicesWithGeoFieldsMap = {};
+        
+        if (Array.isArray(selectedJobs)) {
+          selectedJobs.forEach((job) => {
+            if (job.sourceIndices) {
+              sourceIndices.push(...job.sourceIndices);
+            }
+          })
+
+          // sourceIndicesWithGeoFieldsMap = selectedJobs.reduce((sourceMap, job) => ({
+          //   ...sourceMap,
+          //   [job.id]: job.sourceIndices,
+          // }), {})
+        } 
+        
+        for (const index of sourceIndices) {
+          const dataViewId = await getDataViewIdFromName(index);
+  
+          if (dataViewId) {
+            const dataView = await dataViewsService.get(dataViewId);
+            const hasGeoFields = dataView.fields.getByType(ES_FIELD_TYPES.GEO_POINT).length > 0 || dataView.fields.getByType(ES_FIELD_TYPES.GEO_SHAPE).length > 0;
+            if (hasGeoFields) {
+              sourceIndicesWithGeoFields.push(index);
+            }
+          }
+        }
+        setSourceIndicesWithGeoFields(sourceIndicesWithGeoFields);
+      }
+      checkIfSourceIndicesHaveGeoField();
+    }
+  }, [JSON.stringify(selectedJobIds)]);
 
   if (noJobsSelected && !loading) {
     return (
@@ -436,7 +482,6 @@ export const Explorer: FC<ExplorerUIProps> = ({
   }
 
   const bounds = timefilter.getActiveBounds();
-  const selectedJobIds = Array.isArray(selectedJobs) ? selectedJobs.map((job) => job.id) : [];
 
   const mainPanelContent = (
     <div>
@@ -582,7 +627,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
 
           <EuiSpacer size="m" />
 
-          <AnomaliesTable bounds={bounds} tableData={tableData} influencerFilter={applyFilter} />
+          <AnomaliesTable bounds={bounds} tableData={tableData} influencerFilter={applyFilter} sourceIndicesWithGeoFields={sourceIndicesWithGeoFields} />
         </EuiPanel>
       )}
     </div>

@@ -185,7 +185,7 @@ export class AnomaliesTableInternal extends Component {
         </EuiFlexGroup>
       );
     }
-
+    // TODO: here we pass in the list of source indices with geo fields then we can check against each of the table items
     const columns = getColumns(
       tableData.anomalies,
       tableData.jobIds,
@@ -198,7 +198,8 @@ export class AnomaliesTableInternal extends Component {
       this.state.itemIdToExpandedRowMap,
       this.toggleRow,
       filter,
-      influencerFilter
+      influencerFilter,
+      sourceIndicesWithGeoFields
     );
 
     const sorting = {
@@ -275,4 +276,5 @@ AnomaliesTableInternal.propTypes = {
   influencerFilter: PropTypes.func,
   tableState: PropTypes.object.isRequired,
   updateTableState: PropTypes.func.isRequired,
+  sourceIndicesWithGeoFields: PropTypes.object.isRequired,
 };

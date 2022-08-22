@@ -51,6 +51,7 @@ export interface ExplorerJob {
   selected: boolean;
   bucketSpanSeconds: number;
   isSingleMetricViewerJob?: boolean;
+  sourceIndices?: Array<string>;
 }
 
 interface ClearedSelectedAnomaliesState {
@@ -119,6 +120,7 @@ export function createJobs(jobs: CombinedJob[]): ExplorerJob[] {
       selected: false,
       bucketSpanSeconds: bucketSpan!.asSeconds(),
       isSingleMetricViewerJob: isTimeSeriesViewJob(job),
+      sourceIndices: job.datafeed_config.indices,
     };
   });
 }
