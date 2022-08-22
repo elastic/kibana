@@ -93,7 +93,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         {
           title: '97.220.3.248',
           subtitle: 'Average of bytes',
-          extraText: '19.76K',
+          extraText: 'Average of bytes 19.76K',
           value: '19.76K',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: false,
@@ -101,7 +101,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         {
           title: '169.228.188.120',
           subtitle: 'Average of bytes',
-          extraText: '18.99K',
+          extraText: 'Average of bytes 18.99K',
           value: '18.99K',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: false,
@@ -109,7 +109,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         {
           title: '78.83.247.30',
           subtitle: 'Average of bytes',
-          extraText: '17.25K',
+          extraText: 'Average of bytes 17.25K',
           value: '17.25K',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: false,
@@ -117,7 +117,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         {
           title: '226.82.228.233',
           subtitle: 'Average of bytes',
-          extraText: '15.69K',
+          extraText: 'Average of bytes 15.69K',
           value: '15.69K',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: false,
@@ -125,7 +125,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         {
           title: '93.28.27.24',
           subtitle: 'Average of bytes',
-          extraText: '15.61K',
+          extraText: 'Average of bytes 15.61K',
           value: '15.61K',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: false,
@@ -133,7 +133,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         {
           title: 'Other',
           subtitle: 'Average of bytes',
-          extraText: '5.72K',
+          extraText: 'Average of bytes 5.72K',
           value: '5.72K',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: false,
@@ -204,6 +204,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('converts color stops to number', async () => {
       await PageObjects.lens.openPalettePanel('lnsMetric');
+      await PageObjects.common.sleep(1000);
       await testSubjects.click('lnsPalettePanel_dynamicColoring_rangeType_groups_number');
       expect([
         await testSubjects.getAttribute('lnsPalettePanel_dynamicColoring_range_value_1', 'value'),
@@ -229,6 +230,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await testSubjects.setValue('lnsMetric_max_cols', '1');
+
+      await PageObjects.lens.waitForVisualization('mtrVis');
 
       await PageObjects.lens.closeDimensionEditor();
 

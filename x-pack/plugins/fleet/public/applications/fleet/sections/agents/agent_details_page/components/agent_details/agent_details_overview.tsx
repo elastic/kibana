@@ -69,7 +69,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
               defaultMessage: 'Agent policy',
             }),
             description: agentPolicy ? (
-              <AgentPolicySummaryLine policy={agentPolicy} />
+              <AgentPolicySummaryLine policy={agentPolicy} agent={agent} />
             ) : (
               agent.policy_id || '-'
             ),
