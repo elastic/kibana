@@ -28,7 +28,15 @@ import {
 jest.mock('../../hooks/endpoint/use_get_endpoint_policy_response');
 jest.mock('../../hooks/endpoint/use_get_endpoint_details');
 
-describe('when on the policy response', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/136272
+// FLAKY: https://github.com/elastic/kibana/issues/139033
+// FLAKY: https://github.com/elastic/kibana/issues/139032
+// FLAKY: https://github.com/elastic/kibana/issues/139031
+// FLAKY: https://github.com/elastic/kibana/issues/139030
+// FLAKY: https://github.com/elastic/kibana/issues/139028
+// FLAKY: https://github.com/elastic/kibana/issues/139029
+// FLAKY: https://github.com/elastic/kibana/issues/139027
+describe.skip('when on the policy response', () => {
   const docGenerator = new EndpointDocGenerator();
   const createPolicyResponse = (
     overallStatus: HostPolicyResponseActionStatus = HostPolicyResponseActionStatus.success,
