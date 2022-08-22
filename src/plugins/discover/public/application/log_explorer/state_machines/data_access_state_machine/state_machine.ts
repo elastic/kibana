@@ -86,13 +86,16 @@ export const dataAccessStateMachine = createMachine<
                       {
                         cond: 'hasLoadedTopChunk',
                         target: 'loaded',
+                        internal: true,
                       },
                       {
                         cond: 'hasEmptyTopChunk',
                         target: 'empty',
+                        internal: true,
                       },
                       {
                         target: 'failed',
+                        internal: true,
                       },
                     ],
                   },
@@ -111,8 +114,12 @@ export const dataAccessStateMachine = createMachine<
                           {
                             cond: 'hasFullTopChunk',
                             target: 'full',
+                            internal: true,
                           },
-                          { target: 'partial' },
+                          {
+                            target: 'partial',
+                            internal: true,
+                          },
                         ],
                       },
                       full: {
@@ -137,13 +144,16 @@ export const dataAccessStateMachine = createMachine<
                       {
                         cond: 'hasLoadedBottomChunk',
                         target: 'loaded',
+                        internal: true,
                       },
                       {
                         cond: 'hasEmptyBottomChunk',
                         target: 'empty',
+                        internal: true,
                       },
                       {
                         target: 'failed',
+                        internal: true,
                       },
                     ],
                   },
@@ -162,8 +172,12 @@ export const dataAccessStateMachine = createMachine<
                           {
                             cond: 'hasFullBottomChunk',
                             target: 'full',
+                            internal: true,
                           },
-                          { target: 'partial' },
+                          {
+                            target: 'partial',
+                            internal: true,
+                          },
                         ],
                       },
                       full: {

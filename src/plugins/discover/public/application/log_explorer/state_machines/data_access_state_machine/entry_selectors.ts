@@ -21,17 +21,24 @@ import { selectIsReloading } from './status_selectors';
 export const selectRows = (
   state: DataAccessService['state']
 ): {
-  startRowIndex: number | undefined;
   chunkBoundaryRowIndex: number | undefined;
   endRowIndex: number | undefined;
+  maximumRowIndex: number;
+  minimumRowIndex: number;
   rows: Map<number, LogExplorerRow>;
+  startRowIndex: number | undefined;
 } => {
+  const maximumRowIndex = state.context.configuration.maximumRowCount - 1;
+  const minimumRowIndex = 0;
+
   if (selectIsReloading(state)) {
     return {
-      startRowIndex: undefined,
       chunkBoundaryRowIndex: undefined,
       endRowIndex: undefined,
+      maximumRowIndex,
+      minimumRowIndex,
       rows: new Map(),
+      startRowIndex: undefined,
     };
   }
 
@@ -44,10 +51,12 @@ export const selectRows = (
   const rows = memoizedGetRowMapFromChunksForSelector(topChunk, bottomChunk);
 
   return {
-    startRowIndex,
     chunkBoundaryRowIndex,
     endRowIndex,
+    maximumRowIndex,
+    minimumRowIndex,
     rows,
+    startRowIndex,
   };
 };
 
