@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EntityIterable } from '@kbn/apm-synthtrace';
 
-export const synthtrace = {
-  index: (events: EntityIterable) =>
-    cy.task('synthtrace:index', events.toArray()),
-  clean: () => cy.task('synthtrace:clean'),
-};
+Cypress.on('uncaught:exception', (err, runnable) => {
+  // eslint-disable-next-line no-console
+  console.log('Uncaught exception', err);
+  return false;
+});

@@ -86,8 +86,8 @@ const aliasNamesWithComparison = apiRequestsToInterceptWithComparison.map(
 const aliasNames = [...aliasNamesNoComparison, ...aliasNamesWithComparison];
 
 describe('Service Overview', () => {
-  before(async () => {
-    await synthtrace.index(
+  before(() => {
+    synthtrace.index(
       opbeans({
         from: new Date(start).getTime(),
         to: new Date(end).getTime(),
@@ -95,14 +95,14 @@ describe('Service Overview', () => {
     );
   });
 
-  after(async () => {
-    await synthtrace.clean();
+  after(() => {
+    synthtrace.clean();
   });
 
   describe('renders', () => {
-    before(() => {
+    beforeEach(() => {
       cy.loginAsViewerUser();
-      cy.visit(baseUrl);
+      cy.visitKibana(baseUrl);
     });
 
     it('renders all components on the page', () => {
@@ -122,7 +122,7 @@ describe('Service Overview', () => {
   describe('transactions', () => {
     beforeEach(() => {
       cy.loginAsViewerUser();
-      cy.visit(baseUrl);
+      cy.visitKibana(baseUrl);
     });
 
     it('persists transaction type selected when clicking on Transactions tab', () => {
@@ -173,9 +173,9 @@ describe('Service Overview', () => {
   });
 
   describe('when RUM service', () => {
-    before(() => {
+    beforeEach(() => {
       cy.loginAsViewerUser();
-      cy.visit(
+      cy.visitKibana(
         url.format({
           pathname: '/app/apm/services/opbeans-rum/overview',
           query: { rangeFrom: start, rangeTo: end },
@@ -204,7 +204,7 @@ describe('Service Overview', () => {
   describe('Calls APIs', () => {
     beforeEach(() => {
       cy.loginAsViewerUser();
-      cy.visit(baseUrl);
+      cy.visitKibana(baseUrl);
       apiRequestsToIntercept.map(({ endpoint, aliasName }) => {
         cy.intercept('GET', endpoint).as(aliasName);
       });
@@ -214,7 +214,7 @@ describe('Service Overview', () => {
     });
 
     it.skip('with the correct environment when changing the environment', () => {
-      cy.wait(aliasNames, { requestTimeout: 10000 });
+      cy.wait(aliasNames);
 
       cy.intercept('GET', 'internal/apm/suggestions?*').as(
         'suggestionsRequest'
@@ -241,11 +241,11 @@ describe('Service Overview', () => {
 
     it('when clicking the refresh button', () => {
       cy.contains('Refresh').click();
-      cy.wait(aliasNames, { requestTimeout: 10000 });
+      cy.wait(aliasNames);
     });
 
     it.skip('when selecting a different time range and clicking the update button', () => {
-      cy.wait(aliasNames, { requestTimeout: 10000 });
+      cy.wait(aliasNames);
 
       const timeStart = moment(start).subtract(5, 'm').toISOString();
       const timeEnd = moment(end).subtract(5, 'm').toISOString();

@@ -4,10 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EntityIterable } from '@kbn/apm-synthtrace';
 
-export const synthtrace = {
-  index: (events: EntityIterable) =>
-    cy.task('synthtrace:index', events.toArray()),
-  clean: () => cy.task('synthtrace:clean'),
+import del from 'del';
+
+module.exports = (on, config) => {
+  on('after:spec', (spec, results) => {
+    if (results.stats.failures === 0 && results.video) {
+      return del(results.video);
+    }
+  });
 };

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-Cypress.on('uncaught:exception', (err, runnable) => {
-  return false;
-});
-
 import './commands';
+import './output_command_timings';
+import './log_uncaught_exceptions';
+import './delete_video_after_spec_on_success';
+// import './throttle_xhr_requests';
