@@ -127,9 +127,12 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
     let index = values.findIndex((option) => option.isGroupLabel);
     if (index === -1) {
       const length = values.push({
-        label: i18n.translate('userProfileComponents.userProfilesSelectable.suggestedLabel', {
-          defaultMessage: 'Suggested',
-        }),
+        label: i18n.translate(
+          'sharedUXPackages.userProfileComponents.userProfilesSelectable.suggestedLabel',
+          {
+            defaultMessage: 'Suggested',
+          }
+        ),
         isGroupLabel: true,
       } as SelectableOption);
       index = length - 1;
@@ -237,9 +240,12 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
       searchProps={{
         placeholder:
           searchPlaceholder ??
-          i18n.translate('userProfileComponents.userProfilesSelectable.searchPlaceholder', {
-            defaultMessage: 'Search',
-          }),
+          i18n.translate(
+            'sharedUXPackages.userProfileComponents.userProfilesSelectable.searchPlaceholder',
+            {
+              defaultMessage: 'Search',
+            }
+          ),
         onChange: onSearchChange,
         isLoading,
         isClearable: !isLoading,
@@ -263,7 +269,7 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
                     selectedStatusMessage(selectedCount)
                   ) : (
                     <FormattedMessage
-                      id="userProfileComponents.userProfilesSelectable.selectedStatusMessage"
+                      id="sharedUXPackages.userProfileComponents.userProfilesSelectable.selectedStatusMessage"
                       defaultMessage="{count, plural, one {# user selected} other {# users selected}}"
                       values={{ count: selectedCount }}
                     />
@@ -280,7 +286,7 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
                   >
                     {clearButtonLabel ?? (
                       <FormattedMessage
-                        id="userProfileComponents.userProfilesSelectable.clearButtonLabel"
+                        id="sharedUXPackages.userProfileComponents.userProfilesSelectable.clearButtonLabel"
                         defaultMessage="Remove all users"
                       />
                     )}
