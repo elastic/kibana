@@ -59,12 +59,16 @@ interface SavedObjectFinderState {
   sort?: PropertySort;
 }
 
-interface BaseSavedObjectFinder {
+interface SavedObjectFinderServices {
   savedObjects: CoreStart['savedObjects'];
   uiSettings: CoreStart['uiSettings'];
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   savedObjectsPlugin: SavedObjectsPlugin;
   savedObjectsTagging: SavedObjectsTaggingApi | undefined;
+}
+
+interface BaseSavedObjectFinder {
+  services: SavedObjectFinderServices;
   onChoose?: (
     id: SimpleSavedObject['id'],
     type: SimpleSavedObject['type'],
@@ -105,15 +109,16 @@ export class SavedObjectFinderUi extends React.Component<
 
   private debouncedFetch = debounce(async (query: Query) => {
     const metaDataMap = this.getSavedObjectMetaDataMap();
-    const { queryText, visibleTypes, selectedTags } = this.props.savedObjectsManagement.parseQuery(
-      query,
-      Object.values(metaDataMap).map((metadata) => ({
-        name: metadata.type,
-        namespaceType: 'single',
-        hidden: false,
-        displayName: metadata.name,
-      }))
-    );
+    const { queryText, visibleTypes, selectedTags } =
+      this.props.services.savedObjectsManagement.parseQuery(
+        query,
+        Object.values(metaDataMap).map((metadata) => ({
+          name: metadata.type,
+          namespaceType: 'single',
+          hidden: false,
+          displayName: metadata.name,
+        }))
+      );
 
     const fields = Object.values(metaDataMap)
       .map((metaData) => metaData.includeFields || [])
@@ -126,8 +131,8 @@ export class SavedObjectFinderUi extends React.Component<
       return col;
     }, []);
 
-    const perPage = this.props.savedObjectsPlugin.settings.getListingLimit();
-    const response = await this.props.savedObjects.client.find<FinderAttributes>({
+    const perPage = this.props.services.savedObjectsPlugin.settings.getListingLimit();
+    const response = await this.props.services.savedObjects.client.find<FinderAttributes>({
       type: visibleTypes ?? Object.keys(metaDataMap),
       fields: [...new Set(fields)],
       search: queryText ? `${queryText}*` : undefined,
@@ -135,9 +140,9 @@ export class SavedObjectFinderUi extends React.Component<
       perPage,
       searchFields: ['title^3', 'description', ...additionalSearchFields],
       defaultSearchOperator: 'AND',
-      hasReference: this.props.savedObjectsManagement.getTagFindReferences({
+      hasReference: this.props.services.savedObjectsManagement.getTagFindReferences({
         selectedTags,
-        taggingApi: this.props.savedObjectsTagging,
+        taggingApi: this.props.services.savedObjectsTagging,
       }),
     });
 
@@ -222,7 +227,7 @@ export class SavedObjectFinderUi extends React.Component<
   //    with the current mappings
   public render() {
     const { onChoose, savedObjectMetaData } = this.props;
-    const taggingApi = this.props.savedObjectsTagging;
+    const taggingApi = this.props.services.savedObjectsTagging;
     const originalTagColumn = taggingApi?.ui.getTableColumnDefinition();
     const tagColumn: EuiTableFieldDataColumnType<SavedObject> | undefined = originalTagColumn
       ? {

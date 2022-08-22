@@ -112,11 +112,13 @@ describe('SavedObjectsFinder', () => {
 
     const wrapper = shallow(
       <SavedObjectFinder
-        savedObjects={core.savedObjects}
-        uiSettings={core.uiSettings}
-        savedObjectsManagement={savedObjectsManagement}
-        savedObjectsPlugin={savedObjectsPlugin}
-        savedObjectsTagging={savedObjectsTagging}
+        services={{
+          savedObjects: core.savedObjects,
+          uiSettings: core.uiSettings,
+          savedObjectsManagement,
+          savedObjectsPlugin,
+          savedObjectsTagging,
+        }}
         savedObjectMetaData={searchMetaData}
       />
     );
@@ -143,11 +145,13 @@ describe('SavedObjectsFinder', () => {
 
     const wrapper = shallow(
       <SavedObjectFinder
-        savedObjects={core.savedObjects}
-        uiSettings={core.uiSettings}
-        savedObjectsManagement={savedObjectsManagement}
-        savedObjectsPlugin={savedObjectsPlugin}
-        savedObjectsTagging={savedObjectsTagging}
+        services={{
+          savedObjects: core.savedObjects,
+          uiSettings: core.uiSettings,
+          savedObjectsManagement,
+          savedObjectsPlugin,
+          savedObjectsTagging,
+        }}
         savedObjectMetaData={searchMetaData}
       />
     );
@@ -171,11 +175,13 @@ describe('SavedObjectsFinder', () => {
 
     const wrapper = mount(
       <SavedObjectFinder
-        savedObjects={core.savedObjects}
-        uiSettings={core.uiSettings}
-        savedObjectsManagement={savedObjectsManagement}
-        savedObjectsPlugin={savedObjectsPlugin}
-        savedObjectsTagging={savedObjectsTagging}
+        services={{
+          savedObjects: core.savedObjects,
+          uiSettings: core.uiSettings,
+          savedObjectsManagement,
+          savedObjectsPlugin,
+          savedObjectsTagging,
+        }}
         onChoose={chooseStub}
         savedObjectMetaData={searchMetaData}
       />
@@ -199,11 +205,13 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          savedObjects={core.savedObjects}
-          uiSettings={core.uiSettings}
-          savedObjectsManagement={savedObjectsManagement}
-          savedObjectsPlugin={savedObjectsPlugin}
-          savedObjectsTagging={savedObjectsTagging}
+          services={{
+            savedObjects: core.savedObjects,
+            uiSettings: core.uiSettings,
+            savedObjectsManagement,
+            savedObjectsPlugin,
+            savedObjectsTagging,
+          }}
           savedObjectMetaData={metaDataConfig}
         />
       );
@@ -228,11 +236,13 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          savedObjects={core.savedObjects}
-          uiSettings={core.uiSettings}
-          savedObjectsManagement={savedObjectsManagement}
-          savedObjectsPlugin={savedObjectsPlugin}
-          savedObjectsTagging={savedObjectsTagging}
+          services={{
+            savedObjects: core.savedObjects,
+            uiSettings: core.uiSettings,
+            savedObjectsManagement,
+            savedObjectsPlugin,
+            savedObjectsTagging,
+          }}
           savedObjectMetaData={metaDataConfig}
         />
       );
@@ -261,11 +271,13 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          savedObjects={core.savedObjects}
-          uiSettings={core.uiSettings}
-          savedObjectsManagement={savedObjectsManagement}
-          savedObjectsPlugin={savedObjectsPlugin}
-          savedObjectsTagging={savedObjectsTagging}
+          services={{
+            savedObjects: core.savedObjects,
+            uiSettings: core.uiSettings,
+            savedObjectsManagement,
+            savedObjectsPlugin,
+            savedObjectsTagging,
+          }}
           savedObjectMetaData={searchMetaData}
         />
       );
@@ -286,11 +298,13 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          savedObjects={core.savedObjects}
-          uiSettings={core.uiSettings}
-          savedObjectsManagement={savedObjectsManagement}
-          savedObjectsPlugin={savedObjectsPlugin}
-          savedObjectsTagging={savedObjectsTagging}
+          services={{
+            savedObjects: core.savedObjects,
+            uiSettings: core.uiSettings,
+            savedObjectsManagement,
+            savedObjectsPlugin,
+            savedObjectsTagging,
+          }}
           savedObjectMetaData={searchMetaData}
         />
       );
@@ -314,11 +328,13 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          savedObjects={core.savedObjects}
-          uiSettings={core.uiSettings}
-          savedObjectsManagement={savedObjectsManagement}
-          savedObjectsPlugin={savedObjectsPlugin}
-          savedObjectsTagging={savedObjectsTagging}
+          services={{
+            savedObjects: core.savedObjects,
+            uiSettings: core.uiSettings,
+            savedObjectsManagement,
+            savedObjectsPlugin,
+            savedObjectsTagging,
+          }}
           savedObjectMetaData={metaDataConfig}
         />
       );
@@ -343,11 +359,13 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          savedObjects={core.savedObjects}
-          uiSettings={core.uiSettings}
-          savedObjectsManagement={savedObjectsManagement}
-          savedObjectsPlugin={savedObjectsPlugin}
-          savedObjectsTagging={savedObjectsTagging}
+          services={{
+            savedObjects: core.savedObjects,
+            uiSettings: core.uiSettings,
+            savedObjectsManagement,
+            savedObjectsPlugin,
+            savedObjectsTagging,
+          }}
           savedObjectMetaData={metaDataConfig}
         />
       );
@@ -377,11 +395,13 @@ describe('SavedObjectsFinder', () => {
 
     const wrapper = shallow(
       <SavedObjectFinder
-        savedObjects={core.savedObjects}
-        uiSettings={core.uiSettings}
-        savedObjectsManagement={savedObjectsManagement}
-        savedObjectsPlugin={savedObjectsPlugin}
-        savedObjectsTagging={savedObjectsTagging}
+        services={{
+          savedObjects: core.savedObjects,
+          uiSettings: core.uiSettings,
+          savedObjectsManagement,
+          savedObjectsPlugin,
+          savedObjectsTagging,
+        }}
         savedObjectMetaData={[
           {
             type: 'search',
@@ -409,11 +429,13 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          savedObjects={core.savedObjects}
-          uiSettings={core.uiSettings}
-          savedObjectsManagement={savedObjectsManagement}
-          savedObjectsPlugin={savedObjectsPlugin}
-          savedObjectsTagging={savedObjectsTagging}
+          services={{
+            savedObjects: core.savedObjects,
+            uiSettings: core.uiSettings,
+            savedObjectsManagement,
+            savedObjectsPlugin,
+            savedObjectsTagging,
+          }}
           savedObjectMetaData={searchMetaData}
         />
       );
@@ -441,11 +463,13 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          savedObjects={core.savedObjects}
-          uiSettings={core.uiSettings}
-          savedObjectsManagement={savedObjectsManagement}
-          savedObjectsPlugin={savedObjectsPlugin}
-          savedObjectsTagging={savedObjectsTagging}
+          services={{
+            savedObjects: core.savedObjects,
+            uiSettings: core.uiSettings,
+            savedObjectsManagement,
+            savedObjectsPlugin,
+            savedObjectsTagging,
+          }}
           savedObjectMetaData={[
             {
               type: 'type1',
@@ -488,11 +512,13 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          savedObjects={core.savedObjects}
-          uiSettings={core.uiSettings}
-          savedObjectsManagement={savedObjectsManagement}
-          savedObjectsPlugin={savedObjectsPlugin}
-          savedObjectsTagging={savedObjectsTagging}
+          services={{
+            savedObjects: core.savedObjects,
+            uiSettings: core.uiSettings,
+            savedObjectsManagement,
+            savedObjectsPlugin,
+            savedObjectsTagging,
+          }}
           savedObjectMetaData={searchMetaData}
         />
       );
@@ -516,11 +542,13 @@ describe('SavedObjectsFinder', () => {
 
     const wrapper = shallow(
       <SavedObjectFinder
-        savedObjects={core.savedObjects}
-        uiSettings={core.uiSettings}
-        savedObjectsManagement={savedObjectsManagement}
-        savedObjectsPlugin={savedObjectsPlugin}
-        savedObjectsTagging={savedObjectsTagging}
+        services={{
+          savedObjects: core.savedObjects,
+          uiSettings: core.uiSettings,
+          savedObjectsManagement,
+          savedObjectsPlugin,
+          savedObjectsTagging,
+        }}
         savedObjectMetaData={[
           {
             type: 'search',
@@ -560,11 +588,13 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          savedObjects={core.savedObjects}
-          uiSettings={core.uiSettings}
-          savedObjectsManagement={savedObjectsManagement}
-          savedObjectsPlugin={savedObjectsPlugin}
-          savedObjectsTagging={savedObjectsTagging}
+          services={{
+            savedObjects: core.savedObjects,
+            uiSettings: core.uiSettings,
+            savedObjectsManagement,
+            savedObjectsPlugin,
+            savedObjectsTagging,
+          }}
           showFilter={true}
           savedObjectMetaData={metaDataConfig}
         />
@@ -587,11 +617,13 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          savedObjects={core.savedObjects}
-          uiSettings={core.uiSettings}
-          savedObjectsManagement={savedObjectsManagement}
-          savedObjectsPlugin={savedObjectsPlugin}
-          savedObjectsTagging={savedObjectsTagging}
+          services={{
+            savedObjects: core.savedObjects,
+            uiSettings: core.uiSettings,
+            savedObjectsManagement,
+            savedObjectsPlugin,
+            savedObjectsTagging,
+          }}
           showFilter={false}
           savedObjectMetaData={metaDataConfig}
         />
@@ -612,11 +644,13 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          savedObjects={core.savedObjects}
-          uiSettings={core.uiSettings}
-          savedObjectsManagement={savedObjectsManagement}
-          savedObjectsPlugin={savedObjectsPlugin}
-          savedObjectsTagging={savedObjectsTagging}
+          services={{
+            savedObjects: core.savedObjects,
+            uiSettings: core.uiSettings,
+            savedObjectsManagement,
+            savedObjectsPlugin,
+            savedObjectsTagging,
+          }}
           showFilter={true}
           savedObjectMetaData={searchMetaData}
         />
@@ -638,11 +672,13 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          savedObjects={core.savedObjects}
-          uiSettings={core.uiSettings}
-          savedObjectsManagement={savedObjectsManagement}
-          savedObjectsPlugin={savedObjectsPlugin}
-          savedObjectsTagging={undefined}
+          services={{
+            savedObjects: core.savedObjects,
+            uiSettings: core.uiSettings,
+            savedObjectsManagement,
+            savedObjectsPlugin,
+            savedObjectsTagging,
+          }}
           showFilter={true}
           savedObjectMetaData={metaDataConfig}
         />
@@ -664,11 +700,13 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          savedObjects={core.savedObjects}
-          uiSettings={core.uiSettings}
-          savedObjectsManagement={savedObjectsManagement}
-          savedObjectsPlugin={savedObjectsPlugin}
-          savedObjectsTagging={savedObjectsTagging}
+          services={{
+            savedObjects: core.savedObjects,
+            uiSettings: core.uiSettings,
+            savedObjectsManagement,
+            savedObjectsPlugin,
+            savedObjectsTagging,
+          }}
           showFilter={true}
           savedObjectMetaData={metaDataConfig}
         />
@@ -712,11 +750,13 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          savedObjects={core.savedObjects}
-          uiSettings={core.uiSettings}
-          savedObjectsManagement={savedObjectsManagement}
-          savedObjectsPlugin={savedObjectsPlugin}
-          savedObjectsTagging={savedObjectsTagging}
+          services={{
+            savedObjects: core.savedObjects,
+            uiSettings: core.uiSettings,
+            savedObjectsManagement,
+            savedObjectsPlugin,
+            savedObjectsTagging,
+          }}
           showFilter={true}
           savedObjectMetaData={metaDataConfig}
         />
@@ -760,11 +800,13 @@ describe('SavedObjectsFinder', () => {
     const noItemsMessage = <span id="myNoItemsMessage" />;
     const wrapper = mount(
       <SavedObjectFinder
-        savedObjects={core.savedObjects}
-        uiSettings={core.uiSettings}
-        savedObjectsManagement={savedObjectsManagement}
-        savedObjectsPlugin={savedObjectsPlugin}
-        savedObjectsTagging={savedObjectsTagging}
+        services={{
+          savedObjects: core.savedObjects,
+          uiSettings: core.uiSettings,
+          savedObjectsManagement,
+          savedObjectsPlugin,
+          savedObjectsTagging,
+        }}
         noItemsMessage={noItemsMessage}
         savedObjectMetaData={searchMetaData}
       />
@@ -793,11 +835,13 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          savedObjects={core.savedObjects}
-          uiSettings={core.uiSettings}
-          savedObjectsManagement={savedObjectsManagement}
-          savedObjectsPlugin={savedObjectsPlugin}
-          savedObjectsTagging={savedObjectsTagging}
+          services={{
+            savedObjects: core.savedObjects,
+            uiSettings: core.uiSettings,
+            savedObjectsManagement,
+            savedObjectsPlugin,
+            savedObjectsTagging,
+          }}
           initialPageSize={15}
           savedObjectMetaData={searchMetaData}
         />
@@ -820,11 +864,13 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          savedObjects={core.savedObjects}
-          uiSettings={core.uiSettings}
-          savedObjectsManagement={savedObjectsManagement}
-          savedObjectsPlugin={savedObjectsPlugin}
-          savedObjectsTagging={savedObjectsTagging}
+          services={{
+            savedObjects: core.savedObjects,
+            uiSettings: core.uiSettings,
+            savedObjectsManagement,
+            savedObjectsPlugin,
+            savedObjectsTagging,
+          }}
           initialPageSize={15}
           savedObjectMetaData={searchMetaData}
         />
@@ -853,11 +899,13 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          savedObjects={core.savedObjects}
-          uiSettings={core.uiSettings}
-          savedObjectsManagement={savedObjectsManagement}
-          savedObjectsPlugin={savedObjectsPlugin}
-          savedObjectsTagging={savedObjectsTagging}
+          services={{
+            savedObjects: core.savedObjects,
+            uiSettings: core.uiSettings,
+            savedObjectsManagement,
+            savedObjectsPlugin,
+            savedObjectsTagging,
+          }}
           initialPageSize={15}
           savedObjectMetaData={searchMetaData}
         />
@@ -889,11 +937,13 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          savedObjects={core.savedObjects}
-          uiSettings={core.uiSettings}
-          savedObjectsManagement={savedObjectsManagement}
-          savedObjectsPlugin={savedObjectsPlugin}
-          savedObjectsTagging={savedObjectsTagging}
+          services={{
+            savedObjects: core.savedObjects,
+            uiSettings: core.uiSettings,
+            savedObjectsManagement,
+            savedObjectsPlugin,
+            savedObjectsTagging,
+          }}
           fixedPageSize={33}
           savedObjectMetaData={searchMetaData}
         />
@@ -916,11 +966,13 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          savedObjects={core.savedObjects}
-          uiSettings={core.uiSettings}
-          savedObjectsManagement={savedObjectsManagement}
-          savedObjectsPlugin={savedObjectsPlugin}
-          savedObjectsTagging={savedObjectsTagging}
+          services={{
+            savedObjects: core.savedObjects,
+            uiSettings: core.uiSettings,
+            savedObjectsManagement,
+            savedObjectsPlugin,
+            savedObjectsTagging,
+          }}
           fixedPageSize={33}
           savedObjectMetaData={searchMetaData}
         />
@@ -952,11 +1004,13 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          savedObjects={core.savedObjects}
-          uiSettings={core.uiSettings}
-          savedObjectsManagement={savedObjectsManagement}
-          savedObjectsPlugin={savedObjectsPlugin}
-          savedObjectsTagging={savedObjectsTagging}
+          services={{
+            savedObjects: core.savedObjects,
+            uiSettings: core.uiSettings,
+            savedObjectsManagement,
+            savedObjectsPlugin,
+            savedObjectsTagging,
+          }}
           savedObjectMetaData={searchMetaData}
         />
       );
@@ -972,11 +1026,13 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          savedObjects={core.savedObjects}
-          uiSettings={core.uiSettings}
-          savedObjectsManagement={savedObjectsManagement}
-          savedObjectsPlugin={savedObjectsPlugin}
-          savedObjectsTagging={savedObjectsTagging}
+          services={{
+            savedObjects: core.savedObjects,
+            uiSettings: core.uiSettings,
+            savedObjectsManagement,
+            savedObjectsPlugin,
+            savedObjectsTagging,
+          }}
           savedObjectMetaData={[
             {
               type: 'search',
@@ -1001,11 +1057,13 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          savedObjects={core.savedObjects}
-          uiSettings={core.uiSettings}
-          savedObjectsManagement={savedObjectsManagement}
-          savedObjectsPlugin={savedObjectsPlugin}
-          savedObjectsTagging={savedObjectsTagging}
+          services={{
+            savedObjects: core.savedObjects,
+            uiSettings: core.uiSettings,
+            savedObjectsManagement,
+            savedObjectsPlugin,
+            savedObjectsTagging,
+          }}
           savedObjectMetaData={searchMetaData}
         />
       );
@@ -1030,11 +1088,13 @@ describe('SavedObjectsFinder', () => {
 
     const wrapper = mount(
       <SavedObjectFinder
-        savedObjects={core.savedObjects}
-        uiSettings={core.uiSettings}
-        savedObjectsManagement={savedObjectsManagement}
-        savedObjectsPlugin={savedObjectsPlugin}
-        savedObjectsTagging={savedObjectsTagging}
+        services={{
+          savedObjects: core.savedObjects,
+          uiSettings: core.uiSettings,
+          savedObjectsManagement,
+          savedObjectsPlugin,
+          savedObjectsTagging,
+        }}
         savedObjectMetaData={[
           {
             type: 'search',
@@ -1063,11 +1123,13 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          savedObjects={core.savedObjects}
-          uiSettings={core.uiSettings}
-          savedObjectsManagement={savedObjectsManagement}
-          savedObjectsPlugin={savedObjectsPlugin}
-          savedObjectsTagging={savedObjectsTagging}
+          services={{
+            savedObjects: core.savedObjects,
+            uiSettings: core.uiSettings,
+            savedObjectsManagement,
+            savedObjectsPlugin,
+            savedObjectsTagging,
+          }}
           savedObjectMetaData={metaDataConfig}
         />
       );
@@ -1089,11 +1151,13 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          savedObjects={core.savedObjects}
-          uiSettings={core.uiSettings}
-          savedObjectsManagement={savedObjectsManagement}
-          savedObjectsPlugin={savedObjectsPlugin}
-          savedObjectsTagging={savedObjectsTagging}
+          services={{
+            savedObjects: core.savedObjects,
+            uiSettings: core.uiSettings,
+            savedObjectsManagement,
+            savedObjectsPlugin,
+            savedObjectsTagging,
+          }}
           savedObjectMetaData={searchMetaData}
         />
       );
@@ -1115,11 +1179,13 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          savedObjects={core.savedObjects}
-          uiSettings={core.uiSettings}
-          savedObjectsManagement={savedObjectsManagement}
-          savedObjectsPlugin={savedObjectsPlugin}
-          savedObjectsTagging={undefined}
+          services={{
+            savedObjects: core.savedObjects,
+            uiSettings: core.uiSettings,
+            savedObjectsManagement,
+            savedObjectsPlugin,
+            savedObjectsTagging,
+          }}
           savedObjectMetaData={metaDataConfig}
         />
       );
