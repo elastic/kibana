@@ -57,14 +57,14 @@ export class AlertsService implements IAlertsService {
     // Using setImmediate to call async function but run it immediately
     setImmediate(async () => {
       const esClient = await this.options.elasticsearchClientPromise;
-      this.createOrUpdateIlmPolicy(esClient);
+      await this.createOrUpdateIlmPolicy(esClient);
       // Component templates will follow the new alerts as data schema which is TBD
       // Currently setting dynamic: true and allowing all fields
       // this.createOrUpdateComponentTemplates(esClient);
-      this.createOrUpdateIndexTemplate(esClient);
+      await this.createOrUpdateIndexTemplate(esClient);
 
       // TODO - check if it exists first
-      this.createConcreteWriteIndex(esClient);
+      await this.createConcreteWriteIndex(esClient);
     });
   }
 
@@ -80,11 +80,11 @@ export class AlertsService implements IAlertsService {
   /**
    * Create ILM policy if it doesn't already exist
    */
-  private createOrUpdateIlmPolicy(esClient: ElasticsearchClient) {
-    this.options.logger.debug(`Installing ILM policy`);
+  private async createOrUpdateIlmPolicy(esClient: ElasticsearchClient) {
+    this.options.logger.info(`Installing ILM policy`);
 
     try {
-      esClient.ilm.putLifecycle({
+      await esClient.ilm.putLifecycle({
         name: ILM_POLICY_NAME,
         body: DEFAULT_ILM_POLICY,
       });
@@ -94,11 +94,11 @@ export class AlertsService implements IAlertsService {
     }
   }
 
-  private createOrUpdateComponentTemplates(esClient: ElasticsearchClient) {
+  private async createOrUpdateComponentTemplates(esClient: ElasticsearchClient) {
     this.options.logger.debug(`Installing component templates`);
 
     try {
-      esClient.cluster.putComponentTemplate({
+      await esClient.cluster.putComponentTemplate({
         name: ALERTS_COMPONENT_TEMPLATE_NAME,
         template: {},
       });
@@ -112,11 +112,11 @@ export class AlertsService implements IAlertsService {
     }
   }
 
-  private createOrUpdateIndexTemplate(esClient: ElasticsearchClient) {
-    this.options.logger.debug(`Installing index template`);
+  private async createOrUpdateIndexTemplate(esClient: ElasticsearchClient) {
+    this.options.logger.info(`Installing index template`);
 
     try {
-      esClient.indices.putIndexTemplate({
+      await esClient.indices.putIndexTemplate({
         name: INDEX_TEMPLATE_NAME,
         index_patterns: [`${DEFAULT_ALERTS_INDEX}*`],
         // composed_of: [],
@@ -141,11 +141,11 @@ export class AlertsService implements IAlertsService {
     }
   }
 
-  private createConcreteWriteIndex(esClient: ElasticsearchClient) {
-    this.options.logger.debug(`Creating concrete write index`);
+  private async createConcreteWriteIndex(esClient: ElasticsearchClient) {
+    this.options.logger.info(`Creating concrete write index`);
 
     try {
-      esClient.indices.create({
+      await esClient.indices.create({
         index: `${DEFAULT_ALERTS_INDEX}-000001`,
         aliases: {
           [DEFAULT_ALERTS_INDEX]: {
