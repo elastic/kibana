@@ -28,7 +28,6 @@ export class DashboardPanelActionsService extends FtrService {
   private readonly header = this.ctx.getPageObject('header');
   private readonly common = this.ctx.getPageObject('common');
   private readonly dashboard = this.ctx.getPageObject('dashboard');
-  private readonly retry = this.ctx.getService('retry');
 
   async findContextMenu(parent?: WebElementWrapper) {
     return parent
