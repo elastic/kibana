@@ -18,5 +18,5 @@ import { SyncButton } from './sync_button';
 export const getHeaderActions = (indexData?: ElasticsearchIndexWithIngestion) => [
   ...(isCrawlerIndex(indexData) ? [<CrawlerStatusIndicator />] : []),
   ...(isConnectorIndex(indexData) ? [<SyncButton />] : []),
-  <SearchEnginesPopover indexName={indexData && indexData.name} />,
+  <SearchEnginesPopover indexName={indexData?.name} isHiddenIndex={indexData?.hidden} />,
 ];

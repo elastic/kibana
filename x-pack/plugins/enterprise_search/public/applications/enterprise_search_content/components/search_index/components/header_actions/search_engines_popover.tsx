@@ -15,32 +15,28 @@ import {
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import { APP_SEARCH_PLUGIN } from '../../../../../../../common/constants';
-import { ENGINE_CREATION_PATH } from '../../../../../app_search/routes';
-import { ESINDEX_QUERY_PARAMETER } from '../../../../../shared/constants';
 import { KibanaLogic } from '../../../../../shared/kibana';
-import { addQueryParameter } from '../../../../../shared/query_params';
 
+import { CreateEngineMenuItem } from './create_engine_menu_item';
 import { SearchEnginesPopoverLogic } from './search_engines_popover_logic';
 
 export interface SearchEnginesPopoverProps {
   indexName?: string;
+  isHiddenIndex?: boolean;
 }
 
-export const SearchEnginesPopover: React.FC<SearchEnginesPopoverProps> = ({ indexName }) => {
+export const SearchEnginesPopover: React.FC<SearchEnginesPopoverProps> = ({
+  indexName,
+  isHiddenIndex,
+}) => {
   const { isSearchEnginesPopoverOpen } = useValues(SearchEnginesPopoverLogic);
   const { toggleSearchEnginesPopover } = useActions(SearchEnginesPopoverLogic);
-  const engineCreationURL = () => {
-    const url = `${APP_SEARCH_PLUGIN.URL}${ENGINE_CREATION_PATH}`;
-    if (!indexName) {
-      return url;
-    }
-    return addQueryParameter(url, ESINDEX_QUERY_PARAMETER, indexName);
-  };
 
   return (
     <EuiPopover
@@ -73,22 +69,20 @@ export const SearchEnginesPopover: React.FC<SearchEnginesPopoverProps> = ({ inde
               </p>
             </EuiText>
           </EuiContextMenuItem>,
-          <EuiContextMenuItem
-            icon="plusInCircle"
-            onClick={() => {
-              KibanaLogic.values.navigateToUrl(engineCreationURL(), {
-                shouldNotCreateHref: true,
-              });
-            }}
-          >
-            <EuiText>
-              <p>
-                {i18n.translate('xpack.enterpriseSearch.content.index.searchEngines.createEngine', {
-                  defaultMessage: 'Create a new App Search engine',
-                })}
-              </p>
-            </EuiText>
-          </EuiContextMenuItem>,
+          isHiddenIndex ? (
+            <EuiToolTip
+              content={i18n.translate(
+                'xpack.enterpriseSearch.content.index.searchEngines.createEngineDisabledTooltip',
+                {
+                  defaultMessage: 'You cannot create engines from hidden indices.',
+                }
+              )}
+            >
+              <CreateEngineMenuItem indexName={indexName} isHiddenIndex={isHiddenIndex} />
+            </EuiToolTip>
+          ) : (
+            <CreateEngineMenuItem indexName={indexName} isHiddenIndex={isHiddenIndex} />
+          ),
         ]}
       />
     </EuiPopover>
