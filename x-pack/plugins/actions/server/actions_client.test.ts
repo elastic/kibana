@@ -45,11 +45,15 @@ import { getOAuthJwtAccessToken } from './builtin_action_types/lib/get_oauth_jwt
 import { getOAuthClientCredentialsAccessToken } from './builtin_action_types/lib/get_oauth_client_credentials_access_token';
 import { OAuthParams } from './routes/get_oauth_access_token';
 
-jest.mock('@kbn/core/server/saved_objects/service/lib/utils', () => ({
-  SavedObjectsUtils: {
-    generateId: () => 'mock-saved-object-id',
-  },
-}));
+jest.mock('@kbn/core-saved-objects-utils-server', () => {
+  const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
+  return {
+    ...actual,
+    SavedObjectsUtils: {
+      generateId: () => 'mock-saved-object-id',
+    },
+  };
+});
 
 jest.mock('./lib/track_legacy_rbac_exemption', () => ({
   trackLegacyRBACExemption: jest.fn(),
