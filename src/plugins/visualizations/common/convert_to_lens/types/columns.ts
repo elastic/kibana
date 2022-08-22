@@ -57,7 +57,7 @@ export interface ColumnWithReferences<Op extends OperationWithReferences, Params
   references: string[];
 }
 
-export type FitlersColumn = BaseColumn<'filters', FiltersParams>;
+export type FiltersColumn = BaseColumn<'filters', FiltersParams>;
 export type RangeColumn = ColumnWithSourceField<'range', RangeParams>;
 export type TermsColumn = ColumnWithSourceField<'terms', TermsParams>;
 export type DateHistogramColumn = ColumnWithSourceField<'date_histogram', DateHistogramParams>;
@@ -75,6 +75,7 @@ export type PercentileColumn = ColumnWithSourceField<'percentile', PercentilePar
 export type PercentileRanksColumn = ColumnWithSourceField<'percentile_rank', PercentileRanksParams>;
 export type CountColumn = ColumnWithSourceField<'count', CountParams>;
 export type LastValueColumn = ColumnWithSourceField<'last_value', LastValueParams>;
+
 export type CumulativeSumColumn = ColumnWithReferences<'cumulative_sum', CumulativeSumParams>;
 export type CounterRateColumn = ColumnWithReferences<'counter_rate', CounterRateParams>;
 export type DerivativeColumn = ColumnWithReferences<'differences', DerivativeParams>;
@@ -83,7 +84,7 @@ export type FormulaColumn = ColumnWithReferences<'formula', FormulaParams>;
 export type StaticValueColumn = ColumnWithReferences<'static_value', StaticValueParams>;
 
 export type AnyColumnWithSourceField =
-  | FitlersColumn
+  | FiltersColumn
   | RangeColumn
   | TermsColumn
   | DateHistogramColumn
@@ -109,5 +110,5 @@ export type AnyColumnWithReferences =
 
 export type Column = AnyColumnWithReferences | AnyColumnWithSourceField;
 
-export type ColumnWithMeta<Col extends Column, Meta extends {} | undefined = undefined> = Col &
+export type ColumnWithMeta<Col extends Column | {}, Meta extends {} | undefined = undefined> = Col &
   (Meta extends undefined ? undefined : { meta: Meta });

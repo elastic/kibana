@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { FormulaColumn } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import type { Metric, Series } from '../../../../common/types';
 import { getSiblingPipelineSeriesFormula } from '../metrics';
 import { createFormulaColumn } from './formula';
+import { FormulaColumn } from './types';
 
 export const convertFilterRatioToFormulaColumn = (
   series: Series,

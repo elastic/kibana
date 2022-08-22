@@ -18,13 +18,38 @@ import { getDataViewsStart } from '../../services';
 import { getDataSourceInfo } from '../lib/datasource';
 import { getMetricsColumns, getFiltersOrTermColumns } from '../lib/series';
 import { getLayers, getYExtents } from '../lib/configurations/xy';
+import { Layer as ExtendedLayer, ColumnWithMeta, Column } from '../lib/convert';
+
+const isColumnWithMeta = (column: Column): column is ColumnWithMeta => {
+  if ((column as ColumnWithMeta).meta) {
+    return true;
+  }
+  return false;
+};
+
+const excludeMetaFromLayers = (layers: Record<string, ExtendedLayer>): Record<string, Layer> => {
+  const newLayers: Record<string, Layer> = {};
+  Object.entries(layers).forEach(([layerId, layer]) => {
+    const columns = layer.columns.map((column) => {
+      if (isColumnWithMeta(column)) {
+        const { meta, ...rest } = column;
+        return rest;
+      }
+      return column;
+    });
+
+    newLayers[layerId] = { ...layer, columns };
+  });
+
+  return newLayers;
+};
 
 export const convertToLens = async (
   model: Panel
 ): Promise<NavigateToLensContext<XYConfiguration> | null> => {
   const dataViews = getDataViewsStart();
   const columns = [];
-  const layers: Record<number, Layer> = {};
+  const extendedLayers: Record<number, ExtendedLayer> = {};
   const seriesNum = model.series.filter((series) => !series.hidden).length;
 
   // handle multiple layers/series
@@ -46,27 +71,25 @@ export const convertToLens = async (
     if (!metricsColumns) {
       return null;
     }
-
     columns.push(...metricsColumns);
 
     const filtersOrTermColumns = getFiltersOrTermColumns(series);
     if (filtersOrTermColumns === null) {
       return null;
     }
-
     columns.push(...filtersOrTermColumns);
 
     const layerId = uuid();
-    layers[layerIdx] = { indexPatternId, layerId, columns, columnOrder: [] }; // TODO: update later.
+    extendedLayers[layerIdx] = { indexPatternId, layerId, columns, columnOrder: [] }; // TODO: update later.
   }
 
   const extents = getYExtents(model);
 
   return {
-    layers,
     type: 'lnsXY',
+    layers: excludeMetaFromLayers(extendedLayers),
     configuration: {
-      layers: getLayers(layers, model),
+      layers: getLayers(extendedLayers, model),
       fillOpacity: Number(model.series[0].fill) ?? 0.3,
       legend: {
         isVisible: Boolean(model.show_legend),

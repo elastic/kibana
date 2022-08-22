@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-import {
-  StaticValueColumn,
-  StaticValueParams,
-} from '@kbn/visualizations-plugin/common/convert_to_lens';
+import { StaticValueParams } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import { StaticValueColumn } from './types';
 import type { Metric, Series } from '../../../../common/types';
 import { createColumn } from './column';
 

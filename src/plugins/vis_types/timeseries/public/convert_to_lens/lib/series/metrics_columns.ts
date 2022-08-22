@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { Column } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Series } from '../../../../common/types';
 import { getSeriesAgg } from './get_series_agg';
 import { SUPPORTED_METRICS } from '../metrics';
 import {
+  Column,
   convertMetricsToColumns,
   convertToPercentileColumns,
   convertToPercentileRankColumns,
@@ -97,7 +97,7 @@ export const getMetricsColumns = (
     }
     default: {
       const column = convertMetricAggregationColumnWithoutParams(
-        aggregation,
+        aggregationMap,
         series,
         metrics[metricIdx],
         dataView

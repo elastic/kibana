@@ -7,9 +7,7 @@
  */
 
 import {
-  Column,
   FillType,
-  Layer,
   XYLayerConfig,
   YAxisMode,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
@@ -17,7 +15,12 @@ import { PaletteOutput } from '@kbn/coloring';
 import { SUPPORTED_METRICS } from '../../metrics';
 import type { Metric, Panel } from '../../../../../common/types';
 import { getSeriesAgg } from '../../series';
-import { isPercentileRanksColumnWithMeta, isPercentileColumnWithMeta } from '../../convert';
+import {
+  isPercentileRanksColumnWithMeta,
+  isPercentileColumnWithMeta,
+  Column,
+  Layer,
+} from '../../convert';
 import { getChartType } from './chart_type';
 
 function getPalette(palette: PaletteOutput): PaletteOutput {

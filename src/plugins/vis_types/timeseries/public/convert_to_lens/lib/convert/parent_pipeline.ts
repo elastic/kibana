@@ -8,6 +8,7 @@
 
 import { METRIC_TYPES } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { Operations } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import {
   AvgColumn,
   CardinalityColumn,
@@ -19,13 +20,12 @@ import {
   MaxColumn,
   MinColumn,
   MovingAverageColumn,
-  Operations,
   PercentileColumn,
   PercentileRanksColumn,
   SumColumn,
-} from '@kbn/visualizations-plugin/common/convert_to_lens';
+} from './types';
 import { TSVB_METRIC_TYPES } from '../../../../common/enums';
-import { Metric, MetricType, Series } from '../../../../common/types';
+import { Metric, Series } from '../../../../common/types';
 import {
   getFilterRatioFormula,
   getFormulaFromMetric,
@@ -37,8 +37,8 @@ import {
 import { createColumn } from './column';
 import { createFormulaColumn } from './formula';
 import { convertToMovingAverageParams } from './moving_average';
-import { convertToPercentileParams } from './percentile';
-import { convertToPercentileRankParams } from './percentile_rank';
+import { convertToPercentileColumn } from './percentile';
+import { convertToPercentileRankColumn } from './percentile_rank';
 
 type MetricAggregationWithoutParams =
   | typeof Operations.AVERAGE
@@ -105,28 +105,24 @@ const isSupportedAggregationWithoutParams = (
 };
 
 export const convertMetricAggregationColumnWithoutParams = (
-  aggregation: MetricType,
+  aggregation: SupportedMetric,
   series: Series,
   metric: Metric,
   dataView: DataView
 ): MetricAggregationColumnWithoutParams | null => {
-  const supportedAgg = SUPPORTED_METRICS[aggregation];
-  if (!supportedAgg) {
-    return null;
-  }
-  if (!isSupportedAggregationWithoutParams(supportedAgg.name)) {
+  if (!isSupportedAggregationWithoutParams(aggregation.name)) {
     return null;
   }
 
-  const sourceField = aggregation !== 'count' && metric.field ? metric.field : 'document';
+  const sourceField = aggregation.name !== 'count' && metric.field ? metric.field : 'document';
 
   const field = dataView.getFieldByName(sourceField);
-  if (!field && aggregation !== 'count') {
+  if (!field && aggregation.name !== 'count') {
     return null;
   }
 
   return {
-    operationType: supportedAgg.name,
+    operationType: aggregation.name,
     sourceField,
     ...createColumn(series, metric, field),
     params: {},
@@ -150,34 +146,18 @@ export const convertMetricAggregationToColumn = (
   }
 
   if (aggregation.name === Operations.PERCENTILE) {
-    const params = convertToPercentileParams(meta);
-    return params
-      ? {
-          operationType: aggregation.name,
-          sourceField: field.name,
-          ...createColumn(series, metric, field),
-          params,
-        }
-      : null;
+    return convertToPercentileColumn(meta, series, metric, dataView);
   }
 
   if (aggregation.name === Operations.PERCENTILE_RANK) {
-    const params = convertToPercentileRankParams(meta?.toString() ?? '');
-    return params
-      ? {
-          operationType: aggregation.name,
-          sourceField: field.name,
-          ...createColumn(series, metric, field),
-          params,
-        }
-      : null;
+    return convertToPercentileRankColumn(meta?.toString() ?? '', series, metric, dataView);
   }
 
   if (aggregation.name === Operations.LAST_VALUE) {
     return null;
   }
 
-  return convertMetricAggregationColumnWithoutParams(aggregation.name, series, metric, dataView);
+  return convertMetricAggregationColumnWithoutParams(aggregation, series, metric, dataView);
 };
 
 export const computeParentPipelineColumns = (

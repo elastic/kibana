@@ -7,10 +7,8 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import {
-  LastValueColumn,
-  LastValueParams,
-} from '@kbn/visualizations-plugin/common/convert_to_lens';
+import { LastValueParams } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import { LastValueColumn } from './types';
 import type { Metric, Series } from '../../../../common/types';
 import { createColumn } from './column';
 

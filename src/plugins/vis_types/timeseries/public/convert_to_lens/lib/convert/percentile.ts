@@ -7,20 +7,16 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import {
-  Column,
-  Operations,
-  PercentileParams,
-} from '@kbn/visualizations-plugin/common/convert_to_lens';
+import { Operations, PercentileParams } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import type { Metric, Percentile, Series } from '../../../../common/types';
 import { createColumn } from './column';
-import { CommonPercentileColumnWithMeta, PercentileColumnWithMeta } from './types';
+import { PercentileColumnWithExtendedMeta, PercentileColumn, Column } from './types';
 
 export const isPercentileColumnWithMeta = (
-  column: Column | CommonPercentileColumnWithMeta
-): column is PercentileColumnWithMeta =>
+  column: Column
+): column is PercentileColumnWithExtendedMeta =>
   column.operationType === Operations.PERCENTILE &&
-  Boolean((column as CommonPercentileColumnWithMeta).meta);
+  Boolean((column as PercentileColumnWithExtendedMeta)?.meta?.reference);
 
 export const convertToPercentileParams = (value?: string | number): PercentileParams | null =>
   value !== undefined && !isNaN(Number(value))
@@ -29,14 +25,14 @@ export const convertToPercentileParams = (value?: string | number): PercentilePa
       }
     : null;
 
-const convertToPercentileColumn = (
-  percentile: Percentile,
+export const convertToPercentileColumn = (
+  percentile: Percentile['value'],
   series: Series,
   metric: Metric,
   dataView: DataView,
-  index: number
-): PercentileColumnWithMeta | null => {
-  const params = convertToPercentileParams(percentile.value);
+  index?: number
+): PercentileColumn | null => {
+  const params = convertToPercentileParams(percentile);
   if (!params) {
     return null;
   }
@@ -45,15 +41,19 @@ const convertToPercentileColumn = (
   if (!field) {
     return null;
   }
-
+  const commonColumnParams = createColumn(series, metric, field);
   return {
     operationType: 'percentile',
     sourceField: field.name,
-    ...createColumn(series, metric, field),
+    ...commonColumnParams,
     params,
-    meta: {
-      reference: `${metric.id}.${index}`,
-    },
+    meta:
+      index !== undefined
+        ? {
+            reference: `${metric.id}.${index}`,
+            ...commonColumnParams.meta,
+          }
+        : commonColumnParams.meta,
   };
 };
 
@@ -61,7 +61,7 @@ export const convertToPercentileColumns = (
   series: Series,
   metric: Metric,
   dataView: DataView
-): PercentileColumnWithMeta[] => {
+): PercentileColumn[] => {
   const { percentiles } = metric;
 
   if (!percentiles) {
@@ -69,6 +69,6 @@ export const convertToPercentileColumns = (
   }
 
   return percentiles
-    .map((p, index) => convertToPercentileColumn(p, series, metric, dataView, index))
-    .filter((p): p is PercentileColumnWithMeta => Boolean(p));
+    .map((p, index) => convertToPercentileColumn(p.value, series, metric, dataView, index))
+    .filter((p): p is PercentileColumn => Boolean(p));
 };

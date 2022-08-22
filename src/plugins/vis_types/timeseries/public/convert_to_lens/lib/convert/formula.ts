@@ -7,7 +7,8 @@
  */
 
 import { METRIC_TYPES } from '@kbn/data-plugin/public';
-import { FormulaColumn, FormulaParams } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import { FormulaParams } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import { FormulaColumn } from './types';
 import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import type { Metric, Series } from '../../../../common/types';
 import { getFormulaEquivalent, getSiblingPipelineSeriesFormula } from '../metrics';

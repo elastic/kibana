@@ -19,3 +19,4 @@ export { convertFilterRatioToFormulaColumn } from './filter_ratio';
 export { convertToLastValueColumn } from './last_value';
 export { convertToStaticValueColumn } from './static_value';
 export { convertToFiltersColumn } from './filters';
+export * from './types';

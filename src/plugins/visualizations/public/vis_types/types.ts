@@ -135,8 +135,8 @@ export interface NavigateToLensContext {
       yRight: boolean;
     };
     extents: {
-      yLeftExtent: AxisExtents;
-      yRightExtent: AxisExtents;
+      yLeftExtent?: AxisExtents;
+      yRightExtent?: AxisExtents;
     };
   };
 }

@@ -11,11 +11,16 @@ import {
   Operation,
   DataType,
   Column,
+  ColumnWithMeta,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import uuid from 'uuid';
 import type { Metric, Series } from '../../../../common/types';
 import { ConvertToColumnsFn } from '../../types';
 import { getTimeScale } from '../metrics';
+import { Meta } from './types';
+
+type GeneralColumn = Omit<BaseColumn<Operation, unknown>, 'operationType' | 'params'>;
+type GeneralColumnWithMeta = ColumnWithMeta<GeneralColumn, Meta>;
 
 export const createColumn = (
   series: Series,
@@ -23,7 +28,7 @@ export const createColumn = (
   field?: DataViewField,
   isBucketed: boolean = false,
   isSplit: boolean = false
-): Omit<BaseColumn<Operation, unknown>, 'operationType' | 'params'> => ({
+): GeneralColumnWithMeta => ({
   columnId: uuid(),
   dataType: (field?.type as DataType) ?? undefined,
   label: series.label,
@@ -32,6 +37,7 @@ export const createColumn = (
   window: metric.window?.toString(),
   filter: series.filter,
   timeScale: getTimeScale(metric),
+  meta: { metricId: metric.id },
 });
 
 export const convertMetricsToColumns = <C extends Column>(

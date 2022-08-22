@@ -7,7 +7,8 @@
  */
 
 import uuid from 'uuid';
-import { FiltersParams, FitlersColumn } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import { FiltersParams } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import { FiltersColumn } from './types';
 import type { Series } from '../../../../common/types';
 
 export const convertToFiltersParams = (series: Series): FiltersParams => {
@@ -34,7 +35,7 @@ export const convertToFiltersParams = (series: Series): FiltersParams => {
   };
 };
 
-export const convertToFiltersColumn = (series: Series, isSplit: boolean): FitlersColumn | null => {
+export const convertToFiltersColumn = (series: Series, isSplit: boolean): FiltersColumn | null => {
   const params = convertToFiltersParams(series);
   if (!params.filters.length) {
     return null;
