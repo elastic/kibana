@@ -6,14 +6,6 @@
  * Side Public License, v 1.
  */
 
-import {
-  compareFilters,
-  buildRangeFilter,
-  COMPARE_ALL_OPTIONS,
-  RangeFilterParams,
-  Filter,
-  Query,
-} from '@kbn/es-query';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { isEmpty } from 'lodash';
@@ -23,20 +15,27 @@ import deepEqual from 'fast-deep-equal';
 import { Subscription, lastValueFrom } from 'rxjs';
 import { debounceTime, distinctUntilChanged, skip, map } from 'rxjs/operators';
 
-import { ReduxEmbeddableTools, ReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
-import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
+import {
+  compareFilters,
+  buildRangeFilter,
+  COMPARE_ALL_OPTIONS,
+  RangeFilterParams,
+  Filter,
+  Query,
+} from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { ReduxEmbeddableTools, ReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
 
-import { pluginServices } from '../../services';
 import { ControlInput, ControlOutput } from '../..';
+import { pluginServices } from '../../services';
 import { ControlsDataService } from '../../services/data';
 import { ControlsDataViewsService } from '../../services/data_views';
-
-import { RangeSliderStrings } from './range_slider_strings';
-import { RangeSliderComponent } from './range_slider.component';
-import { getDefaultComponentState, rangeSliderReducers } from './range_slider_reducers';
-import { RangeSliderEmbeddableInput, RangeSliderReduxState, RANGE_SLIDER_CONTROL } from './types';
+import { RangeSliderControl } from '../components/range_slider_control';
+import { getDefaultComponentState, rangeSliderReducers } from '../range_slider_reducers';
+import { RangeSliderEmbeddableInput, RangeSliderReduxState, RANGE_SLIDER_CONTROL } from '../types';
 
 const diffDataFetchProps = (
   current?: RangeSliderDataFetchProps,
@@ -164,8 +163,16 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     if (!this.dataView || this.dataView.id !== dataViewId) {
       try {
         this.dataView = await this.dataViewsService.get(dataViewId);
-        if (!this.dataView)
-          throw new Error(RangeSliderStrings.errors.getDataViewNotFoundError(dataViewId));
+
+        if (!this.dataView) {
+          throw new Error(
+            i18n.translate('controls.rangeSlider.errors.dataViewNotFound', {
+              defaultMessage: 'Could not locate data view: {dataViewId}',
+              values: { dataViewId },
+            })
+          );
+        }
+
         dispatch(setDataViewId(this.dataView.id));
       } catch (e) {
         this.onFatalError(e);
@@ -175,7 +182,14 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     if (!this.field || this.field.name !== fieldName) {
       this.field = this.dataView?.getFieldByName(fieldName);
       if (this.field === undefined) {
-        this.onFatalError(new Error(RangeSliderStrings.errors.getDataViewNotFoundError(fieldName)));
+        this.onFatalError(
+          new Error(
+            i18n.translate('controls.rangeSlider.errors.fieldNotFound', {
+              defaultMessage: 'Could not locate field: {fieldName}',
+              values: { fieldName },
+            })
+          )
+        );
       }
 
       dispatch(setField(this.field?.toSpec()));
@@ -408,7 +422,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
       <KibanaThemeProvider theme$={pluginServices.getServices().theme.theme$}>
         <ControlsServicesProvider>
           <RangeSliderReduxWrapper>
-            <RangeSliderComponent />
+            <RangeSliderControl />
           </RangeSliderReduxWrapper>
         </ControlsServicesProvider>
       </KibanaThemeProvider>,

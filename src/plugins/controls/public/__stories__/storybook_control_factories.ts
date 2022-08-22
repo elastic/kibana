@@ -7,7 +7,7 @@
  */
 
 import { OptionsListEmbeddableFactory } from '../options_list';
-import { RangeSliderEmbeddableFactory } from '../control_types/range_slider';
+import { RangeSliderEmbeddableFactory } from '../range_slider';
 import { TimesliderEmbeddableFactory } from '../control_types/time_slider';
 import { ControlsService } from '../services/controls';
 import { ControlFactory } from '..';
