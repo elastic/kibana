@@ -13,9 +13,9 @@ import type {
   SavedObjectsRawDoc,
   SavedObjectTypeExcludeFromUpgradeFilterHook,
 } from '@kbn/core-saved-objects-server';
+import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import type { ControlState } from './state_action_machine';
 import type { AliasAction } from './actions';
-import type { IndexMapping } from '../mappings';
 import type { TransformErrorObjects } from './core';
 import type { MigrationLog, Progress } from './types';
 
