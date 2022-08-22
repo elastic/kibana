@@ -513,7 +513,12 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
           throw new PackagePolicyRestrictionRelatedError(`Cannot delete package policy ${id}`);
         }
 
-        await validateIsNotHostedPolicy(soClient, packagePolicy?.policy_id, options?.force);
+        await validateIsNotHostedPolicy(
+          soClient,
+          packagePolicy?.policy_id,
+          options?.force,
+          'Cannot remove integrations of hosted agent policy'
+        );
 
         const agentPolicy = await agentPolicyService
           .get(soClient, packagePolicy.policy_id)
@@ -1622,7 +1627,8 @@ export function preconfigurePackageInputs(
 async function validateIsNotHostedPolicy(
   soClient: SavedObjectsClientContract,
   id: string,
-  force = false
+  force = false,
+  errorMessage?: string
 ) {
   const agentPolicy = await agentPolicyService.get(soClient, id, false);
 
@@ -1632,7 +1638,7 @@ async function validateIsNotHostedPolicy(
 
   if (agentPolicy.is_managed && !force) {
     throw new HostedAgentPolicyRestrictionRelatedError(
-      `Cannot update integrations of hosted agent policy ${id}`
+      errorMessage ?? `Cannot update integrations of hosted agent policy ${id}`
     );
   }
 }
