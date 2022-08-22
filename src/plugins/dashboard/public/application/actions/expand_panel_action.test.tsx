@@ -47,7 +47,6 @@ beforeEach(async () => {
     savedObjectMetaData: {} as any,
     uiActions: {} as any,
     uiSettings: uiSettingsServiceMock.createStartContract(),
-    http: coreMock.createStart().http,
     theme: coreMock.createStart().theme,
     presentationUtil: getStubPluginServices(),
     screenshotMode: screenshotModePluginMock.createSetupContract(),

@@ -14,15 +14,13 @@ import {
 
 import { DashboardServices } from './types';
 
-// import { httpServiceFactory } from './http/http.stub';
+import { httpServiceFactory } from './http/http.stub';
 import { dataServiceFactory } from './data/data.stub';
-// import { visualizationsServiceFactory } from './visualizations/visualizations.stub';
-// import { dataViewEditorServiceFactory } from './data_view_editor/data_view_editor.stub';
 
-export const providers: PluginServiceProviders<DashboardServices> = {
+const providers: PluginServiceProviders<DashboardServices> = {
   data: new PluginServiceProvider(dataServiceFactory),
   // dataViewEditor: new PluginServiceProvider(dataViewEditorServiceFactory),
-  // http: new PluginServiceProvider(httpServiceFactory),
+  http: new PluginServiceProvider(httpServiceFactory),
   // visualizations: new PluginServiceProvider(visualizationsServiceFactory),
 };
 

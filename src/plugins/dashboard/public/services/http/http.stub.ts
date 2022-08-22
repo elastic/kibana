@@ -6,13 +6,16 @@
  * Side Public License, v 1.
  */
 
-// import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
-import { DashboardDataService } from './types';
+import { DashboardHTTPService } from './types';
 
-type DataServiceFactory = PluginServiceFactory<DashboardDataService>;
+type HttpServiceFactory = PluginServiceFactory<DashboardHTTPService>;
 
-export const dataServiceFactory: DataServiceFactory = () => ({
-  ...dataPluginMock.createStartContract(),
-});
+export const httpServiceFactory: HttpServiceFactory = () => {
+  const basePath = httpServiceMock.createBasePath() as unknown as DashboardHTTPService['basePath'];
+
+  return {
+    basePath,
+  };
+};

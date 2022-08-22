@@ -190,7 +190,6 @@ export class DashboardPlugin
         uiActions: deps.uiActions,
         inspector: deps.inspector,
         theme: coreStart.theme,
-        http: coreStart.http,
         ExitFullScreenButton,
         presentationUtil: deps.presentationUtil,
       };

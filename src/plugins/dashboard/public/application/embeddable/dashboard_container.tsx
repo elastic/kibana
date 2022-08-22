@@ -67,7 +67,6 @@ export interface DashboardContainerServices {
   embeddable: EmbeddableStart;
   uiActions: UiActionsStart;
   theme: CoreStart['theme'];
-  http: CoreStart['http'];
   analytics?: CoreStart['analytics'];
 }
 

@@ -13,8 +13,8 @@ import { savedObjectsPluginMock } from '@kbn/saved-objects-plugin/public/mocks';
 import { visualizationsPluginMock } from '@kbn/visualizations-plugin/public/mocks';
 import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 import { indexPatternEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
-
 import { chromeServiceMock, coreMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
+
 import { SavedObjectLoader, SavedObjectLoaderFindOptions } from '../../services/saved_objects';
 import { DashboardAppServices, DashboardAppCapabilities } from '../../types';
 import { NavigationPublicPluginStart } from '../../services/navigation';

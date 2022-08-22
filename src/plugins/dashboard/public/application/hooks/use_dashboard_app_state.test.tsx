@@ -92,7 +92,6 @@ const setupEmbeddableFactory = (
     application: {} as unknown,
     inspector: {} as unknown,
     uiActions: {} as unknown,
-    http: coreStart.http,
   } as unknown as DashboardContainerServices;
 
   const dashboardContainer = new DashboardContainer(
