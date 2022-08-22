@@ -7,7 +7,7 @@
 
 import { createReducer } from '@reduxjs/toolkit';
 
-import { MonitorOverviewResult } from '../../../../../common/runtime_types';
+import { ConfigKey, MonitorOverviewResult } from '../../../../../common/runtime_types';
 
 import { IHttpSerializedFetchError, serializeHttpFetchError } from '../utils/http_error';
 
@@ -15,7 +15,7 @@ import { MonitorOverviewPageState } from './models';
 import {
   fetchMonitorOverviewAction,
   quietFetchOverviewAction,
-  setOverviewPerPageAction,
+  setOverviewPageStateAction,
 } from './actions';
 
 export interface MonitorOverviewState {
@@ -30,10 +30,13 @@ const initialState: MonitorOverviewState = {
   data: {
     total: 0,
     allMonitorIds: [],
+    disabledMonitorIds: [],
     pages: {},
   },
   pageState: {
     perPage: 20,
+    sortOrder: 'asc',
+    sortField: `${ConfigKey.NAME}.keyword`,
   },
   loading: false,
   loaded: false,
@@ -62,10 +65,10 @@ export const monitorOverviewReducer = createReducer(initialState, (builder) => {
     .addCase(quietFetchOverviewAction.fail, (state, action) => {
       state.error = serializeHttpFetchError(action.payload);
     })
-    .addCase(setOverviewPerPageAction, (state, action) => {
+    .addCase(setOverviewPageStateAction, (state, action) => {
       state.pageState = {
         ...state.pageState,
-        perPage: action.payload,
+        ...action.payload,
       };
       state.loaded = false;
     });

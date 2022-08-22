@@ -7,10 +7,17 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexItem, EuiFlexGrid, EuiSpacer, EuiTablePagination } from '@elastic/eui';
-import { selectOverviewState, setOverviewPerPageAction } from '../../../../state/overview';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlexGrid,
+  EuiSpacer,
+  EuiTablePagination,
+} from '@elastic/eui';
+import { selectOverviewState, setOverviewPageStateAction } from '../../../../state/overview';
 import { OverviewPaginationInfo } from './overview_pagination_info';
 import { OverviewGridItem } from './overview_grid_item';
+import { SortFields } from './sort_fields';
 
 export const OverviewGrid = () => {
   const {
@@ -27,12 +34,19 @@ export const OverviewGrid = () => {
   };
 
   const changeItemsPerPage = (itemsPerPage: number) => {
-    dispatch(setOverviewPerPageAction(itemsPerPage));
+    dispatch(setOverviewPageStateAction({ perPage: itemsPerPage }));
   };
 
   return loaded ? (
     <>
-      <OverviewPaginationInfo page={page} />
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
+          <OverviewPaginationInfo page={page} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <SortFields />
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer />
       <EuiFlexGrid columns={4}>
         {currentMonitors.map((monitor) => (
