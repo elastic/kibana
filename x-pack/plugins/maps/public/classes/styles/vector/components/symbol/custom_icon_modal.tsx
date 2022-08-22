@@ -386,11 +386,14 @@ export class CustomIconModal extends Component<Props, State> {
               <EuiButton
                 fill
                 onClick={() => {
-                  usageCollector?.reportUiCounter(
-                    APP_ID,
-                    METRIC_TYPE.CLICK,
-                    'settings_custom_icons_add'
-                  );
+                  if (!onDelete) {
+                    // Only report events when adding a new custom icon, not when editing an existing icon
+                    usageCollector?.reportUiCounter(
+                      APP_ID,
+                      METRIC_TYPE.CLICK,
+                      'settings_custom_icons_add'
+                    );
+                  }
                   onSave({ symbolId: symbolId ?? getCustomIconId(), label, svg, cutoff, radius });
                 }}
                 data-test-subj="mapsCustomIconForm-submit"
