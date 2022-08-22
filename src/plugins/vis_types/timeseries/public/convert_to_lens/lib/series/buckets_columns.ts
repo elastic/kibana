@@ -40,7 +40,7 @@ export const isSplitWithDateHistogram = (
   return splitWithDateHistogram;
 };
 
-export const getBucketColumns = (
+export const getBucketsColumns = (
   model: Panel,
   series: Series,
   columns: Column[],

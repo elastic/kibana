@@ -16,7 +16,7 @@ import uuid from 'uuid';
 import { Panel } from '../../../common/types';
 import { getDataViewsStart } from '../../services';
 import { getDataSourceInfo } from '../lib/datasource';
-import { getMetricsColumns, getBucketColumns } from '../lib/series';
+import { getMetricsColumns, getBucketsColumns } from '../lib/series';
 import { getLayers, getYExtents } from '../lib/configurations/xy';
 import {
   Layer as ExtendedLayer,
@@ -75,7 +75,7 @@ export const convertToLens = async (
       return null;
     }
 
-    const bucketsColumns = getBucketColumns(model, series, metricsColumns, indexPattern!, true);
+    const bucketsColumns = getBucketsColumns(model, series, metricsColumns, indexPattern!, true);
     if (bucketsColumns === null) {
       return null;
     }
