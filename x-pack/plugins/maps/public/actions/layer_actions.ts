@@ -554,12 +554,12 @@ export function updateFittableFlag(id: string, includeInFitToBounds: boolean) {
   };
 }
 
-export function updateShowTooltips(id: string, showTooltips: boolean) {
+export function updateDisableTooltips(id: string, disableTooltips: boolean) {
   return {
     type: UPDATE_LAYER_PROP,
     id,
-    propName: 'showTooltips',
-    newValue: showTooltips,
+    propName: 'disableTooltips',
+    newValue: disableTooltips,
   };
 }
 

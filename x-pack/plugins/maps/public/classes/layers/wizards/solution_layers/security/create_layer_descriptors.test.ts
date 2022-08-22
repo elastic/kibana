@@ -42,7 +42,7 @@ describe('createLayerDescriptor', () => {
         label: 'apm-*-transaction* | Source Point',
         maxZoom: 24,
         minZoom: 0,
-        showTooltips: true,
+        disableTooltips: false,
         sourceDescriptor: {
           applyGlobalQuery: true,
           applyGlobalTime: true,
@@ -119,7 +119,7 @@ describe('createLayerDescriptor', () => {
         label: 'apm-*-transaction* | Destination point',
         maxZoom: 24,
         minZoom: 0,
-        showTooltips: true,
+        disableTooltips: false,
         sourceDescriptor: {
           applyGlobalQuery: true,
           applyGlobalTime: true,
@@ -196,7 +196,7 @@ describe('createLayerDescriptor', () => {
         label: 'apm-*-transaction* | Line',
         maxZoom: 24,
         minZoom: 0,
-        showTooltips: true,
+        disableTooltips: false,
         sourceDescriptor: {
           applyGlobalQuery: true,
           applyGlobalTime: true,
@@ -262,7 +262,7 @@ describe('createLayerDescriptor', () => {
         label: 'filebeat-* | Source Point',
         maxZoom: 24,
         minZoom: 0,
-        showTooltips: true,
+        disableTooltips: false,
         sourceDescriptor: {
           applyGlobalQuery: true,
           applyGlobalTime: true,
@@ -339,7 +339,7 @@ describe('createLayerDescriptor', () => {
         label: 'filebeat-* | Destination point',
         maxZoom: 24,
         minZoom: 0,
-        showTooltips: true,
+        disableTooltips: false,
         sourceDescriptor: {
           applyGlobalQuery: true,
           applyGlobalTime: true,
@@ -410,7 +410,7 @@ describe('createLayerDescriptor', () => {
         label: 'filebeat-* | Line',
         maxZoom: 24,
         minZoom: 0,
-        showTooltips: true,
+        disableTooltips: false,
         sourceDescriptor: {
           applyGlobalQuery: true,
           applyGlobalTime: true,
@@ -476,7 +476,7 @@ describe('createLayerDescriptor', () => {
         label: 'traces-apm-opbean-node | Source Point',
         maxZoom: 24,
         minZoom: 0,
-        showTooltips: true,
+        disableTooltips: false,
         sourceDescriptor: {
           applyGlobalQuery: true,
           applyGlobalTime: true,
@@ -553,7 +553,7 @@ describe('createLayerDescriptor', () => {
         label: 'traces-apm-opbean-node | Destination point',
         maxZoom: 24,
         minZoom: 0,
-        showTooltips: true,
+        disableTooltips: false,
         sourceDescriptor: {
           applyGlobalQuery: true,
           applyGlobalTime: true,
@@ -624,7 +624,7 @@ describe('createLayerDescriptor', () => {
         label: 'traces-apm-opbean-node | Line',
         maxZoom: 24,
         minZoom: 0,
-        showTooltips: true,
+        disableTooltips: false,
         sourceDescriptor: {
           applyGlobalQuery: true,
           applyGlobalTime: true,

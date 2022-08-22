@@ -178,7 +178,7 @@ export class TooltipControl extends Component<Props, {}> {
     for (let i = 0; i < mbFeatures.length; i++) {
       const mbFeature = mbFeatures[i];
       const layer = this._getLayerByMbLayerId(mbFeature.layer.id);
-      if (!layer || !layer.isShowTooltip()) {
+      if (!layer || !layer.canShowTooltip() || layer.areTooltipsDisabled()) {
         break;
       }
 

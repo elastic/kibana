@@ -41,6 +41,9 @@ const mockLayer = {
   canShowTooltip: () => {
     return true;
   },
+  areTooltipsDisabled: () => {
+    return false;
+  },
   getMbTooltipLayerIds: () => {
     return ['foo', 'bar'];
   },

@@ -38,7 +38,7 @@ export interface Props {
   updateAlpha: (layerId: string, alpha: number) => void;
   updateLabelsOnTop: (layerId: string, areLabelsOnTop: boolean) => void;
   updateIncludeInFitToBounds: (layerId: string, includeInFitToBounds: boolean) => void;
-  updateShowTooltips: (layerId: string, showTooltips: boolean) => void;
+  updateDisableTooltips: (layerId: string, disableTooltips: boolean) => void;
   supportsFitToBounds: boolean;
 }
 
@@ -71,7 +71,7 @@ export function LayerSettings(props: Props) {
   };
 
   const onShowTooltipsChange = (event: EuiSwitchEvent) => {
-    props.updateShowTooltips(layerId, event.target.checked);
+    props.updateDisableTooltips(layerId, !event.target.checked);
   };
 
   const includeInFitToBoundsChange = (event: EuiSwitchEvent) => {
@@ -168,7 +168,7 @@ export function LayerSettings(props: Props) {
     );
   };
 
-  const renderShowTooltips = () => {
+  const renderDisableTooltips = () => {
     if (!isVectorLayer(props.layer)) {
       return null;
     } else {
@@ -176,11 +176,11 @@ export function LayerSettings(props: Props) {
       return (
         <EuiFormRow display="columnCompressedSwitch">
           <EuiSwitch
-            label={i18n.translate('xpack.maps.layerPanel.settingsPanel.showTooltips', {
+            label={i18n.translate('xpack.maps.layerPanel.settingsPanel.DisableTooltips', {
               defaultMessage: `Show tooltips`,
             })}
             disabled={!layer.canShowTooltip()}
-            checked={layer.isShowTooltip()}
+            checked={!layer.areTooltipsDisabled()}
             onChange={onShowTooltipsChange}
             compressed
           />
@@ -261,7 +261,7 @@ export function LayerSettings(props: Props) {
         {renderShowLocaleSelector()}
         <AttributionFormRow layer={props.layer} onChange={onAttributionChange} />
         {renderIncludeInFitToBounds()}
-        {renderShowTooltips()}
+        {renderDisableTooltips()}
       </EuiPanel>
 
       <EuiSpacer size="s" />
