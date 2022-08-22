@@ -7,7 +7,7 @@
  */
 
 import {
-  FillType,
+  FillTypes,
   XYLayerConfig,
   YAxisMode,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
@@ -20,8 +20,12 @@ import {
   isPercentileColumnWithMeta,
   Column,
   Layer,
+  AnyColumnWithReferences,
 } from '../../convert';
 import { getChartType } from './chart_type';
+
+export const isColumnWithReference = (column: Column): column is AnyColumnWithReferences =>
+  Boolean((column as AnyColumnWithReferences).references);
 
 function getPalette(palette: PaletteOutput): PaletteOutput {
   return !palette || palette.name === 'gradient' || palette.name === 'rainbow'
@@ -55,7 +59,15 @@ export const getLayers = (
     const series = model.series[parseInt(key, 10)];
     const { metrics, seriesAgg } = getSeriesAgg(series.metrics);
     const dataSourceLayer = dataSourceLayers[parseInt(key, 10)];
-    const metricColumns = dataSourceLayer.columns.filter((l) => !l.isBucketed);
+    const referenceColumn = dataSourceLayer.columns.find(
+      (column): column is AnyColumnWithReferences => isColumnWithReference(column)
+    );
+    // as pipiline aggregation has only one reference id
+    const referenceColumnId = referenceColumn?.references[0];
+    // we should not include columns which using as reference for pipeline aggs
+    const metricColumns = dataSourceLayer.columns.filter(
+      (l) => !l.isBucketed && l.columnId !== referenceColumnId
+    );
     const isReferenceLine = metrics.length === 1 && metrics[0].type === 'static';
     const splitAccessor = dataSourceLayer.columns.find(
       (column) => column.isBucketed && column.isSplit
@@ -78,7 +90,7 @@ export const getLayers = (
             ? series.axis_position
             : model.axis_position) as YAxisMode,
           ...(isReferenceLine && {
-            fill: (chartType === 'area' ? 'below' : 'none') as FillType,
+            fill: chartType === 'area' ? FillTypes.BELOW : FillTypes.NONE,
           }),
         };
       }),

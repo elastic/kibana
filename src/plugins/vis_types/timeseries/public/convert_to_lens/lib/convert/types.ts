@@ -15,7 +15,7 @@ import {
   FiltersColumn,
   TermsColumn,
   RangeColumn as BaseRangeColumn,
-  DateHistogramColumn as BaseDateHistogramColumn,
+  DateHistogramColumn,
   MinColumn as BaseMinColumn,
   MaxColumn as BaseMaxColumn,
   AvgColumn as BaseAvgColumn,
@@ -31,6 +31,7 @@ import {
   MovingAverageColumn as BaseMovingAverageColumn,
   FormulaColumn as BaseFormulaColumn,
   StaticValueColumn as BaseStaticValueColumn,
+  AnyColumnWithReferences as BaseAnyColumnWithReferences,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
 
 export interface Meta {
@@ -66,7 +67,6 @@ export type CommonPercentileColumnWithExtendedMeta =
   | PercentileRanksColumnWithExtendedMeta;
 
 export type RangeColumn = GenericColumnWithMeta<BaseRangeColumn, Meta>;
-export type DateHistogramColumn = GenericColumnWithMeta<BaseDateHistogramColumn, Meta>;
 export type MinColumn = GenericColumnWithMeta<BaseMinColumn, Meta>;
 export type MaxColumn = GenericColumnWithMeta<BaseMaxColumn, Meta>;
 export type AvgColumn = GenericColumnWithMeta<BaseAvgColumn, Meta>;
@@ -83,7 +83,8 @@ export type MovingAverageColumn = GenericColumnWithMeta<BaseMovingAverageColumn,
 export type FormulaColumn = GenericColumnWithMeta<BaseFormulaColumn, Meta>;
 export type StaticValueColumn = GenericColumnWithMeta<BaseStaticValueColumn, Meta>;
 
-type ColumnsWithoutMeta = FiltersColumn | TermsColumn;
+type ColumnsWithoutMeta = FiltersColumn | TermsColumn | DateHistogramColumn;
+export type AnyColumnWithReferences = GenericColumnWithMeta<BaseAnyColumnWithReferences, Meta>;
 
 type CommonColumns = Exclude<BaseColumn, ColumnsWithoutMeta>;
 export type ColumnWithMeta =
@@ -92,8 +93,8 @@ export type ColumnWithMeta =
 
 export type Column = ColumnWithMeta | ColumnsWithoutMeta;
 
-export { FiltersColumn, TermsColumn };
-
 export type Layer = Omit<BaseLayer, 'columns'> & {
   columns: Column[];
 };
+
+export { FiltersColumn, TermsColumn, DateHistogramColumn };

@@ -16,9 +16,14 @@ import uuid from 'uuid';
 import { Panel } from '../../../common/types';
 import { getDataViewsStart } from '../../services';
 import { getDataSourceInfo } from '../lib/datasource';
-import { getMetricsColumns, getFiltersOrTermColumns } from '../lib/series';
+import { getMetricsColumns, getSplitColumns } from '../lib/series';
 import { getLayers, getYExtents } from '../lib/configurations/xy';
-import { Layer as ExtendedLayer, ColumnWithMeta, Column } from '../lib/convert';
+import {
+  Layer as ExtendedLayer,
+  ColumnWithMeta,
+  Column,
+  convertToDateHistogramColumn,
+} from '../lib/convert';
 
 const isColumnWithMeta = (column: Column): column is ColumnWithMeta => {
   if ((column as ColumnWithMeta).meta) {
@@ -57,7 +62,7 @@ export const convertToLens = async (
       continue;
     }
 
-    const { indexPatternId, indexPattern } = await getDataSourceInfo(
+    const { indexPatternId, indexPattern, timeField } = await getDataSourceInfo(
       model.index_pattern,
       model.time_field,
       Boolean(series.override_index_pattern),
@@ -65,13 +70,27 @@ export const convertToLens = async (
       dataViews
     );
 
+    if (!timeField) {
+      return null;
+    }
+
+    const dateHistogramColumn = convertToDateHistogramColumn(
+      model,
+      series,
+      indexPattern!,
+      timeField,
+      false
+    );
+    if (dateHistogramColumn === null) {
+      return null;
+    }
     // handle multiple metrics
     const metricsColumns = getMetricsColumns(series, indexPattern!, seriesNum);
     if (!metricsColumns) {
       return null;
     }
 
-    const filtersOrTermColumns = getFiltersOrTermColumns(series);
+    const filtersOrTermColumns = getSplitColumns(model, series, indexPattern!);
     if (filtersOrTermColumns === null) {
       return null;
     }
@@ -80,7 +99,7 @@ export const convertToLens = async (
     extendedLayers[layerIdx] = {
       indexPatternId,
       layerId,
-      columns: [...metricsColumns, ...filtersOrTermColumns],
+      columns: [...metricsColumns, dateHistogramColumn, ...filtersOrTermColumns],
       columnOrder: [],
     }; // TODO: update later.
   }

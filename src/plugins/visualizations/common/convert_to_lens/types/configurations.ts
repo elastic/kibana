@@ -17,16 +17,12 @@ export const XYCurveTypes = {
   CURVE_STEP_AFTER: 'CURVE_STEP_AFTER',
 } as const;
 
-export type XYCurveType = $Values<typeof XYCurveTypes>;
-
 export const YAxisModes = {
   AUTO: 'auto',
   LEFT: 'left',
   RIGHT: 'right',
   BOTTOM: 'bottom',
 } as const;
-
-export type YAxisMode = $Values<typeof YAxisModes>;
 
 export const SeriesTypes = {
   BAR: 'bar',
@@ -41,8 +37,16 @@ export const SeriesTypes = {
   BAR_HORIZONTAL_PERCENTAGE_STACKED: 'bar_horizontal_percentage_stacked',
 } as const;
 
-export type FillType = 'none' | 'above' | 'below';
+export const FillTypes = {
+  NONE: 'none',
+  ABOVE: 'above',
+  BELOW: 'below',
+} as const;
+
+export type FillType = $Values<typeof FillTypes>;
 export type SeriesType = $Values<typeof SeriesTypes>;
+export type YAxisMode = $Values<typeof YAxisModes>;
+export type XYCurveType = $Values<typeof XYCurveTypes>;
 
 export interface AxisExtentConfig {
   mode: 'full' | 'custom' | 'dataBounds';
