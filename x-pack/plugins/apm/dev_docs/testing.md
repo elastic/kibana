@@ -63,7 +63,7 @@ node scripts/test/api --runner --basic --updateSnapshots
 
 **API Test tips**
 
-- For data generation in API tests have a look at the [elastic-apm-synthtrace](../../../../packages/elastic-apm-synthtrace/README.md) package
+- For data generation in API tests have a look at the [kbn-apm-synthtrace](../../../../packages/kbn-apm-synthtrace/README.md) package
 - For debugging access Elasticsearch on http://localhost:9220 and Kibana on http://localhost:5620 (`elastic` / `changeme`)
 
 ---
@@ -124,4 +124,4 @@ All files with a .stories.tsx extension will be loaded. You can access the devel
 
 For end-to-end (e.g. agent -> apm server -> elasticsearch <- kibana) development and testing of Elastic APM please check the the [APM Integration Testing repository](https://github.com/elastic/apm-integration-testing).
 
-Data can also be generated using the [elastic-apm-synthtrace](../../../../packages/elastic-apm-synthtrace/README.md) CLI.
+Data can also be generated using the [kbn-apm-synthtrace](../../../../packages/kbn-apm-synthtrace/README.md) CLI.
