@@ -11,8 +11,8 @@ import * as TaskEither from 'fp-ts/lib/TaskEither';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import { AcknowledgeResponse } from '.';
-import { IndexMapping } from '../../mappings';
 import {
   catchRetryableEsClientErrors,
   RetryableEsClientError,
