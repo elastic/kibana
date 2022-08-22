@@ -95,7 +95,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
     toggleFullscreen,
     isFullscreen,
     supportStaticValue,
-    supportFieldFormat = true,
+    enableFormatSelector = true,
+    formatSelectorOptions,
     layerType,
     paramEditorCustomProps,
   } = props;
@@ -979,8 +980,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
           <>
             {!incompleteInfo && selectedColumn && temporaryState === 'none' && (
               <NameInput
-                // re-render the input from scratch to obtain new "initial value" if the underlying default label changes
-                key={defaultLabel}
                 value={selectedColumn.label}
                 defaultValue={defaultLabel}
                 onChange={(value) => {
@@ -1012,11 +1011,15 @@ export function DimensionEditor(props: DimensionEditorProps) {
               />
             )}
 
-            {supportFieldFormat &&
+            {enableFormatSelector &&
             !isFullscreen &&
             selectedColumn &&
             (selectedColumn.dataType === 'number' || selectedColumn.operationType === 'range') ? (
-              <FormatSelector selectedColumn={selectedColumn} onChange={onFormatChange} />
+              <FormatSelector
+                selectedColumn={selectedColumn}
+                onChange={onFormatChange}
+                options={formatSelectorOptions}
+              />
             ) : null}
           </>
         </div>
