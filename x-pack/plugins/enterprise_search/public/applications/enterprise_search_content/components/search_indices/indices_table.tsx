@@ -7,19 +7,18 @@
 
 import React from 'react';
 
-import { generatePath } from 'react-router-dom';
-
 import {
   CriteriaWithPagination,
   EuiBasicTable,
   EuiBasicTableColumn,
+  EuiButtonIcon,
   EuiIcon,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedRelative } from '@kbn/i18n-react';
 
 import { Meta } from '../../../../../common/types';
+import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { EuiLinkTo, EuiButtonIconTo } from '../../../shared/react_router_helpers';
 import { EuiBadgeTo } from '../../../shared/react_router_helpers/eui_components';
 import { convertMetaToPagination } from '../../../shared/table_pagination';
@@ -39,144 +38,12 @@ const healthColorsMap = {
   yellow: 'warning',
 };
 
-const columns: Array<EuiBasicTableColumn<ElasticsearchViewIndex>> = [
-  {
-    field: 'name',
-    name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.name.columnTitle', {
-      defaultMessage: 'Index name',
-    }),
-    render: (name: string) => (
-      <EuiLinkTo
-        data-test-subj="search-index-link"
-        to={generatePath(SEARCH_INDEX_PATH, { indexName: name })}
-      >
-        {name}
-      </EuiLinkTo>
-    ),
-    sortable: true,
-    truncateText: true,
-  },
-  {
-    field: 'health',
-    name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.health.columnTitle', {
-      defaultMessage: 'Index health',
-    }),
-    render: (health: 'red' | 'green' | 'yellow' | 'unavailable') => (
-      <span>
-        <EuiIcon type="dot" color={healthColorsMap[health] ?? ''} />
-        &nbsp;{health ?? '-'}
-      </span>
-    ),
-    sortable: true,
-    truncateText: true,
-  },
-  {
-    field: 'total.docs.count',
-    name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.docsCount.columnTitle', {
-      defaultMessage: 'Docs count',
-    }),
-    sortable: true,
-    truncateText: true,
-  },
-  {
-    field: 'ingestionMethod',
-    name: i18n.translate(
-      'xpack.enterpriseSearch.content.searchIndices.ingestionMethod.columnTitle',
-      {
-        defaultMessage: 'Ingestion method',
-      }
-    ),
-    render: (ingestionMethod: IngestionMethod) => (
-      <EuiText size="s">{ingestionMethodToText(ingestionMethod)}</EuiText>
-    ),
-    truncateText: true,
-  },
-  {
-    field: 'lastUpdated',
-    name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.lastUpdated.columnTitle', {
-      defaultMessage: 'Last updated',
-    }),
-    render: (dateString: string) => {
-      if (dateString === 'never') {
-        return (
-          <EuiText size="s">
-            {i18n.translate('xpack.enterpriseSearch.content.searchIndices.lastUpdated.never', {
-              defaultMessage: 'Never',
-            })}
-          </EuiText>
-        );
-      }
-      return dateString ? (
-        <FormattedRelative value={new Date(dateString)} />
-      ) : (
-        <EuiText size="s">
-          {i18n.translate('xpack.enterpriseSearch.content.searchIndices.lastUpdated.none', {
-            defaultMessage: 'Unknown',
-          })}
-        </EuiText>
-      );
-    },
-    sortable: true,
-    truncateText: true,
-  },
-  {
-    name: i18n.translate(
-      'xpack.enterpriseSearch.content.searchIndices.ingestionStatus.columnTitle',
-      {
-        defaultMessage: 'Ingestion status',
-      }
-    ),
-    render: (index: ElasticsearchViewIndex) => {
-      const overviewPath = generatePath(SEARCH_INDEX_PATH, { indexName: index.name });
-      if (isCrawlerIndex(index)) {
-        const label = crawlerStatusToText(index.crawler?.most_recent_crawl_request_status);
-
-        return (
-          <EuiBadgeTo
-            to={overviewPath}
-            label={label}
-            color={crawlerStatusToColor(index.crawler?.most_recent_crawl_request_status)}
-          />
-        );
-      } else {
-        const label = ingestionStatusToText(index.ingestionStatus);
-        return (
-          <EuiBadgeTo
-            to={overviewPath}
-            label={label}
-            color={ingestionStatusToColor(index.ingestionStatus)}
-          />
-        );
-      }
-    },
-    truncateText: true,
-  },
-  {
-    actions: [
-      {
-        render: ({ name }) => (
-          <EuiButtonIconTo
-            aria-label={name}
-            iconType="eye"
-            data-test-subj="view-search-index-button"
-            to={generatePath(SEARCH_INDEX_PATH, {
-              indexName: name,
-            })}
-          />
-        ),
-      },
-    ],
-    name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.actions.columnTitle', {
-      defaultMessage: 'Actions',
-    }),
-  },
-];
-
 interface IndicesTableProps {
   indices: ElasticsearchViewIndex[];
-  isLoading: boolean;
+  isLoading?: boolean;
   meta: Meta;
   onChange: (criteria: CriteriaWithPagination<ElasticsearchViewIndex>) => void;
+  onDelete: (indexName: string) => void;
 }
 
 export const IndicesTable: React.FC<IndicesTableProps> = ({
@@ -184,13 +51,141 @@ export const IndicesTable: React.FC<IndicesTableProps> = ({
   isLoading,
   meta,
   onChange,
-}) => (
-  <EuiBasicTable
-    items={indices}
-    columns={columns}
-    onChange={onChange}
-    pagination={{ ...convertMetaToPagination(meta), showPerPageOptions: false }}
-    tableLayout="auto"
-    loading={isLoading}
-  />
-);
+  onDelete,
+}) => {
+  const columns: Array<EuiBasicTableColumn<ElasticsearchViewIndex>> = [
+    {
+      field: 'name',
+      name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.name.columnTitle', {
+        defaultMessage: 'Index name',
+      }),
+      render: (name: string) => (
+        <EuiLinkTo
+          data-test-subj="search-index-link"
+          to={generateEncodedPath(SEARCH_INDEX_PATH, { indexName: name })}
+        >
+          {name}
+        </EuiLinkTo>
+      ),
+      sortable: true,
+      truncateText: true,
+      width: '40%',
+    },
+    {
+      field: 'health',
+      name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.health.columnTitle', {
+        defaultMessage: 'Index health',
+      }),
+      render: (health: 'red' | 'green' | 'yellow' | 'unavailable') => (
+        <span>
+          <EuiIcon type="dot" color={healthColorsMap[health] ?? ''} />
+          &nbsp;{health ?? '-'}
+        </span>
+      ),
+      sortable: true,
+      truncateText: true,
+      width: '10%',
+    },
+    {
+      field: 'count',
+      name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.docsCount.columnTitle', {
+        defaultMessage: 'Docs count',
+      }),
+      sortable: true,
+      truncateText: true,
+      width: '10%',
+    },
+    {
+      field: 'ingestionMethod',
+      name: i18n.translate(
+        'xpack.enterpriseSearch.content.searchIndices.ingestionMethod.columnTitle',
+        {
+          defaultMessage: 'Ingestion method',
+        }
+      ),
+      render: (ingestionMethod: IngestionMethod) => (
+        <EuiText size="s">{ingestionMethodToText(ingestionMethod)}</EuiText>
+      ),
+      truncateText: true,
+      width: '10%',
+    },
+    {
+      name: i18n.translate(
+        'xpack.enterpriseSearch.content.searchIndices.ingestionStatus.columnTitle',
+        {
+          defaultMessage: 'Ingestion status',
+        }
+      ),
+      render: (index: ElasticsearchViewIndex) => {
+        const overviewPath = generateEncodedPath(SEARCH_INDEX_PATH, { indexName: index.name });
+        if (isCrawlerIndex(index)) {
+          const label = crawlerStatusToText(index.crawler?.most_recent_crawl_request_status);
+
+          return (
+            <EuiBadgeTo
+              to={overviewPath}
+              label={label}
+              color={crawlerStatusToColor(index.crawler?.most_recent_crawl_request_status)}
+            />
+          );
+        } else {
+          const label = ingestionStatusToText(index.ingestionStatus);
+          return (
+            <EuiBadgeTo
+              to={overviewPath}
+              label={label}
+              color={ingestionStatusToColor(index.ingestionStatus)}
+            />
+          );
+        }
+      },
+      truncateText: true,
+      width: '10%',
+    },
+    {
+      actions: [
+        {
+          render: ({ name }) => (
+            <EuiButtonIconTo
+              aria-label={name}
+              iconType="eye"
+              data-test-subj={`view-search-index-button-${name}`}
+              to={generateEncodedPath(SEARCH_INDEX_PATH, {
+                indexName: name,
+              })}
+            />
+          ),
+        },
+        {
+          render: (index) =>
+            // We don't have a way to delete crawlers yet
+            isCrawlerIndex(index) ? (
+              <></>
+            ) : (
+              <EuiButtonIcon
+                aria-label={`Delete ${index.name}`}
+                iconType="trash"
+                color="danger"
+                data-test-subj={`delete-search-index-button-${name}`}
+                onClick={() => onDelete(index.name)}
+              />
+            ),
+        },
+      ],
+      name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.actions.columnTitle', {
+        defaultMessage: 'Actions',
+      }),
+      width: '5%',
+    },
+  ];
+  return (
+    <EuiBasicTable
+      items={indices}
+      columns={columns}
+      onChange={onChange}
+      pagination={{ ...convertMetaToPagination(meta), showPerPageOptions: false }}
+      tableLayout="fixed"
+      loading={isLoading}
+    />
+  );
+};

@@ -26,10 +26,18 @@ steps:
         concurrency_group: bazel_macos
         concurrency: 1
         concurrency_method: eager
+        retry:
+          automatic:
+          - exit_status: '*'
+            limit: 1
       - command: .buildkite/scripts/steps/bazel_cache/bootstrap_mac.sh
         label: Bootstrap (MacOS ARM)
         priority: $${PRIORITY}
         agents:
           queue: macos-arm
         timeout_in_minutes: 60
+        retry:
+          automatic:
+          - exit_status: '*'
+            limit: 1
       YAML

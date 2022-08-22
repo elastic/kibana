@@ -145,6 +145,7 @@ export const SourceSelection: FC = () => {
                     defaultMessage: 'Data view',
                   }
                 ),
+                defaultSearchField: 'name',
               },
             ]}
             fixedPageSize={fixedPageSize}

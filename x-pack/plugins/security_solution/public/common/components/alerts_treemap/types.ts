@@ -25,7 +25,10 @@ export interface AlertsTreeMapAggregation {
   };
 }
 
-export type FlattenedBucket = Pick<RawBucket, 'doc_count' | 'key' | 'maxRiskSubAggregation'> & {
+export type FlattenedBucket = Pick<
+  RawBucket,
+  'doc_count' | 'key' | 'key_as_string' | 'maxRiskSubAggregation'
+> & {
   stackByField1Key?: string;
   stackByField1DocCount?: number;
 };

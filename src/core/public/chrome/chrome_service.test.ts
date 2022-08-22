@@ -15,7 +15,7 @@ import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { App, PublicAppInfo } from '../application';
 import { applicationServiceMock } from '../application/application_service.mock';
-import { notificationServiceMock } from '../notifications/notifications_service.mock';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { ChromeService } from './chrome_service';
 import { getAppInfo } from '../application/utils';

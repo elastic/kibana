@@ -38,11 +38,11 @@ export const getLegendItemFromRawBucket = ({
   ),
   render: () =>
     getLabel({
-      baseLabel: bucket.key,
+      baseLabel: bucket.key_as_string ?? bucket.key, // prefer key_as_string when available, because it contains a formatted date
       riskScore: bucket.maxRiskSubAggregation?.value,
     }),
   field: stackByField0,
-  value: bucket.key,
+  value: bucket.key_as_string ?? bucket.key,
 });
 
 export const getLegendItemFromFlattenedBucket = ({
