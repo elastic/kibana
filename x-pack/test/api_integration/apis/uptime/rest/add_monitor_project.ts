@@ -801,6 +801,114 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
+    it('project monitors - returns a failed monitor when user tries to delete a monitor without fleet permissions', async () => {
+      const secondMonitor = {
+        ...projectMonitors.monitors[0],
+        id: 'test-id-2',
+        privateLocations: ['Test private location 0'],
+      };
+      const testMonitors = [projectMonitors.monitors[0], secondMonitor];
+      const username = 'admin';
+      const roleName = 'uptime read only';
+      const password = `${username}-password`;
+      try {
+        await security.role.create(roleName, {
+          kibana: [
+            {
+              feature: {
+                uptime: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        });
+        await security.user.create(username, {
+          password,
+          roles: [roleName],
+          full_name: 'a kibana user',
+        });
+
+        await parseStreamApiResponse(
+          kibanaServerUrl + API_URLS.SYNTHETICS_MONITORS_PROJECT,
+          JSON.stringify({
+            ...projectMonitors,
+            keep_stale: false,
+            monitors: testMonitors,
+          })
+        );
+
+        const messages = await parseStreamApiResponse(
+          kibanaServerUrl + API_URLS.SYNTHETICS_MONITORS_PROJECT,
+          JSON.stringify({
+            ...projectMonitors,
+            keep_stale: false,
+            monitors: [],
+          }),
+          {
+            Authorization:
+              'Basic ' + Buffer.from(`${username}:${password}`, 'binary').toString('base64'),
+          }
+        );
+
+        expect(messages).to.have.length(3);
+        expect(
+          messages.filter((msg) => msg === `Monitor ${testMonitors[1].id} could not be deleted`)
+        ).to.have.length(1);
+        expect(
+          messages.filter((msg) => msg === `Monitor ${testMonitors[0].id} deleted successfully`)
+        ).to.have.length(1);
+        expect(messages[2]).to.eql({
+          createdMonitors: [],
+          updatedMonitors: [],
+          staleMonitors: [],
+          deletedMonitors: [testMonitors[0].id],
+          failedMonitors: [],
+          failedStaleMonitors: [
+            {
+              details:
+                'Unable to delete Synthetics package policy for monitor check if title is present. Fleet write permissions are needed to use Synthetics private locations.',
+              id: 'test-id-2',
+              reason: 'Failed to delete stale monitor',
+            },
+          ],
+        });
+
+        const messages2 = await parseStreamApiResponse(
+          kibanaServerUrl + API_URLS.SYNTHETICS_MONITORS_PROJECT,
+          JSON.stringify({
+            ...projectMonitors,
+            keep_stale: false,
+            monitors: [],
+          })
+        );
+
+        expect(messages2).to.have.length(2);
+        expect(messages2[0]).to.eql(`Monitor ${testMonitors[1].id} deleted successfully`);
+        expect(messages2[1]).to.eql({
+          createdMonitors: [],
+          updatedMonitors: [],
+          staleMonitors: [],
+          deletedMonitors: [testMonitors[1].id],
+          failedMonitors: [],
+          failedStaleMonitors: [],
+        });
+      } finally {
+        await Promise.all([
+          testMonitors.map((monitor) => {
+            return deleteMonitor(
+              monitor.id,
+              projectMonitors.project,
+              'default',
+              username,
+              password
+            );
+          }),
+        ]);
+        await security.user.delete(username);
+        await security.role.delete(roleName);
+      }
+    });
+
     it('project monitors - returns a successful monitor when user defines a private location with fleet permissions', async () => {
       const secondMonitor = {
         ...projectMonitors.monitors[0],
