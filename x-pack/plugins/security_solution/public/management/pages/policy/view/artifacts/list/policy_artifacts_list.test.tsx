@@ -36,7 +36,8 @@ const getDefaultQueryParameters = (customFilter: string | undefined = '') => ({
   },
 });
 
-describe('Policy details artifacts list', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/139183
+describe.skip('Policy details artifacts list', () => {
   let render: (externalPrivileges?: boolean) => Promise<ReturnType<AppContextTestRender['render']>>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let history: AppContextTestRender['history'];
