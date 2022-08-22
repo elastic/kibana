@@ -15,7 +15,9 @@ export const fetchMonitorOverviewAction = createAsyncAction<
   MonitorOverviewResult
 >('fetchMonitorOverviewAction');
 
-export const setOverviewPerPageAction = createAction<number>('setOverviewPerPageAction');
+export const setOverviewPageStateAction = createAction<Partial<MonitorOverviewPageState>>(
+  'setOverviewPageStateAction'
+);
 
 export const quietFetchOverviewAction = createAsyncAction<
   MonitorOverviewPageState,

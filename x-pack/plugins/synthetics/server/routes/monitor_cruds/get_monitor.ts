@@ -191,12 +191,12 @@ export const getSyntheticsMonitorOverviewRoute: SyntheticsRestApiRouteFactory = 
     query: querySchema,
   },
   handler: async ({ request, savedObjectsClient, syntheticsMonitorClient }): Promise<any> => {
-    const { perPage = 5 } = request.query;
+    const { perPage = 5, sortField, sortOrder } = request.query;
     const { saved_objects: monitors } = await getMonitors(
       {
         perPage: 1000,
-        sortField: 'name.keyword',
-        sortOrder: 'asc',
+        sortField,
+        sortOrder,
         page: 1,
       },
       syntheticsMonitorClient.syntheticsService,
@@ -244,4 +244,7 @@ export const getSyntheticsMonitorOverviewRoute: SyntheticsRestApiRouteFactory = 
       allMonitorIds,
     };
   },
+
+  // get all monitors
+  // get status for each location
 });
