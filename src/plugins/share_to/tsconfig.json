@@ -8,6 +8,8 @@
   },
   "include": ["common/**/*", "public/**/*", "index.ts"],
   "references": [
-    { "path": "../../core/tsconfig.json" }
+    { "path": "../../core/tsconfig.json" },
+    { "path": "../ui_actions/tsconfig.json" },
+    { "path": "../embeddable/tsconfig.json" },
   ]
 }

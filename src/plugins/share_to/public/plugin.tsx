@@ -7,26 +7,35 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { DownloadPngAction } from './actions/download_png/download_png_action';
+import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
+
+export interface ShareToPluginSetupDeps {
+  uiActions: UiActionsSetup;
+}
 
 export interface ShareToPluginStartDeps {
+  uiActions: UiActionsStart;
 }
 
-export interface Setup {
+export interface ShareToSetup {
 }
 
-export interface Start {
+export interface ShareToStart {
 }
 
-export class ShareToPublicPlugin implements Plugin<Setup, Start> {
+export class ShareToPublicPlugin implements Plugin<ShareToSetup, ShareToStart, ShareToPluginSetupDeps, ShareToPluginStartDeps> {
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup) {
-    console.log('share to "setup"');
+  public setup(core: CoreSetup, plugins: ShareToPluginSetupDeps) {
+    plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, new DownloadPngAction());
+
     return {};
   }
 
   public start(core: CoreStart, plugins: ShareToPluginStartDeps) {
-    console.log('share to "start"');
+
     return {};
   }
 
