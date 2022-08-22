@@ -23,6 +23,7 @@ export {
   apmServiceGroupMaxNumberOfServices,
   apmTraceExplorerTab,
   apmOperationsTab,
+  apmLabsButton,
 } from './ui_settings_keys';
 
 export {

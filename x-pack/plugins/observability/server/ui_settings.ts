@@ -13,7 +13,6 @@ import {
   enableComparisonByDefault,
   enableInspectEsQueries,
   maxSuggestions,
-  enableInfrastructureView,
   defaultApmServiceEnvironment,
   apmProgressiveLoading,
   enableServiceGroups,
@@ -22,6 +21,7 @@ import {
   apmServiceGroupMaxNumberOfServices,
   apmTraceExplorerTab,
   apmOperationsTab,
+  apmLabsButton,
 } from '../common/ui_settings_keys';
 
 const technicalPreviewLabel = i18n.translate(
@@ -81,17 +81,6 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     value: true,
     description: i18n.translate('xpack.observability.enableComparisonByDefaultDescription', {
       defaultMessage: 'Enable the comparison feature in APM app',
-    }),
-    schema: schema.boolean(),
-  },
-  [enableInfrastructureView]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.enableInfrastructureView', {
-      defaultMessage: 'Infrastructure feature',
-    }),
-    value: true,
-    description: i18n.translate('xpack.observability.enableInfrastructureViewDescription', {
-      defaultMessage: 'Enable the Infrastructure view feature in APM app',
     }),
     schema: schema.boolean(),
   },
@@ -230,6 +219,20 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     schema: schema.boolean(),
     value: false,
     requiresPageReload: true,
+    type: 'boolean',
+  },
+  [apmLabsButton]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmLabsButton', {
+      defaultMessage: 'Enable labs button in APM',
+    }),
+    description: i18n.translate('xpack.observability.apmLabsButtonDescription', {
+      defaultMessage:
+        'This flag determines if the viewer has access to the Labs button, a quick way to enable as disable technical preview features in APM',
+    }),
+    schema: schema.boolean(),
+    value: false,
+    requiresPageReload: false,
     type: 'boolean',
   },
 };

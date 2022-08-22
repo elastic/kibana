@@ -25,6 +25,7 @@ import {
   enableComparisonByDefault,
   enableInspectEsQueries,
   enableServiceGroups,
+  apmLabsButton,
 } from '@kbn/observability-plugin/common';
 import React, { useMemo, useState } from 'react';
 
@@ -41,6 +42,7 @@ const apmSettingsKeys = [
   apmProgressiveLoading,
   apmServiceGroupMaxNumberOfServices,
   enableInspectEsQueries,
+  apmLabsButton,
 ];
 
 type Config = Record<string, ReturnType<typeof toEditableConfig>>;
