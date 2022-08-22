@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { Filter } from '@kbn/es-query';
-import { PayloadAction } from '@reduxjs/toolkit';
 import { WritableDraft } from 'immer/dist/types/types-external';
+import { PayloadAction } from '@reduxjs/toolkit';
+
 import { FieldSpec } from '@kbn/data-views-plugin/common';
+import { Filter } from '@kbn/es-query';
 
 import { RangeSliderReduxState, RangeValue } from './types';
 

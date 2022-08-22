@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export * from './range_slider';
+export type { RangeSliderEmbeddableInput } from '../../common/range_slider/types';
+export { RANGE_SLIDER_CONTROL } from '../../common/range_slider/types';
+
+export type { RangeSliderEmbeddable } from './embeddable/range_slider_embeddable';
+export { RangeSliderEmbeddableFactory } from './embeddable/range_slider_embeddable_factory';
