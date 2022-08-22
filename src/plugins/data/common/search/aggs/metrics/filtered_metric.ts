@@ -46,6 +46,7 @@ export const getFilteredMetricAgg = ({ getConfig }: FiltersMetricAggDependencies
     hasNoDslParams: true,
     getSerializedFormat,
     createFilter: (agg, inputState) => {
+      if (!agg.params.customBucket.params.filter) return;
       const esQueryConfigs = getEsQueryConfig({ get: getConfig });
       return buildQueryFilter(
         buildEsQuery(

@@ -20,11 +20,17 @@ export const fetchIndex = async (
   const indexDataResult = await client.asCurrentUser.indices.get({ index });
   const indexData = indexDataResult[index];
   const { indices } = await client.asCurrentUser.indices.stats({ index });
+
+  const { count } = await client.asCurrentUser.count({ index });
+
   if (!indices || !indices[index] || !indexData) {
     throw new Error('404');
   }
   const indexStats = indices[index];
-  const indexResult = mapIndexStats(indexData, indexStats, index);
+  const indexResult = {
+    count,
+    ...mapIndexStats(indexData, indexStats, index),
+  };
 
   const connector = await fetchConnectorByIndexName(client, index);
   if (connector) {

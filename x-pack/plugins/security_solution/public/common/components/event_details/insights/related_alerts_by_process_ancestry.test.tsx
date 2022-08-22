@@ -21,6 +21,24 @@ jest.mock('../../../containers/alerts/use_alert_prevalence_from_process_tree', (
 }));
 const mockUseAlertPrevalenceFromProcessTree = useAlertPrevalenceFromProcessTree as jest.Mock;
 
+const props = {
+  eventId: 'random',
+  data: {
+    field: 'testfield',
+    values: ['test value'],
+    isObjectArray: false,
+  },
+  index: {
+    field: 'index',
+    values: ['test value'],
+    isObjectArray: false,
+  },
+  originalDocumentId: {
+    field: '_id',
+    values: ['original'],
+    isObjectArray: false,
+  },
+};
 describe('RelatedAlertsByProcessAncestry', () => {
   beforeEach(() => {
     jest.resetAllMocks();
@@ -29,14 +47,7 @@ describe('RelatedAlertsByProcessAncestry', () => {
   it('shows an accordion and does not fetch data right away', () => {
     render(
       <TestProviders>
-        <RelatedAlertsByProcessAncestry
-          eventId="random"
-          data={{
-            field: 'testfield',
-            values: ['test value'],
-            isObjectArray: false,
-          }}
-        />
+        <RelatedAlertsByProcessAncestry {...props} />
       </TestProviders>
     );
 
@@ -51,14 +62,7 @@ describe('RelatedAlertsByProcessAncestry', () => {
 
     render(
       <TestProviders>
-        <RelatedAlertsByProcessAncestry
-          eventId="random"
-          data={{
-            field: 'testfield',
-            values: ['test value'],
-            isObjectArray: false,
-          }}
-        />
+        <RelatedAlertsByProcessAncestry {...props} />
       </TestProviders>
     );
 
@@ -75,14 +79,7 @@ describe('RelatedAlertsByProcessAncestry', () => {
 
     render(
       <TestProviders>
-        <RelatedAlertsByProcessAncestry
-          eventId="random"
-          data={{
-            field: 'testfield',
-            values: ['test value'],
-            isObjectArray: false,
-          }}
-        />
+        <RelatedAlertsByProcessAncestry {...props} />
       </TestProviders>
     );
 
@@ -100,14 +97,7 @@ describe('RelatedAlertsByProcessAncestry', () => {
 
     render(
       <TestProviders>
-        <RelatedAlertsByProcessAncestry
-          eventId="random"
-          data={{
-            field: 'testfield',
-            values: ['test value'],
-            isObjectArray: false,
-          }}
-        />
+        <RelatedAlertsByProcessAncestry {...props} />
       </TestProviders>
     );
 

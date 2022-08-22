@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-/* eslint complexity: ["error", 30]*/
+// Component being re-implemented in 8.5
+
+/* eslint complexity: ["error", 35]*/
 
 import React, { memo, useEffect, useState, useCallback, useMemo } from 'react';
 import styled, { css } from 'styled-components';
@@ -164,26 +166,28 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     maybeRule?.machine_learning_job_id,
     ruleIndices
   );
-
-  const [isIndexPatternLoading, { indexPatterns: indexIndexPatterns }] =
-    useFetchIndex(memoRuleIndices);
-
-  const [indexPattern, setIndexPattern] = useState<DataViewBase>(indexIndexPatterns);
+  const hasDataViewId = dataViewId || maybeRule?.data_view_id || null;
+  const [dataViewIndexPatterns, setDataViewIndexPatterns] = useState<DataViewBase | null>(null);
 
   useEffect(() => {
     const fetchSingleDataView = async () => {
-      const hasDataViewId = dataViewId || maybeRule?.data_view_id || null;
       if (hasDataViewId) {
         const dv = await data.dataViews.get(hasDataViewId);
-        setIndexPattern(dv);
+        setDataViewIndexPatterns(dv);
       }
     };
 
     fetchSingleDataView();
-  }, [data.dataViews, dataViewId, maybeRule?.data_view_id, setIndexPattern]);
+  }, [hasDataViewId, data.dataViews, setDataViewIndexPatterns]);
 
-  const selectedIndexPattern =
-    dataViewId || maybeRule?.data_view_id ? indexPattern : indexIndexPatterns;
+  const [isIndexPatternLoading, { indexPatterns: indexIndexPatterns }] = useFetchIndex(
+    hasDataViewId ? [] : memoRuleIndices
+  );
+
+  const indexPattern = useMemo(
+    (): DataViewBase | null => (hasDataViewId ? dataViewIndexPatterns : indexIndexPatterns),
+    [hasDataViewId, dataViewIndexPatterns, indexIndexPatterns]
+  );
 
   const handleBuilderOnChange = useCallback(
     ({
@@ -481,6 +485,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
           <Loader data-test-subj="loadingAddExceptionFlyout" size="xl" />
         )}
       {fetchOrCreateListError == null &&
+        indexPattern != null &&
         !isSignalIndexLoading &&
         !isSignalIndexPatternLoading &&
         !isLoadingExceptionList &&
@@ -532,7 +537,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
                 listNamespaceType: ruleExceptionList.namespace_type,
                 listTypeSpecificIndexPatternFilter: filterIndexPatterns,
                 ruleName,
-                indexPatterns: selectedIndexPattern,
+                indexPatterns: indexPattern,
                 isOrDisabled: isExceptionBuilderFormDisabled,
                 isAndDisabled: isExceptionBuilderFormDisabled,
                 isNestedDisabled: isExceptionBuilderFormDisabled,

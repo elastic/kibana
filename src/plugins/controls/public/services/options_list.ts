@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { OptionsListRequest, OptionsListResponse } from '../control_types/options_list/types';
+import { OptionsListRequest, OptionsListResponse } from '../options_list/types';
 
 export interface ControlsOptionsListService {
   runOptionsListRequest: (

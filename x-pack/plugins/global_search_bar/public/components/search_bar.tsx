@@ -40,7 +40,9 @@ import './search_bar.scss';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
-const blurEvent = new FocusEvent('blur');
+const blurEvent = new FocusEvent('focusout', {
+  bubbles: true,
+});
 
 const sortByScore = (a: GlobalSearchResult, b: GlobalSearchResult): number => {
   if (a.score < b.score) return 1;
@@ -294,6 +296,7 @@ export const SearchBar: FC<SearchBarProps> = ({
       isPreFiltered
       onChange={onChange}
       options={options}
+      className="kbnSearchBar"
       popoverButtonBreakpoints={['xs', 's']}
       singleSelection={true}
       renderOption={(option) => euiSelectableTemplateSitewideRenderOptions(option, searchTerm)}
@@ -303,7 +306,6 @@ export const SearchBar: FC<SearchBarProps> = ({
         'data-test-subj': 'nav-search-input',
         inputRef: setSearchRef,
         compressed: true,
-        className: 'kbnSearchBar',
         'aria-label': placeholderText,
         placeholder: placeholderText,
         onFocus: () => {
@@ -312,7 +314,7 @@ export const SearchBar: FC<SearchBarProps> = ({
           setShowAppend(false);
         },
         onBlur: () => {
-          setShowAppend(true);
+          setShowAppend(!searchValue.length);
         },
         fullWidth: true,
         append: showAppend ? (

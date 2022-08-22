@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { Query, Filter } from '@kbn/es-query';
 import type { TimeRange } from '@kbn/es-query';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { isDefined } from '../../../common/util/is_defined';
 import { ShardSizeFilter } from './shard_size_select';
 import { DataVisualizerFieldNamesFilter } from './field_name_filter';
 import { DataVisualizerFieldTypeFilter } from './field_type_filter';
@@ -87,8 +88,8 @@ export const SearchPanel: FC<Props> = ({
   }, [searchQueryLanguage, searchString, queryManager.filterManager]);
 
   const searchHandler = ({ query, filters }: { query?: Query; filters?: Filter[] }) => {
-    const mergedQuery = query ?? searchInput;
-    const mergedFilters = filters ?? queryManager.filterManager.getFilters();
+    const mergedQuery = isDefined(query) ? query : searchInput;
+    const mergedFilters = isDefined(filters) ? filters : queryManager.filterManager.getFilters();
     try {
       if (mergedFilters) {
         queryManager.filterManager.setFilters(mergedFilters);

@@ -18,7 +18,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { fullDateFormatter } from '../../../../common/utils/dates';
+import { DateFormatter } from '../../../../components/date_formatter/date_formatter';
 import { EMPTY_VALUE } from '../../../../../common/constants';
 import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
 import { IndicatorsFlyoutJson } from '../indicators_flyout_json/indicators_flyout_json';
@@ -35,8 +35,15 @@ const enum TAB_IDS {
   json,
 }
 
-export const IndicatorsFlyout: VFC<{ indicator: Indicator; closeFlyout: () => void }> = ({
+export interface IndicatorsFlyoutProps {
+  indicator: Indicator;
+  fieldTypesMap: { [id: string]: string };
+  closeFlyout: () => void;
+}
+
+export const IndicatorsFlyout: VFC<IndicatorsFlyoutProps> = ({
   indicator,
+  fieldTypesMap,
   closeFlyout,
 }) => {
   const [selectedTabId, setSelectedTabId] = useState(TAB_IDS.table);
@@ -51,7 +58,7 @@ export const IndicatorsFlyout: VFC<{ indicator: Indicator; closeFlyout: () => vo
             defaultMessage="Table"
           />
         ),
-        content: <IndicatorsFlyoutTable indicator={indicator} />,
+        content: <IndicatorsFlyoutTable indicator={indicator} fieldTypesMap={fieldTypesMap} />,
       },
       {
         id: TAB_IDS.json,
@@ -64,7 +71,7 @@ export const IndicatorsFlyout: VFC<{ indicator: Indicator; closeFlyout: () => vo
         content: <IndicatorsFlyoutJson indicator={indicator} />,
       },
     ],
-    [indicator]
+    [indicator, fieldTypesMap]
   );
   const onSelectedTabChanged = (id: number) => setSelectedTabId(id);
 
@@ -83,9 +90,8 @@ export const IndicatorsFlyout: VFC<{ indicator: Indicator; closeFlyout: () => vo
     [selectedTabId, tabs]
   );
 
-  const firstSeen = unwrapValue(indicator, RawIndicatorFieldId.FirstSeen);
+  const firstSeen: string = unwrapValue(indicator, RawIndicatorFieldId.FirstSeen) as string;
   const value = displayValue(indicator) || EMPTY_VALUE;
-  const formattedFirstSeen: string = firstSeen ? fullDateFormatter(firstSeen) : EMPTY_VALUE;
   const flyoutTitleId = useGeneratedHtmlId({
     prefix: 'simpleFlyoutTitle',
   });
@@ -107,9 +113,9 @@ export const IndicatorsFlyout: VFC<{ indicator: Indicator; closeFlyout: () => vo
           <p data-test-subj={SUBTITLE_TEST_ID}>
             <FormattedMessage
               id="xpack.threatIntelligence.indicator.flyout.panelSubTitle"
-              defaultMessage="First seen: {subTitle}"
-              values={{ subTitle: formattedFirstSeen }}
+              defaultMessage="First seen: "
             />
+            <DateFormatter date={firstSeen} />
           </p>
         </EuiText>
         <EuiSpacer size="m" />

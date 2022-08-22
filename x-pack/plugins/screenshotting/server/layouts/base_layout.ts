@@ -30,7 +30,6 @@ export interface PageSizeParams {
 
 export abstract class BaseLayout {
   public id: LayoutType;
-  public groupCount: number = 0;
 
   public hasHeader: boolean = true;
   public hasFooter: boolean = true;

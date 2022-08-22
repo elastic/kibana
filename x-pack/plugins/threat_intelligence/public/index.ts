@@ -7,8 +7,22 @@
 
 import { ThreatIntelligencePlugin } from './plugin';
 
+export { THREAT_INTELLIGENCE_BASE_PATH } from './common/navigation/constants';
+
+export type { TIPageId } from './common/navigation/types';
+
+export {
+  getSecuritySolutionDeepLink,
+  getSecuritySolutionLink,
+  getSecuritySolutionNavTab,
+} from './common/navigation/security_solution_links';
+
 export function plugin() {
   return new ThreatIntelligencePlugin();
 }
 
-export type { ThreatIntelligencePluginSetup, ThreatIntelligencePluginStart } from './types';
+export type {
+  ThreatIntelligencePluginSetup,
+  ThreatIntelligencePluginStart,
+  SecuritySolutionPluginContext,
+} from './types';

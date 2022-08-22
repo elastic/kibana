@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataView } from '@kbn/data-views-plugin/public';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
 import { DiscoverGrid } from '../../../../components/discover_grid/discover_grid';
@@ -27,7 +28,6 @@ import {
   HIDE_ANNOUNCEMENTS,
 } from '../../../../../common';
 import { useColumns } from '../../../../hooks/use_data_grid_columns';
-import { SavedSearch } from '../../../../services/saved_searches';
 import { DataDocuments$, DataDocumentsMsg, RecordRawType } from '../../hooks/use_saved_search';
 import { AppState, GetStateReturn } from '../../services/discover_state';
 import { useDataState } from '../../hooks/use_data_state';
@@ -41,6 +41,21 @@ import { getRawRecordType } from '../../utils/get_raw_record_type';
 
 const DocTableInfiniteMemoized = React.memo(DocTableInfinite);
 const DataGridMemoized = React.memo(DiscoverGrid);
+
+// export needs for testing
+export const onResize = (
+  colSettings: { columnId: string; width: number },
+  stateContainer: GetStateReturn,
+  state: AppState
+) => {
+  const grid = { ...(state.grid || {}) };
+  const newColumns = { ...(grid.columns || {}) };
+  newColumns[colSettings.columnId] = {
+    width: Math.round(colSettings.width),
+  };
+  const newGrid = { ...grid, columns: newColumns };
+  stateContainer.setAppState({ grid: newGrid });
+};
 
 function DiscoverDocumentsComponent({
   documents$,
@@ -88,16 +103,8 @@ function DiscoverDocumentsComponent({
     useNewFieldsApi,
   });
 
-  const onResize = useCallback(
-    (colSettings: { columnId: string; width: number }) => {
-      const grid = { ...(state.grid || {}) };
-      const newColumns = { ...(grid.columns || {}) };
-      newColumns[colSettings.columnId] = {
-        width: colSettings.width,
-      };
-      const newGrid = { ...grid, columns: newColumns };
-      stateContainer.setAppState({ grid: newGrid });
-    },
+  const onResizeDataGrid = useCallback(
+    (colSettings) => onResize(colSettings, stateContainer, state),
     [stateContainer, state]
   );
 
@@ -200,7 +207,7 @@ function DiscoverDocumentsComponent({
               onRemoveColumn={onRemoveColumn}
               onSetColumns={onSetColumns}
               onSort={!isPlainRecord ? onSort : undefined}
-              onResize={onResize}
+              onResize={onResizeDataGrid}
               useNewFieldsApi={useNewFieldsApi}
               rowHeightState={state.rowHeight}
               onUpdateRowHeight={onUpdateRowHeight}
