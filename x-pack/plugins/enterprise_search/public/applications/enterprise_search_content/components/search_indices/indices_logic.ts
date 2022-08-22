@@ -7,12 +7,23 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { i18n } from '@kbn/i18n';
+
 import { Meta } from '../../../../../common/types';
 import { HttpError, Status } from '../../../../../common/types/api';
 import { ElasticsearchIndexWithIngestion } from '../../../../../common/types/indices';
+import { Actions } from '../../../shared/api_logic/create_api_logic';
 import { DEFAULT_META } from '../../../shared/constants';
-import { flashAPIErrors, clearFlashMessages } from '../../../shared/flash_messages';
+import {
+  flashAPIErrors,
+  clearFlashMessages,
+  flashSuccessToast,
+} from '../../../shared/flash_messages';
 import { updateMetaPageIndex } from '../../../shared/table_pagination';
+import {
+  DeleteIndexApiLogic,
+  DeleteIndexApiLogicArgs,
+} from '../../api/index/delete_index_api_logic';
 import { FetchIndicesAPILogic } from '../../api/index/fetch_indices_api_logic';
 import { ElasticsearchViewIndex } from '../../types';
 import { indexToViewIndex } from '../../utils/indices';
@@ -23,15 +34,25 @@ export interface IndicesActions {
     indices,
     isInitialRequest,
     meta,
+    returnHiddenIndices,
+    searchQuery,
   }: {
     indices: ElasticsearchIndexWithIngestion[];
     isInitialRequest: boolean;
     meta: Meta;
+    returnHiddenIndices: boolean;
+    searchQuery?: string;
   }): {
     indices: ElasticsearchIndexWithIngestion[];
     isInitialRequest: boolean;
     meta: Meta;
+    returnHiddenIndices: boolean;
+    searchQuery?: string;
   };
+  closeDeleteModal(): void;
+  deleteError: Actions<DeleteIndexApiLogicArgs, void>['apiError'];
+  deleteIndex: Actions<DeleteIndexApiLogicArgs, void>['makeRequest'];
+  deleteSuccess: Actions<DeleteIndexApiLogicArgs, void>['apiSuccess'];
   fetchIndices({
     meta,
     returnHiddenIndices,
@@ -43,34 +64,59 @@ export interface IndicesActions {
   }): { meta: Meta; returnHiddenIndices: boolean; searchQuery?: string };
   makeRequest: typeof FetchIndicesAPILogic.actions.makeRequest;
   onPaginate(newPageIndex: number): { newPageIndex: number };
-  setIsFirstRequest(): boolean;
+  openDeleteModal(indexName: string): { indexName: string };
+  setIsFirstRequest(): void;
 }
 export interface IndicesValues {
   data: typeof FetchIndicesAPILogic.values.data;
+  deleteModalIndexName: string;
   hasNoIndices: boolean;
   indices: ElasticsearchViewIndex[];
+  isDeleteModalVisible: boolean;
   isFirstRequest: boolean;
   isLoading: boolean;
   meta: Meta;
+  searchParams: { meta: Meta; returnHiddenIndices: boolean; searchQuery?: string };
   status: typeof FetchIndicesAPILogic.values.status;
 }
 
 export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
   actions: {
+    closeDeleteModal: true,
     fetchIndices: ({ meta, returnHiddenIndices, searchQuery }) => ({
       meta,
       returnHiddenIndices,
       searchQuery,
     }),
     onPaginate: (newPageIndex) => ({ newPageIndex }),
-    setIsFirstRequest: () => true,
+    openDeleteModal: (indexName) => ({ indexName }),
+    setIsFirstRequest: true,
   },
   connect: {
-    actions: [FetchIndicesAPILogic, ['makeRequest', 'apiSuccess', 'apiError']],
+    actions: [
+      FetchIndicesAPILogic,
+      ['makeRequest', 'apiSuccess', 'apiError'],
+      DeleteIndexApiLogic,
+      ['apiError as deleteError', 'apiSuccess as deleteSuccess', 'makeRequest as deleteIndex'],
+    ],
     values: [FetchIndicesAPILogic, ['data', 'status']],
   },
-  listeners: ({ actions }) => ({
+  listeners: ({ actions, values }) => ({
     apiError: (e) => flashAPIErrors(e),
+    deleteError: (e) => flashAPIErrors(e),
+    deleteSuccess: () => {
+      flashSuccessToast(
+        i18n.translate('xpack.enterpriseSearch.content.indices.deleteIndex.successToast.title', {
+          defaultMessage:
+            'Your index {indexName} and any associated connectors or crawlers were successfully deleted',
+          values: {
+            indexName: values.deleteModalIndexName,
+          },
+        })
+      );
+      actions.closeDeleteModal();
+      actions.fetchIndices(values.searchParams);
+    },
     fetchIndices: async (input, breakpoint) => {
       await breakpoint(150);
       actions.makeRequest(input);
@@ -79,6 +125,20 @@ export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
   }),
   path: ['enterprise_search', 'content', 'indices_logic'],
   reducers: () => ({
+    deleteModalIndexName: [
+      '',
+      {
+        closeDeleteModal: () => '',
+        openDeleteModal: (_, { indexName }) => indexName,
+      },
+    ],
+    isDeleteModalVisible: [
+      false,
+      {
+        closeDeleteModal: () => false,
+        openDeleteModal: () => true,
+      },
+    ],
     isFirstRequest: [
       true,
       {
@@ -87,11 +147,18 @@ export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
         setIsFirstRequest: () => true,
       },
     ],
-    meta: [
-      DEFAULT_META,
+    searchParams: [
+      { meta: DEFAULT_META, returnHiddenIndices: false },
       {
-        apiSuccess: (_, { meta }) => meta,
-        onPaginate: (state, { newPageIndex }) => updateMetaPageIndex(state, newPageIndex),
+        apiSuccess: (_, { meta, returnHiddenIndices, searchQuery }) => ({
+          meta,
+          returnHiddenIndices,
+          searchQuery,
+        }),
+        onPaginate: (state, { newPageIndex }) => ({
+          ...state,
+          meta: updateMetaPageIndex(state.meta, newPageIndex),
+        }),
       },
     ],
   }),
@@ -110,5 +177,6 @@ export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
       () => [selectors.status, selectors.isFirstRequest],
       (status, isFirstRequest) => [Status.LOADING, Status.IDLE].includes(status) && isFirstRequest,
     ],
+    meta: [() => [selectors.searchParams], (searchParams) => searchParams.meta],
   }),
 });
