@@ -100,7 +100,7 @@ describe('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
   });
   it('to click the edit button and edit pack', () => {
     navigateTo('/app/osquery/saved_queries');
-
+    cy.getBySel('pagination-button-next').click();
     cy.react('CustomItemAction', {
       props: { index: 1, item: { attributes: { id: SAVED_QUERY_ID } } },
     }).click();

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
 import type { ValidateReferencesParams } from './validate_references';
 import { validateReferences } from './validate_references';
 import { savedObjectsClientMock } from '../../../mocks';
-import { SavedObjectsErrorHelpers } from '../../service';
 
 function setup({
   objects = [],
