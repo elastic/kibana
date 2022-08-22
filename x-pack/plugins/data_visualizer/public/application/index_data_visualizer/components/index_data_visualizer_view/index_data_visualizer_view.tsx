@@ -217,12 +217,6 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     [currentSavedSearch, dataVisualizerListState, setDataVisualizerListState]
   );
 
-  const samplerShardSize =
-    dataVisualizerListState.samplerShardSize ?? restorableDefaults.samplerShardSize;
-  const setSamplerShardSize = (value: number) => {
-    setDataVisualizerListState({ ...dataVisualizerListState, samplerShardSize: value });
-  };
-
   const visibleFieldTypes =
     dataVisualizerListState.visibleFieldTypes ?? restorableDefaults.visibleFieldTypes;
   const setVisibleFieldTypes = (values: string[]) => {
@@ -502,8 +496,6 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                   searchQuery={searchQuery}
                   searchQueryLanguage={searchQueryLanguage}
                   setSearchParams={setSearchParams}
-                  samplerShardSize={samplerShardSize}
-                  setSamplerShardSize={setSamplerShardSize}
                   overallStats={overallStats}
                   indexedFieldTypes={fieldTypes}
                   setVisibleFieldTypes={setVisibleFieldTypes}
