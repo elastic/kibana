@@ -77,27 +77,12 @@ export const bulkAddRuleActions = {
       defaultMessage: 'Actions frequency',
     }
   ),
+
   THROTTLE_HELP_TEXT: i18n.translate(
     'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.addRuleActions.throttleHelpText',
     {
       defaultMessage:
         'Select when automated actions should be performed if a rule evaluates as true.',
     }
-  ),
-
-  warningCalloutMessage: (rulesCount: number): JSX.Element => (
-    <FormattedMessage
-      id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.updateRuleSchedules.warningCalloutMessage"
-      defaultMessage="You're about to overwrite rule actions for {rulesCount, plural, one {# selected rule} other {# selected rules}}, press Save to apply changes."
-      values={{ rulesCount }}
-    />
-  ),
-
-  infoCalloutMessage: (rulesCount: number): JSX.Element => (
-    <FormattedMessage
-      id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.updateRuleSchedules.infoCalloutMessage"
-      defaultMessage="Add actions for {rulesCount, plural, one {# rule} other {# rules}} you’ve selected. If you’d like to delete actions for all selected rules, select “Perform no actions” in the dropdown and check Overwrite all selected rule actions to update."
-      values={{ rulesCount }}
-    />
   ),
 };

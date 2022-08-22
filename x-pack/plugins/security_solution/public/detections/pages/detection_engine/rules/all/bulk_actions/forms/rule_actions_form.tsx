@@ -6,6 +6,7 @@
  */
 import React, { useCallback, useMemo } from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type {
   RuleAction,
@@ -136,17 +137,37 @@ const RuleActionsFormComponent = ({ rulesCount, onClose, onConfirm }: RuleAction
       onSubmit={handleSubmit}
       flyoutSize="l"
     >
-      {overwrite && (
-        <>
-          <EuiCallOut color="warning" data-test-subj="bulkEditRulesRuleActionsWarning">
-            {i18n.warningCalloutMessage(rulesCount)}
-          </EuiCallOut>
-          <EuiSpacer size="m" />
-        </>
-      )}
-
-      <EuiCallOut color="primary" data-test-subj="bulkEditRulesRuleActionInfo">
-        {i18n.infoCalloutMessage(rulesCount)}
+      <EuiCallOut
+        color="primary"
+        data-test-subj="bulkEditRulesRuleActionInfo"
+        title={
+          <FormattedMessage
+            id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.addRuleActions.infoCalloutTitle"
+            defaultMessage="Add actions for {rulesCount, plural, one {# rule} other {# rules}} you’ve selected. Here some tips and suggestions:"
+            values={{ rulesCount }}
+          />
+        }
+      >
+        <ul>
+          <li>
+            <FormattedMessage
+              id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.addRuleActions.actionFrequencyDetail"
+              defaultMessage="Action frequency is shared to all new and existing actions."
+            />
+          </li>
+          <li>
+            <FormattedMessage
+              id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.addRuleActions.deleteActionsDetail"
+              defaultMessage='If you’d like to delete actions for all selected rules, select "Perform no actions" in the dropdown and check Overwrite all selected rule actions.'
+            />
+          </li>
+          <li>
+            <FormattedMessage
+              id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.addRuleActions.ruleVariablesDetail"
+              defaultMessage="Rule variables may only affect some of the rules that you selected based on the rule types."
+            />
+          </li>
+        </ul>
       </EuiCallOut>
       <EuiSpacer size="m" />
 
@@ -177,6 +198,19 @@ const RuleActionsFormComponent = ({ rulesCount, onClose, onConfirm }: RuleAction
           'data-test-subj': 'bulkEditRulesOverwriteRuleActions',
         }}
       />
+
+      {overwrite && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiCallOut color="warning" data-test-subj="bulkEditRulesRuleActionsWarning">
+            <FormattedMessage
+              id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.addRuleActions.warningCalloutMessage"
+              defaultMessage="You're about to overwrite rule actions for {rulesCount, plural, one {# selected rule} other {# selected rules}}, press Save to apply changes."
+              values={{ rulesCount }}
+            />
+          </EuiCallOut>
+        </>
+      )}
     </BulkEditFormWrapper>
   );
 };

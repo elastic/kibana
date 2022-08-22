@@ -72,10 +72,11 @@ export const bulkEditRules = async ({
   // - mute/unmute if needed, refetch rule
   // calling mute for rule needed only when rule was unmuted before and throttle value is  NOTIFICATION_THROTTLE_NO_ACTIONS
   // calling unmute needed only if rule was muted and throttle value is not NOTIFICATION_THROTTLE_NO_ACTIONS
-  // TODO: error handlers (?)
-  const rulesAction = attributesActions.find(({ type }) =>
-    [BulkActionEditType.set_rule_actions, BulkActionEditType.add_rule_actions].includes(type)
-  ) as bulkActionEditPayloadRuleActions;
+  const rulesAction = attributesActions
+    .reverse()
+    .find(({ type }) =>
+      [BulkActionEditType.set_rule_actions, BulkActionEditType.add_rule_actions].includes(type)
+    ) as bulkActionEditPayloadRuleActions;
 
   if (rulesAction) {
     const errors: BulkEditError[] = [];
