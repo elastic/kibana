@@ -11,6 +11,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const esSupertest = getService('esSupertest');
+  const browser = getService('browser');
   const dataGrid = getService('dataGrid');
   const find = getService('find');
   const indexPatterns = getService('indexPatterns');
@@ -572,6 +573,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             return JSON.parse(text)._index === logstashIndexName;
           }
         );
+
+        await browser.goBack();
+        await PageObjects.discover.selectIndexPattern('logstash-*');
       });
     });
   });
