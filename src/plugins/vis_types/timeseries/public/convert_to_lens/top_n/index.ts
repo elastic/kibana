@@ -7,18 +7,17 @@
  */
 
 import { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
-import { PANEL_TYPES } from '../../../common/enums';
+import { PANEL_TYPES, TIME_RANGE_DATA_MODES } from '../../../common/enums';
 import { getDataViewsStart } from '../../services';
 import { getDataSourceInfo } from '../lib/datasource';
 import { getSeries } from '../lib/series';
 import { getFieldsForTerms } from '../../../common/fields_utils';
 import { ConvertTsvbToLensVisualization } from '../types';
-import { convertChartType, getYExtents } from '../lib/xy';
-import { getLayerConfiguration } from '../lib/layers';
 import { isSplitWithDateHistogram } from '../lib/split_chart';
-import { isValidMetrics } from '../lib/metrics';
+import { getLayerConfiguration } from '../lib/layers';
+import { getWindow, isValidMetrics } from '../lib/metrics';
 
-export const convertToLens: ConvertTsvbToLensVisualization = async (model) => {
+export const convertToLens: ConvertTsvbToLensVisualization = async (model, timeRange) => {
   const layersConfiguration: { [key: string]: VisualizeEditorLayersContext } = {};
 
   // get the active series number
@@ -32,11 +31,11 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model) => {
       continue;
     }
 
-    if (!isValidMetrics(layer.metrics, PANEL_TYPES.TIMESERIES)) {
+    if (!isValidMetrics(layer.metrics, PANEL_TYPES.TOP_N, layer.time_range_mode)) {
       return null;
     }
 
-    const { indexPatternId, timeField } = await getDataSourceInfo(
+    const { indexPatternId } = await getDataSourceInfo(
       model.index_pattern,
       model.time_field,
       Boolean(layer.override_index_pattern),
@@ -44,8 +43,13 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model) => {
       dataViews
     );
 
+    const window =
+      model.time_range_mode === TIME_RANGE_DATA_MODES.LAST_VALUE
+        ? getWindow(model.interval, timeRange)
+        : undefined;
+
     // handle multiple metrics
-    const series = getSeries(layer.metrics, seriesNum, layer.split_mode, layer.color);
+    const series = getSeries(layer.metrics, seriesNum, layer.split_mode, layer.color, window);
     if (!series || !series.metrics) {
       return null;
     }
@@ -64,22 +68,19 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model) => {
       return null;
     }
 
-    const chartType = convertChartType(layer);
-
     layersConfiguration[layerIdx] = getLayerConfiguration(
       indexPatternId,
       layerIdx,
-      chartType,
+      'bar_horizontal',
       model,
       series,
       splitFields,
-      timeField,
-      'date_histogram',
-      splitWithDateHistogram
+      undefined,
+      undefined,
+      splitWithDateHistogram,
+      window
     );
   }
-
-  const extents = getYExtents(model);
 
   return {
     layers: layersConfiguration,
@@ -94,11 +95,21 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model) => {
         maxLines: model.max_lines_legend ?? 1,
       },
       gridLinesVisibility: {
-        x: Boolean(model.show_grid),
-        yLeft: Boolean(model.show_grid),
-        yRight: Boolean(model.show_grid),
+        x: false,
+        yLeft: false,
+        yRight: false,
       },
-      extents,
+      tickLabelsVisibility: {
+        x: true,
+        yLeft: false,
+        yRight: false,
+      },
+      axisTitlesVisibility: {
+        x: false,
+        yLeft: false,
+        yRight: false,
+      },
+      valueLabels: true,
     },
   };
 };
