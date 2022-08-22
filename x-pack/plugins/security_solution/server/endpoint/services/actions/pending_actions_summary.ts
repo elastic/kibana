@@ -21,7 +21,7 @@ import { ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN } from '../../../../common/endp
 
 const PENDING_ACTION_RESPONSE_MAX_LAPSED_TIME = 300000; // 300k ms === 5 minutes
 
-export const getPendingActionCounts = async (
+export const getPendingActionsSummary = async (
   esClient: ElasticsearchClient,
   metadataService: EndpointMetadataService,
   /** The Fleet Agent IDs to be checked */

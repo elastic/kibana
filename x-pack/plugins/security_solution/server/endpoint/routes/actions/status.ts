@@ -14,7 +14,7 @@ import type {
   SecuritySolutionRequestHandlerContext,
 } from '../../../types';
 import type { EndpointAppContext } from '../../types';
-import { getPendingActionCounts } from '../../services';
+import { getPendingActionsSummary } from '../../services';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 
 /**
@@ -53,7 +53,7 @@ export const actionStatusRequestHandler = function (
       ? [...new Set(req.query.agent_ids)]
       : [req.query.agent_ids];
 
-    const response = await getPendingActionCounts(
+    const response = await getPendingActionsSummary(
       esClient,
       endpointContext.service.getEndpointMetadataService(),
       agentIDs,
