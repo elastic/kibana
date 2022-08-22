@@ -293,7 +293,7 @@ export class ControlGroupContainer extends Container<
 
   private recalculateFilters = () => {
     const allFilters: Filter[] = [];
-    let timeslice = undefined;
+    let timeslice;
     Object.values(this.children).map((child) => {
       const childOutput = child.getOutput() as ControlOutput;
       allFilters.push(...(childOutput?.filters ?? []));
@@ -398,7 +398,9 @@ export class ControlGroupContainer extends Container<
     childIds.forEach((id) => {
       const child = this.getChild(id);
       if (child.type === TIME_SLIDER_CONTROL) {
-        (child as TimeSliderControlEmbeddable).setAllDashboardPanelsLoaded(allDashboardPanelsLoaded);
+        (child as TimeSliderControlEmbeddable).setAllDashboardPanelsLoaded(
+          allDashboardPanelsLoaded
+        );
       }
     });
   }

@@ -25,7 +25,7 @@ export const settingsServiceFactory: SettingsServiceFactory = ({ coreStart }) =>
     },
     getDefaultTimeRange: () => {
       const defaultTimeRange = coreStart.uiSettings.get('timepicker:timeDefaults');
-      return defaultTimeRange ? defaultTimeRange : { from: 'now-15m', to: 'now'};
+      return defaultTimeRange ? defaultTimeRange : { from: 'now-15m', to: 'now' };
     },
   };
 };

@@ -412,7 +412,9 @@ export class MapEmbeddable
         filters,
         query: this.input.query,
         timeFilters: this.input.timeRange,
-        timeslice: this.input.timeslice ? { from: this.input.timeslice[0], to: this.input.timeslice[1] } : undefined,
+        timeslice: this.input.timeslice
+          ? { from: this.input.timeslice[0], to: this.input.timeslice[1] }
+          : undefined,
         forceRefresh,
         searchSessionId: this._getSearchSessionId(),
         searchSessionMapBuffer: getIsRestore(this._getSearchSessionId())

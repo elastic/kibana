@@ -10,7 +10,6 @@ import _ from 'lodash';
 import { timer, BehaviorSubject } from 'rxjs';
 import moment from 'moment-timezone';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
-import type { TimeRange } from '@kbn/es-query';
 import { ReduxEmbeddableTools, ReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
 import React from 'react';
 import ReactDOM from 'react-dom';

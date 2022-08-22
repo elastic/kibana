@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { TimeRange } from '@kbn/es-query';
 import { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
 import { EuiRangeTick } from '@elastic/eui/src/components/form/range/range_ticks';
 

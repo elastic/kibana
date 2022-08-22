@@ -6,14 +6,11 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
-import React, { Component, ReactNode, useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Observable, Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
-import moment from 'moment-timezone';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiInputPopover } from '@elastic/eui';
-import type { TimeRange } from '@kbn/es-query';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 import { timeSliderReducers } from '../time_slider_reducers';
 import { TimeSliderReduxState } from '../types';
