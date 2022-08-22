@@ -12,8 +12,6 @@ Previous versions: {kibana-ref-all}/8.3/whats-new.html[8.3] | {kibana-ref-all}/8
 
 // tag::notable-highlights[]
 
-coming::[8.4.0]
-
 [discrete]
 [[highlights-8.4-release-docs]]
 === Elastic release docs now in one place
