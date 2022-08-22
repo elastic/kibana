@@ -206,8 +206,9 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
         });
       }
 
-      const canCreateCase = true;
-      if (canCreateCase && selectCaseModal) {
+      const casesPrivileges = cases?.helpers.canUseCases();
+
+      if ((!!casesPrivileges?.create || !!casesPrivileges?.update) && selectCaseModal) {
         rootItems.push({
           panel: 1,
           name: (
@@ -304,7 +305,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
               <AnomalyTimelineHelpPopover />
             </EuiFlexItem>
 
-            {menuPanels.length > 0 ? (
+            {menuPanels[0].items!.length > 0 ? (
               <EuiFlexItem
                 grow={false}
                 css={{ 'margin-left': 'auto !important', 'align-self': 'baseline' }}
