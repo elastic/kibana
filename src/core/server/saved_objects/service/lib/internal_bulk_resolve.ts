@@ -22,13 +22,19 @@ import type {
   SavedObjectsRawDocSource,
 } from '@kbn/core-saved-objects-server';
 import {
+  SavedObjectsErrorHelpers,
+  type DecoratedError,
+} from '@kbn/core-saved-objects-utils-server';
+import {
+  LEGACY_URL_ALIAS_TYPE,
+  type LegacyUrlAlias,
+  type SavedObjectsSerializer,
+} from '@kbn/core-saved-objects-base-server-internal';
+import {
   CORE_USAGE_STATS_ID,
   CORE_USAGE_STATS_TYPE,
   REPOSITORY_RESOLVE_OUTCOME_STATS,
 } from '../../../core_usage_data';
-import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
-import type { SavedObjectsSerializer } from '../../serialization';
-import { DecoratedError, SavedObjectsErrorHelpers } from './errors';
 import {
   getCurrentTime,
   getSavedObjectFromSource,

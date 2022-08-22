@@ -6,7 +6,7 @@
  */
 
 import { mapValues, isObject, isArray } from 'lodash/fp';
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 
 import { toArray } from '../../../common/utils/to_array';
 import { isGeoField } from '../../../common/utils/field_formatters';
