@@ -12,6 +12,7 @@ import { EuiButtonIcon, EuiDescriptionList } from '@elastic/eui';
 import { CasesUiSetup } from '@kbn/cases-plugin/public';
 import { CoreStart } from '@kbn/core/public';
 import { PersistableStateAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { MlStartDependencies } from '../plugin';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE, AnomalySwimlaneEmbeddableInput } from '..';
 import { PLUGIN_ICON } from '../../common/constants/app';
@@ -57,6 +58,10 @@ export function registerAnomalySwimLaneCasesAttachment(
             default: React.memo((props: PersistableStateAttachmentViewProps) => {
               const { persistableStateAttachmentState } = props;
 
+              const dataFormatter = pluginStart.fieldFormats.deserialize({
+                id: FIELD_FORMAT_IDS.DATE,
+              });
+
               const inputProps =
                 persistableStateAttachmentState as unknown as AnomalySwimlaneEmbeddableInput;
 
@@ -95,7 +100,9 @@ export function registerAnomalySwimLaneCasesAttachment(
                             defaultMessage="Time range"
                           />
                         ),
-                        description: `${inputProps.timeRange.from} - ${inputProps.timeRange.to}`,
+                        description: `${dataFormatter.convert(
+                          inputProps.timeRange.from
+                        )} - ${dataFormatter.convert(inputProps.timeRange.to)}`,
                       },
                     ]}
                   />
