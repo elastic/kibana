@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { createPortalNode } from 'react-reverse-portal';
+import { createHtmlPortalNode } from 'react-reverse-portal';
 
-export const MonitorTypePortalNode = createPortalNode();
+export const MonitorTypePortalNode = createHtmlPortalNode();
 
-export const MonitorDetailsLinkPortalNode = createPortalNode();
+export const MonitorDetailsLinkPortalNode = createHtmlPortalNode();
