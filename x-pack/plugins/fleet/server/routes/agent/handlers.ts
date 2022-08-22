@@ -149,7 +149,7 @@ export const bulkUpdateAgentTagsHandler: RequestHandler<
       request.body.tagsToRemove ?? []
     );
 
-    const body = results.items.reduce<PostBulkUpdateAgentTagsResponse>((acc, so) => {
+    const body = results.items.reduce<PostBulkUpdateAgentTagsResponse>((acc: any, so: any) => {
       acc[so.id] = {
         success: !so.error,
         error: so.error?.message,
