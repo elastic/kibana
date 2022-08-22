@@ -3869,10 +3869,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-services@link:bazel-bin/packages/kbn-shared-ux-services":
-=======
-"@kbn/shared-ux-storybook-config@link:bazel-bin/packages/shared-ux/storybook/config":
->>>>>>> upstream/main
+"@kbn/shared-ux-storybook-mock@link:bazel-bin/packages/shared-ux/storybook/mock":
   version "0.0.0"
   uid ""
 
@@ -7838,10 +7835,7 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__shared-ux-services@link:bazel-bin/packages/kbn-shared-ux-services/npm_module_types":
-=======
-"@types/kbn__shared-ux-storybook-config@link:bazel-bin/packages/shared-ux/storybook/config/npm_module_types":
->>>>>>> upstream/main
+"@types/kbn__shared-ux-storybook-mock@link:bazel-bin/packages/shared-ux/storybook/mock/npm_module_types":
   version "0.0.0"
   uid ""
 
