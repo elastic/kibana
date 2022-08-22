@@ -488,6 +488,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     },
     reporting: {
       cloudMinimumRequirements: `${KIBANA_DOCS}reporting-getting-started.html#reporting-on-cloud-resource-requirements`,
+      grantUserAccess: `${KIBANA_DOCS}secure-reporting.html#grant-user-access`,
     },
     security: {
       apiKeyServiceSettings: `${ELASTICSEARCH_DOCS}security-settings.html#api-key-service-settings`,

@@ -338,6 +338,7 @@ export interface DocLinks {
   readonly monitoring: Record<string, string>;
   readonly reporting: Readonly<{
     cloudMinimumRequirements: string;
+    grantUserAccess: string;
   }>;
   readonly security: Readonly<{
     apiKeyServiceSettings: string;
