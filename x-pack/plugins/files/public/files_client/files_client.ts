@@ -140,7 +140,7 @@ export const createFilesClient = ({ http, fileKind }: Args): FilesClient => {
     publicDownload: ({ token, fileName }) => {
       return http.get(apiRoutes.getPublicDownloadRoute(token, fileName));
     },
-    downloadSrc: ({ id }) => {
+    getDownloadHref: ({ id }) => {
       return `${http.basePath.prepend(apiRoutes.getDownloadRoute(fileKind, id))}`;
     },
   };

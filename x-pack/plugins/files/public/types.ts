@@ -133,7 +133,7 @@ export interface FilesClient {
    * Get a string for downloading a file that can be passed to a button element's
    * href for download.
    */
-  downloadSrc: (file: FileJSON) => string;
+  getDownloadHref: (file: FileJSON) => string;
 }
 
 export type FilesClientResponses = {

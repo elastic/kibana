@@ -74,7 +74,7 @@ export const DetailsFlyout: FunctionComponent<Props> = ({ files, file, onDismiss
             height: 400px;
           `}
           alt={file.alt ?? 'unknown'}
-          src={files.example.downloadSrc(file)}
+          src={files.example.getDownloadHref(file)}
         />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
@@ -82,7 +82,7 @@ export const DetailsFlyout: FunctionComponent<Props> = ({ files, file, onDismiss
           <EuiFlexItem grow={false}>
             <EuiButton
               iconType="download"
-              href={files.example.downloadSrc(file)}
+              href={files.example.getDownloadHref(file)}
               download={file.name}
             >
               Download
