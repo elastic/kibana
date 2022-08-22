@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback } from 'react';
-import PropTypes from 'prop-types';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useDispatch, useSelector } from 'react-redux';
