@@ -13,6 +13,8 @@ import type { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/pu
 import type {
   DatasourceFixAction,
   FrameDatasourceAPI,
+  IndexPattern,
+  IndexPatternField,
   OperationMetadata,
   VisualizationDimensionGroupConfig,
 } from '../../types';
@@ -27,8 +29,6 @@ import {
 } from './definitions';
 import type {
   DataViewDragDropOperation,
-  IndexPattern,
-  IndexPatternField,
   IndexPatternLayer,
   IndexPatternPrivateState,
 } from '../types';
@@ -1516,13 +1516,14 @@ export function isOperationAllowedAsReference({
   let hasValidMetadata = true;
   if (field && operationDefinition.input === 'field') {
     const metadata = operationDefinition.getPossibleOperationForField(field);
-    hasValidMetadata = Boolean(metadata) && validation.validateMetadata(metadata!);
+    hasValidMetadata =
+      Boolean(metadata) && validation.validateMetadata(metadata!, operationType, field.name);
   } else if (operationDefinition.input === 'none') {
     const metadata = operationDefinition.getPossibleOperation();
-    hasValidMetadata = Boolean(metadata) && validation.validateMetadata(metadata!);
+    hasValidMetadata = Boolean(metadata) && validation.validateMetadata(metadata!, operationType);
   } else if (operationDefinition.input === 'fullReference') {
     const metadata = operationDefinition.getPossibleOperation(indexPattern);
-    hasValidMetadata = Boolean(metadata) && validation.validateMetadata(metadata!);
+    hasValidMetadata = Boolean(metadata) && validation.validateMetadata(metadata!, operationType);
   } else {
     // TODO: How can we validate the metadata without a specific field?
   }
@@ -1598,7 +1599,11 @@ export function isColumnValidAsReference({
       column,
       validation,
     }) &&
-    validation.validateMetadata(column)
+    validation.validateMetadata(
+      column,
+      operationType,
+      'sourceField' in column ? column.sourceField : undefined
+    )
   );
 }
 
@@ -1646,7 +1651,9 @@ export function computeLayerFromContext(
         FormulaIndexPatternColumn,
         'managedReference'
       >;
-      const tempLayer = { indexPatternId: indexPattern.id, columns: {}, columnOrder: [] };
+      const tempLayer = isLast
+        ? { indexPatternId: indexPattern.id, columns: {}, columnOrder: [] }
+        : computeLayerFromContext(metricsArray.length === 1, metricsArray, indexPattern);
       let newColumn = operationDefinition.buildColumn({
         indexPattern,
         layer: tempLayer,
@@ -1735,7 +1742,8 @@ export function computeLayerFromContext(
 export function getSplitByTermsLayer(
   indexPattern: IndexPattern,
   splitFields: IndexPatternField[],
-  dateField: IndexPatternField | undefined,
+  xField: IndexPatternField | undefined,
+  xMode: string | undefined,
   layer: VisualizeEditorLayersContext
 ): IndexPatternLayer {
   const { termsParams, metrics, timeInterval, splitWithDateHistogram, dropPartialBuckets } = layer;
@@ -1754,18 +1762,21 @@ export function getSplitByTermsLayer(
 
   let termsLayer = insertNewColumn({
     op: splitWithDateHistogram ? 'date_histogram' : 'terms',
-    layer: insertNewColumn({
-      op: 'date_histogram',
-      layer: computedLayer,
-      columnId: generateId(),
-      field: dateField,
-      indexPattern,
-      visualizationGroups: [],
-      columnParams: {
-        interval: timeInterval,
-        dropPartials: dropPartialBuckets,
-      },
-    }),
+    layer:
+      xField && xMode
+        ? insertNewColumn({
+            op: xMode,
+            layer: computedLayer,
+            columnId: generateId(),
+            field: xField,
+            indexPattern,
+            visualizationGroups: [],
+            columnParams: {
+              interval: timeInterval,
+              dropPartials: dropPartialBuckets,
+            },
+          })
+        : computedLayer,
     columnId,
     field: baseField,
     indexPattern,
@@ -1816,7 +1827,8 @@ export function getSplitByTermsLayer(
 
 export function getSplitByFiltersLayer(
   indexPattern: IndexPattern,
-  dateField: IndexPatternField | undefined,
+  xField: IndexPatternField | undefined,
+  xMode: string | undefined,
   layer: VisualizeEditorLayersContext
 ): IndexPatternLayer {
   const { splitFilters, metrics, timeInterval, dropPartialBuckets } = layer;
@@ -1842,18 +1854,21 @@ export function getSplitByFiltersLayer(
   const columnId = generateId();
   let filtersLayer = insertNewColumn({
     op: 'filters',
-    layer: insertNewColumn({
-      op: 'date_histogram',
-      layer: computedLayer,
-      columnId: generateId(),
-      field: dateField,
-      indexPattern,
-      visualizationGroups: [],
-      columnParams: {
-        interval: timeInterval,
-        dropPartials: dropPartialBuckets,
-      },
-    }),
+    layer:
+      xField && xMode
+        ? insertNewColumn({
+            op: xMode,
+            layer: computedLayer,
+            columnId: generateId(),
+            field: xField,
+            indexPattern,
+            visualizationGroups: [],
+            columnParams: {
+              interval: timeInterval,
+              dropPartials: dropPartialBuckets,
+            },
+          })
+        : computedLayer,
     columnId,
     field: undefined,
     indexPattern,
