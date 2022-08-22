@@ -43,6 +43,19 @@ const getResponseBaseParams = (anchorDate: string = ANCHOR_DATE) => ({
   setup: '',
   throttle: 'no_actions',
   actions: [],
+  building_block_type: undefined,
+  note: undefined,
+  license: undefined,
+  outcome: undefined,
+  alias_target_id: undefined,
+  alias_purpose: undefined,
+  timeline_id: undefined,
+  timeline_title: undefined,
+  meta: undefined,
+  rule_name_override: undefined,
+  timestamp_override: undefined,
+  timestamp_override_fallback_disabled: undefined,
+  namespace: undefined,
 });
 
 export const getRulesSchemaMock = (anchorDate: string = ANCHOR_DATE): FullResponseSchema => ({
@@ -50,6 +63,10 @@ export const getRulesSchemaMock = (anchorDate: string = ANCHOR_DATE): FullRespon
   query: 'user.name: root or user.name: admin',
   type: 'query',
   language: 'kuery',
+  index: undefined,
+  data_view_id: undefined,
+  filters: undefined,
+  saved_id: undefined,
 });
 
 export const getRulesMlSchemaMock = (anchorDate: string = ANCHOR_DATE): FullResponseSchema => {
@@ -90,6 +107,14 @@ export const getThreatMatchingSchemaMock = (
         },
       },
     ],
+    index: undefined,
+    data_view_id: undefined,
+    filters: undefined,
+    saved_id: undefined,
+    threat_indicator_path: undefined,
+    threat_language: undefined,
+    concurrent_searches: undefined,
+    items_per_search: undefined,
   };
 };
 
@@ -174,5 +199,11 @@ export const getRulesEqlSchemaMock = (anchorDate: string = ANCHOR_DATE): FullRes
     language: 'eql',
     type: 'eql',
     query: 'process where true',
+    index: undefined,
+    data_view_id: undefined,
+    filters: undefined,
+    timestamp_field: undefined,
+    event_category_override: undefined,
+    tiebreaker_field: undefined,
   };
 };

@@ -67,6 +67,15 @@ export const ruleOutput = (): FullResponseSchema => ({
   related_integrations: [],
   required_fields: [],
   setup: '',
+  outcome: undefined,
+  alias_target_id: undefined,
+  alias_purpose: undefined,
+  rule_name_override: undefined,
+  timestamp_override: undefined,
+  timestamp_override_fallback_disabled: undefined,
+  namespace: undefined,
+  data_view_id: undefined,
+  saved_id: undefined,
 });
 
 describe('validate', () => {
