@@ -259,4 +259,17 @@ export class ConsolePageObject extends FtrService {
       }
     });
   }
+
+  public async copyText() {
+    const editor = await this.getEditorTextArea();
+    const selectionKey = Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
+    await editor.pressKeys([selectionKey, 'a']);
+    await editor.pressKeys([selectionKey, 'c']);
+  }
+
+  public async pasteText() {
+    const editor = await this.getEditorTextArea();
+    const selectionKey = Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
+    await editor.pressKeys([selectionKey, 'v']);
+  }
 }
