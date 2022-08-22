@@ -7,7 +7,7 @@
  */
 
 import _ from 'lodash';
-import { timer } from 'rxjs';
+import { timer, BehaviorSubject } from 'rxjs';
 import moment from 'moment-timezone';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
@@ -39,6 +39,7 @@ export class TimeSliderControlEmbeddable extends Embeddable<
   private getDateFormat: ControlsSettingsService['getDateFormat'];
   private getTimezone: ControlsSettingsService['getTimezone'];
   private timefilter: ControlsDataService['timefilter'];
+  private waitForPanelsToLoad$ = new BehaviorSubject<boolean>(false);
 
   private reduxEmbeddableTools: ReduxEmbeddableTools<
     TimeSliderReduxState,
@@ -62,7 +63,9 @@ export class TimeSliderControlEmbeddable extends Embeddable<
     this.getTimezone = getTimezone;
     this.timefilter = timefilter;
 
-    const timeRangeBounds = timefilter.calculateBounds(input.timeRange ? input.timeRange : getDefaultTimeRange());
+    const timeRangeBounds = timefilter.calculateBounds(
+      input.timeRange ? input.timeRange : getDefaultTimeRange()
+    );
 
     this.reduxEmbeddableTools = reduxEmbeddablePackage.createTools<
       TimeSliderReduxState,
@@ -73,7 +76,7 @@ export class TimeSliderControlEmbeddable extends Embeddable<
       initialComponentState: {
         ticks: getTicks(timeRangeBounds[FROM_INDEX], timeRangeBounds[TO_INDEX], getTimezone()),
         timeRangeBounds,
-      }
+      },
     });
 
     this.inputSubscription = this.getInput$().subscribe(() => this.onInputChange());
@@ -99,7 +102,7 @@ export class TimeSliderControlEmbeddable extends Embeddable<
         dispatch(
           actions.setTimeRangeBounds({
             ticks: getTicks(nextBounds[FROM_INDEX], nextBounds[TO_INDEX], this.getTimezone()),
-            timeRangeBounds: nextBounds, 
+            timeRangeBounds: nextBounds,
           })
         );
         const value = getState().explicitInput.value;
@@ -122,6 +125,10 @@ export class TimeSliderControlEmbeddable extends Embeddable<
 
   public reload() {
     return;
+  }
+
+  public setAllDashboardPanelsLoaded(value: boolean) {
+    this.waitForPanelsToLoad$.next(value);
   }
 
   private debouncedPublishChange = _.debounce((value: [number, number]) => {
@@ -174,7 +181,7 @@ export class TimeSliderControlEmbeddable extends Embeddable<
     const ticks = getState().componentState.ticks;
     const tickRange = ticks[1].value - ticks[0].value;
     const timeRangeBounds = getState().componentState.timeRangeBounds;
-    
+
     if (value === undefined || value[FROM_INDEX] <= timeRangeBounds[FROM_INDEX]) {
       const to = timeRangeBounds[TO_INDEX];
       if (range === undefined || range === tickRange) {
@@ -210,7 +217,7 @@ export class TimeSliderControlEmbeddable extends Embeddable<
 
     ReactDOM.render(
       <TimeSliderControlReduxWrapper>
-        <TimeSlider 
+        <TimeSlider
           formatDate={this.epochToKbnDateFormat}
           onChange={(value?: [number, number]) => {
             this.onTimesliceChange(value);
@@ -221,7 +228,7 @@ export class TimeSliderControlEmbeddable extends Embeddable<
           }}
           onNext={this.onNext}
           onPrevious={this.onPrevious}
-          waitForPanelsToLoad$={mockWaitForPanelsToLoad$}
+          waitForPanelsToLoad$={this.waitForPanelsToLoad$}
         />
       </TimeSliderControlReduxWrapper>,
       node
