@@ -150,20 +150,21 @@ describe('Rule Definition', () => {
   });
 
   it('show rule type description "', async () => {
-    let ruleDescription = wrapper.find('[data-test-subj="ruleSummaryRuleDescription"]');
+    const ruleDescription = wrapper.find('[data-test-subj="ruleSummaryRuleDescription"]');
     expect(ruleDescription).toBeTruthy();
     expect(ruleDescription.find('div.euiText').text()).toEqual('Rule when testing');
+  });
 
+  it('show SIEM rule type description "', async () => {
     await setup({
       ruleOverwrite: {
         consumer: 'siem',
         ruleTypeId: 'siem_rule',
       },
     });
-
-    ruleDescription = wrapper.find('[data-test-subj="ruleSummaryRuleDescription"]');
+    const ruleDescription = wrapper.find('[data-test-subj="ruleSummaryRuleDescription"]');
     expect(ruleDescription).toBeTruthy();
-    expect(ruleDescription.find('div.euiText').text()).toEqual('siem description');
+    expect(ruleDescription.find('div.euiText').text()).toEqual('Security detection rule');
   });
 
   it('show rule conditions "', async () => {
