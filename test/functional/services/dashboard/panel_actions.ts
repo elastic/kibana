@@ -196,8 +196,12 @@ export class DashboardPanelActionsService extends FtrService {
       : await this.testSubjects.find(LIBRARY_NOTIFICATION_TEST_SUBJ);
     await this.retry.try(async () => {
       await libraryNotification.click();
-      await this.testSubjects.click('libraryNotificationUnlinkButton');
+      const exists = await this.testSubjects.exists('libraryNotificationUnlinkButton');
+      if (!exists) {
+        throw new Error('Visualize Library Notification popover did not open');
+      } 
     });
+    await this.testSubjects.click('libraryNotificationUnlinkButton');
   }
 
   async saveToLibrary(newTitle: string, parent?: WebElementWrapper) {
