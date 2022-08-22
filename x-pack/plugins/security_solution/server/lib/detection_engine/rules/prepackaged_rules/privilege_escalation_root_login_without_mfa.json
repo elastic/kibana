@@ -15,13 +15,53 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "AWS Root Login Without MFA",
-  "note": "## Config\n\nThe AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "note": "## Triage and analysis\n\n### Investigating AWS Root Login Without MFA\n\nMulti-factor authentication (MFA) in AWS is a simple best practice that adds an extra layer of protection on top of your\nuser name and password. With MFA enabled, when a user signs in to an AWS Management Console, they will be prompted for\ntheir user name and password, as well as for an authentication code from their AWS MFA device. Taken together, these\nmultiple factors provide increased security for your AWS account settings and resources.\n\nFor more information about using MFA in AWS, access the [official documentation](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa.html).\n\nThe AWS root account is the one identity that has complete access to all AWS services and resources in the account,\nwhich is created when the AWS account is created. AWS strongly recommends that you do not use the root user for your\neveryday tasks, even the administrative ones. Instead, adhere to the best practice of using the root user only to create\nyour first IAM user. Then securely lock away the root user credentials and use them to perform only a few account and\nservice management tasks. Amazon provides a [list of the tasks that require root user](https://docs.aws.amazon.com/general/latest/gr/root-vs-iam.html#aws_tasks-that-require-root).\n\nThis rule looks for attempts to log in to AWS as the root user without using multi-factor authentication (MFA), meaning\nthe account is not secured properly. \n\n#### Possible investigation steps\n\n- Investigate other alerts associated with the user account during the past 48 hours.\n- Examine whether this activity is common in the environment by looking for past occurrences on your logs.\n- Consider the source IP address and geolocation for the calling user who issued the command. Do they look normal for the\n  calling user?\n- Examine the commands, API calls, and data management actions performed by the account in the last 24 hours.\n- Contact the account owner and confirm whether they are aware of this activity.\n- If you suspect the account has been compromised, scope potentially compromised assets by tracking access to servers,\nservices, and data accessed by the account in the last 24 hours.\n\n### False positive analysis\n\n- While this activity is not inherently malicious, the root account must use MFA. The security team should address any\npotential benign true positive (B-TP), as this configuration can risk the entire cloud environment.\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Identify the possible impact of the incident and prioritize accordingly; the following actions can help you gain context:\n    - Identify the account role in the cloud environment.\n    - Identify the services or servers involved criticality.\n    - Work with your IT team to identify and minimize the impact on users.\n    - Identify if the attacker is moving laterally and compromising other accounts, servers, or services.\n    - Identify if there are any regulatory or legal ramifications related to this activity.\n- Configure multi-factor authentication for the user.\n- Follow security best practices [outlined](https://aws.amazon.com/premiumsupport/knowledge-center/security-best-practices/) by AWS.\n- Using the incident response data, update logging and audit policies to improve the mean time to detect (MTTD) and the\nmean time to respond (MTTR).",
   "query": "event.dataset:aws.cloudtrail and event.provider:signin.amazonaws.com and event.action:ConsoleLogin and\n  aws.cloudtrail.user_identity.type:Root and\n  aws.cloudtrail.console_login.additional_eventdata.mfa_used:false and\n  event.outcome:success\n",
   "references": [
     "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_root-user.html"
   ],
+  "related_integrations": [
+    {
+      "integration": "cloudtrail",
+      "package": "aws",
+      "version": "1.10.2"
+    }
+  ],
+  "required_fields": [
+    {
+      "ecs": false,
+      "name": "aws.cloudtrail.console_login.additional_eventdata.mfa_used",
+      "type": "boolean"
+    },
+    {
+      "ecs": false,
+      "name": "aws.cloudtrail.user_identity.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.action",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.dataset",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.outcome",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.provider",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 73,
   "rule_id": "bc0c6f0d-dab0-47a3-b135-0925f0a333bc",
+  "setup": "The AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
   "severity": "high",
   "tags": [
     "Elastic",
@@ -50,5 +90,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 5
+  "version": 7
 }

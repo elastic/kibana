@@ -12,7 +12,7 @@ import { HostsTableType } from '../../store/model';
 import { HOSTS_PATH } from '../../../../common/constants';
 
 const getTabsOnHostDetailsUrl = (hostName: string, tabName: HostsTableType) =>
-  `${HOSTS_PATH}/${hostName}/${tabName}`;
+  `${HOSTS_PATH}/name/${hostName}/${tabName}`;
 
 export const navTabsHostDetails = ({
   hasMlUserPermissions,

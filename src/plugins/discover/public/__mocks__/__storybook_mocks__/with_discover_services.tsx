@@ -86,7 +86,9 @@ const services = {
     },
   },
   navigation: NavigationPlugin.start({} as CoreStart, {
-    unifiedSearch: { ui: { SearchBar } } as unknown as UnifiedSearchPublicPluginStart,
+    unifiedSearch: {
+      ui: { SearchBar, AggregateQuerySearchBar: SearchBar },
+    } as unknown as UnifiedSearchPublicPluginStart,
   }),
   theme: {
     useChartsTheme: () => ({
