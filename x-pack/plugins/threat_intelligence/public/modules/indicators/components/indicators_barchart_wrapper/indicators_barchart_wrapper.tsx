@@ -8,8 +8,8 @@
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DataView } from '@kbn/data-views-plugin/common';
 import { TimeRange } from '@kbn/es-query';
+import { SecuritySolutionDataViewBase } from '../../../../types';
 import { RawIndicatorFieldId } from '../../../../../common/types/indicator';
 import { useAggregatedIndicators } from '../../hooks/use_aggregated_indicators';
 import { IndicatorsFieldSelector } from '../indicators_field_selector/indicators_field_selector';
@@ -19,11 +19,11 @@ const DEFAULT_FIELD = RawIndicatorFieldId.Feed;
 
 export interface IndicatorsBarChartWrapperProps {
   timeRange?: TimeRange;
-  indexPatterns: DataView[];
+  indexPattern: SecuritySolutionDataViewBase;
 }
 
 export const IndicatorsBarChartWrapper = memo<IndicatorsBarChartWrapperProps>(
-  ({ timeRange, indexPatterns }) => {
+  ({ timeRange, indexPattern }) => {
     const { dateRange, indicators, onFieldChange } = useAggregatedIndicators({ timeRange });
 
     return (
@@ -41,7 +41,7 @@ export const IndicatorsBarChartWrapper = memo<IndicatorsBarChartWrapperProps>(
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <IndicatorsFieldSelector
-              indexPatterns={indexPatterns}
+              indexPattern={indexPattern}
               defaultStackByValue={DEFAULT_FIELD}
               valueChange={onFieldChange}
             />

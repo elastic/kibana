@@ -11,20 +11,18 @@ import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { RawIndicatorFieldId } from '../../../../../common/types/indicator';
 import { IndicatorsFieldSelector } from './indicators_field_selector';
 
-const mockIndexPatterns: DataView[] = [
-  {
-    fields: [
-      {
-        name: '@timestamp',
-        type: 'date',
-      } as DataViewField,
-      {
-        name: 'threat.feed.name',
-        type: 'string',
-      } as DataViewField,
-    ],
-  } as DataView,
-];
+const mockIndexPattern: DataView = {
+  fields: [
+    {
+      name: '@timestamp',
+      type: 'date',
+    } as DataViewField,
+    {
+      name: 'threat.feed.name',
+      type: 'string',
+    } as DataViewField,
+  ],
+} as DataView;
 
 export default {
   component: IndicatorsFieldSelector,
@@ -34,7 +32,7 @@ export default {
 export const Default: Story<void> = () => {
   return (
     <IndicatorsFieldSelector
-      indexPatterns={mockIndexPatterns}
+      indexPattern={mockIndexPattern}
       // eslint-disable-next-line no-console
       valueChange={(value: string) => console.log(value)}
     />
@@ -44,7 +42,7 @@ export const Default: Story<void> = () => {
 export const WithDefaultValue: Story<void> = () => {
   return (
     <IndicatorsFieldSelector
-      indexPatterns={mockIndexPatterns}
+      indexPattern={mockIndexPattern}
       // eslint-disable-next-line no-console
       valueChange={(value: string) => console.log(value)}
       defaultStackByValue={RawIndicatorFieldId.LastSeen}
@@ -55,7 +53,7 @@ export const WithDefaultValue: Story<void> = () => {
 export const NoData: Story<void> = () => {
   return (
     <IndicatorsFieldSelector
-      indexPatterns={[]}
+      indexPattern={{ fields: [] } as any}
       // eslint-disable-next-line no-console
       valueChange={(value: string) => console.log(value)}
     />

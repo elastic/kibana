@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-import { createContext } from 'react';
-import { SecuritySolutionPluginContext } from '../types';
-
-export const SecuritySolutionContext = createContext<SecuritySolutionPluginContext | undefined>(
-  undefined
-);
+export * from './indicators_field_browser';

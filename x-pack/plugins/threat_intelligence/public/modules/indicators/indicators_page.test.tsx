@@ -11,6 +11,8 @@ import { TestProvidersComponent } from '../../common/mocks/test_providers';
 import { IndicatorsPage } from './indicators_page';
 import { useIndicators } from './hooks/use_indicators';
 import { useIndicatorsTotalCount } from './hooks/use_indicators_total_count';
+import { useAggregatedIndicators } from './hooks/use_aggregated_indicators';
+
 import {
   TABLE_TEST_ID as INDICATORS_TABLE_TEST_ID,
   TABLE_TEST_ID,
@@ -19,6 +21,7 @@ import { EMPTY_PROMPT_TEST_ID } from '../empty_page';
 import { useIntegrationsPageLink } from '../../hooks/use_integrations_page_link';
 import { useTIDocumentationLink } from '../../hooks/use_documentation_link';
 import { useFilters } from './hooks/use_filters';
+import moment from 'moment';
 
 jest.mock('./hooks/use_indicators');
 jest.mock('./hooks/use_indicators_total_count');
@@ -26,11 +29,20 @@ jest.mock('./hooks/use_filters');
 
 jest.mock('../../hooks/use_integrations_page_link');
 jest.mock('../../hooks/use_documentation_link');
+jest.mock('./hooks/use_aggregated_indicators');
 
 const stub = () => {};
 
 describe('<IndicatorsPage />', () => {
   beforeAll(() => {
+    (
+      useAggregatedIndicators as jest.MockedFunction<typeof useAggregatedIndicators>
+    ).mockReturnValue({
+      dateRange: { min: moment(), max: moment() },
+      indicators: [],
+      onFieldChange: () => {},
+    });
+
     (useIndicators as jest.MockedFunction<typeof useIndicators>).mockReturnValue({
       indicators: [{ fields: {} }],
       indicatorCount: 1,
@@ -45,7 +57,6 @@ describe('<IndicatorsPage />', () => {
       filters: [],
       filterQuery: { language: 'kuery', query: '' },
       filterManager: {} as any,
-      indexPatterns: [],
       handleSavedQuery: stub,
       handleSubmitQuery: stub,
       handleSubmitTimeRange: stub,
@@ -68,11 +79,7 @@ describe('<IndicatorsPage />', () => {
           useTIDocumentationLink as jest.MockedFunction<typeof useTIDocumentationLink>
         ).mockReturnValue('');
 
-        const { queryByTestId } = render(
-          <TestProvidersComponent>
-            <IndicatorsPage />
-          </TestProvidersComponent>
-        );
+        const { queryByTestId } = render(<IndicatorsPage />, { wrapper: TestProvidersComponent });
 
         expect(queryByTestId(EMPTY_PROMPT_TEST_ID)).not.toBeInTheDocument();
         expect(queryByTestId(TABLE_TEST_ID)).not.toBeInTheDocument();
@@ -94,11 +101,7 @@ describe('<IndicatorsPage />', () => {
           useTIDocumentationLink as jest.MockedFunction<typeof useTIDocumentationLink>
         ).mockReturnValue('');
 
-        const { queryByTestId } = render(
-          <TestProvidersComponent>
-            <IndicatorsPage />
-          </TestProvidersComponent>
-        );
+        const { queryByTestId } = render(<IndicatorsPage />, { wrapper: TestProvidersComponent });
 
         expect(queryByTestId(TABLE_TEST_ID)).not.toBeInTheDocument();
         expect(queryByTestId(EMPTY_PROMPT_TEST_ID)).toBeInTheDocument();
@@ -115,11 +118,7 @@ describe('<IndicatorsPage />', () => {
         isLoading: false,
       });
 
-      const { queryByTestId } = render(
-        <TestProvidersComponent>
-          <IndicatorsPage />
-        </TestProvidersComponent>
-      );
+      const { queryByTestId } = render(<IndicatorsPage />, { wrapper: TestProvidersComponent });
 
       expect(queryByTestId(INDICATORS_TABLE_TEST_ID)).toBeInTheDocument();
       expect(queryByTestId(EMPTY_PROMPT_TEST_ID)).not.toBeInTheDocument();
