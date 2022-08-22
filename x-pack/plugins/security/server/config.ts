@@ -83,6 +83,7 @@ function getUniqueProviderSchema<TProperties extends Record<string, Type<any>>>(
 }
 
 type ProvidersConfigType = TypeOf<typeof providersConfigSchema>;
+
 const providersConfigSchema = schema.object(
   {
     basic: getUniqueProviderSchema('basic', {
@@ -237,6 +238,7 @@ export const ConfigSchema = schema.object({
   }),
   authc: schema.object({
     selector: schema.object({ enabled: schema.maybe(schema.boolean()) }),
+    accessAgreement: schema.maybe(schema.object({message: schema.string()})),
     providers: schema.oneOf([schema.arrayOf(schema.string()), providersConfigSchema], {
       defaultValue: {
         basic: {
@@ -306,6 +308,7 @@ export function createConfig(
   }
 
   let secureCookies = config.secureCookies;
+
   if (!isTLSEnabled) {
     if (secureCookies) {
       logger.warn(
@@ -322,22 +325,25 @@ export function createConfig(
   }
 
   const isUsingLegacyProvidersFormat = Array.isArray(config.authc.providers);
-  const providers = (
+
+  let providers = (
     isUsingLegacyProvidersFormat
       ? [...new Set(config.authc.providers as Array<keyof ProvidersConfigType>)].reduce(
           (legacyProviders, providerType, order) => {
             legacyProviders[providerType] = {
-              [providerType]:
-                providerType === 'saml' || providerType === 'oidc'
-                  ? { enabled: true, showInSelector: true, order, ...config.authc[providerType] }
-                  : { enabled: true, showInSelector: true, order },
+              [providerType]: providerType === 'saml' || providerType === 'oidc' ?
+                { enabled: true, showInSelector: true, order, ...config.authc[providerType] } :
+                { enabled: true, showInSelector: true, order },
             };
+
             return legacyProviders;
           },
           {} as Record<string, unknown>
         )
       : config.authc.providers
-  ) as ProvidersConfigType;
+    ) as ProvidersConfigType;
+
+  const updatedProvidersWithAccessAgreement: Record<string, object> = {};
 
   // Remove disabled providers and sort the rest.
   const sortedProviders: Array<{
@@ -346,20 +352,49 @@ export function createConfig(
     order: number;
     hasAccessAgreement: boolean;
   }> = [];
+
   for (const [type, providerGroup] of Object.entries(providers)) {
     for (const [name, { enabled, order, accessAgreement }] of Object.entries(providerGroup ?? {})) {
+      const hasLocalAccessAgreement: boolean = !!accessAgreement?.message;
+      const globalAccessAgreement = config.authc?.accessAgreement?.message;
+
+      let currType = {
+        ...updatedProvidersWithAccessAgreement[type],
+        [name]: {
+          ...providerGroup[name],
+        }
+      };
+
+      if (!hasLocalAccessAgreement) {
+        if (globalAccessAgreement) {
+          currType[name] = {
+            ...currType[name],
+            accessAgreement: {
+              message: globalAccessAgreement
+            }
+          }
+        }
+      }
+
+      updatedProvidersWithAccessAgreement[type] = currType
+
       if (!enabled) {
         delete providerGroup![name];
       } else {
+
+        const hasAccessAgreement: boolean = hasLocalAccessAgreement || !!globalAccessAgreement;
+
         sortedProviders.push({
           type: type as any,
           name,
           order,
-          hasAccessAgreement: !!accessAgreement?.message,
+          hasAccessAgreement,
         });
       }
     }
   }
+
+  providers = updatedProvidersWithAccessAgreement as ProvidersConfigType;
 
   sortedProviders.sort(({ order: orderA }, { order: orderB }) =>
     orderA < orderB ? -1 : orderA > orderB ? 1 : 0
@@ -391,6 +426,7 @@ export function createConfig(
         max: 10,
       },
     } as AppenderConfigType);
+
   return {
     ...config,
     audit: {
