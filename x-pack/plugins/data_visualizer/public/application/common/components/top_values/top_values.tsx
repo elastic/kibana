@@ -44,14 +44,7 @@ function getPercentLabel(docCount: number, topValuesSampleSize: number): string 
 
 export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed, onAddFilter }) => {
   if (stats === undefined || !stats.topValues) return null;
-  const {
-    topValues,
-    topValuesSampleSize,
-    topValuesSamplerShardSize,
-    count,
-    isTopValuesSampled,
-    fieldName,
-  } = stats;
+  const { topValues, topValuesSampleSize, count, isTopValuesSampled, fieldName } = stats;
 
   const progressBarMax = isTopValuesSampled === true ? topValuesSampleSize : count;
   return (
@@ -148,16 +141,15 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
               ) : null}
             </EuiFlexGroup>
           ))}
-        {/* @TODO: REMOVE*/}
         {isTopValuesSampled === true && (
           <Fragment>
             <EuiSpacer size="xs" />
             <EuiText size="xs" textAlign={'center'}>
               <FormattedMessage
                 id="xpack.dataVisualizer.dataGrid.field.topValues.calculatedFromSampleDescription"
-                defaultMessage="Calculated from sample of {topValuesSamplerShardSize} documents"
+                defaultMessage="Calculated from sample of {topValuesSampleSize} documents"
                 values={{
-                  topValuesSamplerShardSize,
+                  topValuesSampleSize,
                 }}
               />
             </EuiText>

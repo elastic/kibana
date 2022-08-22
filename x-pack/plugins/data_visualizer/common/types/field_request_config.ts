@@ -65,7 +65,6 @@ export interface FieldVisStats {
   min?: number;
   topValues?: Array<{ key: number | string; doc_count: number }>;
   topValuesSampleSize?: number;
-  topValuesSamplerShardSize?: number;
   examples?: Array<string | GeoPointExample | object>;
   timeRangeEarliest?: number;
   timeRangeLatest?: number;

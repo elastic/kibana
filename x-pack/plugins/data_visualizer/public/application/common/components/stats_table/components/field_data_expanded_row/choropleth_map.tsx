@@ -97,7 +97,7 @@ interface Props {
 }
 
 export const ChoroplethMap: FC<Props> = ({ stats, suggestion }) => {
-  const { fieldName, isTopValuesSampled, topValues, topValuesSamplerShardSize } = stats!;
+  const { fieldName, isTopValuesSampled, topValues, topValuesSampleSize } = stats!;
 
   const layerList: VectorLayerDescriptor[] = useMemo(
     () => [getChoroplethTopValuesLayer(fieldName || '', topValues || [], suggestion)],
@@ -113,16 +113,15 @@ export const ChoroplethMap: FC<Props> = ({ stats, suggestion }) => {
       <div className={'dvMap__wrapper'}>
         <EmbeddedMapComponent layerList={layerList} />
       </div>
-      {/* @TODO: REMOVE*/}
       {isTopValuesSampled === true && (
         <div>
           <EuiSpacer size={'s'} />
           <EuiText size="xs" textAlign={'center'}>
             <FormattedMessage
               id="xpack.dataVisualizer.dataGrid.fieldExpandedRow.choroplethMapTopValues.calculatedFromSampleDescription"
-              defaultMessage="Calculated from sample of {topValuesSamplerShardSize} documents per shard"
+              defaultMessage="Calculated from sample of {topValuesSampleSize} documents"
               values={{
-                topValuesSamplerShardSize,
+                topValuesSampleSize,
               }}
             />
           </EuiText>

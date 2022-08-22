@@ -102,8 +102,6 @@ export const fetchStringFieldsStats = (
             isTopValuesSampled: true,
             topValues,
             topValuesSampleSize: params.totalCount,
-            // @todo: remove
-            topValuesSamplerShardSize: get(aggregations, ['sample', 'doc_count']),
           };
 
           batchStats.push(stats);

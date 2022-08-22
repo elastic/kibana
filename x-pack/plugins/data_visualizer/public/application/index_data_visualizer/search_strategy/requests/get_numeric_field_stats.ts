@@ -149,8 +149,6 @@ export const fetchNumericFieldsStats = (
             isTopValuesSampled: field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD,
             topValues,
             topValuesSampleSize: get(aggregations, ['sample', 'doc_count']),
-            // @todo: remove
-            topValuesSamplerShardSize: get(aggregations, ['sample', 'doc_count']),
           };
 
           if (stats.count > 0) {

@@ -61,7 +61,6 @@ export interface NumericFieldStats {
   isTopValuesSampled: boolean;
   topValues: Bucket[];
   topValuesSampleSize: number;
-  topValuesSamplerShardSize: number;
   median?: number;
   distribution?: Distribution;
 }
@@ -71,7 +70,6 @@ export interface StringFieldStats {
   isTopValuesSampled: boolean;
   topValues: Bucket[];
   topValuesSampleSize: number;
-  topValuesSamplerShardSize: number;
 }
 
 export interface DateFieldStats {
