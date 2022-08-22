@@ -9,7 +9,6 @@ import { ESTermSource, extractPropertiesMap } from './es_term_source';
 
 jest.mock('../../layers/vector_layer', () => {});
 
-const indexPatternTitle = 'myIndex';
 const termFieldName = 'myTermField';
 const sumFieldName = 'myFieldGettingSummed';
 const metricExamples = [
@@ -33,19 +32,17 @@ describe('getMetricFields', () => {
   it('should override name and label of count metric', async () => {
     const source = new ESTermSource({
       id: '1234',
-      indexPatternTitle: indexPatternTitle,
       term: termFieldName,
       indexPatternId: 'foobar',
     });
     const metrics = source.getMetricFields();
     expect(metrics[0].getName()).toEqual('__kbnjoin__count__1234');
-    expect(await metrics[0].getLabel()).toEqual('Count of myIndex');
+    expect(await metrics[0].getLabel()).toEqual('Count of foobar');
   });
 
   it('should override name and label of sum metric', async () => {
     const source = new ESTermSource({
       id: '1234',
-      indexPatternTitle: indexPatternTitle,
       term: termFieldName,
       metrics: metricExamples,
       indexPatternId: 'foobar',
@@ -54,7 +51,7 @@ describe('getMetricFields', () => {
     expect(metrics[0].getName()).toEqual('__kbnjoin__sum_of_myFieldGettingSummed__1234');
     expect(await metrics[0].getLabel()).toEqual('my custom label');
     expect(metrics[1].getName()).toEqual('__kbnjoin__count__1234');
-    expect(await metrics[1].getLabel()).toEqual('Count of myIndex');
+    expect(await metrics[1].getLabel()).toEqual('Count of foobar');
   });
 });
 
@@ -114,7 +111,6 @@ describe('getSyncMeta', () => {
   it('should contain meta requiring source re-fetch when changed', () => {
     const source = new ESTermSource({
       id: '1234',
-      indexPatternTitle: indexPatternTitle,
       term: termFieldName,
       indexPatternId: 'foobar',
       size: 10,
