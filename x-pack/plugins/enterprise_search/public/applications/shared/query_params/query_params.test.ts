@@ -5,19 +5,11 @@
  * 2.0.
  */
 
-import { parseQueryParams, addQueryParameter } from '.';
+import { parseQueryParams } from '.';
 
 describe('parseQueryParams', () => {
   it('parse query strings', () => {
     expect(parseQueryParams('?foo=bar')).toEqual({ foo: 'bar' });
     expect(parseQueryParams('?foo[]=bar&foo[]=baz')).toEqual({ foo: ['bar', 'baz'] });
-  });
-});
-
-describe('addQueryParameter', () => {
-  it('adds query parameters', () => {
-    expect(addQueryParameter('/foo/bar', 'baz', 'buzz')).toEqual('/foo/bar?baz=buzz');
-    expect(addQueryParameter('/foo/bar', 'baz', 'buzz%=1')).toEqual('/foo/bar?baz=buzz%25%3D1');
-    expect(addQueryParameter('/foo/bar?t=123', 'baz', 'buzz')).toEqual('/foo/bar?baz=buzz&t=123');
   });
 });
