@@ -20,12 +20,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { IntervalField, QueryIdField, QueryDescriptionField, VersionField } from '../../form';
 import { PlatformCheckBoxGroupField } from '../../packs/queries/platform_checkbox_group_field';
 import { ALL_OSQUERY_VERSIONS_OPTIONS } from '../../packs/queries/constants';
-import { Field, getUseField } from '../../shared_imports';
 import { ECSMappingEditorField } from '../../packs/queries/lazy_ecs_mapping_editor_field';
 import { PlaygroundFlyout } from './playground_flyout';
 import { CodeEditorField } from './code_editor_field';
-
-export const CommonUseField = getUseField({ component: Field });
 
 interface SavedQueryFormProps {
   viewMode?: boolean;
