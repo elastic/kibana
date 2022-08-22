@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { rawRules } from '../../../server/lib/detection_engine/rules/prepackaged_rules';
 import {
   COLLAPSED_ACTION_BTN,
   ELASTIC_RULES_BTN,
@@ -12,11 +13,11 @@ import {
   RELOAD_PREBUILT_RULES_BTN,
   RULES_EMPTY_PROMPT,
   RULE_SWITCH,
-  SHOWING_RULES_TEXT,
   RULES_MONITORING_TABLE,
   SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
+  RULES_TABLE,
 } from '../../screens/alerts_detection_rules';
-
+import type { Rule } from '../../../public/detections/containers/detection_engine/rules/types';
 import {
   deleteFirstRule,
   deleteSelectedRules,
@@ -46,7 +47,13 @@ describe('Prebuilt rules', () => {
 
   describe('Alerts rules, prebuilt rules', () => {
     it('Loads prebuilt rules', () => {
-      const rowsPerPage = 100;
+      cy.intercept('/api/detection_engine/rules/_find*', {
+        data: rawRules,
+        page: 1,
+        perPage: 10000,
+        total: rawRules.length,
+      }).as('findRules');
+      const rowsPerPage = 20;
       const expectedNumberOfRules = totalNumberOfPrebuiltRules;
       const expectedNumberOfPages = Math.ceil(totalNumberOfPrebuiltRules / rowsPerPage);
       const expectedElasticRulesBtnText = `Elastic rules (${expectedNumberOfRules})`;
@@ -57,12 +64,16 @@ describe('Prebuilt rules', () => {
 
       cy.get(ELASTIC_RULES_BTN).should('have.text', expectedElasticRulesBtnText);
 
+      // Assert that first page of rules is loaded with rules returned by the API
+      cy.wait('@findRules').then(({ response }) => {
+        const rules = response?.body.data.slice(0, rowsPerPage);
+        rules.forEach((rule: Rule) => {
+          cy.get(RULES_TABLE).should('contain', rule.name);
+        });
+      });
+
       changeRowsPerPageTo(rowsPerPage);
 
-      cy.get(SHOWING_RULES_TEXT).should(
-        'have.text',
-        `Showing 1-${rowsPerPage} of ${expectedNumberOfRules} rules`
-      );
       cy.get(pageSelector(expectedNumberOfPages)).should('exist');
     });
 
