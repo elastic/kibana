@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+/* This test expects a deprecation which is valid only on 7.x. So, this is enabled on 7.x
+ * and disabled on 8.x. Should be enabled again when 8.x to next major upgrade happens with
+ * valid deprecations
+ */
+
 import type { IndicesCreateRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FtrProviderContext } from '../ftr_provider_context';
 
