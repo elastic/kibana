@@ -29,7 +29,7 @@ revolveBuildHashes() {
 }
 
 collectRan() {
-  buildkite-agent artifact download target/ran_files/* .
+  download_artifact target/ran_files/* .
 
   while read -r x; do
     ran=("${ran[@]}" "$(cat "$x")")
@@ -51,7 +51,7 @@ fetchArtifacts() {
 
   local xs=("$@")
   for x in "${xs[@]}"; do
-    buildkite-agent artifact download "target/kibana-coverage/${x}/*" .
+    download_artifact "target/kibana-coverage/${x}/*" .
   done
 }
 

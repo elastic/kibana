@@ -15,8 +15,8 @@ import type {
   SavedObjectsExportByTypeOptions,
   SavedObjectsExportByObjectOptions,
 } from '@kbn/core-saved-objects-server';
+import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
 import { InternalCoreUsageDataSetup } from '../../core_usage_data';
-import { SavedObjectConfig } from '../saved_objects_config';
 import { SavedObjectsExportError } from '../export';
 import type { InternalSavedObjectRouter } from '../internal_types';
 import { validateTypes, validateObjects, catchAndReturnBoomErrors } from './utils';

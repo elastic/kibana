@@ -6,6 +6,7 @@
  */
 
 export enum ErrorCode {
+  ANALYTICS_COLLECTION_ALREADY_EXISTS = 'analytics_collection_already_exists',
   CONNECTOR_DOCUMENT_ALREADY_EXISTS = 'connector_document_already_exists',
   CRAWLER_ALREADY_EXISTS = 'crawler_already_exists',
   INDEX_ALREADY_EXISTS = 'index_already_exists',
