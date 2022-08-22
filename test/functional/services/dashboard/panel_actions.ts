@@ -199,7 +199,7 @@ export class DashboardPanelActionsService extends FtrService {
       const exists = await this.testSubjects.exists('libraryNotificationUnlinkButton');
       if (!exists) {
         throw new Error('Visualize Library Notification popover did not open');
-      } 
+      }
     });
     await this.testSubjects.click('libraryNotificationUnlinkButton');
   }
