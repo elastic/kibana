@@ -6,17 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import createContainer from 'constate';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useColumns as useDiscoverColumns } from '../../../../hooks/use_data_grid_columns';
 import { useDiscoverStateContext } from './use_discover_state';
+import { useStateMachineContext } from '../query_data/use_state_machine';
 
 const MESSAGE_FIELD = 'message';
 
 export const useColumns = () => {
   const { capabilities, dataViews, uiSettings } = useDiscoverServices();
   const { dataView, state, stateContainer } = useDiscoverStateContext();
+  const dataAccessService = useStateMachineContext();
 
   const { columns, onAddColumn, onRemoveColumn, onSetColumns } = useDiscoverColumns({
     capabilities,
@@ -44,6 +46,12 @@ export const useColumns = () => {
   const columnsWithDefaults = useMemo(() => {
     return columns.length > 0 ? columns : [dataView.timeFieldName ?? '@timestamp', MESSAGE_FIELD];
   }, [columns, dataView]);
+
+  useEffect(() => {
+    dataAccessService.send({
+      type: 'columnsChanged',
+    });
+  }, [columnsWithDefaults, dataAccessService]);
 
   return {
     columns: columnsWithDefaults,

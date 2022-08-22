@@ -5,9 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import '../../../main/components/layout/discover_layout.scss';
-import React, { useCallback, useEffect, useRef } from 'react';
-import { isOfQueryType } from '@kbn/es-query';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -18,39 +15,42 @@ import {
   EuiPageContent,
   EuiSpacer,
 } from '@elastic/eui';
+import type { SavedObject } from '@kbn/data-plugin/public';
+import type { DataViewAttributes } from '@kbn/data-views-plugin/public';
+import { isOfQueryType } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import classNames from 'classnames';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { useActor } from '@xstate/react';
+import classNames from 'classnames';
+import React, { useCallback, useEffect, useRef } from 'react';
+import { SavedSearchURLConflictCallout } from '../../../../components/saved_search_url_conflict_callout/saved_search_url_conflict_callout';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { DiscoverNoResults } from '../../../main/components/no_results';
-import { LoadingSpinner } from '../../../main/components/loading_spinner/loading_spinner';
-import { DiscoverSidebarResponsive } from '../../../main/components/sidebar';
-import { DiscoverLayoutProps } from '../../../main/components/layout/types';
-import { DiscoverTopNav } from '../../../main/components/top_nav/discover_topnav';
-import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
-import { DiscoverUninitialized } from '../../../main/components/uninitialized/uninitialized';
+import '../../../main/components/layout/discover_layout.scss';
 import { hasActiveFilter } from '../../../main/components/layout/utils';
-import { LogExplorer } from './log_explorer';
-import { useStateMachineContext } from '../../hooks/query_data/use_state_machine';
-import { useFieldCounts } from '../../hooks/use_field_counts';
-import { useDiscoverStateContext } from '../../hooks/discover_state/use_discover_state';
-import { useSidebarState } from '../../hooks/ui/use_sidebar_state';
+import { LoadingSpinner } from '../../../main/components/loading_spinner/loading_spinner';
+import { DiscoverNoResults } from '../../../main/components/no_results';
+import { DiscoverSidebarResponsive } from '../../../main/components/sidebar';
+import { DiscoverTopNav } from '../../../main/components/top_nav/discover_topnav';
+import { DiscoverUninitialized } from '../../../main/components/uninitialized/uninitialized';
 import { useDiscoverColumnsContext } from '../../hooks/discover_state/use_columns';
-import { SavedSearchURLConflictCallout } from '../../../../components/saved_search_url_conflict_callout/saved_search_url_conflict_callout';
+import { useDiscoverStateContext } from '../../hooks/discover_state/use_discover_state';
+import { useStateMachineContext } from '../../hooks/query_data/use_state_machine';
+import { useSidebarState } from '../../hooks/ui/use_sidebar_state';
+import { useFieldCounts } from '../../hooks/use_field_counts';
+import { LogExplorer } from './log_explorer';
 import { LogExplorerHistogram } from './log_explorer_histogram';
 
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
 const LogExplorerHistogramMemoized = React.memo(LogExplorerHistogram);
 
-export function LogExplorerLayout({
-  dataViewList,
-  inspectorAdapters,
-  expandedDoc,
-  setExpandedDoc,
-  savedSearch,
-}: DiscoverLayoutProps) {
+export interface LogExplorerLayoutProps {
+  dataViewList: Array<SavedObject<DataViewAttributes>>;
+  savedSearch: SavedSearch;
+}
+
+export function LogExplorerLayout({ dataViewList, savedSearch }: LogExplorerLayoutProps) {
   // Access to Discover services
   const { trackUiMetric, data, storage, history, spaces, inspector } = useDiscoverServices();
 
@@ -237,17 +237,7 @@ export function LogExplorerLayout({
                   gutterSize="none"
                   responsive={false}
                 >
-                  <LogExplorer
-                    stateMachine={stateMachine}
-                    expandedDoc={expandedDoc}
-                    dataView={dataView}
-                    navigateTo={navigateTo}
-                    onAddFilter={onAddFilter as DocViewFilterFn}
-                    savedSearch={savedSearch}
-                    setExpandedDoc={setExpandedDoc}
-                    state={state}
-                    stateContainer={stateContainer}
-                  />
+                  <LogExplorer stateMachine={stateMachine} />
                 </EuiFlexGroup>
               )}
             </EuiPageContent>
