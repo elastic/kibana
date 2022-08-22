@@ -5,24 +5,22 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { spawn } from 'xstate';
 import { QueryStart } from '@kbn/data-plugin/public';
 import { TimeRange } from '@kbn/es-query';
 import { useInterpret } from '@xstate/react';
 import createContainer from 'constate';
 import moment from 'moment';
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 import { merge, of } from 'rxjs';
-import {
-  dataAccessStateMachine,
-  loadAfter,
-  loadAround,
-  loadBefore,
-} from '../../state_machines/entries_state_machine';
-import { loadTail } from '../../state_machines/data_access_state_machine/load_tail_service';
-import { loadHistogram } from '../../state_machines/data_access_state_machine/load_histogram_service';
+import { dataAccessStateMachine } from '../../state_machines/data_access_state_machine/state_machine';
+import { loadAfter, loadAround, loadBefore } from '../../state_machines/entries_state_machine';
+import { loadTail } from '../../state_machines/entries_state_machine/services/load_tail_service';
+import { loadHistogram } from '../../state_machines/histogram_state_machine/services/load_histogram_service';
 import { useSubscription } from '../use_observable';
 import { useDiscoverStateContext } from '../discover_state/use_discover_state';
+import { entriesStateMachine } from '../../state_machines/entries_state_machine';
+import { histogramStateMachine } from '../../state_machines/histogram_state_machine';
 
 export const useStateMachineService = ({
   virtualRowCount,
@@ -42,64 +40,9 @@ export const useStateMachineService = ({
 
   const dataAccessService = useInterpret(
     () => {
-      const initialTimeRange = timefilter.getAbsoluteTime();
-
-      return dataAccessStateMachine.withContext({
-        configuration: {
-          chunkSize: 200,
-          minimumChunkOverscan: 50,
-        },
-        dataView,
-        timeRange: initialTimeRange,
-        filters: filterManager.getFilters(),
-        query: queryString.getQuery(),
-        position: {
-          timestamp: getMiddleOfTimeRange(initialTimeRange),
-          tiebreaker: 0,
-        },
-        topChunk: {
-          status: 'uninitialized',
-        },
-        bottomChunk: {
-          status: 'uninitialized',
-        },
-        histogram: {
-          data: [],
-        },
-      });
+      return dataAccessStateMachine;
     },
     {
-      services: {
-        loadAround: loadAround({
-          centerRowIndex,
-          dataView,
-          query,
-          searchSource,
-        }),
-        loadBefore: loadBefore({
-          dataView,
-          query,
-          searchSource,
-        }),
-        loadAfter: loadAfter({
-          dataView,
-          query,
-          searchSource,
-        }),
-        loadTail: loadTail({
-          dataView,
-          query,
-          searchSource,
-        }),
-        loadHistogram: loadHistogram({
-          dataView,
-          query,
-          searchSource,
-        }),
-      },
-      delays: {
-        loadTailDelay: () => timefilter.getRefreshInterval().value,
-      },
       devTools: true,
     }
   );
@@ -161,6 +104,88 @@ export const useStateMachineService = ({
       },
     }
   );
+
+  const initialize = useCallback(() => {
+    const initialTimeRange = timefilter.getAbsoluteTime();
+
+    const subContext = {
+      dataView,
+      position: {
+        timestamp: getMiddleOfTimeRange(initialTimeRange),
+        tiebreaker: 0,
+      },
+      timeRange: initialTimeRange,
+      filters: filterManager.getFilters(),
+      query: queryString.getQuery(),
+    };
+
+    dataAccessService.send({
+      type: 'initialize',
+      initialEntriesContext: {
+        ...subContext,
+        configuration: {
+          chunkSize: 200,
+          minimumChunkOverscan: 50,
+        },
+        topChunk: {
+          status: 'uninitialized',
+        },
+        bottomChunk: {
+          status: 'uninitialized',
+        },
+      },
+      initialEntriesServices: {
+        loadAround: loadAround({
+          centerRowIndex,
+          dataView,
+          query,
+          searchSource,
+        }),
+        loadBefore: loadBefore({
+          dataView,
+          query,
+          searchSource,
+        }),
+        loadAfter: loadAfter({
+          dataView,
+          query,
+          searchSource,
+        }),
+        loadTail: loadTail({
+          dataView,
+          query,
+          searchSource,
+        }),
+      },
+      initialEntriesDelays: {
+        loadTailDelay: () => timefilter.getRefreshInterval().value,
+      },
+      initialHistogramContext: {
+        ...subContext,
+        breakdownField: 'event.dataset',
+        histogram: [],
+      },
+      initialHistogramServices: {
+        loadHistogram: loadHistogram({
+          dataView,
+          query,
+          searchSource,
+        }),
+      },
+    });
+  }, [
+    centerRowIndex,
+    dataAccessService,
+    dataView,
+    filterManager,
+    query,
+    queryString,
+    searchSource,
+    timefilter,
+  ]);
+
+  // TODO: Properly hook this up to the uninitialized state (based on the advanced setting)
+  initialize();
 
   return dataAccessService;
 };

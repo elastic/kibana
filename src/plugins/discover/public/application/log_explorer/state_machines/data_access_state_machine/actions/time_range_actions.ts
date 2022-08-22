@@ -7,17 +7,26 @@
  */
 
 import { assign } from 'xstate';
-import { LogExplorerContext, LogExplorerEvent } from '../_types';
+import { EntriesMachineContext, EntriesMachineEvent } from '../../entries_state_machine/types';
+import {
+  HistogramMachineContext,
+  HistogramMachineEvent,
+} from '../../histogram_state_machine/types';
 
-export const updateTimeRange = assign((context: LogExplorerContext, event: LogExplorerEvent) => {
-  if (event.type !== 'timeRangeChanged') {
-    return context;
+export const updateTimeRange = assign(
+  (
+    context: EntriesMachineContext | HistogramMachineContext,
+    event: EntriesMachineEvent | HistogramMachineEvent
+  ) => {
+    if (event.type !== 'timeRangeChanged') {
+      return context;
+    }
+
+    const { timeRange } = event;
+
+    return {
+      ...context,
+      timeRange,
+    };
   }
-
-  const { timeRange } = event;
-
-  return {
-    ...context,
-    timeRange,
-  };
-});
+);

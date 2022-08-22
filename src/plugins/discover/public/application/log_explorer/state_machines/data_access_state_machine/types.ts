@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { ActorRefFrom } from 'xstate';
 import { DataView } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { LogExplorerPosition } from '../../types';
@@ -44,16 +44,20 @@ export type SharedExternalEvent =
 
 export type DataAccessMachineContext = SharedContext & {
   // Sub state machines
-  entries: EntriesStateMachine;
-  histogram: HistogramStateMachine;
+  entries: ActorRefFrom<EntriesStateMachine>;
+  histogram: ActorRefFrom<HistogramStateMachine>;
 };
 
 export type LogExplorerQuery = Query | AggregateQuery;
 
 // the value union is not ideal, but the closest we can get without typegen
 export interface DataAccessMachineState {
-  value: 'uninitialized' | 'initialized';
+  value: 'uninitialized' | 'initializing' | 'initialized';
   context: DataAccessMachineContext;
+}
+
+export interface DataAccessMachineInternalEvent {
+  type: 'initialize';
 }
 
 export type DataAccessMachineExternalEvent =
@@ -76,6 +80,14 @@ export type DataAccessMachineExternalEvent =
   | {
       type: 'positionChanged';
       position: LogExplorerPosition;
+    }
+  | {
+      type: 'startTailing';
+    }
+  | {
+      type: 'stopTailing';
     };
 
-export type DataAccessMachineEvent = DataAccessMachineExternalEvent;
+export type DataAccessMachineEvent =
+  | DataAccessMachineExternalEvent
+  | DataAccessMachineInternalEvent;

@@ -7,17 +7,26 @@
  */
 
 import { assign } from 'xstate';
-import { LogExplorerContext, LogExplorerEvent } from '../_types';
+import { EntriesMachineContext, EntriesMachineEvent } from '../../entries_state_machine/types';
+import {
+  HistogramMachineContext,
+  HistogramMachineEvent,
+} from '../../histogram_state_machine/types';
 
-export const updatePosition = assign((context: LogExplorerContext, event: LogExplorerEvent) => {
-  if (event.type !== 'positionChanged') {
-    return context;
+export const updatePosition = assign(
+  (
+    context: EntriesMachineContext | HistogramMachineContext,
+    event: EntriesMachineEvent | HistogramMachineEvent
+  ) => {
+    if (event.type !== 'positionChanged') {
+      return context;
+    }
+
+    const { position } = event;
+
+    return {
+      ...context,
+      position,
+    };
   }
-
-  const { position } = event;
-
-  return {
-    ...context,
-    position,
-  };
-});
+);

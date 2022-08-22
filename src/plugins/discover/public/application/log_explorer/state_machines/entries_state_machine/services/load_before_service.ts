@@ -22,7 +22,7 @@ import {
   getPredecessorPosition,
 } from '../../../utils/cursor';
 import { getEntryFromHit } from '../../../utils/entry';
-import { LogExplorerContext, LogExplorerEvent } from './types';
+import { EntriesMachineContext, EntriesMachineEvent } from '../types';
 
 export type LoadBeforeParameters = FetchEntriesBeforeParameters & {
   topEndRowIndex: number;
@@ -55,7 +55,7 @@ export const loadBefore = ({
     searchSource,
   });
 
-  return (context: LogExplorerContext): Observable<LoadBeforeEvent> => {
+  return (context: EntriesMachineContext): Observable<LoadBeforeEvent> => {
     const {
       configuration: { chunkSize },
       filters,
@@ -112,7 +112,7 @@ export const loadBefore = ({
 };
 
 export const updateChunksFromLoadBefore = assign(
-  (context: LogExplorerContext, event: LogExplorerEvent) => {
+  (context: EntriesMachineContext, event: EntriesMachineEvent) => {
     if (event.type !== 'loadBeforeSucceeded') {
       return context;
     }
@@ -162,7 +162,7 @@ export const createTopChunkFromResponse = (
 };
 
 export const prependNewTopChunk = assign(
-  (context: LogExplorerContext, _event: LogExplorerEvent) => {
+  (context: EntriesMachineContext, _event: EntriesMachineEvent) => {
     const { topChunk, bottomChunk } = context;
 
     if (topChunk.status !== 'loaded' || bottomChunk.status !== 'loaded') {

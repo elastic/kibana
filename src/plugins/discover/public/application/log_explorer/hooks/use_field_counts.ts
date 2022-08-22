@@ -8,10 +8,7 @@
 
 import { useSelector } from '@xstate/react';
 import isDeepEqual from 'fast-deep-equal';
-import {
-  DataAccessService,
-  memoizedSelectFieldCounts,
-} from '../state_machines/entries_state_machine';
+import { EntriesService, memoizedSelectFieldCounts } from '../state_machines/entries_state_machine';
 
-export const useFieldCounts = (stateMachine: DataAccessService) =>
+export const useFieldCounts = (stateMachine: EntriesService) =>
   useSelector(stateMachine, memoizedSelectFieldCounts, isDeepEqual);

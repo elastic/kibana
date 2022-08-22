@@ -5,10 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import type { DataViewAttributes } from '@kbn/data-views-plugin/public';
 import type { SavedObject } from '@kbn/data-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { useActor } from '@xstate/react';
 import { LogExplorerLayout } from './components/layout/log_explorer_layout';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { DataTableRecord } from '../../types';
@@ -16,6 +17,8 @@ import { StateMachineProvider as QueryDataProvider } from './hooks/query_data/us
 import { LOG_EXPLORER_VIRTUAL_GRID_ROWS } from './constants';
 import { DiscoverStateProvider } from './hooks/discover_state/use_discover_state';
 import { DiscoverColumnsProvider } from './hooks/discover_state/use_columns';
+import { useStateMachineContext } from './hooks/query_data/use_state_machine';
+import { DiscoverUninitialized } from '../main/components/uninitialized/uninitialized';
 
 const LogExplorerLayoutMemoized = React.memo(LogExplorerLayout);
 
@@ -39,7 +42,7 @@ export function LogExplorerMainApp(props: LogExplorerMainAppProps) {
     <DiscoverStateProvider savedSearch={savedSearch} setExpandedDoc={setExpandedDoc}>
       <QueryDataProvider virtualRowCount={LOG_EXPLORER_VIRTUAL_GRID_ROWS} query={data.query}>
         <DiscoverColumnsProvider>
-          <LogExplorerLayoutMemoized
+          <LogExplorerLayoutWrapper
             dataViewList={dataViewList}
             expandedDoc={expandedDoc}
             setExpandedDoc={setExpandedDoc}
@@ -50,3 +53,23 @@ export function LogExplorerMainApp(props: LogExplorerMainAppProps) {
     </DiscoverStateProvider>
   );
 }
+
+const LogExplorerLayoutWrapper = ({ dataViewList, expandedDoc, setExpandedDoc, savedSearch }) => {
+  const stateMachine = useStateMachineContext();
+  const [dataAccessState] = useActor(stateMachine);
+
+  const loadData = useCallback(() => {
+    stateMachine.send('initialize');
+  }, [stateMachine]);
+
+  return dataAccessState.matches('uninitialized') ? (
+    <DiscoverUninitialized onRefresh={loadData} />
+  ) : (
+    <LogExplorerLayoutMemoized
+      dataViewList={dataViewList}
+      expandedDoc={expandedDoc}
+      setExpandedDoc={setExpandedDoc}
+      savedSearch={savedSearch}
+    />
+  );
+};

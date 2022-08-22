@@ -92,7 +92,8 @@ export function LogExplorerLayout({
   // Data querying state machine access and derivatives
   const stateMachine = useStateMachineContext();
   const [dataAccessState] = useActor(stateMachine);
-  const fieldCounts = useFieldCounts(stateMachine);
+  const [entriesState] = useActor(dataAccessState.context.entries);
+  const fieldCounts = useFieldCounts(entriesState);
 
   // Sidebar state
   const { isSidebarClosed, toggleSidebarCollapse } = useSidebarState({
@@ -102,18 +103,13 @@ export function LogExplorerLayout({
   // Columns
   const { columns, onAddColumn, onRemoveColumn } = useDiscoverColumnsContext();
 
-  const loadData = useCallback(() => {
-    stateMachine.send('load');
-  }, [stateMachine]);
-
   const onFieldEdited = useCallback(() => {
     // TODO: Refetch via state machine
     // savedSearchRefetch$.next('reset');
   }, []);
 
   const contentCentered =
-    dataAccessState.matches({ documents: 'uninitialized' }) ||
-    dataAccessState.matches({ documents: 'failedNoData' });
+    entriesState.matches('uninitialized') || entriesState.matches('failedNoData');
 
   const savedSearchTitle = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
@@ -225,8 +221,6 @@ export function LogExplorerLayout({
                   hasFilters={hasActiveFilter(state.filters)}
                   onDisableFilters={onDisableFilters}
                 />
-              ) : dataAccessState.matches({ documents: 'uninitialized' }) ? (
-                <DiscoverUninitialized onRefresh={loadData} />
               ) : dataAccessState.matches({ documents: 'loadingAround' }) ? (
                 <LoadingSpinner />
               ) : (

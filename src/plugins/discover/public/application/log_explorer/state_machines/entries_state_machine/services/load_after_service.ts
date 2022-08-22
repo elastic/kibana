@@ -22,7 +22,7 @@ import {
   getSuccessorPosition,
 } from '../../../utils/cursor';
 import { getEntryFromHit } from '../../../utils/entry';
-import { LogExplorerContext, LogExplorerEvent } from './types';
+import { EntriesMachineContext, EntriesMachineEvent } from '../types';
 
 export type LoadAfterParameters = FetchEntriesAfterParameters & {
   bottomStartRowIndex: number;
@@ -51,7 +51,7 @@ export const loadAfter = ({
 }) => {
   const boundFetchEntriesAfter = fetchEntriesAfter({ dataView, query: queryService, searchSource });
 
-  return (context: LogExplorerContext): Observable<LoadAfterEvent> => {
+  return (context: EntriesMachineContext): Observable<LoadAfterEvent> => {
     const {
       bottomChunk,
       configuration: { chunkSize },
@@ -108,7 +108,7 @@ export const loadAfter = ({
 };
 
 export const updateChunksFromLoadAfter = assign(
-  (context: LogExplorerContext, event: LogExplorerEvent) => {
+  (context: EntriesMachineContext, event: EntriesMachineEvent) => {
     if (event.type !== 'loadAfterSucceeded') {
       return context;
     }
@@ -158,7 +158,7 @@ export const createBottomChunkFromResponse = (
 };
 
 export const appendNewBottomChunk = assign(
-  (context: LogExplorerContext, _event: LogExplorerEvent) => {
+  (context: EntriesMachineContext, _event: EntriesMachineEvent) => {
     const { topChunk, bottomChunk } = context;
 
     if (topChunk.status !== 'loaded' || bottomChunk.status !== 'loaded') {

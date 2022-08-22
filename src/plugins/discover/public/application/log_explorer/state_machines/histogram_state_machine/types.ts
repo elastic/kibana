@@ -11,6 +11,7 @@ import { SharedContext, SharedExternalEvent } from '../data_access_state_machine
 import { LogExplorerHistogramData } from '../../types';
 
 interface Context {
+  breakdownField: string; // NOTE: Not hooked up for real yet
   histogram: LogExplorerHistogramData;
 }
 

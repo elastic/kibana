@@ -40,7 +40,7 @@ export const entriesStateMachine = createMachine<
 >(
   {
     id: 'logExplorerEntries',
-    initial: 'uninitialized',
+    initial: 'loadingAround',
     states: {
       loadingAround: {
         entry: 'resetChunks',
@@ -342,24 +342,6 @@ export const entriesStateMachine = createMachine<
             target: 'failedNoData',
           },
         ],
-      },
-      uninitialized: {
-        on: {
-          positionChanged: {
-            actions: 'updatePosition',
-            target: 'loadingAround',
-          },
-          timeRangeChanged: {
-            actions: 'updateTimeRange',
-            target: 'loadingAround',
-          },
-          columnsChanged: {
-            target: 'loadingAround',
-          },
-          load: {
-            target: 'loadingAround',
-          },
-        },
       },
       tailing: {
         initial: 'loading',

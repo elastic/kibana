@@ -19,7 +19,7 @@ import { LogExplorerChunk, LogExplorerEntry } from '../../../types';
 import { getPositionFromTimestamp, getPredecessorPosition } from '../../../utils/cursor';
 import { getEntriesFromChunk, getEntryFromHit, countAddedEntries } from '../../../utils/entry';
 import { getEndRowIndex, getStartRowIndex } from '../../../utils/row';
-import { LogExplorerContext, LogExplorerEvent } from './types';
+import { EntriesMachineContext, EntriesMachineEvent } from '../types';
 
 export type LoadTailParameters = FetchEntriesBeforeParameters;
 
@@ -50,7 +50,7 @@ export const loadTail = ({
     searchSource,
   });
 
-  return (context: LogExplorerContext): Observable<LoadTailEvent> => {
+  return (context: EntriesMachineContext): Observable<LoadTailEvent> => {
     const {
       configuration: { chunkSize },
       filters,
@@ -92,7 +92,7 @@ export const loadTail = ({
 };
 
 export const updateChunksFromLoadTail = assign(
-  (context: LogExplorerContext, event: LogExplorerEvent) => {
+  (context: EntriesMachineContext, event: EntriesMachineEvent) => {
     if (event.type !== 'loadTailSucceeded') {
       return context;
     }

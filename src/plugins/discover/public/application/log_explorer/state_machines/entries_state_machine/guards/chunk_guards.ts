@@ -10,32 +10,32 @@ import moment from 'moment';
 import { ConditionPredicate } from 'xstate';
 import { getTimestampFromPosition } from '../../../utils/cursor';
 import { getEndRowTimestamp, getStartRowTimestamp } from '../../../utils/row';
-import { LogExplorerContext, LogExplorerEvent } from './types';
+import { EntriesMachineContext, EntriesMachineEvent } from '../types';
 
-export const hasLoadedTopChunk: ConditionPredicate<LogExplorerContext, LogExplorerEvent> = (
+export const hasLoadedTopChunk: ConditionPredicate<EntriesMachineContext, EntriesMachineEvent> = (
   context,
   event
 ) => context.topChunk.status === 'loaded';
 
-export const hasLoadedBottomChunk: ConditionPredicate<LogExplorerContext, LogExplorerEvent> = (
-  context,
-  event
-) => context.bottomChunk.status === 'loaded';
+export const hasLoadedBottomChunk: ConditionPredicate<
+  EntriesMachineContext,
+  EntriesMachineEvent
+> = (context, event) => context.bottomChunk.status === 'loaded';
 
-export const hasEmptyTopChunk: ConditionPredicate<LogExplorerContext, LogExplorerEvent> = (
+export const hasEmptyTopChunk: ConditionPredicate<EntriesMachineContext, EntriesMachineEvent> = (
   context,
   event
 ) => context.topChunk.status === 'empty';
 
-export const hasEmptyBottomChunk: ConditionPredicate<LogExplorerContext, LogExplorerEvent> = (
+export const hasEmptyBottomChunk: ConditionPredicate<EntriesMachineContext, EntriesMachineEvent> = (
   context,
   event
 ) => context.bottomChunk.status === 'empty';
 
-export const isWithinLoadedChunks: ConditionPredicate<LogExplorerContext, LogExplorerEvent> = (
-  context,
-  event
-) => {
+export const isWithinLoadedChunks: ConditionPredicate<
+  EntriesMachineContext,
+  EntriesMachineEvent
+> = (context, event) => {
   if (event.type !== 'positionChanged') {
     return false;
   }

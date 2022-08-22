@@ -12,12 +12,6 @@ import { updateTimeRange } from '../data_access_state_machine/actions/time_range
 import { updateHistogram } from './services/load_histogram_service';
 import { HistogramMachineContext, HistogramMachineEvent, HistogramMachineState } from './types';
 
-// for stubbing guards until all are implemented
-const constantGuard =
-  <Value extends unknown>(value: Value) =>
-  () =>
-    value;
-
 export const histogramStateMachine = createMachine<
   HistogramMachineContext,
   HistogramMachineEvent,
@@ -25,22 +19,8 @@ export const histogramStateMachine = createMachine<
 >(
   {
     id: 'logExplorerHistogram',
-    initial: 'uninitialized',
+    initial: 'loading',
     states: {
-      uninitialized: {
-        on: {
-          timeRangeChanged: {
-            actions: 'updateTimeRange',
-            target: 'loading',
-          },
-          columnsChanged: {
-            target: 'loading',
-          },
-          load: {
-            target: 'loading',
-          },
-        },
-      },
       loading: {
         invoke: {
           src: 'loadHistogram',

@@ -7,11 +7,11 @@
  */
 
 import { ConditionPredicate } from 'xstate';
-import { LogExplorerContext, LogExplorerEvent } from './types';
+import { EntriesMachineContext, EntriesMachineEvent } from '../types';
 
 export const areVisibleEntriesNearStart: ConditionPredicate<
-  LogExplorerContext,
-  LogExplorerEvent
+  EntriesMachineContext,
+  EntriesMachineEvent
 > = (context, event) =>
   event.type === 'visibleEntriesChanged' &&
   context.topChunk.status === 'loaded' &&
@@ -19,10 +19,10 @@ export const areVisibleEntriesNearStart: ConditionPredicate<
   event.visibleStartRowIndex <=
     context.topChunk.startRowIndex + context.configuration.minimumChunkOverscan;
 
-export const areVisibleEntriesNearEnd: ConditionPredicate<LogExplorerContext, LogExplorerEvent> = (
-  context,
-  event
-) =>
+export const areVisibleEntriesNearEnd: ConditionPredicate<
+  EntriesMachineContext,
+  EntriesMachineEvent
+> = (context, event) =>
   event.type === 'visibleEntriesChanged' &&
   context.bottomChunk.status === 'loaded' &&
   event.visibleEndRowIndex <= context.bottomChunk.endRowIndex &&
