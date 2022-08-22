@@ -20,7 +20,7 @@ export default {
 };
 
 const indicatorsFixture: Indicator[] = Array(10).fill(generateMockIndicator());
-const mockIndexPattern: DataView = {} as DataView;
+const mockIndexPattern: DataView = undefined as unknown as DataView;
 
 const stub = () => void 0;
 
