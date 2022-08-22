@@ -65,7 +65,7 @@ export const metricsRequestHandler = async ({
           state: uiStateObj,
           ...(searchOptions
             ? {
-                searchSession: searchSessionId,
+                searchSession: searchOptions,
               }
             : {}),
         }),
