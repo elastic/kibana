@@ -23,7 +23,7 @@ type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
     | 'apm-indices'
     | 'custom-links'
     | 'schema'
-    | 'experimental-features';
+    | 'general-settings';
   hidden?: boolean;
 };
 
@@ -66,6 +66,17 @@ function getTabs({
   const { search } = history.location;
 
   const tabs: Tab[] = [
+    {
+      key: 'general-settings',
+      label: i18n.translate('xpack.apm.settings.generalSettings', {
+        defaultMessage: 'General settings',
+      }),
+      href: getLegacyApmHref({
+        basePath,
+        path: `/settings/general-settings`,
+        search,
+      }),
+    },
     {
       key: 'agent-configuration',
       label: i18n.translate('xpack.apm.settings.agentConfig', {
@@ -128,17 +139,6 @@ function getTabs({
         defaultMessage: 'Schema',
       }),
       href: getLegacyApmHref({ basePath, path: `/settings/schema`, search }),
-    },
-    {
-      key: 'experimental-features',
-      label: i18n.translate('xpack.apm.settings.experimentalFeatures', {
-        defaultMessage: 'Experimental features',
-      }),
-      href: getLegacyApmHref({
-        basePath,
-        path: `/settings/experimental-features`,
-        search,
-      }),
     },
   ];
 

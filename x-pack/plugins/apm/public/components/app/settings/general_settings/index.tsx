@@ -23,7 +23,6 @@ import {
   apmTraceExplorerTab,
   defaultApmServiceEnvironment,
   enableComparisonByDefault,
-  enableInfrastructureView,
   enableInspectEsQueries,
   enableServiceGroups,
 } from '@kbn/observability-plugin/common';
@@ -31,7 +30,6 @@ import React, { useMemo, useState } from 'react';
 
 const experimentalFeatureKeys = [
   apmTraceExplorerTab,
-  enableInfrastructureView,
   enableServiceGroups,
   apmServiceInventoryOptimizedSorting,
   apmOperationsTab,
@@ -76,7 +74,7 @@ function getEditableConfig({
   return config;
 }
 
-export function ExperimentalFeatures() {
+export function GeneralSettings() {
   const [experimentalMode, setExperimentalMode] = useState(false);
 
   const { services } = useKibana();
