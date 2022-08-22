@@ -25,7 +25,7 @@ const BuildingBlockContainer = styled(AdditionalFiltersItem)`
   background: ${({ theme }) => theme.eui.euiColorHighlight};
 `;
 
-export const AditionalFiltersAction = ({
+export const AdditionalFiltersAction = ({
   areEventsLoading,
   onShowBuildingBlockAlertsChanged,
   showBuildingBlockAlerts,

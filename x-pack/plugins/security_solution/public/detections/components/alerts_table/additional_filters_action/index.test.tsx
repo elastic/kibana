@@ -7,17 +7,28 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
+import { AdditionalFiltersAction } from '.';
 
 import { TestProviders } from '../../../../common/mock/test_providers';
 
 jest.useFakeTimers();
 jest.mock('../../../../common/lib/kibana');
 
-describe('AditionalFiltersAction', () => {
+describe('AdditionalFiltersAction', () => {
   describe('UtilityBarAdditionalFiltersContent', () => {
     test('does not show the showBuildingBlockAlerts checked if the showBuildingBlockAlerts is false', () => {
       const onShowBuildingBlockAlertsChanged = jest.fn();
-      const wrapper = mount(<TestProviders />);
+      const wrapper = mount(
+        <TestProviders>
+          <AdditionalFiltersAction
+            onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChanged}
+            areEventsLoading={false}
+            onShowOnlyThreatIndicatorAlertsChanged={jest.fn()}
+            showBuildingBlockAlerts={false}
+            showOnlyThreatIndicatorAlerts={false}
+          />
+        </TestProviders>
+      );
       // click the filters button to popup the checkbox to make it visible
       wrapper
         .find('[data-test-subj="additionalFilters"] button')
@@ -34,8 +45,18 @@ describe('AditionalFiltersAction', () => {
       ).toEqual(false);
     });
 
-    test('does not show the showOnlyThreatIndicatorAlerts checked if the showThreatMatchOnly is false', () => {
-      const wrapper = mount(<TestProviders />);
+    test('does not show the showOnlyThreatIndicatorAlerts checked if the showOnlyThreatIndicatorAlerts is true', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <AdditionalFiltersAction
+            onShowBuildingBlockAlertsChanged={jest.fn()}
+            areEventsLoading={false}
+            onShowOnlyThreatIndicatorAlertsChanged={jest.fn()}
+            showBuildingBlockAlerts={false}
+            showOnlyThreatIndicatorAlerts={true}
+          />
+        </TestProviders>
+      );
       // click the filters button to popup the checkbox to make it visible
       wrapper
         .find('[data-test-subj="additionalFilters"] button')
@@ -49,12 +70,22 @@ describe('AditionalFiltersAction', () => {
           .find('[data-test-subj="showOnlyThreatIndicatorAlertsCheckbox"] input')
           .first()
           .prop('checked')
-      ).toEqual(false);
+      ).toEqual(true);
     });
 
     test('does show the showBuildingBlockAlerts checked if the showBuildingBlockAlerts is true', () => {
       const onShowBuildingBlockAlertsChanged = jest.fn();
-      const wrapper = mount(<TestProviders />);
+      const wrapper = mount(
+        <TestProviders>
+          <AdditionalFiltersAction
+            onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChanged}
+            areEventsLoading={false}
+            onShowOnlyThreatIndicatorAlertsChanged={jest.fn()}
+            showBuildingBlockAlerts={true}
+            showOnlyThreatIndicatorAlerts={false}
+          />
+        </TestProviders>
+      );
       // click the filters button to popup the checkbox to make it visible
       wrapper
         .find('[data-test-subj="additionalFilters"] button')

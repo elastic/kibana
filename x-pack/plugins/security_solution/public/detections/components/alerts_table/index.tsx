@@ -30,7 +30,7 @@ import { timelineActions, timelineSelectors } from '../../../timelines/store/tim
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import type { TimelineModel } from '../../../timelines/store/timeline/model';
 import { columns, RenderCellValue } from '../../configurations/security_solution_detections';
-import { AditionalFiltersAction } from './aditional_filters_action';
+import { AdditionalFiltersAction } from './additional_filters_action';
 import {
   alertsDefaultModel,
   buildAlertStatusFilter,
@@ -130,7 +130,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   const additionalFiltersComponent = useMemo(
     () => (
-      <AditionalFiltersAction
+      <AdditionalFiltersAction
         areEventsLoading={loadingEventIds.length > 0}
         onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChanged}
         showBuildingBlockAlerts={showBuildingBlockAlerts}
