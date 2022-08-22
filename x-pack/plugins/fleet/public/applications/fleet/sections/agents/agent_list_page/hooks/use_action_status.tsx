@@ -37,7 +37,7 @@ export function useActionStatus() {
       setCurrentActions(res.data.items);
     } catch (err) {
       notifications.toasts.addError(err, {
-        title: i18n.translate('xpack.fleet.currentUpgrade.fetchRequestError', {
+        title: i18n.translate('xpack.fleet.actionStatus.fetchRequestError', {
           defaultMessage: 'An error happened while fetching action status',
         }),
       });

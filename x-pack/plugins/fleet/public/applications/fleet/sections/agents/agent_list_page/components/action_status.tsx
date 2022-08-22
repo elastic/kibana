@@ -50,7 +50,6 @@ export const ActionStatusCallout: React.FunctionComponent<{ refreshActionStatus:
         type: actionNames[currentAction.type ?? 'ACTION'],
         nbAgents: currentAction.nbAgents,
         nbAgentsAck: currentAction.nbAgentsAck,
-        version: currentAction.version,
         actionId: currentAction.actionId,
       }}
     />
