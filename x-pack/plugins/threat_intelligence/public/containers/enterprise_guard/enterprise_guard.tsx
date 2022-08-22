@@ -5,20 +5,25 @@
  * 2.0.
  */
 
-import React, { ReactElement } from 'react';
+import React from 'react';
 import { FC } from 'react';
+import { Paywall } from '../../components/paywall';
+import { useKibana } from '../../hooks/use_kibana';
 import { useSecurityContext } from '../../hooks/use_security_context';
 
-interface EnterpriseGuardProps {
-  fallback?: ReactElement;
-}
-
-export const EnterpriseGuard: FC<EnterpriseGuardProps> = ({ children, fallback = null }) => {
+export const EnterpriseGuard: FC = ({ children }) => {
   const { licenseService } = useSecurityContext();
+  const {
+    services: { http },
+  } = useKibana();
 
   if (licenseService.isEnterprise()) {
     return <>{children}</>;
   }
 
-  return fallback;
+  return (
+    <Paywall
+      licenseManagementHref={http.basePath.prepend('/app/management/stack/license_management')}
+    />
+  );
 };
