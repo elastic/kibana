@@ -304,6 +304,12 @@ export const schema: FormSchema<AboutStepRule> = {
           defaultMessage: 'Group by field',
         }
       ),
+      helpText: i18n.translate(
+        'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldGroupByHelpText',
+        {
+          defaultMessage: 'Choose a field from the source event to group by when creating alerts.',
+        }
+      ),
       labelAppend: OptionalFieldLabel,
     },
   },

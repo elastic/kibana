@@ -37,6 +37,7 @@ import type {
   TimestampOverride,
 } from '../../../../../common/detection_engine/schemas/common';
 import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
+import type { FieldValueAlertGrouping } from '../../../components/rules/grouping_input';
 
 export interface EuiBasicTableSortTypes {
   field: string;
@@ -114,9 +115,7 @@ export interface AboutStepRule {
   threatIndicatorPath?: string;
   threat: Threats;
   note: string;
-  alertGrouping: {
-    groupBy: string[];
-  };
+  alertGrouping: FieldValueAlertGrouping;
 }
 
 export interface AboutStepRuleDetails {
