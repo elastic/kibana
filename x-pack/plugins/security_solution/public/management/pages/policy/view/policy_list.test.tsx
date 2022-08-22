@@ -163,7 +163,7 @@ describe('When on the policy list page', () => {
       await waitFor(() => {
         expect(getPackagePolicies).toHaveBeenCalled();
         expect(sendGetEndpointSpecificPackagePolicies).toHaveBeenCalled();
-        expect(sendGetAgentPolicyList).toHaveBeenCalled();
+        expect(mockedSendBulkGetAgentPolicies).toHaveBeenCalled();
       });
     });
     afterEach(() => {

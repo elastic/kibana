@@ -55,6 +55,7 @@ import {
   PackagePolicyValidationError,
   PackagePolicyRestrictionRelatedError,
   PackagePolicyNotFoundError,
+  HostedAgentPolicyRestrictionRelatedError,
 } from '../errors';
 import { NewPackagePolicySchema, PackagePolicySchema, UpdatePackagePolicySchema } from '../types';
 import type {
@@ -120,6 +121,7 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
         throw new IngestManagerError('You cannot add APM to a policy using a logstash output');
       }
     }
+    await validateIsNotHostedPolicy(soClient, packagePolicy.policy_id);
 
     // trailing whitespace causes issues creating API keys
     packagePolicy.name = packagePolicy.name.trim();
@@ -196,18 +198,11 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
       { ...options, id: packagePolicyId }
     );
 
-    // Assign it to the given agent policy
-    await agentPolicyService.assignPackagePolicies(
-      soClient,
-      esClient,
-      packagePolicy.policy_id,
-      [newSo.id],
-      {
+    if (options?.bumpRevision ?? true) {
+      await agentPolicyService.bumpRevision(soClient, esClient, packagePolicy.policy_id, {
         user: options?.user,
-        bumpRevision: options?.bumpRevision ?? true,
-        force: options?.force,
-      }
-    );
+      });
+    }
 
     return {
       id: newSo.id,
@@ -221,8 +216,9 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
     esClient: ElasticsearchClient,
     packagePolicies: NewPackagePolicy[],
     agentPolicyId: string,
-    options?: { user?: AuthenticatedUser; bumpRevision?: boolean }
+    options?: { user?: AuthenticatedUser; bumpRevision?: boolean; force: true }
   ): Promise<PackagePolicy[]> {
+    await validateIsNotHostedPolicy(soClient, agentPolicyId);
     const isoDate = new Date().toISOString();
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const { saved_objects } = await soClient.bulkCreate<PackagePolicySOAttributes>(
@@ -254,16 +250,12 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
     const newSos = saved_objects.filter((so) => !so.error && so.attributes);
 
     // Assign it to the given agent policy
-    await agentPolicyService.assignPackagePolicies(
-      soClient,
-      esClient,
-      agentPolicyId,
-      newSos.map((newSo) => newSo.id),
-      {
+
+    if (options?.bumpRevision ?? true) {
+      await agentPolicyService.bumpRevision(soClient, esClient, agentPolicyId, {
         user: options?.user,
-        bumpRevision: options?.bumpRevision ?? true,
-      }
-    );
+      });
+    }
 
     return newSos.map((newSo) => ({
       id: newSo.id,
@@ -521,6 +513,8 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
           throw new PackagePolicyRestrictionRelatedError(`Cannot delete package policy ${id}`);
         }
 
+        await validateIsNotHostedPolicy(soClient, packagePolicy?.policy_id, options?.force);
+
         const agentPolicy = await agentPolicyService
           .get(soClient, packagePolicy.policy_id)
           .catch((err) => {
@@ -533,19 +527,12 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
             throw err;
           });
 
-        if (agentPolicy && !options?.skipUnassignFromAgentPolicies) {
-          await agentPolicyService.unassignPackagePolicies(
-            soClient,
-            esClient,
-            packagePolicy.policy_id,
-            [packagePolicy.id],
-            {
-              user: options?.user,
-              force: options?.force,
-            }
-          );
-        }
         await soClient.delete(SAVED_OBJECT_TYPE, id);
+        if (agentPolicy && !options?.skipUnassignFromAgentPolicies) {
+          await agentPolicyService.bumpRevision(soClient, esClient, packagePolicy.policy_id, {
+            user: options?.user,
+          });
+        }
         result.push({
           id,
           name: packagePolicy.name,
@@ -1630,6 +1617,24 @@ export function preconfigurePackageInputs(
   validatePackagePolicyOrThrow(resultingPackagePolicy, packageInfo);
 
   return resultingPackagePolicy;
+}
+
+async function validateIsNotHostedPolicy(
+  soClient: SavedObjectsClientContract,
+  id: string,
+  force = false
+) {
+  const agentPolicy = await agentPolicyService.get(soClient, id, false);
+
+  if (!agentPolicy) {
+    throw new Error('Agent policy not found');
+  }
+
+  if (agentPolicy.is_managed && !force) {
+    throw new HostedAgentPolicyRestrictionRelatedError(
+      `Cannot update integrations of hosted agent policy ${id}`
+    );
+  }
 }
 
 function deepMergeVars(original: any, override: any, keepOriginalValue = false): any {

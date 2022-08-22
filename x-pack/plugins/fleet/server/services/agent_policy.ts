@@ -605,54 +605,6 @@ class AgentPolicyService {
     return res;
   }
 
-  public async assignPackagePolicies(
-    soClient: SavedObjectsClientContract,
-    esClient: ElasticsearchClient,
-    id: string,
-    packagePolicyIds: string[],
-    options: { user?: AuthenticatedUser; bumpRevision: boolean; force?: boolean } = {
-      bumpRevision: true,
-    }
-  ): Promise<AgentPolicy> {
-    const oldAgentPolicy = await this.get(soClient, id, false);
-
-    if (!oldAgentPolicy) {
-      throw new Error('Agent policy not found');
-    }
-
-    if (oldAgentPolicy.is_managed && !options?.force) {
-      throw new HostedAgentPolicyRestrictionRelatedError(
-        `Cannot update integrations of hosted agent policy ${id}`
-      );
-    }
-
-    return await this._update(soClient, esClient, id, {}, options?.user, {
-      bumpRevision: options.bumpRevision,
-    });
-  }
-
-  public async unassignPackagePolicies(
-    soClient: SavedObjectsClientContract,
-    esClient: ElasticsearchClient,
-    id: string,
-    packagePolicyIds: string[],
-    options?: { user?: AuthenticatedUser; force?: boolean }
-  ) {
-    const oldAgentPolicy = await this.get(soClient, id, false);
-
-    if (!oldAgentPolicy) {
-      throw new Error('Agent policy not found');
-    }
-
-    if (oldAgentPolicy.is_managed && !options?.force) {
-      throw new HostedAgentPolicyRestrictionRelatedError(
-        `Cannot remove integrations of hosted agent policy ${id}`
-      );
-    }
-
-    return await this._update(soClient, esClient, id, {}, options?.user);
-  }
-
   public async delete(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
