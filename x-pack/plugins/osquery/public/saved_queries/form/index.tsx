@@ -78,7 +78,6 @@ const SavedQueryFormComponent: React.FC<SavedQueryFormProps> = ({
   return (
     <>
       <QueryIdField idSet={idSet} euiFieldProps={euiFieldProps} />
-
       <EuiSpacer />
       <QueryDescriptionField euiFieldProps={euiFieldProps} />
       <EuiSpacer />

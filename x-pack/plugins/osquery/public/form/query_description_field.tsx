@@ -9,11 +9,11 @@ import { useController } from 'react-hook-form';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-interface DescriptionFieldProps {
+interface QueryDescriptionFieldProps {
   euiFieldProps?: Record<string, unknown>;
 }
 
-export const QueryDescriptionField = ({ euiFieldProps }: DescriptionFieldProps) => {
+const QueryDescriptionFieldComponentn = ({ euiFieldProps }: QueryDescriptionFieldProps) => {
   const {
     field: { onChange, value, name: fieldName },
     fieldState: { error },
@@ -45,3 +45,5 @@ export const QueryDescriptionField = ({ euiFieldProps }: DescriptionFieldProps) 
     </EuiFormRow>
   );
 };
+
+export const QueryDescriptionField = React.memo(QueryDescriptionFieldComponentn);

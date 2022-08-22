@@ -8,7 +8,7 @@
 import type React from 'react';
 import type { ReactNode } from 'react';
 
-export interface IFormField<T> {
+export interface FormField<T> {
   name: string;
   onChange: (data: T) => void;
   value: T;

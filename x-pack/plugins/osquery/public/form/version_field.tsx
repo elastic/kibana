@@ -9,14 +9,13 @@ import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiFormRow, EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-
 import { useController } from 'react-hook-form';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 interface VersionFieldProps {
   euiFieldProps?: Record<string, unknown>;
 }
-export const VersionField = ({ euiFieldProps = {} }: VersionFieldProps) => {
+const VersionFieldComponent = ({ euiFieldProps = {} }: VersionFieldProps) => {
   const {
     field: { onChange, value },
     fieldState: { error },
@@ -85,3 +84,5 @@ export const VersionField = ({ euiFieldProps = {} }: VersionFieldProps) => {
     </EuiFormRow>
   );
 };
+
+export const VersionField = React.memo(VersionFieldComponent);

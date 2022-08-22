@@ -10,12 +10,12 @@ import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { createFormIdFieldValidations } from '../packs/queries/validations';
 
-interface TextFieldProps {
+interface QueryIdFieldProps {
   idSet?: Set<string>;
   euiFieldProps?: Record<string, unknown>;
 }
 
-export const QueryIdField = ({ idSet, euiFieldProps }: TextFieldProps) => {
+const QueryIdFieldComponentn = ({ idSet, euiFieldProps }: QueryIdFieldProps) => {
   const {
     field: { onChange, value, name: fieldName },
     fieldState: { error },
@@ -48,3 +48,5 @@ export const QueryIdField = ({ idSet, euiFieldProps }: TextFieldProps) => {
     </EuiFormRow>
   );
 };
+
+export const QueryIdField = React.memo(QueryIdFieldComponentn);

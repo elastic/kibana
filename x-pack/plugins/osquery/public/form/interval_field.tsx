@@ -11,11 +11,33 @@ import type { EuiFieldNumberProps } from '@elastic/eui';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+const intervalFieldValidations = {
+  required: {
+    message: i18n.translate('xpack.osquery.pack.queryFlyoutForm.intervalFieldMinNumberError', {
+      defaultMessage: 'A positive interval value is required',
+    }),
+    value: true,
+  },
+  min: {
+    message: i18n.translate('xpack.osquery.pack.queryFlyoutForm.intervalFieldMinNumberError', {
+      defaultMessage: 'A positive interval value is required',
+    }),
+    value: 1,
+  },
+  max: {
+    message: i18n.translate('xpack.osquery.pack.queryFlyoutForm.intervalFieldMaxNumberError', {
+      defaultMessage: 'An interval value must be lower than {than}',
+      values: { than: 604800 },
+    }),
+    value: 604800,
+  },
+};
+
 interface IntervalFieldProps {
   euiFieldProps?: Record<string, unknown>;
 }
 
-export const IntervalField = ({ euiFieldProps }: IntervalFieldProps) => {
+const IntervalFieldComponent = ({ euiFieldProps }: IntervalFieldProps) => {
   const {
     field: { onChange, value },
     fieldState: { error },
@@ -57,24 +79,4 @@ export const IntervalField = ({ euiFieldProps }: IntervalFieldProps) => {
   );
 };
 
-const intervalFieldValidations = {
-  required: {
-    message: i18n.translate('xpack.osquery.pack.queryFlyoutForm.intervalFieldMinNumberError', {
-      defaultMessage: 'A positive interval value is required',
-    }),
-    value: true,
-  },
-  min: {
-    message: i18n.translate('xpack.osquery.pack.queryFlyoutForm.intervalFieldMinNumberError', {
-      defaultMessage: 'A positive interval value is required',
-    }),
-    value: 1,
-  },
-  max: {
-    message: i18n.translate('xpack.osquery.pack.queryFlyoutForm.intervalFieldMaxNumberError', {
-      defaultMessage: 'An interval value must be lower than {than}',
-      values: { than: 604800 },
-    }),
-    value: 604800,
-  },
-};
+export const IntervalField = React.memo(IntervalFieldComponent);

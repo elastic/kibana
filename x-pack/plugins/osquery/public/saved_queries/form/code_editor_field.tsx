@@ -56,7 +56,9 @@ const CodeEditorFieldComponent: React.FC<CodeEditorFieldProps> = ({
 
   return (
     <EuiFormRow
-      label="Query"
+      label={i18n.translate('xpack.osquery.savedQuery.queryEditorLabel', {
+        defaultMessage: 'Query',
+      })}
       labelAppend={!isEmpty(labelAppend) ? labelAppend : <OsquerySchemaLink />}
       helpText={helpText}
       isInvalid={!!error?.message}
