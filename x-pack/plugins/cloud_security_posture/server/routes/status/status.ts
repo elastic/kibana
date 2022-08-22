@@ -22,34 +22,46 @@ import { checkForFindings } from '../../lib/check_for_findings';
 
 export const INDEX_TIMEOUT_IN_MINUTES = 10;
 
-export const defineGetCspStatusRoute = (router: CspRouter): void =>
-  router.get(
-    {
-      path: STATUS_ROUTE_PATH,
-      validate: false,
-      options: {
-        tags: ['access:cloud-security-posture-read'],
-      },
-    },
-    async (context, _, response) => {
-      const cspContext = await context.csp;
-      try {
-        const status = await getCspStatus(cspContext);
-        return response.ok({
-          body: status,
-        });
-      } catch (err) {
-        cspContext.logger.error(`Error while fetching status: ${err}`);
-        cspContext.logger.error(err);
+const calculateDiffFromNowInMinutes = (date: string | number): number =>
+  moment().diff(moment(date), 'minutes');
 
-        const error = transformError(err);
-        return response.customError({
-          body: { message: error.message },
-          statusCode: error.statusCode,
-        });
-      }
-    }
+const getHealthyAgents = async (
+  soClient: SavedObjectsClientContract,
+  installedCspPackagePolicies: PackagePolicy[],
+  agentPolicyService: AgentPolicyServiceInterface,
+  agentService: AgentService
+): Promise<number> => {
+  // Get agent policies of package policies (from installed package policies)
+  const agentPolicies = await getCspAgentPolicies(
+    soClient,
+    installedCspPackagePolicies,
+    agentPolicyService
   );
+
+  // Get agents statuses of the following agent policies
+  const agentStatusesByAgentPolicyId = await getAgentStatusesByAgentPolicies(
+    agentService,
+    agentPolicies
+  );
+
+  // TODO: should be fixed - currently returns all agents instead of healthy agents only
+  return Object.values(agentStatusesByAgentPolicyId).reduce((sum, status) => sum + status.total, 0);
+};
+
+const calculateCspStatusCode = (
+  hasFindings: boolean,
+  installedCspPackagePolicies: number,
+  healthyAgents: number,
+  timeSinceInstallationInMinutes: number
+): CspStatusCode => {
+  if (hasFindings) return 'indexed';
+  if (installedCspPackagePolicies === 0) return 'not-installed';
+  if (healthyAgents === 0) return 'not-deployed';
+  if (timeSinceInstallationInMinutes <= INDEX_TIMEOUT_IN_MINUTES) return 'indexing';
+  if (timeSinceInstallationInMinutes > INDEX_TIMEOUT_IN_MINUTES) return 'index-timeout';
+
+  throw new Error('Could not determine csp status');
+};
 
 const getCspStatus = async ({
   logger,
@@ -106,43 +118,31 @@ const getCspStatus = async ({
   };
 };
 
-const getHealthyAgents = async (
-  soClient: SavedObjectsClientContract,
-  installedCspPackagePolicies: PackagePolicy[],
-  agentPolicyService: AgentPolicyServiceInterface,
-  agentService: AgentService
-): Promise<number> => {
-  // Get agent policies of package policies (from installed package policies)
-  const agentPolicies = await getCspAgentPolicies(
-    soClient,
-    installedCspPackagePolicies,
-    agentPolicyService
+export const defineGetCspStatusRoute = (router: CspRouter): void =>
+  router.get(
+    {
+      path: STATUS_ROUTE_PATH,
+      validate: false,
+      options: {
+        tags: ['access:cloud-security-posture-read'],
+      },
+    },
+    async (context, _, response) => {
+      const cspContext = await context.csp;
+      try {
+        const status = await getCspStatus(cspContext);
+        return response.ok({
+          body: status,
+        });
+      } catch (err) {
+        cspContext.logger.error(`Error getting csp status`);
+        cspContext.logger.error(err);
+
+        const error = transformError(err);
+        return response.customError({
+          body: { message: error.message },
+          statusCode: error.statusCode,
+        });
+      }
+    }
   );
-
-  // Get agents statuses of the following agent policies
-  const agentStatusesByAgentPolicyId = await getAgentStatusesByAgentPolicies(
-    agentService,
-    agentPolicies
-  );
-
-  // TODO: should be fixed - currently returns all agents instead of healthy agents only
-  return Object.values(agentStatusesByAgentPolicyId).reduce((sum, status) => sum + status.total, 0);
-};
-
-const calculateCspStatusCode = (
-  hasFindings: boolean,
-  installedCspPackagePolicies: number,
-  healthyAgents: number,
-  timeSinceInstallationInMinutes: number
-): CspStatusCode => {
-  if (hasFindings) return 'indexed';
-  if (installedCspPackagePolicies === 0) return 'not-installed';
-  if (healthyAgents === 0) return 'not-deployed';
-  if (timeSinceInstallationInMinutes <= INDEX_TIMEOUT_IN_MINUTES) return 'indexing';
-  if (timeSinceInstallationInMinutes > INDEX_TIMEOUT_IN_MINUTES) return 'index-timeout';
-
-  throw new Error('Could not determine csp status');
-};
-
-const calculateDiffFromNowInMinutes = (date: string | number): number =>
-  moment().diff(moment(date), 'minutes');
