@@ -10,7 +10,7 @@ import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { GetAgentPoliciesResponse, GetPackagesResponse } from '@kbn/fleet-plugin/common';
 import { useHttp } from '../../../common/lib/kibana';
 import { MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../common/constants';
-import { sendGetAgentPolicyList, sendGetEndpointSecurityPackage } from './ingest';
+import { sendBulkGetAgentPolicyList, sendGetEndpointSecurityPackage } from './ingest';
 import type { GetPolicyListResponse } from '../../pages/policy/types';
 import { sendGetEndpointSpecificPackagePolicies } from './policies';
 import type { ServerApiError } from '../../../common/types';
@@ -62,12 +62,7 @@ export function useGetAgentCountForPolicy({
   return useQuery<GetAgentPoliciesResponse, IHttpFetchError>(
     ['endpointCountForPolicy', agentPolicyIds],
     () => {
-      return sendGetAgentPolicyList(http, {
-        query: {
-          perPage: 50,
-          ids: agentPolicyIds,
-        },
-      });
+      return sendBulkGetAgentPolicyList(http, agentPolicyIds);
     },
     customQueryOptions
   );

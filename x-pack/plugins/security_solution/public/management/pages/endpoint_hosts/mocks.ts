@@ -39,6 +39,7 @@ import {
   fleetGetCheckPermissionsHttpMock,
   fleetGetPackageListHttpMock,
   fleetBulkGetPackagePoliciesListHttpMock,
+  fleetBulkGetAgentPolicyListHttpMock,
   fleetGetPackagePoliciesListHttpMock,
 } from '../../mocks';
 
@@ -136,6 +137,7 @@ export const endpointListFleetApisHttpMock =
     fleetGetPackageListHttpMock,
     fleetGetAgentPolicyListHttpMock,
     fleetBulkGetPackagePoliciesListHttpMock,
+    fleetBulkGetAgentPolicyListHttpMock,
     fleetGetPackagePoliciesListHttpMock,
     fleetGetCheckPermissionsHttpMock,
   ]);

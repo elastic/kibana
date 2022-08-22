@@ -13,6 +13,7 @@ import type {
   GetPackagePoliciesResponse,
   GetPackagesResponse,
   BulkGetPackagePoliciesResponse,
+  BulkGetAgentPoliciesResponse,
 } from '@kbn/fleet-plugin/common';
 import {
   AGENT_API_ROUTES,
@@ -224,6 +225,44 @@ export const fleetGetAgentPolicyListHttpMock =
           perPage: Math.max(requiredPolicyIds.length, 10),
           total: requiredPolicyIds.length,
           page: 1,
+        };
+      },
+    },
+  ]);
+
+export type FleetBulkGetAgentPolicyListHttpMockInterface = ResponseProvidersInterface<{
+  agentPolicy: () => BulkGetAgentPoliciesResponse;
+}>;
+export const fleetBulkGetAgentPolicyListHttpMock =
+  httpHandlerMockFactory<FleetGetAgentPolicyListHttpMockInterface>([
+    {
+      id: 'agentPolicy',
+      path: AGENT_POLICY_API_ROUTES.BULK_GET_PATTERN,
+      method: 'post',
+      handler: ({ body }) => {
+        const generator = new EndpointDocGenerator('seed');
+        const agentPolicyGenerator = new FleetAgentPolicyGenerator('seed');
+        const endpointMetadata = generator.generateHostMetadata();
+        const requiredPolicyIds: string[] = [
+          // Make sure that the Agent policy returned from the API has the Integration Policy ID that
+          // the first endpoint metadata generated is using. This is needed especially when testing the
+          // Endpoint Details flyout where certain actions might be disabled if we know the endpoint integration policy no
+          // longer exists.
+          endpointMetadata.Endpoint.policy.applied.id,
+
+          // In addition, some of our UI logic looks for the existence of certain Endpoint Integration policies
+          // using the Agents Policy API (normally when checking IDs since query by ids is not supported via API)
+          // so also add the first two package policy IDs that the `fleetGetEndpointPackagePolicyListHttpMock()`
+          // method above creates (which Trusted Apps HTTP mocks also use)
+          // FIXME: remove hard-coded IDs below and get them from the new FleetPackagePolicyGenerator (#2262)
+          'ddf6570b-9175-4a6d-b288-61a09771c647',
+          'b8e616ae-44fc-4be7-846c-ce8fa5c082dd',
+        ];
+
+        return {
+          items: requiredPolicyIds.map((packagePolicyId) => {
+            return agentPolicyGenerator.generate({});
+          }),
         };
       },
     },

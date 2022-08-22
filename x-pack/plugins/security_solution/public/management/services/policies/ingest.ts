@@ -71,6 +71,26 @@ export const sendGetAgentPolicyList = (
 };
 
 /**
+ * Retrieve a list of Agent Policies
+ * @param http
+ * @param options
+ */
+export const sendBulkGetAgentPolicyList = (
+  http: HttpStart,
+  ids: string[],
+  options: HttpFetchOptions = {}
+) => {
+  return http.post<GetAgentPoliciesResponse>(`${INGEST_API_AGENT_POLICIES}/_bulk_get`, {
+    ...options,
+    body: JSON.stringify({
+      ids,
+      ignoreMissing: true,
+      full: true,
+    }),
+  });
+};
+
+/**
  * Updates a package policy
  *
  * @param http
