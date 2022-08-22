@@ -323,12 +323,10 @@ export interface GetFieldsOptions {
 export interface FieldsForWildcardResponse {
   fields: FieldSpec[];
   indices: string[];
-};
+}
 
 export interface IDataViewsApiClient {
-  getFieldsForWildcard: (
-    options: GetFieldsOptions
-  ) => Promise<FieldsForWildcardResponse>;
+  getFieldsForWildcard: (options: GetFieldsOptions) => Promise<FieldsForWildcardResponse>;
   hasUserDataView: () => Promise<boolean>;
 }
 
