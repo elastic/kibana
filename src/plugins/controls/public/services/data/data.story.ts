@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { of, Observable } from 'rxjs';
+import { of } from 'rxjs';
 import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { ControlsDataService } from './types';

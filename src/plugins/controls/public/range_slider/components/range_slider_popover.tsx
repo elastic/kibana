@@ -30,8 +30,9 @@ export const RangeSliderPopover: FC = () => {
   const rangeRef = useRef<EuiDualRange | null>(null);
 
   // Controls Services Context
-  const { dataViews } = pluginServices.getHooks();
-  const { get: getDataViewById } = dataViews.useService();
+  const {
+    dataViews: { get: getDataViewById },
+  } = pluginServices.getServices();
   const {
     useEmbeddableDispatch,
     useEmbeddableSelector: select,
