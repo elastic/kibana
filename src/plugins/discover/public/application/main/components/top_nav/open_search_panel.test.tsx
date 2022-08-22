@@ -20,6 +20,7 @@ describe('OpenSearchPanel', () => {
         addBasePath: (path: string) => path,
         capabilities: { savedObjectsManagement: { edit: true } },
         savedObjectsFinder: { Finder: jest.fn() },
+        core: {},
       })),
     }));
     const { OpenSearchPanel } = await import('./open_search_panel');
@@ -36,6 +37,7 @@ describe('OpenSearchPanel', () => {
         addBasePath: (path: string) => path,
         capabilities: { savedObjectsManagement: { edit: false, delete: false } },
         savedObjectsFinder: { Finder: jest.fn() },
+        core: {},
       })),
     }));
     const { OpenSearchPanel } = await import('./open_search_panel');

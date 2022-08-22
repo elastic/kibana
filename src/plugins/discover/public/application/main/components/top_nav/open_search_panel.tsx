@@ -57,11 +57,13 @@ export function OpenSearchPanel(props: OpenSearchPanelProps) {
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <SavedObjectFinder
-          savedObjects={core.savedObjects}
-          uiSettings={uiSettings}
-          savedObjectsManagement={savedObjectsManagement}
-          savedObjectsPlugin={savedObjectsPlugin}
-          savedObjectsTagging={savedObjectsTagging}
+          services={{
+            savedObjects: core.savedObjects,
+            uiSettings,
+            savedObjectsManagement,
+            savedObjectsPlugin,
+            savedObjectsTagging,
+          }}
           noItemsMessage={
             <FormattedMessage
               id="discover.topNav.openSearchPanel.noSearchesFoundDescription"
