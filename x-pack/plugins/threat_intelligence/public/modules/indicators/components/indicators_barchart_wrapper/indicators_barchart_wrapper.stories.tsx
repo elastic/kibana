@@ -23,20 +23,18 @@ export default {
 };
 
 const mockTimeRange: TimeRange = DEFAULT_TIME_RANGE;
-const mockIndexPatterns: DataView[] = [
-  {
-    fields: [
-      {
-        name: '@timestamp',
-        type: 'date',
-      } as DataViewField,
-      {
-        name: 'threat.feed.name',
-        type: 'string',
-      } as DataViewField,
-    ],
-  } as DataView,
-];
+const mockIndexPattern: DataView = {
+  fields: [
+    {
+      name: '@timestamp',
+      type: 'date',
+    } as DataViewField,
+    {
+      name: 'threat.feed.name',
+      type: 'string',
+    } as DataViewField,
+  ],
+} as DataView;
 
 const validDate: string = '1 Jan 2022 00:00:00 GMT';
 const numberOfDays: number = 1;
@@ -107,7 +105,7 @@ const KibanaReactContext = createKibanaReactContext({
 export const Default: Story<void> = () => {
   return (
     <KibanaReactContext.Provider>
-      <IndicatorsBarChartWrapper timeRange={mockTimeRange} indexPatterns={mockIndexPatterns} />
+      <IndicatorsBarChartWrapper timeRange={mockTimeRange} indexPattern={mockIndexPattern} />
     </KibanaReactContext.Provider>
   );
 };

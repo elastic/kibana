@@ -13,27 +13,25 @@ import { TestProvidersComponent } from '../../../../common/mocks/test_providers'
 import { IndicatorsBarChartWrapper } from './indicators_barchart_wrapper';
 import { DEFAULT_TIME_RANGE } from '../../hooks/use_filters/utils';
 
-const mockIndexPatterns: DataView[] = [
-  {
-    fields: [
-      {
-        name: '@timestamp',
-        type: 'date',
-      } as DataViewField,
-      {
-        name: 'threat.feed.name',
-        type: 'string',
-      } as DataViewField,
-    ],
-  } as DataView,
-];
+const mockIndexPatterns: DataView = {
+  fields: [
+    {
+      name: '@timestamp',
+      type: 'date',
+    } as DataViewField,
+    {
+      name: 'threat.feed.name',
+      type: 'string',
+    } as DataViewField,
+  ],
+} as DataView;
 const mockTimeRange: TimeRange = DEFAULT_TIME_RANGE;
 
 describe('<IndicatorsBarChartWrapper />', () => {
   it('should render barchart and field selector dropdown', () => {
     const component = render(
       <TestProvidersComponent>
-        <IndicatorsBarChartWrapper indexPatterns={mockIndexPatterns} timeRange={mockTimeRange} />
+        <IndicatorsBarChartWrapper indexPattern={mockIndexPatterns} timeRange={mockTimeRange} />
       </TestProvidersComponent>
     );
 

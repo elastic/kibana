@@ -18,6 +18,7 @@ import {
 } from '@kbn/data-plugin/public';
 import { SearchBar, SearchBarProps } from '@kbn/unified-search-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { SecuritySolutionDataViewBase } from '../../../../types';
 
 interface QueryPayload {
   dateRange: TimeRange;
@@ -38,7 +39,7 @@ export interface QueryBarComponentProps {
   dateRangeFrom?: string;
   dateRangeTo?: string;
   hideSavedQuery?: boolean;
-  indexPatterns: DataView[];
+  indexPattern: SecuritySolutionDataViewBase;
   isLoading?: boolean;
   isRefreshPaused?: boolean;
   filterQuery: Query;
@@ -62,7 +63,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
     dateRangeFrom,
     dateRangeTo,
     hideSavedQuery = false,
-    indexPatterns,
+    indexPattern,
     isLoading = false,
     isRefreshPaused,
     filterQuery,
@@ -137,13 +138,15 @@ export const QueryBar = memo<QueryBarComponentProps>(
 
     const timeHistory = useMemo(() => new TimeHistory(new Storage(localStorage)), []);
 
+    const indexPatterns = useMemo(() => [indexPattern], [indexPattern]);
+
     return (
       <SearchBar
         showSubmitButton={true}
         dateRangeFrom={dateRangeFrom}
         dateRangeTo={dateRangeTo}
         filters={filters}
-        indexPatterns={indexPatterns}
+        indexPatterns={indexPatterns as DataView[]}
         isLoading={isLoading}
         isRefreshPaused={isRefreshPaused}
         query={filterQuery}

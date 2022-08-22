@@ -13,9 +13,10 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { IStorage } from '@kbn/kibana-utils-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { BehaviorSubject } from 'rxjs';
 import { mockUiSetting } from './mock_kibana_ui_setting';
-import { KibanaContextProvider } from '../../hooks/use_kibana';
-import { Services, ThreatIntelligenceSecuritySolutionContext } from '../../types';
+import { KibanaContext } from '../../hooks/use_kibana';
+import { SecuritySolutionPluginContext } from '../../types';
 import { SecuritySolutionContext } from '../../containers/security_solution_context';
 
 export const localStorageMock = (): IStorage => {
@@ -51,6 +52,7 @@ export const unifiedSearch = unifiedSearchPluginMock.createStartContract();
 
 const validDate: string = '1 Jan 2022 00:00:00 GMT';
 const data = dataPluginMock.createStartContract();
+
 const dataServiceMock = {
   ...data,
   query: {
@@ -83,20 +85,7 @@ const dataServiceMock = {
   },
   search: {
     ...data.search,
-    search: jest.fn().mockImplementation(() => ({
-      subscribe: jest.fn().mockImplementation(() => ({
-        error: jest.fn(),
-        next: jest.fn(),
-        unsubscribe: jest.fn(),
-      })),
-      pipe: jest.fn().mockImplementation(() => ({
-        subscribe: jest.fn().mockImplementation(() => ({
-          error: jest.fn(),
-          next: jest.fn(),
-          unsubscribe: jest.fn(),
-        })),
-      })),
-    })),
+    search: jest.fn().mockReturnValue(new BehaviorSubject({})),
   },
 };
 
@@ -106,7 +95,7 @@ const coreServiceMock = {
   uiSettings: { get: jest.fn().mockImplementation(mockUiSetting) },
 };
 
-const mockSecurityContext: ThreatIntelligenceSecuritySolutionContext = {
+const mockSecurityContext: SecuritySolutionPluginContext = {
   getFiltersGlobalComponent:
     () =>
     ({ children }) =>
@@ -116,19 +105,36 @@ const mockSecurityContext: ThreatIntelligenceSecuritySolutionContext = {
       return true;
     },
   },
+  sourcererDataView: {
+    browserFields: {},
+    selectedPatterns: [],
+    indexPattern: { fields: [], title: '' },
+  },
 };
 
-const mockedServices = {
+export const mockedServices = {
   ...coreServiceMock,
   data: dataServiceMock,
   storage,
   unifiedSearch,
-} as unknown as Services;
+  triggersActionsUi: {
+    getFieldBrowser: jest.fn().mockReturnValue(null),
+  },
+};
 
 export const TestProvidersComponent: FC = ({ children }) => (
   <SecuritySolutionContext.Provider value={mockSecurityContext}>
-    <KibanaContextProvider services={mockedServices}>
+    <KibanaContext.Provider value={{ services: mockedServices } as any}>
       <I18nProvider>{children}</I18nProvider>
-    </KibanaContextProvider>
+    </KibanaContext.Provider>
   </SecuritySolutionContext.Provider>
 );
+
+export type MockedSearch = jest.Mocked<typeof mockedServices.data.search>;
+export type MockedTimefilter = jest.Mocked<typeof mockedServices.data.query.timefilter>;
+export type MockedTriggersActionsUi = jest.Mocked<typeof mockedServices.triggersActionsUi>;
+
+export const mockedSearchService = mockedServices.data.search as MockedSearch;
+export const mockedTimefilterService = mockedServices.data.query.timefilter as MockedTimefilter;
+export const mockedTriggersActionsUiService =
+  mockedServices.triggersActionsUi as MockedTriggersActionsUi;

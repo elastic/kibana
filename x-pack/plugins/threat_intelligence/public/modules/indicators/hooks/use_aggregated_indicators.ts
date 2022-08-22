@@ -17,10 +17,11 @@ import {
 } from '@kbn/data-plugin/common';
 import { convertAggregationToChartSeries } from '../../../common/utils/barchart';
 import { RawIndicatorFieldId } from '../../../../common/types/indicator';
-import { DEFAULT_THREAT_INDEX_KEY, THREAT_QUERY_BASE } from '../../../../common/constants';
+import { THREAT_QUERY_BASE } from '../../../../common/constants';
 import { calculateBarchartColumnTimeInterval } from '../../../common/utils/dates';
 import { useKibana } from '../../../hooks/use_kibana';
 import { DEFAULT_TIME_RANGE } from './use_filters/utils';
+import { useSourcererDataView } from './use_sourcerer_data_view';
 
 export interface UseAggregatedIndicatorsParam {
   timeRange?: TimeRange;
@@ -70,10 +71,10 @@ export const useAggregatedIndicators = ({
   const {
     services: {
       data: { search: searchService, query: queryService },
-      uiSettings,
     },
   } = useKibana();
-  const defaultThreatIndices = uiSettings.get<string[]>(DEFAULT_THREAT_INDEX_KEY);
+
+  const { selectedPatterns } = useSourcererDataView();
 
   const searchSubscription$ = useRef(new Subscription());
   const abortController = useRef(new AbortController());
@@ -120,7 +121,7 @@ export const useAggregatedIndicators = ({
       .search<IEsSearchRequest, IKibanaSearchResponse<RawAggregatedIndicatorsResponse>>(
         {
           params: {
-            index: defaultThreatIndices,
+            index: selectedPatterns,
             body: {
               aggregations: {
                 [AGGREGATION_NAME]: {
@@ -170,7 +171,15 @@ export const useAggregatedIndicators = ({
           searchSubscription$.current.unsubscribe();
         },
       });
-  }, [dateRange, defaultThreatIndices, field, searchService, timeRange]);
+  }, [
+    dateRange.max,
+    dateRange.min,
+    field,
+    searchService,
+    selectedPatterns,
+    timeRange.from,
+    timeRange.to,
+  ]);
 
   const onFieldChange = useCallback(
     async (f: string) => {

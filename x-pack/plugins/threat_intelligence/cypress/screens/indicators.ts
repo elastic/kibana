@@ -38,3 +38,11 @@ export const TABLE_CONTROLS = '[data-test-sub="dataGridControls"]';
 export const INDICATOR_TYPE_CELL = '[data-gridcell-column-id="threat.indicator.type"]';
 
 export const FIELD_SELECTOR = '[data-test-subj="tiIndicatorFieldSelectorDropdown"]';
+
+export const FIELD_BROWSER = `[data-test-subj="show-field-browser"]`;
+
+export const FIELD_BROWSER_MODAL = `[data-test-subj="fields-browser-container"]`;
+
+export const FIELD_BROWSER_MODAL_SOURCE_CHECKBOX = `[data-test-subj="field-_source-checkbox"]`;
+
+export const FIELD_BROWSER_CLOSE = `[data-test-subj="close"]`;

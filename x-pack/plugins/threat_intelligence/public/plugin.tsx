@@ -15,13 +15,13 @@ import {
   ThreatIntelligencePluginSetup,
   ThreatIntelligencePluginStart,
   ThreatIntelligencePluginStartDeps,
-  ThreatIntelligenceSecuritySolutionContext,
+  SecuritySolutionPluginContext,
 } from './types';
 import { SecuritySolutionContext } from './containers/security_solution_context';
 import { EnterpriseGuard } from './containers/enterprise_guard';
 
 interface AppProps {
-  securitySolutionContext: ThreatIntelligenceSecuritySolutionContext;
+  securitySolutionContext: SecuritySolutionPluginContext;
 }
 
 const LazyIndicatorsPage = React.lazy(() => import('./modules/indicators/indicators_page'));
