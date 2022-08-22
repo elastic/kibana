@@ -25,7 +25,7 @@ export const ActionStatusCallout: React.FunctionComponent<{ refreshActionStatus:
   const { currentActions, refreshActions } = useActionStatus();
 
   useEffect(() => {
-    refreshActions();
+    setTimeout(refreshActions, 10000);
   }, [refreshActionStatus, refreshActions]);
 
   const actionNames: { [key: string]: string } = {
@@ -57,37 +57,40 @@ export const ActionStatusCallout: React.FunctionComponent<{ refreshActionStatus:
   );
   return (
     <>
-      {currentActions.slice(0, 3).map((currentAction) => (
-        <React.Fragment key={currentAction.actionId}>
-          <EuiCallOut
-            color={
-              currentAction.complete ? 'success' : currentAction.timedOut ? 'danger' : 'primary'
-            }
-          >
-            <EuiFlexGroup
-              className="euiCallOutHeader__title"
-              justifyContent="spaceBetween"
-              alignItems="center"
-              gutterSize="none"
+      {currentActions
+        .filter((action) => action.type !== 'UPGRADE')
+        .slice(0, 3)
+        .map((currentAction) => (
+          <React.Fragment key={currentAction.actionId}>
+            <EuiCallOut
+              color={
+                currentAction.complete ? 'success' : currentAction.timedOut ? 'danger' : 'primary'
+              }
             >
-              <EuiFlexItem grow={false}>
-                <div>
-                  {!currentAction.complete && !currentAction.timedOut ? (
-                    <EuiLoadingSpinner />
-                  ) : currentAction.complete ? (
-                    <EuiIcon type="check" />
-                  ) : (
-                    <EuiIcon type="alert" />
-                  )}
-                  &nbsp;&nbsp;
-                  {calloutTitle(currentAction)}
-                </div>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiCallOut>
-          <EuiSpacer size="l" />
-        </React.Fragment>
-      ))}
+              <EuiFlexGroup
+                className="euiCallOutHeader__title"
+                justifyContent="spaceBetween"
+                alignItems="center"
+                gutterSize="none"
+              >
+                <EuiFlexItem grow={false}>
+                  <div>
+                    {!currentAction.complete && !currentAction.timedOut ? (
+                      <EuiLoadingSpinner />
+                    ) : currentAction.complete ? (
+                      <EuiIcon type="check" />
+                    ) : (
+                      <EuiIcon type="alert" />
+                    )}
+                    &nbsp;&nbsp;
+                    {calloutTitle(currentAction)}
+                  </div>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiCallOut>
+            <EuiSpacer size="l" />
+          </React.Fragment>
+        ))}
     </>
   );
 };

@@ -48,11 +48,14 @@ export async function getActionStatuses(
 
       const nbAgents = action.total ?? action.nbAgents;
 
+      const complete = nbAgents <= count;
+
       return {
         ...action,
         nbAgents,
         nbAgentsAck: count,
-        complete: nbAgents <= count,
+        complete,
+        timedOut: !complete && action.timedOut,
       };
     },
     { concurrency: 20 }

@@ -5,22 +5,18 @@
  * 2.0.
  */
 
-import { difference, uniq } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
-import type { Agent, BulkActionResult } from '../../types';
+import type { Agent } from '../../types';
 import { AgentReassignmentError } from '../../errors';
 
-import {
-  getAgentDocuments,
-  bulkUpdateAgents,
-  processAgentsInBatches,
-  errorsToResults,
-} from './crud';
+import { SO_SEARCH_LIMIT } from '../../constants';
+
+import { getAgentDocuments, getAgentsByKuery } from './crud';
 import type { GetAgentsOptions } from '.';
 import { searchHitToAgent } from './helpers';
-import { filterHostedPolicies } from './filter_hosted_agents';
+import { UpdateAgentTagsActionRunner, updateTagsBatch } from './update_agent_tags_action_runner';
 
 function isMgetDoc(doc?: estypes.MgetResponseItem<unknown>): doc is estypes.GetGetResult {
   return Boolean(doc && 'found' in doc);
@@ -34,7 +30,7 @@ export async function updateAgentTags(
   tagsToRemove: string[]
 ) {
   const outgoingErrors: Record<Agent['id'], Error> = {};
-  const givenAgents: Agent[] = [];
+  let givenAgents: Agent[] = [];
 
   if ('agentIds' in options) {
     const givenAgentsResults = await getAgentDocuments(esClient, options.agentIds);
@@ -48,25 +44,24 @@ export async function updateAgentTags(
       }
     }
   } else if ('kuery' in options) {
-    return await processAgentsInBatches(
-      esClient,
-      {
-        kuery: options.kuery,
-        showInactive: true,
-        batchSize: options.batchSize,
-      },
-      async (agents: Agent[], skipSuccess: boolean) =>
-        await updateTagsBatch(
-          soClient,
-          esClient,
-          agents,
-          outgoingErrors,
-          tagsToAdd,
-          tagsToRemove,
-          undefined,
-          skipSuccess
-        )
-    );
+    const batchSize = options.batchSize ?? SO_SEARCH_LIMIT;
+    const res = await getAgentsByKuery(esClient, {
+      kuery: options.kuery,
+      showInactive: options.showInactive ?? false,
+      page: 1,
+      perPage: batchSize,
+    });
+    if (res.total <= batchSize) {
+      givenAgents = res.agents;
+    } else {
+      return await new UpdateAgentTagsActionRunner(esClient, soClient, {
+        tagsToAdd,
+        tagsToRemove,
+      }).runActionAsyncWithRetry({
+        ...options,
+        totalAgents: res.total,
+      });
+    }
   }
 
   return await updateTagsBatch(
@@ -78,53 +73,4 @@ export async function updateAgentTags(
     tagsToRemove,
     'agentIds' in options ? options.agentIds : undefined
   );
-}
-
-async function updateTagsBatch(
-  soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient,
-  givenAgents: Agent[],
-  outgoingErrors: Record<Agent['id'], Error>,
-  tagsToAdd: string[],
-  tagsToRemove: string[],
-  agentIds?: string[],
-  skipSuccess?: boolean
-): Promise<{ items: BulkActionResult[] }> {
-  const errors: Record<Agent['id'], Error> = { ...outgoingErrors };
-
-  const filteredAgents = await filterHostedPolicies(
-    soClient,
-    givenAgents,
-    errors,
-    `Cannot modify tags on a hosted agent`
-  );
-
-  const getNewTags = (agent: Agent): string[] => {
-    const existingTags = agent.tags ?? [];
-
-    if (tagsToAdd.length === 1 && tagsToRemove.length === 1) {
-      const removableTagIndex = existingTags.indexOf(tagsToRemove[0]);
-      if (removableTagIndex > -1) {
-        const newTags = uniq([
-          ...existingTags.slice(0, removableTagIndex),
-          tagsToAdd[0],
-          ...existingTags.slice(removableTagIndex + 1),
-        ]);
-        return newTags;
-      }
-    }
-    return uniq(difference(existingTags, tagsToRemove).concat(tagsToAdd));
-  };
-
-  await bulkUpdateAgents(
-    esClient,
-    filteredAgents.map((agent) => ({
-      agentId: agent.id,
-      data: {
-        tags: getNewTags(agent),
-      },
-    }))
-  );
-
-  return { items: errorsToResults(filteredAgents, errors, agentIds, skipSuccess) };
 }

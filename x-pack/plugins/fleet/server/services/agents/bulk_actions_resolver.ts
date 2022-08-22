@@ -19,11 +19,13 @@ import { appContextService } from '../app_context';
 import { ReassignActionRunner } from './reassign_action_runner';
 import { UnenrollActionRunner } from './unenroll_action_runner';
 import { UpgradeActionRunner } from './upgrade_action_runner';
+import { UpdateAgentTagsActionRunner } from './update_agent_tags_action_runner';
 
 export enum BulkActionTaskType {
   REASSIGN_RETRY = 'fleet:reassign_action:retry',
   UNENROLL_RETRY = 'fleet:unenroll_action:retry',
   UPGRADE_RETRY = 'fleet:upgrade_action:retry',
+  UPDATE_AGENT_TAGS_RETRY = 'fleet:update_agent_tags:retry',
 }
 
 export class BulkActionsResolver {
@@ -67,6 +69,17 @@ export class BulkActionsResolver {
                 options
               )
           );
+        case BulkActionTaskType.UPDATE_AGENT_TAGS_RETRY:
+          return createRetryTask(
+            taskInstance,
+            getDeps,
+            async (esClient: ElasticsearchClient, soClient: SavedObjectsClient, options: any) =>
+              await new UpdateAgentTagsActionRunner(
+                esClient,
+                soClient,
+                options
+              ).runActionAsyncWithRetry(options)
+          );
         default:
           throw new Error('Unknown task type: ' + taskType);
       }
@@ -74,26 +87,23 @@ export class BulkActionsResolver {
   }
 
   constructor(taskManager: TaskManagerSetupContract, core: CoreSetup) {
-    taskManager.registerTaskDefinitions({
-      [BulkActionTaskType.REASSIGN_RETRY]: {
-        title: 'Bulk Reassign Retry',
-        timeout: '1m',
-        maxAttempts: 1,
-        createTaskRunner: this.createTaskRunner(core, BulkActionTaskType.REASSIGN_RETRY),
-      },
-      [BulkActionTaskType.UNENROLL_RETRY]: {
-        title: 'Bulk Unenroll Retry',
-        timeout: '1m',
-        maxAttempts: 1,
-        createTaskRunner: this.createTaskRunner(core, BulkActionTaskType.UNENROLL_RETRY),
-      },
-      [BulkActionTaskType.UPGRADE_RETRY]: {
-        title: 'Bulk Unenroll Retry',
-        timeout: '1m',
-        maxAttempts: 1,
-        createTaskRunner: this.createTaskRunner(core, BulkActionTaskType.UPGRADE_RETRY),
-      },
-    });
+    const definitions = Object.values(BulkActionTaskType)
+      .map((type) => {
+        return [
+          type,
+          {
+            title: 'Bulk Action Retry',
+            timeout: '1m',
+            maxAttempts: 1,
+            createTaskRunner: this.createTaskRunner(core, type),
+          },
+        ];
+      })
+      .reduce((acc, current) => {
+        acc[current[0] as string] = current[1];
+        return acc;
+      }, {} as any);
+    taskManager.registerTaskDefinitions(definitions);
   }
 
   public async start(taskManager: TaskManagerStartContract) {

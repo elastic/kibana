@@ -118,7 +118,6 @@ export const PostBulkAgentReassignRequestSchema = {
     policy_id: schema.string(),
     agents: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
     batchSize: schema.maybe(schema.number()),
-    totalAgents: schema.maybe(schema.number()),
   }),
 };
 
