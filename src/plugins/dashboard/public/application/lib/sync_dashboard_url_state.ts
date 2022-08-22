@@ -29,7 +29,6 @@ type SyncDashboardUrlStateProps = DashboardBuildContext & { savedDashboard: Dash
 export const syncDashboardUrlState = ({
   dispatchDashboardStateChange,
   getLatestDashboardState,
-  query: queryService,
   kbnUrlStateStorage,
   usageCollection,
   savedDashboard,
@@ -78,7 +77,6 @@ export const syncDashboardUrlState = ({
       applyDashboardFilterState({
         currentDashboardState: updatedDashboardState,
         kbnUrlStateStorage,
-        queryService,
         savedDashboard,
       });
 

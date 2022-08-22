@@ -17,6 +17,7 @@ import { createKbnUrlStateStorage } from '../../services/kibana_utils';
 import { DashboardListing, DashboardListingProps } from './dashboard_listing';
 import { makeDefaultServices } from '../test_helpers';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_session_storage';
+import { pluginServices } from '../../services/plugin_services';
 
 function makeDefaultProps(): DashboardListingProps {
   return {
@@ -37,9 +38,13 @@ function mountWith({
   const wrappingComponent: React.FC<{
     children: React.ReactNode;
   }> = ({ children }) => {
+    const DashboardServicesProvider = pluginServices.getContextProvider();
+
     return (
       <I18nProvider>
-        <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
+        <KibanaContextProvider services={services}>
+          <DashboardServicesProvider>{children}</DashboardServicesProvider>
+        </KibanaContextProvider>
       </I18nProvider>
     );
   };

@@ -156,7 +156,6 @@ export const applyStateChangesToContainer = ({
     dashboardState: latestState,
     isEmbeddedExternally,
     dashboardCapabilities,
-    query: queryService,
     savedDashboard,
   });
   const differences = diffDashboardContainerInput(

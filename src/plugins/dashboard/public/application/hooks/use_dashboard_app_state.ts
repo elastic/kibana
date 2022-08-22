@@ -101,8 +101,9 @@ export const useDashboardAppState = ({
   const { docTitle } = chrome;
   const { notifications } = core;
 
-  const { data } = pluginServices.getServices();
-  const { query, search, dataViews } = data;
+  const {
+    data: { query, search, dataViews },
+  } = pluginServices.getServices();
   const { getStateTransfer } = embeddable;
   const { version: kibanaVersion } = initializerContext.env.packageInfo;
 
@@ -149,7 +150,7 @@ export const useDashboardAppState = ({
       /**
        * Ensure default data view exists and there is data in elasticsearch
        */
-      const isEmpty = await isDashboardAppInNoDataState(dataViews);
+      const isEmpty = await isDashboardAppInNoDataState();
       if (showNoDataPage || isEmpty) {
         setShowNoDataPage(true);
         return;
@@ -402,7 +403,6 @@ export const useDashboardAppState = ({
     history,
     search,
     query,
-    data,
     showNoDataPage,
     setShowNoDataPage,
     spacesService?.ui,
@@ -422,7 +422,7 @@ export const useDashboardAppState = ({
     }
 
     if (dashboardAppState.getLatestDashboardState().timeRestore) {
-      const { timefilter } = data.query.timefilter;
+      const { timefilter } = query.timefilter;
       const { timeFrom: from, timeTo: to, refreshInterval } = dashboardAppState.savedDashboard;
       if (from && to) timefilter.setTime({ from, to });
       if (refreshInterval) timefilter.setRefreshInterval(refreshInterval);
@@ -433,7 +433,7 @@ export const useDashboardAppState = ({
         viewMode: ViewMode.VIEW,
       })
     );
-  }, [lastSavedState, dashboardAppState, data.query.timefilter, dispatchDashboardStateChange]);
+  }, [lastSavedState, dashboardAppState, query.timefilter, dispatchDashboardStateChange]);
 
   /**
    *  publish state to the state change observable when redux state changes

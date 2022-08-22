@@ -18,12 +18,7 @@ import {
 
 import { DashboardSavedObject } from '../../saved_dashboards';
 import { DashboardContainer, DASHBOARD_CONTAINER_TYPE } from '../embeddable';
-import {
-  DashboardBuildContext,
-  DashboardState,
-  DashboardContainerInput,
-  DashboardAppServices,
-} from '../../types';
+import { DashboardBuildContext, DashboardState, DashboardContainerInput } from '../../types';
 import {
   enableDashboardSearchSessions,
   getSearchSessionIdFromURL,
@@ -104,7 +99,6 @@ export const buildDashboardContainer = async ({
     dashboardState: initialDashboardState,
     dashboardCapabilities,
     incomingEmbeddable,
-    query: data.query,
     searchSessionId,
     savedDashboard,
     executionContext,

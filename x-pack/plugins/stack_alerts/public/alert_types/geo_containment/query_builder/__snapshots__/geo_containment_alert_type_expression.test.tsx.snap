@@ -27,10 +27,19 @@ exports[`should render BoundaryIndexExpression 1`] = `
               "clearCache": [MockFunction],
               "createField": [MockFunction],
               "createFieldList": [MockFunction],
+              "ensureDefaultDataView": [MockFunction],
               "ensureDefaultIndexPattern": [MockFunction],
               "find": [MockFunction],
               "get": [MockFunction],
+              "getCanSaveSync": [MockFunction],
+              "getDefaultDataView": [MockFunction],
+              "getDefaultId": [MockFunction],
               "getIdsWithTitle": [MockFunction],
+              "hasData": Object {
+                "hasDataView": [MockFunction],
+                "hasESData": [MockFunction],
+                "hasUserDataView": [MockFunction],
+              },
               "make": [Function],
             }
           }
@@ -104,10 +113,19 @@ exports[`should render EntityIndexExpression 1`] = `
               "clearCache": [MockFunction],
               "createField": [MockFunction],
               "createFieldList": [MockFunction],
+              "ensureDefaultDataView": [MockFunction],
               "ensureDefaultIndexPattern": [MockFunction],
               "find": [MockFunction],
               "get": [MockFunction],
+              "getCanSaveSync": [MockFunction],
+              "getDefaultDataView": [MockFunction],
+              "getDefaultId": [MockFunction],
               "getIdsWithTitle": [MockFunction],
+              "hasData": Object {
+                "hasDataView": [MockFunction],
+                "hasESData": [MockFunction],
+                "hasUserDataView": [MockFunction],
+              },
               "make": [Function],
             }
           }
@@ -187,10 +205,19 @@ exports[`should render EntityIndexExpression w/ invalid flag if invalid 1`] = `
               "clearCache": [MockFunction],
               "createField": [MockFunction],
               "createFieldList": [MockFunction],
+              "ensureDefaultDataView": [MockFunction],
               "ensureDefaultIndexPattern": [MockFunction],
               "find": [MockFunction],
               "get": [MockFunction],
+              "getCanSaveSync": [MockFunction],
+              "getDefaultDataView": [MockFunction],
+              "getDefaultId": [MockFunction],
               "getIdsWithTitle": [MockFunction],
+              "hasData": Object {
+                "hasDataView": [MockFunction],
+                "hasESData": [MockFunction],
+                "hasUserDataView": [MockFunction],
+              },
               "make": [Function],
             }
           }

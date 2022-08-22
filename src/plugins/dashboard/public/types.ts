@@ -27,7 +27,6 @@ import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { EmbeddableInput, ViewMode } from '@kbn/embeddable-plugin/common';
 import { ContainerInput, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public/types';
 
 import { DataView } from './services/data_views';
 import { SharePluginStart } from './services/share';
@@ -224,6 +223,6 @@ export interface DashboardAppServices {
   screenshotModeService: ScreenshotModePluginStart;
   dashboardSessionStorage: DashboardSessionStorage;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-  savedQueryService: DataPublicPluginStart['query']['savedQueries'];
+  // savedQueryService: DataPublicPluginStart['query']['savedQueries'];
   spacesService?: SpacesPluginStart;
 }

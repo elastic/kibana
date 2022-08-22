@@ -30,7 +30,6 @@ export const getSessionURLObservable = (history: History) =>
 
 export function createSessionRestorationDataProvider(deps: {
   kibanaVersion: string;
-  // data: DataPublicPluginStart;
   getAppState: () => DashboardState;
   getDashboardTitle: () => string;
   getDashboardId: () => string;
@@ -54,10 +53,8 @@ export function enableDashboardSearchSessions({
   getLatestDashboardState,
   savedDashboard,
   kibanaVersion,
-}: // data,
-{
+}: {
   kibanaVersion: string;
-  // data: DataPublicPluginStart;
   canStoreSearchSession: boolean;
   savedDashboard: DashboardSavedObject;
   initialDashboardState: DashboardState;
@@ -94,14 +91,12 @@ export function enableDashboardSearchSessions({
  * as it was.
  */
 function getLocatorParams({
-  // data,
   getAppState,
   kibanaVersion,
   getDashboardId,
   shouldRestoreSearchSession,
 }: {
   kibanaVersion: string;
-  // data: DataPublicPluginStart;
   getAppState: () => DashboardState;
   getDashboardId: () => string;
   shouldRestoreSearchSession: boolean;

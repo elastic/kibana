@@ -20,7 +20,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ApplicationStart, SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import useMount from 'react-use/lib/useMount';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
-import { syncQueryStateWithUrl } from '@kbn/data-plugin/public';
+import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import { attemptLoadDashboardByTitle } from '../lib';
 import { DashboardAppServices, DashboardRedirect } from '../../types';
 import {
@@ -59,8 +59,6 @@ export const DashboardListing = ({
   const {
     services: {
       core,
-      // data,
-      // dataViews,
       savedDashboards,
       savedObjectsClient,
       savedObjectsTagging,
@@ -71,11 +69,10 @@ export const DashboardListing = ({
   } = useKibana<DashboardAppServices>();
 
   const { data } = pluginServices.getServices();
-  const { dataViews } = data;
 
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
   useMount(() => {
-    (async () => setShowNoDataPage(await isDashboardAppInNoDataState(dataViews)))();
+    (async () => setShowNoDataPage(await isDashboardAppInNoDataState()))();
   });
 
   const [unsavedDashboardIds, setUnsavedDashboardIds] = useState<string[]>(
@@ -98,7 +95,7 @@ export const DashboardListing = ({
 
   useEffect(() => {
     // syncs `_g` portion of url with query services
-    const { stop: stopSyncingQueryServiceStateWithUrl } = syncQueryStateWithUrl(
+    const { stop: stopSyncingQueryServiceStateWithUrl } = syncGlobalQueryStateWithUrl(
       data.query,
       kbnUrlStateStorage
     );
