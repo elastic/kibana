@@ -14,9 +14,9 @@ import type {
   SavedObjectSanitizedDoc,
   SavedObjectsRawDocParseOptions,
 } from '@kbn/core-saved-objects-server';
-import { LEGACY_URL_ALIAS_TYPE } from '../object_types';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
+import { LEGACY_URL_ALIAS_TYPE } from '../legacy_alias';
 import { decodeVersion, encodeVersion } from '../version';
-import { SavedObjectsUtils } from '../service';
 
 /**
  * Core internal implementation of {@link ISavedObjectsSerializer}
