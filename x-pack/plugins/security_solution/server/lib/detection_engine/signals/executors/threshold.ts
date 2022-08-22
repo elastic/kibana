@@ -16,7 +16,6 @@ import type {
 } from '@kbn/alerting-plugin/server';
 import type { IRuleDataReader } from '@kbn/rule-registry-plugin/server';
 import type { ListClient } from '@kbn/lists-plugin/server';
-import { hasLargeValueItem } from '../../../../../common/detection_engine/utils';
 import type { CompleteRule, ThresholdRuleParams } from '../../schemas/rule_schemas';
 import { getFilter } from '../get_filter';
 import {
@@ -100,13 +99,6 @@ export const thresholdExecutor = async ({
       for (const hash of toDelete) {
         delete signalHistory[hash];
       }
-    }
-
-    if (hasLargeValueItem(exceptionItems)) {
-      result.warningMessages.push(
-        'Exceptions that use "is in list" or "is not in list" operators are not applied to Threshold rules' // TODO: change or get rid of this
-      );
-      result.warning = true;
     }
 
     // Eliminate dupes

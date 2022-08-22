@@ -70,6 +70,12 @@ export const findAllListItems = async ({
     });
 
     while (response.hits.hits.length !== 0) {
+      allListItems = allListItems.concat(transformElasticToListItem({ response, type: list.type }));
+
+      if (allListItems.length > 100000) {
+        throw new TypeError('API route only supports up to 100,000 items');
+      }
+
       response = await esClient.search<SearchEsListItemSchema>({
         body: {
           query,
@@ -80,11 +86,6 @@ export const findAllListItems = async ({
         index: listItemIndex,
         seq_no_primary_term: true,
       });
-
-      allListItems = allListItems.concat(transformElasticToListItem({ response, type: list.type }));
-      if (allListItems.length > 100000) {
-        throw new TypeError('API route only supports up to 100,000 items');
-      }
     }
     return {
       data: allListItems,
