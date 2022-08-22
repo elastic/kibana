@@ -37,7 +37,12 @@ import { RuleDefinitionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DeleteModalConfirmation } from './components/delete_modal_confirmation';
 import { CenterJustifiedSpinner } from './components/center_justified_spinner';
-import { RuleDetailsPathParams, EVENT_LOG_LIST_TAB, ALERT_LIST_TAB } from './types';
+import {
+  RuleDetailsPathParams,
+  EVENT_LOG_LIST_TAB,
+  ALERT_LIST_TAB,
+  RULE_DETAILS_PAGE_ID,
+} from './types';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
@@ -155,7 +160,7 @@ export function RuleDetailsPage() {
   const alertStateProps = {
     alertsTableConfigurationRegistry,
     configurationId: observabilityFeatureId,
-    id: `case-details-alerts-o11y`,
+    id: RULE_DETAILS_PAGE_ID,
     flyoutSize: 's' as EuiFlyoutSize,
     featureIds: [features] as AlertConsumers[],
     query: {

@@ -29,6 +29,7 @@ import { IntegrationsService } from '@kbn/core-integrations-browser-internal';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { OverlayService } from '@kbn/core-overlays-browser-internal';
 import { KBN_LOAD_MARKS } from '@kbn/core-mount-utils-browser-internal';
+import { SavedObjectsService } from '@kbn/core-saved-objects-browser-internal';
 import { NotificationsService } from '@kbn/core-notifications-browser-internal';
 import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
 import { CoreSetup, CoreStart } from '.';
@@ -36,7 +37,6 @@ import { ChromeService } from './chrome';
 import { PluginsService } from './plugins';
 import { ApplicationService } from './application';
 import { RenderingService } from './rendering';
-import { SavedObjectsService } from './saved_objects';
 import { CoreApp } from './core_app';
 import type { InternalApplicationSetup, InternalApplicationStart } from './application/types';
 

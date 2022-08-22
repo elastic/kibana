@@ -8,7 +8,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import moment from 'moment';
 
-import type { Unit } from '@kbn/datemath';
 import {
   RULE_PREVIEW_FROM,
   RULE_PREVIEW_INTERVAL,
@@ -23,7 +22,10 @@ import type {
 import { previewRule } from './api';
 import * as i18n from './translations';
 import { transformOutput } from './transforms';
-import type { AdvancedPreviewOptions } from '../../../pages/detection_engine/rules/types';
+import type {
+  AdvancedPreviewOptions,
+  QuickQueryPreviewOptions,
+} from '../../../pages/detection_engine/rules/types';
 import { getTimeTypeValue } from '../../../pages/detection_engine/rules/create/helpers';
 
 const REASONABLE_INVOCATION_COUNT = 200;
@@ -35,10 +37,10 @@ const emptyPreviewRule: PreviewResponse = {
 };
 
 export const usePreviewRule = ({
-  timeframe = 'h',
+  quickQueryOptions,
   advancedOptions,
 }: {
-  timeframe: Unit;
+  quickQueryOptions: QuickQueryPreviewOptions;
   advancedOptions?: AdvancedPreviewOptions;
 }) => {
   const [rule, setRule] = useState<CreateRulesSchema | null>(null);
@@ -49,7 +51,7 @@ export const usePreviewRule = ({
   let interval: string = RULE_PREVIEW_INTERVAL.HOUR;
   let from: string = RULE_PREVIEW_FROM.HOUR;
 
-  switch (timeframe) {
+  switch (quickQueryOptions.timeframe) {
     case 'd':
       invocationCount = RULE_PREVIEW_INVOCATION_COUNT.DAY;
       interval = RULE_PREVIEW_INTERVAL.DAY;
@@ -67,8 +69,11 @@ export const usePreviewRule = ({
       break;
   }
   const timeframeEnd = useMemo(
-    () => (advancedOptions ? advancedOptions.timeframeEnd.toISOString() : moment().toISOString()),
-    [advancedOptions]
+    () =>
+      advancedOptions
+        ? advancedOptions.timeframeEnd.toISOString()
+        : quickQueryOptions.timeframeEnd.toISOString(),
+    [advancedOptions, quickQueryOptions]
   );
 
   if (advancedOptions) {
@@ -78,13 +83,15 @@ export const usePreviewRule = ({
       1000;
 
     const { unit: intervalUnit, value: intervalValue } = getTimeTypeValue(advancedOptions.interval);
-    const { unit: lookbackUnit, value: lookbackValue } = getTimeTypeValue(advancedOptions.lookback);
-    const duration = moment.duration(intervalValue, intervalUnit as 's' | 'm' | 'h');
-    duration.add(lookbackValue, lookbackUnit as 's' | 'm' | 'h');
+    const duration = moment.duration(intervalValue, intervalUnit);
     const ruleIntervalDuration = duration.asMilliseconds();
 
     invocationCount = Math.max(Math.ceil(timeframeDuration / ruleIntervalDuration), 1);
     interval = advancedOptions.interval;
+
+    const { unit: lookbackUnit, value: lookbackValue } = getTimeTypeValue(advancedOptions.lookback);
+    duration.add(lookbackValue, lookbackUnit);
+
     from = `now-${duration.asSeconds()}s`;
   }
   const showInvocationCountWarning = invocationCount > REASONABLE_INVOCATION_COUNT;

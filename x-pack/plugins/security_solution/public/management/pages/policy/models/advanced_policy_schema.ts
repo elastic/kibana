@@ -938,13 +938,13 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
-    key: 'windows.advanced.alerts.rollback.remediation.enabled',
+    key: 'windows.advanced.alerts.rollback.self_healing.enabled',
     first_supported_version: '8.4',
     documentation: i18n.translate(
-      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.alerts.rollback.remediation.enabled',
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.alerts.rollback.self_healing.enabled',
       {
         defaultMessage:
-          'Remediate malware artifacts when prevention alerts are triggered. Warning: data loss can occur.  Default: false',
+          'Self-healing erases attack artifacts when prevention alerts are triggered. Warning: data loss can occur. Default: false',
       }
     ),
     license: 'platinum',

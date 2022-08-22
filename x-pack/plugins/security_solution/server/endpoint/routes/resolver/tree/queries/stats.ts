@@ -211,7 +211,7 @@ export class StatsQuery {
               [id]: {
                 total: alertCount + otherEvents.total,
                 byCategory: {
-                  alerts: alertCount,
+                  alert: alertCount,
                   ...otherEvents.byCategory,
                 },
               },
@@ -222,7 +222,7 @@ export class StatsQuery {
               [id]: {
                 total: alertCount,
                 byCategory: {
-                  alerts: alertCount,
+                  alert: alertCount,
                 },
               },
             };
