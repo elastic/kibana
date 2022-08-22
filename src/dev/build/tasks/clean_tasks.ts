@@ -70,7 +70,7 @@ export const CleanExtraFilesFromModules: Task = {
       '**/Changelog.md',
       '**/changelog.md',
 
-      '**/CODE_OF_CONFDUCT.md',
+      '**/CODE_OF_CONDUCT.md',
 
       // examples
       '**/example',
