@@ -15,6 +15,7 @@ import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 reportPerformanceMetricEvent(analytics, {
   eventName: KIBANA_LOADED_EVENT,
   meta: {
+    // fields that are searchable-as-keywords but not aggregateable
     kibana_version: this.coreContext.env.packageInfo.version,
     protocol      : window.location.protocol,
     ...fetchOptionalMemoryInfo(),
