@@ -87,6 +87,7 @@ export const buildDnsHistogramQuery = ({
               unique_domains: 'desc',
             },
             size: 10,
+            _source: false,
           },
           aggs: {
             unique_domains: {
@@ -107,7 +108,7 @@ export const buildDnsHistogramQuery = ({
     },
     size: 0,
     track_total_hits: false,
-    _source: null,
+    _source: false,
   };
 
   return dslQuery;

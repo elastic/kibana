@@ -42,7 +42,7 @@ export const expectedDsl = {
   body: {
     aggs: {
       anomalyActionGroup: {
-        terms: { field: 'job_id', order: { _count: 'desc' }, size: 10 },
+        terms: { field: 'job_id', order: { _count: 'desc' }, size: 10, _source: false },
         aggs: {
           anomalies: {
             date_histogram: {

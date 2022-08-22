@@ -46,6 +46,7 @@ export const expectedDsl = {
           field: 'dns.question.registered_domain',
           order: { unique_domains: 'desc' },
           size: 10,
+          _source: false,
         },
         aggs: {
           unique_domains: { cardinality: { field: 'dns.question.name' } },
@@ -80,5 +81,5 @@ export const expectedDsl = {
   },
   size: 0,
   track_total_hits: false,
-  _source: null,
+  _source: false,
 };
