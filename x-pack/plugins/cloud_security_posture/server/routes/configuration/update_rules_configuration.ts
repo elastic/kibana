@@ -162,7 +162,6 @@ export const defineUpdateRulesConfigRoute = (router: CspRouter): void =>
         return response.ok({ body: updatedPackagePolicy });
       } catch (err) {
         const error = transformError(err);
-        console.log(error.message);
         cspContext.logger.error(
           `Failed to update rules configuration on package policy ${error.message}`
         );
