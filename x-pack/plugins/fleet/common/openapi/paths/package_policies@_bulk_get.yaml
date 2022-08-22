@@ -1,0 +1,35 @@
+post:
+  summary: Package policies - Bulk Get
+  tags: []
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            ids:
+              type: array
+              items:
+                type: string
+              description: list of package policy ids
+            ignoreMissing:
+              type: boolean
+          required:
+            - ids
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              items:
+                type: array
+                items:
+                  $ref: ../components/schemas/package_policy.yaml
+            required:
+              - items
+  operationId: bulk-get-package-policies
+  security: []
+  parameters: []
