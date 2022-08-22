@@ -266,7 +266,6 @@ describe('Fleet preconfiguration reset', () => {
         expect.arrayContaining([
           expect.objectContaining({
             name: 'Elastic Cloud agent policy 0001',
-            // package_policies: expect.arrayContaining([expect.stringMatching(/.*/)]), TODO check
           }),
           expect.objectContaining({
             name: 'Second preconfigured policy',
