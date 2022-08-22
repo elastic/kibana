@@ -118,8 +118,6 @@ export const createReduxEmbeddableTools = <
   return {
     Wrapper,
     actions: context.actions,
-    // @ts-ignore TypeScript thinks 'dispatch' is never available
-    // This is caused by using @reduxjs-toolkit internal types that aren't really meant for public consumption
     dispatch: store.dispatch,
     getState: store.getState,
     cleanup: () => stopReduxEmbeddableSync?.(),

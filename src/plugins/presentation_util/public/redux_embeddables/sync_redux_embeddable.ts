@@ -80,8 +80,6 @@ export const syncReduxEmbeddable = <
     >;
 
     if (!inputEqual(reduxExplicitInput, embeddableExplictInput)) {
-      // @ts-ignore TypeScript thinks 'dispatch' is never available
-      // This is caused by using @reduxjs-toolkit internal types that aren't really meant for public consumption
       store.dispatch(
         actions.updateEmbeddableReduxInput(cleanInputForRedux(embeddableExplictInput))
       );
@@ -95,8 +93,6 @@ export const syncReduxEmbeddable = <
     embeddableToReduxInProgress = true;
     const reduxState = store.getState();
     if (!outputEqual(reduxState.output, embeddableOutput)) {
-      // @ts-ignore TypeScript thinks 'dispatch' is never available
-      // This is caused by using @reduxjs-toolkit internal types that aren't really meant for public consumption
       store.dispatch(actions.updateEmbeddableReduxOutput(embeddableOutput));
     }
     embeddableToReduxInProgress = false;
