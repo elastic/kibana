@@ -70,6 +70,8 @@ export const CleanExtraFilesFromModules: Task = {
       '**/Changelog.md',
       '**/changelog.md',
 
+      '**/CODE_OF_CONDUCT.md',
+
       // examples
       '**/example',
       '**/examples',
@@ -150,6 +152,9 @@ export const CleanExtraFilesFromModules: Task = {
       '**/.codecov.yml',
       '**/.airtap.yml',
       '**/.gitpod.yml',
+      '**/karma.conf.ci.js',
+      '**/karma.conf.js',
+      '**/karma-ci.conf.js',
 
       // metadata
       '**/package-lock.json',
@@ -178,7 +183,25 @@ export const CleanExtraFilesFromModules: Task = {
       '**/*.tgz',
       '**/*.gz',
 
+      '**/*.cc',
+      '**/*.pl',
+      '**/*.py',
+      '**/*.gz',
+      '**/*.h',
       '**/*.xml',
+      '**/*.html',
+
+      '**/*.development.js',
+      '**/*.dev.js',
+      '**/benchmark',
+      '**/benchmarks',
+      '**/benchmark.js',
+      '**/benchmarks.js',
+
+      '**/rollup.config.js',
+      '**/webpack.config.js',
+      '**/commitlint.config.js',
+      '**/styleguide.config.js',
 
       '**/@elastic/eui/es',
       '**/@elastic/eui/test-env',
