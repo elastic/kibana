@@ -11,11 +11,24 @@ import { i18n } from '@kbn/i18n';
 
 import { ErrorCode } from '../../../common/types/error_codes';
 import { addAnalyticsCollection } from '../../lib/analytics/add_analytics_collection';
+import { fetchAnalyticsCollections } from '../../lib/analytics/fetch_analytics_collection';
 import { RouteDependencies } from '../../plugin';
 import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 
 export function registerAnalyticsRoutes({ router, log }: RouteDependencies) {
+  router.get(
+    {
+      path: '/internal/enterprise_search/analytics/collections',
+      validate: {},
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const collections = await fetchAnalyticsCollections(client);
+      return response.ok({ body: collections });
+    })
+  );
+
   router.post(
     {
       path: '/internal/enterprise_search/analytics/collections',
