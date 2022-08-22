@@ -4463,7 +4463,6 @@
     "savedObjects.saveModalOrigin.addToOriginLabel": "追加",
     "savedObjects.saveModalOrigin.returnToOriginLabel": "戻る",
     "savedObjects.saveModalOrigin.saveAndReturnLabel": "保存して戻る",
-    "savedObjectsFinder.filterButtonLabel": "タイプ",
     "savedObjectsManagement.breadcrumb.inspect": "{savedObjectType}の検査",
     "savedObjectsManagement.importSummary.createdCountHeader": "{createdCount}件の新規項目",
     "savedObjectsManagement.importSummary.errorCountHeader": "{errorCount}件のエラー",

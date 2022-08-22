@@ -4465,7 +4465,6 @@
     "savedObjects.saveModalOrigin.addToOriginLabel": "Ajouter",
     "savedObjects.saveModalOrigin.returnToOriginLabel": "Renvoyer",
     "savedObjects.saveModalOrigin.saveAndReturnLabel": "Enregistrer et revenir",
-    "savedObjectsFinder.filterButtonLabel": "Types",
     "savedObjectsManagement.breadcrumb.inspect": "Inspecter {savedObjectType}",
     "savedObjectsManagement.importSummary.createdCountHeader": "{createdCount} nouveau(x)",
     "savedObjectsManagement.importSummary.errorCountHeader": "{errorCount} erreur(s)",

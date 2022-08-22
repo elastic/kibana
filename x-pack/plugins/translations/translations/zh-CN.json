@@ -4468,7 +4468,6 @@
     "savedObjects.saveModalOrigin.addToOriginLabel": "添加",
     "savedObjects.saveModalOrigin.returnToOriginLabel": "返回",
     "savedObjects.saveModalOrigin.saveAndReturnLabel": "保存并返回",
-    "savedObjectsFinder.filterButtonLabel": "类型",
     "savedObjectsManagement.breadcrumb.inspect": "检查 {savedObjectType}",
     "savedObjectsManagement.importSummary.createdCountHeader": "{createdCount} 个新",
     "savedObjectsManagement.importSummary.errorCountHeader": "{errorCount} 个错误",
