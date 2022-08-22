@@ -132,10 +132,24 @@ export function getUserAvatarInitials(
 }
 
 /**
- * Determines the display name for the provided user profile.
- *
- * @param {UserProfileUserInfo} user User info
+ * Set of available name-related fields to pick as display name.
  */
-export function getUserDisplayName(user: Pick<UserProfileUserInfo, 'username' | 'full_name'>) {
-  return user.full_name || user.username;
+export interface GetUserDisplayNameParams {
+  /**
+   * Username of the user.
+   */
+  username: string;
+
+  /**
+   * Optional email of the user.
+   */
+  full_name?: string;
+}
+
+/**
+ * Determines the display name for the provided user information.
+ * @param params Set of available user's name-related fields.
+ */
+export function getUserDisplayName(params: GetUserDisplayNameParams) {
+  return params.full_name || params.username;
 }
