@@ -8,10 +8,11 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Teletype } from '../../../common/types/process_tree';
 import { DEFAULT_TTY_FONT_SIZE } from '../../../common/constants';
+import { ZOOM_IN, ZOOM_FIT, ZOOM_OUT } from './translations';
 
 export interface TTYTextSizerDeps {
   tty?: Teletype;
-  container: HTMLDivElement | null;
+  containerHeight: number;
   fontSize: number;
   onFontSizeChanged(newSize: number): void;
 }
@@ -20,16 +21,21 @@ const LINE_HEIGHT_SCALE_RATIO = 1.3;
 const MINIMUM_FONT_SIZE = 2;
 const MAXIMUM_FONT_SIZE = 20;
 
-export const TTYTextSizer = ({ tty, container, fontSize, onFontSizeChanged }: TTYTextSizerDeps) => {
+export const TTYTextSizer = ({
+  tty,
+  containerHeight,
+  fontSize,
+  onFontSizeChanged,
+}: TTYTextSizerDeps) => {
   const onFitFontSize = useMemo(() => {
-    if (tty?.rows && container?.offsetHeight) {
+    if (tty?.rows && containerHeight) {
       const lineHeight = DEFAULT_TTY_FONT_SIZE * LINE_HEIGHT_SCALE_RATIO;
       const desiredHeight = tty.rows * lineHeight;
-      return DEFAULT_TTY_FONT_SIZE * (container.offsetHeight / desiredHeight);
+      return DEFAULT_TTY_FONT_SIZE * (containerHeight / desiredHeight);
     }
 
     return DEFAULT_TTY_FONT_SIZE;
-  }, [container?.offsetHeight, tty?.rows]);
+  }, [containerHeight, tty?.rows]);
 
   const onFit = useCallback(() => {
     if (fontSize === onFitFontSize || onFitFontSize > DEFAULT_TTY_FONT_SIZE) {
@@ -40,26 +46,43 @@ export const TTYTextSizer = ({ tty, container, fontSize, onFontSizeChanged }: TT
   }, [fontSize, onFontSizeChanged, onFitFontSize]);
 
   const onZoomOut = useCallback(() => {
-    onFontSizeChanged(Math.max(MINIMUM_FONT_SIZE, fontSize - 2));
+    onFontSizeChanged(Math.max(MINIMUM_FONT_SIZE, fontSize - 1));
   }, [fontSize, onFontSizeChanged]);
 
   const onZoomIn = useCallback(() => {
-    onFontSizeChanged(Math.min(MAXIMUM_FONT_SIZE, fontSize + 2));
+    onFontSizeChanged(Math.min(MAXIMUM_FONT_SIZE, fontSize + 1));
   }, [fontSize, onFontSizeChanged]);
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="s" direction="row">
+    <EuiFlexGroup
+      data-test-subj="sessionView:TTYTextSizer"
+      alignItems="center"
+      gutterSize="s"
+      direction="row"
+    >
       <EuiFlexItem>
-        <EuiButtonIcon iconType="magnifyWithPlus" onClick={onZoomIn} />
+        <EuiButtonIcon
+          data-test-subj="sessionView:TTYZoomIn"
+          aria-label={ZOOM_IN}
+          iconType="magnifyWithPlus"
+          onClick={onZoomIn}
+        />
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiButtonIcon
+          data-test-subj="sessionView:TTYZoomFit"
+          aria-label={ZOOM_FIT}
           iconType={onFitFontSize === fontSize ? 'expand' : 'minimize'}
           onClick={onFit}
         />
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiButtonIcon iconType="magnifyWithMinus" onClick={onZoomOut} />
+        <EuiButtonIcon
+          data-test-subj="sessionView:TTYZoomOut"
+          aria-label={ZOOM_OUT}
+          iconType="magnifyWithMinus"
+          onClick={onZoomOut}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

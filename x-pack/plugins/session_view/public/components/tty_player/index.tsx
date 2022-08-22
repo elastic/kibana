@@ -32,11 +32,11 @@ export const TTYPlayer = ({ sessionEntityId, onClose, isFullscreen }: TTYPlayerD
   const { search, currentLine, seekToLine } = useXtermPlayer({
     ref,
     isPlaying,
+    setIsPlaying,
     lines,
     fontSize,
     hasNextPage,
     fetchNextPage,
-    isFullscreen,
   });
 
   const tty = lines?.[currentLine]?.event?.process?.tty;
@@ -109,7 +109,7 @@ export const TTYPlayer = ({ sessionEntityId, onClose, isFullscreen }: TTYPlayerD
           <EuiFlexItem grow={false}>
             <TTYTextSizer
               tty={tty}
-              container={scrollRef.current}
+              containerHeight={scrollRef?.current?.offsetHeight || 0}
               fontSize={fontSize}
               onFontSizeChanged={setFontSize}
             />

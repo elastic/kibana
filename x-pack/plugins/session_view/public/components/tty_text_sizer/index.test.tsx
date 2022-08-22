@@ -5,98 +5,72 @@
  * 2.0.
  */
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
 import userEvent from '@testing-library/user-event';
-import { fireEvent } from '@testing-library/dom';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
-import { sessionViewIOEventsMock } from '../../../common/mocks/responses/session_view_io_events.mock';
-import { useIOLines } from '../tty_player/hooks';
-import { ProcessEventsPage } from '../../../common/types/process_tree';
-import { TTYSearchBar, TTYSearchBarDeps } from '.';
+import { DEFAULT_TTY_FONT_SIZE } from '../../../common/constants';
+import { TTYTextSizer, TTYTextSizerDeps } from '.';
 
-// TTYSearchBar is a HOC to SessionViewSearchBar which is already well tested
-// so these tests will only focus on newly added functionality
-describe('TTYSearchBar component', () => {
+describe('TTYTextSizer component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let mockedContext: AppContextTestRender;
-  let props: TTYSearchBarDeps;
+  let props: TTYTextSizerDeps;
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
 
-    const events = sessionViewIOEventsMock?.events?.map((event) => event._source);
-    const pages: ProcessEventsPage[] = [{ events, total: events?.length }];
-    const { result } = renderHook(() => useIOLines(pages));
-    const lines = result.current;
-
     props = {
-      lines,
-      seekToLine: jest.fn(),
-      xTermSearchFn: jest.fn(),
+      tty: {
+        rows: 24,
+        columns: 80,
+      },
+      containerHeight: 200,
+      fontSize: DEFAULT_TTY_FONT_SIZE,
+      onFontSizeChanged: jest.fn(),
     };
   });
 
-  it('mounts and renders the search bar', async () => {
-    renderResult = mockedContext.render(<TTYSearchBar {...props} />);
-    expect(renderResult.queryByTestId('sessionView:searchBar')).toBeTruthy();
+  it('mounts and renders the text sizer controls', async () => {
+    renderResult = mockedContext.render(<TTYTextSizer {...props} />);
+    expect(renderResult.queryByTestId('sessionView:TTYTextSizer')).toBeTruthy();
   });
 
-  it('does a search when a user enters text and hits enter', async () => {
-    renderResult = mockedContext.render(<TTYSearchBar {...props} />);
+  it('emits a fontSize which will fit the container when ZoomFit clicked', async () => {
+    renderResult = mockedContext.render(<TTYTextSizer {...props} />);
 
-    const searchInput = renderResult.queryByTestId('sessionView:searchBar')?.querySelector('input');
-    if (searchInput) {
-      userEvent.type(searchInput, '-h');
-      fireEvent.keyUp(searchInput, { key: 'Enter', code: 'Enter' });
+    const zoomFitBtn = renderResult.queryByTestId('sessionView:TTYZoomFit');
+
+    if (zoomFitBtn) {
+      userEvent.click(zoomFitBtn);
     }
 
-    expect(props.seekToLine).toHaveBeenCalledTimes(1);
-
-    // there is a slight delay in the seek in xtermjs, so we wait 100ms before trying to highlight a result.
-    await new Promise((r) => setTimeout(r, 100));
-
-    expect(props.xTermSearchFn).toHaveBeenCalledTimes(1);
+    expect(props.onFontSizeChanged).toHaveBeenCalledTimes(1);
+    expect(props.onFontSizeChanged).toHaveBeenCalledWith(6.41025641025641);
   });
 
-  it('calls seekToline and xTermSearchFn when currentMatch changes', async () => {
-    renderResult = mockedContext.render(<TTYSearchBar {...props} />);
+  it('emits a larger fontSize when zoom in clicked', async () => {
+    renderResult = mockedContext.render(<TTYTextSizer {...props} />);
 
-    const searchInput = renderResult.queryByTestId('sessionView:searchBar')?.querySelector('input');
-    if (searchInput) {
-      userEvent.type(searchInput, '-h');
-      fireEvent.keyUp(searchInput, { key: 'Enter', code: 'Enter' });
+    const zoomInBtn = renderResult.queryByTestId('sessionView:TTYZoomIn');
+
+    if (zoomInBtn) {
+      userEvent.click(zoomInBtn);
     }
 
-    await new Promise((r) => setTimeout(r, 100));
-
-    userEvent.click(renderResult.getByTestId('pagination-button-next'));
-
-    await new Promise((r) => setTimeout(r, 100));
-
-    // two calls, first instance -h is at line 22, 2nd at line 42
-    expect(props.seekToLine).toHaveBeenCalledTimes(2);
-    expect(props.seekToLine).toHaveBeenNthCalledWith(1, 22);
-    expect(props.seekToLine).toHaveBeenNthCalledWith(2, 42);
-
-    expect(props.xTermSearchFn).toHaveBeenCalledTimes(2);
-    expect(props.xTermSearchFn).toHaveBeenNthCalledWith(1, '-h', 6);
-    expect(props.xTermSearchFn).toHaveBeenNthCalledWith(2, '-h', 13);
+    expect(props.onFontSizeChanged).toHaveBeenCalledTimes(1);
+    expect(props.onFontSizeChanged).toHaveBeenCalledWith(DEFAULT_TTY_FONT_SIZE + 1);
   });
 
-  it('calls xTermSearchFn with empty query when search is cleared', async () => {
-    renderResult = mockedContext.render(<TTYSearchBar {...props} />);
+  it('emits a smaller fontSize when zoom out clicked', async () => {
+    renderResult = mockedContext.render(<TTYTextSizer {...props} />);
 
-    const searchInput = renderResult.queryByTestId('sessionView:searchBar')?.querySelector('input');
-    if (searchInput) {
-      userEvent.type(searchInput, '-h');
-      fireEvent.keyUp(searchInput, { key: 'Enter', code: 'Enter' });
+    const zoomOutBtn = renderResult.queryByTestId('sessionView:TTYZoomOut');
+
+    if (zoomOutBtn) {
+      userEvent.click(zoomOutBtn);
     }
 
-    await new Promise((r) => setTimeout(r, 100));
-    userEvent.click(renderResult.getByTestId('clearSearchButton'));
-    await new Promise((r) => setTimeout(r, 100));
-
-    expect(props.xTermSearchFn).toHaveBeenNthCalledWith(2, '', 0);
+    expect(props.onFontSizeChanged).toHaveBeenCalledTimes(1);
+    expect(props.onFontSizeChanged).toHaveBeenCalledWith(DEFAULT_TTY_FONT_SIZE - 1);
   });
 });
