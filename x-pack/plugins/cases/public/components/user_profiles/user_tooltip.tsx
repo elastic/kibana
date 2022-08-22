@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTextColor, EuiToolTip } from '@elastic/eui';
 import { UserProfileUserInfo, UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { CaseUserAvatar } from './user_avatar';
 import { getName } from './display_name';
@@ -17,21 +17,14 @@ const UserFullInformation: React.FC<{ profile?: UserProfileWithAvatar }> = React
   ({ profile }) => {
     if (profile?.user.display_name && profile?.user.full_name) {
       return (
-        <>
-          <EuiText
-            size="s"
-            className="eui-textBreakWord"
-            data-test-subj="user-profile-tooltip-display-name"
-          >
-            <strong>{profile.user.display_name}</strong>
-          </EuiText>
-          <EuiText
-            size="s"
-            className="eui-textBreakWord"
-            color="subdued"
-            data-test-subj="user-profile-tooltip-full-name"
-          >{`(${profile.user.full_name})`}</EuiText>
-        </>
+        <EuiText size="s" className="eui-textBreakWord">
+          <strong data-test-subj="user-profile-tooltip-display-name">
+            {profile.user.display_name}
+          </strong>
+          <EuiTextColor color="subdued" data-test-subj="user-profile-tooltip-full-name">
+            {`(${profile.user.full_name})`}
+          </EuiTextColor>
+        </EuiText>
       );
     }
 
@@ -65,7 +58,7 @@ const UserFullRepresentationComponent: React.FC<UserFullRepresentationProps> = (
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s">
       <EuiFlexItem grow={false} data-test-subj="user-profile-tooltip-avatar">
-        <CaseUserAvatar profile={profile} />
+        <CaseUserAvatar size={'m'} profile={profile} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup direction={'column'} gutterSize="none">

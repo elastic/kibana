@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { UserProfilesPopover, UserProfileWithAvatar } from '@kbn/user-profile-components';
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { isEmpty, sortBy } from 'lodash';
 import { useSuggestUserProfiles } from '../../../containers/user_profiles/use_suggest_user_profiles';
 import { useCasesContext } from '../../cases_context/use_cases_context';
@@ -17,35 +17,15 @@ import * as i18n from '../translations';
 import { getSortField } from '../../user_profiles/sort';
 
 const SelectedStatusMessageComponent: React.FC<{
-  searchResultSize: number | undefined;
-  defaultOptionsSize: number | undefined;
   selectedCount: number;
-}> = ({ searchResultSize, defaultOptionsSize, selectedCount }) => {
-  const { euiTheme } = useEuiTheme();
-  const totalUsers = useMemo(
-    () => defaultOptionsSize ?? searchResultSize ?? 0,
-    [defaultOptionsSize, searchResultSize]
-  );
+}> = ({ selectedCount }) => {
+  if (selectedCount <= 0) {
+    return null;
+  }
 
   return (
-    <EuiFlexGroup gutterSize="none">
-      <EuiFlexItem
-        grow={false}
-        css={{
-          paddingRight: euiTheme.size.s,
-          borderRight: euiTheme.border.thin,
-        }}
-      >
-        {i18n.TOTAL_USERS(totalUsers)}
-      </EuiFlexItem>
-      <EuiFlexItem
-        css={{
-          paddingLeft: euiTheme.size.s,
-        }}
-        grow={false}
-      >
-        {i18n.TOTAL_USERS_ASSIGNED(selectedCount)}
-      </EuiFlexItem>
+    <EuiFlexGroup gutterSize="none" data-test-subj="case-view-assignees-popover-totals">
+      <EuiFlexItem grow={false}>{i18n.TOTAL_USERS_ASSIGNED(selectedCount)}</EuiFlexItem>
     </EuiFlexGroup>
   );
 };
@@ -67,9 +47,8 @@ const PopoverButton: React.FC<{ togglePopover: () => void; isLoading: boolean }>
 );
 PopoverButton.displayName = 'PopoverButton';
 
-interface SuggestUsersPopoverProps {
-  selectedUsers: AssigneeWithProfile[];
-  currentUserProfile?: UserProfileWithAvatar;
+export interface SuggestUsersPopoverProps {
+  assignedUsersWithProfiles: AssigneeWithProfile[];
   isLoading: boolean;
   isPopoverOpen: boolean;
   onUsersChange: (users: UserProfileWithAvatar[]) => void;
@@ -78,9 +57,8 @@ interface SuggestUsersPopoverProps {
 }
 
 const SuggestUsersPopoverComponent: React.FC<SuggestUsersPopoverProps> = ({
-  selectedUsers,
+  assignedUsersWithProfiles,
   isLoading,
-  currentUserProfile,
   isPopoverOpen,
   onUsersChange,
   togglePopover,
@@ -89,36 +67,27 @@ const SuggestUsersPopoverComponent: React.FC<SuggestUsersPopoverProps> = ({
   const { owner } = useCasesContext();
   const [searchTerm, setSearchTerm] = useState('');
 
-  const selectedProfiles = useMemo(
-    () => sortProfiles(selectedUsers.map((assignee) => ({ ...assignee.profile }))),
-    [selectedUsers]
-  );
+  const selectedProfiles = useMemo(() => {
+    return sortProfiles(assignedUsersWithProfiles.map((assignee) => ({ ...assignee.profile })));
+  }, [assignedUsersWithProfiles]);
 
-  const [currentSelectedUsers, setCurrentSelectedUsers] =
-    useState<UserProfileWithAvatar[]>(selectedProfiles);
+  const [selectedUsers, setSelectedUsers] = useState<UserProfileWithAvatar[] | undefined>();
 
-  const [defaultOptions, setDefaultOptions] = useState<UserProfileWithAvatar[] | undefined>();
   const [searchResultProfiles, setSearchResultProfiles] = useState<
     UserProfileWithAvatar[] | undefined
   >();
 
   const onChange = useCallback(
     (users: UserProfileWithAvatar[]) => {
-      setCurrentSelectedUsers(users);
+      setSelectedUsers(users);
       onUsersChange(users);
     },
     [onUsersChange]
   );
 
   const selectedStatusMessage = useCallback(
-    (selectedCount: number) => (
-      <SelectedStatusMessageComponent
-        defaultOptionsSize={defaultOptions?.length}
-        searchResultSize={searchResultProfiles?.length}
-        selectedCount={selectedCount}
-      />
-    ),
-    [defaultOptions?.length, searchResultProfiles?.length]
+    (selectedCount: number) => <SelectedStatusMessageComponent selectedCount={selectedCount} />,
+    []
   );
 
   const { data: userProfiles, isLoading: isLoadingSuggest } = useSuggestUserProfiles({
@@ -129,14 +98,12 @@ const SuggestUsersPopoverComponent: React.FC<SuggestUsersPopoverProps> = ({
   useEffect(() => {
     const sortedUserProfiles = sortProfiles(userProfiles);
 
-    if (isEmpty(searchTerm)) {
-      setDefaultOptions(constructDefaultOptions(sortedUserProfiles, currentUserProfile));
-      setSearchResultProfiles(undefined);
-    } else {
-      setDefaultOptions(undefined);
+    if (!isEmpty(searchTerm)) {
       setSearchResultProfiles(sortedUserProfiles);
+    } else {
+      setSearchResultProfiles(undefined);
     }
-  }, [currentUserProfile, searchTerm, userProfiles]);
+  }, [searchTerm, userProfiles]);
 
   const isLoadingData = isLoadingSuggest || isLoading;
 
@@ -154,12 +121,12 @@ const SuggestUsersPopoverComponent: React.FC<SuggestUsersPopoverProps> = ({
         onSearchChange: setSearchTerm,
         selectedStatusMessage,
         options: searchResultProfiles,
-        selectedOptions: currentSelectedUsers,
-        defaultOptions,
+        selectedOptions: selectedUsers ?? selectedProfiles,
         isLoading: isLoadingData,
         height: 'full',
         searchPlaceholder: i18n.SEARCH_USERS,
         clearButtonLabel: i18n.REMOVE_ASSIGNEES,
+        emptyMessage: '',
       }}
     />
   );
@@ -168,25 +135,6 @@ const SuggestUsersPopoverComponent: React.FC<SuggestUsersPopoverProps> = ({
 SuggestUsersPopoverComponent.displayName = 'SuggestUsersPopover';
 
 export const SuggestUsersPopover = React.memo(SuggestUsersPopoverComponent);
-
-const constructDefaultOptions = (
-  profiles?: UserProfileWithAvatar[],
-  currentUserProfile?: UserProfileWithAvatar
-) => {
-  if (!currentUserProfile) {
-    return profiles ?? [];
-  }
-
-  if (!profiles) {
-    return [currentUserProfile];
-  }
-
-  const profilesWithoutCurrentUser = profiles.filter(
-    (profile) => profile.uid !== currentUserProfile.uid
-  );
-
-  return [currentUserProfile, ...profilesWithoutCurrentUser];
-};
 
 const sortProfiles = (profiles?: UserProfileWithAvatar[]) => {
   if (!profiles) {

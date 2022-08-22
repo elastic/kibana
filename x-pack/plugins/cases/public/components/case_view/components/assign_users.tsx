@@ -98,10 +98,9 @@ const AssignUsersComponent: React.FC<AssignUsersProps> = ({
     caseAssignees,
     userProfiles,
   });
+
   const [selectedAssignees, setSelectedAssignees] = useState<Assignee[] | undefined>();
-
   const [needToUpdateAssignees, setNeedToUpdateAssignees] = useState(false);
-
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const togglePopover = useCallback(() => {
@@ -110,8 +109,11 @@ const AssignUsersComponent: React.FC<AssignUsersProps> = ({
   }, []);
 
   const onClosePopover = useCallback(() => {
-    setIsPopoverOpen(false);
+    // Order matters here because needToUpdateAssignees will likely be true already
+    // from the togglePopover call when opening the popover, so if we set the popover to false
+    // first, we'll get a rerender and then get another after we set needToUpdateAssignees to true again
     setNeedToUpdateAssignees(true);
+    setIsPopoverOpen(false);
   }, []);
 
   const onAssigneeRemoved = useCallback(
@@ -174,9 +176,8 @@ const AssignUsersComponent: React.FC<AssignUsersProps> = ({
         {!isLoading && permissions.update && (
           <EuiFlexItem data-test-subj="case-view-assignees-edit" grow={false}>
             <SuggestUsersPopover
-              selectedUsers={assigneesWithProfiles}
+              assignedUsersWithProfiles={assigneesWithProfiles}
               isLoading={isLoading}
-              currentUserProfile={currentUserProfile}
               isPopoverOpen={isPopoverOpen}
               onUsersChange={onUsersChange}
               onClosePopover={onClosePopover}

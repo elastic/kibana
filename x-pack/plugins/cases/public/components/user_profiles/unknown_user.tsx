@@ -7,15 +7,19 @@
 
 import React from 'react';
 
-import { UserAvatar } from '@kbn/user-profile-components';
+import { UserAvatar, UserAvatarProps } from '@kbn/user-profile-components';
 import * as i18n from '../../common/translations';
 
-const CaseUnknownUserAvatarComponent: React.FC = () => {
+interface CaseUnknownUserAvatarProps {
+  size: UserAvatarProps['size'];
+}
+
+const CaseUnknownUserAvatarComponent: React.FC<CaseUnknownUserAvatarProps> = ({ size }) => {
   return (
     <UserAvatar
       user={{ username: '', display_name: i18n.UNKNOWN }}
-      avatar={{ initials: 'U' }}
       data-test-subj="case-user-profile-avatar-unknown-user"
+      size={size}
     />
   );
 };
