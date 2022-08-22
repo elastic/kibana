@@ -199,10 +199,15 @@ export function getVisualizeFieldSuggestions({
     const allSuggestions = suggestions.filter(
       (s) => s.visualizationId === visualizeTriggerFieldContext.type
     );
-    return activeVisualization?.getVisualizationSuggestionFromContext?.({
-      suggestions: allSuggestions,
-      context: visualizeTriggerFieldContext,
-    });
+    return {
+      ...allSuggestions[0],
+      visualizationState: {
+        ...(typeof allSuggestions[0].visualizationState === 'object'
+          ? allSuggestions[0].visualizationState
+          : {}),
+        ...visualizeTriggerFieldContext.configuration,
+      },
+    };
   }
 
   if (suggestions.length) {

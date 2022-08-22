@@ -979,19 +979,7 @@ export interface Visualization<T = unknown> {
     dropType: DropType;
     group?: VisualizationDimensionGroupConfig;
   }) => T;
-  /**
-   * Update the configuration for the visualization. This is used to update the state
-   */
-  updateLayersConfigurationFromContext?: (
-    props: VisualizationConfigurationFromContextChangeProps<T>
-  ) => T;
 
-  /**
-   * Update the visualization state from the context.
-   */
-  getVisualizationSuggestionFromContext?: (
-    props: VisualizationStateFromContextChangeProps
-  ) => Suggestion;
   /**
    * Additional editor that gets rendered inside the dimension popover.
    * This can be used to configure dimension-specific options
