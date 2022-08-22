@@ -8,6 +8,6 @@
 
 import { SavedObjectsFinderPublicPlugin } from './plugin';
 export type { SavedObjectMetaData, SavedObjectFinderProps } from './finder';
-export type { SavedObjectsFinderStart } from './plugin';
+export { SavedObjectFinder } from './finder';
 
 export const plugin = () => new SavedObjectsFinderPublicPlugin();

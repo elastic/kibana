@@ -6,41 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart, Plugin } from '@kbn/core/public';
-import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
-import { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
-import { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import { getSavedObjectFinder, SavedObjectFinderProps } from './finder';
+import { Plugin } from '@kbn/core/public';
 
-export interface SavedObjectsFinderStart {
-  /**
-   * The saved objects finder component
-   */
-  Finder: (props: SavedObjectFinderProps) => JSX.Element;
-}
-
-interface SavedObjectsFinderStartDeps {
-  savedObjectsManagement: SavedObjectsManagementPluginStart;
-  savedObjects: SavedObjectsStart;
-  savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
-}
-
-export class SavedObjectsFinderPublicPlugin
-  implements Plugin<{}, SavedObjectsFinderStart, object, SavedObjectsFinderStartDeps>
-{
+export class SavedObjectsFinderPublicPlugin implements Plugin<{}, {}, object, {}> {
   public setup() {
     return {};
   }
 
-  public start(core: CoreStart, deps: SavedObjectsFinderStartDeps) {
-    return {
-      Finder: getSavedObjectFinder(
-        core.savedObjects,
-        core.uiSettings,
-        deps.savedObjectsManagement,
-        deps.savedObjects,
-        deps.savedObjectsTaggingOss
-      ),
-    };
+  public start() {
+    return {};
   }
 }
