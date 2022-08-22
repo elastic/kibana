@@ -43,29 +43,16 @@ describe('RulesTableUtilityBar', () => {
     );
   });
 
-  describe('renders correct pagination label when', () => {
-    it.each([
-      [0, 0, 0, 'Showing 0-0 of 0 rules'],
-      [1, 1, 1, 'Showing 1-1 of 1 rule'],
-      [1, 10, 21, 'Showing 1-10 of 21 rules'],
-      [1, 10, 8, 'Showing 1-8 of 8 rules'],
-      [2, 10, 31, 'Showing 11-20 of 31 rules'],
-      [4, 10, 31, 'Showing 31-31 of 31 rules'],
-      [1, 5, 4, 'Showing 1-4 of 4 rules'],
-      [1, 100, 100, 'Showing 1-100 of 100 rules'],
-      [2, 100, 101, 'Showing 101-101 of 101 rules'],
-    ])(
-      'current page is %s, showing %s rules per page and total rules is %s',
-      (page, perPage, total, label) => {
+  it('renders correct pagination label according to pagination data', () => {
         const wrapper = mount(
           <TestProviders>
             <RulesTableUtilityBar
               canBulkEdit
               onRefresh={jest.fn()}
               pagination={{
-                page,
-                perPage,
-                total,
+                page: 1,
+                perPage: 10,
+                total: 21,
               }}
               numberSelectedItems={1}
               onGetBulkItemsPopoverContent={jest.fn()}
@@ -75,7 +62,7 @@ describe('RulesTableUtilityBar', () => {
             />
           </TestProviders>
         );
-        expect(wrapper.find('[data-test-subj="showingRules"]').at(0).text()).toEqual(label);
+        expect(wrapper.find('[data-test-subj="showingRules"]').at(0).text()).toEqual("Showing 1-10 of 21 rules");
       }
     );
   });
