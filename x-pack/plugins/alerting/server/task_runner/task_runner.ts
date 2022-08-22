@@ -438,6 +438,7 @@ export class TaskRunner<
 
     await rulesClient.clearExpiredSnoozes({ id: rule.id });
     const ruleIsSnoozed = isRuleSnoozed(rule);
+
     const mutedAlertIdsSet = new Set(mutedInstanceIds);
     const alertsToReturn: Record<string, RawAlertInstance> = {};
 
