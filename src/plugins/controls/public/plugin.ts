@@ -8,27 +8,7 @@
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { pluginServices } from './services';
-import {
-  ControlsPluginSetup,
-  ControlsPluginStart,
-  ControlsPluginSetupDeps,
-  ControlsPluginStartDeps,
-  IEditableControlFactory,
-  ControlInput,
-} from './types';
-import {
-  OptionsListEmbeddableFactory,
-  OptionsListEmbeddableInput,
-} from './control_types/options_list';
-import {
-  RangeSliderEmbeddableFactory,
-  RangeSliderEmbeddableInput,
-} from './control_types/range_slider';
-import {
-  TimeSliderEmbeddableFactory,
-  TimeSliderControlEmbeddableInput,
-} from './control_types/time_slider_2';
+
 import {
   ControlGroupContainerFactory,
   CONTROL_GROUP_TYPE,
@@ -36,6 +16,13 @@ import {
   RANGE_SLIDER_CONTROL,
   TIME_SLIDER_CONTROL,
 } from '.';
+import { OptionsListEmbeddableFactory, OptionsListEmbeddableInput } from './options_list';
+import { RangeSliderEmbeddableFactory, RangeSliderEmbeddableInput } from './range_slider';
+import {
+  TimeSliderEmbeddableFactory,
+  TimeSliderControlEmbeddableInput,
+} from './control_types/time_slider_2';
+import { pluginServices } from './services';
 import { controlsService } from './services/kibana/controls';
 
 export class ControlsPlugin

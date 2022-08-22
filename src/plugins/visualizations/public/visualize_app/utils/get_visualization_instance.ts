@@ -13,7 +13,7 @@ import {
   getSavedSearch,
   SavedSearch,
   throwErrorOnSavedSearchUrlConflict,
-} from '@kbn/discover-plugin/public';
+} from '@kbn/saved-search-plugin/public';
 import { createVisAsync } from '../../vis_async';
 import { convertToSerializedVis, getSavedVisualization } from '../../utils/saved_visualize_utils';
 import {

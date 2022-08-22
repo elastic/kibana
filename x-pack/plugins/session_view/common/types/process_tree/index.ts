@@ -21,7 +21,7 @@ export const enum EventAction {
   fork = 'fork',
   exec = 'exec',
   end = 'end',
-  output = 'output',
+  text_output = 'text_output',
 }
 
 export interface User {
@@ -62,6 +62,20 @@ export interface Teletype {
   };
 }
 
+// used by tty_player component to split process.io.text into lines of IO
+export interface IOLine {
+  value?: string;
+
+  // the following is only set client side for caching purposes
+  process_name?: string;
+  process_entity_id?: string;
+  process_entity_cursor?: string;
+}
+
+export interface IOFields {
+  text?: string;
+}
+
 export interface ProcessFields {
   entity_id?: string;
   args?: string[];
@@ -91,6 +105,7 @@ export interface ProcessSelf extends ProcessFields {
   session_leader?: ProcessFields;
   entry_leader?: ProcessFields;
   group_leader?: ProcessFields;
+  io?: IOFields;
 }
 
 export interface ProcessEventHost {
@@ -209,14 +224,14 @@ export interface ProcessEventOrchestrator {
     name?: string;
     type?: string;
     ip?: string;
+    parent?: {
+      type?: string;
+    };
   };
   namespace?: string;
   cluster?: {
     name?: string;
     id?: string;
-  };
-  parent?: {
-    type?: string;
   };
 }
 
