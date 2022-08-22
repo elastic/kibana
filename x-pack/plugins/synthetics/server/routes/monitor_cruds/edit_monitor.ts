@@ -78,10 +78,7 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
         );
       const normalizedPreviousMonitor = normalizeSecrets(decryptedPreviousMonitor).attributes;
 
-      const editedMonitor = merge({
-        ...normalizedPreviousMonitor,
-        ...monitor,
-      });
+      const editedMonitor = merge(normalizedPreviousMonitor, monitor);
 
       const validationResult = validateMonitor(editedMonitor as MonitorFields);
 
