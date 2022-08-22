@@ -34,11 +34,13 @@ export const getActions = async ({
   size,
   startDate,
   userIds,
+  unExpiredOnly,
 }: Omit<GetActionDetailsListParam, 'logger'>): Promise<{
   actionIds: string[];
   actionRequests: TransportResult<estypes.SearchResponse<LogsEndpointAction>, unknown>;
 }> => {
   const additionalFilters = [];
+
   if (commands?.length) {
     additionalFilters.push({
       terms: {
@@ -46,19 +48,27 @@ export const getActions = async ({
       },
     });
   }
+
   if (userIds?.length) {
     additionalFilters.push({ terms: { user_id: userIds } });
   }
+
   if (elasticAgentIds?.length) {
     additionalFilters.push({ terms: { agents: elasticAgentIds } });
   }
 
+  if (unExpiredOnly) {
+    additionalFilters.push({ range: { expiration: { gte: 'now' } } });
+  }
+
   const dateFilters = getDateFilters({ startDate, endDate });
-  const baseActionFilters = [
+
+  const actionsFilters = [
     { term: { input_type: 'endpoint' } },
     { term: { type: 'INPUT_ACTION' } },
+    ...dateFilters,
+    ...additionalFilters,
   ];
-  const actionsFilters = [...baseActionFilters, ...dateFilters];
 
   const actionsSearchQuery: SearchRequest = {
     index: ENDPOINT_ACTIONS_INDEX,
@@ -67,9 +77,7 @@ export const getActions = async ({
     body: {
       query: {
         bool: {
-          filter: additionalFilters.length
-            ? [...actionsFilters, ...additionalFilters]
-            : actionsFilters,
+          filter: actionsFilters,
         },
       },
       sort: [

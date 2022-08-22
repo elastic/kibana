@@ -28,8 +28,13 @@ interface OptionalFilterParams {
   pageSize?: number;
   startDate?: string;
   userIds?: string[];
+  /** Will filter out the action requests so that only those show `expiration` date is greater than now */
+  unExpiredOnly?: boolean;
 }
 
+/**
+ * Retrieve a list of Actions (`ActionDetails`)
+ */
 export const getActionList = async ({
   commands,
   elasticAgentIds,
@@ -40,6 +45,7 @@ export const getActionList = async ({
   pageSize,
   startDate,
   userIds,
+  unExpiredOnly = false,
 }: OptionalFilterParams & {
   esClient: ElasticsearchClient;
   logger: Logger;
@@ -59,6 +65,7 @@ export const getActionList = async ({
     size,
     startDate,
     userIds,
+    unExpiredOnly,
   });
 
   return {
@@ -90,6 +97,7 @@ const getActionDetailsList = async ({
   size,
   startDate,
   userIds,
+  unExpiredOnly,
 }: GetActionDetailsListParam): Promise<{
   actionDetails: ActionDetails[];
   totalRecords: number;
@@ -109,6 +117,7 @@ const getActionDetailsList = async ({
       from,
       size,
       userIds,
+      unExpiredOnly,
     });
     actionRequests = _actionRequests;
     actionReqIds = actionIds;
