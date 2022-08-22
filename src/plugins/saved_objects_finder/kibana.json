@@ -5,7 +5,5 @@
     "githubTeam": "kibana-core"
   },
   "version": "kibana",
-  "ui": true,
-  "requiredPlugins": ["savedObjects", "savedObjectsManagement"],
-  "optionalPlugins": ["savedObjectsTaggingOss"]
+  "ui": true
 }

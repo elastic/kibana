@@ -25,18 +25,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import {
-  SimpleSavedObject,
-  CoreStart,
-  IUiSettingsClient,
-  SavedObjectsStart,
-  SavedObject,
-} from '@kbn/core/public';
+import { SimpleSavedObject, CoreStart, SavedObject } from '@kbn/core/public';
 import { SavedObjectsStart as SavedObjectsPlugin } from '@kbn/saved-objects-plugin/public/plugin';
-import {
-  SavedObjectsTaggingApi,
-  SavedObjectTaggingOssPluginStart,
-} from '@kbn/saved-objects-tagging-oss-plugin/public';
+import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 
 export interface SavedObjectMetaData<T = unknown> {
   type: string;
@@ -69,6 +60,11 @@ interface SavedObjectFinderState {
 }
 
 interface BaseSavedObjectFinder {
+  savedObjects: CoreStart['savedObjects'];
+  uiSettings: CoreStart['uiSettings'];
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
+  savedObjectsPlugin: SavedObjectsPlugin;
+  savedObjectsTagging: SavedObjectsTaggingApi | undefined;
   onChoose?: (
     id: SimpleSavedObject['id'],
     type: SimpleSavedObject['type'],
@@ -92,16 +88,8 @@ interface SavedObjectFinderInitialPageSize extends BaseSavedObjectFinder {
 
 export type SavedObjectFinderProps = SavedObjectFinderFixedPage | SavedObjectFinderInitialPageSize;
 
-type SavedObjectFinderUiProps = {
-  savedObjects: CoreStart['savedObjects'];
-  uiSettings: CoreStart['uiSettings'];
-  savedObjectsManagement: SavedObjectsManagementPluginStart;
-  savedObjectsPlugin: SavedObjectsPlugin;
-  savedObjectsTagging: SavedObjectsTaggingApi | undefined;
-} & SavedObjectFinderProps;
-
-class SavedObjectFinderUi extends React.Component<
-  SavedObjectFinderUiProps,
+export class SavedObjectFinderUi extends React.Component<
+  SavedObjectFinderProps,
   SavedObjectFinderState
 > {
   public static propTypes = {
@@ -191,7 +179,7 @@ class SavedObjectFinderUi extends React.Component<
     }
   }, 300);
 
-  constructor(props: SavedObjectFinderUiProps) {
+  constructor(props: SavedObjectFinderProps) {
     super(props);
 
     this.state = {
@@ -389,23 +377,6 @@ class SavedObjectFinderUi extends React.Component<
   }
 }
 
-const getSavedObjectFinder = (
-  savedObject: SavedObjectsStart,
-  uiSettings: IUiSettingsClient,
-  savedObjectsManagement: SavedObjectsManagementPluginStart,
-  savedObjectsPlugin: SavedObjectsPlugin,
-  savedObjectsTagging: SavedObjectTaggingOssPluginStart | undefined
-) => {
-  return (props: SavedObjectFinderProps) => (
-    <SavedObjectFinderUi
-      {...props}
-      savedObjects={savedObject}
-      uiSettings={uiSettings}
-      savedObjectsManagement={savedObjectsManagement}
-      savedObjectsPlugin={savedObjectsPlugin}
-      savedObjectsTagging={savedObjectsTagging?.getTaggingApi()}
-    />
-  );
-};
-
-export { getSavedObjectFinder, SavedObjectFinderUi };
+// Needed for React.lazy
+// eslint-disable-next-line import/no-default-export
+export default SavedObjectFinderUi;

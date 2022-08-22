@@ -6,5 +6,15 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
+import type { SavedObjectFinderProps } from './saved_object_finder';
+
+const LazySavedObjectFinder = React.lazy(() => import('./saved_object_finder'));
+const SavedObjectFinder = (props: SavedObjectFinderProps) => (
+  <React.Suspense fallback={null}>
+    <LazySavedObjectFinder {...props} />
+  </React.Suspense>
+);
+
 export type { SavedObjectMetaData, SavedObjectFinderProps } from './saved_object_finder';
-export { getSavedObjectFinder } from './saved_object_finder';
+export { SavedObjectFinder };
