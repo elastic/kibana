@@ -7,24 +7,25 @@
  */
 
 import { isEqual } from 'lodash';
-import { EuiButtonIcon } from '@elastic/eui';
 import React, { useEffect, useRef } from 'react';
 
+import { EuiButtonIcon } from '@elastic/eui';
 import { OverlayRef } from '@kbn/core/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { EmbeddableFactoryNotFoundError } from '@kbn/embeddable-plugin/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { useReduxContainerContext } from '@kbn/presentation-util-plugin/public';
+
+import { pluginServices } from '../../services';
+import { controlGroupReducers } from '../control_group_reducers';
+import { ControlGroupStrings } from '../control_group_strings';
 import { ControlGroupReduxState } from '../types';
 import { ControlEditor } from './control_editor';
-import { pluginServices } from '../../services';
-import { ControlGroupStrings } from '../control_group_strings';
 import {
   IEditableControlFactory,
   ControlInput,
   DataControlInput,
   ControlEmbeddable,
 } from '../../types';
-import { controlGroupReducers } from '../state/control_group_reducers';
 import { ControlGroupContainer, setFlyoutRef } from '../embeddable/control_group_container';
 
 interface EditControlResult {
@@ -45,8 +46,8 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
     typeof controlGroupReducers
   >();
   const {
-    containerActions: { untilEmbeddableLoaded, removeEmbeddable, replaceEmbeddable },
     actions: { setControlWidth, setControlGrow },
+    containerActions: { untilEmbeddableLoaded, removeEmbeddable, replaceEmbeddable },
     useEmbeddableSelector,
     useEmbeddableDispatch,
   } = reduxContainerContext;

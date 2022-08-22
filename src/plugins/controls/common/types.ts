@@ -9,8 +9,8 @@
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { EmbeddableInput } from '@kbn/embeddable-plugin/common/types';
 
-export type ControlWidth = 'small' | 'medium' | 'large';
 export type ControlStyle = 'twoLine' | 'oneLine';
+export type ControlWidth = 'small' | 'medium' | 'large';
 
 export interface ParentIgnoreSettings {
   ignoreFilters?: boolean;

@@ -11,49 +11,50 @@ import React from 'react';
 
 import { OverlayRef } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { pluginServices } from '../../services';
-import { ControlEditor } from './control_editor';
-import { ControlGroupStrings } from '../control_group_strings';
-import { ControlWidth, ControlInput, IEditableControlFactory, DataControlInput } from '../../types';
+
 import {
   DEFAULT_CONTROL_WIDTH,
   DEFAULT_CONTROL_GROW,
 } from '../../../common/control_group/control_group_constants';
+import { pluginServices } from '../../services';
+import { ControlWidth, ControlInput, IEditableControlFactory, DataControlInput } from '../../types';
+import { ControlGroupStrings } from '../control_group_strings';
 import { setFlyoutRef } from '../embeddable/control_group_container';
+import { ControlEditor } from './control_editor';
 
 export type CreateControlButtonTypes = 'toolbar' | 'callout';
 export interface CreateControlButtonProps {
-  defaultControlWidth?: ControlWidth;
-  defaultControlGrow?: boolean;
-  updateDefaultWidth: (defaultControlWidth: ControlWidth) => void;
-  updateDefaultGrow: (defaultControlGrow: boolean) => void;
-  addNewEmbeddable: (type: string, input: Omit<ControlInput, 'id'>) => void;
-  setLastUsedDataViewId?: (newDataViewId: string) => void;
-  getRelevantDataViewId?: () => string | undefined;
   buttonType: CreateControlButtonTypes;
+  defaultControlGrow?: boolean;
+  defaultControlWidth?: ControlWidth;
+  addNewEmbeddable: (type: string, input: Omit<ControlInput, 'id'>) => void;
   closePopover?: () => void;
+  getRelevantDataViewId?: () => string | undefined;
+  setLastUsedDataViewId?: (newDataViewId: string) => void;
+  updateDefaultGrow: (defaultControlGrow: boolean) => void;
+  updateDefaultWidth: (defaultControlWidth: ControlWidth) => void;
 }
 
 interface CreateControlResult {
-  type: string;
   controlInput: Omit<ControlInput, 'id'>;
+  type: string;
 }
 
 export const CreateControlButton = ({
   buttonType,
-  defaultControlWidth,
   defaultControlGrow,
+  defaultControlWidth,
   addNewEmbeddable,
   closePopover,
   getRelevantDataViewId,
   setLastUsedDataViewId,
-  updateDefaultWidth,
   updateDefaultGrow,
+  updateDefaultWidth,
 }: CreateControlButtonProps) => {
   // Controls Services Context
-  const { overlays, controls, theme } = pluginServices.getHooks();
-  const { getControlTypes, getControlFactory } = controls.useService();
-  const { openFlyout, openConfirm } = overlays.useService();
+  const { controls, overlays, theme } = pluginServices.getHooks();
+  const { getControlFactory, getControlTypes } = controls.useService();
+  const { openConfirm, openFlyout } = overlays.useService();
   const themeService = theme.useService();
 
   const createNewControl = async () => {
@@ -69,10 +70,10 @@ export const CreateControlButton = ({
           return;
         }
         openConfirm(ControlGroupStrings.management.discardNewControl.getSubtitle(), {
-          confirmButtonText: ControlGroupStrings.management.discardNewControl.getConfirm(),
-          cancelButtonText: ControlGroupStrings.management.discardNewControl.getCancel(),
-          title: ControlGroupStrings.management.discardNewControl.getTitle(),
           buttonColor: 'danger',
+          cancelButtonText: ControlGroupStrings.management.discardNewControl.getCancel(),
+          confirmButtonText: ControlGroupStrings.management.discardNewControl.getConfirm(),
+          title: ControlGroupStrings.management.discardNewControl.getTitle(),
         }).then((confirmed) => {
           if (confirmed) {
             reject();
@@ -92,7 +93,7 @@ export const CreateControlButton = ({
         if (factory.presaveTransformFunction) {
           inputToReturn = factory.presaveTransformFunction(inputToReturn);
         }
-        resolve({ type, controlInput: inputToReturn });
+        resolve({ controlInput: inputToReturn, type });
         ref.close();
       };
 
@@ -100,30 +101,30 @@ export const CreateControlButton = ({
         toMountPoint(
           <ControlsServicesProvider>
             <ControlEditor
-              setLastUsedDataViewId={setLastUsedDataViewId}
               getRelevantDataViewId={getRelevantDataViewId}
-              isCreate={true}
-              width={defaultControlWidth ?? DEFAULT_CONTROL_WIDTH}
               grow={defaultControlGrow ?? DEFAULT_CONTROL_GROW}
-              updateTitle={(newTitle) => (inputToReturn.title = newTitle)}
-              updateWidth={updateDefaultWidth}
-              updateGrow={updateDefaultGrow}
+              isCreate={true}
               onSave={(type) => onSave(flyoutInstance, type)}
               onCancel={() => onCancel(flyoutInstance)}
               onTypeEditorChange={(partialInput) =>
                 (inputToReturn = { ...inputToReturn, ...partialInput })
               }
+              setLastUsedDataViewId={setLastUsedDataViewId}
+              updateTitle={(newTitle) => (inputToReturn.title = newTitle)}
+              updateWidth={updateDefaultWidth}
+              updateGrow={updateDefaultGrow}
+              width={defaultControlWidth ?? DEFAULT_CONTROL_WIDTH}
             />
           </ControlsServicesProvider>,
           { theme$: themeService.theme$ }
         ),
         {
-          'aria-label': ControlGroupStrings.manageControl.getFlyoutCreateTitle(),
-          outsideClickCloses: false,
           onClose: (flyout) => {
             onCancel(flyout);
             setFlyoutRef(undefined);
           },
+          outsideClickCloses: false,
+          'aria-label': ControlGroupStrings.manageControl.getFlyoutCreateTitle(),
         }
       );
       setFlyoutRef(flyoutInstance);
@@ -141,14 +142,14 @@ export const CreateControlButton = ({
 
   const commonButtonProps = {
     key: 'addControl',
+    'aria-label': ControlGroupStrings.management.getManageButtonTitle(),
+    'data-test-subj': 'controls-create-button',
     onClick: () => {
       createNewControl();
       if (closePopover) {
         closePopover();
       }
     },
-    'data-test-subj': 'controls-create-button',
-    'aria-label': ControlGroupStrings.management.getManageButtonTitle(),
   };
 
   return buttonType === 'callout' ? (

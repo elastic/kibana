@@ -6,37 +6,40 @@
  * Side Public License, v 1.
  */
 
-import '../control_group.scss';
-
-import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
-import React, { useMemo, useState } from 'react';
 import classNames from 'classnames';
-import {
-  arrayMove,
-  SortableContext,
-  rectSortingStrategy,
-  sortableKeyboardCoordinates,
-} from '@dnd-kit/sortable';
+import React, { useMemo, useState } from 'react';
 import {
   closestCenter,
   DndContext,
   DragEndEvent,
   DragOverlay,
   KeyboardSensor,
+  LayoutMeasuringStrategy,
   PointerSensor,
   useSensor,
   useSensors,
-  LayoutMeasuringStrategy,
 } from '@dnd-kit/core';
+import {
+  arrayMove,
+  rectSortingStrategy,
+  SortableContext,
+  sortableKeyboardCoordinates,
+} from '@dnd-kit/sortable';
 
+import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { useReduxContainerContext } from '@kbn/presentation-util-plugin/public';
 
+import { controlGroupReducers } from '../control_group_reducers';
 import { ControlGroupReduxState } from '../types';
-import { controlGroupReducers } from '../state/control_group_reducers';
-import { ControlClone, SortableControl } from './control_group_sortable_item';
+import { SortableControl } from './control_group_sortable_control';
+import { ControlClone } from './control_group_control_clone';
+
+import '../control_group.scss';
 
 export const ControlGroup = () => {
+  const [draggingId, setDraggingId] = useState<string | null>(null);
+
   // Redux embeddable container Context
   const reduxContainerContext = useReduxContainerContext<
     ControlGroupReduxState,
@@ -44,15 +47,15 @@ export const ControlGroup = () => {
   >();
   const {
     actions: { setControlOrders },
-    useEmbeddableSelector: select,
     useEmbeddableDispatch,
+    useEmbeddableSelector: select,
   } = reduxContainerContext;
   const dispatch = useEmbeddableDispatch();
 
   // current state
+  const controlStyle = select((state) => state.explicitInput.controlStyle);
   const panels = select((state) => state.explicitInput.panels);
   const viewMode = select((state) => state.explicitInput.viewMode);
-  const controlStyle = select((state) => state.explicitInput.controlStyle);
 
   const isEditable = viewMode === ViewMode.EDIT;
 
@@ -67,7 +70,6 @@ export const ControlGroup = () => {
     [panels]
   );
 
-  const [draggingId, setDraggingId] = useState<string | null>(null);
   const draggingIndex = useMemo(
     () => (draggingId ? idsInOrder.indexOf(draggingId) : -1),
     [idsInOrder, draggingId]
@@ -104,39 +106,39 @@ export const ControlGroup = () => {
       {idsInOrder.length > 0 ? (
         <EuiPanel
           borderRadius="m"
-          color={panelBg}
-          paddingSize={emptyState ? 's' : 'none'}
-          data-test-subj="controls-group-wrapper"
           className={classNames('controlsWrapper', {
             'controlsWrapper--empty': emptyState,
             'controlsWrapper--twoLine': controlStyle === 'twoLine',
           })}
+          color={panelBg}
+          data-test-subj="controls-group-wrapper"
+          paddingSize={emptyState ? 's' : 'none'}
         >
           <EuiFlexGroup
-            wrap={false}
-            gutterSize="m"
-            direction="row"
-            responsive={false}
             alignItems="center"
             data-test-subj="controls-group"
+            direction="row"
+            gutterSize="m"
+            responsive={false}
+            wrap={false}
           >
             <EuiFlexItem>
               <DndContext
-                onDragStart={({ active }) => setDraggingId(active.id)}
-                onDragEnd={onDragEnd}
-                onDragCancel={() => setDraggingId(null)}
-                sensors={sensors}
                 collisionDetection={closestCenter}
                 layoutMeasuring={{
                   strategy: LayoutMeasuringStrategy.Always,
                 }}
+                onDragCancel={() => setDraggingId(null)}
+                onDragEnd={onDragEnd}
+                onDragStart={({ active }) => setDraggingId(active.id)}
+                sensors={sensors}
               >
                 <SortableContext items={idsInOrder} strategy={rectSortingStrategy}>
                   <EuiFlexGroup
+                    alignItems="center"
                     className={classNames('controlGroup', {
                       'controlGroup-isDragging': draggingId,
                     })}
-                    alignItems="center"
                     gutterSize="s"
                     wrap={true}
                   >
@@ -144,10 +146,10 @@ export const ControlGroup = () => {
                       (controlId, index) =>
                         panels[controlId] && (
                           <SortableControl
-                            isEditable={isEditable}
                             dragInfo={{ index, draggingIndex }}
                             embeddableId={controlId}
                             embeddableType={panels[controlId].type}
+                            isEditable={isEditable}
                             key={controlId}
                           />
                         )

@@ -9,34 +9,10 @@
 import { PayloadAction } from '@reduxjs/toolkit';
 import { WritableDraft } from 'immer/dist/types/types-external';
 
-import { ControlWidth } from '../../types';
-import { ControlGroupInput, ControlGroupReduxState } from '../types';
+import { ControlWidth } from '../types';
+import { ControlGroupInput, ControlGroupReduxState } from './types';
 
 export const controlGroupReducers = {
-  setControlStyle: (
-    state: WritableDraft<ControlGroupReduxState>,
-    action: PayloadAction<ControlGroupInput['controlStyle']>
-  ) => {
-    state.explicitInput.controlStyle = action.payload;
-  },
-  setDefaultControlWidth: (
-    state: WritableDraft<ControlGroupReduxState>,
-    action: PayloadAction<ControlGroupInput['defaultControlWidth']>
-  ) => {
-    state.explicitInput.defaultControlWidth = action.payload;
-  },
-  setDefaultControlGrow: (
-    state: WritableDraft<ControlGroupReduxState>,
-    action: PayloadAction<ControlGroupInput['defaultControlGrow']>
-  ) => {
-    state.explicitInput.defaultControlGrow = action.payload;
-  },
-  setControlWidth: (
-    state: WritableDraft<ControlGroupReduxState>,
-    action: PayloadAction<{ width: ControlWidth; embeddableId: string }>
-  ) => {
-    state.explicitInput.panels[action.payload.embeddableId].width = action.payload.width;
-  },
   setControlGrow: (
     state: WritableDraft<ControlGroupReduxState>,
     action: PayloadAction<{ grow: boolean; embeddableId: string }>
@@ -50,5 +26,29 @@ export const controlGroupReducers = {
     action.payload.ids.forEach((id, index) => {
       state.explicitInput.panels[id].order = index;
     });
+  },
+  setControlStyle: (
+    state: WritableDraft<ControlGroupReduxState>,
+    action: PayloadAction<ControlGroupInput['controlStyle']>
+  ) => {
+    state.explicitInput.controlStyle = action.payload;
+  },
+  setControlWidth: (
+    state: WritableDraft<ControlGroupReduxState>,
+    action: PayloadAction<{ width: ControlWidth; embeddableId: string }>
+  ) => {
+    state.explicitInput.panels[action.payload.embeddableId].width = action.payload.width;
+  },
+  setDefaultControlGrow: (
+    state: WritableDraft<ControlGroupReduxState>,
+    action: PayloadAction<ControlGroupInput['defaultControlGrow']>
+  ) => {
+    state.explicitInput.defaultControlGrow = action.payload;
+  },
+  setDefaultControlWidth: (
+    state: WritableDraft<ControlGroupReduxState>,
+    action: PayloadAction<ControlGroupInput['defaultControlWidth']>
+  ) => {
+    state.explicitInput.defaultControlWidth = action.payload;
   },
 };

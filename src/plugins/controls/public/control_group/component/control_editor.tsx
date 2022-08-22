@@ -18,24 +18,24 @@ import React, { useEffect, useMemo, useState } from 'react';
 import useMount from 'react-use/lib/useMount';
 
 import {
-  EuiFlyoutHeader,
+  EuiButton,
+  EuiButtonEmpty,
   EuiButtonGroup,
-  EuiFlyoutBody,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTitle,
-  EuiFieldText,
+  EuiFlyoutBody,
   EuiFlyoutFooter,
-  EuiButton,
-  EuiFormRow,
+  EuiFlyoutHeader,
   EuiForm,
-  EuiButtonEmpty,
-  EuiSpacer,
+  EuiFormRow,
   EuiIcon,
+  EuiSpacer,
   EuiSwitch,
   EuiTextColor,
+  EuiTitle,
 } from '@elastic/eui';
-import { DataViewListItem, DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { DataView, DataViewField, DataViewListItem } from '@kbn/data-views-plugin/common';
 import { IFieldSubTypeMulti } from '@kbn/es-query';
 import {
   LazyDataViewPicker,
@@ -43,7 +43,7 @@ import {
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
 
-import { ControlGroupStrings } from '../control_group_strings';
+import { pluginServices } from '../../services';
 import {
   ControlEmbeddable,
   ControlWidth,
@@ -51,23 +51,24 @@ import {
   DataControlInput,
   IEditableControlFactory,
 } from '../../types';
+import { ControlGroupStrings } from '../control_group_strings';
 import { CONTROL_WIDTH_OPTIONS } from './editor_constants';
-import { pluginServices } from '../../services';
+
 interface EditControlProps {
   embeddable?: ControlEmbeddable<DataControlInput>;
+  grow: boolean;
   isCreate: boolean;
   title?: string;
   width: ControlWidth;
-  onSave: (type?: string) => void;
-  grow: boolean;
+  getRelevantDataViewId?: () => string | undefined;
   onCancel: () => void;
+  onSave: (type?: string) => void;
+  onTypeEditorChange: (partial: Partial<DataControlInput>) => void;
   removeControl?: () => void;
+  setLastUsedDataViewId?: (newDataViewId: string) => void;
   updateGrow?: (grow: boolean) => void;
   updateTitle: (title?: string) => void;
   updateWidth: (newWidth: ControlWidth) => void;
-  getRelevantDataViewId?: () => string | undefined;
-  setLastUsedDataViewId?: (newDataViewId: string) => void;
-  onTypeEditorChange: (partial: Partial<DataControlInput>) => void;
 }
 
 interface ControlEditorState {
@@ -81,35 +82,35 @@ const DataViewPicker = withSuspense(LazyDataViewPicker, null);
 
 export const ControlEditor = ({
   embeddable,
+  grow,
   isCreate,
   title,
   width,
-  grow,
-  onSave,
+  getRelevantDataViewId,
   onCancel,
+  onSave,
+  onTypeEditorChange,
   removeControl,
+  setLastUsedDataViewId,
   updateGrow,
   updateTitle,
   updateWidth,
-  onTypeEditorChange,
-  getRelevantDataViewId,
-  setLastUsedDataViewId,
 }: EditControlProps) => {
-  const { dataViews, controls } = pluginServices.getHooks();
-  const { getIdsWithTitle, getDefaultId, get } = dataViews.useService();
-  const { getControlTypes, getControlFactory } = controls.useService();
+  const [controlEditorValid, setControlEditorValid] = useState(false);
+  const [currentGrow, setCurrentGrow] = useState(grow);
+  const [currentTitle, setCurrentTitle] = useState(title);
+  const [currentWidth, setCurrentWidth] = useState(width);
+  const [defaultTitle, setDefaultTitle] = useState<string>();
+  const [selectedField, setSelectedField] = useState<string | undefined>(
+    embeddable ? embeddable.getInput().fieldName : undefined
+  );
   const [state, setState] = useState<ControlEditorState>({
     dataViewListItems: [],
   });
 
-  const [defaultTitle, setDefaultTitle] = useState<string>();
-  const [currentTitle, setCurrentTitle] = useState(title);
-  const [currentWidth, setCurrentWidth] = useState(width);
-  const [currentGrow, setCurrentGrow] = useState(grow);
-  const [controlEditorValid, setControlEditorValid] = useState(false);
-  const [selectedField, setSelectedField] = useState<string | undefined>(
-    embeddable ? embeddable.getInput().fieldName : undefined
-  );
+  const { controls, dataViews } = pluginServices.getHooks();
+  const { getControlTypes, getControlFactory } = controls.useService();
+  const { getIdsWithTitle, getDefaultId, get } = dataViews.useService();
 
   const doubleLinkFields = (dataView: DataView) => {
     // double link the parent-child relationship specifically for case-sensitivity support for options lists
@@ -191,6 +192,7 @@ export const ControlEditor = ({
   const factory = controlType && getControlFactory(controlType);
   const CustomSettings =
     factory && (factory as IEditableControlFactory).controlEditorOptionsComponent;
+
   return (
     <>
       <EuiFlyoutHeader hasBorder>
@@ -207,7 +209,6 @@ export const ControlEditor = ({
           <EuiFormRow label={ControlGroupStrings.manageControl.getDataViewTitle()}>
             <DataViewPicker
               dataViews={state.dataViewListItems}
-              selectedDataViewId={dataView?.id}
               onChangeDataViewId={(dataViewId) => {
                 setLastUsedDataViewId?.(dataViewId);
                 if (dataViewId === dataView?.id) return;
@@ -218,6 +219,7 @@ export const ControlEditor = ({
                   setState((s) => ({ ...s, selectedDataView: newDataView }));
                 });
               }}
+              selectedDataViewId={dataView?.id}
               trigger={{
                 label:
                   state.selectedDataView?.getName() ??
@@ -227,11 +229,10 @@ export const ControlEditor = ({
           </EuiFormRow>
           <EuiFormRow label={ControlGroupStrings.manageControl.getFieldTitle()}>
             <FieldPicker
+              dataView={dataView}
               filterPredicate={(field: DataViewField) => {
                 return Boolean(fieldRegistry?.[field.name]);
               }}
-              selectedFieldName={selectedField}
-              dataView={dataView}
               onSelectField={(field) => {
                 const { parentFieldName, childFieldName } = fieldRegistry?.[field.name] ?? {};
                 onTypeEditorChange({
@@ -247,6 +248,7 @@ export const ControlEditor = ({
                   updateTitle(newDefaultTitle);
                 }
               }}
+              selectedFieldName={selectedField}
             />
           </EuiFormRow>
           <EuiFormRow label={ControlGroupStrings.manageControl.getControlTypeTitle()}>
@@ -268,43 +270,43 @@ export const ControlEditor = ({
           <EuiFormRow label={ControlGroupStrings.manageControl.getTitleInputTitle()}>
             <EuiFieldText
               data-test-subj="control-editor-title-input"
-              placeholder={defaultTitle}
-              value={currentTitle}
               onChange={(e) => {
                 updateTitle(e.target.value || defaultTitle);
                 setCurrentTitle(e.target.value);
               }}
+              placeholder={defaultTitle}
+              value={currentTitle}
             />
           </EuiFormRow>
           <EuiFormRow label={ControlGroupStrings.manageControl.getWidthInputTitle()}>
             <EuiButtonGroup
               color="primary"
-              legend={ControlGroupStrings.management.controlWidth.getWidthSwitchLegend()}
-              options={CONTROL_WIDTH_OPTIONS}
               idSelected={currentWidth}
+              legend={ControlGroupStrings.management.controlWidth.getWidthSwitchLegend()}
               onChange={(newWidth: string) => {
                 setCurrentWidth(newWidth as ControlWidth);
                 updateWidth(newWidth as ControlWidth);
               }}
+              options={CONTROL_WIDTH_OPTIONS}
             />
           </EuiFormRow>
           {updateGrow ? (
             <EuiFormRow>
               <EuiSwitch
-                label={ControlGroupStrings.manageControl.getGrowSwitchTitle()}
                 color="primary"
                 checked={currentGrow}
+                data-test-subj="control-editor-grow-switch"
+                label={ControlGroupStrings.manageControl.getGrowSwitchTitle()}
                 onChange={() => {
                   setCurrentGrow(!currentGrow);
                   updateGrow(!currentGrow);
                 }}
-                data-test-subj="control-editor-grow-switch"
               />
             </EuiFormRow>
           ) : null}
           {CustomSettings && (factory as IEditableControlFactory).controlEditorOptionsComponent && (
             <EuiFormRow label={ControlGroupStrings.manageControl.getControlSettingsTitle()}>
-              <CustomSettings onChange={onTypeEditorChange} initialInput={embeddable?.getInput()} />
+              <CustomSettings initialInput={embeddable?.getInput()} onChange={onTypeEditorChange} />
             </EuiFormRow>
           )}
           {removeControl && (
@@ -312,9 +314,9 @@ export const ControlEditor = ({
               <EuiSpacer size="l" />
               <EuiButtonEmpty
                 aria-label={`delete-${title}`}
-                iconType="trash"
-                flush="left"
                 color="danger"
+                flush="left"
+                iconType="trash"
                 onClick={() => {
                   onCancel();
                   removeControl();
@@ -327,7 +329,7 @@ export const ControlEditor = ({
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
+        <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               aria-label={`cancel-${title}`}
@@ -341,10 +343,10 @@ export const ControlEditor = ({
           <EuiFlexItem grow={false}>
             <EuiButton
               aria-label={`save-${title}`}
-              data-test-subj="control-editor-save"
-              iconType="check"
               color="primary"
+              data-test-subj="control-editor-save"
               disabled={!controlEditorValid}
+              iconType="check"
               onClick={() => onSave(controlType)}
             >
               {ControlGroupStrings.manageControl.getSaveChangesTitle()}

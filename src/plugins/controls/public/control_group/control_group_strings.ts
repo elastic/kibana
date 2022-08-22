@@ -9,15 +9,19 @@
 import { i18n } from '@kbn/i18n';
 
 export const ControlGroupStrings = {
-  getEmbeddableTitle: () =>
-    i18n.translate('controls.controlGroup.title', {
-      defaultMessage: 'Control group',
-    }),
   getControlButtonTitle: () =>
     i18n.translate('controls.controlGroup.toolbarButtonTitle', {
       defaultMessage: 'Controls',
     }),
+  getEmbeddableTitle: () =>
+    i18n.translate('controls.controlGroup.title', {
+      defaultMessage: 'Control group',
+    }),
   emptyState: {
+    getAddControlButtonTitle: () =>
+      i18n.translate('controls.controlGroup.emptyState.addControlButtonTitle', {
+        defaultMessage: 'Add control',
+      }),
     getBadge: () =>
       i18n.translate('controls.controlGroup.emptyState.badgeText', {
         defaultMessage: 'New',
@@ -27,27 +31,27 @@ export const ControlGroupStrings = {
         defaultMessage:
           'Filtering your data just got better with Controls, letting you display only the data you want to explore.',
       }),
-    getAddControlButtonTitle: () =>
-      i18n.translate('controls.controlGroup.emptyState.addControlButtonTitle', {
-        defaultMessage: 'Add control',
+    getDismissButton: () =>
+      i18n.translate('controls.controlGroup.emptyState.dismissButton', {
+        defaultMessage: 'Dismiss',
       }),
     getTwoLineLoadingTitle: () =>
       i18n.translate('controls.controlGroup.emptyState.twoLineLoadingTitle', {
         defaultMessage: '...',
       }),
-    getDismissButton: () =>
-      i18n.translate('controls.controlGroup.emptyState.dismissButton', {
-        defaultMessage: 'Dismiss',
-      }),
   },
   manageControl: {
-    getFlyoutCreateTitle: () =>
-      i18n.translate('controls.controlGroup.manageControl.createFlyoutTitle', {
-        defaultMessage: 'Create control',
+    getCancelTitle: () =>
+      i18n.translate('controls.controlGroup.manageControl.cancelTitle', {
+        defaultMessage: 'Cancel',
       }),
-    getFlyoutEditTitle: () =>
-      i18n.translate('controls.controlGroup.manageControl.editFlyoutTitle', {
-        defaultMessage: 'Edit control',
+    getControlSettingsTitle: () =>
+      i18n.translate('controls.controlGroup.manageControl.controlSettingsTitle', {
+        defaultMessage: 'Additional settings',
+      }),
+    getControlTypeTitle: () =>
+      i18n.translate('controls.controlGroup.manageControl.controlTypesTitle', {
+        defaultMessage: 'Control type',
       }),
     getDataViewTitle: () =>
       i18n.translate('controls.controlGroup.manageControl.dataViewTitle', {
@@ -57,41 +61,37 @@ export const ControlGroupStrings = {
       i18n.translate('controls.controlGroup.manageControl.fielditle', {
         defaultMessage: 'Field',
       }),
-    getTitleInputTitle: () =>
-      i18n.translate('controls.controlGroup.manageControl.titleInputTitle', {
-        defaultMessage: 'Label',
+    getFlyoutCreateTitle: () =>
+      i18n.translate('controls.controlGroup.manageControl.createFlyoutTitle', {
+        defaultMessage: 'Create control',
       }),
-    getControlTypeTitle: () =>
-      i18n.translate('controls.controlGroup.manageControl.controlTypesTitle', {
-        defaultMessage: 'Control type',
+    getFlyoutEditTitle: () =>
+      i18n.translate('controls.controlGroup.manageControl.editFlyoutTitle', {
+        defaultMessage: 'Edit control',
       }),
-    getWidthInputTitle: () =>
-      i18n.translate('controls.controlGroup.manageControl.widthInputTitle', {
-        defaultMessage: 'Minimum width',
-      }),
-    getControlSettingsTitle: () =>
-      i18n.translate('controls.controlGroup.manageControl.controlSettingsTitle', {
-        defaultMessage: 'Additional settings',
+    getGrowSwitchTitle: () =>
+      i18n.translate('controls.controlGroup.manageControl.growSwitchTitle', {
+        defaultMessage: 'Expand width to fit available space',
       }),
     getSaveChangesTitle: () =>
       i18n.translate('controls.controlGroup.manageControl.saveChangesTitle', {
         defaultMessage: 'Save and close',
       }),
-    getCancelTitle: () =>
-      i18n.translate('controls.controlGroup.manageControl.cancelTitle', {
-        defaultMessage: 'Cancel',
+    getSelectDataViewMessage: () =>
+      i18n.translate('controls.controlGroup.manageControl.selectDataViewMessage', {
+        defaultMessage: 'Please select a data view',
       }),
     getSelectFieldMessage: () =>
       i18n.translate('controls.controlGroup.manageControl.selectFieldMessage', {
         defaultMessage: 'Please select a field',
       }),
-    getSelectDataViewMessage: () =>
-      i18n.translate('controls.controlGroup.manageControl.selectDataViewMessage', {
-        defaultMessage: 'Please select a data view',
+    getTitleInputTitle: () =>
+      i18n.translate('controls.controlGroup.manageControl.titleInputTitle', {
+        defaultMessage: 'Label',
       }),
-    getGrowSwitchTitle: () =>
-      i18n.translate('controls.controlGroup.manageControl.growSwitchTitle', {
-        defaultMessage: 'Expand width to fit available space',
+    getWidthInputTitle: () =>
+      i18n.translate('controls.controlGroup.manageControl.widthInputTitle', {
+        defaultMessage: 'Minimum width',
       }),
   },
   management: {
@@ -99,63 +99,82 @@ export const ControlGroupStrings = {
       i18n.translate('controls.controlGroup.management.addControl', {
         defaultMessage: 'Add control',
       }),
-    getManageButtonTitle: () =>
-      i18n.translate('controls.controlGroup.management.buttonTitle', {
-        defaultMessage: 'Settings',
-      }),
-    getFlyoutTitle: () =>
-      i18n.translate('controls.controlGroup.management.flyoutTitle', {
-        defaultMessage: 'Control settings',
+    getDeleteAllButtonTitle: () =>
+      i18n.translate('controls.controlGroup.management.deleteAll', {
+        defaultMessage: 'Delete all',
       }),
     getDeleteButtonTitle: () =>
       i18n.translate('controls.controlGroup.management.delete', {
         defaultMessage: 'Delete control',
       }),
-    getDeleteAllButtonTitle: () =>
-      i18n.translate('controls.controlGroup.management.deleteAll', {
-        defaultMessage: 'Delete all',
+    getFlyoutTitle: () =>
+      i18n.translate('controls.controlGroup.management.flyoutTitle', {
+        defaultMessage: 'Control settings',
       }),
-    controlWidth: {
-      getWidthSwitchLegend: () =>
-        i18n.translate('controls.controlGroup.management.layout.controlWidthLegend', {
-          defaultMessage: 'Change control size',
+    getManageButtonTitle: () =>
+      i18n.translate('controls.controlGroup.management.buttonTitle', {
+        defaultMessage: 'Settings',
+      }),
+    controlChaining: {
+      getHierarchySubTitle: () =>
+        i18n.translate('controls.controlGroup.management.hierarchy.subtitle', {
+          defaultMessage:
+            'Selections in one control narrow down available options in the next. Controls are chained from left to right.',
         }),
+      getHierarchyTitle: () =>
+        i18n.translate('controls.controlGroup.management.hierarchy.title', {
+          defaultMessage: 'Chain controls',
+        }),
+    },
+    controlWidth: {
       getAutoWidthTitle: () =>
         i18n.translate('controls.controlGroup.management.layout.auto', {
           defaultMessage: 'Auto',
-        }),
-      getSmallWidthTitle: () =>
-        i18n.translate('controls.controlGroup.management.layout.small', {
-          defaultMessage: 'Small',
-        }),
-      getMediumWidthTitle: () =>
-        i18n.translate('controls.controlGroup.management.layout.medium', {
-          defaultMessage: 'Medium',
         }),
       getLargeWidthTitle: () =>
         i18n.translate('controls.controlGroup.management.layout.large', {
           defaultMessage: 'Large',
         }),
+      getMediumWidthTitle: () =>
+        i18n.translate('controls.controlGroup.management.layout.medium', {
+          defaultMessage: 'Medium',
+        }),
+      getSmallWidthTitle: () =>
+        i18n.translate('controls.controlGroup.management.layout.small', {
+          defaultMessage: 'Small',
+        }),
+      getWidthSwitchLegend: () =>
+        i18n.translate('controls.controlGroup.management.layout.controlWidthLegend', {
+          defaultMessage: 'Change control size',
+        }),
     },
     labelPosition: {
-      getLabelPositionTitle: () =>
-        i18n.translate('controls.controlGroup.management.labelPosition.title', {
-          defaultMessage: 'Label position',
-        }),
-      getLabelPositionLegend: () =>
-        i18n.translate('controls.controlGroup.management.labelPosition.designSwitchLegend', {
-          defaultMessage: 'Switch label position between inline and above',
+      getAboveTitle: () =>
+        i18n.translate('controls.controlGroup.management.labelPosition.above', {
+          defaultMessage: 'Above',
         }),
       getInlineTitle: () =>
         i18n.translate('controls.controlGroup.management.labelPosition.inline', {
           defaultMessage: 'Inline',
         }),
-      getAboveTitle: () =>
-        i18n.translate('controls.controlGroup.management.labelPosition.above', {
-          defaultMessage: 'Above',
+      getLabelPositionLegend: () =>
+        i18n.translate('controls.controlGroup.management.labelPosition.designSwitchLegend', {
+          defaultMessage: 'Switch label position between inline and above',
+        }),
+      getLabelPositionTitle: () =>
+        i18n.translate('controls.controlGroup.management.labelPosition.title', {
+          defaultMessage: 'Label position',
         }),
     },
     deleteControls: {
+      getCancel: () =>
+        i18n.translate('controls.controlGroup.management.delete.cancel', {
+          defaultMessage: 'Cancel',
+        }),
+      getConfirm: () =>
+        i18n.translate('controls.controlGroup.management.delete.confirm', {
+          defaultMessage: 'Delete',
+        }),
       getDeleteAllTitle: () =>
         i18n.translate('controls.controlGroup.management.delete.deleteAllTitle', {
           defaultMessage: 'Delete all controls?',
@@ -168,98 +187,80 @@ export const ControlGroupStrings = {
         i18n.translate('controls.controlGroup.management.delete.sub', {
           defaultMessage: 'Controls are not recoverable once removed.',
         }),
-      getConfirm: () =>
-        i18n.translate('controls.controlGroup.management.delete.confirm', {
-          defaultMessage: 'Delete',
-        }),
-      getCancel: () =>
-        i18n.translate('controls.controlGroup.management.delete.cancel', {
-          defaultMessage: 'Cancel',
-        }),
     },
     discardChanges: {
-      getTitle: () =>
-        i18n.translate('controls.controlGroup.management.discard.title', {
-          defaultMessage: 'Discard changes?',
-        }),
-      getSubtitle: () =>
-        i18n.translate('controls.controlGroup.management.discard.sub', {
-          defaultMessage: `Changes that you've made to this control will be discarded, are you sure you want to continue?`,
+      getCancel: () =>
+        i18n.translate('controls.controlGroup.management.discard.cancel', {
+          defaultMessage: 'Cancel',
         }),
       getConfirm: () =>
         i18n.translate('controls.controlGroup.management.discard.confirm', {
           defaultMessage: 'Discard changes',
         }),
-      getCancel: () =>
-        i18n.translate('controls.controlGroup.management.discard.cancel', {
-          defaultMessage: 'Cancel',
+      getSubtitle: () =>
+        i18n.translate('controls.controlGroup.management.discard.sub', {
+          defaultMessage: `Changes that you've made to this control will be discarded, are you sure you want to continue?`,
+        }),
+      getTitle: () =>
+        i18n.translate('controls.controlGroup.management.discard.title', {
+          defaultMessage: 'Discard changes?',
         }),
     },
     discardNewControl: {
-      getTitle: () =>
-        i18n.translate('controls.controlGroup.management.deleteNew.title', {
-          defaultMessage: 'Discard new control',
-        }),
-      getSubtitle: () =>
-        i18n.translate('controls.controlGroup.management.deleteNew.sub', {
-          defaultMessage: `Changes that you've made to this control will be discarded, are you sure you want to continue?`,
+      getCancel: () =>
+        i18n.translate('controls.controlGroup.management.deleteNew.cancel', {
+          defaultMessage: 'Cancel',
         }),
       getConfirm: () =>
         i18n.translate('controls.controlGroup.management.deleteNew.confirm', {
           defaultMessage: 'Discard control',
         }),
-      getCancel: () =>
-        i18n.translate('controls.controlGroup.management.deleteNew.cancel', {
-          defaultMessage: 'Cancel',
+      getSubtitle: () =>
+        i18n.translate('controls.controlGroup.management.deleteNew.sub', {
+          defaultMessage: `Changes that you've made to this control will be discarded, are you sure you want to continue?`,
+        }),
+      getTitle: () =>
+        i18n.translate('controls.controlGroup.management.deleteNew.title', {
+          defaultMessage: 'Discard new control',
         }),
     },
     validateSelections: {
-      getValidateSelectionsTitle: () =>
-        i18n.translate('controls.controlGroup.management.validate.title', {
-          defaultMessage: 'Validate user selections',
-        }),
       getValidateSelectionsSubTitle: () =>
         i18n.translate('controls.controlGroup.management.validate.subtitle', {
           defaultMessage:
             'Automatically ignore any control selection that would result in no data.',
         }),
-    },
-    controlChaining: {
-      getHierarchyTitle: () =>
-        i18n.translate('controls.controlGroup.management.hierarchy.title', {
-          defaultMessage: 'Chain controls',
-        }),
-      getHierarchySubTitle: () =>
-        i18n.translate('controls.controlGroup.management.hierarchy.subtitle', {
-          defaultMessage:
-            'Selections in one control narrow down available options in the next. Controls are chained from left to right.',
+      getValidateSelectionsTitle: () =>
+        i18n.translate('controls.controlGroup.management.validate.title', {
+          defaultMessage: 'Validate user selections',
         }),
     },
+
     querySync: {
-      getQuerySettingsTitle: () =>
-        i18n.translate('controls.controlGroup.management.query.searchSettingsTitle', {
-          defaultMessage: 'Sync with query bar',
+      getAdvancedSettingsTitle: () =>
+        i18n.translate('controls.controlGroup.management.query.advancedSettings', {
+          defaultMessage: 'Advanced',
+        }),
+      getIgnoreFilterPillsTitle: () =>
+        i18n.translate('controls.controlGroup.management.query.ignoreFilterPills', {
+          defaultMessage: 'Ignore filter pills',
+        }),
+      getIgnoreQueryTitle: () =>
+        i18n.translate('controls.controlGroup.management.query.ignoreQuery', {
+          defaultMessage: 'Ignore query bar',
+        }),
+      getIgnoreTimerangeTitle: () =>
+        i18n.translate('controls.controlGroup.management.query.ignoreTimerange', {
+          defaultMessage: 'Ignore timerange',
         }),
       getQuerySettingsSubtitle: () =>
         i18n.translate('controls.controlGroup.management.query.useAllSearchSettingsTitle', {
           defaultMessage:
             'Keeps the control group in sync with the query bar by applying time range, filter pills, and queries from the query bar',
         }),
-      getAdvancedSettingsTitle: () =>
-        i18n.translate('controls.controlGroup.management.query.advancedSettings', {
-          defaultMessage: 'Advanced',
-        }),
-      getIgnoreTimerangeTitle: () =>
-        i18n.translate('controls.controlGroup.management.query.ignoreTimerange', {
-          defaultMessage: 'Ignore timerange',
-        }),
-      getIgnoreQueryTitle: () =>
-        i18n.translate('controls.controlGroup.management.query.ignoreQuery', {
-          defaultMessage: 'Ignore query bar',
-        }),
-      getIgnoreFilterPillsTitle: () =>
-        i18n.translate('controls.controlGroup.management.query.ignoreFilterPills', {
-          defaultMessage: 'Ignore filter pills',
+      getQuerySettingsTitle: () =>
+        i18n.translate('controls.controlGroup.management.query.searchSettingsTitle', {
+          defaultMessage: 'Sync with query bar',
         }),
     },
   },

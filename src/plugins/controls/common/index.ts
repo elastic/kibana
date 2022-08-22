@@ -10,28 +10,29 @@ export type { ControlWidth } from './types';
 
 // Control Group exports
 export {
-  CONTROL_GROUP_TYPE,
-  type ControlsPanels,
-  type ControlGroupInput,
-  type ControlPanelState,
-  type ControlGroupTelemetry,
-  type RawControlGroupAttributes,
-  type PersistableControlGroupInput,
-  type SerializableControlGroupInput,
-} from './control_group/types';
+  DEFAULT_CONTROL_STYLE,
+  DEFAULT_CONTROL_WIDTH,
+} from './control_group/control_group_constants';
+
 export {
   controlGroupInputToRawControlGroupAttributes,
+  getDefaultControlGroupInput,
+  persistableControlGroupInputIsEqual,
   rawControlGroupAttributesToControlGroupInput,
   rawControlGroupAttributesToSerializable,
   serializableToRawControlGroupAttributes,
-  persistableControlGroupInputIsEqual,
-  getDefaultControlGroupInput,
 } from './control_group/control_group_persistence';
 
 export {
-  DEFAULT_CONTROL_WIDTH,
-  DEFAULT_CONTROL_STYLE,
-} from './control_group/control_group_constants';
+  type ControlGroupInput,
+  type ControlGroupTelemetry,
+  CONTROL_GROUP_TYPE,
+  type ControlPanelState,
+  type ControlsPanels,
+  type PersistableControlGroupInput,
+  type RawControlGroupAttributes,
+  type SerializableControlGroupInput,
+} from './control_group/types';
 
 // Control Type exports
 export { OPTIONS_LIST_CONTROL, type OptionsListEmbeddableInput } from './options_list/types';

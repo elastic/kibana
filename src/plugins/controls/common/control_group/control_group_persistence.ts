@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { SerializableRecord } from '@kbn/utility-types';
 import deepEqual from 'fast-deep-equal';
-
 import { pick } from 'lodash';
+
+import { SerializableRecord } from '@kbn/utility-types';
+
 import { ControlGroupInput } from '..';
 import {
   DEFAULT_CONTROL_GROW,
@@ -28,17 +29,17 @@ const safeJSONParse = <OutType>(jsonString?: string): OutType | undefined => {
 };
 
 export const getDefaultControlGroupInput = (): Omit<ControlGroupInput, 'id'> => ({
-  panels: {},
-  defaultControlWidth: DEFAULT_CONTROL_WIDTH,
-  defaultControlGrow: DEFAULT_CONTROL_GROW,
   controlStyle: DEFAULT_CONTROL_STYLE,
   chainingSystem: 'HIERARCHICAL',
+  defaultControlWidth: DEFAULT_CONTROL_WIDTH,
+  defaultControlGrow: DEFAULT_CONTROL_GROW,
   ignoreParentSettings: {
     ignoreFilters: false,
     ignoreQuery: false,
     ignoreTimerange: false,
     ignoreValidations: false,
   },
+  panels: {},
 });
 
 export const persistableControlGroupInputIsEqual = (

@@ -7,15 +7,16 @@
  */
 
 import React from 'react';
-import { EuiContextMenuItem } from '@elastic/eui';
 
+import { EuiContextMenuItem } from '@elastic/eui';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { OverlayRef } from '@kbn/core/public';
-import { ControlGroupStrings } from '../control_group_strings';
-import { ControlGroupEditor } from './control_group_editor';
+
 import { pluginServices } from '../../services';
 import { ControlGroupContainer } from '..';
+import { ControlGroupStrings } from '../control_group_strings';
 import { setFlyoutRef } from '../embeddable/control_group_container';
+import { ControlGroupEditor } from './control_group_editor';
 
 export interface EditControlGroupButtonProps {
   controlGroupContainer: ControlGroupContainer;
@@ -33,10 +34,10 @@ export const EditControlGroup = ({
   const editControlGroup = () => {
     const onDeleteAll = (ref: OverlayRef) => {
       openConfirm(ControlGroupStrings.management.deleteControls.getSubtitle(), {
-        confirmButtonText: ControlGroupStrings.management.deleteControls.getConfirm(),
-        cancelButtonText: ControlGroupStrings.management.deleteControls.getCancel(),
-        title: ControlGroupStrings.management.deleteControls.getDeleteAllTitle(),
         buttonColor: 'danger',
+        cancelButtonText: ControlGroupStrings.management.deleteControls.getCancel(),
+        confirmButtonText: ControlGroupStrings.management.deleteControls.getConfirm(),
+        title: ControlGroupStrings.management.deleteControls.getDeleteAllTitle(),
       }).then((confirmed) => {
         if (confirmed)
           Object.keys(controlGroupContainer.getInput().panels).forEach((panelId) =>
@@ -49,20 +50,20 @@ export const EditControlGroup = ({
     const flyoutInstance = openFlyout(
       toMountPoint(
         <ControlGroupEditor
-          initialInput={controlGroupContainer.getInput()}
-          updateInput={(changes) => controlGroupContainer.updateInput(changes)}
           controlCount={Object.keys(controlGroupContainer.getInput().panels ?? {}).length}
-          onDeleteAll={() => onDeleteAll(flyoutInstance)}
+          initialInput={controlGroupContainer.getInput()}
           onClose={() => flyoutInstance.close()}
+          onDeleteAll={() => onDeleteAll(flyoutInstance)}
+          updateInput={(changes) => controlGroupContainer.updateInput(changes)}
         />,
         { theme$: themeService.theme$ }
       ),
       {
-        outsideClickCloses: false,
         onClose: () => {
           flyoutInstance.close();
           setFlyoutRef(undefined);
         },
+        outsideClickCloses: false,
       }
     );
     setFlyoutRef(flyoutInstance);
@@ -70,13 +71,13 @@ export const EditControlGroup = ({
 
   const commonButtonProps = {
     key: 'manageControls',
+    icon: 'gear',
+    'aria-label': ControlGroupStrings.management.getManageButtonTitle(),
+    'data-test-subj': 'controls-settings-button',
     onClick: () => {
       editControlGroup();
       closePopover();
     },
-    icon: 'gear',
-    'data-test-subj': 'controls-settings-button',
-    'aria-label': ControlGroupStrings.management.getManageButtonTitle(),
   };
 
   return (

@@ -16,37 +16,38 @@
 
 import fastIsEqual from 'fast-deep-equal';
 import React, { useCallback, useState } from 'react';
+
 import {
-  EuiFlyoutHeader,
+  EuiButton,
+  EuiButtonEmpty,
   EuiButtonGroup,
-  EuiFlyoutBody,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTitle,
+  EuiFlyoutBody,
   EuiFlyoutFooter,
-  EuiButton,
-  EuiFormRow,
-  EuiButtonEmpty,
-  EuiSpacer,
+  EuiFlyoutHeader,
   EuiForm,
+  EuiFormRow,
+  EuiHorizontalRule,
+  EuiSpacer,
   EuiSwitch,
   EuiText,
-  EuiHorizontalRule,
+  EuiTitle,
 } from '@elastic/eui';
 
-import { CONTROL_LAYOUT_OPTIONS } from './editor_constants';
-import { ControlGroupStrings } from '../control_group_strings';
-import { ControlStyle } from '../../types';
-import { ParentIgnoreSettings } from '../..';
-import { ControlGroupInput } from '..';
 import { getDefaultControlGroupInput } from '../../../common';
+import { ParentIgnoreSettings } from '../..';
+import { ControlStyle } from '../../types';
+import { ControlGroupInput } from '..';
+import { ControlGroupStrings } from '../control_group_strings';
+import { CONTROL_LAYOUT_OPTIONS } from './editor_constants';
 
 interface EditControlGroupProps {
-  initialInput: ControlGroupInput;
   controlCount: number;
-  updateInput: (input: Partial<ControlGroupInput>) => void;
-  onDeleteAll: () => void;
+  initialInput: ControlGroupInput;
   onClose: () => void;
+  onDeleteAll: () => void;
+  updateInput: (input: Partial<ControlGroupInput>) => void;
 }
 
 type EditorControlGroupInput = ControlGroupInput;
@@ -57,9 +58,9 @@ const editorControlGroupInputIsEqual = (a: ControlGroupInput, b: ControlGroupInp
 export const ControlGroupEditor = ({
   controlCount,
   initialInput,
-  updateInput,
-  onDeleteAll,
   onClose,
+  onDeleteAll,
+  updateInput,
 }: EditControlGroupProps) => {
   const [controlGroupEditorState, setControlGroupEditorState] = useState<EditorControlGroupInput>({
     ...getDefaultControlGroupInput(),
@@ -106,7 +107,6 @@ export const ControlGroupEditor = ({
           <EuiFormRow label={ControlGroupStrings.management.labelPosition.getLabelPositionTitle()}>
             <EuiButtonGroup
               color="primary"
-              options={CONTROL_LAYOUT_OPTIONS}
               data-test-subj="control-group-layout-options"
               idSelected={controlGroupEditorState.controlStyle}
               legend={ControlGroupStrings.management.labelPosition.getLabelPositionLegend()}
@@ -114,6 +114,7 @@ export const ControlGroupEditor = ({
                 // The UI copy calls this setting labelPosition, but to avoid an unnecessary migration it will be left as controlStyle in the state.
                 updateControlGroupEditorSetting({ controlStyle: newControlStyle as ControlStyle });
               }}
+              options={CONTROL_LAYOUT_OPTIONS}
             />
           </EuiFormRow>
           <EuiHorizontalRule margin="m" />
@@ -121,11 +122,11 @@ export const ControlGroupEditor = ({
             <EuiFlexItem grow={false}>
               <EuiSpacer size="xs" />
               <EuiSwitch
+                checked={!Boolean(controlGroupEditorState.ignoreParentSettings?.ignoreValidations)}
                 data-test-subj="control-group-validate-selections"
                 label={ControlGroupStrings.management.validateSelections.getValidateSelectionsTitle()}
-                showLabel={false}
-                checked={!Boolean(controlGroupEditorState.ignoreParentSettings?.ignoreValidations)}
                 onChange={(e) => updateIgnoreSetting({ ignoreValidations: !e.target.checked })}
+                showLabel={false}
               />
             </EuiFlexItem>
             <EuiFlexItem>
@@ -146,15 +147,15 @@ export const ControlGroupEditor = ({
             <EuiFlexItem grow={false}>
               <EuiSpacer size="xs" />
               <EuiSwitch
+                checked={controlGroupEditorState.chainingSystem === 'HIERARCHICAL'}
                 data-test-subj="control-group-chaining"
                 label={ControlGroupStrings.management.controlChaining.getHierarchyTitle()}
-                showLabel={false}
-                checked={controlGroupEditorState.chainingSystem === 'HIERARCHICAL'}
                 onChange={(e) =>
                   updateControlGroupEditorSetting({
                     chainingSystem: e.target.checked ? 'HIERARCHICAL' : 'NONE',
                   })
                 }
+                showLabel={false}
               />
             </EuiFlexItem>
             <EuiFlexItem>
@@ -171,12 +172,12 @@ export const ControlGroupEditor = ({
               <EuiHorizontalRule margin="m" />
               <EuiSpacer size="m" />
               <EuiButtonEmpty
-                onClick={onDeleteAll}
-                data-test-subj="delete-all-controls-button"
                 aria-label={'delete-all'}
-                iconType="trash"
                 color="danger"
+                data-test-subj="delete-all-controls-button"
                 flush="left"
+                iconType="trash"
+                onClick={onDeleteAll}
                 size="s"
               >
                 {ControlGroupStrings.management.getDeleteAllButtonTitle()}
@@ -186,7 +187,7 @@ export const ControlGroupEditor = ({
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
+        <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               aria-label={`cancel-editing-group`}
@@ -201,9 +202,9 @@ export const ControlGroupEditor = ({
           <EuiFlexItem grow={false}>
             <EuiButton
               aria-label={`save-group`}
-              iconType="check"
               color="primary"
               data-test-subj="control-group-editor-save"
+              iconType="check"
               onClick={() => {
                 applyChangesToInput();
                 onClose();

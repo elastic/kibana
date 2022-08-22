@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
 import classNames from 'classnames';
+import React, { useEffect, useMemo, useState } from 'react';
+
 import {
   EuiButtonIcon,
   EuiFormControlLayout,
@@ -16,30 +17,32 @@ import {
   EuiLoadingChart,
   EuiToolTip,
 } from '@elastic/eui';
-
-import { useReduxContainerContext } from '@kbn/presentation-util-plugin/public';
 import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
-import { ControlGroupReduxState } from '../types';
+import { useReduxContainerContext } from '@kbn/presentation-util-plugin/public';
+
 import { pluginServices } from '../../services';
-import { EditControlButton } from '../editor/edit_control';
+import { ControlInput } from '../../types';
 import { ControlGroupStrings } from '../control_group_strings';
-import { useChildEmbeddable } from '../../hooks/use_child_embeddable';
+import { ControlGroupReduxState } from '../types';
+import { EditControlButton } from './edit_control';
+import { useChildEmbeddable } from './use_child_embeddable';
 
 export interface ControlFrameProps {
   customPrepend?: JSX.Element;
-  enableActions?: boolean;
   embeddableId: string;
   embeddableType: string;
+  enableActions?: boolean;
 }
 
 export const ControlFrame = ({
   customPrepend,
-  enableActions,
   embeddableId,
   embeddableType,
+  enableActions,
 }: ControlFrameProps) => {
   const embeddableRoot: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
   const [hasFatalError, setHasFatalError] = useState(false);
+  const [title, setTitle] = useState<string>();
 
   const {
     useEmbeddableSelector: select,
@@ -54,8 +57,6 @@ export const ControlFrame = ({
 
   const embeddable = useChildEmbeddable({ untilEmbeddableLoaded, embeddableId, embeddableType });
 
-  const [title, setTitle] = useState<string>();
-
   const usingTwoLineLayout = controlStyle === 'twoLine';
 
   useEffect(() => {
@@ -64,7 +65,7 @@ export const ControlFrame = ({
     }
     const inputSubscription = embeddable
       ?.getInput$()
-      .subscribe((newInput) => setTitle(newInput.title));
+      .subscribe((newInput: ControlInput) => setTitle(newInput.title));
     const errorSubscription = embeddable?.getOutput$().subscribe({
       error: (error: Error) => {
         if (!embeddableRoot.current) return;
@@ -93,8 +94,10 @@ export const ControlFrame = ({
       )}
       <EuiToolTip content={ControlGroupStrings.floatingActions.getRemoveButtonTitle()}>
         <EuiButtonIcon
-          data-test-subj={`control-action-${embeddableId}-delete`}
           aria-label={ControlGroupStrings.floatingActions.getRemoveButtonTitle()}
+          color="danger"
+          data-test-subj={`control-action-${embeddableId}-delete`}
+          iconType="cross"
           onClick={() =>
             openConfirm(ControlGroupStrings.management.deleteControls.getSubtitle(), {
               confirmButtonText: ControlGroupStrings.management.deleteControls.getConfirm(),
@@ -107,8 +110,6 @@ export const ControlFrame = ({
               }
             })
           }
-          iconType="cross"
-          color="danger"
         />
       </EuiToolTip>
     </div>

@@ -45,11 +45,11 @@ import {
 } from './control_group_chaining_system';
 import { pluginServices } from '../../services';
 import { ControlGroupStrings } from '../control_group_strings';
-import { EditControlGroup } from '../editor/edit_control_group';
+import { EditControlGroup } from '../component/edit_control_group';
 import { ControlGroup } from '../component/control_group_component';
-import { controlGroupReducers } from '../state/control_group_reducers';
+import { CreateControlButton, CreateControlButtonTypes } from '../component/create_control';
+import { controlGroupReducers } from '../control_group_reducers';
 import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
-import { CreateControlButton, CreateControlButtonTypes } from '../editor/create_control';
 
 let flyoutRef: OverlayRef | undefined;
 export const setFlyoutRef = (newRef: OverlayRef | undefined) => {
