@@ -886,6 +886,31 @@ export default ({ getService }: FtrProviderContext) => {
             const signalsOpen = await getOpenSignals(supertest, log, es, createdRule);
             expect(signalsOpen.hits.hits.length).equal(0);
           });
+
+          it('generates no signals when a value list exception is added for an EQL rule', async () => {
+            const valueListId = 'value-list-id';
+            await importFile(supertest, log, 'keyword', ['zeek-sensor-amsterdam'], valueListId);
+            const rule: EqlCreateSchema = {
+              ...getEqlRuleForSignalTesting(['auditbeat-*']),
+              query: 'configuration where host.name=="zeek-sensor-amsterdam"',
+            };
+
+            const createdRule = await createRuleWithExceptionEntries(supertest, log, rule, [
+              [
+                {
+                  field: 'host.name',
+                  operator: 'included',
+                  type: 'list',
+                  list: {
+                    id: valueListId,
+                    type: 'keyword',
+                  },
+                },
+              ],
+            ]);
+            const signalsOpen = await getOpenSignals(supertest, log, es, createdRule);
+            expect(signalsOpen.hits.hits.length).equal(0);
+          });
         });
       });
     });

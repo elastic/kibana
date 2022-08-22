@@ -10,8 +10,6 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { thresholdExecutor } from './threshold';
-import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
-import { getEntryListMock } from '@kbn/lists-plugin/common/schemas/types/entry_list.mock';
 import { getThresholdRuleParams, getCompleteRuleMock } from '../../schemas/rule_schemas.mock';
 import { sampleEmptyAggsSearchResults } from '../__mocks__/es_results';
 import { getThresholdTermsHash } from '../utils';
@@ -54,36 +52,6 @@ describe('threshold_executor', () => {
   });
 
   describe('thresholdExecutor', () => {
-    it('should set a warning when exception list for threshold rule contains value list exceptions', async () => {
-      const ruleDataClientMock = createRuleDataClientMock();
-      const exceptionItems = [getExceptionListItemSchemaMock({ entries: [getEntryListMock()] })];
-      const response = await thresholdExecutor({
-        completeRule: thresholdCompleteRule,
-        tuple,
-        exceptionItems,
-        services: alertServices,
-        state: { initialized: true, signalHistory: {} },
-        version,
-        ruleExecutionLogger,
-        startedAt: new Date(),
-        bulkCreate: jest.fn().mockImplementation((hits) => ({
-          errors: [],
-          success: true,
-          bulkCreateDuration: '0',
-          createdItemsCount: 0,
-          createdItems: [],
-        })),
-        wrapHits: jest.fn(),
-        ruleDataReader: ruleDataClientMock.getReader({ namespace: 'default' }),
-        runtimeMappings: {},
-        inputIndex: ['auditbeat-*'],
-        primaryTimestamp: TIMESTAMP,
-        aggregatableTimestampField: TIMESTAMP,
-        listClient: getListClientMock(),
-      });
-      expect(response.warningMessages.length).toEqual(1);
-    });
-
     it('should clean up any signal history that has fallen outside the window when state is initialized', async () => {
       const ruleDataClientMock = createRuleDataClientMock();
       const terms1 = [

@@ -50,10 +50,13 @@ describe('ml_executor', () => {
       ruleType: mlCompleteRule.ruleConfig.ruleTypeId,
     });
     (findMlSignals as jest.Mock).mockResolvedValue({
-      _shards: {},
-      hits: {
-        hits: [],
+      anomalyResults: {
+        _shards: {},
+        hits: {
+          hits: [],
+        },
       },
+      unprocessedExceptions: [],
     });
     (bulkCreateMlSignals as jest.Mock).mockResolvedValue({
       success: true,

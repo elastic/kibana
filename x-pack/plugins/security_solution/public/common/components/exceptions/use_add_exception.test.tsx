@@ -125,7 +125,9 @@ describe('useAddOrUpdateException', () => {
       .spyOn(listsApi, 'updateExceptionListItem')
       .mockResolvedValue(getExceptionListItemSchemaMock());
 
-    getQueryFilter = jest.spyOn(getQueryFilterHelper, 'getQueryFilter');
+    getQueryFilter = jest
+      .spyOn(getQueryFilterHelper, 'getQueryFilter')
+      .mockResolvedValue({ bool: { must_not: [], must: [], filter: [], should: [] } });
 
     buildAlertStatusesFilter = jest.spyOn(buildFilterHelpers, 'buildAlertStatusesFilter');
 

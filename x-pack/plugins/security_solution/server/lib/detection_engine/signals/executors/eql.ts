@@ -15,7 +15,6 @@ import type {
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ListClient } from '@kbn/lists-plugin/server';
 import { buildEqlSearchRequest } from '../build_events_query';
-import { hasLargeValueItem } from '../../../../../common/detection_engine/utils';
 
 import type {
   BulkCreate,
@@ -70,12 +69,6 @@ export const eqlExecutor = async ({
 
   return withSecuritySpan('eqlExecutor', async () => {
     const result = createSearchAfterReturnType();
-    if (hasLargeValueItem(exceptionItems)) {
-      result.warningMessages.push(
-        'Exceptions that use "is in list" or "is not in list" operators are not applied to EQL rules' // TODO: change or get rid of this
-      );
-      result.warning = true;
-    }
 
     const request = await buildEqlSearchRequest({
       query: ruleParams.query,
