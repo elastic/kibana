@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { schema, Type } from '@kbn/config-schema';
+import { schema, type Type } from '@kbn/config-schema';
 import type {
   SavedObjectsValidationSpec,
   SavedObjectSanitizedDoc,
