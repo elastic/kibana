@@ -7,7 +7,39 @@
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useMemo, useState } from 'react';
 import { FieldState } from '@kbn/advanced-settings-plugin/public';
-import { getEditableConfig } from '../components/shared/apm_header_action_menu/labs_settings_flyout/utils';
+import { toEditableConfig } from '@kbn/advanced-settings-plugin/public';
+import { IUiSettingsClient } from '@kbn/core/public';
+
+type EditableConfig = Record<string, ReturnType<typeof toEditableConfig>>;
+
+function getEditableConfig({
+  settingsKeys,
+  uiSettings,
+}: {
+  settingsKeys: string[];
+  uiSettings?: IUiSettingsClient;
+}) {
+  if (!uiSettings) {
+    return {};
+  }
+  const uiSettingsDefinition = uiSettings.getAll();
+  const config: EditableConfig = {};
+
+  settingsKeys.forEach((key) => {
+    const settingDef = uiSettingsDefinition?.[key];
+    if (settingDef) {
+      const editableConfig = toEditableConfig({
+        def: settingDef,
+        name: key,
+        value: settingDef.userValue,
+        isCustom: uiSettings.isCustom(key),
+        isOverridden: uiSettings.isOverridden(key),
+      });
+      config[key] = editableConfig;
+    }
+  });
+  return config;
+}
 
 export function useApmEditableSettings(settingsKeys: string[]) {
   const { services } = useKibana();
