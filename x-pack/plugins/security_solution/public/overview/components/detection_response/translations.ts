@@ -253,7 +253,7 @@ export const SOC_TRENDS = i18n.translate('xpack.securitySolution.detectionRespon
 });
 
 export const CASES_MTTR_STAT = i18n.translate('xpack.securitySolution.detectionResponse.mttr', {
-  defaultMessage: 'AVG. CASE RESPONSE TIME',
+  defaultMessage: 'Avg. case response time',
 });
 
 export const CASES_MTTR_DESCRIPTION = i18n.translate(

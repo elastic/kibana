@@ -14,6 +14,7 @@ import {
   EuiIcon,
   EuiLoadingSpinner,
   EuiPanel,
+  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import styled from 'styled-components';
@@ -71,9 +72,11 @@ const SocTrendsComponent: React.FC = () => {
                 {
                   title: (
                     <EuiToolTip content={CASES_MTTR_DESCRIPTION}>
-                      <>
-                        {CASES_MTTR_STAT} <EuiIcon type="questionInCircle" />
-                      </>
+                      <EuiText>
+                        <h6>
+                          {CASES_MTTR_STAT} <EuiIcon type="questionInCircle" />
+                        </h6>
+                      </EuiText>
                     </EuiToolTip>
                   ),
                   description: isLoading ? (

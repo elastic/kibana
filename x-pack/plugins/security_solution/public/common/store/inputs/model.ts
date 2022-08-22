@@ -102,4 +102,5 @@ export interface UrlInputsModelInputs {
 export interface UrlInputsModel {
   global: UrlInputsModelInputs;
   timeline: UrlInputsModelInputs;
+  socTrends: UrlInputsModelInputs;
 }

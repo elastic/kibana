@@ -18,6 +18,7 @@ export const useSyncTimerangeUrlParam = () => {
 
   const { linkTo: globalLinkTo, timerange: globalTimerange } = inputState.global;
   const { linkTo: timelineLinkTo, timerange: timelineTimerange } = inputState.timeline;
+  const { linkTo: socTrendsLinkTo, timerange: socTrendsTimerange } = inputState.socTrends;
 
   useEffect(() => {
     updateTimerangeUrlParam({
@@ -29,6 +30,18 @@ export const useSyncTimerangeUrlParam = () => {
         [URL_PARAM_KEY.timerange]: timelineTimerange,
         linkTo: timelineLinkTo,
       },
+      socTrends: {
+        [URL_PARAM_KEY.timerange]: socTrendsTimerange,
+        linkTo: socTrendsLinkTo,
+      },
     });
-  }, [updateTimerangeUrlParam, globalLinkTo, globalTimerange, timelineLinkTo, timelineTimerange]);
+  }, [
+    updateTimerangeUrlParam,
+    globalLinkTo,
+    globalTimerange,
+    timelineLinkTo,
+    timelineTimerange,
+    socTrendsTimerange,
+    socTrendsLinkTo,
+  ]);
 };

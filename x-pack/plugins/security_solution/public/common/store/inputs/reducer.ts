@@ -93,7 +93,7 @@ export const initialInputsState: InputsState = {
 };
 
 export const createInitialInputsState = (): InputsState => {
-  const { from, fromStr, to, toStr } = getTimeRangeSettings();
+  const { from, fromStr, to, toStr, socTrends } = getTimeRangeSettings();
   const { kind, duration } = getIntervalSettings();
 
   return {
@@ -140,13 +140,7 @@ export const createInitialInputsState = (): InputsState => {
       fullScreen: false,
     },
     socTrends: {
-      timerange: {
-        kind: 'relative',
-        fromStr,
-        toStr,
-        from,
-        to,
-      },
+      timerange: socTrends,
       queries: [],
       policy: {
         kind,

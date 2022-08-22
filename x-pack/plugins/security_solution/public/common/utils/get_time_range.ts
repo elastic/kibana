@@ -6,15 +6,13 @@
  */
 
 import moment from 'moment';
-import type { AbsoluteTimeRange, URLTimeRange } from '../store/inputs/model';
+import type { AbsoluteTimeRange } from '../store/inputs/model';
 
-export const getPreviousTimeRange = <
-  T extends URLTimeRange | { to: string | number; from: string | number }
->(
-  dateRange: T,
-  uiSettings = true
-): AbsoluteTimeRange => {
-  const { from, to } = dateRange; // normalizeTimeRange(dateRange, uiSettings);
+export const getPreviousTimeRange = (dateRange: {
+  to: string | number;
+  from: string | number;
+}): AbsoluteTimeRange => {
+  const { from, to } = dateRange;
   const duration = moment(to).diff(moment(from));
   const previousStart = moment(from).subtract(duration).toISOString();
   const previousEnd = moment(to).subtract(duration).toISOString();
@@ -27,12 +25,10 @@ export const getPreviousTimeRange = <
   };
 };
 
-export const getFutureTimeRange = <
-  T extends URLTimeRange | { to: string | number; from: string | number }
->(
-  dateRange: T,
-  uiSettings = true
-): AbsoluteTimeRange => {
+export const getFutureTimeRange = (dateRange: {
+  to: string | number;
+  from: string | number;
+}): AbsoluteTimeRange => {
   const { from, to } = dateRange; // normalizeTimeRange(dateRange, uiSettings);
   const duration = moment(to).diff(moment(from));
   const previousStart = moment(from).add(duration).toISOString();
