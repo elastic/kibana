@@ -11,7 +11,7 @@ import type {
   SavedObjectMigrationMap,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core-saved-objects-server';
-import { mergeSavedObjectMigrationMaps } from './utils';
+import { mergeSavedObjectMigrationMaps } from './merge_migration_maps';
 
 describe('mergeSavedObjectMigrationMaps', () => {
   const obj1: SavedObjectMigrationMap = {
