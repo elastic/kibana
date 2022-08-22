@@ -20,7 +20,7 @@ import { useTable } from '../../hooks/use_table';
 // @ts-expect-error
 import { PipelineListing } from '../../../components/logstash/pipeline_listing/pipeline_listing';
 import { useCharts } from '../../hooks/use_charts';
-import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
+import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 
 export const LogStashNodePipelinesPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
@@ -33,7 +33,7 @@ export const LogStashNodePipelinesPage: React.FC<ComponentProps> = ({ clusters }
     cluster_uuid: clusterUuid,
   }) as any;
 
-  const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
+  const { generate: generateBreadcrumbs } = useBreadcrumbContainerContext();
 
   const { getPaginationTableProps, getPaginationRouteOptions, updateTotalItemCount } =
     useTable('logstash.pipelines');
