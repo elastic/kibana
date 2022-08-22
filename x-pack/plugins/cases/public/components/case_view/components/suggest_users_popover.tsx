@@ -79,6 +79,7 @@ const SuggestUsersPopoverComponent: React.FC<SuggestUsersPopoverProps> = ({
 
   const onChange = useCallback(
     (users: UserProfileWithAvatar[]) => {
+      // TODO: might need to sort these too? and put the current user at the front
       setSelectedUsers(users);
       onUsersChange(users);
     },
@@ -96,6 +97,7 @@ const SuggestUsersPopoverComponent: React.FC<SuggestUsersPopoverProps> = ({
   });
 
   useEffect(() => {
+    // TODO: if the current user is selected move it to the front
     const sortedUserProfiles = sortProfiles(userProfiles);
 
     if (!isEmpty(searchTerm)) {

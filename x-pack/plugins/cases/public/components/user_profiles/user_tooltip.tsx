@@ -20,7 +20,7 @@ const UserFullInformation: React.FC<{ profile?: UserProfileWithAvatar }> = React
         <EuiText size="s" className="eui-textBreakWord">
           <strong data-test-subj="user-profile-tooltip-display-name">
             {profile.user.display_name}
-          </strong>
+          </strong>{' '}
           <EuiTextColor color="subdued" data-test-subj="user-profile-tooltip-full-name">
             {`(${profile.user.full_name})`}
           </EuiTextColor>

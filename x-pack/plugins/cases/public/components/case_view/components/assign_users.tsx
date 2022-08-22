@@ -46,22 +46,21 @@ const AssigneesList: React.FC<AssigneesListProps> = ({
         <EuiFlexGroup direction="column" gutterSize="none">
           <EuiFlexItem grow={false}>
             <EuiText size="s" color="subdued">
-              <p>{i18n.NO_ASSIGNEES}</p>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s" color="subdued">
-              <EuiLink data-test-subj="case-view-assign-users-link" onClick={togglePopOver}>
-                {i18n.ASSIGN_A_USER}
-              </EuiLink>
-              {currentUserProfile && (
-                <>
-                  <span>{i18n.SPACED_OR}</span>
-                  <EuiLink data-test-subj="case-view-assign-yourself-link" onClick={assignSelf}>
-                    {i18n.ASSIGN_YOURSELF}
-                  </EuiLink>
-                </>
-              )}
+              <p>
+                {i18n.NO_ASSIGNEES}
+                <br />
+                <EuiLink data-test-subj="case-view-assign-users-link" onClick={togglePopOver}>
+                  {i18n.ASSIGN_A_USER}
+                </EuiLink>
+                {currentUserProfile && (
+                  <>
+                    <span>{i18n.SPACED_OR}</span>
+                    <EuiLink data-test-subj="case-view-assign-yourself-link" onClick={assignSelf}>
+                      {i18n.ASSIGN_YOURSELF}
+                    </EuiLink>
+                  </>
+                )}
+              </p>
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
