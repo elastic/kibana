@@ -67,6 +67,7 @@ export const LICENSE_ALLOWED = [
   'WTFPL',
   'Nuclide software',
   'Python-2.0',
+  '(Apache-2.0 AND MIT)',
 ];
 
 // The following list only applies to licenses that

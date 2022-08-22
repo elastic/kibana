@@ -89,7 +89,9 @@ describe('apiKeysManagementApp', () => {
       </div>
     `);
 
-    unmount!();
+    act(() => {
+      unmount!();
+    });
 
     expect(docTitle.reset).toHaveBeenCalledTimes(1);
     expect(container).toMatchInlineSnapshot(`<div />`);
