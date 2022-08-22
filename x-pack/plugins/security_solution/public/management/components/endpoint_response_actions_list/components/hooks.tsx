@@ -10,8 +10,9 @@ import type {
   DurationRange,
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
-import type { DateRangePickerValues } from './action_list_date_range_picker';
+import type { DateRangePickerValues } from './actions_log_date_range_picker';
 import { RESPONSE_ACTION_COMMANDS } from '../../../../../common/endpoint/types';
+import type { FILTER_NAMES } from '../translations';
 
 const defaultDateRangeOptions = Object.freeze({
   autoRefreshOptions: {
@@ -93,25 +94,13 @@ export type FilterItems = Array<{
   checked: 'on' | undefined;
 }>;
 
-// get a normalized command
-// e.g. kill-process -> Kill process
-export const getActionFilterLabel = (value: string): string => {
-  if (value === 'unisolate') {
-    return 'Release';
-  }
-  // readable command e.g. Kill process
-  const normalizeCommand = value.split('-');
-  normalizeCommand[0] = normalizeCommand[0].charAt(0).toUpperCase() + normalizeCommand[0].slice(1);
-  return normalizeCommand.join(' ');
-};
-
 // TODO: add more filter names here
-export type FilterName = 'Actions';
-export const useActionListFilter = () => {
+export type FilterName = keyof typeof FILTER_NAMES;
+export const useActionsLogFilter = () => {
   const [items, setItems] = useState<FilterItems>(
     RESPONSE_ACTION_COMMANDS.slice().map((filter) => ({
       key: filter,
-      label: getActionFilterLabel(filter),
+      label: filter === 'unisolate' ? 'release' : filter,
       checked: undefined,
     }))
   );

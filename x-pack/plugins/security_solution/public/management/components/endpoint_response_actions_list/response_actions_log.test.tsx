@@ -12,7 +12,7 @@ import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
-import { ResponseActionsList } from './response_actions_list';
+import { ResponseActionsLog } from './response_actions_log';
 import type { ActionDetails, ActionListApiResponse } from '../../../../common/endpoint/types';
 import { MANAGEMENT_PATH } from '../../../../common/constants';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
@@ -106,11 +106,11 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
   };
 });
 
-describe('Response Actions List', () => {
+describe('Response Actions Log', () => {
   const testPrefix = 'response-actions-list';
 
   let render: (
-    props?: React.ComponentProps<typeof ResponseActionsList>
+    props?: React.ComponentProps<typeof ResponseActionsLog>
   ) => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let history: AppContextTestRender['history'];
@@ -127,8 +127,8 @@ describe('Response Actions List', () => {
   beforeEach(async () => {
     mockedContext = createAppRootMockRenderer();
     ({ history } = mockedContext);
-    render = (props?: React.ComponentProps<typeof ResponseActionsList>) =>
-      (renderResult = mockedContext.render(<ResponseActionsList {...(props ?? {})} />));
+    render = (props?: React.ComponentProps<typeof ResponseActionsLog>) =>
+      (renderResult = mockedContext.render(<ResponseActionsLog {...(props ?? {})} />));
     reactTestingLibrary.act(() => {
       history.push(`${MANAGEMENT_PATH}/response_actions`);
     });
@@ -154,7 +154,7 @@ describe('Response Actions List', () => {
 
     it('should show actions filter', () => {
       render();
-      expect(renderResult.getByTestId(`${testPrefix}-Actions-filter-popoverButton`)).toBeTruthy();
+      expect(renderResult.getByTestId(`${testPrefix}-actions-filter-popoverButton`)).toBeTruthy();
     });
 
     it('should show empty state when there is no data', async () => {
@@ -419,7 +419,7 @@ describe('Response Actions List', () => {
   });
 
   describe('Actions filter', () => {
-    const filterPrefix = '-Actions-filter';
+    const filterPrefix = '-actions-filter';
 
     it('should have a search bar', () => {
       render();
@@ -439,7 +439,7 @@ describe('Response Actions List', () => {
       expect(filterList.querySelectorAll('ul>li').length).toEqual(5);
       expect(
         Array.from(filterList.querySelectorAll('ul>li')).map((option) => option.textContent)
-      ).toEqual(['Isolate', 'Release', 'Kill process', 'Suspend process', 'Running processes']);
+      ).toEqual(['isolate', 'release', 'kill-process', 'suspend-process', 'running-processes']);
     });
 
     it('should have `clear all` button `disabled` when no selected values', () => {

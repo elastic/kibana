@@ -33,7 +33,7 @@ const DatePickerWrapper = euiStyled.div`
   padding-bottom: ${(props) => `${props.theme.eui.euiCodeBlockPaddingModifiers.paddingLarge}`};
 `;
 
-export const ActionListDateRangePicker = memo(
+export const ActionLogDateRangePicker = memo(
   ({
     dateRangePickerState,
     isDataLoading,
@@ -91,4 +91,4 @@ export const ActionListDateRangePicker = memo(
   }
 );
 
-ActionListDateRangePicker.displayName = 'ActionListDateRangePicker';
+ActionLogDateRangePicker.displayName = 'ActionLogDateRangePicker';

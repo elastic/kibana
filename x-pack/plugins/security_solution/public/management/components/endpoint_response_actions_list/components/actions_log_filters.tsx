@@ -11,13 +11,15 @@ import type {
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
 import type { useGetEndpointActionList } from '../../../hooks';
-import type { DateRangePickerValues } from './action_list_date_range_picker';
-import { ActionListDateRangePicker } from './action_list_date_range_picker';
-import { ActionListFilter } from './action_list_filter';
+import {
+  type DateRangePickerValues,
+  ActionLogDateRangePicker,
+} from './actions_log_date_range_picker';
+import { ActionsLogFilter } from './actions_log_filter';
 import type { FilterName } from './hooks';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
-export const ActionListFilters = memo(
+export const ActionsLogFilters = memo(
   ({
     dateRangePickerState,
     isDataLoading,
@@ -37,10 +39,10 @@ export const ActionListFilters = memo(
   }) => {
     const getTestId = useTestIdGenerator('response-actions-list');
     const filters = useMemo(() => {
-      // TODO: add more filter names here (Users, Hosts, Statuses)
-      const filterNames: FilterName[] = ['Actions'];
+      // TODO: add more filter names here (users, hosts, statuses)
+      const filterNames: FilterName[] = ['actions'];
       return filterNames.map((filterName) => (
-        <ActionListFilter
+        <ActionsLogFilter
           key={filterName}
           data-test-subj={getTestId(`${filterName}-filter`)}
           filterName={filterName}
@@ -54,7 +56,7 @@ export const ActionListFilters = memo(
     return (
       <EuiFlexGroup responsive gutterSize="s">
         <EuiFlexItem>
-          <ActionListDateRangePicker
+          <ActionLogDateRangePicker
             dateRangePickerState={dateRangePickerState}
             isDataLoading={isDataLoading}
             onRefresh={onRefresh}
@@ -79,4 +81,4 @@ export const ActionListFilters = memo(
   }
 );
 
-ActionListFilters.displayName = 'ActionListFilters';
+ActionsLogFilters.displayName = 'ActionsLogFilters';

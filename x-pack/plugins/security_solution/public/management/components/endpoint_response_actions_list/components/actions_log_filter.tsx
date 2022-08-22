@@ -5,20 +5,15 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React, { memo, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSelectable, EuiPopoverTitle } from '@elastic/eui';
-import { ActionListFilterPopover } from './action_list_filter_popover';
-import { type FilterItems, type FilterName, useActionListFilter } from './hooks';
+import { ActionsLogFilterPopover } from './actions_log_filter_popover';
+import { type FilterItems, type FilterName, useActionsLogFilter } from './hooks';
 import { ClearAllButton } from './clear_all_button';
+import { UX_MESSAGES } from '../translations';
+import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
-const getFilterName = (name: string) =>
-  i18n.translate('xpack.securitySolution.responseActionsList.list.filterName', {
-    defaultMessage: `{name}`,
-    values: { name },
-  });
-
-export const ActionListFilter = memo(
+export const ActionsLogFilter = memo(
   ({
     'data-test-subj': dataTestSubj,
     filterName,
@@ -28,9 +23,9 @@ export const ActionListFilter = memo(
     filterName: FilterName;
     onChangeCommandsFilter: (selectedCommands: string[]) => void;
   }) => {
-    const translatedFilterName = getFilterName(filterName);
+    const getTestId = useTestIdGenerator(dataTestSubj);
     const { items, setItems, hasActiveFilters, numActiveFilters, numFilters } =
-      useActionListFilter();
+      useActionsLogFilter();
 
     const onChange = useCallback(
       (newOptions: FilterItems) => {
@@ -62,33 +57,33 @@ export const ActionListFilter = memo(
     }, [items, setItems, onChangeCommandsFilter]);
 
     return (
-      <ActionListFilterPopover
-        data-test-subj={`${dataTestSubj}-popoverButton`}
-        filterName={translatedFilterName}
+      <ActionsLogFilterPopover
+        data-test-subj={`${getTestId('')}popoverButton`}
+        filterName={filterName}
         hasActiveFilters={hasActiveFilters}
         numActiveFilters={numActiveFilters}
         numFilters={numFilters}
       >
         <EuiSelectable
-          aria-label={`${translatedFilterName}`}
+          aria-label={`${filterName}`}
           onChange={onChange}
           options={items}
           searchable
           searchProps={{
-            placeholder: `Search ${translatedFilterName.toLowerCase()}`,
+            placeholder: UX_MESSAGES.filterSearchPlaceholder(filterName),
             compressed: true,
           }}
         >
           {(list, search) => (
-            <div style={{ width: 300 }} data-test-subj={`${dataTestSubj}-popoverList`}>
-              <EuiPopoverTitle data-test-subj={`${dataTestSubj}-search`} paddingSize="s">
+            <div style={{ width: 300 }} data-test-subj={`${getTestId('')}popoverList`}>
+              <EuiPopoverTitle data-test-subj={`${getTestId('')}search`} paddingSize="s">
                 {search}
               </EuiPopoverTitle>
               {list}
               <EuiFlexGroup>
                 <EuiFlexItem>
                   <ClearAllButton
-                    data-test-subj={`${dataTestSubj}-clearAllButton`}
+                    data-test-subj={`${getTestId('')}clearAllButton`}
                     isDisabled={!hasActiveFilters}
                     onClick={onClearAll}
                   />
@@ -97,9 +92,9 @@ export const ActionListFilter = memo(
             </div>
           )}
         </EuiSelectable>
-      </ActionListFilterPopover>
+      </ActionsLogFilterPopover>
     );
   }
 );
 
-ActionListFilter.displayName = 'ActionListFilter';
+ActionsLogFilter.displayName = 'ActionsLogFilter';

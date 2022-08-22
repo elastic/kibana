@@ -7,8 +7,10 @@
 
 import React, { memo, useState, useCallback, useMemo } from 'react';
 import { EuiPopover, EuiFilterButton, useGeneratedHtmlId } from '@elastic/eui';
+import { FILTER_NAMES } from '../translations';
+import type { FilterName } from './hooks';
 
-export const ActionListFilterPopover = memo(
+export const ActionsLogFilterPopover = memo(
   ({
     children,
     'data-test-subj': dataTestSubj,
@@ -19,7 +21,7 @@ export const ActionListFilterPopover = memo(
   }: {
     children: React.ReactNode;
     'data-test-subj'?: string;
-    filterName: string;
+    filterName: FilterName;
     hasActiveFilters: boolean;
     numActiveFilters: number;
     numFilters: number;
@@ -46,7 +48,7 @@ export const ActionListFilterPopover = memo(
           hasActiveFilters={hasActiveFilters}
           numActiveFilters={numActiveFilters}
         >
-          {filterName}
+          {FILTER_NAMES[filterName]}
         </EuiFilterButton>
       ),
       [
@@ -74,4 +76,4 @@ export const ActionListFilterPopover = memo(
   }
 );
 
-ActionListFilterPopover.displayName = 'ActionListFilterPopover';
+ActionsLogFilterPopover.displayName = 'ActionsLogFilterPopover';

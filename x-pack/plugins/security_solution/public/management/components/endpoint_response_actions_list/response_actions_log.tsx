@@ -37,7 +37,7 @@ import { useGetEndpointActionList } from '../../hooks';
 import { OUTPUT_MESSAGES, TABLE_COLUMN_NAMES, UX_MESSAGES } from './translations';
 import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../common/constants';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
-import { ActionListFilters } from './components/action_list_filters';
+import { ActionsLogFilters } from './components/actions_log_filters';
 import { useDateRangePicker } from './components/hooks';
 
 const emptyValue = getEmptyValue();
@@ -104,7 +104,7 @@ const StyledEuiCodeBlock = euiStyled(EuiCodeBlock).attrs({
   }
 `;
 
-export const ResponseActionsList = memo<Pick<EndpointActionListRequestQuery, 'agentIds'>>(
+export const ResponseActionsLog = memo<Pick<EndpointActionListRequestQuery, 'agentIds'>>(
   ({ agentIds }) => {
     const getTestId = useTestIdGenerator('response-actions-list');
     const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<{
@@ -495,7 +495,7 @@ export const ResponseActionsList = memo<Pick<EndpointActionListRequestQuery, 'ag
 
     return (
       <>
-        <ActionListFilters
+        <ActionsLogFilters
           dateRangePickerState={dateRangePickerState}
           isDataLoading={isFetching}
           onClick={reFetchEndpointActionList}
@@ -553,4 +553,4 @@ export const ResponseActionsList = memo<Pick<EndpointActionListRequestQuery, 'ag
   }
 );
 
-ResponseActionsList.displayName = 'ResponseActionsList';
+ResponseActionsLog.displayName = 'ResponseActionsLog';
