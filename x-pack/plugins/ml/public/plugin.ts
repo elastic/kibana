@@ -178,7 +178,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         registerSearchLinks,
         registerMlAlerts,
         registerMapExtension,
-        registerCasesAttachment,
+        registerCasesAttachments,
       } = await import('./register_helper');
 
       const mlEnabled = isMlEnabled(license);
@@ -199,7 +199,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
           registerMlUiActions(pluginsSetup.uiActions, core);
 
           if (pluginsSetup.cases) {
-            registerCasesAttachment(pluginsSetup.cases, coreStart, pluginStart);
+            registerCasesAttachments(pluginsSetup.cases, coreStart, pluginStart);
           }
 
           const canUseMlAlerts = capabilities.ml?.canUseMlAlerts;
