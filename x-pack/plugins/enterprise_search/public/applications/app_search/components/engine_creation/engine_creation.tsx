@@ -29,8 +29,7 @@ export const EngineCreation: React.FC = () => {
   const { method, ...params } = parseQueryParams(search);
 
   const { engineType, currentEngineCreationStep } = useValues(EngineCreationLogic);
-  const { setIngestionMethod, setEngineType, setCreationStep, setSelectedIndex } =
-    useActions(EngineCreationLogic);
+  const { setIngestionMethod, initializeWithESIndex } = useActions(EngineCreationLogic);
 
   useEffect(() => {
     if (typeof method === 'string') {
@@ -38,9 +37,7 @@ export const EngineCreation: React.FC = () => {
     }
     const esIndexParam = params[ESINDEX_QUERY_PARAMETER];
     if (typeof esIndexParam === 'string') {
-      setEngineType('elasticsearch');
-      setSelectedIndex(esIndexParam);
-      setCreationStep(EngineCreationSteps.ConfigureStep);
+      initializeWithESIndex(esIndexParam);
     }
   }, []);
 
