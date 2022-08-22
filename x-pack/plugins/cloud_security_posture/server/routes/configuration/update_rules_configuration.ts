@@ -24,8 +24,8 @@ import { createCspRuleSearchFilterByPackagePolicy } from '../../../common/utils/
 import type { CspRule, CspRulesConfiguration } from '../../../common/schemas';
 import {
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
-  UPDATE_RULES_CONFIG_ROUTE_PATH,
   CSP_RULE_SAVED_OBJECT_TYPE,
+  UPDATE_RULES_CONFIG_ROUTE_PATH,
 } from '../../../common/constants';
 import { CspRouter } from '../../types';
 
@@ -38,7 +38,7 @@ export const getPackagePolicy = async (
 
   // PackagePolicies always contains one element, even when package does not exist
   if (!packagePolicies || !packagePolicies[0].version) {
-    throw new Error(`package policy Id '${packagePolicyId}' is not exist`);
+    throw new Error(`Package policy Id '${packagePolicyId}' does not exist`);
   }
   if (packagePolicies[0].package?.name !== CLOUD_SECURITY_POSTURE_PACKAGE_NAME) {
     throw new Error(
