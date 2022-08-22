@@ -499,9 +499,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         { meta: true }
       );
       expect(response.statusCode).to.eql(200);
-      expect(response.body._source?.alert?.params?.esQuery).to.eql(
-        '{"query":}'
-      );
+      expect(response.body._source?.alert?.params?.esQuery).to.eql('{"query":}');
     });
   });
 }

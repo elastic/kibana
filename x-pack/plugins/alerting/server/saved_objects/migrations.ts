@@ -40,7 +40,8 @@ interface AlertLogMeta extends LogMeta {
 }
 
 type AlertMigration = (
-  doc: SavedObjectUnsanitizedDoc<RawRule>, context: SavedObjectMigrationContext
+  doc: SavedObjectUnsanitizedDoc<RawRule>,
+  context: SavedObjectMigrationContext
 ) => SavedObjectUnsanitizedDoc<RawRule>;
 
 function createEsoMigration(
@@ -758,7 +759,8 @@ function addSecuritySolutionAADRuleTypeTags(
 }
 
 function stripOutRuntimeFieldsInOldESQuery(
-  doc: SavedObjectUnsanitizedDoc<RawRule>, context: SavedObjectMigrationContext
+  doc: SavedObjectUnsanitizedDoc<RawRule>,
+  context: SavedObjectMigrationContext
 ): SavedObjectUnsanitizedDoc<RawRule> {
   const isESDSLrule =
     isEsQueryRuleType(doc) && !isSerializedSearchSource(doc.attributes.params.searchConfiguration);
