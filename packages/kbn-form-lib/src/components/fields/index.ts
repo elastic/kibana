@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-export * from './text_field';
-export * from './numeric_field';
-export * from './checkbox_field';
-export * from './combobox_field';
-export * from './multi_select_field';
-export * from './radio_group_field';
-export * from './range_field';
-export * from './select_field';
-export * from './super_select_field';
-export * from './toggle_field';
-export * from './text_area_field';
-export * from './json_editor_field';
+export { TextField } from './text_field';
+export { NumericField } from './numeric_field';
+export { CheckBoxField } from './checkbox_field';
+export { ComboBoxField } from './combobox_field';
+export { MultiSelectField } from './multi_select_field';
+export { RadioGroupField } from './radio_group_field';
+export { RangeField } from './range_field';
+export { SelectField } from './select_field';
+export { SuperSelectField } from './super_select_field';
+export { ToggleField } from './toggle_field';
+export { TextAreaField } from './text_area_field';
+export { JsonEditorField } from './json_editor_field';
