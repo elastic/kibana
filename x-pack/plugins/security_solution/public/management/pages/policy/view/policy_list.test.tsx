@@ -149,7 +149,8 @@ describe('When on the policy list page', () => {
       render();
     });
   });
-  describe('pagination', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/139207
+  describe.skip('pagination', () => {
     beforeEach(async () => {
       getPackagePolicies.mockImplementation(({ page, perPage }) => {
         // # policies = 100 to trigger UI to show pagination
