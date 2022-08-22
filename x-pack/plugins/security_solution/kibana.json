@@ -33,6 +33,7 @@
     "unifiedSearch"
   ],
   "optionalPlugins": [
+    "cloudExperiments",
     "encryptedSavedObjects",
     "fleet",
     "ml",

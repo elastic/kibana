@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useEffect, useMemo, useState } from 'react';
 import { EuiButton, EuiCard, EuiFlexGroup, EuiFlexItem, EuiPageHeader } from '@elastic/eui';
 import styled from 'styled-components';
 import * as i18n from './translations';
 import endpointSvg from '../../images/endpoint1.svg';
 import cloudSvg from '../../images/cloud1.svg';
 import siemSvg from '../../images/siem1.svg';
-import { ADD_DATA_PATH } from '../../../../common/constants';
+import { ADD_DATA_PATH, ADD_DATA_PATH_VARIATION } from '../../../../common/constants';
 import { useKibana } from '../../lib/kibana';
 
 const imgUrls = {
@@ -60,9 +60,23 @@ export const LandingCards = memo(() => {
     http: {
       basePath: { prepend },
     },
+    cloudExperiments,
   } = useKibana().services;
 
-  const href = useMemo(() => prepend(ADD_DATA_PATH), [prepend]);
+  const [addIntegrationsUrl, setAddIntegrationsUrl] = useState(ADD_DATA_PATH);
+  useEffect(() => {
+    (async function loadVariation() {
+      const variationUrl = await cloudExperiments?.getVariation(
+        ADD_DATA_PATH_VARIATION,
+        ADD_DATA_PATH
+      );
+      if (variationUrl) {
+        setAddIntegrationsUrl(variationUrl);
+      }
+    })();
+  }, [cloudExperiments]);
+
+  const href = useMemo(() => prepend(addIntegrationsUrl), [prepend, addIntegrationsUrl]);
   return (
     <EuiFlexGroup data-test-subj="siem-landing-page" direction="column" gutterSize="l">
       <EuiFlexItem>

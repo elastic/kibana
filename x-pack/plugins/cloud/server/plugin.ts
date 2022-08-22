@@ -8,6 +8,7 @@
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type { CloudExperimentsPluginSetup } from '@kbn/cloud-experiments-plugin/common';
 import { registerCloudDeploymentIdAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
 import { CloudConfigType } from './config';
 import { registerCloudUsageCollector } from './collectors';
@@ -20,6 +21,7 @@ import { readInstanceSizeMb } from './env';
 interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
   security?: SecurityPluginSetup;
+  cloudExperiments?: CloudExperimentsPluginSetup;
 }
 
 export interface CloudSetup {
@@ -44,7 +46,10 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     this.isDev = this.context.env.mode.dev;
   }
 
-  public setup(core: CoreSetup, { usageCollection, security }: PluginsSetup): CloudSetup {
+  public setup(
+    core: CoreSetup,
+    { cloudExperiments, usageCollection, security }: PluginsSetup
+  ): CloudSetup {
     this.logger.debug('Setting up Cloud plugin');
     const isCloudEnabled = getIsCloudEnabled(this.config.id);
     registerCloudDeploymentIdAnalyticsContext(core.analytics, this.config.id);
@@ -52,6 +57,11 @@ export class CloudPlugin implements Plugin<CloudSetup> {
 
     if (isCloudEnabled) {
       security?.setIsElasticCloudDeployment();
+    }
+
+    if (this.config.id) {
+      // We use the Cloud Deployment ID as the userId in the Cloud Experiments
+      cloudExperiments?.identifyUser(this.config.id);
     }
 
     if (this.config.full_story.enabled) {
