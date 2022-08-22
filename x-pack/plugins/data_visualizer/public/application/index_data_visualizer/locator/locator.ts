@@ -72,7 +72,6 @@ export interface IndexDataVisualizerLocatorParams extends SerializableRecord {
   showEmptyFields?: boolean;
   pageSize?: number;
   sortDirection?: 'asc' | 'desc';
-  samplerShardSize?: number;
   pageIndex?: number;
   sortField?: string;
   showDistributions?: number;
@@ -102,7 +101,6 @@ export class IndexDataVisualizerLocatorDefinition
       showEmptyFields,
       pageSize,
       sortDirection,
-      samplerShardSize,
       pageIndex,
       sortField,
       showDistributions,
@@ -119,7 +117,6 @@ export class IndexDataVisualizerLocatorDefinition
       showEmptyFields?: boolean;
       pageSize?: number;
       sortDirection?: 'asc' | 'desc';
-      samplerShardSize?: number;
       pageIndex?: number;
       sortField?: string;
       showDistributions?: number;
@@ -147,7 +144,6 @@ export class IndexDataVisualizerLocatorDefinition
 
     if (pageSize) appState.pageSize = pageSize;
     if (sortDirection) appState.sortDirection = sortDirection;
-    if (samplerShardSize) appState.samplerShardSize = samplerShardSize;
     if (pageIndex) appState.pageIndex = pageIndex;
     if (sortField) appState.sortField = sortField;
     if (showDistributions !== undefined) appState.showDistributions = showDistributions;

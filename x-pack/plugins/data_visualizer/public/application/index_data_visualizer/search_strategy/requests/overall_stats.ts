@@ -10,7 +10,6 @@ import { get } from 'lodash';
 import { Query } from '@kbn/es-query';
 import { IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import type { AggCardinality } from '@kbn/ml-agg-utils';
-import { getSamplerAggregationsResponsePath } from '@kbn/ml-agg-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { buildRandomSamplerAggregation } from './build_random_sampler_agg';
 import {
@@ -113,7 +112,6 @@ export function isNonAggregatableFieldOverallStats(
 export const processAggregatableFieldsExistResponse = (
   responses: AggregatableFieldOverallStats[] | undefined,
   aggregatableFields: string[],
-  samplerShardSize: number,
   totalCount: number,
   datafeedConfig?: estypes.MlDatafeed
 ) => {
@@ -127,7 +125,7 @@ export const processAggregatableFieldsExistResponse = (
   responses.forEach(({ rawResponse: body, aggregatableFields: aggregatableFieldsChunk }) => {
     const aggregations = body.aggregations;
 
-    const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
+    const aggsPath = ['sample'];
     const sampleCount = totalCount;
     aggregatableFieldsChunk.forEach((field, i) => {
       const safeFieldName = getSafeAggregationName(field, i);

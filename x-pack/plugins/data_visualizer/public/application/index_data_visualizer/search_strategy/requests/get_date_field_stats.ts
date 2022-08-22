@@ -15,7 +15,6 @@ import type {
   ISearchOptions,
   ISearchStart,
 } from '@kbn/data-plugin/public';
-import { getSamplerAggregationsResponsePath } from '@kbn/ml-agg-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { buildRandomSamplerAggregation } from './build_random_sampler_agg';
 import type { FieldStatsCommonRequestParams } from '../../../../../common/types/field_stats';
@@ -66,8 +65,6 @@ export const fetchDateFieldsStats = (
   fields: Field[],
   options: ISearchOptions
 ): Observable<DateFieldStats[] | FieldStatsError> => {
-  const { samplerShardSize } = params;
-
   const request: estypes.SearchRequest = getDateFieldsStatsRequest(params, fields);
   return dataSearch
     .search<IKibanaSearchRequest, IKibanaSearchResponse>({ params: request }, options)
@@ -81,7 +78,7 @@ export const fetchDateFieldsStats = (
       map((resp) => {
         if (!isIKibanaSearchResponse(resp)) return resp;
         const aggregations = resp.rawResponse.aggregations;
-        const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
+        const aggsPath = ['sample'];
 
         const batchStats: DateFieldStats[] = fields.map((field, i) => {
           const safeFieldName = field.safeFieldName;

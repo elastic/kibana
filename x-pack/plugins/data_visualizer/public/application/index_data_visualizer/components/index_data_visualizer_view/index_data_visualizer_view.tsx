@@ -98,7 +98,6 @@ export const getDefaultDataVisualizerListState = (
   sortDirection: 'asc',
   visibleFieldTypes: [],
   visibleFieldNames: [],
-  samplerShardSize: 5000,
   searchString: '',
   searchQuery: defaultSearchQuery,
   searchQueryLanguage: SEARCH_QUERY_LANGUAGE.KUERY,
@@ -107,7 +106,7 @@ export const getDefaultDataVisualizerListState = (
   showAllFields: false,
   showEmptyFields: false,
   probability: null,
-  rndSamplerPref: RANDOM_SAMPLER_OPTION.ON_AUTOMATIC,
+  randomSamplerPref: RANDOM_SAMPLER_OPTION.ON_AUTOMATIC,
   ...overrides,
 });
 
@@ -128,7 +127,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
   const restorableDefaults = useMemo(
     () =>
       getDefaultDataVisualizerListState({
-        rndSamplerPref: savedRandomSamplerPreference,
+        randomSamplerPref: savedRandomSamplerPreference,
       }),
     // We just  need to load the saved preference when the page is first loaded
     // eslint-disable-next-line react-hooks/exhaustive-deps

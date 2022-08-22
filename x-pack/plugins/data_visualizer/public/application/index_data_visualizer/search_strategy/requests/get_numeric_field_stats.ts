@@ -16,7 +16,6 @@ import {
   ISearchOptions,
 } from '@kbn/data-plugin/common';
 import type { ISearchStart } from '@kbn/data-plugin/public';
-import { getSamplerAggregationsResponsePath } from '@kbn/ml-agg-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { buildRandomSamplerAggregation } from './build_random_sampler_agg';
 import { MAX_PERCENT, PERCENTILE_SPACING, SAMPLER_TOP_TERMS_THRESHOLD } from './constants';
@@ -105,7 +104,6 @@ export const fetchNumericFieldsStats = (
   fields: Field[],
   options: ISearchOptions
 ): Observable<NumericFieldStats[] | FieldStatsError> => {
-  const { samplerShardSize } = params;
   const request: estypes.SearchRequest = getNumericFieldsStatsRequest(params, fields);
 
   return dataSearch
@@ -121,7 +119,7 @@ export const fetchNumericFieldsStats = (
         if (!isIKibanaSearchResponse(resp)) return resp;
 
         const aggregations = resp.rawResponse.aggregations;
-        const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
+        const aggsPath = ['sample'];
 
         const batchStats: NumericFieldStats[] = [];
 

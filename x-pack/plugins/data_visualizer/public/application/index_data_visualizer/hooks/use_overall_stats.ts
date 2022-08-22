@@ -134,7 +134,6 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
       earliest,
       latest,
       runtimeFieldMap,
-      samplerShardSize,
     } = searchStrategyParams;
 
     const searchOptions: ISearchOptions = {
@@ -233,7 +232,6 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
         const aggregatableOverallStats = processAggregatableFieldsExistResponse(
           aggregatableOverallStatsResp,
           aggregatableFields,
-          samplerShardSize,
           totalCount
         );
 

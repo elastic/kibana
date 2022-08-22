@@ -178,7 +178,6 @@ export function isValidFieldStats(arg: unknown): arg is FieldStats {
 
 export interface FieldStatsCommonRequestParams {
   index: string;
-  samplerShardSize: number;
   timeFieldName?: string;
   earliestMs?: number | undefined;
   latestMs?: number | undefined;
@@ -198,7 +197,6 @@ export interface OverallStatsSearchStrategyParams {
   aggInterval: TimeBucketsInterval;
   intervalMs?: number;
   searchQuery: Query['query'];
-  samplerShardSize: number;
   index: string;
   timeFieldName?: string;
   runtimeFieldMap?: estypes.MappingRuntimeFields;

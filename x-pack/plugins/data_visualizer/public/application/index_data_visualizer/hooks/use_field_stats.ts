@@ -158,7 +158,6 @@ export function useFieldStatsSearchStrategy(
 
     const params: FieldStatsCommonRequestParams = {
       index: searchStrategyParams.index,
-      samplerShardSize: searchStrategyParams.samplerShardSize,
       timeFieldName: searchStrategyParams.timeFieldName,
       earliestMs: searchStrategyParams.earliest,
       latestMs: searchStrategyParams.latest,
