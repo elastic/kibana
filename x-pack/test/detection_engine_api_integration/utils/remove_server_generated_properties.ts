@@ -6,6 +6,7 @@
  */
 
 import type { FullResponseSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import { pickBy } from 'lodash';
 
 /**
  * This will remove server generated properties such as date times, etc...
@@ -22,5 +23,9 @@ export const removeServerGeneratedProperties = (
     execution_summary,
     ...removedProperties
   } = rule;
-  return removedProperties;
+  // We're only removing undefined values, so this cast correctly narrows the type
+  return pickBy(removedProperties, (value) => value !== undefined) as Omit<
+    FullResponseSchema,
+    'id' | 'created_at' | 'updated_at'
+  >;
 };
