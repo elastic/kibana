@@ -6,6 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { LEGACY_URL_ALIAS_TYPE } from './constants';
-export type { LegacyUrlAlias } from './types';
 export { registerCoreObjectTypes } from './registration';
