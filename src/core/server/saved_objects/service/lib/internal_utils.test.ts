@@ -7,8 +7,9 @@
  */
 
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
-import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
-import { encodeHitVersion } from '../../version';
+import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
+import { encodeHitVersion } from '@kbn/core-saved-objects-base-server-internal';
+import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import {
   getBulkOperationError,
   getCurrentTime,
@@ -19,7 +20,6 @@ import {
   rawDocExistsInNamespace,
   rawDocExistsInNamespaces,
 } from './internal_utils';
-import { ALL_NAMESPACES_STRING } from './utils';
 
 describe('#getBulkOperationError', () => {
   const type = 'obj-type';

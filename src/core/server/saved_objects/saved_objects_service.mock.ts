@@ -21,7 +21,7 @@ import type {
 
 import { savedObjectsRepositoryMock } from './service/lib/repository.mock';
 import { savedObjectsClientMock } from './service/saved_objects_client.mock';
-import { typeRegistryMock } from './saved_objects_type_registry.mock';
+import { typeRegistryMock, serializerMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { savedObjectsExporterMock } from './export/saved_objects_exporter.mock';
 import { savedObjectsImporterMock } from './import/saved_objects_importer.mock';
 import { migrationMocks } from './migrations/mocks';
@@ -105,4 +105,5 @@ export const savedObjectsServiceMock = {
   createTypeRegistryMock: typeRegistryMock.create,
   createExporter: savedObjectsExporterMock.create,
   createImporter: savedObjectsImporterMock.create,
+  createSerializer: serializerMock.create,
 };

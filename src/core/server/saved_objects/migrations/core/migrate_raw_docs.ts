@@ -16,7 +16,7 @@ import type {
   SavedObjectsRawDoc,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core-saved-objects-server';
-import { SavedObjectsSerializer } from '../../serialization';
+import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
 import { MigrateAndConvertFn } from './document_migrator';
 import { TransformSavedObjectDocumentError } from '.';
 

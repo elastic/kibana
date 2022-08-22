@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsErrorHelpers } from '../service/lib/errors';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
 import { decodeBase64 } from './base64';
 
 /**

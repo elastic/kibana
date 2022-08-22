@@ -40,7 +40,7 @@ import type {
   SavedObjectsCreatePointInTimeFinderOptions,
   SavedObjectsFindOptions,
 } from '@kbn/core-saved-objects-api-server';
-import { SavedObjectsErrorHelpers } from './lib/errors';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
 
 /**
  * Core internal implementation of {@link SavedObjectsClientContract}

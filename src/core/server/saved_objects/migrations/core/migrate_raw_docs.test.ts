@@ -9,8 +9,10 @@
 import { set } from '@kbn/safer-lodash-set';
 import * as Either from 'fp-ts/lib/Either';
 import _ from 'lodash';
-import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
-import { SavedObjectsSerializer } from '../../serialization';
+import {
+  SavedObjectTypeRegistry,
+  SavedObjectsSerializer,
+} from '@kbn/core-saved-objects-base-server-internal';
 import {
   DocumentsTransformFailed,
   DocumentsTransformSuccess,

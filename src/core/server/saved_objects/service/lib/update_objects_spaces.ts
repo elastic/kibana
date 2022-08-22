@@ -22,10 +22,15 @@ import type {
   ISavedObjectTypeRegistry,
   SavedObjectsRawDocSource,
 } from '@kbn/core-saved-objects-server';
-import type { IndexMapping } from '../../mappings';
-import type { SavedObjectsSerializer } from '../../serialization';
-import type { DecoratedError } from './errors';
-import { SavedObjectsErrorHelpers } from './errors';
+import {
+  SavedObjectsErrorHelpers,
+  ALL_NAMESPACES_STRING,
+  type DecoratedError,
+} from '@kbn/core-saved-objects-utils-server';
+import type {
+  IndexMapping,
+  SavedObjectsSerializer,
+} from '@kbn/core-saved-objects-base-server-internal';
 import {
   getBulkOperationError,
   getExpectedVersionProperties,
@@ -36,7 +41,6 @@ import {
 } from './internal_utils';
 import { DEFAULT_REFRESH_SETTING } from './repository';
 import type { RepositoryEsClient } from './repository_es_client';
-import { ALL_NAMESPACES_STRING } from './utils';
 import type { DeleteLegacyUrlAliasesParams } from './legacy_url_aliases';
 import { deleteLegacyUrlAliases } from './legacy_url_aliases';
 

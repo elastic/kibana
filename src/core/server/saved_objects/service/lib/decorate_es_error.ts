@@ -10,6 +10,7 @@ import { get } from 'lodash';
 import { errors as esErrors } from '@elastic/elasticsearch';
 import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
 import { isSupportedEsServer } from '@kbn/core-elasticsearch-server-internal';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
 
 const responseErrors = {
   isServiceUnavailable: (statusCode?: number) => statusCode === 503,
@@ -24,8 +25,6 @@ const responseErrors = {
 const { ConnectionError, NoLivingConnectionsError, TimeoutError } = esErrors;
 const SCRIPT_CONTEXT_DISABLED_REGEX = /(?:cannot execute scripts using \[)([a-z]*)(?:\] context)/;
 const INLINE_SCRIPTS_DISABLED_MESSAGE = 'cannot execute [inline] scripts';
-
-import { SavedObjectsErrorHelpers } from './errors';
 
 type EsErrors =
   | esErrors.ConnectionError

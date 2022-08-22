@@ -15,7 +15,7 @@ import type {
 import { applyExportTransformsMock } from './collect_exported_objects.test.mocks';
 import { savedObjectsClientMock } from '../../mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { SavedObjectTypeRegistry } from '../saved_objects_type_registry';
+import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
 import { collectExportedObjects, ExclusionReason } from './collect_exported_objects';
 
 const createObject = (parts: Partial<SavedObject>): SavedObject => ({

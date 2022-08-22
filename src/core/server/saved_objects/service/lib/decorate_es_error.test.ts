@@ -8,8 +8,8 @@
 
 import { errors as esErrors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
 import { decorateEsError } from './decorate_es_error';
-import { SavedObjectsErrorHelpers } from './errors';
 
 describe('savedObjectsClient/decorateEsError', () => {
   it('always returns the same error it receives', () => {

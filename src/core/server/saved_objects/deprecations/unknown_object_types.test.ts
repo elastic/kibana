@@ -9,7 +9,7 @@
 import { getIndexForTypeMock } from './unknown_object_types.test.mocks';
 
 import { deleteUnknownTypeObjects, getUnknownTypesDeprecations } from './unknown_object_types';
-import { typeRegistryMock } from '../saved_objects_type_registry.mock';
+import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { SavedObjectsType } from '../..';
 import { createAggregateTypesSearchResponse } from '../migrations/actions/check_for_unknown_docs.mocks';

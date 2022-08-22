@@ -7,12 +7,12 @@
  */
 
 import { mergeWith } from 'lodash';
-import {
+import type {
   SavedObjectMigrationContext,
   SavedObjectMigrationFn,
   SavedObjectMigrationMap,
   SavedObjectUnsanitizedDoc,
-} from '../..';
+} from '@kbn/core-saved-objects-server';
 
 /**
  * Merges two saved object migration maps.

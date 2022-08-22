@@ -7,7 +7,10 @@
  */
 
 import * as esKuery from '@kbn/es-query';
-import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../../object_types';
+import {
+  type LegacyUrlAlias,
+  LEGACY_URL_ALIAS_TYPE,
+} from '@kbn/core-saved-objects-base-server-internal';
 import { getObjectKey } from '../internal_utils';
 import type { CreatePointInTimeFinderFn } from '../point_in_time_finder';
 

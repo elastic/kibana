@@ -8,10 +8,10 @@
 
 import { extname } from 'path';
 import { Readable } from 'stream';
-import { schema } from '@kbn/config-schema';
 import { chain } from 'lodash';
+import { schema } from '@kbn/config-schema';
+import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
 import { InternalCoreUsageDataSetup } from '../../core_usage_data';
-import { SavedObjectConfig } from '../saved_objects_config';
 import { SavedObjectsImportError } from '../import';
 import type { InternalSavedObjectRouter } from '../internal_types';
 import { catchAndReturnBoomErrors, createSavedObjectsStreamFromNdJson } from './utils';

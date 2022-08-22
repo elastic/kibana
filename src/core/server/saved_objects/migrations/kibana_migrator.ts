@@ -22,12 +22,15 @@ import type {
   SavedObjectsRawDoc,
   ISavedObjectTypeRegistry,
 } from '@kbn/core-saved-objects-server';
-import { IndexMapping, SavedObjectsTypeMappingDefinitions } from '../mappings';
-import { SavedObjectsSerializer } from '../serialization';
+import {
+  SavedObjectsSerializer,
+  type IndexMapping,
+  type SavedObjectsTypeMappingDefinitions,
+  type SavedObjectsMigrationConfigType,
+} from '@kbn/core-saved-objects-base-server-internal';
 import { buildActiveMappings, MigrationResult, MigrationStatus } from './core';
 import { DocumentMigrator, VersionedTransformer } from './core/document_migrator';
 import { createIndexMap } from './core/build_index_map';
-import { SavedObjectsMigrationConfigType } from '../saved_objects_config';
 import { runResilientMigrator } from './run_resilient_migrator';
 import { migrateRawDocsSafely } from './core/migrate_raw_docs';
 

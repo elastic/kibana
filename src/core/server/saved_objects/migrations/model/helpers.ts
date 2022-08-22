@@ -12,8 +12,8 @@ import type {
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import * as Either from 'fp-ts/lib/Either';
+import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import type { State } from '../state';
-import type { IndexMapping } from '../../mappings';
 import type { FetchIndexResponse } from '../actions';
 
 /**

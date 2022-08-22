@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { CORE_USAGE_STATS_TYPE, CORE_USAGE_STATS_ID } from './constants';
 import { CoreUsageStats } from './types';
-import { DEFAULT_NAMESPACE_STRING } from '../saved_objects/service/lib/utils';
 import {
   ISavedObjectsRepository,
   SavedObjectsImportOptions,

@@ -7,8 +7,7 @@
  */
 
 import Boom from '@hapi/boom';
-
-import { SavedObjectsErrorHelpers } from './errors';
+import { SavedObjectsErrorHelpers } from './saved_objects_error_helpers';
 
 describe('savedObjectsClient/errorTypes', () => {
   describe('BadRequest error', () => {

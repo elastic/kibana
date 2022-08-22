@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { IndexMapping, SavedObjectsTypeMappingDefinitions } from '../../mappings';
+import type {
+  IndexMapping,
+  SavedObjectsTypeMappingDefinitions,
+} from '@kbn/core-saved-objects-base-server-internal';
 import { buildActiveMappings, diffMappings } from './build_active_mappings';
 
 describe('buildActiveMappings', () => {

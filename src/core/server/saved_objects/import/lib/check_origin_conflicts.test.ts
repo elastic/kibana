@@ -16,9 +16,9 @@ import type {
 } from '@kbn/core-saved-objects-common';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
+import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { checkOriginConflicts } from './check_origin_conflicts';
 import { savedObjectsClientMock } from '../../../mocks';
-import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
 import type { ImportStateMap } from './types';
 
 jest.mock('uuid', () => ({

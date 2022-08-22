@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { typeRegistryMock } from '../saved_objects_type_registry.mock';
-import { LEGACY_URL_ALIAS_TYPE } from './constants';
+import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
+import { LEGACY_URL_ALIAS_TYPE } from '@kbn/core-saved-objects-base-server-internal';
 import { registerCoreObjectTypes } from './registration';
 
 describe('Core saved object types registration', () => {

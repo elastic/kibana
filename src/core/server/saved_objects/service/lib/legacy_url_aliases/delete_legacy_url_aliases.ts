@@ -10,11 +10,13 @@ import * as esKuery from '@kbn/es-query';
 
 import { getErrorMessage as getEsErrorMessage } from '@kbn/core-elasticsearch-client-server-internal';
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
-import type { IndexMapping } from '../../../mappings';
-import { LEGACY_URL_ALIAS_TYPE } from '../../../object_types';
+import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
+import {
+  LEGACY_URL_ALIAS_TYPE,
+  type IndexMapping,
+} from '@kbn/core-saved-objects-base-server-internal';
 import type { RepositoryEsClient } from '../repository_es_client';
 import { getSearchDsl } from '../search_dsl';
-import { ALL_NAMESPACES_STRING } from '../utils';
 
 /** @internal */
 export interface DeleteLegacyUrlAliasesParams {

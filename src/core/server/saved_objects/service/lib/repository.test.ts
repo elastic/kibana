@@ -55,17 +55,21 @@ import type {
   SavedObjectsMappingProperties,
   SavedObjectsTypeMappingDefinition,
 } from '@kbn/core-saved-objects-server';
+import {
+  SavedObjectsErrorHelpers,
+  ALL_NAMESPACES_STRING,
+} from '@kbn/core-saved-objects-utils-server';
 import { SavedObjectsRepository } from './repository';
-import { SavedObjectsErrorHelpers } from './errors';
 import { PointInTimeFinder } from './point_in_time_finder';
-import { ALL_NAMESPACES_STRING } from './utils';
 import { loggerMock } from '@kbn/logging-mocks';
-import { SavedObjectsSerializer } from '../../serialization';
-import { encodeHitVersion } from '../../version';
-import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import {
+  SavedObjectTypeRegistry,
+  SavedObjectsSerializer,
+  encodeHitVersion,
+  LEGACY_URL_ALIAS_TYPE,
+} from '@kbn/core-saved-objects-base-server-internal';
 import { DocumentMigrator } from '../../migrations/core/document_migrator';
 import { mockKibanaMigrator } from '../../migrations/kibana_migrator.mock';
-import { LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import * as esKuery from '@kbn/es-query';
 import { errors as EsErrors } from '@elastic/elasticsearch';

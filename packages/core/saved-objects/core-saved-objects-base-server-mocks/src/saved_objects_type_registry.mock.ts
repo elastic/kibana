@@ -7,7 +7,7 @@
  */
 
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
-import type { SavedObjectTypeRegistry } from './saved_objects_type_registry';
+import type { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
 
 const createRegistryMock = (): jest.Mocked<
   ISavedObjectTypeRegistry & Pick<SavedObjectTypeRegistry, 'registerType'>

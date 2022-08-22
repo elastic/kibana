@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export * from './encode_version';
-export * from './encode_hit_version';
-export * from './decode_version';
-export * from './decode_request_version';
+export { encodeVersion } from './encode_version';
+export { encodeHitVersion } from './encode_hit_version';
+export { decodeVersion } from './decode_version';
+export { decodeRequestVersion } from './decode_request_version';
