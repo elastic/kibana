@@ -305,7 +305,12 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton fill iconType="plusInCircle" onClick={() => setModalOpen(true)}>
+          <EuiButton
+            data-test-subj="createEnrollmentTokenButton"
+            fill
+            iconType="plusInCircle"
+            onClick={() => setModalOpen(true)}
+          >
             <FormattedMessage
               id="xpack.fleet.enrollmentTokensList.newKeyButton"
               defaultMessage="Create enrollment token"
