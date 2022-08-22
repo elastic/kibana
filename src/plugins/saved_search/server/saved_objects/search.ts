@@ -53,6 +53,7 @@ export function getSavedSearchObjectType(
         rowHeight: { type: 'text' },
         timeRestore: { type: 'boolean', index: false, doc_values: false },
         timeRange: {
+          enabled: false,
           dynamic: false,
           properties: {
             from: { type: 'keyword', index: false, doc_values: false },
@@ -60,6 +61,7 @@ export function getSavedSearchObjectType(
           },
         },
         refreshInterval: {
+          enabled: false,
           dynamic: false,
           properties: {
             pause: { type: 'boolean', index: false, doc_values: false },
