@@ -192,7 +192,9 @@ export const CustomizablePalette = ({
             showExtraActions={showExtraActions}
             paletteConfiguration={localState.activePalette?.params}
             colorRanges={localState.colorRanges}
-            displayInfinity={displayInfinity}
+            displayInfinity={
+              displayInfinity && localState.activePalette.params?.rangeType !== 'percent'
+            }
             dispatch={dispatch}
           />
         </ColorRangesContext.Provider>
