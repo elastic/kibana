@@ -14,15 +14,12 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiFormFieldset,
-  EuiIcon,
   EuiSpacer,
-  EuiSwitch,
-  EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { Body } from './body';
+import { Header } from './header';
 
 export function LabsSettingsFlyout() {
   const [isOpen, setIsOpen] = useState(true);
@@ -41,44 +38,12 @@ export function LabsSettingsFlyout() {
         <EuiFlyout onClose={toggleFlyoutVisibility}>
           <EuiFlyoutHeader hasBorder>
             <EuiSpacer />
-            <EuiFlexGroup direction="column" gutterSize="m">
-              <EuiFlexItem>
-                <EuiFlexGroup>
-                  <EuiFlexItem>
-                    <EuiFlexGroup gutterSize="s">
-                      <EuiFlexItem grow={false}>
-                        <EuiIcon type="beaker" size="xl" />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiTitle>
-                          <h2>Labs</h2>
-                        </EuiTitle>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiFormFieldset legend={{ children: 'labs:apm-ui' }}>
-                      <EuiSwitch
-                        showLabel={false}
-                        label=""
-                        checked={isLabsChecked}
-                        onChange={(e) => setIsLabsChecked(e.target.checked)}
-                      />
-                    </EuiFormFieldset>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiText color="subdued" size="s">
-                  {i18n.translate('xpack.apm.labs.description', {
-                    defaultMessage:
-                      'Turn on for automatically opt-in to future tech preview features released.',
-                  })}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <Header
+              isLabsChecked={isLabsChecked}
+              onChangeLabs={setIsLabsChecked}
+            />
           </EuiFlyoutHeader>
-          <EuiFlyoutBody>{isLabsChecked && <>body</>}</EuiFlyoutBody>
+          <EuiFlyoutBody>{isLabsChecked && <Body />}</EuiFlyoutBody>
           <EuiFlyoutFooter>
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
