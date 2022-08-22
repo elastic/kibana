@@ -20,7 +20,7 @@ const TextTruncate = styled.div`
   text-overflow: ellipsis;
 `;
 
-interface Props {
+interface PackComboBoxFieldProps {
   fieldProps?: {
     packsData?: PackSavedObject[];
   };
@@ -34,7 +34,12 @@ interface PackOption {
   description?: string;
 }
 
-export const PacksComboBoxField = ({ queryType, fieldProps = {}, idAria, ...rest }: Props) => {
+export const PacksComboBoxField = ({
+  queryType,
+  fieldProps = {},
+  idAria,
+  ...rest
+}: PackComboBoxFieldProps) => {
   const {
     field: { value, onChange },
     fieldState,

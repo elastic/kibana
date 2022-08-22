@@ -7,7 +7,9 @@
 
 import React, { useEffect, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
-import 'brace/theme/tomorrow';
+
+// eslint-disable-next-line import/no-commonjs
+require('brace/theme/tomorrow');
 
 import type { EuiCodeEditorProps } from '../shared_imports';
 import { EuiCodeEditor } from '../shared_imports';
