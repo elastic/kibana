@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { isEmpty } from 'lodash';
 import React, { Fragment } from 'react';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
@@ -40,7 +41,6 @@ import { ResponsiveFlyout } from '../responsive_flyout';
 import { SpanLinksCount } from '../waterfall_helpers/waterfall_helpers';
 import { SpanDatabase } from './span_db';
 import { StickySpanProperties } from './sticky_span_properties';
-import { ProcessorEvent } from '../../../../../../../../common/processor_event';
 
 function formatType(type: string) {
   switch (type) {

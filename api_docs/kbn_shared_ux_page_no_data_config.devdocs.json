@@ -1,0 +1,254 @@
+{
+  "id": "@kbn/shared-ux-page-no-data-config",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/shared-ux-page-no-data-config",
+        "id": "def-common.NoDataConfigPage",
+        "type": "Function",
+        "tags": [],
+        "label": "NoDataConfigPage",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "NoDataConfigPageProps",
+          ") => JSX.Element | null"
+        ],
+        "path": "packages/shared-ux/page/no_data_config/impl/src/no_data_config_page.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-page-no-data-config",
+            "id": "def-common.NoDataConfigPage.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "NoDataConfigPageProps"
+            ],
+            "path": "packages/shared-ux/page/no_data_config/impl/src/no_data_config_page.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-page-no-data-config",
+        "id": "def-common.NoDataConfigPageKibanaProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "NoDataConfigPageKibanaProvider",
+        "description": [
+          "\nKibana-specific Provider that maps dependencies to services."
+        ],
+        "signature": [
+          "({ children, ...dependencies }: React.PropsWithChildren<",
+          "NoDataCardKibanaDependencies",
+          ">) => JSX.Element"
+        ],
+        "path": "packages/shared-ux/page/no_data_config/impl/src/services.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-page-no-data-config",
+            "id": "def-common.NoDataConfigPageKibanaProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  children,\n  ...dependencies\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              "NoDataCardKibanaDependencies",
+              ">"
+            ],
+            "path": "packages/shared-ux/page/no_data_config/impl/src/services.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-page-no-data-config",
+        "id": "def-common.NoDataConfigPageProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "NoDataConfigPageProvider",
+        "description": [
+          "\nA Context Provider that provides services to the component and its dependencies."
+        ],
+        "signature": [
+          "({ children, ...services }: React.PropsWithChildren<",
+          "NoDataCardServices",
+          ">) => JSX.Element"
+        ],
+        "path": "packages/shared-ux/page/no_data_config/impl/src/services.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-page-no-data-config",
+            "id": "def-common.NoDataConfigPageProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  children,\n  ...services\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              "NoDataCardServices",
+              ">"
+            ],
+            "path": "packages/shared-ux/page/no_data_config/impl/src/services.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-page-no-data-config",
+        "id": "def-common.NoDataConfigPageWithSolutionNavBar",
+        "type": "Function",
+        "tags": [],
+        "label": "NoDataConfigPageWithSolutionNavBar",
+        "description": [],
+        "signature": [
+          "{ (props: ",
+          "Props",
+          "<Omit<",
+          "EuiPageProps",
+          ", \"paddingSize\"> & { template?: \"default\" | \"empty\" | \"centeredBody\" | \"centeredContent\" | undefined; paddingSize?: \"none\" | \"m\" | \"s\" | \"l\" | undefined; pageSideBar?: React.ReactNode; pageSideBarProps?: ",
+          "EuiPageSideBarProps",
+          " | undefined; pageHeader?: ",
+          "EuiPageHeaderProps",
+          " | undefined; pageBodyProps?: ",
+          "EuiPageBodyProps",
+          "<\"main\"> | undefined; pageContentProps?: ",
+          "EuiPageContentProps",
+          " | undefined; pageContentBodyProps?: ",
+          "EuiPageContentBodyProps",
+          " | undefined; bottomBar?: React.ReactNode; bottomBarProps?: ",
+          "EuiBottomBarProps",
+          " | undefined; fullHeight?: boolean | \"noscroll\" | undefined; minHeight?: ",
+          "Property",
+          ".MinHeight<string | number> | undefined; } & { noDataConfig?: ",
+          "NoDataPageProps",
+          " | undefined; }>): JSX.Element; displayName: string; }"
+        ],
+        "path": "packages/shared-ux/page/no_data_config/impl/src/no_data_config_page.tsx",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-page-no-data-config",
+            "id": "def-common.NoDataConfigPageWithSolutionNavBar.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P & ",
+              "TemplateProps",
+              " & { isEmptyState?: boolean | undefined; } & { solutionNav: ",
+              "SolutionNavProps",
+              "; }"
+            ],
+            "path": "node_modules/@types/kbn__shared-ux-page-solution-nav/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/shared-ux-page-no-data-config",
+        "id": "def-common.NoDataConfigPageKibanaDependencies",
+        "type": "Type",
+        "tags": [],
+        "label": "NoDataConfigPageKibanaDependencies",
+        "description": [],
+        "signature": [
+          "KibanaDependencies",
+          " & ",
+          "RedirectAppLinksKibanaDependencies"
+        ],
+        "path": "node_modules/@kbn/shared-ux-page-no-data-config-types/index.d.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-page-no-data-config",
+        "id": "def-common.NoDataConfigPageProps",
+        "type": "Type",
+        "tags": [],
+        "label": "NoDataConfigPageProps",
+        "description": [],
+        "signature": [
+          "Omit<",
+          "EuiPageProps",
+          ", \"paddingSize\"> & { template?: \"default\" | \"empty\" | \"centeredBody\" | \"centeredContent\" | undefined; paddingSize?: \"none\" | \"m\" | \"s\" | \"l\" | undefined; pageSideBar?: React.ReactNode; pageSideBarProps?: ",
+          "EuiPageSideBarProps",
+          " | undefined; pageHeader?: ",
+          "EuiPageHeaderProps",
+          " | undefined; pageBodyProps?: ",
+          "EuiPageBodyProps",
+          "<\"main\"> | undefined; pageContentProps?: ",
+          "EuiPageContentProps",
+          " | undefined; pageContentBodyProps?: ",
+          "EuiPageContentBodyProps",
+          " | undefined; bottomBar?: React.ReactNode; bottomBarProps?: ",
+          "EuiBottomBarProps",
+          " | undefined; fullHeight?: boolean | \"noscroll\" | undefined; minHeight?: ",
+          "Property",
+          ".MinHeight<string | number> | undefined; } & { noDataConfig?: ",
+          "NoDataPageProps",
+          " | undefined; }"
+        ],
+        "path": "node_modules/@kbn/shared-ux-page-no-data-config-types/index.d.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-page-no-data-config",
+        "id": "def-common.NoDataConfigPageServices",
+        "type": "Type",
+        "tags": [],
+        "label": "NoDataConfigPageServices",
+        "description": [],
+        "signature": [
+          "Services",
+          " & ",
+          "RedirectAppLinksServices"
+        ],
+        "path": "node_modules/@kbn/shared-ux-page-no-data-config-types/index.d.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

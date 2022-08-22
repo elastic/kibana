@@ -25,7 +25,8 @@ export const IndexNameLogic = kea<MakeLogicType<IndexNameValues, IndexNameAction
     path: ['enterprise_search', 'content', 'index_name'],
     reducers: ({ props }) => ({
       indexName: [
-        props.indexName,
+        // Short-circuiting this to empty string is necessary to enable testing logics relying on this
+        props.indexName ?? '',
         {
           setIndexName: (_, { indexName }) => indexName,
         },

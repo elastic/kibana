@@ -106,8 +106,7 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
   }, [pinnedChangePoint, selectedChangePoint]);
 
   const {
-    overallDocStats,
-    selectedDocStats,
+    documentStats,
     timefilter,
     earliest,
     latest,
@@ -121,9 +120,7 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
     currentSelectedChangePoint
   );
 
-  const totalCount = currentSelectedChangePoint
-    ? overallDocStats.totalCount + selectedDocStats.totalCount
-    : overallDocStats.totalCount;
+  const { totalCount, documentCountStats, documentCountStatsCompare } = documentStats;
 
   useEffect(
     // TODO: Consolidate this hook/function with with Data visualizer's
@@ -174,7 +171,7 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
   }
 
   return (
-    <EuiPageBody data-test-subj="aiopsIndexPage" paddingSize="none" panelled={false}>
+    <EuiPageBody data-test-subj="aiopsExplainLogRateSpikesPage" paddingSize="none" panelled={false}>
       <EuiFlexGroup gutterSize="none">
         <EuiFlexItem>
           <EuiPageContentHeader className="aiopsPageHeader">
@@ -221,15 +218,15 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
               setSearchParams={setSearchParams}
             />
           </EuiFlexItem>
-          {overallDocStats?.totalCount !== undefined && (
+          {documentCountStats !== undefined && (
             <EuiFlexItem>
               <EuiPanel paddingSize="m">
                 <DocumentCountContent
                   brushSelectionUpdateHandler={setWindowParameters}
                   clearSelectionHandler={clearSelection}
-                  documentCountStats={overallDocStats.documentCountStats}
+                  documentCountStats={documentCountStats}
                   documentCountStatsSplit={
-                    currentSelectedChangePoint ? selectedDocStats.documentCountStats : undefined
+                    currentSelectedChangePoint ? documentCountStatsCompare : undefined
                   }
                   totalCount={totalCount}
                   changePoint={currentSelectedChangePoint}
@@ -271,6 +268,7 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
                       />
                     </p>
                   }
+                  data-test-subj="aiopsNoWindowParametersEmptyPrompt"
                 />
               )}
             </EuiPanel>

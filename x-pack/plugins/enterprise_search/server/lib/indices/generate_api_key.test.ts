@@ -55,7 +55,7 @@ describe('generateApiKey lib function', () => {
     expect(mockClient.asCurrentUser.security.createApiKey).toHaveBeenCalledWith({
       name: 'index_name-connector',
       role_descriptors: {
-        ['index_name-connector-role']: {
+        ['index-name-connector-role']: {
           cluster: [],
           index: [
             {
@@ -90,7 +90,7 @@ describe('generateApiKey lib function', () => {
     expect(mockClient.asCurrentUser.security.createApiKey).toHaveBeenCalledWith({
       name: 'index_name-connector',
       role_descriptors: {
-        ['index_name-connector-role']: {
+        ['index-name-connector-role']: {
           cluster: [],
           index: [
             {
@@ -137,7 +137,7 @@ describe('generateApiKey lib function', () => {
     expect(mockClient.asCurrentUser.security.createApiKey).toHaveBeenCalledWith({
       name: 'index_name-connector',
       role_descriptors: {
-        ['index_name-connector-role']: {
+        ['index-name-connector-role']: {
           cluster: [],
           index: [
             {

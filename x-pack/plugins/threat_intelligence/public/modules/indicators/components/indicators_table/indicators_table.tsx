@@ -5,28 +5,27 @@
  * 2.0.
  */
 
-import React, { VFC, useState, useMemo } from 'react';
-import {
-  EuiDataGrid,
-  EuiDataGridCellValueElementProps,
-  EuiLoadingSpinner,
-  EuiText,
-} from '@elastic/eui';
+import React, { VFC, useState, useMemo, useEffect, useCallback } from 'react';
+import { EuiDataGrid, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { BrowserFields, SecuritySolutionDataViewBase } from '../../../../types';
 import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
-import { UseIndicatorsValue } from '../../hooks/use_indicators';
 import { cellRendererFactory, ComputedIndicatorFieldId } from './cell_renderer';
-import { ActionsRowCell } from './actions_row_cell';
 import { EmptyState } from '../../../../components/empty_state';
+import { IndicatorsTableContext, IndicatorsTableContextValue } from './context';
+import { IndicatorsFlyout } from '../indicators_flyout/indicators_flyout';
+import { Pagination } from '../../hooks/use_indicators';
+import { Column, useToolbarOptions } from './hooks/use_toolbar_options';
 
-interface Column {
-  id: RawIndicatorFieldId | ComputedIndicatorFieldId;
-  displayAsText: string;
-}
-
-const columns: Column[] = [
+const defaultColumns: Column[] = [
+  {
+    id: RawIndicatorFieldId.TimeStamp,
+    displayAsText: i18n.translate('xpack.threatIntelligence.indicator.table.timestampColumnTitle', {
+      defaultMessage: '@timestamp',
+    }),
+  },
   {
     id: ComputedIndicatorFieldId.DisplayValue,
     displayAsText: i18n.translate('xpack.threatIntelligence.indicator.table.indicatorColumTitle', {
@@ -60,20 +59,27 @@ const columns: Column[] = [
       defaultMessage: 'Last seen',
     }),
   },
-  {
-    id: RawIndicatorFieldId.MarkingTLP,
-    displayAsText: i18n.translate(
-      'xpack.threatIntelligence.indicator.table.tlpMarketingColumTitle',
-      {
-        defaultMessage: 'TLP Marking',
-      }
-    ),
-  },
 ];
 
-export type IndicatorsTableProps = Omit<UseIndicatorsValue, 'handleRefresh'>;
+export interface IndicatorsTableProps {
+  indicators: Indicator[];
+  indicatorCount: number;
+  pagination: Pagination;
+  onChangeItemsPerPage: (value: number) => void;
+  onChangePage: (value: number) => void;
+  loading: boolean;
+  indexPattern: SecuritySolutionDataViewBase;
+  browserFields: BrowserFields;
+}
 
 export const TABLE_TEST_ID = 'tiIndicatorsTable';
+
+const gridStyle = {
+  border: 'horizontal',
+  header: 'underline',
+  cellPadding: 'm',
+  fontSize: 's',
+} as const;
 
 export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
   indicators,
@@ -81,84 +87,143 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
   onChangePage,
   onChangeItemsPerPage,
   pagination,
-  firstLoad,
   loading,
+  indexPattern,
+  browserFields,
 }) => {
+  const [columns, setColumns] = useState<Column[]>(defaultColumns);
+
   const [visibleColumns, setVisibleColumns] = useState<Array<Column['id']>>(
     columns.map((column) => column.id)
   );
+
+  const [expanded, setExpanded] = useState<Indicator>();
+
   const renderCellValue = useMemo(
-    () => cellRendererFactory(indicators, pagination.pageIndex * pagination.pageSize),
-    [indicators, pagination.pageIndex, pagination.pageSize]
+    () => cellRendererFactory(pagination.pageIndex * pagination.pageSize),
+    [pagination.pageIndex, pagination.pageSize]
+  );
+
+  // field name to field type map to allow the cell_renderer to format dates
+  const fieldTypesMap: { [id: string]: string } = useMemo(() => {
+    if (!indexPattern) return {};
+
+    const res: { [id: string]: string } = {};
+    indexPattern.fields.map((field) => (res[field.name] = field.type));
+    return res;
+  }, [indexPattern]);
+
+  const indicatorTableContextValue = useMemo<IndicatorsTableContextValue>(
+    () => ({ expanded, setExpanded, indicators, fieldTypesMap }),
+    [expanded, indicators, fieldTypesMap]
   );
 
   const start = pagination.pageIndex * pagination.pageSize;
   const end = start + pagination.pageSize;
 
-  if (firstLoad) {
-    return <EuiLoadingSpinner size="m" />;
+  const flyoutFragment = useMemo(
+    () =>
+      expanded ? (
+        <IndicatorsFlyout
+          indicator={expanded}
+          fieldTypesMap={fieldTypesMap}
+          closeFlyout={() => setExpanded(undefined)}
+        />
+      ) : null,
+    [expanded, fieldTypesMap]
+  );
+
+  const leadingControlColumns = useMemo(
+    () => [
+      {
+        id: 'Actions',
+        width: 72,
+        headerCellRender: () => (
+          <FormattedMessage
+            id="xpack.threatIntelligence.indicator.table.actionColumnLabel"
+            defaultMessage="Actions"
+          />
+        ),
+        rowCellRender: renderCellValue,
+      },
+    ],
+    [renderCellValue]
+  );
+
+  const handleToggleColumn = useCallback((columnId: string) => {
+    setColumns((currentColumns) => {
+      const columnsMatchingId = ({ id }: Column) => id === columnId;
+      const columnsNotMatchingId = (column: Column) => !columnsMatchingId(column);
+
+      const enabled = Boolean(currentColumns.find(columnsMatchingId));
+
+      if (enabled) {
+        return currentColumns.filter(columnsNotMatchingId);
+      }
+
+      return [...currentColumns, { id: columnId as any, displayAsText: columnId }];
+    });
+  }, []);
+
+  const handleResetColumns = useCallback(() => setColumns(defaultColumns), []);
+
+  /**
+   * Whenever selected columns change, we make sure they are in sync with visible cols
+   */
+  useEffect(() => {
+    setVisibleColumns(columns.map(({ id }) => id));
+  }, [columns]);
+
+  const toolbarOptions = useToolbarOptions({
+    browserFields,
+    start,
+    end,
+    indicatorCount,
+    columns,
+    onResetColumns: handleResetColumns,
+    onToggleColumn: handleToggleColumn,
+  });
+
+  if (loading) {
+    return (
+      <EuiFlexGroup justifyContent="spaceAround">
+        <EuiFlexItem grow={false}>
+          <EuiPanel hasShadow={false} hasBorder={false} paddingSize="xl">
+            <EuiLoadingSpinner size="xl" />
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
   }
 
-  const leadingControlColumns = [
-    {
-      id: 'Actions',
-      width: 72,
-      headerCellRender: () => (
-        <FormattedMessage
-          id="xpack.threatIntelligence.indicator.table.actionColumnLabel"
-          defaultMessage="Actions"
-        />
-      ),
-      rowCellRender: (cveProps: EuiDataGridCellValueElementProps) => {
-        const indicator: Indicator = indicators[cveProps.rowIndex];
-        return <ActionsRowCell indicator={indicator} />;
-      },
-    },
-  ];
-
-  if (!loading && !indicatorCount) {
+  if (!indicatorCount) {
     return <EmptyState />;
   }
 
   return (
     <div>
-      <EuiDataGrid
-        aria-labelledby={'indicators-table'}
-        leadingControlColumns={leadingControlColumns}
-        columns={columns}
-        columnVisibility={{
-          visibleColumns,
-          setVisibleColumns: setVisibleColumns as (cols: string[]) => void,
-        }}
-        rowCount={indicatorCount}
-        renderCellValue={renderCellValue}
-        toolbarVisibility={{
-          showDisplaySelector: false,
-          showFullScreenSelector: false,
-          additionalControls: {
-            left: {
-              prepend: (
-                <EuiText style={{ display: 'inline' }} size="xs">
-                  Showing {start + 1}-{end > indicatorCount ? indicatorCount : end} of{' '}
-                  {indicatorCount} indicators
-                </EuiText>
-              ),
-            },
-          },
-        }}
-        pagination={{
-          ...pagination,
-          onChangeItemsPerPage,
-          onChangePage,
-        }}
-        gridStyle={{
-          border: 'horizontal',
-          header: 'underline',
-          cellPadding: 'm',
-          fontSize: 's',
-        }}
-        data-test-subj={TABLE_TEST_ID}
-      />
+      <IndicatorsTableContext.Provider value={indicatorTableContextValue}>
+        <EuiDataGrid
+          aria-labelledby="indicators-table"
+          leadingControlColumns={leadingControlColumns}
+          columns={columns}
+          columnVisibility={{
+            visibleColumns,
+            setVisibleColumns: setVisibleColumns as (cols: string[]) => void,
+          }}
+          rowCount={indicatorCount}
+          renderCellValue={renderCellValue}
+          toolbarVisibility={toolbarOptions}
+          pagination={{
+            ...pagination,
+            onChangeItemsPerPage,
+            onChangePage,
+          }}
+          gridStyle={gridStyle}
+          data-test-subj={TABLE_TEST_ID}
+        />
+        {flyoutFragment}
+      </IndicatorsTableContext.Provider>
     </div>
   );
 };
