@@ -132,7 +132,9 @@ export const getPieVisualization = ({
       applyPaletteToColumnConfig(sortedColumns, state, paletteService);
     }
 
-    const getSliceByGroup = (): VisualizationDimensionGroupConfig => {
+    const getSliceByGroup = ():
+      | VisualizationDimensionGroupConfig
+      | VisualizationDimensionGroupConfig[] => {
       const baseProps = {
         required: true,
         groupId: 'groups',
@@ -155,6 +157,43 @@ export const getPieVisualization = ({
             supportsMoreColumns: sortedColumns.length < PartitionChartsMeta.pie.maxBuckets,
             dataTestSubj: 'lnsPie_sliceByDimensionPanel',
           };
+        case 'mosaic':
+          return [
+            {
+              ...baseProps,
+              groupId: 'groups',
+              groupLabel: i18n.translate('xpack.lens.pie.treemapGroupLabel', {
+                defaultMessage: 'Primary metric',
+              }),
+              accessors: (sortedColumns.length > 0 ? [sortedColumns[0]] : []) || [],
+              dimensionEditorGroupLabel: i18n.translate(
+                'xpack.lens.pie.treemapDimensionGroupLabel',
+                {
+                  defaultMessage: 'Horizontal axis',
+                }
+              ),
+              supportsMoreColumns: sortedColumns.length === 0,
+              dataTestSubj: 'lnsPie_primaryMetricGroupByDimensionPanel',
+              requiredMinDimensionCount: 1,
+            },
+            {
+              ...baseProps,
+              groupId: 'groups',
+              required: false,
+              accessors: (sortedColumns.length > 1 ? [sortedColumns[1]] : []) || [],
+              groupLabel: i18n.translate('xpack.lens.pie.treemapGroupLabel', {
+                defaultMessage: 'Secondary metric',
+              }),
+              dimensionEditorGroupLabel: i18n.translate(
+                'xpack.lens.pie.treemapDimensionGroupLabel',
+                {
+                  defaultMessage: 'Secondary metric',
+                }
+              ),
+              supportsMoreColumns: sortedColumns.length < 2,
+              dataTestSubj: 'lnsPie_secondaryMetricGroupByDimensionPanel',
+            },
+          ];
         default:
           return {
             ...baseProps,
@@ -192,7 +231,7 @@ export const getPieVisualization = ({
     });
 
     return {
-      groups: [getSliceByGroup(), getMetricGroup()],
+      groups: [getSliceByGroup(), getMetricGroup()].flat(),
     };
   },
 
