@@ -1041,3 +1041,156 @@
      }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alert:c8b39c29-d860-43b6-8817-b8058d80ddbc",
+    "index": ".kibana_1",
+    "source": {
+      "alert": {
+        "name": "Old ESQuery with Runtimefield",
+        "alertTypeId": ".es-query",
+        "consumer": "alerts",
+        "params": {
+          "esQuery": "{\n    \"runtime_mappings\": {\n      \"kebabAsSnake\": {\n        \"type\": \"keyword\",\n        \"script\": {\n          \"source\": \"\\\"\\\"\\\"\\\"\"\n        }\n      }\n    },\n    \"fields\": [\"kebabAsSnake\"],\n  \"query\":{\n    \"match_all\" : {}\n  }}",
+          "size": 100,
+          "timeWindowSize": 5,
+          "timeWindowUnit": "m",
+          "threshold": [
+            1000
+          ],
+          "thresholdComparator": ">",
+          "index": [
+            "kibana_sample_data_ecommerce"
+          ],
+          "timeField": "order_date"
+        },
+        "schedule": {
+          "interval": "1m"
+        },
+        "enabled": true,
+        "actions": [
+        ],
+        "throttle": null,
+        "apiKeyOwner": null,
+        "createdBy" : "elastic",
+        "updatedBy" : "elastic",
+        "createdAt": "2022-03-26T16:04:50.698Z",
+        "muteAll": false,
+        "mutedInstanceIds": [],
+        "scheduledTaskId": "c8b39c29-d860-43b6-8817-b8058d80ddbc",
+        "tags": []
+      },
+      "type": "alert",
+      "updated_at": "2022-03-26T16:05:55.957Z",
+      "migrationVersion": {
+        "alert": "8.0.1"
+      },
+      "references": [
+      ]
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alert:62c62b7f-8bf3-4104-a064-6247b7bda44f",
+    "index": ".kibana_1",
+    "source": {
+      "alert": {
+        "name": "Old ESQuery without a Runtimefield but custom formatting",
+        "alertTypeId": ".es-query",
+        "consumer": "alerts",
+        "params": {
+          "esQuery": "{\n\t\"query\":\n{\n\t\"match_all\":\n\t{}\n}\n}",
+          "size": 100,
+          "timeWindowSize": 5,
+          "timeWindowUnit": "m",
+          "threshold": [
+            1000
+          ],
+          "thresholdComparator": ">",
+          "index": [
+            "kibana_sample_data_ecommerce"
+          ],
+          "timeField": "order_date"
+        },
+        "schedule": {
+          "interval": "1m"
+        },
+        "enabled": true,
+        "actions": [
+        ],
+        "throttle": null,
+        "apiKeyOwner": null,
+        "createdBy" : "elastic",
+        "updatedBy" : "elastic",
+        "createdAt": "2022-03-26T16:04:50.698Z",
+        "muteAll": false,
+        "mutedInstanceIds": [],
+        "scheduledTaskId": "62c62b7f-8bf3-4104-a064-6247b7bda44f",
+        "tags": []
+      },
+      "type": "alert",
+      "updated_at": "2022-03-26T16:05:55.957Z",
+      "migrationVersion": {
+        "alert": "8.0.1"
+      },
+      "references": [
+      ]
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alert:f0d13f4d-35ae-4554-897a-6392e97bb84c",
+    "index": ".kibana_1",
+    "source": {
+      "alert": {
+        "name": "Old ESQuery with unparsable query",
+        "alertTypeId": ".es-query",
+        "consumer": "alerts",
+        "params": {
+          "esQuery": "{\"query\":}",
+          "size": 100,
+          "timeWindowSize": 5,
+          "timeWindowUnit": "m",
+          "threshold": [
+            1000
+          ],
+          "thresholdComparator": ">",
+          "index": [
+            "kibana_sample_data_ecommerce"
+          ],
+          "timeField": "order_date"
+        },
+        "schedule": {
+          "interval": "1m"
+        },
+        "enabled": true,
+        "actions": [
+        ],
+        "throttle": null,
+        "apiKeyOwner": null,
+        "createdBy" : "elastic",
+        "updatedBy" : "elastic",
+        "createdAt": "2022-03-26T16:04:50.698Z",
+        "muteAll": false,
+        "mutedInstanceIds": [],
+        "scheduledTaskId": "f0d13f4d-35ae-4554-897a-6392e97bb84c",
+        "tags": []
+      },
+      "type": "alert",
+      "updated_at": "2022-03-26T16:05:55.957Z",
+      "migrationVersion": {
+        "alert": "8.0.1"
+      },
+      "references": [
+      ]
+    }
+  }
+}
