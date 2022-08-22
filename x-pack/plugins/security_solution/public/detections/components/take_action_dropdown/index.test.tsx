@@ -474,14 +474,13 @@ describe('take action dropdown', () => {
 
         await waitFor(() => {
           expect(apiMocks.responseProvider.metadataDetails).toHaveBeenCalled();
+          wrapper.update();
+
+          expect(findLaunchResponderButton().first().prop('disabled')).toBe(true);
+          expect(findLaunchResponderButton().first().prop('toolTipContent')).toEqual(
+            HOST_ENDPOINT_UNENROLLED_TOOLTIP
+          );
         });
-
-        wrapper.update();
-
-        expect(findLaunchResponderButton().first().prop('disabled')).toBe(true);
-        expect(findLaunchResponderButton().first().prop('toolTipContent')).toEqual(
-          HOST_ENDPOINT_UNENROLLED_TOOLTIP
-        );
       });
     });
   });
