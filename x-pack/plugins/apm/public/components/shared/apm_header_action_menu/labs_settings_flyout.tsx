@@ -6,11 +6,13 @@
  */
 
 import {
+  EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
+  EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiFormFieldset,
   EuiIcon,
@@ -77,6 +79,24 @@ export function LabsSettingsFlyout() {
             </EuiFlexGroup>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>{isLabsChecked && <>body</>}</EuiFlyoutBody>
+          <EuiFlyoutFooter>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty>
+                  {i18n.translate('xpack.apm.labs.cancel', {
+                    defaultMessage: 'Cancel',
+                  })}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton fill disabled={!isLabsChecked}>
+                  {i18n.translate('xpack.apm.labs.reload', {
+                    defaultMessage: 'Reload to apply changes',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlyoutFooter>
         </EuiFlyout>
       )}
     </>
