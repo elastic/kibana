@@ -29,21 +29,21 @@ import { useRulesTableContext } from './rules_table/rules_table_context';
 import { getShowingRulesParams } from '../utils';
 import type { Pagination } from '../types';
 
-interface AllRulesUtilityBarProps {
+interface RulesTableUtilityBarProps {
   canBulkEdit: boolean;
   isAllSelected?: boolean;
   isAutoRefreshOn?: boolean;
   numberSelectedItems: number;
   onGetBulkItemsPopoverContent?: (closePopover: () => void) => EuiContextMenuPanelDescriptor[];
-  onRefresh?: () => void;
-  onRefreshSwitch?: (checked: boolean) => void;
-  onToggleSelectAll?: () => void;
+  onRefresh: () => void;
+  onRefreshSwitch: (checked: boolean) => void;
+  onToggleSelectAll: () => void;
   pagination: Pagination;
   isBulkActionInProgress?: boolean;
   hasDisabledActions?: boolean;
 }
 
-export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
+export const RulesTableUtilityBar = React.memo<RulesTableUtilityBarProps>(
   ({
     canBulkEdit,
     isAllSelected,
@@ -133,7 +133,7 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
                 {i18n.SELECTED_RULES(numberSelectedItems)}
               </UtilityBarText>
 
-              {canBulkEdit && onToggleSelectAll && (
+              {canBulkEdit && (
                 <UtilityBarAction
                   disabled={hasDisabledActions}
                   dataTestSubj="selectAllRules"
@@ -191,4 +191,4 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
   }
 );
 
-AllRulesUtilityBar.displayName = 'AllRulesUtilityBar';
+RulesTableUtilityBar.displayName = 'RulesTableUtilityBar';

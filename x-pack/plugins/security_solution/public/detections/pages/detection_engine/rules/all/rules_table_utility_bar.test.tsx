@@ -9,16 +9,16 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 
-import { AllRulesUtilityBar } from './rules_table_utility_bar';
+import { RulesTableUtilityBar } from './rules_table_utility_bar';
 import { TestProviders } from '../../../../../common/mock';
 
 jest.mock('./rules_table/rules_table_context');
 
-describe('AllRules', () => {
-  it('renders AllRulesUtilityBar total rules and selected rules', () => {
+describe('RulesTableUtilityBar', () => {
+  it('renders RulesTableUtilityBar total rules and selected rules', () => {
     const wrapper = mount(
       <TestProviders>
-        <AllRulesUtilityBar
+        <RulesTableUtilityBar
           canBulkEdit
           onRefresh={jest.fn()}
           pagination={{
@@ -30,6 +30,7 @@ describe('AllRules', () => {
           onGetBulkItemsPopoverContent={jest.fn()}
           isAutoRefreshOn={true}
           onRefreshSwitch={jest.fn()}
+          onToggleSelectAll={jest.fn()}
         />
       </TestProviders>
     );
@@ -58,7 +59,7 @@ describe('AllRules', () => {
       (page, perPage, total, label) => {
         const wrapper = mount(
           <TestProviders>
-            <AllRulesUtilityBar
+            <RulesTableUtilityBar
               canBulkEdit
               onRefresh={jest.fn()}
               pagination={{
@@ -70,6 +71,7 @@ describe('AllRules', () => {
               onGetBulkItemsPopoverContent={jest.fn()}
               isAutoRefreshOn={true}
               onRefreshSwitch={jest.fn()}
+              onToggleSelectAll={jest.fn()}
             />
           </TestProviders>
         );
@@ -81,7 +83,7 @@ describe('AllRules', () => {
   it('renders utility actions if user has permissions', () => {
     const wrapper = mount(
       <TestProviders>
-        <AllRulesUtilityBar
+        <RulesTableUtilityBar
           canBulkEdit
           onRefresh={jest.fn()}
           pagination={{
@@ -93,6 +95,7 @@ describe('AllRules', () => {
           onGetBulkItemsPopoverContent={jest.fn()}
           isAutoRefreshOn={true}
           onRefreshSwitch={jest.fn()}
+          onToggleSelectAll={jest.fn()}
         />
       </TestProviders>
     );
@@ -103,7 +106,7 @@ describe('AllRules', () => {
   it('renders no utility actions if user has no permissions', () => {
     const wrapper = mount(
       <TestProviders>
-        <AllRulesUtilityBar
+        <RulesTableUtilityBar
           canBulkEdit={false}
           onRefresh={jest.fn()}
           pagination={{
@@ -115,6 +118,7 @@ describe('AllRules', () => {
           onGetBulkItemsPopoverContent={jest.fn()}
           isAutoRefreshOn={true}
           onRefreshSwitch={jest.fn()}
+          onToggleSelectAll={jest.fn()}
         />
       </TestProviders>
     );
@@ -126,7 +130,7 @@ describe('AllRules', () => {
     const mockRefresh = jest.fn();
     const wrapper = mount(
       <TestProviders>
-        <AllRulesUtilityBar
+        <RulesTableUtilityBar
           canBulkEdit
           onRefresh={mockRefresh}
           pagination={{
@@ -138,6 +142,7 @@ describe('AllRules', () => {
           onGetBulkItemsPopoverContent={jest.fn()}
           isAutoRefreshOn={true}
           onRefreshSwitch={jest.fn()}
+          onToggleSelectAll={jest.fn()}
         />
       </TestProviders>
     );
@@ -151,7 +156,7 @@ describe('AllRules', () => {
     const mockSwitch = jest.fn();
     const wrapper = mount(
       <TestProviders>
-        <AllRulesUtilityBar
+        <RulesTableUtilityBar
           canBulkEdit
           onRefresh={jest.fn()}
           pagination={{
@@ -163,6 +168,7 @@ describe('AllRules', () => {
           onGetBulkItemsPopoverContent={jest.fn()}
           isAutoRefreshOn={true}
           onRefreshSwitch={mockSwitch}
+          onToggleSelectAll={jest.fn()}
         />
       </TestProviders>
     );
@@ -178,7 +184,7 @@ describe('AllRules', () => {
     const mockSwitch = jest.fn();
     const wrapper = mount(
       <TestProviders>
-        <AllRulesUtilityBar
+        <RulesTableUtilityBar
           canBulkEdit
           onRefresh={jest.fn()}
           pagination={{
@@ -190,6 +196,7 @@ describe('AllRules', () => {
           onGetBulkItemsPopoverContent={jest.fn()}
           isAutoRefreshOn={true}
           onRefreshSwitch={mockSwitch}
+          onToggleSelectAll={jest.fn()}
         />
       </TestProviders>
     );

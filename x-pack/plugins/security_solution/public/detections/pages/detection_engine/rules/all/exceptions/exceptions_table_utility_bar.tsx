@@ -14,7 +14,7 @@ import {
   UtilityBarSection,
   UtilityBarText,
 } from '../../../../../../common/components/utility_bar';
-import * as i18n from '../../translations';
+import * as i18n from './translations';
 
 interface ExceptionsTableUtilityBarProps {
   onRefresh?: () => void;
@@ -40,7 +40,7 @@ export const ExceptionsTableUtilityBar: React.FC<ExceptionsTableUtilityBarProps>
             iconType="refresh"
             onClick={onRefresh}
           >
-            {i18n.REFRESH}
+            {i18n.REFRESH_EXCEPTIONS_TABLE}
           </UtilityBarAction>
         </UtilityBarGroup>
       </UtilityBarSection>

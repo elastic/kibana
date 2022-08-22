@@ -840,12 +840,6 @@ export const REFRESH_RULE_POPOVER_LABEL = i18n.translate(
   }
 );
 
-export const SHOWING_EXCEPTION_LISTS = (totalLists: number) =>
-  i18n.translate('xpack.securitySolution.detectionEngine.rules.allRules.showingExceptionLists', {
-    values: { totalLists },
-    defaultMessage: 'Showing {totalLists} {totalLists, plural, =1 {list} other {lists}}',
-  });
-
 /**
  * Bulk Export
  */

@@ -31,7 +31,7 @@ import { showRulesTable } from './helpers';
 import { useRulesTableContext } from './rules_table/rules_table_context';
 import { useAsyncConfirmation } from './rules_table/use_async_confirmation';
 import { RulesTableFilters } from './rules_table_filters/rules_table_filters';
-import { AllRulesUtilityBar } from './rules_table_utility_bar';
+import { RulesTableUtilityBar } from './rules_table_utility_bar';
 import { useBulkActionsDryRun } from './bulk_actions/use_bulk_actions_dry_run';
 import { useBulkActionsConfirmation } from './bulk_actions/use_bulk_actions_confirmation';
 import { useBulkEditFormFlyout } from './bulk_actions/use_bulk_edit_form_flyout';
@@ -331,7 +331,7 @@ export const RulesTables = React.memo<RulesTableProps>(
         )}
         {shouldShowRulesTable && (
           <>
-            <AllRulesUtilityBar
+            <RulesTableUtilityBar
               canBulkEdit={hasPermissions}
               pagination={pagination}
               numberSelectedItems={selectedItemsCount}
