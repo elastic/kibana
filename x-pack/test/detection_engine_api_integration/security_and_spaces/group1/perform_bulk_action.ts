@@ -362,73 +362,204 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('edit action', () => {
-      it('should set, add and delete tags in rules', async () => {
-        const ruleId = 'ruleId';
-        const tags = ['tag1', 'tag2'];
-        await createRule(supertest, log, getSimpleRule(ruleId));
+      describe('tags actions', () => {
+        const overwriteTagsCases = [
+          {
+            caseName: '3 existing tags overwritten with 2 of them = 2 existing tags',
+            existingTags: ['tag1', 'tag2', 'tag3'],
+            tagsToOverwrite: ['tag1', 'tag2'],
+            resultingTags:  ['tag1', 'tag2'],
+          },
+          {
+            caseName: '3 existing tags overwritten with 2 other tags = 2 other tags',
+            existingTags: ['tag1', 'tag2', 'tag3'],
+            tagsToOverwrite: ['new-tag1', 'new-tag2'],
+            resultingTags:   ['new-tag1', 'new-tag2'],
+          },
+          {
+            caseName: '3 existing tags overwritten with 1 of them + 2 other tags = 1 existing tag + 2 other tags',
+            existingTags: ['tag1', 'tag2', 'tag3'],
+            tagsToOverwrite: ['tag1', 'new-tag1', 'new-tag2'],
+            resultingTags: ['tag1', 'new-tag1', 'new-tag2'],
+          },
+          {
+            caseName: '0 existing tags overwritten with 2 tags = 2 tags',
+            existingTags: [],
+            tagsToOverwrite: ['new-tag1', 'new-tag2'],
+            resultingTags: ['new-tag1', 'new-tag2'],
+          },
+          {
+            caseName: '3 existing tags overwritten with 0 tags = 0 tags',
+            existingTags: ['tag1', 'tag2', 'tag3'],
+            tagsToOverwrite: [],
+            resultingTags: [],
+          },
+        ];
 
-        const { body: setTagsBody } = await postBulkAction()
-          .send({
-            query: '',
-            action: BulkAction.edit,
-            [BulkAction.edit]: [
-              {
-                type: BulkActionEditType.set_tags,
-                value: ['reset-tag'],
-              },
-            ],
-          })
-          .expect(200);
+        overwriteTagsCases.forEach(({ caseName, existingTags, tagsToOverwrite, resultingTags }) => {
+          it(`should set tags in rules, case: "${caseName}"`, async () => {
+            const ruleId = 'ruleId';
+  
+            await createRule(supertest, log, {...getSimpleRule(ruleId), tags: existingTags });
+    
+            const { body: bulkEditResponse } = await postBulkAction()
+              .send({
+                query: '',
+                action: BulkAction.edit,
+                [BulkAction.edit]: [
+                  {
+                    type: BulkActionEditType.set_tags,
+                    value: tagsToOverwrite,
+                  },
+                ],
+              })
+              .expect(200);
+    
+            expect(bulkEditResponse.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
+    
+            // Check that the updated rule is returned with the response
+            expect(bulkEditResponse.attributes.results.updated[0].tags).to.eql(resultingTags);
+    
+            // Check that the updates have been persisted
+            const { body: updatedRule } = await fetchRule(ruleId).expect(200);
+    
+            expect(updatedRule.tags).to.eql(resultingTags);
+          });
+        });
 
-        expect(setTagsBody.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
+        const deleteTagsCases = [
+          {
+            caseName: '3 existing tags - 2 of them = 1 tag',
+            existingTags: ['tag1', 'tag2', 'tag3'],
+            tagsToDelete: ['tag1', 'tag2'],
+            resultingTags:  ['tag3'],
+          },
+          {
+            caseName: '3 existing tags - 2 new tags = 3 tags',
+            existingTags: ['tag1', 'tag2', 'tag3'],
+            tagsToDelete: ['tag4', 'tag5'],
+            resultingTags: ['tag1', 'tag2', 'tag3'],
+          },
+          {
+            caseName: '3 existing tags - 1 of them - 2 new tags = 2 tags',
+            existingTags: ['tag1', 'tag2', 'tag3'],
+            tagsToDelete: ['tag3', 'tag4', 'tag5'],
+            resultingTags:  ['tag1', 'tag2'],
+          },
+          {
+            caseName: '3 existing tags - 0 tags = 3 tags',
+            existingTags: ['tag1', 'tag2', 'tag3'],
+            tagsToDelete: [],
+            resultingTags: ['tag1', 'tag2', 'tag3'],
+          },
+          {
+            caseName: '0 existing tags - 2 tags = 0 tags',
+            existingTags: [],
+            tagsToDelete: ['tag4', 'tag5'],
+            resultingTags:  [],
+          },
+          {
+            caseName: '3 existing tags - 3 of them = 0 tags',
+            existingTags: ['tag1', 'tag2', 'tag3'],
+            tagsToDelete: ['tag1', 'tag2', 'tag3'],
+            resultingTags:  [],
+          },
+        ];
 
-        // Check that the updated rule is returned with the response
-        expect(setTagsBody.attributes.results.updated[0].tags).to.eql(['reset-tag']);
 
-        // Check that the updates have been persisted
-        const { body: setTagsRule } = await fetchRule(ruleId).expect(200);
+        deleteTagsCases.forEach(({ caseName, existingTags, tagsToDelete, resultingTags }) => {
+          it(`should delete tags in rules, case: "${caseName}"`, async () => {
+            const ruleId = 'ruleId';
 
-        expect(setTagsRule.tags).to.eql(['reset-tag']);
+            await createRule(supertest, log, {...getSimpleRule(ruleId), tags: existingTags });
+    
+            const { body: bulkEditResponse } = await postBulkAction()
+              .send({
+                query: '',
+                action: BulkAction.edit,
+                [BulkAction.edit]: [
+                  {
+                    type: BulkActionEditType.delete_tags,
+                    value: tagsToDelete,
+                  },
+                ],
+              })
+              .expect(200);
+    
+            expect(bulkEditResponse.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
+    
+            // Check that the updated rule is returned with the response
+            expect(bulkEditResponse.attributes.results.updated[0].tags).to.eql(resultingTags);
+    
+            // Check that the updates have been persisted
+            const { body: updatedRule } = await fetchRule(ruleId).expect(200);
+    
+            expect(updatedRule.tags).to.eql(resultingTags);
+          });
+        });
 
-        const { body: addTagsBody } = await postBulkAction()
-          .send({
-            query: '',
-            action: BulkAction.edit,
-            [BulkAction.edit]: [
-              {
-                type: BulkActionEditType.add_tags,
-                value: tags,
-              },
-            ],
-          })
-          .expect(200);
+        const addTagsCases = [
+          {
+            caseName: '3 existing tags + 2 of them = 3 tags',
+            existingTags: ['tag1', 'tag2', 'tag3'],
+            addedTags: ['tag1', 'tag2'],
+            resultingTags:  ['tag1', 'tag2', 'tag3'],
+          },
+          {
+            caseName: '3 existing tags + 2 new tags = 5 tags',
+            existingTags: ['tag1', 'tag2', 'tag3'],
+            addedTags: ['tag4', 'tag5'],
+            resultingTags:  ['tag1', 'tag2', 'tag3', 'tag4', 'tag5'],
+          },
+          {
+            caseName: '3 existing tags + 1 of them + 2 new tags = 5 tags',
+            existingTags: ['tag1', 'tag2', 'tag3'],
+            addedTags: ['tag4', 'tag5', 'tag1'],
+            resultingTags:  ['tag1', 'tag2', 'tag3', 'tag4', 'tag5'],
+          },
+          {
+            caseName: '0 existing tags + 2 tags = 2 tags',
+            existingTags: [],
+            addedTags: ['tag4', 'tag5'],
+            resultingTags:  ['tag4', 'tag5'],
+          },
+          {
+            caseName: '3 existing tags + 0 tags = 3 tags',
+            existingTags: ['tag1', 'tag2', 'tag3'],
+            addedTags: [],
+            resultingTags:  ['tag1', 'tag2', 'tag3'],
+          },
+        ];
 
-        expect(addTagsBody.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
-
-        // Check that the updated rule is returned with the response
-        expect(addTagsBody.attributes.results.updated[0].tags).to.eql(['reset-tag', ...tags]);
-
-        // Check that the updates have been persisted
-        const { body: addedTagsRule } = await fetchRule(ruleId).expect(200);
-
-        expect(addedTagsRule.tags).to.eql(['reset-tag', ...tags]);
-
-        await postBulkAction()
-          .send({
-            query: '',
-            action: BulkAction.edit,
-            [BulkAction.edit]: [
-              {
-                type: BulkActionEditType.delete_tags,
-                value: ['reset-tag', 'tag1'],
-              },
-            ],
-          })
-          .expect(200);
-
-        const { body: deletedTagsRule } = await fetchRule(ruleId).expect(200);
-
-        expect(deletedTagsRule.tags).to.eql(['tag2']);
+        addTagsCases.forEach(({ caseName, existingTags, addedTags, resultingTags }) => {
+          it(`should add tags to rules, case: "${caseName}"`, async () => {
+            const ruleId = 'ruleId';
+            await createRule(supertest, log, {...getSimpleRule(ruleId), tags: existingTags });
+    
+            const { body: bulkEditResponse } = await postBulkAction()
+              .send({
+                query: '',
+                action: BulkAction.edit,
+                [BulkAction.edit]: [
+                  {
+                    type: BulkActionEditType.add_tags,
+                    value: addedTags,
+                  },
+                ],
+              })
+              .expect(200);
+    
+            expect(bulkEditResponse.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
+    
+            // Check that the updated rule is returned with the response
+            expect(bulkEditResponse.attributes.results.updated[0].tags).to.eql(resultingTags);
+    
+            // Check that the updates have been persisted
+            const { body: updatedRule } = await fetchRule(ruleId).expect(200);
+    
+            expect(updatedRule.tags).to.eql(resultingTags);
+          });
+        });
       });
 
       it('should migrate legacy actions on edit', async () => {
