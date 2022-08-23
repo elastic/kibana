@@ -857,7 +857,6 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
           description: newPolicy.description ?? '',
           enabled: newPolicy.enabled ?? true,
           policy_id: newPolicy.policy_id ?? agentPolicyId,
-          output_id: newPolicy.output_id ?? '',
           inputs: newPolicy.inputs[0]?.streams ? newPolicy.inputs : inputs,
           vars: newPolicy.vars || newPP.vars,
         };
@@ -878,7 +877,7 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
       skipArchive: true,
     });
     if (packageInfo) {
-      return packageToPackagePolicy(packageInfo, '', '');
+      return packageToPackagePolicy(packageInfo, '');
     }
   }
 
@@ -889,19 +888,14 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
   ): Promise<NewPackagePolicy | undefined> {
     const pkgInstall = await getInstallation({ savedObjectsClient: soClient, pkgName, logger });
     if (pkgInstall) {
-      const [packageInfo, defaultOutputId] = await Promise.all([
-        getPackageInfo({
-          savedObjectsClient: soClient,
-          pkgName: pkgInstall.name,
-          pkgVersion: pkgInstall.version,
-        }),
-        outputService.getDefaultDataOutputId(soClient),
-      ]);
+      const packageInfo = await getPackageInfo({
+        savedObjectsClient: soClient,
+        pkgName: pkgInstall.name,
+        pkgVersion: pkgInstall.version,
+      });
+
       if (packageInfo) {
-        if (!defaultOutputId) {
-          throw new Error('Default output is not set');
-        }
-        return packageToPackagePolicy(packageInfo, '', defaultOutputId);
+        return packageToPackagePolicy(packageInfo, '');
       }
     }
   }

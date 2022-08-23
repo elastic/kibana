@@ -17,7 +17,6 @@ export const getTestSyntheticsPolicy = (name: string): PackagePolicy => ({
   package: { name: 'synthetics', title: 'Elastic Synthetics', version: '0.9.4' },
   enabled: true,
   policy_id: '5347cd10-0368-11ed-8df7-a7424c6f5167',
-  output_id: '',
   inputs: [
     {
       type: 'synthetics/http',
@@ -259,7 +258,6 @@ export const getTestProjectSyntheticsPolicy = (
   package: { name: 'synthetics', title: 'Elastic Synthetics', version: '0.9.4' },
   enabled: true,
   policy_id: '46034710-0ba6-11ed-ba04-5f123b9faa8b',
-  output_id: '',
   inputs: [
     {
       type: 'synthetics/http',

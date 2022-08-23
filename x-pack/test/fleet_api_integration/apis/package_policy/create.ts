@@ -80,7 +80,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
           policy_id: hostedPolicy.id,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'filetest',
@@ -106,7 +105,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
           policy_id: hostedPolicy.id,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'filetest',
@@ -134,7 +132,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
           policy_id: agentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'filetest',
@@ -160,7 +157,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: '',
           policy_id: agentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'filetest',
@@ -181,7 +177,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'InvalidNamespace',
           policy_id: agentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'filetest',
@@ -200,7 +195,6 @@ export default function (providerContext: FtrProviderContext) {
             'testlength😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀',
           policy_id: agentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'filetest',
@@ -221,7 +215,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
           policy_id: agentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'endpoint',
@@ -240,7 +233,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
           policy_id: agentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'endpoint',
@@ -261,7 +253,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
           policy_id: agentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'filetest',
@@ -279,7 +270,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
           policy_id: agentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'filetest',
@@ -309,7 +299,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
           policy_id: otherAgentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'filetest',
@@ -327,7 +316,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
           policy_id: agentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'filetest',
@@ -348,7 +336,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
           policy_id: agentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [
             {
               enabled: true,
@@ -384,7 +371,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
           policy_id: agentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [
             {
               enabled: true,
@@ -424,7 +410,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
           policy_id: agentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [
             {
               enabled: true,
@@ -488,7 +473,6 @@ export default function (providerContext: FtrProviderContext) {
             namespace: 'default',
             policy_id: agentPolicyId,
             enabled: true,
-            output_id: '',
             inputs: [
               {
                 type: 'logfile',
@@ -525,7 +509,6 @@ export default function (providerContext: FtrProviderContext) {
             namespace: 'default',
             policy_id: agentPolicyId,
             enabled: true,
-            output_id: '',
             inputs: [
               {
                 type: 'logfile',
@@ -562,7 +545,6 @@ export default function (providerContext: FtrProviderContext) {
             namespace: 'default',
             policy_id: agentPolicyId,
             enabled: true,
-            output_id: '',
             inputs: [
               {
                 type: 'logfile',
