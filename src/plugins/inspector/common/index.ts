@@ -13,4 +13,4 @@ export type {
   RequestStatistics,
   ResponseWarning,
 } from './adapters';
-export { RequestAdapter, RequestStatus, RequestResponder,  } from './adapters';
+export { RequestAdapter, RequestStatus, RequestResponder } from './adapters';
