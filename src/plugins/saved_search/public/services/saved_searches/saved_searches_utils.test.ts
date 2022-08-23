@@ -43,6 +43,7 @@ describe('saved_searches_utils', () => {
           "hideChart": true,
           "id": "id",
           "isTextBasedQuery": false,
+          "refreshInterval": undefined,
           "rowHeight": undefined,
           "rowsPerPage": undefined,
           "searchSource": SearchSource {
@@ -66,6 +67,8 @@ describe('saved_searches_utils', () => {
           },
           "sharingSavedObjectProps": Object {},
           "sort": Array [],
+          "timeRange": undefined,
+          "timeRestore": undefined,
           "title": "saved search",
           "viewMode": undefined,
         }
@@ -123,6 +126,7 @@ describe('saved_searches_utils', () => {
           "kibanaSavedObjectMeta": Object {
             "searchSourceJSON": "{}",
           },
+          "refreshInterval": undefined,
           "rowHeight": undefined,
           "rowsPerPage": undefined,
           "sort": Array [
@@ -131,6 +135,8 @@ describe('saved_searches_utils', () => {
               "asc",
             ],
           ],
+          "timeRange": undefined,
+          "timeRestore": false,
           "title": "title",
           "viewMode": undefined,
         }
