@@ -17,8 +17,8 @@ const timeRange = {
 };
 
 describe('Transaction details', () => {
-  before(async () => {
-    await synthtrace.index(
+  before(() => {
+    synthtrace.index(
       opbeans({
         from: new Date(start).getTime(),
         to: new Date(end).getTime(),
@@ -26,13 +26,13 @@ describe('Transaction details', () => {
     );
   });
 
-  after(async () => {
-    await synthtrace.clean();
+  after(() => {
+    synthtrace.clean();
   });
 
   beforeEach(() => {
     cy.loginAsViewerUser();
-    cy.visit(
+    cy.visitKibana(
       `/app/apm/services/opbeans-java/transactions/view?${new URLSearchParams({
         ...timeRange,
         transactionName: 'GET /api/product',

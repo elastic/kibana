@@ -296,7 +296,7 @@ function getConsumerMultiple({
  * ----Span E
  * ------span.links= producer-external-only / Span B | producer-consumer / Transaction C
  */
-export async function generateSpanLinksData() {
+export function generateSpanLinksData() {
   const producerInternalOnly = getProducerInternalOnly();
   const producerExternalOnly = getProducerExternalOnly();
   const producerConsumer = getProducerConsumer({
@@ -309,7 +309,7 @@ export async function generateSpanLinksData() {
     producerExternalOnlySpanBSpanLink: producerExternalOnly.spanBSpanLink,
   });
 
-  await synthtrace.index(
+  synthtrace.index(
     new EntityArrayIterable(producerInternalOnly.apmFields).merge(
       new EntityArrayIterable(producerExternalOnly.apmFields),
       new EntityArrayIterable(producerConsumer.apmFields),

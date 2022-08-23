@@ -6,10 +6,12 @@
  */
 
 function deleteAllRules() {
+  cy.log('Delete all rules');
   cy.request({
     log: false,
     method: 'GET',
     url: '/api/alerting/rules/_find',
+    auth: { user: 'editor', pass: 'changeme' },
   }).then(({ body }) => {
     if (body.data.length > 0) {
       cy.log(`Deleting rules`);
@@ -21,12 +23,21 @@ function deleteAllRules() {
         log: false,
         method: 'DELETE',
         url: `/api/alerting/rule/${id}`,
+        auth: { user: 'editor', pass: 'changeme' },
       });
     });
   });
 }
 
 describe('Rules', () => {
+  beforeEach(() => {
+    deleteAllRules();
+  });
+
+  after(() => {
+    deleteAllRules();
+  });
+
   describe('Error count', () => {
     const ruleName = 'Error count threshold';
     const comboBoxInputSelector =
@@ -36,18 +47,11 @@ describe('Rules', () => {
 
     describe('when created from APM', () => {
       describe('when created from Service Inventory', () => {
-        before(() => {
-          cy.loginAsEditorUser();
-          deleteAllRules();
-        });
-
-        after(() => {
-          deleteAllRules();
-        });
-
         it('creates a rule', () => {
+          cy.loginAsEditorUser();
+
           // Create a rule in APM
-          cy.visit('/app/apm/services');
+          cy.visitKibana('/app/apm/services');
           cy.contains('Alerts and rules').click();
           cy.contains('Create error count rule').click();
 
@@ -67,18 +71,13 @@ describe('Rules', () => {
     });
 
     describe('when created from Stack management', () => {
-      before(() => {
-        cy.loginAsEditorUser();
-        deleteAllRules();
-      });
-
-      after(() => {
-        deleteAllRules();
-      });
-
       it('creates a rule', () => {
+        cy.loginAsEditorUser();
+
         // Go to stack management
-        cy.visit('/app/management/insightsAndAlerting/triggersActions/rules');
+        cy.visitKibana(
+          '/app/management/insightsAndAlerting/triggersActions/rules'
+        );
 
         // Create a rule
         cy.contains('button', 'Create rule').click();

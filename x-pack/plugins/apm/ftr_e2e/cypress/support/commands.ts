@@ -21,21 +21,24 @@ Cypress.Commands.add('loginAsEditorUser', () => {
 Cypress.Commands.add(
   'loginAs',
   ({ username, password }: { username: string; password: string }) => {
-    cy.log(`Logging in as ${username}`);
-    const kibanaUrl = Cypress.env('KIBANA_URL');
-    return cy.request({
-      log: false,
-      method: 'POST',
-      url: `${kibanaUrl}/internal/security/login`,
-      body: {
-        providerType: 'basic',
-        providerName: 'basic',
-        currentURL: `${kibanaUrl}/login`,
-        params: { username, password },
-      },
-      headers: {
-        'kbn-xsrf': 'e2e_test',
-      },
+    cy.log(`Calling 'loginAs'`);
+    cy.session([username, password], () => {
+      cy.log(`Logging in as ${username}`);
+      const kibanaUrl = Cypress.env('KIBANA_URL');
+      cy.request({
+        log: false,
+        method: 'POST',
+        url: `${kibanaUrl}/internal/security/login`,
+        body: {
+          providerType: 'basic',
+          providerName: 'basic',
+          currentURL: `${kibanaUrl}/login`,
+          params: { username, password },
+        },
+        headers: {
+          'kbn-xsrf': 'e2e_test',
+        },
+      });
     });
   }
 );
@@ -43,6 +46,14 @@ Cypress.Commands.add(
 Cypress.Commands.add('changeTimeRange', (value: string) => {
   cy.get('[data-test-subj="superDatePickerToggleQuickMenuButton"]').click();
   cy.contains(value).click();
+});
+
+Cypress.Commands.add('visitKibana', (url: string) => {
+  cy.visit(url);
+  cy.get('[data-test-subj="kbnLoadingMessage"]').should('exist');
+  cy.get('[data-test-subj="kbnLoadingMessage"]').should('not.exist', {
+    timeout: 50000,
+  });
 });
 
 Cypress.Commands.add(
@@ -96,6 +107,7 @@ Cypress.Commands.add(
       headers: {
         'kbn-xsrf': 'e2e_test',
       },
+      auth: { user: 'editor', pass: 'changeme' },
     });
   }
 );

@@ -6,11 +6,11 @@
  */
 
 describe('APM deep links', () => {
-  before(() => {
+  beforeEach(() => {
     cy.loginAsViewerUser();
   });
   it('navigates to apm links on search elastic', () => {
-    cy.visit('/');
+    cy.visitKibana('/');
     cy.get('[data-test-subj="nav-search-input"]').type('APM');
     cy.contains('APM');
     cy.contains('APM / Services');
