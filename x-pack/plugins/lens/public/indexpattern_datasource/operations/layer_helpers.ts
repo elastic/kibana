@@ -182,13 +182,13 @@ const insertReferences = ({
   targetGroup,
 }: {
   layer: IndexPatternLayer;
-  references: ColumnChange['references'];
+  references: Exclude<ColumnChange['references'], undefined>;
   requiredReferences: RequiredReference[];
   indexPattern: IndexPattern;
   visualizationGroups: VisualizationDimensionGroupConfig[];
   targetGroup?: string;
 }) => {
-  references?.forEach((reference) => {
+  references.forEach((reference) => {
     const validOperations = requiredReferences.filter((validation) =>
       isOperationAllowedAsReference({ validation, operationType: reference.op, indexPattern })
     );
@@ -201,7 +201,7 @@ const insertReferences = ({
   });
 
   const referenceIds: string[] = [];
-  references?.forEach((reference) => {
+  references.forEach((reference) => {
     const operation = operationDefinitionMap[reference.op];
 
     if (operation.input === 'none') {
@@ -219,9 +219,12 @@ const insertReferences = ({
       referenceIds.push(reference.columnId);
       return;
     }
+
     const field =
-      operation.input === 'field'
-        ? indexPattern.fields.find((f) => operation.getPossibleOperationForField(f))
+      operation.input === 'field' &&
+      reference.field &&
+      operation.getPossibleOperationForField(reference.field)
+        ? reference.field
         : undefined;
 
     if (field) {
@@ -239,7 +242,7 @@ const insertReferences = ({
       return;
     }
   });
-  return referenceIds;
+  return { layer, referenceIds };
 };
 
 const generateNewReferences = ({
@@ -263,7 +266,7 @@ const generateNewReferences = ({
   visualizationGroups: VisualizationDimensionGroupConfig[];
   targetGroup?: string;
 }) => {
-  return requiredReferences.map((validation) => {
+  const referenceIds = requiredReferences.map((validation) => {
     const validOperations = Object.values(operationDefinitionMap).filter(({ type }) =>
       isOperationAllowedAsReference({ validation, operationType: type, indexPattern })
     );
@@ -331,6 +334,8 @@ const generateNewReferences = ({
     }
     return newId;
   });
+
+  return { layer, referenceIds };
 };
 
 // Insert a column into an empty ID. The field parameter is required when constructing
@@ -390,11 +395,11 @@ export function insertNewColumn({
     if (field) {
       throw new Error(`Reference-based operations can't take a field as input when creating`);
     }
-    const tempLayer = { ...layer };
 
+    let tempLayer = { ...layer };
     let referenceIds: string[] = [];
     if (references) {
-      referenceIds = insertReferences({
+      const result = insertReferences({
         layer: tempLayer,
         references,
         requiredReferences: operationDefinition.requiredReferences,
@@ -402,18 +407,20 @@ export function insertNewColumn({
         visualizationGroups,
         targetGroup,
       });
+      [tempLayer, referenceIds] = [result.layer, result.referenceIds];
     } else {
-      referenceIds = generateNewReferences({
+      const result = generateNewReferences({
         op,
         incompleteFieldName,
         incompleteFieldOperation,
         columnParams,
-        layer,
+        layer: tempLayer,
         requiredReferences: operationDefinition.requiredReferences,
         indexPattern,
         visualizationGroups,
         targetGroup,
       });
+      [tempLayer, referenceIds] = [result.layer, result.referenceIds];
     }
 
     const possibleOperation = operationDefinition.getPossibleOperation(indexPattern);
