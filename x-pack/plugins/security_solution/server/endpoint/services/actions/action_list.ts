@@ -124,7 +124,8 @@ const getActionDetailsList = async ({
   } catch (error) {
     // all other errors
     const err = new CustomHttpRequestError(
-      error.meta?.meta?.body?.error?.reason ?? 'Unknown error while fetching action requests',
+      error.meta?.meta?.body?.error?.reason ??
+        `Unknown error while fetching action requests (${error.message})`,
       error.meta?.meta?.statusCode ?? 500,
       error
     );
@@ -153,7 +154,8 @@ const getActionDetailsList = async ({
   } catch (error) {
     // all other errors
     const err = new CustomHttpRequestError(
-      error.meta?.meta?.body?.error?.reason ?? 'Unknown error while fetching action responses',
+      error.meta?.meta?.body?.error?.reason ??
+        `Unknown error while fetching action responses (${error.message})`,
       error.meta?.meta?.statusCode ?? 500,
       error
     );
