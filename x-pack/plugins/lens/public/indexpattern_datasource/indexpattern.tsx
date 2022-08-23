@@ -248,17 +248,27 @@ export function getIndexPatternDatasource({
       render(
         <KibanaThemeProvider theme$={core.theme.theme$}>
           <I18nProvider>
-            <IndexPatternDataPanel
-              data={data}
-              dataViews={dataViews}
-              fieldFormats={fieldFormats}
-              charts={charts}
-              indexPatternFieldEditor={dataViewFieldEditor}
-              {...otherProps}
-              core={core}
-              uiActions={uiActions}
-              onIndexPatternRefresh={onRefreshIndexPattern}
-            />
+            <KibanaContextProvider
+              services={{
+                ...core,
+                data,
+                dataViews,
+                fieldFormats,
+                charts,
+              }}
+            >
+              <IndexPatternDataPanel
+                data={data}
+                dataViews={dataViews}
+                fieldFormats={fieldFormats}
+                charts={charts}
+                indexPatternFieldEditor={dataViewFieldEditor}
+                {...otherProps}
+                core={core}
+                uiActions={uiActions}
+                onIndexPatternRefresh={onRefreshIndexPattern}
+              />
+            </KibanaContextProvider>
           </I18nProvider>
         </KibanaThemeProvider>,
         domElement
@@ -586,7 +596,14 @@ export function getIndexPatternDatasource({
         .filter(([_, layer]) => !!indexPatterns[layer.indexPatternId])
         .map(([layerId, layer]) =>
           (
-            getErrorMessages(layer, indexPatterns[layer.indexPatternId], state, layerId, core) ?? []
+            getErrorMessages(
+              layer,
+              indexPatterns[layer.indexPatternId],
+              state,
+              layerId,
+              core,
+              data
+            ) ?? []
           ).map((message) => ({
             shortMessage: '', // Not displayed currently
             longMessage: typeof message === 'string' ? message : message.message,
