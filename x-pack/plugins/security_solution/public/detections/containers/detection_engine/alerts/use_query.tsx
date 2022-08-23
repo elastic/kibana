@@ -50,19 +50,9 @@ const useMonitoredFetchMethod = (fetchMethod: FetchMethod, monitoringKey?: strin
       let result: AlertSearchResponse<Hit, Aggs>;
       try {
         result = await fetchMethod<Hit, Aggs>(params);
-        if (transaction) {
-          transaction.addLabels({ result: 'success' });
-          transaction.end();
-        }
+        transaction?.addLabels({ result: 'success' });
       } catch (err) {
-        if (transaction) {
-          if (params.signal.aborted) {
-            transaction.addLabels({ result: 'aborted' });
-          } else {
-            transaction.addLabels({ result: 'error' });
-          }
-          transaction.end();
-        }
+        transaction?.addLabels({ result: params.signal.aborted ? 'aborted' : 'error' });
         throw err;
       }
       return result;

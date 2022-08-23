@@ -17,6 +17,7 @@ import {
   STATUS_LOW_LABEL,
   STATUS_MEDIUM_LABEL,
 } from '../translations';
+import { FETCH_ALERTS } from '../../../../common/lib/apm/http_requests';
 
 export const severityLabels: Record<Severity, string> = {
   critical: STATUS_CRITICAL_LABEL,
@@ -109,6 +110,7 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
     }),
     indexName: signalIndexName,
     skip,
+    monitoringKey: FETCH_ALERTS.BY_STATUS,
   });
 
   useEffect(() => {

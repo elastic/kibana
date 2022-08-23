@@ -8,6 +8,7 @@
 import { useEffect, useState } from 'react';
 
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
+import { FETCH_ALERTS } from '../../lib/apm/http_requests';
 
 interface UseAlertByIdsOptions {
   alertIds: string[];
@@ -37,6 +38,7 @@ export const useAlertsByIds = ({
 
   const { loading, data, setQuery } = useQueryAlerts<Hit, unknown>({
     query: initialQuery,
+    monitoringKey: FETCH_ALERTS.BY_ID,
   });
 
   useEffect(() => {

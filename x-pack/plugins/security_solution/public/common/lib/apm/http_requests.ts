@@ -8,13 +8,16 @@
 import { APP_UI_ID } from '../../../../common/constants';
 
 export const FETCH_ALERTS = {
+  ADD_EXCEPTION_FLYOUT: `${APP_UI_ID} fetchAlerts addExceptionFlyout`,
+  BY_ID: `${APP_UI_ID} fetchAlerts byId`,
+  BY_RULE_ID: `${APP_UI_ID} fetchAlerts byRuleId`,
+  BY_SEVERITY: `${APP_UI_ID} fetchAlerts bySeverity`,
+  BY_STATUS: `${APP_UI_ID} fetchAlerts byStatus`,
+  CASES: `${APP_UI_ID} fetchAlerts cases`,
+  COUNT: `${APP_UI_ID} fetchAlerts count`,
   HISTOGRAM: `${APP_UI_ID} fetchAlerts histogram`,
+  PREVALENCE: `${APP_UI_ID} fetchAlerts prevalence`,
+  TREE_MAP: `${APP_UI_ID} fetchAlerts treeMap`,
+  VULNERABLE_HOSTS: `${APP_UI_ID} fetchAlerts vulnerableHosts`,
+  VULNERABLE_USERS: `${APP_UI_ID} fetchAlerts vulnerableUsers`,
 } as const;
-
-export const SEARCH_STRATEGY = {
-  NETWORK_FLOW: `${APP_UI_ID} searchStrategy network flow`,
-  NETWORK_IP_FLOW: `${APP_UI_ID} searchStrategy network IP flow`,
-} as const;
-
-export type SearchStrategyMonitoringEntry = keyof typeof SEARCH_STRATEGY;
-export type SearchStrategyMonitoringKey = typeof SEARCH_STRATEGY[SearchStrategyMonitoringEntry];

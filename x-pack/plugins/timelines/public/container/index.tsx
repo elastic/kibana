@@ -16,6 +16,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   clearEventsLoading,
   clearEventsDeleted,
@@ -42,6 +43,7 @@ import type { KueryFilterQueryKind } from '../../common/types/timeline';
 import { useAppToasts } from '../hooks/use_app_toasts';
 import { TimelineId } from '../store/t_grid/types';
 import * as i18n from './translations';
+import { TimelinesStartPlugins } from '../types';
 
 export type InspectResponse = Inspect & { response: string[] };
 
@@ -115,6 +117,32 @@ export const initSortDefault = [
   },
 ];
 
+const useApmTracking = (timelineId: string) => {
+  const { apm } = useKibana<TimelinesStartPlugins>().services;
+
+  const startTracking = useCallback(() => {
+    // Create an auto-instrumented transaction to keep track of all events, it will end automatically when all spans end.
+    const transaction = apm?.startTransaction(`Timeline load ${timelineId}`, 'http-request', {
+      managed: true,
+    });
+    // Create a blocking span to prevent the transaction to end automatically with an uncompleted batch response.
+    // The blocking span needs to be ended manually whenever the entire batched search finishes.
+    const span = transaction?.startSpan('batched search', 'http-request', { blocking: true });
+    return {
+      endTrackingSuccess: () => {
+        transaction?.addLabels({ result: 'success' });
+        span?.end();
+      },
+      endTrackingError: (aborted: boolean) => {
+        transaction?.addLabels({ result: aborted ? 'aborted' : 'error' });
+        span?.end();
+      },
+    };
+  }, [apm, timelineId]);
+
+  return { startTracking };
+};
+
 const NO_CONSUMERS: AlertConsumers[] = [];
 export const useTimelineEvents = ({
   alertConsumers = NO_CONSUMERS,
@@ -136,6 +164,7 @@ export const useTimelineEvents = ({
   data,
 }: UseTimelineEventsProps): [boolean, TimelineArgs] => {
   const dispatch = useDispatch();
+  const { startTracking } = useApmTracking(id);
   const refetch = useRef<Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
@@ -205,6 +234,9 @@ export const useTimelineEvents = ({
         abortCtrl.current = new AbortController();
         setLoading(true);
         if (data && data.search) {
+          const { endTrackingSuccess, endTrackingError } = startTracking();
+          const abortSignal = abortCtrl.current.signal;
+
           searchSubscription$.current = data.search
             .search<TimelineRequest<typeof language>, TimelineResponse<typeof language>>(
               { ...request, entityType },
@@ -213,7 +245,7 @@ export const useTimelineEvents = ({
                   request.language === 'eql'
                     ? 'timelineEqlSearchStrategy'
                     : 'timelineSearchStrategy',
-                abortSignal: abortCtrl.current.signal,
+                abortSignal,
                 // we only need the id to throw better errors
                 indexPattern: { id: dataViewId } as unknown as DataView,
               }
@@ -234,16 +266,19 @@ export const useTimelineEvents = ({
                     setUpdated(newTimelineResponse.updatedAt);
                     return newTimelineResponse;
                   });
+                  endTrackingSuccess();
                   setLoading(false);
 
                   searchSubscription$.current.unsubscribe();
                 } else if (isErrorResponse(response)) {
+                  endTrackingError(abortSignal.aborted);
                   setLoading(false);
                   addWarning(i18n.ERROR_TIMELINE_EVENTS);
                   searchSubscription$.current.unsubscribe();
                 }
               },
               error: (msg) => {
+                endTrackingError(abortSignal.aborted);
                 setLoading(false);
                 data.search.showError(msg);
                 searchSubscription$.current.unsubscribe();
@@ -257,7 +292,7 @@ export const useTimelineEvents = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [skip, data, entityType, dataViewId, setUpdated, addWarning]
+    [skip, data, entityType, dataViewId, setUpdated, addWarning, startTracking]
   );
 
   useEffect(() => {

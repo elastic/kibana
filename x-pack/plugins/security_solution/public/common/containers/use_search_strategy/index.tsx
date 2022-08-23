@@ -11,7 +11,6 @@ import type { Observable } from 'rxjs';
 import { useObservable } from '@kbn/securitysolution-hook-utils';
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/public';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
-import type { Transaction } from '@elastic/apm-rum';
 import * as i18n from './translations';
 
 import type {
@@ -24,7 +23,7 @@ import type { inputsModel } from '../../store';
 import { useKibana } from '../../lib/kibana';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { useStartTransaction } from '../../lib/apm/use_start_transaction';
-import type { SearchStrategyMonitoringKey } from '../../lib/apm/http_requests';
+import { APP_UI_ID } from '../../../../common/constants';
 
 interface UseSearchFunctionParams<QueryType extends FactoryQueryTypes> {
   request: StrategyRequestType<QueryType>;
@@ -45,18 +44,23 @@ const EMPTY_INSPECT = {
 };
 
 const useSearch = <QueryType extends FactoryQueryTypes>(
-  factoryQueryType: QueryType,
-  monitoringKey?: SearchStrategyMonitoringKey
+  factoryQueryType: QueryType
 ): UseSearchFunction<QueryType> => {
   const { data } = useKibana().services;
   const { startTransaction } = useStartTransaction();
 
   const search = useCallback<UseSearchFunction<QueryType>>(
     ({ signal, request }) => {
-      let transaction: Transaction | undefined;
-      if (monitoringKey) {
-        transaction = startTransaction({ name: monitoringKey, type: 'http-request' });
-      }
+      // Create an auto-instrumented transaction to keep track of all events, it will end automatically when all spans end.
+      const transaction = startTransaction({
+        name: `${APP_UI_ID} searchStrategy ${factoryQueryType}`,
+        type: 'http-request',
+      });
+      // Create a blocking span to prevent the transaction to end automatically with an uncompleted batch response.
+      // The blocking span needs to be ended manually whenever the entire batched search finishes.
+      const requestSpan = transaction?.startSpan('batched search', 'http-request', {
+        blocking: true,
+      });
 
       const observable = data.search
         .search<StrategyRequestType<QueryType>, StrategyResponseType<QueryType>>(
@@ -68,26 +72,20 @@ const useSearch = <QueryType extends FactoryQueryTypes>(
         )
         .pipe(filter((response) => isErrorResponse(response) || isCompleteResponse(response)));
 
-      if (monitoringKey) {
-        observable.subscribe({
-          next: () => {
-            if (transaction) {
-              transaction.addLabels({ result: 'success' });
-              transaction.end();
-            }
-          },
-          error: () => {
-            if (transaction) {
-              transaction.addLabels({ result: signal.aborted ? 'aborted' : 'error' });
-              transaction.end();
-            }
-          },
-        });
-      }
+      observable.subscribe({
+        next: () => {
+          transaction?.addLabels({ result: 'success' });
+          requestSpan?.end();
+        },
+        error: () => {
+          transaction?.addLabels({ result: signal.aborted ? 'aborted' : 'error' });
+          requestSpan?.end();
+        },
+      });
 
       return observable;
     },
-    [data.search, factoryQueryType, monitoringKey, startTransaction]
+    [data.search, factoryQueryType, startTransaction]
   );
 
   return search;
@@ -97,7 +95,6 @@ export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
   factoryQueryType,
   initialResult,
   errorMessage,
-  monitoringKey,
   abort = false,
 }: {
   factoryQueryType: QueryType;
@@ -110,10 +107,6 @@ export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
    */
   errorMessage?: string;
   /**
-   * Monitoring Key to track the request performance using APM
-   */
-  monitoringKey?: SearchStrategyMonitoringKey;
-  /**
    * When the flag switches from `false` to `true`, it will abort any ongoing request.
    */
   abort?: boolean;
@@ -122,7 +115,7 @@ export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
   const refetch = useRef<inputsModel.Refetch>(noop);
   const { addError } = useAppToasts();
 
-  const search = useSearch(factoryQueryType, monitoringKey);
+  const search = useSearch(factoryQueryType);
 
   const { start, error, result, loading } = useObservable<
     [UseSearchFunctionParams<QueryType>],
@@ -167,7 +160,7 @@ export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
     }
   }, [abort]);
 
-  const [formatedResult, inspect] = useMemo(
+  const [formattedResult, inspect] = useMemo(
     () => [
       result
         ? omit<StrategyResponseType<QueryType>, 'rawResponse'>('rawResponse', result)
@@ -179,7 +172,7 @@ export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
 
   return {
     loading,
-    result: formatedResult,
+    result: formattedResult,
     error,
     search: searchCb,
     refetch: refetch.current,

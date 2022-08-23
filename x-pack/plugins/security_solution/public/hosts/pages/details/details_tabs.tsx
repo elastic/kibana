@@ -20,7 +20,6 @@ import type { HostDetailsTabsProps } from './types';
 import { type } from './utils';
 
 import {
-  HostsQueryTabBody,
   AuthenticationsQueryTabBody,
   UncommonProcessQueryTabBody,
   HostRiskTabBody,
@@ -61,9 +60,6 @@ export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
       <Switch>
         <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.authentications})`}>
           <AuthenticationsQueryTabBody {...tabProps} />
-        </Route>
-        <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.hosts})`}>
-          <HostsQueryTabBody {...tabProps} />
         </Route>
         <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.uncommonProcesses})`}>
           <UncommonProcessQueryTabBody {...tabProps} />

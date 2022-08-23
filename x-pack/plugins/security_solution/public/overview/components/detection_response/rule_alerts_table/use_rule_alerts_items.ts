@@ -10,6 +10,7 @@ import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/use_query';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
+import { FETCH_ALERTS } from '../../../../common/lib/apm/http_requests';
 
 // Formatted item result
 export interface RuleAlertsItem {
@@ -136,6 +137,7 @@ export const useRuleAlertsItems: UseRuleAlertsItems = ({
     }),
     indexName: signalIndexName,
     skip,
+    monitoringKey: FETCH_ALERTS.BY_SEVERITY,
   });
 
   useEffect(() => {

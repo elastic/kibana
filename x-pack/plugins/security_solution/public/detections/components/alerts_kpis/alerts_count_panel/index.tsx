@@ -26,6 +26,7 @@ import { KpiPanel } from '../common/components';
 import { useInspectButton } from '../common/hooks';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { FieldSelection } from '../../../../common/components/field_selection';
+import { FETCH_ALERTS } from '../../../../common/lib/apm/http_requests';
 
 export const DETECTIONS_ALERTS_COUNT_ID = 'detections-alerts-count';
 
@@ -125,6 +126,7 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
       }),
       indexName: signalIndexName,
       skip: querySkip,
+      monitoringKey: FETCH_ALERTS.COUNT,
     });
 
     useEffect(() => {

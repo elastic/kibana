@@ -14,6 +14,7 @@ import { useQueryAlerts } from '../../../detections/containers/detection_engine/
 import { TimelineId } from '../../../../common/types';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { inputsSelectors } from '../../store';
+import { FETCH_ALERTS } from '../../lib/apm/http_requests';
 
 const ALERT_PREVALENCE_AGG = 'countOfAlertsWithSameFieldAndValue';
 
@@ -52,6 +53,7 @@ export const useAlertPrevalence = ({
   const { loading, data, setQuery } = useQueryAlerts<{ _id: string }, AlertPrevalenceAggregation>({
     query: initialQuery,
     indexName: signalIndexName,
+    monitoringKey: FETCH_ALERTS.PREVALENCE,
   });
 
   useEffect(() => {
