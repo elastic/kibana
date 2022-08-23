@@ -15,15 +15,13 @@ import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
 export const ActionsLogFilter = memo(
   ({
-    'data-test-subj': dataTestSubj,
     filterName,
     onChangeCommandsFilter,
   }: {
-    'data-test-subj'?: string;
     filterName: FilterName;
     onChangeCommandsFilter: (selectedCommands: string[]) => void;
   }) => {
-    const getTestId = useTestIdGenerator(dataTestSubj);
+    const getTestId = useTestIdGenerator('response-actions-list');
     const { items, setItems, hasActiveFilters, numActiveFilters, numFilters } =
       useActionsLogFilter();
 
@@ -58,7 +56,6 @@ export const ActionsLogFilter = memo(
 
     return (
       <ActionsLogFilterPopover
-        data-test-subj={`${getTestId('')}popoverButton`}
         filterName={filterName}
         hasActiveFilters={hasActiveFilters}
         numActiveFilters={numActiveFilters}
@@ -75,15 +72,21 @@ export const ActionsLogFilter = memo(
           }}
         >
           {(list, search) => (
-            <div style={{ width: 300 }} data-test-subj={`${getTestId('')}popoverList`}>
-              <EuiPopoverTitle data-test-subj={`${getTestId('')}search`} paddingSize="s">
+            <div
+              style={{ width: 300 }}
+              data-test-subj={getTestId(`${filterName}-filter-popoverList`)}
+            >
+              <EuiPopoverTitle
+                data-test-subj={getTestId(`${filterName}-filter-search`)}
+                paddingSize="s"
+              >
                 {search}
               </EuiPopoverTitle>
               {list}
               <EuiFlexGroup>
                 <EuiFlexItem>
                   <ClearAllButton
-                    data-test-subj={`${getTestId('')}clearAllButton`}
+                    data-test-subj={getTestId(`${filterName}-filter-clearAllButton`)}
                     isDisabled={!hasActiveFilters}
                     onClick={onClearAll}
                   />

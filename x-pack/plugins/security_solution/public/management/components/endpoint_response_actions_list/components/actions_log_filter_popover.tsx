@@ -9,23 +9,23 @@ import React, { memo, useState, useCallback, useMemo } from 'react';
 import { EuiPopover, EuiFilterButton, useGeneratedHtmlId } from '@elastic/eui';
 import { FILTER_NAMES } from '../translations';
 import type { FilterName } from './hooks';
+import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
 export const ActionsLogFilterPopover = memo(
   ({
     children,
-    'data-test-subj': dataTestSubj,
     filterName,
     hasActiveFilters,
     numActiveFilters,
     numFilters,
   }: {
     children: React.ReactNode;
-    'data-test-subj'?: string;
     filterName: FilterName;
     hasActiveFilters: boolean;
     numActiveFilters: number;
     numFilters: number;
   }) => {
+    const getTestId = useTestIdGenerator('response-actions-list');
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const onButtonClick = useCallback(() => {
       setIsPopoverOpen(!isPopoverOpen);
@@ -40,7 +40,7 @@ export const ActionsLogFilterPopover = memo(
     const button = useMemo(
       () => (
         <EuiFilterButton
-          data-test-subj={dataTestSubj}
+          data-test-subj={getTestId(`${filterName}-filter-popoverButton`)}
           iconType="arrowDown"
           onClick={onButtonClick}
           isSelected={isPopoverOpen}
@@ -52,8 +52,8 @@ export const ActionsLogFilterPopover = memo(
         </EuiFilterButton>
       ),
       [
-        dataTestSubj,
         filterName,
+        getTestId,
         hasActiveFilters,
         isPopoverOpen,
         numActiveFilters,
