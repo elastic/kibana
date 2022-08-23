@@ -38,6 +38,7 @@ export const mockElasticsearchIndices: ElasticsearchIndexWithPrivileges[] = [
   {
     count: 0,
     health: 'yellow',
+    hidden: false,
     status: 'open',
     name: 'search-my-index-1',
     uuid: 'ydlR_QQJTeyZP66tzQSmMQ',
@@ -56,6 +57,7 @@ export const mockElasticsearchIndices: ElasticsearchIndexWithPrivileges[] = [
   {
     count: 100,
     health: 'green',
+    hidden: false,
     status: 'open',
     name: 'my-index-2',
     uuid: '4dlR_QQJTe2ZP6qtzQSmMQ',
@@ -74,6 +76,7 @@ export const mockElasticsearchIndices: ElasticsearchIndexWithPrivileges[] = [
   {
     count: 100,
     health: 'green',
+    hidden: false,
     status: 'open',
     name: 'search-my-index-2',
     uuid: '4dlR_QQJTe2ZP6qtzQSmMQ',
@@ -92,6 +95,7 @@ export const mockElasticsearchIndices: ElasticsearchIndexWithPrivileges[] = [
   {
     count: 100,
     health: 'green',
+    hidden: false,
     status: 'open',
     name: 'alias-my-index-2',
     uuid: '4dlR_QQJTe2ZP6qtzQSmMQ',
@@ -110,6 +114,7 @@ export const mockElasticsearchIndices: ElasticsearchIndexWithPrivileges[] = [
   {
     count: 100,
     health: 'green',
+    hidden: false,
     status: 'open',
     name: 'index-without-read-privilege',
     uuid: '4dlR_QQJTe2ZP6qtzQSmMQ',
@@ -128,6 +133,7 @@ export const mockElasticsearchIndices: ElasticsearchIndexWithPrivileges[] = [
   {
     count: 100,
     health: 'green',
+    hidden: false,
     status: 'open',
     name: 'index-without-manage-privilege',
     uuid: '4dlR_QQJTe2ZP6qtzQSmMQ',
@@ -146,6 +152,7 @@ export const mockElasticsearchIndices: ElasticsearchIndexWithPrivileges[] = [
   {
     count: 100,
     health: 'green',
+    hidden: false,
     status: 'open',
     name: 'alias-without-manage-privilege',
     uuid: '4dlR_QQJTe2ZP6qtzQSmMQ',
