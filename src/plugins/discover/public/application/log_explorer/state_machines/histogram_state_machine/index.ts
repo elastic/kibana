@@ -8,3 +8,4 @@
 
 export * from './selectors/histogram_selectors';
 export * from './state_machine';
+export * from './types';

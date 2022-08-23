@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { createMachine, InterpreterFrom } from 'xstate';
+import { createMachine, InterpreterFrom, Interpreter } from 'xstate';
 import { updateFilters } from '../data_access_state_machine/actions/filters_actions';
 import { updateTimeRange } from '../data_access_state_machine/actions/time_range_actions';
 import { updateHistogram } from './services/load_histogram_service';
 import { HistogramMachineContext, HistogramMachineEvent, HistogramMachineState } from './types';
+import { ActorRefFromInterpreter } from '../data_access_state_machine';
 
 export const histogramStateMachine = createMachine<
   HistogramMachineContext,
@@ -70,3 +71,6 @@ export const histogramStateMachine = createMachine<
 
 export type HistogramStateMachine = typeof histogramStateMachine;
 export type HistogramService = InterpreterFrom<HistogramStateMachine>;
+export type HistogramActorRef = ActorRefFromInterpreter<
+  Interpreter<HistogramMachineContext, {}, HistogramMachineEvent>
+>;

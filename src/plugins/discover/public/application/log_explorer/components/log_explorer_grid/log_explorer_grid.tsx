@@ -38,7 +38,7 @@ import { useFieldEditor } from '../../hooks/ui/use_field_editor';
 const EuiDataGridMemoized = React.memo(EuiDataGrid);
 
 export function LogExplorerGrid({ fieldFormats }: { fieldFormats: FieldFormatsStart }) {
-  const [entriesActor] = useEntries();
+  const { actor: entriesActor } = useEntries();
   const { rows } = useSelector(entriesActor, memoizedSelectRows);
   const imperativeGridRef = useRef<EuiDataGridRefProps | null>(null);
 

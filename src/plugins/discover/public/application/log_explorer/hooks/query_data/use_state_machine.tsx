@@ -13,13 +13,21 @@ import moment from 'moment';
 import { useMemo, useCallback } from 'react';
 import { merge, of } from 'rxjs';
 import { dataAccessStateMachine } from '../../state_machines/data_access_state_machine/state_machine';
-import { loadAfter, loadAround, loadBefore } from '../../state_machines/entries_state_machine';
+import {
+  EntriesActorRef,
+  loadAfter,
+  loadAround,
+  loadBefore,
+} from '../../state_machines/entries_state_machine';
 import { loadTail } from '../../state_machines/entries_state_machine/services/load_tail_service';
 import { loadHistogram } from '../../state_machines/histogram_state_machine/services/load_histogram_service';
 import { useSubscription } from '../use_observable';
 import { useDiscoverStateContext } from '../discover_state/use_discover_state';
-import { entriesStateMachine } from '../../state_machines/entries_state_machine';
-import { histogramStateMachine } from '../../state_machines/histogram_state_machine';
+import {
+  entriesStateMachine,
+  HistogramActorRef,
+  histogramStateMachine,
+} from '../../state_machines';
 
 export const useStateMachineService = ({
   virtualRowCount,
@@ -215,16 +223,32 @@ const getMiddleOfTimeRange = ({ from, to }: TimeRange): string => {
 
 export const useEntries = () => {
   const dataAccessService = useStateMachineContext();
-  const entriesActor = dataAccessService.children.get('entries');
-  const [entriesState, entriesSend] = useActor(entriesActor);
-  console.log('entriesActor', entriesActor);
-  console.log('entriesState', entriesState);
-  return [entriesActor, entriesState, entriesSend];
+  const [dataAccessState] = useActor(dataAccessService);
+
+  if (dataAccessState.matches('uninitialized')) {
+    throw new Error(
+      'The data access state machine should be initialized before trying to access child state machines.'
+    );
+  }
+
+  const actor: EntriesActorRef = dataAccessService.children.get('entries')!;
+  const [state, send] = useActor(actor);
+
+  return { actor, state, send };
 };
 
 export const useHistogram = () => {
   const dataAccessService = useStateMachineContext();
-  const histogramActor = dataAccessService.children.get('histogram');
-  const [histogramState, histogramSend] = useActor(histogramActor);
-  return [histogramActor, histogramState, histogramSend];
+  const [dataAccessState] = useActor(dataAccessService);
+
+  if (dataAccessState.matches('uninitialized')) {
+    throw new Error(
+      'The data access state machine should be initialized before trying to access child state machines.'
+    );
+  }
+
+  const actor: HistogramActorRef = dataAccessService.children.get('histogram')!;
+  const [state, send] = useActor(actor);
+
+  return { actor, state, send };
 };

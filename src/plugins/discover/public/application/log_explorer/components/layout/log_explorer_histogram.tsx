@@ -32,8 +32,8 @@ import * as rt from 'io-ts';
 import moment from 'moment';
 import React, { useCallback, useMemo } from 'react';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { DataAccessService, selectVisibleTimeRange } from '../../state_machines';
-import { selectTimeRange } from '../../state_machines/entries_state_machine';
+import { HistogramActorRef, selectVisibleTimeRange } from '../../state_machines';
+import { EntriesActorRef, selectTimeRange } from '../../state_machines/entries_state_machine';
 import { selectHistogramDataPoints } from '../../state_machines';
 import { getPositionFromMsEpoch } from '../../utils/cursor';
 
@@ -41,7 +41,8 @@ export function LogExplorerHistogram({
   histogramService,
   entriesService,
 }: {
-  dataAccessService: DataAccessService;
+  histogramService: HistogramActorRef;
+  entriesService: EntriesActorRef;
 }) {
   const styles = useLogExplorerHistogramStyles();
   const { chartBaseTheme, chartThemes } = useLogExplorerHistogramThemes();
@@ -142,7 +143,7 @@ const useLogExplorerHistogramStyles = () => {
   );
 };
 
-const useLogExplorerHistogramDomains = (dataAccessService: DataAccessService) => {
+const useLogExplorerHistogramDomains = (dataAccessService: HistogramActorRef) => {
   const timeRange = useSelector(dataAccessService, selectTimeRange);
 
   const timeDomain = useMemo(
@@ -156,7 +157,7 @@ const useLogExplorerHistogramDomains = (dataAccessService: DataAccessService) =>
   return { timeDomain };
 };
 
-const useLogExplorerHistogramSeries = (dataAccessService: DataAccessService) => {
+const useLogExplorerHistogramSeries = (dataAccessService: HistogramActorRef) => {
   const histogramDataPoints = useSelector(dataAccessService, selectHistogramDataPoints);
 
   const countSeries = useMemo(
@@ -176,7 +177,7 @@ const useLogExplorerHistogramSeries = (dataAccessService: DataAccessService) => 
   };
 };
 
-const useLogExplorerHistogramAnnotations = (dataAccessService: DataAccessService) => {
+const useLogExplorerHistogramAnnotations = (dataAccessService: EntriesActorRef) => {
   const { startTimestamp, endTimestamp } = useSelector(dataAccessService, selectVisibleTimeRange);
 
   const visibleRangeAnnotation = useMemo((): RectAnnotationDatum[] => {
@@ -199,7 +200,7 @@ const useLogExplorerHistogramAnnotations = (dataAccessService: DataAccessService
   };
 };
 
-const useLogExplorerHistogramEventHandlers = (dataAccessService: DataAccessService) => {
+const useLogExplorerHistogramEventHandlers = (dataAccessService: EntriesActorRef) => {
   const onProjectionClick = useCallback<ProjectionClickListener>(
     ({ x }) => {
       if (typeof x === 'number') {

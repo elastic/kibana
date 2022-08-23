@@ -84,7 +84,6 @@ export function updateSearchSource(
   searchSource.setField('size', 0);
   searchSource.setField('trackTotalHits', true);
   const chartAggConfigs = getChartAggConfigs(searchSource, interval, data);
-  console.log(chartAggConfigs.toDsl());
   searchSource.setField('aggs', chartAggConfigs.toDsl());
   searchSource.removeField('sort');
   searchSource.removeField('fields');

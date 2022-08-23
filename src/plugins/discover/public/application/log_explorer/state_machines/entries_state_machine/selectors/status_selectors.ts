@@ -6,16 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { DataAccessService } from '../state_machine';
+import { EntriesService } from '../state_machine';
 
-export const selectIsLoading = (state: DataAccessService['state']) =>
+export const selectIsLoading = (state: EntriesService['state']) =>
   selectIsReloading(state) || selectIsUpdating(state);
 
-export const selectIsReloading = (state: DataAccessService['state']) =>
-  state.matches({ documents: 'loadingAround' });
+export const selectIsReloading = (state: EntriesService['state']) => state.matches('loadingAround');
 
-export const selectIsUpdating = (state: DataAccessService['state']) =>
-  state.matches({ documents: 'loadingTop' }) ||
-  state.matches({ documents: 'loadingBottom' }) ||
-  state.matches({ documents: 'extendingTop' }) ||
-  state.matches({ documents: 'extendingBottom' });
+export const selectIsUpdating = (state: EntriesService['state']) =>
+  state.matches('loadingTop') ||
+  state.matches('loadingBottom') ||
+  state.matches('extendingTop') ||
+  state.matches('extendingBottom');

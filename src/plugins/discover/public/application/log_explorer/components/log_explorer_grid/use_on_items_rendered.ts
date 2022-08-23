@@ -24,7 +24,7 @@ export const useOnItemsRendered = ({
 }: {
   imperativeGridRef: MutableRefObject<EuiDataGridRefProps | null>;
 }) => {
-  const [entriesActor] = useEntries();
+  const { actor: entriesActor } = useEntries();
 
   const { chunkBoundaryRowIndex, startRowIndex, endRowIndex, maximumRowIndex, minimumRowIndex } =
     useSelector(entriesActor, memoizedSelectRows);

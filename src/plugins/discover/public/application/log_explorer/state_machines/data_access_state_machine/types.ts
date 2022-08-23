@@ -7,9 +7,8 @@
  */
 import { DataView } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { Interpreter, ActorRef, State } from 'xstate';
 import { LogExplorerPosition } from '../../types';
-import { EntriesStateMachine } from '../entries_state_machine';
-import { HistogramStateMachine } from '../histogram_state_machine';
 
 export interface SharedContext {
   dataView: DataView;
@@ -41,14 +40,9 @@ export type SharedExternalEvent =
       position: LogExplorerPosition;
     };
 
-export interface DataAccessMachineContext {
-  // Sub state machines
-  entries: EntriesStateMachine;
-  histogram: HistogramStateMachine;
-}
-
 export type LogExplorerQuery = Query | AggregateQuery;
 
+export type DataAccessMachineContext = undefined;
 // the value union is not ideal, but the closest we can get without typegen
 export interface DataAccessMachineState {
   value: 'uninitialized' | 'initialized';
@@ -90,3 +84,7 @@ export type DataAccessMachineExternalEvent =
 export type DataAccessMachineEvent =
   | DataAccessMachineExternalEvent
   | DataAccessMachineInternalEvent;
+
+export type ActorRefFromInterpreter<T> = T extends Interpreter<infer TC, {}, infer TE>
+  ? ActorRef<TE, State<TC, TE>>
+  : never;

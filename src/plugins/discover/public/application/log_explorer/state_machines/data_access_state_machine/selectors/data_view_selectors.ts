@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { DataAccessService } from '../../entries_state_machine/state_machine';
+import { EntriesService } from '../../entries_state_machine';
+import { HistogramService } from '../../histogram_state_machine';
 
-export const selectDataView = (state: DataAccessService['state']) => state.context.dataView;
+export const selectDataView = (state: EntriesService['state'] | HistogramService['state']) =>
+  state.context.dataView;

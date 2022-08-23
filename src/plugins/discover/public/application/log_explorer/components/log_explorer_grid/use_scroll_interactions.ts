@@ -16,7 +16,7 @@ export const useScrollInteractions = ({
 }: {
   imperativeGridRef: MutableRefObject<EuiDataGridRefProps | null>;
 }) => {
-  const [entriesActor, entriesState] = useEntries();
+  const { actor: entriesActor, state: entriesState } = useEntries();
 
   useEffect(() => {
     const transitionListener: Parameters<typeof entriesActor['onTransition']>[0] = (
@@ -33,6 +33,7 @@ export const useScrollInteractions = ({
       }
     };
 
+    // TODO: the actor ref does have the correct onTransition, off etc methods. Figure out types.
     entriesActor.onTransition(transitionListener);
 
     return () => {

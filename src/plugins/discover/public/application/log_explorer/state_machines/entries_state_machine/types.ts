@@ -19,10 +19,10 @@ interface Context {
   configuration: {
     chunkSize: number;
     minimumChunkOverscan: number;
+    maximumRowCount: number;
   };
   topChunk: LogExplorerChunk;
   bottomChunk: LogExplorerChunk;
-  maximumRowCount: number;
 }
 
 export type EntriesMachineContext = SharedContext & Context;

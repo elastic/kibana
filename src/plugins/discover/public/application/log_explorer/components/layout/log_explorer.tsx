@@ -16,15 +16,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useSelector } from '@xstate/react';
 import React, { memo } from 'react';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import {
-  DataAccessService,
-  selectIsReloading,
-} from '../../state_machines/entries_state_machine';
+import { EntriesActorRef, selectIsReloading } from '../../state_machines/entries_state_machine';
 import { LogExplorerGrid } from '../log_explorer_grid';
 
 const LogExplorerGridMemoized = React.memo(LogExplorerGrid);
 
-function LogExplorerComponent({ stateMachine }: { stateMachine: DataAccessService }) {
+function LogExplorerComponent({ stateMachine }: { stateMachine: EntriesActorRef }) {
   const { fieldFormats } = useDiscoverServices();
 
   const isReloading = useSelector(stateMachine, selectIsReloading);

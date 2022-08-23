@@ -41,7 +41,7 @@ export const selectRows = (
       startRowIndex: undefined,
     };
   }
-  console.log(state);
+
   const { topChunk, bottomChunk } = state.context;
 
   const startRowIndex = getStartRowIndex(topChunk);

@@ -19,6 +19,7 @@ import { DiscoverStateProvider } from './hooks/discover_state/use_discover_state
 import { DiscoverColumnsProvider } from './hooks/discover_state/use_columns';
 import { useStateMachineContext } from './hooks/query_data/use_state_machine';
 import { DiscoverUninitialized } from '../main/components/uninitialized/uninitialized';
+import { LogExplorerLayoutProps } from './components/layout/log_explorer_layout';
 
 const LogExplorerLayoutMemoized = React.memo(LogExplorerLayout);
 
@@ -50,7 +51,7 @@ export function LogExplorerMainApp({ savedSearch, dataViewList }: LogExplorerMai
   );
 }
 
-const LogExplorerLayoutWrapper = ({ dataViewList, savedSearch }) => {
+const LogExplorerLayoutWrapper = ({ dataViewList, savedSearch }: LogExplorerLayoutProps) => {
   const stateMachine = useStateMachineContext();
   const [dataAccessState] = useActor(stateMachine);
 

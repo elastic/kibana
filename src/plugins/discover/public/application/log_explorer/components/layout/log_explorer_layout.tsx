@@ -88,9 +88,8 @@ export function LogExplorerLayout({ dataViewList, savedSearch }: LogExplorerLayo
   // }, [inspectorSession]);
 
   // Data querying state machine access and derivatives
-  const [entriesActor, entriesState] = useEntries();
-  const [histogramActor] = useHistogram();
-  console.log(entriesActor, entriesState);
+  const { actor: entriesActor, state: entriesState } = useEntries();
+  const { actor: histogramActor } = useHistogram();
   const fieldCounts = useFieldCounts(entriesActor);
 
   // Sidebar state

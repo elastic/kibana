@@ -17,7 +17,7 @@ import { memoizedSelectRows } from '../../state_machines/entries_state_machine';
 import { selectDataView } from '../../state_machines/entries_state_machine';
 
 export function LogExplorerCell({ rowIndex, columnId }: EuiDataGridCellValueElementProps) {
-  const [entriesActor] = useEntries();
+  const { actor: entriesActor } = useEntries();
   const { rows } = useSelector(entriesActor, memoizedSelectRows);
   const dataView = useSelector(entriesActor, selectDataView);
   const { fieldFormats } = useContext(LogExplorerCellContext);

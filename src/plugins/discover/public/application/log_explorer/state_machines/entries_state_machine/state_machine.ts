@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { createMachine, InterpreterFrom } from 'xstate';
+import { createMachine, InterpreterFrom, Interpreter } from 'xstate';
 import {
   hasEmptyBottomChunk,
   hasEmptyTopChunk,
@@ -27,6 +27,7 @@ import {
 } from './guards/visible_entry_guards';
 import { EntriesMachineContext, EntriesMachineEvent, EntriesMachineState } from './types';
 import { hasFullTopChunk, hasFullBottomChunk } from './guards/chunk_guards';
+import { ActorRefFromInterpreter } from '../data_access_state_machine';
 
 // for stubbing guards until all are implemented
 const constantGuard =
@@ -488,3 +489,6 @@ export const entriesStateMachine = createMachine<
 
 export type EntriesStateMachine = typeof entriesStateMachine;
 export type EntriesService = InterpreterFrom<EntriesStateMachine>;
+export type EntriesActorRef = ActorRefFromInterpreter<
+  Interpreter<EntriesMachineContext, {}, EntriesMachineEvent>
+>;
