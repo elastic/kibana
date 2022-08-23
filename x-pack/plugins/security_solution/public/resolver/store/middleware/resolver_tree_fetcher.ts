@@ -92,6 +92,16 @@ export function ResolverTreeFetcher(
             parameters: databaseParameters,
           },
         });
+        if (resolverTree.nodes.length === 0) {
+          const unboundedTree = await dataAccessLayer.resolverTree({
+            dataId: entityIDToFetch,
+            schema: dataSourceSchema,
+            indices: databaseParameters.indices,
+            ancestors: ancestorsRequestAmount(dataSourceSchema),
+            descendants: descendantsRequestAmount(),
+          });
+          console.log(unboundedTree);
+        }
       } catch (error) {
         // https://developer.mozilla.org/en-US/docs/Web/API/DOMException#exception-AbortError
         if (error instanceof DOMException && error.name === 'AbortError') {

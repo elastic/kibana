@@ -670,8 +670,8 @@ export interface IsometricTaxiLayout {
  * Defines the type for bounding a search by a time box.
  */
 export interface TimeRange {
-  from: string;
-  to: string;
+  from: string | number;
+  to: string | number;
 }
 
 /**
@@ -762,7 +762,7 @@ export interface DataAccessLayer {
   }: {
     dataId: string;
     schema: ResolverSchema;
-    timeRange: TimeRange;
+    timeRange?: TimeRange;
     indices: string[];
     ancestors: number;
     descendants: number;
