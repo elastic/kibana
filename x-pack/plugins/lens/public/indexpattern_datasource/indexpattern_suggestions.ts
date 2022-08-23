@@ -223,13 +223,22 @@ function getParams(column: Column) {
   };
 }
 
+function getFieldWithLabel(column: Column, indexPattern: IndexPattern) {
+  const field = getSourceField(column, indexPattern);
+
+  if (field && column.label) {
+    return { ...field, customLabel: column.label };
+  }
+  return field;
+}
+
 function convertToColumnChange(columns: Layer['columns'], indexPattern: IndexPattern) {
   return columns.reduce<ColumnChange[]>((acc, column) => {
     if (!columns.some((c) => isReferenceColumn(c) && column.columnId === c.references[0])) {
       const newColumn: ColumnChange = {
         op: column.operationType,
         columnId: column.columnId,
-        field: getSourceField(column, indexPattern),
+        field: getFieldWithLabel(column, indexPattern),
         indexPattern,
         visualizationGroups: [],
         columnParams: getParams(column),
@@ -240,7 +249,7 @@ function convertToColumnChange(columns: Layer['columns'], indexPattern: IndexPat
           {
             op: referenceColumn.operationType,
             columnId: referenceColumn.columnId,
-            field: getSourceField(referenceColumn, indexPattern),
+            field: getFieldWithLabel(referenceColumn, indexPattern),
             indexPattern,
             visualizationGroups: [],
             columnParams: getParams(referenceColumn),
