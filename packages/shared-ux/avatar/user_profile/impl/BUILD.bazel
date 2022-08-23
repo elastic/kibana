@@ -9,19 +9,11 @@ SOURCE_FILES = glob(
   [
     "**/*.ts",
     "**/*.tsx",
+    "**/*.mdx",
   ],
   exclude = [
-    "**/*.config.js",
-    "**/*.mock.*",
     "**/*.test.*",
     "**/*.stories.*",
-    "**/__snapshots__",
-    "**/integration_tests",
-    "**/mocks",
-    "**/scripts",
-    "**/storybook",
-    "**/test_fixtures",
-    "**/test_helpers",
   ],
 )
 
@@ -105,7 +97,7 @@ ts_project(
   declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  root_dir = ".",
+  root_dir = "src",
   tsconfig = ":tsconfig",
 )
 
