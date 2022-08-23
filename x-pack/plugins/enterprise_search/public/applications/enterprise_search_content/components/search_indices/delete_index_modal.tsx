@@ -26,7 +26,8 @@ export const DeleteIndexModal: React.FC = () => {
   return isDeleteModalVisible ? (
     <EuiConfirmModal
       title={i18n.translate('xpack.enterpriseSearch.content.searchIndices.deleteModal.title', {
-        defaultMessage: `Are you sure you want to delete ${indexName}`,
+        defaultMessage: 'Are you sure you want to delete {indexName}',
+        values: { indexName },
       })}
       onCancel={() => {
         closeDeleteModal();

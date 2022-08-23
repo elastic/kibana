@@ -143,7 +143,7 @@ export const IndicesTable: React.FC<IndicesTableProps> = ({
         }
       },
       truncateText: true,
-      width: '10%',
+      width: '15%',
     },
     {
       actions: [
@@ -174,7 +174,7 @@ export const IndicesTable: React.FC<IndicesTableProps> = ({
       name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.actions.columnTitle', {
         defaultMessage: 'Actions',
       }),
-      width: '5%',
+      width: '10%',
     },
   ];
   return (
