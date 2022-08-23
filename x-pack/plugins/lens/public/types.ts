@@ -229,6 +229,9 @@ interface ChartSettings {
   fill?: string;
   legend?: Record<string, boolean | string>;
   gridLinesVisibility?: Record<string, boolean>;
+  tickLabelsVisibility?: Record<string, boolean>;
+  axisTitlesVisibility?: Record<string, boolean>;
+  valueLabels?: boolean;
   extents?: {
     yLeftExtent: AxisExtents;
     yRightExtent: AxisExtents;

@@ -9,7 +9,10 @@ import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
 import { ANALYTICS_COLLECTIONS_INDEX } from '../..';
 
-import { fetchAnalyticsCollectionByName } from './fetch_analytics_collection';
+import {
+  fetchAnalyticsCollectionByName,
+  fetchAnalyticsCollections,
+} from './fetch_analytics_collection';
 import { setupAnalyticsCollectionIndex } from './setup_indices';
 
 jest.mock('./setup_indices', () => ({
@@ -26,6 +29,75 @@ describe('fetch analytics collection lib function', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe('fetch collections', () => {
+    it('should return a list of analytics collections', async () => {
+      mockClient.asCurrentUser.search.mockImplementationOnce(() =>
+        Promise.resolve({
+          hits: {
+            hits: [
+              { _id: '2', _source: { name: 'example' } },
+              { _id: '1', _source: { name: 'example2' } },
+            ],
+          },
+        })
+      );
+      await expect(
+        fetchAnalyticsCollections(mockClient as unknown as IScopedClusterClient)
+      ).resolves.toEqual([
+        { id: '2', name: 'example' },
+        { id: '1', name: 'example2' },
+      ]);
+    });
+
+    it('should setup the indexes if none exist and return an empty array', async () => {
+      mockClient.asCurrentUser.search.mockImplementationOnce(() =>
+        Promise.reject({
+          meta: {
+            body: {
+              error: {
+                type: 'index_not_found_exception',
+              },
+            },
+          },
+        })
+      );
+
+      await expect(
+        fetchAnalyticsCollections(mockClient as unknown as IScopedClusterClient)
+      ).resolves.toEqual([]);
+
+      expect(setupAnalyticsCollectionIndex as jest.Mock).toHaveBeenCalledWith(
+        mockClient.asCurrentUser
+      );
+    });
+
+    it('should not call setup analytics index on other errors and return error', async () => {
+      const error = {
+        meta: {
+          body: {
+            error: {
+              type: 'other error',
+            },
+          },
+        },
+      };
+      mockClient.asCurrentUser.search.mockImplementationOnce(() => Promise.reject(error));
+      await expect(
+        fetchAnalyticsCollections(mockClient as unknown as IScopedClusterClient)
+      ).rejects.toMatchObject(error);
+
+      expect(mockClient.asCurrentUser.search).toHaveBeenCalledWith({
+        from: 0,
+        index: ANALYTICS_COLLECTIONS_INDEX,
+        query: {
+          match_all: {},
+        },
+        size: 1000,
+      });
+      expect(setupAnalyticsCollectionIndex as jest.Mock).not.toHaveBeenCalled();
+    });
   });
 
   describe('fetch collection by name', () => {
