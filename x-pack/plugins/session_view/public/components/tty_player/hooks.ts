@@ -242,7 +242,7 @@ export const useXtermPlayer = ({
 
       render(index, true);
     },
-    [render]
+    [setIsPlaying, render]
   );
 
   const search = useCallback(
