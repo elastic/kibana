@@ -332,7 +332,16 @@ export interface FileUnshareOptions {
  * A class with set of properties and behaviors of the "smart" file object and adds
  * behaviours for interacting with files on top of the pure data.
  */
-export interface File<Meta = unknown> extends FileJSON<Meta> {
+export interface File<Meta = unknown> {
+  /**
+   * The file ID
+   */
+  id: string;
+
+  /**
+   * File metadata in camelCase form.
+   */
+  data: FileJSON<Meta>;
   /**
    * Update a file object's metadatathat can be updated.
    *
@@ -345,7 +354,7 @@ export interface File<Meta = unknown> extends FileJSON<Meta> {
    *
    * @param content - The content to stream to storage.
    */
-  uploadContent(content: Readable): Promise<void>;
+  uploadContent(content: Readable): Promise<File<Meta>>;
 
   /**
    * Stream file content from storage.
@@ -431,6 +440,8 @@ export interface FileKind {
   id: string;
   /**
    * Maximum size, in bytes, a file of this kind can be.
+   *
+   * @default 4MiB
    */
   maxSizeBytes?: number;
 
