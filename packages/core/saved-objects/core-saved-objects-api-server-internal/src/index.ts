@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export function foo() {
-  return 'hello world';
-}
+export { SavedObjectsClient } from './saved_objects_client';
+export { SavedObjectsClientProvider, SavedObjectsRepository } from './lib';
+export type { ISavedObjectsClientProvider } from './lib';

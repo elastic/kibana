@@ -8,7 +8,7 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
-import { savedObjectsPointInTimeFinderMock } from './lib/point_in_time_finder.mock';
+import { savedObjectsPointInTimeFinderMock } from './point_in_time_finder.mock';
 
 const create = () => {
   const mock = {

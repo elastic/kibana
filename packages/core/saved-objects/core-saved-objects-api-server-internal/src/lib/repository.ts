@@ -7,6 +7,7 @@
  */
 
 import { omit, isObject } from 'lodash';
+import type { Payload } from '@hapi/boom';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import * as esKuery from '@kbn/es-query';
 import type { Logger } from '@kbn/logging';
