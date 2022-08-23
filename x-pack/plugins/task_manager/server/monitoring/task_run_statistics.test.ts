@@ -378,23 +378,23 @@ describe('Task Run Statistics', () => {
             expect(logger.debug).toHaveBeenCalledTimes(5);
             expect(logger.debug).toHaveBeenNthCalledWith(
               1,
-              'resultFrequencySummary.Failed (40) is greater than warn_threshold (39)'
+              'Health Status warn threshold has been exceeded, resultFrequencySummary.Failed (40) is greater than warn_threshold (39)'
             );
             expect(logger.debug).toHaveBeenNthCalledWith(
               2,
-              'resultFrequencySummary.Failed (60) is greater than error_threshold (59)'
+              'Health Status error threshold has been exceeded, resultFrequencySummary.Failed (60) is greater than error_threshold (59)'
             );
             expect(logger.debug).toHaveBeenNthCalledWith(
               3,
-              'resultFrequencySummary.Failed (60) is greater than error_threshold (59)'
+              'Health Status error threshold has been exceeded, resultFrequencySummary.Failed (60) is greater than error_threshold (59)'
             );
             expect(logger.debug).toHaveBeenNthCalledWith(
               4,
-              'resultFrequencySummary.Failed (60) is greater than error_threshold (59)'
+              'Health Status error threshold has been exceeded, resultFrequencySummary.Failed (60) is greater than error_threshold (59)'
             );
             expect(logger.debug).toHaveBeenNthCalledWith(
               5,
-              'resultFrequencySummary.Failed (40) is greater than warn_threshold (39)'
+              'Health Status warn threshold has been exceeded, resultFrequencySummary.Failed (40) is greater than warn_threshold (39)'
             );
             resolve();
           } catch (e) {
