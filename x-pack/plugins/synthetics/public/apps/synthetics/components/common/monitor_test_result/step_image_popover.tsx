@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import React from 'react';
 import { EuiImage, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
 import { LoadingImageState } from './no_image_available';
 import { ScreenshotRefImageData } from '../../../../../../common/runtime_types';
 import { useCompositeImage } from '../../../hooks/use_composite_image';
@@ -16,15 +16,10 @@ import { useCompositeImage } from '../../../hooks/use_composite_image';
 const POPOVER_IMG_HEIGHT = 360;
 const POPOVER_IMG_WIDTH = 640;
 
-const StepImage = styled(EuiImage)`
-  &&& {
-    display: flex;
-    figure.euiImage-isFullScreen {
+const StepImage = euiStyled(EuiImage)`
+  &&& .euiImageFullScreenWrapper {
+    figcaption {
       display: flex;
-      div.stepArrowsFullScreen {
-        display: flex;
-        border: 1px solid darkgreen;
-      }
     }
   }
 `;

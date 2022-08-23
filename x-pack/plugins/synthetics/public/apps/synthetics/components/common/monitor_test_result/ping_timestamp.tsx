@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import React, { useContext, useEffect, useState } from 'react';
 import useIntersection from 'react-use/lib/useIntersection';
-import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -24,11 +24,9 @@ import { NoImageDisplay } from './no_image_display';
 import { StepImageCaption } from './step_image_caption';
 import { StepImagePopover } from './step_image_popover';
 
-const StepDiv = styled.div`
-  figure.euiImage {
-    div.stepArrowsFullScreen {
-      display: none;
-    }
+const StepDiv = euiStyled.div`
+  figcaption {
+    display: none;
   }
 `;
 
