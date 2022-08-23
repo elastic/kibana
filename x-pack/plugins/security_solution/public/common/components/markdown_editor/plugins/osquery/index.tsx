@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 
 import {
   EuiSpacer,
@@ -22,26 +22,22 @@ import { useKibana } from '../../../../lib/kibana';
 import { OsqueryIcon } from './osquery_icon';
 
 const OsqueryEditorComponent = ({ node, onSave, onCancel }) => {
+  const formRef = useRef(null);
   const [actionId, setActionId] = useState<string | null>(null);
-  const osquery = useKibana().services;
+  const { osquery } = useKibana().services;
 
-  console.error(useKibana());
+  console.error('node', node);
 
   const OsqueryActionForm = useMemo(() => {
-    if (osquery?.ActionForm) {
-      const { ActionForm } = osquery;
-      return (
-        <ActionForm
-          onSuccess={(data, variables, context) => {
-            if (data.actions[0]?.action_id) {
-              setActionId(data.actions[0]?.action_id);
-            }
-          }}
-        />
-      );
+    console.error('osquer', osquery);
+    if (osquery?.OsqueryAction) {
+      const { OsqueryAction } = osquery;
+      return <OsqueryAction formRef={formRef} hideQueryTypeField defaultValues={node} />;
     }
     return null;
-  }, [osquery]);
+  }, [node, osquery]);
+
+  console.error('formRef', formRef.current);
 
   return (
     <>
@@ -50,20 +46,26 @@ const OsqueryEditorComponent = ({ node, onSave, onCancel }) => {
       </EuiModalHeader>
 
       <EuiModalBody>
-        <>
-          <OsqueryActionForm />
-        </>
+        <>{OsqueryActionForm}</>
       </EuiModalBody>
 
       <EuiModalFooter>
         <EuiButtonEmpty onClick={onCancel}>{'Cancel'}</EuiButtonEmpty>
         <EuiButton
-          disabled={!actionId}
-          onClick={() =>
-            onSave(`!{osquery${JSON.stringify({ action_id: actionId })}}`, {
-              block: true,
-            })
-          }
+          // disabled={!actionId}
+          onClick={() => {
+            console.error(formRef.current, formRef.current.getFormValues());
+            const formValues = formRef.current?.getFormValues();
+            onSave(
+              `!{osquery${JSON.stringify({
+                query: formValues.query,
+                ecs_mapping: formValues.ecs_mapping,
+              })}}`,
+              {
+                block: true,
+              }
+            );
+          }}
           fill
         >
           {'Attach results'}
@@ -140,7 +142,7 @@ export function parser() {
       match += configurationString;
       try {
         console.error('configurationString', configurationString);
-        configuration = configurationString;
+        configuration = JSON.parse(configurationString);
       } catch (e) {
         const now = eat.now();
         this.file.fail(`Unable to parse osquery JSON configuration: ${e}`, {

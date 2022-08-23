@@ -52,6 +52,8 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
   hideAgentsField,
   packId,
   agentSelection,
+  formRef,
+  hideQueryTypeField,
   addToTimeline,
 }) => {
   const { data: hasActionResultsPrivileges, isLoading } = useActionResultsPrivileges();
@@ -121,6 +123,7 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
 
   return (
     <LiveQueryForm
+      ref={formRef}
       queryField={queryField}
       ecsMappingField={ecsMappingField}
       defaultValue={defaultValue}
@@ -128,6 +131,7 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
       formType={formType}
       enabled={enabled}
       hideAgentsField={hideAgentsField}
+      hideQueryTypeField={hideQueryTypeField}
       addToTimeline={addToTimeline}
     />
   );

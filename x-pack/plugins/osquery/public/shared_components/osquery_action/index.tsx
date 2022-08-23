@@ -6,7 +6,7 @@
  */
 
 import { EuiErrorBoundary, EuiLoadingContent, EuiEmptyPrompt, EuiCode } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React, { forwardRef, useMemo } from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import type { CoreStart } from '@kbn/core/public';
 import {
@@ -31,16 +31,18 @@ interface OsqueryActionProps {
   savedQueryId?: string;
   formType: 'steps' | 'simple';
   hideAgentsField?: boolean;
+  formRef: React.RefObject<HTMLFormElement>;
   addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
 }
 
 const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({
   agentId,
-  query,
-  savedQueryId,
+  formRef,
   formType = 'simple',
   hideAgentsField,
   addToTimeline,
+  hideQueryTypeField,
+  defaultValues = {},
 }) => {
   const permissions = useKibana().services.application.capabilities.osquery;
 
@@ -57,6 +59,8 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({
   );
   const { osqueryAvailable, agentFetched, isLoading, policyFetched, policyLoading, agentData } =
     useIsOsqueryAvailable(agentId);
+
+  console.error('is', isLoading, agentId);
 
   if (agentId && agentFetched && !agentData) {
     return emptyPrompt;
@@ -81,11 +85,11 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({
     );
   }
 
-  if (isLoading) {
+  if (agentId && isLoading) {
     return <EuiLoadingContent lines={10} />;
   }
 
-  if (!policyFetched && policyLoading) {
+  if (agentId && !policyFetched && policyLoading) {
     return <EuiLoadingContent lines={10} />;
   }
 
@@ -113,15 +117,18 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({
 
   return (
     <LiveQuery
+      formRef={formRef}
       formType={formType}
       agentId={agentId}
       hideAgentsField={hideAgentsField}
       addToTimeline={addToTimeline}
-      query={query}
-      savedQueryId={savedQueryId}
+      hideQueryTypeField={hideQueryTypeField}
+      {...defaultValues}
     />
   );
 };
+
+OsqueryActionComponent.displayName = 'OsqueryAction';
 
 export const OsqueryAction = React.memo(OsqueryActionComponent);
 
@@ -132,6 +139,9 @@ const OsqueryActionWrapperComponent: React.FC<OsqueryActionWrapperProps> = ({
   agentId,
   formType,
   hideAgentsField = false,
+  defaultValues,
+  formRef,
+  hideQueryTypeField,
   addToTimeline,
 }) => (
   <KibanaThemeProvider theme$={services.theme.theme$}>
@@ -139,10 +149,13 @@ const OsqueryActionWrapperComponent: React.FC<OsqueryActionWrapperProps> = ({
       <EuiErrorBoundary>
         <QueryClientProvider client={queryClient}>
           <OsqueryAction
+            formRef={formRef}
+            defaultValues={defaultValues}
             agentId={agentId}
             formType={formType}
             hideAgentsField={hideAgentsField}
             addToTimeline={addToTimeline}
+            hideQueryTypeField={hideQueryTypeField}
           />
         </QueryClientProvider>
       </EuiErrorBoundary>
