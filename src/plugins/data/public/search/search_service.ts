@@ -67,7 +67,7 @@ import { AggsService } from './aggs';
 import { createUsageCollector, SearchUsageCollector } from './collectors';
 import { getEql, getEsaggs, getEsdsl, getEssql } from './expressions';
 import { getKibanaContext } from './expressions/kibana_context';
-import { extractWarnings, handleResponse } from './fetch';
+import { handleResponse } from './fetch';
 import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
 import { ISessionsClient, ISessionService, SessionsClient, SessionService } from './session';
 import { registerSearchSessionsMgmt } from './session/sessions_mgmt';
@@ -238,7 +238,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       getConfig: uiSettings.get.bind(uiSettings),
       search,
       onResponse: (...args: [SearchRequest, IKibanaSearchResponse, SearchSourceSearchOptions]) =>
-        handleResponse(...args, theme),
+        handleResponse(...args, undefined, theme),
     };
 
     const config = this.initializerContext.config.get();
@@ -271,23 +271,13 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       },
       showWarnings: (inspector, cb) => {
         inspector.adapter?.getRequests().forEach((req) => {
-          let handled: boolean | undefined;
-          if (cb != null) {
-            const rawResponse = (req.response?.json as IKibanaSearchResponse)?.rawResponse;
-            const warnings = extractWarnings(rawResponse);
-            // use the consumer callback to handle warnings from the request
-            handled = !!warnings && cb(warnings);
-          }
-
-          // test if the consumer callback specifies to skip the default behavior
-          if (!handled) {
-            handleResponse(
-              { body: req.json },
-              (req.response?.json ?? {}) as IKibanaSearchResponse<unknown>,
-              { disableShardFailureWarning: false },
-              theme
-            );
-          }
+          handleResponse(
+            { body: req.json },
+            (req.response?.json ?? {}) as IKibanaSearchResponse<unknown>,
+            { disableShardFailureWarning: false },
+            cb,
+            theme
+          );
         });
       },
       session: this.sessionService,

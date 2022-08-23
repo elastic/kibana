@@ -14,6 +14,7 @@ import { SearchUsageCollector } from './collectors';
 import { AggsSetup, AggsSetupDependencies, AggsStartDependencies, AggsStart } from './aggs';
 import { IInspectorInfo, ISearchGeneric, ISearchStartSearchSource } from '../../common/search';
 import { ISessionsClient, ISessionService } from './session';
+import { WarningHandlerCallback } from './fetch';
 
 export type { ISearchStartSearchSource, SearchUsageCollector };
 
@@ -60,13 +61,9 @@ export interface ISearchStart {
   /**
    * Show warnings, or customize how they're shown
    * @param inspector IInspectorInfo - an inspector object with requests internally collected
-   * @param cb Function - an optional callback function which can intercept warnings. Pass `true` from the
-   *                      function to prevent the search service from showing warning notifications by default.
+   * @param cb WarningHandlerCallback - optional callback to intercept warnings
    */
-  showWarnings: (
-    inspector: IInspectorInfo,
-    cb?: (warnings: SearchResponseWarning[]) => boolean | undefined
-  ) => void;
+  showWarnings: (inspector: IInspectorInfo, cb?: WarningHandlerCallback) => void;
   /**
    * high level search
    * {@link ISearchStartSearchSource}
