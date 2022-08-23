@@ -201,7 +201,7 @@ export function FilterItem({
                         <EuiIcon type="grab" size="s" />
                       </EuiFlexItem>
                       <EuiFlexItem grow={10}>
-                        <EuiFlexGroup alignItems="center">
+                        <EuiFlexGroup gutterSize="m" alignItems="center" justifyContent="center">
                           <EuiFlexItem grow={4}>
                             <EuiFormRow fullWidth>
                               <FieldInput
@@ -237,7 +237,27 @@ export function FilterItem({
                         </EuiFlexGroup>
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
-                        <EuiFlexGroup responsive={false} justifyContent="center">
+                        <EuiFlexGroup
+                          responsive={false}
+                          justifyContent="center"
+                          alignItems="center"
+                          gutterSize="m"
+                        >
+                          <EuiFlexItem grow={false}>
+                            <EuiButtonIcon
+                              onClick={onRemoveFilter}
+                              iconType="trash"
+                              isDisabled={disableRemove}
+                              size="s"
+                              color="danger"
+                              aria-label={i18n.translate(
+                                'unifiedSearch.filter.filtersBuilder.deleteFilterGroupButttonIcon',
+                                {
+                                  defaultMessage: 'Delete filter group',
+                                }
+                              )}
+                            />
+                          </EuiFlexItem>
                           {!hideOr ? (
                             <EuiFlexItem grow={false}>
                               <EuiButtonIcon
@@ -254,7 +274,6 @@ export function FilterItem({
                               />
                             </EuiFlexItem>
                           ) : null}
-
                           <EuiFlexItem grow={false}>
                             <EuiButtonIcon
                               display="base"
@@ -266,23 +285,6 @@ export function FilterItem({
                                 'unifiedSearch.filter.filtersBuilder.addAndFilterGroupButttonIcon',
                                 {
                                   defaultMessage: 'Add filter group with AND',
-                                }
-                              )}
-                            />
-                          </EuiFlexItem>
-
-                          <EuiFlexItem grow={false}>
-                            <EuiButtonIcon
-                              display="base"
-                              onClick={onRemoveFilter}
-                              iconType="trash"
-                              isDisabled={disableRemove}
-                              size="s"
-                              color="danger"
-                              aria-label={i18n.translate(
-                                'unifiedSearch.filter.filtersBuilder.deleteFilterGroupButttonIcon',
-                                {
-                                  defaultMessage: 'Delete filter group',
                                 }
                               )}
                             />
