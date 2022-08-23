@@ -440,6 +440,8 @@ export interface FileKind {
   id: string;
   /**
    * Maximum size, in bytes, a file of this kind can be.
+   *
+   * @default 4MiB
    */
   maxSizeBytes?: number;
 
