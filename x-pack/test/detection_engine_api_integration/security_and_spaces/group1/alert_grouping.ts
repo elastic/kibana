@@ -56,7 +56,7 @@ export default ({ getService }: FtrProviderContext) => {
         query: '*',
         from: 'now-100000h',
         max_signals: 5,
-        alertGrouping: {
+        alert_grouping: {
           groupBy: ['host.name'],
         },
       } as QueryCreateSchema);
