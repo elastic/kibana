@@ -34,22 +34,20 @@ import { useLocalStorage } from '../../../shared/use_local_storage';
 import { NEW_INDEX_PATH } from '../../routes';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
+import { DeleteIndexModal } from './delete_index_modal';
 import { IndicesLogic } from './indices_logic';
 import { IndicesTable } from './indices_table';
 
 import './search_indices.scss';
 
 export const baseBreadcrumbs = [
-  i18n.translate('xpack.enterpriseSearch.content.searchIndices.content.breadcrumb', {
-    defaultMessage: 'Content',
-  }),
   i18n.translate('xpack.enterpriseSearch.content.searchIndices.searchIndices.breadcrumb', {
     defaultMessage: 'Elasticsearch indices',
   }),
 ];
 
 export const SearchIndices: React.FC = () => {
-  const { fetchIndices, onPaginate, setIsFirstRequest } = useActions(IndicesLogic);
+  const { fetchIndices, onPaginate, openDeleteModal, setIsFirstRequest } = useActions(IndicesLogic);
   const { meta, indices, hasNoIndices, isLoading } = useValues(IndicesLogic);
   const [showHiddenIndices, setShowHiddenIndices] = useState(false);
   const [searchQuery, setSearchValue] = useState('');
@@ -85,6 +83,7 @@ export const SearchIndices: React.FC = () => {
 
   return (
     <>
+      <DeleteIndexModal />
       <EnterpriseSearchContentPageTemplate
         pageChrome={baseBreadcrumbs}
         pageViewTelemetry="Search indices"
@@ -203,7 +202,12 @@ export const SearchIndices: React.FC = () => {
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem>
-              <IndicesTable indices={indices} meta={meta} onChange={handlePageChange(onPaginate)} />
+              <IndicesTable
+                indices={indices}
+                meta={meta}
+                onChange={handlePageChange(onPaginate)}
+                onDelete={openDeleteModal}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : (
