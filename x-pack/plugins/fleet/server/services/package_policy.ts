@@ -284,7 +284,7 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
     };
   }
 
-  public async findAllForPolicy(
+  public async findAllForAgentPolicy(
     soClient: SavedObjectsClientContract,
     agentPolicyId: string
   ): Promise<PackagePolicy[]> {
@@ -1293,7 +1293,7 @@ export interface PackagePolicyServiceInterface {
 
   get(soClient: SavedObjectsClientContract, id: string): Promise<PackagePolicy | null>;
 
-  findAllForPolicy(
+  findAllForAgentPolicy(
     soClient: SavedObjectsClientContract,
     agentPolicyId: string
   ): Promise<PackagePolicy[]>;

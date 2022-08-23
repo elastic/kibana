@@ -262,7 +262,7 @@ class AgentPolicyService {
 
     if (withPackagePolicies) {
       agentPolicy.package_policies =
-        (await packagePolicyService.findAllForPolicy(soClient, id)) || [];
+        (await packagePolicyService.findAllForAgentPolicy(soClient, id)) || [];
     }
 
     return agentPolicy;
@@ -631,7 +631,7 @@ class AgentPolicyService {
       throw new Error('Cannot delete agent policy that is assigned to agent(s)');
     }
 
-    const packagePolicies = await packagePolicyService.findAllForPolicy(soClient, id);
+    const packagePolicies = await packagePolicyService.findAllForAgentPolicy(soClient, id);
 
     if (packagePolicies.length) {
       const deletedPackagePolicies: DeletePackagePoliciesResponse =

@@ -239,7 +239,7 @@ jest.mock('./package_policy', () => ({
   ...jest.requireActual('./package_policy'),
   packagePolicyService: {
     ...jest.requireActual('./package_policy').packagePolicyService,
-    findAllForPolicy: jest.fn().mockReturnValue([]),
+    findAllForAgentPolicy: jest.fn().mockReturnValue([]),
     listIds: jest.fn().mockReturnValue({ items: [] }),
     create: jest
       .fn()
@@ -282,7 +282,7 @@ const spyAgentPolicyServicBumpAllAgentPoliciesForOutput = jest.spyOn(
 describe('policy preconfiguration', () => {
   beforeEach(() => {
     mockedPackagePolicyService.create.mockReset();
-    mockedPackagePolicyService.findAllForPolicy.mockReset();
+    mockedPackagePolicyService.findAllForAgentPolicy.mockReset();
     mockInstalledPackages.clear();
     mockInstallPackageErrors.clear();
     mockConfiguredPolicies.clear();
@@ -366,7 +366,7 @@ describe('policy preconfiguration', () => {
     it('should not add new package policy to existing non managed policies', async () => {
       const soClient = getPutPreconfiguredPackagesMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      mockedPackagePolicyService.findAllForPolicy.mockResolvedValue([
+      mockedPackagePolicyService.findAllForAgentPolicy.mockResolvedValue([
         { name: 'test_package1' } as PackagePolicy,
       ]);
 
@@ -416,7 +416,7 @@ describe('policy preconfiguration', () => {
     it('should add new package policy to existing managed policies', async () => {
       const soClient = getPutPreconfiguredPackagesMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      mockedPackagePolicyService.findAllForPolicy.mockResolvedValue([
+      mockedPackagePolicyService.findAllForAgentPolicy.mockResolvedValue([
         { name: 'test_package1' } as PackagePolicy,
       ]);
 
@@ -476,7 +476,7 @@ describe('policy preconfiguration', () => {
       const soClient = getPutPreconfiguredPackagesMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-      mockedPackagePolicyService.findAllForPolicy.mockResolvedValue([
+      mockedPackagePolicyService.findAllForAgentPolicy.mockResolvedValue([
         { name: 'Renamed package policy', id: 'test_package1' } as PackagePolicy,
       ]);
 

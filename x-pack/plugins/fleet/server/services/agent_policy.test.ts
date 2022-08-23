@@ -146,7 +146,7 @@ describe('agent policy', () => {
 
     beforeEach(() => {
       soClient = getSavedObjectMock({ revision: 1, package_policies: ['package-1'] });
-      mockedPackagePolicyService.findAllForPolicy.mockReturnValue([
+      mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
         {
           id: 'package-1',
         },
