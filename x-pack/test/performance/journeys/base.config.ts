@@ -42,7 +42,7 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
     ...(prId !== undefined ? { prId } : {}),
     testJobId,
     testBuildId,
-    isBareMetal: process.env.BARE_METAL_MACHINE === 'true',
+    ciBuildName: process.env.BUILDKITE_PIPELINE_SLUG,
   };
 
   return {
