@@ -117,6 +117,8 @@ export interface CurrentAction {
   total: number;
   timedOut: boolean;
   failed: number;
+  cancelled: boolean;
+  expired: boolean;
 }
 
 // Generated from FleetServer schema.json

@@ -14,17 +14,9 @@ import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../commo
 /**
  * Return current bulk actions
  */
-export async function getActionStatuses(
-  esClient: ElasticsearchClient,
-  now = new Date().toISOString()
-): Promise<CurrentAction[]> {
-  // Fetch all non expired actions
-  const [_actions, cancelledActionIds] = await Promise.all([
-    _getActions(esClient, now),
-    _getCancelledActionId(esClient, now),
-  ]);
-
-  let actions = _actions.filter((action) => cancelledActionIds.indexOf(action.actionId) < 0);
+export async function getActionStatuses(esClient: ElasticsearchClient): Promise<CurrentAction[]> {
+  let actions = await _getActions(esClient);
+  const cancelledActionIds = await _getCancelledActionId(esClient);
 
   // Fetch acknowledged result for every action
   actions = await pMap(
@@ -46,7 +38,7 @@ export async function getActionStatuses(
         },
       });
 
-      const total = action.total ?? action.nbAgents;
+      const total = action.total || action.nbAgents;
       const complete = count === total;
 
       return {
@@ -56,6 +48,7 @@ export async function getActionStatuses(
         total,
         timedOut: !complete && action.timedOut,
         failed: total - action.nbAgents,
+        cancelled: cancelledActionIds.indexOf(action.actionId) > -1,
       };
     },
     { concurrency: 20 }
@@ -64,10 +57,7 @@ export async function getActionStatuses(
   return actions;
 }
 
-async function _getCancelledActionId(
-  esClient: ElasticsearchClient,
-  now = new Date().toISOString()
-) {
+async function _getCancelledActionId(esClient: ElasticsearchClient) {
   const res = await esClient.search<FleetServerAgentAction>({
     index: AGENT_ACTIONS_INDEX,
     ignore_unavailable: true,
@@ -84,11 +74,6 @@ async function _getCancelledActionId(
               field: 'agents',
             },
           },
-          {
-            range: {
-              expiration: { gte: now },
-            },
-          },
         ],
       },
     },
@@ -97,26 +82,23 @@ async function _getCancelledActionId(
   return res.hits.hits.map((hit) => hit._source?.data?.target_id as string);
 }
 
-async function _getActions(esClient: ElasticsearchClient, now = new Date().toISOString()) {
+async function _getActions(esClient: ElasticsearchClient) {
   const res = await esClient.search<FleetServerAgentAction>({
     index: AGENT_ACTIONS_INDEX,
     ignore_unavailable: true,
     query: {
       bool: {
+        must_not: [
+          {
+            term: {
+              type: 'CANCEL',
+            },
+          },
+        ],
         must: [
           {
             exists: {
               field: 'agents',
-            },
-          },
-          {
-            range: {
-              expiration: { gte: now },
-            },
-          },
-          {
-            range: {
-              '@timestamp': { gte: 'now-1h' },
             },
           },
         ],
@@ -141,8 +123,13 @@ async function _getActions(esClient: ElasticsearchClient, now = new Date().toISO
           version: hit._source.data?.version as string,
           startTime,
           type: hit._source?.type,
-          total: hit._source?.total,
+          total: hit._source?.total ?? 0,
+          failed: 0,
           timedOut,
+          cancelled: false,
+          expired: hit._source?.expiration
+            ? Date.parse(hit._source?.expiration) < Date.now()
+            : false,
         };
       }
 
