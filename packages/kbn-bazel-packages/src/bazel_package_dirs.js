@@ -6,10 +6,7 @@
  * Side Public License, v 1.
  */
 
-import globby from 'globby';
-import Path from 'path';
-
-import { REPO_ROOT } from '@kbn/utils';
+const { expandWildcards } = require('./find_files');
 
 /**
  * This is a list of repo-relative paths to directories containing packages. Do not
@@ -19,7 +16,7 @@ import { REPO_ROOT } from '@kbn/utils';
  *   eg. src/vis_editors     => would find a package at src/vis_editors/foo/package.json
  *       src/vis_editors/*   => would find a package at src/vis_editors/foo/bar/package.json
  */
-export const BAZEL_PACKAGE_DIRS = [
+const BAZEL_PACKAGE_DIRS = [
   'packages',
   'packages/shared-ux',
   'packages/shared-ux/*',
@@ -34,18 +31,13 @@ export const BAZEL_PACKAGE_DIRS = [
 
 /**
  * Resolve all the BAZEL_PACKAGE_DIRS to absolute paths
+ * @param {string} repoRoot
  */
-export function getAllBazelPackageDirs() {
-  return globby.sync(BAZEL_PACKAGE_DIRS, {
-    cwd: REPO_ROOT,
-    onlyDirectories: true,
-    expandDirectories: false,
-  });
+function getAllBazelPackageDirs(repoRoot) {
+  return expandWildcards(repoRoot, BAZEL_PACKAGE_DIRS);
 }
 
-/**
- * Resolve all the BAZEL_PACKAGE_DIRS to repo-relative paths
- */
-export function getAllRepoRelativeBazelPackageDirs() {
-  return getAllBazelPackageDirs().map((path) => Path.relative(REPO_ROOT, path));
-}
+module.exports = {
+  BAZEL_PACKAGE_DIRS,
+  getAllBazelPackageDirs,
+};
