@@ -59,79 +59,75 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
-  registry.when(
-    'mappings exists',
-    { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
-    () => {
-      describe('when data is generated', () => {
-        let response: SupertestReturnType<'POST /internal/apm/data_view/static'>;
+  registry.when('mappings exists', { config: 'basic', archives: [] }, () => {
+    describe('when data is generated', () => {
+      let response: SupertestReturnType<'POST /internal/apm/data_view/static'>;
+
+      before(async () => {
+        await generateApmData(synthtrace);
+        response = await createDataViewViaApmApi();
+      });
+
+      after(async () => {
+        await deleteDataView();
+        await synthtrace.clean();
+      });
+
+      it('successfully creates the apm data view', async () => {
+        expect(response.status).to.be(200);
+
+        expect(response.body.dataView!.id).to.be('apm_static_index_pattern_id');
+        expect(response.body.dataView!.name).to.be('APM');
+        expect(response.body.dataView!.title).to.be(
+          'traces-apm*,apm-*,logs-apm*,apm-*,metrics-apm*,apm-*'
+        );
+      });
+
+      describe('when fetching the data view', async () => {
+        let resBody: any;
 
         before(async () => {
-          await generateApmData(synthtrace);
-          response = await createDataViewViaApmApi();
+          const res = await getDataView().expect(200);
+          resBody = res.body;
         });
 
-        after(async () => {
-          await deleteDataView();
-          await synthtrace.clean();
+        it('has correct id', () => {
+          expect(resBody.id).to.be('apm_static_index_pattern_id');
         });
 
-        it('successfully creates the apm data view', async () => {
-          expect(response.status).to.be(200);
+        it('has correct title', () => {
+          expect(resBody.attributes.title).to.be(dataViewPattern);
+        });
 
-          expect(response.body.dataView!.id).to.be('apm_static_index_pattern_id');
-          expect(response.body.dataView!.name).to.be('APM');
-          expect(response.body.dataView!.title).to.be(
-            'traces-apm*,apm-*,logs-apm*,apm-*,metrics-apm*,apm-*'
+        it('has correct attributes', () => {
+          expect(resBody.attributes.fieldFormatMap).to.be(
+            JSON.stringify({
+              'trace.id': {
+                id: 'url',
+                params: {
+                  urlTemplate: 'apm/link-to/trace/{{value}}',
+                  labelTemplate: '{{value}}',
+                },
+              },
+              'transaction.id': {
+                id: 'url',
+                params: {
+                  urlTemplate: 'apm/link-to/transaction/{{value}}',
+                  labelTemplate: '{{value}}',
+                },
+              },
+            })
           );
         });
 
-        describe('when fetching the data view', async () => {
-          let resBody: any;
-
-          before(async () => {
-            const res = await getDataView().expect(200);
-            resBody = res.body;
-          });
-
-          it('has correct id', () => {
-            expect(resBody.id).to.be('apm_static_index_pattern_id');
-          });
-
-          it('has correct title', () => {
-            expect(resBody.attributes.title).to.be(dataViewPattern);
-          });
-
-          it('has correct attributes', () => {
-            expect(resBody.attributes.fieldFormatMap).to.be(
-              JSON.stringify({
-                'trace.id': {
-                  id: 'url',
-                  params: {
-                    urlTemplate: 'apm/link-to/trace/{{value}}',
-                    labelTemplate: '{{value}}',
-                  },
-                },
-                'transaction.id': {
-                  id: 'url',
-                  params: {
-                    urlTemplate: 'apm/link-to/transaction/{{value}}',
-                    labelTemplate: '{{value}}',
-                  },
-                },
-              })
-            );
-          });
-
-          // this test ensures that the default APM Data View doesn't interfere with suggestions returned in the kuery bar (this has been a problem in the past)
-          it('can get suggestions for `trace.id`', async () => {
-            const suggestions = await getDataViewSuggestions('trace.id');
-            expect(suggestions.body.length).to.be(10);
-          });
+        // this test ensures that the default APM Data View doesn't interfere with suggestions returned in the kuery bar (this has been a problem in the past)
+        it('can get suggestions for `trace.id`', async () => {
+          const suggestions = await getDataViewSuggestions('trace.id');
+          expect(suggestions.body.length).to.be(10);
         });
       });
-    }
-  );
+    });
+  });
 }
 
 function generateApmData(synthtrace: ApmSynthtraceEsClient) {

@@ -63,149 +63,141 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
-  registry.when(
-    'when data is loaded',
-    { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
-    () => {
-      const {
-        firstTransaction: { name: firstTransactionName, failureRate: firstTransactionFailureRate },
-        secondTransaction: {
-          name: secondTransactionName,
-          failureRate: secondTransactionFailureRate,
-        },
-      } = config;
+  registry.when('when data is loaded', { config: 'basic', archives: [] }, () => {
+    const {
+      firstTransaction: { name: firstTransactionName, failureRate: firstTransactionFailureRate },
+      secondTransaction: { name: secondTransactionName, failureRate: secondTransactionFailureRate },
+    } = config;
 
-      describe('returns the correct data', () => {
+    describe('returns the correct data', () => {
+      before(async () => {
+        await generateData({ serviceName, start, end, synthtraceEsClient });
+      });
+
+      after(() => synthtraceEsClient.clean());
+
+      describe('without comparison', () => {
+        const numberOfBuckets = 15;
+        let erroneousTransactions: ErroneousTransactions;
+
         before(async () => {
-          await generateData({ serviceName, start, end, synthtraceEsClient });
+          const response = await callApi({
+            path: { groupId: '0000000000000000000000Error test' },
+          });
+          erroneousTransactions = response.body;
         });
 
-        after(() => synthtraceEsClient.clean());
+        it('displays the correct number of occurrences', () => {
+          const { topErroneousTransactions } = erroneousTransactions;
+          expect(topErroneousTransactions.length).to.be(2);
 
-        describe('without comparison', () => {
-          const numberOfBuckets = 15;
+          const firstTransaction = topErroneousTransactions.find(
+            (x) => x.transactionName === firstTransactionName
+          );
+          expect(firstTransaction).to.not.be(undefined);
+          expect(firstTransaction?.occurrences).to.be(
+            firstTransactionFailureRate * numberOfBuckets
+          );
+
+          const secondTransaction = topErroneousTransactions.find(
+            (x) => x.transactionName === secondTransactionName
+          );
+          expect(secondTransaction).to.not.be(undefined);
+          expect(secondTransaction?.occurrences).to.be(
+            secondTransactionFailureRate * numberOfBuckets
+          );
+        });
+
+        it('displays the correct number of occurrences in time series', () => {
+          const { topErroneousTransactions } = erroneousTransactions;
+
+          const firstTransaction = topErroneousTransactions.find(
+            (x) => x.transactionName === firstTransactionName
+          );
+          const firstErrorCount = sumBy(firstTransaction?.currentPeriodTimeseries, 'y');
+          expect(firstErrorCount).to.be(firstTransactionFailureRate * numberOfBuckets);
+
+          const secondTransaction = topErroneousTransactions.find(
+            (x) => x.transactionName === secondTransactionName
+          );
+          const secondErrorCount = sumBy(secondTransaction?.currentPeriodTimeseries, 'y');
+          expect(secondErrorCount).to.be(secondTransactionFailureRate * numberOfBuckets);
+        });
+      });
+
+      describe('with comparison', () => {
+        describe('when there are data for the time periods', () => {
           let erroneousTransactions: ErroneousTransactions;
 
           before(async () => {
+            const fiveMinutes = 5 * 60 * 1000;
             const response = await callApi({
               path: { groupId: '0000000000000000000000Error test' },
+              query: {
+                start: new Date(end - fiveMinutes).toISOString(),
+                end: new Date(end).toISOString(),
+                offset: '5m',
+              },
             });
             erroneousTransactions = response.body;
           });
 
-          it('displays the correct number of occurrences', () => {
+          it('returns some data', () => {
             const { topErroneousTransactions } = erroneousTransactions;
-            expect(topErroneousTransactions.length).to.be(2);
 
-            const firstTransaction = topErroneousTransactions.find(
-              (x) => x.transactionName === firstTransactionName
-            );
-            expect(firstTransaction).to.not.be(undefined);
-            expect(firstTransaction?.occurrences).to.be(
-              firstTransactionFailureRate * numberOfBuckets
+            const hasCurrentPeriodData = topErroneousTransactions[0].currentPeriodTimeseries.some(
+              ({ y }) => isFiniteNumber(y)
             );
 
-            const secondTransaction = topErroneousTransactions.find(
-              (x) => x.transactionName === secondTransactionName
+            const hasPreviousPeriodData = topErroneousTransactions[0].previousPeriodTimeseries.some(
+              ({ y }) => isFiniteNumber(y)
             );
-            expect(secondTransaction).to.not.be(undefined);
-            expect(secondTransaction?.occurrences).to.be(
-              secondTransactionFailureRate * numberOfBuckets
+
+            expect(hasCurrentPeriodData).to.be(true);
+            expect(hasPreviousPeriodData).to.be(true);
+          });
+
+          it('has the same start time for both periods', () => {
+            const { topErroneousTransactions } = erroneousTransactions;
+            expect(first(topErroneousTransactions[0].currentPeriodTimeseries)?.x).to.be(
+              first(topErroneousTransactions[0].previousPeriodTimeseries)?.x
             );
           });
 
-          it('displays the correct number of occurrences in time series', () => {
+          it('has same end time for both periods', () => {
             const { topErroneousTransactions } = erroneousTransactions;
-
-            const firstTransaction = topErroneousTransactions.find(
-              (x) => x.transactionName === firstTransactionName
+            expect(last(topErroneousTransactions[0].currentPeriodTimeseries)?.x).to.be(
+              last(topErroneousTransactions[0].previousPeriodTimeseries)?.x
             );
-            const firstErrorCount = sumBy(firstTransaction?.currentPeriodTimeseries, 'y');
-            expect(firstErrorCount).to.be(firstTransactionFailureRate * numberOfBuckets);
+          });
 
-            const secondTransaction = topErroneousTransactions.find(
-              (x) => x.transactionName === secondTransactionName
+          it('returns same number of buckets for both periods', () => {
+            const { topErroneousTransactions } = erroneousTransactions;
+            expect(topErroneousTransactions[0].currentPeriodTimeseries.length).to.be(
+              topErroneousTransactions[0].previousPeriodTimeseries.length
             );
-            const secondErrorCount = sumBy(secondTransaction?.currentPeriodTimeseries, 'y');
-            expect(secondErrorCount).to.be(secondTransactionFailureRate * numberOfBuckets);
           });
         });
 
-        describe('with comparison', () => {
-          describe('when there are data for the time periods', () => {
-            let erroneousTransactions: ErroneousTransactions;
-
-            before(async () => {
-              const fiveMinutes = 5 * 60 * 1000;
-              const response = await callApi({
-                path: { groupId: '0000000000000000000000Error test' },
-                query: {
-                  start: new Date(end - fiveMinutes).toISOString(),
-                  end: new Date(end).toISOString(),
-                  offset: '5m',
-                },
-              });
-              erroneousTransactions = response.body;
+        describe('when there are no data for the time period', () => {
+          it('returns an empty array', async () => {
+            const response = await callApi({
+              path: { groupId: '0000000000000000000000Error test' },
+              query: {
+                start: '2021-01-03T00:00:00.000Z',
+                end: '2021-01-03T00:15:00.000Z',
+                offset: '1d',
+              },
             });
 
-            it('returns some data', () => {
-              const { topErroneousTransactions } = erroneousTransactions;
+            const {
+              body: { topErroneousTransactions },
+            } = response;
 
-              const hasCurrentPeriodData = topErroneousTransactions[0].currentPeriodTimeseries.some(
-                ({ y }) => isFiniteNumber(y)
-              );
-
-              const hasPreviousPeriodData =
-                topErroneousTransactions[0].previousPeriodTimeseries.some(({ y }) =>
-                  isFiniteNumber(y)
-                );
-
-              expect(hasCurrentPeriodData).to.be(true);
-              expect(hasPreviousPeriodData).to.be(true);
-            });
-
-            it('has the same start time for both periods', () => {
-              const { topErroneousTransactions } = erroneousTransactions;
-              expect(first(topErroneousTransactions[0].currentPeriodTimeseries)?.x).to.be(
-                first(topErroneousTransactions[0].previousPeriodTimeseries)?.x
-              );
-            });
-
-            it('has same end time for both periods', () => {
-              const { topErroneousTransactions } = erroneousTransactions;
-              expect(last(topErroneousTransactions[0].currentPeriodTimeseries)?.x).to.be(
-                last(topErroneousTransactions[0].previousPeriodTimeseries)?.x
-              );
-            });
-
-            it('returns same number of buckets for both periods', () => {
-              const { topErroneousTransactions } = erroneousTransactions;
-              expect(topErroneousTransactions[0].currentPeriodTimeseries.length).to.be(
-                topErroneousTransactions[0].previousPeriodTimeseries.length
-              );
-            });
-          });
-
-          describe('when there are no data for the time period', () => {
-            it('returns an empty array', async () => {
-              const response = await callApi({
-                path: { groupId: '0000000000000000000000Error test' },
-                query: {
-                  start: '2021-01-03T00:00:00.000Z',
-                  end: '2021-01-03T00:15:00.000Z',
-                  offset: '1d',
-                },
-              });
-
-              const {
-                body: { topErroneousTransactions },
-              } = response;
-
-              expect(topErroneousTransactions).to.be.empty();
-            });
+            expect(topErroneousTransactions).to.be.empty();
           });
         });
       });
-    }
-  );
+    });
+  });
 }

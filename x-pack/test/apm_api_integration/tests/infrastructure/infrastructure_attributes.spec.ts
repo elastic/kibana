@@ -48,39 +48,33 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
-  registry.when(
-    'Infrastructure attributes',
-    { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
-    () => {
-      describe('when data is loaded', () => {
-        beforeEach(async () => {
-          await generateData({ start, end, synthtraceEsClient });
-        });
+  registry.when('Infrastructure attributes', { config: 'basic', archives: [] }, () => {
+    describe('when data is loaded', () => {
+      beforeEach(async () => {
+        await generateData({ start, end, synthtraceEsClient });
+      });
 
-        afterEach(() => synthtraceEsClient.clean());
+      afterEach(() => synthtraceEsClient.clean());
 
-        describe('when service runs in container', () => {
-          it('returns arrays of container ids and pod names', async () => {
-            const response = await callApi('synth-go');
-            expect(response.status).to.be(200);
-            expect(response.body.containerIds.length).to.be(1);
-            // hostNames is always returning empty
-            // we can not test the infra indices api call with synthtrace
-            expect(response.body.hostNames.length).to.be(0);
-            expect(response.body.podNames.length).to.be(1);
-          });
-        });
-
-        describe('when service does NOT run in container', () => {
-          it('returns array of host names', async () => {
-            const response = await callApi('synth-java');
-            expect(response.status).to.be(200);
-            expect(response.body.containerIds.length).to.be(0);
-            expect(response.body.hostNames.length).to.be(1);
-            expect(response.body.podNames.length).to.be(0);
-          });
+      describe('when service runs in container', () => {
+        it('returns arrays of container ids and pod names', async () => {
+          const response = await callApi('synth-go');
+          expect(response.status).to.be(200);
+          expect(response.body.containerIds.length).to.be(1);
+          expect(response.body.hostNames.length).to.be(1);
+          expect(response.body.podNames.length).to.be(1);
         });
       });
-    }
-  );
+
+      describe('when service does NOT run in container', () => {
+        it('returns array of host names', async () => {
+          const response = await callApi('synth-java');
+          expect(response.status).to.be(200);
+          expect(response.body.containerIds.length).to.be(0);
+          expect(response.body.hostNames.length).to.be(1);
+          expect(response.body.podNames.length).to.be(0);
+        });
+      });
+    });
+  });
 }

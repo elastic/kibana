@@ -52,7 +52,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
-  registry.when('Trace exists', { config: 'basic', archives: ['apm_mappings_only_8.0.0'] }, () => {
+  registry.when('Trace exists', { config: 'basic', archives: [] }, () => {
     let serviceATraceId: string;
     before(async () => {
       const instanceJava = apm.service('synth-apple', 'production', 'java').instance('instance-b');
