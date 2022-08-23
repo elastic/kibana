@@ -3377,6 +3377,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-saved-objects-base-server-internal@link:bazel-bin/packages/core/saved-objects/core-saved-objects-base-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-saved-objects-base-server-mocks@link:bazel-bin/packages/core/saved-objects/core-saved-objects-base-server-mocks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-saved-objects-browser-internal@link:bazel-bin/packages/core/saved-objects/core-saved-objects-browser-internal":
   version "0.0.0"
   uid ""
@@ -3394,6 +3402,10 @@
   uid ""
 
 "@kbn/core-saved-objects-server@link:bazel-bin/packages/core/saved-objects/core-saved-objects-server":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-saved-objects-utils-server@link:bazel-bin/packages/core/saved-objects/core-saved-objects-utils-server":
   version "0.0.0"
   uid ""
 
@@ -7347,6 +7359,14 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__core-saved-objects-base-server-internal@link:bazel-bin/packages/core/saved-objects/core-saved-objects-base-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-saved-objects-base-server-mocks@link:bazel-bin/packages/core/saved-objects/core-saved-objects-base-server-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__core-saved-objects-browser-internal@link:bazel-bin/packages/core/saved-objects/core-saved-objects-browser-internal/npm_module_types":
   version "0.0.0"
   uid ""
@@ -7364,6 +7384,10 @@
   uid ""
 
 "@types/kbn__core-saved-objects-server@link:bazel-bin/packages/core/saved-objects/core-saved-objects-server/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-saved-objects-utils-server@link:bazel-bin/packages/core/saved-objects/core-saved-objects-utils-server/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -20249,7 +20273,7 @@ micromark@~2.11.0:
     debug "^4.0.0"
     parse-entities "^2.0.0"
 
-micromatch@3.1.10, micromatch@^3.1.10, micromatch@^3.1.4:
+micromatch@^3.1.10, micromatch@^3.1.4:
   version "3.1.10"
   resolved "https://registry.yarnpkg.com/micromatch/-/micromatch-3.1.10.tgz#70859bc95c9840952f359a068a3fc49f9ecfac23"
   integrity sha512-MWikgl9n9M3w+bpsY3He8L+w9eF9338xRl8IAO5viDizwSzziFEyUzo2xrrloB64ADbTf8uA8vRqqttDTOmccg==
@@ -25334,9 +25358,9 @@ set-cookie-serde@^1.0.0:
   integrity sha512-Vq8e5GsupfJ7okHIvEPcfs5neCo7MZ1ZuWrO3sllYi3DOWt6bSSCpADzqXjz3k0fXehnoFIrmmhty9IN6U6BXQ==
 
 set-getter@^0.1.0:
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/set-getter/-/set-getter-0.1.0.tgz#d769c182c9d5a51f409145f2fba82e5e86e80376"
-  integrity sha1-12nBgsnVpR9AkUXy+6guXoboA3Y=
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/set-getter/-/set-getter-0.1.1.tgz#a3110e1b461d31a9cfc8c5c9ee2e9737ad447102"
+  integrity sha512-9sVWOy+gthr+0G9DzqqLaYNA7+5OKkSmcqjL9cBpDEaZrr3ShQlyX2cZ/O/ozE41oxn/Tt0LGEM/w4Rub3A3gw==
   dependencies:
     to-object-path "^0.3.0"
 
@@ -27038,9 +27062,9 @@ tmp@^0.2.1, tmp@~0.2.1:
     rimraf "^3.0.0"
 
 tmpl@1.0.x:
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/tmpl/-/tmpl-1.0.4.tgz#23640dd7b42d00433911140820e5cf440e521dd1"
-  integrity sha1-I2QN17QtAEM5ERQIIOXPRA5SHdE=
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/tmpl/-/tmpl-1.0.5.tgz#8683e0b902bb9c20c4f726e3c0b69f36518c07cc"
+  integrity sha512-3f0uOEAQwIqGuWW2MVzYg8fV/QNnc/IpuJNG837rLuczAaLVHslWHZQj4IGiEl5Hs3kkbhwL9Ab7Hrsmuj+Smw==
 
 to-absolute-glob@^2.0.0:
   version "2.0.2"
