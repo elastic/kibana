@@ -10,8 +10,7 @@ import { executionContextServiceMock } from '@kbn/core-execution-context-server-
 import { ContextService } from '@kbn/core-http-context-server-internal';
 import { createHttpServer, createCoreContext } from '@kbn/core-http-server-mocks';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
-import { contextServiceMock, coreMock } from '../../mocks';
-import type { InternalSavedObjectsRequestHandlerContext } from '../internal_types';
+import { contextServiceMock, coreMock } from '../mocks';
 
 const defaultCoreId = Symbol('core');
 
@@ -27,13 +26,9 @@ export const setupServer = async (coreId: symbol = defaultCoreId) => {
   });
   const handlerContext = coreMock.createRequestHandlerContext();
 
-  httpSetup.registerRouteHandlerContext<InternalSavedObjectsRequestHandlerContext, 'core'>(
-    coreId,
-    'core',
-    (ctx, req, res) => {
-      return handlerContext;
-    }
-  );
+  httpSetup.registerRouteHandlerContext<any, 'core'>(coreId, 'core', (ctx, req, res) => {
+    return handlerContext;
+  });
 
   return {
     server,

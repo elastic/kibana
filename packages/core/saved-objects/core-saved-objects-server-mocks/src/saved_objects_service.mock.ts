@@ -17,7 +17,7 @@ import type {
   SavedObjectsService,
   InternalSavedObjectsServiceSetup,
   InternalSavedObjectsServiceStart,
-} from './saved_objects_service';
+} from '@kbn/core-saved-objects-server-internal';
 
 import { savedObjectsRepositoryMock } from './service/lib/repository.mock';
 import { savedObjectsClientMock } from './service/saved_objects_client.mock';

@@ -32,7 +32,7 @@ export interface IKibanaMigrator {
    *    The promise resolves with an array of migration statuses, one for each
    *    elasticsearch index which was migrated.
    */
-  runMigrations(options: { rerun?: boolean }): Promise<MigrationResult[]>;
+  runMigrations(options?: { rerun?: boolean }): Promise<MigrationResult[]>;
 
   prepareMigrations(): void;
 
