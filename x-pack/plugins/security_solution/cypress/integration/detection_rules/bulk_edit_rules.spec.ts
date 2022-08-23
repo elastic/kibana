@@ -9,7 +9,6 @@ import {
   MODAL_CONFIRMATION_BTN,
   MODAL_CONFIRMATION_CANCEL_BTN,
   MODAL_CONFIRMATION_BODY,
-  RULES_TAGS_FILTER_BTN,
   RULE_CHECKBOX,
   RULES_TAGS_POPOVER_BTN,
   TOASTER_BODY,
@@ -40,7 +39,6 @@ import {
   testMultipleSelectedRulesLabel,
   loadPrebuiltDetectionRulesFromHeaderBtn,
   switchToElasticRules,
-  confirmConfirmationModal,
   clickErrorToastBtn,
 } from '../../tasks/alerts_detection_rules';
 
@@ -61,7 +59,8 @@ import {
   clickAddTagsMenuItem,
   checkOverwriteTagsCheckbox,
   checkOverwriteIndexPatternsCheckbox,
-  clickDeleteIndexPatternsMenuItem,
+  openBulkEditAddIndexPatternsForm,
+  openBulkEditDeleteIndexPatternsForm,
   selectTimelineTemplate,
   checkTagsInTagsFilter,
 } from '../../tasks/rules_bulk_edit';
@@ -77,6 +76,7 @@ import {
   createEventCorrelationRule,
   createThresholdRule,
   createNewTermsRule,
+  deleteCustomRule,
 } from '../../tasks/api_calls/rules';
 import { loadPrepackagedTimelineTemplates } from '../../tasks/api_calls/timelines';
 import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
@@ -95,8 +95,9 @@ import { getIndicatorMatchTimelineTemplate } from '../../objects/timeline';
 import { esArchiverResetKibana } from '../../tasks/es_archiver';
 
 const RULE_NAME = 'Custom rule for bulk actions';
+const ML_RULE_ID = 'machine_learning_rule_id';
 
-const defaultIndexPatterns = ['index-1-*', 'index-2-*'];
+const prePopulatedIndexPatterns = ['index-1-*', 'index-2-*'];
 const prePopulatedTags = ['test-default-tag-1', 'test-default-tag-2'];
 
 const expectedNumberOfCustomRulesToBeEdited = 6;
@@ -110,7 +111,7 @@ const expectedNumberOfNotMLRules =
   expectedNumberOfCustomRulesToBeEdited - expectedNumberOfMachineLearningRulesToBeEdited;
 const numberOfRulesPerPage = 5;
 
-const indexDataSource = { index: defaultIndexPatterns, type: 'indexPatterns' } as const;
+const indexDataSource = { index: prePopulatedIndexPatterns, type: 'indexPatterns' } as const;
 
 const defaultRuleData = {
   dataSource: indexDataSource,
@@ -135,7 +136,7 @@ describe('Detection rules, bulk edit', () => {
       '1'
     );
     createEventCorrelationRule({ ...getEqlRule(), ...defaultRuleData }, '2');
-    createMachineLearningRule({ ...getMachineLearningRule(), ...defaultRuleData }, '3');
+    createMachineLearningRule({ ...getMachineLearningRule(), ...defaultRuleData }, ML_RULE_ID);
     createCustomIndicatorRule({ ...getNewThreatIndicatorRule(), ...defaultRuleData }, '4');
     createThresholdRule({ ...getNewThresholdRule(), ...defaultRuleData }, '5');
     createNewTermsRule({ ...getNewTermsRule(), ...defaultRuleData }, '6');
@@ -208,72 +209,6 @@ describe('Detection rules, bulk edit', () => {
       cy.get(MODAL_CONFIRMATION_CANCEL_BTN).click();
       cy.get(MODAL_CONFIRMATION_BODY).should('not.exist');
     });
-
-    // it('Index pattern action on Machine learning rules', () => {
-    //   loadPrebuiltDetectionRulesFromHeaderBtn();
-
-    //   // modal window should show how many rules can be edit, how many not
-    //   selectAllRules();
-    //   clickAddIndexPatternsMenuItem();
-    //   waitForMixedRulesBulkEditModal(expectedNumberOfNotMLRules);
-
-    //   // check rules that cannot be edited for index patterns: prebuilt and ML
-    //   checkMachineLearningRulesCannotBeModified(expectedNumberOfMachineLearningRulesToBeEdited);
-    //   checkPrebuiltRulesCannotBeModified(totalNumberOfPrebuiltRules);
-
-    //   // user can proceed with custom rule editing
-    //   cy.get(MODAL_CONFIRMATION_BTN).should(
-    //     'have.text',
-    //     `Edit ${expectedNumberOfNotMLRules} Custom rules`
-    //   );
-
-    //   // b
-    //   typeTags(['test-tag']);
-    //   submitBulkEditForm();
-    //   waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
-    // });
-
-    //   it('should show warning modal windows when some of the selected rules cannot be edited', () => {
-    // createMachineLearningRule(getMachineLearningRule(), '7');
-
-    // loadPrebuiltDetectionRulesFromHeaderBtn();
-
-    // // select few Elastic rules, check if we can't proceed further, as ELastic rules are not editable
-    // // filter rules, only Elastic rule to show
-    // switchToElasticRules();
-
-    // // check modal window for few selected rules
-    // selectNumberOfRules(numberOfRulesPerPage);
-    // clickAddIndexPatternsMenuItem();
-    // checkElasticRulesCannotBeModified(numberOfRulesPerPage);
-    // cy.get(MODAL_CONFIRMATION_BTN).click();
-
-    // // Select all rules(Elastic rules and custom)
-    // cy.get(ELASTIC_RULES_BTN).click();
-    // selectAllRules();
-    // clickAddIndexPatternsMenuItem();
-    // waitForMixedRulesBulkEditModal(expectedNumberOfCustomRulesToBeEdited);
-
-    // // check rules that cannot be edited for index patterns: immutable and ML
-    // checkElasticRulesCannotBeModified(totalNumberOfPrebuiltRules);
-    // checkMachineLearningRulesCannotBeModified(expectedNumberOfMachineLearningRulesToBeEdited);
-
-    // // proceed with custom rule editing
-    // cy.get(MODAL_CONFIRMATION_BTN)
-    //   .should('have.text', `Edit ${expectedNumberOfCustomRulesToBeEdited} custom rules`)
-    //   .click();
-
-    // typeIndexPatterns([CUSTOM_INDEX_PATTERN_1]);
-    // confirmBulkEditForm();
-
-    // // check if rule has been updated
-    // cy.get(CUSTOM_RULES_BTN).click();
-    // cy.get(RULES_TABLE_REFRESH_INDICATOR).should('exist');
-    // cy.get(RULES_TABLE_REFRESH_INDICATOR).should('not.exist');
-    // goToTheRuleDetailsOf(RULE_NAME);
-    // hasIndexPatterns([...DEFAULT_INDEX_PATTERNS, CUSTOM_INDEX_PATTERN_1].join(''));
-
-    // });
   });
 
   describe('Tags actions', () => {
@@ -372,8 +307,9 @@ describe('Detection rules, bulk edit', () => {
   });
 
   describe('Index patterns', () => {
-    it('Add index patterns to custom rules when Machine learning rules selected', () => {
+    it('Index pattern action applied to custom rules, including machine learning: user proceeds with edit of custom non machine learning rule', () => {
       const indexPattersToBeAdded = ['index-to-add-1-*', 'index-to-add-2-*'];
+      const resultingIndexPatterns = [...prePopulatedIndexPatterns, ...indexPattersToBeAdded];
 
       selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
       clickAddIndexPatternsMenuItem();
@@ -389,71 +325,99 @@ describe('Detection rules, bulk edit', () => {
 
       // check if rule has been updated
       goToTheRuleDetailsOf(RULE_NAME);
-      hasIndexPatterns([...defaultIndexPatterns, ...indexPattersToBeAdded].join(''));
+      hasIndexPatterns(resultingIndexPatterns.join(''));
     });
 
-    it('Overwrite index patterns in custom rules', () => {
-      const indexPattersToWrite = ['index-to-write-1-*', 'index-to-write-2-*'];
-
+    it('Index pattern action applied to custom rules, including machine learning: user cancels action', () => {
       selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
-
-      // confirm editing custom rules, that are not Machine Learning
       clickAddIndexPatternsMenuItem();
-      confirmConfirmationModal();
-
-      // check overwrite index patterns checkbox, ensure warning message is displayed and type index patterns
-      checkOverwriteIndexPatternsCheckbox();
-      cy.get(RULES_BULK_EDIT_INDEX_PATTERNS_WARNING).should(
-        'have.text',
-        `You’re about to overwrite index patterns for ${expectedNumberOfNotMLRules} selected rules, press Save to apply changes.`
-      );
-
-      typeIndexPatterns(indexPattersToWrite);
-      submitBulkEditForm();
-
-      waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfNotMLRules });
-
-      // check if rule has been updated
-      goToTheRuleDetailsOf(RULE_NAME);
-      hasIndexPatterns(indexPattersToWrite.join(''));
-    });
-
-    it('Delete index patterns from custom rules', () => {
-      const indexPatternsToDelete = defaultIndexPatterns.slice(0, 1);
-      const indexPatternsLeftNotDeleted = defaultIndexPatterns.slice(1);
-
-      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
 
       // confirm editing custom rules, that are not Machine Learning
-      clickDeleteIndexPatternsMenuItem();
-      confirmConfirmationModal();
+      checkMachineLearningRulesCannotBeModified(expectedNumberOfMachineLearningRulesToBeEdited);
 
-      typeIndexPatterns(indexPatternsToDelete);
-      submitBulkEditForm();
-      waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfNotMLRules });
-
-      // check if rule has been updated
-      goToTheRuleDetailsOf(RULE_NAME);
-      hasIndexPatterns(indexPatternsLeftNotDeleted.join(''));
+      // user cancels action and modal disappears
+      cy.get(MODAL_CONFIRMATION_CANCEL_BTN).click();
+      cy.get(MODAL_CONFIRMATION_BODY).should('not.exist');
     });
 
-    it('Delete all index patterns from custom rules', () => {
-      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+    context('no custom machine learning rules exist', () => {
+      beforeEach(() => {
+        deleteCustomRule(ML_RULE_ID);
+        cy.reload();
+      });
 
-      // confirm editing custom rules, that are not Machine Learning
-      clickDeleteIndexPatternsMenuItem();
-      confirmConfirmationModal();
+      it('Add index patterns to custom rules', () => {
+        const indexPattersToBeAdded = ['index-to-add-1-*', 'index-to-add-2-*'];
+        const resultingIndexPatterns = [...prePopulatedIndexPatterns, ...indexPattersToBeAdded];
+  
+        selectNumberOfRules(expectedNumberOfNotMLRules);
+        openBulkEditAddIndexPatternsForm();
+  
+        typeIndexPatterns(indexPattersToBeAdded);
+        submitBulkEditForm();
+  
+        waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfNotMLRules });
+  
+        // check if rule has been updated
+        goToTheRuleDetailsOf(RULE_NAME);
+        hasIndexPatterns(resultingIndexPatterns.join(''));
+      });
+  
+      it('Overwrite index patterns in custom rules', () => {
+        const indexPattersToWrite = ['index-to-write-1-*', 'index-to-write-2-*'];
+  
+        selectNumberOfRules(expectedNumberOfNotMLRules);
+        openBulkEditAddIndexPatternsForm();
 
-      typeIndexPatterns(defaultIndexPatterns);
-      submitBulkEditForm();
+        // check overwrite index patterns checkbox, ensure warning message is displayed and type index patterns
+        checkOverwriteIndexPatternsCheckbox();
+        cy.get(RULES_BULK_EDIT_INDEX_PATTERNS_WARNING).should(
+          'have.text',
+          `You’re about to overwrite index patterns for ${expectedNumberOfNotMLRules} selected rules, press Save to apply changes.`
+        );
+  
+        typeIndexPatterns(indexPattersToWrite);
+        submitBulkEditForm();
+  
+        waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfNotMLRules });
+  
+        // check if rule has been updated
+        goToTheRuleDetailsOf(RULE_NAME);
+        hasIndexPatterns(indexPattersToWrite.join(''));
+      });
+  
+      it('Delete index patterns from custom rules', () => {
+        const indexPatternsToDelete = prePopulatedIndexPatterns.slice(0, 1);
+        const resultingIndexPatterns = prePopulatedIndexPatterns.slice(1);
+  
+        selectNumberOfRules(expectedNumberOfNotMLRules);
+        openBulkEditDeleteIndexPatternsForm();
+  
+        typeIndexPatterns(indexPatternsToDelete);
+        submitBulkEditForm();
+        waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfNotMLRules });
+  
+        // check if rule has been updated
+        goToTheRuleDetailsOf(RULE_NAME);
+        hasIndexPatterns(resultingIndexPatterns.join(''));
+      });
+  
+      it.only('Delete all index patterns from custom rules', () => {
+        selectNumberOfRules(expectedNumberOfNotMLRules);
+  
+        openBulkEditDeleteIndexPatternsForm();
+        typeIndexPatterns(prePopulatedIndexPatterns);
 
-      // error toast should be displayed that that rules edit failed
-      cy.contains(TOASTER_BODY, `${expectedNumberOfNotMLRules} rules failed to update.`);
-
-      // on error toast button click display error that index patterns can't be empty
-      clickErrorToastBtn();
-      cy.contains(MODAL_ERROR_BODY, "Index patterns can't be empty");
-    });
+        submitBulkEditForm();
+  
+        // error toast should be displayed that that rules edit failed
+        cy.contains(TOASTER_BODY, `${expectedNumberOfNotMLRules} rules failed to update.`);
+  
+        // on error toast button click display error that index patterns can't be empty
+        clickErrorToastBtn();
+        cy.contains(MODAL_ERROR_BODY, "Index patterns can't be empty");
+      });
+    })
   });
 
   describe('Timeline templates', () => {
