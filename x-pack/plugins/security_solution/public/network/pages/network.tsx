@@ -112,7 +112,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
       [dispatch]
     );
 
-    const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
+    const { indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
 
     const onSkipFocusBeforeEventsTable = useCallback(() => {
       containerElement.current
@@ -214,7 +214,6 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                   </Display>
 
                   <NetworkRoutes
-                    docValueFields={docValueFields}
                     filterQuery={tabsFilterQuery}
                     from={from}
                     isInitializing={isInitializing}
