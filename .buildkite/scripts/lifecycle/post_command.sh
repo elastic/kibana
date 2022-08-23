@@ -32,6 +32,9 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
   # Upload Cypress assets
   buildkite-agent artifact upload 'x-pack/plugins/**/cypress/screenshots/*'
   buildkite-agent artifact upload 'x-pack/plugins/**/cypress/videos/*'
+  buildkite-agent artifact upload "target/kibana-apm/cypress/screenshots/*.png"
+  buildkite-agent artifact upload "target/kibana-apm/cypress/videos/*"
+  
 
   echo "--- Run Failed Test Reporter"
   node scripts/report_failed_tests --build-url="${BUILDKITE_BUILD_URL}#${BUILDKITE_JOB_ID}" 'target/junit/**/*.xml'

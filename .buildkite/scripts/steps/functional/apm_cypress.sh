@@ -19,5 +19,5 @@ checks-reporter-with-killswitch "APM Cypress Tests" \
 
 # Upload Cypress assets
 echo "uploading assets"
-buildkite-agent artifact upload "${XPACK_DIR}/plugins/**/cypress/screenshots/*"
-buildkite-agent artifact upload "${XPACK_DIR}/plugins/**/cypress/videos/*"
+buildkite-agent artifact upload "target/kibana-apm/cypress/screenshots/*.png"
+buildkite-agent artifact upload "target/kibana-apm/cypress/videos/*"
