@@ -222,7 +222,7 @@ describe('Detection rules, bulk edit', () => {
         .should('have.length', prePopulatedTags.length)
         .each(($el, index) => {
           cy.wrap($el).should('have.text', prePopulatedTags[index]);
-        })
+        });
     });
 
     it('Add tags to custom rules', () => {

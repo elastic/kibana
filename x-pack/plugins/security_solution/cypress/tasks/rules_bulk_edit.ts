@@ -158,13 +158,11 @@ export const selectTimelineTemplate = (timelineTitle: string) => {
  * @param tags
  */
 export const checkTagsInTagsFilter = (tags: string[]) => {
-  cy.get(RULES_TAGS_FILTER_BTN)
-  .contains(`Tags${tags.length}`)
-  .click();
+  cy.get(RULES_TAGS_FILTER_BTN).contains(`Tags${tags.length}`).click();
 
   cy.get(EUI_FILTER_SELECT_ITEM)
     .should('have.length', tags.length)
     .each(($el, index) => {
       cy.wrap($el).should('have.text', tags[index]);
     });
-}
+};
