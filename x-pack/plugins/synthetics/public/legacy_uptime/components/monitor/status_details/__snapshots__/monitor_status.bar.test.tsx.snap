@@ -27,7 +27,7 @@ Array [
     data-type="column"
   >
     <dt
-      class="euiDescriptionList__title c0 emotion-euiDescriptionList__title-column-compressed"
+      class="euiDescriptionList__title c0 emotion-euiDescriptionList__title-column-reverse"
     >
       Overall availability
     </dt>
@@ -38,7 +38,7 @@ Array [
       0.00 %
     </dd>
     <dt
-      class="euiDescriptionList__title c0 emotion-euiDescriptionList__title-column-compressed"
+      class="euiDescriptionList__title c0 emotion-euiDescriptionList__title-column-reverse"
     >
       Url
     </dt>
@@ -49,7 +49,7 @@ Array [
       --
     </dd>
     <dt
-      class="euiDescriptionList__title c0 emotion-euiDescriptionList__title-column-compressed"
+      class="euiDescriptionList__title c0 emotion-euiDescriptionList__title-column-reverse"
     >
       Monitor ID
     </dt>
@@ -58,7 +58,7 @@ Array [
       data-test-subj="monitor-page-title"
     />
     <dt
-      class="euiDescriptionList__title c0 emotion-euiDescriptionList__title-column-compressed"
+      class="euiDescriptionList__title c0 emotion-euiDescriptionList__title-column-reverse"
     >
       Tags
     </dt>

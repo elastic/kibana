@@ -78,7 +78,7 @@ exports[`Storyshots components/WorkpadFilters/FiltersGroupComponent default 1`] 
                   data-type="column"
                 >
                   <dt
-                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-normal"
+                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-compressed"
                     style={
                       Object {
                         "width": "30%",
@@ -108,7 +108,7 @@ exports[`Storyshots components/WorkpadFilters/FiltersGroupComponent default 1`] 
                     </div>
                   </dd>
                   <dt
-                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-normal"
+                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-compressed"
                     style={
                       Object {
                         "width": "30%",
@@ -138,7 +138,7 @@ exports[`Storyshots components/WorkpadFilters/FiltersGroupComponent default 1`] 
                     </div>
                   </dd>
                   <dt
-                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-normal"
+                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-compressed"
                     style={
                       Object {
                         "width": "30%",
@@ -168,7 +168,7 @@ exports[`Storyshots components/WorkpadFilters/FiltersGroupComponent default 1`] 
                     </div>
                   </dd>
                   <dt
-                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-normal"
+                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-compressed"
                     style={
                       Object {
                         "width": "30%",
@@ -207,7 +207,7 @@ exports[`Storyshots components/WorkpadFilters/FiltersGroupComponent default 1`] 
                   data-type="column"
                 >
                   <dt
-                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-normal"
+                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-compressed"
                     style={
                       Object {
                         "width": "30%",
@@ -237,7 +237,7 @@ exports[`Storyshots components/WorkpadFilters/FiltersGroupComponent default 1`] 
                     </div>
                   </dd>
                   <dt
-                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-normal"
+                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-compressed"
                     style={
                       Object {
                         "width": "30%",
@@ -267,7 +267,7 @@ exports[`Storyshots components/WorkpadFilters/FiltersGroupComponent default 1`] 
                     </div>
                   </dd>
                   <dt
-                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-normal"
+                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-compressed"
                     style={
                       Object {
                         "width": "30%",
@@ -297,7 +297,7 @@ exports[`Storyshots components/WorkpadFilters/FiltersGroupComponent default 1`] 
                     </div>
                   </dd>
                   <dt
-                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-normal"
+                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-compressed"
                     style={
                       Object {
                         "width": "30%",
@@ -327,7 +327,7 @@ exports[`Storyshots components/WorkpadFilters/FiltersGroupComponent default 1`] 
                     </div>
                   </dd>
                   <dt
-                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-normal"
+                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-compressed"
                     style={
                       Object {
                         "width": "30%",
@@ -366,7 +366,7 @@ exports[`Storyshots components/WorkpadFilters/FiltersGroupComponent default 1`] 
                   data-type="column"
                 >
                   <dt
-                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-normal"
+                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-compressed"
                     style={
                       Object {
                         "width": "30%",
@@ -396,7 +396,7 @@ exports[`Storyshots components/WorkpadFilters/FiltersGroupComponent default 1`] 
                     </div>
                   </dd>
                   <dt
-                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-normal"
+                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-compressed"
                     style={
                       Object {
                         "width": "30%",
@@ -426,7 +426,7 @@ exports[`Storyshots components/WorkpadFilters/FiltersGroupComponent default 1`] 
                     </div>
                   </dd>
                   <dt
-                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-normal"
+                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-compressed"
                     style={
                       Object {
                         "width": "30%",
@@ -456,7 +456,7 @@ exports[`Storyshots components/WorkpadFilters/FiltersGroupComponent default 1`] 
                     </div>
                   </dd>
                   <dt
-                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-normal"
+                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-compressed"
                     style={
                       Object {
                         "width": "30%",
@@ -495,7 +495,7 @@ exports[`Storyshots components/WorkpadFilters/FiltersGroupComponent default 1`] 
                   data-type="column"
                 >
                   <dt
-                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-normal"
+                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-compressed"
                     style={
                       Object {
                         "width": "30%",
@@ -525,7 +525,7 @@ exports[`Storyshots components/WorkpadFilters/FiltersGroupComponent default 1`] 
                     </div>
                   </dd>
                   <dt
-                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-normal"
+                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-compressed"
                     style={
                       Object {
                         "width": "30%",
@@ -555,7 +555,7 @@ exports[`Storyshots components/WorkpadFilters/FiltersGroupComponent default 1`] 
                     </div>
                   </dd>
                   <dt
-                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-normal"
+                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-compressed"
                     style={
                       Object {
                         "width": "30%",
@@ -585,7 +585,7 @@ exports[`Storyshots components/WorkpadFilters/FiltersGroupComponent default 1`] 
                     </div>
                   </dd>
                   <dt
-                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-normal"
+                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-compressed"
                     style={
                       Object {
                         "width": "30%",
@@ -615,7 +615,7 @@ exports[`Storyshots components/WorkpadFilters/FiltersGroupComponent default 1`] 
                     </div>
                   </dd>
                   <dt
-                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-normal"
+                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-compressed"
                     style={
                       Object {
                         "width": "30%",
