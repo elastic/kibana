@@ -97,7 +97,7 @@ describe('Control group telemetry function', () => {
   });
 
   test('counts all telemetry over multiple runs', () => {
-    expect(finalTelemetry.total).toBe(10);
+    expect(finalTelemetry.total).toBe(8);
   });
 
   test('counts control types over multiple runs.', () => {
