@@ -9,31 +9,38 @@ import { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { sortBy } from 'lodash';
 import { useMemo } from 'react';
 import { CaseAssignees } from '../../../common/api';
-import { getSortField } from '../../components/user_profiles/sort';
+import { getSortField, moveCurrentUserToBeginning } from '../../components/user_profiles/sort';
 import { Assignee, AssigneeWithProfile } from '../../components/user_profiles/types';
 
 export const useAssignees = ({
   caseAssignees,
   userProfiles,
+  currentUserProfile,
 }: {
   caseAssignees: CaseAssignees;
   userProfiles: Map<string, UserProfileWithAvatar>;
+  currentUserProfile?: UserProfileWithAvatar;
 }) => {
-  const assigneesWithProfiles = useMemo(
-    () =>
-      sortProfiles(
-        caseAssignees.reduce<AssigneeWithProfile[]>((acc, assignee) => {
-          const profile = userProfiles.get(assignee.uid);
+  const currentUserAsAssignee = getCurrentUserProfileAsAssignee(currentUserProfile);
 
-          if (profile) {
-            acc.push({ uid: assignee.uid, profile });
-          }
+  const assigneesWithProfiles = useMemo(() => {
+    const sortedUserProfiles = sortProfiles(
+      caseAssignees.reduce<AssigneeWithProfile[]>((acc, assignee) => {
+        const profile = userProfiles.get(assignee.uid);
 
-          return acc;
-        }, [])
-      ),
-    [caseAssignees, userProfiles]
-  );
+        if (profile) {
+          acc.push({ uid: assignee.uid, profile });
+        }
+
+        return acc;
+      }, [])
+    );
+
+    return moveCurrentUserToBeginning<AssigneeWithProfile>(
+      currentUserAsAssignee,
+      sortedUserProfiles
+    );
+  }, [caseAssignees, currentUserAsAssignee, userProfiles]);
 
   const assigneesWithoutProfiles = useMemo(
     () =>
@@ -60,6 +67,11 @@ export const useAssignees = ({
     allAssignees,
   };
 };
+
+const getCurrentUserProfileAsAssignee = (currentUserProfile?: UserProfileWithAvatar) =>
+  currentUserProfile !== undefined
+    ? { uid: currentUserProfile.uid, profile: currentUserProfile }
+    : undefined;
 
 const sortProfiles = (assignees: AssigneeWithProfile[]) => {
   return sortBy(assignees, (assignee) => getSortField(assignee.profile));

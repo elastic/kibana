@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiText } from '@elastic/eui';
+import { EuiTitle } from '@elastic/eui';
 
 interface SidebarTitleProps {
   title: string;
@@ -14,9 +14,9 @@ interface SidebarTitleProps {
 
 const SidebarTitleComponent: React.FC<SidebarTitleProps> = ({ title }) => {
   return (
-    <EuiText size="s">
-      <strong>{title}</strong>
-    </EuiText>
+    <EuiTitle size="xxs">
+      <h2>{title}</h2>
+    </EuiTitle>
   );
 };
 

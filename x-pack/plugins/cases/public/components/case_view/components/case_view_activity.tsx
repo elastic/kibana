@@ -7,6 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
+import { isEqual } from 'lodash';
 import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_get_current_user_profile';
 import { useBulkGetUserProfiles } from '../../../containers/user_profiles/use_bulk_get_user_profiles';
 import { useGetConnectors } from '../../../containers/configure/use_connectors';
@@ -112,10 +113,12 @@ export const CaseViewActivity = ({
 
   const onUpdateAssignees = useCallback(
     (newAssignees: Assignee[]) => {
-      const value = newAssignees.map((assignee) => ({ uid: assignee.uid }));
-      onUpdateField({ key: 'assignees', value });
+      const newAssigneeUids = newAssignees.map((assignee) => ({ uid: assignee.uid }));
+      if (!isEqual(newAssigneeUids.sort(), assignees.sort())) {
+        onUpdateField({ key: 'assignees', value: newAssigneeUids });
+      }
     },
-    [onUpdateField]
+    [assignees, onUpdateField]
   );
 
   const { isLoading: isLoadingConnectors, data: connectors = [] } = useGetConnectors();

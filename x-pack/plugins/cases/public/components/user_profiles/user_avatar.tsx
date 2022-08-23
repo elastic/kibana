@@ -7,23 +7,24 @@
 
 import React from 'react';
 
-import { UserAvatar, UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { UserAvatar, UserProfileWithAvatar, UserAvatarProps } from '@kbn/user-profile-components';
 import { CaseUnknownUserAvatar } from './unknown_user';
 
-interface UserAvatarProps {
+interface CaseUserAvatarProps {
+  size: UserAvatarProps['size'];
   profile?: UserProfileWithAvatar;
 }
 
-const CaseUserAvatarComponent: React.FC<UserAvatarProps> = ({ profile }) => {
+const CaseUserAvatarComponent: React.FC<CaseUserAvatarProps> = ({ size, profile }) => {
   return profile !== undefined ? (
     <UserAvatar
       user={profile.user}
       avatar={profile.data.avatar}
       data-test-subj="case-user-profile-avatar"
-      size="s"
+      size={size}
     />
   ) : (
-    <CaseUnknownUserAvatar />
+    <CaseUnknownUserAvatar size={size} />
   );
 };
 

@@ -19,7 +19,7 @@ const UserAvatarWithName: React.FC<{ profile?: UserProfileWithAvatar }> = ({ pro
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s">
       <EuiFlexItem grow={false}>
-        <CaseUserAvatar profile={profile} />
+        <CaseUserAvatar size={'s'} profile={profile} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup direction={'column'} gutterSize="none">
@@ -51,15 +51,15 @@ const UserRepresentationComponent: React.FC<UserRepresentationProps> = ({
     [onRemoveAssignee, assignee.uid]
   );
 
-  const onMouseEnter = useCallback(() => setIsHovering(true), []);
-  const onMouseLeave = useCallback(() => setIsHovering(false), []);
+  const onFocus = useCallback(() => setIsHovering(true), []);
+  const onFocusLeave = useCallback(() => setIsHovering(false), []);
 
   const usernameDataTestSubj = getUsernameDataTestSubj(assignee);
 
   return (
     <EuiFlexGroup
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
+      onMouseEnter={onFocus}
+      onMouseLeave={onFocusLeave}
       alignItems="center"
       gutterSize="s"
       justifyContent="spaceBetween"
@@ -70,24 +70,27 @@ const UserRepresentationComponent: React.FC<UserRepresentationProps> = ({
           <UserAvatarWithName profile={assignee.profile} />
         </UserToolTip>
       </EuiFlexItem>
-      {isHovering && (
-        <EuiFlexItem grow={false}>
-          <EuiToolTip
-            position="left"
-            content={i18n.REMOVE_ASSIGNEE}
-            data-test-subj={`user-profile-assigned-user-cross-tooltip-${usernameDataTestSubj}`}
-          >
-            <EuiButtonIcon
-              data-test-subj={`user-profile-assigned-user-cross-${usernameDataTestSubj}`}
-              aria-label={i18n.REMOVE_ASSIGNEE_ARIA_LABEL}
-              iconType="cross"
-              color="danger"
-              iconSize="m"
-              onClick={removeAssigneeCallback}
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-      )}
+      <EuiFlexItem grow={false}>
+        <EuiToolTip
+          position="left"
+          content={i18n.REMOVE_ASSIGNEE}
+          data-test-subj={`user-profile-assigned-user-cross-tooltip-${usernameDataTestSubj}`}
+        >
+          <EuiButtonIcon
+            css={{
+              opacity: isHovering ? 1 : 0,
+            }}
+            onFocus={onFocus}
+            onBlur={onFocusLeave}
+            data-test-subj={`user-profile-assigned-user-cross-${usernameDataTestSubj}`}
+            aria-label={i18n.REMOVE_ASSIGNEE_ARIA_LABEL}
+            iconType="cross"
+            color="danger"
+            iconSize="m"
+            onClick={removeAssigneeCallback}
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

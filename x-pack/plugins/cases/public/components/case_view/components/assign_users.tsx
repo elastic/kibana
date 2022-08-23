@@ -9,24 +9,21 @@ import React, { useCallback, useEffect, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonIcon,
   EuiText,
   EuiLink,
-  EuiPopover,
-  EuiToolTip,
   EuiLoadingSpinner,
   EuiSpacer,
 } from '@elastic/eui';
 
-import { UserProfileWithAvatar, USER_PROFILES_SELECTABLE_NAME } from '@kbn/user-profile-components';
+import { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { useAssignees } from '../../../containers/user_profiles/use_assignees';
 import { CaseAssignees } from '../../../../common/api/cases/assignee';
 import * as i18n from '../translations';
-import { SuggestUsers } from '../../user_profiles/suggest_users';
 import { SidebarTitle } from './sidebar_title';
 import { UserRepresentation } from '../../user_profiles/user_representation';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { Assignee } from '../../user_profiles/types';
+import { SuggestUsersPopover } from './suggest_users_popover';
 
 interface AssigneesListProps {
   assignees: Assignee[];
@@ -49,22 +46,21 @@ const AssigneesList: React.FC<AssigneesListProps> = ({
         <EuiFlexGroup direction="column" gutterSize="none">
           <EuiFlexItem grow={false}>
             <EuiText size="s" color="subdued">
-              <p>{i18n.NO_ASSIGNEES}</p>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s" color="subdued">
-              <EuiLink data-test-subj="case-view-assign-users-link" onClick={togglePopOver}>
-                {i18n.ASSIGN_A_USER}
-              </EuiLink>
-              {currentUserProfile && (
-                <>
-                  <span>{i18n.SPACED_OR}</span>
-                  <EuiLink data-test-subj="case-view-assign-yourself-link" onClick={assignSelf}>
-                    {i18n.ASSIGN_YOURSELF}
-                  </EuiLink>
-                </>
-              )}
+              <p>
+                {i18n.NO_ASSIGNEES}
+                <br />
+                <EuiLink data-test-subj="case-view-assign-users-link" onClick={togglePopOver}>
+                  {i18n.ASSIGN_A_USER}
+                </EuiLink>
+                {currentUserProfile && (
+                  <>
+                    <span>{i18n.SPACED_OR}</span>
+                    <EuiLink data-test-subj="case-view-assign-yourself-link" onClick={assignSelf}>
+                      {i18n.ASSIGN_YOURSELF}
+                    </EuiLink>
+                  </>
+                )}
+              </p>
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -100,20 +96,24 @@ const AssignUsersComponent: React.FC<AssignUsersProps> = ({
   const { assigneesWithProfiles, assigneesWithoutProfiles, allAssignees } = useAssignees({
     caseAssignees,
     userProfiles,
+    currentUserProfile,
   });
+
   const [selectedAssignees, setSelectedAssignees] = useState<Assignee[] | undefined>();
   const [needToUpdateAssignees, setNeedToUpdateAssignees] = useState(false);
-
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const togglePopOver = useCallback(() => {
+  const togglePopover = useCallback(() => {
     setIsPopoverOpen((value) => !value);
     setNeedToUpdateAssignees(true);
   }, []);
 
   const onClosePopover = useCallback(() => {
-    setIsPopoverOpen(false);
+    // Order matters here because needToUpdateAssignees will likely be true already
+    // from the togglePopover call when opening the popover, so if we set the popover to false
+    // first, we'll get a rerender and then get another after we set needToUpdateAssignees to true again
     setNeedToUpdateAssignees(true);
+    setIsPopoverOpen(false);
   }, []);
 
   const onAssigneeRemoved = useCallback(
@@ -153,25 +153,13 @@ const AssignUsersComponent: React.FC<AssignUsersProps> = ({
   const { permissions } = useCasesContext();
 
   useEffect(() => {
-    // selectedAssignees will be undefined when an initial or rerender occurs, so we only want to update the assignees
+    // selectedAssignees will be undefined on initial render or a rerender occurs, so we only want to update the assignees
     // after the users have been changed in some manner not when it is an initial value
     if (isPopoverOpen === false && needToUpdateAssignees && selectedAssignees) {
       setNeedToUpdateAssignees(false);
       onAssigneesChanged(selectedAssignees);
     }
   }, [isPopoverOpen, needToUpdateAssignees, onAssigneesChanged, selectedAssignees]);
-
-  const popOverButton = (
-    <EuiToolTip position="left" content={i18n.EDIT_ASSIGNEES}>
-      <EuiButtonIcon
-        data-test-subj="case-view-assignees-edit-button"
-        aria-label={i18n.EDIT_ASSIGNEES_ARIA_LABEL}
-        iconType={'pencil'}
-        onClick={togglePopOver}
-        disabled={isLoading}
-      />
-    </EuiToolTip>
-  );
 
   return (
     <EuiFlexItem grow={false}>
@@ -187,24 +175,14 @@ const AssignUsersComponent: React.FC<AssignUsersProps> = ({
         {isLoading && <EuiLoadingSpinner data-test-subj="case-view-assignees-button-loading" />}
         {!isLoading && permissions.update && (
           <EuiFlexItem data-test-subj="case-view-assignees-edit" grow={false}>
-            <EuiPopover
-              button={popOverButton}
-              isOpen={isPopoverOpen}
-              closePopover={onClosePopover}
-              anchorPosition="downRight"
-              panelStyle={{
-                minWidth: 520,
-              }}
-              panelPaddingSize="none"
-              initialFocus={`[name=${USER_PROFILES_SELECTABLE_NAME}]`}
-            >
-              <SuggestUsers
-                isLoading={isLoading}
-                currentUserProfile={currentUserProfile}
-                onUsersChange={onUsersChange}
-                selectedUsers={assigneesWithProfiles}
-              />
-            </EuiPopover>
+            <SuggestUsersPopover
+              assignedUsersWithProfiles={assigneesWithProfiles}
+              isLoading={isLoading}
+              isPopoverOpen={isPopoverOpen}
+              onUsersChange={onUsersChange}
+              onClosePopover={onClosePopover}
+              togglePopover={togglePopover}
+            />
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
@@ -213,7 +191,7 @@ const AssignUsersComponent: React.FC<AssignUsersProps> = ({
         assignees={allAssignees}
         currentUserProfile={currentUserProfile}
         assignSelf={assignSelf}
-        togglePopOver={togglePopOver}
+        togglePopOver={togglePopover}
         onAssigneeRemoved={onAssigneeRemoved}
       />
     </EuiFlexItem>

@@ -12,13 +12,17 @@ import {
   deleteAllCaseItems,
   createComment,
   updateCase,
+  loginUsers,
 } from '../../../cases_api_integration/common/lib/utils';
+import { User } from '../../../cases_api_integration/common/lib/authentication/types';
+
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { generateRandomCaseWithoutConnector } from './helpers';
 
 export function CasesAPIServiceProvider({ getService }: FtrProviderContext) {
   const kbnSupertest = getService('supertest');
   const es = getService('es');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   return {
     async createCase(overwrites: Partial<CasePostRequest> = {}): Promise<CaseResponse> {
@@ -74,6 +78,13 @@ export function CasesAPIServiceProvider({ getService }: FtrProviderContext) {
             },
           ],
         },
+      });
+    },
+
+    async activateUserProfiles(users: User[]) {
+      await loginUsers({
+        supertest: supertestWithoutAuth,
+        users,
       });
     },
   };
