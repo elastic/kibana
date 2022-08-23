@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { uniq, omit, isEqual, keyBy } from 'lodash';
+import { omit, isEqual, keyBy } from 'lodash';
 import uuidv5 from 'uuid/v5';
 import { safeDump } from 'js-yaml';
 import pMap from 'p-map';
@@ -186,8 +186,9 @@ class AgentPolicyService {
   }
 
   public hasAPMIntegration(agentPolicy: AgentPolicy) {
-    return agentPolicy.package_policies.some(
-      (p) => typeof p !== 'string' && p.package?.name === FLEET_APM_PACKAGE
+    return (
+      agentPolicy.package_policies &&
+      agentPolicy.package_policies.some((p) => p.package?.name === FLEET_APM_PACKAGE)
     );
   }
 
@@ -261,13 +262,7 @@ class AgentPolicyService {
 
     if (withPackagePolicies) {
       agentPolicy.package_policies =
-        (await packagePolicyService.getByIDs(
-          soClient,
-          (agentPolicySO.attributes.package_policies as string[]) || [],
-          {
-            ignoreMissing: true,
-          }
-        )) || [];
+        (await packagePolicyService.findAllForAgentPolicy(soClient, id)) || [];
     }
 
     return agentPolicy;
@@ -458,7 +453,7 @@ class AgentPolicyService {
     );
 
     // Copy all package policies and append (copy n) to their names
-    if (baseAgentPolicy.package_policies.length) {
+    if (baseAgentPolicy.package_policies) {
       const newPackagePolicies = await pMap(
         baseAgentPolicy.package_policies as PackagePolicy[],
         async (packagePolicy: PackagePolicy) => {
@@ -610,75 +605,6 @@ class AgentPolicyService {
     return res;
   }
 
-  public async assignPackagePolicies(
-    soClient: SavedObjectsClientContract,
-    esClient: ElasticsearchClient,
-    id: string,
-    packagePolicyIds: string[],
-    options: { user?: AuthenticatedUser; bumpRevision: boolean; force?: boolean } = {
-      bumpRevision: true,
-    }
-  ): Promise<AgentPolicy> {
-    const oldAgentPolicy = await this.get(soClient, id, false);
-
-    if (!oldAgentPolicy) {
-      throw new Error('Agent policy not found');
-    }
-
-    if (oldAgentPolicy.is_managed && !options?.force) {
-      throw new HostedAgentPolicyRestrictionRelatedError(
-        `Cannot update integrations of hosted agent policy ${id}`
-      );
-    }
-
-    return await this._update(
-      soClient,
-      esClient,
-      id,
-      {
-        package_policies: uniq(
-          [...((oldAgentPolicy.package_policies || []) as string[])].concat(packagePolicyIds)
-        ),
-      },
-      options?.user,
-      { bumpRevision: options.bumpRevision }
-    );
-  }
-
-  public async unassignPackagePolicies(
-    soClient: SavedObjectsClientContract,
-    esClient: ElasticsearchClient,
-    id: string,
-    packagePolicyIds: string[],
-    options?: { user?: AuthenticatedUser; force?: boolean }
-  ) {
-    const oldAgentPolicy = await this.get(soClient, id, false);
-
-    if (!oldAgentPolicy) {
-      throw new Error('Agent policy not found');
-    }
-
-    if (oldAgentPolicy.is_managed && !options?.force) {
-      throw new HostedAgentPolicyRestrictionRelatedError(
-        `Cannot remove integrations of hosted agent policy ${id}`
-      );
-    }
-
-    return await this._update(
-      soClient,
-      esClient,
-      id,
-      {
-        package_policies: uniq(
-          [...((oldAgentPolicy.package_policies || []) as string[])].filter(
-            (packagePolicyId) => !packagePolicyIds.includes(packagePolicyId)
-          )
-        ),
-      },
-      options?.user
-    );
-  }
-
   public async delete(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
@@ -705,12 +631,14 @@ class AgentPolicyService {
       throw new Error('Cannot delete agent policy that is assigned to agent(s)');
     }
 
-    if (agentPolicy.package_policies && agentPolicy.package_policies.length) {
+    const packagePolicies = await packagePolicyService.findAllForAgentPolicy(soClient, id);
+
+    if (packagePolicies.length) {
       const deletedPackagePolicies: DeletePackagePoliciesResponse =
         await packagePolicyService.delete(
           soClient,
           esClient,
-          agentPolicy.package_policies as string[],
+          packagePolicies.map((p) => p.id),
           {
             force: options?.force,
             skipUnassignFromAgentPolicies: true,

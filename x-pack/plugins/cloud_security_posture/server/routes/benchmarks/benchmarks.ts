@@ -111,11 +111,12 @@ const createBenchmarks = (
   );
   return Promise.all(
     agentPolicies.flatMap((agentPolicy) => {
-      const cspPackagesOnAgent = agentPolicy.package_policies
-        .map((pckPolicyId) => {
-          if (typeof pckPolicyId === 'string') return cspPackagePoliciesMap.get(pckPolicyId);
-        })
-        .filter(isNonNullable);
+      const cspPackagesOnAgent =
+        agentPolicy.package_policies
+          ?.map(({ id: pckPolicyId }) => {
+            return cspPackagePoliciesMap.get(pckPolicyId);
+          })
+          .filter(isNonNullable) ?? [];
       const benchmarks = cspPackagesOnAgent.map(async (cspPackage) => {
         const cspRulesStatus = await addPackagePolicyCspRules(soClient, cspPackage);
         const agentPolicyStatus = {
