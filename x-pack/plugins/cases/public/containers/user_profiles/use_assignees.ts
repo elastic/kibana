@@ -36,10 +36,12 @@ export const useAssignees = ({
       }, [])
     );
 
-    return moveCurrentUserToBeginning<AssigneeWithProfile>(
+    const result = moveCurrentUserToBeginning<AssigneeWithProfile>(
       currentUserAsAssignee,
       sortedUserProfiles
     );
+
+    return result ?? [];
   }, [caseAssignees, currentUserAsAssignee, userProfiles]);
 
   const assigneesWithoutProfiles = useMemo(
