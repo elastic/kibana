@@ -8,7 +8,7 @@
 
 import { EuiDataGridProps, EuiDataGridRefProps } from '@elastic/eui';
 import { useSelector } from '@xstate/react';
-import { MutableRefObject, useCallback } from 'react';
+import { useRef, useCallback, MutableRefObject } from 'react';
 import { useEntries } from '../../hooks/query_data/use_state_machine';
 import { useThrottled } from '../../hooks/use_throttled';
 import { memoizedSelectRows } from '../../state_machines/entries_state_machine';
@@ -26,7 +26,10 @@ export const useOnItemsRendered = ({
 }) => {
   const [entriesActor] = useEntries();
 
-  const { startRowIndex, endRowIndex } = useSelector(entriesActor, memoizedSelectRows);
+  const { chunkBoundaryRowIndex, startRowIndex, endRowIndex, maximumRowIndex, minimumRowIndex } =
+    useSelector(entriesActor, memoizedSelectRows);
+
+  const hasPerformedInitialScrollRef = useRef(false);
 
   const throttledSend = useThrottled(entriesActor.send, SEND_THROTTLE_DELAY);
 
@@ -42,13 +45,26 @@ export const useOnItemsRendered = ({
         visibleEndRowIndex: visibleRowStopIndex,
       });
 
-      if (visibleRowStartIndex < startRowIndex) {
+      if (
+        !hasPerformedInitialScrollRef.current &&
+        chunkBoundaryRowIndex != null &&
+        chunkBoundaryRowIndex > 0
+      ) {
+        // perform initial scrolling
+        // we can't do this too early in a `useEffect`, because the EuiDataGrid
+        // sets the row count to 0 until has measured the header height
+        imperativeGridRef.current?.scrollToItem?.({
+          rowIndex: chunkBoundaryRowIndex,
+          align: 'start',
+        });
+        hasPerformedInitialScrollRef.current = true;
+      } else if (visibleRowStartIndex < startRowIndex && visibleRowStartIndex > minimumRowIndex) {
         // block scrolling outside of loaded area
         imperativeGridRef.current?.scrollToItem?.({
           rowIndex: startRowIndex,
           align: 'start',
         });
-      } else if (visibleRowStopIndex > endRowIndex) {
+      } else if (visibleRowStopIndex > endRowIndex && visibleRowStopIndex < maximumRowIndex) {
         // block scrolling outside of loaded area
         imperativeGridRef.current?.scrollToItem?.({
           rowIndex: endRowIndex,
@@ -56,6 +72,14 @@ export const useOnItemsRendered = ({
         });
       }
     },
-    [endRowIndex, imperativeGridRef, startRowIndex, throttledSend]
+    [
+      chunkBoundaryRowIndex,
+      endRowIndex,
+      imperativeGridRef,
+      maximumRowIndex,
+      minimumRowIndex,
+      startRowIndex,
+      throttledSend,
+    ]
   );
 };

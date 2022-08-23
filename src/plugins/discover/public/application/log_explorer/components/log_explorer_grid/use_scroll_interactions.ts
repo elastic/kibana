@@ -30,14 +30,6 @@ export const useScrollInteractions = ({
         if (endRowIndex != null) {
           imperativeGridRef.current?.scrollToItem?.({ rowIndex: endRowIndex, align: 'end' });
         }
-      } else if (event.type === 'loadAroundSucceeded') {
-        // scroll to middle when finished complete reload
-        const { chunkBoundaryRowIndex } = memoizedSelectRows(state);
-
-        imperativeGridRef.current?.scrollToItem?.({
-          rowIndex: chunkBoundaryRowIndex,
-          align: 'start',
-        });
       }
     };
 

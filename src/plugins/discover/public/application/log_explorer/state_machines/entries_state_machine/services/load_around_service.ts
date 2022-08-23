@@ -55,7 +55,6 @@ export const loadAround = ({
   });
 
   return (context: EntriesMachineContext): Observable<LoadAroundEvent> => {
-    // console.log(searchSource.getSearchRequestBody());
     const {
       configuration: { chunkSize },
       filters,

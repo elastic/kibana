@@ -59,6 +59,7 @@ export const useStateMachineService = ({
                 configuration: {
                   chunkSize: 200,
                   minimumChunkOverscan: 50,
+                  maximumRowCount: virtualRowCount,
                 },
                 topChunk: {
                   status: 'uninitialized',

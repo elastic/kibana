@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { assign, createMachine, InterpreterFrom } from 'xstate';
+import { createMachine, InterpreterFrom } from 'xstate';
 import {
   hasEmptyBottomChunk,
   hasEmptyTopChunk,
@@ -26,6 +26,7 @@ import {
   areVisibleEntriesNearStart,
 } from './guards/visible_entry_guards';
 import { EntriesMachineContext, EntriesMachineEvent, EntriesMachineState } from './types';
+import { hasFullTopChunk, hasFullBottomChunk } from './guards/chunk_guards';
 
 // for stubbing guards until all are implemented
 const constantGuard =
@@ -43,7 +44,6 @@ export const entriesStateMachine = createMachine<
     initial: 'loadingAround',
     states: {
       loadingAround: {
-        entry: 'resetChunks',
         invoke: {
           src: 'loadAround',
           id: 'loadAround',
@@ -63,28 +63,36 @@ export const entriesStateMachine = createMachine<
           },
           timeRangeChanged: {
             actions: 'updateTimeRange',
+            target: 'loadingAround',
+            internal: false,
           },
-          columnsChanged: {},
+          columnsChanged: {
+            target: 'loadingAround',
+            internal: false,
+          },
         },
       },
       loaded: {
         type: 'parallel',
         states: {
           top: {
-            initial: 'start',
+            initial: 'unknown',
             states: {
-              start: {
+              unknown: {
                 always: [
                   {
                     cond: 'hasLoadedTopChunk',
                     target: 'loaded',
+                    internal: true,
                   },
                   {
                     cond: 'hasEmptyTopChunk',
                     target: 'empty',
+                    internal: true,
                   },
                   {
                     target: 'failed',
+                    internal: true,
                   },
                 ],
               },
@@ -96,31 +104,53 @@ export const entriesStateMachine = createMachine<
                 },
               },
               loaded: {
-                on: {
-                  visibleEntriesChanged: {
-                    cond: 'areVisibleEntriesNearStart',
-                    target: '#logExplorerEntries.loadingTop',
+                initial: 'unknown',
+                states: {
+                  unknown: {
+                    always: [
+                      {
+                        cond: 'hasFullTopChunk',
+                        target: 'full',
+                        internal: true,
+                      },
+                      {
+                        target: 'partial',
+                        internal: true,
+                      },
+                    ],
                   },
+                  full: {
+                    on: {
+                      visibleEntriesChanged: {
+                        cond: 'areVisibleEntriesNearStart',
+                        target: '#logExplorerEntries.loadingTop',
+                      },
+                    },
+                  },
+                  partial: {},
                 },
               },
               empty: {},
             },
           },
           bottom: {
-            initial: 'start',
+            initial: 'unknown',
             states: {
-              start: {
+              unknown: {
                 always: [
                   {
                     cond: 'hasLoadedBottomChunk',
                     target: 'loaded',
+                    internal: true,
                   },
                   {
                     cond: 'hasEmptyBottomChunk',
                     target: 'empty',
+                    internal: true,
                   },
                   {
                     target: 'failed',
+                    internal: true,
                   },
                 ],
               },
@@ -132,11 +162,30 @@ export const entriesStateMachine = createMachine<
                 },
               },
               loaded: {
-                on: {
-                  visibleEntriesChanged: {
-                    cond: 'areVisibleEntriesNearEnd',
-                    target: '#logExplorerEntries.loadingBottom',
+                initial: 'unknown',
+                states: {
+                  unknown: {
+                    always: [
+                      {
+                        cond: 'hasFullBottomChunk',
+                        target: 'full',
+                        internal: true,
+                      },
+                      {
+                        target: 'partial',
+                        internal: true,
+                      },
+                    ],
                   },
+                  full: {
+                    on: {
+                      visibleEntriesChanged: {
+                        cond: 'areVisibleEntriesNearEnd',
+                        target: '#logExplorerEntries.loadingBottom',
+                      },
+                    },
+                  },
+                  partial: {},
                 },
               },
               empty: {},
@@ -343,6 +392,24 @@ export const entriesStateMachine = createMachine<
           },
         ],
       },
+      uninitialized: {
+        on: {
+          positionChanged: {
+            actions: 'updatePosition',
+            target: 'loadingAround',
+          },
+          timeRangeChanged: {
+            actions: 'updateTimeRange',
+            target: 'loadingAround',
+          },
+          columnsChanged: {
+            target: 'loadingAround',
+          },
+          load: {
+            target: 'loadingAround',
+          },
+        },
+      },
       tailing: {
         initial: 'loading',
         states: {
@@ -391,15 +458,6 @@ export const entriesStateMachine = createMachine<
   },
   {
     actions: {
-      resetChunks: assign((context) => ({
-        ...context,
-        topChunk: {
-          status: 'uninitialized' as const,
-        },
-        bottomChunk: {
-          status: 'uninitialized' as const,
-        },
-      })),
       updateChunksFromLoadAround,
       updateChunksFromLoadBefore,
       updateChunksFromLoadAfter,
@@ -417,6 +475,8 @@ export const entriesStateMachine = createMachine<
       hasEmptyBottomChunk,
       hasLoadedTopChunk,
       hasLoadedBottomChunk,
+      hasFullTopChunk,
+      hasFullBottomChunk,
       isWithinLoadedChunks,
       startTimestampExtendsLoadedTop: constantGuard(false),
       startTimestampReducesLoadedTop: constantGuard(false),

@@ -22,6 +22,18 @@ export const hasLoadedBottomChunk: ConditionPredicate<
   EntriesMachineEvent
 > = (context, event) => context.bottomChunk.status === 'loaded';
 
+export const hasFullTopChunk: ConditionPredicate<EntriesMachineContext, EntriesMachineEvent> = (
+  context
+) =>
+  context.topChunk.status === 'loaded' &&
+  context.topChunk.entries.length >= context.topChunk.chunkSize;
+
+export const hasFullBottomChunk: ConditionPredicate<EntriesMachineContext, EntriesMachineEvent> = (
+  context
+) =>
+  context.bottomChunk.status === 'loaded' &&
+  context.bottomChunk.entries.length >= context.bottomChunk.chunkSize;
+
 export const hasEmptyTopChunk: ConditionPredicate<EntriesMachineContext, EntriesMachineEvent> = (
   context,
   event

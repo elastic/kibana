@@ -33,28 +33,24 @@ export interface LogExplorerMainAppProps {
   savedSearch: SavedSearch;
 }
 
-export function LogExplorerMainApp(props: LogExplorerMainAppProps) {
-  const { savedSearch, dataViewList } = props;
+export function LogExplorerMainApp({ savedSearch, dataViewList }: LogExplorerMainAppProps) {
   const { data } = useDiscoverServices();
-  const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
+
+  // TODO: use expandedDoc state
+  const [, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
 
   return (
     <DiscoverStateProvider savedSearch={savedSearch} setExpandedDoc={setExpandedDoc}>
       <QueryDataProvider virtualRowCount={LOG_EXPLORER_VIRTUAL_GRID_ROWS} query={data.query}>
         <DiscoverColumnsProvider>
-          <LogExplorerLayoutWrapper
-            dataViewList={dataViewList}
-            expandedDoc={expandedDoc}
-            setExpandedDoc={setExpandedDoc}
-            savedSearch={savedSearch}
-          />
+          <LogExplorerLayoutWrapper dataViewList={dataViewList} savedSearch={savedSearch} />
         </DiscoverColumnsProvider>
       </QueryDataProvider>
     </DiscoverStateProvider>
   );
 }
 
-const LogExplorerLayoutWrapper = ({ dataViewList, expandedDoc, setExpandedDoc, savedSearch }) => {
+const LogExplorerLayoutWrapper = ({ dataViewList, savedSearch }) => {
   const stateMachine = useStateMachineContext();
   const [dataAccessState] = useActor(stateMachine);
 
@@ -65,11 +61,6 @@ const LogExplorerLayoutWrapper = ({ dataViewList, expandedDoc, setExpandedDoc, s
   return dataAccessState.matches('uninitialized') ? (
     <DiscoverUninitialized onRefresh={loadData} />
   ) : (
-    <LogExplorerLayoutMemoized
-      dataViewList={dataViewList}
-      expandedDoc={expandedDoc}
-      setExpandedDoc={setExpandedDoc}
-      savedSearch={savedSearch}
-    />
+    <LogExplorerLayoutMemoized dataViewList={dataViewList} savedSearch={savedSearch} />
   );
 };

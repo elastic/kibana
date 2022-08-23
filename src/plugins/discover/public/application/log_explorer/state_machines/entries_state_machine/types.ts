@@ -22,11 +22,16 @@ interface Context {
   };
   topChunk: LogExplorerChunk;
   bottomChunk: LogExplorerChunk;
+  maximumRowCount: number;
 }
 
 export type EntriesMachineContext = SharedContext & Context;
 
-export type LogExplorerLoadedChunkStateValue = 'empty' | 'loaded' | 'failed';
+export type LogExplorerLoadedChunkStateValue =
+  | 'empty'
+  | 'loaded'
+  | { loaded: 'partial' | 'full' }
+  | 'failed';
 
 export type EntriesMachineStateValue =
   | 'uninitialized' // not used yet, but there's a setting that disables automatic initial search
