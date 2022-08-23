@@ -16,7 +16,6 @@
 interface SelectedDataView {
   browserFields: SourcererDataView['browserFields'];
   dataViewId: string | null; // null if legacy pre-8.0 timeline
-  docValueFields: SourcererDataView['docValueFields'];
   /**
    * DataViewBase with enhanced index fields used in timelines
    */

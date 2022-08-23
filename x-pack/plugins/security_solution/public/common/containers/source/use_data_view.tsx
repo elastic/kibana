@@ -12,7 +12,6 @@ import memoizeOne from 'memoize-one';
 import { omit, pick } from 'lodash/fp';
 import type {
   BrowserField,
-  DocValueFields,
   IndexField,
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
@@ -40,7 +39,6 @@ type DangerCastForBrowserFieldsMutation = Record<
 >;
 interface DataViewInfo {
   browserFields: DangerCastForBrowserFieldsMutation;
-  docValueFields: DocValueFields[];
   indexFields: FieldSpec[];
 }
 
@@ -69,17 +67,10 @@ export const getDataViewStateFromIndexFields = memoizeOne(
           pick(['name', 'searchable', 'type', 'aggregatable', 'esTypes', 'subType'], field)
         );
 
-        // mutate docValueFields
-        if (field.readFromDocValues && acc.docValueFields.length < 100) {
-          acc.docValueFields.push({
-            field: field.name,
-          });
-        }
         return acc;
       },
       {
         browserFields: {},
-        docValueFields: [],
         indexFields: [],
       }
     );

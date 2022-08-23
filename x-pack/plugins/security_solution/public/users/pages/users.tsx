@@ -102,7 +102,7 @@ const UsersComponent = () => {
     return filters;
   }, [severitySelection, tabName, filters]);
 
-  const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
+  const { indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
   const [filterQuery, kqlError] = useMemo(
     () =>
       convertToBuildEsQuery({
@@ -210,7 +210,6 @@ const UsersComponent = () => {
 
             <UsersTabs
               deleteQuery={deleteQuery}
-              docValueFields={docValueFields}
               filterQuery={tabsFilterQuery || ''}
               from={from}
               indexNames={selectedPatterns}
