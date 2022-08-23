@@ -127,7 +127,7 @@ export const makeLensEmbeddableFactory =
                 attributes: migratedLensState,
               } as unknown as SerializableRecord;
             },
-            '8.4.0': (state) => {
+            '8.5.0': (state) => {
               const lensState = state as unknown as { attributes: LensDocShape840<VisState840> };
               const migratedLensState = commonMigrateMetricIds(lensState.attributes);
               return {

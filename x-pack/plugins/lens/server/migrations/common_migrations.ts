@@ -31,7 +31,6 @@ import {
   LensDocShape830,
   VisStatePre830,
   LensDocShape840,
-  VisState840,
 } from './types';
 import { DOCUMENT_FIELD_NAME, layerTypes, MetricState } from '../../common';
 import { LensDocShape } from './saved_object_migrations';
@@ -402,15 +401,15 @@ export const commonFixValueLabelsInXY = (
 };
 
 export const commonMigrateMetricIds = (
-  attributes: LensDocShape840<VisState840>
-): LensDocShape840<VisState840> => {
+  attributes: LensDocShape840<unknown>
+): LensDocShape840<unknown> => {
   const typeMappings = {
     lnsMetric: 'lnsLegacyMetric',
     lnsMetricNew: 'lnsMetric',
   } as Record<string, string>;
 
   if (!attributes.visualizationType || !(attributes.visualizationType in typeMappings)) {
-    return attributes as LensDocShape840<VisState840>;
+    return attributes as LensDocShape840<unknown>;
   }
 
   const newAttributes = cloneDeep(attributes);
