@@ -10,14 +10,13 @@ import {
   BaseColumn,
   Operation,
   DataType,
-  Column,
   ColumnWithMeta as GenericColumnWithMeta,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import uuid from 'uuid';
 import type { Metric, Series } from '../../../../common/types';
 import { ConvertToColumnsFn } from '../../types';
 import { getTimeScale } from '../metrics';
-import { ColumnWithMeta, Meta } from './types';
+import { ColumnWithMeta, Meta, Column } from './types';
 
 type GeneralColumn = Omit<BaseColumn<Operation, unknown>, 'operationType' | 'params'>;
 type GeneralColumnWithMeta = GenericColumnWithMeta<GeneralColumn, Meta>;

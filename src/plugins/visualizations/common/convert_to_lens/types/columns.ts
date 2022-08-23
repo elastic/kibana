@@ -107,7 +107,7 @@ export type AnyColumnWithReferences =
   | FormulaColumn
   | StaticValueColumn;
 
-export type Column = AnyColumnWithReferences | AnyColumnWithSourceField;
+export type Column = AnyColumnWithReferences | AnyColumnWithSourceField | FiltersColumn;
 
 export type ColumnWithMeta<Col extends Column | {}, Meta extends {} | undefined = undefined> = Col &
   (Meta extends undefined ? undefined : { meta: Meta });
