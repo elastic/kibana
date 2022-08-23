@@ -15,9 +15,8 @@ import {
   RULE_SWITCH,
   RULES_MONITORING_TABLE,
   SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
-  RULES_TABLE,
+  RULE_NAME,
 } from '../../screens/alerts_detection_rules';
-import type { Rule } from '../../../public/detections/containers/detection_engine/rules/types';
 import {
   deleteFirstRule,
   deleteSelectedRules,
@@ -47,13 +46,7 @@ describe('Prebuilt rules', () => {
 
   describe('Alerts rules, prebuilt rules', () => {
     it('Loads prebuilt rules', () => {
-      cy.intercept('/api/detection_engine/rules/_find*', {
-        data: rawRules,
-        page: 1,
-        perPage: 10000,
-        total: rawRules.length,
-      }).as('findRules');
-      const rowsPerPage = 20;
+      const rowsPerPage = 100;
       const expectedNumberOfRules = totalNumberOfPrebuiltRules;
       const expectedNumberOfPages = Math.ceil(totalNumberOfPrebuiltRules / rowsPerPage);
       const expectedElasticRulesBtnText = `Elastic rules (${expectedNumberOfRules})`;
@@ -64,15 +57,17 @@ describe('Prebuilt rules', () => {
 
       cy.get(ELASTIC_RULES_BTN).should('have.text', expectedElasticRulesBtnText);
 
-      // Assert that first page of rules is loaded with rules returned by the API
-      cy.wait('@findRules').then(({ response }) => {
-        const rules = response?.body.data.slice(0, rowsPerPage);
-        rules.forEach((rule: Rule) => {
-          cy.get(RULES_TABLE).should('contain', rule.name);
+      changeRowsPerPageTo(rowsPerPage);
+
+      cy.request({ url: '/api/detection_engine/rules/_find' }).then(({ body }) => {
+        // Assert the total number of loaded rules equals the expected number of in-memory rules
+        expect(body.total).to.equal(rawRules.length);
+        // Assert the table was refreshed with the rules returned by the API request
+        const ruleNames = rawRules.map((rule) => rule.name);
+        cy.get(RULE_NAME).each(($item) => {
+          expect($item.text()).to.be.oneOf(ruleNames);
         });
       });
-
-      changeRowsPerPageTo(rowsPerPage);
 
       cy.get(pageSelector(expectedNumberOfPages)).should('exist');
     });
