@@ -240,7 +240,7 @@ export const getLegacyMetricVisualization = ({
               defaultMessage: 'Value',
             }),
           },
-          groupLabel: i18n.translate('xpack.lens.legacyMetric.label', {
+          groupLabel: i18n.translate('xpack.lens.metric.label', {
             defaultMessage: 'Metric',
           }),
           layerId: props.state.layerId,
