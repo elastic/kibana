@@ -79,7 +79,8 @@ jest.mock('@elastic/eui', () => {
 
 const { setup } = pageHelpers.watchCreateThreshold;
 
-describe('<ThresholdWatchEdit /> create route', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/136836
+describe.skip('<ThresholdWatchEdit /> create route', () => {
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: WatchCreateThresholdTestBed;
 
