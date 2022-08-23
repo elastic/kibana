@@ -55,10 +55,10 @@ function generateData({
 }
 
 describe('Agent configuration', () => {
-  before(async () => {
+  before(() => {
     const { rangeFrom, rangeTo } = timeRange;
 
-    await synthtrace.index(
+    synthtrace.index(
       generateData({
         from: new Date(rangeFrom).getTime(),
         to: new Date(rangeTo).getTime(),
@@ -67,13 +67,13 @@ describe('Agent configuration', () => {
     );
   });
 
-  after(async () => {
-    await synthtrace.clean();
+  after(() => {
+    synthtrace.clean();
   });
 
   beforeEach(() => {
     cy.loginAsEditorUser();
-    cy.visit(agentConfigHref);
+    cy.visitKibana(agentConfigHref);
   });
 
   it('persists service enviroment when clicking on edit button', () => {
