@@ -30,7 +30,6 @@ const initialState: MonitorOverviewState = {
   data: {
     total: 0,
     allMonitorIds: [],
-    disabledMonitorIds: [],
     pages: {},
   },
   pageState: {
