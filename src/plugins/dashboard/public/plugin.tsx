@@ -37,6 +37,7 @@ import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 // import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
 import { createKbnUrlTracker } from './services/kibana_utils';
 import { UsageCollectionSetup } from './services/usage_collection';
@@ -80,7 +81,6 @@ import { DashboardConstants } from './dashboard_constants';
 import { PlaceholderEmbeddableFactory } from './application/embeddable/placeholder';
 import { ExportCSVAction } from './application/actions/export_csv_action';
 import { dashboardFeatureCatalog } from './dashboard_strings';
-import { SpacesPluginStart } from './services/spaces';
 import { FiltersNotificationBadge } from './application/actions/filters_notification_badge';
 
 export interface DashboardFeatureFlagConfig {

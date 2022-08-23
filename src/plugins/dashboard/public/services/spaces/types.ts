@@ -6,4 +6,9 @@
  * Side Public License, v 1.
  */
 
-export type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+
+export interface DashboardSpacesService {
+  getLegacyUrlConflict?: SpacesPluginStart['ui']['components']['getLegacyUrlConflict'];
+  redirectLegacyUrl?: SpacesPluginStart['ui']['redirectLegacyUrl'];
+}

@@ -95,7 +95,6 @@ export const useDashboardAppState = ({
     dashboardCapabilities,
     dashboardSessionStorage,
     scopedHistory,
-    spacesService,
     screenshotModeService,
   } = services;
   const { docTitle } = chrome;
@@ -103,6 +102,7 @@ export const useDashboardAppState = ({
 
   const {
     data: { query, search, dataViews },
+    spaces: { redirectLegacyUrl },
   } = pluginServices.getServices();
   const { getStateTransfer } = embeddable;
   const { version: kibanaVersion } = initializerContext.env.packageInfo;
@@ -186,7 +186,7 @@ export const useDashboardAppState = ({
         if (screenshotModeService?.isScreenshotMode()) {
           scopedHistory().replace(path);
         } else {
-          await spacesService?.ui.redirectLegacyUrl({ path, aliasPurpose });
+          await redirectLegacyUrl?.({ path, aliasPurpose });
         }
         // Return so we don't run any more of the hook and let it rerun after the redirect that just happened
         return;
@@ -405,7 +405,7 @@ export const useDashboardAppState = ({
     query,
     showNoDataPage,
     setShowNoDataPage,
-    spacesService?.ui,
+    redirectLegacyUrl,
     screenshotModeService,
   ]);
 

@@ -39,17 +39,12 @@ export function DashboardApp({
   redirectTo,
   history,
 }: DashboardAppProps) {
+  const { core, chrome, embeddable, onAppLeave, uiSettings, screenshotModeService } =
+    useKibana<DashboardAppServices>().services;
   const {
-    core,
-    chrome,
-    embeddable,
-    onAppLeave,
-    uiSettings,
-    // data,
-    spacesService,
-    screenshotModeService,
-  } = useKibana<DashboardAppServices>().services;
-  const { data } = pluginServices.getServices();
+    data: { search },
+    spaces: { getLegacyUrlConflict },
+  } = pluginServices.getServices();
 
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
   const dashboardTitleRef = useRef<HTMLHeadingElement>(null);
@@ -129,9 +124,9 @@ export function DashboardApp({
   // clear search session when leaving dashboard route
   useEffect(() => {
     return () => {
-      data.search.session.clear();
+      search.session.clear();
     };
-  }, [data.search.session]);
+  }, [search.session]);
 
   const printMode = useMemo(
     () => dashboardAppState.getLatestDashboardState?.().viewMode === ViewMode.PRINT,
@@ -165,7 +160,7 @@ export function DashboardApp({
           {dashboardAppState.savedDashboard.outcome === 'conflict' &&
           dashboardAppState.savedDashboard.id &&
           dashboardAppState.savedDashboard.aliasId
-            ? spacesService?.ui.components.getLegacyUrlConflict({
+            ? getLegacyUrlConflict?.({
                 currentObjectId: dashboardAppState.savedDashboard.id,
                 otherObjectId: dashboardAppState.savedDashboard.aliasId,
                 otherObjectPath: `#${createDashboardEditUrl(

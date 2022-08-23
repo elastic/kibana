@@ -39,7 +39,6 @@ import type { ScreenshotModePluginStart } from './services/screenshot_mode';
 import { IKbnUrlStateStorage } from './services/kibana_utils';
 import type { DashboardContainer, DashboardSavedObject } from '.';
 import { DashboardAppLocatorParams } from './locator';
-import { SpacesPluginStart } from './services/spaces';
 import { DashboardServices } from './services/types';
 
 export type { SavedDashboardPanel };
@@ -218,5 +217,4 @@ export interface DashboardAppServices {
   dashboardSessionStorage: DashboardSessionStorage;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   // savedQueryService: DataPublicPluginStart['query']['savedQueries'];
-  spacesService?: SpacesPluginStart;
 }
