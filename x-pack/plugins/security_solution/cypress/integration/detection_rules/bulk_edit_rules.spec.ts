@@ -206,47 +206,46 @@ describe('Detection rules, bulk edit', () => {
         `Edit ${expectedNumberOfNotMLRules} Custom rules`
       );
     });
-    
-      it('should show warning modal windows when some of the selected rules cannot be edited', () => {
-    createMachineLearningRule(getMachineLearningRule(), '7');
 
-    loadPrebuiltDetectionRulesFromHeaderBtn();
+    it('should show warning modal windows when some of the selected rules cannot be edited', () => {
+      createMachineLearningRule(getMachineLearningRule(), '7');
 
-    // select few Elastic rules, check if we can't proceed further, as ELastic rules are not editable
-    // filter rules, only Elastic rule to show
-    switchToElasticRules();
+      loadPrebuiltDetectionRulesFromHeaderBtn();
 
-    // check modal window for few selected rules
-    selectNumberOfRules(numberOfRulesPerPage);
-    clickAddIndexPatternsMenuItem();
-    checkElasticRulesCannotBeModified(numberOfRulesPerPage);
-    cy.get(MODAL_CONFIRMATION_BTN).click();
+      // select few Elastic rules, check if we can't proceed further, as ELastic rules are not editable
+      // filter rules, only Elastic rule to show
+      switchToElasticRules();
 
-    // Select all rules(Elastic rules and custom)
-    cy.get(ELASTIC_RULES_BTN).click();
-    selectAllRules();
-    clickAddIndexPatternsMenuItem();
-    waitForMixedRulesBulkEditModal(expectedNumberOfCustomRulesToBeEdited);
+      // check modal window for few selected rules
+      selectNumberOfRules(numberOfRulesPerPage);
+      clickAddIndexPatternsMenuItem();
+      checkElasticRulesCannotBeModified(numberOfRulesPerPage);
+      cy.get(MODAL_CONFIRMATION_BTN).click();
 
-    // check rules that cannot be edited for index patterns: immutable and ML
-    checkElasticRulesCannotBeModified(totalNumberOfPrebuiltRules);
-    checkMachineLearningRulesCannotBeModified(expectedNumberOfMachineLearningRulesToBeEdited);
+      // Select all rules(Elastic rules and custom)
+      cy.get(ELASTIC_RULES_BTN).click();
+      selectAllRules();
+      clickAddIndexPatternsMenuItem();
+      waitForMixedRulesBulkEditModal(expectedNumberOfCustomRulesToBeEdited);
 
-    // proceed with custom rule editing
-    cy.get(MODAL_CONFIRMATION_BTN)
-      .should('have.text', `Edit ${expectedNumberOfCustomRulesToBeEdited} custom rules`)
-      .click();
+      // check rules that cannot be edited for index patterns: immutable and ML
+      checkElasticRulesCannotBeModified(totalNumberOfPrebuiltRules);
+      checkMachineLearningRulesCannotBeModified(expectedNumberOfMachineLearningRulesToBeEdited);
 
-    typeIndexPatterns([CUSTOM_INDEX_PATTERN_1]);
-    confirmBulkEditForm();
+      // proceed with custom rule editing
+      cy.get(MODAL_CONFIRMATION_BTN)
+        .should('have.text', `Edit ${expectedNumberOfCustomRulesToBeEdited} custom rules`)
+        .click();
 
-    // check if rule has been updated
-    cy.get(CUSTOM_RULES_BTN).click();
-    cy.get(RULES_TABLE_REFRESH_INDICATOR).should('exist');
-    cy.get(RULES_TABLE_REFRESH_INDICATOR).should('not.exist');
-    goToTheRuleDetailsOf(RULE_NAME);
-    hasIndexPatterns([...DEFAULT_INDEX_PATTERNS, CUSTOM_INDEX_PATTERN_1].join(''));
-    
+      typeIndexPatterns([CUSTOM_INDEX_PATTERN_1]);
+      confirmBulkEditForm();
+
+      // check if rule has been updated
+      cy.get(CUSTOM_RULES_BTN).click();
+      cy.get(RULES_TABLE_REFRESH_INDICATOR).should('exist');
+      cy.get(RULES_TABLE_REFRESH_INDICATOR).should('not.exist');
+      goToTheRuleDetailsOf(RULE_NAME);
+      hasIndexPatterns([...DEFAULT_INDEX_PATTERNS, CUSTOM_INDEX_PATTERN_1].join(''));
     });
   });
 
