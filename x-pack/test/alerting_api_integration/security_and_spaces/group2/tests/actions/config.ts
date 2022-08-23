@@ -15,5 +15,5 @@ export default createTestConfig('security_and_spaces', {
   enableActionsProxy: true,
   publicBaseUrl: true,
   testFiles: [require.resolve('.')],
-  useDedicatedTaskRunner: false,
+  useDedicatedTaskRunner: true,
 });

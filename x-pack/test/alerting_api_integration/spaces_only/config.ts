@@ -18,5 +18,5 @@ export default createTestConfig('spaces_only', {
   customizeLocalHostSsl: true,
   preconfiguredAlertHistoryEsIndex: true,
   emailDomainsAllowed: EmailDomainsAllowed,
-  useDedicatedTaskRunner: false,
+  useDedicatedTaskRunner: true,
 });
