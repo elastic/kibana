@@ -24,4 +24,4 @@ export type ConvertToColumnsFn<C extends Column> = (
   series: Series,
   metric: Metric,
   dataView: DataView
-) => C[];
+) => Array<C | null> | null;

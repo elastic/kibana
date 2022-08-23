@@ -41,14 +41,26 @@ export const getMetricsColumns = (
 
   switch (aggregation) {
     case 'percentile': {
-      return convertMetricsToColumns(series, metrics, dataView, convertToPercentileColumns);
+      const percentileColumns = convertMetricsToColumns(
+        series,
+        metrics,
+        dataView,
+        convertToPercentileColumns
+      );
+      return getValidColumns(percentileColumns);
     }
     case 'percentile_rank': {
-      return convertMetricsToColumns(series, metrics, dataView, convertToPercentileRankColumns);
+      const percentileRankColumns = convertMetricsToColumns(
+        series,
+        metrics,
+        dataView,
+        convertToPercentileRankColumns
+      );
+      return getValidColumns(percentileRankColumns);
     }
     case 'math': {
       const formulaColumn = convertMathToFormulaColumn(series, metrics);
-      return formulaColumn ? [formulaColumn] : null;
+      return getValidColumns(formulaColumn);
     }
     case 'moving_average': {
       const movingAverageColumns = convertParentPipelineAggToColumns(series, metrics, dataView);

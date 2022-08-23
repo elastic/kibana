@@ -65,14 +65,14 @@ export const convertToPercentileRankColumns = (
   series: Series,
   metric: Metric,
   dataView: DataView
-): PercentileRanksColumn[] => {
+): Array<PercentileRanksColumn | null> | null => {
   const { values } = metric;
 
   if (!values) {
-    return [];
+    return null;
   }
 
-  return values
-    .map((p, index) => convertToPercentileRankColumn(p, series, metric, dataView, index))
-    .filter((p): p is PercentileRanksColumn => Boolean(p));
+  return values.map((p, index) =>
+    convertToPercentileRankColumn(p, series, metric, dataView, index)
+  );
 };
