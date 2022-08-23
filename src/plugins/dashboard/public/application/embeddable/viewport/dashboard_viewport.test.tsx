@@ -17,17 +17,15 @@ import { DashboardContainer, DashboardContainerServices } from '../dashboard_con
 import { getSampleDashboardInput } from '../../test_helpers';
 import { KibanaContextProvider } from '../../../services/kibana_react';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
-import { applicationServiceMock, coreMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
+import { applicationServiceMock, coreMock } from '@kbn/core/public/mocks';
 import {
   ContactCardEmbeddableFactory,
   CONTACT_CARD_EMBEDDABLE,
 } from '@kbn/embeddable-plugin/public/lib/test_samples';
-import { getStubPluginServices } from '@kbn/presentation-util-plugin/public';
 import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 import { pluginServices } from '../../../services/plugin_services';
 
 let dashboardContainer: DashboardContainer | undefined;
-const presentationUtil = getStubPluginServices();
 const DashboardServicesProvider = pluginServices.getContextProvider();
 
 const ExitFullScreenButton = () => <div data-test-subj="exitFullScreenModeText">EXIT</div>;
@@ -45,7 +43,6 @@ function getProps(props?: Partial<DashboardViewportProps>): {
   const start = doStart();
   const options: DashboardContainerServices = {
     application: applicationServiceMock.createStartContract(),
-    uiSettings: uiSettingsServiceMock.createStartContract(),
     theme: coreMock.createStart().theme,
     embeddable: {
       getTriggerCompatibleActions: (() => []) as any,
@@ -63,7 +60,6 @@ function getProps(props?: Partial<DashboardViewportProps>): {
     uiActions: {
       getTriggerCompatibleActions: (() => []) as any,
     } as any,
-    presentationUtil,
     screenshotMode: screenshotModePluginMock.createSetupContract(),
   };
 
@@ -98,11 +94,9 @@ test.skip('renders DashboardViewport', () => {
   const component = mount(
     <I18nProvider>
       <KibanaContextProvider services={options}>
-        <presentationUtil.ContextProvider>
-          <DashboardServicesProvider>
-            <DashboardViewport {...props} />
-          </DashboardServicesProvider>
-        </presentationUtil.ContextProvider>
+        <DashboardServicesProvider>
+          <DashboardViewport {...props} />
+        </DashboardServicesProvider>
       </KibanaContextProvider>
     </I18nProvider>
   );
@@ -117,11 +111,9 @@ test.skip('renders DashboardViewport with no visualizations', () => {
   const component = mount(
     <I18nProvider>
       <KibanaContextProvider services={options}>
-        <presentationUtil.ContextProvider>
-          <DashboardServicesProvider>
-            <DashboardViewport {...props} />
-          </DashboardServicesProvider>
-        </presentationUtil.ContextProvider>
+        <DashboardServicesProvider>
+          <DashboardViewport {...props} />
+        </DashboardServicesProvider>
       </KibanaContextProvider>
     </I18nProvider>
   );
@@ -138,11 +130,9 @@ test.skip('renders DashboardEmptyScreen', () => {
   const component = mount(
     <I18nProvider>
       <KibanaContextProvider services={options}>
-        <presentationUtil.ContextProvider>
-          <DashboardServicesProvider>
-            <DashboardViewport {...props} />
-          </DashboardServicesProvider>
-        </presentationUtil.ContextProvider>
+        <DashboardServicesProvider>
+          <DashboardViewport {...props} />
+        </DashboardServicesProvider>
       </KibanaContextProvider>
     </I18nProvider>
   );
@@ -159,11 +149,9 @@ test.skip('renders exit full screen button when in full screen mode', async () =
   const component = mount(
     <I18nProvider>
       <KibanaContextProvider services={options}>
-        <presentationUtil.ContextProvider>
-          <DashboardServicesProvider>
-            <DashboardViewport {...props} />
-          </DashboardServicesProvider>
-        </presentationUtil.ContextProvider>
+        <DashboardServicesProvider>
+          <DashboardViewport {...props} />
+        </DashboardServicesProvider>
       </KibanaContextProvider>
     </I18nProvider>
   );
@@ -190,11 +178,9 @@ test.skip('renders exit full screen button when in full screen mode and empty sc
   const component = mount(
     <I18nProvider>
       <KibanaContextProvider services={options}>
-        <presentationUtil.ContextProvider>
-          <DashboardServicesProvider>
-            <DashboardViewport {...props} />
-          </DashboardServicesProvider>
-        </presentationUtil.ContextProvider>
+        <DashboardServicesProvider>
+          <DashboardViewport {...props} />
+        </DashboardServicesProvider>
       </KibanaContextProvider>
     </I18nProvider>
   );
@@ -219,11 +205,9 @@ test.skip('DashboardViewport unmount unsubscribes', async (done) => {
   const component = mount(
     <I18nProvider>
       <KibanaContextProvider services={options}>
-        <presentationUtil.ContextProvider>
-          <DashboardServicesProvider>
-            <DashboardViewport {...props} />
-          </DashboardServicesProvider>
-        </presentationUtil.ContextProvider>
+        <DashboardServicesProvider>
+          <DashboardViewport {...props} />
+        </DashboardServicesProvider>
       </KibanaContextProvider>
     </I18nProvider>
   );

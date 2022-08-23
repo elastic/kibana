@@ -17,7 +17,7 @@ import {
   LibraryNotificationProps,
 } from './library_notification_popover';
 import { CoreStart } from '@kbn/core/public';
-import { coreMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { EuiPopover } from '@elastic/eui';
 import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
@@ -28,7 +28,6 @@ import {
   ContactCardEmbeddableOutput,
   CONTACT_CARD_EMBEDDABLE,
 } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
-import { getStubPluginServices } from '@kbn/presentation-util-plugin/public';
 import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 
 describe('LibraryNotificationPopover', () => {
@@ -56,9 +55,7 @@ describe('LibraryNotificationPopover', () => {
       overlays: coreStart.overlays,
       savedObjectMetaData: {} as any,
       uiActions: {} as any,
-      uiSettings: uiSettingsServiceMock.createStartContract(),
       theme: coreStart.theme,
-      presentationUtil: getStubPluginServices(),
       screenshotMode: screenshotModePluginMock.createSetupContract(),
     };
 

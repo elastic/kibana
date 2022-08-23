@@ -9,7 +9,7 @@
 import { getSampleDashboardInput } from '../test_helpers';
 import { DashboardContainer } from '../embeddable/dashboard_container';
 
-import { coreMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { CoreStart } from '@kbn/core/public';
 import { LibraryNotificationAction, UnlinkFromLibraryAction } from '.';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
@@ -27,7 +27,6 @@ import {
   ContactCardEmbeddableOutput,
   CONTACT_CARD_EMBEDDABLE,
 } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
-import { getStubPluginServices } from '@kbn/presentation-util-plugin/public';
 import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 
 const { setup, doStart } = embeddablePluginMock.createInstance();
@@ -60,9 +59,7 @@ beforeEach(async () => {
     overlays: coreStart.overlays,
     savedObjectMetaData: {} as any,
     uiActions: {} as any,
-    uiSettings: uiSettingsServiceMock.createStartContract(),
     theme: coreStart.theme,
-    presentationUtil: getStubPluginServices(),
     screenshotMode: screenshotModePluginMock.createSetupContract(),
   };
 

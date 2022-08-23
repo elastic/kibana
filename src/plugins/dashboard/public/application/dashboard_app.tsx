@@ -39,11 +39,12 @@ export function DashboardApp({
   redirectTo,
   history,
 }: DashboardAppProps) {
-  const { core, chrome, embeddable, onAppLeave, uiSettings, screenshotModeService } =
+  const { core, chrome, embeddable, onAppLeave, screenshotModeService } =
     useKibana<DashboardAppServices>().services;
   const {
     data: { search },
     spaces: { getLegacyUrlConflict },
+    settings: { uiSettings },
   } = pluginServices.getServices();
 
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);

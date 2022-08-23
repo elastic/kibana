@@ -16,7 +16,6 @@ import type {
   SavedObjectsClientContract,
   ScopedHistory,
   ChromeStart,
-  IUiSettingsClient,
   PluginInitializerContext,
   KibanaExecutionContext,
 } from '@kbn/core/public';
@@ -199,7 +198,6 @@ export interface DashboardAppServices {
   chrome: ChromeStart;
   share?: SharePluginStart;
   embeddable: EmbeddableStart;
-  uiSettings: IUiSettingsClient;
   restorePreviousUrl: () => void;
   savedObjects: SavedObjectsStart;
   allowByValueEmbeddables: boolean;
@@ -216,5 +214,4 @@ export interface DashboardAppServices {
   screenshotModeService: ScreenshotModePluginStart;
   dashboardSessionStorage: DashboardSessionStorage;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-  // savedQueryService: DataPublicPluginStart['query']['savedQueries'];
 }

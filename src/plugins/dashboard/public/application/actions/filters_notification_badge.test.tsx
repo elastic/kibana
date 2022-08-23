@@ -28,7 +28,6 @@ import {
   ContactCardEmbeddableOutput,
   CONTACT_CARD_EMBEDDABLE,
 } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
-import { getStubPluginServices } from '@kbn/presentation-util-plugin/public';
 import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 
 const { setup, doStart } = embeddablePluginMock.createInstance();
@@ -80,7 +79,6 @@ beforeEach(async () => {
     uiActions: {} as any,
     uiSettings: uiSettingsServiceMock.createStartContract(),
     theme: coreStart.theme,
-    presentationUtil: getStubPluginServices(),
     screenshotMode: screenshotModePluginMock.createSetupContract(),
   };
 

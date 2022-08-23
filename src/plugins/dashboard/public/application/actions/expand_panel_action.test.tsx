@@ -12,7 +12,6 @@ import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helper
 
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
-import { getStubPluginServices } from '@kbn/presentation-util-plugin/public';
 import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 import {
   ContactCardEmbeddable,
@@ -22,7 +21,7 @@ import {
   CONTACT_CARD_EMBEDDABLE,
 } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
 
-import { coreMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 
 const { setup, doStart } = embeddablePluginMock.createInstance();
 
@@ -46,9 +45,7 @@ beforeEach(async () => {
     overlays: {} as any,
     savedObjectMetaData: {} as any,
     uiActions: {} as any,
-    uiSettings: uiSettingsServiceMock.createStartContract(),
     theme: coreMock.createStart().theme,
-    presentationUtil: getStubPluginServices(),
     screenshotMode: screenshotModePluginMock.createSetupContract(),
   };
   const input = getSampleDashboardInput({

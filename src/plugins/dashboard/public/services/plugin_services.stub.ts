@@ -19,11 +19,13 @@ import { dataViewEditorServiceFactory } from './data_view_editor/data_view_edito
 import { spacesServiceFactory } from './spaces/spaces.stub';
 import { httpServiceFactory } from './http/http.stub';
 import { visualizationsServiceFactory } from './visualizations/visualizations.stub';
+import { settingsServiceFactory } from './settings/settings_service.stub';
 
 export const providers: PluginServiceProviders<DashboardServices> = {
   data: new PluginServiceProvider(dataServiceFactory),
   dataViewEditor: new PluginServiceProvider(dataViewEditorServiceFactory),
   http: new PluginServiceProvider(httpServiceFactory),
+  settings: new PluginServiceProvider(settingsServiceFactory),
   spaces: new PluginServiceProvider(spacesServiceFactory),
   visualizations: new PluginServiceProvider(visualizationsServiceFactory),
 };

@@ -30,13 +30,12 @@ import {
   CONTACT_CARD_EMBEDDABLE,
   EMPTY_EMBEDDABLE,
 } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
-import { applicationServiceMock, coreMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
+import { applicationServiceMock, coreMock } from '@kbn/core/public/mocks';
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
-import { getStubPluginServices } from '@kbn/presentation-util-plugin/public';
 import { createEditModeAction } from '@kbn/embeddable-plugin/public/lib/test_samples';
+import { pluginServices } from '../../services/plugin_services';
 
-const presentationUtil = getStubPluginServices();
 const theme = coreMock.createStart().theme;
 
 const options: DashboardContainerServices = {
@@ -50,9 +49,7 @@ const options: DashboardContainerServices = {
   SavedObjectFinder: () => null,
   ExitFullScreenButton: () => null,
   uiActions: {} as any,
-  uiSettings: uiSettingsServiceMock.createStartContract(),
   theme,
-  presentationUtil,
 };
 
 beforeEach(() => {
@@ -234,10 +231,12 @@ test('DashboardContainer in edit mode shows edit mode actions', async () => {
     firstName: 'Bob',
   });
 
+  const DashboardServicesProvider = pluginServices.getContextProvider();
+
   const component = mount(
     <I18nProvider>
       <KibanaContextProvider services={options}>
-        <presentationUtil.ContextProvider>
+        <DashboardServicesProvider>
           <EmbeddablePanel
             embeddable={embeddable}
             getActions={() => Promise.resolve([])}
@@ -250,7 +249,7 @@ test('DashboardContainer in edit mode shows edit mode actions', async () => {
             SavedObjectFinder={() => null}
             theme={theme}
           />
-        </presentationUtil.ContextProvider>
+        </DashboardServicesProvider>
       </KibanaContextProvider>
     </I18nProvider>
   );

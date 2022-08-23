@@ -101,7 +101,6 @@ export function DashboardTopNav({
     chrome,
     embeddable,
     navigation,
-    uiSettings,
     usageCollection,
     initializerContext,
     savedObjectsTagging,
@@ -113,6 +112,7 @@ export function DashboardTopNav({
   const {
     data: { query, search },
     visualizations: { get: getVisualization, getAliases: getVisTypeAliases },
+    settings: { uiSettings },
   } = pluginServices.getServices();
 
   const { version: kibanaVersion } = initializerContext.env.packageInfo;

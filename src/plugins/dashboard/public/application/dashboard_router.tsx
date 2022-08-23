@@ -83,7 +83,6 @@ export async function mountApp({
     spaces: spacesApi,
     embeddable: embeddableStart,
     savedObjectsTaggingOss,
-    presentationUtil,
     screenshotMode,
   } = pluginsStart;
 
@@ -105,7 +104,6 @@ export async function mountApp({
     setHeaderActionMenu,
     chrome: coreStart.chrome,
     embeddable: embeddableStart,
-    uiSettings: coreStart.uiSettings,
     scopedHistory: () => scopedHistory,
     screenshotModeService: screenshotMode,
     savedObjectsClient: coreStart.savedObjects.client,
@@ -223,32 +221,30 @@ export async function mountApp({
     <I18nProvider>
       <Provider store={dashboardStateStore}>
         <KibanaContextProvider services={dashboardServices}>
-          <presentationUtil.ContextProvider>
-            <DashboardServicesProvider>
-              <KibanaThemeProvider theme$={core.theme.theme$}>
-                <HashRouter>
-                  <Switch>
-                    <Route
-                      path={[
-                        DashboardConstants.CREATE_NEW_DASHBOARD_URL,
-                        `${DashboardConstants.VIEW_DASHBOARD_URL}/:id`,
-                      ]}
-                      render={renderDashboard}
-                    />
-                    <Route
-                      exact
-                      path={DashboardConstants.LANDING_PAGE_PATH}
-                      render={renderListingPage}
-                    />
-                    <Route exact path="/">
-                      <Redirect to={DashboardConstants.LANDING_PAGE_PATH} />
-                    </Route>
-                    <Route render={renderNoMatch} />
-                  </Switch>
-                </HashRouter>
-              </KibanaThemeProvider>
-            </DashboardServicesProvider>
-          </presentationUtil.ContextProvider>
+          <DashboardServicesProvider>
+            <KibanaThemeProvider theme$={core.theme.theme$}>
+              <HashRouter>
+                <Switch>
+                  <Route
+                    path={[
+                      DashboardConstants.CREATE_NEW_DASHBOARD_URL,
+                      `${DashboardConstants.VIEW_DASHBOARD_URL}/:id`,
+                    ]}
+                    render={renderDashboard}
+                  />
+                  <Route
+                    exact
+                    path={DashboardConstants.LANDING_PAGE_PATH}
+                    render={renderListingPage}
+                  />
+                  <Route exact path="/">
+                    <Redirect to={DashboardConstants.LANDING_PAGE_PATH} />
+                  </Route>
+                  <Route render={renderNoMatch} />
+                </Switch>
+              </HashRouter>
+            </KibanaThemeProvider>
+          </DashboardServicesProvider>
         </KibanaContextProvider>
       </Provider>
     </I18nProvider>

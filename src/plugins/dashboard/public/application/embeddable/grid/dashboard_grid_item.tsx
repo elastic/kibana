@@ -16,9 +16,9 @@ import {
   ViewMode,
 } from '@kbn/embeddable-plugin/public';
 
-import { useLabs } from '../../../services/presentation_util';
 import { DashboardPanelState } from '../types';
 import { DashboardContainer } from '..';
+import { pluginServices } from '../../../services/plugin_services';
 
 type PanelProps = Pick<EmbeddableChildPanel, 'container' | 'PanelComponent'>;
 type DivProps = Pick<React.HTMLAttributes<HTMLDivElement>, 'className' | 'style' | 'children'>;
@@ -128,9 +128,11 @@ export const ObservedItem: FC<Props> = (props: Props) => {
 };
 
 export const DashboardGridItem: FC<Props> = (props: Props) => {
-  const { isProjectEnabled } = useLabs();
+  const {
+    settings: { isProjectEnabledInLabs },
+  } = pluginServices.getServices();
   const isPrintMode = props.container.getInput().viewMode === ViewMode.PRINT;
-  const isEnabled = !isPrintMode && isProjectEnabled('labs:dashboard:deferBelowFold');
+  const isEnabled = !isPrintMode && isProjectEnabledInLabs('labs:dashboard:deferBelowFold');
 
   return isEnabled ? <ObservedItem {...props} /> : <Item {...props} />;
 };

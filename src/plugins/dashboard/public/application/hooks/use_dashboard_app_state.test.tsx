@@ -86,7 +86,6 @@ const setupEmbeddableFactory = (
     savedObjectMetaData: {} as unknown,
     ExitFullScreenButton: () => null,
     embeddable: services.embeddable,
-    uiSettings: services.uiSettings,
     SavedObjectFinder: () => null,
     overlays: coreStart.overlays,
     application: {} as unknown,

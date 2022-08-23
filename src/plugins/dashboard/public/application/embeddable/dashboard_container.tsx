@@ -11,7 +11,7 @@ import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Subscription } from 'rxjs';
 import uuid from 'uuid';
-import { CoreStart, IUiSettingsClient, KibanaExecutionContext } from '@kbn/core/public';
+import { CoreStart, KibanaExecutionContext } from '@kbn/core/public';
 import { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 
@@ -46,24 +46,22 @@ import {
 import { PLACEHOLDER_EMBEDDABLE } from './placeholder';
 import { DASHBOARD_LOADED_EVENT } from '../../events';
 import { DashboardAppCapabilities, DashboardContainerInput } from '../../types';
-import { PresentationUtilPluginStart } from '../../services/presentation_util';
 import type { ScreenshotModePluginStart } from '../../services/screenshot_mode';
 import { PanelPlacementMethod, IPanelPlacementArgs } from './panel/dashboard_panel_placement';
 import {
   combineDashboardFiltersWithControlGroupFilters,
   syncDashboardControlGroup,
 } from '../lib/dashboard_control_group';
+import { pluginServices } from '../../services/plugin_services';
 
 export interface DashboardContainerServices {
   ExitFullScreenButton: React.ComponentType<any>;
-  presentationUtil: PresentationUtilPluginStart;
   SavedObjectFinder: React.ComponentType<any>;
   notifications: CoreStart['notifications'];
   application: CoreStart['application'];
   inspector: InspectorStartContract;
   overlays: CoreStart['overlays'];
   screenshotMode: ScreenshotModePluginStart;
-  uiSettings: IUiSettingsClient;
   embeddable: EmbeddableStart;
   uiActions: UiActionsStart;
   theme: CoreStart['theme'];
@@ -171,10 +169,14 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       parent
     );
 
+    const {
+      settings: { isProjectEnabledInLabs },
+    } = pluginServices.getServices();
+
     if (
       controlGroup &&
       !isErrorEmbeddable(controlGroup) &&
-      services.presentationUtil.labsService.isProjectEnabled('labs:dashboard:dashboardControls')
+      isProjectEnabledInLabs('labs:dashboard:dashboardControls')
     ) {
       this.controlGroup = controlGroup;
       syncDashboardControlGroup({ dashboardContainer: this, controlGroup: this.controlGroup }).then(
@@ -341,21 +343,16 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       ReactDOM.unmountComponentAtNode(this.domNode);
     }
     this.domNode = dom;
-    const controlsEnabled = this.services.presentationUtil.labsService.isProjectEnabled(
-      'labs:dashboard:dashboardControls'
-    );
+
     ReactDOM.render(
       <I18nProvider>
         <KibanaContextProvider services={this.services}>
           <KibanaThemeProvider theme$={this.services.theme.theme$}>
-            <this.services.presentationUtil.ContextProvider>
-              <DashboardViewport
-                controlsEnabled={controlsEnabled}
-                container={this}
-                controlGroup={this.controlGroup}
-                onDataLoaded={this.onDataLoaded.bind(this)}
-              />
-            </this.services.presentationUtil.ContextProvider>
+            <DashboardViewport
+              container={this}
+              controlGroup={this.controlGroup}
+              onDataLoaded={this.onDataLoaded.bind(this)}
+            />
           </KibanaThemeProvider>
         </KibanaContextProvider>
       </I18nProvider>,

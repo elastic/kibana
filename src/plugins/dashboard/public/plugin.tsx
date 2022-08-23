@@ -38,11 +38,11 @@ import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 
 import { createKbnUrlTracker } from './services/kibana_utils';
 import { UsageCollectionSetup } from './services/usage_collection';
 import { UiActionsSetup, UiActionsStart } from './services/ui_actions';
-import { PresentationUtilPluginStart } from './services/presentation_util';
 import type { HomePublicPluginSetup } from './services/home';
 import { NavigationPublicPluginStart as NavigationStart } from './services/navigation';
 import { SharePluginSetup, SharePluginStart } from './services/share';
@@ -183,7 +183,6 @@ export class DashboardPlugin
         notifications: coreStart.notifications,
         screenshotMode: deps.screenshotMode,
         application: coreStart.application,
-        uiSettings: coreStart.uiSettings,
         overlays: coreStart.overlays,
         analytics: coreStart.analytics,
         embeddable: deps.embeddable,
@@ -191,7 +190,6 @@ export class DashboardPlugin
         inspector: deps.inspector,
         theme: coreStart.theme,
         ExitFullScreenButton,
-        presentationUtil: deps.presentationUtil,
       };
     };
 

@@ -9,18 +9,15 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { coreMock } from '@kbn/core/public/mocks';
 import { DashboardEmptyScreen, DashboardEmptyScreenProps } from './dashboard_empty_screen';
 import { pluginServices } from '../../../services/plugin_services';
 
 describe('DashboardEmptyScreen', () => {
-  const setupMock = coreMock.createSetup();
   const DashboardServicesProvider = pluginServices.getContextProvider();
 
   const defaultProps = {
     isEditMode: false,
     onLinkClick: jest.fn(),
-    uiSettings: setupMock.uiSettings,
   };
 
   function mountComponent(props?: Partial<DashboardEmptyScreenProps>) {

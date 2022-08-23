@@ -14,6 +14,7 @@ import {
   LazyControlsCallout,
 } from '@kbn/controls-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { withSuspense } from '@kbn/presentation-util-plugin/public';
 import {
   DashboardContainer,
   DashboardReactContextValue,
@@ -22,12 +23,11 @@ import {
 import { DashboardGrid } from '../grid';
 import { context } from '../../../services/kibana_react';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
-import { withSuspense } from '../../../services/presentation_util';
+import { pluginServices } from '../../../services/plugin_services';
 
 export interface DashboardViewportProps {
   container: DashboardContainer;
   controlGroup?: ControlGroupContainer;
-  controlsEnabled?: boolean;
   onDataLoaded?: (data: DashboardLoadedInfo) => void;
 }
 
@@ -106,11 +106,17 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
   };
 
   public render() {
-    const { container, controlsEnabled, controlGroup } = this.props;
+    const { container, controlGroup } = this.props;
     const isEditMode = container.getInput().viewMode !== ViewMode.VIEW;
     const { isEmbeddedExternally, isFullScreenMode, panelCount, title, description, useMargins } =
       this.state;
-    const hideAnnouncements = Boolean(this.context.services.uiSettings.get('hideAnnouncements'));
+
+    const {
+      settings: { isProjectEnabledInLabs, uiSettings },
+    } = pluginServices.getServices();
+    const controlsEnabled = isProjectEnabledInLabs('labs:dashboard:dashboardControls');
+
+    const hideAnnouncements = Boolean(uiSettings.get('hideAnnouncements'));
 
     return (
       <>
@@ -159,7 +165,6 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
                   !this.props.container.getInput().dashboardCapabilities?.showWriteControls
                 }
                 isEditMode={isEditMode}
-                uiSettings={this.context.services.uiSettings}
               />
             </div>
           )}

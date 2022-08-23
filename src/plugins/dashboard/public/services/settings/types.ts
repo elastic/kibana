@@ -6,5 +6,10 @@
  * Side Public License, v 1.
  */
 
-export type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
-export { LazyDashboardPicker, withSuspense, useLabs } from '@kbn/presentation-util-plugin/public';
+import { CoreStart } from '@kbn/core/public';
+import { PresentationLabsService } from '@kbn/presentation-util-plugin/public';
+
+export interface DashboardSettingsService {
+  uiSettings: CoreStart['uiSettings'];
+  isProjectEnabledInLabs: PresentationLabsService['isProjectEnabled'];
+}

@@ -12,9 +12,8 @@ import { getSampleDashboardInput } from '../test_helpers';
 
 import { CoreStart } from '@kbn/core/public';
 
-import { coreMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
-import { getStubPluginServices } from '@kbn/presentation-util-plugin/public';
 import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 
 import {
@@ -63,9 +62,7 @@ beforeEach(async () => {
     overlays: coreStart.overlays,
     savedObjectMetaData: {} as any,
     uiActions: {} as any,
-    uiSettings: uiSettingsServiceMock.createStartContract(),
     theme: coreStart.theme,
-    presentationUtil: getStubPluginServices(),
     screenshotMode: screenshotModePluginMock.createSetupContract(),
   };
 

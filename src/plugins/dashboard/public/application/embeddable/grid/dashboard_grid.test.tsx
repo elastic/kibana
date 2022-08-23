@@ -21,13 +21,11 @@ import {
   ContactCardEmbeddableFactory,
   CONTACT_CARD_EMBEDDABLE,
 } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
-import { coreMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
-import { getStubPluginServices } from '@kbn/presentation-util-plugin/public';
+import { coreMock } from '@kbn/core/public/mocks';
 import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 import { pluginServices } from '../../../services/plugin_services';
 
 let dashboardContainer: DashboardContainer | undefined;
-const presentationUtil = getStubPluginServices();
 const DashboardServicesProvider = pluginServices.getContextProvider();
 
 function prepare(props?: Partial<DashboardGridProps>) {
@@ -71,9 +69,7 @@ function prepare(props?: Partial<DashboardGridProps>) {
     uiActions: {
       getTriggerCompatibleActions: (() => []) as any,
     } as any,
-    uiSettings: uiSettingsServiceMock.createStartContract(),
     theme: coreMock.createStart().theme,
-    presentationUtil,
     screenshotMode: screenshotModePluginMock.createSetupContract(),
   };
   dashboardContainer = new DashboardContainer(initialInput, options);
@@ -102,13 +98,12 @@ afterAll(() => {
 // unhandled promise rejection: https://github.com/elastic/kibana/issues/112699
 test.skip('renders DashboardGrid', () => {
   const { props, options } = prepare();
+
   const component = mountWithIntl(
     <KibanaContextProvider services={options}>
-      <presentationUtil.ContextProvider>
-        <DashboardServicesProvider>
-          <DashboardGrid {...props} />
-        </DashboardServicesProvider>
-      </presentationUtil.ContextProvider>
+      <DashboardServicesProvider>
+        <DashboardGrid {...props} />
+      </DashboardServicesProvider>
     </KibanaContextProvider>
   );
   const panelElements = component.find('EmbeddableChildPanel');
@@ -120,11 +115,9 @@ test.skip('renders DashboardGrid with no visualizations', () => {
   const { props, options } = prepare();
   const component = mountWithIntl(
     <KibanaContextProvider services={options}>
-      <presentationUtil.ContextProvider>
-        <DashboardServicesProvider>
-          <DashboardGrid {...props} />
-        </DashboardServicesProvider>
-      </presentationUtil.ContextProvider>
+      <DashboardServicesProvider>
+        <DashboardGrid {...props} />
+      </DashboardServicesProvider>
     </KibanaContextProvider>
   );
 
@@ -138,11 +131,9 @@ test.skip('DashboardGrid removes panel when removed from container', () => {
   const { props, options } = prepare();
   const component = mountWithIntl(
     <KibanaContextProvider services={options}>
-      <presentationUtil.ContextProvider>
-        <DashboardServicesProvider>
-          <DashboardGrid {...props} />{' '}
-        </DashboardServicesProvider>
-      </presentationUtil.ContextProvider>
+      <DashboardServicesProvider>
+        <DashboardGrid {...props} />{' '}
+      </DashboardServicesProvider>
     </KibanaContextProvider>
   );
 
@@ -160,11 +151,9 @@ test.skip('DashboardGrid renders expanded panel', () => {
   const { props, options } = prepare();
   const component = mountWithIntl(
     <KibanaContextProvider services={options}>
-      <presentationUtil.ContextProvider>
-        <DashboardServicesProvider>
-          <DashboardGrid {...props} />
-        </DashboardServicesProvider>
-      </presentationUtil.ContextProvider>
+      <DashboardServicesProvider>
+        <DashboardGrid {...props} />
+      </DashboardServicesProvider>
     </KibanaContextProvider>
   );
 
@@ -191,9 +180,9 @@ test.skip('DashboardGrid unmount unsubscribes', async (done) => {
   const { props, options } = prepare();
   const component = mountWithIntl(
     <KibanaContextProvider services={options}>
-      <presentationUtil.ContextProvider>
+      <DashboardServicesProvider>
         <DashboardGrid {...props} />
-      </presentationUtil.ContextProvider>
+      </DashboardServicesProvider>
     </KibanaContextProvider>
   );
 

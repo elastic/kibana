@@ -18,23 +18,18 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { IUiSettingsClient } from '@kbn/core/public';
 import { emptyScreenStrings } from '../../../dashboard_strings';
 import { pluginServices } from '../../../services/plugin_services';
 
 export interface DashboardEmptyScreenProps {
   isEditMode?: boolean;
-  uiSettings: IUiSettingsClient;
   isReadonlyMode?: boolean;
 }
 
-export function DashboardEmptyScreen({
-  isEditMode,
-  uiSettings,
-  isReadonlyMode,
-}: DashboardEmptyScreenProps) {
+export function DashboardEmptyScreen({ isEditMode, isReadonlyMode }: DashboardEmptyScreenProps) {
   const {
     http: { basePath },
+    settings: { uiSettings },
   } = pluginServices.getServices();
 
   const IS_DARK_THEME = uiSettings.get('theme:darkMode');

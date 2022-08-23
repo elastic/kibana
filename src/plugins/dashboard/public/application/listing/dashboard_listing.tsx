@@ -68,7 +68,10 @@ export const DashboardListing = ({
     },
   } = useKibana<DashboardAppServices>();
 
-  const { data } = pluginServices.getServices();
+  const {
+    data,
+    settings: { uiSettings },
+  } = pluginServices.getServices();
 
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
   useMount(() => {
@@ -116,8 +119,8 @@ export const DashboardListing = ({
   }, [title, savedObjectsClient, redirectTo, data.query, kbnUrlStateStorage]);
 
   const { showWriteControls } = dashboardCapabilities;
-  const listingLimit = core.uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
-  const initialPageSize = core.uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
+  const listingLimit = uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
+  const initialPageSize = uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
   const defaultFilter = title ? `"${title}"` : '';
 
   const tableColumns = useMemo(
@@ -125,10 +128,10 @@ export const DashboardListing = ({
       getTableColumns(
         core.application,
         kbnUrlStateStorage,
-        core.uiSettings.get('state:storeInSessionStorage'),
+        uiSettings.get('state:storeInSessionStorage'),
         savedObjectsTagging
       ),
-    [core.application, core.uiSettings, kbnUrlStateStorage, savedObjectsTagging]
+    [core.application, uiSettings, kbnUrlStateStorage, savedObjectsTagging]
   );
 
   const createItem = useCallback(() => {
