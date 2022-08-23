@@ -24,6 +24,7 @@ import { pluginServices } from '../../services';
 import { EditControlButton } from '../editor/edit_control';
 import { ControlGroupStrings } from '../control_group_strings';
 import { useChildEmbeddable } from '../../hooks/use_child_embeddable';
+import { TIME_SLIDER_CONTROL } from '../../../common';
 
 export interface ControlFrameProps {
   customPrepend?: JSX.Element;
@@ -86,7 +87,7 @@ export const ControlFrame = ({
         'controlFrameFloatingActions--oneLine': !usingTwoLineLayout,
       })}
     >
-      {!hasFatalError && (
+      {!hasFatalError && embeddableType !== TIME_SLIDER_CONTROL && (
         <EuiToolTip content={ControlGroupStrings.floatingActions.getEditButtonTitle()}>
           <EditControlButton embeddableId={embeddableId} />
         </EuiToolTip>
