@@ -178,20 +178,20 @@ describe('Service Overview', () => {
   });
 
   describe('when RUM service', () => {
-    beforeEach(() => {
+    it('hides dependency tab when RUM service', () => {
       cy.loginAsViewerUser();
+
+      cy.intercept('GET', '/internal/apm/services/opbeans-rum/agent?*').as(
+        'agentRequest'
+      );
+
       cy.visitKibana(
         url.format({
           pathname: '/app/apm/services/opbeans-rum/overview',
           query: { rangeFrom: start, rangeTo: end },
         })
       );
-    });
 
-    it('hides dependency tab when RUM service', () => {
-      cy.intercept('GET', '/internal/apm/services/opbeans-rum/agent?*').as(
-        'agentRequest'
-      );
       cy.contains('Overview');
       cy.contains('Transactions');
       cy.contains('Error');
@@ -209,13 +209,14 @@ describe('Service Overview', () => {
   describe('Calls APIs', () => {
     beforeEach(() => {
       cy.loginAsViewerUser();
-      cy.visitKibana(baseUrl);
+
       apiRequestsToIntercept.map(({ endpoint, aliasName }) => {
         cy.intercept('GET', endpoint).as(aliasName);
       });
       apiRequestsToInterceptWithComparison.map(({ endpoint, aliasName }) => {
         cy.intercept('GET', endpoint).as(aliasName);
       });
+      cy.visitKibana(baseUrl);
     });
 
     it.skip('with the correct environment when changing the environment', () => {
