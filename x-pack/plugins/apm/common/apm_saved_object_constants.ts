@@ -19,3 +19,7 @@ export const APM_TELEMETRY_SAVED_OBJECT_ID = 'apm-telemetry';
 // APM Server schema
 export const APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE = 'apm-server-schema';
 export const APM_SERVER_SCHEMA_SAVED_OBJECT_ID = 'apm-server-schema';
+
+// APM experimental features
+export const APM_EXPERIMENTAL_FEATURES_TYPE = 'apm-experimental-features';
+export const APM_EXPERIMENTAL_FEATURES_ID = 'apm-experimental-features';

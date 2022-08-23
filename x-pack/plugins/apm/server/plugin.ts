@@ -54,6 +54,7 @@ import {
 } from '../common/elasticsearch_fieldnames';
 import { tutorialProvider } from './tutorial';
 import { migrateLegacyAPMIndicesToSpaceAware } from './saved_objects/migrations/migrate_legacy_apm_indices_to_space_aware';
+import { apmExperimentalFeatures } from './saved_objects/apm_experimental_features';
 
 export class APMPlugin
   implements
@@ -81,6 +82,7 @@ export class APMPlugin
     core.savedObjects.registerType(apmTelemetry);
     core.savedObjects.registerType(apmServerSettings);
     core.savedObjects.registerType(apmServiceGroups);
+    core.savedObjects.registerType(apmExperimentalFeatures);
 
     const currentConfig = this.initContext.config.get<APMConfig>();
     this.currentConfig = currentConfig;
