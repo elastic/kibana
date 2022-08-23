@@ -3377,6 +3377,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-saved-objects-api-server-mocks@link:bazel-bin/packages/core/saved-objects/core-saved-objects-api-server-mocks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-saved-objects-api-server@link:bazel-bin/packages/core/saved-objects/core-saved-objects-api-server":
   version "0.0.0"
   uid ""
@@ -3406,6 +3410,10 @@
   uid ""
 
 "@kbn/core-saved-objects-import-export-server-internal@link:bazel-bin/packages/core/saved-objects/core-saved-objects-import-export-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-saved-objects-import-export-server-mocks@link:bazel-bin/packages/core/saved-objects/core-saved-objects-import-export-server-mocks":
   version "0.0.0"
   uid ""
 
@@ -7375,6 +7383,10 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__core-saved-objects-api-server-mocks@link:bazel-bin/packages/core/saved-objects/core-saved-objects-api-server-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__core-saved-objects-api-server@link:bazel-bin/packages/core/saved-objects/core-saved-objects-api-server/npm_module_types":
   version "0.0.0"
   uid ""
@@ -7404,6 +7416,10 @@
   uid ""
 
 "@types/kbn__core-saved-objects-import-export-server-internal@link:bazel-bin/packages/core/saved-objects/core-saved-objects-import-export-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-saved-objects-import-export-server-mocks@link:bazel-bin/packages/core/saved-objects/core-saved-objects-import-export-server-mocks/npm_module_types":
   version "0.0.0"
   uid ""
 
