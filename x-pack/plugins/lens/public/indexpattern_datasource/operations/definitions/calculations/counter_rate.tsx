@@ -99,7 +99,7 @@ export const counterRateOperation: OperationDefinition<
       references: referenceIds,
       timeScale,
       timeShift: columnParams?.shift || previousColumn?.timeShift,
-      filter: getFilter(previousColumn, columnParams),
+      filter: columnParams?.filter || getFilter(previousColumn, columnParams),
       params: getFormatFromPreviousColumn(previousColumn),
     };
   },

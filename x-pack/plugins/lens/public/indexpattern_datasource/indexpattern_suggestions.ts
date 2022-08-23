@@ -7,7 +7,12 @@
 
 import { flatten, minBy, pick, mapValues, partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
+import type {
+  Layer,
+  Column,
+  AnyColumnWithReferences,
+  AnyColumnWithSourceField,
+} from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { generateId } from '../id_generator';
 import type {
   DatasourceSuggestion,
@@ -15,6 +20,7 @@ import type {
   IndexPatternField,
   IndexPatternMap,
   TableChangeType,
+  VisualizationDimensionGroupConfig,
 } from '../types';
 import { columnToOperation } from './indexpattern';
 import {
@@ -28,15 +34,25 @@ import {
   getExistingColumnGroups,
   isReferenced,
   getReferencedColumnIds,
-  getSplitByTermsLayer,
-  getSplitByFiltersLayer,
-  computeLayerFromContext,
   hasTermsWithManyBuckets,
+  FormulaIndexPatternColumn,
 } from './operations';
 import { hasField } from './pure_utils';
 import type { IndexPatternPrivateState, IndexPatternLayer } from './types';
 import { documentField } from './document_field';
+import { OperationDefinition } from './operations/definitions';
+import { insertOrReplaceFormulaColumn } from './operations/definitions/formula';
 export type IndexPatternSuggestion = DatasourceSuggestion<IndexPatternPrivateState>;
+
+interface ColumnChange {
+  op: OperationType;
+  columnId: string;
+  indexPattern: IndexPattern;
+  field?: IndexPatternField;
+  visualizationGroups: VisualizationDimensionGroupConfig[];
+  columnParams?: Record<string, unknown>;
+  references?: ColumnChange[];
+}
 
 function buildSuggestion({
   state,
@@ -155,95 +171,123 @@ export function getDatasourceSuggestionsForField(
 // Called when the user navigates from Visualize editor to Lens
 export function getDatasourceSuggestionsForVisualizeCharts(
   state: IndexPatternPrivateState,
-  context: VisualizeEditorLayersContext[],
+  contextLayers: Layer[],
   indexPatterns: IndexPatternMap
 ): IndexPatternSuggestion[] {
-  const layers = Object.keys(state.layers);
-  const layerIds = layers.filter(
-    (id) => state.layers[id].indexPatternId === context[0].indexPatternId
-  );
-  if (layerIds.length !== 0) return [];
-  return getEmptyLayersSuggestionsForVisualizeCharts(state, context, indexPatterns);
+  return getEmptyLayersSuggestionsForVisualizeCharts(state, contextLayers, indexPatterns);
 }
 
 function getEmptyLayersSuggestionsForVisualizeCharts(
   state: IndexPatternPrivateState,
-  context: VisualizeEditorLayersContext[],
+  contextLayers: Layer[],
   indexPatterns: IndexPatternMap
 ): IndexPatternSuggestion[] {
   const suggestions: IndexPatternSuggestion[] = [];
-  for (let layerIdx = 0; layerIdx < context.length; layerIdx++) {
-    const layer = context[layerIdx];
+  contextLayers.forEach((layer) => {
     const indexPattern = indexPatterns[layer.indexPatternId];
     if (!indexPattern) return [];
-
-    const newId = generateId();
-    let newLayer: IndexPatternLayer | undefined;
-    if (indexPattern.timeFieldName) {
-      newLayer = createNewTimeseriesLayerWithMetricAggregationFromVizEditor(indexPattern, layer);
-    }
-    if (newLayer) {
-      const suggestion = buildSuggestion({
-        state,
-        updatedLayer: newLayer,
-        layerId: newId,
-        changeType: 'initial',
-      });
-      const layerId = Object.keys(suggestion.state.layers)[0];
-      context[layerIdx].layerId = layerId;
-      suggestions.push(suggestion);
-    }
-  }
+    const newLayer = createNewLayerWithMetricAggregationFromVizEditor(indexPattern, layer);
+    const suggestion = buildSuggestion({
+      state,
+      updatedLayer: newLayer,
+      layerId: layer.layerId,
+      changeType: 'initial',
+    });
+    suggestions.push(suggestion);
+  });
   return suggestions;
 }
 
-function createNewTimeseriesLayerWithMetricAggregationFromVizEditor(
-  indexPattern: IndexPattern,
-  layer: VisualizeEditorLayersContext
-): IndexPatternLayer | undefined {
-  const { timeFieldName, splitMode, splitFilters, metrics, timeInterval, dropPartialBuckets } =
-    layer;
-  const dateField = indexPattern.getFieldByName(timeFieldName!);
+function isReferenceColumn(column: Column): column is AnyColumnWithReferences {
+  return 'references' in column && (column as AnyColumnWithReferences).references.length > 0;
+}
 
-  const splitFields = layer.splitFields
-    ? (layer.splitFields
-        .map((item) => indexPattern.getFieldByName(item))
-        .filter(Boolean) as IndexPatternField[])
-    : null;
+function isFieldBasedColumn(column: Column): column is AnyColumnWithSourceField {
+  return 'sourceField' in column;
+}
 
-  // generate the layer for split by terms
-  if (splitMode === 'terms' && splitFields?.length) {
-    return getSplitByTermsLayer(indexPattern, splitFields, dateField, layer);
-    // generate the layer for split by filters
-  } else if (splitMode?.includes('filter') && splitFilters && splitFilters.length) {
-    return getSplitByFiltersLayer(indexPattern, dateField, layer);
-  } else {
-    const copyMetricsArray = [...metrics];
-    const computedLayer = computeLayerFromContext(
-      metrics.length === 1,
-      copyMetricsArray,
-      indexPattern,
-      layer.format,
-      layer.label
-    );
-    // static values layers do not need a date histogram column
-    if (Object.values(computedLayer.columns)[0].isStaticValue) {
-      return computedLayer;
+function getSourceField(column: Column, indexPattern: IndexPattern) {
+  return isFieldBasedColumn(column)
+    ? column.sourceField === 'document'
+      ? documentField
+      : indexPattern.getFieldByName(column.sourceField)
+    : undefined;
+}
+
+function getParams(column: Column) {
+  return {
+    ...column.params,
+    filter: column.filter,
+    shift: column.timeShift,
+    window: column.window,
+  };
+}
+
+function convertToColumnChange(columns: Layer['columns'], indexPattern: IndexPattern) {
+  return columns.reduce<ColumnChange[]>((acc, column) => {
+    if (!columns.some((c) => isReferenceColumn(c) && column.columnId === c.references[0])) {
+      const newColumn: ColumnChange = {
+        op: column.operationType,
+        columnId: column.columnId,
+        field: getSourceField(column, indexPattern),
+        indexPattern,
+        visualizationGroups: [],
+        columnParams: getParams(column),
+      };
+      if (isReferenceColumn(column)) {
+        const referenceColumn = columns.find((c) => c.columnId === column.references[0])!;
+        newColumn.references = [
+          {
+            op: referenceColumn.operationType,
+            columnId: referenceColumn.columnId,
+            field: getSourceField(referenceColumn, indexPattern),
+            indexPattern,
+            visualizationGroups: [],
+            columnParams: getParams(referenceColumn),
+          },
+        ];
+      }
+      acc.push(newColumn);
     }
 
-    return insertNewColumn({
-      op: 'date_histogram',
-      layer: computedLayer,
-      columnId: generateId(),
-      field: dateField,
-      indexPattern,
-      visualizationGroups: [],
-      columnParams: {
-        interval: timeInterval,
-        dropPartials: dropPartialBuckets,
-      },
-    });
-  }
+    return acc;
+  }, []);
+}
+
+function createNewLayerWithMetricAggregationFromVizEditor(
+  indexPattern: IndexPattern,
+  layer: Layer
+) {
+  const columns = convertToColumnChange(layer.columns, indexPattern);
+  let newLayer: IndexPatternLayer = {
+    indexPatternId: indexPattern.id,
+    columns: {},
+    columnOrder: [],
+  };
+  columns.forEach((column) => {
+    if (column.op === 'formula') {
+      const operationDefinition = operationDefinitionMap.formula as OperationDefinition<
+        FormulaIndexPatternColumn,
+        'managedReference'
+      >;
+      const newColumn = operationDefinition.buildColumn(
+        {
+          indexPattern,
+          layer: newLayer,
+        },
+        column.columnParams
+      ) as FormulaIndexPatternColumn;
+      newLayer = insertOrReplaceFormulaColumn(column.columnId, newColumn, newLayer, {
+        indexPattern,
+      }).layer;
+    } else {
+      newLayer = insertNewColumn({
+        ...column,
+        layer: newLayer,
+      });
+    }
+  });
+  return newLayer;
 }
 
 // Called when the user navigates from Discover to Lens (Visualize button)

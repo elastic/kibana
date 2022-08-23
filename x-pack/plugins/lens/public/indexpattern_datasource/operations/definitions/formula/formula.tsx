@@ -138,7 +138,7 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
         },
       ];
     },
-    buildColumn({ previousColumn, layer, indexPattern }, _, operationDefinitionMap) {
+    buildColumn({ previousColumn, layer, indexPattern }, columnParams, operationDefinitionMap) {
       let previousFormula = '';
       if (previousColumn) {
         previousFormula = generateFormula(
@@ -161,13 +161,20 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
         isBucketed: false,
         scale: 'ratio',
         params: previousFormula
-          ? { formula: previousFormula, isFormulaBroken: false, ...prevFormat }
-          : { ...prevFormat },
+          ? {
+              formula: previousFormula,
+              isFormulaBroken: false,
+              ...prevFormat,
+              ...(columnParams?.formula ? { formula: columnParams?.formula } : {}),
+            }
+          : { ...prevFormat, ...(columnParams?.formula ? { formula: columnParams?.formula } : {}) },
         references: [],
         // carry over the filter if coming from another formula,
         // otherwise the filter has been already migrated into the formula text
         filter:
-          previousColumn?.operationType === 'formula' ? getFilter(previousColumn, {}) : undefined,
+          columnParams?.filter || previousColumn?.operationType === 'formula'
+            ? getFilter(previousColumn, columnParams)
+            : undefined,
         timeScale: previousColumn?.timeScale,
       };
     },

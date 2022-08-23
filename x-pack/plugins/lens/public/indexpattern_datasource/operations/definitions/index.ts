@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Query } from '@kbn/es-query';
 import {
   IUiSettingsClient,
   SavedObjectsClientContract,
@@ -439,6 +440,17 @@ interface OperationParam {
   defaultValue?: string | number;
 }
 
+/**
+ * Two possibility to provide filter:
+ * 1. use alredy build filter
+ * 2. use kql/lucene strings
+ */
+interface FilterParams {
+  kql?: string;
+  lucene?: string;
+  filter?: Query;
+}
+
 interface FieldlessOperationDefinition<C extends BaseIndexPatternColumn, P = {}> {
   input: 'none';
 
@@ -496,12 +508,10 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn, P = {}
       previousColumn?: GenericIndexPatternColumn;
     },
     columnParams?: P & {
-      kql?: string;
-      lucene?: string;
       shift?: string;
       window?: string;
       usedInMath?: boolean;
-    }
+    } & FilterParams
   ) => C;
   /**
    * This method will be called if the user changes the field of an operation.
@@ -611,10 +621,8 @@ interface FullReferenceOperationDefinition<C extends BaseIndexPatternColumn> {
       previousColumn?: GenericIndexPatternColumn;
     },
     columnParams?: (ReferenceBasedIndexPatternColumn & C)['params'] & {
-      kql?: string;
-      lucene?: string;
       shift?: string;
-    }
+    } & FilterParams
   ) => ReferenceBasedIndexPatternColumn & C;
   /**
    * Returns the meta data of the operation if applied. Undefined
@@ -640,7 +648,7 @@ interface ManagedReferenceOperationDefinition<C extends BaseIndexPatternColumn> 
     arg: BaseBuildColumnArgs & {
       previousColumn?: GenericIndexPatternColumn;
     },
-    columnParams?: (ReferenceBasedIndexPatternColumn & C)['params'],
+    columnParams?: (ReferenceBasedIndexPatternColumn & C)['params'] & FilterParams,
     operationDefinitionMap?: Record<string, GenericOperationDefinition>
   ) => ReferenceBasedIndexPatternColumn & C;
   /**

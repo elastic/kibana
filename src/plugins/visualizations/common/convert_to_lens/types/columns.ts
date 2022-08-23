@@ -84,7 +84,6 @@ export type FormulaColumn = ColumnWithReferences<'formula', FormulaParams>;
 export type StaticValueColumn = ColumnWithReferences<'static_value', StaticValueParams>;
 
 export type AnyColumnWithSourceField =
-  | FiltersColumn
   | RangeColumn
   | TermsColumn
   | DateHistogramColumn

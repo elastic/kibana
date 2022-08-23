@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { partition, mapValues, pickBy, isArray } from 'lodash';
+import { partition, mapValues, pickBy } from 'lodash';
 import { CoreStart } from '@kbn/core/public';
 import type { Query } from '@kbn/es-query';
 import memoizeOne from 'memoize-one';
-import type { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
 import type {
   DatasourceFixAction,
   FrameDatasourceAPI,
@@ -43,7 +42,6 @@ import { FormulaIndexPatternColumn, insertOrReplaceFormulaColumn } from './defin
 import type { TimeScaleUnit } from '../../../common/expressions';
 import { documentField } from '../document_field';
 import { isColumnOfType } from './definitions/helpers';
-import { isSortableByColumn } from './definitions/terms/helpers';
 
 interface ColumnAdvancedParams {
   filter?: Query | undefined;
@@ -66,7 +64,7 @@ interface ColumnChange {
   incompleteFieldOperation?: OperationType;
   columnParams?: Record<string, unknown>;
   initialParams?: { params: Record<string, unknown> }; // TODO: bind this to the op parameter
-  references?: ColumnChange[];
+  references?: Array<Omit<ColumnChange, 'layer'>>;
 }
 
 interface ColumnCopy {
@@ -184,13 +182,13 @@ const insertReferences = ({
   targetGroup,
 }: {
   layer: IndexPatternLayer;
-  references: ColumnChange[];
+  references: ColumnChange['references'];
   requiredReferences: RequiredReference[];
   indexPattern: IndexPattern;
   visualizationGroups: VisualizationDimensionGroupConfig[];
   targetGroup?: string;
 }) => {
-  references.forEach((reference) => {
+  references?.forEach((reference) => {
     const validOperations = requiredReferences.filter((validation) =>
       isOperationAllowedAsReference({ validation, operationType: reference.op, indexPattern })
     );
@@ -203,7 +201,7 @@ const insertReferences = ({
   });
 
   const referenceIds: string[] = [];
-  references.forEach((reference) => {
+  references?.forEach((reference) => {
     const operation = operationDefinitionMap[reference.op];
 
     if (operation.input === 'none') {
@@ -1741,254 +1739,4 @@ export function getManagedColumnsFrom(
     queue.push(...allNodes[nextId]);
   }
   return store.filter(([, column]) => column);
-}
-
-export function computeLayerFromContext(
-  isLast: boolean,
-  metricsArray: VisualizeEditorLayersContext['metrics'],
-  indexPattern: IndexPattern,
-  format?: string,
-  customLabel?: string
-): IndexPatternLayer {
-  let layer: IndexPatternLayer = {
-    indexPatternId: indexPattern.id,
-    columns: {},
-    columnOrder: [],
-  };
-  if (isArray(metricsArray)) {
-    const metricContext = metricsArray.shift();
-    const field = metricContext
-      ? indexPattern.getFieldByName(metricContext.fieldName) ?? documentField
-      : documentField;
-
-    const operation = metricContext?.agg;
-    // Formula should be treated differently from other operations
-    if (operation === 'formula') {
-      const operationDefinition = operationDefinitionMap.formula as OperationDefinition<
-        FormulaIndexPatternColumn,
-        'managedReference'
-      >;
-      const tempLayer = { indexPatternId: indexPattern.id, columns: {}, columnOrder: [] };
-      let newColumn = operationDefinition.buildColumn({
-        indexPattern,
-        layer: tempLayer,
-      }) as FormulaIndexPatternColumn;
-      let filterBy = metricContext?.params?.kql
-        ? { query: metricContext?.params?.kql, language: 'kuery' }
-        : undefined;
-      if (metricContext?.params?.lucene) {
-        filterBy = metricContext?.params?.lucene
-          ? { query: metricContext?.params?.lucene, language: 'lucene' }
-          : undefined;
-      }
-      newColumn = {
-        ...newColumn,
-        ...(filterBy && { filter: filterBy }),
-        params: {
-          ...newColumn.params,
-          ...metricContext?.params,
-        },
-      } as FormulaIndexPatternColumn;
-      layer = metricContext?.params?.formula
-        ? insertOrReplaceFormulaColumn(generateId(), newColumn, tempLayer, {
-            indexPattern,
-          }).layer
-        : tempLayer;
-    } else {
-      const columnId = generateId();
-      // recursive function to build the layer
-      layer = insertNewColumn({
-        op: operation as OperationType,
-        layer: isLast
-          ? { indexPatternId: indexPattern.id, columns: {}, columnOrder: [] }
-          : computeLayerFromContext(metricsArray.length === 1, metricsArray, indexPattern),
-        columnId,
-        field: !metricContext?.isFullReference ? field ?? documentField : undefined,
-        columnParams: metricContext?.params ?? undefined,
-        incompleteFieldName: metricContext?.isFullReference ? field?.name : undefined,
-        incompleteFieldOperation: metricContext?.isFullReference
-          ? metricContext?.pipelineAggType
-          : undefined,
-        indexPattern,
-        visualizationGroups: [],
-      });
-      if (metricContext) {
-        metricContext.accessor = columnId;
-      }
-    }
-  }
-
-  // update the layer with the custom label and the format
-  let columnIdx = 0;
-  for (const [columnId, column] of Object.entries(layer.columns)) {
-    if (format) {
-      layer = updateColumnParam({
-        layer,
-        columnId,
-        paramName: 'format',
-        value: {
-          id: format,
-          params: {
-            decimals: 0,
-          },
-        },
-      });
-    }
-
-    // for percentiles I want to update all columns with the custom label
-    if (customLabel && column.operationType === 'percentile') {
-      layer = updateColumnLabel({
-        layer,
-        columnId,
-        customLabel,
-      });
-    } else if (customLabel && columnIdx === Object.keys(layer.columns).length - 1) {
-      layer = updateColumnLabel({
-        layer,
-        columnId,
-        customLabel,
-      });
-    }
-    columnIdx++;
-  }
-  return layer;
-}
-
-export function getSplitByTermsLayer(
-  indexPattern: IndexPattern,
-  splitFields: IndexPatternField[],
-  dateField: IndexPatternField | undefined,
-  layer: VisualizeEditorLayersContext
-): IndexPatternLayer {
-  const { termsParams, metrics, timeInterval, splitWithDateHistogram, dropPartialBuckets } = layer;
-  const copyMetricsArray = [...metrics];
-
-  const computedLayer = computeLayerFromContext(
-    metrics.length === 1,
-    copyMetricsArray,
-    indexPattern,
-    layer.format,
-    layer.label
-  );
-
-  const [baseField, ...secondaryFields] = splitFields;
-  const columnId = generateId();
-
-  let termsLayer = insertNewColumn({
-    op: splitWithDateHistogram ? 'date_histogram' : 'terms',
-    layer: insertNewColumn({
-      op: 'date_histogram',
-      layer: computedLayer,
-      columnId: generateId(),
-      field: dateField,
-      indexPattern,
-      visualizationGroups: [],
-      columnParams: {
-        interval: timeInterval,
-        dropPartials: dropPartialBuckets,
-      },
-    }),
-    columnId,
-    field: baseField,
-    indexPattern,
-    visualizationGroups: [],
-  });
-
-  if (secondaryFields.length) {
-    termsLayer = updateColumnParam({
-      layer: termsLayer,
-      columnId,
-      paramName: 'secondaryFields',
-      value: secondaryFields.map((i) => i.name),
-    });
-
-    termsLayer = updateDefaultLabels(termsLayer, indexPattern);
-  }
-
-  const termsColumnParams = termsParams as TermsIndexPatternColumn['params'];
-  if (termsColumnParams) {
-    for (const [param, value] of Object.entries(termsColumnParams)) {
-      let paramValue = value;
-      if (param === 'orderBy') {
-        const [existingMetricColumn] = Object.keys(termsLayer.columns).filter((colId) =>
-          isSortableByColumn(termsLayer, colId)
-        );
-
-        paramValue = (
-          termsColumnParams.orderBy.type === 'column' && existingMetricColumn
-            ? {
-                type: 'column',
-                columnId: existingMetricColumn,
-              }
-            : { type: 'alphabetical', fallback: true }
-        ) as TermsIndexPatternColumn['params']['orderBy'];
-      }
-      termsLayer = updateColumnParam({
-        layer: termsLayer,
-        columnId,
-        paramName: param,
-        value: paramValue,
-      });
-      // label must be updated after the param is updated (Top {size} values of {field})
-      termsLayer = updateDefaultLabels(termsLayer, indexPattern);
-    }
-  }
-  return termsLayer;
-}
-
-export function getSplitByFiltersLayer(
-  indexPattern: IndexPattern,
-  dateField: IndexPatternField | undefined,
-  layer: VisualizeEditorLayersContext
-): IndexPatternLayer {
-  const { splitFilters, metrics, timeInterval, dropPartialBuckets } = layer;
-  const filterParams = splitFilters?.map((param) => {
-    const query = param.filter ? param.filter.query : '';
-    const language = param.filter ? param.filter.language : 'kuery';
-    return {
-      input: {
-        query,
-        language,
-      },
-      label: param.label ?? '',
-    };
-  });
-  const copyMetricsArray = [...metrics];
-  const computedLayer = computeLayerFromContext(
-    metrics.length === 1,
-    copyMetricsArray,
-    indexPattern,
-    layer.format,
-    layer.label
-  );
-  const columnId = generateId();
-  let filtersLayer = insertNewColumn({
-    op: 'filters',
-    layer: insertNewColumn({
-      op: 'date_histogram',
-      layer: computedLayer,
-      columnId: generateId(),
-      field: dateField,
-      indexPattern,
-      visualizationGroups: [],
-      columnParams: {
-        interval: timeInterval,
-        dropPartials: dropPartialBuckets,
-      },
-    }),
-    columnId,
-    field: undefined,
-    indexPattern,
-    visualizationGroups: [],
-  });
-
-  if (filterParams) {
-    filtersLayer = updateColumnParam({
-      layer: filtersLayer,
-      columnId,
-      paramName: 'filters',
-      value: filterParams,
-    });
-  }
-  return filtersLayer;
 }

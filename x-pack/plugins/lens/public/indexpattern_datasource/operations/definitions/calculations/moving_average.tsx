@@ -103,7 +103,7 @@ export const movingAverageOperation: OperationDefinition<
       scale: 'ratio',
       references: referenceIds,
       timeShift: columnParams?.shift || previousColumn?.timeShift,
-      filter: getFilter(previousColumn, columnParams),
+      filter: columnParams?.filter || getFilter(previousColumn, columnParams),
       timeScale: previousColumn?.timeScale,
       params: {
         window,

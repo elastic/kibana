@@ -126,7 +126,7 @@ export const percentileRanksOperation: OperationDefinition<
       sourceField: field.name,
       isBucketed: false,
       scale: 'ratio',
-      filter: getFilter(previousColumn, columnParams),
+      filter: columnParams?.filter || getFilter(previousColumn, columnParams),
       timeShift: columnParams?.shift || previousColumn?.timeShift,
       window: columnParams?.window || previousColumn?.window,
       params: {

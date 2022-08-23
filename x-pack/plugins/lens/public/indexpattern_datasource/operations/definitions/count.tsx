@@ -129,7 +129,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       scale: 'ratio',
       sourceField: field.name,
       timeScale: previousColumn?.timeScale,
-      filter: getFilter(previousColumn, columnParams),
+      filter: columnParams?.filter || getFilter(previousColumn, columnParams),
       timeShift: columnParams?.shift || previousColumn?.timeShift,
       window: columnParams?.window || previousColumn?.window,
       params: {
