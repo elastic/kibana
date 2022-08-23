@@ -33,7 +33,7 @@ const EditIndexPatternCont: React.FC<RouteComponentProps<{ id: string }>> = ({ .
       });
   }, [dataViews, props.match.params.id, setBreadcrumbs, setError]);
 
-  if (error || indexPattern == null) {
+  if (error) {
     const [errorTitle, errorMessage] = [
       i18n.translate('indexPatternManagement.editIndexPattern.couldNotLoadTitle', {
         defaultMessage: 'Unable to load data view',
