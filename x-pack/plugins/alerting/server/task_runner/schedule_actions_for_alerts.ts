@@ -49,15 +49,14 @@ export async function scheduleActionsForAlerts<
       notifyWhen
     );
     if (executeAction && alert.hasScheduledActions()) {
-      const { actionGroup, subgroup: actionSubgroup, state } = alert.getScheduledActionOptions()!;
+      const { actionGroup, state } = alert.getScheduledActionOptions()!;
       await executeAlert(
         alertId,
         alert,
         executionHandler,
         ruleRunMetricsStore,
         actionGroup,
-        state,
-        actionSubgroup
+        state
       );
     }
   }
@@ -95,13 +94,11 @@ async function executeAlert<
   ruleRunMetricsStore: RuleRunMetricsStore,
   actionGroup: ActionGroupIds | RecoveryActionGroupId,
   state: InstanceState,
-  actionSubgroup?: string
 ) {
-  alert.updateLastScheduledActions(actionGroup, actionSubgroup);
+  alert.updateLastScheduledActions(actionGroup);
   alert.unscheduleActions();
   return executionHandler({
     actionGroup,
-    actionSubgroup,
     context: alert.getContext(),
     state,
     alertId,
@@ -133,10 +130,7 @@ function shouldExecuteAction<
         muted ? 'muted' : 'throttled'
       }`
     );
-  } else if (
-    notifyWhen === 'onActionGroupChange' &&
-    !alert.scheduledActionGroupOrSubgroupHasChanged()
-  ) {
+  } else if (notifyWhen === 'onActionGroupChange' && !alert.scheduledActionGroupHasChanged()) {
     executeAction = false;
     logger.debug(
       `skipping scheduling of actions for '${alertId}' in rule ${ruleLabel}: alert is active but action group has not changed`

@@ -40,7 +40,6 @@ interface AlertOpts {
   id: string;
   message: string;
   group?: string;
-  subgroup?: string;
   state?: AlertInstanceState;
 }
 
@@ -49,7 +48,6 @@ interface ActionOpts {
   typeId: string;
   alertId: string;
   alertGroup?: string;
-  alertSubgroup?: string;
 }
 
 export class AlertingEventLogger {
@@ -216,7 +214,6 @@ export function createAlertRecord(context: RuleContextOpts, alert: AlertOpts) {
     state: alert.state,
     instanceId: alert.id,
     group: alert.group,
-    subgroup: alert.subgroup,
     message: alert.message,
     savedObjects: [
       {
@@ -241,14 +238,7 @@ export function createActionExecuteRecord(context: RuleContextOpts, action: Acti
     action: EVENT_LOG_ACTIONS.executeAction,
     instanceId: action.alertId,
     group: action.alertGroup,
-    subgroup: action.alertSubgroup,
-    message: `alert: ${context.ruleType.id}:${context.ruleId}: '${context.ruleName}' instanceId: '${
-      action.alertId
-    }' scheduled ${
-      action.alertSubgroup
-        ? `actionGroup(subgroup): '${action.alertGroup}(${action.alertSubgroup})'`
-        : `actionGroup: '${action.alertGroup}'`
-    } action: ${action.typeId}:${action.id}`,
+    message: `alert: ${context.ruleType.id}:${context.ruleId}: '${context.ruleName}' instanceId: '${action.alertId}' scheduled actionGroup: '${action.alertGroup}' action: ${action.typeId}:${action.id}`,
     savedObjects: [
       {
         id: context.ruleId,

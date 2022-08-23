@@ -180,7 +180,6 @@ export const previewRulesRoute = async (
               | 'getState'
               | 'replaceState'
               | 'scheduleActions'
-              | 'scheduleActionsWithSubGroup'
               | 'setContext'
               | 'getContext'
               | 'hasContext'
