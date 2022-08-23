@@ -402,7 +402,7 @@ describe('Detection rules, bulk edit', () => {
         hasIndexPatterns(resultingIndexPatterns.join(''));
       });
   
-      it.only('Delete all index patterns from custom rules', () => {
+      it('Delete all index patterns from custom rules', () => {
         selectNumberOfRules(expectedNumberOfNotMLRules);
   
         openBulkEditDeleteIndexPatternsForm();
