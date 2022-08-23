@@ -96,6 +96,7 @@ const AssignUsersComponent: React.FC<AssignUsersProps> = ({
   const { assigneesWithProfiles, assigneesWithoutProfiles, allAssignees } = useAssignees({
     caseAssignees,
     userProfiles,
+    currentUserProfile,
   });
 
   const [selectedAssignees, setSelectedAssignees] = useState<Assignee[] | undefined>();

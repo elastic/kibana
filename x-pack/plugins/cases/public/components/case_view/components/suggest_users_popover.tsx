@@ -14,7 +14,7 @@ import { useSuggestUserProfiles } from '../../../containers/user_profiles/use_su
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { AssigneeWithProfile } from '../../user_profiles/types';
 import * as i18n from '../translations';
-import { getSortField } from '../../user_profiles/sort';
+import { getSortField, moveCurrentUserToBeginning } from '../../user_profiles/sort';
 
 const SelectedStatusMessageComponent: React.FC<{
   selectedCount: number;
@@ -49,6 +49,7 @@ PopoverButton.displayName = 'PopoverButton';
 
 export interface SuggestUsersPopoverProps {
   assignedUsersWithProfiles: AssigneeWithProfile[];
+  currentUserProfile?: UserProfileWithAvatar;
   isLoading: boolean;
   isPopoverOpen: boolean;
   onUsersChange: (users: UserProfileWithAvatar[]) => void;
@@ -58,6 +59,7 @@ export interface SuggestUsersPopoverProps {
 
 const SuggestUsersPopoverComponent: React.FC<SuggestUsersPopoverProps> = ({
   assignedUsersWithProfiles,
+  currentUserProfile,
   isLoading,
   isPopoverOpen,
   onUsersChange,
@@ -68,8 +70,11 @@ const SuggestUsersPopoverComponent: React.FC<SuggestUsersPopoverProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
 
   const selectedProfiles = useMemo(() => {
-    return sortProfiles(assignedUsersWithProfiles.map((assignee) => ({ ...assignee.profile })));
-  }, [assignedUsersWithProfiles]);
+    return moveCurrentUserToBeginning(
+      currentUserProfile,
+      sortProfiles(assignedUsersWithProfiles.map((assignee) => ({ ...assignee.profile })))
+    );
+  }, [assignedUsersWithProfiles, currentUserProfile]);
 
   const [selectedUsers, setSelectedUsers] = useState<UserProfileWithAvatar[] | undefined>();
 
@@ -79,11 +84,11 @@ const SuggestUsersPopoverComponent: React.FC<SuggestUsersPopoverProps> = ({
 
   const onChange = useCallback(
     (users: UserProfileWithAvatar[]) => {
-      // TODO: might need to sort these too? and put the current user at the front
-      setSelectedUsers(users);
-      onUsersChange(users);
+      const sortedUsers = moveCurrentUserToBeginning(currentUserProfile, sortProfiles(users));
+      setSelectedUsers(sortedUsers);
+      onUsersChange(sortedUsers);
     },
-    [onUsersChange]
+    [currentUserProfile, onUsersChange]
   );
 
   const selectedStatusMessage = useCallback(
@@ -97,7 +102,6 @@ const SuggestUsersPopoverComponent: React.FC<SuggestUsersPopoverProps> = ({
   });
 
   useEffect(() => {
-    // TODO: if the current user is selected move it to the front
     const sortedUserProfiles = sortProfiles(userProfiles);
 
     if (!isEmpty(searchTerm)) {

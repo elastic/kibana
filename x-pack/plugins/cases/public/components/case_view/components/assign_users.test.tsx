@@ -119,6 +119,9 @@ describe('AssignUsers', () => {
 
     fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
     await waitForEuiPopoverOpen();
+    fireEvent.change(screen.getByPlaceholderText('Search users'), {
+      target: { value: 'damaged_raccoon@elastic.co' },
+    });
 
     expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
   });
@@ -132,6 +135,9 @@ describe('AssignUsers', () => {
 
     fireEvent.click(screen.getByText('Assign a user'));
     await waitForEuiPopoverOpen();
+    fireEvent.change(screen.getByPlaceholderText('Search users'), {
+      target: { value: 'damaged_raccoon@elastic.co' },
+    });
 
     expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
   });
@@ -198,6 +204,9 @@ describe('AssignUsers', () => {
 
     fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
     await waitForEuiPopoverOpen();
+    fireEvent.change(screen.getByPlaceholderText('Search users'), {
+      target: { value: 'damaged_raccoon@elastic.co' },
+    });
 
     fireEvent.click(screen.getByText('Damaged Raccoon'));
 
@@ -292,6 +301,9 @@ describe('AssignUsers', () => {
 
     fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
     await waitForEuiPopoverOpen();
+    fireEvent.change(screen.getByPlaceholderText('Search users'), {
+      target: { value: 'damaged_raccoon@elastic.co' },
+    });
 
     fireEvent.click(screen.getByText('Damaged Raccoon'));
 
@@ -335,6 +347,10 @@ describe('AssignUsers', () => {
 
     fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
     await waitForEuiPopoverOpen();
+
+    fireEvent.change(screen.getByPlaceholderText('Search users'), {
+      target: { value: 'damaged_raccoon@elastic.co' },
+    });
 
     fireEvent.click(screen.getByText('Damaged Raccoon'));
 
