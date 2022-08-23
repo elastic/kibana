@@ -20481,7 +20481,7 @@
             "label": "aggregate",
             "description": [],
             "signature": [
-              "\"min\" | \"max\" | \"concat\" | \"sum\" | \"average\""
+              "\"min\" | \"max\" | \"sum\" | \"average\" | \"concat\""
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/top_hit.ts",
             "deprecated": false
