@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useState, useRef } from 'react';
+import React, { FC, useCallback, useState, useRef } from 'react';
 import { Observable, Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
@@ -26,19 +26,17 @@ import { FROM_INDEX, TO_INDEX } from '../time_utils';
 
 import './index.scss';
 
-export interface Props {
-  formatDate: (epoch: number) => void;
+interface Props {
+  formatDate: (epoch: number) => string;
   onChange: (value: [number, number]) => void;
   onNext: () => void;
   onPrevious: () => void;
   waitForPanelsToLoad$: Observable<void>;
 }
 
-export const TimeSlider: FC<Props> = (props) => {
-  const {
-    useEmbeddableDispatch,
-    actions,
-    useEmbeddableSelector: select,
+export const TimeSlider: FC<Props> = (props: Props) => {
+  const { 
+    useEmbeddableSelector: select
   } = useReduxEmbeddableContext<TimeSliderReduxState, typeof timeSliderReducers>();
   const ticks = select((state) => {
     return state.componentState.ticks;

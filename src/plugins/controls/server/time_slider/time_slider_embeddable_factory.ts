@@ -7,11 +7,11 @@
  */
 
 import { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/server';
-import { TIME_SLIDER_CONTROL } from '../../../common';
+import { TIME_SLIDER_CONTROL } from '../../common';
 import {
   createTimeSliderExtract,
   createTimeSliderInject,
-} from '../../../common/control_types/time_slider/time_slider_persistable_state';
+} from '../../common/time_slider/time_slider_persistable_state';
 
 export const timeSliderPersistableStateServiceFactory = (): EmbeddableRegistryDefinition => {
   return {

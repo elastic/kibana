@@ -16,7 +16,7 @@ interface Props {
   to: number;
 }
 
-export function TimeSliderPopoverButton(props) {
+export function TimeSliderPopoverButton(props: Props) {
   return (
     <button className="timeSlider__anchor eui-textTruncate" color="text" onClick={props.onClick}>
       <EuiText className="eui-textTruncate" size="s">

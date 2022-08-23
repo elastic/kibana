@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
 import { lazyLoadReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
 import {
@@ -14,7 +15,6 @@ import {
 } from '../../../common/options_list/options_list_persistable_state';
 import { TIME_SLIDER_CONTROL } from '../..';
 import { ControlInput, IEditableControlFactory } from '../../types';
-import { TimeSliderStrings } from '../time_slider/time_slider_strings';
 
 export class TimeSliderEmbeddableFactory
   implements EmbeddableFactoryDefinition, IEditableControlFactory<ControlInput>
@@ -36,9 +36,15 @@ export class TimeSliderEmbeddableFactory
 
   public isEditable = () => Promise.resolve(false);
 
-  public getDisplayName = () => TimeSliderStrings.getDisplayName();
+  public getDisplayName = () => 
+    i18n.translate('controls.timeSlider.displayName', {
+      defaultMessage: 'Time slider',
+    });
   public getIconType = () => 'clock';
-  public getDescription = () => TimeSliderStrings.getDescription();
+  public getDescription = () => 
+    i18n.translate('controls.timeSlider.description', {
+      defaultMessage: 'Add a slider for selecting a time range',
+    });
 
   public inject = createOptionsListInject();
   public extract = createOptionsListExtract();

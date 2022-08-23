@@ -50,7 +50,7 @@ import { ControlGroup } from '../component/control_group_component';
 import { controlGroupReducers } from '../state/control_group_reducers';
 import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
 import { CreateControlButton, CreateControlButtonTypes } from '../editor/create_control';
-import { TimeSliderControlEmbeddable } from '../../control_types/time_slider_2/time_slider_embeddable';
+import { TimeSliderControlEmbeddable } from '../../time_slider';
 
 let flyoutRef: OverlayRef | undefined;
 export const setFlyoutRef = (newRef: OverlayRef | undefined) => {

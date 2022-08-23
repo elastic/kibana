@@ -21,9 +21,17 @@ import { RangeSliderEmbeddableFactory, RangeSliderEmbeddableInput } from './rang
 import {
   TimeSliderEmbeddableFactory,
   TimeSliderControlEmbeddableInput,
-} from './control_types/time_slider_2';
+} from './time_slider';
 import { pluginServices } from './services';
 import { controlsService } from './services/kibana/controls';
+import {
+  ControlsPluginSetup,
+  ControlsPluginStart,
+  ControlsPluginSetupDeps,
+  ControlsPluginStartDeps,
+  IEditableControlFactory,
+  ControlInput,
+} from './types';
 
 export class ControlsPlugin
   implements

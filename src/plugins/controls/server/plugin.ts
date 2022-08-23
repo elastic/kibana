@@ -14,7 +14,7 @@ import { setupOptionsListSuggestionsRoute } from './options_list/options_list_su
 import { controlGroupContainerPersistableStateServiceFactory } from './control_group/control_group_container_factory';
 import { optionsListPersistableStateServiceFactory } from './options_list/options_list_embeddable_factory';
 import { rangeSliderPersistableStateServiceFactory } from './range_slider/range_slider_embeddable_factory';
-// import { timeSliderPersistableStateServiceFactory } from './control_types/time_slider/time_slider_embeddable_factory';
+import { timeSliderPersistableStateServiceFactory } from './time_slider/time_slider_embeddable_factory';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
@@ -26,8 +26,7 @@ export class ControlsPlugin implements Plugin<object, object, SetupDeps> {
   public setup(core: CoreSetup, { embeddable, unifiedSearch }: SetupDeps) {
     embeddable.registerEmbeddableFactory(optionsListPersistableStateServiceFactory());
     embeddable.registerEmbeddableFactory(rangeSliderPersistableStateServiceFactory());
-    // Temporary disabling Time Slider
-    // embeddable.registerEmbeddableFactory(timeSliderPersistableStateServiceFactory());
+    embeddable.registerEmbeddableFactory(timeSliderPersistableStateServiceFactory());
 
     embeddable.registerEmbeddableFactory(
       controlGroupContainerPersistableStateServiceFactory(embeddable)

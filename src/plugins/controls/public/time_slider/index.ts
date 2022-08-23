@@ -6,10 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { ControlInput } from '../../types';
-
-export const TIME_SLIDER_CONTROL = 'timeSlider';
-
-export interface TimeSliderControlEmbeddableInput extends ControlInput {
-  value?: [number, number];
-}
+export { TimeSliderControlEmbeddable } from './embeddable/time_slider_embeddable';
+export { TimeSliderEmbeddableFactory } from './embeddable/time_slider_embeddable_factory';
+export type { TimeSliderControlEmbeddableInput } from '../../common/time_slider/types';

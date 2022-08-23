@@ -20,7 +20,7 @@ import {
   DEFAULT_CONTROL_GROW,
 } from '../../../common/control_group/control_group_constants';
 import { setFlyoutRef } from '../embeddable/control_group_container';
-import { TIME_SLIDER_CONTROL } from '../../control_types/time_slider/types';
+import { TIME_SLIDER_CONTROL } from '../../time_slider/types';
 
 export type CreateControlButtonTypes = 'toolbar' | 'callout';
 

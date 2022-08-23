@@ -7,7 +7,7 @@
  */
 
 import _ from 'lodash';
-import { timer, BehaviorSubject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import moment from 'moment-timezone';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
 import { ReduxEmbeddableTools, ReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
@@ -15,15 +15,15 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Subscription } from 'rxjs';
 import { TIME_SLIDER_CONTROL } from '../..';
-import { TimeSliderControlEmbeddableInput } from '../../../common/control_types/time_slider/types';
+import { TimeSliderControlEmbeddableInput } from '../../../common/time_slider/types';
 import { pluginServices } from '../../services';
 import { ControlsSettingsService } from '../../services/settings';
 import { ControlsDataService } from '../../services/data';
 import { ControlOutput } from '../../types';
-import { TimeSlider } from './components';
-import { timeSliderReducers } from './time_slider_reducers';
-import { TimeSliderReduxState } from './types';
-import { getMomentTimezone, getTicks, FROM_INDEX, TO_INDEX } from './time_utils';
+import { TimeSlider } from '../components';
+import { timeSliderReducers } from '../time_slider_reducers';
+import { TimeSliderReduxState } from '../types';
+import { getMomentTimezone, getTicks, FROM_INDEX, TO_INDEX } from '../time_utils';
 
 export class TimeSliderControlEmbeddable extends Embeddable<
   TimeSliderControlEmbeddableInput,
@@ -62,20 +62,12 @@ export class TimeSliderControlEmbeddable extends Embeddable<
     this.getTimezone = getTimezone;
     this.timefilter = timefilter;
 
-    const timeRangeBounds = timefilter.calculateBounds(
-      input.timeRange ? input.timeRange : getDefaultTimeRange()
-    );
-
     this.reduxEmbeddableTools = reduxEmbeddablePackage.createTools<
       TimeSliderReduxState,
       typeof timeSliderReducers
     >({
       embeddable: this,
       reducers: timeSliderReducers,
-      initialComponentState: {
-        ticks: getTicks(timeRangeBounds[FROM_INDEX], timeRangeBounds[TO_INDEX], getTimezone()),
-        timeRangeBounds,
-      },
     });
 
     this.inputSubscription = this.getInput$().subscribe(() => this.onInputChange());
@@ -93,23 +85,30 @@ export class TimeSliderControlEmbeddable extends Embeddable<
 
   private onInputChange() {
     const input = this.getInput();
-    if (input.timeRange) {
-      const timeRangeBounds = this.timefilter.calculateBounds(input.timeRange);
-      const nextBounds = [timeRangeBounds.min.valueOf(), timeRangeBounds.max.valueOf()];
-      const { actions, dispatch, getState } = this.reduxEmbeddableTools;
-      if (!_.isEqual(nextBounds, getState().componentState.timeRangeBounds)) {
-        dispatch(
-          actions.setTimeRangeBounds({
-            ticks: getTicks(nextBounds[FROM_INDEX], nextBounds[TO_INDEX], this.getTimezone()),
-            timeRangeBounds: nextBounds,
-          })
-        );
-        const value = getState().explicitInput.value;
-        // unset value when its not valid for next time bounds
-        if (value && (value[0] < nextBounds[0] || value[1] > nextBounds[1])) {
-          this.onTimesliceChange();
-          this.onRangeChange();
-        }
+
+    if (!input.timeRange) {
+      return;
+    }
+
+    const timeRangeBounds = this.timefilter.calculateBounds(input.timeRange);
+    if (timeRangeBounds.min === undefined || timeRangeBounds.max === undefined) {
+      return;
+    }
+
+    const nextBounds = [timeRangeBounds.min.valueOf(), timeRangeBounds.max.valueOf()] as [number, number];
+    const { actions, dispatch, getState } = this.reduxEmbeddableTools;
+    if (!_.isEqual(nextBounds, getState().componentState.timeRangeBounds)) {
+      dispatch(
+        actions.setTimeRangeBounds({
+          ticks: getTicks(nextBounds[FROM_INDEX], nextBounds[TO_INDEX], this.getTimezone()),
+          timeRangeBounds: nextBounds,
+        })
+      );
+      const value = getState().explicitInput.value;
+      // unset value when its not valid for next time bounds
+      if (value && (value[0] < nextBounds[0] || value[1] > nextBounds[1])) {
+        this.onTimesliceChange();
+        this.onRangeChange();
       }
     }
   }
@@ -117,7 +116,7 @@ export class TimeSliderControlEmbeddable extends Embeddable<
   private initialize() {
     const input = this.getInput();
     if (input.value) {
-      const { actions, dispatch, getState } = this.reduxEmbeddableTools;
+      const { actions, dispatch } = this.reduxEmbeddableTools;
       dispatch(actions.publishValue({ value: input.value }));
     }
   }
@@ -130,7 +129,7 @@ export class TimeSliderControlEmbeddable extends Embeddable<
     this.waitForPanelsToLoad$.next(value);
   }
 
-  private debouncedPublishChange = _.debounce((value: [number, number]) => {
+  private debouncedPublishChange = _.debounce((value?: [number, number]) => {
     const { actions, dispatch } = this.reduxEmbeddableTools;
     dispatch(actions.publishValue({ value }));
   }, 500);
@@ -147,7 +146,7 @@ export class TimeSliderControlEmbeddable extends Embeddable<
   };
 
   private onNext = () => {
-    const { actions, dispatch, getState } = this.reduxEmbeddableTools;
+    const { getState } = this.reduxEmbeddableTools;
     const value = getState().explicitInput.value;
     const range = getState().componentState.range;
     const ticks = getState().componentState.ticks;
@@ -174,7 +173,7 @@ export class TimeSliderControlEmbeddable extends Embeddable<
   };
 
   private onPrevious = () => {
-    const { actions, dispatch, getState } = this.reduxEmbeddableTools;
+    const { getState } = this.reduxEmbeddableTools;
     const value = getState().explicitInput.value;
     const range = getState().componentState.range;
     const ticks = getState().componentState.ticks;
@@ -211,8 +210,6 @@ export class TimeSliderControlEmbeddable extends Embeddable<
     this.node = node;
 
     const { Wrapper: TimeSliderControlReduxWrapper } = this.reduxEmbeddableTools;
-
-    const mockWaitForPanelsToLoad$ = timer(2000, 2000);
 
     ReactDOM.render(
       <TimeSliderControlReduxWrapper>
