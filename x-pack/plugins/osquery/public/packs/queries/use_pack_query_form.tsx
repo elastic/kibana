@@ -80,7 +80,9 @@ const serializer = (payload: PackQueryFormData): PackSOQueryFormData =>
       }
     }
 
-    draft.interval = draft.interval + '';
+    if (draft.interval) {
+      draft.interval = draft.interval + '';
+    }
 
     if (isEmpty(draft.ecs_mapping)) {
       delete draft.ecs_mapping;
