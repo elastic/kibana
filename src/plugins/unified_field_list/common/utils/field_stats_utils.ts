@@ -105,7 +105,8 @@ export function canProvideStatsForField(field: DataViewFieldBase): boolean {
     field.type === 'document' ||
     field.type.includes('range') ||
     field.type === 'geo_point' ||
-    field.type === 'geo_shape'
+    field.type === 'geo_shape' ||
+    field.type === 'murmur3'
   );
 }
 

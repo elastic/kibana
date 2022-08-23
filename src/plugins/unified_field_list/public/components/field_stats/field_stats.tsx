@@ -43,6 +43,7 @@ import {
   getBucketsValuesCount,
   getDefaultColor,
 } from './field_top_values';
+import { FieldSummaryMessage } from './field_summary_message';
 
 interface State {
   isLoading: boolean;
@@ -71,7 +72,10 @@ export interface FieldStatsProps {
   field: DataViewField;
   color?: string;
   'data-test-subj'?: string;
-  overrideMissingContent?: (params?: { noDataFound?: boolean }) => JSX.Element | null;
+  overrideMissingContent?: (params: {
+    element: JSX.Element;
+    noDataFound?: boolean;
+  }) => JSX.Element | null;
   overrideFooter?: (params: {
     element: JSX.Element;
     totalDocuments?: number;
@@ -229,39 +233,73 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   const formatter = dataView.getFormatterForField(field);
   let title = <></>;
 
-  if (field.type.includes('range')) {
+  function combineWithTitleAndFooter(el: React.ReactElement) {
+    const countsElement = totalDocuments ? (
+      <EuiText color="subdued" size="xs" data-test-subj={`${dataTestSubject}-statsFooter`}>
+        {sampledDocuments && (
+          <>
+            {i18n.translate('unifiedFieldList.fieldStats.percentageOfLabel', {
+              defaultMessage: '{percentage}% of',
+              values: {
+                percentage: Math.round((sampledDocuments / totalDocuments) * 100),
+              },
+            })}{' '}
+          </>
+        )}
+        <strong>
+          {fieldFormats
+            .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
+            .convert(totalDocuments)}
+        </strong>{' '}
+        {i18n.translate('unifiedFieldList.fieldStats.ofDocumentsLabel', {
+          defaultMessage: 'documents',
+        })}
+      </EuiText>
+    ) : (
+      <></>
+    );
+
     return (
       <>
-        <EuiText size="s">
-          {i18n.translate('unifiedFieldList.fieldStats.notAvailableForRangeFieldDescription', {
-            defaultMessage: `Summary information is not available for range type fields.`,
-          })}
-        </EuiText>
+        {title ? title : <></>}
+
+        <EuiSpacer size="s" />
+
+        {el}
+
+        {overrideFooter ? (
+          overrideFooter?.({ element: countsElement, totalDocuments, sampledDocuments })
+        ) : (
+          <>
+            <EuiSpacer size="m" />
+            {countsElement}
+          </>
+        )}
       </>
     );
-  }
-
-  if (field.type === 'murmur3') {
-    return (
-      <>
-        <EuiText size="s">
-          {i18n.translate('unifiedFieldList.fieldStats.notAvailableForMurmur3FieldDescription', {
-            defaultMessage: `Summary information is not available for murmur3 fields.`,
-          })}
-        </EuiText>
-      </>
-    );
-  }
-
-  if (field.type === 'geo_point' || field.type === 'geo_shape') {
-    return overrideMissingContent ? overrideMissingContent() : null;
   }
 
   if (
     (!histogram || histogram.buckets.length === 0) &&
     (!topValues || topValues.buckets.length === 0)
   ) {
-    return overrideMissingContent ? overrideMissingContent({ noDataFound: true }) : null;
+    const message = (
+      <FieldSummaryMessage
+        message={i18n.translate(
+          'unifiedFieldList.fieldStats.notAvailableForThisFieldWithoutDataDescription',
+          {
+            defaultMessage: `Summary information is not available for this field.`,
+          }
+        )}
+      />
+    );
+
+    return overrideMissingContent
+      ? overrideMissingContent({
+          noDataFound: canProvideStatsForField(field),
+          element: message,
+        })
+      : message;
   }
 
   if (histogram && histogram.buckets.length && topValues && topValues.buckets.length) {
@@ -311,52 +349,6 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
           })}
         </h6>
       </EuiTitle>
-    );
-  }
-
-  function combineWithTitleAndFooter(el: React.ReactElement) {
-    const countsElement = totalDocuments ? (
-      <EuiText color="subdued" size="xs" data-test-subj={`${dataTestSubject}-statsFooter`}>
-        {sampledDocuments && (
-          <>
-            {i18n.translate('unifiedFieldList.fieldStats.percentageOfLabel', {
-              defaultMessage: '{percentage}% of',
-              values: {
-                percentage: Math.round((sampledDocuments / totalDocuments) * 100),
-              },
-            })}{' '}
-          </>
-        )}
-        <strong>
-          {fieldFormats
-            .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-            .convert(totalDocuments)}
-        </strong>{' '}
-        {i18n.translate('unifiedFieldList.fieldStats.ofDocumentsLabel', {
-          defaultMessage: 'documents',
-        })}
-      </EuiText>
-    ) : (
-      <></>
-    );
-
-    return (
-      <>
-        {title ? title : <></>}
-
-        <EuiSpacer size="s" />
-
-        {el}
-
-        {overrideFooter ? (
-          overrideFooter?.({ element: countsElement, totalDocuments, sampledDocuments })
-        ) : (
-          <>
-            <EuiSpacer size="m" />
-            {countsElement}
-          </>
-        )}
-      </>
     );
   }
 

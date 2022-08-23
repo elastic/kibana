@@ -16,7 +16,6 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiPopoverFooter,
-  EuiSpacer,
   EuiText,
   EuiTitle,
   EuiToolTip,
@@ -38,7 +37,6 @@ import type { IndexPattern, IndexPatternField } from '../types';
 import type { DraggedField } from './types';
 import { LensFieldIcon } from '../shared_components/field_picker/lens_field_icon';
 import { VisualizeGeoFieldButton } from './visualize_geo_field_button';
-import { getVisualizeGeoFieldMessage } from '../utils';
 import type { LensAppServices } from '../app_plugin/types';
 import { debouncedComponent } from '../debounced_component';
 
@@ -348,24 +346,25 @@ function FieldItemPopoverContents(props: FieldItemProps) {
         dataViewOrDataViewId={indexPattern.id} // TODO: Refactor to pass a variable with DataView type instead of IndexPattern
         field={field as DataViewField}
         data-test-subj="lnsFieldListPanel"
-        overrideFooter={({ element }) => <EuiPopoverFooter>{element}</EuiPopoverFooter>}
         overrideMissingContent={(params) => {
           if (field.type === 'geo_point' || field.type === 'geo_shape') {
             return (
               <>
-                <EuiText size="s">{getVisualizeGeoFieldMessage(field.type)}</EuiText>
+                {params.element}
 
-                <EuiSpacer size="m" />
-                <VisualizeGeoFieldButton
-                  uiActions={uiActions}
-                  indexPatternId={indexPattern.id}
-                  fieldName={field.name}
-                />
+                <EuiPopoverFooter>
+                  <VisualizeGeoFieldButton
+                    uiActions={uiActions}
+                    indexPatternId={indexPattern.id}
+                    fieldName={field.name}
+                  />
+                </EuiPopoverFooter>
               </>
             );
           }
 
           if (params?.noDataFound) {
+            // TODO: should we replace this with a default message "Summary is not available for this field?"
             const isUsingSampling = core.uiSettings.get('lens:useFieldExistenceSampling');
             return (
               <>
@@ -384,7 +383,7 @@ function FieldItemPopoverContents(props: FieldItemProps) {
             );
           }
 
-          return null;
+          return params.element;
         }}
       />
     </>

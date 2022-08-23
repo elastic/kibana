@@ -20,6 +20,7 @@ interface DiscoverFieldVisualizeInnerProps {
 
 export const DiscoverFieldVisualizeInner = (props: DiscoverFieldVisualizeInnerProps) => {
   const { field, visualizeInfo, handleVisualizeLinkClick } = props;
+
   return (
     <EuiPopoverFooter>
       {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}

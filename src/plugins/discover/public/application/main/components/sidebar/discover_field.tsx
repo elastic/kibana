@@ -19,7 +19,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { UiCounterMetricType } from '@kbn/analytics';
@@ -415,58 +414,43 @@ function DiscoverFieldComponent({
 
     return (
       <>
-        <>
-          {showLegacyFieldStats ? (
-            <>
-              {showFieldStats && (
-                <>
-                  <EuiTitle size="xxxs">
-                    <h5>
-                      {i18n.translate('discover.fieldChooser.discoverField.fieldTopValuesLabel', {
-                        defaultMessage: 'Top 5 values',
-                      })}
-                    </h5>
-                  </EuiTitle>
-                  <DiscoverFieldDetails
-                    dataView={dataView}
-                    field={field}
-                    details={details}
-                    onAddFilter={onAddFilter}
-                  />
-                </>
-              )}
-            </>
-          ) : (
-            <>
-              {Boolean(dateRange) && (
-                <>
-                  <FieldStats
-                    services={services}
-                    query={state.query!}
-                    filters={state.filters!}
-                    fromDate={dateRange.from}
-                    toDate={dateRange.to}
-                    dataViewOrDataViewId={dataView}
-                    field={fieldForStats}
-                    data-test-subj="dscFieldListPanel"
-                    onAddFilter={onAddFilter}
-                    overrideMissingContent={(params) => {
-                      if (params?.noDataFound) {
-                        return (
-                          <EuiText size="s">{`TODO: add a custom "no data available" message for ${fieldForStats.type} field`}</EuiText>
-                        );
-                      }
-
-                      return (
-                        <EuiText size="s">{`TODO: add a custom "stats are not available" message for ${fieldForStats.type} field`}</EuiText>
-                      );
-                    }}
-                  />
-                </>
-              )}
-            </>
-          )}
-        </>
+        {showLegacyFieldStats ? (
+          <>
+            {showFieldStats && (
+              <>
+                <EuiTitle size="xxxs">
+                  <h5>
+                    {i18n.translate('discover.fieldChooser.discoverField.fieldTopValuesLabel', {
+                      defaultMessage: 'Top 5 values',
+                    })}
+                  </h5>
+                </EuiTitle>
+                <DiscoverFieldDetails
+                  dataView={dataView}
+                  field={field}
+                  details={details}
+                  onAddFilter={onAddFilter}
+                />
+              </>
+            )}
+          </>
+        ) : (
+          <>
+            {Boolean(dateRange) && (
+              <FieldStats
+                services={services}
+                query={state.query!}
+                filters={state.filters!}
+                fromDate={dateRange.from}
+                toDate={dateRange.to}
+                dataViewOrDataViewId={dataView}
+                field={fieldForStats}
+                data-test-subj="dscFieldListPanel"
+                onAddFilter={onAddFilter}
+              />
+            )}
+          </>
+        )}
 
         {multiFields && (
           <>
