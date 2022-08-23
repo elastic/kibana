@@ -6,7 +6,7 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import LaunchDarkly, { type LDClient } from 'launchdarkly-node-client-sdk';
+import LaunchDarkly, { type LDClient } from 'launchdarkly-js-client-sdk';
 import type {
   CloudExperimentsMetric,
   CloudExperimentsPluginSetup,
