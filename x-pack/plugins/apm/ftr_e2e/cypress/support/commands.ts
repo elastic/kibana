@@ -51,7 +51,9 @@ Cypress.Commands.add('changeTimeRange', (value: string) => {
 Cypress.Commands.add('visitKibana', (url: string) => {
   cy.visit(url);
   cy.get('[data-test-subj="kbnLoadingMessage"]').should('exist');
-  cy.get('[data-test-subj="kbnLoadingMessage"]').should('not.exist');
+  cy.get('[data-test-subj="kbnLoadingMessage"]').should('not.exist', {
+    timeout: 50000,
+  });
 });
 
 Cypress.Commands.add(
