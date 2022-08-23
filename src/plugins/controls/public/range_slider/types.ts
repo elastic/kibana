@@ -9,8 +9,8 @@
 import { FieldSpec } from '@kbn/data-views-plugin/common';
 import type { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
 
-import { RangeSliderEmbeddableInput } from '../../../common/control_types/range_slider/types';
-import { ControlOutput } from '../../types';
+import { RangeSliderEmbeddableInput } from '../../common/range_slider/types';
+import { ControlOutput } from '../types';
 
 // Component state is only used by public components.
 export interface RangeSliderComponentState {
@@ -27,4 +27,4 @@ export type RangeSliderReduxState = ReduxEmbeddableState<
   RangeSliderComponentState
 >;
 
-export * from '../../../common/control_types/range_slider/types';
+export * from '../../common/range_slider/types';
