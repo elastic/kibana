@@ -15,6 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const queryBar = getService('queryBar');
   const pieChart = getService('pieChart');
+  const security = getService('security');
   const elasticChart = getService('elasticChart');
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
@@ -32,6 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Dashboard options list integration', () => {
     before(async () => {
+      await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader', 'animals']);
       await common.navigateToApp('dashboard');
       await dashboard.gotoDashboardLandingPage();
       await dashboard.clickNewDashboard();
@@ -422,6 +424,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await filterBar.removeAllFilters();
         await queryBar.clickQuerySubmitButton();
         await dashboardControls.clearAllControls();
+        await security.testUser.restoreDefaults();
       });
     });
   });
