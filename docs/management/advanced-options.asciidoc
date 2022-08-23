@@ -331,6 +331,10 @@ Controls the way the document table looks and works.
 To use the new *Document Explorer* instead of the classic view, turn off this option.
 The *Document Explorer* offers better data sorting, resizable columns, and a full screen view.
 
+[[discover:showLegacyFieldTopValues]]`discover:showLegacyFieldTopValues`::
+This setting will calculate Top Values for a field based only on the loaded records on Discover page. 
+To use the new and more accurate view, turn off this option.
+
 [float]
 [[kibana-ml-settings]]
 ==== Machine Learning

@@ -351,7 +351,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
           overrideFooter?.({ element: countsElement, totalDocuments, sampledDocuments })
         ) : (
           <>
-            <EuiSpacer />
+            <EuiSpacer size="m" />
             {countsElement}
           </>
         )}

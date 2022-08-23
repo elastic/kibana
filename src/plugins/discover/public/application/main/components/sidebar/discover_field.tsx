@@ -19,7 +19,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiHorizontalRule,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -36,6 +35,7 @@ import { getFieldTypeName } from '../../../../utils/get_field_type_name';
 import { DiscoverFieldVisualize } from './discover_field_visualize';
 import type { AppState } from '../../services/discover_state';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import { SHOW_LEGACY_FIELD_TOP_VALUES } from '../../../../../common';
 
 function wrapOnDot(str?: string) {
   // u200B is a non-width white-space character, which allows
@@ -411,19 +411,35 @@ function DiscoverFieldComponent({
     const details = getDetails(field);
     const dateRange = data?.query?.timefilter.timefilter.getTime();
     const fieldForStats = multiFields ? multiFields[0].field : field; // TODO: how to handle multifields?
-    const showNewStatsPreviewInDiscover = true; // Toggle this variable to preview new stats locally
+    const showLegacyFieldStats = services.uiSettings.get(SHOW_LEGACY_FIELD_TOP_VALUES);
 
     return (
       <>
-        {showFieldStats && (
-          <>
-            {showNewStatsPreviewInDiscover && (
-              <>
-                <EuiText color="subdued" size="s">
-                  {'Stats as in Lens:'}
-                </EuiText>
-                <EuiSpacer size="s" />
-                {Boolean(dateRange) && (
+        <>
+          {showLegacyFieldStats ? (
+            <>
+              {showFieldStats && (
+                <>
+                  <EuiTitle size="xxxs">
+                    <h5>
+                      {i18n.translate('discover.fieldChooser.discoverField.fieldTopValuesLabel', {
+                        defaultMessage: 'Top 5 values',
+                      })}
+                    </h5>
+                  </EuiTitle>
+                  <DiscoverFieldDetails
+                    dataView={dataView}
+                    field={field}
+                    details={details}
+                    onAddFilter={onAddFilter}
+                  />
+                </>
+              )}
+            </>
+          ) : (
+            <>
+              {Boolean(dateRange) && (
+                <>
                   <FieldStats
                     services={services}
                     query={state.query!}
@@ -446,34 +462,15 @@ function DiscoverFieldComponent({
                       );
                     }}
                   />
-                )}
-                {/* TODO: remove previous field stats view when we finish FieldStats component and add addFilter buttons to it */}
-                <EuiSpacer size="l" />
-                <EuiText color="subdued" size="s">
-                  {'Current Discover stats:'}
-                </EuiText>
-                <EuiSpacer size="s" />
-              </>
-            )}
-            <EuiTitle size="xxxs">
-              <h5>
-                {i18n.translate('discover.fieldChooser.discoverField.fieldTopValuesLabel', {
-                  defaultMessage: 'Top 5 values',
-                })}
-              </h5>
-            </EuiTitle>
-            <DiscoverFieldDetails
-              dataView={dataView}
-              field={field}
-              details={details}
-              onAddFilter={onAddFilter}
-            />
-          </>
-        )}
+                </>
+              )}
+            </>
+          )}
+        </>
 
         {multiFields && (
           <>
-            {showFieldStats && <EuiSpacer size="m" />}
+            {(showFieldStats || !showLegacyFieldStats) && <EuiSpacer size="m" />}
             <MultiFields
               multiFields={multiFields}
               alwaysShowActionButton={alwaysShowActionButton}
@@ -482,8 +479,8 @@ function DiscoverFieldComponent({
             />
           </>
         )}
-        {(showFieldStats || multiFields) && <EuiHorizontalRule margin="m" />}
-        <DiscoverFieldVisualize // TODO: what to do with `details`?
+
+        <DiscoverFieldVisualize
           field={field}
           dataView={dataView}
           multiFields={rawMultiFields}
