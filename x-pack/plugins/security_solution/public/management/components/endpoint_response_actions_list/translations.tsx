@@ -101,6 +101,17 @@ export const UX_MESSAGES = Object.freeze({
   fetchError: i18n.translate('xpack.securitySolution.responseActionsList.list.errorMessage', {
     defaultMessage: 'Error while retrieving response actions',
   }),
+  filterClearAll: i18n.translate(
+    'xpack.securitySolution.responseActionsList.list.filter.clearAll',
+    {
+      defaultMessage: 'Clear all',
+    }
+  ),
+  filterSearchPlaceholder: (filterName: string) =>
+    i18n.translate('xpack.securitySolution.responseActionsList.list.filter.searchPlaceholder', {
+      defaultMessage: 'Search {filterName}',
+      values: { filterName },
+    }),
   badge: {
     completed: i18n.translate(
       'xpack.securitySolution.responseActionsList.list.item.badge.completed',
@@ -128,4 +139,11 @@ export const UX_MESSAGES = Object.freeze({
         records: totalItemCount,
       },
     }),
+});
+
+// TODO: Add more filter names here (hosts, statuses) etc
+export const FILTER_NAMES = Object.freeze({
+  actions: i18n.translate('xpack.securitySolution.responseActionsList.list.filter.actions', {
+    defaultMessage: 'Actions',
+  }),
 });
