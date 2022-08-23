@@ -9,37 +9,19 @@
 import Fs from 'fs';
 
 /**
- * Simple parsed representation of a package.json file, validated
- * by `assertParsedPackageJson()` and extensible as needed in the future
+ * @param {unknown} v
+ * @returns {v is Record<string, unknown>}
  */
-export interface ParsedPackageJson {
-  /** The name of the package, usually `@kbn/`+something */
-  name: string;
-  /** "dependenices" property from package.json */
-  dependencies?: Record<string, string>;
-  /** "devDependenices" property from package.json */
-  devDependencies?: Record<string, string>;
-  /** Some kibana specific properties about this package */
-  kibana?: {
-    /** Is this package only intended for dev? */
-    devOnly?: boolean;
-  };
-  /** Scripts defined in the package.json file */
-  scripts?: {
-    [key: string]: string | undefined;
-  };
-  /** All other fields in the package.json are typed as unknown as we don't care what they are */
-  [key: string]: unknown;
-}
-
-function isObj(v: unknown): v is Record<string, unknown> {
+function isObj(v) {
   return !!(typeof v === 'object' && v);
 }
 
 /**
  * Asserts that given value looks like a parsed package.json file
+ * @param {unknown} v
+ * @returns {asserts v is import('./types').ParsedPackageJson}
  */
-export function assertParsedPackageJson(v: unknown): asserts v is ParsedPackageJson {
+export function assertParsedPackageJson(v) {
   if (!isObj(v) || typeof v.name !== 'string') {
     throw new Error('Expected at least a "name" property');
   }
@@ -66,8 +48,10 @@ export function assertParsedPackageJson(v: unknown): asserts v is ParsedPackageJ
 
 /**
  * Reads a given package.json file from disk and parses it
+ * @param {string} path
+ * @returns {import('./types').ParsedPackageJson}
  */
-export function readPackageJson(path: string): ParsedPackageJson {
+export function readPackageJson(path) {
   let pkg;
   try {
     pkg = JSON.parse(Fs.readFileSync(path, 'utf8'));

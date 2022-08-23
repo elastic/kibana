@@ -7,6 +7,7 @@ PKG_REQUIRE_NAME = "@kbn/bazel-packages"
 
 SOURCE_FILES = glob(
   [
+    "src/**/*.js",
     "src/**/*.ts",
   ],
   exclude = [
@@ -37,9 +38,6 @@ NPM_MODULE_EXTRA_FILES = [
 #    "@npm//name-of-package"
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
-  "//packages/kbn-utils",
-  "//packages/kbn-std",
-  "//packages/kbn-synthetic-package-map",
   "@npm//globby",
   "@npm//normalize-path",
 ]
@@ -87,6 +85,7 @@ ts_project(
   deps = TYPES_DEPS,
   declaration = True,
   declaration_map = True,
+  allow_js = True,
   emit_declaration_only = True,
   out_dir = "target_types",
   root_dir = "src",
