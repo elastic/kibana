@@ -38,8 +38,6 @@ NPM_MODULE_EXTRA_FILES = [
 #    "@npm//name-of-package"
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
-  "@npm//globby",
-  "@npm//normalize-path",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -53,13 +51,8 @@ RUNTIME_DEPS = [
 #  References to NPM packages work the same as RUNTIME_DEPS:
 #    eg. "@npm//@types/babel__core"
 TYPES_DEPS = [
-  "//packages/kbn-utils:npm_module_types",
-  "//packages/kbn-std:npm_module_types",
-  "//packages/kbn-synthetic-package-map:npm_module_types",
   "@npm//@types/node",
-  "@npm//@types/normalize-path",
-  "@npm//globby",
-  "@npm//normalize-path",
+  "@npm//@types/jest",
 ]
 
 jsts_transpiler(
