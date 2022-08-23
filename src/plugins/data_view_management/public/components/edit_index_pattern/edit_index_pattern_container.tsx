@@ -33,16 +33,15 @@ const EditIndexPatternCont: React.FC<RouteComponentProps<{ id: string }>> = ({ .
       });
   }, [dataViews, props.match.params.id, setBreadcrumbs, setError]);
 
-  if (indexPattern) {
-    return <EditIndexPattern indexPattern={indexPattern} />;
-  } else if (error) {
+  if (error) {
     const errorTitle = i18n.translate('indexPatternManagement.editIndexPattern.couldNotLoad', {
       defaultMessage: 'Cannot load data view',
     });
     notifications.toasts.addError(error ?? new Error(errorTitle), { title: errorTitle });
     props.history.push('/');
   }
-  return <></>;
+
+  return indexPattern != null ? <EditIndexPattern indexPattern={indexPattern} /> : null;
 };
 
 export const EditIndexPatternContainer = withRouter(EditIndexPatternCont);
