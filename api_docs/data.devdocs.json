@@ -10634,6 +10634,42 @@
                 ],
                 "path": "src/plugins/data/public/index.ts",
                 "deprecated": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-public.search.aggs.calcAutoIntervalLessThan",
+                "type": "Function",
+                "tags": [],
+                "label": "calcAutoIntervalLessThan",
+                "description": [],
+                "signature": [
+                  "(maxBucketCount: number, duration: number) => moment.Duration"
+                ],
+                "path": "src/plugins/data/public/index.ts",
+                "deprecated": false,
+                "returnComment": [],
+                "children": [
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-public.search.aggs.calcAutoIntervalLessThan.$1",
+                    "type": "number",
+                    "tags": [],
+                    "label": "maxBucketCount",
+                    "description": [],
+                    "path": "src/plugins/data/common/search/aggs/buckets/lib/time_buckets/calc_auto_interval.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-public.search.aggs.calcAutoIntervalLessThan.$2",
+                    "type": "number",
+                    "tags": [],
+                    "label": "duration",
+                    "description": [],
+                    "path": "src/plugins/data/common/search/aggs/buckets/lib/time_buckets/calc_auto_interval.ts",
+                    "deprecated": false
+                  }
+                ]
               }
             ]
           },
