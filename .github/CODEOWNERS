@@ -175,6 +175,7 @@
 /src/plugins/controls/ @elastic/kibana-presentation
 /test/functional/apps/dashboard/  @elastic/kibana-presentation
 /test/functional/apps/dashboard_elements/  @elastic/kibana-presentation
+/test/functional/services/dadshboard/  @elastic/kibana-presentation
 /x-pack/plugins/canvas/  @elastic/kibana-presentation
 /x-pack/plugins/dashboard_enhanced/ @elastic/kibana-presentation
 /x-pack/test/functional/apps/canvas/  @elastic/kibana-presentation
