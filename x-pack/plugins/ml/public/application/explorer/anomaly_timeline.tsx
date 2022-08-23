@@ -189,6 +189,16 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
 
     const annotations = useMemo(() => overallAnnotations.annotationsData, [overallAnnotations]);
 
+    const closePopoverOnAction = useCallback(
+      (actionCallback: Function) => {
+        return () => {
+          setIsMenuOpen(false);
+          actionCallback();
+        };
+      },
+      [setIsMenuOpen]
+    );
+
     const menuPanels = useMemo<EuiContextMenuPanelDescriptor[]>(() => {
       const rootItems = [] as EuiContextMenuPanelItemDescriptor[];
       const panels = [{ id: 0, items: rootItems }] as EuiContextMenuPanelDescriptor[];
@@ -201,7 +211,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
               defaultMessage="Add to dashboard"
             />
           ),
-          onClick: setIsAddDashboardActive.bind(null, true),
+          onClick: closePopoverOnAction(setIsAddDashboardActive.bind(null, true)),
           'data-test-subj': 'mlAnomalyTimelinePanelAddToDashboardButton',
         });
       }
@@ -237,7 +247,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                   defaultMessage="Overall"
                 />
               ),
-              onClick: openCasesModal.bind(null, 'overall'),
+              onClick: closePopoverOnAction(openCasesModal.bind(null, 'overall')),
               'data-test-subj': 'mlAnomalyTimelinePanelAttachOverallButton',
             },
             {
@@ -248,7 +258,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                   values={{ viewByField: viewBySwimlaneFieldName }}
                 />
               ),
-              onClick: openCasesModal.bind(null, 'viewBy'),
+              onClick: closePopoverOnAction(openCasesModal.bind(null, 'viewBy')),
               'data-test-subj': 'mlAnomalyTimelinePanelAttachViewByButton',
             },
           ],
