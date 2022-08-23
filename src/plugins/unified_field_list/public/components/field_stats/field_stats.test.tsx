@@ -17,8 +17,9 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import { loadFieldStats } from '../../services';
-import { FieldStats, FieldStatsProps } from './field_stats';
+import { loadFieldStats } from '../../services/field_stats';
+import FieldStats from './field_stats';
+import type { FieldStatsProps } from './field_stats';
 
 jest.mock('../../services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({}),
@@ -108,7 +109,7 @@ describe('UnifiedFieldList <FieldStats />', () => {
       toDate: 'now',
       query: { query: '', language: 'lucene' },
       filters: [],
-      testSubject: 'testing',
+      'data-test-subj': 'testing',
     };
 
     (mockedServices.dataViews.get as jest.Mock).mockImplementation(() => {
@@ -198,7 +199,7 @@ describe('UnifiedFieldList <FieldStats />', () => {
   });
 
   it('should not request field stats for range fields', async () => {
-    mountWithIntl(
+    const wrapper = await mountWithIntl(
       <FieldStats
         {...defaultProps}
         field={
@@ -211,11 +212,13 @@ describe('UnifiedFieldList <FieldStats />', () => {
       />
     );
 
+    await wrapper.update();
+
     expect(loadFieldStats).not.toHaveBeenCalled();
   });
 
   it('should not request field stats for geo fields', async () => {
-    mountWithIntl(
+    const wrapper = await mountWithIntl(
       <FieldStats
         {...defaultProps}
         field={
@@ -227,6 +230,8 @@ describe('UnifiedFieldList <FieldStats />', () => {
         }
       />
     );
+
+    await wrapper.update();
 
     expect(loadFieldStats).not.toHaveBeenCalled();
   });
@@ -328,12 +333,12 @@ describe('UnifiedFieldList <FieldStats />', () => {
     const firstValue = stats.childAt(0);
 
     expect(stats).toHaveLength(1);
-    expect(
-      firstValue.find('[data-test-subj="testing-topValues-formattedFieldValue"]').first().text()
-    ).toBe('"success"');
-    expect(
-      firstValue.find('[data-test-subj="testing-topValues-formattedPercentage"]').first().text()
-    ).toBe('41.5%');
+    expect(firstValue.find('[data-test-subj="testing-topValues-formattedFieldValue"]').first().text()).toBe(
+      '"success"'
+    );
+    expect(firstValue.find('[data-test-subj="testing-topValues-formattedPercentage"]').first().text()).toBe(
+      '41.5%'
+    );
 
     expect(wrapper.find('[data-test-subj="testing-statsFooter"]').first().text()).toBe(
       '100% of 1624 documents'

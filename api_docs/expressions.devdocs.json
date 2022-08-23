@@ -6980,7 +6980,7 @@
               "\nTracks state of execution.\n\n- `not-started` - before .start() method was called.\n- `pending` - immediately after .start() method is called.\n- `result` - when expression execution completed.\n- `error` - when execution failed with error."
             ],
             "signature": [
-              "\"error\" | \"result\" | \"not-started\" | \"pending\""
+              "\"error\" | \"not-started\" | \"pending\" | \"result\""
             ],
             "path": "src/plugins/expressions/common/execution/container.ts",
             "deprecated": false
@@ -7966,10 +7966,6 @@
               {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/pointseries/index.ts"
-              },
-              {
-                "plugin": "visTypeXy",
-                "path": "src/plugins/vis_types/xy/public/expression_functions/xy_vis_fn.ts"
               }
             ]
           }
@@ -10800,7 +10796,7 @@
             "label": "padding",
             "description": [],
             "signature": [
-              "\"s\" | \"m\" | \"l\" | \"xl\" | \"xs\" | undefined"
+              "\"m\" | \"s\" | \"xs\" | \"l\" | \"xl\" | undefined"
             ],
             "path": "src/plugins/expressions/public/react_expression_renderer/react_expression_renderer.tsx",
             "deprecated": false
@@ -11601,7 +11597,7 @@
           "\nAllowed column names in a PointSeries"
         ],
         "signature": [
-          "\"color\" | \"size\" | \"x\" | \"y\" | \"text\""
+          "\"color\" | \"size\" | \"text\" | \"y\" | \"x\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/pointseries.ts",
         "deprecated": false,
@@ -17447,7 +17443,7 @@
               "\nTracks state of execution.\n\n- `not-started` - before .start() method was called.\n- `pending` - immediately after .start() method is called.\n- `result` - when expression execution completed.\n- `error` - when execution failed with error."
             ],
             "signature": [
-              "\"error\" | \"result\" | \"not-started\" | \"pending\""
+              "\"error\" | \"not-started\" | \"pending\" | \"result\""
             ],
             "path": "src/plugins/expressions/common/execution/container.ts",
             "deprecated": false
@@ -18404,10 +18400,6 @@
               {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/pointseries/index.ts"
-              },
-              {
-                "plugin": "visTypeXy",
-                "path": "src/plugins/vis_types/xy/public/expression_functions/xy_vis_fn.ts"
               }
             ]
           }
@@ -20629,7 +20621,7 @@
           "\nAllowed column names in a PointSeries"
         ],
         "signature": [
-          "\"color\" | \"size\" | \"x\" | \"y\" | \"text\""
+          "\"color\" | \"size\" | \"text\" | \"y\" | \"x\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/pointseries.ts",
         "deprecated": false,
@@ -28783,7 +28775,7 @@
               "\nTracks state of execution.\n\n- `not-started` - before .start() method was called.\n- `pending` - immediately after .start() method is called.\n- `result` - when expression execution completed.\n- `error` - when execution failed with error."
             ],
             "signature": [
-              "\"error\" | \"result\" | \"not-started\" | \"pending\""
+              "\"error\" | \"not-started\" | \"pending\" | \"result\""
             ],
             "path": "src/plugins/expressions/common/execution/container.ts",
             "deprecated": false
@@ -30224,10 +30216,6 @@
               {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/pointseries/index.ts"
-              },
-              {
-                "plugin": "visTypeXy",
-                "path": "src/plugins/vis_types/xy/public/expression_functions/xy_vis_fn.ts"
               }
             ]
           }
@@ -34711,7 +34699,7 @@
         "label": "MathArguments",
         "description": [],
         "signature": [
-          "{ expression: string; onError?: \"false\" | \"null\" | \"zero\" | \"throw\" | undefined; }"
+          "{ expression: string; onError?: \"null\" | \"zero\" | \"false\" | \"throw\" | undefined; }"
         ],
         "path": "src/plugins/expressions/common/expression_functions/specs/math.ts",
         "deprecated": false,
@@ -34801,7 +34789,7 @@
           "\nAllowed column names in a PointSeries"
         ],
         "signature": [
-          "\"color\" | \"size\" | \"x\" | \"y\" | \"text\""
+          "\"color\" | \"size\" | \"text\" | \"y\" | \"x\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/pointseries.ts",
         "deprecated": false,
@@ -34915,14 +34903,6 @@
           {
             "plugin": "canvas",
             "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/table.ts"
-          },
-          {
-            "plugin": "visTypeXy",
-            "path": "src/plugins/vis_types/xy/public/expression_functions/xy_vis_fn.ts"
-          },
-          {
-            "plugin": "visTypeXy",
-            "path": "src/plugins/vis_types/xy/public/expression_functions/xy_vis_fn.ts"
           }
         ],
         "initialIsOpen": false
@@ -38717,7 +38697,7 @@
                     "label": "options",
                     "description": [],
                     "signature": [
-                      "(\"false\" | \"null\" | \"zero\" | \"throw\")[]"
+                      "(\"null\" | \"zero\" | \"false\" | \"throw\")[]"
                     ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/math.ts",
                     "deprecated": false
@@ -40317,7 +40297,7 @@
                     "label": "options",
                     "description": [],
                     "signature": [
-                      "(\"sum\" | \"min\" | \"max\" | \"average\")[]"
+                      "(\"min\" | \"max\" | \"sum\" | \"average\")[]"
                     ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
                     "deprecated": false

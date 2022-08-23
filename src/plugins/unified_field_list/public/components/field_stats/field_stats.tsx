@@ -34,8 +34,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { buildEsQuery, Query, Filter, AggregateQuery } from '@kbn/es-query';
 import type { BucketedAggregation } from '../../../common/types';
+import { canProvideStatsForField } from '../../../common/utils/field_stats_utils';
+import { loadFieldStats } from '../../services/field_stats';
 import type { AddFieldFilterHandler } from '../../types';
-import { loadFieldStats, canProvideStatsForField } from '../../services';
 import {
   FieldTopValues,
   getOtherCount,
@@ -69,7 +70,7 @@ export interface FieldStatsProps {
   dataViewOrDataViewId: DataView | string;
   field: DataViewField;
   color?: string;
-  testSubject: string;
+  'data-test-subj'?: string;
   overrideMissingContent?: (params?: { noDataFound?: boolean }) => JSX.Element | null;
   overrideFooter?: (params: {
     element: JSX.Element;
@@ -88,7 +89,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   dataViewOrDataViewId,
   field,
   color = getDefaultColor(),
-  testSubject,
+  'data-test-subj': dataTestSubject = 'fieldStats',
   overrideMissingContent,
   overrideFooter,
   onAddFilter,
@@ -315,7 +316,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
 
   function combineWithTitleAndFooter(el: React.ReactElement) {
     const countsElement = totalDocuments ? (
-      <EuiText color="subdued" size="xs" data-test-subj={`${testSubject}-statsFooter`}>
+      <EuiText color="subdued" size="xs" data-test-subj={`${dataTestSubject}-statsFooter`}>
         {sampledDocuments && (
           <>
             {i18n.translate('unifiedFieldList.fieldStats.percentageOfLabel', {
@@ -366,7 +367,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
 
     if (field.type === 'date') {
       return combineWithTitleAndFooter(
-        <Chart data-test-subj={`${testSubject}-histogram`} size={{ height: 200, width: 300 - 32 }}>
+        <Chart data-test-subj={`${dataTestSubject}-histogram`} size={{ height: 200, width: 300 - 32 }}>
           <Settings
             tooltip={{ type: TooltipType.None }}
             theme={customChartTheme}
@@ -410,7 +411,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
 
     if (showingHistogram || !topValues || !topValues.buckets.length) {
       return combineWithTitleAndFooter(
-        <Chart data-test-subj={`${testSubject}-histogram`} size={{ height: 200, width: '100%' }}>
+        <Chart data-test-subj={`${dataTestSubject}-histogram`} size={{ height: 200, width: '100%' }}>
           <Settings
             rotation={90}
             tooltip={{ type: TooltipType.None }}
@@ -446,7 +447,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
         field={field}
         sampledValuesCount={sampledValues!}
         color={color}
-        testSubject={testSubject}
+        testSubject={dataTestSubject}
         onAddFilter={onAddFilter}
       />
     );
@@ -483,10 +484,14 @@ class ErrorBoundary extends React.Component<{}, { hasError: boolean }> {
  * @param props
  * @constructor
  */
-export const FieldStats: React.FC<FieldStatsProps> = (props) => {
+const FieldStats: React.FC<FieldStatsProps> = (props) => {
   return (
     <ErrorBoundary>
       <FieldStatsComponent {...props} />
     </ErrorBoundary>
   );
 };
+
+// Necessary for React.lazy
+// eslint-disable-next-line import/no-default-export
+export default FieldStats;

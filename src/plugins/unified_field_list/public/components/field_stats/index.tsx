@@ -6,5 +6,17 @@
  * Side Public License, v 1.
  */
 
-export type { FieldStatsProps, FieldStatsServices } from './field_stats';
-export { FieldStats } from './field_stats';
+import React, { Fragment } from 'react';
+import type { FieldStatsProps, FieldStatsServices } from './field_stats';
+
+const Fallback = () => <Fragment />;
+
+const LazyFieldStats = React.lazy(() => import('./field_stats'));
+const WrappedFieldStats: React.FC<FieldStatsProps> = (props) => (
+  <React.Suspense fallback={<Fallback />}>
+    <LazyFieldStats {...props} />
+  </React.Suspense>
+);
+
+export const FieldStats = WrappedFieldStats;
+export type { FieldStatsProps, FieldStatsServices };

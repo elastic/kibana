@@ -347,7 +347,7 @@ function FieldItemPopoverContents(props: FieldItemProps) {
         toDate={dateRange.toDate}
         dataViewOrDataViewId={indexPattern.id} // TODO: Refactor to pass a variable with DataView type instead of IndexPattern
         field={field as DataViewField}
-        testSubject="lnsFieldListPanel"
+        data-test-subj="lnsFieldListPanel"
         overrideFooter={({ element }) => <EuiPopoverFooter>{element}</EuiPopoverFooter>}
         overrideMissingContent={(params) => {
           if (field.type === 'geo_point' || field.type === 'geo_shape') {

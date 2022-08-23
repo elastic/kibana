@@ -16,6 +16,7 @@ export type {
 } from '../common/types';
 export type { FieldStatsProps, FieldStatsServices } from './components/field_stats';
 export { FieldStats } from './components/field_stats';
+export { loadFieldStats } from './services/field_stats';
 
 // This exports static code and TypeScript types,
 // as well as, Kibana Platform `plugin()` initializer.
@@ -27,5 +28,3 @@ export type {
   UnifiedFieldListPluginStart,
   AddFieldFilterHandler,
 } from './types';
-
-export { loadFieldStats, canProvideStatsForField } from './services';

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiText } from '@elastic/eui';
 import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
@@ -19,7 +20,7 @@ export default {
 };
 
 const indicatorsFixture: Indicator[] = Array(10).fill(generateMockIndicator());
-const mockIndexPattern: DataView[] = [];
+const mockIndexPattern: DataView = undefined as unknown as DataView;
 
 const stub = () => void 0;
 
@@ -34,6 +35,13 @@ const coreMock = {
       return settings[key];
     },
   },
+  triggersActionsUi: {
+    getFieldBrowser: () => (
+      <EuiText style={{ display: 'inline' }} size="xs">
+        Fields
+      </EuiText>
+    ),
+  },
 } as unknown as CoreStart;
 
 const KibanaReactContext = createKibanaReactContext(coreMock);
@@ -42,7 +50,7 @@ export function WithIndicators() {
   return (
     <KibanaReactContext.Provider>
       <IndicatorsTable
-        firstLoad={false}
+        browserFields={{}}
         loading={false}
         pagination={{
           pageSize: 10,
@@ -53,7 +61,7 @@ export function WithIndicators() {
         onChangePage={stub}
         onChangeItemsPerPage={stub}
         indicatorCount={indicatorsFixture.length * 2}
-        indexPatterns={mockIndexPattern}
+        indexPattern={mockIndexPattern}
       />
     </KibanaReactContext.Provider>
   );
@@ -62,7 +70,7 @@ export function WithIndicators() {
 export function WithNoIndicators() {
   return (
     <IndicatorsTable
-      firstLoad={false}
+      browserFields={{}}
       pagination={{
         pageSize: 10,
         pageIndex: 0,
@@ -73,7 +81,7 @@ export function WithNoIndicators() {
       onChangeItemsPerPage={stub}
       indicatorCount={0}
       loading={false}
-      indexPatterns={[]}
+      indexPattern={mockIndexPattern}
     />
   );
 }
