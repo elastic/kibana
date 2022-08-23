@@ -86,5 +86,3 @@ export {
   getFieldSubtypeMulti,
   getFieldSubtypeNested,
 } from '@kbn/data-views-plugin/common';
-
-export type { SearchRequest } from './search';
