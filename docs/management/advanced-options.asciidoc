@@ -286,8 +286,8 @@ in the current data view is used.
 The columns that appear by default on the *Discover* page. The default is
 `_source`.
 
-[[discover-samplesize]]`discover:sampleSize`::
-The number of rows to show in the *Discover* table.
+[[discover:enableSql]]`discover:enableSql`::
+experimental[] Allows SQL queries for search.
 
 [[discover-max-doc-fields-displayed]]`discover:maxDocFieldsDisplayed`::
 Specifies the maximum number of fields to show in the document column of the *Discover* table.
@@ -295,11 +295,14 @@ Specifies the maximum number of fields to show in the document column of the *Di
 [[discover-modify-columns-on-switch]]`discover:modifyColumnsOnSwitch`::
 When enabled, removes the columns that are not in the new data view.
 
-[[discover-sample-size]]`discover:sampleSize`::
-Specifies the number of rows to display in the *Discover* table.
+[[discover-row-height-option]]`discover:rowHeightOption`::
+The number of lines to allow in a row. A value of -1 automatically adjusts the row height to fit the contents. A value of 0 displays the content in a single line.
 
 [[discover-sampleRowsPerPage]]`discover:sampleRowsPerPage`::
-Specifies the number of rows to display per page in the *Discover* table.
+Limits the number of rows per page in the document table.
+
+[[discover-sample-size]]`discover:sampleSize`::
+Sets the maximum number of rows for the entire document table. This is the maximum number of documents fetched from {es}.
 
 [[discover-searchFieldsFromSource]]`discover:searchFieldsFromSource`::
 Load fields from the original JSON {ref}/mapping-source-field.html[`_source`].
@@ -310,17 +313,18 @@ When disabled, *Discover* loads fields using the {es} search API's
 Controls whether a search is executed when *Discover* first loads. This setting
 does not have an effect when loading a saved search.
 
+[[discover:showFieldStatistics]]`discover:showFieldStatistics`::
+beta[] Enables the Field statistics view. Examine details such as
+the minimum and maximum values of a numeric field or a map of a geo field.
+
 [[discover:showMultiFields]]`discover:showMultiFields`::
-When enabled, displays multi-fields in the expanded document view.
+Controls the display of multi-fields in the expanded document view.
 
 [[discover-sort-defaultorder]]`discover:sort:defaultOrder`::
 The default sort direction for time-based data views.
 
 [[doctable-hidetimecolumn]]`doc_table:hideTimeColumn`::
 Hides the "Time" column in *Discover* and in all saved searches on dashboards.
-
-[[discover:enableSql]]`discover:enableSql`::
-When enabled, allows SQL queries for search.
 
 [[doctable-highlight]]`doc_table:highlight`::
 Highlights results in *Discover* and saved searches on dashboards. Highlighting
@@ -330,6 +334,10 @@ slows requests when working on big documents.
 Controls the way the document table looks and works.
 To use the new *Document Explorer* instead of the classic view, turn off this option.
 The *Document Explorer* offers better data sorting, resizable columns, and a full screen view.
+
+[[truncate-max-height]]`truncate:maxHeight`::
+The maximum height that a cell in a table can occupy. To disable truncation, set to 0.
+
 
 [float]
 [[kibana-ml-settings]]
@@ -448,9 +456,8 @@ Includes {ref}/frozen-indices.html[frozen indices] in results. Searching through
 frozen indices might increase the search time. This setting is off by default.
 Users must opt-in to include frozen indices.
 
-[[search-timeout]]`search:timeout`:: Change the maximum timeout for a search
-session or set to 0 to disable the timeout and allow queries to run to
-completion.
+[[search-timeout]]`search:timeout`:: Change the maximum timeout, in milliseconds (ms), for a search
+session. To disable the timeout and allow queries to run to completion, set to 0. The default is 600,000 ms, or 10 minutes.
 
 [float]
 [[kibana-siem-settings]]

@@ -1173,7 +1173,7 @@
             "label": "errors",
             "description": [],
             "signature": [
-              "{ color?: string | undefined; id?: string | undefined; name?: string | undefined; description?: string | undefined; }"
+              "{ color?: string | undefined; id?: string | undefined; description?: string | undefined; name?: string | undefined; }"
             ],
             "path": "x-pack/plugins/saved_objects_tagging/common/validation.ts",
             "deprecated": false

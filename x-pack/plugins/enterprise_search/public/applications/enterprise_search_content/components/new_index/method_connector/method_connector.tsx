@@ -69,49 +69,6 @@ export const MethodConnector: React.FC = () => {
   const { setIsModalVisible } = useActions(AddConnectorPackageLogic);
   const { fullIndexName, language } = useValues(NewSearchIndexLogic);
 
-  const confirmModal = isModalVisible && (
-    <EuiConfirmModal
-      title={i18n.translate(
-        'xpack.enterpriseSearch.content.newIndex.steps.buildConnector.confirmModal.title',
-        {
-          defaultMessage: 'Replace existing connector',
-        }
-      )}
-      onCancel={(event) => {
-        event?.preventDefault();
-        setIsModalVisible(false);
-      }}
-      onConfirm={(event) => {
-        event.preventDefault();
-        makeRequest({ deleteExistingConnector: true, indexName: fullIndexName, language });
-      }}
-      cancelButtonText={i18n.translate(
-        'xpack.enterpriseSearch.content.newIndex.steps.buildConnector.confirmModal.cancelButton.label',
-        {
-          defaultMessage: 'Cancel',
-        }
-      )}
-      confirmButtonText={i18n.translate(
-        'xpack.enterpriseSearch.content.newIndex.steps.buildConnector.confirmModal.confirmButton.label',
-        {
-          defaultMessage: 'Replace configuration',
-        }
-      )}
-      defaultFocusedButton="confirm"
-    >
-      {i18n.translate(
-        'xpack.enterpriseSearch.content..newIndex.steps.buildConnector.confirmModal.description',
-        {
-          defaultMessage:
-            'A deleted index named {indexName} was originally tied to an existing connector configuration. Would you like to replace the existing connector configuration with a new one?',
-          values: {
-            indexName: fullIndexName,
-          },
-        }
-      )}
-    </EuiConfirmModal>
-  );
-
   return (
     <NewSearchIndexTemplate
       docsUrl="https://github.com/elastic/connectors-ruby/blob/main/README.md"
@@ -162,7 +119,48 @@ export const MethodConnector: React.FC = () => {
           BUILD_SEARCH_EXPERIENCE_STEP,
         ]}
       />
-      {confirmModal}
+      {isModalVisible && (
+        <EuiConfirmModal
+          title={i18n.translate(
+            'xpack.enterpriseSearch.content.newIndex.steps.buildConnector.confirmModal.title',
+            {
+              defaultMessage: 'Replace existing connector',
+            }
+          )}
+          onCancel={(event) => {
+            event?.preventDefault();
+            setIsModalVisible(false);
+          }}
+          onConfirm={(event) => {
+            event.preventDefault();
+            makeRequest({ deleteExistingConnector: true, indexName: fullIndexName, language });
+          }}
+          cancelButtonText={i18n.translate(
+            'xpack.enterpriseSearch.content.newIndex.steps.buildConnector.confirmModal.cancelButton.label',
+            {
+              defaultMessage: 'Cancel',
+            }
+          )}
+          confirmButtonText={i18n.translate(
+            'xpack.enterpriseSearch.content.newIndex.steps.buildConnector.confirmModal.confirmButton.label',
+            {
+              defaultMessage: 'Replace configuration',
+            }
+          )}
+          defaultFocusedButton="confirm"
+        >
+          {i18n.translate(
+            'xpack.enterpriseSearch.content..newIndex.steps.buildConnector.confirmModal.description',
+            {
+              defaultMessage:
+                'A deleted index named {indexName} was originally tied to an existing connector configuration. Would you like to replace the existing connector configuration with a new one?',
+              values: {
+                indexName: fullIndexName,
+              },
+            }
+          )}
+        </EuiConfirmModal>
+      )}
     </NewSearchIndexTemplate>
   );
 };
