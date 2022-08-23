@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import uuid from 'uuid';
 import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
 import { Spaces } from '../../scenarios';
 import {
