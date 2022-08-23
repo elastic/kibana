@@ -7,7 +7,7 @@
  */
 
 import type { EuiPopoverProps, EuiContextMenuPanelProps } from '@elastic/eui';
-import { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
 import React from 'react';
 import { EuiPopover, EuiContextMenuPanel, useGeneratedHtmlId } from '@elastic/eui';
 
