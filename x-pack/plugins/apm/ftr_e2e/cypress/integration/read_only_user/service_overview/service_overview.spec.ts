@@ -125,7 +125,7 @@ describe('Service Overview', () => {
       cy.visitKibana(baseUrl);
     });
 
-    it('persists transaction type selected when clicking on Transactions tab', () => {
+    it.skip('persists transaction type selected when clicking on Transactions tab', () => {
       cy.intercept(
         'GET',
         '/internal/apm/services/opbeans-node/transaction_types?*'
