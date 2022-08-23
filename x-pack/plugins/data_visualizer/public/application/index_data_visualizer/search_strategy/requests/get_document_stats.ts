@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { each, get, sortedIndex } from 'lodash';
+import { each, get, sortedIndex, first } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { DataPublicPluginStart, ISearchOptions } from '@kbn/data-plugin/public';
@@ -67,7 +67,7 @@ export const getDocumentCountStats = async (
   // so that we can calculate the next p value that's appropriate for the data set
   const initialDefaultProbability = probability ?? 1e-5;
 
-  const getAggsWithRandomSampling = (p: number) => ({
+  const getEventRateAggsWithRandomSampling = (p: number) => ({
     sampler: {
       aggs,
       random_sampler: {
@@ -83,7 +83,7 @@ export const getDocumentCountStats = async (
     index,
     body: {
       query,
-      ...(hasTimeField ? { aggs: aggregations } : {}),
+      ...(aggregations !== undefined ? { aggs: aggregations } : {}),
       ...(isPopulatedObject(runtimeFieldMap) ? { runtime_mappings: runtimeFieldMap } : {}),
     },
     track_total_hits: !hasTimeField,
@@ -93,7 +93,27 @@ export const getDocumentCountStats = async (
   const firstResp = await search
     .search(
       {
-        params: getSearchParams(getAggsWithRandomSampling(initialDefaultProbability)),
+        params: getSearchParams(
+          hasTimeField
+            ? getEventRateAggsWithRandomSampling(initialDefaultProbability)
+            : // If there's no time field, we just make a value_count aggregation on any field
+              // just so we can calculate what's the optimal probability from the sampled doc count
+              {
+                sampler: {
+                  random_sampler: {
+                    probability: initialDefaultProbability,
+                  },
+                  aggs: {
+                    price_percentiles: {
+                      value_count: {
+                        field:
+                          first(params.aggregatableFields) ?? first(params.nonAggregatableFields),
+                      },
+                    },
+                  },
+                },
+              }
+        ),
       },
       searchOptions
     )
@@ -102,21 +122,9 @@ export const getDocumentCountStats = async (
   if (firstResp === undefined) {
     throw Error(
       `An error occurred with the following query ${JSON.stringify(
-        getSearchParams(getAggsWithRandomSampling(initialDefaultProbability))
+        getSearchParams(getEventRateAggsWithRandomSampling(initialDefaultProbability))
       )}`
     );
-  }
-
-  if (!hasTimeField && isDefined(firstResp.rawResponse)) {
-    return {
-      ...result,
-      took: firstResp.rawResponse.took,
-      totalCount:
-        (typeof firstResp.rawResponse.hits?.total === 'number'
-          ? firstResp.rawResponse.hits?.total
-          : firstResp.rawResponse.hits?.total?.value) ?? 0,
-      probability: 1,
-    };
   }
 
   if (isDefined(probability)) {
@@ -136,13 +144,25 @@ export const getDocumentCountStats = async (
     const newProbability =
       (initialDefaultProbability * numDocs) / (numSampled - 2 * Math.sqrt(numSampled));
 
+    if (!hasTimeField) {
+      return {
+        ...result,
+        took: firstResp.rawResponse.took,
+        totalCount:
+          (typeof firstResp.rawResponse.hits?.total === 'number'
+            ? firstResp.rawResponse.hits?.total
+            : firstResp.rawResponse.hits?.total?.value) ?? 0,
+        probability: numSampled < 109 ? 1 : newProbability,
+      };
+    }
+
     // If the number of docs sampled is indicative of query with < 10 million docs
     // proceed to make a vanilla aggregation without any sampling
     if (numSampled === 0 || newProbability === Infinity || numSampled < 109) {
       const vanillaAggResp = await search
         .search(
           {
-            params: getSearchParams(getAggsWithRandomSampling(1)),
+            params: getSearchParams(getEventRateAggsWithRandomSampling(1)),
           },
           searchOptions
         )
@@ -162,7 +182,7 @@ export const getDocumentCountStats = async (
       const secondResp = await search
         .search(
           {
-            params: getSearchParams(getAggsWithRandomSampling(closestProbability)),
+            params: getSearchParams(getEventRateAggsWithRandomSampling(closestProbability)),
           },
           searchOptions
         )
