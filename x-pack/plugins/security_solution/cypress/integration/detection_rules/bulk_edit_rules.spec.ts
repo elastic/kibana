@@ -349,23 +349,23 @@ describe('Detection rules, bulk edit', () => {
       it('Add index patterns to custom rules', () => {
         const indexPattersToBeAdded = ['index-to-add-1-*', 'index-to-add-2-*'];
         const resultingIndexPatterns = [...prePopulatedIndexPatterns, ...indexPattersToBeAdded];
-  
+
         selectNumberOfRules(expectedNumberOfNotMLRules);
         openBulkEditAddIndexPatternsForm();
-  
+
         typeIndexPatterns(indexPattersToBeAdded);
         submitBulkEditForm();
-  
+
         waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfNotMLRules });
-  
+
         // check if rule has been updated
         goToTheRuleDetailsOf(RULE_NAME);
         hasIndexPatterns(resultingIndexPatterns.join(''));
       });
-  
+
       it('Overwrite index patterns in custom rules', () => {
         const indexPattersToWrite = ['index-to-write-1-*', 'index-to-write-2-*'];
-  
+
         selectNumberOfRules(expectedNumberOfNotMLRules);
         openBulkEditAddIndexPatternsForm();
 
@@ -375,49 +375,49 @@ describe('Detection rules, bulk edit', () => {
           'have.text',
           `You’re about to overwrite index patterns for ${expectedNumberOfNotMLRules} selected rules, press Save to apply changes.`
         );
-  
+
         typeIndexPatterns(indexPattersToWrite);
         submitBulkEditForm();
-  
+
         waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfNotMLRules });
-  
+
         // check if rule has been updated
         goToTheRuleDetailsOf(RULE_NAME);
         hasIndexPatterns(indexPattersToWrite.join(''));
       });
-  
+
       it('Delete index patterns from custom rules', () => {
         const indexPatternsToDelete = prePopulatedIndexPatterns.slice(0, 1);
         const resultingIndexPatterns = prePopulatedIndexPatterns.slice(1);
-  
+
         selectNumberOfRules(expectedNumberOfNotMLRules);
         openBulkEditDeleteIndexPatternsForm();
-  
+
         typeIndexPatterns(indexPatternsToDelete);
         submitBulkEditForm();
         waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfNotMLRules });
-  
+
         // check if rule has been updated
         goToTheRuleDetailsOf(RULE_NAME);
         hasIndexPatterns(resultingIndexPatterns.join(''));
       });
-  
+
       it('Delete all index patterns from custom rules', () => {
         selectNumberOfRules(expectedNumberOfNotMLRules);
-  
+
         openBulkEditDeleteIndexPatternsForm();
         typeIndexPatterns(prePopulatedIndexPatterns);
 
         submitBulkEditForm();
-  
+
         // error toast should be displayed that that rules edit failed
         cy.contains(TOASTER_BODY, `${expectedNumberOfNotMLRules} rules failed to update.`);
-  
+
         // on error toast button click display error that index patterns can't be empty
         clickErrorToastBtn();
         cy.contains(MODAL_ERROR_BODY, "Index patterns can't be empty");
       });
-    })
+    });
   });
 
   describe('Timeline templates', () => {
