@@ -72,6 +72,7 @@ export const ActionBar = ({
   const isReadOnly = monitor[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT;
 
   const hasServiceManagedLocation = monitor.locations?.some((loc) => loc.isServiceManaged);
+  const isOnlyPrivateLocations = !locations.some((loc) => loc.isServiceManaged);
 
   const { data, status } = useFetcher(() => {
     if (!isSaving || !isValid) {
@@ -192,7 +193,7 @@ export const ActionBar = ({
                     <p>
                       {isTestRunInProgress
                         ? TEST_SCHEDULED_LABEL
-                        : isValid && !hasServiceManagedLocation
+                        : isOnlyPrivateLocations || (isValid && !hasServiceManagedLocation)
                         ? PRIVATE_AVAILABLE_LABEL
                         : TEST_NOW_DESCRIPTION}
                     </p>
