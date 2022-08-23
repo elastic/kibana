@@ -30,7 +30,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await testSubjects.existOrFail('noDataViewsPrompt');
       const { message } = await toasts.getErrorToast();
-      expect(message).to.contain('Could not locate that data view (id: 111111111111)');
+      expect(message).to.contain(
+        'The data view with id:111111111111 could not be loaded. Try creating a new one.'
+      );
     });
   });
 }

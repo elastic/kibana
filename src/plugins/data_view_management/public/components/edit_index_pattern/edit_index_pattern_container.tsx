@@ -39,7 +39,9 @@ const EditIndexPatternCont: React.FC<RouteComponentProps<{ id: string }>> = ({ .
         defaultMessage: 'Unable to load data view',
       }),
       i18n.translate('indexPatternManagement.editIndexPattern.couldNotLoadMessage', {
-        defaultMessage: 'The data view could not be loaded. Try creating a new one.',
+        defaultMessage:
+          'The data view with id:{objectId} could not be loaded. Try creating a new one.',
+        values: { objectId: props.match.params.id },
       }),
     ];
     notifications.toasts.addError(error ?? new Error(errorTitle), {
