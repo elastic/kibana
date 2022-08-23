@@ -117,6 +117,7 @@ enabled:
   - x-pack/test/alerting_api_integration/basic/config.ts
   - x-pack/test/alerting_api_integration/security_and_spaces/group1/config.ts
   - x-pack/test/alerting_api_integration/security_and_spaces/group2/config.ts
+  - x-pack/test/alerting_api_integration/security_and_spaces/group2/config_non_dedicated_task_runner.ts
   - x-pack/test/alerting_api_integration/spaces_only/config.ts
   - x-pack/test/api_integration_basic/config.ts
   - x-pack/test/api_integration/config_security_basic.ts
