@@ -116,7 +116,6 @@ export interface CurrentAction {
   type?: string;
   total: number;
   timedOut: boolean;
-  failed: number;
   cancelled: boolean;
   expired: boolean;
 }

@@ -47,7 +47,6 @@ export async function getActionStatuses(esClient: ElasticsearchClient): Promise<
         complete,
         total,
         timedOut: !complete && action.timedOut,
-        failed: total - action.nbAgents,
         cancelled: cancelledActionIds.indexOf(action.actionId) > -1,
       };
     },
@@ -124,7 +123,6 @@ async function _getActions(esClient: ElasticsearchClient) {
           startTime,
           type: hit._source?.type,
           total: hit._source?.total ?? 0,
-          failed: 0,
           timedOut,
           cancelled: false,
           expired: hit._source?.expiration

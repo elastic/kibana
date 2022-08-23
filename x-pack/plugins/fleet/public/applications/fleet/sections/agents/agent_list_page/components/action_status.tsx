@@ -39,21 +39,22 @@ export const ActionStatusCallout: React.FunctionComponent<{ refreshActionStatus:
   const calloutTitle = (currentAction: CurrentAction) => (
     <FormattedMessage
       id="xpack.fleet.currentAction.calloutTitle"
-      defaultMessage="{type} {status}, {total} actioned, {nbAgentsAck} acknowledged, {failed} failed, actionId: {actionId}"
+      defaultMessage="{type} {status}, {total} actioned, {nbAgents} started, {nbAgentsAck} acknowledged, actionId: {actionId}"
       values={{
         status: currentAction.complete
           ? 'completed'
           : currentAction.timedOut
           ? 'timed out'
-          : currentAction.failed > 0
-          ? 'failed'
+          : currentAction.cancelled
+          ? 'cancelled'
+          : currentAction.expired
+          ? 'expired'
           : 'in progress',
         type: actionNames[currentAction.type ?? 'ACTION'],
         total: currentAction.total,
         nbAgents: currentAction.nbAgents,
         nbAgentsAck: currentAction.nbAgentsAck,
         actionId: currentAction.actionId,
-        failed: currentAction.failed,
       }}
     />
   );
@@ -66,11 +67,7 @@ export const ActionStatusCallout: React.FunctionComponent<{ refreshActionStatus:
           <React.Fragment key={currentAction.actionId}>
             <EuiCallOut
               color={
-                currentAction.complete
-                  ? 'success'
-                  : currentAction.timedOut || currentAction.failed > 0
-                  ? 'danger'
-                  : 'primary'
+                currentAction.complete ? 'success' : currentAction.timedOut ? 'danger' : 'primary'
               }
             >
               <EuiFlexGroup
