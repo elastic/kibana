@@ -25,16 +25,21 @@ import {
   IngestionStatus,
 } from '../types';
 
+const CRAWLER_CONNECTOR_TYPE = 'elastic-crawler'
+
 export function isConnectorIndex(
   index: ElasticsearchIndexWithIngestion | undefined
 ): index is ConnectorIndex {
-  return !!(index as ConnectorIndex)?.connector;
+  const indexAsConnector = index as ConnectorIndex;
+  return !!indexAsConnector?.connector && indexAsConnector.connector.service_type !== CRAWLER_CONNECTOR_TYPE;
 }
 
 export function isCrawlerIndex(
   index: ElasticsearchIndexWithIngestion | undefined
 ): index is CrawlerIndex {
-  return !!(index as CrawlerIndex)?.crawler;
+  const indexAsConnector = index as ConnectorIndex;
+  const indexAsCrawler = index as CrawlerIndex;
+  return !!indexAsCrawler?.crawler || (!!indexAsConnector?.connector && indexAsConnector.connector.service_type === CRAWLER_CONNECTOR_TYPE);
 }
 
 export function isApiIndex(index: ElasticsearchIndexWithIngestion | undefined): boolean {
