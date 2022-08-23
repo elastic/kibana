@@ -25363,8 +25363,6 @@
     "xpack.securitySolution.detectionEngine.rules.allRules.columns.gapTooltip": "规则执行中最近缺口的持续时间。调整规则回查或{seeDocs}以缩小缺口。",
     "xpack.securitySolution.detectionEngine.rules.allRules.selectAllRulesTitle": "选择所有 {totalRules} 个{totalRules, plural, other {规则}}",
     "xpack.securitySolution.detectionEngine.rules.allRules.selectedRulesTitle": "已选择 {selectedRules} 个{selectedRules, plural, other {规则}}",
-    "xpack.securitySolution.detectionEngine.rules.allRules.showingExceptionLists": "正在显示 {totalLists} 个{totalLists, plural, other {列表}}",
-    "xpack.securitySolution.detectionEngine.rules.allRules.showingRulesTitle": "正在显示 {totalRules} 个{totalRules, plural, other {规则}}",
     "xpack.securitySolution.detectionEngine.rules.create.successfullyCreatedRuleTitle": "{ruleName} 已创建",
     "xpack.securitySolution.detectionEngine.rules.popoverTooltip.ariaLabel": "列的工具提示：{columnName}",
     "xpack.securitySolution.detectionEngine.rules.reloadMissingPrePackagedRulesAndTimelinesButton": "安装 {missingRules} 个 Elastic 预构建{missingRules, plural, other {规则}}以及 {missingTimelines} 个 Elastic 预构建{missingTimelines, plural, other {时间线}} ",
