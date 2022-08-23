@@ -122,14 +122,16 @@ describe('Service Overview', () => {
   describe('transactions', () => {
     beforeEach(() => {
       cy.loginAsViewerUser();
-      cy.visitKibana(baseUrl);
     });
 
-    it.skip('persists transaction type selected when clicking on Transactions tab', () => {
+    it('persists transaction type selected when clicking on Transactions tab', () => {
       cy.intercept(
         'GET',
         '/internal/apm/services/opbeans-node/transaction_types?*'
       ).as('transactionTypesRequest');
+
+      cy.visitKibana(baseUrl);
+
       cy.wait('@transactionTypesRequest');
 
       cy.get('[data-test-subj="headerFilterTransactionType"]').should(
@@ -148,11 +150,14 @@ describe('Service Overview', () => {
       );
     });
 
-    it.skip('persists transaction type selected when clicking on View Transactions link', () => {
+    it('persists transaction type selected when clicking on View Transactions link', () => {
       cy.intercept(
         'GET',
         '/internal/apm/services/opbeans-node/transaction_types?*'
       ).as('transactionTypesRequest');
+
+      cy.visitKibana(baseUrl);
+
       cy.wait('@transactionTypesRequest');
       cy.get('[data-test-subj="headerFilterTransactionType"]').should(
         'have.value',
