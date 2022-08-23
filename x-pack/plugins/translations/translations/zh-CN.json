@@ -19063,7 +19063,6 @@
     "xpack.ml.deleteSpaceAwareItemCheckModal.unTagSuccessTitle": "成功更新 {id}",
     "xpack.ml.editModelSnapshotFlyout.calloutText": "这是作业 {jobId} 当前正在使用的快照，因此无法删除。",
     "xpack.ml.editModelSnapshotFlyout.title": "编辑快照 {ssId}",
-    "xpack.ml.embeddables.lensLayerFlyout.createJobCalloutTitle": "此图层可用于创建 {type} 作业",
     "xpack.ml.entityFilter.addFilterAriaLabel": "添加 {influencerFieldName} {influencerFieldValue} 的筛选",
     "xpack.ml.entityFilter.removeFilterAriaLabel": "移除 {influencerFieldName} {influencerFieldValue} 的筛选",
     "xpack.ml.explorer.annotationsOutOfTotalCountTitle": "前 {visibleCount} 个，共 {totalCount} 个",

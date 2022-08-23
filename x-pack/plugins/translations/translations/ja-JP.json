@@ -19039,7 +19039,6 @@
     "xpack.ml.deleteSpaceAwareItemCheckModal.unTagSuccessTitle": "正常に {id} を更新しました",
     "xpack.ml.editModelSnapshotFlyout.calloutText": "これはジョブ{jobId}で使用されている現在のスナップショットであるため削除できません。",
     "xpack.ml.editModelSnapshotFlyout.title": "スナップショット{ssId}の編集",
-    "xpack.ml.embeddables.lensLayerFlyout.createJobCalloutTitle": "このレイヤーを使用して、{type}ジョブを作成できます",
     "xpack.ml.entityFilter.addFilterAriaLabel": "{influencerFieldName} {influencerFieldValue}のフィルターを追加",
     "xpack.ml.entityFilter.removeFilterAriaLabel": "{influencerFieldName} {influencerFieldValue}のフィルターを削除",
     "xpack.ml.explorer.annotationsOutOfTotalCountTitle": "合計{totalCount}件中最初の{visibleCount}件",
