@@ -58,54 +58,47 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
-  registry.when(
-    'when data is loaded',
-    { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
-    () => {
-      describe('top errors for transaction', () => {
-        const {
-          firstTransaction: {
-            name: firstTransactionName,
-            failureRate: firstTransactionFailureRate,
-          },
-        } = config;
+  registry.when('when data is loaded', { config: 'basic', archives: [] }, () => {
+    describe('top errors for transaction', () => {
+      const {
+        firstTransaction: { name: firstTransactionName, failureRate: firstTransactionFailureRate },
+      } = config;
 
+      before(async () => {
+        await generateData({ serviceName, start, end, synthtraceEsClient });
+      });
+
+      after(() => synthtraceEsClient.clean());
+
+      describe('returns the correct data', () => {
+        let errorGroups: ErrorGroups;
         before(async () => {
-          await generateData({ serviceName, start, end, synthtraceEsClient });
+          const response = await callApi({ query: { transactionName: firstTransactionName } });
+          errorGroups = response.body.errorGroups;
         });
 
-        after(() => synthtraceEsClient.clean());
+        it('returns correct number of errors and error data', () => {
+          const numberOfBuckets = 15;
 
-        describe('returns the correct data', () => {
-          let errorGroups: ErrorGroups;
-          before(async () => {
-            const response = await callApi({ query: { transactionName: firstTransactionName } });
-            errorGroups = response.body.errorGroups;
-          });
+          expect(errorGroups.length).to.equal(2);
 
-          it('returns correct number of errors and error data', () => {
-            const numberOfBuckets = 15;
+          const firstErrorId = `Error 1 transaction ${firstTransactionName}`;
+          const firstError = errorGroups.find((x) => x.groupId === firstErrorId);
+          expect(firstError).to.not.be(undefined);
+          expect(firstError?.groupId).to.be(firstErrorId);
+          expect(firstError?.name).to.be(firstErrorId);
+          expect(firstError?.occurrences).to.be(firstTransactionFailureRate * numberOfBuckets);
+          expect(firstError?.lastSeen).to.be(moment(end).startOf('minute').valueOf());
 
-            expect(errorGroups.length).to.equal(2);
-
-            const firstErrorId = `Error 1 transaction ${firstTransactionName}`;
-            const firstError = errorGroups.find((x) => x.groupId === firstErrorId);
-            expect(firstError).to.not.be(undefined);
-            expect(firstError?.groupId).to.be(firstErrorId);
-            expect(firstError?.name).to.be(firstErrorId);
-            expect(firstError?.occurrences).to.be(firstTransactionFailureRate * numberOfBuckets);
-            expect(firstError?.lastSeen).to.be(moment(end).startOf('minute').valueOf());
-
-            const secondErrorId = `Error 2 transaction ${firstTransactionName}`;
-            const secondError = errorGroups.find((x) => x.groupId === secondErrorId);
-            expect(secondError).to.not.be(undefined);
-            expect(secondError?.groupId).to.be(secondErrorId);
-            expect(secondError?.name).to.be(secondErrorId);
-            expect(secondError?.occurrences).to.be(firstTransactionFailureRate * numberOfBuckets);
-            expect(secondError?.lastSeen).to.be(moment(end).startOf('minute').valueOf());
-          });
+          const secondErrorId = `Error 2 transaction ${firstTransactionName}`;
+          const secondError = errorGroups.find((x) => x.groupId === secondErrorId);
+          expect(secondError).to.not.be(undefined);
+          expect(secondError?.groupId).to.be(secondErrorId);
+          expect(secondError?.name).to.be(secondErrorId);
+          expect(secondError?.occurrences).to.be(firstTransactionFailureRate * numberOfBuckets);
+          expect(secondError?.lastSeen).to.be(moment(end).startOf('minute').valueOf());
         });
       });
-    }
-  );
+    });
+  });
 }
