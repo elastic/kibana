@@ -381,8 +381,9 @@ export class SavedSearchEmbeddable
 
     const timeRangeSearchSource = searchSource.create();
     timeRangeSearchSource.setField('filter', () => {
-      if (!this.searchProps || !this.input.timeRange) return;
-      return this.services.timefilter.createFilter(dataView, this.input.timeRange);
+      const timeRange = this.getTimeRange();
+      if (!this.searchProps || !timeRange) return;
+      return this.services.timefilter.createFilter(dataView, timeRange);
     });
 
     this.filtersSearchSource = searchSource.create();
@@ -399,6 +400,16 @@ export class SavedSearchEmbeddable
     }
   }
 
+  private getTimeRange() {
+    return this.input.timeslice !== undefined
+      ? {
+          from: new Date(this.input.timeslice[0]).toISOString(),
+          to: new Date(this.input.timeslice[1]).toISOString(),
+          mode: 'absolute' as 'absolute',
+        }
+      : this.input.timeRange;
+  }
+
   private isFetchRequired(searchProps?: SearchProps) {
     if (!searchProps) {
       return false;
@@ -406,7 +417,7 @@ export class SavedSearchEmbeddable
     return (
       !onlyDisabledFiltersChanged(this.input.filters, this.prevFilters) ||
       !isEqual(this.prevQuery, this.input.query) ||
-      !isEqual(this.prevTimeRange, this.input.timeRange) ||
+      !isEqual(this.prevTimeRange, this.getTimeRange()) ||
       !isEqual(searchProps.sort, this.input.sort || this.savedSearch.sort) ||
       this.prevSearchSessionId !== this.input.searchSessionId
     );
@@ -451,7 +462,7 @@ export class SavedSearchEmbeddable
 
       this.prevFilters = this.input.filters;
       this.prevQuery = this.input.query;
-      this.prevTimeRange = this.input.timeRange;
+      this.prevTimeRange = this.getTimeRange();
       this.prevSearchSessionId = this.input.searchSessionId;
       this.searchProps = searchProps;
       await this.fetch();

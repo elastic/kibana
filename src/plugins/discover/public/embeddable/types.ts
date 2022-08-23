@@ -19,6 +19,7 @@ import { SortOrder } from '../components/doc_table/components/table_header/helpe
 
 export interface SearchInput extends EmbeddableInput {
   timeRange: TimeRange;
+  timeslice?: [number, number];
   query?: Query;
   filters?: Filter[];
   hidePanelTitles?: boolean;
