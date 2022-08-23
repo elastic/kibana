@@ -320,7 +320,7 @@ cloud.auth: <username:password>
 . Give the data view a name: *tri_met_tracks**.
 . Set the index pattern as: *tri_met_tracks**.
 . Click *Next step*.
-. Set the *Time field* to *trimet.time*.
+. Set the *Timestamp field* to *trimet.time*.
 . Click *Create data view*.
 
 {kib} shows the fields in your data view.
