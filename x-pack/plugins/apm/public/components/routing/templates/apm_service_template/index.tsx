@@ -167,6 +167,21 @@ export function isMetricsJVMsTabHidden({
   );
 }
 
+export function isInfraTabHidden({
+  agentName,
+  runtimeName,
+}: {
+  agentName?: string;
+  runtimeName?: string;
+}) {
+  return (
+    !agentName ||
+    isRumAgentName(agentName) ||
+    isMobileAgentName(agentName) ||
+    isServerlessAgent(runtimeName)
+  );
+}
+
 function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
   const { agentName, runtimeName } = useApmServiceContext();
   const { config, core, plugins } = useApmPluginContext();
@@ -266,6 +281,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.home.infraTabLabel', {
         defaultMessage: 'Infrastructure',
       }),
+      hidden: isInfraTabHidden({ agentName, runtimeName }),
     },
     {
       key: 'service-map',
