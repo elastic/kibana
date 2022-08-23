@@ -7,8 +7,8 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { isSortable } from './get_sort';
-import { SortOrder } from '../components/table_header/helpers';
 
 /**
  * use in case the user didn't manually sort.

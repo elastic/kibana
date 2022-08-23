@@ -29,7 +29,6 @@ import { TIMELINE_TEMPLATE_DETAILS } from '../../screens/rule_details';
 
 import { EUI_FILTER_SELECT_ITEM } from '../../screens/common/controllers';
 
-
 import {
   changeRowsPerPageTo,
   waitForRulesTableToBeLoaded,
@@ -41,7 +40,6 @@ import {
   testMultipleSelectedRulesLabel,
   loadPrebuiltDetectionRulesFromHeaderBtn,
   switchToElasticRules,
-  filterByCustomRules,
   confirmConfirmationModal,
   clickErrorToastBtn,
 } from '../../tasks/alerts_detection_rules';
@@ -186,10 +184,9 @@ describe('Detection rules, bulk edit', () => {
       checkPrebuiltRulesCannotBeModified(totalNumberOfPrebuiltRules);
 
       // user can proceed with custom rule editing
-      cy.get(MODAL_CONFIRMATION_BTN).should(
-        'have.text',
-        `Edit ${expectedNumberOfCustomRulesToBeEdited} custom rules`
-      ).click();
+      cy.get(MODAL_CONFIRMATION_BTN)
+        .should('have.text', `Edit ${expectedNumberOfCustomRulesToBeEdited} custom rules`)
+        .click();
 
       // action should finish
       typeTags(['test-tag']);
@@ -235,7 +232,7 @@ describe('Detection rules, bulk edit', () => {
     //   submitBulkEditForm();
     //   waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
     // });
-    
+
     //   it('should show warning modal windows when some of the selected rules cannot be edited', () => {
     // createMachineLearningRule(getMachineLearningRule(), '7');
 
@@ -275,7 +272,7 @@ describe('Detection rules, bulk edit', () => {
     // cy.get(RULES_TABLE_REFRESH_INDICATOR).should('not.exist');
     // goToTheRuleDetailsOf(RULE_NAME);
     // hasIndexPatterns([...DEFAULT_INDEX_PATTERNS, CUSTOM_INDEX_PATTERN_1].join(''));
-    
+
     // });
   });
 
@@ -284,7 +281,7 @@ describe('Detection rules, bulk edit', () => {
       selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
 
       openBulkEditAddTagsForm();
-      openTagsSelect(); 
+      openTagsSelect();
 
       cy.get(EUI_FILTER_SELECT_ITEM)
         .should('have.length', prePopulatedTags.length)
@@ -318,7 +315,7 @@ describe('Detection rules, bulk edit', () => {
       testAllTagsBadges(resultingTags);
 
       // check that new tags were added to tags filter
-      // tags in tags filter sorted alphabetically  
+      // tags in tags filter sorted alphabetically
       const resultingTagsInFilter = [...resultingTags].sort();
       checkTagsInTagsFilter(resultingTagsInFilter);
     });
