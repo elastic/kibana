@@ -9,6 +9,7 @@
 import React, { forwardRef, useCallback, useMemo } from 'react';
 import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { TableHeader } from './components/table_header/table_header';
 import { SHOW_MULTIFIELDS } from '../../../common';
@@ -16,7 +17,7 @@ import { TableRow } from './components/table_row';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { getFieldsToShow } from '../../utils/get_fields_to_show';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import type { DataTableRecord, SortPairArr } from '../../types';
+import type { DataTableRecord } from '../../types';
 
 export interface DocTableProps {
   /**
@@ -148,7 +149,7 @@ export const DocTableWrapper = forwardRef(
           onChangeSortOrder={onSort}
           onMoveColumn={onMoveColumn}
           onRemoveColumn={onRemoveColumn}
-          sortOrder={sort as SortPairArr[]}
+          sortOrder={sort as SortOrder[]}
         />
       ),
       [columns, dataView, onMoveColumn, onRemoveColumn, onSort, sort]

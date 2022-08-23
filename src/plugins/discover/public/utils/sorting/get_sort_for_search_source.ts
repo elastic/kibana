@@ -8,7 +8,7 @@
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { EsQuerySortValue } from '@kbn/data-plugin/public';
-import { SortPairArr } from '../../types';
+import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { getSort } from './get_sort';
 
 /**
@@ -19,7 +19,7 @@ import { getSort } from './get_sort';
  *   when there are indices with date and indices with date_nanos field
  */
 export function getSortForSearchSource(
-  sort?: SortPairArr[],
+  sort?: SortOrder[],
   dataView?: DataView,
   defaultDirection: string = 'desc'
 ): EsQuerySortValue[] {

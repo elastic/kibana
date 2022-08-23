@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { getSortForSearchSource } from './get_sort_for_search_source';
 import { stubDataView, stubDataViewWithoutTimeField } from '@kbn/data-plugin/common/stubs';
-import { SortPairArr } from '../../types';
 
 describe('getSortForSearchSource function', function () {
   test('should be a function', function () {
@@ -16,7 +15,7 @@ describe('getSortForSearchSource function', function () {
   });
 
   test('should return an object to use for searchSource when columns are given', function () {
-    const cols = [['bytes', 'desc']] as SortPairArr[];
+    const cols = [['bytes', 'desc']] as SortOrder[];
     expect(getSortForSearchSource(cols, stubDataView)).toEqual([{ bytes: 'desc' }]);
     expect(getSortForSearchSource(cols, stubDataView, 'asc')).toEqual([{ bytes: 'desc' }]);
 
@@ -27,7 +26,7 @@ describe('getSortForSearchSource function', function () {
   });
 
   test('should return an object to use for searchSource when no columns are given', function () {
-    const cols = [] as SortPairArr[];
+    const cols = [] as SortOrder[];
     expect(getSortForSearchSource(cols, stubDataView)).toEqual([{ _doc: 'desc' }]);
     expect(getSortForSearchSource(cols, stubDataView, 'asc')).toEqual([{ _doc: 'asc' }]);
 

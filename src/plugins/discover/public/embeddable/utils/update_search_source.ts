@@ -7,13 +7,13 @@
  */
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ISearchSource } from '@kbn/data-plugin/public';
-import type { SortPairArr } from '../../types';
+import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { getSortForSearchSource } from '../../utils/sorting';
 
 export const updateSearchSource = (
   searchSource: ISearchSource,
   dataView: DataView | undefined,
-  sort: (SortPairArr[] & string[][]) | undefined,
+  sort: (SortOrder[] & string[][]) | undefined,
   useNewFieldsApi: boolean,
   defaults: {
     sampleSize: number;

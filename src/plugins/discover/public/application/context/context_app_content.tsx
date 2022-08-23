@@ -11,6 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiHorizontalRule, EuiText } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { SortDirection } from '@kbn/data-plugin/public';
+import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { CONTEXT_STEP_SETTING, DOC_HIDE_TIME_COLUMN_SETTING } from '../../../common';
 import { LoadingStatus } from './services/context_query_state';
 import { ActionBar } from './components/action_bar/action_bar';
@@ -21,7 +22,7 @@ import { SurrDocType } from './services/context';
 import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from './services/constants';
 import { DocTableContext } from '../../components/doc_table/doc_table_context';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import type { DataTableRecord, SortPairArr } from '../../types';
+import type { DataTableRecord } from '../../types';
 
 export interface ContextAppContentProps {
   columns: string[];
@@ -150,7 +151,7 @@ export function ContextAppContent({
             expandedDoc={expandedDoc}
             isLoading={isAnchorLoading}
             sampleSize={0}
-            sort={sort as SortPairArr[]}
+            sort={sort as SortOrder[]}
             isSortEnabled={false}
             showTimeCol={showTimeCol}
             useNewFieldsApi={useNewFieldsApi}

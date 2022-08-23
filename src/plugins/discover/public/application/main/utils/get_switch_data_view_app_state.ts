@@ -7,7 +7,7 @@
  */
 import { isOfAggregateQueryType, Query, AggregateQuery } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { SortPairArr } from '../../../types';
+import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { getSortArray } from '../../../utils/sorting';
 
 /**
@@ -18,7 +18,7 @@ export function getDataViewAppState(
   currentDataView: DataView,
   nextDataView: DataView,
   currentColumns: string[],
-  currentSort: SortPairArr[],
+  currentSort: SortOrder[],
   modifyColumns: boolean = true,
   sortDirection: string = 'desc',
   query?: Query | AggregateQuery

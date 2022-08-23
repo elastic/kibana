@@ -23,6 +23,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { getSchemaDetectors } from './discover_grid_schema';
 import { DiscoverGridFlyout } from './discover_grid_flyout';
@@ -44,7 +45,7 @@ import {
 } from '../../../common';
 import { DiscoverGridDocumentToolbarBtn } from './discover_grid_document_selection';
 import { getFieldsToShow } from '../../utils/get_fields_to_show';
-import type { DataTableRecord, SortPairArr, ValueToStringConverter } from '../../types';
+import type { DataTableRecord, ValueToStringConverter } from '../../types';
 import { useRowHeightsOptions } from '../../hooks/use_row_heights_options';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { convertValueToString } from '../../utils/convert_value_to_string';
@@ -140,7 +141,7 @@ export interface DiscoverGridProps {
   /**
    * Current sort setting
    */
-  sort: SortPairArr[];
+  sort: SortOrder[];
   /**
    * How the data is fetched
    */

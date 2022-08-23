@@ -15,7 +15,7 @@ import {
 import type { Filter, TimeRange, Query } from '@kbn/es-query';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { SortPairArr } from '../types';
+import type { SortOrder } from '@kbn/saved-search-plugin/public';
 
 export interface SearchInput extends EmbeddableInput {
   timeRange: TimeRange;
@@ -23,7 +23,7 @@ export interface SearchInput extends EmbeddableInput {
   filters?: Filter[];
   hidePanelTitles?: boolean;
   columns?: string[];
-  sort?: SortPairArr[];
+  sort?: SortOrder[];
   rowHeight?: number;
   rowsPerPage?: number;
 }

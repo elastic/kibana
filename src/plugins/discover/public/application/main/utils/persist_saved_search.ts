@@ -8,9 +8,7 @@
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import type { SortOrder } from '@kbn/saved-search-plugin/public';
-import { saveSavedSearch } from '@kbn/saved-search-plugin/public';
+import { SavedSearch, SortOrder, saveSavedSearch } from '@kbn/saved-search-plugin/public';
 import { updateSearchSource } from './update_search_source';
 import { AppState } from '../services/discover_state';
 import { DiscoverServices } from '../../../build_services';

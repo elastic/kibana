@@ -22,6 +22,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { Container, Embeddable, FilterableEmbeddable } from '@kbn/embeddable-plugin/public';
 import { Adapters, RequestAdapter } from '@kbn/inspector-plugin/common';
+import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import {
   APPLY_FILTER_TRIGGER,
   FilterManager,
@@ -36,7 +37,7 @@ import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { getSortForEmbeddable, SortPair } from '../utils/sorting';
 import { RecordRawType } from '../application/main/hooks/use_saved_search';
 import { buildDataTableRecord } from '../utils/build_data_record';
-import { DataTableRecord, SortPairArr, EsHitRecord } from '../types';
+import { DataTableRecord, EsHitRecord } from '../types';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 import { DiscoverServices } from '../build_services';
@@ -102,7 +103,7 @@ export class SavedSearchEmbeddable
   private prevTimeRange?: TimeRange;
   private prevFilters?: Filter[];
   private prevQuery?: Query;
-  private prevSort?: SortPairArr[];
+  private prevSort?: SortOrder[];
   private prevSearchSessionId?: string;
   private searchProps?: SearchProps;
 
@@ -335,9 +336,9 @@ export class SavedSearchEmbeddable
         this.updateInput({ columns });
       },
       onSort: (nextSort: string[][]) => {
-        const sortOrderArr: SortPairArr[] = [];
+        const sortOrderArr: SortOrder[] = [];
         nextSort.forEach((arr) => {
-          sortOrderArr.push(arr as SortPairArr);
+          sortOrderArr.push(arr as SortOrder);
         });
         this.updateInput({ sort: sortOrderArr });
       },
