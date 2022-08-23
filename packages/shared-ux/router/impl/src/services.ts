@@ -6,16 +6,18 @@
  * Side Public License, v 1.
  */
 
-// Extract services from core needed for the router only
 import { Observable } from 'rxjs';
 import { createContext, useContext } from 'react';
 import { SharedUXExecutionContext } from './types';
 
 /**
- * @public
+ * @public Execution context start and setup types are the same
  */
 export declare type SharedUXExecutionContextStart = SharedUXExecutionContextSetup;
 
+/**
+ * Reduced the interface from ExecutionContextSetup from '@kbn/core-execution-context-browser' to only include properties needed for the Route
+ */
 export interface SharedUXExecutionContextSetup {
   /**
    * The current context observable
@@ -36,7 +38,7 @@ export interface SharedUXExecutionContextSetup {
 }
 
 /**
- * Core services exposed to the `Plugin` start lifecycle
+ * Taken from Core services exposed to the `Plugin` start lifecycle
  *
  * @public
  *

@@ -8,7 +8,6 @@
 
 import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
 import { SharedUXExecutionContextSetup } from './services';
-// '@kbn/shared-ux-router-types';
 import { SharedUXExecutionContext } from './types';
 
 /**

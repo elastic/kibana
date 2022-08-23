@@ -17,7 +17,7 @@ import { useKibanaSharedUX } from './services';
 import { useSharedUXExecutionContext } from './use_execution_context';
 
 /**
- * It's a wrapper around the react-router-dom Route component that inserts
+ * This is a wrapper around the react-router-dom Route component that inserts
  * MatchPropagator in every application route. It helps track all route changes
  * and send them to the execution context, later used to enrich APM
  * 'route-change' transactions.
@@ -72,6 +72,9 @@ export const Route = ({ children, component: Component, render, ...rest }: Route
   );
 };
 
+/**
+ * The match propogator that is part of the Route
+ */
 const MatchPropagator = () => {
   const { executionContext } = useKibanaSharedUX().services;
   const match = useRouteMatch();

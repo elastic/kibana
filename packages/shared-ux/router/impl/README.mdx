@@ -7,7 +7,8 @@ tags: ['shared-ux', 'component', 'router', 'route']
 date: 2022-08-12
 ---
 
-The router does not require any props but commonly accepts a base path. reat router dom vs router component 
+This is a wrapper around the react-router-dom Route component that inserts MatchPropagator in every application route. It helps track all route changes and send them to the execution context, later used to enrich APM 'route-change' transactions.
+The component does not require any props but commonly accepts a base path. 
 
 <!--
 ## API
