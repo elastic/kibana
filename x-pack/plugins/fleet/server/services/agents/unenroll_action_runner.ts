@@ -26,7 +26,14 @@ export class UnenrollActionRunner extends ActionRunner {
     actionId: string,
     total?: number
   ): Promise<{ items: BulkActionResult[] }> {
-    return await unenrollBatch(this.soClient, this.esClient, agents, { actionId }, true, total);
+    return await unenrollBatch(
+      this.soClient,
+      this.esClient,
+      agents,
+      { ...this.actionParams, actionId },
+      true,
+      total
+    );
   }
 
   protected getActionType() {
