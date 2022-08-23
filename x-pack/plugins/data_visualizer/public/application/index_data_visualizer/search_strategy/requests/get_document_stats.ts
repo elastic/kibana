@@ -18,7 +18,13 @@ import type {
   OverallStatsSearchStrategyParams,
 } from '../../../../../common/types/field_stats';
 
-const MINIMUM_RANDOM_SAMPLER_DOC_COUNT = 100000;
+// We want to only use random sampler if dataset contains more than 10.9m docs
+// For a query which matches 9M docs we have "hit count" ~ Binomial(9000000, 0.00001) ~ Normal(90, 90)
+// So the chance that the hit count exceeds 90 + 2 * sqrt(90), i.e. 2 sd, is around 1%.
+const MINIMUM_RANDOM_SAMPLER_SAMPLED_DOCS = 109;
+
+// The desired minimum threshold of randomly sampled documents for which the result is more meaningful
+const DESIRED_MINIMUM_RANDOM_SAMPLER_DOC_COUNT = 100000;
 
 export const getDocumentCountStats = async (
   search: DataPublicPluginStart['search'],
@@ -139,7 +145,7 @@ export const getDocumentCountStats = async (
 
   // @ts-expect-error ES types needs to be updated with doc_count as part random sampler aggregation
   const numSampled = firstResp.rawResponse.aggregations?.sampler?.doc_count;
-  const numDocs = minimumRandomSamplerDocCount ?? MINIMUM_RANDOM_SAMPLER_DOC_COUNT;
+  const numDocs = minimumRandomSamplerDocCount ?? DESIRED_MINIMUM_RANDOM_SAMPLER_DOC_COUNT;
   if (firstResp !== undefined) {
     const newProbability =
       (initialDefaultProbability * numDocs) / (numSampled - 2 * Math.sqrt(numSampled));
@@ -152,13 +158,17 @@ export const getDocumentCountStats = async (
           (typeof firstResp.rawResponse.hits?.total === 'number'
             ? firstResp.rawResponse.hits?.total
             : firstResp.rawResponse.hits?.total?.value) ?? 0,
-        probability: numSampled < 109 ? 1 : newProbability,
+        probability: numSampled < MINIMUM_RANDOM_SAMPLER_SAMPLED_DOCS ? 1 : newProbability,
       };
     }
 
-    // If the number of docs sampled is indicative of query with < 10 million docs
+    // If the number of docs sampled is indicative of query results with < 10.9 million docs
     // proceed to make a vanilla aggregation without any sampling
-    if (numSampled === 0 || newProbability === Infinity || numSampled < 109) {
+    if (
+      numSampled === 0 ||
+      newProbability === Infinity ||
+      numSampled < MINIMUM_RANDOM_SAMPLER_SAMPLED_DOCS
+    ) {
       const vanillaAggResp = await search
         .search(
           {
