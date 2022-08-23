@@ -11,7 +11,7 @@ import { DataViewType, DataView } from '@kbn/data-views-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { SORT_DEFAULT_ORDER_SETTING } from '../../../../common';
 import { DiscoverServices } from '../../../build_services';
-import { getSortForSearchSource } from '../../../components/doc_table';
+import { getSortForSearchSource } from '../../../utils/sorting';
 
 /**
  * Helper function to update the given searchSource before fetching/sharing/persisting

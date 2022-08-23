@@ -16,6 +16,7 @@ const TEST_FILTER_COLUMN_NAMES = [
 ];
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const log = getService('log');
   const retry = getService('retry');
   const filterBar = getService('filterBar');
   const dataGrid = getService('dataGrid');
@@ -114,6 +115,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.waitFor('document table has a length of 6', async () => {
         const nrOfDocs = (await dataGrid.getBodyRows()).length;
+        log.debug('document table length', nrOfDocs);
         return nrOfDocs === 6;
       });
     });
