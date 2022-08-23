@@ -43,7 +43,7 @@ import { MlApiServices } from '../../../../application/services/ml_api_service';
 import { basicJobValidation } from '../../../../../common/util/job_utils';
 import { JOB_ID_MAX_LENGTH } from '../../../../../common/constants/validation';
 import { invalidTimeIntervalMessage } from '../../../../application/jobs/new_job/common/job_validator/util';
-import { ML_APP_LOCATOR } from '../../../../../common/constants/locator';
+import { ML_APP_LOCATOR, ML_PAGES } from '../../../../../common/constants/locator';
 
 interface Props {
   layer: LayerResult;
@@ -119,21 +119,29 @@ export const CompatibleLayer: FC<Props> = ({
   const viewResults = useCallback(
     async (jobType: JOB_TYPE | null) => {
       const { timeRange } = embeddable.getInput();
-      const page = jobType === JOB_TYPE.MULTI_METRIC ? 'explorer' : 'timeseriesexplorer';
       const locator = share.url.locators.get(ML_APP_LOCATOR);
       if (locator) {
+        const page = startJob
+          ? jobType === JOB_TYPE.MULTI_METRIC
+            ? ML_PAGES.ANOMALY_EXPLORER
+            : ML_PAGES.SINGLE_METRIC_VIEWER
+          : ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE;
+        const pageState = startJob
+          ? {
+              jobIds: [jobId],
+              timeRange,
+            }
+          : { jobId };
+
         const url = await locator!.getUrl({
           page,
-          pageState: {
-            jobIds: [jobId],
-            timeRange,
-          },
+          pageState,
         });
 
         application.navigateToUrl(url);
       }
     },
-    [jobId, embeddable, share, application]
+    [jobId, embeddable, share, application, startJob]
   );
 
   function setStartJobWrapper(start: boolean) {
@@ -381,7 +389,12 @@ export const CompatibleLayer: FC<Props> = ({
             flush="left"
             data-test-subj={`mlLensLayerResultsButton_${layerIndex}`}
           >
-            {layer.jobType === JOB_TYPE.MULTI_METRIC ? (
+            {startJob === false ? (
+              <FormattedMessage
+                id="xpack.ml.embeddables.lensLayerFlyout.saveSuccess.resultsLink.jobList"
+                defaultMessage="View in job management page"
+              />
+            ) : layer.jobType === JOB_TYPE.MULTI_METRIC ? (
               <FormattedMessage
                 id="xpack.ml.embeddables.lensLayerFlyout.saveSuccess.resultsLink.multiMetric"
                 defaultMessage="View results in Anomaly Explorer"
