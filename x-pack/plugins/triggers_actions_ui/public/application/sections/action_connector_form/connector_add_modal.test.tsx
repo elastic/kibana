@@ -75,4 +75,84 @@ describe('connector_add_modal', () => {
     expect(wrapper.exists('.euiModalHeader')).toBeTruthy();
     expect(wrapper.exists('[data-test-subj="saveActionButtonModal"]')).toBeTruthy();
   });
+
+  describe('beta badge', () => {
+    it(`does not render beta badge when isExperimental=false`, async () => {
+      const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
+        id: 'my-action-type',
+        iconClass: 'test',
+        isExperimental: false,
+        selectMessage: 'test',
+        validateParams: (): Promise<GenericValidationResult<unknown>> => {
+          const validationResult = { errors: {} };
+          return Promise.resolve(validationResult);
+        },
+        actionConnectorFields: null,
+      });
+      actionTypeRegistry.get.mockReturnValue(actionTypeModel);
+      actionTypeRegistry.has.mockReturnValue(true);
+
+      const actionType: ActionType = {
+        id: 'my-action-type',
+        name: 'test',
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
+        minimumLicenseRequired: 'basic',
+        supportedFeatureIds: ['alerting'],
+      };
+      const wrapper = mountWithIntl(
+        <ConnectorAddModal
+          onClose={() => {}}
+          actionType={actionType}
+          actionTypeRegistry={actionTypeRegistry}
+        />
+      );
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(wrapper.find('EuiBetaBadge').exists()).toBeFalsy();
+    });
+
+    it(`renders beta badge when isExperimental=true`, async () => {
+      const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
+        id: 'my-action-type',
+        iconClass: 'test',
+        isExperimental: true,
+        selectMessage: 'test',
+        validateParams: (): Promise<GenericValidationResult<unknown>> => {
+          const validationResult = { errors: {} };
+          return Promise.resolve(validationResult);
+        },
+        actionConnectorFields: null,
+      });
+      actionTypeRegistry.get.mockReturnValue(actionTypeModel);
+      actionTypeRegistry.has.mockReturnValue(true);
+
+      const actionType: ActionType = {
+        id: 'my-action-type',
+        name: 'test',
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
+        minimumLicenseRequired: 'basic',
+        supportedFeatureIds: ['alerting'],
+      };
+      const wrapper = mountWithIntl(
+        <ConnectorAddModal
+          onClose={() => {}}
+          actionType={actionType}
+          actionTypeRegistry={actionTypeRegistry}
+        />
+      );
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(wrapper.find('EuiBetaBadge').exists()).toBeTruthy();
+    });
+  });
 });

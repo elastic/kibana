@@ -22,8 +22,7 @@ import { createRuleMock } from './rule';
 import { listMock } from '@kbn/lists-plugin/server/mocks';
 import type { QueryRuleParams, RuleParams } from '../../schemas/rule_schemas';
 // this is only used in tests
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { createDefaultAlertExecutorOptions } from '@kbn/rule-registry-plugin/server/utils/rule_executor_test_utils';
+import { createDefaultAlertExecutorOptions } from '@kbn/rule-registry-plugin/server/utils/rule_executor.test_helpers';
 import { getCompleteRuleMock } from '../../schemas/rule_schemas.mock';
 
 export const createRuleTypeMocks = (

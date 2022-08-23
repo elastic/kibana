@@ -20,16 +20,21 @@ import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { KibanaExecutionContext } from '@kbn/core/public';
-import { Container, Embeddable } from '@kbn/embeddable-plugin/public';
+import { Container, Embeddable, FilterableEmbeddable } from '@kbn/embeddable-plugin/public';
 import { Adapters, RequestAdapter } from '@kbn/inspector-plugin/common';
-import { APPLY_FILTER_TRIGGER, FilterManager, generateFilters } from '@kbn/data-plugin/public';
+import {
+  APPLY_FILTER_TRIGGER,
+  FilterManager,
+  generateFilters,
+  mapAndFlattenFilters,
+} from '@kbn/data-plugin/public';
 import { ISearchSource } from '@kbn/data-plugin/public';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { RecordRawType } from '../application/main/hooks/use_saved_search';
 import { buildDataTableRecord } from '../utils/build_data_record';
-import { DataTableRecord } from '../types';
+import { DataTableRecord, EsHitRecord } from '../types';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import { SavedSearch } from '../services/saved_searches';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
@@ -83,7 +88,7 @@ interface SearchEmbeddableConfig {
 
 export class SavedSearchEmbeddable
   extends Embeddable<SearchInput, SearchOutput>
-  implements ISearchEmbeddable
+  implements ISearchEmbeddable, FilterableEmbeddable
 {
   private readonly savedSearch: SavedSearch;
   private inspectorAdapters: Adapters;
@@ -165,6 +170,7 @@ export class SavedSearchEmbeddable
 
     const { searchSource } = this.savedSearch;
 
+    const prevAbortController = this.abortController;
     // Abort any in-progress requests
     if (this.abortController) this.abortController.abort();
     this.abortController = new AbortController();
@@ -261,12 +267,13 @@ export class SavedSearchEmbeddable
       });
 
       this.searchProps!.rows = resp.hits.hits.map((hit) =>
-        buildDataTableRecord(hit, this.searchProps!.dataView)
+        buildDataTableRecord(hit as EsHitRecord, this.searchProps!.dataView)
       );
       this.searchProps!.totalHitCount = resp.hits.total as number;
       this.searchProps!.isLoading = false;
     } catch (error) {
-      if (!this.destroyed) {
+      const cancelled = !!prevAbortController?.signal.aborted;
+      if (!this.destroyed && !cancelled) {
         this.updateOutput({
           ...this.getOutput(),
           loading: false,
@@ -544,6 +551,22 @@ export class SavedSearchEmbeddable
 
   public getDescription() {
     return this.savedSearch.description;
+  }
+
+  /**
+   * @returns Local/panel-level array of filters for Saved Search embeddable
+   */
+  public async getFilters() {
+    return mapAndFlattenFilters(
+      (this.savedSearch.searchSource.getFields().filter as Filter[]) ?? []
+    );
+  }
+
+  /**
+   * @returns Local/panel-level query for Saved Search embeddable
+   */
+  public async getQuery() {
+    return this.savedSearch.searchSource.getFields().query;
   }
 
   public destroy() {

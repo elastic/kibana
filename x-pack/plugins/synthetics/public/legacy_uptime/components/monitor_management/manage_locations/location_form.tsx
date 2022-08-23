@@ -4,55 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect } from 'react';
+import React from 'react';
 import { EuiFieldText, EuiForm, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
+import { useFormContext, useFormState } from 'react-hook-form';
 import { AgentPolicyNeeded } from './agent_policy_needed';
-import { useFormWrapped } from '../../../../hooks/use_form_wrapped';
 import { PrivateLocation } from '../../../../../common/runtime_types';
 import { PolicyHostsField } from './policy_hosts';
 import { selectAgentPolicies } from '../../../state/private_locations';
 
 export const LocationForm = ({
-  setFormData,
   privateLocations,
 }: {
-  setFormData: (val: Partial<PrivateLocation>) => void;
   onDiscard?: () => void;
   privateLocations: PrivateLocation[];
 }) => {
   const { data } = useSelector(selectAgentPolicies);
-
-  const {
-    getValues,
-    control,
-    register,
-    formState: { errors },
-  } = useFormWrapped<PrivateLocation>({
-    mode: 'onTouched',
-    reValidateMode: 'onChange',
-    shouldFocusError: true,
-    defaultValues: {
-      label: '',
-      agentPolicyId: '',
-      id: '',
-      geo: {
-        lat: 0,
-        lon: 0,
-      },
-      concurrentMonitors: 1,
-    },
-  });
-
-  const label = getValues('label');
-  const agentPolicyId = getValues('agentPolicyId');
-
-  useEffect(() => {
-    if (label && agentPolicyId) {
-      setFormData({ label, agentPolicyId });
-    }
-  }, [label, agentPolicyId, setFormData]);
+  const { control, register } = useFormContext<PrivateLocation>();
+  const { errors } = useFormState();
 
   return (
     <>
@@ -67,7 +37,7 @@ export const LocationForm = ({
           <EuiFieldText
             fullWidth
             aria-label={LOCATION_NAME_LABEL}
-            {...register('name', {
+            {...register('label', {
               required: {
                 value: true,
                 message: NAME_REQUIRED,

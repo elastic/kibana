@@ -500,6 +500,19 @@ function getQueryValidationErrors(
         });
       }
     }
+
+    if (arg.name === 'timeRange') {
+      const parsedWindow = parseTimeShift(arg.value || '');
+      if (parsedWindow === 'invalid' || parsedWindow === 'previous') {
+        errors.push({
+          message: i18n.translate('xpack.lens.indexPattern.invalidWindow', {
+            defaultMessage:
+              'Invalid window interval. Enter positive integer amount followed by one of the units s, m, h, d, w, M, y. For example 3h for 3 hours',
+          }),
+          locations: [arg.location],
+        });
+      }
+    }
   });
   return errors;
 }

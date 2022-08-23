@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 
 import { useParams } from 'react-router-dom';
 
-import { useActions, useValues } from 'kea';
+import { useValues } from 'kea';
 
 import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 
@@ -36,7 +36,6 @@ import { SearchIndexDomainManagement } from './crawler/domain_management/domain_
 import { SearchIndexDocuments } from './documents';
 import { SearchIndexIndexMappings } from './index_mappings';
 import { IndexNameLogic } from './index_name_logic';
-import { IndexViewLogic } from './index_view_logic';
 import { SearchIndexOverview } from './overview';
 
 export enum SearchIndexTabId {
@@ -53,18 +52,12 @@ export enum SearchIndexTabId {
 
 export const SearchIndex: React.FC = () => {
   const { data: indexData, status: indexApiStatus } = useValues(FetchIndexApiLogic);
-  const { startFetchIndexPoll, stopFetchIndexPoll } = useActions(IndexViewLogic);
   const { isCalloutVisible } = useValues(IndexCreatedCalloutLogic);
   const { tabId = SearchIndexTabId.OVERVIEW } = useParams<{
     tabId?: string;
   }>();
 
   const { indexName } = useValues(IndexNameLogic);
-
-  useEffect(() => {
-    startFetchIndexPoll();
-    return stopFetchIndexPoll;
-  }, [indexName]);
 
   const ALL_INDICES_TABS: EuiTabbedContentTab[] = [
     {
@@ -158,7 +151,9 @@ export const SearchIndex: React.FC = () => {
     >
       <>
         {isCalloutVisible && <IndexCreatedCallout indexName={indexName} />}
-        <EuiTabbedContent tabs={tabs} selectedTab={selectedTab} onTabClick={onTabClick} />
+        {indexName === indexData?.name && (
+          <EuiTabbedContent tabs={tabs} selectedTab={selectedTab} onTabClick={onTabClick} />
+        )}
         {isCrawlerIndex(indexData) && <CrawlCustomSettingsFlyout />}
       </>
     </EnterpriseSearchContentPageTemplate>

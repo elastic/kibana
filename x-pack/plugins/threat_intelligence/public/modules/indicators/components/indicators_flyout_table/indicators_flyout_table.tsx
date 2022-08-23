@@ -44,7 +44,11 @@ const search = {
   },
 };
 
-export const IndicatorsFlyoutTable: VFC<{ indicator: Indicator }> = ({ indicator }) => {
+export interface IndicatorsFlyoutTableProps {
+  indicator: Indicator;
+}
+
+export const IndicatorsFlyoutTable: VFC<IndicatorsFlyoutTableProps> = ({ indicator }) => {
   const items: Array<{ field: string; value: string }> = [];
 
   for (const key in indicator.fields) {

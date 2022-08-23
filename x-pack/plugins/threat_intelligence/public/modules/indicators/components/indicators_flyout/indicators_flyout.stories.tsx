@@ -7,6 +7,9 @@
 
 import React from 'react';
 import { Story } from '@storybook/react';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { CoreStart } from '@kbn/core/public';
+import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_FORMAT_TZ } from '../../../../../common/constants';
 import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
 import { IndicatorsFlyout } from './indicators_flyout';
 
@@ -17,17 +20,41 @@ export default {
 
 const mockIndicator: Indicator = generateMockIndicator();
 
+const coreMock = {
+  uiSettings: {
+    get: (key: string) => {
+      const settings = {
+        [DEFAULT_DATE_FORMAT]: '',
+        [DEFAULT_DATE_FORMAT_TZ]: 'UTC',
+      };
+      // @ts-expect-error
+      return settings[key];
+    },
+  },
+} as unknown as CoreStart;
+
+const KibanaReactContext = createKibanaReactContext(coreMock);
+
 export const Default: Story<void> = () => {
-  // eslint-disable-next-line no-console
-  return <IndicatorsFlyout indicator={mockIndicator} closeFlyout={() => console.log('closing')} />;
+  return (
+    <KibanaReactContext.Provider>
+      <IndicatorsFlyout
+        indicator={mockIndicator}
+        // eslint-disable-next-line no-console
+        closeFlyout={() => console.log('closing')}
+      />
+    </KibanaReactContext.Provider>
+  );
 };
 
 export const EmtpyIndicator: Story<void> = () => {
   return (
-    <IndicatorsFlyout
-      indicator={{ fields: {} } as Indicator}
-      // eslint-disable-next-line no-console
-      closeFlyout={() => console.log('closing')}
-    />
+    <KibanaReactContext.Provider>
+      <IndicatorsFlyout
+        indicator={{ fields: {} } as Indicator}
+        // eslint-disable-next-line no-console
+        closeFlyout={() => console.log('closing')}
+      />
+    </KibanaReactContext.Provider>
   );
 };

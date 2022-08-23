@@ -70,6 +70,7 @@ export function getStateDefaults({
     savedQuery: undefined,
     rowHeight: undefined,
     rowsPerPage: undefined,
+    grid: undefined,
   };
   if (savedSearch.grid) {
     defaultState.grid = savedSearch.grid;

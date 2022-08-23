@@ -16,4 +16,4 @@ export * from './monitor_management.journey';
 export * from './monitor_management_enablement.journey';
 export * from './monitor_details';
 export * from './locations';
-// export * from './private_locations';
+export * from './private_locations';

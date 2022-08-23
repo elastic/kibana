@@ -29,7 +29,7 @@ export const usePackQueryLastResults = ({
   skip = false,
 }: UsePackQueryLastResultsProps) => {
   const data = useKibana().services.data;
-  const { data: logsDataView } = useLogsDataView();
+  const { data: logsDataView } = useLogsDataView({ skip });
 
   return useQuery(
     ['scheduledQueryLastResults', { actionId }],

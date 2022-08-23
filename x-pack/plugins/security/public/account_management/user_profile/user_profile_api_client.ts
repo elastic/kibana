@@ -39,6 +39,28 @@ export interface UserProfileBulkGetParams {
   dataPath?: string;
 }
 
+/**
+ * Parameters for the suggest API.
+ */
+export interface UserProfileSuggestParams {
+  /**
+   * Query string used to match name-related fields in user profiles. The following fields are treated as
+   * name-related: username, full_name and email.
+   */
+  name: string;
+
+  /**
+   * Desired number of suggestions to return. The default value is 10.
+   */
+  size?: number;
+
+  /**
+   * By default, suggest API returns user information, but does not return any user data. The optional "dataPath"
+   * parameter can be used to return personal data for this user (within `kibana` namespace only).
+   */
+  dataPath?: string;
+}
+
 export class UserProfileAPIClient {
   private readonly internalDataUpdates$: Subject<UserProfileData> = new Subject();
 
@@ -72,6 +94,28 @@ export class UserProfileAPIClient {
    */
   public bulkGet<D extends UserProfileData>(params: UserProfileBulkGetParams) {
     return this.http.post<Array<UserProfile<D>>>('/internal/security/user_profile/_bulk_get', {
+      body: JSON.stringify(params),
+    });
+  }
+
+  /**
+   * Suggests multiple user profiles by search criteria.
+   *
+   * Note: This endpoint is not provided out-of-the-box by the platform. You need to expose your own
+   * version within your app. An example of how to do this can be found in:
+   * `examples/user_profile_examples/server/plugin.ts`
+   *
+   * @param path Path to your app's suggest endpoint.
+   * @param params Suggest operation parameters.
+   * @param params.name Query string used to match name-related fields in user profiles. The
+   * following fields are treated as name-related: username, full_name and email.
+   * @param params.size Desired number of suggestions to return. The default value is 10.
+   * @param params.dataPath By default, suggest API returns user information, but does not return
+   * any user data. The optional "dataPath" parameter can be used to return personal data for this
+   * user (within `kibana` namespace only).
+   */
+  public suggest<D extends UserProfileData>(path: string, params: UserProfileSuggestParams) {
+    return this.http.post<Array<UserProfile<D>>>(path, {
       body: JSON.stringify(params),
     });
   }

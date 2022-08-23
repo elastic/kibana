@@ -12,7 +12,6 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
 import { SavedObject, SavedObjectsFindResponse, SavedObjectsUtils } from '@kbn/core/server';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { FindActionResult } from '@kbn/actions-plugin/server/types';
 import { ActionType, CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
 import {
@@ -132,7 +131,12 @@ async function get(
   clientArgs: CasesClientArgs,
   casesClientInternal: CasesClientInternal
 ): Promise<CasesConfigurationsResponse> {
-  const { unsecuredSavedObjectsClient, caseConfigureService, logger, authorization } = clientArgs;
+  const {
+    unsecuredSavedObjectsClient,
+    services: { caseConfigureService },
+    logger,
+    authorization,
+  } = clientArgs;
   try {
     const queryParams = pipe(
       excess(GetConfigureFindRequestRt).decode(params),
@@ -234,8 +238,13 @@ async function update(
   clientArgs: CasesClientArgs,
   casesClientInternal: CasesClientInternal
 ): Promise<CasesConfigureResponse> {
-  const { caseConfigureService, logger, unsecuredSavedObjectsClient, user, authorization } =
-    clientArgs;
+  const {
+    services: { caseConfigureService },
+    logger,
+    unsecuredSavedObjectsClient,
+    user,
+    authorization,
+  } = clientArgs;
 
   try {
     const request = pipe(
@@ -343,8 +352,13 @@ async function create(
   clientArgs: CasesClientArgs,
   casesClientInternal: CasesClientInternal
 ): Promise<CasesConfigureResponse> {
-  const { unsecuredSavedObjectsClient, caseConfigureService, logger, user, authorization } =
-    clientArgs;
+  const {
+    unsecuredSavedObjectsClient,
+    services: { caseConfigureService },
+    logger,
+    user,
+    authorization,
+  } = clientArgs;
   try {
     let error = null;
 

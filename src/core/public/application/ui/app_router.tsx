@@ -13,7 +13,7 @@ import { Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 
 import type { CoreTheme } from '@kbn/core-theme-browser';
-import type { MountPoint } from '../../types';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import { AppLeaveHandler, AppStatus, Mounter } from '../types';
 import { AppContainer } from './app_container';
 import { ScopedHistory } from '../scoped_history';

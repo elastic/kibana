@@ -1060,57 +1060,26 @@
       },
       {
         "parentPluginId": "presentationUtil",
-        "id": "def-public.LazyReduxEmbeddableWrapper",
+        "id": "def-public.lazyLoadReduxEmbeddablePackage",
         "type": "Function",
         "tags": [],
-        "label": "LazyReduxEmbeddableWrapper",
+        "label": "lazyLoadReduxEmbeddablePackage",
         "description": [],
         "signature": [
-          "<InputType extends ",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.EmbeddableInput",
-            "text": "EmbeddableInput"
-          },
-          " = ",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.EmbeddableInput",
-            "text": "EmbeddableInput"
-          },
-          ">(props: ",
+          "() => Promise<",
           {
             "pluginId": "presentationUtil",
             "scope": "public",
             "docId": "kibPresentationUtilPluginApi",
-            "section": "def-public.ReduxEmbeddableWrapperPropsWithChildren",
-            "text": "ReduxEmbeddableWrapperPropsWithChildren"
+            "section": "def-public.ReduxEmbeddablePackage",
+            "text": "ReduxEmbeddablePackage"
           },
-          "<InputType>) => JSX.Element"
+          ">"
         ],
-        "path": "src/plugins/presentation_util/public/components/index.tsx",
+        "path": "src/plugins/presentation_util/public/redux_embeddables/index.ts",
         "deprecated": false,
+        "children": [],
         "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "presentationUtil",
-            "id": "def-public.LazyReduxEmbeddableWrapper.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "ReduxEmbeddableWrapperProps",
-              "<InputType> & { children?: React.ReactNode; }"
-            ],
-            "path": "src/plugins/presentation_util/public/components/redux_embeddables/redux_embeddable_wrapper.tsx",
-            "deprecated": false
-          }
-        ],
         "initialIsOpen": false
       },
       {
@@ -1577,37 +1546,63 @@
           "\nA typed use context hook for embeddable containers. it @returns an\nReduxContainerContextServices object typed to the generic inputTypes and ReducerTypes you pass in.\nNote that the reducer type is optional, but will be required to correctly infer the keys and payload\ntypes of your reducers. use `typeof MyReducers` here to retain them. It also includes a containerActions\nkey which contains most of the commonly used container operations"
         ],
         "signature": [
-          "<InputType extends ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.ContainerInput",
-            "text": "ContainerInput"
-          },
-          "<{}> = ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.ContainerInput",
-            "text": "ContainerInput"
-          },
-          "<{}>, ReducerType extends ",
-          "GenericEmbeddableReducers",
-          "<InputType> = ",
-          "GenericEmbeddableReducers",
-          "<InputType>>() => ",
+          "<ReduxEmbeddableStateType extends ",
           {
             "pluginId": "presentationUtil",
             "scope": "public",
             "docId": "kibPresentationUtilPluginApi",
-            "section": "def-public.ReduxContainerContextServices",
-            "text": "ReduxContainerContextServices"
+            "section": "def-public.ReduxEmbeddableState",
+            "text": "ReduxEmbeddableState"
           },
-          "<InputType, ReducerType>"
+          "<",
+          {
+            "pluginId": "embeddable",
+            "scope": "common",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-common.EmbeddableInput",
+            "text": "EmbeddableInput"
+          },
+          ", ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.EmbeddableOutput",
+            "text": "EmbeddableOutput"
+          },
+          ", unknown> = ",
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.ReduxEmbeddableState",
+            "text": "ReduxEmbeddableState"
+          },
+          "<",
+          {
+            "pluginId": "embeddable",
+            "scope": "common",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-common.EmbeddableInput",
+            "text": "EmbeddableInput"
+          },
+          ", ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.EmbeddableOutput",
+            "text": "EmbeddableOutput"
+          },
+          ", unknown>, ReducerType extends ",
+          "EmbeddableReducers",
+          "<ReduxEmbeddableStateType> = ",
+          "EmbeddableReducers",
+          "<ReduxEmbeddableStateType>>() => ",
+          "ReduxContainerContext",
+          "<ReduxEmbeddableStateType, ReducerType>"
         ],
-        "path": "src/plugins/presentation_util/public/components/redux_embeddables/redux_embeddable_context.ts",
+        "path": "src/plugins/presentation_util/public/redux_embeddables/use_redux_embeddable_context.ts",
         "deprecated": false,
         "children": [],
         "returnComment": [],
@@ -1623,7 +1618,15 @@
           "\nA typed use context hook for embeddables that are not containers. it @returns an\nReduxEmbeddableContextServices object typed to the generic inputTypes and ReducerTypes you pass in.\nNote that the reducer type is optional, but will be required to correctly infer the keys and payload\ntypes of your reducers. use `typeof MyReducers` here to retain them."
         ],
         "signature": [
-          "<InputType extends ",
+          "<ReduxEmbeddableStateType extends ",
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.ReduxEmbeddableState",
+            "text": "ReduxEmbeddableState"
+          },
+          "<",
           {
             "pluginId": "embeddable",
             "scope": "common",
@@ -1631,7 +1634,23 @@
             "section": "def-common.EmbeddableInput",
             "text": "EmbeddableInput"
           },
-          " = ",
+          ", ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.EmbeddableOutput",
+            "text": "EmbeddableOutput"
+          },
+          ", unknown> = ",
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.ReduxEmbeddableState",
+            "text": "ReduxEmbeddableState"
+          },
+          "<",
           {
             "pluginId": "embeddable",
             "scope": "common",
@@ -1639,15 +1658,23 @@
             "section": "def-common.EmbeddableInput",
             "text": "EmbeddableInput"
           },
-          ", ReducerType extends ",
-          "GenericEmbeddableReducers",
-          "<InputType> = ",
-          "GenericEmbeddableReducers",
-          "<InputType>>() => ",
-          "ReduxEmbeddableContextServices",
-          "<InputType, ReducerType>"
+          ", ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.EmbeddableOutput",
+            "text": "EmbeddableOutput"
+          },
+          ", unknown>, ReducerType extends ",
+          "EmbeddableReducers",
+          "<ReduxEmbeddableStateType> = ",
+          "EmbeddableReducers",
+          "<ReduxEmbeddableStateType>>() => ",
+          "ReduxEmbeddableContext",
+          "<ReduxEmbeddableStateType, ReducerType>"
         ],
-        "path": "src/plugins/presentation_util/public/components/redux_embeddables/redux_embeddable_context.ts",
+        "path": "src/plugins/presentation_util/public/redux_embeddables/use_redux_embeddable_context.ts",
         "deprecated": false,
         "children": [],
         "returnComment": [],
@@ -2395,6 +2422,390 @@
       },
       {
         "parentPluginId": "presentationUtil",
+        "id": "def-public.ReduxEmbeddablePackage",
+        "type": "Interface",
+        "tags": [],
+        "label": "ReduxEmbeddablePackage",
+        "description": [
+          "\nThe package type is lazily exported from presentation_util and should contain all methods needed to use the redux embeddable tools."
+        ],
+        "path": "src/plugins/presentation_util/public/redux_embeddables/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ReduxEmbeddablePackage.createTools",
+            "type": "Function",
+            "tags": [],
+            "label": "createTools",
+            "description": [],
+            "signature": [
+              "<ReduxEmbeddableStateType extends ",
+              {
+                "pluginId": "presentationUtil",
+                "scope": "public",
+                "docId": "kibPresentationUtilPluginApi",
+                "section": "def-public.ReduxEmbeddableState",
+                "text": "ReduxEmbeddableState"
+              },
+              "<",
+              {
+                "pluginId": "embeddable",
+                "scope": "common",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-common.EmbeddableInput",
+                "text": "EmbeddableInput"
+              },
+              ", ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.EmbeddableOutput",
+                "text": "EmbeddableOutput"
+              },
+              ", unknown> = ",
+              {
+                "pluginId": "presentationUtil",
+                "scope": "public",
+                "docId": "kibPresentationUtilPluginApi",
+                "section": "def-public.ReduxEmbeddableState",
+                "text": "ReduxEmbeddableState"
+              },
+              "<",
+              {
+                "pluginId": "embeddable",
+                "scope": "common",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-common.EmbeddableInput",
+                "text": "EmbeddableInput"
+              },
+              ", ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.EmbeddableOutput",
+                "text": "EmbeddableOutput"
+              },
+              ", unknown>, ReducerType extends ",
+              "EmbeddableReducers",
+              "<ReduxEmbeddableStateType> = ",
+              "EmbeddableReducers",
+              "<ReduxEmbeddableStateType>>({ reducers, embeddable, syncSettings, initialComponentState, }: { embeddable: ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.IEmbeddable",
+                "text": "IEmbeddable"
+              },
+              "<ReduxEmbeddableStateType[\"explicitInput\"], ReduxEmbeddableStateType[\"output\"]>; initialComponentState?: ReduxEmbeddableStateType[\"componentState\"] | undefined; syncSettings?: ",
+              "ReduxEmbeddableSyncSettings",
+              "<",
+              {
+                "pluginId": "presentationUtil",
+                "scope": "public",
+                "docId": "kibPresentationUtilPluginApi",
+                "section": "def-public.ReduxEmbeddableState",
+                "text": "ReduxEmbeddableState"
+              },
+              "<",
+              {
+                "pluginId": "embeddable",
+                "scope": "common",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-common.EmbeddableInput",
+                "text": "EmbeddableInput"
+              },
+              ", ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.EmbeddableOutput",
+                "text": "EmbeddableOutput"
+              },
+              ", unknown>> | undefined; reducers: ReducerType; }) => ",
+              {
+                "pluginId": "presentationUtil",
+                "scope": "public",
+                "docId": "kibPresentationUtilPluginApi",
+                "section": "def-public.ReduxEmbeddableTools",
+                "text": "ReduxEmbeddableTools"
+              },
+              "<ReduxEmbeddableStateType, ReducerType>"
+            ],
+            "path": "src/plugins/presentation_util/public/redux_embeddables/types.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.ReduxEmbeddablePackage.createTools.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "__0",
+                "description": [],
+                "signature": [
+                  "{ embeddable: ",
+                  {
+                    "pluginId": "embeddable",
+                    "scope": "public",
+                    "docId": "kibEmbeddablePluginApi",
+                    "section": "def-public.IEmbeddable",
+                    "text": "IEmbeddable"
+                  },
+                  "<ReduxEmbeddableStateType[\"explicitInput\"], ReduxEmbeddableStateType[\"output\"]>; initialComponentState?: ReduxEmbeddableStateType[\"componentState\"] | undefined; syncSettings?: ",
+                  "ReduxEmbeddableSyncSettings",
+                  "<",
+                  {
+                    "pluginId": "presentationUtil",
+                    "scope": "public",
+                    "docId": "kibPresentationUtilPluginApi",
+                    "section": "def-public.ReduxEmbeddableState",
+                    "text": "ReduxEmbeddableState"
+                  },
+                  "<",
+                  {
+                    "pluginId": "embeddable",
+                    "scope": "common",
+                    "docId": "kibEmbeddablePluginApi",
+                    "section": "def-common.EmbeddableInput",
+                    "text": "EmbeddableInput"
+                  },
+                  ", ",
+                  {
+                    "pluginId": "embeddable",
+                    "scope": "public",
+                    "docId": "kibEmbeddablePluginApi",
+                    "section": "def-public.EmbeddableOutput",
+                    "text": "EmbeddableOutput"
+                  },
+                  ", unknown>> | undefined; reducers: ReducerType; }"
+                ],
+                "path": "src/plugins/presentation_util/public/redux_embeddables/create_redux_embeddable_tools.tsx",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.ReduxEmbeddableState",
+        "type": "Interface",
+        "tags": [],
+        "label": "ReduxEmbeddableState",
+        "description": [
+          "\nThe Embeddable Redux store should contain Input, Output and State. Input is serialized and used to create the embeddable,\nOutput is used as a communication layer for state that the Embeddable creates, and State is used to store ephemeral state which needs\nto be communicated between an embeddable and its inner React components."
+        ],
+        "signature": [
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.ReduxEmbeddableState",
+            "text": "ReduxEmbeddableState"
+          },
+          "<InputType, OutputType, StateType>"
+        ],
+        "path": "src/plugins/presentation_util/public/redux_embeddables/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ReduxEmbeddableState.explicitInput",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "explicitInput",
+            "description": [],
+            "signature": [
+              "InputType"
+            ],
+            "path": "src/plugins/presentation_util/public/redux_embeddables/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ReduxEmbeddableState.output",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "output",
+            "description": [],
+            "signature": [
+              "OutputType"
+            ],
+            "path": "src/plugins/presentation_util/public/redux_embeddables/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ReduxEmbeddableState.componentState",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "componentState",
+            "description": [],
+            "signature": [
+              "StateType"
+            ],
+            "path": "src/plugins/presentation_util/public/redux_embeddables/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.ReduxEmbeddableTools",
+        "type": "Interface",
+        "tags": [],
+        "label": "ReduxEmbeddableTools",
+        "description": [
+          "\nThe return type from setupReduxEmbeddable. Contains a wrapper which comes with the store provider and provides the context to react components,\nbut also returns the context object to allow the embeddable class to interact with the redux store."
+        ],
+        "signature": [
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.ReduxEmbeddableTools",
+            "text": "ReduxEmbeddableTools"
+          },
+          "<ReduxEmbeddableStateType, ReducerType>"
+        ],
+        "path": "src/plugins/presentation_util/public/redux_embeddables/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ReduxEmbeddableTools.cleanup",
+            "type": "Function",
+            "tags": [],
+            "label": "cleanup",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/presentation_util/public/redux_embeddables/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ReduxEmbeddableTools.Wrapper",
+            "type": "Function",
+            "tags": [],
+            "label": "Wrapper",
+            "description": [],
+            "signature": [
+              "React.FunctionComponent<{ children?: React.ReactNode; }>"
+            ],
+            "path": "src/plugins/presentation_util/public/redux_embeddables/types.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.ReduxEmbeddableTools.Wrapper.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "P & { children?: React.ReactNode; }"
+                ],
+                "path": "node_modules/@types/react/index.d.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.ReduxEmbeddableTools.Wrapper.$2",
+                "type": "Any",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "node_modules/@types/react/index.d.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ReduxEmbeddableTools.dispatch",
+            "type": "Function",
+            "tags": [],
+            "label": "dispatch",
+            "description": [],
+            "signature": [
+              "Dispatch",
+              "<",
+              "AnyAction",
+              ">"
+            ],
+            "path": "src/plugins/presentation_util/public/redux_embeddables/types.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.ReduxEmbeddableTools.dispatch.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "action",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "node_modules/redux/index.d.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ReduxEmbeddableTools.getState",
+            "type": "Function",
+            "tags": [],
+            "label": "getState",
+            "description": [],
+            "signature": [
+              "() => ReduxEmbeddableStateType"
+            ],
+            "path": "src/plugins/presentation_util/public/redux_embeddables/types.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ReduxEmbeddableTools.actions",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "actions",
+            "description": [],
+            "signature": [
+              "{ [Property in keyof ReducerType]: ",
+              "ActionCreatorWithPayload",
+              "<Parameters<ReducerType[Property]>[1][\"payload\"], string>; } & { updateEmbeddableReduxInput: ",
+              "ActionCreatorWithPayload",
+              "<Partial<ReduxEmbeddableStateType[\"explicitInput\"]>, string>; updateEmbeddableReduxOutput: ",
+              "ActionCreatorWithPayload",
+              "<Partial<ReduxEmbeddableStateType[\"output\"]>, string>; }"
+            ],
+            "path": "src/plugins/presentation_util/public/redux_embeddables/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
         "id": "def-public.SaveModalDashboardProps",
         "type": "Interface",
         "tags": [],
@@ -2759,60 +3170,6 @@
         "path": "src/plugins/presentation_util/common/labs.ts",
         "deprecated": false,
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "presentationUtil",
-        "id": "def-public.ReduxContainerContextServices",
-        "type": "Type",
-        "tags": [],
-        "label": "ReduxContainerContextServices",
-        "description": [],
-        "signature": [
-          "ReduxEmbeddableContextServices",
-          "<InputType, ReducerType> & { containerActions: Pick<",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.IContainer",
-            "text": "IContainer"
-          },
-          "<{}, ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.ContainerInput",
-            "text": "ContainerInput"
-          },
-          "<{}>, ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.ContainerOutput",
-            "text": "ContainerOutput"
-          },
-          ">, \"untilEmbeddableLoaded\" | \"removeEmbeddable\" | \"addNewEmbeddable\" | \"updateInputForChild\" | \"replaceEmbeddable\">; }"
-        ],
-        "path": "src/plugins/presentation_util/public/components/redux_embeddables/types.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "presentationUtil",
-        "id": "def-public.ReduxEmbeddableWrapperPropsWithChildren",
-        "type": "Type",
-        "tags": [],
-        "label": "ReduxEmbeddableWrapperPropsWithChildren",
-        "description": [],
-        "signature": [
-          "ReduxEmbeddableWrapperProps",
-          "<InputType> & { children?: React.ReactNode; }"
-        ],
-        "path": "src/plugins/presentation_util/public/components/redux_embeddables/types.ts",
-        "deprecated": false,
-        "initialIsOpen": false
       }
     ],
     "objects": [
@@ -2969,68 +3326,6 @@
           "readonly [\"labs:dashboard:deferBelowFold\", \"labs:dashboard:dashboardControls\", \"labs:canvas:byValueEmbeddable\"]"
         ],
         "path": "src/plugins/presentation_util/common/labs.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "presentationUtil",
-        "id": "def-public.ReduxEmbeddableContext",
-        "type": "Object",
-        "tags": [],
-        "label": "ReduxEmbeddableContext",
-        "description": [
-          "\nWhen creating the context, a generic EmbeddableInput as placeholder is used. This will later be cast to\nthe generic type passed in by the useReduxEmbeddableContext or useReduxContainerContext hooks"
-        ],
-        "signature": [
-          "React.Context<",
-          "ReduxEmbeddableContextServices",
-          "<",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.EmbeddableInput",
-            "text": "EmbeddableInput"
-          },
-          ", ",
-          "GenericEmbeddableReducers",
-          "<",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.EmbeddableInput",
-            "text": "EmbeddableInput"
-          },
-          ">> | ",
-          {
-            "pluginId": "presentationUtil",
-            "scope": "public",
-            "docId": "kibPresentationUtilPluginApi",
-            "section": "def-public.ReduxContainerContextServices",
-            "text": "ReduxContainerContextServices"
-          },
-          "<",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.EmbeddableInput",
-            "text": "EmbeddableInput"
-          },
-          ", ",
-          "GenericEmbeddableReducers",
-          "<",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.EmbeddableInput",
-            "text": "EmbeddableInput"
-          },
-          ">> | null>"
-        ],
-        "path": "src/plugins/presentation_util/public/components/redux_embeddables/redux_embeddable_context.ts",
         "deprecated": false,
         "initialIsOpen": false
       }

@@ -15,6 +15,7 @@ import { MustacheTextFieldWrapper } from '../../../mustache_text_field_wrapper';
 import { casesVars, commentVars, urlVars } from '../action_variables';
 import { JsonFieldWrapper } from '../../../json_field_wrapper';
 import { HTTP_VERBS } from '../webhook_connectors';
+import { styles } from './update.styles';
 import * as i18n from '../translations';
 const { emptyField, urlField } = fieldValidators;
 
@@ -47,6 +48,7 @@ export const UpdateStep: FunctionComponent<Props> = ({ display, readOnly }) => (
               },
             ],
           }}
+          css={styles.method}
           componentProps={{
             euiFieldProps: {
               'data-test-subj': 'webhookUpdateMethodSelect',
@@ -137,6 +139,7 @@ export const UpdateStep: FunctionComponent<Props> = ({ display, readOnly }) => (
               },
             ],
           }}
+          css={styles.method}
           componentProps={{
             euiFieldProps: {
               'data-test-subj': 'webhookCreateCommentMethodSelect',

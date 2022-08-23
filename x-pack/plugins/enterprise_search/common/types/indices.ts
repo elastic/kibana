@@ -16,12 +16,13 @@ import { Connector } from './connectors';
 import { Crawler } from './crawler';
 
 export interface ElasticsearchIndex {
+  count: number; // Elasticsearch _count
   health?: HealthStatus;
   name: IndexName;
   status?: IndicesStatsIndexMetadataState;
   total: {
     docs: {
-      count: number;
+      count: number; // Lucene count (includes nested documents)
       deleted: number;
     };
     store: {

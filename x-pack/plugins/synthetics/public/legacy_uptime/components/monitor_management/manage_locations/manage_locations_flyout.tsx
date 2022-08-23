@@ -35,6 +35,7 @@ import {
   setAddingNewPrivateLocation,
   setManageFlyoutOpen,
 } from '../../../state/private_locations';
+import { PrivateLocation } from '../../../../../common/runtime_types';
 
 export const ManageLocationsFlyout = () => {
   const dispatch = useDispatch();
@@ -67,6 +68,11 @@ export const ManageLocationsFlyout = () => {
   const closeFlyout = () => {
     setIsOpen(false);
     dispatch(getServiceLocations());
+  };
+
+  const handleSubmit = (formData: PrivateLocation) => {
+    onSubmit(formData);
+    setIsAddingNew(false);
   };
 
   const flyout = (
@@ -127,7 +133,7 @@ export const ManageLocationsFlyout = () => {
       {isAddingNew ? (
         <AddLocationFlyout
           setIsOpen={setIsAddingNew}
-          onSubmit={onSubmit}
+          onSubmit={handleSubmit}
           privateLocations={privateLocations}
         />
       ) : null}

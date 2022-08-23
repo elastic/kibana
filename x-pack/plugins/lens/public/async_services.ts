@@ -14,18 +14,18 @@
  * This file causes all of them to be served in a single request.
  */
 
-export * from './datatable_visualization/datatable_visualization';
-export * from './datatable_visualization';
-export * from './metric_visualization/metric_visualization';
-export * from './metric_visualization';
+export * from './visualizations/datatable/datatable_visualization';
+export * from './visualizations/datatable';
+export * from './visualizations/legacy_metric/metric_visualization';
+export * from './visualizations/legacy_metric';
 export * from './visualizations/metric/metric_visualization';
 export * from './visualizations/metric';
-export * from './pie_visualization/pie_visualization';
-export * from './pie_visualization';
-export * from './xy_visualization/xy_visualization';
-export * from './xy_visualization';
-export * from './heatmap_visualization/heatmap_visualization';
-export * from './heatmap_visualization';
+export * from './visualizations/partition/pie_visualization';
+export * from './visualizations/partition';
+export * from './visualizations/xy/xy_visualization';
+export * from './visualizations/xy';
+export * from './visualizations/heatmap/heatmap_visualization';
+export * from './visualizations/heatmap';
 export * from './visualizations/gauge/gauge_visualization';
 export * from './visualizations/gauge';
 

@@ -23,7 +23,6 @@ import {
 // plugin server `index.ts`. Its unclear what is actually causing the error. Since this is a Mock
 // file and not bundled with the application, adding a eslint disable below and using import from
 // a restricted path.
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { createCasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
 import { createFleetAuthzMock } from '@kbn/fleet-plugin/common';
 import { xpackMocks } from '../fixtures';
@@ -46,7 +45,7 @@ import { createEndpointMetadataServiceTestContextMock } from './services/metadat
 import type { EndpointAuthz } from '../../common/endpoint/types/authz';
 import { EndpointFleetServicesFactory } from './services/fleet';
 import { createLicenseServiceMock } from '../../common/license/mocks';
-import { createFeatureUsageServiceMock } from './services/feature_usage';
+import { createFeatureUsageServiceMock } from './services/feature_usage/mocks';
 
 /**
  * Creates a mocked EndpointAppContext.
