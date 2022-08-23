@@ -41,10 +41,7 @@ export const mapIndexStats = (
   return {
     aliases,
     health: indexStats?.health,
-    hidden:
-      indexData.settings?.index?.hidden === undefined
-        ? undefined
-        : Boolean(indexData.settings.index.hidden),
+    hidden: Boolean(indexData.settings?.index?.hidden),
     name: indexName,
     status: indexStats?.status,
     total,
