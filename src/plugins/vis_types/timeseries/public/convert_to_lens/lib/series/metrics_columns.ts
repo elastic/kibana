@@ -100,6 +100,4 @@ export const getMetricsColumns = (
       return getValidColumns(column);
     }
   }
-
-  return [];
 };
