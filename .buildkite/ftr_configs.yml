@@ -262,3 +262,6 @@ enabled:
   - x-pack/test/performance/journeys/many_fields_discover/config.ts
   - x-pack/test/performance/journeys/promotion_tracking_dashboard/config.ts
   - x-pack/test/performance/journeys/web_logs_dashboard/config.ts
+  - x-pack/test/performance/journeys/security_hosts_dashboard/config.ts
+  - x-pack/test/performance/journeys/security_network_dashboard/config.ts
+  - x-pack/test/performance/journeys/security_overview_dashboard/config.ts
