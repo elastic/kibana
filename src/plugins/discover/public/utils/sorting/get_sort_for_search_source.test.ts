@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { getSortForSearchSource } from './get_sort_for_search_source';
-import { SortOrder } from '../components/table_header/helpers';
 import { stubDataView, stubDataViewWithoutTimeField } from '@kbn/data-plugin/common/stubs';
 
 describe('getSortForSearchSource function', function () {

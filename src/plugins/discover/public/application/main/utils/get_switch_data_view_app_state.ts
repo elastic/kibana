@@ -7,7 +7,8 @@
  */
 import { isOfAggregateQueryType, Query, AggregateQuery } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { getSortArray, SortPairArr } from '../../../components/doc_table/utils/get_sort';
+import type { SortOrder } from '@kbn/saved-search-plugin/public';
+import { getSortArray } from '../../../utils/sorting';
 
 /**
  * Helper function to remove or adapt the currently selected columns/sort to be valid with the next
@@ -17,7 +18,7 @@ export function getDataViewAppState(
   currentDataView: DataView,
   nextDataView: DataView,
   currentColumns: string[],
-  currentSort: SortPairArr[],
+  currentSort: SortOrder[],
   modifyColumns: boolean = true,
   sortDirection: string = 'desc',
   query?: Query | AggregateQuery

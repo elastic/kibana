@@ -15,12 +15,12 @@ import type {
 } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
+import { getSortForSearchSource } from './sorting';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../common';
-import { getSortForSearchSource } from '../components/doc_table';
 import { AppState, isEqualFilters } from '../application/main/services/discover_state';
 
 /**
