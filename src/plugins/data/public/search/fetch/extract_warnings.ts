@@ -22,18 +22,14 @@ export function extractWarnings(
 
   const warnings: SearchResponseWarning[] = [];
 
-  let timedOut: SearchResponseWarning | undefined;
   if (rawResponse.timed_out === true) {
-    timedOut = {
+    warnings.push({
       type: 'timed_out',
       isTimeout: true,
       message: i18n.translate('data.search.searchSource.fetch.requestTimedOutNotificationMessage', {
         defaultMessage: 'Data might be incomplete because your request timed out',
       }),
-    };
-  }
-  if (timedOut) {
-    warnings.push(timedOut);
+    });
   }
 
   if (rawResponse._shards && rawResponse._shards.failed) {
