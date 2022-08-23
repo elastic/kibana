@@ -321,7 +321,7 @@ cloud.auth: <username:password>
 . Set the index pattern as: *tri_met_tracks**.
 . Click *Next step*.
 . Set the *Timestamp field* to *trimet.time*.
-. Click *Create data view*.
+. Click *Save data view to Kibana*.
 
 {kib} shows the fields in your data view.
 
