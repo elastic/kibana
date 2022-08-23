@@ -85,8 +85,8 @@ const FlyoutHeaderComponent: React.FC<Props> = ({
                     alignItems="center"
                   >
                     <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.addConnectorForm.flyoutHeaderAvailability"
-                      defaultMessage="Availability:"
+                      id="xpack.triggersActionsUI.sections.addConnectorForm.flyoutHeaderCompatibility"
+                      defaultMessage="Compatibility:"
                     />{' '}
                     {featureIds.map((featureId: string) => (
                       <EuiFlexItem grow={false} key={featureId}>

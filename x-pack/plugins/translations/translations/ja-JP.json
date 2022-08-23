@@ -32785,7 +32785,6 @@
     "xpack.triggersActionsUI.sections.addAction.casesWebhookAction.error.requiredUpdateMethodText": "ケースメソッドの更新は必須です。",
     "xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredAuthUserNameText": "ユーザー名が必要です。",
     "xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredMethodText": "メソッドが必要です。",
-    "xpack.triggersActionsUI.sections.addConnectorForm.flyoutHeaderAvailability": "可用性：",
     "xpack.triggersActionsUI.sections.addConnectorForm.selectConnectorFlyoutTitle": "コネクターを選択",
     "xpack.triggersActionsUI.sections.addConnectorForm.updateSuccessNotificationText": "「{connectorName}」を作成しました",
     "xpack.triggersActionsUI.sections.addModalConnectorForm.cancelButtonLabel": "キャンセル",
