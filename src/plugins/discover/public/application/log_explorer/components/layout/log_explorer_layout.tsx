@@ -88,8 +88,8 @@ export function LogExplorerLayout({ dataViewList, savedSearch }: LogExplorerLayo
   // }, [inspectorSession]);
 
   // Data querying state machine access and derivatives
-  const [entriesActor, entriesState, entriesSend] = useEntries();
-  const [histogramActor, histogramState, histogramSend] = useHistogram();
+  const [entriesActor, entriesState] = useEntries();
+  const [histogramActor] = useHistogram();
   console.log(entriesActor, entriesState);
   const fieldCounts = useFieldCounts(entriesActor);
 
@@ -227,7 +227,7 @@ export function LogExplorerLayout({ dataViewList, savedSearch }: LogExplorerLayo
                   gutterSize="none"
                   responsive={false}
                 >
-                  <LogExplorer stateMachine={stateMachine} />
+                  <LogExplorer stateMachine={entriesActor} />
                 </EuiFlexGroup>
               )}
             </EuiPageContent>
