@@ -6,15 +6,16 @@
  */
 
 import { ElasticsearchClient, type Logger } from '@kbn/core/server';
-import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '../../common/constants';
+import { LATEST_FINDINGS_INDEX_DEFAULT_NS, FINDINGS_INDEX_PATTERN } from '../../common/constants';
 
-export const isLatestFindingsIndexExists = async (
+export const checkForFindings = async (
   esClient: ElasticsearchClient,
+  latestIndex: boolean,
   logger: Logger
 ): Promise<boolean> => {
   try {
     const queryResult = await esClient.search({
-      index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
+      index: latestIndex ? LATEST_FINDINGS_INDEX_DEFAULT_NS : FINDINGS_INDEX_PATTERN,
       query: {
         match_all: {},
       },
@@ -23,7 +24,7 @@ export const isLatestFindingsIndexExists = async (
 
     return !!queryResult.hits.hits.length;
   } catch (e) {
-    logger.error(e.message);
+    logger.debug(e);
     return false;
   }
 };
