@@ -27,9 +27,16 @@ import React, {
 } from 'react';
 import styled from 'styled-components';
 import { useForm as useHookForm, FormProvider } from 'react-hook-form';
+import { useForm as useHookForm, FormProvider } from 'react-hook-form';
 
 import { isEmpty, map, find, pickBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import type { SavedQuerySOFormData } from '../../saved_queries/form/use_saved_query_form';
+import type {
+  EcsMappingFormField,
+  EcsMappingSerialized,
+} from '../../packs/queries/ecs_mapping_editor_field';
+import { defaultEcsFormData } from '../../packs/queries/ecs_mapping_editor_field';
 import type { SavedQuerySOFormData } from '../../saved_queries/form/use_saved_query_form';
 import type {
   EcsMappingFormField,
@@ -49,7 +56,11 @@ import { useLiveQueryDetails } from '../../actions/use_live_query_details';
 import type { AgentSelection } from '../../agents/types';
 import { LiveQueryQueryField } from './live_query_query_field';
 import { AgentsTableField } from './agents_table_field';
+import type { AgentSelection } from '../../agents/types';
+import { LiveQueryQueryField } from './live_query_query_field';
+import { AgentsTableField } from './agents_table_field';
 import { PacksComboBoxField } from './packs_combobox_field';
+import { savedQueryDataSerializer } from '../../saved_queries/form/use_saved_query_form';
 import { savedQueryDataSerializer } from '../../saved_queries/form/use_saved_query_form';
 
 export interface LiveQueryFormFields {
