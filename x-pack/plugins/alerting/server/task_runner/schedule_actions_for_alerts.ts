@@ -50,14 +50,7 @@ export async function scheduleActionsForAlerts<
     );
     if (executeAction && alert.hasScheduledActions()) {
       const { actionGroup, state } = alert.getScheduledActionOptions()!;
-      await executeAlert(
-        alertId,
-        alert,
-        executionHandler,
-        ruleRunMetricsStore,
-        actionGroup,
-        state
-      );
+      await executeAlert(alertId, alert, executionHandler, ruleRunMetricsStore, actionGroup, state);
     }
   }
 
@@ -93,7 +86,7 @@ async function executeAlert<
   executionHandler: ExecutionHandler<ActionGroupIds | RecoveryActionGroupId>,
   ruleRunMetricsStore: RuleRunMetricsStore,
   actionGroup: ActionGroupIds | RecoveryActionGroupId,
-  state: InstanceState,
+  state: InstanceState
 ) {
   alert.updateLastScheduledActions(actionGroup);
   alert.unscheduleActions();
