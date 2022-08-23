@@ -20,7 +20,7 @@ import {
   SavedSearch,
   getSavedSearch,
   getSavedSearchFullPathUrl,
-} from '../../services/saved_searches';
+} from '@kbn/saved-search-plugin/public';
 import { getState } from './services/discover_state';
 import { loadDataView, resolveDataView } from './utils/resolve_data_view';
 import { DiscoverMainApp } from './discover_main_app';
@@ -29,6 +29,7 @@ import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { DiscoverError } from '../../components/common/error_alert';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getUrlTracker } from '../../kibana_services';
+import { restoreStateFromSavedSearch } from '../../services/saved_searches/restore_from_saved_search';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
@@ -125,6 +126,11 @@ export function DiscoverMainRoute(props: Props) {
         currentSavedSearch.searchSource.setField('index', currentDataView);
       }
 
+      restoreStateFromSavedSearch({
+        savedSearch: currentSavedSearch,
+        timefilter: services.timefilter,
+      });
+
       setSavedSearch(currentSavedSearch);
 
       if (currentSavedSearch.id) {
@@ -159,8 +165,9 @@ export function DiscoverMainRoute(props: Props) {
     }
   }, [
     id,
-    services.data.search,
+    services.data,
     services.spaces,
+    services.timefilter,
     core.savedObjects.client,
     core.application.navigateToApp,
     core.theme,
