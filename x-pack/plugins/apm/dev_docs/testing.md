@@ -1,9 +1,11 @@
 # Testing
 
-## Unit Tests (Jest)
+## Unit Tests (Jest) 
+
+*Note: Run the following command from the root of Kibana.*
 
 ```
-node scripts/test/jest [--watch] [--updateSnapshot]
+node scripts/jest --config x-pack/plugins/apm/jest.config.js [--watch] [--updateSnapshot]
 ```
 
 #### Coverage
