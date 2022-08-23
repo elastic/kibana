@@ -19,6 +19,6 @@ describe('Analytics overview component', () => {
       value: { search: param },
       writable: true,
     });
-    wrapper = shallow(<ElasticsearchGuide />);
+    wrapper = shallow(<AnalyicsOverview />);
   };
 });
