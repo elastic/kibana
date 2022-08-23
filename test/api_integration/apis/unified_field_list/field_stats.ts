@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -19,8 +20,9 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const supertest = getService('supertest');
+  const API_PATH = '/api/unified_field_list/field_stats';
 
-  describe('index stats apis', () => {
+  describe('field stats apis', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
     });
@@ -41,13 +43,13 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should return a 404 for missing index patterns', async () => {
         await supertest
-          .post('/api/lens/index_stats/123/field')
+          .post(API_PATH)
           .set(COMMON_HEADERS)
           .send({
+            dataViewId: '123',
             dslQuery: { match_all: {} },
             fromDate: TEST_START_TIME,
             toDate: TEST_END_TIME,
-            timeFieldName: '@timestamp',
             fieldName: 'bytes',
           })
           .expect(404);
@@ -55,9 +57,10 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should also work without specifying a time field', async () => {
         const { body } = await supertest
-          .post('/api/lens/index_stats/logstash-2015.09.22/field')
+          .post(API_PATH)
           .set(COMMON_HEADERS)
           .send({
+            dataViewId: 'logstash-2015.09.22',
             dslQuery: { match_all: {} },
             fromDate: TEST_START_TIME,
             toDate: TEST_END_TIME,
@@ -70,9 +73,10 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should return an auto histogram for numbers and top values', async () => {
         const { body } = await supertest
-          .post('/api/lens/index_stats/logstash-2015.09.22/field')
+          .post(API_PATH)
           .set(COMMON_HEADERS)
           .send({
+            dataViewId: 'logstash-2015.09.22',
             dslQuery: { match_all: {} },
             fromDate: TEST_START_TIME,
             toDate: TEST_END_TIME,
@@ -177,9 +181,10 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should return an auto histogram for dates', async () => {
         const { body } = await supertest
-          .post('/api/lens/index_stats/logstash-2015.09.22/field')
+          .post(API_PATH)
           .set(COMMON_HEADERS)
           .send({
+            dataViewId: 'logstash-2015.09.22',
             dslQuery: { match_all: {} },
             fromDate: TEST_START_TIME,
             toDate: TEST_END_TIME,
@@ -210,9 +215,10 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should return top values for strings', async () => {
         const { body } = await supertest
-          .post('/api/lens/index_stats/logstash-2015.09.22/field')
+          .post(API_PATH)
           .set(COMMON_HEADERS)
           .send({
+            dataViewId: 'logstash-2015.09.22',
             dslQuery: { match_all: {} },
             fromDate: TEST_START_TIME,
             toDate: TEST_END_TIME,
@@ -273,9 +279,10 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should return top values for ip fields', async () => {
         const { body } = await supertest
-          .post('/api/lens/index_stats/logstash-2015.09.22/field')
+          .post(API_PATH)
           .set(COMMON_HEADERS)
           .send({
+            dataViewId: 'logstash-2015.09.22',
             dslQuery: { match_all: {} },
             fromDate: TEST_START_TIME,
             toDate: TEST_END_TIME,
@@ -336,9 +343,10 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should return histograms for scripted date fields', async () => {
         const { body } = await supertest
-          .post('/api/lens/index_stats/logstash-2015.09.22/field')
+          .post(API_PATH)
           .set(COMMON_HEADERS)
           .send({
+            dataViewId: 'logstash-2015.09.22',
             dslQuery: { match_all: {} },
             fromDate: TEST_START_TIME,
             toDate: TEST_END_TIME,
@@ -361,9 +369,10 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should return top values for scripted string fields', async () => {
         const { body } = await supertest
-          .post('/api/lens/index_stats/logstash-2015.09.22/field')
+          .post(API_PATH)
           .set(COMMON_HEADERS)
           .send({
+            dataViewId: 'logstash-2015.09.22',
             dslQuery: { match_all: {} },
             fromDate: TEST_START_TIME,
             toDate: TEST_END_TIME,
@@ -388,9 +397,10 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should return top values for index pattern runtime string fields', async () => {
         const { body } = await supertest
-          .post('/api/lens/index_stats/logstash-2015.09.22/field')
+          .post(API_PATH)
           .set(COMMON_HEADERS)
           .send({
+            dataViewId: 'logstash-2015.09.22',
             dslQuery: { match_all: {} },
             fromDate: TEST_START_TIME,
             toDate: TEST_END_TIME,
@@ -415,9 +425,10 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should apply filters and queries', async () => {
         const { body } = await supertest
-          .post('/api/lens/index_stats/logstash-2015.09.22/field')
+          .post(API_PATH)
           .set(COMMON_HEADERS)
           .send({
+            dataViewId: 'logstash-2015.09.22',
             dslQuery: {
               bool: {
                 filter: [{ match: { 'geo.src': 'US' } }],
@@ -434,9 +445,10 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should allow filtering on a runtime field other than the field in use', async () => {
         const { body } = await supertest
-          .post('/api/lens/index_stats/logstash-2015.09.22/field')
+          .post(API_PATH)
           .set(COMMON_HEADERS)
           .send({
+            dataViewId: 'logstash-2015.09.22',
             dslQuery: {
               bool: {
                 filter: [{ exists: { field: 'runtime_string_field' } }],
@@ -477,9 +489,10 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should return an auto histogram for precalculated histograms', async () => {
         const { body } = await supertest
-          .post('/api/lens/index_stats/histogram-test/field')
+          .post(API_PATH)
           .set(COMMON_HEADERS)
           .send({
+            dataViewId: 'histogram-test',
             dslQuery: { match_all: {} },
             fromDate: TEST_START_TIME,
             toDate: TEST_END_TIME,
@@ -545,9 +558,10 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should return a single-value histogram when filtering a precalculated histogram', async () => {
         const { body } = await supertest
-          .post('/api/lens/index_stats/histogram-test/field')
+          .post(API_PATH)
           .set(COMMON_HEADERS)
           .send({
+            dataViewId: 'histogram-test',
             dslQuery: { match: { 'histogram-title': 'single value' } },
             fromDate: TEST_START_TIME,
             toDate: TEST_END_TIME,

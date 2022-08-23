@@ -325,6 +325,7 @@ interface BaseOperationDefinitionProps<
             fixAction?: {
               label: string;
               newState: (
+                data: DataPublicPluginStart,
                 core: CoreStart,
                 frame: FrameDatasourceAPI,
                 layerId: string
@@ -552,6 +553,7 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn, P = {}
             fixAction?: {
               label: string;
               newState: (
+                data: DataPublicPluginStart,
                 core: CoreStart,
                 frame: FrameDatasourceAPI,
                 layerId: string
