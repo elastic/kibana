@@ -53,11 +53,15 @@ describe('kibana cli', function () {
         const archive = path.resolve(repliesPath, 'test_plugin.zip');
         await extractArchive(archive, tempPath, 'kibana/test-plugin');
 
-        expect(globby.sync('**/*', { cwd: tempPath })).toMatchInlineSnapshot(`
+        expect(globby.sync('**/*', { cwd: tempPath, onlyFiles: false })).toMatchInlineSnapshot(`
           Array [
+            "bin",
             "kibana.json",
+            "node_modules",
+            "public",
             "bin/executable",
             "bin/not-executable",
+            "node_modules/some-package",
             "public/index.js",
             "node_modules/some-package/index.js",
             "node_modules/some-package/package.json",
