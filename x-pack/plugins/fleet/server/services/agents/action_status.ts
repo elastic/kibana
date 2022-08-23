@@ -46,14 +46,16 @@ export async function getActionStatuses(
         },
       });
 
-      const complete = count === action.total;
+      const total = action.total ?? action.nbAgents;
+      const complete = count === total;
 
       return {
         ...action,
         nbAgentsAck: count,
         complete,
+        total,
         timedOut: !complete && action.timedOut,
-        failed: action.total - action.nbAgents,
+        failed: total - action.nbAgents,
       };
     },
     { concurrency: 20 }
