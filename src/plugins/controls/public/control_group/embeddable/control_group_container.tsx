@@ -127,9 +127,7 @@ export class ControlGroupContainer extends Container<
     );
   };
 
-  public getCreateTimeSliderControlButton = (
-    closePopover?: () => void
-  ) => {
+  public getCreateTimeSliderControlButton = (closePopover?: () => void) => {
     const childIds = this.getChildIds();
     const hasTimeSliderControl = childIds.some((id) => {
       const child = this.getChild(id);
