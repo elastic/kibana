@@ -38,7 +38,7 @@ export default function alertingMonitoringCollectionTests({ getService }: FtrPro
     ? dedicatedTaskRunner.getSupertest()
     : supertest;
 
-  describe('monitoring_collection', () => {
+  describe.only('monitoring_collection', () => {
     let endDate: string;
     const objectRemover = new ObjectRemover(supertest);
 
