@@ -191,6 +191,7 @@ export type {
   SearchSessionInfoProvider,
   ISessionsClient,
   SearchUsageCollector,
+  WarningHandlerCallback,
 } from './search';
 
 export type { ISearchOptions } from '../common';
