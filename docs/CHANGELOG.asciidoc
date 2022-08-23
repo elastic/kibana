@@ -116,6 +116,9 @@ Alerting::
 Cases::
 Adds the ability to customize permissions to prevent users from deleting Cases entities, such as Cases themselves, attachments, and comments {kibana-pull}135487[#135487]
 
+Connectors::
+The {webhook-cm} connector allows users to build a custom connector for any third-party case/ticket management system {kibana-pull}131762[#131762]
+
 Discover::
 Adds the ability to add a custom number of rows in the results and save the specified number with a Saved Search {kibana-pull}135726[#135726]
 
