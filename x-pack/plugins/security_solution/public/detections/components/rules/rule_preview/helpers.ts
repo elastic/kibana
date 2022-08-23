@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash';
 import { Position, ScaleType } from '@elastic/charts';
 import type { EuiSelectOption } from '@elastic/eui';
 import type { Type, Language, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
@@ -207,7 +208,7 @@ export const getIsRulePreviewDisabled = ({
     return machineLearningJobId.length === 0;
   }
   if (ruleType === 'eql' || ruleType === 'query' || ruleType === 'threshold') {
-    return queryBar.query.query.length === 0;
+    return isEmpty(queryBar.query.query) && isEmpty(queryBar.filters);
   }
   if (ruleType === 'new_terms') {
     return newTermsFields.length === 0;
