@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { FilesPlugin } from './plugin';
-export type { FilesSetup, FilesStart } from './plugin';
-export type { FilesClient, FilesClientFactory, FilesClientResponses } from './types';
+import { FilesExamplePlugin } from './plugin';
 
+// This exports static code and TypeScript types,
+// as well as, Kibana Platform `plugin()` initializer.
 export function plugin() {
-  return new FilesPlugin();
+  return new FilesExamplePlugin();
 }

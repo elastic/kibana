@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { FilesPlugin } from './plugin';
-export type { FilesSetup, FilesStart } from './plugin';
-export type { FilesClient, FilesClientFactory, FilesClientResponses } from './types';
+import type { FilesSetup, FilesStart } from '@kbn/files-plugin/server';
 
-export function plugin() {
-  return new FilesPlugin();
+export interface FilesExamplePluginsSetup {
+  files: FilesSetup;
+}
+
+export interface FilesExamplePluginsStart {
+  files: FilesStart;
 }
