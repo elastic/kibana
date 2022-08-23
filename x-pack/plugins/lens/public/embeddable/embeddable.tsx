@@ -468,13 +468,14 @@ export class Embeddable
     const cleanedFilters = containerState.filters
       ? containerState.filters.filter((filter) => !filter.meta.disabled)
       : undefined;
-    const nextTimeRange = containerState.timeslice !== undefined
-      ? {
-          from: new Date(containerState.timeslice[0]).toISOString(),
-          to: new Date(containerState.timeslice[1]).toISOString(),
-          mode: 'absolute' as 'absolute',
-        }
-      : containerState.timeRange;
+    const nextTimeRange =
+      containerState.timeslice !== undefined
+        ? {
+            from: new Date(containerState.timeslice[0]).toISOString(),
+            to: new Date(containerState.timeslice[1]).toISOString(),
+            mode: 'absolute' as 'absolute',
+          }
+        : containerState.timeRange;
     if (
       !isEqual(nextTimeRange, this.externalSearchContext.timeRange) ||
       !isEqual(containerState.query, this.externalSearchContext.query) ||

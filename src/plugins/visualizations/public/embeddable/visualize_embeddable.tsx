@@ -280,13 +280,14 @@ export class VisualizeEmbeddable
     let dirty = false;
 
     // Check if timerange has changed
-    const nextTimeRange = this.input.timeslice !== undefined
-      ? {
-          from: new Date(this.input.timeslice[0]).toISOString(),
-          to: new Date(this.input.timeslice[1]).toISOString(),
-          mode: 'absolute' as 'absolute',
-        }
-      : this.input.timeRange;
+    const nextTimeRange =
+      this.input.timeslice !== undefined
+        ? {
+            from: new Date(this.input.timeslice[0]).toISOString(),
+            to: new Date(this.input.timeslice[1]).toISOString(),
+            mode: 'absolute' as 'absolute',
+          }
+        : this.input.timeRange;
     if (!_.isEqual(nextTimeRange, this.timeRange)) {
       this.timeRange = _.cloneDeep(nextTimeRange);
       dirty = true;
