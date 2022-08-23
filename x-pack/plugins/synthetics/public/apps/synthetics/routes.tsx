@@ -7,7 +7,6 @@
 
 import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 import React, { FC, useEffect } from 'react';
-import { tint } from 'polished';
 import {
   EuiPageTemplateProps,
   EuiFlexGroup,
@@ -171,17 +170,7 @@ const getRoutes = (
         </>
       ),
       dataTestSubj: 'syntheticsMonitorManagementPage',
-      paddingSize: 'none',
-      pageBodyProps: {
-        style: { backgroundColor: tint(0.5, euiTheme.colors.body) },
-      },
-      pageContentProps: {
-        paddingSize: 'l',
-        style: { backgroundColor: euiTheme.colors.ghost },
-      },
       pageHeader: {
-        paddingSize: 'l',
-        style: { margin: 0 },
         pageTitle: <MonitorsPageHeader />,
         tabs: [
           {
