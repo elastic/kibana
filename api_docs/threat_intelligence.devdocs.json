@@ -134,6 +134,66 @@
     "interfaces": [
       {
         "parentPluginId": "threatIntelligence",
+        "id": "def-public.SecuritySolutionPluginContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "SecuritySolutionPluginContext",
+        "description": [
+          "\nMethods exposed from the security solution to the threat intelligence application."
+        ],
+        "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "threatIntelligence",
+            "id": "def-public.SecuritySolutionPluginContext.getFiltersGlobalComponent",
+            "type": "Function",
+            "tags": [],
+            "label": "getFiltersGlobalComponent",
+            "description": [
+              "\nGets the `FiltersGlobal` component for embedding a filter bar in the security solution application."
+            ],
+            "signature": [
+              "() => React.ComponentType<{ children: React.ReactNode; }>"
+            ],
+            "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "threatIntelligence",
+            "id": "def-public.SecuritySolutionPluginContext.licenseService",
+            "type": "Object",
+            "tags": [],
+            "label": "licenseService",
+            "description": [
+              "\nGet the user's license to drive the Threat Intelligence plugin's visibility."
+            ],
+            "signature": [
+              "LicenseAware"
+            ],
+            "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "threatIntelligence",
+            "id": "def-public.SecuritySolutionPluginContext.sourcererDataView",
+            "type": "Object",
+            "tags": [],
+            "label": "sourcererDataView",
+            "description": [],
+            "signature": [
+              "SourcererDataView"
+            ],
+            "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "threatIntelligence",
         "id": "def-public.ThreatIntelligencePluginSetup",
         "type": "Interface",
         "tags": [],
@@ -167,8 +227,8 @@
                 "pluginId": "threatIntelligence",
                 "scope": "public",
                 "docId": "kibThreatIntelligencePluginApi",
-                "section": "def-public.ThreatIntelligenceSecuritySolutionContext",
-                "text": "ThreatIntelligenceSecuritySolutionContext"
+                "section": "def-public.SecuritySolutionPluginContext",
+                "text": "SecuritySolutionPluginContext"
               },
               "; }) => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
             ],
@@ -176,53 +236,6 @@
             "deprecated": false,
             "children": [],
             "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "threatIntelligence",
-        "id": "def-public.ThreatIntelligenceSecuritySolutionContext",
-        "type": "Interface",
-        "tags": [],
-        "label": "ThreatIntelligenceSecuritySolutionContext",
-        "description": [
-          "\nMethods exposed from the security solution to the threat intelligence application."
-        ],
-        "path": "x-pack/plugins/threat_intelligence/public/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "threatIntelligence",
-            "id": "def-public.ThreatIntelligenceSecuritySolutionContext.getFiltersGlobalComponent",
-            "type": "Function",
-            "tags": [],
-            "label": "getFiltersGlobalComponent",
-            "description": [
-              "\nGets the `FiltersGlobal` component for embedding a filter bar in the security solution application."
-            ],
-            "signature": [
-              "() => React.ComponentType<{ children: React.ReactNode; }>"
-            ],
-            "path": "x-pack/plugins/threat_intelligence/public/types.ts",
-            "deprecated": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "threatIntelligence",
-            "id": "def-public.ThreatIntelligenceSecuritySolutionContext.licenseService",
-            "type": "Object",
-            "tags": [],
-            "label": "licenseService",
-            "description": [
-              "\nGet the user's license to drive the Threat Intelligence plugin's visibility."
-            ],
-            "signature": [
-              "LicenseAware"
-            ],
-            "path": "x-pack/plugins/threat_intelligence/public/types.ts",
-            "deprecated": false
           }
         ],
         "initialIsOpen": false
