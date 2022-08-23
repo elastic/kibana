@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import { createTestConfig } from '../common/config';
+import { createTestConfig } from '../../common/config';
 
 // eslint-disable-next-line import/no-default-export
-export default createTestConfig('spaces_only', {
-  disabledPlugins: ['security'],
+export default createTestConfig('security_and_spaces', {
+  disabledPlugins: [],
   license: 'trial',
-  enableActionsProxy: false,
-  rejectUnauthorized: false,
-  verificationMode: undefined,
-  customizeLocalHostSsl: true,
-  preconfiguredAlertHistoryEsIndex: true,
-  useDedicatedTaskRunner: true,
+  ssl: true,
+  enableActionsProxy: true,
+  publicBaseUrl: true,
+  testFiles: [require.resolve('./tests')],
+  useDedicatedTaskRunner: false,
 });
