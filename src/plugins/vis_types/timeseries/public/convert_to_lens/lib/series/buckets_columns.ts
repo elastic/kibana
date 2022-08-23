@@ -13,7 +13,7 @@ import {
   Column,
   convertToFiltersColumn,
   convertToDateHistogramColumn,
-  converToTermsColumns,
+  converToTermsColumn,
 } from '../convert';
 import { getValidColumns } from './columns';
 
@@ -49,10 +49,7 @@ export const getBucketsColumns = (
 ) => {
   if (series.split_mode === 'filters' || series.split_mode === 'filter') {
     const filterColumn = convertToFiltersColumn(series, true);
-    if (!filterColumn) {
-      return null;
-    }
-    return [filterColumn];
+    return getValidColumns([filterColumn]);
   }
   if (series.split_mode === 'terms') {
     const splitFields = getFieldsForTerms(series.terms_field);
@@ -68,14 +65,11 @@ export const getBucketsColumns = (
         splitFields[0],
         true
       );
-      if (!dateHistogramColumn) {
-        return null;
-      }
-      return [dateHistogramColumn];
+      return getValidColumns([dateHistogramColumn]);
     }
 
-    const termsColumns = converToTermsColumns(splitFields, series, columns, dataView, isSplit);
-    return getValidColumns(termsColumns);
+    const termsColumn = converToTermsColumn(splitFields, series, columns, dataView, isSplit);
+    return getValidColumns([termsColumn]);
   }
   return [];
 };

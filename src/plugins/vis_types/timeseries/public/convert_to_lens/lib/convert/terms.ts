@@ -23,7 +23,7 @@ const getOrderByWithAgg = (series: Series, columns: Column[]): OrderByWithAgg | 
     return { orderBy: { type: 'alphabetical' } };
   }
 
-  if (series.terms_order_by === '_count') {
+  if (series.terms_order_by === '_count' || !series.terms_order_by) {
     const columnId = uuid();
     return {
       orderBy: { type: 'column', columnId },
@@ -56,7 +56,11 @@ const getOrderByWithAgg = (series: Series, columns: Column[]): OrderByWithAgg | 
   };
 };
 
-export const convertToTermsParams = (series: Series, columns: Column[]): TermsParams | null => {
+export const convertToTermsParams = (
+  series: Series,
+  columns: Column[],
+  secondaryFields: string[]
+): TermsParams | null => {
   const orderDirection: TermsParams['orderDirection'] =
     series.terms_direction === 'asc' ? 'asc' : 'desc';
 
@@ -75,23 +79,25 @@ export const convertToTermsParams = (series: Series, columns: Column[]): TermsPa
     orderDirection,
     parentFormat: { id: 'terms' },
     ...orderByWithAgg,
+    secondaryFields,
   };
 };
 
 export const converToTermsColumn = (
-  termField: string,
+  termFields: string[],
   series: Series,
   columns: Column[],
   dataView: DataView,
   isSplit: boolean = false
 ): TermsColumn | null => {
-  const field = dataView.getFieldByName(termField);
+  const [baseField, ...secondaryFields] = termFields;
+  const field = dataView.getFieldByName(baseField);
 
   if (!field) {
     return null;
   }
 
-  const params = convertToTermsParams(series, columns);
+  const params = convertToTermsParams(series, columns, secondaryFields);
   if (!params) {
     return params;
   }
@@ -105,14 +111,4 @@ export const converToTermsColumn = (
     isSplit,
     params,
   };
-};
-
-export const converToTermsColumns = (
-  termFields: string[],
-  series: Series,
-  columns: Column[],
-  dataView: DataView,
-  isSplit: boolean = false
-): Array<TermsColumn | null> => {
-  return termFields.map((field) => converToTermsColumn(field, series, columns, dataView, isSplit));
 };

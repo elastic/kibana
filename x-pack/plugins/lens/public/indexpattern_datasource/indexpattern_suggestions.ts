@@ -12,6 +12,7 @@ import type {
   Column,
   AnyColumnWithReferences,
   AnyColumnWithSourceField,
+  TermsColumn,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { generateId } from '../id_generator';
 import type {
@@ -206,6 +207,10 @@ function isFieldBasedColumn(column: Column): column is AnyColumnWithSourceField 
   return 'sourceField' in column;
 }
 
+function isTermsColumn(column: Column): column is TermsColumn {
+  return column.operationType === 'terms';
+}
+
 function getSourceField(column: Column, indexPattern: IndexPattern) {
   return isFieldBasedColumn(column)
     ? column.sourceField === 'document'
@@ -255,6 +260,21 @@ function convertToColumnChange(columns: Layer['columns'], indexPattern: IndexPat
             columnParams: getParams(referenceColumn),
           },
         ];
+      }
+      if (
+        isTermsColumn(column) &&
+        column.params.orderAgg &&
+        !columns.some((c) => c.columnId === column.params.orderAgg?.columnId)
+      ) {
+        const orderAggColumn: ColumnChange = {
+          op: column.params.orderAgg.operationType,
+          columnId: column.params.orderAgg.columnId,
+          field: getSourceField(column.params.orderAgg, indexPattern),
+          indexPattern,
+          visualizationGroups: [],
+          columnParams: getParams(column.params.orderAgg),
+        };
+        acc.push(orderAggColumn);
       }
       acc.push(newColumn);
     }
