@@ -29,7 +29,11 @@ export class ShareToPublicPlugin implements Plugin<ShareToSetup, ShareToStart, S
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, plugins: ShareToPluginSetupDeps) {
-    plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, new DownloadPngAction());
+    const downloadPngAction = new DownloadPngAction({
+      http: core.http,
+    });
+    
+    plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, downloadPngAction);
 
     return {};
   }

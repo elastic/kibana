@@ -149,6 +149,8 @@
       "@kbn/saved-search-plugin/*": ["src/plugins/saved_search/*"],
       "@kbn/screenshot-mode-plugin": ["src/plugins/screenshot_mode"],
       "@kbn/screenshot-mode-plugin/*": ["src/plugins/screenshot_mode/*"],
+      "@kbn/share-to-plugin": ["src/plugins/share_to"],
+      "@kbn/share-to-plugin/*": ["src/plugins/share_to/*"],
       "@kbn/share-plugin": ["src/plugins/share"],
       "@kbn/share-plugin/*": ["src/plugins/share/*"],
       "@kbn/telemetry-collection-manager-plugin": ["src/plugins/telemetry_collection_manager"],

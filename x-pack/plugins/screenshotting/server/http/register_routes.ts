@@ -20,7 +20,7 @@ export const registerRoutes = ({core}: RegisterRoutesParams) => {
     },
   }, async (context, request, response) => {
     const { expression } = request.body;
-    const [, screenshotting] = await core.getStartServices();
+    const [, , screenshotting] = await core.getStartServices();
     const capture = await firstValueFrom(screenshotting.getScreenshots({
       expression,
       format: 'png',
