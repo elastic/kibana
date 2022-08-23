@@ -14,17 +14,25 @@ import {
   EuiLink,
   euiPaletteColorBlind,
   EuiPanel,
+  EuiFlexGrid,
 } from '@elastic/eui';
 import { useChartTheme } from '@kbn/observability-plugin/public';
 import { Chart, Partition, Settings, Datum } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { sumBy } from 'lodash';
 import { IndexLifecyclePhaseSelectOption } from '../../../../../../common/storage_explorer_types';
 import { useApmParams } from '../../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../../hooks/use_time_range';
 import { FETCH_STATUS } from '../../../../../hooks/use_fetcher';
 import { useProgressiveFetcher } from '../../../../../hooks/use_progressive_fetcher';
 import { useApmRouter } from '../../../../../hooks/use_apm_router';
-import { asInteger } from '../../../../../../common/utils/formatters/formatters';
+import {
+  asInteger,
+  asPercent,
+} from '../../../../../../common/utils/formatters/formatters';
 import { NOT_AVAILABLE_LABEL } from '../../../../../../common/i18n';
 import { asDynamicBytes } from '../../../../../../common/utils/formatters';
 import { getComparisonEnabled } from '../../../../shared/time_comparison/get_comparison_enabled';
@@ -35,6 +43,33 @@ interface Props {
   indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
 }
 
+const ProcessorEventLabelMap = {
+  [ProcessorEvent.transaction]: i18n.translate(
+    'xpack.apm.settings.storageExplorer.serviceDetails.transactions',
+    {
+      defaultMessage: 'Transactions',
+    }
+  ),
+  [ProcessorEvent.span]: i18n.translate(
+    'xpack.apm.settings.storageExplorer.serviceDetails.spans',
+    {
+      defaultMessage: 'Spans',
+    }
+  ),
+  [ProcessorEvent.metric]: i18n.translate(
+    'xpack.apm.settings.storageExplorer.serviceDetails.metrics',
+    {
+      defaultMessage: 'Metrics',
+    }
+  ),
+  [ProcessorEvent.error]: i18n.translate(
+    'xpack.apm.settings.storageExplorer.serviceDetails.errors',
+    {
+      defaultMessage: 'Errors',
+    }
+  ),
+};
+
 export function StorageDetailsPerService({
   serviceName,
   indexLifecyclePhase,
@@ -42,6 +77,7 @@ export function StorageDetailsPerService({
   const { core } = useApmPluginContext();
   const chartTheme = useChartTheme();
   const router = useApmRouter();
+  const { euiTheme } = useEuiTheme();
 
   const { query } = useApmParams('/settings/storage-explorer');
   const { rangeFrom, rangeTo, environment, kuery } = query;
@@ -99,6 +135,8 @@ export function StorageDetailsPerService({
     return null;
   }
 
+  const serviceDocs = sumBy(data.processorEventStats, 'docs');
+
   return (
     <>
       <EuiFlexGroup direction="column" responsive={false} gutterSize="xl">
@@ -106,7 +144,14 @@ export function StorageDetailsPerService({
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem>
               <EuiTitle size="xxs">
-                <h4>Service storage details</h4>
+                <h4>
+                  {i18n.translate(
+                    'xpack.apm.settings.storageExplorer.serviceDetails.title',
+                    {
+                      defaultMessage: 'Service storage details',
+                    }
+                  )}
+                </h4>
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -123,13 +168,13 @@ export function StorageDetailsPerService({
         </EuiFlexItem>
 
         <EuiFlexItem>
-          <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="m">
             <EuiFlexItem>
-              <EuiPanel>
-                <Chart size={{ height: 200 }}>
+              <EuiPanel hasShadow={false}>
+                <Chart>
                   <Settings theme={chartTheme} showLegend />
                   <Partition
-                    id="pieByPR"
+                    id="storageExplorerSizeByProcessorType"
                     data={data.processorEventStats}
                     valueAccessor={(d) => d.size ?? 0}
                     valueFormatter={(d: number) =>
@@ -148,14 +193,42 @@ export function StorageDetailsPerService({
               </EuiPanel>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiPanel>
-                <div>
-                  {data.processorEventStats.map(({ processorEvent, docs }) => (
-                    <div>
-                      {processorEvent}: {asInteger(docs)}
-                    </div>
-                  ))}
-                </div>
+              <EuiPanel hasShadow={false} paddingSize="xl">
+                {data.processorEventStats.map(({ processorEvent, docs }) => (
+                  <>
+                    <EuiFlexGrid
+                      columns={2}
+                      css={css`
+                        font-weight: bold;
+                      `}
+                    >
+                      <EuiFlexItem>
+                        {ProcessorEventLabelMap[processorEvent]}
+                      </EuiFlexItem>
+                      <EuiFlexItem>
+                        {i18n.translate(
+                          'xpack.apm.settings.storageExplorer.serviceDetails.ratio',
+                          {
+                            defaultMessage: 'Ratio',
+                          }
+                        )}
+                      </EuiFlexItem>
+                    </EuiFlexGrid>
+                    <EuiFlexGrid
+                      columns={2}
+                      css={css`
+                        background-color: ${euiTheme.colors.lightestShade};
+                        border-top: 1px solid ${euiTheme.colors.lightShade};
+                        border-bottom: 1px solid ${euiTheme.colors.lightShade};
+                      `}
+                    >
+                      <EuiFlexItem>{asInteger(docs)}</EuiFlexItem>
+                      <EuiFlexItem>
+                        {asPercent(docs / serviceDocs, 1)}
+                      </EuiFlexItem>
+                    </EuiFlexGrid>
+                  </>
+                ))}
               </EuiPanel>
             </EuiFlexItem>
           </EuiFlexGroup>
