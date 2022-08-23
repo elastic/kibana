@@ -7,6 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState, FC } from 'react';
 import {
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -14,14 +15,15 @@ import {
   EuiPageContentBody,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
-  EuiSpacer,
+  EuiPanel,
   EuiTitle,
 } from '@elastic/eui';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { WindowParameters } from '@kbn/aiops-utils';
 import type { ChangePoint } from '@kbn/ml-agg-utils';
-import { Filter, Query } from '@kbn/es-query';
+import { Filter, FilterStateStore, Query } from '@kbn/es-query';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedSearch } from '@kbn/discover-plugin/public';
 
 import { useAiOpsKibana } from '../../kibana_context';
@@ -104,8 +106,7 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
   }, [pinnedChangePoint, selectedChangePoint]);
 
   const {
-    overallDocStats,
-    selectedDocStats,
+    documentStats,
     timefilter,
     earliest,
     latest,
@@ -119,18 +120,22 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
     currentSelectedChangePoint
   );
 
-  const totalCount = currentSelectedChangePoint
-    ? overallDocStats.totalCount + selectedDocStats.totalCount
-    : overallDocStats.totalCount;
+  const { totalCount, documentCountStats, documentCountStatsCompare } = documentStats;
 
-  useEffect(() => {
-    return () => {
-      // When navigating away from the index pattern
-      // Reset all previously set filters
-      // to make sure new page doesn't have unrelated filters
-      dataService.query.filterManager.removeAll();
-    };
-  }, [dataView.id, dataService.query.filterManager]);
+  useEffect(
+    // TODO: Consolidate this hook/function with with Data visualizer's
+    function clearFiltersOnLeave() {
+      return () => {
+        // We want to clear all filters that have not been pinned globally
+        // when navigating to other pages
+        dataService.query.filterManager
+          .getFilters()
+          .filter((f) => f.$state?.store === FilterStateStore.APP_STATE)
+          .forEach((f) => dataService.query.filterManager.removeFilter(f));
+      };
+    },
+    [dataService.query.filterManager]
+  );
 
   const [windowParameters, setWindowParameters] = useState<WindowParameters | undefined>();
 
@@ -159,8 +164,14 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
     });
   }, [dataService, searchQueryLanguage, searchString]);
 
+  function clearSelection() {
+    setWindowParameters(undefined);
+    setPinnedChangePoint(null);
+    setSelectedChangePoint(null);
+  }
+
   return (
-    <EuiPageBody data-test-subj="aiopsIndexPage" paddingSize="none" panelled={false}>
+    <EuiPageBody data-test-subj="aiopsExplainLogRateSpikesPage" paddingSize="none" panelled={false}>
       <EuiFlexGroup gutterSize="none">
         <EuiFlexItem>
           <EuiPageContentHeader className="aiopsPageHeader">
@@ -207,34 +218,61 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
               setSearchParams={setSearchParams}
             />
           </EuiFlexItem>
-          {overallDocStats?.totalCount !== undefined && (
+          {documentCountStats !== undefined && (
             <EuiFlexItem>
-              <DocumentCountContent
-                brushSelectionUpdateHandler={setWindowParameters}
-                documentCountStats={overallDocStats.documentCountStats}
-                documentCountStatsSplit={
-                  currentSelectedChangePoint ? selectedDocStats.documentCountStats : undefined
-                }
-                totalCount={totalCount}
-                changePoint={currentSelectedChangePoint}
-              />
+              <EuiPanel paddingSize="m">
+                <DocumentCountContent
+                  brushSelectionUpdateHandler={setWindowParameters}
+                  clearSelectionHandler={clearSelection}
+                  documentCountStats={documentCountStats}
+                  documentCountStatsSplit={
+                    currentSelectedChangePoint ? documentCountStatsCompare : undefined
+                  }
+                  totalCount={totalCount}
+                  changePoint={currentSelectedChangePoint}
+                  windowParameters={windowParameters}
+                />
+              </EuiPanel>
             </EuiFlexItem>
           )}
-          <EuiSpacer size="m" />
-          {earliest !== undefined && latest !== undefined && windowParameters !== undefined && (
-            <EuiFlexItem>
-              <ExplainLogRateSpikesAnalysis
-                dataView={dataView}
-                earliest={earliest}
-                latest={latest}
-                windowParameters={windowParameters}
-                searchQuery={searchQuery}
-                onPinnedChangePoint={setPinnedChangePoint}
-                onSelectedChangePoint={setSelectedChangePoint}
-                selectedChangePoint={currentSelectedChangePoint}
-              />
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem>
+            <EuiPanel paddingSize="m">
+              {earliest !== undefined && latest !== undefined && windowParameters !== undefined && (
+                <ExplainLogRateSpikesAnalysis
+                  dataView={dataView}
+                  earliest={earliest}
+                  latest={latest}
+                  windowParameters={windowParameters}
+                  searchQuery={searchQuery}
+                  onPinnedChangePoint={setPinnedChangePoint}
+                  onSelectedChangePoint={setSelectedChangePoint}
+                  selectedChangePoint={currentSelectedChangePoint}
+                />
+              )}
+              {windowParameters === undefined && (
+                <EuiEmptyPrompt
+                  title={
+                    <h2>
+                      <FormattedMessage
+                        id="xpack.aiops.explainLogRateSpikesPage.emptyPromptTitle"
+                        defaultMessage="Click a spike in the histogram chart to start the analysis."
+                      />
+                    </h2>
+                  }
+                  titleSize="xs"
+                  body={
+                    <p>
+                      <FormattedMessage
+                        id="xpack.aiops.explainLogRateSpikesPage.emptyPromptBody"
+                        defaultMessage="The explain log rate spikes feature identifies statistically significant field/value combinations that contribute to a log rate spike."
+                      />
+                    </p>
+                  }
+                  data-test-subj="aiopsNoWindowParametersEmptyPrompt"
+                />
+              )}
+            </EuiPanel>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPageContentBody>
     </EuiPageBody>

@@ -5,10 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import * as Either from 'fp-ts/lib/Either';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { IndexMapping } from '../../mappings';
+import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import {
   catchRetryableEsClientErrors,
   RetryableEsClientError,
@@ -34,18 +35,14 @@ export const fetchIndices =
     client,
     indices,
   }: FetchIndicesParams): TaskEither.TaskEither<RetryableEsClientError, FetchIndexResponse> =>
-  // @ts-expect-error @elastic/elasticsearch IndexState.alias and IndexState.mappings should be required
   () => {
     return client.indices
-      .get(
-        {
-          index: indices,
-          ignore_unavailable: true, // Don't return an error for missing indices. Note this *will* include closed indices, the docs are misleading https://github.com/elastic/elasticsearch/issues/63607
-        },
-        { maxRetries: 0 }
-      )
+      .get({
+        index: indices,
+        ignore_unavailable: true, // Don't return an error for missing indices. Note this *will* include closed indices, the docs are misleading https://github.com/elastic/elasticsearch/issues/63607
+      })
       .then((body) => {
-        return Either.right(body);
+        return Either.right(body as FetchIndexResponse);
       })
       .catch(catchRetryableEsClientErrors);
   };

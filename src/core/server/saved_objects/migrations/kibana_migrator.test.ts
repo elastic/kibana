@@ -11,9 +11,9 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
 import { KibanaMigratorOptions, KibanaMigrator } from './kibana_migrator';
-import { SavedObjectTypeRegistry } from '../saved_objects_type_registry';
-import { SavedObjectsType } from '../types';
 import { DocumentMigrator } from './core/document_migrator';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
@@ -247,6 +247,9 @@ const mockV2MigrationOptions = () => {
 };
 
 const mockOptions = () => {
+  const mockedClient = elasticsearchClientMock.createElasticsearchClient();
+  (mockedClient as any).child = jest.fn().mockImplementation(() => mockedClient);
+
   const options: MockedOptions = {
     logger: loggingSystemMock.create().get(),
     kibanaVersion: '8.2.3',
@@ -284,7 +287,7 @@ const mockOptions = () => {
       skip: false,
       retryAttempts: 20,
     },
-    client: elasticsearchClientMock.createElasticsearchClient(),
+    client: mockedClient,
     docLinks: docLinksServiceMock.createSetupContract(),
   };
   return options;

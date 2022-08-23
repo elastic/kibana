@@ -20,7 +20,7 @@ describe('test useSavedSearch', () => {
   test('useSavedSearch return is valid', async () => {
     const { history, searchSessionManager } = createSearchSessionMock();
     const stateContainer = getState({
-      getStateDefaults: () => ({ index: 'the-index-pattern-id' }),
+      getStateDefaults: () => ({ index: 'the-data-view-id' }),
       history,
       uiSettings: uiSettingsMock,
     });
@@ -46,7 +46,7 @@ describe('test useSavedSearch', () => {
   test('refetch$ triggers a search', async () => {
     const { history, searchSessionManager } = createSearchSessionMock();
     const stateContainer = getState({
-      getStateDefaults: () => ({ index: 'the-index-pattern-id' }),
+      getStateDefaults: () => ({ index: 'the-data-view-id' }),
       history,
       uiSettings: uiSettingsMock,
     });
@@ -89,7 +89,7 @@ describe('test useSavedSearch', () => {
   test('reset sets back to initial state', async () => {
     const { history, searchSessionManager } = createSearchSessionMock();
     const stateContainer = getState({
-      getStateDefaults: () => ({ index: 'the-index-pattern-id' }),
+      getStateDefaults: () => ({ index: 'the-data-view-id' }),
       history,
       uiSettings: uiSettingsMock,
     });

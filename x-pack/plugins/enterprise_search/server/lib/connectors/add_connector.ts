@@ -11,7 +11,9 @@ import { CONNECTORS_INDEX } from '../..';
 import { ConnectorDocument, ConnectorStatus } from '../../../common/types/connectors';
 import { ErrorCode } from '../../../common/types/error_codes';
 import { setupConnectorsIndices } from '../../index_management/setup_indices';
-import { isIndexNotFoundException } from '../../utils/identify_exceptions';
+
+import { fetchCrawlerByIndexName } from '../crawler/fetch_crawlers';
+import { textAnalysisSettings } from '../indices/text_analysis';
 
 import { deleteConnectorById } from './delete_connector';
 
@@ -39,11 +41,20 @@ const createConnector = async (
       throw new Error(ErrorCode.CONNECTOR_DOCUMENT_ALREADY_EXISTS);
     }
   }
+  const crawler = await fetchCrawlerByIndexName(client, index);
+
+  if (crawler) {
+    throw new Error(ErrorCode.CRAWLER_ALREADY_EXISTS);
+  }
+
   const result = await client.asCurrentUser.index({
     document,
     index: CONNECTORS_INDEX,
   });
-  await client.asCurrentUser.indices.create({ index });
+  await client.asCurrentUser.indices.create({
+    index,
+    settings: textAnalysisSettings(language ?? undefined),
+  });
   await client.asCurrentUser.indices.refresh({ index: CONNECTORS_INDEX });
 
   return { id: result._id, index_name: document.index_name };
@@ -68,21 +79,11 @@ export const addConnector = async (
     status: ConnectorStatus.CREATED,
     sync_now: false,
   };
-  try {
-    return await createConnector(
-      document,
-      client,
-      input.language,
-      !!input.delete_existing_connector
-    );
-  } catch (error) {
-    if (isIndexNotFoundException(error)) {
-      // This means .ent-search-connectors index doesn't exist yet
-      // So we first have to create it, and then try inserting the document again
-      await setupConnectorsIndices(client.asCurrentUser);
-      return await createConnector(document, client, input.language, false);
-    } else {
-      throw error;
-    }
+  const connectorsIndexExists = await client.asCurrentUser.indices.exists({
+    index: CONNECTORS_INDEX,
+  });
+  if (!connectorsIndexExists) {
+    await setupConnectorsIndices(client.asCurrentUser);
   }
+  return await createConnector(document, client, input.language, !!input.delete_existing_connector);
 };

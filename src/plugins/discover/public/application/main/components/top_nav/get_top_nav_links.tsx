@@ -11,10 +11,10 @@ import type { ISearchSource } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { unhashUrl } from '@kbn/kibana-utils-plugin/public';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { showOpenSearchPanel } from './show_open_search_panel';
 import { getSharingData, showPublicUrlSwitch } from '../../../../utils/get_sharing_data';
 import { DiscoverServices } from '../../../../build_services';
-import { SavedSearch } from '../../../../services/saved_searches';
 import { onSaveSearch } from './on_save_search';
 import { GetStateReturn } from '../../services/discover_state';
 import { openOptionsPopover } from './open_options_popover';
@@ -24,7 +24,7 @@ import { openAlertsPopover } from './open_alerts_popover';
  * Helper function to build the top nav links
  */
 export const getTopNavLinks = ({
-  indexPattern,
+  dataView,
   navigateTo,
   savedSearch,
   services,
@@ -34,7 +34,7 @@ export const getTopNavLinks = ({
   onOpenSavedSearch,
   isPlainRecord,
 }: {
-  indexPattern: DataView;
+  dataView: DataView;
   navigateTo: (url: string) => void;
   savedSearch: SavedSearch;
   services: DiscoverServices;
@@ -109,7 +109,7 @@ export const getTopNavLinks = ({
       onSaveSearch({
         savedSearch,
         services,
-        indexPattern,
+        dataView,
         navigateTo,
         state,
         onClose: () => {

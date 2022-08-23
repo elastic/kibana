@@ -11,7 +11,9 @@ import Fs from 'fs';
 import Util from 'util';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import { Root } from '../../../root';
+import { getMigrationDocLink } from './test_utils';
 
+const migrationDocLink = getMigrationDocLink().resolveMigrationFailures;
 const logFilePath = Path.join(__dirname, 'collects_corrupt_docs.log');
 
 const asyncUnlink = Util.promisify(Fs.unlink);
@@ -105,7 +107,7 @@ describe('migration v2 with corrupt saved object documents', () => {
 
         To allow migrations to proceed, please delete or fix these documents.
         Note that you can configure Kibana to automatically discard corrupt documents and transform errors for this migration.
-        Please refer to https://www.elastic.co/guide/en/kibana/master/resolve-migrations-failures.html for more information."
+        Please refer to ${migrationDocLink} for more information."
       `);
 
       expectMatchOrder(errorLines, [

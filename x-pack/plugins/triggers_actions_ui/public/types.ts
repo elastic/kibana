@@ -198,6 +198,7 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
   > | null;
   actionParamsFields: React.LazyExoticComponent<ComponentType<ActionParamsProps<ActionParams>>>;
   customConnectorSelectItem?: CustomConnectorSelectionItem;
+  isExperimental?: boolean;
 }
 
 export interface GenericValidationResult<T> {
@@ -418,6 +419,7 @@ export interface AlertsTableProps {
   flyoutSize?: EuiFlyoutSize;
   pageSize: number;
   pageSizeOptions: number[];
+  id?: string;
   leadingControlColumns: EuiDataGridControlColumn[];
   showExpandToDetails: boolean;
   trailingControlColumns: EuiDataGridControlColumn[];
@@ -442,6 +444,7 @@ export type AlertTableFlyoutComponent =
 export interface AlertsTableFlyoutBaseProps {
   alert: EcsFieldsResponse;
   isLoading: boolean;
+  id?: string;
 }
 
 export interface BulkActionsConfig {
@@ -457,6 +460,7 @@ export type UseBulkActionsRegistry = () => BulkActionsConfig[];
 
 export interface AlertsTableConfigurationRegistry {
   id: string;
+  casesFeatureId: string;
   columns: EuiDataGridColumn[];
   useInternalFlyout?: () => {
     header: AlertTableFlyoutComponent;
@@ -468,7 +472,8 @@ export interface AlertsTableConfigurationRegistry {
   useActionsColumn?: () => {
     renderCustomActionsRow: (
       alert: EcsFieldsResponse,
-      setFlyoutAlert: (data: unknown) => void
+      setFlyoutAlert: (data: unknown) => void,
+      id?: string
     ) => JSX.Element;
     width?: number;
   };

@@ -35,7 +35,7 @@ export interface DiscoverGridFlyoutProps {
   columns: string[];
   hit: DataTableRecord;
   hits?: DataTableRecord[];
-  indexPattern: DataView;
+  dataView: DataView;
   onAddColumn: (column: string) => void;
   onClose: () => void;
   onFilter?: DocViewFilterFn;
@@ -54,7 +54,7 @@ function getIndexByDocId(hits: DataTableRecord[], id: string) {
 export function DiscoverGridFlyout({
   hit,
   hits,
-  indexPattern,
+  dataView,
   columns,
   onFilter,
   onClose,
@@ -96,7 +96,7 @@ export function DiscoverGridFlyout({
   );
 
   const { singleDocProps, surrDocsProps } = useNavigationProps({
-    indexPatternId: indexPattern.id!,
+    dataViewId: dataView.id!,
     rowIndex: hit.raw._index,
     rowId: hit.raw._id,
     filterManager: services.filterManager,
@@ -153,7 +153,7 @@ export function DiscoverGridFlyout({
                 })}
               </EuiButtonEmpty>
             </EuiFlexItem>
-            {indexPattern.isTimeBased() && indexPattern.id && (
+            {dataView.isTimeBased() && dataView.id && (
               <EuiFlexGroup alignItems="center" responsive={false} gutterSize="none">
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
@@ -212,7 +212,7 @@ export function DiscoverGridFlyout({
           <DocViewer
             hit={actualHit}
             columns={columns}
-            indexPattern={indexPattern}
+            dataView={dataView}
             filter={
               onFilter
                 ? (mapping, value, mode) => {

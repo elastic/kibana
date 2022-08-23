@@ -6,7 +6,8 @@
  */
 
 import { get } from 'lodash';
-import React, { useCallback, useEffect, useLayoutEffect, useState, useMemo } from 'react';
+import type { ReactElement } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import {
   EuiBasicTable,
   EuiButtonEmpty,
@@ -41,6 +42,16 @@ import { ResultTabs } from '../../routes/saved_queries/edit/tabs';
 import type { PackItem } from '../../packs/types';
 import type { LogsDataView } from '../../common/hooks/use_logs_data_view';
 import { useLogsDataView } from '../../common/hooks/use_logs_data_view';
+
+const TruncateTooltipText = styled.div`
+  width: 100%;
+
+  > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+`;
 
 const EMPTY_ARRAY: PackQueryStatusItem[] = [];
 
@@ -224,7 +235,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
 }) => {
   const lensService = useKibana().services.lens;
   const isLensAvailable = lensService?.canUseEditor();
-  const { data: logsDataView } = useLogsDataView();
+  const { data: logsDataView } = useLogsDataView({ skip: !actionId });
 
   const handleClick = useCallback(
     (event) => {
@@ -290,7 +301,7 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
   const { discover, application } = useKibana().services;
   const locator = discover?.locator;
   const discoverPermissions = application.capabilities.discover;
-  const { data: logsDataView } = useLogsDataView();
+  const { data: logsDataView } = useLogsDataView({ skip: !actionId });
 
   const [discoverUrl, setDiscoverUrl] = useState<string>('');
 
@@ -519,15 +530,29 @@ interface PackQueriesStatusTableProps {
   data?: PackQueryStatusItem[];
   startDate?: string;
   expirationDate?: string;
+  addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => ReactElement;
 }
 
 const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = ({
+  actionId,
   agentIds,
   data,
   startDate,
   expirationDate,
+  addToTimeline,
 }) => {
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, unknown>>({});
+
+  const renderIDColumn = useCallback(
+    (id: string) => (
+      <TruncateTooltipText>
+        <EuiToolTip content={id} display="block">
+          <>{id}</>
+        </EuiToolTip>
+      </TruncateTooltipText>
+    ),
+    []
+  );
 
   const renderQueryColumn = useCallback((query: string, item) => {
     const singleLine = removeMultilines(query);
@@ -588,6 +613,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
                   endDate={expirationDate}
                   agentIds={agentIds}
                   failedAgentsCount={item?.failed ?? 0}
+                  addToTimeline={addToTimeline}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -597,12 +623,12 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         return itemIdToExpandedRowMapValues;
       });
     },
-    [agentIds, expirationDate, startDate]
+    [agentIds, expirationDate, startDate, addToTimeline]
   );
 
   const renderToggleResultsAction = useCallback(
     (item) =>
-      item?.action_id ? (
+      item?.action_id && data?.length && data.length > 1 ? (
         <EuiButtonIcon
           data-test-subj={`toggleIcon-${item.id}`}
           onClick={getHandleErrorsToggle(item)}
@@ -611,7 +637,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
       ) : (
         <></>
       ),
-    [getHandleErrorsToggle, itemIdToExpandedRowMap]
+    [data, getHandleErrorsToggle, itemIdToExpandedRowMap]
   );
 
   const getItemId = useCallback((item: PackItem) => get(item, 'id'), []);
@@ -624,7 +650,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
           defaultMessage: 'ID',
         }),
         width: '15%',
-        truncateText: true,
+        render: renderIDColumn,
       },
       {
         field: 'query',
@@ -638,12 +664,14 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         name: i18n.translate('xpack.osquery.pack.queriesTable.docsResultsColumnTitle', {
           defaultMessage: 'Docs',
         }),
+        width: '80px',
         render: renderDocsColumn,
       },
       {
         name: i18n.translate('xpack.osquery.pack.queriesTable.agentsResultsColumnTitle', {
           defaultMessage: 'Agents',
         }),
+        width: '160px',
         render: renderAgentsColumn,
       },
       {
@@ -673,6 +701,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
       },
     ],
     [
+      renderIDColumn,
       renderQueryColumn,
       renderDocsColumn,
       renderAgentsColumn,
@@ -692,7 +721,12 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
     []
   );
 
-  useLayoutEffect(() => {
+  useEffect(() => {
+    // reset the expanded row map when the data changes
+    setItemIdToExpandedRowMap({});
+  }, [actionId]);
+
+  useEffect(() => {
     if (
       data?.length === 1 &&
       agentIds?.length &&

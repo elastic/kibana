@@ -17,6 +17,7 @@ import {
   TimefilterContract,
   FilterManager,
   getEsQueryConfig,
+  mapAndFlattenFilters,
 } from '@kbn/data-plugin/public';
 import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 
@@ -40,6 +41,8 @@ import {
   IContainer,
   SavedObjectEmbeddableInput,
   ReferenceOrValueEmbeddable,
+  SelfStyledEmbeddable,
+  FilterableEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
@@ -65,15 +68,17 @@ import {
   Visualization,
   DatasourceMap,
   Datasource,
+  IndexPatternMap,
 } from '../types';
 
 import { getEditPath, DOC_TYPE } from '../../common';
 import { LensAttributeService } from '../lens_attribute_service';
 import type { ErrorMessage, TableInspectorAdapter } from '../editor_frame_service/types';
 import { getLensInspectorService, LensInspector } from '../lens_inspector_service';
-import { SharingSavedObjectProps } from '../types';
+import { SharingSavedObjectProps, VisualizationDisplayOptions } from '../types';
 import { getActiveDatasourceIdFromDoc, getIndexPatternsObjects, inferTimeField } from '../utils';
 import { getLayerMetaInfo, combineQueryAndFilters } from '../app_plugin/show_underlying_data';
+import { convertDataViewIntoLensIndexPattern } from '../indexpattern_service/loader';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 
@@ -120,7 +125,7 @@ export interface LensEmbeddableDeps {
   injectFilterReferences: FilterManager['inject'];
   visualizationMap: VisualizationMap;
   datasourceMap: DatasourceMap;
-  indexPatternService: DataViewsContract;
+  dataViews: DataViewsContract;
   expressionRenderer: ReactExpressionRendererType;
   timefilter: TimefilterContract;
   basePath: IBasePath;
@@ -168,6 +173,7 @@ function getViewUnderlyingDataArgs({
   filters,
   timeRange,
   esQueryConfig,
+  indexPatternsCache,
 }: {
   activeDatasource: Datasource;
   activeDatasourceState: unknown;
@@ -178,11 +184,13 @@ function getViewUnderlyingDataArgs({
   filters: Filter[];
   timeRange: TimeRange;
   esQueryConfig: EsQueryConfig;
+  indexPatternsCache: IndexPatternMap;
 }) {
   const { error, meta } = getLayerMetaInfo(
     activeDatasource,
     activeDatasourceState,
     activeData,
+    indexPatternsCache,
     timeRange,
     capabilities
   );
@@ -210,7 +218,10 @@ function getViewUnderlyingDataArgs({
 
 export class Embeddable
   extends AbstractEmbeddable<LensEmbeddableInput, LensEmbeddableOutput>
-  implements ReferenceOrValueEmbeddable<LensByValueInput, LensByReferenceInput>
+  implements
+    ReferenceOrValueEmbeddable<LensByValueInput, LensByReferenceInput>,
+    SelfStyledEmbeddable,
+    FilterableEmbeddable
 {
   type = DOC_TYPE;
 
@@ -267,7 +278,10 @@ export class Embeddable
 
     this.lensInspector = getLensInspectorService(deps.inspector);
     this.expressionRenderer = deps.expressionRenderer;
-    this.initializeSavedVis(initialInput).then(() => this.onContainerStateChanged(initialInput));
+    this.initializeSavedVis(initialInput)
+      .then(() => this.onContainerStateChanged(initialInput))
+      .catch((e) => this.onFatalError(e));
+
     this.subscription = this.getUpdated$().subscribe(() =>
       this.onContainerStateChanged(this.input)
     );
@@ -552,10 +566,10 @@ export class Embeddable
    */
   render(domNode: HTMLElement | Element) {
     this.domNode = domNode;
-    super.render(domNode as HTMLElement);
     if (!this.savedVis || !this.isInitialized || this.isDestroyed) {
       return;
     }
+    super.render(domNode as HTMLElement);
     if (this.input.onLoad) {
       this.input.onLoad(true);
     }
@@ -579,11 +593,10 @@ export class Embeddable
           errors={this.errors}
           lensInspector={this.lensInspector}
           searchContext={this.getMergedSearchContext()}
-          variables={
-            input.palette
-              ? { theme: { palette: input.palette }, embeddableTitle: this.getTitle() }
-              : { embeddableTitle: this.getTitle() }
-          }
+          variables={{
+            embeddableTitle: this.getTitle(),
+            ...(input.palette ? { theme: { palette: input.palette } } : {}),
+          }}
           searchSessionId={this.externalSearchContext.searchSessionId}
           handleEvent={this.handleEvent}
           onData$={this.updateActiveData}
@@ -600,6 +613,7 @@ export class Embeddable
           onRuntimeError={() => {
             this.logError('runtime');
           }}
+          noPadding={this.visDisplayOptions?.noPadding}
         />
       </KibanaThemeProvider>,
       domNode
@@ -745,7 +759,7 @@ export class Embeddable
   private async loadViewUnderlyingDataArgs(): Promise<boolean> {
     const mergedSearchContext = this.getMergedSearchContext();
 
-    if (!this.activeDataInfo.activeData || !mergedSearchContext.timeRange) {
+    if (!this.activeDataInfo.activeData || !mergedSearchContext.timeRange || !this.savedVis) {
       return false;
     }
 
@@ -757,12 +771,22 @@ export class Embeddable
     this.activeDataInfo.activeDatasource = this.deps.datasourceMap[activeDatasourceId];
     const docDatasourceState = this.savedVis?.state.datasourceStates[activeDatasourceId];
 
+    const indexPatternsCache = this.indexPatterns.reduce(
+      (acc, indexPattern) => ({
+        [indexPattern.id!]: convertDataViewIntoLensIndexPattern(indexPattern),
+        ...acc,
+      }),
+      {}
+    );
+
     if (!this.activeDataInfo.activeDatasourceState) {
-      this.activeDataInfo.activeDatasourceState =
-        await this.activeDataInfo.activeDatasource.initialize(
-          docDatasourceState,
-          this.savedVis?.references
-        );
+      this.activeDataInfo.activeDatasourceState = this.activeDataInfo.activeDatasource.initialize(
+        docDatasourceState,
+        this.savedVis?.references,
+        undefined,
+        undefined,
+        indexPatternsCache
+      );
     }
 
     const viewUnderlyingDataArgs = getViewUnderlyingDataArgs({
@@ -775,6 +799,7 @@ export class Embeddable
       filters: mergedSearchContext.filters || [],
       timeRange: mergedSearchContext.timeRange,
       esQueryConfig: getEsQueryConfig(this.deps.uiSettings),
+      indexPatternsCache,
     });
 
     const loaded = typeof viewUnderlyingDataArgs !== 'undefined';
@@ -804,7 +829,7 @@ export class Embeddable
 
     const { indexPatterns } = await getIndexPatternsObjects(
       this.savedVis?.references.map(({ id }) => id) || [],
-      this.deps.indexPatternService
+      this.deps.dataViews
     );
 
     this.indexPatterns = uniqBy(indexPatterns, 'id');
@@ -866,13 +891,34 @@ export class Embeddable
     return this.savedVis && this.savedVis.description;
   }
 
+  /**
+   * Gets the Lens embeddable's local filters
+   * @returns Local/panel-level array of filters for Lens embeddable
+   */
+  public async getFilters() {
+    return mapAndFlattenFilters(
+      this.deps.injectFilterReferences(
+        this.savedVis?.state.filters ?? [],
+        this.savedVis?.references ?? []
+      )
+    );
+  }
+
+  /**
+   * Gets the Lens embeddable's local query
+   * @returns Local/panel-level query for Lens embeddable
+   */
+  public async getQuery() {
+    return this.savedVis?.state.query;
+  }
+
   public getSavedVis(): Readonly<Document | undefined> {
     return this.savedVis;
   }
 
   destroy() {
-    super.destroy();
     this.isDestroyed = true;
+    super.destroy();
     if (this.inputReloadSubscriptions.length > 0) {
       this.inputReloadSubscriptions.forEach((reloadSub) => {
         reloadSub.unsubscribe();
@@ -884,5 +930,21 @@ export class Embeddable
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
+  }
+
+  public getSelfStyledOptions() {
+    return {
+      hideTitle: this.visDisplayOptions?.noPanelTitle,
+    };
+  }
+
+  private get visDisplayOptions(): VisualizationDisplayOptions | undefined {
+    if (
+      !this.savedVis?.visualizationType ||
+      !this.deps.visualizationMap[this.savedVis.visualizationType].getDisplayOptions
+    ) {
+      return;
+    }
+    return this.deps.visualizationMap[this.savedVis.visualizationType].getDisplayOptions!();
   }
 }

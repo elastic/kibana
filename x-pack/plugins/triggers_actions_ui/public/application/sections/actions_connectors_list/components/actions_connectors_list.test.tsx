@@ -273,6 +273,18 @@ describe('actions_connectors_list component with items', () => {
     await wrapper.find('[data-test-subj="edit1"]').first().find('button').simulate('click');
     expect(wrapper.find('[data-test-subj="edit-connector-flyout"]').exists()).toBeTruthy();
   });
+
+  test('if delete item that is used in a rule should show a warning in the popup', async () => {
+    await setup();
+    await wrapper.find('.euiButtonIcon').last().simulate('click');
+    expect(wrapper.find('[data-test-subj="deleteConnectorsConfirmation"]').exists()).toBeTruthy();
+    expect(
+      wrapper
+        .find('[data-test-subj="deleteConnectorsConfirmation"]')
+        .text()
+        .includes('This connector is used in a rule')
+    );
+  });
 });
 
 describe('actions_connectors_list component empty with show only capability', () => {

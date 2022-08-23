@@ -24,12 +24,10 @@ import { PrivateLocation } from '../../../../../common/runtime_types';
 import { selectAgentPolicies } from '../../../state/private_locations';
 
 export const PolicyHostsField = ({
-  isDisabled,
   errors,
   control,
   privateLocations,
 }: {
-  isDisabled: boolean;
   errors: FieldErrors;
   control: Control<PrivateLocation, any>;
   privateLocations: PrivateLocation[];
@@ -37,7 +35,7 @@ export const PolicyHostsField = ({
   const { data } = useSelector(selectAgentPolicies);
 
   const policyHostsOptions = data?.items.map((item) => {
-    const hasLocation = privateLocations.find((location) => location.policyHostId === item.id);
+    const hasLocation = privateLocations.find((location) => location.agentPolicyId === item.id);
     return {
       disabled: Boolean(hasLocation),
       value: item.id,
@@ -53,11 +51,11 @@ export const PolicyHostsField = ({
       dropdownDisplay: (
         <EuiToolTip
           content={
-            hasLocation?.name
+            hasLocation?.label
               ? i18n.translate('xpack.synthetics.monitorManagement.anotherPrivateLocation', {
                   defaultMessage:
                     'This agent policy is already attached to location: {locationName}.',
-                  values: { locationName: hasLocation?.name },
+                  values: { locationName: hasLocation?.label },
                 })
               : undefined
           }
@@ -71,7 +69,7 @@ export const PolicyHostsField = ({
             </EuiHealth>
             <EuiFlexGroup>
               <EuiFlexItem>
-                <EuiText size="s" color="subdued">
+                <EuiText size="s" color="subdued" className="eui-textNoWrap">
                   <p>
                     {AGENTS_LABEL} {item.agents}
                   </p>
@@ -91,18 +89,18 @@ export const PolicyHostsField = ({
 
   return (
     <EuiFormRow
+      fullWidth
       label={POLICY_HOST_LABEL}
-      helpText={!errors?.policyHostId ? SELECT_POLICY_HOSTS : undefined}
-      isInvalid={!!errors?.policyHostId}
+      helpText={!errors?.agentPolicyId ? SELECT_POLICY_HOSTS_HELP_TEXT : undefined}
+      isInvalid={!!errors?.agentPolicyId}
       error={SELECT_POLICY_HOSTS}
     >
       <Controller
-        name="policyHostId"
+        name="agentPolicyId"
         control={control}
         rules={{ required: true }}
         render={({ field }) => (
           <EuiSuperSelect
-            disabled={isDisabled}
             fullWidth
             aria-label={SELECT_POLICY_HOSTS}
             placeholder={SELECT_POLICY_HOSTS}
@@ -110,7 +108,7 @@ export const PolicyHostsField = ({
             itemLayoutAlign="top"
             popoverProps={{ repositionOnScroll: true }}
             hasDividers
-            isInvalid={!!errors?.policyHostId}
+            isInvalid={!!errors?.agentPolicyId}
             options={policyHostsOptions ?? []}
             {...field}
           />
@@ -127,6 +125,13 @@ const AGENTS_LABEL = i18n.translate('xpack.synthetics.monitorManagement.agentsLa
 const SELECT_POLICY_HOSTS = i18n.translate('xpack.synthetics.monitorManagement.selectPolicyHost', {
   defaultMessage: 'Select agent policy',
 });
+
+const SELECT_POLICY_HOSTS_HELP_TEXT = i18n.translate(
+  'xpack.synthetics.monitorManagement.selectPolicyHost.helpText',
+  {
+    defaultMessage: 'We recommend using a single Elastic agent per agent policy.',
+  }
+);
 
 const POLICY_HOST_LABEL = i18n.translate('xpack.synthetics.monitorManagement.policyHost', {
   defaultMessage: 'Agent policy',

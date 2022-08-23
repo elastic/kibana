@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useContext } from 'react';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { lastValueFrom } from 'rxjs';
 import { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -15,7 +15,7 @@ import { FINDINGS_REFETCH_INTERVAL_MS } from '../constants';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { showErrorToast } from '../latest_findings/use_latest_findings';
 import type { FindingsBaseEsQuery, Sort } from '../types';
-import { getAggregationCount, getFindingsCountAggQuery } from '../utils';
+import { getAggregationCount, getFindingsCountAggQuery } from '../utils/utils';
 
 interface UseFindingsByResourceOptions extends FindingsBaseEsQuery {
   from: NonNullable<estypes.SearchRequest['from']>;
@@ -92,13 +92,13 @@ export const getFindingsByResourceAggQuery = ({
             terms: { field: 'resource.sub_type', size: 1 },
           },
           cis_sections: {
-            terms: { field: 'rule.section.keyword' },
+            terms: { field: 'rule.section' },
           },
           failed_findings: {
-            filter: { term: { 'result.evaluation.keyword': 'failed' } },
+            filter: { term: { 'result.evaluation': 'failed' } },
           },
           cluster_id: {
-            terms: { field: 'cluster_id.keyword', size: 1 },
+            terms: { field: 'cluster_id', size: 1 },
           },
           sort_failed_findings: {
             bucket_sort: {

@@ -177,8 +177,8 @@ export class CommonPageObject extends FtrService {
   ) {
     const appConfig = {
       // subUrl following the basePath, assumes no hashes.  Ex: 'app/endpoint/management'
-      pathname: `${basePath}${this.config.get(['apps', appName]).pathname}${subUrl}`,
-      search,
+      pathname: `${basePath}${this.config.get(['apps', appName]).pathname}${subUrl || ''}`,
+      search: search || '',
     };
 
     await this.navigate({
@@ -293,7 +293,6 @@ export class CommonPageObject extends FtrService {
         }
         if (appName === 'discover') {
           await this.browser.setLocalStorageItem('data.autocompleteFtuePopover', 'true');
-          await this.browser.setLocalStorageItem('data.newDataViewMenu', 'true');
         }
         return currentUrl;
       });

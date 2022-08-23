@@ -48,45 +48,22 @@ export interface RuleTaskInstance extends ConcreteTaskInstance {
   state: RuleTaskState;
 }
 
-export interface GenerateNewAndRecoveredAlertEventsParams<
-  State extends AlertInstanceState,
-  Context extends AlertInstanceContext,
-  ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
-> {
-  alertingEventLogger: AlertingEventLogger;
-  newAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
-  activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
-  recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
-  ruleLabel: string;
-  ruleRunMetricsStore: RuleRunMetricsStore;
-}
-
-export interface ScheduleActionsForRecoveredAlertsParams<
+export interface ScheduleActionsForAlertsParams<
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext,
+  ActionGroupIds extends string,
   RecoveryActionGroupId extends string
 > {
   logger: Logger;
   recoveryActionGroup: ActionGroup<RecoveryActionGroupId>;
   recoveredAlerts: Record<string, Alert<InstanceState, InstanceContext, RecoveryActionGroupId>>;
-  executionHandler: ExecutionHandler<RecoveryActionGroupId>;
+  executionHandler: ExecutionHandler<ActionGroupIds | RecoveryActionGroupId>;
   mutedAlertIdsSet: Set<string>;
   ruleLabel: string;
   ruleRunMetricsStore: RuleRunMetricsStore;
-}
-
-export interface LogActiveAndRecoveredAlertsParams<
-  State extends AlertInstanceState,
-  Context extends AlertInstanceContext,
-  ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
-> {
-  logger: Logger;
-  activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
-  recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
-  ruleLabel: string;
-  canSetRecoveryContext: boolean;
+  activeAlerts: Record<string, Alert<InstanceState, InstanceContext, ActionGroupIds>>;
+  throttle: string | null;
+  notifyWhen: string | null;
 }
 
 // / ExecutionHandler

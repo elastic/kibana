@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
+import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
 import type { RegisterDeprecationsConfig } from '../../deprecations';
-import type { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
-import type { SavedObjectConfig } from '../saved_objects_config';
 import { getUnknownTypesDeprecations } from './unknown_object_types';
 
 interface GetDeprecationProviderOptions {

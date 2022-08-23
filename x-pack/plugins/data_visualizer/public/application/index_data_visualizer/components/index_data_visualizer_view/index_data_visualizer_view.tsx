@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { Required } from 'utility-types';
 import { i18n } from '@kbn/i18n';
-import { Filter, Query } from '@kbn/es-query';
+import { Filter, FilterStateStore, Query } from '@kbn/es-query';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { DV_RANDOM_SAMPLER_PREFERENCE, useStorage } from '../../hooks/use_storage';
@@ -37,7 +37,7 @@ import { IndexBasedDataVisualizerExpandedRow } from '../../../common/components/
 import { DATA_VISUALIZER_INDEX_VIEWER } from '../../constants/index_data_visualizer_viewer';
 import { DataVisualizerIndexBasedAppState } from '../../types/index_data_visualizer_state';
 import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '../../types/combined_query';
-import { JobFieldType, SavedSearchSavedObject } from '../../../../../common/types';
+import { SupportedFieldType, SavedSearchSavedObject } from '../../../../../common/types';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { FieldCountPanel } from '../../../common/components/field_count_panel';
 import { DocumentCountContent } from '../../../common/components/document_count_content';
@@ -181,10 +181,10 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
 
   const fieldTypes = useMemo(() => {
     // Obtain the list of non metric field types which appear in the index pattern.
-    const indexedFieldTypes: JobFieldType[] = [];
+    const indexedFieldTypes: SupportedFieldType[] = [];
     dataViewFields.forEach((field) => {
       if (!OMIT_FIELDS.includes(field.name) && field.scripted !== true) {
-        const dataVisualizerType: JobFieldType | undefined = kbnTypeToJobType(field);
+        const dataVisualizerType: SupportedFieldType | undefined = kbnTypeToJobType(field);
         if (dataVisualizerType !== undefined && !indexedFieldTypes.includes(dataVisualizerType)) {
           indexedFieldTypes.push(dataVisualizerType);
         }
@@ -304,14 +304,19 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     setDataVisualizerListState({ ...dataVisualizerListState, probability: value });
   };
 
-  useEffect(() => {
-    return () => {
-      // When navigating away from the index pattern
-      // Reset all previously set filters
-      // to make sure new page doesn't have unrelated filters
-      data.query.filterManager.removeAll();
-    };
-  }, [currentDataView.id, data.query.filterManager]);
+  useEffect(
+    function clearFiltersOnLeave() {
+      return () => {
+        // We want to clear all filters that have not been pinned globally
+        // when navigating to other pages
+        data.query.filterManager
+          .getFilters()
+          .filter((f) => f.$state?.store === FilterStateStore.APP_STATE)
+          .forEach((f) => data.query.filterManager.removeFilter(f));
+      };
+    },
+    [data.query.filterManager]
+  );
 
   useEffect(() => {
     // Force refresh on index pattern change

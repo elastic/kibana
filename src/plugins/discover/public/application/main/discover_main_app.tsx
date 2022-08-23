@@ -9,22 +9,23 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { DataViewAttributes } from '@kbn/data-views-plugin/public';
 import type { SavedObject } from '@kbn/data-plugin/public';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { DiscoverLayout } from './components/layout';
 import { setBreadcrumbsTitle } from '../../utils/breadcrumbs';
 import { addHelpMenuToAppChrome } from '../../components/help_menu/help_menu_util';
 import { useDiscoverState } from './hooks/use_discover_state';
 import { useUrl } from './hooks/use_url';
-import { SavedSearch, useSavedSearchAliasMatchRedirect } from '../../services/saved_searches';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { DataTableRecord } from '../../types';
+import { useSavedSearchAliasMatchRedirect } from '../../hooks/saved_search_alias_match_redirect';
 
 const DiscoverLayoutMemoized = React.memo(DiscoverLayout);
 
 export interface DiscoverMainProps {
   /**
-   * List of available index patterns
+   * List of available data views
    */
-  indexPatternList: Array<SavedObject<DataViewAttributes>>;
+  dataViewList: Array<SavedObject<DataViewAttributes>>;
   /**
    * Current instance of SavedSearch
    */
@@ -32,7 +33,7 @@ export interface DiscoverMainProps {
 }
 
 export function DiscoverMainApp(props: DiscoverMainProps) {
-  const { savedSearch, indexPatternList } = props;
+  const { savedSearch, dataViewList } = props;
   const services = useDiscoverServices();
   const { chrome, docLinks, uiSettings: config, data, spaces, history } = services;
   const usedHistory = useHistory();
@@ -49,9 +50,9 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
    */
   const {
     data$,
-    indexPattern,
+    dataView,
     inspectorAdapters,
-    onChangeIndexPattern,
+    onChangeDataView,
     onUpdateQuery,
     refetch$,
     resetSavedSearch,
@@ -97,11 +98,11 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
 
   return (
     <DiscoverLayoutMemoized
-      indexPattern={indexPattern}
-      indexPatternList={indexPatternList}
+      dataView={dataView}
+      dataViewList={dataViewList}
       inspectorAdapters={inspectorAdapters}
       expandedDoc={expandedDoc}
-      onChangeIndexPattern={onChangeIndexPattern}
+      onChangeDataView={onChangeDataView}
       onUpdateQuery={onUpdateQuery}
       resetSavedSearch={resetCurrentSavedSearch}
       setExpandedDoc={setExpandedDoc}

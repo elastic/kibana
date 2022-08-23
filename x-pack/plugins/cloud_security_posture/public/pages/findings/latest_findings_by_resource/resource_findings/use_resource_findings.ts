@@ -4,19 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { lastValueFrom } from 'rxjs';
 import { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Pagination } from '@elastic/eui';
 import { useContext } from 'react';
 import { number } from 'io-ts';
+import { getAggregationCount, getFindingsCountAggQuery } from '../../utils/utils';
 import { FindingsEsPitContext } from '../../es_pit/findings_es_pit_context';
 import { FINDINGS_REFETCH_INTERVAL_MS } from '../../constants';
 import { useKibana } from '../../../../common/hooks/use_kibana';
 import { showErrorToast } from '../../latest_findings/use_latest_findings';
 import type { CspFinding, FindingsBaseEsQuery, Sort } from '../../types';
-import { getAggregationCount, getFindingsCountAggQuery, getSortKey } from '../../utils';
 
 interface UseResourceFindingsOptions extends FindingsBaseEsQuery {
   resourceId: string;
@@ -57,7 +57,7 @@ const getResourceFindingsQuery = ({
         filter: [...(query?.bool?.filter || []), { term: { 'resource.id': resourceId } }],
       },
     },
-    sort: [{ [getSortKey(sort.field)]: sort.direction }],
+    sort: [{ [sort.field]: sort.direction }],
     pit: { id: pitId },
     aggs: getFindingsCountAggQuery(),
   },

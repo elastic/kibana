@@ -362,11 +362,21 @@ async function installPackageFromRegistry({
       .getSavedObjects()
       .createImporter(savedObjectsClient);
 
+    const savedObjectTagAssignmentService = appContextService
+      .getSavedObjectsTagging()
+      .createInternalAssignmentService({ client: savedObjectsClient });
+
+    const savedObjectTagClient = appContextService
+      .getSavedObjectsTagging()
+      .createTagClient({ client: savedObjectsClient });
+
     // try installing the package, if there was an error, call error handler and rethrow
     // @ts-expect-error status is string instead of InstallResult.status 'installed' | 'already_installed'
     return await _installPackage({
       savedObjectsClient,
       savedObjectsImporter,
+      savedObjectTagAssignmentService,
+      savedObjectTagClient,
       esClient,
       logger,
       installedPkg,
@@ -477,10 +487,20 @@ async function installPackageByUpload({
       .getSavedObjects()
       .createImporter(savedObjectsClient);
 
+    const savedObjectTagAssignmentService = appContextService
+      .getSavedObjectsTagging()
+      .createInternalAssignmentService({ client: savedObjectsClient });
+
+    const savedObjectTagClient = appContextService
+      .getSavedObjectsTagging()
+      .createTagClient({ client: savedObjectsClient });
+
     // @ts-expect-error status is string instead of InstallResult.status 'installed' | 'already_installed'
     return await _installPackage({
       savedObjectsClient,
       savedObjectsImporter,
+      savedObjectTagAssignmentService,
+      savedObjectTagClient,
       esClient,
       logger,
       installedPkg,

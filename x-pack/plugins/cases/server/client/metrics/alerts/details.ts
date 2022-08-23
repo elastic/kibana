@@ -24,7 +24,10 @@ export class AlertDetails extends SingleCaseAggregationHandler {
   }
 
   public async compute(): Promise<SingleCaseMetricsResponse> {
-    const { alertsService, logger } = this.options.clientArgs;
+    const {
+      services: { alertsService },
+      logger,
+    } = this.options.clientArgs;
     const { casesClient } = this.options;
 
     try {
