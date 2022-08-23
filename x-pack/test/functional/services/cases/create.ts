@@ -97,11 +97,17 @@ export function CasesCreateViewServiceProvider(
       });
     },
 
+    async creteCaseFromFlyout(params: CreateCaseParams) {
+      await this.assertCreateCaseFlyoutVisible(true);
+      await this.createCase(params);
+      await this.assertCreateCaseFlyoutVisible(false);
+    },
+
     async createCaseFromModal(params: CreateCaseParams) {
       await casesCommon.assertCaseModalVisible(true);
       await testSubjects.click('cases-table-add-case-filter-bar');
-      await this.assertCreateCaseFlyoutVisible(true);
-      await this.createCase(params);
+      await casesCommon.assertCaseModalVisible(false);
+      await this.creteCaseFromFlyout(params);
     },
   };
 }
