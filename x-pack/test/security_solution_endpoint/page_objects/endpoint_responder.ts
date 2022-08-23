@@ -42,10 +42,21 @@ export function EndpointResponderPageObjects({ getService }: FtrProviderContext)
     }
   };
 
+  const clickActionLogSuperDatePickerQuickMenuButton = async (): Promise<void> => {
+    const actionLogFlyout = await testSubjects.find(TEST_SUBJ.actionLogFlyout);
+
+    await (
+      await testSubjects.findDescendant('superDatePickerToggleQuickMenuButton', actionLogFlyout)
+    ).click();
+
+    await testSubjects.existOrFail('superDatePickerQuickMenu');
+  };
+
   return {
     ensureOnResponder,
     closeResponder,
     openActionLogFlyout,
     closeActionLogFlyout,
+    clickActionLogSuperDatePickerQuickMenuButton,
   };
 }
