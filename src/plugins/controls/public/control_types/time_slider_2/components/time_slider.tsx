@@ -72,8 +72,7 @@ export const TimeSlider: FC<Props> = (props) => {
     props.onNext();
 
     // use waitForPanelsToLoad$ observable to wait until next frame loaded
-    // .pipe(first()) waits until the first value is emitted from an observable and then automatically unsubscribes
-    const nextSubscription = props.waitForPanelsToLoad$
+    const subscription = props.waitForPanelsToLoad$
       .pipe(first((value) => value === true, false))
       .subscribe((ready: boolean) => {
         if (ready) {
@@ -84,7 +83,7 @@ export const TimeSlider: FC<Props> = (props) => {
           setTimeoutId(nextTimeoutId);
         }
       });
-    setSubscription(nextSubscription);
+    setSubscription(subscription);
   };
 
   const onPlay = () => {
@@ -158,6 +157,8 @@ export const TimeSlider: FC<Props> = (props) => {
       <EuiFlexItem grow={true}>
         <EuiInputPopover
           className="timeSlider__popoverOverride"
+          anchorClassName="timeSlider__anchorOverride"
+          panelClassName="timeSlider__panelOverride"
           input={
             <TimeSliderPopoverButton
               onClick={togglePopover}
