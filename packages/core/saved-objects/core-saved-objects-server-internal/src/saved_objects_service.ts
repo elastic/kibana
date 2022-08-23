@@ -46,7 +46,7 @@ import {
   SavedObjectsExporter,
   SavedObjectsImporter,
 } from '@kbn/core-saved-objects-import-export-server-internal';
-import { InternalCoreUsageDataSetup } from '../core_usage_data';
+import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import { InternalDeprecationsServiceSetup } from '../deprecations';
 import { registerRoutes } from './routes';
 import { calculateStatus$ } from './status';

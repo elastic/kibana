@@ -3105,6 +3105,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-deprecations-server@link:bazel-bin/packages/core/deprecations/core-deprecations-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-doc-links-browser-internal@link:bazel-bin/packages/core/doc-links/core-doc-links-browser-internal":
   version "0.0.0"
   uid ""
@@ -7120,6 +7124,10 @@
   uid ""
 
 "@types/kbn__core-deprecations-common@link:bazel-bin/packages/core/deprecations/core-deprecations-common/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-deprecations-server@link:bazel-bin/packages/core/deprecations/core-deprecations-server/npm_module_types":
   version "0.0.0"
   uid ""
 
