@@ -17,4 +17,3 @@ export type {
   TransformErrorObjects,
 } from './migrate_raw_docs';
 export { disableUnknownTypeMappingFields } from './disable_unknown_type_mapping_fields';
-export type { MigrationResult, MigrationStatus } from './types';

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-/** @internal */
-export const CORE_USAGE_STATS_TYPE = 'core-usage-stats';
-
-/** @internal */
-export const CORE_USAGE_STATS_ID = 'core-usage-stats';
+export {
+  CORE_USAGE_STATS_TYPE,
+  CORE_USAGE_STATS_ID,
+  REPOSITORY_RESOLVE_OUTCOME_STATS,
+} from './src';

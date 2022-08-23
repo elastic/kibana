@@ -6,5 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { SavedObjectsRepository, SavedObjectsClient, SavedObjectsClientProvider } from './src';
+export {
+  SavedObjectsRepository,
+  SavedObjectsClient,
+  SavedObjectsClientProvider,
+  PointInTimeFinder,
+} from './src';
 export type { ISavedObjectsClientProvider } from './src';

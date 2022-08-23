@@ -7,7 +7,10 @@
  */
 
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
-import { CORE_USAGE_STATS_TYPE, CORE_USAGE_STATS_ID } from './constants';
+import {
+  CORE_USAGE_STATS_TYPE,
+  CORE_USAGE_STATS_ID,
+} from '@kbn/core-usage-data-base-server-internal';
 import { CoreUsageStats } from './types';
 import {
   ISavedObjectsRepository,
@@ -21,6 +24,7 @@ import {
 export interface BaseIncrementOptions {
   request: KibanaRequest;
 }
+
 /** @internal */
 export type IncrementSavedObjectsImportOptions = BaseIncrementOptions &
   Pick<SavedObjectsImportOptions, 'createNewCopies' | 'overwrite'>;
@@ -49,13 +53,6 @@ export const EXPORT_STATS_PREFIX = 'apiCalls.savedObjectsExport';
 export const LEGACY_DASHBOARDS_IMPORT_STATS_PREFIX = 'apiCalls.legacyDashboardImport';
 export const LEGACY_DASHBOARDS_EXPORT_STATS_PREFIX = 'apiCalls.legacyDashboardExport';
 
-export const REPOSITORY_RESOLVE_OUTCOME_STATS = {
-  EXACT_MATCH: 'savedObjectsRepository.resolvedOutcome.exactMatch',
-  ALIAS_MATCH: 'savedObjectsRepository.resolvedOutcome.aliasMatch',
-  CONFLICT: 'savedObjectsRepository.resolvedOutcome.conflict',
-  NOT_FOUND: 'savedObjectsRepository.resolvedOutcome.notFound',
-  TOTAL: 'savedObjectsRepository.resolvedOutcome.total',
-};
 const ALL_COUNTER_FIELDS = [
   // Saved Objects Client APIs
   ...getFieldsForCounter(BULK_CREATE_STATS_PREFIX),

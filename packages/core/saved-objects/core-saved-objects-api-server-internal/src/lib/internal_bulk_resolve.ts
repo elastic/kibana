@@ -34,7 +34,7 @@ import {
   CORE_USAGE_STATS_ID,
   CORE_USAGE_STATS_TYPE,
   REPOSITORY_RESOLVE_OUTCOME_STATS,
-} from '../../../core_usage_data';
+} from '@kbn/core-usage-data-base-server-internal';
 import {
   getCurrentTime,
   getSavedObjectFromSource,

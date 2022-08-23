@@ -27,8 +27,11 @@ import {
   type IndexMapping,
   type SavedObjectsTypeMappingDefinitions,
   type SavedObjectsMigrationConfigType,
+  type IKibanaMigrator,
+  type KibanaMigratorStatus,
+  type MigrationResult,
 } from '@kbn/core-saved-objects-base-server-internal';
-import { buildActiveMappings, MigrationResult, MigrationStatus } from './core';
+import { buildActiveMappings } from './core';
 import { DocumentMigrator, VersionedTransformer } from './core/document_migrator';
 import { createIndexMap } from './core/build_index_map';
 import { runResilientMigrator } from './run_resilient_migrator';
@@ -44,18 +47,10 @@ export interface KibanaMigratorOptions {
   docLinks: DocLinksServiceStart;
 }
 
-export type IKibanaMigrator = Pick<KibanaMigrator, keyof KibanaMigrator>;
-
-export interface KibanaMigratorStatus {
-  status: MigrationStatus;
-  result?: MigrationResult[];
-  waitingIndex?: string;
-}
-
 /**
  * Manages the shape of mappings and documents in the Kibana index.
  */
-export class KibanaMigrator {
+export class KibanaMigrator implements IKibanaMigrator {
   private readonly client: ElasticsearchClient;
   private readonly documentMigrator: VersionedTransformer;
   private readonly kibanaIndex: string;
@@ -69,8 +64,9 @@ export class KibanaMigrator {
   });
   private readonly activeMappings: IndexMapping;
   private readonly soMigrationsConfig: SavedObjectsMigrationConfigType;
-  public readonly kibanaVersion: string;
   private readonly docLinks: DocLinksServiceStart;
+
+  public readonly kibanaVersion: string;
 
   /**
    * Creates an instance of KibanaMigrator.
@@ -103,24 +99,6 @@ export class KibanaMigrator {
     this.docLinks = docLinks;
   }
 
-  /**
-   * Migrates the mappings and documents in the Kibana index. By default, this will run only
-   * once and subsequent calls will return the result of the original call.
-   *
-   * @param rerun - If true, method will run a new migration when called again instead of
-   * returning the result of the initial migration. This should only be used when factors external
-   * to Kibana itself alter the kibana index causing the saved objects mappings or data to change
-   * after the Kibana server performed the initial migration.
-   *
-   * @remarks When the `rerun` parameter is set to true, no checks are performed to ensure that no migration
-   * is currently running. Chained or concurrent calls to `runMigrations({ rerun: true })` can lead to
-   * multiple migrations running at the same time. When calling with this parameter, it's expected that the calling
-   * code should ensure that the initial call resolves before calling the function again.
-   *
-   * @returns - A promise which resolves once all migrations have been applied.
-   *    The promise resolves with an array of migration statuses, one for each
-   *    elasticsearch index which was migrated.
-   */
   public runMigrations({ rerun = false }: { rerun?: boolean } = {}): Promise<MigrationResult[]> {
     if (this.migrationResult === undefined || rerun) {
       // Reruns are only used by CI / EsArchiver. Publishing status updates on reruns results in slowing down CI
@@ -192,20 +170,10 @@ export class KibanaMigrator {
     return Promise.all(migrators.map((migrator) => migrator.migrate()));
   }
 
-  /**
-   * Gets all the index mappings defined by Kibana's enabled plugins.
-   *
-   */
   public getActiveMappings(): IndexMapping {
     return this.activeMappings;
   }
 
-  /**
-   * Migrates an individual doc to the latest version, as defined by the plugin migrations.
-   *
-   * @param doc - The saved object to migrate
-   * @returns `doc` with all registered migrations applied.
-   */
   public migrateDocument(doc: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc {
     return this.documentMigrator.migrate(doc);
   }

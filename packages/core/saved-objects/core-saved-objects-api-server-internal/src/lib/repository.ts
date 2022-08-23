@@ -80,12 +80,12 @@ import {
   getRootPropertiesObjects,
   LEGACY_URL_ALIAS_TYPE,
   type IndexMapping,
+  type IKibanaMigrator,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { PointInTimeFinder } from './point_in_time_finder';
 import { createRepositoryEsClient, RepositoryEsClient } from './repository_es_client';
 import { getSearchDsl } from './search_dsl';
 import { includedFields } from './included_fields';
-import { IKibanaMigrator } from '../../migrations';
 import { internalBulkResolve, InternalBulkResolveError } from './internal_bulk_resolve';
 import { validateConvertFilterToKueryNode } from './filter_utils';
 import { validateAndConvertAggregations } from './aggregations';
