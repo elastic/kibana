@@ -9,7 +9,6 @@ import {
   MODAL_CONFIRMATION_BTN,
   MODAL_CONFIRMATION_CANCEL_BTN,
   MODAL_CONFIRMATION_BODY,
-  RULES_TAGS_FILTER_BTN,
   RULE_CHECKBOX,
   RULES_TAGS_POPOVER_BTN,
   TOASTER_BODY,
@@ -287,7 +286,7 @@ describe('Detection rules, bulk edit', () => {
         .should('have.length', prePopulatedTags.length)
         .each(($el, index) => {
           cy.wrap($el).should('have.text', prePopulatedTags[index]);
-        })
+        });
     });
 
     it('Add tags to custom rules', () => {
