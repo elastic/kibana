@@ -226,18 +226,20 @@ export const termsOperation: OperationDefinition<
       sourceField: field.name,
       isBucketed: true,
       params: {
-        size: columnParams?.size ?? previousBucketsLength === 0 ? 5 : DEFAULT_SIZE,
+        size: columnParams?.size ?? (previousBucketsLength === 0 ? 5 : DEFAULT_SIZE),
         orderBy:
-          columnParams?.orderBy ?? existingMetricColumn
+          columnParams?.orderBy ??
+          (existingMetricColumn
             ? {
                 type: 'column',
                 columnId: existingMetricColumn,
               }
-            : { type: 'alphabetical', fallback: true },
-        orderDirection: columnParams?.orderDirection ?? existingMetricColumn ? 'desc' : 'asc',
+            : { type: 'alphabetical', fallback: true }),
+        orderDirection: columnParams?.orderDirection ?? (existingMetricColumn ? 'desc' : 'asc'),
         otherBucket: (columnParams?.otherBucket ?? true) && !indexPattern.hasRestrictions,
         missingBucket: columnParams?.missingBucket ?? false,
         parentFormat: columnParams?.parentFormat ?? { id: 'terms' },
+        secondaryFields: columnParams?.secondaryFields,
       },
     };
   },
