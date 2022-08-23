@@ -20,10 +20,10 @@ interface Props {
 export const CreateTimeSliderControlButton = ({
   addNewEmbeddable,
   closePopover,
-  hasTimeSliderControl
+  hasTimeSliderControl,
 }: Props) => {
   return (
-    <EuiContextMenuItem 
+    <EuiContextMenuItem
       icon="plusInCircle"
       onClick={() => {
         addNewEmbeddable(TIME_SLIDER_CONTROL, { width: 'large' });
@@ -33,11 +33,12 @@ export const CreateTimeSliderControlButton = ({
       }}
       dataTestSubj="controls-create-timeslider-button"
       disabled={hasTimeSliderControl}
-      toolTipContent={hasTimeSliderControl
-        ? i18n.translate('controls.controlGroup.onlyOneTimeSliderControlMsg', {
-            defaultMessage: 'Control group already contains time slider control.',
-          })
-        : null
+      toolTipContent={
+        hasTimeSliderControl
+          ? i18n.translate('controls.controlGroup.onlyOneTimeSliderControlMsg', {
+              defaultMessage: 'Control group already contains time slider control.',
+            })
+          : null
       }
     >
       {i18n.translate('controls.controlGroup.addTimeSliderControlButtonTitle', {
