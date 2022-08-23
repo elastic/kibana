@@ -105,10 +105,14 @@ export const dateHistogramOperation: OperationDefinition<
       };
     }
   },
-  getDefaultLabel: (column, indexPattern) => getSafeName(column.sourceField, indexPattern),
+  getDefaultLabel: (column, indexPattern) => {
+    const { label } = getSafeName(column.sourceField, indexPattern);
+    return label;
+  },
   buildColumn({ field }, columnParams) {
     return {
-      label: field.displayName,
+      label: field.customLabel || field.displayName,
+      customLabel: Boolean(field.customLabel),
       dataType: 'date',
       operationType: 'date_histogram',
       sourceField: field.name,
@@ -134,7 +138,7 @@ export const dateHistogramOperation: OperationDefinition<
   onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
-      label: field.displayName,
+      label: field.customLabel || field.displayName,
       sourceField: field.name,
     };
   },

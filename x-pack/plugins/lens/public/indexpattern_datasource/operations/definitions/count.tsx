@@ -52,10 +52,6 @@ function ofName(
   timeScale: string | undefined,
   window: string | undefined
 ) {
-  if (field?.customLabel) {
-    return field.customLabel;
-  }
-
   return adjustTimeScaleLabelSuffix(
     field?.type !== 'document'
       ? i18n.translate('xpack.lens.indexPattern.valueCountOf', {
@@ -120,13 +116,12 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
     return ofName(field, column.timeShift, column.timeScale, column.window);
   },
   buildColumn({ field, previousColumn }, columnParams) {
+    const label =
+      field.customLabel ||
+      ofName(field, previousColumn?.timeShift, previousColumn?.timeScale, previousColumn?.window);
+
     return {
-      label: ofName(
-        field,
-        previousColumn?.timeShift,
-        previousColumn?.timeScale,
-        previousColumn?.window
-      ),
+      label,
       customLabel: Boolean(field.customLabel),
       dataType: 'number',
       operationType: 'count',

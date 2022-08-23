@@ -107,13 +107,14 @@ export const percentileOperation: OperationDefinition<
         !newField.aggregationRestrictions
     );
   },
-  getDefaultLabel: (column, indexPattern, columns) =>
-    ofName(
-      getSafeName(column.sourceField, indexPattern),
-      column.params.percentile,
-      column.timeShift,
-      column.window
-    ),
+  getDefaultLabel: (column, indexPattern, columns) => {
+    const { customLabel, label } = getSafeName(column.sourceField, indexPattern);
+    if (customLabel) {
+      return label;
+    }
+
+    return ofName(label, column.params.percentile, column.timeShift, column.window);
+  },
   buildColumn: ({ field, previousColumn, indexPattern }, columnParams) => {
     const existingPercentileParam =
       previousColumn &&
@@ -121,13 +122,13 @@ export const percentileOperation: OperationDefinition<
       previousColumn.params.percentile;
     const newPercentileParam =
       columnParams?.percentile ?? (existingPercentileParam || DEFAULT_PERCENTILE_VALUE);
+
+    const { customLabel, label } = getSafeName(field.name, indexPattern);
     return {
-      label: ofName(
-        getSafeName(field.name, indexPattern),
-        newPercentileParam,
-        previousColumn?.timeShift,
-        previousColumn?.window
-      ),
+      label: customLabel
+        ? label
+        : ofName(label, newPercentileParam, previousColumn?.timeShift, previousColumn?.window),
+      customLabel,
       dataType: 'number',
       operationType: 'percentile',
       sourceField: field.name,
@@ -145,12 +146,15 @@ export const percentileOperation: OperationDefinition<
   onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
-      label: ofName(
-        field.displayName,
-        oldColumn.params.percentile,
-        oldColumn.timeShift,
-        oldColumn.window
-      ),
+      label:
+        field.customLabel ||
+        ofName(
+          field.displayName,
+          oldColumn.params.percentile,
+          oldColumn.timeShift,
+          oldColumn.window
+        ),
+      customLabel: Boolean(field.customLabel),
       sourceField: field.name,
     };
   },

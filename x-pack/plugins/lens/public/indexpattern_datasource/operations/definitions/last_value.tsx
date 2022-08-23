@@ -133,8 +133,13 @@ export const lastValueOperation: OperationDefinition<
   displayName: i18n.translate('xpack.lens.indexPattern.lastValue', {
     defaultMessage: 'Last value',
   }),
-  getDefaultLabel: (column, indexPattern) =>
-    ofName(getSafeName(column.sourceField, indexPattern), column.timeShift, column.window),
+  getDefaultLabel: (column, indexPattern) => {
+    const { customLabel, label } = getSafeName(column.sourceField, indexPattern);
+    if (customLabel) {
+      return label;
+    }
+    return ofName(label, column.timeShift, column.window);
+  },
   input: 'field',
   onFieldChange: (oldColumn, field) => {
     const newParams = { ...oldColumn.params };
@@ -147,7 +152,7 @@ export const lastValueOperation: OperationDefinition<
     return {
       ...oldColumn,
       dataType: field.type as DataType,
-      label: ofName(field.displayName, oldColumn.timeShift, oldColumn.window),
+      label: field.customLabel || ofName(field.displayName, oldColumn.timeShift, oldColumn.window),
       sourceField: field.name,
       params: newParams,
       scale: field.type === 'string' ? 'ordinal' : 'ratio',
@@ -209,7 +214,10 @@ export const lastValueOperation: OperationDefinition<
     const showArrayValues = isScriptedField(field) || lastValueParams?.showArrayValues;
 
     return {
-      label: ofName(field.displayName, previousColumn?.timeShift, previousColumn?.window),
+      label:
+        field.customLabel ||
+        ofName(field.displayName, previousColumn?.timeShift, previousColumn?.window),
+      customLabel: Boolean(field.customLabel),
       dataType: field.type as DataType,
       operationType: 'last_value',
       isBucketed: false,
