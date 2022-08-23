@@ -61,7 +61,6 @@ export interface Props {
   onRuleChange?: () => void;
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
-  utilityBar?: (refetch: inputsModel.Refetch, totalCount: number) => React.ReactNode;
   additionalFilters?: React.ReactNode;
   hasAlertsCrud?: boolean;
   unit?: (n: number) => string;
@@ -86,7 +85,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   rowRenderers,
   start,
   scopeId,
-  utilityBar,
   additionalFilters,
   hasAlertsCrud = false,
   unit,

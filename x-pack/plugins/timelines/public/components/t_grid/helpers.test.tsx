@@ -225,7 +225,7 @@ describe('Combined Queries', () => {
     ignoreFilterIfFieldNotInIndex: true,
     dateFormatTZ: 'America/New_York',
   };
-  test('No Data Provider & No kqlQuery & and isEventViewer is false', () => {
+  test('No Data Provider & No kqlQuery', () => {
     expect(
       combineQueries({
         config,
@@ -239,26 +239,7 @@ describe('Combined Queries', () => {
     ).toBeNull();
   });
 
-  test('No Data Provider & No kqlQuery & isEventViewer is true', () => {
-    const isEventViewer = true;
-    expect(
-      combineQueries({
-        config,
-        dataProviders: [],
-        indexPattern: mockIndexPattern,
-        browserFields: mockBrowserFields,
-        filters: [],
-        kqlQuery: { query: '', language: 'kuery' },
-        kqlMode: 'search',
-        isEventViewer,
-      })
-    ).toEqual({
-      filterQuery: '{"bool":{"must":[],"filter":[],"should":[],"must_not":[]}}',
-    });
-  });
-
   test('No Data Provider & No kqlQuery & with Filters', () => {
-    const isEventViewer = true;
     expect(
       combineQueries({
         config,
@@ -293,7 +274,6 @@ describe('Combined Queries', () => {
         ],
         kqlQuery: { query: '', language: 'kuery' },
         kqlMode: 'search',
-        isEventViewer,
       })
     ).toEqual({
       filterQuery:

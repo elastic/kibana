@@ -10,7 +10,7 @@ import { EuiButton, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 import { useResponderActionItem } from '../endpoint_responder';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
-import { TAKE_ACTION } from '../alerts_table/alerts_utility_bar/translations';
+import { TAKE_ACTION } from '../alerts_table/additional_filters_action/translations';
 import { useExceptionActions } from '../alerts_table/timeline_actions/use_add_exception_actions';
 import { useAlertsActions } from '../alerts_table/timeline_actions/use_alerts_actions';
 import { useInvestigateInTimeline } from '../alerts_table/timeline_actions/use_investigate_in_timeline';
