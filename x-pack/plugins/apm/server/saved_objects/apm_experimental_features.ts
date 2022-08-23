@@ -8,11 +8,6 @@ import { SavedObjectsType } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { APM_EXPERIMENTAL_FEATURES_TYPE } from '../../common/apm_saved_object_constants';
 
-export interface ExperimentalFeatures {
-  enableExperimentalFeatures: boolean;
-  experimentalFeatures: string[];
-}
-
 export const apmExperimentalFeatures: SavedObjectsType = {
   name: APM_EXPERIMENTAL_FEATURES_TYPE,
   hidden: false,

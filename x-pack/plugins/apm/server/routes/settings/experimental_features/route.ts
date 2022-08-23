@@ -7,32 +7,41 @@
 import { jsonRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import { APM_EXPERIMENTAL_FEATURES_TYPE } from '../../../../common/apm_saved_object_constants';
-import { ExperimentalFeatures } from '../../../saved_objects/apm_experimental_features';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
-
-interface ExperimentalFeatureResponseType
-  extends Partial<ExperimentalFeatures> {
-  savedObjectId: string;
-}
 
 const experimentalFeaturesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/settings/experimental_feature',
   options: { tags: ['access:apm'] },
   handler: async (
     resources
-  ): Promise<{ experimentalFeatures: ExperimentalFeatureResponseType[] }> => {
+  ): Promise<{
+    experimentalFeatures: Array<{
+      savedObjectId: string;
+      enableExperimentalFeatures?: boolean;
+      experimentalFeatures?: string[];
+    }>;
+  }> => {
     const { context } = resources;
     const {
       savedObjects: { client: savedObjectsClient },
     } = await context.core;
 
-    const result = await savedObjectsClient.find<ExperimentalFeatures>({
+    const result = await savedObjectsClient.find<{
+      enableExperimentalFeatures?: boolean;
+      experimentalFeatures?: string[];
+    }>({
       type: APM_EXPERIMENTAL_FEATURES_TYPE,
     });
 
     return {
       experimentalFeatures: result.saved_objects.map(
-        (savedObject): ExperimentalFeatureResponseType => {
+        (
+          savedObject
+        ): {
+          savedObjectId: string;
+          enableExperimentalFeatures?: boolean;
+          experimentalFeatures?: string[];
+        } => {
           return {
             savedObjectId: savedObject?.id,
             enableExperimentalFeatures:
@@ -58,7 +67,13 @@ const saveExperimentalFeaturesRoute = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm', 'access:apm_write'] },
-  handler: async (resources): Promise<ExperimentalFeatureResponseType> => {
+  handler: async (
+    resources
+  ): Promise<{
+    savedObjectId: string;
+    enableExperimentalFeatures?: boolean;
+    experimentalFeatures?: string[];
+  }> => {
     const {
       context,
       params: { body },

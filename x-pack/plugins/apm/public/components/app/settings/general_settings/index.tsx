@@ -41,7 +41,13 @@ export function GeneralSettings() {
   } = useApmEditableSettings(apmSettingsKeys);
 
   async function handleSave() {
+    const reloadPage = Object.keys(unsavedChanges).some((key) => {
+      return settingsEditableConfig[key].requiresPageReload;
+    });
     await saveAll();
+    if (reloadPage) {
+      window.location.reload();
+    }
   }
 
   return (

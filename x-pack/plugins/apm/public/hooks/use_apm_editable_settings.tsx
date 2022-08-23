@@ -80,20 +80,13 @@ export function useApmEditableSettings(settingsKeys: string[]) {
     if (uiSettings && !isEmpty(unsavedChanges)) {
       try {
         setIsSaving(true);
-        let reloadPage = false;
-        const arr = Object.entries(unsavedChanges).map(([key, fieldState]) => {
-          if (!reloadPage) {
-            reloadPage = settingsEditableConfig[key].requiresPageReload;
-          }
-          return uiSettings.set(key, fieldState.value);
-        });
+        const arr = Object.entries(unsavedChanges).map(([key, fieldState]) =>
+          uiSettings.set(key, fieldState.value)
+        );
 
         await Promise.all(arr);
         setForceReloadSettings((state) => ++state);
         cleanUnsavedChanges();
-        if (reloadPage) {
-          window.location.reload();
-        }
       } catch (e) {
         // TODO: do something here
       } finally {

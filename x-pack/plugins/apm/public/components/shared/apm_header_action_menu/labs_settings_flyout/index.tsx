@@ -80,6 +80,10 @@ export function LabsSettingsFlyout() {
   }
 
   async function handleSave() {
+    const reloadPage = Object.keys(unsavedChanges).some((key) => {
+      return settingsEditableConfig[key].requiresPageReload;
+    });
+
     await Promise.all([
       callApmApi('POST /internal/apm/settings/experimental_feature', {
         signal: null,
@@ -96,7 +100,11 @@ export function LabsSettingsFlyout() {
       saveAll(),
     ]);
 
-    setIsOpen(false);
+    if (reloadPage) {
+      window.location.reload();
+    } else {
+      setIsOpen(false);
+    }
   }
 
   function handelCancel() {
