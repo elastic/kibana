@@ -10,6 +10,7 @@ import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import {
   CORE_USAGE_STATS_TYPE,
   CORE_USAGE_STATS_ID,
+  REPOSITORY_RESOLVE_OUTCOME_STATS,
 } from '@kbn/core-usage-data-base-server-internal';
 import { CoreUsageStats } from './types';
 import {

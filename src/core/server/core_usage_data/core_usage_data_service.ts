@@ -27,6 +27,7 @@ import {
   LEGACY_URL_ALIAS_TYPE,
   type SavedObjectsConfigType,
 } from '@kbn/core-saved-objects-base-server-internal';
+import { CORE_USAGE_STATS_TYPE } from '@kbn/core-usage-data-base-server-internal';
 
 import { SavedObjectsServiceStart, SavedObjectTypeRegistry } from '..';
 import type {
@@ -39,7 +40,6 @@ import type {
 } from './types';
 import { isConfigured } from './is_configured';
 import { coreUsageStatsType } from './core_usage_stats';
-import { CORE_USAGE_STATS_TYPE } from './constants';
 import { CoreUsageStatsClient } from './core_usage_stats_client';
 import { CoreIncrementUsageCounter } from './types';
 

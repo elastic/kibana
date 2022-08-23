@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
-export function foo() {
-  return 'hello world';
-}
+export { SavedObjectsService } from './saved_objects_service';
+export type {
+  InternalSavedObjectsServiceStart,
+  InternalSavedObjectsServiceSetup,
+} from './saved_objects_service';
+export { CoreSavedObjectsRouteHandlerContext } from './saved_objects_route_handler_context';

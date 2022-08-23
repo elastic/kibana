@@ -9,6 +9,7 @@
 import { Subject, Observable, firstValueFrom } from 'rxjs';
 import { filter, take, switchMap } from 'rxjs/operators';
 import type { Logger } from '@kbn/logging';
+import type { ServiceStatus } from '@kbn/core-base-common';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -33,16 +34,21 @@ import {
   SavedObjectTypeRegistry,
   type SavedObjectsConfigType,
   type SavedObjectsMigrationConfigType,
+  type IKibanaMigrator,
 } from '@kbn/core-saved-objects-base-server-internal';
-import { SavedObjectsClient, SavedObjectsClientProvider } from './service';
-import { KibanaMigrator, IKibanaMigrator } from './migrations';
+import {
+  SavedObjectsClient,
+  SavedObjectsClientProvider,
+} from '@kbn/core-saved-objects-api-server-internal';
+import { KibanaMigrator } from '@kbn/core-saved-objects-migration-server-internal';
+import { SavedObjectsRepository } from '@kbn/core-saved-objects-api-server-internal';
+import {
+  SavedObjectsExporter,
+  SavedObjectsImporter,
+} from '@kbn/core-saved-objects-import-export-server-internal';
 import { InternalCoreUsageDataSetup } from '../core_usage_data';
 import { InternalDeprecationsServiceSetup } from '../deprecations';
-import { SavedObjectsRepository } from './service/lib/repository';
-import { SavedObjectsExporter } from './export';
-import { SavedObjectsImporter } from './import';
 import { registerRoutes } from './routes';
-import { ServiceStatus } from '../status';
 import { calculateStatus$ } from './status';
 import { registerCoreObjectTypes } from './object_types';
 import { getSavedObjectsDeprecationsProvider } from './deprecations';

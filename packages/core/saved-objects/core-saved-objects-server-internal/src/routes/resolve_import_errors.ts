@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { Readable } from 'stream';
 import { extname } from 'path';
+import { Readable } from 'stream';
+import { chain } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
+import { SavedObjectsImportError } from '@kbn/core-saved-objects-import-export-server-internal';
 import { InternalCoreUsageDataSetup } from '../../core_usage_data';
-import { SavedObjectsImportError } from '../import';
 import type { InternalSavedObjectRouter } from '../internal_types';
 import { catchAndReturnBoomErrors, createSavedObjectsStreamFromNdJson } from './utils';
 
@@ -26,7 +27,7 @@ interface FileStream extends Readable {
   };
 }
 
-export const registerImportRoute = (
+export const registerResolveImportErrorsRoute = (
   router: InternalSavedObjectRouter,
   { config, coreUsageData }: RouteDependencies
 ) => {
@@ -34,7 +35,7 @@ export const registerImportRoute = (
 
   router.post(
     {
-      path: '/_import',
+      path: '/_resolve_import_errors',
       options: {
         body: {
           maxBytes: maxImportPayloadBytes,
@@ -43,31 +44,38 @@ export const registerImportRoute = (
         },
       },
       validate: {
-        query: schema.object(
-          {
-            overwrite: schema.boolean({ defaultValue: false }),
-            createNewCopies: schema.boolean({ defaultValue: false }),
-          },
-          {
-            validate: (object) => {
-              if (object.overwrite && object.createNewCopies) {
-                return 'cannot use [overwrite] with [createNewCopies]';
-              }
-            },
-          }
-        ),
+        query: schema.object({
+          createNewCopies: schema.boolean({ defaultValue: false }),
+        }),
         body: schema.object({
           file: schema.stream(),
+          retries: schema.arrayOf(
+            schema.object({
+              type: schema.string(),
+              id: schema.string(),
+              overwrite: schema.boolean({ defaultValue: false }),
+              destinationId: schema.maybe(schema.string()),
+              replaceReferences: schema.arrayOf(
+                schema.object({
+                  type: schema.string(),
+                  from: schema.string(),
+                  to: schema.string(),
+                }),
+                { defaultValue: [] }
+              ),
+              createNewCopy: schema.maybe(schema.boolean()),
+              ignoreMissingReferences: schema.maybe(schema.boolean()),
+            })
+          ),
         }),
       },
     },
     catchAndReturnBoomErrors(async (context, req, res) => {
-      const { overwrite, createNewCopies } = req.query;
-      const { getClient, getImporter, typeRegistry } = (await context.core).savedObjects;
+      const { createNewCopies } = req.query;
 
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient
-        .incrementSavedObjectsImport({ request: req, createNewCopies, overwrite })
+        .incrementSavedObjectsResolveImportErrors({ request: req, createNewCopies })
         .catch(() => {});
 
       const file = req.body.file as FileStream;
@@ -85,19 +93,23 @@ export const registerImportRoute = (
         });
       }
 
-      const supportedTypes = typeRegistry.getImportableAndExportableTypes().map((t) => t.name);
+      const { getClient, getImporter, typeRegistry } = (await context.core).savedObjects;
 
-      const includedHiddenTypes = supportedTypes.filter((supportedType) =>
-        typeRegistry.isHidden(supportedType)
-      );
+      const includedHiddenTypes = chain(req.body.retries)
+        .map('type')
+        .uniq()
+        .filter(
+          (type) => typeRegistry.isHidden(type) && typeRegistry.isImportableAndExportable(type)
+        )
+        .value();
 
       const client = getClient({ includedHiddenTypes });
       const importer = getImporter(client);
 
       try {
-        const result = await importer.import({
+        const result = await importer.resolveImportErrors({
           readStream,
-          overwrite,
+          retries: req.body.retries,
           createNewCopies,
         });
 

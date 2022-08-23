@@ -7,7 +7,7 @@
  */
 
 import { of, Observable } from 'rxjs';
-import { ServiceStatus, ServiceStatusLevels } from '../status';
+import { type ServiceStatus, ServiceStatusLevels } from '@kbn/core-base-common';
 import { calculateStatus$ } from './status';
 import { take } from 'rxjs/operators';
 

@@ -6,13 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { extname } from 'path';
 import { Readable } from 'stream';
-import { chain } from 'lodash';
+import { extname } from 'path';
 import { schema } from '@kbn/config-schema';
 import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
+import { SavedObjectsImportError } from '@kbn/core-saved-objects-import-export-server-internal';
 import { InternalCoreUsageDataSetup } from '../../core_usage_data';
-import { SavedObjectsImportError } from '../import';
 import type { InternalSavedObjectRouter } from '../internal_types';
 import { catchAndReturnBoomErrors, createSavedObjectsStreamFromNdJson } from './utils';
 
@@ -27,7 +26,7 @@ interface FileStream extends Readable {
   };
 }
 
-export const registerResolveImportErrorsRoute = (
+export const registerImportRoute = (
   router: InternalSavedObjectRouter,
   { config, coreUsageData }: RouteDependencies
 ) => {
@@ -35,7 +34,7 @@ export const registerResolveImportErrorsRoute = (
 
   router.post(
     {
-      path: '/_resolve_import_errors',
+      path: '/_import',
       options: {
         body: {
           maxBytes: maxImportPayloadBytes,
@@ -44,38 +43,31 @@ export const registerResolveImportErrorsRoute = (
         },
       },
       validate: {
-        query: schema.object({
-          createNewCopies: schema.boolean({ defaultValue: false }),
-        }),
+        query: schema.object(
+          {
+            overwrite: schema.boolean({ defaultValue: false }),
+            createNewCopies: schema.boolean({ defaultValue: false }),
+          },
+          {
+            validate: (object) => {
+              if (object.overwrite && object.createNewCopies) {
+                return 'cannot use [overwrite] with [createNewCopies]';
+              }
+            },
+          }
+        ),
         body: schema.object({
           file: schema.stream(),
-          retries: schema.arrayOf(
-            schema.object({
-              type: schema.string(),
-              id: schema.string(),
-              overwrite: schema.boolean({ defaultValue: false }),
-              destinationId: schema.maybe(schema.string()),
-              replaceReferences: schema.arrayOf(
-                schema.object({
-                  type: schema.string(),
-                  from: schema.string(),
-                  to: schema.string(),
-                }),
-                { defaultValue: [] }
-              ),
-              createNewCopy: schema.maybe(schema.boolean()),
-              ignoreMissingReferences: schema.maybe(schema.boolean()),
-            })
-          ),
         }),
       },
     },
     catchAndReturnBoomErrors(async (context, req, res) => {
-      const { createNewCopies } = req.query;
+      const { overwrite, createNewCopies } = req.query;
+      const { getClient, getImporter, typeRegistry } = (await context.core).savedObjects;
 
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient
-        .incrementSavedObjectsResolveImportErrors({ request: req, createNewCopies })
+        .incrementSavedObjectsImport({ request: req, createNewCopies, overwrite })
         .catch(() => {});
 
       const file = req.body.file as FileStream;
@@ -93,23 +85,19 @@ export const registerResolveImportErrorsRoute = (
         });
       }
 
-      const { getClient, getImporter, typeRegistry } = (await context.core).savedObjects;
+      const supportedTypes = typeRegistry.getImportableAndExportableTypes().map((t) => t.name);
 
-      const includedHiddenTypes = chain(req.body.retries)
-        .map('type')
-        .uniq()
-        .filter(
-          (type) => typeRegistry.isHidden(type) && typeRegistry.isImportableAndExportable(type)
-        )
-        .value();
+      const includedHiddenTypes = supportedTypes.filter((supportedType) =>
+        typeRegistry.isHidden(supportedType)
+      );
 
       const client = getClient({ includedHiddenTypes });
       const importer = getImporter(client);
 
       try {
-        const result = await importer.resolveImportErrors({
+        const result = await importer.import({
           readStream,
-          retries: req.body.retries,
+          overwrite,
           createNewCopies,
         });
 

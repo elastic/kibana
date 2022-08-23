@@ -8,3 +8,6 @@
 
 export { KibanaMigrator, buildActiveMappings, mergeTypes } from './src';
 export type { KibanaMigratorOptions } from './src';
+
+export { getAggregatedTypesDocuments } from './src/actions/check_for_unknown_docs';
+export { addExcludedTypesToBoolQuery } from './src/model/helpers';

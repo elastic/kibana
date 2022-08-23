@@ -10,9 +10,11 @@ import { i18n } from '@kbn/i18n';
 import type { DeprecationsDetails } from '@kbn/core-deprecations-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
-import { getAggregatedTypesDocuments } from '../migrations/actions/check_for_unknown_docs';
-import { addExcludedTypesToBoolQuery } from '../migrations/model/helpers';
-import { getIndexForType } from '../service/lib';
+import { getIndexForType } from '@kbn/core-saved-objects-base-server-internal';
+import {
+  getAggregatedTypesDocuments,
+  addExcludedTypesToBoolQuery,
+} from '@kbn/core-saved-objects-migration-server-internal';
 
 interface UnknownTypesDeprecationOptions {
   typeRegistry: ISavedObjectTypeRegistry;

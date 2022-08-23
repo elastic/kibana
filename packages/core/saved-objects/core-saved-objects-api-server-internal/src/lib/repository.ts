@@ -79,6 +79,7 @@ import {
   encodeHitVersion,
   getRootPropertiesObjects,
   LEGACY_URL_ALIAS_TYPE,
+  getIndexForType,
   type IndexMapping,
   type IKibanaMigrator,
 } from '@kbn/core-saved-objects-base-server-internal';
@@ -103,7 +104,6 @@ import {
 } from './internal_utils';
 import { collectMultiNamespaceReferences } from './collect_multi_namespace_references';
 import { updateObjectsSpaces } from './update_objects_spaces';
-import { getIndexForType } from './get_index_for_type';
 import {
   preflightCheckForCreate,
   PreflightCheckForCreateObject,
