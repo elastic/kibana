@@ -26,6 +26,7 @@ import type {
   PackagePolicy,
   DeleteOnePackagePolicyRequestSchema,
   BulkGetPackagePoliciesRequestSchema,
+  CreateSimplifiedPackagePolicyRequestSchema,
 } from '../../types';
 import type {
   BulkGetPackagePoliciesResponse,
@@ -37,8 +38,9 @@ import type {
 } from '../../../common/types';
 import { installationStatuses } from '../../../common/constants';
 import { defaultIngestErrorHandler, PackagePolicyNotFoundError } from '../../errors';
-import { getInstallations } from '../../services/epm/packages';
+import { getInstallations, getPackageInfo } from '../../services/epm/packages';
 import { PACKAGES_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../constants';
+import { simplifiedPackagePolicytoNewPackagePolicy } from '../../services/package_policies/simplified_package_policy_helper';
 
 export const getPackagePoliciesHandler: RequestHandler<
   undefined,
@@ -180,6 +182,64 @@ export const createPackagePolicyHandler: FleetRequestHandler<
       soClient,
       newPolicy as NewPackagePolicy
     );
+
+    const newData = await packagePolicyService.runExternalCallbacks(
+      'packagePolicyCreate',
+      newPackagePolicy,
+      context,
+      request
+    );
+
+    // Create package policy
+    const packagePolicy = await packagePolicyService.create(soClient, esClient, newData, {
+      user,
+      force,
+      spaceId,
+    });
+
+    const enrichedPackagePolicy = await packagePolicyService.runExternalCallbacks(
+      'packagePolicyPostCreate',
+      packagePolicy,
+      context,
+      request
+    );
+
+    const body: CreatePackagePolicyResponse = { item: enrichedPackagePolicy };
+
+    return response.ok({
+      body,
+    });
+  } catch (error) {
+    if (error.statusCode) {
+      return response.customError({
+        statusCode: error.statusCode,
+        body: { message: error.message },
+      });
+    }
+    return defaultIngestErrorHandler({ error, response });
+  }
+};
+
+export const createSimplifiedPackagePolicyHandler: FleetRequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof CreateSimplifiedPackagePolicyRequestSchema.body>
+> = async (context, request, response) => {
+  const coreContext = await context.core;
+  const fleetContext = await context.fleet;
+  const soClient = fleetContext.epm.internalSoClient;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
+  const { force, package: pkg, ...newPolicy } = request.body;
+  const spaceId = fleetContext.spaceId;
+  try {
+    const res = await getPackageInfo({
+      savedObjectsClient: soClient,
+      pkgName: pkg?.name,
+      pkgVersion: pkg?.version || '',
+      skipArchive: true,
+    });
+    const newPackagePolicy = simplifiedPackagePolicytoNewPackagePolicy(newPolicy, res);
 
     const newData = await packagePolicyService.runExternalCallbacks(
       'packagePolicyCreate',
