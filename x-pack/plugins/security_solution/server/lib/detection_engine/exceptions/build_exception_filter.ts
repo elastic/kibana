@@ -406,8 +406,11 @@ const isBooleanFilter = (clause: object): clause is BooleanFilter => {
   return keys.includes('bool') != null;
 };
 
-export const buildIpRangeClauses = (ranges: string[], field: string) => {
-  return ranges.map((range) => {
+export const buildIpRangeClauses = (
+  ranges: string[],
+  field: string
+): estypes.QueryDslQueryContainer[] =>
+  ranges.map((range) => {
     const [gte, lte] = range.split('-');
     return {
       range: {
@@ -418,7 +421,21 @@ export const buildIpRangeClauses = (ranges: string[], field: string) => {
       },
     };
   });
-};
+
+export const buildTextClauses = (
+  textValues: string[],
+  field: string
+): estypes.QueryDslQueryContainer[] =>
+  textValues.map((value) => {
+    return {
+      match: {
+        [field]: {
+          query: value,
+          operator: 'and',
+        },
+      },
+    };
+  });
 
 export const buildListClause = async (
   entry: EntryList,
@@ -434,35 +451,50 @@ export const buildListClause = async (
     listId: entry.list.id,
     filter: '',
   });
-  const listValues = list?.data.map((listItem) => listItem.value);
+  if (list == null) {
+    throw new TypeError(`Cannot find list: "${entry.list.id}"`);
+  }
+  const listValues = list.data.map((listItem) => listItem.value);
 
   if (type === 'ip_range') {
     const [dashNotationRange, slashNotationRange] = partition(listValues, (value) => {
       return value.includes('-');
     });
     if (dashNotationRange.length > 200) {
-      throw new TypeError(
-        `Too many dash notation entries in list: "${entry.list.id}", only first 200 being used`
-      );
+      throw new TypeError(`Too many dash notation entries in list: "${entry.list.id}"`);
     }
-    const rangeClauses = buildIpRangeClauses(dashNotationRange.slice(0, 200), field);
+    const rangeClauses = buildIpRangeClauses(dashNotationRange, field);
+    if (slashNotationRange.length > 0) {
+      rangeClauses.push({
+        terms: {
+          [field]: slashNotationRange,
+        },
+      });
+    }
     return {
       bool: {
-        [operator === 'excluded' ? 'must_not' : 'must']: [
-          {
-            terms: {
-              [field]: slashNotationRange,
-            },
-          },
-          ...rangeClauses,
-        ],
+        [operator === 'excluded' ? 'must_not' : 'should']: rangeClauses,
+        minimum_should_match: 1,
+      },
+    };
+  }
+
+  if (type === 'text') {
+    const textClauses = buildTextClauses(listValues, field);
+    if (textClauses.length > 200) {
+      throw new TypeError(`Too many text entries in list: "${entry.list.id}"`);
+    }
+    return {
+      bool: {
+        [operator === 'excluded' ? 'must_not' : 'should']: textClauses,
+        minimum_should_match: 1,
       },
     };
   }
 
   return {
     bool: {
-      [operator === 'excluded' ? 'must_not' : 'must']: {
+      [operator === 'excluded' ? 'must_not' : 'filter']: {
         terms: {
           [field]: listValues,
         },

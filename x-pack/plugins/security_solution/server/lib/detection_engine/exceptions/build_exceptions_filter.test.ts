@@ -1111,7 +1111,7 @@ describe('build_exceptions_filter', () => {
 
       expect(booleanFilter).toEqual({
         bool: {
-          must: {
+          filter: {
             terms: {
               'host.name': ['127.0.0.1'],
             },
@@ -1130,6 +1130,49 @@ describe('build_exceptions_filter', () => {
               'host.name': ['127.0.0.1'],
             },
           },
+        },
+      });
+    });
+
+    test('it should build with a should clause when list is ip_range type', async () => {
+      const booleanFilter = await buildListClause(
+        { ...getEntryListMock(), list: { id: getEntryListMock().list.id, type: 'ip_range' } },
+        listClient
+      );
+
+      expect(booleanFilter).toEqual({
+        bool: {
+          should: [
+            {
+              terms: {
+                'host.name': ['127.0.0.1'],
+              },
+            },
+          ],
+          minimum_should_match: 1,
+        },
+      });
+    });
+
+    test('it should build with a filter clause when list is text type', async () => {
+      const booleanFilter = await buildListClause(
+        { ...getEntryListMock(), list: { id: getEntryListMock().list.id, type: 'text' } },
+        listClient
+      );
+
+      expect(booleanFilter).toEqual({
+        bool: {
+          should: [
+            {
+              match: {
+                'host.name': {
+                  query: '127.0.0.1',
+                  operator: 'and',
+                },
+              },
+            },
+          ],
+          minimum_should_match: 1,
         },
       });
     });
