@@ -8,27 +8,28 @@
 import type { Readable } from 'stream';
 
 import type { SavedObjectAttributes, SavedObjectsClientContract } from '@kbn/core/server';
+import type { SanitizedRule } from '@kbn/alerting-plugin/common';
+import type { RulesClient, PartialRule } from '@kbn/alerting-plugin/server';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 
-import type { RulesClient, PartialRule, BulkEditOperation } from '@kbn/alerting-plugin/server';
-import type { SanitizedRule } from '@kbn/alerting-plugin/common';
-import type { UpdateRulesSchema } from '../../../../common/detection_engine/schemas/request';
 import type {
+  FieldsOrUndefined,
   Id,
   IdOrUndefined,
-  RuleIdOrUndefined,
-  PerPageOrUndefined,
   PageOrUndefined,
-  SortFieldOrUndefined,
+  PerPageOrUndefined,
   QueryFilterOrUndefined,
-  FieldsOrUndefined,
+  RuleIdOrUndefined,
+  SortFieldOrUndefined,
   SortOrderOrUndefined,
 } from '../../../../common/detection_engine/schemas/common';
 
-import type { RuleParams } from '../schemas/rule_schemas';
-import type { IRuleExecutionLogForRoutes } from '../rule_execution_log';
 import type { CreateRulesSchema } from '../../../../common/detection_engine/schemas/request/rule_schemas';
 import type { PatchRulesSchema } from '../../../../common/detection_engine/schemas/request/patch_rules_schema';
+import type { UpdateRulesSchema } from '../../../../common/detection_engine/schemas/request';
+
+import type { RuleParams } from '../schemas/rule_schemas';
+import type { IRuleExecutionLogForRoutes } from '../rule_monitoring';
 
 export type RuleAlertType = SanitizedRule<RuleParams>;
 
@@ -54,12 +55,6 @@ export interface HapiReadableStream extends Readable {
 export interface Clients {
   rulesClient: RulesClient;
 }
-
-export const isAlertTypes = (
-  partialAlert: Array<PartialRule<RuleParams>>
-): partialAlert is RuleAlertType[] => {
-  return partialAlert.every((rule) => isAlertType(rule));
-};
 
 export const isAlertType = (
   partialAlert: PartialRule<RuleParams>
@@ -102,21 +97,12 @@ export interface DeleteRuleOptions {
 
 export interface FindRuleOptions {
   rulesClient: RulesClient;
-  perPage: PerPageOrUndefined;
-  page: PageOrUndefined;
-  sortField: SortFieldOrUndefined;
   filter: QueryFilterOrUndefined;
   fields: FieldsOrUndefined;
+  sortField: SortFieldOrUndefined;
   sortOrder: SortOrderOrUndefined;
-}
-
-export interface BulkEditRulesOptions {
-  isRuleRegistryEnabled: boolean;
-  rulesClient: RulesClient;
-  operations: BulkEditOperation[];
-  filter?: QueryFilterOrUndefined;
-  ids?: string[];
-  paramsModifier?: (params: RuleParams) => Promise<RuleParams>;
+  page: PageOrUndefined;
+  perPage: PerPageOrUndefined;
 }
 
 export interface LegacyMigrateParams {

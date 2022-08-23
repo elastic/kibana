@@ -21,7 +21,7 @@ import type {
   EndpointActionResponse,
   LogsEndpointActionResponse,
   ActionResponseOutput,
-  ProcessesEntry,
+  GetProcessesActionOutputContent,
 } from '../../../common/endpoint/types';
 import type { EndpointActionListRequestQuery } from '../../../common/endpoint/schema/actions';
 import { EndpointActionGenerator } from '../../../common/endpoint/data_generators/endpoint_action_generator';
@@ -158,6 +158,6 @@ const getOutputDataIfNeeded = (
             entries: endpointActionGenerator.randomResponseActionProcesses(100),
           },
         },
-      } as { output: ActionResponseOutput<ProcessesEntry> })
+      } as { output: ActionResponseOutput<GetProcessesActionOutputContent> })
     : {};
 };

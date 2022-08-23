@@ -13,8 +13,6 @@ import stream from 'stream';
 import Boom from '@hapi/boom';
 import { URL } from 'url';
 
-import { encodePath } from './utils';
-
 interface Args {
   method: 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head';
   agent: http.Agent;
@@ -23,7 +21,6 @@ interface Args {
   timeout: number;
   headers: http.OutgoingHttpHeaders;
   rejectUnauthorized?: boolean;
-  requestPath: string;
 }
 
 /**
@@ -44,11 +41,10 @@ export const proxyRequest = ({
   timeout,
   payload,
   rejectUnauthorized,
-  requestPath,
 }: Args) => {
-  const { hostname, port, protocol, search } = uri;
+  const { hostname, port, protocol, search, pathname } = uri;
   const client = uri.protocol === 'https:' ? https : http;
-  const encodedPath = encodePath(requestPath);
+
   let resolved = false;
 
   let resolve: (res: http.IncomingMessage) => void;
@@ -71,7 +67,7 @@ export const proxyRequest = ({
     host: sanitizeHostname(hostname),
     port: port === '' ? undefined : parseInt(port, 10),
     protocol,
-    path: `${encodedPath}${search || ''}`,
+    path: `${pathname}${search || ''}`,
     headers: {
       ...finalUserHeaders,
       'content-type': 'application/json',

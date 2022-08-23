@@ -24,6 +24,7 @@ describe('streamReducer', () => {
       loaded: 50,
       loadingState: 'Loaded 50%',
       changePoints: [],
+      errors: [],
     });
   });
 
@@ -38,6 +39,7 @@ describe('streamReducer', () => {
           bg_count: 100,
           score: 0.1,
           pValue: 0.01,
+          normalizedScore: 0.123,
         },
       ])
     );

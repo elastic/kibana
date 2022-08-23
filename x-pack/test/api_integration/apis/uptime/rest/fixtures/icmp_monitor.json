@@ -6,6 +6,7 @@
     "number": "3",
     "unit": "m"
   },
+  "config_id": "",
   "service.name": "example-service-name",
   "tags": [
     "tagT1",

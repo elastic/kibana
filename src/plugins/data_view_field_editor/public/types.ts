@@ -6,26 +6,37 @@
  * Side Public License, v 1.
  */
 
+import { FieldSpec } from '@kbn/data-views-plugin/public';
 import { FunctionComponent } from 'react';
-
+import { DeleteFieldProviderProps } from './components';
+import { OpenFieldDeleteModalOptions } from './open_delete_modal';
+import { OpenFieldEditorOptions } from './open_editor';
+import { FormatEditorServiceSetup, FormatEditorServiceStart } from './service';
 import {
   DataPublicPluginStart,
   DataViewsPublicPluginStart,
+  FieldFormatsStart,
   RuntimeField,
   RuntimeType,
   UsageCollectionStart,
-  FieldFormatsStart,
 } from './shared_imports';
-import { OpenFieldEditorOptions } from './open_editor';
-import { OpenFieldDeleteModalOptions } from './open_delete_modal';
-import { FormatEditorServiceSetup, FormatEditorServiceStart } from './service';
-import { DeleteFieldProviderProps } from './components';
 
+/**
+ * Public setup contract of data view field editor
+ * @public
+ */
 export interface PluginSetup {
   fieldFormatEditors: FormatEditorServiceSetup['fieldFormatEditors'];
 }
 
+/**
+ * Public start contract of data view field editor
+ * @public
+ */
 export interface PluginStart {
+  /**
+   * method to open the data view field editor fly-out
+   */
   openEditor(options: OpenFieldEditorOptions): () => void;
   openDeleteModal(options: OpenFieldDeleteModalOptions): () => void;
   fieldFormatEditors: FormatEditorServiceStart['fieldFormatEditors'];
@@ -47,18 +58,35 @@ export interface StartPlugins {
 
 export type InternalFieldType = 'concrete' | 'runtime';
 
+/**
+ * The data model for the field editor
+ * @public
+ */
 export interface Field {
-  name: string;
-  type: RuntimeField['type'] | string;
+  /**
+   * name / path used for the field
+   */
+  name: FieldSpec['name'];
+  /**
+   * ES type
+   */
+  type: RuntimeType;
+  /**
+   * source of the runtime field script
+   */
   script?: RuntimeField['script'];
-  customLabel?: string;
+  /**
+   * custom label for display
+   */
+  customLabel?: FieldSpec['customLabel'];
+  /**
+   * custom popularity
+   */
   popularity?: number;
-  format?: FieldFormatConfig;
-}
-
-export interface FieldFormatConfig {
-  id: string;
-  params?: { [key: string]: any };
+  /**
+   * configuration of the field format
+   */
+  format?: FieldSpec['format'];
 }
 
 export interface EsRuntimeField {

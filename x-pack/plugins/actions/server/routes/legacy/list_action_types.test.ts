@@ -49,6 +49,7 @@ describe('listActionTypesRoute', () => {
         enabledInConfig: true,
         enabledInLicense: true,
         minimumLicenseRequired: 'gold' as LicenseType,
+        supportedFeatureIds: ['alerting'],
       },
     ];
 
@@ -66,6 +67,9 @@ describe('listActionTypesRoute', () => {
             "id": "1",
             "minimumLicenseRequired": "gold",
             "name": "name",
+            "supportedFeatureIds": Array [
+              "alerting",
+            ],
           },
         ],
       }
@@ -94,6 +98,7 @@ describe('listActionTypesRoute', () => {
         enabledInConfig: true,
         enabledInLicense: true,
         minimumLicenseRequired: 'gold' as LicenseType,
+        supportedFeatureIds: ['alerting'],
       },
     ];
 
@@ -135,6 +140,7 @@ describe('listActionTypesRoute', () => {
         enabledInConfig: true,
         enabledInLicense: true,
         minimumLicenseRequired: 'gold' as LicenseType,
+        supportedFeatureIds: ['alerting'],
       },
     ];
 

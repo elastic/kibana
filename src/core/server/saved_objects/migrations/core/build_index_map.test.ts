@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
 import { createIndexMap } from './build_index_map';
-import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
-import { SavedObjectsType } from '../../types';
 
 const createRegistry = (...types: Array<Partial<SavedObjectsType>>) => {
   const registry = new SavedObjectTypeRegistry();

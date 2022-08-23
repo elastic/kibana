@@ -74,7 +74,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   actionMessageParams,
   ruleType,
 }) => {
-  const [isLoadingCaseAction, hasErrorOnCreationCaseAction] = useManageCaseAction();
+  const [isLoadingCaseAction] = useManageCaseAction();
   const {
     services: {
       application,
@@ -165,14 +165,13 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
             component={RuleActionsField}
             componentProps={{
               messageVariables: actionMessageParams,
-              hasErrorOnCreationCaseAction,
             }}
           />
         </>
       ) : (
         <UseField path="actions" component={GhostFormField} />
       ),
-    [throttle, actionMessageParams, hasErrorOnCreationCaseAction]
+    [throttle, actionMessageParams]
   );
   const displayResponseActionsOptions = useMemo(() => {
     if (ruleType === 'query') {

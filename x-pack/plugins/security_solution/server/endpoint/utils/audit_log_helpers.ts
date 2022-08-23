@@ -6,7 +6,6 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { SearchRequest } from '@kbn/data-plugin/public';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { TransportResult } from '@elastic/elasticsearch';

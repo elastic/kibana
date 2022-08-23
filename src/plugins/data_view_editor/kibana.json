@@ -9,5 +9,5 @@
     "name": "App Services",
     "githubTeam": "kibana-app-services"
   },
-  "description": "This plugin provides the ability to create data views via a modal flyout from any kibana app"
+  "description": "This plugin provides the ability to create data views via a modal flyout inside Kibana apps"
 }

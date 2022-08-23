@@ -77,6 +77,7 @@ const useFormatSideNavItem = (): FormatSideNavItems => {
                     id: current.id,
                     label: current.title,
                     description: current.description,
+                    isBeta: current.isBeta,
                     ...getSecuritySolutionLinkProps({ deepLinkId: current.id }),
                   });
                 }

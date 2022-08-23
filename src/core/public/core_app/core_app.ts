@@ -12,13 +12,13 @@ import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { HttpSetup, HttpStart } from '@kbn/core-http-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { NotificationsSetup, NotificationsStart } from '@kbn/core-notifications-browser';
 import {
   type InternalApplicationSetup,
   type InternalApplicationStart,
   AppNavLinkStatus,
   type AppMountParameters,
 } from '../application';
-import type { NotificationsSetup, NotificationsStart } from '../notifications';
 import {
   renderApp as renderErrorApp,
   setupPublicBaseUrlConfigWarning,

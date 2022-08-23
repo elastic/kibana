@@ -117,15 +117,29 @@ export const aggTerms = (): FunctionDefinition => ({
       }),
     },
     exclude: {
-      types: ['string'],
+      types: ['string', 'number'],
       help: i18n.translate('data.search.aggs.buckets.terms.exclude.help', {
         defaultMessage: 'Specific bucket values to exclude from results',
       }),
+      multi: true,
     },
     include: {
-      types: ['string'],
+      types: ['string', 'number'],
       help: i18n.translate('data.search.aggs.buckets.terms.include.help', {
         defaultMessage: 'Specific bucket values to include in results',
+      }),
+      multi: true,
+    },
+    includeIsRegex: {
+      types: ['boolean'],
+      help: i18n.translate('data.search.aggs.buckets.terms.includeIsRegex.help', {
+        defaultMessage: 'When set to true, the include property is handled as regex',
+      }),
+    },
+    excludeIsRegex: {
+      types: ['boolean'],
+      help: i18n.translate('data.search.aggs.buckets.terms.excludeIsRegex.help', {
+        defaultMessage: 'When set to true, the exclude property is handled as regex',
       }),
     },
     json: {

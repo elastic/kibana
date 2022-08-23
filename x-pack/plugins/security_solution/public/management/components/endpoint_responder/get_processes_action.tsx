@@ -11,7 +11,10 @@ import { EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ActionDetails, ProcessesEntry } from '../../../../common/endpoint/types';
+import type {
+  ActionDetails,
+  GetProcessesActionOutputContent,
+} from '../../../../common/endpoint/types';
 import { useGetActionDetails } from '../../hooks/endpoint/use_get_action_details';
 import type { EndpointCommandDefinitionMeta } from './types';
 import type { CommandExecutionComponentProps } from '../console/types';
@@ -46,7 +49,7 @@ export const GetProcessesActionResult = memo<
     {
       actionId?: string;
       actionRequestSent?: boolean;
-      completedActionDetails?: ActionDetails<ProcessesEntry>;
+      completedActionDetails?: ActionDetails<GetProcessesActionOutputContent>;
       apiError?: IHttpFetchError;
     },
     EndpointCommandDefinitionMeta
@@ -63,13 +66,16 @@ export const GetProcessesActionResult = memo<
     mutate: getProcesses,
     data: getProcessesData,
     isSuccess: isGetProcessesSuccess,
-    error: getProcessesError,
+    error: processesActionRequestError,
   } = useSendGetEndpointProcessesRequest();
 
-  const { data: actionDetails } = useGetActionDetails<ProcessesEntry>(actionId ?? '-', {
-    enabled: Boolean(actionId) && isPending,
-    refetchInterval: isPending ? 3000 : false,
-  });
+  const { data: actionDetails } = useGetActionDetails<GetProcessesActionOutputContent>(
+    actionId ?? '-',
+    {
+      enabled: Boolean(actionId) && isPending,
+      refetchInterval: isPending ? 3000 : false,
+    }
+  );
 
   // Send get processes request if not yet done
   useEffect(() => {
@@ -87,27 +93,30 @@ export const GetProcessesActionResult = memo<
 
   // If get processes request was created, store the action id if necessary
   useEffect(() => {
-    if (isGetProcessesSuccess && actionId !== getProcessesData?.data.id) {
-      setStore((prevState) => {
-        return { ...prevState, actionId: getProcessesData?.data.id };
-      });
-    } else if (getProcessesError) {
-      setStatus('error');
-      setStore((prevState) => {
-        return { ...prevState, apiError: getProcessesError };
-      });
+    if (isPending) {
+      if (isGetProcessesSuccess && actionId !== getProcessesData?.data.id) {
+        setStore((prevState) => {
+          return { ...prevState, actionId: getProcessesData?.data.id };
+        });
+      } else if (processesActionRequestError) {
+        setStatus('error');
+        setStore((prevState) => {
+          return { ...prevState, apiError: processesActionRequestError };
+        });
+      }
     }
   }, [
     actionId,
     getProcessesData?.data.id,
-    getProcessesError,
+    processesActionRequestError,
     isGetProcessesSuccess,
     setStatus,
     setStore,
+    isPending,
   ]);
 
   useEffect(() => {
-    if (actionDetails?.data.isCompleted) {
+    if (actionDetails?.data.isCompleted && isPending) {
       setStatus('success');
       setStore((prevState) => {
         return {
@@ -116,7 +125,7 @@ export const GetProcessesActionResult = memo<
         };
       });
     }
-  }, [actionDetails?.data, setStatus, setStore]);
+  }, [actionDetails?.data, setStatus, setStore, isPending]);
 
   const columns = useMemo(
     () => [
@@ -198,7 +207,7 @@ export const GetProcessesActionResult = memo<
           { defaultMessage: 'Get processes action failed' }
         )}
         dataTestSubj={'getProcessesErrorCallout'}
-        errors={completedActionDetails?.errors}
+        action={completedActionDetails}
         ResultComponent={ResultComponent}
       />
     );

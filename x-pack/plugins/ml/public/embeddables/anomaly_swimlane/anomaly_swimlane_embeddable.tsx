@@ -53,6 +53,10 @@ export class AnomalySwimlaneEmbeddable extends Embeddable<
     );
   }
 
+  public reportsEmbeddableLoad() {
+    return true;
+  }
+
   public onLoading() {
     this.renderComplete.dispatchInProgress();
     this.updateOutput({ loading: true, error: undefined });

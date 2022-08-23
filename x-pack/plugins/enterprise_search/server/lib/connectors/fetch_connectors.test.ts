@@ -92,7 +92,7 @@ describe('fetchConnectors lib', () => {
         index: CONNECTORS_INDEX,
         query: {
           term: {
-            ['index_name.keyword']: 'id',
+            ['index_name']: 'id',
           },
         },
       });
@@ -112,7 +112,7 @@ describe('fetchConnectors lib', () => {
         index: CONNECTORS_INDEX,
         query: {
           term: {
-            ['index_name.keyword']: 'id',
+            ['index_name']: 'id',
           },
         },
       });
@@ -135,7 +135,7 @@ describe('fetchConnectors lib', () => {
         index: CONNECTORS_INDEX,
         query: {
           term: {
-            ['index_name.keyword']: 'id',
+            ['index_name']: 'id',
           },
         },
       });

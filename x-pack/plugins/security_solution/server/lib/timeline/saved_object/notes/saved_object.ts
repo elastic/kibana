@@ -19,10 +19,7 @@ import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import type {
   SavedNote,
   NoteSavedObject,
-  PageInfoNote,
-  SortNote,
   NoteResult,
-  ResponseNotes,
   ResponseNote,
   NoteWithoutExternalRefs,
 } from '../../../../../common/types/timeline/note';
@@ -32,14 +29,6 @@ import { noteSavedObjectType } from '../../saved_object_mappings/notes';
 import { createTimeline } from '../timelines';
 import { timelineSavedObjectType } from '../../saved_object_mappings';
 import { noteFieldsMigrator } from './field_migrator';
-
-export const deleteNote = async (request: FrameworkRequest, noteIds: string[]) => {
-  const savedObjectsClient = (await request.context.core).savedObjects.client;
-
-  await Promise.all(
-    noteIds.map((noteId) => savedObjectsClient.delete(noteSavedObjectType, noteId))
-  );
-};
 
 export const deleteNoteByTimelineId = async (request: FrameworkRequest, timelineId: string) => {
   const options: SavedObjectsFindOptions = {
@@ -63,19 +52,6 @@ export const getNote = async (
   return getSavedNote(request, noteId);
 };
 
-export const getNotesByEventId = async (
-  request: FrameworkRequest,
-  eventId: string
-): Promise<NoteSavedObject[]> => {
-  const options: SavedObjectsFindOptions = {
-    type: noteSavedObjectType,
-    search: eventId,
-    searchFields: ['eventId'],
-  };
-  const notesByEventId = await getAllSavedNote(request, options);
-  return notesByEventId.notes;
-};
-
 export const getNotesByTimelineId = async (
   request: FrameworkRequest,
   timelineId: string
@@ -86,24 +62,6 @@ export const getNotesByTimelineId = async (
   };
   const notesByTimelineId = await getAllSavedNote(request, options);
   return notesByTimelineId.notes;
-};
-
-export const getAllNotes = async (
-  request: FrameworkRequest,
-  pageInfo: PageInfoNote | null,
-  search: string | null,
-  sort: SortNote | null
-): Promise<ResponseNotes> => {
-  const options: SavedObjectsFindOptions = {
-    type: noteSavedObjectType,
-    perPage: pageInfo != null ? pageInfo.pageSize : undefined,
-    page: pageInfo != null ? pageInfo.pageIndex : undefined,
-    search: search != null ? search : undefined,
-    searchFields: ['note'],
-    sortField: sort != null ? sort.sortField : undefined,
-    sortOrder: sort != null ? sort.sortOrder : undefined,
-  };
-  return getAllSavedNote(request, options);
 };
 
 export const persistNote = async ({

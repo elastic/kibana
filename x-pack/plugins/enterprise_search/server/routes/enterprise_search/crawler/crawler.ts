@@ -6,15 +6,22 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
+
+import { ErrorCode } from '../../../../common/types/error_codes';
+import { fetchConnectorByIndexName } from '../../../lib/connectors/fetch_connectors';
+import { fetchCrawlerByIndexName } from '../../../lib/crawler/fetch_crawlers';
 
 import { RouteDependencies } from '../../../plugin';
+import { createError } from '../../../utils/create_error';
+import { elasticsearchErrorHandler } from '../../../utils/elasticsearch_error_handler';
 
 import { registerCrawlerCrawlRulesRoutes } from './crawler_crawl_rules';
 import { registerCrawlerEntryPointRoutes } from './crawler_entry_points';
 import { registerCrawlerSitemapRoutes } from './crawler_sitemaps';
 
 export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
-  const { router, enterpriseSearchRequestHandler } = routeDependencies;
+  const { router, enterpriseSearchRequestHandler, log } = routeDependencies;
 
   router.post(
     {
@@ -26,8 +33,62 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
         }),
       },
     },
-    enterpriseSearchRequestHandler.createRequest({
-      path: '/api/ent/v1/internal/indices',
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+
+      const indexExists = await client.asCurrentUser.indices.exists({
+        index: request.body.index_name,
+      });
+
+      if (indexExists) {
+        return createError({
+          errorCode: ErrorCode.INDEX_ALREADY_EXISTS,
+          message: i18n.translate(
+            'xpack.enterpriseSearch.server.routes.addCrawler.indexExistsError',
+            {
+              defaultMessage: 'This index already exists',
+            }
+          ),
+          response,
+          statusCode: 409,
+        });
+      }
+
+      const crawler = await fetchCrawlerByIndexName(client, request.body.index_name);
+
+      if (crawler) {
+        return createError({
+          errorCode: ErrorCode.CRAWLER_ALREADY_EXISTS,
+          message: i18n.translate(
+            'xpack.enterpriseSearch.server.routes.addCrawler.crawlerExistsError',
+            {
+              defaultMessage: 'A crawler for this index already exists',
+            }
+          ),
+          response,
+          statusCode: 409,
+        });
+      }
+
+      const connector = await fetchConnectorByIndexName(client, request.body.index_name);
+
+      if (connector) {
+        return createError({
+          errorCode: ErrorCode.CONNECTOR_DOCUMENT_ALREADY_EXISTS,
+          message: i18n.translate(
+            'xpack.enterpriseSearch.server.routes.addCrawler.connectorExistsError',
+            {
+              defaultMessage: 'A connector for this index already exists',
+            }
+          ),
+          response,
+          statusCode: 409,
+        });
+      }
+
+      return enterpriseSearchRequestHandler.createRequest({
+        path: '/api/ent/v1/internal/indices',
+      })(context, request, response);
     })
   );
 
@@ -36,8 +97,8 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
       path: '/internal/enterprise_search/crawler/validate_url',
       validate: {
         body: schema.object({
-          url: schema.string(),
           checks: schema.arrayOf(schema.string()),
+          url: schema.string(),
         }),
       },
     },
@@ -64,19 +125,19 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
     {
       path: '/internal/enterprise_search/indices/{indexName}/crawler/crawl_requests',
       validate: {
-        params: schema.object({
-          indexName: schema.string(),
-        }),
         body: schema.object({
           overrides: schema.maybe(
             schema.object({
               domain_allowlist: schema.maybe(schema.arrayOf(schema.string())),
               max_crawl_depth: schema.maybe(schema.number()),
               seed_urls: schema.maybe(schema.arrayOf(schema.string())),
-              sitemap_urls: schema.maybe(schema.arrayOf(schema.string())),
               sitemap_discovery_disabled: schema.maybe(schema.boolean()),
+              sitemap_urls: schema.maybe(schema.arrayOf(schema.string())),
             })
           ),
+        }),
+        params: schema.object({
+          indexName: schema.string(),
         }),
       },
     },
@@ -104,8 +165,8 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
       path: '/internal/enterprise_search/indices/{indexName}/crawler/crawl_requests/{crawlRequestId}',
       validate: {
         params: schema.object({
-          indexName: schema.string(),
           crawlRequestId: schema.string(),
+          indexName: schema.string(),
         }),
       },
     },
@@ -173,21 +234,21 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
     {
       path: '/internal/enterprise_search/indices/{indexName}/crawler/domains/{domainId}',
       validate: {
-        params: schema.object({
-          indexName: schema.string(),
-          domainId: schema.string(),
-        }),
         body: schema.object({
           crawl_rules: schema.maybe(
             schema.arrayOf(
               schema.object({
-                order: schema.number(),
                 id: schema.string(),
+                order: schema.number(),
               })
             )
           ),
           deduplication_enabled: schema.maybe(schema.boolean()),
           deduplication_fields: schema.maybe(schema.arrayOf(schema.string())),
+        }),
+        params: schema.object({
+          domainId: schema.string(),
+          indexName: schema.string(),
         }),
       },
     },
@@ -218,6 +279,10 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
         params: schema.object({
           indexName: schema.string(),
         }),
+        query: schema.object({
+          'page[current]': schema.maybe(schema.number()),
+          'page[size]': schema.maybe(schema.number()),
+        }),
       },
     },
     enterpriseSearchRequestHandler.createRequest({
@@ -229,11 +294,11 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
     {
       path: '/internal/enterprise_search/indices/{indexName}/crawler/process_crawls',
       validate: {
-        params: schema.object({
-          indexName: schema.string(),
-        }),
         body: schema.object({
           domains: schema.maybe(schema.arrayOf(schema.string())),
+        }),
+        params: schema.object({
+          indexName: schema.string(),
         }),
       },
     },
@@ -260,12 +325,12 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
     {
       path: '/internal/enterprise_search/indices/{indexName}/crawler/crawl_schedule',
       validate: {
+        body: schema.object({
+          frequency: schema.number(),
+          unit: schema.string(),
+        }),
         params: schema.object({
           indexName: schema.string(),
-        }),
-        body: schema.object({
-          unit: schema.string(),
-          frequency: schema.number(),
         }),
       },
     },

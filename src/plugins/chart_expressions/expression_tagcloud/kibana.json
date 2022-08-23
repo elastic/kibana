@@ -6,7 +6,7 @@
   "ui": true,
   "requiredPlugins": ["expressions", "visualizations", "charts", "presentationUtil", "fieldFormats"],
   "requiredBundles": ["kibanaUtils", "kibanaReact"],
-  "optionalPlugins": [],
+  "optionalPlugins": ["usageCollection"],
   "owner": {
     "name": "Vis Editors",
     "githubTeam": "kibana-vis-editors"

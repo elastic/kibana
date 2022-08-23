@@ -39,6 +39,7 @@ import type {
   ScheduleStepRule,
   ActionsStepRule,
 } from './types';
+import { DataSourceType } from './types';
 import { severityOptions } from '../../../components/rules/step_about_rule/data';
 
 export interface GetStepsData {
@@ -89,6 +90,7 @@ export const getActionsStepsData = (
   };
 };
 
+/* eslint-disable complexity */
 export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
   ruleType: rule.type,
   anomalyThreshold: rule.anomaly_threshold ?? 50,
@@ -130,7 +132,20 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
     eventCategoryField: rule.event_category_override,
     tiebreakerField: rule.tiebreaker_field,
   },
+  dataSourceType: rule.data_view_id ? DataSourceType.DataView : DataSourceType.IndexPatterns,
+  newTermsFields: rule.new_terms_fields ?? [],
+  historyWindowSize: rule.history_window_start
+    ? convertHistoryStartToSize(rule.history_window_start)
+    : '7d',
 });
+
+const convertHistoryStartToSize = (relativeTime: string) => {
+  if (relativeTime.startsWith('now-')) {
+    return relativeTime.substring(4);
+  } else {
+    return relativeTime;
+  }
+};
 
 export const getScheduleStepsData = (rule: Rule): ScheduleStepRule => {
   const { interval, from } = rule;
@@ -365,6 +380,7 @@ const getRuleSpecificRuleParamKeys = (ruleType: Type) => {
       return ['anomaly_threshold', 'machine_learning_job_id'];
     case 'threshold':
       return ['threshold', ...queryRuleParams];
+    case 'new_terms':
     case 'threat_match':
     case 'query':
     case 'saved_query':

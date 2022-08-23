@@ -22,7 +22,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { dataTypes } from '../../../../../../../common';
+import { dataTypes } from '../../../../../../../common/constants';
 import type { NewAgentPolicy, AgentPolicy } from '../../../../types';
 import { useStartServices } from '../../../../hooks';
 
@@ -109,7 +109,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
       </EuiDescribedFormGroup>
       <EuiDescribedFormGroup
         title={
-          <h4>
+          <h4 data-test-subj="defaultNamespaceHeader">
             <FormattedMessage
               id="xpack.fleet.agentPolicyForm.namespaceFieldLabel"
               defaultMessage="Default namespace"

@@ -8,11 +8,12 @@
 
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
-import { ElasticsearchClient } from '../../../elasticsearch';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   catchRetryableEsClientErrors,
   RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
+
 /** @internal */
 export interface OpenPitResponse {
   pitId: string;
@@ -24,7 +25,7 @@ export interface OpenPitParams {
   index: string;
 }
 // how long ES should keep PIT alive
-export const pitKeepAlive = '10m';
+export const DEFAULT_PIT_KEEP_ALIVE = '10m';
 /*
  * Creates a lightweight view of data when the request has been initiated.
  * See https://www.elastic.co/guide/en/elasticsearch/reference/current/point-in-time-api.html
@@ -38,7 +39,7 @@ export const openPit =
     return client
       .openPointInTime({
         index,
-        keep_alive: pitKeepAlive,
+        keep_alive: DEFAULT_PIT_KEEP_ALIVE,
       })
       .then((response) => Either.right({ pitId: response.id }))
       .catch(catchRetryableEsClientErrors);

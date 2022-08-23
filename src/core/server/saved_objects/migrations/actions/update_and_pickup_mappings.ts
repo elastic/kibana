@@ -9,8 +9,8 @@
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { ElasticsearchClient } from '../../../elasticsearch';
-import { IndexMapping } from '../../mappings';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import {
   catchRetryableEsClientErrors,
   RetryableEsClientError,

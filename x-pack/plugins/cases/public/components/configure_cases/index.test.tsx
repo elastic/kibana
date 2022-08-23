@@ -553,20 +553,7 @@ describe('ConfigureCases', () => {
         expect(wrapper.find('[data-test-subj="add-connector-flyout"]').exists()).toBe(true);
         expect(getAddConnectorFlyoutMock).toHaveBeenCalledWith(
           expect.objectContaining({
-            supportedActionTypes: [
-              expect.objectContaining({
-                id: '.servicenow',
-              }),
-              expect.objectContaining({
-                id: '.jira',
-              }),
-              expect.objectContaining({
-                id: '.resilient',
-              }),
-              expect.objectContaining({
-                id: '.servicenow-sir',
-              }),
-            ],
+            featureId: 'cases',
           })
         );
       });

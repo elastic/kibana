@@ -11,10 +11,10 @@ import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 
 import { defineReducerStreamRoute, defineSimpleStringStreamRoute } from './routes';
 
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ResponseStreamSetupPlugins {}
 
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ResponseStreamStartPlugins {}
 
 export class ResponseStreamPlugin implements Plugin {

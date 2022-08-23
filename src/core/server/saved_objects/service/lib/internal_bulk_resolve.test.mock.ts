@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
 import type * as InternalUtils from './internal_utils';
-import type { isNotFoundFromUnsupportedServer } from '../../../elasticsearch';
 
 export const mockGetSavedObjectFromSource = jest.fn() as jest.MockedFunction<
   typeof InternalUtils['getSavedObjectFromSource']
@@ -28,8 +28,8 @@ jest.mock('./internal_utils', () => {
 export const mockIsNotFoundFromUnsupportedServer = jest.fn() as jest.MockedFunction<
   typeof isNotFoundFromUnsupportedServer
 >;
-jest.mock('../../../elasticsearch', () => {
-  const actual = jest.requireActual('../../../elasticsearch');
+jest.mock('@kbn/core-elasticsearch-server-internal', () => {
+  const actual = jest.requireActual('@kbn/core-elasticsearch-server-internal');
   return {
     ...actual,
     isNotFoundFromUnsupportedServer: mockIsNotFoundFromUnsupportedServer,

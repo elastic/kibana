@@ -32,8 +32,8 @@ describe('AutomaticCrawlSchedulerLogic', () => {
 
     expect(AutomaticCrawlSchedulerLogic.values).toEqual({
       crawlAutomatically: false,
-      crawlFrequency: 7,
-      crawlUnit: CrawlUnits.days,
+      crawlFrequency: 24,
+      crawlUnit: CrawlUnits.hours,
       isSubmitting: false,
     });
   });
@@ -51,8 +51,8 @@ describe('AutomaticCrawlSchedulerLogic', () => {
 
         expect(AutomaticCrawlSchedulerLogic.values).toMatchObject({
           crawlAutomatically: false,
-          crawlFrequency: 7,
-          crawlUnit: CrawlUnits.days,
+          crawlFrequency: 24,
+          crawlUnit: CrawlUnits.hours,
         });
       });
     });

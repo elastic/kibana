@@ -12,6 +12,8 @@ import { namesMock } from './names.mock';
 import { IClusterClientAdapter } from './cluster_client_adapter';
 import { clusterClientAdapterMock } from './cluster_client_adapter.mock';
 
+export const MOCK_RETRY_DELAY = 20;
+
 const createContextMock = () => {
   const mock: jest.Mocked<EsContext> & {
     esAdapter: jest.Mocked<IClusterClientAdapter>;
@@ -23,6 +25,7 @@ const createContextMock = () => {
     waitTillReady: jest.fn(async () => true),
     esAdapter: clusterClientAdapterMock.create(),
     initialized: true,
+    retryDelay: MOCK_RETRY_DELAY,
   };
   return mock;
 };

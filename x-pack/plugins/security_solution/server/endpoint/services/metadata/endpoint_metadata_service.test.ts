@@ -8,8 +8,7 @@
 import type { EndpointMetadataServiceTestContextMock } from './mocks';
 import { createEndpointMetadataServiceTestContextMock } from './mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import type { ElasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
+import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import {
   legacyMetadataSearchResponseMock,
   unitedMetadataSearchResponseMock,

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiContextMenu,
   EuiContextMenuPanelItemDescriptor,
@@ -19,7 +19,11 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { BaseVisType, VisGroups, VisTypeAlias } from '@kbn/visualizations-plugin/public';
 import { SolutionToolbarPopover } from '@kbn/presentation-util-plugin/public';
-import { EmbeddableFactoryDefinition, EmbeddableInput } from '../../services/embeddable';
+import {
+  EmbeddableFactory,
+  EmbeddableFactoryDefinition,
+  EmbeddableInput,
+} from '../../services/embeddable';
 import { useKibana } from '../../services/kibana_react';
 import { DashboardAppServices } from '../../types';
 import { DashboardContainer } from '..';
@@ -41,9 +45,33 @@ interface FactoryGroup {
   factories: EmbeddableFactoryDefinition[];
 }
 
+interface UnwrappedEmbeddableFactory {
+  factory: EmbeddableFactory;
+  isEditable: boolean;
+}
+
 export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
   const { core, embeddable, visualizations, usageCollection, uiSettings } =
     useKibana<DashboardAppServices>().services;
+
+  const embeddableFactories = useMemo(
+    () => (embeddable ? Array.from(embeddable.getEmbeddableFactories()) : []),
+    [embeddable]
+  );
+  const [unwrappedEmbeddableFactories, setUnwrappedEmbeddableFactories] = useState<
+    UnwrappedEmbeddableFactory[]
+  >([]);
+
+  useEffect(() => {
+    Promise.all(
+      embeddableFactories.map<Promise<UnwrappedEmbeddableFactory>>(async (factory) => ({
+        factory,
+        isEditable: await factory.isEditable(),
+      }))
+    ).then((factories) => {
+      setUnwrappedEmbeddableFactories(factories);
+    });
+  }, [embeddableFactories]);
 
   const IS_DARK_THEME = uiSettings.get('theme:darkMode');
   const LABS_ENABLED = uiSettings.get('visualize:enableLabs');
@@ -89,13 +117,10 @@ export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
       a === b ? 0 : a ? -1 : 1
     );
 
-  const factories = embeddable
-    ? Array.from(embeddable.getEmbeddableFactories()).filter(
-        ({ type, isEditable, canCreateNew, isContainerType }) =>
-          // @ts-expect-error ts 4.5 upgrade
-          isEditable() && !isContainerType && canCreateNew() && type !== 'visualization'
-      )
-    : [];
+  const factories = unwrappedEmbeddableFactories.filter(
+    ({ isEditable, factory: { type, canCreateNew, isContainerType } }) =>
+      isEditable && !isContainerType && canCreateNew() && type !== 'visualization'
+  );
 
   const factoryGroupMap: Record<string, FactoryGroup> = {};
   const ungroupedFactories: EmbeddableFactoryDefinition[] = [];
@@ -103,7 +128,7 @@ export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
 
   let panelCount = 1 + aggBasedPanelID;
 
-  factories.forEach((factory: EmbeddableFactoryDefinition, index) => {
+  factories.forEach(({ factory }) => {
     const { grouping } = factory;
 
     if (grouping) {

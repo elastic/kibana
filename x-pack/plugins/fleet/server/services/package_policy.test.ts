@@ -13,11 +13,12 @@ import {
 } from '@kbn/core/server/mocks';
 import { produce } from 'immer';
 import type {
+  KibanaRequest,
   SavedObjectsClient,
   SavedObjectsClientContract,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
-import type { KibanaRequest } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import type {
   PackageInfo,
@@ -41,8 +42,8 @@ import type {
   NewPackagePolicy,
   NewPackagePolicyInput,
   PackagePolicyPackage,
-} from '../../common';
-import { packageToPackagePolicy } from '../../common';
+} from '../../common/types';
+import { packageToPackagePolicy } from '../../common/services';
 
 import { IngestManagerError, PackagePolicyIneligibleForUpgradeError } from '../errors';
 
@@ -113,6 +114,36 @@ async function mockedGetPackageInfo(params: any) {
   if (params.pkgName === 'apache') pkg = { version: '1.3.2' };
   if (params.pkgName === 'aws') pkg = { version: '0.3.3' };
   if (params.pkgName === 'endpoint') pkg = {};
+  if (params.pkgName === 'test') {
+    pkg = {
+      version: '1.0.2',
+    };
+  }
+  if (params.pkgName === 'test-conflict') {
+    pkg = {
+      version: '1.0.2',
+      policy_templates: [
+        {
+          name: 'test-conflict',
+          inputs: [
+            {
+              title: 'test',
+              type: 'logs',
+              description: 'test',
+              vars: [
+                {
+                  name: 'test-var-required',
+                  required: true,
+                  type: 'integer',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+  }
+
   return Promise.resolve(pkg);
 }
 
@@ -129,8 +160,8 @@ jest.mock('./epm/packages', () => {
   };
 });
 
-jest.mock('../../common', () => ({
-  ...jest.requireActual('../../common'),
+jest.mock('../../common/services/package_to_package_policy', () => ({
+  ...jest.requireActual('../../common/services/package_to_package_policy'),
   packageToPackagePolicy: jest.fn(),
 }));
 
@@ -620,7 +651,7 @@ describe('Package policy service', () => {
           _type: string,
           _id: string
         ): Promise<SavedObjectsUpdateResponse<PackagePolicySOAttributes>> => {
-          throw savedObjectsClient.errors.createConflictError('abc', '123');
+          throw SavedObjectsErrorHelpers.createConflictError('abc', '123');
         }
       );
       const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -1108,6 +1139,10 @@ describe('Package policy service', () => {
 
       expect(result.name).toEqual('test');
     });
+  });
+
+  describe('delete', () => {
+    it('should allow to delete a package policy', async () => {});
   });
 
   describe('runDeleteExternalCallbacks', () => {
@@ -3380,6 +3415,72 @@ describe('Package policy service', () => {
         packagePolicyService.getUpgradePackagePolicyInfo(savedObjectsClient, 'package-policy-id')
       ).rejects.toEqual(new IngestManagerError('Package notinstalled is not installed'));
     });
+  });
+});
+
+describe('getUpgradeDryRunDiff', () => {
+  let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  beforeEach(() => {
+    savedObjectsClient = savedObjectsClientMock.create();
+    appContextService.start(createAppContextStartContractMock());
+  });
+  afterEach(() => {
+    appContextService.stop();
+  });
+  it('should return no errors if there is no conflict to upgrade', async () => {
+    const res = await packagePolicyService.getUpgradeDryRunDiff(
+      savedObjectsClient,
+      'package-policy-id',
+      {
+        id: '123',
+        name: 'test-123',
+        package: {
+          title: 'test',
+          name: 'test',
+          version: '1.0.1',
+        },
+        namespace: 'default',
+        inputs: [
+          {
+            id: 'toto',
+            enabled: true,
+            streams: [],
+            type: 'logs',
+          },
+        ],
+      } as any,
+      '1.0.2'
+    );
+
+    expect(res.hasErrors).toBeFalsy();
+  });
+
+  it('should no errors if there is a conflict to upgrade', async () => {
+    const res = await packagePolicyService.getUpgradeDryRunDiff(
+      savedObjectsClient,
+      'package-policy-id',
+      {
+        id: '123',
+        name: 'test-123',
+        package: {
+          title: 'test',
+          name: 'test-conflict',
+          version: '1.0.1',
+        },
+        namespace: 'default',
+        inputs: [
+          {
+            id: 'toto',
+            enabled: true,
+            streams: [],
+            type: 'logs',
+          },
+        ],
+      } as any,
+      '1.0.2'
+    );
+
+    expect(res.hasErrors).toBeTruthy();
   });
 });
 

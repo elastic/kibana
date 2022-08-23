@@ -5,26 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-export { SavedObjectsErrorHelpers, SavedObjectsClientProvider, SavedObjectsUtils } from './lib';
-export type {
-  SavedObjectsRepository,
-  ISavedObjectsPointInTimeFinder,
-  SavedObjectsCreatePointInTimeFinderOptions,
-  SavedObjectsCreatePointInTimeFinderDependencies,
-  ISavedObjectsClientProvider,
-  SavedObjectsClientProviderOptions,
-  SavedObjectsClientWrapperFactory,
-  SavedObjectsClientWrapperOptions,
-  SavedObjectsClientFactory,
-  SavedObjectsClientFactoryProvider,
-  SavedObjectsCollectMultiNamespaceReferencesObject,
-  SavedObjectsCollectMultiNamespaceReferencesOptions,
-  SavedObjectReferenceWithContext,
-  SavedObjectsCollectMultiNamespaceReferencesResponse,
-  SavedObjectsUpdateObjectsSpacesObject,
-  SavedObjectsUpdateObjectsSpacesOptions,
-  SavedObjectsUpdateObjectsSpacesResponse,
-  SavedObjectsUpdateObjectsSpacesResponseObject,
-} from './lib';
 
-export * from './saved_objects_client';
+export { SavedObjectsClientProvider } from './lib';
+export type { SavedObjectsRepository, ISavedObjectsClientProvider } from './lib';
+export { SavedObjectsClient } from './saved_objects_client';

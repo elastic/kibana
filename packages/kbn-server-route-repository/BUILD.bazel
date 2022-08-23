@@ -51,6 +51,7 @@ jsts_transpiler(
   name = "target_node",
   srcs = SRCS,
   build_pkg_name = package_name(),
+  root_input_dir = "src",
 )
 
 jsts_transpiler(
@@ -61,6 +62,7 @@ jsts_transpiler(
     "src/parse_endpoint.ts",
   ],
   build_pkg_name = package_name(),
+  root_input_dir = "src",
   web = True,
 )
 

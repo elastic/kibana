@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+// TODO Consolidate with duplicate component `DatePickerWrapper` in
+// `x-pack/plugins/data_visualizer/public/application/common/components/date_picker_wrapper/date_picker_wrapper.tsx`
+
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Subscription } from 'rxjs';
 import { debounce } from 'lodash';

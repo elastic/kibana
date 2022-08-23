@@ -7,15 +7,16 @@
  */
 
 import { mockGetConvertedObjectId } from './document_migrator.test.mock';
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import _ from 'lodash';
-import { SavedObjectUnsanitizedDoc } from '../../serialization';
+import type { SavedObjectUnsanitizedDoc, SavedObjectsType } from '@kbn/core-saved-objects-server';
+import {
+  SavedObjectTypeRegistry,
+  LEGACY_URL_ALIAS_TYPE,
+} from '@kbn/core-saved-objects-base-server-internal';
 import { DocumentMigrator } from './document_migrator';
 import { TransformSavedObjectDocumentError } from './transform_saved_object_document_error';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { SavedObjectsType } from '../../types';
-import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
-import { LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 
 const mockLoggerFactory = loggingSystemMock.create();
 const mockLogger = mockLoggerFactory.get('mock logger');
@@ -115,7 +116,9 @@ describe('DocumentMigrator', () => {
         expect(migrationObj.prepareMigrations).toThrow(/expected a function, but got 23/i);
       });
       it('validates definitions with migrations: Function | Objects', () => {
-        const validMigrationMap = { '1.2.3': () => {} };
+        const validMigrationMap = {
+          '1.2.3': () => {},
+        };
         const migrationFn = new DocumentMigrator(createDefinition(() => validMigrationMap));
         const migrationObj = new DocumentMigrator(createDefinition(validMigrationMap));
         expect(migrationFn.prepareMigrations).not.toThrow();

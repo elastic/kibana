@@ -88,7 +88,7 @@ describe('TransactionActionMenu component', () => {
     expect(
       (getByText('Trace logs').parentElement as HTMLAnchorElement).href
     ).toEqual(
-      'http://localhost/basepath/app/logs/link-to/logs?time=1545092070952&filter=trace.id:%228b60bd32ecc6e1506735a8b6cfcf175c%22%20OR%20%228b60bd32ecc6e1506735a8b6cfcf175c%22'
+      'http://localhost/basepath/app/logs/link-to/logs?time=1545092070952&filter=trace.id:%228b60bd32ecc6e1506735a8b6cfcf175c%22%20OR%20(not%20trace.id:*%20AND%20%228b60bd32ecc6e1506735a8b6cfcf175c%22)'
     );
   });
 

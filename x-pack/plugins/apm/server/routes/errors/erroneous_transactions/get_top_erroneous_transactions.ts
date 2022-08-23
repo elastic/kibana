@@ -17,6 +17,7 @@ import {
   kqlQuery,
   termQuery,
 } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { keyBy } from 'lodash';
 import {
   ERROR_GROUP_ID,
@@ -24,7 +25,6 @@ import {
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../../common/processor_event';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { Setup } from '../../../lib/helpers/setup_request';
 import { getBucketSize } from '../../../lib/helpers/get_bucket_size';

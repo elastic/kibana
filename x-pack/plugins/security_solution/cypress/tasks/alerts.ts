@@ -7,7 +7,6 @@
 
 import {
   ADD_EXCEPTION_BTN,
-  ALERT_RISK_SCORE_HEADER,
   ALERT_CHECKBOX,
   CHART_SELECT,
   CLOSE_ALERT_BTN,
@@ -27,7 +26,10 @@ import {
   TIMELINE_CONTEXT_MENU_BTN,
 } from '../screens/alerts';
 import { REFRESH_BUTTON } from '../screens/security_header';
-import { TIMELINE_COLUMN_SPINNER } from '../screens/timeline';
+import {
+  ALERT_TABLE_CELL_ACTIONS_ADD_TO_TIMELINE,
+  TIMELINE_COLUMN_SPINNER,
+} from '../screens/timeline';
 import {
   UPDATE_ENRICHMENT_RANGE_BUTTON,
   ENRICHMENT_QUERY_END_INPUT,
@@ -111,12 +113,6 @@ export const goToOpenedAlerts = () => {
   cy.get(REFRESH_BUTTON).should('have.attr', 'aria-label', 'Refresh query');
 };
 
-export const refreshAlerts = () => {
-  // ensure we've refetched fields the first time index is defined
-  cy.get(REFRESH_BUTTON).should('have.attr', 'aria-label', 'Refresh query');
-  cy.get(REFRESH_BUTTON).first().click({ force: true });
-};
-
 export const openFirstAlert = () => {
   cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
   cy.get(OPEN_ALERT_BTN).click();
@@ -155,14 +151,13 @@ export const selectNumberOfAlerts = (numberOfAlerts: number) => {
   }
 };
 
-export const sortRiskScore = () => {
-  cy.get(ALERT_RISK_SCORE_HEADER).click();
-  cy.get(TIMELINE_COLUMN_SPINNER).should('exist');
-  cy.get(TIMELINE_COLUMN_SPINNER).should('not.exist');
-};
-
 export const investigateFirstAlertInTimeline = () => {
   cy.get(SEND_ALERT_TO_TIMELINE_BTN).first().click({ force: true });
+};
+
+export const addAlertPropertyToTimeline = (propertySelector: string, rowIndex: number) => {
+  cy.get(propertySelector).eq(rowIndex).trigger('mouseover');
+  cy.get(ALERT_TABLE_CELL_ACTIONS_ADD_TO_TIMELINE).first().click({ force: true });
 };
 
 export const waitForAlerts = () => {

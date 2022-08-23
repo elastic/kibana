@@ -13,8 +13,7 @@ import type { ConsoleDataAction, ConsoleStoreReducer } from '../types';
 export const INPUT_DEFAULT_PLACEHOLDER_TEXT = i18n.translate(
   'xpack.securitySolution.handleInputAreaState.inputPlaceholderText',
   {
-    defaultMessage:
-      'Click here to type and submit an action. For assistance, use the "help" action',
+    defaultMessage: 'Submit response action',
   }
 );
 
@@ -23,7 +22,8 @@ type InputAreaStateAction = ConsoleDataAction & {
     | 'updateInputPopoverState'
     | 'updateInputHistoryState'
     | 'updateInputTextEnteredState'
-    | 'updateInputPlaceholderState';
+    | 'updateInputPlaceholderState'
+    | 'setInputState';
 };
 
 export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
@@ -96,6 +96,19 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
           },
         };
       }
+      break;
+
+    case 'setInputState':
+      if (state.input.visibleState !== payload.value) {
+        return {
+          ...state,
+          input: {
+            ...state.input,
+            visibleState: payload.value,
+          },
+        };
+      }
+      break;
   }
 
   // No updates needed. Just return original state

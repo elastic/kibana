@@ -18,7 +18,6 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiFieldText,
-  EuiIconTip,
   EuiFormRow,
   EuiText,
 } from '@elastic/eui';
@@ -133,15 +132,14 @@ function DragAndDropTextListComponent({
                         <EuiFlexGroup
                           className="pipelineProcessorsEditor__form__dragAndDropList__item"
                           justifyContent="center"
-                          alignItems="center"
                           gutterSize="none"
                         >
                           <EuiFlexItem grow={false}>
-                            <div {...provided.dragHandleProps}>
-                              <EuiIcon
-                                className="pipelineProcessorsEditor__form__dragAndDropList__grabIcon"
-                                type="grab"
-                              />
+                            <div
+                              {...provided.dragHandleProps}
+                              className="pipelineProcessorsEditor__form__dragAndDropList__grabIcon"
+                            >
+                              <EuiIcon type="grab" />
                             </div>
                           </EuiFlexItem>
                           <EuiFlexItem>
@@ -160,34 +158,17 @@ function DragAndDropTextListComponent({
                                 const { isInvalid, errorMessage } =
                                   getFieldValidityAndErrorMessage(field);
                                 return (
-                                  <EuiFlexGroup gutterSize="none" alignItems="center">
-                                    <EuiFlexItem>
-                                      <EuiFieldText
-                                        data-test-subj={`input-${idx}`}
-                                        id={idx === 0 ? firstItemId : undefined}
-                                        isInvalid={isInvalid}
-                                        value={field.value}
-                                        onChange={field.onChange}
-                                        compressed
-                                        fullWidth
-                                      />
-                                    </EuiFlexItem>
-                                    {typeof errorMessage === 'string' && (
-                                      <EuiFlexItem grow={false}>
-                                        <div
-                                          className="pipelineProcessorsEditor__form__dragAndDropList__errorIcon"
-                                          data-test-subj="errorIcon"
-                                        >
-                                          <EuiIconTip
-                                            aria-label={errorMessage}
-                                            content={errorMessage}
-                                            type="alert"
-                                            color="danger"
-                                          />
-                                        </div>
-                                      </EuiFlexItem>
-                                    )}
-                                  </EuiFlexGroup>
+                                  <EuiFormRow isInvalid={isInvalid} error={errorMessage} fullWidth>
+                                    <EuiFieldText
+                                      data-test-subj={`input-${idx}`}
+                                      id={idx === 0 ? firstItemId : undefined}
+                                      isInvalid={isInvalid}
+                                      value={field.value}
+                                      onChange={field.onChange}
+                                      compressed
+                                      fullWidth
+                                    />
+                                  </EuiFormRow>
                                 );
                               }}
                             </UseField>
@@ -200,6 +181,7 @@ function DragAndDropTextListComponent({
                                 iconType="minusInCircle"
                                 color="danger"
                                 onClick={() => onRemove(item.id)}
+                                size="s"
                               />
                             ) : (
                               // Render a no-op placeholder button

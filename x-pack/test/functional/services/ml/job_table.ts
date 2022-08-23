@@ -41,10 +41,11 @@ export interface OtherUrlConfig {
 }
 
 export function MachineLearningJobTableProvider(
-  { getService }: FtrProviderContext,
+  { getPageObject, getService }: FtrProviderContext,
   mlCommonUI: MlCommonUI,
   customUrls: MlCustomUrls
 ) {
+  const headerPage = getPageObject('header');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
@@ -606,6 +607,7 @@ export function MachineLearningJobTableProvider(
       // click Custom URLs tab
       await testSubjects.click('mlEditJobFlyout-customUrls');
       await this.ensureEditCustomUrlTabOpen();
+      await headerPage.waitUntilLoadingHasFinished();
     }
 
     public async ensureEditCustomUrlTabOpen() {

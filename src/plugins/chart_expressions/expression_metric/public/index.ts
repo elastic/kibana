@@ -11,3 +11,5 @@ import { ExpressionMetricPlugin } from './plugin';
 export function plugin() {
   return new ExpressionMetricPlugin();
 }
+
+export { getDataBoundsForPalette } from './utils';

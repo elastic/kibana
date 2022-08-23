@@ -12,15 +12,19 @@ import {
   mockIsNotFoundFromUnsupportedServer,
 } from './internal_bulk_resolve.test.mock';
 
-import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
-import { LEGACY_URL_ALIAS_TYPE } from '../../object_types';
-import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
-import { SavedObjectsSerializer } from '../../serialization';
-import { SavedObjectsErrorHelpers } from './errors';
-import { SavedObjectsBulkResolveObject } from '../saved_objects_client';
-import { SavedObject, SavedObjectsBaseOptions } from '../../types';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type {
+  SavedObjectsBulkResolveObject,
+  SavedObjectsBaseOptions,
+} from '@kbn/core-saved-objects-api-server';
+import { SavedObjectsErrorHelpers, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
+import {
+  SavedObjectsSerializer,
+  LEGACY_URL_ALIAS_TYPE,
+} from '@kbn/core-saved-objects-base-server-internal';
+import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { internalBulkResolve, InternalBulkResolveParams } from './internal_bulk_resolve';
-import { SavedObjectsUtils } from './utils';
 import { normalizeNamespace } from './internal_utils';
 
 const VERSION_PROPS = { _seq_no: 1, _primary_term: 1 };

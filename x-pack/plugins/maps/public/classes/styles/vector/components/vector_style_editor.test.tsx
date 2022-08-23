@@ -65,7 +65,14 @@ const vectorStyleDescriptor = {
 const vectorStyle = new VectorStyle(
   vectorStyleDescriptor,
   {} as unknown as IVectorSource,
-  {} as unknown as IVectorLayer,
+  {
+    getMaxZoom: () => {
+      return 24;
+    },
+    getMinZoom: () => {
+      return 0;
+    },
+  } as unknown as IVectorLayer,
   [] as CustomIcon[]
 );
 const styleProperties: StyleProperties = {};

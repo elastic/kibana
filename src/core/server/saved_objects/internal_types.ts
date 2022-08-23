@@ -7,8 +7,8 @@
  */
 
 import type { IRouter, RequestHandlerContextBase } from '@kbn/core-http-server';
-import type { ElasticsearchRequestHandlerContext } from '../elasticsearch';
-import type { SavedObjectsRequestHandlerContext } from './saved_objects_route_handler_context';
+import type { ElasticsearchRequestHandlerContext } from '@kbn/core-elasticsearch-server';
+import type { SavedObjectsRequestHandlerContext } from '@kbn/core-saved-objects-server';
 
 /**
  * Request handler context used by core's savedObjects routes.

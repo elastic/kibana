@@ -65,6 +65,9 @@ describe('KibanaExecutionContext', () => {
         type: 'test-type',
         name: 'test-name',
         id: '42',
+        meta: {
+          foo: true,
+        },
         description: 'test-descripton',
       };
 
@@ -84,6 +87,9 @@ describe('KibanaExecutionContext', () => {
         type: 'child-test-type',
         name: 'child-test-name',
         id: '42',
+        meta: {
+          foo: 'test',
+        },
         description: 'test-descripton',
       };
 
@@ -98,6 +104,9 @@ describe('KibanaExecutionContext', () => {
         id: 'Visualization☺漢字',
         type: 'test☺type',
         name: 'test漢name',
+        meta: {
+          foo: 'test漢name',
+        },
         description: 'test字description',
       };
 
@@ -112,6 +121,9 @@ describe('KibanaExecutionContext', () => {
         id: 'Dashboard☺漢字',
         type: 'test☺type',
         name: 'test漢name',
+        meta: {
+          foo: 'test漢name',
+        },
         description: 'parent-descripton',
       };
       const parentContainer = new ExecutionContextContainer(parentContext);
@@ -135,6 +147,9 @@ describe('KibanaExecutionContext', () => {
           new ExecutionContextContainer({
             type: 'test-type'.repeat(1000),
             name: 'test-name',
+            meta: {
+              foo: 'test-meta',
+            },
             id: '42'.repeat(1000),
             description: 'test-descripton',
           }).toString(),
@@ -149,6 +164,9 @@ describe('KibanaExecutionContext', () => {
         type: 'test-type',
         name: 'test-name',
         id: '42',
+        meta: {
+          foo: 'test',
+        },
         description: 'test-descripton',
       };
 
@@ -161,6 +179,9 @@ describe('KibanaExecutionContext', () => {
         type: 'type',
         name: 'name',
         id: '41',
+        meta: {
+          foo: true,
+        },
         description: 'descripton',
       };
 
@@ -168,6 +189,9 @@ describe('KibanaExecutionContext', () => {
         type: 'child-test-type',
         name: 'child-test-name',
         id: '42',
+        meta: {
+          foo: 42,
+        },
         description: 'test-descripton',
       };
       const contextContainer = new ExecutionContextContainer(context);

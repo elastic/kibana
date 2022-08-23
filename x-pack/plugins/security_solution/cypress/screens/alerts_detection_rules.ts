@@ -35,6 +35,8 @@ export const ELASTIC_RULES_BTN = '[data-test-subj="showElasticRulesFilterButton"
 
 export const EXPORT_ACTION_BTN = '[data-test-subj="exportRuleAction"]';
 
+export const BULK_EXPORT_ACTION_BTN = '[data-test-subj="exportRuleBulk"]';
+
 export const FIRST_RULE = 0;
 
 export const FOURTH_RULE = 3;
@@ -101,8 +103,6 @@ export const MODAL_CONFIRMATION_TITLE = '[data-test-subj="confirmModalTitleText"
 export const MODAL_CONFIRMATION_BODY = '[data-test-subj="confirmModalBodyText"]';
 
 export const RULE_DETAILS_DELETE_BTN = '[data-test-subj="rules-details-delete-rule"]';
-
-export const ALERT_DETAILS_CELLS = '[data-test-subj="dataGridRowCell"]';
 
 export const SERVER_SIDE_EVENT_COUNT = '[data-test-subj="server-side-event-count"]';
 

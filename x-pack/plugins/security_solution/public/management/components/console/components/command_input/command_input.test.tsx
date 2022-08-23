@@ -90,6 +90,9 @@ describe('When entering data into the Console input', () => {
     enterCommand('abc ', { inputOnly: true });
 
     expect(getFooterText()).toEqual('Unknown command abc');
+    expect(renderResult.getByTestId('test-cmdInput-container').classList.contains('error')).toBe(
+      true
+    );
   });
 
   it('should show the arrow button as not disabled if input has text entered', () => {
@@ -260,7 +263,7 @@ describe('When entering data into the Console input', () => {
       expect(getUserInputText()).toEqual('c');
       expect(getRightOfCursorText()).toEqual('md1 ');
 
-      expect(getFooterText()).toEqual('cmd1 ');
+      expect(getFooterText()).toEqual('Hit enter to execute');
     });
 
     // FIXME:PT uncomment once task OLM task #4384 is implemented

@@ -6,16 +6,13 @@
  */
 
 import type { IconType } from '@elastic/eui';
-import type { UrlStateType } from '../url_state/constants';
 import { SecurityPageName } from '../../../app/types';
-import type { UrlState } from '../url_state/types';
 import type { SiemRouteType } from '../../utils/route/types';
 import type { LinkCategories } from '../../links';
 
 export interface TabNavigationComponentProps {
   pageName: string;
   tabName: SiemRouteType | undefined;
-  urlState: UrlState;
   pathName: string;
 }
 
@@ -28,10 +25,32 @@ export interface NavGroupTab {
 export enum SecurityNavGroupKey {
   dashboards = 'dashboards',
   detect = 'detect',
+  findings = 'findings',
   explore = 'explore',
+  intelligence = 'intelligence',
   investigate = 'investigate',
   manage = 'manage',
 }
+
+export type UrlStateType =
+  | 'administration'
+  | 'alerts'
+  | 'cases'
+  | 'detection_response'
+  | 'exceptions'
+  | 'get_started'
+  | 'host'
+  | 'users'
+  | 'network'
+  | 'kubernetes'
+  | 'overview'
+  | 'rules'
+  | 'timeline'
+  | 'explore'
+  | 'dashboards'
+  | 'indicators'
+  | 'cloud_posture'
+  | 'findings';
 
 export type SecurityNavGroup = Record<SecurityNavGroupKey, NavGroupTab>;
 export interface NavTab {
@@ -44,7 +63,6 @@ export interface NavTab {
   isBeta?: boolean;
 }
 export const securityNavKeys = [
-  SecurityPageName.administration,
   SecurityPageName.alerts,
   SecurityPageName.blocklist,
   SecurityPageName.detectionAndResponse,
@@ -64,6 +82,11 @@ export const securityNavKeys = [
   SecurityPageName.trustedApps,
   SecurityPageName.users,
   SecurityPageName.kubernetes,
+  SecurityPageName.threatIntelligenceIndicators,
+  SecurityPageName.cloudSecurityPostureDashboard,
+  SecurityPageName.cloudSecurityPostureFindings,
+  SecurityPageName.cloudSecurityPostureBenchmarks,
+  SecurityPageName.cloudSecurityPostureRules,
 ] as const;
 export type SecurityNavKey = typeof securityNavKeys[number];
 
@@ -75,10 +98,6 @@ export interface SecuritySolutionTabNavigationProps {
   display?: 'default' | 'condensed';
   navTabs: GenericNavRecord;
 }
-export type GetUrlForApp = (
-  appId: string,
-  options?: { deepLinkId?: string; path?: string; absolute?: boolean }
-) => string;
 
 export type NavigateToUrl = (url: string) => void;
 export interface NavLinkItem {
@@ -91,4 +110,5 @@ export interface NavLinkItem {
   image?: string;
   title: string;
   skipUrlState?: boolean;
+  isBeta?: boolean;
 }
