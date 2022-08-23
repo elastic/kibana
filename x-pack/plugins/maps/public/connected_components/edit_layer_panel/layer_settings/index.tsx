@@ -18,6 +18,7 @@ import {
   updateLayerAlpha,
   updateLabelsOnTop,
   updateFittableFlag,
+  updateDisableTooltips,
 } from '../../../actions';
 import { Attribution } from '../../../../common/descriptor_types';
 
@@ -35,6 +36,8 @@ function mapDispatchToProps(dispatch: Dispatch<AnyAction>) {
       dispatch(updateLabelsOnTop(id, areLabelsOnTop)),
     updateIncludeInFitToBounds: (id: string, includeInFitToBounds: boolean) =>
       dispatch(updateFittableFlag(id, includeInFitToBounds)),
+    updateDisableTooltips: (id: string, DisableTooltips: boolean) =>
+      dispatch(updateDisableTooltips(id, DisableTooltips)),
   };
 }
 
