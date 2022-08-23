@@ -15,6 +15,7 @@ import {
 import {
   ServiceLocations,
   FormMonitorType,
+  SyntheticsMonitor,
 } from '../../../../../common/runtime_types/monitor_management';
 
 export type StepKey = 'step1' | 'step2' | 'step3' | 'scriptEdit';
@@ -37,7 +38,7 @@ export interface FieldMeta {
   helpText?: string | React.ReactNode;
   props?: (params: {
     field?: ControllerRenderProps;
-    formState: FormState<unknown>;
+    formState: FormState<SyntheticsMonitor>;
     setValue: UseFormReturn['setValue'];
     reset: UseFormReturn['reset'];
     locations: ServiceLocations;

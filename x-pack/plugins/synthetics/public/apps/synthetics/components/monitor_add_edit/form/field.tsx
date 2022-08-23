@@ -13,7 +13,7 @@ import { useKibanaSpace, useIsEditFlow } from '../hooks';
 import { ControlledField } from './controlled_field';
 import { FieldMeta } from '../types';
 
-type Props = FieldMeta & { fieldError: FieldError };
+type Props = FieldMeta & { fieldError?: FieldError };
 
 export const Field = memo<Props>(
   ({

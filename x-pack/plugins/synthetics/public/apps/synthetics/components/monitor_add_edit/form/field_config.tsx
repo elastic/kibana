@@ -39,6 +39,7 @@ import {
   MonitorServiceLocations,
   ScreenshotOption,
   ServiceLocations,
+  SyntheticsMonitor,
   TLSVersion,
   VerificationMode,
   FieldMeta,
@@ -383,7 +384,7 @@ export const FIELD: Record<string, FieldMeta> = {
       field?: ControllerRenderProps;
       setValue: UseFormReturn['setValue'];
       locations: ServiceLocations;
-      formState: FormState<unknown>;
+      formState: FormState<SyntheticsMonitor>;
     }) => {
       return {
         options: Object.values(locations).map((location) => ({

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, FieldError } from 'react-hook-form';
 import { Step } from './step';
 import { FORM_CONFIG } from '../form/form_config';
 import { Field } from '../form/field';
@@ -28,7 +28,13 @@ export const StepFields = ({
   return (
     <Step description={description}>
       {FORM_CONFIG[type][stepKey]?.map((field) => {
-        return <Field {...field} key={field.fieldKey} fieldError={errors[field.fieldKey]} />;
+        return (
+          <Field
+            {...field}
+            key={field.fieldKey}
+            fieldError={errors[field.fieldKey] as FieldError}
+          />
+        );
       })}
     </Step>
   );

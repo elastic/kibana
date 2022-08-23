@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiAccordion, EuiDescribedFormGroup, EuiPanel, EuiSpacer } from '@elastic/eui';
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, FieldError } from 'react-hook-form';
 import { FORM_CONFIG } from '../form/form_config';
 import { Field } from '../form/field';
 import { ConfigKey, FormMonitorType } from '../types';
@@ -39,7 +39,11 @@ export const AdvancedConfig = () => {
             >
               {configGroup.components.map((field) => {
                 return (
-                  <Field {...field} key={field.fieldKey} fieldError={errors[field.fieldKey]} />
+                  <Field
+                    {...field}
+                    key={field.fieldKey}
+                    fieldError={errors[field.fieldKey] as FieldError}
+                  />
                 );
               })}
             </EuiDescribedFormGroup>
