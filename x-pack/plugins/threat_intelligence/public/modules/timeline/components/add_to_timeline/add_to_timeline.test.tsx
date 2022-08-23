@@ -49,12 +49,39 @@ describe('<AddToTimeline />', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it(`should render empty component when data is ${EMPTY_VALUE}`, () => {
-    const mockField: string = 'threat.indicator.ip';
+  it(`should render empty component when field exist in data but isn't supported`, () => {
+    const mockField: string = 'abc';
+    const mockData: Indicator = generateMockIndicator();
+    mockData.fields['threat.indicator.type'] = ['abc'];
 
     const component = render(
       <TestProvidersComponent>
-        <AddToTimeline field={mockField} data={EMPTY_VALUE} />
+        <AddToTimeline field={mockField} data={mockData} />
+      </TestProvidersComponent>
+    );
+    expect(component).toMatchSnapshot();
+  });
+
+  it(`should render empty component when calculated value is ${EMPTY_VALUE}`, () => {
+    const mockField: string = 'threat.indicator.first_seen';
+    const mockData: Indicator = generateMockIndicator();
+    mockData.fields['threat.indicator.first_seen'] = [''];
+
+    const component = render(
+      <TestProvidersComponent>
+        <AddToTimeline field={mockField} data={mockData} />
+      </TestProvidersComponent>
+    );
+    expect(component).toMatchSnapshot();
+  });
+
+  it(`should render empty component when data is ${EMPTY_VALUE}`, () => {
+    const mockField: string = 'threat.indicator.ip';
+    const mockData = EMPTY_VALUE;
+
+    const component = render(
+      <TestProvidersComponent>
+        <AddToTimeline field={mockField} data={mockData} />
       </TestProvidersComponent>
     );
     expect(component).toMatchSnapshot();

@@ -69,12 +69,3 @@ export const generateMockFileIndicator = (): Indicator => {
 
   return indicator;
 };
-
-/**
- * Mapping between the indicator type and the {@link RawIndicatorFieldId}.
- */
-export const indicatorTypeToFieldMap: { [id: string]: RawIndicatorFieldId } = {
-  file: RawIndicatorFieldId.FileSha256,
-  url: RawIndicatorFieldId.UrlFull,
-  ip: RawIndicatorFieldId.Ip,
-};

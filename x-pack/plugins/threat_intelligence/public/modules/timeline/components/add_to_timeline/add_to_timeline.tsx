@@ -9,15 +9,12 @@ import React, { VFC } from 'react';
 import { DataProvider, QueryOperator } from '@kbn/timelines-plugin/common';
 import { AddToTimelineButtonProps } from '@kbn/timelines-plugin/public';
 import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui/src/components/button';
-import { displayValue } from '../../../indicators/lib/display_value';
+import { EMPTY_VALUE } from '../../../../../common/constants';
+import { displayField, displayValue } from '../../../indicators/lib/display_value';
 import { ComputedIndicatorFieldId } from '../../../indicators/components/indicators_table/cell_renderer';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { unwrapValue } from '../../../indicators/lib/unwrap_value';
-import {
-  Indicator,
-  indicatorTypeToFieldMap,
-  RawIndicatorFieldId,
-} from '../../../../../common/types/indicator';
+import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
 import { useStyles } from './styles';
 
 export interface AddToTimelineProps {
@@ -57,13 +54,13 @@ export const AddToTimeline: VFC<AddToTimelineProps> = ({ data, field, component,
   if (typeof data === 'string') {
     value = data;
   } else if (field === ComputedIndicatorFieldId.DisplayValue) {
-    field = indicatorTypeToFieldMap[unwrapValue(data, RawIndicatorFieldId.Type) || ''];
+    field = displayField(data) || '';
     value = displayValue(data);
   } else {
     value = unwrapValue(data, field as RawIndicatorFieldId);
   }
 
-  if (!value) {
+  if (!value || value === EMPTY_VALUE || !field) {
     return <></>;
   }
 
