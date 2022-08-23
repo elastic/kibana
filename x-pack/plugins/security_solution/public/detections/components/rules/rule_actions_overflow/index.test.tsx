@@ -236,7 +236,7 @@ describe('RuleActionsOverflow', () => {
   });
 
   describe('rules details export rule', () => {
-    test('should call export actions without the onSuccess to use the default prop', async () => {
+    test('should call export actions and display toast when export option is clicked', async () => {
       bulkExportRulesMock.mockImplementation(() => Promise.resolve({}));
       const wrapper = mount(
         <RuleActionsOverflow
