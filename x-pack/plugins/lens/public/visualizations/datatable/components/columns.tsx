@@ -63,7 +63,8 @@ export const createGridColumns = (
     rowIndex,
     columnId,
   }: Pick<EuiDataGridColumnCellActionProps, 'rowIndex' | 'columnId'>) => {
-    const rowValue = table.rows[rowIndex][columnId];
+    // incoming data might change and put the current page out of bounds - check whether row actually exists
+    const rowValue = table.rows[rowIndex]?.[columnId];
     const column = columnsReverseLookup?.[columnId];
     const contentsIsDefined = rowValue != null;
 
