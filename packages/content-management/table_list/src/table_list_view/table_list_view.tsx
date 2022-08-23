@@ -23,7 +23,7 @@ import { keyBy, uniq, get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import { KibanaPageTemplate } from '@kbn/shared-ux-components';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { Table, ConfirmDeleteModal, ListingLimitWarning } from './components';
 import { useServices } from './services';

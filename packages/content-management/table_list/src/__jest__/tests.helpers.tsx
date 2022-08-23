@@ -28,7 +28,7 @@ export function WithServices<P>(
     const services = getMockServices(overrides);
     return (
       <TableListViewProvider {...services}>
-        <Comp {...props} />
+        <Comp {...(props as any)} />
       </TableListViewProvider>
     );
   };
