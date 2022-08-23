@@ -50,6 +50,7 @@ import { ControlGroup } from '../component/control_group_component';
 import { controlGroupReducers } from '../state/control_group_reducers';
 import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
 import { CreateControlButton, CreateControlButtonTypes } from '../editor/create_control';
+import { CreateTimeSliderControlButton } from '../editor/create_time_slider_control';
 import { TimeSliderControlEmbeddable } from '../../time_slider';
 
 let flyoutRef: OverlayRef | undefined;
@@ -121,32 +122,26 @@ export class ControlGroupContainer extends Container<
           closePopover={closePopover}
           getRelevantDataViewId={() => this.getMostRelevantDataViewId()}
           setLastUsedDataViewId={(newId) => this.setLastUsedDataViewId(newId)}
-          controlType="field"
         />
       </ControlsServicesProvider>
     );
   };
 
   public getCreateTimeSliderControlButton = (
-    buttonType: CreateControlButtonTypes,
     closePopover?: () => void
   ) => {
+    const childIds = this.getChildIds();
+    const hasTimeSliderControl = childIds.some((id) => {
+      const child = this.getChild(id);
+      return child.type === TIME_SLIDER_CONTROL;
+    });
     const ControlsServicesProvider = pluginServices.getContextProvider();
     return (
-      <ControlsServicesProvider>
-        <CreateControlButton
-          buttonType={buttonType}
-          defaultControlWidth={this.getInput().defaultControlWidth}
-          defaultControlGrow={this.getInput().defaultControlGrow}
-          updateDefaultWidth={(defaultControlWidth) => this.updateInput({ defaultControlWidth })}
-          updateDefaultGrow={(defaultControlGrow: boolean) =>
-            this.updateInput({ defaultControlGrow })
-          }
-          addNewEmbeddable={(type, input) => this.addNewEmbeddable(type, input)}
-          closePopover={closePopover}
-          controlType="timeslider"
-        />
-      </ControlsServicesProvider>
+      <CreateTimeSliderControlButton
+        addNewEmbeddable={(type, input) => this.addNewEmbeddable(type, input)}
+        closePopover={closePopover}
+        hasTimeSliderControl={hasTimeSliderControl}
+      />
     );
   };
 
@@ -178,7 +173,7 @@ export class ControlGroupContainer extends Container<
           <EuiContextMenuPanel
             items={[
               this.getCreateControlButton('toolbar', closePopover),
-              this.getCreateTimeSliderControlButton('toolbar', closePopover),
+              this.getCreateTimeSliderControlButton(closePopover),
               this.getEditControlGroupButton(closePopover),
             ]}
           />
