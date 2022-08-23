@@ -99,6 +99,14 @@
                 "section": "def-common.VisParams",
                 "text": "VisParams"
               },
+              " | undefined, timeRange?: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
               " | undefined) => Promise<",
               {
                 "pluginId": "visualizations",
@@ -2870,7 +2878,7 @@
             "label": "configuration",
             "description": [],
             "signature": [
-              "{ fill: string | number; legend: { isVisible: boolean; position: string; shouldTruncate: boolean; maxLines: number; showSingleSeries: boolean; }; gridLinesVisibility: { x: boolean; yLeft: boolean; yRight: boolean; }; extents: { yLeftExtent: AxisExtents; yRightExtent: AxisExtents; }; }"
+              "{ fill: string | number; legend: { isVisible: boolean; position: string; shouldTruncate: boolean; maxLines: number; showSingleSeries: boolean; }; gridLinesVisibility: { x: boolean; yLeft: boolean; yRight: boolean; }; tickLabelsVisibility?: { x: boolean; yLeft: boolean; yRight: boolean; } | undefined; axisTitlesVisibility?: { x: boolean; yLeft: boolean; yRight: boolean; } | undefined; valueLabels?: boolean | undefined; extents?: { yLeftExtent: AxisExtents; yRightExtent: AxisExtents; } | undefined; }"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false
@@ -4308,6 +4316,14 @@
                 "section": "def-common.VisParams",
                 "text": "VisParams"
               },
+              " | undefined, timeRange?: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
               " | undefined) => Promise<",
               {
                 "pluginId": "visualizations",
@@ -4335,6 +4351,27 @@
                     "docId": "kibVisualizationsPluginApi",
                     "section": "def-common.VisParams",
                     "text": "VisParams"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/plugins/visualizations/public/vis_types/types.ts",
+                "deprecated": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "visualizations",
+                "id": "def-public.VisTypeDefinition.navigateToLens.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "timeRange",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataQueryPluginApi",
+                    "section": "def-common.TimeRange",
+                    "text": "TimeRange"
                   },
                   " | undefined"
                 ],
@@ -5139,10 +5176,23 @@
           },
           {
             "parentPluginId": "visualizations",
-            "id": "def-public.VisualizeEditorLayersContext.timeFieldName",
+            "id": "def-public.VisualizeEditorLayersContext.xFieldName",
             "type": "string",
             "tags": [],
-            "label": "timeFieldName",
+            "label": "xFieldName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/visualizations/public/vis_types/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.VisualizeEditorLayersContext.xMode",
+            "type": "string",
+            "tags": [],
+            "label": "xMode",
             "description": [],
             "signature": [
               "string | undefined"
