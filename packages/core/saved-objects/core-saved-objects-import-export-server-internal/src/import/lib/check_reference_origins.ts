@@ -9,8 +9,8 @@
 import pMap from 'p-map';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
+import { getObjectKey, parseObjectKey } from '@kbn/core-saved-objects-base-server-internal';
 import type { ImportStateMap, ImportStateValue } from './types';
-import { getObjectKey, parseObjectKey } from '../../service/lib/internal_utils';
 import { createOriginQuery } from './utils';
 
 export interface CheckReferenceOriginsParams {

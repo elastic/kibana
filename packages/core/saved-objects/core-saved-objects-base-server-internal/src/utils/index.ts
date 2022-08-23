@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { savedObjectsExporterMock, savedObjectsImporterMock } from './src';
+export { getObjectKey, parseObjectKey } from './object_key';

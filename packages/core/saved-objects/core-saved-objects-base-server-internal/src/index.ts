@@ -33,3 +33,4 @@ export type {
   MigrationResult,
   MigrationStatus,
 } from './migration';
+export { parseObjectKey, getObjectKey } from './utils';

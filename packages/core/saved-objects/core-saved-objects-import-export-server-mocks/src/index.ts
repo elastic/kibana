@@ -6,6 +6,5 @@
  * Side Public License, v 1.
  */
 
-export function foo() {
-  return 'hello world';
-}
+export { savedObjectsImporterMock } from './saved_objects_importer.mock';
+export { savedObjectsExporterMock } from './saved_objects_exporter.mock';
