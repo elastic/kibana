@@ -8,7 +8,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { SavedObjectsUpdateOptions } from '@kbn/core-saved-objects-api-server';
-import { InternalCoreUsageDataSetup } from '../../core_usage_data';
+import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { InternalSavedObjectRouter } from '../internal_types';
 import { catchAndReturnBoomErrors } from './utils';
 

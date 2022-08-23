@@ -63,6 +63,7 @@ TYPES_DEPS = [
   "//packages/core/saved-objects/core-saved-objects-base-server-internal:npm_module_types",
   "//packages/core/saved-objects/core-saved-objects-migration-server-internal:npm_module_types",
   "//packages/core/saved-objects/core-saved-objects-import-export-server-internal:npm_module_types",
+  "//packages/core/usage-data/core-usage-data-base-server-internal:npm_module_types",
 ]
 
 jsts_transpiler(

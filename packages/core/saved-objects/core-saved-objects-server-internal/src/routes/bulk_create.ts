@@ -7,7 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { InternalCoreUsageDataSetup } from '../../core_usage_data';
+import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { InternalSavedObjectRouter } from '../internal_types';
 import { catchAndReturnBoomErrors } from './utils';
 

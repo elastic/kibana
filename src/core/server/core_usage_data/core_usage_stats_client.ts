@@ -7,36 +7,18 @@
  */
 
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
+import type { CoreUsageStats } from '@kbn/core-usage-data-server';
 import {
+  type ICoreUsageStatsClient,
+  type BaseIncrementOptions,
+  type IncrementSavedObjectsImportOptions,
+  type IncrementSavedObjectsResolveImportErrorsOptions,
+  type IncrementSavedObjectsExportOptions,
   CORE_USAGE_STATS_TYPE,
   CORE_USAGE_STATS_ID,
   REPOSITORY_RESOLVE_OUTCOME_STATS,
 } from '@kbn/core-usage-data-base-server-internal';
-import { CoreUsageStats } from './types';
-import {
-  ISavedObjectsRepository,
-  SavedObjectsImportOptions,
-  SavedObjectsResolveImportErrorsOptions,
-  KibanaRequest,
-  IBasePath,
-} from '..';
-
-/** @internal */
-export interface BaseIncrementOptions {
-  request: KibanaRequest;
-}
-
-/** @internal */
-export type IncrementSavedObjectsImportOptions = BaseIncrementOptions &
-  Pick<SavedObjectsImportOptions, 'createNewCopies' | 'overwrite'>;
-/** @internal */
-export type IncrementSavedObjectsResolveImportErrorsOptions = BaseIncrementOptions &
-  Pick<SavedObjectsResolveImportErrorsOptions, 'createNewCopies'>;
-/** @internal */
-export type IncrementSavedObjectsExportOptions = BaseIncrementOptions & {
-  types?: string[];
-  supportedTypes: string[];
-};
+import { ISavedObjectsRepository, KibanaRequest, IBasePath } from '..';
 
 export const BULK_CREATE_STATS_PREFIX = 'apiCalls.savedObjectsBulkCreate';
 export const BULK_GET_STATS_PREFIX = 'apiCalls.savedObjectsBulkGet';
@@ -90,7 +72,7 @@ const ALL_COUNTER_FIELDS = [
 const SPACE_CONTEXT_REGEX = /^\/s\/([a-z0-9_\-]+)/;
 
 /** @internal */
-export class CoreUsageStatsClient {
+export class CoreUsageStatsClient implements ICoreUsageStatsClient {
   constructor(
     private readonly debugLogger: (message: string) => void,
     private readonly basePath: IBasePath,

@@ -6,6 +6,16 @@
  * Side Public License, v 1.
  */
 
-export function foo() {
-  return 'hello world';
-}
+export type {
+  CoreUsageDataSetup,
+  CoreUsageDataStart,
+  CoreUsageCounter,
+  CoreIncrementUsageCounter,
+  ConfigUsageData,
+  CoreEnvironmentUsageData,
+  CoreIncrementCounterParams,
+  CoreUsageData,
+  CoreConfigUsageData,
+  CoreServicesUsageData,
+  CoreUsageStats,
+} from './src';

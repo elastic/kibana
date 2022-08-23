@@ -3481,6 +3481,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-usage-data-server@link:bazel-bin/packages/core/usage-data/core-usage-data-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/crypto-browser@link:bazel-bin/packages/kbn-crypto-browser":
   version "0.0.0"
   uid ""
@@ -7500,6 +7504,10 @@
   uid ""
 
 "@types/kbn__core-usage-data-base-server-internal@link:bazel-bin/packages/core/usage-data/core-usage-data-base-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-usage-data-server@link:bazel-bin/packages/core/usage-data/core-usage-data-server/npm_module_types":
   version "0.0.0"
   uid ""
 

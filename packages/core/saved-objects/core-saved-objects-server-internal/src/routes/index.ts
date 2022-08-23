@@ -12,7 +12,7 @@ import type {
   SavedObjectConfig,
   IKibanaMigrator,
 } from '@kbn/core-saved-objects-base-server-internal';
-import { InternalCoreUsageDataSetup } from '../../core_usage_data';
+import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { InternalSavedObjectsRequestHandlerContext } from '../internal_types';
 import { registerGetRoute } from './get';
 import { registerResolveRoute } from './resolve';
