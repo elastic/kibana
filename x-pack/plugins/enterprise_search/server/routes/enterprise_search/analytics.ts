@@ -11,7 +11,10 @@ import { i18n } from '@kbn/i18n';
 
 import { ErrorCode } from '../../../common/types/error_codes';
 import { addAnalyticsCollection } from '../../lib/analytics/add_analytics_collection';
-import { fetchAnalyticsCollections } from '../../lib/analytics/fetch_analytics_collection';
+import {
+  fetchAnalyticsCollectionByName,
+  fetchAnalyticsCollections,
+} from '../../lib/analytics/fetch_analytics_collection';
 import { RouteDependencies } from '../../plugin';
 import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
@@ -26,6 +29,49 @@ export function registerAnalyticsRoutes({ router, log }: RouteDependencies) {
       const { client } = (await context.core).elasticsearch;
       const collections = await fetchAnalyticsCollections(client);
       return response.ok({ body: collections });
+    })
+  );
+
+  router.get(
+    {
+      path: '/internal/enterprise_search/analytics/collections/{collection_name}',
+      validate: {
+        params: schema.object({
+          collection_name: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+
+      try {
+        const collection = await fetchAnalyticsCollectionByName(
+          client,
+          request.params.collection_name
+        );
+
+        if (!collection) {
+          throw new Error(ErrorCode.ANALYTICS_COLLECTION_NOT_FOUND);
+        }
+
+        return response.ok({ body: collection });
+      } catch (error) {
+        if ((error as Error).message === ErrorCode.ANALYTICS_COLLECTION_NOT_FOUND) {
+          return createError({
+            errorCode: (error as Error).message as ErrorCode,
+            message: i18n.translate(
+              'xpack.enterpriseSearch.server.routes.addAnalyticsCollection.analyticsCollectionNotFoundError',
+              {
+                defaultMessage: 'Analytics collection not found',
+              }
+            ),
+            response,
+            statusCode: 404,
+          });
+        }
+
+        throw error;
+      }
     })
   );
 
