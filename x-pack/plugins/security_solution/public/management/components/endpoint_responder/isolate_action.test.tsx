@@ -17,6 +17,7 @@ import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mock
 import { enterConsoleCommand } from '../console/mocks';
 import { waitFor } from '@testing-library/react';
 import { getDeferred } from '../mocks';
+import { RESPONDER_CAPABILITIES } from '../../../../common/endpoint/constants';
 
 describe('When using isolate action from response actions console', () => {
   let render: () => Promise<ReturnType<AppContextTestRender['render']>>;
@@ -38,7 +39,10 @@ describe('When using isolate action from response actions console', () => {
             return {
               consoleProps: {
                 'data-test-subj': 'test',
-                commands: getEndpointResponseActionsConsoleCommands('a.b.c'),
+                commands: getEndpointResponseActionsConsoleCommands({
+                  endpointAgentId: 'a.b.c',
+                  endpointCapabilities: [...RESPONDER_CAPABILITIES],
+                }),
               },
             };
           }}

@@ -16,6 +16,7 @@ import { getEndpointResponseActionsConsoleCommands } from './endpoint_response_a
 import { enterConsoleCommand } from '../console/mocks';
 import { waitFor } from '@testing-library/react';
 import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mocks';
+import { RESPONDER_CAPABILITIES } from '../../../../common/endpoint/constants';
 
 describe('When using the kill-process action from response actions console', () => {
   let render: () => Promise<ReturnType<AppContextTestRender['render']>>;
@@ -37,7 +38,10 @@ describe('When using the kill-process action from response actions console', () 
             return {
               consoleProps: {
                 'data-test-subj': 'test',
-                commands: getEndpointResponseActionsConsoleCommands('a.b.c'),
+                commands: getEndpointResponseActionsConsoleCommands({
+                  endpointAgentId: 'a.b.c',
+                  endpointCapabilities: [...RESPONDER_CAPABILITIES],
+                }),
               },
             };
           }}
