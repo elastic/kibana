@@ -50,7 +50,7 @@
       }
     },
     "title": "Artistpreviouslyknownaslens",
-    "visualizationType": "lnsLegacyMetric"
+    "visualizationType": "lnsMetric"
   },
   "coreMigrationVersion": "7.15.0",
   "id": "my-lens-vis",

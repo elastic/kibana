@@ -181,7 +181,7 @@
       }
     },
     "title": "Artistpreviouslyknownaslens",
-    "visualizationType": "lnsLegacyMetric"
+    "visualizationType": "lnsMetric"
   },
   "coreMigrationVersion": "8.4.0",
   "id": "76fc4200-cf44-11e9-b933-fd84270f3ac1",
