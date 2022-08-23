@@ -114,7 +114,7 @@ Dashboard::
 Transfer state when drilldown is opened in a new tab {kibana-pull}124770[#124770]
 
 Discover::
-Fixes _source fields of objects formatting {kibana-pull}136473[#136473]
+Fixes objects formatting when discover:searchFieldsFromSource in Advanced settings is enabled {kibana-pull}136473[#136473]
 
 Fleet::
 Invalidate api keys in agents `default_api_key_history` on force unenroll {kibana-pull}135910[#135910]
