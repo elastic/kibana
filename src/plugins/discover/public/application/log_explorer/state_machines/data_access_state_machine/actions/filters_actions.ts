@@ -7,11 +7,8 @@
  */
 
 import { assign } from 'xstate';
-import { EntriesMachineContext, EntriesMachineEvent } from '../../entries_state_machine/types';
-import {
-  HistogramMachineContext,
-  HistogramMachineEvent,
-} from '../../histogram_state_machine/types';
+import { EntriesMachineEvent } from '../../entries_state_machine/types';
+import { HistogramMachineEvent } from '../../histogram_state_machine/types';
 import { SharedContext } from '../types';
 
 export const updateFilters = assign(
