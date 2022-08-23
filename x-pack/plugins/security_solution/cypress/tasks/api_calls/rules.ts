@@ -136,7 +136,7 @@ export const createNewTermsRule = (rule: NewTermsRule, ruleId = 'rule_testing') 
         index: rule.dataSource.index,
         query: rule.customQuery,
         new_terms_fields: rule.newTermsFields,
-        history_window_start: `now-${rule.historyWindowSize}`,
+        history_window_start: `now-${rule.historyWindowSize.interval}${rule.historyWindowSize.type}`,
         enabled: true,
         tags: rule.tags,
       },

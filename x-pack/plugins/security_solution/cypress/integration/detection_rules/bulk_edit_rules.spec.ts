@@ -8,6 +8,7 @@
 import {
   MODAL_CONFIRMATION_BTN,
   MODAL_CONFIRMATION_CANCEL_BTN,
+  MODAL_CONFIRMATION_BODY,
   RULES_TAGS_FILTER_BTN,
   RULE_CHECKBOX,
   RULES_TAGS_POPOVER_BTN,
@@ -25,6 +26,9 @@ import {
 } from '../../screens/rules_bulk_edit';
 
 import { TIMELINE_TEMPLATE_DETAILS } from '../../screens/rule_details';
+
+import { EUI_FILTER_SELECT_ITEM } from '../../screens/common/controllers';
+
 
 import {
   changeRowsPerPageTo,
@@ -53,8 +57,10 @@ import {
   openBulkEditAddTagsForm,
   openBulkEditDeleteTagsForm,
   typeTags,
+  openTagsSelect,
   openBulkActionsMenu,
   clickApplyTimelineTemplatesMenuItem,
+  clickAddTagsMenuItem,
   checkOverwriteTagsCheckbox,
   checkOverwriteIndexPatternsCheckbox,
   clickDeleteIndexPatternsMenuItem,
@@ -110,6 +116,7 @@ const indexDataSource = { index: defaultIndexPatterns, type: 'indexPatterns' } a
 const defaultRuleData = {
   dataSource: indexDataSource,
   tags: defaultTags,
+  timeline: timelineTemplate,
 };
 
 describe('Detection rules, bulk edit', () => {
@@ -125,7 +132,6 @@ describe('Detection rules, bulk edit', () => {
         ...getNewRule(),
         name: RULE_NAME,
         ...defaultRuleData,
-        timeline: timelineTemplate,
       },
       '1'
     );
@@ -164,98 +170,152 @@ describe('Detection rules, bulk edit', () => {
       // check modal window for Elastic rule that can't be edited
       checkPrebuiltRulesCannotBeModified(expectedNumberOfSelectedRules);
 
-      // the only action available for users to cancel action
-      cy.get(MODAL_CONFIRMATION_BTN).should('have.text', 'Close');
-      // euiConfirm still renders button but it's not shown
-      cy.get(MODAL_CONFIRMATION_CANCEL_BTN).should('have.text', '');
+      // the confirm button closes modal
+      cy.get(MODAL_CONFIRMATION_BTN).should('have.text', 'Close').click();
+      cy.get(MODAL_CONFIRMATION_BODY).should('not.exist');
     });
 
-    it('Prebuilt and custom rules selected', () => {
+    it('Prebuilt and custom rules selected: user proceeds with custom rules editing', () => {
       loadPrebuiltDetectionRulesFromHeaderBtn();
 
       // modal window should show how many rules can be edit, how many not
       selectAllRules();
-      clickApplyTimelineTemplatesMenuItem();
+      clickAddTagsMenuItem();
       waitForMixedRulesBulkEditModal(expectedNumberOfCustomRulesToBeEdited);
 
-      // check rules that cannot be edited for index patterns: prebuilt and ML
       checkPrebuiltRulesCannotBeModified(totalNumberOfPrebuiltRules);
 
       // user can proceed with custom rule editing
       cy.get(MODAL_CONFIRMATION_BTN).should(
         'have.text',
-        `Edit ${expectedNumberOfCustomRulesToBeEdited} Custom rules`
-      );
+        `Edit ${expectedNumberOfCustomRulesToBeEdited} custom rules`
+      ).click();
+
+      // action should finish
+      typeTags(['test-tag']);
+      submitBulkEditForm();
+      waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
     });
 
-    it('Index pattern action on Machine learning rules', () => {
+    it('Prebuilt and custom rules selected: user cancels action', () => {
       loadPrebuiltDetectionRulesFromHeaderBtn();
 
       // modal window should show how many rules can be edit, how many not
       selectAllRules();
-      clickAddIndexPatternsMenuItem();
-      waitForMixedRulesBulkEditModal(expectedNumberOfNotMLRules);
+      clickAddTagsMenuItem();
+      waitForMixedRulesBulkEditModal(expectedNumberOfCustomRulesToBeEdited);
 
-      // check rules that cannot be edited for index patterns: prebuilt and ML
-      checkMachineLearningRulesCannotBeModified(expectedNumberOfMachineLearningRulesToBeEdited);
       checkPrebuiltRulesCannotBeModified(totalNumberOfPrebuiltRules);
 
-      // user can proceed with custom rule editing
-      cy.get(MODAL_CONFIRMATION_BTN).should(
-        'have.text',
-        `Edit ${expectedNumberOfNotMLRules} Custom rules`
-      );
+      // user cancels action and modal disappears
+      cy.get(MODAL_CONFIRMATION_CANCEL_BTN).click();
+      cy.get(MODAL_CONFIRMATION_BODY).should('not.exist');
     });
+
+    // it('Index pattern action on Machine learning rules', () => {
+    //   loadPrebuiltDetectionRulesFromHeaderBtn();
+
+    //   // modal window should show how many rules can be edit, how many not
+    //   selectAllRules();
+    //   clickAddIndexPatternsMenuItem();
+    //   waitForMixedRulesBulkEditModal(expectedNumberOfNotMLRules);
+
+    //   // check rules that cannot be edited for index patterns: prebuilt and ML
+    //   checkMachineLearningRulesCannotBeModified(expectedNumberOfMachineLearningRulesToBeEdited);
+    //   checkPrebuiltRulesCannotBeModified(totalNumberOfPrebuiltRules);
+
+    //   // user can proceed with custom rule editing
+    //   cy.get(MODAL_CONFIRMATION_BTN).should(
+    //     'have.text',
+    //     `Edit ${expectedNumberOfNotMLRules} Custom rules`
+    //   );
+
+    //   // b
+    //   typeTags(['test-tag']);
+    //   submitBulkEditForm();
+    //   waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
+    // });
     
-      it('should show warning modal windows when some of the selected rules cannot be edited', () => {
-    createMachineLearningRule(getMachineLearningRule(), '7');
+    //   it('should show warning modal windows when some of the selected rules cannot be edited', () => {
+    // createMachineLearningRule(getMachineLearningRule(), '7');
 
-    loadPrebuiltDetectionRulesFromHeaderBtn();
+    // loadPrebuiltDetectionRulesFromHeaderBtn();
 
-    // select few Elastic rules, check if we can't proceed further, as ELastic rules are not editable
-    // filter rules, only Elastic rule to show
-    switchToElasticRules();
+    // // select few Elastic rules, check if we can't proceed further, as ELastic rules are not editable
+    // // filter rules, only Elastic rule to show
+    // switchToElasticRules();
 
-    // check modal window for few selected rules
-    selectNumberOfRules(numberOfRulesPerPage);
-    clickAddIndexPatternsMenuItem();
-    checkElasticRulesCannotBeModified(numberOfRulesPerPage);
-    cy.get(MODAL_CONFIRMATION_BTN).click();
+    // // check modal window for few selected rules
+    // selectNumberOfRules(numberOfRulesPerPage);
+    // clickAddIndexPatternsMenuItem();
+    // checkElasticRulesCannotBeModified(numberOfRulesPerPage);
+    // cy.get(MODAL_CONFIRMATION_BTN).click();
 
-    // Select all rules(Elastic rules and custom)
-    cy.get(ELASTIC_RULES_BTN).click();
-    selectAllRules();
-    clickAddIndexPatternsMenuItem();
-    waitForMixedRulesBulkEditModal(expectedNumberOfCustomRulesToBeEdited);
+    // // Select all rules(Elastic rules and custom)
+    // cy.get(ELASTIC_RULES_BTN).click();
+    // selectAllRules();
+    // clickAddIndexPatternsMenuItem();
+    // waitForMixedRulesBulkEditModal(expectedNumberOfCustomRulesToBeEdited);
 
-    // check rules that cannot be edited for index patterns: immutable and ML
-    checkElasticRulesCannotBeModified(totalNumberOfPrebuiltRules);
-    checkMachineLearningRulesCannotBeModified(expectedNumberOfMachineLearningRulesToBeEdited);
+    // // check rules that cannot be edited for index patterns: immutable and ML
+    // checkElasticRulesCannotBeModified(totalNumberOfPrebuiltRules);
+    // checkMachineLearningRulesCannotBeModified(expectedNumberOfMachineLearningRulesToBeEdited);
 
-    // proceed with custom rule editing
-    cy.get(MODAL_CONFIRMATION_BTN)
-      .should('have.text', `Edit ${expectedNumberOfCustomRulesToBeEdited} custom rules`)
-      .click();
+    // // proceed with custom rule editing
+    // cy.get(MODAL_CONFIRMATION_BTN)
+    //   .should('have.text', `Edit ${expectedNumberOfCustomRulesToBeEdited} custom rules`)
+    //   .click();
 
-    typeIndexPatterns([CUSTOM_INDEX_PATTERN_1]);
-    confirmBulkEditForm();
+    // typeIndexPatterns([CUSTOM_INDEX_PATTERN_1]);
+    // confirmBulkEditForm();
 
-    // check if rule has been updated
-    cy.get(CUSTOM_RULES_BTN).click();
-    cy.get(RULES_TABLE_REFRESH_INDICATOR).should('exist');
-    cy.get(RULES_TABLE_REFRESH_INDICATOR).should('not.exist');
-    goToTheRuleDetailsOf(RULE_NAME);
-    hasIndexPatterns([...DEFAULT_INDEX_PATTERNS, CUSTOM_INDEX_PATTERN_1].join(''));
+    // // check if rule has been updated
+    // cy.get(CUSTOM_RULES_BTN).click();
+    // cy.get(RULES_TABLE_REFRESH_INDICATOR).should('exist');
+    // cy.get(RULES_TABLE_REFRESH_INDICATOR).should('not.exist');
+    // goToTheRuleDetailsOf(RULE_NAME);
+    // hasIndexPatterns([...DEFAULT_INDEX_PATTERNS, CUSTOM_INDEX_PATTERN_1].join(''));
     
-    });
+    // });
   });
 
   describe('Tags actions', () => {
-    it('Add tags to custom rules', () => {
-      const tagsToBeAdded = ['tag-to-add-1', 'tag-to-add-2'];
+    it('Display list of tags in tags select', () => {
+      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
 
-      // check only 2 tags exist in tags filter
-      cy.get(RULES_TAGS_FILTER_BTN).contains(/Tags2/);
+      openBulkEditAddTagsForm();
+      openTagsSelect(); 
+
+      cy.get(EUI_FILTER_SELECT_ITEM)
+        .should('have.length', defaultTags.length)
+        .each(($el, index) => {
+          cy.wrap($el).should('have.text', defaultTags[index]);
+        })
+    });
+
+    it('Add tags to custom rules', () => {
+      const checkTagsInTagsFilter = (tags: string[]) => {
+        cy.get(RULES_TAGS_FILTER_BTN)
+        .contains(`Tags${tags.length}`)
+        .click();
+
+        cy.get(EUI_FILTER_SELECT_ITEM)
+          .should('have.length', tags.length)
+          .each(($el, index) => {
+            cy.wrap($el).should('have.text', tags[index]);
+          });
+      }
+      const tagsToBeAdded = ['tag-to-add-1', 'tag-to-add-2'];
+      const resultingTags = [...defaultTags, ...tagsToBeAdded];
+
+      // check only default tags exist in tags filter
+      checkTagsInTagsFilter(defaultTags);
+
+      cy.get(EUI_FILTER_SELECT_ITEM)
+        .should('have.length', defaultTags.length)
+        .each(($el, index) => {
+          cy.wrap($el).should('have.text', defaultTags[index]);
+        });
 
       selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
 
@@ -266,10 +326,12 @@ describe('Detection rules, bulk edit', () => {
       waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
 
       // check if all rules have been updated with new tags
-      testAllTagsBadges([...defaultTags, ...tagsToBeAdded]);
+      testAllTagsBadges(resultingTags);
 
-      // check that 2 new tags were added to tags filter
-      cy.get(RULES_TAGS_FILTER_BTN).contains(/Tags4/);
+      // check that new tags were added to tags filter
+      // tags in tags filter sorted alphabetically  
+      const resultingTagsInFilter = [...resultingTags].sort();
+      checkTagsInTagsFilter(resultingTagsInFilter);
     });
 
     it('Overwrite tags in custom rules', () => {
@@ -433,29 +495,6 @@ describe('Detection rules, bulk edit', () => {
       getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', timelineTemplateName);
     });
 
-    it('Apply timeline template to all custom and prebuilt rules', () => {
-      const timelineTemplateName = 'Generic Endpoint Timeline';
-
-      loadPrebuiltDetectionRulesFromHeaderBtn();
-
-      selectAllRules();
-
-      // open Timeline template form, confirm action modal, select timeline template
-      clickApplyTimelineTemplatesMenuItem();
-      confirmConfirmationModal();
-      selectTimelineTemplate(timelineTemplateName);
-
-      submitBulkEditForm();
-      waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
-
-      // switch to custom rules tab to be able to open details page of edited custom rule
-      filterByCustomRules();
-
-      // check if timeline template has been updated to selected one
-      goToTheRuleDetailsOf(RULE_NAME);
-      getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', timelineTemplateName);
-    });
-
     it('Reset timeline template to None for custom rules', () => {
       const noneTimelineTemplate = 'None';
 
@@ -467,9 +506,8 @@ describe('Detection rules, bulk edit', () => {
       submitBulkEditForm();
       waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
 
-      // check if timeline template has been updated to selected one by opening rule that had timeline before resetting it to none
+      // check if timeline template has been updated to selected one, by opening rule that have had timeline prior to editing
       goToTheRuleDetailsOf(RULE_NAME);
-      // TODO: expect me to fail :/
       getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', noneTimelineTemplate);
     });
   });

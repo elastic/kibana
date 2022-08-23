@@ -42,6 +42,16 @@ export const clickIndexPatternsMenuItem = () => {
   cy.get(INDEX_PATTERNS_RULE_BULK_MENU_ITEM).click().should('not.exist');
 };
 
+export const clickTagsMenuItem = () => {
+  cy.get(BULK_ACTIONS_BTN).click();
+  cy.get(TAGS_RULE_BULK_MENU_ITEM).click();
+};
+
+export const clickAddTagsMenuItem = () => {
+  clickTagsMenuItem();
+  cy.get(ADD_TAGS_RULE_BULK_MENU_ITEM).click();
+};
+
 export const clickAddIndexPatternsMenuItem = () => {
   clickIndexPatternsMenuItem();
   cy.get(ADD_INDEX_PATTERNS_RULE_BULK_MENU_ITEM).click();
@@ -67,16 +77,13 @@ export const openBulkEditDeleteIndexPatternsForm = () => {
 };
 
 export const openBulkEditAddTagsForm = () => {
-  cy.get(BULK_ACTIONS_BTN).click();
-  cy.get(TAGS_RULE_BULK_MENU_ITEM).click();
-  cy.get(ADD_TAGS_RULE_BULK_MENU_ITEM).click();
+  clickAddTagsMenuItem();
 
   cy.get(RULES_BULK_EDIT_FORM_TITLE).should('have.text', 'Add tags');
 };
 
 export const openBulkEditDeleteTagsForm = () => {
-  cy.get(BULK_ACTIONS_BTN).click();
-  cy.get(TAGS_RULE_BULK_MENU_ITEM).click();
+  clickTagsMenuItem();
   cy.get(DELETE_TAGS_RULE_BULK_MENU_ITEM).click();
 
   cy.get(RULES_BULK_EDIT_FORM_TITLE).should('have.text', 'Delete tags');
@@ -92,6 +99,10 @@ export const typeIndexPatterns = (indices: string[]) => {
 
 export const typeTags = (tags: string[]) => {
   cy.get(RULES_BULK_EDIT_TAGS).find('input').type(tags.join('{enter}'));
+};
+
+export const openTagsSelect = () => {
+  cy.get(RULES_BULK_EDIT_TAGS).find('input').click();
 };
 
 export const submitBulkEditForm = () => cy.get(RULES_BULK_EDIT_FORM_CONFIRM_BTN).click();

@@ -562,7 +562,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(deleteIndexRule.index).to.eql(['initial-index-*', 'index2-*']);
       });
 
-      it('should set timeline values in rule', async () => {
+      it('should set timeline template values in rule', async () => {
         const ruleId = 'ruleId';
         const timelineId = '91832785-286d-4ebe-b884-1a208d111a70';
         const timelineTitle = 'Test timeline';
@@ -597,7 +597,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(rule.timeline_title).to.eql(timelineTitle);
       });
 
-      it('should correctly remove timeline', async () => {
+      it('should correctly remove timeline template', async () => {
         const timelineId = 'test-id';
         const timelineTitle = 'Test timeline template';
         const ruleId = 'ruleId';
