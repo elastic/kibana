@@ -943,7 +943,7 @@ describe('createActionExecuteRecord', () => {
     expect(record.event?.kind).toEqual('alert');
     expect(record.event?.category).toEqual([contextWithName.ruleType.producer]);
     expect(record.message).toEqual(
-      `alert: test:123: 'my-super-cool-rule' instanceId: '123' scheduled actionGroup: action: .email:abc`
+      `alert: test:123: 'my-super-cool-rule' instanceId: '123' scheduled actionGroup: 'aGroup' action: .email:abc`
     );
     expect(record.kibana?.alert?.rule?.rule_type_id).toEqual(contextWithName.ruleType.id);
     expect(record.kibana?.alert?.rule?.consumer).toEqual(contextWithName.consumer);
