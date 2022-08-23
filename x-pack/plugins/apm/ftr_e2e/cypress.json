@@ -12,5 +12,6 @@
   "viewportHeight": 900,
   "viewportWidth": 1440,
   "video": false,
-  "screenshotOnRunFailure": false
+  "screenshotOnRunFailure": false,
+  "experimentalSessionAndOrigin": true
 }
