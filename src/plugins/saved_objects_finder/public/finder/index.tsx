@@ -7,14 +7,26 @@
  */
 
 import React from 'react';
-import type { SavedObjectFinderProps } from './saved_object_finder';
+import type {
+  BaseSavedObjectFinderProps,
+  SavedObjectFinderProps,
+  SavedObjectFinderServices,
+} from './saved_object_finder';
 
 const LazySavedObjectFinder = React.lazy(() => import('./saved_object_finder'));
-const SavedObjectFinder = (props: SavedObjectFinderProps) => (
+export const SavedObjectFinder = (props: SavedObjectFinderProps) => (
   <React.Suspense fallback={null}>
     <LazySavedObjectFinder {...props} />
   </React.Suspense>
 );
 
-export type { SavedObjectMetaData, SavedObjectFinderProps } from './saved_object_finder';
-export { SavedObjectFinder };
+export const getSavedObjectFinder =
+  (services: SavedObjectFinderServices) => (props: BaseSavedObjectFinderProps) =>
+    <SavedObjectFinder services={services} {...props} />;
+
+export type {
+  SavedObjectMetaData,
+  BaseSavedObjectFinderProps,
+  SavedObjectFinderProps,
+  SavedObjectFinderServices,
+} from './saved_object_finder';

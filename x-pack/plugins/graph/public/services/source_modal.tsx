@@ -5,28 +5,25 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
 import React from 'react';
 import { KibanaReactOverlays } from '@kbn/kibana-react-plugin/public';
+import { BaseSavedObjectFinderProps } from '@kbn/saved-objects-finder-plugin/public';
 import { SourceModal } from '../components/source_modal';
 import { IndexPatternSavedObject } from '../types';
 
 export function openSourceModal(
   {
     overlays,
-    savedObjects,
-    uiSettings,
+    SavedObjectFinder,
   }: {
     overlays: KibanaReactOverlays;
-    savedObjects: CoreStart['savedObjects'];
-    uiSettings: CoreStart['uiSettings'];
+    SavedObjectFinder: (props: BaseSavedObjectFinderProps) => JSX.Element;
   },
   onSelected: (indexPattern: IndexPatternSavedObject) => void
 ) {
   const modalRef = overlays.openModal(
     <SourceModal
-      uiSettings={uiSettings}
-      savedObjects={savedObjects}
+      SavedObjectFinder={SavedObjectFinder}
       onIndexPatternSelected={(indexPattern) => {
         onSelected(indexPattern);
         modalRef.close();

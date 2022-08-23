@@ -29,6 +29,9 @@ import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 import { BfetchPublicSetup } from '@kbn/bfetch-plugin/public';
 import { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
+import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { CanvasAppLocatorDefinition } from '../common/locator';
 import { SESSIONSTORAGE_LASTPATH, CANVAS_APP } from '../common/lib/constants';
@@ -65,6 +68,9 @@ export interface CanvasStartDeps {
   presentationUtil: PresentationUtilPluginStart;
   visualizations: VisualizationsStart;
   spaces?: SpacesPluginStart;
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
+  savedObjects: SavedObjectsStart;
+  savedObjectsTagging?: SavedObjectsTaggingApi;
 }
 
 /**

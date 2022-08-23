@@ -7,7 +7,6 @@
 
 import { Observable } from 'rxjs';
 import {
-  SavedObjectsStart,
   SavedObjectsClientContract,
   IUiSettingsClient,
   ChromeBreadcrumb,
@@ -16,6 +15,7 @@ import {
 } from '@kbn/core/public';
 
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { BaseSavedObjectFinderProps } from '@kbn/saved-objects-finder-plugin/public';
 
 export interface CanvasPlatformService {
   getBasePath: () => string;
@@ -34,7 +34,7 @@ export interface CanvasPlatformService {
 
   // TODO: these should go away.  We want thin accessors, not entire objects.
   // Entire objects are hard to mock, and hide our dependency on the external service.
-  getSavedObjects: () => SavedObjectsStart;
+  getSavedObjectFinder: () => (props: BaseSavedObjectFinderProps) => JSX.Element;
   getSavedObjectsClient: () => SavedObjectsClientContract;
   getUISettings: () => IUiSettingsClient;
 }

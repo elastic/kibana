@@ -59,7 +59,7 @@ interface SavedObjectFinderState {
   sort?: PropertySort;
 }
 
-interface SavedObjectFinderServices {
+export interface SavedObjectFinderServices {
   savedObjects: CoreStart['savedObjects'];
   uiSettings: CoreStart['uiSettings'];
   savedObjectsManagement: SavedObjectsManagementPluginStart;
@@ -68,7 +68,6 @@ interface SavedObjectFinderServices {
 }
 
 interface BaseSavedObjectFinder {
-  services: SavedObjectFinderServices;
   onChoose?: (
     id: SimpleSavedObject['id'],
     type: SimpleSavedObject['type'],
@@ -90,7 +89,13 @@ interface SavedObjectFinderInitialPageSize extends BaseSavedObjectFinder {
   fixedPageSize?: undefined;
 }
 
-export type SavedObjectFinderProps = SavedObjectFinderFixedPage | SavedObjectFinderInitialPageSize;
+export type BaseSavedObjectFinderProps =
+  | SavedObjectFinderFixedPage
+  | SavedObjectFinderInitialPageSize;
+
+export type SavedObjectFinderProps = BaseSavedObjectFinderProps & {
+  services: SavedObjectFinderServices;
+};
 
 export class SavedObjectFinderUi extends React.Component<
   SavedObjectFinderProps,

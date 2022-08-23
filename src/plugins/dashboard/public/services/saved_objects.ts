@@ -12,10 +12,7 @@ export type {
   SavedObjectsStart,
   SavedObjectSaveOpts,
 } from '@kbn/saved-objects-plugin/public';
-export {
-  showSaveModal,
-  SavedObjectSaveModal,
-  getSavedObjectFinder,
-} from '@kbn/saved-objects-plugin/public';
+export { showSaveModal, SavedObjectSaveModal } from '@kbn/saved-objects-plugin/public';
+export { getSavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 export { SavedObjectLoader } from './saved_object_loader';
 export type { SavedObjectLoaderFindOptions } from './saved_object_loader';

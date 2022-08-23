@@ -11,18 +11,16 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SimpleSavedObject, SavedObjectAttributes } from '@kbn/core/public';
 import React from 'react';
-import { IUiSettingsClient, SavedObjectsStart } from '@kbn/core/public';
 
-import { SavedObjectFinderUi } from '@kbn/saved-objects-plugin/public';
+import { BaseSavedObjectFinderProps } from '@kbn/saved-objects-finder-plugin/public';
 import type { BaseVisType } from '../../vis_types';
 import { DialogNavigation } from '../dialog_navigation';
 
 interface SearchSelectionProps {
   onSearchSelected: (searchId: string, searchType: string) => void;
   visType: BaseVisType;
-  uiSettings: IUiSettingsClient;
-  savedObjects: SavedObjectsStart;
   goBack: () => void;
+  SavedObjectFinder: (props: BaseSavedObjectFinderProps) => JSX.Element;
 }
 interface SavedSearchesAttributes extends SavedObjectAttributes {
   isTextBasedQuery: boolean;
@@ -50,7 +48,7 @@ export class SearchSelection extends React.Component<SearchSelectionProps> {
         </EuiModalHeader>
         <EuiModalBody>
           <DialogNavigation goBack={this.props.goBack} />
-          <SavedObjectFinderUi
+          <this.props.SavedObjectFinder
             key="searchSavedObjectFinder"
             onChoose={this.props.onSearchSelected}
             showFilter
@@ -90,8 +88,6 @@ export class SearchSelection extends React.Component<SearchSelectionProps> {
               },
             ]}
             fixedPageSize={this.fixedPageSize}
-            uiSettings={this.props.uiSettings}
-            savedObjects={this.props.savedObjects}
           />
         </EuiModalBody>
       </React.Fragment>

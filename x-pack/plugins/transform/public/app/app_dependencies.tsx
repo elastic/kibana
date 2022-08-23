@@ -28,6 +28,7 @@ import type { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { GetMlSharedImportsReturnType } from '../shared_imports';
 
 export interface AppDependencies {
@@ -40,6 +41,7 @@ export interface AppDependencies {
   notifications: NotificationsSetup;
   uiSettings: IUiSettingsClient;
   savedObjects: SavedObjectsStart;
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
   storage: Storage;
   overlays: OverlayStart;
   theme: ThemeServiceStart;
@@ -49,7 +51,7 @@ export interface AppDependencies {
   ml: GetMlSharedImportsReturnType;
   spaces?: SpacesPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
-  savedObjectTagging?: SavedObjectsTaggingApi;
+  savedObjectsTagging?: SavedObjectsTaggingApi;
 }
 
 export const useAppDependencies = () => {

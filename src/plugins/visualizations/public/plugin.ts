@@ -53,6 +53,8 @@ import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/publ
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import { getSavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { TypesSetup, TypesStart } from './vis_types';
 import type { VisualizeServices } from './visualize_app/types';
 import { visualizeEditorTrigger } from './triggers';
@@ -89,6 +91,7 @@ import {
   setExecutionContext,
   setFieldFormats,
   setSavedObjectTagging,
+  setSavedObjectFinder,
 } from './services';
 import { VisualizeConstants } from '../common/constants';
 
@@ -129,6 +132,7 @@ export interface VisualizationsStartDeps {
   presentationUtil: PresentationUtilPluginStart;
   savedObjects: SavedObjectsStart;
   savedObjectsClient: SavedObjectsClientContract;
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
   spaces?: SpacesPluginStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
   share?: SharePluginStart;
@@ -352,6 +356,7 @@ export class VisualizationsPlugin
       uiActions,
       embeddable,
       savedObjects,
+      savedObjectsManagement,
       spaces,
       savedObjectsTaggingOss,
       fieldFormats,
@@ -374,6 +379,15 @@ export class VisualizationsPlugin
     setExecutionContext(core.executionContext);
     setChrome(core.chrome);
     setFieldFormats(fieldFormats);
+    setSavedObjectFinder(
+      getSavedObjectFinder({
+        savedObjects: core.savedObjects,
+        uiSettings: core.uiSettings,
+        savedObjectsManagement,
+        savedObjectsPlugin: savedObjects,
+        savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
+      })
+    );
 
     if (spaces) {
       setSpaces(spaces);

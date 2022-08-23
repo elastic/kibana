@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
+import { getSavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 
 import { CanvasStartDeps } from '../../plugin';
 import { CanvasPlatformService } from '../platform';
@@ -42,7 +43,14 @@ export const platformServiceFactory: CanvaPlatformServiceFactory = ({
 
     // TODO: these should go away.  We want thin accessors, not entire objects.
     // Entire objects are hard to mock, and hide our dependency on the external service.
-    getSavedObjects: () => coreStart.savedObjects,
+    getSavedObjectFinder: () =>
+      getSavedObjectFinder({
+        savedObjects: coreStart.savedObjects,
+        uiSettings: coreStart.uiSettings,
+        savedObjectsManagement: startPlugins.savedObjectsManagement,
+        savedObjectsPlugin: startPlugins.savedObjects,
+        savedObjectsTagging: startPlugins.savedObjectsTagging,
+      }),
     getSavedObjectsClient: () => coreStart.savedObjects.client,
     getUISettings: () => coreStart.uiSettings,
   };

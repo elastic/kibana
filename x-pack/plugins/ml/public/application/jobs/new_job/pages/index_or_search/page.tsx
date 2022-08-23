@@ -9,7 +9,7 @@ import React, { FC } from 'react';
 import { EuiPageBody, EuiPageContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SavedObjectFinderUi } from '@kbn/saved-objects-plugin/public';
+import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import { useMlKibana, useNavigateToPath } from '../../../../contexts/kibana';
 import { MlPageHeader } from '../../../../components/page_header';
 
@@ -19,7 +19,13 @@ export interface PageProps {
 
 export const Page: FC<PageProps> = ({ nextStepPath }) => {
   const RESULTS_PER_PAGE = 20;
-  const { uiSettings, savedObjects } = useMlKibana().services;
+  const {
+    savedObjects,
+    savedObjectsPlugin,
+    savedObjectsManagement,
+    savedObjectsTagging,
+    uiSettings,
+  } = useMlKibana().services;
   const navigateToPath = useNavigateToPath();
 
   const onObjectSelection = (id: string, type: string) => {
@@ -40,7 +46,14 @@ export const Page: FC<PageProps> = ({ nextStepPath }) => {
           />
         </MlPageHeader>
         <EuiPageContent hasShadow={false} hasBorder={true}>
-          <SavedObjectFinderUi
+          <SavedObjectFinder
+            services={{
+              savedObjects,
+              uiSettings,
+              savedObjectsManagement,
+              savedObjectsPlugin,
+              savedObjectsTagging,
+            }}
             key="searchSavedObjectFinder"
             onChoose={onObjectSelection}
             showFilter
@@ -71,8 +84,6 @@ export const Page: FC<PageProps> = ({ nextStepPath }) => {
               },
             ]}
             fixedPageSize={RESULTS_PER_PAGE}
-            uiSettings={uiSettings}
-            savedObjects={savedObjects}
           />
         </EuiPageContent>
       </EuiPageBody>

@@ -42,6 +42,7 @@ export const WorkspaceRoute = ({
     setHeaderActionMenu,
     spaces,
     indexPatterns: getIndexPatternProvider,
+    SavedObjectFinder,
   },
 }: WorkspaceRouteProps) => {
   /**
@@ -73,9 +74,10 @@ export const WorkspaceRoute = ({
       appName: 'graph',
       storage,
       data,
+      SavedObjectFinder,
       ...coreStart,
     }),
-    [coreStart, data, storage]
+    [SavedObjectFinder, coreStart, data, storage]
   );
 
   const [store] = useState(() =>

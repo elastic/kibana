@@ -8,7 +8,10 @@
     "licensing",
     "data",
     "navigation",
-    "savedObjects"
+    "savedObjects",
+    "savedObjectsFinder",
+    "savedObjectsManagement",
+    "savedObjectsTagging"
   ],
   "optionalPlugins": [
     "home",

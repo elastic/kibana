@@ -11,6 +11,8 @@
     "management",
     "features",
     "savedObjects",
+    "savedObjectsFinder",
+    "savedObjectsManagement",
     "share",
     "triggersActionsUi",
     "fieldFormats"

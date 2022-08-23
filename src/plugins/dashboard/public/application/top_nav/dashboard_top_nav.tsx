@@ -109,6 +109,8 @@ export function DashboardTopNav({
     dashboardCapabilities,
     dashboardSessionStorage,
     allowByValueEmbeddables,
+    savedObjects,
+    savedObjectsManagement,
   } = useKibana<DashboardAppServices>().services;
   const { version: kibanaVersion } = initializerContext.env.packageInfo;
   const timefilter = data.query.timefilter.timefilter;
@@ -161,7 +163,13 @@ export function DashboardTopNav({
           getFactory: embeddable.getEmbeddableFactory,
           notifications: core.notifications,
           overlays: core.overlays,
-          SavedObjectFinder: getSavedObjectFinder(core.savedObjects, uiSettings),
+          SavedObjectFinder: getSavedObjectFinder({
+            savedObjects: core.savedObjects,
+            uiSettings,
+            savedObjectsManagement,
+            savedObjectsPlugin: savedObjects,
+            savedObjectsTagging,
+          }),
           reportUiCounter: usageCollection?.reportUiCounter,
           theme: core.theme,
         }),
@@ -172,11 +180,14 @@ export function DashboardTopNav({
     embeddable.getEmbeddableFactories,
     embeddable.getEmbeddableFactory,
     core.notifications,
-    core.savedObjects,
     core.overlays,
+    core.savedObjects,
     core.theme,
     uiSettings,
-    usageCollection,
+    savedObjectsManagement,
+    savedObjects,
+    savedObjectsTagging,
+    usageCollection?.reportUiCounter,
   ]);
 
   const createNewVisType = useCallback(

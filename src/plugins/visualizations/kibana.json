@@ -13,6 +13,8 @@
     "embeddable",
     "inspector",
     "savedObjects",
+    "savedObjectsFinder",
+    "savedObjectsManagement",
     "screenshotMode",
     "presentationUtil",
     "dataViews",

@@ -26,6 +26,9 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
 import { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import { getSavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import { checkLicense } from '../common/check_license';
 import { ConfigSchema } from '../config';
 
@@ -38,6 +41,8 @@ export interface GraphPluginStartDependencies {
   licensing: LicensingPluginStart;
   data: DataPublicPluginStart;
   savedObjects: SavedObjectsStart;
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
+  savedObjectsTagging?: SavedObjectsTaggingApi;
   home?: HomePublicPluginStart;
   spaces?: SpacesApi;
 }
@@ -107,6 +112,13 @@ export class GraphPlugin
           savedObjects: pluginsStart.savedObjects,
           uiSettings: core.uiSettings,
           spaces: pluginsStart.spaces,
+          SavedObjectFinder: getSavedObjectFinder({
+            savedObjects: coreStart.savedObjects,
+            uiSettings: coreStart.uiSettings,
+            savedObjectsManagement: pluginsStart.savedObjectsManagement,
+            savedObjectsPlugin: pluginsStart.savedObjects,
+            savedObjectsTagging: pluginsStart.savedObjectsTagging,
+          }),
         });
       },
     });

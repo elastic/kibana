@@ -22,6 +22,9 @@ import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import type { DashboardSetup } from '@kbn/dashboard-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { MlServicesContext } from '../../app';
 
 interface StartPlugins {
@@ -39,11 +42,15 @@ interface StartPlugins {
   dashboard: DashboardSetup;
   spacesApi: SpacesPluginStart;
   charts: ChartsPluginStart;
+  savedObjects: SavedObjectsStart;
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
+  savedObjectsTagging?: SavedObjectsTaggingApi;
 }
 export type StartServices = CoreStart &
-  StartPlugins & {
+  Omit<StartPlugins, 'savedObjects'> & {
     kibanaVersion: string;
     storage: IStorageWrapper;
+    savedObjectsPlugin: SavedObjectsStart;
   } & MlServicesContext;
 export const useMlKibana = () => useKibana<StartServices>();
 export type MlKibanaReactContextValue = KibanaReactContextValue<StartServices>;

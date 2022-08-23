@@ -9,7 +9,7 @@ import { EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui'
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FC } from 'react';
-import { SavedObjectFinderUi } from '@kbn/saved-objects-plugin/public';
+import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import { useAppDependencies } from '../../../../app_dependencies';
 
 interface SearchSelectionProps {
@@ -19,7 +19,13 @@ interface SearchSelectionProps {
 const fixedPageSize: number = 8;
 
 export const SearchSelection: FC<SearchSelectionProps> = ({ onSearchSelected }) => {
-  const { uiSettings, savedObjects } = useAppDependencies();
+  const {
+    uiSettings,
+    savedObjects,
+    savedObjectsManagement,
+    savedObjectsPlugin,
+    savedObjectsTagging,
+  } = useAppDependencies();
 
   return (
     <>
@@ -37,7 +43,14 @@ export const SearchSelection: FC<SearchSelectionProps> = ({ onSearchSelected }) 
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <SavedObjectFinderUi
+        <SavedObjectFinder
+          services={{
+            savedObjects,
+            uiSettings,
+            savedObjectsManagement,
+            savedObjectsPlugin,
+            savedObjectsTagging,
+          }}
           key="searchSavedObjectFinder"
           onChoose={onSearchSelected}
           showFilter
@@ -71,8 +84,6 @@ export const SearchSelection: FC<SearchSelectionProps> = ({ onSearchSelected }) 
             },
           ]}
           fixedPageSize={fixedPageSize}
-          uiSettings={uiSettings}
-          savedObjects={savedObjects}
         />
       </EuiModalBody>
     </>

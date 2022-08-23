@@ -30,6 +30,7 @@ import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/public';
 
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { createKbnUrlTracker } from './services/kibana_utils';
 import { UsageCollectionSetup } from './services/usage_collection';
 import { UiActionsSetup, UiActionsStart } from './services/ui_actions';
@@ -111,6 +112,7 @@ export interface DashboardStartDependencies {
   savedObjects: SavedObjectsStart;
   presentationUtil: PresentationUtilPluginStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
   spaces?: SpacesPluginStart;
   visualizations: VisualizationsStart;
   screenshotMode: ScreenshotModePluginStart;
@@ -170,7 +172,13 @@ export class DashboardPlugin
         return <ExitFullScreenButtonUi {...props} chrome={coreStart.chrome} />;
       };
       return {
-        SavedObjectFinder: getSavedObjectFinder(coreStart.savedObjects, coreStart.uiSettings),
+        SavedObjectFinder: getSavedObjectFinder({
+          savedObjects: coreStart.savedObjects,
+          uiSettings: coreStart.uiSettings,
+          savedObjectsManagement: deps.savedObjectsManagement,
+          savedObjectsPlugin: deps.savedObjects,
+          savedObjectsTagging: deps.savedObjectsTaggingOss?.getTaggingApi(),
+        }),
         showWriteControls: Boolean(coreStart.application.capabilities.dashboard.showWriteControls),
         notifications: coreStart.notifications,
         screenshotMode: deps.screenshotMode,
@@ -341,13 +349,28 @@ export class DashboardPlugin
   }
 
   public start(core: CoreStart, plugins: DashboardStartDependencies): DashboardStart {
-    const { notifications, overlays, application, theme, uiSettings } = core;
-    const { uiActions, data, share, presentationUtil, embeddable } = plugins;
+    const { notifications, overlays, application, theme, uiSettings, savedObjects } = core;
+    const {
+      uiActions,
+      data,
+      share,
+      presentationUtil,
+      embeddable,
+      savedObjectsManagement,
+      savedObjects: savedObjectsPlugin,
+      savedObjectsTaggingOss,
+    } = plugins;
 
     const dashboardCapabilities: Readonly<DashboardCapabilities> = application.capabilities
       .dashboard as DashboardCapabilities;
 
-    const SavedObjectFinder = getSavedObjectFinder(core.savedObjects, uiSettings);
+    const SavedObjectFinder = getSavedObjectFinder({
+      savedObjects,
+      uiSettings,
+      savedObjectsManagement,
+      savedObjectsPlugin,
+      savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
+    });
 
     const expandPanelAction = new ExpandPanelAction();
     uiActions.registerAction(expandPanelAction);

@@ -29,7 +29,8 @@ export async function mountManagementSection(
   const startServices = await getStartServices();
   const [core, plugins] = startServices;
   const { application, chrome, docLinks, i18n, overlays, theme, savedObjects, uiSettings } = core;
-  const { data, share, spaces, triggersActionsUi, savedObjectTagging } = plugins;
+  const { data, share, spaces, triggersActionsUi, savedObjectsTagging, savedObjectsManagement } =
+    plugins;
   const { docTitle } = chrome;
 
   // Initialize services
@@ -57,7 +58,8 @@ export async function mountManagementSection(
     spaces,
     ml: await getMlSharedImports(),
     triggersActionsUi,
-    savedObjectTagging,
+    savedObjectsTagging,
+    savedObjectsManagement,
   };
 
   const unmountAppCallback = renderApp(element, appDependencies);

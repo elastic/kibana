@@ -86,6 +86,7 @@ export async function mountApp({
     presentationUtil,
     screenshotMode,
     dataViewEditor,
+    savedObjectsManagement,
   } = pluginsStart;
 
   const activeSpaceId =
@@ -117,6 +118,7 @@ export async function mountApp({
     savedObjectsClient: coreStart.savedObjects.client,
     savedDashboards: dashboardStart.getSavedDashboardLoader(),
     savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
+    savedObjectsManagement,
     allowByValueEmbeddables:
       initializerContext.config.get<DashboardFeatureFlagConfig>().allowByValueEmbeddables,
     dashboardCapabilities: {

@@ -31,6 +31,7 @@ import('./font_awesome');
 import { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
 import { SpacesApi } from '@kbn/spaces-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { BaseSavedObjectFinderProps } from '@kbn/saved-objects-finder-plugin/public';
 import { GraphSavePolicy } from './types';
 import { graphRouter } from './router';
 import { checkLicense } from '../common/check_license';
@@ -66,6 +67,7 @@ export interface GraphDependencies {
   uiSettings: IUiSettingsClient;
   history: ScopedHistory<unknown>;
   spaces?: SpacesApi;
+  SavedObjectFinder: (props: BaseSavedObjectFinderProps) => JSX.Element;
 }
 
 export type GraphServices = Omit<GraphDependencies, 'element' | 'history'>;

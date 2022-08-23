@@ -30,7 +30,7 @@ export const platformServiceFactory: CanvasPlatformServiceFactory = () => ({
   hasHeaderBanner$: noop,
   setBreadcrumbs: noop,
   setRecentlyAccessed: noop,
-  getSavedObjects: noop,
+  getSavedObjectFinder: noop,
   getSavedObjectsClient: noop,
   getUISettings: noop,
   setFullscreen: noop,

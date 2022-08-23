@@ -18,6 +18,7 @@ import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { registerFeature } from './register_feature';
 import { getTransformHealthRuleType } from './alerting';
 
@@ -27,11 +28,12 @@ export interface PluginsDependencies {
   management: ManagementSetup;
   home: HomePublicPluginSetup;
   savedObjects: SavedObjectsStart;
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
   share: SharePluginStart;
   spaces?: SpacesApi;
   alerting?: AlertingSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
-  savedObjectTagging?: SavedObjectsTaggingApi;
+  savedObjectsTagging?: SavedObjectsTaggingApi;
 }
 
 export class TransformUiPlugin {

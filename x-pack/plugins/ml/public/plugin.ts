@@ -44,6 +44,9 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DashboardSetup, DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { registerManagementSection } from './application/management';
 import { MlLocatorDefinition, MlLocator } from './locator';
 import { setDependencyCache } from './application/util/dependency_cache';
@@ -66,6 +69,9 @@ export interface MlStartDependencies {
   dashboard: DashboardStart;
   charts: ChartsPluginStart;
   lens?: LensPublicStart;
+  savedObjects: SavedObjectsStart;
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
+  savedObjectsTagging?: SavedObjectsTaggingApi;
 }
 
 export interface MlSetupDependencies {
@@ -133,6 +139,9 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             usageCollection: pluginsSetup.usageCollection,
             fieldFormats: pluginsStart.fieldFormats,
             lens: pluginsStart.lens,
+            savedObjects: pluginsStart.savedObjects,
+            savedObjectsManagement: pluginsStart.savedObjectsManagement,
+            savedObjectsTagging: pluginsStart.savedObjectsTagging,
           },
           params
         );
