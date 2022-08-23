@@ -110,7 +110,7 @@ export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
       flashSuccessToast(
         i18n.translate('xpack.enterpriseSearch.content.indices.deleteIndex.successToast.title', {
           defaultMessage:
-            'Your index {indexName} and any associated ingestion confiurations were successfully deleted',
+            'Your index {indexName} and any associated ingestion configurations were successfully deleted',
           values: {
             indexName: values.deleteModalIndexName,
           },
