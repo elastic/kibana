@@ -235,6 +235,7 @@ const insertReferences = ({
         op: operation.type,
         indexPattern,
         field,
+        columnParams: { ...reference.columnParams },
         visualizationGroups,
         targetGroup,
       });
