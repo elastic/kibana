@@ -28,8 +28,10 @@ export const MonitorForm: React.FC<{ defaultValues?: SyntheticsMonitor; space?: 
     shouldFocusError: true,
   });
 
+  /* React hook form doesn't seem to register a field
+   * as dirty until validation unless dirtyFields is subscribed to */
   const {
-    formState: { isSubmitted, errors },
+    formState: { isSubmitted, errors, dirtyFields: _ },
   } = methods;
 
   return (
