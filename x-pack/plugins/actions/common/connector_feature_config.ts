@@ -88,13 +88,16 @@ export function getConnectorFeatureName(id: string) {
   return featureConfig ? featureConfig.name : id;
 }
 
-export function getConnectorCompatibility(featureIds: string[]): string[] {
+export function getConnectorCompatibility(featureIds?: string[]): string[] {
   const compatibility = new Set<string>();
 
-  for (const featureId of featureIds) {
-    if (AllAvailableConnectorFeatures[featureId]) {
-      compatibility.add(AllAvailableConnectorFeatures[featureId].compatibility);
+  if (featureIds && featureIds.length > 0) {
+    for (const featureId of featureIds) {
+      if (AllAvailableConnectorFeatures[featureId]) {
+        compatibility.add(AllAvailableConnectorFeatures[featureId].compatibility);
+      }
     }
   }
+
   return Array.from(compatibility);
 }
