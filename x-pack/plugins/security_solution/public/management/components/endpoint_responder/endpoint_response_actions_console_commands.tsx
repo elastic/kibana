@@ -6,6 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
+import { EuiToolTip, EuiTextColor } from '@elastic/eui';
 import type { Command, CommandDefinition } from '../console';
 import { IsolateActionResult } from './isolate_action';
 import { ReleaseActionResult } from './release_action';
@@ -53,12 +56,15 @@ const commandToCapabilitiesMap = new Map<ResponderCommands, ResponderCapabilitie
 ]);
 
 const capabilitiesValidator = (command: Command): true | string => {
-  const endpointCapabilities = command.commandDefinition.meta.capabilities;
-  const responderCapability = command.commandDefinition.name;
-  if (endpointCapabilities.includes(commandToCapabilitiesMap.get(responderCapability)) === true) {
-    return true;
+  const endpointCapabilities: ResponderCapabilities[] = command.commandDefinition.meta.capabilities;
+  const responderCapability = commandToCapabilitiesMap.get(
+    command.commandDefinition.name as ResponderCommands
+  );
+  if (responderCapability) {
+    if (endpointCapabilities.includes(responderCapability) === true) {
+      return true;
+    }
   }
-
   return UPGRADE_ENDPOINT_FOR_RESPONDER;
 };
 
@@ -86,9 +92,14 @@ const COMMENT_ARG_ABOUT = i18n.translate(
   { defaultMessage: 'A comment to go along with the action' }
 );
 
-const DISABLED_COMMAND_ABOUT = i18n.translate(
-  'xpack.securitySolution.endpointConsoleCommands.suspendProcess.disabledCommandAbout',
+const DISABLED_COMMAND_INFO = i18n.translate(
+  'xpack.securitySolution.endpointConsoleCommands.suspendProcess.disabledCommandInfo',
   { defaultMessage: 'This endpoint does not support this commmand' }
+);
+
+const DISABLED_COMMAND = i18n.translate(
+  'xpack.securitySolution.endpointConsoleCommands.suspendProcess.disabledCommand',
+  { defaultMessage: 'Disabled' }
 );
 
 export const getEndpointResponseActionsConsoleCommands = ({
@@ -98,6 +109,12 @@ export const getEndpointResponseActionsConsoleCommands = ({
   endpointAgentId: string;
   endpointCapabilities: ImmutableArray<string>;
 }): CommandDefinition[] => {
+  const doesEndpointSupportResponder = (commandName: ResponderCommands) => {
+    const responderCapability = commandToCapabilitiesMap.get(commandName);
+    if (responderCapability) {
+      return endpointCapabilities.includes(responderCapability);
+    }
+  };
   return [
     {
       name: 'isolate',
@@ -149,9 +166,22 @@ export const getEndpointResponseActionsConsoleCommands = ({
     },
     {
       name: 'kill-process',
-      about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.killProcess.about', {
-        defaultMessage: 'Kill/terminate a process',
-      }),
+      about: (
+        <FormattedMessage
+          id="xpack.securitySolution.endpointConsoleCommands.killProcess.about"
+          defaultMessage="Kill/terminate a process {optionalMessage}"
+          values={{
+            optionalMessage: doesEndpointSupportResponder('kill-process') ? (
+              ''
+            ) : (
+              <EuiToolTip content={DISABLED_COMMAND_INFO}>
+                <EuiTextColor color="danger">{DISABLED_COMMAND}</EuiTextColor>
+              </EuiToolTip>
+            ),
+          }}
+        />
+      ),
+
       RenderComponent: KillProcessActionResult,
       meta: {
         endpointId: endpointAgentId,

@@ -7,7 +7,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { ComponentType } from 'react';
+import type { ComponentType, ReactNode } from 'react';
 import type { CommonProps } from '@elastic/eui';
 import type { CommandExecutionResultComponent } from './components/command_execution_result';
 import type { CommandExecutionState } from './components/console_state/types';
@@ -35,7 +35,7 @@ export interface CommandArgs {
 
 export interface CommandDefinition<TMeta = any> {
   name: string;
-  about: ComponentType | string;
+  about: ReactNode | string;
   /**
    * The Component that will be used to render the Command
    */
