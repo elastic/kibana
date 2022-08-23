@@ -12,7 +12,7 @@ import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
-import { ResponseActionsList } from './response_actions_list';
+import { ResponseActionsLog } from './response_actions_log';
 import type { ActionDetails, ActionListApiResponse } from '../../../../common/endpoint/types';
 import { MANAGEMENT_PATH } from '../../../../common/constants';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
@@ -106,11 +106,11 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
   };
 });
 
-describe('Response Actions List', () => {
+describe('Response Actions Log', () => {
   const testPrefix = 'response-actions-list';
 
   let render: (
-    props?: React.ComponentProps<typeof ResponseActionsList>
+    props?: React.ComponentProps<typeof ResponseActionsLog>
   ) => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let history: AppContextTestRender['history'];
@@ -127,8 +127,8 @@ describe('Response Actions List', () => {
   beforeEach(async () => {
     mockedContext = createAppRootMockRenderer();
     ({ history } = mockedContext);
-    render = (props?: React.ComponentProps<typeof ResponseActionsList>) =>
-      (renderResult = mockedContext.render(<ResponseActionsList {...(props ?? {})} />));
+    render = (props?: React.ComponentProps<typeof ResponseActionsLog>) =>
+      (renderResult = mockedContext.render(<ResponseActionsLog {...(props ?? {})} />));
     reactTestingLibrary.act(() => {
       history.push(`${MANAGEMENT_PATH}/response_actions`);
     });
@@ -150,6 +150,11 @@ describe('Response Actions List', () => {
     it('should show date filters', () => {
       render();
       expect(renderResult.getByTestId(`${testPrefix}-super-date-picker`)).toBeTruthy();
+    });
+
+    it('should show actions filter', () => {
+      render();
+      expect(renderResult.getByTestId(`${testPrefix}-actions-filter-popoverButton`)).toBeTruthy();
     });
 
     it('should show empty state when there is no data', async () => {
@@ -282,9 +287,7 @@ describe('Response Actions List', () => {
     it('should refresh data when super date picker refresh button is clicked', async () => {
       render();
 
-      const superRefreshButton = renderResult.getByTestId(
-        `${testPrefix}-super-date-picker-refresh-button`
-      );
+      const superRefreshButton = renderResult.getByTestId(`${testPrefix}-super-refresh-button`);
       userEvent.click(superRefreshButton);
       expect(refetchFunction).toHaveBeenCalledTimes(1);
     });
@@ -412,6 +415,40 @@ describe('Response Actions List', () => {
           .slice(0, 6)
           .map((col) => col.textContent)
       ).toEqual(['Time', 'Command', 'User', 'Host', 'Comments', 'Status']);
+    });
+  });
+
+  describe('Actions filter', () => {
+    const filterPrefix = '-actions-filter';
+
+    it('should have a search bar', () => {
+      render();
+      userEvent.click(renderResult.getByTestId(`${testPrefix}${filterPrefix}-popoverButton`));
+      const searchBar = renderResult.getByTestId(`${testPrefix}${filterPrefix}-search`);
+      expect(searchBar).toBeTruthy();
+      expect(searchBar.querySelector('input')?.getAttribute('placeholder')).toEqual(
+        'Search actions'
+      );
+    });
+
+    it('should show a list of actions when opened', () => {
+      render();
+      userEvent.click(renderResult.getByTestId(`${testPrefix}${filterPrefix}-popoverButton`));
+      const filterList = renderResult.getByTestId(`${testPrefix}${filterPrefix}-popoverList`);
+      expect(filterList).toBeTruthy();
+      expect(filterList.querySelectorAll('ul>li').length).toEqual(5);
+      expect(
+        Array.from(filterList.querySelectorAll('ul>li')).map((option) => option.textContent)
+      ).toEqual(['isolate', 'release', 'kill-process', 'suspend-process', 'running-processes']);
+    });
+
+    it('should have `clear all` button `disabled` when no selected values', () => {
+      render();
+      userEvent.click(renderResult.getByTestId(`${testPrefix}${filterPrefix}-popoverButton`));
+      const clearAllButton = renderResult.getByTestId(
+        `${testPrefix}${filterPrefix}-clearAllButton`
+      );
+      expect(clearAllButton.hasAttribute('disabled')).toBeTruthy();
     });
   });
 });
