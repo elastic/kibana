@@ -51,6 +51,21 @@ export function getSavedSearchObjectType(
         grid: { type: 'object', enabled: false },
         version: { type: 'integer' },
         rowHeight: { type: 'text' },
+        timeRestore: { type: 'boolean', index: false, doc_values: false },
+        timeRange: {
+          dynamic: false,
+          properties: {
+            from: { type: 'keyword', index: false, doc_values: false },
+            to: { type: 'keyword', index: false, doc_values: false },
+          },
+        },
+        refreshInterval: {
+          dynamic: false,
+          properties: {
+            pause: { type: 'boolean', index: false, doc_values: false },
+            value: { type: 'integer', index: false, doc_values: false },
+          },
+        },
         rowsPerPage: { type: 'integer', index: false, doc_values: false },
       },
     },

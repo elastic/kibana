@@ -46,7 +46,6 @@ export default function ({ getService }: FtrProviderContext) {
               from: FROM,
             },
             defaultIndex: ['auditbeat-users'],
-            docValueFields: [],
             ip: IP,
             flowTarget: FlowTarget.destination,
             sort: { field: NetworkUsersFields.name, direction: Direction.asc },
