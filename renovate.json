@@ -180,6 +180,17 @@
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "backport:skip", "ci:all-cypress-suites"],
       "enabled": true
+    },
+    {
+      "groupName": "react-hook-form",
+      "packageNames": ["react-hook-form"],
+      "reviewers": [
+        "team:security-asset-management",
+        "team:uptime"
+      ],
+      "matchBaseBranches": ["main"],
+      "labels": ["release_note:skip", "backport:skip", "ci:all-cypress-suites"],
+      "enabled": true
     }
   ]
 }
