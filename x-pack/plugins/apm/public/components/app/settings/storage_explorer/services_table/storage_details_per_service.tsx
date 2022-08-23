@@ -80,7 +80,13 @@ export function StorageDetailsPerService({
   const { euiTheme } = useEuiTheme();
 
   const { query } = useApmParams('/settings/storage-explorer');
-  const { rangeFrom, rangeTo, environment, kuery } = query;
+  const {
+    rangeFrom,
+    rangeTo,
+    environment,
+    kuery,
+    comparisonEnabled: urlComparisonEnabled,
+  } = query;
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -91,7 +97,7 @@ export function StorageDetailsPerService({
     query: {
       ...query,
       serviceGroup: '',
-      comparisonEnabled: getComparisonEnabled({ core }),
+      comparisonEnabled: getComparisonEnabled({ core, urlComparisonEnabled }),
     },
   });
 

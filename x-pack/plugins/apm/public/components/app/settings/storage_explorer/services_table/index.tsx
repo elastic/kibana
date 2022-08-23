@@ -48,12 +48,21 @@ export function ServicesTable({ indexLifecyclePhase }: Props) {
   const { core } = useApmPluginContext();
 
   const {
-    query: { rangeFrom, rangeTo, environment, kuery },
+    query: {
+      rangeFrom,
+      rangeTo,
+      environment,
+      kuery,
+      comparisonEnabled: urlComparisonEnabled,
+    },
   } = useApmParams('/settings/storage-explorer');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const comparisonEnabled = getComparisonEnabled({ core });
+  const comparisonEnabled = getComparisonEnabled({
+    core,
+    urlComparisonEnabled,
+  });
 
   const toggleRowDetails = (selectedServiceName: string) => {
     const expandedRowMapValues = { ...itemIdToExpandedRowMap };

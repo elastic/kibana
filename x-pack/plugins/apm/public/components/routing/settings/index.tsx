@@ -9,6 +9,7 @@ import * as t from 'io-ts';
 import { Outlet } from '@kbn/typed-react-router-config';
 import { i18n } from '@kbn/i18n';
 import { Redirect } from 'react-router-dom';
+import { toBooleanRt } from '@kbn/io-ts-utils';
 import { agentConfigurationPageStepRt } from '../../../../common/agent_configuration/constants';
 import { Breadcrumb } from '../../app/breadcrumb';
 import { SettingsTemplate } from '../templates/settings_template';
@@ -160,6 +161,7 @@ export const settings = {
             t.partial({
               refreshPaused: t.union([t.literal('true'), t.literal('false')]),
               refreshInterval: t.string,
+              comparisonEnabled: toBooleanRt,
             }),
           ]),
         }),
