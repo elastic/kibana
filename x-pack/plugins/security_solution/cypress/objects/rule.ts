@@ -64,7 +64,7 @@ export interface CustomRule {
 
 export interface ThresholdRule extends CustomRule {
   thresholdField: string;
-  threshold: string;
+  threshold: number;
 }
 
 export interface OverrideRule extends CustomRule {
