@@ -22,13 +22,15 @@ import { DEFAULT_META } from '../../../shared/constants';
 
 import { FetchIndicesAPILogic } from '../../api/index/fetch_indices_api_logic';
 
-import { IngestionStatus } from '../../types';
+import { IngestionMethod, IngestionStatus } from '../../types';
 
 import { IndicesLogic } from './indices_logic';
 
 const DEFAULT_VALUES = {
   data: undefined,
+  deleteModalIndex: null,
   deleteModalIndexName: '',
+  deleteModalIngestionMethod: IngestionMethod.API,
   hasNoIndices: false,
   indices: [],
   isDeleteModalVisible: false,
@@ -76,17 +78,19 @@ describe('IndicesLogic', () => {
     });
     describe('openDeleteModal', () => {
       it('should set deleteIndexName and set isDeleteModalVisible to true', () => {
-        IndicesLogic.actions.openDeleteModal('delete');
+        IndicesLogic.actions.openDeleteModal(connectorIndex);
         expect(IndicesLogic.values).toEqual({
           ...DEFAULT_VALUES,
-          deleteModalIndexName: 'delete',
+          deleteModalIndex: connectorIndex,
+          deleteModalIndexName: 'connector',
+          deleteModalIngestionMethod: IngestionMethod.CONNECTOR,
           isDeleteModalVisible: true,
         });
       });
     });
     describe('closeDeleteModal', () => {
       it('should set deleteIndexName to empty and set isDeleteModalVisible to false', () => {
-        IndicesLogic.actions.openDeleteModal('delete');
+        IndicesLogic.actions.openDeleteModal(connectorIndex);
         IndicesLogic.actions.closeDeleteModal();
         expect(IndicesLogic.values).toEqual(DEFAULT_VALUES);
       });
