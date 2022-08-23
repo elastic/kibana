@@ -18,7 +18,11 @@ import {
   getLastUpdated,
   indexToViewIndex,
   isConnectorIndex,
-  isCrawlerIndex
+  isCrawlerIndex,
+  isApiIndex,
+  isConnectorViewIndex,
+  isCrawlerViewIndex,
+  isApiViewIndex
 } from './indices';
 
 describe('Indices util functions', () => {
@@ -147,6 +151,62 @@ describe('Indices util functions', () => {
     });
     it('should return false for API indices', () => {
       expect(isCrawlerIndex(apiIndex)).toEqual(false);
+    });
+  });
+  describe('isApiIndex', () => {
+    it('should return true for API indices', () => {
+      expect(isApiIndex(apiIndex)).toEqual(true);
+    });
+    it('should return false for crawler indices', () => {
+      expect(isApiIndex(crawlerIndex)).toEqual(false);
+    });
+    it('should return false for connector-crawler indices', () => {
+      expect(isApiIndex(connectorCrawlerIndex)).toEqual(false);
+    });
+    it('should return false for connector and API indices', () => {
+      expect(isApiIndex(connectorIndex)).toEqual(false);
+    });
+  });
+  describe('isConnectorViewIndex', () => {
+    it('should return true for connector indices', () => {
+      expect(isConnectorViewIndex(connectorIndex)).toEqual(true);
+    });
+    it('should return false for connector-crawler indices', () => {
+      expect(isConnectorViewIndex(connectorCrawlerIndex)).toEqual(false);
+    });
+    it('should return false for crawler indices', () => {
+      expect(isConnectorViewIndex(crawlerIndex)).toEqual(false);
+    });
+    it('should return false for API indices', () => {
+      expect(isConnectorViewIndex(apiIndex)).toEqual(false);
+    });
+  });
+  describe('isCrawlerViewIndex', () => {
+    it('should return true for crawler indices', () => {
+      expect(isCrawlerViewIndex(crawlerIndex)).toEqual(true);
+    });
+    it('should return true for connector-crawler indices', () => {
+      expect(isCrawlerViewIndex(connectorCrawlerIndex)).toEqual(true);
+    });
+    it('should return false for connector and API indices', () => {
+      expect(isCrawlerViewIndex(connectorIndex)).toEqual(false);
+    });
+    it('should return false for API indices', () => {
+      expect(isCrawlerViewIndex(apiIndex)).toEqual(false);
+    });
+  });
+  describe('isApiViewIndex', () => {
+    it('should return true for API indices', () => {
+      expect(isApiViewIndex(apiIndex)).toEqual(true);
+    });
+    it('should return false for crawler indices', () => {
+      expect(isApiViewIndex(crawlerIndex)).toEqual(false);
+    });
+    it('should return false for connector-crawler indices', () => {
+      expect(isApiViewIndex(connectorCrawlerIndex)).toEqual(false);
+    });
+    it('should return false for connector and API indices', () => {
+      expect(isApiViewIndex(connectorIndex)).toEqual(false);
     });
   });
 });

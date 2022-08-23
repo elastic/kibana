@@ -50,11 +50,14 @@ export function isApiIndex(index: ElasticsearchIndexWithIngestion | undefined): 
 }
 
 export function isConnectorViewIndex(index: ElasticsearchViewIndex): index is ConnectorViewIndex {
-  return !!(index as ConnectorViewIndex)?.connector;
+  const indexAsConnector = index as ConnectorViewIndex;
+  return !!indexAsConnector?.connector && indexAsConnector.connector.service_type !== CRAWLER_CONNECTOR_TYPE;
 }
 
 export function isCrawlerViewIndex(index: ElasticsearchViewIndex): index is CrawlerViewIndex {
-  return !!(index as CrawlerViewIndex)?.crawler;
+  const indexAsConnector = index as ConnectorViewIndex;
+  const indexAsCrawler = index as CrawlerViewIndex;
+  return !!indexAsCrawler?.crawler || (!!indexAsConnector?.connector && indexAsConnector.connector.service_type === CRAWLER_CONNECTOR_TYPE);
 }
 
 export function isApiViewIndex(index: ElasticsearchViewIndex): index is ApiViewIndex {
