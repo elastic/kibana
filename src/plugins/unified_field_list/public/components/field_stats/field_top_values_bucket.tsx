@@ -43,7 +43,7 @@ export const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
   testSubject,
   onAddFilter,
 }) => {
-  const isFilterButtonDisabled = !onAddFilter || type === 'other';
+  const isFilterButtonHidden = type === 'other';
 
   return (
     <EuiFlexGroup alignItems="stretch" gutterSize="s" responsive={false}>
@@ -95,9 +95,17 @@ export const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
       </EuiFlexItem>
       {onAddFilter && field.filterable && (
         <EuiFlexItem grow={false}>
-          <div>
+          <div
+            css={
+              isFilterButtonHidden
+                ? css`
+                    visibility: hidden;
+                  `
+                : undefined
+            }
+          >
             <EuiButtonIcon
-              disabled={isFilterButtonDisabled}
+              disabled={isFilterButtonHidden}
               iconSize="s"
               iconType="plusInCircle"
               onClick={() => onAddFilter(field, fieldValue, '+')}
@@ -116,7 +124,7 @@ export const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
               }}
             />
             <EuiButtonIcon
-              disabled={isFilterButtonDisabled}
+              disabled={isFilterButtonHidden}
               iconSize="s"
               iconType="minusInCircle"
               onClick={() => onAddFilter(field, fieldValue, '-')}
