@@ -23,7 +23,6 @@ import {
   RULES_TABLE,
   RULE_SWITCH,
   SEVERITY,
-  SHOWING_RULES_TEXT,
 } from '../../screens/alerts_detection_rules';
 import {
   ABOUT_CONTINUE_BTN,
@@ -218,10 +217,10 @@ describe('Custom query rules', () => {
             const initialNumberOfRules = rules.length;
             const expectedNumberOfRulesAfterDeletion = initialNumberOfRules - 1;
 
-            cy.get(SHOWING_RULES_TEXT).should(
-              'have.text',
-              `Showing 1-${initialNumberOfRules} of ${initialNumberOfRules} rules`
-            );
+            cy.request({ url: '/api/detection_engine/rules/_find' }).then(({ body }) => {
+              const numberOfRules = body.data.length;
+              expect(numberOfRules).to.eql(initialNumberOfRules);
+            });
 
             deleteFirstRule();
             waitForRulesTableToBeRefreshed();
@@ -229,10 +228,10 @@ describe('Custom query rules', () => {
             cy.get(RULES_TABLE)
               .find(RULES_ROW)
               .should('have.length', expectedNumberOfRulesAfterDeletion);
-            cy.get(SHOWING_RULES_TEXT).should(
-              'have.text',
-              `Showing 1-${expectedNumberOfRulesAfterDeletion} of ${expectedNumberOfRulesAfterDeletion} rules`
-            );
+            cy.request({ url: '/api/detection_engine/rules/_find' }).then(({ body }) => {
+              const numberOfRules = body.data.length;
+              expect(numberOfRules).to.eql(expectedNumberOfRulesAfterDeletion);
+            });
             cy.get(CUSTOM_RULES_BTN).should(
               'have.text',
               `Custom rules (${expectedNumberOfRulesAfterDeletion})`
@@ -256,10 +255,10 @@ describe('Custom query rules', () => {
             cy.get(RULES_TABLE)
               .find(RULES_ROW)
               .should('have.length', expectedNumberOfRulesAfterDeletion);
-            cy.get(SHOWING_RULES_TEXT).should(
-              'have.text',
-              `Showing 1-${expectedNumberOfRulesAfterDeletion} of ${expectedNumberOfRulesAfterDeletion} rule`
-            );
+            cy.request({ url: '/api/detection_engine/rules/_find' }).then(({ body }) => {
+              const numberOfRules = body.data.length;
+              expect(numberOfRules).to.eql(expectedNumberOfRulesAfterDeletion);
+            });
             cy.get(CUSTOM_RULES_BTN).should(
               'have.text',
               `Custom rules (${expectedNumberOfRulesAfterDeletion})`
@@ -284,10 +283,10 @@ describe('Custom query rules', () => {
               cy.get(RULES_TABLE)
                 .find(RULES_ROW)
                 .should('have.length', expectedNumberOfRulesAfterDeletion);
-              cy.get(SHOWING_RULES_TEXT).should(
-                'have.text',
-                `Showing 1-${expectedNumberOfRulesAfterDeletion} of ${expectedNumberOfRulesAfterDeletion} rules`
-              );
+              cy.request({ url: '/api/detection_engine/rules/_find' }).then(({ body }) => {
+                const numberOfRules = body.data.length;
+                expect(numberOfRules).to.eql(expectedNumberOfRulesAfterDeletion);
+              });
               cy.get(CUSTOM_RULES_BTN).should(
                 'have.text',
                 `Custom rules (${expectedNumberOfRulesAfterDeletion})`
