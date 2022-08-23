@@ -6,11 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  OPTIONS_LIST_CONTROL,
-  RANGE_SLIDER_CONTROL,
-  TIME_SLIDER_CONTROL,
-} from '@kbn/controls-plugin/common';
+import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '@kbn/controls-plugin/common';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
