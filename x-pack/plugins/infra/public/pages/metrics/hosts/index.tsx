@@ -21,6 +21,7 @@ import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { MetricsPageTemplate } from '../page_template';
 import { hostsTitle } from '../../../translations';
 import { HostsContent } from './hosts_content';
+import { MetricsDataViewProvider } from './hooks/use_data_view';
 
 export const HostsPage = () => {
   const {
@@ -65,7 +66,9 @@ export const HostsPage = () => {
                 paddingSize: 'none',
               }}
             >
-              <HostsContent sourceMetricAlias={source.configuration.metricAlias} />
+              <MetricsDataViewProvider metricAlias={source.configuration.metricAlias}>
+                <HostsContent />
+              </MetricsDataViewProvider>
             </MetricsPageTemplate>
           </HostsPageWrapper>
         </>
