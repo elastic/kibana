@@ -30,7 +30,7 @@ import type {
 } from '../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { defaultHeaders } from '../body/column_headers/default_headers';
-import { combineQueries, getCombinedFilterQuery } from '../helpers';
+import { getCombinedFilterQuery } from '../helpers';
 import { tGridActions, tGridSelectors } from '../../../store/t_grid';
 import type { State } from '../../../store/t_grid';
 import { useTimelineEvents } from '../../../container';
@@ -170,25 +170,32 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   }, [dispatch, isQueryLoading]);
 
   const justTitle = useMemo(() => <TitleText data-test-subj="title">{title}</TitleText>, [title]);
+  const esQueryConfig = getEsQueryConfig(uiSettings);
 
-  const combinedQueries = useMemo(
+  const filterQuery = useMemo(
     () =>
-      combineQueries({
-        config: getEsQueryConfig(uiSettings),
-        dataProviders: EMPTY_DATA_PROVIDERS,
-        indexPattern: indexPatterns,
+      getCombinedFilterQuery({
+        config: esQueryConfig,
         browserFields,
+        dataProviders: EMPTY_DATA_PROVIDERS,
         filters,
-        kqlQuery: query,
+        from: start,
+        indexPattern: indexPatterns,
         kqlMode: 'search',
-        isEventViewer: true,
+        kqlQuery: query,
+        to: end,
       }),
-    [uiSettings, indexPatterns, browserFields, filters, query]
+    [esQueryConfig, indexPatterns, browserFields, filters, start, end, query]
   );
 
   const canQueryTimeline = useMemo(
-    () => !indexPatternsLoading && combinedQueries != null && !isEmpty(start) && !isEmpty(end),
-    [indexPatternsLoading, combinedQueries, start, end]
+    () =>
+      filterQuery != null &&
+      indexPatternsLoading != null &&
+      !indexPatternsLoading &&
+      !isEmpty(start) &&
+      !isEmpty(end),
+    [indexPatternsLoading, filterQuery, start, end]
   );
 
   const fields = useMemo(
@@ -221,7 +228,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     entityType,
     excludeEcsData: true,
     fields,
-    filterQuery: combinedQueries?.filterQuery,
+    filterQuery,
     id: STANDALONE_ID,
     indexNames,
     limit: itemsPerPageStore,
@@ -264,23 +271,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   const nonDeletedEvents = useMemo(
     () => events.filter((e) => !deletedEventIds.includes(e._id)),
     [deletedEventIds, events]
-  );
-
-  const filterQuery = useMemo(
-    () =>
-      getCombinedFilterQuery({
-        config: getEsQueryConfig(uiSettings),
-        dataProviders: EMPTY_DATA_PROVIDERS,
-        indexPattern: indexPatterns,
-        browserFields,
-        filters,
-        kqlQuery: query,
-        kqlMode: 'search',
-        isEventViewer: true,
-        from: start,
-        to: end,
-      }),
-    [uiSettings, indexPatterns, browserFields, filters, query, start, end]
   );
 
   useEffect(() => {
