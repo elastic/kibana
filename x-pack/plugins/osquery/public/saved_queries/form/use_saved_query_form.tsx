@@ -75,7 +75,9 @@ export const savedQueryDataSerializer = (payload: SavedQueryFormData): SavedQuer
 
     draft.ecs_mapping = convertECSMappingToObject(payload.ecs_mapping);
 
-    draft.interval = draft.interval + '';
+    if (draft.interval) {
+      draft.interval = draft.interval + '';
+    }
 
     return draft;
   });
