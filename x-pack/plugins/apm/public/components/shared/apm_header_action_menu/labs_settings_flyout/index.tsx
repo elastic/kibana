@@ -19,12 +19,7 @@ import {
 } from '@elastic/eui';
 import { LazyField } from '@kbn/advanced-settings-plugin/public';
 import { i18n } from '@kbn/i18n';
-import {
-  apmOperationsTab,
-  apmServiceInventoryOptimizedSorting,
-  apmTraceExplorerTab,
-  enableServiceGroups,
-} from '@kbn/observability-plugin/common';
+import { apmExperimentalFeaturesSettings } from '@kbn/observability-plugin/common';
 import React, { useEffect, useState } from 'react';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmEditableSettings } from '../../../../hooks/use_apm_editable_settings';
@@ -32,17 +27,11 @@ import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { callApmApi } from '../../../../services/rest/create_call_apm_api';
 import { Header } from './header';
 
-const experimentalFeatureKeys = [
-  apmTraceExplorerTab,
-  enableServiceGroups,
-  apmServiceInventoryOptimizedSorting,
-  apmOperationsTab,
-];
-
 export function LabsSettingsFlyout() {
   const [isOpen, setIsOpen] = useState(false);
   const { docLinks, notifications } = useApmPluginContext().core;
   const [isLabsChecked, setIsLabsChecked] = useState(false);
+  const experimentalFeatureKeys = Object.keys(apmExperimentalFeaturesSettings);
   const {
     handleFieldChange,
     settingsEditableConfig,

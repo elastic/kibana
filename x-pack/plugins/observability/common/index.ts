@@ -38,8 +38,7 @@ export const casesFeatureId = 'observabilityCases';
 // want to change it.
 export const observabilityAppId = 'observability-overview';
 
-// Used by feature and "solution" registration
-export const observabilityFeatureId = 'observability';
+export { observabilityFeatureId } from './observability_feature_id';
 
 // Used by Cases to install routes
 export const casesPath = '/cases';
@@ -49,3 +48,5 @@ export const casesPath = '/cases';
 export const uptimeOverviewLocatorID = 'UPTIME_OVERVIEW_LOCATOR';
 export const syntheticsMonitorDetailLocatorID = 'SYNTHETICS_MONITOR_DETAIL_LOCATOR';
 export const syntheticsEditMonitorLocatorID = 'SYNTHETICS_EDIT_MONITOR_LOCATOR';
+
+export { apmExperimentalFeaturesSettings } from './apm_ui_experimental_features_settings';
