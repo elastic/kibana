@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
-import { AdditionalFiltersAction } from '.';
+import { render, screen, fireEvent } from '@testing-library/react';
 
+import { AdditionalFiltersAction } from '.';
 import { TestProviders } from '../../../../common/mock/test_providers';
 
 jest.useFakeTimers();
@@ -16,9 +16,9 @@ jest.mock('../../../../common/lib/kibana');
 
 describe('AdditionalFiltersAction', () => {
   describe('UtilityBarAdditionalFiltersContent', () => {
-    test('does not show the showBuildingBlockAlerts checked if the showBuildingBlockAlerts is false', () => {
+    test('does not show the showBuildingBlockAlerts checked if the showBuildingBlockAlerts is false', async () => {
       const onShowBuildingBlockAlertsChanged = jest.fn();
-      const wrapper = mount(
+      render(
         <TestProviders>
           <AdditionalFiltersAction
             onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChanged}
@@ -30,23 +30,15 @@ describe('AdditionalFiltersAction', () => {
         </TestProviders>
       );
       // click the filters button to popup the checkbox to make it visible
-      wrapper
-        .find('[data-test-subj="additionalFilters"] button')
-        .first()
-        .simulate('click')
-        .update();
+      const additionalFiltersButton = screen.findByTestId('additionalFilters-popover');
+      fireEvent.click(await additionalFiltersButton);
 
       // The check box should be false
-      expect(
-        wrapper
-          .find('[data-test-subj="showBuildingBlockAlertsCheckbox"] input')
-          .first()
-          .prop('checked')
-      ).toEqual(false);
+      expect(await screen.findByTestId('showBuildingBlockAlertsCheckbox')).not.toBeChecked();
     });
 
-    test('does not show the showOnlyThreatIndicatorAlerts checked if the showOnlyThreatIndicatorAlerts is true', () => {
-      const wrapper = mount(
+    test('does not show the showOnlyThreatIndicatorAlerts checked if the showOnlyThreatIndicatorAlerts is true', async () => {
+      render(
         <TestProviders>
           <AdditionalFiltersAction
             onShowBuildingBlockAlertsChanged={jest.fn()}
@@ -58,24 +50,15 @@ describe('AdditionalFiltersAction', () => {
         </TestProviders>
       );
       // click the filters button to popup the checkbox to make it visible
-      wrapper
-        .find('[data-test-subj="additionalFilters"] button')
-        .first()
-        .simulate('click')
-        .update();
+      const additionalFiltersButton = screen.findByTestId('additionalFilters-popover');
+      fireEvent.click(await additionalFiltersButton);
 
-      // The check box should be false
-      expect(
-        wrapper
-          .find('[data-test-subj="showOnlyThreatIndicatorAlertsCheckbox"] input')
-          .first()
-          .prop('checked')
-      ).toEqual(true);
+      expect(await screen.findByTestId('showOnlyThreatIndicatorAlertsCheckbox')).toBeChecked();
     });
 
-    test('does show the showBuildingBlockAlerts checked if the showBuildingBlockAlerts is true', () => {
+    test('does show the showBuildingBlockAlerts checked if the showBuildingBlockAlerts is true', async () => {
       const onShowBuildingBlockAlertsChanged = jest.fn();
-      const wrapper = mount(
+      render(
         <TestProviders>
           <AdditionalFiltersAction
             onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChanged}
@@ -87,19 +70,11 @@ describe('AdditionalFiltersAction', () => {
         </TestProviders>
       );
       // click the filters button to popup the checkbox to make it visible
-      wrapper
-        .find('[data-test-subj="additionalFilters"] button')
-        .first()
-        .simulate('click')
-        .update();
+      const additionalFiltersButton = screen.findByTestId('additionalFilters-popover');
+      fireEvent.click(await additionalFiltersButton);
 
       // The check box should be true
-      expect(
-        wrapper
-          .find('[data-test-subj="showBuildingBlockAlertsCheckbox"] input')
-          .first()
-          .prop('checked')
-      ).toEqual(true);
+      expect(await screen.findByTestId('showBuildingBlockAlertsCheckbox')).toBeChecked();
     });
   });
 });
