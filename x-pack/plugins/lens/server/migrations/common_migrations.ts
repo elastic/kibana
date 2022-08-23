@@ -32,7 +32,7 @@ import {
   VisStatePre830,
   LensDocShape840,
 } from './types';
-import { DOCUMENT_FIELD_NAME, layerTypes, MetricState } from '../../common';
+import { DOCUMENT_FIELD_NAME, layerTypes, LegacyMetricState } from '../../common';
 import { LensDocShape } from './saved_object_migrations';
 
 export const commonRenameOperationsForFormula = (
@@ -249,7 +249,7 @@ export const commonLockOldMetricVisSettings = (
     return newAttributes as LensDocShape830<VisState830>;
   }
 
-  const visState = newAttributes.state.visualization as MetricState;
+  const visState = newAttributes.state.visualization as LegacyMetricState;
   visState.textAlign = visState.textAlign ?? 'center';
   visState.titlePosition = visState.titlePosition ?? 'bottom';
   visState.size = visState.size ?? 'xl';

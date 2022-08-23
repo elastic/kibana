@@ -23,7 +23,7 @@ import {
   VisState820,
   VisState830,
 } from './types';
-import { layerTypes, MetricState } from '../../common';
+import { layerTypes, LegacyMetricState } from '../../common';
 import { Filter } from '@kbn/es-query';
 
 describe('Lens migrations', () => {
@@ -2086,7 +2086,7 @@ describe('Lens migrations', () => {
       const result = migrations['8.3.0'](example, context) as ReturnType<
         SavedObjectMigrationFn<LensDocShape, LensDocShape>
       >;
-      const visState = result.attributes.state.visualization as MetricState;
+      const visState = result.attributes.state.visualization as LegacyMetricState;
       expect(visState.textAlign).toBe('center');
       expect(visState.titlePosition).toBe('bottom');
       expect(visState.size).toBe('xl');
@@ -2109,7 +2109,7 @@ describe('Lens migrations', () => {
         },
         context
       ) as ReturnType<SavedObjectMigrationFn<LensDocShape, LensDocShape>>;
-      const visState = result.attributes.state.visualization as MetricState;
+      const visState = result.attributes.state.visualization as LegacyMetricState;
       expect(visState.textAlign).toBe('right');
       expect(visState.titlePosition).toBe('top');
       expect(visState.size).toBe('s');
