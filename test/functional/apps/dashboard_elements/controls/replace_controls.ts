@@ -17,6 +17,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const security = getService('security');
 
   const { dashboardControls, timePicker, common, dashboard } = getPageObjects([
     'dashboardControls',
@@ -59,10 +60,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     before(async () => {
       await common.navigateToApp('dashboard');
+      await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader', 'animals']);
       await dashboard.gotoDashboardLandingPage();
       await dashboard.clickNewDashboard();
       await timePicker.setDefaultDataRange();
       await dashboard.saveDashboard(DASHBOARD_NAME, { exitFromEditMode: false });
+    });
+
+    after(async () => {
+      await security.testUser.restoreDefaults();
     });
 
     describe('Replace options list', async () => {

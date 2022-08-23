@@ -16,10 +16,10 @@ import {
   AggregateQuery,
   Query,
 } from '@kbn/es-query';
+import { SavedSearch, getSavedSearch } from '@kbn/saved-search-plugin/public';
 import { getState } from '../services/discover_state';
 import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../build_services';
-import { SavedSearch, getSavedSearch } from '../../../services/saved_searches';
 import { loadDataView } from '../utils/resolve_data_view';
 import { useSavedSearch as useSavedSearchData, DataDocumentsMsg } from './use_saved_search';
 import {
@@ -34,6 +34,7 @@ import { FetchStatus } from '../../types';
 import { getDataViewAppState } from '../utils/get_switch_data_view_app_state';
 import { SortPairArr } from '../../../components/doc_table/utils/get_sort';
 import { DataTableRecord } from '../../../types';
+import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
 
 const MAX_NUM_OF_COLUMNS = 50;
 
@@ -193,6 +194,12 @@ export function useDiscoverState({
         savedSearch: newSavedSearch,
         storage,
       });
+
+      restoreStateFromSavedSearch({
+        savedSearch: newSavedSearch,
+        timefilter: services.timefilter,
+      });
+
       await stateContainer.replaceUrlAppState(newAppState);
       setState(newAppState);
     },

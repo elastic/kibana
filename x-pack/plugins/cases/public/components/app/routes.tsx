@@ -8,7 +8,7 @@
 import React, { lazy, Suspense, useCallback } from 'react';
 import { Redirect, Switch } from 'react-router-dom';
 import { Route } from '@kbn/kibana-react-plugin/public';
-import { QueryClientProvider } from 'react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { AllCases } from '../all_cases';
 import { CreateCase } from '../create';
