@@ -325,7 +325,7 @@ export const SearchExamplesApp = ({
        * { disableShardFailureWarning: true } in the SearchSourceSearchOptions passed to $fetch
        */
       data.search.showWarnings(inspector, (responseWarnings) => {
-        setWarnings([...warnings, responseWarnings]);
+        setWarnings([responseWarnings]);
         return false; // optional: set to `true` to prevent fetch from following the callback with default behavior
       });
 
@@ -430,8 +430,8 @@ export const SearchExamplesApp = ({
     }
   };
 
-  const onSearchSourceClickHandler = (withOtherBucket: boolean) => {
-    doSearchSourceSearch(withOtherBucket);
+  const onSearchSourceClickHandler = (withOtherBucket: boolean, warningsShown: boolean) => {
+    doSearchSourceSearch(withOtherBucket, warningsShown);
   };
 
   const reqTabs: EuiTabbedContentTab[] = [
@@ -636,7 +636,7 @@ export const SearchExamplesApp = ({
                 </EuiText>
                 <EuiButtonEmpty
                   size="xs"
-                  onClick={() => onSearchSourceClickHandler(true)}
+                  onClick={() => onSearchSourceClickHandler(true, true)}
                   iconType="play"
                   data-test-subj="searchSourceWithOther"
                 >
@@ -648,14 +648,14 @@ export const SearchExamplesApp = ({
                 <EuiText size="xs" color="subdued" className="searchExampleStepDsc">
                   <FormattedMessage
                     id="searchExamples.buttonText"
-                    defaultMessage="Bucket and metrics aggregations with other bucket."
+                    defaultMessage="Bucket and metrics aggregations, with other bucket and default warnings."
                   />
                 </EuiText>
                 <EuiButtonEmpty
                   size="xs"
-                  onClick={() => onSearchSourceClickHandler(false)}
+                  onClick={() => onSearchSourceClickHandler(false, false)}
                   iconType="play"
-                  data-test-subj="searchSourceWithoutOther"
+                  data-test-subj="searchSourceWithoutOtherAndWithoutDefaultWarnings"
                 >
                   <FormattedMessage
                     id="searchExamples.searchSource.buttonText"
@@ -665,7 +665,7 @@ export const SearchExamplesApp = ({
                 <EuiText size="xs" color="subdued" className="searchExampleStepDsc">
                   <FormattedMessage
                     id="searchExamples.buttonText"
-                    defaultMessage="Bucket and metrics aggregations without other bucket."
+                    defaultMessage="Bucket and metrics aggregations, without other bucket or default warnings."
                   />
                 </EuiText>
               </EuiText>
