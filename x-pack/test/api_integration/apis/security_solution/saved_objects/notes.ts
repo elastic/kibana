@@ -10,12 +10,12 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const supertest = getService('supertest');
 
   describe('Note - Saved Objects', () => {
-    beforeEach(() => esArchiver.load('x-pack/test/functional/es_archives/empty_kibana'));
-    afterEach(() => esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana'));
+    before(() => kibanaServer.savedObjects.cleanStandardList());
+    after(() => kibanaServer.savedObjects.cleanStandardList());
 
     describe('create a note', () => {
       it('should return a timelineId, timelineVersion, noteId and version', async () => {

@@ -23,7 +23,8 @@ export default function (providerContext: FtrProviderContext) {
     skipIfNoDockerRegistry(providerContext);
 
     before(async () => {
-      await getService('esArchiver').load('x-pack/test/functional/es_archives/empty_kibana');
+      await getService('kibanaServer').savedObjects.cleanStandardList();
+
       await getService('esArchiver').load(
         'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
       );
@@ -33,7 +34,7 @@ export default function (providerContext: FtrProviderContext) {
       await getService('esArchiver').unload(
         'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
       );
-      await getService('esArchiver').unload('x-pack/test/functional/es_archives/empty_kibana');
+      await getService('kibanaServer').savedObjects.cleanStandardList();
     });
 
     describe('get by id', async function () {
