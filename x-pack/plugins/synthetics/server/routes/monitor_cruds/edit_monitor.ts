@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { merge } from 'lodash';
+import { mergeWith } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import {
   SavedObjectsUpdateResponse,
@@ -78,7 +78,7 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
         );
       const normalizedPreviousMonitor = normalizeSecrets(decryptedPreviousMonitor).attributes;
 
-      const editedMonitor = merge(normalizedPreviousMonitor, monitor);
+      const editedMonitor = mergeWith(normalizedPreviousMonitor, monitor, customizer);
 
       const validationResult = validateMonitor(editedMonitor as MonitorFields);
 
@@ -184,5 +184,12 @@ export const syncEditedMonitor = async ({
     );
 
     throw e;
+  }
+};
+
+// Ensure that METADATA is merged deeply, to protect AAD and prevent decryption errors
+const customizer = (_: any, srcValue: any, key: string) => {
+  if (key !== ConfigKey.METADATA) {
+    return srcValue;
   }
 };
