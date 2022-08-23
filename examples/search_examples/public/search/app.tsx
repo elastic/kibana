@@ -325,7 +325,6 @@ export const SearchExamplesApp = ({
        * { disableShardFailureWarning: true } in the SearchSourceSearchOptions passed to $fetch
        */
       data.search.showWarnings(inspector, (responseWarnings) => {
-        console.log('callback!');
         setWarnings([...warnings, responseWarnings]);
         return false; // optional: set to `true` to prevent fetch from following the callback with default behavior
       });
