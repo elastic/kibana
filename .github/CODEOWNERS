@@ -13,8 +13,10 @@
 /src/plugins/saved_search/ @elastic/kibana-data-discovery
 /x-pack/plugins/discover_enhanced/ @elastic/kibana-data-discovery
 /test/functional/apps/discover/ @elastic/kibana-data-discovery
+/test/api_integration/apis/unified_field_list/ @elastic/kibana-data-discovery
 /x-pack/plugins/graph/ @elastic/kibana-data-discovery
 /x-pack/test/functional/apps/graph @elastic/kibana-data-discovery
+/src/plugins/unified_field_list/ @elastic/kibana-data-discovery
 
 # Vis Editors
 /x-pack/plugins/lens/ @elastic/kibana-vis-editors
@@ -41,7 +43,10 @@
 /src/plugins/url_forwarding/ @elastic/kibana-vis-editors
 /packages/kbn-tinymath/ @elastic/kibana-vis-editors
 /x-pack/test/functional/apps/lens @elastic/kibana-vis-editors
+/x-pack/test/api_integration/apis/lens/ @elastic/kibana-vis-editors
 /test/functional/apps/visualize/ @elastic/kibana-vis-editors
+/src/plugins/unified_field_list/ @elastic/kibana-vis-editors
+/test/api_integration/apis/unified_field_list/ @elastic/kibana-vis-editors
 
 # Application Services
 /examples/bfetch_explorer/ @elastic/kibana-app-services
@@ -87,6 +92,7 @@
 /x-pack/test/search_sessions_integration/ @elastic/kibana-app-services
 /src/plugins/dashboard/public/application/embeddable/viewport/print_media @elastic/kibana-app-services
 x-pack/plugins/files @elastic/kibana-app-services
+x-pack/examples/files_example @elastic/kibana-app-services
 
 ### Observability Plugins
 
@@ -136,7 +142,7 @@ x-pack/plugins/files @elastic/kibana-app-services
 /src/apm.js @elastic/kibana-core @vigneshshanmugam
 /packages/kbn-apm-config-loader/ @elastic/kibana-core @vigneshshanmugam
 /src/core/types/elasticsearch @elastic/apm-ui
-/packages/elastic-apm-synthtrace/  @elastic/apm-ui
+/packages/kbn-apm-synthtrace/  @elastic/apm-ui
 /packages/kbn-shared-svg @elastic/apm-ui
 #CC# /src/plugins/apm_oss/ @elastic/apm-ui
 #CC# /x-pack/plugins/observability/ @elastic/apm-ui
@@ -597,10 +603,10 @@ x-pack/plugins/security_solution/cypress/README.md @elastic/security-engineering
 x-pack/test/security_solution_cypress @elastic/security-engineering-productivity
 
 ## Security Solution sub teams - adaptive-workload-protection
-x-pack/plugins/kubernetes_security @elastic/awp-platform
-x-pack/plugins/session_view @elastic/awp-platform
-x-pack/plugins/security_solution/public/common/components/sessions_viewer @elastic/awp-platform
-x-pack/plugins/security_solution/public/kubernetes @elastic/awp-platform
+x-pack/plugins/kubernetes_security @elastic/awp-viz
+x-pack/plugins/session_view @elastic/awp-viz
+x-pack/plugins/security_solution/public/common/components/sessions_viewer @elastic/awp-viz
+x-pack/plugins/security_solution/public/kubernetes @elastic/awp-viz
 
 ## Security Solution sub teams - Protections Experience
 x-pack/plugins/threat_intelligence @elastic/protections-experience
@@ -618,6 +624,7 @@ x-pack/test/threat_intelligence_cypress @elastic/protections-experience
 # Cloud Security Posture
 /x-pack/plugins/cloud_security_posture/ @elastic/kibana-cloud-security-posture
 /x-pack/plugins/security_solution/public/cloud_security_posture @elastic/kibana-cloud-security-posture
+/x-pack/test/api_integration/apis/cloud_security_posture/ @elastic/kibana-cloud-security-posture
 
 # Security Solution onboarding tour
 /x-pack/plugins/security_solution/public/common/components/guided_onboarding @elastic/platform-onboarding
@@ -669,7 +676,6 @@ x-pack/test/threat_intelligence_cypress @elastic/protections-experience
 # Application Experience
 
 ## Shared UX Team
-/src/plugins/shared_ux/ @elastic/shared-ux
 /packages/shared-ux/ @elastic/shared-ux
 /packages/shared-ux-*/ @elastic/shared-ux
 
