@@ -15,9 +15,7 @@ export const TO_INDEX = 1;
 
 export function getMomentTimezone(dateFormatTZ: string) {
   const detectedTimezone = moment.tz.guess();
-  return (dateFormatTZ === undefined) || (dateFormatTZ === 'Browser')
-    ? detectedTimezone
-    : dateFormatTZ;
+  return dateFormatTZ === undefined || dateFormatTZ === 'Browser' ? detectedTimezone : dateFormatTZ;
 }
 
 function getScaledDateFormat(interval: number): string {

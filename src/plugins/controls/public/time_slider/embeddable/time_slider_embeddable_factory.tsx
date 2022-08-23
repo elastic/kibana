@@ -36,12 +36,12 @@ export class TimeSliderEmbeddableFactory
 
   public isEditable = () => Promise.resolve(false);
 
-  public getDisplayName = () => 
+  public getDisplayName = () =>
     i18n.translate('controls.timeSlider.displayName', {
       defaultMessage: 'Time slider',
     });
   public getIconType = () => 'clock';
-  public getDescription = () => 
+  public getDescription = () =>
     i18n.translate('controls.timeSlider.description', {
       defaultMessage: 'Add a slider for selecting a time range',
     });

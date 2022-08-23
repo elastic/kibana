@@ -35,9 +35,10 @@ interface Props {
 }
 
 export const TimeSlider: FC<Props> = (props: Props) => {
-  const { 
-    useEmbeddableSelector: select
-  } = useReduxEmbeddableContext<TimeSliderReduxState, typeof timeSliderReducers>();
+  const { useEmbeddableSelector: select } = useReduxEmbeddableContext<
+    TimeSliderReduxState,
+    typeof timeSliderReducers
+  >();
   const ticks = select((state) => {
     return state.componentState.ticks;
   });

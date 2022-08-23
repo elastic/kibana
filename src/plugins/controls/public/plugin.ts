@@ -18,10 +18,7 @@ import {
 } from '.';
 import { OptionsListEmbeddableFactory, OptionsListEmbeddableInput } from './options_list';
 import { RangeSliderEmbeddableFactory, RangeSliderEmbeddableInput } from './range_slider';
-import {
-  TimeSliderEmbeddableFactory,
-  TimeSliderControlEmbeddableInput,
-} from './time_slider';
+import { TimeSliderEmbeddableFactory, TimeSliderControlEmbeddableInput } from './time_slider';
 import { pluginServices } from './services';
 import { controlsService } from './services/kibana/controls';
 import {
