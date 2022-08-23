@@ -2232,4 +2232,34 @@ describe('Lens migrations', () => {
       expect(visState.valueLabels).toBe('hide');
     });
   });
+
+  describe('8.5.0 migrates metric IDs', () => {
+    const context = { log: { warn: () => {} } } as unknown as SavedObjectMigrationContext;
+    const example = {
+      type: 'lens',
+      id: 'mocked-saved-object-id',
+      attributes: {
+        savedObjectId: '1',
+        title: 'MyRenamedOps',
+        description: '',
+        visualizationType: 'lnsMetric',
+        state: {},
+      },
+    } as unknown as SavedObjectUnsanitizedDoc<LensDocShape810>;
+
+    it('lnsMetric => lnsLegacyMetric', () => {
+      const result = migrations['8.5.0'](example, context) as ReturnType<
+        SavedObjectMigrationFn<LensDocShape, LensDocShape>
+      >;
+      expect(result.attributes.visualizationType).toBe('lnsLegacyMetric');
+    });
+
+    it('lnsMetricNew => lnsMetric', () => {
+      const result = migrations['8.5.0'](
+        { ...example, attributes: { ...example.attributes, visualizationType: 'lnsMetricNew' } },
+        context
+      ) as ReturnType<SavedObjectMigrationFn<LensDocShape, LensDocShape>>;
+      expect(result.attributes.visualizationType).toBe('lnsMetric');
+    });
+  });
 });
