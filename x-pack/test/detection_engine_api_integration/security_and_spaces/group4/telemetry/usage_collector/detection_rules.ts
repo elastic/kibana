@@ -1315,12 +1315,12 @@ export default ({ getService }: FtrProviderContext) => {
             created_on: createdOn,
             updated_on: updatedOn,
             rule_id: ruleId,
+            rule_version: ruleVersion,
             ...omittedFields
           } = foundRule;
           expect(omittedFields).to.eql({
             rule_name: 'Endpoint Security',
             rule_type: 'query',
-            rule_version: 3,
             enabled: true,
             elastic_rule: true,
             alert_count_daily: 0,
@@ -1354,12 +1354,12 @@ export default ({ getService }: FtrProviderContext) => {
             created_on: createdOn,
             updated_on: updatedOn,
             rule_id: ruleId,
+            rule_version: ruleVersion,
             ...omittedFields
           } = foundRule;
           expect(omittedFields).to.eql({
             rule_name: 'Simple Rule Query',
             rule_type: 'query',
-            rule_version: 3,
             enabled: false,
             elastic_rule: true,
             alert_count_daily: 0,
@@ -1408,12 +1408,12 @@ export default ({ getService }: FtrProviderContext) => {
             created_on: createdOn,
             updated_on: updatedOn,
             rule_id: ruleId,
+            rule_version: ruleVersion,
             ...omittedFields
           } = foundRule;
           expect(omittedFields).to.eql({
             rule_name: 'Simple Rule Query',
             rule_type: 'query',
-            rule_version: 3,
             enabled: true,
             elastic_rule: true,
             alert_count_daily: 0,
@@ -1462,12 +1462,12 @@ export default ({ getService }: FtrProviderContext) => {
             created_on: createdOn,
             updated_on: updatedOn,
             rule_id: ruleId,
+            rule_version: ruleVersion,
             ...omittedFields
           } = foundRule;
           expect(omittedFields).to.eql({
             rule_name: 'Simple Rule Query',
             rule_type: 'query',
-            rule_version: 3,
             enabled: false,
             elastic_rule: true,
             alert_count_daily: 0,
@@ -1516,12 +1516,12 @@ export default ({ getService }: FtrProviderContext) => {
             created_on: createdOn,
             updated_on: updatedOn,
             rule_id: ruleId,
+            rule_version: ruleVersion,
             ...omittedFields
           } = foundRule;
           expect(omittedFields).to.eql({
             rule_name: 'Simple Rule Query',
             rule_type: 'query',
-            rule_version: 3,
             enabled: true,
             elastic_rule: true,
             alert_count_daily: 0,

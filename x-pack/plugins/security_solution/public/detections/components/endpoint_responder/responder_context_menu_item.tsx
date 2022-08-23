@@ -91,7 +91,7 @@ export const ResponderContextMenuItem = memo<ResponderContextMenuItemProps>(
       >
         <FormattedMessage
           id="xpack.securitySolution.endpoint.detections.takeAction.responseActionConsole.buttonLabel"
-          defaultMessage="Launch responder"
+          defaultMessage="Respond"
         />
       </EuiContextMenuItem>
     );
