@@ -46,7 +46,6 @@ export async function getActionStatuses(esClient: ElasticsearchClient): Promise<
         nbAgentsAck: count,
         complete,
         total,
-        timedOut: !complete && action.timedOut,
         cancelled: cancelledActionIds.indexOf(action.actionId) > -1,
       };
     },
@@ -113,7 +112,6 @@ async function _getActions(esClient: ElasticsearchClient) {
 
       if (!acc[hit._source.action_id]) {
         const startTime = hit._source?.start_time ?? hit._source?.['@timestamp'];
-        const timedOut = new Date().getTime() - new Date(startTime || 0).getTime() > 5 * 60 * 1000; // 5 min timeout
         acc[hit._source.action_id] = {
           actionId: hit._source.action_id,
           nbAgents: 0,
@@ -123,7 +121,6 @@ async function _getActions(esClient: ElasticsearchClient) {
           startTime,
           type: hit._source?.type,
           total: hit._source?.total ?? 0,
-          timedOut,
           cancelled: false,
           expired: hit._source?.expiration
             ? Date.parse(hit._source?.expiration) < Date.now()

@@ -43,8 +43,6 @@ export const ActionStatusCallout: React.FunctionComponent<{ refreshActionStatus:
       values={{
         status: currentAction.complete
           ? 'completed'
-          : currentAction.timedOut
-          ? 'timed out'
           : currentAction.cancelled
           ? 'cancelled'
           : currentAction.expired
@@ -65,11 +63,7 @@ export const ActionStatusCallout: React.FunctionComponent<{ refreshActionStatus:
         .slice(0, 3)
         .map((currentAction) => (
           <React.Fragment key={currentAction.actionId}>
-            <EuiCallOut
-              color={
-                currentAction.complete ? 'success' : currentAction.timedOut ? 'danger' : 'primary'
-              }
-            >
+            <EuiCallOut color={currentAction.complete ? 'success' : 'primary'}>
               <EuiFlexGroup
                 className="euiCallOutHeader__title"
                 justifyContent="spaceBetween"
@@ -78,13 +72,7 @@ export const ActionStatusCallout: React.FunctionComponent<{ refreshActionStatus:
               >
                 <EuiFlexItem grow={false}>
                   <div>
-                    {!currentAction.complete && !currentAction.timedOut ? (
-                      <EuiLoadingSpinner />
-                    ) : currentAction.complete ? (
-                      <EuiIcon type="check" />
-                    ) : (
-                      <EuiIcon type="alert" />
-                    )}
+                    {currentAction.complete ? <EuiIcon type="check" /> : <EuiLoadingSpinner />}
                     &nbsp;&nbsp;
                     {calloutTitle(currentAction)}
                   </div>
