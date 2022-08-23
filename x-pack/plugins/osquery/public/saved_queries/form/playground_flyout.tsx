@@ -10,8 +10,8 @@ import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { useFormContext } from 'react-hook-form';
 import { LiveQuery } from '../../live_queries';
-import { useFormData } from '../../shared_imports';
 
 const StyledEuiFlyoutHeader = styled(EuiFlyoutHeader)`
   &.euiFlyoutHeader.euiFlyoutHeader--hasBorder {
@@ -26,11 +26,13 @@ interface PlaygroundFlyoutProps {
 }
 
 const PlaygroundFlyoutComponent: React.FC<PlaygroundFlyoutProps> = ({ enabled, onClose }) => {
-  const [{ query, ecs_mapping: ecsMapping, id }, formDataSerializer] = useFormData();
-
+  // @ts-expect-error update types
+  const { serializer, watch } = useFormContext();
+  const watchedValues = watch();
+  const { query, ecs_mapping: ecsMapping, id } = watchedValues;
   /* recalculate the form data when ecs_mapping changes */
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const serializedFormData = useMemo(() => formDataSerializer(), [ecsMapping, formDataSerializer]);
+  const serializedFormData = useMemo(() => serializer(watchedValues), [ecsMapping]);
 
   return (
     <EuiFlyout type="push" size="m" onClose={onClose}>

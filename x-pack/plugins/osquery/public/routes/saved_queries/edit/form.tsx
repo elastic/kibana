@@ -16,14 +16,17 @@ import {
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { PackQueryFormData } from '../../../packs/queries/use_pack_query_form';
+import { FormProvider } from 'react-hook-form';
 import { useRouterNavigate } from '../../../common/lib/kibana';
-import { Form } from '../../../shared_imports';
 import { SavedQueryForm } from '../../../saved_queries/form';
+import type {
+  SavedQueryFormData,
+  SavedQuerySOFormData,
+} from '../../../saved_queries/form/use_saved_query_form';
 import { useSavedQueryForm } from '../../../saved_queries/form/use_saved_query_form';
 
 interface EditSavedQueryFormProps {
-  defaultValue?: PackQueryFormData;
+  defaultValue?: SavedQuerySOFormData;
   handleSubmit: (payload: unknown) => Promise<void>;
   viewMode?: boolean;
 }
@@ -35,15 +38,28 @@ const EditSavedQueryFormComponent: React.FC<EditSavedQueryFormProps> = ({
 }) => {
   const savedQueryListProps = useRouterNavigate('saved_queries');
 
-  const { form } = useSavedQueryForm({
+  const hooksForm = useSavedQueryForm({
     defaultValue,
-    handleSubmit,
   });
-  const { submit, isSubmitting } = form;
+
+  const {
+    serializer,
+    idSet,
+    handleSubmit: formSubmit,
+    formState: { isSubmitting },
+  } = hooksForm;
+
+  const onSubmit = (payload: SavedQueryFormData) => {
+    const serializedData = serializer(payload);
+    try {
+      handleSubmit(serializedData);
+      // eslint-disable-next-line no-empty
+    } catch (e) {}
+  };
 
   return (
-    <Form form={form}>
-      <SavedQueryForm viewMode={viewMode} hasPlayground />
+    <FormProvider {...hooksForm}>
+      <SavedQueryForm viewMode={viewMode} hasPlayground idSet={idSet} />
       {!viewMode && (
         <>
           <EuiBottomBar>
@@ -65,7 +81,7 @@ const EditSavedQueryFormComponent: React.FC<EditSavedQueryFormProps> = ({
                       fill
                       size="m"
                       iconType="save"
-                      onClick={submit}
+                      onClick={formSubmit(onSubmit)}
                     >
                       <FormattedMessage
                         id="xpack.osquery.editSavedQuery.form.updateQueryButtonLabel"
@@ -82,7 +98,7 @@ const EditSavedQueryFormComponent: React.FC<EditSavedQueryFormProps> = ({
           <EuiSpacer size="xxl" />
         </>
       )}
-    </Form>
+    </FormProvider>
   );
 };
 
