@@ -12,8 +12,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { IUiSettingsClient, ApplicationStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
-import './style.scss';
-
 import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
@@ -24,8 +22,9 @@ import {
   EuiTitle,
   EuiSpacer,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
-import { MlApiServices } from '../../../application/services/ml_api_service';
+import type { MlApiServices } from '../../../application/services/ml_api_service';
 
 import { Layer } from './layer';
 import type { LayerResult } from '../../../application/jobs/new_job/job_from_lens';
@@ -37,7 +36,7 @@ interface Props {
   data: DataPublicPluginStart;
   application: ApplicationStart;
   kibanaConfig: IUiSettingsClient;
-  ml: MlApiServices;
+  mlApiServices: MlApiServices;
   onClose: () => void;
 }
 
@@ -48,9 +47,10 @@ export const LensLayerSelectionFlyout: FC<Props> = ({
   share,
   data,
   application,
-  ml,
+  mlApiServices,
   kibanaConfig,
 }) => {
+  const { euiTheme } = useEuiTheme();
   return (
     <>
       <EuiFlyoutHeader hasBorder>
@@ -70,7 +70,7 @@ export const LensLayerSelectionFlyout: FC<Props> = ({
           />
         </EuiText>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody className="mlLensToJobFlyoutBody">
+      <EuiFlyoutBody css={{ backgroundColor: euiTheme.colors.lightestShade }}>
         {layerResults.map((layer, i) => (
           <Layer
             layer={layer}
@@ -79,7 +79,7 @@ export const LensLayerSelectionFlyout: FC<Props> = ({
             data={data}
             embeddable={embeddable}
             kibanaConfig={kibanaConfig}
-            ml={ml}
+            mlApiServices={mlApiServices}
             share={share}
           />
         ))}

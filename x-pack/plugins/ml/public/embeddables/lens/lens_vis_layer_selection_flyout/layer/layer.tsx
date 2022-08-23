@@ -32,7 +32,7 @@ interface Props {
   data: DataPublicPluginStart;
   application: ApplicationStart;
   kibanaConfig: IUiSettingsClient;
-  ml: MlApiServices;
+  mlApiServices: MlApiServices;
 }
 
 export const Layer: FC<Props> = ({
@@ -42,7 +42,7 @@ export const Layer: FC<Props> = ({
   share,
   data,
   application,
-  ml,
+  mlApiServices,
   kibanaConfig,
 }) => {
   return (
@@ -72,7 +72,7 @@ export const Layer: FC<Props> = ({
               data={data}
               embeddable={embeddable}
               kibanaConfig={kibanaConfig}
-              ml={ml}
+              mlApiServices={mlApiServices}
               share={share}
             />
           ) : (

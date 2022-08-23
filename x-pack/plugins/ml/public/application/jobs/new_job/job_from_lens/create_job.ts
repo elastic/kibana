@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mergeWith } from 'lodash';
+import { mergeWith, uniqBy, isEqual } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IUiSettingsClient, SavedObjectReference } from '@kbn/core/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
@@ -30,7 +30,11 @@ import { i18n } from '@kbn/i18n';
 import type { JobCreatorType } from '../common/job_creator';
 import { createEmptyJob, createEmptyDatafeed } from '../common/job_creator/util/default_configs';
 import { stashJobForCloning } from '../common/job_creator/util/general';
-import { CREATED_BY_LABEL, DEFAULT_BUCKET_SPAN } from '../../../../../common/constants/new_job';
+import {
+  CREATED_BY_LABEL,
+  DEFAULT_BUCKET_SPAN,
+  JOB_TYPE,
+} from '../../../../../common/constants/new_job';
 import { ErrorType } from '../../../../../common/util/errors';
 import { createQueries } from '../utils/new_job_utils';
 import {
@@ -52,7 +56,7 @@ export interface LayerResult {
   label: string;
   icon: VisualizationType['icon'];
   isCompatible: boolean;
-  jobWizardType: CREATED_BY_LABEL | null;
+  jobType: JOB_TYPE | null;
   error?: ErrorType;
 }
 
@@ -68,7 +72,7 @@ export async function createAndStashADJob(
   layerIndex: number | undefined
 ) {
   try {
-    const { jobConfig, datafeedConfig, createdBy, start, end, includeTimeRange } = await createJob(
+    const { jobConfig, datafeedConfig, jobType, start, end, includeTimeRange } = await createJob(
       vis,
       startString,
       endString,
@@ -88,7 +92,10 @@ export async function createAndStashADJob(
       {
         jobConfig,
         datafeedConfig,
-        createdBy,
+        createdBy:
+          jobType === JOB_TYPE.SINGLE_METRIC
+            ? CREATED_BY_LABEL.SINGLE_METRIC
+            : CREATED_BY_LABEL.MULTI_METRIC,
         start,
         end,
       } as JobCreatorType,
@@ -114,7 +121,7 @@ export async function createJob(
   timeFilter: TimefilterContract,
   layerIndex: number | undefined
 ) {
-  const { jobConfig, datafeedConfig, createdBy } = await createADJobFromLensSavedObject(
+  const { jobConfig, datafeedConfig, jobType } = await createADJobFromLensSavedObject(
     vis,
     query,
     filters,
@@ -155,7 +162,7 @@ export async function createJob(
   return {
     jobConfig,
     datafeedConfig,
-    createdBy,
+    jobType,
     start,
     end,
     includeTimeRange,
@@ -187,17 +194,15 @@ async function getLayers(
         try {
           const { fields, splitField } = await extractFields(layer, vis, dataViewClient);
           const detectors = createDetectors(fields, splitField);
-          const createdBy =
-            splitField || detectors.length > 1
-              ? CREATED_BY_LABEL.MULTI_METRIC
-              : CREATED_BY_LABEL.SINGLE_METRIC;
+          const jobType =
+            splitField || detectors.length > 1 ? JOB_TYPE.MULTI_METRIC : JOB_TYPE.SINGLE_METRIC;
 
           return {
             id: layer.layerId,
             layerType: layer.layerType,
             label,
             icon,
-            jobWizardType: createdBy,
+            jobType,
             isCompatible: true,
           };
         } catch (error) {
@@ -206,7 +211,7 @@ async function getLayers(
             layerType: layer.layerType,
             label,
             icon,
-            jobWizardType: null,
+            jobType: null,
             isCompatible: false,
             error,
           };
@@ -259,7 +264,8 @@ async function createADJobFromLensSavedObject(
     jobConfig.analysis_config.influencers = [splitField.sourceField];
   }
   const isSingleMetric = splitField === null && jobConfig.analysis_config.detectors.length === 1;
-  const createdBy = isSingleMetric ? CREATED_BY_LABEL.SINGLE_METRIC : CREATED_BY_LABEL.MULTI_METRIC;
+  const jobType = isSingleMetric ? JOB_TYPE.SINGLE_METRIC : JOB_TYPE.MULTI_METRIC;
+
   if (isSingleMetric) {
     jobConfig.model_plot_config = {
       enabled: true,
@@ -270,7 +276,7 @@ async function createADJobFromLensSavedObject(
   return {
     jobConfig,
     datafeedConfig,
-    createdBy,
+    jobType,
   };
 }
 
@@ -446,7 +452,8 @@ function combineQueriesAndFilters(
     visQueries,
     (objValue: estypes.QueryDslQueryContainer, srcValue: estypes.QueryDslQueryContainer) => {
       if (Array.isArray(objValue)) {
-        return objValue.concat(srcValue);
+        const combinedQuery = objValue.concat(srcValue);
+        return uniqBy(combinedQuery, isEqual);
       }
     }
   );

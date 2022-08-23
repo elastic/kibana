@@ -37,7 +37,7 @@ import {
   createAndSaveJob,
 } from '../../../../application/jobs/new_job/job_from_lens';
 import type { LayerResult } from '../../../../application/jobs/new_job/job_from_lens';
-import { CREATED_BY_LABEL, DEFAULT_BUCKET_SPAN } from '../../../../../common/constants/new_job';
+import { JOB_TYPE, DEFAULT_BUCKET_SPAN } from '../../../../../common/constants/new_job';
 import { extractErrorMessage } from '../../../../../common/util/errors';
 import { MlApiServices } from '../../../../application/services/ml_api_service';
 import { basicJobValidation } from '../../../../../common/util/job_utils';
@@ -53,7 +53,7 @@ interface Props {
   data: DataPublicPluginStart;
   application: ApplicationStart;
   kibanaConfig: IUiSettingsClient;
-  ml: MlApiServices;
+  mlApiServices: MlApiServices;
 }
 
 enum STATE {
@@ -71,10 +71,10 @@ export const CompatibleLayer: FC<Props> = ({
   share,
   data,
   application,
-  ml,
+  mlApiServices: mlApiServices,
   kibanaConfig,
 }) => {
-  const [jobId, setJobId] = useState('');
+  const [jobId, setJobId] = useState<string | undefined>(undefined);
   const [startJob, setStartJob] = useState(true);
   const [runInRealTime, setRunInRealTime] = useState(true);
   const [bucketSpan, setBucketSpan] = useState(DEFAULT_BUCKET_SPAN);
@@ -89,6 +89,10 @@ export const CompatibleLayer: FC<Props> = ({
   }
 
   async function createADJob() {
+    if (jobId === undefined) {
+      return;
+    }
+
     setState(STATE.SAVING);
     setCreateError(null);
     const result = await createAndSaveJob(
@@ -100,7 +104,7 @@ export const CompatibleLayer: FC<Props> = ({
       data.dataViews,
       kibanaConfig,
       data.query.timefilter.timefilter,
-      ml,
+      mlApiServices,
       layerIndex
     );
     const error = checkForCreationErrors(result);
@@ -113,9 +117,9 @@ export const CompatibleLayer: FC<Props> = ({
   }
 
   const viewResults = useCallback(
-    async (jobType: CREATED_BY_LABEL | null) => {
+    async (jobType: JOB_TYPE | null) => {
       const { timeRange } = embeddable.getInput();
-      const page = jobType === CREATED_BY_LABEL.MULTI_METRIC ? 'explorer' : 'timeseriesexplorer';
+      const page = jobType === JOB_TYPE.MULTI_METRIC ? 'explorer' : 'timeseriesexplorer';
       const locator = share.url.locators.get(ML_APP_LOCATOR);
       if (locator) {
         const url = await locator!.getUrl({
@@ -138,7 +142,10 @@ export const CompatibleLayer: FC<Props> = ({
   }
 
   useDebounce(
-    async function validateJobId() {
+    function validateJobId() {
+      if (jobId === undefined) {
+        return;
+      }
       setJobIdValid('');
       setBucketSpanValid('');
       const validationResults = basicJobValidation(
@@ -170,15 +177,22 @@ export const CompatibleLayer: FC<Props> = ({
           })
         );
       } else {
-        const resp = await ml.jobs.jobsExist([jobId]);
-        if (resp[jobId].exists) {
-          setJobIdValid(
-            i18n.translate('xpack.ml.newJob.wizard.validateJob.jobNameAlreadyExists', {
-              defaultMessage:
-                'Job ID already exists. A job ID cannot be the same as an existing job or group.',
-            })
-          );
-        }
+        mlApiServices.jobs
+          .jobsExist([jobId])
+          .then((resp) => {
+            if (resp[jobId].exists) {
+              setJobIdValid(
+                i18n.translate('xpack.ml.newJob.wizard.validateJob.jobNameAlreadyExists', {
+                  defaultMessage:
+                    'Job ID already exists. A job ID cannot be the same as an existing job or group.',
+                })
+              );
+            }
+          })
+          .catch((error) => {
+            // eslint-disable-next-line no-console
+            console.error('Could not validate whether job ID exists');
+          });
       }
 
       if (validationResults.contains('bucket_span_invalid')) {
@@ -202,7 +216,7 @@ export const CompatibleLayer: FC<Props> = ({
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText size="s">
-                {layer.jobWizardType === CREATED_BY_LABEL.MULTI_METRIC ? (
+                {layer.jobType === JOB_TYPE.MULTI_METRIC ? (
                   <FormattedMessage
                     id="xpack.ml.embeddables.lensLayerFlyout.createJobCalloutTitle.multiMetric"
                     defaultMessage="This layer can be used to create a multi-metric job"
@@ -218,7 +232,13 @@ export const CompatibleLayer: FC<Props> = ({
           </EuiFlexGroup>
           <EuiSpacer size="m" />
           <EuiForm>
-            <EuiFormRow label="Job ID" error={jobIdValid} isInvalid={jobIdValid !== ''}>
+            <EuiFormRow
+              label={i18n.translate('xpack.ml.newJob.wizard.jobDetailsStep.jobId.title', {
+                defaultMessage: 'Job ID',
+              })}
+              error={jobIdValid}
+              isInvalid={jobIdValid !== ''}
+            >
               <EuiFieldText
                 data-test-subj={`mlLensLayerJobIdInput_${layerIndex}`}
                 value={jobId}
@@ -242,7 +262,12 @@ export const CompatibleLayer: FC<Props> = ({
             >
               <EuiSpacer size="s" />
               <EuiFormRow
-                label="Bucket span"
+                label={i18n.translate(
+                  'xpack.ml.newJob.wizard.pickFieldsStep.bucketSpan.placeholder',
+                  {
+                    defaultMessage: 'Bucket span',
+                  }
+                )}
                 error={bucketSpanValid}
                 isInvalid={bucketSpanValid !== ''}
               >
@@ -352,11 +377,11 @@ export const CompatibleLayer: FC<Props> = ({
 
           <EuiSpacer size="s" />
           <EuiButtonEmpty
-            onClick={viewResults.bind(null, layer.jobWizardType)}
+            onClick={viewResults.bind(null, layer.jobType)}
             flush="left"
             data-test-subj={`mlLensLayerResultsButton_${layerIndex}`}
           >
-            {layer.jobWizardType === CREATED_BY_LABEL.MULTI_METRIC ? (
+            {layer.jobType === JOB_TYPE.MULTI_METRIC ? (
               <FormattedMessage
                 id="xpack.ml.embeddables.lensLayerFlyout.saveSuccess.resultsLink.multiMetric"
                 defaultMessage="View results in Anomaly Explorer"

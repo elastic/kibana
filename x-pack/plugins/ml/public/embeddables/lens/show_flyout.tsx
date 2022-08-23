@@ -70,7 +70,7 @@ export async function showLensVisToADJobFlyout(
                 data={data}
                 application={coreStart.application}
                 kibanaConfig={coreStart.uiSettings}
-                ml={ml}
+                mlApiServices={ml}
               />
             </KibanaContextProvider>,
             theme$

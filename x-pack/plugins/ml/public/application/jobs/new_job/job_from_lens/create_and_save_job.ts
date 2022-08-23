@@ -13,17 +13,19 @@ import { getJobsItemsFromEmbeddable } from './utils';
 import { createJob } from './create_job';
 import { MlApiServices } from '../../../services/ml_api_service';
 import type { ErrorType } from '../../../../../common/util/errors';
+import { createDatafeedId } from '../../../../../common/util/job_utils';
+import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../common/constants/new_job';
 
-interface State {
+interface CreationState {
   success: boolean;
   error?: ErrorType;
 }
 
 interface CreateState {
-  jobCreated: State;
-  datafeedCreated: State;
-  jobOpened: State;
-  datafeedStarted: State;
+  jobCreated: CreationState;
+  datafeedCreated: CreationState;
+  jobOpened: CreationState;
+  datafeedStarted: CreationState;
 }
 
 export async function createAndSaveJob(
@@ -35,7 +37,7 @@ export async function createAndSaveJob(
   dataViewClient: DataViewsContract,
   kibanaConfig: IUiSettingsClient,
   timeFilter: TimefilterContract,
-  ml: MlApiServices,
+  mlApiServices: MlApiServices,
   layerIndex?: number
 ): Promise<CreateState> {
   const { query, filters, to, from, vis } = getJobsItemsFromEmbeddable(embeddable);
@@ -43,7 +45,7 @@ export async function createAndSaveJob(
     throw new Error('Cannot create job, query and filters are undefined');
   }
 
-  const { jobConfig, datafeedConfig, start, end } = await createJob(
+  const { jobConfig, datafeedConfig, start, end, jobType } = await createJob(
     vis,
     from,
     to,
@@ -58,8 +60,15 @@ export async function createAndSaveJob(
   const job = {
     ...jobConfig,
     job_id: jobId,
+    custom_settings: {
+      created_by:
+        jobType === JOB_TYPE.SINGLE_METRIC
+          ? CREATED_BY_LABEL.SINGLE_METRIC_FROM_LENS
+          : CREATED_BY_LABEL.MULTI_METRIC_FROM_LENS,
+    },
   };
-  const datafeedId = `datafeed-${jobId}`;
+
+  const datafeedId = createDatafeedId(jobId);
   const datafeed = { ...datafeedConfig, job_id: jobId, datafeed_id: datafeedId };
 
   const result: CreateState = {
@@ -70,7 +79,7 @@ export async function createAndSaveJob(
   };
 
   try {
-    await ml.addJob({ jobId: job.job_id, job });
+    await mlApiServices.addJob({ jobId: job.job_id, job });
   } catch (error) {
     result.jobCreated.error = error;
     return result;
@@ -78,7 +87,7 @@ export async function createAndSaveJob(
   result.jobCreated.success = true;
 
   try {
-    await ml.addDatafeed({ datafeedId, datafeedConfig: datafeed });
+    await mlApiServices.addDatafeed({ datafeedId, datafeedConfig: datafeed });
   } catch (error) {
     result.datafeedCreated.error = error;
     return result;
@@ -87,7 +96,7 @@ export async function createAndSaveJob(
 
   if (startJob) {
     try {
-      await ml.openJob({ jobId });
+      await mlApiServices.openJob({ jobId });
     } catch (error) {
       // job may already be open, so ignore 409 error.
       if (error.body.statusCode !== 409) {
@@ -98,7 +107,7 @@ export async function createAndSaveJob(
     result.jobOpened.success = true;
 
     try {
-      await ml.startDatafeed({ datafeedId, start, ...(runInRealTime ? {} : { end }) });
+      await mlApiServices.startDatafeed({ datafeedId, start, ...(runInRealTime ? {} : { end }) });
     } catch (error) {
       result.datafeedStarted.error = error;
       return result;
