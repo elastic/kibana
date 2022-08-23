@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import Fs from 'fs';
+const Fs = require('fs');
 
 /**
  * @param {unknown} v
@@ -21,7 +21,7 @@ function isObj(v) {
  * @param {unknown} v
  * @returns {asserts v is import('./types').ParsedPackageJson}
  */
-export function assertParsedPackageJson(v) {
+function validateParsedPackageJson(v) {
   if (!isObj(v) || typeof v.name !== 'string') {
     throw new Error('Expected at least a "name" property');
   }
@@ -51,13 +51,15 @@ export function assertParsedPackageJson(v) {
  * @param {string} path
  * @returns {import('./types').ParsedPackageJson}
  */
-export function readPackageJson(path) {
+function readPackageJson(path) {
   let pkg;
   try {
     pkg = JSON.parse(Fs.readFileSync(path, 'utf8'));
-    assertParsedPackageJson(pkg);
+    validateParsedPackageJson(pkg);
   } catch (error) {
     throw new Error(`unable to parse package.json at [${path}]: ${error.message}`);
   }
   return pkg;
 }
+
+module.exports = { readPackageJson, validateParsedPackageJson };
