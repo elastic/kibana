@@ -17,9 +17,9 @@ import moment from 'moment';
 import { appContextService } from '../app_context';
 
 import { ReassignActionRunner } from './reassign_action_runner';
-import { UnenrollActionRunner } from './unenroll_action_runner';
 import { UpgradeActionRunner } from './upgrade_action_runner';
 import { UpdateAgentTagsActionRunner } from './update_agent_tags_action_runner';
+import { UnenrollActionRunner } from './unenroll_action_runner';
 
 export enum BulkActionTaskType {
   REASSIGN_RETRY = 'fleet:reassign_action:retry',
@@ -41,49 +41,21 @@ export class BulkActionsResolver {
         };
       };
 
-      switch (taskType) {
-        case BulkActionTaskType.REASSIGN_RETRY:
-          return createRetryTask(
-            taskInstance,
-            getDeps,
-            async (esClient: ElasticsearchClient, soClient: SavedObjectsClient, options: any) =>
-              await new ReassignActionRunner(
-                esClient,
-                soClient,
-                options.newAgentPolicyId
-              ).runActionAsyncWithRetry(options)
-          );
-        case BulkActionTaskType.UNENROLL_RETRY:
-          return createRetryTask(
-            taskInstance,
-            getDeps,
-            async (esClient: ElasticsearchClient, soClient: SavedObjectsClient, options: any) =>
-              await new UnenrollActionRunner(esClient, soClient).runActionAsyncWithRetry(options)
-          );
-        case BulkActionTaskType.UPGRADE_RETRY:
-          return createRetryTask(
-            taskInstance,
-            getDeps,
-            async (esClient: ElasticsearchClient, soClient: SavedObjectsClient, options: any) =>
-              await new UpgradeActionRunner(esClient, soClient, options).runActionAsyncWithRetry(
-                options
-              )
-          );
-        case BulkActionTaskType.UPDATE_AGENT_TAGS_RETRY:
-          return createRetryTask(
-            taskInstance,
-            getDeps,
-            async (esClient: ElasticsearchClient, soClient: SavedObjectsClient, options: any) =>
-              await new UpdateAgentTagsActionRunner(
-                esClient,
-                soClient,
-                options.tagsToAdd,
-                options.tagsToRemove
-              ).runActionAsyncWithRetry(options)
-          );
-        default:
-          throw new Error('Unknown task type: ' + taskType);
-      }
+      const runnerMap = {
+        [BulkActionTaskType.UNENROLL_RETRY]: UnenrollActionRunner,
+        [BulkActionTaskType.REASSIGN_RETRY]: ReassignActionRunner,
+        [BulkActionTaskType.UPDATE_AGENT_TAGS_RETRY]: UpdateAgentTagsActionRunner,
+        [BulkActionTaskType.UPGRADE_RETRY]: UpgradeActionRunner,
+      };
+
+      return createRetryTask(
+        taskInstance,
+        getDeps,
+        async (esClient: ElasticsearchClient, soClient: SavedObjectsClient, options: any) =>
+          await new runnerMap[taskType](esClient, soClient, options).runActionAsyncWithRetry(
+            options
+          )
+      );
     };
   }
 
@@ -135,7 +107,7 @@ export class BulkActionsResolver {
       scope: ['fleet'],
       state: {},
       params: { options },
-      runAt: runAt ?? moment(new Date()).add(1, 's').toDate(),
+      runAt: runAt ?? moment(new Date()).add(Math.pow(3, options.retryCount), 's').toDate(),
     });
     appContextService.getLogger().info('Running task ' + taskId);
     return taskId;

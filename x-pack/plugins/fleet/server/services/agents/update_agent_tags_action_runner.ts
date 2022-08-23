@@ -18,22 +18,6 @@ import { BulkActionTaskType } from './bulk_actions_resolver';
 import { filterHostedPolicies } from './filter_hosted_agents';
 
 export class UpdateAgentTagsActionRunner extends ActionRunner {
-  private soClient: SavedObjectsClientContract;
-  private tagsToAdd: string[];
-  private tagsToRemove: string[];
-
-  constructor(
-    esClient: ElasticsearchClient,
-    soClient: SavedObjectsClientContract,
-    tagsToAdd: string[],
-    tagsToRemove: string[]
-  ) {
-    super(esClient);
-    this.soClient = soClient;
-    this.tagsToAdd = tagsToAdd;
-    this.tagsToRemove = tagsToRemove;
-  }
-
   protected async processAgents(
     agents: Agent[],
     actionId: string,
@@ -44,7 +28,7 @@ export class UpdateAgentTagsActionRunner extends ActionRunner {
       this.esClient,
       agents,
       {},
-      { tagsToAdd: this.tagsToAdd, tagsToRemove: this.tagsToRemove },
+      { tagsToAdd: this.actionParams.tagsToAdd, tagsToRemove: this.actionParams.tagsToRemove },
       undefined,
       true
     );
@@ -52,13 +36,6 @@ export class UpdateAgentTagsActionRunner extends ActionRunner {
 
   protected getActionType() {
     return BulkActionTaskType.UPDATE_AGENT_TAGS_RETRY;
-  }
-
-  protected getActionParams(): { [key: string]: any } {
-    return {
-      tagsToAdd: this.tagsToAdd,
-      tagsToRemove: this.tagsToRemove,
-    };
   }
 }
 

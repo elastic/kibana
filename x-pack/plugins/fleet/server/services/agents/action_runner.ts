@@ -7,7 +7,7 @@
 
 import uuid from 'uuid';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 
 import type { Agent, BulkActionResult, ListWithKuery } from '../../types';
@@ -19,14 +19,22 @@ import { closePointInTime, getAgentsByKuery, openPointInTime } from './crud';
 
 export abstract class ActionRunner {
   protected esClient: ElasticsearchClient;
+  protected soClient: SavedObjectsClientContract;
 
   protected pitId?: string;
   protected searchAfter?: SortResults;
   protected retryCount?: number;
   protected actionId?: string;
+  protected actionParams: { [key: string]: any } = {};
 
-  constructor(esClient: ElasticsearchClient) {
+  constructor(
+    esClient: ElasticsearchClient,
+    soClient: SavedObjectsClientContract,
+    actionParams: { [key: string]: any }
+  ) {
     this.esClient = esClient;
+    this.soClient = soClient;
+    this.actionParams = actionParams;
   }
 
   protected abstract getActionType(): string;
@@ -36,10 +44,6 @@ export abstract class ActionRunner {
     actionId: string,
     total?: number
   ): Promise<{ items: BulkActionResult[] }>;
-
-  protected getActionParams(): { [key: string]: any } {
-    return {};
-  }
 
   public async runActionAsyncWithRetry(options: {
     kuery: string;
@@ -91,7 +95,7 @@ export abstract class ActionRunner {
         const taskId = await appContextService.getBulkActionsResolver()!.run(
           {
             ...options,
-            ...this.getActionParams(),
+            ...this.actionParams,
             pitId: this.pitId!,
             searchAfter: this.searchAfter,
             actionId: this.actionId!,
@@ -185,7 +189,7 @@ export abstract class ActionRunner {
       const currentResults = await this.processBatch(currentAgents, searchAfter, res.total);
       results = { items: results.items.concat(currentResults.items) };
       allAgentsProcessed += currentAgents.length;
-      // if (allAgentsProcessed > 200) throw new Error('simulating error after batch processed ' + searchAfter);
+      // if (allAgentsProcessed > 20) throw new Error('simulating error after batch processed ' + searchAfter);
     }
 
     await closePointInTime(esClient, pitId);

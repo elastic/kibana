@@ -11,22 +11,16 @@ import type { Agent, BulkActionResult } from '../../types';
 
 import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 
+import { invalidateAPIKeys } from '../api_keys';
+
 import { ActionRunner } from './action_runner';
 
 import { errorsToResults, bulkUpdateAgents } from './crud';
 import { createAgentAction } from './actions';
 import { getHostedPolicies, isHostedAgent } from './hosted_agent';
 import { BulkActionTaskType } from './bulk_actions_resolver';
-import { invalidateAPIKeysForAgents } from './unenroll';
 
 export class UnenrollActionRunner extends ActionRunner {
-  private soClient: SavedObjectsClientContract;
-
-  constructor(esClient: ElasticsearchClient, soClient: SavedObjectsClientContract) {
-    super(esClient);
-    this.soClient = soClient;
-  }
-
   protected async processAgents(
     agents: Agent[],
     actionId: string,
@@ -107,4 +101,23 @@ export async function unenrollBatch(
   return {
     items: errorsToResults(givenAgents, outgoingErrors, undefined, skipSuccess),
   };
+}
+
+export async function invalidateAPIKeysForAgents(agents: Agent[]) {
+  const apiKeys = agents.reduce<string[]>((keys, agent) => {
+    if (agent.access_api_key_id) {
+      keys.push(agent.access_api_key_id);
+    }
+    if (agent.default_api_key_id) {
+      keys.push(agent.default_api_key_id);
+    }
+    if (agent.default_api_key_history) {
+      agent.default_api_key_history.forEach((apiKey) => keys.push(apiKey.id));
+    }
+    return keys;
+  }, []);
+
+  if (apiKeys.length) {
+    await invalidateAPIKeys(apiKeys);
+  }
 }

@@ -8,7 +8,6 @@
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 import type { Agent, BulkActionResult } from '../../types';
-import { invalidateAPIKeys } from '../api_keys';
 import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 import { SO_SEARCH_LIMIT } from '../../constants';
 
@@ -16,7 +15,11 @@ import { createAgentAction } from './actions';
 import type { GetAgentsOptions } from './crud';
 import { getAgentsByKuery } from './crud';
 import { getAgentById, getAgents, updateAgent, getAgentPolicyForAgent } from './crud';
-import { UnenrollActionRunner, unenrollBatch } from './unenroll_action_runner';
+import {
+  invalidateAPIKeysForAgents,
+  UnenrollActionRunner,
+  unenrollBatch,
+} from './unenroll_action_runner';
 
 async function unenrollAgentIsAllowed(
   soClient: SavedObjectsClientContract,
@@ -84,30 +87,11 @@ export async function unenrollAgents(
     const givenAgents = await getAgents(esClient, options);
     return await unenrollBatch(soClient, esClient, givenAgents, options);
   } else {
-    return await new UnenrollActionRunner(esClient, soClient).runActionAsyncWithRetry({
+    return await new UnenrollActionRunner(esClient, soClient, options).runActionAsyncWithRetry({
       ...options,
       batchSize,
       totalAgents: res.total,
     });
-  }
-}
-
-export async function invalidateAPIKeysForAgents(agents: Agent[]) {
-  const apiKeys = agents.reduce<string[]>((keys, agent) => {
-    if (agent.access_api_key_id) {
-      keys.push(agent.access_api_key_id);
-    }
-    if (agent.default_api_key_id) {
-      keys.push(agent.default_api_key_id);
-    }
-    if (agent.default_api_key_history) {
-      agent.default_api_key_history.forEach((apiKey) => keys.push(apiKey.id));
-    }
-    return keys;
-  }, []);
-
-  if (apiKeys.length) {
-    await invalidateAPIKeys(apiKeys);
   }
 }
 

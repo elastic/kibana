@@ -117,11 +117,9 @@ export async function reassignAgents(
     if (res.total <= batchSize) {
       givenAgents = res.agents;
     } else {
-      return await new ReassignActionRunner(
-        esClient,
-        soClient,
-        newAgentPolicyId
-      ).runActionAsyncWithRetry({
+      return await new ReassignActionRunner(esClient, soClient, {
+        newAgentPolicyId,
+      }).runActionAsyncWithRetry({
         ...options,
         batchSize,
         totalAgents: res.total,

@@ -26,15 +26,6 @@ import { getHostedPolicies, isHostedAgent } from './hosted_agent';
 import { BulkActionTaskType } from './bulk_actions_resolver';
 
 export class UpgradeActionRunner extends ActionRunner {
-  private soClient: SavedObjectsClientContract;
-  private options: any;
-
-  constructor(esClient: ElasticsearchClient, soClient: SavedObjectsClientContract, options: any) {
-    super(esClient);
-    this.soClient = soClient;
-    this.options = options;
-  }
-
   protected async processAgents(
     agents: Agent[],
     actionId: string,
@@ -45,7 +36,7 @@ export class UpgradeActionRunner extends ActionRunner {
       this.esClient,
       agents,
       {},
-      { ...this.options, actionId },
+      { ...this.actionParams, actionId } as any,
       true,
       total
     );

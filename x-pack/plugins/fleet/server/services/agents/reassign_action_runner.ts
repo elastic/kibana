@@ -21,19 +21,6 @@ import { getHostedPolicies, isHostedAgent } from './hosted_agent';
 import { BulkActionTaskType } from './bulk_actions_resolver';
 
 export class ReassignActionRunner extends ActionRunner {
-  private soClient: SavedObjectsClientContract;
-  private newAgentPolicyId: string;
-
-  constructor(
-    esClient: ElasticsearchClient,
-    soClient: SavedObjectsClientContract,
-    newAgentPolicyId: string
-  ) {
-    super(esClient);
-    this.soClient = soClient;
-    this.newAgentPolicyId = newAgentPolicyId;
-  }
-
   protected async processAgents(
     agents: Agent[],
     actionId: string,
@@ -42,7 +29,7 @@ export class ReassignActionRunner extends ActionRunner {
     return await reassignBatch(
       this.soClient,
       this.esClient,
-      { newAgentPolicyId: this.newAgentPolicyId, actionId },
+      { newAgentPolicyId: this.actionParams.newAgentPolicyId, actionId },
       agents,
       {},
       undefined,
@@ -53,12 +40,6 @@ export class ReassignActionRunner extends ActionRunner {
 
   protected getActionType() {
     return BulkActionTaskType.REASSIGN_RETRY;
-  }
-
-  protected getActionParams(): { [key: string]: any } {
-    return {
-      newAgentPolilcyId: this.newAgentPolicyId,
-    };
   }
 }
 
