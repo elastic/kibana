@@ -208,6 +208,19 @@ export const getPushedInfo = (
   };
 };
 
+export const getProfileUids = (userActions: CaseUserActions[]) => {
+  const uids = userActions.reduce<string[]>((acc, userAction) => {
+    if (userAction.type === ActionTypes.assignees) {
+      const uidsFromPayload = userAction.payload.assignees.map((assignee) => assignee.uid);
+      acc.push(...uidsFromPayload);
+    }
+
+    return acc;
+  }, []);
+
+  return uids;
+};
+
 export const useGetCaseUserActions = (caseId: string, caseConnectorId: string) => {
   const toasts = useToasts();
   const abortCtrlRef = new AbortController();
@@ -221,10 +234,12 @@ export const useGetCaseUserActions = (caseId: string, caseConnectorId: string) =
 
       const caseUserActions = !isEmpty(response) ? response : [];
       const pushedInfo = getPushedInfo(caseUserActions, caseConnectorId);
+      const profileUids = getProfileUids(caseUserActions);
 
       return {
         caseUserActions,
         participants,
+        profileUids,
         ...pushedInfo,
       };
     },
@@ -242,5 +257,3 @@ export const useGetCaseUserActions = (caseId: string, caseConnectorId: string) =
 };
 
 export type UseGetCaseUserActions = ReturnType<typeof useGetCaseUserActions>;
-
-// TODO: extract the assigned and unassigned users so their profiles can be retrieved
