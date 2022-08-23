@@ -1594,7 +1594,7 @@
         "label": "ActionParamsType",
         "description": [],
         "signature": [
-          "{ readonly to: string[]; readonly message: string; readonly subject: string; readonly cc: string[]; readonly bcc: string[]; readonly kibanaFooterLink: Readonly<{} & { path: string; text: string; }>; }"
+          "{ readonly message: string; readonly to: string[]; readonly subject: string; readonly cc: string[]; readonly bcc: string[]; readonly kibanaFooterLink: Readonly<{} & { path: string; text: string; }>; }"
         ],
         "path": "x-pack/plugins/actions/server/builtin_action_types/email.ts",
         "deprecated": false,
@@ -1622,7 +1622,7 @@
         "label": "ActionParamsType",
         "description": [],
         "signature": [
-          "{ readonly group?: string | undefined; readonly source?: string | undefined; readonly summary?: string | undefined; readonly component?: string | undefined; readonly timestamp?: string | undefined; readonly eventAction?: \"resolve\" | \"trigger\" | \"acknowledge\" | undefined; readonly dedupKey?: string | undefined; readonly severity?: \"error\" | \"warning\" | \"info\" | \"critical\" | undefined; readonly class?: string | undefined; }"
+          "{ readonly source?: string | undefined; readonly summary?: string | undefined; readonly group?: string | undefined; readonly component?: string | undefined; readonly timestamp?: string | undefined; readonly eventAction?: \"resolve\" | \"trigger\" | \"acknowledge\" | undefined; readonly dedupKey?: string | undefined; readonly severity?: \"error\" | \"warning\" | \"info\" | \"critical\" | undefined; readonly class?: string | undefined; }"
         ],
         "path": "x-pack/plugins/actions/server/builtin_action_types/pagerduty.ts",
         "deprecated": false,
@@ -1706,7 +1706,7 @@
         "label": "ActionParamsType",
         "description": [],
         "signature": [
-          "Readonly<{} & { subAction: \"getFields\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"getIncident\"; subActionParams: Readonly<{} & { externalId: string; }>; }> | Readonly<{} & { subAction: \"handshake\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"pushToService\"; subActionParams: Readonly<{} & { incident: Readonly<{} & { name: string; description: string | null; externalId: string | null; incidentTypes: number[] | null; severityCode: number | null; }>; comments: Readonly<{} & { comment: string; commentId: string; }>[] | null; }>; }> | Readonly<{} & { subAction: \"incidentTypes\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"severity\"; subActionParams: Readonly<{} & {}>; }>"
+          "Readonly<{} & { subAction: \"getFields\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"getIncident\"; subActionParams: Readonly<{} & { externalId: string; }>; }> | Readonly<{} & { subAction: \"handshake\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"pushToService\"; subActionParams: Readonly<{} & { incident: Readonly<{} & { description: string | null; name: string; externalId: string | null; incidentTypes: number[] | null; severityCode: number | null; }>; comments: Readonly<{} & { comment: string; commentId: string; }>[] | null; }>; }> | Readonly<{} & { subAction: \"incidentTypes\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"severity\"; subActionParams: Readonly<{} & {}>; }>"
         ],
         "path": "x-pack/plugins/actions/server/builtin_action_types/resilient/index.ts",
         "deprecated": false,
@@ -1758,17 +1758,7 @@
           },
           "<",
           "ActionTypeConfig",
-          ">>; delete: ({ id }: { id: string; }) => Promise<{}>; execute: ({ actionId, params, source, relatedSavedObjects, }: Omit<",
-          "ExecuteOptions",
-          "<unknown>, \"request\">) => Promise<",
-          {
-            "pluginId": "actions",
-            "scope": "common",
-            "docId": "kibActionsPluginApi",
-            "section": "def-common.ActionTypeExecutorResult",
-            "text": "ActionTypeExecutorResult"
-          },
-          "<unknown>>; create: ({ action: { actionTypeId, name, config, secrets }, }: ",
+          ">>; delete: ({ id }: { id: string; }) => Promise<{}>; create: ({ action: { actionTypeId, name, config, secrets }, }: ",
           "CreateOptions",
           ") => Promise<",
           {
@@ -1792,7 +1782,17 @@
           },
           "<",
           "ActionTypeConfig",
-          ">>; getAll: () => Promise<",
+          ">>; execute: ({ actionId, params, source, relatedSavedObjects, }: Omit<",
+          "ExecuteOptions",
+          "<unknown>, \"request\">) => Promise<",
+          {
+            "pluginId": "actions",
+            "scope": "common",
+            "docId": "kibActionsPluginApi",
+            "section": "def-common.ActionTypeExecutorResult",
+            "text": "ActionTypeExecutorResult"
+          },
+          "<unknown>>; getAll: () => Promise<",
           {
             "pluginId": "actions",
             "scope": "server",

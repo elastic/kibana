@@ -1906,7 +1906,7 @@
           },
           ">"
         ],
-        "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable.tsx",
+        "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
         "deprecated": false,
         "children": [
           {
@@ -1919,7 +1919,7 @@
             "signature": [
               "\"rangeSliderControl\""
             ],
-            "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable.tsx",
+            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
             "deprecated": false
           },
           {
@@ -1929,7 +1929,7 @@
             "tags": [],
             "label": "deferEmbeddableLoad",
             "description": [],
-            "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable.tsx",
+            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
             "deprecated": false
           },
           {
@@ -1942,7 +1942,7 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable.tsx",
+            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
             "deprecated": false,
             "children": [
               {
@@ -1961,7 +1961,7 @@
                     "text": "ReduxEmbeddablePackage"
                   }
                 ],
-                "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable.tsx",
+                "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -1981,7 +1981,7 @@
                     "text": "RangeSliderEmbeddableInput"
                   }
                 ],
-                "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable.tsx",
+                "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -2001,7 +2001,7 @@
                     "text": "ControlOutput"
                   }
                 ],
-                "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable.tsx",
+                "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -2038,7 +2038,7 @@
                   },
                   "> | undefined"
                 ],
-                "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable.tsx",
+                "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -2055,7 +2055,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable.tsx",
+            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -2070,7 +2070,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable.tsx",
+            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -2085,7 +2085,7 @@
             "signature": [
               "(node: HTMLElement) => void"
             ],
-            "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable.tsx",
+            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
             "deprecated": false,
             "children": [
               {
@@ -2098,7 +2098,7 @@
                 "signature": [
                   "HTMLElement"
                 ],
-                "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable.tsx",
+                "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -2191,7 +2191,7 @@
           },
           ">"
         ],
-        "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable_factory.tsx",
+        "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
         "deprecated": false,
         "children": [
           {
@@ -2201,8 +2201,53 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable_factory.tsx",
+            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.RangeSliderEmbeddableFactory.getDisplayName",
+            "type": "Function",
+            "tags": [],
+            "label": "getDisplayName",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.RangeSliderEmbeddableFactory.getDescription",
+            "type": "Function",
+            "tags": [],
+            "label": "getDescription",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.RangeSliderEmbeddableFactory.getIconType",
+            "type": "Function",
+            "tags": [],
+            "label": "getIconType",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "controls",
@@ -2214,22 +2259,22 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable_factory.tsx",
+            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
             "deprecated": false,
             "children": [],
             "returnComment": []
           },
           {
             "parentPluginId": "controls",
-            "id": "def-public.RangeSliderEmbeddableFactory.Unnamed",
+            "id": "def-public.RangeSliderEmbeddableFactory.isEditable",
             "type": "Function",
             "tags": [],
-            "label": "Constructor",
+            "label": "isEditable",
             "description": [],
             "signature": [
-              "any"
+              "() => Promise<boolean>"
             ],
-            "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable_factory.tsx",
+            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -2284,7 +2329,7 @@
               },
               ">"
             ],
-            "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable_factory.tsx",
+            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
             "deprecated": false,
             "children": [
               {
@@ -2303,7 +2348,7 @@
                     "text": "RangeSliderEmbeddableInput"
                   }
                 ],
-                "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable_factory.tsx",
+                "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -2340,7 +2385,7 @@
                   },
                   "> | undefined"
                 ],
-                "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable_factory.tsx",
+                "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -2397,7 +2442,7 @@
               },
               ">"
             ],
-            "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable_factory.tsx",
+            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
             "deprecated": false,
             "children": [
               {
@@ -2418,7 +2463,7 @@
                   },
                   ">"
                 ],
-                "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable_factory.tsx",
+                "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -2455,7 +2500,7 @@
                   },
                   "> | undefined"
                 ],
-                "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable_factory.tsx",
+                "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -2474,7 +2519,7 @@
               "DataControlField",
               ") => void"
             ],
-            "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable_factory.tsx",
+            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
             "deprecated": false,
             "children": [
               {
@@ -2487,71 +2532,11 @@
                 "signature": [
                   "DataControlField"
                 ],
-                "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable_factory.tsx",
+                "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
                 "deprecated": false,
                 "isRequired": true
               }
             ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "controls",
-            "id": "def-public.RangeSliderEmbeddableFactory.isEditable",
-            "type": "Function",
-            "tags": [],
-            "label": "isEditable",
-            "description": [],
-            "signature": [
-              "() => Promise<boolean>"
-            ],
-            "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable_factory.tsx",
-            "deprecated": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "controls",
-            "id": "def-public.RangeSliderEmbeddableFactory.getDisplayName",
-            "type": "Function",
-            "tags": [],
-            "label": "getDisplayName",
-            "description": [],
-            "signature": [
-              "() => string"
-            ],
-            "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable_factory.tsx",
-            "deprecated": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "controls",
-            "id": "def-public.RangeSliderEmbeddableFactory.getIconType",
-            "type": "Function",
-            "tags": [],
-            "label": "getIconType",
-            "description": [],
-            "signature": [
-              "() => string"
-            ],
-            "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable_factory.tsx",
-            "deprecated": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "controls",
-            "id": "def-public.RangeSliderEmbeddableFactory.getDescription",
-            "type": "Function",
-            "tags": [],
-            "label": "getDescription",
-            "description": [],
-            "signature": [
-              "() => string"
-            ],
-            "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable_factory.tsx",
-            "deprecated": false,
-            "children": [],
             "returnComment": []
           },
           {
@@ -2581,7 +2566,7 @@
                 "text": "EmbeddableStateWithType"
               }
             ],
-            "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable_factory.tsx",
+            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -2642,7 +2627,7 @@
               "SavedObjectReference",
               "[]; }"
             ],
-            "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable_factory.tsx",
+            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -3281,7 +3266,7 @@
           " extends ",
           "DataControlInput"
         ],
-        "path": "src/plugins/controls/common/control_types/range_slider/types.ts",
+        "path": "src/plugins/controls/common/range_slider/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -3294,7 +3279,7 @@
             "signature": [
               "[string, string]"
             ],
-            "path": "src/plugins/controls/common/control_types/range_slider/types.ts",
+            "path": "src/plugins/controls/common/range_slider/types.ts",
             "deprecated": false
           }
         ],
@@ -3529,7 +3514,7 @@
         "signature": [
           "\"rangeSliderControl\""
         ],
-        "path": "src/plugins/controls/common/control_types/range_slider/types.ts",
+        "path": "src/plugins/controls/common/range_slider/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4263,7 +4248,7 @@
           " extends ",
           "DataControlInput"
         ],
-        "path": "src/plugins/controls/common/control_types/range_slider/types.ts",
+        "path": "src/plugins/controls/common/range_slider/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -4276,7 +4261,7 @@
             "signature": [
               "[string, string]"
             ],
-            "path": "src/plugins/controls/common/control_types/range_slider/types.ts",
+            "path": "src/plugins/controls/common/range_slider/types.ts",
             "deprecated": false
           }
         ],
@@ -4395,7 +4380,7 @@
         "signature": [
           "\"rangeSliderControl\""
         ],
-        "path": "src/plugins/controls/common/control_types/range_slider/types.ts",
+        "path": "src/plugins/controls/common/range_slider/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
