@@ -97,47 +97,64 @@ export const buildExceptionItemFilterWithOsType = async (
   osTypes: OsTypeArray,
   entries: ExceptionEntry[],
   listClient: ListClient
-): Promise<BooleanFilter[]> => {
+): Promise<{ filter: BooleanFilter[]; unprocessable?: boolean }> => {
+  let isUnprocessable = false;
   const entriesWithOsTypes = transformOsType(osTypes, entries);
   const exceptionItemFilter = await Promise.all(
     entriesWithOsTypes.map(async (entryWithOsType) => {
+      const esFilter = await Promise.all(
+        entryWithOsType.map(async (entry) => {
+          const { filter, unprocessable = false } = await createInnerAndClauses({
+            entry,
+            listClient,
+          });
+          isUnprocessable = unprocessable;
+          return filter;
+        })
+      );
       return {
         bool: {
-          filter: await Promise.all(
-            entryWithOsType.map((entry) => createInnerAndClauses({ entry, listClient }))
-          ),
+          filter: esFilter,
         },
       };
     })
   );
-  return exceptionItemFilter;
+  return { filter: exceptionItemFilter, unprocessable: isUnprocessable };
 };
 
 export const buildExceptionItemFilter = async (
   exceptionItem: ExceptionListItemSchema,
   listClient: ListClient
-): Promise<Array<BooleanFilter | NestedFilter>> => {
+): Promise<{ filter: Array<BooleanFilter | NestedFilter>; unprocessable?: boolean }> => {
+  let isUnprocessable = false;
   const { entries, os_types: osTypes } = exceptionItem;
   if (osTypes != null && osTypes.length > 0) {
-    const exceptionItemFilter = await buildExceptionItemFilterWithOsType(
-      osTypes,
-      entries,
-      listClient
-    );
-    return exceptionItemFilter;
+    return buildExceptionItemFilterWithOsType(osTypes, entries, listClient);
   } else {
     if (entries.length === 1) {
-      return [await createInnerAndClauses({ entry: entries[0], listClient })];
+      const { filter, unprocessable } = await createInnerAndClauses({
+        entry: entries[0],
+        listClient,
+      });
+      return { filter: [filter], unprocessable };
     } else {
-      return [
+      const esFilter = [
         {
           bool: {
             filter: await Promise.all(
-              entries.map((entry) => createInnerAndClauses({ entry, listClient }))
+              entries.map(async (entry) => {
+                const { filter, unprocessable = false } = await createInnerAndClauses({
+                  entry,
+                  listClient,
+                });
+                isUnprocessable = unprocessable;
+                return filter;
+              })
             ),
           },
         },
       ];
+      return { filter: esFilter, unprocessable: isUnprocessable };
     }
   }
 };
@@ -145,11 +162,26 @@ export const buildExceptionItemFilter = async (
 export const createOrClauses = async (
   exceptionItems: ExceptionListItemSchema[],
   listClient: ListClient
-): Promise<Array<BooleanFilter | NestedFilter>> => {
-  const orClauses = await Promise.all(
-    exceptionItems.map((exceptionItem) => buildExceptionItemFilter(exceptionItem, listClient))
+): Promise<{
+  orClauses: Array<BooleanFilter | NestedFilter>;
+  unprocessableExceptionItems: ExceptionListItemSchema[];
+}> => {
+  const unprocessableExceptionItems: ExceptionListItemSchema[] = [];
+  const orClauses: Array<Array<BooleanFilter | NestedFilter>> = [];
+  await Promise.all(
+    exceptionItems.map(async (exceptionItem) => {
+      const { filter, unprocessable = false } = await buildExceptionItemFilter(
+        exceptionItem,
+        listClient
+      );
+      if (unprocessable) {
+        unprocessableExceptionItems.push(exceptionItem);
+        return;
+      }
+      orClauses.push(filter);
+    })
   );
-  return orClauses.flat();
+  return { orClauses: orClauses.flat(), unprocessableExceptionItems };
 };
 
 export const filterOutLargeValueLists = async (
@@ -236,17 +268,24 @@ export const buildExceptionFilter = async ({
   if (exceptionsWithoutLargeValueLists.length === 0) {
     return { filter: undefined, unprocessedExceptions };
   } else if (exceptionsWithoutLargeValueLists.length <= chunkSize) {
-    const clause = await createOrClauses(exceptionsWithoutLargeValueLists, listClient);
+    const { orClauses: clause, unprocessableExceptionItems } = await createOrClauses(
+      exceptionsWithoutLargeValueLists,
+      listClient
+    );
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     exceptionFilter.query!.bool!.should = clause;
+    unprocessedExceptions.concat(unprocessableExceptionItems);
     return { filter: exceptionFilter, unprocessedExceptions };
   } else {
     const chunks = chunkExceptions(exceptionsWithoutLargeValueLists, chunkSize);
 
     const filters = await Promise.all(
       chunks.map(async (exceptionsChunk) => {
-        const orClauses = await createOrClauses(exceptionsChunk, listClient);
-
+        const { orClauses, unprocessableExceptionItems } = await createOrClauses(
+          exceptionsChunk,
+          listClient
+        );
+        unprocessedExceptions.concat(unprocessableExceptionItems);
         return {
           meta: {
             alias: null,
@@ -440,12 +479,13 @@ export const buildTextClauses = (
 export const buildListClause = async (
   entry: EntryList,
   listClient: ListClient
-): Promise<BooleanFilter> => {
+): Promise<{ listClause: BooleanFilter; unprocessable?: boolean }> => {
   const {
     field,
     operator,
     list: { type },
   } = entry;
+  let unprocessable = false;
 
   const list = await listClient.findAllListItems({
     listId: entry.list.id,
@@ -461,7 +501,7 @@ export const buildListClause = async (
       return value.includes('-');
     });
     if (dashNotationRange.length > 200) {
-      throw new TypeError(`Too many dash notation entries in list: "${entry.list.id}"`);
+      unprocessable = true;
     }
     const rangeClauses = buildIpRangeClauses(dashNotationRange, field);
     if (slashNotationRange.length > 0) {
@@ -472,31 +512,39 @@ export const buildListClause = async (
       });
     }
     return {
-      bool: {
-        [operator === 'excluded' ? 'must_not' : 'should']: rangeClauses,
-        minimum_should_match: 1,
+      listClause: {
+        bool: {
+          [operator === 'excluded' ? 'must_not' : 'should']: rangeClauses,
+          minimum_should_match: 1,
+        },
       },
+      unprocessable,
     };
   }
 
   if (type === 'text') {
     const textClauses = buildTextClauses(listValues, field);
     if (textClauses.length > 200) {
-      throw new TypeError(`Too many text entries in list: "${entry.list.id}"`);
+      unprocessable = true;
     }
     return {
-      bool: {
-        [operator === 'excluded' ? 'must_not' : 'should']: textClauses,
-        minimum_should_match: 1,
+      listClause: {
+        bool: {
+          [operator === 'excluded' ? 'must_not' : 'should']: textClauses,
+          minimum_should_match: 1,
+        },
       },
+      unprocessable,
     };
   }
 
   return {
-    bool: {
-      [operator === 'excluded' ? 'must_not' : 'filter']: {
-        terms: {
-          [field]: listValues,
+    listClause: {
+      bool: {
+        [operator === 'excluded' ? 'must_not' : 'filter']: {
+          terms: {
+            [field]: listValues,
+          },
         },
       },
     },
@@ -521,9 +569,14 @@ export const getBaseNestedClause = async (
   return {
     bool: {
       filter: await Promise.all(
-        entries.map((nestedEntry) =>
-          createInnerAndClauses({ entry: nestedEntry, parent: parentField, listClient })
-        )
+        entries.map(async (nestedEntry) => {
+          const { filter } = await createInnerAndClauses({
+            entry: nestedEntry,
+            parent: parentField,
+            listClient,
+          });
+          return filter;
+        })
       ),
     },
   };
@@ -554,21 +607,21 @@ export const createInnerAndClauses = async ({
   entry: ExceptionEntry;
   parent?: string;
   listClient: ListClient;
-}): Promise<BooleanFilter | NestedFilter> => {
+}): Promise<{ filter: BooleanFilter | NestedFilter; unprocessable?: boolean }> => {
   const field = parent != null ? `${parent}.${entry.field}` : entry.field;
   if (entriesExists.is(entry)) {
-    return buildExistsClause({ ...entry, field });
+    return { filter: buildExistsClause({ ...entry, field }) };
   } else if (entriesMatch.is(entry)) {
-    return buildMatchClause({ ...entry, field });
+    return { filter: buildMatchClause({ ...entry, field }) };
   } else if (entriesMatchAny.is(entry)) {
-    return buildMatchAnyClause({ ...entry, field });
+    return { filter: buildMatchAnyClause({ ...entry, field }) };
   } else if (entriesMatchWildcard.is(entry)) {
-    return buildMatchWildcardClause({ ...entry, field });
+    return { filter: buildMatchWildcardClause({ ...entry, field }) };
   } else if (entriesList.is(entry)) {
-    const listClause = await buildListClause({ ...entry, field }, listClient);
-    return listClause;
+    const { listClause, unprocessable } = await buildListClause({ ...entry, field }, listClient);
+    return { filter: listClause, unprocessable };
   } else if (entriesNested.is(entry)) {
-    return buildNestedClause(entry, listClient);
+    return { filter: await buildNestedClause(entry, listClient) };
   } else {
     throw new TypeError(`Unexpected exception entry: ${entry}`);
   }
