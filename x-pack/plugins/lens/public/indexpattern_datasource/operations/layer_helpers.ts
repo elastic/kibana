@@ -66,6 +66,7 @@ interface ColumnChange {
   incompleteFieldOperation?: OperationType;
   columnParams?: Record<string, unknown>;
   initialParams?: { params: Record<string, unknown> }; // TODO: bind this to the op parameter
+  references?: ColumnChange[];
 }
 
 interface ColumnCopy {
@@ -174,6 +175,166 @@ function ensureCompatibleParamsAreMoved<T extends ColumnAdvancedParams>(
   return newColumn;
 }
 
+const insertReferences = ({
+  layer,
+  references,
+  requiredReferences,
+  indexPattern,
+  visualizationGroups,
+  targetGroup,
+}: {
+  layer: IndexPatternLayer;
+  references: ColumnChange[];
+  requiredReferences: RequiredReference[];
+  indexPattern: IndexPattern;
+  visualizationGroups: VisualizationDimensionGroupConfig[];
+  targetGroup?: string;
+}) => {
+  references.forEach((reference) => {
+    const validOperations = requiredReferences.filter((validation) =>
+      isOperationAllowedAsReference({ validation, operationType: reference.op, indexPattern })
+    );
+
+    if (!validOperations.length) {
+      throw new Error(
+        `Can't create reference, ${reference.op} has a validation function which doesn't allow any operations`
+      );
+    }
+  });
+
+  const referenceIds: string[] = [];
+  references.forEach((reference) => {
+    const operation = operationDefinitionMap[reference.op];
+
+    if (operation.input === 'none') {
+      layer = insertNewColumn({
+        layer,
+        columnId: reference.columnId,
+        op: operation.type,
+        indexPattern,
+        columnParams: { ...reference.columnParams },
+        ...(reference.references ? { references: reference.references } : {}),
+        visualizationGroups,
+        targetGroup,
+      });
+
+      referenceIds.push(reference.columnId);
+      return;
+    }
+    const field =
+      operation.input === 'field'
+        ? indexPattern.fields.find((f) => operation.getPossibleOperationForField(f))
+        : undefined;
+
+    if (field) {
+      // Recursively update the layer for each new reference
+      layer = insertNewColumn({
+        layer,
+        columnId: reference.columnId,
+        op: operation.type,
+        indexPattern,
+        field,
+        visualizationGroups,
+        targetGroup,
+      });
+      referenceIds.push(reference.columnId);
+      return;
+    }
+  });
+  return referenceIds;
+};
+
+const generateNewReferences = ({
+  op,
+  incompleteFieldOperation,
+  incompleteFieldName,
+  columnParams,
+  layer,
+  requiredReferences,
+  indexPattern,
+  visualizationGroups,
+  targetGroup,
+}: {
+  op: string;
+  incompleteFieldName?: string;
+  incompleteFieldOperation?: OperationType;
+  columnParams?: Record<string, unknown>;
+  layer: IndexPatternLayer;
+  requiredReferences: RequiredReference[];
+  indexPattern: IndexPattern;
+  visualizationGroups: VisualizationDimensionGroupConfig[];
+  targetGroup?: string;
+}) => {
+  return requiredReferences.map((validation) => {
+    const validOperations = Object.values(operationDefinitionMap).filter(({ type }) =>
+      isOperationAllowedAsReference({ validation, operationType: type, indexPattern })
+    );
+
+    if (!validOperations.length) {
+      throw new Error(
+        `Can't create reference, ${op} has a validation function which doesn't allow any operations`
+      );
+    }
+
+    const newId = generateId();
+    if (incompleteFieldOperation && incompleteFieldName) {
+      const validFields = indexPattern.fields.filter(
+        (validField) => validField.name === incompleteFieldName
+      );
+      layer = insertNewColumn({
+        layer,
+        columnId: newId,
+        op: incompleteFieldOperation,
+        indexPattern,
+        field: validFields[0] ?? documentField,
+        visualizationGroups,
+        columnParams,
+        targetGroup,
+      });
+    }
+    if (validOperations.length === 1) {
+      const def = validOperations[0];
+
+      let validFields =
+        def.input === 'field' ? indexPattern.fields.filter(def.getPossibleOperationForField) : [];
+
+      if (incompleteFieldName) {
+        validFields = validFields.filter((validField) => validField.name === incompleteFieldName);
+      }
+      if (def.input === 'none') {
+        layer = insertNewColumn({
+          layer,
+          columnId: newId,
+          op: def.type,
+          indexPattern,
+          visualizationGroups,
+          targetGroup,
+        });
+      } else if (validFields.length === 1) {
+        // Recursively update the layer for each new reference
+        layer = insertNewColumn({
+          layer,
+          columnId: newId,
+          op: def.type,
+          indexPattern,
+          field: validFields[0],
+          visualizationGroups,
+          targetGroup,
+        });
+      } else {
+        layer = {
+          ...layer,
+          incompleteColumns: {
+            ...layer.incompleteColumns,
+            [newId]: { operationType: def.type },
+          },
+        };
+      }
+    }
+    return newId;
+  });
+};
+
 // Insert a column into an empty ID. The field parameter is required when constructing
 // a field-based operation, but will cause the function to fail for any other type of operation.
 export function insertNewColumn({
@@ -184,12 +345,12 @@ export function insertNewColumn({
   indexPattern,
   visualizationGroups,
   targetGroup,
-  shouldResetLabel,
   incompleteParams,
   incompleteFieldName,
   incompleteFieldOperation,
   columnParams,
   initialParams,
+  references,
 }: ColumnChange): IndexPatternLayer {
   const operationDefinition = operationDefinitionMap[op];
 
@@ -231,75 +392,31 @@ export function insertNewColumn({
     if (field) {
       throw new Error(`Reference-based operations can't take a field as input when creating`);
     }
-    let tempLayer = { ...layer };
-    const referenceIds = operationDefinition.requiredReferences.map((validation) => {
-      const validOperations = Object.values(operationDefinitionMap).filter(({ type }) =>
-        isOperationAllowedAsReference({ validation, operationType: type, indexPattern })
-      );
+    const tempLayer = { ...layer };
 
-      if (!validOperations.length) {
-        throw new Error(
-          `Can't create reference, ${op} has a validation function which doesn't allow any operations`
-        );
-      }
-
-      const newId = generateId();
-      if (incompleteFieldOperation && incompleteFieldName) {
-        const validFields = indexPattern.fields.filter(
-          (validField) => validField.name === incompleteFieldName
-        );
-        tempLayer = insertNewColumn({
-          layer: tempLayer,
-          columnId: newId,
-          op: incompleteFieldOperation,
-          indexPattern,
-          field: validFields[0] ?? documentField,
-          visualizationGroups,
-          columnParams,
-          targetGroup,
-        });
-      }
-      if (validOperations.length === 1) {
-        const def = validOperations[0];
-
-        let validFields =
-          def.input === 'field' ? indexPattern.fields.filter(def.getPossibleOperationForField) : [];
-
-        if (incompleteFieldName) {
-          validFields = validFields.filter((validField) => validField.name === incompleteFieldName);
-        }
-        if (def.input === 'none') {
-          tempLayer = insertNewColumn({
-            layer: tempLayer,
-            columnId: newId,
-            op: def.type,
-            indexPattern,
-            visualizationGroups,
-            targetGroup,
-          });
-        } else if (validFields.length === 1) {
-          // Recursively update the layer for each new reference
-          tempLayer = insertNewColumn({
-            layer: tempLayer,
-            columnId: newId,
-            op: def.type,
-            indexPattern,
-            field: validFields[0],
-            visualizationGroups,
-            targetGroup,
-          });
-        } else {
-          tempLayer = {
-            ...tempLayer,
-            incompleteColumns: {
-              ...tempLayer.incompleteColumns,
-              [newId]: { operationType: def.type },
-            },
-          };
-        }
-      }
-      return newId;
-    });
+    let referenceIds: string[] = [];
+    if (references) {
+      referenceIds = insertReferences({
+        layer: tempLayer,
+        references,
+        requiredReferences: operationDefinition.requiredReferences,
+        indexPattern,
+        visualizationGroups,
+        targetGroup,
+      });
+    } else {
+      referenceIds = generateNewReferences({
+        op,
+        incompleteFieldName,
+        incompleteFieldOperation,
+        columnParams,
+        layer,
+        requiredReferences: operationDefinition.requiredReferences,
+        indexPattern,
+        visualizationGroups,
+        targetGroup,
+      });
+    }
 
     const possibleOperation = operationDefinition.getPossibleOperation(indexPattern);
     if (!possibleOperation) {
