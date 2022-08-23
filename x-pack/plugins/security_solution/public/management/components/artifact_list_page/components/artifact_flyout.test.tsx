@@ -146,7 +146,9 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
       let getByTestId: typeof renderResult['getByTestId'];
 
       beforeEach(async () => {
-        await render();
+        await act(async () => {
+          await render();
+        });
 
         getByTestId = renderResult.getByTestId;
 
@@ -166,34 +168,38 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
         }
       });
 
-      it('should disable all buttons while an update is in flight', () => {
-        expect(getByTestId('testPage-flyout-cancelButton')).not.toBeEnabled();
-        expect(getByTestId('testPage-flyout-submitButton')).not.toBeEnabled();
+      it('should disable all buttons while an update is in flight', async () => {
+        await waitFor(() => {
+          expect(getByTestId('testPage-flyout-cancelButton')).not.toBeEnabled();
+          expect(getByTestId('testPage-flyout-submitButton')).not.toBeEnabled();
+        });
       });
 
-      it('should display loading indicator on Submit while an update is in flight', () => {
-        expect(
-          getByTestId('testPage-flyout-submitButton').querySelector('.euiLoadingSpinner')
-        ).toBeTruthy();
+      it('should display loading indicator on Submit while an update is in flight', async () => {
+        await waitFor(() =>
+          expect(
+            getByTestId('testPage-flyout-submitButton').querySelector('.euiLoadingSpinner')
+          ).toBeTruthy()
+        );
       });
 
-      it('should pass `disabled=true` to the Form component while an update is in flight', () => {
-        expect(getLastFormComponentProps().disabled).toBe(true);
+      it('should pass `disabled=true` to the Form component while an update is in flight', async () => {
+        await waitFor(() => expect(getLastFormComponentProps().disabled).toBe(true));
       });
     });
 
     describe('and submit is successful', () => {
       beforeEach(async () => {
-        await render();
+        await act(async () => {
+          await render();
+        });
 
         act(() => {
           userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
         });
 
-        await act(async () => {
-          await waitFor(() => {
-            expect(renderResult.queryByTestId('testPage-flyout')).toBeNull();
-          });
+        await waitFor(() => {
+          expect(renderResult.queryByTestId('testPage-flyout')).toBeNull();
         });
       });
 
@@ -209,25 +215,25 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
     });
 
     describe('and submit fails', () => {
-      beforeEach(async () => {
+      beforeEach(() => {
         const _renderAndWaitForFlyout = render;
 
         render = async (...args) => {
-          mockedApi.responseProvider.trustedAppCreate.mockImplementation(() => {
-            throw new Error('oh oh. no good!');
-          });
+          mockedApi.responseProvider.trustedAppCreate.mockRejectedValue(
+            new Error('oh oh. no good!') as never
+          );
 
-          await _renderAndWaitForFlyout(...args);
+          await act(async () => {
+            await _renderAndWaitForFlyout(...args);
+          });
 
           act(() => {
             userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
           });
 
-          await act(async () => {
-            await waitFor(() =>
-              expect(mockedApi.responseProvider.trustedAppCreate).toHaveBeenCalled()
-            );
-          });
+          await waitFor(() =>
+            expect(mockedApi.responseProvider.trustedAppCreate).toHaveBeenCalled()
+          );
 
           return renderResult;
         };
@@ -270,7 +276,9 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
           return new ExceptionsListItemGenerator().generateTrustedApp(item);
         });
 
-        await render({ onFormSubmit: handleSubmitCallback });
+        await act(async () => {
+          await render({ onFormSubmit: handleSubmitCallback });
+        });
 
         act(() => {
           userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
@@ -319,8 +327,10 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
   });
 
   describe('and in Edit mode', () => {
-    beforeEach(async () => {
-      history.push('somepage?show=edit&itemId=123');
+    beforeEach(() => {
+      act(() => {
+        history.push('somepage?show=edit&itemId=123');
+      });
     });
 
     it('should show loader while initializing in edit mode', async () => {
@@ -355,10 +365,8 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
     it('should provide Form component with the item for edit', async () => {
       const { getByTestId } = await render();
 
-      await act(async () => {
-        await waitFor(() => {
-          expect(getByTestId('formMock')).toBeTruthy();
-        });
+      await waitFor(() => {
+        expect(getByTestId('formMock')).toBeTruthy();
       });
 
       const expectedProps = {
@@ -373,37 +381,34 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
         expectedProps.entries
       ) as ExceptionListItemSchema['entries'];
 
-      expect(getLastFormComponentProps().item).toEqual(expectedProps);
+      await waitFor(() => {
+        expect(getLastFormComponentProps().item).toEqual(expectedProps);
+      });
     });
 
     it('should show error toast and close flyout if item for edit does not exist', async () => {
-      mockedApi.responseProvider.trustedApp.mockImplementation(() => {
-        throw new Error('does not exist');
-      });
-
-      await render();
+      mockedApi.responseProvider.trustedApp.mockRejectedValue(new Error('does not exist') as never);
 
       await act(async () => {
-        await waitFor(() => {
-          expect(mockedApi.responseProvider.trustedApp).toHaveBeenCalled();
-        });
+        await render();
       });
 
-      expect(coreStart.notifications.toasts.addWarning).toHaveBeenCalledWith(
-        'Failed to retrieve item for edit. Reason: does not exist'
-      );
+      await waitFor(() => {
+        expect(mockedApi.responseProvider.trustedApp).toHaveBeenCalled();
+
+        expect(coreStart.notifications.toasts.addWarning).toHaveBeenCalledWith(
+          'Failed to retrieve item for edit. Reason: does not exist'
+        );
+      });
     });
 
     it('should not show the expired license callout', async () => {
       const { queryByTestId, getByTestId } = await render();
 
-      await act(async () => {
-        await waitFor(() => {
-          expect(getByTestId('formMock')).toBeTruthy();
-        });
+      await waitFor(() => {
+        expect(getByTestId('formMock')).toBeTruthy();
+        expect(queryByTestId('testPage-flyout-expiredLicenseCallout')).not.toBeTruthy();
       });
-
-      expect(queryByTestId('testPage-flyout-expiredLicenseCallout')).not.toBeTruthy();
     });
 
     it('should show expired license warning when unsupported features are being used (downgrade scenario)', async () => {
@@ -425,13 +430,10 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
 
       const { getByTestId } = await render();
 
-      await act(async () => {
-        await waitFor(() => {
-          expect(getByTestId('formMock')).toBeTruthy();
-        });
+      await waitFor(() => {
+        expect(getByTestId('formMock')).toBeTruthy();
+        expect(getByTestId('testPage-flyout-expiredLicenseCallout')).toBeTruthy();
       });
-
-      expect(getByTestId('testPage-flyout-expiredLicenseCallout')).toBeTruthy();
     });
   });
 });

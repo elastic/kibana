@@ -12,6 +12,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiInMemoryTable,
+  EuiIcon,
   EuiLink,
   EuiPageContent,
   EuiSpacer,
@@ -36,7 +37,7 @@ import {
   getPageErrorCode,
   PageError,
   DeleteWatchesModal,
-  WatchStatus,
+  WatchStateBadge,
   SectionLoading,
   Error,
 } from '../../components';
@@ -275,42 +276,99 @@ export const WatchListPage = () => {
       },
       {
         field: 'watchStatus.state',
-        name: i18n.translate('xpack.watcher.sections.watchList.watchTable.stateHeader', {
-          defaultMessage: 'State',
-        }),
+        name: (
+          <EuiToolTip
+            content={i18n.translate(
+              'xpack.watcher.sections.watchList.watchTable.stateHeader.tooltipText',
+              {
+                defaultMessage: 'Active, inactive, or error.',
+              }
+            )}
+          >
+            <span>
+              {i18n.translate('xpack.watcher.sections.watchList.watchTable.stateHeader', {
+                defaultMessage: 'State',
+              })}{' '}
+              <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+            </span>
+          </EuiToolTip>
+        ),
         sortable: true,
         width: '130px',
-        render: (state: string) => <WatchStatus status={state} />,
+        render: (state: string) => <WatchStateBadge state={state} />,
       },
       {
         field: 'watchStatus.lastMetCondition',
-        name: i18n.translate('xpack.watcher.sections.watchList.watchTable.lastFiredHeader', {
-          defaultMessage: 'Last fired',
-        }),
+        name: (
+          <EuiToolTip
+            content={i18n.translate(
+              'xpack.watcher.sections.watchList.watchTable.lastFiredHeader.tooltipText',
+              {
+                defaultMessage: `The last time the condition was met and action taken.`,
+              }
+            )}
+          >
+            <span>
+              {i18n.translate('xpack.watcher.sections.watchList.watchTable.lastFiredHeader', {
+                defaultMessage: 'Condition last met',
+              })}{' '}
+              <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+            </span>
+          </EuiToolTip>
+        ),
         sortable: true,
         truncateText: true,
-        width: '130px',
+        width: '160px',
         render: (lastMetCondition: Moment) => {
           return lastMetCondition ? lastMetCondition.fromNow() : lastMetCondition;
         },
       },
       {
         field: 'watchStatus.lastChecked',
-        name: i18n.translate('xpack.watcher.sections.watchList.watchTable.lastTriggeredHeader', {
-          defaultMessage: 'Last triggered',
-        }),
+        name: (
+          <EuiToolTip
+            content={i18n.translate(
+              'xpack.watcher.sections.watchList.watchTable.lastTriggeredHeader.tooltipText',
+              {
+                defaultMessage: `The last time the condition was checked.`,
+              }
+            )}
+          >
+            <span>
+              {i18n.translate('xpack.watcher.sections.watchList.watchTable.lastTriggeredHeader', {
+                defaultMessage: 'Last checked',
+              })}{' '}
+              <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+            </span>
+          </EuiToolTip>
+        ),
         sortable: true,
         truncateText: true,
-        width: '130px',
+        width: '160px',
         render: (lastChecked: Moment) => {
           return lastChecked ? lastChecked.fromNow() : lastChecked;
         },
       },
       {
         field: 'watchStatus.comment',
-        name: i18n.translate('xpack.watcher.sections.watchList.watchTable.commentHeader', {
-          defaultMessage: 'Comment',
-        }),
+        name: (
+          <EuiToolTip
+            content={i18n.translate(
+              'xpack.watcher.sections.watchList.watchTable.commentHeader.tooltipText',
+              {
+                defaultMessage:
+                  'Whether any actions have been acknowledged, throttled, or failed to execute.',
+              }
+            )}
+          >
+            <span>
+              {i18n.translate('xpack.watcher.sections.watchList.watchTable.commentHeader', {
+                defaultMessage: 'Comment',
+              })}{' '}
+              <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+            </span>
+          </EuiToolTip>
+        ),
         sortable: true,
         truncateText: true,
       },
