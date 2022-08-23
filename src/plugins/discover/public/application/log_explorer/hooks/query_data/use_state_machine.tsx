@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { spawn } from 'xstate';
 import { QueryStart } from '@kbn/data-plugin/public';
 import { TimeRange } from '@kbn/es-query';
-import { useInterpret } from '@xstate/react';
+import { useInterpret, useActor } from '@xstate/react';
 import createContainer from 'constate';
 import moment from 'moment';
 import { useMemo, useCallback } from 'react';
@@ -40,7 +39,93 @@ export const useStateMachineService = ({
 
   const dataAccessService = useInterpret(
     () => {
-      return dataAccessStateMachine;
+      return dataAccessStateMachine.withConfig({
+        services: {
+          entries: (context, event) => {
+            const initialTimeRange = timefilter.getAbsoluteTime();
+            const subContext = {
+              dataView,
+              position: {
+                timestamp: getMiddleOfTimeRange(initialTimeRange),
+                tiebreaker: 0,
+              },
+              timeRange: initialTimeRange,
+              filters: filterManager.getFilters(),
+              query: queryString.getQuery(),
+            };
+            return entriesStateMachine
+              .withContext({
+                ...subContext,
+                configuration: {
+                  chunkSize: 200,
+                  minimumChunkOverscan: 50,
+                },
+                topChunk: {
+                  status: 'uninitialized',
+                },
+                bottomChunk: {
+                  status: 'uninitialized',
+                },
+              })
+              .withConfig({
+                services: {
+                  loadAround: loadAround({
+                    centerRowIndex,
+                    dataView,
+                    query,
+                    searchSource,
+                  }),
+                  loadBefore: loadBefore({
+                    dataView,
+                    query,
+                    searchSource,
+                  }),
+                  loadAfter: loadAfter({
+                    dataView,
+                    query,
+                    searchSource,
+                  }),
+                  loadTail: loadTail({
+                    dataView,
+                    query,
+                    searchSource,
+                  }),
+                },
+                delays: {
+                  loadTailDelay: () => timefilter.getRefreshInterval().value,
+                },
+              });
+          },
+          histogram: (context, event) => {
+            const initialTimeRange = timefilter.getAbsoluteTime();
+            const subContext = {
+              dataView,
+              position: {
+                timestamp: getMiddleOfTimeRange(initialTimeRange),
+                tiebreaker: 0,
+              },
+              timeRange: initialTimeRange,
+              filters: filterManager.getFilters(),
+              query: queryString.getQuery(),
+            };
+            return histogramStateMachine
+              .withContext({
+                ...subContext,
+                breakdownField: 'event.dataset',
+                histogram: [],
+              })
+              .withConfig({
+                services: {
+                  loadHistogram: loadHistogram({
+                    dataView,
+                    query,
+                    searchSource,
+                  }),
+                },
+              });
+          },
+        },
+      });
     },
     {
       devTools: true,
@@ -106,83 +191,10 @@ export const useStateMachineService = ({
   );
 
   const initialize = useCallback(() => {
-    const initialTimeRange = timefilter.getAbsoluteTime();
-
-    const subContext = {
-      dataView,
-      position: {
-        timestamp: getMiddleOfTimeRange(initialTimeRange),
-        tiebreaker: 0,
-      },
-      timeRange: initialTimeRange,
-      filters: filterManager.getFilters(),
-      query: queryString.getQuery(),
-    };
-
     dataAccessService.send({
       type: 'initialize',
-      initialEntriesContext: {
-        ...subContext,
-        configuration: {
-          chunkSize: 200,
-          minimumChunkOverscan: 50,
-        },
-        topChunk: {
-          status: 'uninitialized',
-        },
-        bottomChunk: {
-          status: 'uninitialized',
-        },
-      },
-      initialEntriesServices: {
-        loadAround: loadAround({
-          centerRowIndex,
-          dataView,
-          query,
-          searchSource,
-        }),
-        loadBefore: loadBefore({
-          dataView,
-          query,
-          searchSource,
-        }),
-        loadAfter: loadAfter({
-          dataView,
-          query,
-          searchSource,
-        }),
-        loadTail: loadTail({
-          dataView,
-          query,
-          searchSource,
-        }),
-      },
-      initialEntriesDelays: {
-        loadTailDelay: () => timefilter.getRefreshInterval().value,
-      },
-      initialHistogramContext: {
-        ...subContext,
-        breakdownField: 'event.dataset',
-        histogram: [],
-      },
-      initialHistogramServices: {
-        loadHistogram: loadHistogram({
-          dataView,
-          query,
-          searchSource,
-        }),
-      },
     });
-  }, [
-    centerRowIndex,
-    dataAccessService,
-    dataView,
-    filterManager,
-    query,
-    queryString,
-    searchSource,
-    timefilter,
-  ]);
+  }, [dataAccessService]);
 
   // TODO: Properly hook this up to the uninitialized state (based on the advanced setting)
   initialize();
@@ -193,24 +205,25 @@ export const useStateMachineService = ({
 export const [StateMachineProvider, useStateMachineContext] =
   createContainer(useStateMachineService);
 
-// export const useStateMachineContextSelector = <T, TEmitted = DataAccessService['state']>(
-//   selector: (emitted: TEmitted) => T,
-//   compare?: (a: T, b: T) => boolean,
-//   getSnapshot?: (a: DataAccessService) => TEmitted
-// ) => {
-//   const dataAccessMachine = useStateMachineContext();
-
-//   return useSelector(dataAccessMachine, selector, compare, getSnapshot);
-// };
-
-// export const useStateMachineContextActor = () => {
-//   const dataAccessService = useStateMachineContext();
-//   return useActor(dataAccessService);
-// };
-
 const getMiddleOfTimeRange = ({ from, to }: TimeRange): string => {
   const fromMoment = moment.utc(from);
   const toMoment = moment.utc(to);
 
   return fromMoment.add(toMoment.diff(fromMoment) / 2, 'ms').toISOString();
+};
+
+export const useEntries = () => {
+  const dataAccessService = useStateMachineContext();
+  const entriesActor = dataAccessService.children.get('entries');
+  const [entriesState, entriesSend] = useActor(entriesActor);
+  console.log('entriesActor', entriesActor);
+  console.log('entriesState', entriesState);
+  return [entriesActor, entriesState, entriesSend];
+};
+
+export const useHistogram = () => {
+  const dataAccessService = useStateMachineContext();
+  const histogramActor = dataAccessService.children.get('histogram');
+  const [histogramState, histogramSend] = useActor(histogramActor);
+  return [histogramActor, histogramState, histogramSend];
 };

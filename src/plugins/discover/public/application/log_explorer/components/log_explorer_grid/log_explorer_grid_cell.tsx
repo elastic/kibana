@@ -12,14 +12,14 @@ import { useSelector } from '@xstate/react';
 import React, { useContext } from 'react';
 import { CELL_CLASS } from '../../../../components/discover_grid/get_render_cell_value';
 import { formatFieldValue } from '../../../../utils/format_value';
-import { useStateMachineContext } from '../../hooks/query_data/use_state_machine';
+import { useEntries } from '../../hooks/query_data/use_state_machine';
 import { memoizedSelectRows } from '../../state_machines/entries_state_machine';
 import { selectDataView } from '../../state_machines/entries_state_machine';
 
 export function LogExplorerCell({ rowIndex, columnId }: EuiDataGridCellValueElementProps) {
-  const stateMachine = useStateMachineContext();
-  const { rows } = useSelector(stateMachine, memoizedSelectRows);
-  const dataView = useSelector(stateMachine, selectDataView);
+  const [entriesActor] = useEntries();
+  const { rows } = useSelector(entriesActor, memoizedSelectRows);
+  const dataView = useSelector(entriesActor, selectDataView);
   const { fieldFormats } = useContext(LogExplorerCellContext);
 
   const row = rows.get(rowIndex);

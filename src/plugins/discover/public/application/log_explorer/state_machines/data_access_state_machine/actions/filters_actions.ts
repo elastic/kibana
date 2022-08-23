@@ -12,12 +12,10 @@ import {
   HistogramMachineContext,
   HistogramMachineEvent,
 } from '../../histogram_state_machine/types';
+import { SharedContext } from '../types';
 
 export const updateFilters = assign(
-  (
-    context: EntriesMachineContext | HistogramMachineContext,
-    event: EntriesMachineEvent | HistogramMachineEvent
-  ) => {
+  (context: SharedContext, event: EntriesMachineEvent | HistogramMachineEvent) => {
     if (event.type !== 'filtersChanged') {
       return context;
     }

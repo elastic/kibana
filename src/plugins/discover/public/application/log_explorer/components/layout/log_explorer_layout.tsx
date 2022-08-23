@@ -20,7 +20,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
-import { useActor } from '@xstate/react';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverNoResults } from '../../../main/components/no_results';
@@ -29,10 +28,9 @@ import { DiscoverSidebarResponsive } from '../../../main/components/sidebar';
 import { DiscoverLayoutProps } from '../../../main/components/layout/types';
 import { DiscoverTopNav } from '../../../main/components/top_nav/discover_topnav';
 import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
-import { DiscoverUninitialized } from '../../../main/components/uninitialized/uninitialized';
 import { hasActiveFilter } from '../../../main/components/layout/utils';
 import { LogExplorer } from './log_explorer';
-import { useStateMachineContext } from '../../hooks/query_data/use_state_machine';
+import { useEntries, useHistogram } from '../../hooks/query_data/use_state_machine';
 import { useFieldCounts } from '../../hooks/use_field_counts';
 import { useDiscoverStateContext } from '../../hooks/discover_state/use_discover_state';
 import { useSidebarState } from '../../hooks/ui/use_sidebar_state';
@@ -90,10 +88,10 @@ export function LogExplorerLayout({
   // }, [inspectorSession]);
 
   // Data querying state machine access and derivatives
-  const stateMachine = useStateMachineContext();
-  const [dataAccessState] = useActor(stateMachine);
-  const [entriesState] = useActor(dataAccessState.context.entries);
-  const fieldCounts = useFieldCounts(entriesState);
+  const [entriesActor, entriesState, entriesSend] = useEntries();
+  const [histogramActor, histogramState, histogramSend] = useHistogram();
+  console.log(entriesActor, entriesState);
+  const fieldCounts = useFieldCounts(entriesActor);
 
   // Sidebar state
   const { isSidebarClosed, toggleSidebarCollapse } = useSidebarState({
@@ -207,12 +205,10 @@ export function LogExplorerLayout({
               hasShadow={false}
               className={classNames('dscPageContent', {
                 'dscPageContent--centered': contentCentered,
-                'dscPageContent--emptyPrompt': dataAccessState.matches({
-                  documents: 'failedNoData',
-                }),
+                'dscPageContent--emptyPrompt': entriesState.matches('failedNoData'),
               })}
             >
-              {dataAccessState.matches({ documents: 'failedNoData' }) ? (
+              {entriesState.matches('failedNoData') ? (
                 <DiscoverNoResults
                   isTimeBased={true}
                   data={data}
@@ -221,7 +217,7 @@ export function LogExplorerLayout({
                   hasFilters={hasActiveFilter(state.filters)}
                   onDisableFilters={onDisableFilters}
                 />
-              ) : dataAccessState.matches({ documents: 'loadingAround' }) ? (
+              ) : entriesState.matches('loadingAround') ? (
                 <LoadingSpinner />
               ) : (
                 <EuiFlexGroup
@@ -232,7 +228,7 @@ export function LogExplorerLayout({
                   responsive={false}
                 >
                   <LogExplorer
-                    stateMachine={stateMachine}
+                    stateMachine={entriesActor}
                     expandedDoc={expandedDoc}
                     dataView={dataView}
                     navigateTo={navigateTo}
@@ -247,7 +243,10 @@ export function LogExplorerLayout({
             </EuiPageContent>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <LogExplorerHistogramMemoized dataAccessService={stateMachine} />
+            <LogExplorerHistogramMemoized
+              histogramService={histogramActor}
+              entriesService={entriesActor}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPageBody>

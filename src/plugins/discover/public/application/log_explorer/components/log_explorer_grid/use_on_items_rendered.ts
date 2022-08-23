@@ -9,7 +9,7 @@
 import { EuiDataGridProps, EuiDataGridRefProps } from '@elastic/eui';
 import { useSelector } from '@xstate/react';
 import { MutableRefObject, useCallback } from 'react';
-import { useStateMachineContext } from '../../hooks/query_data/use_state_machine';
+import { useEntries } from '../../hooks/query_data/use_state_machine';
 import { useThrottled } from '../../hooks/use_throttled';
 import { memoizedSelectRows } from '../../state_machines/entries_state_machine';
 
@@ -24,11 +24,11 @@ export const useOnItemsRendered = ({
 }: {
   imperativeGridRef: MutableRefObject<EuiDataGridRefProps | null>;
 }) => {
-  const stateMachine = useStateMachineContext();
+  const [entriesActor] = useEntries();
 
-  const { startRowIndex, endRowIndex } = useSelector(stateMachine, memoizedSelectRows);
+  const { startRowIndex, endRowIndex } = useSelector(entriesActor, memoizedSelectRows);
 
-  const throttledSend = useThrottled(stateMachine.send, SEND_THROTTLE_DELAY);
+  const throttledSend = useThrottled(entriesActor.send, SEND_THROTTLE_DELAY);
 
   return useCallback(
     ({ visibleRowStartIndex, visibleRowStopIndex }: GridOnItemsRenderedProps) => {

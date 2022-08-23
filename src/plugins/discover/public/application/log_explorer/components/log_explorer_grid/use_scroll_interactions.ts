@@ -8,7 +8,7 @@
 
 import { EuiDataGridRefProps } from '@elastic/eui';
 import { MutableRefObject, useEffect } from 'react';
-import { useStateMachineContext } from '../../hooks/query_data/use_state_machine';
+import { useEntries } from '../../hooks/query_data/use_state_machine';
 import { memoizedSelectRows } from '../../state_machines/entries_state_machine';
 
 export const useScrollInteractions = ({
@@ -16,14 +16,14 @@ export const useScrollInteractions = ({
 }: {
   imperativeGridRef: MutableRefObject<EuiDataGridRefProps | null>;
 }) => {
-  const stateMachine = useStateMachineContext();
+  const [entriesActor, entriesState] = useEntries();
 
   useEffect(() => {
-    const transitionListener: Parameters<typeof stateMachine['onTransition']>[0] = (
+    const transitionListener: Parameters<typeof entriesActor['onTransition']>[0] = (
       state,
       event
     ) => {
-      if (state.matches({ documents: 'tailing' }) && state.changed) {
+      if (state.matches('tailing') && state.changed) {
         // scroll to bottom when tailing starts or loading finishes
         const { endRowIndex } = memoizedSelectRows(state);
 
@@ -41,10 +41,10 @@ export const useScrollInteractions = ({
       }
     };
 
-    stateMachine.onTransition(transitionListener);
+    entriesActor.onTransition(transitionListener);
 
     return () => {
-      stateMachine.off(transitionListener);
+      entriesActor.off(transitionListener);
     };
-  }, [imperativeGridRef, stateMachine]);
+  }, [imperativeGridRef, entriesState, entriesActor]);
 };

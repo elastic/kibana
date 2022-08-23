@@ -6,9 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { interpret } from 'xstate';
 import { useSelector } from '@xstate/react';
 import isDeepEqual from 'fast-deep-equal';
 import { EntriesService, memoizedSelectFieldCounts } from '../state_machines/entries_state_machine';
 
-export const useFieldCounts = (stateMachine: EntriesService) =>
-  useSelector(stateMachine, memoizedSelectFieldCounts, isDeepEqual);
+export const useFieldCounts = (stateMachine: EntriesService) => {
+  console.log(stateMachine.machine);
+  console.log(interpret(stateMachine.machine));
+  return useSelector(stateMachine, memoizedSelectFieldCounts, isDeepEqual);
+};

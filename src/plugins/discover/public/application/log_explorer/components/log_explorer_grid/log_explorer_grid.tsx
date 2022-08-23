@@ -31,15 +31,15 @@ import { useScrollInteractions } from './use_scroll_interactions';
 import { useDiscoverColumnsContext } from '../../hooks/discover_state/use_columns';
 import { useDiscoverStateContext } from '../../hooks/discover_state/use_discover_state';
 import { ValueToStringConverter } from '../../../../types';
-import { useStateMachineContext } from '../../hooks/query_data/use_state_machine';
+import { useEntries } from '../../hooks/query_data/use_state_machine';
 import { memoizedSelectRows } from '../../state_machines';
 import { useFieldEditor } from '../../hooks/ui/use_field_editor';
 
 const EuiDataGridMemoized = React.memo(EuiDataGrid);
 
 export function LogExplorerGrid({ fieldFormats }: { fieldFormats: FieldFormatsStart }) {
-  const stateMachine = useStateMachineContext();
-  const { rows } = useSelector(stateMachine, memoizedSelectRows);
+  const [entriesActor] = useEntries();
+  const { rows } = useSelector(entriesActor, memoizedSelectRows);
   const imperativeGridRef = useRef<EuiDataGridRefProps | null>(null);
 
   const onItemsRendered = useOnItemsRendered({ imperativeGridRef });
@@ -57,8 +57,8 @@ export function LogExplorerGrid({ fieldFormats }: { fieldFormats: FieldFormatsSt
 
   // In place editing of fields
   const onFieldEdited = useCallback(() => {
-    stateMachine.send({ type: 'columnsChanged' });
-  }, [stateMachine]);
+    entriesActor.send({ type: 'columnsChanged' });
+  }, [entriesActor]);
 
   const { editField } = useFieldEditor({ dataView, onFieldEdited });
 

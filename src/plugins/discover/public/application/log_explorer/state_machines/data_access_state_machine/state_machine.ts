@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { createMachine, InterpreterFrom, send, assign, spawn } from 'xstate';
+import { createMachine, InterpreterFrom, forwardTo } from 'xstate';
 import { DataAccessMachineContext, DataAccessMachineState, DataAccessMachineEvent } from './types';
-import { entriesStateMachine } from '../entries_state_machine';
-import { histogramStateMachine } from '../histogram_state_machine';
 
 export const dataAccessStateMachine = createMachine<
   DataAccessMachineContext,
@@ -23,85 +21,38 @@ export const dataAccessStateMachine = createMachine<
       uninitialized: {
         on: {
           initialize: {
-            actions: [
-              assign({
-                entries: (context, event) => {
-                  const { initialEntriesContext, initialEntriesServices, initialEntriesDelays } =
-                    event; // TODO: type these properly in events
-                  return spawn(
-                    entriesStateMachine.withContext(initialEntriesContext).withConfig({
-                      services: initialEntriesServices,
-                      delays: initialEntriesDelays,
-                    })
-                  );
-                },
-                histogram: (context, event) => {
-                  const { initialHistogramContext, initialHistogramServices } = event; // TODO: type these properly in events
-                  return spawn(
-                    histogramStateMachine.withContext(initialHistogramContext).withConfig({
-                      services: initialHistogramServices,
-                    })
-                  );
-                },
-              }),
-            ],
             target: 'initialized',
           },
         },
       },
       initialized: {
+        invoke: [
+          {
+            src: 'entries',
+            id: 'entries',
+          },
+          {
+            src: 'histogram',
+            id: 'histogram',
+          },
+        ],
         on: {
           timeRangeChanged: {
-            actions: [
-              send((context, event) => ({ ...event, type: 'updateTimeRange' }), {
-                to: (context) => context.entries,
-              }),
-              send((context, event) => ({ ...event, type: 'updateTimeRange' }), {
-                to: (context) => context.histogram,
-              }),
-            ],
+            actions: [forwardTo('entries'), forwardTo('histogram')],
           },
           filtersChanged: {
-            actions: [
-              send((context, event) => ({ ...event, type: 'updateFilters' }), {
-                to: (context) => context.entries,
-              }),
-              send((context, event) => ({ ...event, type: 'updateFilters' }), {
-                to: (context) => context.histogram,
-              }),
-            ],
+            actions: [forwardTo('entries'), forwardTo('histogram')],
             internal: false,
           },
           dataViewChanged: {
-            actions: [
-              send((context, event) => ({ ...event, type: 'dataViewChanged' }), {
-                to: (context) => context.entries,
-              }),
-              send((context, event) => ({ ...event, type: 'dataViewChanged' }), {
-                to: (context) => context.histogram,
-              }),
-            ],
+            actions: [forwardTo('entries'), forwardTo('histogram')],
             internal: false,
           },
           startTailing: {
-            actions: [
-              send(
-                { type: 'startTailing' },
-                {
-                  to: (context) => context.entries,
-                }
-              ),
-            ],
+            actions: [forwardTo('entries')],
           },
           stopTailing: {
-            actions: [
-              send(
-                { type: 'stopTailing' },
-                {
-                  to: (context) => context.entries,
-                }
-              ),
-            ],
+            actions: [forwardTo('entries')],
           },
         },
       },

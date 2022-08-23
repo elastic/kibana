@@ -33,24 +33,23 @@ import moment from 'moment';
 import React, { useCallback, useMemo } from 'react';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DataAccessService, selectVisibleTimeRange } from '../../state_machines';
-import {
-  selectHistogramDataPoints,
-  selectTimeRange,
-} from '../../state_machines/entries_state_machine';
+import { selectTimeRange } from '../../state_machines/entries_state_machine';
+import { selectHistogramDataPoints } from '../../state_machines';
 import { getPositionFromMsEpoch } from '../../utils/cursor';
 
 export function LogExplorerHistogram({
-  dataAccessService,
+  histogramService,
+  entriesService,
 }: {
   dataAccessService: DataAccessService;
 }) {
   const styles = useLogExplorerHistogramStyles();
   const { chartBaseTheme, chartThemes } = useLogExplorerHistogramThemes();
 
-  const { timeDomain } = useLogExplorerHistogramDomains(dataAccessService);
-  const { countSeries } = useLogExplorerHistogramSeries(dataAccessService);
-  const { visibleRangeAnnotation } = useLogExplorerHistogramAnnotations(dataAccessService);
-  const histogramEventHandlers = useLogExplorerHistogramEventHandlers(dataAccessService);
+  const { timeDomain } = useLogExplorerHistogramDomains(histogramService);
+  const { countSeries } = useLogExplorerHistogramSeries(histogramService);
+  const { visibleRangeAnnotation } = useLogExplorerHistogramAnnotations(entriesService);
+  const histogramEventHandlers = useLogExplorerHistogramEventHandlers(entriesService);
   // TODO: handle state machine states that don't have data
   return (
     <div css={styles.outerWrapper}>

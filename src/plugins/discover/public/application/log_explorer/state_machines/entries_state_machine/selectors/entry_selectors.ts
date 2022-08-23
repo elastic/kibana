@@ -15,11 +15,11 @@ import {
   getStartRowIndex,
   getStartRowTimestamp,
 } from '../../../utils/row';
-import { DataAccessService } from '../state_machine';
+import { EntriesService } from '../state_machine';
 import { selectIsReloading } from './status_selectors';
 
 export const selectRows = (
-  state: DataAccessService['state']
+  state: EntriesService['state']
 ): {
   startRowIndex: number | undefined;
   chunkBoundaryRowIndex: number | undefined;
@@ -34,7 +34,7 @@ export const selectRows = (
       rows: new Map(),
     };
   }
-
+  console.log(state);
   const { topChunk, bottomChunk } = state.context;
 
   const startRowIndex = getStartRowIndex(topChunk);
@@ -59,7 +59,7 @@ const getRowMapFromChunks = (topChunk: LogExplorerChunk, bottomChunk: LogExplore
 const memoizedGetRowMapFromChunksForSelector = memoizeOne(getRowMapFromChunks);
 
 export const selectVisibleTimeRange = (
-  state: DataAccessService['state']
+  state: EntriesService['state']
 ): {
   startTimestamp?: Timestamp;
   endTimestamp?: Timestamp;
