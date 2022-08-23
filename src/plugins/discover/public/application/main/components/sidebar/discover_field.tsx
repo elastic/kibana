@@ -448,7 +448,7 @@ function DiscoverFieldComponent({
                     toDate={dateRange.to}
                     dataViewOrDataViewId={dataView}
                     field={fieldForStats}
-                    testSubject="dscFieldListPanel"
+                    data-test-subj="dscFieldListPanel"
                     onAddFilter={onAddFilter}
                     overrideMissingContent={(params) => {
                       if (params?.noDataFound) {
