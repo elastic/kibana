@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { mockKibanaMigrator } from './src';
+export { mockKibanaMigrator, migrationMocks, createSavedObjectsMigrationLoggerMock } from './src';

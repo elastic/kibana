@@ -8,6 +8,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import { ServiceStatusLevels } from '@kbn/core-base-common';
 import type {
   SavedObjectsServiceSetup,
   SavedObjectsServiceStart,
@@ -18,14 +19,16 @@ import type {
   InternalSavedObjectsServiceSetup,
   InternalSavedObjectsServiceStart,
 } from '@kbn/core-saved-objects-server-internal';
-
-import { savedObjectsRepositoryMock } from './service/lib/repository.mock';
-import { savedObjectsClientMock } from './service/saved_objects_client.mock';
+import {
+  savedObjectsRepositoryMock,
+  savedObjectsClientMock,
+} from '@kbn/core-saved-objects-api-server-mocks';
 import { typeRegistryMock, serializerMock } from '@kbn/core-saved-objects-base-server-mocks';
-import { savedObjectsExporterMock } from './export/saved_objects_exporter.mock';
-import { savedObjectsImporterMock } from './import/saved_objects_importer.mock';
-import { migrationMocks } from './migrations/mocks';
-import { ServiceStatusLevels } from '../status';
+import {
+  savedObjectsExporterMock,
+  savedObjectsImporterMock,
+} from '@kbn/core-saved-objects-import-export-server-mocks';
+import { migrationMocks } from '@kbn/core-saved-objects-migration-server-mocks';
 
 type SavedObjectsServiceContract = PublicMethodsOf<SavedObjectsService>;
 
