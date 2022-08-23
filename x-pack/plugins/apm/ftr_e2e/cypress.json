@@ -6,6 +6,8 @@
   "screenshotsFolder": "./cypress/screenshots",
   "supportFile": "./cypress/support/index.ts",
   "videosFolder": "./cypress/videos",
+  "requestTimeout": 10000,
+  "responseTimeout": 40000,
   "defaultCommandTimeout": 30000,
   "execTimeout": 120000,
   "pageLoadTimeout": 120000,
