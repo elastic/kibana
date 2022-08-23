@@ -333,12 +333,12 @@ describe('UnifiedFieldList <FieldStats />', () => {
     const firstValue = stats.childAt(0);
 
     expect(stats).toHaveLength(1);
-    expect(firstValue.find('[data-test-subj="testing-topValues-formattedFieldValue"]').first().text()).toBe(
-      '"success"'
-    );
-    expect(firstValue.find('[data-test-subj="testing-topValues-formattedPercentage"]').first().text()).toBe(
-      '41.5%'
-    );
+    expect(
+      firstValue.find('[data-test-subj="testing-topValues-formattedFieldValue"]').first().text()
+    ).toBe('"success"');
+    expect(
+      firstValue.find('[data-test-subj="testing-topValues-formattedPercentage"]').first().text()
+    ).toBe('41.5%');
 
     expect(wrapper.find('[data-test-subj="testing-statsFooter"]').first().text()).toBe(
       '100% of 1624 documents'

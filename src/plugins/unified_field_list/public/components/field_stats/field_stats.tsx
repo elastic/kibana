@@ -367,7 +367,10 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
 
     if (field.type === 'date') {
       return combineWithTitleAndFooter(
-        <Chart data-test-subj={`${dataTestSubject}-histogram`} size={{ height: 200, width: 300 - 32 }}>
+        <Chart
+          data-test-subj={`${dataTestSubject}-histogram`}
+          size={{ height: 200, width: 300 - 32 }}
+        >
           <Settings
             tooltip={{ type: TooltipType.None }}
             theme={customChartTheme}
@@ -411,7 +414,10 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
 
     if (showingHistogram || !topValues || !topValues.buckets.length) {
       return combineWithTitleAndFooter(
-        <Chart data-test-subj={`${dataTestSubject}-histogram`} size={{ height: 200, width: '100%' }}>
+        <Chart
+          data-test-subj={`${dataTestSubject}-histogram`}
+          size={{ height: 200, width: '100%' }}
+        >
           <Settings
             rotation={90}
             tooltip={{ type: TooltipType.None }}
