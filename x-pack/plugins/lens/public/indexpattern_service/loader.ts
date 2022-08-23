@@ -172,9 +172,16 @@ export async function loadIndexPatterns({
   }
   indexPatterns.push(
     ...(await Promise.all(
-      Object.values(adHocDataViews || {}).map((spec) => dataViews.create(spec))
+      Object.values(adHocDataViews || {}).map((spec) => delay(() => dataViews.create(spec)))
     ))
   );
+
+  async function delay(fn, ms = 5000) {
+    await new Promise((resolve) => {
+      setTimeout(resolve, ms);
+    });
+    return fn();
+  }
 
   const indexPatternsObject = indexPatterns.reduce(
     (acc, indexPattern) => ({

@@ -68,6 +68,8 @@ export const FILTER_EDITOR_WIDTH = 800;
 export function FilterItem(props: FilterItemProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const [indexPatternExists, setIndexPatternExists] = useState<boolean | undefined>(undefined);
+  const [isFilterAutomaticallyDisabled, setIsFilterAutomaticallyDisabled] =
+    useState<boolean>(false);
   const [renderedComponent, setRenderedComponent] = useState('menu');
   const { id, filter, indexPatterns, hiddenPanelOptions, readOnly = false } = props;
 
@@ -78,29 +80,31 @@ export function FilterItem(props: FilterItemProps) {
   }, [isPopoverOpen]);
 
   useEffect(() => {
-    const index = props.filter.meta.index;
-    let isSubscribed = true;
-    if (index) {
-      getIndexPatterns()
-        .get(index)
-        .then((indexPattern) => {
-          if (isSubscribed) {
-            setIndexPatternExists(!!indexPattern);
-          }
-        })
-        .catch(() => {
-          if (isSubscribed) {
-            setIndexPatternExists(false);
-          }
-        });
-    } else if (isSubscribed) {
-      // Allow filters without an index pattern and don't validate them.
-      setIndexPatternExists(true);
+    async function isValidDataView() {
+      const index = filter.meta.index;
+      if (!index || indexPatterns.some((dataView) => dataView.id === index)) return true;
+      try {
+        const dataView = await getIndexPatterns().get(index);
+        return !!dataView;
+      } catch (e) {
+        return false;
+      }
     }
-    return () => {
-      isSubscribed = false;
-    };
-  }, [props.filter.meta.index]);
+
+    isValidDataView().then((isValid) => setIndexPatternExists(isValid));
+  }, [filter.meta.index, indexPatterns]);
+
+  if (!indexPatternExists && !isFilterAutomaticallyDisabled && !filter.meta.disabled) {
+    setFilterDisabledAndRerender(true);
+  } else if (indexPatternExists && isFilterAutomaticallyDisabled) {
+    setFilterDisabledAndRerender(false);
+  }
+
+  function setFilterDisabledAndRerender(disabled: boolean) {
+    setIsFilterAutomaticallyDisabled(disabled);
+    filter.meta.disabled = disabled;
+    props.onUpdate(filter);
+  }
 
   function handleBadgeClick(e: MouseEvent<HTMLInputElement>) {
     if (e.shiftKey) {
@@ -347,13 +351,6 @@ export function FilterItem(props: FilterItemProps) {
   // Don't render until we know if the index pattern is valid
   if (indexPatternExists === undefined) return null;
   const valueLabelConfig = getValueLabel();
-
-  // Disable errored filters and re-render
-  if (valueLabelConfig.status === FILTER_ITEM_ERROR && !filter.meta.disabled) {
-    filter.meta.disabled = true;
-    props.onUpdate(filter);
-    return null;
-  }
 
   const filterViewProps = {
     filter,
