@@ -24,6 +24,7 @@ import {
   SolutionToolbar,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
+import { cloneDeep } from 'lodash';
 import { saveDashboard } from '../lib';
 import { TopNavIds } from './top_nav_ids';
 import { EditorMenu } from './editor_menu';
@@ -201,6 +202,10 @@ export function DashboardTopNav({
         path = '#/create?';
       }
 
+      data.query.filterManager.setSessionFilters(
+        cloneDeep(dashboardAppState.getLatestDashboardState().filters)
+      );
+
       stateTransferService.navigateToEditor(appId, {
         path,
         state: {
@@ -209,7 +214,13 @@ export function DashboardTopNav({
         },
       });
     },
-    [stateTransferService, data.search.session, trackUiMetric]
+    [
+      data.query.filterManager,
+      data.search.session,
+      dashboardAppState,
+      stateTransferService,
+      trackUiMetric,
+    ]
   );
 
   const closeAllFlyouts = useCallback(() => {

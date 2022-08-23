@@ -10,6 +10,7 @@ import { History } from 'history';
 import { debounceTime, switchMap } from 'rxjs/operators';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
+import { cloneDeep } from 'lodash';
 
 import { DashboardConstants } from '../..';
 import { ViewMode } from '../../services/embeddable';
@@ -216,6 +217,9 @@ export const useDashboardAppState = ({
         // if there is an incoming embeddable, dashboard always needs to be in edit mode to receive it.
         ...(incomingEmbeddable ? { viewMode: ViewMode.EDIT } : {}),
       };
+      if (query.filterManager.getSessionFilters()) {
+        initialDashboardState.filters = cloneDeep(query.filterManager.getSessionFilters());
+      }
       dispatchDashboardStateChange(setDashboardState(initialDashboardState));
 
       /**

@@ -35,6 +35,7 @@ import {
 interface PartitionedFilters {
   globalFilters: Filter[];
   appFilters: Filter[];
+  sessionFilters: Filter[];
 }
 
 export class FilterManager implements PersistableStateService<Filter[]> {
@@ -48,8 +49,7 @@ export class FilterManager implements PersistableStateService<Filter[]> {
   }
 
   private mergeIncomingFilters(partitionedFilters: PartitionedFilters): Filter[] {
-    const globalFilters = partitionedFilters.globalFilters;
-    const appFilters = partitionedFilters.appFilters;
+    const { globalFilters, appFilters, sessionFilters } = partitionedFilters;
 
     // existing globalFilters should be mutated by appFilters
     // ignore original appFilters which are already inside globalFilters
@@ -68,18 +68,31 @@ export class FilterManager implements PersistableStateService<Filter[]> {
       _.assignIn(match.meta, filter.meta);
     });
 
-    return FilterManager.mergeFilters(cleanedAppFilters, globalFilters);
+    return FilterManager.mergeFilters(cleanedAppFilters, globalFilters, sessionFilters);
   }
 
-  private static mergeFilters(appFilters: Filter[], globalFilters: Filter[]): Filter[] {
-    return uniqFilters(appFilters.reverse().concat(globalFilters.reverse())).reverse();
+  private static mergeFilters(
+    appFilters: Filter[],
+    globalFilters: Filter[],
+    sessionFilters: Filter[]
+  ): Filter[] {
+    return uniqFilters(
+      appFilters.reverse().concat(globalFilters.reverse()).concat(sessionFilters.reverse())
+    ).reverse();
   }
 
   private static partitionFilters(filters: Filter[]): PartitionedFilters {
-    const [globalFilters, appFilters] = _.partition(filters, isFilterPinned);
+    const globalFilters = filters.filter((filter) => isFilterPinned(filter));
+    const appFilters = filters.filter(
+      (filter) => filter.$state?.store === FilterStateStore.APP_STATE
+    );
+    const sessionFilters = filters.filter(
+      (filter) => filter.$state?.store === FilterStateStore.SESSION_STATE
+    );
     return {
       globalFilters,
       appFilters,
+      sessionFilters,
     };
   }
 
@@ -112,6 +125,11 @@ export class FilterManager implements PersistableStateService<Filter[]> {
   public getGlobalFilters() {
     const { globalFilters } = this.getPartitionedFilters();
     return globalFilters;
+  }
+
+  public getSessionFilters() {
+    const { sessionFilters } = this.getPartitionedFilters();
+    return sessionFilters;
   }
 
   public getPartitionedFilters(): PartitionedFilters {
@@ -178,10 +196,11 @@ export class FilterManager implements PersistableStateService<Filter[]> {
   public setGlobalFilters(newGlobalFilters: Filter[]) {
     newGlobalFilters = mapAndFlattenFilters(newGlobalFilters);
     FilterManager.setFiltersStore(newGlobalFilters, FilterStateStore.GLOBAL_STATE, true);
-    const { appFilters } = this.getPartitionedFilters();
+    const { appFilters, sessionFilters } = this.getPartitionedFilters();
     const newFilters = this.mergeIncomingFilters({
       appFilters,
       globalFilters: newGlobalFilters,
+      sessionFilters,
     });
 
     this.handleStateUpdate(newFilters);
@@ -195,12 +214,24 @@ export class FilterManager implements PersistableStateService<Filter[]> {
   public setAppFilters(newAppFilters: Filter[]) {
     newAppFilters = mapAndFlattenFilters(newAppFilters);
     FilterManager.setFiltersStore(newAppFilters, FilterStateStore.APP_STATE, true);
-    const { globalFilters } = this.getPartitionedFilters();
+    const { globalFilters, sessionFilters } = this.getPartitionedFilters();
     const newFilters = this.mergeIncomingFilters({
       globalFilters,
       appFilters: newAppFilters,
+      sessionFilters,
     });
     this.handleStateUpdate(newFilters);
+  }
+
+  public setSessionFilters(newSessionFilters: Filter[]) {
+    newSessionFilters = mapAndFlattenFilters(newSessionFilters);
+    FilterManager.setFiltersStore(newSessionFilters, FilterStateStore.SESSION_STATE, true);
+    /* const { globalFilters } = this.getPartitionedFilters();
+    const newFilters = this.mergeIncomingFilters({
+      globalFilters,
+      sessionFilters: newSessionFilters,
+    });*/
+    this.handleStateUpdate(newSessionFilters);
   }
 
   public removeFilter(filter: Filter) {

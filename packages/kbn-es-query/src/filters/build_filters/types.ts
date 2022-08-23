@@ -47,6 +47,7 @@ export enum FILTERS {
 export enum FilterStateStore {
   APP_STATE = 'appState',
   GLOBAL_STATE = 'globalState',
+  SESSION_STATE = 'sessionState',
 }
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions

@@ -72,7 +72,7 @@ export const getPreloadedState = ({
       ? data.query.queryString.getDefaultQuery()
       : (data.query.queryString.getQuery() as Query),
     filters: !initialContext
-      ? data.query.filterManager.getGlobalFilters()
+      ? data.query.filterManager.getSessionFilters()
       : data.query.filterManager.getFilters(),
     searchSessionId: data.search.session.getSessionId(),
     resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
