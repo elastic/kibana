@@ -95,7 +95,7 @@ a field, select *Edit Settings*, and change *Terms per hop*.
 Documents that match a blocked term are not allowed in the graph.
 To block a term, select its vertex and click
 the block icon
-image:user/graph/images/graph-block-button.png[Block selection]
+image:user/graph/images/graph-block-button.png[Block list]
 in the control panel.
 For a list of blocked terms, go to *Settings > Blocked terms*.
 
