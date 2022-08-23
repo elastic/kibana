@@ -7,8 +7,18 @@
 
 import {
   generateMockFileIndicator,
-  generateMockIndicator,
+  generateMockIpIndicator,
   generateMockUrlIndicator,
+  generateMockFileMd5Indicator,
+  generateMockDomainIndicator,
+  generateMockEmailAddrIndicator,
+  generateMockDomainNameIndicator,
+  generateMockX509CertificateIndicator,
+  generateMockX509SerialIndicator,
+  generateMockUnknownIndicator,
+  generateMockWindowsRegistryKeyIndicator,
+  generateMockAutonomousSystemIndicator,
+  generateMockMacAddressIndicator,
   Indicator,
   RawIndicatorFieldId,
 } from '../../../../common/types/indicator';
@@ -17,9 +27,19 @@ import { displayField, displayValue } from './display_value';
 type ExpectedIndicatorValue = string | null;
 
 const cases: Array<[Indicator, ExpectedIndicatorValue]> = [
-  [generateMockIndicator(), '12.68.554.87'],
+  [generateMockIpIndicator(), '12.68.554.87'],
   [generateMockUrlIndicator(), 'https://google.com'],
   [generateMockFileIndicator(), 'sample_sha256_hash'],
+  [generateMockFileMd5Indicator(), 'sample_md5_hash'],
+  [generateMockEmailAddrIndicator(), 'sample@example.com'],
+  [generateMockDomainIndicator(), 'google.com'],
+  [generateMockDomainNameIndicator(), 'google.com'],
+  [generateMockX509CertificateIndicator(), 'sample_serial_number'],
+  [generateMockX509SerialIndicator(), 'sample_serial_bla'],
+  [generateMockUnknownIndicator(), 'sample_id'],
+  [generateMockWindowsRegistryKeyIndicator(), 'sample_registry_key'],
+  [generateMockAutonomousSystemIndicator(), 'sample_as_number'],
+  [generateMockMacAddressIndicator(), 'sample_mac_address'],
 
   // Indicator with no fields should yield null as a display value
   [{ fields: {} }, null],
