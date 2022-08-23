@@ -20,6 +20,7 @@ import { TooltipWrapper } from '../tooltip_wrapper';
 
 import type { ColorRangesActions, ColorRange, ColorRangeAccessor } from './types';
 import { ColorRangesContext } from './color_ranges_context';
+import { InfinityIcon } from '../assets/infinity';
 
 export interface ColorRangesItemButtonProps {
   index: number;
@@ -28,6 +29,7 @@ export interface ColorRangesItemButtonProps {
   continuity: PaletteContinuity;
   dispatch: Dispatch<ColorRangesActions>;
   accessor: ColorRangeAccessor;
+  displayInfinity: boolean;
 }
 
 const switchContinuity = (isLast: boolean, continuity: PaletteContinuity) => {
@@ -117,6 +119,7 @@ export function ColorRangeAutoDetectButton({
   continuity,
   dispatch,
   accessor,
+  displayInfinity,
 }: ColorRangesItemButtonProps) {
   const { dataBounds, palettes } = useContext(ColorRangesContext);
   const isLast = isLastItem(accessor);
@@ -131,8 +134,16 @@ export function ColorRangeAutoDetectButton({
   }, [continuity, dataBounds, dispatch, isLast, palettes]);
 
   const tooltipContent = isLast
-    ? i18n.translate('coloring.dynamicColoring.customPalette.useAutoMaxValue', {
-        defaultMessage: `Use maximum data value`,
+    ? displayInfinity
+      ? i18n.translate('coloring.dynamicColoring.customPalette.useAutoMaxValueInfinity', {
+          defaultMessage: `Use positive infinity`,
+        })
+      : i18n.translate('coloring.dynamicColoring.customPalette.useAutoMaxValue', {
+          defaultMessage: `Use maximum data value`,
+        })
+    : displayInfinity
+    ? i18n.translate('coloring.dynamicColoring.customPalette.useAutoMinValueInfinity', {
+        defaultMessage: `Use negative infinity`,
       })
     : i18n.translate('coloring.dynamicColoring.customPalette.useAutoMinValue', {
         defaultMessage: `Use minimum data value`,
@@ -141,7 +152,7 @@ export function ColorRangeAutoDetectButton({
   return (
     <TooltipWrapper tooltipContent={tooltipContent} condition={true} position="top" delay="regular">
       <EuiButtonIcon
-        iconType={isLast ? ValueMaxIcon : ValueMinIcon}
+        iconType={displayInfinity ? InfinityIcon : isLast ? ValueMaxIcon : ValueMinIcon}
         aria-label={tooltipContent}
         onClick={onExecuteAction}
         data-test-subj={`lnsPalettePanel_dynamicColoring_autoDetect_${

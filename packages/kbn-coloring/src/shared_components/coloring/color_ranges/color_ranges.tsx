@@ -26,6 +26,7 @@ export interface ColorRangesProps {
   colorRanges: ColorRange[];
   paletteConfiguration: CustomPaletteParams | undefined;
   showExtraActions: boolean;
+  displayInfinity: boolean;
   dispatch: Dispatch<PaletteConfigurationActions>;
 }
 
@@ -33,6 +34,7 @@ export function ColorRanges({
   colorRanges,
   paletteConfiguration,
   showExtraActions,
+  displayInfinity,
   dispatch,
 }: ColorRangesProps) {
   const [colorRangesValidity, setColorRangesValidity] = useState<
@@ -65,6 +67,7 @@ export function ColorRanges({
             index={index}
             validation={colorRangesValidity[index]}
             accessor="start"
+            displayInfinity={displayInfinity}
           />
         </EuiFlexItem>
       ))}
@@ -79,6 +82,7 @@ export function ColorRanges({
             index={colorRanges.length - 1}
             validation={colorRangesValidity.last}
             accessor="end"
+            displayInfinity={displayInfinity}
           />
         </EuiFlexItem>
       ) : null}
