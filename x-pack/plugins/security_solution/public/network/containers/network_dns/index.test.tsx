@@ -17,7 +17,6 @@ const mockUseSearchStrategy = useSearchStrategy as jest.Mock;
 const mockSearch = jest.fn();
 
 const props = {
-  docValueFields: [],
   endDate: '2020-07-08T08:20:18.966Z',
   id: ID,
   indexNames: ['auditbeat-*'],

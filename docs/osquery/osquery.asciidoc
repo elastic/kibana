@@ -37,26 +37,25 @@ To inspect hosts, run a query against one or more agents or policies,
 then view the results.
 
 . Open the main menu, and then click *Osquery*.
-
 . In the *Live queries* view, click **New live query**.
-
+. Choose to run a single query or a query pack.
 . Select one or more agents or groups to query. Start typing in the search field,
 and you'll get suggestions for agents by name, ID, platform, and policy.
-
-. Enter a query or select a query from your saved queries.
+. Specify the query or pack to run:
+** *Query*: Select a saved query or enter a new one in the text box. After you enter the query, you can expand the **Advanced** section to view or set <<osquery-map-fields,mapped ECS fields>> included in the results from the live query. Mapping ECS fields is optional.
+** *Pack*: Select from query packs that have been loaded and activated. After you select a pack, all of the queries in the pack are displayed.
++
+TIP: Refer to <<osquery-prebuilt-packs,prebuilt packs>> to learn about using and managing Elastic prebuilt packs.
 +
 [role="screenshot"]
 image::images/enter-query.png[Select saved query dropdown name showing query name and description]
 
-. (Optional) Expand the **Advanced** section to view or set <<osquery-map-fields,mapped ECS fields>> included in the results from the live query.
+. Click **Submit**. Queries will timeout after 5 minutes if there are no responses.
++
+TIP: To save a single query for future use, click *Save for later* and define the ID, description, and other <<osquery-manage-query,details>>.
 
-. Click **Submit**.
-
-. Review the results in a table, or navigate to *Discover* to dive deeper into the response,
-or to the drag-and-drop *Lens* editor to create visualizations.
+. Review the results. Next, navigate to *Discover* to dive deeper into the response or to *Lens* to create visualizations.
 . To view more information about the request, such as failures, open the *Status* tab.
-. To save the query for future use, click *Save for later* and define the ID,
-description, and other <<osquery-manage-query,details>>.
 
 [float]
 [[osquery-view-history]]
@@ -72,17 +71,17 @@ Each query has the following options:
 [role="screenshot"]
 image::images/live-query-check-results.png[Results of OSquery]
 
-
 [float]
 [[osquery-schedule-query]]
 == Schedule queries with packs
 
-Create packs to organize sets of queries. For example, you might create one pack that checks
-for IT compliance-type issues, and another pack that monitors for evidence of malware.
-You can schedule packs to run for one or more agent policies. When scheduled, queries in the pack are run at the set intervals for all agents in those policies. Scheduling packs is optional.
+A pack is a set of grouped queries that perform similar functions or address common use cases. <<osquery-prebuilt-packs, Prebuilt Elastic packs>> are available to download and can help you get started using the Osquery integration.
 
-. Open the **Packs** tab.
+You can also create a custom pack with one or more queries. For example, when creating custom packs, you might create one pack that checks for IT compliance-type issues, and another pack that monitors for evidence of malware.
 
+You can run packs as live queries or schedule packs to run for one or more agent policies. When scheduled, queries in the pack are run at the set intervals for all agents in those policies.
+
+. Click the **Packs** tab.
 . Click **Add pack** to create a new pack, or click the name of an existing pack, then **Edit** to add queries to an existing pack.
 
 . Provide the following fields:
@@ -91,7 +90,7 @@ You can schedule packs to run for one or more agent policies. When scheduled, qu
 
 * A short description of the pack.
 
-* The agent policies where this pack should run. If no agent policies are set, then the pack is not scheduled.
+* The agent policies where this pack should run. If no agent policies are set, the pack is not scheduled.
 
 . Add queries to schedule:
 
@@ -159,28 +158,13 @@ Once you save a query, you can only edit it from the *Saved queries* tab:
 [float]
 [[osquery-prebuilt-packs-queries]]
 == Prebuilt Elastic packs and queries
-Osquery Manager includes a set of prebuilt Osquery packs and saved queries
-that can help you get started using the integration.
-
-[float]
-[[osquery-prebuilt-queries]]
-=== Prebuilt queries
-A set of saved queries are included with the integration and available to run as a live query. 
-Note the following about the prebuilt queries:
-
-* The queries are not editable. 
-
-* Several of the queries include default ECS mappings to standardize the results.
-
-* The prebuilt Elastic queries all follow the same naming convention and identify  
-what type of information is being queried, what operating system it supports if it's limited to one or more,
-and that these are Elastic queries. For example, `firewall_rules_windows_elastic`. 
+The prebuilt Osquery packs are included with the integration. Once you add a pack, you can activate and schedule it.
 
 [float]
 [[osquery-prebuilt-packs]]
 === Prebuilt packs
-The prebuilt Osquery packs are included with the integration and can be optionally loaded. 
-Once added, you can then activate and schedule the packs. 
+The prebuilt Osquery packs are included with the integration and can be optionally loaded.
+Once added, you can then activate and schedule the packs.
 
 You can modify the scheduled agent policies for a prebuilt pack, but you cannot edit queries in the pack. To edit the queries, you must first create a copy of the pack.
 
@@ -194,7 +178,7 @@ For information about the prebuilt packs that are available, refer to <<prebuilt
 +
 NOTE: This option is only available if new or updated prebuilt packs are available.
 
-. For each pack that you want to schedule: 
+. For each pack that you want to schedule:
 
 * Enable the option to make the pack *Active*.
 
@@ -221,6 +205,20 @@ To modify queries in prebuilt packs, you must first make a copy of the pack.
 . Click *Import*.
 
 . Select the import option *Create new objects with random IDs*, then click *Import* to import the pack. This creates a copy of the pack that you can edit.
+
+[float]
+[[osquery-prebuilt-queries]]
+=== Prebuilt queries
+A set of saved queries are included with the integration and available to run as a live query.
+Note the following about the prebuilt queries:
+
+* The queries are not editable.
+
+* Several of the queries include default ECS mappings to standardize the results.
+
+* The prebuilt Elastic queries all follow the same naming convention and identify
+what type of information is being queried, what operating system it supports if it's limited to one or more,
+and that these are Elastic queries. For example, `firewall_rules_windows_elastic`.
 
 [float]
 [[osquery-map-fields]]
