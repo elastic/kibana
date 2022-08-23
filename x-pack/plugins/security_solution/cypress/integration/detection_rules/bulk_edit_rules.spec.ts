@@ -65,6 +65,7 @@ import {
   checkOverwriteIndexPatternsCheckbox,
   clickDeleteIndexPatternsMenuItem,
   selectTimelineTemplate,
+  checkTagsInTagsFilter,
 } from '../../tasks/rules_bulk_edit';
 
 import { hasIndexPatterns, getDetails } from '../../tasks/rule_details';
@@ -98,7 +99,7 @@ import { esArchiverResetKibana } from '../../tasks/es_archiver';
 const RULE_NAME = 'Custom rule for bulk actions';
 
 const defaultIndexPatterns = ['index-1-*', 'index-2-*'];
-const defaultTags = ['test-default-tag-1', 'test-default-tag-2'];
+const prePopulatedTags = ['test-default-tag-1', 'test-default-tag-2'];
 
 const expectedNumberOfCustomRulesToBeEdited = 6;
 const expectedNumberOfMachineLearningRulesToBeEdited = 1;
@@ -115,7 +116,7 @@ const indexDataSource = { index: defaultIndexPatterns, type: 'indexPatterns' } a
 
 const defaultRuleData = {
   dataSource: indexDataSource,
-  tags: defaultTags,
+  tags: prePopulatedTags,
   timeline: timelineTemplate,
 };
 
@@ -161,8 +162,7 @@ describe('Detection rules, bulk edit', () => {
 
       loadPrebuiltDetectionRulesFromHeaderBtn();
 
-      // select Elastic rules, check if we can't proceed further, as Elastic rules are not editable
-      // filter rules, only Elastic rule to show
+      // select Elastic(prebuilt) rules, check if we can't proceed further, as Elastic rules are not editable
       switchToElasticRules();
       selectNumberOfRules(expectedNumberOfSelectedRules);
       clickApplyTimelineTemplatesMenuItem();
@@ -287,34 +287,23 @@ describe('Detection rules, bulk edit', () => {
       openTagsSelect(); 
 
       cy.get(EUI_FILTER_SELECT_ITEM)
-        .should('have.length', defaultTags.length)
+        .should('have.length', prePopulatedTags.length)
         .each(($el, index) => {
-          cy.wrap($el).should('have.text', defaultTags[index]);
+          cy.wrap($el).should('have.text', prePopulatedTags[index]);
         })
     });
 
     it('Add tags to custom rules', () => {
-      const checkTagsInTagsFilter = (tags: string[]) => {
-        cy.get(RULES_TAGS_FILTER_BTN)
-        .contains(`Tags${tags.length}`)
-        .click();
-
-        cy.get(EUI_FILTER_SELECT_ITEM)
-          .should('have.length', tags.length)
-          .each(($el, index) => {
-            cy.wrap($el).should('have.text', tags[index]);
-          });
-      }
       const tagsToBeAdded = ['tag-to-add-1', 'tag-to-add-2'];
-      const resultingTags = [...defaultTags, ...tagsToBeAdded];
+      const resultingTags = [...prePopulatedTags, ...tagsToBeAdded];
 
-      // check only default tags exist in tags filter
-      checkTagsInTagsFilter(defaultTags);
+      // check if only pre-populated tags exist in the tags filter
+      checkTagsInTagsFilter(prePopulatedTags);
 
       cy.get(EUI_FILTER_SELECT_ITEM)
-        .should('have.length', defaultTags.length)
+        .should('have.length', prePopulatedTags.length)
         .each(($el, index) => {
-          cy.wrap($el).should('have.text', defaultTags[index]);
+          cy.wrap($el).should('have.text', prePopulatedTags[index]);
         });
 
       selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
@@ -337,8 +326,8 @@ describe('Detection rules, bulk edit', () => {
     it('Overwrite tags in custom rules', () => {
       const tagsToOverwrite = ['overwrite-tag-1'];
 
-      // check only 2 tags exist in tags filter
-      cy.get(RULES_TAGS_FILTER_BTN).contains(/Tags2/);
+      // check if only pre-populated tags exist in the tags filter
+      checkTagsInTagsFilter(prePopulatedTags);
 
       selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
 
@@ -358,16 +347,16 @@ describe('Detection rules, bulk edit', () => {
       // check if all rules have been updated with new tags
       testAllTagsBadges(tagsToOverwrite);
 
-      // check that only 1 new tag is in filters
-      cy.get(RULES_TAGS_FILTER_BTN).contains(/Tags1/);
+      // check that only new tags are in the tag filter
+      checkTagsInTagsFilter(tagsToOverwrite);
     });
 
     it('Delete tags from custom rules', () => {
-      const tagsToDelete = defaultTags.slice(0, 1);
-      const tagsLeftNotDeleted = defaultTags.slice(1);
+      const tagsToDelete = prePopulatedTags.slice(0, 1);
+      const resultingTags = prePopulatedTags.slice(1);
 
-      // check only 2 tags exist in tags filter
-      cy.get(RULES_TAGS_FILTER_BTN).contains(/Tags2/);
+      // check if only pre-populated tags exist in the tags filter
+      checkTagsInTagsFilter(prePopulatedTags);
 
       selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
 
@@ -378,10 +367,10 @@ describe('Detection rules, bulk edit', () => {
       waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
 
       // check tags has been removed from all rules
-      testAllTagsBadges(tagsLeftNotDeleted);
+      testAllTagsBadges(resultingTags);
 
-      // check that only 1 tag left in filters
-      cy.get(RULES_TAGS_FILTER_BTN).contains(/Tags1/);
+      // check that tags were removed from the tag filter
+      checkTagsInTagsFilter(resultingTags);
     });
   });
 
@@ -520,7 +509,7 @@ describe('Detection rules, bulk edit', () => {
 
     // open add tags form and add 2 new tags
     openBulkEditAddTagsForm();
-    typeTags(defaultTags);
+    typeTags(prePopulatedTags);
     submitBulkEditForm();
     waitForBulkEditActionToFinish({ rulesCount });
 
@@ -531,7 +520,7 @@ describe('Detection rules, bulk edit', () => {
       cy.get(RULES_TAGS_POPOVER_BTN)
         .eq(i)
         .each(($el) => {
-          testTagsBadge($el, defaultTags);
+          testTagsBadge($el, prePopulatedTags);
         });
     }
   });

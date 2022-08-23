@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TIMELINE_SEARCH_BOX } from '../screens/common/controllers';
+import { TIMELINE_SEARCH_BOX, EUI_FILTER_SELECT_ITEM } from '../screens/common/controllers';
 
 import {
   BULK_ACTIONS_BTN,
@@ -13,6 +13,7 @@ import {
   MODAL_CONFIRMATION_TITLE,
   MODAL_CONFIRMATION_BODY,
   TOASTER_BODY,
+  RULES_TAGS_FILTER_BTN,
 } from '../screens/alerts_detection_rules';
 
 import {
@@ -151,3 +152,19 @@ export const selectTimelineTemplate = (timelineTitle: string) => {
   cy.get(RULES_BULK_EDIT_TIMELINE_TEMPLATES_SELECTOR).click();
   cy.get(TIMELINE_SEARCH_BOX).type(`${timelineTitle}{enter}`).should('not.exist');
 };
+
+/**
+ * check if rule tags filter populated with a list of tags
+ * @param tags
+ */
+export const checkTagsInTagsFilter = (tags: string[]) => {
+  cy.get(RULES_TAGS_FILTER_BTN)
+  .contains(`Tags${tags.length}`)
+  .click();
+
+  cy.get(EUI_FILTER_SELECT_ITEM)
+    .should('have.length', tags.length)
+    .each(($el, index) => {
+      cy.wrap($el).should('have.text', tags[index]);
+    });
+}
