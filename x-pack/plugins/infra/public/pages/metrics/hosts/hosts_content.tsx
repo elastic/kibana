@@ -22,6 +22,7 @@ export const HostsContent: React.FunctionComponent = () => {
   const [dateRange, setDateRange] = useState<TimeRange>({ from: 'now-15m', to: 'now' });
   const [query, setQuery] = useState<Query>({ query: '', language: 'kuery' });
   const { metricsDataView } = useMetricsDataViewContext();
+  // needed to refresh the lens table when filters havent changed
   const [searchSessionId, setSearchSessionId] = useState(data.search.session.start());
 
   const onQuerySubmit = useCallback(
