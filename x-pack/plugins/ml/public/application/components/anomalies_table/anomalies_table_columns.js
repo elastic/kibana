@@ -50,7 +50,9 @@ function showLinksMenuForItem(item, showViewSeriesLink, sourceIndicesWithGeoFiel
     item.entityName === 'mlcategory' ||
     item.customUrls !== undefined ||
     item.detector.includes(ML_JOB_AGGREGATION.LAT_LONG) ||
-    item.sourceIndices(sourceIndex => sourceIndicesWithGeoFields.includes(sourceIndex))
+    item.sourceIndices(
+      (sourceIndex) => sourceIndicesWithGeoFields[item.jobId][sourceIndex] !== undefined
+    )
   );
 }
 
@@ -309,7 +311,9 @@ export function getColumns(
     });
   }
 
-  const showLinks = items.some((item) => showLinksMenuForItem(item, showViewSeriesLink, sourceIndicesWithGeoFields));
+  const showLinks = items.some((item) =>
+    showLinksMenuForItem(item, showViewSeriesLink, sourceIndicesWithGeoFields)
+  );
 
   if (showLinks === true) {
     columns.push({

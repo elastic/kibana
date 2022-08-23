@@ -12,7 +12,7 @@ import { FIELD_ORIGIN, STYLE_TYPE } from '@kbn/maps-plugin/common';
 import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
 import { ESSearchResponse } from '@kbn/core/types/elasticsearch';
 import { VectorSourceRequestMeta } from '@kbn/maps-plugin/common';
-import { LAYER_TYPE } from '@kbn/maps-plugin/common';
+import { LAYER_TYPE, SOURCE_TYPES, SCALING_TYPES } from '@kbn/maps-plugin/common';
 import { SEVERITY_COLOR_RAMP } from '../../common';
 import { formatHumanReadableDateTimeSeconds } from '../../common/util/date_utils';
 import type { MlApiServices } from '../application/services/ml_api_service';
@@ -103,6 +103,34 @@ export function getInitialAnomaliesLayers(jobId: string) {
           ML_ANOMALY_LAYERS[layer as keyof typeof ML_ANOMALY_LAYERS] === ML_ANOMALY_LAYERS.TYPICAL
             ? TYPICAL_STYLE
             : ACTUAL_STYLE,
+      });
+    }
+  }
+  return initialLayers;
+}
+
+export function getInitialSourceIndexFieldLayer(sourceIndicesWithGeoFields: {
+  [key: string]: { geoFields: string[]; dataViewId: string };
+}) {
+  const initialLayers: any = [];
+  for (const index in sourceIndicesWithGeoFields) {
+    if (sourceIndicesWithGeoFields.hasOwnProperty(index)) {
+      const { dataViewId, geoFields } = sourceIndicesWithGeoFields[index];
+
+      geoFields.forEach((geoField) => {
+        initialLayers.push({
+          id: htmlIdGenerator()(),
+          type: LAYER_TYPE.MVT_VECTOR,
+          sourceDescriptor: {
+            id: htmlIdGenerator()(),
+            type: SOURCE_TYPES.ES_SEARCH,
+            tooltipProperties: [geoField],
+            label: index,
+            indexPatternId: dataViewId,
+            geoField,
+            scalingType: SCALING_TYPES.MVT,
+          },
+        });
       });
     }
   }

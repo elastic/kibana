@@ -25,7 +25,7 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { MAPS_APP_LOCATOR } from '@kbn/maps-plugin/public';
 import { mlJobService } from '../../services/job_service';
 import { getDataViewIdFromName } from '../../util/index_utils';
-import { getInitialAnomaliesLayers } from '../../../maps/util';
+import { getInitialAnomaliesLayers, getInitialSourceIndexFieldLayer } from '../../../maps/util';
 import {
   formatHumanReadableDateTimeSeconds,
   timeFormatter,
@@ -59,7 +59,9 @@ interface LinksMenuProps {
   interval: 'day' | 'hour' | 'second';
   showRuleEditorFlyout: (anomaly: AnomaliesTableRecord) => void;
   onItemClick: () => void;
-  sourceIndicesWithGeoFields: string[];
+  sourceIndicesWithGeoFields: {
+    [key: string]: { [key: string]: { geoFields: string[]; dataViewId: string } };
+  };
 }
 
 export const LinksMenuUI = (props: LinksMenuProps) => {
@@ -105,25 +107,22 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     return location;
   };
 
-  // TODO update this one
-  const getAnomalySourceMapsLink = async (anomaly: AnomaliesTableRecord, sourceIndicesWithGeoFields: string[]) => {
-    const initialLayers = getInitialAnomaliesLayers(anomaly.jobId);
-    const anomalyBucketStartMoment = moment(anomaly.time).tz(getDateFormatTz());
-    const anomalyBucketStart = anomalyBucketStartMoment.toISOString();
-    const anomalyBucketEnd = anomalyBucketStartMoment
-      .add(anomaly.source.bucket_span, 'seconds')
-      .subtract(1, 'ms')
-      .toISOString();
-    const timeRange = data.query.timefilter.timefilter.getTime();
-
-    // Set 'from' in timeRange to start bucket time for the specific anomaly
-    timeRange.from = anomalyBucketStart;
-    timeRange.to = anomalyBucketEnd;
+  const getAnomalySourceMapsLink = async (
+    anomaly: AnomaliesTableRecord,
+    sourceIndicesWithGeoFields: {
+      [key: string]: { [key: string]: { geoFields: string[]; dataViewId: string } };
+    }
+  ) => {
+    // Create a layer for each of the geoFields
+    const initialLayers = getInitialSourceIndexFieldLayer(
+      sourceIndicesWithGeoFields[anomaly.jobId]
+    );
 
     const locator = share.url.locators.get(MAPS_APP_LOCATOR);
     const location = await locator?.getLocation({
       initialLayers,
-      timeRange,
+      timeRange: data.query.timefilter.timefilter.getTime(),
+      filters: data.query.filterManager.getFilters(),
       ...(anomaly.entityName && anomaly.entityValue
         ? {
             query: {
@@ -667,25 +666,28 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
         );
       }
     }
-    // TODO: create maps link for source index using geo fields
-    if (anomaly.isGeoRecord === true) {
-        items.push(
-          <EuiContextMenuItem
-            key="view_in_maps"
-            icon="gisApp"
-            onClick={async () => {
-              const mapsLink = await getAnomalySourceMapsLink(anomaly, props.sourceIndicesWithGeoFields);
-              await application.navigateToApp(MAPS_APP_ID, { path: mapsLink?.path });
-            }}
-            data-test-subj="mlAnomaliesListRowActionViewSourceIndexInMapsButton"
-          >
-            <FormattedMessage
-              id="xpack.ml.anomaliesTable.linksMenu.viewSourceIndexInMapsLabel"
-              defaultMessage="View source index in Maps"
-            />
-          </EuiContextMenuItem>
-        );
-      }
+
+    if (props.sourceIndicesWithGeoFields[anomaly.jobId]) {
+      items.push(
+        <EuiContextMenuItem
+          key="view_in_maps"
+          icon="gisApp"
+          onClick={async () => {
+            const mapsLink = await getAnomalySourceMapsLink(
+              anomaly,
+              props.sourceIndicesWithGeoFields
+            );
+            await application.navigateToApp(MAPS_APP_ID, { path: mapsLink?.path });
+          }}
+          data-test-subj="mlAnomaliesListRowActionViewSourceIndexInMapsButton"
+        >
+          <FormattedMessage
+            id="xpack.ml.anomaliesTable.linksMenu.viewSourceIndexInMapsLabel"
+            defaultMessage="View source index in Maps"
+          />
+        </EuiContextMenuItem>
+      );
+    }
 
     if (application.capabilities.discover?.show && isCategorizationAnomalyRecord) {
       items.push(

@@ -51,7 +51,7 @@ export interface ExplorerJob {
   selected: boolean;
   bucketSpanSeconds: number;
   isSingleMetricViewerJob?: boolean;
-  sourceIndices?: Array<string>;
+  sourceIndices?: string[];
 }
 
 interface ClearedSelectedAnomaliesState {
