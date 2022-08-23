@@ -79,6 +79,7 @@ import { getRuleDefinitionLazy } from './common/get_rule_definition';
 import { RuleStatusPanelProps } from './application/sections/rule_details/components/rule_status_panel';
 import { RuleAlertsSummaryProps } from './application/sections/rule_details/components/alert_summary';
 import { getRuleAlertsSummaryLazy } from './common/get_rule_alerts_summary';
+import { getDefaultsForActionParams } from './application/lib/get_defaults_for_action_params';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
@@ -278,6 +279,7 @@ export class Plugin
           ...props,
           actionTypeRegistry: this.actionTypeRegistry,
           connectorServices: this.connectorServices!,
+          getDefaultActionParams: getDefaultsForActionParams,
         });
       },
       getAddConnectorFlyout: (props: Omit<CreateConnectorFlyoutProps, 'actionTypeRegistry'>) => {

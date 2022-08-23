@@ -165,7 +165,6 @@ export async function executor(
       url: webhook_integration_url,
       method: 'post',
       headers: {
-        // "X-Signature": crypto.createHmac('sha256', token || "").update(data || "").digest('hex'),
         "X-Torq-Token": token || "",
       },
       params: {},
@@ -175,7 +174,7 @@ export async function executor(
     })
   );
 
-  logger.debug(`torq action result: ${JSON.stringify(result)}`);
+  logger.debug(`torq action result: ${result}`);
 
   if (isOk(result)) {
     const {

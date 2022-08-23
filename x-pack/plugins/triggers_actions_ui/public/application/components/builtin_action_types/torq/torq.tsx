@@ -35,7 +35,7 @@ export function getActionType(): ActionTypeModel<
     ): Promise<GenericValidationResult<TorqActionParams>> => {
       const translations = await import('./translations');
       const errors = {
-        body: [] as Array<String>,
+        body: [] as Array<string>,
       }; // TODO: consider adding validations
       const validationResult = { errors };
       validationResult.errors = errors;

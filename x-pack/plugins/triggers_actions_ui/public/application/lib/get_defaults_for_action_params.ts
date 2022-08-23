@@ -12,13 +12,15 @@ import { AlertProvidedActionVariables } from './action_variables';
 export type DefaultActionParams = Record<string, RuleActionParam> | undefined;
 export type DefaultActionParamsGetter = (
   actionTypeId: string,
-  actionGroupId: string
+  actionGroupId: string,
+  isRecoveryActionGroup: boolean,
 ) => DefaultActionParams;
 export const getDefaultsForActionParams = (
   actionTypeId: string,
   actionGroupId: string,
   isRecoveryActionGroup: boolean
 ): DefaultActionParams => {
+  console.log('get defaults called');
   switch (actionTypeId) {
     case '.pagerduty':
       const pagerDutyDefaults = {
@@ -38,5 +40,19 @@ export const getDefaultsForActionParams = (
         spaceId: `{{${AlertProvidedActionVariables.ruleSpaceId}}}`,
       };
       return xmattersDefaults;
+    case '.torq':
+      const torqDefaults = {
+        body: JSON.stringify(
+          {
+            alert_action_group: '{{alert.actionGroup}}',
+            alert_id: '{{alert.id}}',
+            alert: '{{context.alerts}}',
+            // TODO: continue building this template
+          },
+          null,
+          4
+        ),
+      };
+      return torqDefaults;
   }
 };
