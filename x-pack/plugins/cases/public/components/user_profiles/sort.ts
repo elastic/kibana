@@ -18,7 +18,7 @@ export const moveCurrentUserToBeginning = <T extends { uid: string }>(
   profiles?: T[]
 ) => {
   if (!profiles) {
-    return [];
+    return;
   }
 
   if (!currentUserProfile) {

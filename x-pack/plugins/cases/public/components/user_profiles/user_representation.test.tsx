@@ -32,7 +32,7 @@ describe('UserRepresentation', () => {
   it('does not show the cross button when the user is not hovering over the row', () => {
     appMockRender.render(<UserRepresentation {...defaultProps} />);
 
-    expect(screen.queryByTestId(dataTestSubjCross)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(dataTestSubjCross)).toHaveStyle('opacity: 0');
   });
 
   it('show the cross button when the user is hovering over the row', () => {
@@ -40,7 +40,7 @@ describe('UserRepresentation', () => {
 
     fireEvent.mouseEnter(screen.getByTestId(dataTestSubjGroup));
 
-    expect(screen.getByTestId(dataTestSubjCross)).toBeInTheDocument();
+    expect(screen.getByTestId(dataTestSubjCross)).toHaveStyle('opacity: 1');
   });
 
   it('show the cross button when hovering over the row of an unknown user', () => {
@@ -50,17 +50,17 @@ describe('UserRepresentation', () => {
 
     fireEvent.mouseEnter(screen.getByTestId(dataTestSubjGroupUnknown));
 
-    expect(screen.getByTestId(dataTestSubjCrossUnknown)).toBeInTheDocument();
+    expect(screen.getByTestId(dataTestSubjCrossUnknown)).toHaveStyle('opacity: 1');
   });
 
   it('shows and then removes the cross button when the user hovers and removes the mouse from over the row', () => {
     appMockRender.render(<UserRepresentation {...defaultProps} />);
 
     fireEvent.mouseEnter(screen.getByTestId(dataTestSubjGroup));
-    expect(screen.getByTestId(dataTestSubjCross)).toBeInTheDocument();
+    expect(screen.getByTestId(dataTestSubjCross)).toHaveStyle('opacity: 1');
 
     fireEvent.mouseLeave(screen.getByTestId(dataTestSubjGroup));
-    expect(screen.queryByTestId(dataTestSubjCross)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(dataTestSubjCross)).toHaveStyle('opacity: 0');
   });
 
   it("renders unknown for the user's information", () => {

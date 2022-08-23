@@ -178,6 +178,6 @@ describe('UserToolTip', () => {
 
     await waitFor(() => screen.getByTestId('user-profile-tooltip'));
     expect(screen.getByText('Unable to find user profile')).toBeInTheDocument();
-    expect(screen.getByText('U')).toBeInTheDocument();
+    expect(screen.getByText('?')).toBeInTheDocument();
   });
 });

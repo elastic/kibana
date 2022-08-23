@@ -191,6 +191,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     describe('Assignees field', () => {
       before(async () => {
         await createUsersAndRoles(getService, users, roles);
+        await cases.api.activateUserProfiles([casesAllUser]);
       });
 
       after(async () => {
@@ -225,9 +226,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           await testSubjects.existOrFail('user-profile-assigned-user-group-abc');
 
           await cases.singleCase.openAssigneesPopover();
+          await cases.singleCase.setSearchTextInAssigneesPopover('case');
           await cases.singleCase.selectFirstRowInAssigneesPopover();
 
-          await (await find.byButtonText('Remove all users')).click();
+          await (await find.byButtonText('Remove all assignees')).click();
           await cases.singleCase.closeAssigneesPopover();
           await testSubjects.missingOrFail('user-profile-assigned-user-group-abc');
         });
@@ -267,6 +269,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         it('assigns a user from the popover', async () => {
           await cases.singleCase.openAssigneesPopover();
+          await cases.singleCase.setSearchTextInAssigneesPopover('case');
           await cases.singleCase.selectFirstRowInAssigneesPopover();
 
           // navigate out of the modal
@@ -281,6 +284,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         it('removes an assigned user', async () => {
           await cases.singleCase.openAssigneesPopover();
+          await cases.singleCase.setSearchTextInAssigneesPopover('case');
           await cases.singleCase.selectFirstRowInAssigneesPopover();
 
           // navigate out of the modal

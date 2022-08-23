@@ -190,6 +190,29 @@ describe('SuggestUsersPopover', () => {
 
     expect(togglePopover).toBeCalled();
   });
+
+  it('shows the empty message initially', async () => {
+    useSuggestUserProfilesMock.mockReturnValue({ data: [], isLoading: false });
+    appMockRender.render(<SuggestUsersPopover {...defaultProps} />);
+
+    await waitForEuiPopoverOpen();
+
+    fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
+
+    expect(screen.queryByTestId('case-view-assignees-popover-no-matches')).not.toBeInTheDocument();
+  });
+
+  it('shows the no matches component', async () => {
+    useSuggestUserProfilesMock.mockReturnValue({ data: [], isLoading: false });
+    appMockRender.render(<SuggestUsersPopover {...defaultProps} />);
+
+    await waitForEuiPopoverOpen();
+
+    fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
+    fireEvent.change(screen.getByPlaceholderText('Search users'), { target: { value: 'bananas' } });
+
+    expect(screen.getAllByTestId('case-view-assignees-popover-no-matches')[0]).toBeInTheDocument();
+  });
 });
 
 const asAssignee = (profile: UserProfileWithAvatar): AssigneeWithProfile => ({

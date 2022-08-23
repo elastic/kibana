@@ -8,7 +8,16 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { UserProfilesPopover, UserProfileWithAvatar } from '@kbn/user-profile-components';
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiSpacer,
+  EuiText,
+  EuiTextAlign,
+  EuiToolTip,
+} from '@elastic/eui';
 import { isEmpty, sortBy } from 'lodash';
 import { useSuggestUserProfiles } from '../../../containers/user_profiles/use_suggest_user_profiles';
 import { useCasesContext } from '../../cases_context/use_cases_context';
@@ -46,6 +55,38 @@ const PopoverButton: React.FC<{ togglePopover: () => void; isLoading: boolean }>
   </EuiToolTip>
 );
 PopoverButton.displayName = 'PopoverButton';
+
+const EmptyMessage: React.FC = () => null;
+EmptyMessage.displayName = 'EmptyMessage';
+
+const NoMatches: React.FC = () => {
+  return (
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="none"
+      direction="column"
+      justifyContent="spaceAround"
+      data-test-subj="case-view-assignees-popover-no-matches"
+    >
+      <EuiFlexItem grow={false}>
+        <EuiIcon type="userAvatar" size="xl" />
+        <EuiSpacer size="xs" />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiTextAlign textAlign="center">
+          <EuiText size="s" color="default">
+            <strong>{i18n.NO_MATCHING_USERS}</strong>
+            <br />
+          </EuiText>
+          <EuiText size="s" color="subdued">
+            {i18n.TRY_MODIFYING_SEARCH}
+          </EuiText>
+        </EuiTextAlign>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+NoMatches.displayName = 'NoMatches';
 
 export interface SuggestUsersPopoverProps {
   assignedUsersWithProfiles: AssigneeWithProfile[];
@@ -86,7 +127,7 @@ const SuggestUsersPopoverComponent: React.FC<SuggestUsersPopoverProps> = ({
     (users: UserProfileWithAvatar[]) => {
       const sortedUsers = moveCurrentUserToBeginning(currentUserProfile, sortProfiles(users));
       setSelectedUsers(sortedUsers);
-      onUsersChange(sortedUsers);
+      onUsersChange(sortedUsers ?? []);
     },
     [currentUserProfile, onUsersChange]
   );
@@ -101,17 +142,16 @@ const SuggestUsersPopoverComponent: React.FC<SuggestUsersPopoverProps> = ({
     owners: owner,
   });
 
+  const isLoadingData = isLoadingSuggest || isLoading;
+
   useEffect(() => {
     const sortedUserProfiles = sortProfiles(userProfiles);
-
     if (!isEmpty(searchTerm)) {
       setSearchResultProfiles(sortedUserProfiles);
     } else {
       setSearchResultProfiles(undefined);
     }
   }, [searchTerm, userProfiles]);
-
-  const isLoadingData = isLoadingSuggest || isLoading;
 
   return (
     <UserProfilesPopover
@@ -132,7 +172,8 @@ const SuggestUsersPopoverComponent: React.FC<SuggestUsersPopoverProps> = ({
         height: 'full',
         searchPlaceholder: i18n.SEARCH_USERS,
         clearButtonLabel: i18n.REMOVE_ASSIGNEES,
-        emptyMessage: '',
+        emptyMessage: <EmptyMessage />,
+        noMatchesMessage: <NoMatches />,
       }}
     />
   );
@@ -144,7 +185,7 @@ export const SuggestUsersPopover = React.memo(SuggestUsersPopoverComponent);
 
 const sortProfiles = (profiles?: UserProfileWithAvatar[]) => {
   if (!profiles) {
-    return [];
+    return;
   }
 
   return sortBy(profiles, getSortField);

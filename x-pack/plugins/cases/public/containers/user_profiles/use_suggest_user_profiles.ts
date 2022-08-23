@@ -9,6 +9,7 @@ import { useState } from 'react';
 import { useQuery, UseQueryResult } from 'react-query';
 import useDebounce from 'react-use/lib/useDebounce';
 import { UserProfile } from '@kbn/security-plugin/common';
+import { isEmpty } from 'lodash';
 import { DEFAULT_USER_SIZE } from '../../../common/constants';
 import * as i18n from '../translations';
 import { useKibana, useToasts } from '../../common/lib/kibana';
@@ -37,6 +38,9 @@ export const useSuggestUserProfiles = ({
       { name: debouncedName, owners, size },
     ],
     () => {
+      if (isEmpty(name)) {
+        return [];
+      }
       const abortCtrlRef = new AbortController();
       return suggestUserProfiles({
         http,
@@ -48,6 +52,7 @@ export const useSuggestUserProfiles = ({
     },
     {
       retry: false,
+      keepPreviousData: true,
       onError: (error: ServerError) => {
         if (error.name !== 'AbortError') {
           toasts.addError(

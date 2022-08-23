@@ -19,14 +19,14 @@ describe('CaseUserAvatar', () => {
   });
 
   it('renders the avatar of Damaged Raccoon profile', () => {
-    appMockRender.render(<CaseUserAvatar profile={userProfiles[0]} />);
+    appMockRender.render(<CaseUserAvatar size="s" profile={userProfiles[0]} />);
 
     expect(screen.getByText('DR')).toBeInTheDocument();
   });
 
   it('renders the avatar of the unknown profile', () => {
-    appMockRender.render(<CaseUserAvatar />);
+    appMockRender.render(<CaseUserAvatar size="s" />);
 
-    expect(screen.getByText('U')).toBeInTheDocument();
+    expect(screen.getByText('?')).toBeInTheDocument();
   });
 });
