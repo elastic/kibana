@@ -20481,7 +20481,7 @@
             "label": "aggregate",
             "description": [],
             "signature": [
-              "\"min\" | \"max\" | \"concat\" | \"sum\" | \"average\""
+              "\"min\" | \"max\" | \"sum\" | \"average\" | \"concat\""
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/top_hit.ts",
             "deprecated": false
@@ -28641,7 +28641,7 @@
         "label": "GeoPoint",
         "description": [],
         "signature": [
-          "string | [number, number] | Point"
+          "string | Point | [number, number]"
         ],
         "path": "src/plugins/data/common/search/expressions/geo_point.ts",
         "deprecated": false,
