@@ -162,18 +162,18 @@ export const getPieVisualization = ({
             {
               ...baseProps,
               groupId: 'groups',
-              groupLabel: i18n.translate('xpack.lens.pie.primaryAxisLabel', {
-                defaultMessage: 'Primary axis',
+              groupLabel: i18n.translate('xpack.lens.pie.horizontalAxisLabel', {
+                defaultMessage: 'Horizontal axis',
               }),
               accessors: (sortedColumns.length > 0 ? [sortedColumns[0]] : []) || [],
               dimensionEditorGroupLabel: i18n.translate(
-                'xpack.lens.pie.primaryAxisDimansionLabel',
+                'xpack.lens.pie.horizontalAxisDimensionLabel',
                 {
-                  defaultMessage: 'Primary axis',
+                  defaultMessage: 'Horizontal axis',
                 }
               ),
               supportsMoreColumns: sortedColumns.length === 0,
-              dataTestSubj: 'lnsPie_primaryAxisGroupByDimensionPanel',
+              dataTestSubj: 'lnsPie_horizontalAxisDimensionPanel',
               requiredMinDimensionCount: 1,
             },
             {
@@ -181,17 +181,17 @@ export const getPieVisualization = ({
               groupId: 'groups',
               required: false,
               accessors: (sortedColumns.length > 1 ? [sortedColumns[1]] : []) || [],
-              groupLabel: i18n.translate('xpack.lens.pie.secondaryAxisLabel', {
-                defaultMessage: 'Secondary axis',
+              groupLabel: i18n.translate('xpack.lens.pie.verticalAxisLabel', {
+                defaultMessage: 'Vertical axis',
               }),
               dimensionEditorGroupLabel: i18n.translate(
-                'xpack.lens.pie.secondaryAxisDimentionLabel',
+                'xpack.lens.pie.verticalAxisDimensionLabel',
                 {
-                  defaultMessage: 'Secondary axis',
+                  defaultMessage: 'Vertical axis',
                 }
               ),
               supportsMoreColumns: sortedColumns.length < 2,
-              dataTestSubj: 'lnsPie_secondaryAxisGroupByDimensionPanel',
+              dataTestSubj: 'lnsPie_verticalAxisDimensionPanel',
             },
           ];
         default:
