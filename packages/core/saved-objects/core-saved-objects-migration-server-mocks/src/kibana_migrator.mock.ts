@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { IKibanaMigrator, KibanaMigratorStatus } from './kibana_migrator';
-import { buildActiveMappings } from './core';
-
-const { mergeTypes } = jest.requireActual('./kibana_migrator');
-import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { BehaviorSubject } from 'rxjs';
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import type {
+  IKibanaMigrator,
+  KibanaMigratorStatus,
+} from '@kbn/core-saved-objects-base-server-internal';
+import { buildActiveMappings, mergeTypes } from '@kbn/core-saved-objects-migration-server-internal';
 
 const defaultSavedObjectTypes: SavedObjectsType[] = [
   {

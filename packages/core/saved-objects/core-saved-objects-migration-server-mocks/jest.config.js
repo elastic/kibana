@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { KibanaMigrator, mergeTypes } from './kibana_migrator';
-export type { KibanaMigratorOptions } from './kibana_migrator';
-export { buildActiveMappings } from './core';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/core/saved-objects/core-saved-objects-migration-server-mocks'],
+};

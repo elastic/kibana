@@ -3421,6 +3421,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-saved-objects-migration-server-mocks@link:bazel-bin/packages/core/saved-objects/core-saved-objects-migration-server-mocks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-saved-objects-server-internal@link:bazel-bin/packages/core/saved-objects/core-saved-objects-server-internal":
   version "0.0.0"
   uid ""
@@ -7428,6 +7432,10 @@
   uid ""
 
 "@types/kbn__core-saved-objects-migration-server-internal@link:bazel-bin/packages/core/saved-objects/core-saved-objects-migration-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-saved-objects-migration-server-mocks@link:bazel-bin/packages/core/saved-objects/core-saved-objects-migration-server-mocks/npm_module_types":
   version "0.0.0"
   uid ""
 

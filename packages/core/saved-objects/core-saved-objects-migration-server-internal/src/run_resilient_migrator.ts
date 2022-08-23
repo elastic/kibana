@@ -14,9 +14,9 @@ import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import type {
   IndexMapping,
   SavedObjectsMigrationConfigType,
+  MigrationResult,
 } from '@kbn/core-saved-objects-base-server-internal';
 import type { TransformRawDocs } from './types';
-import { MigrationResult } from './core';
 import { next } from './next';
 import { model } from './model';
 import { createInitialState } from './initial_state';

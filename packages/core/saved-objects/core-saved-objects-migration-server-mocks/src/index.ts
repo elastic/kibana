@@ -6,6 +6,4 @@
  * Side Public License, v 1.
  */
 
-export type { MigrationResult } from './core';
-export { KibanaMigrator } from './kibana_migrator';
-export type { IKibanaMigrator, KibanaMigratorStatus } from './kibana_migrator';
+export { mockKibanaMigrator } from './kibana_migrator.mock';

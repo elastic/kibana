@@ -6,6 +6,5 @@
  * Side Public License, v 1.
  */
 
-export function foo() {
-  return 'hello world';
-}
+export { KibanaMigrator, buildActiveMappings, mergeTypes } from './src';
+export type { KibanaMigratorOptions } from './src';
