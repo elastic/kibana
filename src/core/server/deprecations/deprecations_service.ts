@@ -14,7 +14,10 @@ import type { DomainDeprecationDetails } from '@kbn/core-deprecations-common';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type { DeprecationsServiceSetup } from '@kbn/core-deprecations-server';
+import type {
+  DeprecationsServiceSetup,
+  DeprecationRegistryProvider,
+} from '@kbn/core-deprecations-server';
 import { DeprecationsFactory } from './deprecations_factory';
 import { registerRoutes } from './routes';
 import { config as deprecationConfig, DeprecationConfigType } from './deprecation_config';
@@ -40,9 +43,7 @@ export interface InternalDeprecationsServiceStart {
 }
 
 /** @internal */
-export interface InternalDeprecationsServiceSetup {
-  getRegistry: (domainId: string) => DeprecationsServiceSetup;
-}
+export type InternalDeprecationsServiceSetup = DeprecationRegistryProvider;
 
 /** @internal */
 export interface DeprecationsSetupDeps {

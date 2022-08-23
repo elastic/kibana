@@ -103,3 +103,10 @@ export interface GetDeprecationsContext {
   esClient: IScopedClusterClient;
   savedObjectsClient: SavedObjectsClientContract;
 }
+
+/**
+ * @public
+ */
+export interface DeprecationRegistryProvider {
+  getRegistry: (domainId: string) => DeprecationsServiceSetup;
+}

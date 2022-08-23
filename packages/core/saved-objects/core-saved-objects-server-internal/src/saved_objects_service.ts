@@ -47,7 +47,7 @@ import {
   SavedObjectsImporter,
 } from '@kbn/core-saved-objects-import-export-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
-import { InternalDeprecationsServiceSetup } from '../deprecations';
+import type { DeprecationRegistryProvider } from '@kbn/core-deprecations-server';
 import { registerRoutes } from './routes';
 import { calculateStatus$ } from './status';
 import { registerCoreObjectTypes } from './object_types';
@@ -71,7 +71,7 @@ export interface SavedObjectsSetupDeps {
   http: InternalHttpServiceSetup;
   elasticsearch: InternalElasticsearchServiceSetup;
   coreUsageData: InternalCoreUsageDataSetup;
-  deprecations: InternalDeprecationsServiceSetup;
+  deprecations: DeprecationRegistryProvider;
 }
 
 interface WrappedClientFactoryWrapper {
