@@ -77,6 +77,7 @@ export type VectorLayerDescriptor = LayerDescriptor & {
   type: LAYER_TYPE.GEOJSON_VECTOR | LAYER_TYPE.MVT_VECTOR | LAYER_TYPE.BLENDED_VECTOR;
   joins?: JoinDescriptor[];
   style: VectorStyleDescriptor;
+  disableTooltips?: boolean;
 };
 
 export type HeatmapLayerDescriptor = LayerDescriptor & {

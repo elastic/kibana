@@ -434,6 +434,19 @@ export const DetailPanelMetadataTab = ({
                 ),
               },
               {
+                title: <DetailPanelListItem>resource.parent.type</DetailPanelListItem>,
+                description: (
+                  <DetailPanelCopy
+                    textToCopy={`orchestrator.resource.parent.type: "${orchestratorData.resource.parent.type}"`}
+                    tooltipContent={orchestratorData.resource.parent.type}
+                  >
+                    <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                      {orchestratorData.resource.parent.type}
+                    </EuiTextColor>
+                  </DetailPanelCopy>
+                ),
+              },
+              {
                 title: <DetailPanelListItem>namespace</DetailPanelListItem>,
                 description: (
                   <DetailPanelCopy
@@ -468,19 +481,6 @@ export const DetailPanelMetadataTab = ({
                   >
                     <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
                       {orchestratorData.cluster.name}
-                    </EuiTextColor>
-                  </DetailPanelCopy>
-                ),
-              },
-              {
-                title: <DetailPanelListItem>parent.type</DetailPanelListItem>,
-                description: (
-                  <DetailPanelCopy
-                    textToCopy={`orchestrator.parent.type: "${orchestratorData.parent.type}"`}
-                    tooltipContent={orchestratorData.parent.type}
-                  >
-                    <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                      {orchestratorData.parent.type}
                     </EuiTextColor>
                   </DetailPanelCopy>
                 ),

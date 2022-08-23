@@ -27,7 +27,8 @@ export const convertFilter = (series: Series): Filter | void => {
 const convertMetric = (
   series: Series,
   metric: VisualizeEditorLayersContext['metrics'][number],
-  filter: Filter | void
+  filter: Filter | void,
+  interval?: string
 ) => ({
   ...metric,
   color: metric.color ?? series.color,
@@ -35,11 +36,13 @@ const convertMetric = (
     ...metric.params,
     ...(series.offset_time && { shift: series.offset_time }),
     ...(filter && filter),
+    ...(interval && { window: interval }),
   },
 });
 
 export const convertMetrics = (
   series: Series,
   metrics: VisualizeEditorLayersContext['metrics'],
-  filter: Filter | void
-) => metrics.map((metric) => convertMetric(series, metric, filter));
+  filter: Filter | void,
+  interval?: string
+) => metrics.map((metric) => convertMetric(series, metric, filter, interval));
