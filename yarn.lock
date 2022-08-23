@@ -3373,6 +3373,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-saved-objects-api-server-internal@link:bazel-bin/packages/core/saved-objects/core-saved-objects-api-server-internal":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-saved-objects-api-server@link:bazel-bin/packages/core/saved-objects/core-saved-objects-api-server":
   version "0.0.0"
   uid ""
@@ -3398,6 +3402,18 @@
   uid ""
 
 "@kbn/core-saved-objects-common@link:bazel-bin/packages/core/saved-objects/core-saved-objects-common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-saved-objects-import-export-server-internal@link:bazel-bin/packages/core/saved-objects/core-saved-objects-import-export-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-saved-objects-migration-server-internal@link:bazel-bin/packages/core/saved-objects/core-saved-objects-migration-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-saved-objects-server-internal@link:bazel-bin/packages/core/saved-objects/core-saved-objects-server-internal":
   version "0.0.0"
   uid ""
 
@@ -7355,6 +7371,10 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__core-saved-objects-api-server-internal@link:bazel-bin/packages/core/saved-objects/core-saved-objects-api-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__core-saved-objects-api-server@link:bazel-bin/packages/core/saved-objects/core-saved-objects-api-server/npm_module_types":
   version "0.0.0"
   uid ""
@@ -7380,6 +7400,18 @@
   uid ""
 
 "@types/kbn__core-saved-objects-common@link:bazel-bin/packages/core/saved-objects/core-saved-objects-common/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-saved-objects-import-export-server-internal@link:bazel-bin/packages/core/saved-objects/core-saved-objects-import-export-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-saved-objects-migration-server-internal@link:bazel-bin/packages/core/saved-objects/core-saved-objects-migration-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-saved-objects-server-internal@link:bazel-bin/packages/core/saved-objects/core-saved-objects-server-internal/npm_module_types":
   version "0.0.0"
   uid ""
 
