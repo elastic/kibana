@@ -25333,8 +25333,6 @@
     "xpack.securitySolution.detectionEngine.rules.allRules.columns.gapTooltip": "ルール実行の最新のギャップの期間。ルールルックバックを調整するか、ギャップの軽減については{seeDocs}してください。",
     "xpack.securitySolution.detectionEngine.rules.allRules.selectAllRulesTitle": "すべての{totalRules} {totalRules, plural, other  {個のルール}}を選択",
     "xpack.securitySolution.detectionEngine.rules.allRules.selectedRulesTitle": "{selectedRules} {selectedRules, plural, other  {ルール}}を選択しました",
-    "xpack.securitySolution.detectionEngine.rules.allRules.showingExceptionLists": "{totalLists} {totalLists, plural, other  {件のリスト}}を表示しています。",
-    "xpack.securitySolution.detectionEngine.rules.allRules.showingRulesTitle": "{totalRules} {totalRules, plural, other  {ルール}}を表示中",
     "xpack.securitySolution.detectionEngine.rules.create.successfullyCreatedRuleTitle": "{ruleName}が作成されました",
     "xpack.securitySolution.detectionEngine.rules.popoverTooltip.ariaLabel": "列のツールチップ：{columnName}",
     "xpack.securitySolution.detectionEngine.rules.reloadMissingPrePackagedRulesAndTimelinesButton": "{missingRules} Elastic事前構築済み{missingRules, plural, other  {ルール}}と{missingTimelines} Elastic事前構築済み{missingTimelines, plural, other  {タイムライン}}をインストール ",
