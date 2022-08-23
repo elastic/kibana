@@ -4,38 +4,44 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { i18n } from '@kbn/i18n';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlexGrid,
-  EuiSpacer,
-  EuiTablePagination,
-} from '@elastic/eui';
-import { selectOverviewState, setOverviewPageStateAction } from '../../../../state/overview';
+import React, { useEffect, useState, useRef } from 'react';
+import { useSelector } from 'react-redux';
+import useIntersection from 'react-use/lib/useIntersection';
+import { EuiFlexGroup, EuiFlexItem, EuiFlexGrid, EuiSpacer } from '@elastic/eui';
+import { selectOverviewState } from '../../../../state/overview';
+import { MonitorOverviewItem } from '../../../../../../../common/runtime_types';
 import { OverviewPaginationInfo } from './overview_pagination_info';
 import { OverviewGridItem } from './overview_grid_item';
 import { SortFields } from './sort_fields';
+import { useMonitorsSortedByStatus } from '../../../../hooks/use_monitors_sorted_by_status';
 
 export const OverviewGrid = () => {
   const {
-    data: { pages },
+    data: { monitors },
     loaded,
-    pageState: { perPage },
+    pageState: { perPage, sortField, sortOrder },
   } = useSelector(selectOverviewState);
-  const dispatch = useDispatch();
-  const [page, setPage] = useState(0);
-  const currentMonitors = pages[page] || [];
-
-  const goToPage = (pageNumber: number) => {
-    setPage(pageNumber);
-  };
-
-  const changeItemsPerPage = (itemsPerPage: number) => {
-    dispatch(setOverviewPageStateAction({ perPage: itemsPerPage }));
-  };
+  const { monitorsSortedByStatus } = useMonitorsSortedByStatus(sortField === 'status');
+  const [page, setPage] = useState(1);
+  const currentMonitors = getCurrentMonitors({
+    monitors,
+    monitorsSortedByStatus,
+    perPage,
+    sortField,
+    sortOrder,
+  });
+  const intersectionRef = useRef(null);
+  const intersection = useIntersection(intersectionRef, {
+    root: null,
+    rootMargin: '0px',
+    threshold: 1,
+  });
+  const hasIntersected = intersection && intersection.intersectionRatio === 1;
+  useEffect(() => {
+    if (hasIntersected) {
+      setPage((p) => p + 1);
+    }
+  }, [hasIntersected]);
 
   return loaded ? (
     <>
@@ -58,17 +64,27 @@ export const OverviewGrid = () => {
           </EuiFlexItem>
         ))}
       </EuiFlexGrid>
-      <EuiTablePagination
-        aria-label={i18n.translate('xpack.synthetics.overview.pagination.ariaLabel', {
-          defaultMessage: 'Pagination for monitor overview',
-        })}
-        pageCount={Object.keys(pages).length}
-        activePage={page}
-        onChangePage={goToPage}
-        itemsPerPage={perPage}
-        onChangeItemsPerPage={changeItemsPerPage}
-        itemsPerPageOptions={[10, 20, 40]}
-      />
+      <span ref={intersectionRef} />
     </>
   ) : null;
+};
+
+const getCurrentMonitors = ({
+  sortField,
+  sortOrder,
+  perPage,
+  monitors,
+  monitorsSortedByStatus,
+}: {
+  sortField: string;
+  sortOrder: string;
+  perPage: number;
+  monitors: MonitorOverviewItem[];
+  monitorsSortedByStatus: MonitorOverviewItem[];
+}) => {
+  if (sortField === 'status') {
+    return monitorsSortedByStatus.slice(0, perPage);
+  } else {
+    return monitors.slice(0, perPage);
+  }
 };

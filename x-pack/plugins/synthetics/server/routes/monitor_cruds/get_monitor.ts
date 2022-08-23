@@ -15,6 +15,7 @@ import {
   ConfigKey,
   EncryptedSyntheticsMonitor,
   ServiceLocations,
+  MonitorOverviewItem,
 } from '../../../common/runtime_types';
 import { monitorAttributes } from '../../../common/types/saved_objects';
 import { UMServerLibs } from '../../legacy_uptime/lib/lib';
@@ -191,11 +192,12 @@ export const getSyntheticsMonitorOverviewRoute: SyntheticsRestApiRouteFactory = 
     query: querySchema,
   },
   handler: async ({ request, savedObjectsClient, syntheticsMonitorClient }): Promise<any> => {
-    const { perPage = 5, sortField, sortOrder } = request.query;
+    const { sortField, sortOrder } = request.query;
     const { saved_objects: monitors } = await getMonitors(
       {
         perPage: 1000,
-        sortField,
+        // monitors are sorted by status on the client side via useMonitorsSortedByStatus
+        sortField: sortField === 'status' ? `${ConfigKey.NAME}.keyword` : sortField,
         sortOrder,
         page: 1,
       },
@@ -204,10 +206,8 @@ export const getSyntheticsMonitorOverviewRoute: SyntheticsRestApiRouteFactory = 
     );
 
     const allMonitorIds: string[] = [];
-    const pages: Record<number, unknown[]> = {};
-    let currentPage = 0;
-    let currentItem = 0;
     let total = 0;
+    const allMonitors: MonitorOverviewItem[] = [];
 
     monitors.forEach((monitor) => {
       /* collect all monitor ids for use
@@ -224,22 +224,13 @@ export const getSyntheticsMonitorOverviewRoute: SyntheticsRestApiRouteFactory = 
           location,
           isEnabled: monitor.attributes[ConfigKey.ENABLED],
         };
-        if (!pages[currentPage]) {
-          pages[currentPage] = [config];
-        } else {
-          pages[currentPage].push(config);
-        }
-        currentItem++;
+        allMonitors.push(config);
         total++;
-        if (currentItem % perPage === 0) {
-          currentPage++;
-          currentItem = 0;
-        }
       });
     });
 
     return {
-      pages,
+      monitors: allMonitors,
       total,
       allMonitorIds,
     };

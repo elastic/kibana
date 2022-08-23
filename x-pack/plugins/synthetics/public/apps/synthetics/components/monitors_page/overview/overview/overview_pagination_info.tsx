@@ -12,14 +12,14 @@ import { selectOverviewState } from '../../../../state/overview';
 
 export const OverviewPaginationInfo = ({ page }: { page: number }) => {
   const {
-    data: { total, pages },
+    data: { total, monitors },
     loaded,
     pageState: { perPage },
   } = useSelector(selectOverviewState);
-  const startRange = (page + 1) * perPage - perPage + 1;
-  const endRange = startRange + (pages[`${page}`]?.length || 0) - 1;
+  const startRange = 1;
+  const endRange = monitors.length < page * perPage ? monitors.length : page * perPage;
 
-  if (loaded && !Object.keys(pages).length) {
+  if (loaded && !monitors.length) {
     return null;
   }
 

@@ -47,6 +47,20 @@ export const SortFields = () => {
   ];
   const sortByOptions = [
     {
+      label: STATUS_LABEL,
+      value: 'status',
+      checked: sortField === 'status',
+      defaultSortOrder: 'asc',
+      onClick: () => {
+        dispatch(
+          setOverviewPageStateAction({
+            sortField: 'status',
+            sortOrder: 'asc',
+          })
+        );
+      },
+    },
+    {
       label: ALPHABETICAL_LABEL,
       value: `${ConfigKey.NAME}.keyword`,
       checked: sortField === `${ConfigKey.NAME}.keyword`,
@@ -108,6 +122,12 @@ const getOrderContent = (sortField: string) => {
         desc: SORT_UPDATED_DESC,
         label: LAST_MODIFIED_LABEL,
       };
+    case 'status':
+      return {
+        asc: SORT_STATUS_ASC,
+        desc: SORT_STATUS_DESC,
+        label: STATUS_LABEL,
+      };
     default:
       return {
         asc: ASCENDING_LABEL,
@@ -137,7 +157,7 @@ const SORT_ALPHABETICAL_DESC = i18n.translate(
   }
 );
 
-const SORT_UPDATED_ASC = i18n.translate('xpack.synthetics.overview.sortPopover.lastModified.desc', {
+const SORT_UPDATED_ASC = i18n.translate('xpack.synthetics.overview.sortPopover.lastModified.asc', {
   defaultMessage: 'Oldest first',
 });
 
@@ -148,12 +168,24 @@ const SORT_UPDATED_DESC = i18n.translate(
   }
 );
 
+const SORT_STATUS_ASC = i18n.translate('xpack.synthetics.overview.sortPopover.status.asc', {
+  defaultMessage: 'Down first',
+});
+
+const SORT_STATUS_DESC = i18n.translate('xpack.synthetics.overview.sortPopover.lastModified.desc', {
+  defaultMessage: 'Up first',
+});
+
 const ASCENDING_LABEL = i18n.translate('xpack.synthetics.overview.sortPopover.ascending.label', {
   defaultMessage: 'Ascending',
 });
 
 const DESCENDING_LABEL = i18n.translate('xpack.synthetics.overview.sortPopover.descending.label', {
   defaultMessage: 'Descending',
+});
+
+const STATUS_LABEL = i18n.translate('xpack.synthetics.overview.sortPopover.alphabetical.label', {
+  defaultMessage: 'Status',
 });
 
 const ALPHABETICAL_LABEL = i18n.translate(

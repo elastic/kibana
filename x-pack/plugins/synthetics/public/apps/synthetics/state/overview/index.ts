@@ -7,7 +7,7 @@
 
 import { createReducer } from '@reduxjs/toolkit';
 
-import { ConfigKey, MonitorOverviewResult } from '../../../../../common/runtime_types';
+import { MonitorOverviewResult } from '../../../../../common/runtime_types';
 
 import { IHttpSerializedFetchError, serializeHttpFetchError } from '../utils/http_error';
 
@@ -30,12 +30,12 @@ const initialState: MonitorOverviewState = {
   data: {
     total: 0,
     allMonitorIds: [],
-    pages: {},
+    monitors: [],
   },
   pageState: {
-    perPage: 20,
+    perPage: 16,
     sortOrder: 'asc',
-    sortField: `${ConfigKey.NAME}.keyword`,
+    sortField: 'status',
   },
   loading: false,
   loaded: false,
