@@ -12,7 +12,7 @@ import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import { sendGetEndpointSpecificPackagePolicies } from '../../../services/policies/policies';
 import { sendGetEndpointSpecificPackagePoliciesMock } from '../../../services/policies/test_mock_utils';
 import { PolicyList } from './policy_list';
-import { sendGetAgentPolicyList } from '../../../services/policies/ingest';
+import { sendBulkGetAgentPolicyList } from '../../../services/policies/ingest';
 import type { GetPolicyListResponse } from '../types';
 import { getEndpointListPath, getPoliciesPath } from '../../../common/routing';
 import { APP_UI_ID } from '../../../../../common/constants';
@@ -22,7 +22,7 @@ jest.mock('../../../services/policies/ingest');
 
 const getPackagePolicies = sendGetEndpointSpecificPackagePolicies as jest.Mock;
 
-const getAgentPolicies = sendGetAgentPolicyList as jest.Mock;
+const mockedSendBulkGetAgentPolicies = sendBulkGetAgentPolicyList as jest.Mock;
 
 describe('When on the policy list page', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -77,19 +77,19 @@ describe('When on the policy list page', () => {
 
     beforeEach(async () => {
       getPackagePolicies.mockReturnValue(policies);
-      getAgentPolicies.mockReturnValue({
+      mockedSendBulkGetAgentPolicies.mockReturnValue({
         items: [
-          { package_policies: [policies.items[0].id], agents: 4 },
-          { package_policies: [policies.items[1].id], agents: 2 },
-          { package_policies: [policies.items[2].id], agents: 5 },
-          { package_policies: [policies.items[3].id], agents: 1 },
-          { package_policies: [policies.items[4].id], agents: 3 },
+          { package_policies: [{ id: policies.items[0].id }], agents: 4 },
+          { package_policies: [{ id: policies.items[1].id }], agents: 2 },
+          { package_policies: [{ id: policies.items[2].id }], agents: 5 },
+          { package_policies: [{ id: policies.items[3].id }], agents: 1 },
+          { package_policies: [{ id: policies.items[4].id }], agents: 3 },
         ],
       });
       render();
       await waitFor(() => {
         expect(sendGetEndpointSpecificPackagePolicies).toHaveBeenCalled();
-        expect(sendGetAgentPolicyList).toHaveBeenCalled();
+        expect(sendBulkGetAgentPolicyList).toHaveBeenCalled();
       });
     });
     it('should display the policy list table', () => {
@@ -164,7 +164,7 @@ describe('When on the policy list page', () => {
       await waitFor(() => {
         expect(getPackagePolicies).toHaveBeenCalled();
         expect(sendGetEndpointSpecificPackagePolicies).toHaveBeenCalled();
-        expect(sendGetAgentPolicyList).toHaveBeenCalled();
+        expect(mockedSendBulkGetAgentPolicies).toHaveBeenCalled();
       });
     });
     afterEach(() => {
