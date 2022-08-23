@@ -107,7 +107,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Persistable state attachments', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/139300
+    describe.skip('Persistable state attachments', () => {
       const getLensState = (dataViewId: string) => ({
         title: '',
         visualizationType: 'lnsXY',
