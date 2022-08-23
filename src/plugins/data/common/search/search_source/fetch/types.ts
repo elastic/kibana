@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { SearchSourceSearchOptions } from '../../..';
+import { ResponseWarning } from '@kbn/inspector-plugin/common';
+import { estypes } from '@elastic/elasticsearch';
 import { GetConfigFn } from '../../../types';
-import { IKibanaSearchResponse } from '../../types';
 
 /**
  * @internal
@@ -26,10 +26,10 @@ export interface FetchHandlers {
    * side effects like displaying UI errors on the client.
    */
   onResponse: (
+    warning: ResponseWarning,
     request: SearchRequest,
-    response: IKibanaSearchResponse,
-    options: SearchSourceSearchOptions
-  ) => IKibanaSearchResponse;
+    response: estypes.SearchResponse
+  ) => void;
 }
 
 export interface SearchError {

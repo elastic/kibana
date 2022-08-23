@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export type { Request, RequestStatistic, RequestStatistics } from './types';
+export type { Request, RequestStatistic, RequestStatistics, ResponseWarning } from './types';
 export { RequestStatus } from './types';
 export { RequestAdapter } from './request_adapter';
 export { RequestResponder } from './request_responder';

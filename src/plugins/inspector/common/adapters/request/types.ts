@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { estypes } from '@elastic/elasticsearch';
+
 /**
  * The status a request can have.
  */
@@ -54,4 +56,23 @@ export interface RequestStatistic {
 export interface Response {
   json?: object;
   time?: number;
+}
+
+/**
+ * Format of warnings of failed shards or internal ES timeouts that surface from search responses
+ * @public
+ */
+export interface ResponseWarning {
+  /**
+   * type:  for handling the warning in logic
+   */
+  type: 'timed_out' | 'generic_shard_warning' | estypes.ShardFailure['reason']['type'];
+  /**
+   * message: failure reason from ES
+   */
+  message: string;
+  /**
+   * text: human-friendly error message
+   */
+  text?: string;
 }

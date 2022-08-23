@@ -7,7 +7,8 @@
  */
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { Adapters } from '@kbn/inspector-plugin/common';
-import { KibanaContext, handleResponse } from '@kbn/data-plugin/public';
+import { KibanaContext } from '@kbn/data-plugin/public';
+import { estypes } from '@elastic/elasticsearch';
 import { getTimezone } from './application/lib/get_timezone';
 import { getUISettings, getDataStart, getCoreStart } from './services';
 import { ROUTES, UI_SETTINGS } from '../common/constants';
@@ -37,7 +38,6 @@ export const metricsRequestHandler = async ({
   if (!expressionAbortSignal.aborted) {
     const config = getUISettings();
     const data = getDataStart();
-    const theme = getCoreStart().theme;
     const abortController = new AbortController();
     const expressionAbortHandler = function () {
       abortController.abort();
@@ -87,7 +87,15 @@ export const metricsRequestHandler = async ({
             .ok({ time: query.time });
 
           if (query.response && config.get(UI_SETTINGS.ALLOW_CHECKING_FOR_FAILED_SHARDS)) {
-            handleResponse({ body: query.body }, { rawResponse: query.response }, {}, theme);
+            inspectorAdapters?.requests
+              ?.getWarnings()
+              .forEach((w) =>
+                dataSearch.showWarnings(
+                  w,
+                  { body: query.body },
+                  query.response! as unknown as estypes.SearchResponse
+                )
+              );
           }
         });
 

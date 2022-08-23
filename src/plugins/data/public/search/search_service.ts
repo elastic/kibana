@@ -25,9 +25,11 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
 import { DataViewsContract } from '@kbn/data-views-plugin/common';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ResponseWarning } from '@kbn/inspector-plugin/common';
 import type { ISearchSetup, ISearchStart } from './types';
 
-import { handleResponse } from './fetch';
+import { handleWarnings } from './fetch';
 import {
   cidrFunction,
   dateRangeFunction,
@@ -55,10 +57,9 @@ import {
   SearchSourceService,
   selectFilterFunction,
   eqlRawResponse,
-  SearchSourceSearchOptions,
 } from '../../common/search';
 import { AggsService } from './aggs';
-import { IKibanaSearchResponse, SearchRequest } from '..';
+import { SearchRequest } from '..';
 import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
 import { createUsageCollector, SearchUsageCollector } from './collectors';
 import { getEsaggs, getEsdsl, getEssql, getEql } from './expressions';
@@ -235,12 +236,19 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     const aggs = this.aggsService.start({ fieldFormats, indexPatterns });
 
+    const showWarnings = (
+      warning: ResponseWarning,
+      request: SearchRequest,
+      response: estypes.SearchResponse
+    ) => {
+      handleWarnings(warning, request, response, theme);
+    };
+
     const searchSourceDependencies: SearchSourceDependencies = {
       aggs,
       getConfig: uiSettings.get.bind(uiSettings),
       search,
-      onResponse: (...args: [SearchRequest, IKibanaSearchResponse, SearchSourceSearchOptions]) =>
-        handleResponse(...args, theme),
+      onResponse: showWarnings,
     };
 
     const config = this.initializerContext.config.get();
@@ -271,6 +279,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       showError: (e: Error) => {
         this.searchInterceptor.showError(e);
       },
+      showWarnings,
       session: this.sessionService,
       sessionsClient: this.sessionsClient,
       searchSource: this.searchSourceService.start(indexPatterns, searchSourceDependencies),

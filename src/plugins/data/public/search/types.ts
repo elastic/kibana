@@ -9,9 +9,11 @@
 import type { PackageInfo } from '@kbn/core/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { DataViewsContract } from '@kbn/data-views-plugin/common';
+import { ResponseWarning } from '@kbn/inspector-plugin/common';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SearchUsageCollector } from './collectors';
 import { AggsSetup, AggsSetupDependencies, AggsStartDependencies, AggsStart } from './aggs';
-import { ISearchGeneric, ISearchStartSearchSource } from '../../common/search';
+import { ISearchGeneric, ISearchStartSearchSource, SearchRequest } from '../../common/search';
 import { ISessionsClient, ISessionService } from './session';
 
 export type { ISearchStartSearchSource, SearchUsageCollector };
@@ -53,6 +55,12 @@ export interface ISearchStart {
   search: ISearchGeneric;
 
   showError: (e: Error) => void;
+
+  showWarnings: (
+    warning: ResponseWarning,
+    request: SearchRequest,
+    response: estypes.SearchResponse
+  ) => void;
   /**
    * high level search
    * {@link ISearchStartSearchSource}

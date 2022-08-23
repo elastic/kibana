@@ -8,8 +8,10 @@
 
 import { EventEmitter } from 'events';
 import uuid from 'uuid/v4';
+import { i18n } from '@kbn/i18n';
+import { estypes } from '@elastic/elasticsearch';
 import { RequestResponder } from './request_responder';
-import { Request, RequestParams, RequestStatus } from './types';
+import { Request, RequestParams, RequestStatus, ResponseWarning } from './types';
 
 /**
  * An generic inspector adapter to log requests.
@@ -66,6 +68,50 @@ export class RequestAdapter extends EventEmitter {
 
   public getRequests(): Request[] {
     return Array.from(this.requests.values());
+  }
+
+  public getWarnings() {
+    const warnings: ResponseWarning[] = [];
+
+    this.getRequests().forEach((request) => {
+      const rawResponse = request.response?.json as unknown as estypes.SearchResponse;
+
+      if (rawResponse?.timed_out === true) {
+        warnings.push({
+          type: 'timed_out',
+          message: i18n.translate(
+            'inspector.search.searchSource.fetch.requestTimedOutNotificationMessage',
+            {
+              defaultMessage: 'Data might be incomplete because your request timed out',
+            }
+          ),
+        });
+      }
+
+      rawResponse?._shards.failures?.forEach((f) => {
+        warnings.push({ type: f.reason.type, message: f.reason.reason });
+      });
+
+      if (rawResponse?._shards.failed) {
+        const message = i18n.translate(
+          'data.search.searchSource.fetch.shardsFailedNotificationMessage',
+          {
+            defaultMessage: '{shardsFailed} of {shardsTotal} shards failed',
+            values: {
+              shardsFailed: rawResponse._shards.failed,
+              shardsTotal: rawResponse._shards.total,
+            },
+          }
+        );
+        const text = i18n.translate(
+          'data.search.searchSource.fetch.shardsFailedNotificationDescription',
+          { defaultMessage: 'The data you are seeing might be incomplete or wrong.' }
+        );
+        warnings.push({ type: 'generic_shard_warning', message, text });
+      }
+    });
+
+    return warnings;
   }
 
   private _onChange(): void {

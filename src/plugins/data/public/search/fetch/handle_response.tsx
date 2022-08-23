@@ -7,62 +7,42 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { IKibanaSearchResponse, SearchSourceSearchOptions } from '../../../common';
+import { ResponseWarning } from '@kbn/inspector-plugin/common/adapters/request/types';
+import { estypes } from '@elastic/elasticsearch';
+import { SearchRequest } from '../../../common';
 import { ShardFailureOpenModalButton } from '../../shard_failure_modal';
 import { getNotifications } from '../../services';
-import type { SearchRequest } from '..';
 
-export function handleResponse(
+export function handleWarnings(
+  warning: ResponseWarning,
   request: SearchRequest,
-  response: IKibanaSearchResponse,
-  { disableShardFailureWarning }: SearchSourceSearchOptions,
+  response: estypes.SearchResponse,
   theme: ThemeServiceStart
 ) {
-  const { rawResponse } = response;
-
-  if (rawResponse.timed_out) {
+  if (warning.type === 'timed_out') {
     getNotifications().toasts.addWarning({
-      title: i18n.translate('data.search.searchSource.fetch.requestTimedOutNotificationMessage', {
-        defaultMessage: 'Data might be incomplete because your request timed out',
-      }),
+      title: warning.message,
     });
   }
 
-  if (rawResponse._shards && rawResponse._shards.failed && !disableShardFailureWarning) {
-    const title = i18n.translate('data.search.searchSource.fetch.shardsFailedNotificationMessage', {
-      defaultMessage: '{shardsFailed} of {shardsTotal} shards failed',
-      values: {
-        shardsFailed: rawResponse._shards.failed,
-        shardsTotal: rawResponse._shards.total,
-      },
-    });
-    const description = i18n.translate(
-      'data.search.searchSource.fetch.shardsFailedNotificationDescription',
-      {
-        defaultMessage: 'The data you are seeing might be incomplete or wrong.',
-      }
-    );
-
+  if (warning.type === 'generic_shard_warning') {
     const text = toMountPoint(
       <>
-        {description}
+        {warning.text}
         <EuiSpacer size="s" />
         <ShardFailureOpenModalButton
           request={request.body}
-          response={rawResponse}
+          response={response}
           theme={theme}
-          title={title}
+          title={warning.message}
         />
       </>,
       { theme$: theme.theme$ }
     );
 
-    getNotifications().toasts.addWarning({ title, text });
+    getNotifications().toasts.addWarning({ title: warning.message, text });
   }
-
-  return response;
 }

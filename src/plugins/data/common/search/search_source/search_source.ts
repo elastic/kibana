@@ -571,7 +571,16 @@ export class SearchSource {
           }
         });
       }),
-      map((response) => onResponse(searchRequest, response, options))
+      map((response) => {
+        if (!options.disableShardFailureWarning) {
+          options.inspector?.adapter
+            ?.getWarnings()
+            .forEach((warning) =>
+              onResponse(warning, searchRequest, response.rawResponse as estypes.SearchResponse)
+            );
+        }
+        return response;
+      })
     );
   }
 
