@@ -83,7 +83,7 @@ function formatFieldsToComboBox(fields?: DataViewField[]) {
 }
 
 const bucketAggType = 'terms';
-const metricAggType = 'avg';
+const metricAggType = 'median';
 
 export const SearchExamplesApp = ({
   http,
@@ -215,7 +215,7 @@ export const SearchExamplesApp = ({
           if (isCompleteResponse(res)) {
             setIsLoading(false);
             setResponse(res);
-            const avgResult: number | undefined = res.rawResponse.aggregations
+            const aggResult: number | undefined = res.rawResponse.aggregations
               ? // @ts-expect-error @elastic/elasticsearch no way to declare a type for aggregation in the search response
                 res.rawResponse.aggregations[1].value
               : undefined;
@@ -224,8 +224,8 @@ export const SearchExamplesApp = ({
             const message = (
               <EuiText>
                 Searched {res.rawResponse.hits.total} documents. <br />
-                The average of {selectedNumericField!.name} is{' '}
-                {avgResult ? Math.floor(avgResult) : 0}.
+                The ${metricAggType} of {selectedNumericField!.name} is{' '}
+                {aggResult ? Math.floor(aggResult) : 0}.
                 <br />
                 {isCool ? `Is it Cool? ${isCool}` : undefined}
                 <br />
@@ -325,6 +325,7 @@ export const SearchExamplesApp = ({
        * { disableShardFailureWarning: true } in the SearchSourceSearchOptions passed to $fetch
        */
       data.search.showWarnings(inspector, (responseWarnings) => {
+        console.log('callback!');
         setWarnings([...warnings, responseWarnings]);
         return false; // optional: set to `true` to prevent fetch from following the callback with default behavior
       });
