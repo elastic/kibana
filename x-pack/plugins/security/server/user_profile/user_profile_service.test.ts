@@ -466,21 +466,17 @@ describe('UserProfileService', () => {
         type: 'accessToken',
         accessToken: 'some-token',
       });
-      await nextTick();
-      jest.runAllTimers();
 
-      // The first retry.
-      await nextTick();
-      jest.runAllTimers();
-
-      // The second retry.
-      await nextTick();
-      jest.runAllTimers();
+      // Re-try 9 more times.
+      for (const _ of Array.from({ length: 9 })) {
+        await nextTick();
+        jest.runAllTimers();
+      }
 
       await expect(activatePromise).rejects.toBe(failureReason);
       expect(
         mockStartParams.clusterClient.asInternalUser.security.activateUserProfile
-      ).toHaveBeenCalledTimes(3);
+      ).toHaveBeenCalledTimes(10);
       expect(
         mockStartParams.clusterClient.asInternalUser.security.activateUserProfile
       ).toHaveBeenCalledWith({ grant_type: 'access_token', access_token: 'some-token' });
