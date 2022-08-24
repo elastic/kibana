@@ -68,8 +68,7 @@ import {
   encodeHitVersion,
   LEGACY_URL_ALIAS_TYPE,
 } from '@kbn/core-saved-objects-base-server-internal';
-import { DocumentMigrator } from '../../migrations/core/document_migrator';
-import { mockKibanaMigrator } from '../../migrations/kibana_migrator.mock';
+import { createMigratorMock } from '../mocks/internal_mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import * as esKuery from '@kbn/es-query';
 import { errors as EsErrors } from '@elastic/elasticsearch';
@@ -105,7 +104,7 @@ const createUnsupportedTypeError = (type: string) =>
 describe('SavedObjectsRepository', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let savedObjectsRepository: SavedObjectsRepository;
-  let migrator: ReturnType<typeof mockKibanaMigrator.create>;
+  let migrator: ReturnType<typeof createMigratorMock>;
   let logger: ReturnType<typeof loggerMock.create>;
   let serializer: jest.Mocked<SavedObjectsSerializer>;
 
@@ -252,11 +251,13 @@ describe('SavedObjectsRepository', () => {
     })
   );
 
+  /*
   const documentMigrator = new DocumentMigrator({
     typeRegistry: registry,
     kibanaVersion: KIBANA_VERSION,
     log: loggerMock.create(),
   });
+   */
 
   const getMockGetResponse = (
     {
@@ -376,9 +377,13 @@ describe('SavedObjectsRepository', () => {
   beforeEach(() => {
     pointInTimeFinderMock.mockClear();
     client = elasticsearchClientMock.createElasticsearchClient();
-    migrator = mockKibanaMigrator.create();
-    documentMigrator.prepareMigrations();
-    migrator.migrateDocument = jest.fn().mockImplementation(documentMigrator.migrate);
+    migrator = createMigratorMock();
+    migrator.migrateDocument.mockImplementation((doc) => ({
+      ...doc,
+      migrationVersion: { [doc.type]: '1.1.1' },
+      coreMigrationVersion: KIBANA_VERSION,
+    }));
+
     migrator.runMigrations = jest.fn().mockResolvedValue([{ status: 'skipped' }]);
     logger = loggerMock.create();
 
