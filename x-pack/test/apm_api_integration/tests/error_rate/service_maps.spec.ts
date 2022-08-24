@@ -60,87 +60,83 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   let errorRateMetricValues: Awaited<ReturnType<typeof getErrorRateValues>>;
   let errorTransactionValues: Awaited<ReturnType<typeof getErrorRateValues>>;
-  registry.when(
-    'Service maps APIs',
-    { config: 'trial', archives: ['apm_mappings_only_8.0.0'] },
-    () => {
-      describe('when data is loaded ', () => {
-        const GO_PROD_LIST_RATE = 75;
-        const GO_PROD_LIST_ERROR_RATE = 25;
-        const GO_PROD_ID_RATE = 50;
-        const GO_PROD_ID_ERROR_RATE = 50;
+  registry.when('Service maps APIs', { config: 'trial', archives: [] }, () => {
+    describe('when data is loaded ', () => {
+      const GO_PROD_LIST_RATE = 75;
+      const GO_PROD_LIST_ERROR_RATE = 25;
+      const GO_PROD_ID_RATE = 50;
+      const GO_PROD_ID_ERROR_RATE = 50;
+      before(async () => {
+        const serviceGoProdInstance = apm
+          .service(serviceName, 'production', 'go')
+          .instance('instance-a');
+
+        const transactionNameProductList = 'GET /api/product/list';
+        const transactionNameProductId = 'GET /api/product/:id';
+
+        await synthtraceEsClient.index([
+          timerange(start, end)
+            .interval('1m')
+            .rate(GO_PROD_LIST_RATE)
+            .generator((timestamp) =>
+              serviceGoProdInstance
+                .transaction(transactionNameProductList, 'Worker')
+                .timestamp(timestamp)
+                .duration(1000)
+                .success()
+            ),
+          timerange(start, end)
+            .interval('1m')
+            .rate(GO_PROD_LIST_ERROR_RATE)
+            .generator((timestamp) =>
+              serviceGoProdInstance
+                .transaction(transactionNameProductList, 'Worker')
+                .duration(1000)
+                .timestamp(timestamp)
+                .failure()
+            ),
+          timerange(start, end)
+            .interval('1m')
+            .rate(GO_PROD_ID_RATE)
+            .generator((timestamp) =>
+              serviceGoProdInstance
+                .transaction(transactionNameProductId)
+                .timestamp(timestamp)
+                .duration(1000)
+                .success()
+            ),
+          timerange(start, end)
+            .interval('1m')
+            .rate(GO_PROD_ID_ERROR_RATE)
+            .generator((timestamp) =>
+              serviceGoProdInstance
+                .transaction(transactionNameProductId)
+                .duration(1000)
+                .timestamp(timestamp)
+                .failure()
+            ),
+        ]);
+      });
+
+      after(() => synthtraceEsClient.clean());
+
+      describe('compare latency value between service inventory and service maps', () => {
         before(async () => {
-          const serviceGoProdInstance = apm
-            .service(serviceName, 'production', 'go')
-            .instance('instance-a');
-
-          const transactionNameProductList = 'GET /api/product/list';
-          const transactionNameProductId = 'GET /api/product/:id';
-
-          await synthtraceEsClient.index([
-            timerange(start, end)
-              .interval('1m')
-              .rate(GO_PROD_LIST_RATE)
-              .generator((timestamp) =>
-                serviceGoProdInstance
-                  .transaction(transactionNameProductList, 'Worker')
-                  .timestamp(timestamp)
-                  .duration(1000)
-                  .success()
-              ),
-            timerange(start, end)
-              .interval('1m')
-              .rate(GO_PROD_LIST_ERROR_RATE)
-              .generator((timestamp) =>
-                serviceGoProdInstance
-                  .transaction(transactionNameProductList, 'Worker')
-                  .duration(1000)
-                  .timestamp(timestamp)
-                  .failure()
-              ),
-            timerange(start, end)
-              .interval('1m')
-              .rate(GO_PROD_ID_RATE)
-              .generator((timestamp) =>
-                serviceGoProdInstance
-                  .transaction(transactionNameProductId)
-                  .timestamp(timestamp)
-                  .duration(1000)
-                  .success()
-              ),
-            timerange(start, end)
-              .interval('1m')
-              .rate(GO_PROD_ID_ERROR_RATE)
-              .generator((timestamp) =>
-                serviceGoProdInstance
-                  .transaction(transactionNameProductId)
-                  .duration(1000)
-                  .timestamp(timestamp)
-                  .failure()
-              ),
+          [errorTransactionValues, errorRateMetricValues] = await Promise.all([
+            getErrorRateValues('transaction'),
+            getErrorRateValues('metric'),
           ]);
         });
 
-        after(() => synthtraceEsClient.clean());
-
-        describe('compare latency value between service inventory and service maps', () => {
-          before(async () => {
-            [errorTransactionValues, errorRateMetricValues] = await Promise.all([
-              getErrorRateValues('transaction'),
-              getErrorRateValues('metric'),
-            ]);
-          });
-
-          it('returns same avg error rate value for Transaction-based and Metric-based data', () => {
-            [
-              errorTransactionValues.serviceInventoryErrorRate,
-              errorTransactionValues.serviceMapsNodeDetailsErrorRate,
-              errorRateMetricValues.serviceInventoryErrorRate,
-              errorRateMetricValues.serviceMapsNodeDetailsErrorRate,
-            ].forEach((value) => expect(value).to.be.equal(GO_PROD_ID_ERROR_RATE / 100));
-          });
+        it('returns same avg error rate value for Transaction-based and Metric-based data', () => {
+          [
+            errorTransactionValues.serviceInventoryErrorRate,
+            errorTransactionValues.serviceMapsNodeDetailsErrorRate,
+            errorRateMetricValues.serviceInventoryErrorRate,
+            errorRateMetricValues.serviceMapsNodeDetailsErrorRate,
+          ].forEach((value) => expect(value).to.be.equal(GO_PROD_ID_ERROR_RATE / 100));
         });
       });
-    }
-  );
+    });
+  });
 }
