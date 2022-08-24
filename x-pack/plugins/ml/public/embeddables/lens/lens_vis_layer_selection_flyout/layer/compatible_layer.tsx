@@ -79,8 +79,8 @@ export const CompatibleLayer: FC<Props> = ({
   const [runInRealTime, setRunInRealTime] = useState(true);
   const [bucketSpan, setBucketSpan] = useState(DEFAULT_BUCKET_SPAN);
 
-  const [jobIdValid, setJobIdValid] = useState<string>('');
-  const [bucketSpanValid, setBucketSpanValid] = useState<string>('');
+  const [jobIdValidationError, setJobIdValidationError] = useState<string>('');
+  const [bucketSpanValidationError, setBucketSpanValidationError] = useState<string>('');
   const [state, setState] = useState<STATE>(STATE.DEFAULT);
   const [createError, setCreateError] = useState<{ text: string; errorText: string } | null>(null);
 
@@ -154,8 +154,8 @@ export const CompatibleLayer: FC<Props> = ({
       if (jobId === undefined) {
         return;
       }
-      setJobIdValid('');
-      setBucketSpanValid('');
+      setJobIdValidationError('');
+      setBucketSpanValidationError('');
       const validationResults = basicJobValidation(
         {
           job_id: jobId,
@@ -167,7 +167,7 @@ export const CompatibleLayer: FC<Props> = ({
       );
 
       if (validationResults.contains('job_id_invalid')) {
-        setJobIdValid(
+        setJobIdValidationError(
           i18n.translate('xpack.ml.newJob.wizard.validateJob.jobNameAllowedCharactersDescription', {
             defaultMessage:
               'Job ID can contain lowercase alphanumeric (a-z and 0-9), hyphens or underscores; ' +
@@ -175,7 +175,7 @@ export const CompatibleLayer: FC<Props> = ({
           })
         );
       } else if (validationResults.contains('job_id_invalid_max_length')) {
-        setJobIdValid(
+        setJobIdValidationError(
           i18n.translate('xpack.ml.newJob.wizard.validateJob.jobIdInvalidMaxLengthErrorMessage', {
             defaultMessage:
               'Job ID must be no more than {maxLength, plural, one {# character} other {# characters}} long.',
@@ -189,7 +189,7 @@ export const CompatibleLayer: FC<Props> = ({
           .jobsExist([jobId])
           .then((resp) => {
             if (resp[jobId].exists) {
-              setJobIdValid(
+              setJobIdValidationError(
                 i18n.translate('xpack.ml.newJob.wizard.validateJob.jobNameAlreadyExists', {
                   defaultMessage:
                     'Job ID already exists. A job ID cannot be the same as an existing job or group.',
@@ -204,7 +204,7 @@ export const CompatibleLayer: FC<Props> = ({
       }
 
       if (validationResults.contains('bucket_span_invalid')) {
-        setBucketSpanValid(invalidTimeIntervalMessage(bucketSpan));
+        setBucketSpanValidationError(invalidTimeIntervalMessage(bucketSpan));
       }
       setState(STATE.DEFAULT);
     },
@@ -244,8 +244,8 @@ export const CompatibleLayer: FC<Props> = ({
               label={i18n.translate('xpack.ml.newJob.wizard.jobDetailsStep.jobId.title', {
                 defaultMessage: 'Job ID',
               })}
-              error={jobIdValid}
-              isInvalid={jobIdValid !== ''}
+              error={jobIdValidationError}
+              isInvalid={jobIdValidationError !== ''}
             >
               <EuiFieldText
                 data-test-subj={`mlLensLayerJobIdInput_${layerIndex}`}
@@ -276,8 +276,8 @@ export const CompatibleLayer: FC<Props> = ({
                     defaultMessage: 'Bucket span',
                   }
                 )}
-                error={bucketSpanValid}
-                isInvalid={bucketSpanValid !== ''}
+                error={bucketSpanValidationError}
+                isInvalid={bucketSpanValidationError !== ''}
               >
                 <EuiFieldText
                   data-test-subj={`mlLensLayerBucketSpanInput_${layerIndex}`}
@@ -330,8 +330,8 @@ export const CompatibleLayer: FC<Props> = ({
                 disabled={
                   state === STATE.VALIDATING ||
                   jobId === '' ||
-                  jobIdValid !== '' ||
-                  bucketSpanValid !== ''
+                  jobIdValidationError !== '' ||
+                  bucketSpanValidationError !== ''
                 }
                 onClick={createADJob.bind(null, layerIndex)}
                 size="s"
