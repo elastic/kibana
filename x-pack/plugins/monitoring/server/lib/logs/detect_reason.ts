@@ -26,9 +26,7 @@ async function doesFilebeatIndexExist(
 
   const typeFilter = {
     bool: {
-      should: [
-        { term: { 'service.type': 'elasticsearch' } },
-      ],
+      should: [{ term: { 'service.type': 'elasticsearch' } }],
     },
   };
   const structuredLogsFilter = { exists: { field: 'elasticsearch.cluster' } };

@@ -66,9 +66,7 @@ export async function getLogTypes(
 
   const typeFilter = {
     bool: {
-      should: [
-        { term: { 'service.type': 'elasticsearch' } },
-      ],
+      should: [{ term: { 'service.type': 'elasticsearch' } }],
     },
   };
 

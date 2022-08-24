@@ -78,9 +78,7 @@ export async function getLogs(
       // `service.type` is not assigned by the filebeat in the agents.
       // The filter by `data_stream.type` is hack to use `should` filter.
       // 'data_stream.type' will always be 'logs' for `logs-*` indices.
-      should: [
-        { term: { 'service.type': 'elasticsearch' } },
-      ],
+      should: [{ term: { 'service.type': 'elasticsearch' } }],
     },
   };
 
