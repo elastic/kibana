@@ -540,7 +540,6 @@
     "core.euiBasicTable.selectThisRow": "选择此行",
     "core.euiBottomBar.screenReaderAnnouncement": "有页面级别控件位于文档结尾的新地区地标。",
     "core.euiBottomBar.screenReaderHeading": "页面级别控件",
-    "core.euiBreadcrumbs.collapsedBadge.ariaLabel": "查看折叠的痕迹导航",
     "core.euiBreadcrumbs.nav.ariaLabel": "痕迹导航",
     "core.euiCardSelect.select": "选择",
     "core.euiCardSelect.selected": "已选定",

@@ -129,20 +129,22 @@ describe('StepConfigurePackage', () => {
     testRenderer = createFleetTestRendererMock();
   });
 
-  it('should show nothing to configure if no matching integration', () => {
+  it('should show nothing to configure if no matching integration', async () => {
     packageInfo.policy_templates = [];
     render();
 
-    waitFor(() => {
-      expect(renderResult.getByText('Nothing to configure')).toBeInTheDocument();
+    await waitFor(async () => {
+      expect(await renderResult.findByText('Nothing to configure')).toBeInTheDocument();
     });
   });
 
   it('should show inputs of policy templates and update package policy with input enabled: false', async () => {
     render();
 
-    waitFor(() => {
-      expect(renderResult.getByText('Collect logs from Nginx instances')).toBeInTheDocument();
+    await waitFor(async () => {
+      expect(
+        await renderResult.findByText('Collect logs from Nginx instances')
+      ).toBeInTheDocument();
     });
     act(() => {
       fireEvent.click(renderResult.getByRole('switch'));

@@ -538,7 +538,6 @@
     "core.euiBasicTable.selectThisRow": "この行を選択",
     "core.euiBottomBar.screenReaderAnnouncement": "ドキュメントの最後には、新しいリージョンランドマークとページレベルのコントロールがあります。",
     "core.euiBottomBar.screenReaderHeading": "ページレベルのコントロール",
-    "core.euiBreadcrumbs.collapsedBadge.ariaLabel": "折りたたまれたブレッドクラムを表示",
     "core.euiBreadcrumbs.nav.ariaLabel": "ブレッドクラム",
     "core.euiCardSelect.select": "選択してください",
     "core.euiCardSelect.selected": "利用不可",
