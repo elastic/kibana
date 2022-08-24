@@ -16,6 +16,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { getFilter } from '../get_filter';
 import { groupAndBulkCreate } from '../alert_grouping/group_and_bulk_create';
+import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
 import type { RuleRangeTuple, BulkCreate, WrapHits } from '../types';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import type {
@@ -96,6 +97,10 @@ export const queryExecutor = async ({
       secondaryTimestamp,
     };
 
-    return groupAndBulkCreate(searchParams);
+    if (experimentalFeatures.alertGroupingEnabled) {
+      return groupAndBulkCreate(searchParams);
+    } else {
+      return searchAfterAndBulkCreate(searchParams);
+    }
   });
 };
