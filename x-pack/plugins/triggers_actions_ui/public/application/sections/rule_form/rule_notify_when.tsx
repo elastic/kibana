@@ -49,7 +49,7 @@ export const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<RuleNotifyWhenType>
         <EuiText size="s" color="subdued">
           <p>
             <FormattedMessage
-              defaultMessage="Actions run when the rule status changes."
+              defaultMessage="Actions run when the alert status changes."
               id="xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.onActionGroupChange.description"
             />
           </p>
@@ -62,7 +62,7 @@ export const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<RuleNotifyWhenType>
     inputDisplay: i18n.translate(
       'xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.onActiveAlert.display',
       {
-        defaultMessage: 'Every time rule is active',
+        defaultMessage: 'Every time alert is active',
       }
     ),
     'data-test-subj': 'onActiveAlert',
@@ -70,14 +70,14 @@ export const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<RuleNotifyWhenType>
       <>
         <strong>
           <FormattedMessage
-            defaultMessage="Every time rule is active"
+            defaultMessage="Every time alert is active"
             id="xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.onActiveAlert.label"
           />
         </strong>
         <EuiText size="s" color="subdued">
           <p>
             <FormattedMessage
-              defaultMessage="Actions repeat at the rule interval when the rule is active."
+              defaultMessage="Actions repeat at the rule interval when the alert is active."
               id="xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.onActiveAlert.description"
             />
           </p>
