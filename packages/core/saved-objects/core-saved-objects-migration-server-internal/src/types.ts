@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import * as TaskEither from 'fp-ts/TaskEither';
+import * as TaskEither from 'fp-ts/lib/TaskEither';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import { DocumentsTransformFailed, DocumentsTransformSuccess } from './core';
 
