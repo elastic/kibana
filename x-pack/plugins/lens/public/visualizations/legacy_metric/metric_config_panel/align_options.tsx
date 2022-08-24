@@ -8,11 +8,11 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup } from '@elastic/eui';
-import { MetricState } from '../../../../common/types';
+import { LegacyMetricState } from '../../../../common/types';
 
 export interface TitlePositionProps {
-  state: MetricState;
-  setState: (newState: MetricState) => void;
+  state: LegacyMetricState;
+  setState: (newState: LegacyMetricState) => void;
 }
 
 export const DEFAULT_TEXT_ALIGNMENT = 'left';
@@ -50,7 +50,7 @@ export const AlignOptions: React.FC<TitlePositionProps> = ({ state, setState }) 
       options={alignButtonIcons}
       idSelected={state.textAlign ?? DEFAULT_TEXT_ALIGNMENT}
       onChange={(id) => {
-        setState({ ...state, textAlign: id as MetricState['textAlign'] });
+        setState({ ...state, textAlign: id as LegacyMetricState['textAlign'] });
       }}
       isIconOnly
       buttonSize="compressed"

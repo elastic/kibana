@@ -98,7 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('lens metric chart', async () => {
-      await PageObjects.lens.switchToVisualization('lnsMetric');
+      await PageObjects.lens.switchToVisualization('lnsLegacyMetric');
       await a11y.testAppSnapshot();
     });
 

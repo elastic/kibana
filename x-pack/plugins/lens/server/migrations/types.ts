@@ -269,3 +269,6 @@ export interface XYVisualizationState830 extends VisState820 {
 
 export type VisStatePre830 = XYVisualizationStatePre830;
 export type VisState830 = XYVisualizationState830;
+
+export type VisState840 = VisState830;
+export type LensDocShape840<VisualizationState = unknown> = LensDocShape830<VisualizationState>;
