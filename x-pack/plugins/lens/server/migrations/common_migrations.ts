@@ -30,6 +30,8 @@ import {
   LensDocShape810,
   LensDocShape830,
   VisStatePre830,
+  XYVisStatePre850,
+  XYVisState850,
 } from './types';
 import { DOCUMENT_FIELD_NAME, layerTypes, MetricState } from '../../common';
 import { LensDocShape } from './saved_object_migrations';
@@ -394,6 +396,39 @@ export const commonFixValueLabelsInXY = (
       visualization: {
         ...visualization,
         valueLabels: valueLabels && valueLabels !== 'hide' ? 'show' : valueLabels,
+      },
+    },
+  };
+};
+
+export const commonExplicitAnnotationType = (
+  attributes: LensDocShape830<XYVisStatePre850>
+): LensDocShape830<XYVisState850> => {
+  // Skip the migration heavy part if not XY or it does not contain annotations
+  if (
+    attributes.visualizationType !== 'lnsXY' ||
+    attributes.state.visualization.layers.every((l) => l.layerType !== 'annotations')
+  ) {
+    return attributes as LensDocShape830<XYVisState850>;
+  }
+  const newAttributes = cloneDeep(attributes);
+  const { visualization } = newAttributes.state;
+  const { layers } = visualization;
+  return {
+    ...newAttributes,
+    state: {
+      ...newAttributes.state,
+      visualization: {
+        ...visualization,
+        layers: layers.map((l) => {
+          if (l.layerType !== 'annotations') {
+            return l;
+          }
+          return {
+            ...l,
+            annotations: l.annotations.map((a) => ({ ...a, type: 'manual' })),
+          };
+        }),
       },
     },
   };

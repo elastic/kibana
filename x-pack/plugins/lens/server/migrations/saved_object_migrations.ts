@@ -33,6 +33,8 @@ import {
   XYVisualizationState830,
   VisState810,
   VisState820,
+  XYVisState850,
+  XYVisStatePre850,
 } from './types';
 import {
   commonRenameOperationsForFormula,
@@ -50,6 +52,7 @@ import {
   commonFixValueLabelsInXY,
   commonLockOldMetricVisSettings,
   commonPreserveOldLegendSizeDefault,
+  commonExplicitAnnotationType,
 } from './common_migrations';
 
 interface LensDocShapePre710<VisualizationState = unknown> {
@@ -510,6 +513,14 @@ const preserveOldLegendSizeDefault: SavedObjectMigrationFn<LensDocShape810, Lens
   doc
 ) => ({ ...doc, attributes: commonPreserveOldLegendSizeDefault(doc.attributes) });
 
+const addEventAnnotationType: SavedObjectMigrationFn<
+  LensDocShape830<XYVisStatePre850>,
+  LensDocShape830<XYVisState850>
+> = (doc) => {
+  const newDoc = cloneDeep(doc);
+  return { ...newDoc, attributes: commonExplicitAnnotationType(newDoc.attributes) };
+};
+
 const lensMigrations: SavedObjectMigrationMap = {
   '7.7.0': removeInvalidAccessors,
   // The order of these migrations matter, since the timefield migration relies on the aggConfigs
@@ -530,6 +541,7 @@ const lensMigrations: SavedObjectMigrationMap = {
     enhanceTableRowHeight
   ),
   '8.3.0': flow(lockOldMetricVisSettings, preserveOldLegendSizeDefault, fixValueLabelsInXY),
+  '8.5.0': flow(addEventAnnotationType),
 };
 
 export const getAllMigrations = (
