@@ -20,6 +20,7 @@ export const convertToStaticValueColumn = (
   metrics: Metric[],
   visibleSeriesCount: number
 ): StaticValueColumn | null => {
+  // Lens support reference lines only when at least one layer data exists
   if (visibleSeriesCount === 1) {
     return null;
   }

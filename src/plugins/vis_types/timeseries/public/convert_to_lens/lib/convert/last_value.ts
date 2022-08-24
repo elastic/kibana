@@ -12,13 +12,10 @@ import { LastValueColumn } from './types';
 import type { Metric, Series } from '../../../../common/types';
 import { createColumn } from './column';
 
-const convertToLastValueParams = (metric: Metric): LastValueParams | null =>
-  metric.order_by
-    ? {
-        sortField: metric.order_by,
-        showArrayValues: false,
-      }
-    : null;
+const convertToLastValueParams = (metric: Metric): LastValueParams | null => ({
+  sortField: metric.order_by,
+  showArrayValues: false,
+});
 
 export const convertToLastValueColumn = (
   series: Series,
