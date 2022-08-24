@@ -300,14 +300,14 @@ describe('getFetchEventAnnotations', () => {
     const result = await runGetFetchEventAnnotations({
       interval: '2h',
       groups: [],
-      timezone: 'UTC',
+      timezone: 'Europe/Madrid',
     });
     expect(result).toEqual(null);
   });
 
   describe('Manual annotations', () => {
     const manualOnlyArgs = {
-      timezone: 'CET',
+      timezone: 'Europe/Madrid',
       interval: '30m',
       groups: [
         {
@@ -348,7 +348,7 @@ describe('getFetchEventAnnotations', () => {
   describe('Query annotations', () => {
     test('runs handleRequest only for query annotations when manual and query are defined', async () => {
       const sampleArgs = {
-        timezone: 'CET',
+        timezone: 'Europe/Madrid',
         interval: '3d',
         groups: [
           {
@@ -384,7 +384,7 @@ describe('getFetchEventAnnotations', () => {
     });
     test('runs single handleRequest for query annotations with the same data view and timeField and creates aggregation for each extraField', async () => {
       const sampleArgs = {
-        timezone: 'CET',
+        timezone: 'Europe/Madrid',
         interval: '3d',
         groups: [
           {
@@ -406,7 +406,7 @@ describe('getFetchEventAnnotations', () => {
     });
     test('runs two separate handleRequests if timeField is different', async () => {
       const sampleArgs = {
-        timezone: 'CET',
+        timezone: 'Europe/Madrid',
         interval: '3d',
         groups: [
           {

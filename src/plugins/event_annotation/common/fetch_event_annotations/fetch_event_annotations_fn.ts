@@ -27,7 +27,7 @@ export const getFetchEventAnnotationsMeta: () => Omit<
       types: ['string'],
       help: i18n.translate('eventAnnotation.fetchEventAnnotations.timezone.help', {
         defaultMessage:
-          'The timezone to use for date operations. Valid ISO8601 formats and UTC offsets both work.',
+          'The timezone to use for date operations. Valid IANA format.',
       }),
     },
     groups: {
