@@ -278,17 +278,24 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     dispatch(setLoading(true));
 
     // need to get filters, query, ignoreParentSettings, and timeRange from input for inheritance
-    const { ignoreParentSettings, filters, query, timeRange: globalTimeRange, timeslice } = this.getInput();
+    const {
+      ignoreParentSettings,
+      filters,
+      query,
+      timeRange: globalTimeRange,
+      timeslice,
+    } = this.getInput();
 
     if (this.abortController) this.abortController.abort();
     this.abortController = new AbortController();
-    const timeRange = timeslice !== undefined
-      ? {
-          from: new Date(timeslice[0]).toISOString(),
-          to: new Date(timeslice[1]).toISOString(),
-          mode: 'absolute' as 'absolute',
-        }
-      : globalTimeRange;
+    const timeRange =
+      timeslice !== undefined
+        ? {
+            from: new Date(timeslice[0]).toISOString(),
+            to: new Date(timeslice[1]).toISOString(),
+            mode: 'absolute' as 'absolute',
+          }
+        : globalTimeRange;
     const { suggestions, invalidSelections, totalCardinality } =
       await this.optionsListService.runOptionsListRequest(
         {
