@@ -9,11 +9,71 @@ import React, { memo, useState, useCallback, useEffect } from 'react';
 import { EuiForm, EuiFlexGroup, EuiFlexItem, EuiCheckbox, EuiRadio, EuiSelect } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { PackagePolicyCreateExtensionComponentProps } from '@kbn/fleet-plugin/public';
+import styled from 'styled-components'
 
 /**
  * Exports Endpoint-specific package policy instructions
  * for use in the Ingest app create / edit package policy
  */
+const SelectConfigurationSettingsText = styled.div`
+  font-size: 22px; 
+  font-weight: 700; 
+  padding-top: 12px; 
+  padding-bottom: 10px;
+  line-height: 32px;
+`;
+
+const RadioOptionsDetails = styled.div`
+  padding-left: 24px;
+  color: #69707D;
+  font-weight: 400;
+  font-size: 12.25px;
+  line-height: 21px;
+`;
+
+const IntegrationOptionsContainer = styled.div`
+  margin-bottom: 48px;
+  margin-top: 17px;
+`;
+
+const CloudOptionDataIngestionMessage = styled.div`
+  font-size: 14px;
+  width: max-content;
+  font-weight: 400;
+  padding-top: 12px;
+  padding-bottom: 10px;
+  color: #69707D;
+`;
+
+const SubduedText = styled.div`
+  font-size: 14px;
+  font-weight: 400;
+  color: #69707D;
+  line-height: 24px;
+`;
+
+const BoldSubtitle = styled.div`
+  font-size: 14px;
+  font-weight: 700;
+  padding-top: 10px;
+  padding-bottom: 8px;
+`;
+
+const QuickSettingInfo = styled.div`
+  padding-bottom: 16px; 
+  font-size: 14px;
+  line-height: 24px;
+`;
+
+const CloudRadioProtectionsModeContainer = styled.div`
+  padding-top: 8px;
+`;
+
+const DropDownSelect = styled(EuiSelect)`
+  margin-top: 14px;
+`;
+
+
 export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionComponentProps>(
   ({ newPolicy, onChange }) => {
     // Fleet will initialize the create form with a default name for the integratin policy, however,
@@ -32,12 +92,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
               _config: {
                 type: 'endpoint',
                 endpointConfig: {
-                  events: {
-                    process: true,
-                    file: false,
-                    network: false,
-                    session_data: false,
-                  },
+                  preset: 'NGAV',
                 },
               },
             },
@@ -70,9 +125,9 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
                         malware: false,
                       },
                     },
-                  },
-                  eventFilters: {
-                    interactiveSession: true,
+                    eventFilters: {
+                      interactiveSession: true,
+                    },
                   },
                 },
               ],
@@ -87,12 +142,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
                   _config: {
                     type: e?.target?.value,
                     endpointConfig: {
-                      events: {
-                        process: true,
-                        file: false,
-                        network: false,
-                        session_data: false,
-                      },
+                      preset: 'NGAV',
                     },
                   },
                 },
@@ -116,9 +166,11 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
           updatedPolicy: {
             inputs: [
               {
-                ...newPolicy.inputs[0],
-                eventFilters: {
-                  interactiveSession: false,
+                _config: {
+                  ...newPolicy.inputs[0]._config,
+                  eventFilters: {
+                    interactiveSession: false,
+                  },
                 },
               },
             ],
@@ -130,9 +182,11 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
           updatedPolicy: {
             inputs: [
               {
-                ...newPolicy.inputs[0],
-                eventFilters: {
-                  interactiveSession: true,
+                _config: {
+                  ...newPolicy.inputs[0]._config,
+                  eventFilters: {
+                    interactiveSession: true,
+                  },
                 },
               },
             ],
@@ -154,15 +208,9 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
               inputs: [
                 {
                   _config: {
-                    // type: 'endpoint',
                     ...newPolicy.inputs[0]._config,
                     endpointConfig: {
-                      events: {
-                        process: true,
-                        file: false,
-                        network: false,
-                        session_data: false,
-                      },
+                      preset: 'NGAV',
                     },
                   },
                 },
@@ -176,15 +224,9 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
               inputs: [
                 {
                   _config: {
-                    // type: 'endpoint',
                     ...newPolicy.inputs[0]._config,
                     endpointConfig: {
-                      events: {
-                        process: true,
-                        file: true,
-                        network: true,
-                        session_data: false,
-                      },
+                      preset: 'EDREssential',
                     },
                   },
                 },
@@ -192,7 +234,6 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
             },
           });
         } else if (e.target.value === 'EDR Complete') {
-          // onChange({isValid:true, updatedPolicy : {inputs : [{ config : { _create : {policyParams : {type: 'endpoint', sessionData: true}}}}]}})
           onChange({
             isValid: true,
             updatedPolicy: {
@@ -201,12 +242,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
                   _config: {
                     ...newPolicy.inputs[0]._config,
                     endpointConfig: {
-                      events: {
-                        process: true,
-                        file: true,
-                        network: true,
-                        session_data: true,
-                      },
+                      preset: 'EDRComplete',
                     },
                   },
                 },
@@ -274,25 +310,26 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
 
     return (
       <EuiForm component="form">
-        <div css={{ fontSize: '18px', fontWeight: 700, paddingTop: '12px', paddingBottom: '10px' }}>
+        <SelectConfigurationSettingsText>
           <FormattedMessage
             id="xpack.fleet.createPackagePolicy.stepConfigure.enablePrevention"
             defaultMessage="Select configuration settings"
           />
-        </div>
-        <div css={{ paddingBottom: '24px', fontSize: '14px', lineHeight: '24px' }}>
+       </SelectConfigurationSettingsText>
+        <QuickSettingInfo>
           <FormattedMessage
             id="xpack.fleet.createPackagePolicy.stepConfigure.quickSettingsTranslation"
-            defaultMessage="Use quick settings to configure the integration to protect your tranditional endpoints or dynamic clound environments. You can make changes to the configurations after you add it."
+            defaultMessage="Use quick settings to configure the integration to {value}. You can make changes to the configurations after you add it."
+            values={{
+              value : <b>protect your tranditional endpoints or dynamic clound environments</b>
+            }}
           />
-        </div>
-        <div css={{ paddingBottom: '0px', fontSize: '14px', lineHeight: '24px' }}>
+        </QuickSettingInfo>
           <FormattedMessage
             id="xpack.fleet.createPackagePolicy.stepConfigure.selectEnvironmentTextTranslation"
             defaultMessage="Select for what environment you would like to add the integration"
           />
-        </div>
-        <EuiSelect
+        <DropDownSelect
           id="selectIntegrationTypeId"
           options={dropDownOptions}
           value={dropdownValue}
@@ -302,6 +339,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
 
         {dropdownValue === dropDownOptions[0].value && (
           <>
+          <IntegrationOptionsContainer>
             <EuiRadio
               id="radioOptionNGAV"
               label="NGAV"
@@ -310,10 +348,12 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
               checked={radioEndpointOption === 'NGAV'}
               onChange={(e) => onChangeRadioEndpoint(e)}
             />
+            <RadioOptionsDetails>
             <FormattedMessage
               id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicTypeEndpointNGAV"
               defaultMessage="Prevents Malware, Ransomware and Memory Threats and provides process telemetry"
             />
+            </RadioOptionsDetails>
 
             <EuiRadio
               id="radioOptionEDREssential"
@@ -323,10 +363,12 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
               checked={radioEndpointOption === 'EDR Essential'}
               onChange={(e) => onChangeRadioEndpoint(e)}
             />
+            <RadioOptionsDetails>
             <FormattedMessage
               id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicTypeEndpointEDREssential"
               defaultMessage="Endpoint Alerts, Process Events, Network Events, File Events"
             />
+            </RadioOptionsDetails>
 
             <EuiRadio
               id="radioOptionEDRComplete"
@@ -336,29 +378,25 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
               checked={radioEndpointOption === 'EDR Complete'}
               onChange={(e) => onChangeRadioEndpoint(e)}
             />
+            <RadioOptionsDetails>
             <FormattedMessage
               id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicTypeEndpointEDRComplete"
               defaultMessage="Endpoint Alerts, Full Event capture"
             />
+            </RadioOptionsDetails>
+            </IntegrationOptionsContainer>
           </>
         )}
 
         {dropdownValue === dropDownOptions[1].value && (
           <>
-            <div
-              css={{
-                fontSize: '12px',
-                width: 'max-content',
-                fontWeight: 400,
-                paddingTop: '12px',
-                paddingBottom: '10px',
-              }}
-            >
+          <IntegrationOptionsContainer>
+            <CloudOptionDataIngestionMessage>
               <FormattedMessage
                 id="xpack.fleet.createPackagePolicy.stepConfigure.interactiveSessionSuggestionTranslation"
                 defaultMessage="To save on data ingestion volume select interactive session only "
               />
-            </div>
+            </CloudOptionDataIngestionMessage>
 
             <EuiRadio
               id="radioInteractiveOption"
@@ -366,10 +404,12 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
               checked={radioInteractiveSelected}
               onChange={onChangeRadio}
             />
+            <RadioOptionsDetails>
             <FormattedMessage
               id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicTypeInteractiveOnlyInfo"
               defaultMessage="Monitors and collects session data from interactive sessions only. "
             />
+            </RadioOptionsDetails>
 
             <EuiRadio
               id="radioComprehensiveOption"
@@ -377,32 +417,27 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
               checked={radioComprehensiveSelected}
               onChange={onChangeRadio}
             />
+             <RadioOptionsDetails>
             <FormattedMessage
               id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicTypeComprehensiveInfo"
               defaultMessage="Monitors and collects session data from all process executions. "
             />
+             </RadioOptionsDetails>
 
-            <div
-              css={{
-                fontSize: '14px',
-                width: '240px',
-                fontWeight: 700,
-                paddingTop: '10px',
-                paddingBottom: '10px',
-              }}
-            >
+            <BoldSubtitle>
               <FormattedMessage
                 id="xpack.fleet.createPackagePolicy.stepConfigure.protectionModeTranslation"
                 defaultMessage="Protection mode"
               />
-            </div>
-            <div>
+            </BoldSubtitle>
+            <SubduedText>
               <FormattedMessage
                 id="xpack.fleet.createPackagePolicy.stepConfigure.protectionModeDetailsTranslation"
                 defaultMessage="In addition to detections, Elastic security can prevent threats before they happen.
               You can disable detections anytime in the agent policy configurations settings."
               />
-            </div>
+            </SubduedText>
+            <CloudRadioProtectionsModeContainer>
             <EuiFlexGroup>
               <EuiFlexItem>
                 <EuiCheckbox
@@ -421,6 +456,8 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
+            </CloudRadioProtectionsModeContainer>
+            </IntegrationOptionsContainer>
           </>
         )}
       </EuiForm>
