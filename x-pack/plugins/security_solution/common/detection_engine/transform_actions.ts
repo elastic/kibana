@@ -9,6 +9,7 @@ import { map, reduce, isEmpty } from 'lodash';
 import type { RuleAction, RuleResponseAction } from '@kbn/alerting-plugin/common';
 import type { EcsMappingFormValueArray } from '@kbn/osquery-plugin/common/schemas/common/utils';
 import type { RuleAlertAction, RuleAlertResponseAction } from './types';
+import { ResponseActionsTypes } from './types';
 
 export const transformRuleToAlertAction = ({
   group,
@@ -49,7 +50,7 @@ export const transformRuleToAlertResponseAction = ({
   action_type_id, // eslint-disable-line @typescript-eslint/naming-convention
   params,
 }: RuleAlertResponseAction): RuleResponseAction => {
-  if (action_type_id === '.osquery') {
+  if (action_type_id === ResponseActionsTypes.OSQUERY) {
     return {
       params: {
         ...params,
@@ -70,7 +71,7 @@ export const transformAlertToRuleResponseAction = ({
   actionTypeId,
   params,
 }: RuleResponseAction): RuleAlertResponseAction => {
-  if (actionTypeId === '.osquery') {
+  if (actionTypeId === ResponseActionsTypes.OSQUERY) {
     return {
       params: {
         ...params,

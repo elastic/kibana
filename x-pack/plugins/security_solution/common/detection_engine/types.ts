@@ -15,6 +15,9 @@ export type RuleAlertResponseAction = Omit<RuleResponseAction, 'actionTypeId'> &
   action_type_id: string;
 };
 
+export enum ResponseActionsTypes {
+  OSQUERY = '.osquery',
+}
 /**
  * Defines the search types you can have from Elasticsearch within a
  * doc._source. It uses recursive types of "| SearchTypes[]" to designate
