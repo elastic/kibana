@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import { useController, useFormContext } from 'react-hook-form';
+import { useController } from 'react-hook-form';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -14,15 +14,12 @@ interface QueryDescriptionFieldProps {
 }
 
 const LabelFieldComponent = ({ euiFieldProps }: QueryDescriptionFieldProps) => {
-  const formContext = useFormContext();
-  console.error('formContextxx', formContext);
   const {
     field: { onChange, value, name: fieldName },
     fieldState: { error },
   } = useController({
     name: 'label',
     defaultValue: '',
-    rules: { required: true },
   });
 
   const hasError = useMemo(() => !!error?.message, [error?.message]);

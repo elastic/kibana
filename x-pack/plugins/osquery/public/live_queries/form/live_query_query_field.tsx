@@ -45,6 +45,8 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
   const permissions = useKibana().services.application.capabilities.osquery;
   const queryType = formContext?.watch('queryType', 'query');
 
+  console.error('queryType', queryType);
+
   const {
     field: { onChange, value },
     fieldState: { error },
@@ -55,7 +57,7 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
         message: i18n.translate('xpack.osquery.pack.queryFlyoutForm.emptyQueryError', {
           defaultMessage: 'Query is a required field',
         }),
-        value: queryType === 'query',
+        value: queryType !== 'pack',
       },
       maxLength: {
         message: i18n.translate('xpack.osquery.liveQuery.queryForm.largeQueryError', {
@@ -70,7 +72,6 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
 
   const handleSavedQueryChange: SavedQueriesDropdownProps['onChange'] = useCallback(
     (savedQuery) => {
-      console.error('saveddQwer', savedQuery);
       if (savedQuery) {
         formContext?.setValue('query', savedQuery.query);
         formContext?.setValue('savedQueryId', savedQuery.savedQueryId);
@@ -133,9 +134,7 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
   return (
     <>
       {!isSavedQueryDisabled && (
-        <>
-          <SavedQueriesDropdown disabled={isSavedQueryDisabled} onChange={handleSavedQueryChange} />
-        </>
+        <SavedQueriesDropdown disabled={isSavedQueryDisabled} onChange={handleSavedQueryChange} />
       )}
       <EuiFormRow
         isInvalid={!!error?.message}

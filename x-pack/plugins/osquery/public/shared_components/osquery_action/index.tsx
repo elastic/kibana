@@ -22,8 +22,7 @@ import { useIsOsqueryAvailable } from './use_is_osquery_available';
 
 interface OsqueryActionProps {
   agentId?: string;
-  query?: string;
-  savedQueryId?: string;
+  defaultValues?: {};
   formType: 'steps' | 'simple';
   hideAgentsField?: boolean;
   addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
@@ -32,6 +31,7 @@ interface OsqueryActionProps {
 const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({
   agentId,
   formType = 'simple',
+  defaultValues,
   hideAgentsField,
   addToTimeline,
 }) => {
@@ -110,6 +110,7 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({
       agentId={agentId}
       hideAgentsField={hideAgentsField}
       addToTimeline={addToTimeline}
+      {...defaultValues}
     />
   );
 };

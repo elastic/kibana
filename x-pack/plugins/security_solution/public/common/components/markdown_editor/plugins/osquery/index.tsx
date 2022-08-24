@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { pick } from 'lodash';
-import React, { useMemo, useState, useCallback } from 'react';
+import { pickBy, isEmpty } from 'lodash';
+import type { Plugin } from 'unified';
+import React, { useContext, useMemo, useState, useCallback } from 'react';
+import type { RemarkTokenizer } from '@elastic/eui';
 import {
   EuiSpacer,
   EuiCodeBlock,
@@ -18,28 +20,56 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { useForm, FormProvider } from 'react-hook-form';
+import styled from 'styled-components';
+import type { EuiMarkdownEditorUiPluginEditorProps } from '@elastic/eui/src/components/markdown_editor/markdown_types';
 import { useKibana } from '../../../../lib/kibana';
-import { OsqueryIcon } from './osquery_icon';
 import { LabelField } from './label_field';
+import OsqueryLogo from './osquery_icon/osquery.svg';
 import { OsqueryFlyout } from '../../../../../detections/components/osquery/osquery_flyout';
+import { BasicAlertDataContext } from '../../../event_details/investigation_guide_view';
+import { convertECSMappingToObject } from './utils';
 
-const OsqueryEditorComponent = ({ node, onSave, onCancel }) => {
+const StyledEuiButton = styled(EuiButton)`
+  > span > img {
+    margin-block-end: 0;
+  }
+`;
+
+const OsqueryEditorComponent = ({
+  node,
+  onSave,
+  onCancel,
+}: EuiMarkdownEditorUiPluginEditorProps<{
+  label?: string;
+  query: string;
+  ecs_mapping: { [key: string]: {} };
+}>) => {
   const { osquery } = useKibana().services;
   const formMethods = useForm({
     defaultValues: {
       label: node?.label,
-      savedQueryId: node?.savedQueryId,
       query: node?.query,
       ecs_mapping: node?.ecs_mapping,
     },
   });
 
-  console.error('node', node);
   const onSubmit = useCallback(
     (data) => {
-      onSave(`!{osquery${JSON.stringify(pick(data, ['label', 'query', 'ecs_mapping']))}}`, {
-        block: true,
-      });
+      onSave(
+        `!{osquery${JSON.stringify(
+          pickBy(
+            {
+              query: data.query,
+              label: data.label,
+              ecs_mapping: convertECSMappingToObject(data.ecs_mapping),
+            },
+            (value) => !isEmpty(value)
+          )
+        )}}`,
+        {
+          block: true,
+        }
+      );
     },
     [onSave]
   );
@@ -98,17 +128,15 @@ export const plugin = {
   editor: OsqueryEditor,
 };
 
-export function parser() {
+export const parser: Plugin = function () {
   const Parser = this.Parser;
   const tokenizers = Parser.prototype.blockTokenizers;
   const methods = Parser.prototype.blockMethods;
 
-  function tokenizeOsquery(eat, value, silent) {
+  const tokenizeOsquery: RemarkTokenizer = function (eat, value, silent) {
     if (value.startsWith('!{osquery') === false) return false;
 
     const nextChar = value[9];
-
-    console.error('nextChar', nextChar);
 
     if (nextChar !== '{' && nextChar !== '}') return false; // this isn't actually a osquery
 
@@ -159,28 +187,44 @@ export function parser() {
 
     return eat(match)({
       type: 'osquery',
-      ...configuration,
+      configuration,
     });
-  }
+  };
 
   tokenizers.osquery = tokenizeOsquery;
   methods.splice(methods.indexOf('text'), 0, 'osquery');
-}
+};
 
 // receives the configuration from the parser and renders
-const ChartMarkdownRenderer = (props) => {
-  console.error('props', props);
+const RunOsqueryButtonRenderer = ({
+  configuration,
+}: {
+  configuration: {
+    label?: string;
+    query: string;
+    ecs_mapping: { [key: string]: {} };
+  };
+}) => {
   const [showFlyout, setShowFlyout] = useState(false);
-  const { osquery } = useKibana().services;
+  const { agentId } = useContext(BasicAlertDataContext);
 
   return (
     <>
-      <EuiButton iconType={OsqueryIcon} onClick={() => setShowFlyout(true)}>
-        {props?.label ?? 'Run Osquery'}
-      </EuiButton>
-      {showFlyout && <OsqueryFlyout onClose={() => setShowFlyout(false)} />}
+      <StyledEuiButton iconType={OsqueryLogo} onClick={() => setShowFlyout(true)}>
+        {configuration.label ?? 'Run Osquery'}
+      </StyledEuiButton>
+      {showFlyout && (
+        <OsqueryFlyout
+          defaultValues={{
+            query: configuration.query,
+            ecs_mapping: configuration.ecs_mapping,
+          }}
+          agentId={agentId}
+          onClose={() => setShowFlyout(false)}
+        />
+      )}
     </>
   );
 };
 
-export { ChartMarkdownRenderer as renderer };
+export { RunOsqueryButtonRenderer as renderer };

@@ -16,8 +16,6 @@ export const getLazyLiveQueryField =
   ({ formMethods, ...props }) => {
     const LiveQueryField = lazy(() => import('../live_queries/form/live_query_query_field'));
 
-    console.error('formMethods', formMethods);
-
     return (
       <Suspense fallback={null}>
         <ServicesWrapper services={services}>

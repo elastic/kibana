@@ -26,15 +26,18 @@ const OsqueryActionWrapper = styled.div`
 
 export interface OsqueryFlyoutProps {
   agentId?: string;
+  defaultValues?: {};
   onClose: () => void;
 }
 
-const TimelineComponent = React.memo((props) => {
-  return <EuiButtonEmpty {...props} size="xs" />;
-});
+const TimelineComponent = React.memo((props) => <EuiButtonEmpty {...props} size="xs" />);
 TimelineComponent.displayName = 'TimelineComponent';
 
-export const OsqueryFlyoutComponent: React.FC<OsqueryFlyoutProps> = ({ agentId, onClose }) => {
+export const OsqueryFlyoutComponent: React.FC<OsqueryFlyoutProps> = ({
+  agentId,
+  defaultValues,
+  onClose,
+}) => {
   const {
     services: { osquery, timelines },
   } = useKibana();
@@ -89,6 +92,7 @@ export const OsqueryFlyoutComponent: React.FC<OsqueryFlyoutProps> = ({ agentId, 
             <osquery.OsqueryAction
               agentId={agentId}
               formType="steps"
+              defaultValues={defaultValues}
               addToTimeline={handleAddToTimeline}
             />
           </OsqueryActionWrapper>
