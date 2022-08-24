@@ -18,12 +18,10 @@ const deleteAnalyticsCollectionEvents = async (client: IScopedClusterClient, nam
   const indexPattern = `elastic_analytics-events-${name}-*`;
   const indices = await fetchIndices(client, indexPattern, true, false);
 
-  for (const index of indices) {
-    await client.asCurrentUser.indices.delete({
-      ignore_unavailable: true,
-      index: index.name,
-    });
-  }
+  await client.asCurrentUser.indices.delete({
+    ignore_unavailable: true,
+    index: indices.map((index) => index.name),
+  });
 };
 
 export const deleteAnalyticsCollectionByName = async (

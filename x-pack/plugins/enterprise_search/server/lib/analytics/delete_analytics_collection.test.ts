@@ -69,10 +69,9 @@ describe('delete analytics collection lib function', () => {
         index: ANALYTICS_COLLECTIONS_INDEX,
       });
 
-      expect(mockClient.asCurrentUser.indices.delete).toHaveBeenCalledTimes(indices.length);
-      expect(mockClient.asCurrentUser.indices.delete).toHaveBeenLastCalledWith({
+      expect(mockClient.asCurrentUser.indices.delete).toHaveBeenCalledWith({
         ignore_unavailable: true,
-        index: indices[indices.length - 1].name,
+        index: indices.map((index) => index.name),
       });
     });
 
