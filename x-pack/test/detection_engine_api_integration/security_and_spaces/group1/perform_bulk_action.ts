@@ -368,16 +368,17 @@ export default ({ getService }: FtrProviderContext): void => {
             caseName: '3 existing tags overwritten with 2 of them = 2 existing tags',
             existingTags: ['tag1', 'tag2', 'tag3'],
             tagsToOverwrite: ['tag1', 'tag2'],
-            resultingTags:  ['tag1', 'tag2'],
+            resultingTags: ['tag1', 'tag2'],
           },
           {
             caseName: '3 existing tags overwritten with 2 other tags = 2 other tags',
             existingTags: ['tag1', 'tag2', 'tag3'],
             tagsToOverwrite: ['new-tag1', 'new-tag2'],
-            resultingTags:   ['new-tag1', 'new-tag2'],
+            resultingTags: ['new-tag1', 'new-tag2'],
           },
           {
-            caseName: '3 existing tags overwritten with 1 of them + 2 other tags = 1 existing tag + 2 other tags',
+            caseName:
+              '3 existing tags overwritten with 1 of them + 2 other tags = 1 existing tag + 2 other tags',
             existingTags: ['tag1', 'tag2', 'tag3'],
             tagsToOverwrite: ['tag1', 'new-tag1', 'new-tag2'],
             resultingTags: ['tag1', 'new-tag1', 'new-tag2'],
@@ -399,9 +400,9 @@ export default ({ getService }: FtrProviderContext): void => {
         overwriteTagsCases.forEach(({ caseName, existingTags, tagsToOverwrite, resultingTags }) => {
           it(`should set tags in rules, case: "${caseName}"`, async () => {
             const ruleId = 'ruleId';
-  
-            await createRule(supertest, log, {...getSimpleRule(ruleId), tags: existingTags });
-    
+
+            await createRule(supertest, log, { ...getSimpleRule(ruleId), tags: existingTags });
+
             const { body: bulkEditResponse } = await postBulkAction()
               .send({
                 query: '',
@@ -414,15 +415,19 @@ export default ({ getService }: FtrProviderContext): void => {
                 ],
               })
               .expect(200);
-    
-            expect(bulkEditResponse.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
-    
+
+            expect(bulkEditResponse.attributes.summary).to.eql({
+              failed: 0,
+              succeeded: 1,
+              total: 1,
+            });
+
             // Check that the updated rule is returned with the response
             expect(bulkEditResponse.attributes.results.updated[0].tags).to.eql(resultingTags);
-    
+
             // Check that the updates have been persisted
             const { body: updatedRule } = await fetchRule(ruleId).expect(200);
-    
+
             expect(updatedRule.tags).to.eql(resultingTags);
           });
         });
@@ -432,7 +437,7 @@ export default ({ getService }: FtrProviderContext): void => {
             caseName: '3 existing tags - 2 of them = 1 tag',
             existingTags: ['tag1', 'tag2', 'tag3'],
             tagsToDelete: ['tag1', 'tag2'],
-            resultingTags:  ['tag3'],
+            resultingTags: ['tag3'],
           },
           {
             caseName: '3 existing tags - 2 new tags = 3 tags',
@@ -444,7 +449,7 @@ export default ({ getService }: FtrProviderContext): void => {
             caseName: '3 existing tags - 1 of them - 2 new tags = 2 tags',
             existingTags: ['tag1', 'tag2', 'tag3'],
             tagsToDelete: ['tag3', 'tag4', 'tag5'],
-            resultingTags:  ['tag1', 'tag2'],
+            resultingTags: ['tag1', 'tag2'],
           },
           {
             caseName: '3 existing tags - 0 tags = 3 tags',
@@ -456,23 +461,22 @@ export default ({ getService }: FtrProviderContext): void => {
             caseName: '0 existing tags - 2 tags = 0 tags',
             existingTags: [],
             tagsToDelete: ['tag4', 'tag5'],
-            resultingTags:  [],
+            resultingTags: [],
           },
           {
             caseName: '3 existing tags - 3 of them = 0 tags',
             existingTags: ['tag1', 'tag2', 'tag3'],
             tagsToDelete: ['tag1', 'tag2', 'tag3'],
-            resultingTags:  [],
+            resultingTags: [],
           },
         ];
-
 
         deleteTagsCases.forEach(({ caseName, existingTags, tagsToDelete, resultingTags }) => {
           it(`should delete tags in rules, case: "${caseName}"`, async () => {
             const ruleId = 'ruleId';
 
-            await createRule(supertest, log, {...getSimpleRule(ruleId), tags: existingTags });
-    
+            await createRule(supertest, log, { ...getSimpleRule(ruleId), tags: existingTags });
+
             const { body: bulkEditResponse } = await postBulkAction()
               .send({
                 query: '',
@@ -485,15 +489,19 @@ export default ({ getService }: FtrProviderContext): void => {
                 ],
               })
               .expect(200);
-    
-            expect(bulkEditResponse.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
-    
+
+            expect(bulkEditResponse.attributes.summary).to.eql({
+              failed: 0,
+              succeeded: 1,
+              total: 1,
+            });
+
             // Check that the updated rule is returned with the response
             expect(bulkEditResponse.attributes.results.updated[0].tags).to.eql(resultingTags);
-    
+
             // Check that the updates have been persisted
             const { body: updatedRule } = await fetchRule(ruleId).expect(200);
-    
+
             expect(updatedRule.tags).to.eql(resultingTags);
           });
         });
@@ -503,39 +511,39 @@ export default ({ getService }: FtrProviderContext): void => {
             caseName: '3 existing tags + 2 of them = 3 tags',
             existingTags: ['tag1', 'tag2', 'tag3'],
             addedTags: ['tag1', 'tag2'],
-            resultingTags:  ['tag1', 'tag2', 'tag3'],
+            resultingTags: ['tag1', 'tag2', 'tag3'],
           },
           {
             caseName: '3 existing tags + 2 new tags = 5 tags',
             existingTags: ['tag1', 'tag2', 'tag3'],
             addedTags: ['tag4', 'tag5'],
-            resultingTags:  ['tag1', 'tag2', 'tag3', 'tag4', 'tag5'],
+            resultingTags: ['tag1', 'tag2', 'tag3', 'tag4', 'tag5'],
           },
           {
             caseName: '3 existing tags + 1 of them + 2 new tags = 5 tags',
             existingTags: ['tag1', 'tag2', 'tag3'],
             addedTags: ['tag4', 'tag5', 'tag1'],
-            resultingTags:  ['tag1', 'tag2', 'tag3', 'tag4', 'tag5'],
+            resultingTags: ['tag1', 'tag2', 'tag3', 'tag4', 'tag5'],
           },
           {
             caseName: '0 existing tags + 2 tags = 2 tags',
             existingTags: [],
             addedTags: ['tag4', 'tag5'],
-            resultingTags:  ['tag4', 'tag5'],
+            resultingTags: ['tag4', 'tag5'],
           },
           {
             caseName: '3 existing tags + 0 tags = 3 tags',
             existingTags: ['tag1', 'tag2', 'tag3'],
             addedTags: [],
-            resultingTags:  ['tag1', 'tag2', 'tag3'],
+            resultingTags: ['tag1', 'tag2', 'tag3'],
           },
         ];
 
         addTagsCases.forEach(({ caseName, existingTags, addedTags, resultingTags }) => {
           it(`should add tags to rules, case: "${caseName}"`, async () => {
             const ruleId = 'ruleId';
-            await createRule(supertest, log, {...getSimpleRule(ruleId), tags: existingTags });
-    
+            await createRule(supertest, log, { ...getSimpleRule(ruleId), tags: existingTags });
+
             const { body: bulkEditResponse } = await postBulkAction()
               .send({
                 query: '',
@@ -548,17 +556,215 @@ export default ({ getService }: FtrProviderContext): void => {
                 ],
               })
               .expect(200);
-    
-            expect(bulkEditResponse.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
-    
+
+            expect(bulkEditResponse.attributes.summary).to.eql({
+              failed: 0,
+              succeeded: 1,
+              total: 1,
+            });
+
             // Check that the updated rule is returned with the response
             expect(bulkEditResponse.attributes.results.updated[0].tags).to.eql(resultingTags);
-    
+
             // Check that the updates have been persisted
             const { body: updatedRule } = await fetchRule(ruleId).expect(200);
-    
+
             expect(updatedRule.tags).to.eql(resultingTags);
           });
+        });
+      });
+
+      describe('index patterns actions', () => {
+        it('should set index patterns in rules', async () => {
+          const ruleId = 'ruleId';
+          await createRule(supertest, log, getSimpleRule(ruleId));
+
+          const { body: bulkEditResponse } = await postBulkAction()
+            .send({
+              query: '',
+              action: BulkAction.edit,
+              [BulkAction.edit]: [
+                {
+                  type: BulkActionEditType.set_index_patterns,
+                  value: ['initial-index-*'],
+                },
+              ],
+            })
+            .expect(200);
+
+          expect(bulkEditResponse.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
+
+          // Check that the updated rule is returned with the response
+          expect(bulkEditResponse.attributes.results.updated[0].index).to.eql(['initial-index-*']);
+
+          // Check that the updates have been persisted
+          const { body: updatedRule } = await fetchRule(ruleId).expect(200);
+
+          expect(updatedRule.index).to.eql(['initial-index-*']);
+        });
+
+        it('should add index patterns to rules', async () => {
+          const ruleId = 'ruleId';
+          const indexPatterns = ['index1-*', 'index2-*'];
+          const resultingIndexPatterns = ['index1-*', 'index2-*', 'index3-*'];
+          await createRule(supertest, log, { ...getSimpleRule(ruleId), index: indexPatterns });
+
+          const { body: bulkEditResponse } = await postBulkAction()
+            .send({
+              query: '',
+              action: BulkAction.edit,
+              [BulkAction.edit]: [
+                {
+                  type: BulkActionEditType.add_index_patterns,
+                  value: ['index3-*'],
+                },
+              ],
+            })
+            .expect(200);
+
+          expect(bulkEditResponse.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
+
+          // Check that the updated rule is returned with the response
+          expect(bulkEditResponse.attributes.results.updated[0].index).to.eql(
+            resultingIndexPatterns
+          );
+
+          // Check that the updates have been persisted
+          const { body: updatedRule } = await fetchRule(ruleId).expect(200);
+
+          expect(updatedRule.index).to.eql(resultingIndexPatterns);
+        });
+
+        it('should delete index patterns from rules', async () => {
+          const ruleId = 'ruleId';
+          const indexPatterns = ['index1-*', 'index2-*'];
+          const resultingIndexPatterns = ['index1-*'];
+          await createRule(supertest, log, { ...getSimpleRule(ruleId), index: indexPatterns });
+
+          const { body: bulkEditResponse } = await postBulkAction()
+            .send({
+              query: '',
+              action: BulkAction.edit,
+              [BulkAction.edit]: [
+                {
+                  type: BulkActionEditType.delete_index_patterns,
+                  value: ['index2-*'],
+                },
+              ],
+            })
+            .expect(200);
+
+          expect(bulkEditResponse.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
+
+          // Check that the updated rule is returned with the response
+          expect(bulkEditResponse.attributes.results.updated[0].index).to.eql(
+            resultingIndexPatterns
+          );
+
+          // Check that the updates have been persisted
+          const { body: updatedRule } = await fetchRule(ruleId).expect(200);
+
+          expect(updatedRule.index).to.eql(resultingIndexPatterns);
+        });
+
+        it('should return error if index patterns action is applied to machine learning rule', async () => {
+          const mlRule = await createRule(supertest, log, getSimpleMlRule());
+
+          const { body } = await postBulkAction()
+            .send({
+              ids: [mlRule.id],
+              action: BulkAction.edit,
+              [BulkAction.edit]: [
+                {
+                  type: BulkActionEditType.add_index_patterns,
+                  value: ['index-*'],
+                },
+              ],
+            })
+            .expect(500);
+
+          expect(body.attributes.summary).to.eql({ failed: 1, succeeded: 0, total: 1 });
+          expect(body.attributes.errors[0]).to.eql({
+            message:
+              "Index patterns can't be added. Machine learning rule doesn't have index patterns property",
+            status_code: 500,
+            rules: [
+              {
+                id: mlRule.id,
+                name: mlRule.name,
+              },
+            ],
+          });
+        });
+
+        it('should return error if all index patterns removed from a rule', async () => {
+          const rule = await createRule(supertest, log, {
+            ...getSimpleRule(),
+            index: ['simple-index-*'],
+          });
+
+          const { body } = await postBulkAction()
+            .send({
+              ids: [rule.id],
+              action: BulkAction.edit,
+              [BulkAction.edit]: [
+                {
+                  type: BulkActionEditType.delete_index_patterns,
+                  value: ['simple-index-*'],
+                },
+              ],
+            })
+            .expect(500);
+
+          expect(body.attributes.summary).to.eql({ failed: 1, succeeded: 0, total: 1 });
+          expect(body.attributes.errors[0]).to.eql({
+            message: "Mutated params invalid: Index patterns can't be empty",
+            status_code: 500,
+            rules: [
+              {
+                id: rule.id,
+                name: rule.name,
+              },
+            ],
+          });
+        });
+
+        it('should return error if index patterns set to empty list', async () => {
+          const ruleId = 'ruleId';
+          const rule = await createRule(supertest, log, {
+            ...getSimpleRule(ruleId),
+            index: ['simple-index-*'],
+          });
+
+          const { body } = await postBulkAction()
+            .send({
+              ids: [rule.id],
+              action: BulkAction.edit,
+              [BulkAction.edit]: [
+                {
+                  type: BulkActionEditType.set_index_patterns,
+                  value: [],
+                },
+              ],
+            })
+            .expect(500);
+
+          expect(body.attributes.summary).to.eql({ failed: 1, succeeded: 0, total: 1 });
+          expect(body.attributes.errors[0]).to.eql({
+            message: "Mutated params invalid: Index patterns can't be empty",
+            status_code: 500,
+            rules: [
+              {
+                id: rule.id,
+                name: rule.name,
+              },
+            ],
+          });
+
+          // Check that the rule hasn't been updated
+          const { body: reFetchedRule } = await fetchRule(ruleId).expect(200);
+
+          expect(reFetchedRule.index).to.eql(['simple-index-*']);
         });
       });
 
@@ -619,78 +825,6 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           },
         ]);
-      });
-
-      it('should set, add and delete index patterns in rules', async () => {
-        const ruleId = 'ruleId';
-        const indices = ['index1-*', 'index2-*'];
-        await createRule(supertest, log, getSimpleRule(ruleId));
-
-        const { body: setIndexBody } = await postBulkAction()
-          .send({
-            query: '',
-            action: BulkAction.edit,
-            [BulkAction.edit]: [
-              {
-                type: BulkActionEditType.set_index_patterns,
-                value: ['initial-index-*'],
-              },
-            ],
-          })
-          .expect(200);
-
-        expect(setIndexBody.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
-
-        // Check that the updated rule is returned with the response
-        expect(setIndexBody.attributes.results.updated[0].index).to.eql(['initial-index-*']);
-
-        // Check that the updates have been persisted
-        const { body: setIndexRule } = await fetchRule(ruleId).expect(200);
-
-        expect(setIndexRule.index).to.eql(['initial-index-*']);
-
-        const { body: addIndexBody } = await postBulkAction()
-          .send({
-            query: '',
-            action: BulkAction.edit,
-            [BulkAction.edit]: [
-              {
-                type: BulkActionEditType.add_index_patterns,
-                value: indices,
-              },
-            ],
-          })
-          .expect(200);
-
-        expect(addIndexBody.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
-
-        // Check that the updated rule is returned with the response
-        expect(addIndexBody.attributes.results.updated[0].index).to.eql([
-          'initial-index-*',
-          ...indices,
-        ]);
-
-        // Check that the updates have been persisted
-        const { body: addIndexRule } = await fetchRule(ruleId).expect(200);
-
-        expect(addIndexRule.index).to.eql(['initial-index-*', ...indices]);
-
-        await postBulkAction()
-          .send({
-            query: '',
-            action: BulkAction.edit,
-            [BulkAction.edit]: [
-              {
-                type: BulkActionEditType.delete_index_patterns,
-                value: ['index1-*'],
-              },
-            ],
-          })
-          .expect(200);
-
-        const { body: deleteIndexRule } = await fetchRule(ruleId).expect(200);
-
-        expect(deleteIndexRule.index).to.eql(['initial-index-*', 'index2-*']);
       });
 
       it('should set timeline template values in rule', async () => {
@@ -802,68 +936,6 @@ export default ({ getService }: FtrProviderContext): void => {
             {
               id: immutableRule.id,
               name: immutableRule.name,
-            },
-          ],
-        });
-      });
-
-      it('should return error if index patterns action is applied to machine learning rule', async () => {
-        const mlRule = await createRule(supertest, log, getSimpleMlRule());
-
-        const { body } = await postBulkAction()
-          .send({
-            ids: [mlRule.id],
-            action: BulkAction.edit,
-            [BulkAction.edit]: [
-              {
-                type: BulkActionEditType.add_index_patterns,
-                value: ['index-*'],
-              },
-            ],
-          })
-          .expect(500);
-
-        expect(body.attributes.summary).to.eql({ failed: 1, succeeded: 0, total: 1 });
-        expect(body.attributes.errors[0]).to.eql({
-          message:
-            "Index patterns can't be added. Machine learning rule doesn't have index patterns property",
-          status_code: 500,
-          rules: [
-            {
-              id: mlRule.id,
-              name: mlRule.name,
-            },
-          ],
-        });
-      });
-
-      it('should return error if all index patterns removed from a rule', async () => {
-        const rule = await createRule(supertest, log, {
-          ...getSimpleRule(),
-          index: ['simple-index-*'],
-        });
-
-        const { body } = await postBulkAction()
-          .send({
-            ids: [rule.id],
-            action: BulkAction.edit,
-            [BulkAction.edit]: [
-              {
-                type: BulkActionEditType.delete_index_patterns,
-                value: ['simple-index-*'],
-              },
-            ],
-          })
-          .expect(500);
-
-        expect(body.attributes.summary).to.eql({ failed: 1, succeeded: 0, total: 1 });
-        expect(body.attributes.errors[0]).to.eql({
-          message: "Mutated params invalid: Index patterns can't be empty",
-          status_code: 500,
-          rules: [
-            {
-              id: rule.id,
-              name: rule.name,
             },
           ],
         });
