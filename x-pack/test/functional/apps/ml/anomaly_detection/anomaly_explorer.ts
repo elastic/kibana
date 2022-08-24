@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { stringHash } from '@kbn/ml-string-hash';
 import { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import { AnomalySwimlaneEmbeddableInput } from '@kbn/ml-plugin/public';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../services/ml/security_common';
 
@@ -387,6 +389,18 @@ export default function ({ getService }: FtrProviderContext) {
               tag: 'ml_case',
             });
 
+            const expectedAttachment = {
+              swimlaneType: 'viewBy',
+              viewBy: 'airline',
+              jobIds: [testData.jobConfig.job_id],
+              timeRange: {
+                from: '2016-02-07T00:00:00.000Z',
+                to: '2016-02-11T23:59:54.000Z',
+              },
+            } as AnomalySwimlaneEmbeddableInput;
+
+            expectedAttachment.id = stringHash(JSON.stringify(expectedAttachment)).toString();
+
             await ml.cases.assertCaseWithAnomalySwimLaneAttachment(
               {
                 title: 'ML Test case',
@@ -394,8 +408,9 @@ export default function ({ getService }: FtrProviderContext) {
                 tag: 'ml_case',
                 reporter: USER.ML_POWERUSER,
               },
+              expectedAttachment,
               {
-                swimLaneType: 'viewBy',
+                yAxisLabelCount: 10,
               }
             );
           });

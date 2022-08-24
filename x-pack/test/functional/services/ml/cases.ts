@@ -6,6 +6,7 @@
  */
 
 import { SwimlaneType } from '@kbn/ml-plugin/public/application/explorer/explorer_constants';
+import { AnomalySwimlaneEmbeddableInput } from '@kbn/ml-plugin/public';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { MlAnomalySwimLane } from './swim_lane';
 
@@ -37,7 +38,13 @@ export function MachineLearningCasesProvider(
       await cases.casesTable.goToFirstListedCase();
     },
 
-    async assertCaseWithAnomalySwimLaneAttachment(params: CaseParams, attachment: Attachment) {
+    async assertCaseWithAnomalySwimLaneAttachment(
+      params: CaseParams,
+      attachment: AnomalySwimlaneEmbeddableInput,
+      expectedSwimLaneState: {
+        yAxisLabelCount: number;
+      }
+    ) {
       await this.openCaseInCasesApp(params.tag);
       await elasticChart.setNewChartUiDebugFlag(true);
 
@@ -48,7 +55,11 @@ export function MachineLearningCasesProvider(
       await testSubjects.existOrFail('comment-persistableState-ml_anomaly_swimlane');
 
       await mlAnomalySwimLane.waitForSwimLanesToLoad();
-      await mlAnomalySwimLane.assertAxisLabelCount('mlSwimLaneEmbeddable_undefined', 'y', 10);
+      await mlAnomalySwimLane.assertAxisLabelCount(
+        `mlSwimLaneEmbeddable_${attachment.id}`,
+        'y',
+        expectedSwimLaneState.yAxisLabelCount
+      );
     },
   };
 }
