@@ -42,8 +42,12 @@ export class UpgradeActionRunner extends ActionRunner {
     );
   }
 
-  protected getActionType() {
+  protected getTaskType() {
     return BulkActionTaskType.UPGRADE_RETRY;
+  }
+
+  protected getActionType() {
+    return 'UPGRADE';
   }
 }
 

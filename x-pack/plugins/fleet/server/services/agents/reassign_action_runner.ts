@@ -38,8 +38,12 @@ export class ReassignActionRunner extends ActionRunner {
     );
   }
 
-  protected getActionType() {
+  protected getTaskType() {
     return BulkActionTaskType.REASSIGN_RETRY;
+  }
+
+  protected getActionType() {
+    return 'POLICY_REASSIGN';
   }
 }
 

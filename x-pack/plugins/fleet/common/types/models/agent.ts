@@ -35,7 +35,8 @@ export type AgentActionType =
   | 'UPGRADE'
   | 'SETTINGS'
   | 'POLICY_REASSIGN'
-  | 'CANCEL';
+  | 'CANCEL'
+  | 'UPDATE_TAGS';
 
 export interface NewAgentAction {
   type: AgentActionType;
@@ -108,15 +109,14 @@ export interface CurrentUpgrade {
 
 export interface CurrentAction {
   actionId: string;
-  complete: boolean;
   nbAgents: number;
   nbAgentsAck: number;
   version: string;
   startTime?: string;
   type?: string;
   total: number;
-  cancelled: boolean;
-  expired: boolean;
+  status: 'complete' | 'expired' | 'cancelled' | 'failed' | 'in progress';
+  errorMessage?: string;
 }
 
 // Generated from FleetServer schema.json

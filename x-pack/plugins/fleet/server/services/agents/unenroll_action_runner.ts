@@ -36,8 +36,12 @@ export class UnenrollActionRunner extends ActionRunner {
     );
   }
 
-  protected getActionType() {
+  protected getTaskType() {
     return BulkActionTaskType.UNENROLL_RETRY;
+  }
+
+  protected getActionType() {
+    return 'UNENROLL';
   }
 }
 

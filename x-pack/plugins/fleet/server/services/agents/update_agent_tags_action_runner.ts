@@ -34,8 +34,12 @@ export class UpdateAgentTagsActionRunner extends ActionRunner {
     );
   }
 
-  protected getActionType() {
+  protected getTaskType() {
     return BulkActionTaskType.UPDATE_AGENT_TAGS_RETRY;
+  }
+
+  protected getActionType() {
+    return 'UPDATE_TAGS';
   }
 }
 

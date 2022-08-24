@@ -14,6 +14,7 @@ import {
   EuiSpacer,
   EuiLoadingSpinner,
   EuiIcon,
+  EuiAccordion,
 } from '@elastic/eui';
 
 import type { CurrentAction } from '../../../../types';
@@ -41,13 +42,7 @@ export const ActionStatusCallout: React.FunctionComponent<{ refreshActionStatus:
       id="xpack.fleet.currentAction.calloutTitle"
       defaultMessage="{type} {status}, {total} actioned, {nbAgents} started, {nbAgentsAck} acknowledged, actionId: {actionId}"
       values={{
-        status: currentAction.complete
-          ? 'completed'
-          : currentAction.cancelled
-          ? 'cancelled'
-          : currentAction.expired
-          ? 'expired'
-          : 'in progress',
+        status: currentAction.status,
         type: actionNames[currentAction.type ?? 'ACTION'],
         total: currentAction.total,
         nbAgents: currentAction.nbAgents,
@@ -63,7 +58,15 @@ export const ActionStatusCallout: React.FunctionComponent<{ refreshActionStatus:
         .slice(0, 3)
         .map((currentAction) => (
           <React.Fragment key={currentAction.actionId}>
-            <EuiCallOut color={currentAction.complete ? 'success' : 'primary'}>
+            <EuiCallOut
+              color={
+                currentAction.status === 'complete'
+                  ? 'success'
+                  : currentAction.status === 'failed'
+                  ? 'danger'
+                  : 'primary'
+              }
+            >
               <EuiFlexGroup
                 className="euiCallOutHeader__title"
                 justifyContent="spaceBetween"
@@ -72,9 +75,25 @@ export const ActionStatusCallout: React.FunctionComponent<{ refreshActionStatus:
               >
                 <EuiFlexItem grow={false}>
                   <div>
-                    {currentAction.complete ? <EuiIcon type="check" /> : <EuiLoadingSpinner />}
+                    {currentAction.status === 'complete' ? (
+                      <EuiIcon type="check" />
+                    ) : currentAction.status === 'failed' ? (
+                      <EuiIcon type="alert" />
+                    ) : (
+                      <EuiLoadingSpinner />
+                    )}
                     &nbsp;&nbsp;
                     {calloutTitle(currentAction)}
+                  </div>
+                  <div>
+                    {currentAction.errorMessage && (
+                      <EuiAccordion
+                        id={currentAction.actionId}
+                        buttonContent="Expand error message"
+                      >
+                        {currentAction.errorMessage}
+                      </EuiAccordion>
+                    )}
                   </div>
                 </EuiFlexItem>
               </EuiFlexGroup>

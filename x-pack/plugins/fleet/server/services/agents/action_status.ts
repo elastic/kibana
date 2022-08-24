@@ -8,6 +8,8 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import pMap from 'p-map';
 
+import { AGENT_ACTIONS_STATUS_INDEX } from '../../../common/constants';
+
 import type { FleetServerAgentAction, CurrentAction } from '../../types';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../common';
 
@@ -17,6 +19,7 @@ import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../commo
 export async function getActionStatuses(esClient: ElasticsearchClient): Promise<CurrentAction[]> {
   let actions = await _getActions(esClient);
   const cancelledActionIds = await _getCancelledActionId(esClient);
+  const actionStatuses = await _getActionStatuses(esClient);
 
   // Fetch acknowledged result for every action
   actions = await pMap(
@@ -40,13 +43,22 @@ export async function getActionStatuses(esClient: ElasticsearchClient): Promise<
 
       const total = action.total || action.nbAgents;
       const complete = count === total;
+      const isCancelled = cancelledActionIds.indexOf(action.actionId) > -1;
+
+      const actionStatus = actionStatuses.find((as) => as.actionId === action.actionId);
 
       return {
         ...action,
         nbAgentsAck: count,
-        complete,
+        status: complete
+          ? 'complete'
+          : isCancelled
+          ? 'cancelled'
+          : actionStatus?.status === 'failed'
+          ? 'failed'
+          : action.status,
+        errorMessage: actionStatus?.errorMessage,
         total,
-        cancelled: cancelledActionIds.indexOf(action.actionId) > -1,
       };
     },
     { concurrency: 20 }
@@ -80,6 +92,19 @@ async function _getCancelledActionId(esClient: ElasticsearchClient) {
   return res.hits.hits.map((hit) => hit._source?.data?.target_id as string);
 }
 
+async function _getActionStatuses(esClient: ElasticsearchClient) {
+  const res = await esClient.search<any>({
+    index: AGENT_ACTIONS_STATUS_INDEX,
+    ignore_unavailable: true,
+  });
+
+  return res.hits.hits.map((hit) => ({
+    actionId: hit._id,
+    status: hit._source?.status,
+    errorMessage: hit._source?.error_message,
+  }));
+}
+
 async function _getActions(esClient: ElasticsearchClient) {
   const res = await esClient.search<FleetServerAgentAction>({
     index: AGENT_ACTIONS_INDEX,
@@ -102,6 +127,9 @@ async function _getActions(esClient: ElasticsearchClient) {
         ],
       },
     },
+    body: {
+      sort: [{ '@timestamp': 'desc' }],
+    },
   });
 
   return Object.values(
@@ -112,19 +140,18 @@ async function _getActions(esClient: ElasticsearchClient) {
 
       if (!acc[hit._source.action_id]) {
         const startTime = hit._source?.start_time ?? hit._source?.['@timestamp'];
+        const isExpired = hit._source?.expiration
+          ? Date.parse(hit._source?.expiration) < Date.now()
+          : false;
         acc[hit._source.action_id] = {
           actionId: hit._source.action_id,
           nbAgents: 0,
-          complete: false,
           nbAgentsAck: 0,
           version: hit._source.data?.version as string,
           startTime,
           type: hit._source?.type,
           total: hit._source?.total ?? 0,
-          cancelled: false,
-          expired: hit._source?.expiration
-            ? Date.parse(hit._source?.expiration) < Date.now()
-            : false,
+          status: isExpired ? 'expired' : 'in progress',
         };
       }
 

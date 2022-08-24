@@ -10,9 +10,11 @@ import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 
+import { isResponseError } from '@kbn/es-errors';
+
 import type { Agent, BulkActionResult, ListWithKuery } from '../../types';
 import { appContextService } from '..';
-import { SO_SEARCH_LIMIT } from '../../../common/constants';
+import { AGENT_ACTIONS_STATUS_INDEX, SO_SEARCH_LIMIT } from '../../../common/constants';
 
 import { getAgentActions } from './actions';
 import { closePointInTime, getAgentsByKuery, openPointInTime } from './crud';
@@ -38,6 +40,8 @@ export abstract class ActionRunner {
   }
 
   protected abstract getActionType(): string;
+
+  protected abstract getTaskType(): string;
 
   protected abstract processAgents(
     agents: Agent[],
@@ -67,7 +71,7 @@ export abstract class ActionRunner {
         `Running action asynchronously, actionId: ${this.actionId}, total agents: ${options.totalAgents}`
       );
 
-    withSpan({ name: this.getActionType(), type: 'action' }, () =>
+    withSpan({ name: this.getTaskType(), type: 'action' }, () =>
       this.processAgentsInBatches(this.esClient, {
         kuery: options.kuery,
         showInactive: options.showInactive ?? false,
@@ -75,6 +79,21 @@ export abstract class ActionRunner {
         pitId: this.pitId,
         searchAfter: options.searchAfter,
       }).catch(async (error) => {
+        const updateActionStatus = (errorMessage: string) =>
+          this.updateActionStatus(this.esClient, this.actionId!, {
+            '@timestamp': new Date().toISOString(),
+            error_message: errorMessage,
+            status: 'failed',
+          });
+
+        // 404 error comes when PIT query is closed
+        if (isResponseError(error) && error.statusCode === 404) {
+          const errorMessage =
+            '404 error from elasticsearch, not retrying. Error: ' + error.message;
+          appContextService.getLogger().warn(errorMessage);
+          await updateActionStatus(errorMessage);
+          return;
+        }
         if (options.retryCount) {
           appContextService
             .getLogger()
@@ -83,11 +102,10 @@ export abstract class ActionRunner {
             );
 
           if (options.retryCount === 3) {
-            appContextService.getLogger().debug('Stopping after 3rd retry');
-            return {
-              error: { message: 'Failed after 3rd retry' },
-              state: {},
-            };
+            const errorMessage = 'Stopping after 3rd retry. Error: ' + error.message;
+            appContextService.getLogger().warn(errorMessage);
+            await updateActionStatus(errorMessage);
+            return;
           }
         } else {
           appContextService.getLogger().error(`Action failed: ${error.message}`);
@@ -101,7 +119,7 @@ export abstract class ActionRunner {
             actionId: this.actionId!,
             retryCount: (options.retryCount ?? 0) + 1,
           },
-          this.getActionType()
+          this.getTaskType()
         );
 
         appContextService.getLogger().info(`Retrying in task: ${taskId}`);
@@ -109,6 +127,20 @@ export abstract class ActionRunner {
     );
 
     return { items: [] };
+  }
+
+  async updateActionStatus(
+    esClient: ElasticsearchClient,
+    agentId: string,
+    data: any
+  ): Promise<void> {
+    await esClient.update({
+      index: AGENT_ACTIONS_STATUS_INDEX,
+      id: agentId,
+      body: { doc: data },
+      refresh: 'wait_for',
+      doc_as_upsert: true,
+    });
   }
 
   private async processBatch(
@@ -189,7 +221,7 @@ export abstract class ActionRunner {
       const currentResults = await this.processBatch(currentAgents, searchAfter, res.total);
       results = { items: results.items.concat(currentResults.items) };
       allAgentsProcessed += currentAgents.length;
-      // if (allAgentsProcessed > 20) throw new Error('simulating error after batch processed ' + searchAfter);
+      // if (allAgentsProcessed > 9) throw new Error('simulating error after batch processed ' + searchAfter);
     }
 
     await closePointInTime(esClient, pitId);
