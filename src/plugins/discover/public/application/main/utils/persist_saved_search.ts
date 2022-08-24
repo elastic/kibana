@@ -8,9 +8,7 @@
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import type { SortOrder } from '@kbn/saved-search-plugin/public';
-import { saveSavedSearch } from '@kbn/saved-search-plugin/public';
+import { SavedSearch, SortOrder, saveSavedSearch } from '@kbn/saved-search-plugin/public';
 import { updateSearchSource } from './update_search_source';
 import { AppState } from '../services/discover_state';
 import { DiscoverServices } from '../../../build_services';
@@ -68,6 +66,20 @@ export async function persistSavedSearch(
   if (savedSearch.isTextBasedQuery || isTextBasedQuery) {
     savedSearch.isTextBasedQuery = isTextBasedQuery;
   }
+
+  const { from, to } = services.timefilter.getTime();
+  const refreshInterval = services.timefilter.getRefreshInterval();
+  savedSearch.timeRange =
+    savedSearch.timeRestore || savedSearch.timeRange
+      ? {
+          from,
+          to,
+        }
+      : undefined;
+  savedSearch.refreshInterval =
+    savedSearch.timeRestore || savedSearch.refreshInterval
+      ? { value: refreshInterval.value, pause: refreshInterval.pause }
+      : undefined;
 
   try {
     const id = await saveSavedSearch(savedSearch, saveOptions, services.core.savedObjects.client);
