@@ -54,7 +54,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when(
     'Service node metadata when data is loaded',
-    { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
+    { config: 'basic', archives: [] },
     () => {
       before(async () => {
         const instance = apm.service(serviceName, 'production', 'go').instance(instanceName);
