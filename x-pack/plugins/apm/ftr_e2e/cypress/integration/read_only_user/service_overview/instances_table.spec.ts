@@ -41,7 +41,7 @@ describe('Instances table', () => {
     cy.loginAsViewerUser();
   });
 
-  describe.skip('when data is not loaded', () => {
+  describe('when data is not loaded', () => {
     it('shows empty message', () => {
       cy.visitKibana(serviceOverviewHref);
       cy.contains('opbeans-java');
@@ -91,7 +91,7 @@ describe('Instances table', () => {
       });
     });
 
-    it.skip('shows actions available', () => {
+    it('shows actions available', () => {
       apisToIntercept.map(({ endpoint, name }) => {
         cy.intercept('GET', endpoint).as(name);
       });

@@ -85,7 +85,7 @@ describe('When navigating to the service inventory', () => {
     cy.contains('h1', 'opbeans-node');
   });
 
-  describe.skip('Calls APIs', () => {
+  describe('Calls APIs', () => {
     beforeEach(() => {
       [...mainApiRequestsToIntercept, ...secondaryApiRequestsToIntercept].map(
         ({ endpoint, aliasName }) => {
@@ -120,7 +120,7 @@ describe('When navigating to the service inventory', () => {
       cy.wait(mainAliasNames);
     });
 
-    it.skip('when selecting a different time range and clicking the update button', () => {
+    it('when selecting a different time range and clicking the update button', () => {
       cy.wait(mainAliasNames);
 
       cy.selectAbsoluteTimeRange(
