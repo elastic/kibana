@@ -6,10 +6,6 @@
  * Side Public License, v 1.
  */
 
-jest.mock('../../../saved_objects/export', () => ({
-  exportSavedObjectsToStream: jest.fn(),
-}));
-
 import supertest from 'supertest';
 import { createListStream } from '@kbn/utils';
 import { CoreUsageStatsClient } from '../../../core_usage_data';
