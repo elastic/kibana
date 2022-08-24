@@ -66,7 +66,8 @@ export default function ({ getService }: FtrProviderContext) {
   const browser = getService('browser');
 
   describe('anomaly explorer', function () {
-    this.tags(['ml', 'dima']);
+    this.tags(['ml']);
+
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
@@ -386,12 +387,17 @@ export default function ({ getService }: FtrProviderContext) {
               tag: 'ml_case',
             });
 
-            await ml.cases.assertCaseWithAnomalySwimLaneAttachment({
-              title: 'ML Test case',
-              description: 'Case with an anomaly swim lane',
-              tag: 'ml_case',
-              reporter: USER.ML_POWERUSER,
-            });
+            await ml.cases.assertCaseWithAnomalySwimLaneAttachment(
+              {
+                title: 'ML Test case',
+                description: 'Case with an anomaly swim lane',
+                tag: 'ml_case',
+                reporter: USER.ML_POWERUSER,
+              },
+              {
+                swimLaneType: 'viewBy',
+              }
+            );
           });
 
           it('adds swim lane embeddable to a dashboard', async () => {

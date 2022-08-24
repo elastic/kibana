@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SwimlaneType } from '@kbn/ml-plugin/public/application/explorer/explorer_constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { MlAnomalySwimLane } from './swim_lane';
 
@@ -13,6 +14,10 @@ export interface CaseParams {
   description: string;
   reporter: string;
   tag: string;
+}
+
+export interface Attachment {
+  swimLaneType: SwimlaneType;
 }
 
 export function MachineLearningCasesProvider(
@@ -32,7 +37,7 @@ export function MachineLearningCasesProvider(
       await cases.casesTable.goToFirstListedCase();
     },
 
-    async assertCaseWithAnomalySwimLaneAttachment(params: CaseParams) {
+    async assertCaseWithAnomalySwimLaneAttachment(params: CaseParams, attachment: Attachment) {
       await this.openCaseInCasesApp(params.tag);
       await elasticChart.setNewChartUiDebugFlag(true);
 
@@ -41,8 +46,9 @@ export function MachineLearningCasesProvider(
       await cases.singleCase.assertCaseDescription(params.description);
 
       await testSubjects.existOrFail('comment-persistableState-ml_anomaly_swimlane');
-      // await mlAnomalySwimLane.waitForSwimLanesToLoad();
-      // await mlAnomalySwimLane.assertAxisLabelCount('mlAnomalyExplorerSwimlaneViewBy', 'y', 10);
+
+      await mlAnomalySwimLane.waitForSwimLanesToLoad();
+      await mlAnomalySwimLane.assertAxisLabelCount('mlSwimLaneEmbeddable_undefined', 'y', 10);
     },
   };
 }
