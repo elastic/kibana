@@ -6,15 +6,25 @@
  */
 
 import Boom from '@hapi/boom';
-import { ActionType, ActionTypeConfig, ActionTypeSecrets, ActionTypeParams } from '../types';
+import {
+  ActionType,
+  ActionTypeConfig,
+  ActionTypeSecrets,
+  ActionTypeParams,
+  ValidatorServices,
+} from '../types';
 
 export function validateParams<
   Config extends ActionTypeConfig = ActionTypeConfig,
   Secrets extends ActionTypeSecrets = ActionTypeSecrets,
   Params extends ActionTypeParams = ActionTypeParams,
   ExecutorResultData = void
->(actionType: ActionType<Config, Secrets, Params, ExecutorResultData>, value: unknown) {
-  return validateWithSchema(actionType, 'params', value);
+>(
+  actionType: ActionType<Config, Secrets, Params, ExecutorResultData>,
+  value: unknown,
+  validatorServices: ValidatorServices
+) {
+  return validateWithSchema(actionType, 'params', value, validatorServices);
 }
 
 export function validateConfig<
@@ -22,8 +32,12 @@ export function validateConfig<
   Secrets extends ActionTypeSecrets = ActionTypeSecrets,
   Params extends ActionTypeParams = ActionTypeParams,
   ExecutorResultData = void
->(actionType: ActionType<Config, Secrets, Params, ExecutorResultData>, value: unknown) {
-  return validateWithSchema(actionType, 'config', value);
+>(
+  actionType: ActionType<Config, Secrets, Params, ExecutorResultData>,
+  value: unknown,
+  validatorServices: ValidatorServices
+) {
+  return validateWithSchema(actionType, 'config', value, validatorServices);
 }
 
 export function validateSecrets<
@@ -31,8 +45,12 @@ export function validateSecrets<
   Secrets extends ActionTypeSecrets = ActionTypeSecrets,
   Params extends ActionTypeParams = ActionTypeParams,
   ExecutorResultData = void
->(actionType: ActionType<Config, Secrets, Params, ExecutorResultData>, value: unknown) {
-  return validateWithSchema(actionType, 'secrets', value);
+>(
+  actionType: ActionType<Config, Secrets, Params, ExecutorResultData>,
+  value: unknown,
+  validatorServices: ValidatorServices
+) {
+  return validateWithSchema(actionType, 'secrets', value, validatorServices);
 }
 
 export function validateConnector<
@@ -73,7 +91,8 @@ function validateWithSchema<
 >(
   actionType: ActionType<Config, Secrets, Params, ExecutorResultData>,
   key: ValidKeys,
-  value: unknown | { config: unknown; secrets: unknown }
+  value: unknown | { config: unknown; secrets: unknown },
+  validatorServices: ValidatorServices
 ): Record<string, unknown> {
   if (actionType.validate) {
     let name;
@@ -82,20 +101,41 @@ function validateWithSchema<
         case 'params':
           name = 'action params';
           if (actionType.validate.params) {
-            return actionType.validate.params.validate(value);
+            const params = actionType.validate.params.validateSchema.validate(value);
+            if (actionType.validate.params.validate) {
+              const result = actionType.validate.params.validate(params, validatorServices);
+              if (result) {
+                throw new Error(result);
+              }
+            }
+            return params;
           }
           break;
         case 'config':
           name = 'action type config';
           if (actionType.validate.config) {
-            return actionType.validate.config.validate(value);
+            const config = actionType.validate.config.validateSchema.validate(value);
+            if (actionType.validate.config.validate) {
+              const result = actionType.validate.config.validate(config, validatorServices);
+              if (result) {
+                throw new Error(result);
+              }
+            }
+            return config;
           }
 
           break;
         case 'secrets':
           name = 'action type secrets';
           if (actionType.validate.secrets) {
-            return actionType.validate.secrets.validate(value);
+            const secrets = actionType.validate.secrets.validateSchema.validate(value);
+            if (actionType.validate.secrets.validate) {
+              const result = actionType.validate.secrets.validate(secrets, validatorServices);
+              if (result) {
+                throw new Error(result);
+              }
+            }
+            return secrets;
           }
           break;
         default:

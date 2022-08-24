@@ -21,7 +21,12 @@ import {
 
 import { sendEmail, JSON_TRANSPORT_SERVICE, SendEmailOptions, Transport } from './lib/send_email';
 import { portSchema } from './lib/schemas';
-import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
+import {
+  ActionType,
+  ActionTypeExecutorOptions,
+  ActionTypeExecutorResult,
+  ValidatorServices,
+} from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { renderMustacheString, renderMustacheObject } from '../lib/mustache_renderer';
 
@@ -66,13 +71,14 @@ const ConfigSchemaProps = {
 const ConfigSchema = schema.object(ConfigSchemaProps);
 
 function validateConfig(
-  configurationUtilities: ActionsConfigurationUtilities,
-  configObject: ActionTypeConfigType
+  configObject: ActionTypeConfigType,
+  validatorServices?: ValidatorServices
 ): string | void {
   const config = configObject;
+  const { configurationUtilities } = validatorServices || {};
 
   const emails = [config.from];
-  const invalidEmailsMessage = configurationUtilities.validateEmailAddresses(emails);
+  const invalidEmailsMessage = configurationUtilities?.validateEmailAddresses(emails);
   if (!!invalidEmailsMessage) {
     return `[from]: ${invalidEmailsMessage}`;
   }
@@ -109,7 +115,7 @@ function validateConfig(
       return '[port] is required';
     }
 
-    if (!configurationUtilities.isHostnameAllowed(config.host)) {
+    if (!configurationUtilities?.isHostnameAllowed(config.host)) {
       return `[host] value '${config.host}' is not in the allowedHosts configuration`;
     }
   } else {
@@ -118,7 +124,7 @@ function validateConfig(
     if (host == null) {
       return `[service] value '${config.service}' is not valid`;
     }
-    if (!configurationUtilities.isHostnameAllowed(host)) {
+    if (!configurationUtilities?.isHostnameAllowed(host)) {
       return `[service] value '${config.service}' resolves to host '${host}' which is not in the allowedHosts configuration`;
     }
   }
@@ -161,9 +167,11 @@ const ParamsSchemaProps = {
 const ParamsSchema = schema.object(ParamsSchemaProps);
 
 function validateParams(
-  configurationUtilities: ActionsConfigurationUtilities,
-  paramsObject: unknown
+  paramsObject: unknown,
+  validatorServices?: ValidatorServices
 ): string | void {
+  const { configurationUtilities } = validatorServices || {};
+
   // avoids circular reference ...
   const params = paramsObject as ActionParamsType;
 
@@ -175,7 +183,7 @@ function validateParams(
   }
 
   const emails = withoutMustacheTemplate(to.concat(cc).concat(bcc));
-  const invalidEmailsMessage = configurationUtilities.validateEmailAddresses(emails, {
+  const invalidEmailsMessage = configurationUtilities?.validateEmailAddresses(emails, {
     treatMustacheTemplatesAsValid: true,
   });
   if (invalidEmailsMessage) {
@@ -224,13 +232,17 @@ export function getActionType(params: GetActionTypeParams): EmailActionType {
       SecurityConnectorFeatureId,
     ],
     validate: {
-      config: schema.object(ConfigSchemaProps, {
-        validate: curry(validateConfig)(configurationUtilities),
-      }),
-      secrets: SecretsSchema,
-      params: schema.object(ParamsSchemaProps, {
-        validate: curry(validateParams)(configurationUtilities),
-      }),
+      config: {
+        validateSchema: ConfigSchema,
+        validate: validateConfig,
+      },
+      secrets: {
+        validateSchema: SecretsSchema,
+      },
+      params: {
+        validateSchema: ParamsSchema,
+        validate: validateParams,
+      },
       connector: validateConnector,
     },
     renderParameterTemplates,
