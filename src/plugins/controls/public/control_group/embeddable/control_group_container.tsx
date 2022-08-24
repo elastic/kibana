@@ -348,13 +348,14 @@ export class ControlGroupContainer extends Container<
     });
     const allFilters = [
       ...(ignoreParentSettings?.ignoreFilters ? [] : filters ?? []),
-      ...(precedingFilters ?? []),
+      ...(precedingFilters?.filters ?? []),
     ];
     return {
       ignoreParentSettings,
       filters: allFilters,
       query: ignoreParentSettings?.ignoreQuery ? undefined : query,
       timeRange: ignoreParentSettings?.ignoreTimerange ? undefined : timeRange,
+      timeslice: ignoreParentSettings?.ignoreTimerange ? undefined : precedingFilters?.timeslice,
       id,
     };
   }

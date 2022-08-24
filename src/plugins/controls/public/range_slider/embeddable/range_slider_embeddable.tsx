@@ -125,6 +125,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
         dataViewId: newInput.dataViewId,
         fieldName: newInput.fieldName,
         timeRange: newInput.timeRange,
+        timeslice: newInput.timeslice,
         filters: newInput.filters,
         query: newInput.query,
       })),
@@ -209,7 +210,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     if (!dataView || !field) return;
 
     const embeddableInput = this.getInput();
-    const { ignoreParentSettings, fieldName, query, timeRange } = embeddableInput;
+    const { ignoreParentSettings, fieldName, query, timeRange: globalTimeRange, timeslice } = embeddableInput;
     let { filters = [] } = embeddableInput;
 
     if (!field) {
@@ -224,6 +225,13 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
       filters = [];
     }
 
+    const timeRange = timeslice !== undefined
+      ? {
+          from: new Date(timeslice[0]).toISOString(),
+          to: new Date(timeslice[1]).toISOString(),
+          mode: 'absolute' as 'absolute',
+        }
+      : globalTimeRange;
     if (!ignoreParentSettings?.ignoreTimerange && timeRange) {
       const timeFilter = this.dataService.timefilter.createFilter(dataView, timeRange);
       if (timeFilter) {
