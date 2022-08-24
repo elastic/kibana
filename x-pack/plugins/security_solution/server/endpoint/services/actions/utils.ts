@@ -139,13 +139,16 @@ export const getActionCompletionInfo = (
     };
 
     // Store the outputs and agent state for any agent that has received a response
-    if (agentResponses && agentResponses.endpointResponse) {
+    if (agentResponses) {
       completedInfo.agentState[agentId].isCompleted = agentResponses.isCompleted;
       completedInfo.agentState[agentId].wasSuccessful = agentResponses.wasSuccessful;
       completedInfo.agentState[agentId].completedAt = agentResponses.completedAt;
       completedInfo.agentState[agentId].errors = agentResponses.errors;
 
-      if (agentResponses.endpointResponse.item.data.EndpointActions.data.output) {
+      if (
+        agentResponses.endpointResponse &&
+        agentResponses.endpointResponse.item.data.EndpointActions.data.output
+      ) {
         completedInfo.outputs[agentId] =
           agentResponses.endpointResponse.item.data.EndpointActions.data.output;
       }
