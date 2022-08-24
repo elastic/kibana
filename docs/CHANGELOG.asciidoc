@@ -55,7 +55,7 @@ To identify snoozed rules in all Spaces using **Dev Tools**, run the following q
 GET kbn:api/alerting/rules/_find
 ----
 
-When you upgrade {kib} from 8.3.0 to 8.4.0, and your alerting rules have snooze notifications, you receive the following error message:
+When you upgrade {kib} to 8.4.0, and your alerting rules have snooze notifications, you will receive the following error message:
 
 [source,text]
 ----
