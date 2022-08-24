@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-export const LENS_METRIC_ID = 'lnsMetric';
+import { CSSObject } from '@emotion/react';
 
-export const GROUP_ID = {
-  METRIC: 'metric',
-  SECONDARY_METRIC: 'secondaryMetric',
-  MAX: 'max',
-  BREAKDOWN_BY: 'breakdownBy',
-} as const;
+export const useStyles = () => {
+  const button: CSSObject = {
+    display: 'inline-flex',
+  };
+
+  return {
+    button,
+  };
+};
