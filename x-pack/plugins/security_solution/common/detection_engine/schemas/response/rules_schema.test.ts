@@ -12,6 +12,7 @@ import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts
 import {
   getRulesSchemaMock,
   getRulesMlSchemaMock,
+  getSavedQuerySchemaMock,
   getThreatMatchingSchemaMock,
   getRulesEqlSchemaMock,
 } from './rules_schema.mocks';
@@ -69,25 +70,20 @@ describe('rules_schema', () => {
   });
 
   test('it should validate a type of "saved_query" with a "saved_id" dependent', () => {
-    const payload: FullResponseSchema & { saved_id?: string } = getRulesSchemaMock();
-    payload.type = 'saved_query';
-    payload.saved_id = 'save id 123';
+    const payload = getSavedQuerySchemaMock();
 
     const decoded = fullResponseSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-    const expected: FullResponseSchema & { saved_id?: string } = getRulesSchemaMock();
-
-    expected.type = 'saved_query';
-    expected.saved_id = 'save id 123';
+    const expected = getSavedQuerySchemaMock();
 
     expect(getPaths(left(message.errors))).toEqual([]);
     expect(message.schema).toEqual(expected);
   });
 
   test('it should NOT validate a type of "saved_query" without a "saved_id" dependent', () => {
-    const payload: FullResponseSchema & { saved_id?: string } = getRulesSchemaMock();
-    payload.type = 'saved_query';
+    const payload: FullResponseSchema & { saved_id?: string } = getSavedQuerySchemaMock();
+    // @ts-expect-error
     delete payload.saved_id;
 
     const decoded = fullResponseSchema.decode(payload);
@@ -102,9 +98,7 @@ describe('rules_schema', () => {
 
   test('it should NOT validate a type of "saved_query" when it has extra data', () => {
     const payload: FullResponseSchema & { saved_id?: string; invalid_extra_data?: string } =
-      getRulesSchemaMock();
-    payload.type = 'saved_query';
-    payload.saved_id = 'save id 123';
+      getSavedQuerySchemaMock();
     payload.invalid_extra_data = 'invalid_extra_data';
 
     const decoded = fullResponseSchema.decode(payload);
@@ -189,19 +183,15 @@ describe('rules_schema', () => {
 
     test('it should validate a type of "saved_query" with "data_view_id" defined', () => {
       const payload: FullResponseSchema & { saved_id?: string; data_view_id?: string } =
-        getRulesSchemaMock();
-      payload.type = 'saved_query';
-      payload.saved_id = 'save id 123';
+        getSavedQuerySchemaMock();
       payload.data_view_id = 'logs-*';
 
       const decoded = fullResponseSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       const expected: FullResponseSchema & { saved_id?: string; data_view_id?: string } =
-        getRulesSchemaMock();
+        getSavedQuerySchemaMock();
 
-      expected.type = 'saved_query';
-      expected.saved_id = 'save id 123';
       expected.data_view_id = 'logs-*';
 
       expect(getPaths(left(message.errors))).toEqual([]);

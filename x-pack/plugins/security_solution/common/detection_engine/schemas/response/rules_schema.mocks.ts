@@ -10,6 +10,7 @@ import type {
   EqlResponseSchema,
   MachineLearningResponseSchema,
   QueryResponseSchema,
+  SavedQueryResponseSchema,
   ThreatMatchResponseSchema,
 } from '../request';
 import { getListArrayMock } from '../types/lists.mock';
@@ -72,6 +73,18 @@ export const getRulesSchemaMock = (anchorDate: string = ANCHOR_DATE): QueryRespo
   data_view_id: undefined,
   filters: undefined,
   saved_id: undefined,
+});
+export const getSavedQuerySchemaMock = (
+  anchorDate: string = ANCHOR_DATE
+): SavedQueryResponseSchema => ({
+  ...getResponseBaseParams(anchorDate),
+  query: 'user.name: root or user.name: admin',
+  type: 'saved_query',
+  saved_id: 'save id 123',
+  language: 'kuery',
+  index: undefined,
+  data_view_id: undefined,
+  filters: undefined,
 });
 
 export const getRulesMlSchemaMock = (
