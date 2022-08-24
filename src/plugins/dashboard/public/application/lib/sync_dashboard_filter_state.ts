@@ -15,12 +15,13 @@ import {
   syncQueryStateWithUrl,
   waitUntilNextSessionCompletes$,
 } from '@kbn/data-plugin/public';
-import { setQuery } from '../state';
-import { DashboardBuildContext, DashboardState } from '../../types';
-import { DashboardSavedObject } from '../../saved_dashboards';
-import { setFiltersAndQuery } from '../state/dashboard_state_slice';
-import { Filter, Query } from '../../services/data/types';
+import type { Filter, Query } from '@kbn/es-query';
+
 import { cleanFiltersForSerialize } from '.';
+import { setQuery } from '../state';
+import type { DashboardBuildContext, DashboardState } from '../../types';
+import type { DashboardSavedObject } from '../../saved_dashboards';
+import { setFiltersAndQuery } from '../state/dashboard_state_slice';
 import { pluginServices } from '../../services/plugin_services';
 
 type SyncDashboardFilterStateProps = DashboardBuildContext & {

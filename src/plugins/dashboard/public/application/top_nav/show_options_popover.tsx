@@ -8,11 +8,13 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+
+import type { CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiWrappingPopover } from '@elastic/eui';
-import { CoreStart } from '@kbn/core/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+
 import { OptionsMenu } from './options';
-import { KibanaThemeProvider } from '../../services/kibana_react';
 
 let isOpen = false;
 

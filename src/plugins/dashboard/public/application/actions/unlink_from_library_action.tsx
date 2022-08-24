@@ -9,16 +9,16 @@
 import { NotificationsStart } from '@kbn/core/public';
 import {
   ViewMode,
-  PanelState,
-  IEmbeddable,
-  PanelNotFoundError,
-  EmbeddableInput,
-  isReferenceOrValueEmbeddable,
+  type PanelState,
+  type IEmbeddable,
   isErrorEmbeddable,
+  PanelNotFoundError,
+  type EmbeddableInput,
+  isReferenceOrValueEmbeddable,
 } from '@kbn/embeddable-plugin/public';
-import { Action, IncompatibleActionError } from '../../services/ui_actions';
+import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { dashboardUnlinkFromLibraryAction } from '../../dashboard_strings';
-import { DashboardPanelState, DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '..';
+import { type DashboardPanelState, DASHBOARD_CONTAINER_TYPE, type DashboardContainer } from '..';
 
 export const ACTION_UNLINK_FROM_LIBRARY = 'unlinkFromLibrary';
 

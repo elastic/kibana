@@ -9,19 +9,20 @@
 import _ from 'lodash';
 
 import { isFilterPinned } from '@kbn/es-query';
-import { TimefilterContract } from '@kbn/data-plugin/public';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
+import type { NotificationsStart } from '@kbn/core/public';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { RefreshInterval } from '@kbn/data-plugin/public';
+
 import { convertTimeToUTCString } from '.';
-import { NotificationsStart } from '../../services/core';
-import { DashboardSavedObject } from '../../saved_dashboards';
-import { DashboardRedirect, DashboardState } from '../../types';
-import { SavedObjectSaveOpts } from '../../services/saved_objects';
+import type { DashboardSavedObject } from '../../saved_dashboards';
 import { dashboardSaveToastStrings } from '../../dashboard_strings';
 import { getHasTaggingCapabilitiesGuard } from './dashboard_tagging';
-import { SavedObjectsTaggingApi } from '../../services/saved_objects_tagging_oss';
-import { RefreshInterval } from '../../services/data/types';
-import { convertPanelStateToSavedDashboardPanel } from '../../../common/embeddable/embeddable_saved_object_converters';
-import { DashboardSessionStorage } from './dashboard_session_storage';
+import type { DashboardRedirect, DashboardState } from '../../types';
+import type { SavedObjectSaveOpts } from '../../services/saved_objects';
+import type { DashboardSessionStorage } from './dashboard_session_storage';
 import { serializeControlGroupToDashboardSavedObject } from './dashboard_control_group';
+import { convertPanelStateToSavedDashboardPanel } from '../../../common/embeddable/embeddable_saved_object_converters';
 
 export type SavedDashboardSaveOpts = SavedObjectSaveOpts & { stayInEditMode?: boolean };
 

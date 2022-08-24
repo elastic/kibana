@@ -20,24 +20,25 @@ import type {
   KibanaExecutionContext,
 } from '@kbn/core/public';
 import type { Filter } from '@kbn/es-query';
-import { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
-import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
-import { EmbeddableInput, ViewMode } from '@kbn/embeddable-plugin/common';
-import { ContainerInput, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-
-import { DataView } from './services/data_views';
-import { SharePluginStart } from './services/share';
-import { DashboardSessionStorage } from './application/lib';
-import { UsageCollectionSetup } from './services/usage_collection';
-import { NavigationPublicPluginStart } from './services/navigation';
-import { Query, RefreshInterval, TimeRange } from './services/data/types';
-import { DashboardPanelState, SavedDashboardPanel } from '../common/types';
-import { SavedObjectsTaggingApi } from './services/saved_objects_tagging_oss';
-import { SavedObjectLoader, SavedObjectsStart } from './services/saved_objects';
-import type { ScreenshotModePluginStart } from './services/screenshot_mode';
-import { IKbnUrlStateStorage } from './services/kibana_utils';
+import type { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
+import type { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
+import { type EmbeddableInput, ViewMode } from '@kbn/embeddable-plugin/common';
+import type { ContainerInput, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { RefreshInterval } from '@kbn/data-plugin/public';
+import type { Query, TimeRange } from '@kbn/es-query';
 import type { DashboardContainer, DashboardSavedObject } from '.';
-import { DashboardAppLocatorParams } from './locator';
+import type { DashboardAppLocatorParams } from './locator';
+
+import { DashboardSessionStorage } from './application/lib';
+import { DashboardPanelState, SavedDashboardPanel } from '../common/types';
+import { SavedObjectLoader, SavedObjectsStart } from './services/saved_objects';
 import { DashboardServices } from './services/types';
 
 export type { SavedDashboardPanel };

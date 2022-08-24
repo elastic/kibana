@@ -10,12 +10,9 @@ import React from 'react';
 import { mount } from 'enzyme';
 
 import { findTestSubject, nextTick } from '@kbn/test-jest-helpers';
-import { DashboardContainer, DashboardContainerServices } from './dashboard_container';
-import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
 import { I18nProvider } from '@kbn/i18n-react';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
-
-import { KibanaContextProvider } from '../../services/kibana_react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
   CONTEXT_MENU_TRIGGER,
   EmbeddablePanel,
@@ -34,6 +31,9 @@ import { applicationServiceMock, coreMock } from '@kbn/core/public/mocks';
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { createEditModeAction } from '@kbn/embeddable-plugin/public/lib/test_samples';
+
+import { DashboardContainer, DashboardContainerServices } from './dashboard_container';
+import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
 import { pluginServices } from '../../services/plugin_services';
 
 const theme = coreMock.createStart().theme;

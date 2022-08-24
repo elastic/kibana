@@ -7,46 +7,47 @@
  */
 
 import React from 'react';
+import uuid from 'uuid';
 import ReactDOM from 'react-dom';
+
 import { I18nProvider } from '@kbn/i18n-react';
 import { Subscription } from 'rxjs';
-import uuid from 'uuid';
-import { CoreStart, KibanaExecutionContext } from '@kbn/core/public';
+import type { CoreStart, KibanaExecutionContext } from '@kbn/core/public';
 import { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-
-import { ControlGroupContainer } from '@kbn/controls-plugin/public';
-import { Filter, TimeRange } from '@kbn/es-query';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
+import type { Filter, TimeRange } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   ViewMode,
   Container,
-  PanelState,
-  IEmbeddable,
-  EmbeddableInput,
-  EmbeddableStart,
-  EmbeddableOutput,
-  EmbeddableFactory,
+  type PanelState,
+  type IEmbeddable,
+  type EmbeddableInput,
+  type EmbeddableStart,
+  type EmbeddableOutput,
+  type EmbeddableFactory,
   ErrorEmbeddable,
   isErrorEmbeddable,
 } from '@kbn/embeddable-plugin/public';
-
-import { UiActionsStart } from '../../services/ui_actions';
-import { RefreshInterval, Query } from '../../services/data/types';
-import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
-import { createPanelState } from './panel';
-import { DashboardPanelState } from './types';
-import { DashboardViewport } from './viewport/dashboard_viewport';
+import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
 import {
   KibanaContextProvider,
   KibanaReactContext,
   KibanaReactContextValue,
   KibanaThemeProvider,
-} from '../../services/kibana_react';
+} from '@kbn/kibana-react-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { RefreshInterval } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
+
+import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
+import { createPanelState } from './panel';
+import { DashboardPanelState } from './types';
+import { DashboardViewport } from './viewport/dashboard_viewport';
 import { PLACEHOLDER_EMBEDDABLE } from './placeholder';
 import { DASHBOARD_LOADED_EVENT } from '../../events';
 import { DashboardAppCapabilities, DashboardContainerInput } from '../../types';
-import type { ScreenshotModePluginStart } from '../../services/screenshot_mode';
 import { PanelPlacementMethod, IPanelPlacementArgs } from './panel/dashboard_panel_placement';
 import {
   combineDashboardFiltersWithControlGroupFilters,

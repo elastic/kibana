@@ -8,10 +8,11 @@
 
 import { set } from '@kbn/safer-lodash-set';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { Storage } from '../../services/kibana_utils';
-import { NotificationsStart } from '../../services/core';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { NotificationsStart } from '@kbn/core/public';
+
 import { panelStorageErrorStrings } from '../../dashboard_strings';
-import { DashboardState } from '../../types';
+import type { DashboardState } from '../../types';
 
 export const DASHBOARD_PANELS_UNSAVED_ID = 'unsavedDashboard';
 const DASHBOARD_PANELS_SESSION_KEY = 'dashboardStateManagerPanels';

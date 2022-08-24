@@ -8,11 +8,12 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { EuiLoadingChart } from '@elastic/eui';
 import classNames from 'classnames';
-import { CoreStart } from '@kbn/core/public';
-import { Embeddable, EmbeddableInput, IContainer } from '@kbn/embeddable-plugin/public';
-import { KibanaThemeProvider } from '../../../services/kibana_react';
+
+import { EuiLoadingChart } from '@elastic/eui';
+import type { CoreStart } from '@kbn/core/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { Embeddable, type EmbeddableInput, type IContainer } from '@kbn/embeddable-plugin/public';
 
 export const PLACEHOLDER_EMBEDDABLE = 'placeholder';
 

@@ -17,10 +17,14 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { ApplicationStart, SavedObjectsFindOptionsReference } from '@kbn/core/public';
+import type { ApplicationStart, SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import useMount from 'react-use/lib/useMount';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
+import { TableListView, useKibana } from '@kbn/kibana-react-plugin/public';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+
 import { attemptLoadDashboardByTitle } from '../lib';
 import { DashboardAppServices, DashboardRedirect } from '../../types';
 import {
@@ -30,9 +34,6 @@ import {
   dashboardUnsavedListingStrings,
   getNewDashboardTitle,
 } from '../../dashboard_strings';
-import { IKbnUrlStateStorage } from '../../services/kibana_utils';
-import { TableListView, useKibana } from '../../services/kibana_react';
-import { SavedObjectsTaggingApi } from '../../services/saved_objects_tagging_oss';
 import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
 import { confirmCreateWithUnsaved, confirmDiscardUnsavedChanges } from './confirm_overlays';
 import { getDashboardListItemLink } from './get_dashboard_list_item_link';

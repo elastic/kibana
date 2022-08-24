@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart } from '@kbn/core/public';
-import { IEmbeddable, ViewMode, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '../embeddable';
-import { Action, IncompatibleActionError } from '../../services/ui_actions';
+import type { CoreStart } from '@kbn/core/public';
+import { type IEmbeddable, ViewMode, type EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { DASHBOARD_CONTAINER_TYPE, type DashboardContainer } from '../embeddable';
 import { openReplacePanelFlyout } from './open_replace_panel_flyout';
 import { dashboardReplacePanelAction } from '../../dashboard_strings';
 

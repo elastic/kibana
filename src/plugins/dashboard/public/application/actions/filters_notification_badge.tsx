@@ -8,18 +8,18 @@
 
 import React from 'react';
 
-import { CoreStart, OverlayStart } from '@kbn/core/public';
 import {
   EditPanelAction,
-  EmbeddableStart,
+  type EmbeddableStart,
   isFilterableEmbeddable,
 } from '@kbn/embeddable-plugin/public';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import { IEmbeddable, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
-
 import { type AggregateQuery } from '@kbn/es-query';
-import { Action, IncompatibleActionError } from '../../services/ui_actions';
-import { toMountPoint } from '../../services/kibana_react';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import type { CoreStart, OverlayStart } from '@kbn/core/public';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { type IEmbeddable, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
+
 import { dashboardFilterNotificationBadge } from '../../dashboard_strings';
 
 export const BADGE_FILTERS_NOTIFICATION = 'ACTION_FILTERS_NOTIFICATION';

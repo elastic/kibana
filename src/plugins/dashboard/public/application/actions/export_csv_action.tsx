@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { Datatable } from '@kbn/expressions-plugin/public';
-import { CoreStart } from '@kbn/core/public';
-import { FormatFactory } from '@kbn/field-formats-plugin/common';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public/types';
+import type { CoreStart } from '@kbn/core/public';
 import { exporters } from '@kbn/data-plugin/public';
-import { Adapters, IEmbeddable } from '@kbn/embeddable-plugin/public';
+import { Action } from '@kbn/ui-actions-plugin/public';
+import { Datatable } from '@kbn/expressions-plugin/public';
+import { downloadMultipleAs } from '@kbn/share-plugin/public';
+import { FormatFactory } from '@kbn/field-formats-plugin/common';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public/types';
+import type { Adapters, IEmbeddable } from '@kbn/embeddable-plugin/public';
 
-import { downloadMultipleAs } from '../../services/share';
-import { Action } from '../../services/ui_actions';
 import { dashboardExportCsvAction } from '../../dashboard_strings';
 
 export const ACTION_EXPORT_CSV = 'ACTION_EXPORT_CSV';

@@ -17,16 +17,16 @@ import {
 } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import { BaseVisType, VisGroups, VisTypeAlias } from '@kbn/visualizations-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { type BaseVisType, VisGroups, type VisTypeAlias } from '@kbn/visualizations-plugin/public';
 import { SolutionToolbarPopover } from '@kbn/presentation-util-plugin/public';
-import {
+import type {
   EmbeddableFactory,
   EmbeddableFactoryDefinition,
   EmbeddableInput,
 } from '@kbn/embeddable-plugin/public';
 
-import { useKibana } from '../../services/kibana_react';
-import { DashboardAppServices } from '../../types';
+import type { DashboardAppServices } from '../../types';
 import { DashboardContainer } from '..';
 import { DashboardConstants } from '../../dashboard_constants';
 import { dashboardReplacePanelAction } from '../../dashboard_strings';

@@ -7,8 +7,9 @@
  */
 
 import _ from 'lodash';
+
 import type { KibanaExecutionContext } from '@kbn/core/public';
-import { ControlGroupInput } from '@kbn/controls-plugin/public';
+import type { ControlGroupInput } from '@kbn/controls-plugin/public';
 import {
   compareFilters,
   isFilterPinned,
@@ -16,13 +17,13 @@ import {
   COMPARE_ALL_OPTIONS,
   type Filter,
 } from '@kbn/es-query';
-import { EmbeddablePackageState, ViewMode } from '@kbn/embeddable-plugin/public';
+import { type EmbeddablePackageState, ViewMode } from '@kbn/embeddable-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
 
-import { DashboardSavedObject } from '../../saved_dashboards';
+import type { DashboardSavedObject } from '../../saved_dashboards';
 import { getTagsFromSavedDashboard, migrateAppState } from '.';
-import { TimeRange } from '../../services/data/types';
 import { convertPanelStateToSavedDashboardPanel } from '../../../common/embeddable/embeddable_saved_object_converters';
-import {
+import type {
   DashboardState,
   RawDashboardState,
   DashboardAppServices,

@@ -12,9 +12,9 @@ import { EuiHorizontalRule } from '@elastic/eui';
 import UseUnmount from 'react-use/lib/useUnmount';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { OverlayRef } from '@kbn/core/public';
-import { TopNavMenuProps } from '@kbn/navigation-plugin/public';
-import { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
+import type { OverlayRef } from '@kbn/core/public';
+import type { TopNavMenuProps } from '@kbn/navigation-plugin/public';
+import type { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
 import {
   AddFromLibraryButton,
   LazyLabsFlyout,
@@ -24,8 +24,9 @@ import {
   SolutionToolbar,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
-import { SavedQuery } from '@kbn/data-plugin/common';
+import type { SavedQuery } from '@kbn/data-plugin/common';
 import { isErrorEmbeddable, openAddPanelFlyout, ViewMode } from '@kbn/embeddable-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import { saveDashboard } from '../lib';
 import { TopNavIds } from './top_nav_ids';
@@ -35,12 +36,11 @@ import { DashboardSaveModal } from './save_modal';
 import { showCloneModal } from './show_clone_modal';
 import { ShowShareModal } from './show_share_modal';
 import { getTopNavConfig } from './get_top_nav_config';
-import { useKibana } from '../../services/kibana_react';
 import { showOptionsPopover } from './show_options_popover';
 import { DashboardConstants } from '../../dashboard_constants';
 import { confirmDiscardUnsavedChanges } from '../listing/confirm_overlays';
-import { DashboardAppState, DashboardSaveOptions, NavAction } from '../../types';
-import { DashboardAppServices, DashboardEmbedSettings, DashboardRedirect } from '../../types';
+import type { DashboardAppState, DashboardSaveOptions, NavAction } from '../../types';
+import type { DashboardAppServices, DashboardEmbedSettings, DashboardRedirect } from '../../types';
 import { getSavedObjectFinder, SaveResult, showSaveModal } from '../../services/saved_objects';
 import { getCreateVisualizationButtonTitle, unsavedChangesBadge } from '../../dashboard_strings';
 import {

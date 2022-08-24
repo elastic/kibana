@@ -11,6 +11,7 @@ import { Provider } from 'react-redux';
 import { createBrowserHistory } from 'history';
 import { renderHook, act, RenderHookResult } from '@testing-library/react-hooks';
 import { createKbnUrlStateStorage, defer } from '@kbn/kibana-utils-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 
 import { DashboardSessionStorage } from '../lib';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -27,7 +28,6 @@ import {
   getSavedDashboardMock,
   makeDefaultServices,
 } from '../test_helpers';
-import { DataView } from '../../services/data_views';
 
 import type { Filter } from '@kbn/es-query';
 import { pluginServices } from '../../services/plugin_services';

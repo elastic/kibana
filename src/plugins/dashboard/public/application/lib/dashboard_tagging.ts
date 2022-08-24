@@ -6,10 +6,13 @@
  * Side Public License, v 1.
  */
 
+import {
+  SavedObjectsTaggingApi,
+  type TagDecoratedSavedObject,
+} from '@kbn/saved-objects-tagging-oss-plugin/public';
+
 import { DashboardSavedObject } from '../..';
 import { SavedObject } from '../../services/saved_objects';
-import { SavedObjectsTaggingApi } from '../../services/saved_objects_tagging_oss';
-import type { TagDecoratedSavedObject } from '../../services/saved_objects_tagging_oss';
 
 // TS is picky with type guards, we can't just inline `() => false`
 function defaultTaggingGuard(_obj: SavedObject): _obj is TagDecoratedSavedObject {

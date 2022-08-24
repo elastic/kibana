@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { Subscription } from 'rxjs';
+
 import {
   CalloutProps,
   ControlGroupContainer,
@@ -15,13 +16,14 @@ import {
 } from '@kbn/controls-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
+import { context } from '@kbn/kibana-react-plugin/public';
+
 import {
   DashboardContainer,
   DashboardReactContextValue,
   DashboardLoadedInfo,
 } from '../dashboard_container';
 import { DashboardGrid } from '../grid';
-import { context } from '../../../services/kibana_react';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
 import { pluginServices } from '../../../services/plugin_services';
 

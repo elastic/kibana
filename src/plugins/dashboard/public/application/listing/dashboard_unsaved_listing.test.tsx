@@ -5,20 +5,20 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import React from 'react';
+import { mount } from 'enzyme';
 
 import { I18nProvider } from '@kbn/i18n-react';
-import { findTestSubject } from '@elastic/eui/lib/test';
 import { waitFor } from '@testing-library/react';
-import { mount } from 'enzyme';
-import React from 'react';
+import { findTestSubject } from '@elastic/eui/lib/test';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import { DashboardSavedObject } from '../..';
 import { DashboardAppServices } from '../../types';
+import { makeDefaultServices } from '../test_helpers';
 import { SavedObjectLoader } from '../../services/saved_objects';
-import { KibanaContextProvider } from '../../services/kibana_react';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_session_storage';
 import { DashboardUnsavedListing, DashboardUnsavedListingProps } from './dashboard_unsaved_listing';
-import { makeDefaultServices } from '../test_helpers';
 
 const mockedDashboards: { [key: string]: DashboardSavedObject } = {
   dashboardUnsavedOne: {

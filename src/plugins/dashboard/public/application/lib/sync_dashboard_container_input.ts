@@ -12,9 +12,10 @@ import { debounceTime, tap } from 'rxjs/operators';
 
 import { compareFilters, COMPARE_ALL_OPTIONS, type Filter } from '@kbn/es-query';
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/public';
-import { DashboardContainer } from '../embeddable';
-import { Query } from '../../services/data/types';
-import { DashboardConstants, DashboardSavedObject } from '../..';
+import type { Query } from '@kbn/es-query';
+
+import type { DashboardContainer } from '../embeddable';
+import { DashboardConstants, type DashboardSavedObject } from '../..';
 import {
   setControlGroupState,
   setExpandedPanelId,
@@ -25,7 +26,7 @@ import {
   setTimeslice,
 } from '../state';
 import { diffDashboardContainerInput } from './diff_dashboard_state';
-import { DashboardBuildContext, DashboardContainerInput } from '../../types';
+import type { DashboardBuildContext, DashboardContainerInput } from '../../types';
 import {
   getSearchSessionIdFromURL,
   getSessionURLObservable,

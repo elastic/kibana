@@ -8,12 +8,13 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
+
 import { I18nProvider } from '@kbn/i18n-react';
+import { SimpleSavedObject } from '@kbn/core/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
 import { DashboardAppServices } from '../../types';
-import { SimpleSavedObject } from '@kbn/core/public';
-import { KibanaContextProvider } from '../../services/kibana_react';
-import { createKbnUrlStateStorage } from '../../services/kibana_utils';
 import { DashboardListing, DashboardListingProps } from './dashboard_listing';
 import { makeDefaultServices } from '../test_helpers';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_session_storage';

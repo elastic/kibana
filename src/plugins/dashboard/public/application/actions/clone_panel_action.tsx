@@ -20,15 +20,15 @@ import {
   isErrorEmbeddable,
   isReferenceOrValueEmbeddable,
 } from '@kbn/embeddable-plugin/public';
+import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
-import { Action, IncompatibleActionError } from '../../services/ui_actions';
 import { SavedObject } from '../../services/saved_objects';
 import {
   placePanelBeside,
   IPanelPlacementBesideArgs,
 } from '../embeddable/panel/dashboard_panel_placement';
 import { dashboardClonePanelAction } from '../../dashboard_strings';
-import { DashboardPanelState, DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '..';
+import { type DashboardPanelState, DASHBOARD_CONTAINER_TYPE, type DashboardContainer } from '..';
 
 export const ACTION_CLONE_PANEL = 'clonePanel';
 

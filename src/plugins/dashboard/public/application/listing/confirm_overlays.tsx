@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
+
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -18,10 +20,9 @@ import {
   EuiText,
   EUI_MODAL_CANCEL_BUTTON,
 } from '@elastic/eui';
-import React from 'react';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import type { CoreStart, OverlayStart } from '@kbn/core/public';
 
-import { CoreStart, OverlayStart } from '@kbn/core/public';
-import { toMountPoint } from '../../services/kibana_react';
 import { createConfirmStrings, discardConfirmStrings } from '../../dashboard_strings';
 
 export type DiscardOrKeepSelection = 'cancel' | 'discard' | 'keep';

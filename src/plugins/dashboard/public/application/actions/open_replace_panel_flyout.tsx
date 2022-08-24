@@ -9,15 +9,15 @@
 import React from 'react';
 
 import { CoreStart } from '@kbn/core/public';
-import {
+import type {
   IContainer,
   IEmbeddable,
   EmbeddableStart,
   EmbeddableInput,
   EmbeddableOutput,
 } from '@kbn/embeddable-plugin/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
-import { toMountPoint } from '../../services/kibana_react';
 import { ReplacePanelFlyout } from './replace_panel_flyout';
 
 export async function openReplacePanelFlyout(options: {

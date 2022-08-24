@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
-import { EuiCallOut } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps } from 'react-router-dom';
 
-import { useKibana, toMountPoint } from '../../services/kibana_react';
+import { i18n } from '@kbn/i18n';
+import { EuiCallOut } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana, toMountPoint } from '@kbn/kibana-react-plugin/public';
+
 import { DashboardAppServices } from '../../types';
 import { DashboardConstants } from '../..';
 

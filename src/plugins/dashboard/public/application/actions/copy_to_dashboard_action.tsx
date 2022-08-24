@@ -7,12 +7,14 @@
  */
 
 import React from 'react';
-import { CoreStart, OverlayStart } from '@kbn/core/public';
-import { EmbeddableStateTransfer, IEmbeddable } from '@kbn/embeddable-plugin/public';
-import { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import type { CoreStart, OverlayStart } from '@kbn/core/public';
+import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import type { EmbeddableStateTransfer, IEmbeddable } from '@kbn/embeddable-plugin/public';
+import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+
 import { dashboardCopyToDashboardAction } from '../../dashboard_strings';
-import { toMountPoint } from '../../services/kibana_react';
-import { Action, IncompatibleActionError } from '../../services/ui_actions';
 import { DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '../embeddable';
 import { CopyToDashboardModal } from './copy_to_dashboard_modal';
 

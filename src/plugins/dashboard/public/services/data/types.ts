@@ -13,6 +13,3 @@ export interface DashboardDataService {
   search: DataPublicPluginStart['search'];
   dataViews: DataPublicPluginStart['dataViews'];
 }
-
-export type { RefreshInterval } from '@kbn/data-plugin/public';
-export type { Query, TimeRange, Filter } from '@kbn/es-query';

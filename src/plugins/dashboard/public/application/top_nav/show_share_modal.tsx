@@ -6,24 +6,26 @@
  * Side Public License, v 1.
  */
 
-import { EuiCheckboxGroup } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React, { ReactElement, useState } from 'react';
+
+import { EuiCheckboxGroup } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { Capabilities } from '@kbn/core/public';
-import { SerializableControlGroupInput } from '@kbn/controls-plugin/common';
+import type { SerializableControlGroupInput } from '@kbn/controls-plugin/common';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { DashboardSavedObject } from '../..';
+import { setStateToKbnUrl, unhashUrl } from '@kbn/kibana-utils-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
+
+import type { DashboardSavedObject } from '../..';
 import { shareModalStrings } from '../../dashboard_strings';
 import { DashboardAppLocatorParams, DASHBOARD_APP_LOCATOR } from '../../locator';
-import { TimeRange } from '../../services/data/types';
-import { setStateToKbnUrl, unhashUrl } from '../../services/kibana_utils';
-import { SharePluginStart } from '../../services/share';
-import { DashboardAppCapabilities, DashboardState } from '../../types';
+import type { DashboardAppCapabilities, DashboardState } from '../../types';
 import { dashboardUrlParams } from '../dashboard_router';
 import { stateToRawDashboardState } from '../lib/convert_dashboard_state';
 import { convertPanelMapToSavedPanels } from '../lib/convert_dashboard_panels';
-import { DashboardSessionStorage } from '../lib';
+import type { DashboardSessionStorage } from '../lib';
 
 const showFilterBarId = 'showFilterBar';
 

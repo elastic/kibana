@@ -10,12 +10,10 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import React from 'react';
 import { skip } from 'rxjs/operators';
 import { mount } from 'enzyme';
+
 import { I18nProvider } from '@kbn/i18n-react';
 import { nextTick } from '@kbn/test-jest-helpers';
-import { DashboardViewport, DashboardViewportProps } from './dashboard_viewport';
-import { DashboardContainer, DashboardContainerServices } from '../dashboard_container';
-import { getSampleDashboardInput } from '../../test_helpers';
-import { KibanaContextProvider } from '../../../services/kibana_react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { applicationServiceMock, coreMock } from '@kbn/core/public/mocks';
 import {
@@ -23,6 +21,10 @@ import {
   CONTACT_CARD_EMBEDDABLE,
 } from '@kbn/embeddable-plugin/public/lib/test_samples';
 import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
+
+import { DashboardViewport, DashboardViewportProps } from './dashboard_viewport';
+import { DashboardContainer, DashboardContainerServices } from '../dashboard_container';
+import { getSampleDashboardInput } from '../../test_helpers';
 import { pluginServices } from '../../../services/plugin_services';
 
 let dashboardContainer: DashboardContainer | undefined;

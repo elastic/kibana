@@ -11,9 +11,9 @@ import {
   AnalyticsNoDataPageKibanaProvider,
   AnalyticsNoDataPage,
 } from '@kbn/shared-ux-page-analytics-no-data';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
-import { DashboardAppServices } from '../types';
-import { useKibana } from '../services/kibana_react';
+import type { DashboardAppServices } from '../types';
 import { pluginServices } from '../services/plugin_services';
 
 export const DashboardAppNoDataPage = ({

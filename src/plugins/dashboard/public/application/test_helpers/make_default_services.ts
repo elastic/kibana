@@ -12,10 +12,10 @@ import { PluginInitializerContext, ScopedHistory } from '@kbn/core/public';
 import { savedObjectsPluginMock } from '@kbn/saved-objects-plugin/public/mocks';
 import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 import { chromeServiceMock, coreMock } from '@kbn/core/public/mocks';
+import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 
 import { SavedObjectLoader, SavedObjectLoaderFindOptions } from '../../services/saved_objects';
 import { DashboardAppServices, DashboardAppCapabilities } from '../../types';
-import { NavigationPublicPluginStart } from '../../services/navigation';
 import { getSavedDashboardMock } from './get_saved_dashboard_mock';
 import { DashboardSessionStorage } from '../lib';
 

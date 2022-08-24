@@ -8,14 +8,15 @@
 
 // @ts-ignore
 import sizeMe from 'react-sizeme';
-
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { skip } from 'rxjs/operators';
+
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+
 import { DashboardGrid, DashboardGridProps } from './dashboard_grid';
 import { DashboardContainer, DashboardContainerServices } from '../dashboard_container';
 import { getSampleDashboardInput } from '../../test_helpers';
-import { KibanaContextProvider } from '../../../services/kibana_react';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import {
   ContactCardEmbeddableFactory,

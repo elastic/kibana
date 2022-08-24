@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import React, { useCallback, useEffect, useState } from 'react';
+
 import {
   EuiButtonEmpty,
   EuiCallOut,
@@ -15,12 +17,12 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useState } from 'react';
-import { DashboardSavedObject } from '../..';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+
+import type { DashboardSavedObject } from '../..';
 import { dashboardUnsavedListingStrings, getNewDashboardTitle } from '../../dashboard_strings';
-import { useKibana } from '../../services/kibana_react';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_session_storage';
-import { DashboardAppServices, DashboardRedirect } from '../../types';
+import type { DashboardAppServices, DashboardRedirect } from '../../types';
 import { confirmDiscardUnsavedChanges } from './confirm_overlays';
 
 const DashboardUnsavedItem = ({

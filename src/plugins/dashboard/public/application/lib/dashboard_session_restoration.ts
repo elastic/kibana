@@ -7,17 +7,19 @@
  */
 
 import { History } from 'history';
+
 import { createQueryParamObservable } from '@kbn/kibana-utils-plugin/public';
 import type { Query } from '@kbn/es-query';
 import {
   noSearchSessionStorageCapabilityMessage,
   SearchSessionInfoProvider,
 } from '@kbn/data-plugin/public';
+import { getQueryParams } from '@kbn/kibana-utils-plugin/public';
+
+import type { DashboardState } from '../../types';
+import type { DashboardSavedObject } from '../../saved_dashboards';
 import { DashboardAppLocatorParams, DashboardConstants } from '../..';
-import { DashboardState } from '../../types';
 import { getDashboardTitle } from '../../dashboard_strings';
-import { DashboardSavedObject } from '../../saved_dashboards';
-import { getQueryParams } from '../../services/kibana_utils';
 import { stateToRawDashboardState } from './convert_dashboard_state';
 import { DASHBOARD_APP_LOCATOR } from '../../locator';
 import { pluginServices } from '../../services/plugin_services';

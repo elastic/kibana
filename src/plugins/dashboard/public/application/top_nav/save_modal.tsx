@@ -10,10 +10,10 @@ import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiTextArea, EuiSwitch } from '@elastic/eui';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 
-import type { SavedObjectsTaggingApi } from '../../services/saved_objects_tagging_oss';
 import { SavedObjectSaveModal } from '../../services/saved_objects';
-import { DashboardSaveOptions } from '../../types';
+import type { DashboardSaveOptions } from '../../types';
 
 interface Props {
   onSave: ({

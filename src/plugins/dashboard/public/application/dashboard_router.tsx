@@ -11,21 +11,28 @@ import React from 'react';
 import { History } from 'history';
 import { Provider } from 'react-redux';
 import { first } from 'rxjs/operators';
-import { I18nProvider } from '@kbn/i18n-react';
 import { parse, ParsedQuery } from 'query-string';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Switch, Route, RouteComponentProps, HashRouter, Redirect } from 'react-router-dom';
+
+import { I18nProvider } from '@kbn/i18n-react';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
+import {
+  AppMountParameters,
+  CoreSetup,
+  PluginInitializerContext,
+  ScopedHistory,
+} from '@kbn/core/public';
 
 import { DashboardListing } from './listing';
 import { dashboardStateStore } from './state';
 import { DashboardApp } from './dashboard_app';
 import { DashboardNoMatch } from './listing/dashboard_no_match';
-import { KibanaContextProvider, KibanaThemeProvider } from '../services/kibana_react';
 import { addHelpMenuToAppChrome, DashboardSessionStorage } from './lib';
 import { createDashboardListingFilterUrl } from '../dashboard_constants';
 import { createDashboardEditUrl, DashboardConstants } from '../dashboard_constants';
 import { getDashboardPageTitle, dashboardReadonlyBadge } from '../dashboard_strings';
-import { createKbnUrlStateStorage, withNotifyOnErrors } from '../services/kibana_utils';
 import { DashboardAppServices, DashboardEmbedSettings, RedirectToProps } from '../types';
 import {
   DashboardFeatureFlagConfig,
@@ -33,12 +40,6 @@ import {
   DashboardStart,
   DashboardStartDependencies,
 } from '../plugin';
-import {
-  AppMountParameters,
-  CoreSetup,
-  PluginInitializerContext,
-  ScopedHistory,
-} from '../services/core';
 import { pluginServices } from '../services/plugin_services';
 
 export const dashboardUrlParams = {

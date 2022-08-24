@@ -11,13 +11,13 @@ import { BehaviorSubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 import { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
-import { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
+import type { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import {
   App,
   Plugin,
-  CoreSetup,
-  CoreStart,
+  type CoreSetup,
+  type CoreStart,
   AppUpdater,
   ScopedHistory,
   AppMountParameters,
@@ -32,34 +32,34 @@ import {
   PANEL_BADGE_TRIGGER,
   PANEL_NOTIFICATION_TRIGGER,
 } from '@kbn/embeddable-plugin/public';
-import { VisualizationsStart } from '@kbn/visualizations-plugin/public';
-import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-// import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/public';
-import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
-
-import { createKbnUrlTracker } from './services/kibana_utils';
-import { UsageCollectionSetup } from './services/usage_collection';
-import { UiActionsSetup, UiActionsStart } from './services/ui_actions';
-import type { HomePublicPluginSetup } from './services/home';
-import { NavigationPublicPluginStart as NavigationStart } from './services/navigation';
-import { SharePluginSetup, SharePluginStart } from './services/share';
-import type { SavedObjectTaggingOssPluginStart } from './services/saved_objects_tagging_oss';
+import {
+  ExitFullScreenButton as ExitFullScreenButtonUi,
+  type ExitFullScreenButtonProps,
+} from '@kbn/kibana-react-plugin/public';
 import type {
   ScreenshotModePluginSetup,
   ScreenshotModePluginStart,
-} from './services/screenshot_mode';
+} from '@kbn/screenshot-mode-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/public';
+import { createKbnUrlTracker } from '@kbn/kibana-utils-plugin/public';
+import type { VisualizationsStart } from '@kbn/visualizations-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+// import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
+
 import {
   getSavedObjectFinder,
   SavedObjectLoader,
   SavedObjectsStart,
 } from './services/saved_objects';
-import {
-  ExitFullScreenButton as ExitFullScreenButtonUi,
-  ExitFullScreenButtonProps,
-} from './services/kibana_react';
 
 import {
   ClonePanelAction,
@@ -104,7 +104,7 @@ export interface DashboardStartDependencies {
   urlForwarding: UrlForwardingStart;
   embeddable: EmbeddableStart;
   inspector: InspectorStartContract;
-  navigation: NavigationStart;
+  navigation: NavigationPublicPluginStart;
   savedObjectsClient: SavedObjectsClientContract;
   share?: SharePluginStart;
   uiActions: UiActionsStart;

@@ -8,17 +8,18 @@
 
 import {
   ViewMode,
-  PanelState,
-  IEmbeddable,
+  type PanelState,
+  type IEmbeddable,
   PanelNotFoundError,
-  EmbeddableInput,
-  isReferenceOrValueEmbeddable,
+  type EmbeddableInput,
   isErrorEmbeddable,
+  isReferenceOrValueEmbeddable,
 } from '@kbn/embeddable-plugin/public';
-import { Action, IncompatibleActionError } from '../../services/ui_actions';
-import { ApplicationStart, NotificationsStart } from '../../services/core';
+import type { ApplicationStart, NotificationsStart } from '@kbn/core/public';
+import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+
 import { dashboardAddToLibraryAction } from '../../dashboard_strings';
-import { DashboardPanelState, DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '..';
+import { type DashboardPanelState, DASHBOARD_CONTAINER_TYPE, type DashboardContainer } from '..';
 
 export const ACTION_ADD_TO_LIBRARY = 'saveToLibrary';
 

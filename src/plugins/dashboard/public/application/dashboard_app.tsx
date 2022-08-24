@@ -11,6 +11,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import { EmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public';
 import { useKibana, useExecutionContext } from '@kbn/kibana-react-plugin/public';
+import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 
 import { useDashboardSelector } from './state';
 import { useDashboardAppState } from './hooks';
@@ -23,7 +24,6 @@ import {
 import { createDashboardEditUrl } from '../dashboard_constants';
 import { DashboardTopNav, isCompleteDashboardAppState } from './top_nav/dashboard_top_nav';
 import { DashboardAppServices, DashboardEmbedSettings, DashboardRedirect } from '../types';
-import { createKbnUrlStateStorage, withNotifyOnErrors } from '../services/kibana_utils';
 import { DashboardAppNoDataPage } from './dashboard_app_no_data';
 import { pluginServices } from '../services/plugin_services';
 export interface DashboardAppProps {

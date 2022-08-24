@@ -12,13 +12,13 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
 import { DashboardConstants } from '../..';
-import { useKibana } from '../../services/kibana_react';
 import { getNewDashboardTitle } from '../../dashboard_strings';
-import { IKbnUrlStateStorage } from '../../services/kibana_utils';
 import { setDashboardState, useDashboardDispatch, useDashboardSelector } from '../state';
-import {
+import type {
   DashboardBuildContext,
   DashboardAppServices,
   DashboardAppState,

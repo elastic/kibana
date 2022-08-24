@@ -7,20 +7,21 @@
  */
 
 import semverSatisfies from 'semver/functions/satisfies';
-import type { SerializableRecord } from '@kbn/utility-types';
+
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 
-import { UsageCollectionSetup } from '../../services/usage_collection';
 import { RawDashboardState, SavedDashboardPanel } from '../../types';
 import {
   migratePanelsTo730,
-  SavedDashboardPanelTo60,
-  SavedDashboardPanel730ToLatest,
-  SavedDashboardPanel610,
-  SavedDashboardPanel630,
-  SavedDashboardPanel640To720,
-  SavedDashboardPanel620,
+  type SavedDashboardPanelTo60,
+  type SavedDashboardPanel730ToLatest,
+  type SavedDashboardPanel610,
+  type SavedDashboardPanel630,
+  type SavedDashboardPanel640To720,
+  type SavedDashboardPanel620,
 } from '../../../common';
 
 /**
