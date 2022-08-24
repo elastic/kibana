@@ -24,13 +24,12 @@ interface SetupDeps {
 
 export class ControlsPlugin implements Plugin<object, object, SetupDeps> {
   public setup(core: CoreSetup, { embeddable, unifiedSearch }: SetupDeps) {
-    embeddable.registerEmbeddableFactory(optionsListPersistableStateServiceFactory());
-    embeddable.registerEmbeddableFactory(rangeSliderPersistableStateServiceFactory());
-    embeddable.registerEmbeddableFactory(timeSliderPersistableStateServiceFactory());
-
     embeddable.registerEmbeddableFactory(
       controlGroupContainerPersistableStateServiceFactory(embeddable)
     );
+    embeddable.registerEmbeddableFactory(optionsListPersistableStateServiceFactory());
+    embeddable.registerEmbeddableFactory(rangeSliderPersistableStateServiceFactory());
+    embeddable.registerEmbeddableFactory(timeSliderPersistableStateServiceFactory());
 
     setupOptionsListSuggestionsRoute(core, unifiedSearch.autocomplete.getAutocompleteSettings);
     return {};

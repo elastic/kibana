@@ -9,6 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
+import type { ControlInput } from '../../types';
 import { TIME_SLIDER_CONTROL } from '../../time_slider/types';
 
 interface Props {
@@ -31,7 +32,7 @@ export const CreateTimeSliderControlButton = ({
           closePopover();
         }
       }}
-      dataTestSubj="controls-create-timeslider-button"
+      data-test-subj="controls-create-timeslider-button"
       disabled={hasTimeSliderControl}
       toolTipContent={
         hasTimeSliderControl

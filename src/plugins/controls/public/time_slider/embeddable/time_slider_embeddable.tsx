@@ -55,7 +55,7 @@ export class TimeSliderControlEmbeddable extends Embeddable<
 
     const {
       data: { timefilter },
-      settings: { getDateFormat, getDefaultTimeRange, getTimezone },
+      settings: { getDateFormat, getTimezone },
     } = pluginServices.getServices();
 
     this.getDateFormat = getDateFormat;

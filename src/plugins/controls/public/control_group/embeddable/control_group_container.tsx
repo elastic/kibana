@@ -29,7 +29,6 @@ import {
 import { OverlayRef } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { Container, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { TIME_SLIDER_CONTROL } from '../..';
 import {
   ControlGroupInput,
   ControlGroupOutput,
@@ -51,7 +50,7 @@ import { controlGroupReducers } from '../state/control_group_reducers';
 import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
 import { CreateControlButton, CreateControlButtonTypes } from '../editor/create_control';
 import { CreateTimeSliderControlButton } from '../editor/create_time_slider_control';
-import { TimeSliderControlEmbeddable } from '../../time_slider';
+import { TimeSliderControlEmbeddable, TIME_SLIDER_CONTROL } from '../../time_slider';
 
 let flyoutRef: OverlayRef | undefined;
 export const setFlyoutRef = (newRef: OverlayRef | undefined) => {
@@ -71,7 +70,6 @@ export class ControlGroupContainer extends Container<
 
   private relevantDataViewId?: string;
   private lastUsedDataViewId?: string;
-  private allPanelsLoaded: boolean;
 
   private reduxEmbeddableTools: ReduxEmbeddableTools<
     ControlGroupReduxState,
@@ -133,7 +131,6 @@ export class ControlGroupContainer extends Container<
       const child = this.getChild(id);
       return child.type === TIME_SLIDER_CONTROL;
     });
-    const ControlsServicesProvider = pluginServices.getContextProvider();
     return (
       <CreateTimeSliderControlButton
         addNewEmbeddable={(type, input) => this.addNewEmbeddable(type, input)}
@@ -203,8 +200,6 @@ export class ControlGroupContainer extends Container<
       embeddable: this,
       reducers: controlGroupReducers,
     });
-
-    this.allPanelsLoaded = false;
 
     // when all children are ready setup subscriptions
     this.untilReady().then(() => {
