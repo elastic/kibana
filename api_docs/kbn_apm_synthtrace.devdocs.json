@@ -1301,6 +1301,20 @@
             ],
             "path": "packages/kbn-apm-synthtrace/src/lib/apm/index.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-synthtrace",
+            "id": "def-server.apm.ApmSynthtraceKibanaClient",
+            "type": "Object",
+            "tags": [],
+            "label": "ApmSynthtraceKibanaClient",
+            "description": [],
+            "signature": [
+              "typeof ",
+              "ApmSynthtraceKibanaClient"
+            ],
+            "path": "packages/kbn-apm-synthtrace/src/lib/apm/index.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
