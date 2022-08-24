@@ -6,7 +6,7 @@
  */
 import { schema as rt, TypeOf } from '@kbn/config-schema';
 import yaml from 'js-yaml';
-import { PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import type {
   ElasticsearchClient,
   SavedObject,

@@ -8,19 +8,19 @@ import { httpServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 import {
   createRulesConfig,
   defineUpdateRulesConfigRoute,
-  PackagePolicyRuleUpdatePayload,
   getUpdatedPackagePolicy,
   updatePackagePolicyVars,
   updateRulesById,
   UpdateRulesConfigBodySchema,
   updateRulesConfigurationHandler,
+  type PackagePolicyRuleUpdatePayload,
 } from './update_rules_configuration';
 import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import type { KibanaRequest, SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
 import { Chance } from 'chance';
 import { createCspRequestHandlerContextMock } from '../../mocks';
-import { CspRequestHandlerContext } from '../../types';
-import { CspRule } from '../../../common/schemas';
+import type { CspRequestHandlerContext } from '../../types';
+import type { CspRule } from '../../../common/schemas';
 
 const chance = new Chance();
 
@@ -28,7 +28,7 @@ const chance = new Chance();
  * rules that differ only in their 'enabled' value
  */
 const setupRules = () => {
-  const regoRulesIds = ['1.1.1', '1.1.2'];
+  const regoRulesIds = ['cis_1_1_1', 'cis_1_1_2'];
   const ids: string[] = chance.unique(chance.string, regoRulesIds.length);
   const disabledRules: Array<SavedObject<PackagePolicyRuleUpdatePayload>> = Array.from(
     { length: ids.length },
@@ -85,7 +85,7 @@ const setupPackagePolicyServiceGetMock = (mocks: CspUpdateRulesConfigMocks) => {
   mocks.packagePolicyServiceMock.get.mockReturnValue(Promise.resolve(mocks.packagePolicyMock));
 };
 
-const getMocks = async () => {
+const getMocks = () => {
   const { enabledRules, disabledRules } = setupRules();
   const responseMock = httpServerMock.createResponseFactory();
   const requestMock = {
@@ -93,7 +93,7 @@ const getMocks = async () => {
   };
   const contextMock = createCspRequestHandlerContextMock();
   const packagePolicyMock = createPackagePolicyMock();
-  const cspContext = await contextMock.csp;
+  const cspContext = contextMock.csp;
   const {
     soClient: soClientMock,
     packagePolicyService: packagePolicyServiceMock,
@@ -136,7 +136,7 @@ describe('Update rules configuration API', () => {
 
     const [_, handler] = router.post.mock.calls[0];
 
-    const mocks = await getMocks();
+    const mocks = getMocks();
     setupRequestMock(mocks);
 
     const { contextMock, responseMock, requestMock } = mocks;
@@ -151,7 +151,7 @@ describe('Update rules configuration API', () => {
     defineUpdateRulesConfigRoute(router);
     const [_, handler] = router.post.mock.calls[0];
 
-    const { contextMock, responseMock, requestMock } = await getMocks();
+    const { contextMock, responseMock, requestMock } = getMocks();
 
     contextMock.fleet = {
       authz: { fleet: { all: false } },
@@ -163,7 +163,7 @@ describe('Update rules configuration API', () => {
   });
 
   it('create csp rules config based on activated csp rules', async () => {
-    const { enabledRules } = await getMocks();
+    const { enabledRules } = getMocks();
 
     const cspConfig = createRulesConfig(enabledRules);
     expect(cspConfig).toMatchObject({
@@ -176,7 +176,7 @@ describe('Update rules configuration API', () => {
   });
 
   it('create empty csp rules config when all rules are disabled', async () => {
-    const { disabledRules } = await getMocks();
+    const { disabledRules } = getMocks();
 
     const cspConfig = createRulesConfig(disabledRules);
     expect(cspConfig).toMatchObject({ runtime_cfg: { activated_rules: {} } });
@@ -200,7 +200,7 @@ describe('Update rules configuration API', () => {
   });
 
   it('updates saved-object rules', async () => {
-    const mocks = await getMocks();
+    const mocks = getMocks();
 
     setupRequestMock(mocks);
     setupSoClientBulkGetMock(mocks);
@@ -223,7 +223,7 @@ describe('Update rules configuration API', () => {
   });
 
   it('verify that the API for updating package policy was invoked', async () => {
-    const mocks = await getMocks();
+    const mocks = getMocks();
 
     setupRequestMock(mocks);
     setupSoClientBulkGetMock(mocks);
@@ -250,7 +250,7 @@ describe('Update rules configuration API', () => {
   });
 
   it("updates to package policy vars doesn't override unknown vars", async () => {
-    const mocks = await getMocks();
+    const mocks = getMocks();
 
     setupRequestMock(mocks);
     setupSoClientBulkGetMock(mocks);
@@ -260,7 +260,6 @@ describe('Update rules configuration API', () => {
 
     const { esClientMock, soClientMock, packagePolicyMock, packagePolicyServiceMock, cspContext } =
       mocks;
-    packagePolicyServiceMock.update.mockReturnValue(Promise.resolve(packagePolicyMock));
 
     const dummyVar = { type: 'ymal', value: 'foo ' };
     packagePolicyMock.vars!.foo = { ...dummyVar };
@@ -279,7 +278,7 @@ describe('Update rules configuration API', () => {
   });
 
   it('attempts to rollback rules saved-object when package policy update failed', async () => {
-    const mocks = await getMocks();
+    const mocks = getMocks();
 
     setupRequestMock(mocks);
     setupSoClientBulkGetMock(mocks);
@@ -306,7 +305,7 @@ describe('Update rules configuration API', () => {
   });
 
   it('updates package policy as authenticated user', async () => {
-    const mocks = await getMocks();
+    const mocks = getMocks();
 
     setupRequestMock(mocks);
     setupSoClientBulkGetMock(mocks);
@@ -325,7 +324,7 @@ describe('Update rules configuration API', () => {
   });
 
   it('handles failed rules saved object update', async () => {
-    const mocks = await getMocks();
+    const mocks = getMocks();
 
     setupRequestMock(mocks);
     setupSoClientBulkGetMock(mocks);
@@ -353,7 +352,7 @@ describe('Update rules configuration API', () => {
   });
 
   it('handles failed rules package policy update', async () => {
-    const mocks = await getMocks();
+    const mocks = getMocks();
 
     setupRequestMock(mocks);
     setupSoClientBulkGetMock(mocks);
