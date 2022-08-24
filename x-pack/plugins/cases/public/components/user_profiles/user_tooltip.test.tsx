@@ -22,7 +22,6 @@ describe('UserToolTip', () => {
       },
       user: {
         username: 'user',
-        display_name: 'Some User',
         email: 'some.user@google.com',
         full_name: 'Some Super User',
       },
@@ -37,8 +36,7 @@ describe('UserToolTip', () => {
     fireEvent.mouseOver(screen.getByText('case user'));
 
     await waitFor(() => screen.getByTestId('user-profile-tooltip'));
-    expect(screen.getByText('Some User')).toBeInTheDocument();
-    expect(screen.getByText('(Some Super User)')).toBeInTheDocument();
+    expect(screen.getByText('Some Super User')).toBeInTheDocument();
     expect(screen.getByText('some.user@google.com')).toBeInTheDocument();
     expect(screen.getByText('SU')).toBeInTheDocument();
   });
@@ -54,7 +52,6 @@ describe('UserToolTip', () => {
       },
       user: {
         username: 'user',
-        display_name: 'Some User',
         email: 'some.user@google.com',
       },
     };
@@ -68,8 +65,7 @@ describe('UserToolTip', () => {
     fireEvent.mouseOver(screen.getByText('case user'));
 
     await waitFor(() => screen.getByTestId('user-profile-tooltip'));
-    expect(screen.getByText('Some User')).toBeInTheDocument();
-    expect(screen.queryByText('(Some Super User)')).not.toBeInTheDocument();
+    expect(screen.queryByText('Some Super User')).not.toBeInTheDocument();
     expect(screen.getByText('some.user@google.com')).toBeInTheDocument();
     expect(screen.getByText('SU')).toBeInTheDocument();
   });
@@ -100,7 +96,6 @@ describe('UserToolTip', () => {
 
     await waitFor(() => screen.getByTestId('user-profile-tooltip'));
     expect(screen.getByText('Some Super User')).toBeInTheDocument();
-    expect(screen.queryByText('(Some Super User)')).not.toBeInTheDocument();
     expect(screen.getByText('some.user@google.com')).toBeInTheDocument();
     expect(screen.getByText('SU')).toBeInTheDocument();
   });
@@ -130,8 +125,6 @@ describe('UserToolTip', () => {
 
     await waitFor(() => screen.getByTestId('user-profile-tooltip'));
     expect(screen.queryByText('Some Super User')).not.toBeInTheDocument();
-    expect(screen.queryByText('Some User')).not.toBeInTheDocument();
-    expect(screen.queryByText('(Some Super User)')).not.toBeInTheDocument();
     expect(screen.getByText('some.user@google.com')).toBeInTheDocument();
     expect(screen.getByText('SU')).toBeInTheDocument();
   });
@@ -160,8 +153,6 @@ describe('UserToolTip', () => {
 
     await waitFor(() => screen.getByTestId('user-profile-tooltip'));
     expect(screen.queryByText('Some Super User')).not.toBeInTheDocument();
-    expect(screen.queryByText('Some User')).not.toBeInTheDocument();
-    expect(screen.queryByText('(Some Super User)')).not.toBeInTheDocument();
     expect(screen.queryByText('some.user@google.com')).not.toBeInTheDocument();
     expect(screen.getByText('user')).toBeInTheDocument();
     expect(screen.getByText('SU')).toBeInTheDocument();

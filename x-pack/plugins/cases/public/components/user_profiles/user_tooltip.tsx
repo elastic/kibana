@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTextColor, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { UserProfileUserInfo, UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { CaseUserAvatar } from './user_avatar';
 import { getName } from './display_name';
@@ -15,15 +15,10 @@ import * as i18n from './translations';
 
 const UserFullInformation: React.FC<{ profile?: UserProfileWithAvatar }> = React.memo(
   ({ profile }) => {
-    if (profile?.user.display_name && profile?.user.full_name) {
+    if (profile?.user.full_name) {
       return (
         <EuiText size="s" className="eui-textBreakWord">
-          <strong data-test-subj="user-profile-tooltip-display-name">
-            {profile.user.display_name}
-          </strong>{' '}
-          <EuiTextColor color="subdued" data-test-subj="user-profile-tooltip-full-name">
-            {`(${profile.user.full_name})`}
-          </EuiTextColor>
+          <strong data-test-subj="user-profile-tooltip-full-name">{profile.user.full_name}</strong>
         </EuiText>
       );
     }
@@ -85,7 +80,7 @@ const UserFullRepresentationComponent: React.FC<UserFullRepresentationProps> = (
 UserFullRepresentationComponent.displayName = 'UserFullRepresentation';
 
 const displayEmail = (profile?: UserProfileWithAvatar) => {
-  return (profile?.user.display_name || profile?.user.full_name) && profile?.user.email;
+  return profile?.user.full_name && profile?.user.email;
 };
 
 export interface UserToolTipProps {
