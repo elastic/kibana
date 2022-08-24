@@ -6,7 +6,7 @@
  */
 import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -236,13 +236,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   });
   setRefetch(refetch);
 
-  const isFirstUpdate = useRef(true);
-  useEffect(() => {
-    if (isFirstUpdate.current && !loading) {
-      isFirstUpdate.current = false;
-    }
-  }, [loading]);
-
   useEffect(() => {
     dispatch(tGridActions.updateIsLoading({ id: STANDALONE_ID, isLoading: loading }));
   }, [dispatch, loading]);
@@ -273,6 +266,12 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     [deletedEventIds.length, totalCount]
   );
   const hasAlerts = totalCountMinusDeleted > 0;
+
+  // Only show the table-spanning loading indicator for the initial fetch of the data.
+  // Subsequent fetches (e.g. for pagination) will show a small loading indicator on
+  // top of the table and the table will display the current page until the next page
+  // is fetched. This prevents a flicker when paginating.
+  const showFullLoading = loading && !hasAlerts;
 
   const nonDeletedEvents = useMemo(
     () => events.filter((e) => !deletedEventIds.includes(e._id)),
@@ -328,7 +327,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
             Subsequent fetches (e.g. for pagination) will show a small loading indicator on
             top of the table and the tabke will display the current page until the next page
             is fetched. This prevents a flicker when paginating. */}
-        {isFirstUpdate.current && <TGridLoading />}
+        {showFullLoading && <TGridLoading />}
         {canQueryTimeline ? (
           <TimelineContext.Provider value={timelineContext}>
             <EventsContainerLoading

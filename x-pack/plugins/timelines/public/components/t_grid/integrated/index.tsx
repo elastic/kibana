@@ -8,7 +8,7 @@
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
@@ -256,19 +256,18 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
     dispatch(tGridActions.updateIsLoading({ id, isLoading: loading }));
   }, [dispatch, id, loading]);
 
-  const isFirstUpdate = useRef(true);
-  useEffect(() => {
-    if (isFirstUpdate.current && !loading) {
-      isFirstUpdate.current = false;
-    }
-  }, [loading]);
-
   const totalCountMinusDeleted = useMemo(
     () => (totalCount > 0 ? totalCount - deletedEventIds.length : 0),
     [deletedEventIds.length, totalCount]
   );
 
   const hasAlerts = totalCountMinusDeleted > 0;
+
+  // Only show the table-spanning loading indicator for the initial fetch of the data.
+  // Subsequent fetches (e.g. for pagination) will show a small loading indicator on
+  // top of the table and the table will display the current page until the next page
+  // is fetched. This prevents a flicker when paginating.
+  const showFullLoading = loading && !hasAlerts;
 
   const nonDeletedEvents = useMemo(
     () => events.filter((e) => !deletedEventIds.includes(e._id)),
@@ -302,11 +301,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
         data-test-subj="events-viewer-panel"
         $isFullScreen={globalFullScreen}
       >
-        {/* Only show the table-spanning loading indicator for the initial fetch of the data.
-            Subsequent fetches (e.g. for pagination) will show a small loading indicator on
-            top of the table and the tabke will display the current page until the next page
-            is fetched. This prevents a flicker when paginating. */}
-        {isFirstUpdate.current && <TGridLoading height="short" />}
+        {showFullLoading && <TGridLoading height="short" />}
 
         {graphOverlay}
 
