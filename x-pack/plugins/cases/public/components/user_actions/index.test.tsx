@@ -32,6 +32,7 @@ const onShowAlertDetails = jest.fn();
 const defaultProps = {
   caseServices: {},
   caseUserActions: [],
+  userProfiles: new Map(),
   connectors: [],
   actionsNavigation: { href: jest.fn(), onClick: jest.fn() },
   getRuleDetailsHref: jest.fn(),
@@ -440,6 +441,7 @@ describe(`UserActions`, () => {
         ).toBe('lock');
       });
     });
+
     it('shows a lockOpen icon if the action is unisolate/release', async () => {
       const isolateAction = [getHostIsolationUserAction()];
       const props = {

@@ -6,8 +6,8 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
-import { isEqual } from 'lodash';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { isEqual, uniq } from 'lodash';
 import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_get_current_user_profile';
 import { useBulkGetUserProfiles } from '../../../containers/user_profiles/use_bulk_get_user_profiles';
 import { useGetConnectors } from '../../../containers/configure/use_connectors';
@@ -58,9 +58,18 @@ export const CaseViewActivity = ({
     [caseData.assignees]
   );
 
+  const [uidsToRetrieve, setUidsToRetrieve] = useState<string[]>([]);
+
   const { data: userProfiles, isLoading: isLoadingUserProfiles } = useBulkGetUserProfiles({
-    uids: assignees,
+    uids: uidsToRetrieve,
   });
+
+  useEffect(() => {
+    if (userActionsData?.profileUids !== undefined) {
+      const uids = uniq([...userActionsData.profileUids, ...assignees]);
+      setUidsToRetrieve(uids);
+    }
+  }, [assignees, userActionsData?.profileUids]);
 
   const { data: currentUserProfile, isLoading: isLoadingCurrentUserProfile } =
     useGetCurrentUserProfile();
@@ -151,10 +160,12 @@ export const CaseViewActivity = ({
         {isLoadingUserActions && (
           <EuiLoadingContent lines={8} data-test-subj="case-view-loading-content" />
         )}
-        {!isLoadingUserActions && userActionsData && (
+        {!isLoadingUserActions && userActionsData && userProfiles && (
           <EuiFlexGroup direction="column" responsive={false} data-test-subj="case-view-activity">
             <EuiFlexItem>
               <UserActions
+                userProfiles={userProfiles}
+                currentUserProfile={currentUserProfile}
                 getRuleDetailsHref={ruleDetailsNavigation?.href}
                 onRuleDetailsClick={ruleDetailsNavigation?.onClick}
                 caseServices={userActionsData.caseServices}
