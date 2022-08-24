@@ -17,7 +17,8 @@ export const computeParentSeries = (
   currentMetric: Metric,
   subFunctionMetric: Metric,
   pipelineAgg: SupportedMetric,
-  meta?: number
+  meta?: number,
+  window?: string
 ) => {
   const aggregationMap = SUPPORTED_METRICS[aggregation];
   if (!aggregationMap) {

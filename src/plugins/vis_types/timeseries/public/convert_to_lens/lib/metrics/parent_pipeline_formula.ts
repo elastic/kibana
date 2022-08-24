@@ -8,7 +8,6 @@
 
 import type { Metric, MetricType } from '../../../../common/types';
 import { SUPPORTED_METRICS, getFormulaFromMetric, SupportedMetric } from './supported_metrics';
-import { getFilterRatioFormula } from './filter_ratio_formula';
 import { getFormulaEquivalent } from './metrics_helpers';
 
 export const getParentPipelineSeriesFormula = (
