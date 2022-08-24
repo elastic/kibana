@@ -42,7 +42,7 @@ Review the following information about the {kib} 8.4.0 release.
 [[known-issue-8.4.0]]
 === Known issues
 
-If you have alerting rules with configured snooze notifications, do not upgrade {kib} from 8.3.0 to 8.4.0.
+If you have alerting rules with configured snooze notifications, do not upgrade {kib} to 8.4.0.
 
 To verify if your alerting rules have snooze notifications, open the main menu, then click **Stack Management** -> **Rules and Connectors**.
 Filter the rule list by selecting **View** -> **Snoozed**.
