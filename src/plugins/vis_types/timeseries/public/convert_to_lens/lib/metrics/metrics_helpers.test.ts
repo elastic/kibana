@@ -44,7 +44,7 @@ describe('getPercentilesSeries', () => {
         value: '90',
       },
     ] as Metric['percentiles'];
-    const config = getPercentilesSeries(percentiles, 'bytes');
+    const config = getPercentilesSeries(percentiles, 'everything', '', 'bytes');
     expect(config).toStrictEqual([
       {
         agg: 'percentile',
@@ -82,7 +82,7 @@ describe('getPercentileRankSeries', () => {
   test('should return correct config for multiple percentile ranks', () => {
     const values = ['1', '5', '7'] as Metric['values'];
     const colors = ['#68BC00', 'rgba(0,63,188,1)', 'rgba(188,38,0,1)'] as Metric['colors'];
-    const config = getPercentileRankSeries(values, colors, 'day_of_week_i');
+    const config = getPercentileRankSeries(values, colors, 'everything', '', 'day_of_week_i');
     expect(config).toStrictEqual([
       {
         agg: 'percentile_rank',
