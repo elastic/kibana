@@ -8,6 +8,7 @@
 import type { SavedObjectMigrationFn } from '@kbn/core/server';
 
 import type { PackagePolicy } from '../../../common';
+import type { AgentPolicy } from '../../types';
 
 export const migratePackagePolicyToV850: SavedObjectMigrationFn<PackagePolicy, PackagePolicy> = (
   packagePolicyDoc,
@@ -17,4 +18,16 @@ export const migratePackagePolicyToV850: SavedObjectMigrationFn<PackagePolicy, P
   delete packagePolicyDoc.attributes.output_id;
 
   return packagePolicyDoc;
+};
+
+export const migrateAgentPolicyToV850: SavedObjectMigrationFn<
+  Exclude<AgentPolicy, 'download_source_id'> & {
+    package_policies: string[];
+  },
+  AgentPolicy
+> = (agentPolicyDoc) => {
+  // @ts-expect-error
+  delete agentPolicyDoc.attributes.package_policies;
+
+  return agentPolicyDoc;
 };
