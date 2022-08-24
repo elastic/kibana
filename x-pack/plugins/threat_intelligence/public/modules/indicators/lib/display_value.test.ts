@@ -46,7 +46,7 @@ describe('displayValueField()', () => {
   it('should return correct RawIndicatorFieldId for valid field', () => {
     const mockIndicator = generateMockIndicator();
     const result = displayField(mockIndicator);
-    expect(result).toEqual(RawIndicatorFieldId.UrlFull);
+    expect(result).toEqual(RawIndicatorFieldId.Ip);
   });
 
   it('should return null for invalid field', () => {
