@@ -44,6 +44,6 @@ addons.setConfig({
   showPanel: true,
   isFullscreen: false,
   panelPosition: 'bottom',
-  isToolshown: true,
+  showToolbar: true,
   selectedPanel: PANEL_ID,
 });
