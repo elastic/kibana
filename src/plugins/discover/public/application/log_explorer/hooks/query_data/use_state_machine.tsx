@@ -10,7 +10,7 @@ import { TimeRange } from '@kbn/es-query';
 import { useInterpret, useActor } from '@xstate/react';
 import createContainer from 'constate';
 import moment from 'moment';
-import { useMemo, useCallback } from 'react';
+import { useMemo } from 'react';
 import { merge, of } from 'rxjs';
 import { dataAccessStateMachine } from '../../state_machines/data_access_state_machine/state_machine';
 import {
