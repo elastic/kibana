@@ -25,12 +25,10 @@ export function handleWarning(
   response: estypes.SearchResponse,
   theme: ThemeServiceStart
 ) {
-  if (warning.isTimeout) {
-    getNotifications().toasts.addWarning({ title: warning.message });
-  }
+  const title = warning.message;
 
-  if (warning.isShardFailure) {
-    const title = warning.message;
+  // if warning message contains text, show in ShardFailureOpenModalButton
+  if (warning.text) {
     const text = toMountPoint(
       <>
         {warning.text}
@@ -46,5 +44,9 @@ export function handleWarning(
     );
 
     getNotifications().toasts.addWarning({ title, text });
+    return;
   }
+
+  // timeout warning, or shard warning with no failure reason
+  getNotifications().toasts.addWarning({ title });
 }

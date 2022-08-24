@@ -104,14 +104,6 @@ export interface SearchResponseWarning {
    */
   type: 'timed_out' | 'generic_shard_warning' | estypes.ShardFailure['reason']['reason'];
   /**
-   * isTimeout: true for general internal ES timeout warning
-   */
-  isTimeout?: boolean;
-  /**
-   * isTimeout: true for shard-specific internal ES warning
-   */
-  isShardFailure?: boolean;
-  /**
    * message: failure reason from ES
    */
   message: string;

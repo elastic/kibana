@@ -38,7 +38,6 @@ describe('extract search response warnings', () => {
 
     expect(extractWarnings(response)).toEqual([
       {
-        isShardFailure: true,
         message: '2 of 4 shards failed',
         text: 'The data you are seeing might be incomplete or wrong.',
         type: 'illegal_argument_exception',
@@ -55,7 +54,6 @@ describe('extract search response warnings', () => {
     };
     expect(extractWarnings(warnings)).toEqual([
       {
-        isTimeout: true,
         message: 'Data might be incomplete because your request timed out',
         type: 'timed_out',
       },
@@ -71,7 +69,6 @@ describe('extract search response warnings', () => {
     } as estypes.SearchResponse;
     expect(extractWarnings(warnings)).toEqual([
       {
-        isShardFailure: true,
         message: '77 of 79 shards failed',
         text: 'The data you are seeing might be incomplete or wrong.',
         type: 'generic_shard_warning',
@@ -88,7 +85,6 @@ describe('extract search response warnings', () => {
     } as estypes.SearchResponse);
     expect(warnings).toEqual([
       {
-        isShardFailure: true,
         message: '77 of 79 shards failed',
         text: 'The data you are seeing might be incomplete or wrong.',
         type: 'generic_shard_warning',
@@ -105,8 +101,8 @@ describe('extract search response warnings', () => {
       },
     } as estypes.SearchResponse);
     const [shardFailures, timedOut] = [
-      warnings.filter(({ isShardFailure }) => isShardFailure === true),
-      warnings.filter(({ isTimeout }) => isTimeout === true),
+      warnings.filter(({ type }) => type !== 'timed_out'),
+      warnings.filter(({ type }) => type === 'timed_out'),
     ];
     expect(shardFailures[0]!.message).toBeDefined();
     expect(timedOut[0]!.message).toBeDefined();

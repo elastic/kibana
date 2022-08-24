@@ -19,7 +19,6 @@ export function extractWarnings(rawResponse: estypes.SearchResponse): SearchResp
   if (rawResponse.timed_out === true) {
     warnings.push({
       type: 'timed_out',
-      isTimeout: true,
       message: i18n.translate('data.search.searchSource.fetch.requestTimedOutNotificationMessage', {
         defaultMessage: 'Data might be incomplete because your request timed out',
       }),
@@ -27,7 +26,6 @@ export function extractWarnings(rawResponse: estypes.SearchResponse): SearchResp
   }
 
   if (rawResponse._shards && rawResponse._shards.failed) {
-    const isShardFailure = true;
     const message = i18n.translate(
       'data.search.searchSource.fetch.shardsFailedNotificationMessage',
       {
@@ -45,10 +43,10 @@ export function extractWarnings(rawResponse: estypes.SearchResponse): SearchResp
 
     if (rawResponse._shards.failures) {
       rawResponse._shards.failures?.forEach((f) => {
-        warnings.push({ type: f.reason.type, isShardFailure, message, text });
+        warnings.push({ type: f.reason.type, message, text });
       });
     } else {
-      warnings.push({ type: 'generic_shard_warning', isShardFailure, message, text });
+      warnings.push({ type: 'generic_shard_warning', message, text });
     }
   }
 
