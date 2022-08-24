@@ -94,26 +94,6 @@ describe('build_exceptions_filter', () => {
                   "bool": Object {
                     "filter": Array [
                       Object {
-                        "nested": Object {
-                          "path": "some.parentField",
-                          "query": Object {
-                            "filter": Object {
-                              "bool": Object {
-                                "minimum_should_match": 1,
-                                "should": Array [
-                                  Object {
-                                    "match_phrase": Object {
-                                      "some.parentField.nested.field": "some value",
-                                    },
-                                  },
-                                ],
-                              },
-                            },
-                          },
-                          "score_mode": "none",
-                        },
-                      },
-                      Object {
                         "bool": Object {
                           "minimum_should_match": 1,
                           "should": Array [
@@ -123,6 +103,24 @@ describe('build_exceptions_filter', () => {
                               },
                             },
                           ],
+                        },
+                      },
+                      Object {
+                        "nested": Object {
+                          "path": "some.parentField",
+                          "query": Object {
+                            "bool": Object {
+                              "minimum_should_match": 1,
+                              "should": Array [
+                                Object {
+                                  "match_phrase": Object {
+                                    "some.parentField.nested.field": "some value",
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                          "score_mode": "none",
                         },
                       },
                     ],
@@ -558,6 +556,18 @@ describe('build_exceptions_filter', () => {
               "bool": Object {
                 "filter": Array [
                   Object {
+                    "bool": Object {
+                      "minimum_should_match": 1,
+                      "should": Array [
+                        Object {
+                          "match_phrase": Object {
+                            "host.name": "some host name",
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  Object {
                     "nested": Object {
                       "path": "parent.field",
                       "query": Object {
@@ -593,24 +603,75 @@ describe('build_exceptions_filter', () => {
                       "score_mode": "none",
                     },
                   },
-                  Object {
-                    "bool": Object {
-                      "minimum_should_match": 1,
-                      "should": Array [
-                        Object {
-                          "match_phrase": Object {
-                            "host.name": "some host name",
-                          },
-                        },
-                      ],
-                    },
-                  },
                 ],
               },
             },
             Object {
               "bool": Object {
                 "filter": Array [
+                  Object {
+                    "bool": Object {
+                      "minimum_should_match": 1,
+                      "should": Array [
+                        Object {
+                          "bool": Object {
+                            "minimum_should_match": 1,
+                            "should": Array [
+                              Object {
+                                "match_phrase": Object {
+                                  "host.name": "some \\"host\\" name",
+                                },
+                              },
+                            ],
+                          },
+                        },
+                        Object {
+                          "bool": Object {
+                            "minimum_should_match": 1,
+                            "should": Array [
+                              Object {
+                                "match_phrase": Object {
+                                  "host.name": "some other host name",
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  Object {
+                    "bool": Object {
+                      "must_not": Object {
+                        "bool": Object {
+                          "minimum_should_match": 1,
+                          "should": Array [
+                            Object {
+                              "match_phrase": Object {
+                                "host.name": "some host name",
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    },
+                  },
+                  Object {
+                    "bool": Object {
+                      "must_not": Object {
+                        "bool": Object {
+                          "minimum_should_match": 1,
+                          "should": Array [
+                            Object {
+                              "exists": Object {
+                                "field": "host.name",
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    },
+                  },
                   Object {
                     "nested": Object {
                       "path": "parent.field",
@@ -680,69 +741,6 @@ describe('build_exceptions_filter', () => {
                         },
                       },
                       "score_mode": "none",
-                    },
-                  },
-                  Object {
-                    "bool": Object {
-                      "minimum_should_match": 1,
-                      "should": Array [
-                        Object {
-                          "bool": Object {
-                            "minimum_should_match": 1,
-                            "should": Array [
-                              Object {
-                                "match_phrase": Object {
-                                  "host.name": "some \\"host\\" name",
-                                },
-                              },
-                            ],
-                          },
-                        },
-                        Object {
-                          "bool": Object {
-                            "minimum_should_match": 1,
-                            "should": Array [
-                              Object {
-                                "match_phrase": Object {
-                                  "host.name": "some other host name",
-                                },
-                              },
-                            ],
-                          },
-                        },
-                      ],
-                    },
-                  },
-                  Object {
-                    "bool": Object {
-                      "must_not": Object {
-                        "bool": Object {
-                          "minimum_should_match": 1,
-                          "should": Array [
-                            Object {
-                              "match_phrase": Object {
-                                "host.name": "some host name",
-                              },
-                            },
-                          ],
-                        },
-                      },
-                    },
-                  },
-                  Object {
-                    "bool": Object {
-                      "must_not": Object {
-                        "bool": Object {
-                          "minimum_should_match": 1,
-                          "should": Array [
-                            Object {
-                              "exists": Object {
-                                "field": "host.name",
-                              },
-                            },
-                          ],
-                        },
-                      },
                     },
                   },
                 ],
@@ -770,151 +768,148 @@ describe('build_exceptions_filter', () => {
         listClient
       );
       expect(exceptionItemFilter).toMatchInlineSnapshot(`
-        Object {
-          "filter": Array [
-            Object {
-              "bool": Object {
-                "filter": Array [
-                  Object {
-                    "nested": Object {
-                      "path": "parent.field",
-                      "query": Object {
-                        "bool": Object {
-                          "filter": Array [
-                            Object {
-                              "bool": Object {
-                                "minimum_should_match": 1,
-                                "should": Array [
-                                  Object {
-                                    "match_phrase": Object {
-                                      "parent.field.host.name": "some host name",
-                                    },
-                                  },
-                                ],
-                              },
-                            },
-                            Object {
-                              "bool": Object {
-                                "must_not": Object {
-                                  "bool": Object {
-                                    "minimum_should_match": 1,
-                                    "should": Array [
-                                      Object {
-                                        "bool": Object {
-                                          "minimum_should_match": 1,
-                                          "should": Array [
-                                            Object {
-                                              "match_phrase": Object {
-                                                "parent.field.host.name": "some host name",
-                                              },
-                                            },
-                                          ],
-                                        },
-                                      },
-                                      Object {
-                                        "bool": Object {
-                                          "minimum_should_match": 1,
-                                          "should": Array [
-                                            Object {
-                                              "match_phrase": Object {
-                                                "parent.field.host.name": "some other host name",
-                                              },
-                                            },
-                                          ],
-                                        },
-                                      },
-                                    ],
-                                  },
-                                },
-                              },
-                            },
-                            Object {
-                              "bool": Object {
-                                "minimum_should_match": 1,
-                                "should": Array [
-                                  Object {
-                                    "exists": Object {
-                                      "field": "parent.field.host.name",
-                                    },
-                                  },
-                                ],
-                              },
-                            },
-                          ],
-                        },
-                      },
-                      "score_mode": "none",
-                    },
-                  },
-                  Object {
-                    "bool": Object {
-                      "minimum_should_match": 1,
-                      "should": Array [
-                        Object {
-                          "bool": Object {
-                            "minimum_should_match": 1,
-                            "should": Array [
-                              Object {
-                                "match_phrase": Object {
-                                  "host.name": "some \\"host\\" name",
-                                },
-                              },
-                            ],
-                          },
-                        },
-                        Object {
-                          "bool": Object {
-                            "minimum_should_match": 1,
-                            "should": Array [
-                              Object {
-                                "match_phrase": Object {
-                                  "host.name": "some other host name",
-                                },
-                              },
-                            ],
-                          },
-                        },
-                      ],
-                    },
-                  },
-                  Object {
-                    "bool": Object {
-                      "must_not": Object {
+        Array [
+          Object {
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "bool": Object {
+                    "minimum_should_match": 1,
+                    "should": Array [
+                      Object {
                         "bool": Object {
                           "minimum_should_match": 1,
                           "should": Array [
                             Object {
                               "match_phrase": Object {
-                                "host.name": "some host name",
+                                "host.name": "some \\"host\\" name",
                               },
                             },
                           ],
                         },
                       },
-                    },
-                  },
-                  Object {
-                    "bool": Object {
-                      "must_not": Object {
+                      Object {
                         "bool": Object {
                           "minimum_should_match": 1,
                           "should": Array [
                             Object {
-                              "exists": Object {
-                                "field": "host.name",
+                              "match_phrase": Object {
+                                "host.name": "some other host name",
                               },
                             },
                           ],
                         },
                       },
+                    ],
+                  },
+                },
+                Object {
+                  "bool": Object {
+                    "must_not": Object {
+                      "bool": Object {
+                        "minimum_should_match": 1,
+                        "should": Array [
+                          Object {
+                            "match_phrase": Object {
+                              "host.name": "some host name",
+                            },
+                          },
+                        ],
+                      },
                     },
                   },
-                ],
-              },
+                },
+                Object {
+                  "bool": Object {
+                    "must_not": Object {
+                      "bool": Object {
+                        "minimum_should_match": 1,
+                        "should": Array [
+                          Object {
+                            "exists": Object {
+                              "field": "host.name",
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  },
+                },
+                Object {
+                  "nested": Object {
+                    "path": "parent.field",
+                    "query": Object {
+                      "bool": Object {
+                        "filter": Array [
+                          Object {
+                            "bool": Object {
+                              "minimum_should_match": 1,
+                              "should": Array [
+                                Object {
+                                  "match_phrase": Object {
+                                    "parent.field.host.name": "some host name",
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                          Object {
+                            "bool": Object {
+                              "must_not": Object {
+                                "bool": Object {
+                                  "minimum_should_match": 1,
+                                  "should": Array [
+                                    Object {
+                                      "bool": Object {
+                                        "minimum_should_match": 1,
+                                        "should": Array [
+                                          Object {
+                                            "match_phrase": Object {
+                                              "parent.field.host.name": "some host name",
+                                            },
+                                          },
+                                        ],
+                                      },
+                                    },
+                                    Object {
+                                      "bool": Object {
+                                        "minimum_should_match": 1,
+                                        "should": Array [
+                                          Object {
+                                            "match_phrase": Object {
+                                              "parent.field.host.name": "some other host name",
+                                            },
+                                          },
+                                        ],
+                                      },
+                                    },
+                                  ],
+                                },
+                              },
+                            },
+                          },
+                          Object {
+                            "bool": Object {
+                              "minimum_should_match": 1,
+                              "should": Array [
+                                Object {
+                                  "exists": Object {
+                                    "field": "parent.field.host.name",
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    "score_mode": "none",
+                  },
+                },
+              ],
             },
-          ],
-          "unprocessable": false,
-        }
+          },
+        ]
       `);
     });
 
@@ -1253,12 +1248,10 @@ describe('build_exceptions_filter', () => {
       const booleanFilter = await buildListClause(getEntryListMock(), listClient);
 
       expect(booleanFilter).toEqual({
-        listClause: {
-          bool: {
-            filter: {
-              terms: {
-                'host.name': ['127.0.0.1'],
-              },
+        bool: {
+          filter: {
+            terms: {
+              'host.name': ['127.0.0.1'],
             },
           },
         },
@@ -1269,12 +1262,10 @@ describe('build_exceptions_filter', () => {
       const booleanFilter = await buildListClause(getEntryListExcludedMock(), listClient);
 
       expect(booleanFilter).toEqual({
-        listClause: {
-          bool: {
-            must_not: {
-              terms: {
-                'host.name': ['127.0.0.1'],
-              },
+        bool: {
+          must_not: {
+            terms: {
+              'host.name': ['127.0.0.1'],
             },
           },
         },
@@ -1288,19 +1279,16 @@ describe('build_exceptions_filter', () => {
       );
 
       expect(booleanFilter).toEqual({
-        listClause: {
-          bool: {
-            should: [
-              {
-                terms: {
-                  'host.name': ['127.0.0.1'],
-                },
+        bool: {
+          should: [
+            {
+              terms: {
+                'host.name': ['127.0.0.1'],
               },
-            ],
-            minimum_should_match: 1,
-          },
+            },
+          ],
+          minimum_should_match: 1,
         },
-        unprocessable: false,
       });
     });
 
@@ -1311,22 +1299,19 @@ describe('build_exceptions_filter', () => {
       );
 
       expect(booleanFilter).toEqual({
-        listClause: {
-          bool: {
-            should: [
-              {
-                match: {
-                  'host.name': {
-                    query: '127.0.0.1',
-                    operator: 'and',
-                  },
+        bool: {
+          should: [
+            {
+              match: {
+                'host.name': {
+                  query: '127.0.0.1',
+                  operator: 'and',
                 },
               },
-            ],
-            minimum_should_match: 1,
-          },
+            },
+          ],
+          minimum_should_match: 1,
         },
-        unprocessable: false,
       });
     });
   });

@@ -254,70 +254,72 @@ describe('get_filter', () => {
         listClient: listClientMock,
       });
 
-      expect(esFilter).toEqual({
-        bool: {
-          must: [],
-          filter: [
-            {
-              bool: {
-                should: [
-                  {
-                    match: {
-                      'host.name': 'siem',
+      expect(esFilter).toMatchInlineSnapshot(`
+        Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "bool": Object {
+                  "minimum_should_match": 1,
+                  "should": Array [
+                    Object {
+                      "match": Object {
+                        "host.name": "siem",
+                      },
                     },
-                  },
-                ],
-                minimum_should_match: 1,
+                  ],
+                },
               },
-            },
-          ],
-          must_not: [
-            {
-              bool: {
-                should: [
-                  {
-                    bool: {
-                      filter: [
-                        {
-                          nested: {
-                            path: 'some.parentField',
-                            query: {
-                              bool: {
-                                should: [
-                                  {
-                                    match_phrase: {
-                                      'some.parentField.nested.field': 'some value',
-                                    },
+            ],
+            "must": Array [],
+            "must_not": Array [
+              Object {
+                "bool": Object {
+                  "should": Array [
+                    Object {
+                      "bool": Object {
+                        "filter": Array [
+                          Object {
+                            "bool": Object {
+                              "minimum_should_match": 1,
+                              "should": Array [
+                                Object {
+                                  "match_phrase": Object {
+                                    "some.not.nested.field": "some value",
                                   },
-                                ],
-                                minimum_should_match: 1,
-                              },
+                                },
+                              ],
                             },
-                            score_mode: 'none',
                           },
-                        },
-                        {
-                          bool: {
-                            should: [
-                              {
-                                match_phrase: {
-                                  'some.not.nested.field': 'some value',
+                          Object {
+                            "nested": Object {
+                              "path": "some.parentField",
+                              "query": Object {
+                                "bool": Object {
+                                  "minimum_should_match": 1,
+                                  "should": Array [
+                                    Object {
+                                      "match_phrase": Object {
+                                        "some.parentField.nested.field": "some value",
+                                      },
+                                    },
+                                  ],
                                 },
                               },
-                            ],
-                            minimum_should_match: 1,
+                              "score_mode": "none",
+                            },
                           },
-                        },
-                      ],
+                        ],
+                      },
                     },
-                  },
-                ],
+                  ],
+                },
               },
-            },
-          ],
-          should: [],
-        },
-      });
+            ],
+            "should": Array [],
+          },
+        }
+      `);
     });
   });
 });

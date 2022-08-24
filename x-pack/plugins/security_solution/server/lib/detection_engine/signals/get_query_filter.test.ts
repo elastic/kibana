@@ -528,59 +528,72 @@ describe('get_filter', () => {
           lists: [getExceptionListItemSchemaMock()],
           listClient,
         });
-        expect(queryFilter).toEqual({
-          bool: {
-            filter: [
-              { bool: { minimum_should_match: 1, should: [{ match: { 'host.name': 'linux' } }] } },
-            ],
-            must: [],
-            must_not: [
-              {
-                bool: {
-                  should: [
-                    {
-                      bool: {
-                        filter: [
-                          {
-                            nested: {
-                              path: 'some.parentField',
-                              query: {
-                                bool: {
-                                  minimum_should_match: 1,
-                                  should: [
-                                    {
-                                      match_phrase: {
-                                        'some.parentField.nested.field': 'some value',
-                                      },
+        expect(queryFilter).toMatchInlineSnapshot(`
+          Object {
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "bool": Object {
+                    "minimum_should_match": 1,
+                    "should": Array [
+                      Object {
+                        "match": Object {
+                          "host.name": "linux",
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+              "must": Array [],
+              "must_not": Array [
+                Object {
+                  "bool": Object {
+                    "should": Array [
+                      Object {
+                        "bool": Object {
+                          "filter": Array [
+                            Object {
+                              "bool": Object {
+                                "minimum_should_match": 1,
+                                "should": Array [
+                                  Object {
+                                    "match_phrase": Object {
+                                      "some.not.nested.field": "some value",
                                     },
-                                  ],
-                                },
+                                  },
+                                ],
                               },
-                              score_mode: 'none',
                             },
-                          },
-                          {
-                            bool: {
-                              minimum_should_match: 1,
-                              should: [
-                                {
-                                  match_phrase: {
-                                    'some.not.nested.field': 'some value',
+                            Object {
+                              "nested": Object {
+                                "path": "some.parentField",
+                                "query": Object {
+                                  "bool": Object {
+                                    "minimum_should_match": 1,
+                                    "should": Array [
+                                      Object {
+                                        "match_phrase": Object {
+                                          "some.parentField.nested.field": "some value",
+                                        },
+                                      },
+                                    ],
                                   },
                                 },
-                              ],
+                                "score_mode": "none",
+                              },
                             },
-                          },
-                        ],
+                          ],
+                        },
                       },
-                    },
-                  ],
+                    ],
+                  },
                 },
-              },
-            ],
-            should: [],
-          },
-        });
+              ],
+              "should": Array [],
+            },
+          }
+        `);
       });
     });
 
@@ -593,98 +606,111 @@ describe('get_filter', () => {
         lists: [getExceptionListItemSchemaMock(), getExceptionListItemSchemaMock()],
         listClient,
       });
-      expect(queryFilter).toEqual({
-        bool: {
-          filter: [
-            { bool: { minimum_should_match: 1, should: [{ match: { 'host.name': 'linux' } }] } },
-          ],
-          must: [],
-          must_not: [
-            {
-              bool: {
-                should: [
-                  {
-                    bool: {
-                      filter: [
-                        {
-                          nested: {
-                            path: 'some.parentField',
-                            query: {
-                              bool: {
-                                minimum_should_match: 1,
-                                should: [
-                                  {
-                                    match_phrase: {
-                                      'some.parentField.nested.field': 'some value',
-                                    },
-                                  },
-                                ],
-                              },
-                            },
-                            score_mode: 'none',
-                          },
-                        },
-                        {
-                          bool: {
-                            minimum_should_match: 1,
-                            should: [
-                              {
-                                match_phrase: {
-                                  'some.not.nested.field': 'some value',
-                                },
-                              },
-                            ],
-                          },
-                        },
-                      ],
+      expect(queryFilter).toMatchInlineSnapshot(`
+        Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "bool": Object {
+                  "minimum_should_match": 1,
+                  "should": Array [
+                    Object {
+                      "match": Object {
+                        "host.name": "linux",
+                      },
                     },
-                  },
-                  {
-                    bool: {
-                      filter: [
-                        {
-                          nested: {
-                            path: 'some.parentField',
-                            query: {
-                              bool: {
-                                minimum_should_match: 1,
-                                should: [
-                                  {
-                                    match_phrase: {
-                                      'some.parentField.nested.field': 'some value',
-                                    },
-                                  },
-                                ],
-                              },
-                            },
-                            score_mode: 'none',
-                          },
-                        },
-                        {
-                          bool: {
-                            minimum_should_match: 1,
-                            should: [
-                              {
-                                match_phrase: {
-                                  'some.not.nested.field': 'some value',
-                                },
-                              },
-                            ],
-                          },
-                        },
-                      ],
-                    },
-                  },
-                ],
+                  ],
+                },
               },
-            },
-          ],
-          should: [],
-        },
-      });
+            ],
+            "must": Array [],
+            "must_not": Array [
+              Object {
+                "bool": Object {
+                  "should": Array [
+                    Object {
+                      "bool": Object {
+                        "filter": Array [
+                          Object {
+                            "bool": Object {
+                              "minimum_should_match": 1,
+                              "should": Array [
+                                Object {
+                                  "match_phrase": Object {
+                                    "some.not.nested.field": "some value",
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                          Object {
+                            "nested": Object {
+                              "path": "some.parentField",
+                              "query": Object {
+                                "bool": Object {
+                                  "minimum_should_match": 1,
+                                  "should": Array [
+                                    Object {
+                                      "match_phrase": Object {
+                                        "some.parentField.nested.field": "some value",
+                                      },
+                                    },
+                                  ],
+                                },
+                              },
+                              "score_mode": "none",
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    Object {
+                      "bool": Object {
+                        "filter": Array [
+                          Object {
+                            "bool": Object {
+                              "minimum_should_match": 1,
+                              "should": Array [
+                                Object {
+                                  "match_phrase": Object {
+                                    "some.not.nested.field": "some value",
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                          Object {
+                            "nested": Object {
+                              "path": "some.parentField",
+                              "query": Object {
+                                "bool": Object {
+                                  "minimum_should_match": 1,
+                                  "should": Array [
+                                    Object {
+                                      "match_phrase": Object {
+                                        "some.parentField.nested.field": "some value",
+                                      },
+                                    },
+                                  ],
+                                },
+                              },
+                              "score_mode": "none",
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+            "should": Array [],
+          },
+        }
+      `);
     });
 
-    test('it should work with an exception list that includes a nested typ', async () => {
+    test('it should work with an exception list that includes a nested type', async () => {
       const { queryFilter } = await getQueryFilter({
         query: 'host.name: linux',
         language: 'kuery',
@@ -694,51 +720,72 @@ describe('get_filter', () => {
         listClient,
       });
 
-      expect(queryFilter).toEqual({
-        bool: {
-          must: [],
-          filter: [
-            { bool: { should: [{ match: { 'host.name': 'linux' } }], minimum_should_match: 1 } },
-          ],
-          should: [],
-          must_not: [
-            {
-              bool: {
-                should: [
-                  {
-                    bool: {
-                      filter: [
-                        {
-                          nested: {
-                            path: 'some.parentField',
-                            query: {
-                              bool: {
-                                should: [
-                                  {
-                                    match_phrase: { 'some.parentField.nested.field': 'some value' },
-                                  },
-                                ],
-                                minimum_should_match: 1,
-                              },
-                            },
-                            score_mode: 'none',
-                          },
-                        },
-                        {
-                          bool: {
-                            should: [{ match_phrase: { 'some.not.nested.field': 'some value' } }],
-                            minimum_should_match: 1,
-                          },
-                        },
-                      ],
+      expect(queryFilter).toMatchInlineSnapshot(`
+        Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "bool": Object {
+                  "minimum_should_match": 1,
+                  "should": Array [
+                    Object {
+                      "match": Object {
+                        "host.name": "linux",
+                      },
                     },
-                  },
-                ],
+                  ],
+                },
               },
-            },
-          ],
-        },
-      });
+            ],
+            "must": Array [],
+            "must_not": Array [
+              Object {
+                "bool": Object {
+                  "should": Array [
+                    Object {
+                      "bool": Object {
+                        "filter": Array [
+                          Object {
+                            "bool": Object {
+                              "minimum_should_match": 1,
+                              "should": Array [
+                                Object {
+                                  "match_phrase": Object {
+                                    "some.not.nested.field": "some value",
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                          Object {
+                            "nested": Object {
+                              "path": "some.parentField",
+                              "query": Object {
+                                "bool": Object {
+                                  "minimum_should_match": 1,
+                                  "should": Array [
+                                    Object {
+                                      "match_phrase": Object {
+                                        "some.parentField.nested.field": "some value",
+                                      },
+                                    },
+                                  ],
+                                },
+                              },
+                              "score_mode": "none",
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+            "should": Array [],
+          },
+        }
+      `);
     });
 
     test('it should work with an empty list', async () => {
@@ -794,58 +841,71 @@ describe('get_filter', () => {
           listClient,
           excludeExceptions: false,
         });
-        expect(queryFilter).toEqual({
-          bool: {
-            filter: [
-              { bool: { minimum_should_match: 1, should: [{ match: { 'host.name': 'linux' } }] } },
-              {
-                bool: {
-                  should: [
-                    {
-                      bool: {
-                        filter: [
-                          {
-                            nested: {
-                              path: 'some.parentField',
-                              query: {
-                                bool: {
-                                  minimum_should_match: 1,
-                                  should: [
-                                    {
-                                      match_phrase: {
-                                        'some.parentField.nested.field': 'some value',
-                                      },
+        expect(queryFilter).toMatchInlineSnapshot(`
+          Object {
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "bool": Object {
+                    "minimum_should_match": 1,
+                    "should": Array [
+                      Object {
+                        "match": Object {
+                          "host.name": "linux",
+                        },
+                      },
+                    ],
+                  },
+                },
+                Object {
+                  "bool": Object {
+                    "should": Array [
+                      Object {
+                        "bool": Object {
+                          "filter": Array [
+                            Object {
+                              "bool": Object {
+                                "minimum_should_match": 1,
+                                "should": Array [
+                                  Object {
+                                    "match_phrase": Object {
+                                      "some.not.nested.field": "some value",
                                     },
-                                  ],
-                                },
+                                  },
+                                ],
                               },
-                              score_mode: 'none',
                             },
-                          },
-                          {
-                            bool: {
-                              minimum_should_match: 1,
-                              should: [
-                                {
-                                  match_phrase: {
-                                    'some.not.nested.field': 'some value',
+                            Object {
+                              "nested": Object {
+                                "path": "some.parentField",
+                                "query": Object {
+                                  "bool": Object {
+                                    "minimum_should_match": 1,
+                                    "should": Array [
+                                      Object {
+                                        "match_phrase": Object {
+                                          "some.parentField.nested.field": "some value",
+                                        },
+                                      },
+                                    ],
                                   },
                                 },
-                              ],
+                                "score_mode": "none",
+                              },
                             },
-                          },
-                        ],
+                          ],
+                        },
                       },
-                    },
-                  ],
+                    ],
+                  },
                 },
-              },
-            ],
-            must: [],
-            must_not: [],
-            should: [],
-          },
-        });
+              ],
+              "must": Array [],
+              "must_not": Array [],
+              "should": Array [],
+            },
+          }
+        `);
       });
 
       test('it should work with a list with multiple items', async () => {
@@ -858,94 +918,107 @@ describe('get_filter', () => {
           listClient,
           excludeExceptions: false,
         });
-        expect(queryFilter).toEqual({
-          bool: {
-            filter: [
-              { bool: { minimum_should_match: 1, should: [{ match: { 'host.name': 'linux' } }] } },
-              {
-                bool: {
-                  should: [
-                    {
-                      bool: {
-                        filter: [
-                          {
-                            nested: {
-                              path: 'some.parentField',
-                              query: {
-                                bool: {
-                                  minimum_should_match: 1,
-                                  should: [
-                                    {
-                                      match_phrase: {
-                                        'some.parentField.nested.field': 'some value',
-                                      },
-                                    },
-                                  ],
-                                },
-                              },
-                              score_mode: 'none',
-                            },
-                          },
-                          {
-                            bool: {
-                              minimum_should_match: 1,
-                              should: [
-                                {
-                                  match_phrase: {
-                                    'some.not.nested.field': 'some value',
-                                  },
-                                },
-                              ],
-                            },
-                          },
-                        ],
+        expect(queryFilter).toMatchInlineSnapshot(`
+          Object {
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "bool": Object {
+                    "minimum_should_match": 1,
+                    "should": Array [
+                      Object {
+                        "match": Object {
+                          "host.name": "linux",
+                        },
                       },
-                    },
-                    {
-                      bool: {
-                        filter: [
-                          {
-                            nested: {
-                              path: 'some.parentField',
-                              query: {
-                                bool: {
-                                  minimum_should_match: 1,
-                                  should: [
-                                    {
-                                      match_phrase: {
-                                        'some.parentField.nested.field': 'some value',
-                                      },
-                                    },
-                                  ],
-                                },
-                              },
-                              score_mode: 'none',
-                            },
-                          },
-                          {
-                            bool: {
-                              minimum_should_match: 1,
-                              should: [
-                                {
-                                  match_phrase: {
-                                    'some.not.nested.field': 'some value',
-                                  },
-                                },
-                              ],
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  ],
+                    ],
+                  },
                 },
-              },
-            ],
-            must: [],
-            must_not: [],
-            should: [],
-          },
-        });
+                Object {
+                  "bool": Object {
+                    "should": Array [
+                      Object {
+                        "bool": Object {
+                          "filter": Array [
+                            Object {
+                              "bool": Object {
+                                "minimum_should_match": 1,
+                                "should": Array [
+                                  Object {
+                                    "match_phrase": Object {
+                                      "some.not.nested.field": "some value",
+                                    },
+                                  },
+                                ],
+                              },
+                            },
+                            Object {
+                              "nested": Object {
+                                "path": "some.parentField",
+                                "query": Object {
+                                  "bool": Object {
+                                    "minimum_should_match": 1,
+                                    "should": Array [
+                                      Object {
+                                        "match_phrase": Object {
+                                          "some.parentField.nested.field": "some value",
+                                        },
+                                      },
+                                    ],
+                                  },
+                                },
+                                "score_mode": "none",
+                              },
+                            },
+                          ],
+                        },
+                      },
+                      Object {
+                        "bool": Object {
+                          "filter": Array [
+                            Object {
+                              "bool": Object {
+                                "minimum_should_match": 1,
+                                "should": Array [
+                                  Object {
+                                    "match_phrase": Object {
+                                      "some.not.nested.field": "some value",
+                                    },
+                                  },
+                                ],
+                              },
+                            },
+                            Object {
+                              "nested": Object {
+                                "path": "some.parentField",
+                                "query": Object {
+                                  "bool": Object {
+                                    "minimum_should_match": 1,
+                                    "should": Array [
+                                      Object {
+                                        "match_phrase": Object {
+                                          "some.parentField.nested.field": "some value",
+                                        },
+                                      },
+                                    ],
+                                  },
+                                },
+                                "score_mode": "none",
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+              "must": Array [],
+              "must_not": Array [],
+              "should": Array [],
+            },
+          }
+        `);
       });
 
       test('it should work with an empty list', async () => {
@@ -980,51 +1053,53 @@ describe('get_filter', () => {
         lists: [],
         listClient,
       });
-      expect(queryFilter).toEqual({
-        bool: {
-          must: [],
-          filter: [
-            {
-              nested: {
-                path: 'category',
-                query: {
-                  bool: {
-                    filter: [
-                      {
-                        bool: {
-                          should: [
-                            {
-                              match: {
-                                'category.name': 'Frank',
+      expect(queryFilter).toMatchInlineSnapshot(`
+        Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "nested": Object {
+                  "path": "category",
+                  "query": Object {
+                    "bool": Object {
+                      "filter": Array [
+                        Object {
+                          "bool": Object {
+                            "minimum_should_match": 1,
+                            "should": Array [
+                              Object {
+                                "match": Object {
+                                  "category.name": "Frank",
+                                },
                               },
-                            },
-                          ],
-                          minimum_should_match: 1,
+                            ],
+                          },
                         },
-                      },
-                      {
-                        bool: {
-                          should: [
-                            {
-                              match: {
-                                'category.trusted': true,
+                        Object {
+                          "bool": Object {
+                            "minimum_should_match": 1,
+                            "should": Array [
+                              Object {
+                                "match": Object {
+                                  "category.trusted": true,
+                                },
                               },
-                            },
-                          ],
-                          minimum_should_match: 1,
+                            ],
+                          },
                         },
-                      },
-                    ],
+                      ],
+                    },
                   },
+                  "score_mode": "none",
                 },
-                score_mode: 'none',
               },
-            },
-          ],
-          should: [],
-          must_not: [],
-        },
-      });
+            ],
+            "must": Array [],
+            "must_not": Array [],
+            "should": Array [],
+          },
+        }
+      `);
     });
 
     test('it works with references and does not add indexes', async () => {
