@@ -1263,14 +1263,14 @@ export function getMetricOperationTypes(field: IndexPatternField) {
   });
 }
 
-export function updateColumnLabel<C extends GenericIndexPatternColumn>({
+export function updateColumnLabel({
   layer,
   columnId,
   customLabel,
 }: {
   layer: IndexPatternLayer;
   columnId: string;
-  customLabel: string;
+  customLabel?: string;
 }): IndexPatternLayer {
   const oldColumn = layer.columns[columnId];
   return {

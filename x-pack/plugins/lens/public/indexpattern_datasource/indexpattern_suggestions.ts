@@ -37,6 +37,7 @@ import {
   getReferencedColumnIds,
   hasTermsWithManyBuckets,
   FormulaIndexPatternColumn,
+  updateColumnLabel,
 } from './operations';
 import { hasField } from './pure_utils';
 import type { IndexPatternPrivateState, IndexPatternLayer } from './types';
@@ -316,7 +317,11 @@ function createNewLayerWithMetricAggregationFromVizEditor(
       });
     }
   });
-  return newLayer;
+  let updatedLayer = newLayer;
+  layer.columns.forEach(({ columnId, label: customLabel }) => {
+    updatedLayer = updateColumnLabel({ layer: updatedLayer, columnId, customLabel });
+  });
+  return updatedLayer;
 }
 
 // Called when the user navigates from Discover to Lens (Visualize button)
