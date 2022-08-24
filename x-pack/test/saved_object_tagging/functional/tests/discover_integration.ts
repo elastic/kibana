@@ -149,7 +149,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
       });
 
-      it('allows to select tags for an existing dashboard', async () => {
+      it('allows to select tags for an existing saved search', async () => {
         await PageObjects.discover.loadSavedSearch('A Saved Search');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.saveSearch('A Saved Search', undefined, {
