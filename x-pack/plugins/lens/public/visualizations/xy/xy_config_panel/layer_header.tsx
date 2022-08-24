@@ -9,16 +9,15 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiIcon, EuiPopover, EuiSelectable, EuiText, EuiPopoverTitle } from '@elastic/eui';
 import { ToolbarButton } from '@kbn/kibana-react-plugin/public';
+import { IconChartBarReferenceLine, IconChartBarAnnotations } from '@kbn/chart-icons';
 import type {
   VisualizationLayerHeaderContentProps,
   VisualizationLayerWidgetProps,
   VisualizationType,
 } from '../../../types';
-import { State, visualizationTypes, SeriesType, XYAnnotationLayerConfig } from '../types';
+import type { State, visualizationTypes, SeriesType, XYAnnotationLayerConfig } from '../types';
 import { isHorizontalChart, isHorizontalSeries } from '../state_helpers';
 import { ChangeIndexPattern, StaticHeader } from '../../../shared_components';
-import { LensIconChartBarReferenceLine } from '../../../assets/chart_bar_reference_line';
-import { LensIconChartBarAnnotations } from '../../../assets/chart_bar_annotations';
 import { updateLayer } from '.';
 import { isAnnotationsLayer, isDataLayer, isReferenceLayer } from '../visualization_helpers';
 
@@ -47,7 +46,7 @@ export function LayerHeaderContent(props: VisualizationLayerHeaderContentProps<S
 function ReferenceLayerHeader() {
   return (
     <StaticHeader
-      icon={LensIconChartBarReferenceLine}
+      icon={IconChartBarReferenceLine}
       label={i18n.translate('xpack.lens.xyChart.layerReferenceLineLabel', {
         defaultMessage: 'Reference lines',
       })}
@@ -57,14 +56,12 @@ function ReferenceLayerHeader() {
 
 function AnnotationsLayerHeader() {
   return (
-    <>
-      <StaticHeader
-        icon={LensIconChartBarAnnotations}
-        label={i18n.translate('xpack.lens.xyChart.layerAnnotationsLabel', {
-          defaultMessage: 'Annotations',
-        })}
-      />
-    </>
+    <StaticHeader
+      icon={IconChartBarAnnotations}
+      label={i18n.translate('xpack.lens.xyChart.layerAnnotationsLabel', {
+        defaultMessage: 'Annotations',
+      })}
+    />
   );
 }
 

@@ -1235,7 +1235,7 @@
             "label": "xScaleType",
             "description": [],
             "signature": [
-              "\"time\" | \"linear\" | \"ordinal\""
+              "\"linear\" | \"time\" | \"ordinal\""
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false
@@ -1302,7 +1302,13 @@
             "label": "decorations",
             "description": [],
             "signature": [
-              "DataDecorationConfigResult",
+              {
+                "pluginId": "expressionXY",
+                "scope": "common",
+                "docId": "kibExpressionXYPluginApi",
+                "section": "def-common.DataDecorationConfigResult",
+                "text": "DataDecorationConfigResult"
+              },
               "[] | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
@@ -3779,7 +3785,7 @@
               "\nThe change type indicates what was changed in this table compared to the currently active table of this layer."
             ],
             "signature": [
-              "\"initial\" | \"layers\" | \"unchanged\" | \"reduced\" | \"extended\" | \"reorder\""
+              "\"layers\" | \"initial\" | \"unchanged\" | \"reduced\" | \"extended\" | \"reorder\""
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false
@@ -3835,7 +3841,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ size: number; accuracyMode?: boolean | undefined; include?: number[] | string[] | undefined; exclude?: number[] | string[] | undefined; includeIsRegex?: boolean | undefined; excludeIsRegex?: boolean | undefined; orderBy: { type: \"alphabetical\"; fallback?: boolean | undefined; } | { type: \"rare\"; maxDocCount: number; } | { type: \"column\"; columnId: string; } | { type: \"custom\"; }; orderAgg?: ",
+              "{ size: number; accuracyMode?: boolean | undefined; include?: string[] | number[] | undefined; exclude?: string[] | number[] | undefined; includeIsRegex?: boolean | undefined; excludeIsRegex?: boolean | undefined; orderBy: { type: \"alphabetical\"; fallback?: boolean | undefined; } | { type: \"rare\"; maxDocCount: number; } | { type: \"column\"; columnId: string; } | { type: \"custom\"; }; orderAgg?: ",
               {
                 "pluginId": "lens",
                 "scope": "public",
@@ -4521,7 +4527,7 @@
             "tags": [],
             "label": "renderLayerHeader",
             "description": [
-              "\nHeader rendered as layer title This can be used for both static and dynamic content lioke\nfor extra configurability, such as for switch chart type"
+              "\nHeader rendered as layer title. This can be used for both static and dynamic content like\nfor extra configurability, such as for switch chart type"
             ],
             "signature": [
               "((domElement: Element, props: ",
@@ -4548,6 +4554,55 @@
               {
                 "parentPluginId": "lens",
                 "id": "def-public.Visualization.renderLayerHeader.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "VisualizationLayerWidgetProps",
+                  "<T>"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.Visualization.renderLayerPanel",
+            "type": "Function",
+            "tags": [],
+            "label": "renderLayerPanel",
+            "description": [
+              "\nLayer panel content rendered. This can be used to render a custom content below the title,\nlike a custom dataview switch"
+            ],
+            "signature": [
+              "((domElement: Element, props: ",
+              "VisualizationLayerWidgetProps",
+              "<T>) => void | ((cleanupElement: Element) => void)) | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.renderLayerPanel.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "domElement",
+                "description": [],
+                "signature": [
+                  "Element"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.renderLayerPanel.$2",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "props",
@@ -5490,6 +5545,66 @@
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.Visualization.onIndexPatternChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onIndexPatternChange",
+            "description": [
+              "\nSome visualization track indexPattern changes (i.e. annotations)\nThis method makes it aware of the change and produces a new updated state"
+            ],
+            "signature": [
+              "((state: T, indexPatternId: string, layerId?: string | undefined) => T) | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.onIndexPatternChange.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.onIndexPatternChange.$2",
+                "type": "string",
+                "tags": [],
+                "label": "indexPatternId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.onIndexPatternChange.$3",
+                "type": "string",
+                "tags": [],
+                "label": "layerId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -7812,7 +7927,7 @@
         "label": "XScaleType",
         "description": [],
         "signature": [
-          "\"time\" | \"linear\" | \"ordinal\""
+          "\"linear\" | \"time\" | \"ordinal\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
@@ -7890,7 +8005,7 @@
         "label": "YScaleType",
         "description": [],
         "signature": [
-          "\"log\" | \"time\" | \"linear\" | \"sqrt\""
+          "\"linear\" | \"log\" | \"time\" | \"sqrt\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
@@ -9006,7 +9121,7 @@
         "label": "OperationTypePost712",
         "description": [],
         "signature": [
-          "\"min\" | \"max\" | \"sum\" | \"filters\" | \"count\" | \"date_histogram\" | \"percentile\" | \"average\" | \"range\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"unique_count\" | \"last_value\" | \"counter_rate\" | \"differences\""
+          "\"range\" | \"min\" | \"max\" | \"filters\" | \"count\" | \"date_histogram\" | \"percentile\" | \"sum\" | \"average\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"unique_count\" | \"last_value\" | \"counter_rate\" | \"differences\""
         ],
         "path": "x-pack/plugins/lens/server/migrations/types.ts",
         "deprecated": false,
@@ -9020,7 +9135,7 @@
         "label": "OperationTypePre712",
         "description": [],
         "signature": [
-          "\"min\" | \"max\" | \"sum\" | \"filters\" | \"count\" | \"date_histogram\" | \"percentile\" | \"range\" | \"terms\" | \"avg\" | \"median\" | \"cumulative_sum\" | \"derivative\" | \"moving_average\" | \"last_value\" | \"counter_rate\" | \"cardinality\""
+          "\"range\" | \"min\" | \"max\" | \"filters\" | \"count\" | \"date_histogram\" | \"percentile\" | \"sum\" | \"terms\" | \"avg\" | \"median\" | \"cumulative_sum\" | \"derivative\" | \"moving_average\" | \"last_value\" | \"counter_rate\" | \"cardinality\""
         ],
         "path": "x-pack/plugins/lens/server/migrations/types.ts",
         "deprecated": false,
@@ -9341,42 +9456,6 @@
     "interfaces": [
       {
         "parentPluginId": "lens",
-        "id": "def-common.BucketedAggregation",
-        "type": "Interface",
-        "tags": [],
-        "label": "BucketedAggregation",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "lens",
-            "scope": "common",
-            "docId": "kibLensPluginApi",
-            "section": "def-common.BucketedAggregation",
-            "text": "BucketedAggregation"
-          },
-          "<KeyType>"
-        ],
-        "path": "x-pack/plugins/lens/common/api.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.BucketedAggregation.buckets",
-            "type": "Array",
-            "tags": [],
-            "label": "buckets",
-            "description": [],
-            "signature": [
-              "{ key: KeyType; count: number; }[]"
-            ],
-            "path": "x-pack/plugins/lens/common/api.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lens",
         "id": "def-common.DateRange",
         "type": "Interface",
         "tags": [],
@@ -9439,108 +9518,6 @@
               "string[]"
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lens",
-        "id": "def-common.FieldStatsResponse",
-        "type": "Interface",
-        "tags": [],
-        "label": "FieldStatsResponse",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "lens",
-            "scope": "common",
-            "docId": "kibLensPluginApi",
-            "section": "def-common.FieldStatsResponse",
-            "text": "FieldStatsResponse"
-          },
-          "<KeyType>"
-        ],
-        "path": "x-pack/plugins/lens/common/api.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.FieldStatsResponse.totalDocuments",
-            "type": "number",
-            "tags": [],
-            "label": "totalDocuments",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "x-pack/plugins/lens/common/api.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.FieldStatsResponse.sampledDocuments",
-            "type": "number",
-            "tags": [],
-            "label": "sampledDocuments",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "x-pack/plugins/lens/common/api.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.FieldStatsResponse.sampledValues",
-            "type": "number",
-            "tags": [],
-            "label": "sampledValues",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "x-pack/plugins/lens/common/api.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.FieldStatsResponse.histogram",
-            "type": "Object",
-            "tags": [],
-            "label": "histogram",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "lens",
-                "scope": "common",
-                "docId": "kibLensPluginApi",
-                "section": "def-common.BucketedAggregation",
-                "text": "BucketedAggregation"
-              },
-              "<KeyType> | undefined"
-            ],
-            "path": "x-pack/plugins/lens/common/api.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.FieldStatsResponse.topValues",
-            "type": "Object",
-            "tags": [],
-            "label": "topValues",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "lens",
-                "scope": "common",
-                "docId": "kibLensPluginApi",
-                "section": "def-common.BucketedAggregation",
-                "text": "BucketedAggregation"
-              },
-              "<KeyType> | undefined"
-            ],
-            "path": "x-pack/plugins/lens/common/api.ts",
             "deprecated": false
           }
         ],
@@ -9665,69 +9642,6 @@
               "\"left\" | \"right\" | \"center\" | undefined"
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lens",
-        "id": "def-common.NumberStatsResult",
-        "type": "Interface",
-        "tags": [],
-        "label": "NumberStatsResult",
-        "description": [],
-        "path": "x-pack/plugins/lens/common/api.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.NumberStatsResult.count",
-            "type": "number",
-            "tags": [],
-            "label": "count",
-            "description": [],
-            "path": "x-pack/plugins/lens/common/api.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.NumberStatsResult.histogram",
-            "type": "Object",
-            "tags": [],
-            "label": "histogram",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "lens",
-                "scope": "common",
-                "docId": "kibLensPluginApi",
-                "section": "def-common.BucketedAggregation",
-                "text": "BucketedAggregation"
-              },
-              "<number>"
-            ],
-            "path": "x-pack/plugins/lens/common/api.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.NumberStatsResult.topValues",
-            "type": "Object",
-            "tags": [],
-            "label": "topValues",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "lens",
-                "scope": "common",
-                "docId": "kibLensPluginApi",
-                "section": "def-common.BucketedAggregation",
-                "text": "BucketedAggregation"
-              },
-              "<number>"
-            ],
-            "path": "x-pack/plugins/lens/common/api.ts",
             "deprecated": false
           }
         ],
@@ -10058,49 +9972,6 @@
               "boolean | undefined"
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lens",
-        "id": "def-common.TopValuesResult",
-        "type": "Interface",
-        "tags": [],
-        "label": "TopValuesResult",
-        "description": [],
-        "path": "x-pack/plugins/lens/common/api.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.TopValuesResult.count",
-            "type": "number",
-            "tags": [],
-            "label": "count",
-            "description": [],
-            "path": "x-pack/plugins/lens/common/api.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.TopValuesResult.topValues",
-            "type": "Object",
-            "tags": [],
-            "label": "topValues",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "lens",
-                "scope": "common",
-                "docId": "kibLensPluginApi",
-                "section": "def-common.BucketedAggregation",
-                "text": "BucketedAggregation"
-              },
-              "<string>"
-            ],
-            "path": "x-pack/plugins/lens/common/api.ts",
             "deprecated": false
           }
         ],
