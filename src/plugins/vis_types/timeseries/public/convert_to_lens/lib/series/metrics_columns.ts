@@ -62,9 +62,14 @@ export const getMetricsColumns = (
       const formulaColumn = convertMathToFormulaColumn(series, metrics);
       return getValidColumns(formulaColumn);
     }
+    case 'derivative':
     case 'moving_average': {
-      const movingAverageColumns = convertParentPipelineAggToColumns(series, metrics, dataView);
-      return getValidColumns(movingAverageColumns);
+      const movingAverageOrDerivativeColumns = convertParentPipelineAggToColumns(
+        series,
+        metrics,
+        dataView
+      );
+      return getValidColumns(movingAverageOrDerivativeColumns);
     }
     case 'cumulative_sum': {
       const cumulativeSumColumns = convertToCumulativeSumColumns(series, metrics, dataView);
