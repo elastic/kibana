@@ -6,6 +6,7 @@
  */
 
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+
 import { ANALYTICS_COLLECTIONS_INDEX } from '../..';
 
 import { ErrorCode } from '../../../common/types/error_codes';

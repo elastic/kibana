@@ -8,13 +8,13 @@
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
 import { ANALYTICS_COLLECTIONS_INDEX } from '../..';
+import { AnalyticsCollection } from '../../../common/types/analytics';
 
+import { ErrorCode } from '../../../common/types/error_codes';
 import { fetchIndices } from '../indices/fetch_indices';
-import { fetchAnalyticsCollectionByName } from './fetch_analytics_collection';
 
 import { deleteAnalyticsCollectionByName } from './delete_analytics_collection';
-import { AnalyticsCollection } from '@kbn/enterprise-search-plugin/common/types/analytics';
-import { ErrorCode } from '@kbn/enterprise-search-plugin/common/types/error_codes';
+import { fetchAnalyticsCollectionByName } from './fetch_analytics_collection';
 
 jest.mock('../indices/fetch_indices', () => ({
   fetchIndices: jest.fn(),
