@@ -55,6 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     // skipped as on Cloud it's a different setup than locally
+    // https://github.com/elastic/kibana/issues/139270
     xit('click on Observability card leads to Observability', async () => {
       let solutionCards: string | any[] = [];
       await retry.waitForWithTimeout('all solutions to be present', 5000, async () => {
@@ -66,6 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     // skipped as on Cloud it's a different setup than locally
+    // https://github.com/elastic/kibana/issues/139270
     xit('click on Security card leads to Security', async () => {
       await PageObjects.common.navigateToUrl('kibana_overview', '', { useActualUrl: true });
       await PageObjects.header.waitUntilLoadingHasFinished();
