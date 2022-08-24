@@ -90,13 +90,21 @@ export const updateHistogram = assign(
 
     const histogramData = breakdownBuckets.reduce((acc, bucket) => {
       const termsBuckets = bucket.breakdown_terms.buckets;
-      acc.push({
+
+      const entry = {
         startTime: bucket.key_as_string,
         countByBreakdownCriterion: termsBuckets.reduce((termsAcc, termsBucket) => {
           termsAcc[termsBucket.key] = termsBucket.doc_count;
           return termsAcc;
         }, {}),
-      });
+      };
+
+      entry.countByBreakdownCriterion.Other =
+        bucket.doc_count -
+        Object.values(entry.countByBreakdownCriterion).reduce((acc, value) => acc + value, 0);
+
+      acc.push(entry);
+
       return acc;
     }, []);
 
