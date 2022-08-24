@@ -152,7 +152,7 @@ in the *Actions* column.
 === View watch history and status
 The Watcher overview page lists your watches, including the state of each watch,
 when its condition was last met, when the condition was last checked, and
-information about whether any of its actions have been acknowledged,
+whether any of its actions have been acknowledged,
 throttled, or failed to execute. Each watch can be in one of three states:
 
 * *Active.* The watch is working properly.
