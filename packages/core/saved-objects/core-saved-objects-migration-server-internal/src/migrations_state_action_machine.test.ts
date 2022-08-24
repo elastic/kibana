@@ -12,7 +12,7 @@ import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { LoggerAdapter } from '@kbn/core-logging-server-internal';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
-import { elasticsearchServiceMock } from '../../mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 import { errors } from '@elastic/elasticsearch';

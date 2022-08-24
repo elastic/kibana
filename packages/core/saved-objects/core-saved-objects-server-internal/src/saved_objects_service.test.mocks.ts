@@ -6,20 +6,28 @@
  * Side Public License, v 1.
  */
 
-import { mockKibanaMigrator } from './migrations/kibana_migrator.mock';
-import { savedObjectsClientProviderMock } from './service/lib/scoped_client_provider.mock';
+import { mockKibanaMigrator } from '@kbn/core-saved-objects-migration-server-mocks';
+import { savedObjectsClientProviderMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 
 export const migratorInstanceMock = mockKibanaMigrator.create();
 export const KibanaMigratorMock = jest.fn().mockImplementation(() => migratorInstanceMock);
-jest.doMock('./migrations/kibana_migrator', () => ({
-  KibanaMigrator: KibanaMigratorMock,
-}));
+jest.doMock('@kbn/core-saved-objects-migration-server-internal', () => {
+  const actual = jest.requireActual('@kbn/core-saved-objects-migration-server-internal');
+  return {
+    ...actual,
+    KibanaMigrator: KibanaMigratorMock,
+  };
+});
 
 export const clientProviderInstanceMock = savedObjectsClientProviderMock.create();
-jest.doMock('./service/lib/scoped_client_provider', () => ({
-  SavedObjectsClientProvider: jest.fn().mockImplementation(() => clientProviderInstanceMock),
-}));
+jest.doMock('@kbn/core-saved-objects-api-server-internal', () => {
+  const actual = jest.requireActual('@kbn/core-saved-objects-api-server-internal');
+  return {
+    ...actual,
+    SavedObjectsClientProvider: jest.fn().mockImplementation(() => clientProviderInstanceMock),
+  };
+});
 
 export const typeRegistryInstanceMock = typeRegistryMock.create();
 jest.doMock('@kbn/core-saved-objects-base-server-internal', () => {

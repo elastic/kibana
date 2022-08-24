@@ -9,7 +9,7 @@
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
 import type { ValidateReferencesParams } from './validate_references';
 import { validateReferences } from './validate_references';
-import { savedObjectsClientMock } from '../../../mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 function setup({
   objects = [],

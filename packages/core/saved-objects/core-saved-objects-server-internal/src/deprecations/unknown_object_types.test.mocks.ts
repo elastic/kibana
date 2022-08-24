@@ -8,6 +8,10 @@
 
 export const getIndexForTypeMock = jest.fn();
 
-jest.doMock('../service/lib/get_index_for_type', () => ({
-  getIndexForType: getIndexForTypeMock,
-}));
+jest.doMock('@kbn/core-saved-objects-base-server-internal', () => {
+  const actual = jest.requireActual('@kbn/core-saved-objects-base-server-internal');
+  return {
+    ...actual,
+    getIndexForType: getIndexForTypeMock,
+  };
+});

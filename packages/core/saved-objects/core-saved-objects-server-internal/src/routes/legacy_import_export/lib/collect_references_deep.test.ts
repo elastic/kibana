@@ -7,7 +7,7 @@
  */
 
 import type { SavedObject, SavedObjectAttributes } from '@kbn/core-saved-objects-common';
-import { savedObjectsClientMock } from '../../../../mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { collectReferencesDeep } from './collect_references_deep';
 
 const data: Array<SavedObject<SavedObjectAttributes>> = [

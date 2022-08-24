@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { savedObjectsClientMock, savedObjectsRepositoryMock } from './src';
+export {
+  savedObjectsClientMock,
+  savedObjectsRepositoryMock,
+  savedObjectsClientProviderMock,
+} from './src';

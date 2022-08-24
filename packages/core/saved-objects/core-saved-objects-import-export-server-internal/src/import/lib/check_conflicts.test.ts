@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { savedObjectsClientMock } from '../../../mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type {
   SavedObject,
   SavedObjectReference,

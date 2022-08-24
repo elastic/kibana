@@ -8,3 +8,4 @@
 
 export { savedObjectsClientMock } from './saved_objects_client.mock';
 export { savedObjectsRepositoryMock } from './repository.mock';
+export { savedObjectsClientProviderMock } from './scoped_client_provider.mock';

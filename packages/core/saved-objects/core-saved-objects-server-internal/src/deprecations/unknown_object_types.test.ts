@@ -8,11 +8,42 @@
 
 import { getIndexForTypeMock } from './unknown_object_types.test.mocks';
 
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { deleteUnknownTypeObjects, getUnknownTypesDeprecations } from './unknown_object_types';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { SavedObjectsType } from '../..';
-import { createAggregateTypesSearchResponse } from '../migrations/actions/check_for_unknown_docs.mocks';
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
+
+const createAggregateTypesSearchResponse = (
+  typesIds: Record<string, string[]> = {}
+): SearchResponse => {
+  return {
+    took: 0,
+    timed_out: false,
+    _shards: {
+      total: 1,
+      successful: 1,
+      skipped: 0,
+      failed: 0,
+    },
+    hits: {
+      total: {
+        value: Object.keys(typesIds).length,
+        relation: 'eq',
+      },
+      max_score: null,
+      hits: [],
+    },
+    aggregations: {
+      typesAggregation: {
+        buckets: Object.entries(typesIds).map(([type, ids]) => ({
+          key: type,
+          docs: { hits: { hits: ids.map((_id) => ({ _id })) } },
+        })),
+      },
+    },
+  };
+};
 
 describe('unknown saved object types deprecation', () => {
   const kibanaVersion = '8.0.0';

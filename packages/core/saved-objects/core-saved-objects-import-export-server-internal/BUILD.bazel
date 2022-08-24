@@ -39,6 +39,8 @@ RUNTIME_DEPS = [
   "@npm//uuid",
   "@npm//p-map",
   "//packages/kbn-utils",
+  ### test dependencies
+  "//packages/core/saved-objects/core-saved-objects-api-server-mocks",
 ]
 
 TYPES_DEPS = [

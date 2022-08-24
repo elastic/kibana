@@ -44,6 +44,11 @@ RUNTIME_DEPS = [
   "@npm//@elastic/elasticsearch",
   "//packages/kbn-std",
   "//packages/core/elasticsearch/core-elasticsearch-client-server-internal",
+  ### test dependencies
+  "//packages/core/elasticsearch/core-elasticsearch-server-mocks",
+  "//packages/core/elasticsearch/core-elasticsearch-client-server-mocks",
+  "//packages/core/logging/core-logging-server-mocks",
+
 ]
 
 TYPES_DEPS = [

@@ -14,7 +14,7 @@ import type {
 } from '@kbn/core-saved-objects-api-server';
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import { checkReferenceOrigins, CheckReferenceOriginsParams } from './check_reference_origins';
-import { savedObjectsClientMock } from '../../../mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import type { ImportStateMap } from './types';
 

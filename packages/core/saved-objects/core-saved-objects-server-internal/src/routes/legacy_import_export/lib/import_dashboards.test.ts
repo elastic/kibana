@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { savedObjectsClientMock } from '../../../../mocks';
-import { SavedObject } from '../../../..';
+import type { SavedObject } from '@kbn/core-saved-objects-common';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { importDashboards } from './import_dashboards';
 
 describe('importDashboards(req)', () => {

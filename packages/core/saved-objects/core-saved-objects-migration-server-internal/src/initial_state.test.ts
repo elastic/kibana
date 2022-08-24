@@ -14,7 +14,7 @@ import {
   type SavedObjectsMigrationConfigType,
   SavedObjectTypeRegistry,
 } from '@kbn/core-saved-objects-base-server-internal';
-import { loggingSystemMock } from '../../mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { createInitialState } from './initial_state';
 
 const mockLogger = loggingSystemMock.create();
