@@ -658,7 +658,7 @@ export const SearchExamplesApp = ({
                   size="xs"
                   onClick={() => onSearchSourceClickHandler(false, false)}
                   iconType="play"
-                  data-test-subj="searchSourceWithoutOtherAndWithoutDefaultWarnings"
+                  data-test-subj="searchSourceWithoutOther"
                 >
                   <FormattedMessage
                     id="searchExamples.searchSource.buttonText"

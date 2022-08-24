@@ -33,6 +33,7 @@ export default async function ({ readConfigFile }) {
       require.resolve('./data_view_field_editor_example'),
       require.resolve('./field_formats'),
       require.resolve('./partial_results'),
+      require.resolve('./search'),
     ],
     services: {
       ...functionalConfig.get('services'),
