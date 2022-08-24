@@ -16,7 +16,10 @@ import { executionContextServiceMock } from '@kbn/core-execution-context-server-
 import { coreUsageStatsClientMock } from '../../../core_usage_data/core_usage_stats_client.mock';
 import { coreUsageDataServiceMock } from '../../../core_usage_data/core_usage_data_service.mock';
 import { contextServiceMock, coreMock } from '../../../mocks';
-import { registerGetRoute, type InternalSavedObjectsRequestHandlerContext } from '@kbn/core-saved-objects-server-internal';
+import {
+  registerGetRoute,
+  type InternalSavedObjectsRequestHandlerContext,
+} from '@kbn/core-saved-objects-server-internal';
 
 const coreId = Symbol('core');
 
