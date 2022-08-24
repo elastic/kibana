@@ -775,7 +775,6 @@ describe('DatatableComponent', () => {
           uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
           renderMode="edit"
           interactive
-          renderComplete={renderComplete}
         />
       );
       const newIndex = 3;
