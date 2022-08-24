@@ -33,21 +33,23 @@ import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
 import { SavedObjectsService } from './saved_objects_service';
 
-import { coreUsageDataServiceMock } from '../core_usage_data/core_usage_data_service.mock';
-import { deprecationsServiceMock } from '../deprecations/deprecations_service.mock';
+import {
+  createDeprecationsSetupMock,
+  createDeprecationRegistryProviderMock,
+  createCoreUsageDataSetupMock,
+} from './mocks/internal_mocks';
 
 import { registerCoreObjectTypes } from './object_types';
 import { getSavedObjectsDeprecationsProvider } from './deprecations';
 
-// jest.mock('./service/lib/repository'); TODO: need to adapt?
 jest.mock('./object_types');
 jest.mock('./deprecations');
 
 describe('SavedObjectsService', () => {
-  let deprecationsSetup: ReturnType<typeof deprecationsServiceMock.createInternalSetupContract>;
+  let deprecationsSetup: ReturnType<typeof createDeprecationRegistryProviderMock>;
 
   beforeEach(() => {
-    deprecationsSetup = deprecationsServiceMock.createInternalSetupContract();
+    deprecationsSetup = createDeprecationRegistryProviderMock();
   });
 
   const createCoreContext = ({
@@ -73,7 +75,7 @@ describe('SavedObjectsService', () => {
       http: httpServiceMock.createInternalSetupContract(),
       elasticsearch: elasticsearchMock,
       deprecations: deprecationsSetup,
-      coreUsageData: coreUsageDataServiceMock.createSetupContract(),
+      coreUsageData: createCoreUsageDataSetupMock(),
     };
   };
 
@@ -104,7 +106,7 @@ describe('SavedObjectsService', () => {
       const coreContext = createCoreContext();
       const soService = new SavedObjectsService(coreContext);
 
-      const mockRegistry = deprecationsServiceMock.createSetupContract();
+      const mockRegistry = createDeprecationsSetupMock();
       deprecationsSetup.getRegistry.mockReturnValue(mockRegistry);
 
       const deprecations = Symbol('deprecations');

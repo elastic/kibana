@@ -7,7 +7,10 @@
  */
 
 import { mockKibanaMigrator } from '@kbn/core-saved-objects-migration-server-mocks';
-import { savedObjectsClientProviderMock } from '@kbn/core-saved-objects-api-server-mocks';
+import {
+  savedObjectsClientProviderMock,
+  savedObjectsRepositoryMock,
+} from '@kbn/core-saved-objects-api-server-mocks';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 
 export const migratorInstanceMock = mockKibanaMigrator.create();
@@ -21,10 +24,15 @@ jest.doMock('@kbn/core-saved-objects-migration-server-internal', () => {
 });
 
 export const clientProviderInstanceMock = savedObjectsClientProviderMock.create();
+export const repositoryMock = savedObjectsRepositoryMock.create();
+
 jest.doMock('@kbn/core-saved-objects-api-server-internal', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-api-server-internal');
   return {
     ...actual,
+    SavedObjectsRepository: {
+      createRepository: jest.fn().mockImplementation(() => repositoryMock),
+    },
     SavedObjectsClientProvider: jest.fn().mockImplementation(() => clientProviderInstanceMock),
   };
 });
