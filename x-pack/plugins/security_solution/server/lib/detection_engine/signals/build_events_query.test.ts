@@ -765,91 +765,99 @@ describe('create_signals', () => {
         eventCategoryOverride: undefined,
         listClient: getListClientMock(),
       });
-      expect(request).toEqual({
-        allow_no_indices: true,
-        index: ['testindex1', 'testindex2'],
-        body: {
-          size: 100,
-          query: 'process where true',
-          runtime_mappings: undefined,
-          filter: {
-            bool: {
-              filter: [
-                {
-                  range: {
-                    '@timestamp': {
-                      gte: 'now-5m',
-                      lte: 'now',
-                      format: 'strict_date_optional_time',
+      expect(request).toMatchInlineSnapshot(`
+        Object {
+          "allow_no_indices": true,
+          "body": Object {
+            "event_category_field": undefined,
+            "fields": Array [
+              Object {
+                "field": "*",
+                "include_unmapped": true,
+              },
+              Object {
+                "field": "@timestamp",
+                "format": "strict_date_optional_time",
+              },
+            ],
+            "filter": Object {
+              "bool": Object {
+                "filter": Array [
+                  Object {
+                    "range": Object {
+                      "@timestamp": Object {
+                        "format": "strict_date_optional_time",
+                        "gte": "now-5m",
+                        "lte": "now",
+                      },
                     },
                   },
-                },
-                {
-                  bool: {
-                    must: [],
-                    filter: [],
-                    should: [],
-                    must_not: [
-                      {
-                        bool: {
-                          should: [
-                            {
-                              bool: {
-                                filter: [
-                                  {
-                                    nested: {
-                                      path: 'some.parentField',
-                                      query: {
-                                        bool: {
-                                          minimum_should_match: 1,
-                                          should: [
-                                            {
-                                              match_phrase: {
-                                                'some.parentField.nested.field': 'some value',
-                                              },
+                  Object {
+                    "bool": Object {
+                      "filter": Array [],
+                      "must": Array [],
+                      "must_not": Array [
+                        Object {
+                          "bool": Object {
+                            "should": Array [
+                              Object {
+                                "bool": Object {
+                                  "filter": Array [
+                                    Object {
+                                      "bool": Object {
+                                        "minimum_should_match": 1,
+                                        "should": Array [
+                                          Object {
+                                            "match_phrase": Object {
+                                              "some.not.nested.field": "some value",
                                             },
-                                          ],
-                                        },
+                                          },
+                                        ],
                                       },
-                                      score_mode: 'none',
                                     },
-                                  },
-                                  {
-                                    bool: {
-                                      minimum_should_match: 1,
-                                      should: [
-                                        {
-                                          match_phrase: {
-                                            'some.not.nested.field': 'some value',
+                                    Object {
+                                      "nested": Object {
+                                        "path": "some.parentField",
+                                        "query": Object {
+                                          "bool": Object {
+                                            "minimum_should_match": 1,
+                                            "should": Array [
+                                              Object {
+                                                "match_phrase": Object {
+                                                  "some.parentField.nested.field": "some value",
+                                                },
+                                              },
+                                            ],
                                           },
                                         },
-                                      ],
+                                        "score_mode": "none",
+                                      },
                                     },
-                                  },
-                                ],
+                                  ],
+                                },
                               },
-                            },
-                          ],
+                            ],
+                          },
                         },
-                      },
-                    ],
+                      ],
+                      "should": Array [],
+                    },
                   },
-                },
-              ],
+                ],
+              },
             },
+            "query": "process where true",
+            "runtime_mappings": undefined,
+            "size": 100,
+            "tiebreaker_field": undefined,
+            "timestamp_field": undefined,
           },
-          fields: [
-            {
-              field: '*',
-              include_unmapped: true,
-            },
-            {
-              field: '@timestamp',
-              format: 'strict_date_optional_time',
-            },
+          "index": Array [
+            "testindex1",
+            "testindex2",
           ],
-        },
-      });
+        }
+      `);
     });
 
     test('should build a request with filters', async () => {
