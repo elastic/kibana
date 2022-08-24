@@ -3517,20 +3517,6 @@
         "path": "src/plugins/controls/common/range_slider/types.ts",
         "deprecated": false,
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "controls",
-        "id": "def-public.TIME_SLIDER_CONTROL",
-        "type": "string",
-        "tags": [],
-        "label": "TIME_SLIDER_CONTROL",
-        "description": [],
-        "signature": [
-          "\"timeSlider\""
-        ],
-        "path": "src/plugins/controls/common/control_types/time_slider/types.ts",
-        "deprecated": false,
-        "initialIsOpen": false
       }
     ],
     "objects": []
@@ -4441,20 +4427,6 @@
           "; }"
         ],
         "path": "src/plugins/controls/common/control_group/types.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "controls",
-        "id": "def-common.TIME_SLIDER_CONTROL",
-        "type": "string",
-        "tags": [],
-        "label": "TIME_SLIDER_CONTROL",
-        "description": [],
-        "signature": [
-          "\"timeSlider\""
-        ],
-        "path": "src/plugins/controls/common/control_types/time_slider/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
