@@ -16,10 +16,15 @@ import type {
 export type ISOLATION_ACTIONS = 'isolate' | 'unisolate';
 
 /** The output provided by some of the Endpoint responses */
-export interface ActionResponseOutput<TOutputContent extends object = object> {
-  type: 'json' | 'text';
-  content: TOutputContent;
-}
+export type ActionResponseOutput<TOutputContent extends object = object> =
+  | {
+      type: 'json';
+      content: TOutputContent;
+    }
+  | {
+      type: 'text';
+      content: string;
+    };
 
 export interface ProcessesEntry {
   command: string;
