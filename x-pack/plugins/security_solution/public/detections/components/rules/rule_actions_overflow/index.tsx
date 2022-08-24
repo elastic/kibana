@@ -111,7 +111,6 @@ const RuleActionsOverflowComponent = ({
                 closePopover();
                 await bulkExportRules({
                   action: BulkAction.export,
-                  onSuccess: noop,
                   search: { ids: [rule.id] },
                   toasts,
                 });

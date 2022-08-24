@@ -7,14 +7,16 @@
  */
 
 import { mockGetConvertedObjectId } from './document_migrator.test.mock';
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import _ from 'lodash';
 import type { SavedObjectUnsanitizedDoc, SavedObjectsType } from '@kbn/core-saved-objects-server';
+import {
+  SavedObjectTypeRegistry,
+  LEGACY_URL_ALIAS_TYPE,
+} from '@kbn/core-saved-objects-base-server-internal';
 import { DocumentMigrator } from './document_migrator';
 import { TransformSavedObjectDocumentError } from './transform_saved_object_document_error';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
-import { LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 
 const mockLoggerFactory = loggingSystemMock.create();
 const mockLogger = mockLoggerFactory.get('mock logger');
