@@ -95,7 +95,6 @@ import { getIndicatorMatchTimelineTemplate } from '../../objects/timeline';
 import { esArchiverResetKibana } from '../../tasks/es_archiver';
 
 const RULE_NAME = 'Custom rule for bulk actions';
-const ML_RULE_ID = 'machine_learning_rule_id';
 
 const prePopulatedIndexPatterns = ['index-1-*', 'index-2-*'];
 const prePopulatedTags = ['test-default-tag-1', 'test-default-tag-2'];
@@ -136,7 +135,7 @@ describe('Detection rules, bulk edit', () => {
       '1'
     );
     createEventCorrelationRule({ ...getEqlRule(), ...defaultRuleData }, '2');
-    createMachineLearningRule({ ...getMachineLearningRule(), ...defaultRuleData }, ML_RULE_ID);
+    createMachineLearningRule({ ...getMachineLearningRule(), ...defaultRuleData });
     createCustomIndicatorRule({ ...getNewThreatIndicatorRule(), ...defaultRuleData }, '4');
     createThresholdRule({ ...getNewThresholdRule(), ...defaultRuleData }, '5');
     createNewTermsRule({ ...getNewTermsRule(), ...defaultRuleData }, '6');
@@ -305,7 +304,7 @@ describe('Detection rules, bulk edit', () => {
     });
   });
 
-  describe.only('Index patterns', () => {
+  describe('Index patterns', () => {
     it('Index pattern action applied to custom rules, including machine learning: user proceeds with edit of custom non machine learning rule', () => {
       const indexPattersToBeAdded = ['index-to-add-1-*', 'index-to-add-2-*'];
       const resultingIndexPatterns = [...prePopulatedIndexPatterns, ...indexPattersToBeAdded];
