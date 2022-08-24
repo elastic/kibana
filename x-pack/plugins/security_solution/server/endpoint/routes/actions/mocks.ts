@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import type { TransportResult } from '@elastic/elasticsearch';
 import type {
   LogsEndpointAction,
   LogsEndpointActionResponse,
@@ -39,23 +37,7 @@ export const mockAuditLogSearchResult = (results?: Results[]) => {
     statusCode: 200,
     headers: {},
     warnings: [],
-    meta: {} as any,
+    meta: {},
   };
   return response;
-};
-
-export const mockSearchResult = (results: any = []): TransportResult<any> => {
-  return {
-    body: {
-      hits: {
-        hits: results.map((a: any) => ({
-          _source: a,
-        })),
-      },
-    },
-    statusCode: 200,
-    headers: {},
-    warnings: [],
-    meta: {} as any,
-  };
 };

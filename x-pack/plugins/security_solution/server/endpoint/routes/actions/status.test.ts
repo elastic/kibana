@@ -31,7 +31,6 @@ import {
 } from '../../mocks';
 import { registerActionStatusRoutes } from './status';
 import uuid from 'uuid';
-import { mockSearchResult } from './mocks';
 import { ACTION_RESPONSE_INDICES } from '../../services/actions/constants';
 import type {
   LogsEndpointAction,
@@ -113,7 +112,11 @@ describe('Endpoint Pending Action Summary API', () => {
             throw error;
         }
 
-        return mockSearchResult(items, index);
+        return {
+          body: endpointActionGenerator.toEsSearchResponse(
+            items.map((item) => endpointActionGenerator.toEsSearchHit(item, index))
+          ),
+        };
       });
     };
   };
