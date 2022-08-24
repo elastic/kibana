@@ -44,12 +44,9 @@ const mainAliasNames = mainApiRequestsToIntercept.map(
 );
 
 describe('When navigating to the service inventory', () => {
-  before(async () => {
-    cy.loginAsViewerUser();
-    cy.visit(serviceInventoryHref);
-
+  before(() => {
     const { rangeFrom, rangeTo } = timeRange;
-    await synthtrace.index(
+    synthtrace.index(
       opbeans({
         from: new Date(rangeFrom).getTime(),
         to: new Date(rangeTo).getTime(),
@@ -57,8 +54,13 @@ describe('When navigating to the service inventory', () => {
     );
   });
 
-  after(async () => {
-    await synthtrace.clean();
+  beforeEach(() => {
+    cy.loginAsViewerUser();
+    cy.visitKibana(serviceInventoryHref);
+  });
+
+  after(() => {
+    synthtrace.clean();
   });
 
   it('has no detectable a11y violations on load', () => {
@@ -92,7 +94,7 @@ describe('When navigating to the service inventory', () => {
       );
 
       cy.loginAsViewerUser();
-      cy.visit(serviceInventoryHref);
+      cy.visitKibana(serviceInventoryHref);
     });
 
     it('with the correct environment when changing the environment', () => {
@@ -135,11 +137,9 @@ describe('When navigating to the service inventory', () => {
 });
 
 describe('Check detailed statistics API with multiple services', () => {
-  before(async () => {
-    cy.loginAsViewerUser();
+  before(() => {
     const { rangeFrom, rangeTo } = timeRange;
-
-    await synthtrace.index(
+    synthtrace.index(
       generateMultipleServicesData({
         from: new Date(rangeFrom).getTime(),
         to: new Date(rangeTo).getTime(),
@@ -147,8 +147,12 @@ describe('Check detailed statistics API with multiple services', () => {
     );
   });
 
-  after(async () => {
-    await synthtrace.clean();
+  beforeEach(() => {
+    cy.loginAsViewerUser();
+  });
+
+  after(() => {
+    synthtrace.clean();
   });
 
   it('calls detailed API with visible items only', () => {
@@ -157,7 +161,7 @@ describe('Check detailed statistics API with multiple services', () => {
     );
     cy.intercept('GET', '/internal/apm/services?*').as('mainStatisticsRequest');
 
-    cy.visit(
+    cy.visitKibana(
       `${serviceInventoryHref}&pageSize=10&sortField=serviceName&sortDirection=asc`
     );
     cy.wait('@mainStatisticsRequest');
