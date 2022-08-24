@@ -41,7 +41,14 @@ export const LensLayerSelectionFlyout: FC<Props> = ({ onClose, embeddable }) => 
 
   useEffect(() => {
     const visExtractor = new VisualizationExtractor(data.dataViews);
-    visExtractor.getResultLayersFromEmbeddable(embeddable, lens).then(setLayerResults);
+    visExtractor
+      .getResultLayersFromEmbeddable(embeddable, lens)
+      .then(setLayerResults)
+      .catch((error) => {
+        // eslint-disable-next-line no-console
+        console.error('Layers could not be extracted from embeddable', error);
+        onClose();
+      });
   }, [data, lens, embeddable]);
 
   return (
