@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 
 import type { SwimlaneType } from '@kbn/ml-plugin/public/application/explorer/explorer_constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import type { CreateCaseParams } from '../cases/create';
 
 export function MachineLearningAnomalyExplorerProvider({
   getPageObject,
@@ -88,7 +89,7 @@ export function MachineLearningAnomalyExplorerProvider({
       await testSubjects.existOrFail('mlAddToDashboardModal');
     },
 
-    async attachSwimLaneToCase(swimLaneType: SwimlaneType = 'overall') {
+    async attachSwimLaneToCase(swimLaneType: SwimlaneType = 'overall', params: CreateCaseParams) {
       const attachTestSubject =
         swimLaneType === 'overall'
           ? 'mlAnomalyTimelinePanelAttachOverallButton'
@@ -97,10 +98,7 @@ export function MachineLearningAnomalyExplorerProvider({
       await testSubjects.click('mlAnomalyTimelinePanelAttachToCaseButton');
       await testSubjects.click(attachTestSubject);
 
-      await cases.create.createCaseFromModal({
-        title: 'ML Test case',
-        description: 'Case with an anomaly swim lane',
-      });
+      await cases.create.createCaseFromModal(params);
     },
 
     async addAndEditSwimlaneInDashboard(dashboardTitle: string) {
