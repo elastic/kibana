@@ -26,7 +26,11 @@ import {
   LazyOsqueryManagedPolicyEditExtension,
   LazyOsqueryManagedCustomButtonExtension,
 } from './fleet_integration';
-import { getLazyOsqueryAction,getLazyLiveQueryField, useIsOsqueryAvailableSimple } from './shared_components';
+import {
+  getLazyOsqueryAction,
+  getLazyLiveQueryField,
+  useIsOsqueryAvailableSimple,
+} from './shared_components';
 
 export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginStart> {
   private kibanaVersion: string;
