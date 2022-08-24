@@ -220,7 +220,7 @@ image:management/watcher-ui/images/advanced-watch/advanced-watch-create.png["Cre
 The *Simulate* tab allows you to override parts of the watch, and then run a
 simulation. Be aware of these implementation details on overrides:
 
-* Trigger overrides use {ref}/common-options.html#date-math[date ma th].
+* Trigger overrides use {ref}/common-options.html#date-math[date math].
 * Input overrides accepts a JSON blob.
 * Condition overrides indicates if you want to force the condition to always be `true`.
 * Action overrides support {ref}/watcher-api-execute-watch.html#watcher-api-execute-watch-action-mode[multiple options].
