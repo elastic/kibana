@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { EuiBadge, EuiFlexGroup } from '@elastic/eui';
-import { Filter } from '@kbn/es-query';
 import React from 'react';
+import { EuiBadge, EuiFlexGroup } from '@elastic/eui';
+import { FilterItem } from '../../filters_builder/filters_builder_utils';
 import { FilterExpressionBadge } from './filter_badge_expression';
 
 export interface FilterBadgeProps {
-  filter: Filter;
+  filter: FilterItem;
 }
 
 export function FilterBadge({ filter }: FilterBadgeProps) {
   return (
-    <EuiFlexGroup gutterSize="none" alignItems="flexStart" responsive={false}>
+    <EuiFlexGroup wrap responsive={false} gutterSize="xs">
       <EuiBadge
         style={{ cursor: 'pointer', padding: '5px' }}
         color="hollow"

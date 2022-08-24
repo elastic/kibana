@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { Filter } from '@kbn/es-query';
 import React from 'react';
+import { FilterItem } from '../../filters_builder/filters_builder_utils';
 
 export interface FilterBadgeExpressionProps {
-  filter: Filter;
+  filter: FilterItem;
 }
 
 export function FilterExpressionBadge({ filter }: FilterBadgeExpressionProps) {
-  return <>{filter}</>;
+  return <>filter</>;
 }

@@ -11,6 +11,7 @@ import { ComponentStory } from '@storybook/react';
 import { FC } from 'react';
 import type { FilterBadgeProps } from '../filter_badge';
 import { FilterBadge } from '../filter_badge';
+import { getFilterMock } from '../__mock__/filters';
 
 export default {
   title: 'Filters badge',
@@ -20,3 +21,9 @@ export default {
 const Template: ComponentStory<FC<FilterBadgeProps>> = (args) => <FilterBadge {...args} />;
 
 export const Default = Template.bind({});
+
+const filter = getFilterMock();
+
+Default.args = {
+  filter,
+};
