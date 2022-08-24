@@ -111,11 +111,11 @@ export const SearchExamplesApp = ({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [currentAbortController, setAbortController] = useState<AbortController>();
   const [rawResponse, setRawResponse] = useState<Record<string, any>>({});
-  const [warning, setWarning] = useState<SearchResponseWarning | undefined>();
+  const [warningContents, setWarningContents] = useState<SearchResponseWarning[]>([]);
   const [selectedTab, setSelectedTab] = useState(0);
 
   function setResponse(response: IKibanaSearchResponse) {
-    setWarning(undefined);
+    setWarningContents([]);
     setRawResponse(response.rawResponse);
     setLoaded(response.loaded!);
     setTotal(response.total!);
@@ -261,7 +261,10 @@ export const SearchExamplesApp = ({
       });
   };
 
-  const doSearchSourceSearch = async (otherBucket: boolean, warningsShown = true) => {
+  const doSearchSourceSearch = async (
+    otherBucket: boolean,
+    showWarningToastNotifications = true
+  ) => {
     if (!dataView) return;
 
     const query = data.query.queryString.getQuery();
@@ -311,7 +314,7 @@ export const SearchExamplesApp = ({
       const result = await lastValueFrom(
         searchSource.fetch$({
           abortSignal: abortController.signal,
-          disableShardFailureWarning: !warningsShown,
+          disableShardFailureWarning: !showWarningToastNotifications,
           inspector,
         })
       );
@@ -323,13 +326,16 @@ export const SearchExamplesApp = ({
        * Suppressing the shard failure warning notification from appearing by default requires setting
        * { disableShardFailureWarning: true } in the SearchSourceSearchOptions passed to $fetch
        */
-      if (!warningsShown) {
+      if (showWarningToastNotifications) {
+        setWarningContents([]);
+      } else {
+        const warnings: SearchResponseWarning[] = [];
         data.search.showWarnings(inspector, (warning) => {
-          setWarning(warning);
+          warnings.push(warning);
           return true; // prevent or allow search service from showing this warning on its own
         });
-      } else {
-        setWarning(undefined);
+        // click the warnings tab to see the warnings
+        setWarningContents(warnings);
       }
 
       const message = <EuiText>Searched {result.rawResponse.hits.total} documents.</EuiText>;
@@ -433,8 +439,11 @@ export const SearchExamplesApp = ({
     }
   };
 
-  const onSearchSourceClickHandler = (withOtherBucket: boolean, warningsShown: boolean) => {
-    doSearchSourceSearch(withOtherBucket, warningsShown);
+  const onSearchSourceClickHandler = (
+    withOtherBucket: boolean,
+    showWarningToastNotifications: boolean
+  ) => {
+    doSearchSourceSearch(withOtherBucket, showWarningToastNotifications);
   };
 
   const reqTabs: EuiTabbedContentTab[] = [
@@ -506,10 +515,10 @@ export const SearchExamplesApp = ({
             paddingSize="s"
             overflowHeight={450}
             isCopyable
-            data-test-subj="responseCodeBlock"
+            data-test-subj="warningsCodeBlock"
           >
             {' '}
-            {JSON.stringify(warning, null, 2)}{' '}
+            {JSON.stringify(warningContents, null, 2)}{' '}
           </EuiCodeBlock>{' '}
         </>
       ),
