@@ -9,8 +9,6 @@ import moment from 'moment';
 import { BehaviorSubject, throwError } from 'rxjs';
 import { renderHook } from '@testing-library/react-hooks';
 import { IKibanaSearchResponse, TimeRangeBounds } from '@kbn/data-plugin/common';
-import { mockKibanaDataService } from '../../../common/mocks/mock_kibana_data_service';
-import { DEFAULT_THREAT_INDEX_KEY } from '../../../../common/constants';
 import {
   AGGREGATION_NAME,
   RawAggregatedIndicatorsResponse,
@@ -18,8 +16,14 @@ import {
   UseAggregatedIndicatorsParam,
 } from './use_aggregated_indicators';
 import { DEFAULT_TIME_RANGE } from './use_filters/utils';
+import {
+  TestProvidersComponent,
+  mockedSearchService,
+  mockedTimefilterService,
+} from '../../../common/mocks/test_providers';
+import { useFilters } from './use_filters';
 
-jest.mock('../../../hooks/use_kibana');
+jest.mock('./use_filters/use_filters');
 
 const aggregationResponse = {
   rawResponse: { aggregations: { [AGGREGATION_NAME]: { buckets: [] } } },
@@ -34,48 +38,57 @@ const useAggregatedIndicatorsParams: UseAggregatedIndicatorsParam = {
   timeRange: DEFAULT_TIME_RANGE,
 };
 
+const stub = () => {};
+
 describe('useAggregatedIndicators()', () => {
-  let mockData: ReturnType<typeof mockKibanaDataService>;
+  beforeEach(jest.clearAllMocks);
+
+  beforeEach(() => {
+    mockedSearchService.search.mockReturnValue(new BehaviorSubject(aggregationResponse));
+    mockedTimefilterService.timefilter.calculateBounds.mockReturnValue(calculateBoundsResponse);
+  });
 
   describe('when mounted', () => {
     beforeEach(() => {
-      mockData = mockKibanaDataService({
-        searchSubject: new BehaviorSubject(aggregationResponse),
-        calculateSubject: calculateBoundsResponse,
+      (useFilters as jest.MockedFunction<typeof useFilters>).mockReturnValue({
+        filters: [],
+        filterQuery: { language: 'kuery', query: '' },
+        filterManager: {} as any,
+        handleSavedQuery: stub,
+        handleSubmitQuery: stub,
+        handleSubmitTimeRange: stub,
+      });
+
+      renderHook(() => useAggregatedIndicators(useAggregatedIndicatorsParams), {
+        wrapper: TestProvidersComponent,
       });
     });
 
-    beforeEach(async () => {
-      renderHook(() => useAggregatedIndicators(useAggregatedIndicatorsParams));
-    });
-
     it('should query the database for threat indicators', async () => {
-      expect(mockData.search).toHaveBeenCalledTimes(1);
-    });
-
-    it('should retrieve index patterns from settings', () => {
-      expect(mockData.getUiSetting).toHaveBeenCalledWith(DEFAULT_THREAT_INDEX_KEY);
+      expect(mockedSearchService.search).toHaveBeenCalledTimes(1);
     });
 
     it('should use the calculateBounds to convert TimeRange to TimeRangeBounds', () => {
-      expect(mockData.calculateBounds).toHaveBeenCalledTimes(1);
+      expect(mockedTimefilterService.timefilter.calculateBounds).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('when query fails', () => {
     beforeEach(async () => {
-      mockData = mockKibanaDataService({
-        searchSubject: throwError(() => new Error('some random error')),
-        calculateSubject: calculateBoundsResponse,
-      });
+      mockedSearchService.search.mockReturnValue(throwError(() => new Error('some random error')));
+      mockedTimefilterService.timefilter.calculateBounds.mockReturnValue(calculateBoundsResponse);
+    });
 
-      renderHook(() => useAggregatedIndicators(useAggregatedIndicatorsParams));
+    beforeEach(() => {
+      renderHook(() => useAggregatedIndicators(useAggregatedIndicatorsParams), {
+        wrapper: TestProvidersComponent,
+      });
     });
 
     it('should show an error', async () => {
-      expect(mockData.showError).toHaveBeenCalledTimes(1);
+      expect(mockedSearchService.showError).toHaveBeenCalledTimes(1);
 
-      expect(mockData.search).toHaveBeenCalledWith(
+      expect(mockedSearchService.search).toHaveBeenCalledWith(
         expect.objectContaining({
           params: expect.objectContaining({
             body: expect.objectContaining({
@@ -95,8 +108,8 @@ describe('useAggregatedIndicators()', () => {
 
   describe('when query is successful', () => {
     beforeEach(async () => {
-      mockData = mockKibanaDataService({
-        searchSubject: new BehaviorSubject<IKibanaSearchResponse<RawAggregatedIndicatorsResponse>>({
+      mockedSearchService.search.mockReturnValue(
+        new BehaviorSubject<IKibanaSearchResponse<RawAggregatedIndicatorsResponse>>({
           rawResponse: {
             aggregations: {
               [AGGREGATION_NAME]: {
@@ -118,13 +131,15 @@ describe('useAggregatedIndicators()', () => {
               },
             },
           },
-        }),
-        calculateSubject: calculateBoundsResponse,
-      });
+        })
+      );
+      mockedTimefilterService.timefilter.calculateBounds.mockReturnValue(calculateBoundsResponse);
     });
 
     it('should call mapping function on every hit', async () => {
-      const { result } = renderHook(() => useAggregatedIndicators(useAggregatedIndicatorsParams));
+      const { result } = renderHook(() => useAggregatedIndicators(useAggregatedIndicatorsParams), {
+        wrapper: TestProvidersComponent,
+      });
 
       expect(result.current.indicators.length).toEqual(1);
     });

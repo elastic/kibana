@@ -13,5 +13,5 @@ export const getName = (user?: UserProfileUserInfo): string => {
     return i18n.UNKNOWN;
   }
 
-  return user.display_name ?? user.full_name ?? user.email ?? user.username;
+  return user.full_name ?? user.email ?? user.username;
 };

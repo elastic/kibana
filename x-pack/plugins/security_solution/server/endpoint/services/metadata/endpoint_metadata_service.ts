@@ -64,14 +64,7 @@ type AgentPolicyWithPackagePolicies = Omit<AgentPolicy, 'package_policies'> & {
 const isAgentPolicyWithPackagePolicies = (
   agentPolicy: AgentPolicy | AgentPolicyWithPackagePolicies
 ): agentPolicy is AgentPolicyWithPackagePolicies => {
-  if (
-    agentPolicy.package_policies.length === 0 ||
-    typeof agentPolicy.package_policies[0] !== 'string'
-  ) {
-    return true;
-  }
-
-  return false;
+  return agentPolicy.package_policies ? true : false;
 };
 
 export class EndpointMetadataService {

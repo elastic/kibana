@@ -8,7 +8,6 @@
 import { UserProfileWithAvatar } from '@kbn/user-profile-components';
 
 export const getSortField = (profile: UserProfileWithAvatar) =>
-  profile.user.display_name?.toLowerCase() ??
   profile.user.full_name?.toLowerCase() ??
   profile.user.email?.toLowerCase() ??
   profile.user.username.toLowerCase();

@@ -88,18 +88,13 @@ export function CasesSingleViewServiceProvider({ getService, getPageObject }: Ft
     },
 
     async openAssigneesPopover() {
-      if (!(await testSubjects.exists('euiSelectableList'))) {
-        await common.clickAndValidate('case-view-assignees-edit-button', 'euiSelectableList');
-        await header.waitUntilLoadingHasFinished();
-      }
+      await common.clickAndValidate('case-view-assignees-edit-button', 'euiSelectableList');
+      await header.waitUntilLoadingHasFinished();
     },
 
     async closeAssigneesPopover() {
-      if (await testSubjects.exists('euiSelectableList')) {
-        await testSubjects.click('case-view-assignees-edit-button');
-        await header.waitUntilLoadingHasFinished();
-        await testSubjects.missingOrFail('euiSelectableList');
-      }
+      await testSubjects.click('case-refresh');
+      await header.waitUntilLoadingHasFinished();
     },
 
     async setSearchTextInAssigneesPopover(text: string) {

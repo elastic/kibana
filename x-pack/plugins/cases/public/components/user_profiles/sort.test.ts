@@ -10,7 +10,7 @@ import { moveCurrentUserToBeginning } from './sort';
 describe('sort', () => {
   describe('moveCurrentUserToBeginning', () => {
     it('returns an empty array if no profiles are provided', () => {
-      expect(moveCurrentUserToBeginning()).toEqual([]);
+      expect(moveCurrentUserToBeginning()).toBeUndefined();
     });
 
     it("returns the profiles if the current profile isn't provided", () => {
