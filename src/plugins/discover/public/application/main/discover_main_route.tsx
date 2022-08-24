@@ -73,16 +73,23 @@ export function DiscoverMainRoute(props: Props) {
     const hasUserDataViewValue = await data.dataViews.hasData.hasUserDataView().catch(() => false);
 
     if (!hasUserDataViewValue) {
+      // eslint-disable-next-line no-console
+      console.log('hasDataView - no user dataview');
       return false;
     }
 
     const defaultDataView = await data.dataViews.getDefaultDataView();
 
     if (!defaultDataView) {
+      // eslint-disable-next-line no-console
+      console.log('hasDataView - no default dataview');
       return false;
     }
 
-    return await data.dataViews.hasData.hasDataView();
+    const actualHasDataView = await data.dataViews.hasData.hasDataView();
+    // eslint-disable-next-line no-console
+    console.log('hasDataView -  data.dataViews.hasData.hasDataView' + actualHasDataView);
+    return actualHasDataView;
   }, [data.dataViews]);
 
   const loadDefaultOrCurrentDataView = useCallback(

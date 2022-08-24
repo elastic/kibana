@@ -30,6 +30,8 @@ export const KibanaNoDataPage: FC<KibanaNoDataPageProps> = ({
   const [hasUserDataViews, setHasUserDataViews] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line no-console
+    console.log('kibana_no_data_page - checkData');
     const checkData = async () => {
       setDataExists(await hasESData());
       setHasUserDataViews(await hasUserDataView());
@@ -47,10 +49,14 @@ export const KibanaNoDataPage: FC<KibanaNoDataPageProps> = ({
   }
 
   if (!hasUserDataViews && dataExists) {
+    // eslint-disable-next-line no-console
+    console.log('kibana_no_data_page - NoDataViewsPrompt', { hasUserDataViews, dataExists });
     return <NoDataViewsPrompt onDataViewCreated={onDataViewCreated} />;
   }
 
   if (!dataExists) {
+    // eslint-disable-next-line no-console
+    console.log('kibana_no_data_page - NoDataConfigPage', { dataExists });
     return <NoDataConfigPage noDataConfig={noDataConfig} />;
   }
 
