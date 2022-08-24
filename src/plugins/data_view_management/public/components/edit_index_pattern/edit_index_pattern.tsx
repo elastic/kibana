@@ -82,7 +82,7 @@ export const EditIndexPattern = withRouter(
     }, [savedObjectsManagement]);
 
     useEffect(() => {
-      if (allowedTypes.length === 0) {
+      if (allowedTypes.length === 0 || !indexPattern.isPersisted()) {
         return;
       }
       const allowedAsString = allowedTypes.map((item) => item.name);
@@ -91,7 +91,7 @@ export const EditIndexPattern = withRouter(
         .then((resp) => {
           setRelationships(resp.relations.map((r) => ({ ...r, title: r.meta.title! })));
         });
-    }, [savedObjectsManagement, indexPattern, allowedTypes]);
+    }, [savedObjectsManagement, indexPattern, allowedTypes, indexPattern]);
 
     useEffect(() => {
       setFields(indexPattern.getNonScriptedFields());
