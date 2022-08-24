@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
+import {
+  IEvent,
+  IEventLogger,
+  millisToNanos,
+  SAVED_OBJECT_REL_PRIMARY,
+} from '@kbn/event-log-plugin/server';
 import { EVENT_LOG_ACTIONS } from '../../plugin';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { TaskRunnerTimings } from '../../task_runner/task_runner_timer';
@@ -102,7 +107,12 @@ export class AlertingEventLogger {
   }
 
   public getStartAndDuration(): { start?: Date; duration?: string | number } {
-    return { start: this.startTime, duration: this.event?.event?.duration };
+    return {
+      start: this.startTime,
+      duration: this.startTime
+        ? millisToNanos(new Date().getTime() - this.startTime!.getTime())
+        : '0',
+    };
   }
 
   public setRuleName(ruleName: string) {
