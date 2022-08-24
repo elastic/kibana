@@ -13,10 +13,7 @@ import {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import {
-  ElasticsearchIndex,
-  ElasticsearchIndexWithPrivileges,
-} from '../../../common/types/indices';
+import { ElasticsearchIndexWithPrivileges } from '../../../common/types/indices';
 
 import { fetchIndexCounts } from './fetch_index_counts';
 import { fetchIndexPrivileges } from './fetch_index_privileges';
