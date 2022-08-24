@@ -31,8 +31,7 @@ import {
 } from '../../mocks';
 import { registerActionStatusRoutes } from './status';
 import uuid from 'uuid';
-import type { MockEndpointResponse, MockResponse, MockAction } from './mocks';
-import { aMockAction, aMockResponse, mockSearchResult } from './mocks';
+import { mockSearchResult } from './mocks';
 import { ACTION_RESPONSE_INDICES } from '../../services/actions/constants';
 import type {
   LogsEndpointAction,
@@ -40,7 +39,91 @@ import type {
 } from '../../../../common/endpoint/types';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 
-describe('Endpoint Action Status', () => {
+describe('Endpoint Pending Action Summary API', () => {
+  let endpointAppContextService: EndpointAppContextService;
+  let endpointActionGenerator: EndpointActionGenerator;
+
+  // convenience for calling the route and handler for action status
+  let getPendingStatus: (reqParams?: any) => Promise<jest.Mocked<KibanaResponseFactory>>;
+
+  // convenience for injecting mock responses for actions index and responses
+  let havingActionsAndResponses: (
+    endpointRequests: LogsEndpointAction[],
+    endpointResponses: LogsEndpointActionResponse[]
+  ) => void;
+
+  const setupRouteHandler = (pendingActionResponsesWithAck: boolean = true): void => {
+    const esClientMock = elasticsearchServiceMock.createScopedClusterClient();
+    const routerMock = httpServiceMock.createRouter();
+
+    endpointActionGenerator = new EndpointActionGenerator('seed');
+    endpointAppContextService = new EndpointAppContextService();
+
+    endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
+    endpointAppContextService.start(createMockEndpointAppContextServiceStartContract());
+
+    registerActionStatusRoutes(routerMock, {
+      logFactory: loggingSystemMock.create(),
+      service: endpointAppContextService,
+      config: () => Promise.resolve(createMockConfig()),
+      experimentalFeatures: {
+        ...parseExperimentalConfigValue(createMockConfig().enableExperimental),
+        pendingActionResponsesWithAck,
+      },
+    });
+
+    getPendingStatus = async (reqParams?: any): Promise<jest.Mocked<KibanaResponseFactory>> => {
+      const req = httpServerMock.createKibanaRequest(reqParams);
+      const mockResponse = httpServerMock.createResponseFactory();
+      const [, routeHandler]: [
+        RouteConfig<any, any, any, any>,
+        RequestHandler<any, any, any, any>
+      ] = routerMock.get.mock.calls.find(([{ path }]) => path.startsWith(ACTION_STATUS_ROUTE))!;
+      await routeHandler(
+        createRouteHandlerContext(esClientMock, savedObjectsClientMock.create()),
+        req,
+        mockResponse
+      );
+
+      return mockResponse;
+    };
+
+    havingActionsAndResponses = (
+      endpointRequests: LogsEndpointAction[],
+      endpointResponses: LogsEndpointActionResponse[]
+    ) => {
+      esClientMock.asInternalUser.search.mockResponseImplementation((req = {}) => {
+        const size = req.size ? req.size : 10;
+        const items: any[] = [];
+        let index = Array.isArray(req.index) ? req.index.join() : req.index;
+
+        switch (index) {
+          case ENDPOINT_ACTIONS_INDEX:
+            items.push(...endpointRequests.splice(0, size));
+            break;
+
+          case ACTION_RESPONSE_INDICES.join():
+            items.push(...endpointResponses.splice(0, size));
+            index = ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN;
+            break;
+
+          default:
+            const error = new Error(`missing mock data for index: ${req.index}`);
+            window.console.error(error);
+            throw error;
+        }
+
+        return mockSearchResult(items, index);
+      });
+    };
+  };
+
+  afterEach(() => {
+    if (endpointAppContextService) {
+      endpointAppContextService.stop();
+    }
+  });
+
   describe('schema', () => {
     it('should require at least 1 agent ID', () => {
       expect(() => {
@@ -67,85 +150,16 @@ describe('Endpoint Action Status', () => {
     });
   });
 
-  describe('response', () => {
-    let endpointAppContextService: EndpointAppContextService;
-    let endpointActionGenerator: EndpointActionGenerator;
-
-    // convenience for calling the route and handler for action status
-    let getPendingStatus: (reqParams?: any) => Promise<jest.Mocked<KibanaResponseFactory>>;
-
-    // convenience for injecting mock responses for actions index and responses
-    let havingActionsAndResponses: (
-      endpointRequests: LogsEndpointAction[],
-      endpointResponses: LogsEndpointActionResponse[]
-    ) => void;
+  describe.each([
+    ['when pendingActionResponsesWithAck is TRUE', true],
+    ['when pendingActionResponsesWithAck is FALSE', false],
+  ])('response %s', (_, pendingActionResponsesWithAck) => {
+    const getExpected = (value: number): number => {
+      return pendingActionResponsesWithAck ? value : 0;
+    };
 
     beforeEach(() => {
-      const esClientMock = elasticsearchServiceMock.createScopedClusterClient();
-      const routerMock = httpServiceMock.createRouter();
-      endpointActionGenerator = new EndpointActionGenerator('seed');
-      endpointAppContextService = new EndpointAppContextService();
-      endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
-      endpointAppContextService.start(createMockEndpointAppContextServiceStartContract());
-
-      registerActionStatusRoutes(routerMock, {
-        logFactory: loggingSystemMock.create(),
-        service: endpointAppContextService,
-        config: () => Promise.resolve(createMockConfig()),
-        experimentalFeatures: {
-          ...parseExperimentalConfigValue(createMockConfig().enableExperimental),
-          pendingActionResponsesWithAck: true,
-        },
-      });
-
-      getPendingStatus = async (reqParams?: any): Promise<jest.Mocked<KibanaResponseFactory>> => {
-        const req = httpServerMock.createKibanaRequest(reqParams);
-        const mockResponse = httpServerMock.createResponseFactory();
-        const [, routeHandler]: [
-          RouteConfig<any, any, any, any>,
-          RequestHandler<any, any, any, any>
-        ] = routerMock.get.mock.calls.find(([{ path }]) => path.startsWith(ACTION_STATUS_ROUTE))!;
-        await routeHandler(
-          createRouteHandlerContext(esClientMock, savedObjectsClientMock.create()),
-          req,
-          mockResponse
-        );
-
-        return mockResponse;
-      };
-
-      havingActionsAndResponses = (
-        endpointRequests: LogsEndpointAction[],
-        endpointResponses: LogsEndpointActionResponse[]
-      ) => {
-        esClientMock.asInternalUser.search.mockResponseImplementation((req = {}) => {
-          const size = req.size ? req.size : 10;
-          const items: any[] = [];
-          let index = Array.isArray(req.index) ? req.index.join() : req.index;
-
-          switch (index) {
-            case ENDPOINT_ACTIONS_INDEX:
-              items.push(...endpointRequests.splice(0, size));
-              break;
-
-            case ACTION_RESPONSE_INDICES.join():
-              items.push(...endpointResponses.splice(0, size));
-              index = ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN;
-              break;
-
-            default:
-              const error = new Error(`missing mock data for index: ${req.index}`);
-              window.console.error(error);
-              throw error;
-          }
-
-          return mockSearchResult(items, index);
-        });
-      };
-    });
-
-    afterEach(() => {
-      endpointAppContextService.stop();
+      setupRouteHandler(pendingActionResponsesWithAck);
     });
 
     it('should include agent IDs in the output, even if they have no actions', async () => {
@@ -181,7 +195,7 @@ describe('Endpoint Action Status', () => {
       expect((response.ok.mock.calls[0][0]?.body as any)?.data).toHaveLength(1);
       expect((response.ok.mock.calls[0][0]?.body as any)?.data[0].agent_id).toEqual(mockID);
       expect((response.ok.mock.calls[0][0]?.body as any)?.data[0].pending_actions.isolate).toEqual(
-        1400
+        getExpected(1400)
       );
     });
 
@@ -228,7 +242,7 @@ describe('Endpoint Action Status', () => {
       expect((response.ok.mock.calls[0][0]?.body as any)?.data).toHaveLength(1);
       expect((response.ok.mock.calls[0][0]?.body as any)?.data[0].agent_id).toEqual(mockID);
       expect((response.ok.mock.calls[0][0]?.body as any)?.data[0].pending_actions.isolate).toEqual(
-        2
+        getExpected(2)
       );
     });
     it('should show multiple pending actions, and their counts', async () => {
@@ -253,11 +267,11 @@ describe('Endpoint Action Status', () => {
       expect((response.ok.mock.calls[0][0]?.body as any)?.data).toHaveLength(1);
       expect((response.ok.mock.calls[0][0]?.body as any)?.data[0].agent_id).toEqual(mockID);
       expect((response.ok.mock.calls[0][0]?.body as any)?.data[0].pending_actions.isolate).toEqual(
-        3
+        getExpected(3)
       );
       expect(
         (response.ok.mock.calls[0][0]?.body as any)?.data[0].pending_actions.unisolate
-      ).toEqual(2);
+      ).toEqual(getExpected(2));
     });
     it('should calculate correct pending counts from grouped/bulked actions', async () => {
       const mockID = 'XYZABC-000';
@@ -287,7 +301,7 @@ describe('Endpoint Action Status', () => {
       expect((response.ok.mock.calls[0][0]?.body as any)?.data).toHaveLength(1);
       expect((response.ok.mock.calls[0][0]?.body as any)?.data[0].agent_id).toEqual(mockID);
       expect((response.ok.mock.calls[0][0]?.body as any)?.data[0].pending_actions.isolate).toEqual(
-        2
+        getExpected(2)
       );
     });
 
@@ -326,7 +340,7 @@ describe('Endpoint Action Status', () => {
       expect((response.ok.mock.calls[0][0]?.body as any)?.data).toHaveLength(1);
       expect((response.ok.mock.calls[0][0]?.body as any)?.data[0].agent_id).toEqual(mockAgentID);
       expect((response.ok.mock.calls[0][0]?.body as any)?.data[0].pending_actions.isolate).toEqual(
-        1
+        getExpected(1)
       );
     });
 
@@ -376,337 +390,20 @@ describe('Endpoint Action Status', () => {
       expect((response.ok.mock.calls[0][0]?.body as any)?.data).toContainEqual({
         agent_id: agentOne,
         pending_actions: {
-          isolate: 1,
+          isolate: getExpected(1),
         },
       });
       expect((response.ok.mock.calls[0][0]?.body as any)?.data).toContainEqual({
         agent_id: agentTwo,
         pending_actions: {
-          isolate: 2,
+          isolate: getExpected(2),
         },
       });
       expect((response.ok.mock.calls[0][0]?.body as any)?.data).toContainEqual({
         agent_id: agentThree,
         pending_actions: {
-          isolate: 2, // present in all three actions, but second one has a response, therefore not pending
+          isolate: getExpected(2), // present in all three actions, but second one has a response, therefore not pending
         },
-      });
-    });
-  });
-
-  describe('response (when pendingActionResponsesWithAck is FALSE)', () => {
-    let endpointAppContextService: EndpointAppContextService;
-
-    // convenience for calling the route and handler for action status
-    let getPendingStatus: (reqParams?: any) => Promise<jest.Mocked<KibanaResponseFactory>>;
-    // convenience for injecting mock responses for actions index and responses
-    let havingActionsAndResponses: (
-      actions: MockAction[],
-      responses: MockResponse[],
-      endpointResponses?: MockEndpointResponse[]
-    ) => void;
-
-    beforeEach(() => {
-      const esClientMock = elasticsearchServiceMock.createScopedClusterClient();
-      const routerMock = httpServiceMock.createRouter();
-      endpointAppContextService = new EndpointAppContextService();
-      endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
-      endpointAppContextService.start(createMockEndpointAppContextServiceStartContract());
-
-      registerActionStatusRoutes(routerMock, {
-        logFactory: loggingSystemMock.create(),
-        service: endpointAppContextService,
-        config: () => Promise.resolve(createMockConfig()),
-        experimentalFeatures: {
-          ...parseExperimentalConfigValue(createMockConfig().enableExperimental),
-          pendingActionResponsesWithAck: false,
-        },
-      });
-
-      getPendingStatus = async (reqParams?: any): Promise<jest.Mocked<KibanaResponseFactory>> => {
-        const req = httpServerMock.createKibanaRequest(reqParams);
-        const mockResponse = httpServerMock.createResponseFactory();
-        const [, routeHandler]: [
-          RouteConfig<any, any, any, any>,
-          RequestHandler<any, any, any, any>
-        ] = routerMock.get.mock.calls.find(([{ path }]) => path.startsWith(ACTION_STATUS_ROUTE))!;
-        await routeHandler(
-          createRouteHandlerContext(esClientMock, savedObjectsClientMock.create()),
-          req,
-          mockResponse
-        );
-
-        return mockResponse;
-      };
-
-      havingActionsAndResponses = (
-        actions: MockAction[],
-        responses: MockResponse[],
-        endpointResponses?: MockEndpointResponse[]
-      ) => {
-        esClientMock.asInternalUser.search.mockResponseImplementation((req = {}) => {
-          const size = req.size ? req.size : 10;
-          const items: any[] =
-            req.index === '.fleet-actions'
-              ? actions.splice(0, size)
-              : req.index === '.logs-endpoint.action.responses' && !!endpointResponses
-              ? endpointResponses
-              : responses.splice(0, size);
-
-          if (items.length > 0) {
-            return mockSearchResult(items.map((x) => x.build()));
-          } else {
-            return mockSearchResult();
-          }
-        });
-      };
-    });
-
-    afterEach(() => {
-      endpointAppContextService.stop();
-    });
-
-    it('should include total counts for large (more than a page) action counts', async () => {
-      const mockID = 'XYZABC-000';
-      const actions = [];
-      for (let i = 0; i < 1400; i++) {
-        // putting more than a single page of results in
-        actions.push(aMockAction().withAgent(mockID));
-      }
-      havingActionsAndResponses(actions, []);
-
-      const response = await getPendingStatus({
-        query: {
-          agent_ids: [mockID],
-        },
-      });
-
-      expect(response.ok).toBeCalled();
-      expect((response.ok.mock.calls[0][0]?.body as any)?.data).toHaveLength(1);
-      expect((response.ok.mock.calls[0][0]?.body as any)?.data[0].agent_id).toEqual(mockID);
-      expect((response.ok.mock.calls[0][0]?.body as any)?.data[0].pending_actions.isolate).toEqual(
-        0
-      );
-    });
-    it('should include a total count of a pending action', async () => {
-      const mockID = 'XYZABC-000';
-      havingActionsAndResponses(
-        [
-          aMockAction().withAgent(mockID).withAction('isolate'),
-          aMockAction().withAgent(mockID).withAction('isolate'),
-        ],
-        []
-      );
-      const response = await getPendingStatus({
-        query: {
-          agent_ids: [mockID],
-        },
-      });
-      expect(response.ok).toBeCalled();
-      expect((response.ok.mock.calls[0][0]?.body as any)?.data).toHaveLength(1);
-      expect((response.ok.mock.calls[0][0]?.body as any)?.data[0].agent_id).toEqual(mockID);
-      expect((response.ok.mock.calls[0][0]?.body as any)?.data[0].pending_actions.isolate).toEqual(
-        0
-      );
-    });
-    it('should show multiple pending actions, and their counts', async () => {
-      const mockID = 'XYZABC-000';
-      havingActionsAndResponses(
-        [
-          aMockAction().withAgent(mockID).withAction('isolate'),
-          aMockAction().withAgent(mockID).withAction('isolate'),
-          aMockAction().withAgent(mockID).withAction('isolate'),
-          aMockAction().withAgent(mockID).withAction('unisolate'),
-          aMockAction().withAgent(mockID).withAction('unisolate'),
-        ],
-        []
-      );
-      const response = await getPendingStatus({
-        query: {
-          agent_ids: [mockID],
-        },
-      });
-      expect(response.ok).toBeCalled();
-      expect((response.ok.mock.calls[0][0]?.body as any)?.data).toHaveLength(1);
-      expect((response.ok.mock.calls[0][0]?.body as any)?.data[0].agent_id).toEqual(mockID);
-      expect((response.ok.mock.calls[0][0]?.body as any)?.data[0].pending_actions.isolate).toEqual(
-        0
-      );
-      expect(
-        (response.ok.mock.calls[0][0]?.body as any)?.data[0].pending_actions.unisolate
-      ).toEqual(0);
-    });
-    it('should calculate correct pending counts from grouped/bulked actions', async () => {
-      const mockID = 'XYZABC-000';
-      havingActionsAndResponses(
-        [
-          aMockAction()
-            .withAgents([mockID, 'IRRELEVANT-OTHER-AGENT', 'ANOTHER-POSSIBLE-AGENT'])
-            .withAction('isolate'),
-          aMockAction().withAgents([mockID, 'YET-ANOTHER-AGENT-ID']).withAction('isolate'),
-          aMockAction().withAgents(['YET-ANOTHER-AGENT-ID']).withAction('isolate'), // one WITHOUT our agent-under-test
-        ],
-        []
-      );
-      const response = await getPendingStatus({
-        query: {
-          agent_ids: [mockID],
-        },
-      });
-      expect(response.ok).toBeCalled();
-      expect((response.ok.mock.calls[0][0]?.body as any)?.data).toHaveLength(1);
-      expect((response.ok.mock.calls[0][0]?.body as any)?.data[0].agent_id).toEqual(mockID);
-      expect((response.ok.mock.calls[0][0]?.body as any)?.data[0].pending_actions.isolate).toEqual(
-        0
-      );
-    });
-
-    it('should exclude actions that have responses from the pending count', async () => {
-      const mockAgentID = 'XYZABC-000';
-      const actionID = 'some-known-actionid';
-      havingActionsAndResponses(
-        [
-          aMockAction().withAgent(mockAgentID).withAction('isolate'),
-          aMockAction().withAgent(mockAgentID).withAction('isolate').withID(actionID),
-        ],
-        [aMockResponse(actionID, mockAgentID)]
-      );
-      (endpointAppContextService.getEndpointMetadataService as jest.Mock) = jest
-        .fn()
-        .mockReturnValue({
-          findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
-        });
-      const response = await getPendingStatus({
-        query: {
-          agent_ids: [mockAgentID],
-        },
-      });
-      expect(response.ok).toBeCalled();
-      expect((response.ok.mock.calls[0][0]?.body as any)?.data).toHaveLength(1);
-      expect((response.ok.mock.calls[0][0]?.body as any)?.data[0].agent_id).toEqual(mockAgentID);
-      expect((response.ok.mock.calls[0][0]?.body as any)?.data[0].pending_actions.isolate).toEqual(
-        0
-      );
-    });
-    it('should have accurate counts for multiple agents, bulk actions, and responses', async () => {
-      const agentOne = 'XYZABC-000';
-      const agentTwo = 'DEADBEEF';
-      const agentThree = 'IDIDIDID';
-
-      const actionTwoID = 'ID-TWO';
-      havingActionsAndResponses(
-        [
-          aMockAction().withAgents([agentOne, agentTwo, agentThree]).withAction('isolate'),
-          aMockAction()
-            .withAgents([agentTwo, agentThree])
-            .withAction('isolate')
-            .withID(actionTwoID),
-          aMockAction().withAgents([agentThree]).withAction('isolate'),
-        ],
-        [aMockResponse(actionTwoID, agentThree)]
-      );
-      (endpointAppContextService.getEndpointMetadataService as jest.Mock) = jest
-        .fn()
-        .mockReturnValue({
-          findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
-        });
-      const response = await getPendingStatus({
-        query: {
-          agent_ids: [agentOne, agentTwo, agentThree],
-        },
-      });
-      expect(response.ok).toBeCalled();
-      expect((response.ok.mock.calls[0][0]?.body as any)?.data).toHaveLength(3);
-      expect((response.ok.mock.calls[0][0]?.body as any)?.data).toContainEqual({
-        agent_id: agentOne,
-        pending_actions: {
-          isolate: 0,
-        },
-      });
-      expect((response.ok.mock.calls[0][0]?.body as any)?.data).toContainEqual({
-        agent_id: agentTwo,
-        pending_actions: {
-          isolate: 0,
-        },
-      });
-      expect((response.ok.mock.calls[0][0]?.body as any)?.data).toContainEqual({
-        agent_id: agentThree,
-        pending_actions: {
-          isolate: 0,
-        },
-      });
-    });
-
-    describe('with endpoint response index', () => {
-      it('should include a total count of a pending action response', async () => {
-        const mockAgentId = 'XYZABC-000';
-        const actionIds = ['action_id_0', 'action_id_1'];
-        havingActionsAndResponses(
-          [
-            aMockAction().withAgent(mockAgentId).withAction('isolate').withID(actionIds[0]),
-            aMockAction().withAgent(mockAgentId).withAction('isolate').withID(actionIds[1]),
-          ],
-          [
-            aMockResponse(actionIds[0], mockAgentId, true),
-            aMockResponse(actionIds[1], mockAgentId, true),
-          ]
-        );
-        (endpointAppContextService.getEndpointMetadataService as jest.Mock) = jest
-          .fn()
-          .mockReturnValue({
-            findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
-          });
-        const response = await getPendingStatus({
-          query: {
-            agent_ids: [mockAgentId],
-          },
-        });
-        expect(response.ok).toBeCalled();
-        expect((response.ok.mock.calls[0][0]?.body as any)?.data).toHaveLength(1);
-        expect((response.ok.mock.calls[0][0]?.body as any)?.data[0].agent_id).toEqual(mockAgentId);
-        expect(
-          (response.ok.mock.calls[0][0]?.body as any)?.data[0].pending_actions.isolate
-        ).toEqual(0);
-      });
-
-      it('should show multiple pending action responses, and their counts', async () => {
-        const mockAgentID = 'XYZABC-000';
-        const actionIds = ['ack_0', 'ack_1', 'ack_2', 'ack_3', 'ack_4'];
-        havingActionsAndResponses(
-          [
-            aMockAction().withAgent(mockAgentID).withAction('isolate').withID(actionIds[0]),
-            aMockAction().withAgent(mockAgentID).withAction('isolate').withID(actionIds[1]),
-            aMockAction().withAgent(mockAgentID).withAction('isolate').withID(actionIds[2]),
-            aMockAction().withAgent(mockAgentID).withAction('unisolate').withID(actionIds[3]),
-            aMockAction().withAgent(mockAgentID).withAction('unisolate').withID(actionIds[4]),
-          ],
-          [
-            aMockResponse(actionIds[0], mockAgentID, true),
-            aMockResponse(actionIds[1], mockAgentID, true),
-            aMockResponse(actionIds[2], mockAgentID, true),
-            aMockResponse(actionIds[3], mockAgentID, true),
-            aMockResponse(actionIds[4], mockAgentID, true),
-          ]
-        );
-        (endpointAppContextService.getEndpointMetadataService as jest.Mock) = jest
-          .fn()
-          .mockReturnValue({
-            findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
-          });
-        const response = await getPendingStatus({
-          query: {
-            agent_ids: [mockAgentID],
-          },
-        });
-        expect(response.ok).toBeCalled();
-        expect((response.ok.mock.calls[0][0]?.body as any)?.data).toHaveLength(1);
-        expect((response.ok.mock.calls[0][0]?.body as any)?.data[0].agent_id).toEqual(mockAgentID);
-        expect(
-          (response.ok.mock.calls[0][0]?.body as any)?.data[0].pending_actions.isolate
-        ).toEqual(0);
-        expect(
-          (response.ok.mock.calls[0][0]?.body as any)?.data[0].pending_actions.unisolate
-        ).toEqual(0);
       });
     });
   });
