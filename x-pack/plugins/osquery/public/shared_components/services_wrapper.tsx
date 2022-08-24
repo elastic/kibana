@@ -15,7 +15,7 @@ import { queryClient } from '../query_client';
 import { KibanaThemeProvider } from '../shared_imports';
 import type { StartPlugins } from '../types';
 
-interface ServicesWrapperProps {
+export interface ServicesWrapperProps {
   services: CoreStart & StartPlugins;
   children: React.ReactNode;
 }

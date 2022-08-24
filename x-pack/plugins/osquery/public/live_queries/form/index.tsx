@@ -21,7 +21,6 @@ import { useForm as useHookForm, FormProvider } from 'react-hook-form';
 import { isEmpty, map, find, pickBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-import type { LiveQueryDetailsItem } from '../../actions/use_live_query_details';
 import type { SavedQuerySOFormData } from '../../saved_queries/form/use_saved_query_form';
 import type {
   EcsMappingFormField,
@@ -108,18 +107,6 @@ interface LiveQueryFormProps {
   hideAgentsField?: boolean;
   addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
 }
-
-const liveQueryFormSerializer = (values: LiveQueryFormFields): Partial<LiveQueryDetailsItem> =>
-  pickBy<Partial<LiveQueryDetailsItem>>(
-    {
-      agentSelection: values.agentSelection,
-      saved_query_id: values.savedQueryId,
-      query: values.query,
-      pack_id: values?.packId?.length ? values?.packId[0] : undefined,
-      ...(values.ecs_mapping ? { ecs_mapping: convertECSMappingToObject(values.ecs_mapping) } : {}),
-    },
-    (value) => !isEmpty(value)
-  );
 
 const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   defaultValue,
@@ -209,9 +196,21 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
 
   const onSubmit = useCallback(
     async (values: LiveQueryFormFields) => {
-      const serializedData = liveQueryFormSerializer(values);
+      const serializedData = pickBy(
+        {
+          agentSelection: values.agentSelection,
+          saved_query_id: values.savedQueryId,
+          query: values.query,
+          pack_id: values?.packId?.length ? values?.packId[0] : undefined,
+          ...(values.ecs_mapping
+            ? { ecs_mapping: convertECSMappingToObject(values.ecs_mapping) }
+            : {}),
+        },
+        (value) => !isEmpty(value)
+      );
       if (isEmpty(errors)) {
         try {
+          // @ts-expect-error update types
           await mutateAsync(serializedData);
           // eslint-disable-next-line no-empty
         } catch (e) {}

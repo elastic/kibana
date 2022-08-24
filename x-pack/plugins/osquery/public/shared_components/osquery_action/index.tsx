@@ -20,7 +20,7 @@ import { LiveQuery } from '../../live_queries';
 import { OsqueryIcon } from '../../components/osquery_icon';
 import { useIsOsqueryAvailable } from './use_is_osquery_available';
 
-interface OsqueryActionProps {
+export interface OsqueryActionProps {
   agentId?: string;
   defaultValues?: {};
   formType: 'steps' | 'simple';

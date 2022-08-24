@@ -30,7 +30,7 @@ const StyledEuiCodeBlock = styled(EuiCodeBlock)`
   min-height: 100px;
 `;
 
-interface LiveQueryQueryFieldProps {
+export interface LiveQueryQueryFieldProps {
   disabled?: boolean;
   handleSubmitForm?: () => void;
 }
@@ -44,8 +44,6 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
     useState<EuiAccordionProps['forceState']>('closed');
   const permissions = useKibana().services.application.capabilities.osquery;
   const queryType = formContext?.watch('queryType', 'query');
-
-  console.error('queryType', queryType);
 
   const {
     field: { onChange, value },

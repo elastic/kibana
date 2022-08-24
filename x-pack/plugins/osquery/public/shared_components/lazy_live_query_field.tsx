@@ -6,14 +6,16 @@
  */
 
 import React, { lazy, Suspense } from 'react';
+import type { UseFormReturn } from 'react-hook-form';
 import { FormProvider } from 'react-hook-form';
+import type { LiveQueryQueryFieldProps } from '../live_queries/form/live_query_query_field';
+import type { ServicesWrapperProps } from './services_wrapper';
 import ServicesWrapper from './services_wrapper';
 
-// @ts-expect-error update types
 export const getLazyLiveQueryField =
-  (services) =>
+  (services: ServicesWrapperProps['services']) =>
   // eslint-disable-next-line react/display-name
-  ({ formMethods, ...props }) => {
+  ({ formMethods, ...props }: LiveQueryQueryFieldProps & { formMethods: UseFormReturn }) => {
     const LiveQueryField = lazy(() => import('../live_queries/form/live_query_query_field'));
 
     return (
