@@ -15,7 +15,7 @@ export type QueryPointEventAnnotationArgs = {
   textSource?: string;
   textField?: string;
   query: ExpressionValueBoxed<'kibana_query', Query>;
-  additionalFields?: string[];
+  extraFields?: string[];
 } & PointStyleProps;
 
 export type QueryPointEventAnnotationOutput = QueryPointEventAnnotationArgs & {

@@ -181,6 +181,7 @@ describe('AnnotationsPanel', () => {
           panelRef={React.createRef()}
         />
       );
+
       component.find('button[data-test-subj="lns-xyAnnotation-rangeSwitch"]').simulate('click');
 
       expect(setState).toBeCalledWith({
@@ -193,6 +194,7 @@ describe('AnnotationsPanel', () => {
                 id: 'ann1',
                 isHidden: undefined,
                 label: 'Event range',
+                type: 'manual',
                 key: {
                   endTimestamp: '2022-03-21T10:49:00.000Z',
                   timestamp: '2022-03-18T08:25:00.000Z',
@@ -200,6 +202,7 @@ describe('AnnotationsPanel', () => {
                 },
               },
             ],
+            indexPatternId: 'indexPattern1',
             layerId: 'annotation',
             layerType: 'annotations',
           },
@@ -220,8 +223,10 @@ describe('AnnotationsPanel', () => {
                   type: 'point_in_time',
                 },
                 label: 'Event',
+                type: 'manual',
               },
             ],
+            indexPatternId: 'indexPattern1',
             layerId: 'annotation',
             layerType: 'annotations',
           },

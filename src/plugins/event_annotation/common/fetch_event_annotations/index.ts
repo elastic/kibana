@@ -13,8 +13,14 @@ import type { ExpressionFunctionDefinition, Datatable } from '@kbn/expressions-p
 import moment from 'moment';
 import { ESCalendarInterval, ESFixedInterval, roundDateToESInterval } from '@elastic/charts';
 import { EventAnnotationGroupOutput } from '../event_annotation_group';
-import { annotationColumns, EventAnnotationOutput } from '../manual_event_annotation/types';
-import { filterOutOfTimeRange, isManualPointAnnotation, sortByTime } from './utils';
+import { annotationColumns, ManualEventAnnotationOutput } from '../manual_event_annotation/types';
+import {
+  filterOutOfTimeRange,
+  isManualPointAnnotation,
+  isQueryAnnotation,
+  sortByTime,
+} from './utils';
+import { EventAnnotationOutput } from '../types';
 
 export interface FetchEventAnnotationsDatatable {
   annotations: EventAnnotationOutput[];
@@ -76,20 +82,24 @@ export function fetchEventAnnotations(): FetchEventAnnotationsExpressionFunction
           const datatable: Datatable = {
             type: 'datatable',
             columns: annotationColumns,
-            rows: annotations.sort(sortByTime).map((annotation) => {
-              const initialDate = moment(annotation.time).valueOf();
-              const snappedDate = roundDateToESInterval(
-                initialDate,
-                parseEsInterval(args.interval) as ESCalendarInterval | ESFixedInterval,
-                'start',
-                'UTC'
-              );
-              return {
-                ...annotation,
-                type: isManualPointAnnotation(annotation) ? 'point' : 'range',
-                timebucket: moment(snappedDate).toISOString(),
-              };
-            }),
+            rows: annotations
+              // TODO: remove once the Query fetching part is complete
+              .filter((a): a is ManualEventAnnotationOutput => !isQueryAnnotation(a))
+              .sort(sortByTime)
+              .map((annotation) => {
+                const initialDate = moment(annotation.time).valueOf();
+                const snappedDate = roundDateToESInterval(
+                  initialDate,
+                  parseEsInterval(args.interval) as ESCalendarInterval | ESFixedInterval,
+                  'start',
+                  'UTC'
+                );
+                return {
+                  ...annotation,
+                  type: isManualPointAnnotation(annotation) ? 'point' : 'range',
+                  timebucket: moment(snappedDate).toISOString(),
+                };
+              }),
           };
 
           return new Observable<Datatable>((subscriber) => {

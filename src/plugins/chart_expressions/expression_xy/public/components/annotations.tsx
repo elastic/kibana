@@ -29,6 +29,8 @@ import {
   defaultAnnotationColor,
   defaultAnnotationRangeColor,
 } from '@kbn/event-annotation-plugin/public';
+import { isQueryAnnotation } from '@kbn/event-annotation-plugin/common/fetch_event_annotations/utils';
+import { ManualEventAnnotationOutput } from '@kbn/event-annotation-plugin/common/manual_event_annotation/types';
 import type {
   AnnotationLayerArgs,
   CommonXYAnnotationLayerConfig,
@@ -65,6 +67,7 @@ const groupVisibleConfigsByInterval = (
     .flatMap(({ annotations }) =>
       annotations.filter((a) => !a.isHidden && a.type === 'manual_point_event_annotation')
     )
+    .filter((a): a is ManualEventAnnotationOutput => !isQueryAnnotation(a))
     .sort((a, b) => moment(a.time).valueOf() - moment(b.time).valueOf())
     .reduce<Record<string, ManualPointEventAnnotationArgs[]>>((acc, current) => {
       const roundedTimestamp = getRoundedTimestamp(

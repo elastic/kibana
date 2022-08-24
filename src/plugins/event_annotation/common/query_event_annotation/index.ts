@@ -95,9 +95,9 @@ export const queryPointEventAnnotation: ExpressionFunctionDefinition<
         defaultMessage: `Query to apply for the annotation`,
       }),
     },
-    additionalFields: {
+    extraFields: {
       types: ['string'],
-      help: i18n.translate('eventAnnotation.queryAnnotation.args.additionalFields', {
+      help: i18n.translate('eventAnnotation.queryAnnotation.args.extraFields', {
         defaultMessage: `Provide additional field names to visualize in the tooltip`,
       }),
       multi: true,

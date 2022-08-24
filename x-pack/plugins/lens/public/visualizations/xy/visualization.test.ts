@@ -479,10 +479,12 @@ describe('xy_visualization', () => {
         ).toEqual({
           layerId: 'annotation',
           layerType: layerTypes.ANNOTATIONS,
+          indexPatternId: 'indexPattern1',
           annotations: [
             exampleAnnotation,
             {
               icon: 'triangle',
+              type: 'manual',
               id: 'newCol',
               key: {
                 timestamp: '2022-04-15T00:00:00.000Z',
@@ -526,6 +528,7 @@ describe('xy_visualization', () => {
         ).toEqual({
           layerId: 'annotation',
           layerType: layerTypes.ANNOTATIONS,
+          indexPatternId: 'indexPattern1',
           annotations: [exampleAnnotation2, { ...exampleAnnotation2, id: 'newColId' }],
         });
       });
@@ -563,6 +566,7 @@ describe('xy_visualization', () => {
         ).toEqual({
           layerId: 'annotation',
           layerType: layerTypes.ANNOTATIONS,
+          indexPatternId: 'indexPattern1',
           annotations: [exampleAnnotation2, exampleAnnotation],
         });
       });
@@ -608,11 +612,13 @@ describe('xy_visualization', () => {
           {
             layerId: 'first',
             layerType: layerTypes.ANNOTATIONS,
+            indexPatternId: 'indexPattern1',
             annotations: [exampleAnnotation],
           },
           {
             layerId: 'second',
             layerType: layerTypes.ANNOTATIONS,
+            indexPatternId: 'indexPattern1',
             annotations: [{ ...exampleAnnotation, id: 'an2' }],
           },
         ]);

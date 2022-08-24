@@ -9,10 +9,12 @@
 import { TimeRange } from '@kbn/data-plugin/common';
 
 import {
-  EventAnnotationOutput,
+  ManualEventAnnotationOutput,
   ManualPointEventAnnotationOutput,
   ManualRangeEventAnnotationOutput,
 } from '../manual_event_annotation/types';
+import { QueryPointEventAnnotationOutput } from '../query_event_annotation/types';
+import { EventAnnotationOutput } from '../types';
 
 export const isRangeAnnotation = (
   annotation: EventAnnotationOutput
@@ -24,6 +26,12 @@ export const isManualPointAnnotation = (
   annotation: EventAnnotationOutput
 ): annotation is ManualPointEventAnnotationOutput => {
   return 'time' in annotation && !('endTime' in annotation);
+};
+
+export const isQueryAnnotation = (
+  annotation: EventAnnotationOutput
+): annotation is QueryPointEventAnnotationOutput => {
+  return 'query' in annotation;
 };
 
 export const filterOutOfTimeRange = (annotation: EventAnnotationOutput, timerange?: TimeRange) => {
@@ -38,6 +46,6 @@ export const filterOutOfTimeRange = (annotation: EventAnnotationOutput, timerang
   }
 };
 
-export const sortByTime = (a: EventAnnotationOutput, b: EventAnnotationOutput) => {
+export const sortByTime = (a: ManualEventAnnotationOutput, b: ManualEventAnnotationOutput) => {
   return a.time.localeCompare(b.time);
 };

@@ -15,7 +15,7 @@ import type {
   VisualizationLayerWidgetProps,
   VisualizationType,
 } from '../../../types';
-import type { State, visualizationTypes, SeriesType, XYAnnotationLayerConfig } from '../types';
+import { State, visualizationTypes, SeriesType, XYAnnotationLayerConfig } from '../types';
 import { isHorizontalChart, isHorizontalSeries } from '../state_helpers';
 import { ChangeIndexPattern, StaticHeader } from '../../../shared_components';
 import { updateLayer } from '.';

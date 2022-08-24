@@ -82,7 +82,7 @@ export interface MarkerDecorationConfig<T extends string = string> {
 
 function getSelectedOption(
   { textSource, textVisibility }: MarkerDecorationConfig = {},
-  isQueryBased: boolean
+  isQueryBased?: boolean
 ) {
   if (!textVisibility) {
     return 'none';
@@ -103,8 +103,9 @@ export function TextDecorationSetting<Icon extends string = string>({
   currentConfig?: MarkerDecorationConfig<Icon>;
   setConfig: (config: MarkerDecorationConfig<Icon>) => void;
   customIconSet?: IconSet<Icon>;
-  isQueryBased: boolean;
-  children: (textDecoration: 'none' | 'name' | 'field') => JSX.Element | null;
+  isQueryBased?: boolean;
+  /** A children render function for custom sub fields on textDecoration change */
+  children?: (textDecoration: 'none' | 'name' | 'field') => JSX.Element | null;
 }) {
   const options = [
     {
@@ -164,7 +165,7 @@ export function TextDecorationSetting<Icon extends string = string>({
           }}
           isFullWidth
         />
-        {children(selectedVisibleOption)}
+        {children?.(selectedVisibleOption)}
       </div>
     </EuiFormRow>
   );
