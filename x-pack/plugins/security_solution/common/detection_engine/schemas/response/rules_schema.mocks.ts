@@ -6,7 +6,12 @@
  */
 
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../constants';
-import type { FullResponseSchema } from '../request';
+import type {
+  EqlResponseSchema,
+  MachineLearningResponseSchema,
+  QueryResponseSchema,
+  ThreatMatchResponseSchema,
+} from '../request';
 import { getListArrayMock } from '../types/lists.mock';
 
 export const ANCHOR_DATE = '2020-02-20T03:57:54.037Z';
@@ -58,7 +63,7 @@ const getResponseBaseParams = (anchorDate: string = ANCHOR_DATE) => ({
   namespace: undefined,
 });
 
-export const getRulesSchemaMock = (anchorDate: string = ANCHOR_DATE): FullResponseSchema => ({
+export const getRulesSchemaMock = (anchorDate: string = ANCHOR_DATE): QueryResponseSchema => ({
   ...getResponseBaseParams(anchorDate),
   query: 'user.name: root or user.name: admin',
   type: 'query',
@@ -69,7 +74,9 @@ export const getRulesSchemaMock = (anchorDate: string = ANCHOR_DATE): FullRespon
   saved_id: undefined,
 });
 
-export const getRulesMlSchemaMock = (anchorDate: string = ANCHOR_DATE): FullResponseSchema => {
+export const getRulesMlSchemaMock = (
+  anchorDate: string = ANCHOR_DATE
+): MachineLearningResponseSchema => {
   return {
     ...getResponseBaseParams(anchorDate),
     type: 'machine_learning',
@@ -80,7 +87,7 @@ export const getRulesMlSchemaMock = (anchorDate: string = ANCHOR_DATE): FullResp
 
 export const getThreatMatchingSchemaMock = (
   anchorDate: string = ANCHOR_DATE
-): FullResponseSchema => {
+): ThreatMatchResponseSchema => {
   return {
     ...getResponseBaseParams(anchorDate),
     type: 'threat_match',
@@ -124,7 +131,7 @@ export const getThreatMatchingSchemaMock = (
  */
 export const getThreatMatchingSchemaPartialMock = (
   enabled = false
-): Partial<FullResponseSchema> => {
+): Partial<ThreatMatchResponseSchema> => {
   return {
     author: [],
     created_by: 'elastic',
@@ -193,7 +200,7 @@ export const getThreatMatchingSchemaPartialMock = (
   };
 };
 
-export const getRulesEqlSchemaMock = (anchorDate: string = ANCHOR_DATE): FullResponseSchema => {
+export const getRulesEqlSchemaMock = (anchorDate: string = ANCHOR_DATE): EqlResponseSchema => {
   return {
     ...getResponseBaseParams(anchorDate),
     language: 'eql',

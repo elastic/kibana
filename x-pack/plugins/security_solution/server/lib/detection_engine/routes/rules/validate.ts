@@ -20,7 +20,7 @@ import type { RuleParams } from '../../schemas/rule_schemas';
 import type { LegacyRulesActionsSavedObject } from '../../rule_actions/legacy_get_rule_actions_saved_object';
 import { internalRuleToAPIResponse } from '../../schemas/rule_converters';
 
-export const newTransformValidate = (
+export const transformValidate = (
   rule: PartialRule<RuleParams>,
   ruleExecutionSummary: RuleExecutionSummary | null,
   legacyRuleActions?: LegacyRulesActionsSavedObject | null

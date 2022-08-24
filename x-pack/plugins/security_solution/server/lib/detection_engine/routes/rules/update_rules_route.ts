@@ -16,7 +16,7 @@ import { throwAuthzError } from '../../../machine_learning/validation';
 import { buildSiemResponse } from '../utils';
 
 import { getIdError } from './utils';
-import { newTransformValidate } from './validate';
+import { transformValidate } from './validate';
 import { updateRules } from '../../rules/update_rules';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { legacyMigrate } from '../../rules/utils';
@@ -73,7 +73,7 @@ export const updateRulesRoute = (router: SecuritySolutionPluginRouter, ml: Setup
         if (rule != null) {
           const ruleExecutionLog = ctx.securitySolution.getRuleExecutionLog();
           const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(rule.id);
-          const [validated, errors] = newTransformValidate(rule, ruleExecutionSummary);
+          const [validated, errors] = transformValidate(rule, ruleExecutionSummary);
           if (errors != null) {
             return siemResponse.error({ statusCode: 500, body: errors });
           } else {
