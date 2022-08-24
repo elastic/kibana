@@ -452,9 +452,9 @@ ssl.test: 123
         "hosts": Array [
           "http://host.fr",
         ],
-        "password": "{ES_PASSWORD}",
+        "password": "\${ES_PASSWORD}",
         "type": "elasticsearch",
-        "username": "{ES_USERNAME}",
+        "username": "\${ES_USERNAME}",
       }
     `);
   });
