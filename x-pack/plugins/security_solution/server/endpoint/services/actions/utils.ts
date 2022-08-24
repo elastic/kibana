@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   ENDPOINT_ACTIONS_DS,
@@ -26,6 +27,7 @@ import type {
   ResponseActions,
 } from '../../../../common/endpoint/types';
 import { ActivityLogItemTypes } from '../../../../common/endpoint/types';
+import type { EndpointMetadataService } from '../metadata';
 /**
  * Type guard to check if a given Action is in the shape of the Endpoint Action.
  * @param item
@@ -430,4 +432,27 @@ export const formatEndpointActionResults = (
         };
       })
     : [];
+};
+
+export const getAgentMetadataInfo = async ({
+  esClient,
+  searchedAgentIds,
+  metadataService,
+}: {
+  esClient: ElasticsearchClient;
+  searchedAgentIds: string[];
+  metadataService: EndpointMetadataService;
+}): Promise<{ [k: string]: string }> => {
+  // get host metadata docs with queried agents
+  const metaDataDocs = await metadataService.findHostMetadataForFleetAgents(esClient, [
+    ...new Set(searchedAgentIds),
+  ]);
+  // agent ids and names from metadata
+  // map this into an object as {id1: name1, id2: name2} etc
+  const agentsMetadataInfo = metaDataDocs.reduce<{ [k: string]: string }>((acc, curr) => {
+    acc[curr.agent.id] = curr.host.hostname;
+    return acc;
+  }, {});
+
+  return agentsMetadataInfo;
 };

@@ -323,13 +323,12 @@ export const ResponseActionsLog = memo<Pick<EndpointActionListRequestQuery, 'age
         },
         // conditional hostname column
         {
-          field: 'agents',
+          field: 'hosts',
           name: TABLE_COLUMN_NAMES.host,
           width: '20%',
           truncateText: true,
-          render: (agents: ActionDetails['agents']) => {
-            // TODO: compute host names later with hostMetadata? (using agent Ids for now)
-            const hostname = agents?.[0] ?? '';
+          render: (hosts: ActionDetails['hosts']) => {
+            const hostname = hosts[0].name;
             return (
               <EuiToolTip content={hostname} anchorClassName="eui-textTruncate">
                 <EuiText
@@ -423,7 +422,7 @@ export const ResponseActionsLog = memo<Pick<EndpointActionListRequestQuery, 'age
       ];
       // filter out the host column
       if (hideHostColumn) {
-        return columns.filter((column) => column.field !== 'agents');
+        return columns.filter((column) => column.field !== 'hosts');
       }
       return columns;
     }, [agentIds, getTestId, itemIdToExpandedRowMap, onClickCallback]);

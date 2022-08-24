@@ -272,6 +272,11 @@ export interface ActionDetails<TOutputContent extends object = object> {
    */
   agents: string[];
   /**
+   * The endpoint ID/fleet agent ID which was used to create the action (same as above) and the agent's name
+   * Action could have been sent for multiple endpoints which is why this is an Array
+   */
+  hosts: Array<{ id: string; name: string }>;
+  /**
    * The Endpoint type of action (ex. `isolate`, `release`) that is being requested to be
    * performed on the endpoint
    */

@@ -18,7 +18,9 @@ import {
   categorizeResponseResults,
   getActionCompletionInfo,
   mapToNormalizedActionRequest,
+  getAgentMetadataInfo,
 } from './utils';
+import type { EndpointMetadataService } from '../metadata';
 
 interface OptionalFilterParams {
   commands?: string[];
@@ -36,6 +38,7 @@ export const getActionList = async ({
   esClient,
   endDate,
   logger,
+  metadataService,
   page: _page,
   pageSize,
   startDate,
@@ -43,6 +46,7 @@ export const getActionList = async ({
 }: OptionalFilterParams & {
   esClient: ElasticsearchClient;
   logger: Logger;
+  metadataService: EndpointMetadataService;
 }): Promise<ActionListApiResponse> => {
   const size = pageSize ?? ENDPOINT_DEFAULT_PAGE_SIZE;
   const page = _page ?? 1;
@@ -56,6 +60,7 @@ export const getActionList = async ({
     endDate,
     from,
     logger,
+    metadataService,
     size,
     startDate,
     userIds,
@@ -87,10 +92,11 @@ const getActionDetailsList = async ({
   endDate,
   from,
   logger,
+  metadataService,
   size,
   startDate,
   userIds,
-}: GetActionDetailsListParam): Promise<{
+}: GetActionDetailsListParam & { metadataService: EndpointMetadataService }): Promise<{
   actionDetails: ActionDetails[];
   totalRecords: number;
 }> => {
@@ -157,6 +163,13 @@ const getActionDetailsList = async ({
     results: actionResponses?.body?.hits?.hits,
   });
 
+  // get host metadata info with queried agents
+  const agentsInfo = await getAgentMetadataInfo({
+    esClient,
+    metadataService,
+    searchedAgentIds: normalizedActionRequests.map((action) => action.agents).flat(),
+  });
+
   // compute action details list for each action id
   const actionDetails: ActionDetails[] = normalizedActionRequests.map((action) => {
     // pick only those responses that match the current action id
@@ -175,6 +188,10 @@ const getActionDetailsList = async ({
     return {
       id: action.id,
       agents: action.agents,
+      hosts: action.agents.map((id) => ({
+        id,
+        name: agentsInfo[id],
+      })),
       command: action.command,
       startedAt: action.createdAt,
       isCompleted,
