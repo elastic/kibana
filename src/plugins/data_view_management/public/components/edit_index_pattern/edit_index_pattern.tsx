@@ -91,7 +91,7 @@ export const EditIndexPattern = withRouter(
         .then((resp) => {
           setRelationships(resp.relations.map((r) => ({ ...r, title: r.meta.title! })));
         });
-    }, [savedObjectsManagement, indexPattern, allowedTypes, indexPattern]);
+    }, [savedObjectsManagement, indexPattern, allowedTypes]);
 
     useEffect(() => {
       setFields(indexPattern.getNonScriptedFields());
