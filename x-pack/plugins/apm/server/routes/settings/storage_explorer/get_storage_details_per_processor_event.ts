@@ -96,10 +96,22 @@ export async function getStorageDetailsPerProcessorEvent({
                   size: 10,
                 },
                 aggs: {
+                  number_of_metric_docs_for_processor_event: {
+                    value_count: {
+                      field: PROCESSOR_EVENT,
+                    },
+                  },
                   indices: {
                     terms: {
                       field: INDEX,
                       size: 500,
+                    },
+                    aggs: {
+                      number_of_metric_docs_for_index: {
+                        value_count: {
+                          field: INDEX,
+                        },
+                      },
                     },
                   },
                 },
@@ -127,7 +139,9 @@ export async function getStorageDetailsPerProcessorEvent({
         ProcessorEvent,
         ProcessorEvent.profile
       >,
-      docs: bucketForProcessorEvent?.doc_count ?? 0,
+      docs:
+        bucketForProcessorEvent?.number_of_metric_docs_for_processor_event
+          .value ?? 0,
       size:
         allIndicesStats && bucketForProcessorEvent
           ? bucketForProcessorEvent.indices.buckets.reduce((prev, curr) => {
@@ -136,7 +150,7 @@ export async function getStorageDetailsPerProcessorEvent({
                 getEstimatedSizeForDocumentsInIndex({
                   allIndicesStats,
                   indexName: curr.key as string,
-                  numberOfDocs: curr.doc_count,
+                  numberOfDocs: curr.number_of_metric_docs_for_index.value,
                 })
               );
             }, 0)

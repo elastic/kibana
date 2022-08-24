@@ -109,6 +109,13 @@ async function getMainServiceStatistics({
                     field: INDEX,
                     size: 500,
                   },
+                  aggs: {
+                    number_of_metric_docs: {
+                      value_count: {
+                        field: INDEX,
+                      },
+                    },
+                  },
                 },
                 environments: {
                   terms: {
@@ -145,7 +152,7 @@ async function getMainServiceStatistics({
               getEstimatedSizeForDocumentsInIndex({
                 allIndicesStats,
                 indexName: curr.key as string,
-                numberOfDocs: curr.doc_count,
+                numberOfDocs: curr.number_of_metric_docs.value,
               })
             );
           }, 0)
