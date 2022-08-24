@@ -14,3 +14,4 @@ export * from './sibling_pipeline_formula';
 export * from './filter_ratio_formula';
 export * from './parent_pipeline_series';
 export * from './counter_rate_formula';
+export * from './validate_metrics';

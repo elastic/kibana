@@ -9,7 +9,7 @@ import { cloneDeep } from 'lodash';
 import dateMath from '@kbn/datemath';
 import expect from '@kbn/expect';
 import moment from 'moment';
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import uuid from 'uuid';
 import {
   getRuleExecutionResultsUrl,

@@ -20,6 +20,38 @@
     "https://msrc-blog.microsoft.com/2020/07/14/july-2020-security-update-cve-2020-1350-vulnerability-in-windows-domain-name-system-dns-server/",
     "https://github.com/maxpl0it/CVE-2020-1350-DoS"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "destination.port",
+      "type": "long"
+    },
+    {
+      "ecs": true,
+      "name": "event.category",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.dataset",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "network.bytes",
+      "type": "long"
+    },
+    {
+      "ecs": false,
+      "name": "type",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 47,
   "rule_id": "11013227-0301-4a8c-b150-4db924484475",
   "severity": "medium",
@@ -48,5 +80,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 7
+  "version": 8
 }

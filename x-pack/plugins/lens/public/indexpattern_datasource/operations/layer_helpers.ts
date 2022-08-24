@@ -9,6 +9,7 @@ import { partition, mapValues, pickBy } from 'lodash';
 import { CoreStart } from '@kbn/core/public';
 import type { Query } from '@kbn/es-query';
 import memoizeOne from 'memoize-one';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type {
   DatasourceFixAction,
   FrameDatasourceAPI,
@@ -1498,7 +1499,8 @@ export function getErrorMessages(
   indexPattern: IndexPattern,
   state: IndexPatternPrivateState,
   layerId: string,
-  core: CoreStart
+  core: CoreStart,
+  data: DataPublicPluginStart
 ):
   | Array<
       | string
@@ -1540,7 +1542,7 @@ export function getErrorMessages(
                 ...state,
                 layers: {
                   ...state.layers,
-                  [layerId]: await errorMessage.fixAction!.newState(core, frame, layerId),
+                  [layerId]: await errorMessage.fixAction!.newState(data, core, frame, layerId),
                 },
               }),
             }

@@ -7,12 +7,14 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { TimeRange } from '@kbn/data-plugin/common';
 import { NavigateToLensContext } from '@kbn/visualizations-plugin/public';
 import type { Metric, Panel, Series } from '../../common/types';
 import { Column } from './lib/convert';
 
 export type ConvertTsvbToLensVisualization = (
-  model: Panel
+  model: Panel,
+  timeRange?: TimeRange
 ) => Promise<NavigateToLensContext | null>;
 
 export interface Filter {

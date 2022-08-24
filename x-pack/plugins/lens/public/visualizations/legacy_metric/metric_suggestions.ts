@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { IconChartMetric } from '@kbn/chart-icons';
 import { SuggestionRequest, VisualizationSuggestion, TableSuggestion } from '../../types';
-import type { MetricState } from '../../../common/types';
+import type { LegacyMetricState } from '../../../common/types';
 import { layerTypes } from '../../../common';
-import { LensIconChartMetric } from '../../assets/chart_metric';
 import { legacyMetricSupportedTypes } from './visualization';
 
 /**
@@ -20,7 +20,7 @@ export function getSuggestions({
   table,
   state,
   keptLayerIds,
-}: SuggestionRequest<MetricState>): Array<VisualizationSuggestion<MetricState>> {
+}: SuggestionRequest<LegacyMetricState>): Array<VisualizationSuggestion<LegacyMetricState>> {
   // We only render metric charts for single-row queries. We require a single, numeric column.
   if (
     table.isMultiRow ||
@@ -42,14 +42,14 @@ export function getSuggestions({
   return [getSuggestion(table)];
 }
 
-function getSuggestion(table: TableSuggestion): VisualizationSuggestion<MetricState> {
+function getSuggestion(table: TableSuggestion): VisualizationSuggestion<LegacyMetricState> {
   const col = table.columns[0];
   const title = table.label || col.operation.label;
 
   return {
     title,
     score: 0.1,
-    previewIcon: LensIconChartMetric,
+    previewIcon: IconChartMetric,
     state: {
       layerId: table.layerId,
       accessor: col.columnId,

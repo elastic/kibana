@@ -9,12 +9,11 @@
 import { METRIC_TYPES } from '@kbn/data-plugin/public';
 import { Operation, Operations } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { MetricType } from '../../../../common/types';
-import { TSVB_METRIC_TYPES } from '../../../../common/enums';
+import { TSVB_METRIC_TYPES, PANEL_TYPES, TIME_RANGE_DATA_MODES } from '../../../../common/enums';
 
 interface Agg {
   isFormula?: false;
 }
-
 interface AggWithFormula {
   isFormula: true;
   formula: string;
@@ -22,6 +21,9 @@ interface AggWithFormula {
 
 export type AggOptions<T> = {
   isFullReference: boolean;
+  isFieldRequired: boolean;
+  supportedPanelTypes: string[];
+  supportedTimeRangeModes: string[];
 } & (T extends Exclude<Operation, 'formula'> ? Agg : AggWithFormula);
 
 // list of supported TSVB aggregation types in Lens
@@ -64,100 +66,216 @@ export const SUPPORTED_METRICS: SupportedMetrics = {
   avg: {
     name: 'average',
     isFullReference: false,
+    isFieldRequired: true,
+    supportedPanelTypes: [PANEL_TYPES.TIMESERIES, PANEL_TYPES.TOP_N],
+    supportedTimeRangeModes: [
+      TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE,
+      TIME_RANGE_DATA_MODES.LAST_VALUE,
+    ],
   },
   cardinality: {
     name: 'unique_count',
     isFullReference: false,
+    isFieldRequired: true,
+    supportedPanelTypes: [PANEL_TYPES.TIMESERIES, PANEL_TYPES.TOP_N],
+    supportedTimeRangeModes: [
+      TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE,
+      TIME_RANGE_DATA_MODES.LAST_VALUE,
+    ],
   },
   count: {
     name: 'count',
     isFullReference: false,
+    isFieldRequired: false,
+    supportedPanelTypes: [PANEL_TYPES.TIMESERIES, PANEL_TYPES.TOP_N],
+    supportedTimeRangeModes: [
+      TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE,
+      TIME_RANGE_DATA_MODES.LAST_VALUE,
+    ],
   },
   positive_rate: {
     name: 'counter_rate',
     isFullReference: true,
+    isFieldRequired: true,
+    supportedPanelTypes: [PANEL_TYPES.TIMESERIES],
+    supportedTimeRangeModes: [
+      TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE,
+      TIME_RANGE_DATA_MODES.LAST_VALUE,
+    ],
   },
   moving_average: {
     name: 'moving_average',
     isFullReference: true,
+    isFieldRequired: true,
+    supportedPanelTypes: [PANEL_TYPES.TIMESERIES],
+    supportedTimeRangeModes: [TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE],
   },
   derivative: {
     name: 'differences',
     isFullReference: true,
+    isFieldRequired: true,
+    supportedPanelTypes: [PANEL_TYPES.TIMESERIES],
+    supportedTimeRangeModes: [TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE],
   },
   cumulative_sum: {
     name: 'cumulative_sum',
     isFullReference: true,
+    isFieldRequired: true,
+    supportedPanelTypes: [PANEL_TYPES.TIMESERIES],
+    supportedTimeRangeModes: [TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE],
   },
   avg_bucket: {
     name: 'formula',
     isFullReference: true,
     isFormula: true,
     formula: 'overall_average',
+    supportedPanelTypes: [PANEL_TYPES.TIMESERIES],
+    supportedTimeRangeModes: [TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE],
   },
   max_bucket: {
     name: 'formula',
     isFullReference: true,
     isFormula: true,
     formula: 'overall_max',
+    supportedPanelTypes: [PANEL_TYPES.TIMESERIES],
+    supportedTimeRangeModes: [TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE],
   },
   min_bucket: {
     name: 'formula',
     isFullReference: true,
     isFormula: true,
     formula: 'overall_min',
+    supportedPanelTypes: [PANEL_TYPES.TIMESERIES],
+    supportedTimeRangeModes: [TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE],
   },
   sum_bucket: {
     name: 'formula',
     isFullReference: true,
     isFormula: true,
     formula: 'overall_sum',
+    supportedPanelTypes: [PANEL_TYPES.TIMESERIES],
+    supportedTimeRangeModes: [TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE],
   },
   max: {
     name: 'max',
     isFullReference: false,
+    isFieldRequired: true,
+    supportedPanelTypes: [PANEL_TYPES.TIMESERIES, PANEL_TYPES.TOP_N],
+    supportedTimeRangeModes: [
+      TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE,
+      TIME_RANGE_DATA_MODES.LAST_VALUE,
+    ],
   },
   min: {
     name: 'min',
     isFullReference: false,
+    isFieldRequired: true,
+    supportedPanelTypes: [PANEL_TYPES.TIMESERIES, PANEL_TYPES.TOP_N],
+    supportedTimeRangeModes: [
+      TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE,
+      TIME_RANGE_DATA_MODES.LAST_VALUE,
+    ],
   },
   percentile: {
     name: 'percentile',
     isFullReference: false,
+    isFieldRequired: true,
+    supportedPanelTypes: [PANEL_TYPES.TIMESERIES, PANEL_TYPES.TOP_N],
+    supportedTimeRangeModes: [
+      TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE,
+      TIME_RANGE_DATA_MODES.LAST_VALUE,
+    ],
   },
   percentile_rank: {
     name: 'percentile_rank',
     isFullReference: false,
+    isFieldRequired: true,
+    supportedPanelTypes: [PANEL_TYPES.TIMESERIES, PANEL_TYPES.TOP_N],
+    supportedTimeRangeModes: [
+      TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE,
+      TIME_RANGE_DATA_MODES.LAST_VALUE,
+    ],
   },
   sum: {
     name: 'sum',
     isFullReference: false,
+    isFieldRequired: true,
+    supportedPanelTypes: [PANEL_TYPES.TIMESERIES, PANEL_TYPES.TOP_N],
+    supportedTimeRangeModes: [
+      TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE,
+      TIME_RANGE_DATA_MODES.LAST_VALUE,
+    ],
   },
   filter_ratio: {
     name: 'formula',
     isFullReference: false,
     isFormula: true,
     formula: 'filter_ratio',
+
+    supportedPanelTypes: [PANEL_TYPES.TIMESERIES, PANEL_TYPES.TOP_N],
+    supportedTimeRangeModes: [
+      TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE,
+      TIME_RANGE_DATA_MODES.LAST_VALUE,
+    ],
   },
   top_hit: {
     name: 'last_value',
     isFullReference: false,
+    isFieldRequired: true,
+    supportedPanelTypes: [PANEL_TYPES.TIMESERIES, PANEL_TYPES.TOP_N],
+    supportedTimeRangeModes: [
+      TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE,
+      TIME_RANGE_DATA_MODES.LAST_VALUE,
+    ],
   },
   math: {
     name: 'formula',
-    isFullReference: true,
     isFormula: true,
     formula: 'math',
+    isFieldRequired: false,
+    supportedPanelTypes: [PANEL_TYPES.TIMESERIES, PANEL_TYPES.TOP_N],
+    supportedTimeRangeModes: [
+      TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE,
+      TIME_RANGE_DATA_MODES.LAST_VALUE,
+    ],
   },
   positive_only: {
     name: 'formula',
     isFullReference: true,
     isFormula: true,
     formula: 'pick_max',
+    supportedPanelTypes: [PANEL_TYPES.TIMESERIES],
+    supportedTimeRangeModes: [TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE],
   },
   static: {
     name: 'static_value',
     isFullReference: true,
+    isFieldRequired: false,
+    supportedPanelTypes: [PANEL_TYPES.TIMESERIES, PANEL_TYPES.TOP_N],
+    supportedTimeRangeModes: [
+      TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE,
+      TIME_RANGE_DATA_MODES.LAST_VALUE,
+    ],
+  },
+  value_count: {
+    name: 'count',
+    isFullReference: false,
+    isFieldRequired: true,
+    supportedPanelTypes: [PANEL_TYPES.TIMESERIES, PANEL_TYPES.TOP_N],
+    supportedTimeRangeModes: [
+      TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE,
+      TIME_RANGE_DATA_MODES.LAST_VALUE,
+    ],
+  },
+  std_deviation: {
+    name: 'standard_deviation',
+    isFullReference: false,
+    isFieldRequired: true,
+    supportedPanelTypes: [PANEL_TYPES.TIMESERIES, PANEL_TYPES.TOP_N],
+    supportedTimeRangeModes: [
+      TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE,
+      TIME_RANGE_DATA_MODES.LAST_VALUE,
+    ],
   },
 } as const;
 

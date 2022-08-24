@@ -19,7 +19,7 @@ import {
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 import { getSavedQueriesComplexTest } from '../../tasks/saved_queries';
 
-describe.skip('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
+describe('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
   const SAVED_QUERY_ID = 'Saved-Query-Id';
   const NEW_SAVED_QUERY_ID = 'Saved-Query-Id-T2';
   const NEW_SAVED_QUERY_DESCRIPTION = 'Test saved query description T2';
@@ -100,16 +100,16 @@ describe.skip('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
   });
   it('to click the edit button and edit pack', () => {
     navigateTo('/app/osquery/saved_queries');
+    cy.getBySel('pagination-button-next').click();
 
     cy.react('CustomItemAction', {
       props: { index: 1, item: { attributes: { id: SAVED_QUERY_ID } } },
     }).click();
     cy.contains('Custom key/value pairs.').should('exist');
     cy.contains('Hours of uptime').should('exist');
-    cy.react('ECSComboboxFieldComponent', { props: { field: { value: 'labels' } } })
-      .parents('[data-test-subj="ECSMappingEditorForm"]')
-      .react('EuiButtonIcon', { props: { iconType: 'trash' } })
-      .click();
+    cy.react('ECSMappingEditorForm').within(() => {
+      cy.react('EuiButtonIcon', { props: { iconType: 'trash' } }).click();
+    });
     cy.react('EuiButton').contains('Update query').click();
     cy.wait(5000);
 
