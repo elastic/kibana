@@ -11,7 +11,7 @@ import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import { DragDropContextWrapper } from '../../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import '../../../common/mock/match_media';
-import { mockBrowserFields, mockDocValueFields } from '../../../common/containers/source/mock';
+import { mockBrowserFields } from '../../../common/containers/source/mock';
 import { TimelineId } from '../../../../common/types/timeline';
 import {
   createSecuritySolutionStorageMock,
@@ -94,7 +94,6 @@ jest.mock('../../../common/containers/sourcerer');
 const mockDataView = {
   dataViewId: mockGlobalState.timeline.timelineById.test?.dataViewId,
   browserFields: mockBrowserFields,
-  docValueFields: mockDocValueFields,
   loading: false,
   indexPattern: mockIndexPattern,
   pageInfo: { activePage: 0, querySize: 0 },
