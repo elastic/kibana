@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TIMELINE_SEARCH_BOX, EUI_FILTER_SELECT_ITEM } from '../screens/common/controls';
+import { TIMELINE_SEARCHBOX, EUI_FILTER_SELECT_ITEM } from '../screens/common/controls';
 
 import {
   BULK_ACTIONS_BTN,
@@ -150,7 +150,7 @@ export const checkOverwriteIndexPatternsCheckbox = () => {
 
 export const selectTimelineTemplate = (timelineTitle: string) => {
   cy.get(RULES_BULK_EDIT_TIMELINE_TEMPLATES_SELECTOR).click();
-  cy.get(TIMELINE_SEARCH_BOX).type(`${timelineTitle}{enter}`).should('not.exist');
+  cy.get(TIMELINE_SEARCHBOX).type(`${timelineTitle}{enter}`).should('not.exist');
 };
 
 /**

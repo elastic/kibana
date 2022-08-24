@@ -7,7 +7,6 @@
 
 import {
   MODAL_CONFIRMATION_BTN,
-  MODAL_CONFIRMATION_CANCEL_BTN,
   MODAL_CONFIRMATION_BODY,
   RULE_CHECKBOX,
   RULES_TAGS_POPOVER_BTN,
@@ -40,6 +39,8 @@ import {
   loadPrebuiltDetectionRulesFromHeaderBtn,
   switchToElasticRules,
   clickErrorToastBtn,
+  unselectRuleByName,
+  cancelConfirmationModal,
 } from '../../tasks/alerts_detection_rules';
 
 import {
@@ -76,7 +77,6 @@ import {
   createEventCorrelationRule,
   createThresholdRule,
   createNewTermsRule,
-  deleteCustomRule,
 } from '../../tasks/api_calls/rules';
 import { loadPrepackagedTimelineTemplates } from '../../tasks/api_calls/timelines';
 import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
@@ -206,8 +206,7 @@ describe('Detection rules, bulk edit', () => {
       checkPrebuiltRulesCannotBeModified(totalNumberOfPrebuiltRules);
 
       // user cancels action and modal disappears
-      cy.get(MODAL_CONFIRMATION_CANCEL_BTN).click();
-      cy.get(MODAL_CONFIRMATION_BODY).should('not.exist');
+      cancelConfirmationModal();
     });
   });
 
@@ -306,7 +305,7 @@ describe('Detection rules, bulk edit', () => {
     });
   });
 
-  describe('Index patterns', () => {
+  describe.only('Index patterns', () => {
     it('Index pattern action applied to custom rules, including machine learning: user proceeds with edit of custom non machine learning rule', () => {
       const indexPattersToBeAdded = ['index-to-add-1-*', 'index-to-add-2-*'];
       const resultingIndexPatterns = [...prePopulatedIndexPatterns, ...indexPattersToBeAdded];
@@ -336,130 +335,131 @@ describe('Detection rules, bulk edit', () => {
       checkMachineLearningRulesCannotBeModified(expectedNumberOfMachineLearningRulesToBeEdited);
 
       // user cancels action and modal disappears
-      cy.get(MODAL_CONFIRMATION_CANCEL_BTN).click();
-      cy.get(MODAL_CONFIRMATION_BODY).should('not.exist');
+      cancelConfirmationModal();
     });
 
-    context('no custom machine learning rules exist', () => {
-      beforeEach(() => {
-        deleteCustomRule(ML_RULE_ID);
-        cy.reload();
-      });
+    it('Add index patterns to custom rules', () => {
+      const indexPattersToBeAdded = ['index-to-add-1-*', 'index-to-add-2-*'];
+      const resultingIndexPatterns = [...prePopulatedIndexPatterns, ...indexPattersToBeAdded];
 
-      it('Add index patterns to custom rules', () => {
-        const indexPattersToBeAdded = ['index-to-add-1-*', 'index-to-add-2-*'];
-        const resultingIndexPatterns = [...prePopulatedIndexPatterns, ...indexPattersToBeAdded];
+      // select only rules that are not ML
+      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      unselectRuleByName(getMachineLearningRule().name);
 
-        selectNumberOfRules(expectedNumberOfNotMLRules);
-        openBulkEditAddIndexPatternsForm();
+      openBulkEditAddIndexPatternsForm();
+      typeIndexPatterns(indexPattersToBeAdded);
+      submitBulkEditForm();
 
-        typeIndexPatterns(indexPattersToBeAdded);
-        submitBulkEditForm();
+      waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfNotMLRules });
 
-        waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfNotMLRules });
+      // check if rule has been updated
+      goToTheRuleDetailsOf(RULE_NAME);
+      hasIndexPatterns(resultingIndexPatterns.join(''));
+    });
 
-        // check if rule has been updated
-        goToTheRuleDetailsOf(RULE_NAME);
-        hasIndexPatterns(resultingIndexPatterns.join(''));
-      });
+    it('Overwrite index patterns in custom rules', () => {
+      const indexPattersToWrite = ['index-to-write-1-*', 'index-to-write-2-*'];
 
-      it('Overwrite index patterns in custom rules', () => {
-        const indexPattersToWrite = ['index-to-write-1-*', 'index-to-write-2-*'];
+      // select only rules that are not ML
+      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      unselectRuleByName(getMachineLearningRule().name);
 
-        selectNumberOfRules(expectedNumberOfNotMLRules);
-        openBulkEditAddIndexPatternsForm();
+      openBulkEditAddIndexPatternsForm();
 
-        // check overwrite index patterns checkbox, ensure warning message is displayed and type index patterns
-        checkOverwriteIndexPatternsCheckbox();
-        cy.get(RULES_BULK_EDIT_INDEX_PATTERNS_WARNING).should(
-          'have.text',
-          `You’re about to overwrite index patterns for ${expectedNumberOfNotMLRules} selected rules, press Save to apply changes.`
-        );
+      // check overwrite index patterns checkbox, ensure warning message is displayed and type index patterns
+      checkOverwriteIndexPatternsCheckbox();
+      cy.get(RULES_BULK_EDIT_INDEX_PATTERNS_WARNING).should(
+        'have.text',
+        `You’re about to overwrite index patterns for ${expectedNumberOfNotMLRules} selected rules, press Save to apply changes.`
+      );
 
-        typeIndexPatterns(indexPattersToWrite);
-        submitBulkEditForm();
+      typeIndexPatterns(indexPattersToWrite);
+      submitBulkEditForm();
 
-        waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfNotMLRules });
+      waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfNotMLRules });
 
-        // check if rule has been updated
-        goToTheRuleDetailsOf(RULE_NAME);
-        hasIndexPatterns(indexPattersToWrite.join(''));
-      });
+      // check if rule has been updated
+      goToTheRuleDetailsOf(RULE_NAME);
+      hasIndexPatterns(indexPattersToWrite.join(''));
+    });
 
-      it('Delete index patterns from custom rules', () => {
-        const indexPatternsToDelete = prePopulatedIndexPatterns.slice(0, 1);
-        const resultingIndexPatterns = prePopulatedIndexPatterns.slice(1);
+    it('Delete index patterns from custom rules', () => {
+      const indexPatternsToDelete = prePopulatedIndexPatterns.slice(0, 1);
+      const resultingIndexPatterns = prePopulatedIndexPatterns.slice(1);
 
-        selectNumberOfRules(expectedNumberOfNotMLRules);
-        openBulkEditDeleteIndexPatternsForm();
+      // select only not ML rules
+      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      unselectRuleByName(getMachineLearningRule().name);
 
-        typeIndexPatterns(indexPatternsToDelete);
-        submitBulkEditForm();
-        waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfNotMLRules });
+      openBulkEditDeleteIndexPatternsForm();
+      typeIndexPatterns(indexPatternsToDelete);
+      submitBulkEditForm();
 
-        // check if rule has been updated
-        goToTheRuleDetailsOf(RULE_NAME);
-        hasIndexPatterns(resultingIndexPatterns.join(''));
-      });
+      waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfNotMLRules });
 
-      it('Delete all index patterns from custom rules', () => {
-        selectNumberOfRules(expectedNumberOfNotMLRules);
+      // check if rule has been updated
+      goToTheRuleDetailsOf(RULE_NAME);
+      hasIndexPatterns(resultingIndexPatterns.join(''));
+    });
 
-        openBulkEditDeleteIndexPatternsForm();
-        typeIndexPatterns(prePopulatedIndexPatterns);
+    it('Delete all index patterns from custom rules', () => {
+      // select only rules that are not ML
+      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      unselectRuleByName(getMachineLearningRule().name);
 
-        submitBulkEditForm();
+      openBulkEditDeleteIndexPatternsForm();
+      typeIndexPatterns(prePopulatedIndexPatterns);
+      submitBulkEditForm();
 
-        // error toast should be displayed that that rules edit failed
-        cy.contains(TOASTER_BODY, `${expectedNumberOfNotMLRules} rules failed to update.`);
+      // error toast should be displayed that that rules edit failed
+      cy.contains(TOASTER_BODY, `${expectedNumberOfNotMLRules} rules failed to update.`);
 
-        // on error toast button click display error that index patterns can't be empty
-        clickErrorToastBtn();
-        cy.contains(MODAL_ERROR_BODY, "Index patterns can't be empty");
-      });
+      // on error toast button click display error that index patterns can't be empty
+      clickErrorToastBtn();
+      cy.contains(MODAL_ERROR_BODY, "Index patterns can't be empty");
     });
   });
+});
 
-  describe('Timeline templates', () => {
-    beforeEach(() => {
-      loadPrepackagedTimelineTemplates();
-    });
+describe('Timeline templates', () => {
+  beforeEach(() => {
+    loadPrepackagedTimelineTemplates();
+  });
 
-    it('Apply timeline template to custom rules', () => {
-      const timelineTemplateName = 'Generic Endpoint Timeline';
+  it('Apply timeline template to custom rules', () => {
+    const timelineTemplateName = 'Generic Endpoint Timeline';
 
-      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+    selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
 
-      // open Timeline template form, check warning, select timeline template
-      clickApplyTimelineTemplatesMenuItem();
-      cy.get(RULES_BULK_EDIT_TIMELINE_TEMPLATES_WARNING).contains(
-        `You're about to apply changes to ${expectedNumberOfCustomRulesToBeEdited} selected rules. If you previously applied Timeline templates to these rules, they will be overwritten or (if you select 'None') reset to none.`
-      );
-      selectTimelineTemplate(timelineTemplateName);
+    // open Timeline template form, check warning, select timeline template
+    clickApplyTimelineTemplatesMenuItem();
+    cy.get(RULES_BULK_EDIT_TIMELINE_TEMPLATES_WARNING).contains(
+      `You're about to apply changes to ${expectedNumberOfCustomRulesToBeEdited} selected rules. If you previously applied Timeline templates to these rules, they will be overwritten or (if you select 'None') reset to none.`
+    );
+    selectTimelineTemplate(timelineTemplateName);
 
-      submitBulkEditForm();
-      waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
+    submitBulkEditForm();
+    waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
 
-      // check if timeline template has been updated to selected one
-      goToTheRuleDetailsOf(RULE_NAME);
-      getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', timelineTemplateName);
-    });
+    // check if timeline template has been updated to selected one
+    goToTheRuleDetailsOf(RULE_NAME);
+    getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', timelineTemplateName);
+  });
 
-    it('Reset timeline template to None for custom rules', () => {
-      const noneTimelineTemplate = 'None';
+  it('Reset timeline template to None for custom rules', () => {
+    const noneTimelineTemplate = 'None';
 
-      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+    selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
 
-      // open Timeline template form, submit form without picking timeline template as None is selected by default
-      clickApplyTimelineTemplatesMenuItem();
+    // open Timeline template form, submit form without picking timeline template as None is selected by default
+    clickApplyTimelineTemplatesMenuItem();
 
-      submitBulkEditForm();
-      waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
+    submitBulkEditForm();
+    waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
 
-      // check if timeline template has been updated to selected one, by opening rule that have had timeline prior to editing
-      goToTheRuleDetailsOf(RULE_NAME);
-      getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', noneTimelineTemplate);
-    });
+    // check if timeline template has been updated to selected one, by opening rule that have had timeline prior to editing
+    goToTheRuleDetailsOf(RULE_NAME);
+    getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', noneTimelineTemplate);
   });
 
   it('should not lose rules selection after edit action', () => {

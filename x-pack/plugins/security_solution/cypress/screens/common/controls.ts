@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export const TIMELINE_SEARCH_BOX = '[data-test-subj="timeline-super-select-search-box"]';
+export const TIMELINE_SEARCHBOX = '[data-test-subj="timeline-super-select-search-box"]';
 
 export const EUI_FILTER_SELECT_ITEM = '.euiFilterSelectItem';
+
+export const EUI_CHECKBOX = '.euiCheckbox__input';

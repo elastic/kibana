@@ -54,7 +54,10 @@ import {
   ELASTIC_RULES_BTN,
   BULK_EXPORT_ACTION_BTN,
   TOASTER_ERROR_BTN,
+  MODAL_CONFIRMATION_CANCEL_BTN,
+  MODAL_CONFIRMATION_BODY,
 } from '../screens/alerts_detection_rules';
+import { EUI_CHECKBOX } from '../screens/common/controls';
 import { ALL_ACTIONS } from '../screens/rule_details';
 import { LOADING_INDICATOR } from '../screens/security_header';
 
@@ -205,6 +208,14 @@ export const selectNumberOfRules = (numberOfRules: number) => {
   }
 };
 
+export const unselectRuleByName = (ruleName: string) => {
+  cy.contains(RULE_NAME, ruleName)
+    .parents(RULES_ROW)
+    .find(EUI_CHECKBOX)
+    .click()
+    .should('not.be.checked');
+};
+
 export const selectAllRules = () => {
   cy.get(SELECT_ALL_RULES_BTN).contains('Select all').click();
   cy.get(SELECT_ALL_RULES_BTN).contains('Clear');
@@ -352,9 +363,9 @@ export const bulkExportRules = () => {
   cy.get(BULK_EXPORT_ACTION_BTN).click();
 };
 
-export const confirmConfirmationModal = () => {
-  cy.get(MODAL_CONFIRMATION_BTN).click();
-  cy.get(RULES_DELETE_CONFIRMATION_MODAL).should('not.exist');
+export const cancelConfirmationModal = () => {
+  cy.get(MODAL_CONFIRMATION_CANCEL_BTN).click();
+  cy.get(MODAL_CONFIRMATION_BODY).should('not.exist');
 };
 
 export const clickErrorToastBtn = () => {
