@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { useMemo } from 'react';
-import { useSpaceId } from '../../risk_score/containers/common';
 import { devToolPrebuiltContentUrl } from '../../../common/constants';
+import { useSpaceId } from './use_space_id';
 
 export const useEnableHostRiskFromUrl = () => {
   const spaceId = useSpaceId();

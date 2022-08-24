@@ -16,7 +16,6 @@ import { ENABLE_VIA_DEV_TOOLS } from './translations';
 import { OpenInDevConsoleButton } from '../../../common/components/open_in_dev_console';
 import { useCheckSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_check_signal_index';
 import type { LinkPanelListItem } from '../link_panel';
-import { useEnableHostRiskFromUrl } from '../../../common/hooks/use_enable_host_risk_from_url';
 
 export const RISKY_HOSTS_DOC_LINK =
   'https://www.github.com/elastic/detection-rules/blob/main/docs/experimental-machine-learning/host-risk-score.md';

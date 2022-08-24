@@ -29,8 +29,8 @@ describe('Errors page', () => {
   });
 
   describe('when data is loaded', () => {
-    before(async () => {
-      await synthtrace.index(
+    before(() => {
+      synthtrace.index(
         generateData({
           from: new Date(start).getTime(),
           to: new Date(end).getTime(),
@@ -38,12 +38,12 @@ describe('Errors page', () => {
       );
     });
 
-    after(async () => {
-      await synthtrace.clean();
+    after(() => {
+      synthtrace.clean();
     });
 
     it('has no detectable a11y violations on load', () => {
-      cy.visit(javaServiceErrorsPageHref);
+      cy.visitKibana(javaServiceErrorsPageHref);
       cy.contains('Error occurrences');
       // set skipFailures to true to not fail the test when there are accessibility failures
       checkA11y({ skipFailures: true });
@@ -51,7 +51,7 @@ describe('Errors page', () => {
 
     describe('when service has no errors', () => {
       it('shows empty message', () => {
-        cy.visit(nodeServiceErrorsPageHref);
+        cy.visitKibana(nodeServiceErrorsPageHref);
         cy.contains('opbeans-node');
         cy.contains('No errors found');
       });
@@ -59,28 +59,28 @@ describe('Errors page', () => {
 
     describe('when service has errors', () => {
       it('shows errors distribution chart', () => {
-        cy.visit(javaServiceErrorsPageHref);
+        cy.visitKibana(javaServiceErrorsPageHref);
         cy.contains('Error occurrences');
       });
 
       it('shows failed transaction rate chart', () => {
-        cy.visit(javaServiceErrorsPageHref);
+        cy.visitKibana(javaServiceErrorsPageHref);
         cy.contains('Failed transaction rate');
       });
 
       it('errors table is populated', () => {
-        cy.visit(javaServiceErrorsPageHref);
+        cy.visitKibana(javaServiceErrorsPageHref);
         cy.contains('Error 0');
       });
 
       it('clicking on an error in the list navigates to error detail page', () => {
-        cy.visit(javaServiceErrorsPageHref);
+        cy.visitKibana(javaServiceErrorsPageHref);
         cy.contains('a', 'Error 1').click();
         cy.contains('div', 'Error 1');
       });
 
       it('clicking on type adds a filter in the kuerybar', () => {
-        cy.visit(javaServiceErrorsPageHref);
+        cy.visitKibana(javaServiceErrorsPageHref);
         cy.get('[data-test-subj="headerFilterKuerybar"]')
           .invoke('val')
           .should('be.empty');
@@ -97,13 +97,13 @@ describe('Errors page', () => {
       });
 
       it('sorts by ocurrences', () => {
-        cy.visit(javaServiceErrorsPageHref);
+        cy.visitKibana(javaServiceErrorsPageHref);
         cy.contains('span', 'Occurrences').click();
         cy.url().should('include', '&sortField=occurrences&sortDirection=asc');
       });
 
       it('sorts by latest occurrences', () => {
-        cy.visit(javaServiceErrorsPageHref);
+        cy.visitKibana(javaServiceErrorsPageHref);
         cy.contains('span', 'Last seen').click();
         cy.url().should('include', '&sortField=lastSeen&sortDirection=asc');
       });
@@ -112,9 +112,8 @@ describe('Errors page', () => {
 });
 
 describe('Check detailed statistics API with multiple errors', () => {
-  before(async () => {
-    cy.loginAsViewerUser();
-    await synthtrace.index(
+  before(() => {
+    synthtrace.index(
       generateErrors({
         from: new Date(start).getTime(),
         to: new Date(end).getTime(),
@@ -123,8 +122,12 @@ describe('Check detailed statistics API with multiple errors', () => {
     );
   });
 
-  after(async () => {
-    await synthtrace.clean();
+  beforeEach(() => {
+    cy.loginAsViewerUser();
+  });
+
+  after(() => {
+    synthtrace.clean();
   });
 
   it('calls detailed API with visible items only', () => {
@@ -136,7 +139,7 @@ describe('Check detailed statistics API with multiple errors', () => {
       'POST',
       '/internal/apm/services/opbeans-java/errors/groups/detailed_statistics?*'
     ).as('errorsDetailedStatistics');
-    cy.visit(`${javaServiceErrorsPageHref}&pageSize=10`);
+    cy.visitKibana(`${javaServiceErrorsPageHref}&pageSize=10`);
     cy.wait('@errorsMainStatistics');
     cy.get('.euiPagination__list').children().should('have.length', 5);
     cy.wait('@errorsDetailedStatistics').then((payload) => {
