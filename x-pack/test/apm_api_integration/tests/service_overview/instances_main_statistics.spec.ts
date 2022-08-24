@@ -283,7 +283,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when(
     'Service overview instances main statistics when data is generated',
-    { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
+    { config: 'basic', archives: [] },
     () => {
       describe('for two go instances and one java instance', () => {
         const GO_A_INSTANCE_RATE_SUCCESS = 10;
