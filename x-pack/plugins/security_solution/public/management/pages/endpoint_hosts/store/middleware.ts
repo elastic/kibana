@@ -9,7 +9,6 @@ import type { DataViewBase, Query } from '@kbn/es-query';
 import type { CoreStart, HttpStart } from '@kbn/core/public';
 import type { Dispatch } from 'redux';
 import semverGte from 'semver/functions/gte';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import {
   BASE_POLICY_RESPONSE_ROUTE,
   HOST_METADATA_GET_ROUTE,
@@ -41,7 +40,7 @@ import {
   createLoadingResourceState,
 } from '../../../state';
 import {
-  sendGetAgentPolicyList,
+  sendBulkGetPackagePolicies,
   sendGetEndpointSecurityPackage,
   sendGetFleetAgentsWithEndpoint,
 } from '../../../services/policies/ingest';
@@ -173,19 +172,12 @@ const getAgentAndPoliciesForEndpointsList = async (
   // Package Ids that it uses, thus if a reference exists there, then the package policy (policy)
   // exists.
   const policiesFound = (
-    await sendGetAgentPolicyList(http, {
-      query: {
-        kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.package_policies: (${policyIdsToCheck.join(
-          ' or '
-        )})`,
-      },
-    })
+    await sendBulkGetPackagePolicies(http, policyIdsToCheck)
   ).items.reduce<PolicyIds>(
-    (list, agentPolicy) => {
-      (agentPolicy.package_policies as string[]).forEach((packagePolicy) => {
-        list.packagePolicy[packagePolicy as string] = true;
-        list.agentPolicy[packagePolicy as string] = agentPolicy.id;
-      });
+    (list, packagePolicy) => {
+      list.packagePolicy[packagePolicy.id as string] = true;
+      list.agentPolicy[packagePolicy.id as string] = packagePolicy.policy_id;
+
       return list;
     },
     { packagePolicy: {}, agentPolicy: {} }
