@@ -20,6 +20,7 @@ import { DashboardStartDependencies } from '../plugin';
 import { dataServiceFactory } from './data/data_service';
 import { dataViewEditorServiceFactory } from './data_view_editor/data_view_editor_service';
 import { httpServiceFactory } from './http/http_service';
+import { navigationServiceFactory } from './navigation/navigation_service';
 import { overlaysServiceFactory } from './overlays/overlays_service';
 import { settingsServiceFactory } from './settings/settings_service';
 import { spacesServiceFactory } from './spaces/spaces_service';
@@ -32,6 +33,7 @@ const providers: PluginServiceProviders<
   data: new PluginServiceProvider(dataServiceFactory),
   dataViewEditor: new PluginServiceProvider(dataViewEditorServiceFactory),
   http: new PluginServiceProvider(httpServiceFactory),
+  navigation: new PluginServiceProvider(navigationServiceFactory),
   overlays: new PluginServiceProvider(overlaysServiceFactory),
   settings: new PluginServiceProvider(settingsServiceFactory),
   spaces: new PluginServiceProvider(spacesServiceFactory),

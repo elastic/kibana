@@ -100,7 +100,6 @@ export function DashboardTopNav({
     share,
     chrome,
     embeddable,
-    navigation,
     usageCollection,
     initializerContext,
     savedObjectsTagging,
@@ -114,6 +113,7 @@ export function DashboardTopNav({
     overlays,
     settings: { uiSettings, theme },
     visualizations: { get: getVisualization, getAliases: getVisTypeAliases },
+    navigation: { TopNavMenu },
   } = pluginServices.getServices();
 
   const { version: kibanaVersion } = initializerContext.env.packageInfo;
@@ -552,8 +552,6 @@ export function DashboardTopNav({
       },
     };
   };
-
-  const { TopNavMenu } = navigation.ui;
 
   const getVisTypeQuickButton = (visTypeName: string) => {
     const visType =

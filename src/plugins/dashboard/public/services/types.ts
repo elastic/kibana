@@ -9,6 +9,7 @@
 import { DashboardDataService } from './data/types';
 import { DashboardDataViewEditorService } from './data_view_editor/types';
 import { DashboardHTTPService } from './http/types';
+import { DashboardNavigationService } from './navigation/types';
 import { DashboardOverlaysService } from './overlays/types';
 import { DashboardSettingsService } from './settings/types';
 import { DashboardSpacesService } from './spaces/types';
@@ -19,6 +20,7 @@ export interface DashboardServices {
   data: DashboardDataService;
   dataViewEditor: DashboardDataViewEditorService; // used only for no data state
   http: DashboardHTTPService;
+  navigation: DashboardNavigationService;
   overlays: DashboardOverlaysService;
   settings: DashboardSettingsService;
   spaces: DashboardSpacesService;

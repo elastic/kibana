@@ -17,6 +17,7 @@ import { DashboardServices } from './types';
 import { dataServiceFactory } from './data/data.stub';
 import { dataViewEditorServiceFactory } from './data_view_editor/data_view_editor.stub';
 import { httpServiceFactory } from './http/http.stub';
+import { navigationServiceFactory } from './navigation/navigation.stub';
 import { overlaysServiceFactory } from './overlays/overlays.stub';
 import { settingsServiceFactory } from './settings/settings.stub';
 import { spacesServiceFactory } from './spaces/spaces.stub';
@@ -26,6 +27,7 @@ export const providers: PluginServiceProviders<DashboardServices> = {
   data: new PluginServiceProvider(dataServiceFactory),
   dataViewEditor: new PluginServiceProvider(dataViewEditorServiceFactory),
   http: new PluginServiceProvider(httpServiceFactory),
+  navigation: new PluginServiceProvider(navigationServiceFactory),
   overlays: new PluginServiceProvider(overlaysServiceFactory),
   settings: new PluginServiceProvider(settingsServiceFactory),
   spaces: new PluginServiceProvider(spacesServiceFactory),

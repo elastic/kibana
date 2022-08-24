@@ -76,7 +76,6 @@ export async function mountApp({
   const [coreStart, pluginsStart, dashboardStart] = await core.getStartServices();
 
   const {
-    navigation,
     savedObjects,
     urlForwarding,
     data: dataStart,
@@ -93,7 +92,6 @@ export async function mountApp({
   let routerHistory: History;
 
   const dashboardServices: DashboardAppServices = {
-    navigation,
     onAppLeave,
     savedObjects,
     urlForwarding,

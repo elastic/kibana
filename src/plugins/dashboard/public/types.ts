@@ -25,7 +25,6 @@ import type { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 import { type EmbeddableInput, ViewMode } from '@kbn/embeddable-plugin/common';
 import type { ContainerInput, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
@@ -206,7 +205,6 @@ export interface DashboardAppServices {
   savedDashboards: SavedObjectLoader;
   scopedHistory: () => ScopedHistory;
   usageCollection?: UsageCollectionSetup;
-  navigation: NavigationPublicPluginStart;
   dashboardCapabilities: DashboardAppCapabilities;
   initializerContext: PluginInitializerContext;
   onAppLeave: AppMountParameters['onAppLeave'];
