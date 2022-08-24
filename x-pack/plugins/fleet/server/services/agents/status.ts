@@ -97,6 +97,7 @@ export async function getAgentStatusForAgentPolicy(
             agentPolicyId ? `${AGENTS_PREFIX}.policy_id:"${agentPolicyId}"` : undefined,
           ]
         ),
+        errorTrace: true,
       }),
     {
       concurrency: 1,

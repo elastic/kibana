@@ -163,6 +163,7 @@ export async function getAgentsByKuery(
     sortOrder?: 'asc' | 'desc';
     pitId?: string;
     searchAfter?: SortResults;
+    errorTrace?: boolean;
   }
 ): Promise<{
   agents: Agent[];
@@ -198,29 +199,36 @@ export async function getAgentsByKuery(
   const secondarySort: estypes.Sort = isDefaultSort
     ? [{ 'local_metadata.host.hostname.keyword': { order: 'asc' } }]
     : [];
-  const queryAgents = async (from: number, size: number) =>
-    esClient.search<FleetServerAgent, {}>({
-      from,
-      size,
-      track_total_hits: true,
-      rest_total_hits_as_int: true,
-      body: {
-        ...body,
-        sort: [{ [sortField]: { order: sortOrder } }, ...secondarySort],
-      },
-      ...(pitId
-        ? {
-            pit: {
-              id: pitId,
-              keep_alive: '1m',
-            },
-          }
-        : {
-            index: AGENTS_INDEX,
-            ignore_unavailable: true,
-          }),
-      ...(pitId && searchAfter ? { search_after: searchAfter, from: 0 } : {}),
-    });
+  const queryAgents = async (from: number, size: number) => {
+    try {
+      return esClient.search<FleetServerAgent, {}>({
+        from,
+        size,
+        track_total_hits: true,
+        rest_total_hits_as_int: true,
+        error_trace: options.errorTrace,
+        body: {
+          ...body,
+          sort: [{ [sortField]: { order: sortOrder } }, ...secondarySort],
+        },
+        ...(pitId
+          ? {
+              pit: {
+                id: pitId,
+                keep_alive: '1m',
+              },
+            }
+          : {
+              index: AGENTS_INDEX,
+              ignore_unavailable: true,
+            }),
+        ...(pitId && searchAfter ? { search_after: searchAfter, from: 0 } : {}),
+      });
+    } catch (error) {
+      appContextService.getLogger().error(error);
+      throw error;
+    }
+  };
   const res = await queryAgents((page - 1) * perPage, perPage);
 
   let agents = res.hits.hits.map(searchHitToAgent);
