@@ -12,14 +12,6 @@ export {
   REPOSITORY_RESOLVE_OUTCOME_STATS,
   type InternalCoreUsageDataSetup,
 } from '@kbn/core-usage-data-base-server-internal';
-export type {
-  ConfigUsageData,
-  CoreUsageDataStart,
-  CoreUsageDataSetup,
-  CoreUsageCounter,
-  CoreIncrementUsageCounter,
-  CoreIncrementCounterParams,
-} from '@kbn/core-usage-data-server';
 export { CoreUsageDataService } from './core_usage_data_service';
 export { CoreUsageStatsClient } from './core_usage_stats_client';
 
@@ -31,6 +23,12 @@ import type {
   CoreConfigUsageData,
   CoreEnvironmentUsageData,
   CoreServicesUsageData,
+  ConfigUsageData,
+  CoreUsageDataStart,
+  CoreUsageDataSetup,
+  CoreUsageCounter,
+  CoreIncrementUsageCounter,
+  CoreIncrementCounterParams,
 } from '@kbn/core-usage-data-server';
 
 export type {
@@ -39,4 +37,10 @@ export type {
   CoreConfigUsageData,
   CoreEnvironmentUsageData,
   CoreServicesUsageData,
+  ConfigUsageData,
+  CoreUsageDataStart,
+  CoreUsageDataSetup,
+  CoreUsageCounter,
+  CoreIncrementUsageCounter,
+  CoreIncrementCounterParams,
 };
