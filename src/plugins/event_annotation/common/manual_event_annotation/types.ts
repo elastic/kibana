@@ -26,11 +26,6 @@ export type ManualRangeEventAnnotationOutput = ManualRangeEventAnnotationArgs & 
   type: 'manual_range_event_annotation';
 };
 
-export type EventAnnotationArgs = ManualPointEventAnnotationArgs | ManualRangeEventAnnotationArgs;
-export type EventAnnotationOutput =
-  | ManualPointEventAnnotationOutput
-  | ManualRangeEventAnnotationOutput;
-
 export const annotationColumns: DatatableColumn[] = [
   { id: 'time', name: 'time', meta: { type: 'string' } },
   { id: 'endTime', name: 'endTime', meta: { type: 'string' } },
