@@ -6,6 +6,7 @@
  */
 
 import type {
+  EntryList,
   EntryMatchAny,
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
@@ -20,6 +21,7 @@ import {
   buildMatchWildcardClause,
   buildNestedClause,
   createOrClauses,
+  filterOutUnprocessableValueLists,
 } from './build_exception_filter';
 
 import {
@@ -1313,6 +1315,36 @@ describe('build_exceptions_filter', () => {
           minimum_should_match: 1,
         },
       });
+    });
+  });
+
+  describe('filterOutUnprocessableValueLists', () => {
+    test('it should filter in list types we do support', async () => {
+      const listEntryItem: EntryList = {
+        ...getEntryListMock(),
+        list: { id: getEntryListMock().list.id, type: 'keyword' },
+      };
+      const listExceptionItem = getExceptionListItemSchemaMock({ entries: [listEntryItem] });
+
+      const { filteredExceptions, unprocessableValueListExceptions } =
+        await filterOutUnprocessableValueLists([listExceptionItem], listClient);
+
+      expect(filteredExceptions).toEqual([listExceptionItem]);
+      expect(unprocessableValueListExceptions).toEqual([]);
+    });
+
+    test("it should filter out list types we don't support", async () => {
+      const listEntryItem: EntryList = {
+        ...getEntryListMock(),
+        list: { id: getEntryListMock().list.id, type: 'double' },
+      };
+      const listExceptionItem = getExceptionListItemSchemaMock({ entries: [listEntryItem] });
+
+      const { filteredExceptions, unprocessableValueListExceptions } =
+        await filterOutUnprocessableValueLists([listExceptionItem], listClient);
+
+      expect(filteredExceptions).toEqual([]);
+      expect(unprocessableValueListExceptions).toEqual([listExceptionItem]);
     });
   });
 });

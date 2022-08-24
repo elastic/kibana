@@ -201,17 +201,19 @@ export const createOrClauses = async (
 const isListTypeProcessable = (type: Type): boolean =>
   type === 'keyword' || type === 'text' || type === 'ip' || type === 'ip_range';
 
-export const filterOutLargeValueLists = async (
+export const filterOutUnprocessableValueLists = async (
   exceptionItems: ExceptionListItemSchema[],
   listClient: ListClient
-) => {
-  const [filteredExceptions, largeValueListExceptions] = partition(
-    exceptionItems,
-    (exceptionItem) => {
+): Promise<{
+  filteredExceptions: ExceptionListItemSchema[];
+  unprocessableValueListExceptions: ExceptionListItemSchema[];
+}> => {
+  const exceptionBooleans = await Promise.all(
+    exceptionItems.map(async (exceptionItem) => {
       const listEntries = exceptionItem.entries.filter((entry): entry is EntryList =>
         entriesList.is(entry)
       );
-      return listEntries.every(async (listEntry) => {
+      for await (const listEntry of listEntries) {
         const {
           list: { id, type },
         } = listEntry;
@@ -229,13 +231,20 @@ export const filterOutLargeValueLists = async (
           currentIndexPosition: 0,
         });
 
-        if (valueList && valueList.total <= MAXIMUM_SMALL_VALUE_LIST_SIZE) {
-          return true;
+        if (!valueList || (valueList && valueList.total > MAXIMUM_SMALL_VALUE_LIST_SIZE)) {
+          return false;
         }
-      });
-    }
+      }
+      // If we're here, all the entries are processable
+      return true;
+    })
   );
-  return { filteredExceptions, largeValueListExceptions };
+  const filteredExceptions = exceptionItems.filter((item, index) => exceptionBooleans[index]);
+  const unprocessableValueListExceptions = exceptionItems.filter(
+    (item, index) => !exceptionBooleans[index]
+  );
+
+  return { filteredExceptions, unprocessableValueListExceptions };
 };
 
 export const buildExceptionFilter = async ({
@@ -266,12 +275,10 @@ export const buildExceptionFilter = async ({
   // Exceptions that contain large value list exceptions and will be processed later on in rule execution
   const unprocessedExceptions: ExceptionListItemSchema[] = [];
 
-  const { filteredExceptions, largeValueListExceptions } = await filterOutLargeValueLists(
-    valueListExceptions,
-    listClient
-  );
+  const { filteredExceptions, unprocessableValueListExceptions } =
+    await filterOutUnprocessableValueLists(valueListExceptions, listClient);
   exceptionsWithoutLargeValueLists.push(...filteredExceptions);
-  unprocessedExceptions.push(...largeValueListExceptions);
+  unprocessedExceptions.push(...unprocessableValueListExceptions);
 
   const exceptionFilter: Filter = {
     meta: {
