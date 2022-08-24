@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { i18nTexts } from '../../../../public/application/sections/edit_policy/i18n_texts';
 import { setupEnvironment } from '../../helpers';
 import { setupValidationTestBed, ValidationTestBed } from './validation.helpers';
