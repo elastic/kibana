@@ -41,19 +41,19 @@ describe('Instances table', () => {
     cy.loginAsViewerUser();
   });
 
-  // describe('when data is not loaded', () => {
-  //   it('shows empty message', () => {
-  //     cy.visit(serviceOverviewHref);
-  //     cy.contains('opbeans-java');
-  //     cy.get('[data-test-subj="serviceInstancesTableContainer"]').contains(
-  //       'No items found'
-  //     );
-  //   });
-  // });
+  describe.skip('when data is not loaded', () => {
+    it('shows empty message', () => {
+      cy.visitKibana(serviceOverviewHref);
+      cy.contains('opbeans-java');
+      cy.get('[data-test-subj="serviceInstancesTableContainer"]').contains(
+        'No items found'
+      );
+    });
+  });
 
   describe('when data is loaded', () => {
-    before(async () => {
-      await synthtrace.index(
+    before(() => {
+      synthtrace.index(
         opbeans({
           from: new Date(start).getTime(),
           to: new Date(end).getTime(),
@@ -61,12 +61,12 @@ describe('Instances table', () => {
       );
     });
 
-    after(async () => {
-      await synthtrace.clean();
+    after(() => {
+      synthtrace.clean();
     });
 
     it('has data in the table', () => {
-      cy.visit(serviceOverviewHref);
+      cy.visitKibana(serviceOverviewHref);
       cy.contains('opbeans-java');
       cy.contains(serviceNodeName);
     });
@@ -75,7 +75,7 @@ describe('Instances table', () => {
         cy.intercept('GET', endpoint).as(name);
       });
 
-      cy.visit(serviceOverviewHref);
+      cy.visitKibana(serviceOverviewHref);
       cy.contains('opbeans-java');
 
       cy.wait('@instancesMainRequest');
@@ -96,7 +96,7 @@ describe('Instances table', () => {
         cy.intercept('GET', endpoint).as(name);
       });
 
-      cy.visit(serviceOverviewHref);
+      cy.visitKibana(serviceOverviewHref);
       cy.contains('opbeans-java');
 
       cy.wait('@instancesMainRequest');

@@ -20,6 +20,7 @@ export const apiIndex: ApiViewIndex = {
   ingestionMethod: IngestionMethod.API,
   ingestionStatus: IngestionStatus.CONNECTED,
   lastUpdated: null,
+  hidden: false,
   name: 'api',
   total: {
     docs: {
@@ -50,6 +51,7 @@ export const connectorIndex: ConnectorViewIndex = {
     sync_now: false,
   },
   count: 1,
+  hidden: false,
   ingestionMethod: IngestionMethod.CONNECTOR,
   ingestionStatus: IngestionStatus.INCOMPLETE,
   lastUpdated: 'never',
@@ -68,6 +70,7 @@ export const crawlerIndex: CrawlerViewIndex = {
     id: '3',
     index_name: 'crawler',
   },
+  hidden: false,
   ingestionMethod: IngestionMethod.CRAWLER,
   ingestionStatus: IngestionStatus.INCOMPLETE,
   lastUpdated: null,
