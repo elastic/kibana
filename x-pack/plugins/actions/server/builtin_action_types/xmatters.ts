@@ -9,7 +9,12 @@ import { i18n } from '@kbn/i18n';
 import { curry, isString } from 'lodash';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { Logger } from '@kbn/core/server';
-import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
+import {
+  ActionType,
+  ActionTypeExecutorOptions,
+  ActionTypeExecutorResult,
+  ValidatorServices,
+} from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { postXmatters } from './lib/post_xmatters';
 import { AlertingConnectorFeatureId } from '../../common';
@@ -71,13 +76,17 @@ export function getActionType({
     }),
     supportedFeatureIds: [AlertingConnectorFeatureId],
     validate: {
-      config: schema.object(configSchemaProps, {
-        validate: curry(validateActionTypeConfig)(configurationUtilities),
-      }),
-      secrets: schema.object(secretSchemaProps, {
-        validate: curry(validateActionTypeSecrets)(configurationUtilities),
-      }),
-      params: ParamsSchema,
+      config: {
+        validateSchema: ConfigSchema,
+        validate: validateActionTypeConfig,
+      },
+      secrets: {
+        validateSchema: SecretsSchema,
+        validate: validateActionTypeSecrets,
+      },
+      params: {
+        validateSchema: ParamsSchema,
+      },
       connector: validateConnector,
     },
     executor: curry(executor)({ logger, configurationUtilities }),
@@ -85,9 +94,10 @@ export function getActionType({
 }
 
 function validateActionTypeConfig(
-  configurationUtilities: ActionsConfigurationUtilities,
-  configObject: ActionTypeConfigType
+  configObject: ActionTypeConfigType,
+  validatorServices?: ValidatorServices
 ): string | undefined {
+  const { configurationUtilities } = validatorServices || {};
   const configuredUrl = configObject.configUrl;
   const usesBasic = configObject.usesBasic;
   if (!usesBasic) return;
@@ -106,7 +116,7 @@ function validateActionTypeConfig(
 
   try {
     if (configuredUrl) {
-      configurationUtilities.ensureUriAllowed(configuredUrl);
+      configurationUtilities?.ensureUriAllowed(configuredUrl);
     }
   } catch (allowListError) {
     return i18n.translate('xpack.actions.builtin.xmatters.xmattersConfigurationError', {
@@ -167,9 +177,10 @@ function validateConnector(
 }
 
 function validateActionTypeSecrets(
-  configurationUtilities: ActionsConfigurationUtilities,
-  secretsObject: ActionTypeSecretsType
+  secretsObject: ActionTypeSecretsType,
+  validatorServices?: ValidatorServices
 ): string | undefined {
+  const { configurationUtilities } = validatorServices || {};
   if (!secretsObject.secretsUrl && !secretsObject.user && !secretsObject.password) {
     return i18n.translate('xpack.actions.builtin.xmatters.noSecretsProvided', {
       defaultMessage: 'Provide either secretsUrl link or user/password to authenticate',
@@ -203,7 +214,7 @@ function validateActionTypeSecrets(
     // Test that hostname is allowed
     try {
       if (secretsObject.secretsUrl) {
-        configurationUtilities.ensureUriAllowed(secretsObject.secretsUrl);
+        configurationUtilities?.ensureUriAllowed(secretsObject.secretsUrl);
       }
     } catch (allowListError) {
       return i18n.translate('xpack.actions.builtin.xmatters.xmattersHostnameNotAllowed', {

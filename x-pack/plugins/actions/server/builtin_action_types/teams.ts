@@ -16,7 +16,12 @@ import { Logger } from '@kbn/core/server';
 import { getRetryAfterIntervalFromHeaders } from './lib/http_rersponse_retry_header';
 import { isOk, promiseResult, Result } from './lib/result_type';
 import { request } from './lib/axios_utils';
-import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
+import {
+  ActionType,
+  ActionTypeExecutorOptions,
+  ActionTypeExecutorResult,
+  ValidatorServices,
+} from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import {
   AlertingConnectorFeatureId,
@@ -69,19 +74,23 @@ export function getActionType({
       SecurityConnectorFeatureId,
     ],
     validate: {
-      secrets: schema.object(secretsSchemaProps, {
-        validate: curry(validateActionTypeConfig)(configurationUtilities),
-      }),
-      params: ParamsSchema,
+      secrets: {
+        validateSchema: SecretsSchema,
+        validate: validateActionTypeConfig,
+      },
+      params: {
+        validateSchema: ParamsSchema,
+      },
     },
     executor: curry(teamsExecutor)({ logger, configurationUtilities }),
   };
 }
 
 function validateActionTypeConfig(
-  configurationUtilities: ActionsConfigurationUtilities,
-  secretsObject: ActionTypeSecretsType
+  secretsObject: ActionTypeSecretsType,
+  validatorServices?: ValidatorServices
 ) {
+  const { configurationUtilities } = validatorServices || {};
   const configuredUrl = secretsObject.webhookUrl;
   try {
     new URL(configuredUrl);
@@ -92,7 +101,7 @@ function validateActionTypeConfig(
   }
 
   try {
-    configurationUtilities.ensureUriAllowed(configuredUrl);
+    configurationUtilities?.ensureUriAllowed(configuredUrl);
   } catch (allowListError) {
     return i18n.translate('xpack.actions.builtin.teams.teamsConfigurationError', {
       defaultMessage: 'error configuring teams action: {message}',

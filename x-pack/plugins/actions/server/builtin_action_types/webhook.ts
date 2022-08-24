@@ -15,7 +15,12 @@ import { Logger } from '@kbn/core/server';
 import { getRetryAfterIntervalFromHeaders } from './lib/http_rersponse_retry_header';
 import { nullableType } from './lib/nullable';
 import { isOk, promiseResult, Result } from './lib/result_type';
-import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
+import {
+  ActionType,
+  ActionTypeExecutorOptions,
+  ActionTypeExecutorResult,
+  ValidatorServices,
+} from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { request } from './lib/axios_utils';
 import { renderMustacheString } from '../lib/mustache_renderer';
@@ -99,11 +104,16 @@ export function getActionType({
       SecurityConnectorFeatureId,
     ],
     validate: {
-      config: schema.object(configSchemaProps, {
-        validate: curry(validateActionTypeConfig)(configurationUtilities),
-      }),
-      secrets: SecretsSchema,
-      params: ParamsSchema,
+      config: {
+        validateSchema: ConfigSchema,
+        validate: validateActionTypeConfig,
+      },
+      secrets: {
+        validateSchema: SecretsSchema,
+      },
+      params: {
+        validateSchema: ParamsSchema,
+      },
     },
     renderParameterTemplates,
     executor: curry(executor)({ logger, configurationUtilities }),
@@ -121,9 +131,10 @@ function renderParameterTemplates(
 }
 
 function validateActionTypeConfig(
-  configurationUtilities: ActionsConfigurationUtilities,
-  configObject: ActionTypeConfigType
+  configObject: ActionTypeConfigType,
+  validatorServices?: ValidatorServices
 ) {
+  const { configurationUtilities } = validatorServices || {};
   const configuredUrl = configObject.url;
   try {
     new URL(configuredUrl);
@@ -137,7 +148,7 @@ function validateActionTypeConfig(
   }
 
   try {
-    configurationUtilities.ensureUriAllowed(configuredUrl);
+    configurationUtilities?.ensureUriAllowed(configuredUrl);
   } catch (allowListError) {
     return i18n.translate('xpack.actions.builtin.webhook.webhookConfigurationError', {
       defaultMessage: 'error configuring webhook action: {message}',

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ActionsConfigurationUtilities } from '../../actions_config';
 import {
   ServiceNowPublicConfigurationType,
   ServiceNowSecretConfigurationType,
@@ -13,15 +12,16 @@ import {
 } from './types';
 
 import * as i18n from './translations';
+import { ValidatorServices } from '../../types';
 
 export const validateCommonConfig = (
-  configurationUtilities: ActionsConfigurationUtilities,
-  config: ServiceNowPublicConfigurationType
+  config: ServiceNowPublicConfigurationType,
+  validatorServices?: ValidatorServices
 ) => {
   const { isOAuth, apiUrl, userIdentifierValue, clientId, jwtKeyId } = config;
-
+  const { configurationUtilities } = validatorServices || {};
   try {
-    configurationUtilities.ensureUriAllowed(apiUrl);
+    configurationUtilities?.ensureUriAllowed(apiUrl);
   } catch (allowedListError) {
     return i18n.ALLOWED_HOSTS_ERROR(allowedListError.message);
   }
@@ -42,8 +42,8 @@ export const validateCommonConfig = (
 };
 
 export const validateCommonSecrets = (
-  configurationUtilities: ActionsConfigurationUtilities,
-  secrets: ServiceNowSecretConfigurationType
+  secrets: ServiceNowSecretConfigurationType,
+  validatorServices?: ValidatorServices
 ) => {
   const { username, password, clientSecret, privateKey } = secrets;
 

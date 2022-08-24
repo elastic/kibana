@@ -12,11 +12,13 @@ import {
   CasesWebhookSecretConfigurationType,
   ExternalServiceValidation,
 } from './types';
+import { ValidatorServices } from '../../types';
 
 const validateConfig = (
-  configurationUtilities: ActionsConfigurationUtilities,
-  configObject: CasesWebhookPublicConfigurationType
+  configObject: CasesWebhookPublicConfigurationType,
+  validatorServices?: ValidatorServices
 ) => {
+  const { configurationUtilities } = validatorServices || {};
   const {
     createCommentUrl,
     createIncidentUrl,
@@ -41,7 +43,7 @@ const validateConfig = (
         return i18n.INVALID_URL(err, url);
       }
       try {
-        configurationUtilities.ensureUriAllowed(url);
+        configurationUtilities?.ensureUriAllowed(url);
       } catch (allowListError) {
         return i18n.CONFIG_ERR(allowListError.message);
       }
@@ -59,7 +61,10 @@ export const validateConnector = (
   return i18n.INVALID_USER_PW;
 };
 
-export const validateSecrets = (secrets: CasesWebhookSecretConfigurationType) => {
+export const validateSecrets = (
+  secrets: CasesWebhookSecretConfigurationType,
+  validatorServices?: ValidatorServices
+) => {
   // user and password must be set together (or not at all)
   if (!secrets.password && !secrets.user) return;
   if (secrets.password && secrets.user) return;

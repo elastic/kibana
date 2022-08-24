@@ -72,8 +72,12 @@ export function getActionType({ logger }: { logger: Logger }): ESIndexActionType
       SecurityConnectorFeatureId,
     ],
     validate: {
-      config: ConfigSchema,
-      params: ParamsSchema,
+      config: {
+        validateSchema: ConfigSchema,
+      },
+      params: {
+        validateSchema: ParamsSchema,
+      },
     },
     executor: curry(executor)({ logger }),
     renderParameterTemplates,

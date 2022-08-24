@@ -23,6 +23,7 @@ import {
   ActionTypeExecutorOptions,
   ActionTypeExecutorResult,
   ExecutorType,
+  ValidatorServices,
 } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { getCustomAgents } from './lib/get_custom_agents';
@@ -81,10 +82,13 @@ export function getActionType({
       SecurityConnectorFeatureId,
     ],
     validate: {
-      secrets: schema.object(secretsSchemaProps, {
-        validate: curry(validateActionTypeConfig)(configurationUtilities),
-      }),
-      params: ParamsSchema,
+      secrets: {
+        validateSchema: SecretsSchema,
+        validate: validateActionTypeConfig,
+      },
+      params: {
+        validateSchema: ParamsSchema,
+      },
     },
     renderParameterTemplates,
     executor,
@@ -101,9 +105,10 @@ function renderParameterTemplates(
 }
 
 function validateActionTypeConfig(
-  configurationUtilities: ActionsConfigurationUtilities,
-  secretsObject: ActionTypeSecretsType
+  secretsObject: ActionTypeSecretsType,
+  validatorServices?: ValidatorServices
 ) {
+  const { configurationUtilities } = validatorServices || {};
   const configuredUrl = secretsObject.webhookUrl;
   try {
     new URL(configuredUrl);
@@ -114,7 +119,7 @@ function validateActionTypeConfig(
   }
 
   try {
-    configurationUtilities.ensureUriAllowed(configuredUrl);
+    configurationUtilities?.ensureUriAllowed(configuredUrl);
   } catch (allowListError) {
     return i18n.translate('xpack.actions.builtin.slack.slackConfigurationError', {
       defaultMessage: 'error configuring slack action: {message}',
