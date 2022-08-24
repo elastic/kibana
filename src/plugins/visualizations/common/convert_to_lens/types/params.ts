@@ -98,7 +98,7 @@ export interface CountParams {
 }
 
 export interface LastValueParams {
-  sortField: string;
+  sortField?: string;
   showArrayValues: boolean;
   format?: NumberValueFormat;
 }

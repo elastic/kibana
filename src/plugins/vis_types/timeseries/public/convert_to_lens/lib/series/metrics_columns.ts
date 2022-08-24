@@ -32,7 +32,11 @@ export const getMetricsColumns = (
   dataView: DataView,
   visibleSeriesCount: number
 ): Column[] | null => {
-  const { metrics } = getSeriesAgg(series.metrics);
+  const { metrics, seriesAgg } = getSeriesAgg(series.metrics);
+  // series agg supported as collapseFn if we have split
+  if (seriesAgg && series.split_mode === 'everything') {
+    return null;
+  }
   const metricIdx = metrics.length - 1;
   const aggregation = metrics[metricIdx].type;
   const aggregationMap = SUPPORTED_METRICS[aggregation];
@@ -63,9 +67,14 @@ export const getMetricsColumns = (
       const formulaColumn = convertMathToFormulaColumn(series, metrics);
       return getValidColumns(formulaColumn);
     }
+    case 'derivative':
     case 'moving_average': {
-      const movingAverageColumns = convertParentPipelineAggToColumns(series, metrics, dataView);
-      return getValidColumns(movingAverageColumns);
+      const movingAverageOrDerivativeColumns = convertParentPipelineAggToColumns(
+        series,
+        metrics,
+        dataView
+      );
+      return getValidColumns(movingAverageOrDerivativeColumns);
     }
     case 'cumulative_sum': {
       const cumulativeSumColumns = convertToCumulativeSumColumns(series, metrics, dataView);

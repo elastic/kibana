@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import type { Metric, Series } from '../../../../common/types';
-import { getSiblingPipelineSeriesFormula } from '../metrics';
+import { getFilterRatioFormula } from '../metrics';
 import { createFormulaColumn } from './formula';
 import { FormulaColumn } from './types';
 
@@ -18,11 +17,7 @@ export const convertFilterRatioToFormulaColumn = (
 ): FormulaColumn | null => {
   const currentMetric = metrics[metrics.length - 1];
 
-  const formula = getSiblingPipelineSeriesFormula(
-    TSVB_METRIC_TYPES.FILTER_RATIO,
-    currentMetric,
-    metrics
-  );
+  const formula = getFilterRatioFormula(currentMetric);
 
   if (!formula) {
     return null;
