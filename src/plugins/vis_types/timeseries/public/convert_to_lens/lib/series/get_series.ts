@@ -28,7 +28,13 @@ export interface VisSeries {
   seriesAgg?: string;
 }
 
-export const getSeries = (initialMetrics: Metric[], totalSeriesNum: number): VisSeries | null => {
+export const getSeries = (
+  initialMetrics: Metric[],
+  totalSeriesNum: number,
+  splitMode: string,
+  layerColor: string,
+  window?: string
+): VisSeries | null => {
   const { metrics, seriesAgg } = getSeriesAgg(initialMetrics);
   const metricIdx = metrics.length - 1;
   const aggregation = metrics[metricIdx].type;
@@ -44,6 +50,8 @@ export const getSeries = (initialMetrics: Metric[], totalSeriesNum: number): Vis
       if (percentiles?.length) {
         const percentilesSeries = getPercentilesSeries(
           percentiles,
+          splitMode,
+          layerColor,
           fieldName
         ) as VisualizeEditorLayersContext['metrics'];
         metricsArray = [...metricsArray, ...percentilesSeries];
@@ -57,6 +65,8 @@ export const getSeries = (initialMetrics: Metric[], totalSeriesNum: number): Vis
         const percentileRanksSeries = getPercentileRankSeries(
           values,
           colors,
+          splitMode,
+          layerColor,
           fieldName
         ) as VisualizeEditorLayersContext['metrics'];
         metricsArray = [...metricsArray, ...percentileRanksSeries];
@@ -92,12 +102,17 @@ export const getSeries = (initialMetrics: Metric[], totalSeriesNum: number): Vis
             const [_, meta] = variable?.field?.split('[') ?? [];
             const metaValue = Number(meta?.replace(']', ''));
             if (!metaValue) return;
-            const script = getFormulaEquivalent(currentMetric, layerMetricsArray, metaValue);
+            const script = getFormulaEquivalent(
+              currentMetric,
+              layerMetricsArray,
+              metaValue,
+              window
+            );
             if (!script) return;
             finalScript = finalScript?.replace(`params.${variable.name}`, script);
           });
         } else {
-          const script = getFormulaEquivalent(currentMetric, layerMetricsArray);
+          const script = getFormulaEquivalent(currentMetric, layerMetricsArray, undefined, window);
           if (!script) return null;
           const variable = variables.find((v) => v.field === currentMetric.id);
           finalScript = finalScript?.replaceAll(`params.${variable?.name}`, script);
@@ -113,7 +128,8 @@ export const getSeries = (initialMetrics: Metric[], totalSeriesNum: number): Vis
       metricsArray = getParentPipelineSeries(
         aggregation,
         metricIdx,
-        metrics
+        metrics,
+        window
       ) as VisualizeEditorLayersContext['metrics'];
       break;
     }
@@ -137,7 +153,8 @@ export const getSeries = (initialMetrics: Metric[], totalSeriesNum: number): Vis
           subFunctionMetric,
           pipelineAgg,
           aggregation,
-          metaValue
+          metaValue,
+          window
         );
         if (!formula) return null;
         metricsArray = getFormulaSeries(formula);
@@ -146,7 +163,9 @@ export const getSeries = (initialMetrics: Metric[], totalSeriesNum: number): Vis
           aggregation,
           metrics[metricIdx],
           subFunctionMetric,
-          pipelineAgg
+          pipelineAgg,
+          undefined,
+          window
         );
         if (!series) return null;
         metricsArray = series;
@@ -154,7 +173,12 @@ export const getSeries = (initialMetrics: Metric[], totalSeriesNum: number): Vis
       break;
     }
     case 'positive_only': {
-      const formula = getSiblingPipelineSeriesFormula(aggregation, metrics[metricIdx], metrics);
+      const formula = getSiblingPipelineSeriesFormula(
+        aggregation,
+        metrics[metricIdx],
+        metrics,
+        window
+      );
       if (!formula) {
         return null;
       }
@@ -165,7 +189,12 @@ export const getSeries = (initialMetrics: Metric[], totalSeriesNum: number): Vis
     case 'max_bucket':
     case 'min_bucket':
     case 'sum_bucket': {
-      const formula = getSiblingPipelineSeriesFormula(aggregation, metrics[metricIdx], metrics);
+      const formula = getSiblingPipelineSeriesFormula(
+        aggregation,
+        metrics[metricIdx],
+        metrics,
+        window
+      );
       if (!formula) {
         return null;
       }
@@ -173,7 +202,7 @@ export const getSeries = (initialMetrics: Metric[], totalSeriesNum: number): Vis
       break;
     }
     case 'filter_ratio': {
-      const formula = getFilterRatioFormula(metrics[metricIdx]);
+      const formula = getFilterRatioFormula(metrics[metricIdx], window);
       if (!formula) {
         return null;
       }
@@ -220,6 +249,25 @@ export const getSeries = (initialMetrics: Metric[], totalSeriesNum: number): Vis
         },
       ];
       break;
+    }
+    case 'std_deviation': {
+      const currentMetric = metrics[metricIdx];
+      if (currentMetric.mode === 'upper' || currentMetric.mode === 'lower') {
+        const script = getFormulaEquivalent(currentMetric, metrics, undefined, window);
+        if (!script) return null;
+        metricsArray = getFormulaSeries(script);
+        break;
+      } else if (currentMetric.mode === 'band') {
+        [
+          { ...currentMetric, mode: 'upper' },
+          { ...currentMetric, mode: 'lower' },
+        ].forEach((metric) => {
+          const script = getFormulaEquivalent(metric, metrics, undefined, window);
+          if (!script) return null;
+          metricsArray.push(...getFormulaSeries(script));
+        });
+        break;
+      }
     }
     default: {
       const timeScale = getTimeScale(metrics[metricIdx]);
