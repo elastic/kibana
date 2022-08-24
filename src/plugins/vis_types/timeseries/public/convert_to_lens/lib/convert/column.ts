@@ -27,14 +27,15 @@ export const createColumn = (
   metric: Metric,
   field?: DataViewField,
   isBucketed: boolean = false,
-  isSplit: boolean = false
+  isSplit: boolean = false,
+  window?: string
 ): GeneralColumnWithMeta => ({
   columnId: uuid(),
   dataType: (field?.type as DataType) ?? undefined,
   label: series.label,
   isBucketed,
   isSplit,
-  window: metric.window?.toString(),
+  window,
   filter: series.filter,
   timeScale: getTimeScale(metric),
   meta: { metricId: metric.id },
@@ -44,8 +45,9 @@ export const convertMetricsToColumns = <C extends Column>(
   series: Series,
   metrics: Metric[],
   dataView: DataView,
-  convertToFn: ConvertToColumnsFn<C>
-) => metrics.flatMap((metric) => convertToFn(series, metric, dataView));
+  convertToFn: ConvertToColumnsFn<C>,
+  window?: string
+) => metrics.flatMap((metric) => convertToFn(series, metric, dataView, window));
 
 export const isColumnWithMeta = (column: Column): column is ColumnWithMeta => {
   if ((column as ColumnWithMeta).meta) {

@@ -13,11 +13,12 @@ import { FormulaColumn } from './types';
 
 export const convertFilterRatioToFormulaColumn = (
   series: Series,
-  metrics: Metric[]
+  metrics: Metric[],
+  window?: string
 ): FormulaColumn | null => {
   const currentMetric = metrics[metrics.length - 1];
 
-  const formula = getFilterRatioFormula(currentMetric);
+  const formula = getFilterRatioFormula(currentMetric, window);
 
   if (!formula) {
     return null;

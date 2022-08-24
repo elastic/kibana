@@ -18,7 +18,7 @@ const getConvertFnByType = (type: PANEL_TYPES) => {
       return convertToLens;
     },
     [PANEL_TYPES.TOP_N]: async () => {
-      const { convertToLens } = await import('./top_n');
+      const { convertToLens } = await import('./top_n/new.index');
       return convertToLens;
     },
   };

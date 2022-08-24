@@ -22,14 +22,13 @@ export const isSplitWithDateHistogram = (
   splitFields: string[],
   dataView: DataView
 ) => {
-  let splitWithDateHistogram = false;
   if (series.terms_field && series.split_mode === 'terms' && splitFields) {
     for (const f of splitFields) {
       const fieldType = dataView.getFieldByName(f)?.type;
 
       if (fieldType === 'date') {
         if (splitFields.length === 1) {
-          splitWithDateHistogram = true;
+          return true;
         } else {
           // not supported terms with several field if one of them has date type
           return null;
@@ -37,7 +36,7 @@ export const isSplitWithDateHistogram = (
       }
     }
   }
-  return splitWithDateHistogram;
+  return false;
 };
 
 export const getBucketsColumns = (
@@ -65,11 +64,11 @@ export const getBucketsColumns = (
         splitFields[0],
         true
       );
-      return getValidColumns([dateHistogramColumn]);
+      return getValidColumns(dateHistogramColumn);
     }
 
     const termsColumn = converToTermsColumn(splitFields, series, columns, dataView, isSplit);
-    return getValidColumns([termsColumn]);
+    return getValidColumns(termsColumn);
   }
   return [];
 };

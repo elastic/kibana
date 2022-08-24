@@ -16,19 +16,18 @@ export const isSplitWithDateHistogram = async (
   indexPatternId: string,
   dataViews: DataViewsPublicPluginStart
 ) => {
-  let splitWithDateHistogram = false;
   if (series.terms_field && series.split_mode === 'terms' && splitFields) {
     for (const f of splitFields) {
       const fieldType = await getFieldType(indexPatternId, f, dataViews);
 
       if (fieldType === 'date') {
         if (splitFields.length === 1) {
-          splitWithDateHistogram = true;
+          return true;
         } else {
           return null;
         }
       }
     }
   }
-  return splitWithDateHistogram;
+  return false;
 };

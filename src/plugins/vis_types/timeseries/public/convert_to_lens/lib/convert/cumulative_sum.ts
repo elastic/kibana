@@ -16,7 +16,8 @@ import { computeParentPipelineColumns } from './parent_pipeline';
 export const convertToCumulativeSumColumns = (
   series: Series,
   metrics: Metric[],
-  dataView: DataView
+  dataView: DataView,
+  window?: string
 ) => {
   const currentMetric = metrics[metrics.length - 1];
   if (!currentMetric) {
@@ -43,7 +44,8 @@ export const convertToCumulativeSumColumns = (
       subFunctionMetric,
       pipelineAgg,
       currentMetric.type,
-      metaValue
+      metaValue,
+      window
     );
     if (!formula) {
       return null;
@@ -62,7 +64,9 @@ export const convertToCumulativeSumColumns = (
       currentMetric,
       dataView,
       subFunctionMetric,
-      pipelineAgg
+      pipelineAgg,
+      undefined,
+      window
     );
   }
 };

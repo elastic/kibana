@@ -20,7 +20,8 @@ const convertToLastValueParams = (metric: Metric): LastValueParams | null => ({
 export const convertToLastValueColumn = (
   series: Series,
   metrics: Metric[],
-  dataView: DataView
+  dataView: DataView,
+  window?: string
 ): LastValueColumn | null => {
   const currentMetric = metrics[metrics.length - 1];
   // We can only support top_hit with size 1
@@ -44,7 +45,7 @@ export const convertToLastValueColumn = (
   return {
     operationType: 'last_value',
     sourceField: field.name ?? 'document',
-    ...createColumn(series, currentMetric),
+    ...createColumn(series, currentMetric, undefined, false, false, window),
     params,
   };
 };

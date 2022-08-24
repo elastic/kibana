@@ -48,7 +48,8 @@ const convertFormulaScriptForPercentileAggs = (
   mathScript: string,
   variables: Exclude<Metric['variables'], undefined>,
   metric: Metric,
-  allAggMetrics: Metric[]
+  allAggMetrics: Metric[],
+  window?: string
 ) => {
   variables.forEach((variable) => {
     const [_, meta] = variable?.field?.split('[') ?? [];
@@ -56,7 +57,7 @@ const convertFormulaScriptForPercentileAggs = (
     if (!metaValue) {
       return;
     }
-    const script = getFormulaEquivalent(metric, allAggMetrics, metaValue);
+    const script = getFormulaEquivalent(metric, allAggMetrics, metaValue, window);
     if (!script) {
       return;
     }
@@ -69,9 +70,10 @@ const convertFormulaScriptForAggs = (
   mathScript: string,
   variables: Exclude<Metric['variables'], undefined>,
   metric: Metric,
-  allAggMetrics: Metric[]
+  allAggMetrics: Metric[],
+  window?: string
 ) => {
-  const script = getFormulaEquivalent(metric, allAggMetrics);
+  const script = getFormulaEquivalent(metric, allAggMetrics, window);
   if (!script) {
     return null;
   }
@@ -81,7 +83,8 @@ const convertFormulaScriptForAggs = (
 
 export const convertMathToFormulaColumn = (
   series: Series,
-  metrics: Metric[]
+  metrics: Metric[],
+  window?: string
 ): FormulaColumn | null => {
   // find the metric idx that has math expression
   const mathMetric = metrics.find((metric) => metric.type === 'math');
@@ -113,9 +116,15 @@ export const convertMathToFormulaColumn = (
 
     // should treat percentiles differently
     if (notMathMetric.type === 'percentile' || notMathMetric.type === 'percentile_rank') {
-      script = convertFormulaScriptForPercentileAggs(script!, variables, notMathMetric, metrics);
+      script = convertFormulaScriptForPercentileAggs(
+        script!,
+        variables,
+        notMathMetric,
+        metrics,
+        window
+      );
     } else {
-      script = convertFormulaScriptForAggs(script!, variables, notMathMetric, metrics);
+      script = convertFormulaScriptForAggs(script!, variables, notMathMetric, metrics, window);
     }
   }
 
@@ -134,11 +143,12 @@ export const convertMathToFormulaColumn = (
 export const convertOtherAggsToFormulaColumn = (
   aggregation: OtherFormulaAggregations,
   series: Series,
-  metrics: Metric[]
+  metrics: Metric[],
+  window?: string
 ): FormulaColumn | null => {
   const currentMetric = metrics[metrics.length - 1];
 
-  const formula = getSiblingPipelineSeriesFormula(aggregation, currentMetric, metrics);
+  const formula = getSiblingPipelineSeriesFormula(aggregation, currentMetric, metrics, window);
   if (!formula) {
     return null;
   }

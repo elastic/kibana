@@ -108,7 +108,8 @@ export const convertMetricAggregationColumnWithoutParams = (
   aggregation: SupportedMetric,
   series: Series,
   metric: Metric,
-  dataView: DataView
+  dataView: DataView,
+  window?: string
 ): MetricAggregationColumnWithoutParams | null => {
   if (!isSupportedAggregationWithoutParams(aggregation.name)) {
     return null;
@@ -123,7 +124,7 @@ export const convertMetricAggregationColumnWithoutParams = (
   return {
     operationType: aggregation.name,
     sourceField,
-    ...createColumn(series, metric, field),
+    ...createColumn(series, metric, field, false, false, window),
     params: {},
   } as MetricAggregationColumnWithoutParams;
 };
@@ -133,7 +134,8 @@ export const convertMetricAggregationToColumn = (
   series: Series,
   metric: Metric,
   dataView: DataView,
-  meta?: number
+  meta?: number,
+  window?: string
 ): MetricAggregationColumn | null => {
   if (!isSupportedAggregation(aggregation.name)) {
     return null;
@@ -145,18 +147,25 @@ export const convertMetricAggregationToColumn = (
   }
 
   if (aggregation.name === Operations.PERCENTILE) {
-    return convertToPercentileColumn(meta, series, metric, dataView);
+    return convertToPercentileColumn(meta, series, metric, dataView, undefined, window);
   }
 
   if (aggregation.name === Operations.PERCENTILE_RANK) {
-    return convertToPercentileRankColumn(meta?.toString() ?? '', series, metric, dataView);
+    return convertToPercentileRankColumn(
+      meta?.toString() ?? '',
+      series,
+      metric,
+      dataView,
+      undefined,
+      window
+    );
   }
 
   if (aggregation.name === Operations.LAST_VALUE) {
     return null;
   }
 
-  return convertMetricAggregationColumnWithoutParams(aggregation, series, metric, dataView);
+  return convertMetricAggregationColumnWithoutParams(aggregation, series, metric, dataView, window);
 };
 
 export const computeParentPipelineColumns = (
@@ -166,7 +175,8 @@ export const computeParentPipelineColumns = (
   dataView: DataView,
   subFunctionMetric: Metric,
   pipelineAgg: SupportedMetric,
-  meta?: number
+  meta?: number,
+  window?: string
 ) => {
   const agg = SUPPORTED_METRICS[currentMetric.type];
   if (!agg) {
@@ -176,7 +186,7 @@ export const computeParentPipelineColumns = (
   const aggFormula = getFormulaFromMetric(agg);
 
   if (subFunctionMetric.type === 'filter_ratio') {
-    const script = getFilterRatioFormula(subFunctionMetric);
+    const script = getFilterRatioFormula(subFunctionMetric, window);
     if (!script) {
       return null;
     }
@@ -189,7 +199,8 @@ export const computeParentPipelineColumns = (
     series,
     subFunctionMetric,
     dataView,
-    meta
+    meta,
+    window
   );
 
   if (!metricAggregationColumn) {
@@ -209,7 +220,8 @@ const convertMovingAvgOrDerivativeToColumns = (
   currentMetric: Metric,
   series: Series,
   metrics: Metric[],
-  dataView: DataView
+  dataView: DataView,
+  window?: string
 ) => {
   //  percentile value is derived from the field Id. It has the format xxx-xxx-xxx-xxx[percentile]
   const [fieldId, meta] = currentMetric?.field?.split('[') ?? [];
@@ -233,7 +245,8 @@ const convertMovingAvgOrDerivativeToColumns = (
       subFunctionMetric,
       pipelineAgg,
       currentMetric.type,
-      metaValue
+      metaValue,
+      window
     );
     if (!formula) {
       return null;
@@ -253,7 +266,8 @@ const convertMovingAvgOrDerivativeToColumns = (
       dataView,
       subFunctionMetric,
       pipelineAgg,
-      metaValue
+      metaValue,
+      window
     );
   }
 };
@@ -261,7 +275,8 @@ const convertMovingAvgOrDerivativeToColumns = (
 export const convertParentPipelineAggToColumns = (
   series: Series,
   metrics: Metric[],
-  dataView: DataView
+  dataView: DataView,
+  window?: string
 ) => {
   const currentMetric = metrics[metrics.length - 1];
 
@@ -271,7 +286,8 @@ export const convertParentPipelineAggToColumns = (
       currentMetric,
       series,
       metrics,
-      dataView
+      dataView,
+      window
     );
   }
   return null;

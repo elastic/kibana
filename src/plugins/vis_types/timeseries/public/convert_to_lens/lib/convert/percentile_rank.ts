@@ -33,7 +33,8 @@ export const convertToPercentileRankColumn = (
   series: Series,
   metric: Metric,
   dataView: DataView,
-  index?: number
+  index?: number,
+  window?: string
 ): PercentileRanksColumn | null => {
   const params = convertToPercentileRankParams(value);
   if (!params) {
@@ -45,7 +46,7 @@ export const convertToPercentileRankColumn = (
     return null;
   }
 
-  const commonColumnParams = createColumn(series, metric, field);
+  const commonColumnParams = createColumn(series, metric, field, false, false, window);
   return {
     operationType: 'percentile_rank',
     sourceField: field.name,
@@ -64,7 +65,8 @@ export const convertToPercentileRankColumn = (
 export const convertToPercentileRankColumns = (
   series: Series,
   metric: Metric,
-  dataView: DataView
+  dataView: DataView,
+  window?: string
 ): Array<PercentileRanksColumn | null> | null => {
   const { values } = metric;
 
@@ -73,6 +75,6 @@ export const convertToPercentileRankColumns = (
   }
 
   return values.map((p, index) =>
-    convertToPercentileRankColumn(p, series, metric, dataView, index)
+    convertToPercentileRankColumn(p, series, metric, dataView, index, window)
   );
 };
