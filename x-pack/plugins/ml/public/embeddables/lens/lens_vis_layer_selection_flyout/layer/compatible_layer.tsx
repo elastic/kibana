@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import React, { FC, useState, useCallback } from 'react';
+import React, { FC, useState, useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
 import type { Embeddable } from '@kbn/lens-plugin/public';
@@ -33,8 +33,8 @@ import {
 } from '@elastic/eui';
 
 import {
-  convertLensToADJob,
-  createAndSaveJob,
+  redirectToADJobWizards,
+  QuickJobCreator,
 } from '../../../../application/jobs/new_job/job_from_lens';
 import type { LayerResult } from '../../../../application/jobs/new_job/job_from_lens';
 import { JOB_TYPE, DEFAULT_BUCKET_SPAN } from '../../../../../common/constants/new_job';
@@ -83,9 +83,13 @@ export const CompatibleLayer: FC<Props> = ({
   const [bucketSpanValidationError, setBucketSpanValidationError] = useState<string>('');
   const [state, setState] = useState<STATE>(STATE.DEFAULT);
   const [createError, setCreateError] = useState<{ text: string; errorText: string } | null>(null);
+  const quickJobCreator = useMemo(
+    () => new QuickJobCreator(data.dataViews, kibanaConfig, data.query.timefilter.timefilter),
+    [data, kibanaConfig]
+  );
 
   function createADJobInWizard() {
-    convertLensToADJob(embeddable, share, layerIndex);
+    redirectToADJobWizards(embeddable, layerIndex, share);
   }
 
   async function createADJob() {
@@ -95,17 +99,14 @@ export const CompatibleLayer: FC<Props> = ({
 
     setState(STATE.SAVING);
     setCreateError(null);
-    const result = await createAndSaveJob(
+    const result = await quickJobCreator.createAndSaveJob(
       jobId,
       bucketSpan,
       embeddable,
       startJob,
       runInRealTime,
-      data.dataViews,
-      kibanaConfig,
-      data.query.timefilter.timefilter,
-      mlApiServices,
-      layerIndex
+      layerIndex,
+      mlApiServices
     );
     const error = checkForCreationErrors(result);
     if (error === null) {
@@ -435,7 +436,9 @@ export const CompatibleLayer: FC<Props> = ({
   );
 };
 
-const checkForCreationErrors = (result: Awaited<ReturnType<typeof createAndSaveJob>>) => {
+const checkForCreationErrors = (
+  result: Awaited<ReturnType<QuickJobCreator['createAndSaveJob']>>
+) => {
   if (result.jobCreated.error) {
     return {
       text: i18n.translate('xpack.ml.embeddables.lensLayerFlyout.jobCreateError.jobCreated', {

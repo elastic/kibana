@@ -26,14 +26,14 @@ import { mlApiServicesProvider } from '../../application/services/ml_api_service
 import { getMlGlobalServices } from '../../application/app';
 import { LensLayerSelectionFlyout } from './lens_vis_layer_selection_flyout';
 
-import { getResultLayersFromEmbeddable } from '../../application/jobs/new_job/job_from_lens';
+import { VisExtractor } from '../../application/jobs/new_job/job_from_lens';
 
 export async function showLensVisToADJobFlyout(
   embeddable: Embeddable,
   coreStart: CoreStart,
-  share: SharePluginStart,
-  data: DataPublicPluginStart,
-  lens: LensPublicStart
+  shareStart: SharePluginStart,
+  dataStart: DataPublicPluginStart,
+  lensStart: LensPublicStart
 ): Promise<void> {
   const {
     http,
@@ -44,7 +44,8 @@ export async function showLensVisToADJobFlyout(
 
   return new Promise(async (resolve, reject) => {
     try {
-      const layerResults = await getResultLayersFromEmbeddable(embeddable, data.dataViews, lens);
+      const visExtractor = new VisExtractor(dataStart.dataViews);
+      const layerResults = await visExtractor.getResultLayersFromEmbeddable(embeddable, lensStart);
 
       const onFlyoutClose = () => {
         flyoutSession.close();
@@ -66,8 +67,8 @@ export async function showLensVisToADJobFlyout(
                   resolve();
                 }}
                 layerResults={layerResults}
-                share={share}
-                data={data}
+                share={shareStart}
+                data={dataStart}
                 application={coreStart.application}
                 kibanaConfig={coreStart.uiSettings}
                 mlApiServices={ml}

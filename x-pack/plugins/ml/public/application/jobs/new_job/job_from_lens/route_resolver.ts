@@ -9,7 +9,7 @@ import rison from 'rison-node';
 import type { Query } from '@kbn/es-query';
 import { Filter } from '@kbn/es-query';
 import type { LensSavedObjectAttributes } from '@kbn/lens-plugin/public';
-import { createAndStashADJob } from './create_job';
+import { QuickJobCreator } from './quick_create_job';
 import {
   getUiSettings,
   getDataViews,
@@ -68,19 +68,15 @@ export async function resolver(
     layerIndex = undefined;
   }
 
-  const dataViewClient = getDataViews();
-  const kibanaConfig = getUiSettings();
-  const timeFilter = getTimefilter();
+  const jobCreator = new QuickJobCreator(getDataViews(), getUiSettings(), getTimefilter());
 
-  await createAndStashADJob(
+  await jobCreator.createAndStashADJob(
     vis,
     from,
     to,
     query,
     filters,
-    dataViewClient,
-    kibanaConfig,
-    timeFilter,
+
     layerIndex
   );
 }

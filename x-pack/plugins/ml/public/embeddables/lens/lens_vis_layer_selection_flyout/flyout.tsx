@@ -70,7 +70,7 @@ export const LensLayerSelectionFlyout: FC<Props> = ({
           />
         </EuiText>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody css={{ backgroundColor: euiTheme.colors.lightestShade }}>
+      <EuiFlyoutBody css={{ backgroundColors: euiTheme.colors.lightestShade }}>
         {layerResults.map((layer, i) => (
           <Layer
             layer={layer}

@@ -18,9 +18,11 @@ import type {
   XYLayerConfig,
   DataType,
 } from '@kbn/lens-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { layerTypes } from '@kbn/lens-plugin/public';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 
+import { ML_PAGES, ML_APP_LOCATOR } from '../../../../../common/constants/locator';
 import { ML_JOB_AGGREGATION } from '../../../../../common/constants/aggregation_types';
 
 export const COMPATIBLE_SERIES_TYPES: SeriesType[] = [
@@ -43,6 +45,29 @@ export const COMPATIBLE_SPLIT_FIELD_TYPES: DataType[] = [
   KBN_FIELD_TYPES.STRING,
   KBN_FIELD_TYPES.IP,
 ];
+
+export async function redirectToADJobWizards(
+  embeddable: Embeddable,
+  layerIndex: number,
+  share: SharePluginStart
+) {
+  const { query, filters, to, from, vis } = getJobsItemsFromEmbeddable(embeddable);
+  const locator = share.url.locators.get(ML_APP_LOCATOR);
+
+  const url = await locator?.getUrl({
+    page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_FROM_LENS,
+    pageState: {
+      vis: vis as any,
+      from,
+      to,
+      query,
+      filters,
+      layerIndex,
+    },
+  });
+
+  window.open(url, '_blank');
+}
 
 export function getJobsItemsFromEmbeddable(embeddable: Embeddable) {
   const { query, filters, timeRange } = embeddable.getInput();
@@ -182,4 +207,19 @@ export function isCompatibleSplitFieldType(column: GenericIndexPatternColumn) {
 
 export function hasIncompatibleProperties(column: GenericIndexPatternColumn) {
   return 'timeShift' in column || 'filter' in column;
+}
+
+export function createDetectors(
+  fields: FieldBasedIndexPatternColumn[],
+  splitField: FieldBasedIndexPatternColumn | null
+) {
+  return fields.map(({ operationType, sourceField }) => {
+    const func = getMlFunction(operationType);
+    return {
+      function: func,
+      // don't use the source field if the detector is count
+      ...(func === 'count' ? {} : { field_name: sourceField }),
+      ...(splitField ? { partition_field_name: splitField.sourceField } : {}),
+    };
+  });
 }
