@@ -36,7 +36,11 @@ describe('Custom links', () => {
   });
 
   it('clears filter values when field is selected', () => {
+    cy.intercept('GET', '/internal/apm/settings/custom_links?*').as(
+      'customLinks'
+    );
     cy.visitKibana(basePath);
+    cy.wait('@customLinks');
     cy.contains('Create custom link').click();
     cy.get('[data-test-subj="filter-0"]').select('service.name');
     cy.get(
