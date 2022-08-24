@@ -121,12 +121,14 @@ const useApmTracking = (timelineId: string) => {
   const { apm } = useKibana<TimelinesStartPlugins>().services;
 
   const startTracking = useCallback(() => {
-    // Create an auto-instrumented transaction to keep track of all events, it will end automatically when all spans end.
-    const transaction = apm?.startTransaction(`Timeline load ${timelineId}`, 'http-request', {
-      managed: true,
+    // Create the transaction, the managed flag is turned off to prevent it from being polluted by non-related automatic spans.
+    // The managed flag can be turned on to investigate high latency requests in APM.
+    // However, note that by enabling the managed flag, the transaction trace may be distorted by other requests information.
+    const transaction = apm?.startTransaction(`Timeline search ${timelineId}`, 'http-request', {
+      managed: false,
     });
-    // Create a blocking span to prevent the transaction to end automatically with an uncompleted batch response.
-    // The blocking span needs to be ended manually whenever the entire batched search finishes.
+    // Create a blocking span to control the transaction time and prevent it from closing automatically with partial batch responses.
+    // The blocking span needs to be ended manually when the batched request finishes.
     const span = transaction?.startSpan('batched search', 'http-request', { blocking: true });
     return {
       endTrackingSuccess: () => {

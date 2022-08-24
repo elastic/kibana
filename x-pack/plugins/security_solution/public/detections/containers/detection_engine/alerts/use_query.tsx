@@ -9,11 +9,10 @@ import { isEmpty } from 'lodash';
 import { useMemo, useEffect, useState } from 'react';
 import type { SetStateAction } from 'react';
 import type React from 'react';
-import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
-
 import type { fetchQueryRuleRegistryAlerts } from './api';
 import { fetchQueryAlerts } from './api';
 import type { AlertSearchResponse, QueryAlerts } from './types';
+import { useTrackHttpRequest } from '../../../../common/lib/apm/use_track_http_request';
 
 type Func = () => Promise<void>;
 
@@ -40,24 +39,25 @@ interface AlertsQueryParams {
  * http-request monitoring using APM transactions.
  */
 const useMonitoredFetchMethod = (fetchMethod: FetchMethod, monitoringKey?: string): FetchMethod => {
-  const { startTransaction } = useStartTransaction();
+  const { startTracking } = useTrackHttpRequest();
 
   const monitoredFetchMethod = useMemo<FetchMethod>(() => {
     if (!monitoringKey) return fetchMethod;
 
     return async <Hit, Aggs>(params: QueryAlerts) => {
-      const transaction = startTransaction({ name: monitoringKey, type: 'http-request' });
+      const { endTrackingSuccess, endTrackingError } = startTracking({ name: monitoringKey });
+
       let result: AlertSearchResponse<Hit, Aggs>;
       try {
         result = await fetchMethod<Hit, Aggs>(params);
-        transaction?.addLabels({ result: 'success' });
+        endTrackingSuccess();
       } catch (err) {
-        transaction?.addLabels({ result: params.signal.aborted ? 'aborted' : 'error' });
+        endTrackingError(params.signal.aborted);
         throw err;
       }
       return result;
     };
-  }, [fetchMethod, monitoringKey, startTransaction]);
+  }, [fetchMethod, monitoringKey, startTracking]);
 
   return monitoredFetchMethod;
 };

@@ -6,13 +6,15 @@
  */
 
 import { useCallback } from 'react';
+import type { TransactionOptions } from '@elastic/apm-rum';
 import { useKibana } from '../kibana';
 
-const transactionOptions = { managed: true };
+const DEFAULT_TRANSACTION_OPTIONS: TransactionOptions = { managed: true };
 
 interface StartTransactionOptions {
   name: string;
   type?: string;
+  options?: TransactionOptions;
 }
 
 export const useStartTransaction = () => {
@@ -21,8 +23,8 @@ export const useStartTransaction = () => {
   } = useKibana();
 
   const startTransaction = useCallback(
-    ({ name, type = 'user-interaction' }: StartTransactionOptions) => {
-      return apm.startTransaction(name, type, transactionOptions);
+    ({ name, type = 'user-interaction', options }: StartTransactionOptions) => {
+      return apm.startTransaction(name, type, options ?? DEFAULT_TRANSACTION_OPTIONS);
     },
     [apm]
   );

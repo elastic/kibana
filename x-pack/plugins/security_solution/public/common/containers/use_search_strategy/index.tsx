@@ -22,7 +22,7 @@ import { getInspectResponse } from '../../../helpers';
 import type { inputsModel } from '../../store';
 import { useKibana } from '../../lib/kibana';
 import { useAppToasts } from '../../hooks/use_app_toasts';
-import { useStartTransaction } from '../../lib/apm/use_start_transaction';
+import { useTrackHttpRequest } from '../../lib/apm/use_track_http_request';
 import { APP_UI_ID } from '../../../../common/constants';
 
 interface UseSearchFunctionParams<QueryType extends FactoryQueryTypes> {
@@ -47,19 +47,13 @@ const useSearch = <QueryType extends FactoryQueryTypes>(
   factoryQueryType: QueryType
 ): UseSearchFunction<QueryType> => {
   const { data } = useKibana().services;
-  const { startTransaction } = useStartTransaction();
+  const { startTracking } = useTrackHttpRequest();
 
   const search = useCallback<UseSearchFunction<QueryType>>(
     ({ signal, request }) => {
-      // Create an auto-instrumented transaction to keep track of all events, it will end automatically when all spans end.
-      const transaction = startTransaction({
+      const { endTrackingSuccess, endTrackingError } = startTracking({
         name: `${APP_UI_ID} searchStrategy ${factoryQueryType}`,
-        type: 'http-request',
-      });
-      // Create a blocking span to prevent the transaction to end automatically with an uncompleted batch response.
-      // The blocking span needs to be ended manually whenever the entire batched search finishes.
-      const requestSpan = transaction?.startSpan('batched search', 'http-request', {
-        blocking: true,
+        spanName: 'batched search',
       });
 
       const observable = data.search
@@ -74,18 +68,16 @@ const useSearch = <QueryType extends FactoryQueryTypes>(
 
       observable.subscribe({
         next: () => {
-          transaction?.addLabels({ result: 'success' });
-          requestSpan?.end();
+          endTrackingSuccess();
         },
         error: () => {
-          transaction?.addLabels({ result: signal.aborted ? 'aborted' : 'error' });
-          requestSpan?.end();
+          endTrackingError(signal.aborted);
         },
       });
 
       return observable;
     },
-    [data.search, factoryQueryType, startTransaction]
+    [data.search, factoryQueryType, startTracking]
   );
 
   return search;
