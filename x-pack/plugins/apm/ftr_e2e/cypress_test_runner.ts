@@ -7,17 +7,14 @@
 
 /* eslint-disable no-console */
 
-import { argv } from 'yargs';
 import Url from 'url';
 import cypress from 'cypress';
+import path from 'path';
+import { esArchiverLoad, esArchiverUnload } from './cypress/tasks/es_archiver';
 import { FtrProviderContext } from './ftr_provider_context';
 import { createApmUsers } from '../scripts/create_apm_users/create_apm_users';
-import { esArchiverLoad, esArchiverUnload } from './cypress/tasks/es_archiver';
 
-export async function cypressStart(
-  getService: FtrProviderContext['getService'],
-  cypressExecution: typeof cypress.run | typeof cypress.open
-) {
+export async function cypressTestRunner({ getService }: FtrProviderContext) {
   const config = getService('config');
 
   const kibanaUrl = Url.format({
@@ -26,39 +23,43 @@ export async function cypressStart(
     port: config.get('servers.kibana.port'),
   });
 
+  const username = config.get('servers.elasticsearch.username');
+  const password = config.get('servers.elasticsearch.password');
+
   // Creates APM users
   await createApmUsers({
-    elasticsearch: {
-      username: config.get('servers.elasticsearch.username'),
-      password: config.get('servers.elasticsearch.password'),
-    },
-    kibana: {
-      hostname: kibanaUrl,
-    },
+    elasticsearch: { username, password },
+    kibana: { hostname: kibanaUrl },
   });
 
   const esNode = Url.format({
     protocol: config.get('servers.elasticsearch.protocol'),
     port: config.get('servers.elasticsearch.port'),
     hostname: config.get('servers.elasticsearch.hostname'),
-    auth: `${config.get('servers.elasticsearch.username')}:${config.get(
-      'servers.elasticsearch.password'
-    )}`,
+    auth: `${username}:${password}`,
   });
 
   const esRequestTimeout = config.get('timeouts.esRequestTimeout');
-  const archiveName = 'apm_mappings_only_8.0.0';
-  const metricsArchiveName = 'metrics_8.0.0';
+  const apmMappingsArchive = 'apm_mappings_only_8.0.0';
+  const apmMetricsArchive = 'metrics_8.0.0';
 
   console.log(`Creating APM mappings`);
-  await esArchiverLoad(archiveName);
+  await esArchiverLoad(apmMappingsArchive);
   console.log(`Creating Metrics mappings`);
-  await esArchiverLoad(metricsArchiveName);
+  await esArchiverLoad(apmMetricsArchive);
 
-  const spec = argv.grep as string | undefined;
+  const cypressProjectPath = path.join(__dirname);
+  const { open, ...cypressCliArgs } = getCypressCliArgs();
+  const cypressExecution = open ? cypress.open : cypress.run;
   const res = await cypressExecution({
-    ...(spec ? { spec } : {}),
-    config: { baseUrl: kibanaUrl },
+    ...cypressCliArgs,
+    project: cypressProjectPath,
+    config: {
+      baseUrl: kibanaUrl,
+      requestTimeout: 10000,
+      responseTimeout: 60000,
+      defaultCommandTimeout: 15000,
+    },
     env: {
       KIBANA_URL: kibanaUrl,
       ES_NODE: esNode,
@@ -68,9 +69,21 @@ export async function cypressStart(
   });
 
   console.log('Removing APM mappings');
-  await esArchiverUnload(archiveName);
+  await esArchiverUnload(apmMappingsArchive);
   console.log('Removing Metrics mappings');
-  await esArchiverUnload(metricsArchiveName);
+  await esArchiverUnload(apmMetricsArchive);
 
   return res;
+}
+
+function getCypressCliArgs() {
+  if (!process.env.CYPRESS_CLI_ARGS) {
+    return {};
+  }
+
+  const { $0, _, ...cypressCliArgs } = JSON.parse(
+    process.env.CYPRESS_CLI_ARGS
+  ) as Record<string, unknown>;
+
+  return cypressCliArgs;
 }
