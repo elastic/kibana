@@ -24,7 +24,8 @@ export default function (providerContext: FtrProviderContext) {
   // because `this` has to point to the Mocha context
   // see https://mochajs.org/#arrow-functions
 
-  describe('Package Policy - create', async function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/139336
+  describe.skip('Package Policy - create', async function () {
     skipIfNoDockerRegistry(providerContext);
     let agentPolicyId: string;
     before(async () => {
