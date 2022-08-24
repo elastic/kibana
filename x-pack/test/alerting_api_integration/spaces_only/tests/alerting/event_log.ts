@@ -431,11 +431,11 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                   event?.kibana?.alert?.rule?.execution?.metrics?.rule_type_run_duration_ms
                 ).to.be.greaterThan(0);
                 expect(
-                  event?.kibana?.alert?.rule?.execution?.metrics?.process_alerts_duration_ms
-                ).to.be.greaterThan(0);
+                  event?.kibana?.alert?.rule?.execution?.metrics?.process_alerts_duration_ms! >= 0
+                ).to.be(true);
                 expect(
-                  event?.kibana?.alert?.rule?.execution?.metrics?.trigger_actions_duration_ms
-                ).to.be.greaterThan(0);
+                  event?.kibana?.alert?.rule?.execution?.metrics?.trigger_actions_duration_ms! >= 0
+                ).to.be(true);
                 expect(
                   event?.kibana?.alert?.rule?.execution?.metrics?.process_rule_duration_ms
                 ).to.be.greaterThan(0);
