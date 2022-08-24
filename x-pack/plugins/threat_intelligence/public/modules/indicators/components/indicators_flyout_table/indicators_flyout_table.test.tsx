@@ -13,6 +13,7 @@ import {
   Indicator,
   RawIndicatorFieldId,
 } from '../../../../../common/types/indicator';
+import { generateFieldTypeMap } from '../../../../common/mocks/mock_field_type_map';
 import {
   EMPTY_PROMPT_TEST_ID,
   IndicatorsFlyoutTable,
@@ -22,10 +23,7 @@ import { unwrapValue } from '../../lib/unwrap_value';
 import { displayValue } from '../../lib/display_value';
 
 const mockIndicator: Indicator = generateMockIndicator();
-const mockFieldTypesMap: { [id: string]: string } = {
-  '@timestamp': 'date',
-  'threat.feed.name': 'string',
-};
+const mockFieldTypesMap = generateFieldTypeMap();
 
 describe('<IndicatorsFlyoutTable />', () => {
   it('should render fields and values in table', () => {
