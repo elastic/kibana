@@ -33,16 +33,6 @@ describe('<EditPolicy /> serialization', () => {
   });
 
   describe('top level form', () => {
-    afterAll(async () => {
-      await act(async () => {
-        testBed = await setupSerializationTestBed(httpSetup, {
-          appServicesContext: {
-            license: licensingMock.createLicense({ license: { type: 'enterprise' } }),
-          },
-        });
-      });
-    });
-
     /**
      * We assume that policies that populate this form are loaded directly from ES and so
      * are valid according to ES. There may be settings in the policy created through the ILM
