@@ -17,7 +17,13 @@ import {
   EuiFlexGrid,
 } from '@elastic/eui';
 import { useChartTheme } from '@kbn/observability-plugin/public';
-import { Chart, Partition, Settings, Datum } from '@elastic/charts';
+import {
+  Chart,
+  Partition,
+  Settings,
+  Datum,
+  PartitionLayout,
+} from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
@@ -141,7 +147,14 @@ export function StorageDetailsPerService({
     return null;
   }
 
-  const serviceDocs = sumBy(data.processorEventStats, 'docs');
+  const processorEventStats = data.processorEventStats.map(
+    ({ processorEvent, docs, size }) => ({
+      processorEventLabel: ProcessorEventLabelMap[processorEvent],
+      docs,
+      size,
+    })
+  );
+  const serviceDocs = sumBy(processorEventStats, 'docs');
 
   return (
     <>
@@ -178,17 +191,32 @@ export function StorageDetailsPerService({
             <EuiFlexItem>
               <EuiPanel hasShadow={false}>
                 <Chart>
-                  <Settings theme={chartTheme} showLegend />
+                  <Settings
+                    theme={[
+                      {
+                        partition: {
+                          fillLabel: {
+                            textColor: euiTheme.colors.emptyShade,
+                          },
+                          emptySizeRatio: 0.3,
+                        },
+                      },
+                      ...chartTheme,
+                    ]}
+                    showLegend
+                  />
                   <Partition
+                    layout={PartitionLayout.sunburst}
                     id="storageExplorerSizeByProcessorType"
-                    data={data.processorEventStats}
+                    data={processorEventStats}
                     valueAccessor={(d) => d.size ?? 0}
+                    valueGetter="percent"
                     valueFormatter={(d: number) =>
                       asDynamicBytes(d) || NOT_AVAILABLE_LABEL
                     }
                     layers={[
                       {
-                        groupByRollup: (d: Datum) => d.processorEvent,
+                        groupByRollup: (d: Datum) => d.processorEventLabel,
                         shape: {
                           fillColor: (d) => groupedPalette[d.sortIndex],
                         },
@@ -200,7 +228,7 @@ export function StorageDetailsPerService({
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiPanel hasShadow={false} paddingSize="xl">
-                {data.processorEventStats.map(({ processorEvent, docs }) => (
+                {processorEventStats.map(({ processorEventLabel, docs }) => (
                   <>
                     <EuiFlexGrid
                       columns={2}
@@ -208,9 +236,7 @@ export function StorageDetailsPerService({
                         font-weight: bold;
                       `}
                     >
-                      <EuiFlexItem>
-                        {ProcessorEventLabelMap[processorEvent]}
-                      </EuiFlexItem>
+                      <EuiFlexItem>{processorEventLabel}</EuiFlexItem>
                       <EuiFlexItem>
                         {i18n.translate(
                           'xpack.apm.settings.storageExplorer.serviceDetails.ratio',
