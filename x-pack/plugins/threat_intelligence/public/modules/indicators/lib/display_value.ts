@@ -61,9 +61,9 @@ const rules: Record<string, IndicatorValueExtractor> = {};
  */
 const indicatorTypeToField: { [id: string]: RawIndicatorFieldId } = {
   file: RawIndicatorFieldId.FileSha256,
-  'ipv4-addr': RawIndicatorFieldId.UrlFull,
-  'ipv6-addr': RawIndicatorFieldId.UrlFull,
-  ip: RawIndicatorFieldId.Ip,
+  'ipv4-addr': RawIndicatorFieldId.Ip,
+  'ipv6-addr': RawIndicatorFieldId.Ip,
+  url: RawIndicatorFieldId.UrlFull,
 };
 
 /**
