@@ -16,39 +16,44 @@ import { IndicatorsBarChart } from './indicators_barchart';
 moment.suppressDeprecationWarnings = true;
 moment.tz.setDefault('UTC');
 
-const mockIndicators: ChartSeries[] = [
-  {
-    x: '1 Jan 2022 00:00:00 GMT',
-    y: 0,
-    g: '[Filebeat] AbuseCH Malware',
-  },
-  {
-    x: '1 Jan 2022 00:00:00 GMT',
-    y: 10,
-    g: '[Filebeat] AbuseCH MalwareBazaar',
-  },
-  {
-    x: '1 Jan 2022 12:00:00 GMT',
-    y: 25,
-    g: '[Filebeat] AbuseCH Malware',
-  },
-  {
-    x: '1 Jan 2022 18:00:00 GMT',
-    y: 15,
-    g: '[Filebeat] AbuseCH MalwareBazaar',
-  },
-];
-const validDate: string = '1 Jan 2022 00:00:00 GMT';
-const mockDateRange: TimeRangeBounds = {
-  min: moment(validDate),
-  max: moment(validDate).add(1, 'days'),
-};
-
 describe('<IndicatorsBarChart />', () => {
   it('should render barchart', () => {
+    const mockIndicators: ChartSeries[] = [
+      {
+        x: '1 Jan 2022 00:00:00 GMT',
+        y: 0,
+        g: '[Filebeat] AbuseCH Malware',
+      },
+      {
+        x: '1 Jan 2022 00:00:00 GMT',
+        y: 10,
+        g: '[Filebeat] AbuseCH MalwareBazaar',
+      },
+      {
+        x: '1 Jan 2022 12:00:00 GMT',
+        y: 25,
+        g: '[Filebeat] AbuseCH Malware',
+      },
+      {
+        x: '1 Jan 2022 18:00:00 GMT',
+        y: 15,
+        g: '[Filebeat] AbuseCH MalwareBazaar',
+      },
+    ];
+    const validDate: string = '1 Jan 2022 00:00:00 GMT';
+    const mockDateRange: TimeRangeBounds = {
+      min: moment(validDate),
+      max: moment(validDate).add(1, 'days'),
+    };
+    const mockField: string = 'threat.indicator.ip';
+
     const component = render(
       <TestProvidersComponent>
-        <IndicatorsBarChart indicators={mockIndicators} dateRange={mockDateRange} />
+        <IndicatorsBarChart
+          indicators={mockIndicators}
+          dateRange={mockDateRange}
+          field={mockField}
+        />
       </TestProvidersComponent>
     );
 

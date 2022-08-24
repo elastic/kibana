@@ -77,6 +77,7 @@ describe('ALL - Packs', () => {
       cy.contains('Attach next query');
       inputQuery('select * from uptime');
       findFormFieldByRowsLabelAndType('ID', SAVED_QUERY_ID);
+      cy.react('EuiFlyoutFooter').react('EuiButton').contains('Save').click();
       cy.contains('ID must be unique').should('exist');
       findFormFieldByRowsLabelAndType('ID', NEW_QUERY_NAME);
       cy.contains('ID must be unique').should('not.exist');
@@ -95,6 +96,7 @@ describe('ALL - Packs', () => {
       cy.contains('Attach next query');
       cy.contains('ID must be unique').should('not.exist');
       getSavedQueriesDropdown().type(`${SAVED_QUERY_ID}{downArrow}{enter}`);
+      cy.react('EuiFlyoutFooter').react('EuiButton').contains('Save').click();
       cy.contains('ID must be unique').should('exist');
       cy.react('EuiFlyoutFooter').react('EuiButtonEmpty').contains('Cancel').click();
     });
