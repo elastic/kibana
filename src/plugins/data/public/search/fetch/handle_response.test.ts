@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { handleResponse, WarningHandlerCallback } from './handle_response';
+import { handleWarning, WarningHandlerCallback } from './handle_response';
 
 // Temporary disable eslint, will be removed after moving to new platform folder
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
@@ -43,7 +43,7 @@ describe('handleResponse', () => {
         timed_out: true,
       },
     };
-    const result = handleResponse(request, response, options, callback, theme);
+    const result = handleWarning(request, response, options, callback, theme);
     expect(result).toBe(response);
     expect(notifications.toasts.addWarning).toBeCalled();
     expect((notifications.toasts.addWarning as jest.Mock).mock.calls[0][0].title).toMatch(
@@ -63,7 +63,7 @@ describe('handleResponse', () => {
         },
       },
     };
-    const result = handleResponse(request, response, options, callback, theme);
+    const result = handleWarning(request, response, options, callback, theme);
     expect(result).toBe(response);
     expect(notifications.toasts.addWarning).toBeCalled();
     expect((notifications.toasts.addWarning as jest.Mock).mock.calls[0][0].title).toMatch(
@@ -85,7 +85,7 @@ describe('handleResponse', () => {
         },
       },
     };
-    const result = handleResponse(request, response, options, callback, theme);
+    const result = handleWarning(request, response, options, callback, theme);
     expect(result).toBe(response);
     expect(notifications.toasts.addWarning).not.toBeCalled();
   });
@@ -95,7 +95,7 @@ describe('handleResponse', () => {
     const response = {
       rawResponse: {},
     };
-    const result = handleResponse(request, response, options, callback, theme);
+    const result = handleWarning(request, response, options, callback, theme);
     expect(result).toBe(response);
   });
 
@@ -115,7 +115,7 @@ describe('handleResponse', () => {
         },
       };
 
-      handleResponse(request, response, options, callback, theme);
+      handleWarning(request, response, options, callback, theme);
       expect(callback).toBeCalledWith({
         isShardFailure: true,
         message: '{shardsFailed} of {shardsTotal} shards failed',
@@ -140,7 +140,7 @@ describe('handleResponse', () => {
         },
       };
 
-      handleResponse(request, response, options, callback, theme);
+      handleWarning(request, response, options, callback, theme);
       expect(callback).toBeCalledWith({
         isShardFailure: true,
         message: '{shardsFailed} of {shardsTotal} shards failed',

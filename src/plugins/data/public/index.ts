@@ -161,7 +161,6 @@ export type {
   ISearchGeneric,
   ISearchSource,
   SearchRequest,
-  SearchResponseWarning,
   SearchSourceFields,
   SerializedSearchSourceFields,
   // errors
@@ -191,7 +190,6 @@ export type {
   SearchSessionInfoProvider,
   ISessionsClient,
   SearchUsageCollector,
-  WarningHandlerCallback,
 } from './search';
 
 export type { ISearchOptions } from '../common';

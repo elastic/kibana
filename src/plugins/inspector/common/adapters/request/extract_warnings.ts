@@ -8,12 +8,13 @@
 
 import { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
-import { SearchResponseWarning } from '../types';
+import { Request, SearchResponseWarning } from './types';
 
 /**
  * @internal
  */
 export function extractWarnings(
+  request: Request,
   rawResponse: estypes.SearchResponse | undefined
 ): SearchResponseWarning[] {
   if (!rawResponse) {
@@ -29,6 +30,7 @@ export function extractWarnings(
       message: i18n.translate('data.search.searchSource.fetch.requestTimedOutNotificationMessage', {
         defaultMessage: 'Data might be incomplete because your request timed out',
       }),
+      request,
     });
   }
 
@@ -51,10 +53,10 @@ export function extractWarnings(
 
     if (rawResponse._shards.failures) {
       rawResponse._shards.failures?.forEach((f) => {
-        warnings.push({ type: f.reason.type, isShardFailure, message, text });
+        warnings.push({ type: f.reason.type, isShardFailure, message, text, request });
       });
     } else {
-      warnings.push({ type: 'generic_shard_warning', isShardFailure, message, text });
+      warnings.push({ type: 'generic_shard_warning', isShardFailure, message, text, request });
     }
   }
 

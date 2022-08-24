@@ -7,15 +7,15 @@
  */
 
 import type { PackageInfo } from '@kbn/core/server';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { DataViewsContract } from '@kbn/data-views-plugin/common';
-import { estypes } from '@elastic/elasticsearch';
-import { SearchUsageCollector } from './collectors';
-import { AggsSetup, AggsSetupDependencies, AggsStartDependencies, AggsStart } from './aggs';
+import { WarningHandlerCallback } from '@kbn/inspector-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { IInspectorInfo, ISearchGeneric, ISearchStartSearchSource } from '../../common/search';
+import { AggsSetup, AggsSetupDependencies, AggsStart, AggsStartDependencies } from './aggs';
+import { SearchUsageCollector } from './collectors';
 import { ISessionsClient, ISessionService } from './session';
-import { WarningHandlerCallback } from './fetch';
 
+export { SEARCH_EVENT_TYPE } from './collectors';
 export type { ISearchStartSearchSource, SearchUsageCollector };
 
 /**
@@ -81,8 +81,6 @@ export interface ISearchStart {
   sessionsClient: ISessionsClient;
 }
 
-export { SEARCH_EVENT_TYPE } from './collectors';
-
 /** @internal */
 export interface SearchServiceSetupDependencies {
   packageInfo: PackageInfo;
@@ -94,31 +92,4 @@ export interface SearchServiceSetupDependencies {
 export interface SearchServiceStartDependencies {
   fieldFormats: AggsStartDependencies['fieldFormats'];
   indexPatterns: DataViewsContract;
-}
-
-/**
- * Format of warnings of failed shards or internal ES timeouts that surface from search responses
- * @public
- */
-export interface SearchResponseWarning {
-  /**
-   * type:  for handling the warning in logic
-   */
-  type: 'timed_out' | 'generic_shard_warning' | estypes.ShardFailure['reason']['reason'];
-  /**
-   * isTimeout: true for general internal ES timeout warning
-   */
-  isTimeout?: boolean;
-  /**
-   * isTimeout: true for shard-specific internal ES warning
-   */
-  isShardFailure?: boolean;
-  /**
-   * message: failure reason from ES
-   */
-  message: string;
-  /**
-   * text: human-friendly error message
-   */
-  text?: string;
 }

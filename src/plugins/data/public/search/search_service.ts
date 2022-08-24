@@ -17,6 +17,7 @@ import {
 import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { extractWarnings } from '@kbn/inspector-plugin/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
@@ -25,7 +26,6 @@ import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import moment from 'moment';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { IKibanaSearchResponse, SearchRequest } from '..';
 import {
   cidrFunction,
   dateRangeFunction,
@@ -51,7 +51,6 @@ import {
   rangeFunction,
   removeFilterFunction,
   SearchSourceDependencies,
-  SearchSourceSearchOptions,
   SearchSourceService,
   selectFilterFunction,
 } from '../../common/search';
@@ -67,7 +66,7 @@ import { AggsService } from './aggs';
 import { createUsageCollector, SearchUsageCollector } from './collectors';
 import { getEql, getEsaggs, getEsdsl, getEssql } from './expressions';
 import { getKibanaContext } from './expressions/kibana_context';
-import { handleResponse } from './fetch';
+import { handleWarning } from './fetch/handle_response';
 import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
 import { ISessionsClient, ISessionService, SessionsClient, SessionService } from './session';
 import { registerSearchSessionsMgmt } from './session/sessions_mgmt';
@@ -237,8 +236,14 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       aggs,
       getConfig: uiSettings.get.bind(uiSettings),
       search,
-      onResponse: (...args: [SearchRequest, IKibanaSearchResponse, SearchSourceSearchOptions]) =>
-        handleResponse(...args, undefined, theme),
+      onResponse: (request, response, options) => {
+        extractWarnings(request, response.rawResponse).forEach((warning) => {
+          if (warning.isTimeout || !options.disableShardFailureWarning) {
+            handleWarning(warning, request, response.rawResponse, theme);
+          }
+        });
+        return response;
+      },
     };
 
     const config = this.initializerContext.config.get();
@@ -270,14 +275,17 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         this.searchInterceptor.showError(e);
       },
       showWarnings: (inspector, cb) => {
-        inspector.adapter?.getRequests().forEach((req) => {
-          handleResponse(
-            { body: req.json },
-            (req.response?.json ?? {}) as IKibanaSearchResponse<unknown>,
-            { disableShardFailureWarning: false },
-            cb,
-            theme
-          );
+        inspector.adapter?.getWarnings().forEach((warning) => {
+          const handled = cb(warning);
+          if (handled !== true) {
+            handleWarning(
+              warning,
+              warning.request,
+              warning.request.response,
+              { disableShardFailureWarning: false },
+              theme
+            );
+          }
         });
       },
       session: this.sessionService,

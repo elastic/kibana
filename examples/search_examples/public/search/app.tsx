@@ -35,12 +35,12 @@ import {
   IKibanaSearchResponse,
   isCompleteResponse,
   isErrorResponse,
-  SearchResponseWarning,
 } from '@kbn/data-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { SearchResponseWarning } from '@kbn/inspector-plugin/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
@@ -111,11 +111,11 @@ export const SearchExamplesApp = ({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [currentAbortController, setAbortController] = useState<AbortController>();
   const [rawResponse, setRawResponse] = useState<Record<string, any>>({});
-  const [warnings, setWarnings] = useState<SearchResponseWarning[]>([]);
+  const [warning, setWarning] = useState<SearchResponseWarning | undefined>();
   const [selectedTab, setSelectedTab] = useState(0);
 
   function setResponse(response: IKibanaSearchResponse) {
-    setWarnings([]);
+    setWarning(undefined);
     setRawResponse(response.rawResponse);
     setLoaded(response.loaded!);
     setTotal(response.total!);
@@ -316,7 +316,6 @@ export const SearchExamplesApp = ({
         })
       );
       setRawResponse(result.rawResponse);
-      setWarnings([]);
 
       /* Here is an example of using showWarnings on the search service, using an optional callback to
        * intercept the warnings before notification warnings are shown.
@@ -324,10 +323,14 @@ export const SearchExamplesApp = ({
        * Suppressing the shard failure warning notification from appearing by default requires setting
        * { disableShardFailureWarning: true } in the SearchSourceSearchOptions passed to $fetch
        */
-      data.search.showWarnings(inspector, (responseWarnings) => {
-        setWarnings([responseWarnings]);
-        return false; // optional: set to `true` to prevent fetch from following the callback with default behavior
-      });
+      if (!warningsShown) {
+        data.search.showWarnings(inspector, (warning) => {
+          setWarning(warning);
+          return true; // prevent or allow search service from showing this warning on its own
+        });
+      } else {
+        setWarning(undefined);
+      }
 
       const message = <EuiText>Searched {result.rawResponse.hits.total} documents.</EuiText>;
       notifications.toasts.addSuccess(
@@ -506,7 +509,7 @@ export const SearchExamplesApp = ({
             data-test-subj="responseCodeBlock"
           >
             {' '}
-            {JSON.stringify(warnings, null, 2)}{' '}
+            {JSON.stringify(warning, null, 2)}{' '}
           </EuiCodeBlock>{' '}
         </>
       ),

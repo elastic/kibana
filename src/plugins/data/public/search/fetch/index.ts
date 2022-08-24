@@ -6,6 +6,4 @@
  * Side Public License, v 1.
  */
 
-export type { WarningHandlerCallback } from './handle_response';
-export { handleResponse } from './handle_response';
-export { extractWarnings } from './extract_warnings';
+export { handleWarning as handleResponse } from './handle_response';
