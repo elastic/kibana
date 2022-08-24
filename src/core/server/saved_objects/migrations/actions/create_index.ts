@@ -11,8 +11,8 @@ import * as TaskEither from 'fp-ts/lib/TaskEither';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import { AcknowledgeResponse } from '.';
-import { IndexMapping } from '../../mappings';
 import {
   catchRetryableEsClientErrors,
   RetryableEsClientError,
@@ -82,21 +82,24 @@ export const createIndex = ({
         // available. If the request doesn't complete within timeout,
         // acknowledged or shards_acknowledged would be false.
         timeout,
-        body: {
-          mappings,
-          aliases: aliasesObject,
-          settings: {
-            index: {
-              // ES rule of thumb: shards should be several GB to 10's of GB, so
-              // Kibana is unlikely to cross that limit.
-              number_of_shards: 1,
-              auto_expand_replicas: INDEX_AUTO_EXPAND_REPLICAS,
-              // Set an explicit refresh interval so that we don't inherit the
-              // value from incorrectly configured index templates (not required
-              // after we adopt system indices)
-              refresh_interval: '1s',
-              // Bump priority so that recovery happens before newer indices
-              priority: 10,
+        mappings,
+        aliases: aliasesObject,
+        settings: {
+          index: {
+            // ES rule of thumb: shards should be several GB to 10's of GB, so
+            // Kibana is unlikely to cross that limit.
+            number_of_shards: 1,
+            auto_expand_replicas: INDEX_AUTO_EXPAND_REPLICAS,
+            // Set an explicit refresh interval so that we don't inherit the
+            // value from incorrectly configured index templates (not required
+            // after we adopt system indices)
+            refresh_interval: '1s',
+            // Bump priority so that recovery happens before newer indices
+            priority: 10,
+            // Increase the fields limit beyond the default of 1000
+            // @ts-expect-error https://github.com/elastic/elasticsearch/issues/89381
+            mapping: {
+              total_fields: { limit: 1500 },
             },
           },
         },

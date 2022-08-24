@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation, useQueryClient } from 'react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 
 import { useKibana } from '../common/lib/kibana';
@@ -40,15 +40,15 @@ export const useUpdateSavedQuery = ({ savedQueryId }: UseUpdateSavedQueryProps) 
           toastMessage: error.body.message,
         });
       },
-      onSuccess: (payload: SavedQuerySO) => {
-        queryClient.invalidateQueries(SAVED_QUERIES_ID);
+      onSuccess: (payload: { data: SavedQuerySO }) => {
+        queryClient.invalidateQueries([SAVED_QUERIES_ID]);
         queryClient.invalidateQueries([SAVED_QUERY_ID, { savedQueryId }]);
         navigateToApp(PLUGIN_ID, { path: pagePathGetters.saved_queries() });
         toasts.addSuccess(
           i18n.translate('xpack.osquery.editSavedQuery.successToastMessageText', {
             defaultMessage: 'Successfully updated "{savedQueryName}" query',
             values: {
-              savedQueryName: payload.attributes?.id ?? '',
+              savedQueryName: payload.data.attributes?.id ?? '',
             },
           })
         );
