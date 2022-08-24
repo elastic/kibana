@@ -18,6 +18,10 @@ Verify your node version [here](https://github.com/elastic/kibana/blob/main/.nod
 
 **Run Kibana:**
 
+> **Important:**
+> 
+> See here to get your `kibana.yaml` to enable the Threat Intelligence plugin.
+
 ```
 yarn kbn reset && yarn kbn bootstrap
 yarn start --no-base-path

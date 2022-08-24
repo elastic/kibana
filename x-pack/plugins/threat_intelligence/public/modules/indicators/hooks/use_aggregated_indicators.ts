@@ -32,6 +32,7 @@ export interface UseAggregatedIndicatorsValue {
   indicators: ChartSeries[];
   onFieldChange: (field: string) => void;
   dateRange: TimeRangeBounds;
+  selectedField: string;
 }
 
 export interface Aggregation {
@@ -209,5 +210,6 @@ export const useAggregatedIndicators = ({
     dateRange,
     indicators,
     onFieldChange,
+    selectedField: field,
   };
 };

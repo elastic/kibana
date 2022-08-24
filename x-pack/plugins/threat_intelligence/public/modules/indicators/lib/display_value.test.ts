@@ -10,8 +10,9 @@ import {
   generateMockIndicator,
   generateMockUrlIndicator,
   Indicator,
+  RawIndicatorFieldId,
 } from '../../../../common/types/indicator';
-import { displayValue } from './display_value';
+import { displayField, displayValue } from './display_value';
 
 type ExpectedIndicatorValue = string | null;
 
@@ -39,4 +40,19 @@ describe('displayValue()', () => {
       });
     }
   );
+});
+
+describe('displayValueField()', () => {
+  it('should return correct RawIndicatorFieldId for valid field', () => {
+    const mockIndicator = generateMockIndicator();
+    const result = displayField(mockIndicator);
+    expect(result).toEqual(RawIndicatorFieldId.Ip);
+  });
+
+  it('should return null for invalid field', () => {
+    const mockIndicator = generateMockIndicator();
+    mockIndicator.fields['threat.indicator.type'] = ['abc'];
+    const result = displayField(mockIndicator);
+    expect(result).toBeUndefined();
+  });
 });

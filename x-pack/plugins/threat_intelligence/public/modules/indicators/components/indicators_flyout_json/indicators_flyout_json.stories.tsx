@@ -15,9 +15,9 @@ export default {
   title: 'IndicatorsFlyoutJson',
 };
 
-const mockIndicator: Indicator = generateMockIndicator();
-
 export const Default: Story<void> = () => {
+  const mockIndicator: Indicator = generateMockIndicator();
+
   return <IndicatorsFlyoutJson indicator={mockIndicator} />;
 };
 

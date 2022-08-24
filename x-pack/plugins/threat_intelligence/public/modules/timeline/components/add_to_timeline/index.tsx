@@ -5,11 +5,4 @@
  * 2.0.
  */
 
-export function mockUiSetting(key: string): string | undefined {
-  if (key === 'dateFormat') {
-    return 'MMM D, YYYY @ HH:mm:ss.SSS';
-  }
-  if (key === 'dateFormat:tz') {
-    return 'America/New_York';
-  }
-}
+export * from './add_to_timeline';
