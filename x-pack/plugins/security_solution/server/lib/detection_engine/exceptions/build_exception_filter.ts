@@ -17,6 +17,7 @@ import type {
   EntryList,
   EntryMatchWildcard,
   Entry,
+  Type,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
   entriesExists,
@@ -197,6 +198,9 @@ export const createOrClauses = async (
   return { orClauses: clauses.flat(), unprocessableExceptionItems };
 };
 
+const isListTypeProcessable = (type: Type): boolean =>
+  type === 'keyword' || type === 'text' || type === 'ip' || type === 'ip_range';
+
 export const filterOutLargeValueLists = async (
   exceptionItems: ExceptionListItemSchema[],
   listClient: ListClient
@@ -209,8 +213,12 @@ export const filterOutLargeValueLists = async (
       );
       return listEntries.every(async (listEntry) => {
         const {
-          list: { id },
+          list: { id, type },
         } = listEntry;
+
+        if (!isListTypeProcessable(type)) {
+          return false;
+        }
 
         // Don't want any items, just the total list size
         const valueList = await listClient.findListItem({
