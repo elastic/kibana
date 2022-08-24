@@ -147,17 +147,17 @@ export class SearchSessionsService extends FtrService {
           perPage: 10000,
           sortField: 'created',
           sortOrder: 'asc',
-          search: 'true',
-          searchFields: ['persisted'],
         })
         .expect(200);
 
       const { saved_objects: savedObjects } = body as SavedObjectsFindResponse;
-      this.log.debug(
-        `Found created search sessions: ${savedObjects.map(({ id }) => id)}, ${JSON.stringify(
-          body
-        )}`
-      );
+
+      if (savedObjects.length > 0) {
+        this.log.debug(`Found created search sessions: ${savedObjects.map(({ id }) => id)}`);
+      } else {
+        this.log.debug(`Found no search sessions to delete`);
+        return;
+      }
 
       await Promise.all(
         savedObjects.map(async (so) => {
