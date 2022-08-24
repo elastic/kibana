@@ -23,18 +23,11 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EsQueryAlertParams, SearchType } from '../types';
 import { EsQueryExpression } from './es_query_expression';
 
-jest.mock('@kbn/kibana-react-plugin/public');
-jest.mock('@kbn/es-ui-shared-plugin/public', () => ({
-  XJson: {
-    useXJsonMode: jest.fn().mockReturnValue({
-      convertToJson: jest.fn(),
-      setXJson: jest.fn(),
-      xJson: jest.fn(),
-    }),
-  },
-  // Mocking EuiCodeEditor, which uses React Ace under the hood
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  useKibana: jest.fn(),
+  // Mocking CodeEditor
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  EuiCodeEditor: (props: any) => (
+  CodeEditor: (props: any) => (
     <input
       data-test-subj="mockCodeEditor"
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -43,6 +36,15 @@ jest.mock('@kbn/es-ui-shared-plugin/public', () => ({
       }}
     />
   ),
+}));
+jest.mock('@kbn/es-ui-shared-plugin/public', () => ({
+  XJson: {
+    useXJsonMode: jest.fn().mockReturnValue({
+      convertToJson: jest.fn(),
+      setXJson: jest.fn(),
+      xJson: jest.fn(),
+    }),
+  },
 }));
 jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
   const original = jest.requireActual('@kbn/triggers-actions-ui-plugin/public');
