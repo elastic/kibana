@@ -76,7 +76,6 @@ export default function (providerContext: FtrProviderContext) {
       await uninstallPackages([
         { name: pkgName, version: pkgVersion },
         { name: experimentalPkgName, version: pkgVersion },
-        // TODO: ask Nicolas Chaulet why this wasn't being removed
         { name: experimental2PkgName, version: pkgVersion },
       ]);
     });
