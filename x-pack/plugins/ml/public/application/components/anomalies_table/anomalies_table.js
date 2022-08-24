@@ -185,7 +185,7 @@ export class AnomaliesTableInternal extends Component {
         </EuiFlexGroup>
       );
     }
-    
+
     const columns = getColumns(
       tableData.anomalies,
       tableData.jobIds,
