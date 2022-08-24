@@ -200,4 +200,9 @@ describe('UserProfilesSelectable', () => {
     wrapper.find('input[type="search"]').simulate('change', { target: { value: 'search' } });
     expect(onSearchChange).toHaveBeenCalledWith('search', []);
   });
+
+  it('should set `id` prop of search input correctly', () => {
+    const wrapper = mount(<UserProfilesSelectable searchInputId="testSearchField" />);
+    expect(wrapper.find('input[type="search"]').prop('id')).toBe('testSearchField');
+  });
 });
