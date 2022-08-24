@@ -396,6 +396,10 @@ export {
 export { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
 export type { SavedObjectsRepository } from '@kbn/core-saved-objects-api-server-internal';
 export { SavedObjectsClient } from '@kbn/core-saved-objects-api-server-internal';
+export type {
+  SavedObjectsExportError,
+  SavedObjectsImportError,
+} from '@kbn/core-saved-objects-import-export-server-internal';
 
 export type {
   IUiSettingsClient,
