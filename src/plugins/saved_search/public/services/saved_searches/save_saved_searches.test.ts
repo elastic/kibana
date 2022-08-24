@@ -151,6 +151,7 @@ describe('saveSavedSearch', () => {
         kibanaSavedObjectMeta: { searchSourceJSON: '{}' },
         sort: [],
         title: 'title',
+        timeRestore: false,
       },
       { references: ['tag-1', 'tag-2'] }
     );
