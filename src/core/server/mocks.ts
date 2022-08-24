@@ -34,7 +34,7 @@ import type {
   CorePreboot,
   RequestHandlerContext,
 } from '.';
-import { httpResourcesMock } from './http_resources/http_resources_service.mock';\
+import { httpResourcesMock } from './http_resources/http_resources_service.mock';
 import { renderingMock } from './rendering/rendering_service.mock';
 import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 import { SharedGlobalConfig } from './plugins';
