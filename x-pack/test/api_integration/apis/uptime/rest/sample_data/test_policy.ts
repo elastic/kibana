@@ -9,14 +9,18 @@ import { omit, sortBy } from 'lodash';
 import expect from '@kbn/expect';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
 
-export const getTestSyntheticsPolicy = (name: string): PackagePolicy => ({
-  id: '5863efe0-0368-11ed-8df7-a7424c6f5167-5347cd10-0368-11ed-8df7-a7424c6f5167',
-  version: 'WzMyNTcsMV0=',
-  name: '5863efe0-0368-11ed-8df7-a7424c6f5167-5347cd10-0368-11ed-8df7-a7424c6f5167',
+export const getTestSyntheticsPolicy = (
+  name: string,
+  id: string,
+  locationName?: string
+): PackagePolicy => ({
+  id: '2bfd7da0-22ed-11ed-8c6b-09a2d21dfbc3-27337270-22ed-11ed-8c6b-09a2d21dfbc3-default',
+  version: 'WzE2MjYsMV0=',
+  name: 'test-monitor-name-Test private location 0-default',
   namespace: 'default',
-  package: { name: 'synthetics', title: 'Elastic Synthetics', version: '0.9.4' },
+  package: { name: 'synthetics', title: 'Elastic Synthetics', version: '0.10.2' },
   enabled: true,
-  policy_id: '5347cd10-0368-11ed-8df7-a7424c6f5167',
+  policy_id: '27337270-22ed-11ed-8c6b-09a2d21dfbc3',
   output_id: '',
   inputs: [
     {
@@ -48,7 +52,10 @@ export const getTestSyntheticsPolicy = (name: string): PackagePolicy => ({
             'response.include_headers': { value: true, type: 'bool' },
             'response.include_body': { value: 'never', type: 'text' },
             'check.request.method': { value: '', type: 'text' },
-            'check.request.headers': { value: null, type: 'yaml' },
+            'check.request.headers': {
+              value: '{"sampleHeader":"sampleHeaderValue"}',
+              type: 'yaml',
+            },
             'check.request.body': { value: '"testValue"', type: 'yaml' },
             'check.response.status': { value: '["200","201"]', type: 'yaml' },
             'check.response.headers': { value: null, type: 'yaml' },
@@ -60,8 +67,13 @@ export const getTestSyntheticsPolicy = (name: string): PackagePolicy => ({
             'ssl.key_passphrase': { value: 't.string', type: 'text' },
             'ssl.verification_mode': { value: 'certificate', type: 'text' },
             'ssl.supported_protocols': { value: '["TLSv1.1","TLSv1.2"]', type: 'yaml' },
+            location_name: { value: locationName || 'Test private location 0', type: 'text' },
+            id: { value: id, type: 'text' },
+            config_id: { value: id, type: 'text' },
+            run_once: { value: false, type: 'bool' },
+            origin: { value: 'ui', type: 'text' },
           },
-          id: 'synthetics/http-http-5863efe0-0368-11ed-8df7-a7424c6f5167-5347cd10-0368-11ed-8df7-a7424c6f5167',
+          id: 'synthetics/http-http-2bfd7da0-22ed-11ed-8c6b-09a2d21dfbc3-27337270-22ed-11ed-8c6b-09a2d21dfbc3-default',
           compiled_stream: {
             __ui: {
               is_tls_enabled: false,
@@ -70,6 +82,8 @@ export const getTestSyntheticsPolicy = (name: string): PackagePolicy => ({
             },
             type: 'http',
             name,
+            id,
+            origin: 'ui',
             enabled: true,
             urls: 'https://nextjs-test-synthetics.vercel.app/api/users',
             schedule: '@every 5m',
@@ -82,6 +96,7 @@ export const getTestSyntheticsPolicy = (name: string): PackagePolicy => ({
             'response.include_headers': true,
             'response.include_body': 'never',
             'check.request.method': null,
+            'check.request.headers': { sampleHeader: 'sampleHeaderValue' },
             'check.request.body': 'testValue',
             'check.response.status': ['200', '201'],
             'ssl.certificate': 't.string',
@@ -91,8 +106,18 @@ export const getTestSyntheticsPolicy = (name: string): PackagePolicy => ({
             'ssl.verification_mode': 'certificate',
             'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2'],
             processors: [
-              { add_observer_metadata: { geo: { name: 'Fleet managed' } } },
-              { add_fields: { target: '', fields: { 'monitor.fleet_managed': true } } },
+              {
+                add_observer_metadata: { geo: { name: locationName || 'Test private location 0' } },
+              },
+              {
+                add_fields: {
+                  target: '',
+                  fields: {
+                    'monitor.fleet_managed': true,
+                    config_id: id,
+                  },
+                },
+              },
             ],
           },
         },
@@ -126,8 +151,13 @@ export const getTestSyntheticsPolicy = (name: string): PackagePolicy => ({
             'ssl.key_passphrase': { type: 'text' },
             'ssl.verification_mode': { type: 'text' },
             'ssl.supported_protocols': { type: 'yaml' },
+            location_name: { value: 'Fleet managed', type: 'text' },
+            id: { type: 'text' },
+            config_id: { type: 'text' },
+            run_once: { value: false, type: 'bool' },
+            origin: { type: 'text' },
           },
-          id: 'synthetics/tcp-tcp-5863efe0-0368-11ed-8df7-a7424c6f5167-5347cd10-0368-11ed-8df7-a7424c6f5167',
+          id: 'synthetics/tcp-tcp-2bfd7da0-22ed-11ed-8c6b-09a2d21dfbc3-27337270-22ed-11ed-8c6b-09a2d21dfbc3-default',
         },
       ],
     },
@@ -150,8 +180,13 @@ export const getTestSyntheticsPolicy = (name: string): PackagePolicy => ({
             'service.name': { type: 'text' },
             timeout: { type: 'text' },
             tags: { type: 'yaml' },
+            location_name: { value: 'Fleet managed', type: 'text' },
+            id: { type: 'text' },
+            config_id: { type: 'text' },
+            run_once: { value: false, type: 'bool' },
+            origin: { type: 'text' },
           },
-          id: 'synthetics/icmp-icmp-5863efe0-0368-11ed-8df7-a7424c6f5167-5347cd10-0368-11ed-8df7-a7424c6f5167',
+          id: 'synthetics/icmp-icmp-2bfd7da0-22ed-11ed-8c6b-09a2d21dfbc3-27337270-22ed-11ed-8c6b-09a2d21dfbc3-default',
         },
       ],
     },
@@ -177,7 +212,9 @@ export const getTestSyntheticsPolicy = (name: string): PackagePolicy => ({
             'source.zip_url.folder': { type: 'text' },
             'source.zip_url.password': { type: 'password' },
             'source.inline.script': { type: 'yaml' },
+            'source.project.content': { type: 'text' },
             params: { type: 'yaml' },
+            playwright_options: { type: 'yaml' },
             screenshots: { type: 'text' },
             synthetics_args: { type: 'text' },
             ignore_https_errors: { type: 'bool' },
@@ -191,8 +228,15 @@ export const getTestSyntheticsPolicy = (name: string): PackagePolicy => ({
             'source.zip_url.ssl.verification_mode': { type: 'text' },
             'source.zip_url.ssl.supported_protocols': { type: 'yaml' },
             'source.zip_url.proxy_url': { type: 'text' },
+            location_name: { value: 'Fleet managed', type: 'text' },
+            id: { type: 'text' },
+            config_id: { type: 'text' },
+            run_once: { value: false, type: 'bool' },
+            origin: { type: 'text' },
+            'monitor.project.id': { type: 'text' },
+            'monitor.project.name': { type: 'text' },
           },
-          id: 'synthetics/browser-browser-5863efe0-0368-11ed-8df7-a7424c6f5167-5347cd10-0368-11ed-8df7-a7424c6f5167',
+          id: 'synthetics/browser-browser-2bfd7da0-22ed-11ed-8c6b-09a2d21dfbc3-27337270-22ed-11ed-8c6b-09a2d21dfbc3-default',
           compiled_stream: {
             __ui: null,
             type: 'browser',
@@ -210,7 +254,7 @@ export const getTestSyntheticsPolicy = (name: string): PackagePolicy => ({
         {
           enabled: true,
           data_stream: { type: 'synthetics', dataset: 'browser.network' },
-          id: 'synthetics/browser-browser.network-5863efe0-0368-11ed-8df7-a7424c6f5167-5347cd10-0368-11ed-8df7-a7424c6f5167',
+          id: 'synthetics/browser-browser.network-2bfd7da0-22ed-11ed-8c6b-09a2d21dfbc3-27337270-22ed-11ed-8c6b-09a2d21dfbc3-default',
           compiled_stream: {
             processors: [
               { add_observer_metadata: { geo: { name: 'Fleet managed' } } },
@@ -221,7 +265,7 @@ export const getTestSyntheticsPolicy = (name: string): PackagePolicy => ({
         {
           enabled: true,
           data_stream: { type: 'synthetics', dataset: 'browser.screenshot' },
-          id: 'synthetics/browser-browser.screenshot-5863efe0-0368-11ed-8df7-a7424c6f5167-5347cd10-0368-11ed-8df7-a7424c6f5167',
+          id: 'synthetics/browser-browser.screenshot-2bfd7da0-22ed-11ed-8c6b-09a2d21dfbc3-27337270-22ed-11ed-8c6b-09a2d21dfbc3-default',
           compiled_stream: {
             processors: [
               { add_observer_metadata: { geo: { name: 'Fleet managed' } } },
@@ -234,9 +278,9 @@ export const getTestSyntheticsPolicy = (name: string): PackagePolicy => ({
   ],
   is_managed: true,
   revision: 1,
-  created_at: '2022-07-14T11:30:23.034Z',
+  created_at: '2022-08-23T14:09:17.176Z',
   created_by: 'system',
-  updated_at: '2022-07-14T11:30:23.034Z',
+  updated_at: '2022-08-23T14:09:17.176Z',
   updated_by: 'system',
 });
 
@@ -244,21 +288,27 @@ export const getTestProjectSyntheticsPolicy = (
   {
     name,
     inputs = {},
+    configId,
+    id,
   }: {
     name?: string;
     inputs: Record<string, { value: string | boolean; type: string }>;
+    configId: string;
+    id: string;
   } = {
     name: 'check if title is present-Test private location 0',
     inputs: {},
+    configId: '',
+    id: '',
   }
 ): PackagePolicy => ({
-  id: 'cccec568-e488-4049-a399-def8b6a31f34-test-suite-default-46034710-0ba6-11ed-ba04-5f123b9faa8b',
-  version: 'WzMwNTMsMV0=',
-  name: 'check if title is present-Test private location 0',
+  id: '4b6abc6c-118b-4d93-a489-1135500d09f1-test-suite-default-d70a46e0-22ea-11ed-8c6b-09a2d21dfbc3',
+  version: 'WzEzMDksMV0=',
+  name: '4b6abc6c-118b-4d93-a489-1135500d09f1-test-suite-default-Test private location 0',
   namespace: 'default',
-  package: { name: 'synthetics', title: 'Elastic Synthetics', version: '0.9.4' },
+  package: { name: 'synthetics', title: 'Elastic Synthetics', version: '0.10.2' },
   enabled: true,
-  policy_id: '46034710-0ba6-11ed-ba04-5f123b9faa8b',
+  policy_id: 'd70a46e0-22ea-11ed-8c6b-09a2d21dfbc3',
   output_id: '',
   inputs: [
     {
@@ -298,8 +348,13 @@ export const getTestProjectSyntheticsPolicy = (
             'ssl.key_passphrase': { type: 'text' },
             'ssl.verification_mode': { type: 'text' },
             'ssl.supported_protocols': { type: 'yaml' },
+            location_name: { value: 'Fleet managed', type: 'text' },
+            id: { type: 'text' },
+            config_id: { type: 'text' },
+            run_once: { value: false, type: 'bool' },
+            origin: { type: 'text' },
           },
-          id: 'synthetics/http-http-cccec568-e488-4049-a399-def8b6a31f34-test-suite-default-46034710-0ba6-11ed-ba04-5f123b9faa8b',
+          id: 'synthetics/http-http-4b6abc6c-118b-4d93-a489-1135500d09f1-test-suite-default-d70a46e0-22ea-11ed-8c6b-09a2d21dfbc3',
         },
       ],
     },
@@ -331,8 +386,13 @@ export const getTestProjectSyntheticsPolicy = (
             'ssl.key_passphrase': { type: 'text' },
             'ssl.verification_mode': { type: 'text' },
             'ssl.supported_protocols': { type: 'yaml' },
+            location_name: { value: 'Fleet managed', type: 'text' },
+            id: { type: 'text' },
+            config_id: { type: 'text' },
+            run_once: { value: false, type: 'bool' },
+            origin: { type: 'text' },
           },
-          id: 'synthetics/tcp-tcp-cccec568-e488-4049-a399-def8b6a31f34-test-suite-default-46034710-0ba6-11ed-ba04-5f123b9faa8b',
+          id: 'synthetics/tcp-tcp-4b6abc6c-118b-4d93-a489-1135500d09f1-test-suite-default-d70a46e0-22ea-11ed-8c6b-09a2d21dfbc3',
         },
       ],
     },
@@ -355,8 +415,13 @@ export const getTestProjectSyntheticsPolicy = (
             'service.name': { type: 'text' },
             timeout: { type: 'text' },
             tags: { type: 'yaml' },
+            location_name: { value: 'Fleet managed', type: 'text' },
+            id: { type: 'text' },
+            config_id: { type: 'text' },
+            run_once: { value: false, type: 'bool' },
+            origin: { type: 'text' },
           },
-          id: 'synthetics/icmp-icmp-cccec568-e488-4049-a399-def8b6a31f34-test-suite-default-46034710-0ba6-11ed-ba04-5f123b9faa8b',
+          id: 'synthetics/icmp-icmp-4b6abc6c-118b-4d93-a489-1135500d09f1-test-suite-default-d70a46e0-22ea-11ed-8c6b-09a2d21dfbc3',
         },
       ],
     },
@@ -386,7 +451,16 @@ export const getTestProjectSyntheticsPolicy = (
             'source.zip_url.folder': { value: '', type: 'text' },
             'source.zip_url.password': { value: '', type: 'password' },
             'source.inline.script': { value: null, type: 'yaml' },
+            'source.project.content': {
+              value:
+                'UEsDBBQACAAIAON5qVQAAAAAAAAAAAAAAAAfAAAAZXhhbXBsZXMvdG9kb3MvYmFzaWMuam91cm5leS50c22Q0WrDMAxF3/sVF7MHB0LMXlc6RvcN+wDPVWNviW0sdUsp/fe5SSiD7UFCWFfHujIGlpnkybwxFTZfoY/E3hsaLEtwhs9RPNWKDU12zAOxkXRIbN4tB9d9pFOJdO6EN2HMqQguWN9asFBuQVMmJ7jiWNII9fIXrbabdUYr58l9IhwhQQZCYORCTFFUC31Btj21NRc7Mq4Nds+4bDD/pNVgT9F52Jyr2Fa+g75LAPttg8yErk+S9ELpTmVotlVwnfNCuh2lepl3+JflUmSBJ3uggt1v9INW/lHNLKze9dJe1J3QJK8pSvWkm6aTtCet5puq+x63+AFQSwcIAPQ3VfcAAACcAQAAUEsBAi0DFAAIAAgA43mpVAD0N1X3AAAAnAEAAB8AAAAAAAAAAAAgAKSBAAAAAGV4YW1wbGVzL3RvZG9zL2Jhc2ljLmpvdXJuZXkudHNQSwUGAAAAAAEAAQBNAAAARAEAAAAA',
+              type: 'text',
+            },
             params: { value: '', type: 'yaml' },
+            playwright_options: {
+              value: '{"headless":true,"chromiumSandbox":false}',
+              type: 'yaml',
+            },
             screenshots: { value: 'on', type: 'text' },
             synthetics_args: { value: null, type: 'text' },
             ignore_https_errors: { value: false, type: 'bool' },
@@ -400,9 +474,16 @@ export const getTestProjectSyntheticsPolicy = (
             'source.zip_url.ssl.verification_mode': { value: null, type: 'text' },
             'source.zip_url.ssl.supported_protocols': { value: null, type: 'yaml' },
             'source.zip_url.proxy_url': { value: '', type: 'text' },
+            location_name: { value: 'Test private location 0', type: 'text' },
+            id: { value: id, type: 'text' },
+            config_id: { value: configId, type: 'text' },
+            run_once: { value: false, type: 'bool' },
+            origin: { value: 'project', type: 'text' },
+            'monitor.project.id': { value: 'test-suite', type: 'text' },
+            'monitor.project.name': { value: 'test-suite', type: 'text' },
             ...inputs,
           },
-          id: 'synthetics/browser-browser-cccec568-e488-4049-a399-def8b6a31f34-test-suite-default-46034710-0ba6-11ed-ba04-5f123b9faa8b',
+          id: 'synthetics/browser-browser-4b6abc6c-118b-4d93-a489-1135500d09f1-test-suite-default-d70a46e0-22ea-11ed-8c6b-09a2d21dfbc3',
           compiled_stream: {
             __ui: {
               script_source: { is_generated_script: false, file_name: '' },
@@ -410,15 +491,30 @@ export const getTestProjectSyntheticsPolicy = (
             },
             type: 'browser',
             name: 'check if title is present',
+            id,
+            origin: 'project',
             enabled: true,
             schedule: '@every 10m',
             timeout: null,
             throttling: '5d/3u/20l',
+            'source.project.content':
+              'UEsDBBQACAAIAON5qVQAAAAAAAAAAAAAAAAfAAAAZXhhbXBsZXMvdG9kb3MvYmFzaWMuam91cm5leS50c22Q0WrDMAxF3/sVF7MHB0LMXlc6RvcN+wDPVWNviW0sdUsp/fe5SSiD7UFCWFfHujIGlpnkybwxFTZfoY/E3hsaLEtwhs9RPNWKDU12zAOxkXRIbN4tB9d9pFOJdO6EN2HMqQguWN9asFBuQVMmJ7jiWNII9fIXrbabdUYr58l9IhwhQQZCYORCTFFUC31Btj21NRc7Mq4Nds+4bDD/pNVgT9F52Jyr2Fa+g75LAPttg8yErk+S9ELpTmVotlVwnfNCuh2lepl3+JflUmSBJ3uggt1v9INW/lHNLKze9dJe1J3QJK8pSvWkm6aTtCet5puq+x63+AFQSwcIAPQ3VfcAAACcAQAAUEsBAi0DFAAIAAgA43mpVAD0N1X3AAAAnAEAAB8AAAAAAAAAAAAgAKSBAAAAAGV4YW1wbGVzL3RvZG9zL2Jhc2ljLmpvdXJuZXkudHNQSwUGAAAAAAEAAQBNAAAARAEAAAAA',
+            playwright_options: { headless: true, chromiumSandbox: false },
             screenshots: 'on',
             'filter_journeys.match': 'check if title is present',
             processors: [
-              { add_observer_metadata: { geo: { name: 'Fleet managed' } } },
-              { add_fields: { target: '', fields: { 'monitor.fleet_managed': true } } },
+              { add_observer_metadata: { geo: { name: 'Test private location 0' } } },
+              {
+                add_fields: {
+                  target: '',
+                  fields: {
+                    'monitor.fleet_managed': true,
+                    config_id: configId,
+                    'monitor.project.name': 'test-suite',
+                    'monitor.project.id': 'test-suite',
+                  },
+                },
+              },
             ],
             ...Object.keys(inputs).reduce((acc: Record<string, unknown>, key) => {
               acc[key] = inputs[key].value;
@@ -429,7 +525,7 @@ export const getTestProjectSyntheticsPolicy = (
         {
           enabled: true,
           data_stream: { type: 'synthetics', dataset: 'browser.network' },
-          id: 'synthetics/browser-browser.network-cccec568-e488-4049-a399-def8b6a31f34-test-suite-default-46034710-0ba6-11ed-ba04-5f123b9faa8b',
+          id: 'synthetics/browser-browser.network-4b6abc6c-118b-4d93-a489-1135500d09f1-test-suite-default-d70a46e0-22ea-11ed-8c6b-09a2d21dfbc3',
           compiled_stream: {
             processors: [
               { add_observer_metadata: { geo: { name: 'Fleet managed' } } },
@@ -440,7 +536,7 @@ export const getTestProjectSyntheticsPolicy = (
         {
           enabled: true,
           data_stream: { type: 'synthetics', dataset: 'browser.screenshot' },
-          id: 'synthetics/browser-browser.screenshot-cccec568-e488-4049-a399-def8b6a31f34-test-suite-default-46034710-0ba6-11ed-ba04-5f123b9faa8b',
+          id: 'synthetics/browser-browser.screenshot-4b6abc6c-118b-4d93-a489-1135500d09f1-test-suite-default-d70a46e0-22ea-11ed-8c6b-09a2d21dfbc3',
           compiled_stream: {
             processors: [
               { add_observer_metadata: { geo: { name: 'Fleet managed' } } },
@@ -453,9 +549,9 @@ export const getTestProjectSyntheticsPolicy = (
   ],
   is_managed: true,
   revision: 1,
-  created_at: '2022-07-24T23:13:55.606Z',
+  created_at: '2022-08-23T13:52:42.531Z',
   created_by: 'system',
-  updated_at: '2022-07-24T23:13:55.606Z',
+  updated_at: '2022-08-23T13:52:42.531Z',
   updated_by: 'system',
 });
 

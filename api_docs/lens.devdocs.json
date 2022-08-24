@@ -9456,42 +9456,6 @@
     "interfaces": [
       {
         "parentPluginId": "lens",
-        "id": "def-common.BucketedAggregation",
-        "type": "Interface",
-        "tags": [],
-        "label": "BucketedAggregation",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "lens",
-            "scope": "common",
-            "docId": "kibLensPluginApi",
-            "section": "def-common.BucketedAggregation",
-            "text": "BucketedAggregation"
-          },
-          "<KeyType>"
-        ],
-        "path": "x-pack/plugins/lens/common/api.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.BucketedAggregation.buckets",
-            "type": "Array",
-            "tags": [],
-            "label": "buckets",
-            "description": [],
-            "signature": [
-              "{ key: KeyType; count: number; }[]"
-            ],
-            "path": "x-pack/plugins/lens/common/api.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lens",
         "id": "def-common.DateRange",
         "type": "Interface",
         "tags": [],
@@ -9554,108 +9518,6 @@
               "string[]"
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lens",
-        "id": "def-common.FieldStatsResponse",
-        "type": "Interface",
-        "tags": [],
-        "label": "FieldStatsResponse",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "lens",
-            "scope": "common",
-            "docId": "kibLensPluginApi",
-            "section": "def-common.FieldStatsResponse",
-            "text": "FieldStatsResponse"
-          },
-          "<KeyType>"
-        ],
-        "path": "x-pack/plugins/lens/common/api.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.FieldStatsResponse.totalDocuments",
-            "type": "number",
-            "tags": [],
-            "label": "totalDocuments",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "x-pack/plugins/lens/common/api.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.FieldStatsResponse.sampledDocuments",
-            "type": "number",
-            "tags": [],
-            "label": "sampledDocuments",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "x-pack/plugins/lens/common/api.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.FieldStatsResponse.sampledValues",
-            "type": "number",
-            "tags": [],
-            "label": "sampledValues",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "x-pack/plugins/lens/common/api.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.FieldStatsResponse.histogram",
-            "type": "Object",
-            "tags": [],
-            "label": "histogram",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "lens",
-                "scope": "common",
-                "docId": "kibLensPluginApi",
-                "section": "def-common.BucketedAggregation",
-                "text": "BucketedAggregation"
-              },
-              "<KeyType> | undefined"
-            ],
-            "path": "x-pack/plugins/lens/common/api.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.FieldStatsResponse.topValues",
-            "type": "Object",
-            "tags": [],
-            "label": "topValues",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "lens",
-                "scope": "common",
-                "docId": "kibLensPluginApi",
-                "section": "def-common.BucketedAggregation",
-                "text": "BucketedAggregation"
-              },
-              "<KeyType> | undefined"
-            ],
-            "path": "x-pack/plugins/lens/common/api.ts",
             "deprecated": false
           }
         ],
@@ -9780,69 +9642,6 @@
               "\"left\" | \"right\" | \"center\" | undefined"
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lens",
-        "id": "def-common.NumberStatsResult",
-        "type": "Interface",
-        "tags": [],
-        "label": "NumberStatsResult",
-        "description": [],
-        "path": "x-pack/plugins/lens/common/api.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.NumberStatsResult.count",
-            "type": "number",
-            "tags": [],
-            "label": "count",
-            "description": [],
-            "path": "x-pack/plugins/lens/common/api.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.NumberStatsResult.histogram",
-            "type": "Object",
-            "tags": [],
-            "label": "histogram",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "lens",
-                "scope": "common",
-                "docId": "kibLensPluginApi",
-                "section": "def-common.BucketedAggregation",
-                "text": "BucketedAggregation"
-              },
-              "<number>"
-            ],
-            "path": "x-pack/plugins/lens/common/api.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.NumberStatsResult.topValues",
-            "type": "Object",
-            "tags": [],
-            "label": "topValues",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "lens",
-                "scope": "common",
-                "docId": "kibLensPluginApi",
-                "section": "def-common.BucketedAggregation",
-                "text": "BucketedAggregation"
-              },
-              "<number>"
-            ],
-            "path": "x-pack/plugins/lens/common/api.ts",
             "deprecated": false
           }
         ],
@@ -10173,49 +9972,6 @@
               "boolean | undefined"
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lens",
-        "id": "def-common.TopValuesResult",
-        "type": "Interface",
-        "tags": [],
-        "label": "TopValuesResult",
-        "description": [],
-        "path": "x-pack/plugins/lens/common/api.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.TopValuesResult.count",
-            "type": "number",
-            "tags": [],
-            "label": "count",
-            "description": [],
-            "path": "x-pack/plugins/lens/common/api.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.TopValuesResult.topValues",
-            "type": "Object",
-            "tags": [],
-            "label": "topValues",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "lens",
-                "scope": "common",
-                "docId": "kibLensPluginApi",
-                "section": "def-common.BucketedAggregation",
-                "text": "BucketedAggregation"
-              },
-              "<string>"
-            ],
-            "path": "x-pack/plugins/lens/common/api.ts",
             "deprecated": false
           }
         ],

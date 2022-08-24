@@ -70,7 +70,7 @@ pageLoadAssetSize:
   visTypeTimeseries: 55203
   visTypeVega: 153573
   visTypeVislib: 242838
-  visTypeXy: 113478
+  visTypeXy: 30000
   visualizations: 90000
   watcher: 43598
   runtimeFields: 41752
@@ -119,13 +119,13 @@ pageLoadAssetSize:
   expressionGauge: 25000
   controls: 40000
   expressionPartitionVis: 26338
-  sharedUX: 16225
   savedSearch: 16225
   ux: 20784
   sessionView: 77750
   cloudSecurityPosture: 19109
   visTypeGauge: 24113
   unifiedSearch: 71059
+  unifiedFieldList: 65500
   data: 454087
   eventAnnotation: 19334
   screenshotting: 22870
