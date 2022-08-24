@@ -10,23 +10,25 @@ import fs from 'fs';
 import path from 'path';
 import { promisify } from 'util';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { checkIfPngsMatch } from './lib/compare_pngs';
 
 const writeFileAsync = promisify(fs.writeFile);
 const mkdirAsync = promisify(fs.mkdir);
 
 const REPORTS_FOLDER = path.resolve(__dirname, 'reports');
 
-export default function ({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({
+  getPageObjects,
+  getService,
+  updateBaselines,
+}: FtrProviderContext & { updateBaselines: boolean }) {
   const PageObjects = getPageObjects(['reporting', 'common', 'dashboard']);
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const browser = getService('browser');
-  const log = getService('log');
-  const config = getService('config');
   const es = getService('es');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
+  const png = getService('png');
   const ecommerceSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
 
   const loadEcommerce = async () => {
@@ -182,12 +184,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const url = await PageObjects.reporting.getReportURL(60000);
         const reportData = await PageObjects.reporting.getRawPdfReportData(url);
         const reportFileName = 'small_dashboard_preserve_layout';
-        const sessionReportPath = await writeSessionReport(reportFileName, reportData, 'png');
-        const percentDiff = await checkIfPngsMatch(
+        const sessionReportPath = await PageObjects.reporting.writeSessionReport(
+          reportFileName,
+          'png',
+          reportData,
+          REPORTS_FOLDER
+        );
+
+        const percentDiff = await png.compareAgainstBaseline(
           sessionReportPath,
-          getBaselineReportPath(reportFileName, 'png'),
-          config.get('screenshots.directory'),
-          log
+          PageObjects.reporting.getBaselineReportPath(reportFileName, 'png', REPORTS_FOLDER),
+          REPORTS_FOLDER,
+          updateBaselines
         );
 
         expect(percentDiff).to.be.lessThan(0.09);
@@ -206,12 +214,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const url = await PageObjects.reporting.getReportURL(200000);
         const reportData = await PageObjects.reporting.getRawPdfReportData(url);
         const reportFileName = 'large_dashboard_preserve_layout';
-        const sessionReportPath = await writeSessionReport(reportFileName, reportData, 'png');
-        const percentDiff = await checkIfPngsMatch(
+        const sessionReportPath = await PageObjects.reporting.writeSessionReport(
+          reportFileName,
+          'png',
+          reportData,
+          REPORTS_FOLDER
+        );
+        const percentDiff = await png.compareAgainstBaseline(
           sessionReportPath,
-          getBaselineReportPath(reportFileName, 'png'),
-          config.get('screenshots.directory'),
-          log
+          PageObjects.reporting.getBaselineReportPath(reportFileName, 'png', REPORTS_FOLDER),
+          REPORTS_FOLDER,
+          updateBaselines
         );
 
         expect(percentDiff).to.be.lessThan(0.09);
@@ -268,6 +281,58 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(res.status).to.equal(200);
         expect(res.get('content-type')).to.equal('application/pdf');
         await kibanaServer.uiSettings.replace({});
+      });
+    });
+
+    describe('Sample data from Kibana 7.6', () => {
+      const reportFileName = 'sample_data_ecommerce_76';
+      let sessionReportPath: string;
+
+      before(async () => {
+        await kibanaServer.uiSettings.replace({
+          defaultIndex: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+        });
+
+        await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce_76');
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce_76.json'
+        );
+
+        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.loadSavedDashboard('[K7.6-eCommerce] Revenue Dashboard');
+
+        await PageObjects.reporting.openPngReportingPanel();
+        await PageObjects.reporting.forceSharedItemsContainerSize({ width: 1405 });
+        await PageObjects.reporting.clickGenerateReportButton();
+        await PageObjects.reporting.removeForceSharedItemsContainerSize();
+
+        const url = await PageObjects.reporting.getReportURL(60000);
+        const reportData = await PageObjects.reporting.getRawPdfReportData(url);
+        sessionReportPath = await PageObjects.reporting.writeSessionReport(
+          reportFileName,
+          'png',
+          reportData,
+          REPORTS_FOLDER
+        );
+      });
+
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce_76');
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce_76.json'
+        );
+      });
+
+      it('PNG file matches the baseline image', async function () {
+        this.timeout(300000);
+        const percentDiff = await png.compareAgainstBaseline(
+          sessionReportPath,
+          PageObjects.reporting.getBaselineReportPath(reportFileName, 'png', REPORTS_FOLDER),
+          REPORTS_FOLDER,
+          updateBaselines
+        );
+
+        expect(percentDiff).to.be.lessThan(0.09);
       });
     });
   });
