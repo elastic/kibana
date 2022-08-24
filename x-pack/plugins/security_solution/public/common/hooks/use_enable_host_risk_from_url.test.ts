@@ -8,7 +8,7 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { useEnableHostRiskFromUrl } from './use_enable_host_risk_from_url';
 
-jest.mock('../../risk_score/containers/common', () => {
+jest.mock('./use_space_id', () => {
   return { useSpaceId: () => 'myspace' };
 });
 
