@@ -7,12 +7,130 @@
  */
 
 import React from 'react';
-import { FilterItem } from '../../filters_builder/filters_builder_utils';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { Filter } from '@kbn/es-query';
+import { FILTERS } from '@kbn/es-query';
+import { EuiTextColor } from '@elastic/eui';
+import { getDisplayValueFromFilter, getIndexPatternFromFilter } from '@kbn/data-plugin/public';
+import { existsOperator, isOneOfOperator } from '../../filter_bar/filter_editor';
 
-export interface FilterBadgeExpressionProps {
-  filter: FilterItem;
+const FILTER_ITEM_OK = '';
+const FILTER_ITEM_WARNING = 'warn';
+const FILTER_ITEM_ERROR = 'error';
+
+export type FilterLabelStatus =
+  | typeof FILTER_ITEM_OK
+  | typeof FILTER_ITEM_WARNING
+  | typeof FILTER_ITEM_ERROR;
+
+interface LabelOptions {
+  title: string;
+  status: FilterLabelStatus;
+  message?: string;
 }
 
-export function FilterExpressionBadge({ filter }: FilterBadgeExpressionProps) {
-  return <>filter</>;
+const getValue = (text?: string) => {
+  return <span>{text}</span>;
+};
+
+const getFilterContent = (filter: Filter, label: LabelOptions, prefix: string | JSX.Element) => {
+  switch (filter.meta.type) {
+    case FILTERS.EXISTS:
+      return (
+        <>
+          {prefix}
+          {filter.meta.key}: {getValue(`${existsOperator.message}`)}
+        </>
+      );
+    case FILTERS.PHRASES:
+      return (
+        <>
+          {prefix}
+          {filter.meta.key}: {getValue(`${isOneOfOperator.message} ${label.title}`)}
+        </>
+      );
+    case FILTERS.QUERY_STRING:
+      return (
+        <>
+          {prefix}
+          {getValue(`${label.title}`)}
+        </>
+      );
+    case FILTERS.PHRASE:
+    case FILTERS.RANGE:
+      return (
+        <>
+          {prefix}
+          {filter.meta.key}: {getValue(label.title)}
+        </>
+      );
+    default:
+      return (
+        <>
+          {prefix}
+          {getValue(`${JSON.stringify(filter.query) || filter.meta.value}`)}
+        </>
+      );
+  }
+};
+
+function isFilterApplicable(filter: Filter, dataView: DataView[]) {
+  // Any filter is applicable if no index patterns were provided to FilterBar.
+  if (!dataView.length) return true;
+
+  const ip = getIndexPatternFromFilter(filter, dataView);
+  if (ip) return true;
+
+  const allFields = dataView.map((indexPattern) => {
+    return indexPattern.fields.map((field) => field.name);
+  });
+  const flatFields = allFields.reduce((acc: string[], it: string[]) => [...acc, ...it], []);
+  return flatFields.includes(filter.meta?.key || '');
+}
+
+function getValueLabel(filter: Filter, dataView: DataView): LabelOptions {
+  const label: LabelOptions = {
+    title: '',
+    message: '',
+    status: FILTER_ITEM_OK,
+  };
+
+  if (filter.meta?.isMultiIndex) {
+    return label;
+  }
+
+  if (isFilterApplicable(filter, [dataView])) {
+    try {
+      label.title = getDisplayValueFromFilter(filter, [dataView]);
+    } catch (e) {
+      label.status = FILTER_ITEM_ERROR;
+      label.title = `Error`;
+      label.message = e.message;
+    }
+  } else {
+    label.status = FILTER_ITEM_WARNING;
+    label.title = `Warning`;
+    label.message = 'Field {fieldName} does not exist in current view';
+  }
+
+  return label;
+}
+
+export interface FilterBadgeExpressionProps {
+  filter: Filter;
+  dataView: DataView;
+}
+
+export function FilterExpressionBadge({ filter, dataView }: FilterBadgeExpressionProps) {
+  const label = getValueLabel(filter, dataView);
+
+  const prefixText = filter.meta.negate ? ` NOT ` : '';
+  const prefix =
+    filter.meta.negate && !filter.meta.disabled ? (
+      <EuiTextColor color="danger">{prefixText}</EuiTextColor>
+    ) : (
+      prefixText
+    );
+
+  return <>{getFilterContent(filter, label, prefix)}</>;
 }

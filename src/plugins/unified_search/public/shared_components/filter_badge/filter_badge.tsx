@@ -8,23 +8,34 @@
 
 import React from 'react';
 import { EuiBadge, EuiFlexGroup } from '@elastic/eui';
+import { css } from '@emotion/css';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { FilterItem } from '../../filters_builder/filters_builder_utils';
 import { FilterExpressionBadge } from './filter_badge_expression';
-
 export interface FilterBadgeProps {
   filter: FilterItem;
+  dataView: DataView;
 }
 
-export function FilterBadge({ filter }: FilterBadgeProps) {
+const cursor = css`
+  cursor: pointer;
+  padding: 5px;
+`;
+
+export function FilterBadge({ filter, dataView }: FilterBadgeProps) {
   return (
     <EuiFlexGroup wrap responsive={false} gutterSize="xs">
       <EuiBadge
-        style={{ cursor: 'pointer', padding: '5px' }}
+        className={cursor}
         color="hollow"
         iconType="cross"
         iconSide="right"
+        iconOnClick={() => {}}
+        onClickAriaLabel="Filter actions"
+        iconOnClickAriaLabel="Remove filter"
+        onClick={() => {}}
       >
-        <FilterExpressionBadge filter={filter} />
+        <FilterExpressionBadge filter={filter} dataView={dataView} />
       </EuiBadge>
     </EuiFlexGroup>
   );
