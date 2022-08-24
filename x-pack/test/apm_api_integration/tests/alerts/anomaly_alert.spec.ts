@@ -24,7 +24,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when(
     'fetching service anomalies with a trial license',
-    { config: 'trial', archives: ['apm_mappings_only_8.0.0'] },
+    { config: 'trial', archives: [] },
     () => {
       const start = '2021-01-01T00:00:00.000Z';
       const end = '2021-01-08T00:15:00.000Z';
