@@ -37,7 +37,7 @@ import {
   RuleTaskState,
   RuleTypeRegistry,
 } from '../types';
-import { asErr, map, promiseResult, resolveErr, Result } from '../lib/result_type';
+import { asErr, asOk, map, resolveErr, Result } from '../lib/result_type';
 import { getExecutionDurationPercentiles, getExecutionSuccessRatio } from '../lib/monitoring';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import { isAlertSavedObjectNotFoundError, isEsUnavailableError } from '../lib/is_alerting_error';
@@ -67,7 +67,7 @@ import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event
 import { loadRule } from './rule_loader';
 import { logAlerts } from './log_alerts';
 import { scheduleActionsForAlerts } from './schedule_actions_for_alerts';
-import { RuleRunTimer, RuleRunTimerSpans } from '../lib/rule_run_timer';
+import { TaskRunnerTimer, TaskRunnerTimerSpan } from './task_runner_timer';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -108,7 +108,7 @@ export class TaskRunner<
   private readonly inMemoryMetrics: InMemoryMetrics;
   private readonly maxAlerts: number;
   private alerts: Record<string, Alert<State, Context>>;
-  private ruleRunTimer: RuleRunTimer;
+  private timer: TaskRunnerTimer;
   private alertingEventLogger: AlertingEventLogger;
   private usageCounter?: UsageCounter;
   private searchAbortController: AbortController;
@@ -141,7 +141,7 @@ export class TaskRunner<
     this.inMemoryMetrics = inMemoryMetrics;
     this.maxAlerts = context.maxAlerts;
     this.alerts = {};
-    this.ruleRunTimer = new RuleRunTimer({ logger: this.logger });
+    this.timer = new TaskRunnerTimer({ logger: this.logger });
     this.alertingEventLogger = new AlertingEventLogger(this.context.eventLogger);
   }
 
@@ -298,7 +298,7 @@ export class TaskRunner<
     });
 
     const { updatedRuleTypeState, hasReachedAlertLimit, originalAlerts } =
-      await this.ruleRunTimer.runWithTimer(RuleRunTimerSpans.RuleTypeRunner, async () => {
+      await this.timer.runWithTimer(TaskRunnerTimerSpan.RuleTypeRun, async () => {
         for (const id in alertRawInstances) {
           if (alertRawInstances.hasOwnProperty(id)) {
             this.alerts[id] = new Alert<State, Context>(id, alertRawInstances[id]);
@@ -408,8 +408,8 @@ export class TaskRunner<
         };
       });
 
-    const { activeAlerts, recoveredAlerts } = await this.ruleRunTimer.runWithTimer(
-      RuleRunTimerSpans.ProcessAlerts,
+    const { activeAlerts, recoveredAlerts } = await this.timer.runWithTimer(
+      TaskRunnerTimerSpan.ProcessAlerts,
       async () => {
         const {
           newAlerts: processedAlertsNew,
@@ -442,7 +442,7 @@ export class TaskRunner<
       }
     );
 
-    await this.ruleRunTimer.runWithTimer(RuleRunTimerSpans.TriggerActions, async () => {
+    await this.timer.runWithTimer(TaskRunnerTimerSpan.TriggerActions, async () => {
       const executionHandler = this.getExecutionHandler(
         ruleId,
         rule.name,
@@ -598,8 +598,6 @@ export class TaskRunner<
       );
     }
 
-    this.alertingEventLogger.done({ status: executionStatus, metrics: executionMetrics });
-
     const monitoringHistory: RuleMonitoringHistory = {
       success: true,
       timestamp: +new Date(),
@@ -642,6 +640,8 @@ export class TaskRunner<
         monitoring,
       });
     }
+
+    return { executionStatus, executionMetrics };
   }
 
   async run(): Promise<RuleTaskRunResult> {
@@ -657,41 +657,39 @@ export class TaskRunner<
 
     if (startedAt) {
       // Capture how long it took for the rule to start running after being claimed
-      this.ruleRunTimer.setDuration(RuleRunTimerSpans.StartRunning, startedAt);
+      this.timer.setDuration(TaskRunnerTimerSpan.StartTaskRun, startedAt);
     }
 
     let stateWithMetrics: Result<RuleTaskStateAndMetrics, Error>;
-    let monitoring: RuleMonitoring;
+    let monitoring: RuleMonitoring = getDefaultRuleMonitoring();
     let schedule: Result<IntervalSchedule, Error>;
     try {
-      const { fakeRequest, rulesClient, rule, apiKey, validatedParams } =
-        await this.ruleRunTimer.runWithTimer(RuleRunTimerSpans.PreRun, async () =>
-          this.prepareToRun()
-        );
-
-      monitoring = rule.monitoring ?? getDefaultRuleMonitoring();
-      stateWithMetrics = await promiseResult<RuleTaskStateAndMetrics, Error>(
-        this.runRule({ fakeRequest, rulesClient, rule, apiKey, validatedParams })
+      const preparedResult = await this.timer.runWithTimer(
+        TaskRunnerTimerSpan.PrepareRule,
+        async () => this.prepareToRun()
       );
+
+      monitoring = preparedResult.rule.monitoring ?? getDefaultRuleMonitoring();
+
+      stateWithMetrics = asOk(await this.runRule(preparedResult));
 
       // fetch the rule again to ensure we return the correct schedule as it may have
       // changed during the task execution
-      schedule = await promiseResult<IntervalSchedule, Error>(
-        Promise.resolve((await rulesClient.get({ id: ruleId })).schedule)
-      );
+      schedule = asOk((await preparedResult.rulesClient.get({ id: ruleId })).schedule);
     } catch (err) {
       stateWithMetrics = asErr(err);
-      monitoring = getDefaultRuleMonitoring();
       schedule = asErr(err);
     }
 
-    await this.ruleRunTimer.runWithTimer(RuleRunTimerSpans.PostRun, async () => {
-      this.processRunResults({
-        runDate,
-        stateWithMetrics,
-        monitoring,
-      });
-    });
+    const { executionStatus, executionMetrics } = await this.timer.runWithTimer(
+      TaskRunnerTimerSpan.ProcessRuleRun,
+      async () =>
+        this.processRunResults({
+          runDate,
+          stateWithMetrics,
+          monitoring,
+        })
+    );
 
     const transformRunStateToTaskState = (
       runStateWithMetrics: RuleTaskStateAndMetrics
@@ -701,6 +699,17 @@ export class TaskRunner<
         previousStartedAt: startedAt,
       };
     };
+
+    if (startedAt) {
+      // Capture how long it took for the rule to run after being claimed
+      this.timer.setDuration(TaskRunnerTimerSpan.TotalRunDuration, startedAt);
+    }
+
+    this.alertingEventLogger.done({
+      status: executionStatus,
+      metrics: executionMetrics,
+      timings: this.timer,
+    });
 
     return {
       state: map<RuleTaskStateAndMetrics, ElasticsearchError, RuleTaskState>(
