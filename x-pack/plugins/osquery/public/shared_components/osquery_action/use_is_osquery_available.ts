@@ -6,8 +6,8 @@
  */
 
 import { useMemo } from 'react';
-import { find } from 'lodash';
-import type { AgentStatus } from '@kbn/fleet-plugin/common';
+import { find, isString } from 'lodash';
+import type { AgentStatus, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { useAgentDetails } from '../../agents/use_agent_details';
 import { useAgentPolicy } from '../../agent_policies';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
@@ -48,12 +48,12 @@ export const useIsOsqueryAvailable = (agentId?: string): IIsOsqueryAvailable => 
   const osqueryAvailable = useMemo(() => {
     if (policyError) return false;
 
-    const osqueryPackageInstalled = find(agentPolicyData?.package_policies, [
-      'package.name',
-      OSQUERY_INTEGRATION_NAME,
-    ]);
+    const osqueryPackageInstalled = find<PackagePolicy | string>(
+      agentPolicyData?.package_policies,
+      ['package.name', OSQUERY_INTEGRATION_NAME]
+    );
 
-    return osqueryPackageInstalled?.enabled;
+    return !isString(osqueryPackageInstalled) ? !!osqueryPackageInstalled?.enabled : false;
   }, [agentPolicyData?.package_policies, policyError]);
 
   return { osqueryAvailable, agentFetched, isLoading, policyFetched, policyLoading, agentData };

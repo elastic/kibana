@@ -17,15 +17,15 @@ import { ConsoleText } from './console_text';
 
 const COMMAND_EXECUTION_RESULT_SUCCESS_TITLE = i18n.translate(
   'xpack.securitySolution.commandExecutionResult.successTitle',
-  { defaultMessage: 'Success. Action was complete.' }
+  { defaultMessage: 'Action completed.' }
 );
 const COMMAND_EXECUTION_RESULT_FAILURE_TITLE = i18n.translate(
   'xpack.securitySolution.commandExecutionResult.failureTitle',
-  { defaultMessage: 'Error. Action failed.' }
+  { defaultMessage: 'Action failed.' }
 );
 const COMMAND_EXECUTION_RESULT_PENDING = i18n.translate(
   'xpack.securitySolution.commandExecutionResult.pending',
-  { defaultMessage: 'Action pending' }
+  { defaultMessage: 'Action pending.' }
 );
 
 export type CommandExecutionResultProps = PropsWithChildren<{

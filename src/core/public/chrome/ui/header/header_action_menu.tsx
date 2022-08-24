@@ -8,7 +8,7 @@
 
 import React, { FC, useRef, useLayoutEffect, useState } from 'react';
 import { Observable } from 'rxjs';
-import { MountPoint, UnmountCallback } from '../../../types';
+import type { MountPoint, UnmountCallback } from '@kbn/core-mount-utils-browser';
 
 interface HeaderActionMenuProps {
   actionMenu$: Observable<MountPoint | undefined>;

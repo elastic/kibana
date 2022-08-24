@@ -173,7 +173,7 @@ export const requestIndexFieldSearch = async (
             _index: '',
             _id: '',
             _score: -1,
-            _source: null,
+            fields: {},
           },
         ],
       },

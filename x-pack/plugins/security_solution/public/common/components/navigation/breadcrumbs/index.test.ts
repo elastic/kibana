@@ -79,28 +79,6 @@ const getMockObject = (
         isOpen: false,
         graphEventId: '',
       },
-      timerange: {
-        global: {
-          linkTo: ['timeline'],
-          timerange: {
-            from: '2019-05-16T23:10:43.696Z',
-            fromStr: 'now-24h',
-            kind: 'relative',
-            to: '2019-05-17T23:10:43.697Z',
-            toStr: 'now',
-          },
-        },
-        timeline: {
-          linkTo: ['global'],
-          timerange: {
-            from: '2019-05-16T23:10:43.696Z',
-            fromStr: 'now-24h',
-            kind: 'relative',
-            to: '2019-05-17T23:10:43.697Z',
-            toStr: 'now',
-          },
-        },
-      },
     },
   };
 });
@@ -262,7 +240,7 @@ describe('Navigation Breadcrumbs', () => {
           hostsBreadcrumbs,
           {
             text: 'siem-kibana',
-            href: 'securitySolutionUI/hosts/siem-kibana',
+            href: 'securitySolutionUI/hosts/name/siem-kibana',
           },
           { text: 'Authentications', href: '' },
         ]);
@@ -279,7 +257,7 @@ describe('Navigation Breadcrumbs', () => {
           networkBreadcrumb,
           {
             text: ipv4,
-            href: `securitySolutionUI/network/ip/${ipv4}/source`,
+            href: `securitySolutionUI/network/ip/${ipv4}/source/flows`,
           },
           { text: 'Flows', href: '' },
         ]);
@@ -296,7 +274,7 @@ describe('Navigation Breadcrumbs', () => {
           networkBreadcrumb,
           {
             text: ipv6,
-            href: `securitySolutionUI/network/ip/${ipv6Encoded}/source`,
+            href: `securitySolutionUI/network/ip/${ipv6Encoded}/source/flows`,
           },
           { text: 'Flows', href: '' },
         ]);
@@ -440,9 +418,9 @@ describe('Navigation Breadcrumbs', () => {
         expect(breadcrumbs).toEqual(null);
       });
 
-      test('should return Admin breadcrumbs when supplied endpoints pageName', () => {
+      test('should return Endpoints breadcrumbs when supplied endpoints pageName', () => {
         const breadcrumbs = getBreadcrumbsForRoute(
-          getMockObject(SecurityPageName.administration, '/endpoints', undefined),
+          getMockObject(SecurityPageName.endpoints, '/endpoints', undefined),
           getSecuritySolutionUrl,
           false
         );
@@ -470,17 +448,17 @@ describe('Navigation Breadcrumbs', () => {
         expect(setBreadcrumbsMock).toBeCalledWith([
           expect.objectContaining({
             text: 'Security',
-            href: "securitySolutionUI/get_started?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
+            href: 'securitySolutionUI/get_started',
             onClick: expect.any(Function),
           }),
           expect.objectContaining({
             text: 'Hosts',
-            href: "securitySolutionUI/hosts?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
+            href: 'securitySolutionUI/hosts',
             onClick: expect.any(Function),
           }),
           expect.objectContaining({
             text: 'siem-kibana',
-            href: "securitySolutionUI/hosts/siem-kibana?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
+            href: 'securitySolutionUI/hosts/name/siem-kibana',
             onClick: expect.any(Function),
           }),
           {
@@ -578,7 +556,7 @@ describe('Navigation Breadcrumbs', () => {
           hostsBreadcrumbs,
           {
             text: 'siem-kibana',
-            href: 'securitySolutionUI/hosts/siem-kibana',
+            href: 'securitySolutionUI/hosts/name/siem-kibana',
           },
           { text: 'Authentications', href: '' },
         ]);
@@ -596,7 +574,7 @@ describe('Navigation Breadcrumbs', () => {
           networkBreadcrumb,
           {
             text: ipv4,
-            href: `securitySolutionUI/network/ip/${ipv4}/source`,
+            href: `securitySolutionUI/network/ip/${ipv4}/source/flows`,
           },
           { text: 'Flows', href: '' },
         ]);
@@ -614,7 +592,7 @@ describe('Navigation Breadcrumbs', () => {
           networkBreadcrumb,
           {
             text: ipv6,
-            href: `securitySolutionUI/network/ip/${ipv6Encoded}/source`,
+            href: `securitySolutionUI/network/ip/${ipv6Encoded}/source/flows`,
           },
           { text: 'Flows', href: '' },
         ]);
@@ -763,9 +741,9 @@ describe('Navigation Breadcrumbs', () => {
         expect(breadcrumbs).toEqual(null);
       });
 
-      test('should return Admin breadcrumbs when supplied endpoints pageName', () => {
+      test('should return Endpoints breadcrumbs when supplied endpoints pageName', () => {
         const breadcrumbs = getBreadcrumbsForRoute(
-          getMockObject(SecurityPageName.administration, '/endpoints', undefined),
+          getMockObject(SecurityPageName.endpoints, '/', undefined),
           getSecuritySolutionUrl,
           true
         );
@@ -775,6 +753,22 @@ describe('Navigation Breadcrumbs', () => {
           manageBreadcrumbs,
           {
             text: 'Endpoints',
+            href: '',
+          },
+        ]);
+      });
+
+      test('should return Admin breadcrumbs when supplied admin pageName', () => {
+        const breadcrumbs = getBreadcrumbsForRoute(
+          getMockObject(SecurityPageName.administration, '/', undefined),
+          getSecuritySolutionUrl,
+          true
+        );
+
+        expect(breadcrumbs).toEqual([
+          securityBreadCrumb,
+          {
+            text: 'Manage',
             href: '',
           },
         ]);
@@ -790,28 +784,26 @@ describe('Navigation Breadcrumbs', () => {
           chromeMock,
           navigateToUrlMock
         );
-        const searchString =
-          "?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))";
 
         expect(setBreadcrumbsMock).toBeCalledWith([
           expect.objectContaining({
             text: 'Security',
-            href: `securitySolutionUI/get_started${searchString}`,
+            href: 'securitySolutionUI/get_started',
             onClick: expect.any(Function),
           }),
           expect.objectContaining({
             text: 'Explore',
-            href: `securitySolutionUI/explore`,
+            href: 'securitySolutionUI/explore',
             onClick: expect.any(Function),
           }),
           expect.objectContaining({
             text: 'Hosts',
-            href: `securitySolutionUI/hosts${searchString}`,
+            href: 'securitySolutionUI/hosts',
             onClick: expect.any(Function),
           }),
           expect.objectContaining({
             text: 'siem-kibana',
-            href: `securitySolutionUI/hosts/siem-kibana${searchString}`,
+            href: 'securitySolutionUI/hosts/name/siem-kibana',
             onClick: expect.any(Function),
           }),
           {

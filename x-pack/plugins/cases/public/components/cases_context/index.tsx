@@ -16,22 +16,21 @@ import {
   casesContextReducer,
   getInitialCasesContextState,
 } from './cases_context_reducer';
-import { CasesFeaturesAllRequired, CasesFeatures } from '../../containers/types';
+import { CasesFeaturesAllRequired, CasesFeatures, CasesPermissions } from '../../containers/types';
 import { CasesGlobalComponents } from './cases_global_components';
 import { ReleasePhase } from '../types';
 import { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
+import { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
 
 export type CasesContextValueDispatch = Dispatch<CasesContextStoreAction>;
 
 export interface CasesContextValue {
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
+  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   owner: string[];
   appId: string;
   appTitle: string;
-  permissions: {
-    all: boolean;
-    read: boolean;
-  };
+  permissions: CasesPermissions;
   basePath: string;
   features: CasesFeaturesAllRequired;
   releasePhase: ReleasePhase;
@@ -41,7 +40,10 @@ export interface CasesContextValue {
 export interface CasesContextProps
   extends Pick<
     CasesContextValue,
-    'owner' | 'permissions' | 'externalReferenceAttachmentTypeRegistry'
+    | 'owner'
+    | 'permissions'
+    | 'externalReferenceAttachmentTypeRegistry'
+    | 'persistableStateAttachmentTypeRegistry'
   > {
   basePath?: string;
   features?: CasesFeatures;
@@ -59,6 +61,7 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
   children,
   value: {
     externalReferenceAttachmentTypeRegistry,
+    persistableStateAttachmentTypeRegistry,
     owner,
     permissions,
     basePath = DEFAULT_BASE_PATH,
@@ -70,6 +73,7 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
   const [state, dispatch] = useReducer(casesContextReducer, getInitialCasesContextState());
   const [value, setValue] = useState<CasesContextStateValue>(() => ({
     externalReferenceAttachmentTypeRegistry,
+    persistableStateAttachmentTypeRegistry,
     owner,
     permissions,
     basePath,

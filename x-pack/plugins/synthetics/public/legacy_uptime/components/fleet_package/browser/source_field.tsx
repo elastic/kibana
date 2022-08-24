@@ -9,6 +9,7 @@ import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
+  EuiCode,
   EuiTabbedContent,
   EuiTabbedContentTab,
   EuiFormRow,
@@ -44,7 +45,7 @@ interface SourceConfig {
   fileName?: string;
 }
 
-interface Props {
+export interface Props {
   onChange: (sourceConfig: SourceConfig) => void;
   onFieldBlur: (field: ConfigKey) => void;
   defaultConfig?: SourceConfig;
@@ -104,6 +105,42 @@ export const SourceField = ({
       id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrl.label"
       defaultMessage="Zip URL"
     />
+  );
+
+  const params = (
+    <EuiFormRow
+      label={
+        <FormattedMessage
+          id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.params.label"
+          defaultMessage="Parameters"
+        />
+      }
+      labelAppend={<OptionalLabel />}
+      helpText={
+        <FormattedMessage
+          id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.params.helpText"
+          defaultMessage="Use JSON to define parameters that can be referenced in your script with {code}"
+          values={{ code: <EuiCode>params.value</EuiCode> }}
+        />
+      }
+    >
+      <CodeEditor
+        ariaLabel={i18n.translate(
+          'xpack.synthetics.createPackagePolicy.stepConfigure.requestBody.codeEditor.json.ariaLabel',
+          {
+            defaultMessage: 'JSON code editor',
+          }
+        )}
+        id="jsonParamsEditor"
+        languageId={MonacoEditorLangId.JSON}
+        onChange={(code) => {
+          setConfig((prevConfig) => ({ ...prevConfig, params: code }));
+          onFieldBlur(ConfigKey.PARAMS);
+        }}
+        value={config.params}
+        data-test-subj="syntheticsBrowserParams"
+      />
+    </EuiFormRow>
   );
 
   const zipUrlSourceTabId = 'syntheticsBrowserZipURLConfig';
@@ -189,38 +226,7 @@ export const SourceField = ({
               data-test-subj="syntheticsBrowserZipUrlFolder"
             />
           </EuiFormRow>
-          <EuiFormRow
-            label={
-              <FormattedMessage
-                id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.params.label"
-                defaultMessage="Params"
-              />
-            }
-            labelAppend={<OptionalLabel />}
-            helpText={
-              <FormattedMessage
-                id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.params.helpText"
-                defaultMessage="A JSON object that defines any variables your tests require."
-              />
-            }
-          >
-            <CodeEditor
-              ariaLabel={i18n.translate(
-                'xpack.synthetics.createPackagePolicy.stepConfigure.requestBody.codeEditor.json.ariaLabel',
-                {
-                  defaultMessage: 'JSON code editor',
-                }
-              )}
-              id="jsonParamsEditor"
-              languageId={MonacoEditorLangId.JSON}
-              onChange={(code) => {
-                setConfig((prevConfig) => ({ ...prevConfig, params: code }));
-                onFieldBlur(ConfigKey.PARAMS);
-              }}
-              value={config.params}
-              data-test-subj="syntheticsBrowserZipUrlParams"
-            />
-          </EuiFormRow>
+          {params}
           <EuiFormRow
             label={
               <FormattedMessage
@@ -282,37 +288,40 @@ export const SourceField = ({
       ),
       'data-test-subj': `syntheticsSourceTab__inline`,
       content: (
-        <EuiFormRow
-          isInvalid={isSourceInlineInvalid}
-          error={
-            <FormattedMessage
-              id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.inlineScript.error"
-              defaultMessage="Script is required"
+        <>
+          <EuiFormRow
+            isInvalid={isSourceInlineInvalid}
+            error={
+              <FormattedMessage
+                id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.inlineScript.error"
+                defaultMessage="Script is required"
+              />
+            }
+            helpText={
+              <FormattedMessage
+                id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.inlineScript.helpText"
+                defaultMessage="Runs Synthetic test scripts that are defined inline."
+              />
+            }
+          >
+            <CodeEditor
+              ariaLabel={i18n.translate(
+                'xpack.synthetics.createPackagePolicy.stepConfigure.requestBody.codeEditor.javascript.ariaLabel',
+                {
+                  defaultMessage: 'JavaScript code editor',
+                }
+              )}
+              id="javascript"
+              languageId={MonacoEditorLangId.JAVASCRIPT}
+              onChange={(code) => {
+                setConfig((prevConfig) => ({ ...prevConfig, inlineScript: code }));
+                onFieldBlur(ConfigKey.SOURCE_INLINE);
+              }}
+              value={config.inlineScript}
             />
-          }
-          helpText={
-            <FormattedMessage
-              id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.inlineScript.helpText"
-              defaultMessage="Runs Synthetic test scripts that are defined inline."
-            />
-          }
-        >
-          <CodeEditor
-            ariaLabel={i18n.translate(
-              'xpack.synthetics.createPackagePolicy.stepConfigure.requestBody.codeEditor.javascript.ariaLabel',
-              {
-                defaultMessage: 'JavaScript code editor',
-              }
-            )}
-            id="javascript"
-            languageId={MonacoEditorLangId.JAVASCRIPT}
-            onChange={(code) => {
-              setConfig((prevConfig) => ({ ...prevConfig, inlineScript: code }));
-              onFieldBlur(ConfigKey.SOURCE_INLINE);
-            }}
-            value={config.inlineScript}
-          />
-        </EuiFormRow>
+          </EuiFormRow>
+          {params}
+        </>
       ),
     },
     {
@@ -347,18 +356,22 @@ export const SourceField = ({
       ),
       'data-test-subj': 'syntheticsSourceTab__scriptRecorder',
       content: (
-        <ScriptRecorderFields
-          onChange={({ scriptText, fileName }) =>
-            setConfig((prevConfig) => ({
-              ...prevConfig,
-              inlineScript: scriptText,
-              isGeneratedScript: true,
-              fileName,
-            }))
-          }
-          script={config.inlineScript}
-          fileName={config.fileName}
-        />
+        <>
+          <ScriptRecorderFields
+            onChange={({ scriptText, fileName }) =>
+              setConfig((prevConfig) => ({
+                ...prevConfig,
+                inlineScript: scriptText,
+                isGeneratedScript: true,
+                fileName,
+              }))
+            }
+            script={config.inlineScript}
+            fileName={config.fileName}
+          />
+          <EuiSpacer size="s" />
+          {params}
+        </>
       ),
     },
   ];

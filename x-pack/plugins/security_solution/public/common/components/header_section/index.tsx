@@ -51,7 +51,9 @@ const Header = styled.header<HeaderProps>`
 Header.displayName = 'Header';
 
 export interface HeaderSectionProps extends HeaderProps {
+  alignHeader?: 'center' | 'baseline' | 'stretch' | 'flexStart' | 'flexEnd';
   children?: React.ReactNode;
+  outerDirection?: 'row' | 'rowReverse' | 'column' | 'columnReverse' | undefined;
   growLeftSplit?: boolean;
   headerFilters?: string | React.ReactNode;
   height?: number;
@@ -66,19 +68,39 @@ export interface HeaderSectionProps extends HeaderProps {
   toggleQuery?: (status: boolean) => void;
   toggleStatus?: boolean;
   title: string | React.ReactNode;
+  inspectTitle?: string;
   titleSize?: EuiTitleSize;
   tooltip?: string;
 }
 
+export const getHeaderAlignment = ({
+  alignHeader,
+  stackHeader,
+}: {
+  alignHeader?: 'center' | 'baseline' | 'stretch' | 'flexStart' | 'flexEnd';
+  stackHeader?: boolean;
+}) => {
+  if (alignHeader != null) {
+    return alignHeader;
+  } else if (stackHeader) {
+    return undefined;
+  } else {
+    return 'center';
+  }
+};
+
 const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
+  alignHeader,
   border,
   children,
+  outerDirection = 'column',
   growLeftSplit = true,
   headerFilters,
   height,
   hideSubtitle = false,
   id,
   inspectMultiple = false,
+  inspectTitle,
   isInspectDisabled,
   showInspectButton = true,
   split,
@@ -108,10 +130,16 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
       className={classNames}
       $hideSubtitle={hideSubtitle}
     >
-      <EuiFlexGroup direction="column" responsive={false} gutterSize="xs">
-        <EuiFlexItem>
+      <EuiFlexGroup
+        data-test-subj="headerSectionOuterFlexGroup"
+        direction={outerDirection}
+        gutterSize="xs"
+        responsive={false}
+      >
+        <EuiFlexItem grow={growLeftSplit}>
           <EuiFlexGroup
-            alignItems={stackHeader ? undefined : 'center'}
+            alignItems={getHeaderAlignment({ alignHeader, stackHeader })}
+            data-test-subj="headerSectionInnerFlexGroup"
             direction={stackHeader ? 'column' : 'row'}
             gutterSize="s"
           >
@@ -158,13 +186,14 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
                   </EuiFlexGroup>
                 </EuiFlexItem>
 
-                {id && showInspectButton && toggleStatus && (
+                {id && toggleStatus && (
                   <EuiFlexItem grow={false}>
                     <InspectButton
                       isDisabled={isInspectDisabled}
                       queryId={id}
                       multiple={inspectMultiple}
-                      title={title}
+                      showInspectButton={showInspectButton}
+                      title={inspectTitle != null ? inspectTitle : title}
                     />
                   </EuiFlexItem>
                 )}

@@ -37,6 +37,21 @@ ruleTester.run('@kbn/eslint/module-migration', rule, {
         ],
       ],
     },
+
+    {
+      code: dedent`
+        import "foo/bar"
+      `,
+      options: [
+        [
+          {
+            from: 'foo',
+            to: 'bar',
+            exact: true,
+          },
+        ],
+      ],
+    },
   ],
 
   invalid: [
@@ -146,6 +161,32 @@ ruleTester.run('@kbn/eslint/module-migration', rule, {
       ],
       output: dedent`
         import '../../common/foo'
+      `,
+    },
+
+    {
+      code: dedent`
+        import 'foo'
+        import 'foo/bar'
+      `,
+      options: [
+        [
+          {
+            from: 'foo',
+            to: 'bar',
+            exact: true,
+          },
+        ],
+      ],
+      errors: [
+        {
+          line: 1,
+          message: 'Imported module "foo" should be "bar"',
+        },
+      ],
+      output: dedent`
+        import 'bar'
+        import 'foo/bar'
       `,
     },
   ],

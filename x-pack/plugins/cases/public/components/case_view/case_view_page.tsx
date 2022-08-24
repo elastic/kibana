@@ -123,13 +123,16 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
                 name: (
                   <>
                     {ALERTS_TAB}
-                    <ExperimentalBadge
-                      label={EXPERIMENTAL_LABEL}
-                      size="s"
-                      iconType="beaker"
-                      tooltipContent={EXPERIMENTAL_DESC}
-                      tooltipPosition="bottom"
-                    />
+                    {features.alerts.isExperimental ? (
+                      <ExperimentalBadge
+                        label={EXPERIMENTAL_LABEL}
+                        size="s"
+                        iconType="beaker"
+                        tooltipContent={EXPERIMENTAL_DESC}
+                        tooltipPosition="bottom"
+                        data-test-subj="case-view-alerts-table-experimental-badge"
+                      />
+                    ) : null}
                   </>
                 ),
                 content: <CaseViewAlerts caseData={caseData} />,
@@ -141,6 +144,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
         actionsNavigation,
         caseData,
         features.alerts.enabled,
+        features.alerts.isExperimental,
         ruleDetailsNavigation,
         showAlertDetails,
         useFetchAlertData,

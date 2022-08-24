@@ -8,21 +8,33 @@
 
 import type { MgetResponseItem } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
+import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type {
+  SavedObjectsBaseOptions,
+  SavedObjectsBulkResolveObject,
+  SavedObjectsResolveResponse,
+  SavedObjectsIncrementCounterField,
+  SavedObjectsIncrementCounterOptions,
+} from '@kbn/core-saved-objects-api-server';
+import type {
+  ISavedObjectTypeRegistry,
+  SavedObjectsRawDocSource,
+} from '@kbn/core-saved-objects-server';
+import {
+  SavedObjectsErrorHelpers,
+  type DecoratedError,
+} from '@kbn/core-saved-objects-utils-server';
+import {
+  LEGACY_URL_ALIAS_TYPE,
+  type LegacyUrlAlias,
+  type SavedObjectsSerializer,
+} from '@kbn/core-saved-objects-base-server-internal';
 import {
   CORE_USAGE_STATS_ID,
   CORE_USAGE_STATS_TYPE,
   REPOSITORY_RESOLVE_OUTCOME_STATS,
 } from '../../../core_usage_data';
-import { isNotFoundFromUnsupportedServer } from '../../../elasticsearch';
-import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
-import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
-import type { SavedObjectsRawDocSource, SavedObjectsSerializer } from '../../serialization';
-import type { SavedObject, SavedObjectsBaseOptions } from '../../types';
-import type {
-  SavedObjectsBulkResolveObject,
-  SavedObjectsResolveResponse,
-} from '../saved_objects_client';
-import { DecoratedError, SavedObjectsErrorHelpers } from './errors';
 import {
   getCurrentTime,
   getSavedObjectFromSource,
@@ -33,10 +45,6 @@ import {
   isLeft,
   isRight,
 } from './internal_utils';
-import {
-  SavedObjectsIncrementCounterField,
-  SavedObjectsIncrementCounterOptions,
-} from './repository';
 import type { RepositoryEsClient } from './repository_es_client';
 
 /**

@@ -12,9 +12,9 @@ import { useKibana } from '../../lib/kibana';
 import { inputsSelectors } from '../../store';
 import { inputsActions } from '../../store/inputs';
 import { useInitializeUrlParam } from '../../utils/global_query_string';
-import { CONSTANTS } from '../../components/url_state/constants';
+import { URL_PARAM_KEY } from '../use_url_state';
 
-export const useInitSearchBarUrlParams = () => {
+export const useInitSearchBarFromUrlParams = () => {
   const dispatch = useDispatch();
   const { filterManager, savedQueries } = useKibana().services.data.query;
   const getGlobalFiltersQuerySelector = useMemo(
@@ -23,7 +23,7 @@ export const useInitSearchBarUrlParams = () => {
   );
   const filtersFromStore = useSelector(getGlobalFiltersQuerySelector);
 
-  const onInitializeAppQueryUrlParam = useCallback(
+  const onInitializeAppQueryFromUrlParam = useCallback(
     (initialState: Query | null) => {
       if (initialState != null) {
         dispatch(
@@ -38,7 +38,7 @@ export const useInitSearchBarUrlParams = () => {
     [dispatch]
   );
 
-  const onInitializeFiltersUrlParam = useCallback(
+  const onInitializeFiltersFromUrlParam = useCallback(
     (initialState: Filter[] | null) => {
       if (initialState != null) {
         filterManager.setFilters(initialState);
@@ -63,7 +63,7 @@ export const useInitSearchBarUrlParams = () => {
     [filterManager, dispatch, filtersFromStore]
   );
 
-  const onInitializeSavedQueryUrlParam = useCallback(
+  const onInitializeSavedQueryFromUrlParam = useCallback(
     (savedQueryId: string | null) => {
       if (savedQueryId != null && savedQueryId !== '') {
         savedQueries.getSavedQuery(savedQueryId).then((savedQueryData) => {
@@ -91,7 +91,7 @@ export const useInitSearchBarUrlParams = () => {
     [dispatch, filterManager, savedQueries]
   );
 
-  useInitializeUrlParam(CONSTANTS.appQuery, onInitializeAppQueryUrlParam);
-  useInitializeUrlParam(CONSTANTS.filters, onInitializeFiltersUrlParam);
-  useInitializeUrlParam(CONSTANTS.savedQuery, onInitializeSavedQueryUrlParam);
+  useInitializeUrlParam(URL_PARAM_KEY.appQuery, onInitializeAppQueryFromUrlParam);
+  useInitializeUrlParam(URL_PARAM_KEY.filters, onInitializeFiltersFromUrlParam);
+  useInitializeUrlParam(URL_PARAM_KEY.savedQuery, onInitializeSavedQueryFromUrlParam);
 };

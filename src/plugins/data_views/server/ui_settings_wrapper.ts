@@ -14,15 +14,15 @@ export class UiSettingsServerToCommon implements UiSettingsCommon {
   constructor(uiSettings: IUiSettingsClient) {
     this.uiSettings = uiSettings;
   }
-  get<T = any>(key: string): Promise<T> {
+  get<T = unknown>(key: string): Promise<T | undefined> {
     return this.uiSettings.get(key);
   }
 
-  getAll<T = any>(): Promise<Record<string, T>> {
+  getAll<T = unknown>(): Promise<Record<string, T>> {
     return this.uiSettings.getAll();
   }
 
-  set(key: string, value: any) {
+  set(key: string, value: unknown) {
     return this.uiSettings.set(key, value);
   }
 

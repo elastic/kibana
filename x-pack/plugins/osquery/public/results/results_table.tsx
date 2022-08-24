@@ -17,10 +17,10 @@ import {
   EuiCallOut,
   EuiCode,
   EuiDataGrid,
+  EuiPanel,
   EuiLink,
   EuiLoadingContent,
   EuiProgress,
-  EuiSpacer,
   EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -28,6 +28,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { createContext, useEffect, useState, useCallback, useContext, useMemo } from 'react';
 
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
+import type { ECSMapping } from '../../common/schemas/common';
 import { useAllResults } from './use_all_results';
 import type { ResultEdges } from '../../common/search_strategy';
 import { Direction } from '../../common/search_strategy';
@@ -41,7 +42,6 @@ import {
 } from '../packs/pack_queries_status_table';
 import { useActionResultsPrivileges } from '../action_results/use_action_privileges';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
-import { useActionDetails } from '../actions/use_action_details';
 
 const DataContext = createContext<ResultEdges>([]);
 
@@ -49,6 +49,7 @@ interface ResultsTableComponentProps {
   actionId: string;
   selectedAgent?: string;
   agentIds?: string[];
+  ecsMapping?: ECSMapping;
   endDate?: string;
   startDate?: string;
   addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
@@ -57,13 +58,13 @@ interface ResultsTableComponentProps {
 const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   actionId,
   agentIds,
+  ecsMapping,
   startDate,
   endDate,
   addToTimeline,
 }) => {
   const [isLive, setIsLive] = useState(true);
   const { data: hasActionResultsPrivileges } = useActionResultsPrivileges();
-  const { data: actionDetails } = useActionDetails({ actionId });
 
   const {
     // @ts-expect-error update types
@@ -130,10 +131,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     [visibleColumns, setVisibleColumns]
   );
 
-  const ecsMappingColumns = useMemo(
-    () => keys(get('actionDetails._source.data.ecs_mapping', actionDetails) || {}),
-    [actionDetails]
-  );
+  const ecsMappingColumns = useMemo(() => keys(ecsMapping || {}), [ecsMapping]);
 
   const renderCellValue: EuiDataGridProps['renderCellValue'] = useMemo(
     () =>
@@ -185,29 +183,25 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     [onChangeItemsPerPage, onChangePage, pagination]
   );
 
-  const ecsMapping = useMemo(() => {
-    const mapping = get('actionDetails._source.data.ecs_mapping', actionDetails);
-    if (!mapping) return;
+  const ecsMappingConfig = useMemo(() => {
+    if (!ecsMapping) return;
 
     return reduce(
-      (acc, [key, value]) => {
-        // @ts-expect-error update types
+      (acc: Record<string, string[]>, [key, value]) => {
         if (value?.field) {
-          // @ts-expect-error update types
           acc[value?.field] = [...(acc[value?.field] ?? []), key];
         }
 
         return acc;
       },
       {},
-      Object.entries(mapping)
+      Object.entries(ecsMapping)
     );
-  }, [actionDetails]);
+  }, [ecsMapping]);
 
   const getHeaderDisplay = useCallback(
     (columnName: string) => {
-      // @ts-expect-error update types
-      if (ecsMapping && ecsMapping[columnName]) {
+      if (ecsMappingConfig && ecsMappingConfig[columnName]) {
         return (
           <>
             {columnName}{' '}
@@ -221,12 +215,9 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
                   />
                   {`:`}
                   <ul>
-                    {
-                      // @ts-expect-error update types
-                      ecsMapping[columnName].map((fieldName) => (
-                        <li key={fieldName}>{fieldName}</li>
-                      ))
-                    }
+                    {ecsMappingConfig[columnName].map((fieldName) => (
+                      <li key={fieldName}>{fieldName}</li>
+                    ))}
                   </ul>
                 </>
               }
@@ -236,7 +227,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
         );
       }
     },
-    [ecsMapping]
+    [ecsMappingConfig]
   );
 
   useEffect(() => {
@@ -365,8 +356,8 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
         return !!(
           aggregations.totalResponded !== agentIds?.length ||
-          allResultsData?.totalCount !== aggregations?.totalRowCount ||
-          (allResultsData?.totalCount && !allResultsData?.edges.length)
+          allResultsData?.total !== aggregations?.totalRowCount ||
+          (allResultsData?.total && !allResultsData?.edges.length)
         );
       }),
     [
@@ -374,7 +365,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
       aggregations.totalResponded,
       aggregations?.totalRowCount,
       allResultsData?.edges.length,
-      allResultsData?.totalCount,
+      allResultsData?.total,
       expired,
     ]
   );
@@ -415,10 +406,9 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
       {isLive && <EuiProgress color="primary" size="xs" />}
 
       {!allResultsData?.edges.length ? (
-        <>
+        <EuiPanel hasShadow={false}>
           <EuiCallOut title={generateEmptyDataMessage(aggregations.totalResponded)} />
-          <EuiSpacer />
-        </>
+        </EuiPanel>
       ) : (
         <DataContext.Provider value={allResultsData?.edges}>
           <EuiDataGrid
@@ -426,7 +416,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
             aria-label="Osquery results"
             columns={columns}
             columnVisibility={columnVisibility}
-            rowCount={allResultsData?.totalCount ?? 0}
+            rowCount={allResultsData?.total ?? 0}
             renderCellValue={renderCellValue}
             leadingControlColumns={leadingControlColumns}
             sorting={tableSorting}

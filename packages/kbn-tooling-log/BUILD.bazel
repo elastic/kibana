@@ -54,13 +54,15 @@ TYPES_DEPS = [
   "@npm//tslib",
   "@npm//@types/node",
   "@npm//@types/jest",
-  "//packages/kbn-jest-serializers:npm_module_types" # needed for windows development, only used in tests
+  "//packages/kbn-some-dev-log:npm_module_types",
+  "//packages/kbn-jest-serializers:npm_module_types", # needed for windows development, only used in tests
 ]
 
 jsts_transpiler(
   name = "target_node",
   srcs = SRCS,
   build_pkg_name = package_name(),
+  root_input_dir = "src",
 )
 
 ts_config(

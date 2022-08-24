@@ -23,7 +23,6 @@ import {
   NodeMetricsTableData,
   NumberCell,
   StepwisePagination,
-  UptimeCell,
 } from '../shared';
 import type { ContainerNodeMetricsRow } from './use_container_metrics_table';
 
@@ -116,30 +115,17 @@ function containerNodeColumns(
 ): Array<EuiBasicTableColumn<ContainerNodeMetricsRow>> {
   return [
     {
-      name: i18n.translate('xpack.infra.metricsTable.container.nameColumnHeader', {
-        defaultMessage: 'Name',
+      name: i18n.translate('xpack.infra.metricsTable.container.idColumnHeader', {
+        defaultMessage: 'Id',
       }),
-      field: 'name',
+      field: 'id',
       truncateText: true,
       textOnly: true,
-      render: (name: string) => {
+      render: (id: string) => {
         return (
-          <MetricsNodeDetailsLink
-            id={name}
-            label={name}
-            nodeType={'container'}
-            timerange={timerange}
-          />
+          <MetricsNodeDetailsLink id={id} label={id} nodeType={'container'} timerange={timerange} />
         );
       },
-    },
-    {
-      name: i18n.translate('xpack.infra.metricsTable.container.uptimeColumnHeader', {
-        defaultMessage: 'Uptime',
-      }),
-      field: 'uptime',
-      align: 'right',
-      render: (uptime: number) => <UptimeCell uptimeMs={uptime} />,
     },
     {
       name: i18n.translate(

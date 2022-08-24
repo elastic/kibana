@@ -86,24 +86,6 @@ const barColors = {
   closed: '#d3dae6',
 };
 
-export const emptyChartSettings = [
-  {
-    key: 'open',
-    value: [{ y: 20, x: STATUS_OPEN, g: STATUS_OPEN }],
-    color: barColors.empty,
-  },
-  {
-    key: 'in-progress',
-    value: [{ y: 20, x: STATUS_IN_PROGRESS, g: STATUS_IN_PROGRESS }],
-    color: barColors.empty,
-  },
-  {
-    key: 'closed',
-    value: [{ y: 20, x: STATUS_CLOSED, g: STATUS_CLOSED }],
-    color: barColors.empty,
-  },
-];
-
 const StyledEuiFlexItem = styled(EuiFlexItem)`
   align-items: center;
   width: 70%;

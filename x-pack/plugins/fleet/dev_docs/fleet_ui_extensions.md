@@ -1,3 +1,4 @@
+TODO: update with additional extension points (Integration app, add agent flyout etc.)
 # Fleet UI Extensions
 
 Fleet's Kibana UI supports two types of UI extensions:

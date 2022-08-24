@@ -15,9 +15,10 @@ import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ManagementSetup, ManagementAppMountParams } from '@kbn/management-plugin/public';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/public';
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart as TriggersActionsStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type { DistributiveOmit } from '@elastic/eui';
 import type {
   CasesByAlertId,
   CasesByAlertIDRequest,
@@ -29,7 +30,7 @@ import type {
 } from '../common/api';
 import type { UseCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import type { UseCasesAddToNewCaseFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';
-import type { CasesOwners } from './client/helpers/can_use_cases';
+import { canUseCases } from './client/helpers/can_use_cases';
 import { getRuleIdFromEvent } from './client/helpers/get_rule_id_from_event';
 import type { GetCasesContextProps } from './client/ui/get_cases_context';
 import type { GetCasesProps } from './client/ui/get_cases';
@@ -38,8 +39,10 @@ import type { GetCreateCaseFlyoutProps } from './client/ui/get_create_case_flyou
 import type { GetRecentCasesProps } from './client/ui/get_recent_cases';
 import type { Cases, CasesStatus, CasesMetrics } from '../common/ui';
 import { groupAlertsByRule } from './client/helpers/group_alerts_by_rule';
+import { getUICapabilities } from './client/helpers/capabilities';
 import type { AttachmentFramework } from './client/attachment_framework/types';
 import { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
+import { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
 
 export interface CasesPluginSetup {
   security: SecurityPluginSetup;
@@ -54,6 +57,7 @@ export interface CasesPluginStart {
   storage: Storage;
   triggersActionsUi: TriggersActionsStart;
   features: FeaturesPluginStart;
+  security: SecurityPluginStart;
   spaces?: SpacesPluginStart;
 }
 
@@ -63,10 +67,7 @@ export interface CasesPluginStart {
  * Leaving it out currently in lieu of RBAC changes
  */
 
-export type StartServices = CoreStart &
-  CasesPluginStart & {
-    security: SecurityPluginSetup;
-  };
+export type StartServices = CoreStart & CasesPluginStart;
 
 export interface RenderAppProps {
   mountParams: ManagementAppMountParams;
@@ -75,6 +76,7 @@ export interface RenderAppProps {
   storage: Storage;
   kibanaVersion: string;
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
+  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
 }
 
 export interface CasesUiSetup {
@@ -135,7 +137,8 @@ export interface CasesUiStart {
      * @param owners an array of CaseOwners that should be queried for permission
      * @returns An object denoting the case permissions of the current user
      */
-    canUseCases: (owners?: CasesOwners[]) => { crud: boolean; read: boolean };
+    canUseCases: ReturnType<typeof canUseCases>;
+    getUICapabilities: typeof getUICapabilities;
     getRuleIdFromEvent: typeof getRuleIdFromEvent;
     groupAlertsByRule: typeof groupAlertsByRule;
   };
@@ -143,5 +146,7 @@ export interface CasesUiStart {
 
 export type SupportedCaseAttachment = CommentRequestAlertType | CommentRequestUserType;
 export type CaseAttachments = SupportedCaseAttachment[];
+export type CaseAttachmentWithoutOwner = DistributiveOmit<SupportedCaseAttachment, 'owner'>;
+export type CaseAttachmentsWithoutOwner = CaseAttachmentWithoutOwner[];
 
 export type ServerError = IHttpFetchError<ResponseErrorBody>;

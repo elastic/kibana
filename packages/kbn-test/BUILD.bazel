@@ -32,7 +32,6 @@ NPM_MODULE_EXTRA_FILES = [
   "jest_integration_node/jest-preset.js",
   "jest_node/jest-preset.js",
   "jest.config.js",
-  "README.md",
   "package.json",
 ]
 
@@ -76,6 +75,7 @@ RUNTIME_DEPS = [
     "@npm//rxjs",
     "@npm//semver",
     "@npm//strip-ansi",
+    "@npm//supertest",
     "@npm//xmlbuilder",
     "@npm//xml2js",
 ]
@@ -86,6 +86,7 @@ TYPES_DEPS = [
   "//packages/kbn-utils:npm_module_types",
   "//packages/kbn-tooling-log:npm_module_types",
   "//packages/kbn-bazel-packages:npm_module_types",
+  "//packages/kbn-get-repo-files:npm_module_types",
   "@npm//@elastic/elasticsearch",
   "@npm//@jest/console",
   "@npm//@jest/reporters",
@@ -123,6 +124,7 @@ TYPES_DEPS = [
   "@npm//@types/react-redux",
   "@npm//@types/react-router-dom",
   "@npm//@types/semver",
+  "@npm//@types/supertest",
   "@npm//@types/uuid",
   "@npm//@types/xml2js",
 ]
@@ -131,6 +133,7 @@ jsts_transpiler(
   name = "target_node",
   srcs = SRCS,
   build_pkg_name = package_name(),
+  root_input_dir = "src",
 )
 
 ts_config(

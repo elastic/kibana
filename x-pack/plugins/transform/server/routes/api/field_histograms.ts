@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import { fetchHistogramsForFields } from '@kbn/ml-agg-utils';
+
 import { dataViewTitleSchema, DataViewTitleSchema } from '../../../common/api_schemas/common';
 import {
   fieldHistogramsRequestSchema,
   FieldHistogramsRequestSchema,
 } from '../../../common/api_schemas/field_histograms';
-import { getHistogramsForFields } from '../../shared_imports';
 import { RouteDependencies } from '../../types';
 
 import { addBasePath } from '..';
@@ -33,8 +34,8 @@ export function registerFieldHistogramsRoutes({ router, license }: RouteDependen
 
         try {
           const esClient = (await ctx.core).elasticsearch.client;
-          const resp = await getHistogramsForFields(
-            esClient,
+          const resp = await fetchHistogramsForFields(
+            esClient.asCurrentUser,
             dataViewTitle,
             query,
             fields,

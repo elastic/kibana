@@ -72,7 +72,6 @@ const HistogramPanel = styled(Panel)<{ height?: number }>`
 export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> = ({
   chartHeight,
   defaultStackByOption,
-  docValueFields,
   endDate,
   errorMessage,
   filterQuery,
@@ -138,6 +137,11 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [selectedStackByOption, setSelectedStackByOption] =
     useState<MatrixHistogramOption>(defaultStackByOption);
+
+  useEffect(() => {
+    setSelectedStackByOption(defaultStackByOption);
+  }, [defaultStackByOption]);
+
   const setSelectedChartOptionCallback = useCallback(
     (event: React.ChangeEvent<HTMLSelectElement>) => {
       setSelectedStackByOption(
@@ -171,7 +175,6 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     stackByField: selectedStackByOption.value,
     runtimeMappings,
     isPtrIncluded,
-    docValueFields,
     skip: querySkip,
   };
   const [loading, { data, inspect, totalCount, refetch }] =

@@ -10,7 +10,7 @@ import {
   ExpressionFunctionDefinition,
   ExpressionValueRender,
   Style,
-} from '@kbn/expressions-plugin';
+} from '@kbn/expressions-plugin/common';
 
 export enum Shape {
   ARROW = 'arrow',

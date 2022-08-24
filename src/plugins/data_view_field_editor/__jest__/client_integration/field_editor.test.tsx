@@ -98,7 +98,7 @@ describe('<FieldEditor />', () => {
   test('should accept a defaultValue and onChange prop to forward the form state', async () => {
     const field = {
       name: 'foo',
-      type: 'date',
+      type: 'date' as const,
       script: { source: 'emit("hello")' },
     };
 

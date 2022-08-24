@@ -36,10 +36,6 @@ jest.mock('../visualization_actions', () => ({
   )),
 }));
 
-jest.mock('../inspect', () => ({
-  InspectButton: jest.fn(() => <div data-test-subj="mock-inspect" />),
-}));
-
 jest.mock('./utils', () => ({
   getBarchartConfigs: jest.fn(),
   getCustomChartData: jest.fn().mockReturnValue(true),
@@ -50,7 +46,7 @@ jest.mock('../../utils/route/use_route_spy', () => ({
     {
       detailName: 'mockHost',
       pageName: 'hosts',
-      tabName: 'externalAlerts',
+      tabName: 'events',
     },
   ]),
 }));
@@ -185,7 +181,7 @@ describe('Matrix Histogram Component', () => {
         {
           detailName: 'mockHost',
           pageName: 'hosts',
-          tabName: 'externalAlerts',
+          tabName: 'events',
         },
       ]);
 
@@ -196,7 +192,7 @@ describe('Matrix Histogram Component', () => {
       wrapper = mount(<MatrixHistogram {...testProps} />, {
         wrappingComponent: TestProviders,
       });
-      expect(wrapper.find('[data-test-subj="mock-inspect"]').exists()).toBe(false);
+      expect(wrapper.find('[data-test-subj="inspect-icon-button"]').exists()).toBe(false);
     });
 
     test("it doesn't render Inspect button by default on Network page", () => {
@@ -215,7 +211,7 @@ describe('Matrix Histogram Component', () => {
       wrapper = mount(<MatrixHistogram {...testProps} />, {
         wrappingComponent: TestProviders,
       });
-      expect(wrapper.find('[data-test-subj="mock-inspect"]').exists()).toBe(false);
+      expect(wrapper.find('[data-test-subj="inspect-icon-button"]').exists()).toBe(false);
     });
 
     test('it render Inspect button by default on other pages', () => {
@@ -234,7 +230,7 @@ describe('Matrix Histogram Component', () => {
       wrapper = mount(<MatrixHistogram {...testProps} />, {
         wrappingComponent: TestProviders,
       });
-      expect(wrapper.find('[data-test-subj="mock-inspect"]').exists()).toBe(true);
+      expect(wrapper.find('[data-test-subj="inspect-icon-button"]').exists()).toBe(true);
     });
   });
 
@@ -244,7 +240,7 @@ describe('Matrix Histogram Component', () => {
         {
           detailName: 'mockHost',
           pageName: 'hosts',
-          tabName: 'externalAlerts',
+          tabName: 'events',
         },
       ]);
 
@@ -266,7 +262,7 @@ describe('Matrix Histogram Component', () => {
         {
           detailName: undefined,
           pageName: 'network',
-          tabName: 'external-alerts',
+          tabName: 'events',
         },
       ]);
 

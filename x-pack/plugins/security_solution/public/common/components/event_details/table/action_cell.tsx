@@ -73,7 +73,7 @@ export const ActionCell: React.FC<Props> = React.memo(
         applyWidthAndPadding={applyWidthAndPadding}
         closeTopN={closeTopN}
         dataType={data.type}
-        dataProvider={actionCellConfig?.dataProvider}
+        dataProvider={actionCellConfig?.dataProviders}
         enableOverflowButton={true}
         field={data.field}
         isAggregatable={aggregatable}
@@ -86,7 +86,7 @@ export const ActionCell: React.FC<Props> = React.memo(
         timelineId={timelineId ?? timelineIdFind}
         toggleColumn={toggleColumn}
         toggleTopN={toggleTopN}
-        values={actionCellConfig?.stringValues}
+        values={actionCellConfig?.values}
       />
     );
   }

@@ -20,7 +20,6 @@ import { SplitTooltip } from './split_tooltip';
 export const getHeatmapVisTypeDefinition = ({
   showElasticChartsOptions = false,
   palettes,
-  trackUiMetric,
 }: HeatmapTypeProps): VisTypeDefinition<HeatmapVisParams> => ({
   name: 'heatmap',
   title: i18n.translate('visTypeHeatmap.heatmap.heatmapTitle', { defaultMessage: 'Heat map' }),
@@ -68,7 +67,6 @@ export const getHeatmapVisTypeDefinition = ({
     optionsTemplate: getHeatmapOptions({
       showElasticChartsOptions,
       palettes,
-      trackUiMetric,
     }),
     schemas: [
       {

@@ -83,7 +83,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
   );
   const getFilters = () => [...hostDetailsPageFilters, ...filters];
 
-  const narrowDateRange = useCallback<UpdateDateRange>(
+  const updateDateRange = useCallback<UpdateDateRange>(
     ({ x }) => {
       if (!x) {
         return;
@@ -99,8 +99,21 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     },
     [dispatch]
   );
+  const narrowDateRange = useCallback(
+    (score, interval) => {
+      const fromTo = scoreIntervalToDateTime(score, interval);
+      dispatch(
+        setAbsoluteRangeDatePicker({
+          id: 'global',
+          from: fromTo.from,
+          to: fromTo.to,
+        })
+      );
+    },
+    [dispatch]
+  );
 
-  const { docValueFields, indexPattern, indicesExist, selectedPatterns } = useSourcererDataView();
+  const { indexPattern, indicesExist, selectedPatterns } = useSourcererDataView();
   const [loading, { inspect, hostDetails: hostOverview, id, refetch }] = useHostDetails({
     endDate: to,
     startDate: from,
@@ -141,7 +154,6 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                 border
                 subtitle={
                   <LastEventTime
-                    docValueFields={docValueFields}
                     indexKey={LastEventIndexKey.hostDetails}
                     hostName={detailName}
                     indexNames={selectedPatterns}
@@ -166,14 +178,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                     loading={loading}
                     startDate={from}
                     endDate={to}
-                    narrowDateRange={(score, interval) => {
-                      const fromTo = scoreIntervalToDateTime(score, interval);
-                      setAbsoluteRangeDatePicker({
-                        id: 'global',
-                        from: fromTo.from,
-                        to: fromTo.to,
-                      });
-                    }}
+                    narrowDateRange={narrowDateRange}
                     setQuery={setQuery}
                     refetch={refetch}
                     inspect={inspect}
@@ -191,7 +196,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                 indexNames={selectedPatterns}
                 setQuery={setQuery}
                 to={to}
-                narrowDateRange={narrowDateRange}
+                updateDateRange={updateDateRange}
                 skip={isInitializing}
               />
 
@@ -221,7 +226,6 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
               filterQuery={filterQuery}
               hostDetailsPagePath={hostDetailsPagePath}
               indexPattern={indexPattern}
-              setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
             />
           </SecuritySolutionPageWrapper>
         </>

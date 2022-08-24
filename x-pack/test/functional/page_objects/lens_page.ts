@@ -45,7 +45,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async isLensPageOrFail() {
-      return await testSubjects.existOrFail('lnsApp', { timeout: 1000 });
+      return await testSubjects.existOrFail('lnsApp', { timeout: 5000 });
     },
 
     /**
@@ -70,7 +70,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async assertExpectedText(selector: string, test: (value?: string) => boolean) {
       let actualText: string | undefined;
 
-      await retry.waitForWithTimeout('assertExpectedText', 1000, async () => {
+      await retry.waitForWithTimeout('assertExpectedText', 5000, async () => {
         actualText = await find.byCssSelector(selector).then((el) => el.getVisibleText());
         return test(actualText);
       });
@@ -99,7 +99,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return retry.try(async () => {
         await testSubjects.click(`visListingTitleLink-${title}`);
         await this.isLensPageOrFail();
-        await PageObjects.unifiedSearch.closeTourPopoverByLocalStorage();
       });
     },
 
@@ -512,10 +511,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async enableTimeShift() {
-      await testSubjects.click('indexPattern-advanced-popover');
-      await retry.try(async () => {
-        await testSubjects.click('indexPattern-time-shift-enable');
-      });
+      await testSubjects.click('indexPattern-advanced-accordion');
     },
 
     async setTimeShift(shift: string) {
@@ -523,9 +519,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async enableFilter() {
-      await testSubjects.click('indexPattern-advanced-popover');
+      await testSubjects.click('indexPattern-advanced-accordion');
       await retry.try(async () => {
-        await testSubjects.click('indexPattern-filter-by-enable');
+        await testSubjects.click('indexPattern-filters-existingFilterTrigger');
       });
     },
 
@@ -1083,20 +1079,20 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param title - expected title
      * @param count - expected count of metric
      */
-    async assertMetric(title: string, count: string) {
+    async assertLegacyMetric(title: string, count: string) {
       await this.assertExactText('[data-test-subj="metric_label"]', title);
       await this.assertExactText('[data-test-subj="metric_value"]', count);
     },
 
-    async clickMetric() {
+    async clickLegacyMetric() {
       await testSubjects.click('metric_label');
     },
 
-    async setMetricDynamicColoring(coloringType: 'none' | 'labels' | 'background') {
-      await testSubjects.click('lnsMetric_dynamicColoring_groups_' + coloringType);
+    async setLegacyMetricDynamicColoring(coloringType: 'none' | 'labels' | 'background') {
+      await testSubjects.click('lnsLegacyMetric_dynamicColoring_groups_' + coloringType);
     },
 
-    async getMetricStyle() {
+    async getLegacyMetricStyle() {
       const el = await testSubjects.find('metric_value');
       const styleString = await el.getAttribute('style');
       return styleString.split(';').reduce<Record<string, string>>((memo, cssLine) => {
@@ -1135,7 +1131,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await PageObjects.dashboard.switchToEditMode();
       }
       await dashboardAddPanel.clickCreateNewLink();
-      await PageObjects.unifiedSearch.closeTourPopoverByLocalStorage();
       await this.goToTimeRange();
       await this.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -1271,8 +1266,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
               dispatchEvent(target, dropEvent, dragStartEvent.dataTransfer);
               const dragEndEvent = createEvent('dragend');
               dispatchEvent(origin, dragEndEvent, dropEvent.dataTransfer);
-            }, 100)
-          }, 100);
+            }, 200)
+          }, 200);
       `,
         dragging,
         draggedOver,
@@ -1291,7 +1286,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async dragFieldToExtraDropType(
       field: string,
       to: string,
-      type: 'duplicate' | 'swap' | 'combine'
+      type: 'duplicate' | 'swap' | 'combine',
+      visDataTestSubj?: string | undefined
     ) {
       const from = `lnsFieldListPanelField-${field}`;
       await this.dragEnterDrop(
@@ -1299,7 +1295,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         testSubjects.getCssSelector(`${to} > lnsDragDrop`),
         testSubjects.getCssSelector(`${to} > lnsDragDrop-${type}`)
       );
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.waitForVisualization(visDataTestSubj);
     },
 
     /**
@@ -1312,14 +1308,15 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async dragDimensionToExtraDropType(
       from: string,
       to: string,
-      type: 'duplicate' | 'swap' | 'combine'
+      type: 'duplicate' | 'swap' | 'combine',
+      visDataTestSubj?: string | undefined
     ) {
       await this.dragEnterDrop(
         testSubjects.getCssSelector(from),
         testSubjects.getCssSelector(`${to} > lnsDragDrop`),
         testSubjects.getCssSelector(`${to} > lnsDragDrop-${type}`)
       );
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.waitForVisualization(visDataTestSubj);
     },
 
     async switchToQuickFunctions() {

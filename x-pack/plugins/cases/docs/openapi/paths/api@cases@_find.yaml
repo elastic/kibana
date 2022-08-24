@@ -1,5 +1,6 @@
 get:
-  summary: Retrieves a paginated subset of cases.
+  summary: Retrieves a paginated subset of cases from the default space.
+  operationId: getCasesDefaultSpace
   description: >
     You must have `read` privileges for the **Cases** feature in the
     **Management**, **Observability**, or **Security** section of the Kibana

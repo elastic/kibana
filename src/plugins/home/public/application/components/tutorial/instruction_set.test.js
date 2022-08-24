@@ -46,7 +46,7 @@ test('render', () => {
       isCloudEnabled={false}
     />
   );
-  expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(component).toMatchSnapshot();
 });
 
 describe('statusCheckState', () => {
@@ -72,7 +72,7 @@ describe('statusCheckState', () => {
         isCloudEnabled={false}
       />
     );
-    expect(component).toMatchSnapshot(); // eslint-disable-line
+    expect(component).toMatchSnapshot();
   });
 
   test('checking status', () => {
@@ -89,7 +89,7 @@ describe('statusCheckState', () => {
         isCloudEnabled={false}
       />
     );
-    expect(component).toMatchSnapshot(); // eslint-disable-line
+    expect(component).toMatchSnapshot();
   });
 
   test('failed status check - error', () => {
@@ -106,7 +106,7 @@ describe('statusCheckState', () => {
         isCloudEnabled={false}
       />
     );
-    expect(component).toMatchSnapshot(); // eslint-disable-line
+    expect(component).toMatchSnapshot();
   });
 
   test('failed status check - no data', () => {
@@ -123,7 +123,7 @@ describe('statusCheckState', () => {
         isCloudEnabled={false}
       />
     );
-    expect(component).toMatchSnapshot(); // eslint-disable-line
+    expect(component).toMatchSnapshot();
   });
 
   test('successful status check', () => {
@@ -140,6 +140,6 @@ describe('statusCheckState', () => {
         isCloudEnabled={false}
       />
     );
-    expect(component).toMatchSnapshot(); // eslint-disable-line
+    expect(component).toMatchSnapshot();
   });
 });

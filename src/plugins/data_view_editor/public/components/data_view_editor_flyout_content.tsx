@@ -20,6 +20,7 @@ import {
   useFormData,
   useKibana,
   GetFieldsOptions,
+  UseField,
 } from '../shared_imports';
 
 import { ensureMinimumTime, getIndices, extractTimeFields, getMatchedIndices } from '../lib';
@@ -55,7 +56,7 @@ export interface Props {
   /**
    * Handler for the "save" footer button
    */
-  onSave: (dataViewSpec: DataViewSpec) => void;
+  onSave: (dataViewSpec: DataViewSpec, persist: boolean) => void;
   /**
    * Handler for the "cancel" footer button
    */
@@ -63,6 +64,7 @@ export interface Props {
   defaultTypeIsRollup?: boolean;
   requireTimestampField?: boolean;
   editData?: DataView;
+  allowAdHoc: boolean;
 }
 
 const editorTitle = i18n.translate('indexPatternEditor.title', {
@@ -79,6 +81,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   defaultTypeIsRollup,
   requireTimestampField = false,
   editData,
+  allowAdHoc,
 }: Props) => {
   const {
     services: { http, dataViews, uiSettings, overlays },
@@ -88,6 +91,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
     // Prefill with data if editData exists
     defaultValue: {
       type: defaultTypeIsRollup ? INDEX_PATTERN_TYPE.ROLLUP : INDEX_PATTERN_TYPE.DEFAULT,
+      isAdHoc: false,
       ...(editData
         ? {
             title: editData.title,
@@ -129,11 +133,11 @@ const IndexPatternEditorFlyoutContentComponent = ({
           dataViewName: formData.name || formData.title,
           overlays,
           onEdit: async () => {
-            await onSave(indexPatternStub);
+            await onSave(indexPatternStub, !formData.isAdHoc);
           },
         });
       } else {
-        await onSave(indexPatternStub);
+        await onSave(indexPatternStub, !formData.isAdHoc);
       }
     },
   });
@@ -189,10 +193,11 @@ const IndexPatternEditorFlyoutContentComponent = ({
   useEffect(() => {
     loadSources();
     const getTitles = async () => {
-      const indexPatternTitles = await dataViews.getTitles(editData ? true : false);
+      const dataViewListItems = await dataViews.getIdsWithTitle(editData ? true : false);
+      const indexPatternNames = dataViewListItems.map((item) => item.name || item.title);
 
       setExistingIndexPatterns(
-        editData ? indexPatternTitles.filter((v) => v !== editData.title) : indexPatternTitles
+        editData ? indexPatternNames.filter((v) => v !== editData.name) : indexPatternNames
       );
       setIsLoadingIndexPatterns(false);
     };
@@ -222,9 +227,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
       const currentLoadingTimestampFieldsIdx = ++currentLoadingTimestampFieldsRef.current;
       let timestampOptions: TimestampOption[] = [];
       const isValidResult =
-        !existingIndexPatterns.includes(query) &&
-        matchedIndices.exactMatchedIndices.length > 0 &&
-        !isLoadingMatchedIndices;
+        matchedIndices.exactMatchedIndices.length > 0 && !isLoadingMatchedIndices;
       if (isValidResult) {
         setIsLoadingTimestampFields(true);
         const getFieldsOptions: GetFieldsOptions = {
@@ -245,7 +248,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
       return timestampOptions;
     },
     [
-      existingIndexPatterns,
       dataViews,
       requireTimestampField,
       rollupIndex,
@@ -371,11 +373,12 @@ const IndexPatternEditorFlyoutContentComponent = ({
           <h2>{editData ? editorTitleEditMode : editorTitle}</h2>
         </EuiTitle>
         <Form form={form} className="indexPatternEditor__form">
+          <UseField path="isAdHoc" />
           {indexPatternTypeSelect}
           <EuiSpacer size="l" />
           <EuiFlexGroup>
             <EuiFlexItem>
-              <NameField editData={editData} />
+              <NameField editData={editData} existingDataViewNames={existingIndexPatterns} />
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="l" />
@@ -383,7 +386,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
             <EuiFlexItem>
               <TitleField
                 isRollup={form.getFields().type?.value === INDEX_PATTERN_TYPE.ROLLUP}
-                existingIndexPatterns={existingIndexPatterns}
                 refreshMatchedIndices={reloadMatchedIndices}
                 matchedIndices={matchedIndices.exactMatchedIndices}
                 rollupIndicesCapabilities={rollupIndicesCapabilities}
@@ -396,7 +398,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
               <TimestampField
                 options={timestampFieldOptions}
                 isLoadingOptions={isLoadingTimestampFields}
-                isExistingIndexPattern={existingIndexPatterns.includes(title)}
                 isLoadingMatchedIndices={isLoadingMatchedIndices}
                 hasMatchedIndices={!!matchedIndices.exactMatchedIndices.length}
               />
@@ -409,9 +410,18 @@ const IndexPatternEditorFlyoutContentComponent = ({
         </Form>
         <Footer
           onCancel={onCancel}
-          onSubmit={() => form.submit()}
+          onSubmit={async (adhoc?: boolean) => {
+            const formData = form.getFormData();
+            if (!formData.name) {
+              form.updateFieldValues({ name: formData.title });
+              await form.getFields().name.validate();
+            }
+            form.setFieldValue('isAdHoc', adhoc || false);
+            form.submit();
+          }}
           submitDisabled={form.isSubmitted && !form.isValid}
           isEdit={!!editData}
+          allowAdHoc={allowAdHoc}
         />
       </FlyoutPanels.Item>
       <FlyoutPanels.Item>

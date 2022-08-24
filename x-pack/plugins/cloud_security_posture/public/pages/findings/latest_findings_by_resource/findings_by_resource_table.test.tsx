@@ -45,6 +45,9 @@ describe('<FindingsByResourceTable />', () => {
       loading: false,
       items: [],
       pagination: { pageIndex: 0, pageSize: 10, totalItemCount: 0 },
+      sorting: {
+        sort: { field: 'failed_findings', direction: 'desc' },
+      },
       setTableOptions: jest.fn(),
       onAddFilter: jest.fn(),
     };
@@ -67,6 +70,9 @@ describe('<FindingsByResourceTable />', () => {
       loading: false,
       items: data,
       pagination: { pageIndex: 0, pageSize: 10, totalItemCount: 0 },
+      sorting: {
+        sort: { field: 'failed_findings', direction: 'desc' },
+      },
       setTableOptions: jest.fn(),
       onAddFilter: jest.fn(),
     };

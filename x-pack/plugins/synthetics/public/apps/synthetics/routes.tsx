@@ -7,9 +7,8 @@
 
 import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 import React, { FC, useEffect } from 'react';
-import { tint } from 'polished';
 import { EuiPageTemplateProps, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
-import { Route, Switch } from 'react-router-dom';
+import { Route, Switch, useHistory } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
@@ -58,7 +57,10 @@ export const MONITOR_MANAGEMENT_LABEL = i18n.translate(
   }
 );
 
-const getRoutes = (euiTheme: EuiThemeComputed): RouteProps[] => {
+const getRoutes = (
+  euiTheme: EuiThemeComputed,
+  history: ReturnType<typeof useHistory>
+): RouteProps[] => {
   return [
     {
       title: i18n.translate('xpack.synthetics.gettingStartedRoute.title', {
@@ -116,6 +118,29 @@ const getRoutes = (euiTheme: EuiThemeComputed): RouteProps[] => {
         rightSideItems: [
           /* <AddMonitorBtn />*/
         ],
+        tabs: [
+          {
+            label: (
+              <FormattedMessage
+                id="xpack.synthetics.monitorManagement.overviewTab.title"
+                defaultMessage="Overview"
+              />
+            ),
+            isSelected: true,
+          },
+          {
+            label: (
+              <FormattedMessage
+                id="xpack.synthetics.monitorManagement.monitorsTab.title"
+                defaultMessage="Management"
+              />
+            ),
+            onClick: () =>
+              history.push({
+                pathname: MONITORS_ROUTE,
+              }),
+          },
+        ],
       },
     },
     {
@@ -132,19 +157,21 @@ const getRoutes = (euiTheme: EuiThemeComputed): RouteProps[] => {
         </>
       ),
       dataTestSubj: 'syntheticsMonitorManagementPage',
-      paddingSize: 'none',
-      pageBodyProps: {
-        style: { backgroundColor: tint(0.5, euiTheme.colors.body) },
-      },
-      pageContentProps: {
-        paddingSize: 'l',
-        style: { backgroundColor: euiTheme.colors.ghost },
-      },
       pageHeader: {
-        paddingSize: 'l',
-        style: { margin: 0 },
         pageTitle: <MonitorsPageHeader />,
         tabs: [
+          {
+            label: (
+              <FormattedMessage
+                id="xpack.synthetics.monitorManagement.overviewTab.title"
+                defaultMessage="Overview"
+              />
+            ),
+            onClick: () =>
+              history.push({
+                pathname: OVERVIEW_ROUTE,
+              }),
+          },
           {
             label: (
               <FormattedMessage
@@ -193,7 +220,8 @@ const RouteInit: React.FC<Pick<RouteProps, 'path' | 'title'>> = ({ path, title }
 export const PageRouter: FC = () => {
   const { addInspectorRequest } = useInspectorContext();
   const { euiTheme } = useEuiTheme();
-  const routes = getRoutes(euiTheme);
+  const history = useHistory();
+  const routes = getRoutes(euiTheme, history);
 
   apiService.addInspectorRequest = addInspectorRequest;
 

@@ -67,7 +67,7 @@ const MyEuiCommentList = styled(EuiCommentList)`
       flex-grow: 1;
     }
 
-    & .comment-action.empty-comment .euiCommentEvent--regular {
+    & .comment-action.empty-comment [class*="euiCommentEvent-regular] {
       box-shadow: none;
       .euiCommentEvent__header {
         padding: ${theme.eui.euiSizeM} ${theme.eui.euiSizeS};
@@ -95,7 +95,8 @@ export const UserActions = React.memo(
     const { detailName: caseId, commentId } = useCaseViewParams();
     const [initLoading, setInitLoading] = useState(true);
     const currentUser = useCurrentUser();
-    const { externalReferenceAttachmentTypeRegistry } = useCasesContext();
+    const { externalReferenceAttachmentTypeRegistry, persistableStateAttachmentTypeRegistry } =
+      useCasesContext();
 
     const alertIdsWithoutRuleInfo = useMemo(
       () => getManualAlertIdsWithNoRuleId(caseData.comments),
@@ -180,6 +181,7 @@ export const UserActions = React.memo(
             const userActionBuilder = builder({
               caseData,
               externalReferenceAttachmentTypeRegistry,
+              persistableStateAttachmentTypeRegistry,
               userAction,
               caseServices,
               comments: caseData.comments,
@@ -207,6 +209,7 @@ export const UserActions = React.memo(
       [
         caseUserActions,
         externalReferenceAttachmentTypeRegistry,
+        persistableStateAttachmentTypeRegistry,
         descriptionCommentListObj,
         caseData,
         caseServices,
@@ -230,7 +233,7 @@ export const UserActions = React.memo(
 
     const { permissions } = useCasesContext();
 
-    const bottomActions = permissions.all
+    const bottomActions = permissions.create
       ? [
           {
             username: (
@@ -240,7 +243,7 @@ export const UserActions = React.memo(
               />
             ),
             'data-test-subj': 'add-comment',
-            timelineIcon: (
+            timelineAvatar: (
               <UserActionAvatar username={currentUser?.username} fullName={currentUser?.fullName} />
             ),
             className: 'isEdit',

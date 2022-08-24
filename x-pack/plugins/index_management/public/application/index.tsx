@@ -35,7 +35,7 @@ export const renderApp = (
     return () => undefined;
   }
 
-  const { i18n, docLinks, notifications, application, executionContext } = core;
+  const { i18n, docLinks, notifications, application, executionContext, overlays } = core;
   const { Context: I18nContext } = i18n;
   const { services, history, setBreadcrumbs, uiSettings, kibanaVersion, theme$ } = dependencies;
 
@@ -51,6 +51,7 @@ export const renderApp = (
 
   const componentTemplateProviderValues = {
     httpClient: services.httpService.httpClient,
+    overlays,
     apiBasePath: API_BASE_PATH,
     trackMetric: services.uiMetricService.trackMetric.bind(services.uiMetricService),
     docLinks,

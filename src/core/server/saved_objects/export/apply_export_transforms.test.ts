@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { SavedObject } from '../../../types';
-import { CoreKibanaRequest } from '../../http';
-import { httpServerMock } from '../../http/http_server.mocks';
+import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { SavedObjectsExportTransform } from '@kbn/core-saved-objects-server';
 import { applyExportTransforms } from './apply_export_transforms';
-import { SavedObjectsExportTransform } from './types';
 
 const createObj = (
   type: string,

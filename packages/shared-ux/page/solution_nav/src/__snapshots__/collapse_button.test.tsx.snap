@@ -1,0 +1,23 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SolutionNavCollapseButton isCollapsed 1`] = `
+<EuiButtonIcon
+  aria-label="Open side navigation"
+  className="kbnSolutionNavCollapseButton kbnSolutionNavCollapseButton-isCollapsed"
+  color="text"
+  iconType="menuRight"
+  size="s"
+  title="Open side navigation"
+/>
+`;
+
+exports[`SolutionNavCollapseButton renders 1`] = `
+<EuiButtonIcon
+  aria-label="Collapse side navigation"
+  className="kbnSolutionNavCollapseButton"
+  color="text"
+  iconType="menuLeft"
+  size="s"
+  title="Collapse side navigation"
+/>
+`;

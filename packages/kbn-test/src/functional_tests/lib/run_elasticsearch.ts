@@ -9,7 +9,7 @@
 import { resolve } from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
 import getPort from 'get-port';
-import { KIBANA_ROOT } from './paths';
+import { REPO_ROOT } from '@kbn/utils';
 import type { Config } from '../../functional_test_runner';
 import { createTestEsCluster } from '../../es';
 
@@ -106,7 +106,7 @@ async function startEsNode(
     port: config.port,
     ssl: config.ssl,
     log,
-    basePath: resolve(KIBANA_ROOT, '.es'),
+    basePath: resolve(REPO_ROOT, '.es'),
     nodes: [
       {
         name,

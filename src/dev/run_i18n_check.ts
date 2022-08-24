@@ -120,6 +120,7 @@ run(
       {
         concurrent: false,
         exitOnError: true,
+        renderer: process.env.CI ? 'verbose' : 'default',
       }
     );
 

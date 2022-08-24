@@ -57,13 +57,12 @@ import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
 import type {
   ClusterClientMock,
   ScopedClusterClientMock,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '@kbn/core/server/elasticsearch/client/mocks';
+} from '@kbn/core-elasticsearch-client-server-mocks';
 import { EndpointHostNotFoundError } from '../../services/metadata';
 import { FleetAgentGenerator } from '../../../../common/endpoint/data_generators/fleet_agent_generator';
 import { createMockAgentClient, createMockPackageService } from '@kbn/fleet-plugin/server/mocks';
 import type { TransformGetTransformStatsResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz';
+import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
 
 class IndexNotFoundException extends Error {
   meta: { body: { error: { type: string } } };
@@ -249,30 +248,6 @@ describe('test endpoint routes', () => {
             must: [
               {
                 bool: {
-                  filter: [
-                    {
-                      terms: {
-                        'united.agent.policy_id': [],
-                      },
-                    },
-                    {
-                      exists: {
-                        field: 'united.endpoint.agent.id',
-                      },
-                    },
-                    {
-                      exists: {
-                        field: 'united.agent.agent.id',
-                      },
-                    },
-                    {
-                      term: {
-                        'united.agent.active': {
-                          value: true,
-                        },
-                      },
-                    },
-                  ],
                   must_not: {
                     terms: {
                       'agent.id': [
@@ -281,6 +256,12 @@ describe('test endpoint routes', () => {
                       ],
                     },
                   },
+                  filter: [
+                    { terms: { 'united.agent.policy_id': [] } },
+                    { exists: { field: 'united.endpoint.agent.id' } },
+                    { exists: { field: 'united.agent.agent.id' } },
+                    { term: { 'united.agent.active': { value: true } } },
+                  ],
                 },
               },
               {
@@ -291,13 +272,7 @@ describe('test endpoint routes', () => {
                         filter: [
                           {
                             bool: {
-                              should: [
-                                {
-                                  exists: {
-                                    field: 'united.agent.upgrade_started_at',
-                                  },
-                                },
-                              ],
+                              should: [{ exists: { field: 'united.agent.upgrade_started_at' } }],
                               minimum_should_match: 1,
                             },
                           },
@@ -305,13 +280,7 @@ describe('test endpoint routes', () => {
                             bool: {
                               must_not: {
                                 bool: {
-                                  should: [
-                                    {
-                                      exists: {
-                                        field: 'united.agent.upgraded_at',
-                                      },
-                                    },
-                                  ],
+                                  should: [{ exists: { field: 'united.agent.upgraded_at' } }],
                                   minimum_should_match: 1,
                                 },
                               },
@@ -324,13 +293,7 @@ describe('test endpoint routes', () => {
                       bool: {
                         must_not: {
                           bool: {
-                            should: [
-                              {
-                                exists: {
-                                  field: 'united.agent.last_checkin',
-                                },
-                              },
-                            ],
+                            should: [{ exists: { field: 'united.agent.last_checkin' } }],
                             minimum_should_match: 1,
                           },
                         },
@@ -338,14 +301,18 @@ describe('test endpoint routes', () => {
                     },
                     {
                       bool: {
-                        should: [
-                          {
-                            exists: {
-                              field: 'united.agent.unenrollment_started_at',
-                            },
-                          },
-                        ],
+                        should: [{ exists: { field: 'united.agent.unenrollment_started_at' } }],
                         minimum_should_match: 1,
+                      },
+                    },
+                    {
+                      bool: {
+                        must_not: {
+                          bool: {
+                            should: [{ exists: { field: 'united.agent.policy_revision_idx' } }],
+                            minimum_should_match: 1,
+                          },
+                        },
                       },
                     },
                   ],
@@ -356,13 +323,7 @@ describe('test endpoint routes', () => {
                 bool: {
                   must_not: {
                     bool: {
-                      should: [
-                        {
-                          match: {
-                            'host.ip': '10.140.73.246',
-                          },
-                        },
-                      ],
+                      should: [{ match: { 'host.ip': '10.140.73.246' } }],
                       minimum_should_match: 1,
                     },
                   },

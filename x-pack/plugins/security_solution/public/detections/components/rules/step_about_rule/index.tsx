@@ -45,6 +45,7 @@ import { useFetchIndex } from '../../../../common/containers/source';
 import { isThreatMatchRule } from '../../../../../common/detection_engine/utils';
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana';
+import { useRuleIndices } from '../../../containers/detection_engine/rules/use_rule_indices';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -102,15 +103,18 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
 
   const [severityValue, setSeverityValue] = useState<string>(initialState.severity.value);
 
+  const { ruleIndices } = useRuleIndices(
+    defineRuleData?.machineLearningJobId,
+    defineRuleData?.index
+  );
+
   /**
    * 1. if not null, fetch data view from id saved on rule form
    * 2. Create a state to set the indexPattern to be used
    * 3. useEffect if indexIndexPattern is updated and dataView from rule form is empty
    */
 
-  const [indexPatternLoading, { indexPatterns: indexIndexPattern }] = useFetchIndex(
-    defineRuleData?.index ?? []
-  );
+  const [indexPatternLoading, { indexPatterns: indexIndexPattern }] = useFetchIndex(ruleIndices);
 
   const [indexPattern, setIndexPattern] = useState<DataViewBase>(indexIndexPattern);
 
@@ -140,10 +144,11 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
     schema,
   });
   const { getFields, getFormData, submit } = form;
-  const [{ severity: formSeverity }] = useFormData<AboutStepRule>({
-    form,
-    watch: ['severity'],
-  });
+  const [{ severity: formSeverity, timestampOverride: formTimestampOverride }] =
+    useFormData<AboutStepRule>({
+      form,
+      watch: ['severity', 'timestampOverride'],
+    });
 
   useEffect(() => {
     const formSeverityValue = formSeverity?.value;
@@ -399,6 +404,20 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 placeholder: '',
               }}
             />
+            {!!formTimestampOverride && formTimestampOverride !== '@timestamp' && (
+              <>
+                <CommonUseField
+                  path="timestampOverrideFallbackDisabled"
+                  componentProps={{
+                    idAria: 'detectionTimestampOverrideFallbackDisabled',
+                    'data-test-subj': 'detectionTimestampOverrideFallbackDisabled',
+                    euiFieldProps: {
+                      disabled: isLoading,
+                    },
+                  }}
+                />
+              </>
+            )}
           </EuiAccordion>
         </Form>
       </StepContentWrapper>

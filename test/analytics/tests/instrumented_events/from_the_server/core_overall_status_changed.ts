@@ -14,8 +14,8 @@ export default function ({ getService }: FtrProviderContext) {
   const ebtServerHelper = getService('kibana_ebt_server');
 
   describe('core-overall_status_changed', () => {
-    let initialEvent: Event;
-    let secondEvent: Event;
+    let initialEvent: Event<Record<string, unknown>>;
+    let secondEvent: Event<Record<string, unknown>>;
 
     before(async () => {
       [initialEvent, secondEvent] = await ebtServerHelper.getEvents(2, {

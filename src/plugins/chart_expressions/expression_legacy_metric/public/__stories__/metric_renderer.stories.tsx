@@ -10,12 +10,17 @@ import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { from } from 'rxjs';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
-import { Datatable, DatatableColumn } from '@kbn/expressions-plugin';
+import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
 import { ColorMode, CustomPaletteState } from '@kbn/charts-plugin/common';
+import { getFormatService } from '../__mocks__/format_service';
+import { getPaletteService } from '../__mocks__/palette_service';
+import { ExpressionMetricVisRendererDependencies } from '../expression_renderers/metric_vis_renderer';
 import { getMetricVisRenderer } from '../expression_renderers';
 import { MetricStyle, MetricVisRenderConfig, visType } from '../../common/types';
 import { LabelPosition } from '../../common/constants';
+import { setFormatService } from '../services/format_service';
+import { setPaletteService } from '../services/palette_service';
 
 const palette: CustomPaletteState = {
   colors: ['rgb(219 231 38)', 'rgb(112 38 231)', 'rgb(38 124 231)'],
@@ -124,7 +129,21 @@ const containerSize = {
   height: '700px',
 };
 
-const metricVisRenderer = getMetricVisRenderer({ theme$: from([{ darkMode: false }]) });
+setFormatService(getFormatService());
+setPaletteService(getPaletteService());
+
+const getStartDeps = (() => ({
+  core: {
+    theme: {
+      theme$: from([{ darkMode: false }]),
+    },
+  },
+})) as unknown as ExpressionMetricVisRendererDependencies['getStartDeps'];
+
+const metricVisRenderer = () =>
+  getMetricVisRenderer({
+    getStartDeps,
+  });
 
 storiesOf('renderers/visMetric', module)
   .add('Default', () => {

@@ -12,7 +12,7 @@ import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import { KibanaPageTemplate } from '@kbn/shared-ux-components';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { HasDataContextProvider } from '../../context/has_data_context';
 import { PluginContext } from '../../context/plugin_context';
 import { registerDataHandler, unregisterDataHandler } from '../../data_handler';
@@ -84,7 +84,6 @@ const withCore = makeDecorator({
               } as unknown as AppMountParameters,
               observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
               ObservabilityPageTemplate: KibanaPageTemplate,
-              kibanaFeatures: [],
             }}
           >
             <HasDataContextProvider>{storyFn(context) as ReactNode}</HasDataContextProvider>
@@ -229,7 +228,7 @@ storiesOf('app/Overview', module)
       hasData: async () => ({ hasData: false, indices: 'heartbeat-*,synthetics-*' }),
     });
 
-    return <OverviewPage routeParams={{ query: {} }} />;
+    return <OverviewPage />;
   })
   .add('Single Panel', () => {
     registerDataHandler({
@@ -238,13 +237,7 @@ storiesOf('app/Overview', module)
       hasData: async () => ({ hasData: true, indices: 'test-index' }),
     });
 
-    return (
-      <OverviewPage
-        routeParams={{
-          query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
-        }}
-      />
-    );
+    return <OverviewPage />;
   })
   .add('Logs and Metrics', () => {
     registerDataHandler({
@@ -258,13 +251,7 @@ storiesOf('app/Overview', module)
       hasData: async () => ({ hasData: true, indices: 'metric-*' }),
     });
 
-    return (
-      <OverviewPage
-        routeParams={{
-          query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
-        }}
-      />
-    );
+    return <OverviewPage />;
   })
   .add(
     'Logs, Metrics, and Alerts',
@@ -280,13 +267,7 @@ storiesOf('app/Overview', module)
         hasData: async () => ({ hasData: true, indices: 'metric-*' }),
       });
 
-      return (
-        <OverviewPage
-          routeParams={{
-            query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
-          }}
-        />
-      );
+      return <OverviewPage />;
     },
     { core: coreWithAlerts }
   )
@@ -309,13 +290,7 @@ storiesOf('app/Overview', module)
         hasData: async () => ({ hasData: true, indices: sampleAPMIndices }),
       });
 
-      return (
-        <OverviewPage
-          routeParams={{
-            query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
-          }}
-        />
-      );
+      return <OverviewPage />;
     },
     { core: coreWithAlerts }
   )
@@ -341,13 +316,7 @@ storiesOf('app/Overview', module)
       hasData: async () => ({ hasData: true, indices: 'heartbeat-*,synthetics-*' }),
     });
 
-    return (
-      <OverviewPage
-        routeParams={{
-          query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
-        }}
-      />
-    );
+    return <OverviewPage />;
   })
   .add(
     'Logs, Metrics, APM, Uptime, and Alerts',
@@ -373,13 +342,7 @@ storiesOf('app/Overview', module)
         hasData: async () => ({ hasData: true, indices: 'heartbeat-*,synthetics-*' }),
       });
 
-      return (
-        <OverviewPage
-          routeParams={{
-            query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
-          }}
-        />
-      );
+      return <OverviewPage />;
     },
     { core: coreWithAlerts }
   )
@@ -406,13 +369,7 @@ storiesOf('app/Overview', module)
         fetchData: fetchUptimeData,
         hasData: async () => ({ hasData: true, indices: 'heartbeat-*,synthetics-*' }),
       });
-      return (
-        <OverviewPage
-          routeParams={{
-            query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
-          }}
-        />
-      );
+      return <OverviewPage />;
     },
     { core: coreWithNewsFeed }
   )
@@ -438,13 +395,7 @@ storiesOf('app/Overview', module)
       hasData: async () => ({ hasData: true, indices: 'heartbeat-*,synthetics-*' }),
     });
 
-    return (
-      <OverviewPage
-        routeParams={{
-          query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
-        }}
-      />
-    );
+    return <OverviewPage />;
   })
   .add(
     'Fetch Data with Error',
@@ -477,13 +428,7 @@ storiesOf('app/Overview', module)
         },
         hasData: async () => ({ hasData: true, indices: 'heartbeat-*,synthetics-*' }),
       });
-      return (
-        <OverviewPage
-          routeParams={{
-            query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
-          }}
-        />
-      );
+      return <OverviewPage />;
     },
     { core: coreAlertsThrowsError }
   )
@@ -522,13 +467,7 @@ storiesOf('app/Overview', module)
           throw new Error('Error has data');
         },
       });
-      return (
-        <OverviewPage
-          routeParams={{
-            query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
-          }}
-        />
-      );
+      return <OverviewPage />;
     },
     { core: coreWithAlerts }
   )
@@ -566,11 +505,5 @@ storiesOf('app/Overview', module)
       },
     });
 
-    return (
-      <OverviewPage
-        routeParams={{
-          query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
-        }}
-      />
-    );
+    return <OverviewPage />;
   });

@@ -345,7 +345,7 @@ const TimelineStatusInfoComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }
 const TimelineStatusInfo = React.memo(TimelineStatusInfoComponent);
 
 const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
-  const { selectedPatterns, indexPattern, docValueFields, browserFields } = useSourcererDataView(
+  const { selectedPatterns, indexPattern, browserFields } = useSourcererDataView(
     SourcererScopeName.timeline
   );
   const getStartSelector = useMemo(() => startSelector(), []);
@@ -409,13 +409,12 @@ const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
 
   const [loading, kpis] = useTimelineKpis({
     defaultIndex: selectedPatterns,
-    docValueFields,
     timerange,
     isBlankTimeline,
     filterQuery: combinedQueries?.filterQuery ?? '',
   });
 
-  const hasWritePermissions = useGetUserCasesPermissions()?.crud ?? false;
+  const userCasesPermissions = useGetUserCasesPermissions();
 
   return (
     <StyledTimelineHeader alignItems="center" gutterSize="s">
@@ -448,7 +447,7 @@ const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
           <EuiFlexItem grow={false}>
             <AddToFavoritesButton timelineId={timelineId} />
           </EuiFlexItem>
-          {hasWritePermissions && (
+          {userCasesPermissions.create && userCasesPermissions.read && (
             <EuiFlexItem grow={false}>
               <AddToCaseButton timelineId={timelineId} />
             </EuiFlexItem>

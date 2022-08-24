@@ -12,14 +12,13 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
-import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { DataViewBase, Filter, Query } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { Direction, EntityType } from '../../../../common/search_strategy';
-import type { DocValueFields } from '../../../../common/search_strategy';
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
 import {
   BulkActionsProp,
@@ -40,7 +39,7 @@ import type {
 
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { defaultHeaders } from '../body/column_headers/default_headers';
-import { buildCombinedQuery, getCombinedFilterQuery, resolverIsShowing } from '../helpers';
+import { getCombinedFilterQuery, resolverIsShowing } from '../helpers';
 import { tGridActions, tGridSelectors } from '../../../store/t_grid';
 import { useTimelineEvents, InspectResponse, Refetch } from '../../../container';
 import { StatefulBody } from '../body';
@@ -105,7 +104,6 @@ export interface TGridIntegratedProps {
   defaultCellActions?: TGridCellAction[];
   deletedEventIds: Readonly<string[]>;
   disabledCellActions: string[];
-  docValueFields: DocValueFields[];
   end: string;
   entityType: EntityType;
   fieldBrowserOptions?: FieldBrowserOptions;
@@ -151,7 +149,6 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   defaultCellActions,
   deletedEventIds,
   disabledCellActions,
-  docValueFields,
   end,
   entityType,
   fieldBrowserOptions,
@@ -197,26 +194,32 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   }, [dispatch, id, isQueryLoading]);
 
   const justTitle = useMemo(() => <TitleText data-test-subj="title">{title}</TitleText>, [title]);
+  const esQueryConfig = getEsQueryConfig(uiSettings);
 
-  const combinedQueries = buildCombinedQuery({
-    config: getEsQueryConfig(uiSettings),
-    dataProviders,
-    indexPattern,
-    browserFields,
-    filters,
-    kqlQuery: query,
-    kqlMode,
-    isEventViewer: true,
-  });
+  const filterQuery = useMemo(
+    () =>
+      getCombinedFilterQuery({
+        config: esQueryConfig,
+        browserFields,
+        dataProviders,
+        filters,
+        from: start,
+        indexPattern,
+        kqlMode,
+        kqlQuery: query,
+        to: end,
+      }),
+    [esQueryConfig, dataProviders, indexPattern, browserFields, filters, start, end, query, kqlMode]
+  );
 
   const canQueryTimeline = useMemo(
     () =>
-      combinedQueries != null &&
+      filterQuery != null &&
       isLoadingIndexPattern != null &&
       !isLoadingIndexPattern &&
       !isEmpty(start) &&
       !isEmpty(end),
-    [isLoadingIndexPattern, combinedQueries, start, end]
+    [isLoadingIndexPattern, filterQuery, start, end]
   );
 
   const fields = useMemo(
@@ -241,11 +244,10 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
       alertConsumers: SECURITY_ALERTS_CONSUMERS,
       data,
       dataViewId,
-      docValueFields,
       endDate: end,
       entityType,
       fields,
-      filterQuery: combinedQueries?.filterQuery,
+      filterQuery,
       id,
       indexNames,
       limit: itemsPerPage,
@@ -254,23 +256,6 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
       sort: sortField,
       startDate: start,
     });
-
-  const filterQuery = useMemo(
-    () =>
-      getCombinedFilterQuery({
-        config: getEsQueryConfig(uiSettings),
-        browserFields,
-        dataProviders,
-        filters,
-        from: start,
-        indexPattern,
-        isEventViewer: true,
-        kqlMode,
-        kqlQuery: query,
-        to: end,
-      }),
-    [uiSettings, dataProviders, indexPattern, browserFields, filters, start, end, query, kqlMode]
-  );
 
   const totalCountMinusDeleted = useMemo(
     () => (totalCount > 0 ? totalCount - deletedEventIds.length : 0),

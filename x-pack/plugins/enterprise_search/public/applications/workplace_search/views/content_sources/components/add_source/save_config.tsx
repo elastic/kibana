@@ -34,44 +34,47 @@ import { AddSourceLogic, SourceConfigFormElement } from './add_source_logic';
 import { ConfigDocsLinks } from './config_docs_links';
 import { OAUTH_SAVE_CONFIG_BUTTON, OAUTH_BACK_BUTTON } from './constants';
 
-const getInternalConnectorConfigurableFields = (
-  configuration: Configuration
-): SourceConfigFormElement[] => {
-  const internalConnectorFields: SourceConfigFormElement[] = [
-    {
-      key: 'client_id',
-      label: i18n.translate(
-        'xpack.enterpriseSearch.workplaceSearch.contentSource.saveConfig.clientIDLabel',
-        {
-          defaultMessage: 'Client ID',
-        }
-      ),
-    },
-    {
-      key: 'client_secret',
-      label: i18n.translate(
-        'xpack.enterpriseSearch.workplaceSearch.contentSource.saveConfig.clientSecretLabel',
-        {
-          defaultMessage: 'Client Secret',
-        }
-      ),
-    },
-  ];
+const clientIdSecretFields: SourceConfigFormElement[] = [
+  {
+    key: 'client_id',
+    label: i18n.translate(
+      'xpack.enterpriseSearch.workplaceSearch.contentSource.saveConfig.clientIDLabel',
+      {
+        defaultMessage: 'Client ID',
+      }
+    ),
+  },
+  {
+    key: 'client_secret',
+    label: i18n.translate(
+      'xpack.enterpriseSearch.workplaceSearch.contentSource.saveConfig.clientSecretLabel',
+      {
+        defaultMessage: 'Client Secret',
+      }
+    ),
+  },
+];
 
-  return configuration.needsBaseUrl
-    ? [
-        ...internalConnectorFields,
-        {
-          key: 'base_url',
-          label: i18n.translate(
-            'xpack.enterpriseSearch.workplaceSearch.contentSource.saveConfig.baseUrlLabel',
-            {
-              defaultMessage: 'Base URL',
-            }
-          ),
-        },
-      ]
-    : internalConnectorFields;
+const baseUrlFields: SourceConfigFormElement[] = [
+  {
+    key: 'base_url',
+    label: i18n.translate(
+      'xpack.enterpriseSearch.workplaceSearch.contentSource.saveConfig.baseUrlLabel',
+      {
+        defaultMessage: 'Base URL',
+      }
+    ),
+  },
+];
+
+const getInternalConnectorConfigurableFields = (
+  needsClientIdSecret: boolean,
+  needsBaseUrl: boolean
+): SourceConfigFormElement[] => {
+  return [
+    ...(needsClientIdSecret ? clientIdSecretFields : []),
+    ...(needsBaseUrl ? baseUrlFields : []),
+  ];
 };
 
 interface SaveConfigProps {
@@ -101,10 +104,13 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
 
   const { accountContextOnly, serviceType, configurableFields = [] } = sourceConfigData;
 
+  const isPublicKey = configuredFields.public_key && configuredFields.consumer_key;
+  const needsClientIdSecret = !isPublicKey;
+
   const formFields: SourceConfigFormElement[] =
     serviceType === 'external'
       ? configurableFields
-      : getInternalConnectorConfigurableFields(configuration);
+      : getInternalConnectorConfigurableFields(needsClientIdSecret, configuration.needsBaseUrl);
 
   const handleFormSubmission = (e: FormEvent) => {
     e.preventDefault();
@@ -154,7 +160,7 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
           applicationPortalUrl={applicationPortalUrl}
           applicationLinkTitle={applicationLinkTitle}
         />
-        {configuredFields.public_key && configuredFields.consumer_key && (
+        {isPublicKey && (
           <>
             <EuiSpacer />
             <EuiFlexGroup direction="column" justifyContent="flexStart" responsive={false}>

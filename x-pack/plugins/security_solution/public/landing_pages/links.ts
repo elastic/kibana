@@ -25,8 +25,7 @@ export const dashboardsLandingLinks: LinkItem = {
   id: SecurityPageName.dashboardsLanding,
   title: DASHBOARDS,
   path: DASHBOARDS_PATH,
-  globalNavEnabled: true,
-  globalNavOrder: 1,
+  globalNavPosition: 1,
   capabilities: [`${SERVER_APP_ID}.show`],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.dashboards', {
@@ -42,8 +41,7 @@ export const threatHuntingLandingLinks: LinkItem = {
   id: SecurityPageName.exploreLanding,
   title: EXPLORE,
   path: EXPLORE_PATH,
-  globalNavEnabled: true,
-  globalNavOrder: 6,
+  globalNavPosition: 6,
   capabilities: [`${SERVER_APP_ID}.show`],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.explore', {

@@ -10,7 +10,7 @@ import type { ConsoleTestSetup } from '../../mocks';
 import { getConsoleTestSetup } from '../../mocks';
 import type { ConsoleProps } from '../../types';
 import { INPUT_DEFAULT_PLACEHOLDER_TEXT } from '../console_state/state_update_handlers/handle_input_area_state';
-import { waitFor } from '@testing-library/react';
+import { act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 describe('When entering data into the Console input', () => {
@@ -90,16 +90,45 @@ describe('When entering data into the Console input', () => {
     enterCommand('abc ', { inputOnly: true });
 
     expect(getFooterText()).toEqual('Unknown command abc');
+    expect(renderResult.getByTestId('test-cmdInput-container').classList.contains('error')).toBe(
+      true
+    );
   });
 
-  it('should display the input history popover when UP key is pressed', async () => {
+  it('should show the arrow button as not disabled if input has text entered', () => {
+    render();
+    enterCommand('cm ', { inputOnly: true });
+
+    const arrowButton = renderResult.getByTestId('test-inputTextSubmitButton');
+    expect(arrowButton).not.toBeDisabled();
+  });
+
+  it('should show the arrow button as disabled if input area is blank', () => {
+    render();
+
+    const arrowButton = renderResult.getByTestId('test-inputTextSubmitButton');
+    expect(arrowButton).toBeDisabled();
+  });
+
+  it('should execute correct command if arrow button is clicked', () => {
+    render();
+    enterCommand('isolate', { inputOnly: true });
+    act(() => {
+      renderResult.getByTestId('test-inputTextSubmitButton').click();
+    });
+    expect(renderResult.getByTestId('test-userCommandText').textContent).toEqual('isolate');
+  });
+
+  // FIXME:PT uncomment once task OLM task #4384 is implemented
+  it.skip('should display the input history popover when UP key is pressed', async () => {
     render();
     await showInputHistoryPopover();
 
     expect(renderResult.getByTestId('test-inputHistorySelector')).not.toBeNull();
   });
 
-  describe('and when the command input history popover is opened', () => {
+  // FIXME:PT uncomment once task OLM task #4384 is implemented
+  describe.skip('and when the command input history popover is opened', () => {
     const renderWithInputHistory = async (inputText: string = '') => {
       render();
       enterCommand('help');
@@ -234,10 +263,11 @@ describe('When entering data into the Console input', () => {
       expect(getUserInputText()).toEqual('c');
       expect(getRightOfCursorText()).toEqual('md1 ');
 
-      expect(getFooterText()).toEqual('cmd1 ');
+      expect(getFooterText()).toEqual('Hit enter to execute');
     });
 
-    it('should return original cursor position if input history is closed with no selection', async () => {
+    // FIXME:PT uncomment once task OLM task #4384 is implemented
+    it.skip('should return original cursor position if input history is closed with no selection', async () => {
       typeKeyboardKey('{Enter}'); // add `isolate` to the input history
 
       typeKeyboardKey('release');
@@ -262,7 +292,8 @@ describe('When entering data into the Console input', () => {
       expect(getRightOfCursorText()).toEqual('elease');
     });
 
-    it('should reset cursor position to default (at end) if a selection is done from input history', async () => {
+    // FIXME:PT uncomment once task OLM task #4384 is implemented
+    it.skip('should reset cursor position to default (at end) if a selection is done from input history', async () => {
       typeKeyboardKey('{Enter}'); // add `isolate` to the input history
 
       typeKeyboardKey('release');

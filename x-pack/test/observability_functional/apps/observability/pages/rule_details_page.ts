@@ -94,7 +94,7 @@ export default ({ getService }: FtrProviderContext) => {
           'Rules table to be visible',
           async () => await testSubjects.exists('rulesList')
         );
-        await find.clickByLinkText(logThresholdRuleName);
+        await find.clickByButtonText(logThresholdRuleName);
         await retry.waitFor(
           'Rule details to be visible',
           async () => await testSubjects.exists('ruleDetails')
@@ -132,6 +132,10 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('maps correctly the rule type with the human readable rule type', async () => {
+        await retry.waitFor(
+          'ruleTypeIndex to be loaded from hook',
+          async () => await testSubjects.exists('ruleSummaryRuleType')
+        );
         const ruleType = await testSubjects.getVisibleText('ruleSummaryRuleType');
         expect(ruleType).to.be('Log threshold');
       });
@@ -141,27 +145,35 @@ export default ({ getService }: FtrProviderContext) => {
       before(async () => {
         await observability.alerts.common.navigateToRuleDetailsByRuleId(logThresholdRuleId);
       });
-      it('should show the more (...) button if user has permissions', async () => {
+      it('should show the actions button if user has permissions', async () => {
         await retry.waitFor(
-          'More button to be visible',
-          async () => await testSubjects.exists('moreButton')
+          'Actions button to be visible',
+          async () => await testSubjects.exists('actions')
         );
       });
 
-      it('should shows the rule edit and delete button if user has permissions', async () => {
-        await testSubjects.click('moreButton');
+      it('should show the rule edit and delete button if user has permissions', async () => {
+        await testSubjects.click('actions');
+
         await testSubjects.existOrFail('editRuleButton');
         await testSubjects.existOrFail('deleteRuleButton');
       });
 
-      it('should not let user edit/delete the rule if he has no permissions', async () => {
+      it('should close actions popover correctly', async () => {
+        await testSubjects.click('actions');
+
+        // popover should be closed
+        await testSubjects.missingOrFail('editRuleButton');
+      });
+
+      it('should not show the actions button if user has no permissions', async () => {
         await observability.users.setTestUserRole(
           observability.users.defineBasicObservabilityRole({
             logs: ['read'],
           })
         );
         await observability.alerts.common.navigateToRuleDetailsByRuleId(logThresholdRuleId);
-        await testSubjects.missingOrFail('moreButton');
+        await testSubjects.missingOrFail('actions');
       });
     });
   });

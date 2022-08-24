@@ -23,6 +23,7 @@ import {
   genericEmbeddableInputIsEqual,
   VALUE_CLICK_TRIGGER,
   omitGenericEmbeddableInput,
+  FilterableEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
@@ -35,6 +36,7 @@ import {
   setReadOnly,
   updateLayerById,
   setGotoWithCenter,
+  setEmbeddableSearchContext,
 } from '../actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
 import {
@@ -47,6 +49,8 @@ import {
 import {
   areLayersLoaded,
   getGeoFieldNames,
+  getEmbeddableSearchContext,
+  getLayerList,
   getGoto,
   getMapCenter,
   getMapBuffer,
@@ -81,8 +85,8 @@ import { getIndexPatternsFromIds } from '../index_pattern_util';
 import { getMapAttributeService } from '../map_attribute_service';
 import { isUrlDrilldown, toValueClickDataFormat } from '../trigger_actions/trigger_utils';
 import { waitUntilTimeLayersLoad$ } from '../routes/map_page/map_app/wait_until_time_layers_load';
-import { synchronizeMovement } from './synchronize_movement';
-import { getFilterByMapExtent } from '../trigger_actions/filter_by_map_extent_action';
+import { mapEmbeddablesSingleton } from './map_embeddables_singleton';
+import { getGeoFieldsLabel } from './get_geo_fields_label';
 
 import {
   MapByValueInput,
@@ -102,7 +106,7 @@ function getIsRestore(searchSessionId?: string) {
 
 export class MapEmbeddable
   extends Embeddable<MapEmbeddableInput, MapEmbeddableOutput>
-  implements ReferenceOrValueEmbeddable<MapByValueInput, MapByReferenceInput>
+  implements ReferenceOrValueEmbeddable<MapByValueInput, MapByReferenceInput>, FilterableEmbeddable
 {
   type = MAP_SAVED_OBJECT_TYPE;
   deferEmbeddableLoad = true;
@@ -111,7 +115,6 @@ export class MapEmbeddable
   private _savedMap: SavedMap;
   private _renderTooltipContent?: RenderToolTipContent;
   private _subscription: Subscription;
-  private _prevFilterByMapExtent: boolean;
   private _prevIsRestore: boolean = false;
   private _prevMapExtent?: MapExtent;
   private _prevTimeRange?: TimeRange;
@@ -143,7 +146,10 @@ export class MapEmbeddable
     this._initializeSaveMap();
     this._subscription = this.getUpdated$().subscribe(() => this.onUpdate());
     this._controlledBy = `mapEmbeddablePanel${this.id}`;
-    this._prevFilterByMapExtent = getFilterByMapExtent(this.input);
+  }
+
+  public reportsEmbeddableLoad() {
+    return true;
   }
 
   private async _initializeSaveMap() {
@@ -189,6 +195,21 @@ export class MapEmbeddable
     this._dispatchSetQuery({
       forceRefresh: false,
     });
+
+    const mapStateJSON = this._savedMap.getAttributes().mapStateJSON;
+    if (mapStateJSON) {
+      try {
+        const mapState = JSON.parse(mapStateJSON);
+        store.dispatch(
+          setEmbeddableSearchContext({
+            filters: mapState.filters ? mapState.filters : [],
+            query: mapState.query,
+          })
+        );
+      } catch (e) {
+        // ignore malformed mapStateJSON, not a critical error for viewing map - map will just use defaults
+      }
+    }
 
     this._unsubscribeFromStore = store.subscribe(() => {
       this._handleStoreChanges();
@@ -245,6 +266,20 @@ export class MapEmbeddable
     return this._isInitialized ? this._savedMap.getAttributes().description : '';
   }
 
+  public async getFilters() {
+    const embeddableSearchContext = getEmbeddableSearchContext(
+      this._savedMap.getStore().getState()
+    );
+    return embeddableSearchContext ? embeddableSearchContext.filters : [];
+  }
+
+  public async getQuery() {
+    const embeddableSearchContext = getEmbeddableSearchContext(
+      this._savedMap.getStore().getState()
+    );
+    return embeddableSearchContext?.query;
+  }
+
   public supportedTriggers(): string[] {
     return [APPLY_FILTER_TRIGGER, VALUE_CLICK_TRIGGER];
   }
@@ -273,16 +308,6 @@ export class MapEmbeddable
   }
 
   onUpdate() {
-    const filterByMapExtent = getFilterByMapExtent(this.input);
-    if (this._prevFilterByMapExtent !== filterByMapExtent) {
-      this._prevFilterByMapExtent = filterByMapExtent;
-      if (filterByMapExtent) {
-        this.setMapExtentFilter();
-      } else {
-        this.clearMapExtentFilter();
-      }
-    }
-
     if (
       !_.isEqual(this.input.timeRange, this._prevTimeRange) ||
       !_.isEqual(this.input.query, this._prevQuery) ||
@@ -316,8 +341,12 @@ export class MapEmbeddable
       : this.input.isMovementSynchronized;
   };
 
+  _getIsFilterByMapExtent = () => {
+    return this.input.filterByMapExtent === undefined ? false : this.input.filterByMapExtent;
+  };
+
   _gotoSynchronizedLocation() {
-    const syncedLocation = synchronizeMovement.getLocation();
+    const syncedLocation = mapEmbeddablesSingleton.getLocation();
     if (syncedLocation) {
       // set map to synchronized view
       this._mapSyncHandler(syncedLocation.lat, syncedLocation.lon, syncedLocation.zoom);
@@ -329,7 +358,7 @@ export class MapEmbeddable
       // Use goto because un-rendered map will not have accurate mapCenter and mapZoom.
       const goto = getGoto(this._savedMap.getStore().getState());
       if (goto && goto.center) {
-        synchronizeMovement.setLocation(
+        mapEmbeddablesSingleton.setLocation(
           this.input.id,
           goto.center.lat,
           goto.center.lon,
@@ -342,12 +371,12 @@ export class MapEmbeddable
     // Initialize synchronized view to map's view
     const center = getMapCenter(this._savedMap.getStore().getState());
     const zoom = getMapZoom(this._savedMap.getStore().getState());
-    synchronizeMovement.setLocation(this.input.id, center.lat, center.lon, zoom);
+    mapEmbeddablesSingleton.setLocation(this.input.id, center.lat, center.lon, zoom);
   }
 
   _propogateMapMovement = (lat: number, lon: number, zoom: number) => {
     if (this._getIsMovementSynchronized()) {
-      synchronizeMovement.setLocation(this.input.id, lat, lon, zoom);
+      mapEmbeddablesSingleton.setLocation(this.input.id, lat, lon, zoom);
     }
   };
 
@@ -413,7 +442,7 @@ export class MapEmbeddable
       return;
     }
 
-    synchronizeMovement.register(this.input.id, {
+    mapEmbeddablesSingleton.register(this.input.id, {
       getTitle: () => {
         const output = this.getOutput();
         if (output.title) {
@@ -436,6 +465,18 @@ export class MapEmbeddable
           // restore autoFitToBounds when isMovementSynchronized disabled
           this._savedMap.getStore().dispatch(setMapSettings({ autoFitToDataBounds: true }));
         }
+      },
+      getIsFilterByMapExtent: this._getIsFilterByMapExtent,
+      setIsFilterByMapExtent: (isFilterByMapExtent: boolean) => {
+        this.updateInput({ filterByMapExtent: isFilterByMapExtent });
+        if (isFilterByMapExtent) {
+          this._setMapExtentFilter();
+        } else {
+          this._clearMapExtentFilter();
+        }
+      },
+      getGeoFieldNames: () => {
+        return getGeoFieldNames(this._savedMap.getStore().getState());
       },
     });
     if (this._getIsMovementSynchronized()) {
@@ -563,14 +604,21 @@ export class MapEmbeddable
     } as ActionExecutionContext;
   };
 
-  setMapExtentFilter() {
-    const state = this._savedMap.getStore().getState();
-    const mapExtent = getMapExtent(state);
-    const geoFieldNames = getGeoFieldNames(state);
-    const center = getMapCenter(state);
-    const zoom = getMapZoom(state);
+  // Timing bug for dashboard with multiple maps with synchronized movement and filter by map extent enabled
+  // When moving map with filterByMapExtent:false, previous map extent filter(s) does not get removed
+  // Cuased by syncDashboardContainerInput applyContainerChangesToState.
+  //   1) _setMapExtentFilter executes ACTION_GLOBAL_APPLY_FILTER action,
+  //      removing previous map extent filter and adding new map extent filter
+  //   2) applyContainerChangesToState then re-adds stale input.filters (which contains previous map extent filter)
+  // Add debounce to fix timing issue.
+  //   1) applyContainerChangesToState now runs first and does its thing
+  //   2) _setMapExtentFilter executes ACTION_GLOBAL_APPLY_FILTER action,
+  //      removing previous map extent filter and adding new map extent filter
+  _setMapExtentFilter = _.debounce(() => {
+    const mapExtent = getMapExtent(this._savedMap.getStore().getState());
+    const geoFieldNames = mapEmbeddablesSingleton.getGeoFieldNames();
 
-    if (center === undefined || mapExtent === undefined || geoFieldNames.length === 0) {
+    if (mapExtent === undefined || geoFieldNames.length === 0) {
       return;
     }
 
@@ -579,12 +627,8 @@ export class MapEmbeddable
     const mapExtentFilter = createExtentFilter(mapExtent, geoFieldNames);
     mapExtentFilter.meta.controlledBy = this._controlledBy;
     mapExtentFilter.meta.alias = i18n.translate('xpack.maps.embeddable.boundsFilterLabel', {
-      defaultMessage: 'Map bounds at center: {lat}, {lon}, zoom: {zoom}',
-      values: {
-        lat: center.lat,
-        lon: center.lon,
-        zoom,
-      },
+      defaultMessage: '{geoFieldsLabel} within map bounds',
+      values: { geoFieldsLabel: getGeoFieldsLabel(geoFieldNames) },
     });
 
     const executeContext = {
@@ -597,9 +641,9 @@ export class MapEmbeddable
       throw new Error('Unable to apply map extent filter, could not locate action');
     }
     action.execute(executeContext);
-  }
+  }, 100);
 
-  clearMapExtentFilter() {
+  _clearMapExtentFilter() {
     this._prevMapExtent = undefined;
     const executeContext = {
       ...this.getActionContext(),
@@ -615,7 +659,7 @@ export class MapEmbeddable
 
   destroy() {
     super.destroy();
-    synchronizeMovement.unregister(this.input.id);
+    mapEmbeddablesSingleton.unregister(this.input.id);
     this._isActive = false;
     if (this._unsubscribeFromStore) {
       this._unsubscribeFromStore();
@@ -660,8 +704,8 @@ export class MapEmbeddable
     }
 
     const mapExtent = getMapExtent(this._savedMap.getStore().getState());
-    if (getFilterByMapExtent(this.input) && !_.isEqual(this._prevMapExtent, mapExtent)) {
-      this.setMapExtentFilter();
+    if (this._getIsFilterByMapExtent() && !_.isEqual(this._prevMapExtent, mapExtent)) {
+      this._setMapExtentFilter();
     }
 
     const center = getMapCenter(this._savedMap.getStore().getState());
@@ -704,6 +748,40 @@ export class MapEmbeddable
       this.updateInput({
         hiddenLayers: hiddenLayerIds,
       });
+    }
+
+    if (areLayersLoaded(this._savedMap.getStore().getState())) {
+      const layers = getLayerList(this._savedMap.getStore().getState());
+      const isLoading =
+        layers.length === 0 ||
+        layers.some((layer) => {
+          return layer.isLayerLoading();
+        });
+      const firstLayerWithError = layers.find((layer) => {
+        return layer.hasErrors();
+      });
+      const output = this.getOutput();
+      if (
+        output.loading !== isLoading ||
+        firstLayerWithError?.getErrors() !== output.error?.message
+      ) {
+        /**
+         * Maps emit rendered when the data is loaded, as we don't have feedback from the maps rendering library atm.
+         * This means that the DASHBOARD_LOADED_EVENT event might be fired while a map is still rendering in some cases.
+         * For more details please contact the maps team.
+         */
+        this.updateOutput({
+          ...output,
+          loading: isLoading,
+          rendered: !isLoading && firstLayerWithError === undefined,
+          error: firstLayerWithError
+            ? {
+                name: 'EmbeddableError',
+                message: firstLayerWithError.getErrors(),
+              }
+            : undefined,
+        });
+      }
     }
   }
 }

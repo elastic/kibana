@@ -8,6 +8,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import moment from 'moment';
 import pMap from 'p-map';
+import uuid from 'uuid/v4';
 
 import type { Agent, BulkActionResult, FleetServerAgentAction, CurrentUpgrade } from '../../types';
 import {
@@ -100,6 +101,7 @@ export async function sendUpgradeAgentsActions(
       }
     }
   } else if ('kuery' in options) {
+    const actionId = uuid();
     return await processAgentsInBatches(
       esClient,
       {
@@ -108,7 +110,14 @@ export async function sendUpgradeAgentsActions(
         batchSize: options.batchSize,
       },
       async (agents: Agent[], skipSuccess: boolean) =>
-        await upgradeBatch(soClient, esClient, agents, outgoingErrors, options, skipSuccess)
+        await upgradeBatch(
+          soClient,
+          esClient,
+          agents,
+          outgoingErrors,
+          { ...options, actionId },
+          skipSuccess
+        )
     );
   }
 
@@ -121,6 +130,7 @@ async function upgradeBatch(
   givenAgents: Agent[],
   outgoingErrors: Record<Agent['id'], Error>,
   options: ({ agents: Agent[] } | GetAgentsOptions) & {
+    actionId?: string;
     version: string;
     sourceUri?: string | undefined;
     force?: boolean;
@@ -177,17 +187,13 @@ async function upgradeBatch(
     source_uri: options.sourceUri,
   };
 
-  const rollingUpgradeOptions = options?.upgradeDurationSeconds
-    ? {
-        start_time: options.startTime ?? now,
-        minimum_execution_duration: MINIMUM_EXECUTION_DURATION_SECONDS,
-        expiration: moment(options.startTime ?? now)
-          .add(options?.upgradeDurationSeconds, 'seconds')
-          .toISOString(),
-      }
-    : {};
+  const rollingUpgradeOptions = getRollingUpgradeOptions(
+    options?.startTime,
+    options.upgradeDurationSeconds
+  );
 
   await createAgentAction(esClient, {
+    id: options.actionId,
     created_at: now,
     data,
     ack_data: data,
@@ -351,3 +357,30 @@ async function _getUpgradeActions(esClient: ElasticsearchClient, now = new Date(
     }, {} as { [k: string]: CurrentUpgrade })
   );
 }
+
+const getRollingUpgradeOptions = (startTime?: string, upgradeDurationSeconds?: number) => {
+  const now = new Date().toISOString();
+  // Perform a rolling upgrade
+  if (upgradeDurationSeconds) {
+    return {
+      start_time: startTime ?? now,
+      minimum_execution_duration: MINIMUM_EXECUTION_DURATION_SECONDS,
+      expiration: moment(startTime ?? now)
+        .add(upgradeDurationSeconds, 'seconds')
+        .toISOString(),
+    };
+  }
+  // Schedule without rolling upgrade (Immediately after start_time)
+  if (startTime && !upgradeDurationSeconds) {
+    return {
+      start_time: startTime ?? now,
+      minimum_execution_duration: MINIMUM_EXECUTION_DURATION_SECONDS,
+      expiration: moment(startTime)
+        .add(MINIMUM_EXECUTION_DURATION_SECONDS, 'seconds')
+        .toISOString(),
+    };
+  } else {
+    // Regular bulk upgrade (non scheduled, non rolling)
+    return {};
+  }
+};

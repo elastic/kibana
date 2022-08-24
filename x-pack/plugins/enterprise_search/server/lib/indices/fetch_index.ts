@@ -7,47 +7,43 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import { CONNECTORS_INDEX } from '../..';
-import { Connector } from '../../types/connector';
-import { Crawler } from '../../types/crawler';
+import { ElasticsearchIndexWithIngestion } from '../../../common/types/indices';
+import { fetchConnectorByIndexName } from '../connectors/fetch_connectors';
+import { fetchCrawlerByIndexName } from '../crawler/fetch_crawlers';
 
 import { mapIndexStats } from './fetch_indices';
 
-export const fetchIndex = async (client: IScopedClusterClient, index: string) => {
+export const fetchIndex = async (
+  client: IScopedClusterClient,
+  index: string
+): Promise<ElasticsearchIndexWithIngestion> => {
   const indexDataResult = await client.asCurrentUser.indices.get({ index });
   const indexData = indexDataResult[index];
   const { indices } = await client.asCurrentUser.indices.stats({ index });
+
+  const { count } = await client.asCurrentUser.count({ index });
+
   if (!indices || !indices[index] || !indexData) {
     throw new Error('404');
   }
   const indexStats = indices[index];
-  const indexResult = mapIndexStats(indexData, indexStats, index);
+  const indexResult = {
+    count,
+    ...mapIndexStats(indexData, indexStats, index),
+  };
 
-  const connectorResult = await client.asCurrentUser.search<Connector>({
-    index: CONNECTORS_INDEX,
-    query: { term: { 'index_name.keyword': index } },
-  });
-  const connector = connectorResult.hits.hits[0]?._source ?? undefined;
-
+  const connector = await fetchConnectorByIndexName(client, index);
   if (connector) {
     return {
-      connector: { ...connector, id: connectorResult.hits.hits[0]._id },
-      index: indexResult,
+      ...indexResult,
+      connector,
     };
   }
 
-  const crawlerResult = await client.asCurrentUser.search<Crawler>({
-    index: '.ent-search-actastic-crawler2_configurations',
-    query: { term: { index_name: index } },
-  });
-  const crawler = crawlerResult.hits.hits[0]?._source ?? undefined;
-
+  const crawler = await fetchCrawlerByIndexName(client, index);
   if (crawler) {
-    return {
-      crawler,
-      index: indexResult,
-    };
+    return { ...indexResult, crawler };
   }
 
-  return { index: indexResult };
+  return indexResult;
 };

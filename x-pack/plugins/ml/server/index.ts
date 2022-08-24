@@ -21,7 +21,6 @@ export {
   UnknownMLCapabilitiesError,
   InsufficientMLCapabilities,
   MLPrivilegesUninitialized,
-  getHistogramsForFields,
 } from './shared';
 
 export const plugin = (ctx: PluginInitializerContext) => new MlServerPlugin(ctx);

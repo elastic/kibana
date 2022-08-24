@@ -58,6 +58,7 @@ describe('duplicateRule', () => {
       timelineTitle: undefined,
       ruleNameOverride: undefined,
       timestampOverride: undefined,
+      timestampOverrideFallbackDisabled: undefined,
       dataViewId: undefined,
     },
     schedule: {

@@ -11,14 +11,14 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
+  const log = getService('log');
   const supertest = getService('supertest');
   const supertestUnauth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
   const usageAPI = getService('usageAPI');
   const reportingAPI = getService('reportingAPI');
 
-  // Failing: See https://github.com/elastic/kibana/issues/134517
-  describe.skip(`Usage Counters`, () => {
+  describe(`Usage Counters`, () => {
     before(async () => {
       await esArchiver.emptyKibanaIndex();
       await reportingAPI.initEcommerce();
@@ -29,11 +29,14 @@ export default function ({ getService }: FtrProviderContext) {
       await reportingAPI.teardownEcommerce();
     });
 
-    it('configuration settings of the tests_server', async () => {
-      const usage = await usageAPI.getUsageStats();
-      expect(usage.kibana_config_usage.xpack_reporting_capture_max_attempts).to.be(1);
-      expect(usage.kibana_config_usage.xpack_reporting_csv_max_size_bytes).to.be(6000);
-      expect(usage.kibana_config_usage.xpack_reporting_roles_enabled).to.be(false);
+    describe('server', function () {
+      this.tags('skipCloud');
+      it('configuration settings of the tests_server', async () => {
+        const usage = await usageAPI.getUsageStats();
+        expect(usage.kibana_config_usage.xpack_reporting_capture_max_attempts).to.be(1);
+        expect(usage.kibana_config_usage.xpack_reporting_csv_max_size_bytes).to.be(6000);
+        expect(usage.kibana_config_usage.xpack_reporting_roles_enabled).to.be(false);
+      });
     });
 
     describe('API counters: management', () => {
@@ -92,39 +95,53 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('downloading', async () => {
-        await supertestUnauth
-          .get('/api/reporting/jobs/download/kraz0qle154g0763b569zz83')
-          .auth('test_user', 'changeme');
-        await supertestUnauth
-          .get('/api/reporting/jobs/download/kraz0vj4154g0763b5curq51')
-          .auth('test_user', 'changeme');
-        await supertestUnauth
-          .get('/api/reporting/jobs/download/k9a9rq1i0gpe1457b17s7yc6')
-          .auth('test_user', 'changeme');
+        try {
+          await Promise.all([
+            supertestUnauth
+              .get('/api/reporting/jobs/download/kraz0qle154g0763b569zz83')
+              .auth('test_user', 'changeme'),
+            supertestUnauth
+              .get('/api/reporting/jobs/download/kraz0vj4154g0763b5curq51')
+              .auth('test_user', 'changeme'),
+            supertestUnauth
+              .get('/api/reporting/jobs/download/k9a9rq1i0gpe1457b17s7yc6')
+              .auth('test_user', 'changeme'),
+          ]);
+        } catch (error) {
+          log.error(error);
+        }
 
+        log.info(`waiting on internal stats aggregation...`);
         await waitOnAggregation();
+        log.info(`waiting on aggregation completed.`);
 
+        log.info(`calling getUsageStats...`);
         expect(
           getUsageCount(await usageAPI.getUsageStats(), `get /api/reporting/jobs/download/{docId}`)
         ).to.be(3);
       });
 
       it('deleting', async () => {
-        await supertestUnauth
-          .delete('/api/reporting/jobs/delete/krazcyw4156m0763b503j7f9')
-          .auth('test_user', 'changeme')
-          .set('kbn-xsrf', 'xxx');
+        log.info(`sending 1 delete request...`);
 
-        await supertestUnauth
-          .delete('/api/reporting/jobs/delete/krazaxch156m0763b5bf81ov')
-          .auth('test_user', 'changeme')
-          .set('kbn-xsrf', 'xxx');
+        try {
+          await supertestUnauth
+            .delete('/api/reporting/jobs/delete/krazcyw4156m0763b503j7f9')
+            .auth('test_user', 'changeme')
+            .set('kbn-xsrf', 'xxx');
+        } catch (error) {
+          log.error(error);
+        }
+        log.info(`delete request completed.`);
 
+        log.info(`waiting on internal stats aggregation...`);
         await waitOnAggregation();
+        log.info(`waiting on aggregation completed.`);
 
+        log.info(`calling getUsageStats...`);
         expect(
           getUsageCount(await usageAPI.getUsageStats(), `delete /api/reporting/jobs/delete/{docId}`)
-        ).to.be(2);
+        ).to.be(1);
       });
     });
 

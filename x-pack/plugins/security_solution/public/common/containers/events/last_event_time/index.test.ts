@@ -67,7 +67,6 @@ describe('useTimelineLastEventTime', () => {
         useTimelineLastEventTime({
           indexKey: LastEventIndexKey.hostDetails,
           details: {},
-          docValueFields: [],
           indexNames: [],
         })
       );
@@ -86,7 +85,6 @@ describe('useTimelineLastEventTime', () => {
           useTimelineLastEventTime({
             indexKey: LastEventIndexKey.hostDetails,
             details: {},
-            docValueFields: [],
             indexNames: [],
           })
       );
@@ -95,7 +93,6 @@ describe('useTimelineLastEventTime', () => {
       expect(mockSearchStrategy.mock.calls[0][0]).toEqual({
         defaultIndex: [],
         details: {},
-        docValueFields: [],
         factoryQueryType: 'eventsLastEventTime',
         indexKey: 'hostDetails',
       });
@@ -111,7 +108,6 @@ describe('useTimelineLastEventTime', () => {
         useTimelineLastEventTime({
           indexKey: LastEventIndexKey.hostDetails,
           details: {},
-          docValueFields: [],
           indexNames: [],
         })
       );

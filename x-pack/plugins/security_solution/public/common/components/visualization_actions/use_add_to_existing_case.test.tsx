@@ -9,6 +9,11 @@ import { useKibana as mockUseKibana } from '../../lib/kibana/__mocks__';
 import { kpiHostMetricLensAttributes } from './lens_attributes/hosts/kpi_host_metric';
 import { useAddToExistingCase } from './use_add_to_existing_case';
 import { useGetUserCasesPermissions } from '../../lib/kibana';
+import {
+  allCasesPermissions,
+  readCasesPermissions,
+  writeCasesPermissions,
+} from '../../../cases_test_utils';
 
 const mockedUseKibana = mockUseKibana();
 const mockGetUseCasesAddToExistingCaseModal = jest.fn();
@@ -41,10 +46,7 @@ describe('useAddToExistingCase', () => {
   };
 
   beforeEach(() => {
-    (useGetUserCasesPermissions as jest.Mock).mockReturnValue({
-      crud: true,
-      read: true,
-    });
+    (useGetUserCasesPermissions as jest.Mock).mockReturnValue(allCasesPermissions());
   });
 
   it('getUseCasesAddToExistingCaseModal with attachments', () => {
@@ -62,11 +64,21 @@ describe('useAddToExistingCase', () => {
     expect(result.current.disabled).toEqual(false);
   });
 
-  it("button disabled if user Can't Crud", () => {
-    (useGetUserCasesPermissions as jest.Mock).mockReturnValue({
-      crud: false,
-      read: true,
-    });
+  it("disables the button if the user can't create but can read", () => {
+    (useGetUserCasesPermissions as jest.Mock).mockReturnValue(readCasesPermissions());
+
+    const { result } = renderHook(() =>
+      useAddToExistingCase({
+        lensAttributes: kpiHostMetricLensAttributes,
+        timeRange,
+        onAddToCaseClicked: mockOnAddToCaseClicked,
+      })
+    );
+    expect(result.current.disabled).toEqual(true);
+  });
+
+  it("disables the button if the user can't read but can create", () => {
+    (useGetUserCasesPermissions as jest.Mock).mockReturnValue(writeCasesPermissions());
 
     const { result } = renderHook(() =>
       useAddToExistingCase({

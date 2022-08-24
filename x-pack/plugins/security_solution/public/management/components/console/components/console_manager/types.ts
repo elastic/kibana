@@ -35,6 +35,9 @@ export interface ConsoleRegistrationInterface<TMeta extends object = any> {
    * the Responder page overlay is shown.
    */
   ActionComponents?: Array<ComponentType<ManagedConsoleExtensionComponentProps<TMeta>>>;
+
+  /** controls the visibility of the console close button */
+  showCloseButton?: boolean;
 }
 
 /**

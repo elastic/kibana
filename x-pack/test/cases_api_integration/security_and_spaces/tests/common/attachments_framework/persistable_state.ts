@@ -39,6 +39,10 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const kibanaServer = getService('kibanaServer');
 
+  /**
+   * Attachment types are being registered in
+   * x-pack/test/cases_api_integration/common/fixtures/plugins/cases/server/plugin.ts
+   */
   describe('Persistable state attachments', () => {
     describe('references', () => {
       afterEach(async () => {
@@ -244,6 +248,16 @@ export default ({ getService }: FtrProviderContext): void => {
           caseId: postedCase.id,
           // @ts-expect-error
           params: { ...persistableStateAttachment, notValid: 'test' },
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s when creating a non registered persistable state attachment type', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: { ...persistableStateAttachment, persistableStateAttachmentTypeId: 'not-exists' },
           expectedHttpCode: 400,
         });
       });

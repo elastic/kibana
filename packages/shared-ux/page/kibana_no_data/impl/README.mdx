@@ -1,0 +1,29 @@
+---
+id: sharedUX/Page/KibanaNoDataPage
+slug: /shared-ux/page/kibana-no-data
+title: Kibana No Data Page
+description: A page to be displayed when there is no data in Elasticsearch, or no data views.
+tags: ['shared-ux', 'component']
+date: 2022-04-20
+---
+
+Many plugins display a "no data" page, either when there is no data in Elasticsearch, or there haven't been any data views created yet.  This component is meant
+to be used in those scenarios.  It displays an appropriate message to the user and facilitate addition of integrations and creation of data views. 
+
+The `KibanaNoDataPage` connected component uses:
+
+- `hasUserDataView` and `hasData` API from the `HasData` service in the `data_views` plugin to check for existence of data an data views.
+- `onDataViewCreated` callback once a data view has been created.
+- (noDataConfig)[https://github.com/elastic/kibana/blob/main/packages/shared-ux/page/no_data/types/index.d.ts] as configuration for the page in case of no data.
+
+## API
+
+| Export | Description |
+|---|---|
+| `KibanaNoDataPageProvider` | Provides contextual services to `KibanaNoDataPage`. |
+| `KibanaNoDataPageKibanaProvider` | Maps Kibana dependencies to provide contextual services to `KibanaNoDataPage`. |
+| `KibanaNoDataPage` | Uses a `Provider` to access contextual services and render the component. |
+
+## EUI Promotion Status
+
+This component is not currently considered for promotion to EUI.

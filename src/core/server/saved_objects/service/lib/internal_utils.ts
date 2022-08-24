@@ -7,18 +7,28 @@
  */
 
 import type { Payload } from '@hapi/boom';
-import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
-import type { SavedObjectsRawDoc, SavedObjectsRawDocSource } from '../../serialization';
-import type { SavedObject } from '../../types';
-import { decodeRequestVersion, encodeHitVersion } from '../../version';
-import { SavedObjectsErrorHelpers } from './errors';
-import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from './utils';
+import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type {
+  ISavedObjectTypeRegistry,
+  SavedObjectsRawDoc,
+  SavedObjectsRawDocSource,
+} from '@kbn/core-saved-objects-server';
+import {
+  SavedObjectsErrorHelpers,
+  SavedObjectsUtils,
+  ALL_NAMESPACES_STRING,
+} from '@kbn/core-saved-objects-utils-server';
+import {
+  decodeRequestVersion,
+  encodeHitVersion,
+} from '@kbn/core-saved-objects-base-server-internal';
 
 /**
  * Discriminated union (TypeScript approximation of an algebraic data type); this design pattern is used for internal repository operations.
  * @internal
  */
 export type Either<L = unknown, R = L> = Left<L> | Right<R>;
+
 /**
  * Left part of discriminated union ({@link Either}).
  * @internal
@@ -27,6 +37,7 @@ export interface Left<L> {
   tag: 'Left';
   value: L;
 }
+
 /**
  * Right part of discriminated union ({@link Either}).
  * @internal
@@ -35,6 +46,7 @@ export interface Right<R> {
   tag: 'Right';
   value: R;
 }
+
 /**
  * Type guard for left part of discriminated union ({@link Left}, {@link Either}).
  * @internal

@@ -4,30 +4,32 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { lastValueFrom } from 'rxjs';
 import { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Pagination } from '@elastic/eui';
 import { useContext } from 'react';
 import { number } from 'io-ts';
+import { getAggregationCount, getFindingsCountAggQuery } from '../../utils/utils';
 import { FindingsEsPitContext } from '../../es_pit/findings_es_pit_context';
 import { FINDINGS_REFETCH_INTERVAL_MS } from '../../constants';
 import { useKibana } from '../../../../common/hooks/use_kibana';
 import { showErrorToast } from '../../latest_findings/use_latest_findings';
-import type { CspFinding, FindingsBaseEsQuery } from '../../types';
-import { getAggregationCount, getFindingsCountAggQuery } from '../../utils';
+import type { CspFinding, FindingsBaseEsQuery, Sort } from '../../types';
 
 interface UseResourceFindingsOptions extends FindingsBaseEsQuery {
   resourceId: string;
   from: NonNullable<estypes.SearchRequest['from']>;
   size: NonNullable<estypes.SearchRequest['size']>;
+  sort: Sort<CspFinding>;
   enabled: boolean;
 }
 
 export interface ResourceFindingsQuery {
   pageIndex: Pagination['pageIndex'];
   pageSize: Pagination['pageSize'];
+  sort: Sort<CspFinding>;
 }
 
 type ResourceFindingsRequest = IKibanaSearchRequest<estypes.SearchRequest>;
@@ -43,6 +45,7 @@ const getResourceFindingsQuery = ({
   from,
   size,
   pitId,
+  sort,
 }: UseResourceFindingsOptions & { pitId: string }): estypes.SearchRequest => ({
   from,
   size,
@@ -54,6 +57,7 @@ const getResourceFindingsQuery = ({
         filter: [...(query?.bool?.filter || []), { term: { 'resource.id': resourceId } }],
       },
     },
+    sort: [{ [sort.field]: sort.direction }],
     pit: { id: pitId },
     aggs: getFindingsCountAggQuery(),
   },

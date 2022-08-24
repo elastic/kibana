@@ -16,7 +16,7 @@ export interface BuildReasonMessageArgs {
 }
 
 export interface BuildReasonMessageUtilArgs extends BuildReasonMessageArgs {
-  type?: 'eql' | 'ml' | 'query' | 'threatMatch' | 'threshold';
+  type?: 'eql' | 'ml' | 'query' | 'threatMatch' | 'threshold' | 'new_terms';
 }
 
 export type BuildReasonMessage = (args: BuildReasonMessageArgs) => string;
@@ -35,7 +35,7 @@ interface ReasonFields {
 }
 const getFieldsFromDoc = (mergedDoc: SignalSourceHit) => {
   const reasonFields: ReasonFields = {};
-  const docToUse = mergedDoc?.fields || mergedDoc;
+  const docToUse = mergedDoc?.fields || mergedDoc?._source || mergedDoc;
 
   reasonFields.destinationAddress = getOr(null, 'destination.address', docToUse);
   reasonFields.destinationPort = getOr(null, 'destination.port', docToUse);
@@ -134,3 +134,6 @@ export const buildReasonMessageForThreatMatchAlert = (args: BuildReasonMessageAr
 
 export const buildReasonMessageForThresholdAlert = (args: BuildReasonMessageArgs) =>
   buildReasonMessageUtil({ ...args, type: 'threshold' });
+
+export const buildReasonMessageForNewTermsAlert = (args: BuildReasonMessageArgs) =>
+  buildReasonMessageUtil({ ...args, type: 'new_terms' });

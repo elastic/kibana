@@ -9,7 +9,7 @@
 import { BehaviorSubject } from 'rxjs';
 
 import {
-  MetricsServiceSetup,
+  type MetricsServiceSetup,
   RequestHandlerContext,
   ServiceStatus,
   ServiceStatusLevels,

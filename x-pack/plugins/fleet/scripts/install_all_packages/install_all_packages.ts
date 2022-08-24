@@ -6,15 +6,15 @@
  */
 
 import fetch from 'node-fetch';
+import { kibanaPackageJson } from '@kbn/utils';
 import { ToolingLog } from '@kbn/tooling-log';
-import ReadPackage from 'read-pkg';
 
 const REGISTRY_URL = 'https://epr-snapshot.elastic.co';
 const KIBANA_URL = 'http://localhost:5601';
 const KIBANA_USERNAME = 'elastic';
 const KIBANA_PASSWORD = 'changeme';
 
-const KIBANA_VERSION = ReadPackage.sync().version;
+const KIBANA_VERSION = kibanaPackageJson.version;
 
 const SKIP_PACKAGES: string[] = [];
 

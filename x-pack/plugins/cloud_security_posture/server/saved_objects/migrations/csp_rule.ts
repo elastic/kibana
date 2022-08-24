@@ -17,7 +17,7 @@ function migrateCspRuleMetadata(
   context: SavedObjectMigrationContext
 ): SavedObjectUnsanitizedDoc<CspRuleV840> {
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { enabled, muted, package_policy_id, policy_id, ...metadata } = doc.attributes;
+  const { enabled, muted, package_policy_id, policy_id, benchmark, ...metadata } = doc.attributes;
 
   return {
     ...doc,
@@ -28,6 +28,7 @@ function migrateCspRuleMetadata(
       policy_id,
       metadata: {
         ...metadata,
+        benchmark: { ...benchmark, id: 'cis_k8s' },
         impact: metadata.impact || undefined,
         default_value: metadata.default_value || undefined,
         references: metadata.references || undefined,

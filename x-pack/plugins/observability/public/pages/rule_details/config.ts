@@ -7,18 +7,6 @@
 import { RuleExecutionStatuses } from '@kbn/alerting-plugin/common';
 import { RuleType, Rule } from '@kbn/triggers-actions-ui-plugin/public';
 
-type Capabilities = Record<string, any>;
-
-export type InitialRule = Partial<Rule> &
-  Pick<Rule, 'params' | 'consumer' | 'schedule' | 'actions' | 'tags' | 'notifyWhen'>;
-
-export function hasAllPrivilege(rule: InitialRule, ruleType?: RuleType): boolean {
-  return ruleType?.authorizedConsumers[rule.consumer]?.all ?? false;
-}
-
-export const hasExecuteActionsCapability = (capabilities: Capabilities) =>
-  capabilities?.actions?.execute;
-
 export function getHealthColor(status: RuleExecutionStatuses) {
   switch (status) {
     case 'active':
@@ -33,3 +21,15 @@ export function getHealthColor(status: RuleExecutionStatuses) {
       return 'subdued';
   }
 }
+
+type Capabilities = Record<string, any>;
+
+export type InitialRule = Partial<Rule> &
+  Pick<Rule, 'params' | 'consumer' | 'schedule' | 'actions' | 'tags' | 'notifyWhen'>;
+
+export function hasAllPrivilege(rule: InitialRule, ruleType?: RuleType): boolean {
+  return ruleType?.authorizedConsumers[rule.consumer]?.all ?? false;
+}
+
+export const hasExecuteActionsCapability = (capabilities: Capabilities) =>
+  capabilities?.actions?.execute;

@@ -8,6 +8,7 @@
 import React, { useCallback, useRef } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
+import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import { DatasourceMap, FramePublicAPI, VisualizationMap, Suggestion } from '../../types';
 import { DataPanelWrapper } from './data_panel_wrapper';
 import { ConfigPanelWrapper } from './config_panel';
@@ -17,7 +18,6 @@ import { WorkspacePanel } from './workspace_panel';
 import { DragDropIdentifier, RootDragDropProvider } from '../../drag_drop';
 import { EditorFrameStartPlugins } from '../service';
 import { getTopSuggestionForField, switchToSuggestion } from './suggestion_helpers';
-import { trackUiEvent } from '../../lens_ui_telemetry';
 import {
   useLensSelector,
   useLensDispatch,
@@ -28,6 +28,8 @@ import {
   selectVisualization,
 } from '../../state_management';
 import type { LensInspector } from '../../lens_inspector_service';
+import { ErrorBoundary, showMemoizedErrorNotification } from '../../lens_ui_errors';
+import { IndexPatternServiceAPI } from '../../indexpattern_service/service';
 
 export interface EditorFrameProps {
   datasourceMap: DatasourceMap;
@@ -37,6 +39,7 @@ export interface EditorFrameProps {
   plugins: EditorFrameStartPlugins;
   showNoDataPopover: () => void;
   lensInspector: LensInspector;
+  indexPatternService: IndexPatternServiceAPI;
 }
 
 export function EditorFrame(props: EditorFrameProps) {
@@ -50,6 +53,7 @@ export function EditorFrame(props: EditorFrameProps) {
   const visualizationTypeIsKnown = Boolean(
     visualization.activeId && props.visualizationMap[visualization.activeId]
   );
+
   const framePublicAPI: FramePublicAPI = useLensSelector((state) =>
     selectFramePublicAPI(state, datasourceMap)
   );
@@ -65,7 +69,8 @@ export function EditorFrame(props: EditorFrameProps) {
       datasourceStates,
       visualizationMap,
       datasourceMap[activeDatasourceId],
-      field
+      field,
+      framePublicAPI.dataViews
     );
   };
 
@@ -78,60 +83,76 @@ export function EditorFrame(props: EditorFrameProps) {
     (field) => {
       const suggestion = getSuggestionForField.current!(field);
       if (suggestion) {
-        trackUiEvent('drop_onto_workspace');
+        trackUiCounterEvents('drop_onto_workspace');
         switchToSuggestion(dispatchLens, suggestion, { clearStagedPreview: true });
       }
     },
     [getSuggestionForField, dispatchLens]
   );
 
+  const onError = useCallback((error: Error) => {
+    showMemoizedErrorNotification(error);
+  }, []);
+
   return (
     <RootDragDropProvider>
       <FrameLayout
         dataPanel={
-          <DataPanelWrapper
-            core={props.core}
-            plugins={props.plugins}
-            datasourceMap={datasourceMap}
-            showNoDataPopover={props.showNoDataPopover}
-            dropOntoWorkspace={dropOntoWorkspace}
-            hasSuggestionForField={hasSuggestionForField}
-          />
+          <ErrorBoundary onError={onError}>
+            <DataPanelWrapper
+              core={props.core}
+              plugins={props.plugins}
+              datasourceMap={datasourceMap}
+              showNoDataPopover={props.showNoDataPopover}
+              dropOntoWorkspace={dropOntoWorkspace}
+              hasSuggestionForField={hasSuggestionForField}
+              indexPatternService={props.indexPatternService}
+              frame={framePublicAPI}
+            />
+          </ErrorBoundary>
         }
         configPanel={
           areDatasourcesLoaded && (
-            <ConfigPanelWrapper
-              core={props.core}
-              datasourceMap={datasourceMap}
-              visualizationMap={visualizationMap}
-              framePublicAPI={framePublicAPI}
-            />
+            <ErrorBoundary onError={onError}>
+              <ConfigPanelWrapper
+                core={props.core}
+                datasourceMap={datasourceMap}
+                visualizationMap={visualizationMap}
+                framePublicAPI={framePublicAPI}
+                uiActions={props.plugins.uiActions}
+                indexPatternService={props.indexPatternService}
+              />
+            </ErrorBoundary>
           )
         }
         workspacePanel={
           areDatasourcesLoaded &&
           isVisualizationLoaded && (
-            <WorkspacePanel
-              core={props.core}
-              plugins={props.plugins}
-              ExpressionRenderer={props.ExpressionRenderer}
-              lensInspector={props.lensInspector}
-              datasourceMap={datasourceMap}
-              visualizationMap={visualizationMap}
-              framePublicAPI={framePublicAPI}
-              getSuggestionForField={getSuggestionForField.current}
-            />
+            <ErrorBoundary onError={onError}>
+              <WorkspacePanel
+                core={props.core}
+                plugins={props.plugins}
+                ExpressionRenderer={props.ExpressionRenderer}
+                lensInspector={props.lensInspector}
+                datasourceMap={datasourceMap}
+                visualizationMap={visualizationMap}
+                framePublicAPI={framePublicAPI}
+                getSuggestionForField={getSuggestionForField.current}
+              />
+            </ErrorBoundary>
           )
         }
         suggestionsPanel={
           visualizationTypeIsKnown &&
           areDatasourcesLoaded && (
-            <SuggestionPanelWrapper
-              ExpressionRenderer={props.ExpressionRenderer}
-              datasourceMap={datasourceMap}
-              visualizationMap={visualizationMap}
-              frame={framePublicAPI}
-            />
+            <ErrorBoundary onError={onError}>
+              <SuggestionPanelWrapper
+                ExpressionRenderer={props.ExpressionRenderer}
+                datasourceMap={datasourceMap}
+                visualizationMap={visualizationMap}
+                frame={framePublicAPI}
+              />
+            </ErrorBoundary>
           )
         }
       />

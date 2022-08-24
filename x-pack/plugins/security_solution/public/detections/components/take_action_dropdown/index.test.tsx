@@ -24,8 +24,8 @@ import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '..
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import {
-  HOST_ENDPOINT_UNENROLLED_TOOLTIP,
   NOT_FROM_ENDPOINT_HOST_TOOLTIP,
+  HOST_ENDPOINT_UNENROLLED_TOOLTIP,
 } from '../endpoint_responder/responder_context_menu_item';
 import { endpointMetadataHttpMocks } from '../../../management/pages/endpoint_hosts/mocks';
 import type { HttpSetup } from '@kbn/core/public';
@@ -35,6 +35,7 @@ import {
 } from '../../../common/utils/endpoint_alert_check';
 import { HostStatus } from '../../../../common/endpoint/types';
 import { getUserPrivilegesMockDefaultValue } from '../../../common/components/user_privileges/__mocks__';
+import { allCasesPermissions } from '../../../cases_test_utils';
 
 jest.mock('../../../common/components/user_privileges');
 
@@ -43,7 +44,7 @@ jest.mock('../user_info', () => ({
 }));
 
 jest.mock('../../../common/lib/kibana');
-(useGetUserCasesPermissions as jest.Mock).mockReturnValue({ crud: true });
+(useGetUserCasesPermissions as jest.Mock).mockReturnValue(allCasesPermissions());
 
 jest.mock('../../containers/detection_engine/alerts/use_alerts_privileges', () => ({
   useAlertsPrivileges: jest.fn().mockReturnValue({ hasIndexWrite: true, hasKibanaCRUD: true }),
@@ -233,11 +234,11 @@ describe('take action dropdown', () => {
         );
       });
     });
-    test('should render "Launch responder"', async () => {
+    test('should render "Respond"', async () => {
       await waitFor(() => {
         expect(
           wrapper.find('[data-test-subj="endpointResponseActions-action-item"]').first().text()
-        ).toEqual('Launch responder');
+        ).toEqual('Respond');
       });
     });
   });
@@ -365,7 +366,7 @@ describe('take action dropdown', () => {
       });
     });
 
-    describe('should correctly enable/disable the "Launch responder" button', () => {
+    describe('should correctly enable/disable the "Respond" button', () => {
       let wrapper: ReactWrapper;
       let apiMocks: ReturnType<typeof endpointMetadataHttpMocks>;
 
@@ -473,14 +474,13 @@ describe('take action dropdown', () => {
 
         await waitFor(() => {
           expect(apiMocks.responseProvider.metadataDetails).toHaveBeenCalled();
+          wrapper.update();
+
+          expect(findLaunchResponderButton().first().prop('disabled')).toBe(true);
+          expect(findLaunchResponderButton().first().prop('toolTipContent')).toEqual(
+            HOST_ENDPOINT_UNENROLLED_TOOLTIP
+          );
         });
-
-        wrapper.update();
-
-        expect(findLaunchResponderButton().first().prop('disabled')).toBe(true);
-        expect(findLaunchResponderButton().first().prop('toolTipContent')).toEqual(
-          HOST_ENDPOINT_UNENROLLED_TOOLTIP
-        );
       });
     });
   });

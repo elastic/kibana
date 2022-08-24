@@ -8,6 +8,7 @@
 import { Actions } from '../../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
+import { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
 import { basicCase, basicPush, getUserAction } from '../../containers/mock';
 import { UserActionBuilderArgs } from './types';
 
@@ -58,10 +59,12 @@ export const getMockBuilderArgs = (): UserActionBuilderArgs => {
   const handleManageQuote = jest.fn();
   const handleOutlineComment = jest.fn();
   const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
+  const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
 
   return {
     userAction,
     externalReferenceAttachmentTypeRegistry,
+    persistableStateAttachmentTypeRegistry,
     caseData: basicCase,
     comments: basicCase.comments,
     caseServices,

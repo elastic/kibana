@@ -90,7 +90,7 @@ const UsersComponent = () => {
 
   const { tabName } = useParams<{ tabName: string }>();
   const tabsFilters: Filter[] = React.useMemo(() => {
-    if (tabName === UsersTableType.alerts || tabName === UsersTableType.events) {
+    if (tabName === UsersTableType.events) {
       return filters.length > 0 ? [...filters, ...userNameExistsFilter] : userNameExistsFilter;
     }
 
@@ -102,7 +102,7 @@ const UsersComponent = () => {
     return filters;
   }, [severitySelection, tabName, filters]);
 
-  const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
+  const { indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
   const [filterQuery, kqlError] = useMemo(
     () =>
       convertToBuildEsQuery({
@@ -150,7 +150,7 @@ const UsersComponent = () => {
     [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
   );
 
-  const narrowDateRange = useCallback<UpdateDateRange>(
+  const updateDateRange = useCallback<UpdateDateRange>(
     ({ x }) => {
       if (!x) {
         return;
@@ -186,11 +186,7 @@ const UsersComponent = () => {
           <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
             <HeaderPage
               subtitle={
-                <LastEventTime
-                  docValueFields={docValueFields}
-                  indexKey={LastEventIndexKey.users}
-                  indexNames={selectedPatterns}
-                />
+                <LastEventTime indexKey={LastEventIndexKey.users} indexNames={selectedPatterns} />
               }
               border
               title={i18n.PAGE_TITLE}
@@ -203,7 +199,7 @@ const UsersComponent = () => {
               setQuery={setQuery}
               to={to}
               skip={isInitializing || !filterQuery}
-              narrowDateRange={narrowDateRange}
+              updateDateRange={updateDateRange}
             />
 
             <EuiSpacer />
@@ -214,12 +210,10 @@ const UsersComponent = () => {
 
             <UsersTabs
               deleteQuery={deleteQuery}
-              docValueFields={docValueFields}
               filterQuery={tabsFilterQuery || ''}
               from={from}
               indexNames={selectedPatterns}
               isInitializing={isInitializing}
-              setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
               setQuery={setQuery}
               to={to}
               type={usersModel.UsersType.page}

@@ -17,7 +17,7 @@ import { validateImmutable, validateIndexPatterns } from '../utils';
 export const createQueryAlertType = (
   createOptions: CreateRuleOptions
 ): SecurityAlertType<QueryRuleParams, {}, {}, 'default'> => {
-  const { eventsTelemetry, experimentalFeatures, logger, version } = createOptions;
+  const { eventsTelemetry, experimentalFeatures, version } = createOptions;
   return {
     id: QUERY_RULE_TYPE_ID,
     name: 'Custom Query Rule',
@@ -65,35 +65,38 @@ export const createQueryAlertType = (
         runOpts: {
           inputIndex,
           runtimeMappings,
-          buildRuleMessage,
-          bulkCreate,
+          completeRule,
+          tuple,
           exceptionItems,
           listClient,
-          completeRule,
+          ruleExecutionLogger,
           searchAfterSize,
-          tuple,
+          bulkCreate,
           wrapHits,
+          primaryTimestamp,
+          secondaryTimestamp,
         },
         services,
         state,
       } = execOptions;
 
       const result = await queryExecutor({
-        buildRuleMessage,
-        bulkCreate,
-        exceptionItems,
-        experimentalFeatures,
-        eventsTelemetry,
-        listClient,
-        logger,
         completeRule,
-        searchAfterSize,
-        services,
         tuple,
+        exceptionItems,
+        listClient,
+        experimentalFeatures,
+        ruleExecutionLogger,
+        eventsTelemetry,
+        services,
         version,
+        searchAfterSize,
+        bulkCreate,
         wrapHits,
         inputIndex,
         runtimeMappings,
+        primaryTimestamp,
+        secondaryTimestamp,
       });
       return { ...result, state };
     },

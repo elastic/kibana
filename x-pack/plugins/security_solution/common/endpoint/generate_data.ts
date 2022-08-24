@@ -6,7 +6,6 @@
  */
 
 import type seedrandom from 'seedrandom';
-import semverLte from 'semver/functions/lte';
 import { assertNever } from '@kbn/std';
 import type {
   GetAgentPoliciesResponseItem,
@@ -461,8 +460,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
     const hostName = this.randomHostname();
     const isIsolated = this.randomBoolean(0.3);
     const agentVersion = this.randomVersion();
-    const minCapabilitiesVersion = '7.15.0';
-    const capabilities = ['isolation'];
+    const capabilities = ['isolation', 'kill_process', 'suspend_process', 'running_processes'];
     const agentId = this.seededUUIDv4();
 
     return {
@@ -496,7 +494,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         state: {
           isolation: isIsolated,
         },
-        capabilities: semverLte(minCapabilitiesVersion, agentVersion) ? capabilities : [],
+        capabilities,
       },
     };
   }
@@ -1691,7 +1689,6 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       revision: 2,
       updated_at: '2020-07-22T16:36:49.196Z',
       updated_by: 'elastic',
-      package_policies: ['852491f0-cc39-11ea-bac2-cdbf95b4b41a'],
       agents: 0,
     };
   }

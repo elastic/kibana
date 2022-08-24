@@ -32,57 +32,103 @@ describe('ExecutionContextService', () => {
     const context$ = analytics.registerContextProvider.mock.calls[0][0].context$;
     execContext.set({
       type: 'ghf',
+      meta: {
+        foo: 'test',
+      },
       description: 'first set',
     });
 
     await expect(firstValueFrom(context$)).resolves.toMatchInlineSnapshot(`
-      Object {
-        "applicationId": "app1",
-        "entityId": undefined,
-        "page": undefined,
-        "pageName": "ghf:app1",
-      }
-    `);
+                  Object {
+                    "applicationId": "app1",
+                    "entityId": undefined,
+                    "page": undefined,
+                    "pageName": "ghf:app1",
+                  }
+              `);
   });
 
   it('app name updates automatically and clears everything else', () => {
     execContext.set({
       type: 'ghf',
+      meta: {
+        foo: 1,
+      },
       description: 'first set',
     });
 
-    expect(execContext.get()).toStrictEqual({
-      name: 'app1',
-      description: 'first set',
-      type: 'ghf',
-      url: '/',
-    });
+    expect(execContext.get()).toMatchInlineSnapshot(
+      {
+        name: 'app1',
+        description: 'first set',
+        type: 'ghf',
+        url: '/',
+      },
+      `
+      Object {
+        "description": "first set",
+        "meta": Object {
+          "foo": 1,
+        },
+        "name": "app1",
+        "type": "ghf",
+        "url": "/",
+      }
+    `
+    );
 
     curApp$.next('app2');
 
-    expect(execContext.get()).toStrictEqual({
-      name: 'app2',
-      url: '/',
-    });
+    expect(execContext.get()).toMatchInlineSnapshot(
+      {
+        name: 'app2',
+        url: '/',
+      },
+      `
+      Object {
+        "name": "app2",
+        "url": "/",
+      }
+    `
+    );
   });
 
   it('sets context and adds current url and appid when getting it', () => {
     execContext.set({
       type: 'ghf',
+      meta: {
+        foo: false,
+      },
       description: 'first set',
     });
 
-    expect(execContext.get()).toStrictEqual({
-      name: 'app1',
-      description: 'first set',
-      type: 'ghf',
-      url: '/',
-    });
+    expect(execContext.get()).toMatchInlineSnapshot(
+      {
+        name: 'app1',
+        description: 'first set',
+        type: 'ghf',
+        url: '/',
+      },
+      `
+      Object {
+        "description": "first set",
+        "meta": Object {
+          "foo": false,
+        },
+        "name": "app1",
+        "type": "ghf",
+        "url": "/",
+      }
+    `
+    );
   });
 
   it('merges context between calls and gets it', () => {
     execContext.set({
       type: 'ghf',
+      meta: {
+        foo: true,
+      },
       description: 'first set',
     });
 
@@ -91,12 +137,25 @@ describe('ExecutionContextService', () => {
       description: 'second set',
     });
 
-    expect(execContext.get()).toStrictEqual({
-      name: 'app1',
-      type: 'ghf',
-      description: 'second set',
-      url: '/',
-    });
+    expect(execContext.get()).toMatchInlineSnapshot(
+      {
+        name: 'app1',
+        type: 'ghf',
+        description: 'second set',
+        url: '/',
+      },
+      `
+      Object {
+        "description": "second set",
+        "meta": Object {
+          "foo": true,
+        },
+        "name": "app1",
+        "type": "ghf",
+        "url": "/",
+      }
+    `
+    );
   });
 
   it('context observable fires the context each time it changes', () => {
@@ -104,6 +163,9 @@ describe('ExecutionContextService', () => {
 
     execContext.set({
       type: 'ghf',
+      meta: {
+        foo: 'meta',
+      },
       description: 'first set',
     });
 
@@ -113,6 +175,9 @@ describe('ExecutionContextService', () => {
       name: 'app1',
       type: 'ghf',
       description: 'first set',
+      meta: {
+        foo: 'meta',
+      },
       url: '/',
     });
 
@@ -124,6 +189,9 @@ describe('ExecutionContextService', () => {
     expect(sub).toHaveBeenCalledWith({
       name: 'app1',
       type: 'str',
+      meta: {
+        foo: 'meta',
+      },
       description: 'first set',
       url: '/',
     });
@@ -136,6 +204,9 @@ describe('ExecutionContextService', () => {
 
     execContext.set({
       type: 'ghf',
+      meta: {
+        foo: 'test',
+      },
       description: 'first set',
     });
 
@@ -148,6 +219,9 @@ describe('ExecutionContextService', () => {
     expect(sub).toHaveBeenCalledWith({
       name: 'app1',
       type: 'ghf',
+      meta: {
+        foo: 'test',
+      },
       description: 'first set',
       url: '/',
     });
@@ -160,6 +234,9 @@ describe('ExecutionContextService', () => {
 
     execContext.set({
       type: 'ghf',
+      meta: {
+        foo: true,
+      },
       description: 'first set',
     });
     execContext.context$.subscribe(sub);
@@ -180,16 +257,28 @@ describe('ExecutionContextService', () => {
       description: 'first set',
       page: 'mypage',
       child: {
+        meta: {
+          foo: 'test',
+        },
         description: 'inner',
       },
       id: '123',
     });
 
-    expect(execContext.getAsLabels()).toStrictEqual({
-      name: 'app1',
-      page: 'mypage',
-      id: '123',
-    });
+    expect(execContext.getAsLabels()).toMatchInlineSnapshot(
+      {
+        name: 'app1',
+        page: 'mypage',
+        id: '123',
+      },
+      `
+      Object {
+        "id": "123",
+        "name": "app1",
+        "page": "mypage",
+      }
+    `
+    );
   });
 
   it('getAsLabels removes undefined values', () => {
@@ -197,22 +286,48 @@ describe('ExecutionContextService', () => {
       type: 'ghf',
       description: 'first set',
       page: 'mypage',
+      meta: {
+        foo: false,
+      },
       id: undefined,
     });
 
-    expect(execContext.get()).toStrictEqual({
-      name: 'app1',
-      type: 'ghf',
-      page: 'mypage',
-      url: '/',
-      description: 'first set',
-      id: undefined,
-    });
+    expect(execContext.get()).toMatchInlineSnapshot(
+      {
+        name: 'app1',
+        type: 'ghf',
+        page: 'mypage',
+        url: '/',
+        description: 'first set',
+        id: undefined,
+      },
+      `
+      Object {
+        "description": "first set",
+        "id": undefined,
+        "meta": Object {
+          "foo": false,
+        },
+        "name": "app1",
+        "page": "mypage",
+        "type": "ghf",
+        "url": "/",
+      }
+    `
+    );
 
-    expect(execContext.getAsLabels()).toStrictEqual({
-      name: 'app1',
-      page: 'mypage',
-    });
+    expect(execContext.getAsLabels()).toMatchInlineSnapshot(
+      {
+        name: 'app1',
+        page: 'mypage',
+      },
+      `
+      Object {
+        "name": "app1",
+        "page": "mypage",
+      }
+    `
+    );
   });
 
   it('stop clears subscriptions', () => {

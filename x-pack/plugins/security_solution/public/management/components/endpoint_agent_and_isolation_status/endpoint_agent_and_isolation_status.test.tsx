@@ -23,6 +23,7 @@ describe('When using the EndpointAgentAndIsolationStatus component', () => {
     renderProps = {
       status: HostStatus.HEALTHY,
       'data-test-subj': 'test',
+      pendingActions: {},
     };
 
     render = () => {

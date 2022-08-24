@@ -26,7 +26,6 @@ jest.mock('react-redux', () => {
 jest.mock('../../../../common/containers/sourcerer', () => {
   const mockSourcererReturn = {
     browserFields: {},
-    docValueFields: [],
     loading: true,
     indexPattern: {},
     selectedPatterns: [],
@@ -140,7 +139,6 @@ describe('useDetailPanel', () => {
       expect(result.current.DetailsPanel).toMatchInlineSnapshot(`
         <Memo(DetailsPanel)
           browserFields={Object {}}
-          docValueFields={Array []}
           handleOnPanelClosed={[Function]}
           tabType="session"
           timelineId="test"

@@ -11,7 +11,7 @@ import React from 'react';
 import deepEqual from 'fast-deep-equal';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { EntityType } from '@kbn/timelines-plugin/common';
-import type { BrowserFields, DocValueFields } from '../../../../common/containers/source';
+import type { BrowserFields } from '../../../../common/containers/source';
 import { ExpandableEvent, ExpandableEventTitle } from './expandable_event';
 import { useTimelineEventsDetails } from '../../../containers/details';
 import type { TimelineTabs } from '../../../../../common/types/timeline';
@@ -20,11 +20,11 @@ import type { HostRisk } from '../../../../risk_score/containers';
 import { useHostRiskScore } from '../../../../risk_score/containers';
 import { useHostIsolationTools } from './use_host_isolation_tools';
 import { FlyoutBody, FlyoutHeader, FlyoutFooter } from './flyout';
-import { useBasicDataFromDetailsData } from './helpers';
+import { useBasicDataFromDetailsData, getAlertIndexAlias } from './helpers';
+import { useSpaceId } from '../../../../common/hooks/use_space_id';
 
 interface EventDetailsPanelProps {
   browserFields: BrowserFields;
-  docValueFields: DocValueFields[];
   entityType?: EntityType;
   expandedEvent: {
     eventId: string;
@@ -42,7 +42,6 @@ interface EventDetailsPanelProps {
 
 const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   browserFields,
-  docValueFields,
   entityType = 'events', // Default to events so only alerts have to pass entityType in
   expandedEvent,
   handleOnEventClosed,
@@ -53,11 +52,13 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   timelineId,
   isReadOnly,
 }) => {
+  const currentSpaceId = useSpaceId();
+  const { indexName } = expandedEvent;
+  const eventIndex = getAlertIndexAlias(indexName, currentSpaceId) ?? indexName;
   const [loading, detailsData, rawEventData, ecsData, refetchFlyoutData] = useTimelineEventsDetails(
     {
-      docValueFields,
       entityType,
-      indexName: expandedEvent.indexName ?? '',
+      indexName: eventIndex ?? '',
       eventId: expandedEvent.eventId ?? '',
       runtimeMappings,
       skip: !expandedEvent.eventId,
@@ -182,7 +183,6 @@ export const EventDetailsPanel = React.memo(
   EventDetailsPanelComponent,
   (prevProps, nextProps) =>
     deepEqual(prevProps.browserFields, nextProps.browserFields) &&
-    deepEqual(prevProps.docValueFields, nextProps.docValueFields) &&
     deepEqual(prevProps.expandedEvent, nextProps.expandedEvent) &&
     prevProps.timelineId === nextProps.timelineId &&
     prevProps.isDraggable === nextProps.isDraggable

@@ -50,10 +50,10 @@ describe('helpers', () => {
       expect(result).toEqual({ unit: 'm', value: 0 });
     });
 
-    test('returns timeObj with unit set to empty string if no expected time type found', () => {
+    test('returns timeObj with unit set to default unit value of "ms" if no expected time type found', () => {
       const result = getTimeTypeValue('5l');
 
-      expect(result).toEqual({ unit: '', value: 5 });
+      expect(result).toEqual({ unit: 'ms', value: 5 });
     });
 
     test('returns timeObj with unit of s and value 5 when time is 5s ', () => {
@@ -80,10 +80,10 @@ describe('helpers', () => {
       expect(result).toEqual({ unit: 'm', value: 5 });
     });
 
-    test('returns timeObj with value of 0 and unit of "" if random string passed in', () => {
+    test('returns timeObj with value of 0 and unit of "ms" if random string passed in', () => {
       const result = getTimeTypeValue('random');
 
-      expect(result).toEqual({ unit: '', value: 0 });
+      expect(result).toEqual({ unit: 'ms', value: 0 });
     });
   });
 
@@ -706,6 +706,34 @@ describe('helpers', () => {
             ],
           },
         ],
+      };
+
+      expect(result).toEqual(expected);
+    });
+
+    test('returns formatted object with timestamp override', () => {
+      const mockStepData: AboutStepRule = {
+        ...mockData,
+        timestampOverride: 'event.ingest',
+        timestampOverrideFallbackDisabled: true,
+      };
+      const result = formatAboutStepData(mockStepData);
+      const expected: AboutStepRuleJson = {
+        author: ['Elastic'],
+        description: '24/7',
+        false_positives: ['test'],
+        license: 'Elastic License',
+        name: 'Query with rule-id',
+        note: '# this is some markdown documentation',
+        references: ['www.test.co'],
+        risk_score: 21,
+        risk_score_mapping: [],
+        severity: 'low',
+        severity_mapping: [],
+        tags: ['tag1', 'tag2'],
+        threat: getThreatMock(),
+        timestamp_override: 'event.ingest',
+        timestamp_override_fallback_disabled: true,
       };
 
       expect(result).toEqual(expected);

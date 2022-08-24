@@ -19,7 +19,9 @@ type KibanaClusterMetricOptions = Pick<
   | 'units'
   | 'metricAgg'
   | 'derivative'
+  | 'derivativeNormalizedUnits'
   | 'isNotSupportedInInternalCollection'
+  | 'technicalPreview'
 > &
   Partial<Pick<MetricOptions, 'title'>>;
 

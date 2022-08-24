@@ -9,12 +9,12 @@
 import { registerBundleRoutesMock } from './core_app.test.mocks';
 
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
+import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import { coreMock, httpServerMock } from '../mocks';
 import { httpResourcesMock } from '../http_resources/http_resources_service.mock';
 import type { UiPlugins } from '../plugins';
 import { PluginType } from '../plugins';
 import { CoreApp } from './core_app';
-import { mockRouter } from '../http/router/router.mock';
 import { RequestHandlerContext } from '..';
 
 const emptyPlugins = (): UiPlugins => ({

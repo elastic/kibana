@@ -11,8 +11,7 @@ import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createMockedIndexPattern } from '../../../../mocks';
 import { GenericOperationDefinition } from '../..';
-import type { IndexPatternField } from '../../../../types';
-import type { OperationMetadata } from '../../../../../types';
+import type { OperationMetadata, IndexPatternField } from '../../../../../types';
 import { tinymathFunctions } from '../util';
 import {
   getSignatureHelp,

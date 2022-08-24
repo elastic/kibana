@@ -6,13 +6,20 @@
  */
 
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { createSpacesAndUsers, deleteSpacesAndUsers } from '../../../common/lib/authentication';
+import {
+  createSpacesAndUsers,
+  deleteSpacesAndUsers,
+  activateUserProfiles,
+} from '../../../common/lib/authentication';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ loadTestFile, getService }: FtrProviderContext): void => {
   describe('cases security and spaces enabled: trial', function () {
     before(async () => {
       await createSpacesAndUsers(getService);
+      // once a user profile is created the only way to remove it is to delete the user and roles, so best to activate
+      // before all the tests
+      await activateUserProfiles(getService);
     });
 
     after(async () => {

@@ -186,8 +186,9 @@ describe('Lens App', () => {
           ],
         },
       });
-
-      const extraEntry = instance.find(services.navigation.ui.TopNavMenu).prop('config')[0];
+      const navigationComponent = services.navigation.ui
+        .TopNavMenu as unknown as React.ReactElement;
+      const extraEntry = instance.find(navigationComponent).prop('config')[0];
       expect(extraEntry.label).toEqual('My entry');
       expect(extraEntry.run).toBe(runFn);
     });
@@ -476,7 +477,7 @@ describe('Lens App', () => {
       expect(services.navigation.ui.TopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
           query: 'fake query',
-          indexPatterns: [{ id: 'mockip', isTimeBased: expect.any(Function) }],
+          indexPatterns: [{ id: 'mockip', isTimeBased: expect.any(Function), fields: [] }],
         }),
         {}
       );
@@ -881,8 +882,7 @@ describe('Lens App', () => {
           });
         });
         expect(checkForDuplicateTitle).toHaveBeenCalledWith(
-          expect.objectContaining({ id: '123' }),
-          false,
+          expect.objectContaining({ id: '123', isTitleDuplicateConfirmed: false }),
           onTitleDuplicate,
           expect.anything()
         );
@@ -1415,7 +1415,8 @@ describe('Lens App', () => {
           layers: [
             {
               indexPatternId: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
-              timeFieldName: 'order_date',
+              xFieldName: 'order_date',
+              xMode: 'date_histogram',
               chartType: 'area',
               axisPosition: 'left',
               palette: {

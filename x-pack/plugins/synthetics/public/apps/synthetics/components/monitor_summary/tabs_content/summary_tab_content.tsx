@@ -11,7 +11,9 @@ import { i18n } from '@kbn/i18n';
 
 import { MonitorDurationTrend } from './duration_trend';
 import { StepDurationPanel } from './step_duration_panel';
+import { AvailabilityPanel } from './availability_panel';
 import { MonitorDetailsPanel } from './monitor_details_panel';
+import { AvailabilitySparklines } from './availability_sparklines';
 
 export const SummaryTabContent = () => {
   return (
@@ -26,6 +28,23 @@ export const SummaryTabContent = () => {
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={2}>
+          <EuiPanel style={{ paddingBottom: 0, height: 150 }}>
+            <EuiTitle size="xs">
+              <h3>{LAST_30DAYS_LABEL}</h3>
+            </EuiTitle>
+            <EuiFlexGroup gutterSize="none">
+              <EuiFlexItem>
+                <AvailabilityPanel />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <AvailabilitySparklines />
+              </EuiFlexItem>
+              <EuiFlexItem>{/* TODO: Add duration metric*/}</EuiFlexItem>
+              <EuiFlexItem>{/* TODO: Add duration metric sparkline*/}</EuiFlexItem>
+              <EuiFlexItem>{/* TODO: Add error metric and sparkline*/}</EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+          <EuiSpacer size="s" />
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiPanel>
@@ -64,6 +83,10 @@ export const SummaryTabContent = () => {
 
 const MONITOR_DETAILS_LABEL = i18n.translate('xpack.synthetics.detailsPanel.monitorDetails', {
   defaultMessage: 'Monitor details',
+});
+
+const LAST_30DAYS_LABEL = i18n.translate('xpack.synthetics.detailsPanel.last30Days', {
+  defaultMessage: 'Last 30 days',
 });
 
 const DURATION_TREND_LABEL = i18n.translate('xpack.synthetics.detailsPanel.durationTrends', {
