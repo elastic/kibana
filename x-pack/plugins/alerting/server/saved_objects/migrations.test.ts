@@ -2397,6 +2397,26 @@ describe('successful migrations', () => {
       });
     });
 
+    describe('8.4.1', () => {
+      test('removes removeIsSnoozedUntil', () => {
+        const fakeTimer = sinon.useFakeTimers();
+        const migration841 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
+          '8.4.1'
+        ];
+        const mutedAlert = getMockData(
+          {
+            isSnoozedUntil: '1970-01-02T00:00:00.000Z',
+          },
+          true
+        );
+        expect(mutedAlert.attributes.isSnoozedUntil).toBeTruthy();
+        const migratedAlert841 = migration841(mutedAlert, migrationContext);
+
+        expect(migratedAlert841.attributes.isSnoozedUntil).toBeFalsy();
+        fakeTimer.restore();
+      });
+    });
+
     describe('Metrics Inventory Threshold rule', () => {
       test('Migrates incorrect action group spelling', () => {
         const migration800 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
