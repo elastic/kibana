@@ -23,5 +23,3 @@ export default {
 export const Component = () => {
   return <Route path="/app" />;
 };
-
-
