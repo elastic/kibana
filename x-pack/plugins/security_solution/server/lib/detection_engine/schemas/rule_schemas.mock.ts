@@ -125,6 +125,7 @@ export const getQueryRuleParams = (): QueryRuleParams => {
       },
     ],
     savedId: undefined,
+    alertGrouping: undefined,
   };
 };
 
@@ -146,6 +147,7 @@ export const getSavedQueryRuleParams = (): SavedQueryRuleParams => {
       },
     ],
     savedId: 'some-id',
+    alertGrouping: undefined,
   };
 };
 

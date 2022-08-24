@@ -7,6 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type moment from 'moment';
+import type { ESSearchResponse } from '@kbn/core/types/elasticsearch';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type {
   RuleTypeState,
@@ -42,6 +43,7 @@ import type {
   WrappedFieldsLatest,
 } from '../../../../common/detection_engine/schemas/alerts';
 import type { IRuleExecutionLogForExecutors } from '../rule_monitoring';
+import type { buildGroupByFieldAggregation } from './alert_grouping/build_group_by_field_aggregation';
 
 export interface ThresholdResult {
   terms?: Array<{
@@ -315,3 +317,12 @@ export interface ThresholdAlertState extends RuleTypeState {
   initialized: boolean;
   signalHistory: ThresholdSignalHistory;
 }
+
+export type EventGroupingMultiBucketAggregationResult = ESSearchResponse<
+  SignalSource,
+  {
+    body: {
+      aggregations: ReturnType<typeof buildGroupByFieldAggregation>;
+    };
+  }
+>;

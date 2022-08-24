@@ -15,6 +15,7 @@ import type { ListClient } from '@kbn/lists-plugin/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { getFilter } from '../get_filter';
+import { groupAndBulkCreate } from '../alert_grouping/group_and_bulk_create';
 import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
 import type { RuleRangeTuple, BulkCreate, WrapHits } from '../types';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
@@ -77,7 +78,7 @@ export const queryExecutor = async ({
       lists: exceptionItems,
     });
 
-    return searchAfterAndBulkCreate({
+    const searchParams = {
       tuple,
       completeRule,
       services,
@@ -94,6 +95,12 @@ export const queryExecutor = async ({
       runtimeMappings,
       primaryTimestamp,
       secondaryTimestamp,
-    });
+    };
+
+    if (experimentalFeatures.alertGroupingEnabled) {
+      return groupAndBulkCreate(searchParams);
+    } else {
+      return searchAfterAndBulkCreate(searchParams);
+    }
   });
 };

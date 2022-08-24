@@ -78,6 +78,7 @@ import {
   newTermsFields,
   historyWindowStart,
   timestampOverrideFallbackDisabledOrUndefined,
+  alertGroupingOrUndefined,
 } from '../../../../common/detection_engine/schemas/common';
 import { SERVER_APP_ID } from '../../../../common/constants';
 
@@ -165,6 +166,7 @@ const querySpecificRuleParams = t.exact(
     filters: filtersOrUndefined,
     savedId: savedIdOrUndefined,
     dataViewId: dataViewIdOrUndefined,
+    alertGrouping: alertGroupingOrUndefined,
   })
 );
 export const queryRuleParams = t.intersection([baseRuleParams, querySpecificRuleParams]);
@@ -181,6 +183,7 @@ const savedQuerySpecificRuleParams = t.type({
   query: queryOrUndefined,
   filters: filtersOrUndefined,
   savedId: saved_id,
+  alertGrouping: alertGroupingOrUndefined,
 });
 export const savedQueryRuleParams = t.intersection([baseRuleParams, savedQuerySpecificRuleParams]);
 export type SavedQuerySpecificRuleParams = t.TypeOf<typeof savedQuerySpecificRuleParams>;

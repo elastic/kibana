@@ -34,7 +34,7 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
 
   /**
-   * Specific api integration tests for threat matching rule type
+   * Specific api integration tests for new terms rule type
    */
   describe('create_new_terms', () => {
     before(async () => {
