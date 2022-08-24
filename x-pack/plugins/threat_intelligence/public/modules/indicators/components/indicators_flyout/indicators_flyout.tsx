@@ -36,11 +36,23 @@ const enum TAB_IDS {
 }
 
 export interface IndicatorsFlyoutProps {
+  /**
+   * Indicator passed down to the different tabs (table and json views).
+   */
   indicator: Indicator;
+  /**
+   * Object mapping each field with their type to ease display in the {@link IndicatorsFlyoutTable} component.
+   */
   fieldTypesMap: { [id: string]: string };
+  /**
+   * Event to close flyout (used by {@link EuiFlyout}).
+   */
   closeFlyout: () => void;
 }
 
+/**
+ * Leverages the {@link EuiFlyout} from the @elastic/eui library to dhow the details of a specific {@link Indicator}.
+ */
 export const IndicatorsFlyout: VFC<IndicatorsFlyoutProps> = ({
   indicator,
   fieldTypesMap,

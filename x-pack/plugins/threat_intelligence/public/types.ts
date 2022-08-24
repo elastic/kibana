@@ -14,6 +14,7 @@ import {
   FieldSpec,
 } from '@kbn/data-views-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart as TriggersActionsStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { BrowserField } from '@kbn/triggers-actions-ui-plugin/public/application/sections/field_browser/types';
 import { DataViewBase } from '@kbn/es-query';
@@ -40,6 +41,7 @@ export type Services = {
   storage: Storage;
   dataViews: DataViewsPublicPluginStart;
   triggersActionsUi: TriggersActionsStart;
+  timelines: TimelinesUIStart;
 } & CoreStart;
 
 export interface LicenseAware {
@@ -66,5 +68,8 @@ export interface SecuritySolutionPluginContext {
    * Get the user's license to drive the Threat Intelligence plugin's visibility.
    */
   licenseService: LicenseAware;
+  /**
+   * Gets Security Solution shared information like browerFields, indexPattern and selectedPatterns in DataView
+   */
   sourcererDataView: SourcererDataView;
 }

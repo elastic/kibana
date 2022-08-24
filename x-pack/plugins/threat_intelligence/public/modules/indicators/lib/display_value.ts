@@ -14,7 +14,7 @@ export type IndicatorTypePredicate = (indicatorType: string | null) => boolean;
 type MapperRule = [predicate: IndicatorTypePredicate, extract: IndicatorValueExtractor];
 
 /**
- * Predicates to help identify identicator by type
+ * Predicates to help identify indicator by type
  */
 const isIpIndicator: IndicatorTypePredicate = (indicatorType) =>
   !!indicatorType && ['ipv4-addr', 'ipv6-addr'].includes(indicatorType);
@@ -55,6 +55,25 @@ const findMappingRule = (indicatorType: string | null): IndicatorValueExtractor 
  * Cached rules for indicator types
  */
 const rules: Record<string, IndicatorValueExtractor> = {};
+
+/**
+ * Mapping between the indicator type and the {@link RawIndicatorFieldId}.
+ */
+const indicatorTypeToField: { [id: string]: RawIndicatorFieldId } = {
+  file: RawIndicatorFieldId.FileSha256,
+  'ipv4-addr': RawIndicatorFieldId.Ip,
+  'ipv6-addr': RawIndicatorFieldId.Ip,
+  url: RawIndicatorFieldId.UrlFull,
+};
+
+/**
+ * Find and return indicator display value field
+ */
+export const displayField = (indicator: Indicator): string | null => {
+  const indicatorType = (unwrapValue(indicator, RawIndicatorFieldId.Type) || '').toLowerCase();
+
+  return indicatorTypeToField[indicatorType];
+};
 
 /**
  * Find and return indicator display value, if possible

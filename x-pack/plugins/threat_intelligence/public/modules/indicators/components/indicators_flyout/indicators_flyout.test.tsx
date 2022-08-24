@@ -11,16 +11,14 @@ import { IndicatorsFlyout, SUBTITLE_TEST_ID, TITLE_TEST_ID } from './indicators_
 import { generateMockIndicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
 import { EMPTY_VALUE } from '../../../../../common/constants';
 import { dateFormatter } from '../../../../common/utils/dates';
-import { mockUiSetting } from '../../../../common/mocks/mock_kibana_ui_setting';
+import { mockUiSetting } from '../../../../common/mocks/mock_kibana_ui_settings_service';
 import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
+import { generateFieldTypeMap } from '../../../../common/mocks/mock_field_type_map';
 import { unwrapValue } from '../../lib/unwrap_value';
 import { displayValue } from '../../lib/display_value';
 
 const mockIndicator = generateMockIndicator();
-const mockFieldTypesMap: { [id: string]: string } = {
-  '@timestamp': 'date',
-  'threat.feed.name': 'string',
-};
+const mockFieldTypesMap = generateFieldTypeMap();
 
 describe('<IndicatorsFlyout />', () => {
   it('should render ioc id in title and first_seen in subtitle', () => {

@@ -25,10 +25,10 @@ import {
   ENDING_BREADCRUMB,
   FIELD_BROWSER,
   FIELD_BROWSER_MODAL,
-} from '../../screens/indicators';
-import { login } from '../../tasks/login';
-import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
-import { selectRange } from '../../tasks/select_range';
+} from '../screens/indicators';
+import { login } from '../tasks/login';
+import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
+import { selectRange } from '../tasks/select_range';
 
 before(() => {
   login();

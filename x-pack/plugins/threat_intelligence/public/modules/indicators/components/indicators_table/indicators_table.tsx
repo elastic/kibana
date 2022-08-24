@@ -6,20 +6,29 @@
  */
 
 import React, { VFC, useState, useMemo, useEffect, useCallback } from 'react';
-import { EuiDataGrid, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
+import {
+  EuiDataGrid,
+  EuiDataGridColumnCellActionProps,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiPanel,
+} from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { EuiDataGridColumn } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import { BrowserFields, SecuritySolutionDataViewBase } from '../../../../types';
 import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
 import { cellRendererFactory, ComputedIndicatorFieldId } from './cell_renderer';
 import { EmptyState } from '../../../../components/empty_state';
+import { AddToTimeline } from '../../../timeline/components/add_to_timeline';
 import { IndicatorsTableContext, IndicatorsTableContextValue } from './context';
 import { IndicatorsFlyout } from '../indicators_flyout/indicators_flyout';
 import { Pagination } from '../../hooks/use_indicators';
-import { Column, useToolbarOptions } from './hooks/use_toolbar_options';
+import { useToolbarOptions } from './hooks/use_toolbar_options';
 
-const defaultColumns: Column[] = [
+const defaultColumns: EuiDataGridColumn[] = [
   {
     id: RawIndicatorFieldId.TimeStamp,
     displayAsText: i18n.translate('xpack.threatIntelligence.indicator.table.timestampColumnTitle', {
@@ -73,6 +82,7 @@ export interface IndicatorsTableProps {
 }
 
 export const TABLE_TEST_ID = 'tiIndicatorsTable';
+export const CELL_TIMELINE_BUTTON_TEST_ID = 'tiIndicatorsTableCellTimelineButton';
 
 const gridStyle = {
   border: 'horizontal',
@@ -91,9 +101,9 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
   indexPattern,
   browserFields,
 }) => {
-  const [columns, setColumns] = useState<Column[]>(defaultColumns);
+  const [columns, setColumns] = useState<EuiDataGridColumn[]>(defaultColumns);
 
-  const [visibleColumns, setVisibleColumns] = useState<Array<Column['id']>>(
+  const [visibleColumns, setVisibleColumns] = useState<Array<EuiDataGridColumn['id']>>(
     columns.map((column) => column.id)
   );
 
@@ -152,8 +162,8 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
 
   const handleToggleColumn = useCallback((columnId: string) => {
     setColumns((currentColumns) => {
-      const columnsMatchingId = ({ id }: Column) => id === columnId;
-      const columnsNotMatchingId = (column: Column) => !columnsMatchingId(column);
+      const columnsMatchingId = ({ id }: EuiDataGridColumn) => id === columnId;
+      const columnsNotMatchingId = (column: EuiDataGridColumn) => !columnsMatchingId(column);
 
       const enabled = Boolean(currentColumns.find(columnsMatchingId));
 
@@ -173,6 +183,22 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
   useEffect(() => {
     setVisibleColumns(columns.map(({ id }) => id));
   }, [columns]);
+
+  useMemo(() => {
+    columns.map(
+      (col: EuiDataGridColumn) =>
+        (col.cellActions = [
+          ({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => (
+            <AddToTimeline
+              data={indicators[rowIndex % pagination.pageSize]}
+              field={columnId}
+              component={Component}
+              testId={CELL_TIMELINE_BUTTON_TEST_ID}
+            />
+          ),
+        ])
+    );
+  }, [columns, indicators, pagination]);
 
   const toolbarOptions = useToolbarOptions({
     browserFields,
