@@ -48,11 +48,18 @@ To determine if you have snoozed alerting rules, open the main menu, then click 
 Filter the rule list by selecting **View** -> **Snoozed**.
 For each space, cancel the snooze for all affected rules before you upgrade.
 
-To identify snoozed rules in all Spaces using **Dev Tools**, run the following query and then search for the `is_snoozed_until` string:
+To identify snoozed rules in all Spaces using **Dev Tools**, run the following query:
 
 [source,console]
 ----
-GET kbn:api/alerting/rules/_find
+GET /.kibana/_search
+{
+  "query": {
+    "exists": {
+      "field": "alert.isSnoozedUntil"
+    }
+  }
+}
 ----
 
 When you upgrade {kib} to 8.4.0, and you have alerting rules configured to snooze notifications, you will receive the following error message:
