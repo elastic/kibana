@@ -105,67 +105,43 @@ const getAllPartialRulesSavedObjects = (
   packagePolicyId: PackagePolicy['id'],
   policyId: PackagePolicy['policy_id']
 ) =>
-  soClient
-    .find<PackagePolicyRuleUpdatePayload>({
-      type: CSP_RULE_SAVED_OBJECT_TYPE,
-      filter: createCspRuleSearchFilterByPackagePolicy({
-        packagePolicyId,
-        policyId,
-      }),
-      fields: RUNTIME_CFG_FIELDS,
-      searchFields: ['name'],
-      perPage: 10000,
-    })
-    .then((response) => response.saved_objects);
-
-/**
- * Combines all existing rules with overrides
- * @returns all rules of a package policy with their runtime config fields
- */
-const getAllPackagePolicyRules = async (
-  soClient: SavedObjectsClientContract,
-  packagePolicy: PackagePolicy,
-  rulesToChange: UpdateRulesConfigBodySchema['rules']
-): Promise<Array<SavedObject<PackagePolicyRuleUpdatePayload>>> => {
-  const currentRules = await getAllPartialRulesSavedObjects(
-    soClient,
-    packagePolicy.id,
-    packagePolicy.policy_id
-  );
-  const nextRulesMap = Object.fromEntries(rulesToChange.map((rule) => [rule.id, rule.enabled]));
-  return currentRules.map((rule) => ({
-    ...rule,
-    enabled: nextRulesMap[rule.id] ?? rule.attributes.enabled,
-  }));
-};
+  soClient.find<PackagePolicyRuleUpdatePayload>({
+    type: CSP_RULE_SAVED_OBJECT_TYPE,
+    filter: createCspRuleSearchFilterByPackagePolicy({
+      packagePolicyId,
+      policyId,
+    }),
+    fields: RUNTIME_CFG_FIELDS,
+    searchFields: ['name'],
+    perPage: 10000,
+  });
 
 /**
  * Updates the package policy vars object with a new value for the runtimeCfg key
  * @internal
  * */
 export const updatePackagePolicyVars = async ({
-  rules = [],
   packagePolicyService,
   packagePolicy,
   esClient,
   soClient,
   user,
 }: {
-  /**
-   * Override existing rules with a new value for the 'enabled' key
-   */
-  rules?: UpdateRulesConfigBodySchema['rules'];
   packagePolicyService: PackagePolicyServiceInterface;
   packagePolicy: PackagePolicy;
   esClient: ElasticsearchClient;
   soClient: SavedObjectsClientContract;
   user: AuthenticatedUser | null;
 }): Promise<PackagePolicy> => {
-  const packagePolicyRules = await getAllPackagePolicyRules(soClient, packagePolicy, rules);
+  const packagePolicyRules = await getAllPartialRulesSavedObjects(
+    soClient,
+    packagePolicy.id,
+    packagePolicy.policy_id
+  );
 
   const updatedPolicy = getUpdatedPackagePolicy(
     packagePolicy,
-    yaml.safeDump(createRulesConfig(packagePolicyRules))
+    yaml.safeDump(createRulesConfig(packagePolicyRules.saved_objects))
   );
 
   return packagePolicyService.update(
@@ -246,7 +222,6 @@ export const updateRulesById = async (
     if (!packagePolicy) throw new Error('Missing package policy');
 
     const updatedPolicy = await updatePackagePolicyVars({
-      rules: next.map((rule) => ({ id: rule.id, enabled: rule.attributes.enabled })),
       soClient,
       packagePolicyService,
       user,
