@@ -708,7 +708,7 @@ export class TaskRunner<
     this.alertingEventLogger.done({
       status: executionStatus,
       metrics: executionMetrics,
-      timings: this.timer,
+      timings: this.timer.toJson(),
     });
 
     return {

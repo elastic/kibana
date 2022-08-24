@@ -8,7 +8,7 @@
 import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { EVENT_LOG_ACTIONS } from '../../plugin';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
-import { TaskRunnerTimer, TaskRunnerTimings } from '../../task_runner/task_runner_timer';
+import { TaskRunnerTimings } from '../../task_runner/task_runner_timer';
 import { AlertInstanceState, RuleExecutionStatus } from '../../types';
 import { createAlertEventLogRecordObject } from '../create_alert_event_log_record_object';
 import { RuleRunMetrics } from '../rule_run_metrics_store';
@@ -32,7 +32,7 @@ type RuleContext = RuleContextOpts & {
 };
 
 interface DoneOpts {
-  timings?: TaskRunnerTimer;
+  timings?: TaskRunnerTimings;
   status?: RuleExecutionStatus;
   metrics?: RuleRunMetrics | null;
 }
@@ -190,7 +190,7 @@ export class AlertingEventLogger {
     }
 
     if (timings) {
-      updateEvent(this.event, { timings: timings.toJson() });
+      updateEvent(this.event, { timings });
     }
 
     this.eventLogger.logEvent(this.event);

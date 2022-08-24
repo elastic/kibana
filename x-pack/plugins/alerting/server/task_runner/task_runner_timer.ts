@@ -37,7 +37,7 @@ export class TaskRunnerTimer {
     }
 
     // Calculate duration in millis from start until now and store
-    this.timings[name] = Date.now() - start.getTime();
+    this.timings[name] = new Date().getTime() - start.getTime();
   }
 
   public async runWithTimer<T>(name: TaskRunnerTimerSpan, cb: () => Promise<T>): Promise<T> {
@@ -49,7 +49,7 @@ export class TaskRunnerTimer {
     const result = await cb();
     const end = new Date();
 
-    this.timings[name] = end.getDate() - start.getDate();
+    this.timings[name] = end.getTime() - start.getTime();
 
     return result;
   }
