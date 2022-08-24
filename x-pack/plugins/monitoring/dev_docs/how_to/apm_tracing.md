@@ -27,6 +27,8 @@ For example:
 }
 ```
 
+This is an administrative-only API currently, so you'll need admin access or open a support case to have it configured.
+
 ## For ECE or other deployments
 
 For on-premise deployments or developers outside Elastic, you can configure an APM endpoint via `kibana.yml`. Note that at the time of writing this document you can't use `kibana.dev.yml` for these settings due to library load order.
