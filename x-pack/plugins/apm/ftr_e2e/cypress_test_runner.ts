@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-/* eslint-disable no-console */
-
 import Url from 'url';
 import cypress from 'cypress';
+import { esTestConfig } from '@kbn/test';
+import { apm, createLogger, LogLevel } from '@kbn/apm-synthtrace';
 import path from 'path';
-import { esArchiverLoad, esArchiverUnload } from './cypress/tasks/es_archiver';
 import { FtrProviderContext } from './ftr_provider_context';
 import { createApmUsers } from '../scripts/create_apm_users/create_apm_users';
 
 export async function cypressTestRunner({ getService }: FtrProviderContext) {
   const config = getService('config');
+  const kibanaVersion = esTestConfig.getVersion();
 
   const kibanaUrl = Url.format({
     protocol: config.get('servers.kibana.protocol'),
@@ -40,13 +40,16 @@ export async function cypressTestRunner({ getService }: FtrProviderContext) {
   });
 
   const esRequestTimeout = config.get('timeouts.esRequestTimeout');
-  const apmMappingsArchive = 'apm_mappings_only_8.0.0';
-  const apmMetricsArchive = 'metrics_8.0.0';
+  const kibanaClient = new apm.ApmSynthtraceKibanaClient(
+    createLogger(LogLevel.info)
+  );
 
-  console.log(`Creating APM mappings`);
-  await esArchiverLoad(apmMappingsArchive);
-  console.log(`Creating Metrics mappings`);
-  await esArchiverLoad(apmMetricsArchive);
+  await kibanaClient.installApmPackage(
+    kibanaUrl,
+    kibanaVersion,
+    username,
+    password
+  );
 
   const cypressProjectPath = path.join(__dirname);
   const { open, ...cypressCliArgs } = getCypressCliArgs();
@@ -67,11 +70,6 @@ export async function cypressTestRunner({ getService }: FtrProviderContext) {
       TEST_CLOUD: process.env.TEST_CLOUD,
     },
   });
-
-  console.log('Removing APM mappings');
-  await esArchiverUnload(apmMappingsArchive);
-  console.log('Removing Metrics mappings');
-  await esArchiverUnload(apmMetricsArchive);
 
   return res;
 }

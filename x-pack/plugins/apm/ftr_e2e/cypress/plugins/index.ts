@@ -43,7 +43,7 @@ const plugin: Cypress.PluginConfig = (on, config) => {
     client,
     createLogger(LogLevel.info),
     {
-      forceLegacyIndices: true,
+      forceLegacyIndices: false,
       refreshAfterIndex: true,
     }
   );
