@@ -18,13 +18,25 @@ import { IndicatorsBarChart } from '../indicators_barchart/indicators_barchart';
 const DEFAULT_FIELD = RawIndicatorFieldId.Feed;
 
 export interface IndicatorsBarChartWrapperProps {
+  /**
+   * From and to values received from the KQL bar and passed down to the hook to query data.
+   */
   timeRange?: TimeRange;
+  /**
+   * List of fields coming from the Security Solution sourcerer data view, passed down to the {@link IndicatorFieldSelector} to populate the dropdown.
+   */
   indexPattern: SecuritySolutionDataViewBase;
 }
 
+/**
+ * Displays the {@link IndicatorsBarChart} and {@link IndicatorsFieldSelector} components,
+ * and handles retrieving aggregated indicator data.
+ */
 export const IndicatorsBarChartWrapper = memo<IndicatorsBarChartWrapperProps>(
   ({ timeRange, indexPattern }) => {
-    const { dateRange, indicators, onFieldChange } = useAggregatedIndicators({ timeRange });
+    const { dateRange, indicators, selectedField, onFieldChange } = useAggregatedIndicators({
+      timeRange,
+    });
 
     return (
       <>
@@ -47,7 +59,11 @@ export const IndicatorsBarChartWrapper = memo<IndicatorsBarChartWrapperProps>(
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-        {timeRange ? <IndicatorsBarChart indicators={indicators} dateRange={dateRange} /> : <></>}
+        {timeRange ? (
+          <IndicatorsBarChart indicators={indicators} dateRange={dateRange} field={selectedField} />
+        ) : (
+          <></>
+        )}
       </>
     );
   }
