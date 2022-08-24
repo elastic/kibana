@@ -83,6 +83,25 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             (appleTransaction.failureRate + bananaTransaction.failureRate) * numberOfBuckets
           );
         });
+
+        describe('displays correct start in errors distribution chart', () => {
+          let errorsDistributionWithComparison: ErrorsDistribution;
+          before(async () => {
+            const responseWithComparison = await callApi({
+              query: {
+                start: new Date(start).toISOString(),
+                end: new Date(end).toISOString(),
+                offset: '15m',
+              },
+            });
+            errorsDistributionWithComparison = responseWithComparison.body;
+          });
+          it('has same start time when comparison is enabled', () => {
+            expect(first(errorsDistribution.currentPeriod)?.x).to.equal(
+              first(errorsDistributionWithComparison.currentPeriod)?.x
+            );
+          });
+        });
       });
 
       describe('displays occurrences for type "apple transaction" only', () => {
