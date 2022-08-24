@@ -238,7 +238,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       search,
       onResponse: (request, response, options) => {
         extractWarnings(request, response.rawResponse).forEach((warning) => {
-          if (warning.isTimeout || !options.disableShardFailureWarning) {
+          if (!options.disableShardFailureWarning) {
             handleWarning(warning, request, response.rawResponse, theme);
           }
         });
@@ -276,15 +276,9 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       },
       showWarnings: (inspector, cb) => {
         inspector.adapter?.getWarnings().forEach((warning) => {
-          const handled = cb(warning);
+          const handled = cb?.(warning);
           if (handled !== true) {
-            handleWarning(
-              warning,
-              warning.request,
-              warning.request.response,
-              { disableShardFailureWarning: false },
-              theme
-            );
+            handleWarning(warning, warning.request, warning.request.response, theme);
           }
         });
       },

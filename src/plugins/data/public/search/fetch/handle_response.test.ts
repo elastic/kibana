@@ -6,13 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { handleWarning, WarningHandlerCallback } from './handle_response';
-
-// Temporary disable eslint, will be removed after moving to new platform folder
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
-import { setNotifications } from '../../services';
-import { SearchSourceSearchOptions } from '../../../common';
 import { themeServiceMock } from '@kbn/core/public/mocks';
+import { setNotifications } from '../../services';
+import { handleWarning } from './handle_response';
 
 jest.mock('@kbn/i18n', () => {
   return {
@@ -24,15 +21,12 @@ jest.mock('@kbn/i18n', () => {
 
 const theme = themeServiceMock.createStartContract();
 
-describe('handleResponse', () => {
+describe('handleWarning', () => {
   const notifications = notificationServiceMock.createStartContract();
-  let callback: WarningHandlerCallback | undefined;
-  let options: SearchSourceSearchOptions;
 
   beforeEach(() => {
     setNotifications(notifications);
     (notifications.toasts.addWarning as jest.Mock).mockReset();
-    options = { disableShardFailureWarning: false };
     jest.resetAllMocks();
   });
 
@@ -43,7 +37,7 @@ describe('handleResponse', () => {
         timed_out: true,
       },
     };
-    const result = handleWarning(request, response, options, callback, theme);
+    const result = handleWarning(request, response, theme);
     expect(result).toBe(response);
     expect(notifications.toasts.addWarning).toBeCalled();
     expect((notifications.toasts.addWarning as jest.Mock).mock.calls[0][0].title).toMatch(
@@ -63,7 +57,7 @@ describe('handleResponse', () => {
         },
       },
     };
-    const result = handleWarning(request, response, options, callback, theme);
+    const result = handleWarning(request, response, theme);
     expect(result).toBe(response);
     expect(notifications.toasts.addWarning).toBeCalled();
     expect((notifications.toasts.addWarning as jest.Mock).mock.calls[0][0].title).toMatch(
@@ -71,83 +65,12 @@ describe('handleResponse', () => {
     );
   });
 
-  test('should not notify of shards failed if disableShardFailureWarning is true', () => {
-    options.disableShardFailureWarning = true;
-
-    const request = { body: {} };
-    const response = {
-      rawResponse: {
-        _shards: {
-          failed: 1,
-          total: 2,
-          successful: 1,
-          skipped: 1,
-        },
-      },
-    };
-    const result = handleWarning(request, response, options, callback, theme);
-    expect(result).toBe(response);
-    expect(notifications.toasts.addWarning).not.toBeCalled();
-  });
-
   test('returns the response', () => {
     const request = {};
     const response = {
       rawResponse: {},
     };
-    const result = handleWarning(request, response, options, callback, theme);
+    const result = handleWarning(request, response, theme);
     expect(result).toBe(response);
-  });
-
-  describe('using WarningHandlerCallback', () => {
-    test('can return true to prevent default behavior', () => {
-      callback = jest.fn(() => true);
-
-      const request = { body: {} };
-      const response = {
-        rawResponse: {
-          _shards: {
-            failed: 1,
-            total: 2,
-            successful: 1,
-            skipped: 1,
-          },
-        },
-      };
-
-      handleWarning(request, response, options, callback, theme);
-      expect(callback).toBeCalledWith({
-        isShardFailure: true,
-        message: '{shardsFailed} of {shardsTotal} shards failed',
-        text: 'The data you are seeing might be incomplete or wrong.',
-        type: 'generic_shard_warning',
-      });
-      expect(notifications.toasts.addWarning).not.toBeCalled();
-    });
-
-    test('can return false to allow default behavior', () => {
-      callback = jest.fn(() => false);
-
-      const request = { body: {} };
-      const response = {
-        rawResponse: {
-          _shards: {
-            failed: 1,
-            total: 2,
-            successful: 1,
-            skipped: 1,
-          },
-        },
-      };
-
-      handleWarning(request, response, options, callback, theme);
-      expect(callback).toBeCalledWith({
-        isShardFailure: true,
-        message: '{shardsFailed} of {shardsTotal} shards failed',
-        text: 'The data you are seeing might be incomplete or wrong.',
-        type: 'generic_shard_warning',
-      });
-      expect(notifications.toasts.addWarning).toBeCalled();
-    });
   });
 });

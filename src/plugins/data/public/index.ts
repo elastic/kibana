@@ -181,7 +181,7 @@ export {
   SearchSource,
   SearchSessionState,
   SortDirection,
-  handleResponse,
+  handleWarning,
 } from './search';
 
 export type {

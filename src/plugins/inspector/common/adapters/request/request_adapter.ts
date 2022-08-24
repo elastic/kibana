@@ -72,7 +72,7 @@ export class RequestAdapter extends EventEmitter {
   public getWarnings(): SearchResponseWarning[] {
     let warnings: SearchResponseWarning[] = [];
     this.getRequests().forEach((request) => {
-      warnings = warnings.concat(extractWarnings(request, request.response.json.rawResponse));
+      warnings = warnings.concat(extractWarnings(request, request.response?.json?.rawResponse));
     });
     return warnings;
   }

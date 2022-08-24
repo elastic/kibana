@@ -93,5 +93,5 @@ export interface SearchResponseWarning {
   /**
    * full request including response, if availble
    */
-  request: Response;
+  request: Request;
 }
