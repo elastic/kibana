@@ -53,7 +53,10 @@ export interface Indicator {
   fields: Partial<Record<RawIndicatorFieldId, unknown[]>>;
 }
 
-const generateMockBaseIndicator = (): Indicator => ({
+/**
+ * Used as a base to create Indicators of a specific type. Mocks are used in Jest tests and storybooks
+ */
+export const generateMockBaseIndicator = (): Indicator => ({
   fields: {
     '@timestamp': ['2022-01-01T01:01:01.000Z'],
     'threat.indicator.first_seen': ['2022-01-01T01:01:01.000Z'],
@@ -63,7 +66,7 @@ const generateMockBaseIndicator = (): Indicator => ({
 });
 
 /**
- * Used to create new Indicators, used mainly in jest unit tests and Storybook stories.
+ * Used to create an Indicator where the type is not important.
  */
 export const generateMockIndicator = (): Indicator => {
   const indicator = generateMockBaseIndicator();
@@ -76,9 +79,6 @@ export const generateMockIndicator = (): Indicator => {
 
 export const generateMockIpIndicator = generateMockIndicator;
 
-/**
- * Used to create new url-type Indicators, used mainly in jest unit tests and Storybook stories.
- */
 export const generateMockUrlIndicator = (): Indicator => {
   const indicator = generateMockBaseIndicator();
 
@@ -88,9 +88,6 @@ export const generateMockUrlIndicator = (): Indicator => {
   return indicator;
 };
 
-/**
- * Used to create new file-type Indicators, used mainly in jest unit tests and Storybook stories.
- */
 export const generateMockFileIndicator = (): Indicator => {
   const indicator = generateMockBaseIndicator();
 

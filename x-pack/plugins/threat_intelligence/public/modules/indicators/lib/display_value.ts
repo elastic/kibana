@@ -8,10 +8,11 @@
 import { Indicator, RawIndicatorFieldId } from '../../../../common/types/indicator';
 import { unwrapValue } from './unwrap_value';
 
-export type IndicatorValueExtractor = (indicator: Indicator) => string | null;
-export type IndicatorTypePredicate = (indicatorType: string | null) => boolean;
+type IndicatorDisplayName = [RawIndicatorFieldId, string | null];
+type IndicatorDisplayNameExtractor = (indicator: Indicator) => IndicatorDisplayName;
+type IndicatorTypePredicate = (indicatorType: string | null) => boolean;
 
-type MapperRule = [predicate: IndicatorTypePredicate, extract: IndicatorValueExtractor];
+type MapperRule = [predicate: IndicatorTypePredicate, extract: IndicatorDisplayNameExtractor];
 
 /**
  * Predicates to help identify indicator by type
@@ -37,52 +38,150 @@ const isMacAddress: IndicatorTypePredicate = (indicatorType) => indicatorType ==
 /**
  * Display value extraction logic
  */
-const extractStub = () => null;
+const extractIp: IndicatorDisplayNameExtractor = (indicator: Indicator) => [
+  RawIndicatorFieldId.Ip,
+  unwrapValue(indicator, RawIndicatorFieldId.Ip),
+];
 
-const extractIp = (indicator: Indicator) => unwrapValue(indicator, RawIndicatorFieldId.Ip);
+const extractUrl: IndicatorDisplayNameExtractor = (indicator: Indicator) => [
+  RawIndicatorFieldId.UrlOriginal,
+  unwrapValue(indicator, RawIndicatorFieldId.UrlOriginal),
+];
 
-const extractUrl = (indicator: Indicator) =>
-  unwrapValue(indicator, RawIndicatorFieldId.UrlOriginal);
+const extractId: IndicatorDisplayNameExtractor = (indicator: Indicator) => [
+  RawIndicatorFieldId.Id,
+  unwrapValue(indicator, RawIndicatorFieldId.Id),
+];
 
-const extractFile = (indicator: Indicator) =>
-  unwrapValue(indicator, RawIndicatorFieldId.FileSha256) ||
-  unwrapValue(indicator, RawIndicatorFieldId.FileMd5) ||
-  unwrapValue(indicator, RawIndicatorFieldId.FileSha1) ||
-  unwrapValue(indicator, RawIndicatorFieldId.FileSha512) ||
-  unwrapValue(indicator, RawIndicatorFieldId.FileSha224) ||
-  unwrapValue(indicator, RawIndicatorFieldId.FileSha384) ||
-  unwrapValue(indicator, RawIndicatorFieldId.FileSha3224) ||
-  unwrapValue(indicator, RawIndicatorFieldId.FileSha3256) ||
-  unwrapValue(indicator, RawIndicatorFieldId.FileSha3384) ||
-  unwrapValue(indicator, RawIndicatorFieldId.FileSha3512) ||
-  unwrapValue(indicator, RawIndicatorFieldId.FileSha512224) ||
-  unwrapValue(indicator, RawIndicatorFieldId.FileSha512256) ||
-  unwrapValue(indicator, RawIndicatorFieldId.FileSSDeep) ||
-  unwrapValue(indicator, RawIndicatorFieldId.FileTlsh) ||
-  unwrapValue(indicator, RawIndicatorFieldId.FileImpfuzzy) ||
-  unwrapValue(indicator, RawIndicatorFieldId.FileImphash) ||
-  unwrapValue(indicator, RawIndicatorFieldId.FilePehash) ||
-  unwrapValue(indicator, RawIndicatorFieldId.FileVhash);
+const extractFile: IndicatorDisplayNameExtractor = (indicator: Indicator) => {
+  if (unwrapValue(indicator, RawIndicatorFieldId.FileSha256)) {
+    return [RawIndicatorFieldId.FileSha256, unwrapValue(indicator, RawIndicatorFieldId.FileSha256)];
+  }
 
-const extractEmailAddress = (indicator: Indicator) =>
-  unwrapValue(indicator, RawIndicatorFieldId.EmailAddress);
+  if (unwrapValue(indicator, RawIndicatorFieldId.FileMd5)) {
+    return [RawIndicatorFieldId.FileMd5, unwrapValue(indicator, RawIndicatorFieldId.FileMd5)];
+  }
 
-const extractDomain = (indicator: Indicator) =>
-  unwrapValue(indicator, RawIndicatorFieldId.UrlDomain);
+  if (unwrapValue(indicator, RawIndicatorFieldId.FileSha1)) {
+    return [RawIndicatorFieldId.FileSha1, unwrapValue(indicator, RawIndicatorFieldId.FileSha1)];
+  }
 
-const extractX509Serial = (indicator: Indicator) =>
-  unwrapValue(indicator, RawIndicatorFieldId.X509Serial);
+  if (unwrapValue(indicator, RawIndicatorFieldId.FileSha512)) {
+    return [RawIndicatorFieldId.FileSha512, unwrapValue(indicator, RawIndicatorFieldId.FileSha512)];
+  }
 
-const extractWindowsRegistryKey = (indicator: Indicator) =>
-  unwrapValue(indicator, RawIndicatorFieldId.WindowsRegistryKey);
+  if (unwrapValue(indicator, RawIndicatorFieldId.FileSha224)) {
+    return [RawIndicatorFieldId.FileSha224, unwrapValue(indicator, RawIndicatorFieldId.FileSha224)];
+  }
 
-const extractAutonomousSystemNumber = (indicator: Indicator) =>
-  unwrapValue(indicator, RawIndicatorFieldId.AutonomousSystemNumber);
+  if (unwrapValue(indicator, RawIndicatorFieldId.FileSha384)) {
+    return [RawIndicatorFieldId.FileSha384, unwrapValue(indicator, RawIndicatorFieldId.FileSha384)];
+  }
 
-const extractMacAddress = (indicator: Indicator) =>
-  unwrapValue(indicator, RawIndicatorFieldId.MacAddress);
+  if (unwrapValue(indicator, RawIndicatorFieldId.FileSha3224)) {
+    return [
+      RawIndicatorFieldId.FileSha3224,
+      unwrapValue(indicator, RawIndicatorFieldId.FileSha3224),
+    ];
+  }
 
-const extractId = (indicator: Indicator) => unwrapValue(indicator, RawIndicatorFieldId.Id);
+  if (unwrapValue(indicator, RawIndicatorFieldId.FileSha3256)) {
+    return [
+      RawIndicatorFieldId.FileSha3256,
+      unwrapValue(indicator, RawIndicatorFieldId.FileSha3256),
+    ];
+  }
+
+  if (unwrapValue(indicator, RawIndicatorFieldId.FileSha3384)) {
+    return [
+      RawIndicatorFieldId.FileSha3384,
+      unwrapValue(indicator, RawIndicatorFieldId.FileSha3384),
+    ];
+  }
+
+  if (unwrapValue(indicator, RawIndicatorFieldId.FileSha3512)) {
+    return [
+      RawIndicatorFieldId.FileSha3512,
+      unwrapValue(indicator, RawIndicatorFieldId.FileSha3512),
+    ];
+  }
+
+  if (unwrapValue(indicator, RawIndicatorFieldId.FileSha512224)) {
+    return [
+      RawIndicatorFieldId.FileSha512224,
+      unwrapValue(indicator, RawIndicatorFieldId.FileSha512224),
+    ];
+  }
+
+  if (unwrapValue(indicator, RawIndicatorFieldId.FileSha512256)) {
+    return [
+      RawIndicatorFieldId.FileSha512256,
+      unwrapValue(indicator, RawIndicatorFieldId.FileSha512256),
+    ];
+  }
+
+  if (unwrapValue(indicator, RawIndicatorFieldId.FileSSDeep)) {
+    return [RawIndicatorFieldId.FileSSDeep, unwrapValue(indicator, RawIndicatorFieldId.FileSSDeep)];
+  }
+
+  if (unwrapValue(indicator, RawIndicatorFieldId.FileTlsh)) {
+    return [RawIndicatorFieldId.FileTlsh, unwrapValue(indicator, RawIndicatorFieldId.FileTlsh)];
+  }
+
+  if (unwrapValue(indicator, RawIndicatorFieldId.FileImpfuzzy)) {
+    return [
+      RawIndicatorFieldId.FileImpfuzzy,
+      unwrapValue(indicator, RawIndicatorFieldId.FileImpfuzzy),
+    ];
+  }
+
+  if (unwrapValue(indicator, RawIndicatorFieldId.FileImphash)) {
+    return [
+      RawIndicatorFieldId.FileImphash,
+      unwrapValue(indicator, RawIndicatorFieldId.FileImphash),
+    ];
+  }
+
+  if (unwrapValue(indicator, RawIndicatorFieldId.FilePehash)) {
+    return [RawIndicatorFieldId.FilePehash, unwrapValue(indicator, RawIndicatorFieldId.FilePehash)];
+  }
+
+  if (unwrapValue(indicator, RawIndicatorFieldId.FileVhash)) {
+    return [RawIndicatorFieldId.FileVhash, unwrapValue(indicator, RawIndicatorFieldId.FileVhash)];
+  }
+
+  return extractId(indicator);
+};
+
+const extractEmailAddress: IndicatorDisplayNameExtractor = (indicator: Indicator) => [
+  RawIndicatorFieldId.EmailAddress,
+  unwrapValue(indicator, RawIndicatorFieldId.EmailAddress),
+];
+
+const extractDomain: IndicatorDisplayNameExtractor = (indicator: Indicator) => [
+  RawIndicatorFieldId.UrlDomain,
+  unwrapValue(indicator, RawIndicatorFieldId.UrlDomain),
+];
+
+const extractX509Serial: IndicatorDisplayNameExtractor = (indicator: Indicator) => [
+  RawIndicatorFieldId.X509Serial,
+  unwrapValue(indicator, RawIndicatorFieldId.X509Serial),
+];
+
+const extractWindowsRegistryKey: IndicatorDisplayNameExtractor = (indicator: Indicator) => [
+  RawIndicatorFieldId.WindowsRegistryKey,
+  unwrapValue(indicator, RawIndicatorFieldId.WindowsRegistryKey),
+];
+
+const extractAutonomousSystemNumber: IndicatorDisplayNameExtractor = (indicator: Indicator) => [
+  RawIndicatorFieldId.AutonomousSystemNumber,
+  unwrapValue(indicator, RawIndicatorFieldId.AutonomousSystemNumber),
+];
+
+const extractMacAddress: IndicatorDisplayNameExtractor = (indicator: Indicator) => [
+  RawIndicatorFieldId.MacAddress,
+  unwrapValue(indicator, RawIndicatorFieldId.MacAddress),
+];
 
 /**
  * Pairs rule condition with display value extraction logic
@@ -103,39 +202,20 @@ const rulesArray: MapperRule[] = [
 /**
  * Finds display value mapping function for given indicatorType
  */
-const findMappingRule = (indicatorType: string | null): IndicatorValueExtractor => {
-  const [_, extract = extractStub] = rulesArray.find(([check]) => check(indicatorType)) || [];
+const findMappingRule = (indicatorType: string | null): IndicatorDisplayNameExtractor => {
+  const [_, extract = extractId] = rulesArray.find(([check]) => check(indicatorType)) || [];
   return extract;
 };
 
 /**
  * Cached rules for indicator types
  */
-const rules: Record<string, IndicatorValueExtractor> = {};
+const rules: Record<string, IndicatorDisplayNameExtractor> = {};
 
 /**
- * Mapping between the indicator type and the {@link RawIndicatorFieldId}.
+ * Find and return indicator display name structure [field, value]
  */
-const indicatorTypeToField: { [id: string]: RawIndicatorFieldId } = {
-  file: RawIndicatorFieldId.FileSha256,
-  'ipv4-addr': RawIndicatorFieldId.Ip,
-  'ipv6-addr': RawIndicatorFieldId.Ip,
-  url: RawIndicatorFieldId.UrlFull,
-};
-
-/**
- * Find and return indicator display value field
- */
-export const displayField = (indicator: Indicator): string | null => {
-  const indicatorType = (unwrapValue(indicator, RawIndicatorFieldId.Type) || '').toLowerCase();
-
-  return indicatorTypeToField[indicatorType];
-};
-
-/**
- * Find and return indicator display value, if possible
- */
-export const displayValue = (indicator: Indicator): string | null => {
+export const getDisplayName = (indicator: Indicator): IndicatorDisplayName => {
   const indicatorType = (unwrapValue(indicator, RawIndicatorFieldId.Type) || '').toLowerCase();
 
   if (!rules[indicatorType]) {

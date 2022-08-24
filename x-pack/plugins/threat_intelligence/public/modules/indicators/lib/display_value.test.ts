@@ -6,6 +6,7 @@
  */
 
 import {
+  generateMockBaseIndicator,
   generateMockFileIndicator,
   generateMockIpIndicator,
   generateMockUrlIndicator,
@@ -22,7 +23,7 @@ import {
   Indicator,
   RawIndicatorFieldId,
 } from '../../../../common/types/indicator';
-import { displayField, displayValue } from './display_value';
+import { getDisplayName } from './display_value';
 
 type ExpectedIndicatorValue = string | null;
 
@@ -51,12 +52,12 @@ const cases: Array<[Indicator, ExpectedIndicatorValue]> = [
   [null, null],
 ];
 
-describe('displayValue()', () => {
+describe('getDisplayName()', () => {
   describe.each<[Indicator, ExpectedIndicatorValue]>(cases)(
     '%s',
     (indicator, expectedDisplayValue) => {
       it(`should render the indicator as ${expectedDisplayValue}`, () => {
-        expect(displayValue(indicator)).toEqual(expectedDisplayValue);
+        expect(getDisplayName(indicator)[1]).toEqual(expectedDisplayValue);
       });
     }
   );
@@ -64,15 +65,15 @@ describe('displayValue()', () => {
 
 describe('displayValueField()', () => {
   it('should return correct RawIndicatorFieldId for valid field', () => {
-    const mockIndicator = generateMockIndicator();
-    const result = displayField(mockIndicator);
-    expect(result).toEqual(RawIndicatorFieldId.Ip);
+    const mockIndicator = generateMockIpIndicator();
+    const result = getDisplayName(mockIndicator);
+    expect(result[0]).toEqual(RawIndicatorFieldId.Ip);
   });
 
   it('should return null for invalid field', () => {
-    const mockIndicator = generateMockIndicator();
+    const mockIndicator = generateMockBaseIndicator();
     mockIndicator.fields['threat.indicator.type'] = ['abc'];
-    const result = displayField(mockIndicator);
-    expect(result).toBeUndefined();
+    const result = getDisplayName(mockIndicator);
+    expect(result[0]).toEqual(RawIndicatorFieldId.Id);
   });
 });
