@@ -10,10 +10,18 @@ import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
 import type {
   SavedObjectsFindResult,
   SavedObjectsCreatePointInTimeFinderOptions,
+  SavedObjectsPointInTimeFinderClient,
 } from '@kbn/core-saved-objects-api-server';
-import { savedObjectsRepositoryMock } from './repository.mock';
 
 import { PointInTimeFinder } from './point_in_time_finder';
+
+const createPITClientMock = (): jest.Mocked<SavedObjectsPointInTimeFinderClient> => {
+  return {
+    find: jest.fn(),
+    openPointInTimeForType: jest.fn(),
+    closePointInTime: jest.fn(),
+  };
+};
 
 const mockHits = [
   {
@@ -42,11 +50,11 @@ const mockHits = [
 
 describe('createPointInTimeFinder()', () => {
   let logger: MockedLogger;
-  let repository: ReturnType<typeof savedObjectsRepositoryMock.create>;
+  let repository: ReturnType<typeof createPITClientMock>;
 
   beforeEach(() => {
     logger = loggerMock.create();
-    repository = savedObjectsRepositoryMock.create();
+    repository = createPITClientMock();
   });
 
   describe('#find', () => {
@@ -332,9 +340,13 @@ describe('createPointInTimeFinder()', () => {
     });
 
     test('finder can be reused after closing', async () => {
-      repository.openPointInTimeForType.mockResolvedValueOnce({
-        id: 'abc123',
-      });
+      repository.openPointInTimeForType
+        .mockResolvedValueOnce({
+          id: 'abc123',
+        })
+        .mockResolvedValueOnce({
+          id: 'abc456',
+        });
       repository.find
         .mockResolvedValueOnce({
           total: 2,

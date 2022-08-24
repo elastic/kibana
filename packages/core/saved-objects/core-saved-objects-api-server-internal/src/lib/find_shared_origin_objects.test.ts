@@ -8,10 +8,11 @@
 
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
-import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
+import type {
+  SavedObjectsPointInTimeFinderClient,
+} from '@kbn/core-saved-objects-api-server';
 import type { CreatePointInTimeFinderFn, PointInTimeFinder } from './point_in_time_finder';
 import { savedObjectsPointInTimeFinderMock } from './point_in_time_finder.mock';
-import { savedObjectsRepositoryMock } from './repository.mock';
 import { findSharedOriginObjects } from './find_shared_origin_objects';
 
 interface MockFindResultParams {
@@ -21,13 +22,24 @@ interface MockFindResultParams {
   namespaces: string[];
 }
 
+const createPITClientMock = (): jest.Mocked<SavedObjectsPointInTimeFinderClient> => {
+  return {
+    find: jest.fn(),
+    openPointInTimeForType: jest.fn(),
+    closePointInTime: jest.fn(),
+  };
+};
+
 describe('findSharedOriginObjects', () => {
-  let savedObjectsMock: jest.Mocked<ISavedObjectsRepository>;
+  let savedObjectsMock: ReturnType<typeof createPITClientMock>;
   let pointInTimeFinder: DeeplyMockedKeys<PointInTimeFinder>;
   let createPointInTimeFinder: jest.MockedFunction<CreatePointInTimeFinderFn>;
 
   beforeEach(() => {
-    savedObjectsMock = savedObjectsRepositoryMock.create();
+    savedObjectsMock = createPITClientMock();
+    savedObjectsMock.openPointInTimeForType.mockResolvedValueOnce({
+      id: 'abc123',
+    });
     savedObjectsMock.find.mockResolvedValue({
       pit_id: 'foo',
       saved_objects: [],

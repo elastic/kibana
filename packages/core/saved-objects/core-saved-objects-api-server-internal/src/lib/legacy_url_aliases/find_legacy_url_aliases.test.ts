@@ -8,23 +8,30 @@
 
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
-import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsPointInTimeFinderClient } from '@kbn/core-saved-objects-api-server';
 import {
   type LegacyUrlAlias,
   LEGACY_URL_ALIAS_TYPE,
 } from '@kbn/core-saved-objects-base-server-internal';
 import type { CreatePointInTimeFinderFn, PointInTimeFinder } from '../point_in_time_finder';
 import { savedObjectsPointInTimeFinderMock } from '../point_in_time_finder.mock';
-import { savedObjectsRepositoryMock } from '../repository.mock';
 import { findLegacyUrlAliases } from './find_legacy_url_aliases';
 
+const createPITClientMock = (): jest.Mocked<SavedObjectsPointInTimeFinderClient> => {
+  return {
+    find: jest.fn(),
+    openPointInTimeForType: jest.fn(),
+    closePointInTime: jest.fn(),
+  };
+};
+
 describe('findLegacyUrlAliases', () => {
-  let savedObjectsMock: jest.Mocked<ISavedObjectsRepository>;
+  let savedObjectsMock: ReturnType<typeof createPITClientMock>;
   let pointInTimeFinder: DeeplyMockedKeys<PointInTimeFinder>;
   let createPointInTimeFinder: jest.MockedFunction<CreatePointInTimeFinderFn>;
 
   beforeEach(() => {
-    savedObjectsMock = savedObjectsRepositoryMock.create();
+    savedObjectsMock = createPITClientMock();
     savedObjectsMock.find.mockResolvedValue({
       pit_id: 'foo',
       saved_objects: [],
@@ -32,6 +39,9 @@ describe('findLegacyUrlAliases', () => {
       total: 0,
       page: 1,
       per_page: 100,
+    });
+    savedObjectsMock.openPointInTimeForType.mockResolvedValueOnce({
+      id: 'abc123',
     });
     pointInTimeFinder = savedObjectsPointInTimeFinderMock.create({ savedObjectsMock })(); // PIT finder mock uses the actual implementation, but it doesn't need to be created with real params because the SOR is mocked too
     createPointInTimeFinder = jest.fn().mockReturnValue(pointInTimeFinder);

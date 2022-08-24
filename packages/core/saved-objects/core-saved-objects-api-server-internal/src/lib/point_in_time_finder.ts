@@ -10,16 +10,11 @@ import type { Logger } from '@kbn/logging';
 import type {
   SavedObjectsFindOptions,
   SavedObjectsFindResponse,
-  SavedObjectsClientContract,
   SavedObjectsCreatePointInTimeFinderDependencies,
   SavedObjectsCreatePointInTimeFinderOptions,
   ISavedObjectsPointInTimeFinder,
+  SavedObjectsPointInTimeFinderClient,
 } from '@kbn/core-saved-objects-api-server';
-
-type PointInTimeFinderClient = Pick<
-  SavedObjectsClientContract,
-  'find' | 'openPointInTimeForType' | 'closePointInTime'
->;
 
 /**
  * @internal
@@ -43,7 +38,7 @@ export class PointInTimeFinder<T = unknown, A = unknown>
   implements ISavedObjectsPointInTimeFinder<T, A>
 {
   readonly #log: Logger;
-  readonly #client: PointInTimeFinderClient;
+  readonly #client: SavedObjectsPointInTimeFinderClient;
   readonly #findOptions: SavedObjectsFindOptions;
   #open: boolean = false;
   #pitId?: string;
