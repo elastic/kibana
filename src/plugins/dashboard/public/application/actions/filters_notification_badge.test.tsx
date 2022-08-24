@@ -74,7 +74,6 @@ beforeEach(async () => {
     embeddable: start,
     inspector: {} as any,
     notifications: {} as any,
-    overlays: coreStart.overlays,
     savedObjectMetaData: {} as any,
     uiActions: {} as any,
     uiSettings: uiSettingsServiceMock.createStartContract(),

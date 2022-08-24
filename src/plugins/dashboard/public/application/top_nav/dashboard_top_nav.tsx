@@ -111,8 +111,9 @@ export function DashboardTopNav({
   } = useKibana<DashboardAppServices>().services;
   const {
     data: { query, search },
-    visualizations: { get: getVisualization, getAliases: getVisTypeAliases },
+    overlays,
     settings: { uiSettings, theme },
+    visualizations: { get: getVisualization, getAliases: getVisTypeAliases },
   } = pluginServices.getServices();
 
   const { version: kibanaVersion } = initializerContext.env.packageInfo;
@@ -164,7 +165,7 @@ export function DashboardTopNav({
           getAllFactories: embeddable.getEmbeddableFactories,
           getFactory: embeddable.getEmbeddableFactory,
           notifications: core.notifications,
-          overlays: core.overlays,
+          overlays,
           SavedObjectFinder: getSavedObjectFinder(core.savedObjects, uiSettings),
           reportUiCounter: usageCollection?.reportUiCounter,
           theme,
@@ -177,7 +178,7 @@ export function DashboardTopNav({
     embeddable.getEmbeddableFactory,
     core.notifications,
     core.savedObjects,
-    core.overlays,
+    overlays,
     theme,
     uiSettings,
     usageCollection,
@@ -234,11 +235,9 @@ export function DashboardTopNav({
         return;
       }
 
-      confirmDiscardUnsavedChanges(core.overlays, () =>
-        dashboardAppState.resetToLastSavedState?.()
-      );
+      confirmDiscardUnsavedChanges(() => dashboardAppState.resetToLastSavedState?.());
     },
-    [closeAllFlyouts, core.overlays, dashboardAppState, dispatchDashboardStateChange]
+    [closeAllFlyouts, dashboardAppState, dispatchDashboardStateChange]
   );
 
   const runSaveAs = useCallback(async () => {

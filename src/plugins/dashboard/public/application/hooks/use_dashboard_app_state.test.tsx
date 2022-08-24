@@ -14,7 +14,6 @@ import { createKbnUrlStateStorage, defer } from '@kbn/kibana-utils-plugin/public
 import { DataView } from '@kbn/data-views-plugin/public';
 
 import { DashboardSessionStorage } from '../lib';
-import { coreMock } from '@kbn/core/public/mocks';
 import { DashboardConstants } from '../../dashboard_constants';
 import { SavedObjectLoader } from '../../services/saved_objects';
 import { DashboardAppServices, DashboardAppState } from '../../types';
@@ -80,14 +79,12 @@ const setupEmbeddableFactory = (
   services: DashboardAppServices,
   id: string
 ): SetupEmbeddableFactoryReturn => {
-  const coreStart = coreMock.createStart();
   const containerOptions = {
     notifications: services.core.notifications,
     savedObjectMetaData: {} as unknown,
     ExitFullScreenButton: () => null,
     embeddable: services.embeddable,
     SavedObjectFinder: () => null,
-    overlays: coreStart.overlays,
     application: {} as unknown,
     inspector: {} as unknown,
     uiActions: {} as unknown,

@@ -42,7 +42,6 @@ beforeEach(async () => {
     embeddable: start,
     inspector: {} as any,
     notifications: {} as any,
-    overlays: {} as any,
     savedObjectMetaData: {} as any,
     uiActions: {} as any,
     theme: coreMock.createStart().theme,

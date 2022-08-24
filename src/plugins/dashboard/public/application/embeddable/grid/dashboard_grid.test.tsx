@@ -60,7 +60,6 @@ function prepare(props?: Partial<DashboardGridProps>) {
       getEmbeddableFactory,
     } as any,
     notifications: {} as any,
-    overlays: {} as any,
     inspector: {
       isAvailable: jest.fn(),
     } as any,

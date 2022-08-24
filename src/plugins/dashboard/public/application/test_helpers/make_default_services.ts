@@ -21,7 +21,6 @@ import { DashboardSessionStorage } from '../lib';
 
 export function makeDefaultServices(): DashboardAppServices {
   const core = coreMock.createStart();
-  core.overlays.openConfirm = jest.fn().mockResolvedValue(true);
 
   const savedDashboards = {} as SavedObjectLoader;
   savedDashboards.find = (search: string, sizeOrOptions: number | SavedObjectLoaderFindOptions) => {

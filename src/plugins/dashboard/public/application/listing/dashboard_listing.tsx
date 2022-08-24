@@ -140,7 +140,6 @@ export const DashboardListing = ({
       redirectTo({ destination: 'dashboard' });
     } else {
       confirmCreateWithUnsaved(
-        core.overlays,
         () => {
           dashboardSessionStorage.clearState();
           redirectTo({ destination: 'dashboard' });
@@ -148,7 +147,7 @@ export const DashboardListing = ({
         () => redirectTo({ destination: 'dashboard' })
       );
     }
-  }, [dashboardSessionStorage, redirectTo, core.overlays]);
+  }, [dashboardSessionStorage, redirectTo]);
 
   const emptyPrompt = useMemo(() => {
     if (!showWriteControls) {
@@ -174,7 +173,7 @@ export const DashboardListing = ({
             size="s"
             color="danger"
             onClick={() =>
-              confirmDiscardUnsavedChanges(core.overlays, () => {
+              confirmDiscardUnsavedChanges(() => {
                 dashboardSessionStorage.clearState(DASHBOARD_PANELS_UNSAVED_ID);
                 setUnsavedDashboardIds(dashboardSessionStorage.getDashboardIdsWithUnsavedChanges());
               })
@@ -246,7 +245,6 @@ export const DashboardListing = ({
   }, [
     redirectTo,
     createItem,
-    core.overlays,
     core.application,
     showWriteControls,
     unsavedDashboardIds,

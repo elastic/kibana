@@ -61,7 +61,6 @@ export interface DashboardContainerServices {
   notifications: CoreStart['notifications'];
   application: CoreStart['application'];
   inspector: InspectorStartContract;
-  overlays: CoreStart['overlays'];
   screenshotMode: ScreenshotModePluginStart;
   embeddable: EmbeddableStart;
   uiActions: UiActionsStart;

@@ -52,7 +52,6 @@ function getProps(props?: Partial<DashboardViewportProps>): {
       getEmbeddableFactory: start.getEmbeddableFactory,
     } as any,
     notifications: {} as any,
-    overlays: {} as any,
     inspector: {
       isAvailable: jest.fn(),
     } as any,

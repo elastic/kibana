@@ -22,10 +22,10 @@ let bannerId: string | undefined;
 
 export const DashboardNoMatch = ({ history }: { history: RouteComponentProps['history'] }) => {
   const { services } = useKibana<DashboardAppServices>();
-  const { core } = services;
 
   const {
     settings: { theme },
+    overlays: { banners },
   } = pluginServices.getServices();
 
   useEffect(() => {
@@ -39,7 +39,7 @@ export const DashboardNoMatch = ({ history }: { history: RouteComponentProps['hi
         defaultMessage: 'Page not found',
       });
 
-      bannerId = core.overlays.banners.replace(
+      bannerId = banners.replace(
         bannerId,
         toMountPoint(
           <EuiCallOut color="warning" iconType="iInCircle" title={bannerMessage}>
@@ -60,13 +60,13 @@ export const DashboardNoMatch = ({ history }: { history: RouteComponentProps['hi
       // hide the message after the user has had a chance to acknowledge it -- so it doesn't permanently stick around
       setTimeout(() => {
         if (bannerId) {
-          services.core.overlays.banners.remove(bannerId);
+          banners.remove(bannerId);
         }
       }, 15000);
 
       history.replace(DashboardConstants.LANDING_PAGE_PATH);
     }
-  }, [services, core, theme, history]);
+  }, [services, banners, theme, history]);
 
   return null;
 };

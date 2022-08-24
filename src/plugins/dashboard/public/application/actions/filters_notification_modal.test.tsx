@@ -50,7 +50,6 @@ describe('LibraryNotificationPopover', () => {
       embeddable: start,
       inspector: {} as any,
       notifications: {} as any,
-      overlays: coreStart.overlays,
       savedObjectMetaData: {} as any,
       uiActions: {} as any,
       theme: coreStart.theme,

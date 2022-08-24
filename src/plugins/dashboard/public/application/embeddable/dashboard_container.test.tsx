@@ -43,7 +43,6 @@ const options: DashboardContainerServices = {
   application: {} as any,
   embeddable: {} as any,
   notifications: {} as any,
-  overlays: {} as any,
   inspector: {} as any,
   screenshotMode: {} as any,
   SavedObjectFinder: () => null,
@@ -243,7 +242,6 @@ test('DashboardContainer in edit mode shows edit mode actions', async () => {
             getEmbeddableFactory={(() => null) as any}
             notifications={{} as any}
             application={options.application}
-            overlays={{} as any}
             inspector={inspector}
             SavedObjectFinder={() => null}
             theme={theme}

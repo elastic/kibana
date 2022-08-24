@@ -21,30 +21,31 @@ import {
   EUI_MODAL_CANCEL_BUTTON,
 } from '@elastic/eui';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import type { OverlayStart } from '@kbn/core/public';
 
 import { createConfirmStrings, discardConfirmStrings } from '../../dashboard_strings';
 import { pluginServices } from '../../services/plugin_services';
 
 export type DiscardOrKeepSelection = 'cancel' | 'discard' | 'keep';
 
-export const confirmDiscardUnsavedChanges = (overlays: OverlayStart, discardCallback: () => void) =>
-  overlays
-    .openConfirm(discardConfirmStrings.getDiscardSubtitle(), {
-      confirmButtonText: discardConfirmStrings.getDiscardConfirmButtonText(),
-      cancelButtonText: discardConfirmStrings.getDiscardCancelButtonText(),
-      buttonColor: 'danger',
-      defaultFocusedButton: EUI_MODAL_CANCEL_BUTTON,
-      title: discardConfirmStrings.getDiscardTitle(),
-    })
-    .then((isConfirmed) => {
-      if (isConfirmed) {
-        discardCallback();
-      }
-    });
+export const confirmDiscardUnsavedChanges = (discardCallback: () => void) => {
+  const {
+    overlays: { openConfirm },
+  } = pluginServices.getServices();
+
+  openConfirm(discardConfirmStrings.getDiscardSubtitle(), {
+    confirmButtonText: discardConfirmStrings.getDiscardConfirmButtonText(),
+    cancelButtonText: discardConfirmStrings.getDiscardCancelButtonText(),
+    buttonColor: 'danger',
+    defaultFocusedButton: EUI_MODAL_CANCEL_BUTTON,
+    title: discardConfirmStrings.getDiscardTitle(),
+  }).then((isConfirmed) => {
+    if (isConfirmed) {
+      discardCallback();
+    }
+  });
+};
 
 export const confirmCreateWithUnsaved = (
-  overlays: OverlayStart,
   startBlankCallback: () => void,
   contineCallback: () => void
 ) => {
@@ -53,9 +54,10 @@ export const confirmCreateWithUnsaved = (
 
   const {
     settings: { theme },
+    overlays: { openModal },
   } = pluginServices.getServices();
 
-  const session = overlays.openModal(
+  const session = openModal(
     toMountPoint(
       <EuiFocusTrap
         clickOutsideDisables={true}

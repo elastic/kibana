@@ -116,11 +116,7 @@ export const DashboardUnsavedListing = ({
   refreshUnsavedDashboards,
 }: DashboardUnsavedListingProps) => {
   const {
-    services: {
-      dashboardSessionStorage,
-      savedDashboards,
-      core: { overlays },
-    },
+    services: { dashboardSessionStorage, savedDashboards },
   } = useKibana<DashboardAppServices>();
 
   const [items, setItems] = useState<UnsavedItemMap>({});
@@ -134,12 +130,12 @@ export const DashboardUnsavedListing = ({
 
   const onDiscard = useCallback(
     (id?: string) => {
-      confirmDiscardUnsavedChanges(overlays, () => {
+      confirmDiscardUnsavedChanges(() => {
         dashboardSessionStorage.clearState(id);
         refreshUnsavedDashboards();
       });
     },
-    [overlays, refreshUnsavedDashboards, dashboardSessionStorage]
+    [refreshUnsavedDashboards, dashboardSessionStorage]
   );
 
   useEffect(() => {
