@@ -48,7 +48,7 @@ To verify if your alerting rules have snooze notifications, open the main menu, 
 Filter the rule list by selecting **View** -> **Snoozed**.
 For each space, cancel the snooze for all affected rules before you upgrade.
 
-To identify snoozed rules in Spaces using **Dev Tools**, run the following query to search for the `is_snoozed_until` string:
+To identify snoozed rules in all Spaces using **Dev Tools**, run the following query and then search for the `is_snoozed_until` string:
 
 [source,console]
 ----
