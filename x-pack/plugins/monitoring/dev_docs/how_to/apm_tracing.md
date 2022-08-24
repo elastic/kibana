@@ -15,7 +15,17 @@ All data will be available on the shared APM cluster. See (internal) https://doc
 
 ## For ESS
 
-All ESS clusters are configured to send data to the cloud overview cluster automatically. Search for `label.deploymentId: <your deployment ID>` in a kibana dashboard or APM UI.
+ESS clusters in the Elastic organization are configured to send data to the cloud overview cluster automatically (via the cloud `KibanaInternalApmSettings` class). Search for `label.deploymentId: <your deployment ID>` in a kibana dashboard or APM UI.
+
+For clusters outside the Elastic organization, or to send APM data to a different deployment, you can add the APM settings into the `user_settings_override_yaml` deployment configuration within `kibana.plan.kibana` section as escaped YAML inside JSON.
+
+For example:
+
+```json
+{
+  "user_settings_override_yaml": "elastic.apm.active: true\nelastic.apm.serverUrl: https://<my_apm_endpoint>\nelastic.apm.secretToken: <my_APM_token>\nelastic.apm.globalLabels.deploymentId: <my_deployment_ID>\nelastic.apm.centralConfig: false\nelastic.apm.breakdownMetrics: false\nelastic.apm.transactionSampleRate: 0.1\nelastic.apm.metricsInterval: 120s\nelastic.apm.captureSpanStackTraces: false"
+}
+```
 
 ## For ECE or other deployments
 
