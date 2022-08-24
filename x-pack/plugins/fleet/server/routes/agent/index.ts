@@ -41,6 +41,7 @@ import {
   getAgentDataHandler,
   bulkUpdateAgentTagsHandler,
   getAvailableVersionsHandler,
+  getActionStatusHandler,
 } from './handlers';
 import {
   postNewAgentActionHandlerBuilder,
@@ -48,7 +49,6 @@ import {
 } from './actions_handlers';
 import { postAgentUnenrollHandler, postBulkAgentsUnenrollHandler } from './unenroll_handler';
 import {
-  getActionStatusHandler,
   getCurrentUpgradesHandler,
   postAgentUpgradeHandler,
   postBulkAgentsUpgradeHandler,

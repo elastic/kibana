@@ -29,6 +29,7 @@ import type {
   PostBulkUpdateAgentTagsResponse,
   GetAgentTagsResponse,
   GetAvailableVersionsResponse,
+  GetActionStatusResponse,
 } from '../../../common/types';
 import type {
   GetAgentsRequestSchema,
@@ -357,6 +358,19 @@ export const getAvailableVersionsHandler: RequestHandler = async (context, reque
       ? [kibanaVersionCoerced].concat(parsedVersions)
       : parsedVersions;
     const body: GetAvailableVersionsResponse = { items: versionsToDisplay };
+    return response.ok({ body });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
+  }
+};
+
+export const getActionStatusHandler: RequestHandler = async (context, request, response) => {
+  const coreContext = await context.core;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+
+  try {
+    const actionStatuses = await AgentService.getActionStatuses(esClient);
+    const body: GetActionStatusResponse = { items: actionStatuses };
     return response.ok({ body });
   } catch (error) {
     return defaultIngestErrorHandler({ error, response });

@@ -152,19 +152,6 @@ export const getCurrentUpgradesHandler: RequestHandler = async (context, request
   }
 };
 
-export const getActionStatusHandler: RequestHandler = async (context, request, response) => {
-  const coreContext = await context.core;
-  const esClient = coreContext.elasticsearch.client.asInternalUser;
-
-  try {
-    const upgrades = await AgentService.getActionStatuses(esClient);
-    const body: GetCurrentUpgradesResponse = { items: upgrades };
-    return response.ok({ body });
-  } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
-  }
-};
-
 export const checkKibanaVersion = (version: string, kibanaVersion: string) => {
   // get version number only in case "-SNAPSHOT" is in it
   const kibanaVersionNumber = semverCoerce(kibanaVersion)?.version;
