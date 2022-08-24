@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { TestBed } from '@kbn/test-jest-helpers';
 
 const jsonSelector = 'policyRequestJson';
