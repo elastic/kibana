@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 import { setNotifications } from '../../services';
@@ -23,11 +24,6 @@ const theme = themeServiceMock.createStartContract();
 
 describe('handleWarning', () => {
   const notifications = notificationServiceMock.createStartContract();
-  const warning = {
-    type: 'timed_out',
-    message: 'this stuff timed out on us',
-  };
-
   beforeEach(() => {
     setNotifications(notifications);
     (notifications.toasts.addWarning as jest.Mock).mockReset();
@@ -35,14 +31,10 @@ describe('handleWarning', () => {
   });
 
   test('should notify if timed out', () => {
+    const warning = { isTimeout: true, message: 'request timed out', type: 'timeout_warning' };
     const request = { body: {} };
-    const response = {
-      rawResponse: {
-        timed_out: true,
-      },
-    };
-    const result = handleWarning(warning, request, response, theme);
-    expect(result).toBe(response);
+    const response = { rawResponse: { timed_out: true } } as unknown as estypes.SearchResponse;
+    handleWarning(warning, request, response, theme);
     expect(notifications.toasts.addWarning).toBeCalled();
     expect((notifications.toasts.addWarning as jest.Mock).mock.calls[0][0].title).toMatch(
       'request timed out'
@@ -50,31 +42,19 @@ describe('handleWarning', () => {
   });
 
   test('should notify if shards failed', () => {
+    const warning = {
+      isShardFailure: true,
+      message: 'shards failed',
+      type: 'general_search_response_warning',
+    };
     const request = { body: {} };
     const response = {
-      rawResponse: {
-        _shards: {
-          failed: 1,
-          total: 2,
-          successful: 1,
-          skipped: 1,
-        },
-      },
-    };
-    const result = handleWarning(warning, request, response, theme);
-    expect(result).toBe(response);
+      rawResponse: { _shards: { failed: 1, total: 2, successful: 1, skipped: 1 } },
+    } as unknown as estypes.SearchResponse;
+    handleWarning(warning, request, response, theme);
     expect(notifications.toasts.addWarning).toBeCalled();
     expect((notifications.toasts.addWarning as jest.Mock).mock.calls[0][0].title).toMatch(
       'shards failed'
     );
-  });
-
-  test('returns the response', () => {
-    const request = {};
-    const response = {
-      rawResponse: {},
-    };
-    const result = handleWarning(warning, request, response, theme);
-    expect(result).toBe(response);
   });
 });
