@@ -17,32 +17,34 @@ import { ShardFailureOpenModalButton } from '../../shard_failure_modal';
 import { getNotifications } from '../../services';
 
 export function handleWarnings(
-  warning: ResponseWarning,
+  warnings: ResponseWarning[],
   request: SearchRequest,
   response: estypes.SearchResponse,
   theme: ThemeServiceStart
 ) {
-  if (warning.type === 'timed_out') {
+  const timedOut = warnings.find((w) => w.type === 'timed_out');
+  if (timedOut) {
     getNotifications().toasts.addWarning({
-      title: warning.message,
+      title: timedOut.message,
     });
   }
 
-  if (warning.type === 'generic_shard_warning') {
+  const genericShardWarning = warnings.find((w) => w.type === 'generic_shard_warning');
+  if (genericShardWarning) {
     const text = toMountPoint(
       <>
-        {warning.text}
+        {genericShardWarning.text}
         <EuiSpacer size="s" />
         <ShardFailureOpenModalButton
           request={request.body}
           response={response}
           theme={theme}
-          title={warning.message}
+          title={genericShardWarning.message}
         />
       </>,
       { theme$: theme.theme$ }
     );
 
-    getNotifications().toasts.addWarning({ title: warning.message, text });
+    getNotifications().toasts.addWarning({ title: genericShardWarning.message, text });
   }
 }

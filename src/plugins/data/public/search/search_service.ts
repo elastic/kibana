@@ -237,11 +237,11 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     const aggs = this.aggsService.start({ fieldFormats, indexPatterns });
 
     const showWarnings = (
-      warning: ResponseWarning,
+      warnings: ResponseWarning[],
       request: SearchRequest,
       response: estypes.SearchResponse
     ) => {
-      handleWarnings(warning, request, response, theme);
+      handleWarnings(warnings, request, response, theme);
     };
 
     const searchSourceDependencies: SearchSourceDependencies = {

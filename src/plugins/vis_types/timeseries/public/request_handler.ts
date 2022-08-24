@@ -87,15 +87,14 @@ export const metricsRequestHandler = async ({
             .ok({ time: query.time });
 
           if (query.response && config.get(UI_SETTINGS.ALLOW_CHECKING_FOR_FAILED_SHARDS)) {
-            inspectorAdapters?.requests
-              ?.getWarnings()
-              .forEach((w) =>
-                dataSearch.showWarnings(
-                  w,
-                  { body: query.body },
-                  query.response! as unknown as estypes.SearchResponse
-                )
+            const warnings = inspectorAdapters?.requests?.getWarnings();
+            if (warnings) {
+              dataSearch.showWarnings(
+                warnings,
+                { body: query.body },
+                query.response! as unknown as estypes.SearchResponse
               );
+            }
           }
         });
 

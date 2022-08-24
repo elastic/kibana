@@ -57,7 +57,7 @@ export interface ISearchStart {
   showError: (e: Error) => void;
 
   showWarnings: (
-    warning: ResponseWarning,
+    warnings: ResponseWarning[],
     request: SearchRequest,
     response: estypes.SearchResponse
   ) => void;

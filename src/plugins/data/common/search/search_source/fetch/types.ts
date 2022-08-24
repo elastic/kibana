@@ -26,7 +26,7 @@ export interface FetchHandlers {
    * side effects like displaying UI errors on the client.
    */
   onResponse: (
-    warning: ResponseWarning,
+    warnings: ResponseWarning[],
     request: SearchRequest,
     response: estypes.SearchResponse
   ) => void;

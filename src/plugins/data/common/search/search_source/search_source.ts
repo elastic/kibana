@@ -573,11 +573,10 @@ export class SearchSource {
       }),
       map((response) => {
         if (!options.disableShardFailureWarning) {
-          options.inspector?.adapter
-            ?.getWarnings()
-            .forEach((warning) =>
-              onResponse(warning, searchRequest, response.rawResponse as estypes.SearchResponse)
-            );
+          const warnings = options.inspector?.adapter?.getWarnings();
+          if (warnings) {
+            onResponse(warnings, searchRequest, response.rawResponse as estypes.SearchResponse);
+          }
         }
         return response;
       })
