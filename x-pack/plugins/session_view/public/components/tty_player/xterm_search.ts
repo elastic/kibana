@@ -94,7 +94,7 @@ export class SearchAddon implements ITerminalAddon {
     }
 
     if (searchOptions?.lastLineOnly) {
-      startRow = this._terminal.buffer.active.cursorY - 1;
+      startRow = this._terminal.buffer.active.cursorY;
       startCol = searchOptions?.startCol || 0;
     }
 
@@ -176,10 +176,9 @@ export class SearchAddon implements ITerminalAddon {
       // Start from selection start if there is a selection
       startRow = currentSelection.startRow;
       startCol = currentSelection.startColumn;
-    }
-
-    if (searchOptions?.lastLineOnly) {
+    } else if (searchOptions?.lastLineOnly) {
       startRow = this._terminal.buffer.active.cursorY - 1;
+      startCol = this._terminal.cols;
     }
 
     this._initLinesCache();
