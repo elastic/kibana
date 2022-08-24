@@ -444,4 +444,8 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
       node
     );
   };
+
+  public isChained() {
+    return true;
+  }
 }

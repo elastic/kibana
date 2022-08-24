@@ -233,4 +233,8 @@ export class TimeSliderControlEmbeddable extends Embeddable<
       node
     );
   };
+
+  public isChained() {
+    return false;
+  }
 }

@@ -107,13 +107,28 @@ export const ControlGroupChainingSystems: {
         return;
       }
 
-      // when output changes on a child which isn't the last - make the next embeddable updateInputFromParent
-      const nextOrder = childOrder.IdsToOrder[childOutputChangedId] + 1;
-      if (nextOrder >= childOrder.idsInOrder.length) return;
-      setTimeout(
-        () => getChild(childOrder.idsInOrder[nextOrder])?.refreshInputFromParent(),
-        1 // run on next tick
-      );
+      // when output changes on a child which isn't the last
+      let nextOrder = childOrder.IdsToOrder[childOutputChangedId] + 1;
+      while(nextOrder < childOrder.idsInOrder.length) {
+        const nextControl = getChild(childOrder.idsInOrder[nextOrder]);
+
+        // make the next chained embeddable updateInputFromParent
+        if (nextControl.isChained()) {
+          setTimeout(
+            () => nextControl.refreshInputFromParent(),
+            1 // run on next tick
+          );
+          return;
+        }
+
+        // recalculate filters when there are no chained controls to the right of the updated control
+        if (nextControl.id === childOrder.lastChildId) {
+          recalculateFilters$.next(null);
+          return;
+        }
+
+        nextOrder += 1;
+      }
     },
   },
   NONE: {

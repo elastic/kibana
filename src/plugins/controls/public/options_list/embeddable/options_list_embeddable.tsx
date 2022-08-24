@@ -392,4 +392,8 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       node
     );
   };
+
+  public isChained() {
+    return true;
+  }
 }
