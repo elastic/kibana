@@ -80,7 +80,6 @@ export async function getLogs(
       // 'data_stream.type' will always be 'logs' for `logs-*` indices.
       should: [
         { term: { 'service.type': 'elasticsearch' } },
-        { term: { 'data_stream.type': 'logs' } },
       ],
     },
   };

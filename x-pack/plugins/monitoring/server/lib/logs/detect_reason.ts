@@ -28,7 +28,6 @@ async function doesFilebeatIndexExist(
     bool: {
       should: [
         { term: { 'service.type': 'elasticsearch' } },
-        { term: { 'data_stream.type': 'logs' } },
       ],
     },
   };
