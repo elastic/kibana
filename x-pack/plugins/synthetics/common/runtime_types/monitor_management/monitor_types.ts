@@ -16,6 +16,7 @@ import {
 import {
   DataStream,
   DataStreamCodec,
+  FormMonitorTypeCodec,
   ModeCodec,
   ResponseBodyIndexPolicyCodec,
   ScheduleUnitCodec,
@@ -79,6 +80,7 @@ export const CommonFieldsCodec = t.intersection([
     [ConfigKey.LOCATIONS]: MonitorServiceLocationsCodec,
   }),
   t.partial({
+    [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorTypeCodec,
     [ConfigKey.TIMEOUT]: t.union([t.string, t.null]),
     [ConfigKey.REVISION]: t.number,
     [ConfigKey.MONITOR_SOURCE_TYPE]: SourceTypeCodec,
@@ -220,6 +222,7 @@ export const EncryptedBrowserSimpleFieldsCodec = t.intersection([
       [ConfigKey.PROJECT_ID]: t.string,
       [ConfigKey.ORIGINAL_SPACE]: t.string,
       [ConfigKey.CUSTOM_HEARTBEAT_ID]: t.string,
+      [ConfigKey.TEXT_ASSERTION]: t.string,
     }),
   ]),
   ZipUrlTLSFieldsCodec,

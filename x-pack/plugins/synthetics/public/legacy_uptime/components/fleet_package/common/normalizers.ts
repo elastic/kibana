@@ -91,4 +91,5 @@ export const commonNormalizers: CommonNormalizerMap = {
     fields?.[ConfigKey.NAMESPACE]?.value ?? DEFAULT_NAMESPACE_STRING,
   [ConfigKey.REVISION]: getCommonNormalizer(ConfigKey.REVISION),
   [ConfigKey.MONITOR_SOURCE_TYPE]: getCommonNormalizer(ConfigKey.MONITOR_SOURCE_TYPE),
+  [ConfigKey.FORM_MONITOR_TYPE]: getCommonNormalizer(ConfigKey.FORM_MONITOR_TYPE),
 };

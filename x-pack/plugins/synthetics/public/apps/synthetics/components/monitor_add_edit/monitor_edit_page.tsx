@@ -1,0 +1,44 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useEffect } from 'react';
+import { EuiLoadingSpinner } from '@elastic/eui';
+import { useParams } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { useTrackPageview, useFetcher } from '@kbn/observability-plugin/public';
+import { getServiceLocations } from '../../state';
+import { MonitorSteps } from './steps';
+import { MonitorForm } from './form';
+import { MonitorDetailsLinkPortal } from './monitor_details_portal';
+import { useMonitorAddEditBreadcrumbs } from './use_breadcrumbs';
+import { getMonitorAPI } from '../../state/monitor_management/api';
+import { EDIT_MONITOR_STEPS } from './steps/step_config';
+
+export const MonitorEditPage: React.FC = () => {
+  useTrackPageview({ app: 'synthetics', path: 'edit-monitor' });
+  useTrackPageview({ app: 'synthetics', path: 'edit-monitor', delay: 15000 });
+  const { monitorId } = useParams<{ monitorId: string }>();
+  useMonitorAddEditBreadcrumbs(true);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(getServiceLocations());
+  }, [dispatch]);
+
+  const { data, loading, error } = useFetcher(() => {
+    return getMonitorAPI({ id: monitorId });
+  }, []);
+
+  return data && !loading && !error ? (
+    <MonitorForm defaultValues={data?.attributes}>
+      <MonitorSteps stepMap={EDIT_MONITOR_STEPS} isEditFlow={true} />
+      <MonitorDetailsLinkPortal id={data?.id} name={data?.attributes.name} />
+    </MonitorForm>
+  ) : (
+    <EuiLoadingSpinner />
+  );
+};

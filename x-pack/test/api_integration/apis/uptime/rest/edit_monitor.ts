@@ -66,9 +66,37 @@ export default function ({ getService }: FtrProviderContext) {
       const updates: Partial<HTTPFields> = {
         [ConfigKey.URLS]: 'https://modified-host.com',
         [ConfigKey.NAME]: 'Modified name',
+        [ConfigKey.LOCATIONS]: [
+          {
+            id: 'eu-west-01',
+            label: 'Europe West',
+            geo: {
+              lat: 33.2343132435,
+              lon: 73.2342343434,
+            },
+            url: 'https://example-url.com',
+            isServiceManaged: true,
+          },
+        ],
+        [ConfigKey.REQUEST_HEADERS_CHECK]: {
+          sampleHeader2: 'sampleValue2',
+        },
+        [ConfigKey.METADATA]: {
+          script_source: {
+            is_generated_script: false,
+            file_name: 'test-file.name',
+          },
+        },
       };
 
-      const modifiedMonitor = { ...newMonitor, ...updates };
+      const modifiedMonitor = {
+        ...newMonitor,
+        ...updates,
+        [ConfigKey.METADATA]: {
+          ...newMonitor[ConfigKey.METADATA],
+          ...updates[ConfigKey.METADATA],
+        },
+      };
 
       const editResponse = await supertest
         .put(API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)

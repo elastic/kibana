@@ -42,7 +42,7 @@ export const MonitorsPageHeader = () => {
           fill
           iconSide="left"
           iconType="plusInCircleFilled"
-          href={`${basePath}/app/uptime${MONITOR_ADD_ROUTE}`}
+          href={`${basePath}/app/synthetics${MONITOR_ADD_ROUTE}`}
           isDisabled={!isEnabled}
           data-test-subj="syntheticsAddMonitorBtn"
         >

@@ -8,13 +8,17 @@
 import React, { useEffect } from 'react';
 import { EuiEmptyPrompt, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
+import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { useBreadcrumbs } from '../../hooks';
 import { getServiceLocations } from '../../state';
+import { MONITOR_ADD_ROUTE } from '../../../../../common/constants/ui';
 import { SimpleMonitorForm } from './simple_monitor_form';
+
 export const GettingStartedPage = () => {
   const dispatch = useDispatch();
+  const history = useHistory();
 
   useEffect(() => {
     dispatch(getServiceLocations());
@@ -32,7 +36,13 @@ export const GettingStartedPage = () => {
           <>
             <EuiText size="s">
               {OR_LABEL}{' '}
-              <EuiLink href="/synthetics/monitors/add-new">{SELECT_DIFFERENT_MONITOR}</EuiLink>
+              <EuiLink
+                href={history.createHref({
+                  pathname: MONITOR_ADD_ROUTE,
+                })}
+              >
+                {SELECT_DIFFERENT_MONITOR}
+              </EuiLink>
               {i18n.translate('xpack.synthetics.gettingStarted.createSingle.description', {
                 defaultMessage: ' to get started with Elastic Synthetics Monitoring',
               })}

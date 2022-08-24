@@ -27,7 +27,9 @@
   "check.response.body.negative": [],
   "check.response.body.positive": [],
   "response.include_body": "never",
-  "check.response.headers": {},
+  "check.request.headers": {
+    "sampleHeader": "sampleHeaderValue"
+  },
   "response.include_headers": true,
   "check.response.status": [
     "200",
@@ -37,7 +39,7 @@
     "value": "testValue",
     "type": "json"
   },
-  "check.request.headers": {},
+  "check.response.headers": {},
   "check.request.method": "",
   "username": "test-username",
   "ssl.certificate_authorities": "t.string",
@@ -74,5 +76,6 @@
   ],
   "namespace": "testnamespace",
   "revision": 1,
-  "origin": "ui"
+  "origin": "ui",
+  "form_monitor_type": "http"
 }
