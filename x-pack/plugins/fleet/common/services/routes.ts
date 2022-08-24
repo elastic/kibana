@@ -118,6 +118,10 @@ export const agentPolicyRouteService = {
     return AGENT_POLICY_API_ROUTES.LIST_PATTERN;
   },
 
+  getBulkGetPath: () => {
+    return AGENT_POLICY_API_ROUTES.BULK_GET_PATTERN;
+  },
+
   getInfoPath: (agentPolicyId: string) => {
     return AGENT_POLICY_API_ROUTES.INFO_PATTERN.replace('{agentPolicyId}', agentPolicyId);
   },
