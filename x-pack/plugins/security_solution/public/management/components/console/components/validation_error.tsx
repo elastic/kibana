@@ -41,30 +41,24 @@ export const ValidationError = memo<
       }
       data-test-subj={getTestId('validationError')}
     >
-      <>
-        <div data-test-subj={getTestId('validationError-message')}>{store.errorMessage}</div>
-        <EuiSpacer size="s" />
-        <div>
-          <CommandInputUsage commandDef={command.commandDefinition} />
-        </div>
-        <div>
-          <ConsoleCodeBlock>
-            <EuiSpacer size="m" />
-            <FormattedMessage
-              id="xpack.securitySolution.console.validationError.helpMessage"
-              defaultMessage="Enter {helpCmd} for further assistance."
-              values={{
-                helpCmd: (
-                  <ConsoleCodeBlock
-                    bold
-                    inline
-                  >{`${command.commandDefinition.name} --help`}</ConsoleCodeBlock>
-                ),
-              }}
-            />
-          </ConsoleCodeBlock>
-        </div>
-      </>
+      <div data-test-subj={getTestId('validationError-message')}>{store.errorMessage}</div>
+      <EuiSpacer size="s" />
+      <CommandInputUsage commandDef={command.commandDefinition} />
+      <ConsoleCodeBlock>
+        <EuiSpacer size="m" />
+        <FormattedMessage
+          id="xpack.securitySolution.console.validationError.helpMessage"
+          defaultMessage="Enter {helpCmd} for further assistance."
+          values={{
+            helpCmd: (
+              <ConsoleCodeBlock
+                bold
+                inline
+              >{`${command.commandDefinition.name} --help`}</ConsoleCodeBlock>
+            ),
+          }}
+        />
+      </ConsoleCodeBlock>
     </UnsupportedMessageCallout>
   );
 });
