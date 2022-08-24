@@ -79,11 +79,12 @@ export abstract class ActionRunner {
         pitId: this.pitId,
         searchAfter: options.searchAfter,
       }).catch(async (error) => {
-        const updateActionStatus = (errorMessage: string) =>
-          this.updateActionStatus(this.esClient, this.actionId!, {
+        const createActionStatus = (errorMessage: string) =>
+          this.createActionStatus(this.esClient, {
             '@timestamp': new Date().toISOString(),
             error_message: errorMessage,
             status: 'failed',
+            action_id: this.actionId!,
           });
 
         // 404 error comes when PIT query is closed
@@ -91,7 +92,7 @@ export abstract class ActionRunner {
           const errorMessage =
             '404 error from elasticsearch, not retrying. Error: ' + error.message;
           appContextService.getLogger().warn(errorMessage);
-          await updateActionStatus(errorMessage);
+          await createActionStatus(errorMessage);
           return;
         }
         if (options.retryCount) {
@@ -104,7 +105,7 @@ export abstract class ActionRunner {
           if (options.retryCount === 3) {
             const errorMessage = 'Stopping after 3rd retry. Error: ' + error.message;
             appContextService.getLogger().warn(errorMessage);
-            await updateActionStatus(errorMessage);
+            await createActionStatus(errorMessage);
             return;
           }
         } else {
@@ -129,17 +130,12 @@ export abstract class ActionRunner {
     return { items: [] };
   }
 
-  async updateActionStatus(
-    esClient: ElasticsearchClient,
-    agentId: string,
-    data: any
-  ): Promise<void> {
-    await esClient.update({
+  async createActionStatus(esClient: ElasticsearchClient, data: any): Promise<void> {
+    await esClient.create({
       index: AGENT_ACTIONS_STATUS_INDEX,
-      id: agentId,
-      body: { doc: data },
+      id: uuid(),
+      body: { data },
       refresh: 'wait_for',
-      doc_as_upsert: true,
     });
   }
 
@@ -200,6 +196,8 @@ export abstract class ActionRunner {
 
     let results = await this.processBatch(currentAgents, options.searchAfter, res.total);
     let allAgentsProcessed = currentAgents.length;
+
+    // throw new Error('simulating error after batch processed ');
 
     while (allAgentsProcessed < res.total) {
       const lastAgent = currentAgents[currentAgents.length - 1];

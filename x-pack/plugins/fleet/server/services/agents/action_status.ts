@@ -99,9 +99,9 @@ async function _getActionStatuses(esClient: ElasticsearchClient) {
   });
 
   return res.hits.hits.map((hit) => ({
-    actionId: hit._id,
-    status: hit._source?.status,
-    errorMessage: hit._source?.error_message,
+    actionId: hit._source?.data.action_id,
+    status: hit._source?.data.status,
+    errorMessage: hit._source?.data.error_message,
   }));
 }
 

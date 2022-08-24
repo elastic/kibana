@@ -541,7 +541,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(typeof agent2data.body.item.upgrade_started_at).to.be('undefined');
       });
 
-      it('should bulk upgrade multiple agents by kuery in batches', async () => {
+      it('should bulk upgrade multiple agents by kuery in batches async', async () => {
         await es.update({
           id: 'agent1',
           refresh: 'wait_for',
@@ -578,13 +578,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
 
-        expect(unenrolledBody).to.eql({
-          agent4: { success: false, error: 'agent4 is not upgradeable' },
-          agent3: { success: false, error: 'agent3 is not upgradeable' },
-          agent2: { success: false, error: 'agent2 is not upgradeable' },
-          agent1: { success: true },
-          agentWithFS: { success: false, error: 'agentWithFS is not upgradeable' },
-        });
+        expect(unenrolledBody).to.eql({});
       });
 
       it('should not upgrade an unenrolling agent during bulk_upgrade', async () => {
