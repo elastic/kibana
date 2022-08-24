@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { AuditAction } from '@kbn/core/server';
+import type { EcsEventOutcome, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { auditLoggerMock } from '../audit/mocks';
 import type { CheckSavedObjectsPrivileges } from '../authorization';
@@ -236,8 +237,261 @@ describe('#checkAuthorization', () => {
   });
 });
 
-test.todo('#enforceAuthorization');
+describe('#enforceAuthorization', () => {
+  test('fully authorized', () => {
+    const { securityExtension } = setup();
 
-test.todo('#addAuditEvent');
+    const authorizationResult = {
+      status: 'fully_authorized',
+      typeMap: new Map()
+        .set('a', {
+          foo: { isGloballyAuthorized: true, authorizedSpaces: [] },
+          ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+        })
+        .set('b', {
+          foo: { authorizedSpaces: ['x', 'y'] },
+          ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+        })
+        .set('c', {
+          foo: { authorizedSpaces: ['y', 'z'] },
+          ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+        }),
+    };
 
-test.todo('#redactNamespaces');
+    const spacesToEnforce = new Set(['x', 'y', 'z']);
+
+    expect(() =>
+      securityExtension.enforceAuthorization({
+        typesAndSpaces: new Map([
+          ['a', spacesToEnforce],
+          ['b', new Set(['x', 'y'])],
+          ['c', new Set(['y', 'z'])],
+        ]),
+        action: 'foo',
+        typeMap: authorizationResult.typeMap,
+      })
+    ).not.toThrowError();
+  });
+
+  test('partially authorized', () => {
+    const { securityExtension } = setup();
+
+    const authorizationResult = {
+      status: 'partially_authorized',
+      typeMap: new Map()
+        .set('a', {
+          foo: { isGloballyAuthorized: true, authorizedSpaces: [] },
+          ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+        })
+        .set('b', {
+          foo: { authorizedSpaces: ['x'] },
+          ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+        })
+        .set('c', {
+          foo: { authorizedSpaces: ['z'] },
+          ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+        }),
+    };
+
+    const spacesToEnforce = new Set(['x', 'y', 'z']);
+
+    expect(() =>
+      securityExtension.enforceAuthorization({
+        typesAndSpaces: new Map([
+          ['a', spacesToEnforce],
+          ['b', new Set(['x', 'y'])],
+          ['c', new Set(['y', 'z'])],
+        ]),
+        action: 'foo',
+        typeMap: authorizationResult.typeMap,
+      })
+    ).toThrowError('Unable to foo b,c');
+  });
+
+  test('unauthorized', () => {
+    const { securityExtension } = setup();
+
+    const authorizationResult = {
+      status: 'unauthorized',
+      typeMap: new Map()
+        .set('a', {
+          foo: { authorizedSpaces: ['x'] },
+          ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+        })
+        .set('b', {
+          foo: { authorizedSpaces: ['y'] },
+          ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+        })
+        .set('c', {
+          foo: { authorizedSpaces: ['z'] },
+          ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+        }),
+    };
+
+    expect(() =>
+      securityExtension.enforceAuthorization({
+        typesAndSpaces: new Map([
+          ['a', new Set(['y', 'z'])],
+          ['b', new Set(['x', 'z'])],
+          ['c', new Set(['x', 'y'])],
+        ]),
+        action: 'foo',
+        typeMap: authorizationResult.typeMap,
+      })
+    ).toThrowError('Unable to foo a,b,c');
+  });
+});
+
+describe('#addAuditEvent', () => {
+  test(`adds an unknown audit event`, async () => {
+    const { auditLogger, securityExtension } = setup();
+    const action = AuditAction.UPDATE_OBJECTS_SPACES;
+    const outcome: EcsEventOutcome = 'unknown';
+    const savedObject = { type: 'dashboard', id: '3' };
+    const spaces = ['space-id'];
+
+    const auditParams = {
+      action,
+      outcome,
+      savedObject,
+      deleteFromSpaces: spaces,
+    };
+
+    securityExtension.addAuditEvent(auditParams);
+
+    expect(auditLogger.log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        event: expect.objectContaining({
+          action,
+          outcome,
+        }),
+        kibana: savedObject
+          ? expect.objectContaining({
+              saved_object: savedObject,
+              delete_from_spaces: spaces,
+            })
+          : expect.anything(),
+        message: `User is updating spaces of ${savedObject.type} [id=${savedObject.id}]`,
+      })
+    );
+  });
+
+  test(`adds a success audit event`, async () => {
+    const { auditLogger, securityExtension } = setup();
+    const action = AuditAction.UPDATE_OBJECTS_SPACES;
+    const outcome: EcsEventOutcome = 'success';
+    const savedObject = { type: 'dashboard', id: '3' };
+    const spaces = ['space-id'];
+
+    const auditParams = {
+      action,
+      outcome,
+      savedObject,
+      addToSpaces: spaces,
+    };
+
+    securityExtension.addAuditEvent(auditParams);
+
+    expect(auditLogger.log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        event: expect.objectContaining({
+          action,
+          outcome,
+        }),
+        kibana: savedObject
+          ? expect.objectContaining({
+              saved_object: savedObject,
+              add_to_spaces: spaces,
+            })
+          : expect.anything(),
+        message: `User has updated spaces of ${savedObject.type} [id=${savedObject.id}]`,
+      })
+    );
+  });
+
+  test(`adds a failure audit event`, async () => {
+    const { auditLogger, securityExtension } = setup();
+    const action = AuditAction.DELETE;
+    const outcome: EcsEventOutcome = 'failure';
+    const savedObject = { type: 'dashboard', id: '3' };
+    const error: Error = {
+      name: 'test_error',
+      message: 'this is just a test',
+    };
+
+    const auditParams = {
+      action,
+      outcome,
+      savedObject,
+      error,
+    };
+
+    securityExtension.addAuditEvent(auditParams);
+
+    expect(auditLogger.log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        error: { code: error.name, message: error.message },
+        event: expect.objectContaining({
+          action,
+          outcome,
+        }),
+        kibana: savedObject
+          ? expect.objectContaining({
+              saved_object: savedObject,
+            })
+          : expect.anything(),
+        message: `Failed attempt to delete ${savedObject.type} [id=${savedObject.id}]`,
+      })
+    );
+  });
+});
+
+describe('#redactNamespaces', () => {
+  test(`filters namespaces that the user doesn't have access to`, () => {
+    const { securityExtension } = setup();
+
+    const typeMap = new Map().set('so-type', {
+      // redact is only concerned with 'login' attribute, not specific action
+      ['login:']: { authorizedSpaces: ['authorized-space'] },
+    });
+
+    const so = {
+      id: 'some-id',
+      type: 'so-type',
+      namespaces: ['authorized-space', 'unauthorized-space'],
+      attributes: {
+        test: 'attr',
+      },
+      score: 1,
+      references: [],
+    };
+
+    const result = securityExtension.redactNamespaces({ typeMap, savedObject: so });
+    expect(result).toEqual(expect.objectContaining({ namespaces: ['authorized-space', '?'] }));
+  });
+
+  test(`does not redact on isGloballyAuthorized`, () => {
+    const { securityExtension } = setup();
+
+    const typeMap = new Map().set('so-type', {
+      // redact is only concerned with 'login' attribute, not specific action
+      ['login:']: { isGloballyAuthorized: true },
+    });
+
+    const so = {
+      id: 'some-id',
+      type: 'so-type',
+      namespaces: ['space-a', 'space-b', 'space-c'],
+      attributes: {
+        test: 'attr',
+      },
+      score: 1,
+      references: [],
+    };
+
+    const result = securityExtension.redactNamespaces({ typeMap, savedObject: so });
+    expect(result).toEqual(
+      expect.objectContaining({ namespaces: ['space-a', 'space-b', 'space-c'] })
+    );
+  });
+});

@@ -7,6 +7,8 @@
 
 import { mockSpaceIdToNamespace } from './saved_objects_spaces_extension.test.mocks';
 
+import Boom from '@hapi/boom';
+
 import { spacesClientMock } from '../mocks';
 import { SavedObjectsSpacesExtension } from './saved_objects_spaces_extension';
 
@@ -39,4 +41,86 @@ describe('#getCurrentNamespace', () => {
   });
 });
 
-test.todo('#getSearchableNamespaces');
+describe('#getSearchableNamespaces', () => {
+  test(`returns empty result if user is unauthorized in this space`, async () => {
+    const { spacesClient, spacesExtension } = setup();
+    spacesClient.getAll.mockImplementation(() =>
+      Promise.resolve([
+        { id: 'ns-1', name: '', disabledFeatures: [] },
+        { id: 'ns-2', name: '', disabledFeatures: [] },
+        { id: 'ns-3', name: '', disabledFeatures: [] },
+        { id: 'ns-4', name: '', disabledFeatures: [] },
+      ])
+    );
+    expect(spacesExtension.getSearchableNamespaces(['some-namespace'])).resolves.toEqual([]);
+  });
+
+  test(`throws an error if user is unauthorized in any space`, async () => {
+    const { spacesClient, spacesExtension } = setup();
+    spacesClient.getAll.mockRejectedValue(Boom.forbidden());
+    expect(spacesExtension.getSearchableNamespaces(['some-namespace'])).rejects.toThrow(
+      'Forbidden'
+    );
+  });
+
+  test(`returns the active namespace if the namespaces argument is undefined`, async () => {
+    const { spacesClient, spacesExtension } = setup();
+    spacesClient.getAll.mockImplementation(() =>
+      Promise.resolve([
+        { id: 'ns-1', name: '', disabledFeatures: [] },
+        { id: 'ns-2', name: '', disabledFeatures: [] },
+        { id: 'ns-3', name: '', disabledFeatures: [] },
+        { id: 'ns-4', name: '', disabledFeatures: [] },
+      ])
+    );
+    expect(spacesExtension.getSearchableNamespaces(undefined)).resolves.toEqual([ACTIVE_SPACE_ID]);
+  });
+
+  test(`filters results based on requested namespaces`, async () => {
+    const { spacesClient, spacesExtension } = setup();
+    spacesClient.getAll.mockImplementation(() =>
+      Promise.resolve([
+        { id: 'ns-1', name: '', disabledFeatures: [] },
+        { id: 'ns-2', name: '', disabledFeatures: [] },
+        { id: 'ns-3', name: '', disabledFeatures: [] },
+        { id: 'ns-4', name: '', disabledFeatures: [] },
+      ])
+    );
+
+    expect(spacesExtension.getSearchableNamespaces(['ns-1', 'ns-3'])).resolves.toEqual([
+      'ns-1',
+      'ns-3',
+    ]);
+  });
+
+  test(`filters options.namespaces based on authorization`, async () => {
+    const { spacesClient, spacesExtension } = setup();
+    spacesClient.getAll.mockImplementation(() =>
+      Promise.resolve([
+        { id: 'ns-1', name: '', disabledFeatures: [] },
+        { id: 'ns-2', name: '', disabledFeatures: [] },
+      ])
+    );
+
+    expect(spacesExtension.getSearchableNamespaces(['ns-1', 'ns-3'])).resolves.toEqual(['ns-1']);
+  });
+
+  test(`handles namespaces argument ['*']`, async () => {
+    const { spacesClient, spacesExtension } = setup();
+    spacesClient.getAll.mockImplementation(() =>
+      Promise.resolve([
+        { id: 'ns-1', name: '', disabledFeatures: [] },
+        { id: 'ns-2', name: '', disabledFeatures: [] },
+        { id: 'ns-3', name: '', disabledFeatures: [] },
+        { id: 'ns-4', name: '', disabledFeatures: [] },
+      ])
+    );
+
+    expect(spacesExtension.getSearchableNamespaces(['*'])).resolves.toEqual([
+      'ns-1',
+      'ns-2',
+      'ns-3',
+      'ns-4',
+    ]);
+  });
+});
