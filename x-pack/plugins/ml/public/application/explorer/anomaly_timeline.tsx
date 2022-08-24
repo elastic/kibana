@@ -207,8 +207,8 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
     );
 
     const menuPanels = useMemo<EuiContextMenuPanelDescriptor[]>(() => {
-      const rootItems = [] as EuiContextMenuPanelItemDescriptor[];
-      const panels = [{ id: 0, items: rootItems }] as EuiContextMenuPanelDescriptor[];
+      const rootItems: EuiContextMenuPanelItemDescriptor[] = [];
+      const panels: EuiContextMenuPanelDescriptor[] = [{ id: 0, items: rootItems }];
 
       if (canEditDashboards) {
         rootItems.push({

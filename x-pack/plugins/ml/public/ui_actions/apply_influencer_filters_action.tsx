@@ -71,7 +71,7 @@ export function createApplyInfluencerFiltersAction(
         })
       );
     },
-    async isCompatible({ embeddable, data, ...rest }) {
+    async isCompatible({ embeddable, data }) {
       const [{ application }] = await getStartServices();
       const appId = await firstValueFrom(application.currentAppId$);
 
