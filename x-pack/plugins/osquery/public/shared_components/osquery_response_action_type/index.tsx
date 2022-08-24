@@ -5,13 +5,19 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { QueryClientProvider } from 'react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 import type { EuiAccordionProps } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 
 import uuid from 'uuid';
+import { useForm as useHookForm } from 'react-hook-form';
+import { FormProvider } from 'react-hook-form';
+import { get, isEmpty } from 'lodash';
+import useEffectOnce from 'react-use/lib/useEffectOnce';
+import type { EcsMappingFormField } from '../../packs/queries/ecs_mapping_editor_field';
+import { defaultEcsFormData } from '../../packs/queries/ecs_mapping_editor_field';
 import { convertECSMappingToFormValue } from '../../../common/schemas/common/utils';
 import { ECSMappingEditorField } from '../../packs/queries/lazy_ecs_mapping_editor_field';
 import { UseField, useFormContext } from '../../shared_imports';
@@ -26,12 +32,33 @@ const GhostFormField = () => <></>;
 
 interface IProps {
   item: ArrayItem;
+  onSubmit: () => void;
 }
 
-// eslint-disable-next-line react/display-name
+interface OsqueryResponseActionsParamsFormFields {
+  savedQueryId: string | null;
+  id: string;
+  ecs_mapping: EcsMappingFormField[];
+  query: string;
+}
+
 export const OsqueryResponseActionParamsForm: React.FunctionComponent<IProps> = React.memo(
   ({ item }) => {
     const uniqueId = useMemo(() => uuid.v4(), []);
+    const hooksForm = useHookForm<OsqueryResponseActionsParamsFormFields>({
+      defaultValues: {
+        ecs_mapping: [defaultEcsFormData],
+        id: uniqueId,
+      },
+      mode: 'onChange',
+    });
+    const { watch, setValue, register } = hooksForm;
+
+    const watchedValues = watch();
+    useEffect(() => {
+      register('savedQueryId');
+      register('id');
+    }, [register]);
     const permissions = useKibana().services.application.capabilities.osquery;
     const [advancedContentState, setAdvancedContentState] =
       useState<EuiAccordionProps['forceState']>('closed');
@@ -47,92 +74,90 @@ export const OsqueryResponseActionParamsForm: React.FunctionComponent<IProps> = 
 
     const context = useFormContext();
 
+    const data = context.getFormData();
+
+    useEffectOnce(() => {
+      const { params: defaultParams } = get(data, item.path);
+      if (defaultParams) {
+        setValue('savedQueryId', defaultParams.savedQueryId);
+        setValue('query', defaultParams.query);
+        setValue('id', defaultParams.id);
+        if (!isEmpty(defaultParams.ecs_mapping)) {
+          setValue('ecs_mapping', defaultParams.ecs_mapping);
+        }
+      }
+    });
+
+    useEffect(() => {
+      context.updateFieldValues({
+        [item.path]: { actionTypeId: '.osquery', params: watchedValues },
+      });
+    }, [context, item.path, watchedValues]);
+
     const handleSavedQueryChange = useCallback(
       (savedQuery) => {
         if (savedQuery) {
-          const params = {
-            savedQueryId: savedQuery.savedQueryId,
-            query: savedQuery.query,
-            ecs_mapping: convertECSMappingToFormValue(savedQuery.ecs_mapping),
-          };
-
-          context.updateFieldValues({
-            [item.path]: { actionTypeId: '.osquery', params },
-          });
-          const convertedECS = convertECSMappingToFormValue(savedQuery.ecs_mapping);
-          context.setFieldValue(`${item.path}.params.query`, savedQuery.query);
-          context.setFieldValue(`${item.path}.params.savedQueryId`, savedQuery.savedQueryId);
-          context.setFieldValue(`${item.path}.params.ecs_mapping`, convertedECS);
-          setTimeout(
-            () =>
-              convertedECS.forEach((ecs, index) => {
-                context.setFieldValue(`${item.path}.params.ecs_mapping[${index}].key`, ecs.key);
-                context.setFieldValue(
-                  `${item.path}.params.ecs_mapping[${index}].result.type`,
-                  ecs.result.type
-                );
-                context.setFieldValue(
-                  `${item.path}.params.ecs_mapping[${index}].result.value`,
-                  ecs.result.value
-                );
-              }),
-            1000
+          setValue('savedQueryId', savedQuery.savedQueryId);
+          setValue('query', savedQuery.query);
+          setValue(
+            'ecs_mapping',
+            !isEmpty(savedQuery.ecs_mapping)
+              ? convertECSMappingToFormValue(savedQuery.ecs_mapping)
+              : [defaultEcsFormData]
           );
         } else {
-          context.setFieldValue(`${item.path}.params.savedQueryId`, null);
+          setValue('savedQueryId', null);
         }
       },
-      [item.path, context]
+      [setValue]
     );
 
     return (
-      <QueryClientProvider client={queryClient}>
-        {!isSavedQueryDisabled && (
+      <FormProvider {...hooksForm}>
+        <QueryClientProvider client={queryClient}>
+          {!isSavedQueryDisabled && (
+            <>
+              <SavedQueriesDropdown
+                disabled={isSavedQueryDisabled}
+                onChange={handleSavedQueryChange}
+              />
+            </>
+          )}
+          <LiveQueryQueryField queryType={'query'} />
+          <UseField
+            path={`${item.path}.params.query`}
+            component={GhostFormField}
+            readDefaultValueOnForm={!item.isNew}
+          />
+          <UseField
+            path={`${item.path}.params.savedQueryId`}
+            component={GhostFormField}
+            readDefaultValueOnForm={!item.isNew}
+          />
+          <UseField
+            path={`${item.path}.params.id`}
+            component={GhostFormField}
+            readDefaultValueOnForm={!item.isNew}
+          />
+          <UseField
+            path={`${item.path}.params.ecs_mapping`}
+            component={GhostFormField}
+            readDefaultValueOnForm={!item.isNew}
+          />
           <>
-            <SavedQueriesDropdown
-              disabled={isSavedQueryDisabled}
-              onChange={handleSavedQueryChange}
-            />
+            <EuiSpacer size="m" />
+            <StyledEuiAccordion
+              id="advanced"
+              forceState={advancedContentState}
+              onToggle={handleToggle}
+              buttonContent="Advanced"
+            >
+              <EuiSpacer size="xs" />
+              <ECSMappingEditorField />
+            </StyledEuiAccordion>
           </>
-        )}
-        <UseField
-          path={`${item.path}.params.query`}
-          component={LiveQueryQueryField}
-          readDefaultValueOnForm={!item.isNew}
-        />
-        <UseField
-          path={`${item.path}.actionTypeId`}
-          component={GhostFormField}
-          defaultValue={'.osquery'}
-          readDefaultValueOnForm={!item.isNew}
-        />
-        <UseField
-          path={`${item.path}.params.savedQueryId`}
-          component={GhostFormField}
-          readDefaultValueOnForm={!item.isNew}
-        />
-        <UseField
-          path={`${item.path}.params.id`}
-          component={GhostFormField}
-          readDefaultValueOnForm={!item.isNew}
-          defaultValue={uniqueId}
-        />
-        <>
-          <EuiSpacer size="m" />
-          <StyledEuiAccordion
-            id="advanced"
-            forceState={advancedContentState}
-            onToggle={handleToggle}
-            buttonContent="Advanced"
-          >
-            <EuiSpacer size="xs" />
-            <ECSMappingEditorField
-              path={`${item.path}.params.ecs_mapping`}
-              queryFieldPath={`${item.path}.params.query`}
-            />
-          </StyledEuiAccordion>
-        </>
-      </QueryClientProvider>
+        </QueryClientProvider>
+      </FormProvider>
     );
   }
 );

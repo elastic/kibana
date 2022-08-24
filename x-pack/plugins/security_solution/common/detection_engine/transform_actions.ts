@@ -7,6 +7,7 @@
 
 import { map, reduce, isEmpty } from 'lodash';
 import type { RuleAction, RuleResponseAction } from '@kbn/alerting-plugin/common';
+import type { EcsMappingFormValueArray } from '@kbn/osquery-plugin/common/schemas/common/utils';
 import type { RuleAlertAction, RuleAlertResponseAction } from './types';
 
 export const transformRuleToAlertAction = ({
@@ -34,7 +35,7 @@ export const transformAlertToRuleAction = ({
 });
 
 export const convertECSMappingToFormValue = (
-  mapping: Record<string, Record<'field', string>>
+  mapping?: Record<string, Record<'field', string>>
 ): EcsMappingFormValueArray =>
   map(mapping, (value, key) => ({
     key,
@@ -52,6 +53,7 @@ export const transformRuleToAlertResponseAction = ({
     return {
       params: {
         ...params,
+        // @ts-expect-error update types
         ecs_mapping: convertECSMappingToFormValue(params.ecs_mapping),
       },
       actionTypeId: action_type_id,
@@ -72,6 +74,7 @@ export const transformAlertToRuleResponseAction = ({
     return {
       params: {
         ...params,
+        // @ts-expect-error update types
         ecs_mapping: convertECSMappingToObject(params.ecs_mapping),
       },
       action_type_id: actionTypeId,
@@ -85,7 +88,7 @@ export const transformAlertToRuleResponseAction = ({
 };
 
 export const convertECSMappingToObject = (
-  ecsMapping: EcsMappingFormValueArray
+  ecsMapping?: EcsMappingFormValueArray
 ): Record<string, { field?: string; value?: string }> =>
   reduce(
     ecsMapping,

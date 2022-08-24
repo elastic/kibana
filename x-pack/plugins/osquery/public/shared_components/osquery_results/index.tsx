@@ -15,7 +15,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import React, { useEffect, useMemo } from 'react';
-import { QueryClientProvider } from 'react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 import type { CoreStart } from '@kbn/core/public';
 
 import { FormattedRelative } from '@kbn/i18n-react';

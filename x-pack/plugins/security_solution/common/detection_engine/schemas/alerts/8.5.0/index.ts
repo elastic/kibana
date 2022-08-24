@@ -5,20 +5,12 @@
  * 2.0.
  */
 
-import type { ALERT_BUILDING_BLOCK_TYPE, ALERT_UUID } from '@kbn/rule-data-utils';
+import type { ALERT_UUID } from '@kbn/rule-data-utils';
 import type { AlertWithCommonFields800 } from '@kbn/rule-registry-plugin/common/schemas/8.0.0';
-import type {
-  ALERT_GROUP_ID,
-  ALERT_GROUP_INDEX,
-  ALERT_NEW_TERMS,
-  ALERT_RULE_INDICES,
-} from '../../../../field_maps/field_names';
-import type {
-  Ancestor800,
-  BaseFields800,
-  EqlBuildingBlockAlert800,
-  EqlShellAlert800,
-} from '../8.0.0';
+import type { RuleAlertResponseAction } from '../../../types';
+import type { ALERT_RULE_RESPONSE_ACTIONS } from '../../../../field_maps/field_names';
+import type { BaseFields840 } from '../8.4.0';
+import type { Ancestor800, EqlBuildingBlockAlert800, EqlShellAlert800 } from '../8.0.0';
 
 export type { Ancestor800 as Ancestor840 };
 
@@ -37,39 +29,28 @@ Then, update `../index.ts` to import from the new folder that has the latest sch
 new schemas to the union of all alert schemas, and re-export the new schemas as the `*Latest` schemas.
 */
 
-export interface BaseFields840 extends BaseFields800 {
-  [ALERT_RULE_INDICES]: string[];
+export interface BaseFields850 extends BaseFields840 {
+  [ALERT_RULE_RESPONSE_ACTIONS]: RuleAlertResponseAction[];
 }
 
-export interface WrappedFields840<T extends BaseFields840> {
+export interface WrappedFields850<T extends BaseFields850> {
   _id: string;
   _index: string;
   _source: T & { [ALERT_UUID]: string };
 }
 
-export type GenericAlert840 = AlertWithCommonFields800<BaseFields840>;
+export type GenericAlert850 = AlertWithCommonFields800<BaseFields850>;
 
-export interface EqlShellFields840 extends BaseFields840 {
-  [ALERT_GROUP_ID]: string;
-  [ALERT_UUID]: string;
-}
+export type EqlBuildingBlockFields850 = BaseFields850;
 
-export interface EqlBuildingBlockFields840 extends BaseFields840 {
-  [ALERT_GROUP_ID]: string;
-  [ALERT_GROUP_INDEX]: number;
-  [ALERT_BUILDING_BLOCK_TYPE]: 'default';
-}
+export type NewTermsFields850 = BaseFields850;
 
-export interface NewTermsFields840 extends BaseFields840 {
-  [ALERT_NEW_TERMS]: Array<string | number | null>;
-}
-
-export type NewTermsAlert840 = AlertWithCommonFields800<NewTermsFields840>;
+export type NewTermsAlert850 = AlertWithCommonFields800<NewTermsFields850>;
 
 // This is the type of the final generated alert including base fields, common fields
 // added by the alertWithPersistence function, and arbitrary fields copied from source documents
-export type DetectionAlert840 =
-  | GenericAlert840
+export type DetectionAlert850 =
+  | GenericAlert850
   | EqlShellAlert800
   | EqlBuildingBlockAlert800
-  | NewTermsAlert840;
+  | NewTermsAlert850;
