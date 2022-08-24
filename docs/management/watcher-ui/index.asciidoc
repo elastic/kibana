@@ -156,7 +156,7 @@ whether any of its actions have been acknowledged,
 throttled, or failed to execute. Each watch can be in one of three states:
 
 * *Active.* The watch is working properly.
-* *Inactive.* The watch is working properly but has been deliberately disabled, so it won't execute any actions.
+* *Inactive.* The watch is working properly, but is deliberately disabled, so it won't execute any actions.
 * *Error.* The watch is not working properly.
 
 From this page you can drill down into a watch to investigate its history
