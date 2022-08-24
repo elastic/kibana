@@ -394,15 +394,8 @@ export {
   mergeSavedObjectMigrationMaps,
 } from '@kbn/core-saved-objects-utils-server';
 export { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
-
-export type {
-  SavedObjectsRepository,
-  SavedObjectsExporter,
-  SavedObjectsExportError,
-  SavedObjectsImporter,
-  SavedObjectsImportError,
-} from './saved_objects';
-export { SavedObjectsClient } from './saved_objects';
+export type { SavedObjectsRepository } from '@kbn/core-saved-objects-api-server-internal';
+export { SavedObjectsClient } from '@kbn/core-saved-objects-api-server-internal';
 
 export type {
   IUiSettingsClient,
