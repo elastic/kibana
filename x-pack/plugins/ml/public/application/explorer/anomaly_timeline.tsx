@@ -26,10 +26,11 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
 import useObservable from 'react-use/lib/useObservable';
+import { CommentType } from '@kbn/cases-plugin/common';
+import { stringHash } from '@kbn/ml-string-hash';
 import { useTimeRangeUpdates } from '../contexts/kibana/use_timefilter';
-import { AnomalySwimlaneEmbeddableCustomInput } from '../../embeddables';
+import type { AnomalySwimlaneEmbeddableInput } from '../../embeddables';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../..';
-import { PLUGIN_ID } from '../../../common/constants/app';
 import {
   OVERALL_LABEL,
   SWIMLANE_TYPE,
@@ -165,21 +166,27 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
 
     const openCasesModal = useCallback(
       (swimLaneType: SwimlaneType) => {
+        const persistableStateAttachmentState = {
+          swimlaneType: swimLaneType,
+          ...(swimLaneType === SWIMLANE_TYPE.VIEW_BY ? { viewBy: viewBySwimlaneFieldName } : {}),
+          jobIds: selectedJobs?.map((v) => v.id),
+          timeRange: globalTimeRange,
+        } as AnomalySwimlaneEmbeddableInput;
+
+        // Creates unique id based on the input
+        persistableStateAttachmentState.id = stringHash(
+          JSON.stringify(persistableStateAttachmentState)
+        ).toString();
+
         selectCaseModal!.open({
           attachments: [
             {
-              // @ts-ignore
-              type: 'persistableState' as const,
+              type: CommentType.persistableState,
               persistableStateAttachmentTypeId: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
-              persistableStateAttachmentState: {
-                swimlaneType: swimLaneType,
-                ...(swimLaneType === SWIMLANE_TYPE.VIEW_BY
-                  ? { viewBy: viewBySwimlaneFieldName }
-                  : {}),
-                jobIds: selectedJobs?.map((v) => v.id),
-                timeRange: globalTimeRange,
-              } as AnomalySwimlaneEmbeddableCustomInput,
-              owner: PLUGIN_ID,
+              // TODO Cases: improve type for persistableStateAttachmentState with io-ts
+              persistableStateAttachmentState: JSON.parse(
+                JSON.stringify(persistableStateAttachmentState)
+              ),
             },
           ],
         });
