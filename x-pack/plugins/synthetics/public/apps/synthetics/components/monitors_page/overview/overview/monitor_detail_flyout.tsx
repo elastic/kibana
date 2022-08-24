@@ -87,10 +87,11 @@ export function MonitorDetailFlyout(props: {
                   <h2>{monitorSavedObject?.name}</h2>
                 </EuiTitle>
               </EuiFlexItem>
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 {monitor && (
                   <ActionsPopover
                     isPopoverOpen={isActionsPopoverOpen}
+                    isInspectView
                     monitor={monitor}
                     setIsPopoverOpen={setIsActionsPopoverOpen}
                     position="default"

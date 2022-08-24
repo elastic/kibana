@@ -20,38 +20,46 @@ import { useEditMonitorLocator } from '../../hooks/use_edit_monitor_locator';
 import { useMonitorDetailLocator } from '../../hooks/use_monitor_detail_locator';
 import { useLocationName } from '../../../../hooks';
 
+type PopoverPosition = 'relative' | 'default';
+
 interface ActionContainerProps {
   boxShadow: string;
+  position: PopoverPosition;
 }
 
-const ActionContainer = styled.div<ActionContainerProps>`
-  // position
+const RelativeContainer = styled.div<ActionContainerProps>`
+  ${({ position }) =>
+    position === 'relative'
+      ? // custom styles used to overlay the popover button on `MetricItem`
+        `
   display: inline-block;
   position: relative;
   bottom: 42px;
   left: 12px;
   z-index: 1;
+`
+      : // otherwise, no custom position needed
+        ''}
 
-  // style
   border-radius: ${({ theme }) => theme.eui.euiBorderRadius};
   ${({ boxShadow }) => boxShadow}
 `;
 
-function StandardContainer({ children }: any) {
-  return <>{children}</>;
+interface Props {
+  isPopoverOpen: boolean;
+  isInspectView?: boolean;
+  monitor: MonitorOverviewItem;
+  setIsPopoverOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  position: PopoverPosition;
 }
 
 export function ActionsPopover({
   isPopoverOpen,
+  isInspectView,
   setIsPopoverOpen,
   monitor,
   position,
-}: {
-  isPopoverOpen: boolean;
-  monitor: MonitorOverviewItem;
-  setIsPopoverOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  position: 'relative' | 'default';
-}) {
+}: Props) {
   const theme = useTheme();
   const euiShadow = useEuiShadow('l');
   const dispatch = useDispatch();
@@ -93,10 +101,50 @@ export function ActionsPopover({
     }
   }, [setEnableLabel, status, isEnabled, monitor.isEnabled]);
 
-  const Container = position === 'relative' ? ActionContainer : StandardContainer;
+  const quickInspect = {
+    name: 'Quick inspect',
+    icon: 'inspect',
+    disabled: !locationName,
+    onClick: () => {
+      if (locationName) {
+        dispatch(setFlyoutConfig({ monitorId: monitor.id, location: locationName }));
+        setIsPopoverOpen(false);
+      }
+    },
+  };
+
+  let items = [
+    {
+      name: actionsMenuGoToMonitorName,
+      icon: 'sortRight',
+      href: detailUrl,
+    },
+    quickInspect,
+    // not rendering this for now because the manual test flyout is
+    // still in the design phase
+    // {
+    //   name: 'Run test manually',
+    //   icon: 'beaker',
+    // },
+    {
+      name: actionsMenuEditMonitorName,
+      icon: 'pencil',
+      href: editUrl,
+    },
+    {
+      name: enableLabel,
+      icon: 'invert',
+      onClick: () => {
+        if (status !== FETCH_STATUS.LOADING) {
+          updateMonitorEnabledState(monitor, !monitor.isEnabled);
+        }
+      },
+    },
+  ];
+  if (isInspectView) items = items.filter((i) => i !== quickInspect);
 
   return (
-    <Container boxShadow={euiShadow}>
+    <RelativeContainer boxShadow={euiShadow} position={position}>
       <EuiPopover
         button={
           <EuiButtonIcon
@@ -121,48 +169,12 @@ export function ActionsPopover({
             {
               id: '0',
               title: actionsMenuTitle,
-              items: [
-                {
-                  name: actionsMenuGoToMonitorName,
-                  icon: 'sortRight',
-                  href: detailUrl,
-                },
-                {
-                  name: 'Quick inspect',
-                  icon: 'inspect',
-                  disabled: !locationName,
-                  onClick: () => {
-                    if (locationName) {
-                      dispatch(setFlyoutConfig({ monitorId: monitor.id, location: locationName }));
-                      setIsPopoverOpen(false);
-                    }
-                  },
-                },
-                // not rendering this for now because the manual test flyout is
-                // still in the design phase
-                // {
-                //   name: 'Run test manually',
-                //   icon: 'beaker',
-                // },
-                {
-                  name: actionsMenuEditMonitorName,
-                  icon: 'pencil',
-                  href: editUrl,
-                },
-                {
-                  name: enableLabel,
-                  icon: 'invert',
-                  onClick: () => {
-                    if (status !== FETCH_STATUS.LOADING)
-                      updateMonitorEnabledState(monitor, !monitor.isEnabled);
-                  },
-                },
-              ],
+              items,
             },
           ]}
         />
       </EuiPopover>
-    </Container>
+    </RelativeContainer>
   );
 }
 
