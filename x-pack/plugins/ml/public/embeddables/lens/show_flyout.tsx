@@ -19,7 +19,6 @@ import {
   wrapWithTheme,
   KibanaContextProvider,
 } from '@kbn/kibana-react-plugin/public';
-// import { DashboardConstants } from '@kbn/dashboard-plugin/public';
 
 import { getMlGlobalServices } from '../../application/app';
 import { LensLayerSelectionFlyout } from './lens_vis_layer_selection_flyout';
