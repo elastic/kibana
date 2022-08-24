@@ -14,7 +14,6 @@ import {
   CONTROL_GROUP_TYPE,
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
-  // TIME_SLIDER_CONTROL,
 } from '.';
 import { OptionsListEmbeddableFactory, OptionsListEmbeddableInput } from './options_list';
 import { RangeSliderEmbeddableFactory, RangeSliderEmbeddableInput } from './range_slider';
@@ -28,13 +27,6 @@ import {
   IEditableControlFactory,
   ControlInput,
 } from './types';
-
-/*
-import {
-  TimesliderEmbeddableFactory,
-  TimeSliderControlEmbeddableInput,
-} from './control_types/time_slider';
-*/
 
 export class ControlsPlugin
   implements
@@ -101,22 +93,6 @@ export class ControlsPlugin
         rangeSliderFactory
       );
       registerControlType(rangeSliderFactory);
-
-      // Time Slider Control Factory Setup
-      /* Temporary disabling Time Slider
-      const timeSliderFactoryDef = new TimesliderEmbeddableFactory();
-      const timeSliderFactory = embeddable.registerEmbeddableFactory(
-        TIME_SLIDER_CONTROL,
-        timeSliderFactoryDef
-      )();
-      this.transferEditorFunctions<TimeSliderControlEmbeddableInput>(
-        timeSliderFactoryDef,
-        timeSliderFactory
-      );
-      
-
-      registerControlType(timeSliderFactory);
-      */
     });
 
     return {
