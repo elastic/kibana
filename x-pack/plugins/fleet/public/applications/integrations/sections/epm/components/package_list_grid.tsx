@@ -7,6 +7,7 @@
 
 import type { ReactNode, FunctionComponent } from 'react';
 import React, { useCallback, useState, useRef, useEffect } from 'react';
+
 import {
   EuiFlexGrid,
   EuiFlexGroup,
@@ -16,7 +17,9 @@ import {
   EuiTitle,
   EuiSearchBar,
   EuiText,
+  EuiBadge,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -25,6 +28,8 @@ import { Loading } from '../../../components';
 import { useLocalSearch, searchIdField } from '../../../hooks';
 
 import type { IntegrationCardItem } from '../../../../../../common/types/models';
+
+import type { ExtendedIntegrationCategory } from '../screens/home';
 
 import { PackageCard } from './package_card';
 
@@ -35,6 +40,7 @@ export interface Props {
   list: IntegrationCardItem[];
   featuredList?: JSX.Element | null;
   initialSearch?: string;
+  selectedCategory: ExtendedIntegrationCategory;
   setSelectedCategory: (category: string) => void;
   onSearchChange: (search: string) => void;
   showMissingIntegrationMessage?: boolean;
@@ -49,6 +55,7 @@ export const PackageListGrid: FunctionComponent<Props> = ({
   list,
   initialSearch,
   onSearchChange,
+  selectedCategory,
   setSelectedCategory,
   showMissingIntegrationMessage = false,
   featuredList = null,
@@ -73,15 +80,15 @@ export const PackageListGrid: FunctionComponent<Props> = ({
   }, [windowScrollY, isSticky]);
 
   const onQueryChange = ({
-    queryText: userInput,
+    queryText,
     error,
   }: {
     queryText: string;
     error: { message: string } | null;
   }) => {
     if (!error) {
-      onSearchChange(userInput);
-      setSearchTerm(userInput);
+      onSearchChange(queryText);
+      setSearchTerm(queryText);
     }
   };
 
@@ -123,12 +130,31 @@ export const PackageListGrid: FunctionComponent<Props> = ({
             <EuiSearchBar
               query={searchTerm || undefined}
               box={{
+                'data-test-subj': 'epmList.searchBar',
                 placeholder: i18n.translate('xpack.fleet.epmList.searchPackagesPlaceholder', {
                   defaultMessage: 'Search for integrations',
                 }),
                 incremental: true,
               }}
               onChange={onQueryChange}
+              toolsRight={
+                selectedCategory ? (
+                  <div>
+                    <EuiBadge
+                      color="accent"
+                      iconType="cross"
+                      iconSide="right"
+                      iconOnClick={() => {
+                        setSelectedCategory('');
+                      }}
+                      iconOnClickAriaLabel="Remove category"
+                      data-test-sub="epmList.categoryBadge"
+                    >
+                      {selectedCategory}
+                    </EuiBadge>
+                  </div>
+                ) : undefined
+              }
             />
             {callout ? (
               <>

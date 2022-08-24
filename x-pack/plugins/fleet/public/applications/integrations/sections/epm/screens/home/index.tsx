@@ -31,19 +31,17 @@ import type { CategoryFacet } from './category_facets';
 import { InstalledPackages } from './installed_packages';
 import { AvailablePackages } from './available_packages';
 
+export type ExtendedIntegrationCategory = IntegrationCategory | '';
 export interface CategoryParams {
-  category?: string;
+  category?: ExtendedIntegrationCategory;
 }
 
 export const getParams = (params: CategoryParams, search: string) => {
   const { category } = params;
-  const selectedCategory = category || '';
+  const selectedCategory: ExtendedIntegrationCategory = category || '';
   const queryParams = new URLSearchParams(search);
   const searchParam = queryParams.get(INTEGRATIONS_SEARCH_QUERYPARAM) || '';
-  return { selectedCategory, searchParam } as {
-    selectedCategory: IntegrationCategory & '';
-    searchParam: string;
-  };
+  return { selectedCategory, searchParam };
 };
 
 export const categoryExists = (category: string, categories: CategoryFacet[]) => {
