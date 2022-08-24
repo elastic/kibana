@@ -8,8 +8,7 @@
 
 import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObjectsRepository } from './repository';
-import { mockKibanaMigrator } from '../../migrations/kibana_migrator.mock';
-import { KibanaMigrator } from '../../migrations';
+import { createMigratorMock } from '../mocks/internal_mocks';
 import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
 
 jest.mock('./repository');
@@ -57,7 +56,7 @@ describe('SavedObjectsRepository#createRepository', () => {
     migrations: {},
   });
 
-  const migrator = mockKibanaMigrator.create({ types: typeRegistry.getAllTypes() });
+  const migrator = createMigratorMock({ types: typeRegistry.getAllTypes() });
   const RepositoryConstructor =
     SavedObjectsRepository as unknown as jest.Mock<SavedObjectsRepository>;
 
@@ -69,7 +68,7 @@ describe('SavedObjectsRepository#createRepository', () => {
   it('should not allow a repository with an undefined type', () => {
     try {
       originalRepository.createRepository(
-        migrator as unknown as KibanaMigrator,
+        migrator,
         typeRegistry,
         '.kibana-test',
         callAdminCluster,
@@ -85,7 +84,7 @@ describe('SavedObjectsRepository#createRepository', () => {
 
   it('should create a repository without hidden types', () => {
     const repository = originalRepository.createRepository(
-      migrator as unknown as KibanaMigrator,
+      migrator,
       typeRegistry,
       '.kibana-test',
       callAdminCluster,
@@ -104,7 +103,7 @@ describe('SavedObjectsRepository#createRepository', () => {
 
   it('should create a repository with a unique list of hidden types', () => {
     const repository = originalRepository.createRepository(
-      migrator as unknown as KibanaMigrator,
+      migrator,
       typeRegistry,
       '.kibana-test',
       callAdminCluster,
