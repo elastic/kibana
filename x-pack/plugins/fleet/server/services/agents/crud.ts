@@ -199,9 +199,9 @@ export async function getAgentsByKuery(
   const secondarySort: estypes.Sort = isDefaultSort
     ? [{ 'local_metadata.host.hostname.keyword': { order: 'asc' } }]
     : [];
-  const queryAgents = async (from: number, size: number) => {
-    try {
-      return esClient.search<FleetServerAgent, {}>({
+  const queryAgents = async (from: number, size: number) =>
+    esClient
+      .search<FleetServerAgent, {}>({
         from,
         size,
         track_total_hits: true,
@@ -223,12 +223,11 @@ export async function getAgentsByKuery(
               ignore_unavailable: true,
             }),
         ...(pitId && searchAfter ? { search_after: searchAfter, from: 0 } : {}),
+      })
+      .catch((error) => {
+        appContextService.getLogger().error(JSON.stringify(error.body.error.root_cause, null, 2));
+        throw error;
       });
-    } catch (error) {
-      appContextService.getLogger().error(error);
-      throw error;
-    }
-  };
   const res = await queryAgents((page - 1) * perPage, perPage);
 
   let agents = res.hits.hits.map(searchHitToAgent);
