@@ -52,5 +52,9 @@ export {
 export { getAggregatedTypesDocuments } from './src/actions/check_for_unknown_docs';
 export { addExcludedTypesToBoolQuery } from './src/model/helpers';
 export { deterministicallyRegenerateObjectId } from './src/core/document_migrator';
-export { REMOVED_TYPES, DocumentsTransformFailed, DocumentsTransformSuccess } from './src/core';
+export {
+  REMOVED_TYPES,
+  type DocumentsTransformFailed,
+  type DocumentsTransformSuccess,
+} from './src/core';
 export { MIGRATION_CLIENT_OPTIONS } from './src/run_resilient_migrator';
