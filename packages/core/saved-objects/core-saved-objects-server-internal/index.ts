@@ -7,4 +7,28 @@
  */
 
 export { SavedObjectsService, CoreSavedObjectsRouteHandlerContext } from './src';
-export type { InternalSavedObjectsServiceStart, InternalSavedObjectsServiceSetup } from './src';
+export type {
+  InternalSavedObjectsServiceStart,
+  InternalSavedObjectsServiceSetup,
+  InternalSavedObjectsRequestHandlerContext,
+  InternalSavedObjectRouter,
+} from './src';
+
+// only used by integration tests
+export { registerDeleteUnknownTypesRoute } from './src/routes/deprecations';
+export { registerLegacyExportRoute } from './src/routes/legacy_import_export/export';
+export { registerLegacyImportRoute } from './src/routes/legacy_import_export/import';
+export { registerBulkCreateRoute } from './src/routes/bulk_create';
+export { registerBulkGetRoute } from './src/routes/bulk_get';
+export { registerBulkResolveRoute } from './src/routes/bulk_resolve';
+export { registerBulkUpdateRoute } from './src/routes/bulk_update';
+export { registerCreateRoute } from './src/routes/create';
+export { registerDeleteRoute } from './src/routes/delete';
+export { registerExportRoute } from './src/routes/export';
+export { registerFindRoute } from './src/routes/find';
+export { registerGetRoute } from './src/routes/get';
+export { registerImportRoute } from './src/routes/import';
+export { registerMigrateRoute } from './src/routes/migrate';
+export { registerResolveRoute } from './src/routes/resolve';
+export { registerResolveImportErrorsRoute } from './src/routes/resolve_import_errors';
+export { registerUpdateRoute } from './src/routes/update';

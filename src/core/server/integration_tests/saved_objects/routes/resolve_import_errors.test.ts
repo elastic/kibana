@@ -17,7 +17,7 @@ import { coreUsageDataServiceMock } from '../../../core_usage_data/core_usage_da
 import { setupServer, createExportableType } from '../../../saved_objects/routes/test_utils';
 import { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObjectsImporter } from '../../../saved_objects/import';
-import type { InternalSavedObjectsRequestHandlerContext } from '../../../saved_objects/internal_types';
+import type { InternalSavedObjectsRequestHandlerContext } from '@kbn/core-saved-objects-server-internal';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 

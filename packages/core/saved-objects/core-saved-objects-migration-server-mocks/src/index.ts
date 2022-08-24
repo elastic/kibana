@@ -8,3 +8,4 @@
 
 export { mockKibanaMigrator } from './kibana_migrator.mock';
 export { migrationMocks, createSavedObjectsMigrationLoggerMock } from './migration.mocks';
+export { retryAsync } from './helpers/retry_async';

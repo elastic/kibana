@@ -39,7 +39,7 @@ import {
   waitForIndexStatus,
   initAction,
   cloneIndex,
-} from '../../../../saved_objects/migrations/actions';
+} from '@kbn/core-saved-objects-migration-server-internal';
 import type {
   DocumentsTransformFailed,
   DocumentsTransformSuccess,

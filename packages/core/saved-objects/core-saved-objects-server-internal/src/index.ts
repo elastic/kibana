@@ -12,3 +12,7 @@ export type {
   InternalSavedObjectsServiceSetup,
 } from './saved_objects_service';
 export { CoreSavedObjectsRouteHandlerContext } from './saved_objects_route_handler_context';
+export type {
+  InternalSavedObjectsRequestHandlerContext,
+  InternalSavedObjectRouter,
+} from './internal_types';

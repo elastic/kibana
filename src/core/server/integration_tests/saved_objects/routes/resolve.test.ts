@@ -17,7 +17,7 @@ import { coreUsageStatsClientMock } from '../../../core_usage_data/core_usage_st
 import { coreUsageDataServiceMock } from '../../../core_usage_data/core_usage_data_service.mock';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock, coreMock } from '../../../mocks';
-import type { InternalSavedObjectsRequestHandlerContext } from '../../../saved_objects/internal_types';
+import type { InternalSavedObjectsRequestHandlerContext } from '@kbn/core-saved-objects-server-internal';
 
 const coreId = Symbol('core');
 
