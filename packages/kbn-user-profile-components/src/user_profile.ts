@@ -143,6 +143,11 @@ export interface GetUserDisplayNameParams {
   /**
    * Optional email of the user.
    */
+  email?: string;
+
+  /**
+   * Optional full name of the user.
+   */
   full_name?: string;
 }
 
@@ -151,5 +156,5 @@ export interface GetUserDisplayNameParams {
  * @param params Set of available user's name-related fields.
  */
 export function getUserDisplayName(params: GetUserDisplayNameParams) {
-  return params.full_name || params.username;
+  return params.full_name || params.email || params.username;
 }
