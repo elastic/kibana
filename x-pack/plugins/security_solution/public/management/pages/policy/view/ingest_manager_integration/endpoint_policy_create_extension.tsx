@@ -9,23 +9,23 @@ import React, { memo, useState, useCallback, useEffect } from 'react';
 import { EuiForm, EuiFlexGroup, EuiFlexItem, EuiCheckbox, EuiRadio, EuiSelect } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { PackagePolicyCreateExtensionComponentProps } from '@kbn/fleet-plugin/public';
-import styled from 'styled-components'
+import styled from 'styled-components';
 
 /**
  * Exports Endpoint-specific package policy instructions
  * for use in the Ingest app create / edit package policy
  */
 const SelectConfigurationSettingsText = styled.div`
-  font-size: 22px; 
-  font-weight: 700; 
-  padding-top: 12px; 
+  font-size: 22px;
+  font-weight: 700;
+  padding-top: 12px;
   padding-bottom: 10px;
   line-height: 32px;
 `;
 
 const RadioOptionsDetails = styled.div`
   padding-left: 24px;
-  color: #69707D;
+  color: #69707d;
   font-weight: 400;
   font-size: 12.25px;
   line-height: 21px;
@@ -42,13 +42,13 @@ const CloudOptionDataIngestionMessage = styled.div`
   font-weight: 400;
   padding-top: 12px;
   padding-bottom: 10px;
-  color: #69707D;
+  color: #69707d;
 `;
 
 const SubduedText = styled.div`
   font-size: 14px;
   font-weight: 400;
-  color: #69707D;
+  color: #69707d;
   line-height: 24px;
 `;
 
@@ -60,7 +60,7 @@ const BoldSubtitle = styled.div`
 `;
 
 const QuickSettingInfo = styled.div`
-  padding-bottom: 16px; 
+  padding-bottom: 16px;
   font-size: 14px;
   line-height: 24px;
 `;
@@ -72,7 +72,6 @@ const CloudRadioProtectionsModeContainer = styled.div`
 const DropDownSelect = styled(EuiSelect)`
   margin-top: 14px;
 `;
-
 
 export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionComponentProps>(
   ({ newPolicy, onChange }) => {
@@ -315,20 +314,20 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
             id="xpack.fleet.createPackagePolicy.stepConfigure.enablePrevention"
             defaultMessage="Select configuration settings"
           />
-       </SelectConfigurationSettingsText>
+        </SelectConfigurationSettingsText>
         <QuickSettingInfo>
           <FormattedMessage
             id="xpack.fleet.createPackagePolicy.stepConfigure.quickSettingsTranslation"
             defaultMessage="Use quick settings to configure the integration to {value}. You can make changes to the configurations after you add it."
             values={{
-              value : <b>protect your tranditional endpoints or dynamic clound environments</b>
+              value: <b>protect your tranditional endpoints or dynamic clound environments</b>,
             }}
           />
         </QuickSettingInfo>
-          <FormattedMessage
-            id="xpack.fleet.createPackagePolicy.stepConfigure.selectEnvironmentTextTranslation"
-            defaultMessage="Select for what environment you would like to add the integration"
-          />
+        <FormattedMessage
+          id="xpack.fleet.createPackagePolicy.stepConfigure.selectEnvironmentTextTranslation"
+          defaultMessage="Select for what environment you would like to add the integration"
+        />
         <DropDownSelect
           id="selectIntegrationTypeId"
           options={dropDownOptions}
@@ -339,124 +338,124 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
 
         {dropdownValue === dropDownOptions[0].value && (
           <>
-          <IntegrationOptionsContainer>
-            <EuiRadio
-              id="radioOptionNGAV"
-              label="NGAV"
-              name="Radio Endpoint"
-              value="NGAV"
-              checked={radioEndpointOption === 'NGAV'}
-              onChange={(e) => onChangeRadioEndpoint(e)}
-            />
-            <RadioOptionsDetails>
-            <FormattedMessage
-              id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicTypeEndpointNGAV"
-              defaultMessage="Prevents Malware, Ransomware and Memory Threats and provides process telemetry"
-            />
-            </RadioOptionsDetails>
+            <IntegrationOptionsContainer>
+              <EuiRadio
+                id="radioOptionNGAV"
+                label="NGAV"
+                name="Radio Endpoint"
+                value="NGAV"
+                checked={radioEndpointOption === 'NGAV'}
+                onChange={(e) => onChangeRadioEndpoint(e)}
+              />
+              <RadioOptionsDetails>
+                <FormattedMessage
+                  id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicTypeEndpointNGAV"
+                  defaultMessage="Prevents Malware, Ransomware and Memory Threats and provides process telemetry"
+                />
+              </RadioOptionsDetails>
 
-            <EuiRadio
-              id="radioOptionEDREssential"
-              label="EDR Essential"
-              name="Radio Endpoint"
-              value="EDR Essential"
-              checked={radioEndpointOption === 'EDR Essential'}
-              onChange={(e) => onChangeRadioEndpoint(e)}
-            />
-            <RadioOptionsDetails>
-            <FormattedMessage
-              id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicTypeEndpointEDREssential"
-              defaultMessage="Endpoint Alerts, Process Events, Network Events, File Events"
-            />
-            </RadioOptionsDetails>
+              <EuiRadio
+                id="radioOptionEDREssential"
+                label="EDR Essential"
+                name="Radio Endpoint"
+                value="EDR Essential"
+                checked={radioEndpointOption === 'EDR Essential'}
+                onChange={(e) => onChangeRadioEndpoint(e)}
+              />
+              <RadioOptionsDetails>
+                <FormattedMessage
+                  id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicTypeEndpointEDREssential"
+                  defaultMessage="Endpoint Alerts, Process Events, Network Events, File Events"
+                />
+              </RadioOptionsDetails>
 
-            <EuiRadio
-              id="radioOptionEDRComplete"
-              label="EDR Complete"
-              name="Radio Endpoint"
-              value="EDR Complete"
-              checked={radioEndpointOption === 'EDR Complete'}
-              onChange={(e) => onChangeRadioEndpoint(e)}
-            />
-            <RadioOptionsDetails>
-            <FormattedMessage
-              id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicTypeEndpointEDRComplete"
-              defaultMessage="Endpoint Alerts, Full Event capture"
-            />
-            </RadioOptionsDetails>
+              <EuiRadio
+                id="radioOptionEDRComplete"
+                label="EDR Complete"
+                name="Radio Endpoint"
+                value="EDR Complete"
+                checked={radioEndpointOption === 'EDR Complete'}
+                onChange={(e) => onChangeRadioEndpoint(e)}
+              />
+              <RadioOptionsDetails>
+                <FormattedMessage
+                  id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicTypeEndpointEDRComplete"
+                  defaultMessage="Endpoint Alerts, Full Event capture"
+                />
+              </RadioOptionsDetails>
             </IntegrationOptionsContainer>
           </>
         )}
 
         {dropdownValue === dropDownOptions[1].value && (
           <>
-          <IntegrationOptionsContainer>
-            <CloudOptionDataIngestionMessage>
-              <FormattedMessage
-                id="xpack.fleet.createPackagePolicy.stepConfigure.interactiveSessionSuggestionTranslation"
-                defaultMessage="To save on data ingestion volume select interactive session only "
+            <IntegrationOptionsContainer>
+              <CloudOptionDataIngestionMessage>
+                <FormattedMessage
+                  id="xpack.fleet.createPackagePolicy.stepConfigure.interactiveSessionSuggestionTranslation"
+                  defaultMessage="To save on data ingestion volume select interactive session only "
+                />
+              </CloudOptionDataIngestionMessage>
+
+              <EuiRadio
+                id="radioInteractiveOption"
+                label="Interactive only"
+                checked={radioInteractiveSelected}
+                onChange={onChangeRadio}
               />
-            </CloudOptionDataIngestionMessage>
+              <RadioOptionsDetails>
+                <FormattedMessage
+                  id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicTypeInteractiveOnlyInfo"
+                  defaultMessage="Monitors and collects session data from interactive sessions only. "
+                />
+              </RadioOptionsDetails>
 
-            <EuiRadio
-              id="radioInteractiveOption"
-              label="Interactive only"
-              checked={radioInteractiveSelected}
-              onChange={onChangeRadio}
-            />
-            <RadioOptionsDetails>
-            <FormattedMessage
-              id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicTypeInteractiveOnlyInfo"
-              defaultMessage="Monitors and collects session data from interactive sessions only. "
-            />
-            </RadioOptionsDetails>
-
-            <EuiRadio
-              id="radioComprehensiveOption"
-              label="All events"
-              checked={radioComprehensiveSelected}
-              onChange={onChangeRadio}
-            />
-             <RadioOptionsDetails>
-            <FormattedMessage
-              id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicTypeComprehensiveInfo"
-              defaultMessage="Monitors and collects session data from all process executions. "
-            />
-             </RadioOptionsDetails>
-
-            <BoldSubtitle>
-              <FormattedMessage
-                id="xpack.fleet.createPackagePolicy.stepConfigure.protectionModeTranslation"
-                defaultMessage="Protection mode"
+              <EuiRadio
+                id="radioComprehensiveOption"
+                label="All events"
+                checked={radioComprehensiveSelected}
+                onChange={onChangeRadio}
               />
-            </BoldSubtitle>
-            <SubduedText>
-              <FormattedMessage
-                id="xpack.fleet.createPackagePolicy.stepConfigure.protectionModeDetailsTranslation"
-                defaultMessage="In addition to detections, Elastic security can prevent threats before they happen.
+              <RadioOptionsDetails>
+                <FormattedMessage
+                  id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicTypeComprehensiveInfo"
+                  defaultMessage="Monitors and collects session data from all process executions. "
+                />
+              </RadioOptionsDetails>
+
+              <BoldSubtitle>
+                <FormattedMessage
+                  id="xpack.fleet.createPackagePolicy.stepConfigure.protectionModeTranslation"
+                  defaultMessage="Protection mode"
+                />
+              </BoldSubtitle>
+              <SubduedText>
+                <FormattedMessage
+                  id="xpack.fleet.createPackagePolicy.stepConfigure.protectionModeDetailsTranslation"
+                  defaultMessage="In addition to detections, Elastic security can prevent threats before they happen.
               You can disable detections anytime in the agent policy configurations settings."
-              />
-            </SubduedText>
-            <CloudRadioProtectionsModeContainer>
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiCheckbox
-                  id="CheckBoxIdMalware"
-                  label="Prevent malware"
-                  checked={checkboxMalwareChecked}
-                  onChange={onChangeMalwareCheckbox}
                 />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiCheckbox
-                  id="CheckBoxIdRansomware"
-                  label="Prevent ransomware"
-                  checked={checkboxRansomwareChecked}
-                  onChange={onChangeRansomwareCheckbox}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            </CloudRadioProtectionsModeContainer>
+              </SubduedText>
+              <CloudRadioProtectionsModeContainer>
+                <EuiFlexGroup>
+                  <EuiFlexItem>
+                    <EuiCheckbox
+                      id="CheckBoxIdMalware"
+                      label="Prevent malware"
+                      checked={checkboxMalwareChecked}
+                      onChange={onChangeMalwareCheckbox}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiCheckbox
+                      id="CheckBoxIdRansomware"
+                      label="Prevent ransomware"
+                      checked={checkboxRansomwareChecked}
+                      onChange={onChangeRansomwareCheckbox}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </CloudRadioProtectionsModeContainer>
             </IntegrationOptionsContainer>
           </>
         )}
