@@ -192,7 +192,7 @@ describe('Access agreement view routes', () => {
         },
       }).config.authc;
 
-      config.accessAgreement = {message: 'Foo'};
+      config.accessAgreement = { message: 'Foo' };
 
       const cases: Array<[AuthenticationProvider, string]> = [
         [{ type: 'basic', name: 'basic1' }, 'Foo'],

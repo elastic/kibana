@@ -826,15 +826,21 @@ export class Authenticator {
 
     //  3. Request is authenticated by the provider that has `accessAgreement` configured
     const hasAccessAgreementConfigured =
-      (this.options.config.authc.providers as Record<string, any>)[sessionValue.provider.type]?.[sessionValue.provider.name]?.accessAgreement ||
-      !!this.options.accessAgreement.message;
+      (this.options.config.authc.providers as Record<string, any>)[sessionValue.provider.type]?.[
+        sessionValue.provider.name
+      ]?.accessAgreement || !!this.options.accessAgreement.message;
 
     //  4. Current license allows access agreement
-    const doesCurrentLicenseAllowAccessAgreement = this.options.license.getFeatures().allowAccessAgreement;
+    const doesCurrentLicenseAllowAccessAgreement =
+      this.options.license.getFeatures().allowAccessAgreement;
 
     //  5. And it's not a request to the Access Agreement UI itself
 
-    return isAccessAgreementAlreadyAcknowledged && hasAccessAgreementConfigured && doesCurrentLicenseAllowAccessAgreement;
+    return (
+      isAccessAgreementAlreadyAcknowledged &&
+      hasAccessAgreementConfigured &&
+      doesCurrentLicenseAllowAccessAgreement
+    );
   }
 
   /**

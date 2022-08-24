@@ -75,7 +75,7 @@ function getMockOptions({
     featureUsageService: securityFeatureUsageServiceMock.createStartContract(),
     userProfileService: userProfileServiceMock.createStart(),
     isElasticCloudDeployment: jest.fn().mockReturnValue(false),
-    accessAgreement: { message: accessAgreementMessage }
+    accessAgreement: { message: accessAgreementMessage },
   };
 }
 
@@ -1922,16 +1922,17 @@ describe('Authenticator', () => {
         expect(auditLogger.log).not.toHaveBeenCalled();
       });
 
-
       it('redirects to global Access Agreement when local Access Agreement is not configured.', async () => {
         mockOptions = getMockOptions({
           providers: {
-            basic: { basic1: { order: 0, } },
+            basic: { basic1: { order: 0 } },
           },
-          accessAgreementMessage: 'Foo'
+          accessAgreementMessage: 'Foo',
         });
 
-        mockOptions.license.getFeatures.mockReturnValue({ allowAccessAgreement: true,} as SecurityLicenseFeatures);
+        mockOptions.license.getFeatures.mockReturnValue({
+          allowAccessAgreement: true,
+        } as SecurityLicenseFeatures);
 
         authenticator = new Authenticator(mockOptions);
 

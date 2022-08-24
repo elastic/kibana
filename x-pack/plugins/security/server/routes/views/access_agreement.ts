@@ -51,7 +51,10 @@ export function defineAccessAgreementRoutes({
       let accessAgreement: string = '';
 
       if (sessionValue) {
-        const localAccessAgreement = config.authc.providers[sessionValue.provider.type as keyof ConfigType['authc']['providers']]?.[sessionValue.provider.name]?.accessAgreement?.message;
+        const localAccessAgreement =
+          config.authc.providers[
+            sessionValue.provider.type as keyof ConfigType['authc']['providers']
+          ]?.[sessionValue.provider.name]?.accessAgreement?.message;
         const globalAccessAgreement = config.accessAgreement?.message;
 
         if (localAccessAgreement) {
@@ -61,7 +64,7 @@ export function defineAccessAgreementRoutes({
         }
       }
 
-      return response.ok({ body: {accessAgreement} });
+      return response.ok({ body: { accessAgreement } });
     })
   );
 }

@@ -326,7 +326,7 @@ export function createConfig(
 
   const isUsingLegacyProvidersFormat = Array.isArray(config.authc.providers);
 
-  let providers = (
+  const providers = (
     isUsingLegacyProvidersFormat
       ? [...new Set(config.authc.providers as Array<keyof ProvidersConfigType>)].reduce(
           (legacyProviders, providerType, order) => {
