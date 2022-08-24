@@ -457,7 +457,7 @@ export const dateHistogramOperation: OperationDefinition<
     );
   },
   helpComponentTitle: i18n.translate('xpack.lens.indexPattern.dateHistogram.titleHelp', {
-    defaultMessage: 'How auto date histogram works',
+    defaultMessage: 'How Date histogram works',
   }),
   helpComponent() {
     const infiniteBound = i18n.translate('xpack.lens.indexPattern.dateHistogram.moreThanYear', {
@@ -471,14 +471,14 @@ export const dateHistogramOperation: OperationDefinition<
       <>
         <p>
           {i18n.translate('xpack.lens.indexPattern.dateHistogram.autoBasicExplanation', {
-            defaultMessage: 'The auto date histogram splits a data field into buckets by interval.',
+            defaultMessage: 'Date histogram splits data into time intervals.',
           })}
         </p>
 
         <p>
           <FormattedMessage
             id="xpack.lens.indexPattern.dateHistogram.autoLongerExplanation"
-            defaultMessage="To choose the interval, Lens divides the specified time range by the {targetBarSetting} setting. Lens calculates the best interval for your data. For example 30m, 1h, and 12. The maximum number of bars is set by the {maxBarSetting} value."
+            defaultMessage="To choose the interval, Lens divides the specified time range by the {targetBarSetting} Advanced Setting and calculates the best interval for your data. For example, when the time range is 4 days, the data is divided into hourly buckets. To configure the maximum number of bars, use the {maxBarSetting} Advanced Setting."
             values={{
               maxBarSetting: <EuiCode>{UI_SETTINGS.HISTOGRAM_MAX_BARS}</EuiCode>,
               targetBarSetting: <EuiCode>{UI_SETTINGS.HISTOGRAM_BAR_TARGET}</EuiCode>,

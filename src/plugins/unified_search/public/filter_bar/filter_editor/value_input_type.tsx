@@ -39,7 +39,7 @@ class ValueInputTypeUI extends Component<Props> {
 
   public render() {
     const value = this.props.value;
-    const type = this.props.field ? this.props.field.type : 'string';
+    const type = this.props.field?.type ?? 'string';
     let inputElement: React.ReactNode;
     switch (type) {
       case 'string':

@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { FilterEditor } from './filter_editor';
-
 export type { Operator } from './lib';
 
 export {
@@ -39,7 +37,5 @@ export { PhraseValueInput } from './phrase_value_input';
 export { RangeValueInput, isRangeParams } from './range_value_input';
 export { ValueInputType } from './value_input_type';
 
+export { FilterEditor } from './filter_editor';
 export type { FilterEditorProps } from './filter_editor';
-// React.lazy support
-// eslint-disable-next-line import/no-default-export
-export default FilterEditor;

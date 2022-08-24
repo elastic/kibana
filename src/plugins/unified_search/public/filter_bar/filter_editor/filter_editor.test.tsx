@@ -7,8 +7,8 @@
  */
 
 import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
-import { FilterEditorProps } from '.';
-import FilterEditor from '.';
+import type { FilterEditorProps } from '.';
+import { FilterEditor } from '.';
 import React from 'react';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => {
