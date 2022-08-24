@@ -393,7 +393,6 @@
     "chroma-js": "^1.4.1",
     "classnames": "2.2.6",
     "color": "^4.2.3",
-    "colorette": "^1.2.2",
     "commander": "^4.1.1",
     "compare-versions": "3.5.1",
     "constate": "^3.3.2",
