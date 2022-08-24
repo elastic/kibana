@@ -7,7 +7,6 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  EuiAvatar,
   EuiBadgeGroup,
   EuiBadge,
   EuiButton,
@@ -23,7 +22,9 @@ import {
 } from '@elastic/eui';
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import styled from 'styled-components';
+// import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
+import { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { Case, DeleteCase, UpdateByKey } from '../../../common/ui/types';
 import { CaseStatuses, ActionConnector, CaseSeverity } from '../../../common/api';
 import { OWNER_INFO } from '../../../common/constants';
@@ -44,11 +45,20 @@ import { useCasesFeatures } from '../cases_context/use_cases_features';
 import { severities } from '../severity/config';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { useCasesContext } from '../cases_context/use_cases_context';
+import { UserToolTip } from '../user_profiles/user_tooltip';
+import { CaseUserAvatar } from '../user_profiles/user_avatar';
+import { useAssignees } from '../../containers/user_profiles/use_assignees';
 
 export type CasesColumns =
   | EuiTableActionsColumnType<Case>
   | EuiTableComputedColumnType<Case>
   | EuiTableFieldDataColumnType<Case>;
+
+// const OverlappingFlexItems = euiStyled(EuiFlexItem)`
+//   &:not(:first-child) {
+//     margin-left: -4px
+//   }
+// `;
 
 const MediumShadeText = styled.p`
   color: ${({ theme }) => theme.eui.euiColorMediumShade};
@@ -57,8 +67,51 @@ const MediumShadeText = styled.p`
 const renderStringField = (field: string, dataTestSubj: string) =>
   field != null ? <span data-test-subj={dataTestSubj}>{field}</span> : getEmptyTagValue();
 
+const AssigneesColumn: React.FC<{
+  assignees: Case['assignees'];
+  userProfiles: Map<string, UserProfileWithAvatar>;
+  currentUserProfile?: UserProfileWithAvatar;
+}> = ({ assignees, userProfiles, currentUserProfile }) => {
+  const { allAssignees } = useAssignees({
+    caseAssignees: assignees,
+    userProfiles,
+    currentUserProfile,
+  });
+
+  if (allAssignees.length <= 0) {
+    return getEmptyTagValue();
+  }
+
+  return (
+    <EuiFlexGroup
+      gutterSize="none"
+      data-test-subj="case-table-column-assignee"
+      wrap
+      // css={{ position: 'relative' }}
+      // alignItems="center"
+    >
+      {allAssignees.map((assignee, index) => {
+        // shift each avatar over to the left 20 pixels
+        const left = index * 20;
+        // apply reverse ordering so that the first avatar is on top
+        // TODO: figure out how to style them appropriately when they wrap
+        // const zIndex = (assignees.length - index) * 10;
+        return (
+          <EuiFlexItem grow={false} key={assignee.uid}>
+            <UserToolTip profile={assignee.profile}>
+              <CaseUserAvatar size="s" profile={assignee.profile} />
+            </UserToolTip>
+          </EuiFlexItem>
+        );
+      })}
+    </EuiFlexGroup>
+  );
+};
+AssigneesColumn.displayName = 'AssigneesColumn';
 export interface GetCasesColumn {
   filterStatus: string;
+  userProfiles: Map<string, UserProfileWithAvatar>;
+  currentUserProfile?: UserProfileWithAvatar;
   handleIsLoading: (a: boolean) => void;
   refreshCases?: (a?: boolean) => void;
   isSelectorView: boolean;
@@ -69,6 +122,8 @@ export interface GetCasesColumn {
 }
 export const useCasesColumns = ({
   filterStatus,
+  userProfiles,
+  currentUserProfile,
   handleIsLoading,
   refreshCases,
   isSelectorView,
@@ -173,27 +228,15 @@ export const useCasesColumns = ({
       },
     },
     {
-      field: 'createdBy',
-      name: i18n.REPORTER,
-      render: (createdBy: Case['createdBy']) => {
-        if (createdBy != null) {
-          return (
-            <EuiToolTip
-              position="top"
-              content={createdBy.username ?? i18n.UNKNOWN}
-              data-test-subj="case-table-column-createdBy-tooltip"
-            >
-              <EuiAvatar
-                className="userAction__circle"
-                name={createdBy.fullName ? createdBy.fullName : createdBy.username ?? i18n.UNKNOWN}
-                size="s"
-                data-test-subj="case-table-column-createdBy"
-              />
-            </EuiToolTip>
-          );
-        }
-        return getEmptyTagValue();
-      },
+      field: 'assignees',
+      name: i18n.ASSIGNEES,
+      render: (assignees: Case['assignees']) => (
+        <AssigneesColumn
+          assignees={assignees}
+          userProfiles={userProfiles}
+          currentUserProfile={currentUserProfile}
+        />
+      ),
     },
     {
       field: 'tags',

@@ -27,6 +27,8 @@ import {
   CasesByAlertId,
   CasesByAlertIdRt,
   CaseAttributes,
+  AllAssigneesFindRequest,
+  AllAssigneesFindRequestRt,
 } from '../../../common/api';
 import { createCaseError } from '../../common/error';
 import { countAlertsForID, flattenCaseSavedObject } from '../../common/utils';
@@ -303,6 +305,40 @@ export async function getTags(
     return tags;
   } catch (error) {
     throw createCaseError({ message: `Failed to get tags: ${error}`, error, logger });
+  }
+}
+
+export async function getAssignees(
+  params: AllAssigneesFindRequest,
+  clientArgs: CasesClientArgs
+): Promise<string[]> {
+  const {
+    unsecuredSavedObjectsClient,
+    services: { caseService },
+    logger,
+    authorization,
+  } = clientArgs;
+
+  try {
+    const queryParams = pipe(
+      excess(AllAssigneesFindRequestRt).decode(params),
+      fold(throwErrors(Boom.badRequest), identity)
+    );
+
+    const { filter: authorizationFilter } = await authorization.getAuthorizationFilter(
+      Operations.findCases
+    );
+
+    const filter = combineAuthorizedAndOwnerFilter(queryParams.owner, authorizationFilter);
+
+    const tags = await caseService.getAssignees({
+      unsecuredSavedObjectsClient,
+      filter,
+    });
+
+    return tags;
+  } catch (error) {
+    throw createCaseError({ message: `Failed to get assignees: ${error}`, error, logger });
   }
 }
 

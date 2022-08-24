@@ -18,12 +18,12 @@ import {
   EuiTextAlign,
   EuiToolTip,
 } from '@elastic/eui';
-import { isEmpty, sortBy } from 'lodash';
+import { isEmpty } from 'lodash';
 import { useSuggestUserProfiles } from '../../../containers/user_profiles/use_suggest_user_profiles';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { AssigneeWithProfile } from '../../user_profiles/types';
 import * as i18n from '../translations';
-import { getSortField, moveCurrentUserToBeginning } from '../../user_profiles/sort';
+import { bringCurrentUserToFrontAndSort, sortProfiles } from '../../user_profiles/sort';
 
 const SelectedStatusMessageComponent: React.FC<{
   selectedCount: number;
@@ -111,9 +111,9 @@ const SuggestUsersPopoverComponent: React.FC<SuggestUsersPopoverProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
 
   const selectedProfiles = useMemo(() => {
-    return moveCurrentUserToBeginning(
+    return bringCurrentUserToFrontAndSort(
       currentUserProfile,
-      sortProfiles(assignedUsersWithProfiles.map((assignee) => ({ ...assignee.profile })))
+      assignedUsersWithProfiles.map((assignee) => ({ ...assignee.profile }))
     );
   }, [assignedUsersWithProfiles, currentUserProfile]);
 
@@ -125,7 +125,7 @@ const SuggestUsersPopoverComponent: React.FC<SuggestUsersPopoverProps> = ({
 
   const onChange = useCallback(
     (users: UserProfileWithAvatar[]) => {
-      const sortedUsers = moveCurrentUserToBeginning(currentUserProfile, sortProfiles(users));
+      const sortedUsers = bringCurrentUserToFrontAndSort(currentUserProfile, users);
       setSelectedUsers(sortedUsers);
       onUsersChange(sortedUsers ?? []);
     },
@@ -182,11 +182,3 @@ const SuggestUsersPopoverComponent: React.FC<SuggestUsersPopoverProps> = ({
 SuggestUsersPopoverComponent.displayName = 'SuggestUsersPopover';
 
 export const SuggestUsersPopover = React.memo(SuggestUsersPopoverComponent);
-
-const sortProfiles = (profiles?: UserProfileWithAvatar[]) => {
-  if (!profiles) {
-    return;
-  }
-
-  return sortBy(profiles, getSortField);
-};

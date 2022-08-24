@@ -40,6 +40,7 @@ import {
   CASE_TAGS_URL,
   CASES_URL,
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
+  CASE_ASSIGNEES_URL,
 } from '../../common/constants';
 import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
 
@@ -115,6 +116,15 @@ export const getTags = async (signal: AbortSignal, owner: string[]): Promise<str
   return response ?? [];
 };
 
+export const getAssignees = async (signal: AbortSignal, owner: string[]): Promise<string[]> => {
+  const response = await KibanaServices.get().http.fetch<string[]>(CASE_ASSIGNEES_URL, {
+    method: 'GET',
+    signal,
+    query: { ...(owner.length > 0 ? { owner } : {}) },
+  });
+  return response ?? [];
+};
+
 export const getReporters = async (signal: AbortSignal, owner: string[]): Promise<User[]> => {
   const response = await KibanaServices.get().http.fetch<User[]>(CASE_REPORTERS_URL, {
     method: 'GET',
@@ -164,7 +174,7 @@ export const getCases = async ({
     search: '',
     searchFields: [],
     severity: SeverityAll,
-    reporters: [],
+    assignees: [],
     status: StatusAll,
     tags: [],
     owner: [],
@@ -180,7 +190,7 @@ export const getCases = async ({
   const query = {
     ...(filterOptions.status !== StatusAll ? { status: filterOptions.status } : {}),
     ...(filterOptions.severity !== SeverityAll ? { severity: filterOptions.severity } : {}),
-    reporters: filterOptions.reporters.map((r) => r.username ?? '').filter((r) => r !== ''),
+    assignees: filterOptions.assignees,
     tags: filterOptions.tags,
     ...(filterOptions.search.length > 0 ? { search: filterOptions.search } : {}),
     ...(filterOptions.searchFields.length > 0 ? { searchFields: filterOptions.searchFields } : {}),

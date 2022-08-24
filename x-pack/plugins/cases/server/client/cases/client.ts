@@ -13,6 +13,7 @@ import {
   AllTagsFindRequest,
   AllReportersFindRequest,
   CasesByAlertId,
+  AllAssigneesFindRequest,
 } from '../../../common/api';
 import { CasesClient } from '../client';
 import { CasesClientInternal } from '../client_internal';
@@ -37,6 +38,7 @@ import {
   GetParams,
   getReporters,
   getTags,
+  getAssignees,
 } from './get';
 import { push, PushParams } from './push';
 import { update } from './update';
@@ -87,6 +89,10 @@ export interface CasesSubClient {
    */
   getReporters(params: AllReportersFindRequest): Promise<User[]>;
   /**
+   * Retrieves all the assignees across all accessible cases.
+   */
+  getAssignees(params: AllAssigneesFindRequest): Promise<string[]>;
+  /**
    * Retrieves the cases ID and title that have the requested alert attached to them
    */
   getCasesByAlertID(params: CasesByAlertIDParams): Promise<CasesByAlertId>;
@@ -112,6 +118,7 @@ export const createCasesSubClient = (
     delete: (ids: string[]) => deleteCases(ids, clientArgs),
     getTags: (params: AllTagsFindRequest) => getTags(params, clientArgs),
     getReporters: (params: AllReportersFindRequest) => getReporters(params, clientArgs),
+    getAssignees: (params: AllAssigneesFindRequest) => getAssignees(params, clientArgs),
     getCasesByAlertID: (params: CasesByAlertIDParams) => getCasesByAlertID(params, clientArgs),
   };
 

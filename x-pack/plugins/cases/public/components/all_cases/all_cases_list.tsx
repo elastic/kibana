@@ -35,6 +35,8 @@ import {
   initialData,
   useGetCases,
 } from '../../containers/use_get_cases';
+import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
+import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
 
 const ProgressLoader = styled(EuiProgress)`
   ${({ $isShow }: { $isShow: boolean }) =>
@@ -87,6 +89,23 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       filterOptions,
       queryParams,
     });
+
+    const assigneesFromCases = useMemo(() => {
+      return data.cases.reduce<string[]>((acc, caseInfo) => {
+        if (!caseInfo) {
+          return acc;
+        }
+
+        acc.push(...caseInfo.assignees.map((assignee) => assignee.uid));
+        return acc;
+      }, []);
+    }, [data.cases]);
+
+    const { data: userProfiles } = useBulkGetUserProfiles({
+      uids: assigneesFromCases,
+    });
+
+    const { data: currentUserProfile } = useGetCurrentUserProfile();
 
     const { data: connectors = [] } = useGetConnectors();
 
@@ -193,6 +212,8 @@ export const AllCasesList = React.memo<AllCasesListProps>(
 
     const columns = useCasesColumns({
       filterStatus: filterOptions.status ?? StatusAll,
+      userProfiles: userProfiles ?? new Map(),
+      currentUserProfile,
       handleIsLoading,
       refreshCases,
       isSelectorView,
@@ -245,7 +266,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           initial={{
             search: filterOptions.search,
             searchFields: filterOptions.searchFields,
-            reporters: filterOptions.reporters,
+            assignees: [],
             tags: filterOptions.tags,
             status: filterOptions.status,
             owner: filterOptions.owner,

@@ -330,6 +330,7 @@ export const AllTagsFindRequestRt = rt.partial({
 });
 
 export const AllReportersFindRequestRt = AllTagsFindRequestRt;
+export const AllAssigneesFindRequestRt = AllTagsFindRequestRt;
 
 export type CaseAttributes = rt.TypeOf<typeof CaseAttributesRt>;
 
@@ -349,6 +350,7 @@ export type CaseExternalServiceBasic = rt.TypeOf<typeof CaseExternalServiceBasic
 
 export type AllTagsFindRequest = rt.TypeOf<typeof AllTagsFindRequestRt>;
 export type AllReportersFindRequest = AllTagsFindRequest;
+export type AllAssigneesFindRequest = AllTagsFindRequest;
 
 export type GetCaseIdsByAlertIdAggs = rt.TypeOf<typeof GetCaseIdsByAlertIdAggsRt>;
 export type CasesByAlertId = rt.TypeOf<typeof CasesByAlertIdRt>;

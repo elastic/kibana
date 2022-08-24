@@ -15,7 +15,6 @@ import {
 import {
   CasePatchRequest,
   CaseStatuses,
-  User,
   ActionConnector,
   CaseExternalServiceBasic,
   CaseUserActionResponse,
@@ -103,7 +102,7 @@ export interface FilterOptions {
   severity: CaseSeverityWithAll;
   status: CaseStatusWithAllStatus;
   tags: string[];
-  reporters: User[];
+  assignees: string[];
   owner: string[];
 }
 

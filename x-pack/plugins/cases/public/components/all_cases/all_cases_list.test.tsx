@@ -145,6 +145,7 @@ describe('AllCasesListGeneric', () => {
     handleIsLoading: jest.fn(),
     isLoadingCases: [],
     isSelectorView: false,
+    userProfiles: new Map(),
   };
 
   let appMockRenderer: AppMockRenderer;
