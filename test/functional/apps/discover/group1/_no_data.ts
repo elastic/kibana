@@ -11,7 +11,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
   const security = getService('security');
-  const browser = getService('browser');
   const find = getService('find');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
@@ -73,7 +72,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.error('data view created');
       await PageObjects.header.waitUntilLoadingHasFinished();
       log.error('loading finished');
-      await browser.refresh();
+      // await browser.refresh();
       await retry.waitForWithTimeout(
         'data view selector to include a newly created dataview',
         10000,
