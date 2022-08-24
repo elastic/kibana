@@ -23,8 +23,8 @@ import { SuperDatePicker } from '../../../../common/components/super_date_picker
 import { LastUpdatedAt } from '../utils';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { HeaderSection } from '../../../../common/components/header_section';
-import { CASES_MTTR_DESCRIPTION, CASES_MTTR_STAT, SOC_TRENDS } from '../translations';
-import { useSocTrends } from './use_soc_trends';
+import * as i18n from './translations';
+import { useSocTrends } from './hooks/use_soc_trends';
 
 const SOC_TRENDS_ID = 'socTrends';
 
@@ -37,7 +37,9 @@ const StyledEuiFlexGroup = styled(EuiFlexGroup)`
 
 const SocTrendsComponent: React.FC = () => {
   const { toggleStatus, setToggleStatus } = useQueryToggle(SOC_TRENDS_ID);
-  const { casesMttr, percentage, isLoading, updatedAt } = useSocTrends({
+  const {
+    casesMttr: { casesMttr, percentage, isLoading, updatedAt },
+  } = useSocTrends({
     skip: !toggleStatus,
   });
 
@@ -48,7 +50,7 @@ const SocTrendsComponent: React.FC = () => {
         showInspectButton={false}
         stackHeader={true}
         subtitle={<LastUpdatedAt updatedAt={updatedAt} isUpdating={isLoading} />}
-        title={SOC_TRENDS}
+        title={i18n.SOC_TRENDS}
         titleSize="s"
         toggleQuery={setToggleStatus}
         toggleStatus={toggleStatus}
@@ -71,10 +73,10 @@ const SocTrendsComponent: React.FC = () => {
               listItems={[
                 {
                   title: (
-                    <EuiToolTip content={CASES_MTTR_DESCRIPTION}>
+                    <EuiToolTip content={i18n.CASES_MTTR_DESCRIPTION}>
                       <EuiText>
                         <h6>
-                          {CASES_MTTR_STAT} <EuiIcon type="questionInCircle" />
+                          {i18n.CASES_MTTR_STAT} <EuiIcon type="questionInCircle" />
                         </h6>
                       </EuiText>
                     </EuiToolTip>

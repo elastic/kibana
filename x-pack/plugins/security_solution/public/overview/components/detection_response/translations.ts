@@ -248,17 +248,3 @@ export const USER_TOOLTIP = i18n.translate(
     defaultMessage: 'Maximum of 100 users. Please consult Alerts page for further information.',
   }
 );
-export const SOC_TRENDS = i18n.translate('xpack.securitySolution.detectionResponse.socTrends', {
-  defaultMessage: 'SOC Trends',
-});
-
-export const CASES_MTTR_STAT = i18n.translate('xpack.securitySolution.detectionResponse.mttr', {
-  defaultMessage: 'Avg. case response time',
-});
-
-export const CASES_MTTR_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detectionResponse.mttrDescription',
-  {
-    defaultMessage: 'The average duration (from creation to closure) for your current cases',
-  }
-);

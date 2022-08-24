@@ -6,12 +6,11 @@
  */
 
 import React from 'react';
-import { useSocTrends } from './use_soc_trends';
+import type { UseCasesMttr } from './use_cases_mttr';
+import { useCasesMttr } from './use_cases_mttr';
 import { act, renderHook } from '@testing-library/react-hooks';
-import { TestProviders } from '../../../../common/mock';
-import { useKibana as useKibanaMock } from '../../../../common/lib/kibana/__mocks__';
-import { useGlobalTime } from '../../../../common/containers/use_global_time';
-
+import { TestProviders } from '../../../../../common/mock';
+import { useKibana as useKibanaMock } from '../../../../../common/lib/kibana/__mocks__';
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
   const original = jest.requireActual('react-redux');
@@ -25,27 +24,29 @@ const dateNow = new Date('2022-04-15T12:00:00.000Z').valueOf();
 const mockDateNow = jest.fn().mockReturnValue(dateNow);
 Date.now = jest.fn(() => mockDateNow()) as unknown as DateConstructor['now'];
 
-jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../common/containers/use_global_time');
-describe('useSocTrends', () => {
+jest.mock('../../../../../common/lib/kibana');
+const props: UseCasesMttr = {
+  deleteQuery: jest.fn(),
+  from: '2020-07-07T08:20:18.966Z',
+  fromCompare: '2020-07-06T08:20:18.966Z',
+  setQuery: jest.fn(),
+  skip: false,
+  to: '2020-07-08T08:20:18.966Z',
+  toCompare: '2020-07-07T08:20:18.966Z',
+};
+
+describe('useCasesMttr', () => {
   const wrapperContainer: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
     <TestProviders>{children}</TestProviders>
   );
   const mockGetCasesMetrics = jest.fn();
-  beforeEach(() => {
-    (useGlobalTime as jest.Mock).mockReturnValue({
-      from: '2020-07-07T08:20:18.966Z',
-      deleteQuery: () => {},
-      to: '2020-07-08T08:20:18.966Z',
-      setQuery: () => {},
-    });
-  });
+
   afterEach(() => {
     jest.clearAllMocks();
   });
   it('loads initial state', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useSocTrends({ skip: false }), {
+      const { result, waitForNextUpdate } = renderHook(() => useCasesMttr(props), {
         wrapper: wrapperContainer,
       });
       await waitForNextUpdate();
@@ -66,7 +67,7 @@ describe('useSocTrends', () => {
       .mockReturnValueOnce({ mttr: 10000 })
       .mockReturnValue({ mttr: 5000 });
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useSocTrends({ skip: false }), {
+      const { result, waitForNextUpdate } = renderHook(() => useCasesMttr(props), {
         wrapper: wrapperContainer,
       });
       await waitForNextUpdate();
@@ -88,7 +89,7 @@ describe('useSocTrends', () => {
       .mockReturnValueOnce({ mttr: 5000 })
       .mockReturnValue({ mttr: 10000 });
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useSocTrends({ skip: false }), {
+      const { result, waitForNextUpdate } = renderHook(() => useCasesMttr(props), {
         wrapper: wrapperContainer,
       });
       await waitForNextUpdate();
@@ -110,7 +111,7 @@ describe('useSocTrends', () => {
       mttr: 10000,
     });
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useSocTrends({ skip: false }), {
+      const { result, waitForNextUpdate } = renderHook(() => useCasesMttr(props), {
         wrapper: wrapperContainer,
       });
       await waitForNextUpdate();
@@ -132,7 +133,7 @@ describe('useSocTrends', () => {
       .mockReturnValueOnce({ mttr: null })
       .mockReturnValue({ mttr: 10000 });
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useSocTrends({ skip: false }), {
+      const { result, waitForNextUpdate } = renderHook(() => useCasesMttr(props), {
         wrapper: wrapperContainer,
       });
       await waitForNextUpdate();
@@ -154,7 +155,7 @@ describe('useSocTrends', () => {
       .mockReturnValueOnce({ mttr: 10000 })
       .mockReturnValue({ mttr: null });
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useSocTrends({ skip: false }), {
+      const { result, waitForNextUpdate } = renderHook(() => useCasesMttr(props), {
         wrapper: wrapperContainer,
       });
       await waitForNextUpdate();
@@ -179,12 +180,10 @@ describe('useSocTrends', () => {
         mttr: null,
       });
     await act(async () => {
-      const { result, rerender, waitForNextUpdate } = renderHook(
-        () => useSocTrends({ skip: false }),
-        {
-          wrapper: wrapperContainer,
-        }
-      );
+      let ourProps = props;
+      const { result, rerender, waitForNextUpdate } = renderHook(() => useCasesMttr(ourProps), {
+        wrapper: wrapperContainer,
+      });
       await waitForNextUpdate();
       await waitForNextUpdate();
       expect(result.current).toEqual({
@@ -197,12 +196,11 @@ describe('useSocTrends', () => {
         },
         updatedAt: dateNow,
       });
-      (useGlobalTime as jest.Mock).mockReturnValue({
+      ourProps = {
+        ...props,
         from: '2020-07-08T08:20:18.966Z',
-        deleteQuery: () => {},
         to: '2020-07-09T08:20:18.966Z',
-        setQuery: () => {},
-      });
+      };
       rerender();
       await waitForNextUpdate();
       expect(result.current).toEqual({
@@ -225,12 +223,10 @@ describe('useSocTrends', () => {
         mttr: undefined,
       });
     await act(async () => {
-      const { result, rerender, waitForNextUpdate } = renderHook(
-        () => useSocTrends({ skip: false }),
-        {
-          wrapper: wrapperContainer,
-        }
-      );
+      let ourProps = props;
+      const { result, rerender, waitForNextUpdate } = renderHook(() => useCasesMttr(ourProps), {
+        wrapper: wrapperContainer,
+      });
       await waitForNextUpdate();
       await waitForNextUpdate();
       expect(result.current).toEqual({
@@ -243,12 +239,12 @@ describe('useSocTrends', () => {
         },
         updatedAt: dateNow,
       });
-      (useGlobalTime as jest.Mock).mockReturnValue({
+      ourProps = {
+        ...props,
         from: '2020-07-08T08:20:18.966Z',
-        deleteQuery: () => {},
         to: '2020-07-09T08:20:18.966Z',
-        setQuery: () => {},
-      });
+      };
+      rerender();
       rerender();
       await waitForNextUpdate();
       expect(result.current).toEqual({
