@@ -97,8 +97,8 @@ export const DocumentCountContent: FC<Props> = ({
   }
 
   const { timeRangeEarliest, timeRangeLatest } = documentCountStats;
-  if (timeRangeEarliest === undefined || timeRangeLatest === undefined)
-    return <TotalCountHeader totalCount={totalCount} />;
+  // if (timeRangeEarliest === undefined || timeRangeLatest === undefined)
+  //   return <TotalCountHeader totalCount={totalCount} />;
 
   let chartPoints: DocumentCountChartPoint[] = [];
   if (documentCountStats.buckets !== undefined) {
@@ -125,7 +125,7 @@ export const DocumentCountContent: FC<Props> = ({
     <>
       <EuiFlexGroup alignItems="center" gutterSize="xs">
         <TotalCountHeader totalCount={totalCount} approximate={approximate} loading={loading} />
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} style={{ marginLeft: 'auto' }}>
           <EuiPopover
             id="dscSamplingOptions"
             button={
@@ -152,7 +152,7 @@ export const DocumentCountContent: FC<Props> = ({
           >
             <EuiPanel style={{ maxWidth: 400 }}>
               <EuiFlexItem grow={true}>
-                <EuiCallOut size="s" color={'primary'} title={calloutInfoMessage} />
+                <EuiCallOut size="s" color="primary" title={calloutInfoMessage} />
               </EuiFlexItem>
               <EuiSpacer size="m" />
 
@@ -223,13 +223,15 @@ export const DocumentCountContent: FC<Props> = ({
           <EuiFlexItem />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <DocumentCountChart
-        chartPoints={chartPoints}
-        timeRangeEarliest={timeRangeEarliest}
-        timeRangeLatest={timeRangeLatest}
-        interval={documentCountStats.interval}
-        loading={loading}
-      />
+      {timeRangeEarliest !== undefined && timeRangeLatest !== undefined ? (
+        <DocumentCountChart
+          chartPoints={chartPoints}
+          timeRangeEarliest={timeRangeEarliest}
+          timeRangeLatest={timeRangeLatest}
+          interval={documentCountStats.interval}
+          loading={loading}
+        />
+      ) : null}
     </>
   );
 };
