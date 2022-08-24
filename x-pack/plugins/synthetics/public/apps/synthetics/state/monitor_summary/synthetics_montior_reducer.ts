@@ -29,7 +29,7 @@ export const syntheticsMonitorReducer = createReducer(initialState, (builder) =>
       state.loading = true;
     })
     .addCase(getSyntheticsMonitorAction.success, (state, action) => {
-      state.data = action.payload;
+      state.data = action.payload.attributes;
       state.loading = false;
     })
     .addCase(getSyntheticsMonitorAction.fail, (state, action) => {

@@ -84,7 +84,7 @@ export function MonitorDetailFlyout(props: {
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
                 <EuiTitle>
-                  <h2>{monitorSavedObject?.name}</h2>
+                  <h2>{monitorSavedObject?.attributes.name}</h2>
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -109,7 +109,7 @@ export function MonitorDetailFlyout(props: {
                   render: () => (
                     <MonitorEnabled
                       id={id}
-                      monitor={monitorSavedObject}
+                      monitor={monitorSavedObject.attributes}
                       reloadPage={props.onEnabledChange}
                     />
                   ),
@@ -221,13 +221,13 @@ export function MonitorDetailFlyout(props: {
             />
             <BodyInfo
               header={FREQUENCY_HEADER_TEXT}
-              content={freqeuncyStr(monitorSavedObject?.schedule)}
+              content={freqeuncyStr(monitorSavedObject?.attributes.schedule)}
             />
             <BodyInfo
               header={TAGS_HEADER_TEXT}
               content={
                 <>
-                  {monitorSavedObject.tags?.map((tag) => (
+                  {monitorSavedObject?.attributes.tags?.map((tag) => (
                     <EuiFlexItem key={`${tag}-tag`} grow={false}>
                       <EuiBadge color="hollow">{tag}</EuiBadge>
                     </EuiFlexItem>

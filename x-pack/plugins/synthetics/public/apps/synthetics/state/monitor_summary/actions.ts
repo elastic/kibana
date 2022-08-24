@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SavedObject } from '@kbn/core/types';
 import { createAction } from '@reduxjs/toolkit';
 import { Ping, SyntheticsMonitor } from '../../../../../common/runtime_types';
 import { QueryParams } from './api';
@@ -16,6 +17,6 @@ export const setMonitorSummaryLocationAction = createAction<string>(
 
 export const getMonitorStatusAction = createAsyncAction<QueryParams, Ping>('[MONITOR SUMMARY] GET');
 
-export const getSyntheticsMonitorAction = createAsyncAction<string, SyntheticsMonitor>(
+export const getSyntheticsMonitorAction = createAsyncAction<string, SavedObject<SyntheticsMonitor>>(
   'fetchSyntheticsMonitorAction'
 );
