@@ -236,9 +236,9 @@ export const ConfigSchema = schema.object({
     hostname: schema.maybe(schema.string({ hostname: true })),
     port: schema.maybe(schema.number({ min: 0, max: 65535 })),
   }),
+  accessAgreement: schema.maybe(schema.object({ message: schema.string() })),
   authc: schema.object({
     selector: schema.object({ enabled: schema.maybe(schema.boolean()) }),
-    accessAgreement: schema.maybe(schema.object({ message: schema.string() })),
     providers: schema.oneOf([schema.arrayOf(schema.string()), providersConfigSchema], {
       defaultValue: {
         basic: {
@@ -344,8 +344,6 @@ export function createConfig(
       : config.authc.providers
   ) as ProvidersConfigType;
 
-  const updatedProvidersWithAccessAgreement: Record<string, object> = {};
-
   // Remove disabled providers and sort the rest.
   const sortedProviders: Array<{
     type: keyof ProvidersConfigType;
@@ -357,32 +355,12 @@ export function createConfig(
   for (const [type, providerGroup] of Object.entries(providers)) {
     for (const [name, { enabled, order, accessAgreement }] of Object.entries(providerGroup ?? {})) {
       const hasLocalAccessAgreement: boolean = !!accessAgreement?.message;
-      const globalAccessAgreement = config.authc?.accessAgreement?.message;
-
-      const currType = {
-        ...updatedProvidersWithAccessAgreement[type],
-        [name]: {
-          ...providerGroup[name],
-        },
-      };
-
-      if (!hasLocalAccessAgreement) {
-        if (globalAccessAgreement) {
-          currType[name] = {
-            ...currType[name],
-            accessAgreement: {
-              message: globalAccessAgreement,
-            },
-          };
-        }
-      }
-
-      updatedProvidersWithAccessAgreement[type] = currType;
+      const hasGlobalAccessAgreement: boolean = !!config.accessAgreement?.message;
 
       if (!enabled) {
         delete providerGroup![name];
       } else {
-        const hasAccessAgreement: boolean = hasLocalAccessAgreement || !!globalAccessAgreement;
+        const hasAccessAgreement: boolean = hasLocalAccessAgreement || hasGlobalAccessAgreement;
 
         sortedProviders.push({
           type: type as any,
@@ -393,8 +371,6 @@ export function createConfig(
       }
     }
   }
-
-  providers = updatedProvidersWithAccessAgreement as ProvidersConfigType;
 
   sortedProviders.sort(({ order: orderA }, { order: orderB }) =>
     orderA < orderB ? -1 : orderA > orderB ? 1 : 0

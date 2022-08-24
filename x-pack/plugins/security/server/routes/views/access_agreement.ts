@@ -47,14 +47,21 @@ export function defineAccessAgreementRoutes({
       // authenticated with the help of HTTP authentication), that means we should safely check if
       // we have it and can get a corresponding configuration.
       const sessionValue = await getSession().get(request);
-      const accessAgreement =
-        (sessionValue &&
-          config.authc.providers[
-            sessionValue.provider.type as keyof ConfigType['authc']['providers']
-          ]?.[sessionValue.provider.name]?.accessAgreement?.message) ||
-        '';
 
-      return response.ok({ body: { accessAgreement } });
+      let accessAgreement: string = '';
+
+      if (sessionValue) {
+        const localAccessAgreement = config.authc.providers[sessionValue.provider.type as keyof ConfigType['authc']['providers']]?.[sessionValue.provider.name]?.accessAgreement?.message;
+        const globalAccessAgreement = config.accessAgreement?.message;
+
+        if (localAccessAgreement) {
+          accessAgreement = localAccessAgreement;
+        } else if (globalAccessAgreement) {
+          accessAgreement = globalAccessAgreement;
+        }
+      }
+
+      return response.ok({ body: {accessAgreement} });
     })
   );
 }

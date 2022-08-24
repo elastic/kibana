@@ -43,15 +43,6 @@ xpack.security.authc:
 <4> Specifies the settings for the SAML authentication provider with a `saml2` name.
 
 [float]
-[[authentication-access-agreement-settings]]
-==== Configure a default access agreement
-
-xpack.security.authc.accessAgreement.message {ess-icon}::
-This setting specifies the access agreement text in Markdown format that will be used as the default access agreement for all providers that do not 
-specify a value for `xpack.security.authc.providers.<provider-type>.<provider-name>.accessAgreement.message`.
-For more information, refer to <<xpack-security-access-agreement>>.
-
-[float]
 [[authentication-provider-settings]]
 ==== Valid settings for all authentication providers
 
@@ -164,6 +155,15 @@ Adds a message accessible at the login UI with additional help information for t
 
 xpack.security.authc.selector.enabled {ess-icon}::
 Determines if the login selector UI should be enabled. By default, this setting is set to `true` if more than one authentication provider is configured.
+
+[float]
+[[authentication-access-agreement-settings]]
+==== Configure a default access agreement
+
+xpack.security.accessAgreement.message {ess-icon}::
+This setting specifies the access agreement text in Markdown format that will be used as the default access agreement for all providers that do not
+specify a value for `xpack.security.authc.providers.<provider-type>.<provider-name>.accessAgreement.message`.
+For more information, refer to <<xpack-security-access-agreement>>.
 
 [float]
 [[security-session-and-cookie-settings]]

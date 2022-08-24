@@ -1789,39 +1789,6 @@ describe('createConfig()', () => {
     ).toThrow('[audit.appender.1.layout]: expected at least one defined value but got [undefined]');
   });
 
-  describe('Global accessAgreement', () => {
-    it('should not override local access agreement', () => {
-      const resultConfig = createConfig(
-        ConfigSchema.validate({
-          authc: {
-            accessAgreement: { message: 'foo' },
-            providers: {
-              basic: {
-                basic1: { order: 0, accessAgreement: { message: 'bar' } },
-              },
-              saml: {
-                saml1: { order: 1, realm: 'saml1', accessAgreement: { message: 'baz' } },
-                saml2: { order: 2, realm: 'saml2' },
-              },
-              oidc: {
-                oidc1: { order: 3, realm: 'oidc1' },
-                oidc2: { order: 4, realm: 'oidc2', accessAgreement: { message: 'qux' } },
-              },
-            },
-          },
-        }),
-        loggingSystemMock.create().get(),
-        { isTLSEnabled: true }
-      );
-
-      expect(resultConfig.authc.providers.basic?.basic1.accessAgreement?.message).toBe('bar');
-      expect(resultConfig.authc.providers.saml?.saml1.accessAgreement?.message).toBe('baz');
-      expect(resultConfig.authc.providers.saml?.saml2.accessAgreement?.message).toBe('foo');
-      expect(resultConfig.authc.providers.oidc?.oidc1.accessAgreement?.message).toBe('foo');
-      expect(resultConfig.authc.providers.oidc?.oidc2.accessAgreement?.message).toBe('qux');
-    });
-  });
-
   describe('#getExpirationTimeouts', () => {
     function createMockConfig(config: Record<string, any> = {}) {
       return createConfig(ConfigSchema.validate(config), loggingSystemMock.createLogger(), {

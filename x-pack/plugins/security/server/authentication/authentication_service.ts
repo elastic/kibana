@@ -343,6 +343,7 @@ export class AuthenticationService {
       license: this.license,
       session,
       isElasticCloudDeployment,
+      accessAgreement: { message: config.accessAgreement?.message }
     });
 
     return {
