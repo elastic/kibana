@@ -7,7 +7,7 @@
  */
 
 import { defer, firstValueFrom } from 'rxjs';
-import { get, omit, partition, pick } from 'lodash';
+import { get, partition } from 'lodash';
 import {
   AggsStart,
   DataViewsContract,
@@ -17,7 +17,7 @@ import {
   AggConfigs,
   IndexPatternExpressionType,
 } from '@kbn/data-plugin/common';
-import { DatatableColumn, ExecutionContext } from '@kbn/expressions-plugin/common';
+import { ExecutionContext } from '@kbn/expressions-plugin/common';
 import moment from 'moment';
 import { ESCalendarInterval, ESFixedInterval, roundDateToESInterval } from '@elastic/charts';
 import { Adapters } from '@kbn/inspector-plugin/common';
@@ -35,7 +35,6 @@ import {
 import type { ManualEventAnnotationOutput } from '../manual_event_annotation/types';
 import { QueryEventAnnotationOutput } from '../query_event_annotation/types';
 import { FetchEventAnnotationsArgs, FetchEventAnnotationsStartDependencies } from './types';
-import { annotationColumns, PointStyleProps } from '../types';
 
 interface ManualGroup {
   type: 'manual';
@@ -112,6 +111,7 @@ export const requestEventAnnotations = (
     );
 
     const allQueryAnnotationsConfigs = queryGroups.flatMap((group) => group.annotations);
+
     const esaggsResponses = await Promise.all(
       esaggsGroups.map(async ({ esaggsParams, fieldsColIdMap }) => ({
         response: await createEsaggsSingleRequest(esaggsParams),
@@ -119,102 +119,11 @@ export const requestEventAnnotations = (
       }))
     );
 
-    const datatableColumns: DatatableColumn[] = esaggsResponses
-      .flatMap(({ response, fieldsColIdMap }) => {
-        const swappedFieldsColIdMap = Object.fromEntries(
-          Object.entries(fieldsColIdMap).map(([k, v]) => [v, k])
-        );
-        return response.columns
-          .filter((col) => swappedFieldsColIdMap[col.id])
-          .map((col) => {
-            return {
-              ...col,
-              id: swappedFieldsColIdMap[col.id],
-            };
-          });
-      })
-      .reduce<DatatableColumn[]>((acc, col) => {
-        if (!acc.find((c) => c.id === col.id)) {
-          acc.push(col);
-        }
-        return acc;
-      }, [])
-      .concat(annotationColumns);
-
-    let modifiedRows = esaggsResponses
-      .flatMap(({ response, fieldsColIdMap }) =>
-        response.rows
-          .map((row) => {
-            const annotationConfig = allQueryAnnotationsConfigs.find(
-              ({ id }) => id === row['col-0-1']
-            );
-            if (!annotationConfig) {
-              throw new Error(`Could not find annotation config for id: ${row['col-0-1']}`);
-            }
-
-            let modifiedRow: TimebucketRow = {
-              id: row['col-0-1'], // todo: do we need id for the tooltip in the future?
-              timebucket: moment(row['col-1-2']).toISOString(),
-              time: row['col-3-4'],
-              type: 'point',
-              ...passStylesFromAnnotationConfig(annotationConfig),
-            };
-            const countRow = row['col-2-3'];
-            if (countRow > ANNOTATIONS_PER_BUCKET) {
-              modifiedRow = {
-                skippedCount: countRow - ANNOTATIONS_PER_BUCKET,
-                ...modifiedRow,
-              };
-            }
-
-            if (annotationConfig?.fields?.length) {
-              modifiedRow.fields = annotationConfig.fields.reduce(
-                (acc, field) => ({ ...acc, [`field:${field}`]: row[fieldsColIdMap[field]] }),
-                {}
-              );
-            }
-
-            return modifiedRow;
-          })
-          .concat(manualAnnotationDatatableRows)
-      )
-      .sort((a, b) => a.timebucket.localeCompare(b.timebucket));
-
-    console.log(modifiedRows);
-    modifiedRows = addSkippedCount(modifiedRows);
-
-    console.log('modifiedRows after: ', modifiedRows);
-
-    const flattenedRows = modifiedRows
-      .reduce<any>((acc, row) => {
-        if (!Array.isArray(row.time)) {
-          acc.push({
-            ...omit(row, ['fields']),
-            ...row.fields,
-          });
-        } else {
-          row.time.forEach((time, index, array) => {
-            const fields: Record<string, string | number | boolean> = {};
-            if (row.fields) {
-              Object.entries(row?.fields).forEach(([fieldKey, fieldValue]) => {
-                fields[fieldKey] = Array.isArray(fieldValue) ? fieldValue[index] : fieldValue;
-              });
-            }
-            acc.push({
-              ...(index === array.length - 1 && row.skippedCount
-                ? { skippedCount: row.skippedCount }
-                : null),
-              ...omit(row, ['fields', 'skippedCount']),
-              ...fields,
-              time,
-            });
-          });
-        }
-        return acc;
-      }, [])
-      .sort(sortByTime);
-
-    return wrapRowsInDatatable(flattenedRows, datatableColumns);
+    return postprocessAnnotations(
+      esaggsResponses,
+      allQueryAnnotationsConfigs,
+      manualAnnotationDatatableRows
+    );
   });
 };
 
@@ -432,52 +341,4 @@ function regroupForRequestOptimization(
       return acc;
     }, {});
   return Object.values(outputGroups);
-}
-
-type TimebucketRow = {
-  id: string;
-  timebucket: string;
-  time: string;
-  type: string;
-  skippedCount?: number;
-  fields?: Record<string, string | number | string[] | number[]>;
-} & PointStyleProps;
-
-function addSkippedCount(rows: TimebucketRow[]) {
-  let accSkippedCount = 0;
-  const output: TimebucketRow[] = [];
-
-  rows.forEach((row, index, arr) => {
-    const noSkippedCountRow = omit(row, 'skippedCount');
-    if (index === arr.length - 1 || row.timebucket !== arr[index + 1].timebucket) {
-      if (accSkippedCount + (row.skippedCount || 0) > 0) {
-        output.push({
-          skippedCount: accSkippedCount + (row.skippedCount || 0),
-          ...noSkippedCountRow,
-        });
-      } else {
-        output.push(noSkippedCountRow);
-      }
-      accSkippedCount = 0;
-    } else {
-      output.push(noSkippedCountRow);
-      accSkippedCount = accSkippedCount + (row.skippedCount || 0);
-    }
-  });
-  return output;
-}
-
-function passStylesFromAnnotationConfig(
-  annotationConfig: QueryEventAnnotationOutput
-): PointStyleProps {
-  return {
-    ...pick(annotationConfig, [
-      `label`,
-      `color`,
-      `icon`,
-      `lineWidth`,
-      `lineStyle`,
-      `textVisibility`,
-    ]),
-  };
 }

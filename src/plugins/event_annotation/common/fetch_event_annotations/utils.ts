@@ -54,8 +54,8 @@ export const isInRange = (annotation: ManualEventAnnotationOutput, timerange?: T
   return true;
 };
 
-export const sortByTime = (a: { time: string }, b: { time: string }) => {
-  return a.time.localeCompare(b.time);
+export const sortByTime = (a: DatatableRow, b: DatatableRow) => {
+  return 'time' in a && 'time' in b ? a.time.localeCompare(b.time) : 0;
 };
 
 export const wrapRowsInDatatable = (rows: DatatableRow[], columns = annotationColumns) => {
@@ -99,7 +99,7 @@ export const postprocessAnnotations = (
         .map((col) => {
           return {
             ...col,
-            id: swappedFieldsColIdMap[col.id],
+            id: `field:${swappedFieldsColIdMap[col.id]}`,
           };
         });
     })
@@ -111,7 +111,7 @@ export const postprocessAnnotations = (
     }, [])
     .concat(annotationColumns);
 
-  let modifiedRows = esaggsResponses
+  const modifiedRows = esaggsResponses
     .flatMap(({ response, fieldsColIdMap }) =>
       response.rows
         .map((row) => {
@@ -120,7 +120,7 @@ export const postprocessAnnotations = (
             throw new Error(`Could not find annotation config for id: ${row['col-0-1']}`);
           }
 
-          const modifiedRow: TimebucketRow = {
+          let modifiedRow: TimebucketRow = {
             id: row['col-0-1'], // todo: do we need id for the tooltip in the future?
             timebucket: moment(row['col-1-2']).toISOString(),
             time: row['col-3-4'],
@@ -129,7 +129,10 @@ export const postprocessAnnotations = (
           };
           const countRow = row['col-2-3'];
           if (countRow > ANNOTATIONS_PER_BUCKET) {
-            modifiedRow.skippedCount = countRow - ANNOTATIONS_PER_BUCKET;
+            modifiedRow = {
+              skippedCount: countRow - ANNOTATIONS_PER_BUCKET,
+              ...modifiedRow,
+            };
           }
 
           if (annotationConfig?.fields?.length) {
@@ -145,17 +148,17 @@ export const postprocessAnnotations = (
     )
     .sort((a, b) => a.timebucket.localeCompare(b.timebucket));
 
-  modifiedRows = addSkippedCount(modifiedRows);
+  const skippedCountPerBucket = getSkippedCountPerBucket(modifiedRows);
 
   const flattenedRows = modifiedRows
-    .reduce<any>((acc, row) => {
+    .reduce<DatatableRow[]>((acc, row) => {
       if (!Array.isArray(row.time)) {
         acc.push({
-          ...omit(row, ['fields']),
+          ...omit(row, ['fields', 'skippedCount']),
           ...row.fields,
         });
       } else {
-        row.time.forEach((time, index, array) => {
+        row.time.forEach((time, index) => {
           const fields: Record<string, string | number | boolean> = {};
           if (row.fields) {
             Object.entries(row?.fields).forEach(([fieldKey, fieldValue]) => {
@@ -163,9 +166,6 @@ export const postprocessAnnotations = (
             });
           }
           acc.push({
-            ...(index === array.length - 1 && row.skippedCount
-              ? { skippedCount: row.skippedCount }
-              : null),
             ...omit(row, ['fields', 'skippedCount']),
             ...fields,
             time,
@@ -174,10 +174,36 @@ export const postprocessAnnotations = (
       }
       return acc;
     }, [])
-    .sort(sortByTime);
+    .sort(sortByTime)
+    .reduce<DatatableRow[]>((acc, row, index, arr) => {
+      if (index === arr.length - 1 || row.timebucket !== arr[index + 1].timebucket) {
+        acc.push({ ...row, skippedCount: skippedCountPerBucket[row.timebucket] });
+        return acc;
+      }
+      acc.push(row);
+      return acc;
+    }, []);
 
   return wrapRowsInDatatable(flattenedRows, datatableColumns);
 };
+
+type TimebucketRow = {
+  id: string;
+  timebucket: string;
+  time: string;
+  type: string;
+  skippedCount?: number;
+  fields?: Record<string, string | number | string[] | number[]>;
+} & PointStyleProps;
+
+function getSkippedCountPerBucket(rows: TimebucketRow[]) {
+  return rows.reduce<Record<string, number>>((acc, current) => {
+    if (current.skippedCount) {
+      acc[current.timebucket] = (acc[current.timebucket] || 0) + current.skippedCount;
+    }
+    return acc;
+  }, {});
+}
 
 function passStylesFromAnnotationConfig(
   annotationConfig: QueryEventAnnotationOutput
@@ -192,37 +218,4 @@ function passStylesFromAnnotationConfig(
       `textVisibility`,
     ]),
   };
-}
-
-type TimebucketRow = {
-  id: string;
-  timebucket: string;
-  time: string;
-  type: string;
-  skippedCount?: number;
-  fields?: Record<string, string | number | string[] | number[]>;
-} & PointStyleProps;
-
-function addSkippedCount(rows: TimebucketRow[]) {
-  let accSkippedCount = 0;
-  const output: TimebucketRow[] = [];
-
-  rows.forEach((row, index, arr) => {
-    const noSkippedCountRow = omit(row, 'skippedCount');
-    if (index === arr.length - 1 || row.timebucket !== arr[index + 1].timebucket) {
-      if (accSkippedCount > 0) {
-        output.push({
-          skippedCount: accSkippedCount,
-          ...noSkippedCountRow,
-        });
-      } else {
-        output.push(noSkippedCountRow);
-      }
-      accSkippedCount = 0;
-    } else {
-      output.push(noSkippedCountRow);
-      accSkippedCount = accSkippedCount + Number(row.skippedCount);
-    }
-  });
-  return output;
 }
