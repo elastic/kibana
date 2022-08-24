@@ -148,7 +148,7 @@ export async function upgradeBatch(
   };
 }
 
-const MINIMUM_EXECUTION_DURATION_SECONDS = 1800; // 30m
+const MINIMUM_EXECUTION_DURATION_SECONDS = 60 * 60 * 2; // 2h
 
 const getRollingUpgradeOptions = (startTime?: string, upgradeDurationSeconds?: number) => {
   const now = new Date().toISOString();
@@ -156,7 +156,10 @@ const getRollingUpgradeOptions = (startTime?: string, upgradeDurationSeconds?: n
   if (upgradeDurationSeconds) {
     return {
       start_time: startTime ?? now,
-      minimum_execution_duration: MINIMUM_EXECUTION_DURATION_SECONDS,
+      minimum_execution_duration: Math.min(
+        MINIMUM_EXECUTION_DURATION_SECONDS,
+        upgradeDurationSeconds
+      ),
       expiration: moment(startTime ?? now)
         .add(upgradeDurationSeconds, 'seconds')
         .toISOString(),
