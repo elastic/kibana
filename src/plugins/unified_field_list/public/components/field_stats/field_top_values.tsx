@@ -44,8 +44,8 @@ export const FieldTopValues: React.FC<FieldTopValuesProps> = ({
 
   return (
     <div data-test-subj={`${testSubject}-topValues`}>
-      {buckets.map((topValue, index) => {
-        const fieldValue = topValue.key;
+      {buckets.map((bucket, index) => {
+        const fieldValue = bucket.key;
         const formatted = formatter.convert(fieldValue);
 
         return (
@@ -56,11 +56,11 @@ export const FieldTopValues: React.FC<FieldTopValuesProps> = ({
               fieldValue={fieldValue}
               formattedFieldValue={formatted}
               formattedPercentage={getFormattedPercentageValue(
-                topValue.count,
+                bucket.count,
                 sampledValuesCount,
                 digitsRequired
               )}
-              progressValue={getProgressValue(topValue.count, sampledValuesCount)}
+              progressValue={getProgressValue(bucket.count, sampledValuesCount)}
               color={color}
               testSubject={testSubject}
               onAddFilter={onAddFilter}
