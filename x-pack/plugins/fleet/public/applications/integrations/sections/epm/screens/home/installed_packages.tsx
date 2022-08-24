@@ -23,7 +23,7 @@ import type { CategoryFacet } from './category_facets';
 import { CategoryFacets } from './category_facets';
 
 import type { CategoryParams } from '.';
-import { getParams, categoryExists, mapToCard } from '.';
+import { getParams, categoryExists, mapToCard, UPDATES_AVAILABLE } from '.';
 import { INSTALLED_CATEGORY } from './category_facets';
 
 const AnnouncementLink = () => {
@@ -142,7 +142,7 @@ export const InstalledPackages: React.FC<{
         count: installedPackages.length,
       },
       {
-        id: 'updates_available',
+        id: UPDATES_AVAILABLE,
         count: updatablePackages.length,
         title: i18n.translate('xpack.fleet.epmList.updatesAvailableFilterLinkText', {
           defaultMessage: 'Updates available',
