@@ -14,7 +14,7 @@ import type {
 } from '../objects/case';
 import { ALL_CASES_OPEN_CASES_COUNT, ALL_CASES_OPEN_FILTER } from '../screens/all_cases';
 
-import { TIMELINE_SEARCH_BOX } from '../screens/common/controllers';
+import { TIMELINE_SEARCH_BOX } from '../screens/common/controls';
 import {
   BACK_TO_CASES_BTN,
   DESCRIPTION_INPUT,

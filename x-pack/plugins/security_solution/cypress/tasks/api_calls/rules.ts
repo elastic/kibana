@@ -110,7 +110,11 @@ export const createThresholdRule = (rule: ThresholdRule, ruleId = 'rule_testing'
         type: 'threshold',
         index: rule.dataSource.index,
         query: rule.customQuery,
-        threshold: { field: [rule.thresholdField], value: rule.threshold, cardinality: [] },
+        threshold: {
+          field: [rule.thresholdField],
+          value: parseInt(rule.threshold, 10),
+          cardinality: [],
+        },
         enabled: true,
         tags: rule.tags,
       },

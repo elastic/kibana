@@ -26,7 +26,7 @@ import {
 
 import { TIMELINE_TEMPLATE_DETAILS } from '../../screens/rule_details';
 
-import { EUI_FILTER_SELECT_ITEM } from '../../screens/common/controllers';
+import { EUI_FILTER_SELECT_ITEM } from '../../screens/common/controls';
 
 import {
   changeRowsPerPageTo,

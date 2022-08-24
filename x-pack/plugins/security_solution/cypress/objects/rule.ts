@@ -64,7 +64,7 @@ export interface CustomRule {
 
 export interface ThresholdRule extends CustomRule {
   thresholdField: string;
-  threshold: number;
+  threshold: string;
 }
 
 export interface OverrideRule extends CustomRule {
@@ -343,7 +343,7 @@ export const getNewThresholdRule = (): ThresholdRule => ({
   mitre: [getMitre1(), getMitre2()],
   note: '# test markdown',
   thresholdField: 'host.name',
-  threshold: 1,
+  threshold: '1',
   runsEvery: getRunsEvery(),
   lookBack: getLookBack(),
   timeline: getTimeline(),

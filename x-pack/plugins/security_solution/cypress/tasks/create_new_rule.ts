@@ -104,7 +104,7 @@ import { TOAST_ERROR } from '../screens/shared';
 import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
 import { TIMELINE } from '../screens/timelines';
 import { refreshPage } from './security_header';
-import { EUI_FILTER_SELECT_ITEM } from '../screens/common/controllers';
+import { EUI_FILTER_SELECT_ITEM } from '../screens/common/controls';
 
 export const createAndEnableRule = () => {
   cy.get(SCHEDULE_CONTINUE_BUTTON).click({ force: true });

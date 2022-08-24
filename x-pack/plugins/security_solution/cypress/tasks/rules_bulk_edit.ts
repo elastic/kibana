@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TIMELINE_SEARCH_BOX, EUI_FILTER_SELECT_ITEM } from '../screens/common/controllers';
+import { TIMELINE_SEARCH_BOX, EUI_FILTER_SELECT_ITEM } from '../screens/common/controls';
 
 import {
   BULK_ACTIONS_BTN,
