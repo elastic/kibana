@@ -25,10 +25,6 @@ export default function (providerContext: FtrProviderContext) {
       .send({ force: true });
   };
 
-  const uninstallPackage = async (pkg: string, version: string) => {
-    await supertest.delete(`/api/fleet/epm/packages/${pkg}/${version}`).set('kbn-xsrf', 'xxxx');
-  };
-
   const getPackageInfo = async (pkg: string, version: string) => {
     return await supertest.get(`/api/fleet/epm/packages/${pkg}/${version}`).set('kbn-xsrf', 'xxxx');
   };
@@ -41,7 +37,6 @@ export default function (providerContext: FtrProviderContext) {
     });
     afterEach(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      await uninstallPackage(pkgName, goodPackageVersion);
     });
 
     it('on a fresh install, it should uninstall a broken package during rollback', async function () {

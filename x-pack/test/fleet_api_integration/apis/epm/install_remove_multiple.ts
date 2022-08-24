@@ -76,7 +76,6 @@ export default function (providerContext: FtrProviderContext) {
       await uninstallPackages([
         { name: pkgName, version: pkgVersion },
         { name: experimentalPkgName, version: pkgVersion },
-        { name: experimental2PkgName, version: pkgVersion },
       ]);
     });
     it('should create index patterns (without fields)', async () => {

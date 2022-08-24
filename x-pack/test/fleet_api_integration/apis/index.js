@@ -13,11 +13,11 @@ export default function ({ loadTestFile, getService }) {
       await setupTestUsers(getService('security'));
     });
 
-    // Fleet setup
-    loadTestFile(require.resolve('./fleet_setup'));
-
     // EPM
     loadTestFile(require.resolve('./epm'));
+
+    // Fleet setup
+    loadTestFile(require.resolve('./fleet_setup'));
 
     // Agents
     loadTestFile(require.resolve('./agents'));

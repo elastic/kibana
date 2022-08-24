@@ -12,7 +12,6 @@ export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const dockerServers = getService('dockerServers');
-  const kibanaServer = getService('kibanaServer');
 
   const getPackagePolicyById = async (id: string) => {
     const { body } = await supertest.get(`/api/fleet/package_policies/${id}`);
@@ -31,7 +30,7 @@ export default function (providerContext: FtrProviderContext) {
     let packagePolicyId: string;
     let packagePolicyId2: string;
     before(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
+      await getService('esArchiver').load('x-pack/test/functional/es_archives/empty_kibana');
       await getService('esArchiver').load(
         'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
       );
@@ -122,7 +121,7 @@ export default function (providerContext: FtrProviderContext) {
       await getService('esArchiver').unload(
         'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
       );
-      await kibanaServer.savedObjects.cleanStandardList();
+      await getService('esArchiver').unload('x-pack/test/functional/es_archives/empty_kibana');
     });
 
     it('should work with valid values on "regular" policies', async function () {
