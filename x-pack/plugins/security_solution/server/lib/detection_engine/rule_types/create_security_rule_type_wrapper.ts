@@ -43,8 +43,15 @@ import { buildTimestampRuntimeMapping } from './utils/build_timestamp_runtime_ma
 
 /* eslint-disable complexity */
 export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
-  ({ lists, logger, config, ruleDataClient, ruleExecutionLoggerFactory, version,     osqueryCreateAction,
-   }) =>
+  ({
+    lists,
+    logger,
+    config,
+    ruleDataClient,
+    ruleExecutionLoggerFactory,
+    version,
+    osqueryCreateAction,
+  }) =>
   (type) => {
     const { alertIgnoreFields: ignoreFields, alertMergeStrategy: mergeStrategy } = config;
     const persistenceRuleType = createPersistenceRuleTypeWrapper({ ruleDataClient, logger });
