@@ -19,6 +19,7 @@ describe('getDownloadHeadersForFile', () => {
     return {
       'content-type': contentType,
       'content-disposition': `attachment; filename="${contentDisposition}"`,
+      'cache-control': 'max-age=31536000, immutable',
     };
   }
 
