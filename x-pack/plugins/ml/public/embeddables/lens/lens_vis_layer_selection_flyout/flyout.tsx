@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useState, useEffect } from 'react';
 import type { Embeddable } from '@kbn/lens-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -23,15 +23,26 @@ import {
 
 import { Layer } from './layer';
 import type { LayerResult } from '../../../application/jobs/new_job/job_from_lens';
+import { VisualizationExtractor } from '../../../application/jobs/new_job/job_from_lens';
+import { useMlFromLensKibanaContext } from '../context';
 
 interface Props {
-  layerResults: LayerResult[];
   embeddable: Embeddable;
   onClose: () => void;
 }
 
-export const LensLayerSelectionFlyout: FC<Props> = ({ onClose, layerResults, embeddable }) => {
+export const LensLayerSelectionFlyout: FC<Props> = ({ onClose, embeddable }) => {
   const { euiTheme } = useEuiTheme();
+  const {
+    services: { data, lens },
+  } = useMlFromLensKibanaContext();
+
+  const [layerResults, setLayerResults] = useState<LayerResult[]>([]);
+
+  useEffect(() => {
+    const visExtractor = new VisualizationExtractor(data.dataViews);
+    visExtractor.getResultLayersFromEmbeddable(embeddable, lens).then(setLayerResults);
+  }, [data, lens, embeddable]);
 
   return (
     <>

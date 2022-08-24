@@ -23,8 +23,6 @@ import {
 import { getMlGlobalServices } from '../../application/app';
 import { LensLayerSelectionFlyout } from './lens_vis_layer_selection_flyout';
 
-import { VisualizationExtractor } from '../../application/jobs/new_job/job_from_lens';
-
 export async function showLensVisToADJobFlyout(
   embeddable: Embeddable,
   coreStart: CoreStart,
@@ -41,9 +39,6 @@ export async function showLensVisToADJobFlyout(
 
   return new Promise(async (resolve, reject) => {
     try {
-      const visExtractor = new VisualizationExtractor(data.dataViews);
-      const layerResults = await visExtractor.getResultLayersFromEmbeddable(embeddable, lens);
-
       const onFlyoutClose = () => {
         flyoutSession.close();
         resolve();
@@ -57,6 +52,7 @@ export async function showLensVisToADJobFlyout(
                 ...coreStart,
                 share,
                 data,
+                lens,
                 mlServices: getMlGlobalServices(http),
               }}
             >
@@ -66,7 +62,6 @@ export async function showLensVisToADJobFlyout(
                   onFlyoutClose();
                   resolve();
                 }}
-                layerResults={layerResults}
               />
             </KibanaContextProvider>,
             theme$
