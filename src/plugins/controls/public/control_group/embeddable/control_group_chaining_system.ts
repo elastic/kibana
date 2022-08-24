@@ -109,7 +109,7 @@ export const ControlGroupChainingSystems: {
 
       // when output changes on a child which isn't the last
       let nextOrder = childOrder.IdsToOrder[childOutputChangedId] + 1;
-      while(nextOrder < childOrder.idsInOrder.length) {
+      while (nextOrder < childOrder.idsInOrder.length) {
         const nextControl = getChild(childOrder.idsInOrder[nextOrder]);
 
         // make the next chained embeddable updateInputFromParent
