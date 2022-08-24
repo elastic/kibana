@@ -70,7 +70,8 @@ export async function redirectToADJobWizards(
 }
 
 export function getJobsItemsFromEmbeddable(embeddable: Embeddable) {
-  const { query, filters, timeRange } = embeddable.getInput();
+  const { filters, timeRange, ...input } = embeddable.getInput();
+  const query = input.query === undefined ? { query: '', language: 'kuery' } : input.query;
 
   if (timeRange === undefined) {
     throw Error(
