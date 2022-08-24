@@ -5,11 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import type { DataViewAttributes } from '@kbn/data-views-plugin/public';
 import type { SavedObject } from '@kbn/data-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { useActor } from '@xstate/react';
+import { SEARCH_ON_PAGE_LOAD_SETTING } from '../../../common';
 import { LogExplorerLayout } from './components/layout/log_explorer_layout';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { DataTableRecord } from '../../types';
@@ -54,13 +55,24 @@ export function LogExplorerMainApp({ savedSearch, dataViewList }: LogExplorerMai
 const LogExplorerLayoutWrapper = ({ dataViewList, savedSearch }: LogExplorerLayoutProps) => {
   const stateMachine = useStateMachineContext();
   const [dataAccessState] = useActor(stateMachine);
+  const { uiSettings: config } = useDiscoverServices();
 
-  const loadData = useCallback(() => {
+  const initialize = useCallback(() => {
     stateMachine.send('initialize');
   }, [stateMachine]);
 
+  useEffect(() => {
+    // NOTE: Discover uses some additional criteria we might want to consider:
+    // https://github.com/elastic/kibana/blob/main/src/plugins/discover/public/application/main/hooks/use_discover_state.ts#L96
+    const shouldSearchOnPageLoad =
+      config.get<boolean>(SEARCH_ON_PAGE_LOAD_SETTING) || savedSearch.id !== undefined; // NOTE: SOPL setting has no effect when there's a saved search
+    if (shouldSearchOnPageLoad) {
+      initialize();
+    }
+  }, [config, initialize, savedSearch.id]);
+
   return dataAccessState.matches('uninitialized') ? (
-    <DiscoverUninitialized onRefresh={loadData} />
+    <DiscoverUninitialized onRefresh={initialize} />
   ) : (
     <LogExplorerLayoutMemoized dataViewList={dataViewList} savedSearch={savedSearch} />
   );

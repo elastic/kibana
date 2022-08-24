@@ -199,15 +199,6 @@ export const useStateMachineService = ({
     }
   );
 
-  const initialize = useCallback(() => {
-    dataAccessService.send({
-      type: 'initialize',
-    });
-  }, [dataAccessService]);
-
-  // TODO: Properly hook this up to the uninitialized state (based on the advanced setting)
-  initialize();
-
   return dataAccessService;
 };
 
