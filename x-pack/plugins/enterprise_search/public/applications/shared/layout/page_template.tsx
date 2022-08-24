@@ -13,7 +13,7 @@ import { useValues } from 'kea';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { KibanaPageTemplate, KibanaPageTemplateProps } from '@kbn/kibana-react-plugin/public';
+import { KibanaPageTemplate, KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 
 import { FlashMessages } from '../flash_messages';
 import { HttpLogic } from '../http';
