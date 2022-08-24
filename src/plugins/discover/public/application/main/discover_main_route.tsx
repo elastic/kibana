@@ -88,7 +88,11 @@ export function DiscoverMainRoute(props: Props) {
   const loadDefaultOrCurrentDataView = useCallback(
     async (searchSource: ISearchSource) => {
       try {
+        // eslint-disable-next-line no-console
+        console.log('loadDefaultOrCurrentDataView');
         const hasView = await hasDataView();
+        // eslint-disable-next-line no-console
+        console.log('loadDefaultOrCurrentDataView - hasView', hasView);
 
         if (!hasView) {
           return;
@@ -113,6 +117,8 @@ export function DiscoverMainRoute(props: Props) {
 
   const loadSavedSearch = useCallback(async () => {
     try {
+      // eslint-disable-next-line no-console
+      console.log('loadSavedSearch');
       const currentSavedSearch = await getSavedSearch(id, {
         search: services.data.search,
         savedObjectsClient: core.savedObjects.client,
@@ -120,6 +126,8 @@ export function DiscoverMainRoute(props: Props) {
       });
 
       const currentDataView = await loadDefaultOrCurrentDataView(currentSavedSearch.searchSource);
+      // eslint-disable-next-line no-console
+      console.log('loadSavedSearch - currentDataView', currentDataView);
 
       if (!currentDataView) {
         return;
@@ -183,6 +191,8 @@ export function DiscoverMainRoute(props: Props) {
 
   const onDataViewCreated = useCallback(
     async (nextDataView: unknown) => {
+      // eslint-disable-next-line no-console
+      console.log('onDataViewCreated', nextDataView);
       if (nextDataView) {
         setError(undefined);
         await loadSavedSearch();
@@ -218,6 +228,8 @@ export function DiscoverMainRoute(props: Props) {
   };
 
   const Discover = () => {
+    // eslint-disable-next-line no-console
+    console.log('render Discover');
     if (error) {
       return <DiscoverError error={error} />;
     }
