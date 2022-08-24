@@ -255,6 +255,14 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   useEffect(() => {
     dispatch(tGridActions.updateIsLoading({ id, isLoading: loading }));
   }, [dispatch, id, loading]);
+
+  const isFirstUpdate = useRef(true);
+  useEffect(() => {
+    if (isFirstUpdate.current && !loading) {
+      isFirstUpdate.current = false;
+    }
+  }, [loading]);
+
   const totalCountMinusDeleted = useMemo(
     () => (totalCount > 0 ? totalCount - deletedEventIds.length : 0),
     [deletedEventIds.length, totalCount]
@@ -268,13 +276,6 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   );
 
   const alignItems = tableView === 'gridView' ? 'baseline' : 'center';
-
-  const isFirstUpdate = useRef(true);
-  useEffect(() => {
-    if (isFirstUpdate.current && !loading) {
-      isFirstUpdate.current = false;
-    }
-  }, [loading]);
 
   useEffect(() => {
     setQuery(inspect, loading, refetch);
@@ -301,6 +302,10 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
         data-test-subj="events-viewer-panel"
         $isFullScreen={globalFullScreen}
       >
+        {/* Only show the table-spanning loading indicator for the initial fetch of the data.
+            Subsequent fetches (e.g. for pagination) will show a small loading indicator on
+            top of the table and the tabke will display the current page until the next page
+            is fetched. This prevents a flicker when paginating. */}
         {isFirstUpdate.current && <TGridLoading height="short" />}
 
         {graphOverlay}
