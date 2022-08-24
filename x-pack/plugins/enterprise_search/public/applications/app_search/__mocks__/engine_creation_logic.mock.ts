@@ -7,6 +7,8 @@
 
 import dedent from 'dedent';
 
+import { ElasticsearchIndexWithPrivileges } from '../../../../common/types/indices';
+
 import { EngineCreationSteps } from '../components/engine_creation/engine_creation_logic';
 import { SearchIndexSelectableOption } from '../components/engine_creation/search_index_selectable';
 
@@ -32,9 +34,11 @@ export const DEFAULT_VALUES = {
   selectedIndexFormatted: undefined,
 };
 
-export const mockElasticsearchIndices = [
+export const mockElasticsearchIndices: ElasticsearchIndexWithPrivileges[] = [
   {
+    count: 0,
     health: 'yellow',
+    hidden: false,
     status: 'open',
     name: 'search-my-index-1',
     uuid: 'ydlR_QQJTeyZP66tzQSmMQ',
@@ -51,7 +55,9 @@ export const mockElasticsearchIndices = [
     },
   },
   {
+    count: 100,
     health: 'green',
+    hidden: false,
     status: 'open',
     name: 'my-index-2',
     uuid: '4dlR_QQJTe2ZP6qtzQSmMQ',
@@ -68,7 +74,9 @@ export const mockElasticsearchIndices = [
     },
   },
   {
+    count: 100,
     health: 'green',
+    hidden: false,
     status: 'open',
     name: 'search-my-index-2',
     uuid: '4dlR_QQJTe2ZP6qtzQSmMQ',
@@ -85,7 +93,9 @@ export const mockElasticsearchIndices = [
     },
   },
   {
+    count: 100,
     health: 'green',
+    hidden: false,
     status: 'open',
     name: 'alias-my-index-2',
     uuid: '4dlR_QQJTe2ZP6qtzQSmMQ',
@@ -102,7 +112,9 @@ export const mockElasticsearchIndices = [
     },
   },
   {
+    count: 100,
     health: 'green',
+    hidden: false,
     status: 'open',
     name: 'index-without-read-privilege',
     uuid: '4dlR_QQJTe2ZP6qtzQSmMQ',
@@ -119,7 +131,9 @@ export const mockElasticsearchIndices = [
     },
   },
   {
+    count: 100,
     health: 'green',
+    hidden: false,
     status: 'open',
     name: 'index-without-manage-privilege',
     uuid: '4dlR_QQJTe2ZP6qtzQSmMQ',
@@ -136,7 +150,9 @@ export const mockElasticsearchIndices = [
     },
   },
   {
+    count: 100,
     health: 'green',
+    hidden: false,
     status: 'open',
     name: 'alias-without-manage-privilege',
     uuid: '4dlR_QQJTe2ZP6qtzQSmMQ',
@@ -156,6 +172,7 @@ export const mockElasticsearchIndices = [
 
 export const mockSearchIndexOptions: SearchIndexSelectableOption[] = [
   {
+    count: 0,
     label: 'search-my-index-1',
     health: 'yellow',
     status: 'open',
@@ -181,6 +198,7 @@ export const mockSearchIndexOptions: SearchIndexSelectableOption[] = [
     },
   },
   {
+    count: 100,
     label: 'my-index-2',
     health: 'green',
     status: 'open',
@@ -207,6 +225,7 @@ export const mockSearchIndexOptions: SearchIndexSelectableOption[] = [
     },
   },
   {
+    count: 100,
     label: 'search-my-index-2',
     health: 'green',
     status: 'open',
@@ -229,6 +248,7 @@ export const mockSearchIndexOptions: SearchIndexSelectableOption[] = [
     },
   },
   {
+    count: 100,
     label: 'alias-my-index-2',
     health: 'green',
     status: 'open',

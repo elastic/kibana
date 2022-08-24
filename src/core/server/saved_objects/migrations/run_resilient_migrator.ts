@@ -10,15 +10,17 @@ import type { Logger } from '@kbn/logging';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
-import { IndexMapping } from '../mappings';
+import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
+import type {
+  IndexMapping,
+  SavedObjectsMigrationConfigType,
+} from '@kbn/core-saved-objects-base-server-internal';
 import type { TransformRawDocs } from './types';
 import { MigrationResult } from './core';
 import { next } from './next';
 import { model } from './model';
 import { createInitialState } from './initial_state';
 import { migrationStateActionMachine } from './migrations_state_action_machine';
-import { SavedObjectsMigrationConfigType } from '../saved_objects_config';
-import type { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
 
 /**
  * To avoid the Elasticsearch-js client aborting our requests before we

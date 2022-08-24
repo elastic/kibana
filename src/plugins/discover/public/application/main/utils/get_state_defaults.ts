@@ -10,16 +10,16 @@ import { cloneDeep, isEqual } from 'lodash';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { getDefaultSort, getSortArray } from '../../../utils/sorting';
 import {
   DEFAULT_COLUMNS_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../../../common';
-import { SavedSearch } from '../../../services/saved_searches';
 
 import { AppState } from '../services/discover_state';
-import { getDefaultSort, getSortArray } from '../../../components/doc_table';
 import { CHART_HIDDEN_KEY } from '../components/chart/discover_chart';
 
 function getDefaultColumns(savedSearch: SavedSearch, config: IUiSettingsClient) {
@@ -44,10 +44,10 @@ export function getStateDefaults({
   storage: Storage;
 }) {
   const { searchSource } = savedSearch;
-  const indexPattern = searchSource.getField('index');
+  const dataView = searchSource.getField('index');
 
   const query = searchSource.getField('query') || data.query.queryString.getDefaultQuery();
-  const sort = getSortArray(savedSearch.sort ?? [], indexPattern!);
+  const sort = getSortArray(savedSearch.sort ?? [], dataView!);
   const columns = getDefaultColumns(savedSearch, config);
   const chartHidden = storage.get(CHART_HIDDEN_KEY);
 
@@ -55,13 +55,13 @@ export function getStateDefaults({
     query,
     sort: !sort.length
       ? getDefaultSort(
-          indexPattern,
+          dataView,
           config.get(SORT_DEFAULT_ORDER_SETTING, 'desc'),
           config.get(DOC_HIDE_TIME_COLUMN_SETTING, false)
         )
       : sort,
     columns,
-    index: indexPattern?.id,
+    index: dataView?.id,
     interval: 'auto',
     filters: cloneDeep(searchSource.getOwnField('filter')) as AppState['filters'],
     hideChart: typeof chartHidden === 'boolean' ? chartHidden : undefined,
@@ -70,6 +70,7 @@ export function getStateDefaults({
     savedQuery: undefined,
     rowHeight: undefined,
     rowsPerPage: undefined,
+    grid: undefined,
   };
   if (savedSearch.grid) {
     defaultState.grid = savedSearch.grid;

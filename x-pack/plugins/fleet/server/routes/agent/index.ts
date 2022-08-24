@@ -40,6 +40,7 @@ import {
   postBulkAgentsReassignHandler,
   getAgentDataHandler,
   bulkUpdateAgentTagsHandler,
+  getAvailableVersionsHandler,
 } from './handlers';
 import {
   postNewAgentActionHandlerBuilder,
@@ -262,5 +263,17 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       },
     },
     postBulkAgentsUnenrollHandler
+  );
+
+  // Available versions for upgrades
+  router.get(
+    {
+      path: AGENT_API_ROUTES.AVAILABLE_VERSIONS_PATTERN,
+      validate: false,
+      fleetAuthz: {
+        fleet: { all: true },
+      },
+    },
+    getAvailableVersionsHandler
   );
 };

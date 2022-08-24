@@ -43,6 +43,7 @@ export const AgentPolicyGeneralFields: React.FunctionComponent<Props> = ({
       isInvalid={Boolean(touchedFields.name && validation.name)}
     >
       <EuiFieldText
+        data-test-subj="createAgentPolicyNameField"
         disabled={agentPolicy.is_managed === true}
         fullWidth
         value={agentPolicy.name}

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+/**
+ * Enum of indicator fields supported by the Threat Intelligence plugin.
+ */
 export enum RawIndicatorFieldId {
   Type = 'threat.indicator.type',
   FirstSeen = 'threat.indicator.first_seen',
@@ -18,21 +21,34 @@ export enum RawIndicatorFieldId {
   UrlDomain = 'threat.indicator.url.domain',
   FileMd5 = 'threat.indicator.file.hash.md5',
   FileSha256 = 'threat.indicator.file.hash.sha256',
+  TimeStamp = '@timestamp',
 }
 
+/**
+ * Threat Intelligence Indicator interface.
+ */
 export interface Indicator {
+  _id?: unknown;
   fields: Partial<Record<RawIndicatorFieldId, unknown[]>>;
 }
 
+/**
+ * Used to create new Indicators, used mainly in jest unit tests and Storybook stories.
+ */
 export const generateMockIndicator = (): Indicator => ({
   fields: {
+    '@timestamp': ['2022-01-01T01:01:01.000Z'],
     'threat.indicator.type': ['ipv4-addr'],
     'threat.indicator.ip': ['12.68.554.87'],
     'threat.indicator.first_seen': ['2022-01-01T01:01:01.000Z'],
-    'threat.feed.name': ['Abuse_CH'],
+    'threat.feed.name': ['[Filebeat] AbuseCH Malware'],
   },
+  _id: Math.random(),
 });
 
+/**
+ * Used to create new url-type Indicators, used mainly in jest unit tests and Storybook stories.
+ */
 export const generateMockUrlIndicator = (): Indicator => {
   const indicator = generateMockIndicator();
 
@@ -42,6 +58,9 @@ export const generateMockUrlIndicator = (): Indicator => {
   return indicator;
 };
 
+/**
+ * Used to create new file-type Indicators, used mainly in jest unit tests and Storybook stories.
+ */
 export const generateMockFileIndicator = (): Indicator => {
   const indicator = generateMockIndicator();
 

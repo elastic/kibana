@@ -15,7 +15,6 @@ import type {
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
 import { parseDuration } from '@kbn/alerting-plugin/common';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { ExecutorType } from '@kbn/alerting-plugin/server/types';
 import type { Alert } from '@kbn/alerting-plugin/server';
 import type { StartPlugins, SetupPlugins } from '../../../../plugin';
@@ -186,6 +185,7 @@ export const previewRulesRoute = async (
               | 'getContext'
               | 'hasContext'
             >;
+            hasReachedAlertLimit: () => boolean;
             done: () => { getRecoveredAlerts: () => [] };
           }
         ) => {
@@ -285,7 +285,11 @@ export const previewRulesRoute = async (
               queryAlertType.name,
               previewRuleParams,
               () => true,
-              { create: alertInstanceFactoryStub, done: () => ({ getRecoveredAlerts: () => [] }) }
+              {
+                create: alertInstanceFactoryStub,
+                hasReachedAlertLimit: () => false,
+                done: () => ({ getRecoveredAlerts: () => [] }),
+              }
             );
             break;
           case 'saved_query':
@@ -298,7 +302,11 @@ export const previewRulesRoute = async (
               savedQueryAlertType.name,
               previewRuleParams,
               () => true,
-              { create: alertInstanceFactoryStub, done: () => ({ getRecoveredAlerts: () => [] }) }
+              {
+                create: alertInstanceFactoryStub,
+                hasReachedAlertLimit: () => false,
+                done: () => ({ getRecoveredAlerts: () => [] }),
+              }
             );
             break;
           case 'threshold':
@@ -311,7 +319,11 @@ export const previewRulesRoute = async (
               thresholdAlertType.name,
               previewRuleParams,
               () => true,
-              { create: alertInstanceFactoryStub, done: () => ({ getRecoveredAlerts: () => [] }) }
+              {
+                create: alertInstanceFactoryStub,
+                hasReachedAlertLimit: () => false,
+                done: () => ({ getRecoveredAlerts: () => [] }),
+              }
             );
             break;
           case 'threat_match':
@@ -324,7 +336,11 @@ export const previewRulesRoute = async (
               threatMatchAlertType.name,
               previewRuleParams,
               () => true,
-              { create: alertInstanceFactoryStub, done: () => ({ getRecoveredAlerts: () => [] }) }
+              {
+                create: alertInstanceFactoryStub,
+                hasReachedAlertLimit: () => false,
+                done: () => ({ getRecoveredAlerts: () => [] }),
+              }
             );
             break;
           case 'eql':
@@ -335,7 +351,11 @@ export const previewRulesRoute = async (
               eqlAlertType.name,
               previewRuleParams,
               () => true,
-              { create: alertInstanceFactoryStub, done: () => ({ getRecoveredAlerts: () => [] }) }
+              {
+                create: alertInstanceFactoryStub,
+                hasReachedAlertLimit: () => false,
+                done: () => ({ getRecoveredAlerts: () => [] }),
+              }
             );
             break;
           case 'machine_learning':
@@ -346,7 +366,11 @@ export const previewRulesRoute = async (
               mlAlertType.name,
               previewRuleParams,
               () => true,
-              { create: alertInstanceFactoryStub, done: () => ({ getRecoveredAlerts: () => [] }) }
+              {
+                create: alertInstanceFactoryStub,
+                hasReachedAlertLimit: () => false,
+                done: () => ({ getRecoveredAlerts: () => [] }),
+              }
             );
             break;
           case 'new_terms':
@@ -357,7 +381,11 @@ export const previewRulesRoute = async (
               newTermsAlertType.name,
               previewRuleParams,
               () => true,
-              { create: alertInstanceFactoryStub, done: () => ({ getRecoveredAlerts: () => [] }) }
+              {
+                create: alertInstanceFactoryStub,
+                hasReachedAlertLimit: () => false,
+                done: () => ({ getRecoveredAlerts: () => [] }),
+              }
             );
             break;
           default:

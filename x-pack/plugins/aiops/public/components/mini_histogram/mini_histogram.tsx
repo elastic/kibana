@@ -6,18 +6,32 @@
  */
 
 import React, { FC } from 'react';
+import { css } from '@emotion/react';
 
 import { Chart, BarSeries, PartialTheme, ScaleType, Settings } from '@elastic/charts';
+import { EuiLoadingChart, EuiTextColor } from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { ChangePointHistogramItem } from '@kbn/ml-agg-utils';
 
+import { useAiOpsKibana } from '../../kibana_context';
+import { useEuiTheme } from '../../hooks/use_eui_theme';
+
 interface MiniHistogramProps {
-  chartData: ChangePointHistogramItem[];
+  chartData?: ChangePointHistogramItem[];
+  isLoading: boolean;
   label: string;
 }
 
-export const MiniHistogram: FC<MiniHistogramProps> = ({ chartData, label }) => {
-  const theme: PartialTheme = {
+export const MiniHistogram: FC<MiniHistogramProps> = ({ chartData, isLoading, label }) => {
+  const {
+    services: { charts },
+  } = useAiOpsKibana();
+
+  const euiTheme = useEuiTheme();
+  const defaultChartTheme = charts.theme.useChartsTheme();
+
+  const miniHistogramChartTheme: PartialTheme = {
     chartMargins: {
       left: 0,
       right: 0,
@@ -33,18 +47,49 @@ export const MiniHistogram: FC<MiniHistogramProps> = ({ chartData, label }) => {
     scales: {
       barsPadding: 0.1,
     },
+    background: {
+      color: 'transparent',
+    },
   };
 
+  const cssChartSize = css({
+    width: '80px',
+    height: euiTheme.euiSizeL,
+    margin: '0px',
+  });
+
+  const cssCenter = css({
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  });
+
+  if (isLoading) {
+    return (
+      <div css={[cssChartSize, cssCenter]}>
+        <EuiLoadingChart mono />
+      </div>
+    );
+  }
+
+  if (!chartData) {
+    return (
+      <div css={[cssChartSize, cssCenter]}>
+        <EuiTextColor color="subdued">
+          <FormattedMessage id="xpack.aiops.miniHistogram.noDataLabel" defaultMessage="N/A" />
+        </EuiTextColor>
+      </div>
+    );
+  }
+
   return (
-    <div
-      style={{
-        width: '80px',
-        height: '24px',
-        margin: '0px',
-      }}
-    >
+    <div css={cssChartSize}>
       <Chart>
-        <Settings theme={theme} showLegend={false} />
+        <Settings
+          theme={[miniHistogramChartTheme, defaultChartTheme]}
+          showLegend={false}
+          tooltip="none"
+        />
         <BarSeries
           id="doc_count_overall"
           xScaleType={ScaleType.Time}

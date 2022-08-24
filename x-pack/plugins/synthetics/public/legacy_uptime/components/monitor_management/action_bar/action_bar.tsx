@@ -144,7 +144,6 @@ export const ActionBar = ({
                 {/* Popover is used instead of EuiTooltip until the resolution of https://github.com/elastic/eui/issues/5604 */}
                 <EuiPopover
                   repositionOnScroll={true}
-                  initialFocus={false}
                   button={
                     <EuiButton
                       css={{ width: '100%' }}

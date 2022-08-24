@@ -114,9 +114,8 @@ const mockNewAPI = () =>
       data: {
         capabilities: {
           'list-project-issuetypes':
-            'https://siem-kibana.atlassian.net/rest/capabilities/list-project-issuetypes',
-          'list-issuetype-fields':
-            'https://siem-kibana.atlassian.net/rest/capabilities/list-issuetype-fields',
+            'https://coolsite.net/rest/capabilities/list-project-issuetypes',
+          'list-issuetype-fields': 'https://coolsite.net/rest/capabilities/list-issuetype-fields',
         },
       },
     })
@@ -127,7 +126,7 @@ const mockOldAPI = () =>
     createAxiosResponse({
       data: {
         capabilities: {
-          navigation: 'https://siem-kibana.atlassian.net/rest/capabilities/navigation',
+          navigation: 'https://coolsite.net/rest/capabilities/navigation',
         },
       },
     })
@@ -141,7 +140,7 @@ describe('Jira service', () => {
       {
         // The trailing slash at the end of the url is intended.
         // All API calls need to have the trailing slash removed.
-        config: { apiUrl: 'https://siem-kibana.atlassian.net/', projectKey: 'CK' },
+        config: { apiUrl: 'https://coolsite.net/', projectKey: 'CK' },
         secrets: { apiToken: 'token', email: 'elastic@elastic.com' },
       },
       logger,
@@ -240,7 +239,7 @@ describe('Jira service', () => {
       await service.getIncident('1');
       expect(requestMock).toHaveBeenCalledWith({
         axios,
-        url: 'https://siem-kibana.atlassian.net/rest/api/2/issue/1',
+        url: 'https://coolsite.net/rest/api/2/issue/1',
         logger,
         configurationUtilities,
       });
@@ -313,7 +312,7 @@ describe('Jira service', () => {
         title: 'CK-1',
         id: '1',
         pushedDate: '2020-04-27T10:59:46.202Z',
-        url: 'https://siem-kibana.atlassian.net/browse/CK-1',
+        url: 'https://coolsite.net/browse/CK-1',
       });
     });
 
@@ -329,7 +328,7 @@ describe('Jira service', () => {
         createAxiosResponse({
           data: {
             capabilities: {
-              navigation: 'https://siem-kibana.atlassian.net/rest/capabilities/navigation',
+              navigation: 'https://coolsite.net/rest/capabilities/navigation',
             },
           },
         })
@@ -365,12 +364,12 @@ describe('Jira service', () => {
         title: 'CK-1',
         id: '1',
         pushedDate: '2020-04-27T10:59:46.202Z',
-        url: 'https://siem-kibana.atlassian.net/browse/CK-1',
+        url: 'https://coolsite.net/browse/CK-1',
       });
 
       expect(requestMock).toHaveBeenCalledWith({
         axios,
-        url: 'https://siem-kibana.atlassian.net/rest/api/2/issue',
+        url: 'https://coolsite.net/rest/api/2/issue',
         logger,
         method: 'post',
         configurationUtilities,
@@ -392,7 +391,7 @@ describe('Jira service', () => {
         createAxiosResponse({
           data: {
             capabilities: {
-              navigation: 'https://siem-kibana.atlassian.net/rest/capabilities/navigation',
+              navigation: 'https://coolsite.net/rest/capabilities/navigation',
             },
           },
         })
@@ -427,7 +426,7 @@ describe('Jira service', () => {
 
       expect(requestMock).toHaveBeenCalledWith({
         axios,
-        url: 'https://siem-kibana.atlassian.net/rest/api/2/issue',
+        url: 'https://coolsite.net/rest/api/2/issue',
         logger,
         method: 'post',
         configurationUtilities,
@@ -459,7 +458,7 @@ describe('Jira service', () => {
 
       expect(requestMock).toHaveBeenCalledWith({
         axios,
-        url: 'https://siem-kibana.atlassian.net/rest/api/2/issue',
+        url: 'https://coolsite.net/rest/api/2/issue',
         logger,
         method: 'post',
         configurationUtilities,
@@ -538,7 +537,7 @@ describe('Jira service', () => {
         title: 'CK-1',
         id: '1',
         pushedDate: '2020-04-27T10:59:46.202Z',
-        url: 'https://siem-kibana.atlassian.net/browse/CK-1',
+        url: 'https://coolsite.net/browse/CK-1',
       });
     });
 
@@ -560,7 +559,7 @@ describe('Jira service', () => {
         logger,
         method: 'put',
         configurationUtilities,
-        url: 'https://siem-kibana.atlassian.net/rest/api/2/issue/1',
+        url: 'https://coolsite.net/rest/api/2/issue/1',
         data: {
           fields: {
             summary: 'title',
@@ -644,7 +643,7 @@ describe('Jira service', () => {
         logger,
         method: 'post',
         configurationUtilities,
-        url: 'https://siem-kibana.atlassian.net/rest/api/2/issue/1/comment',
+        url: 'https://coolsite.net/rest/api/2/issue/1/comment',
         data: { body: 'comment' },
       });
     });
@@ -686,7 +685,7 @@ describe('Jira service', () => {
       const res = await service.getCapabilities();
       expect(res).toEqual({
         capabilities: {
-          navigation: 'https://siem-kibana.atlassian.net/rest/capabilities/navigation',
+          navigation: 'https://coolsite.net/rest/capabilities/navigation',
         },
       });
     });
@@ -701,7 +700,7 @@ describe('Jira service', () => {
         logger,
         method: 'get',
         configurationUtilities,
-        url: 'https://siem-kibana.atlassian.net/rest/capabilities',
+        url: 'https://coolsite.net/rest/capabilities',
       });
     });
 
@@ -782,7 +781,7 @@ describe('Jira service', () => {
           logger,
           method: 'get',
           configurationUtilities,
-          url: 'https://siem-kibana.atlassian.net/rest/api/2/issue/createmeta?projectKeys=CK&expand=projects.issuetypes.fields',
+          url: 'https://coolsite.net/rest/api/2/issue/createmeta?projectKeys=CK&expand=projects.issuetypes.fields',
         });
       });
 
@@ -856,7 +855,7 @@ describe('Jira service', () => {
           logger,
           method: 'get',
           configurationUtilities,
-          url: 'https://siem-kibana.atlassian.net/rest/api/2/issue/createmeta/CK/issuetypes',
+          url: 'https://coolsite.net/rest/api/2/issue/createmeta/CK/issuetypes',
         });
       });
 
@@ -931,7 +930,7 @@ describe('Jira service', () => {
           logger,
           method: 'get',
           configurationUtilities,
-          url: 'https://siem-kibana.atlassian.net/rest/api/2/issue/createmeta?projectKeys=CK&issuetypeIds=10006&expand=projects.issuetypes.fields',
+          url: 'https://coolsite.net/rest/api/2/issue/createmeta?projectKeys=CK&issuetypeIds=10006&expand=projects.issuetypes.fields',
         });
       });
 
@@ -1044,7 +1043,7 @@ describe('Jira service', () => {
           logger,
           method: 'get',
           configurationUtilities,
-          url: 'https://siem-kibana.atlassian.net/rest/api/2/issue/createmeta/CK/issuetypes/10006',
+          url: 'https://coolsite.net/rest/api/2/issue/createmeta/CK/issuetypes/10006',
         });
       });
 
@@ -1112,7 +1111,7 @@ describe('Jira service', () => {
         logger,
         method: 'get',
         configurationUtilities,
-        url: `https://siem-kibana.atlassian.net/rest/api/2/search?jql=project%3D%22CK%22%20and%20summary%20~%22Test%20title%22`,
+        url: `https://coolsite.net/rest/api/2/search?jql=project%3D%22CK%22%20and%20summary%20~%22Test%20title%22`,
       });
     });
 
@@ -1171,7 +1170,7 @@ describe('Jira service', () => {
         logger,
         method: 'get',
         configurationUtilities,
-        url: `https://siem-kibana.atlassian.net/rest/api/2/issue/RJ-107`,
+        url: `https://coolsite.net/rest/api/2/issue/RJ-107`,
       });
     });
 
@@ -1206,9 +1205,9 @@ describe('Jira service', () => {
             data: {
               capabilities: {
                 'list-project-issuetypes':
-                  'https://siem-kibana.atlassian.net/rest/capabilities/list-project-issuetypes',
+                  'https://coolsite.net/rest/capabilities/list-project-issuetypes',
                 'list-issuetype-fields':
-                  'https://siem-kibana.atlassian.net/rest/capabilities/list-issuetype-fields',
+                  'https://coolsite.net/rest/capabilities/list-issuetype-fields',
               },
             },
           })
@@ -1225,9 +1224,9 @@ describe('Jira service', () => {
             data: {
               capabilities: {
                 'list-project-issuetypes':
-                  'https://siem-kibana.atlassian.net/rest/capabilities/list-project-issuetypes',
+                  'https://coolsite.net/rest/capabilities/list-project-issuetypes',
                 'list-issuetype-fields':
-                  'https://siem-kibana.atlassian.net/rest/capabilities/list-issuetype-fields',
+                  'https://coolsite.net/rest/capabilities/list-issuetype-fields',
               },
             },
           })
@@ -1237,9 +1236,9 @@ describe('Jira service', () => {
             data: {
               capabilities: {
                 'list-project-issuetypes':
-                  'https://siem-kibana.atlassian.net/rest/capabilities/list-project-issuetypes',
+                  'https://coolsite.net/rest/capabilities/list-project-issuetypes',
                 'list-issuetype-fields':
-                  'https://siem-kibana.atlassian.net/rest/capabilities/list-issuetype-fields',
+                  'https://coolsite.net/rest/capabilities/list-issuetype-fields',
               },
             },
           })
@@ -1289,12 +1288,12 @@ describe('Jira service', () => {
       callMocks();
       await service.getFields();
       const callUrls = [
-        'https://siem-kibana.atlassian.net/rest/capabilities',
-        'https://siem-kibana.atlassian.net/rest/api/2/issue/createmeta/CK/issuetypes',
-        'https://siem-kibana.atlassian.net/rest/capabilities',
-        'https://siem-kibana.atlassian.net/rest/capabilities',
-        'https://siem-kibana.atlassian.net/rest/api/2/issue/createmeta/CK/issuetypes/10006',
-        'https://siem-kibana.atlassian.net/rest/api/2/issue/createmeta/CK/issuetypes/10007',
+        'https://coolsite.net/rest/capabilities',
+        'https://coolsite.net/rest/api/2/issue/createmeta/CK/issuetypes',
+        'https://coolsite.net/rest/capabilities',
+        'https://coolsite.net/rest/capabilities',
+        'https://coolsite.net/rest/api/2/issue/createmeta/CK/issuetypes/10006',
+        'https://coolsite.net/rest/api/2/issue/createmeta/CK/issuetypes/10007',
       ];
       requestMock.mock.calls.forEach((call, i) => {
         expect(call[0].url).toEqual(callUrls[i]);

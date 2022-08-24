@@ -8,6 +8,7 @@
 
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
+import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import type {
   FatalState,
   State,
@@ -41,7 +42,6 @@ import type {
   CheckUnknownDocumentsState,
   CalculateExcludeFiltersState,
 } from '../state';
-import { SavedObjectsRawDoc } from '../../serialization';
 import { TransformErrorObjects, TransformSavedObjectDocumentError } from '../core';
 import { AliasAction, RetryableEsClientError } from '../actions';
 import { ResponseType } from '../next';

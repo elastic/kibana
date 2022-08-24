@@ -8,13 +8,15 @@
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { SavedObject, SavedObjectError } from '@kbn/core-saved-objects-common';
+import type {
+  SavedObjectsExportTransform,
+  SavedObjectsExportablePredicate,
+} from '@kbn/core-saved-objects-server';
 import { applyExportTransformsMock } from './collect_exported_objects.test.mocks';
 import { savedObjectsClientMock } from '../../mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { SavedObjectTypeRegistry } from '../saved_objects_type_registry';
-import type { SavedObjectsExportTransform } from './types';
+import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
 import { collectExportedObjects, ExclusionReason } from './collect_exported_objects';
-import { SavedObjectsExportablePredicate } from '../types';
 
 const createObject = (parts: Partial<SavedObject>): SavedObject => ({
   id: 'id',

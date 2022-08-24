@@ -13,7 +13,6 @@ import { cloneDeep } from 'lodash';
 import { initialSourcererState, SourcererScopeName } from '../../store/sourcerer/model';
 import { Sourcerer } from '.';
 import { sourcererActions, sourcererModel } from '../../store/sourcerer';
-import { sortWithExcludesAtEnd } from '../../store/sourcerer/helpers';
 import {
   createSecuritySolutionStorageMock,
   kibanaObservable,
@@ -28,6 +27,7 @@ import { useSourcererDataView } from '../../containers/sourcerer';
 import { useSignalHelpers } from '../../containers/sourcerer/use_signal_helpers';
 import { TimelineId, TimelineType } from '../../../../common/types';
 import { DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
+import { sortWithExcludesAtEnd } from '../../../../common/utils/sourcerer';
 
 const mockDispatch = jest.fn();
 

@@ -150,7 +150,7 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
         <>
           <FieldErrorsContainer>
             <EuiCallOut title={FORM_ERRORS_TITLE} color="danger" iconType="alert">
-              <ReactMarkdown source={fieldErrors} />
+              <ReactMarkdown>{fieldErrors}</ReactMarkdown>
             </EuiCallOut>
           </FieldErrorsContainer>
           <EuiSpacer />

@@ -180,173 +180,181 @@ describe('action_form', () => {
 
   const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
-  describe('action_form in alert', () => {
-    async function setup(customActions?: RuleAction[], customRecoveredActionGroup?: string) {
-      const actionTypeRegistry = actionTypeRegistryMock.create();
+  async function setup(
+    customActions?: RuleAction[],
+    customRecoveredActionGroup?: string,
+    isExperimental?: boolean
+  ) {
+    const actionTypeRegistry = actionTypeRegistryMock.create();
 
-      const { loadAllActions } = jest.requireMock('../../lib/action_connector_api');
-      loadAllActions.mockResolvedValueOnce(allActions);
-      const mocks = coreMock.createSetup();
-      const [
-        {
-          application: { capabilities },
-        },
-      ] = await mocks.getStartServices();
-      // eslint-disable-next-line react-hooks/rules-of-hooks
-      useKibanaMock().services.application.capabilities = {
-        ...capabilities,
-        actions: {
-          show: true,
-          save: true,
-          delete: true,
-        },
-      };
-      actionTypeRegistry.list.mockReturnValue([
-        actionType,
-        disabledByConfigActionType,
-        disabledByLicenseActionType,
-        disabledByActionType,
-        preconfiguredOnly,
-      ]);
-      actionTypeRegistry.has.mockReturnValue(true);
-      actionTypeRegistry.get.mockReturnValue(actionType);
-      const initialAlert = {
-        name: 'test',
-        params: {},
-        consumer: 'alerts',
-        alertTypeId: alertType.id,
-        schedule: {
-          interval: '1m',
-        },
-        actions: customActions
-          ? customActions
-          : [
-              {
-                group: 'default',
-                id: 'test',
-                actionTypeId: actionType.id,
-                params: {
-                  message: '',
-                },
-              },
-            ],
-        tags: [],
-        muteAll: false,
-        enabled: false,
-        mutedInstanceIds: [],
-      } as unknown as Rule;
-
-      loadActionTypes.mockResolvedValue([
-        {
-          id: actionType.id,
-          name: 'Test',
-          enabled: true,
-          enabledInConfig: true,
-          enabledInLicense: true,
-          minimumLicenseRequired: 'basic',
-          supportedFeatureIds: ['alerting'],
-        },
-        {
-          id: '.index',
-          name: 'Index',
-          enabled: true,
-          enabledInConfig: true,
-          enabledInLicense: true,
-          minimumLicenseRequired: 'basic',
-          supportedFeatureIds: ['alerting'],
-        },
-        {
-          id: 'preconfigured',
-          name: 'Preconfigured only',
-          enabled: true,
-          enabledInConfig: false,
-          enabledInLicense: true,
-          minimumLicenseRequired: 'basic',
-          supportedFeatureIds: ['alerting'],
-        },
-        {
-          id: 'disabled-by-config',
-          name: 'Disabled by config',
-          enabled: false,
-          enabledInConfig: false,
-          enabledInLicense: true,
-          minimumLicenseRequired: 'gold',
-          supportedFeatureIds: ['alerting'],
-        },
-        {
-          id: 'disabled-by-license',
-          name: 'Disabled by license',
-          enabled: false,
-          enabledInConfig: true,
-          enabledInLicense: false,
-          minimumLicenseRequired: 'gold',
-          supportedFeatureIds: ['alerting'],
-        },
-        {
-          id: '.jira',
-          name: 'Disabled by action type',
-          enabled: true,
-          enabledInConfig: true,
-          enabledInLicense: true,
-          minimumLicenseRequired: 'basic',
-          supportedFeatureIds: ['alerting'],
-        },
-      ]);
-
-      const defaultActionMessage = 'Alert [{{context.metadata.name}}] has exceeded the threshold';
-      const wrapper = mountWithIntl(
-        <ActionForm
-          actions={initialAlert.actions}
-          messageVariables={{
-            params: [
-              { name: 'testVar1', description: 'test var1' },
-              { name: 'testVar2', description: 'test var2' },
-            ],
-            state: [],
-            context: [{ name: 'contextVar', description: 'context var1' }],
-          }}
-          featureId="alerting"
-          defaultActionGroupId={'default'}
-          isActionGroupDisabledForActionType={(actionGroupId: string, actionTypeId: string) => {
-            const recoveryActionGroupId = customRecoveredActionGroup
-              ? customRecoveredActionGroup
-              : 'recovered';
-            return isActionGroupDisabledForActionTypeId(
-              actionGroupId === recoveryActionGroupId ? RecoveredActionGroup.id : actionGroupId,
-              actionTypeId
-            );
-          }}
-          setActionIdByIndex={(id: string, index: number) => {
-            initialAlert.actions[index].id = id;
-          }}
-          actionGroups={[
-            { id: 'default', name: 'Default', defaultActionMessage },
+    const { loadAllActions } = jest.requireMock('../../lib/action_connector_api');
+    loadAllActions.mockResolvedValueOnce(allActions);
+    const mocks = coreMock.createSetup();
+    const [
+      {
+        application: { capabilities },
+      },
+    ] = await mocks.getStartServices();
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useKibanaMock().services.application.capabilities = {
+      ...capabilities,
+      actions: {
+        show: true,
+        save: true,
+        delete: true,
+      },
+    };
+    const newActionType = {
+      ...actionType,
+      isExperimental,
+    };
+    actionTypeRegistry.list.mockReturnValue([
+      newActionType,
+      disabledByConfigActionType,
+      disabledByLicenseActionType,
+      disabledByActionType,
+      preconfiguredOnly,
+    ]);
+    actionTypeRegistry.has.mockReturnValue(true);
+    actionTypeRegistry.get.mockReturnValue(newActionType);
+    const initialAlert = {
+      name: 'test',
+      params: {},
+      consumer: 'alerts',
+      alertTypeId: alertType.id,
+      schedule: {
+        interval: '1m',
+      },
+      actions: customActions
+        ? customActions
+        : [
             {
-              id: customRecoveredActionGroup ? customRecoveredActionGroup : 'recovered',
-              name: customRecoveredActionGroup ? 'I feel better' : 'Recovered',
+              group: 'default',
+              id: 'test',
+              actionTypeId: newActionType.id,
+              params: {
+                message: '',
+              },
             },
-          ]}
-          setActionGroupIdByIndex={(group: string, index: number) => {
-            initialAlert.actions[index].group = group;
-          }}
-          setActions={(_updatedActions: RuleAction[]) => {}}
-          setActionParamsProperty={(key: string, value: any, index: number) =>
-            (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
-          }
-          actionTypeRegistry={actionTypeRegistry}
-          setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
-        />
-      );
+          ],
+      tags: [],
+      muteAll: false,
+      enabled: false,
+      mutedInstanceIds: [],
+    } as unknown as Rule;
 
-      // Wait for active space to resolve before requesting the component to update
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
+    loadActionTypes.mockResolvedValue([
+      {
+        id: newActionType.id,
+        name: 'Test',
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
+        minimumLicenseRequired: 'basic',
+        supportedFeatureIds: ['alerting'],
+      },
+      {
+        id: '.index',
+        name: 'Index',
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
+        minimumLicenseRequired: 'basic',
+        supportedFeatureIds: ['alerting'],
+      },
+      {
+        id: 'preconfigured',
+        name: 'Preconfigured only',
+        enabled: true,
+        enabledInConfig: false,
+        enabledInLicense: true,
+        minimumLicenseRequired: 'basic',
+        supportedFeatureIds: ['alerting'],
+      },
+      {
+        id: 'disabled-by-config',
+        name: 'Disabled by config',
+        enabled: false,
+        enabledInConfig: false,
+        enabledInLicense: true,
+        minimumLicenseRequired: 'gold',
+        supportedFeatureIds: ['alerting'],
+      },
+      {
+        id: 'disabled-by-license',
+        name: 'Disabled by license',
+        enabled: false,
+        enabledInConfig: true,
+        enabledInLicense: false,
+        minimumLicenseRequired: 'gold',
+        supportedFeatureIds: ['alerting'],
+      },
+      {
+        id: '.jira',
+        name: 'Disabled by action type',
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
+        minimumLicenseRequired: 'basic',
+        supportedFeatureIds: ['alerting'],
+      },
+    ]);
 
-      return wrapper;
-    }
+    const defaultActionMessage = 'Alert [{{context.metadata.name}}] has exceeded the threshold';
+    const wrapper = mountWithIntl(
+      <ActionForm
+        actions={initialAlert.actions}
+        messageVariables={{
+          params: [
+            { name: 'testVar1', description: 'test var1' },
+            { name: 'testVar2', description: 'test var2' },
+          ],
+          state: [],
+          context: [{ name: 'contextVar', description: 'context var1' }],
+        }}
+        featureId="alerting"
+        defaultActionGroupId={'default'}
+        isActionGroupDisabledForActionType={(actionGroupId: string, actionTypeId: string) => {
+          const recoveryActionGroupId = customRecoveredActionGroup
+            ? customRecoveredActionGroup
+            : 'recovered';
+          return isActionGroupDisabledForActionTypeId(
+            actionGroupId === recoveryActionGroupId ? RecoveredActionGroup.id : actionGroupId,
+            actionTypeId
+          );
+        }}
+        setActionIdByIndex={(id: string, index: number) => {
+          initialAlert.actions[index].id = id;
+        }}
+        actionGroups={[
+          { id: 'default', name: 'Default', defaultActionMessage },
+          {
+            id: customRecoveredActionGroup ? customRecoveredActionGroup : 'recovered',
+            name: customRecoveredActionGroup ? 'I feel better' : 'Recovered',
+          },
+        ]}
+        setActionGroupIdByIndex={(group: string, index: number) => {
+          initialAlert.actions[index].group = group;
+        }}
+        setActions={(_updatedActions: RuleAction[]) => {}}
+        setActionParamsProperty={(key: string, value: any, index: number) =>
+          (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
+        }
+        actionTypeRegistry={actionTypeRegistry}
+        setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
+      />
+    );
 
+    // Wait for active space to resolve before requesting the component to update
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    return wrapper;
+  }
+
+  describe('action_form in alert', () => {
     it('renders available action cards', async () => {
       const wrapper = await setup();
       const actionOption = wrapper.find(
@@ -603,6 +611,30 @@ describe('action_form', () => {
       expect(
         wrapper.find(`EuiIconTip[data-test-subj="alertActionAccordionErrorTooltip"]`)
       ).toHaveLength(2);
+    });
+  });
+
+  describe('beta badge (action_type_form)', () => {
+    it(`does not render beta badge when isExperimental=undefined`, async () => {
+      const wrapper = await setup();
+      expect(wrapper.find('EuiKeyPadMenuItem EuiBetaBadge').exists()).toBeFalsy();
+      expect(
+        wrapper.find('EuiBetaBadge[data-test-subj="action-type-form-beta-badge"]').exists()
+      ).toBeFalsy();
+    });
+    it(`does not render beta badge when isExperimental=false`, async () => {
+      const wrapper = await setup(undefined, undefined, false);
+      expect(wrapper.find('EuiKeyPadMenuItem EuiBetaBadge').exists()).toBeFalsy();
+      expect(
+        wrapper.find('EuiBetaBadge[data-test-subj="action-type-form-beta-badge"]').exists()
+      ).toBeFalsy();
+    });
+    it(`renders beta badge when isExperimental=true`, async () => {
+      const wrapper = await setup(undefined, undefined, true);
+      expect(wrapper.find('EuiKeyPadMenuItem EuiBetaBadge').exists()).toBeTruthy();
+      expect(
+        wrapper.find('EuiBetaBadge[data-test-subj="action-type-form-beta-badge"]').exists()
+      ).toBeTruthy();
     });
   });
 });

@@ -27,6 +27,7 @@ export enum SecurityNavGroupKey {
   detect = 'detect',
   findings = 'findings',
   explore = 'explore',
+  intelligence = 'intelligence',
   investigate = 'investigate',
   manage = 'manage',
 }
@@ -47,7 +48,7 @@ export type UrlStateType =
   | 'timeline'
   | 'explore'
   | 'dashboards'
-  | 'threat_intelligence'
+  | 'indicators'
   | 'cloud_posture'
   | 'findings';
 
@@ -62,7 +63,6 @@ export interface NavTab {
   isBeta?: boolean;
 }
 export const securityNavKeys = [
-  SecurityPageName.administration,
   SecurityPageName.alerts,
   SecurityPageName.blocklist,
   SecurityPageName.detectionAndResponse,
@@ -82,7 +82,7 @@ export const securityNavKeys = [
   SecurityPageName.trustedApps,
   SecurityPageName.users,
   SecurityPageName.kubernetes,
-  SecurityPageName.threatIntelligence,
+  SecurityPageName.threatIntelligenceIndicators,
   SecurityPageName.cloudSecurityPostureDashboard,
   SecurityPageName.cloudSecurityPostureFindings,
   SecurityPageName.cloudSecurityPostureBenchmarks,
@@ -110,4 +110,5 @@ export interface NavLinkItem {
   image?: string;
   title: string;
   skipUrlState?: boolean;
+  isBeta?: boolean;
 }

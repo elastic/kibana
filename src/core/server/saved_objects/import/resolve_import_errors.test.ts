@@ -31,10 +31,13 @@ import type {
   SavedObjectsImportWarning,
 } from '@kbn/core-saved-objects-common';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { SavedObjectsType } from '../types';
+import type {
+  SavedObjectsType,
+  ISavedObjectTypeRegistry,
+  SavedObjectsImportHook,
+} from '@kbn/core-saved-objects-server';
+import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { savedObjectsClientMock } from '../../mocks';
-import { ISavedObjectTypeRegistry, SavedObjectsImportHook } from '..';
-import { typeRegistryMock } from '../saved_objects_type_registry.mock';
 import {
   resolveSavedObjectsImportErrors,
   ResolveSavedObjectsImportErrorsOptions,

@@ -15,8 +15,10 @@ import type {
   SavedObjectsImportSuccess,
 } from '@kbn/core-saved-objects-common';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
-import { SavedObjectsImportHook } from './types';
+import type {
+  ISavedObjectTypeRegistry,
+  SavedObjectsImportHook,
+} from '@kbn/core-saved-objects-server';
 import {
   collectSavedObjects,
   createObjectsFilter,
