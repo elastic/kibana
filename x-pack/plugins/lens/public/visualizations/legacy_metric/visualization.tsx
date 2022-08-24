@@ -17,7 +17,7 @@ import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { IconChartMetric } from '@kbn/chart-icons';
 import { getSuggestions } from './metric_suggestions';
 import { Visualization, OperationMetadata, DatasourceLayers } from '../../types';
-import type { MetricState } from '../../../common/types';
+import type { LegacyMetricState } from '../../../common/types';
 import { layerTypes } from '../../../common';
 import { MetricDimensionEditor } from './dimension_editor';
 import { MetricToolbar } from './metric_config_panel';
@@ -25,7 +25,7 @@ import { DEFAULT_TITLE_POSITION } from './metric_config_panel/title_position_opt
 import { DEFAULT_TITLE_SIZE } from './metric_config_panel/size_options';
 import { DEFAULT_TEXT_ALIGNMENT } from './metric_config_panel/align_options';
 
-interface MetricConfig extends Omit<MetricState, 'palette' | 'colorMode'> {
+interface MetricConfig extends Omit<LegacyMetricState, 'palette' | 'colorMode'> {
   title: string;
   description: string;
   metricTitle: string;
@@ -46,9 +46,9 @@ const getFontSizeAndUnit = (fontSize: string) => {
 
 const toExpression = (
   paletteService: PaletteRegistry,
-  state: MetricState,
+  state: LegacyMetricState,
   datasourceLayers: DatasourceLayers,
-  attributes?: Partial<Omit<MetricConfig, keyof MetricState>>,
+  attributes?: Partial<Omit<MetricConfig, keyof LegacyMetricState>>,
   datasourceExpressionsByLayers: Record<string, Ast> | undefined = {}
 ): Ast | null => {
   if (!state.accessor) {
@@ -175,12 +175,12 @@ export const getLegacyMetricVisualization = ({
 }: {
   paletteService: PaletteRegistry;
   theme: ThemeServiceStart;
-}): Visualization<MetricState> => ({
-  id: 'lnsMetric',
+}): Visualization<LegacyMetricState> => ({
+  id: 'lnsLegacyMetric',
 
   visualizationTypes: [
     {
-      id: 'lnsMetric',
+      id: 'lnsLegacyMetric',
       icon: IconChartMetric,
       label: i18n.translate('xpack.lens.legacyMetric.label', {
         defaultMessage: 'Legacy Metric',
@@ -192,7 +192,7 @@ export const getLegacyMetricVisualization = ({
   ],
 
   getVisualizationTypeId() {
-    return 'lnsMetric';
+    return 'lnsLegacyMetric';
   },
 
   clearLayer(state) {
@@ -240,8 +240,8 @@ export const getLegacyMetricVisualization = ({
               defaultMessage: 'Value',
             }),
           },
-          groupLabel: i18n.translate('xpack.lens.legacyMetric.label', {
-            defaultMessage: 'Legacy Metric',
+          groupLabel: i18n.translate('xpack.lens.metric.label', {
+            defaultMessage: 'Metric',
           }),
           layerId: props.state.layerId,
           accessors: props.state.accessor

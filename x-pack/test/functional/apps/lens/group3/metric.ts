@@ -65,7 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.clickVisType('lens');
       await PageObjects.lens.goToTimeRange();
 
-      await PageObjects.lens.switchToVisualization('lnsMetricNew', 'Metric');
+      await PageObjects.lens.switchToVisualization('lnsMetric', 'Metric');
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsMetric_primaryMetricDimensionPanel > lns-empty-dimension',

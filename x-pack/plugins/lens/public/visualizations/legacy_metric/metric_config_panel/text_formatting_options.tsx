@@ -8,13 +8,13 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { MetricState } from '../../../../common/types';
+import type { LegacyMetricState } from '../../../../common/types';
 import { SizeOptions } from './size_options';
 import { AlignOptions } from './align_options';
 
 export interface TitlePositionProps {
-  state: MetricState;
-  setState: (newState: MetricState) => void;
+  state: LegacyMetricState;
+  setState: (newState: LegacyMetricState) => void;
 }
 
 export const TextFormattingOptions: React.FC<TitlePositionProps> = ({ state, setState }) => {
