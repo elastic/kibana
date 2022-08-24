@@ -65,7 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.clickVisType('lens');
       await PageObjects.lens.goToTimeRange();
 
-      await PageObjects.lens.switchToVisualization('lnsMetricNew', 'Metric');
+      await PageObjects.lens.switchToVisualization('lnsMetric', 'Metric');
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsMetric_primaryMetricDimensionPanel > lns-empty-dimension',
@@ -204,6 +204,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('converts color stops to number', async () => {
       await PageObjects.lens.openPalettePanel('lnsMetric');
+      await PageObjects.common.sleep(1000);
       await testSubjects.click('lnsPalettePanel_dynamicColoring_rangeType_groups_number');
       expect([
         await testSubjects.getAttribute('lnsPalettePanel_dynamicColoring_range_value_1', 'value'),

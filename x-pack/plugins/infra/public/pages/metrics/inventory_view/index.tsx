@@ -7,7 +7,7 @@
 
 import { EuiErrorBoundary } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useContext } from 'react';
+import React from 'react';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
@@ -17,7 +17,7 @@ import { DocumentTitle } from '../../../components/document_title';
 
 import { SourceErrorPage } from '../../../components/source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
-import { Source } from '../../../containers/metrics_source';
+import { useSourceContext } from '../../../containers/metrics_source';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { LayoutView } from './components/layout_view';
 import { SavedViewProvider } from '../../../containers/saved_view/saved_view';
@@ -36,7 +36,7 @@ export const SnapshotPage = () => {
     loadSource,
     source,
     metricIndicesExist,
-  } = useContext(Source.Context);
+  } = useSourceContext();
   useTrackPageview({ app: 'infra_metrics', path: 'inventory' });
   useTrackPageview({ app: 'infra_metrics', path: 'inventory', delay: 15000 });
   const { source: optionsSource } = useWaffleOptionsContext();
