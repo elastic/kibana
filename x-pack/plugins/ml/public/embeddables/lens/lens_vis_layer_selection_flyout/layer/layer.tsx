@@ -7,9 +7,6 @@
 
 import React, { FC } from 'react';
 import type { Embeddable } from '@kbn/lens-plugin/public';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { IUiSettingsClient, ApplicationStart } from '@kbn/core/public';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,7 +17,6 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import type { LayerResult } from '../../../../application/jobs/new_job/job_from_lens';
-import { MlApiServices } from '../../../../application/services/ml_api_service';
 import { CompatibleLayer } from './compatible_layer';
 import { IncompatibleLayer } from './incompatible_layer';
 
@@ -28,23 +24,9 @@ interface Props {
   layer: LayerResult;
   layerIndex: number;
   embeddable: Embeddable;
-  share: SharePluginStart;
-  data: DataPublicPluginStart;
-  application: ApplicationStart;
-  kibanaConfig: IUiSettingsClient;
-  mlApiServices: MlApiServices;
 }
 
-export const Layer: FC<Props> = ({
-  layer,
-  layerIndex,
-  embeddable,
-  share,
-  data,
-  application,
-  mlApiServices,
-  kibanaConfig,
-}) => {
+export const Layer: FC<Props> = ({ layer, layerIndex, embeddable }) => {
   return (
     <>
       <EuiSplitPanel.Outer grow>
@@ -65,16 +47,7 @@ export const Layer: FC<Props> = ({
         <EuiHorizontalRule margin="none" />
         <EuiSplitPanel.Inner grow={false} color="subdued">
           {layer.isCompatible ? (
-            <CompatibleLayer
-              layer={layer}
-              layerIndex={layerIndex}
-              application={application}
-              data={data}
-              embeddable={embeddable}
-              kibanaConfig={kibanaConfig}
-              mlApiServices={mlApiServices}
-              share={share}
-            />
+            <CompatibleLayer layer={layer} layerIndex={layerIndex} embeddable={embeddable} />
           ) : (
             <IncompatibleLayer layer={layer} />
           )}

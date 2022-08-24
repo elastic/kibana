@@ -53,7 +53,6 @@ export class VisExtractor {
 
   public async getResultLayersFromEmbeddable(
     embeddable: Embeddable,
-
     lens: LensPublicStart
   ): Promise<LayerResult[]> {
     const { vis } = getJobsItemsFromEmbeddable(embeddable);

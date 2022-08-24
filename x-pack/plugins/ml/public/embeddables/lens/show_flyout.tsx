@@ -21,8 +21,6 @@ import {
 } from '@kbn/kibana-react-plugin/public';
 import { DashboardConstants } from '@kbn/dashboard-plugin/public';
 
-import { HttpService } from '../../application/services/http_service';
-import { mlApiServicesProvider } from '../../application/services/ml_api_service';
 import { getMlGlobalServices } from '../../application/app';
 import { LensLayerSelectionFlyout } from './lens_vis_layer_selection_flyout';
 
@@ -31,9 +29,9 @@ import { VisExtractor } from '../../application/jobs/new_job/job_from_lens';
 export async function showLensVisToADJobFlyout(
   embeddable: Embeddable,
   coreStart: CoreStart,
-  shareStart: SharePluginStart,
-  dataStart: DataPublicPluginStart,
-  lensStart: LensPublicStart
+  share: SharePluginStart,
+  data: DataPublicPluginStart,
+  lens: LensPublicStart
 ): Promise<void> {
   const {
     http,
@@ -44,21 +42,24 @@ export async function showLensVisToADJobFlyout(
 
   return new Promise(async (resolve, reject) => {
     try {
-      const visExtractor = new VisExtractor(dataStart.dataViews);
-      const layerResults = await visExtractor.getResultLayersFromEmbeddable(embeddable, lensStart);
+      const visExtractor = new VisExtractor(data.dataViews);
+      const layerResults = await visExtractor.getResultLayersFromEmbeddable(embeddable, lens);
 
       const onFlyoutClose = () => {
         flyoutSession.close();
         resolve();
       };
 
-      const ml = mlApiServicesProvider(new HttpService(coreStart.http));
-
       const flyoutSession = overlays.openFlyout(
         toMountPoint(
           wrapWithTheme(
             <KibanaContextProvider
-              services={{ ...coreStart, mlServices: getMlGlobalServices(http) }}
+              services={{
+                ...coreStart,
+                share,
+                data,
+                mlServices: getMlGlobalServices(http),
+              }}
             >
               <LensLayerSelectionFlyout
                 embeddable={embeddable}
@@ -67,11 +68,6 @@ export async function showLensVisToADJobFlyout(
                   resolve();
                 }}
                 layerResults={layerResults}
-                share={shareStart}
-                data={dataStart}
-                application={coreStart.application}
-                kibanaConfig={coreStart.uiSettings}
-                mlApiServices={ml}
               />
             </KibanaContextProvider>,
             theme$

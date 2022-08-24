@@ -11,9 +11,6 @@ import React, { FC, useState, useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
 import type { Embeddable } from '@kbn/lens-plugin/public';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { IUiSettingsClient, ApplicationStart } from '@kbn/core/public';
 
 import {
   EuiFlexGroup,
@@ -39,21 +36,16 @@ import {
 import type { LayerResult } from '../../../../application/jobs/new_job/job_from_lens';
 import { JOB_TYPE, DEFAULT_BUCKET_SPAN } from '../../../../../common/constants/new_job';
 import { extractErrorMessage } from '../../../../../common/util/errors';
-import { MlApiServices } from '../../../../application/services/ml_api_service';
 import { basicJobValidation } from '../../../../../common/util/job_utils';
 import { JOB_ID_MAX_LENGTH } from '../../../../../common/constants/validation';
 import { invalidTimeIntervalMessage } from '../../../../application/jobs/new_job/common/job_validator/util';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../../../../common/constants/locator';
+import { useMlFromLensKibanaContext } from '../../context';
 
 interface Props {
   layer: LayerResult;
   layerIndex: number;
   embeddable: Embeddable;
-  share: SharePluginStart;
-  data: DataPublicPluginStart;
-  application: ApplicationStart;
-  kibanaConfig: IUiSettingsClient;
-  mlApiServices: MlApiServices;
 }
 
 enum STATE {
@@ -64,16 +56,17 @@ enum STATE {
   SAVE_FAILED,
 }
 
-export const CompatibleLayer: FC<Props> = ({
-  layer,
-  layerIndex,
-  embeddable,
-  share,
-  data,
-  application,
-  mlApiServices: mlApiServices,
-  kibanaConfig,
-}) => {
+export const CompatibleLayer: FC<Props> = ({ layer, layerIndex, embeddable }) => {
+  const {
+    services: {
+      data,
+      share,
+      application,
+      uiSettings,
+      mlServices: { mlApiServices },
+    },
+  } = useMlFromLensKibanaContext();
+
   const [jobId, setJobId] = useState<string | undefined>(undefined);
   const [startJob, setStartJob] = useState(true);
   const [runInRealTime, setRunInRealTime] = useState(true);
@@ -84,8 +77,8 @@ export const CompatibleLayer: FC<Props> = ({
   const [state, setState] = useState<STATE>(STATE.DEFAULT);
   const [createError, setCreateError] = useState<{ text: string; errorText: string } | null>(null);
   const quickJobCreator = useMemo(
-    () => new QuickJobCreator(data.dataViews, kibanaConfig, data.query.timefilter.timefilter),
-    [data, kibanaConfig]
+    () => new QuickJobCreator(data.dataViews, uiSettings, data.query.timefilter.timefilter),
+    [data, uiSettings]
   );
 
   function createADJobInWizard() {

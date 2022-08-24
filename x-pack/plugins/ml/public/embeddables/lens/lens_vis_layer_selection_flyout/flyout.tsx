@@ -7,11 +7,7 @@
 
 import React, { FC } from 'react';
 import type { Embeddable } from '@kbn/lens-plugin/public';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { IUiSettingsClient, ApplicationStart } from '@kbn/core/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-
 import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
@@ -24,7 +20,6 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import type { MlApiServices } from '../../../application/services/ml_api_service';
 
 import { Layer } from './layer';
 import type { LayerResult } from '../../../application/jobs/new_job/job_from_lens';
@@ -32,25 +27,12 @@ import type { LayerResult } from '../../../application/jobs/new_job/job_from_len
 interface Props {
   layerResults: LayerResult[];
   embeddable: Embeddable;
-  share: SharePluginStart;
-  data: DataPublicPluginStart;
-  application: ApplicationStart;
-  kibanaConfig: IUiSettingsClient;
-  mlApiServices: MlApiServices;
   onClose: () => void;
 }
 
-export const LensLayerSelectionFlyout: FC<Props> = ({
-  onClose,
-  layerResults,
-  embeddable,
-  share,
-  data,
-  application,
-  mlApiServices,
-  kibanaConfig,
-}) => {
+export const LensLayerSelectionFlyout: FC<Props> = ({ onClose, layerResults, embeddable }) => {
   const { euiTheme } = useEuiTheme();
+
   return (
     <>
       <EuiFlyoutHeader hasBorder>
@@ -72,16 +54,7 @@ export const LensLayerSelectionFlyout: FC<Props> = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody css={{ backgroundColors: euiTheme.colors.lightestShade }}>
         {layerResults.map((layer, i) => (
-          <Layer
-            layer={layer}
-            layerIndex={i}
-            application={application}
-            data={data}
-            embeddable={embeddable}
-            kibanaConfig={kibanaConfig}
-            mlApiServices={mlApiServices}
-            share={share}
-          />
+          <Layer layer={layer} layerIndex={i} embeddable={embeddable} />
         ))}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
