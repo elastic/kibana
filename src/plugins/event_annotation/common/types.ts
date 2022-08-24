@@ -65,7 +65,7 @@ export type PointInTimeQueryEventAnnotationConfig = {
     type: 'point_in_time';
     field: string;
   };
-  additionalFields?: string[];
+  extraFields?: string[];
   query: Query;
   textSource?: 'name' | 'field';
   textField?: string;

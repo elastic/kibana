@@ -155,7 +155,6 @@ describe('Event Annotation Service', () => {
                 lineStyle: ['solid'],
                 icon: ['triangle'],
                 textVisibility: [false],
-                textSource: [],
                 textField: [],
                 isHidden: [false],
                 query: [
@@ -255,7 +254,6 @@ describe('Event Annotation Service', () => {
                 lineStyle: ['solid'],
                 icon: ['triangle'],
                 textVisibility: [false],
-                textSource: [],
                 textField: [],
                 isHidden: [false],
                 query: [
@@ -273,11 +271,11 @@ describe('Event Annotation Service', () => {
     });
     it.each`
       textSource | textField    | expected
-      ${''}      | ${''}        | ${'name'}
-      ${'name'}  | ${''}        | ${'name'}
-      ${'name'}  | ${'myField'} | ${'name'}
-      ${'field'} | ${''}        | ${'field'}
-      ${'field'} | ${'myField'} | ${'field'}
+      ${''}      | ${''}        | ${''}
+      ${'name'}  | ${''}        | ${''}
+      ${'name'}  | ${'myField'} | ${''}
+      ${'field'} | ${''}        | ${''}
+      ${'field'} | ${'myField'} | ${'myField'}
     `(
       "should handle correctly textVisibility when textSource is set to '$textSource' and textField to '$textField'",
       ({ textSource, textField, expected }) => {
@@ -312,8 +310,7 @@ describe('Event Annotation Service', () => {
                   lineStyle: ['solid'],
                   icon: ['triangle'],
                   textVisibility: [true],
-                  textSource: [expected],
-                  textField: textSource === 'field' && textField ? [textField] : [],
+                  textField: expected ? [expected] : [],
                   isHidden: [false],
                   query: [
                     {

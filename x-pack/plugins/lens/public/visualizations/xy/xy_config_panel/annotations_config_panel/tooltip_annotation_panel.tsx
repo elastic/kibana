@@ -61,13 +61,13 @@ export function TooltipSection({
     (values: WrappedValue[]) => {
       setConfig({
         ...currentConfig,
-        additionalFields: values.filter(removeNewEmptyField).map(({ value }) => value),
+        extraFields: values.filter(removeNewEmptyField).map(({ value }) => value),
       });
     },
     [setConfig, currentConfig]
   );
   const wrappedValues = useMemo(() => {
-    return currentConfig.additionalFields?.map((value) => ({ id: generateId(), value })) || [];
+    return currentConfig.extraFields?.map((value) => ({ id: generateId(), value })) || [];
   }, [currentConfig]);
 
   const { inputValue: localValues, handleInputChange } = useDebouncedValue<WrappedValue[]>({

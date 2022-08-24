@@ -91,7 +91,7 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
           textField,
           textSource,
           query,
-          additionalFields,
+          extraFields,
         } = annotation;
         expressions.push({
           type: 'expression' as const,
@@ -107,11 +107,10 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
                 lineStyle: [lineStyle || 'solid'],
                 icon: hasIcon(icon) ? [icon] : ['triangle'],
                 textVisibility: [textVisibility || false],
-                textSource: textVisibility ? [textSource || 'name'] : [],
                 textField: textVisibility && textSource === 'field' && textField ? [textField] : [],
                 isHidden: [Boolean(isHidden)],
                 query: query ? [queryToAst(query)] : [],
-                additionalFields: additionalFields || [],
+                extraFields: extraFields || [],
               },
             },
           ],

@@ -96,7 +96,7 @@ export const sanitizeProperties = (annotation: EventAnnotationConfig) => {
       'textSource',
       'textField',
       'query',
-      'additionalFields',
+      'extraFields',
     ]);
     return lineAnnotation;
   }
