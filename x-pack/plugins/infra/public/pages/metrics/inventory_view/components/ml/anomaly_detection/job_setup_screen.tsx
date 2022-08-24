@@ -4,27 +4,37 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { debounce } from 'lodash';
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { EuiForm, EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
-import { EuiText, EuiSpacer } from '@elastic/eui';
-import { EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlyoutFooter } from '@elastic/eui';
-import { EuiButton } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
-import moment, { Moment } from 'moment';
-import { EuiComboBox } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiComboBox,
+  EuiDescribedFormGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiForm,
+  EuiFormRow,
+  EuiLoadingSpinner,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useUiTracker } from '@kbn/observability-plugin/public';
-import { useSourceViaHttp } from '../../../../../../containers/metrics_source/use_source_via_http';
-import { useMetricK8sModuleContext } from '../../../../../../containers/ml/modules/metrics_k8s/module';
-import { useMetricHostsModuleContext } from '../../../../../../containers/ml/modules/metrics_hosts/module';
+import { debounce } from 'lodash';
+import moment, { Moment } from 'moment';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FixedDatePicker } from '../../../../../../components/fixed_datepicker';
+import { useSourceViaHttp } from '../../../../../../containers/metrics_source/use_source_via_http';
+import { useMetricHostsModuleContext } from '../../../../../../containers/ml/modules/metrics_hosts/module';
+import { useMetricK8sModuleContext } from '../../../../../../containers/ml/modules/metrics_k8s/module';
 import { DEFAULT_K8S_PARTITION_FIELD } from '../../../../../../containers/ml/modules/metrics_k8s/module_descriptor';
-import { MetricsExplorerKueryBar } from '../../../../metrics_explorer/components/kuery_bar';
+import { useDerivedDataView } from '../../../../../../hooks/use_derived_data_view';
 import { convertKueryToElasticSearchQuery } from '../../../../../../utils/kuery';
+import { MetricsExplorerKueryBar } from '../../../../metrics_explorer/components/kuery_bar';
 
 interface Props {
   jobType: 'hosts' | 'kubernetes';
@@ -42,9 +52,10 @@ export const JobSetupScreen = (props: Props) => {
   const [filter, setFilter] = useState<string>('');
   const [filterQuery, setFilterQuery] = useState<string>('');
   const trackMetric = useUiTracker({ app: 'infra_metrics' });
-  const { createDerivedIndexPattern } = useSourceViaHttp({
+  const { source } = useSourceViaHttp({
     sourceId: 'default',
   });
+  const derivedDataView = useDerivedDataView(source?.configuration.metricAlias);
 
   const indicies = h.sourceConfiguration.indices;
 
@@ -79,11 +90,6 @@ export const JobSetupScreen = (props: Props) => {
       return h.jobSummaries.length > 0;
     }
   }, [props.jobType, k.jobSummaries, h.jobSummaries]);
-
-  const derivedIndexPattern = useMemo(
-    () => createDerivedIndexPattern(),
-    [createDerivedIndexPattern]
-  );
 
   const updateStart = useCallback((date: Moment) => {
     setStartDate(date);
@@ -120,9 +126,9 @@ export const JobSetupScreen = (props: Props) => {
   const onFilterChange = useCallback(
     (f: string) => {
       setFilter(f || '');
-      setFilterQuery(convertKueryToElasticSearchQuery(f, derivedIndexPattern) || '');
+      setFilterQuery(convertKueryToElasticSearchQuery(f, derivedDataView) || '');
     },
-    [derivedIndexPattern]
+    [derivedDataView]
   );
 
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
@@ -283,7 +289,7 @@ export const JobSetupScreen = (props: Props) => {
                     selectedOptions={
                       partitionField ? partitionField.map((p) => ({ label: p })) : undefined
                     }
-                    options={derivedIndexPattern.fields
+                    options={derivedDataView.fields
                       .filter((f) => f.aggregatable && f.type === 'string')
                       .map((f) => ({ label: f.name }))}
                     onChange={onPartitionFieldChange}
@@ -318,7 +324,7 @@ export const JobSetupScreen = (props: Props) => {
                   }
                 >
                   <MetricsExplorerKueryBar
-                    derivedIndexPattern={derivedIndexPattern}
+                    derivedIndexPattern={derivedDataView}
                     onSubmit={onFilterChange}
                     onChange={debouncedOnFilterChange}
                     value={filter}

@@ -28,7 +28,7 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { Comparator } from '../../../../common/alerting/metrics';
 import { decimalToPct, pctToDecimal } from '../../../../common/utils/corrected_percent_convert';
-import { DerivedIndexPattern } from '../../../containers/metrics_source';
+import { DerivedDataView } from '../../../hooks/use_derived_data_view';
 import { AGGREGATION_TYPES, MetricExpression } from '../types';
 
 const customComparators = {
@@ -43,7 +43,7 @@ const customComparators = {
 };
 
 interface ExpressionRowProps {
-  fields: DerivedIndexPattern['fields'];
+  fields: DerivedDataView['fields'];
   expressionId: number;
   expression: MetricExpression;
   errors: IErrorObject;

@@ -150,9 +150,7 @@ export class InfraServerPlugin
     // and make them available via the request context so we can do away with
     // the wrapper classes
     const domainLibs: InfraDomainLibs = {
-      fields: new InfraFieldsDomain(new FrameworkFieldsAdapter(framework), {
-        sources,
-      }),
+      fields: new InfraFieldsDomain(new FrameworkFieldsAdapter(framework)),
       logEntries: new InfraLogEntriesDomain(new InfraKibanaLogEntriesAdapter(framework), {
         framework,
         getStartServices: () => core.getStartServices(),

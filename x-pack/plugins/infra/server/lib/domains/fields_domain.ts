@@ -6,25 +6,15 @@
  */
 
 import type { InfraPluginRequestHandlerContext } from '../../types';
-import { FieldsAdapter } from '../adapters/fields';
-import { InfraSourceIndexField, InfraSources } from '../sources';
+import { FieldsAdapter, IndexFieldDescriptor } from '../adapters/fields';
 
 export class InfraFieldsDomain {
-  constructor(
-    private readonly adapter: FieldsAdapter,
-    private readonly libs: { sources: InfraSources }
-  ) {}
+  constructor(private readonly adapter: FieldsAdapter) {}
 
   public async getFields(
     requestContext: InfraPluginRequestHandlerContext,
-    sourceId: string,
-    indexType: 'METRICS'
-  ): Promise<InfraSourceIndexField[]> {
-    const soClient = (await requestContext.core).savedObjects.client;
-    const { configuration } = await this.libs.sources.getSourceConfiguration(soClient, sourceId);
-
-    const fields = await this.adapter.getIndexFields(requestContext, configuration.metricAlias);
-
-    return fields;
+    indexPattern: string
+  ): Promise<IndexFieldDescriptor[]> {
+    return this.adapter.getIndexFields(requestContext, indexPattern);
   }
 }

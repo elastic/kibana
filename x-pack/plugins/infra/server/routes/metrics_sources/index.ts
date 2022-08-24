@@ -35,10 +35,9 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
       const { sourceId } = request.params;
       const soClient = (await requestContext.core).savedObjects.client;
 
-      const [source, metricIndicesExist, indexFields] = await Promise.all([
+      const [source, metricIndicesExist] = await Promise.all([
         libs.sources.getSourceConfiguration(soClient, sourceId),
         libs.sourceStatus.hasMetricIndices(requestContext, sourceId),
-        libs.fields.getFields(requestContext, sourceId, 'METRICS'),
       ]);
 
       if (!source) {
@@ -47,7 +46,6 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
 
       const status: MetricsSourceStatus = {
         metricIndicesExist,
-        indexFields,
       };
 
       return response.ok({
@@ -97,14 +95,12 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
               patchedSourceConfigurationProperties
             ));
 
-        const [metricIndicesExist, indexFields] = await Promise.all([
+        const [metricIndicesExist] = await Promise.all([
           libs.sourceStatus.hasMetricIndices(requestContext, sourceId),
-          libs.fields.getFields(requestContext, sourceId, 'METRICS'),
         ]);
 
         const status: MetricsSourceStatus = {
           metricIndicesExist,
-          indexFields,
         };
 
         return response.ok({

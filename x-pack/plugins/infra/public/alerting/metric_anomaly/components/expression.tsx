@@ -8,13 +8,13 @@
 import { EuiFlexGroup, EuiLoadingContent, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { euiStyled, EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import {
   RuleTypeParams,
   RuleTypeParamsExpressionProps,
   WhenExpression,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import React, { useCallback, useEffect, useState } from 'react';
 import { MetricAnomalyParams } from '../../../../common/alerting/metrics';
 import { ANOMALY_THRESHOLD } from '../../../../common/infra_ml';
 import { findInventoryModel } from '../../../../common/inventory_models';
@@ -22,6 +22,7 @@ import { InventoryItemType, SnapshotMetricType } from '../../../../common/invent
 import { SubscriptionSplashPrompt } from '../../../components/subscription_splash_content';
 import { useSourceViaHttp } from '../../../containers/metrics_source/use_source_via_http';
 import { useInfraMLCapabilities } from '../../../containers/ml/infra_ml_capabilities';
+import { useDerivedDataView } from '../../../hooks/use_derived_data_view';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useActiveKibanaSpace } from '../../../hooks/use_kibana_space';
 import { InfraWaffleMapOptions } from '../../../lib/lib';
@@ -55,16 +56,13 @@ export const Expression: React.FC<Props> = (props) => {
   const { space } = useActiveKibanaSpace();
 
   const { setRuleParams, ruleParams, ruleInterval, metadata } = props;
-  const { source, createDerivedIndexPattern } = useSourceViaHttp({
+  const { source } = useSourceViaHttp({
     sourceId: 'default',
     fetch: http.fetch,
     toastWarning: notifications.toasts.addWarning,
   });
 
-  const derivedIndexPattern = useMemo(
-    () => createDerivedIndexPattern(),
-    [createDerivedIndexPattern]
-  );
+  const derivedDataView = useDerivedDataView(source?.configuration.metricAlias);
 
   const [influencerFieldName, updateInfluencerFieldName] = useState(
     ruleParams.influencerFilter?.fieldName ?? 'host.name'
@@ -165,7 +163,7 @@ export const Expression: React.FC<Props> = (props) => {
     if (!ruleParams.spaceId) {
       setRuleParams('spaceId', space?.id || 'default');
     }
-  }, [metadata, derivedIndexPattern, defaultExpression, source, space]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [metadata, derivedDataView, defaultExpression, source, space]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (isLoadingMLCapabilities) return <EuiLoadingContent lines={10} />;
   if (!hasInfraMLCapabilities) return <SubscriptionSplashPrompt />;
@@ -233,7 +231,7 @@ export const Expression: React.FC<Props> = (props) => {
       </StyledExpressionRow>
       <EuiSpacer size={'m'} />
       <InfluencerFilter
-        derivedIndexPattern={derivedIndexPattern}
+        derivedIndexPattern={derivedDataView}
         nodeType={ruleParams.nodeType}
         fieldName={influencerFieldName}
         fieldValue={ruleParams.influencerFilter?.fieldValue ?? ''}

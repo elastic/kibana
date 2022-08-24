@@ -44,7 +44,6 @@ const metricsSourceConfigurationOriginRT = rt.keyof({
 
 export const metricsSourceStatusRT = rt.strict({
   metricIndicesExist: SourceStatusRuntimeType.props.metricIndicesExist,
-  indexFields: SourceStatusRuntimeType.props.indexFields,
 });
 
 export type MetricsSourceStatus = rt.TypeOf<typeof metricsSourceStatusRT>;

@@ -6,16 +6,17 @@
  */
 
 import { fromKueryExpression } from '@kbn/es-query';
-import { useState, useMemo, useCallback, useEffect } from 'react';
-import * as rt from 'io-ts';
-import { pipe } from 'fp-ts/lib/pipeable';
+import createContainter from 'constate';
 import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
-import createContainter from 'constate';
+import { pipe } from 'fp-ts/lib/pipeable';
+import * as rt from 'io-ts';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
-import { useUrlState } from '../../../../utils/use_url_state';
 import { useSourceContext } from '../../../../containers/metrics_source';
+import { useDerivedDataView } from '../../../../hooks/use_derived_data_view';
 import { convertKueryToElasticSearchQuery } from '../../../../utils/kuery';
+import { useUrlState } from '../../../../utils/use_url_state';
 
 const validateKuery = (expression: string) => {
   try {
@@ -29,8 +30,8 @@ const validateKuery = (expression: string) => {
 export const DEFAULT_WAFFLE_FILTERS_STATE: WaffleFiltersState = { kind: 'kuery', expression: '' };
 
 export const useWaffleFilters = () => {
-  const { createDerivedIndexPattern } = useSourceContext();
-  const indexPattern = createDerivedIndexPattern();
+  const { source } = useSourceContext();
+  const derivedDataView = useDerivedDataView(source?.configuration.metricAlias);
 
   const [urlState, setUrlState] = useUrlState<WaffleFiltersState>({
     defaultState: DEFAULT_WAFFLE_FILTERS_STATE,
@@ -46,8 +47,8 @@ export const useWaffleFilters = () => {
   const [filterQueryDraft, setFilterQueryDraft] = useState<string>(urlState.expression);
 
   const filterQueryAsJson = useMemo(
-    () => convertKueryToElasticSearchQuery(urlState.expression, indexPattern),
-    [indexPattern, urlState.expression]
+    () => convertKueryToElasticSearchQuery(urlState.expression, derivedDataView),
+    [derivedDataView, urlState.expression]
   );
 
   const applyFilterQueryFromKueryExpression = useCallback(

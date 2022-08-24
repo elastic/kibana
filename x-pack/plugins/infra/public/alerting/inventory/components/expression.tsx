@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -21,15 +20,16 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { debounce, omit } from 'lodash';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
 import {
   ForLastExpression,
   IErrorObject,
   RuleTypeParamsExpressionProps,
   ThresholdExpression,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
+import { debounce, omit } from 'lodash';
+import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Comparator,
   FilterQuery,
@@ -54,8 +54,8 @@ import {
   SnapshotMetricTypeRT,
 } from '../../../../common/inventory_models/types';
 import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
-import { DerivedIndexPattern } from '../../../containers/metrics_source';
 import { useSourceViaHttp } from '../../../containers/metrics_source/use_source_via_http';
+import { useDerivedDataView, DerivedDataView } from '../../../hooks/use_derived_data_view';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { InfraWaffleMapOptions } from '../../../lib/lib';
 import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
@@ -106,7 +106,7 @@ export const defaultExpression = {
 export const Expressions: React.FC<Props> = (props) => {
   const { http, notifications } = useKibanaContextForPlugin().services;
   const { setRuleParams, ruleParams, errors, metadata } = props;
-  const { source, createDerivedIndexPattern } = useSourceViaHttp({
+  const { source } = useSourceViaHttp({
     sourceId: 'default',
     fetch: http.fetch,
     toastWarning: notifications.toasts.addWarning,
@@ -114,10 +114,7 @@ export const Expressions: React.FC<Props> = (props) => {
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<TimeUnitChar>('m');
 
-  const derivedIndexPattern = useMemo(
-    () => createDerivedIndexPattern(),
-    [createDerivedIndexPattern]
-  );
+  const derivedDataView = useDerivedDataView(source?.configuration.metricAlias);
 
   const updateParams = useCallback(
     (id, e: InventoryMetricConditions) => {
@@ -155,13 +152,13 @@ export const Expressions: React.FC<Props> = (props) => {
       try {
         setRuleParams(
           'filterQuery',
-          convertKueryToElasticSearchQuery(filter, derivedIndexPattern, false) || ''
+          convertKueryToElasticSearchQuery(filter, derivedDataView, false) || ''
         );
       } catch (e) {
         setRuleParams('filterQuery', QUERY_INVALID);
       }
     },
-    [derivedIndexPattern, setRuleParams]
+    [derivedDataView, setRuleParams]
   );
 
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
@@ -236,10 +233,10 @@ export const Expressions: React.FC<Props> = (props) => {
       setRuleParams('filterQueryText', md.filter);
       setRuleParams(
         'filterQuery',
-        convertKueryToElasticSearchQuery(md.filter, derivedIndexPattern) || ''
+        convertKueryToElasticSearchQuery(md.filter, derivedDataView) || ''
       );
     }
-  }, [metadata, derivedIndexPattern, setRuleParams]);
+  }, [metadata, derivedDataView, setRuleParams]);
 
   useEffect(() => {
     const md = metadata;
@@ -265,7 +262,7 @@ export const Expressions: React.FC<Props> = (props) => {
     if (!ruleParams.sourceId) {
       setRuleParams('sourceId', source?.id || 'default');
     }
-  }, [metadata, derivedIndexPattern, defaultExpression, source]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [metadata, derivedDataView, defaultExpression, source]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <>
@@ -303,7 +300,7 @@ export const Expressions: React.FC<Props> = (props) => {
               setRuleParams={updateParams}
               errors={(errors[idx] as IErrorObject) || emptyError}
               expression={e || {}}
-              fields={derivedIndexPattern.fields}
+              fields={derivedDataView.fields}
             >
               <ExpressionChart
                 expression={e}
@@ -377,7 +374,7 @@ export const Expressions: React.FC<Props> = (props) => {
       >
         {(metadata && (
           <MetricsExplorerKueryBar
-            derivedIndexPattern={derivedIndexPattern}
+            derivedIndexPattern={derivedDataView}
             onSubmit={onFilterChange}
             onChange={debouncedOnFilterChange}
             value={ruleParams.filterQueryText}
@@ -411,7 +408,7 @@ interface ExpressionRowProps {
   addExpression(): void;
   remove(id: number): void;
   setRuleParams(id: number, params: Partial<InventoryMetricConditions>): void;
-  fields: DerivedIndexPattern['fields'];
+  fields: DerivedDataView['fields'];
 }
 
 const NonCollapsibleExpression = euiStyled.div`

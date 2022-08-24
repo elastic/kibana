@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
-import { fieldToName } from '../../lib/field_to_display_name';
 import { useSourceContext } from '../../../../../containers/metrics_source';
+import { useDerivedDataView } from '../../../../../hooks/use_derived_data_view';
 import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
+import { fieldToName } from '../../lib/field_to_display_name';
 import { WaffleInventorySwitcher } from '../waffle/waffle_inventory_switcher';
 import { ToolbarProps } from './toolbar';
 
@@ -37,14 +38,16 @@ export const ToolbarWrapper = (props: Props) => {
     customMetrics,
     changeCustomMetrics,
   } = useWaffleOptionsContext();
-  const { createDerivedIndexPattern } = useSourceContext();
+  const { source } = useSourceContext();
+  const derivedDataView = useDerivedDataView(source?.configuration.metricAlias);
+
   return (
     <EuiFlexGroup responsive={false} wrap gutterSize="m">
       <EuiFlexItem grow={false}>
         <WaffleInventorySwitcher />
       </EuiFlexItem>
       {props.children({
-        createDerivedIndexPattern,
+        derivedDataView,
         changeMetric,
         changeGroupBy,
         changeAccount,

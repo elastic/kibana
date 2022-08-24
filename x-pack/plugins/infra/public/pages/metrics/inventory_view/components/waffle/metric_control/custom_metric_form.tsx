@@ -29,7 +29,7 @@ import {
   SNAPSHOT_CUSTOM_AGGREGATIONS,
   SnapshotCustomAggregationRT,
 } from '../../../../../../../common/http_api/snapshot_api';
-import { DerivedIndexPattern } from '../../../../../../containers/metrics_source';
+import { DerivedDataView } from '../../../../../../hooks/use_derived_data_view';
 
 interface SelectedOption {
   label: string;
@@ -53,7 +53,7 @@ const AGGREGATION_LABELS = {
 interface Props {
   theme: EuiTheme | undefined;
   metric?: SnapshotCustomMetricInput;
-  fields: DerivedIndexPattern['fields'];
+  fields: DerivedDataView['fields'];
   customMetrics: SnapshotCustomMetricInput[];
   onChange: (metric: SnapshotCustomMetricInput) => void;
   onCancel: () => void;

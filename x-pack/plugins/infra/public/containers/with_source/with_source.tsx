@@ -13,7 +13,6 @@ import {
 } from '../../../common/metrics_sources';
 import { RendererFunction } from '../../utils/typed_react';
 import { useSourceContext } from '../metrics_source';
-import { CreateDerivedIndexPattern } from '../metrics_source';
 
 interface WithSourceProps {
   children: RendererFunction<{
@@ -21,7 +20,6 @@ interface WithSourceProps {
     create: (
       sourceProperties: PartialMetricsSourceConfigurationProperties
     ) => Promise<any> | undefined;
-    createDerivedIndexPattern: CreateDerivedIndexPattern;
     exists?: boolean;
     hasFailed: boolean;
     isLoading: boolean;
@@ -41,7 +39,6 @@ interface WithSourceProps {
 export const WithSource: React.FunctionComponent<WithSourceProps> = ({ children }) => {
   const {
     createSourceConfiguration,
-    createDerivedIndexPattern,
     source,
     sourceExists,
     sourceId,
@@ -57,7 +54,6 @@ export const WithSource: React.FunctionComponent<WithSourceProps> = ({ children 
   return children({
     create: createSourceConfiguration,
     configuration: source && source.configuration,
-    createDerivedIndexPattern,
     exists: sourceExists,
     hasFailed: hasFailedLoadingSource,
     isLoading,

@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiAccordion,
   EuiButtonEmpty,
@@ -20,16 +19,18 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { debounce } from 'lodash';
+import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
 import {
   ForLastExpression,
   IErrorObject,
   RuleTypeParams,
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
+import { debounce } from 'lodash';
+import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import { Aggregators, Comparator, QUERY_INVALID } from '../../../../common/alerting/metrics';
 import { useSourceViaHttp } from '../../../containers/metrics_source/use_source_via_http';
+import { useDerivedDataView } from '../../../hooks/use_derived_data_view';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { MetricsExplorerGroupBy } from '../../../pages/metrics/metrics_explorer/components/group_by';
 import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
@@ -57,18 +58,15 @@ export { defaultExpression };
 export const Expressions: React.FC<Props> = (props) => {
   const { setRuleParams, ruleParams, errors, metadata } = props;
   const { http, notifications, docLinks } = useKibanaContextForPlugin().services;
-  const { source, createDerivedIndexPattern } = useSourceViaHttp({
+  const { source } = useSourceViaHttp({
     sourceId: 'default',
     fetch: http.fetch,
     toastWarning: notifications.toasts.addWarning,
   });
+  const derivedDataView = useDerivedDataView(source?.configuration.metricAlias);
 
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<TimeUnitChar | undefined>('m');
-  const derivedIndexPattern = useMemo(
-    () => createDerivedIndexPattern(),
-    [createDerivedIndexPattern]
-  );
 
   const options = useMemo<MetricsExplorerOptions>(() => {
     if (metadata?.currentOptions?.metrics) {
@@ -117,13 +115,13 @@ export const Expressions: React.FC<Props> = (props) => {
       try {
         setRuleParams(
           'filterQuery',
-          convertKueryToElasticSearchQuery(filter, derivedIndexPattern, false) || ''
+          convertKueryToElasticSearchQuery(filter, derivedDataView, false) || ''
         );
       } catch (e) {
         setRuleParams('filterQuery', QUERY_INVALID);
       }
     },
-    [setRuleParams, derivedIndexPattern]
+    [setRuleParams, derivedDataView]
   );
 
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
@@ -197,7 +195,7 @@ export const Expressions: React.FC<Props> = (props) => {
       setRuleParams('filterQueryText', md.currentOptions.filterQuery);
       setRuleParams(
         'filterQuery',
-        convertKueryToElasticSearchQuery(md.currentOptions.filterQuery, derivedIndexPattern) || ''
+        convertKueryToElasticSearchQuery(md.currentOptions.filterQuery, derivedDataView) || ''
       );
     } else if (md && md.currentOptions?.groupBy && md.series) {
       const { groupBy } = md.currentOptions;
@@ -205,12 +203,9 @@ export const Expressions: React.FC<Props> = (props) => {
         ? groupBy.map((field, index) => `${field}: "${md.series?.keys?.[index]}"`).join(' and ')
         : `${groupBy}: "${md.series.id}"`;
       setRuleParams('filterQueryText', filter);
-      setRuleParams(
-        'filterQuery',
-        convertKueryToElasticSearchQuery(filter, derivedIndexPattern) || ''
-      );
+      setRuleParams('filterQuery', convertKueryToElasticSearchQuery(filter, derivedDataView) || '');
     }
-  }, [metadata, derivedIndexPattern, setRuleParams]);
+  }, [metadata, derivedDataView, setRuleParams]);
 
   const preFillAlertGroupBy = useCallback(() => {
     const md = metadata;
@@ -303,7 +298,7 @@ export const Expressions: React.FC<Props> = (props) => {
           return (
             <ExpressionRow
               canDelete={(ruleParams.criteria && ruleParams.criteria.length > 1) || false}
-              fields={derivedIndexPattern.fields}
+              fields={derivedDataView.fields}
               remove={removeExpression}
               addExpression={addExpression}
               key={idx} // idx's don't usually make good key's but here the index has semantic meaning
@@ -314,7 +309,7 @@ export const Expressions: React.FC<Props> = (props) => {
             >
               <ExpressionChart
                 expression={e}
-                derivedIndexPattern={derivedIndexPattern}
+                derivedIndexPattern={derivedDataView}
                 source={source}
                 filterQuery={ruleParams.filterQueryText}
                 groupBy={ruleParams.groupBy}
@@ -397,7 +392,7 @@ export const Expressions: React.FC<Props> = (props) => {
       >
         {(metadata && (
           <MetricsExplorerKueryBar
-            derivedIndexPattern={derivedIndexPattern}
+            derivedIndexPattern={derivedDataView}
             onChange={debouncedOnFilterChange}
             onSubmit={onFilterChange}
             value={ruleParams.filterQueryText}
@@ -425,7 +420,7 @@ export const Expressions: React.FC<Props> = (props) => {
       >
         <MetricsExplorerGroupBy
           onChange={onGroupByChange}
-          fields={derivedIndexPattern.fields}
+          fields={derivedDataView.fields}
           options={{
             ...options,
             groupBy: ruleParams.groupBy || undefined,

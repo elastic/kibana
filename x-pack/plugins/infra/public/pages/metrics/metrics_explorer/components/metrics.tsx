@@ -12,13 +12,13 @@ import React, { useCallback, useState } from 'react';
 import { colorTransformer, Color } from '../../../../../common/color_palette';
 import { MetricsExplorerMetric } from '../../../../../common/http_api/metrics_explorer';
 import { MetricsExplorerOptions } from '../hooks/use_metrics_explorer_options';
-import { DerivedIndexPattern } from '../../../../containers/metrics_source';
+import { DerivedDataView } from '../../../../hooks/use_derived_data_view';
 
 interface Props {
   autoFocus?: boolean;
   options: MetricsExplorerOptions;
   onChange: (metrics: MetricsExplorerMetric[]) => void;
-  fields: DerivedIndexPattern['fields'];
+  fields: DerivedDataView['fields'];
 }
 
 interface SelectedOption {

@@ -32,7 +32,7 @@ import {
   SnapshotCustomMetricInputRT,
   SNAPSHOT_CUSTOM_AGGREGATIONS,
 } from '../../../../common/http_api/snapshot_api';
-import { DerivedIndexPattern } from '../../../containers/metrics_source';
+import { DerivedDataView } from '../../../hooks/use_derived_data_view';
 
 interface Props {
   metric?: { value: string; text: string };
@@ -41,7 +41,7 @@ interface Props {
   onChange: (metric?: string) => void;
   onChangeCustom: (customMetric?: SnapshotCustomMetricInput) => void;
   customMetric?: SnapshotCustomMetricInput;
-  fields: DerivedIndexPattern['fields'];
+  fields: DerivedDataView['fields'];
   popupPosition?:
     | 'upCenter'
     | 'upLeft'

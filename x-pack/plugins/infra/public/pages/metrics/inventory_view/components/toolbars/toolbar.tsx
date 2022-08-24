@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
 import { EuiFlexItem } from '@elastic/eui';
-import { useSourceContext } from '../../../../../containers/metrics_source';
-import {
-  SnapshotMetricInput,
-  SnapshotGroupBy,
-  SnapshotCustomMetricInput,
-} from '../../../../../../common/http_api/snapshot_api';
+import React, { FunctionComponent } from 'react';
 import { InventoryCloudAccount } from '../../../../../../common/http_api/inventory_meta_api';
+import {
+  SnapshotCustomMetricInput,
+  SnapshotGroupBy,
+  SnapshotMetricInput,
+} from '../../../../../../common/http_api/snapshot_api';
 import { findToolbar } from '../../../../../../common/inventory_models/toolbars';
+import { InventoryItemType } from '../../../../../../common/inventory_models/types';
+import { useSourceContext } from '../../../../../containers/metrics_source';
+import type { DerivedDataView } from '../../../../../hooks/use_derived_data_view';
+import { InfraGroupByOptions } from '../../../../../lib/lib';
+import { useInventoryMeta } from '../../hooks/use_inventory_meta';
+import { WaffleOptionsState, WaffleSortOption } from '../../hooks/use_waffle_options';
 import { ToolbarWrapper } from './toolbar_wrapper';
 
-import { InfraGroupByOptions } from '../../../../../lib/lib';
-import { InventoryItemType } from '../../../../../../common/inventory_models/types';
-import { WaffleOptionsState, WaffleSortOption } from '../../hooks/use_waffle_options';
-import { useInventoryMeta } from '../../hooks/use_inventory_meta';
-import { CreateDerivedIndexPattern } from '../../../../../containers/metrics_source';
 export interface ToolbarProps extends Omit<WaffleOptionsState, 'boundsOverride' | 'autoBounds'> {
-  createDerivedIndexPattern: CreateDerivedIndexPattern;
+  derivedDataView: DerivedDataView;
   changeMetric: (payload: SnapshotMetricInput) => void;
   changeGroupBy: (payload: SnapshotGroupBy) => void;
   changeCustomOptions: (payload: InfraGroupByOptions[]) => void;

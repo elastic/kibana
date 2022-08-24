@@ -21,14 +21,14 @@ import { CustomFieldPanel } from './custom_field_panel';
 import { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import { SnapshotGroupBy } from '../../../../../../common/http_api/snapshot_api';
 import { DropdownButton } from '../dropdown_button';
-import { DerivedIndexPattern } from '../../../../../containers/metrics_source';
+import { DerivedDataView } from '../../../../../hooks/use_derived_data_view';
 interface Props {
   options: Array<{ text: string; field: string; toolTipContent?: string }>;
   nodeType: InventoryItemType;
   groupBy: SnapshotGroupBy;
   onChange: (groupBy: SnapshotGroupBy) => void;
   onChangeCustomOptions: (options: InfraGroupByOptions[]) => void;
-  fields: DerivedIndexPattern['fields'];
+  fields: DerivedDataView['fields'];
   customOptions: InfraGroupByOptions[];
 }
 

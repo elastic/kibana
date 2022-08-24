@@ -5,48 +5,49 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import { Chart, niceTimeFormatter, PointerEvent } from '@elastic/charts';
-import { EuiLoadingChart, EuiSpacer, EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
-import { first, last } from 'lodash';
+import { EuiFlexGrid, EuiFlexItem, EuiLoadingChart, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { TabContent, TabProps } from '../shared';
-import { useSnapshot } from '../../../../hooks/use_snaphot';
-import { useWaffleOptionsContext } from '../../../../hooks/use_waffle_options';
-import { useSourceContext } from '../../../../../../../containers/metrics_source';
-import { findInventoryFields } from '../../../../../../../../common/inventory_models';
-import { convertKueryToElasticSearchQuery } from '../../../../../../../utils/kuery';
-import { SnapshotMetricType } from '../../../../../../../../common/inventory_models/types';
-import {
-  MetricsExplorerChartType,
-  MetricsExplorerOptionsMetric,
-} from '../../../../../metrics_explorer/hooks/use_metrics_explorer_options';
+import { first, last } from 'lodash';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Color } from '../../../../../../../../common/color_palette';
+import { getCustomMetricLabel } from '../../../../../../../../common/formatters/get_custom_metric_label';
 import {
   MetricsExplorerAggregation,
   MetricsExplorerSeries,
 } from '../../../../../../../../common/http_api';
-import { createInventoryMetricFormatter } from '../../../../lib/create_inventory_metric_formatter';
+import { findInventoryFields } from '../../../../../../../../common/inventory_models';
+import { SnapshotMetricType } from '../../../../../../../../common/inventory_models/types';
+import { useSourceContext } from '../../../../../../../containers/metrics_source';
+import { useDerivedDataView } from '../../../../../../../hooks/use_derived_data_view';
+import { convertKueryToElasticSearchQuery } from '../../../../../../../utils/kuery';
 import { calculateDomain } from '../../../../../metrics_explorer/components/helpers/calculate_domain';
-import { ChartSection } from './chart_section';
+import { createFormatterForMetric } from '../../../../../metrics_explorer/components/helpers/create_formatter_for_metric';
 import {
-  SYSTEM_METRIC_NAME,
-  USER_METRIC_NAME,
-  INBOUND_METRIC_NAME,
-  OUTBOUND_METRIC_NAME,
-  USED_MEMORY_METRIC_NAME,
-  FREE_MEMORY_METRIC_NAME,
+  MetricsExplorerChartType,
+  MetricsExplorerOptionsMetric,
+} from '../../../../../metrics_explorer/hooks/use_metrics_explorer_options';
+import { useSnapshot } from '../../../../hooks/use_snaphot';
+import { useWaffleOptionsContext } from '../../../../hooks/use_waffle_options';
+import { createInventoryMetricFormatter } from '../../../../lib/create_inventory_metric_formatter';
+import { TabContent, TabProps } from '../shared';
+import { ChartSection } from './chart_section';
+import { TimeDropdown } from './time_dropdown';
+import {
   CPU_CHART_TITLE,
+  FREE_MEMORY_METRIC_NAME,
+  INBOUND_METRIC_NAME,
   LOAD_CHART_TITLE,
+  LOG_RATE_CHART_TITLE,
+  LOG_RATE_METRIC_NAME,
   MEMORY_CHART_TITLE,
   NETWORK_CHART_TITLE,
-  LOG_RATE_METRIC_NAME,
-  LOG_RATE_CHART_TITLE,
+  OUTBOUND_METRIC_NAME,
+  SYSTEM_METRIC_NAME,
+  USED_MEMORY_METRIC_NAME,
+  USER_METRIC_NAME,
 } from './translations';
-import { TimeDropdown } from './time_dropdown';
-import { getCustomMetricLabel } from '../../../../../../../../common/formatters/get_custom_metric_label';
-import { createFormatterForMetric } from '../../../../../metrics_explorer/components/helpers/create_formatter_for_metric';
 
 const ONE_HOUR = 60 * 60 * 1000;
 
@@ -69,17 +70,14 @@ const TabComponent = (props: TabProps) => {
     logRateChartRef,
     customMetricRefs,
   ]);
-  const { sourceId, createDerivedIndexPattern } = useSourceContext();
+  const { sourceId, source } = useSourceContext();
   const { nodeType, accountId, region, customMetrics } = useWaffleOptionsContext();
   const { currentTime, node } = props;
-  const derivedIndexPattern = useMemo(
-    () => createDerivedIndexPattern(),
-    [createDerivedIndexPattern]
-  );
+  const derivedDataView = useDerivedDataView(source?.configuration.metricAlias);
   let filter = `${findInventoryFields(nodeType).id}: "${node.id}"`;
 
   if (filter) {
-    filter = convertKueryToElasticSearchQuery(filter, derivedIndexPattern);
+    filter = convertKueryToElasticSearchQuery(filter, derivedDataView);
   }
 
   const buildCustomMetric = useCallback(

@@ -26,8 +26,7 @@ export function useProcessList(
   sortBy: SortBy,
   searchFilter: object
 ) {
-  const { createDerivedIndexPattern } = useSourceContext();
-  const indexPattern = createDerivedIndexPattern().title;
+  const { source } = useSourceContext();
 
   const [inErrorState, setInErrorState] = useState(false);
   const decodeResponse = (response: any) => {
@@ -50,7 +49,7 @@ export function useProcessList(
     'POST',
     JSON.stringify({
       hostTerm,
-      indexPattern,
+      indexPattern: source?.configuration.metricAlias ?? 'unknown',
       to,
       sortBy: parsedSortBy,
       searchFilter,
@@ -75,9 +74,8 @@ export function useProcessList(
 
 function useProcessListParams(props: { hostTerm: Record<string, string>; to: number }) {
   const { hostTerm, to } = props;
-  const { createDerivedIndexPattern } = useSourceContext();
-  const indexPattern = createDerivedIndexPattern().title;
-  return { hostTerm, indexPattern, to };
+  const { source } = useSourceContext();
+  return { hostTerm, indexPattern: source?.configuration.metricAlias ?? 'unknown', to };
 }
 const ProcessListContext = createContainter(useProcessListParams);
 export const [ProcessListContextProvider, useProcessListContext] = ProcessListContext;

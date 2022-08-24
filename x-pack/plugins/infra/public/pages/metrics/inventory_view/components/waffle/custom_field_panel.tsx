@@ -9,10 +9,10 @@ import { EuiButton, EuiComboBox, EuiForm, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { InfraGroupByOptions } from '../../../../../lib/lib';
-import { DerivedIndexPattern } from '../../../../../containers/metrics_source';
+import { DerivedDataView } from '../../../../../hooks/use_derived_data_view';
 interface Props {
   onSubmit: (field: string) => void;
-  fields: DerivedIndexPattern['fields'];
+  fields: DerivedDataView['fields'];
   currentOptions: InfraGroupByOptions[];
 }
 

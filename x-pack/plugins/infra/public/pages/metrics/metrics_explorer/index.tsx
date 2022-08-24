@@ -21,10 +21,10 @@ import { useSavedViewContext } from '../../../containers/saved_view/saved_view';
 import { MetricsPageTemplate } from '../page_template';
 import { metricsExplorerTitle } from '../../../translations';
 import { SavedViewsToolbarControls } from '../../../components/saved_views/toolbar_control';
-import { DerivedIndexPattern } from '../../../containers/metrics_source';
+import { DerivedDataView } from '../../../hooks/use_derived_data_view';
 interface MetricsExplorerPageProps {
   source: MetricsSourceConfigurationProperties;
-  derivedIndexPattern: DerivedIndexPattern;
+  derivedIndexPattern: DerivedDataView;
 }
 
 export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExplorerPageProps) => {

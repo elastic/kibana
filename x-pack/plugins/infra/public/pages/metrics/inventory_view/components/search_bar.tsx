@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { useSourceContext } from '../../../../containers/metrics_source';
+import React from 'react';
 import { AutocompleteField } from '../../../../components/autocomplete_field';
+import { useSourceContext } from '../../../../containers/metrics_source';
 import { WithKueryAutocompletion } from '../../../../containers/with_kuery_autocompletion';
+import { useDerivedDataView } from '../../../../hooks/use_derived_data_view';
 import { useWaffleFiltersContext } from '../hooks/use_waffle_filters';
 
 export const SearchBar = () => {
-  const { createDerivedIndexPattern } = useSourceContext();
+  const { source } = useSourceContext();
+  const derivedDataView = useDerivedDataView(source?.configuration.metricAlias);
+
   const {
     applyFilterQueryFromKueryExpression,
     filterQueryDraft,
@@ -21,7 +24,7 @@ export const SearchBar = () => {
     setFilterQueryDraftFromKueryExpression,
   } = useWaffleFiltersContext();
   return (
-    <WithKueryAutocompletion indexPattern={createDerivedIndexPattern()}>
+    <WithKueryAutocompletion indexPattern={derivedDataView}>
       {({ isLoadingSuggestions, loadSuggestions, suggestions }) => (
         <AutocompleteField
           isLoadingSuggestions={isLoadingSuggestions}

@@ -17,19 +17,6 @@ import {
 
 import { useTrackedPromise } from '../../utils/use_tracked_promise';
 
-export const pickIndexPattern = (
-  source: MetricsSourceConfiguration | undefined,
-  type: 'metrics'
-) => {
-  if (!source) {
-    return 'unknown-index';
-  }
-  if (type === 'metrics') {
-    return source.configuration.metricAlias;
-  }
-  return `${source.configuration.metricAlias}`;
-};
-
 const DEPENDENCY_ERROR_MESSAGE = 'Failed to load source: No fetch client available.';
 
 export const useSource = ({ sourceId }: { sourceId: string }) => {
@@ -100,13 +87,6 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
     [fetchService, sourceId]
   );
 
-  const createDerivedIndexPattern = () => {
-    return {
-      fields: source?.status ? source.status.indexFields : [],
-      title: pickIndexPattern(source, 'metrics'),
-    };
-  };
-
   const isLoading = useMemo(
     () =>
       [
@@ -139,7 +119,6 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
 
   return {
     createSourceConfiguration,
-    createDerivedIndexPattern,
     isLoading,
     isLoadingSource: loadSourceRequest.state === 'pending',
     isUninitialized,

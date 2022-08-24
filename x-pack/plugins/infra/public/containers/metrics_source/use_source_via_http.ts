@@ -5,33 +5,18 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useCallback } from 'react';
+import { HttpHandler, ToastInput } from '@kbn/core/public';
+import createContainer from 'constate';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
-import createContainer from 'constate';
-import { HttpHandler } from '@kbn/core/public';
-import { ToastInput } from '@kbn/core/public';
+import { useEffect, useMemo } from 'react';
 import {
-  metricsSourceConfigurationResponseRT,
   MetricsSourceConfigurationResponse,
-  MetricsSourceConfiguration,
+  metricsSourceConfigurationResponseRT,
 } from '../../../common/metrics_sources';
+import { createPlainError, throwErrors } from '../../../common/runtime_types';
 import { useHTTPRequest } from '../../hooks/use_http_request';
-import { throwErrors, createPlainError } from '../../../common/runtime_types';
-
-export const pickIndexPattern = (
-  source: MetricsSourceConfiguration | undefined,
-  type: 'metrics'
-) => {
-  if (!source) {
-    return 'unknown-index';
-  }
-  if (type === 'metrics') {
-    return source.configuration.metricAlias;
-  }
-  return `${source.configuration.metricAlias}`;
-};
 
 interface Props {
   sourceId: string;
@@ -63,19 +48,11 @@ export const useSourceViaHttp = ({ sourceId = 'default', fetch, toastWarning }: 
     })();
   }, [makeRequest]);
 
-  const createDerivedIndexPattern = useCallback(() => {
-    return {
-      fields: response?.source.status ? response.source.status.indexFields : [],
-      title: pickIndexPattern(response?.source, 'metrics'),
-    };
-  }, [response]);
-
   const source = useMemo(() => {
     return response ? response.source : null;
   }, [response]);
 
   return {
-    createDerivedIndexPattern,
     source,
     loading,
     error,

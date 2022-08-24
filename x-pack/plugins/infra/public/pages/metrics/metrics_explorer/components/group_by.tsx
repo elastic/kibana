@@ -10,12 +10,12 @@ import { i18n } from '@kbn/i18n';
 
 import React, { useCallback } from 'react';
 import { MetricsExplorerOptions } from '../hooks/use_metrics_explorer_options';
-import { DerivedIndexPattern } from '../../../../containers/metrics_source';
+import { DerivedDataView } from '../../../../hooks/use_derived_data_view';
 
 interface Props {
   options: MetricsExplorerOptions;
   onChange: (groupBy: string | null | string[]) => void;
-  fields: DerivedIndexPattern['fields'];
+  fields: DerivedDataView['fields'];
   errorOptions?: string[];
 }
 

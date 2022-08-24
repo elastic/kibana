@@ -21,12 +21,12 @@ import { MetricsEditMode } from './metrics_edit_mode';
 import { CustomMetricMode } from './types';
 import { SnapshotMetricType } from '../../../../../../../common/inventory_models/types';
 import { DropdownButton } from '../../dropdown_button';
-import { DerivedIndexPattern } from '../../../../../../containers/metrics_source';
+import { DerivedDataView } from '../../../../../../hooks/use_derived_data_view';
 
 interface Props {
   options: Array<{ text: string; value: string }>;
   metric: SnapshotMetricInput;
-  fields: DerivedIndexPattern['fields'];
+  fields: DerivedDataView['fields'];
   onChange: (metric: SnapshotMetricInput) => void;
   onChangeCustomMetrics: (metrics: SnapshotCustomMetricInput[]) => void;
   customMetrics: SnapshotCustomMetricInput[];
