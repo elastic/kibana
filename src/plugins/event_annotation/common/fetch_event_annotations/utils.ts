@@ -121,11 +121,12 @@ export const postprocessAnnotations = (
           }
 
           let modifiedRow: TimebucketRow = {
-            id: row['col-0-1'], // todo: do we need id for the tooltip in the future?
+            ...passStylesFromAnnotationConfig(annotationConfig),
+            id: row['col-0-1'],
             timebucket: moment(row['col-1-2']).toISOString(),
             time: row['col-3-4'],
             type: 'point',
-            ...passStylesFromAnnotationConfig(annotationConfig),
+            label: annotationConfig.textField ? row[fieldsColIdMap[annotationConfig.textField]] : annotationConfig.label,
           };
           const countRow = row['col-2-3'];
           if (countRow > ANNOTATIONS_PER_BUCKET) {
@@ -135,8 +136,8 @@ export const postprocessAnnotations = (
             };
           }
 
-          if (annotationConfig?.fields?.length) {
-            modifiedRow.fields = annotationConfig.fields.reduce(
+          if (annotationConfig?.extraFields?.length) {
+            modifiedRow.extraFields = annotationConfig.extraFields.reduce(
               (acc, field) => ({ ...acc, [`field:${field}`]: row[fieldsColIdMap[field]] }),
               {}
             );
@@ -154,20 +155,22 @@ export const postprocessAnnotations = (
     .reduce<DatatableRow[]>((acc, row) => {
       if (!Array.isArray(row.time)) {
         acc.push({
-          ...omit(row, ['fields', 'skippedCount']),
-          ...row.fields,
+          ...omit(row, ['extraFields', 'skippedCount']),
+          ...row.extraFields,
         });
       } else {
         row.time.forEach((time, index) => {
-          const fields: Record<string, string | number | boolean> = {};
-          if (row.fields) {
-            Object.entries(row?.fields).forEach(([fieldKey, fieldValue]) => {
-              fields[fieldKey] = Array.isArray(fieldValue) ? fieldValue[index] : fieldValue;
+          const extraFields: Record<string, string | number | boolean> = {};
+          if (row.extraFields) {
+            Object.entries(row?.extraFields).forEach(([fieldKey, fieldValue]) => {
+              extraFields[fieldKey] = Array.isArray(fieldValue) ? fieldValue[index] : fieldValue;
             });
           }
+
           acc.push({
-            ...omit(row, ['fields', 'skippedCount']),
-            ...fields,
+            ...omit(row, ['extraFields', 'skippedCount']),
+            ...extraFields,
+            label: Array.isArray(row.label) ? row.label[index] : row.label,
             time,
           });
         });
@@ -193,7 +196,7 @@ type TimebucketRow = {
   time: string;
   type: string;
   skippedCount?: number;
-  fields?: Record<string, string | number | string[] | number[]>;
+  extraFields?: Record<string, string | number | string[] | number[]>;
 } & PointStyleProps;
 
 function getSkippedCountPerBucket(rows: TimebucketRow[]) {

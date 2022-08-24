@@ -65,7 +65,8 @@ export type QueryEventAnnotationConfig = {
   id: string;
   filter: KibanaQueryOutput;
   timeField: string;
-  fields?: string[];
+  textField: string;
+  extraFields?: string[];
   key: {
     type: 'point_in_time';
   };
@@ -95,6 +96,7 @@ export const annotationColumns: DatatableColumn[] = [
   { id: 'lineWidth', name: 'lineWidth', meta: { type: 'number' } },
   { id: 'icon', name: 'icon', meta: { type: 'string' } },
   { id: 'textVisibility', name: 'textVisibility', meta: { type: 'boolean' } },
+  { id: 'textField', name: 'textField', meta: { type: 'string' } },
   { id: 'outside', name: 'outside', meta: { type: 'number' } },
   { id: 'type', name: 'type', meta: { type: 'string' } },
   { id: 'skippedCount', name: 'skippedCount', meta: { type: 'number' } },

@@ -51,7 +51,7 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
         };
       } else if ('filter' in annotation) {
         const {
-          fields,
+          extraFields,
           label,
           isHidden,
           color,
@@ -61,6 +61,7 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
           filter,
           textVisibility,
           timeField,
+          textField
         } = annotation;
         return {
           type: 'expression',
@@ -71,6 +72,7 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
               arguments: {
                 filter: filter ? [queryToAst(filter)] : [],
                 timeField: [timeField],
+                textField: [textField],
                 label: [label || defaultAnnotationLabel],
                 color: [color || defaultAnnotationColor],
                 lineWidth: [lineWidth || 1],
@@ -78,7 +80,7 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
                 icon: hasIcon(icon) ? [icon] : ['triangle'],
                 textVisibility: [textVisibility || false],
                 isHidden: [Boolean(isHidden)],
-                fields: fields ? [...fields] : [],
+                extraFields: extraFields ? [...extraFields] : [],
               },
             },
           ],
@@ -99,7 +101,7 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
                 lineWidth: [lineWidth || 1],
                 lineStyle: [lineStyle || 'solid'],
                 icon: hasIcon(icon) ? [icon] : ['triangle'],
-                textVisibility: [textVisibility || false],
+                textVisibility: [textVisibility || 'false'],
                 isHidden: [Boolean(isHidden)],
               },
             },

@@ -13,7 +13,8 @@ export type QueryEventAnnotationArgs = {
   id: string;
   filter: KibanaQueryOutput;
   timeField: string;
-  fields?: string[];
+  extraFields?: string[];
+  textField?: string;
 } & PointStyleProps;
 
 export type QueryEventAnnotationOutput = QueryEventAnnotationArgs & {

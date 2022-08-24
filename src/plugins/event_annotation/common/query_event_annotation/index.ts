@@ -33,7 +33,7 @@ export const queryEventAnnotation: ExpressionFunctionDefinition<
       }),
       required: true,
     },
-    fields: {
+    extraFields: {
       required: false,
       multi: true,
       types: ['string'],
@@ -90,6 +90,12 @@ export const queryEventAnnotation: ExpressionFunctionDefinition<
       types: ['boolean'],
       help: i18n.translate('eventAnnotation.queryAnnotation.args.textVisibility', {
         defaultMessage: 'Visibility of the label on the annotation line',
+      }),
+    },
+    textField: {
+      types: ['string'],
+      help: i18n.translate('eventAnnotation.queryAnnotation.args.textField', {
+        defaultMessage: `Field name used for the annotation label`,
       }),
     },
     isHidden: {

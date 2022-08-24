@@ -44,7 +44,7 @@ interface ManualGroup {
 interface QueryGroup {
   type: 'query';
   annotations: QueryEventAnnotationOutput[];
-  fields?: string[];
+  allFields?: string[];
   dataView: IndexPatternExpressionType;
   timeField: string;
 }
@@ -214,7 +214,7 @@ const prepareEsaggsForQueryGroups = async (
       },
     };
 
-    const timefieldTopHits = {
+    const timefieldTopMetric = {
       type: 'agg_type',
       value: {
         enabled: true,
@@ -228,7 +228,7 @@ const prepareEsaggsForQueryGroups = async (
       },
     };
 
-    const extraFieldsTopMetrics = (group.fields || [])?.map((field) => ({
+    const fieldsTopMetric = (group.allFields || [])?.map((field) => ({
       type: 'agg_type',
       value: {
         enabled: true,
@@ -246,15 +246,15 @@ const prepareEsaggsForQueryGroups = async (
       annotationsFilters,
       dateHistogram,
       count,
-      timefieldTopHits,
-      ...extraFieldsTopMetrics,
+      timefieldTopMetric,
+      ...fieldsTopMetric,
     ];
 
     const aggConfigs = aggs.createAggConfigs(dataView, aggregations?.map((agg) => agg.value) ?? []);
     return {
       esaggsParams: { dataView, aggConfigs, timeFields: [group.timeField] },
       fieldsColIdMap:
-        group.fields?.reduce<Record<string, string>>(
+        group.allFields?.reduce<Record<string, string>>(
           (acc, fieldName, i) => ({
             ...acc,
             [fieldName]: `col-${i + 4}-${i + 5}`,
@@ -285,33 +285,47 @@ function regroupForRequestOptimization(
             ...acc,
             ['manual']: manualSubgroup
               ? {
-                  ...manualSubgroup,
-                  annotations: [...manualSubgroup.annotations, current],
-                }
+                ...manualSubgroup,
+                annotations: [...manualSubgroup.annotations, current],
+              }
               : {
-                  type: 'manual',
-                  annotations: [current],
-                },
+                type: 'manual',
+                annotations: [current],
+              },
           };
         } else {
           const key = `${g.dataView.value.id}-${current.timeField}`;
           const subGroup = acc[key] as QueryGroup;
+          if (subGroup) {
+            let allFields = [...(subGroup.allFields || []), ...(current.extraFields || [])]
+            if (current.textField) {
+              allFields = [...allFields, current.textField];
+            }
+            return {
+              ...acc,
+              [key]: {
+                ...subGroup,
+                allFields: [...new Set(allFields)],
+                annotations: [...subGroup.annotations, current],
+              }
+
+            };
+          }
+
+          let allFields = current.extraFields || [];
+          if (current.textField) {
+            allFields = [...allFields, current.textField];
+          }
 
           return {
             ...acc,
-            [key]: subGroup
-              ? {
-                  ...subGroup,
-                  fields: [...new Set([...(subGroup.fields || []), ...(current.fields || [])])],
-                  annotations: [...subGroup.annotations, current],
-                }
-              : {
-                  type: 'query',
-                  dataView: g.dataView,
-                  timeField: current.timeField,
-                  fields: current.fields || [],
-                  annotations: [current],
-                },
+            [key]: {
+              type: 'query',
+              dataView: g.dataView,
+              timeField: current.timeField,
+              allFields,
+              annotations: [current],
+            },
           };
         }
       }, {});
@@ -331,7 +345,7 @@ function regroupForRequestOptimization(
             acc[key] = {
               ...accSubGroup,
               annotations: [...accSubGroup.annotations, ...currentSubGroup.annotations],
-              fields: [...(accSubGroup.fields || []), ...(currentSubGroup.fields || [])],
+              allFields: [...(accSubGroup.allFields || []), ...(currentSubGroup.allFields || [])],
             };
           }
         } else {
