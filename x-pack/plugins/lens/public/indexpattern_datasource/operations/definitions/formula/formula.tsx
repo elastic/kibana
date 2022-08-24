@@ -150,10 +150,15 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
       }
       // carry over the format settings from previous operation for seamless transfer
       // NOTE: this works only for non-default formatters set in Lens
-      let prevFormat = {};
+      let format = {};
       if (previousColumn && isColumnFormatted(previousColumn)) {
-        prevFormat = { format: previousColumn.params?.format };
+        format = { format: previousColumn.params?.format };
       }
+
+      if (columnParams?.format) {
+        format = { format: columnParams.format };
+      }
+
       return {
         label: previousFormula || defaultLabel,
         dataType: 'number',
@@ -164,10 +169,10 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
           ? {
               formula: previousFormula,
               isFormulaBroken: false,
-              ...prevFormat,
+              ...format,
               ...(columnParams?.formula ? { formula: columnParams?.formula } : {}),
             }
-          : { ...prevFormat, ...(columnParams?.formula ? { formula: columnParams?.formula } : {}) },
+          : { ...format, ...(columnParams?.formula ? { formula: columnParams?.formula } : {}) },
         references: [],
         // carry over the filter if coming from another formula,
         // otherwise the filter has been already migrated into the formula text

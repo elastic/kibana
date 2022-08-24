@@ -113,7 +113,6 @@ export const convertMetricAggregationColumnWithoutParams = (
   if (!isSupportedAggregationWithoutParams(aggregation.name)) {
     return null;
   }
-
   const sourceField = aggregation.name !== 'count' && metric.field ? metric.field : 'document';
 
   const field = dataView.getFieldByName(sourceField);

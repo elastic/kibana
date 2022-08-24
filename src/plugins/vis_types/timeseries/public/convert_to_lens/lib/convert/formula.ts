@@ -28,7 +28,8 @@ const convertToFormulaParams = (formula: string): FormulaParams | null => ({
 export const createFormulaColumn = (
   mathScript: string,
   series: Series,
-  metric: Metric
+  metric: Metric,
+  formatParams: Omit<FormulaParams, 'formula'> = {}
 ): FormulaColumn | null => {
   const params = convertToFormulaParams(mathScript);
   if (!params) {
@@ -39,7 +40,7 @@ export const createFormulaColumn = (
     operationType: 'formula',
     references: [],
     ...createColumn(series, metric),
-    params,
+    params: { ...params, ...formatParams },
   };
 };
 

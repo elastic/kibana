@@ -23,6 +23,7 @@ import {
   convertToLastValueColumn,
   convertToStaticValueColumn,
   convertMetricAggregationColumnWithoutParams,
+  convertToCounterRateFormulaColumn,
 } from '../convert';
 import { getValidColumns } from './columns';
 
@@ -72,6 +73,10 @@ export const getMetricsColumns = (
     }
     case 'filter_ratio': {
       const formulaColumn = convertFilterRatioToFormulaColumn(series, metrics);
+      return getValidColumns(formulaColumn);
+    }
+    case 'positive_rate': {
+      const formulaColumn = convertToCounterRateFormulaColumn(series, metrics, dataView);
       return getValidColumns(formulaColumn);
     }
     case 'positive_only':

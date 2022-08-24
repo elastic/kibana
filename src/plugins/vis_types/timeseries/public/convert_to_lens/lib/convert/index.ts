@@ -21,5 +21,6 @@ export { convertToStaticValueColumn } from './static_value';
 export { convertToFiltersColumn } from './filters';
 export { convertToDateHistogramColumn } from './date_histogram';
 export { converToTermsColumn } from './terms';
+export { convertToCounterRateFormulaColumn } from './counter_rate';
 
 export * from './types';
