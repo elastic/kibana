@@ -13,7 +13,7 @@ import {
   TaskInstanceWithDeprecatedFields,
   TaskStatus,
 } from '@kbn/task-manager-plugin/server/task';
-import { SavedObjectsUtils } from '@kbn/core/server/saved_objects';
+import { SavedObjectsUtils } from '@kbn/core/server';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 export default function createGetTests({ getService }: FtrProviderContext) {
