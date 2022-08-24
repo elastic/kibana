@@ -9,7 +9,7 @@ import React, { ComponentType } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { AppMountParameters } from '@kbn/core/public';
 import { CoreStart } from '@kbn/core/public';
-import { KibanaPageTemplate } from '@kbn/shared-ux-components';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { casesFeatureId } from '../../../common';
 import { PluginContext, PluginContextValue } from '../../context/plugin_context';

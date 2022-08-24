@@ -13,11 +13,23 @@ import { Indicator } from '../../../../../common/types/indicator';
 export const BUTTON_TEST_ID = 'tiToggleIndicatorFlyoutButton';
 
 export interface OpenIndicatorFlyoutButtonProps {
+  /**
+   * {@link Indicator} passed to the flyout component.
+   */
   indicator: Indicator;
+  /**
+   * Method called by the onClick event to open/close the flyout.
+   */
   onOpen: (indicator: Indicator) => void;
+  /**
+   * Boolean used to change the color and type of icon depending on the state of the flyout.
+   */
   isOpen: boolean;
 }
 
+/**
+ * Button added to the actions column of the indicators table to open/close the IndicatorFlyout component.
+ */
 export const OpenIndicatorFlyoutButton: VFC<OpenIndicatorFlyoutButtonProps> = ({
   indicator,
   onOpen,
@@ -31,18 +43,16 @@ export const OpenIndicatorFlyoutButton: VFC<OpenIndicatorFlyoutButtonProps> = ({
   );
 
   return (
-    <>
-      <EuiToolTip content={buttonLabel} delay="long">
-        <EuiButtonIcon
-          data-test-subj={BUTTON_TEST_ID}
-          color={isOpen ? 'primary' : 'text'}
-          iconType={isOpen ? 'minimize' : 'expand'}
-          isSelected={isOpen}
-          iconSize="s"
-          aria-label={buttonLabel}
-          onClick={() => onOpen(indicator)}
-        />
-      </EuiToolTip>
-    </>
+    <EuiToolTip content={buttonLabel} delay="long">
+      <EuiButtonIcon
+        data-test-subj={BUTTON_TEST_ID}
+        color={isOpen ? 'primary' : 'text'}
+        iconType={isOpen ? 'minimize' : 'expand'}
+        isSelected={isOpen}
+        iconSize="s"
+        aria-label={buttonLabel}
+        onClick={() => onOpen(indicator)}
+      />
+    </EuiToolTip>
   );
 };

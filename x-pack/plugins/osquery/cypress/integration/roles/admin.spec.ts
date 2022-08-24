@@ -20,7 +20,6 @@ describe('Admin', () => {
     cy.contains('New live query').click();
     selectAllAgents();
     inputQuery('select * from uptime; ');
-    cy.wait(500);
     submitQuery();
     checkResults();
   });
