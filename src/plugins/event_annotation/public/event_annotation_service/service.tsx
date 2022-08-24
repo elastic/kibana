@@ -61,14 +61,14 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
           filter,
           textVisibility,
           timeField,
-          textField
+          textField,
         } = annotation;
         return {
           type: 'expression',
           chain: [
             {
               type: 'function',
-              function: 'query_event_annotation',
+              function: 'query_point_event_annotation',
               arguments: {
                 filter: filter ? [queryToAst(filter)] : [],
                 timeField: [timeField],

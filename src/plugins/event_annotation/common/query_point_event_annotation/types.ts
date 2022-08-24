@@ -9,7 +9,7 @@
 import { KibanaQueryOutput } from '@kbn/data-plugin/common';
 import { PointStyleProps } from '../types';
 
-export type QueryEventAnnotationArgs = {
+export type QueryPointEventAnnotationArgs = {
   id: string;
   filter: KibanaQueryOutput;
   timeField: string;
@@ -17,6 +17,6 @@ export type QueryEventAnnotationArgs = {
   textField?: string;
 } & PointStyleProps;
 
-export type QueryEventAnnotationOutput = QueryEventAnnotationArgs & {
-  type: 'query_event_annotation';
+export type QueryPointEventAnnotationOutput = QueryPointEventAnnotationArgs & {
+  type: 'query_point_event_annotation';
 };

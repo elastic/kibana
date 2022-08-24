@@ -79,8 +79,8 @@ export default function ({
         kibana_context timeRange={timerange from='${timeRange.from}' to='${timeRange.to}'}
         | fetch_event_annotations interval="1d" timezone="Australia/Darwin" groups={event_annotation_group  
           dataView={indexPatternLoad id="logstash-*"} 
-          annotations={query_event_annotation id="server_errors" filter={kql q="response.raw === 503"}  extraFields='response.raw'  extraFields='extension.raw'   extraFields='bytes' timeField="@timestamp" label="503" color="red"}
-          annotations={query_event_annotation id="client_errors" filter={kql q="response.raw === 404"}  extraFields='response.raw' textField="ip"  timeField="@timestamp" label="404" color="orange"}}
+          annotations={query_point_event_annotation id="server_errors" filter={kql q="response.raw === 503"}  extraFields='response.raw'  extraFields='extension.raw'   extraFields='bytes' timeField="@timestamp" label="503" color="red"}
+          annotations={query_point_event_annotation id="client_errors" filter={kql q="response.raw === 404"}  extraFields='response.raw' textField="ip"  timeField="@timestamp" label="404" color="orange"}}
       `;
 
         const result = await expectExpression('fetch_event_annotations', expression).getResponse();
@@ -91,10 +91,10 @@ export default function ({
         kibana_context timeRange={timerange from='${timeRange.from}' to='${timeRange.to}'}
         | fetch_event_annotations interval="1d" timezone="Australia/Darwin" groups={event_annotation_group  
           dataView={indexPatternLoad id="logstash-*"} 
-          annotations={query_event_annotation id="server_errors" filter={kql q="response.raw === 503"}  extraFields='response.raw'  extraFields='extension.raw'   extraFields='bytes' timeField="@timestamp" label="503" color="red"}}
+          annotations={query_point_event_annotation id="server_errors" filter={kql q="response.raw === 503"}  extraFields='response.raw'  extraFields='extension.raw'   extraFields='bytes' timeField="@timestamp" label="503" color="red"}}
           groups={event_annotation_group  
             dataView={indexPatternLoad id="logstash-*"} 
-            annotations={query_event_annotation id="client_errors" filter={kql q="response.raw === 404"}  extraFields='response.raw'  textField="ip" timeField="@timestamp" label="404" color="orange"}}
+            annotations={query_point_event_annotation id="client_errors" filter={kql q="response.raw === 404"}  extraFields='response.raw'  textField="ip" timeField="@timestamp" label="404" color="orange"}}
       `;
 
         const result = await expectExpression('fetch_event_annotations', expression).getResponse();
@@ -105,13 +105,13 @@ export default function ({
         kibana_context timeRange={timerange from='${timeRange.from}' to='${timeRange.to}'}
         | fetch_event_annotations interval="1d" timezone="Australia/Darwin" groups={event_annotation_group  
           dataView={indexPatternLoad id="logstash-*"} 
-          annotations={query_event_annotation id="server_errors" filter={kql q="response.raw === 503"}  extraFields='response.raw'  extraFields='extension.raw'   extraFields='bytes' timeField="@timestamp" label="503" color="red"}}
+          annotations={query_point_event_annotation id="server_errors" filter={kql q="response.raw === 503"}  extraFields='response.raw'  extraFields='extension.raw'   extraFields='bytes' timeField="@timestamp" label="503" color="red"}}
           groups={event_annotation_group  
             dataView={indexPatternLoad id="logstash-*"} 
             annotations={
               manual_point_event_annotation id="ann1" label="Manual1" color="red" icon="bolt" time="2015-09-21T12:15:00Z" lineWidth="3" lineStyle="solid" textVisibility=true
             } 
-            annotations={query_event_annotation id="client_errors" filter={kql q="response.raw === 404"}  extraFields='response.raw' timeField="@timestamp"  textField="ip" label="404" color="orange"}
+            annotations={query_point_event_annotation id="client_errors" filter={kql q="response.raw === 404"}  extraFields='response.raw' timeField="@timestamp"  textField="ip" label="404" color="orange"}
             annotations={
               manual_range_event_annotation id="ann3" label="Range" color="blue" time="2015-09-21T07:30:00Z" endTime="2015-09-21T12:30:00Z"
             }}

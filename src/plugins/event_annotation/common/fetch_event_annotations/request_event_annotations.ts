@@ -33,7 +33,7 @@ import {
   wrapRowsInDatatable,
 } from './utils';
 import type { ManualEventAnnotationOutput } from '../manual_event_annotation/types';
-import { QueryEventAnnotationOutput } from '../query_event_annotation/types';
+import { QueryPointEventAnnotationOutput } from '../query_point_event_annotation/types';
 import { FetchEventAnnotationsArgs, FetchEventAnnotationsStartDependencies } from './types';
 
 interface ManualGroup {
@@ -43,7 +43,7 @@ interface ManualGroup {
 
 interface QueryGroup {
   type: 'query';
-  annotations: QueryEventAnnotationOutput[];
+  annotations: QueryPointEventAnnotationOutput[];
   allFields?: string[];
   dataView: IndexPatternExpressionType;
   timeField: string;
@@ -285,19 +285,19 @@ function regroupForRequestOptimization(
             ...acc,
             ['manual']: manualSubgroup
               ? {
-                ...manualSubgroup,
-                annotations: [...manualSubgroup.annotations, current],
-              }
+                  ...manualSubgroup,
+                  annotations: [...manualSubgroup.annotations, current],
+                }
               : {
-                type: 'manual',
-                annotations: [current],
-              },
+                  type: 'manual',
+                  annotations: [current],
+                },
           };
         } else {
           const key = `${g.dataView.value.id}-${current.timeField}`;
           const subGroup = acc[key] as QueryGroup;
           if (subGroup) {
-            let allFields = [...(subGroup.allFields || []), ...(current.extraFields || [])]
+            let allFields = [...(subGroup.allFields || []), ...(current.extraFields || [])];
             if (current.textField) {
               allFields = [...allFields, current.textField];
             }
@@ -307,8 +307,7 @@ function regroupForRequestOptimization(
                 ...subGroup,
                 allFields: [...new Set(allFields)],
                 annotations: [...subGroup.annotations, current],
-              }
-
+              },
             };
           }
 

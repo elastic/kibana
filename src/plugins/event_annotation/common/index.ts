@@ -13,12 +13,12 @@ export type {
   ManualRangeEventAnnotationOutput,
 } from './manual_event_annotation/types';
 export type {
-  QueryEventAnnotationArgs,
-  QueryEventAnnotationOutput,
-} from './query_event_annotation/types';
+  QueryPointEventAnnotationArgs,
+  QueryPointEventAnnotationOutput,
+} from './query_point_event_annotation/types';
 export type { EventAnnotationArgs, EventAnnotationOutput } from './types';
 export { manualPointEventAnnotation, manualRangeEventAnnotation } from './manual_event_annotation';
-export { queryEventAnnotation } from './query_event_annotation';
+export { queryPointEventAnnotation } from './query_point_event_annotation';
 export { eventAnnotationGroup } from './event_annotation_group';
 export type { EventAnnotationGroupArgs } from './event_annotation_group';
 

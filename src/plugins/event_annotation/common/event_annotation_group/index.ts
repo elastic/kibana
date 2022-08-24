@@ -48,7 +48,7 @@ export function eventAnnotationGroup(): ExpressionFunctionDefinition<
         types: [
           'manual_point_event_annotation',
           'manual_range_event_annotation',
-          'query_event_annotation',
+          'query_point_event_annotation',
         ],
         help: i18n.translate('eventAnnotation.group.args.annotationConfigs', {
           defaultMessage: 'Annotation configs',

@@ -16,7 +16,7 @@ import {
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { EventAnnotationService } from '..';
 import { getFetchEventAnnotations } from '.';
-import { FetchEventAnnotationsArgs, QueryEventAnnotationOutput } from '../../common';
+import { FetchEventAnnotationsArgs, QueryPointEventAnnotationOutput } from '../../common';
 import { EventAnnotationStartDependencies } from '../plugin';
 import { of as mockOf } from 'rxjs';
 import { handleRequest } from '../../common/fetch_event_annotations/handle_request';
@@ -206,9 +206,9 @@ const manualAnnotationSamples = {
   },
 };
 
-const queryAnnotationSamples: Record<string, QueryEventAnnotationOutput> = {
+const queryAnnotationSamples: Record<string, QueryPointEventAnnotationOutput> = {
   noExtraFields: {
-    type: 'query_event_annotation',
+    type: 'query_point_event_annotation',
     id: 'ann1',
     filter: {
       type: 'kibana_query',
@@ -219,7 +219,7 @@ const queryAnnotationSamples: Record<string, QueryEventAnnotationOutput> = {
     label: 'Ann1',
   },
   extraFields: {
-    type: 'query_event_annotation',
+    type: 'query_point_event_annotation',
     id: 'ann2',
     label: 'Ann2',
     filter: {
@@ -236,7 +236,7 @@ const queryAnnotationSamples: Record<string, QueryEventAnnotationOutput> = {
     textVisibility: true,
   },
   hidden: {
-    type: 'query_event_annotation',
+    type: 'query_point_event_annotation',
     id: 'ann3',
     label: 'Ann3',
     timeField: 'timestamp',
@@ -249,7 +249,7 @@ const queryAnnotationSamples: Record<string, QueryEventAnnotationOutput> = {
     isHidden: true,
   },
   differentTimeField: {
-    type: 'query_event_annotation',
+    type: 'query_point_event_annotation',
     filter: {
       type: 'kibana_query',
       language: 'kuery',
@@ -261,7 +261,7 @@ const queryAnnotationSamples: Record<string, QueryEventAnnotationOutput> = {
     label: 'Ann4',
   },
   ann5: {
-    type: 'query_event_annotation',
+    type: 'query_point_event_annotation',
     filter: {
       type: 'kibana_query',
       language: 'kuery',

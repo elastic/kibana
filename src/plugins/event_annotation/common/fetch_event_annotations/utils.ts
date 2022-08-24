@@ -15,7 +15,7 @@ import {
   ManualPointEventAnnotationOutput,
   ManualRangeEventAnnotationOutput,
 } from '../manual_event_annotation/types';
-import { QueryEventAnnotationOutput } from '../query_event_annotation/types';
+import { QueryPointEventAnnotationOutput } from '../query_point_event_annotation/types';
 import {
   annotationColumns,
   AvailableAnnotationIcon,
@@ -74,7 +74,7 @@ export const postprocessAnnotations = (
     response: Datatable;
     fieldsColIdMap: Record<string, string>;
   }>,
-  queryAnnotationConfigs: QueryEventAnnotationOutput[],
+  queryAnnotationConfigs: QueryPointEventAnnotationOutput[],
   manualAnnotationDatatableRows: Array<{
     type: string;
     id: string;
@@ -126,7 +126,9 @@ export const postprocessAnnotations = (
             timebucket: moment(row['col-1-2']).toISOString(),
             time: row['col-3-4'],
             type: 'point',
-            label: annotationConfig.textField ? row[fieldsColIdMap[annotationConfig.textField]] : annotationConfig.label,
+            label: annotationConfig.textField
+              ? row[fieldsColIdMap[annotationConfig.textField]]
+              : annotationConfig.label,
           };
           const countRow = row['col-2-3'];
           if (countRow > ANNOTATIONS_PER_BUCKET) {
@@ -209,7 +211,7 @@ function getSkippedCountPerBucket(rows: TimebucketRow[]) {
 }
 
 function passStylesFromAnnotationConfig(
-  annotationConfig: QueryEventAnnotationOutput
+  annotationConfig: QueryPointEventAnnotationOutput
 ): PointStyleProps {
   return {
     ...pick(annotationConfig, [

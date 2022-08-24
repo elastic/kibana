@@ -10,17 +10,17 @@ import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/commo
 import { i18n } from '@kbn/i18n';
 import { AvailableAnnotationIcons } from '../constants';
 
-import type { QueryEventAnnotationArgs, QueryEventAnnotationOutput } from './types';
+import type { QueryPointEventAnnotationArgs, QueryPointEventAnnotationOutput } from './types';
 
-export const queryEventAnnotation: ExpressionFunctionDefinition<
-  'query_event_annotation',
+export const queryPointEventAnnotation: ExpressionFunctionDefinition<
+  'query_point_event_annotation',
   null,
-  QueryEventAnnotationArgs,
-  QueryEventAnnotationOutput
+  QueryPointEventAnnotationArgs,
+  QueryPointEventAnnotationOutput
 > = {
-  name: 'query_event_annotation',
+  name: 'query_point_event_annotation',
   aliases: [],
-  type: 'query_event_annotation',
+  type: 'query_point_event_annotation',
   help: i18n.translate('eventAnnotation.queryAnnotation.description', {
     defaultMessage: `Configure manual annotation`,
   }),
@@ -105,9 +105,9 @@ export const queryEventAnnotation: ExpressionFunctionDefinition<
       }),
     },
   },
-  fn: function fn(input: unknown, args: QueryEventAnnotationArgs) {
+  fn: function fn(input: unknown, args: QueryPointEventAnnotationArgs) {
     return {
-      type: 'query_event_annotation',
+      type: 'query_point_event_annotation',
       ...args,
     };
   },

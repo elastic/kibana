@@ -16,9 +16,9 @@ import {
   ManualRangeEventAnnotationArgs,
 } from './manual_event_annotation/types';
 import {
-  QueryEventAnnotationArgs,
-  QueryEventAnnotationOutput,
-} from './query_event_annotation/types';
+  QueryPointEventAnnotationArgs,
+  QueryPointEventAnnotationOutput,
+} from './query_point_event_annotation/types';
 
 export type LineStyle = 'solid' | 'dashed' | 'dotted';
 export type Fill = 'inside' | 'outside' | 'none';
@@ -61,7 +61,7 @@ export type RangeEventAnnotationConfig = {
 
 export type StyleProps = PointStyleProps & RangeStyleProps;
 
-export type QueryEventAnnotationConfig = {
+export type QueryPointEventAnnotationConfig = {
   id: string;
   filter: KibanaQueryOutput;
   timeField: string;
@@ -75,14 +75,14 @@ export type QueryEventAnnotationConfig = {
 export type EventAnnotationConfig =
   | PointInTimeEventAnnotationConfig
   | RangeEventAnnotationConfig
-  | QueryEventAnnotationConfig;
+  | QueryPointEventAnnotationConfig;
 
 export type EventAnnotationArgs =
   | ManualPointEventAnnotationArgs
   | ManualRangeEventAnnotationArgs
-  | QueryEventAnnotationArgs;
+  | QueryPointEventAnnotationArgs;
 
-export type EventAnnotationOutput = ManualEventAnnotationOutput | QueryEventAnnotationOutput;
+export type EventAnnotationOutput = ManualEventAnnotationOutput | QueryPointEventAnnotationOutput;
 
 export const annotationColumns: DatatableColumn[] = [
   { id: 'id', name: 'id', meta: { type: 'string' } },
