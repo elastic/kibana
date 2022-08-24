@@ -75,8 +75,9 @@ function buildMetricOperation<T extends MetricColumn<string>>({
   documentationDescription?: string;
 }) {
   const labelLookup = (name: string, column?: BaseIndexPatternColumn) => {
+    const label = ofName(name);
     return adjustTimeScaleLabelSuffix(
-      name,
+      label,
       undefined,
       optionalTimeScaling ? column?.timeScale : undefined,
       undefined,
@@ -120,19 +121,11 @@ function buildMetricOperation<T extends MetricColumn<string>>({
       optionalTimeScaling
         ? (adjustTimeScaleOnOtherColumnChange(layer, thisColumnId) as T)
         : (layer.columns[thisColumnId] as T),
-    getDefaultLabel: (column, indexPattern, columns) => {
-      const { label, customLabel } = getSafeName(column.sourceField, indexPattern);
-      if (customLabel) {
-        return label;
-      }
-      return labelLookup(label, column);
-    },
+    getDefaultLabel: (column, indexPattern, columns) =>
+      labelLookup(getSafeName(column.sourceField, indexPattern), column),
     buildColumn: ({ field, previousColumn }, columnParams) => {
       return {
-        label: field.customLabel
-          ? field.customLabel
-          : labelLookup(field.displayName, previousColumn),
-        customLabel: Boolean(field.customLabel),
+        label: labelLookup(field.displayName, previousColumn),
         dataType: supportsDate && field.type === 'date' ? 'date' : 'number',
         operationType: type,
         sourceField: field.name,
@@ -154,8 +147,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
     onFieldChange: (oldColumn, field) => {
       return {
         ...oldColumn,
-        label: field.customLabel || labelLookup(field.displayName, oldColumn),
-        customLabel: Boolean(field.customLabel),
+        label: labelLookup(field.displayName, oldColumn),
         dataType: field.type,
         sourceField: field.name,
       };

@@ -100,13 +100,13 @@ export const percentileRanksOperation: OperationDefinition<
         !newField.aggregationRestrictions
     );
   },
-  getDefaultLabel: (column, indexPattern, columns) => {
-    const { label, customLabel } = getSafeName(column.sourceField, indexPattern);
-    if (customLabel) {
-      return label;
-    }
-    return ofName(label, column.params.value, column.timeShift, column.window);
-  },
+  getDefaultLabel: (column, indexPattern, columns) =>
+    ofName(
+      getSafeName(column.sourceField, indexPattern),
+      column.params.value,
+      column.timeShift,
+      column.window
+    ),
   buildColumn: ({ field, previousColumn, indexPattern }, columnParams) => {
     const existingPercentileRanksParam =
       previousColumn &&
@@ -114,13 +114,13 @@ export const percentileRanksOperation: OperationDefinition<
       previousColumn.params.value;
     const newPercentileRanksParam =
       columnParams?.value ?? (existingPercentileRanksParam || DEFAULT_PERCENTILE_RANKS_VALUE);
-
-    const { label, customLabel } = getSafeName(field.name, indexPattern);
-
     return {
-      label: customLabel
-        ? label
-        : ofName(label, newPercentileRanksParam, previousColumn?.timeShift, previousColumn?.window),
+      label: ofName(
+        getSafeName(field.name, indexPattern),
+        newPercentileRanksParam,
+        previousColumn?.timeShift,
+        previousColumn?.window
+      ),
       dataType: 'number',
       operationType: 'percentile_rank',
       sourceField: field.name,
@@ -138,10 +138,12 @@ export const percentileRanksOperation: OperationDefinition<
   onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
-      label:
-        field.customLabel ||
-        ofName(field.displayName, oldColumn.params.value, oldColumn.timeShift, oldColumn.window),
-      customLabel: Boolean(field.customLabel),
+      label: ofName(
+        field.displayName,
+        oldColumn.params.value,
+        oldColumn.timeShift,
+        oldColumn.window
+      ),
       sourceField: field.name,
     };
   },

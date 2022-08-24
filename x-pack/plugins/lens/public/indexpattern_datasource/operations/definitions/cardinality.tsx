@@ -108,21 +108,11 @@ export const cardinalityOperation: OperationDefinition<
   filterable: true,
   shiftable: true,
   windowable: true,
-  getDefaultLabel: (column, indexPattern) => {
-    const { customLabel, label } = getSafeName(column.sourceField, indexPattern);
-    if (customLabel) {
-      return label;
-    }
-    return ofName(label, column.timeShift, column.window);
-  },
+  getDefaultLabel: (column, indexPattern) =>
+    ofName(getSafeName(column.sourceField, indexPattern), column.timeShift, column.window),
   buildColumn({ field, previousColumn }, columnParams) {
-    const label =
-      field.customLabel ||
-      ofName(field.displayName, previousColumn?.timeShift, previousColumn?.window);
-
     return {
-      label,
-      customLabel: Boolean(field.customLabel),
+      label: ofName(field.displayName, previousColumn?.timeShift, previousColumn?.window),
       dataType: 'number',
       operationType: OPERATION_TYPE,
       scale: SCALE,
@@ -195,8 +185,7 @@ export const cardinalityOperation: OperationDefinition<
   onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
-      label: field.customLabel || ofName(field.displayName, oldColumn.timeShift, oldColumn.window),
-      customLabel: Boolean(field.customLabel),
+      label: ofName(field.displayName, oldColumn.timeShift, oldColumn.window),
       sourceField: field.name,
     };
   },

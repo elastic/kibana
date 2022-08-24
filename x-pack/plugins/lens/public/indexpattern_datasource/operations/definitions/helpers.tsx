@@ -95,28 +95,13 @@ export function combineErrorMessages(
   return messages.length ? messages : undefined;
 }
 
-export function getSafeName(name: string, indexPattern: IndexPattern) {
+export function getSafeName(name: string, indexPattern: IndexPattern): string {
   const field = indexPattern.getFieldByName(name);
-  if (!field) {
-    return {
-      label: i18n.translate('xpack.lens.indexPattern.missingFieldLabel', {
+  return field
+    ? field.displayName
+    : i18n.translate('xpack.lens.indexPattern.missingFieldLabel', {
         defaultMessage: 'Missing field',
-      }),
-      customLabel: false,
-    };
-  }
-
-  if (field.customLabel) {
-    return {
-      label: field.customLabel,
-      customLabel: true,
-    };
-  }
-
-  return {
-    label: field.displayName,
-    customLabel: false,
-  };
+      });
 }
 
 export function isValidNumber(
