@@ -103,7 +103,8 @@ export const groupAndBulkCreate = async ({
       // - analyze query for fields/wildcards
       // - get a random sample of docs... analyze fields in the docs
       // - use that to determine which fields to group by
-      // - low cardinality means we may want to group by that field?
+      // - low cardinality and high cardinality are probably not interesting
+      // maybe somewhere in the middle? 
       // - also, should we sort first by severity?
 
       // TODO: remove this type assertion once threat_match grouping is implemented
