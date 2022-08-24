@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiBadge,
   EuiDescriptionList,
@@ -24,6 +24,7 @@ import { LastUpdatedAt } from '../utils';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { HeaderSection } from '../../../../common/components/header_section';
 import * as i18n from './translations';
+import type { StatState } from './hooks/use_soc_trends';
 import { useSocTrends } from './hooks/use_soc_trends';
 
 const SOC_TRENDS_ID = 'socTrends';
@@ -35,13 +36,42 @@ const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   max-width: 300px;
 `;
 
-const SocTrendsComponent: React.FC = () => {
+interface Props {
+  signalIndexName: string | null;
+}
+
+const getListItem = (stat: StatState) => ({
+  title: (
+    <EuiToolTip content={stat.description}>
+      <EuiText>
+        <h6>
+          {stat.title} <EuiIcon type="questionInCircle" />
+        </h6>
+      </EuiText>
+    </EuiToolTip>
+  ),
+  description: stat.isLoading ? (
+    <EuiLoadingSpinner data-test-subj={`${stat.testRef}-stat-loading-spinner`} />
+  ) : (
+    <>
+      {stat.stat}{' '}
+      <EuiToolTip content={stat.percentage.note}>
+        <EuiBadge color={stat.percentage.color}>
+          {stat.percentage.percent != null ? stat.percentage.percent : '-'}
+        </EuiBadge>
+      </EuiToolTip>
+    </>
+  ),
+});
+
+const SocTrendsComponent = ({ signalIndexName }: Props) => {
   const { toggleStatus, setToggleStatus } = useQueryToggle(SOC_TRENDS_ID);
-  const {
-    casesMttr: { casesMttr, percentage, isLoading, updatedAt },
-  } = useSocTrends({
+  const { stats, latestUpdate, isUpdating } = useSocTrends({
     skip: !toggleStatus,
+    signalIndexName,
   });
+
+  const listItems = useMemo(() => stats.map((stat) => getListItem(stat)), [stats]);
 
   return (
     <StyledEuiPanel hasBorder>
@@ -49,7 +79,7 @@ const SocTrendsComponent: React.FC = () => {
         id={SOC_TRENDS_ID}
         showInspectButton={false}
         stackHeader={true}
-        subtitle={<LastUpdatedAt updatedAt={updatedAt} isUpdating={isLoading} />}
+        subtitle={<LastUpdatedAt updatedAt={latestUpdate} isUpdating={isUpdating} />}
         title={i18n.SOC_TRENDS}
         titleSize="s"
         toggleQuery={setToggleStatus}
@@ -64,37 +94,13 @@ const SocTrendsComponent: React.FC = () => {
           </EuiFlexItem>
         </StyledEuiFlexGroup>
       </HeaderSection>
-      {!isLoading && toggleStatus && (
+      {toggleStatus && (
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem grow={true}>
             <EuiDescriptionList
-              data-test-subj={'casesMttrStatsHeader'}
+              data-test-subj={'statsList'}
               textStyle="reverse"
-              listItems={[
-                {
-                  title: (
-                    <EuiToolTip content={i18n.CASES_MTTR_DESCRIPTION}>
-                      <EuiText>
-                        <h6>
-                          {i18n.CASES_MTTR_STAT} <EuiIcon type="questionInCircle" />
-                        </h6>
-                      </EuiText>
-                    </EuiToolTip>
-                  ),
-                  description: isLoading ? (
-                    <EuiLoadingSpinner data-test-subj={`mttr-stat-loading-spinner`} />
-                  ) : (
-                    <>
-                      {casesMttr}{' '}
-                      <EuiToolTip content={percentage.note}>
-                        <EuiBadge color={percentage.color}>
-                          {percentage.percent != null ? percentage.percent : '-'}
-                        </EuiBadge>
-                      </EuiToolTip>
-                    </>
-                  ),
-                },
-              ]}
+              listItems={listItems}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

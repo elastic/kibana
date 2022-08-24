@@ -22,41 +22,56 @@ export const CASES_MTTR_DESCRIPTION = i18n.translate(
   }
 );
 
-export const NO_TIME_CHANGE = i18n.translate(
-  'xpack.securitySolution.detectionResponse.noTimeChange',
+export const CRITICAL_ALERTS_STAT = i18n.translate(
+  'xpack.securitySolution.detectionResponse.criticalAlerts',
   {
-    defaultMessage: 'Your case resolution time is unchanged',
+    defaultMessage: 'Open critical alerts',
   }
 );
 
-export const NO_CASE_DATA = i18n.translate('xpack.securitySolution.detectionResponse.noCaseData', {
-  defaultMessage: 'There is no case data to compare',
-});
-
-export const NO_CASE_DATA_COMPARE = i18n.translate(
-  'xpack.securitySolution.detectionResponse.noCaseDataCompare',
+export const CRITICAL_ALERTS_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionResponse.criticalAlertsDescription',
   {
-    defaultMessage: 'There is no case data to compare from the compare time range',
+    defaultMessage: 'The count of open critical alerts for the current time range',
   }
 );
 
-export const NO_CASE_DATA_CURRENT = i18n.translate(
-  'xpack.securitySolution.detectionResponse.noCaseDataCurrent',
-  {
-    defaultMessage: 'There is no case data to compare from the current time range',
-  }
-);
+export const NO_CHANGE = (dataType: string) =>
+  i18n.translate('xpack.securitySolution.detectionResponse.noChange', {
+    defaultMessage: 'Your {dataType} is unchanged',
+    values: { dataType },
+  });
 
-export const TIME_DIFFERENCE = ({
+export const NO_DATA = (dataType: 'case' | 'alerts') =>
+  i18n.translate('xpack.securitySolution.detectionResponse.noData', {
+    defaultMessage: 'There is no {dataType} data to compare',
+    values: { dataType },
+  });
+
+export const NO_DATA_COMPARE = (dataType: 'case' | 'alerts') =>
+  i18n.translate('xpack.securitySolution.detectionResponse.noDataCompare', {
+    defaultMessage: 'There is no {dataType} data to compare from the compare time range',
+    values: { dataType },
+  });
+
+export const NO_DATA_CURRENT = (dataType: 'case' | 'alerts') =>
+  i18n.translate('xpack.securitySolution.detectionResponse.noDataCurrent', {
+    defaultMessage: 'There is no {dataType} data to compare from the current time range',
+    values: { dataType },
+  });
+
+export const STAT_DIFFERENCE = ({
   upOrDown,
   percentageChange,
-  time,
+  stat,
+  statType,
 }: {
   upOrDown: string;
   percentageChange: string;
-  time: string;
+  stat: string;
+  statType: string;
 }) =>
   i18n.translate('xpack.securitySolution.detectionResponse.timeDifference', {
-    defaultMessage: `Your case resolution time is {upOrDown} by {percentageChange} from {time}`,
-    values: { upOrDown, percentageChange, time },
+    defaultMessage: `Your {statType} is {upOrDown} by {percentageChange} from {stat}`,
+    values: { upOrDown, percentageChange, stat, statType },
   });

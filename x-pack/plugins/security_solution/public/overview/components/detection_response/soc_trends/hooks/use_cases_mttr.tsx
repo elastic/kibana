@@ -6,56 +6,46 @@
  */
 
 import { useEffect, useMemo, useReducer } from 'react';
-import prettyMilliseconds from 'pretty-ms';
 import uuid from 'uuid';
 import type { GlobalTimeArgs } from '../../../../../common/containers/use_global_time';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { APP_ID } from '../../../../../../common/constants';
-import { getPercChange } from '../helpers';
+import { getPercChange, makePrettyNumber } from '../helpers';
 import * as i18n from '../translations';
-
-export interface CasesMttrState {
-  casesMttr: string;
-  isLoading: boolean;
-  percentage: { percent: string | null; color: 'success' | 'danger' | 'hollow'; note: string };
-  updatedAt: number;
-}
+import type { StatState } from './use_soc_trends';
 
 type CasesMttrActions =
   | {
       type: 'setUpdatedAt';
-      updatedAt: CasesMttrState['updatedAt'];
+      updatedAt: StatState['updatedAt'];
     }
   | {
       type: 'setIsLoading';
-      isLoading: CasesMttrState['isLoading'];
+      isLoading: StatState['isLoading'];
     }
   | {
-      type: 'setCasesMttr';
-      casesMttr: CasesMttrState['casesMttr'];
+      type: 'setStat';
+      stat: StatState['stat'];
     }
   | {
       type: 'setPercentage';
-      percentage: CasesMttrState['percentage'];
+      percentage: StatState['percentage'];
     };
 
-const reducer = (state: CasesMttrState, action: CasesMttrActions) => {
+const reducer = (state: StatState, action: CasesMttrActions) => {
   switch (action.type) {
     case 'setIsLoading':
       return { ...state, isLoading: action.isLoading };
     case 'setUpdatedAt':
       return { ...state, updatedAt: action.updatedAt };
-    case 'setCasesMttr':
-      return { ...state, casesMttr: action.casesMttr };
+    case 'setStat':
+      return { ...state, stat: action.stat };
     case 'setPercentage':
       return { ...state, percentage: action.percentage };
     default:
       throw new Error();
   }
 };
-
-const makePrettyNumber = (mttr: number): string =>
-  prettyMilliseconds(mttr * 1000, { compact: true, verbose: false });
 
 export interface UseCasesMttr {
   deleteQuery: GlobalTimeArgs['deleteQuery'];
@@ -75,20 +65,23 @@ export const useCasesMttr = ({
   skip = false,
   to,
   toCompare,
-}: UseCasesMttr): CasesMttrState => {
+}: UseCasesMttr): StatState => {
   const {
     services: { cases },
   } = useKibana();
   const uniqueQueryId = useMemo(() => `useCasesMttr-${uuid.v4()}`, []);
   const [state, dispatch] = useReducer(reducer, {
-    updatedAt: Date.now(),
+    description: i18n.CASES_MTTR_DESCRIPTION,
     isLoading: true,
-    casesMttr: '-',
     percentage: {
       percent: null,
       color: 'hollow',
-      note: i18n.NO_CASE_DATA,
+      note: i18n.NO_DATA('case'),
     },
+    stat: '-',
+    testRef: 'casesMttr',
+    title: i18n.CASES_MTTR_STAT,
+    updatedAt: Date.now(),
   });
 
   useEffect(() => {
@@ -121,9 +114,9 @@ export const useCasesMttr = ({
         const percentageChange = getPercChange(responseCurrent.mttr, responseCompare.mttr);
 
         if (isSubscribed && responseCurrent.mttr != null) {
-          dispatch({ type: 'setCasesMttr', casesMttr: makePrettyNumber(responseCurrent.mttr) });
+          dispatch({ type: 'setStat', stat: makePrettyNumber(responseCurrent.mttr) });
         } else if (isSubscribed) {
-          dispatch({ type: 'setCasesMttr', casesMttr: '-' });
+          dispatch({ type: 'setStat', stat: '-' });
         }
 
         if (
@@ -144,11 +137,12 @@ export const useCasesMttr = ({
                 ? 'success' // a negative change is good
                 : 'danger',
               note: isZero
-                ? i18n.NO_TIME_CHANGE
-                : i18n.TIME_DIFFERENCE({
+                ? i18n.NO_CHANGE('case resolution time')
+                : i18n.STAT_DIFFERENCE({
                     upOrDown: isNegative ? 'down' : 'up',
                     percentageChange: isNegative ? percentageChange.substring(1) : percentageChange,
-                    time: makePrettyNumber(responseCompare.mttr),
+                    stat: makePrettyNumber(responseCompare.mttr),
+                    statType: 'case resolution time',
                   }),
             },
           });
@@ -157,10 +151,10 @@ export const useCasesMttr = ({
           const badCompare = responseCompare.mttr == null;
           const note =
             badCurrent && badCompare
-              ? i18n.NO_CASE_DATA
+              ? i18n.NO_DATA('case')
               : badCurrent
-              ? i18n.NO_CASE_DATA_CURRENT
-              : i18n.NO_CASE_DATA_COMPARE;
+              ? i18n.NO_DATA_CURRENT('case')
+              : i18n.NO_DATA_COMPARE('case');
 
           dispatch({
             type: 'setPercentage',
@@ -173,7 +167,7 @@ export const useCasesMttr = ({
         }
       } catch (error) {
         if (isSubscribed) {
-          dispatch({ type: 'setCasesMttr', casesMttr: '-' });
+          dispatch({ type: 'setStat', stat: '-' });
         }
       }
       if (isSubscribed) {

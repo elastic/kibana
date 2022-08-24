@@ -106,7 +106,7 @@ const DetectionResponseComponent = () => {
                       </EuiFlexGroup>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      <SocTrends />
+                      <SocTrends signalIndexName={signalIndexName} />
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
