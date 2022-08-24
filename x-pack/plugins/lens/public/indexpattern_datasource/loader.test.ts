@@ -148,7 +148,8 @@ describe('loader', () => {
           layers: [
             {
               indexPatternId: '1',
-              timeFieldName: 'timestamp',
+              xFieldName: 'timestamp',
+              xMode: 'date_histogram',
               chartType: 'area',
               axisPosition: 'left',
               metrics: [],

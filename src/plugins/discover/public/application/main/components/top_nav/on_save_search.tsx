@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { EuiFormRow, EuiSwitch } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectSaveModal, showSaveModal, OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearch, SaveSavedSearchOptions } from '@kbn/saved-search-plugin/public';
@@ -108,20 +110,24 @@ export async function onSaveSearch({
   const onSave = async ({
     newTitle,
     newCopyOnSave,
+    newTimeRestore,
     newDescription,
     isTitleDuplicateConfirmed,
     onTitleDuplicate,
   }: {
     newTitle: string;
+    newTimeRestore: boolean;
     newCopyOnSave: boolean;
     newDescription: string;
     isTitleDuplicateConfirmed: boolean;
     onTitleDuplicate: () => void;
   }) => {
     const currentTitle = savedSearch.title;
+    const currentTimeRestore = savedSearch.timeRestore;
     const currentRowsPerPage = savedSearch.rowsPerPage;
     savedSearch.title = newTitle;
     savedSearch.description = newDescription;
+    savedSearch.timeRestore = newTimeRestore;
     savedSearch.rowsPerPage = uiSettings.get(DOC_TABLE_LEGACY)
       ? currentRowsPerPage
       : state.appStateContainer.getState().rowsPerPage;
@@ -143,6 +149,7 @@ export async function onSaveSearch({
     // If the save wasn't successful, put the original values back.
     if (!response.id || response.error) {
       savedSearch.title = currentTitle;
+      savedSearch.timeRestore = currentTimeRestore;
       savedSearch.rowsPerPage = currentRowsPerPage;
     } else {
       state.resetInitialAppState();
@@ -156,6 +163,7 @@ export async function onSaveSearch({
       title={savedSearch.title ?? ''}
       showCopyOnSave={!!savedSearch.id}
       description={savedSearch.description}
+      timeRestore={savedSearch.timeRestore}
       onSave={onSave}
       onClose={onClose ?? (() => {})}
     />
@@ -167,12 +175,41 @@ const SaveSearchObjectModal: React.FC<{
   title: string;
   showCopyOnSave: boolean;
   description?: string;
-  onSave: (props: OnSaveProps & { newRowsPerPage?: number }) => void;
+  timeRestore?: boolean;
+  onSave: (props: OnSaveProps & { newTimeRestore: boolean }) => void;
   onClose: () => void;
-}> = ({ title, description, showCopyOnSave, onSave, onClose }) => {
+}> = ({ title, description, showCopyOnSave, timeRestore: savedTimeRestore, onSave, onClose }) => {
+  const [timeRestore, setTimeRestore] = useState<boolean>(savedTimeRestore || false);
+
   const onModalSave = (params: OnSaveProps) => {
-    onSave(params);
+    onSave({
+      ...params,
+      newTimeRestore: timeRestore,
+    });
   };
+
+  const options = (
+    <EuiFormRow
+      helpText={
+        <FormattedMessage
+          id="discover.topNav.saveModal.storeTimeWithSearchToggleDescription"
+          defaultMessage="Update the time filter and refresh interval to the current selection when using this search."
+        />
+      }
+    >
+      <EuiSwitch
+        data-test-subj="storeTimeWithSearch"
+        checked={timeRestore}
+        onChange={(event) => setTimeRestore(event.target.checked)}
+        label={
+          <FormattedMessage
+            id="discover.topNav.saveModal.storeTimeWithSearchToggleLabel"
+            defaultMessage="Store time with saved search"
+          />
+        }
+      />
+    </EuiFormRow>
+  );
 
   return (
     <SavedObjectSaveModal
@@ -183,6 +220,7 @@ const SaveSearchObjectModal: React.FC<{
         defaultMessage: 'search',
       })}
       showDescription={true}
+      options={options}
       onSave={onModalSave}
       onClose={onClose}
     />

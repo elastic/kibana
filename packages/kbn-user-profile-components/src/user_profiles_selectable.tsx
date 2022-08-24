@@ -74,9 +74,14 @@ export interface UserProfilesSelectableProps
   isLoading?: boolean;
 
   /**
-   * Placeholder text for search box.
+   * Placeholder text of search field.
    */
   searchPlaceholder?: string;
+
+  /**
+   * Identifier of search field.
+   */
+  searchInputId?: string;
 
   /**
    * Returns text for selected status.
@@ -107,6 +112,7 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
   emptyMessage,
   errorMessage,
   searchPlaceholder,
+  searchInputId,
   selectedStatusMessage,
   clearButtonLabel,
 }) => {
@@ -243,6 +249,7 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
         onChange: onSearchChange,
         isLoading,
         isClearable: !isLoading,
+        id: searchInputId,
       }}
       isPreFiltered
       listProps={{ onFocusBadge: false }}
