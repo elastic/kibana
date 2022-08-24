@@ -8,11 +8,13 @@
 
 import type { Metric, MetricType } from '../../../../common/types';
 import { getFormulaFromMetric, SUPPORTED_METRICS } from './supported_metrics';
+import { getFormulaEquivalent } from './metrics_helpers';
 
 export const getSiblingPipelineSeriesFormula = (
   aggregation: MetricType,
   currentMetric: Metric,
-  metrics: Metric[]
+  metrics: Metric[],
+  window?: string
 ) => {
   const [nestedFieldId, nestedMeta] = currentMetric.field?.split('[') ?? [];
   const subFunctionMetric = metrics.find((metric) => metric.id === nestedFieldId);
@@ -52,18 +54,15 @@ export const getSiblingPipelineSeriesFormula = (
       additionalSubFunctionField ?? ''
     }))${minimumValue})`;
   } else {
-    let additionalFunctionArgs;
-    // handle percentile and percentile_rank
     const nestedMetaValue = Number(nestedMeta?.replace(']', ''));
-    if (pipelineAggMap.name === 'percentile' && nestedMetaValue) {
-      additionalFunctionArgs = `, percentile=${nestedMetaValue}`;
+
+    const subFormula = getFormulaEquivalent(subFunctionMetric, metrics, nestedMetaValue, window);
+
+    if (!subFormula) {
+      return null;
     }
-    if (pipelineAggMap.name === 'percentile_rank' && nestedMetaValue) {
-      additionalFunctionArgs = `, value=${nestedMetaValue}`;
-    }
-    formula += `${pipelineAggFormula}(${subMetricField ?? ''}${
-      additionalFunctionArgs ? `${additionalFunctionArgs}` : ''
-    })${minimumValue})`;
+
+    formula += `${subFormula}${minimumValue})`;
   }
   return formula;
 };

@@ -17,7 +17,8 @@ export const computeParentSeries = (
   currentMetric: Metric,
   subFunctionMetric: Metric,
   pipelineAgg: SupportedMetric,
-  meta?: number
+  meta?: number,
+  window?: string
 ) => {
   const aggregationMap = SUPPORTED_METRICS[aggregation];
   if (!aggregationMap) {
@@ -25,7 +26,7 @@ export const computeParentSeries = (
   }
 
   if (subFunctionMetric.type === 'filter_ratio') {
-    const script = getFilterRatioFormula(subFunctionMetric);
+    const script = getFilterRatioFormula(subFunctionMetric, window);
     if (!script) {
       return null;
     }
@@ -62,7 +63,8 @@ export const computeParentSeries = (
 export const getParentPipelineSeries = (
   aggregation: MetricType,
   currentMetricIdx: number,
-  metrics: Metric[]
+  metrics: Metric[],
+  window?: string
 ) => {
   const currentMetric = metrics[currentMetricIdx];
   //  percentile value is derived from the field Id. It has the format xxx-xxx-xxx-xxx[percentile]
@@ -88,7 +90,8 @@ export const getParentPipelineSeries = (
       subFunctionMetric,
       pipelineAgg,
       aggregation,
-      metaValue
+      metaValue,
+      window
     );
     if (!formula) {
       return null;
@@ -100,7 +103,8 @@ export const getParentPipelineSeries = (
       currentMetric,
       subFunctionMetric,
       pipelineAgg,
-      metaValue
+      metaValue,
+      window
     );
   }
 };

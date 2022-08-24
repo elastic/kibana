@@ -9,20 +9,21 @@
 import type { Query } from '@kbn/es-query';
 import type { Metric, MetricType } from '../../../../common/types';
 import { getFormulaFromMetric, SupportedMetric, SUPPORTED_METRICS } from './supported_metrics';
+import { addTimeRangeToFormula } from '.';
 
 const escapeQuotes = (str: string) => {
   return str?.replace(/'/g, "\\'");
 };
 
-const constructFilterRationFormula = (operation: string, metric?: Query) => {
+const constructFilterRationFormula = (operation: string, metric?: Query, window?: string) => {
   return `${operation}${metric?.language === 'lucene' ? 'lucene' : 'kql'}='${
     metric?.query && typeof metric?.query === 'string'
       ? escapeQuotes(metric?.query)
       : metric?.query ?? '*'
-  }')`;
+  }'${addTimeRangeToFormula(window)})`;
 };
 
-export const getFilterRatioFormula = (currentMetric: Metric) => {
+export const getFilterRatioFormula = (currentMetric: Metric, window?: string) => {
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { numerator, denominator, metric_agg, field } = currentMetric;
   let aggregation: SupportedMetric | null | undefined = SUPPORTED_METRICS.count;
@@ -38,17 +39,19 @@ export const getFilterRatioFormula = (currentMetric: Metric) => {
 
   if (aggregation.name === 'counter_rate') {
     const numeratorFormula = constructFilterRationFormula(
-      `${aggFormula}(max('${field}',`,
-      numerator
+      `${aggregation.name}(max('${field}',`,
+      numerator,
+      window
     );
     const denominatorFormula = constructFilterRationFormula(
-      `${aggFormula}(max('${field}',`,
-      denominator
+      `${aggregation.name}(max('${field}',`,
+      denominator,
+      window
     );
     return `${numeratorFormula}) / ${denominatorFormula})`;
   } else {
-    const numeratorFormula = constructFilterRationFormula(operation, numerator);
-    const denominatorFormula = constructFilterRationFormula(operation, denominator);
+    const numeratorFormula = constructFilterRationFormula(operation, numerator, window);
+    const denominatorFormula = constructFilterRationFormula(operation, denominator, window);
     return `${numeratorFormula} / ${denominatorFormula}`;
   }
 };
