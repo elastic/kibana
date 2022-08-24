@@ -7,3 +7,4 @@
  */
 
 export { handleWarning } from './handle_response';
+export { extractWarnings } from './extract_warnings';

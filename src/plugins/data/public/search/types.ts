@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import type { PackageInfo } from '@kbn/core/server';
 import { DataViewsContract } from '@kbn/data-views-plugin/common';
-import { WarningHandlerCallback } from '@kbn/inspector-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { IInspectorInfo, ISearchGeneric, ISearchStartSearchSource } from '../../common/search';
 import { AggsSetup, AggsSetupDependencies, AggsStart, AggsStartDependencies } from './aggs';
@@ -93,3 +93,37 @@ export interface SearchServiceStartDependencies {
   fieldFormats: AggsStartDependencies['fieldFormats'];
   indexPatterns: DataViewsContract;
 }
+
+/**
+ * Format of warnings of failed shards or internal ES timeouts that surface from search responses
+ * @public
+ */
+export interface SearchResponseWarning {
+  /**
+   * type:  for handling the warning in logic
+   */
+  type: 'timed_out' | 'generic_shard_warning' | estypes.ShardFailure['reason']['reason'];
+  /**
+   * isTimeout: true for general internal ES timeout warning
+   */
+  isTimeout?: boolean;
+  /**
+   * isTimeout: true for shard-specific internal ES warning
+   */
+  isShardFailure?: boolean;
+  /**
+   * message: failure reason from ES
+   */
+  message: string;
+  /**
+   * text: human-friendly error message
+   */
+  text?: string;
+}
+
+/**
+ * A callback function which can intercept warnings when passed to {@link showWarnings}. Pass `true` from the
+ * function to prevent the search service from showing warning notifications by default.
+ * @public
+ */
+export type WarningHandlerCallback = (warnings: SearchResponseWarning) => boolean | undefined;

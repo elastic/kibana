@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { BfetchPublicSetup } from '@kbn/bfetch-plugin/public';
 import {
   CoreSetup,
@@ -17,7 +18,6 @@ import {
 import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { extractWarnings } from '@kbn/inspector-plugin/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
@@ -66,6 +66,7 @@ import { AggsService } from './aggs';
 import { createUsageCollector, SearchUsageCollector } from './collectors';
 import { getEql, getEsaggs, getEsdsl, getEssql } from './expressions';
 import { getKibanaContext } from './expressions/kibana_context';
+import { extractWarnings } from './fetch';
 import { handleWarning } from './fetch/handle_response';
 import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
 import { ISessionsClient, ISessionService, SessionsClient, SessionService } from './session';
@@ -237,7 +238,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       getConfig: uiSettings.get.bind(uiSettings),
       search,
       onResponse: (request, response, options) => {
-        extractWarnings(request, response.rawResponse).forEach((warning) => {
+        extractWarnings(response.rawResponse).forEach((warning) => {
           if (!options.disableShardFailureWarning) {
             handleWarning(warning, request, response.rawResponse, theme);
           }
@@ -275,10 +276,19 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         this.searchInterceptor.showError(e);
       },
       showWarnings: (inspector, cb) => {
-        inspector.adapter?.getWarnings().forEach((warning) => {
-          const handled = cb?.(warning);
-          if (handled !== true) {
-            handleWarning(warning, warning.request, warning.request.response, theme);
+        inspector.adapter?.getRequests().forEach((request) => {
+          const rawResponse = (
+            request.response?.json as { rawResponse: estypes.SearchResponse | undefined }
+          )?.rawResponse;
+
+          if (rawResponse) {
+            const warnings = extractWarnings(rawResponse);
+            warnings.forEach((warning) => {
+              const consumerHandled = cb?.(warning);
+              if (!consumerHandled) {
+                handleWarning(warning, request, rawResponse, theme);
+              }
+            });
           }
         });
       },

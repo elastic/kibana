@@ -123,8 +123,4 @@ describe('extract search response warnings', () => {
 
     expect(warnings).toEqual([]);
   });
-
-  it('should return [] if rawResponse is undefined', () => {
-    expect(extractWarnings(undefined)).toEqual([]);
-  });
 });

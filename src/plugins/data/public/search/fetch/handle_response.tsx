@@ -9,18 +9,19 @@
 import { estypes } from '@elastic/elasticsearch';
 import { EuiSpacer } from '@elastic/eui';
 import { ThemeServiceStart } from '@kbn/core/public';
-import { SearchResponseWarning } from '@kbn/inspector-plugin/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
+import { SearchRequest } from '..';
 import { getNotifications } from '../../services';
 import { ShardFailureOpenModalButton } from '../../shard_failure_modal';
+import { SearchResponseWarning } from '../types';
 
 /**
  * @internal
  */
 export function handleWarning(
   warning: SearchResponseWarning,
-  request: estypes.SearchRequest,
+  request: SearchRequest,
   response: estypes.SearchResponse,
   theme: ThemeServiceStart
 ) {

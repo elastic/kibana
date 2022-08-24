@@ -8,9 +8,8 @@
 
 import { EventEmitter } from 'events';
 import uuid from 'uuid/v4';
-import { extractWarnings } from './extract_warnings';
 import { RequestResponder } from './request_responder';
-import { Request, RequestParams, RequestStatus, SearchResponseWarning } from './types';
+import { Request, RequestParams, RequestStatus } from './types';
 
 /**
  * An generic inspector adapter to log requests.
@@ -67,14 +66,6 @@ export class RequestAdapter extends EventEmitter {
 
   public getRequests(): Request[] {
     return Array.from(this.requests.values());
-  }
-
-  public getWarnings(): SearchResponseWarning[] {
-    let warnings: SearchResponseWarning[] = [];
-    this.getRequests().forEach((request) => {
-      warnings = warnings.concat(extractWarnings(request, request.response?.json?.rawResponse));
-    });
-    return warnings;
   }
 
   private _onChange(): void {

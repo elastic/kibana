@@ -23,6 +23,10 @@ const theme = themeServiceMock.createStartContract();
 
 describe('handleWarning', () => {
   const notifications = notificationServiceMock.createStartContract();
+  const warning = {
+    type: 'timed_out',
+    message: 'this stuff timed out on us',
+  };
 
   beforeEach(() => {
     setNotifications(notifications);
@@ -37,7 +41,7 @@ describe('handleWarning', () => {
         timed_out: true,
       },
     };
-    const result = handleWarning(request, response, theme);
+    const result = handleWarning(warning, request, response, theme);
     expect(result).toBe(response);
     expect(notifications.toasts.addWarning).toBeCalled();
     expect((notifications.toasts.addWarning as jest.Mock).mock.calls[0][0].title).toMatch(
@@ -57,7 +61,7 @@ describe('handleWarning', () => {
         },
       },
     };
-    const result = handleWarning(request, response, theme);
+    const result = handleWarning(warning, request, response, theme);
     expect(result).toBe(response);
     expect(notifications.toasts.addWarning).toBeCalled();
     expect((notifications.toasts.addWarning as jest.Mock).mock.calls[0][0].title).toMatch(
@@ -70,7 +74,7 @@ describe('handleWarning', () => {
     const response = {
       rawResponse: {},
     };
-    const result = handleWarning(request, response, theme);
+    const result = handleWarning(warning, request, response, theme);
     expect(result).toBe(response);
   });
 });
