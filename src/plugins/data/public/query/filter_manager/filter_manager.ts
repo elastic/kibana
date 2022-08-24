@@ -50,7 +50,6 @@ export class FilterManager implements PersistableStateService<Filter[]> {
 
   private mergeIncomingFilters(partitionedFilters: PartitionedFilters): Filter[] {
     const { globalFilters, appFilters, sessionFilters } = partitionedFilters;
-
     // existing globalFilters should be mutated by appFilters
     // ignore original appFilters which are already inside globalFilters
     const cleanedAppFilters: Filter[] = [];
@@ -83,11 +82,13 @@ export class FilterManager implements PersistableStateService<Filter[]> {
 
   private static partitionFilters(filters: Filter[]): PartitionedFilters {
     const globalFilters = filters.filter((filter) => isFilterPinned(filter));
-    const appFilters = filters.filter(
-      (filter) => filter.$state?.store === FilterStateStore.APP_STATE
-    );
     const sessionFilters = filters.filter(
       (filter) => filter.$state?.store === FilterStateStore.SESSION_STATE
+    );
+    const appFilters = filters.filter(
+      (filter) =>
+        filter.$state?.store === FilterStateStore.APP_STATE ||
+        (!globalFilters.includes(filter) && !sessionFilters.includes(filter))
     );
     return {
       globalFilters,
@@ -128,8 +129,8 @@ export class FilterManager implements PersistableStateService<Filter[]> {
   }
 
   public getSessionFilters() {
-    const { sessionFilters } = this.getPartitionedFilters();
-    return sessionFilters;
+    const { globalFilters, sessionFilters } = this.getPartitionedFilters();
+    return uniqFilters(globalFilters.concat(sessionFilters));
   }
 
   public getPartitionedFilters(): PartitionedFilters {
@@ -176,11 +177,17 @@ export class FilterManager implements PersistableStateService<Filter[]> {
 
   public setFilters(
     newFilters: Filter[],
-    pinFilterStatus: boolean = this.uiSettings.get(UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT)
+    pinFilterStatus: boolean = this.uiSettings.get(UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT),
+    store?: FilterStateStore
   ) {
-    const store = pinFilterStatus ? FilterStateStore.GLOBAL_STATE : FilterStateStore.APP_STATE;
+    let storeToAddFiltersTo = FilterStateStore.APP_STATE;
+    if (pinFilterStatus) {
+      storeToAddFiltersTo = FilterStateStore.GLOBAL_STATE;
+    } else if (store) {
+      storeToAddFiltersTo = store;
+    }
 
-    FilterManager.setFiltersStore(newFilters, store);
+    FilterManager.setFiltersStore(newFilters, storeToAddFiltersTo);
 
     const mappedFilters = mapAndFlattenFilters(newFilters);
     const newPartitionedFilters = FilterManager.partitionFilters(mappedFilters);
@@ -226,12 +233,13 @@ export class FilterManager implements PersistableStateService<Filter[]> {
   public setSessionFilters(newSessionFilters: Filter[]) {
     newSessionFilters = mapAndFlattenFilters(newSessionFilters);
     FilterManager.setFiltersStore(newSessionFilters, FilterStateStore.SESSION_STATE, true);
-    /* const { globalFilters } = this.getPartitionedFilters();
+    const { globalFilters, appFilters } = this.getPartitionedFilters();
     const newFilters = this.mergeIncomingFilters({
       globalFilters,
       sessionFilters: newSessionFilters,
-    });*/
-    this.handleStateUpdate(newSessionFilters);
+      appFilters,
+    });
+    this.handleStateUpdate(newFilters);
   }
 
   public removeFilter(filter: Filter) {

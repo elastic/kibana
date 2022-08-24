@@ -15,6 +15,7 @@ import { QueryStart, SavedQuery, DataPublicPluginStart } from '@kbn/data-plugin/
 import type { Query, AggregateQuery } from '@kbn/es-query';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { FilterStateStore } from '@kbn/es-query';
 import { SearchBar } from '.';
 import type { SearchBarOwnProps } from '.';
 import { useFilterManager } from './lib/use_filter_manager';
@@ -41,7 +42,7 @@ export type StatefulSearchBarProps<QT extends Query | AggregateQuery = Query> =
 // Respond to user changing the filters
 const defaultFiltersUpdated = (queryService: QueryStart) => {
   return (filters: Filter[]) => {
-    queryService.filterManager.setFilters(filters);
+    queryService.filterManager.setFilters(filters, undefined, FilterStateStore.SESSION_STATE);
   };
 };
 

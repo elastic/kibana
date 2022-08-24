@@ -153,7 +153,7 @@ export const applyDashboardFilterState = ({
   const { timefilter: timefilterService } = timefilter;
 
   // apply filters to the query service and to the saved dashboard
-  filterManager.setAppFilters(_.cloneDeep(currentDashboardState.filters));
+  filterManager.setSessionFilters(_.cloneDeep(currentDashboardState.filters));
   savedDashboard.searchSource.setField('filter', currentDashboardState.filters);
 
   // apply query to the query service and to the saved dashboard
