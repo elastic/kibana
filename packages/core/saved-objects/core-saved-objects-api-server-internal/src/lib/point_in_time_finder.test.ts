@@ -10,18 +10,10 @@ import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
 import type {
   SavedObjectsFindResult,
   SavedObjectsCreatePointInTimeFinderOptions,
-  SavedObjectsPointInTimeFinderClient,
 } from '@kbn/core-saved-objects-api-server';
+import { createPITClientMock } from '../mocks/internal_mocks';
 
 import { PointInTimeFinder } from './point_in_time_finder';
-
-const createPITClientMock = (): jest.Mocked<SavedObjectsPointInTimeFinderClient> => {
-  return {
-    find: jest.fn(),
-    openPointInTimeForType: jest.fn(),
-    closePointInTime: jest.fn(),
-  };
-};
 
 const mockHits = [
   {

@@ -8,7 +8,6 @@
 
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
-import type { SavedObjectsPointInTimeFinderClient } from '@kbn/core-saved-objects-api-server';
 import {
   type LegacyUrlAlias,
   LEGACY_URL_ALIAS_TYPE,
@@ -16,14 +15,7 @@ import {
 import type { CreatePointInTimeFinderFn, PointInTimeFinder } from '../point_in_time_finder';
 import { savedObjectsPointInTimeFinderMock } from '../point_in_time_finder.mock';
 import { findLegacyUrlAliases } from './find_legacy_url_aliases';
-
-const createPITClientMock = (): jest.Mocked<SavedObjectsPointInTimeFinderClient> => {
-  return {
-    find: jest.fn(),
-    openPointInTimeForType: jest.fn(),
-    closePointInTime: jest.fn(),
-  };
-};
+import { createPITClientMock } from '../../mocks/internal_mocks';
 
 describe('findLegacyUrlAliases', () => {
   let savedObjectsMock: ReturnType<typeof createPITClientMock>;

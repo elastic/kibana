@@ -7,13 +7,10 @@
  */
 
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
-
-import type {
-  SavedObjectsPointInTimeFinderClient,
-} from '@kbn/core-saved-objects-api-server';
 import type { CreatePointInTimeFinderFn, PointInTimeFinder } from './point_in_time_finder';
 import { savedObjectsPointInTimeFinderMock } from './point_in_time_finder.mock';
 import { findSharedOriginObjects } from './find_shared_origin_objects';
+import { createPITClientMock } from '../mocks/internal_mocks';
 
 interface MockFindResultParams {
   type: string;
@@ -21,14 +18,6 @@ interface MockFindResultParams {
   originId?: string;
   namespaces: string[];
 }
-
-const createPITClientMock = (): jest.Mocked<SavedObjectsPointInTimeFinderClient> => {
-  return {
-    find: jest.fn(),
-    openPointInTimeForType: jest.fn(),
-    closePointInTime: jest.fn(),
-  };
-};
 
 describe('findSharedOriginObjects', () => {
   let savedObjectsMock: ReturnType<typeof createPITClientMock>;

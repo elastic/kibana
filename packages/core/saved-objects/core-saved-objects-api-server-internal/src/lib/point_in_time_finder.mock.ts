@@ -10,6 +10,7 @@ import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
 import type {
   SavedObjectsClientContract,
   ISavedObjectsRepository,
+  SavedObjectsPointInTimeFinderClient,
 } from '@kbn/core-saved-objects-api-server';
 import { PointInTimeFinder } from './point_in_time_finder';
 
@@ -18,7 +19,9 @@ const createPointInTimeFinderMock = ({
   savedObjectsMock,
 }: {
   logger?: MockedLogger;
-  savedObjectsMock: jest.Mocked<ISavedObjectsRepository | SavedObjectsClientContract>;
+  savedObjectsMock: jest.Mocked<
+    ISavedObjectsRepository | SavedObjectsClientContract | SavedObjectsPointInTimeFinderClient
+  >;
 }): jest.Mock => {
   const mock = jest.fn();
 

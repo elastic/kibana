@@ -25,14 +25,13 @@ import type {
   SavedObjectsUpdateObjectsSpacesOptions,
 } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsClient } from './saved_objects_client';
-import { savedObjectsRepositoryMock } from './lib/repository.mock';
-import { savedObjectsClientMock } from './saved_objects_client.mock';
+import { createRepositoryMock, createPITClientMock } from './mocks/internal_mocks';
 
 describe('', () => {
-  let mockRepository: ReturnType<typeof savedObjectsRepositoryMock.create>;
+  let mockRepository: ReturnType<typeof createRepositoryMock>;
 
   beforeEach(() => {
-    mockRepository = savedObjectsRepositoryMock.create();
+    mockRepository = createRepositoryMock();
   });
 
   test(`#create`, async () => {
@@ -111,7 +110,7 @@ describe('', () => {
         type: 'foo',
       };
       const dependencies = {
-        client: savedObjectsClientMock.create(),
+        client: createPITClientMock(),
       };
       const result = client.createPointInTimeFinder(options, dependencies);
 
