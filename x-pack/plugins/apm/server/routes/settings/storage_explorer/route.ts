@@ -19,7 +19,7 @@ import {
   rangeRt,
 } from '../../default_api_types';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
-import { getStorageDetailsForService } from './get_storage_details_for_service';
+import { getStorageDetailsPerProcessorEvent } from './get_storage_details_per_processor_event';
 
 const storageExplorerRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/storage_explorer',
@@ -125,7 +125,7 @@ const storageExplorerServiceDetailsRoute = createApmServerRoute({
       },
     } = params;
 
-    const processorEventStats = await getStorageDetailsForService({
+    const processorEventStats = await getStorageDetailsPerProcessorEvent({
       setup,
       context,
       indexLifecyclePhase,

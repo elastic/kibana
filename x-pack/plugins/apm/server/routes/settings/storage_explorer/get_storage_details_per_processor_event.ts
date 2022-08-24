@@ -28,9 +28,9 @@ import { ApmPluginRequestHandlerContext } from '../../typings';
 import {
   getTotalIndicesStats,
   getEstimatedSizeForDocumentsInIndex,
-} from './get_indices_stats';
+} from './indices_stats_helpers';
 
-export async function getStorageDetailsForService({
+export async function getStorageDetailsPerProcessorEvent({
   setup,
   context,
   indexLifecyclePhase,
@@ -56,7 +56,7 @@ export async function getStorageDetailsForService({
   const allIndicesStats = await getTotalIndicesStats({ setup, context });
 
   const response = await apmEventClient.search(
-    'get_storage_details_for_service',
+    'get_storage_details_per_processor_event',
     {
       apm: {
         events: [
