@@ -7,12 +7,8 @@
  */
 
 import React from 'react';
-// import { ComponentNoDataPageStorybookMock } from '@kbn/shared-ux-page-Component-no-data-mocks';
-// import type { ComponentNoDataPageStorybookParams } from '@kbn/shared-ux-page-Component-no-data-mocks';
-
-// import { ComponentNoDataPageProvider } from './services';
-import mdx from '../README.mdx';
 import { Route } from './router';
+import mdx from '../README.mdx';
 
 export default {
   title: 'Router',
@@ -25,7 +21,7 @@ export default {
 };
 
 export const Component = () => {
-  return <Route />;
+  return <Route path="/app" />;
 };
 
-Component.argTypes = mock.getArgumentTypes();
+

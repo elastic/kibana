@@ -7,17 +7,29 @@ tags: ['shared-ux', 'component', 'router', 'route']
 date: 2022-08-12
 ---
 
-This is a wrapper around the react-router-dom Route component that inserts MatchPropagator in every application route. It helps track all route changes and send them to the execution context, later used to enrich APM 'route-change' transactions.
-The component does not require any props but commonly accepts a base path. 
+## Summary
+This is a wrapper around the `react-router-dom` Route component that inserts MatchPropagator in every application route. It helps track all route changes and send them to the execution context, later used to enrich APM 'route-change' transactions.
+The component does not require any props and accepts props from the RouteProps interface such as a `path`, or a component like `AppContainer`. 
 
-<!--
-## API
-| Export | Description |
-|---|---|
-| `NoDataViewsPromptProvider` | Provides contextual services to `NoDataViewsPrompt`. |
-| `NoDataViewsPromptKibanaProvider` | Maps Kibana dependencies to provide contextual services to `NoDataViewsPrompt`. |
-| `NoDataViewsPrompt` | Uses a `Provider` to access contextual services to populate props on the `NoDataViewsPromptComponent`. |
-| `NoDataViewsPromptComponent` | The pure component, a pre-configured **EuiEmptyPrompt**. | -->
+```jsx
+export interface RouteProps {
+    location?: H.Location;
+    component?: React.ComponentType<RouteComponentProps<any>> | React.ComponentType<any>;
+    render?: (props: RouteComponentProps<any>) => React.ReactNode;
+    children?: ((props: RouteChildrenProps<any>) => React.ReactNode) | React.ReactNode;
+    path?: string | string[];
+    exact?: boolean;
+    sensitive?: boolean;
+    strict?: boolean;
+}
+```
+
+
+```jsx 
+<Route basepath="/url" />
+```
+
+This component removes the need for manual calls to `useExecutionContext` and should be removed. 
 
 ## EUI Promotion Status
 
