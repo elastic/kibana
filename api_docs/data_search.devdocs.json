@@ -2720,9 +2720,9 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "{ filter?: any; search?: string | undefined; page?: number | undefined; aggs?: Record<string, ",
+                  "{ filter?: any; search?: string | undefined; aggs?: Record<string, ",
                   "AggregationsAggregationContainer",
-                  "> | undefined; fields?: string[] | undefined; searchAfter?: string[] | undefined; perPage?: number | undefined; sortField?: string | undefined; sortOrder?: ",
+                  "> | undefined; fields?: string[] | undefined; searchAfter?: string[] | undefined; page?: number | undefined; perPage?: number | undefined; sortField?: string | undefined; sortOrder?: ",
                   "SortOrder",
                   " | undefined; searchFields?: string[] | undefined; rootSearchFields?: string[] | undefined; hasReference?: ",
                   "SavedObjectsFindOptionsReference",
@@ -20481,7 +20481,7 @@
             "label": "aggregate",
             "description": [],
             "signature": [
-              "\"min\" | \"max\" | \"sum\" | \"concat\" | \"average\""
+              "\"min\" | \"max\" | \"sum\" | \"average\" | \"concat\""
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/top_hit.ts",
             "deprecated": false
@@ -28641,7 +28641,7 @@
         "label": "GeoPoint",
         "description": [],
         "signature": [
-          "string | [number, number] | Point"
+          "string | Point | [number, number]"
         ],
         "path": "src/plugins/data/common/search/expressions/geo_point.ts",
         "deprecated": false,
