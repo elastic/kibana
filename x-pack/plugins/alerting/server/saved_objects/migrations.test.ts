@@ -2398,8 +2398,7 @@ describe('successful migrations', () => {
     });
 
     describe('8.4.1', () => {
-      test('removes removeIsSnoozedUntil', () => {
-        const fakeTimer = sinon.useFakeTimers();
+      test('removes IsSnoozedUntil', () => {
         const migration841 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
           '8.4.1'
         ];
@@ -2413,7 +2412,6 @@ describe('successful migrations', () => {
         const migratedAlert841 = migration841(mutedAlert, migrationContext);
 
         expect(migratedAlert841.attributes.isSnoozedUntil).toBeFalsy();
-        fakeTimer.restore();
       });
     });
 
