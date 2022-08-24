@@ -25,6 +25,48 @@ import { AvailableFields$, DataDocuments$, RecordRawType } from '../../hooks/use
 import { stubLogstashDataView } from '@kbn/data-plugin/common/stubs';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+
+jest.mock('@kbn/unified-field-list-plugin/public/services/field_stats', () => ({
+  loadFieldStats: jest.fn().mockResolvedValue({
+    totalDocuments: 1624,
+    sampledDocuments: 1624,
+    sampledValues: 3248,
+    topValues: {
+      buckets: [
+        {
+          count: 1349,
+          key: 'gif',
+        },
+        {
+          count: 1206,
+          key: 'zip',
+        },
+        {
+          count: 329,
+          key: 'css',
+        },
+        {
+          count: 164,
+          key: 'js',
+        },
+        {
+          count: 111,
+          key: 'png',
+        },
+        {
+          count: 89,
+          key: 'jpg',
+        },
+      ],
+    },
+  }),
+}));
+
+const dataServiceMock = dataPluginMock.createStartContract();
 
 const mockServices = {
   history: () => ({
@@ -45,6 +87,9 @@ const mockServices = {
       if (key === 'fields:popularLimit') {
         return 5;
       }
+      if (key === 'discover:showLegacyFieldTopValues') {
+        return true;
+      }
     },
   },
   docLinks: { links: { discover: { fieldTypeHelp: '' } } },
@@ -53,6 +98,25 @@ const mockServices = {
       editDataView: jest.fn(() => true),
     },
   },
+  data: {
+    ...dataServiceMock,
+    query: {
+      ...dataServiceMock.query,
+      timefilter: {
+        ...dataServiceMock.query.timefilter,
+        timefilter: {
+          ...dataServiceMock.query.timefilter.timefilter,
+          getTime: () => ({
+            from: 'now-7d',
+            to: 'now',
+          }),
+        },
+      },
+    },
+  },
+  dataViews: dataViewPluginMocks.createStartContract(),
+  fieldFormats: fieldFormatsServiceMock.createStartContract(),
+  charts: chartPluginMock.createSetupContract(),
 } as unknown as DiscoverServices;
 
 const mockfieldCounts: Record<string, number> = {};
@@ -105,7 +169,10 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
     onAddField: jest.fn(),
     onRemoveField: jest.fn(),
     selectedDataView: dataView,
-    state: {},
+    state: {
+      query: { query: '', language: 'lucene' },
+      filters: [],
+    },
     trackUiMetric: jest.fn(),
     onFieldEdited: jest.fn(),
     viewMode: VIEW_MODE.DOCUMENT_LEVEL,
@@ -118,9 +185,9 @@ describe('discover responsive sidebar', function () {
   let props: DiscoverSidebarResponsiveProps;
   let comp: ReactWrapper<DiscoverSidebarResponsiveProps>;
 
-  beforeAll(() => {
+  beforeAll(async () => {
     props = getCompProps();
-    comp = mountWithIntl(
+    comp = await mountWithIntl(
       <KibanaContextProvider services={mockServices}>
         <DiscoverSidebarResponsive {...props} />
       </KibanaContextProvider>
