@@ -37,6 +37,7 @@ export const dataAccessStateMachine = createMachine<
           },
         ],
         on: {
+          initialize: undefined, // Forbidden transition once initialized
           timeRangeChanged: {
             actions: [forwardTo('entries'), forwardTo('histogram')],
           },
