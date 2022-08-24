@@ -71,7 +71,7 @@ export const DashboardListing = ({
 
   const {
     data,
-    settings: { uiSettings },
+    settings: { uiSettings, theme },
   } = pluginServices.getServices();
 
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
@@ -141,7 +141,6 @@ export const DashboardListing = ({
     } else {
       confirmCreateWithUnsaved(
         core.overlays,
-        core.theme,
         () => {
           dashboardSessionStorage.clearState();
           redirectTo({ destination: 'dashboard' });
@@ -149,7 +148,7 @@ export const DashboardListing = ({
         () => redirectTo({ destination: 'dashboard' })
       );
     }
-  }, [dashboardSessionStorage, redirectTo, core.overlays, core.theme]);
+  }, [dashboardSessionStorage, redirectTo, core.overlays]);
 
   const emptyPrompt = useMemo(() => {
     if (!showWriteControls) {
@@ -323,7 +322,7 @@ export const DashboardListing = ({
             listingLimit,
             tableColumns,
           }}
-          theme={core.theme}
+          theme={theme}
           application={core.application}
         >
           <DashboardUnsavedListing

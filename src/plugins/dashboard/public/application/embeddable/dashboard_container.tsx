@@ -65,7 +65,6 @@ export interface DashboardContainerServices {
   screenshotMode: ScreenshotModePluginStart;
   embeddable: EmbeddableStart;
   uiActions: UiActionsStart;
-  theme: CoreStart['theme'];
   analytics?: CoreStart['analytics'];
 }
 
@@ -345,10 +344,14 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     }
     this.domNode = dom;
 
+    const {
+      settings: { theme },
+    } = pluginServices.getServices();
+
     ReactDOM.render(
       <I18nProvider>
         <KibanaContextProvider services={this.services}>
-          <KibanaThemeProvider theme$={this.services.theme.theme$}>
+          <KibanaThemeProvider theme$={theme.theme$}>
             <DashboardViewport
               container={this}
               controlGroup={this.controlGroup}

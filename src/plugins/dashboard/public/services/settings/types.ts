@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart } from '@kbn/core/public';
-import { PresentationLabsService } from '@kbn/presentation-util-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { PresentationLabsService } from '@kbn/presentation-util-plugin/public';
 
 export interface DashboardSettingsService {
   uiSettings: CoreStart['uiSettings'];
+  theme: CoreStart['theme'];
   isProjectEnabledInLabs: PresentationLabsService['isProjectEnabled'];
 }

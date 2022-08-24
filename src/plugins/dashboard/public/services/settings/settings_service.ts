@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
-import { DashboardStartDependencies } from '../../plugin';
-import { DashboardSettingsService } from './types';
+import type { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
+import type { DashboardStartDependencies } from '../../plugin';
+import type { DashboardSettingsService } from './types';
 
 export type SettingsServiceFactory = KibanaPluginServiceFactory<
   DashboardSettingsService,
@@ -16,7 +16,7 @@ export type SettingsServiceFactory = KibanaPluginServiceFactory<
 >;
 
 export const settingsServiceFactory: SettingsServiceFactory = ({ coreStart, startPlugins }) => {
-  const { uiSettings } = coreStart;
+  const { uiSettings, theme } = coreStart;
 
   const {
     presentationUtil: {
@@ -26,6 +26,7 @@ export const settingsServiceFactory: SettingsServiceFactory = ({ coreStart, star
 
   return {
     uiSettings,
+    theme,
     isProjectEnabledInLabs: isProjectEnabled,
   };
 };

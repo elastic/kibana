@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 
 export interface DashboardDataViewEditorService {
   openEditor: DataViewEditorStart['openEditor'];

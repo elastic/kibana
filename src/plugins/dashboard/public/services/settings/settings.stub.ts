@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { DashboardSettingsService } from './types';
@@ -13,9 +14,9 @@ import { DashboardSettingsService } from './types';
 type SettingsServiceFactory = PluginServiceFactory<DashboardSettingsService>;
 
 export const settingsServiceFactory: SettingsServiceFactory = () => {
-  const uiSettingsPluginMock = uiSettingsServiceMock.createStartContract();
   return {
-    uiSettings: uiSettingsPluginMock,
+    uiSettings: uiSettingsServiceMock.createStartContract(),
+    theme: themeServiceMock.createStartContract(),
     isProjectEnabledInLabs: jest.fn().mockReturnValue(true),
   };
 };

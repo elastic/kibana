@@ -15,7 +15,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { nextTick } from '@kbn/test-jest-helpers';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
-import { applicationServiceMock, coreMock } from '@kbn/core/public/mocks';
+import { applicationServiceMock } from '@kbn/core/public/mocks';
 import {
   ContactCardEmbeddableFactory,
   CONTACT_CARD_EMBEDDABLE,
@@ -45,7 +45,6 @@ function getProps(props?: Partial<DashboardViewportProps>): {
   const start = doStart();
   const options: DashboardContainerServices = {
     application: applicationServiceMock.createStartContract(),
-    theme: coreMock.createStart().theme,
     embeddable: {
       getTriggerCompatibleActions: (() => []) as any,
       getEmbeddablePanel: jest.fn(),

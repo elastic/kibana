@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
-import { DashboardStartDependencies } from '../../plugin';
-import { DashboardSpacesService } from './types';
+import type { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
+import type { DashboardStartDependencies } from '../../plugin';
+import type { DashboardSpacesService } from './types';
 
 export type SpacesServiceFactory = KibanaPluginServiceFactory<
   DashboardSpacesService,

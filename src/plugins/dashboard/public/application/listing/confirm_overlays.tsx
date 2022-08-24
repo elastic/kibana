@@ -21,9 +21,10 @@ import {
   EUI_MODAL_CANCEL_BUTTON,
 } from '@elastic/eui';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import type { CoreStart, OverlayStart } from '@kbn/core/public';
+import type { OverlayStart } from '@kbn/core/public';
 
 import { createConfirmStrings, discardConfirmStrings } from '../../dashboard_strings';
+import { pluginServices } from '../../services/plugin_services';
 
 export type DiscardOrKeepSelection = 'cancel' | 'discard' | 'keep';
 
@@ -44,12 +45,15 @@ export const confirmDiscardUnsavedChanges = (overlays: OverlayStart, discardCall
 
 export const confirmCreateWithUnsaved = (
   overlays: OverlayStart,
-  theme: CoreStart['theme'],
   startBlankCallback: () => void,
   contineCallback: () => void
 ) => {
   const titleId = 'confirmDiscardOrKeepTitle';
   const descriptionId = 'confirmDiscardOrKeepDescription';
+
+  const {
+    settings: { theme },
+  } = pluginServices.getServices();
 
   const session = overlays.openModal(
     toMountPoint(

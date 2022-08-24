@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { VisualizationsStart } from '@kbn/visualizations-plugin/public';
+import type { VisualizationsStart } from '@kbn/visualizations-plugin/public';
 
 export interface DashboardVisualizationsService {
   get: VisualizationsStart['get'];

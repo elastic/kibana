@@ -16,11 +16,17 @@ import { useKibana, toMountPoint } from '@kbn/kibana-react-plugin/public';
 
 import { DashboardAppServices } from '../../types';
 import { DashboardConstants } from '../..';
+import { pluginServices } from '../../services/plugin_services';
 
 let bannerId: string | undefined;
 
 export const DashboardNoMatch = ({ history }: { history: RouteComponentProps['history'] }) => {
   const { services } = useKibana<DashboardAppServices>();
+  const { core } = services;
+
+  const {
+    settings: { theme },
+  } = pluginServices.getServices();
 
   useEffect(() => {
     services.restorePreviousUrl();
@@ -33,7 +39,7 @@ export const DashboardNoMatch = ({ history }: { history: RouteComponentProps['hi
         defaultMessage: 'Page not found',
       });
 
-      bannerId = services.core.overlays.banners.replace(
+      bannerId = core.overlays.banners.replace(
         bannerId,
         toMountPoint(
           <EuiCallOut color="warning" iconType="iInCircle" title={bannerMessage}>
@@ -47,7 +53,7 @@ export const DashboardNoMatch = ({ history }: { history: RouteComponentProps['hi
               />
             </p>
           </EuiCallOut>,
-          { theme$: services.core.theme.theme$ }
+          { theme$: theme.theme$ }
         )
       );
 
@@ -60,7 +66,7 @@ export const DashboardNoMatch = ({ history }: { history: RouteComponentProps['hi
 
       history.replace(DashboardConstants.LANDING_PAGE_PATH);
     }
-  }, [services, history]);
+  }, [services, core, theme, history]);
 
   return null;
 };

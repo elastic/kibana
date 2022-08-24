@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
-import { DashboardStartDependencies } from '../../plugin';
-import { DashboardHTTPService } from './types';
+import type { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
+import type { DashboardStartDependencies } from '../../plugin';
+import type { DashboardHTTPService } from './types';
 
 export type HttpServiceFactory = KibanaPluginServiceFactory<
   DashboardHTTPService,

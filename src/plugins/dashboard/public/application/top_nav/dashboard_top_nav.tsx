@@ -112,14 +112,13 @@ export function DashboardTopNav({
   const {
     data: { query, search },
     visualizations: { get: getVisualization, getAliases: getVisTypeAliases },
-    settings: { uiSettings },
+    settings: { uiSettings, theme },
   } = pluginServices.getServices();
 
   const { version: kibanaVersion } = initializerContext.env.packageInfo;
   const timefilter = query.timefilter.timefilter;
-  const { notifications, theme } = core;
+  const { notifications } = core;
   const { toasts } = notifications;
-  const { theme$ } = theme;
 
   const dispatchDashboardStateChange = useDashboardDispatch();
   const dashboardState = useDashboardSelector((state) => state.dashboardStateReducer);
@@ -168,7 +167,7 @@ export function DashboardTopNav({
           overlays: core.overlays,
           SavedObjectFinder: getSavedObjectFinder(core.savedObjects, uiSettings),
           reportUiCounter: usageCollection?.reportUiCounter,
-          theme: core.theme,
+          theme,
         }),
       }));
     }
@@ -179,7 +178,7 @@ export function DashboardTopNav({
     core.notifications,
     core.savedObjects,
     core.overlays,
-    core.theme,
+    theme,
     uiSettings,
     usageCollection,
   ]);
@@ -381,7 +380,7 @@ export function DashboardTopNav({
       });
       return saveResult.id ? { id: saveResult.id } : { error: saveResult.error };
     };
-    showCloneModal({ onClone, title: currentState.title, theme$ });
+    showCloneModal({ onClone, title: currentState.title });
   }, [
     dashboardSessionStorage,
     savedObjectsTagging,
@@ -389,7 +388,6 @@ export function DashboardTopNav({
     kibanaVersion,
     redirectTo,
     timefilter,
-    theme$,
     toasts,
   ]);
 
@@ -414,10 +412,9 @@ export function DashboardTopNav({
         onHidePanelTitlesChange: (isChecked: boolean) => {
           dispatchDashboardStateChange(setHidePanelTitles(isChecked));
         },
-        theme$,
       });
     },
-    [dashboardAppState, dispatchDashboardStateChange, theme$]
+    [dashboardAppState, dispatchDashboardStateChange]
   );
 
   const showShare = useCallback(
