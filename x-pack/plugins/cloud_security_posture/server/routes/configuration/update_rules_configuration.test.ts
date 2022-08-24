@@ -198,19 +198,12 @@ describe('Update rules configuration API', () => {
   });
 
   it('verify that the API for updating package policy was invoked', async () => {
-    const {
-      enabledRules,
-      esClientMock,
-      soClientMock,
-      packagePolicyMock,
-      packagePolicyServiceMock,
-      cspContext,
-    } = await setupMocks();
+    const { esClientMock, soClientMock, packagePolicyMock, packagePolicyServiceMock, cspContext } =
+      await setupMocks();
 
     packagePolicyServiceMock.update.mockReturnValue(Promise.resolve(packagePolicyMock));
 
     const updatedPackagePolicy = await updatePackagePolicyVars({
-      rules: enabledRules.map((rule) => ({ id: rule.id, enabled: rule.attributes.enabled })),
       packagePolicy: packagePolicyMock,
       soClient: soClientMock,
       esClient: esClientMock.asCurrentUser,
@@ -226,21 +219,14 @@ describe('Update rules configuration API', () => {
   });
 
   it("updates to package policy vars doesn't override unknown vars", async () => {
-    const {
-      enabledRules,
-      esClientMock,
-      soClientMock,
-      packagePolicyMock,
-      packagePolicyServiceMock,
-      cspContext,
-    } = await setupMocks();
+    const { esClientMock, soClientMock, packagePolicyMock, packagePolicyServiceMock, cspContext } =
+      await setupMocks();
 
     const dummyVar = { type: 'ymal', value: 'foo ' };
     packagePolicyMock.vars!.foo = { ...dummyVar };
     packagePolicyServiceMock.update.mockReturnValue(Promise.resolve(packagePolicyMock));
 
     const updatedPackagePolicy = await updatePackagePolicyVars({
-      rules: enabledRules.map((rule) => ({ id: rule.id, enabled: rule.attributes.enabled })),
       packagePolicy: packagePolicyMock,
       soClient: soClientMock,
       esClient: esClientMock.asCurrentUser,

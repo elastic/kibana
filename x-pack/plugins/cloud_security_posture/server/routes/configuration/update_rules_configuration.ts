@@ -27,15 +27,8 @@ import type { CspApiRequestHandlerContext, CspRouter, CspRequestHandler } from '
 
 export type UpdateRulesConfigBodySchema = TypeOf<typeof updateRulesConfigurationBodySchema>;
 
+/** Minimal set of fields required for updating a CSP SO rule */
 type SavedObjectRuleUpdatePayload = Pick<CspRule, 'enabled'>;
-
-/**
- * Used for updating rules saved object with 'next'. 'current' is used for potential rollback.
- */
-type RulesSavedObjectUpdate = Record<
-  'current' | 'next',
-  Array<SavedObject<SavedObjectRuleUpdatePayload>>
->;
 
 /**
  * Minimal set of fields required for generating
@@ -100,7 +93,7 @@ export const getUpdatedPackagePolicy = (
 /**
  * gets all rules of a package policy with fields required for runtime config
  */
-const getAllPartialRulesSavedObjects = (
+const getAllPackagePolicyCspRules = (
   soClient: SavedObjectsClientContract,
   packagePolicyId: PackagePolicy['id'],
   policyId: PackagePolicy['policy_id']
@@ -115,6 +108,24 @@ const getAllPartialRulesSavedObjects = (
     searchFields: ['name'],
     perPage: 10000,
   });
+
+/**
+ * gets rules by id of a package policy with fields required for updating SO object
+ */
+const getPartialCspRulesById = (
+  soClient: CspApiRequestHandlerContext['soClient'],
+  ruleIds: string[]
+) =>
+  soClient.bulkGet<SavedObjectRuleUpdatePayload>(
+    ruleIds.map((ruleId) => ({
+      id: ruleId,
+      type: CSP_RULE_SAVED_OBJECT_TYPE,
+      fields: ['enabled'],
+    }))
+  );
+
+const getRuntimeCfgVarValue = (rules: Array<SavedObject<PackagePolicyRuleUpdatePayload>>) =>
+  yaml.safeDump(createRulesConfig(rules));
 
 /**
  * Updates the package policy vars object with a new value for the runtimeCfg key
@@ -133,22 +144,15 @@ export const updatePackagePolicyVars = async ({
   soClient: SavedObjectsClientContract;
   user: AuthenticatedUser | null;
 }): Promise<PackagePolicy> => {
-  const packagePolicyRules = await getAllPartialRulesSavedObjects(
-    soClient,
-    packagePolicy.id,
-    packagePolicy.policy_id
-  );
-
-  const updatedPolicy = getUpdatedPackagePolicy(
-    packagePolicy,
-    yaml.safeDump(createRulesConfig(packagePolicyRules.saved_objects))
-  );
+  const packagePolicyRulesSO = (
+    await getAllPackagePolicyCspRules(soClient, packagePolicy.id, packagePolicy.policy_id)
+  ).saved_objects;
 
   return packagePolicyService.update(
     soClient,
     esClient,
     packagePolicy.id,
-    updatedPolicy,
+    getUpdatedPackagePolicy(packagePolicy, getRuntimeCfgVarValue(packagePolicyRulesSO)),
     user ? { user } : undefined
   );
 };
@@ -161,41 +165,25 @@ const getRuleUpdateFields = ({
   type,
   attributes,
   references,
-}: SavedObject<SavedObjectRuleUpdatePayload>) => ({
-  id,
-  type,
-  attributes,
-  references,
-});
+}: SavedObject<SavedObjectRuleUpdatePayload>) => ({ id, type, attributes, references });
 
 /**
- * Gets the next and current rules to update/rollback respectively
- * @internal
+ * Gets current rules with next values for 'enabled' property
  */
-export const getPartialSavedObjectRulesById = async (
-  soClient: CspApiRequestHandlerContext['soClient'],
+const getNextCspRules = (
+  current: Array<SavedObject<SavedObjectRuleUpdatePayload>>,
   rulesToChange: UpdateRulesConfigBodySchema['rules']
-): Promise<RulesSavedObjectUpdate> => {
-  const current = (
-    await soClient.bulkGet<SavedObjectRuleUpdatePayload>(
-      rulesToChange.map((rule) => ({
-        id: rule.id,
-        type: CSP_RULE_SAVED_OBJECT_TYPE,
-        fields: ['enabled'],
-      }))
-    )
-  ).saved_objects.map(getRuleUpdateFields);
-
-  const currentRulesMap = Object.fromEntries(current.map((rule) => [rule.id, rule]));
-  const next = rulesToChange.map((rule) => ({
+) => {
+  const currentRulesMap = Object.fromEntries(
+    current.map((rule) => [rule.id, getRuleUpdateFields(rule)])
+  );
+  return rulesToChange.map((rule) => ({
     ...currentRulesMap[rule.id],
     attributes: {
       ...currentRulesMap[rule.id].attributes,
       enabled: rule.enabled,
     },
   }));
-
-  return { current, next };
 };
 
 /**
@@ -204,22 +192,22 @@ export const getPartialSavedObjectRulesById = async (
  */
 export const updateRulesById = async (
   { soClient, packagePolicyService, esClient, user, logger }: CspApiRequestHandlerContext,
-  { rules, package_policy_id: packagePolicyId }: UpdateRulesConfigBodySchema
+  { rules: rulesToChange, package_policy_id: packagePolicyId }: UpdateRulesConfigBodySchema
 ): Promise<PackagePolicy> => {
-  logger.debug('Start updating rules');
+  logger.info(`Start updating rules: ${JSON.stringify(rulesToChange)}`);
 
-  const { current, next } = await getPartialSavedObjectRulesById(soClient, rules);
+  const currentRules = (
+    await getPartialCspRulesById(
+      soClient,
+      rulesToChange.map((rule) => rule.id)
+    )
+  ).saved_objects;
 
-  try {
-    await soClient.bulkUpdate(next); // Only needs a Partial<SavedObject<T>> for updating
-  } catch (e) {
-    logger.debug('Failed updating saved-object rules');
-    throw e;
-  }
+  await soClient.bulkUpdate(getNextCspRules(currentRules, rulesToChange));
 
   try {
     const packagePolicy = await packagePolicyService.get(soClient, packagePolicyId);
-    if (!packagePolicy) throw new Error('Missing package policy');
+    if (!packagePolicy) throw new Error(`Missing package policy - ${packagePolicyId}`);
 
     const updatedPolicy = await updatePackagePolicyVars({
       soClient,
@@ -229,16 +217,16 @@ export const updateRulesById = async (
       esClient: esClient.asCurrentUser,
     });
 
-    logger.debug('Finish updating rules');
+    logger.info('Finish updating rules');
 
     return updatedPolicy;
   } catch (e) {
-    logger.debug('Failed updating rules in package policy vars');
+    logger.error('Failed updating rules in package policy vars');
     logger.error(e);
 
-    logger.debug('Try to rollback to previous saved-objects rules');
-    await soClient.bulkUpdate(current);
-    logger.debug('Finish rollback');
+    logger.info('Rollback to previous saved-objects rules');
+    await soClient.bulkUpdate(currentRules);
+    logger.info('Finish rollback');
 
     throw e;
   }
