@@ -39,12 +39,10 @@ import {
   waitForIndexStatus,
   initAction,
   cloneIndex,
+  type DocumentsTransformFailed,
+  type DocumentsTransformSuccess,
+  MIGRATION_CLIENT_OPTIONS,
 } from '@kbn/core-saved-objects-migration-server-internal';
-import type {
-  DocumentsTransformFailed,
-  DocumentsTransformSuccess,
-} from '../../../../saved_objects/migrations/core';
-import { MIGRATION_CLIENT_OPTIONS } from '../../../../saved_objects/migrations/run_resilient_migrator';
 
 const { startES } = kbnTestServer.createTestServers({
   adjustTimeout: (t: number) => jest.setTimeout(t),

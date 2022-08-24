@@ -32,6 +32,8 @@ export {
   refreshIndex,
   pickupUpdatedMappings,
   fetchIndices,
+  waitForReindexTask,
+  waitForPickupUpdatedMappingsTask,
 } from './src/actions';
 export type {
   OpenPitResponse,
