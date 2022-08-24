@@ -6652,35 +6652,6 @@
       },
       {
         "parentPluginId": "timelines",
-        "id": "def-common.DocValueFields",
-        "type": "Type",
-        "tags": [],
-        "label": "DocValueFields",
-        "description": [],
-        "signature": [
-          "QueryDslFieldAndFormat"
-        ],
-        "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "timelines",
-        "id": "def-common.EMPTY_DOCVALUE_FIELD",
-        "type": "Array",
-        "tags": [],
-        "label": "EMPTY_DOCVALUE_FIELD",
-        "description": [],
-        "signature": [
-          "QueryDslFieldAndFormat",
-          "[]"
-        ],
-        "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "timelines",
         "id": "def-common.EMPTY_INDEX_FIELDS",
         "type": "Array",
         "tags": [],
