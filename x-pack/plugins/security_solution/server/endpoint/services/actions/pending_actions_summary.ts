@@ -53,6 +53,14 @@ export const getPendingActionsSummary = async (
 
   for (const agentID of agentIDs) {
     const agentPendingActions: EndpointPendingActions['pending_actions'] = {};
+    const setActionAsPending = (commandName: string) => {
+      // Add the command to the list of pending actions, but set it to zero if the
+      // `pendingActionResponsesWithAck` feature flag is false.
+      // Otherwise, just increment the count for this command
+      agentPendingActions[commandName] = !isPendingActionResponsesWithAckEnabled
+        ? 0
+        : (agentPendingActions[commandName] ?? 0) + 1;
+    };
 
     pending.push({
       agent_id: agentID,
@@ -62,13 +70,9 @@ export const getPendingActionsSummary = async (
     const agentUnexpiredActions = unExpiredByAgentId[agentID] ?? [];
 
     for (const unExpiredAction of agentUnexpiredActions) {
-      if (!unExpiredAction.isCompleted) {
-        // Add the command to the list of pending actions, but set it to zero if the
-        // `pendingActionResponsesWithAck` feature flag is false.
-        // Otherwise, just increment the count for this command
-        agentPendingActions[unExpiredAction.command] = !isPendingActionResponsesWithAckEnabled
-          ? 0
-          : (agentPendingActions[unExpiredAction.command] ?? 0) + 1;
+      // If this agent's action state is not completed, then mark it as pending
+      if (!unExpiredAction.agentState[agentID].isCompleted) {
+        setActionAsPending(unExpiredAction.command);
       } else if (
         unExpiredAction.wasSuccessful &&
         (unExpiredAction.command === 'isolate' || unExpiredAction.command === 'unisolate')
@@ -101,9 +105,7 @@ export const getPendingActionsSummary = async (
           lastEndpointMetadataEventTimestamp &&
           lastEndpointMetadataEventTimestamp < actionCompletedAtTimestamp
         ) {
-          agentPendingActions[unExpiredAction.command] = !isPendingActionResponsesWithAckEnabled
-            ? 0
-            : (agentPendingActions[unExpiredAction.command] ?? 0) + 1;
+          setActionAsPending(unExpiredAction.command);
         }
       }
     }
