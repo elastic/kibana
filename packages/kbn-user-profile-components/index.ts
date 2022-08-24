@@ -12,4 +12,10 @@ export type { UserProfilesPopoverProps } from './src/user_profiles_popover';
 export { UserAvatar } from './src/user_avatar';
 export { UserProfilesSelectable } from './src/user_profiles_selectable';
 export { UserProfilesPopover } from './src/user_profiles_popover';
-export type { UserProfile, UserProfileUserInfo, UserProfileAvatarData } from './src/user_profile';
+export { getUserDisplayName } from './src/user_profile';
+export type {
+  UserProfile,
+  UserProfileUserInfo,
+  UserProfileAvatarData,
+  GetUserDisplayNameParams,
+} from './src/user_profile';

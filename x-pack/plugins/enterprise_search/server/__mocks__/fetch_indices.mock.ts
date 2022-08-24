@@ -15,6 +15,7 @@ export const mockSingleIndexStatsResponse = {
   indices: {
     'search-regular-index': {
       health: 'green',
+      hidden: false,
       status: 'open',
       total: {
         docs: {
@@ -115,6 +116,7 @@ export const getIndexReturnValue = (indexName: string) => {
     alias: indexName.startsWith('alias') || indexName.startsWith('search-alias'),
     count: 100,
     name: indexName,
+    hidden: indexName.includes('hidden'),
     privileges: { manage: true, read: true },
     total: {
       ...mockMultiStatsResponse.indices[indexName].total,
