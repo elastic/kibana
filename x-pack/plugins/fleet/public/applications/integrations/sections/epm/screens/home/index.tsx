@@ -28,10 +28,12 @@ import { useGetPackages } from '../../../../hooks';
 import type { Section } from '../../..';
 
 import type { CategoryFacet } from './category_facets';
+
 import { InstalledPackages } from './installed_packages';
 import { AvailablePackages } from './available_packages';
 
-export type ExtendedIntegrationCategory = IntegrationCategory | '';
+export type ExtendedIntegrationCategory = IntegrationCategory | 'updates_available' | '';
+
 export interface CategoryParams {
   category?: ExtendedIntegrationCategory;
 }

@@ -30,6 +30,7 @@ export const EmptyList = (props: Args) => (
     list={[]}
     onSearchChange={action('onSearchChange')}
     setSelectedCategory={action('setSelectedCategory')}
+    selectedCategory=""
     {...props}
   />
 );
@@ -112,6 +113,7 @@ export const List = (props: Args) => (
     ]}
     onSearchChange={action('onSearchChange')}
     setSelectedCategory={action('setSelectedCategory')}
+    selectedCategory=""
     {...props}
   />
 );

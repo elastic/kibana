@@ -188,7 +188,7 @@ export const InstalledPackages: React.FC<{
 
   return (
     <PackageListGrid
-      {...{ isLoading, controls, setSelectedCategory, callout }}
+      {...{ isLoading, controls, setSelectedCategory, callout, selectedCategory }}
       onSearchChange={setSearchTerm}
       initialSearch={searchParam}
       list={cards}
