@@ -86,5 +86,27 @@ export function CasesSingleViewServiceProvider({ getService, getPageObject }: Ft
       await addVisualizationButton.moveMouseTo();
       await new Promise((resolve) => setTimeout(resolve, 500)); // give tooltip time to open
     },
+
+    async openAssigneesPopover() {
+      await common.clickAndValidate('case-view-assignees-edit-button', 'euiSelectableList');
+      await header.waitUntilLoadingHasFinished();
+    },
+
+    async closeAssigneesPopover() {
+      await testSubjects.click('case-refresh');
+      await header.waitUntilLoadingHasFinished();
+    },
+
+    async setSearchTextInAssigneesPopover(text: string) {
+      await (
+        await (await find.byClassName('euiContextMenuPanel')).findByClassName('euiFieldSearch')
+      ).type(text);
+      await header.waitUntilLoadingHasFinished();
+    },
+
+    async selectFirstRowInAssigneesPopover() {
+      await (await find.byClassName('euiSelectableListItem__content')).click();
+      await header.waitUntilLoadingHasFinished();
+    },
   };
 }

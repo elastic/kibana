@@ -6,7 +6,7 @@
  */
 
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
-import { UserProfile } from '@kbn/security-plugin/common';
+import { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import * as i18n from '../translations';
 import { useKibana, useToasts } from '../../common/lib/kibana';
 import { ServerError } from '../../types';
@@ -18,12 +18,22 @@ export const useBulkGetUserProfiles = ({ uids }: { uids: string[] }) => {
 
   const toasts = useToasts();
 
-  return useQuery<UserProfile[], ServerError>(
+  return useQuery<Map<string, UserProfileWithAvatar>, ServerError>(
     [USER_PROFILES_CACHE_KEY, USER_PROFILES_BULK_GET_CACHE_KEY, uids],
-    () => {
-      return bulkGetUserProfiles({ security, uids });
+    async () => {
+      if (uids.length <= 0) {
+        return new Map<string, UserProfileWithAvatar>();
+      }
+
+      const profiles = await bulkGetUserProfiles({ security, uids });
+      return profiles.reduce<Map<string, UserProfileWithAvatar>>((acc, profile) => {
+        acc.set(profile.uid, profile);
+        return acc;
+      }, new Map<string, UserProfileWithAvatar>());
     },
     {
+      retry: false,
+      keepPreviousData: true,
       onError: (error: ServerError) => {
         if (error.name !== 'AbortError') {
           toasts.addError(
@@ -38,4 +48,7 @@ export const useBulkGetUserProfiles = ({ uids }: { uids: string[] }) => {
   );
 };
 
-export type UseSuggestUserProfiles = UseQueryResult<UserProfile[], ServerError>;
+export type UseBulkGetUserProfiles = UseQueryResult<
+  Map<string, UserProfileWithAvatar>,
+  ServerError
+>;

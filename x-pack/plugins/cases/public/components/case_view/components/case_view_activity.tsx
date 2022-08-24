@@ -7,6 +7,9 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
+import { isEqual } from 'lodash';
+import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_get_current_user_profile';
+import { useBulkGetUserProfiles } from '../../../containers/user_profiles/use_bulk_get_user_profiles';
 import { useGetConnectors } from '../../../containers/configure/use_connectors';
 import { CaseSeverity } from '../../../../common/api';
 import { useCaseViewNavigation } from '../../../common/navigation';
@@ -15,9 +18,9 @@ import { Case, CaseStatuses } from '../../../../common';
 import { EditConnector } from '../../edit_connector';
 import { CasesNavigation } from '../../links';
 import { StatusActionButton } from '../../status/button';
-import { TagList } from '../../tag_list';
+import { EditTags } from './edit_tags';
 import { UserActions } from '../../user_actions';
-import { UserList } from '../../user_list';
+import { UserList } from './user_list';
 import { useOnUpdateField } from '../use_on_update_field';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import * as i18n from '../translations';
@@ -25,6 +28,9 @@ import { getNoneConnector, normalizeActionConnector } from '../../configure_case
 import { getConnectorById } from '../../utils';
 import { SeveritySidebarSelector } from '../../severity/sidebar_selector';
 import { useGetCaseUserActions } from '../../../containers/use_get_case_user_actions';
+import { AssignUsers } from './assign_users';
+import { SidebarSection } from './sidebar_section';
+import { Assignee } from '../../user_profiles/types';
 
 export const CaseViewActivity = ({
   ruleDetailsNavigation,
@@ -47,6 +53,18 @@ export const CaseViewActivity = ({
     caseData.connector.id
   );
 
+  const assignees = useMemo(
+    () => caseData.assignees.map((assignee) => assignee.uid),
+    [caseData.assignees]
+  );
+
+  const { data: userProfiles, isLoading: isLoadingUserProfiles } = useBulkGetUserProfiles({
+    uids: assignees,
+  });
+
+  const { data: currentUserProfile, isLoading: isLoadingCurrentUserProfile } =
+    useGetCurrentUserProfile();
+
   const onShowAlertDetails = useCallback(
     (alertId: string, index: string) => {
       if (showAlertDetails) {
@@ -60,6 +78,11 @@ export const CaseViewActivity = ({
     caseId: caseData.id,
     caseData,
   });
+
+  const isLoadingAssigneeData =
+    (isLoading && loadingKey === 'assignees') ||
+    isLoadingUserProfiles ||
+    isLoadingCurrentUserProfile;
 
   const changeStatus = useCallback(
     (status: CaseStatuses) =>
@@ -86,6 +109,16 @@ export const CaseViewActivity = ({
   const onUpdateSeverity = useCallback(
     (newSeverity: CaseSeverity) => onUpdateField({ key: 'severity', value: newSeverity }),
     [onUpdateField]
+  );
+
+  const onUpdateAssignees = useCallback(
+    (newAssignees: Assignee[]) => {
+      const newAssigneeUids = newAssignees.map((assignee) => ({ uid: assignee.uid }));
+      if (!isEqual(newAssigneeUids.sort(), assignees.sort())) {
+        onUpdateField({ key: 'assignees', value: newAssigneeUids });
+      }
+    },
+    [assignees, onUpdateField]
   );
 
   const { isLoading: isLoadingConnectors, data: connectors = [] } = useGetConnectors();
@@ -148,6 +181,15 @@ export const CaseViewActivity = ({
         )}
       </EuiFlexItem>
       <EuiFlexItem grow={2}>
+        <SidebarSection>
+          <AssignUsers
+            caseAssignees={caseData.assignees}
+            currentUserProfile={currentUserProfile}
+            onAssigneesChanged={onUpdateAssignees}
+            isLoading={isLoadingAssigneeData}
+            userProfiles={userProfiles ?? new Map()}
+          />
+        </SidebarSection>
         <SeveritySidebarSelector
           isDisabled={!permissions.update}
           isLoading={isLoading}
@@ -169,7 +211,7 @@ export const CaseViewActivity = ({
             users={userActionsData.participants}
           />
         ) : null}
-        <TagList
+        <EditTags
           tags={caseData.tags}
           onSubmit={onSubmitTags}
           isLoading={isLoading && loadingKey === 'tags'}

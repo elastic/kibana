@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+import { UserProfileWithAvatar } from '@kbn/user-profile-components';
 
-export const SEND_EMAIL_ARIA = (user: string) =>
-  i18n.translate('xpack.cases.caseView.sendEmalLinkAria', {
-    values: { user },
-    defaultMessage: 'click to send an email to {user}',
-  });
+export interface Assignee {
+  uid: string;
+  profile?: UserProfileWithAvatar;
+}
+
+export interface AssigneeWithProfile extends Assignee {
+  profile: UserProfileWithAvatar;
+}

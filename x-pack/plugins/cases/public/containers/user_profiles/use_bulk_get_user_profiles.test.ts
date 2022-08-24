@@ -31,7 +31,7 @@ describe('useBulkGetUserProfiles', () => {
   });
 
   it('calls bulkGetUserProfiles with correct arguments', async () => {
-    const spyOnSuggestUserProfiles = jest.spyOn(api, 'bulkGetUserProfiles');
+    const spyOnBulkGetUserProfiles = jest.spyOn(api, 'bulkGetUserProfiles');
 
     const { result, waitFor } = renderHook(() => useBulkGetUserProfiles(props), {
       wrapper: appMockRender.AppWrapper,
@@ -39,16 +39,29 @@ describe('useBulkGetUserProfiles', () => {
 
     await waitFor(() => result.current.isSuccess);
 
-    expect(spyOnSuggestUserProfiles).toBeCalledWith({
+    expect(spyOnBulkGetUserProfiles).toBeCalledWith({
       ...props,
       security: expect.anything(),
     });
   });
 
-  it('shows a toast error message when an error occurs in the response', async () => {
-    const spyOnSuggestUserProfiles = jest.spyOn(api, 'bulkGetUserProfiles');
+  it('does not call bulkGetUserProfiles and returns an empty array when the uids is empty', async () => {
+    const spyOnBulkGetUserProfiles = jest.spyOn(api, 'bulkGetUserProfiles');
 
-    spyOnSuggestUserProfiles.mockImplementation(() => {
+    const { result, waitFor } = renderHook(() => useBulkGetUserProfiles({ uids: [] }), {
+      wrapper: appMockRender.AppWrapper,
+    });
+
+    await waitFor(() => result.current.isSuccess);
+
+    expect(spyOnBulkGetUserProfiles).not.toBeCalled();
+    expect(result.current.data?.size).toBe(0);
+  });
+
+  it('shows a toast error message when an error occurs in the response', async () => {
+    const spyOnBulkGetUserProfiles = jest.spyOn(api, 'bulkGetUserProfiles');
+
+    spyOnBulkGetUserProfiles.mockImplementation(() => {
       throw new Error('Something went wrong');
     });
 

@@ -7,18 +7,20 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { UserList } from '.';
-import * as i18n from '../case_view/translations';
+import { UserList } from './user_list';
+import * as i18n from '../translations';
 
 describe('UserList ', () => {
   const title = 'Case Title';
   const caseLink = 'http://reddit.com';
   const user = { username: 'username', fullName: 'Full Name', email: 'testemail@elastic.co' };
   const open = jest.fn();
+
   beforeEach(() => {
     jest.clearAllMocks();
     window.open = open;
   });
+
   it('triggers mailto when email icon clicked', () => {
     const wrapper = shallow(
       <UserList
