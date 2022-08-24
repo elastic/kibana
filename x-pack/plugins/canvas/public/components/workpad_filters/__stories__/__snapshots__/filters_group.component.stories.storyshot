@@ -58,7 +58,598 @@ exports[`Storyshots components/WorkpadFilters/FiltersGroupComponent default 1`] 
         id="canvas-filter-group-0"
         role="region"
         tabIndex={-1}
-      />
+      >
+        <div>
+          <div
+            className=" emotion-euiAccordion__children"
+          >
+            <div
+              style={
+                Object {
+                  "paddingTop": "15px",
+                }
+              }
+            >
+              <div
+                className="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-m-m-plain"
+              >
+                <dl
+                  className="euiDescriptionList workpadFilter emotion-euiDescriptionList-column-left"
+                  data-type="column"
+                >
+                  <dt
+                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-compressed"
+                    style={
+                      Object {
+                        "width": "30%",
+                      }
+                    }
+                  >
+                    <div
+                      className="euiText emotion-euiText-s"
+                    >
+                      <h4>
+                        Column
+                      </h4>
+                    </div>
+                  </dt>
+                  <dd
+                    className="euiDescriptionList__description eui-textBreakWord emotion-euiDescriptionList__description-column-normal"
+                    style={
+                      Object {
+                        "width": "70%",
+                      }
+                    }
+                  >
+                    <div
+                      className="euiText emotion-euiText-s"
+                    >
+                      project
+                    </div>
+                  </dd>
+                  <dt
+                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-compressed"
+                    style={
+                      Object {
+                        "width": "30%",
+                      }
+                    }
+                  >
+                    <div
+                      className="euiText emotion-euiText-s"
+                    >
+                      <h4>
+                        Value
+                      </h4>
+                    </div>
+                  </dt>
+                  <dd
+                    className="euiDescriptionList__description eui-textBreakWord emotion-euiDescriptionList__description-column-normal"
+                    style={
+                      Object {
+                        "width": "70%",
+                      }
+                    }
+                  >
+                    <div
+                      className="euiText emotion-euiText-s"
+                    >
+                      kibana
+                    </div>
+                  </dd>
+                  <dt
+                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-compressed"
+                    style={
+                      Object {
+                        "width": "30%",
+                      }
+                    }
+                  >
+                    <div
+                      className="euiText emotion-euiText-s"
+                    >
+                      <h4>
+                        Type
+                      </h4>
+                    </div>
+                  </dt>
+                  <dd
+                    className="euiDescriptionList__description eui-textBreakWord emotion-euiDescriptionList__description-column-normal"
+                    style={
+                      Object {
+                        "width": "70%",
+                      }
+                    }
+                  >
+                    <div
+                      className="euiText emotion-euiText-s"
+                    >
+                      Dropdown
+                    </div>
+                  </dd>
+                  <dt
+                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-compressed"
+                    style={
+                      Object {
+                        "width": "30%",
+                      }
+                    }
+                  >
+                    <div
+                      className="euiText emotion-euiText-s"
+                    >
+                      <h4>
+                        Filter group
+                      </h4>
+                    </div>
+                  </dt>
+                  <dd
+                    className="euiDescriptionList__description eui-textBreakWord emotion-euiDescriptionList__description-column-normal"
+                    style={
+                      Object {
+                        "width": "70%",
+                      }
+                    }
+                  >
+                    <div
+                      className="euiText emotion-euiText-s"
+                    >
+                      Group 1
+                    </div>
+                  </dd>
+                </dl>
+              </div>
+              <div
+                className="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-m-m-plain"
+              >
+                <dl
+                  className="euiDescriptionList workpadFilter emotion-euiDescriptionList-column-left"
+                  data-type="column"
+                >
+                  <dt
+                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-compressed"
+                    style={
+                      Object {
+                        "width": "30%",
+                      }
+                    }
+                  >
+                    <div
+                      className="euiText emotion-euiText-s"
+                    >
+                      <h4>
+                        Column
+                      </h4>
+                    </div>
+                  </dt>
+                  <dd
+                    className="euiDescriptionList__description eui-textBreakWord emotion-euiDescriptionList__description-column-normal"
+                    style={
+                      Object {
+                        "width": "70%",
+                      }
+                    }
+                  >
+                    <div
+                      className="euiText emotion-euiText-s"
+                    >
+                      @timestamp
+                    </div>
+                  </dd>
+                  <dt
+                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-compressed"
+                    style={
+                      Object {
+                        "width": "30%",
+                      }
+                    }
+                  >
+                    <div
+                      className="euiText emotion-euiText-s"
+                    >
+                      <h4>
+                        From
+                      </h4>
+                    </div>
+                  </dt>
+                  <dd
+                    className="euiDescriptionList__description eui-textBreakWord emotion-euiDescriptionList__description-column-normal"
+                    style={
+                      Object {
+                        "width": "70%",
+                      }
+                    }
+                  >
+                    <div
+                      className="euiText emotion-euiText-s"
+                    >
+                      2021-01-01 08:15:00
+                    </div>
+                  </dd>
+                  <dt
+                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-compressed"
+                    style={
+                      Object {
+                        "width": "30%",
+                      }
+                    }
+                  >
+                    <div
+                      className="euiText emotion-euiText-s"
+                    >
+                      <h4>
+                        To
+                      </h4>
+                    </div>
+                  </dt>
+                  <dd
+                    className="euiDescriptionList__description eui-textBreakWord emotion-euiDescriptionList__description-column-normal"
+                    style={
+                      Object {
+                        "width": "70%",
+                      }
+                    }
+                  >
+                    <div
+                      className="euiText emotion-euiText-s"
+                    >
+                      2021-02-01 17:22:00
+                    </div>
+                  </dd>
+                  <dt
+                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-compressed"
+                    style={
+                      Object {
+                        "width": "30%",
+                      }
+                    }
+                  >
+                    <div
+                      className="euiText emotion-euiText-s"
+                    >
+                      <h4>
+                        Type
+                      </h4>
+                    </div>
+                  </dt>
+                  <dd
+                    className="euiDescriptionList__description eui-textBreakWord emotion-euiDescriptionList__description-column-normal"
+                    style={
+                      Object {
+                        "width": "70%",
+                      }
+                    }
+                  >
+                    <div
+                      className="euiText emotion-euiText-s"
+                    >
+                      Time
+                    </div>
+                  </dd>
+                  <dt
+                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-compressed"
+                    style={
+                      Object {
+                        "width": "30%",
+                      }
+                    }
+                  >
+                    <div
+                      className="euiText emotion-euiText-s"
+                    >
+                      <h4>
+                        Filter group
+                      </h4>
+                    </div>
+                  </dt>
+                  <dd
+                    className="euiDescriptionList__description eui-textBreakWord emotion-euiDescriptionList__description-column-normal"
+                    style={
+                      Object {
+                        "width": "70%",
+                      }
+                    }
+                  >
+                    <div
+                      className="euiText emotion-euiText-s"
+                    >
+                      Group 1
+                    </div>
+                  </dd>
+                </dl>
+              </div>
+              <div
+                className="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-m-m-plain"
+              >
+                <dl
+                  className="euiDescriptionList workpadFilter emotion-euiDescriptionList-column-left"
+                  data-type="column"
+                >
+                  <dt
+                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-compressed"
+                    style={
+                      Object {
+                        "width": "30%",
+                      }
+                    }
+                  >
+                    <div
+                      className="euiText emotion-euiText-s"
+                    >
+                      <h4>
+                        Column
+                      </h4>
+                    </div>
+                  </dt>
+                  <dd
+                    className="euiDescriptionList__description eui-textBreakWord emotion-euiDescriptionList__description-column-normal"
+                    style={
+                      Object {
+                        "width": "70%",
+                      }
+                    }
+                  >
+                    <div
+                      className="euiText emotion-euiText-s"
+                    >
+                      country
+                    </div>
+                  </dd>
+                  <dt
+                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-compressed"
+                    style={
+                      Object {
+                        "width": "30%",
+                      }
+                    }
+                  >
+                    <div
+                      className="euiText emotion-euiText-s"
+                    >
+                      <h4>
+                        Value
+                      </h4>
+                    </div>
+                  </dt>
+                  <dd
+                    className="euiDescriptionList__description eui-textBreakWord emotion-euiDescriptionList__description-column-normal"
+                    style={
+                      Object {
+                        "width": "70%",
+                      }
+                    }
+                  >
+                    <div
+                      className="euiText emotion-euiText-s"
+                    >
+                      US
+                    </div>
+                  </dd>
+                  <dt
+                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-compressed"
+                    style={
+                      Object {
+                        "width": "30%",
+                      }
+                    }
+                  >
+                    <div
+                      className="euiText emotion-euiText-s"
+                    >
+                      <h4>
+                        Type
+                      </h4>
+                    </div>
+                  </dt>
+                  <dd
+                    className="euiDescriptionList__description eui-textBreakWord emotion-euiDescriptionList__description-column-normal"
+                    style={
+                      Object {
+                        "width": "70%",
+                      }
+                    }
+                  >
+                    <div
+                      className="euiText emotion-euiText-s"
+                    >
+                      Dropdown
+                    </div>
+                  </dd>
+                  <dt
+                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-compressed"
+                    style={
+                      Object {
+                        "width": "30%",
+                      }
+                    }
+                  >
+                    <div
+                      className="euiText emotion-euiText-s"
+                    >
+                      <h4>
+                        Filter group
+                      </h4>
+                    </div>
+                  </dt>
+                  <dd
+                    className="euiDescriptionList__description eui-textBreakWord emotion-euiDescriptionList__description-column-normal"
+                    style={
+                      Object {
+                        "width": "70%",
+                      }
+                    }
+                  >
+                    <div
+                      className="euiText emotion-euiText-s"
+                    >
+                      Group 1
+                    </div>
+                  </dd>
+                </dl>
+              </div>
+              <div
+                className="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-m-m-plain"
+              >
+                <dl
+                  className="euiDescriptionList workpadFilter emotion-euiDescriptionList-column-left"
+                  data-type="column"
+                >
+                  <dt
+                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-compressed"
+                    style={
+                      Object {
+                        "width": "30%",
+                      }
+                    }
+                  >
+                    <div
+                      className="euiText emotion-euiText-s"
+                    >
+                      <h4>
+                        Column
+                      </h4>
+                    </div>
+                  </dt>
+                  <dd
+                    className="euiDescriptionList__description eui-textBreakWord emotion-euiDescriptionList__description-column-normal"
+                    style={
+                      Object {
+                        "width": "70%",
+                      }
+                    }
+                  >
+                    <div
+                      className="euiText emotion-euiText-s"
+                    >
+                      time
+                    </div>
+                  </dd>
+                  <dt
+                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-compressed"
+                    style={
+                      Object {
+                        "width": "30%",
+                      }
+                    }
+                  >
+                    <div
+                      className="euiText emotion-euiText-s"
+                    >
+                      <h4>
+                        From
+                      </h4>
+                    </div>
+                  </dt>
+                  <dd
+                    className="euiDescriptionList__description eui-textBreakWord emotion-euiDescriptionList__description-column-normal"
+                    style={
+                      Object {
+                        "width": "70%",
+                      }
+                    }
+                  >
+                    <div
+                      className="euiText emotion-euiText-s"
+                    >
+                      2021-05-01 10:50:00
+                    </div>
+                  </dd>
+                  <dt
+                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-compressed"
+                    style={
+                      Object {
+                        "width": "30%",
+                      }
+                    }
+                  >
+                    <div
+                      className="euiText emotion-euiText-s"
+                    >
+                      <h4>
+                        To
+                      </h4>
+                    </div>
+                  </dt>
+                  <dd
+                    className="euiDescriptionList__description eui-textBreakWord emotion-euiDescriptionList__description-column-normal"
+                    style={
+                      Object {
+                        "width": "70%",
+                      }
+                    }
+                  >
+                    <div
+                      className="euiText emotion-euiText-s"
+                    >
+                      2021-05-01 04:40:00
+                    </div>
+                  </dd>
+                  <dt
+                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-compressed"
+                    style={
+                      Object {
+                        "width": "30%",
+                      }
+                    }
+                  >
+                    <div
+                      className="euiText emotion-euiText-s"
+                    >
+                      <h4>
+                        Type
+                      </h4>
+                    </div>
+                  </dt>
+                  <dd
+                    className="euiDescriptionList__description eui-textBreakWord emotion-euiDescriptionList__description-column-normal"
+                    style={
+                      Object {
+                        "width": "70%",
+                      }
+                    }
+                  >
+                    <div
+                      className="euiText emotion-euiText-s"
+                    >
+                      Time
+                    </div>
+                  </dd>
+                  <dt
+                    className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-compressed"
+                    style={
+                      Object {
+                        "width": "30%",
+                      }
+                    }
+                  >
+                    <div
+                      className="euiText emotion-euiText-s"
+                    >
+                      <h4>
+                        Filter group
+                      </h4>
+                    </div>
+                  </dt>
+                  <dd
+                    className="euiDescriptionList__description eui-textBreakWord emotion-euiDescriptionList__description-column-normal"
+                    style={
+                      Object {
+                        "width": "70%",
+                      }
+                    }
+                  >
+                    <div
+                      className="euiText emotion-euiText-s"
+                    >
+                      Group 1
+                    </div>
+                  </dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -122,7 +713,21 @@ exports[`Storyshots components/WorkpadFilters/FiltersGroupComponent empty group 
         id="canvas-filter-group-0"
         role="region"
         tabIndex={-1}
-      />
+      >
+        <div>
+          <div
+            className=" emotion-euiAccordion__children"
+          >
+            <div
+              style={
+                Object {
+                  "paddingTop": "15px",
+                }
+              }
+            />
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>

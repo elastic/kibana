@@ -209,7 +209,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.policy.confirmAndSave();
 
         await testSubjects.existOrFail('policyDetailsSuccessMessage');
-        await testSubjects.waitForHidden('toastCloseButton');
 
         const agentFullPolicy = await policyTestResources.getFullAgentPolicy(
           policyInfo.agentPolicy.id
