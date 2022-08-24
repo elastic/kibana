@@ -10,12 +10,10 @@ import type { Panel } from '../../common/types';
 import { PANEL_TYPES } from '../../common/enums';
 import { ConvertTsvbToLensVisualization } from './types';
 
-const getConvertFnByType = (
-  type: PANEL_TYPES
-): Promise<ConvertTsvbToLensVisualization> | undefined => {
+const getConvertFnByType = (type: PANEL_TYPES) => {
   const convertionFns: { [key in PANEL_TYPES]?: () => Promise<ConvertTsvbToLensVisualization> } = {
     [PANEL_TYPES.TIMESERIES]: async () => {
-      const { convertToLens } = await import('./timeseries');
+      const { convertToLens } = await import('./timeseries/new.index');
       return convertToLens;
     },
   };
