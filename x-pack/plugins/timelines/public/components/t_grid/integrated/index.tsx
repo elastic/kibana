@@ -181,17 +181,12 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   const dispatch = useDispatch();
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
   const { uiSettings } = useKibana<CoreStart>().services;
-  const [isQueryLoading, setIsQueryLoading] = useState(true);
 
   const [tableView, setTableView] = useState<ViewSelection>('gridView');
   const getManageTimeline = useMemo(() => tGridSelectors.getManageTimelineById(), []);
   const { queryFields, title } = useDeepEqualSelector((state) =>
     getManageTimeline(state, id ?? '')
   );
-
-  useEffect(() => {
-    dispatch(tGridActions.updateIsLoading({ id, isLoading: isQueryLoading }));
-  }, [dispatch, id, isQueryLoading]);
 
   const justTitle = useMemo(() => <TitleText data-test-subj="title">{title}</TitleText>, [title]);
   const esQueryConfig = getEsQueryConfig(uiSettings);
@@ -257,6 +252,9 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
       startDate: start,
     });
 
+  useEffect(() => {
+    dispatch(tGridActions.updateIsLoading({ id, isLoading: loading }));
+  }, [dispatch, id, loading]);
   const totalCountMinusDeleted = useMemo(
     () => (totalCount > 0 ? totalCount - deletedEventIds.length : 0),
     [deletedEventIds.length, totalCount]
@@ -268,10 +266,6 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
     () => events.filter((e) => !deletedEventIds.includes(e._id)),
     [deletedEventIds, events]
   );
-
-  useEffect(() => {
-    setIsQueryLoading(loading);
-  }, [loading]);
 
   const alignItems = tableView === 'gridView' ? 'baseline' : 'center';
 

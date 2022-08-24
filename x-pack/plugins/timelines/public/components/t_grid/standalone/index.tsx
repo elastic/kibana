@@ -6,7 +6,7 @@
  */
 import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import React, { useEffect, useMemo, useState, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -153,7 +153,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   const dispatch = useDispatch();
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
   const { uiSettings } = useKibana<CoreStart>().services;
-  const [isQueryLoading, setIsQueryLoading] = useState(false);
   const [indexPatternsLoading, { browserFields, indexPatterns }] = useFetchIndex(indexNames);
 
   const getTGrid = useMemo(() => tGridSelectors.getTGridByIdSelector(), []);
@@ -164,10 +163,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     sort: sortStore,
     title,
   } = useDeepEqualSelector((state) => getTGrid(state, STANDALONE_ID ?? ''));
-
-  useEffect(() => {
-    dispatch(tGridActions.updateIsLoading({ id: STANDALONE_ID, isLoading: isQueryLoading }));
-  }, [dispatch, isQueryLoading]);
 
   const justTitle = useMemo(() => <TitleText data-test-subj="title">{title}</TitleText>, [title]);
   const esQueryConfig = getEsQueryConfig(uiSettings);
@@ -241,6 +236,10 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   });
   setRefetch(refetch);
 
+  useEffect(() => {
+    dispatch(tGridActions.updateIsLoading({ id: STANDALONE_ID, isLoading: loading }));
+  }, [dispatch, loading]);
+
   const { hasAlertsCrud, totalSelectAllAlerts } = useMemo(() => {
     return Object.entries(consumers).reduce<{
       hasAlertsCrud: boolean;
@@ -272,10 +271,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     () => events.filter((e) => !deletedEventIds.includes(e._id)),
     [deletedEventIds, events]
   );
-
-  useEffect(() => {
-    setIsQueryLoading(loading);
-  }, [loading]);
 
   useEffect(() => {
     dispatch(
