@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useMemo, useRef, useState } from 'react';
-
+import { pick } from 'lodash';
+import React, { useMemo, useState, useCallback } from 'react';
 import {
   EuiSpacer,
   EuiCodeBlock,
@@ -16,33 +16,53 @@ import {
   EuiModalFooter,
   EuiButton,
   EuiButtonEmpty,
-  EuiFlyoutBody,
 } from '@elastic/eui';
+import { useForm, FormProvider } from 'react-hook-form';
 import { useKibana } from '../../../../lib/kibana';
 import { OsqueryIcon } from './osquery_icon';
+import { LabelField } from './label_field';
+import { OsqueryFlyout } from '../../../../../detections/components/osquery/osquery_flyout';
 
 const OsqueryEditorComponent = ({ node, onSave, onCancel }) => {
-  const formRef = useRef(null);
-  const [actionId, setActionId] = useState<string | null>(null);
   const { osquery } = useKibana().services;
+  const formMethods = useForm({
+    defaultValues: {
+      label: node?.label,
+      savedQueryId: node?.savedQueryId,
+      query: node?.query,
+      ecs_mapping: node?.ecs_mapping,
+    },
+  });
 
   console.error('node', node);
+  const onSubmit = useCallback(
+    (data) => {
+      onSave(`!{osquery${JSON.stringify(pick(data, ['label', 'query', 'ecs_mapping']))}}`, {
+        block: true,
+      });
+    },
+    [onSave]
+  );
 
   const OsqueryActionForm = useMemo(() => {
-    console.error('osquer', osquery);
-    if (osquery?.OsqueryAction) {
-      const { OsqueryAction } = osquery;
-      return <OsqueryAction formRef={formRef} hideQueryTypeField defaultValues={node} />;
+    if (osquery?.LiveQueryField) {
+      const { LiveQueryField } = osquery;
+
+      return (
+        <FormProvider {...formMethods}>
+          <LabelField />
+          <EuiSpacer size="m" />
+          <LiveQueryField formMethods={formMethods} />
+        </FormProvider>
+      );
     }
     return null;
-  }, [node, osquery]);
-
-  console.error('formRef', formRef.current);
+  }, [formMethods, osquery]);
 
   return (
     <>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>{'Run Osquery action'}</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle>{'Add Osquery query'}</EuiModalHeaderTitle>
       </EuiModalHeader>
 
       <EuiModalBody>
@@ -51,24 +71,8 @@ const OsqueryEditorComponent = ({ node, onSave, onCancel }) => {
 
       <EuiModalFooter>
         <EuiButtonEmpty onClick={onCancel}>{'Cancel'}</EuiButtonEmpty>
-        <EuiButton
-          // disabled={!actionId}
-          onClick={() => {
-            console.error(formRef.current, formRef.current.getFormValues());
-            const formValues = formRef.current?.getFormValues();
-            onSave(
-              `!{osquery${JSON.stringify({
-                query: formValues.query,
-                ecs_mapping: formValues.ecs_mapping,
-              })}}`,
-              {
-                block: true,
-              }
-            );
-          }}
-          fill
-        >
-          {'Attach results'}
+        <EuiButton onClick={formMethods.handleSubmit(onSubmit)} fill>
+          {'Attach query'}
         </EuiButton>
       </EuiModalFooter>
     </>
@@ -141,7 +145,6 @@ export function parser() {
 
       match += configurationString;
       try {
-        console.error('configurationString', configurationString);
         configuration = JSON.parse(configurationString);
       } catch (e) {
         const now = eat.now();
@@ -167,26 +170,16 @@ export function parser() {
 // receives the configuration from the parser and renders
 const ChartMarkdownRenderer = (props) => {
   console.error('props', props);
-  const { openFlyout } = useKibana().overlays;
+  const [showFlyout, setShowFlyout] = useState(false);
   const { osquery } = useKibana().services;
 
-  console.error(useKibana());
-
-  const OsqueryActionForm = useMemo(() => {
-    console.error('osquery', osquery);
-    if (osquery?.OsqueryAction) {
-      return <osquery.OsqueryAction />;
-    }
-    return <></>;
-  }, [osquery]);
-
   return (
-    <EuiButton
-      iconType={OsqueryIcon}
-      onClick={() => openFlyout(<EuiFlyoutBody>{OsqueryActionForm}</EuiFlyoutBody>)}
-    >
-      {'Run Osquery'}
-    </EuiButton>
+    <>
+      <EuiButton iconType={OsqueryIcon} onClick={() => setShowFlyout(true)}>
+        {props?.label ?? 'Run Osquery'}
+      </EuiButton>
+      {showFlyout && <OsqueryFlyout onClose={() => setShowFlyout(false)} />}
+    </>
   );
 };
 

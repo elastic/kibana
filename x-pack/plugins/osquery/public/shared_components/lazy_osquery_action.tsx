@@ -6,6 +6,7 @@
  */
 
 import React, { lazy, Suspense } from 'react';
+import ServicesWrapper from './services_wrapper';
 
 // @ts-expect-error update types
 // eslint-disable-next-line react/display-name
@@ -14,7 +15,9 @@ export const getLazyOsqueryAction = (services) => (props) => {
 
   return (
     <Suspense fallback={null}>
-      <OsqueryAction services={services} {...props} />
+      <ServicesWrapper services={services}>
+        <OsqueryAction {...props} />
+      </ServicesWrapper>
     </Suspense>
   );
 };

@@ -5,32 +5,32 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import { useController } from 'react-hook-form';
+import { useController, useFormContext } from 'react-hook-form';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { createFormIdFieldValidations } from '../packs/queries/validations';
 
-interface QueryIdFieldProps {
-  idSet?: Set<string>;
+interface QueryDescriptionFieldProps {
   euiFieldProps?: Record<string, unknown>;
 }
 
-const QueryIdFieldComponent = ({ idSet, euiFieldProps }: QueryIdFieldProps) => {
+const LabelFieldComponent = ({ euiFieldProps }: QueryDescriptionFieldProps) => {
+  const formContext = useFormContext();
+  console.error('formContextxx', formContext);
   const {
     field: { onChange, value, name: fieldName },
     fieldState: { error },
   } = useController({
-    name: 'id',
+    name: 'label',
     defaultValue: '',
-    rules: idSet && createFormIdFieldValidations(idSet),
+    rules: { required: true },
   });
 
   const hasError = useMemo(() => !!error?.message, [error?.message]);
 
   return (
     <EuiFormRow
-      label={i18n.translate('xpack.osquery.pack.queryFlyoutForm.idFieldLabel', {
-        defaultMessage: 'ID',
+      label={i18n.translate('xpack.security_solution.markdown.osquery.labelFieldText', {
+        defaultMessage: 'Label',
       })}
       error={error?.message}
       isInvalid={hasError}
@@ -49,4 +49,4 @@ const QueryIdFieldComponent = ({ idSet, euiFieldProps }: QueryIdFieldProps) => {
   );
 };
 
-export const QueryIdField = React.memo(QueryIdFieldComponent);
+export const LabelField = React.memo(LabelFieldComponent);
