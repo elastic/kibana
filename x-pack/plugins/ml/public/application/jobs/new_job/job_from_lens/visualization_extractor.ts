@@ -48,7 +48,7 @@ export interface LayerResult {
   error?: ErrorType;
 }
 
-export class VisExtractor {
+export class VisualizationExtractor {
   constructor(private dataViewClient: DataViewsContract) {}
 
   public async getResultLayersFromEmbeddable(

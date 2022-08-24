@@ -24,7 +24,7 @@ import { DashboardConstants } from '@kbn/dashboard-plugin/public';
 import { getMlGlobalServices } from '../../application/app';
 import { LensLayerSelectionFlyout } from './lens_vis_layer_selection_flyout';
 
-import { VisExtractor } from '../../application/jobs/new_job/job_from_lens';
+import { VisualizationExtractor } from '../../application/jobs/new_job/job_from_lens';
 
 export async function showLensVisToADJobFlyout(
   embeddable: Embeddable,
@@ -42,7 +42,7 @@ export async function showLensVisToADJobFlyout(
 
   return new Promise(async (resolve, reject) => {
     try {
-      const visExtractor = new VisExtractor(data.dataViews);
+      const visExtractor = new VisualizationExtractor(data.dataViews);
       const layerResults = await visExtractor.getResultLayersFromEmbeddable(embeddable, lens);
 
       const onFlyoutClose = () => {

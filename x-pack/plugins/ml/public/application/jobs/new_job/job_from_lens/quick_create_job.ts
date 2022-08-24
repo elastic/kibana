@@ -31,7 +31,7 @@ import {
 } from '../../../../../common/constants/new_job';
 import { createQueries } from '../utils/new_job_utils';
 import { isCompatibleLayer, createDetectors, getJobsItemsFromEmbeddable } from './utils';
-import { VisExtractor } from './vis';
+import { VisualizationExtractor } from './visualization_extractor';
 
 interface CreationState {
   success: boolean;
@@ -249,7 +249,7 @@ export class QuickJobCreator {
     const selectedLayer =
       layerIndex !== undefined ? visualization.layers[layerIndex] : compatibleLayers[0];
 
-    const visExtractor = new VisExtractor(this.dataViewClient);
+    const visExtractor = new VisualizationExtractor(this.dataViewClient);
     const { fields, timeField, splitField, dataView } = await visExtractor.extractFields(
       selectedLayer,
       vis

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export type { LayerResult } from './vis';
-export { VisExtractor } from './vis';
+export type { LayerResult } from './visualization_extractor';
+export { VisualizationExtractor } from './visualization_extractor';
 export { resolver } from './route_resolver';
 export { QuickJobCreator } from './quick_create_job';
 export {
