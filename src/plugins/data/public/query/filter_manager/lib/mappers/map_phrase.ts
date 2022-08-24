@@ -22,7 +22,8 @@ const getScriptedPhraseValue = (filter: PhraseFilter) =>
   get(filter, ['query', 'script', 'script', 'params', 'value']);
 
 export function getPhraseDisplayValue(filter: PhraseFilter, formatter?: FieldFormat) {
-  return formatter?.convert(filter.meta.value) ?? filter.meta.value ?? '';
+  const value = filter.meta.value ?? filter.meta.params.query;
+  return formatter?.convert(value) ?? value ?? '';
 }
 
 const getParams = (filter: PhraseFilter) => {

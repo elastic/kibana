@@ -28,7 +28,10 @@ describe('getDisplayValueFromFilter', () => {
   });
 
   it('returns the value if undefined', () => {
-    const filter = { ...phraseFilter, meta: { ...phraseFilter.meta, value: undefined } };
+    const filter = {
+      ...phraseFilter,
+      meta: { ...phraseFilter.meta, value: undefined, params: { query: undefined } },
+    };
     const displayValue = getDisplayValueFromFilter(filter, [stubIndexPattern]);
     expect(displayValue).toBe('');
   });

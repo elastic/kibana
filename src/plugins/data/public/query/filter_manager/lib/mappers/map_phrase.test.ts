@@ -53,7 +53,7 @@ describe('filter manager utilities', () => {
     });
 
     test('without formatter with undefined value', () => {
-      const filter = { meta: {} } as PhraseFilter;
+      const filter = { meta: { params: {} } } as PhraseFilter;
       const result = getPhraseDisplayValue(filter);
       expect(result).toMatchInlineSnapshot(`""`);
     });

@@ -42,12 +42,7 @@ export function getFieldDisplayValueFromFilter(filter: Filter, indexPatterns: Da
 export function getDisplayValueFromFilter(filter: Filter, indexPatterns: DataView[]): string {
   const { key, value } = filter.meta;
   const indexPattern = getIndexPatternFromFilter(filter, indexPatterns);
-  let valueFormatter;
-  try {
-    valueFormatter = getValueFormatter(indexPattern, key);
-  } catch (e) {
-    // The field does not exist in this index pattern
-  }
+  const valueFormatter = getValueFormatter(indexPattern, key);
 
   if (isPhraseFilter(filter)) {
     return getPhraseDisplayValue(filter, valueFormatter);
