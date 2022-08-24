@@ -34,6 +34,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     esTestIndexTool,
     esTestIndexToolOutput,
     esTestIndexToolDataStream,
+    createEsDocumentsInGroups,
   } = getRuleServices(getService);
 
   describe('rule', async () => {
@@ -604,7 +605,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       it('excludes hits from the previous rule run when excludeHitsFromPreviousRun is true', async () => {
         endDate = new Date().toISOString();
 
-        await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE);
+        await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
 
         await createRule({
           name: 'always fire',
@@ -628,7 +629,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       it('excludes hits from the previous rule run when excludeHitsFromPreviousRun is undefined', async () => {
         endDate = new Date().toISOString();
 
-        await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE);
+        await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
 
         await createRule({
           name: 'always fire',
@@ -651,7 +652,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       it('does not exclude hits from the previous rule run when excludeHitsFromPreviousRun is false', async () => {
         endDate = new Date().toISOString();
 
-        await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE);
+        await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
 
         await createRule({
           name: 'always fire',
@@ -672,22 +673,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         expect(docs[1]._source.params.message).to.match(/rule 'always fire' is active/);
       });
     });
-
-    async function createEsDocumentsInGroups(
-      groups: number,
-      indexTool: ESTestIndexTool = esTestIndexTool,
-      indexName: string = ES_TEST_INDEX_NAME
-    ) {
-      await createEsDocuments(
-        es,
-        indexTool,
-        endDate,
-        RULE_INTERVALS_TO_WRITE,
-        RULE_INTERVAL_MILLIS,
-        groups,
-        indexName
-      );
-    }
 
     async function waitForDocs(count: number): Promise<any[]> {
       return await esTestIndexToolOutput.waitForDocs(
