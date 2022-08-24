@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { EuiToolTip, EuiTextColor } from '@elastic/eui';
+import { EuiIconTip } from '@elastic/eui';
 import type { Command, CommandDefinition } from '../console';
 import { IsolateActionResult } from './isolate_action';
 import { ReleaseActionResult } from './release_action';
@@ -61,7 +61,7 @@ const capabilitiesValidator = (command: Command): true | string => {
     command.commandDefinition.name as ResponderCommands
   );
   if (responderCapability) {
-    if (endpointCapabilities.includes(responderCapability) === true) {
+    if (endpointCapabilities.includes(responderCapability)) {
       return true;
     }
   }
@@ -92,22 +92,16 @@ const COMMENT_ARG_ABOUT = i18n.translate(
   { defaultMessage: 'A comment to go along with the action' }
 );
 
-const DISABLED_COMMAND_INFO = i18n.translate(
-  'xpack.securitySolution.endpointConsoleCommands.suspendProcess.disabledCommandInfo',
-  { defaultMessage: 'This endpoint does not support this commmand' }
-);
-
-const DISABLED_COMMAND = i18n.translate(
-  'xpack.securitySolution.endpointConsoleCommands.suspendProcess.disabledCommand',
-  { defaultMessage: 'Disabled' }
+const UNSUPPORTED_COMMAND_INFO = i18n.translate(
+  'xpack.securitySolution.endpointConsoleCommands.suspendProcess.unsupportedCommandInfo',
+  {
+    defaultMessage:
+      'This version of the Endpoint does not support this command. Upgrade your Agent in Fleet to use the latest response actions.',
+  }
 );
 
 export const DisabledTooltip = React.memo(() => {
-  return (
-    <EuiToolTip content={DISABLED_COMMAND_INFO}>
-      <EuiTextColor color="danger">{DISABLED_COMMAND}</EuiTextColor>
-    </EuiToolTip>
-  );
+  return <EuiIconTip content={UNSUPPORTED_COMMAND_INFO} type="alert" color="danger" />;
 });
 DisabledTooltip.displayName = 'DisabledTooltip';
 
