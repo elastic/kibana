@@ -99,7 +99,7 @@ const getActionDetailsList = async ({
   userIds,
   unExpiredOnly,
 }: GetActionDetailsListParam): Promise<{
-  actionDetails: ActionDetails[];
+  actionDetails: ActionListApiResponse['data'];
   totalRecords: number;
 }> => {
   let actionRequests;
@@ -178,11 +178,14 @@ const getActionDetailsList = async ({
     );
 
     // find the specific response's details using that set of matching responses
-    const { isCompleted, completedAt, wasSuccessful, errors } = getActionCompletionInfo(
+    const { isCompleted, completedAt, wasSuccessful, errors, agentState } = getActionCompletionInfo(
       action.agents,
       matchedResponses
     );
 
+    // NOTE: `outputs` is not returned in this service because including it on a list of data
+    // could result in a very large response unnecessarily. In the future, we might include
+    // an option to optionally include it.
     return {
       id: action.id,
       agents: action.agents,
@@ -192,6 +195,7 @@ const getActionDetailsList = async ({
       completedAt,
       wasSuccessful,
       errors,
+      agentState,
       isExpired: !isCompleted && action.expiration < new Date().toISOString(),
       createdBy: action.createdBy,
       comment: action.comment,
