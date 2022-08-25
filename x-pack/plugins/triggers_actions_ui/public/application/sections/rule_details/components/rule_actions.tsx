@@ -46,9 +46,9 @@ export function RuleActions({ ruleActions, actionTypeRegistry }: RuleActionsProp
   }
   if (isLoadingActionConnectors) return <EuiLoadingSpinner size="s" />;
   return (
-    <EuiFlexGroup direction="column">
+    <EuiFlexGroup direction="column" gutterSize="none">
       {actionConnectors.map(({ actionTypeId, name }) => (
-        <React.Fragment key={actionTypeId}>
+        <EuiFlexItem key={actionTypeId}>
           <EuiFlexGroup alignItems="center" gutterSize="s" component="span">
             <EuiFlexItem grow={false}>
               <EuiIcon size="m" type={getActionIconClass(actionTypeId) ?? 'apps'} />
@@ -60,7 +60,7 @@ export function RuleActions({ ruleActions, actionTypeRegistry }: RuleActionsProp
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="s" />
-        </React.Fragment>
+        </EuiFlexItem>
       ))}
     </EuiFlexGroup>
   );
