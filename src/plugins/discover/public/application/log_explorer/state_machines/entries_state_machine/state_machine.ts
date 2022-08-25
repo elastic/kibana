@@ -58,7 +58,7 @@ export const entriesStateMachine = createMachine<
         on: {
           loadAroundSucceeded: {
             actions: 'updateChunksFromLoadAround',
-            target: 'loaded',
+            target: ['loaded', 'loaded.grid.staleAfterLoadAround'],
           },
           positionChanged: {
             actions: 'updatePosition',
@@ -197,8 +197,14 @@ export const entriesStateMachine = createMachine<
             },
           },
           grid: {
-            initial: 'staleAfterLoadAround',
             states: {
+              unknown: {
+                after: {
+                  500: {
+                    target: 'waitingForSynchronization',
+                  },
+                },
+              },
               staleAfterLoadAround: {
                 on: {
                   visibleEntriesChanged: [
@@ -328,11 +334,11 @@ export const entriesStateMachine = createMachine<
         on: {
           loadBeforeSucceeded: {
             actions: 'updateChunksFromLoadBefore',
-            target: ['#logExplorerEntries.loaded', 'loaded.grid.staleAfterLoadBefore'],
+            target: ['loaded', 'loaded.grid.staleAfterLoadBefore'],
           },
           loadBeforeFailed: {
             actions: 'updateChunksFromLoadBefore',
-            target: ['#logExplorerEntries.loaded.top.failed', 'loaded.grid.staleAfterLoadBefore'],
+            target: ['loaded.top.failed', 'loaded.grid.staleAfterLoadBefore'],
           },
           columnsChanged: {
             target: 'reloading',
@@ -499,10 +505,35 @@ export const entriesStateMachine = createMachine<
             },
           },
           loaded: {
+            initial: 'staleAfterLoadTail',
             after: {
               loadTailDelay: {
                 target: 'loading',
               },
+            },
+            states: {
+              staleAfterLoadTail: {
+                on: {
+                  visibleEntriesChanged: [
+                    {
+                      actions: 'scrollBeforeEnd',
+                      target: 'waitingForSynchronization',
+                      internal: true,
+                    },
+                  ],
+                },
+              },
+              waitingForSynchronization: {
+                on: {
+                  visibleEntriesChanged: [
+                    {
+                      target: 'synchronized',
+                      internal: true,
+                    },
+                  ],
+                },
+              },
+              synchronized: {},
             },
           },
         },
