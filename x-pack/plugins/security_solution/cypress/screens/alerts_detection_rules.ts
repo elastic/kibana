@@ -120,7 +120,7 @@ export const INPUT_FILE = 'input[type=file]';
 
 export const TOASTER = '[data-test-subj="euiToastHeader"]';
 
-export const TOASTER_BODY = '[data-test-subj="globalToastList"] .euiToastBody';
+export const TOASTER_BODY = '[data-test-subj="globalToastList"] [data-test-subj="euiToastBody"]';
 
 export const TOASTER_ERROR_BTN = '[data-test-subj="errorToastBtn"]';
 
