@@ -227,7 +227,7 @@ export function DiscoverMainRoute(props: Props) {
       hasData: {
         ...data.dataViews.hasData,
         // If we're in dev mode, we want to always return true here.
-        hasESData: isDev ? () => Promise.resolve(true) : data.dataViews.hasData.hasESData,
+        hasESData: () => (isDev ? Promise.resolve(true) : data.dataViews.hasData.hasESData),
         hasDataView,
       },
     },
