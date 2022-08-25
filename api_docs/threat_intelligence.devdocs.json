@@ -182,7 +182,9 @@
             "type": "Object",
             "tags": [],
             "label": "sourcererDataView",
-            "description": [],
+            "description": [
+              "\nGets Security Solution shared information like browerFields, indexPattern and selectedPatterns in DataView"
+            ],
             "signature": [
               "SourcererDataView"
             ],
