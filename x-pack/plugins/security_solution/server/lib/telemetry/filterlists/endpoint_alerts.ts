@@ -102,7 +102,7 @@ const allowlistBaseEventFields: AllowlistFields = {
   user: {
     id: true,
   },
-  Persistence : true,
+  Persistence: true,
 };
 
 // Allow list for the data we include in the events. True means that it is deep-cloned
