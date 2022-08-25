@@ -55,7 +55,10 @@ import {
   OverallSwimlaneData,
   AppStateSelectedCells,
 } from './explorer_utils';
-import { checkIfSourceIndicesHaveGeoField, SourceIndicesWithGeoFields } from '../../../common/util/job_utils';
+import {
+  checkIfSourceIndicesHaveGeoField,
+  SourceIndicesWithGeoFields,
+} from '../../../common/util/job_utils';
 import { AnomalyTimeline } from './anomaly_timeline';
 import { FILTER_ACTION, FilterAction } from './explorer_constants';
 // Explorer Charts
