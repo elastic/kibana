@@ -109,6 +109,7 @@ export const connectorCrawlerIndex: CrawlerViewIndex = {
     id: '5',
     index_name: 'crawler',
   },
+  hidden: false,
   ingestionMethod: IngestionMethod.CRAWLER,
   ingestionStatus: IngestionStatus.INCOMPLETE,
   lastUpdated: null,
