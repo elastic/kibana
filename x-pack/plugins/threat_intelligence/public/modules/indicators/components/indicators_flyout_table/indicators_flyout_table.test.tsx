@@ -37,7 +37,7 @@ describe('<IndicatorsFlyoutTable />', () => {
 
     expect(getByText(RawIndicatorFieldId.Feed)).toBeInTheDocument();
 
-    expect(getByText(getDisplayName(mockIndicator)[1] as string)).toBeInTheDocument();
+    expect(getByText(getDisplayName(mockIndicator).value as string)).toBeInTheDocument();
 
     expect(
       getByText(unwrapValue(mockIndicator, RawIndicatorFieldId.Feed) as string)

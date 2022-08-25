@@ -57,7 +57,7 @@ describe('getDisplayName()', () => {
     '%s',
     (indicator, expectedDisplayValue) => {
       it(`should render the indicator as ${expectedDisplayValue}`, () => {
-        expect(getDisplayName(indicator)[1]).toEqual(expectedDisplayValue);
+        expect(getDisplayName(indicator).value).toEqual(expectedDisplayValue);
       });
     }
   );
@@ -67,13 +67,13 @@ describe('displayValueField()', () => {
   it('should return correct RawIndicatorFieldId for valid field', () => {
     const mockIndicator = generateMockIpIndicator();
     const result = getDisplayName(mockIndicator);
-    expect(result[0]).toEqual(RawIndicatorFieldId.Ip);
+    expect(result.field).toEqual(RawIndicatorFieldId.Ip);
   });
 
   it('should return null for invalid field', () => {
     const mockIndicator = generateMockBaseIndicator();
     mockIndicator.fields['threat.indicator.type'] = ['abc'];
     const result = getDisplayName(mockIndicator);
-    expect(result[0]).toEqual(RawIndicatorFieldId.Id);
+    expect(result.field).toEqual(RawIndicatorFieldId.Id);
   });
 });

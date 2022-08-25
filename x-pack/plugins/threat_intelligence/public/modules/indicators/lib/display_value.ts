@@ -9,6 +9,7 @@ import { Indicator, RawIndicatorFieldId } from '../../../../common/types/indicat
 import { unwrapValue } from './unwrap_value';
 
 type IndicatorDisplayName = [RawIndicatorFieldId, string | null];
+type IndicatorDisplayNameAsObject = { field: RawIndicatorFieldId; value: string | null };
 type IndicatorDisplayNameExtractor = (indicator: Indicator) => IndicatorDisplayName;
 type IndicatorTypePredicate = (indicatorType: string | null) => boolean;
 
@@ -215,12 +216,14 @@ const rules: Record<string, IndicatorDisplayNameExtractor> = {};
 /**
  * Find and return indicator display name structure [field, value]
  */
-export const getDisplayName = (indicator: Indicator): IndicatorDisplayName => {
+export const getDisplayName = (indicator: Indicator): IndicatorDisplayNameAsObject => {
   const indicatorType = (unwrapValue(indicator, RawIndicatorFieldId.Type) || '').toLowerCase();
 
   if (!rules[indicatorType]) {
     rules[indicatorType] = findMappingRule(indicatorType);
   }
 
-  return rules[indicatorType](indicator);
+  const [field, value] = rules[indicatorType](indicator);
+
+  return { field, value };
 };

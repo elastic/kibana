@@ -61,7 +61,7 @@ export const cellRendererFactory = (from: number) => {
 
     if (columnId === ComputedIndicatorFieldId.DisplayName) {
       const displayName = getDisplayName(indicator);
-      const displayNameValue = displayName[1];
+      const displayNameValue = displayName.value;
       return displayNameValue || EMPTY_VALUE;
     }
 

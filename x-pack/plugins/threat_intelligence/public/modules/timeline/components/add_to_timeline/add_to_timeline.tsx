@@ -55,8 +55,8 @@ export const AddToTimeline: VFC<AddToTimelineProps> = ({ data, field, component,
     value = data;
   } else if (field === ComputedIndicatorFieldId.DisplayName) {
     const displayName = getDisplayName(data);
-    field = displayName[0];
-    value = displayName[1];
+    field = displayName.field;
+    value = displayName.value;
   } else {
     value = unwrapValue(data, field as RawIndicatorFieldId);
   }

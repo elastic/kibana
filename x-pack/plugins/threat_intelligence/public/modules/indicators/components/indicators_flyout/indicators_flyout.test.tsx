@@ -33,7 +33,7 @@ describe('<IndicatorsFlyout />', () => {
     );
 
     expect(getByTestId(TITLE_TEST_ID).innerHTML).toContain(
-      `Indicator: ${getDisplayName(mockIndicator)[1]}`
+      `Indicator: ${getDisplayName(mockIndicator).value}`
     );
     expect(getByTestId(SUBTITLE_TEST_ID).innerHTML).toContain(
       `First seen: ${dateFormatter(

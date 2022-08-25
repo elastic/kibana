@@ -104,7 +104,7 @@ export const IndicatorsFlyout: VFC<IndicatorsFlyoutProps> = ({
 
   const firstSeen: string = unwrapValue(indicator, RawIndicatorFieldId.FirstSeen) as string;
   const displayName = getDisplayName(indicator);
-  const displayNameValue = displayName[1] || EMPTY_VALUE;
+  const displayNameValue = displayName.value || EMPTY_VALUE;
   const flyoutTitleId = useGeneratedHtmlId({
     prefix: 'simpleFlyoutTitle',
   });
