@@ -14,10 +14,16 @@ import {
   EuiFlexItem,
   EuiTitle,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import type { EuiInMemoryTableProps } from '@elastic/eui';
 
-import type { PackageInfo, RegistryVarsEntry } from '../../../../../types';
+import type {
+  PackageInfo,
+  RegistryVarsEntry,
+  RegistryStream,
+  RegistryInput,
+} from '../../../../../types';
 import { getStreamsForInputType } from '../../../../../../../../common/services';
 
 interface Props {
@@ -40,80 +46,94 @@ export const DocumentationPage: React.FunctionComponent<Props> = ({ packageInfo 
   );
 };
 
+type RegistryInputWithStreams = RegistryInput & {
+  key: string;
+  streams: Array<RegistryStream & { data_stream: { type: string; dataset: string } }>;
+};
+
 const PolicyTemplates: React.FunctionComponent<{ packageInfo: PackageInfo }> = ({
   packageInfo,
 }) => {
+  const inputs = useMemo(
+    () =>
+      packageInfo.policy_templates?.reduce((acc, policyTemplate) => {
+        // TODO support integration
+        if (policyTemplate.inputs) {
+          return [
+            ...acc,
+            ...policyTemplate.inputs.map((input) => ({
+              key: `${policyTemplate.name}-${input.type}`,
+              ...input,
+              streams: getStreamsForInputType(input.type, packageInfo, []),
+            })),
+          ];
+        }
+        return acc;
+      }, [] as RegistryInputWithStreams[]),
+    [packageInfo]
+  );
   return (
     <>
-      <EuiTitle size="s">
-        <h4>Policy templates</h4>
+      <EuiText>
+        That tab document all the inputs and datastreams available to programatically create a
+        package policy from that integration using Fleet Rest API, see doc for more info.
+      </EuiText>
+      <EuiSpacer size="m" />
+      <EuiTitle size="xs">
+        <h4>Inputs</h4>
       </EuiTitle>
       <EuiSpacer size="s" />
-      {packageInfo.policy_templates?.map((policyTemplate) => (
-        <EuiAccordion
-          key={policyTemplate.title}
-          id={policyTemplate.title}
-          buttonContent={policyTemplate.title}
-          initialIsOpen={true}
-          paddingSize={'m'}
-        >
-          <p>
-            policy_template: <EuiCode>{policyTemplate.name}</EuiCode>
-          </p>
-          <p>{policyTemplate.description}</p>
-          <EuiTitle size="xs">
-            <h6>Inputs</h6>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          {policyTemplate.inputs?.map((input) => {
-            const dataStreams = getStreamsForInputType(
-              input.type,
-              packageInfo,
-              policyTemplate.data_streams
-            );
-
-            return (
+      {inputs?.map((input) => {
+        return (
+          <EuiAccordion
+            key={input.key}
+            id={input.key}
+            buttonContent={
+              <>
+                <EuiCode>{input.key}</EuiCode>({input.title})
+              </>
+            }
+            initialIsOpen={true}
+            paddingSize={'m'}
+          >
+            <EuiText>{input.description}</EuiText>
+            {input.vars ? (
+              <>
+                <EuiSpacer size="m" />
+                <VarsTable vars={input.vars} />
+              </>
+            ) : null}
+            <EuiSpacer size="m" />
+            <EuiTitle size="xs">
+              <h6>Datastreams</h6>
+            </EuiTitle>
+            <EuiSpacer size="m" />
+            {input.streams.map((dataStream) => (
               <EuiAccordion
-                key={input.type}
-                id={input.type}
-                buttonContent={input.title}
+                key={dataStream.data_stream.type + dataStream.data_stream.dataset}
+                id={dataStream.data_stream.type + dataStream.data_stream.dataset}
+                buttonContent={
+                  <>
+                    <EuiCode>{dataStream.data_stream.dataset}</EuiCode>({dataStream.title})
+                  </>
+                }
                 initialIsOpen={true}
                 paddingSize={'m'}
               >
-                Type: <EuiCode>{input.type}</EuiCode>
-                <p>{input.description}</p>
-                Inputs vars:
-                {input.vars ? <VarsTable vars={input.vars} /> : null}
-                {/* {input.} */}
-                <br />
-                <EuiTitle size="xs">
-                  <h6>Datastreams</h6>
-                </EuiTitle>
-                {dataStreams.map((dataStream) => (
-                  <EuiAccordion
-                    key={dataStream.data_stream.type + dataStream.data_stream.dataset}
-                    id={dataStream.data_stream.type + dataStream.data_stream.dataset}
-                    buttonContent={dataStream.title}
-                    initialIsOpen={true}
-                    paddingSize={'m'}
-                  >
-                    <p>
-                      datastream type: <EuiCode>{dataStream.data_stream.type}</EuiCode>
-                    </p>
-                    <p>
-                      datastream dataset: <EuiCode>{dataStream.data_stream.dataset}</EuiCode>
-                    </p>
-                    Stream vars:
-                    {dataStream.vars ? <VarsTable vars={dataStream.vars} /> : null}
-                  </EuiAccordion>
-                ))}
-                {/* {JSON.stringify(dataStreams)} */}
-                {/* {packageInfo.data_streams?.filter(ds => ds.)} */}
+                <EuiText>{dataStream.description}</EuiText>
+                {dataStream.vars ? (
+                  <>
+                    <EuiSpacer size="m" />
+                    <VarsTable vars={dataStream.vars} />
+                  </>
+                ) : null}
               </EuiAccordion>
-            );
-          }) ?? null}
-        </EuiAccordion>
-      ))}
+            ))}
+            {/* {JSON.stringify(dataStreams)} */}
+            {/* {packageInfo.data_streams?.filter(ds => ds.)} */}
+          </EuiAccordion>
+        );
+      }) ?? null}
     </>
   );
 };
@@ -161,5 +181,12 @@ const VarsTable: React.FunctionComponent<{ vars: RegistryVarsEntry[] }> = ({ var
     ];
   }, []);
 
-  return <EuiBasicTable columns={columns} items={vars} />;
+  return (
+    <>
+      <EuiTitle size="xxs">
+        <h6>Variables</h6>
+      </EuiTitle>
+      <EuiBasicTable columns={columns} items={vars} />
+    </>
+  );
 };

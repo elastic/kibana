@@ -497,7 +497,7 @@ export function Detail() {
       name: (
         <FormattedMessage
           id="xpack.fleet.epm.packageDetailsNav.documentationLinkText"
-          defaultMessage="Documentation"
+          defaultMessage="Policy reference"
         />
       ),
       isSelected: panel === 'documentation',
