@@ -322,7 +322,7 @@ export { fetchExceptionListByIdWithValidation as fetchExceptionListById };
  * @param http Kibana http service
  * @param listIds ExceptionList list_ids (not ID)
  * @param namespaceTypes ExceptionList namespace_types
- * @param filterOptions optional - filter by field or tags
+ * @param filter optional
  * @param pagination optional
  * @param signal to cancel request
  *
@@ -332,7 +332,7 @@ const fetchExceptionListsItemsByListIds = async ({
   http,
   listIds,
   namespaceTypes,
-  filters,
+  filter,
   pagination,
   search,
   signal,
@@ -345,7 +345,7 @@ const fetchExceptionListsItemsByListIds = async ({
     search,
     sort_field: 'exception-list.created_at',
     sort_order: 'desc',
-    filter: filters,
+    filter,
   };
 
   return http.fetch<FoundExceptionListItemSchema>(`${EXCEPTION_LIST_ITEM_URL}/_find`, {
@@ -356,7 +356,7 @@ const fetchExceptionListsItemsByListIds = async ({
 };
 
 const fetchExceptionListsItemsByListIdsWithValidation = async ({
-  filters,
+  filter,
   http,
   listIds,
   namespaceTypes,
@@ -369,7 +369,7 @@ const fetchExceptionListsItemsByListIdsWithValidation = async ({
       tryCatch(
         () =>
           fetchExceptionListsItemsByListIds({
-            filters,
+            filter,
             http,
             listIds,
             namespaceTypes,

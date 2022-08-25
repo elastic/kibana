@@ -77,7 +77,7 @@ import { hasMlLicense } from '../../../../../../common/machine_learning/has_ml_l
 import { SecurityPageName } from '../../../../../app/types';
 import { LinkButton } from '../../../../../common/components/links';
 import { useFormatUrl } from '../../../../../common/components/link_to';
-import { ExceptionsViewer } from '../../../../../common/components/exceptions/viewer';
+import { ExceptionsViewer } from '../../../../../detection_engine/rule_exceptions/all_exception_items_table';
 import { APP_UI_ID } from '../../../../../../common/constants';
 import { useGlobalFullScreen } from '../../../../../common/containers/use_full_screen';
 import { Display } from '../../../../../hosts/pages/display';

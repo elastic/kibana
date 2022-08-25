@@ -40,7 +40,7 @@ interface FindExceptionListItemsOptions {
   sortField: SortFieldOrUndefined;
   sortOrder: SortOrderOrUndefined;
   searchAfter: SearchAfterOrUndefined;
-  search?: SearchOrUndefined;
+  search: SearchOrUndefined;
 }
 
 export const findExceptionListsItem = async ({

@@ -99,10 +99,10 @@ export interface ExceptionListIdentifiers {
 
 export interface ApiCallFindListsItemsMemoProps {
   lists: ExceptionListIdentifiers[];
-  filters?: string;
   pagination: Partial<Pagination>;
   showDetectionsListsOnly: boolean;
   showEndpointListsOnly: boolean;
+  filter?: string;
   onError: (arg: string[]) => void;
   onSuccess: (arg: UseExceptionListItemsSuccess) => void;
 }
@@ -170,7 +170,7 @@ export interface ApiCallByListIdProps {
   namespaceTypes: NamespaceType[];
   pagination: Partial<Pagination>;
   search?: string;
-  filters?: string;
+  filter?: string;
   signal: AbortSignal;
 }
 

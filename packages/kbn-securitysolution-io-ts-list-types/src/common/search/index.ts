@@ -9,5 +9,7 @@
 import * as t from 'io-ts';
 
 export const search = t.string;
-export const searchFieldOrUndefined = t.union([search, t.undefined]);
-export type SearchFieldOrUndefined = t.TypeOf<typeof searchFieldOrUndefined>;
+export type Search = t.TypeOf<typeof search>;
+
+export const searchOrUndefined = t.union([search, t.undefined]);
+export type SearchOrUndefined = t.TypeOf<typeof searchOrUndefined>;

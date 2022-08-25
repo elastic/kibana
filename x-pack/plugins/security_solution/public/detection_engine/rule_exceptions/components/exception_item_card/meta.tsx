@@ -1,0 +1,174 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { memo, useMemo, useState } from 'react';
+import type { EuiContextMenuPanelProps } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+  EuiText,
+  EuiButtonEmpty,
+  EuiPopover,
+} from '@elastic/eui';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import styled from 'styled-components';
+
+import * as i18n from './translations';
+import { FormattedDate } from '../../../../common/components/formatted_date';
+import { LinkAnchor } from '../../../../common/components/links';
+import { APP_UI_ID, SecurityPageName } from '../../../../../common/constants';
+import { useKibana } from '../../../../common/lib/kibana';
+import { getRuleDetailsUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
+import { useGetSecuritySolutionUrl } from '../../../../common/components/link_to';
+import type { RuleReferenceSchema } from '../../../../../common/detection_engine/schemas/response';
+
+const StyledFlexItem = styled(EuiFlexItem)`
+  border-right: 1px solid #d3dae6;
+  padding: 4px 12px 4px 0;
+`;
+
+export interface ExceptionItemCardMetaInfoProps {
+  item: ExceptionListItemSchema;
+  references: RuleReferenceSchema[];
+  dataTestSubj: string;
+}
+
+export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
+  ({ item, references, dataTestSubj }) => {
+    const { navigateToApp } = useKibana().services.application;
+    const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
+
+    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+    const onAffectedRulesClick = () => setIsPopoverOpen((isOpen) => !isOpen);
+    const onClosePopover = () => setIsPopoverOpen(false);
+
+    const itemActions = useMemo((): EuiContextMenuPanelProps['items'] => {
+      if (references == null) {
+        return [];
+      }
+      return references.map((reference) => (
+        <EuiContextMenuItem
+          data-test-subj={`${dataTestSubj}-actionItem-${reference.id}`}
+          key={reference.id}
+        >
+          <EuiToolTip content={reference.name} anchorClassName="eui-textTruncate">
+            <LinkAnchor
+              data-test-subj="ruleName"
+              onClick={(ev: { preventDefault: () => void }) => {
+                ev.preventDefault();
+                navigateToApp(APP_UI_ID, {
+                  deepLinkId: SecurityPageName.rules,
+                  path: getRuleDetailsUrl(reference.id),
+                });
+              }}
+              href={getSecuritySolutionUrl({
+                deepLinkId: SecurityPageName.rules,
+                path: getRuleDetailsUrl(reference.id),
+              })}
+            >
+              {reference.name}
+            </LinkAnchor>
+          </EuiToolTip>
+        </EuiContextMenuItem>
+      ));
+    }, [references, dataTestSubj, getSecuritySolutionUrl, navigateToApp]);
+
+    return (
+      <EuiFlexGroup
+        alignItems="center"
+        responsive={false}
+        gutterSize="s"
+        data-test-subj={dataTestSubj}
+      >
+        <StyledFlexItem grow={false}>
+          <MetaInfoDetails
+            fieldName="created_by"
+            label={i18n.EXCEPTION_ITEM_CREATED_LABEL}
+            value1={<FormattedDate fieldName="created_at" value={item.created_at} />}
+            value2={item.created_by}
+            dataTestSubj={`${dataTestSubj}-createdBy`}
+          />
+        </StyledFlexItem>
+        <StyledFlexItem grow={false}>
+          <MetaInfoDetails
+            fieldName="updated_by"
+            label={i18n.EXCEPTION_ITEM_UPDATED_LABEL}
+            value1={<FormattedDate fieldName="updated_at" value={item.updated_at} />}
+            value2={item.updated_by}
+            dataTestSubj={`${dataTestSubj}-updatedBy`}
+          />
+        </StyledFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiPopover
+            button={
+              <EuiButtonEmpty
+                onClick={onAffectedRulesClick}
+                iconType="list"
+                data-test-subj={`${dataTestSubj}-affectedRulesButton`}
+              >
+                {i18n.AFFECTED_RULES(references.length)}
+              </EuiButtonEmpty>
+            }
+            panelPaddingSize="none"
+            isOpen={isPopoverOpen}
+            closePopover={onClosePopover}
+            data-test-subj={`${dataTestSubj}-items`}
+          >
+            <EuiContextMenuPanel size="s" items={itemActions} />
+          </EuiPopover>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+);
+ExceptionItemCardMetaInfo.displayName = 'ExceptionItemCardMetaInfo';
+
+interface MetaInfoDetailsProps {
+  fieldName: string;
+  label: string;
+  value1: JSX.Element | string;
+  value2: string;
+  dataTestSubj: string;
+}
+
+const MetaInfoDetails = memo<MetaInfoDetailsProps>(({ label, value1, value2, dataTestSubj }) => {
+  return (
+    <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false} responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiText size="xs" style={{ fontFamily: 'Inter' }}>
+          {label}
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} data-test-subj={`${dataTestSubj}-value1`}>
+        <EuiBadge color="default" style={{ fontFamily: 'Inter' }}>
+          {value1}
+        </EuiBadge>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiText size="xs" style={{ fontFamily: 'Inter' }}>
+          {i18n.EXCEPTION_ITEM_META_BY}
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} data-test-subj={`${dataTestSubj}-value2`}>
+        <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center" wrap={false}>
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="hollow" style={{ fontFamily: 'Inter' }}>
+              {value2}
+            </EuiBadge>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+});
+
+MetaInfoDetails.displayName = 'MetaInfoDetails';
