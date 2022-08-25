@@ -121,4 +121,52 @@ describe('ImportDataModal', () => {
     expect(overwriteCheckbox.checked).toBeFalsy();
     expect(exceptionCheckbox.checked).toBeFalsy();
   });
+  test('should uncheck the selected checkboxes after closing the Flyout', async () => {
+    const { queryByTestId, getAllByRole } = render(
+      <ImportDataModalComponent
+        showModal={true}
+        closeModal={closeModal}
+        importComplete={importComplete}
+        checkBoxLabel="checkBoxLabel"
+        description="description"
+        errorMessage={jest.fn()}
+        failedDetailed={jest.fn()}
+        importData={importData}
+        showCheckBox={true}
+        submitBtnText="submitBtnText"
+        subtitle="subtitle"
+        successMessage={jest.fn((totalCount) => 'successMessage')}
+        title="title"
+        showExceptionsCheckBox={true}
+      />
+    );
+
+    const closeButton = getAllByRole('button')[0];
+
+    const overwriteCheckbox: HTMLInputElement = queryByTestId(
+      'import-data-modal-checkbox-label'
+    ) as HTMLInputElement;
+    const exceptionCheckbox: HTMLInputElement = queryByTestId(
+      'import-data-modal-exceptions-checkbox-label'
+    ) as HTMLInputElement;
+
+    await waitFor(() => fireEvent.click(overwriteCheckbox));
+    await waitFor(() => fireEvent.click(exceptionCheckbox));
+
+    await waitFor(() =>
+      fireEvent.change(queryByTestId('rule-file-picker') as HTMLInputElement, {
+        target: { files: [file] },
+      })
+    );
+    expect(overwriteCheckbox.checked).toBeTruthy();
+    expect(exceptionCheckbox.checked).toBeTruthy();
+
+    await waitFor(() => {
+      fireEvent.click(closeButton as HTMLButtonElement);
+    });
+    expect(closeModal).toHaveBeenCalled();
+
+    expect(overwriteCheckbox.checked).toBeFalsy();
+    expect(exceptionCheckbox.checked).toBeFalsy();
+  });
 });
