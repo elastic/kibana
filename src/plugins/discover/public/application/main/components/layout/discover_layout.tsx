@@ -345,7 +345,6 @@ export function DiscoverLayout({
                               interval={state.interval}
                               isTimeBased={isTimeBased}
                             />
-                            <EuiSpacer size="m" />
                           </EuiResizablePanel>
                           <EuiResizableButton />
                         </>

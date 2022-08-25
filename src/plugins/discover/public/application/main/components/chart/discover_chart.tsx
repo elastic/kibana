@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
+  EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -118,7 +119,13 @@ export function DiscoverChart({
   );
 
   return (
-    <EuiFlexGroup direction="column" alignItems="stretch" gutterSize="none" responsive={false}>
+    <EuiFlexGroup
+      className="eui-fullHeight"
+      direction="column"
+      alignItems="stretch"
+      gutterSize="none"
+      responsive={false}
+    >
       <EuiFlexItem grow={false} className="dscResultCount">
         <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" responsive={false}>
           <EuiFlexItem
@@ -187,21 +194,28 @@ export function DiscoverChart({
         </EuiFlexGroup>
       </EuiFlexItem>
       {isTimeBased && !hideChart && (
-        <EuiFlexItem grow={false}>
-          <section
-            ref={(element) => (chartRef.current.element = element)}
-            tabIndex={-1}
-            aria-label={i18n.translate('discover.histogramOfFoundDocumentsAriaLabel', {
-              defaultMessage: 'Histogram of found documents',
-            })}
-            className="dscTimechart"
-          >
-            <DiscoverHistogramMemoized
-              savedSearchData$={savedSearchDataChart$}
-              timefilterUpdateHandler={timefilterUpdateHandler}
-              stateContainer={stateContainer}
-            />
-          </section>
+        <EuiFlexItem>
+          <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
+            <EuiFlexItem>
+              <section
+                ref={(element) => (chartRef.current.element = element)}
+                tabIndex={-1}
+                aria-label={i18n.translate('discover.histogramOfFoundDocumentsAriaLabel', {
+                  defaultMessage: 'Histogram of found documents',
+                })}
+                className="dscTimechart"
+              >
+                <DiscoverHistogramMemoized
+                  savedSearchData$={savedSearchDataChart$}
+                  timefilterUpdateHandler={timefilterUpdateHandler}
+                  stateContainer={stateContainer}
+                />
+              </section>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiSpacer size="m" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
