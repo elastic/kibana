@@ -42,7 +42,7 @@ export {
   JsonEditorField,
 } from './components';
 
-export { fieldValidators, fieldFormatters, deserializers, serializers } from './helpers';
+export { fieldValidators, fieldFormatters, deserializers, serializers, isJSON } from './helpers';
 
 export type {
   FieldConfig,

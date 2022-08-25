@@ -24,6 +24,8 @@ import { toInt } from './field_formatters';
 import { multiSelectComponent as multiSelectSerializer, stripEmptyFields } from './serializers';
 import { multiSelectComponent as multiSelectDeserializer } from './de_serializers';
 
+export { isJSON } from './validators';
+
 export const fieldValidators = {
   emptyField,
   maxLengthField,

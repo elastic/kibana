@@ -8,8 +8,7 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-
-import { isJSON } from '../../../static/validators/string';
+import { isJSON } from '@kbn/form-lib';
 
 export interface JsonEditorState<T = { [key: string]: any }> {
   data: {
