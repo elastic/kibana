@@ -13,15 +13,25 @@ export interface DownloadPngActionDependencies {
 export class DownloadPngAction implements Action<DownloadPngActionContext> {
   public readonly type = DOWNLOAD_PNG_ACTION;
   public readonly id = DOWNLOAD_PNG_ACTION;
+
+  public readonly grouping = [
+    {
+      id: 'share',
+      getDisplayName: () => 'Share',
+      getIconType: () => {
+        return 'share';
+      },
+    },
+  ];
   
   constructor(protected readonly deps: DownloadPngActionDependencies) {}
 
   public getDisplayName() {
-    return 'Download PNG';
+    return 'Download as PNG';
   }
 
   public getIconType() {
-    return 'calendar';
+    return 'download';
   }
 
   public async isCompatible({ embeddable }: DownloadPngActionContext) {
