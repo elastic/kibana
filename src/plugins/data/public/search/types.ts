@@ -9,8 +9,9 @@
 import { estypes } from '@elastic/elasticsearch';
 import type { PackageInfo } from '@kbn/core/server';
 import { DataViewsContract } from '@kbn/data-views-plugin/common';
+import { RequestAdapter } from '@kbn/inspector-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { IInspectorInfo, ISearchGeneric, ISearchStartSearchSource } from '../../common/search';
+import { ISearchGeneric, ISearchStartSearchSource } from '../../common/search';
 import { AggsSetup, AggsSetupDependencies, AggsStart, AggsStartDependencies } from './aggs';
 import { SearchUsageCollector } from './collectors';
 import { ISessionsClient, ISessionService } from './session';
@@ -63,7 +64,7 @@ export interface ISearchStart {
    * @param inspector IInspectorInfo - an inspector object with requests internally collected
    * @param cb WarningHandlerCallback - optional callback to intercept warnings
    */
-  showWarnings: (inspector: IInspectorInfo, cb?: WarningHandlerCallback) => void;
+  showWarnings: (adapter: RequestAdapter, cb?: WarningHandlerCallback) => void;
   /**
    * high level search
    * {@link ISearchStartSearchSource}

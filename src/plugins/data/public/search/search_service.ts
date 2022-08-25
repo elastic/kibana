@@ -275,8 +275,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       showError: (e) => {
         this.searchInterceptor.showError(e);
       },
-      showWarnings: (inspector, cb) => {
-        inspector.adapter?.getRequests().forEach((request) => {
+      showWarnings: (adapter, cb) => {
+        adapter?.getRequests().forEach((request) => {
           const rawResponse = (
             request.response?.json as { rawResponse: estypes.SearchResponse | undefined }
           )?.rawResponse;
