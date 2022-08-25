@@ -5,12 +5,4 @@
  * 2.0.
  */
 
-import { defaultConfig } from '@kbn/storybook';
-
-module.exports = {
-  ...defaultConfig,
-  stories: ['../**/*.stories.tsx'],
-  reactOptions: {
-    strictMode: true,
-  },
-};
+export { Image, ImageProps } from './image';
