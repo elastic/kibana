@@ -8,8 +8,7 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { AppUnmount } from '@kbn/core-application-browser';
-import { Mounter } from '../types';
-import { ApplicationService } from '../application_service';
+import type { ApplicationService, Mounter } from '@kbn/core-application-browser-internal';
 
 /** @internal */
 export type ApplicationServiceContract = PublicMethodsOf<ApplicationService>;

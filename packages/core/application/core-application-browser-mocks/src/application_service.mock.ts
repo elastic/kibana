@@ -10,17 +10,19 @@ import { History } from 'history';
 import { BehaviorSubject, Subject } from 'rxjs';
 
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
-import { capabilitiesServiceMock } from './capabilities_service.mock';
+import { capabilitiesServiceMock } from '@kbn/core-capabilities-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { scopedHistoryMock } from './scoped_history.mock';
 import {
   ApplicationSetup,
-  InternalApplicationStart,
   ApplicationStart,
-  InternalApplicationSetup,
   PublicAppInfo,
   AppMountParameters,
-} from './types';
+} from '@kbn/core-application-browser';
+import type {
+  InternalApplicationStart,
+  InternalApplicationSetup,
+} from '@kbn/core-application-browser-internal';
 import { ApplicationServiceContract } from './test_types';
 
 const createSetupContractMock = (): jest.Mocked<ApplicationSetup> => ({

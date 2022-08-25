@@ -12,7 +12,6 @@ SOURCE_FILES = glob(
   ],
   exclude = [
     "**/*.config.js",
-    "**/*.mock.*",
     "**/*.test.*",
     "**/*.stories.*",
     "**/__snapshots__",
@@ -38,6 +37,7 @@ NPM_MODULE_EXTRA_FILES = [
 
 RUNTIME_DEPS = [
   "//packages/kbn-std",
+  "//packages/core/capabilities/core-capabilities-browser-mocks"
 ]
 
 TYPES_DEPS = [
@@ -49,6 +49,8 @@ TYPES_DEPS = [
   "//packages/core/mount-utils/core-mount-utils-browser:npm_module_types",
   "//packages/core/application/core-application-browser:npm_module_types",
   "//packages/core/application/core-application-browser-internal:npm_module_types",
+  "//packages/core/capabilities/core-capabilities-browser-mocks:npm_module_types",
+  "//packages/core/theme/core-theme-browser-mocks:npm_module_types",
 ]
 
 jsts_transpiler(

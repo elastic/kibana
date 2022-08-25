@@ -2791,6 +2791,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-capabilities-browser-internal@link:bazel-bin/packages/core/capabilities/core-capabilities-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-capabilities-browser-mocks@link:bazel-bin/packages/core/capabilities/core-capabilities-browser-mocks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-capabilities-common@link:bazel-bin/packages/core/capabilities/core-capabilities-common":
   version "0.0.0"
   uid ""
@@ -6778,6 +6786,14 @@
   uid ""
 
 "@types/kbn__core-base-server@link:bazel-bin/packages/core/base/core-base-server/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-capabilities-browser-internal@link:bazel-bin/packages/core/capabilities/core-capabilities-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-capabilities-browser-mocks@link:bazel-bin/packages/core/capabilities/core-capabilities-browser-mocks/npm_module_types":
   version "0.0.0"
   uid ""
 

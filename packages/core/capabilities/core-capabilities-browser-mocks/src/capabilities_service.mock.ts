@@ -8,7 +8,10 @@
 
 import { deepFreeze } from '@kbn/std';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { CapabilitiesService, CapabilitiesStart } from '../capabilities/capabilities_service';
+import type {
+  CapabilitiesStart,
+  CapabilitiesService,
+} from '@kbn/core-capabilities-browser-internal';
 
 const createStartContractMock = (): jest.Mocked<CapabilitiesStart> => ({
   capabilities: deepFreeze({

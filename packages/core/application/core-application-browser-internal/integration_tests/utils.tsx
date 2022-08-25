@@ -10,9 +10,9 @@ import React, { ReactElement } from 'react';
 import { act } from 'react-dom/test-utils';
 import { mount } from 'enzyme';
 import { I18nProvider } from '@kbn/i18n-react';
+import type { AppMountParameters } from '@kbn/core-application-browser';
 
-import { AppMountParameters } from '../types';
-import { MockedMounterTuple, Mountable } from '../test_types';
+import { MockedMounterTuple, Mountable } from '../src/test_helpers/test_types';
 
 type Dom = ReturnType<typeof mount> | null;
 type Renderer = () => Dom | Promise<Dom>;

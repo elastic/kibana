@@ -27,9 +27,9 @@ import type {
   NavigateToAppOptions,
   NavigateToUrlOptions,
 } from '@kbn/core-application-browser';
+import { CapabilitiesService } from '@kbn/core-capabilities-browser-internal';
 import { AppStatus, AppNavLinkStatus } from '@kbn/core-application-browser';
 import { AppRouter } from './ui';
-import { CapabilitiesService } from './capabilities';
 import type { InternalApplicationSetup, InternalApplicationStart, Mounter } from './types';
 
 import { getLeaveAction, isConfirmAction } from './application_leave';
