@@ -101,10 +101,7 @@ describe('UnifiedFieldList <FieldStats />', () => {
     defaultProps = {
       services: mockedServices,
       dataViewOrDataViewId: dataView,
-      field: {
-        name: 'bytes',
-        type: 'number',
-      } as unknown as DataViewField,
+      field: dataView.fields.find((f) => f.name === 'bytes')!,
       fromDate: 'now-7d',
       toDate: 'now',
       query: { query: '', language: 'lucene' },
@@ -200,50 +197,36 @@ describe('UnifiedFieldList <FieldStats />', () => {
 
   it('should not request field stats for range fields', async () => {
     const wrapper = await mountWithIntl(
-      <FieldStats
-        {...defaultProps}
-        field={
-          {
-            name: 'ip_range',
-            displayName: 'ip_range',
-            type: 'ip_range',
-          } as DataViewField
-        }
-      />
+      <FieldStats {...defaultProps} field={dataView.fields.find((f) => f.name === 'ip_range')!} />
     );
-
-    await wrapper.update();
-
-    expect(loadFieldStats).not.toHaveBeenCalled();
-  });
-
-  it('should not request field stats for geo fields', async () => {
-    const wrapper = await mountWithIntl(
-      <FieldStats
-        {...defaultProps}
-        field={
-          {
-            name: 'geo_shape',
-            displayName: 'geo_shape',
-            type: 'geo_shape',
-          } as DataViewField
-        }
-      />
-    );
-
-    await wrapper.update();
-
-    expect(loadFieldStats).not.toHaveBeenCalled();
-  });
-
-  it('should render nothing if no data is found', async () => {
-    const wrapper = mountWithIntl(<FieldStats {...defaultProps} />);
 
     await wrapper.update();
 
     expect(loadFieldStats).toHaveBeenCalled();
 
-    expect(wrapper.text()).toBe('');
+    expect(wrapper.text()).toBe('Analysis is not available for this field.');
+  });
+
+  it('should not request field stats for geo fields', async () => {
+    const wrapper = await mountWithIntl(
+      <FieldStats {...defaultProps} field={dataView.fields.find((f) => f.name === 'geo_shape')!} />
+    );
+
+    await wrapper.update();
+
+    expect(loadFieldStats).toHaveBeenCalled();
+
+    expect(wrapper.text()).toBe('Analysis is not available for this field.');
+  });
+
+  it('should render nothing if no data is found', async () => {
+    const wrapper = await mountWithIntl(<FieldStats {...defaultProps} />);
+
+    await wrapper.update();
+
+    expect(loadFieldStats).toHaveBeenCalled();
+
+    expect(wrapper.text()).toBe('Analysis is not available for this field.');
   });
 
   it('should render Top Values field stats correctly for a keyword field', async () => {
@@ -346,6 +329,80 @@ describe('UnifiedFieldList <FieldStats />', () => {
 
     expect(wrapper.text()).toBe(
       'Top values"success"41.5%"info"37.1%"security"10.1%"warning"5.0%"error"3.4%"login"2.7%100% of 1624 documents'
+    );
+  });
+
+  it('should render Examples correctly for a non-aggregatable field', async () => {
+    let resolveFunction: (arg: unknown) => void;
+
+    (loadFieldStats as jest.Mock).mockImplementation(() => {
+      return new Promise((resolve) => {
+        resolveFunction = resolve;
+      });
+    });
+
+    const wrapper = mountWithIntl(
+      <FieldStats
+        {...defaultProps}
+        field={
+          {
+            name: 'test_text',
+            type: 'string',
+            aggregatable: false,
+          } as unknown as DataViewField
+        }
+      />
+    );
+
+    await wrapper.update();
+
+    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(1);
+
+    await act(async () => {
+      resolveFunction!({
+        totalDocuments: 1624,
+        sampledDocuments: 1624,
+        sampledValues: 3248,
+        topValues: {
+          buckets: [
+            {
+              count: 1349,
+              key: 'success',
+            },
+            {
+              count: 1206,
+              key: 'info',
+            },
+            {
+              count: 329,
+              key: 'security',
+            },
+            {
+              count: 164,
+              key: 'warning',
+            },
+            {
+              count: 111,
+              key: 'error',
+            },
+            {
+              count: 89,
+              key: 'login',
+            },
+          ],
+        },
+      });
+    });
+
+    await wrapper.update();
+
+    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
+    expect(wrapper.find(EuiProgress)).toHaveLength(6);
+
+    expect(loadFieldStats).toHaveBeenCalledTimes(1);
+
+    expect(wrapper.text()).toBe(
+      'Examples"success"41.5%"info"37.1%"security"10.1%"warning"5.0%"error"3.4%"login"2.7%100% of 1624 documents'
     );
   });
 
