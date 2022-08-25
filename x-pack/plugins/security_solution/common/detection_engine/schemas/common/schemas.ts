@@ -7,6 +7,7 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
+import { saved_object_attributes } from '@kbn/securitysolution-io-ts-alerting-types';
 import {
   enumeration,
   IsoDateString,
@@ -101,6 +102,18 @@ export type Index = t.TypeOf<typeof index>;
 export const data_view_id = t.string;
 
 export const dataViewIdOrUndefined = t.union([data_view_id, t.undefined]);
+
+export const action_action_type_id = t.string;
+export const action_params = saved_object_attributes;
+
+export const responseAction = t.exact(
+  t.type({
+    action_type_id: action_action_type_id,
+    params: action_params,
+  })
+);
+
+export const responseActions = t.intersection([responseAction, t.undefined]);
 
 export const indexOrUndefined = t.union([index, t.undefined]);
 export type IndexOrUndefined = t.TypeOf<typeof indexOrUndefined>;

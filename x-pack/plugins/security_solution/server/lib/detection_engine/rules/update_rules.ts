@@ -8,10 +8,7 @@
 /* eslint-disable complexity */
 import type { PartialRule } from '@kbn/alerting-plugin/server';
 import { DEFAULT_MAX_SIGNALS } from '../../../../common/constants';
-import {
-  transformRuleToAlertAction,
-  transformRuleToAlertResponseAction,
-} from '../../../../common/detection_engine/transform_actions';
+import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 
 import type { UpdateRulesOptions } from './types';
 import { typeSpecificSnakeToCamel } from '../schemas/rule_converters';
@@ -73,10 +70,6 @@ export const updateRules = async ({
     },
     schedule: { interval: ruleUpdate.interval ?? '5m' },
     actions: ruleUpdate.actions != null ? ruleUpdate.actions.map(transformRuleToAlertAction) : [],
-    responseActions:
-      ruleUpdate.response_actions != null
-        ? ruleUpdate.response_actions.map(transformRuleToAlertResponseAction)
-        : [],
     throttle: transformToAlertThrottle(ruleUpdate.throttle),
     notifyWhen: transformToNotifyWhen(ruleUpdate.throttle),
   };

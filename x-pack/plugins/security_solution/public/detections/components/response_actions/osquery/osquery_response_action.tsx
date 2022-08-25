@@ -39,6 +39,8 @@ export const OsqueryResponseAction = (props: IProps) => {
                   id="xpack.osquery.action.missingPrivilleges"
                   defaultMessage="To access this page, ask your administrator for {osquery} Kibana privileges."
                   values={{
+                    // TODO fix error
+                    // eslint-disable-next-line react/jsx-no-literals
                     osquery: <EuiCode>osquery</EuiCode>,
                   }}
                 />

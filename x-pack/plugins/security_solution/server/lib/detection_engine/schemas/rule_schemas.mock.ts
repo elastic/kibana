@@ -124,6 +124,7 @@ export const getQueryRuleParams = (): QueryRuleParams => {
         },
       },
     ],
+    responseActions: [],
     savedId: undefined,
   };
 };

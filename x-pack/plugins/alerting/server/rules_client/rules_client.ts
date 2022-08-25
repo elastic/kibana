@@ -541,7 +541,6 @@ export class RulesClient {
       notifyWhen,
       executionStatus: getRuleExecutionStatusPending(new Date().toISOString()),
       monitoring: getDefaultRuleMonitoring(),
-      responseActions: [],
     };
 
     const mappedParams = getMappedParams(updatedParams);

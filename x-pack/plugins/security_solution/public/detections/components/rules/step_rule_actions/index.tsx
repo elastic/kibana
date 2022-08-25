@@ -178,9 +178,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
       if (throttle !== stepActionsDefaultValue.throttle) {
         return (
           <>
-            <UseArray path="responseActions" readDefaultValueOnForm={true}>
-              {ResponseActionsForm}
-            </UseArray>
+            <UseArray path="responseActions">{ResponseActionsForm}</UseArray>
           </>
         );
       } else {

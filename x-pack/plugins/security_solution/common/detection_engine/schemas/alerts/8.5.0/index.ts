@@ -7,8 +7,6 @@
 
 import type { ALERT_UUID } from '@kbn/rule-data-utils';
 import type { AlertWithCommonFields800 } from '@kbn/rule-registry-plugin/common/schemas/8.0.0';
-import type { RuleAlertResponseAction } from '../../../types';
-import type { ALERT_RULE_RESPONSE_ACTIONS } from '../../../../field_maps/field_names';
 import type { BaseFields840 } from '../8.4.0';
 import type { Ancestor800, EqlBuildingBlockAlert800, EqlShellAlert800 } from '../8.0.0';
 
@@ -22,9 +20,7 @@ for the version to be released and add the field(s) to the schema in that folder
 Then, update `../index.ts` to import from the new folder that has the latest schemas, add the
 new schemas to the union of all alert schemas, and re-export the new schemas as the `*Latest` schemas.
 */
-export interface BaseFields850 extends BaseFields840 {
-  [ALERT_RULE_RESPONSE_ACTIONS]: RuleAlertResponseAction[];
-}
+export type BaseFields850 = BaseFields840;
 
 export interface WrappedFields850<T extends BaseFields850> {
   _id: string;

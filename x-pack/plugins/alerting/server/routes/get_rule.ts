@@ -63,7 +63,6 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
     params,
     connector_type_id: actionTypeId,
   })),
-  response_actions: [],
 });
 
 interface BuildGetRulesRouteParams {

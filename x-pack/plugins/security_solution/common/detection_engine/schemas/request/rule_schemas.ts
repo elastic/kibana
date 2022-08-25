@@ -190,7 +190,7 @@ const baseParams = {
     enabled,
     throttle,
     actions,
-    response_actions,
+    // response_actions,
     author,
     false_positives,
     from,
@@ -297,6 +297,7 @@ const queryRuleParams = {
     data_view_id,
     filters,
     saved_id,
+    response_actions,
   },
   defaultable: {
     query,

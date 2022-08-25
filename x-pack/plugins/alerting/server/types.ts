@@ -242,7 +242,7 @@ export interface RawRule extends SavedObjectAttributes {
   legacyId: string | null;
   schedule: SavedObjectAttributes;
   actions: RawRuleAction[];
-  responseActions: RawRuleResponseAction[];
+  // responseActions: RawRuleResponseAction[];
   params: SavedObjectAttributes;
   mapped_params?: MappedParams;
   scheduledTaskId?: string | null;

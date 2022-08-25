@@ -247,7 +247,6 @@ export class TaskRunner<
       updatedAt,
       enabled,
       actions,
-      responseActions,
     } = rule;
     const {
       params: { alertId: ruleId },
@@ -364,7 +363,7 @@ export class TaskRunner<
             enabled,
             schedule,
             actions,
-            responseActions,
+            // responseActions,
             createdBy,
             updatedBy,
             createdAt,

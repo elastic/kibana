@@ -166,6 +166,7 @@ const querySpecificRuleParams = t.exact(
     filters: filtersOrUndefined,
     savedId: savedIdOrUndefined,
     dataViewId: dataViewIdOrUndefined,
+    responseActions: responseActionsCamel,
   })
 );
 export const queryRuleParams = t.intersection([baseRuleParams, querySpecificRuleParams]);
@@ -275,7 +276,6 @@ export const internalRuleCreate = t.type({
   }),
   enabled,
   actions: actionsCamel,
-  responseActions: responseActionsCamel,
   params: ruleParams,
   throttle: throttleOrNull,
   notifyWhen,
@@ -289,7 +289,6 @@ export const internalRuleUpdate = t.type({
     interval: t.string,
   }),
   actions: actionsCamel,
-  responseActions: responseActionsCamel,
   params: ruleParams,
   throttle: throttleOrNull,
   notifyWhen,
