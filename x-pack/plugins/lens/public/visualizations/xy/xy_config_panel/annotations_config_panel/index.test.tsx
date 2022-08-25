@@ -17,6 +17,8 @@ import { Position } from '@elastic/charts';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import moment from 'moment';
 import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
+import { createMockDataViewsState } from '../../../../indexpattern_service/mocks';
+import { createMockedIndexPattern } from '../../../../indexpattern_datasource/mocks';
 
 jest.mock('lodash', () => {
   const original = jest.requireActual('lodash');
@@ -59,9 +61,9 @@ describe('AnnotationsPanel', () => {
   }
 
   beforeEach(() => {
-    frame = createMockFramePublicAPI();
-    frame.datasourceLayers = {};
+    frame = createMockFramePublicAPI({ datasourceLayers: {} });
   });
+
   describe('Dimension Editor', () => {
     test('shows correct options for line annotations', () => {
       const state = testState();
@@ -232,6 +234,76 @@ describe('AnnotationsPanel', () => {
           },
         ],
       });
+    });
+
+    test('shows correct options for query based', () => {
+      const state = testState();
+      const indexPattern = createMockedIndexPattern();
+      state.layers[0] = {
+        annotations: [
+          {
+            color: 'red',
+            icon: 'triangle',
+            id: 'ann1',
+            type: 'query',
+            isHidden: undefined,
+            key: {
+              field: 'timestamp',
+              type: 'point_in_time',
+            },
+            label: 'Query based event',
+            lineStyle: 'dashed',
+            lineWidth: 3,
+            query: { query: '', language: 'kql' },
+          },
+        ],
+        layerId: 'annotation',
+        layerType: 'annotations',
+        indexPatternId: indexPattern.id,
+      };
+      const frameMock = createMockFramePublicAPI({
+        datasourceLayers: {},
+        dataViews: createMockDataViewsState({
+          indexPatterns: { [indexPattern.id]: indexPattern },
+        }),
+      });
+
+      const component = mount(
+        <AnnotationsPanel
+          layerId={state.layers[0].layerId}
+          frame={frameMock}
+          setState={jest.fn()}
+          accessor="ann1"
+          groupId="left"
+          state={state}
+          datatableUtilities={datatableUtilities}
+          formatFactory={jest.fn()}
+          paletteService={chartPluginMock.createPaletteRegistry()}
+          panelRef={React.createRef()}
+        />
+      );
+
+      expect(
+        component.find('[data-test-subj="annotation-query-based-field-picker"]').exists()
+      ).toBeTruthy();
+      expect(
+        component.find('[data-test-subj="annotation-query-based-query-input"]').exists()
+      ).toBeTruthy();
+
+      // The provided indexPattern has 2 date fields
+      expect(
+        component
+          .find('[data-test-subj="annotation-query-based-field-picker"]')
+          .at(0)
+          .prop('options')
+      ).toHaveLength(2);
+      // When in query mode a new "field" option is added to the previous 2 ones
+      expect(
+        component.find('[data-test-subj="lns-lineMarker-text-visibility"]').at(0).prop('options')
+      ).toHaveLength(3);
+      expect(
+        component.find('[data-test-subj="lnsXY-annotation-tooltip-add_field"]').exists()
+      ).toBeTruthy();
     });
   });
 });
