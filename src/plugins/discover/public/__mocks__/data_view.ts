@@ -71,6 +71,7 @@ const fields = [
     scripted: false,
     filterable: true,
     aggregatable: true,
+    isRolledUpField: true,
   },
 ] as DataView['fields'];
 
