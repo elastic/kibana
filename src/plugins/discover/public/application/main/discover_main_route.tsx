@@ -198,8 +198,6 @@ export function DiscoverMainRoute(props: Props) {
 
   const onDataViewCreated = useCallback(
     async (nextDataView: unknown) => {
-      // eslint-disable-next-line no-console
-      console.log('onDataViewCreated', nextDataView);
       if (nextDataView) {
         setError(undefined);
         await loadSavedSearch();
@@ -227,7 +225,7 @@ export function DiscoverMainRoute(props: Props) {
       hasData: {
         ...data.dataViews.hasData,
         // If we're in dev mode, we want to always return true here.
-        hasESData: () => (isDev ? Promise.resolve(true) : data.dataViews.hasData.hasESData),
+        hasESData: () => (isDev ? Promise.resolve(true) : data.dataViews.hasData.hasESData()),
         hasDataView,
       },
     },
