@@ -37,11 +37,13 @@
 
 .dscDiscoverGrid__cellValue {
   font-family: $euiCodeFontFamily;
+  white-space: pre-wrap;
 }
 
 .dscDiscoverGrid__cellPopoverValue {
   font-family: $euiCodeFontFamily;
   font-size: $euiFontSizeS;
+  white-space: pre-wrap;
 }
 
 .dscDiscoverGrid__inner {
@@ -81,7 +83,7 @@
   .euiDataGridHeaderCell__content {
     @include euiTextTruncate;
     overflow: hidden;
-    white-space: nowrap;
+    white-space: pre-wrap;
     flex-grow: 1;
   }
 
@@ -114,6 +116,7 @@
 
 .dscDiscoverGrid__descriptionListDescription {
   word-break: normal !important;
+  white-space: nowrap;
 
   // Special handling for images coming from the image field formatter
   img {
