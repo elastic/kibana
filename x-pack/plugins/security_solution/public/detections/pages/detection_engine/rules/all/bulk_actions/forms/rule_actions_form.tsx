@@ -164,7 +164,7 @@ const RuleActionsFormComponent = ({ rulesCount, onClose, onConfirm }: RuleAction
           <li>
             <FormattedMessage
               id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.addRuleActions.ruleVariablesDetail"
-              defaultMessage="Rule variables may only affect some of the rules that you selected based on the rule types(for example {{context.rule.threshold}} will only work for threshold rule type)."
+              defaultMessage='Rule variables may only affect some of the rules that you selected based on the rule types(for example "context.rule.threshold" will only work for threshold rule type).'
             />
           </li>
         </ul>
