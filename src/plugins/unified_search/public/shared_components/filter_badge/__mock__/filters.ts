@@ -9,7 +9,7 @@
 import { Filter } from '@kbn/es-query';
 import { mapFilter } from '@kbn/data-plugin/public/query/filter_manager/lib/map_filter';
 
-export const getFilterMock = () =>
+export const getFilterMock = () => [
   mapFilter({
     meta: {
       index: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
@@ -30,7 +30,8 @@ export const getFilterMock = () =>
     $state: {
       store: 'appState',
     },
-  } as Filter);
+  } as Filter),
+];
 
 export const getFilterMockOrConditional = () => [
   {

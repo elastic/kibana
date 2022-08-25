@@ -20,7 +20,7 @@ export interface FilterBadgeProps {
 }
 
 const cursor = css`
-  padding: 5px;
+  padding: 7px;
 `;
 
 const rootLevelConditionType = ConditionTypes.AND;
