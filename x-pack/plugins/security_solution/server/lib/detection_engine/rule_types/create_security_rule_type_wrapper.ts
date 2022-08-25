@@ -114,8 +114,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             schedule: { interval },
           } = completeRule.ruleConfig;
 
-          // @ts-expect-error update types  // TODO
-          const { responseActions } = completeRule.ruleParams;
           const refresh = actions.length ? 'wait_for' : false;
 
           ruleExecutionLogger.debug('[+] Starting Signal Rule execution');
