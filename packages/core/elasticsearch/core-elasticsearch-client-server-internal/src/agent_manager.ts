@@ -9,7 +9,6 @@
 import { isDeepStrictEqual } from 'util';
 import { Agent as HttpAgent } from 'http';
 import { Agent as HttpsAgent } from 'https';
-import { HttpProxyAgent, HttpsProxyAgent } from 'hpagent';
 import { ConnectionOptions, HttpAgentOptions, UndiciAgentOptions } from '@elastic/elasticsearch';
 
 export type NetworkAgent = HttpAgent | HttpsAgent;
@@ -52,7 +51,7 @@ export class AgentManager {
       return validAgentConfig;
     }
 
-    const baseConfig = Object.assign({}, this.defaultAgentConfig, validAgentConfig);
+    const currentConfig = Object.assign({}, this.defaultAgentConfig, validAgentConfig);
 
     return (connectionOpts: ConnectionOptions): NetworkAgent => {
       const agentMap = this.agentsMaps[connectionOpts.url.protocol];
@@ -61,44 +60,27 @@ export class AgentManager {
         throw new Error(`Unsupported protocol: '${connectionOpts.url.protocol}'`);
       }
 
-      let agentTuple = agentMap[type];
+      const agentTuple = agentMap[type];
 
       if (agentTuple) {
         const [agent, initialConfig] = agentTuple;
-        const currentConfig = Object.assign({}, baseConfig, {
-          proxy: connectionOpts.proxy,
-          tls: connectionOpts.tls,
-        });
+
         if (!isDeepStrictEqual(initialConfig, currentConfig)) {
           throw new Error(
             `Attempted to retrieve HTTP Agent instances of the same type '${type}' using different configurations`
           );
         }
         return agent;
-      } else {
-        let agent;
-
-        if (connectionOpts.proxy !== undefined) {
-          const proxyConfig = Object.assign({}, baseConfig, {
-            proxy: connectionOpts.proxy,
-            tls: connectionOpts.tls,
-          });
-          agent =
-            connectionOpts.url.protocol === 'https:'
-              ? new HttpsProxyAgent(proxyConfig)
-              : new HttpProxyAgent(proxyConfig);
-          agentTuple = [agent, proxyConfig];
-        } else {
-          agent =
-            connectionOpts.url.protocol === 'https:'
-              ? new HttpsAgent(baseConfig)
-              : new HttpAgent(baseConfig);
-          agentTuple = [agent, baseConfig];
-        }
-        agentMap[type] = agentTuple;
       }
 
-      return agentTuple[0];
+      const agent =
+        connectionOpts.url.protocol === 'https:'
+          ? new HttpsAgent(currentConfig)
+          : new HttpAgent(currentConfig);
+
+      agentMap[type] = [agent, currentConfig];
+
+      return agent;
     };
   }
 }
