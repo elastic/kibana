@@ -22,6 +22,21 @@ export const ENTERPRISE_SEARCH_OVERVIEW_PLUGIN = {
   LOGO: 'logoEnterpriseSearch',
 };
 
+export const ENTERPRISE_SEARCH_ANALYTICS_PLUGIN = {
+  ID: 'enterpriseSearchAnalytics',
+  NAME: i18n.translate('xpack.enterpriseSearch.content.productName', {
+    defaultMessage: 'Enterprise Search',
+  }),
+  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.analytics.navTitle', {
+    defaultMessage: 'Analytics',
+  }),
+  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.overview.description', {
+    defaultMessage: 'Create search experiences with a refined set of APIs and tools.',
+  }),
+  URL: '/app/enterprise_search/analytics',
+  LOGO: 'logoEnterpriseSearch',
+};
+
 export const ENTERPRISE_SEARCH_CONTENT_PLUGIN = {
   ID: 'enterpriseSearchContent',
   NAME: i18n.translate('xpack.enterpriseSearch.content.productName', {
