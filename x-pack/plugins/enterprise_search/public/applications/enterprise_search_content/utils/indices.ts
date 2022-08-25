@@ -9,6 +9,7 @@ import moment from 'moment';
 
 import { i18n } from '@kbn/i18n';
 
+import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../common/constants';
 import { SyncStatus, ConnectorStatus } from '../../../../common/types/connectors';
 import {
   ConnectorIndex,
@@ -25,21 +26,18 @@ import {
   IngestionStatus,
 } from '../types';
 
-const CRAWLER_CONNECTOR_TYPE = 'elastic-crawler'
-
 export function isConnectorIndex(
   index: ElasticsearchIndexWithIngestion | undefined
 ): index is ConnectorIndex {
-  const indexAsConnector = index as ConnectorIndex;
-  return !!indexAsConnector?.connector && indexAsConnector.connector.service_type !== CRAWLER_CONNECTOR_TYPE;
+  const connectorIndex = index as ConnectorIndex;
+  return !!connectorIndex?.connector && connectorIndex.connector.service_type !== ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE;
 }
 
 export function isCrawlerIndex(
   index: ElasticsearchIndexWithIngestion | undefined
 ): index is CrawlerIndex {
-  const indexAsConnector = index as ConnectorIndex;
-  const indexAsCrawler = index as CrawlerIndex;
-  return !!indexAsCrawler?.crawler || (!!indexAsConnector?.connector && indexAsConnector.connector.service_type === CRAWLER_CONNECTOR_TYPE);
+  const crawlerIndex = index as CrawlerIndex;
+  return !!crawlerIndex?.crawler || (!!crawlerIndex?.connector && crawlerIndex.connector.service_type === ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE);
 }
 
 export function isApiIndex(index: ElasticsearchIndexWithIngestion | undefined): boolean {
@@ -50,14 +48,13 @@ export function isApiIndex(index: ElasticsearchIndexWithIngestion | undefined): 
 }
 
 export function isConnectorViewIndex(index: ElasticsearchViewIndex): index is ConnectorViewIndex {
-  const indexAsConnector = index as ConnectorViewIndex;
-  return !!indexAsConnector?.connector && indexAsConnector.connector.service_type !== CRAWLER_CONNECTOR_TYPE;
+  const connectorViewIndex = index as ConnectorViewIndex;
+  return !!connectorViewIndex?.connector && connectorViewIndex.connector.service_type !== ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE;
 }
 
 export function isCrawlerViewIndex(index: ElasticsearchViewIndex): index is CrawlerViewIndex {
-  const indexAsConnector = index as ConnectorViewIndex;
-  const indexAsCrawler = index as CrawlerViewIndex;
-  return !!indexAsCrawler?.crawler || (!!indexAsConnector?.connector && indexAsConnector.connector.service_type === CRAWLER_CONNECTOR_TYPE);
+  const crawlerViewIndex = index as CrawlerViewIndex;
+  return !!crawlerViewIndex?.crawler || (!!crawlerViewIndex?.connector && crawlerViewIndex.connector.service_type === ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE);
 }
 
 export function isApiViewIndex(index: ElasticsearchViewIndex): index is ApiViewIndex {

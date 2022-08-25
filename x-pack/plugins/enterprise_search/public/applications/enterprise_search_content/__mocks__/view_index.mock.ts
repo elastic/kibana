@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '@kbn/enterprise-search-plugin/common/constants';
 import { SyncStatus, ConnectorStatus } from '../../../../common/types/connectors';
 
 import {
@@ -83,7 +84,7 @@ export const crawlerIndex: CrawlerViewIndex = {
     store: { size_in_bytes: '8024' },
   },
 };
-export const connectorCrawlerIndex: ConnectorViewIndex = {
+export const connectorCrawlerIndex: CrawlerViewIndex = {
   count: 1,
   connector: {
     api_key_id: null,
@@ -100,9 +101,13 @@ export const connectorCrawlerIndex: ConnectorViewIndex = {
       enabled: false,
       interval: '',
     },
-    service_type: 'elastic-crawler',
+    service_type: ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE,
     status: ConnectorStatus.CONFIGURED,
     sync_now: false,
+  },
+  crawler: {
+    id: '5',
+    index_name: 'crawler',
   },
   ingestionMethod: IngestionMethod.CRAWLER,
   ingestionStatus: IngestionStatus.INCOMPLETE,
