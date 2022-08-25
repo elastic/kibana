@@ -6,8 +6,15 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import React, { Ref } from 'react';
-import { EuiDualRange } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiDualRange,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+} from '@elastic/eui';
 import { EuiRangeTick } from '@elastic/eui/src/components/form/range/range_ticks';
 
 interface Props {
@@ -25,17 +32,45 @@ export function TimeSliderPopoverContent(props: Props) {
   }
 
   return (
-    <EuiDualRange
-      ref={props.rangeRef}
-      fullWidth={true}
-      value={props.value}
-      onChange={onChange}
-      showTicks={true}
-      min={props.timeRangeMin}
-      max={props.timeRangeMax}
-      step={1}
-      ticks={props.ticks}
-      isDraggable
-    />
+    <EuiFlexGroup
+      className="rangeSlider__actions"
+      gutterSize="none"
+      data-test-subj="rangeSlider-control-actions"
+      responsive={false}
+    >
+      <EuiFlexItem>
+        <EuiDualRange
+          ref={props.rangeRef}
+          fullWidth={true}
+          value={props.value}
+          onChange={onChange}
+          showTicks={true}
+          min={props.timeRangeMin}
+          max={props.timeRangeMax}
+          step={1}
+          ticks={props.ticks}
+          isDraggable
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiToolTip content={
+          i18n.translate('controls.timeSlider.popover.clearTimeTitle', {
+            defaultMessage: 'Clear time selection',
+          })}
+        >
+          <EuiButtonIcon
+            iconType="eraser"
+            color="danger"
+            onClick={() => {
+              onChange();
+            }}
+            aria-label={i18n.translate('controls.timeSlider.popover.clearTimeTitle', {
+              defaultMessage: 'Clear time selection',
+            })}
+            data-test-subj="timeSlider__clearTimeButton"
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
