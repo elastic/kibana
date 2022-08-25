@@ -36,7 +36,9 @@ interface SocTrends {
 
 export const useSocTrends = ({ skip = false, signalIndexName }: UseSocTrends): SocTrends => {
   const { to, from, setQuery, deleteQuery } = useGlobalTime();
-  const { from: fromCompare, to: toCompare } = useDeepEqualSelector((state) =>
+  // TODO: remove empty compare times when socTrendsEnabled feature flag removed
+  // this hook will not be called if socTrendsEnabled = false so the empty times don't matter
+  const { from: fromCompare = '', to: toCompare = '' } = useDeepEqualSelector((state) =>
     pick(['from', 'to'], inputsSelectors.socTrendsTimeRangeSelector(state))
   );
 

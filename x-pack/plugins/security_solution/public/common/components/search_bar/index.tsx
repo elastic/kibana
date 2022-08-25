@@ -352,7 +352,8 @@ const makeMapStateToProps = () => {
       fromStr: getFromStrSelector(inputsRange),
       filterQuery: getFilterQuerySelector(inputsRange),
       isLoading: getIsLoadingSelector(inputsRange),
-      queries: getQueriesSelector(state, id),
+      // TODO: revert 'global' | 'timeline' to InputsModelId when socTrendsEnabled feature flag removed
+      queries: getQueriesSelector(state, id as 'global' | 'timeline'),
       savedQuery: getSavedQuerySelector(inputsRange),
       start: getStartSelector(inputsRange),
       toStr: getToStrSelector(inputsRange),

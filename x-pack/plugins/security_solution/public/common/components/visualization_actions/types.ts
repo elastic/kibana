@@ -6,7 +6,6 @@
  */
 
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import type { InputsModelId } from '../../store/inputs/constants';
 
 export type LensAttributes = TypedLensByValueInput['attributes'];
 export type GetLensAttributes = (stackByField?: string) => LensAttributes;
@@ -14,7 +13,8 @@ export type GetLensAttributes = (stackByField?: string) => LensAttributes;
 export interface VisualizationActionsProps {
   className?: string;
   getLensAttributes?: GetLensAttributes;
-  inputId?: InputsModelId;
+  // TODO: revert 'global' | 'timeline' to InputsModelId when socTrendsEnabled feature flag removed
+  inputId?: 'global' | 'timeline';
   inspectIndex?: number;
   isInspectButtonDisabled?: boolean;
   isMultipleQuery?: boolean;

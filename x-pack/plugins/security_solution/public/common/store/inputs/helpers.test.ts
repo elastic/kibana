@@ -22,6 +22,8 @@ import {
 import type { InputsModel, TimeRange } from './model';
 
 let state = mockGlobalState.inputs;
+
+// TODO: remove socTrends check when socTrendsEnabled feature flag removed
 const emptyLinkToState: InputsModel = {
   ...state,
   global: {
@@ -32,10 +34,14 @@ const emptyLinkToState: InputsModel = {
     ...state.timeline,
     linkTo: [],
   },
-  socTrends: {
-    ...state.socTrends,
-    linkTo: [],
-  },
+  ...(state.socTrends
+    ? {
+        socTrends: {
+          ...state.socTrends,
+          linkTo: [],
+        },
+      }
+    : {}),
 };
 const socTrendsGlobalLinkToState: InputsModel = {
   ...state,
@@ -47,10 +53,14 @@ const socTrendsGlobalLinkToState: InputsModel = {
     ...state.timeline,
     linkTo: [],
   },
-  socTrends: {
-    ...state.socTrends,
-    linkTo: ['global'],
-  },
+  ...(state.socTrends
+    ? {
+        socTrends: {
+          ...state.socTrends,
+          linkTo: ['global'],
+        },
+      }
+    : {}),
 };
 const timelineGlobalLinkToState: InputsModel = {
   ...state,
@@ -62,10 +72,14 @@ const timelineGlobalLinkToState: InputsModel = {
     ...state.timeline,
     linkTo: ['global'],
   },
-  socTrends: {
-    ...state.socTrends,
-    linkTo: [],
-  },
+  ...(state.socTrends
+    ? {
+        socTrends: {
+          ...state.socTrends,
+          linkTo: [],
+        },
+      }
+    : {}),
 };
 const allLinkToState: InputsModel = state;
 
@@ -96,7 +110,7 @@ describe('Inputs', () => {
         };
         const newState: InputsModel = updateInputTimerange('global', newTimerange, allLinkToState);
         expect(newState.timeline.timerange).toEqual(newState.global.timerange);
-        expect(newState.socTrends.timerange).toEqual({
+        expect(newState.socTrends?.timerange).toEqual({
           kind: 'absolute',
           from: '2020-07-04T08:00:00.000Z',
           to: '2020-07-06T08:00:00.000Z',
@@ -117,7 +131,7 @@ describe('Inputs', () => {
           allLinkToState
         );
         expect(newState.timeline.timerange).toEqual(newState.global.timerange);
-        expect(newState.socTrends.timerange).toEqual({
+        expect(newState.socTrends?.timerange).toEqual({
           kind: 'absolute',
           from: '2020-07-03T02:00:00.000Z',
           to: '2020-07-05T22:00:00.000Z',
@@ -143,7 +157,7 @@ describe('Inputs', () => {
           to: '2020-07-03T00:00:00.000Z',
         });
         expect(newState.global.timerange).toEqual(newState.timeline.timerange);
-        expect(newState.socTrends.timerange).toEqual(newTimerange);
+        expect(newState.socTrends?.timerange).toEqual(newTimerange);
       });
     });
 
@@ -162,7 +176,7 @@ describe('Inputs', () => {
           emptyLinkToState
         );
         expect(newState.timeline.timerange).toEqual(emptyLinkToState.timeline.timerange);
-        expect(newState.socTrends.timerange).toEqual(emptyLinkToState.socTrends.timerange);
+        expect(newState.socTrends?.timerange).toEqual(emptyLinkToState.socTrends?.timerange);
         expect(newState.global.timerange).toEqual(newTimerange);
       });
 
@@ -180,7 +194,7 @@ describe('Inputs', () => {
           emptyLinkToState
         );
         expect(newState.timeline.timerange).toEqual(newTimerange);
-        expect(newState.socTrends.timerange).toEqual(emptyLinkToState.socTrends.timerange);
+        expect(newState.socTrends?.timerange).toEqual(emptyLinkToState.socTrends?.timerange);
         expect(newState.global.timerange).toEqual(emptyLinkToState.global.timerange);
       });
 
@@ -199,7 +213,7 @@ describe('Inputs', () => {
         );
         expect(newState.timeline.timerange).toEqual(emptyLinkToState.timeline.timerange);
         expect(newState.global.timerange).toEqual(emptyLinkToState.global.timerange);
-        expect(newState.socTrends.timerange).toEqual(newTimerange);
+        expect(newState.socTrends?.timerange).toEqual(newTimerange);
       });
     });
 
@@ -218,7 +232,9 @@ describe('Inputs', () => {
           timelineGlobalLinkToState
         );
         expect(newState.timeline.timerange).toEqual(newState.global.timerange);
-        expect(newState.socTrends.timerange).toEqual(timelineGlobalLinkToState.socTrends.timerange);
+        expect(newState.socTrends?.timerange).toEqual(
+          timelineGlobalLinkToState.socTrends?.timerange
+        );
       });
 
       test('global should be identical to timeline & socTrends should be previous time range when timeline change', () => {
@@ -235,7 +251,9 @@ describe('Inputs', () => {
           timelineGlobalLinkToState
         );
         expect(newState.timeline.timerange).toEqual(newState.global.timerange);
-        expect(newState.socTrends.timerange).toEqual(timelineGlobalLinkToState.socTrends.timerange);
+        expect(newState.socTrends?.timerange).toEqual(
+          timelineGlobalLinkToState.socTrends?.timerange
+        );
       });
 
       test('global and timeline should remain unchanged when socTrends change', () => {
@@ -254,7 +272,7 @@ describe('Inputs', () => {
 
         expect(newState.global.timerange).toEqual(timelineGlobalLinkToState.global.timerange);
         expect(newState.timeline.timerange).toEqual(timelineGlobalLinkToState.timeline.timerange);
-        expect(newState.socTrends.timerange).toEqual(newTimerange);
+        expect(newState.socTrends?.timerange).toEqual(newTimerange);
       });
     });
 
@@ -274,7 +292,7 @@ describe('Inputs', () => {
         );
         expect(newState.timeline.timerange).toEqual(socTrendsGlobalLinkToState.timeline.timerange);
         expect(newState.global.timerange).toEqual(newTimerange);
-        expect(newState.socTrends.timerange).toEqual({
+        expect(newState.socTrends?.timerange).toEqual({
           kind: 'absolute',
           from: '2020-07-04T08:00:00.000Z',
           to: '2020-07-06T08:00:00.000Z',
@@ -296,8 +314,8 @@ describe('Inputs', () => {
         );
         expect(newState.timeline.timerange).toEqual(newTimerange);
         expect(newState.global.timerange).toEqual(socTrendsGlobalLinkToState.global.timerange);
-        expect(newState.socTrends.timerange).toEqual(
-          socTrendsGlobalLinkToState.socTrends.timerange
+        expect(newState.socTrends?.timerange).toEqual(
+          socTrendsGlobalLinkToState.socTrends?.timerange
         );
       });
 
@@ -321,7 +339,7 @@ describe('Inputs', () => {
           from: '2020-07-02T00:00:00.000Z',
           to: '2020-07-03T00:00:00.000Z',
         });
-        expect(newState.socTrends.timerange).toEqual(newTimerange);
+        expect(newState.socTrends?.timerange).toEqual(newTimerange);
       });
     });
   });
@@ -457,7 +475,7 @@ describe('Inputs', () => {
         const newState: InputsModel = addInputLink(['global', 'timeline'], emptyLinkToState);
         expect(newState.global.linkTo).toEqual(['timeline']);
         expect(newState.timeline.linkTo).toEqual(['global']);
-        expect(newState.socTrends.linkTo).toEqual([]);
+        expect(newState.socTrends?.linkTo).toEqual([]);
       });
       test('socTends and global linked, add timeline and socTrends to global, add global and socTrends to timeline', () => {
         const newState: InputsModel = addInputLink(
@@ -466,7 +484,7 @@ describe('Inputs', () => {
         );
         expect(newState.global.linkTo.sort()).toEqual(['socTrends', 'timeline'].sort());
         expect(newState.timeline.linkTo.sort()).toEqual(['global', 'socTrends'].sort());
-        expect(newState.socTrends.linkTo.sort()).toEqual(['global', 'timeline'].sort());
+        expect(newState.socTrends?.linkTo.sort()).toEqual(['global', 'timeline'].sort());
       });
       test('timeline and global linked, do not update state', () => {
         const newState: InputsModel = addInputLink(
@@ -479,15 +497,15 @@ describe('Inputs', () => {
         expect(newState.timeline.linkTo.sort()).toEqual(
           timelineGlobalLinkToState.timeline.linkTo.sort()
         );
-        expect(newState.socTrends.linkTo.sort()).toEqual(
-          timelineGlobalLinkToState.socTrends.linkTo.sort()
+        expect(newState.socTrends?.linkTo.sort()).toEqual(
+          timelineGlobalLinkToState.socTrends?.linkTo.sort()
         );
       });
       test('socTends, timeline, and global linked, do not update state', () => {
         const newState: InputsModel = addInputLink(['global', 'timeline'], allLinkToState);
         expect(newState.global.linkTo.sort()).toEqual(allLinkToState.global.linkTo.sort());
         expect(newState.timeline.linkTo.sort()).toEqual(allLinkToState.timeline.linkTo.sort());
-        expect(newState.socTrends.linkTo.sort()).toEqual(allLinkToState.socTrends.linkTo.sort());
+        expect(newState.socTrends?.linkTo.sort()).toEqual(allLinkToState.socTrends?.linkTo.sort());
       });
     });
     describe(`linkToIds === ['global', 'socTrends']`, () => {
@@ -495,7 +513,7 @@ describe('Inputs', () => {
         const newState: InputsModel = addInputLink(['global', 'socTrends'], emptyLinkToState);
         expect(newState.global.linkTo).toEqual(['socTrends']);
         expect(newState.timeline.linkTo).toEqual([]);
-        expect(newState.socTrends.linkTo).toEqual(['global']);
+        expect(newState.socTrends?.linkTo).toEqual(['global']);
       });
       test('timeline and global linked, add timeline and socTrends to global, add global and timeline to socTrends', () => {
         const newState: InputsModel = addInputLink(
@@ -504,7 +522,7 @@ describe('Inputs', () => {
         );
         expect(newState.global.linkTo.sort()).toEqual(['socTrends', 'timeline'].sort());
         expect(newState.timeline.linkTo.sort()).toEqual(['global', 'socTrends'].sort());
-        expect(newState.socTrends.linkTo.sort()).toEqual(['global', 'timeline'].sort());
+        expect(newState.socTrends?.linkTo.sort()).toEqual(['global', 'timeline'].sort());
       });
       test('socTends and global linked, do not update state', () => {
         const newState: InputsModel = addInputLink(
@@ -517,8 +535,8 @@ describe('Inputs', () => {
         expect(newState.timeline.linkTo.sort()).toEqual(
           socTrendsGlobalLinkToState.timeline.linkTo.sort()
         );
-        expect(newState.socTrends.linkTo.sort()).toEqual(
-          socTrendsGlobalLinkToState.socTrends.linkTo.sort()
+        expect(newState.socTrends?.linkTo.sort()).toEqual(
+          socTrendsGlobalLinkToState.socTrends?.linkTo.sort()
         );
       });
       test('socTrends, timeline, and global linked, do not update state', () => {
@@ -526,7 +544,7 @@ describe('Inputs', () => {
         const newState: InputsModel = addInputLink(['global', 'socTrends'], inputState);
         expect(newState.global.linkTo.sort()).toEqual(inputState.global.linkTo.sort());
         expect(newState.timeline.linkTo.sort()).toEqual(inputState.timeline.linkTo.sort());
-        expect(newState.socTrends.linkTo.sort()).toEqual(inputState.socTrends.linkTo.sort());
+        expect(newState.socTrends?.linkTo.sort()).toEqual(inputState.socTrends?.linkTo.sort());
       });
     });
   });
@@ -559,7 +577,7 @@ describe('Inputs', () => {
         const newState: InputsModel = removeInputLink(['global', 'timeline'], emptyLinkToState);
         expect(newState.global.linkTo).toEqual(emptyLinkToState.global.linkTo);
         expect(newState.timeline.linkTo).toEqual(emptyLinkToState.timeline.linkTo);
-        expect(newState.socTrends.linkTo).toEqual(emptyLinkToState.socTrends.linkTo);
+        expect(newState.socTrends?.linkTo).toEqual(emptyLinkToState.socTrends?.linkTo);
       });
       test('socTrends and global linked, do nothing', () => {
         const newState: InputsModel = removeInputLink(
@@ -568,7 +586,7 @@ describe('Inputs', () => {
         );
         expect(newState.global.linkTo).toEqual(socTrendsGlobalLinkToState.global.linkTo);
         expect(newState.timeline.linkTo).toEqual(socTrendsGlobalLinkToState.timeline.linkTo);
-        expect(newState.socTrends.linkTo).toEqual(socTrendsGlobalLinkToState.socTrends.linkTo);
+        expect(newState.socTrends?.linkTo).toEqual(socTrendsGlobalLinkToState.socTrends?.linkTo);
       });
       test('timeline and global linked, remove link', () => {
         const newState: InputsModel = removeInputLink(
@@ -577,13 +595,13 @@ describe('Inputs', () => {
         );
         expect(newState.global.linkTo).toEqual([]);
         expect(newState.timeline.linkTo).toEqual([]);
-        expect(newState.socTrends.linkTo).toEqual([]);
+        expect(newState.socTrends?.linkTo).toEqual([]);
       });
       test('socTrends, timeline, and global linked, unlink timeline/global only', () => {
         const newState: InputsModel = removeInputLink(['global', 'timeline'], allLinkToState);
         expect(newState.global.linkTo).toEqual(['socTrends']);
         expect(newState.timeline.linkTo).toEqual([]);
-        expect(newState.socTrends.linkTo).toEqual(['global']);
+        expect(newState.socTrends?.linkTo).toEqual(['global']);
       });
     });
     describe(`linkToIds === ['global', 'socTrends']`, () => {
@@ -591,7 +609,7 @@ describe('Inputs', () => {
         const newState: InputsModel = removeInputLink(['global', 'socTrends'], emptyLinkToState);
         expect(newState.global.linkTo).toEqual(emptyLinkToState.global.linkTo);
         expect(newState.timeline.linkTo).toEqual(emptyLinkToState.timeline.linkTo);
-        expect(newState.socTrends.linkTo).toEqual(emptyLinkToState.socTrends.linkTo);
+        expect(newState.socTrends?.linkTo).toEqual(emptyLinkToState.socTrends?.linkTo);
       });
       test('timeline and global linked, do nothing', () => {
         const newState: InputsModel = removeInputLink(
@@ -600,7 +618,7 @@ describe('Inputs', () => {
         );
         expect(newState.global.linkTo).toEqual(timelineGlobalLinkToState.global.linkTo);
         expect(newState.timeline.linkTo).toEqual(timelineGlobalLinkToState.timeline.linkTo);
-        expect(newState.socTrends.linkTo).toEqual(timelineGlobalLinkToState.socTrends.linkTo);
+        expect(newState.socTrends?.linkTo).toEqual(timelineGlobalLinkToState.socTrends?.linkTo);
       });
       test('socTrends and global linked, remove link', () => {
         const newState: InputsModel = removeInputLink(
@@ -609,13 +627,13 @@ describe('Inputs', () => {
         );
         expect(newState.global.linkTo).toEqual([]);
         expect(newState.timeline.linkTo).toEqual([]);
-        expect(newState.socTrends.linkTo).toEqual([]);
+        expect(newState.socTrends?.linkTo).toEqual([]);
       });
       test('socTrends, timeline, and global linked, unlink timeline/global only', () => {
         const newState: InputsModel = removeInputLink(['global', 'socTrends'], allLinkToState);
         expect(newState.global.linkTo).toEqual(['timeline']);
         expect(newState.timeline.linkTo).toEqual(['global']);
-        expect(newState.socTrends.linkTo).toEqual([]);
+        expect(newState.socTrends?.linkTo).toEqual([]);
       });
     });
   });

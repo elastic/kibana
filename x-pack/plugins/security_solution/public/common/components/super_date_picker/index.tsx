@@ -331,7 +331,8 @@ export const makeMapStateToProps = () => {
       kind: getKindSelector(inputsRange),
       kqlQuery: getKqlQuerySelector(inputsRange) as inputsModel.GlobalKqlQuery,
       policy: getPolicySelector(inputsRange),
-      queries: getQueriesSelector(state, id),
+      // TODO: revert 'global' | 'timeline' to InputsModelId when socTrendsEnabled feature flag removed
+      queries: getQueriesSelector(state, id as 'global' | 'timeline'),
       start: getStartSelector(inputsRange),
       toStr: getToStrSelector(inputsRange),
     };

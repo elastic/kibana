@@ -76,7 +76,8 @@ export const toggleLockSocTrends = (state: InputsModel): InputsModel => {
 
 export interface UpdateQueryParams {
   id: string;
-  inputId: InputsModelId;
+  // TODO: revert 'global' | 'timeline' to InputsModelId when socTrendsEnabled feature flag removed
+  inputId: 'global' | 'timeline';
   inspect: InspectQuery | null;
   loading: boolean;
   refetch: Refetch | RefetchKql;
@@ -127,7 +128,8 @@ export const upsertQuery = ({
 
 export interface SetIsInspectedParams {
   id: string;
-  inputId: InputsModelId;
+  // TODO: revert 'global' | 'timeline' to InputsModelId when socTrendsEnabled feature flag removed
+  inputId: 'global' | 'timeline';
   isInspected: boolean;
   selectedInspectIndex: number;
   state: InputsModel;
@@ -188,7 +190,8 @@ export const addInputLink = (linkToIds: InputsModelId[], state: InputsModel): In
         ...state.global,
         linkTo: [...socTrends, timelineVal],
       },
-      ...(socTrends.length
+      // TODO: remove state.socTrends check when socTrendsEnabled feature flag removed
+      ...(state.socTrends && socTrends.length
         ? {
             socTrends: {
               ...state.socTrends,
@@ -203,10 +206,15 @@ export const addInputLink = (linkToIds: InputsModelId[], state: InputsModel): In
     const timeline = state.global.linkTo.includes(timelineVal) ? [timelineVal] : [];
     return {
       ...state,
-      socTrends: {
-        ...state.socTrends,
-        linkTo: [...timeline, globalVal],
-      },
+      // TODO: remove state.socTrends check when socTrendsEnabled feature flag removed
+      ...(state.socTrends
+        ? {
+            socTrends: {
+              ...state.socTrends,
+              linkTo: [...timeline, globalVal],
+            },
+          }
+        : {}),
       global: {
         ...state.global,
         linkTo: [...timeline, socTrendsVal],
@@ -255,7 +263,8 @@ export const removeInputLink = (linkToIds: InputsModelId[], state: InputsModel):
         ...state.global,
         linkTo: socTrends,
       },
-      ...(socTrends.length
+      // TODO: remove state.socTrends check when socTrendsEnabled feature flag removed
+      ...(state.socTrends && socTrends.length
         ? {
             socTrends: {
               ...state.socTrends,
@@ -270,10 +279,15 @@ export const removeInputLink = (linkToIds: InputsModelId[], state: InputsModel):
     const timeline = state.global.linkTo.includes(timelineVal) ? [timelineVal] : [];
     return {
       ...state,
-      socTrends: {
-        ...state.socTrends,
-        linkTo: [],
-      },
+      // TODO: remove state.socTrends check when socTrendsEnabled feature flag removed
+      ...(state.socTrends
+        ? {
+            socTrends: {
+              ...state.socTrends,
+              linkTo: [],
+            },
+          }
+        : {}),
       global: {
         ...state.global,
         linkTo: timeline,
@@ -293,7 +307,8 @@ export const removeInputLink = (linkToIds: InputsModelId[], state: InputsModel):
 
 export interface DeleteOneQueryParams {
   id: string;
-  inputId: InputsModelId;
+  // TODO: revert 'global' | 'timeline' to InputsModelId when socTrendsEnabled feature flag removed
+  inputId: 'global' | 'timeline';
   state: InputsModel;
 }
 

@@ -308,7 +308,7 @@ describe('SearchBarComponent', () => {
         expect(mockUpdateUrlParam).toHaveBeenCalledWith(
           expect.objectContaining({
             global: {
-              linkTo: ['timeline'],
+              linkTo: ['timeline', 'socTrends'],
               timerange: newTimerange,
             },
           })
@@ -347,7 +347,7 @@ describe('SearchBarComponent', () => {
         expect(mockUpdateUrlParam).toHaveBeenCalledWith(
           expect.objectContaining({
             timeline: {
-              linkTo: ['global'],
+              linkTo: ['global', 'socTrends'],
               timerange: newTimerange,
             },
           })

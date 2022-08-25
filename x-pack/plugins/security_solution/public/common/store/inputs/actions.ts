@@ -47,7 +47,8 @@ export const setFullScreen = actionCreator<{
 }>('SET_FULL_SCREEN');
 
 export const setQuery = actionCreator<{
-  inputId: InputsModelId;
+  // TODO: revert 'global' | 'timeline' to InputsModelId when socTrendsEnabled feature flag removed
+  inputId: 'global' | 'timeline';
   id: string;
   loading: boolean;
   refetch: Refetch | RefetchKql;
@@ -55,13 +56,15 @@ export const setQuery = actionCreator<{
 }>('SET_QUERY');
 
 export const deleteOneQuery = actionCreator<{
-  inputId: InputsModelId;
+  // TODO: revert 'global' | 'timeline' to InputsModelId when socTrendsEnabled feature flag removed
+  inputId: 'global' | 'timeline';
   id: string;
 }>('DELETE_QUERY');
 
 export const setInspectionParameter = actionCreator<{
   id: string;
-  inputId: InputsModelId;
+  // TODO: revert 'global' | 'timeline' to InputsModelId when socTrendsEnabled feature flag removed
+  inputId: 'global' | 'timeline';
   isInspected: boolean;
   selectedInspectIndex: number;
 }>('SET_INSPECTION_PARAMETER');
