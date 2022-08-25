@@ -38,7 +38,6 @@ describe('policy details: ', () => {
       updated_by: '',
       policy_id: '',
       enabled: true,
-      output_id: '',
       inputs: [
         {
           type: 'endpoint',
@@ -259,7 +258,6 @@ describe('policy details: ', () => {
         description: '',
         policy_id: '',
         enabled: true,
-        output_id: '',
         inputs: [
           {
             type: 'endpoint',
