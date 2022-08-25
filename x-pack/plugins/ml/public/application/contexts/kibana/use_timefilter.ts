@@ -48,11 +48,12 @@ export const useRefreshIntervalUpdates = () => {
   );
 };
 
-export const useTimeRangeUpdates = () => {
+export const useTimeRangeUpdates = (absolute = false) => {
   const timefilter = useTimefilter();
 
-  return useObservable(
-    timefilter.getTimeUpdate$().pipe(map(timefilter.getTime)),
-    timefilter.getTime()
-  );
+  const getTimeCallback = absolute
+    ? timefilter.getAbsoluteTime.bind(timefilter)
+    : timefilter.getTime.bind(timefilter);
+
+  return useObservable(timefilter.getTimeUpdate$().pipe(map(getTimeCallback)), getTimeCallback());
 };

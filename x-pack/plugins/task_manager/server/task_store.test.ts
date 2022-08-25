@@ -15,20 +15,15 @@ import {
   TaskLifecycleResult,
   SerializedConcreteTaskInstance,
 } from './task';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
 import { TaskStore, SearchOpts, AggregationOpts } from './task_store';
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
-import {
-  SavedObjectsSerializer,
-  SavedObjectTypeRegistry,
-  SavedObjectAttributes,
-  SavedObjectsErrorHelpers,
-} from '@kbn/core/server';
+import { SavedObjectAttributes, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { mockLogger } from './test_utils';
 
 const savedObjectsClient = savedObjectsRepositoryMock.create();
-const serializer = new SavedObjectsSerializer(new SavedObjectTypeRegistry());
+const serializer = savedObjectsServiceMock.createSerializer();
 
 beforeEach(() => jest.resetAllMocks());
 
