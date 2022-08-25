@@ -36,10 +36,11 @@ export const DocumentViewModeToggle = ({
   const tabsCss = css`
     padding: 0 ${useEuiPaddingSize('s')};
     background-color: ${euiThemeVars.euiPageBackgroundColor};
-  `;
 
-  const tabCss = css`
-    font-size: ${useEuiFontSize('s').fontSize};
+    .dscViewModeToggle__tab .euiTab__content {
+      font-size: ${useEuiFontSize('s').fontSize};
+      line-height: ${useEuiPaddingSize('xl')};
+    }
   `;
 
   const badgeCellCss = css`
@@ -53,29 +54,28 @@ export const DocumentViewModeToggle = ({
   }
 
   return (
-    <EuiTabs size="s" css={tabsCss} data-test-subj="dscViewModeToggle">
+    <EuiTabs size="m" css={tabsCss} data-test-subj="dscViewModeToggle">
       <EuiTab
         isSelected={viewMode === VIEW_MODE.DOCUMENT_LEVEL}
         onClick={() => setDiscoverViewMode(VIEW_MODE.DOCUMENT_LEVEL)}
+        className="dscViewModeToggle__tab"
         data-test-subj="dscViewModeDocumentButton"
       >
-        <span css={tabCss}>
-          <FormattedMessage id="discover.viewModes.document.label" defaultMessage="Documents" />
-        </span>
+        <FormattedMessage id="discover.viewModes.document.label" defaultMessage="Documents" />
       </EuiTab>
       <EuiTab
         isSelected={viewMode === VIEW_MODE.AGGREGATED_LEVEL}
         onClick={() => setDiscoverViewMode(VIEW_MODE.AGGREGATED_LEVEL)}
+        className="dscViewModeToggle__tab"
         data-test-subj="dscViewModeFieldStatsButton"
       >
-        <EuiFlexGroup alignItems="center" gutterSize="none" css={tabCss}>
+        <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
           <EuiFlexItem>
             <FormattedMessage
               id="discover.viewModes.fieldStatistics.label"
               defaultMessage="Field statistics"
             />
           </EuiFlexItem>
-
           <EuiFlexItem css={badgeCellCss}>
             <EuiBetaBadge
               label={i18n.translate('discover.viewModes.fieldStatistics.betaTitle', {
