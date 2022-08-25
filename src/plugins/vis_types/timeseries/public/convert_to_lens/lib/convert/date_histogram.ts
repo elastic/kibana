@@ -20,9 +20,13 @@ import { DateHistogramParams, DataType } from '@kbn/visualizations-plugin/common
 import { DateHistogramColumn } from './types';
 import type { Panel, Series } from '../../../../common/types';
 
+const getInterval = (interval?: string) => {
+  return interval && !interval?.includes('=') ? interval : 'auto';
+};
+
 export const convertToDateHistogramParams = (model: Panel, series: Series): DateHistogramParams => {
   return {
-    interval: model.interval && !model.interval?.includes('=') ? model.interval : 'auto',
+    interval: getInterval(series.override_index_pattern ? series.series_interval : model.interval),
     dropPartials: series.override_index_pattern
       ? series.series_drop_last_bucket > 0
       : model.drop_last_bucket > 0,
