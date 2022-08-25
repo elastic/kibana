@@ -75,7 +75,7 @@ describe('RuleDataClient', () => {
   describe('getReader()', () => {
     beforeEach(() => {
       jest.resetAllMocks();
-      getFieldsForWildcardMock.mockResolvedValue(['foo']);
+      getFieldsForWildcardMock.mockResolvedValue({ fields: ['foo'] });
       IndexPatternsFetcher.prototype.getFieldsForWildcard = getFieldsForWildcardMock;
     });
 

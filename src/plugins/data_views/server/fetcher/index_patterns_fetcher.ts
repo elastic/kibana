@@ -61,7 +61,7 @@ export class IndexPatternsFetcher {
     type?: string;
     rollupIndex?: string;
     filter?: QueryDslQueryContainer;
-  }): Promise<FieldDescriptor[]> {
+  }): Promise<{ fields: FieldDescriptor[]; indices: string[] }> {
     const { pattern, metaFields = [], fieldCapsOptions, type, rollupIndex, filter } = options;
     const patternList = Array.isArray(pattern) ? pattern : pattern.split(',');
     const allowNoIndices = fieldCapsOptions
@@ -94,17 +94,20 @@ export class IndexPatternsFetcher {
       }
 
       const rollupIndexCapabilities = capabilityCheck.aggs;
-      const fieldCapsResponseObj = keyBy(fieldCapsResponse, 'name');
+      const fieldCapsResponseObj = keyBy(fieldCapsResponse.fields, 'name');
       // Keep meta fields
       metaFields!.forEach(
         (field: string) =>
           fieldCapsResponseObj[field] && rollupFields.push(fieldCapsResponseObj[field])
       );
-      return mergeCapabilitiesWithFields(
-        rollupIndexCapabilities!,
-        fieldCapsResponseObj,
-        rollupFields
-      );
+      return {
+        fields: mergeCapabilitiesWithFields(
+          rollupIndexCapabilities!,
+          fieldCapsResponseObj,
+          rollupFields
+        ),
+        indices: fieldCapsResponse.indices,
+      };
     }
     return fieldCapsResponse;
   }
