@@ -66,7 +66,8 @@ export const LensLayerSelectionFlyout: FC<Props> = ({ onClose, embeddable }) => 
         <EuiText size="s">
           <FormattedMessage
             id="xpack.ml.embeddables.lensLayerFlyout.secondTitle"
-            defaultMessage="Select a compatible layer from the visualization to create an anomaly detection job."
+            defaultMessage="Select a compatible layer from the visualization {title} to create an anomaly detection job."
+            values={{ title: embeddable.getTitle() }}
           />
         </EuiText>
       </EuiFlyoutHeader>
