@@ -62,7 +62,7 @@ describe('updatePrepackagedRules', () => {
 
     expect(patchRules).toHaveBeenCalledWith(
       expect.objectContaining({
-        params: expect.objectContaining({
+        nextParams: expect.objectContaining({
           actions: undefined,
         }),
       })
@@ -70,7 +70,7 @@ describe('updatePrepackagedRules', () => {
 
     expect(patchRules).toHaveBeenCalledWith(
       expect.objectContaining({
-        params: expect.objectContaining({
+        nextParams: expect.objectContaining({
           enabled: undefined,
         }),
       })
@@ -99,7 +99,7 @@ describe('updatePrepackagedRules', () => {
 
     expect(patchRules).toHaveBeenCalledWith(
       expect.objectContaining({
-        params: expect.objectContaining({
+        nextParams: expect.objectContaining({
           threat_indicator_path: 'test.path',
         }),
       })
@@ -107,7 +107,7 @@ describe('updatePrepackagedRules', () => {
 
     expect(patchRules).toHaveBeenCalledWith(
       expect.objectContaining({
-        params: expect.objectContaining({
+        nextParams: expect.objectContaining({
           threat_index: ['test-index'],
         }),
       })
@@ -115,7 +115,7 @@ describe('updatePrepackagedRules', () => {
 
     expect(patchRules).toHaveBeenCalledWith(
       expect.objectContaining({
-        params: expect.objectContaining({
+        nextParams: expect.objectContaining({
           threat_query: 'threat:*',
         }),
       })
