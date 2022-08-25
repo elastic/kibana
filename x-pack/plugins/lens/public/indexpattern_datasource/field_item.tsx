@@ -366,7 +366,9 @@ function FieldItemPopoverContents(props: FieldItemProps) {
           }
 
           if (params?.noDataFound) {
-            const isUsingSampling = core.uiSettings.get('lens:useFieldExistenceSampling');
+            const isUsingSampling = core.uiSettings.get(
+              'unifiedFieldList:useFieldExistenceSampling'
+            );
             return (
               <>
                 <EuiText size="s">

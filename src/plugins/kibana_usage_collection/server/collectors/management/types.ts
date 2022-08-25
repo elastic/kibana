@@ -135,7 +135,7 @@ export interface UsageStats {
   'discover:rowHeightOption': number;
   hideAnnouncements: boolean;
   isDefaultIndexMigrated: boolean;
-  'lens:useFieldExistenceSampling': boolean;
+  'unifiedFieldList:useFieldExistenceSampling': boolean;
   'metrics:allowCheckingForFailedShards': boolean;
   'observability:apmOperationsTab': boolean;
   'observability:apmProgressiveLoading': string;

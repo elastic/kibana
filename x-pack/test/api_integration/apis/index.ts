@@ -24,7 +24,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./uptime'));
     loadTestFile(require.resolve('./maps'));
     loadTestFile(require.resolve('./security_solution'));
-    loadTestFile(require.resolve('./lens'));
     loadTestFile(require.resolve('./transform'));
     loadTestFile(require.resolve('./lists'));
     loadTestFile(require.resolve('./upgrade_assistant'));
