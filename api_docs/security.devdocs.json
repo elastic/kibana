@@ -2646,7 +2646,57 @@
   },
   "common": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "security",
+        "id": "def-common.getUserDisplayName",
+        "type": "Function",
+        "tags": [],
+        "label": "getUserDisplayName",
+        "description": [
+          "\nDetermines the display name for the provided user information."
+        ],
+        "signature": [
+          "(params: ",
+          {
+            "pluginId": "security",
+            "scope": "common",
+            "docId": "kibSecurityPluginApi",
+            "section": "def-common.GetUserDisplayNameParams",
+            "text": "GetUserDisplayNameParams"
+          },
+          ") => string"
+        ],
+        "path": "x-pack/plugins/security/common/model/user.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-common.getUserDisplayName.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [
+              "Set of available user's name-related fields."
+            ],
+            "signature": [
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.GetUserDisplayNameParams",
+                "text": "GetUserDisplayNameParams"
+              }
+            ],
+            "path": "x-pack/plugins/security/common/model/user.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "security",
@@ -2923,6 +2973,63 @@
               "[featureId: string]:  string[]"
             ],
             "path": "x-pack/plugins/security/common/model/features_privileges.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
+        "id": "def-common.GetUserDisplayNameParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "GetUserDisplayNameParams",
+        "description": [
+          "\nSet of available name-related fields to pick as display name."
+        ],
+        "path": "x-pack/plugins/security/common/model/user.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-common.GetUserDisplayNameParams.username",
+            "type": "string",
+            "tags": [],
+            "label": "username",
+            "description": [
+              "\nUsername of the user."
+            ],
+            "path": "x-pack/plugins/security/common/model/user.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.GetUserDisplayNameParams.email",
+            "type": "string",
+            "tags": [],
+            "label": "email",
+            "description": [
+              "\nOptional email of the user."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/security/common/model/user.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.GetUserDisplayNameParams.full_name",
+            "type": "string",
+            "tags": [],
+            "label": "full_name",
+            "description": [
+              "\nOptional full name of the user."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/security/common/model/user.ts",
             "deprecated": false
           }
         ],
@@ -3958,21 +4065,6 @@
             "label": "full_name",
             "description": [
               "\nOptional full name of the user."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/security/common/model/user_profile.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "security",
-            "id": "def-common.UserProfileUserInfo.display_name",
-            "type": "string",
-            "tags": [],
-            "label": "display_name",
-            "description": [
-              "\nOptional display name of the user."
             ],
             "signature": [
               "string | undefined"

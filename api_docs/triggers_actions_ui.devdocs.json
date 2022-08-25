@@ -3980,7 +3980,7 @@
             "description": [],
             "signature": [
               "(crumbs: ",
-              "EuiBreadcrumb",
+              "EuiBreadcrumbProps",
               "[]) => void"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
@@ -3994,7 +3994,7 @@
                 "label": "crumbs",
                 "description": [],
                 "signature": [
-                  "EuiBreadcrumb",
+                  "EuiBreadcrumbProps",
                   "[]"
                 ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",

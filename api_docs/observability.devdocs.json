@@ -1080,7 +1080,7 @@
         "description": [],
         "signature": [
           "(extraCrumbs: ",
-          "EuiBreadcrumb",
+          "EuiBreadcrumbProps",
           "[], app?: { id: string; label: string; } | undefined) => void"
         ],
         "path": "x-pack/plugins/observability/public/hooks/use_breadcrumbs.ts",
@@ -1094,7 +1094,7 @@
             "label": "extraCrumbs",
             "description": [],
             "signature": [
-              "EuiBreadcrumb",
+              "EuiBreadcrumbProps",
               "[]"
             ],
             "path": "x-pack/plugins/observability/public/hooks/use_breadcrumbs.ts",
