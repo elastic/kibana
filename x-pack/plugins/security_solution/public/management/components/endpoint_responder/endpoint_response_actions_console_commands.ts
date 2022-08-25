@@ -97,7 +97,7 @@ export const getEndpointResponseActionsConsoleCommands = ({
   endpointAgentId: string;
   endpointCapabilities: ImmutableArray<string>;
 }): CommandDefinition[] => {
-  const doesEndpointSupportResponder = (commandName: ResponderCommands) => {
+  const doesEndpointSupportCommand = (commandName: ResponderCommands) => {
     const responderCapability = commandToCapabilitiesMap.get(commandName);
     if (responderCapability) {
       return endpointCapabilities.includes(responderCapability);
@@ -111,7 +111,7 @@ export const getEndpointResponseActionsConsoleCommands = ({
         aboutInfo: i18n.translate('xpack.securitySolution.endpointConsoleCommands.isolate.about', {
           defaultMessage: 'Isolate the host',
         }),
-        isSupported: doesEndpointSupportResponder('isolate'),
+        isSupported: doesEndpointSupportCommand('isolate'),
       }),
       RenderComponent: IsolateActionResult,
       meta: {
@@ -131,7 +131,7 @@ export const getEndpointResponseActionsConsoleCommands = ({
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
       helpCommandPosition: 0,
-      helpDisabled: doesEndpointSupportResponder('isolate') === false,
+      helpDisabled: doesEndpointSupportCommand('isolate') === false,
     },
     {
       name: 'release',
@@ -139,7 +139,7 @@ export const getEndpointResponseActionsConsoleCommands = ({
         aboutInfo: i18n.translate('xpack.securitySolution.endpointConsoleCommands.release.about', {
           defaultMessage: 'Release the host',
         }),
-        isSupported: doesEndpointSupportResponder('release'),
+        isSupported: doesEndpointSupportCommand('release'),
       }),
       RenderComponent: ReleaseActionResult,
       meta: {
@@ -159,7 +159,7 @@ export const getEndpointResponseActionsConsoleCommands = ({
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
       helpCommandPosition: 1,
-      helpDisabled: doesEndpointSupportResponder('release') === false,
+      helpDisabled: doesEndpointSupportCommand('release') === false,
     },
     {
       name: 'kill-process',
@@ -170,7 +170,7 @@ export const getEndpointResponseActionsConsoleCommands = ({
             defaultMessage: 'Kill/terminate a process',
           }
         ),
-        isSupported: doesEndpointSupportResponder('kill-process'),
+        isSupported: doesEndpointSupportCommand('kill-process'),
       }),
       RenderComponent: KillProcessActionResult,
       meta: {
@@ -212,7 +212,7 @@ export const getEndpointResponseActionsConsoleCommands = ({
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
       helpCommandPosition: 4,
-      helpDisabled: doesEndpointSupportResponder('kill-process') === false,
+      helpDisabled: doesEndpointSupportCommand('kill-process') === false,
     },
     {
       name: 'suspend-process',
@@ -223,7 +223,7 @@ export const getEndpointResponseActionsConsoleCommands = ({
             defaultMessage: 'Temporarily suspend a process',
           }
         ),
-        isSupported: doesEndpointSupportResponder('suspend-process'),
+        isSupported: doesEndpointSupportCommand('suspend-process'),
       }),
       RenderComponent: SuspendProcessActionResult,
       meta: {
@@ -268,7 +268,7 @@ export const getEndpointResponseActionsConsoleCommands = ({
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
       helpCommandPosition: 5,
-      helpDisabled: doesEndpointSupportResponder('suspend-process') === false,
+      helpDisabled: doesEndpointSupportCommand('suspend-process') === false,
     },
     {
       name: 'status',
@@ -292,7 +292,7 @@ export const getEndpointResponseActionsConsoleCommands = ({
             defaultMessage: 'Show all running processes',
           }
         ),
-        isSupported: doesEndpointSupportResponder('processes'),
+        isSupported: doesEndpointSupportCommand('processes'),
       }),
       RenderComponent: GetProcessesActionResult,
       meta: {
@@ -312,7 +312,7 @@ export const getEndpointResponseActionsConsoleCommands = ({
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
       helpCommandPosition: 3,
-      helpDisabled: doesEndpointSupportResponder('processes') === false,
+      helpDisabled: doesEndpointSupportCommand('processes') === false,
     },
   ];
 };
