@@ -41,6 +41,8 @@ export const validateHistoryWindowStart = ({
   });
   const parsedFrom = parseDateString({ date: from, forceNow, name: 'from' });
   if (parsedHistoryWindowStart.isSameOrAfter(parsedFrom)) {
-    throw Error(`History window size too small, 'historyWindowStart' must be earlier than 'from'`);
+    throw Error(
+      `History window size is smaller than rule interval + additional lookback, 'historyWindowStart' must be earlier than 'from'`
+    );
   }
 };
