@@ -126,7 +126,7 @@ export function ChangeDataView({
         color={isMissingCurrent ? 'danger' : 'primary'}
         iconSide="right"
         iconType="arrowDown"
-        title={title}
+        title={triggerLabel}
         fullWidth={fullWidth}
         {...rest}
       >
