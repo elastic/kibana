@@ -24,14 +24,11 @@ interface Props {
 export const TimeSliderPrepend: FC<Props> = (props: Props) => {
   const {
     useEmbeddableDispatch,
-    useEmbeddableSelector: select, 
-    actions
-  } = useReduxEmbeddableContext<
-    TimeSliderReduxState,
-    typeof timeSliderReducers
-  >();
+    useEmbeddableSelector: select,
+    actions,
+  } = useReduxEmbeddableContext<TimeSliderReduxState, typeof timeSliderReducers>();
   const dispatch = useEmbeddableDispatch();
-  
+
   const [isPaused, setIsPaused] = useState(true);
   const [timeoutId, setTimeoutId] = useState<number | undefined>(undefined);
   const [subscription, setSubscription] = useState<Subscription | undefined>(undefined);
@@ -113,7 +110,6 @@ export const TimeSliderPrepend: FC<Props> = (props: Props) => {
           defaultMessage: 'Next time window',
         })}
       />
-      
     </div>
   );
 };

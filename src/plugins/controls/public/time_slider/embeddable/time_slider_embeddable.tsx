@@ -249,7 +249,7 @@ export class TimeSliderControlEmbeddable extends Embeddable<
           waitForPanelsToLoad$={this.waitForPanelsToLoad$}
         />
       </TimeSliderControlReduxWrapper>
-    )
+    );
   }
 
   public isChained() {

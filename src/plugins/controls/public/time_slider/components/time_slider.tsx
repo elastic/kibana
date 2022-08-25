@@ -7,11 +7,7 @@
  */
 
 import React, { FC, useRef } from 'react';
-import { i18n } from '@kbn/i18n';
-import {
-  EuiInputPopover,
-  EuiDualRange,
-} from '@elastic/eui';
+import { EuiInputPopover, EuiDualRange } from '@elastic/eui';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 import { timeSliderReducers } from '../time_slider_reducers';
 import { TimeSliderReduxState } from '../types';
@@ -29,12 +25,9 @@ interface Props {
 export const TimeSlider: FC<Props> = (props: Props) => {
   const {
     useEmbeddableDispatch,
-    useEmbeddableSelector: select, 
-    actions
-  } = useReduxEmbeddableContext<
-    TimeSliderReduxState,
-    typeof timeSliderReducers
-  >();
+    useEmbeddableSelector: select,
+    actions,
+  } = useReduxEmbeddableContext<TimeSliderReduxState, typeof timeSliderReducers>();
   const dispatch = useEmbeddableDispatch();
   const ticks = select((state) => {
     return state.componentState.ticks;
@@ -50,7 +43,7 @@ export const TimeSlider: FC<Props> = (props: Props) => {
   const isOpen = select((state) => {
     return state.componentState.isOpen;
   });
-  
+
   const rangeRef = useRef<EuiDualRange>(null);
 
   const onPanelResize = (width?: number) => {
@@ -67,7 +60,9 @@ export const TimeSlider: FC<Props> = (props: Props) => {
       panelClassName="timeSlider__panelOverride"
       input={
         <TimeSliderPopoverButton
-          onClick={() => { dispatch(actions.setIsOpen({ isOpen: !isOpen })) }}
+          onClick={() => {
+            dispatch(actions.setIsOpen({ isOpen: !isOpen }));
+          }}
           formatDate={props.formatDate}
           from={from}
           to={to}

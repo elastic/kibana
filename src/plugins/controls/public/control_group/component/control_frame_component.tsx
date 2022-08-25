@@ -126,13 +126,13 @@ export const ControlFrame = ({
       return embeddable.renderPrepend();
     }
 
-    return usingTwoLineLayout
-      ? undefined
-      : (<EuiToolTip anchorClassName="controlFrame__labelToolTip" content={title}>
-          <EuiFormLabel className="controlFrame__formControlLayoutLabel" htmlFor={embeddableId}>
-            {title}
-          </EuiFormLabel>
-        </EuiToolTip>);
+    return usingTwoLineLayout ? undefined : (
+      <EuiToolTip anchorClassName="controlFrame__labelToolTip" content={title}>
+        <EuiFormLabel className="controlFrame__formControlLayoutLabel" htmlFor={embeddableId}>
+          {title}
+        </EuiFormLabel>
+      </EuiToolTip>
+    );
   }
 
   const form = (
