@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
+import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
 import { isEqual } from 'lodash/fp';
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiFilterGroup, EuiButton } from '@elastic/eui';
 
+import { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { StatusAll, CaseStatusWithAllStatus, CaseSeverityWithAll } from '../../../common/ui/types';
 import { CaseStatuses } from '../../../common/api';
 import { FilterOptions } from '../../containers/types';
@@ -22,7 +23,8 @@ import { SeverityFilter } from './severity_filter';
 import { useGetTags } from '../../containers/use_get_tags';
 import { CASE_LIST_CACHE_KEY } from '../../containers/constants';
 import { DEFAULT_FILTER_OPTIONS } from '../../containers/use_get_cases';
-import { useGetAssignees } from '../../containers/use_get_assignees';
+import { AssigneesFilterPopover } from './assignees_filter';
+import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
 
 interface CasesTableFiltersProps {
   countClosedCases: number | null;
@@ -62,20 +64,26 @@ const CasesTableFiltersComponent = ({
   displayCreateCaseButton,
   onCreateCasePressed,
 }: CasesTableFiltersProps) => {
-  const [selectedAssignees, setSelectedAssignees] = useState(
-    initial.assignees.map((assignee) => assignee)
-  );
   const [search, setSearch] = useState(initial.search);
   const [selectedTags, setSelectedTags] = useState(initial.tags);
   const [selectedOwner, setSelectedOwner] = useState(initial.owner);
+  const [selectedAssignees, setSelectedAssignees] = useState<UserProfileWithAvatar[]>([]);
+  const fetchAssignees = useRef<() => void>();
   const { data: tags = [], refetch: fetchTags } = useGetTags(CASE_LIST_CACHE_KEY);
-  // TODO: this isn't quite what we need, ideally we'd hit an api that given a list of profile uids it'll tell use which ones
-  // from that list are matched given the search text
-  const { data: assignees = [], refetch: fetchAssignees } = useGetAssignees(CASE_LIST_CACHE_KEY);
+
+  // TODO: should I move this up into the all cases component above this one?
+  const { data: currentUserProfile, isLoading: isLoadingCurrentUserProfile } =
+    useGetCurrentUserProfile();
+
+  const setFetchAssignees = useCallback((refetchAssignees: () => void) => {
+    fetchAssignees.current = refetchAssignees;
+  }, []);
 
   const refetch = useCallback(() => {
     fetchTags();
-    fetchAssignees();
+    if (fetchAssignees.current != null) {
+      fetchAssignees.current();
+    }
   }, [fetchAssignees, fetchTags]);
 
   useEffect(() => {
@@ -85,21 +93,21 @@ const CasesTableFiltersComponent = ({
   }, [refetch, setFilterRefetch]);
 
   const handleSelectedAssignees = useCallback(
-    (newAssignees) => {
+    (newAssignees: UserProfileWithAvatar[]) => {
       if (!isEqual(newAssignees, selectedAssignees)) {
         setSelectedAssignees(newAssignees);
-        onFilterChanged({ assignees: newAssignees });
+        onFilterChanged({ assignees: newAssignees.map((assignee) => assignee.uid) });
       }
     },
     [selectedAssignees, onFilterChanged]
   );
 
-  useEffect(() => {
-    if (selectedAssignees.length) {
-      const newAssignees = selectedAssignees.filter((assignee) => assignees.includes(assignee));
-      handleSelectedAssignees(newAssignees);
-    }
-  }, [assignees, handleSelectedAssignees, selectedAssignees]);
+  // useEffect(() => {
+  //   if (selectedAssignees.length > 0) {
+  //     const newAssignees = selectedAssignees.filter((assignee) => assignees.includes(assignee));
+  //     handleSelectedAssignees(newAssignees);
+  //   }
+  // }, [assignees, handleSelectedAssignees, selectedAssignees]);
 
   const handleSelectedTags = useCallback(
     (newTags) => {
@@ -203,14 +211,20 @@ const CasesTableFiltersComponent = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>
-          {/* TODO: open popover for suggest users*/}
-          <FilterPopover
+          <AssigneesFilterPopover
+            selectedAssignees={selectedAssignees}
+            currentUserProfile={currentUserProfile}
+            isLoading={isLoadingCurrentUserProfile}
+            onSelectionChange={handleSelectedAssignees}
+            setFetchAssignees={setFetchAssignees}
+          />
+          {/* <FilterPopover
             buttonLabel={i18n.ASSIGNEES}
             onSelectedOptionsChanged={handleSelectedAssignees}
             selectedOptions={selectedAssignees}
             options={assignees}
             optionsEmptyLabel={i18n.NO_REPORTERS_AVAILABLE}
-          />
+          /> */}
           <FilterPopover
             buttonLabel={i18n.TAGS}
             onSelectedOptionsChanged={handleSelectedTags}

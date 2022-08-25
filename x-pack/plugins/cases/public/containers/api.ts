@@ -7,6 +7,7 @@
 
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
+import { UserProfile } from '@kbn/user-profile-components';
 import {
   Cases,
   FetchCasesProps,
@@ -40,7 +41,7 @@ import {
   CASE_TAGS_URL,
   CASES_URL,
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
-  CASE_ASSIGNEES_URL,
+  INTERNAL_FIND_ASSIGNEES_URL,
 } from '../../common/constants';
 import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
 
@@ -116,12 +117,27 @@ export const getTags = async (signal: AbortSignal, owner: string[]): Promise<str
   return response ?? [];
 };
 
-export const getAssignees = async (signal: AbortSignal, owner: string[]): Promise<string[]> => {
-  const response = await KibanaServices.get().http.fetch<string[]>(CASE_ASSIGNEES_URL, {
-    method: 'GET',
-    signal,
-    query: { ...(owner.length > 0 ? { owner } : {}) },
-  });
+export interface FindAssigneesProps {
+  searchTerm: string;
+  owners: string[];
+  size?: number;
+  signal: AbortSignal;
+}
+
+export const findAssignees = async ({
+  searchTerm,
+  owners,
+  size,
+  signal,
+}: FindAssigneesProps): Promise<UserProfile[]> => {
+  const response = await KibanaServices.get().http.fetch<UserProfile[]>(
+    INTERNAL_FIND_ASSIGNEES_URL,
+    {
+      method: 'GET',
+      signal,
+      query: { ...(owners.length > 0 ? { owners } : {}), searchTerm, size },
+    }
+  );
   return response ?? [];
 };
 

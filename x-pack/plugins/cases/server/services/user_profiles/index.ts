@@ -15,9 +15,17 @@ import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/s
 import type { UserProfile } from '@kbn/security-plugin/common';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
-import { excess, SuggestUserProfilesRequestRt, throwErrors } from '../../../common/api';
+import { isEmpty } from 'lodash';
+import {
+  excess,
+  FindAssigneesRequestRt,
+  SuggestUserProfilesRequestRt,
+  throwErrors,
+} from '../../../common/api';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
+import { CasesClient } from '../../client';
+import { asArray } from '../../common/utils';
 
 const MAX_SUGGESTION_SIZE = 100;
 const MIN_SUGGESTION_SIZE = 0;
@@ -41,6 +49,78 @@ export class UserProfileService {
     this.options = options;
   }
 
+  public async findAssignees(
+    request: KibanaRequest,
+    casesClient: CasesClient
+  ): Promise<UserProfile[]> {
+    const params = pipe(
+      excess(FindAssigneesRequestRt).decode(request.query),
+      fold(throwErrors(Boom.badRequest), identity)
+    );
+
+    const { searchTerm, size, owners: ownersStringOrArray } = params;
+    const owners = asArray(ownersStringOrArray);
+
+    try {
+      if (this.options === undefined) {
+        throw new Error('UserProfileService must be initialized before calling suggest');
+      }
+
+      const { spaces } = this.options;
+
+      const securityPluginFields = {
+        securityPluginSetup: this.options.securityPluginSetup,
+        securityPluginStart: this.options.securityPluginStart,
+      };
+
+      UserProfileService.validateSizeParam(size);
+
+      if (!UserProfileService.isSecurityEnabled(securityPluginFields)) {
+        return [];
+      }
+
+      const assigneesWithinAllCases = new Set(
+        await casesClient.cases.getAssignees({ owner: owners })
+      );
+
+      const { securityPluginStart } = securityPluginFields;
+
+      // if we didn't receive a search term just return all the assignees within cases
+      if (isEmpty(searchTerm)) {
+        return securityPluginStart.userProfiles.bulkGet({
+          uids: assigneesWithinAllCases,
+          dataPath: 'avatar',
+        });
+      }
+
+      const suggestedUsers = await securityPluginStart.userProfiles.suggest({
+        name: searchTerm,
+        size,
+        dataPath: 'avatar',
+        requiredPrivileges: {
+          spaceId: spaces.spacesService.getSpaceId(request),
+          privileges: {
+            kibana: UserProfileService.buildRequiredPrivileges(owners, securityPluginStart),
+          },
+        },
+      });
+
+      return suggestedUsers.reduce<UserProfile[]>((acc, suggestedUser) => {
+        if (assigneesWithinAllCases.has(suggestedUser.uid)) {
+          acc.push(suggestedUser);
+        }
+
+        return acc;
+      }, []);
+    } catch (error) {
+      throw createCaseError({
+        logger: this.logger,
+        message: `Failed to retrieve assignee user profiles in service for name: ${searchTerm} owners: [${owners}]: ${error}`,
+        error,
+      });
+    }
+  }
+
   public async suggest(request: KibanaRequest): Promise<UserProfile[]> {
     const params = pipe(
       excess(SuggestUserProfilesRequestRt).decode(request.body),
@@ -61,12 +141,7 @@ export class UserProfileService {
         securityPluginStart: this.options.securityPluginStart,
       };
 
-      /**
-       * The limit of 100 helps prevent DDoS attacks and is also enforced by the security plugin.
-       */
-      if (size !== undefined && (size > MAX_SUGGESTION_SIZE || size < MIN_SUGGESTION_SIZE)) {
-        throw Boom.badRequest('size must be between 0 and 100');
-      }
+      UserProfileService.validateSizeParam(size);
 
       if (!UserProfileService.isSecurityEnabled(securityPluginFields)) {
         return [];
@@ -91,6 +166,15 @@ export class UserProfileService {
         message: `Failed to retrieve suggested user profiles in service for name: ${name} owners: [${owners}]: ${error}`,
         error,
       });
+    }
+  }
+
+  private static validateSizeParam(size?: number) {
+    /**
+     * The limit of 100 helps prevent DDoS attacks and is also enforced by the security plugin.
+     */
+    if (size !== undefined && (size > MAX_SUGGESTION_SIZE || size < MIN_SUGGESTION_SIZE)) {
+      throw Boom.badRequest('size must be between 0 and 100');
     }
   }
 
