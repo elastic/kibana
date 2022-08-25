@@ -39,12 +39,13 @@ export function DashboardApp({
   redirectTo,
   history,
 }: DashboardAppProps) {
-  const { core, chrome, embeddable, onAppLeave, screenshotModeService } =
+  const { core, embeddable, onAppLeave, screenshotModeService } =
     useKibana<DashboardAppServices>().services;
   const {
+    chrome: { setBreadcrumbs, setIsVisible },
     data: { search },
-    spaces: { getLegacyUrlConflict },
     settings: { uiSettings },
+    spaces: { getLegacyUrlConflict },
   } = pluginServices.getServices();
 
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
@@ -108,7 +109,7 @@ export function DashboardApp({
   // Set breadcrumbs when dashboard's title or view mode changes
   useEffect(() => {
     if (!dashboardState.title && savedDashboardId) return;
-    chrome.setBreadcrumbs([
+    setBreadcrumbs([
       {
         text: getDashboardBreadcrumb(),
         'data-test-subj': 'dashboardListingBreadcrumb',
@@ -120,7 +121,7 @@ export function DashboardApp({
         text: dashboardTitle,
       },
     ]);
-  }, [chrome, dashboardState.title, redirectTo, savedDashboardId, dashboardTitle]);
+  }, [setBreadcrumbs, dashboardState.title, redirectTo, savedDashboardId, dashboardTitle]);
 
   // clear search session when leaving dashboard route
   useEffect(() => {
@@ -135,8 +136,8 @@ export function DashboardApp({
   );
 
   useEffect(() => {
-    if (!embedSettings) chrome.setIsVisible(!printMode);
-  }, [chrome, printMode, embedSettings]);
+    if (!embedSettings) setIsVisible(!printMode);
+  }, [setIsVisible, printMode, embedSettings]);
 
   return (
     <>

@@ -98,7 +98,6 @@ export function DashboardTopNav({
   const {
     core,
     share,
-    chrome,
     embeddable,
     usageCollection,
     initializerContext,
@@ -109,6 +108,11 @@ export function DashboardTopNav({
     allowByValueEmbeddables,
   } = useKibana<DashboardAppServices>().services;
   const {
+    chrome: {
+      getIsVisible$: getChromeIsVisible$,
+      recentlyAccessed: chromeRecentlyAccessed,
+      docTitle,
+    },
     data: { query, search },
     overlays,
     settings: { uiSettings, theme },
@@ -140,12 +144,12 @@ export function DashboardTopNav({
   );
 
   useEffect(() => {
-    const visibleSubscription = chrome.getIsVisible$().subscribe((chromeIsVisible) => {
+    const visibleSubscription = getChromeIsVisible$().subscribe((chromeIsVisible) => {
       setState((s) => ({ ...s, chromeIsVisible }));
     });
     const { id, title, getFullEditPath } = dashboardAppState.savedDashboard;
     if (id && title) {
-      chrome.recentlyAccessed.add(
+      chromeRecentlyAccessed.add(
         getFullEditPath(dashboardState.viewMode === ViewMode.EDIT),
         title,
         id
@@ -154,7 +158,13 @@ export function DashboardTopNav({
     return () => {
       visibleSubscription.unsubscribe();
     };
-  }, [chrome, allowByValueEmbeddables, dashboardState.viewMode, dashboardAppState.savedDashboard]);
+  }, [
+    getChromeIsVisible$,
+    chromeRecentlyAccessed,
+    allowByValueEmbeddables,
+    dashboardState.viewMode,
+    dashboardAppState.savedDashboard,
+  ]);
 
   const addFromLibrary = useCallback(() => {
     if (!isErrorEmbeddable(dashboardAppState.dashboardContainer)) {
@@ -281,7 +291,7 @@ export function DashboardTopNav({
       if (saveResult.id && !saveResult.redirected) {
         dispatchDashboardStateChange(setStateFromSaveModal(stateFromSaveModal));
         dashboardAppState.updateLastSavedState?.();
-        chrome.docTitle.change(stateFromSaveModal.title);
+        docTitle.change(stateFromSaveModal.title);
       }
       return saveResult.id ? { id: saveResult.id } : { error: saveResult.error };
     };
@@ -312,7 +322,7 @@ export function DashboardTopNav({
     savedObjectsTagging,
     dashboardAppState,
     core.i18n.Context,
-    chrome.docTitle,
+    docTitle,
     closeAllFlyouts,
     kibanaVersion,
     timefilter,

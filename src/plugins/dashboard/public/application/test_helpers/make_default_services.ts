@@ -11,7 +11,7 @@ import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { PluginInitializerContext, ScopedHistory } from '@kbn/core/public';
 import { savedObjectsPluginMock } from '@kbn/saved-objects-plugin/public/mocks';
 import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
-import { chromeServiceMock, coreMock } from '@kbn/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 
 import { SavedObjectLoader, SavedObjectLoaderFindOptions } from '../../services/saved_objects';
 import { DashboardAppServices, DashboardAppCapabilities } from '../../types';
@@ -68,7 +68,6 @@ export function makeDefaultServices(): DashboardAppServices {
     screenshotModeService: screenshotModePluginMock.createSetupContract(),
     savedObjects: savedObjectsPluginMock.createStartContract(),
     embeddable: embeddablePluginMock.createInstance().doStart(),
-    chrome: chromeServiceMock.createStartContract(),
     savedObjectsClient: core.savedObjects.client,
     dashboardCapabilities: defaultCapabilities,
     scopedHistory: () => ({} as ScopedHistory),

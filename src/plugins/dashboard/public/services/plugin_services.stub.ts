@@ -14,6 +14,7 @@ import {
 
 import { DashboardServices } from './types';
 
+import { chromeServiceFactory } from './chrome/chrome.stub';
 import { dataServiceFactory } from './data/data.stub';
 import { dataViewEditorServiceFactory } from './data_view_editor/data_view_editor.stub';
 import { httpServiceFactory } from './http/http.stub';
@@ -24,6 +25,7 @@ import { spacesServiceFactory } from './spaces/spaces.stub';
 import { visualizationsServiceFactory } from './visualizations/visualizations.stub';
 
 export const providers: PluginServiceProviders<DashboardServices> = {
+  chrome: new PluginServiceProvider(chromeServiceFactory),
   data: new PluginServiceProvider(dataServiceFactory),
   dataViewEditor: new PluginServiceProvider(dataViewEditorServiceFactory),
   http: new PluginServiceProvider(httpServiceFactory),

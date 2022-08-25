@@ -83,11 +83,8 @@ export const useDashboardAppState = ({
    */
   const services = useKibana<DashboardAppServices>().services;
   const {
-    // data,
     core,
-    chrome,
     embeddable,
-    // dataViews,
     usageCollection,
     savedDashboards,
     initializerContext,
@@ -97,10 +94,10 @@ export const useDashboardAppState = ({
     scopedHistory,
     screenshotModeService,
   } = services;
-  const { docTitle } = chrome;
   const { notifications } = core;
 
   const {
+    chrome: { docTitle },
     data: { query, search, dataViews },
     spaces: { redirectLegacyUrl },
   } = pluginServices.getServices();

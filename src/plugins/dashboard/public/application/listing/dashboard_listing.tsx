@@ -65,13 +65,13 @@ export const DashboardListing = ({
       savedObjectsTagging,
       dashboardCapabilities,
       dashboardSessionStorage,
-      chrome: { setBreadcrumbs },
     },
   } = useKibana<DashboardAppServices>();
 
   const {
     data,
     settings: { uiSettings, theme },
+    chrome: { setBreadcrumbs },
   } = pluginServices.getServices();
 
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);

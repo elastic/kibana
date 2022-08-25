@@ -15,7 +15,6 @@ import type {
   CoreStart,
   SavedObjectsClientContract,
   ScopedHistory,
-  ChromeStart,
   PluginInitializerContext,
   KibanaExecutionContext,
 } from '@kbn/core/public';
@@ -195,7 +194,6 @@ export interface DashboardAppCapabilities {
 
 export interface DashboardAppServices {
   core: CoreStart;
-  chrome: ChromeStart;
   share?: SharePluginStart;
   embeddable: EmbeddableStart;
   restorePreviousUrl: () => void;

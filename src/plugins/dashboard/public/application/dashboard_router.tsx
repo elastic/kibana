@@ -101,7 +101,6 @@ export async function mountApp({
     initializerContext,
     restorePreviousUrl,
     setHeaderActionMenu,
-    chrome: coreStart.chrome,
     embeddable: embeddableStart,
     scopedHistory: () => scopedHistory,
     screenshotModeService: screenshotMode,
@@ -177,7 +176,11 @@ export async function mountApp({
   };
 
   const renderListingPage = (routeProps: RouteComponentProps) => {
-    coreStart.chrome.docTitle.change(getDashboardPageTitle());
+    const {
+      chrome: { docTitle },
+    } = pluginServices.getServices();
+
+    docTitle.change(getDashboardPageTitle());
     const routeParams = parse(routeProps.history.location.search);
     const title = (routeParams.title as string) || undefined;
     const filter = (routeParams.filter as string) || undefined;
@@ -249,7 +252,7 @@ export async function mountApp({
     </I18nProvider>
   );
 
-  addHelpMenuToAppChrome(dashboardServices.chrome, coreStart.docLinks);
+  addHelpMenuToAppChrome(coreStart.chrome, coreStart.docLinks);
   if (!dashboardServices.dashboardCapabilities.showWriteControls) {
     coreStart.chrome.setBadge({
       text: dashboardReadonlyBadge.getText(),
