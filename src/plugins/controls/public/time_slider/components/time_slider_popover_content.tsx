@@ -13,7 +13,7 @@ import { EuiRangeTick } from '@elastic/eui/src/components/form/range/range_ticks
 
 interface Props {
   value: [number, number];
-  onChange: (value: [number, number]) => void;
+  onChange: (value?: [number, number]) => void;
   ticks: EuiRangeTick[];
   timeRangeMin: number;
   timeRangeMax: number;

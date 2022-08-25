@@ -7,3 +7,4 @@
  */
 
 export { TimeSlider } from './time_slider';
+export { TimeSliderPrepend } from './time_slider_prepend';

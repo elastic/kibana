@@ -17,6 +17,7 @@ export * from '../../common/time_slider/types';
 // Component state is only used by public components.
 export interface TimeSliderSubjectState {
   range?: number;
+  isOpen: boolean;
   ticks: EuiRangeTick[];
   timeRangeBounds: [number, number];
 }

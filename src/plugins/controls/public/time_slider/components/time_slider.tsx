@@ -6,14 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useCallback, useState, useRef } from 'react';
-import { Observable, Subscription } from 'rxjs';
-import { first } from 'rxjs/operators';
+import React, { FC, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiInputPopover,
   EuiDualRange,
 } from '@elastic/eui';
@@ -28,17 +23,19 @@ import './index.scss';
 
 interface Props {
   formatDate: (epoch: number) => string;
-  onChange: (value: [number, number]) => void;
-  onNext: () => void;
-  onPrevious: () => void;
-  waitForPanelsToLoad$: Observable<void>;
+  onChange: (value?: [number, number]) => void;
 }
 
 export const TimeSlider: FC<Props> = (props: Props) => {
-  const { useEmbeddableSelector: select } = useReduxEmbeddableContext<
+  const {
+    useEmbeddableDispatch,
+    useEmbeddableSelector: select, 
+    actions
+  } = useReduxEmbeddableContext<
     TimeSliderReduxState,
     typeof timeSliderReducers
   >();
+  const dispatch = useEmbeddableDispatch();
   const ticks = select((state) => {
     return state.componentState.ticks;
   });
@@ -50,140 +47,48 @@ export const TimeSlider: FC<Props> = (props: Props) => {
   const value = select((state) => {
     return state.explicitInput.value;
   });
-
+  const isOpen = select((state) => {
+    return state.componentState.isOpen;
+  });
+  
   const rangeRef = useRef<EuiDualRange>(null);
-
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [isPaused, setIsPaused] = useState(true);
-  const [timeoutId, setTimeoutId] = useState<number | undefined>(undefined);
-  const [subscription, setSubscription] = useState<Subscription | undefined>(undefined);
-
-  const togglePopover = useCallback(() => {
-    setIsPopoverOpen(!isPopoverOpen);
-  }, [isPopoverOpen, setIsPopoverOpen]);
 
   const onPanelResize = (width?: number) => {
     rangeRef.current?.onResize(width);
-  };
-
-  const playNextFrame = () => {
-    // advance to next frame
-    props.onNext();
-
-    // use waitForPanelsToLoad$ observable to wait until next frame loaded
-    const subscription = props.waitForPanelsToLoad$
-      .pipe(first((value) => value === true, false))
-      .subscribe((ready: boolean) => {
-        if (ready) {
-          // use timeout to display frame for small time period before moving to next frame
-          const nextTimeoutId = window.setTimeout(() => {
-            playNextFrame();
-          }, 1750);
-          setTimeoutId(nextTimeoutId);
-        }
-      });
-    setSubscription(subscription);
-  };
-
-  const onPlay = () => {
-    setIsPopoverOpen(true);
-    setIsPaused(false);
-    playNextFrame();
-  };
-
-  const onPause = () => {
-    setIsPopoverOpen(true);
-    setIsPaused(true);
-    if (subscription) {
-      subscription.unsubscribe();
-      setSubscription(undefined);
-    }
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-      setTimeoutId(undefined);
-    }
   };
 
   const from = value ? value[FROM_INDEX] : timeRangeMin;
   const to = value ? value[TO_INDEX] : timeRangeMax;
 
   return (
-    <EuiFlexGroup gutterSize="none">
-      <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          onClick={() => {
-            onPause();
-            props.onPrevious();
-          }}
-          iconType="framePrevious"
-          color="text"
-          aria-label={i18n.translate('xpack.maps.timeslider.previousTimeWindowLabel', {
-            defaultMessage: 'Previous time window',
-          })}
+    <EuiInputPopover
+      className="timeSlider__popoverOverride"
+      anchorClassName="timeSlider__anchorOverride"
+      panelClassName="timeSlider__panelOverride"
+      input={
+        <TimeSliderPopoverButton
+          onClick={() => { dispatch(actions.setIsOpen({ isOpen: !isOpen })) }}
+          formatDate={props.formatDate}
+          from={from}
+          to={to}
         />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          className="mapTimeslider__playButton"
-          onClick={isPaused ? onPlay : onPause}
-          iconType={isPaused ? 'playFilled' : 'pause'}
-          size="s"
-          display="fill"
-          aria-label={
-            isPaused
-              ? i18n.translate('xpack.maps.timeslider.playLabel', {
-                  defaultMessage: 'Play',
-                })
-              : i18n.translate('xpack.maps.timeslider.pauseLabel', {
-                  defaultMessage: 'Pause',
-                })
-          }
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          onClick={() => {
-            onPause();
-            props.onNext();
-          }}
-          iconType="frameNext"
-          color="text"
-          aria-label={i18n.translate('xpack.maps.timeslider.nextTimeWindowLabel', {
-            defaultMessage: 'Next time window',
-          })}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={true}>
-        <EuiInputPopover
-          className="timeSlider__popoverOverride"
-          anchorClassName="timeSlider__anchorOverride"
-          panelClassName="timeSlider__panelOverride"
-          input={
-            <TimeSliderPopoverButton
-              onClick={togglePopover}
-              formatDate={props.formatDate}
-              from={from}
-              to={to}
-            />
-          }
-          isOpen={isPopoverOpen}
-          closePopover={() => setIsPopoverOpen(false)}
-          panelPaddingSize="s"
-          anchorPosition="downCenter"
-          disableFocusTrap
-          attachToAnchor={false}
-          onPanelResize={onPanelResize}
-        >
-          <TimeSliderPopoverContent
-            rangeRef={rangeRef}
-            value={[from, to]}
-            onChange={props.onChange}
-            ticks={ticks}
-            timeRangeMin={timeRangeMin}
-            timeRangeMax={timeRangeMax}
-          />
-        </EuiInputPopover>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      }
+      isOpen={isOpen}
+      closePopover={() => dispatch(actions.setIsOpen({ isOpen: false }))}
+      panelPaddingSize="s"
+      anchorPosition="downCenter"
+      disableFocusTrap
+      attachToAnchor={false}
+      onPanelResize={onPanelResize}
+    >
+      <TimeSliderPopoverContent
+        rangeRef={rangeRef}
+        value={[from, to]}
+        onChange={props.onChange}
+        ticks={ticks}
+        timeRangeMin={timeRangeMin}
+        timeRangeMax={timeRangeMax}
+      />
+    </EuiInputPopover>
   );
 };

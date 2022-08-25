@@ -21,7 +21,7 @@ import { pluginServices } from '../../services';
 import { ControlsSettingsService } from '../../services/settings';
 import { ControlsDataService } from '../../services/data';
 import { ControlOutput } from '../../types';
-import { TimeSlider } from '../components';
+import { TimeSlider, TimeSliderPrepend } from '../components';
 import { timeSliderReducers } from '../time_slider_reducers';
 import { TimeSliderReduxState } from '../types';
 import { getMomentTimezone, getTicks, FROM_INDEX, TO_INDEX } from '../time_utils';
@@ -73,6 +73,7 @@ export class TimeSliderControlEmbeddable extends Embeddable<
       embeddable: this,
       reducers: timeSliderReducers,
       initialComponentState: {
+        isOpen: false,
         ticks: getTicks(timeRangeBounds[FROM_INDEX], timeRangeBounds[TO_INDEX], this.getTimezone()),
         timeRangeBounds,
       },
@@ -232,14 +233,24 @@ export class TimeSliderControlEmbeddable extends Embeddable<
               this.onRangeChange(range);
             }
           }}
-          onNext={this.onNext}
-          onPrevious={this.onPrevious}
-          waitForPanelsToLoad$={this.waitForPanelsToLoad$}
         />
       </TimeSliderControlReduxWrapper>,
       node
     );
   };
+
+  public renderPrepend() {
+    const { Wrapper: TimeSliderControlReduxWrapper } = this.reduxEmbeddableTools;
+    return (
+      <TimeSliderControlReduxWrapper>
+        <TimeSliderPrepend
+          onNext={this.onNext}
+          onPrevious={this.onPrevious}
+          waitForPanelsToLoad$={this.waitForPanelsToLoad$}
+        />
+      </TimeSliderControlReduxWrapper>
+    )
+  }
 
   public isChained() {
     return false;

@@ -37,4 +37,10 @@ export const timeSliderReducers = {
   ) => {
     state.componentState.range = action.payload.range;
   },
+  setIsOpen: (
+    state: WritableDraft<TimeSliderReduxState>,
+    action: PayloadAction<{ isOpen: boolean }>
+  ) => {
+    state.componentState.isOpen = action.payload.isOpen;
+  },
 };

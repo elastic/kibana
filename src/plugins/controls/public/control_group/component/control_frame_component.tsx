@@ -121,6 +121,20 @@ export const ControlFrame = ({
     'controlFrame--fatalError': hasFatalError,
   });
 
+  function renderEmbeddablePrepend() {
+    if (typeof embeddable?.renderPrepend === 'function') {
+      return embeddable.renderPrepend();
+    }
+
+    return usingTwoLineLayout
+      ? undefined
+      : (<EuiToolTip anchorClassName="controlFrame__labelToolTip" content={title}>
+          <EuiFormLabel className="controlFrame__formControlLayoutLabel" htmlFor={embeddableId}>
+            {title}
+          </EuiFormLabel>
+        </EuiToolTip>);
+  }
+
   const form = (
     <EuiFormControlLayout
       className={classNames('controlFrame__formControlLayout', {
@@ -130,13 +144,7 @@ export const ControlFrame = ({
       prepend={
         <>
           {(embeddable && customPrepend) ?? null}
-          {usingTwoLineLayout ? undefined : (
-            <EuiToolTip anchorClassName="controlFrame__labelToolTip" content={title}>
-              <EuiFormLabel className="controlFrame__formControlLayoutLabel" htmlFor={embeddableId}>
-                {title}
-              </EuiFormLabel>
-            </EuiToolTip>
-          )}
+          {renderEmbeddablePrepend()}
         </>
       }
     >
