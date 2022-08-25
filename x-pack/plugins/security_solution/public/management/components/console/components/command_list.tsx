@@ -205,7 +205,7 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
                           command.helpDisabled === true
                             ? i18n.translate(
                                 'xpack.securitySolution.console.commandList.disabledButtonTooltip',
-                                { defaultMessage: 'Disabled command' }
+                                { defaultMessage: 'Unsupported command' }
                               )
                             : i18n.translate(
                                 'xpack.securitySolution.console.commandList.addButtonTooltip',
