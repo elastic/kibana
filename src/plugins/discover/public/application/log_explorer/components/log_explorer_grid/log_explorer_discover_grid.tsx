@@ -7,10 +7,10 @@
  */
 
 import { EuiDataGridRefProps } from '@elastic/eui';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { useSelector } from '@xstate/react';
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { DataTableRecord } from '../../../../types';
 import {
   DiscoverGrid,
   EuiDataGridPropOverrides,
@@ -23,13 +23,7 @@ import { useScrollInteractions } from './use_scroll_interactions';
 
 const DiscoverGridMemoized = React.memo(DiscoverGrid);
 
-export function LogExplorerDiscoverGrid({
-  fieldFormats,
-  savedSearch,
-}: {
-  fieldFormats: FieldFormatsStart;
-  savedSearch: SavedSearch;
-}) {
+export function LogExplorerDiscoverGrid({ savedSearch }: { savedSearch: SavedSearch }) {
   const mainActor = useStateMachineContext();
   const { actor: entriesActor } = useEntries();
   const { generationId, rows } = useSelector(entriesActor, selectDiscoverRows);
@@ -50,13 +44,6 @@ export function LogExplorerDiscoverGrid({
 
   const { columns, onSetColumns, onAddColumn, onRemoveColumn } = useDiscoverColumnsContext();
 
-  // Access to Discover services
-  // const {
-  //   data: {
-  //     query: { filterManager },
-  //   },
-  // } = useDiscoverServices();
-
   // Access to "outer" Discover state
   const { dataView, state, onAddFilter } = useDiscoverStateContext();
 
@@ -65,63 +52,13 @@ export function LogExplorerDiscoverGrid({
     mainActor.send({ type: 'columnsChanged' });
   }, [mainActor]);
 
-  // const { editField } = useFieldEditor({ dataView, onFieldEdited });
-
-  // const valueToStringConverter: ValueToStringConverter = useCallback(
-  //   (rowIndex, columnId, options) => {
-  //     return convertValueToString({
-  //       rowIndex,
-  //       rows,
-  //       dataView,
-  //       columnId,
-  //       services,
-  //       options,
-  //     });
-  //   },
-  //   [rows, dataView, services]
-  // );
-
-  // const euiGridColumns = useMemo(
-  //   () =>
-  //     getEuiGridColumns({
-  //       columns,
-  //       rowsCount: rows.size,
-  //       settings: state.grid,
-  //       dataView,
-  //       showTimeCol: false, // NOTE: This is handled as a default elsewhere. Ignores the advanced setting here.
-  //       defaultColumns: false, // NOTE: We don't need a differentiation here between default and not. We don't require the functionality that brings.
-  //       isSortEnabled: false, // NOTE: We disable sorting for the log explorer.
-  //       services,
-  //       valueToStringConverter,
-  //       onFilter: onAddFilter as DocViewFilterFn, // TODO: Fix this if there's time. It's broken due to discover_grid_cell_actions handling of rows (and looking up state from the rows). It needs changing to understand our log explorer rows Map.
-  //       editField,
-  //     }),
-  //   [
-  //     columns,
-  //     dataView,
-  //     services,
-  //     valueToStringConverter,
-  //     state.grid,
-  //     rows.size,
-  //     onAddFilter,
-  //     editField,
-  //   ]
-  // );
-
-  // const columnVisibility: EuiDataGridColumnVisibility = useMemo(() => {
-  //   return {
-  //     setVisibleColumns: (newColumns: string[]) => {
-  //       onSetColumns(newColumns, true);
-  //     },
-  //     visibleColumns: columns,
-  //   };
-  // }, [columns, onSetColumns]);
+  const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
 
   return (
     <DiscoverGridMemoized
       ariaLabelledBy="documentsAriaLabel"
       columns={columns}
-      // expandedDoc={expandedDoc}
+      expandedDoc={expandedDoc}
       dataView={dataView}
       isLoading={false}
       rows={rows}
@@ -130,7 +67,7 @@ export function LogExplorerDiscoverGrid({
       sampleSize={rows.length}
       searchDescription={savedSearch.description}
       searchTitle={savedSearch.title}
-      // setExpandedDoc={!isPlainRecord ? setExpandedDoc : undefined}
+      setExpandedDoc={setExpandedDoc}
       showTimeCol={true}
       settings={state.grid}
       onAddColumn={onAddColumn}
@@ -142,7 +79,7 @@ export function LogExplorerDiscoverGrid({
       useNewFieldsApi={true}
       // rowHeightState={state.rowHeight}
       onUpdateRowHeight={noop}
-      isSortEnabled={true}
+      isSortEnabled={false}
       isPlainRecord={false}
       isPaginationEnabled={false}
       // rowsPerPageState={state.rowsPerPage}

@@ -16,7 +16,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { useSelector } from '@xstate/react';
 import React, { memo } from 'react';
-import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { EntriesActorRef, selectIsReloading } from '../../state_machines/entries_state_machine';
 import { LogExplorerDiscoverGrid } from '../log_explorer_grid/log_explorer_discover_grid';
 
@@ -29,8 +28,6 @@ function LogExplorerComponent({
   savedSearch: SavedSearch;
   stateMachine: EntriesActorRef;
 }) {
-  const { fieldFormats } = useDiscoverServices();
-
   const isReloading = useSelector(stateMachine, selectIsReloading);
 
   if (isReloading) {
@@ -53,7 +50,7 @@ function LogExplorerComponent({
         </h2>
       </EuiScreenReaderOnly>
       <div className="dscDiscoverGrid">
-        <LogExplorerDiscoverGridMemoized fieldFormats={fieldFormats} savedSearch={savedSearch} />
+        <LogExplorerDiscoverGridMemoized savedSearch={savedSearch} />
       </div>
     </EuiFlexItem>
   );
