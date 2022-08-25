@@ -288,7 +288,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
         message={i18n.translate(
           'unifiedFieldList.fieldStats.notAvailableForThisFieldWithoutDataDescription',
           {
-            defaultMessage: `Summary information is not available for this field.`,
+            defaultMessage: `Analysis is not available for this field.`,
           }
         )}
       />

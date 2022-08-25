@@ -17,7 +17,6 @@ export interface FieldDetails {
   exists: number;
   total: number;
   buckets: Bucket[];
-  columns: string[];
 }
 
 export interface Bucket {

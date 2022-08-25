@@ -9,11 +9,16 @@
 import React from 'react';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-
-import { DiscoverField } from './discover_field';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { DiscoverField, DiscoverFieldProps } from './discover_field';
 import { DataViewField } from '@kbn/data-views-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { stubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
+
+const dataServiceMock = dataPluginMock.createStartContract();
 
 jest.mock('../../../../kibana_services', () => ({
   getUiActions: jest.fn(() => {
@@ -25,12 +30,12 @@ jest.mock('../../../../kibana_services', () => ({
 
 function getComponent({
   selected = false,
-  showDetails = false,
+  showFieldStats = false,
   field,
   onAddFilterExists = true,
 }: {
   selected?: boolean;
-  showDetails?: boolean;
+  showFieldStats?: boolean;
   field?: DataViewField;
   onAddFilterExists?: boolean;
 }) {
@@ -47,16 +52,20 @@ function getComponent({
       readFromDocValues: true,
     });
 
-  const props = {
+  const props: DiscoverFieldProps = {
     dataView: stubDataView,
     field: finalField,
-    getDetails: jest.fn(() => ({ buckets: [], error: '', exists: 1, total: 2, columns: [] })),
+    getDetails: jest.fn(() => ({ buckets: [], error: '', exists: 1, total: 2 })),
     ...(onAddFilterExists && { onAddFilter: jest.fn() }),
     onAddField: jest.fn(),
     onRemoveField: jest.fn(),
-    showDetails,
+    showFieldStats,
     selected,
-    state: {},
+    state: {
+      query: { query: '', language: 'lucene' },
+      filters: [],
+    },
+    contextualFields: [],
   };
   const services = {
     history: () => ({
@@ -74,8 +83,30 @@ function getComponent({
         if (key === 'fields:popularLimit') {
           return 5;
         }
+        if (key === 'discover:showLegacyFieldTopValues') {
+          return true;
+        }
       },
     },
+    data: {
+      ...dataServiceMock,
+      query: {
+        ...dataServiceMock.query,
+        timefilter: {
+          ...dataServiceMock.query.timefilter,
+          timefilter: {
+            ...dataServiceMock.query.timefilter.timefilter,
+            getTime: () => ({
+              from: 'now-7d',
+              to: 'now',
+            }),
+          },
+        },
+      },
+    },
+    dataViews: dataViewPluginMocks.createStartContract(),
+    fieldFormats: fieldFormatsServiceMock.createStartContract(),
+    charts: chartPluginMock.createSetupContract(),
   };
   const comp = mountWithIntl(
     <KibanaContextProvider services={services}>
@@ -97,7 +128,7 @@ describe('discover sidebar field', function () {
     expect(props.onRemoveField).toHaveBeenCalledWith('bytes');
   });
   it('should trigger getDetails', function () {
-    const { comp, props } = getComponent({ selected: true });
+    const { comp, props } = getComponent({ selected: true, showFieldStats: true });
     findTestSubject(comp, 'field-bytes-showDetails').simulate('click');
     expect(props.getDetails).toHaveBeenCalledWith(props.field);
   });
@@ -138,7 +169,7 @@ describe('discover sidebar field', function () {
     expect(props.getDetails.mock.calls.length).toEqual(0);
   });
   it('should execute getDetails when show details is requested', function () {
-    const { props, comp } = getComponent({});
+    const { props, comp } = getComponent({ showFieldStats: true });
     findTestSubject(comp, 'field-bytes-showDetails').simulate('click');
     expect(props.getDetails.mock.calls.length).toEqual(1);
   });

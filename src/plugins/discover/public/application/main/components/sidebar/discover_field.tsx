@@ -271,6 +271,11 @@ export interface DiscoverFieldProps {
    * Discover App State
    */
   state: AppState;
+
+  /**
+   * Columns
+   */
+  contextualFields: string[];
 }
 
 function DiscoverFieldComponent({
@@ -288,6 +293,7 @@ function DiscoverFieldComponent({
   onDeleteField,
   showFieldStats,
   state,
+  contextualFields,
 }: DiscoverFieldProps) {
   const services = useDiscoverServices();
   const { data } = services;
@@ -407,7 +413,6 @@ function DiscoverFieldComponent({
   }
 
   const renderPopover = () => {
-    const details = getDetails(field);
     const dateRange = data?.query?.timefilter.timefilter.getTime();
     const fieldForStats = multiFields ? multiFields[0].field : field; // TODO: how to handle multifields?
     const showLegacyFieldStats = services.uiSettings.get(SHOW_LEGACY_FIELD_TOP_VALUES);
@@ -428,7 +433,7 @@ function DiscoverFieldComponent({
                 <DiscoverFieldDetails
                   dataView={dataView}
                   field={field}
-                  details={details}
+                  details={getDetails(field)}
                   onAddFilter={onAddFilter}
                 />
               </>
@@ -469,7 +474,7 @@ function DiscoverFieldComponent({
           dataView={dataView}
           multiFields={rawMultiFields}
           trackUiMetric={trackUiMetric}
-          details={details}
+          contextualFields={contextualFields}
         />
       </>
     );
