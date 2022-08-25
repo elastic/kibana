@@ -42,7 +42,8 @@ export function getFieldValueCounts(params: FieldValueCountsParams) {
   if (
     params.field.type === 'geo_point' ||
     params.field.type === 'geo_shape' ||
-    params.field.type === 'attachment'
+    params.field.type === 'attachment' ||
+    params.field.type === 'unknown'
   ) {
     throw new Error('Analysis is not available this field type');
   }
