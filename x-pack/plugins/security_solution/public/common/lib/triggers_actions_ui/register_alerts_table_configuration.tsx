@@ -18,13 +18,28 @@ import { getColumns } from '../../../detections/configurations/security_solution
 import { useRenderCellValue } from '../../../detections/configurations/security_solution_detections/render_cell_value';
 import { useToGetInternalFlyout } from '../../../timelines/components/side_panel/event_details/flyout';
 
+const tableConfigurations = [
+  {
+    id: APP_ID,
+    configurationFn: registerCaseAlertTableConfig,
+  },
+];
+
 const registerAlertsTableConfiguration = (
   registry: AlertsTableConfigurationRegistryContract,
   storage: Storage
 ) => {
-  if (registry.has(APP_ID)) {
-    return;
-  }
+  tableConfigurations.forEach(({ id, configurationFn }) => {
+    if (!registry.has(id)) {
+      configurationFn(registry, storage);
+    }
+  });
+};
+
+function registerCaseAlertTableConfig(
+  registry: AlertsTableConfigurationRegistryContract,
+  storage: Storage
+) {
   const timelineStorage = getTimelinesInStorageByIds(storage, [TimelineId.detectionsPage]);
   const columnsFormStorage = timelineStorage?.[TimelineId.detectionsPage]?.columns ?? [];
   const alertColumns = columnsFormStorage.length ? columnsFormStorage : getColumns();
@@ -39,6 +54,6 @@ const registerAlertsTableConfiguration = (
       return { header, body, footer };
     },
   });
-};
+}
 
 export { registerAlertsTableConfiguration };
