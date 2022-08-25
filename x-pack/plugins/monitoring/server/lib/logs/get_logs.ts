@@ -74,10 +74,6 @@ export async function getLogs(
   const metric = { timestampField: '@timestamp' };
   const typeFilter = {
     bool: {
-      // The point here is to make the query work for `filebeat-*` index and with logs-* index pattern.
-      // `service.type` is not assigned by the filebeat in the agents.
-      // The filter by `data_stream.type` is hack to use `should` filter.
-      // 'data_stream.type' will always be 'logs' for `logs-*` indices.
       should: [{ term: { 'service.type': 'elasticsearch' } }],
     },
   };
