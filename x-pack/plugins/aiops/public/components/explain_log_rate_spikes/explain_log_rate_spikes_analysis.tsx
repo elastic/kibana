@@ -8,12 +8,13 @@
 import React, { useEffect, useMemo, useState, FC } from 'react';
 import { isEqual } from 'lodash';
 
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiCallOut, EuiEmptyPrompt, EuiSpacer, EuiText } from '@elastic/eui';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ProgressControls } from '@kbn/aiops-components';
 import { useFetchStream } from '@kbn/aiops-utils';
 import type { WindowParameters } from '@kbn/aiops-utils';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ChangePoint } from '@kbn/ml-agg-utils';
 import type { Query } from '@kbn/es-query';
@@ -59,10 +60,13 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
     WindowParameters | undefined
   >();
 
-  const { cancel, start, data, isRunning, error } = useFetchStream<
-    ApiExplainLogRateSpikes,
-    typeof basePath
-  >(
+  const {
+    cancel,
+    start,
+    data,
+    isRunning,
+    errors: streamErrors,
+  } = useFetchStream<ApiExplainLogRateSpikes, typeof basePath>(
     `${basePath}/internal/aiops/explain_log_rate_spikes`,
     {
       start: earliest,
@@ -76,11 +80,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
     { reducer: streamReducer, initialState }
   );
 
-  useEffect(() => {
-    setCurrentAnalysisWindowParameters(windowParameters);
-    start();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const errors = useMemo(() => [...streamErrors, ...data.errors], [streamErrors, data.errors]);
 
   // Start handler clears possibly hovered or pinned
   // change points on analysis refresh.
@@ -96,6 +96,12 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
     start();
   }
 
+  useEffect(() => {
+    setCurrentAnalysisWindowParameters(windowParameters);
+    start();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const shouldRerunAnalysis = useMemo(
     () =>
       currentAnalysisWindowParameters !== undefined &&
@@ -106,7 +112,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   const showSpikeAnalysisTable = data?.changePoints.length > 0;
 
   return (
-    <>
+    <div data-test-subj="aiopsExplainLogRateSpikesAnalysis">
       <ProgressControls
         progress={data.loaded}
         progressMessage={data.loadingState ?? ''}
@@ -115,8 +121,10 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
         onCancel={cancel}
         shouldRerunAnalysis={shouldRerunAnalysis}
       />
+      <EuiSpacer size="xs" />
       {!isRunning && !showSpikeAnalysisTable && (
         <EuiEmptyPrompt
+          data-test-subj="aiopsNoResultsFoundEmptyPrompt"
           title={
             <h2>
               <FormattedMessage
@@ -136,16 +144,42 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
           }
         />
       )}
+      {errors.length > 0 && (
+        <>
+          <EuiCallOut
+            title={i18n.translate('xpack.aiops.analysis.errorCallOutTitle', {
+              defaultMessage:
+                'The following {errorCount, plural, one {error} other {errors}} occurred running the analysis.',
+              values: { errorCount: errors.length },
+            })}
+            color="warning"
+            iconType="alert"
+            size="s"
+          >
+            <EuiText size="s">
+              {errors.length === 1 ? (
+                <p>{errors[0]}</p>
+              ) : (
+                <ul>
+                  {errors.map((e, i) => (
+                    <li key={i}>{e}</li>
+                  ))}
+                </ul>
+              )}
+            </EuiText>
+          </EuiCallOut>
+          <EuiSpacer size="xs" />
+        </>
+      )}
       {showSpikeAnalysisTable && (
         <SpikeAnalysisTable
           changePoints={data.changePoints}
           loading={isRunning}
-          error={error}
           onPinnedChangePoint={onPinnedChangePoint}
           onSelectedChangePoint={onSelectedChangePoint}
           selectedChangePoint={selectedChangePoint}
         />
       )}
-    </>
+    </div>
   );
 };

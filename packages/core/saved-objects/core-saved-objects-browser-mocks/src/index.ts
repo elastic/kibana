@@ -7,3 +7,4 @@
  */
 
 export { savedObjectsServiceMock } from './saved_objects_service.mock';
+export { simpleSavedObjectMock } from './simple_saved_object.mock';

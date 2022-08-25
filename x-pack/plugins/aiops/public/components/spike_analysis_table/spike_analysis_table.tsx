@@ -34,7 +34,6 @@ const DEFAULT_SORT_DIRECTION = 'asc';
 
 interface SpikeAnalysisTableProps {
   changePoints: ChangePoint[];
-  error?: string;
   loading: boolean;
   onPinnedChangePoint?: (changePoint: ChangePoint | null) => void;
   onSelectedChangePoint?: (changePoint: ChangePoint | null) => void;
@@ -43,7 +42,6 @@ interface SpikeAnalysisTableProps {
 
 export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
   changePoints,
-  error,
   loading,
   onPinnedChangePoint,
   onSelectedChangePoint,
@@ -58,6 +56,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
 
   const columns: Array<EuiBasicTableColumn<ChangePoint>> = [
     {
+      'data-test-subj': 'aiopsSpikeAnalysisTableColumnFieldName',
       field: 'fieldName',
       name: i18n.translate(
         'xpack.aiops.correlations.failedTransactions.correlationsTable.fieldNameLabel',
@@ -66,6 +65,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
       sortable: true,
     },
     {
+      'data-test-subj': 'aiopsSpikeAnalysisTableColumnFieldValue',
       field: 'fieldValue',
       name: i18n.translate(
         'xpack.aiops.correlations.failedTransactions.correlationsTable.fieldValueLabel',
@@ -75,6 +75,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
       sortable: true,
     },
     {
+      'data-test-subj': 'aiopsSpikeAnalysisTableColumnLogRate',
       width: NARROW_COLUMN_WIDTH,
       field: 'pValue',
       name: (
@@ -107,6 +108,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
       sortable: false,
     },
     {
+      'data-test-subj': 'aiopsSpikeAnalysisTableColumnPValue',
       width: NARROW_COLUMN_WIDTH,
       field: 'pValue',
       name: (
@@ -133,6 +135,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
       sortable: true,
     },
     {
+      'data-test-subj': 'aiopsSpikeAnalysisTableColumnImpact',
       width: NARROW_COLUMN_WIDTH,
       field: 'pValue',
       name: (
@@ -212,16 +215,17 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
 
   return (
     <EuiBasicTable
+      data-test-subj="aiopsSpikeAnalysisTable"
       compressed
       columns={columns}
       items={pageOfItems}
       onChange={onChange}
       pagination={pagination}
       loading={false}
-      error={error}
       sorting={sorting as EuiTableSortingType<ChangePoint>}
       rowProps={(changePoint) => {
         return {
+          'data-test-subj': `aiopsSpikeAnalysisTableRow row-${changePoint.fieldName}-${changePoint.fieldValue}`,
           onClick: () => {
             if (onPinnedChangePoint) {
               onPinnedChangePoint(changePoint);

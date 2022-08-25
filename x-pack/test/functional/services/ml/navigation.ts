@@ -17,7 +17,7 @@ export function MachineLearningNavigationProvider({
   const browser = getService('browser');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'header']);
+  const PageObjects = getPageObjects(['common', 'header', 'discover']);
 
   return {
     async navigateToMl() {
@@ -42,6 +42,13 @@ export function MachineLearningNavigationProvider({
         } else {
           await testSubjects.missingOrFail('jobsListLink', { timeout: 2000 });
         }
+      });
+    },
+
+    async navigateToDiscoverViaAppsMenu() {
+      await retry.tryForTime(60 * 1000, async () => {
+        await appsMenu.clickLink('Discover');
+        await PageObjects.discover.waitForDiscoverAppOnScreen();
       });
     },
 
@@ -77,15 +84,6 @@ export function MachineLearningNavigationProvider({
         await testSubjects.existOrFail(`${linkSubject} & ~selected`);
         await testSubjects.existOrFail(pageSubject);
       });
-    },
-
-    async assertMainTabsExist() {
-      await this.assertTabsExist('mlMainTab', [
-        'anomalyDetection',
-        'dataFrames',
-        'dataFrameAnalytics',
-        'dataVisualizer',
-      ]);
     },
 
     async assertTabEnabled(tabSubject: string, expectedValue: boolean) {
@@ -150,6 +148,15 @@ export function MachineLearningNavigationProvider({
 
     async navigateToAnomalyDetection() {
       await this.navigateToArea('~mlMainTab & ~anomalyDetection', 'mlPageJobManagement');
+    },
+
+    async navigateToAnomalyExplorer(jobId: string, timeRange: { from: string; to: string }) {
+      await PageObjects.common.navigateToUrlWithBrowserHistory(
+        'ml',
+        `/explorer`,
+        `?_g=(ml%3A(jobIds%3A!(${jobId}))%2CrefreshInterval%3A(display%3AOff%2Cpause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3A'${timeRange.from}'%2Cto%3A'${timeRange.to}'))`
+      );
+      await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
     async navigateToSingleMetricViewer(jobId: string) {

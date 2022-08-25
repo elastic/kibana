@@ -147,10 +147,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await testSubjects.click('discoverAlertsButton');
     await testSubjects.click('discoverCreateAlertButton');
 
-    await testSubjects.setValue('ruleNameInput', alertName);
+    await retry.waitFor('rule name value is correct', async () => {
+      await testSubjects.setValue('ruleNameInput', alertName);
+      const ruleName = await testSubjects.getAttribute('ruleNameInput', 'value');
+      return ruleName === alertName;
+    });
     await testSubjects.click('thresholdPopover');
     await testSubjects.setValue('alertThresholdInput', '3');
-    await testSubjects.click('.index-alerting-ActionTypeSelectOption');
+    await retry.waitFor('actions accordion to exist', async () => {
+      await testSubjects.click('.index-alerting-ActionTypeSelectOption');
+      return await testSubjects.exists('alertActionAccordion-0');
+    });
 
     await monacoEditor.setCodeEditorValue(`{
       "rule_id": "{{ruleId}}",
@@ -163,10 +170,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const getLastToast = async () => {
     const toastList = await testSubjects.find('globalToastList');
-    const titles = await toastList.findAllByCssSelector('.euiToastHeader');
+    const titles = await toastList.findAllByTestSubject('euiToastHeader');
     const lastTitleElement = last(titles)!;
     const title = await lastTitleElement.getVisibleText();
-    const messages = await toastList.findAllByCssSelector('.euiToastBody');
+    const messages = await toastList.findAllByTestSubject('euiToastBody');
     const lastMessageElement = last(messages)!;
     const message = await lastMessageElement.getVisibleText();
     return { message, title };
@@ -175,7 +182,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const getErrorToastTitle = async () => {
     const toastList = await testSubjects.find('globalToastList');
     const title = await (
-      await toastList.findByCssSelector('.euiToast--danger > .euiToastHeader')
+      await toastList.findByCssSelector(
+        '[class*="euiToast-danger"] > [data-test-subj="euiToastHeader"]'
+      )
     ).getVisibleText();
     return title;
   };

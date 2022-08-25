@@ -51,9 +51,14 @@ const suffixLabel = i18n.translate('xpack.lens.indexPattern.suffixLabel', {
   defaultMessage: 'Suffix',
 });
 
+export interface FormatSelectorOptions {
+  disableExtraOptions?: boolean;
+}
+
 interface FormatSelectorProps {
   selectedColumn: GenericIndexPatternColumn;
   onChange: (newFormat?: { id: string; params?: Record<string, unknown> }) => void;
+  options?: FormatSelectorOptions;
 }
 
 const RANGE_MIN = 0;
@@ -149,9 +154,9 @@ export function FormatSelector(props: FormatSelectorProps) {
             selectedOptions={currentOption}
             onChange={onChangeWrapped}
           />
-          {currentFormat ? (
+          {currentFormat && !props.options?.disableExtraOptions ? (
             <>
-              <EuiSpacer size="xs" />
+              <EuiSpacer size="s" />
               <EuiRange
                 showInput="inputWithPopover"
                 value={decimals}
@@ -175,7 +180,8 @@ export function FormatSelector(props: FormatSelectorProps) {
                 prepend={decimalsLabel}
                 aria-label={decimalsLabel}
               />
-              <EuiSpacer size="xs" />
+
+              <EuiSpacer size="s" />
               <EuiFieldText
                 value={suffix}
                 onChange={(e) => {
