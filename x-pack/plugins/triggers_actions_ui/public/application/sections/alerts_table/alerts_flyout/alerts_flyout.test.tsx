@@ -7,7 +7,7 @@
 import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { AlertsFlyout } from './alerts_flyout';
 import { AlertsField } from '../../../../types';
 

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 
 import '../../../test/global_mocks';
 import { API_BASE_PATH } from '../../../common/constants';

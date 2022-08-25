@@ -9,7 +9,7 @@ import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { ActionTypeForm } from './action_type_form';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ActionConnector, ActionType, RuleAction, GenericValidationResult } from '../../../types';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { EuiFieldText } from '@elastic/eui';
 import { DefaultActionParams } from '../../lib/get_defaults_for_action_params';
 

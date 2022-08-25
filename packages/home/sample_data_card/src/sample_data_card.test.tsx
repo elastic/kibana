@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { renderWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 
 import { SampleDataCard } from './sample_data_card';
 import { SampleDataCardProvider } from './services';

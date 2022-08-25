@@ -10,7 +10,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import XmattersActionConnectorFields from './xmatters_connectors';
 import { ConnectorFormTestProvider, waitForComponentToUpdate } from '../test_utils';
 import userEvent from '@testing-library/user-event';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { render } from '@testing-library/react';
 
 describe('XmattersActionConnectorFields renders', () => {

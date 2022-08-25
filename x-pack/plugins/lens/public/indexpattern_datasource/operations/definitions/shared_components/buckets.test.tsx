@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { mount, shallow } from 'enzyme';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { EuiIcon } from '@elastic/eui';
 import { DragDropBuckets, DraggableBucketContainer } from '.';
 

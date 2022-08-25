@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import sinon from 'sinon';
 
 import {

@@ -14,7 +14,7 @@ import {
   exactMatchDoc,
 } from '../mocks';
 import { Location, History } from 'history';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { LensEmbeddableInput } from '../embeddable';
 import { loadInitial } from './lens_slice';
 import { Filter } from '@kbn/es-query';

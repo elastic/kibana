@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { EuiSearchBoxProps } from '@elastic/eui/src/components/search_bar/search_box';
 
 import { useLoadSnapshots } from '../../public/application/services/http';

@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiFieldText } from '@elastic/eui';
 import { mount } from 'enzyme';
 import { DebouncedInput } from './debounced_input';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 
 jest.mock('lodash', () => {
   const original = jest.requireActual('lodash');

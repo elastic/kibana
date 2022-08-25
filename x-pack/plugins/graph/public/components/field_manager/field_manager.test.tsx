@@ -12,7 +12,7 @@ import { FieldEditor } from './field_editor';
 import { GraphStore, loadFields } from '../../state_management';
 import { getSuitableIcon } from '../../helpers/style_choices';
 import { shallow, ShallowWrapper } from 'enzyme';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { FieldManager } from './field_manager';
 import { Provider } from 'react-redux';
 import { createMockGraphStore } from '../../state_management/mocks';

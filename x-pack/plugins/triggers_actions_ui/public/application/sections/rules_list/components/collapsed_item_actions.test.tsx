@@ -8,7 +8,7 @@ import * as React from 'react';
 import moment from 'moment';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { CollapsedItemActions } from './collapsed_item_actions';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 import { RuleTableItem, RuleTypeModel } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';

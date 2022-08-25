@@ -8,7 +8,7 @@
 import * as React from 'react';
 import uuid from 'uuid';
 import { mount, ReactWrapper } from 'enzyme';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 
 import { Rule } from '../../../../types';
 import { ViewInApp } from './view_in_app';

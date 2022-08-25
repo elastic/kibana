@@ -7,7 +7,7 @@
 
 import { mockHttpRequest, pageHelpers } from './helpers';
 
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { setHttp, init as initDocumentation } from '../../crud_app/services';
 import { JOB_TO_CLONE, JOB_CLONE_INDEX_PATTERN_CHECK } from './helpers/constants';
 import { coreMock, docLinksServiceMock } from '@kbn/core/public/mocks';

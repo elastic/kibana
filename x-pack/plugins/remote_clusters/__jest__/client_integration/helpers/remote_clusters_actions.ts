@@ -6,7 +6,7 @@
  */
 
 import { TestBed } from '@kbn/test-jest-helpers';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 export interface RemoteClustersActions {
   docsButtonExists: () => boolean;
   pageTitle: {

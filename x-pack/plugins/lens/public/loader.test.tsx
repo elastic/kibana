@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiProgress } from '@elastic/eui';
 import { Loader } from './loader';
 import { mount } from 'enzyme';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 
 describe('loader', () => {
   it('shows a loading indicator when loading', async () => {

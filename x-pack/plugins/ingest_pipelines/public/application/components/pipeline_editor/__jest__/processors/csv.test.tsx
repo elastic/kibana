@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { setup, SetupResult, getProcessorValue, setupEnvironment } from './processor.helpers';
 
 // Default parameter values automatically added to the CSV processor when saved

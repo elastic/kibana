@@ -13,11 +13,10 @@ import 'brace/mode/json';
 import '@kbn/test-jest-helpers/target_node//stub_web_worker';
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
 
 import { CodeEditorField } from '@kbn/kibana-react-plugin/public';
 import type { monaco } from '@kbn/monaco';
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
+import { safeAct as act, shallowWithIntl } from '@kbn/test-jest-helpers';
 
 import { AllRule, AnyRule, ExceptAllRule, ExceptAnyRule, FieldRule } from '../../model';
 import { JSONRuleEditor } from './json_rule_editor';

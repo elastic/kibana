@@ -7,7 +7,7 @@
 
 import * as React from 'react';
 import { shallow } from 'enzyme';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { ValueExpression } from './value';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 

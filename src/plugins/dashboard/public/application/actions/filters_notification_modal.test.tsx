@@ -26,7 +26,7 @@ import {
   ContactCardEmbeddableOutput,
   ContactCardEmbeddable,
 } from '../../services/embeddable_test_samples';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 
 describe('LibraryNotificationPopover', () => {
   const { setup, doStart } = embeddablePluginMock.createInstance();

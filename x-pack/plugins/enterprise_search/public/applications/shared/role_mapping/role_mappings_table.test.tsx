@@ -10,10 +10,10 @@ import { wsRoleMapping, asRoleMapping } from './__mocks__/roles';
 import React from 'react';
 
 import { mount } from 'enzyme';
-import { act } from 'react-dom/test-utils';
 
 import { EuiInMemoryTable, EuiTableHeaderCell, EuiTableRow } from '@elastic/eui';
 import type { EuiSearchBarProps } from '@elastic/eui';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 
 import { engines } from '../../app_search/__mocks__/engines.mock';
 

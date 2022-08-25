@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import * as fixtures from '../../__fixtures__';
 import { setupEnvironment, pageHelpers, getRandomString, findTestSubject } from './helpers';
 import type { WatchListTestBed } from './helpers/watch_list_page.helpers';

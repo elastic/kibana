@@ -7,7 +7,7 @@
  */
 
 import React, { FC, useEffect } from 'react';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import type { ReactWrapper } from 'enzyme';
 import { of, BehaviorSubject } from 'rxjs';
 import { useEuiTheme } from '@elastic/eui';

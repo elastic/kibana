@@ -7,7 +7,7 @@
 
 import { mount } from 'enzyme';
 import { createElement } from 'react';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import initStoryshots from '@storybook/addon-storyshots';
 
 describe('Fleet Storybook Smoke', () => {

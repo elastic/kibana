@@ -16,7 +16,7 @@ import {
   OverlayStart,
   SavedObjectsStart,
 } from '@kbn/core/public';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { setAutocomplete } from '@kbn/unified-search-plugin/public/services';

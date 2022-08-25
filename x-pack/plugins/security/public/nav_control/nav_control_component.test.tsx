@@ -9,9 +9,10 @@ import { EuiContextMenu } from '@elastic/eui';
 import { shallow } from 'enzyme';
 import type { ReactElement } from 'react';
 import React from 'react';
-import { act } from 'react-dom/test-utils';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
+
+import { safeAct as act } from '@kbn/test-jest-helpers';
 
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import { userProfileMock } from '../../common/model/user_profile.mock';

@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { ReactWrapper } from 'enzyme';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { MountPoint } from '@kbn/core/public';
 import { TopNavMenu } from './top_nav_menu';
 import { TopNavMenuData } from './top_nav_menu_data';

@@ -12,7 +12,7 @@ import { createGridCell } from './cell_value';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { Datatable } from '@kbn/expressions-plugin/public';
 import { IUiSettingsClient } from '@kbn/core/public';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { ReactWrapper } from 'enzyme';
 import { DatatableArgs, ColumnConfigArg } from '../../../../common/expressions';
 import { DataContextType } from './types';

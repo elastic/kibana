@@ -8,7 +8,7 @@
 import React from 'react';
 import { Observable, Subject } from 'rxjs';
 import { ReactWrapper } from 'enzyme';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { App } from './app';
 import { LensAppProps, LensAppServices } from './types';
 import { EditorFrameInstance, EditorFrameProps } from '../types';

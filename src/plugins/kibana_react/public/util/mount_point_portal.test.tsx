@@ -10,7 +10,7 @@ import React, { FC } from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 import { MountPoint, UnmountCallback } from '@kbn/core/public';
 import { MountPointPortal } from './mount_point_portal';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 
 describe('MountPointPortal', () => {
   let portalTarget: HTMLElement;

@@ -12,7 +12,7 @@ import { ReactWrapper } from 'enzyme';
 import PieOptions, { PieOptionsProps } from './pie';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 
 describe('PalettePicker', function () {
   let props: PieOptionsProps;

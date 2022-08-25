@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 
 import { INVALID_NAME_CHARS } from '../../public/application/services/validation/validate_repository';
 import { API_BASE_PATH } from '../../common';

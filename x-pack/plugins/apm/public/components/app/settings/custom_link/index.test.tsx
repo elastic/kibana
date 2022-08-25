@@ -7,7 +7,7 @@
 
 import { fireEvent, render, RenderResult } from '@testing-library/react';
 import React from 'react';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { getCallApmApiSpy } from '../../../../services/rest/call_apm_api_spy';
 import { CustomLinkOverview } from '.';
 import { License } from '@kbn/licensing-plugin/common/license';

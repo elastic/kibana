@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { type History, createMemoryHistory } from 'history';
 import { BasePath } from '@kbn/core-http-browser-internal';
 import type { IBasePath } from '@kbn/core-http-browser';

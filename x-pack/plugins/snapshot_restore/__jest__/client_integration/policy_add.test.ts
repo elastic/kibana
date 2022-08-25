@@ -9,7 +9,7 @@
 import { setupEnvironment, pageHelpers, getRandomString } from './helpers';
 
 import { ReactElement } from 'react';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 
 import { HttpFetchOptionsWithPath } from '@kbn/core/public';
 import * as fixtures from '../../test/fixtures';

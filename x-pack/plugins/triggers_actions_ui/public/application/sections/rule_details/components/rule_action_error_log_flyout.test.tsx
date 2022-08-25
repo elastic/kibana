@@ -7,7 +7,7 @@
 
 import React from 'react';
 import uuid from 'uuid';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { RuleActionErrorLogFlyout } from './rule_action_error_log_flyout';
 import { loadActionErrorLog } from '../../../lib/rule_api/load_action_error_log';

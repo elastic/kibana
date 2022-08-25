@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { setup, SetupResult, getProcessorValue, setupEnvironment } from './processor.helpers';
 
 const COMMUNITY_ID_TYPE = 'community_id';

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 
 import { getRouter } from '../../../public/application/services';
 import { getRemoteClusterMock } from '../../../fixtures/remote_cluster';

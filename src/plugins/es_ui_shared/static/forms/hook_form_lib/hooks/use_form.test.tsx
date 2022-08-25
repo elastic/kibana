@@ -7,7 +7,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 
 import { registerTestBed, getRandomString, TestBed } from '../shared_imports';
 import { emptyField } from '../../helpers/field_validators';

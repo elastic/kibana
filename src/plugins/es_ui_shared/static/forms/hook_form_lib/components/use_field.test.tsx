@@ -7,7 +7,7 @@
  */
 
 import React, { useEffect, FunctionComponent, useState, useCallback } from 'react';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { first } from 'rxjs/operators';
 
 import { registerTestBed, TestBed } from '../shared_imports';

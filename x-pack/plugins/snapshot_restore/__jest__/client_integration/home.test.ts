@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import * as fixtures from '../../test/fixtures';
 import { SNAPSHOT_STATE } from '../../public/application/constants';
 import { API_BASE_PATH } from '../../common';

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { ReactWrapper, shallow, mount } from 'enzyme';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { EuiDataGrid } from '@elastic/eui';
 import { IAggType } from '@kbn/data-plugin/public';

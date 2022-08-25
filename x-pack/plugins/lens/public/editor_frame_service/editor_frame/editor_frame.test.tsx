@@ -30,7 +30,7 @@ jest.mock('react-virtualized-auto-sizer', () => {
 import { EuiPanel, EuiToolTip } from '@elastic/eui';
 import { EditorFrame, EditorFrameProps } from './editor_frame';
 import { DatasourcePublicAPI, DatasourceSuggestion, Visualization } from '../../types';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { coreMock } from '@kbn/core/public/mocks';
 import {
   createMockVisualization,

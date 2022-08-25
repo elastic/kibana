@@ -21,7 +21,7 @@ import { createMockedIndexPattern } from '../../mocks';
 import type { IndexPatternLayer } from '../../types';
 import type { IndexPattern } from '../../../types';
 import { getFieldByNameFactory } from '../../pure_helpers';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 
 const dataStart = dataPluginMock.createStartContract();
 const unifiedSearchStart = unifiedSearchPluginMock.createStartContract();

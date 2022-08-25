@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
-
-import { registerTestBed, findTestSubject } from '@kbn/test-jest-helpers';
+import { safeAct as act, registerTestBed, findTestSubject } from '@kbn/test-jest-helpers';
 
 import { WithAppDependencies } from '../helpers';
 import { RemoteClusterList } from '../../../public/application/sections/remote_cluster_list';

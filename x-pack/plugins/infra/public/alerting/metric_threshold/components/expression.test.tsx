@@ -7,7 +7,7 @@
 
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 // We are using this inside a `jest.mock` call. Jest requires dynamic dependencies to be prefixed with `mock`
 import { coreMock as mockCoreMock } from '@kbn/core/public/mocks';
 import { Comparator } from '../../../../common/alerting/metrics';

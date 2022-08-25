@@ -16,7 +16,7 @@ import {
   DraggingIdentifier,
   DropIdentifier,
 } from './providers';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { DropType } from '../types';
 
 jest.useFakeTimers();

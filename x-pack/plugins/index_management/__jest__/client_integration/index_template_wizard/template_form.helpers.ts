@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 
 import { TestBed, SetupFunc } from '@kbn/test-jest-helpers';
 import { TemplateDeserialized } from '../../../common';

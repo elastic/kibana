@@ -15,7 +15,7 @@ import type { Datatable } from '@kbn/expressions-plugin/public';
 import { shallow } from 'enzyme';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import PartitionVisComponent, { PartitionVisComponentProps } from './partition_vis_component';
 import {
   createMockDonutParams,

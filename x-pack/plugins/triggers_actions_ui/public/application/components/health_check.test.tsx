@@ -10,7 +10,7 @@ import { render } from '@testing-library/react';
 
 import { HealthCheck } from './health_check';
 
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { HealthContextProvider } from '../context/health_context';
 import { useKibana } from '../../common/lib/kibana';
 jest.mock('../../common/lib/kibana');

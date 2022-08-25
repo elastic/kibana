@@ -7,7 +7,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 
 import { registerTestBed } from '../shared_imports';
 import { useForm } from '../hooks/use_form';

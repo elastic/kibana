@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import PagerDutyActionConnectorFields from './pagerduty_connectors';
 import { ConnectorFormTestProvider } from '../test_utils';
 import { render } from '@testing-library/react';

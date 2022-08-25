@@ -8,7 +8,7 @@
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { FormatSelector } from './format_selector';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { GenericIndexPatternColumn } from '../..';
 
 jest.mock('lodash', () => {

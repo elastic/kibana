@@ -6,9 +6,8 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
 
-import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
+import { safeAct as act, mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 
 import { spacesManagerMock } from '../../../spaces_manager/mocks';
 import { ConfirmDeleteModal } from './confirm_delete_modal';

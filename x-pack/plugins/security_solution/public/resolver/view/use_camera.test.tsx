@@ -25,7 +25,7 @@ import { createStore } from 'redux';
 import { resolverReducer } from '../store/reducer';
 import { mockTreeFetcherParameters } from '../mocks/tree_fetcher_parameters';
 import * as nodeModel from '../../../common/endpoint/models/node';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { mockResolverNode } from '../mocks/resolver_node';
 import { endpointSourceSchema } from '../mocks/tree_schema';
 import { panAnimationDuration } from '../store/camera/scaling_constants';

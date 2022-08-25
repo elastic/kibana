@@ -8,7 +8,7 @@
 
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { ColorRanges, ColorRangesProps } from './color_ranges';
 import { ReactWrapper } from 'enzyme';
 import { ColorRangesContext } from './color_ranges_context';

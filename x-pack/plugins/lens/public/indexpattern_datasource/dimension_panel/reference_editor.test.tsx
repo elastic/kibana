@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { ReactWrapper, ShallowWrapper } from 'enzyme';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { EuiComboBox } from '@elastic/eui';
 import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';

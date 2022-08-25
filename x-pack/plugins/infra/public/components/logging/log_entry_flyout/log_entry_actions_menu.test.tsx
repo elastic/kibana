@@ -7,7 +7,7 @@
 
 import testSubject from '@kbn/test-subj-selector';
 import React from 'react';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 
 import { mount } from 'enzyme';
 import { LogEntryActionsMenu } from './log_entry_actions_menu';

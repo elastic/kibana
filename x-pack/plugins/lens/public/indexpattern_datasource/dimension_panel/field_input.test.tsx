@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { EuiComboBox } from '@elastic/eui';
 import { GenericOperationDefinition } from '../operations';
 import {

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { shallow } from 'enzyme';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { ValuesInput } from './values_input';

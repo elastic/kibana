@@ -16,7 +16,7 @@ import { dataViewMock } from '../../__mocks__/data_view';
 import { ContextApp } from './context_app';
 import { DiscoverServices } from '../../build_services';
 import { dataViewsMock } from '../../__mocks__/data_views';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { uiSettingsMock } from '../../__mocks__/ui_settings';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 import { LocalStorageMock } from '../../__mocks__/local_storage_mock';

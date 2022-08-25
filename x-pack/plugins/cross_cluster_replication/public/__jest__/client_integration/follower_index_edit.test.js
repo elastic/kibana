@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 
 import { API_BASE_PATH } from '../../../common/constants';
 import { FollowerIndexForm } from '../../app/components/follower_index_form/follower_index_form';

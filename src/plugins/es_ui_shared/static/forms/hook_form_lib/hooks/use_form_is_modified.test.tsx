@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import React, { useState, useEffect } from 'react';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 
 import { registerTestBed } from '../shared_imports';
 import { useForm } from './use_form';

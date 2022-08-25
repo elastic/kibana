@@ -19,7 +19,7 @@ import { createMockDatasource, createMockFramePublicAPI } from '../../../mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { TableDimensionEditor } from './dimension_editor';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { PalettePanelContainer } from '../../../shared_components';
 import { layerTypes } from '../../../../common';
 

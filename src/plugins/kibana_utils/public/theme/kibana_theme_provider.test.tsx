@@ -10,7 +10,7 @@ import { useEuiTheme } from '@elastic/eui';
 import type { ReactWrapper } from 'enzyme';
 import type { FC } from 'react';
 import React, { useEffect } from 'react';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { BehaviorSubject, of } from 'rxjs';
 
 import { mountWithIntl } from '@kbn/test-jest-helpers';

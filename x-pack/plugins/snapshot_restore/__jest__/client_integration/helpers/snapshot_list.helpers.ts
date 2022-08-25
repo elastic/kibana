@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { TestBedConfig, registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 
 import { BASE_PATH } from '../../../public/application/constants';

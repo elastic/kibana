@@ -11,8 +11,6 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { act } from 'react-dom/test-utils';
-
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -23,6 +21,7 @@ import {
   EuiSelectableSearch,
   EuiSwitch,
 } from '@elastic/eui';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 
 import { mountWithIntl, rerender } from '../../../../../test_helpers';
 

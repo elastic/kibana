@@ -7,7 +7,7 @@
 
 import { EuiButtonIcon, EuiButton } from '@elastic/eui';
 import React from 'react';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import moment from 'moment';
 
 import { RuleTableItem } from '../../../../types';

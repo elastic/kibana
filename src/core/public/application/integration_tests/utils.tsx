@@ -7,7 +7,7 @@
  */
 
 import React, { ReactElement } from 'react';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { mount } from 'enzyme';
 import { I18nProvider } from '@kbn/i18n-react';
 

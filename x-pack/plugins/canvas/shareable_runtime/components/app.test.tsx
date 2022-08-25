@@ -13,7 +13,7 @@
 
 import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
-// import { act } from 'react-dom/test-utils';
+// import { safeAct as act } from '@kbn/test-jest-helpers';
 import { App } from './app';
 import { sharedWorkpads, WorkpadNames, tick } from '../test';
 import {

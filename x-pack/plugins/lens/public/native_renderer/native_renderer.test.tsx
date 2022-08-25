@@ -8,7 +8,7 @@
 import React, { useEffect } from 'react';
 import { render } from 'react-dom';
 import { NativeRenderer } from './native_renderer';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 
 function renderAndTriggerHooks(element: JSX.Element, mountpoint: Element) {
   // act takes care of triggering state hooks

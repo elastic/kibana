@@ -7,7 +7,7 @@
 
 import React from 'react';
 import uuid from 'uuid';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ActionGroup, ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';

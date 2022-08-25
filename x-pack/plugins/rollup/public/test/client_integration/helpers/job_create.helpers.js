@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
+import { safeAct as act, registerTestBed } from '@kbn/test-jest-helpers';
 
-import { registerTestBed } from '@kbn/test-jest-helpers';
 import { rollupJobsStore } from '../../../crud_app/store';
 import { JobCreate } from '../../../crud_app/sections';
 

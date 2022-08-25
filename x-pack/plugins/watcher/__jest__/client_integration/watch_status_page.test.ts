@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import moment from 'moment';
 import { getWatchHistory } from '../../__fixtures__';
 import { WATCH_STATES, ACTION_STATES } from '../../common/constants';

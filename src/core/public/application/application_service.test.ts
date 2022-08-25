@@ -23,7 +23,7 @@ import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
 import { MockLifecycle } from './test_types';
 import { ApplicationService } from './application_service';
 import { App, AppDeepLink, AppNavLinkStatus, AppStatus, AppUpdater, PublicAppInfo } from './types';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 
 const createApp = (props: Partial<App>): App => {
   return {

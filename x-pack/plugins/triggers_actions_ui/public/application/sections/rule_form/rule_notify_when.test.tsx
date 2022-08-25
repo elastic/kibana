@@ -8,7 +8,7 @@
 import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { ReactWrapper } from 'enzyme';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { Rule } from '../../../types';
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { RuleNotifyWhen } from './rule_notify_when';

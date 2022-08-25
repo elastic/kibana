@@ -16,7 +16,7 @@ import { render } from '../../../lib/helper/rtl_helpers';
 import { JourneyStep } from '../../../../../common/runtime_types';
 import { SYNTHETIC_CHECK_STEPS_ROUTE } from '../../../../../common/constants';
 import { COLLAPSE_LABEL, EXPAND_LABEL } from '../translations';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),

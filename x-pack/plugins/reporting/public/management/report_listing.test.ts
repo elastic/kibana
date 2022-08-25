@@ -6,7 +6,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 
 import type { ILicense } from '@kbn/licensing-plugin/public';
 import type { IlmPolicyMigrationStatus } from '../../common/types';

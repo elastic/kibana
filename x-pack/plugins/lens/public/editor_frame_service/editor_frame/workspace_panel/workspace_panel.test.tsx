@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { ReactExpressionRendererProps } from '@kbn/expressions-plugin/public';
 import { FramePublicAPI, Visualization } from '../../../types';
 import {

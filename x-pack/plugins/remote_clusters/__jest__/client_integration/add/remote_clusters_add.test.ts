@@ -6,7 +6,7 @@
  */
 
 import { TestBed } from '@kbn/test-jest-helpers';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 
 import { setupEnvironment, RemoteClustersActions } from '../helpers';
 import { setup } from './remote_clusters_add.helpers';

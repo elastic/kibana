@@ -18,7 +18,7 @@ import type {
 } from '../../palettes';
 import { CustomizablePalette } from './palette_configuration';
 import { getPaletteRegistry } from './mocks/palettes_registry';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 
 // mocking random id generator function
 jest.mock('@elastic/eui', () => {

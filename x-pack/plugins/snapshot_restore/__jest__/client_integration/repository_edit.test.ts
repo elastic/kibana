@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 
 import { setupEnvironment, pageHelpers, nextTick, TestBed, getRandomString } from './helpers';
 import { RepositoryForm } from '../../public/application/components/repository_form';

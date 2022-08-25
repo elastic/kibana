@@ -7,7 +7,7 @@
 import React from 'react';
 import moment from 'moment';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { RulesListAutoRefresh } from './rules_list_auto_refresh';
 
 const onRefresh = jest.fn();

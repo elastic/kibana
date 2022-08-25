@@ -7,7 +7,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { nextTick } from '@kbn/test-jest-helpers';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { RuleActions } from './rule_actions';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { ActionConnector, ActionTypeModel, RuleAction } from '../../../../types';

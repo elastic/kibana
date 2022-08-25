@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { nextTick } from '@kbn/test-jest-helpers';
 import { RuleDefinition } from './rule_definition';

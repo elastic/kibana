@@ -8,7 +8,7 @@
 import { copyToClipboard } from '@elastic/eui';
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { TestQueryRow } from './test_query_row';
 
 jest.mock('@elastic/eui', () => {

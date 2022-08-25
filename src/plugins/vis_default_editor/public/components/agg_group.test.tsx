@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { mount, shallow } from 'enzyme';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import type { IAggConfigs, IAggConfig } from '@kbn/data-plugin/public';
 import { ISchemas } from '@kbn/visualizations-plugin/public';
 import { createMockedVisEditorSchemas } from '@kbn/visualizations-plugin/public/mocks';

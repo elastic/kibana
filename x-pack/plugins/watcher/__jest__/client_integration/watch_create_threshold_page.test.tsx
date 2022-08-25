@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 
 import { HttpFetchOptionsWithPath } from '@kbn/core/public';
 import { WATCH_ID } from './helpers/jest_constants';

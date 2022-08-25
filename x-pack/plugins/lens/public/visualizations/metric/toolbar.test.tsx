@@ -14,7 +14,7 @@ import { createMockFramePublicAPI } from '../../mocks';
 import { HTMLAttributes, ReactWrapper } from 'enzyme';
 import { EuiFieldText } from '@elastic/eui';
 import { ToolbarButton } from '@kbn/kibana-react-plugin/public';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 
 jest.mock('lodash', () => {
   const original = jest.requireActual('lodash');

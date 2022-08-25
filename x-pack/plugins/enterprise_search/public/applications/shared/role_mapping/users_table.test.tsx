@@ -15,10 +15,10 @@ import {
 import React from 'react';
 
 import { shallow, mount } from 'enzyme';
-import { act } from 'react-dom/test-utils';
 
 import { EuiInMemoryTable, EuiTextColor, EuiBadge, EuiTableRow } from '@elastic/eui';
 import type { EuiSearchBarProps } from '@elastic/eui';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 
 import { engines } from '../../app_search/__mocks__/engines.mock';
 

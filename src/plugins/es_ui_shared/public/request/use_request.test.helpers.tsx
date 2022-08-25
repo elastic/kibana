@@ -7,7 +7,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { mount, ReactWrapper } from 'enzyme';
 import sinon from 'sinon';
 

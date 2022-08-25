@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import '@kbn/es-ui-shared-plugin/public/components/code_editor/jest_mock';
 
 jest.mock('lodash', () => {

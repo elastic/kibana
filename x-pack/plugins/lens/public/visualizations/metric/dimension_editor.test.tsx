@@ -18,7 +18,7 @@ import { CollapseSetting } from '../../shared_components/collapse_setting';
 import { EuiButtonGroup, EuiColorPicker } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { LayoutDirection } from '@elastic/charts';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { EuiColorPickerOutput } from '@elastic/eui/src/components/color_picker/color_picker';
 import { createMockFramePublicAPI } from '../../mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';

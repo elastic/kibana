@@ -8,7 +8,7 @@
 
 import { BehaviorSubject, type Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { createMemoryHistory, MemoryHistory } from 'history';
 
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';

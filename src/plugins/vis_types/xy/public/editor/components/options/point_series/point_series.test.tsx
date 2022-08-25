@@ -11,7 +11,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ReactWrapper } from 'enzyme';
 import { PointSeriesOptions } from './point_series';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { ChartType } from '../../../../../common';
 import { getAggs, getVis, getStateParams } from './point_series.mocks';
 

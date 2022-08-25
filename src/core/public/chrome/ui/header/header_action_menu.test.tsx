@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { BehaviorSubject } from 'rxjs';
 import { HeaderActionMenu } from './header_action_menu';
 import type { MountPoint, UnmountCallback } from '@kbn/core-mount-utils-browser';

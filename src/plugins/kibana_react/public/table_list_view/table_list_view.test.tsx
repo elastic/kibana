@@ -11,7 +11,7 @@ import { shallowWithIntl, registerTestBed, TestBed } from '@kbn/test-jest-helper
 import { ToastsStart } from '@kbn/core/public';
 import React from 'react';
 import moment, { Moment } from 'moment';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { themeServiceMock, applicationServiceMock } from '@kbn/core/public/mocks';
 import { TableListView, TableListViewProps } from './table_list_view';
 

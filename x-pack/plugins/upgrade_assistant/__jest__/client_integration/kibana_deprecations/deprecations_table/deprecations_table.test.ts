@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { deprecationsServiceMock } from '@kbn/core/public/mocks';
 import type { DeprecationsServiceStart } from '@kbn/core/public';
 

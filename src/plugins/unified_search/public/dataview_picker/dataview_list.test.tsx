@@ -8,7 +8,7 @@
 
 import React, { MouseEvent } from 'react';
 import { EuiSelectable } from '@elastic/eui';
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { ShallowWrapper } from 'enzyme';
 import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import { DataViewsList, DataViewsListProps } from './dataview_list';

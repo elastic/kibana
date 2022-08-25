@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
+import { safeAct as act } from '@kbn/test-jest-helpers';
 import { expectToBeAccessible } from '@kbn/test-jest-helpers';
 import { IndicesTestBed, setup } from '../client_integration/home/indices_tab.helpers';
 import {
