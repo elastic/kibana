@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-// import { Observable } from 'rxjs';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { ControlInput } from '../../types';

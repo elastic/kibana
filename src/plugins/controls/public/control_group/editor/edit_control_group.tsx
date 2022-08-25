@@ -28,7 +28,7 @@ export const EditControlGroup = ({
 }: EditControlGroupButtonProps) => {
   const {
     overlays: { openConfirm, openFlyout },
-    theme,
+    theme: { theme$ },
   } = pluginServices.getServices();
 
   const editControlGroup = () => {
@@ -56,7 +56,7 @@ export const EditControlGroup = ({
           onDeleteAll={() => onDeleteAll(flyoutInstance)}
           onClose={() => flyoutInstance.close()}
         />,
-        { theme$: theme.theme$ }
+        { theme$ }
       ),
       {
         outsideClickCloses: false,

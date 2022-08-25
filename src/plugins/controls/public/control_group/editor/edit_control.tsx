@@ -37,7 +37,7 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
   const {
     overlays: { openFlyout, openConfirm },
     controls: { getControlFactory },
-    theme,
+    theme: { theme$ },
   } = pluginServices.getServices();
   // Redux embeddable container Context
   const reduxContainerContext = useReduxContainerContext<
@@ -161,7 +161,7 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
               }}
             />
           </ControlsServicesProvider>,
-          { theme$: theme.theme$ }
+          { theme$ }
         ),
         {
           'aria-label': ControlGroupStrings.manageControl.getFlyoutEditTitle(),

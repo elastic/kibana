@@ -54,7 +54,7 @@ export const CreateControlButton = ({
   const {
     overlays: { openFlyout, openConfirm },
     controls: { getControlTypes, getControlFactory },
-    theme,
+    theme: { theme$ },
   } = pluginServices.getServices();
 
   const createNewControl = async () => {
@@ -116,7 +116,7 @@ export const CreateControlButton = ({
               }
             />
           </ControlsServicesProvider>,
-          { theme$: theme.theme$ }
+          { theme$ }
         ),
         {
           'aria-label': ControlGroupStrings.manageControl.getFlyoutCreateTitle(),
