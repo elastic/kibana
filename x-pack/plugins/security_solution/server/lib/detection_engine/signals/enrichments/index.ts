@@ -5,77 +5,49 @@
  * 2.0.
  */
 
-import type {
-  AlertInstanceContext,
-  AlertInstanceState,
-  RuleExecutorServices,
-} from '@kbn/alerting-plugin/server';
-import type { Logger } from '@kbn/core/server';
-import type { ListClient } from '@kbn/lists-plugin/server';
-import { mergeWith, isArray } from 'lodash';
+import {
+  createHostRiskEnrichments,
+  getIsHostRiskScoreAvailable,
+} from './enrichment_by_type/host_risk';
 
-import { createThreatEnrichments } from './threat_indicators';
-import type { SignalSourceHit } from '../types';
-import type { BuildRuleMessage } from '../rule_messages';
+import {
+  createUserRiskEnrichments,
+  getIsUserRiskScoreAvailable,
+} from './enrichment_by_type/user_risk';
+import type { EnrichEventsFunction } from './types';
+import { applyEnrichmentsToEvents } from './utils/trasnforms';
 
-export const enrichEvents = async ({
-  services,
-  logger,
-  buildRuleMessage,
-  events,
-  listClient,
-}: {
-  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
-  logger: Logger;
-  buildRuleMessage: BuildRuleMessage;
-  events: SignalSourceHit[];
-  listClient: ListClient;
-}) => {
-  const allEventsWithEnrichments = await Promise.all([
-    // createThreatEnrichments({
-    //   services,
-    //   logger,
-    //   buildRuleMessage,
-    //   events,
-    //   threatIndex: ['filebeat*'],
-    //   threatIndicatorPath: 'threat.indicator',
-    // }),
-    createThreatEnrichments({
-      services,
-      logger,
-      buildRuleMessage,
-      events,
-      threatIndex: ['threat-indicator-0','threat-indicator-1','threat-indicator-2','threat-indicator-3','threat-indicator-4','threat-indicator-5','threat-indicator-6','threat-indicator-7','threat-indicator-8','threat-indicator-9'],
-      threatIndicatorPath: 'threat.indicator',
-      listClient,
-    })
+export const enrichEvents: EnrichEventsFunction = async ({ services, logger, events, spaceId }) => {
+  const enrichments = [];
+
+  const [isHostRiskScoreIndexExist, isUserRiskScoreIndexExist] = await Promise.all([
+    getIsHostRiskScoreAvailable({ spaceId, services }),
+    getIsUserRiskScoreAvailable({ spaceId, services }),
   ]);
 
-  const eventsMap: { [key: string]: SignalSourceHit[] } = {};
-  allEventsWithEnrichments.forEach((enrichedEvents: SignalSourceHit[] | undefined) => {
-    enrichedEvents?.forEach((signal: SignalSourceHit) => {
-      if (!eventsMap[signal._id]) {
-        eventsMap[signal._id] = [];
-      }
-      eventsMap[signal._id].push(signal);
-    });
-  });
-
-  const enrichedMergedEvents: SignalSourceHit[] = [];
-  Object.keys(eventsMap).forEach((id) => {
-    const eventsById = eventsMap[id];
-    // TODO: Does merge ok for us here?
-    const mergedEvent: SignalSourceHit | null = eventsById.reduce(
-      (acc, val) =>
-        mergeWith(acc, val, (objValue, srcValue) => {
-          if (isArray(objValue)) {
-            return objValue.concat(srcValue);
-          }
-        }),
-      null
+  if (isHostRiskScoreIndexExist) {
+    enrichments.push(
+      createHostRiskEnrichments({
+        services,
+        logger,
+        events,
+        spaceId,
+      })
     );
-    if (mergedEvent) enrichedMergedEvents.push(mergedEvent);
-  });
+  }
 
-  return enrichedMergedEvents;
+  if (isUserRiskScoreIndexExist) {
+    enrichments.push(
+      createUserRiskEnrichments({
+        services,
+        logger,
+        events,
+        spaceId,
+      })
+    );
+  }
+
+  const allEnrichmentsResults = await Promise.all(enrichments);
+
+  return applyEnrichmentsToEvents(events, allEnrichmentsResults);
 };

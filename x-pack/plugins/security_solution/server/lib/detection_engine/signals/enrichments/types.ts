@@ -1,0 +1,93 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { Filter } from '@kbn/es-query';
+
+import type {
+  BaseFieldsLatest,
+  WrappedFieldsLatest,
+} from '../../../../../common/detection_engine/schemas/alerts';
+import type { RuleServices } from '../types';
+import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
+
+export type EnrichmentType = estypes.SearchHit<unknown>;
+
+export type EventsForEnrichment<T extends BaseFieldsLatest> = Pick<
+  WrappedFieldsLatest<T>,
+  '_id' | '_source'
+>;
+
+export type EnrichmentFunction = <T extends BaseFieldsLatest>(
+  e: EventsForEnrichment<T>
+) => EventsForEnrichment<T>;
+
+//
+export interface EventsMapByEnrichments {
+  [id: string]: EnrichmentFunction[];
+}
+
+export type MergeEnrichments = <T extends BaseFieldsLatest>(
+  allEnrichmentsResults: EventsMapByEnrichments[]
+) => EventsMapByEnrichments;
+
+export type ApplyEnrichmentsToEvents = <T extends BaseFieldsLatest>(
+  events: Array<EventsForEnrichment<T>>,
+  allEnrichmentsResults: EventsMapByEnrichments[]
+) => Array<EventsForEnrichment<T>>;
+
+interface BasedEnrichParamters<T extends BaseFieldsLatest> {
+  services: RuleServices;
+  logger: IRuleExecutionLogForExecutors;
+  events: Array<EventsForEnrichment<T>>;
+}
+
+interface SingleMappingField {
+  eventField: string;
+  enrichmentField: string;
+}
+export type MakeSinleFieldMathRequest = <T extends BaseFieldsLatest>(params: {
+  events: Array<EventsForEnrichment<T>>;
+  mappingField: SingleMappingField;
+}) => Filter;
+
+export type SearchEnrichments = (params: {
+  index: string[];
+  services: RuleServices;
+  logger: IRuleExecutionLogForExecutors;
+  query: Filter;
+}) => Promise<EnrichmentType[]>;
+
+export type GetIsRiskScoreAvailable = (params: {
+  spaceId: string;
+  services: RuleServices;
+}) => Promise<boolean>;
+
+export type CreateRiskEnrichment = <T extends BaseFieldsLatest>(
+  params: BasedEnrichParamters<T> & {
+    spaceId: string;
+  }
+) => Promise<EventsMapByEnrichments>;
+
+export type CreateFieldsMatchEnrichment = <T extends BaseFieldsLatest>(
+  params: BasedEnrichParamters<T> & {
+    index: string[];
+    mappingField: SingleMappingField;
+    createEnrichmentFunction: (enrichmentDoc: EnrichmentType) => EnrichmentFunction;
+  }
+) => Promise<EventsMapByEnrichments>;
+
+export type EnrichEventsFunction = <T extends BaseFieldsLatest>(
+  params: BasedEnrichParamters<T> & {
+    spaceId: string;
+  }
+) => Promise<Array<EventsForEnrichment<T>>>;
+
+export type EnrichEvents = <T extends BaseFieldsLatest>(
+  alerts: Array<EventsForEnrichment<T>>,
+  params: { spaceId: string }
+) => Promise<Array<EventsForEnrichment<T>>>;
