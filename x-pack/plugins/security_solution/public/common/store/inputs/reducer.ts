@@ -8,6 +8,7 @@
 import { get } from 'lodash/fp';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
+import type { InputsModelId } from './constants';
 import { getIntervalSettings, getTimeRangeSettings } from '../../utils/default_date_settings';
 import {
   deleteAllQuery,
@@ -44,11 +45,13 @@ import type { InputsModel, TimeRange } from './model';
 
 export type InputsState = InputsModel;
 
+const { socTrends: socTrendsUnused, ...timeRangeSettings } = getTimeRangeSettings(false);
+
 export const initialInputsState: InputsState = {
   global: {
     timerange: {
       kind: 'relative',
-      ...getTimeRangeSettings(false),
+      ...timeRangeSettings,
     },
     queries: [],
     policy: getIntervalSettings(false),
@@ -63,7 +66,7 @@ export const initialInputsState: InputsState = {
   timeline: {
     timerange: {
       kind: 'relative',
-      ...getTimeRangeSettings(false),
+      ...timeRangeSettings,
     },
     queries: [],
     policy: getIntervalSettings(false),
@@ -75,27 +78,12 @@ export const initialInputsState: InputsState = {
     filters: [],
     fullScreen: false,
   },
-  socTrends: {
-    timerange: {
-      kind: 'relative',
-      ...getTimeRangeSettings(false),
-    },
-    queries: [],
-    policy: getIntervalSettings(false),
-    linkTo: ['socTrends'],
-    query: {
-      query: '',
-      language: 'kuery',
-    },
-    filters: [],
-    fullScreen: false,
-  },
 };
 
-export const createInitialInputsState = (): InputsState => {
+export const createInitialInputsState = (socTrendsEnabled: boolean): InputsState => {
   const { from, fromStr, to, toStr, socTrends } = getTimeRangeSettings();
   const { kind, duration } = getIntervalSettings();
-
+  const socTrendsId: InputsModelId = 'socTrends';
   return {
     global: {
       timerange: {
@@ -110,7 +98,7 @@ export const createInitialInputsState = (): InputsState => {
         kind,
         duration,
       },
-      linkTo: ['timeline', 'socTrends'],
+      linkTo: ['timeline', ...(socTrendsEnabled ? [socTrendsId] : [])],
       query: {
         query: '',
         language: 'kuery',
@@ -139,21 +127,25 @@ export const createInitialInputsState = (): InputsState => {
       filters: [],
       fullScreen: false,
     },
-    socTrends: {
-      timerange: socTrends,
-      queries: [],
-      policy: {
-        kind,
-        duration,
-      },
-      linkTo: ['global'],
-      query: {
-        query: '',
-        language: 'kuery',
-      },
-      filters: [],
-      fullScreen: false,
-    },
+    ...(socTrendsEnabled
+      ? {
+          socTrends: {
+            timerange: socTrends,
+            queries: [],
+            policy: {
+              kind,
+              duration,
+            },
+            linkTo: ['global'],
+            query: {
+              query: '',
+              language: 'kuery',
+            },
+            filters: [],
+            fullScreen: false,
+          },
+        }
+      : {}),
   };
 };
 

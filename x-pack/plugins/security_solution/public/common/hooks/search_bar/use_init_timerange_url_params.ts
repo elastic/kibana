@@ -9,6 +9,7 @@ import { useCallback } from 'react';
 import { get, isEmpty } from 'lodash/fp';
 import { useDispatch } from 'react-redux';
 import type { Dispatch } from 'redux';
+import { useIsExperimentalFeatureEnabled } from '../use_experimental_features';
 import type { InputsModelId, TimeRangeKinds } from '../../store/inputs/constants';
 import type {
   AbsoluteTimeRange,
@@ -24,11 +25,11 @@ import { URL_PARAM_KEY } from '../use_url_state';
 
 export const useInitTimerangeFromUrlParam = () => {
   const dispatch = useDispatch();
-
+  const isSocTrendsEnabled = useIsExperimentalFeatureEnabled('socTrendsEnabled');
   const onInitialize = useCallback(
     (initialState: UrlInputsModel | null) =>
-      initializeTimerangeFromUrlParam(initialState, dispatch),
-    [dispatch]
+      initializeTimerangeFromUrlParam(initialState, dispatch, isSocTrendsEnabled),
+    [dispatch, isSocTrendsEnabled]
   );
 
   useInitializeUrlParam(URL_PARAM_KEY.timerange, onInitialize);
@@ -36,7 +37,8 @@ export const useInitTimerangeFromUrlParam = () => {
 
 const initializeTimerangeFromUrlParam = (
   initialState: UrlInputsModel | null,
-  dispatch: Dispatch
+  dispatch: Dispatch,
+  isSocTrendsEnabled: boolean
 ) => {
   if (initialState != null) {
     const globalId: InputsModelId = 'global';
@@ -50,19 +52,22 @@ const initializeTimerangeFromUrlParam = (
     const socTrendsId: InputsModelId = 'socTrends';
     const socTrendsLinkTo: LinkTo = { linkTo: get('socTrends.linkTo', initialState) };
     const socTrendsType: TimeRangeKinds = get('socTrends.timerange.kind', initialState);
-
-    if (isEmpty(socTrendsLinkTo.linkTo)) {
-      dispatch(inputsActions.removeLinkTo(['global', 'socTrends']));
-    } else {
-      dispatch(inputsActions.addLinkTo(['global', 'socTrends']));
+    if (isSocTrendsEnabled) {
+      if (isEmpty(socTrendsLinkTo.linkTo)) {
+        dispatch(inputsActions.removeLinkTo(['global', 'socTrends']));
+      } else {
+        dispatch(inputsActions.addLinkTo(['global', 'socTrends']));
+      }
     }
 
     if (isEmpty(globalLinkTo.linkTo)) {
       dispatch(inputsActions.removeLinkTo(['global', 'timeline']));
-      dispatch(inputsActions.removeLinkTo(['global', 'socTrends']));
+      dispatch(
+        inputsActions.removeLinkTo(['global', ...(isSocTrendsEnabled ? [socTrendsId] : [])])
+      );
     } else {
       dispatch(inputsActions.addLinkTo(['global', 'timeline']));
-      dispatch(inputsActions.addLinkTo(['global', 'socTrends']));
+      dispatch(inputsActions.addLinkTo(['global', ...(isSocTrendsEnabled ? [socTrendsId] : [])]));
     }
 
     if (isEmpty(timelineLinkTo.linkTo)) {
@@ -138,7 +143,7 @@ const initializeTimerangeFromUrlParam = (
       }
     }
 
-    if (socTrendsType) {
+    if (isSocTrendsEnabled && socTrendsType) {
       if (socTrendsType === 'absolute') {
         const absoluteRange = normalizeTimeRange<AbsoluteTimeRange>(
           get('socTrends.timerange', initialState)

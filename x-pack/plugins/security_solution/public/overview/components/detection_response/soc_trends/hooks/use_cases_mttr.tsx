@@ -98,7 +98,7 @@ export const useCasesMttr = ({
           dispatch({
             type: 'setPercentage',
             percentage: {
-              percent: percentageChange,
+              percent: isNegative ? percentageChange : `+${percentageChange}`,
               color: isZero
                 ? 'hollow'
                 : isNegative

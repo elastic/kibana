@@ -6,6 +6,7 @@
  */
 import { useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
+import { useIsExperimentalFeatureEnabled } from '../use_experimental_features';
 import type { UrlInputsModel } from '../../store/inputs/model';
 import { inputsSelectors } from '../../store/inputs';
 import { useUpdateUrlParam } from '../../utils/global_query_string';
@@ -15,10 +16,23 @@ export const useSyncTimerangeUrlParam = () => {
   const updateTimerangeUrlParam = useUpdateUrlParam<UrlInputsModel>(URL_PARAM_KEY.timerange);
   const getInputSelector = useMemo(() => inputsSelectors.inputsSelector(), []);
   const inputState = useSelector(getInputSelector);
+  const isSocTrendsEnabled = useIsExperimentalFeatureEnabled('socTrendsEnabled');
 
   const { linkTo: globalLinkTo, timerange: globalTimerange } = inputState.global;
   const { linkTo: timelineLinkTo, timerange: timelineTimerange } = inputState.timeline;
-  const { linkTo: socTrendsLinkTo, timerange: socTrendsTimerange } = inputState.socTrends;
+
+  const socTrendsUrlParams = useMemo(() => {
+    if (isSocTrendsEnabled && inputState.socTrends) {
+      const { linkTo: socTrendsLinkTo, timerange: socTrendsTimerange } = inputState.socTrends;
+      return {
+        socTrends: {
+          [URL_PARAM_KEY.timerange]: socTrendsTimerange,
+          linkTo: socTrendsLinkTo,
+        },
+      };
+    }
+    return {};
+  }, [inputState.socTrends, isSocTrendsEnabled]);
 
   useEffect(() => {
     updateTimerangeUrlParam({
@@ -30,10 +44,7 @@ export const useSyncTimerangeUrlParam = () => {
         [URL_PARAM_KEY.timerange]: timelineTimerange,
         linkTo: timelineLinkTo,
       },
-      socTrends: {
-        [URL_PARAM_KEY.timerange]: socTrendsTimerange,
-        linkTo: socTrendsLinkTo,
-      },
+      ...socTrendsUrlParams,
     });
   }, [
     updateTimerangeUrlParam,
@@ -41,7 +52,6 @@ export const useSyncTimerangeUrlParam = () => {
     globalTimerange,
     timelineLinkTo,
     timelineTimerange,
-    socTrendsTimerange,
-    socTrendsLinkTo,
+    socTrendsUrlParams,
   ]);
 };

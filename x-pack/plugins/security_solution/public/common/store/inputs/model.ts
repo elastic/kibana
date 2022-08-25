@@ -93,7 +93,8 @@ export interface LinkTo {
 export interface InputsModel {
   global: InputsRange;
   timeline: InputsRange;
-  socTrends: InputsRange;
+  // TODO: remove ? when isSocTrendsEnabled feature flag is removed
+  socTrends?: InputsRange;
 }
 export interface UrlInputsModelInputs {
   linkTo: InputsModelId[];
@@ -102,5 +103,6 @@ export interface UrlInputsModelInputs {
 export interface UrlInputsModel {
   global: UrlInputsModelInputs;
   timeline: UrlInputsModelInputs;
-  socTrends: UrlInputsModelInputs;
+  // TODO: remove ? when isSocTrendsEnabled feature flag is removed
+  socTrends?: UrlInputsModelInputs;
 }
