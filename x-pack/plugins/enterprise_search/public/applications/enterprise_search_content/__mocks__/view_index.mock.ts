@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '@kbn/enterprise-search-plugin/common/constants';
+import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../common/constants';
+
 import { SyncStatus, ConnectorStatus } from '../../../../common/types/connectors';
 
 import {
@@ -123,4 +124,9 @@ export const connectorCrawlerIndex: CrawlerViewIndex = {
   },
 };
 
-export const elasticsearchViewIndices = [apiIndex, connectorIndex, crawlerIndex, connectorCrawlerIndex];
+export const elasticsearchViewIndices = [
+  apiIndex,
+  connectorIndex,
+  crawlerIndex,
+  connectorCrawlerIndex,
+];
