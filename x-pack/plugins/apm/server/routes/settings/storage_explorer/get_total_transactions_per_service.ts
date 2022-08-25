@@ -24,12 +24,13 @@ import {
   indexLifeCyclePhaseToDataTier,
 } from '../../../../common/storage_explorer_types';
 import { environmentQuery } from '../../../../common/utils/environment_query';
+import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 
 export async function getTotalTransactionsPerService({
   setup,
   searchAggregatedTransactions,
   indexLifecyclePhase,
-  probability,
+  randomSampler,
   start,
   end,
   environment,
@@ -38,7 +39,7 @@ export async function getTotalTransactionsPerService({
   setup: Setup;
   searchAggregatedTransactions: boolean;
   indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
-  probability: number;
+  randomSampler: RandomSampler;
   start: number;
   end: number;
   environment: string;
@@ -76,9 +77,7 @@ export async function getTotalTransactionsPerService({
         },
         aggs: {
           sample: {
-            random_sampler: {
-              probability,
-            },
+            random_sampler: randomSampler,
             aggs: {
               services: {
                 terms: {

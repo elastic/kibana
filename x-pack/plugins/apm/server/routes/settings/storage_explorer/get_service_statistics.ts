@@ -33,12 +33,13 @@ import {
   getTotalIndicesStats,
   getEstimatedSizeForDocumentsInIndex,
 } from './indices_stats_helpers';
+import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 
 async function getMainServiceStatistics({
   setup,
   context,
   indexLifecyclePhase,
-  probability,
+  randomSampler,
   start,
   end,
   environment,
@@ -47,7 +48,7 @@ async function getMainServiceStatistics({
   setup: Setup;
   context: ApmPluginRequestHandlerContext;
   indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
-  probability: number;
+  randomSampler: RandomSampler;
   start: number;
   end: number;
   environment: string;
@@ -85,9 +86,7 @@ async function getMainServiceStatistics({
       },
       aggs: {
         sample: {
-          random_sampler: {
-            probability,
-          },
+          random_sampler: randomSampler,
           aggs: {
             services: {
               terms: {
@@ -178,7 +177,7 @@ export async function getServiceStatistics({
   setup,
   context,
   indexLifecyclePhase,
-  probability,
+  randomSampler,
   start,
   end,
   environment,
@@ -188,7 +187,7 @@ export async function getServiceStatistics({
   setup: Setup;
   context: ApmPluginRequestHandlerContext;
   indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
-  probability: number;
+  randomSampler: RandomSampler;
   start: number;
   end: number;
   environment: string;
@@ -201,7 +200,7 @@ export async function getServiceStatistics({
         setup,
         context,
         indexLifecyclePhase,
-        probability,
+        randomSampler,
         environment,
         kuery,
         start,
@@ -211,7 +210,7 @@ export async function getServiceStatistics({
         setup,
         searchAggregatedTransactions,
         indexLifecyclePhase,
-        probability,
+        randomSampler,
         environment,
         kuery,
         start,

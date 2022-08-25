@@ -29,12 +29,13 @@ import {
   getTotalIndicesStats,
   getEstimatedSizeForDocumentsInIndex,
 } from './indices_stats_helpers';
+import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 
 export async function getStorageDetailsPerProcessorEvent({
   setup,
   context,
   indexLifecyclePhase,
-  probability,
+  randomSampler,
   start,
   end,
   environment,
@@ -44,7 +45,7 @@ export async function getStorageDetailsPerProcessorEvent({
   setup: Setup;
   context: ApmPluginRequestHandlerContext;
   indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
-  probability: number;
+  randomSampler: RandomSampler;
   start: number;
   end: number;
   environment: string;
@@ -86,9 +87,7 @@ export async function getStorageDetailsPerProcessorEvent({
         },
         aggs: {
           sample: {
-            random_sampler: {
-              probability,
-            },
+            random_sampler: randomSampler,
             aggs: {
               processor_event: {
                 terms: {

@@ -20,6 +20,7 @@ import {
 } from '../../default_api_types';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { getStorageDetailsPerProcessorEvent } from './get_storage_details_per_processor_event';
+import { getRandomSampler } from '../../../lib/helpers/get_random_sampler';
 
 const storageExplorerRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/storage_explorer',
@@ -44,8 +45,12 @@ const storageExplorerRoute = createApmServerRoute({
       sampling: number;
     }>;
   }> => {
-    const setup = await setupRequest(resources);
-    const { params, context } = resources;
+    const {
+      params,
+      context,
+      request,
+      plugins: { security },
+    } = resources;
 
     const {
       query: {
@@ -58,6 +63,11 @@ const storageExplorerRoute = createApmServerRoute({
       },
     } = params;
 
+    const [setup, randomSampler] = await Promise.all([
+      setupRequest(resources),
+      getRandomSampler({ security, request, probability }),
+    ]);
+
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       apmEventClient: setup.apmEventClient,
       config: setup.config,
@@ -68,7 +78,7 @@ const storageExplorerRoute = createApmServerRoute({
       setup,
       context,
       indexLifecyclePhase,
-      probability,
+      randomSampler,
       environment,
       kuery,
       start,
@@ -110,8 +120,12 @@ const storageExplorerServiceDetailsRoute = createApmServerRoute({
       size: number;
     }>;
   }> => {
-    const setup = await setupRequest(resources);
-    const { params, context } = resources;
+    const {
+      params,
+      context,
+      request,
+      plugins: { security },
+    } = resources;
 
     const {
       path: { serviceName },
@@ -125,11 +139,16 @@ const storageExplorerServiceDetailsRoute = createApmServerRoute({
       },
     } = params;
 
+    const [setup, randomSampler] = await Promise.all([
+      setupRequest(resources),
+      getRandomSampler({ security, request, probability }),
+    ]);
+
     const processorEventStats = await getStorageDetailsPerProcessorEvent({
       setup,
       context,
       indexLifecyclePhase,
-      probability,
+      randomSampler,
       environment,
       kuery,
       start,
