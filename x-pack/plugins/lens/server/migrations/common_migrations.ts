@@ -30,10 +30,11 @@ import {
   LensDocShape810,
   LensDocShape830,
   VisStatePre830,
-  XYVisStatePre850,
-  XYVisState850,
+  XYVisStatePre840,
+  VisState840,
+  LensDocShape840,
 } from './types';
-import { DOCUMENT_FIELD_NAME, layerTypes, MetricState } from '../../common';
+import { DOCUMENT_FIELD_NAME, layerTypes, LegacyMetricState } from '../../common';
 import { LensDocShape } from './saved_object_migrations';
 
 export const commonRenameOperationsForFormula = (
@@ -250,7 +251,7 @@ export const commonLockOldMetricVisSettings = (
     return newAttributes as LensDocShape830<VisState830>;
   }
 
-  const visState = newAttributes.state.visualization as MetricState;
+  const visState = newAttributes.state.visualization as LegacyMetricState;
   visState.textAlign = visState.textAlign ?? 'center';
   visState.titlePosition = visState.titlePosition ?? 'bottom';
   visState.size = visState.size ?? 'xl';
@@ -402,14 +403,14 @@ export const commonFixValueLabelsInXY = (
 };
 
 export const commonExplicitAnnotationType = (
-  attributes: LensDocShape830<XYVisStatePre850>
-): LensDocShape830<XYVisState850> => {
+  attributes: LensDocShape840<XYVisStatePre840>
+): LensDocShape840<VisState840> => {
   // Skip the migration heavy part if not XY or it does not contain annotations
   if (
     attributes.visualizationType !== 'lnsXY' ||
     attributes.state.visualization.layers.every((l) => l.layerType !== 'annotations')
   ) {
-    return attributes as LensDocShape830<XYVisState850>;
+    return attributes as LensDocShape840<VisState840>;
   }
   const newAttributes = cloneDeep(attributes);
   const { visualization } = newAttributes.state;
@@ -432,4 +433,22 @@ export const commonExplicitAnnotationType = (
       },
     },
   };
+};
+
+export const commonMigrateMetricIds = (
+  attributes: LensDocShape840<unknown>
+): LensDocShape840<unknown> => {
+  const typeMappings = {
+    lnsMetric: 'lnsLegacyMetric',
+    lnsMetricNew: 'lnsMetric',
+  } as Record<string, string>;
+
+  if (!attributes.visualizationType || !(attributes.visualizationType in typeMappings)) {
+    return attributes as LensDocShape840<unknown>;
+  }
+
+  const newAttributes = cloneDeep(attributes);
+  newAttributes.visualizationType = typeMappings[attributes.visualizationType];
+
+  return newAttributes;
 };
