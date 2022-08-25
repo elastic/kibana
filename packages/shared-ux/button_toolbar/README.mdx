@@ -7,5 +7,17 @@ tags: ['shared-ux', 'component', 'toolbar']
 date: 2022-07-28
 ---
 
-This `toolbar` component is a component that requires the prop `children`. The `children` prop can include the `popover`, previously primary now generic `button`, `icon button group` and `add from library button` for solutions. 
+This `toolbar` component accepts a `children` prop. Children can include a `popover` or a generic `button`. It can also include the `IconButtonGroup` and `AddFromLibrary` component for soltuions. 
 Styling of the popover and button follow the primary styles.
+
+
+```jsx
+   <Toolbar>
+      {{
+        primaryButton,
+        iconButtonGroup,
+        extraButtons,
+        addFromLibraryButton,
+      }}
+    </Toolbar>
+```

@@ -10,4 +10,4 @@ export { Toolbar } from './toolbar';
 
 export type { Props as ToolbarProps } from './toolbar';
 
-export type { Button } from './toolbar';
+export type { ToolbarButton } from './toolbar';

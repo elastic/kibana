@@ -11,15 +11,16 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { IconButtonGroup, PrimaryButton } from '../buttons';
 import { ToolbarPopover } from '../popover';
+import { i18n } from '@kbn/i18n';
 
 /** type for cases with both button or a popover could be used */
-export type Button = typeof PrimaryButton | typeof ToolbarPopover;
+export type ToolbarButton = typeof PrimaryButton | typeof ToolbarPopover;
 
 /** Specific type for the toolbar children in its props */
 interface NamedSlots {
-  primaryButton: ReactElement<Button>;
+  primaryButton: ReactElement<ToolbarButton>;
   iconButtonGroup?: ReactElement<typeof IconButtonGroup>;
-  extraButtons?: Array<ReactElement<Button>> | undefined;
+  extraButtons?: Array<ReactElement<ToolbarButton>> | undefined;
 }
 
 /**
@@ -28,6 +29,10 @@ interface NamedSlots {
 export interface Props {
   children: NamedSlots;
 }
+
+const errorText = i18n.translate('sharedUXPackages.buttonToolbar.toolbar.errorToolbarText', {
+  defaultMessage: 'There are over 120 extra buttons. Please consider limiting the number of buttons.'
+});
 
 /**
  *
@@ -38,9 +43,7 @@ export const Toolbar = ({ children }: Props) => {
   const { primaryButton, iconButtonGroup, extraButtons = [] } = children;
 
   if (extraButtons.length > 120) {
-    throw new Error(
-      'There are over 120 extra buttons. Please consider limiting the number of buttons.'
-    );
+    throw new Error(errorText);
   }
 
   const extra = extraButtons.map((button, index) =>
