@@ -251,14 +251,6 @@ describe('SavedObjectsRepository', () => {
     })
   );
 
-  /*
-  const documentMigrator = new DocumentMigrator({
-    typeRegistry: registry,
-    kibanaVersion: KIBANA_VERSION,
-    log: loggerMock.create(),
-  });
-   */
-
   const getMockGetResponse = (
     {
       type,

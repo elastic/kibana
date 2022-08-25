@@ -8,6 +8,8 @@
 
 export { KibanaMigrator, buildActiveMappings, mergeTypes } from './src';
 export type { KibanaMigratorOptions } from './src';
+export { getAggregatedTypesDocuments } from './src/actions/check_for_unknown_docs';
+export { addExcludedTypesToBoolQuery } from './src/model/helpers';
 
 // these are only used for integration tests
 export {
@@ -49,8 +51,6 @@ export {
   isWriteBlockException,
   isIndexNotFoundException,
 } from './src/actions/es_errors';
-export { getAggregatedTypesDocuments } from './src/actions/check_for_unknown_docs';
-export { addExcludedTypesToBoolQuery } from './src/model/helpers';
 export { deterministicallyRegenerateObjectId } from './src/core/document_migrator';
 export {
   REMOVED_TYPES,
