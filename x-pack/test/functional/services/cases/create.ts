@@ -8,12 +8,25 @@
 import { CaseSeverity } from '@kbn/cases-plugin/common/api';
 import uuid from 'uuid';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import type { CasesCommon } from './common';
 
-export function CasesCreateViewServiceProvider({ getService, getPageObject }: FtrProviderContext) {
+export interface CreateCaseParams {
+  title?: string;
+  description?: string;
+  tag?: string;
+  severity?: CaseSeverity;
+  owner?: string;
+}
+
+export function CasesCreateViewServiceProvider(
+  { getService, getPageObject }: FtrProviderContext,
+  casesCommon: CasesCommon
+) {
   const common = getPageObject('common');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const comboBox = getService('comboBox');
+  const retry = getService('retry');
 
   return {
     /**
@@ -41,18 +54,10 @@ export function CasesCreateViewServiceProvider({ getService, getPageObject }: Ft
       tag = 'tagme',
       severity = CaseSeverity.LOW,
       owner,
-    }: {
-      title?: string;
-      description?: string;
-      tag?: string;
-      severity?: CaseSeverity;
-      owner?: string;
-    }) {
-      // case name
-      await testSubjects.setValue('input', title);
+    }: CreateCaseParams) {
+      await this.setCaseTitle(title);
 
-      // case tag
-      await comboBox.setCustom('comboBoxInput', tag);
+      await this.setCaseTags(tag);
 
       // case description
       const descriptionArea = await find.byCssSelector('textarea.euiMarkdownEditorTextArea');
@@ -72,6 +77,37 @@ export function CasesCreateViewServiceProvider({ getService, getPageObject }: Ft
 
       // save
       await testSubjects.click('create-case-submit');
+    },
+
+    async setCaseTitle(title: string) {
+      await testSubjects.setValue('input', title);
+    },
+
+    async setCaseTags(tag: string) {
+      await comboBox.setCustom('comboBoxInput', tag);
+    },
+
+    async assertCreateCaseFlyoutVisible(expectVisible = true) {
+      await retry.tryForTime(5000, async () => {
+        if (expectVisible) {
+          await testSubjects.existOrFail('create-case-flyout');
+        } else {
+          await testSubjects.missingOrFail('create-case-flyout');
+        }
+      });
+    },
+
+    async creteCaseFromFlyout(params: CreateCaseParams) {
+      await this.assertCreateCaseFlyoutVisible(true);
+      await this.createCase(params);
+      await this.assertCreateCaseFlyoutVisible(false);
+    },
+
+    async createCaseFromModal(params: CreateCaseParams) {
+      await casesCommon.assertCaseModalVisible(true);
+      await testSubjects.click('cases-table-add-case-filter-bar');
+      await casesCommon.assertCaseModalVisible(false);
+      await this.creteCaseFromFlyout(params);
     },
   };
 }

@@ -6,9 +6,12 @@
  */
 
 import expect from '@kbn/expect';
+import { ProvidedType } from '@kbn/test';
 import { CaseStatuses } from '@kbn/cases-plugin/common';
 import { CaseSeverity } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../ftr_provider_context';
+
+export type CasesCommon = ProvidedType<typeof CasesCommonServiceProvider>;
 
 export function CasesCommonServiceProvider({ getService, getPageObject }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -16,6 +19,7 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
   const header = getPageObject('header');
   const common = getPageObject('common');
   const toasts = getService('toasts');
+  const retry = getService('retry');
 
   return {
     /**
@@ -74,6 +78,16 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
       const toast = await toasts.getToastElement(1);
       expect(await toast.getVisibleText()).to.contain(content);
       await toasts.dismissAllToasts();
+    },
+
+    async assertCaseModalVisible(expectVisible = true) {
+      await retry.tryForTime(5000, async () => {
+        if (expectVisible) {
+          await testSubjects.existOrFail('all-cases-modal');
+        } else {
+          await testSubjects.missingOrFail('all-cases-modal');
+        }
+      });
     },
   };
 }

@@ -26,6 +26,7 @@ import type {
   CasesMetricsRequest,
   CasesStatusRequest,
   CommentRequestAlertType,
+  CommentRequestPersistableStateType,
   CommentRequestUserType,
 } from '../common/api';
 import type { UseCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
@@ -144,7 +145,11 @@ export interface CasesUiStart {
   };
 }
 
-export type SupportedCaseAttachment = CommentRequestAlertType | CommentRequestUserType;
+export type SupportedCaseAttachment =
+  | CommentRequestAlertType
+  | CommentRequestUserType
+  | CommentRequestPersistableStateType;
+
 export type CaseAttachments = SupportedCaseAttachment[];
 export type CaseAttachmentWithoutOwner = DistributiveOmit<SupportedCaseAttachment, 'owner'>;
 export type CaseAttachmentsWithoutOwner = CaseAttachmentWithoutOwner[];

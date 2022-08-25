@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { AnomalySwimlaneEmbeddableFactory } from './anomaly_swimlane_embeddable_factory';
-export { getEmbeddableComponent as getAnomalySwimLaneEmbeddableComponent } from './embeddable_component';
+export { registerCasesAttachments } from './register_cases_attachments';

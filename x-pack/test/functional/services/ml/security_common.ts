@@ -153,6 +153,7 @@ export function MachineLearningSecurityCommonProvider({ getService }: FtrProvide
             savedObjectsManagement: ['all'],
             advancedSettings: ['all'],
             indexPatterns: ['all'],
+            generalCases: ['all'],
           },
           spaces: ['*'],
         },

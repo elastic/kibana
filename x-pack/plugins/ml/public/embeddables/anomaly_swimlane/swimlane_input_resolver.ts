@@ -151,7 +151,9 @@ export function useSwimlaneInputResolver(
 
           let appliedFilters: any;
           try {
-            appliedFilters = processFilters(filters, query, CONTROLLED_BY_SWIM_LANE_FILTER);
+            if (filters && query) {
+              appliedFilters = processFilters(filters, query, CONTROLLED_BY_SWIM_LANE_FILTER);
+            }
           } catch (e) {
             // handle query syntax errors
             setError(e);

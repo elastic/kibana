@@ -25,7 +25,10 @@ import { mlApiServicesProvider } from './services/ml_api_service';
 import { HttpService } from './services/http_service';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../common/constants/locator';
 
-export type MlDependencies = Omit<MlSetupDependencies, 'share' | 'fieldFormats' | 'maps'> &
+export type MlDependencies = Omit<
+  MlSetupDependencies,
+  'share' | 'fieldFormats' | 'maps' | 'cases'
+> &
   MlStartDependencies;
 
 interface AppProps {
@@ -87,6 +90,7 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
     fieldFormats: deps.fieldFormats,
     dashboard: deps.dashboard,
     charts: deps.charts,
+    cases: deps.cases,
     ...coreStart,
   };
 

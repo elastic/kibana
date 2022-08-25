@@ -23,6 +23,7 @@ import {
   AnomalySwimlaneServices,
 } from '..';
 import { EmbeddableLoading } from '../common/components/embeddable_loading_fallback';
+
 export const getDefaultSwimlanePanelTitle = (jobIds: JobId[]) =>
   i18n.translate('xpack.ml.swimlaneEmbeddable.title', {
     defaultMessage: 'ML anomaly swim lane for {jobIds}',
@@ -90,7 +91,7 @@ export class AnomalySwimlaneEmbeddable extends Embeddable<
               <EmbeddableSwimLaneContainer
                 id={this.input.id}
                 embeddableContext={this}
-                embeddableInput={this.getInput$()}
+                embeddableInput$={this.getInput$()}
                 services={this.services}
                 refresh={this.reload$.asObservable()}
                 onInputChange={this.updateInput.bind(this)}
