@@ -7,44 +7,11 @@
 
 import { useEffect, useMemo, useReducer } from 'react';
 import { useQueryAlerts } from '../../../../../detections/containers/detection_engine/alerts/use_query';
-import type { AlertsByStatusAgg } from '../../alerts_by_status/types';
 import type { GlobalTimeArgs } from '../../../../../common/containers/use_global_time';
 import * as i18n from '../translations';
 import { getPercChange } from '../helpers';
+import { statReducer } from './stat_reducer';
 import type { StatState } from './use_soc_trends';
-
-type CriticalAlertsActions =
-  | {
-      type: 'setUpdatedAt';
-      updatedAt: StatState['updatedAt'];
-    }
-  | {
-      type: 'setIsLoading';
-      isLoading: StatState['isLoading'];
-    }
-  | {
-      type: 'setStat';
-      stat: StatState['stat'];
-    }
-  | {
-      type: 'setPercentage';
-      percentage: StatState['percentage'];
-    };
-
-const reducer = (state: StatState, action: CriticalAlertsActions) => {
-  switch (action.type) {
-    case 'setIsLoading':
-      return { ...state, isLoading: action.isLoading };
-    case 'setUpdatedAt':
-      return { ...state, updatedAt: action.updatedAt };
-    case 'setStat':
-      return { ...state, stat: action.stat };
-    case 'setPercentage':
-      return { ...state, percentage: action.percentage };
-    default:
-      throw new Error();
-  }
-};
 
 export interface UseCriticalAlerts {
   deleteQuery: GlobalTimeArgs['deleteQuery'];
@@ -56,16 +23,37 @@ export interface UseCriticalAlerts {
   to: GlobalTimeArgs['to'];
   toCompare: string;
 }
-
+export interface CriticalOpenAlertsAgg {
+  open: {
+    doc_count: number;
+    critical: {
+      doc_count: number;
+    };
+  };
+}
 const getCriticalAlertsQuery = ({ from, to }: { from: string; to: string }) => ({
   size: 0,
   query: {
     bool: {
-      must: [
-        { match: { 'kibana.alert.workflow_status': 'open' } },
-        { match: { 'kibana.alert.severity': 'critical' } },
-      ],
       filter: [{ range: { '@timestamp': { gte: from, lte: to } } }],
+    },
+  },
+  aggs: {
+    open: {
+      filter: {
+        term: {
+          'kibana.alert.workflow_status': 'open',
+        },
+      },
+      aggs: {
+        critical: {
+          filter: {
+            term: {
+              'kibana.alert.severity': 'critical',
+            },
+          },
+        },
+      },
     },
   },
 });
@@ -78,7 +66,7 @@ export const useCriticalAlerts = ({
   to,
   toCompare,
 }: UseCriticalAlerts): StatState => {
-  const [state, dispatch] = useReducer(reducer, {
+  const [state, dispatch] = useReducer(statReducer, {
     description: i18n.CRITICAL_ALERTS_DESCRIPTION,
     isLoading: true,
     percentage: {
@@ -112,7 +100,7 @@ export const useCriticalAlerts = ({
     data: dataCurrent,
     loading: isLoadingCurrent,
     setQuery: setAlertsQueryCurrent,
-  } = useQueryAlerts<{}, AlertsByStatusAgg>({
+  } = useQueryAlerts<{}, CriticalOpenAlertsAgg>({
     query: currentTimeQuery,
     indexName: signalIndexName,
     skip,
@@ -122,7 +110,7 @@ export const useCriticalAlerts = ({
     data: dataCompare,
     loading: isLoadingCompare,
     setQuery: setAlertsQueryCompare,
-  } = useQueryAlerts<{}, AlertsByStatusAgg>({
+  } = useQueryAlerts<{}, CriticalOpenAlertsAgg>({
     query: compareTimeQuery,
     indexName: signalIndexName,
     skip,
@@ -142,9 +130,8 @@ export const useCriticalAlerts = ({
   }, [isLoadingCurrent, isLoadingCompare]);
 
   useEffect(() => {
-    const current = dataCurrent ? dataCurrent.hits.total.value : null;
-    const compare = dataCompare ? dataCompare.hits.total.value : null;
-    console.log('STATS', { current, compare });
+    const current = dataCurrent?.aggregations?.open.critical.doc_count ?? null;
+    const compare = dataCompare?.aggregations?.open.critical.doc_count ?? null;
     const percentageChange = getPercChange(current, compare);
     if (current != null) {
       dispatch({

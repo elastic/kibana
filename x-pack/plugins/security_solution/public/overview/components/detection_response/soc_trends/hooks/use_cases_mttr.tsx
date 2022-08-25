@@ -7,45 +7,13 @@
 
 import { useEffect, useMemo, useReducer } from 'react';
 import uuid from 'uuid';
+import { statReducer } from './stat_reducer';
 import type { GlobalTimeArgs } from '../../../../../common/containers/use_global_time';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { APP_ID } from '../../../../../../common/constants';
 import { getPercChange, makePrettyNumber } from '../helpers';
 import * as i18n from '../translations';
 import type { StatState } from './use_soc_trends';
-
-type CasesMttrActions =
-  | {
-      type: 'setUpdatedAt';
-      updatedAt: StatState['updatedAt'];
-    }
-  | {
-      type: 'setIsLoading';
-      isLoading: StatState['isLoading'];
-    }
-  | {
-      type: 'setStat';
-      stat: StatState['stat'];
-    }
-  | {
-      type: 'setPercentage';
-      percentage: StatState['percentage'];
-    };
-
-const reducer = (state: StatState, action: CasesMttrActions) => {
-  switch (action.type) {
-    case 'setIsLoading':
-      return { ...state, isLoading: action.isLoading };
-    case 'setUpdatedAt':
-      return { ...state, updatedAt: action.updatedAt };
-    case 'setStat':
-      return { ...state, stat: action.stat };
-    case 'setPercentage':
-      return { ...state, percentage: action.percentage };
-    default:
-      throw new Error();
-  }
-};
 
 export interface UseCasesMttr {
   deleteQuery: GlobalTimeArgs['deleteQuery'];
@@ -70,7 +38,7 @@ export const useCasesMttr = ({
     services: { cases },
   } = useKibana();
   const uniqueQueryId = useMemo(() => `useCasesMttr-${uuid.v4()}`, []);
-  const [state, dispatch] = useReducer(reducer, {
+  const [state, dispatch] = useReducer(statReducer, {
     description: i18n.CASES_MTTR_DESCRIPTION,
     isLoading: true,
     percentage: {

@@ -10,7 +10,7 @@ import { useSocTrends } from './use_soc_trends';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../../../common/mock';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
-import { useCasesMttr } from './use_cases_mttr';
+import * as i18n from '../translations';
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -25,23 +25,12 @@ const dateNow = new Date('2022-04-15T12:00:00.000Z').valueOf();
 const mockDateNow = jest.fn().mockReturnValue(dateNow);
 Date.now = jest.fn(() => mockDateNow()) as unknown as DateConstructor['now'];
 
-jest.mock('./use_cases_mttr');
 jest.mock('../../../../../common/containers/use_global_time');
 describe('useSocTrends', () => {
   const wrapperContainer: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
     <TestProviders>{children}</TestProviders>
   );
   beforeEach(() => {
-    (useCasesMttr as jest.Mock).mockReturnValue({
-      updatedAt: Date.now(),
-      isLoading: true,
-      casesMttr: '-',
-      percentage: {
-        percent: null,
-        color: 'hollow',
-        note: 'There is no case data to compare',
-      },
-    });
     (useGlobalTime as jest.Mock).mockReturnValue({
       from: '2020-07-07T08:20:18.966Z',
       deleteQuery: () => {},
@@ -54,21 +43,44 @@ describe('useSocTrends', () => {
   });
   it('loads initial state', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useSocTrends({ skip: false }), {
-        wrapper: wrapperContainer,
-      });
+      const { result, waitForNextUpdate } = renderHook(
+        () => useSocTrends({ skip: false, signalIndexName: '.alerts-default' }),
+        {
+          wrapper: wrapperContainer,
+        }
+      );
       await waitForNextUpdate();
       expect(result.current).toEqual({
-        casesMttr: {
-          casesMttr: '-',
-          isLoading: true,
-          percentage: {
-            percent: null,
-            color: 'hollow',
-            note: 'There is no case data to compare',
+        stats: [
+          {
+            stat: '-',
+            isLoading: true,
+            percentage: {
+              percent: null,
+              color: 'hollow',
+              note: i18n.NO_DATA('case'),
+            },
+            testRef: 'casesMttr',
+            title: i18n.CASES_MTTR_STAT,
+            description: i18n.CASES_MTTR_DESCRIPTION,
+            updatedAt: dateNow,
           },
-          updatedAt: dateNow,
-        },
+          {
+            stat: '-',
+            isLoading: true,
+            percentage: {
+              percent: null,
+              color: 'hollow',
+              note: i18n.NO_DATA('alerts'),
+            },
+            testRef: 'criticalAlerts',
+            title: i18n.CRITICAL_ALERTS_STAT,
+            description: i18n.CRITICAL_ALERTS_DESCRIPTION,
+            updatedAt: dateNow,
+          },
+        ],
+        isUpdating: true,
+        latestUpdate: dateNow,
       });
     });
   });
