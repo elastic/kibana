@@ -109,11 +109,11 @@ export interface SearchResponseWarning {
    */
   reason?: estypes.ShardFailure['reason']['reason'];
   /**
-   * message: failure reason from ES
+   * message: human-friendly message
    */
   message: string;
   /**
-   * text: human-friendly error message
+   * text: text to show in ShardFailureModal (optional)
    */
   text?: string;
 }
