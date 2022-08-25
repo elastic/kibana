@@ -31,7 +31,7 @@ describe('When using processes action from response actions console', () => {
 
     apiMocks = responseActionsHttpMocks(mockedContext.coreStart.http);
 
-    render = async () => {
+    render = async (capabilities: string[] = RESPONDER_CAPABILITIES) => {
       renderResult = mockedContext.render(
         <ConsoleManagerTestComponent
           registerConsoleProps={() => {
@@ -40,7 +40,7 @@ describe('When using processes action from response actions console', () => {
                 'data-test-subj': 'test',
                 commands: getEndpointResponseActionsConsoleCommands({
                   endpointAgentId: 'a.b.c',
-                  endpointCapabilities: [...RESPONDER_CAPABILITIES],
+                  endpointCapabilities: [...capabilities],
                 }),
               },
             };
@@ -55,6 +55,15 @@ describe('When using processes action from response actions console', () => {
 
       return renderResult;
     };
+  });
+
+  it('should show an error if the `running_processes` capability is not present in the endpoint', async () => {
+    await render([]);
+    enterConsoleCommand(renderResult, 'processes');
+
+    expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
+      'The current version of the Agent does not support this feature. Upgrade your Agent through Fleet to use this feature and new response actions such as killing and suspending processes.'
+    );
   });
 
   it('should call `running-procs` api when command is entered', async () => {
