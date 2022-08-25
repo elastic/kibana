@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { FETCH_ALERTS } from '../../../../common/lib/apm/http_requests';
 import { buildVulnerableUserAggregationQuery } from './use_user_alerts_items';
 
 export const mockVulnerableUsersBySeverityResult = {
@@ -126,4 +127,5 @@ export const mockQuery = () => ({
   }),
   indexName: 'signal-alerts',
   skip: false,
+  monitoringKey: FETCH_ALERTS.VULNERABLE_USERS,
 });

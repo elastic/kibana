@@ -7,7 +7,7 @@
 
 export const mockApm = () => ({
   startTransaction: jest.fn(() => ({
-    addLabel: jest.fn(),
+    addLabels: jest.fn(),
     end: jest.fn(),
     startSpan: jest.fn(() => ({
       end: jest.fn(),

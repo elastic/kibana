@@ -45,14 +45,13 @@ const useMonitoredFetchMethod = (fetchMethod: FetchMethod, monitoringKey?: strin
     if (!monitoringKey) return fetchMethod;
 
     return async <Hit, Aggs>(params: QueryAlerts) => {
-      const { endTrackingSuccess, endTrackingError } = startTracking({ name: monitoringKey });
-
+      const { endTracking } = startTracking({ name: monitoringKey });
       let result: AlertSearchResponse<Hit, Aggs>;
       try {
         result = await fetchMethod<Hit, Aggs>(params);
-        endTrackingSuccess();
+        endTracking('success');
       } catch (err) {
-        endTrackingError(params.signal.aborted);
+        endTracking(params.signal.aborted ? 'aborted' : 'error');
         throw err;
       }
       return result;

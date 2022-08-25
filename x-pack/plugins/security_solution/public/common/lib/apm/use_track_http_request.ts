@@ -12,6 +12,8 @@ interface UseTrackHttpRequestOptions {
   spanName?: string;
 }
 
+export type RequestResult = 'success' | 'error' | 'aborted' | 'malformed';
+
 export const useTrackHttpRequest = () => {
   const { startTransaction } = useStartTransaction();
 
@@ -31,12 +33,8 @@ export const useTrackHttpRequest = () => {
         blocking: true,
       });
       return {
-        endTrackingSuccess: () => {
-          transaction?.addLabels({ result: 'success' });
-          span?.end();
-        },
-        endTrackingError: (aborted: boolean) => {
-          transaction?.addLabels({ result: aborted ? 'aborted' : 'error' });
+        endTracking: (result: RequestResult): void => {
+          transaction?.addLabels({ result });
           span?.end();
         },
       };

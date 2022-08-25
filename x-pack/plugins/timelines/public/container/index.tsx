@@ -131,12 +131,8 @@ const useApmTracking = (timelineId: string) => {
     // The blocking span needs to be ended manually when the batched request finishes.
     const span = transaction?.startSpan('batched search', 'http-request', { blocking: true });
     return {
-      endTrackingSuccess: () => {
-        transaction?.addLabels({ result: 'success' });
-        span?.end();
-      },
-      endTrackingError: (aborted: boolean) => {
-        transaction?.addLabels({ result: aborted ? 'aborted' : 'error' });
+      endTracking: (result: 'success' | 'error' | 'aborted' | 'malformed') => {
+        transaction?.addLabels({ result });
         span?.end();
       },
     };
@@ -236,7 +232,7 @@ export const useTimelineEvents = ({
         abortCtrl.current = new AbortController();
         setLoading(true);
         if (data && data.search) {
-          const { endTrackingSuccess, endTrackingError } = startTracking();
+          const { endTracking } = startTracking();
           const abortSignal = abortCtrl.current.signal;
 
           searchSubscription$.current = data.search
@@ -255,6 +251,7 @@ export const useTimelineEvents = ({
             .subscribe({
               next: (response) => {
                 if (isCompleteResponse(response)) {
+                  endTracking('success');
                   setTimelineResponse((prevResponse) => {
                     const newTimelineResponse = {
                       ...prevResponse,
@@ -268,19 +265,18 @@ export const useTimelineEvents = ({
                     setUpdated(newTimelineResponse.updatedAt);
                     return newTimelineResponse;
                   });
-                  endTrackingSuccess();
                   setLoading(false);
 
                   searchSubscription$.current.unsubscribe();
                 } else if (isErrorResponse(response)) {
-                  endTrackingError(abortSignal.aborted);
+                  endTracking('malformed');
                   setLoading(false);
                   addWarning(i18n.ERROR_TIMELINE_EVENTS);
                   searchSubscription$.current.unsubscribe();
                 }
               },
               error: (msg) => {
-                endTrackingError(abortSignal.aborted);
+                endTracking(abortSignal.aborted ? 'aborted' : 'error');
                 setLoading(false);
                 data.search.showError(msg);
                 searchSubscription$.current.unsubscribe();

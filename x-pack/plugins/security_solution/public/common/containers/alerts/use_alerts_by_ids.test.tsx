@@ -8,6 +8,7 @@
 import { renderHook } from '@testing-library/react-hooks';
 
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
+import { FETCH_ALERTS } from '../../lib/apm/http_requests';
 import { useAlertsByIds } from './use_alerts_by_ids';
 
 jest.mock('../../../detections/containers/detection_engine/alerts/use_query', () => ({
@@ -71,6 +72,7 @@ describe('useAlertsByIds', () => {
     renderHook(() => useAlertsByIds({ alertIds }));
 
     expect(mockUseQueryAlerts).toHaveBeenCalledWith({
+      monitoringKey: FETCH_ALERTS.BY_ID,
       query: expect.objectContaining({
         fields: ['*'],
         _source: false,
@@ -93,6 +95,7 @@ describe('useAlertsByIds', () => {
     renderHook(() => useAlertsByIds({ alertIds, fields: testFields }));
 
     expect(mockUseQueryAlerts).toHaveBeenCalledWith({
+      monitoringKey: FETCH_ALERTS.BY_ID,
       query: expect.objectContaining({ fields: testFields }),
     });
   });

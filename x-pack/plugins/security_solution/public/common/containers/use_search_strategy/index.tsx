@@ -27,7 +27,7 @@ import { APP_UI_ID } from '../../../../common/constants';
 
 interface UseSearchFunctionParams<QueryType extends FactoryQueryTypes> {
   request: StrategyRequestType<QueryType>;
-  signal: AbortSignal;
+  abortSignal: AbortSignal;
 }
 
 type UseSearchFunction<QueryType extends FactoryQueryTypes> = (
@@ -43,15 +43,15 @@ const EMPTY_INSPECT = {
   response: [],
 };
 
-const useSearch = <QueryType extends FactoryQueryTypes>(
+export const useSearch = <QueryType extends FactoryQueryTypes>(
   factoryQueryType: QueryType
 ): UseSearchFunction<QueryType> => {
   const { data } = useKibana().services;
   const { startTracking } = useTrackHttpRequest();
 
   const search = useCallback<UseSearchFunction<QueryType>>(
-    ({ signal, request }) => {
-      const { endTrackingSuccess, endTrackingError } = startTracking({
+    ({ abortSignal, request }) => {
+      const { endTracking } = startTracking({
         name: `${APP_UI_ID} searchStrategy ${factoryQueryType}`,
         spanName: 'batched search',
       });
@@ -61,17 +61,21 @@ const useSearch = <QueryType extends FactoryQueryTypes>(
           { ...request, factoryQueryType },
           {
             strategy: 'securitySolutionSearchStrategy',
-            abortSignal: signal,
+            abortSignal,
           }
         )
         .pipe(filter((response) => isErrorResponse(response) || isCompleteResponse(response)));
 
       observable.subscribe({
-        next: () => {
-          endTrackingSuccess();
+        next: (response) => {
+          if (isErrorResponse(response)) {
+            endTracking('malformed');
+          } else {
+            endTracking('success');
+          }
         },
         error: () => {
-          endTrackingError(signal.aborted);
+          endTracking(abortSignal.aborted ? 'aborted' : 'error');
         },
       });
 
@@ -128,7 +132,7 @@ export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
         abortCtrl.current = new AbortController();
         start({
           request,
-          signal: abortCtrl.current.signal,
+          abortSignal: abortCtrl.current.signal,
         });
       };
 
@@ -152,15 +156,16 @@ export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
     }
   }, [abort]);
 
-  const [formattedResult, inspect] = useMemo(
-    () => [
-      result
-        ? omit<StrategyResponseType<QueryType>, 'rawResponse'>('rawResponse', result)
-        : initialResult,
-      result ? getInspectResponse(result, EMPTY_INSPECT) : EMPTY_INSPECT,
-    ],
-    [result, initialResult]
-  );
+  const [formattedResult, inspect] = useMemo(() => {
+    if (isErrorResponse(result)) {
+      // TODO: Call addWarning() toast using an additional `warningMessage` prop. List at https://github.com/elastic/kibana/issues/129054
+      return [initialResult, EMPTY_INSPECT];
+    }
+    return [
+      omit<StrategyResponseType<QueryType>, 'rawResponse'>('rawResponse', result),
+      getInspectResponse(result, EMPTY_INSPECT),
+    ];
+  }, [result, initialResult]);
 
   return {
     loading,
