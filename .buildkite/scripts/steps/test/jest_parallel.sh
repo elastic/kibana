@@ -20,9 +20,16 @@ else
 fi
 
 export TEST_TYPE
-echo "--- downloading jest test run order"
-download_artifact jest_run_order.json .
-configs=$(jq -r 'getpath([env.TEST_TYPE]) | .groups[env.JOB | tonumber].names | .[]' jest_run_order.json)
+configs="x-pack/plugins/index_lifecycle_management/jest.config.js
+x-pack/plugins/index_lifecycle_management/jest.config.js
+x-pack/plugins/index_lifecycle_management/jest.config.js
+x-pack/plugins/index_lifecycle_management/jest.config.js
+x-pack/plugins/index_lifecycle_management/jest.config.js
+x-pack/plugins/index_lifecycle_management/jest.config.js
+x-pack/plugins/index_lifecycle_management/jest.config.js
+x-pack/plugins/index_lifecycle_management/jest.config.js
+x-pack/plugins/index_lifecycle_management/jest.config.js
+x-pack/plugins/index_lifecycle_management/jest.config.js"
 
 while read -r config; do
   echo "--- $ node scripts/jest --config $config"
