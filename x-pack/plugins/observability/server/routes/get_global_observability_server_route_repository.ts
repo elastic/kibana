@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { ObservabilityConfig } from '..';
-import { rulesRouteRepository } from './rules';
+import { rulesRouteRepository } from './rules/route';
 import { slosRouteRepository } from './slo/route';
 
 export function getGlobalObservabilityServerRouteRepository(config: ObservabilityConfig) {
