@@ -15,6 +15,7 @@ import {
   euiPaletteColorBlind,
   EuiPanel,
   EuiFlexGrid,
+  EuiSpacer,
 } from '@elastic/eui';
 import { useChartTheme } from '@kbn/observability-plugin/public';
 import {
@@ -28,21 +29,18 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { sumBy } from 'lodash';
 import { IndexLifecyclePhaseSelectOption } from '../../../../../../common/storage_explorer_types';
 import { useApmParams } from '../../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../../hooks/use_time_range';
 import { FETCH_STATUS } from '../../../../../hooks/use_fetcher';
 import { useProgressiveFetcher } from '../../../../../hooks/use_progressive_fetcher';
 import { useApmRouter } from '../../../../../hooks/use_apm_router';
-import {
-  asInteger,
-  asPercent,
-} from '../../../../../../common/utils/formatters/formatters';
+import { asInteger } from '../../../../../../common/utils/formatters/formatters';
 import { NOT_AVAILABLE_LABEL } from '../../../../../../common/i18n';
 import { asDynamicBytes } from '../../../../../../common/utils/formatters';
 import { getComparisonEnabled } from '../../../../shared/time_comparison/get_comparison_enabled';
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
+import { SizeLabel } from './size_label';
 
 interface Props {
   serviceName: string;
@@ -154,7 +152,6 @@ export function StorageDetailsPerService({
       size,
     })
   );
-  const serviceDocs = sumBy(processorEventStats, 'docs');
 
   return (
     <>
@@ -228,39 +225,35 @@ export function StorageDetailsPerService({
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiPanel hasShadow={false} paddingSize="xl">
-                {processorEventStats.map(({ processorEventLabel, docs }) => (
-                  <>
-                    <EuiFlexGrid
-                      columns={2}
-                      css={css`
-                        font-weight: bold;
-                      `}
-                    >
-                      <EuiFlexItem>{processorEventLabel}</EuiFlexItem>
-                      <EuiFlexItem>
-                        {i18n.translate(
-                          'xpack.apm.settings.storageExplorer.serviceDetails.ratio',
-                          {
-                            defaultMessage: 'Ratio',
-                          }
-                        )}
-                      </EuiFlexItem>
-                    </EuiFlexGrid>
-                    <EuiFlexGrid
-                      columns={2}
-                      css={css`
-                        background-color: ${euiTheme.colors.lightestShade};
-                        border-top: 1px solid ${euiTheme.colors.lightShade};
-                        border-bottom: 1px solid ${euiTheme.colors.lightShade};
-                      `}
-                    >
-                      <EuiFlexItem>{asInteger(docs)}</EuiFlexItem>
-                      <EuiFlexItem>
-                        {asPercent(docs / serviceDocs, 1)}
-                      </EuiFlexItem>
-                    </EuiFlexGrid>
-                  </>
-                ))}
+                {processorEventStats.map(
+                  ({ processorEventLabel, docs, size }) => (
+                    <>
+                      <EuiFlexGrid
+                        columns={2}
+                        css={css`
+                          font-weight: bold;
+                        `}
+                      >
+                        <EuiFlexItem>{processorEventLabel}</EuiFlexItem>
+                        <EuiFlexItem>
+                          <SizeLabel />
+                        </EuiFlexItem>
+                      </EuiFlexGrid>
+                      <EuiFlexGrid
+                        columns={2}
+                        css={css`
+                          background-color: ${euiTheme.colors.lightestShade};
+                          border-top: 1px solid ${euiTheme.colors.lightShade};
+                          border-bottom: 1px solid ${euiTheme.colors.lightShade};
+                        `}
+                      >
+                        <EuiFlexItem>{asInteger(docs)}</EuiFlexItem>
+                        <EuiFlexItem>{asDynamicBytes(size)}</EuiFlexItem>
+                      </EuiFlexGrid>
+                      <EuiSpacer />
+                    </>
+                  )
+                )}
               </EuiPanel>
             </EuiFlexItem>
           </EuiFlexGroup>

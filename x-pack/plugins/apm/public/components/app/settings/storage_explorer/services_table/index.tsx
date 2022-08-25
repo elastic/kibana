@@ -31,6 +31,7 @@ import { useApmParams } from '../../../../../hooks/use_apm_params';
 import { FETCH_STATUS } from '../../../../../hooks/use_fetcher';
 import { useProgressiveFetcher } from '../../../../../hooks/use_progressive_fetcher';
 import { useTimeRange } from '../../../../../hooks/use_time_range';
+import { SizeLabel } from './size_label';
 import type { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
 
 type StorageExplorerItems =
@@ -187,31 +188,7 @@ export function ServicesTable({ indexLifecyclePhase }: Props) {
       },
       {
         field: 'size',
-        name: (
-          <EuiToolTip
-            content={i18n.translate(
-              'xpack.apm.settings.storageExplorer.table.sizeColumnDescription',
-              {
-                defaultMessage: `The estimated storage size per service. This estimate includes primary and replica shards and is calculated by prorating the total size of your indices by the service's document count divided by the total number of documents.`,
-              }
-            )}
-          >
-            <>
-              {i18n.translate(
-                'xpack.apm.settings.storageExplorer.table.sizeColumnName',
-                {
-                  defaultMessage: 'Size',
-                }
-              )}{' '}
-              <EuiIcon
-                size="s"
-                color="subdued"
-                type="questionInCircle"
-                className="eui-alignTop"
-              />
-            </>
-          </EuiToolTip>
-        ),
+        name: <SizeLabel />,
         render: (_, { size }) => asDynamicBytes(size) || NOT_AVAILABLE_LABEL,
         sortable: true,
       },
