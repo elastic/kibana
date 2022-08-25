@@ -20,7 +20,6 @@ export interface FilterBadgeProps {
 }
 
 const cursor = css`
-  cursor: pointer;
   padding: 5px;
 `;
 
