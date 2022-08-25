@@ -39,6 +39,8 @@ describe('extract search response warnings', () => {
     expect(extractWarnings(response)).toEqual([
       {
         message: '2 of 4 shards failed',
+        reason:
+          'Field [kubernetes.container.memory.available.bytes] of type [aggregate_metric_double] is not supported for aggregation [percentiles]',
         text: 'The data you are seeing might be incomplete or wrong.',
         type: 'illegal_argument_exception',
       },

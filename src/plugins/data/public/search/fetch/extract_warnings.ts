@@ -43,9 +43,15 @@ export function extractWarnings(rawResponse: estypes.SearchResponse): SearchResp
 
     if (rawResponse._shards.failures) {
       rawResponse._shards.failures?.forEach((f) => {
-        warnings.push({ type: f.reason.type, message, text });
+        warnings.push({
+          type: f.reason.type,
+          reason: f.reason.reason,
+          message,
+          text,
+        });
       });
     } else {
+      // unknown type and reason
       warnings.push({ type: 'generic_shard_warning', message, text });
     }
   }

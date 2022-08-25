@@ -101,9 +101,13 @@ export interface SearchServiceStartDependencies {
  */
 export interface SearchResponseWarning {
   /**
-   * type:  for handling the warning in logic
+   * type: failure code from Elasticsearch
    */
-  type: 'timed_out' | 'generic_shard_warning' | estypes.ShardFailure['reason']['reason'];
+  type: 'timed_out' | 'generic_shard_warning' | estypes.ShardFailure['reason']['type'];
+  /**
+   * reason: failure reason from Elasticsearch
+   */
+  reason?: estypes.ShardFailure['reason']['reason'];
   /**
    * message: failure reason from ES
    */
