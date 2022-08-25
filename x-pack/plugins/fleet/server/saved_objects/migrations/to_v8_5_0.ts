@@ -14,7 +14,7 @@ export const migratePackagePolicyToV850: SavedObjectMigrationFn<PackagePolicy, P
   packagePolicyDoc,
   migrationContext
 ) => {
-  // @ts-expect-error
+  // @ts-expect-error output_id property does not exists anymore
   delete packagePolicyDoc.attributes.output_id;
 
   return packagePolicyDoc;
