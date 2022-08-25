@@ -21,19 +21,8 @@ import { getHostedPolicies, isHostedAgent } from './hosted_agent';
 import { BulkActionTaskType } from './bulk_actions_resolver';
 
 export class UnenrollActionRunner extends ActionRunner {
-  protected async processAgents(
-    agents: Agent[],
-    actionId: string,
-    total?: number
-  ): Promise<{ items: BulkActionResult[] }> {
-    return await unenrollBatch(
-      this.soClient,
-      this.esClient,
-      agents,
-      { ...this.actionParams, actionId },
-      true,
-      total
-    );
+  protected async processAgents(agents: Agent[]): Promise<{ items: BulkActionResult[] }> {
+    return await unenrollBatch(this.soClient, this.esClient, agents, this.actionParams!, true);
   }
 
   protected getTaskType() {
@@ -53,9 +42,9 @@ export async function unenrollBatch(
     force?: boolean;
     revoke?: boolean;
     actionId?: string;
+    total?: number;
   },
-  skipSuccess?: boolean,
-  total?: number
+  skipSuccess?: boolean
 ): Promise<{ items: BulkActionResult[] }> {
   // Filter to those not already unenrolled, or unenrolling
   const agentsEnrolled = givenAgents.filter((agent) => {
@@ -95,7 +84,7 @@ export async function unenrollBatch(
       agents: agentsToUpdate.map((agent) => agent.id),
       created_at: now,
       type: 'UNENROLL',
-      total,
+      total: options.total,
     });
   }
 

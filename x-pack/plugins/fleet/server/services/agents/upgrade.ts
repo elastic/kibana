@@ -102,7 +102,7 @@ export async function sendUpgradeAgentsActions(
     if (res.total <= batchSize) {
       givenAgents = res.agents;
     } else {
-      return await new UpgradeActionRunner(esClient, soClient, options).runActionAsyncWithRetry({
+      return await new UpgradeActionRunner(esClient, soClient).runActionAsyncWithRetry({
         ...options,
         batchSize,
         totalAgents: res.total,

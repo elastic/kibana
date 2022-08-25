@@ -87,7 +87,7 @@ export async function unenrollAgents(
     const givenAgents = await getAgents(esClient, options);
     return await unenrollBatch(soClient, esClient, givenAgents, options);
   } else {
-    return await new UnenrollActionRunner(esClient, soClient, options).runActionAsyncWithRetry({
+    return await new UnenrollActionRunner(esClient, soClient).runActionAsyncWithRetry({
       ...options,
       batchSize,
       totalAgents: res.total,

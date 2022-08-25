@@ -21,20 +21,15 @@ import { getHostedPolicies, isHostedAgent } from './hosted_agent';
 import { BulkActionTaskType } from './bulk_actions_resolver';
 
 export class ReassignActionRunner extends ActionRunner {
-  protected async processAgents(
-    agents: Agent[],
-    actionId: string,
-    total?: number
-  ): Promise<{ items: BulkActionResult[] }> {
+  protected async processAgents(agents: Agent[]): Promise<{ items: BulkActionResult[] }> {
     return await reassignBatch(
       this.soClient,
       this.esClient,
-      { newAgentPolicyId: this.actionParams.newAgentPolicyId, actionId },
+      this.actionParams! as any,
       agents,
       {},
       undefined,
-      true,
-      total
+      true
     );
   }
 
@@ -53,12 +48,12 @@ export async function reassignBatch(
   options: {
     newAgentPolicyId: string;
     actionId?: string;
+    total?: number;
   },
   givenAgents: Agent[],
   outgoingErrors: Record<Agent['id'], Error>,
   agentIds?: string[],
-  skipSuccess?: boolean,
-  total?: number
+  skipSuccess?: boolean
 ): Promise<{ items: BulkActionResult[] }> {
   const errors: Record<Agent['id'], Error> = { ...outgoingErrors };
 
@@ -121,7 +116,7 @@ export async function reassignBatch(
     agents: agentsToUpdate.map((agent) => agent.id),
     created_at: now,
     type: 'POLICY_REASSIGN',
-    total,
+    total: options.total,
   });
 
   return result;

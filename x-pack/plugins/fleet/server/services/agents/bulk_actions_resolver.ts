@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { SavedObjectsClient } from '@kbn/core/server';
-import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
@@ -20,6 +19,7 @@ import { ReassignActionRunner } from './reassign_action_runner';
 import { UpgradeActionRunner } from './upgrade_action_runner';
 import { UpdateAgentTagsActionRunner } from './update_agent_tags_action_runner';
 import { UnenrollActionRunner } from './unenroll_action_runner';
+import type { ActionParams, RetryParams } from './action_runner';
 
 export enum BulkActionTaskType {
   REASSIGN_RETRY = 'fleet:reassign_action:retry',
@@ -51,9 +51,15 @@ export class BulkActionsResolver {
       return createRetryTask(
         taskInstance,
         getDeps,
-        async (esClient: ElasticsearchClient, soClient: SavedObjectsClient, options: any) =>
-          await new runnerMap[taskType](esClient, soClient, options).runActionAsyncWithRetry(
-            options
+        async (
+          esClient: ElasticsearchClient,
+          soClient: SavedObjectsClient,
+          actionParams: ActionParams,
+          retryParams: RetryParams
+        ) =>
+          await new runnerMap[taskType](esClient, soClient).runActionAsyncWithRetry(
+            actionParams,
+            retryParams
           )
       );
     };
@@ -88,26 +94,23 @@ export class BulkActionsResolver {
   }
 
   public async run(
-    options: {
-      kuery: string;
-      showInactive?: boolean;
-      batchSize?: number;
-      pitId: string;
-      actionId: string;
-      searchAfter?: SortResults;
-      retryCount: number;
-    },
+    actionParams: ActionParams,
+    retryParams: RetryParams,
     taskType: string,
     runAt?: Date
   ) {
-    const taskId = this.getTaskId(options.actionId, taskType);
+    const taskId = this.getTaskId(actionParams.actionId!, taskType);
     await this.taskManager?.ensureScheduled({
       id: taskId,
       taskType,
       scope: ['fleet'],
       state: {},
-      params: { options },
-      runAt: runAt ?? moment(new Date()).add(Math.pow(3, options.retryCount), 's').toDate(),
+      params: { actionParams, retryParams },
+      runAt:
+        runAt ??
+        moment(new Date())
+          .add(Math.pow(3, retryParams.retryCount ?? 1), 's')
+          .toDate(),
     });
     appContextService.getLogger().info('Running task ' + taskId);
     return taskId;
@@ -117,7 +120,12 @@ export class BulkActionsResolver {
 export function createRetryTask(
   taskInstance: ConcreteTaskInstance,
   getDeps: () => Promise<{ esClient: ElasticsearchClient; soClient: SavedObjectsClient }>,
-  doRetry: (esClient: ElasticsearchClient, soClient: SavedObjectsClient, options: any) => void
+  doRetry: (
+    esClient: ElasticsearchClient,
+    soClient: SavedObjectsClient,
+    actionParams: ActionParams,
+    retryParams: RetryParams
+  ) => void
 ) {
   return {
     async run() {
@@ -125,26 +133,24 @@ export function createRetryTask(
 
       const { esClient, soClient } = await getDeps();
 
-      const options = taskInstance.params.options;
+      const retryParams = taskInstance.params.retryParams;
 
       appContextService
         .getLogger()
-        .debug(`Retry #${options.retryCount} of task ${taskInstance.id}`);
+        .debug(`Retry #${retryParams.retryCount} of task ${taskInstance.id}`);
 
-      if (options.searchAfter) {
-        appContextService.getLogger().info('Continuing task from batch ' + options.searchAfter);
+      if (retryParams.searchAfter) {
+        appContextService.getLogger().info('Continuing task from batch ' + retryParams.searchAfter);
       }
 
-      doRetry(esClient, soClient, {
-        ...options,
+      doRetry(esClient, soClient, taskInstance.params.actionParams, {
+        ...retryParams,
         taskId: taskInstance.id,
       });
 
       appContextService.getLogger().info('Completed bulk action retry task');
     },
 
-    async cancel() {
-      // appContextService.getLogger().debug('Cancel bulk action retry task');
-    },
+    async cancel() {},
   };
 }

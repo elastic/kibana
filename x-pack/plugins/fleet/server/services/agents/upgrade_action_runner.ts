@@ -26,19 +26,14 @@ import { getHostedPolicies, isHostedAgent } from './hosted_agent';
 import { BulkActionTaskType } from './bulk_actions_resolver';
 
 export class UpgradeActionRunner extends ActionRunner {
-  protected async processAgents(
-    agents: Agent[],
-    actionId: string,
-    total?: number
-  ): Promise<{ items: BulkActionResult[] }> {
+  protected async processAgents(agents: Agent[]): Promise<{ items: BulkActionResult[] }> {
     return await upgradeBatch(
       this.soClient,
       this.esClient,
       agents,
       {},
-      { ...this.actionParams, actionId } as any,
-      true,
-      total
+      this.actionParams! as any,
+      true
     );
   }
 
@@ -63,9 +58,9 @@ export async function upgradeBatch(
     force?: boolean;
     upgradeDurationSeconds?: number;
     startTime?: string;
+    total?: number;
   },
-  skipSuccess?: boolean,
-  total?: number
+  skipSuccess?: boolean
 ): Promise<{ items: BulkActionResult[] }> {
   const errors: Record<Agent['id'], Error> = { ...outgoingErrors };
 
@@ -126,7 +121,7 @@ export async function upgradeBatch(
     data,
     ack_data: data,
     type: 'UPGRADE',
-    total,
+    total: options.total,
     agents: agentsToUpdate.map((agent) => agent.id),
     ...rollingUpgradeOptions,
   });

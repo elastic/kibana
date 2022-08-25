@@ -18,17 +18,13 @@ import { BulkActionTaskType } from './bulk_actions_resolver';
 import { filterHostedPolicies } from './filter_hosted_agents';
 
 export class UpdateAgentTagsActionRunner extends ActionRunner {
-  protected async processAgents(
-    agents: Agent[],
-    actionId: string,
-    total?: number
-  ): Promise<{ items: BulkActionResult[] }> {
+  protected async processAgents(agents: Agent[]): Promise<{ items: BulkActionResult[] }> {
     return await updateTagsBatch(
       this.soClient,
       this.esClient,
       agents,
       {},
-      { tagsToAdd: this.actionParams.tagsToAdd, tagsToRemove: this.actionParams.tagsToRemove },
+      { tagsToAdd: this.actionParams?.tagsToAdd, tagsToRemove: this.actionParams?.tagsToRemove },
       undefined,
       true
     );
