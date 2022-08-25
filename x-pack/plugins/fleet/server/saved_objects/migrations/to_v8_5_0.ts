@@ -7,7 +7,18 @@
 
 import type { SavedObjectMigrationFn } from '@kbn/core/server';
 
+import type { PackagePolicy } from '../../../common';
 import type { AgentPolicy } from '../../types';
+
+export const migratePackagePolicyToV850: SavedObjectMigrationFn<PackagePolicy, PackagePolicy> = (
+  packagePolicyDoc,
+  migrationContext
+) => {
+  // @ts-expect-error output_id property does not exists anymore
+  delete packagePolicyDoc.attributes.output_id;
+
+  return packagePolicyDoc;
+};
 
 export const migrateAgentPolicyToV850: SavedObjectMigrationFn<
   Exclude<AgentPolicy, 'download_source_id'> & {

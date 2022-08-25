@@ -45,7 +45,7 @@ import {
   migrateAgentPolicyToV840,
   migratePackagePolicyToV840,
 } from './migrations/to_v8_4_0';
-import { migrateAgentPolicyToV850 } from './migrations/to_v8_5_0';
+import { migratePackagePolicyToV850, migrateAgentPolicyToV850 } from './migrations/to_v8_5_0';
 
 /*
  * Saved object types and mappings
@@ -153,7 +153,6 @@ const getSavedObjectTypes = (
         enabled: { type: 'boolean' },
         is_managed: { type: 'boolean' },
         policy_id: { type: 'keyword' },
-        output_id: { type: 'keyword' },
         package: {
           properties: {
             name: { type: 'keyword' },
@@ -223,6 +222,7 @@ const getSavedObjectTypes = (
       '8.2.0': migratePackagePolicyToV820,
       '8.3.0': migratePackagePolicyToV830,
       '8.4.0': migratePackagePolicyToV840,
+      '8.5.0': migratePackagePolicyToV850,
     },
   },
   [PACKAGES_SAVED_OBJECT_TYPE]: {

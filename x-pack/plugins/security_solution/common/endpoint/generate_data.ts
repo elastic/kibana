@@ -1643,7 +1643,6 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       updated_by: 'elastic',
       policy_id: this.seededUUIDv4(),
       enabled: true,
-      output_id: '',
       inputs: [
         {
           type: 'endpoint',

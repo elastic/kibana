@@ -1228,7 +1228,6 @@ describe('Package policy service', () => {
       inputs: [],
       name: 'endpoint-1',
       namespace: 'default',
-      output_id: '',
       package: {
         name: 'endpoint',
         title: 'Elastic Endpoint',
@@ -1409,7 +1408,6 @@ describe('Package policy service', () => {
       },
       enabled: true,
       policy_id: '1e6d0690-b995-11ec-a355-d35391e25881',
-      output_id: '',
       inputs: [
         {
           type: 'cloudbeat',
@@ -1497,7 +1495,6 @@ describe('Package policy service', () => {
           namespace: 'default',
           enabled: true,
           policy_id: 'xxxx',
-          output_id: 'xxxx',
           package: {
             name: 'test-package',
             title: 'Test Package',
@@ -1585,7 +1582,6 @@ describe('Package policy service', () => {
           namespace: 'default',
           enabled: true,
           policy_id: 'xxxx',
-          output_id: 'xxxx',
           package: {
             name: 'test-package',
             title: 'Test Package',
@@ -1683,7 +1679,6 @@ describe('Package policy service', () => {
           namespace: 'default',
           enabled: true,
           policy_id: 'xxxx',
-          output_id: 'xxxx',
           package: {
             name: 'test-package',
             title: 'Test Package',
@@ -1781,7 +1776,6 @@ describe('Package policy service', () => {
           namespace: 'default',
           enabled: true,
           policy_id: 'xxxx',
-          output_id: 'xxxx',
           package: {
             name: 'test-package',
             title: 'Test Package',
@@ -1951,7 +1945,6 @@ describe('Package policy service', () => {
           namespace: 'default',
           enabled: true,
           policy_id: 'xxxx',
-          output_id: 'xxxx',
           package: {
             name: 'test-package',
             title: 'Test Package',
@@ -2171,7 +2164,6 @@ describe('Package policy service', () => {
           namespace: 'default',
           enabled: true,
           policy_id: 'xxxx',
-          output_id: 'xxxx',
           package: {
             name: 'test-package',
             title: 'Test Package',
@@ -2266,7 +2258,6 @@ describe('Package policy service', () => {
           namespace: 'default',
           enabled: true,
           policy_id: 'xxxx',
-          output_id: 'xxxx',
           package: {
             name: 'test-package',
             title: 'Test Package',
@@ -2368,7 +2359,6 @@ describe('Package policy service', () => {
           namespace: 'default',
           enabled: true,
           policy_id: 'xxxx',
-          output_id: 'xxxx',
           package: {
             name: 'test-package',
             title: 'Test Package',
@@ -2467,7 +2457,6 @@ describe('Package policy service', () => {
           namespace: 'default',
           enabled: true,
           policy_id: 'xxxx',
-          output_id: 'xxxx',
           package: {
             name: 'test-package',
             title: 'Test Package',
@@ -2566,7 +2555,6 @@ describe('Package policy service', () => {
           namespace: 'default',
           enabled: true,
           policy_id: 'xxxx',
-          output_id: 'xxxx',
           package: {
             name: 'test-package',
             title: 'Test Package',
@@ -2737,7 +2725,6 @@ describe('Package policy service', () => {
           namespace: 'default',
           enabled: true,
           policy_id: 'xxxx',
-          output_id: 'xxxx',
           package: {
             name: 'test-package',
             title: 'Test Package',
@@ -2958,7 +2945,6 @@ describe('Package policy service', () => {
           namespace: 'default',
           enabled: true,
           policy_id: 'xxxx',
-          output_id: 'xxxx',
           package: {
             name: 'test-package',
             title: 'Test Package',
@@ -3052,7 +3038,6 @@ describe('Package policy service', () => {
           namespace: 'default',
           enabled: true,
           policy_id: 'xxxx',
-          output_id: 'xxxx',
           package: {
             name: 'test-package',
             title: 'Test Package',
@@ -3193,7 +3178,6 @@ describe('Package policy service', () => {
         package: { name: 'apache', title: 'Apache', version: '1.0.0' },
         enabled: true,
         policy_id: '1',
-        output_id: '',
         inputs: [
           {
             enabled: false,
@@ -3270,7 +3254,6 @@ describe('Package policy service', () => {
         package: { name: 'aws', title: 'AWS', version: '1.0.0' },
         enabled: true,
         policy_id: '1',
-        output_id: '',
         inputs: [
           {
             type: 'aws/metrics',
@@ -3297,7 +3280,6 @@ describe('Package policy service', () => {
         description: 'desc',
         enabled: false,
         policy_id: '2',
-        output_id: '3',
         inputs: [
           {
             type: 'logfile',
@@ -3332,7 +3314,6 @@ describe('Package policy service', () => {
         package: { name: 'apache', title: 'Apache', version: '1.0.0' },
         enabled: false,
         policy_id: '2',
-        output_id: '3',
         inputs: [
           {
             enabled: true,

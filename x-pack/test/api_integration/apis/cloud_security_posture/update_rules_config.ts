@@ -60,7 +60,6 @@ export default function ({ getService }: FtrProviderContext) {
           namespace: 'default',
           policy_id: agentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'cloud_security_posture',

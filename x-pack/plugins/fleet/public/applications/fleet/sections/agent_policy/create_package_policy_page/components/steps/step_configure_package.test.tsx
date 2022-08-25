@@ -105,7 +105,6 @@ describe('StepConfigurePackage', () => {
       namespace: 'default',
       policy_id: '',
       enabled: true,
-      output_id: '',
       inputs: [
         {
           type: 'logfile',

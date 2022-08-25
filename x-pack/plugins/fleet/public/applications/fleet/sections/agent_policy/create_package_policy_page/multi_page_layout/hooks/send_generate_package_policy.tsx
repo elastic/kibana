@@ -32,14 +32,12 @@ export const sendGeneratePackagePolicy = async (
     namespace: 'default',
     policy_id: agentPolicyId,
     enabled: true,
-    output_id: '',
     inputs: [],
   };
 
   const packagePolicy = packageToPackagePolicy(
     packageInfo,
     agentPolicyId,
-    defaultPolicy.output_id,
     defaultPolicy.namespace,
     defaultPolicy.name,
     defaultPolicy.description,

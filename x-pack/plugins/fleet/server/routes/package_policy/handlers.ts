@@ -174,6 +174,8 @@ export const createPackagePolicyHandler: FleetRequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
   const { force, ...newPolicy } = request.body;
+  // TODO Remove deprecated APIs https://github.com/elastic/kibana/issues/121485
+  delete newPolicy.output_id;
   const spaceId = fleetContext.spaceId;
   try {
     const newPackagePolicy = await packagePolicyService.enrichPolicyWithDefaultsFromPackage(
@@ -234,6 +236,8 @@ export const updatePackagePolicyHandler: RequestHandler<
   }
 
   const { force, ...body } = request.body;
+  // TODO Remove deprecated APIs https://github.com/elastic/kibana/issues/121485
+  delete body.output_id;
   // removed fields not recognized by schema
   const packagePolicyInputs = packagePolicy.inputs.map((input) => {
     const newInput = {
@@ -247,6 +251,7 @@ export const updatePackagePolicyHandler: RequestHandler<
     delete newInput.compiled_input;
     return newInput;
   });
+
   // listing down accepted properties, because loaded packagePolicy contains some that are not accepted in update
   let newData = {
     ...body,
@@ -255,7 +260,6 @@ export const updatePackagePolicyHandler: RequestHandler<
     namespace: body.namespace ?? packagePolicy.namespace,
     policy_id: body.policy_id ?? packagePolicy.policy_id,
     enabled: body.enabled ?? packagePolicy.enabled,
-    output_id: body.output_id ?? packagePolicy.output_id,
     package: body.package ?? packagePolicy.package,
     inputs: body.inputs ?? packagePolicyInputs,
     vars: body.vars ?? packagePolicy.vars,

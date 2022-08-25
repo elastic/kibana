@@ -145,7 +145,6 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
         updated_by: '',
         revision: 1,
         policy_id: '',
-        output_id: '',
       },
     ];
 
@@ -240,7 +239,6 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
         updated_by: '',
         revision: 1,
         policy_id: '',
-        output_id: '',
       },
     ];
 
@@ -340,7 +338,6 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
         updated_by: '',
         revision: 1,
         policy_id: '',
-        output_id: '',
       },
     ];
 
@@ -449,7 +446,6 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
         updated_by: '',
         revision: 1,
         policy_id: '',
-        output_id: '',
       },
     ];
 

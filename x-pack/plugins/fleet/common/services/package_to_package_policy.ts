@@ -162,7 +162,6 @@ export const packageToPackagePolicyInputs = (
 export const packageToPackagePolicy = (
   packageInfo: PackageInfo,
   agentPolicyId: string,
-  outputId: string,
   namespace: string = '',
   packagePolicyName?: string,
   description?: string,
@@ -179,7 +178,6 @@ export const packageToPackagePolicy = (
     },
     enabled: true,
     policy_id: agentPolicyId,
-    output_id: outputId,
     inputs: packageToPackagePolicyInputs(packageInfo, integrationToEnable),
     vars: undefined,
   };

@@ -69,7 +69,6 @@ export const indexFleetEndpointPolicy = async (
     description: 'Protect the worlds data',
     policy_id: agentPolicy.data.item.id,
     enabled: true,
-    output_id: '',
     inputs: [
       {
         type: 'endpoint',

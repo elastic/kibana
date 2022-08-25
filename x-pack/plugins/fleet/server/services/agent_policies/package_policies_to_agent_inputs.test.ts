@@ -51,7 +51,6 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
     updated_by: '',
     policy_id: '',
     enabled: true,
-    output_id: '',
     namespace: 'default',
     inputs: [],
     revision: 1,
