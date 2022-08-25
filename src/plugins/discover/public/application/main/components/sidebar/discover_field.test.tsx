@@ -166,12 +166,12 @@ describe('discover sidebar field', function () {
   });
   it('should not execute getDetails when rendered, since it can be expensive', function () {
     const { props } = getComponent({});
-    expect(props.getDetails.mock.calls.length).toEqual(0);
+    expect(props.getDetails).toHaveBeenCalledTimes(0);
   });
   it('should execute getDetails when show details is requested', function () {
     const { props, comp } = getComponent({ showFieldStats: true });
     findTestSubject(comp, 'field-bytes-showDetails').simulate('click');
-    expect(props.getDetails.mock.calls.length).toEqual(1);
+    expect(props.getDetails).toHaveBeenCalledTimes(1);
   });
   it('should not return the popover if onAddFilter is not provided', function () {
     const field = new DataViewField({

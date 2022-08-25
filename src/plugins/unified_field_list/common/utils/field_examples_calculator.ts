@@ -15,16 +15,6 @@ import { flattenHit } from '@kbn/data-plugin/common';
 
 type FieldHitValue = any;
 
-function getFieldValues(
-  hits: estypes.SearchHit[],
-  field: DataViewField,
-  dataView: DataView
-): FieldHitValue[] {
-  return map(hits, function (hit) {
-    return flattenHit(hit, dataView, { includeIgnoredValues: true })[field.name];
-  });
-}
-
 interface FieldValueCountsParams {
   hits: estypes.SearchHit[];
   dataView: DataView;
@@ -33,7 +23,7 @@ interface FieldValueCountsParams {
   count?: number;
 }
 
-export function getFieldValueCounts(params: FieldValueCountsParams) {
+export function getFieldExampleBuckets(params: FieldValueCountsParams) {
   params = defaults(params, {
     count: 5,
     grouped: false,
@@ -74,12 +64,22 @@ export function getFieldValueCounts(params: FieldValueCountsParams) {
   };
 }
 
+export function getFieldValues(
+  hits: estypes.SearchHit[],
+  field: DataViewField,
+  dataView: DataView
+): FieldHitValue[] {
+  return map(hits, function (hit) {
+    return flattenHit(hit, dataView, { includeIgnoredValues: true })[field.name];
+  });
+}
+
 // returns a count of fields in the array that are undefined or null
-function countMissing(array: FieldHitValue[]): number {
+export function countMissing(array: FieldHitValue[]): number {
   return array.length - without(array, undefined, null).length;
 }
 
-function groupValues(allValues: FieldHitValue[], params: FieldValueCountsParams) {
+export function groupValues(allValues: FieldHitValue[], params: FieldValueCountsParams) {
   const groups: Record<string, { count: number; value: any }> = {};
   let k;
 

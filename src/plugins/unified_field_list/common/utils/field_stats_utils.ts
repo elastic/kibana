@@ -11,7 +11,7 @@ import DateMath from '@kbn/datemath';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { ESSearchResponse } from '@kbn/core/types/elasticsearch';
 import type { FieldStatsResponse } from '../types';
-import { getFieldValueCounts } from './field_examples_calculator';
+import { getFieldExampleBuckets } from './field_examples_calculator';
 
 export type SearchHandler = ({
   aggs,
@@ -345,7 +345,7 @@ export async function getSimpleExamples(
 
     const simpleExamplesResult = await search(simpleExamplesBody);
 
-    const groupedSimpleExamples = getFieldValueCounts({
+    const fieldExampleBuckets = getFieldExampleBuckets({
       hits: simpleExamplesResult.hits.hits,
       field,
       dataView,
@@ -353,10 +353,10 @@ export async function getSimpleExamples(
 
     return {
       totalDocuments: getHitsTotal(simpleExamplesResult),
-      sampledDocuments: groupedSimpleExamples.total, // TODO: check if that's correct mapping
-      sampledValues: groupedSimpleExamples.exists, // TODO: check if that's correct mapping
+      sampledDocuments: fieldExampleBuckets.total, // TODO: check if that's correct mapping
+      sampledValues: fieldExampleBuckets.exists, // TODO: check if that's correct mapping
       topValues: {
-        buckets: groupedSimpleExamples.buckets,
+        buckets: fieldExampleBuckets.buckets,
       },
     };
   } catch (error) {

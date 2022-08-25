@@ -1,0 +1,289 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import { keys, clone, uniq, filter, map, flatten } from 'lodash';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import {
+  getFieldExampleBuckets,
+  countMissing,
+  groupValues,
+  getFieldValues,
+} from './field_examples_calculator';
+
+const hitsAsValues: Array<Record<string, string | number>> = [
+  {
+    extension: 'html',
+    bytes: 360.20000000000005,
+  },
+  {
+    extension: 'gif',
+    bytes: 5848.700000000001,
+  },
+  {
+    extension: 'png',
+    bytes: 841.6,
+  },
+  {
+    extension: 'html',
+    bytes: 1626.4,
+  },
+  {
+    extension: 'php',
+    bytes: 2070.6,
+    phpmemory: 276080,
+  },
+  {
+    extension: 'gif',
+    bytes: 8421.6,
+  },
+  {
+    extension: 'html',
+    bytes: 994.8000000000001,
+  },
+  {
+    extension: 'html',
+    bytes: 374,
+  },
+  {
+    extension: 'php',
+    bytes: 506.09999999999997,
+    phpmemory: 67480,
+  },
+  {
+    extension: 'php',
+    bytes: 506.09999999999997,
+    phpmemory: 67480,
+  },
+  {
+    extension: 'php',
+    bytes: 2591.1,
+    phpmemory: 345480,
+  },
+  {
+    extension: 'html',
+    bytes: 1450,
+  },
+  {
+    extension: 'php',
+    bytes: 1803.8999999999999,
+    phpmemory: 240520,
+  },
+  {
+    extension: 'html',
+    bytes: 1626.4,
+  },
+  {
+    extension: 'gif',
+    bytes: 10617.2,
+  },
+  {
+    extension: 'gif',
+    bytes: 10961.5,
+  },
+  {
+    extension: 'html',
+    bytes: 382.8,
+  },
+  {
+    extension: 'html',
+    bytes: 374,
+  },
+  {
+    extension: 'png',
+    bytes: 3059.2000000000003,
+  },
+  {
+    extension: 'gif',
+    bytes: 10617.2,
+  },
+];
+
+const hits = hitsAsValues.map((value) => ({
+  _index: 'logstash-2014.09.09',
+  _id: '1945',
+  _score: 1,
+  fields: Object.keys(value).reduce(
+    (result: Record<string, Array<string | number>>, fieldName: string) => {
+      result[fieldName] = [value[fieldName]];
+      return result;
+    },
+    {}
+  ),
+}));
+
+describe('fieldExamplesCalculator', function () {
+  it('should have a _countMissing that counts nulls & undefineds in an array', function () {
+    const values = [
+      ['foo', 'bar'],
+      'foo',
+      'foo',
+      undefined,
+      ['foo', 'bar'],
+      'bar',
+      'baz',
+      null,
+      null,
+      null,
+      'foo',
+      undefined,
+    ];
+    expect(countMissing(values)).toBe(5);
+  });
+
+  describe('groupValues', function () {
+    let groups: Record<string, any>;
+    let params: any;
+    let values: any;
+    beforeEach(function () {
+      values = [
+        ['foo', 'bar'],
+        'foo',
+        'foo',
+        undefined,
+        ['foo', 'bar'],
+        'bar',
+        'baz',
+        null,
+        null,
+        null,
+        'foo',
+        undefined,
+      ];
+      params = {};
+      groups = groupValues(values, params);
+    });
+
+    it('should have a groupValues that counts values', function () {
+      expect(groups).toBeInstanceOf(Object);
+    });
+
+    it('should throw an error if any value is a plain object', function () {
+      expect(function () {
+        groupValues([{}, true, false], params);
+      }).toThrowError();
+    });
+
+    it('should handle values with dots in them', function () {
+      values = ['0', '0.........', '0.......,.....'];
+      params = {};
+      groups = groupValues(values, params);
+      expect(groups[values[0]].count).toBe(1);
+      expect(groups[values[1]].count).toBe(1);
+      expect(groups[values[2]].count).toBe(1);
+    });
+
+    it('should have a a key for value in the array when not grouping array terms', function () {
+      expect(keys(groups).length).toBe(3);
+      expect(groups.foo).toBeInstanceOf(Object);
+      expect(groups.bar).toBeInstanceOf(Object);
+      expect(groups.baz).toBeInstanceOf(Object);
+    });
+
+    it('should count array terms independently', function () {
+      expect(groups['foo,bar']).toBe(undefined);
+      expect(groups.foo.count).toBe(5);
+      expect(groups.bar.count).toBe(3);
+      expect(groups.baz.count).toBe(1);
+    });
+
+    describe('grouped array terms', function () {
+      beforeEach(function () {
+        params.grouped = true;
+        groups = groupValues(values, params);
+      });
+
+      it('should group array terms when passed params.grouped', function () {
+        expect(keys(groups).length).toBe(4);
+        expect(groups['foo,bar']).toBeInstanceOf(Object);
+      });
+
+      it('should contain the original array as the value', function () {
+        expect(groups['foo,bar'].value).toEqual(['foo', 'bar']);
+      });
+
+      it('should count the pairs separately from the values they contain', function () {
+        expect(groups['foo,bar'].count).toBe(2);
+        expect(groups.foo.count).toBe(3);
+        expect(groups.bar.count).toBe(1);
+      });
+    });
+  });
+
+  describe('getFieldValues', function () {
+    it('Should return an array of values for _source fields', function () {
+      const extensions = getFieldValues(hits, dataView.fields.getByName('extension')!, dataView);
+      expect(extensions).toBeInstanceOf(Array);
+      expect(
+        filter(extensions, function (v) {
+          return v.includes('html');
+        }).length
+      ).toBe(8);
+      expect(uniq(flatten(clone(extensions))).sort()).toEqual(['gif', 'html', 'php', 'png']);
+    });
+
+    it('Should return an array of values for core meta fields', function () {
+      const types = getFieldValues(hits, dataView.fields.getByName('_id')!, dataView);
+      expect(types).toBeInstanceOf(Array);
+      expect(types.length).toBe(20);
+    });
+  });
+
+  describe('getFieldExampleBuckets', function () {
+    let params: { hits: any; field: any; count: number; dataView: DataView };
+    beforeEach(function () {
+      params = {
+        hits,
+        field: dataView.fields.getByName('extension'),
+        count: 3,
+        dataView,
+      };
+    });
+
+    it('counts the top 3 values', function () {
+      const extensions = getFieldExampleBuckets(params);
+      expect(extensions).toBeInstanceOf(Object);
+      expect(extensions.buckets).toBeInstanceOf(Array);
+      expect(extensions.buckets.length).toBe(3);
+      expect(map(extensions.buckets, 'key')).toEqual(['html', 'php', 'gif']);
+    });
+
+    it('fails to analyze geo and attachment types', function () {
+      params.field = dataView.fields.getByName('point');
+      expect(() => getFieldExampleBuckets(params)).toThrowError(
+        'Analysis is not available this field type'
+      );
+
+      params.field = dataView.fields.getByName('area');
+      expect(() => getFieldExampleBuckets(params)).toThrowError(
+        'Analysis is not available this field type'
+      );
+
+      params.field = dataView.fields.getByName('request_body');
+      expect(() => getFieldExampleBuckets(params)).toThrowError(
+        'Analysis is not available this field type'
+      );
+    });
+
+    it('fails to analyze fields that are in the mapping, but not the hits', function () {
+      params.field = dataView.fields.getByName('ip');
+      expect(() => getFieldExampleBuckets(params)).toThrowError(
+        'No data for this field in the first found records'
+      );
+    });
+
+    it('counts the total hits', function () {
+      expect(getFieldExampleBuckets(params).total).toBe(params.hits.length);
+    });
+
+    it('counts the hits the field exists in', function () {
+      params.field = dataView.fields.getByName('phpmemory');
+      expect(getFieldExampleBuckets(params).exists).toBe(5);
+    });
+  });
+});
