@@ -31,7 +31,6 @@ describe('ExceptionsViewerItems', () => {
         <ExceptionsViewerItems
           disableActions={false}
           exceptions={[]}
-          loadingItemIds={[]}
           listType={ExceptionListTypeEnum.DETECTION}
           ruleReferences={null}
           viewerState="empty"
@@ -55,7 +54,6 @@ describe('ExceptionsViewerItems', () => {
           <ExceptionsViewerItems
             disableActions={false}
             exceptions={[]}
-            loadingItemIds={[]}
             listType={ExceptionListTypeEnum.DETECTION}
             ruleReferences={null}
             viewerState="empty_search"
@@ -80,7 +78,6 @@ describe('ExceptionsViewerItems', () => {
           <ExceptionsViewerItems
             disableActions={false}
             exceptions={[getExceptionListItemSchemaMock()]}
-            loadingItemIds={[]}
             listType={ExceptionListTypeEnum.DETECTION}
             ruleReferences={null}
             viewerState={null}

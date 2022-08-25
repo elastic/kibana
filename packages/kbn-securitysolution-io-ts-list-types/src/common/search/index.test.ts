@@ -15,7 +15,7 @@ import { left } from 'fp-ts/lib/Either';
 
 import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
-describe('searchAfter', () => {
+describe('search', () => {
   test('it will validate a correct search', () => {
     const payload = 'name:foo';
     const decoded = searchOrUndefined.decode(payload);

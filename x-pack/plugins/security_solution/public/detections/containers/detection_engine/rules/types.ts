@@ -7,7 +7,6 @@
 
 import * as t from 'io-ts';
 
-import type { HttpStart } from '@kbn/core/public';
 import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import { listArray } from '@kbn/securitysolution-io-ts-list-types';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
@@ -352,6 +351,5 @@ export interface FindRulesReferencedByExceptionsListProp {
 
 export interface FindRulesReferencedByExceptionsProps {
   lists: FindRulesReferencedByExceptionsListProp[];
-  http: HttpStart;
   signal?: AbortSignal;
 }

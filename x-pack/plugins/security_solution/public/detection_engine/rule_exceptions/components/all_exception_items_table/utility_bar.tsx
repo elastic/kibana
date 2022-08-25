@@ -34,9 +34,13 @@ const StyledCondition = styled.span`
 
 interface ExceptionsViewerUtilityProps {
   pagination: ExceptionsPagination;
+  // Corresponds to last time exception items were fetched
   lastUpdated: string | number | null;
 }
 
+/**
+ * Utilities include exception item counts and group by options
+ */
 const ExceptionsViewerUtilityComponent: React.FC<ExceptionsViewerUtilityProps> = ({
   pagination,
   lastUpdated,

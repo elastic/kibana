@@ -77,7 +77,6 @@ import { hasMlLicense } from '../../../../../../common/machine_learning/has_ml_l
 import { SecurityPageName } from '../../../../../app/types';
 import { LinkButton } from '../../../../../common/components/links';
 import { useFormatUrl } from '../../../../../common/components/link_to';
-import { ExceptionsViewer } from '../../../../../detection_engine/rule_exceptions/all_exception_items_table';
 import { APP_UI_ID } from '../../../../../../common/constants';
 import { useGlobalFullScreen } from '../../../../../common/containers/use_full_screen';
 import { Display } from '../../../../../hosts/pages/display';
@@ -125,6 +124,7 @@ import {
 } from '../../../../components/alerts_table/alerts_filter_group';
 import { useSignalHelpers } from '../../../../../common/containers/sourcerer/use_signal_helpers';
 import { HeaderPage } from '../../../../../common/components/header_page';
+import { ExceptionsViewer } from '../../../../../detection_engine/rule_exceptions/components/all_exception_items_table';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.

@@ -9,7 +9,7 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { ExceptionsViewerUtility } from './utility_bar';
-import { TestProviders } from '../../../common/mock';
+import { TestProviders } from '../../../../common/mock';
 
 describe('ExceptionsViewerUtility', () => {
   it('it renders correct item counts', () => {

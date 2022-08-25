@@ -378,17 +378,15 @@ export const fetchInstalledIntegrations = async ({
  * Fetch info on what exceptions lists are referenced by what rules
  *
  * @param lists exception list information needed for making request
- * @param http Kibana http service
  * @param signal to cancel request
  *
  * @throws An error if response is not OK
  */
 export const findRuleExceptionReferences = async ({
   lists,
-  http,
   signal,
 }: FindRulesReferencedByExceptionsProps): Promise<RulesReferencedByExceptionListsSchema> =>
-  http.fetch<RulesReferencedByExceptionListsSchema>(
+  KibanaServices.get().http.fetch<RulesReferencedByExceptionListsSchema>(
     `${DETECTION_ENGINE_RULES_URL}/exceptions/_find_references`,
     {
       method: 'GET',

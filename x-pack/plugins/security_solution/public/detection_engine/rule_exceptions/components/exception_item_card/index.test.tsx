@@ -24,7 +24,6 @@ describe('ExceptionItemCard', () => {
       <TestProviders>
         <ExceptionItemCard
           disableActions={false}
-          loadingItemIds={[]}
           onDeleteException={jest.fn()}
           onEditException={jest.fn()}
           exceptionItem={exceptionItem}
@@ -70,7 +69,6 @@ describe('ExceptionItemCard', () => {
       <TestProviders>
         <ExceptionItemCard
           disableActions={false}
-          loadingItemIds={[]}
           onDeleteException={jest.fn()}
           onEditException={jest.fn()}
           exceptionItem={exceptionItem}
@@ -116,7 +114,6 @@ describe('ExceptionItemCard', () => {
       <TestProviders>
         <ExceptionItemCard
           disableActions
-          loadingItemIds={[]}
           onDeleteException={jest.fn()}
           onEditException={jest.fn()}
           exceptionItem={exceptionItem}
@@ -158,7 +155,6 @@ describe('ExceptionItemCard', () => {
       <TestProviders>
         <ExceptionItemCard
           disableActions={false}
-          loadingItemIds={[]}
           onDeleteException={jest.fn()}
           onEditException={mockOnEditException}
           exceptionItem={exceptionItem}
@@ -209,7 +205,6 @@ describe('ExceptionItemCard', () => {
       <TestProviders>
         <ExceptionItemCard
           disableActions={false}
-          loadingItemIds={[]}
           onDeleteException={mockOnDeleteException}
           onEditException={jest.fn()}
           exceptionItem={exceptionItem}
@@ -262,7 +257,6 @@ describe('ExceptionItemCard', () => {
       <TestProviders>
         <ExceptionItemCard
           disableActions={false}
-          loadingItemIds={[]}
           onDeleteException={jest.fn()}
           onEditException={jest.fn()}
           exceptionItem={exceptionItem}

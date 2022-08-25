@@ -48,9 +48,7 @@ const initialState: State = {
   },
   exceptions: [],
   exceptionToEdit: null,
-  loadingItemIds: [],
-  currentModal: null,
-  exceptionListTypeToEdit: null,
+  currenFlyout: null,
   viewerState: 'loading',
   exceptionLists: [],
 };
@@ -74,16 +72,7 @@ const ExceptionsViewerComponent = ({
 
   // Reducer state
   const [
-    {
-      exceptions,
-      pagination,
-      loadingItemIds,
-      currentModal,
-      exceptionToEdit,
-      exceptionListTypeToEdit,
-      viewerState,
-      exceptionLists,
-    },
+    { exceptions, pagination, currenFlyout, exceptionToEdit, viewerState, exceptionLists },
     dispatch,
   ] = useReducer(allExceptionItemsReducer(), {
     ...initialState,
@@ -125,16 +114,6 @@ const ExceptionsViewerComponent = ({
       dispatch({
         type: 'updateFlyoutOpen',
         flyoutType,
-      });
-    },
-    [dispatch]
-  );
-
-  const setLoadingItemIds = useCallback(
-    (items: ExceptionListItemIdentifiers[]): void => {
-      dispatch({
-        type: 'updateLoadingItemIds',
-        items,
       });
     },
     [dispatch]
@@ -257,23 +236,18 @@ const ExceptionsViewerComponent = ({
   );
 
   const handleAddException = useCallback((): void => {
-    dispatch({
-      type: 'updateExceptionListTypeToEdit',
-      exceptionListType: listType,
-    });
     setFlyoutType('addException');
-  }, [listType, setFlyoutType]);
+  }, [setFlyoutType]);
 
   const handleEditException = useCallback(
     (exception: ExceptionListItemSchema): void => {
       dispatch({
         type: 'updateExceptionToEdit',
-        lists: exceptionLists,
         exception,
       });
       setFlyoutType('editException');
     },
-    [setFlyoutType, exceptionLists]
+    [setFlyoutType]
   );
 
   const handleCancelExceptionItemFlyout = useCallback((): void => {
@@ -291,7 +265,7 @@ const ExceptionsViewerComponent = ({
       const abortCtrl = new AbortController();
 
       try {
-        setLoadingItemIds([{ id: itemId, namespaceType }]);
+        setViewerState('loading');
 
         await deleteExceptionListItemById({
           http: services.http,
@@ -300,10 +274,8 @@ const ExceptionsViewerComponent = ({
           signal: abortCtrl.signal,
         });
 
-        setLoadingItemIds(loadingItemIds.filter(({ id }) => id !== itemId));
+        setViewerState(null);
       } catch (e) {
-        setLoadingItemIds(loadingItemIds.filter(({ id }) => id !== itemId));
-
         setViewerState('error');
 
         toasts.addError(e, {
@@ -311,7 +283,7 @@ const ExceptionsViewerComponent = ({
         });
       }
     },
-    [setLoadingItemIds, services.http, loadingItemIds, setViewerState, toasts]
+    [services.http, setViewerState, toasts]
   );
 
   // User privileges checks
@@ -333,32 +305,32 @@ const ExceptionsViewerComponent = ({
 
   return (
     <>
-      {currentModal === 'editException' &&
-        exceptionToEdit != null &&
-        exceptionListTypeToEdit != null && (
-          <EditExceptionFlyout
-            ruleName={rule.name}
-            ruleId={rule.id}
-            ruleIndices={rule.index ?? DEFAULT_INDEX_PATTERN}
-            dataViewId={rule.data_view_id}
-            exceptionListType={exceptionListTypeToEdit}
-            exceptionItem={exceptionToEdit}
-            onCancel={handleCancelExceptionItemFlyout}
-            onConfirm={handleConfirmExceptionFlyout}
-            onRuleChange={onRuleChange}
-          />
-        )}
+      {currenFlyout === 'editException' && exceptionToEdit != null && (
+        <EditExceptionFlyout
+          ruleName={rule.name}
+          ruleId={rule.id}
+          ruleIndices={rule.index ?? DEFAULT_INDEX_PATTERN}
+          dataViewId={rule.data_view_id}
+          exceptionListType={listType}
+          exceptionItem={exceptionToEdit}
+          onCancel={handleCancelExceptionItemFlyout}
+          onConfirm={handleConfirmExceptionFlyout}
+          onRuleChange={onRuleChange}
+          data-test-subj="editExceptionItemFlyout"
+        />
+      )}
 
-      {currentModal === 'addException' && exceptionListTypeToEdit != null && (
+      {currenFlyout === 'addException' && (
         <AddExceptionFlyout
           ruleName={rule.name}
           ruleIndices={rule.index ?? DEFAULT_INDEX_PATTERN}
           dataViewId={rule.data_view_id}
           ruleId={rule.id}
-          exceptionListType={exceptionListTypeToEdit}
+          exceptionListType={listType}
           onCancel={handleCancelExceptionItemFlyout}
           onConfirm={handleConfirmExceptionFlyout}
           onRuleChange={onRuleChange}
+          data-test-subj="addExceptionItemFlyout"
         />
       )}
 
@@ -382,7 +354,6 @@ const ExceptionsViewerComponent = ({
           <ExceptionsViewerItems
             disableActions={isReadOnly}
             exceptions={exceptions}
-            loadingItemIds={loadingItemIds}
             listType={listType}
             ruleReferences={allReferences}
             viewerState={viewerState}

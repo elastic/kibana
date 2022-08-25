@@ -30,7 +30,6 @@ const MyFlexItem = styled(EuiFlexItem)`
 interface ExceptionItemsViewerProps {
   disableActions: boolean;
   exceptions: ExceptionListItemSchema[];
-  loadingItemIds: ExceptionListItemIdentifiers[];
   listType: ExceptionListTypeEnum;
   ruleReferences: RuleReferences | null;
   viewerState: ViewerState;
@@ -41,7 +40,6 @@ interface ExceptionItemsViewerProps {
 
 const ExceptionItemsViewerComponent: React.FC<ExceptionItemsViewerProps> = ({
   exceptions,
-  loadingItemIds,
   listType,
   disableActions,
   ruleReferences,
@@ -66,7 +64,6 @@ const ExceptionItemsViewerComponent: React.FC<ExceptionItemsViewerProps> = ({
                 <MyFlexItem data-test-subj="exceptionItemContainer" grow={false} key={exception.id}>
                   <ExceptionItemCard
                     disableActions={disableActions}
-                    loadingItemIds={loadingItemIds}
                     exceptionItem={exception}
                     listType={listType}
                     ruleReferences={ruleReferences != null ? ruleReferences[exception.list_id] : []}

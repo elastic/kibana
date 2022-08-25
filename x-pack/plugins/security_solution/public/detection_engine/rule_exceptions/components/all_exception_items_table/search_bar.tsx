@@ -43,6 +43,8 @@ const ITEMS_SCHEMA = {
 
 interface ExceptionsViewerSearchBarProps {
   isReadOnly: boolean;
+  // Exception list type used to determine what type of item is
+  // being created when "onAddExceptionClick" is invoked
   listType: ExceptionListTypeEnum;
   onSearch: (arg: string) => void;
   onAddExceptionClick: (type: ExceptionListTypeEnum) => void;

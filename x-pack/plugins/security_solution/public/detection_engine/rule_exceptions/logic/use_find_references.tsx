@@ -10,7 +10,7 @@ import type { ListArray } from '@kbn/securitysolution-io-ts-list-types';
 
 import type { RuleReferenceSchema } from '../../../../common/detection_engine/schemas/response';
 import { findRuleExceptionReferences } from '../../../detections/containers/detection_engine/rules/api';
-import { useKibana, useToasts } from '../../../common/lib/kibana';
+import { useToasts } from '../../../common/lib/kibana';
 import type { FindRulesReferencedByExceptionsListProp } from '../../../detections/containers/detection_engine/rules/types';
 import * as i18n from '../utils/translations';
 
@@ -26,7 +26,6 @@ export interface RuleReferences {
 export const useFindExceptionListReferences = (
   ruleExceptionLists: ListArray
 ): ReturnUseFindExceptionListReferences => {
-  const { http } = useKibana().services;
   const toasts = useToasts();
   const [isLoading, setIsLoading] = useState(false);
   const [references, setReferences] = useState<RuleReferences | null>(null);
@@ -50,7 +49,6 @@ export const useFindExceptionListReferences = (
 
         const { references: referencesResults } = await findRuleExceptionReferences({
           lists: listRefs,
-          http,
           signal: abortCtrl.signal,
         });
 
@@ -85,7 +83,7 @@ export const useFindExceptionListReferences = (
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [http, ruleExceptionLists, listRefs, toasts]);
+  }, [ruleExceptionLists, listRefs, toasts]);
 
   return [isLoading, references];
 };

@@ -6,24 +6,25 @@
  */
 
 import type {
-  ExceptionListType,
   ExceptionListItemSchema,
   Pagination,
   ListArray,
 } from '@kbn/securitysolution-io-ts-list-types';
-import type { ExceptionsPagination, ExceptionListItemIdentifiers } from '../../utils/types';
+import type { ExceptionsPagination } from '../../utils/types';
 
 export type ViewerFlyoutName = 'addException' | 'editException' | null;
 export type ViewerState = 'error' | 'empty' | 'empty_search' | 'loading' | 'searching' | null;
 
 export interface State {
   pagination: ExceptionsPagination;
+  // Individual exception items
   exceptions: ExceptionListItemSchema[];
+  // Exception item selected to update
   exceptionToEdit: ExceptionListItemSchema | null;
-  loadingItemIds: ExceptionListItemIdentifiers[];
-  currentModal: ViewerFlyoutName;
-  exceptionListTypeToEdit: ExceptionListType | null;
+  // Flyout to be opened (edit vs add vs none)
+  currenFlyout: ViewerFlyoutName;
   viewerState: ViewerState;
+  // Exception list containers
   exceptionLists: ListArray;
 }
 
@@ -36,11 +37,8 @@ export type Action =
   | { type: 'updateFlyoutOpen'; flyoutType: ViewerFlyoutName }
   | {
       type: 'updateExceptionToEdit';
-      lists: ListArray;
       exception: ExceptionListItemSchema;
     }
-  | { type: 'updateLoadingItemIds'; items: ExceptionListItemIdentifiers[] }
-  | { type: 'updateExceptionListTypeToEdit'; exceptionListType: ExceptionListType | null }
   | {
       type: 'setViewerState';
       state: ViewerState;
@@ -64,33 +62,17 @@ export const allExceptionItemsReducer =
           exceptions,
         };
       }
-      case 'updateLoadingItemIds': {
-        return {
-          ...state,
-          loadingItemIds: [...state.loadingItemIds, ...action.items],
-        };
-      }
       case 'updateExceptionToEdit': {
-        const { exception, lists } = action;
-        const exceptionListToEdit = lists.find((list) => {
-          return list !== null && exception.list_id === list.list_id;
-        });
+        const { exception } = action;
         return {
           ...state,
           exceptionToEdit: exception,
-          exceptionListTypeToEdit: exceptionListToEdit ? exceptionListToEdit.type : null,
         };
       }
       case 'updateFlyoutOpen': {
         return {
           ...state,
-          currentModal: action.flyoutType,
-        };
-      }
-      case 'updateExceptionListTypeToEdit': {
-        return {
-          ...state,
-          exceptionListTypeToEdit: action.exceptionListType,
+          currenFlyout: action.flyoutType,
         };
       }
       case 'setViewerState': {

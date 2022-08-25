@@ -6,15 +6,7 @@
  */
 
 import type { EuiCommentProps } from '@elastic/eui';
-import {
-  EuiPanel,
-  EuiFlexGroup,
-  EuiCommentList,
-  EuiAccordion,
-  EuiFlexItem,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useMemo, useCallback } from 'react';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
@@ -26,9 +18,9 @@ import { ExceptionItemCardHeader } from './header';
 import { ExceptionItemCardConditions } from './conditions';
 import { ExceptionItemCardMetaInfo } from './meta';
 import type { RuleReferenceSchema } from '../../../../../common/detection_engine/schemas/response';
+import { ExceptionItemCardComments } from './comments';
 
 export interface ExceptionItemProps {
-  loadingItemIds: ExceptionListItemIdentifiers[];
   exceptionItem: ExceptionListItemSchema;
   listType: ExceptionListTypeEnum;
   disableActions: boolean;
@@ -40,7 +32,6 @@ export interface ExceptionItemProps {
 
 const ExceptionItemCardComponent = ({
   disableActions,
-  loadingItemIds,
   exceptionItem,
   listType,
   ruleReferences,
@@ -48,8 +39,6 @@ const ExceptionItemCardComponent = ({
   onEditException,
   dataTestSubj,
 }: ExceptionItemProps): JSX.Element => {
-  const { euiTheme } = useEuiTheme();
-
   const handleDelete = useCallback((): void => {
     onDeleteException({
       id: exceptionItem.id,
@@ -64,11 +53,6 @@ const ExceptionItemCardComponent = ({
   const formattedComments = useMemo((): EuiCommentProps[] => {
     return getFormattedComments(exceptionItem.comments);
   }, [exceptionItem.comments]);
-
-  const disableItemActions = useMemo((): boolean => {
-    const foundItems = loadingItemIds.some(({ id }) => id === exceptionItem.id);
-    return disableActions || foundItems;
-  }, [loadingItemIds, exceptionItem.id, disableActions]);
 
   return (
     <EuiPanel paddingSize="l" data-test-subj={dataTestSubj} hasBorder hasShadow={false}>
@@ -96,7 +80,7 @@ const ExceptionItemCardComponent = ({
                 onClick: handleDelete,
               },
             ]}
-            disableActions={disableItemActions}
+            disableActions={disableActions}
             dataTestSubj="exceptionItemCardHeader"
           />
         </EuiFlexItem>
@@ -114,24 +98,7 @@ const ExceptionItemCardComponent = ({
             dataTestSubj="exceptionItemCardConditions"
           />
         </EuiFlexItem>
-        {formattedComments.length > 0 && (
-          <EuiFlexItem>
-            <EuiAccordion
-              id="exceptionItemCardComments"
-              buttonContent={
-                <EuiText size="s" style={{ color: euiTheme.colors.primary }}>
-                  {i18n.exceptionItemCommentsAccordion(formattedComments.length)}
-                </EuiText>
-              }
-              arrowDisplay="none"
-              data-test-subj="exceptionsViewerCommentAccordion"
-            >
-              <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
-                <EuiCommentList comments={formattedComments} />
-              </EuiPanel>
-            </EuiAccordion>
-          </EuiFlexItem>
-        )}
+        {formattedComments.length > 0 && <ExceptionItemCardComments comments={formattedComments} />}
       </EuiFlexGroup>
     </EuiPanel>
   );
