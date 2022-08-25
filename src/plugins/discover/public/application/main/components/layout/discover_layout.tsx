@@ -16,6 +16,7 @@ import {
   EuiPage,
   EuiPageBody,
   EuiPageContent_Deprecated as EuiPageContent,
+  EuiResizableContainer,
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -327,63 +328,81 @@ export function DiscoverLayout({
               )}
               {resultState === 'loading' && <LoadingSpinner />}
               {resultState === 'ready' && (
-                <EuiFlexGroup
-                  className="dscPageContent__inner"
-                  direction="column"
-                  alignItems="stretch"
-                  gutterSize="none"
-                  responsive={false}
-                >
-                  {!isPlainRecord && (
+                <EuiResizableContainer className="dscPageContent__inner" direction="vertical">
+                  {(EuiResizablePanel, EuiResizableButton) => (
                     <>
-                      <EuiFlexItem grow={false}>
-                        <DiscoverChartMemoized
-                          resetSavedSearch={resetSavedSearch}
-                          savedSearch={savedSearch}
-                          savedSearchDataChart$={charts$}
-                          savedSearchDataTotalHits$={totalHits$}
-                          stateContainer={stateContainer}
-                          dataView={dataView}
-                          hideChart={state.hideChart}
-                          interval={state.interval}
-                          isTimeBased={isTimeBased}
-                        />
-                      </EuiFlexItem>
-                      <EuiHorizontalRule margin="none" />
-                      <DocumentViewModeToggle
-                        viewMode={viewMode}
-                        setDiscoverViewMode={setDiscoverViewMode}
-                      />
+                      {!isPlainRecord && (
+                        <>
+                          <EuiResizablePanel initialSize={25} minSize="185px" paddingSize="none">
+                            <DiscoverChartMemoized
+                              resetSavedSearch={resetSavedSearch}
+                              savedSearch={savedSearch}
+                              savedSearchDataChart$={charts$}
+                              savedSearchDataTotalHits$={totalHits$}
+                              stateContainer={stateContainer}
+                              dataView={dataView}
+                              hideChart={state.hideChart}
+                              interval={state.interval}
+                              isTimeBased={isTimeBased}
+                            />
+                            <EuiSpacer size="m" />
+                          </EuiResizablePanel>
+                          <EuiResizableButton />
+                        </>
+                      )}
+                      <EuiResizablePanel initialSize={85} minSize="250px" paddingSize="none">
+                        <EuiFlexGroup
+                          className="eui-fullHeight"
+                          direction="column"
+                          gutterSize="none"
+                          responsive={false}
+                        >
+                          {!isPlainRecord && (
+                            <EuiFlexItem grow={false}>
+                              <EuiSpacer size="s" />
+                              <EuiHorizontalRule margin="none" />
+                              <DocumentViewModeToggle
+                                viewMode={viewMode}
+                                setDiscoverViewMode={setDiscoverViewMode}
+                              />
+                            </EuiFlexItem>
+                          )}
+                          {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
+                            <DiscoverDocuments
+                              documents$={savedSearchData$.documents$}
+                              expandedDoc={expandedDoc}
+                              dataView={dataView}
+                              navigateTo={navigateTo}
+                              onAddFilter={
+                                !isPlainRecord ? (onAddFilter as DocViewFilterFn) : undefined
+                              }
+                              savedSearch={savedSearch}
+                              setExpandedDoc={setExpandedDoc}
+                              state={state}
+                              stateContainer={stateContainer}
+                              onFieldEdited={!isPlainRecord ? onFieldEdited : undefined}
+                            />
+                          ) : (
+                            <FieldStatisticsTableMemoized
+                              availableFields$={savedSearchData$.availableFields$}
+                              savedSearch={savedSearch}
+                              dataView={dataView}
+                              query={state.query}
+                              filters={state.filters}
+                              columns={columns}
+                              stateContainer={stateContainer}
+                              onAddFilter={
+                                !isPlainRecord ? (onAddFilter as DocViewFilterFn) : undefined
+                              }
+                              trackUiMetric={trackUiMetric}
+                              savedSearchRefetch$={savedSearchRefetch$}
+                            />
+                          )}
+                        </EuiFlexGroup>
+                      </EuiResizablePanel>
                     </>
                   )}
-                  {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
-                    <DiscoverDocuments
-                      documents$={savedSearchData$.documents$}
-                      expandedDoc={expandedDoc}
-                      dataView={dataView}
-                      navigateTo={navigateTo}
-                      onAddFilter={!isPlainRecord ? (onAddFilter as DocViewFilterFn) : undefined}
-                      savedSearch={savedSearch}
-                      setExpandedDoc={setExpandedDoc}
-                      state={state}
-                      stateContainer={stateContainer}
-                      onFieldEdited={!isPlainRecord ? onFieldEdited : undefined}
-                    />
-                  ) : (
-                    <FieldStatisticsTableMemoized
-                      availableFields$={savedSearchData$.availableFields$}
-                      savedSearch={savedSearch}
-                      dataView={dataView}
-                      query={state.query}
-                      filters={state.filters}
-                      columns={columns}
-                      stateContainer={stateContainer}
-                      onAddFilter={!isPlainRecord ? (onAddFilter as DocViewFilterFn) : undefined}
-                      trackUiMetric={trackUiMetric}
-                      savedSearchRefetch$={savedSearchRefetch$}
-                    />
-                  )}
-                </EuiFlexGroup>
+                </EuiResizableContainer>
               )}
             </EuiPageContent>
           </EuiFlexItem>
