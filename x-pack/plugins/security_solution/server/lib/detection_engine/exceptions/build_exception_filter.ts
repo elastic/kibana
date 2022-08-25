@@ -199,7 +199,7 @@ export const createOrClauses = async (
 };
 
 const isListTypeProcessable = (type: Type): boolean =>
-  type === 'keyword' || type === 'text' || type === 'ip' || type === 'ip_range';
+  type === 'keyword' || type === 'ip' || type === 'ip_range';
 
 export const filterOutUnprocessableValueLists = async (
   exceptionItems: ExceptionListItemSchema[],
@@ -493,21 +493,6 @@ export const buildIpRangeClauses = (
     };
   });
 
-export const buildTextClauses = (
-  textValues: string[],
-  field: string
-): estypes.QueryDslQueryContainer[] =>
-  textValues.map((value) => {
-    return {
-      match: {
-        [field]: {
-          query: value,
-          operator: 'and',
-        },
-      },
-    };
-  });
-
 export const buildListClause = async (
   entry: EntryList,
   listClient: ListClient
@@ -545,19 +530,6 @@ export const buildListClause = async (
     return {
       bool: {
         [operator === 'excluded' ? 'must_not' : 'should']: rangeClauses,
-        minimum_should_match: 1,
-      },
-    };
-  }
-
-  if (type === 'text') {
-    const textClauses = buildTextClauses(listValues, field);
-    if (textClauses.length > 200) {
-      return;
-    }
-    return {
-      bool: {
-        [operator === 'excluded' ? 'must_not' : 'should']: textClauses,
         minimum_should_match: 1,
       },
     };

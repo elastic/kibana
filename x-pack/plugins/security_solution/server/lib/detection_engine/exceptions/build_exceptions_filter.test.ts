@@ -1293,29 +1293,6 @@ describe('build_exceptions_filter', () => {
         },
       });
     });
-
-    test('it should build with a filter clause when list is text type', async () => {
-      const booleanFilter = await buildListClause(
-        { ...getEntryListMock(), list: { id: getEntryListMock().list.id, type: 'text' } },
-        listClient
-      );
-
-      expect(booleanFilter).toEqual({
-        bool: {
-          should: [
-            {
-              match: {
-                'host.name': {
-                  query: '127.0.0.1',
-                  operator: 'and',
-                },
-              },
-            },
-          ],
-          minimum_should_match: 1,
-        },
-      });
-    });
   });
 
   describe('filterOutUnprocessableValueLists', () => {
@@ -1336,7 +1313,7 @@ describe('build_exceptions_filter', () => {
     test("it should filter out list types we don't support", async () => {
       const listEntryItem: EntryList = {
         ...getEntryListMock(),
-        list: { id: getEntryListMock().list.id, type: 'double' },
+        list: { id: getEntryListMock().list.id, type: 'text' },
       };
       const listExceptionItem = getExceptionListItemSchemaMock({ entries: [listEntryItem] });
 
