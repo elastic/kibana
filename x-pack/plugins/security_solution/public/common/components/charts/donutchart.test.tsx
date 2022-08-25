@@ -70,7 +70,6 @@ describe('DonutChart', () => {
   const props: DonutChartProps = {
     data: parsedMockAlertsData?.open?.severities,
     label: 'Open',
-    link: null,
     title: <ChartLabel count={parsedMockAlertsData?.open?.total} />,
     fillColor: jest.fn(() => '#ccc'),
     totalCount: parsedMockAlertsData?.open?.total,

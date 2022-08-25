@@ -21,6 +21,7 @@ export const NETWORK_URL = '/app/security/network';
 export const OVERVIEW_URL = '/app/security/overview';
 export const DASHBOARDS_URL = '/app/security/dashboards';
 export const DETECTION_RESPONSE_URL = '/app/security/detection_response';
+export const ENTITY_ANALYTICS_URL = '/app/security/entity_analytics';
 export const KUBERNETES_URL = '/app/security/kubernetes';
 export const CSP_DASHBOARD_URL = '/app/security/cloud_security_posture/dashboard';
 export const INDICATORS_URL = '/app/security/threat_intelligence/indicators';
