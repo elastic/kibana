@@ -286,6 +286,7 @@ describe('test endpoint policy data config extraction', () => {
     },
     enabled: true,
     policy_id: '499b5aa7-d214-5b5d-838b-3cd76469844e',
+    output_id: '',
     inputs: [
       {
         type: 'endpoint',
