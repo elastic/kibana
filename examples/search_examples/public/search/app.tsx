@@ -300,15 +300,16 @@ export const SearchExamplesApp = ({
         const ac = data.search.aggs.createAggConfigs(dataView, aggDef);
         searchSource.setField('aggs', ac);
       }
-
       setRequest(searchSource.getSearchRequestBody());
       const abortController = new AbortController();
-      const inspector: IInspectorInfo = {
+
+      const inspector: Required<IInspectorInfo> = {
         adapter: new RequestAdapter(),
         title: 'Example App Inspector!',
         id: 'greatest-example-app-inspector',
         description: 'Use the `description` field for more info about the inspector.',
       };
+
       setAbortController(abortController);
       setIsLoading(true);
       const result = await lastValueFrom(
@@ -330,7 +331,7 @@ export const SearchExamplesApp = ({
         setWarningContents([]);
       } else {
         const warnings: SearchResponseWarning[] = [];
-        data.search.showWarnings(inspector, (warning) => {
+        data.search.showWarnings(inspector.adapter, (warning) => {
           warnings.push(warning);
           return true; // prevent or allow search service from showing this warning on its own
         });
