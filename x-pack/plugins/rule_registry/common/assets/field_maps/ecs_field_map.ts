@@ -1581,6 +1581,11 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'host.risk.calculated_level': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'host.network.egress.bytes': {
     type: 'long',
     array: false,
@@ -5884,6 +5889,11 @@ export const ecsFieldMap = {
   'user.roles': {
     type: 'keyword',
     array: true,
+    required: false,
+  },
+  'user.risk.calculated_level': {
+    type: 'keyword',
+    array: false,
     required: false,
   },
   'user.target.domain': {

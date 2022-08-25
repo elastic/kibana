@@ -23,6 +23,7 @@ import {
 import type { SearchAfterAndBulkCreateParams, SearchAfterAndBulkCreateReturnType } from './types';
 import { withSecuritySpan } from '../../../utils/with_security_span';
 import { enrichEvents } from './enrichments';
+import type { EnrichEvents } from './enrichments/types';
 
 // search_after through documents and re-index using bulk endpoint.
 export const searchAfterAndBulkCreate = async ({
@@ -157,18 +158,20 @@ export const searchAfterAndBulkCreate = async ({
           addToSearchAfterReturn({ current: toReturn, next: bulkCreateResult });
 =======
           const limitedEvents = includedEvents.slice(0, tuple.maxSignals - signalsCreatedCount);
-          // const enrichedEvents = await enrichment(limitedEvents);
-
-          logger.debug(buildRuleMessage(`--------- Start enrichments`));
-
-          const enrichedEvents = await enrichEvents({
-            events: limitedEvents,
-            services,
-            logger,
-            buildRuleMessage,
-            listClient,
-          });
+          // TODO: should we move those IM enrichment, after deduplication?
+          const enrichedEvents = await enrichment(limitedEvents);
           const wrappedDocs = wrapHits(enrichedEvents, buildReasonMessage);
+
+          const enrichEventsAfterDeduplicaton: EnrichEvents = (
+            events,
+            { spaceId }: { spaceId: string }
+          ) =>
+            enrichEvents({
+              events,
+              services,
+              logger: ruleExecutionLogger,
+              spaceId,
+            });
 
           const {
             bulkCreateDuration: bulkDuration,
@@ -176,9 +179,7 @@ export const searchAfterAndBulkCreate = async ({
             createdItems,
             success: bulkSuccess,
             errors: bulkErrors,
-          } = await bulkCreate(wrappedDocs);
-
-          logger.debug(`---- wrappedDocs ----- ${JSON.stringify(createdItems.length)}`);
+          } = await bulkCreate(wrappedDocs, undefined, enrichEventsAfterDeduplicaton);
 
           toReturn = mergeReturns([
             toReturn,
