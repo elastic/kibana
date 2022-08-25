@@ -10,8 +10,7 @@ import { buildUp, tearDown } from '..';
 
 // eslint-disable-next-line import/no-default-export
 export default function actionsTests({ loadTestFile, getService }: FtrProviderContext) {
-  // FLAKY: https://github.com/elastic/kibana/issues/116055
-  describe.skip('Actions', () => {
+  describe('Actions', () => {
     before(async () => buildUp(getService));
     after(async () => tearDown(getService));
 
