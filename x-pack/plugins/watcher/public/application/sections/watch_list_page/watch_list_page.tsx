@@ -251,7 +251,7 @@ export const WatchListPage = () => {
           defaultMessage: 'ID',
         }),
         sortable: true,
-        truncateText: true,
+        truncateText: false,
         render: (id: string) => {
           return (
             <EuiLink
@@ -272,7 +272,7 @@ export const WatchListPage = () => {
           return <span data-test-subj={`watchNameColumn-${item.id}`}>{name}</span>;
         },
         sortable: true,
-        truncateText: true,
+        truncateText: false,
       },
       {
         field: 'watchStatus.state',
