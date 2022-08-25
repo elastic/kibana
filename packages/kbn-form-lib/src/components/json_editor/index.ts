@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export * from './json_editor';
+export { JsonEditor } from './json_editor';
 
 export type { OnJsonEditorUpdateHandler, JsonEditorState } from './use_json';
