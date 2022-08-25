@@ -166,6 +166,15 @@ describe('<EditPolicy /> serialization', () => {
 
   describe('hot phase', () => {
     beforeEach(async () => {
+      await act(async () => {
+        // this used to be in an afterAll hook in the previous suite... it seems to mutate something that is required for the following tests to work...
+        testBed = await setupSerializationTestBed(httpSetup, {
+          appServicesContext: {
+            license: licensingMock.createLicense({ license: { type: 'enterprise' } }),
+          },
+        });
+      });
+
       httpRequestsMockHelpers.setDefaultResponses();
 
       await act(async () => {
