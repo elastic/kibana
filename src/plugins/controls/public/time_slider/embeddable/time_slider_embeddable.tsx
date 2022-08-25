@@ -11,6 +11,7 @@ import { BehaviorSubject } from 'rxjs';
 import moment from 'moment-timezone';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
 import { ReduxEmbeddableTools, ReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Subscription } from 'rxjs';
@@ -55,19 +56,24 @@ export class TimeSliderControlEmbeddable extends Embeddable<
 
     const {
       data: { timefilter },
-      settings: { getDateFormat, getTimezone },
+      settings: { getDateFormat, getDefaultTimeRange, getTimezone },
     } = pluginServices.getServices();
 
     this.getDateFormat = getDateFormat;
     this.getTimezone = getTimezone;
     this.timefilter = timefilter;
 
+    const timeRangeBounds = this.timeRangeToBounds(getDefaultTimeRange());
     this.reduxEmbeddableTools = reduxEmbeddablePackage.createTools<
       TimeSliderReduxState,
       typeof timeSliderReducers
     >({
       embeddable: this,
       reducers: timeSliderReducers,
+      initialComponentState: {
+        ticks: getTicks(timeRangeBounds[FROM_INDEX], timeRangeBounds[TO_INDEX], this.getTimezone()),
+        timeRangeBounds,
+      },
     });
 
     this.inputSubscription = this.getInput$().subscribe(() => this.onInputChange());
@@ -90,15 +96,7 @@ export class TimeSliderControlEmbeddable extends Embeddable<
       return;
     }
 
-    const timeRangeBounds = this.timefilter.calculateBounds(input.timeRange);
-    if (timeRangeBounds.min === undefined || timeRangeBounds.max === undefined) {
-      return;
-    }
-
-    const nextBounds = [timeRangeBounds.min.valueOf(), timeRangeBounds.max.valueOf()] as [
-      number,
-      number
-    ];
+    const nextBounds = this.timeRangeToBounds(input.timeRange);
     const { actions, dispatch, getState } = this.reduxEmbeddableTools;
     if (!_.isEqual(nextBounds, getState().componentState.timeRangeBounds)) {
       dispatch(
@@ -122,6 +120,13 @@ export class TimeSliderControlEmbeddable extends Embeddable<
       const { actions, dispatch } = this.reduxEmbeddableTools;
       dispatch(actions.publishValue({ value: input.value }));
     }
+  }
+
+  private timeRangeToBounds(timeRange: TimeRange): [number, number] {
+    const timeRangeBounds = this.timefilter.calculateBounds(timeRange);
+    return timeRangeBounds.min === undefined || timeRangeBounds.max === undefined
+      ? [Date.now() - 1000 * 60 * 15, Date.now()]
+      : [timeRangeBounds.min.valueOf(), timeRangeBounds.max.valueOf()];
   }
 
   public reload() {
