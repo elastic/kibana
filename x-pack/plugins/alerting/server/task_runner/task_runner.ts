@@ -394,12 +394,7 @@ export class TaskRunner<
       alertFactory.alertLimit.checkLimitUsage();
     } catch (err) {
       // Check if this error is due to reaching the alert limit
-      if (!hasReachedAlertLimit) {
-        this.logger.warn(
-          `rule execution generated greater than ${this.maxAlerts} alerts: ${ruleLabel}`
-        );
-        ruleRunMetricsStore.setHasReachedAlertLimit(true);
-      } else {
+      if (!hasReachedAlertLimit()) {
         this.alertingEventLogger.setExecutionFailed(
           `rule execution failure: ${ruleLabel}`,
           err.message
