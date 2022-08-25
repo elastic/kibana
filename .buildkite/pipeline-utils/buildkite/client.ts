@@ -28,6 +28,8 @@ export interface BuildkiteStep {
   command: string;
   label: string;
   parallelism?: number;
+  concurrency?: number;
+  concurrency_group?: string;
   agents: {
     queue: string;
   };
