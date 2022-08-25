@@ -28045,7 +28045,6 @@
     "xpack.securitySolution.exceptions.commentEventLabel": "a ajouté un commentaire",
     "xpack.securitySolution.exceptions.dissasociateExceptionListError": "Impossible de retirer la liste d'exceptions",
     "xpack.securitySolution.exceptions.dissasociateListSuccessText": "La liste d'exceptions ({id}) a été retirée avec succès",
-    "xpack.securitySolution.exceptions.editButtonLabel": "Modifier",
     "xpack.securitySolution.exceptions.editException.bulkCloseLabel": "Fermer toutes les alertes qui correspondent à cette exception et ont été générées par cette règle",
     "xpack.securitySolution.exceptions.editException.bulkCloseLabel.disabled": "Fermer toutes les alertes qui correspondent à cette exception et ont été générées par cette règle (les listes et les champs non ECS ne sont pas pris en charge)",
     "xpack.securitySolution.exceptions.editException.cancel": "Annuler",
