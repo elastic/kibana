@@ -20,4 +20,13 @@ describe('<Toolbar />', () => {
 
     expect(component).toMatchSnapshot();
   });
+
+  test('onClick works as expected when the primary button is clicked', () => {
+    const mockClickHandler = jest.fn();
+    const primaryButton = <PrimaryButton label="Create chart" onClick={mockClickHandler} />;
+    const children = { primaryButton };
+    const component = mountWithIntl(<Toolbar children={children} />);
+    component.find('button').simulate('click')
+    expect(mockClickHandler).toHaveBeenCalled();
+  });
 });
