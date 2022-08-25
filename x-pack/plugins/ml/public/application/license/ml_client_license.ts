@@ -5,19 +5,33 @@
  * 2.0.
  */
 
+import type { CoreStart } from '@kbn/core/public';
+import { ML_PAGES } from '../../../common/constants/locator';
 import { MlLicense } from '../../../common/license';
 import { showExpiredLicenseWarning } from './expired_warning';
 
 export class MlClientLicense extends MlLicense {
-  fullLicenseResolver() {
+  constructor(private application: CoreStart['application']) {
+    super();
+  }
+
+  private redirectToKibana() {
+    return this.application.navigateToApp('home');
+  }
+
+  private redirectToBasic() {
+    return this.application.navigateToApp('ml', { path: ML_PAGES.DATA_VISUALIZER });
+  }
+
+  fullLicenseResolver(): Promise<void> {
     if (this.isMlEnabled() === false || this.isMinimumLicense() === false) {
       // ML is not enabled or the license isn't at least basic
-      return redirectToKibana();
+      return this.redirectToKibana();
     }
 
     if (this.isFullLicense() === false) {
       // ML is enabled, but only with a basic or gold license
-      return redirectToBasic();
+      return this.redirectToBasic();
     }
 
     // ML is enabled
@@ -30,7 +44,7 @@ export class MlClientLicense extends MlLicense {
   basicLicenseResolver() {
     if (this.isMlEnabled() === false || this.isMinimumLicense() === false) {
       // ML is not enabled or the license isn't at least basic
-      return redirectToKibana();
+      return this.redirectToKibana();
     }
 
     // ML is enabled
@@ -39,14 +53,4 @@ export class MlClientLicense extends MlLicense {
     }
     return Promise.resolve();
   }
-}
-
-function redirectToKibana() {
-  window.location.href = '/';
-  return Promise.reject();
-}
-
-function redirectToBasic() {
-  window.location.href = '#/datavisualizer';
-  return Promise.reject();
 }
