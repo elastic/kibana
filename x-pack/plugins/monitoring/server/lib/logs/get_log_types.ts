@@ -10,7 +10,7 @@ import { createTimeFilter, TimerangeFilter } from '../create_query';
 import { detectReason } from './detect_reason';
 import { detectReasonFromException } from './detect_reason_from_exception';
 import { LegacyRequest } from '../../types';
-import { FilebeatResponse } from '../../../common/types/filebeat';
+import { LogsResponse } from '../../../common/types/logs';
 
 interface LogType {
   level?: string;
@@ -18,9 +18,9 @@ interface LogType {
 }
 
 async function handleResponse(
-  response: FilebeatResponse,
+  response: LogsResponse,
   req: LegacyRequest,
-  filebeatIndexPattern: string,
+  logsIndexPattern: string,
   opts: { clusterUuid?: string; nodeUuid?: string; indexUuid?: string; start: number; end: number }
 ) {
   const result: { enabled: boolean; types: LogType[]; reason?: any } = {
@@ -43,7 +43,7 @@ async function handleResponse(
       };
     });
   } else {
-    result.reason = await detectReason(req, filebeatIndexPattern, opts);
+    result.reason = await detectReason(req, logsIndexPattern, opts);
   }
 
   return result;

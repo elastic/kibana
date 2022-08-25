@@ -8,7 +8,7 @@
 import { LegacyRequest } from '../../types';
 import { createTimeFilter } from '../create_query';
 
-export interface FilebeatIndexCheckOpts {
+export interface LogsIndexCheckOpts {
   start: number;
   end: number;
   clusterUuid?: string;
@@ -16,10 +16,10 @@ export interface FilebeatIndexCheckOpts {
   indexUuid?: string;
 }
 
-async function doesFilebeatIndexExist(
+async function doesLogsIndexExist(
   req: LegacyRequest,
-  filebeatIndexPattern: string,
-  { start, end, clusterUuid, nodeUuid, indexUuid }: FilebeatIndexCheckOpts
+  logsIndexPattern: string,
+  { start, end, clusterUuid, nodeUuid, indexUuid }: LogsIndexCheckOpts
 ) {
   const metric = { timestampField: '@timestamp' };
   const filter = [createTimeFilter({ start, end, metric })];
@@ -95,28 +95,28 @@ async function doesFilebeatIndexExist(
   };
 
   const body = [
-    { index: filebeatIndexPattern },
+    { index: logsIndexPattern },
     { ...defaultParams },
-    { index: filebeatIndexPattern },
+    { index: logsIndexPattern },
     { ...defaultParams, ...indexPatternExistsQuery },
-    { index: filebeatIndexPattern },
+    { index: logsIndexPattern },
     { ...defaultParams, ...typeExistsAtAnyTimeQuery },
-    { index: filebeatIndexPattern },
+    { index: logsIndexPattern },
     { ...defaultParams, ...typeExistsQuery },
-    { index: filebeatIndexPattern },
+    { index: logsIndexPattern },
     { ...defaultParams, ...usingStructuredLogsQuery },
   ];
 
   if (clusterUuid) {
-    body.push(...[{ index: filebeatIndexPattern }, { ...defaultParams, ...clusterExistsQuery }]);
+    body.push(...[{ index: logsIndexPattern }, { ...defaultParams, ...clusterExistsQuery }]);
   }
 
   if (nodeUuid) {
-    body.push(...[{ index: filebeatIndexPattern }, { ...defaultParams, ...nodeExistsQuery }]);
+    body.push(...[{ index: logsIndexPattern }, { ...defaultParams, ...nodeExistsQuery }]);
   }
 
   if (indexUuid) {
-    body.push(...[{ index: filebeatIndexPattern }, { ...defaultParams, ...indexExistsQuery }]);
+    body.push(...[{ index: logsIndexPattern }, { ...defaultParams, ...indexExistsQuery }]);
   }
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
@@ -148,8 +148,8 @@ async function doesFilebeatIndexExist(
 
 export async function detectReason(
   req: LegacyRequest,
-  filebeatIndexPattern: string,
-  opts: FilebeatIndexCheckOpts
+  logsIndexPattern: string,
+  opts: LogsIndexCheckOpts
 ) {
-  return await doesFilebeatIndexExist(req, filebeatIndexPattern, opts);
+  return await doesLogsIndexExist(req, logsIndexPattern, opts);
 }

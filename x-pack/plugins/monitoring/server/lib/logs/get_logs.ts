@@ -8,12 +8,12 @@
 import moment from 'moment';
 import { checkParam } from '../error_missing_required';
 import { createTimeFilter, TimerangeFilter } from '../create_query';
-import { detectReason, FilebeatIndexCheckOpts } from './detect_reason';
+import { detectReason, LogsIndexCheckOpts } from './detect_reason';
 import { formatUTCTimestampForTimezone } from '../format_timezone';
 import { getTimezone } from '../get_timezone';
 import { detectReasonFromException } from './detect_reason_from_exception';
 import { LegacyRequest } from '../../types';
-import { FilebeatResponse } from '../../../common/types/filebeat';
+import { LogsResponse } from '../../../common/types/logs';
 import { MonitoringConfig } from '../../config';
 
 interface Log {
@@ -27,10 +27,10 @@ interface Log {
 }
 
 async function handleResponse(
-  response: FilebeatResponse,
+  response: LogsResponse,
   req: LegacyRequest,
   logsIndexPattern: string,
-  opts: FilebeatIndexCheckOpts
+  opts: LogsIndexCheckOpts
 ) {
   const result: { enabled: boolean; logs: Log[]; reason?: any } = {
     enabled: false,
@@ -67,7 +67,7 @@ export async function getLogs(
   config: MonitoringConfig,
   req: LegacyRequest,
   logsIndexPattern: string,
-  { clusterUuid, nodeUuid, indexUuid, start, end }: FilebeatIndexCheckOpts
+  { clusterUuid, nodeUuid, indexUuid, start, end }: LogsIndexCheckOpts
 ) {
   checkParam(logsIndexPattern, 'logsIndexPattern in logs/getLogs');
 
@@ -122,7 +122,7 @@ export async function getLogs(
     logs: [],
   };
   try {
-    const response: FilebeatResponse = await callWithRequest(req, 'search', params);
+    const response: LogsResponse = await callWithRequest(req, 'search', params);
     result = await handleResponse(response, req, logsIndexPattern, {
       clusterUuid,
       nodeUuid,
