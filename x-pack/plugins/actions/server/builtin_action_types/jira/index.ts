@@ -83,7 +83,7 @@ export function getActionType(
       },
       secrets: {
         validateSchema: ExternalIncidentServiceSecretConfigurationSchema,
-        validate: validate.config,
+        validate: validate.secrets,
       },
       params: {
         validateSchema: ExecutorParamsSchema,
