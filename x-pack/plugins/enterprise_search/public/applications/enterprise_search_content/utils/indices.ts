@@ -36,8 +36,7 @@ export function isConnectorIndex(
 export function isCrawlerIndex(
   index: ElasticsearchIndexWithIngestion | undefined
 ): index is CrawlerIndex {
-  const crawlerIndex = index as CrawlerIndex;
-  return !!crawlerIndex?.crawler || (!!crawlerIndex?.connector && crawlerIndex.connector.service_type === ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE);
+  return !!(index as CrawlerIndex)?.crawler;
 }
 
 export function isApiIndex(index: ElasticsearchIndexWithIngestion | undefined): boolean {
@@ -53,8 +52,7 @@ export function isConnectorViewIndex(index: ElasticsearchViewIndex): index is Co
 }
 
 export function isCrawlerViewIndex(index: ElasticsearchViewIndex): index is CrawlerViewIndex {
-  const crawlerViewIndex = index as CrawlerViewIndex;
-  return !!crawlerViewIndex?.crawler || (!!crawlerViewIndex?.connector && crawlerViewIndex.connector.service_type === ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE);
+  return !!(index as CrawlerViewIndex)?.crawler;
 }
 
 export function isApiViewIndex(index: ElasticsearchViewIndex): index is ApiViewIndex {
