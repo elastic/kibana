@@ -33,8 +33,7 @@ export const getCommandAboutInfo = ({
     aboutInfo
   ) : (
     <>
-      {aboutInfo}
-      <DisabledTooltip />
+      {aboutInfo} <DisabledTooltip />
     </>
   );
 };
