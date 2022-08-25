@@ -50,7 +50,6 @@ export function safeAct(cb: () => Promise<void> | void) {
     console.log(
       `act() cb triggered after test completed, act registration stacktrace:\n${indentedStack}`
     );
-
-    return undefined as never;
+    process.exit(1);
   });
 }
