@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiLink } from '@elastic/eui';
@@ -20,49 +20,59 @@ const MediumShadeText = styled.span`
   color: ${({ theme }) => theme.eui.euiColorMediumShade};
 `;
 
-export const getAnomaliesColumns = (): AnomaliesColumns => [
-  {
-    field: 'name',
-    name: i18n.ANOMALY_NAME,
-    truncateText: true,
-    mobileOptions: { show: true },
-    render: (name, { status }) => {
-      if (status === 'enabled') {
-        return name;
-      } else {
-        return <MediumShadeText>{name}</MediumShadeText>;
-      }
-    },
-  },
-  {
-    field: 'count',
-    sortable: ({ count, status }) => {
-      if (status === 'enabled') {
-        return count;
-      }
-      if (status === 'disabled') {
-        return -1;
-      }
-      return -2;
-    },
-    truncateText: true,
-    align: 'right',
-    name: i18n.ANOMALY_COUNT,
-    mobileOptions: { show: true },
-    width: '15%',
-    render: (count, { status, jobId }) => {
-      if (status === 'enabled') {
-        return count;
-      } else {
-        if (status === 'disabled') {
-          return <EnableJobLink jobId={jobId} />;
-        }
+export const useAnomaliesColumns = (loading: boolean): AnomaliesColumns => {
+  const columns: AnomaliesColumns = useMemo(
+    () => [
+      {
+        field: 'name',
+        name: i18n.ANOMALY_NAME,
+        truncateText: true,
+        mobileOptions: { show: true },
+        'data-test-subj': 'anomalies-table-column-name',
+        render: (name, { status }) => {
+          if (status === 'enabled') {
+            return name;
+          } else {
+            return <MediumShadeText>{name}</MediumShadeText>;
+          }
+        },
+      },
+      {
+        field: 'count',
+        sortable: ({ count, status }) => {
+          if (status === 'enabled') {
+            return count;
+          }
+          if (status === 'disabled') {
+            return -1;
+          }
+          return -2;
+        },
+        truncateText: true,
+        align: 'right',
+        name: i18n.ANOMALY_COUNT,
+        mobileOptions: { show: true },
+        width: '15%',
+        'data-test-subj': 'anomalies-table-column-count',
+        render: (count, { status, jobId }) => {
+          if (loading) return '';
 
-        return <MediumShadeText>{status}</MediumShadeText>;
-      }
-    },
-  },
-];
+          if (status === 'enabled') {
+            return count;
+          } else {
+            if (status === 'disabled') {
+              return <EnableJobLink jobId={jobId} />;
+            }
+
+            return <MediumShadeText>{status}</MediumShadeText>;
+          }
+        },
+      },
+    ],
+    [loading]
+  );
+  return columns;
+};
 
 const EnableJobLink = ({ jobId }: { jobId: NotableAnomaliesJobId }) => {
   const {
@@ -78,7 +88,7 @@ const EnableJobLink = ({ jobId }: { jobId: NotableAnomaliesJobId }) => {
 
   return (
     <EuiLink data-test-subj="jobs-table-link" href={jobUrl}>
-      {i18n.ENABLE_JOB}
+      {i18n.RUN_JOB}
     </EuiLink>
   );
 };

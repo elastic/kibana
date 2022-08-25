@@ -91,9 +91,9 @@ export const SUSPICIOUS_POWERSHELL_SCRIPT = i18n.translate(
   }
 );
 
-export const ENABLE_JOB = i18n.translate(
+export const RUN_JOB = i18n.translate(
   'xpack.securitySolution.entityAnalytics.anomalies.enableJob',
   {
-    defaultMessage: 'Enable job',
+    defaultMessage: 'Run job',
   }
 );

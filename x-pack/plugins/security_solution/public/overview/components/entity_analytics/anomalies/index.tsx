@@ -12,8 +12,8 @@ import { HeaderSection } from '../../../../common/components/header_section';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { LastUpdatedAt } from '../../detection_response/utils';
 import * as i18n from './translations';
-import { useNotableAnomaliesSearchSearch } from '../../../../common/components/ml/anomaly/use_anomalies_search';
-import { getAnomaliesColumns } from './columns';
+import { useNotableAnomaliesSearch } from '../../../../common/components/ml/anomaly/use_anomalies_search';
+import { useAnomaliesColumns } from './columns';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import {
@@ -48,13 +48,13 @@ export const EntityAnalyticsAnomalies = () => {
 
   const [updatedAt, setUpdatedAt] = useState<number>(Date.now());
   const { toggleStatus, setToggleStatus } = useQueryToggle(TABLE_QUERY_ID);
-  const columns = useMemo(() => getAnomaliesColumns(), []);
   const { deleteQuery, setQuery, from, to } = useGlobalTime(false);
-  const { isLoading, data, refetch } = useNotableAnomaliesSearchSearch({
+  const { isLoading, data, refetch } = useNotableAnomaliesSearch({
     skip: !toggleStatus,
     from,
     to,
   });
+  const columns = useAnomaliesColumns(isLoading);
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
 
   useEffect(() => {
@@ -97,6 +97,7 @@ export const EntityAnalyticsAnomalies = () => {
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem>
             <LinkAnchor
+              data-test-subj="anomalies_table_hosts_link"
               onClick={goToHostsAnomaliesTab}
               href={hostsAnomaliesTabUrl}
               className="eui-textNoWrap"
@@ -106,16 +107,16 @@ export const EntityAnalyticsAnomalies = () => {
           </EuiFlexItem>
           <EuiFlexItem>
             <LinkAnchor
+              data-test-subj="anomalies_table_users_link"
               onClick={goToUsersAnomaliesTab}
               href={usersAnomaliesTabUrl}
-              data-test-subj="critical_hosts_link"
               className="eui-textNoWrap"
             >
               {i18n.VIEW_ALL_USERS_ANOMALIES}
             </LinkAnchor>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <LinkButton href={jobsUrl} target="_blank">
+            <LinkButton data-test-subj="anomalies_table_all" href={jobsUrl} target="_blank">
               {i18n.VIEW_ALL_ANOMALIES}
             </LinkButton>
           </EuiFlexItem>

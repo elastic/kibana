@@ -21,7 +21,7 @@ import { usersActions } from '../../../../users/store';
 import { getTabsOnUsersUrl } from '../../../../common/components/link_to/redirect_to_users';
 import { UsersTableType } from '../../../../users/store/model';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { useNotableAnomaliesSearchSearch } from '../../../../common/components/ml/anomaly/use_anomalies_search';
+import { useNotableAnomaliesSearch } from '../../../../common/components/ml/anomaly/use_anomalies_search';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 
 const StyledEuiTitle = styled(EuiTitle)`
@@ -32,7 +32,7 @@ export const EntityAnalyticsHeader = () => {
   const { severityCount: hostsSeverityCount } = useHostRiskScoreKpi({});
   const { severityCount: usersSeverityCount } = useUserRiskScoreKpi({});
   const { from, to } = useGlobalTime(false);
-  const { data } = useNotableAnomaliesSearchSearch({ skip: false, from, to });
+  const { data } = useNotableAnomaliesSearch({ skip: false, from, to });
   const dispatch = useDispatch();
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
   const riskyUsersFeatureEnabled = useIsExperimentalFeatureEnabled('riskyUsersEnabled');

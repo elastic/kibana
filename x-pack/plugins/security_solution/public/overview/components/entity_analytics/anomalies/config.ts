@@ -38,15 +38,6 @@ export const NOTABLE_ANOMALIES_CONFIG = {
     name: i18n.SUSPICIOUS_POWERSHELL_SCRIPT,
     entity: 'User',
   },
-  // ============== TEST ==============
-  kk_auth_high_count_logon_events: {
-    name: 'test 1 2 3',
-    entity: 'User',
-  },
-  hi_auth_rare_user: {
-    name: 'test 3 2 1',
-    entity: 'Host',
-  },
 };
 
 export const NOTABLE_ANOMALIES_IDS = Object.keys(

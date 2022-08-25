@@ -20,7 +20,7 @@ import {
   NOTABLE_ANOMALIES_CONFIG,
   NOTABLE_ANOMALIES_IDS,
 } from '../../../../overview/components/entity_analytics/anomalies/config';
-import { getAggregatedAnaomaliesQuery } from '../../../../overview/components/entity_analytics/anomalies/query';
+import { getAggregatedAnomaliesQuery } from '../../../../overview/components/entity_analytics/anomalies/query';
 import type { inputsModel } from '../../../store';
 import { isJobFailed, isJobStarted } from '../../../../../common/machine_learning/helpers';
 
@@ -33,22 +33,22 @@ export interface AnomaliesCount {
   status: AnomalyJobStatus;
 }
 
-interface UseNotableAnomaliesSearchSearchProps {
+interface UseNotableAnomaliesSearchProps {
   skip: boolean;
   from: string;
   to: string;
 }
 
-export const useNotableAnomaliesSearchSearch = ({
+export const useNotableAnomaliesSearch = ({
   skip,
   from,
   to,
-}: UseNotableAnomaliesSearchSearchProps): {
+}: UseNotableAnomaliesSearchProps): {
   isLoading: boolean;
   data: AnomaliesCount[];
   refetch: inputsModel.Refetch;
 } => {
-  const [data, setData] = useState<AnomaliesCount[]>([]);
+  const [data, setData] = useState<AnomaliesCount[]>(formatResultData([], [], []));
   const refetch = useRef<inputsModel.Refetch>(noop);
 
   const {
@@ -67,7 +67,7 @@ export const useNotableAnomaliesSearchSearch = ({
 
     const newFilteredJobIds = newFilteredJobs.map(({ id }) => id);
 
-    const newQuery = getAggregatedAnaomaliesQuery({
+    const newQuery = getAggregatedAnomaliesQuery({
       jobIds: newFilteredJobIds,
       anomalyScoreThreshhold: anomalyScoreThreshhold ?? 50,
       from,
@@ -82,50 +82,36 @@ export const useNotableAnomaliesSearchSearch = ({
     const abortCtrl = new AbortController();
 
     async function fetchAnomaliesSearch() {
-      if (skip || !isMlUser || filteredJobs.length === 0) {
+      if (!isSubscribed) return;
+
+      if (skip || !isMlUser || filteredJobIds.length === 0) {
+        setLoading(false);
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const response = await notableAnomaliesSearch(
+          {
+            jobIds: filteredJobIds,
+            query,
+          },
+          abortCtrl.signal
+        );
+
         if (isSubscribed) {
           setLoading(false);
+          const buckets = response.aggregations.number_of_anomalies.buckets;
+          setData(formatResultData(buckets, filteredJobs, filteredJobIds));
         }
-      } else {
-        setLoading(true);
-        try {
-          const response = await notableAnomaliesSearch(
-            {
-              jobIds: filteredJobIds,
-              query,
-            },
-            abortCtrl.signal
-          );
-
-          if (isSubscribed) {
-            setLoading(false);
-            const buckets = response.aggregations.number_of_anomalies.buckets;
-
-            const resultData = NOTABLE_ANOMALIES_IDS.map((jobId) => {
-              const bucket = buckets.find(({ key }) => jobId === key);
-
-              const job = filteredJobs.find(({ id }) => id === jobId);
-
-              const status: AnomalyJobStatus = getMLJobStatus(jobId, job, filteredJobIds);
-
-              return {
-                jobId,
-                name: NOTABLE_ANOMALIES_CONFIG[jobId].name,
-                count: bucket?.doc_count ?? 0,
-                status,
-              };
-            });
-
-            setData(resultData);
-          }
-        } catch (error) {
-          if (isSubscribed && error.name !== 'AbortError') {
-            addError(error, { title: i18n.SIEM_TABLE_FETCH_FAILURE });
-            setLoading(false);
-          }
+      } catch (error) {
+        if (isSubscribed && error.name !== 'AbortError') {
+          addError(error, { title: i18n.SIEM_TABLE_FETCH_FAILURE });
+          setLoading(false);
         }
       }
     }
+
     fetchAnomaliesSearch();
     refetch.current = fetchAnomaliesSearch;
     return () => {
@@ -149,3 +135,24 @@ const getMLJobStatus = (jobId: string, job: MlSummaryJob | undefined, filteredJo
 
   return filteredJobIds.includes(jobId) ? 'disabled' : 'uninstalled';
 };
+function formatResultData(
+  buckets: Array<{
+    key: NotableAnomaliesJobId;
+    doc_count: number;
+  }>,
+  filteredJobs: MlSummaryJob[],
+  filteredJobIds: string[]
+) {
+  return NOTABLE_ANOMALIES_IDS.map((jobId) => {
+    const bucket = buckets.find(({ key }) => jobId === key);
+    const job = filteredJobs.find(({ id }) => id === jobId);
+    const status: AnomalyJobStatus = getMLJobStatus(jobId, job, filteredJobIds);
+
+    return {
+      jobId,
+      name: NOTABLE_ANOMALIES_CONFIG[jobId].name,
+      count: bucket?.doc_count ?? 0,
+      status,
+    };
+  });
+}

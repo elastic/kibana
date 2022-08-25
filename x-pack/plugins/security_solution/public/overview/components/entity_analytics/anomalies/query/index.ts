@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const getAggregatedAnaomaliesQuery = ({
+export const getAggregatedAnomaliesQuery = ({
   from,
   to,
   jobIds,
