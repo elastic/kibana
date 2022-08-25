@@ -4,11 +4,11 @@ standard_list="url,index-pattern,query,graph-workspace,tag,visualization,canvas-
 
 #orig_archive="x-pack/test/functional/es_archives/reporting/ecommerce_kibana_spaces"
 orig_archive="x-pack/test/functional/es_archives/dashboard/feature_controls/security"
-new_archive="x-pack/test/functional/fixtures/kbn_archiver/home/feature_controls/security"
+new_archive="x-pack/test/functional/fixtures/kbn_archiver/dashboard/feature_controls/security"
 #new_archive="x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce_kibana_spaces"
 newArchives=("x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce_kibana_non_default_space")
 newArchives+=("x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce_kibana_non_timezone_space")
-test_config="x-pack/test/functional/apps/home/config.ts"
+test_config="x-pack/test/functional/apps/dashboard/group1/config.ts"
 
 arrayify_csv() {
   local xs=${1}

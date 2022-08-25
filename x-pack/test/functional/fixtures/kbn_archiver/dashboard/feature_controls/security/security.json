@@ -174,3 +174,19 @@
   "updated_at": "2019-01-22T19:32:47.232Z",
   "version": "WzksMl0="
 }
+
+{
+  "attributes": {
+    "timeFieldName": "@timestamp",
+    "title": "logs*"
+  },
+  "coreMigrationVersion": "7.17.2",
+  "id": "b15b1d40-a8bb-11e9-98cf-2bb06ef63e0b",
+  "migrationVersion": {
+    "index-pattern": "7.11.0"
+  },
+  "references": [],
+  "type": "index-pattern",
+  "updated_at": "2018-12-21T00:43:07.096Z",
+  "version": "WzEwLDJd"
+}

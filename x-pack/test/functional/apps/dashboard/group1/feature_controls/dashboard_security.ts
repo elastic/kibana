@@ -30,13 +30,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const globalNav = getService('globalNav');
   const queryBar = getService('queryBar');
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
+  const kbnServer = getService('kibanaServer');
 
-  describe('dashboard feature controls security', () => {
+  describe.only('dashboard feature controls security', () => {
     before(async () => {
-      await esArchiver.load(
-        'x-pack/test/functional/es_archives/dashboard/feature_controls/security'
-      );
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await kbnServer.importExport.load('x-pack/test/functional/fixtures/kbn_archiver/dashboard/feature_controls/security/security.json')
 
       // ensure we're logged out so we can login as the appropriate users
       await PageObjects.security.forceLogout();
@@ -47,8 +46,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // NOTE: Logout needs to happen before anything else to avoid flaky behavior
       await PageObjects.security.forceLogout();
 
+      await kbnServer.savedObjects.cleanStandardList();
       await esArchiver.unload(
-        'x-pack/test/functional/es_archives/dashboard/feature_controls/security'
+        'x-pack/test/functional/es_archives/logstash_functional'
       );
     });
 
