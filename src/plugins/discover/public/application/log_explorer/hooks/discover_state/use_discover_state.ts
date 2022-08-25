@@ -13,12 +13,12 @@ import { generateFilters } from '@kbn/data-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { SavedSearch, getSavedSearch } from '@kbn/saved-search-plugin/public';
+import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { getState } from '../../../main/services/discover_state';
 import { getStateDefaults } from '../../../main/utils/get_state_defaults';
 import { loadDataView } from '../../../main/utils/resolve_data_view';
 import { MODIFY_COLUMNS_ON_SWITCH, SORT_DEFAULT_ORDER_SETTING } from '../../../../../common';
 import { getDataViewAppState } from '../../../main/utils/get_switch_data_view_app_state';
-import { SortPairArr } from '../../../../components/doc_table/utils/get_sort';
 import { DataTableRecord } from '../../../../types';
 import { useUrl } from '../../../main/hooks/use_url';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -158,7 +158,7 @@ export function useDiscoverState({
           dataView,
           nextDataView,
           state.columns || [],
-          (state.sort || []) as SortPairArr[],
+          (state.sort || []) as SortOrder[],
           config.get(MODIFY_COLUMNS_ON_SWITCH),
           config.get(SORT_DEFAULT_ORDER_SETTING),
           state.query
@@ -220,7 +220,7 @@ export function useDiscoverState({
 
   const navigateTo = useCallback(
     (path: string) => {
-      usedHistory.push(path);
+      usedHistory.push(`/log-explorer${path}`);
     },
     [usedHistory]
   );

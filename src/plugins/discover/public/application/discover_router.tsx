@@ -42,6 +42,9 @@ export const discoverRouter = (services: DiscoverServices, history: History, isD
           <Route path="/view/:id">
             <DiscoverMainRoute isDev={isDev} />
           </Route>
+          <Route path="/log-explorer/view/:id">
+            <DiscoverLogExplorerRoute isDev={isDev} />
+          </Route>
           <Route path="/log-explorer">
             <DiscoverLogExplorerRoute isDev={isDev} />
           </Route>
