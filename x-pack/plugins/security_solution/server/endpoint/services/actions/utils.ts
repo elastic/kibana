@@ -434,7 +434,7 @@ export const formatEndpointActionResults = (
     : [];
 };
 
-export const getAgentMetadataInfo = async ({
+export const getAgentsMetadataInfo = async ({
   esClient,
   searchedAgentIds,
   metadataService,

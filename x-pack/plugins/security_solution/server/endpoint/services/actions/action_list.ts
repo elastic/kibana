@@ -18,7 +18,7 @@ import {
   categorizeResponseResults,
   getActionCompletionInfo,
   mapToNormalizedActionRequest,
-  getAgentMetadataInfo,
+  getAgentsMetadataInfo,
 } from './utils';
 import type { EndpointMetadataService } from '../metadata';
 
@@ -164,7 +164,7 @@ const getActionDetailsList = async ({
   });
 
   // get host metadata info with queried agents
-  const agentsInfo = await getAgentMetadataInfo({
+  const agentsInfo = await getAgentsMetadataInfo({
     esClient,
     metadataService,
     searchedAgentIds: normalizedActionRequests.map((action) => action.agents).flat(),

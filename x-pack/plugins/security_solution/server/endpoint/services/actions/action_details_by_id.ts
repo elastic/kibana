@@ -13,7 +13,7 @@ import {
   categorizeResponseResults,
   getActionCompletionInfo,
   mapToNormalizedActionRequest,
-  getAgentMetadataInfo,
+  getAgentsMetadataInfo,
 } from './utils';
 import type {
   ActionDetails,
@@ -110,7 +110,7 @@ export const getActionDetailsById = async (
   }
 
   // get host metadata info with queried agents
-  const agentsInfo = await getAgentMetadataInfo({
+  const agentsInfo = await getAgentsMetadataInfo({
     esClient,
     searchedAgentIds: normalizedActionRequest.agents,
     metadataService,
