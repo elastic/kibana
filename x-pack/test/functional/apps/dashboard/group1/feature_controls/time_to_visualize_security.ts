@@ -33,7 +33,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('dashboard time to visualize security', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
-      await kbnServer.importExport.load('x-pack/test/functional/fixtures/kbn_archiver/dashboard/feature_controls/security/security.json');
+      await kbnServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/dashboard/feature_controls/security/security.json'
+      );
 
       // ensure we're logged out so we can login as the appropriate users
       await PageObjects.security.forceLogout();
@@ -77,9 +79,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await security.user.delete('dashboard_write_vis_read_user');
 
       await kbnServer.savedObjects.cleanStandardList();
-      await esArchiver.unload(
-        'x-pack/test/functional/es_archives/logstash_functional'
-      );
+      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
     });
 
     describe('lens by value works without library save permissions', () => {

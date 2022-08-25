@@ -15,10 +15,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const kbnServer = getService('kibanaServer');
 
-  describe.only('security', () => {
+  describe('security', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
-      await kbnServer.importExport.load('x-pack/test/functional/fixtures/kbn_archiver/home/feature_controls/security/security.json');
+      await kbnServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/home/feature_controls/security/security.json'
+      );
 
       // ensure we're logged out so we can login as the appropriate users
       await PageObjects.security.forceLogout();
@@ -30,9 +32,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.security.forceLogout();
 
       await kbnServer.savedObjects.cleanStandardList();
-      await esArchiver.unload(
-        'x-pack/test/functional/es_archives/logstash_functional'
-      );
+      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
     });
 
     // https://github.com/elastic/kibana/issues/132628
