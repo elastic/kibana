@@ -6,9 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
-import { EuiIconTip } from '@elastic/eui';
 import type { Command, CommandDefinition } from '../console';
 import { IsolateActionResult } from './isolate_action';
 import { ReleaseActionResult } from './release_action';
@@ -23,6 +20,7 @@ import type {
   ResponderCapabilities,
   ResponderCommands,
 } from '../../../../common/endpoint/constants';
+import { getCommandAboutInfo } from './get_command_about_info';
 
 const emptyArgumentValidator = (argData: ParsedArgData): true | string => {
   if (argData?.length > 0 && argData[0]?.trim().length > 0) {
@@ -100,11 +98,6 @@ const UNSUPPORTED_COMMAND_INFO = i18n.translate(
   }
 );
 
-export const DisabledTooltip = React.memo(() => {
-  return <EuiIconTip content={UNSUPPORTED_COMMAND_INFO} type="alert" color="danger" />;
-});
-DisabledTooltip.displayName = 'DisabledTooltip';
-
 export const getEndpointResponseActionsConsoleCommands = ({
   endpointAgentId,
   endpointCapabilities,
@@ -121,15 +114,12 @@ export const getEndpointResponseActionsConsoleCommands = ({
   return [
     {
       name: 'isolate',
-      about: (
-        <FormattedMessage
-          id="xpack.securitySolution.endpointConsoleCommands.isolate.about"
-          defaultMessage="Isolate the host {optionalMessage}"
-          values={{
-            optionalMessage: doesEndpointSupportResponder('isolate') ? '' : <DisabledTooltip />,
-          }}
-        />
-      ),
+      about: getCommandAboutInfo({
+        aboutInfo: i18n.translate('xpack.securitySolution.endpointConsoleCommands.isolate.about', {
+          defaultMessage: 'Isolate the host',
+        }),
+        isSupported: doesEndpointSupportResponder('isolate'),
+      }),
       RenderComponent: IsolateActionResult,
       meta: {
         endpointId: endpointAgentId,
@@ -152,15 +142,12 @@ export const getEndpointResponseActionsConsoleCommands = ({
     },
     {
       name: 'release',
-      about: (
-        <FormattedMessage
-          id="xpack.securitySolution.endpointConsoleCommands.release.about"
-          defaultMessage="Release the host {optionalMessage}"
-          values={{
-            optionalMessage: doesEndpointSupportResponder('release') ? '' : <DisabledTooltip />,
-          }}
-        />
-      ),
+      about: getCommandAboutInfo({
+        aboutInfo: i18n.translate('xpack.securitySolution.endpointConsoleCommands.release.about', {
+          defaultMessage: 'Release the host',
+        }),
+        isSupported: doesEndpointSupportResponder(''),
+      }),
       RenderComponent: ReleaseActionResult,
       meta: {
         endpointId: endpointAgentId,
@@ -183,20 +170,15 @@ export const getEndpointResponseActionsConsoleCommands = ({
     },
     {
       name: 'kill-process',
-      about: (
-        <FormattedMessage
-          id="xpack.securitySolution.endpointConsoleCommands.killProcess.about"
-          defaultMessage="Kill/terminate a process {optionalMessage}"
-          values={{
-            optionalMessage: doesEndpointSupportResponder('kill-process') ? (
-              ''
-            ) : (
-              <DisabledTooltip />
-            ),
-          }}
-        />
-      ),
-
+      about: getCommandAboutInfo({
+        aboutInfo: i18n.translate(
+          'xpack.securitySolution.endpointConsoleCommands.killProcess.about',
+          {
+            defaultMessage: 'Kill/terminate a process',
+          }
+        ),
+        isSupported: doesEndpointSupportResponder('kill-process'),
+      }),
       RenderComponent: KillProcessActionResult,
       meta: {
         endpointId: endpointAgentId,
@@ -241,19 +223,15 @@ export const getEndpointResponseActionsConsoleCommands = ({
     },
     {
       name: 'suspend-process',
-      about: (
-        <FormattedMessage
-          id="xpack.securitySolution.endpointConsoleCommands.suspendProcess.about"
-          defaultMessage="Temporarily suspend a process {optionalMessage}"
-          values={{
-            optionalMessage: doesEndpointSupportResponder('suspend-process') ? (
-              ''
-            ) : (
-              <DisabledTooltip />
-            ),
-          }}
-        />
-      ),
+      about: getCommandAboutInfo({
+        aboutInfo: i18n.translate(
+          'xpack.securitySolution.endpointConsoleCommands.suspendProcess.about',
+          {
+            defaultMessage: 'Temporarily suspend a process',
+          }
+        ),
+        isSupported: doesEndpointSupportResponder('suspend-process'),
+      }),
       RenderComponent: SuspendProcessActionResult,
       meta: {
         endpointId: endpointAgentId,
@@ -314,15 +292,15 @@ export const getEndpointResponseActionsConsoleCommands = ({
     },
     {
       name: 'processes',
-      about: (
-        <FormattedMessage
-          id="xpack.securitySolution.endpointConsoleCommands.processes.about"
-          defaultMessage="Show all running processes {optionalMessage}"
-          values={{
-            optionalMessage: doesEndpointSupportResponder('processes') ? '' : <DisabledTooltip />,
-          }}
-        />
-      ),
+      about: getCommandAboutInfo({
+        aboutInfo: i18n.translate(
+          'xpack.securitySolution.endpointConsoleCommands.processes.about',
+          {
+            defaultMessage: 'Show all running processes',
+          }
+        ),
+        isSupported: doesEndpointSupportResponder('processes'),
+      }),
       RenderComponent: GetProcessesActionResult,
       meta: {
         endpointId: endpointAgentId,
