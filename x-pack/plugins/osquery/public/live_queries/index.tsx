@@ -54,7 +54,7 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
   packId,
   agentSelection,
   addToTimeline,
-                                                        hideSubmitButton,
+  hideSubmitButton,
 }) => {
   const { data: hasActionResultsPrivileges, isLoading } = useActionResultsPrivileges();
 
