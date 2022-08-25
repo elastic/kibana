@@ -13,15 +13,22 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { useSelector } from '@xstate/react';
 import React, { memo } from 'react';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { EntriesActorRef, selectIsReloading } from '../../state_machines/entries_state_machine';
-import { LogExplorerGrid } from '../log_explorer_grid';
+import { LogExplorerDiscoverGrid } from '../log_explorer_grid/log_explorer_discover_grid';
 
-const LogExplorerGridMemoized = React.memo(LogExplorerGrid);
+const LogExplorerDiscoverGridMemoized = React.memo(LogExplorerDiscoverGrid);
 
-function LogExplorerComponent({ stateMachine }: { stateMachine: EntriesActorRef }) {
+function LogExplorerComponent({
+  savedSearch,
+  stateMachine,
+}: {
+  savedSearch: SavedSearch;
+  stateMachine: EntriesActorRef;
+}) {
   const { fieldFormats } = useDiscoverServices();
 
   const isReloading = useSelector(stateMachine, selectIsReloading);
@@ -46,7 +53,7 @@ function LogExplorerComponent({ stateMachine }: { stateMachine: EntriesActorRef 
         </h2>
       </EuiScreenReaderOnly>
       <div className="dscDiscoverGrid">
-        <LogExplorerGridMemoized fieldFormats={fieldFormats} />
+        <LogExplorerDiscoverGridMemoized fieldFormats={fieldFormats} savedSearch={savedSearch} />
       </div>
     </EuiFlexItem>
   );

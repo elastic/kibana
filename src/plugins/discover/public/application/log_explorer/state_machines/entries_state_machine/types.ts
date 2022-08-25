@@ -8,12 +8,13 @@
 
 import { DataView } from '@kbn/data-views-plugin/public';
 import type { Filter, TimeRange } from '@kbn/es-query';
+import { EuiDataGridRefProps } from '@elastic/eui';
 import { LogExplorerChunk, LogExplorerPosition } from '../../types';
 import { LoadAfterEvent } from './services/load_after_service';
 import { LoadAroundEvent } from './services/load_around_service';
 import { LoadBeforeEvent } from './services/load_before_service';
 import { LoadTailEvent } from './services/load_tail_service';
-import { SharedContext, SharedExternalEvent, LogExplorerQuery } from '../data_access_state_machine';
+import { SharedContext, LogExplorerQuery } from '../data_access_state_machine';
 
 interface Context {
   configuration: {
@@ -33,12 +34,25 @@ export type LogExplorerLoadedChunkStateValue =
   | { loaded: 'partial' | 'full' }
   | 'failed';
 
+export type LogExplorerLoadedGridStateValue =
+  | 'staleAfterLoadAround'
+  | 'staleAfterLoadBefore'
+  | 'staleAfterLoadAfter'
+  | 'waitingForSynchronization'
+  | 'synchronized';
+
 export type EntriesMachineStateValue =
   | 'uninitialized' // not used yet, but there's a setting that disables automatic initial search
   | 'loadingAround'
   | 'failedNoData'
   | 'loaded'
-  | { loaded: { top: LogExplorerLoadedChunkStateValue; bottom: LogExplorerLoadedChunkStateValue } }
+  | {
+      loaded: {
+        top: LogExplorerLoadedChunkStateValue;
+        bottom: LogExplorerLoadedChunkStateValue;
+        grid: LogExplorerLoadedGridStateValue;
+      };
+    }
   | 'loadingTop'
   | 'loadingBottom'
   | 'extendingTop'
@@ -52,13 +66,7 @@ export interface EntriesMachineState {
   context: EntriesMachineContext;
 }
 
-export type EntriesExternalEvent = SharedExternalEvent & {
-  type: 'visibleEntriesChanged';
-  visibleStartRowIndex: number;
-  visibleEndRowIndex: number;
-};
-
-export type EntriesInternalEvent =
+export type EntriesMachineEvent =
   | {
       type: 'load';
     }
@@ -70,6 +78,12 @@ export type EntriesInternalEvent =
     }
   | {
       type: 'retryTop';
+    }
+  | {
+      type: 'requestMoreBefore';
+    }
+  | {
+      type: 'requestMoreAfter';
     }
   | LoadAroundEvent
   | LoadBeforeEvent
@@ -128,6 +142,5 @@ export type EntriesInternalEvent =
       type: 'visibleEntriesChanged';
       visibleStartRowIndex: number;
       visibleEndRowIndex: number;
+      gridApi: EuiDataGridRefProps;
     };
-
-export type EntriesMachineEvent = EntriesExternalEvent | EntriesInternalEvent;

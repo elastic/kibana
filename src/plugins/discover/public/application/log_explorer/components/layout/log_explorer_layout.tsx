@@ -226,7 +226,7 @@ export function LogExplorerLayout({ dataViewList, savedSearch }: LogExplorerLayo
                   gutterSize="none"
                   responsive={false}
                 >
-                  <LogExplorer stateMachine={entriesActor} />
+                  <LogExplorer savedSearch={savedSearch} stateMachine={entriesActor} />
                 </EuiFlexGroup>
               )}
             </EuiPageContent>

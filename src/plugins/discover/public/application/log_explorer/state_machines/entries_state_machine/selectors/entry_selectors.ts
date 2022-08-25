@@ -7,7 +7,9 @@
  */
 
 import memoizeOne from 'memoize-one';
-import { LogExplorerChunk, LogExplorerRow, Timestamp } from '../../../types';
+import { v4 } from 'uuid';
+import { LogExplorerChunk, LogExplorerEntry, LogExplorerRow, Timestamp } from '../../../types';
+import { getEntriesFromChunk } from '../../../utils/entry';
 import {
   getEndRowIndex,
   getEndRowTimestamp,
@@ -79,3 +81,47 @@ export const selectVisibleTimeRange = (
     endTimestamp: getEndRowTimestamp(state.context.bottomChunk),
   };
 };
+
+export const selectDiscoverRows = (
+  state: EntriesService['state']
+): {
+  chunkBoundaryRowIndex: number | undefined;
+  endRowIndex: number | undefined;
+  generationId: string;
+  rows: LogExplorerEntry[];
+  startRowIndex: number | undefined;
+} => {
+  if (selectIsReloading(state)) {
+    return {
+      chunkBoundaryRowIndex: undefined,
+      endRowIndex: undefined,
+      generationId: v4(),
+      rows: [],
+      startRowIndex: undefined,
+    };
+  }
+
+  const { topChunk, bottomChunk } = state.context;
+
+  const { generationId, rows } = getDiscoverRowsFromChunksMemoized(topChunk, bottomChunk);
+  const startRowIndex = 0;
+  const endRowIndex = rows.length - 1;
+  const chunkBoundaryRowIndex = topChunk.status === 'loaded' ? topChunk.entries.length : 0;
+
+  return {
+    generationId,
+    rows,
+    startRowIndex,
+    endRowIndex,
+    chunkBoundaryRowIndex,
+  };
+};
+
+export const selectDiscoverRowsMemoized = memoizeOne(selectDiscoverRows);
+
+const getDiscoverRowsFromChunks = (topChunk: LogExplorerChunk, bottomChunk: LogExplorerChunk) => ({
+  generationId: v4(),
+  rows: [...getEntriesFromChunk(topChunk), ...getEntriesFromChunk(bottomChunk)],
+});
+
+const getDiscoverRowsFromChunksMemoized = memoizeOne(getDiscoverRowsFromChunks);

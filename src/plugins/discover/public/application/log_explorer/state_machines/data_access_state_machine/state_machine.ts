@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { createMachine, InterpreterFrom, forwardTo } from 'xstate';
+import { createMachine, InterpreterFrom } from 'xstate';
 import { DataAccessMachineContext, DataAccessMachineState, DataAccessMachineEvent } from './types';
 
 export const dataAccessStateMachine = createMachine<
@@ -30,32 +30,14 @@ export const dataAccessStateMachine = createMachine<
           {
             src: 'entries',
             id: 'entries',
+            autoForward: true,
           },
           {
             src: 'histogram',
             id: 'histogram',
+            autoForward: true,
           },
         ],
-        on: {
-          initialize: undefined, // Forbidden transition once initialized
-          timeRangeChanged: {
-            actions: [forwardTo('entries'), forwardTo('histogram')],
-          },
-          filtersChanged: {
-            actions: [forwardTo('entries'), forwardTo('histogram')],
-            internal: false,
-          },
-          dataViewChanged: {
-            actions: [forwardTo('entries'), forwardTo('histogram')],
-            internal: false,
-          },
-          startTailing: {
-            actions: [forwardTo('entries')],
-          },
-          stopTailing: {
-            actions: [forwardTo('entries')],
-          },
-        },
       },
     },
   },

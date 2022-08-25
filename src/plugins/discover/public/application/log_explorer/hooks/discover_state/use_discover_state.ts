@@ -227,7 +227,11 @@ export function useDiscoverState({
 
   // Filters
   const onAddFilter = useCallback(
-    (field: DataViewField | string, values: unknown, operation: '+' | '-') => {
+    (field: DataViewField | string | undefined, values: unknown, operation: '+' | '-') => {
+      if (field == null) {
+        return;
+      }
+
       const fieldName = typeof field === 'string' ? field : field.name;
       popularizeField(dataView, fieldName, dataViews, capabilities);
       const newFilters = generateFilters(filterManager, field, values, operation, dataView);

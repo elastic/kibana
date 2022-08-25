@@ -6,8 +6,16 @@
  * Side Public License, v 1.
  */
 
+import { Subscribable as XStateSubscribable } from 'xstate';
 import { useEffect, useRef, useState } from 'react';
-import { BehaviorSubject, Observable, OperatorFunction, PartialObserver, Subscription } from 'rxjs';
+import {
+  BehaviorSubject,
+  Observable,
+  OperatorFunction,
+  PartialObserver,
+  Subscribable,
+  Unsubscribable,
+} from 'rxjs';
 import { share, switchMap, tap } from 'rxjs/operators';
 
 export const useLatest = <Value>(value: Value) => {
@@ -63,11 +71,13 @@ export const useObservableState = <State, InitialState>(
   return { latestValue, latestError };
 };
 
+type CompatibleSubscribable<TEmitted> = Subscribable<TEmitted> | XStateSubscribable<TEmitted>;
+
 export const useSubscription = <InputValue>(
-  input$: Observable<InputValue>,
+  input$: CompatibleSubscribable<InputValue>,
   { next, error, complete, unsubscribe }: PartialObserver<InputValue> & { unsubscribe?: () => void }
 ) => {
-  const latestSubscription = useRef<Subscription | undefined>();
+  const latestSubscription = useRef<Unsubscribable | undefined>();
   const latestNext = useLatest(next);
   const latestError = useLatest(error);
   const latestComplete = useLatest(complete);

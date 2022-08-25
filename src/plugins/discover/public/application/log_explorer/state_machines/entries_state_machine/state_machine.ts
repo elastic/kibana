@@ -28,6 +28,12 @@ import {
 import { EntriesMachineContext, EntriesMachineEvent, EntriesMachineState } from './types';
 import { hasFullTopChunk, hasFullBottomChunk } from './guards/chunk_guards';
 import { ActorRefFromInterpreter } from '../data_access_state_machine';
+import { requestMoreAfter, requestMoreBefore } from './actions/request_more_actions';
+import {
+  scrollAfterChunkBoundary,
+  scrollBeforeChunkBoundary,
+  scrollBeforeEnd,
+} from './actions/scroll_actions';
 
 // for stubbing guards until all are implemented
 const constantGuard =
@@ -122,8 +128,7 @@ export const entriesStateMachine = createMachine<
                   },
                   full: {
                     on: {
-                      visibleEntriesChanged: {
-                        cond: 'areVisibleEntriesNearStart',
+                      requestMoreBefore: {
                         target: '#logExplorerEntries.loadingTop',
                       },
                     },
@@ -180,8 +185,7 @@ export const entriesStateMachine = createMachine<
                   },
                   full: {
                     on: {
-                      visibleEntriesChanged: {
-                        cond: 'areVisibleEntriesNearEnd',
+                      requestMoreAfter: {
                         target: '#logExplorerEntries.loadingBottom',
                       },
                     },
@@ -190,6 +194,68 @@ export const entriesStateMachine = createMachine<
                 },
               },
               empty: {},
+            },
+          },
+          grid: {
+            initial: 'staleAfterLoadAround',
+            states: {
+              staleAfterLoadAround: {
+                on: {
+                  visibleEntriesChanged: [
+                    {
+                      actions: 'scrollAfterChunkBoundary',
+                      target: 'waitingForSynchronization',
+                      internal: true,
+                    },
+                  ],
+                },
+              },
+              staleAfterLoadBefore: {
+                on: {
+                  visibleEntriesChanged: [
+                    {
+                      actions: 'scrollAfterChunkBoundary',
+                      target: 'waitingForSynchronization',
+                      internal: true,
+                    },
+                  ],
+                },
+              },
+              staleAfterLoadAfter: {
+                on: {
+                  visibleEntriesChanged: [
+                    {
+                      actions: 'scrollBeforeChunkBoundary',
+                      target: 'waitingForSynchronization',
+                      internal: true,
+                    },
+                  ],
+                },
+              },
+              waitingForSynchronization: {
+                on: {
+                  visibleEntriesChanged: [
+                    {
+                      target: 'synchronized',
+                      internal: true,
+                    },
+                  ],
+                },
+              },
+              synchronized: {
+                on: {
+                  visibleEntriesChanged: [
+                    {
+                      cond: 'areVisibleEntriesNearStart',
+                      actions: ['requestMoreBefore'],
+                    },
+                    {
+                      cond: 'areVisibleEntriesNearEnd',
+                      actions: ['requestMoreAfter'],
+                    },
+                  ],
+                },
+              },
             },
           },
         },
@@ -262,11 +328,11 @@ export const entriesStateMachine = createMachine<
         on: {
           loadBeforeSucceeded: {
             actions: 'updateChunksFromLoadBefore',
-            target: '#logExplorerEntries.loaded.top.loaded',
+            target: ['#logExplorerEntries.loaded', 'loaded.grid.staleAfterLoadBefore'],
           },
           loadBeforeFailed: {
             actions: 'updateChunksFromLoadBefore',
-            target: '#logExplorerEntries.loaded.top.failed',
+            target: ['#logExplorerEntries.loaded.top.failed', 'loaded.grid.staleAfterLoadBefore'],
           },
           columnsChanged: {
             target: 'reloading',
@@ -282,11 +348,17 @@ export const entriesStateMachine = createMachine<
         on: {
           loadAfterSucceeded: {
             actions: 'updateChunksFromLoadAfter',
-            target: '#logExplorerEntries.loaded.bottom.loaded',
+            target: [
+              '#logExplorerEntries.loaded',
+              '#logExplorerEntries.loaded.grid.staleAfterLoadAfter',
+            ],
           },
           loadAfterFailed: {
             actions: 'updateChunksFromLoadAfter',
-            target: '#logExplorerEntries.loaded.bottom.failed',
+            target: [
+              '#logExplorerEntries.loaded.bottom.failed',
+              '#logExplorerEntries.loaded.grid.staleAfterLoadAfter',
+            ],
           },
           columnsChanged: {
             target: 'reloading',
@@ -382,11 +454,11 @@ export const entriesStateMachine = createMachine<
         onDone: [
           {
             cond: 'hasLoadedTopChunk',
-            target: '#logExplorerEntries.loaded',
+            target: ['#logExplorerEntries.loaded', '#logExplorerEntries.loaded.grid.synchronized'],
           },
           {
             cond: 'hasLoadedBottomChunk',
-            target: '#logExplorerEntries.loaded',
+            target: ['#logExplorerEntries.loaded', '#logExplorerEntries.loaded.grid.synchronized'],
           },
           {
             target: 'failedNoData',
@@ -468,6 +540,11 @@ export const entriesStateMachine = createMachine<
       updateTimeRange,
       prependNewTopChunk,
       appendNewBottomChunk,
+      requestMoreBefore,
+      requestMoreAfter,
+      scrollAfterChunkBoundary,
+      scrollBeforeChunkBoundary,
+      scrollBeforeEnd,
     },
     guards: {
       areVisibleEntriesNearStart,

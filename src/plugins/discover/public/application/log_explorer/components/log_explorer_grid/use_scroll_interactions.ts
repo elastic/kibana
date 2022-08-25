@@ -6,38 +6,61 @@
  * Side Public License, v 1.
  */
 
-import { EuiDataGridRefProps } from '@elastic/eui';
-import { MutableRefObject, useEffect } from 'react';
+import { EuiDataGridProps, EuiDataGridRefProps } from '@elastic/eui';
+import { useSelector } from '@xstate/react';
+import { MutableRefObject, useCallback } from 'react';
 import { useEntries } from '../../hooks/query_data/use_state_machine';
-import { memoizedSelectRows } from '../../state_machines/entries_state_machine';
+import { useSubscription } from '../../hooks/use_observable';
+import { useThrottled } from '../../hooks/use_throttled';
+import { selectDiscoverRows } from '../../state_machines/entries_state_machine';
+
+type GridOnItemsRenderedProps = Parameters<
+  NonNullable<NonNullable<EuiDataGridProps['virtualizationOptions']>['onItemsRendered']>
+>[0];
+
+const SEND_THROTTLE_DELAY = 1000;
 
 export const useScrollInteractions = ({
   imperativeGridRef,
 }: {
   imperativeGridRef: MutableRefObject<EuiDataGridRefProps | null>;
 }) => {
-  const { actor: entriesActor, state: entriesState } = useEntries();
+  const { actor: entriesActor } = useEntries();
+  const { endRowIndex } = useSelector(entriesActor, selectDiscoverRows);
+  const throttledSend = useThrottled(entriesActor.send, SEND_THROTTLE_DELAY);
 
-  useEffect(() => {
-    const transitionListener: Parameters<typeof entriesActor['onTransition']>[0] = (
-      state,
-      event
-    ) => {
+  // const initializedGenerationIdRef = useRef<string>();
+
+  useSubscription(entriesActor, {
+    next: (state) => {
       if (state.matches('tailing') && state.changed) {
         // scroll to bottom when tailing starts or loading finishes
-        const { endRowIndex } = memoizedSelectRows(state);
-
         if (endRowIndex != null) {
           imperativeGridRef.current?.scrollToItem?.({ rowIndex: endRowIndex, align: 'end' });
         }
       }
-    };
+    },
+  });
 
-    // TODO: the actor ref does have the correct onTransition, off etc methods. Figure out types.
-    entriesActor.onTransition(transitionListener);
+  const onItemsRendered = useCallback(
+    (props: GridOnItemsRenderedProps) => {
+      if (imperativeGridRef.current == null) {
+        return;
+      }
 
-    return () => {
-      entriesActor.off(transitionListener);
-    };
-  }, [imperativeGridRef, entriesState, entriesActor]);
+      const { visibleRowStartIndex, visibleRowStopIndex } = props;
+
+      throttledSend({
+        type: 'visibleEntriesChanged',
+        visibleStartRowIndex: visibleRowStartIndex,
+        visibleEndRowIndex: visibleRowStopIndex,
+        gridApi: imperativeGridRef.current,
+      });
+    },
+    [imperativeGridRef, throttledSend]
+  );
+
+  return {
+    onItemsRendered,
+  };
 };

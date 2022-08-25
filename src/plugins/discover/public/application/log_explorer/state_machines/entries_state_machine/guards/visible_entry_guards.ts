@@ -7,28 +7,42 @@
  */
 
 import { ConditionPredicate } from 'xstate';
+import { getEntriesFromChunk } from '../../../utils/entry';
 import { EntriesMachineContext, EntriesMachineEvent } from '../types';
 
 export const areVisibleEntriesNearStart: ConditionPredicate<
   EntriesMachineContext,
   EntriesMachineEvent
-> = (context, event) =>
-  event.type === 'visibleEntriesChanged' &&
-  context.topChunk.status === 'loaded' &&
-  context.topChunk.startRowIndex > 0 &&
-  context.topChunk.chunkSize <= context.topChunk.entries.length &&
-  event.visibleStartRowIndex >= context.topChunk.startRowIndex &&
-  event.visibleStartRowIndex <=
-    context.topChunk.startRowIndex + context.configuration.minimumChunkOverscan;
+> = (context, event) => {
+  return event.type === 'visibleEntriesChanged' && event.visibleStartRowIndex <= 1;
+};
 
 export const areVisibleEntriesNearEnd: ConditionPredicate<
   EntriesMachineContext,
   EntriesMachineEvent
-> = (context, event) =>
-  event.type === 'visibleEntriesChanged' &&
-  context.bottomChunk.status === 'loaded' &&
-  context.bottomChunk.endRowIndex < context.configuration.maximumRowCount &&
-  context.bottomChunk.chunkSize <= context.bottomChunk.entries.length &&
-  event.visibleEndRowIndex <= context.bottomChunk.endRowIndex &&
-  event.visibleEndRowIndex >=
-    context.bottomChunk.endRowIndex - context.configuration.minimumChunkOverscan;
+> = (context, event) => {
+  if (event.type !== 'visibleEntriesChanged') {
+    return false;
+  }
+
+  const entryCount =
+    getEntriesFromChunk(context.topChunk).length + getEntriesFromChunk(context.bottomChunk).length;
+
+  return event.visibleEndRowIndex >= entryCount - 1;
+};
+
+export const areVisibleEntriesNearChunkBoundary: ConditionPredicate<
+  EntriesMachineContext,
+  EntriesMachineEvent
+> = (context, event) => {
+  if (event.type !== 'visibleEntriesChanged') {
+    return false;
+  }
+
+  const chunkBoundaryRowIndex = getEntriesFromChunk(context.topChunk).length;
+
+  return (
+    event.visibleStartRowIndex <= chunkBoundaryRowIndex &&
+    event.visibleEndRowIndex >= chunkBoundaryRowIndex
+  );
+};
