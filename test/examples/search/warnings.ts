@@ -19,6 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const indexPatterns = getService('indexPatterns');
   const comboBox = getService('comboBox');
+  const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
 
   describe('handling warnings with search source fetch', function () {
@@ -69,6 +70,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         },
         { override: true }
       );
+    });
+
+    after(async () => {
+      await es.indices.delete({ index: [testIndex, testRollupIndex] });
+      await es.rollup.deleteJob({ id: testRollupIndex });
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     beforeEach(async () => {
