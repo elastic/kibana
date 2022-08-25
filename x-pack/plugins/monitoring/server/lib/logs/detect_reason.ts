@@ -49,7 +49,7 @@ async function doesLogsIndexExist(
   const typeExistsQuery = {
     query: {
       bool: {
-        filter: [...filter, typeFilter],
+        filter: [...filter, elasticsearchLogsFilter],
       },
     },
   };
@@ -57,7 +57,7 @@ async function doesLogsIndexExist(
   const usingStructuredLogsQuery = {
     query: {
       bool: {
-        filter: [...filter, typeFilter, structuredLogsFilter],
+        filter: [...filter, elasticsearchLogsFilter, structuredLogsFilter],
       },
     },
   };
@@ -65,7 +65,7 @@ async function doesLogsIndexExist(
   const clusterExistsQuery = {
     query: {
       bool: {
-        filter: [...filter, typeFilter, clusterFilter],
+        filter: [...filter, elasticsearchLogsFilter, clusterFilter],
       },
     },
   };
@@ -73,7 +73,7 @@ async function doesLogsIndexExist(
   const nodeExistsQuery = {
     query: {
       bool: {
-        filter: [...filter, typeFilter, clusterFilter, nodeFilter],
+        filter: [...filter, elasticsearchLogsFilter, clusterFilter, nodeFilter],
       },
     },
   };
@@ -81,7 +81,7 @@ async function doesLogsIndexExist(
   const indexExistsQuery = {
     query: {
       bool: {
-        filter: [...filter, typeFilter, clusterFilter, indexFilter],
+        filter: [...filter, elasticsearchLogsFilter, clusterFilter, indexFilter],
       },
     },
   };
