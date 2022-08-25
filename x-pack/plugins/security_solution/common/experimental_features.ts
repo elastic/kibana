@@ -53,6 +53,12 @@ export const allowedExperimentalValues = Object.freeze({
    * - We show a table with plain execution logs on the Rule Details page.
    */
   extendedRuleExecutionLoggingEnabled: false,
+
+  /**
+   * Enables the alert details page currently only accessible via the alert details flyout
+   */
+
+  alertDetailsPageEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

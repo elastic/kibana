@@ -11,6 +11,7 @@ import type { RouteComponentProps } from 'react-router-dom';
 
 import type { TimelineType } from '../../../../common/types/timeline';
 
+import type { AlertDetailRouteType } from '../../../detections/pages/alert_details/types';
 import type { HostsTableType } from '../../../hosts/store/model';
 import type { NetworkRouteType } from '../../../network/pages/navigation/types';
 import type { AdministrationSubTab as AdministrationType } from '../../../management/types';
@@ -19,6 +20,7 @@ import type { UsersTableType } from '../../../users/store/model';
 import type { SecurityPageName } from '../../../app/types';
 
 export type SiemRouteType =
+  | AlertDetailRouteType
   | HostsTableType
   | NetworkRouteType
   | TimelineType
@@ -35,6 +37,9 @@ export interface RouteSpyState {
   state?: Record<string, string | undefined>;
 }
 
+export interface AlertDetailRouteSpyState extends RouteSpyState {
+  tabName: AlertDetailRouteType | undefined;
+}
 export interface HostRouteSpyState extends RouteSpyState {
   tabName: HostsTableType | undefined;
 }

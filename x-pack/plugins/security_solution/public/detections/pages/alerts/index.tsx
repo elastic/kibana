@@ -16,6 +16,9 @@ import * as i18n from './translations';
 import { DetectionEnginePage } from '../detection_engine/detection_engine';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { useReadonlyHeader } from '../../../use_readonly_header';
+import { AlertDetailsRoutes } from '../alert_details/routes';
+import { ALERT_DETAILS_PATH } from '../alert_details/constants';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 const AlertsRoute = () => (
   <TrackApplicationView viewId={SecurityPageName.alerts}>
@@ -24,12 +27,24 @@ const AlertsRoute = () => (
   </TrackApplicationView>
 );
 
+const AlertDetailsRoute = () => (
+  <TrackApplicationView viewId={SecurityPageName.alerts}>
+    <AlertDetailsRoutes />
+    <SpyRoute pageName={SecurityPageName.alerts} />
+  </TrackApplicationView>
+);
+
+// TODO: Do we want to track alert detail page views? May be a bit extreme...
+
 const AlertsContainerComponent: React.FC = () => {
   useReadonlyHeader(i18n.READ_ONLY_BADGE_TOOLTIP);
-
+  const isAlertDetailsPageEnabled = useIsExperimentalFeatureEnabled('alertDetailsPageEnabled');
   return (
     <Switch>
       <Route path={ALERTS_PATH} exact component={AlertsRoute} />
+      {isAlertDetailsPageEnabled && (
+        <Route path={ALERT_DETAILS_PATH} component={AlertDetailsRoute} />
+      )}
       <Route component={NotFoundPage} />
     </Switch>
   );

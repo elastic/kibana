@@ -40,6 +40,8 @@ import {
 } from './helpers';
 import type { HostsTableType } from '../../../hosts/store/model';
 import type { UsersTableType } from '../../../users/store/model';
+import type { AlertDetailRouteType } from '../../../detections/pages/alert_details/types';
+import { getAlertDetailsUrl, getAlertDetailsTabUrl } from '../link_to/redirect_to_alerts';
 
 export { LinkButton, LinkAnchor } from './helpers';
 
@@ -49,6 +51,67 @@ export const DEFAULT_NUMBER_OF_LINK = 5;
 export const DEFAULT_MORE_MAX_HEIGHT = '200px';
 
 // Internal Links
+const AlertDetailsLinkComponent: React.FC<{
+  children?: React.ReactNode;
+  /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
+  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
+  alertId: string;
+  alertDetailsTab?: AlertDetailRouteType;
+  title?: string;
+  isButton?: boolean;
+  onClick?: (e: SyntheticEvent) => void;
+}> = ({ alertId, alertDetailsTab, children, Component, isButton, onClick, title }) => {
+  // Shouldn't have to be done
+  const encodedAlertId = encodeURIComponent(alertId);
+
+  const { formatUrl, search } = useFormatUrl(SecurityPageName.alerts);
+  const { navigateToApp } = useKibana().services.application;
+  const goToAlertDetails = useCallback(
+    (ev) => {
+      ev.preventDefault();
+      navigateToApp(APP_UI_ID, {
+        deepLinkId: SecurityPageName.alerts,
+        path: alertDetailsTab
+          ? getAlertDetailsTabUrl(encodedAlertId, alertDetailsTab, search)
+          : getAlertDetailsUrl(encodedAlertId, search),
+      });
+    },
+    [encodedAlertId, navigateToApp, search, alertDetailsTab]
+  );
+
+  const href = useMemo(
+    () =>
+      formatUrl(
+        alertDetailsTab
+          ? getAlertDetailsTabUrl(encodedAlertId, alertDetailsTab)
+          : getAlertDetailsUrl(encodedAlertId)
+      ),
+    [formatUrl, encodedAlertId, alertDetailsTab]
+  );
+
+  return isButton ? (
+    <GenericLinkButton
+      Component={Component}
+      dataTestSubj="alert-details-link-button"
+      href={href}
+      onClick={onClick ?? goToAlertDetails}
+      title={title ?? alertId}
+    >
+      {children ? children : alertId}
+    </GenericLinkButton>
+  ) : (
+    <LinkAnchor
+      data-test-subj="alert-details-link-anchor"
+      onClick={onClick ?? goToAlertDetails}
+      href={href}
+    >
+      {children ? children : alertId}
+    </LinkAnchor>
+  );
+};
+
+export const AlertDetailsLink = React.memo(AlertDetailsLinkComponent);
+
 const UserDetailsLinkComponent: React.FC<{
   children?: React.ReactNode;
   /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
