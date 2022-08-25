@@ -4,10 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { ObservabilityConfig } from '..';
 import { rulesRouteRepository } from './rules';
+import { slosRouteRepository } from './slo/route';
 
-export function getGlobalObservabilityServerRouteRepository() {
-  return rulesRouteRepository;
+export function getGlobalObservabilityServerRouteRepository(config: ObservabilityConfig) {
+  const isSloFeatureEnabled = config.unsafe.slo.enabled;
+
+  const repository = {
+    ...rulesRouteRepository,
+    ...(isSloFeatureEnabled ? slosRouteRepository : {}),
+  };
+  return repository;
 }
 
 export type ObservabilityServerRouteRepository = ReturnType<
