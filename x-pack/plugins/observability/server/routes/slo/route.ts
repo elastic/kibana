@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-
+import { createSloParamsSchema } from '../../schema';
 import { createObservabilityServerRoute } from '../create_observability_server_route';
 
 const createSLORoute = createObservabilityServerRoute({
@@ -14,11 +13,7 @@ const createSLORoute = createObservabilityServerRoute({
   options: {
     tags: [],
   },
-  params: t.type({
-    body: t.type({
-      description: t.string,
-    }),
-  }),
+  params: createSloParamsSchema,
   handler: async ({ context, request, params }) => {
     return { success: true };
   },
