@@ -2763,6 +2763,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-application-common@link:bazel-bin/packages/core/application/core-application-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-base-browser-internal@link:bazel-bin/packages/core/base/core-base-browser-internal":
   version "0.0.0"
   uid ""
@@ -6738,6 +6742,10 @@
   uid ""
 
 "@types/kbn__core-application-browser@link:bazel-bin/packages/core/application/core-application-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-application-common@link:bazel-bin/packages/core/application/core-application-common/npm_module_types":
   version "0.0.0"
   uid ""
 

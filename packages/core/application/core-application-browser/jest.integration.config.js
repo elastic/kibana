@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { applicationServiceMock } from './src/application_service.mock';
-export type { ScopedHistoryMock } from './src/scoped_history.mock';
-export { scopedHistoryMock } from './src/scoped_history.mock';
-export { capabilitiesServiceMock } from './src/capabilities_service.mock';
+module.exports = {
+  preset: '@kbn/test/jest_integration',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/core/application/core-application-browser'],
+};

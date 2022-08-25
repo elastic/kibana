@@ -6,7 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { applicationServiceMock } from './src/application_service.mock';
-export type { ScopedHistoryMock } from './src/scoped_history.mock';
-export { scopedHistoryMock } from './src/scoped_history.mock';
-export { capabilitiesServiceMock } from './src/capabilities_service.mock';
+export type { AppCategory } from './src/app_category';
+export { APP_WRAPPER_CLASS } from './src/app_wrapper_class';

@@ -6,6 +6,30 @@
  * Side Public License, v 1.
  */
 
-export function foo() {
-  return 'hello world';
-}
+export { ApplicationService } from './src/application_service';
+export { ScopedHistory } from './src/scoped_history';
+export { CapabilitiesService } from './src/capabilities';
+export type {
+  App,
+  AppMount,
+  AppUnmount,
+  AppMountParameters,
+  AppUpdatableFields,
+  AppNavOptions,
+  AppUpdater,
+  AppDeepLink,
+  ApplicationSetup,
+  ApplicationStart,
+  AppLeaveHandler,
+  AppLeaveActionType,
+  AppLeaveAction,
+  AppLeaveDefaultAction,
+  AppLeaveConfirmAction,
+  NavigateToAppOptions,
+  NavigateToUrlOptions,
+  PublicAppInfo,
+  PublicAppDeepLinkInfo,
+  // Internal types
+  InternalApplicationSetup,
+  InternalApplicationStart,
+} from './types';
