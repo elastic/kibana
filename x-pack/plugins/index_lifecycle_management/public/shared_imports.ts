@@ -19,7 +19,7 @@ export type {
   FormSchema,
   ValidationConfig,
   ValidationError,
-} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+} from '@kbn/form-lib';
 
 export {
   useForm,
@@ -28,11 +28,7 @@ export {
   getFieldValidityAndErrorMessage,
   useFormContext,
   UseMultiFields,
-} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-
-export { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-
-export {
+  fieldValidators,
   ToggleField,
   NumericField,
   SelectField,
@@ -40,7 +36,7 @@ export {
   ComboBoxField,
   TextField,
   CheckBoxField,
-} from '@kbn/es-ui-shared-plugin/static/forms/components';
+} from '@kbn/form-lib';
 
 export { attemptToURIDecode } from '@kbn/es-ui-shared-plugin/public';
 
