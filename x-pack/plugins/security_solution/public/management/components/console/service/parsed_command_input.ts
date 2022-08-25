@@ -58,7 +58,7 @@ const parseInputString = (rawInput: string): ParsedCommandInput => {
           response.args[argName] = [];
         }
 
-        // if this argument name as a value, then process that
+        // if this argument name has a value, then process that
         if (argName !== argNameAndValueTrimmedString && firstSpaceOrEqualSign) {
           let newArgValue = argNameAndValueTrimmedString
             .substring(firstSpaceOrEqualSign.index + 1)
@@ -74,6 +74,9 @@ const parseInputString = (rawInput: string): ParsedCommandInput => {
           }
 
           response.args[argName].push(newArgValue);
+        } else {
+          // Argument has not value (bare), set it to true
+          response.args[argName].push('');
         }
       }
     }
