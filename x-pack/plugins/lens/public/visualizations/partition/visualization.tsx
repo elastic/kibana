@@ -174,7 +174,6 @@ export const getPieVisualization = ({
               ),
               supportsMoreColumns: sortedColumns.length === 0,
               dataTestSubj: 'lnsPie_horizontalAxisDimensionPanel',
-              requiredMinDimensionCount: 1,
             },
             {
               ...baseProps,
