@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { connectorIndex, crawlerIndex, connectorCrawlerIndex, apiIndex } from '../__mocks__/view_index.mock';
+import {
+  connectorIndex,
+  crawlerIndex,
+  connectorCrawlerIndex,
+  apiIndex,
+} from '../__mocks__/view_index.mock';
 
 import moment from 'moment';
 
@@ -22,7 +27,7 @@ import {
   isApiIndex,
   isConnectorViewIndex,
   isCrawlerViewIndex,
-  isApiViewIndex
+  isApiViewIndex,
 } from './indices';
 
 describe('Indices util functions', () => {

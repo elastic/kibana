@@ -7,7 +7,8 @@
 
 import { ByteSizeValue } from '@kbn/config-schema';
 import { IScopedClusterClient } from '@kbn/core/server';
-import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '@kbn/enterprise-search-plugin/common/constants';
+
+import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../common/constants';
 
 import { fetchConnectorByIndexName } from '../connectors/fetch_connectors';
 import { fetchCrawlerByIndexName } from '../crawler/fetch_crawlers';
@@ -106,7 +107,7 @@ describe('fetchIndex lib function', () => {
     (fetchConnectorByIndexName as jest.Mock).mockImplementationOnce(() =>
       Promise.resolve({
         doc: 'doc',
-        service_type: 'some-service-type'
+        service_type: 'some-service-type',
       })
     );
     mockClient.asCurrentUser.indices.stats.mockImplementation(() => Promise.resolve(statsResponse));
@@ -156,7 +157,7 @@ describe('fetchIndex lib function', () => {
     (fetchConnectorByIndexName as jest.Mock).mockImplementationOnce(() =>
       Promise.resolve({
         doc: 'doc',
-        service_type: ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE
+        service_type: ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE,
       })
     );
     mockClient.asCurrentUser.indices.stats.mockImplementation(() => Promise.resolve(statsResponse));
