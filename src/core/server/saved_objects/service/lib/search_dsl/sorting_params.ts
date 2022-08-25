@@ -8,7 +8,7 @@
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import Boom from '@hapi/boom';
-import { getProperty, IndexMapping } from '../../../mappings';
+import { getProperty, type IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 
 const TOP_LEVEL_FIELDS = ['_id', '_score'];
 
