@@ -6,8 +6,9 @@
  */
 
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
-import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DateRange } from '../../common';
 import type { IndexPattern, IndexPatternMap, IndexPatternRef } from '../types';
 import {
@@ -19,9 +20,9 @@ import {
 import type { DataViewsState } from '../state_management';
 
 export interface IndexPatternServiceProps {
-  core: Pick<CoreStart, 'http' | 'notifications'>;
+  core: Pick<CoreStart, 'http' | 'notifications' | 'uiSettings'>;
+  data: DataPublicPluginStart;
   dataViews: DataViewsContract;
-  uiSettings: IUiSettingsClient;
   updateIndexPatterns: (
     newState: Partial<DataViewsState>,
     options?: { applyImmediately: boolean }
@@ -86,7 +87,7 @@ export interface IndexPatternServiceAPI {
 export function createIndexPatternService({
   core,
   dataViews,
-  uiSettings,
+  data,
   updateIndexPatterns,
 }: IndexPatternServiceProps): IndexPatternServiceAPI {
   const onChangeError = (err: Error) =>
@@ -110,9 +111,12 @@ export function createIndexPatternService({
         updateIndexPatterns,
         fetchJson: core.http.post,
         ...args,
+        data,
+        dataViews,
+        core,
       }),
     loadIndexPatternRefs: async ({ isFullEditor }) =>
       isFullEditor ? loadIndexPatternRefs(dataViews) : [],
-    getDefaultIndex: () => uiSettings.get('defaultIndex'),
+    getDefaultIndex: () => core.uiSettings.get('defaultIndex'),
   };
 }

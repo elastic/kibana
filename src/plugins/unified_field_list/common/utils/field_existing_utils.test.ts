@@ -1,12 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { DataView } from '@kbn/data-views-plugin/common';
-import { legacyExistingFields, existingFields, Field, buildFieldList } from './existing_fields';
+import {
+  legacyExistingFields,
+  existingFields,
+  Field,
+  buildFieldList,
+} from './field_existing_utils';
 
 describe('existingFields', () => {
   it('should remove missing fields by matching names', () => {

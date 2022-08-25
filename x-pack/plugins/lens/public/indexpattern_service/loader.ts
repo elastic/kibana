@@ -8,10 +8,13 @@
 import { isNestedField } from '@kbn/data-views-plugin/common';
 import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
 import { keyBy } from 'lodash';
-import { HttpSetup } from '@kbn/core/public';
+import { CoreStart, HttpSetup } from '@kbn/core/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { loadFieldExisting } from '@kbn/unified-field-list-plugin/public';
 import { IndexPattern, IndexPatternField, IndexPatternMap, IndexPatternRef } from '../types';
 import { documentField } from '../indexpattern_datasource/document_field';
-import { BASE_API_URL, DateRange, ExistingFields } from '../../common';
+import { DateRange } from '../../common';
+// import { BASE_API_URL, DateRange, ExistingFields } from '../../common';
 import { DataViewsState } from '../state_management';
 
 type ErrorHandler = (err: Error) => void;
@@ -203,15 +206,21 @@ async function refreshExistingFields({
   fetchJson,
   indexPatternList,
   dslQuery,
+  core,
+  data,
+  dataViews,
 }: {
   dateRange: DateRange;
   indexPatternList: IndexPattern[];
   fetchJson: HttpSetup['post'];
   dslQuery: object;
+  core: Pick<CoreStart, 'http' | 'notifications' | 'uiSettings'>;
+  data: DataPublicPluginStart;
+  dataViews: DataViewsContract;
 }) {
   try {
     const emptinessInfo = await Promise.all(
-      indexPatternList.map((pattern) => {
+      indexPatternList.map(async (pattern) => {
         if (pattern.hasRestrictions) {
           return {
             indexPatternTitle: pattern.title,
@@ -228,11 +237,28 @@ async function refreshExistingFields({
           body.timeFieldName = pattern.timeFieldName;
         }
 
-        return fetchJson(`${BASE_API_URL}/existing_fields/${pattern.id}`, {
-          body: JSON.stringify(body),
-        }) as Promise<ExistingFields>;
+        const dataView = await dataViews.get(pattern.id);
+
+        // eslint-disable-next-line no-console
+        console.log('pattern', pattern, 'loaded dataView', dataView);
+        return await loadFieldExisting({
+          dslQuery,
+          fromDate: dateRange.fromDate,
+          toDate: dateRange.toDate,
+          timeFieldName: pattern.timeFieldName,
+          data,
+          uiSettingsClient: core.uiSettings,
+          dataViewsService: dataViews,
+          dataView,
+        });
+
+        // return fetchJson(`${BASE_API_URL}/existing_fields/${pattern.id}`, {
+        //   body: JSON.stringify(body),
+        // }) as Promise<ExistingFields>;
       })
     );
+    // eslint-disable-next-line no-console
+    console.log('emptinessInfo', emptinessInfo);
     return { result: emptinessInfo, status: 200 };
   } catch (e) {
     return { result: undefined, status: e.res?.status as number };
@@ -263,11 +289,14 @@ export async function syncExistingFields({
   currentIndexPatternTitle: string;
   dslQuery: object;
   onNoData?: () => void;
+  core: Pick<CoreStart, 'http' | 'notifications' | 'uiSettings'>;
+  data: DataPublicPluginStart;
+  dataViews: DataViewsContract;
 }) {
   const { indexPatternList } = requestOptions;
   const newExistingFields = { ...existingFields };
 
-  const { result, status } = await refreshExistingFields(requestOptions);
+  const { result, status } = await refreshExistingFields({ ...requestOptions });
 
   if (result) {
     if (isFirstExistenceFetch) {
@@ -287,6 +316,9 @@ export async function syncExistingFields({
       newExistingFields[title] = booleanMap(fields.map((field) => field.name));
     }
   }
+
+  // eslint-disable-next-line no-console
+  console.log('updateIndexPatterns, status', status);
 
   updateIndexPatterns(
     {

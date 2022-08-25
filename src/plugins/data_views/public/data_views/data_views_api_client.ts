@@ -49,14 +49,13 @@ export class DataViewsApiClient implements IDataViewsApiClient {
    * @param options options for fields request
    */
   getFieldsForWildcard(options: GetFieldsOptions) {
-    const { pattern, metaFields, type, rollupIndex, allowNoIndex, filter } = options;
+    const { pattern, metaFields, type, rollupIndex, allowNoIndex } = options;
     return this._request<{ fields: FieldSpec[] }>(this._getUrl(['_fields_for_wildcard']), {
       pattern,
       meta_fields: metaFields,
       type,
       rollup_index: rollupIndex,
       allow_no_index: allowNoIndex,
-      filter,
     }).then((resp) => resp?.fields || []);
   }
 
