@@ -245,25 +245,6 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     );
   }
 
-  public untilNoChildLoading = () => {
-    const panelsLoading = () => this.anyChildLoading$.value;
-    if (panelsLoading()) {
-      return new Promise<void>((resolve, reject) => {
-        const subscription = this.anyChildLoading$.subscribe(() => {
-          if (this.destroyed) {
-            subscription.unsubscribe();
-            reject();
-          }
-          if (!panelsLoading()) {
-            subscription.unsubscribe();
-            resolve();
-          }
-        });
-      });
-    }
-    return Promise.resolve();
-  };
-
   private onDataLoaded(data: DashboardLoadedInfo) {
     if (this.services.analytics) {
       reportPerformanceMetricEvent(this.services.analytics, {
