@@ -75,7 +75,7 @@ const parseInputString = (rawInput: string): ParsedCommandInput => {
 
           response.args[argName].push(newArgValue);
         } else {
-          // Argument has not value (bare), set it to true
+          // Argument has not value (bare), set it to empty string
           response.args[argName].push('');
         }
       }
