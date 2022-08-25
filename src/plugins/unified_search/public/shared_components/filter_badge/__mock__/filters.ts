@@ -7,9 +7,10 @@
  */
 
 import { Filter } from '@kbn/es-query';
+import { mapFilter } from '@kbn/data-plugin/public/query/filter_manager/lib/map_filter';
 
 export const getFilterMock = () =>
-  ({
+  mapFilter({
     meta: {
       index: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
       alias: null,
@@ -31,33 +32,12 @@ export const getFilterMock = () =>
     },
   } as Filter);
 
-export const getFilterMockOrConditional = () => ({
-  meta: {
-    type: 'OR',
-    params: [
-      {
-        meta: {
-          index: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
-          alias: null,
-          negate: false,
-          disabled: false,
-          type: 'phrase',
-          key: 'category.keyword',
-          params: {
-            query: "Men's Accessories 2",
-          },
-        },
-        query: {
-          match_phrase: {
-            'category.keyword': "Men's Accessories 2",
-          },
-        },
-        $state: {
-          store: 'appState',
-        },
-      },
-      [
-        {
+export const getFilterMockOrConditional = () => [
+  {
+    meta: {
+      type: 'OR',
+      params: [
+        mapFilter({
           meta: {
             index: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
             alias: null,
@@ -66,19 +46,20 @@ export const getFilterMockOrConditional = () => ({
             type: 'phrase',
             key: 'category.keyword',
             params: {
-              query: "Men's Accessories 3",
+              query: "Men's Accessories 2",
             },
           },
           query: {
             match_phrase: {
-              'category.keyword': "Men's Accessories 3",
+              'category.keyword': "Men's Accessories 2",
             },
           },
           $state: {
             store: 'appState',
           },
-        },
-        {
+        } as Filter),
+
+        mapFilter({
           meta: {
             index: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
             alias: null,
@@ -87,40 +68,19 @@ export const getFilterMockOrConditional = () => ({
             type: 'phrase',
             key: 'category.keyword',
             params: {
-              query: "Men's Accessories 4",
+              query: "Men's Accessories 5",
             },
           },
           query: {
             match_phrase: {
-              'category.keyword': "Men's Accessories 4",
+              'category.keyword': "Men's Accessories 5",
             },
           },
           $state: {
             store: 'appState',
           },
-        },
+        } as Filter),
       ],
-      {
-        meta: {
-          index: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
-          alias: null,
-          negate: false,
-          disabled: false,
-          type: 'phrase',
-          key: 'category.keyword',
-          params: {
-            query: "Men's Accessories 5",
-          },
-        },
-        query: {
-          match_phrase: {
-            'category.keyword': "Men's Accessories 5",
-          },
-        },
-        $state: {
-          store: 'appState',
-        },
-      },
-    ],
+    },
   },
-});
+];

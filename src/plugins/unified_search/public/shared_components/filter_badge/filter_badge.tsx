@@ -7,13 +7,15 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiFlexGroup } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { FilterItem } from '../../filters_builder/filters_builder_utils';
-import { FilterExpressionBadge } from './filter_badge_expression';
+import { Filter } from '@kbn/es-query';
+import { FilterBadgeGroup } from './filter_badge_group';
+import { ConditionTypes } from '../../filters_builder/filters_builder_condition_types';
+
 export interface FilterBadgeProps {
-  filter: FilterItem;
+  filters: Filter[];
   dataView: DataView;
 }
 
@@ -22,21 +24,31 @@ const cursor = css`
   padding: 5px;
 `;
 
-export function FilterBadge({ filter, dataView }: FilterBadgeProps) {
+const rootLevelConditionType = ConditionTypes.AND;
+
+export function FilterBadge({ filters, dataView }: FilterBadgeProps) {
   return (
     <EuiFlexGroup wrap responsive={false} gutterSize="xs">
-      <EuiBadge
-        className={cursor}
-        color="hollow"
-        iconType="cross"
-        iconSide="right"
-        iconOnClick={() => {}}
-        onClickAriaLabel="Filter actions"
-        iconOnClickAriaLabel="Remove filter"
-        onClick={() => {}}
-      >
-        <FilterExpressionBadge filter={filter} dataView={dataView} />
-      </EuiBadge>
+      <EuiFlexItem grow={false}>
+        <EuiBadge
+          className={cursor}
+          color="hollow"
+          iconType="cross"
+          iconSide="right"
+          iconOnClick={() => {}}
+          onClickAriaLabel="Filter actions"
+          iconOnClickAriaLabel="Remove filter"
+          onClick={() => {}}
+        >
+          <EuiFlexGroup wrap responsive={false} gutterSize="xs">
+            <FilterBadgeGroup
+              filters={filters}
+              dataView={dataView}
+              conditionType={rootLevelConditionType}
+            />
+          </EuiFlexGroup>
+        </EuiBadge>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 }

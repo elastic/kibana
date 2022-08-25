@@ -10,10 +10,9 @@ import React from 'react';
 import { ComponentStory } from '@storybook/react';
 import { FC } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { mapFilter } from '@kbn/data-plugin/public/query/filter_manager/lib/map_filter';
 import type { FilterBadgeProps } from '../filter_badge';
 import { FilterBadge } from '../filter_badge';
-import { getFilterMock } from '../__mock__/filters';
+import { getFilterMockOrConditional } from '../__mock__/filters';
 
 export default {
   title: 'Filters badge',
@@ -23,8 +22,6 @@ export default {
 const Template: ComponentStory<FC<FilterBadgeProps>> = (args) => <FilterBadge {...args} />;
 
 export const Default = Template.bind({});
-
-const filter = getFilterMock();
 
 const mockedDataView = {
   id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
@@ -45,6 +42,6 @@ const mockedDataView = {
 } as unknown as DataView;
 
 Default.args = {
-  filter: mapFilter(filter),
+  filters: getFilterMockOrConditional(),
   dataView: mockedDataView,
 };

@@ -10,9 +10,12 @@ import React from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { FILTERS } from '@kbn/es-query';
-import { EuiTextColor } from '@elastic/eui';
+import { EuiFlexItem, EuiTextColor } from '@elastic/eui';
 import { getDisplayValueFromFilter, getIndexPatternFromFilter } from '@kbn/data-plugin/public';
 import { existsOperator, isOneOfOperator } from '../../filter_bar/filter_editor';
+import { FilterBadgeGroup } from './filter_badge_group';
+import { getConditionalOperationType } from '../../filters_builder/filters_builder_utils';
+import { ConditionTypes } from '../../filters_builder/filters_builder_condition_types';
 
 const FILTER_ITEM_OK = '';
 const FILTER_ITEM_WARNING = 'warn';
@@ -30,7 +33,7 @@ interface LabelOptions {
 }
 
 const getValue = (text?: string) => {
-  return <span>{text}</span>;
+  return text;
 };
 
 const getFilterContent = (filter: Filter, label: LabelOptions, prefix: string | JSX.Element) => {
@@ -119,18 +122,41 @@ function getValueLabel(filter: Filter, dataView: DataView): LabelOptions {
 export interface FilterBadgeExpressionProps {
   filter: Filter;
   dataView: DataView;
+  conditionType?: ConditionTypes;
 }
 
 export function FilterExpressionBadge({ filter, dataView }: FilterBadgeExpressionProps) {
-  const label = getValueLabel(filter, dataView);
+  const conditionalOperationType = getConditionalOperationType(filter);
+  let label: LabelOptions = {
+    title: '',
+    message: '',
+    status: FILTER_ITEM_OK,
+  };
+  let prefix: any;
 
-  const prefixText = filter.meta.negate ? ` NOT ` : '';
-  const prefix =
-    filter.meta.negate && !filter.meta.disabled ? (
-      <EuiTextColor color="danger">{prefixText}</EuiTextColor>
-    ) : (
-      prefixText
-    );
+  if (!conditionalOperationType) {
+    label = getValueLabel(filter, dataView);
 
-  return <>{getFilterContent(filter, label, prefix)}</>;
+    const prefixText = filter?.meta?.negate ? ` NOT ` : '';
+    prefix =
+      filter?.meta?.negate && !filter?.meta?.disabled ? (
+        <EuiTextColor color="danger">{prefixText}</EuiTextColor>
+      ) : (
+        prefixText
+      );
+  }
+
+  return (
+    <>
+      {conditionalOperationType ? (
+        <FilterBadgeGroup
+          filters={Array.isArray(filter) ? filter : filter.meta?.params}
+          dataView={dataView}
+          conditionType={conditionalOperationType}
+        />
+      ) : (
+        <EuiFlexItem>{getFilterContent(filter, label, prefix)}</EuiFlexItem>
+      )}
+    </>
+  );
 }
