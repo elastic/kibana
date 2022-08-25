@@ -138,7 +138,7 @@ export const ImportDataModalComponent = ({
   return (
     <>
       {showModal && (
-        <EuiModal onClose={closeModal} maxWidth={'750px'}>
+        <EuiModal onClose={handleCloseModal} maxWidth={'750px'}>
           <EuiModalHeader>
             <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
           </EuiModalHeader>
