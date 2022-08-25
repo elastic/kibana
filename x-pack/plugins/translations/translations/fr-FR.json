@@ -28086,7 +28086,6 @@
     "xpack.securitySolution.exceptions.exceptionItem.updatedLabel": "Mis à jour",
     "xpack.securitySolution.exceptions.fetchError": "Erreur lors de la récupération de la liste d'exceptions",
     "xpack.securitySolution.exceptions.modalErrorAccordionText": "Afficher les informations de référence de la règle :",
-    "xpack.securitySolution.exceptions.nameLabel": "Nom",
     "xpack.securitySolution.exceptions.operatingSystemFullLabel": "Système d'exploitation",
     "xpack.securitySolution.exceptions.operatingSystemLinux": "Linux",
     "xpack.securitySolution.exceptions.operatingSystemMac": "macOS",
