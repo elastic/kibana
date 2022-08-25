@@ -28,7 +28,7 @@ configs="${FTR_CONFIG:-}"
 
 if [[ "$configs" == "" ]]; then
   echo "--- Downloading ftr test run order"
-  buildkite-agent artifact download ftr_run_order.json .
+  download_artifact ftr_run_order.json .
   configs=$(jq -r '.[env.FTR_CONFIG_GROUP_KEY].names[]' ftr_run_order.json)
 fi
 

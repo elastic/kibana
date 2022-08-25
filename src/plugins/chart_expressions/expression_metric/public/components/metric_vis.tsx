@@ -80,7 +80,10 @@ const getMetricFormatter = (
   columns: Datatable['columns']
 ) => {
   const serializedFieldFormat = getFormatByAccessor(accessor, columns);
-  const formatId = serializedFieldFormat?.id ?? 'number';
+  const formatId =
+    (serializedFieldFormat?.id === 'suffix'
+      ? serializedFieldFormat.params?.id
+      : serializedFieldFormat?.id) ?? 'number';
 
   if (
     !['number', 'currency', 'percent', 'bytes', 'duration', 'string', 'null'].includes(formatId)
@@ -160,16 +163,11 @@ const getColor = (
   data: Datatable,
   rowNumber: number
 ) => {
-  let minBound = paletteParams.rangeMin;
-  let maxBound = paletteParams.rangeMax;
-
   const { min, max } = getDataBoundsForPalette(accessors, data, rowNumber);
-  minBound = min;
-  maxBound = max;
 
   return getPaletteService().get(CUSTOM_PALETTE)?.getColorForValue?.(value, paletteParams, {
-    min: minBound,
-    max: maxBound,
+    min,
+    max,
   });
 };
 
@@ -244,6 +242,7 @@ export const MetricVis = ({
       ? formatBreakdownValue(row[breakdownByColumn.id])
       : primaryMetricColumn.name;
     const subtitle = breakdownByColumn ? primaryMetricColumn.name : config.metric.subtitle;
+    const secondaryPrefix = config.metric.secondaryPrefix ?? secondaryMetricColumn?.name;
     return {
       value,
       valueFormatter: formatPrimaryMetric,
@@ -251,9 +250,9 @@ export const MetricVis = ({
       subtitle,
       extra: (
         <span>
-          {config.metric.secondaryPrefix}
+          {secondaryPrefix}
           {secondaryMetricColumn
-            ? `${config.metric.secondaryPrefix ? ' ' : ''}${formatSecondaryMetric!(
+            ? `${secondaryPrefix ? ' ' : ''}${formatSecondaryMetric!(
                 row[secondaryMetricColumn.id]
               )}`
             : undefined}
