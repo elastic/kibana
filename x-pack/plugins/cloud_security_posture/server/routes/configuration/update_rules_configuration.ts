@@ -24,7 +24,8 @@ import { createCspRuleSearchFilterByPackagePolicy } from '../../../common/utils/
 import type {
   CspRule,
   CspRulesConfiguration,
-  CspRulesConfigurationV1, SupportedRuleTypes,
+  CspRulesConfigurationV1,
+  SupportedRuleTypes,
 } from '../../../common/schemas';
 import {
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
@@ -108,7 +109,7 @@ export const createRulesConfig = (
 
 export const CreateRuleConfigV1 = (
   cspRules: SavedObjectsFindResponse<CspRule>
-): CspRulesConfigurationV1  => ({
+): CspRulesConfigurationV1 => ({
   runtime_cfg: {
     v1: { rules: getEnabledRulesByBenchmarkV1(cspRules.saved_objects) },
   },
@@ -122,9 +123,7 @@ export const CreateDeprecatedRuleConfig = (
   },
 });
 
-export const convertRulesConfigToYaml = (
-  config: SupportedRuleTypes
-): string => {
+export const convertRulesConfigToYaml = (config: SupportedRuleTypes): string => {
   return yaml.safeDump(config);
 };
 
