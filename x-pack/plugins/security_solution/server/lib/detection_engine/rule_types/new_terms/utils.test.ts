@@ -52,7 +52,7 @@ describe('new terms utils', () => {
       const historyWindowStart = 'now-7m';
       const from = 'now-7m';
       expect(() => validateHistoryWindowStart({ historyWindowStart, from })).toThrowError(
-        `History window size too small, 'historyWindowStart' must be earlier than 'from'`
+        `History window size is smaller than rule interval + additional lookback, 'historyWindowStart' must be earlier than 'from'`
       );
     });
 
@@ -60,7 +60,7 @@ describe('new terms utils', () => {
       const historyWindowStart = 'now-7m';
       const from = 'now-8m';
       expect(() => validateHistoryWindowStart({ historyWindowStart, from })).toThrowError(
-        `History window size too small, 'historyWindowStart' must be earlier than 'from'`
+        `History window size is smaller than rule interval + additional lookback, 'historyWindowStart' must be earlier than 'from'`
       );
     });
   });
