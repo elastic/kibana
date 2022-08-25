@@ -12,7 +12,7 @@ import { themeServiceMock } from '@kbn/core/public/mocks';
 import { setNotifications } from '../../services';
 import { SearchResponseWarning } from '../types';
 import { extractWarnings } from './extract_warnings';
-import { handleWarning } from './handle_response';
+import { handleWarning } from './handle_warning';
 
 jest.mock('@kbn/i18n', () => {
   return {

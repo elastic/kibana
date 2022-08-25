@@ -67,7 +67,7 @@ import { createUsageCollector, SearchUsageCollector } from './collectors';
 import { getEql, getEsaggs, getEsdsl, getEssql } from './expressions';
 import { getKibanaContext } from './expressions/kibana_context';
 import { extractWarnings } from './fetch';
-import { handleWarning } from './fetch/handle_response';
+import { handleWarning } from './fetch/handle_warning';
 import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
 import { ISessionsClient, ISessionService, SessionsClient, SessionService } from './session';
 import { registerSearchSessionsMgmt } from './session/sessions_mgmt';
