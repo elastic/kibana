@@ -35,7 +35,7 @@ export const ValidationError = memo<
         <ConsoleCodeBlock textColor="error">
           <FormattedMessage
             id="xpack.securitySolution.console.validationError.title"
-            defaultMessage="Unsupported action by endpoint"
+            defaultMessage="Unsupported action"
           />
         </ConsoleCodeBlock>
       }
