@@ -35,6 +35,63 @@ export class ShareToPublicPlugin implements Plugin<ShareToSetup, ShareToStart, S
     
     plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, downloadPngAction);
 
+    plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, {
+      type: 'DOWNLOAD_PDF',
+      id: 'DOWNLOAD_PDF',
+      grouping: [
+        {
+          id: 'share',
+          getDisplayName: () => 'Share',
+        },
+      ],
+      getDisplayName: () => 'Download as PDF',
+      getIconType() {
+        return 'download';
+      },
+      isCompatible: async () => {
+        return true;
+      },
+      execute: async () => {},
+    });
+
+    plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, {
+      type: 'SHARE_EMAIL',
+      id: 'SHARE_EMAIL',
+      grouping: [
+        {
+          id: 'share',
+          getDisplayName: () => 'Share',
+        },
+      ],
+      getDisplayName: () => 'Send by email',
+      getIconType() {
+        return 'email';
+      },
+      isCompatible: async () => {
+        return true;
+      },
+      execute: async () => {},
+    });
+
+    plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, {
+      type: 'SHARE_SLACK',
+      id: 'SHARE_SLACK',
+      grouping: [
+        {
+          id: 'share',
+          getDisplayName: () => 'Share',
+        },
+      ],
+      getDisplayName: () => 'Send to Slack',
+      getIconType() {
+        return 'share';
+      },
+      isCompatible: async () => {
+        return true;
+      },
+      execute: async () => {},
+    });
+
     return {};
   }
 
