@@ -8,7 +8,8 @@
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import React, { memo } from 'react';
-import { Actions, AssigneesUserAction } from '../../../common/api';
+import { SnakeToCamelCase } from '../../../common/types';
+import { Actions, AssigneesUserAction, User } from '../../../common/api';
 import { getName } from '../user_profiles/display_name';
 import { Assignee } from '../user_profiles/types';
 import { UserToolTip } from '../user_profiles/user_tooltip';
@@ -75,10 +76,10 @@ AssigneeComponent.displayName = 'Assignee';
 
 interface AssigneesProps {
   assignees: Assignee[];
-  currentUserProfile?: UserProfileWithAvatar;
+  createdByUser: SnakeToCamelCase<User>;
 }
 
-const AssigneesComponent = ({ assignees, currentUserProfile }: AssigneesProps) => (
+const AssigneesComponent = ({ assignees, createdByUser }: AssigneesProps) => (
   <>
     {assignees.length > 0 && (
       <EuiFlexGroup alignItems="center" gutterSize="xs">
@@ -92,7 +93,7 @@ const AssigneesComponent = ({ assignees, currentUserProfile }: AssigneesProps) =
               key={assignee.uid}
             >
               <EuiText size="s" className="eui-textBreakWord">
-                {isCurrentUser(assignee, currentUserProfile) ? (
+                {doesAssigneeMatchCreatedByUser(assignee, createdByUser) ? (
                   <Themselves index={index} numOfAssigness={assignees.length} />
                 ) : (
                   <AssigneeComponent
@@ -112,14 +113,21 @@ const AssigneesComponent = ({ assignees, currentUserProfile }: AssigneesProps) =
 AssigneesComponent.displayName = 'Assignees';
 const Assignees = memo(AssigneesComponent);
 
-const isCurrentUser = (assignee: Assignee, currentUserProfile?: UserProfileWithAvatar) => {
-  return assignee.uid === currentUserProfile?.uid;
+const doesAssigneeMatchCreatedByUser = (
+  assignee: Assignee,
+  createdByUser: SnakeToCamelCase<User>
+) => {
+  return (
+    assignee.uid === createdByUser?.profileUid ||
+    // cases created before the assignees functionality will not have the profileUid so we'll need to fallback to the
+    // next best field
+    assignee?.profile?.user.username === createdByUser.username
+  );
 };
 
 const getLabelTitle = (
   userAction: UserActionResponse<AssigneesUserAction>,
-  userProfiles?: Map<string, UserProfileWithAvatar>,
-  currentUserProfile?: UserProfileWithAvatar
+  userProfiles?: Map<string, UserProfileWithAvatar>
 ) => {
   const assignees = userAction.payload.assignees.map((assignee) => {
     const profile = userProfiles?.get(assignee.uid);
@@ -136,7 +144,7 @@ const getLabelTitle = (
         {userAction.action === Actions.delete && i18n.UNASSIGNED}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <Assignees assignees={assignees} currentUserProfile={currentUserProfile} />
+        <Assignees createdByUser={userAction.createdBy} assignees={assignees} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -146,11 +154,10 @@ export const createAssigneesUserActionBuilder: UserActionBuilder = ({
   userAction,
   handleOutlineComment,
   userProfiles,
-  currentUserProfile,
 }) => ({
   build: () => {
     const assigneesUserAction = userAction as UserActionResponse<AssigneesUserAction>;
-    const label = getLabelTitle(assigneesUserAction, userProfiles, currentUserProfile);
+    const label = getLabelTitle(assigneesUserAction, userProfiles);
     const commonBuilder = createCommonUpdateUserActionBuilder({
       userAction,
       handleOutlineComment,

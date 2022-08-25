@@ -6,6 +6,7 @@
  */
 
 import { UserProfileUserInfo } from '@kbn/user-profile-components/target_types/user_profile';
+import { isEmpty } from 'lodash';
 import * as i18n from './translations';
 
 export const getName = (user?: UserProfileUserInfo): string => {
@@ -13,5 +14,18 @@ export const getName = (user?: UserProfileUserInfo): string => {
     return i18n.UNKNOWN;
   }
 
-  return user.full_name ?? user.email ?? user.username;
+  return (
+    getIfNotEmpty(user.full_name) ??
+    getIfNotEmpty(user.email) ??
+    getIfNotEmpty(user.username) ??
+    i18n.UNKNOWN
+  );
+};
+
+const getIfNotEmpty = (field?: string) => {
+  if (isEmpty(field)) {
+    return;
+  }
+
+  return field;
 };

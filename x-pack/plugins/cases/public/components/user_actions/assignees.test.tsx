@@ -10,7 +10,7 @@ import { EuiCommentList } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 
 import { Actions } from '../../../common/api';
-import { getUserAction } from '../../containers/mock';
+import { elasticUser, getUserAction } from '../../containers/mock';
 import { TestProviders } from '../../common/mock';
 import { createAssigneesUserActionBuilder } from './assignees';
 import { getMockBuilderArgs } from './mock';
@@ -26,7 +26,12 @@ describe('createAssigneesUserActionBuilder', () => {
   });
 
   it('renders assigned users', () => {
-    const userAction = getUserAction('assignees', Actions.add);
+    const userAction = getUserAction('assignees', Actions.add, {
+      createdBy: {
+        // damaged_raccoon uid
+        profileUid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
+      },
+    });
     const builder = createAssigneesUserActionBuilder({
       ...builderArgs,
       userAction,
@@ -49,7 +54,12 @@ describe('createAssigneesUserActionBuilder', () => {
   });
 
   it('renders unassigned users', () => {
-    const userAction = getUserAction('assignees', Actions.delete);
+    const userAction = getUserAction('assignees', Actions.delete, {
+      createdBy: {
+        // damaged_raccoon uid
+        profileUid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
+      },
+    });
     const builder = createAssigneesUserActionBuilder({
       ...builderArgs,
       userAction,
@@ -97,8 +107,42 @@ describe('createAssigneesUserActionBuilder', () => {
     expect(screen.queryByText('and')).not.toBeInTheDocument();
   });
 
-  it('renders a single assigned user that is themselves', () => {
+  it('renders a single assigned user that is themselves using matching profile uids', () => {
     const userAction = getUserAction('assignees', Actions.add, {
+      createdBy: {
+        ...elasticUser,
+        profileUid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
+      },
+      payload: {
+        assignees: [
+          // only render the damaged raccoon which is the current user
+          { uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' },
+        ],
+      },
+    });
+    const builder = createAssigneesUserActionBuilder({
+      ...builderArgs,
+      userAction,
+    });
+
+    const createdUserAction = builder.build();
+    render(
+      <TestProviders>
+        <EuiCommentList comments={createdUserAction} />
+      </TestProviders>
+    );
+
+    expect(screen.getByText('themselves')).toBeInTheDocument();
+    expect(screen.queryByText('Physical Dinosaur')).not.toBeInTheDocument();
+    expect(screen.queryByText('and')).not.toBeInTheDocument();
+  });
+
+  it('renders a single assigned user that is themselves using matching usernames', () => {
+    const userAction = getUserAction('assignees', Actions.add, {
+      createdBy: {
+        ...elasticUser,
+        username: 'damaged_raccoon',
+      },
       payload: {
         assignees: [
           // only render the damaged raccoon which is the current user
