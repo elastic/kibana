@@ -13,7 +13,14 @@ import type {
 import type { ExceptionsPagination } from '../../utils/types';
 
 export type ViewerFlyoutName = 'addException' | 'editException' | null;
-export type ViewerState = 'error' | 'empty' | 'empty_search' | 'loading' | 'searching' | null;
+export type ViewerState =
+  | 'error'
+  | 'empty'
+  | 'empty_search'
+  | 'loading'
+  | 'searching'
+  | 'deleting'
+  | null;
 
 export interface State {
   pagination: ExceptionsPagination;

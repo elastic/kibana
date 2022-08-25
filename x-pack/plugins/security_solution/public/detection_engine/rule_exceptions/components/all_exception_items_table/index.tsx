@@ -265,7 +265,7 @@ const ExceptionsViewerComponent = ({
       const abortCtrl = new AbortController();
 
       try {
-        setViewerState('loading');
+        setViewerState('deleting');
 
         await deleteExceptionListItemById({
           http: services.http,
@@ -273,6 +273,8 @@ const ExceptionsViewerComponent = ({
           namespaceType,
           signal: abortCtrl.signal,
         });
+
+        await handleGetExceptionListItems();
 
         setViewerState(null);
       } catch (e) {
@@ -283,7 +285,7 @@ const ExceptionsViewerComponent = ({
         });
       }
     },
-    [services.http, setViewerState, toasts]
+    [handleGetExceptionListItems, services.http, setViewerState, toasts]
   );
 
   // User privileges checks
@@ -352,7 +354,7 @@ const ExceptionsViewerComponent = ({
           )}
 
           <ExceptionsViewerItems
-            disableActions={isReadOnly}
+            disableActions={isReadOnly || viewerState === 'deleting'}
             exceptions={exceptions}
             listType={listType}
             ruleReferences={allReferences}

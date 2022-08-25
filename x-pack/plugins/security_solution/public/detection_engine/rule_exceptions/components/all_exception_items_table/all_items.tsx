@@ -50,7 +50,7 @@ const ExceptionItemsViewerComponent: React.FC<ExceptionItemsViewerProps> = ({
 }): JSX.Element => {
   return (
     <>
-      {viewerState != null ? (
+      {viewerState != null && viewerState !== 'deleting' ? (
         <ExeptionItemsViewerEmptyPrompts
           listType={listType}
           currentState={viewerState}
