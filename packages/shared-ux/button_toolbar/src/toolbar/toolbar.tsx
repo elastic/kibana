@@ -9,9 +9,9 @@
 import React, { ReactElement } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
 import { IconButtonGroup, PrimaryButton } from '../buttons';
 import { ToolbarPopover } from '../popover';
-import { i18n } from '@kbn/i18n';
 
 /** type for cases with both button or a popover could be used */
 export type ToolbarButton = typeof PrimaryButton | typeof ToolbarPopover;
@@ -31,7 +31,8 @@ export interface Props {
 }
 
 const errorText = i18n.translate('sharedUXPackages.buttonToolbar.toolbar.errorToolbarText', {
-  defaultMessage: 'There are over 120 extra buttons. Please consider limiting the number of buttons.'
+  defaultMessage:
+    'There are over 120 extra buttons. Please consider limiting the number of buttons.',
 });
 
 /**
