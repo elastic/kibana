@@ -9,6 +9,7 @@ import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   AGENT,
+  CONTAINER,
   CLOUD,
   CLOUD_AVAILABILITY_ZONE,
   CLOUD_REGION,
@@ -49,8 +50,8 @@ export interface ServiceMetadataDetails {
     };
   };
   container?: {
-    os?: string;
-    isContainerized?: boolean;
+    ids?: string[];
+    image?: { name: string };
     totalNumberInstances?: number;
     type?: ContainerType;
   };
@@ -99,7 +100,7 @@ export async function getServiceMetadataDetails({
     },
     body: {
       size: 1,
-      _source: [SERVICE, AGENT, HOST, CONTAINER_ID, KUBERNETES, CLOUD],
+      _source: [SERVICE, AGENT, HOST, CONTAINER, KUBERNETES, CLOUD],
       query: { bool: { filter, should } },
       aggs: {
         serviceVersions: {
@@ -112,6 +113,12 @@ export async function getServiceMetadataDetails({
         availabilityZones: {
           terms: {
             field: CLOUD_AVAILABILITY_ZONE,
+            size: 10,
+          },
+        },
+        containerIds: {
+          terms: {
+            field: CONTAINER_ID,
             size: 10,
           },
         },
@@ -181,10 +188,11 @@ export async function getServiceMetadataDetails({
   const containerDetails =
     host || container || totalNumberInstances || kubernetes
       ? {
-          os: host?.os?.platform,
           type: (!!kubernetes ? 'Kubernetes' : 'Docker') as ContainerType,
-          isContainerized: !!container?.id,
           totalNumberInstances,
+          ids: response.aggregations?.containerIds.buckets.map(
+            (bucket) => bucket.key as string
+          ),
         }
       : undefined;
 
