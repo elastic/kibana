@@ -31,7 +31,7 @@ for i in "${scalabilityJourneys[@]}"; do
 done
 
 echo "--- Creating scalability dataset in ${OUTPUT_REL}"
-mkdir "${OUTPUT_DIR}"
+mkdir -p "${OUTPUT_DIR}"
 
 echo "--- Archiving scalability trace and uploading as build artifact"
 tar -czf "${OUTPUT_DIR}/scalability_traces.tar.gz" -C target scalability_traces
