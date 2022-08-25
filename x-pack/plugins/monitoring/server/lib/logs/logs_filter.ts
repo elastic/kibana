@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-  export const elasticsearchLogsFilter = {
-    bool: {
-      should: [{ term: { 'service.type': 'elasticsearch' } }],
-    },
-  };
+export const elasticsearchLogsFilter = {
+  bool: {
+    should: [{ term: { 'service.type': 'elasticsearch' } }],
+  },
+};

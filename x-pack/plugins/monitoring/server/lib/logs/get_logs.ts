@@ -15,7 +15,6 @@ import { detectReasonFromException } from './detect_reason_from_exception';
 import { LegacyRequest } from '../../types';
 import { LogsResponse } from '../../../common/types/logs';
 import { MonitoringConfig } from '../../config';
-import { elasticsearchLogsFilter } from './logs_filter';
 
 interface Log {
   timestamp?: string | number;
