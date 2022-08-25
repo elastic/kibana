@@ -33,11 +33,11 @@ mkdir "${BUILD_ID}"
 # Archive json files with traces and upload as build artifacts
 tar -czf "${BUILD_ID}/scalability_traces.tar.gz" -C target scalability_traces
 buildkite-agent artifact upload "${BUILD_ID}/scalability_traces.tar.gz"
-# Upload Kibana build, plugins, commit sha and traces to the bucket
-download_artifact kibana-default.tar.gz ./"${BUILD_ID}"
-download_artifact kibana-default-plugins.tar.gz ./"${BUILD_ID}"
+
+echo "--- Uploading ${BUILD_ID} dir to ${GCS_BUCKET}"
 echo "${BUILDKITE_COMMIT}" > "${BUILD_ID}/KIBANA_COMMIT_HASH"
 gsutil -m cp -r "${BUILD_ID}" "${GCS_BUCKET}"
-echo "--- Update reference to the latest CI build"
+
+echo "--- Promoting ${BUILD_ID} to LATEST"
 echo "${BUILD_ID}" > LATEST
 gsutil cp LATEST "${GCS_BUCKET}"
