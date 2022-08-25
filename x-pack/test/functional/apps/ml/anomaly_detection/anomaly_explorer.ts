@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+import { stringHash } from '@kbn/ml-string-hash';
 import { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import { AnomalySwimlaneEmbeddableInput } from '@kbn/ml-plugin/public';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { USER } from '../../../services/ml/security_common';
 
 // @ts-expect-error not full interface
 const JOB_CONFIG: Job = {
@@ -66,6 +69,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('anomaly explorer', function () {
     this.tags(['ml']);
+
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
@@ -368,13 +372,56 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.anomaliesTable.assertTableRowsCount(10);
         });
 
-        it('adds swim lane embeddable to a dashboard', async () => {
-          // should be the last step because it navigates away from the Anomaly Explorer page
-          await ml.testExecution.logTestStep(
-            'should allow to attach anomaly swim lane embeddable to the dashboard'
-          );
-          await ml.anomalyExplorer.openAddToDashboardControl();
-          await ml.anomalyExplorer.addAndEditSwimlaneInDashboard('ML Test');
+        describe('Anomaly Swim Lane as embeddable', function () {
+          beforeEach(async () => {
+            await ml.navigation.navigateToAnomalyExplorer(testData.jobConfig.job_id, {
+              from: '2016-02-07T00%3A00%3A00.000Z',
+              to: '2016-02-11T23%3A59%3A54.000Z',
+            });
+            await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
+            await ml.commonUI.waitForDatePickerIndicatorLoaded();
+          });
+
+          it('attaches swim lane embeddable to a case', async () => {
+            await ml.anomalyExplorer.attachSwimLaneToCase('viewBy', {
+              title: 'ML Test case',
+              description: 'Case with an anomaly swim lane',
+              tag: 'ml_case',
+            });
+
+            const expectedAttachment = {
+              swimlaneType: 'viewBy',
+              viewBy: 'airline',
+              jobIds: [testData.jobConfig.job_id],
+              timeRange: {
+                from: '2016-02-07T00:00:00.000Z',
+                to: '2016-02-11T23:59:54.000Z',
+              },
+            } as AnomalySwimlaneEmbeddableInput;
+
+            expectedAttachment.id = stringHash(JSON.stringify(expectedAttachment)).toString();
+
+            await ml.cases.assertCaseWithAnomalySwimLaneAttachment(
+              {
+                title: 'ML Test case',
+                description: 'Case with an anomaly swim lane',
+                tag: 'ml_case',
+                reporter: USER.ML_POWERUSER,
+              },
+              expectedAttachment,
+              {
+                yAxisLabelCount: 10,
+              }
+            );
+          });
+
+          it('adds swim lane embeddable to a dashboard', async () => {
+            await ml.testExecution.logTestStep(
+              'should allow to attach anomaly swim lane embeddable to the dashboard'
+            );
+            await ml.anomalyExplorer.openAddToDashboardControl();
+            await ml.anomalyExplorer.addAndEditSwimlaneInDashboard('ML Test');
+          });
         });
       });
     }
