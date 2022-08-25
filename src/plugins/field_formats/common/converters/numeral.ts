@@ -31,14 +31,14 @@ export abstract class NumeralFormat extends FieldFormat {
     pattern: this.getConfig!(`format:${this.id}:defaultPattern`),
   });
 
-  protected getConvertedValue(val: number | string): string {
+  protected getConvertedValue(val: number | string | object): string {
     if (val === -Infinity) return '-∞';
     if (val === +Infinity) return '+∞';
-    if (typeof val !== 'number') {
+    if (typeof val === 'string') {
       val = parseFloat(val);
-      if (typeof val === 'object') {
-        return JSON.stringify(val);
-      }
+    }
+    if (typeof val === 'object') {
+      return JSON.stringify(val);
     }
 
     if (isNaN(val)) return '';
