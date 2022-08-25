@@ -8,13 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { Ref } from 'react';
-import {
-  EuiButtonIcon,
-  EuiDualRange,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiDualRange, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { EuiRangeTick } from '@elastic/eui/src/components/form/range/range_ticks';
 
 interface Props {
@@ -53,8 +47,8 @@ export function TimeSliderPopoverContent(props: Props) {
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiToolTip content={
-          i18n.translate('controls.timeSlider.popover.clearTimeTitle', {
+        <EuiToolTip
+          content={i18n.translate('controls.timeSlider.popover.clearTimeTitle', {
             defaultMessage: 'Clear time selection',
           })}
         >
