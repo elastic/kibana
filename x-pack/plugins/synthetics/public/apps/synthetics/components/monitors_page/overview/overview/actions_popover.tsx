@@ -27,7 +27,7 @@ interface ActionContainerProps {
   position: PopoverPosition;
 }
 
-const RelativeContainer = styled.div<ActionContainerProps>`
+const Container = styled.div<ActionContainerProps>`
   ${({ position }) =>
     position === 'relative'
       ? // custom styles used to overlay the popover button on `MetricItem`
@@ -101,8 +101,8 @@ export function ActionsPopover({
     }
   }, [setEnableLabel, status, isEnabled, monitor.isEnabled]);
 
-  const quickInspect = {
-    name: 'Quick inspect',
+  const quickInspectPopoverItem = {
+    name: quickInspectName,
     icon: 'inspect',
     disabled: !locationName,
     onClick: () => {
@@ -113,13 +113,13 @@ export function ActionsPopover({
     },
   };
 
-  let items = [
+  let popoverItems = [
     {
       name: actionsMenuGoToMonitorName,
       icon: 'sortRight',
       href: detailUrl,
     },
-    quickInspect,
+    quickInspectPopoverItem,
     // not rendering this for now because the manual test flyout is
     // still in the design phase
     // {
@@ -141,10 +141,10 @@ export function ActionsPopover({
       },
     },
   ];
-  if (isInspectView) items = items.filter((i) => i !== quickInspect);
+  if (isInspectView) popoverItems = popoverItems.filter((i) => i !== quickInspectPopoverItem);
 
   return (
-    <RelativeContainer boxShadow={euiShadow} position={position}>
+    <Container boxShadow={euiShadow} position={position}>
       <EuiPopover
         button={
           <EuiButtonIcon
@@ -169,14 +169,18 @@ export function ActionsPopover({
             {
               id: '0',
               title: actionsMenuTitle,
-              items,
+              items: popoverItems,
             },
           ]}
         />
       </EuiPopover>
-    </RelativeContainer>
+    </Container>
   );
 }
+
+const quickInspectName = i18n.translate('xpack.synthetics.overview.actions.openPopover.ariaLabel', {
+  defaultMessage: 'Quick inspect',
+});
 
 const openActionsMenuAria = i18n.translate(
   'xpack.synthetics.overview.actions.openPopover.ariaLabel',

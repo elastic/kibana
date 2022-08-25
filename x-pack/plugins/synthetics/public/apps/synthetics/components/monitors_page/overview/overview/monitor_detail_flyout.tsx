@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import {
   EuiBadge,
   EuiBasicTable,
@@ -27,20 +26,46 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { FETCH_STATUS, useEsSearch, useFetcher } from '@kbn/observability-plugin/public';
+import { FETCH_STATUS, useFetcher } from '@kbn/observability-plugin/public';
 import moment from 'moment';
 import React, { useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { capitalize } from 'lodash';
 import styled from 'styled-components';
 import { ClientPluginsStart } from '../../../../../../plugin';
-import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../../common/constants/ui';
 import { fetchSyntheticsMonitor } from '../../../../state/monitor_summary/api';
 import { useStatusByLocation } from '../../../../hooks/use_status_by_location';
 import { MonitorEnabled } from '../../management/monitor_list_table/monitor_enabled';
-import { Ping } from '../../../../../../../common/runtime_types';
 import { ActionsPopover } from './actions_popover';
 import { selectOverviewState } from '../../../../state';
+import { useMonitorDetail } from '../../../../hooks/use_monitor_detail';
+import { MonitorOverviewItem } from '../types';
+
+// supplying `any` here because we're not doing anything prop-specific as it
+// relates to the `EuiBasicTable` component, and typescript requires a generic arg here
+const FlyoutHeadingTable = styled<any>(EuiBasicTable)`
+  .euiTableRowCell {
+    border-bottom: 1px solid transparent;
+    border-top: 1px solid transparent;
+  }
+  .euiTable {
+    width: inherit;
+  }
+  thead {
+    .euiTableCellContent {
+      padding-bottom: 0px;
+    }
+  }
+  tbody {
+    .euiTableCellContent {
+      padding-top: 0px;
+    }
+  }
+`;
+
+const BoldItem = styled(EuiFlexItem)`
+  font-weight: bold;
+`;
 
 export function MonitorDetailFlyout(props: {
   id: string;
@@ -51,13 +76,14 @@ export function MonitorDetailFlyout(props: {
   const { id } = props;
   const state = useSelector(selectOverviewState);
 
-  const monitor = useMemo(() => {
+  const monitor: MonitorOverviewItem | null = useMemo(() => {
     const { pages } = state.data;
     const pageKeys = Object.keys(pages);
     for (const key of pageKeys) {
-      const m = pages[key].filter((f) => f.id === id)[0];
-      if (m) return m;
+      const overviewItem = pages[key].filter(({ id: itemId }) => itemId === id)[0];
+      if (overviewItem) return overviewItem;
     }
+    return null;
   }, [id, state.data]);
 
   const theme = useEuiTheme();
@@ -262,98 +288,6 @@ export function MonitorDetailFlyout(props: {
   );
 }
 
-// supplying `any` here because we're not doing anything prop-specific as it
-// relates to the `EuiBasicTable` component, and typescript requires a generic arg here
-const FlyoutHeadingTable = styled<any>(EuiBasicTable)`
-  .euiTableRowCell {
-    border-bottom: 1px solid transparent;
-    border-top: 1px solid transparent;
-  }
-  .euiTable {
-    width: inherit;
-  }
-  thead {
-    .euiTableCellContent {
-      padding-bottom: 0px;
-    }
-  }
-  tbody {
-    .euiTableCellContent {
-      padding-top: 0px;
-    }
-  }
-`;
-
-const BoldItem = styled(EuiFlexItem)`
-  font-weight: bold;
-`;
-
-const useMonitorDetail = (
-  monitorId: string,
-  location: string
-): { data?: Ping; loading?: boolean } => {
-  const params = {
-    index: SYNTHETICS_INDEX_PATTERN,
-    body: {
-      size: 1,
-      query: {
-        bool: {
-          filter: [
-            {
-              term: {
-                'monitor.id': monitorId,
-              },
-            },
-            {
-              term: {
-                'observer.geo.name': location,
-              },
-            },
-            {
-              exists: {
-                field: 'summary',
-              },
-            },
-          ],
-        },
-      },
-      sort: [{ '@timestamp': 'desc' }],
-    },
-  };
-  const { data: result, loading } = useEsSearch<Ping & { '@timestamp': string }, SearchRequest>(
-    params,
-    [monitorId],
-    {
-      name: 'getMonitorStatusByLocation',
-    }
-  );
-
-  if (!result || result.hits.hits.length !== 1) return { data: undefined, loading };
-  return {
-    data: { ...result.hits.hits[0]._source, timestamp: result.hits.hits[0]._source['@timestamp'] },
-    loading,
-  };
-};
-
-function unitToString(unit: string) {
-  switch (unit) {
-    case 's':
-      return SECONDS_STRING;
-    case 'm':
-      return MINUTES_STRING;
-    case 'h':
-      return HOURS_STRING;
-    case 'd':
-      return DAYS_STRING;
-    default:
-      return unit;
-  }
-}
-
-function freqeuncyStr(frequency: { number: string; unit: string }) {
-  return `Every ${frequency.number} ${unitToString(frequency.unit)}`;
-}
-
 function BodyInfo({ header, content }: { header: string; content: JSX.Element | string }) {
   return (
     <EuiFlexGroup>
@@ -361,6 +295,10 @@ function BodyInfo({ header, content }: { header: string; content: JSX.Element | 
       <EuiFlexItem>{content}</EuiFlexItem>
     </EuiFlexGroup>
   );
+}
+
+function freqeuncyStr(frequency: { number: string; unit: string }) {
+  return `Every ${frequency.number} ${unitToString(frequency.unit)}`;
 }
 
 function dateFmtString(timestamp: string) {
@@ -376,6 +314,21 @@ function dateFmtString(timestamp: string) {
 const Time = ({ timestamp }: { timestamp: string }) => (
   <time dateTime={timestamp}>{moment(timestamp).format(dateFmtString(timestamp))}</time>
 );
+
+function unitToString(unit: string) {
+  switch (unit) {
+    case 's':
+      return SECONDS_STRING;
+    case 'm':
+      return MINUTES_STRING;
+    case 'h':
+      return HOURS_STRING;
+    case 'd':
+      return DAYS_STRING;
+    default:
+      return unit;
+  }
+}
 
 const SECONDS_STRING = i18n.translate('xpack.synthetics.monitorDetail.seconds', {
   defaultMessage: 'seconds',
