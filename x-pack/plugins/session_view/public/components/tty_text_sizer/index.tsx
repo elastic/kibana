@@ -38,8 +38,7 @@ export const TTYTextSizer = ({
   }, [containerHeight, tty?.rows]);
 
   const onFit = useCallback(() => {
-    if (fontSize === onFitFontSize) {
-      // || onFitFontSize > DEFAULT_TTY_FONT_SIZE) {
+    if (fontSize === onFitFontSize || onFitFontSize > DEFAULT_TTY_FONT_SIZE) {
       onFontSizeChanged(DEFAULT_TTY_FONT_SIZE);
     } else {
       onFontSizeChanged(onFitFontSize);
