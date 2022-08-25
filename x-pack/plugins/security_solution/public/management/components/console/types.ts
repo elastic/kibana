@@ -35,7 +35,7 @@ export interface CommandArgs {
 
 export interface CommandDefinition<TMeta = any> {
   name: string;
-  about: ReactNode | string;
+  about: ReactNode;
   /**
    * The Component that will be used to render the Command
    */
