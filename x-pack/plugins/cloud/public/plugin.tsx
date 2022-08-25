@@ -121,8 +121,10 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     } = this.config;
 
     if (id) {
-      // We use the Cloud Deployment ID as the userId in the Cloud Experiments
-      cloudExperiments?.identifyUser(id);
+      // We use the Hashed Cloud Deployment ID as the userId in the Cloud Experiments
+      cloudExperiments?.identifyUser(sha256(id), {
+        kibanaVersion: this.initializerContext.env.packageInfo.version,
+      });
     }
 
     this.setupChat({ http: core.http, security }).catch((e) =>

@@ -9,6 +9,7 @@ import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { CloudExperimentsPluginSetup } from '@kbn/cloud-experiments-plugin/common';
+import { createSHA256Hash } from '@kbn/crypto';
 import { registerCloudDeploymentIdAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
 import { CloudConfigType } from './config';
 import { registerCloudUsageCollector } from './collectors';
@@ -61,7 +62,9 @@ export class CloudPlugin implements Plugin<CloudSetup> {
 
     if (this.config.id) {
       // We use the Cloud Deployment ID as the userId in the Cloud Experiments
-      cloudExperiments?.identifyUser(this.config.id);
+      cloudExperiments?.identifyUser(createSHA256Hash(this.config.id), {
+        kibanaVersion: this.context.env.packageInfo.version,
+      });
     }
 
     if (this.config.full_story.enabled) {

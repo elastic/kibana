@@ -71,8 +71,8 @@ export class CloudExperimentsPlugin
     }
 
     return {
-      identifyUser: (userId) => {
-        this.launchDarklyUser = { key: userId };
+      identifyUser: (userId, userMetadata) => {
+        this.launchDarklyUser = { key: userId, custom: userMetadata };
         this.launchDarklyClient.identify(this.launchDarklyUser!);
       },
       getVariation: this.getVariation,

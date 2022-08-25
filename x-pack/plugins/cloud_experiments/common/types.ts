@@ -13,8 +13,12 @@ export interface CloudExperimentsPluginSetup extends CloudExperimentsPluginStart
    * Identifies the user in the A/B testing service.
    * For now, we only rely on the user ID. In the future, we may request further details for more targeted experiments.
    * @param userId The unique identifier of the user in the experiment.
+   * @param userMetadata Additional attributes to the user.
    */
-  identifyUser: (userId: string) => void;
+  identifyUser: (
+    userId: string,
+    userMetadata?: Record<string, string | boolean | number | Array<string | boolean | number>>
+  ) => void;
 }
 
 /**

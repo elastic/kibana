@@ -35,10 +35,10 @@ export class CloudExperimentsPlugin
    */
   public setup(core: CoreSetup): CloudExperimentsPluginSetup {
     return {
-      identifyUser: (userId) => {
+      identifyUser: (userId, userMetadata) => {
         this.launchDarklyClient = LaunchDarkly.initialize(
           this.clientId,
-          { key: userId },
+          { key: userId, custom: userMetadata },
           { application: { id: 'kibana-browser', version: this.kibanaVersion } }
         );
       },
