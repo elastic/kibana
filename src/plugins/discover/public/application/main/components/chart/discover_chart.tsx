@@ -14,7 +14,6 @@ import {
   EuiFlexItem,
   EuiPopover,
   EuiToolTip,
-  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -121,7 +120,7 @@ export function DiscoverChart({
   return (
     <EuiFlexGroup direction="column" alignItems="stretch" gutterSize="none" responsive={false}>
       <EuiFlexItem grow={false} className="dscResultCount">
-        <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
+        <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" responsive={false}>
           <EuiFlexItem
             grow={false}
             className="dscResultCount__title eui-textTruncate eui-textNoWrap"
@@ -203,7 +202,6 @@ export function DiscoverChart({
               stateContainer={stateContainer}
             />
           </section>
-          <EuiSpacer size="s" />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
