@@ -13,7 +13,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
   describe('discover/classic', function () {
     before(async function () {
-      await browser.setWindowSize(1200, 800);
+      await browser.setWindowSize(1300, 800);
     });
 
     after(async function unloadMakelogs() {
