@@ -137,7 +137,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
 
       setDataView(loadedDataView);
 
-      if (state.isLoading || !canProvideStatsForField(field)) {
+      if (state.isLoading) {
         return;
       }
 
@@ -296,7 +296,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
 
     return overrideMissingContent
       ? overrideMissingContent({
-          noDataFound: canProvideStatsForField(field),
+          noDataFound: canProvideStatsForField(field), // TODO: should we have different messaging?
           element: message,
         })
       : message;
@@ -344,9 +344,13 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
     title = (
       <EuiTitle size="xxxs">
         <h6>
-          {i18n.translate('unifiedFieldList.fieldStats.topValuesLabel', {
-            defaultMessage: 'Top values',
-          })}
+          {field.aggregatable
+            ? i18n.translate('unifiedFieldList.fieldStats.topValuesLabel', {
+                defaultMessage: 'Top values',
+              })
+            : i18n.translate('unifiedFieldList.fieldStats.examplesLabel', {
+                defaultMessage: 'Examples',
+              })}
         </h6>
       </EuiTitle>
     );

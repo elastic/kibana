@@ -8,16 +8,24 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import DateMath from '@kbn/datemath';
-import { ESSearchResponse } from '@kbn/core/types/elasticsearch';
-import type { DataViewFieldBase } from '@kbn/es-query';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import type { ESSearchResponse } from '@kbn/core/types/elasticsearch';
 import type { FieldStatsResponse } from '../types';
+import { getFieldValueCounts } from './field_examples_calculator';
 
-export type SearchHandler = (
-  aggs: Record<string, estypes.AggregationsAggregationContainer>
-) => Promise<estypes.SearchResponse<unknown>>;
+export type SearchHandler = ({
+  aggs,
+  fields,
+  size,
+}: {
+  aggs?: Record<string, estypes.AggregationsAggregationContainer>;
+  fields?: object[];
+  size?: number;
+}) => Promise<estypes.SearchResponse<unknown>>;
 
 const SHARD_SIZE = 5000;
 const DEFAULT_TOP_VALUES_SIZE = 10;
+const SIMPLE_EXAMPLES_SIZE = 100;
 
 export function buildSearchParams({
   dataViewPattern,
@@ -27,6 +35,8 @@ export function buildSearchParams({
   dslQuery,
   runtimeMappings,
   aggs,
+  fields,
+  size,
 }: {
   dataViewPattern: string;
   timeFieldName?: string;
@@ -34,7 +44,9 @@ export function buildSearchParams({
   toDate: string;
   dslQuery: object;
   runtimeMappings: estypes.MappingRuntimeFields;
-  aggs: Record<string, estypes.AggregationsAggregationContainer>;
+  aggs?: Record<string, estypes.AggregationsAggregationContainer>;
+  fields?: object[];
+  size?: number;
 }) {
   const filter = timeFieldName
     ? [
@@ -50,6 +62,12 @@ export function buildSearchParams({
       ]
     : [dslQuery];
 
+  if (fields?.length === 1) {
+    filter.push({
+      exists: fields[0],
+    });
+  }
+
   const query = {
     bool: {
       filter,
@@ -61,26 +79,34 @@ export function buildSearchParams({
     body: {
       query,
       aggs,
+      fields,
       runtime_mappings: runtimeMappings,
+      _source: fields?.length ? false : undefined,
     },
     track_total_hits: true,
-    size: 0,
+    size: size ?? 0,
   };
 }
 
 export async function fetchAndCalculateFieldStats({
   searchHandler,
+  dataView,
   field,
   fromDate,
   toDate,
   size,
 }: {
   searchHandler: SearchHandler;
-  field: DataViewFieldBase;
+  dataView: DataView;
+  field: DataViewField;
   fromDate: string;
   toDate: string;
   size?: number;
 }) {
+  if (!field.aggregatable) {
+    return await getSimpleExamples(searchHandler, field, dataView);
+  }
+
   if (!canProvideStatsForField(field)) {
     return {};
   }
@@ -100,19 +126,20 @@ export async function fetchAndCalculateFieldStats({
   return await getStringSamples(searchHandler, field, size);
 }
 
-export function canProvideStatsForField(field: DataViewFieldBase): boolean {
+export function canProvideStatsForField(field: DataViewField): boolean {
   return !(
     field.type === 'document' ||
     field.type.includes('range') ||
     field.type === 'geo_point' ||
     field.type === 'geo_shape' ||
-    field.type === 'murmur3'
+    field.type === 'murmur3' ||
+    field.type === 'attachment'
   );
 }
 
 export async function getNumberHistogram(
   aggSearchWithBody: SearchHandler,
-  field: DataViewFieldBase,
+  field: DataViewField,
   useTopHits = true
 ): Promise<FieldStatsResponse<string | number>> {
   const fieldRef = getFieldRef(field);
@@ -144,9 +171,9 @@ export async function getNumberHistogram(
     },
   };
 
-  const minMaxResult = (await aggSearchWithBody(
-    useTopHits ? searchWithHits : searchWithoutHits
-  )) as
+  const minMaxResult = (await aggSearchWithBody({
+    aggs: useTopHits ? searchWithHits : searchWithoutHits,
+  })) as
     | ESSearchResponse<unknown, { body: { aggs: typeof searchWithHits } }>
     | ESSearchResponse<unknown, { body: { aggs: typeof searchWithoutHits } }>;
 
@@ -200,7 +227,7 @@ export async function getNumberHistogram(
       },
     },
   };
-  const histogramResult = (await aggSearchWithBody(histogramBody)) as ESSearchResponse<
+  const histogramResult = (await aggSearchWithBody({ aggs: histogramBody })) as ESSearchResponse<
     unknown,
     { body: { aggs: typeof histogramBody } }
   >;
@@ -221,7 +248,7 @@ export async function getNumberHistogram(
 
 export async function getStringSamples(
   aggSearchWithBody: SearchHandler,
-  field: DataViewFieldBase,
+  field: DataViewField,
   size = DEFAULT_TOP_VALUES_SIZE
 ): Promise<FieldStatsResponse<string | number>> {
   const fieldRef = getFieldRef(field);
@@ -240,7 +267,7 @@ export async function getStringSamples(
       },
     },
   };
-  const topValuesResult = (await aggSearchWithBody(topValuesBody)) as ESSearchResponse<
+  const topValuesResult = (await aggSearchWithBody({ aggs: topValuesBody })) as ESSearchResponse<
     unknown,
     { body: { aggs: typeof topValuesBody } }
   >;
@@ -261,7 +288,7 @@ export async function getStringSamples(
 // This one is not sampled so that it returns the full date range
 export async function getDateHistogram(
   aggSearchWithBody: SearchHandler,
-  field: DataViewFieldBase,
+  field: DataViewField,
   range: { fromDate: string; toDate: string }
 ): Promise<FieldStatsResponse<string | number>> {
   const fromDate = DateMath.parse(range.fromDate);
@@ -287,7 +314,7 @@ export async function getDateHistogram(
   const histogramBody = {
     histo: { date_histogram: { ...getFieldRef(field), fixed_interval: fixedInterval } },
   };
-  const results = (await aggSearchWithBody(histogramBody)) as ESSearchResponse<
+  const results = (await aggSearchWithBody({ aggs: histogramBody })) as ESSearchResponse<
     unknown,
     { body: { aggs: typeof histogramBody } }
   >;
@@ -303,7 +330,42 @@ export async function getDateHistogram(
   };
 }
 
-function getFieldRef(field: DataViewFieldBase) {
+export async function getSimpleExamples(
+  search: SearchHandler,
+  field: DataViewField,
+  dataView: DataView
+): Promise<FieldStatsResponse<string | number>> {
+  try {
+    const fieldRef = getFieldRef(field);
+
+    const simpleExamplesBody = {
+      size: SIMPLE_EXAMPLES_SIZE,
+      fields: [fieldRef],
+    };
+
+    const simpleExamplesResult = await search(simpleExamplesBody);
+
+    const groupedSimpleExamples = getFieldValueCounts({
+      hits: simpleExamplesResult.hits.hits,
+      field,
+      dataView,
+    });
+
+    return {
+      totalDocuments: getHitsTotal(simpleExamplesResult),
+      sampledDocuments: groupedSimpleExamples.total, // TODO: check if that's correct mapping
+      sampledValues: groupedSimpleExamples.exists, // TODO: check if that's correct mapping
+      topValues: {
+        buckets: groupedSimpleExamples.buckets,
+      },
+    };
+  } catch (error) {
+    // console.error(error)
+    return {};
+  }
+}
+
+function getFieldRef(field: DataViewField) {
   return field.scripted
     ? {
         script: {

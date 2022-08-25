@@ -7,9 +7,8 @@
  */
 
 import { lastValueFrom } from 'rxjs';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DataViewFieldBase } from '@kbn/es-query';
 import type { FieldStatsResponse } from '../../../common/types';
 import {
   fetchAndCalculateFieldStats,
@@ -22,7 +21,7 @@ interface FetchFieldStatsParams {
     data: DataPublicPluginStart;
   };
   dataView: DataView;
-  field: DataViewFieldBase;
+  field: DataViewField;
   fromDate: string;
   toDate: string;
   dslQuery: object;
@@ -62,7 +61,7 @@ export const loadFieldStats: LoadFieldStatsHandler = async ({
       return {};
     }
 
-    const searchHandler: SearchHandler = async (aggs) => {
+    const searchHandler: SearchHandler = async (body) => {
       const result = await lastValueFrom(
         data.search.search(
           {
@@ -73,7 +72,7 @@ export const loadFieldStats: LoadFieldStatsHandler = async ({
               toDate,
               dslQuery,
               runtimeMappings: dataView.getRuntimeMappings(),
-              aggs,
+              ...body,
             }),
           },
           {
@@ -86,6 +85,7 @@ export const loadFieldStats: LoadFieldStatsHandler = async ({
 
     return await fetchAndCalculateFieldStats({
       searchHandler,
+      dataView,
       field,
       fromDate,
       toDate,
