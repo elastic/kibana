@@ -9,7 +9,10 @@ import { Indicator, RawIndicatorFieldId } from '../../../../common/types/indicat
 import { unwrapValue } from './unwrap_value';
 
 type IndicatorDisplayName = [RawIndicatorFieldId, string | null];
-type IndicatorDisplayNameAsObject = { field: RawIndicatorFieldId; value: string | null };
+interface IndicatorDisplayNameAsObject {
+  field: RawIndicatorFieldId;
+  value: string | null;
+}
 type IndicatorDisplayNameExtractor = (indicator: Indicator) => IndicatorDisplayName;
 type IndicatorTypePredicate = (indicatorType: string | null) => boolean;
 
