@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useLocation, useHistory, useParams } from 'react-router-dom';
 import semverLt from 'semver/functions/lt';
 import { i18n } from '@kbn/i18n';
@@ -19,12 +19,16 @@ import { PackageListGrid } from '../../components/package_list_grid';
 
 import type { PackageListItem } from '../../../../types';
 
-import type { CategoryFacet } from './category_facets';
+import type { CategoryFacet, ExtendedIntegrationCategory } from './category_facets';
 import { CategoryFacets } from './category_facets';
 
 import type { CategoryParams } from '.';
-import { getParams, categoryExists, mapToCard, UPDATES_AVAILABLE } from '.';
-import { INSTALLED_CATEGORY } from './category_facets';
+import { getParams, categoryExists, mapToCard } from '.';
+import {
+  ALL_INSTALLED_CATEGORY,
+  UPDATES_AVAILABLE,
+  UPDATES_AVAILABLE_CATEGORY,
+} from './category_facets';
 
 const AnnouncementLink = () => {
   const { docLinks } = useStartServices();
@@ -104,10 +108,13 @@ export const InstalledPackages: React.FC<{
     useParams<CategoryParams>(),
     useLocation().search
   );
+  const [category, setCategory] = useState(selectedCategory);
 
   const history = useHistory();
 
-  function setSelectedCategory(categoryId: string) {
+  function setUrlCategory(categoryId: string) {
+    setCategory(categoryId as ExtendedIntegrationCategory);
+
     const url = pagePathGetters.integrations_installed({
       category: categoryId,
       searchTerm: searchParam,
@@ -116,12 +123,12 @@ export const InstalledPackages: React.FC<{
     history.push(url);
   }
 
-  function setSearchTerm(search: string) {
+  function setUrlSearchTerm(search: string) {
     // Use .replace so the browser's back button is not tied to single keystroke
     history.replace(
       pagePathGetters.integrations_installed({
-        category: selectedCategory,
         searchTerm: search,
+        category,
       })[1]
     );
   }
@@ -138,21 +145,18 @@ export const InstalledPackages: React.FC<{
   const categories: CategoryFacet[] = useMemo(
     () => [
       {
-        ...INSTALLED_CATEGORY,
+        ...ALL_INSTALLED_CATEGORY,
         count: installedPackages.length,
       },
       {
-        id: UPDATES_AVAILABLE,
+        ...UPDATES_AVAILABLE_CATEGORY,
         count: updatablePackages.length,
-        title: i18n.translate('xpack.fleet.epmList.updatesAvailableFilterLinkText', {
-          defaultMessage: 'Updates available',
-        }),
       },
     ],
     [installedPackages.length, updatablePackages.length]
   );
 
-  if (!categoryExists(selectedCategory, categories)) {
+  if (!categoryExists(category, categories)) {
     history.replace(
       pagePathGetters.integrations_installed({ category: '', searchTerm: searchParam })[1]
     );
@@ -163,33 +167,33 @@ export const InstalledPackages: React.FC<{
   const controls = (
     <CategoryFacets
       categories={categories}
-      selectedCategory={selectedCategory}
-      onCategoryChange={({ id }: CategoryFacet) => setSelectedCategory(id)}
+      selectedCategory={category}
+      onCategoryChange={({ id }: CategoryFacet) => setUrlCategory(id)}
     />
   );
 
-  const cards = (
-    selectedCategory === 'updates_available' ? updatablePackages : installedPackages
-  ).map((item) =>
-    mapToCard({
-      getAbsolutePath,
-      getHref,
-      item,
-      selectedCategory: selectedCategory || 'installed',
-      packageVerificationKeyId,
-    })
+  const cards = (category === UPDATES_AVAILABLE ? updatablePackages : installedPackages).map(
+    (item) =>
+      mapToCard({
+        getAbsolutePath,
+        getHref,
+        item,
+        selectedCategory: category || 'installed',
+        packageVerificationKeyId,
+      })
   );
 
   const CalloutComponent = cards.some((c) => c.isUnverified)
     ? VerificationWarningCallout
     : InstalledIntegrationsInfoCallout;
-  const callout =
-    selectedCategory === 'updates_available' || isLoading ? null : <CalloutComponent />;
+  const callout = category === UPDATES_AVAILABLE || isLoading ? null : <CalloutComponent />;
 
   return (
     <PackageListGrid
-      {...{ isLoading, controls, setSelectedCategory, callout, selectedCategory }}
-      onSearchChange={setSearchTerm}
+      {...{ isLoading, controls, setUrlCategory, callout, categories }}
+      selectedCategory={category}
+      setSelectedCategory={setUrlCategory}
+      onSearchChange={setUrlSearchTerm}
       initialSearch={searchParam}
       list={cards}
     />

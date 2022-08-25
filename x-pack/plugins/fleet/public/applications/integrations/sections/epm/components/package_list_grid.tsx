@@ -29,7 +29,7 @@ import { useLocalSearch, searchIdField } from '../../../hooks';
 
 import type { IntegrationCardItem } from '../../../../../../common/types/models';
 
-import type { ExtendedIntegrationCategory } from '../screens/home';
+import type { ExtendedIntegrationCategory, CategoryFacet } from '../screens/home/category_facets';
 
 import { PackageCard } from './package_card';
 
@@ -42,6 +42,7 @@ export interface Props {
   initialSearch?: string;
   selectedCategory: ExtendedIntegrationCategory;
   setSelectedCategory: (category: string) => void;
+  categories: CategoryFacet[];
   onSearchChange: (search: string) => void;
   showMissingIntegrationMessage?: boolean;
   callout?: JSX.Element | null;
@@ -57,6 +58,7 @@ export const PackageListGrid: FunctionComponent<Props> = ({
   onSearchChange,
   selectedCategory,
   setSelectedCategory,
+  categories,
   showMissingIntegrationMessage = false,
   featuredList = null,
   callout,
@@ -95,6 +97,10 @@ export const PackageListGrid: FunctionComponent<Props> = ({
   const resetQuery = () => {
     setSearchTerm('');
   };
+
+  const selectedCategoryTitle = selectedCategory
+    ? categories.find((category) => category.id === selectedCategory)?.title
+    : undefined;
 
   const controlsContent = <ControlsColumn title={title} controls={controls} sticky={isSticky} />;
   let gridContent: JSX.Element;
@@ -138,7 +144,7 @@ export const PackageListGrid: FunctionComponent<Props> = ({
               }}
               onChange={onQueryChange}
               toolsRight={
-                selectedCategory ? (
+                selectedCategoryTitle ? (
                   <div>
                     <EuiBadge
                       color="accent"
@@ -150,7 +156,7 @@ export const PackageListGrid: FunctionComponent<Props> = ({
                       iconOnClickAriaLabel="Remove category"
                       data-test-sub="epmList.categoryBadge"
                     >
-                      {selectedCategory}
+                      {selectedCategoryTitle}
                     </EuiBadge>
                   </div>
                 ) : undefined

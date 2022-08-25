@@ -8,8 +8,6 @@
 import React, { useMemo } from 'react';
 import { Switch, Route } from 'react-router-dom';
 
-import type { IntegrationCategory } from '@kbn/custom-integrations-plugin/common';
-
 import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
 
 import { installationStatuses } from '../../../../../../../common/constants';
@@ -27,13 +25,10 @@ import { useGetPackages } from '../../../../hooks';
 
 import type { Section } from '../../..';
 
-import type { CategoryFacet } from './category_facets';
+import type { CategoryFacet, ExtendedIntegrationCategory } from './category_facets';
 
 import { InstalledPackages } from './installed_packages';
 import { AvailablePackages } from './available_packages';
-
-export const UPDATES_AVAILABLE = 'updates_available';
-export type ExtendedIntegrationCategory = IntegrationCategory | typeof UPDATES_AVAILABLE | '';
 
 export interface CategoryParams {
   category?: ExtendedIntegrationCategory;
