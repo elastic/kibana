@@ -15,6 +15,7 @@ import {
   isErrorResponse,
   TimeRangeBounds,
 } from '@kbn/data-plugin/common';
+import { useFilters } from './use_filters';
 import { convertAggregationToChartSeries } from '../../../common/utils/barchart';
 import { RawIndicatorFieldId } from '../../../../common/types/indicator';
 import { THREAT_QUERY_BASE } from '../../../../common/constants';
@@ -31,6 +32,7 @@ export interface UseAggregatedIndicatorsValue {
   indicators: ChartSeries[];
   onFieldChange: (field: string) => void;
   dateRange: TimeRangeBounds;
+  selectedField: string;
 }
 
 export interface Aggregation {
@@ -87,6 +89,8 @@ export const useAggregatedIndicators = ({
     [queryService, timeRange]
   );
 
+  const { filters, filterQuery } = useFilters();
+
   const loadData = useCallback(async () => {
     const dateFrom: number = (dateRange.min as moment.Moment).toDate().getTime();
     const dateTo: number = (dateRange.max as moment.Moment).toDate().getTime();
@@ -101,8 +105,13 @@ export const useAggregatedIndicators = ({
           query: THREAT_QUERY_BASE,
           language: 'kuery',
         },
+        {
+          query: filterQuery.query as string,
+          language: 'kuery',
+        },
       ],
       [
+        ...filters,
         {
           query: {
             range: {
@@ -175,6 +184,8 @@ export const useAggregatedIndicators = ({
     dateRange.max,
     dateRange.min,
     field,
+    filterQuery,
+    filters,
     searchService,
     selectedPatterns,
     timeRange.from,
@@ -199,5 +210,6 @@ export const useAggregatedIndicators = ({
     dateRange,
     indicators,
     onFieldChange,
+    selectedField: field,
   };
 };

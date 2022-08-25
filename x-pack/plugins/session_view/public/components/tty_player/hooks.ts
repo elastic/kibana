@@ -6,13 +6,16 @@
  */
 import { Terminal } from 'xterm';
 import 'xterm/css/xterm.css';
-import { FitAddon } from 'xterm-addon-fit';
 import { useMemo, useState, useEffect, useCallback } from 'react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SearchAddon } from './xterm_search';
 import { useEuiTheme } from '../../hooks';
+
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
+import { sessionViewIOEventsMock } from '../../../common/mocks/responses/session_view_io_events.mock';
+
 import {
   IOLine,
   ProcessEvent,
@@ -24,7 +27,11 @@ import {
   IO_EVENTS_PER_PAGE,
   QUERY_KEY_IO_EVENTS,
   DEFAULT_TTY_PLAYSPEED_MS,
+  DEFAULT_TTY_FONT_SIZE,
+  TTY_LINE_SPLITTER_REGEX,
 } from '../../../common/constants';
+
+const MOCK_DEBUG = false; // This code will be removed once we have an agent to test with.
 
 export const useFetchIOEvents = (sessionEntityId: string) => {
   const { http } = useKibana<CoreStart>().services;
@@ -41,13 +48,18 @@ export const useFetchIOEvents = (sessionEntityId: string) => {
         },
       });
 
+      if (MOCK_DEBUG) {
+        res.events = sessionViewIOEventsMock.events;
+        res.total = res.events?.length || 0;
+      }
+
       const events = res.events?.map((event: any) => event._source as ProcessEvent) ?? [];
 
       return { events, cursor, total: res.total };
     },
     {
       getNextPageParam: (lastPage) => {
-        if (lastPage.events.length >= IO_EVENTS_PER_PAGE) {
+        if (!MOCK_DEBUG && lastPage.events.length >= IO_EVENTS_PER_PAGE) {
           return {
             cursor: lastPage.events[lastPage.events.length - 1]['@timestamp'],
           };
@@ -77,9 +89,21 @@ export const useIOLines = (pages: ProcessEventsPage[] | undefined) => {
     return pages.reduce((previous, current) => {
       if (current.events) {
         current.events.forEach((event) => {
-          if (event?.process?.io?.text) {
-            const data: IOLine[] = event.process.io.text.split(/\n\r?/).map((line) => {
+          const { process } = event;
+          if (process?.io?.text !== undefined) {
+            const splitLines = process.io.text.split(TTY_LINE_SPLITTER_REGEX);
+            const combinedLines = [splitLines[0]];
+
+            // delimiters e.g \r\n or cursor movements are merged with their line text
+            // we start on an odd number so that cursor movements happen at the start of each line
+            // this is needed for the search to work accurately
+            for (let i = 1; i < splitLines.length - 1; i = i + 2) {
+              combinedLines.push(splitLines[i] + splitLines[i + 1]);
+            }
+
+            const data: IOLine[] = combinedLines.map((line) => {
               return {
+                event, // pointer to the event so it's easy to look up other details for the line
                 value: line,
               };
             });
@@ -99,84 +123,93 @@ export const useIOLines = (pages: ProcessEventsPage[] | undefined) => {
 export interface XtermPlayerDeps {
   ref: React.RefObject<HTMLElement>;
   isPlaying: boolean;
+  setIsPlaying(value: boolean): void;
   lines: IOLine[];
+  fontSize: number;
   hasNextPage?: boolean;
   fetchNextPage?: () => void;
-  isFullscreen?: boolean;
 }
 
 export const useXtermPlayer = ({
   ref,
   isPlaying,
+  setIsPlaying,
   lines,
+  fontSize,
   hasNextPage,
   fetchNextPage,
-  isFullscreen,
 }: XtermPlayerDeps) => {
   const { euiTheme } = useEuiTheme();
   const { font, colors } = euiTheme;
   const [currentLine, setCurrentLine] = useState(0);
-  const [userSeeked, setUserSeeked] = useState(false);
   const [playSpeed] = useState(DEFAULT_TTY_PLAYSPEED_MS); // potentially configurable
+  const tty = lines?.[currentLine]?.event.process?.tty;
 
-  const [terminal, fitAddon, searchAddon] = useMemo(() => {
+  const [terminal, searchAddon] = useMemo(() => {
     const term = new Terminal({
       theme: {
-        background: 'rgba(0,0,0,0)',
         selection: colors.warning,
       },
       fontFamily: font.familyCode,
-      fontSize: 11,
-      allowTransparency: true,
+      fontSize: DEFAULT_TTY_FONT_SIZE,
+      scrollback: 0,
+      convertEol: true,
     });
 
-    const fitInstance = new FitAddon();
     const searchInstance = new SearchAddon();
-
-    term.loadAddon(fitInstance);
     term.loadAddon(searchInstance);
 
-    return [term, fitInstance, searchInstance];
-  }, [colors, font]);
+    return [term, searchInstance];
+  }, [font, colors]);
 
   useEffect(() => {
-    if (ref.current) {
+    if (ref.current && !terminal.element) {
       terminal.open(ref.current);
     }
   }, [terminal, ref]);
 
-  useEffect(() => {
-    // isFullscreen check is there just to avoid the necessary "unnecessary" react-hook dep
-    // When isFullscreen changes, e.g goes from false to true and vice versa, we need to call fit.
-    if (isFullscreen !== undefined) {
-      fitAddon.fit();
-    }
-  }, [isFullscreen, fitAddon]);
-
   const render = useCallback(
-    (lineNumber: number) => {
+    (lineNumber: number, clear: boolean) => {
       if (lines.length === 0) {
         return;
       }
 
       let linesToPrint;
 
-      if (userSeeked) {
-        linesToPrint = lines.slice(0, lineNumber);
+      if (clear) {
+        linesToPrint = lines.slice(0, lineNumber + 1);
+        terminal.reset();
         terminal.clear();
-        setUserSeeked(false);
       } else {
         linesToPrint = [lines[lineNumber]];
       }
 
       linesToPrint.forEach((line, index) => {
         if (line?.value !== undefined) {
-          terminal.writeln(line.value);
+          terminal.write(line.value);
         }
       });
     },
-    [terminal, lines, userSeeked]
+    [terminal, lines]
   );
+
+  useEffect(() => {
+    const fontChanged = terminal.getOption('fontSize') !== fontSize;
+    const ttyChanged = tty && (terminal.rows !== tty?.rows || terminal.cols !== tty?.columns);
+
+    if (fontChanged) {
+      terminal.setOption('fontSize', fontSize);
+    }
+
+    if (tty?.rows && tty?.columns && ttyChanged) {
+      terminal.resize(tty.columns, tty.rows);
+    }
+
+    if (fontChanged || ttyChanged) {
+      // clear and rerender
+      render(currentLine, true);
+    }
+  }, [currentLine, fontSize, terminal, render, tty]);
 
   useEffect(() => {
     if (isPlaying) {
@@ -185,29 +218,32 @@ export const useXtermPlayer = ({
           return;
         }
 
-        if (currentLine < lines.length) {
+        if (currentLine < lines.length - 1) {
           setCurrentLine(currentLine + 1);
+        }
+
+        render(currentLine, false);
+
+        if (hasNextPage && fetchNextPage && currentLine === lines.length - 1) {
+          fetchNextPage();
         }
       }, playSpeed);
 
       return () => {
-        clearInterval(timer);
+        clearTimeout(timer);
       };
     }
-  }, [lines, currentLine, isPlaying, playSpeed]);
+  }, [lines, currentLine, isPlaying, playSpeed, render, hasNextPage, fetchNextPage]);
 
-  useEffect(() => {
-    render(currentLine);
+  const seekToLine = useCallback(
+    (index) => {
+      setCurrentLine(index);
+      setIsPlaying(false);
 
-    if (hasNextPage && fetchNextPage && currentLine === lines.length - 1) {
-      fetchNextPage();
-    }
-  }, [fetchNextPage, currentLine, lines, render, hasNextPage]);
-
-  const seekToLine = useCallback((line) => {
-    setUserSeeked(true);
-    setCurrentLine(line);
-  }, []);
+      render(index, true);
+    },
+    [setIsPlaying, render]
+  );
 
   const search = useCallback(
     (query: string, startCol: number) => {
@@ -216,15 +252,10 @@ export const useXtermPlayer = ({
     [searchAddon]
   );
 
-  const fit = useCallback(() => {
-    fitAddon.fit();
-  }, [fitAddon]);
-
   return {
     terminal,
     currentLine,
     seekToLine,
     search,
-    fit,
   };
 };

@@ -40,6 +40,7 @@ describe('<IndicatorsPage />', () => {
     ).mockReturnValue({
       dateRange: { min: moment(), max: moment() },
       indicators: [],
+      selectedField: '',
       onFieldChange: () => {},
     });
 
