@@ -70,6 +70,10 @@ const services = {
           getAbsoluteTime: () => {
             return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
           },
+          getTime: () => ({
+            from: 'now-7d',
+            to: 'now',
+          }),
         },
       },
       savedQueries: { findSavedQueries: () => Promise.resolve({ queries: [] as SavedQuery[] }) },
