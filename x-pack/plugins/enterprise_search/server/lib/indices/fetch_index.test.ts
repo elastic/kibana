@@ -43,6 +43,7 @@ describe('fetchIndex lib function', () => {
     indices: {
       index_name: {
         health: 'green',
+        hidden: false,
         size: new ByteSizeValue(108000).toString(),
         status: 'open',
         total: {
@@ -63,6 +64,7 @@ describe('fetchIndex lib function', () => {
     aliases: [],
     count: 100,
     health: 'green',
+    hidden: false,
     name: 'index_name',
     status: 'open',
     total: {
