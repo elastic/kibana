@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import Chalk from 'chalk';
 import { act } from 'react-dom/test-utils';
 
 let current: symbol | undefined;
@@ -39,17 +40,21 @@ export function safeAct(cb: () => Promise<void> | void) {
       return cb() as never;
     }
 
+    const title = Chalk.red.bold('safeAct() violation:');
+    const desc = 'act() cb triggered after test completed';
     const indentedStack = sourceStack
       .split('\n')
       .slice(1)
       .map((l) => `  ${l}`)
       .join('\n');
 
-    // console.log is the proper way to log in jest tests, but also nobody ever looks at them...
-    // eslint-disable-next-line no-console
-    console.log(
-      `act() cb triggered after test completed, act registration stacktrace:\n${indentedStack}`
+    process.stderr.write(
+      `\n\n${title}\n${desc}, registration stacktrace:\n${indentedStack}\n`,
+      () => {
+        process.exit(1);
+      }
     );
-    process.exit(1);
+
+    return new Promise(() => {}) as never;
   });
 }
