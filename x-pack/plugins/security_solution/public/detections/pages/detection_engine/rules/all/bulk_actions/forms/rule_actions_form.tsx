@@ -161,12 +161,7 @@ const RuleActionsFormComponent = ({ rulesCount, onClose, onConfirm }: RuleAction
               defaultMessage='If you’d like to delete actions for all selected rules, select "Perform no actions" in the dropdown and check Overwrite all selected rule actions.'
             />
           </li>
-          <li>
-            <FormattedMessage
-              id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.addRuleActions.ruleVariablesDetail"
-              defaultMessage='Rule variables may only affect some of the rules that you selected based on the rule types(for example "context.rule.threshold" will only work for threshold rule type).'
-            />
-          </li>
+          <li>{i18n.RULE_VARIABLES_DETAIL}</li>
         </ul>
       </EuiCallOut>
       <EuiSpacer size="m" />
