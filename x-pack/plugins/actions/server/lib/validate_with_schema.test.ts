@@ -14,10 +14,13 @@ import {
   validateConnector,
 } from './validate_with_schema';
 import { ActionType, ExecutorType } from '../types';
+import { actionsConfigMock } from '../actions_config.mock';
 
 const executor: ExecutorType<{}, {}, {}, void> = async (options) => {
   return { status: 'ok', actionId: options.actionId };
 };
+
+const configurationUtilities = actionsConfigMock.create();
 
 test('should validate when there are no validators', () => {
   const actionType: ActionType = {
@@ -29,7 +32,7 @@ test('should validate when there are no validators', () => {
   };
   const testValue = { any: ['old', 'thing'] };
 
-  const result = validateConfig(actionType, testValue);
+  const result = validateConfig(actionType, testValue, { configurationUtilities });
   expect(result).toEqual(testValue);
 });
 
@@ -46,13 +49,13 @@ test('should validate when there are no individual validators', () => {
   let result;
   const testValue = { any: ['old', 'thing'] };
 
-  result = validateParams(actionType, testValue);
+  result = validateParams(actionType, testValue, { configurationUtilities });
   expect(result).toEqual(testValue);
 
-  result = validateConfig(actionType, testValue);
+  result = validateConfig(actionType, testValue, { configurationUtilities });
   expect(result).toEqual(testValue);
 
-  result = validateSecrets(actionType, testValue);
+  result = validateSecrets(actionType, testValue, { configurationUtilities });
   expect(result).toEqual(testValue);
 
   result = validateConnector(actionType, { config: testValue });
@@ -68,9 +71,15 @@ test('should validate when validators return incoming value', () => {
     supportedFeatureIds: ['alerting'],
     executor,
     validate: {
-      params: selfValidator,
-      config: selfValidator,
-      secrets: selfValidator,
+      params: {
+        validateSchema: selfValidator,
+      },
+      config: {
+        validateSchema: selfValidator,
+      },
+      secrets: {
+        validateSchema: selfValidator,
+      },
       connector: () => null,
     },
   };
@@ -78,13 +87,13 @@ test('should validate when validators return incoming value', () => {
   let result;
   const testValue = { any: ['old', 'thing'] };
 
-  result = validateParams(actionType, testValue);
+  result = validateParams(actionType, testValue, { configurationUtilities });
   expect(result).toEqual(testValue);
 
-  result = validateConfig(actionType, testValue);
+  result = validateConfig(actionType, testValue, { configurationUtilities });
   expect(result).toEqual(testValue);
 
-  result = validateSecrets(actionType, testValue);
+  result = validateSecrets(actionType, testValue, { configurationUtilities });
   expect(result).toEqual(testValue);
 
   result = validateConnector(actionType, { config: testValue, secrets: { user: 'test' } });
@@ -101,9 +110,15 @@ test('should validate when validators return different values', () => {
     supportedFeatureIds: ['alerting'],
     executor,
     validate: {
-      params: selfValidator,
-      config: selfValidator,
-      secrets: selfValidator,
+      params: {
+        validateSchema: selfValidator,
+      },
+      config: {
+        validateSchema: selfValidator,
+      },
+      secrets: {
+        validateSchema: selfValidator,
+      },
       connector: () => null,
     },
   };
@@ -111,13 +126,13 @@ test('should validate when validators return different values', () => {
   let result;
   const testValue = { any: ['old', 'thing'] };
 
-  result = validateParams(actionType, testValue);
+  result = validateParams(actionType, testValue, { configurationUtilities });
   expect(result).toEqual(returnedValue);
 
-  result = validateConfig(actionType, testValue);
+  result = validateConfig(actionType, testValue, { configurationUtilities });
   expect(result).toEqual(returnedValue);
 
-  result = validateSecrets(actionType, testValue);
+  result = validateSecrets(actionType, testValue, { configurationUtilities });
   expect(result).toEqual(returnedValue);
 
   result = validateConnector(actionType, { config: testValue, secrets: { user: 'test' } });
@@ -137,26 +152,32 @@ test('should throw with expected error when validators fail', () => {
     supportedFeatureIds: ['alerting'],
     executor,
     validate: {
-      params: erroringValidator,
-      config: erroringValidator,
-      secrets: erroringValidator,
+      params: {
+        validateSchema: erroringValidator,
+      },
+      config: {
+        validateSchema: erroringValidator,
+      },
+      secrets: {
+        validateSchema: erroringValidator,
+      },
       connector: () => 'test error',
     },
   };
 
   const testValue = { any: ['old', 'thing'] };
 
-  expect(() => validateParams(actionType, testValue)).toThrowErrorMatchingInlineSnapshot(
-    `"error validating action params: test error"`
-  );
+  expect(() =>
+    validateParams(actionType, testValue, { configurationUtilities })
+  ).toThrowErrorMatchingInlineSnapshot(`"error validating action params: test error"`);
 
-  expect(() => validateConfig(actionType, testValue)).toThrowErrorMatchingInlineSnapshot(
-    `"error validating action type config: test error"`
-  );
+  expect(() =>
+    validateConfig(actionType, testValue, { configurationUtilities })
+  ).toThrowErrorMatchingInlineSnapshot(`"error validating action type config: test error"`);
 
-  expect(() => validateSecrets(actionType, testValue)).toThrowErrorMatchingInlineSnapshot(
-    `"error validating action type secrets: test error"`
-  );
+  expect(() =>
+    validateSecrets(actionType, testValue, { configurationUtilities })
+  ).toThrowErrorMatchingInlineSnapshot(`"error validating action type secrets: test error"`);
 
   expect(() =>
     validateConnector(actionType, { config: testValue, secrets: { user: 'test' } })
@@ -172,17 +193,25 @@ test('should work with @kbn/config-schema', () => {
     supportedFeatureIds: ['alerting'],
     executor,
     validate: {
-      params: testSchema,
-      config: testSchema,
-      secrets: testSchema,
+      params: {
+        validateSchema: testSchema,
+      },
+      config: {
+        validateSchema: testSchema,
+      },
+      secrets: {
+        validateSchema: testSchema,
+      },
       connector: () => null,
     },
   };
 
-  const result = validateParams(actionType, { foo: 'bar' });
+  const result = validateParams(actionType, { foo: 'bar' }, { configurationUtilities });
   expect(result).toEqual({ foo: 'bar' });
 
-  expect(() => validateParams(actionType, { bar: 2 })).toThrowErrorMatchingInlineSnapshot(
+  expect(() =>
+    validateParams(actionType, { bar: 2 }, { configurationUtilities })
+  ).toThrowErrorMatchingInlineSnapshot(
     `"error validating action params: [foo]: expected value of type [string] but got [undefined]"`
   );
 });
@@ -197,9 +226,15 @@ describe('validateConnectors', () => {
     supportedFeatureIds: ['alerting'],
     executor,
     validate: {
-      params: selfValidator,
-      config: selfValidator,
-      secrets: selfValidator,
+      params: {
+        validateSchema: selfValidator,
+      },
+      config: {
+        validateSchema: selfValidator,
+      },
+      secrets: {
+        validateSchema: selfValidator,
+      },
       connector: () => null,
     },
   };
