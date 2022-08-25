@@ -11,6 +11,8 @@
 
 import { get, union, uniq } from 'lodash';
 import moment from 'moment-timezone';
+import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { asyncForEach } from '@kbn/std';
 
 import { lastValueFrom } from 'rxjs';
 import {
@@ -18,6 +20,7 @@ import {
   ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
 } from '../../../common/constants/search';
 import { EntityField, getEntityFieldList } from '../../../common/util/anomaly_utils';
+import { getDataViewIdFromName } from '../util/index_utils';
 import { extractErrorMessage } from '../../../common/util/errors';
 import { ML_JOB_AGGREGATION } from '../../../common/constants/aggregation_types';
 import {
@@ -39,6 +42,7 @@ import {
   VIEW_BY_JOB_LABEL,
 } from './explorer_constants';
 import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
+import { isCombinedJob } from '../../../common/types/anomaly_detection_jobs/combined_job';
 import { MlResultsService } from '../services/results_service';
 import { InfluencersFilterQuery } from '../../../common/types/es_client';
 import { TimeRangeBounds } from '../util/time_buckets';
@@ -109,6 +113,10 @@ export interface OverallSwimlaneData extends SwimlaneData {
 
 export interface ViewBySwimLaneData extends OverallSwimlaneData {
   cardinality: number;
+}
+
+export interface SourceIndicesWithGeoFields {
+  [key: string]: { [key: string]: { geoFields: string[]; dataViewId: string } };
 }
 
 // create new job objects based on standard job config objects
@@ -601,4 +609,52 @@ export function removeFilterFromQueryString(
   newQueryString = newQueryString.replace(startPattern, '');
 
   return newQueryString;
+}
+
+// Returns an object mapping job ids to source indices which map to geo fields for that index
+export async function checkIfSourceIndicesHaveGeoField(
+  selectedJobs: Array<CombinedJob | ExplorerJob>,
+  dataViewsService: any
+): Promise<SourceIndicesWithGeoFields> {
+  const sourceIndicesWithGeoFieldsMap: SourceIndicesWithGeoFields = {};
+  // Go through selected jobs
+  if (Array.isArray(selectedJobs)) {
+    await asyncForEach(selectedJobs, async (job) => {
+      let sourceIndices;
+      let jobId: string;
+      if (isCombinedJob(job)) {
+        sourceIndices = job.datafeed_config.indices;
+        jobId = job.job_id;
+      } else {
+        sourceIndices = job.sourceIndices;
+        jobId = job.id;
+      }
+
+      if (Array.isArray(sourceIndices)) {
+        // Check fields for each source index to see if it has geo fields
+        await asyncForEach(sourceIndices, async (sourceIndex) => {
+          const dataViewId = await getDataViewIdFromName(sourceIndex);
+
+          if (dataViewId) {
+            const dataView = await dataViewsService.get(dataViewId);
+            const geoFields = [
+              ...dataView.fields.getByType(ES_FIELD_TYPES.GEO_POINT),
+              ...dataView.fields.getByType(ES_FIELD_TYPES.GEO_SHAPE),
+            ];
+            if (geoFields.length > 0) {
+              if (sourceIndicesWithGeoFieldsMap[jobId] === undefined) {
+                sourceIndicesWithGeoFieldsMap[jobId] = {
+                  [sourceIndex]: { geoFields: [], dataViewId },
+                };
+              }
+              sourceIndicesWithGeoFieldsMap[jobId][sourceIndex].geoFields.push(
+                ...geoFields.map((field) => field.name)
+              );
+            }
+          }
+        });
+      }
+    });
+  }
+  return sourceIndicesWithGeoFieldsMap;
 }
