@@ -9,7 +9,7 @@
 import React from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { Filter } from '@kbn/es-query';
-import { EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiFlexItem, EuiTextColor } from '@elastic/eui';
 import { FilterExpressionBadge } from './filter_badge_expression';
 import { ConditionTypes } from '../../filters_builder/filters_builder_condition_types';
 
@@ -22,9 +22,7 @@ export interface FilterBadgeGroupProps {
 const ConditionalTypeDelimiter = ({ conditional }: { conditional: ConditionTypes }) => {
   return (
     <EuiFlexItem>
-      <EuiText size="s" color="subdued">
-        {conditional}
-      </EuiText>
+      <EuiTextColor color="rgb(0, 113, 194)">{conditional}</EuiTextColor>
     </EuiFlexItem>
   );
 };

@@ -10,8 +10,9 @@ import React from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { FILTERS } from '@kbn/es-query';
-import { EuiFlexItem, EuiTextColor } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTextColor } from '@elastic/eui';
 import { getDisplayValueFromFilter, getIndexPatternFromFilter } from '@kbn/data-plugin/public';
+import { css } from '@emotion/css';
 import { existsOperator, isOneOfOperator } from '../../filter_bar/filter_editor';
 import { FilterBadgeGroup } from './filter_badge_group';
 import { getConditionalOperationType } from '../../filters_builder/filters_builder_utils';
@@ -32,8 +33,22 @@ interface LabelOptions {
   message?: string;
 }
 
-const getValue = (text?: string) => {
-  return text;
+const filterExpressionValue = css`
+  color: #387765;
+`;
+
+const filterExpressionValueNumber = css`
+  color: #ac4e6d;
+`;
+
+const getValue = (value: string | number) => {
+  return (
+    <EuiFlexItem
+      className={typeof value === 'string' ? filterExpressionValue : filterExpressionValueNumber}
+    >
+      {value}
+    </EuiFlexItem>
+  );
 };
 
 const getFilterContent = (filter: Filter, label: LabelOptions, prefix: string | JSX.Element) => {
@@ -41,21 +56,22 @@ const getFilterContent = (filter: Filter, label: LabelOptions, prefix: string | 
     case FILTERS.EXISTS:
       return (
         <>
-          {prefix}
-          {filter.meta.key}: {getValue(`${existsOperator.message}`)}
+          <EuiFlexItem grow={false}>
+            {prefix} {filter.meta.key}:
+          </EuiFlexItem>
+          {getValue(`${existsOperator.message}`)}
         </>
       );
     case FILTERS.PHRASES:
       return (
-        <>
-          {prefix}
-          {filter.meta.key}: {getValue(`${isOneOfOperator.message} ${label.title}`)}
-        </>
+        <EuiFlexItem grow={false}>
+          {prefix} {filter.meta.key}:{getValue(`${isOneOfOperator.message} ${label.title}`)}
+        </EuiFlexItem>
       );
     case FILTERS.QUERY_STRING:
       return (
         <>
-          {prefix}
+          <EuiFlexItem grow={false}>{prefix}</EuiFlexItem>
           {getValue(`${label.title}`)}
         </>
       );
@@ -63,14 +79,16 @@ const getFilterContent = (filter: Filter, label: LabelOptions, prefix: string | 
     case FILTERS.RANGE:
       return (
         <>
-          {prefix}
-          {filter.meta.key}: {getValue(label.title)}
+          <EuiFlexItem grow={false}>
+            {prefix} {filter.meta.key}:
+          </EuiFlexItem>
+          {getValue(label.title)}
         </>
       );
     default:
       return (
         <>
-          {prefix}
+          <EuiFlexItem grow={false}>{prefix}</EuiFlexItem>
           {getValue(`${JSON.stringify(filter.query) || filter.meta.value}`)}
         </>
       );
@@ -78,7 +96,6 @@ const getFilterContent = (filter: Filter, label: LabelOptions, prefix: string | 
 };
 
 function isFilterApplicable(filter: Filter, dataView: DataView[]) {
-  // Any filter is applicable if no index patterns were provided to FilterBar.
   if (!dataView.length) return true;
 
   const ip = getIndexPatternFromFilter(filter, dataView);
@@ -155,7 +172,9 @@ export function FilterExpressionBadge({ filter, dataView }: FilterBadgeExpressio
           conditionType={conditionalOperationType}
         />
       ) : (
-        <EuiFlexItem>{getFilterContent(filter, label, prefix)}</EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFlexGroup gutterSize="xs">{getFilterContent(filter, label, prefix)}</EuiFlexGroup>
+        </EuiFlexItem>
       )}
     </>
   );
