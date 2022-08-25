@@ -9,6 +9,7 @@ import moment from 'moment';
 import { checkParam } from '../error_missing_required';
 import { createTimeFilter, TimerangeFilter } from '../create_query';
 import { detectReason, LogsIndexCheckOpts } from './detect_reason';
+import { elasticsearchLogsFilter } from './logs_filter';
 import { formatUTCTimestampForTimezone } from '../format_timezone';
 import { getTimezone } from '../get_timezone';
 import { detectReasonFromException } from './detect_reason_from_exception';
@@ -104,7 +105,7 @@ export async function getLogs(
       sort: { '@timestamp': { order: 'desc', unmapped_type: 'long' } },
       query: {
         bool: {
-          filter: [elasticsearchTypeFilter, ...filter],
+          filter: [elasticsearchLogsFilter, ...filter],
         },
       },
     },
