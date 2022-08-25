@@ -54,9 +54,8 @@ export class ApmSynthtraceKibanaClient {
     });
   }
   async fetchLatestApmPackageVersion(currentKibanaVersion: string) {
-    const url =
-      'https://epr-snapshot.elastic.co/search?package=apm&prerelease=true&all=true&kibana.version=';
-    const response = await fetch(url + currentKibanaVersion, { method: 'GET' });
+    const url = `https://epr-snapshot.elastic.co/search?package=apm&prerelease=true&all=true&kibana.version=${currentKibanaVersion}`;
+    const response = await fetch(url, { method: 'GET' });
     const json = (await response.json()) as Array<{ version: string }>;
     const packageVersions = (json ?? []).map((item) => item.version).sort(Semver.rcompare);
     const validPackageVersions = packageVersions.filter((v) => Semver.valid(v));
@@ -71,7 +70,7 @@ export class ApmSynthtraceKibanaClient {
 
   async installApmPackage(kibanaUrl: string, version: string, username: string, password: string) {
     const packageVersion = await this.fetchLatestApmPackageVersion(version);
-    const response = await fetch(kibanaUrl + '/api/fleet/epm/packages/apm/' + packageVersion, {
+    const response = await fetch(`${kibanaUrl}/api/fleet/epm/packages/apm/${packageVersion}`, {
       method: 'POST',
       headers: {
         Authorization: 'Basic ' + Buffer.from(username + ':' + password).toString('base64'),

@@ -18,6 +18,7 @@ import { Crawler } from './crawler';
 export interface ElasticsearchIndex {
   count: number; // Elasticsearch _count
   health?: HealthStatus;
+  hidden: boolean;
   name: IndexName;
   status?: IndicesStatsIndexMetadataState;
   total: {
