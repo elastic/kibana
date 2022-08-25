@@ -320,7 +320,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
             id="xpack.fleet.createPackagePolicy.stepConfigure.quickSettingsTranslation"
             defaultMessage="Use quick settings to configure the integration to {value}. You can make changes to the configurations after you add it."
             values={{
-              value: <b>protect your tranditional endpoints or dynamic clound environments</b>,
+              value: <b>{"protect your tranditional endpoints or dynamic clound environments"}</b>,
             }}
           />
         </QuickSettingInfo>
