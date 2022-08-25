@@ -14,7 +14,6 @@ jest.mock('../route/use_route_spy', () => ({
     .mockImplementationOnce(() => [{ pageName: 'hosts' }])
     .mockImplementationOnce(() => [{ pageName: 'rules' }])
     .mockImplementationOnce(() => [{ pageName: 'network' }]),
-
 }));
 jest.mock('../../containers/sourcerer', () => ({
   useSourcererDataView: jest
