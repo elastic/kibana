@@ -68,7 +68,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when(
     'Top dependency spans when data is loaded',
-    { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
+    { config: 'basic', archives: [] },
     () => {
       const javaInstance = apm.service('java', 'production', 'java').instance('instance-a');
 
