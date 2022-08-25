@@ -260,8 +260,8 @@ export const createAndAssociateDefaultExceptionList = async ({
 
   await patchRules({
     rulesClient,
-    rule,
-    params: {
+    existingRule: rule,
+    nextParams: {
       ...rule.params,
       exceptions_list: [
         ...ruleExceptionLists,
