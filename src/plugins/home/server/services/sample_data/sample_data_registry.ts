@@ -22,8 +22,8 @@ import { flightsSpecProvider, logsSpecProvider, ecommerceSpecProvider } from './
 import {
   createListRoute,
   createInstallRoute,
-  createInstallLargeDatasetRoute,
   createIsLargeDataSetInstalledRoute,
+  createInstallLargeDatasetRoute,
 } from './routes';
 import { makeSampleDataUsageCollector, usage } from './usage';
 import { createUninstallRoute } from './routes/uninstall';
@@ -89,7 +89,7 @@ export class SampleDataRegistry {
     createListRoute(router, this.sampleDatasets, this.appLinksMap, logger);
     createInstallRoute(router, this.sampleDatasets, logger, usageTracker);
     createUninstallRoute(router, this.sampleDatasets, logger, usageTracker);
-    createIsLargeDataSetInstalledRoute(router, this.sampleDatasets);
+    createIsLargeDataSetInstalledRoute(router, core);
     createInstallLargeDatasetRoute(
       router,
       this.sampleDatasets,

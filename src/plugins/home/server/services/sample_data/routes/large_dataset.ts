@@ -6,12 +6,10 @@
  * Side Public License, v 1.
  */
 import { spawn } from 'child_process';
-import { Readable } from 'stream';
 import uuid from 'uuid';
 import { schema } from '@kbn/config-schema';
 import { IRouter, Logger, SavedObject } from '@kbn/core/server';
-import { SampleDataInstallError } from '../errors';
-import { getSavedObjectsClient } from './utils';
+import { CoreSetup } from '@kbn/core/server';
 import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
 
 const dataView = (indexName: string) => {
@@ -83,7 +81,6 @@ export function createInstallLargeDatasetRoute(
       );
 
       pythonProcess.stdout.setEncoding('utf8');
-
       pythonProcess.stderr.setEncoding('utf8');
       pythonProcess.stderr.on('error', function (data) {
         errorOccured = true;
@@ -92,7 +89,7 @@ export function createInstallLargeDatasetRoute(
 
       const core = await context.core;
       const { getImporter } = core.savedObjects;
-      const objectTypes = ['index-pattern'];
+      /* const objectTypes = ['index-pattern'];
       const savedObjectsClient = await getSavedObjectsClient(context, objectTypes);
       const soImporter = getImporter(savedObjectsClient);
 
@@ -104,6 +101,7 @@ export function createInstallLargeDatasetRoute(
         overwrite: true,
         createNewCopies: false,
       });
+      logger.info('Started process');
       if (errors.length > 0) {
         const errMsg = `sample_data install errors while loading saved objects. Errors: ${JSON.stringify(
           errors.map(({ type, id }) => ({ type, id })) // discard other fields
@@ -113,8 +111,6 @@ export function createInstallLargeDatasetRoute(
       }
 
       pythonProcess.stdout.on('data', function (data) {
-        // Here is where the output goes
-
         logger.info('stdout: ' + data);
         installCompleteCallback(
           largeDatasetProvider(indexName, 'Large dataset', indexName, savedObjects)
@@ -128,29 +124,29 @@ export function createInstallLargeDatasetRoute(
             message: 'Error occurred while generating data set',
           },
         });
-      }
-
-      // pythonProcess.on('close', function (code) {});
-
+      }*/
+      pythonProcess.on('close', function (code) {
+        logger.info('Closed');
+      });
       return res.ok({
         body: {
-          elasticsearchIndicesCreated: 10,
-          kibanaSavedObjectsLoaded: 10,
+          elasticsearchIndicesCreated: 1,
+          kibanaSavedObjectsLoaded: 1,
         },
       });
     }
   );
 }
 
-export function createIsLargeDataSetInstalledRoute(
-  router: IRouter,
-  sampleDatasets: SampleDatasetSchema[]
-) {
+export function createIsLargeDataSetInstalledRoute(router: IRouter, core: CoreSetup) {
   router.get(
     { path: '/api/sample_data/large_dataset/installed', validate: false },
     async (context, _req, res) => {
-      const sampleDataset = await sampleDatasets.find(({ id }) => id === 'large_dataset');
-      if (!sampleDataset) {
+      const esClient = (await core.getStartServices())[0].elasticsearch.client;
+      const indexExists = await esClient.asInternalUser.indices.exists({
+        index: 'test_data',
+      });
+      if (!indexExists) {
         return res.notFound();
       }
       return res.ok({

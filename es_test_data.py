@@ -293,6 +293,8 @@ def generate_test_data():
             upload_data_txt += json.dumps(cmd) + "\n"
             upload_data_txt += json.dumps(item) + "\n"
             upload_data_count += 1
+            if (upload_data_count > 100000)
+                break
 
             if upload_data_count % tornado.options.options.batch_size == 0:
                 yield upload_batch(upload_data_txt)
@@ -476,7 +478,6 @@ def get_data_for_format(format):
     elif field_type == "words":
         min = 2 if len(split_f) < 3 else int(split_f[2])
         max = min + 8 if len(split_f) < 4 else int(split_f[3])
-        count = generate_count(min, max)
         words = []
         for _ in range(count):
             word_len = random.randrange(3, 10)
@@ -562,7 +563,7 @@ def csv_file_to_json(csvFilePath):
 
 @tornado.gen.coroutine
 def generate_test_data():
-
+    logging.info('Started')
     global upload_data_count
 
     if tornado.options.options.force_init_index:
@@ -629,9 +630,8 @@ def generate_test_data():
 
             upload_data_txt += json.dumps(cmd) + "\n"
             upload_data_txt += json.dumps(item) + "\n"
-            upload_data_count += 1
 
-            if upload_data_count % tornado.options.options.batch_size == 0:
+            if  % tornado.options.options.batch_size == 0:
                 yield upload_batch(upload_data_txt)
                 upload_data_txt = ""
 
