@@ -53,7 +53,7 @@ export function LabsSettingsFlyout() {
   const [experimentalFeature] = data.experimentalFeatures;
 
   useEffect(() => {
-    setIsLabsChecked(experimentalFeature?.enableExperimentalFeatures || false);
+    setIsLabsChecked(experimentalFeature?.isAutoSubscribed || false);
   }, [experimentalFeature]);
 
   function toggleFlyoutVisibility() {
@@ -79,7 +79,7 @@ export function LabsSettingsFlyout() {
         params: {
           body: {
             savedObjectId: experimentalFeature?.savedObjectId,
-            enableExperimentalFeatures: isLabsChecked,
+            isAutoSubscribed: isLabsChecked,
             experimentalFeatures: JSON.stringify(
               Object.keys(settingsEditableConfig)
             ),

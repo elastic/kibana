@@ -61,7 +61,7 @@ export function Header({ isLabsChecked, onChangeLabs }: Props) {
         <EuiText color="subdued" size="s">
           {i18n.translate('xpack.apm.labs.description', {
             defaultMessage:
-              'Turn on for automatically opt-in to future tech preview features released.',
+              'Turn on for automatically opt-in to future technical preview features released.',
           })}
         </EuiText>
       </EuiFlexItem>

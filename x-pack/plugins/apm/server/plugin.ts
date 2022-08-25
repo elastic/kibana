@@ -54,7 +54,10 @@ import {
 } from '../common/elasticsearch_fieldnames';
 import { tutorialProvider } from './tutorial';
 import { migrateLegacyAPMIndicesToSpaceAware } from './saved_objects/migrations/migrate_legacy_apm_indices_to_space_aware';
-import { apmExperimentalFeatures } from './saved_objects/apm_experimental_features';
+import {
+  apmExperimentalFeatures,
+  autoSubscribeToNewExperimentalFeatures,
+} from './saved_objects/apm_experimental_features';
 
 export class APMPlugin
   implements
@@ -260,6 +263,11 @@ export class APMPlugin
     });
 
     migrateLegacyAPMIndicesToSpaceAware({
+      coreStart: core,
+      logger: this.logger,
+    });
+
+    autoSubscribeToNewExperimentalFeatures({
       coreStart: core,
       logger: this.logger,
     });

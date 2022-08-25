@@ -7,45 +7,35 @@
 import { jsonRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import { APM_EXPERIMENTAL_FEATURES_TYPE } from '../../../../common/apm_saved_object_constants';
+import { ExperimentalFeatures } from '../../../saved_objects/apm_experimental_features';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
+
+export interface ExperimentalFeatureResponse extends ExperimentalFeatures {
+  savedObjectId?: string;
+}
 
 const experimentalFeaturesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/settings/experimental_feature',
   options: { tags: ['access:apm'] },
   handler: async (
     resources
-  ): Promise<{
-    experimentalFeatures: Array<{
-      savedObjectId: string;
-      enableExperimentalFeatures?: boolean;
-      experimentalFeatures?: string[];
-    }>;
-  }> => {
+  ): Promise<{ experimentalFeatures: ExperimentalFeatureResponse[] }> => {
     const { context } = resources;
     const {
       savedObjects: { client: savedObjectsClient },
     } = await context.core;
 
-    const result = await savedObjectsClient.find<{
-      enableExperimentalFeatures?: boolean;
-      experimentalFeatures?: string[];
-    }>({
+    const result = await savedObjectsClient.find<ExperimentalFeatures>({
       type: APM_EXPERIMENTAL_FEATURES_TYPE,
     });
 
     return {
       experimentalFeatures: result.saved_objects.map(
-        (
-          savedObject
-        ): {
-          savedObjectId: string;
-          enableExperimentalFeatures?: boolean;
-          experimentalFeatures?: string[];
-        } => {
+        (savedObject): ExperimentalFeatureResponse => {
           return {
             savedObjectId: savedObject?.id,
-            enableExperimentalFeatures:
-              savedObject?.attributes?.enableExperimentalFeatures || false,
+            isAutoSubscribed:
+              savedObject?.attributes?.isAutoSubscribed || false,
             experimentalFeatures:
               savedObject?.attributes?.experimentalFeatures || [],
           };
@@ -61,19 +51,13 @@ const saveExperimentalFeaturesRoute = createApmServerRoute({
     body: t.intersection([
       t.partial({ savedObjectId: t.string }),
       t.type({
-        enableExperimentalFeatures: t.boolean,
+        isAutoSubscribed: t.boolean,
         experimentalFeatures: jsonRt.pipe(t.array(t.string)),
       }),
     ]),
   }),
   options: { tags: ['access:apm', 'access:apm_write'] },
-  handler: async (
-    resources
-  ): Promise<{
-    savedObjectId: string;
-    enableExperimentalFeatures?: boolean;
-    experimentalFeatures?: string[];
-  }> => {
+  handler: async (resources): Promise<void> => {
     const {
       context,
       params: { body },
@@ -84,20 +68,11 @@ const saveExperimentalFeaturesRoute = createApmServerRoute({
 
     const { savedObjectId, ...experimentalFeaturesObject } = body;
 
-    const savedObject = savedObjectId
-      ? await savedObjectsClient.update(
-          APM_EXPERIMENTAL_FEATURES_TYPE,
-          savedObjectId,
-          experimentalFeaturesObject
-        )
-      : await savedObjectsClient.create(
-          APM_EXPERIMENTAL_FEATURES_TYPE,
-          experimentalFeaturesObject
-        );
-    return {
-      savedObjectId: savedObject.id,
-      ...savedObject.attributes,
-    };
+    await savedObjectsClient.create(
+      APM_EXPERIMENTAL_FEATURES_TYPE,
+      experimentalFeaturesObject,
+      { id: savedObjectId, overwrite: true }
+    );
   },
 });
 

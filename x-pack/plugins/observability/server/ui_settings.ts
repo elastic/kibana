@@ -160,11 +160,11 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
   [apmLabsButton]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.apmLabsButton', {
-      defaultMessage: 'Enable labs button in APM',
+      defaultMessage: 'Labs mode',
     }),
     description: i18n.translate('xpack.observability.apmLabsButtonDescription', {
       defaultMessage:
-        'This flag determines if the viewer has access to the Labs button, a quick way to enable as disable technical preview features in APM',
+        'Turn on for automatically opt-in to future technical preview features released.',
     }),
     schema: schema.boolean(),
     value: false,
