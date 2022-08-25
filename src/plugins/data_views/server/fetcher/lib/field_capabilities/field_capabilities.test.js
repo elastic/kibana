@@ -85,7 +85,7 @@ describe('index_patterns/field_capabilities/field_capabilities', () => {
         fieldsFromFieldCaps: fields.map((name) => ({ name })),
       });
 
-      const fieldNames = (await getFieldCapabilities(getArgsWithCallCluster())).map(
+      const fieldNames = (await getFieldCapabilities(getArgsWithCallCluster())).fields.map(
         (field) => field.name
       );
       expect(fieldNames).toEqual(fields);
@@ -99,7 +99,7 @@ describe('index_patterns/field_capabilities/field_capabilities', () => {
         fieldsFromFieldCaps: shuffle(letters.map((name) => ({ name }))),
       });
 
-      const fieldNames = (await getFieldCapabilities(getArgsWithCallCluster())).map(
+      const fieldNames = (await getFieldCapabilities(getArgsWithCallCluster())).fields.map(
         (field) => field.name
       );
       expect(fieldNames).toEqual(sortedLetters);
@@ -115,8 +115,8 @@ describe('index_patterns/field_capabilities/field_capabilities', () => {
       const args = getArgsWithCallCluster({ metaFields: ['meta1', 'meta2'] });
 
       const resp = await getFieldCapabilities(args);
-      expect(resp).toHaveLength(4);
-      expect(resp.map((field) => field.name)).toEqual(['bar', 'foo', 'meta1', 'meta2']);
+      expect(resp.fields).toHaveLength(4);
+      expect(resp.fields.map((field) => field.name)).toEqual(['bar', 'foo', 'meta1', 'meta2']);
     });
   });
 
@@ -141,7 +141,7 @@ describe('index_patterns/field_capabilities/field_capabilities', () => {
             fieldsFromFieldCaps: [field],
           });
 
-          const resp = await getFieldCapabilities(getArgsWithCallCluster());
+          const { fields: resp } = await getFieldCapabilities(getArgsWithCallCluster());
           expect(resp).toHaveLength(1);
           expect(resp[0]).toHaveProperty(property);
           expect(resp[0][property]).not.toBe(footballs[0]);
@@ -185,7 +185,7 @@ describe('index_patterns/field_capabilities/field_capabilities', () => {
         },
       });
 
-      expect(await getFieldCapabilities(getArgsWithCallCluster())).toEqual([
+      expect((await getFieldCapabilities(getArgsWithCallCluster())).fields).toEqual([
         { notFieldAnymore: 1 },
         { notFieldAnymore: 1 },
       ]);
