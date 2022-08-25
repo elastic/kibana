@@ -12,7 +12,6 @@ import type { Filter } from '@kbn/es-query';
 import { FILTERS } from '@kbn/es-query';
 import { EuiFlexGroup, EuiFlexItem, EuiTextColor } from '@elastic/eui';
 import { getDisplayValueFromFilter, getIndexPatternFromFilter } from '@kbn/data-plugin/public';
-import { css } from '@emotion/css';
 import { existsOperator, isOneOfOperator } from '../../filter_bar/filter_editor';
 import { FilterBadgeGroup } from './filter_badge_group';
 import { getConditionalOperationType } from '../../filters_builder/filters_builder_utils';
@@ -33,20 +32,10 @@ interface LabelOptions {
   message?: string;
 }
 
-const filterExpressionValue = css`
-  color: #387765;
-`;
-
-const filterExpressionValueNumber = css`
-  color: #ac4e6d;
-`;
-
 const getValue = (value: string | number) => {
   return (
-    <EuiFlexItem
-      className={typeof value === 'string' ? filterExpressionValue : filterExpressionValueNumber}
-    >
-      {value}
+    <EuiFlexItem>
+      <EuiTextColor color={typeof value === 'string' ? '#387765' : '#ac4e6d'}>{value}</EuiTextColor>
     </EuiFlexItem>
   );
 };
@@ -166,11 +155,19 @@ export function FilterExpressionBadge({ filter, dataView }: FilterBadgeExpressio
   return (
     <>
       {conditionalOperationType ? (
-        <FilterBadgeGroup
-          filters={Array.isArray(filter) ? filter : filter.meta?.params}
-          dataView={dataView}
-          conditionType={conditionalOperationType}
-        />
+        <>
+          <EuiFlexItem>
+            <EuiTextColor color="rgb(0, 113, 194)">(</EuiTextColor>
+          </EuiFlexItem>
+          <FilterBadgeGroup
+            filters={Array.isArray(filter) ? filter : filter.meta?.params}
+            dataView={dataView}
+            conditionType={conditionalOperationType}
+          />
+          <EuiFlexItem>
+            <EuiTextColor color="rgb(0, 113, 194)">)</EuiTextColor>
+          </EuiFlexItem>
+        </>
       ) : (
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="xs">{getFilterContent(filter, label, prefix)}</EuiFlexGroup>

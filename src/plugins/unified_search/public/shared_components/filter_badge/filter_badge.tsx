@@ -20,7 +20,7 @@ export interface FilterBadgeProps {
 }
 
 const cursor = css`
-  padding: 5px;
+  padding: 7px;
 `;
 
 const rootLevelConditionType = ConditionTypes.AND;
@@ -38,6 +38,7 @@ export function FilterBadge({ filters, dataView }: FilterBadgeProps) {
           onClickAriaLabel="Filter actions"
           iconOnClickAriaLabel="Remove filter"
           onClick={() => {}}
+          title=""
         >
           <EuiFlexGroup wrap responsive={false} gutterSize="xs">
             <FilterBadgeGroup
