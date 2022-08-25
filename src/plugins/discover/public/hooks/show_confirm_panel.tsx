@@ -35,8 +35,8 @@ export const showConfirmPanel = ({
   document.body.appendChild(container);
   const element = (
     <EuiConfirmModal
-      title={i18n.translate('discover.confirmDataViewPersist.title', {
-        defaultMessage: 'Persist data view',
+      title={i18n.translate('discover.confirmDataViewSave.title', {
+        defaultMessage: 'Save data view',
       })}
       onCancel={() => {
         onClose();
@@ -49,14 +49,14 @@ export const showConfirmPanel = ({
       cancelButtonText={i18n.translate('discover.confirmDataViewPersist.cancel', {
         defaultMessage: 'Cancel',
       })}
-      confirmButtonText={i18n.translate('discover.confirmDataViewPersist.confirm', {
-        defaultMessage: 'Confirm',
+      confirmButtonText={i18n.translate('discover.confirmDataViewPersist.saveAndContinue', {
+        defaultMessage: 'Save and continue',
       })}
       defaultFocusedButton="confirm"
     >
       <p>
-        {i18n.translate('discover.confirmDataViewPersist.message', {
-          defaultMessage: 'Persist data view, then proceed.',
+        {i18n.translate('discover.confirmDataViewSave.message', {
+          defaultMessage: 'The action you chose requires a saved data view.',
         })}
       </p>
     </EuiConfirmModal>

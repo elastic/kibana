@@ -34,6 +34,10 @@ import type { TextBasedLanguagesListProps } from './text_languages_list';
 import type { TextBasedLanguagesTransitionModalProps } from './text_languages_transition_modal';
 import { changeDataViewStyles } from './change_dataview.styles';
 
+type DataViewItem = DataViewListItem & {
+  isHoc?: boolean;
+};
+
 // local storage key for the text based languages transition modal
 const TEXT_LANG_TRANSITION_MODAL_KEY = 'data.textLangTransitionModal';
 
@@ -72,7 +76,7 @@ export function ChangeDataView({
 }: DataViewPickerPropsExtended) {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
-  const [dataViewsList, setDataViewsList] = useState<DataViewListItem[]>([]);
+  const [dataViewsList, setDataViewsList] = useState<DataViewItem[]>([]);
   const [triggerLabel, setTriggerLabel] = useState('');
   const [isTextBasedLangSelected, setIsTextBasedLangSelected] = useState(
     Boolean(textBasedLanguage)
@@ -92,25 +96,32 @@ export function ChangeDataView({
 
   useEffect(() => {
     const fetchDataViews = async () => {
-      const dataViewsRefs = await data.dataViews.getIdsWithTitle();
+      const savedDataViews = await data.dataViews.getIdsWithTitle();
 
-      const dataViewExists = !!dataViewsRefs.find(({ id }) => id === currentDataViewId);
-      const currentDataView =
-        !dataViewExists && currentDataViewId
-          ? await data.dataViews.get(currentDataViewId)
-          : undefined;
+      const currentDataView = currentDataViewId
+        ? await data.dataViews.get(currentDataViewId)
+        : undefined;
+      let hocDataView: DataViewItem | undefined;
       if (currentDataView && !currentDataView.isPersisted()) {
-        dataViewsRefs.push({
+        hocDataView = {
           title: currentDataView.title,
           name: currentDataView.name,
           id: currentDataView.id!,
-        });
+          isHoc: true,
+        };
       }
 
-      setDataViewsList((prevDataViews) => [
-        ...dataViewsRefs,
-        ...prevDataViews.filter(({ id }) => !dataViewsRefs.find(({ id: newId }) => newId === id)),
-      ]);
+      setDataViewsList((prevDataViews) => {
+        const currentHocDataView = hocDataView;
+        if (currentHocDataView) {
+          return [currentHocDataView, ...savedDataViews];
+        }
+        const prevHocDataView = prevDataViews.find((dv) => dv.isHoc);
+        if (prevHocDataView) {
+          return [prevHocDataView, ...savedDataViews];
+        }
+        return savedDataViews;
+      });
     };
     fetchDataViews();
   }, [data, currentDataViewId]);
