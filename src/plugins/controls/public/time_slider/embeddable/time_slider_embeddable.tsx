@@ -63,7 +63,9 @@ export class TimeSliderControlEmbeddable extends Embeddable<
     this.getTimezone = getTimezone;
     this.timefilter = timefilter;
 
-    const timeRangeBounds = this.timeRangeToBounds(input.timeRange ? input.timeRange : getDefaultTimeRange());
+    const timeRangeBounds = this.timeRangeToBounds(
+      input.timeRange ? input.timeRange : getDefaultTimeRange()
+    );
     this.reduxEmbeddableTools = reduxEmbeddablePackage.createTools<
       TimeSliderReduxState,
       typeof timeSliderReducers
