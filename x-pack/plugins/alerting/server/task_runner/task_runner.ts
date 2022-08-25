@@ -316,6 +316,18 @@ export class TaskRunner<
       maxAlerts: this.maxAlerts,
       canSetRecoveryContext: ruleType.doesSetRecoveryContext ?? false,
     });
+
+    const hasReachedAlertLimit = () => {
+      const reachedLimit = alertFactory.hasReachedAlertLimit();
+      if (reachedLimit) {
+        this.logger.warn(
+          `rule execution generated greater than ${this.maxAlerts} alerts: ${ruleLabel}`
+        );
+        ruleRunMetricsStore.setHasReachedAlertLimit(true);
+      }
+      return reachedLimit;
+    };
+
     let updatedRuleTypeState: void | Record<string, unknown>;
     try {
       const ctx = {
@@ -382,7 +394,7 @@ export class TaskRunner<
       alertFactory.alertLimit.checkLimitUsage();
     } catch (err) {
       // Check if this error is due to reaching the alert limit
-      if (alertFactory.hasReachedAlertLimit()) {
+      if (!hasReachedAlertLimit) {
         this.logger.warn(
           `rule execution generated greater than ${this.maxAlerts} alerts: ${ruleLabel}`
         );
@@ -401,12 +413,7 @@ export class TaskRunner<
     }
 
     // Check if the rule type has reported that it reached the alert limit
-    if (alertFactory.hasReachedAlertLimit()) {
-      this.logger.warn(
-        `rule execution generated greater than ${this.maxAlerts} alerts: ${ruleLabel}`
-      );
-      ruleRunMetricsStore.setHasReachedAlertLimit(true);
-    }
+    hasReachedAlertLimit();
 
     this.alertingEventLogger.setExecutionSucceeded(`rule executed: ${ruleLabel}`);
 
