@@ -475,7 +475,7 @@ describe('migration actions', () => {
         source: 'existing_index_with_write_block',
         target: 'clone_target_1',
       });
-      expect.assertions(1);
+      expect.assertions(3);
       await expect(task()).resolves.toMatchInlineSnapshot(`
         Object {
           "_tag": "Right",
@@ -485,6 +485,12 @@ describe('migration actions', () => {
           },
         }
       `);
+      const { clone_target_1: cloneTarget1 } = await client.indices.getSettings({
+        index: 'clone_target_1',
+      });
+      // @ts-expect-error https://github.com/elastic/elasticsearch/issues/89381
+      expect(cloneTarget1.settings?.index.mapping?.total_fields.limit).toBe('1500');
+      expect(cloneTarget1.settings?.blocks?.write).toBeUndefined();
     });
     it('resolves right if clone target already existed after waiting for index status to be green ', async () => {
       expect.assertions(2);
@@ -1612,6 +1618,11 @@ describe('migration actions', () => {
         _tag: 'Right',
         right: 'create_index_succeeded',
       });
+      const { create_new_index: createNewIndex } = await client.indices.getSettings({
+        index: 'create_new_index',
+      });
+      // @ts-expect-error https://github.com/elastic/elasticsearch/issues/89381
+      expect(createNewIndex.settings?.index?.mapping.total_fields.limit).toBe('1500');
     });
     it('resolves left if an existing index status does not become green', async () => {
       expect.assertions(2);

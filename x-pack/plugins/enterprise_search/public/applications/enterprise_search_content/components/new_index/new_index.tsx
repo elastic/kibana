@@ -21,6 +21,8 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { parseQueryParams } from '../../../shared/query_params';
+import { EuiLinkTo } from '../../../shared/react_router_helpers';
+
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 import { baseBreadcrumbs } from '../search_indices';
 
@@ -147,6 +149,12 @@ export const NewIndex: React.FC = () => {
               selected={selectedMethod}
               onChange={setSelectedMethod}
             />
+            <EuiSpacer size="xxl" />
+            <EuiLinkTo to="/app/integrations" shouldNotCreateHref>
+              {i18n.translate('xpack.enterpriseSearch.content.newIndex.viewIntegrationsLink', {
+                defaultMessage: 'View additional integrations',
+              })}
+            </EuiLinkTo>
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem>

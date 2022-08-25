@@ -156,7 +156,8 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
                   </EuiFlexItem>
                 )}
                 {renderCustomActionsRow &&
-                  renderCustomActionsRow(alerts[visibleRowIndex], handleFlyoutAlert)}
+                  alerts[visibleRowIndex] &&
+                  renderCustomActionsRow(alerts[visibleRowIndex], handleFlyoutAlert, props.id)}
               </EuiFlexGroup>
             );
           },
@@ -173,9 +174,10 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   }, [
     actionsColumnWidth,
     alerts,
-    handleFlyoutAlert,
     getBulkActionsLeadingControlColumn,
+    handleFlyoutAlert,
     isBulkActionsColumnActive,
+    props.id,
     props.leadingControlColumns,
     props.showExpandToDetails,
     renderCustomActionsRow,
@@ -183,7 +185,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   ]);
 
   useEffect(() => {
-    // Row classes do not deal with visible row indices so we need to handle page offset
+    // Row classes do not deal with visible row indices, so we need to handle page offset
     const rowIndex = flyoutAlertIndex + pagination.pageIndex * pagination.pageSize;
     setRowClasses({
       [rowIndex]: ACTIVE_ROW_CLASS,
@@ -200,7 +202,6 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     columnId: string;
   }) => {
     const value = data.find((d) => d.field === columnId)?.value ?? [];
-    // console.log({ data, columnId })
     return <>{value.length ? value.join() : '--'}</>;
   };
 
@@ -242,6 +243,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
             flyoutIndex={flyoutAlertIndex + pagination.pageIndex * pagination.pageSize}
             onPaginate={onPaginateFlyout}
             isLoading={isLoading}
+            id={props.id}
           />
         )}
       </Suspense>

@@ -1066,9 +1066,11 @@ describe('when on the endpoint list page', () => {
 
       const packagePolicy = docGenerator.generatePolicyPackagePolicy();
       packagePolicy.id = hosts[0].metadata.Endpoint.policy.applied.id;
+
       const agentPolicy = generator.generateAgentPolicy();
       agentPolicyId = agentPolicy.id;
       agentId = hosts[0].metadata.elastic.agent.id;
+      packagePolicy.policy_id = agentPolicyId;
 
       setEndpointListApiMockImplementation(coreStart.http, {
         endpointsResults: hostInfo,

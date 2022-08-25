@@ -34,32 +34,34 @@ import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin
 import { VISUALIZE_GEO_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
-import type { DatasourceDataPanelProps, DataType, StateSetter } from '../types';
-import { ChildDragDropProvider, DragContextState } from '../drag_drop';
 import type {
+  DatasourceDataPanelProps,
+  DataType,
+  FramePublicAPI,
   IndexPattern,
-  IndexPatternPrivateState,
   IndexPatternField,
-  IndexPatternRef,
-} from './types';
-import { loadIndexPatterns, syncExistingFields } from './loader';
-import { fieldExists } from './pure_helpers';
+} from '../types';
+import { ChildDragDropProvider, DragContextState } from '../drag_drop';
+import type { IndexPatternPrivateState } from './types';
 import { Loader } from '../loader';
 import { LensFieldIcon } from '../shared_components/field_picker/lens_field_icon';
 import { FieldGroups, FieldList } from './field_list';
+import { fieldContainsData, fieldExists } from '../shared_components';
+import { IndexPatternServiceAPI } from '../indexpattern_service/service';
 
-export type Props = Omit<DatasourceDataPanelProps<IndexPatternPrivateState>, 'core'> & {
+export type Props = Omit<
+  DatasourceDataPanelProps<IndexPatternPrivateState>,
+  'core' | 'onChangeIndexPattern'
+> & {
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   fieldFormats: FieldFormatsStart;
-  changeIndexPattern: (
-    id: string,
-    state: IndexPatternPrivateState,
-    setState: StateSetter<IndexPatternPrivateState, { applyImmediately?: boolean }>
-  ) => void;
   charts: ChartsPluginSetup;
   core: CoreStart;
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
+  frame: FramePublicAPI;
+  indexPatternService: IndexPatternServiceAPI;
+  onIndexPatternRefresh: () => void;
 };
 
 function sortFields(fieldA: IndexPatternField, fieldB: IndexPatternField) {
@@ -117,7 +119,6 @@ function buildSafeEsQuery(
 }
 
 export function IndexPatternDataPanel({
-  setState,
   state,
   dragDropContext,
   core,
@@ -127,32 +128,19 @@ export function IndexPatternDataPanel({
   query,
   filters,
   dateRange,
-  changeIndexPattern,
   charts,
   indexPatternFieldEditor,
   showNoDataPopover,
   dropOntoWorkspace,
   hasSuggestionForField,
   uiActions,
+  indexPatternService,
+  frame,
+  onIndexPatternRefresh,
 }: Props) {
-  const { indexPatternRefs, indexPatterns, currentIndexPatternId } = state;
-  const onChangeIndexPattern = useCallback(
-    (id: string) => changeIndexPattern(id, state, setState),
-    [state, setState, changeIndexPattern]
-  );
-
-  const onUpdateIndexPattern = useCallback(
-    (indexPattern: IndexPattern) => {
-      setState((prevState) => ({
-        ...prevState,
-        indexPatterns: {
-          ...prevState.indexPatterns,
-          [indexPattern.id]: indexPattern,
-        },
-      }));
-    },
-    [setState]
-  );
+  const { indexPatterns, indexPatternRefs, existingFields, isFirstExistenceFetch } =
+    frame.dataViews;
+  const { currentIndexPatternId } = state;
 
   const indexPatternList = uniq(
     Object.values(state.layers)
@@ -160,14 +148,8 @@ export function IndexPatternDataPanel({
       .concat(currentIndexPatternId)
   )
     .filter((id) => !!indexPatterns[id])
-    .sort((a, b) => a.localeCompare(b))
-    .map((id) => ({
-      id,
-      title: indexPatterns[id].title,
-      timeFieldName: indexPatterns[id].timeFieldName,
-      fields: indexPatterns[id].fields,
-      hasRestrictions: indexPatterns[id].hasRestrictions,
-    }));
+    .sort()
+    .map((id) => indexPatterns[id]);
 
   const dslQuery = buildSafeEsQuery(
     indexPatterns[currentIndexPatternId],
@@ -180,15 +162,14 @@ export function IndexPatternDataPanel({
     <>
       <Loader
         load={() =>
-          syncExistingFields({
+          indexPatternService.refreshExistingFields({
             dateRange,
-            setState,
-            isFirstExistenceFetch: state.isFirstExistenceFetch,
             currentIndexPatternTitle: indexPatterns[currentIndexPatternId]?.title || '',
-            showNoDataPopover,
-            indexPatterns: indexPatternList,
-            fetchJson: core.http.post,
+            onNoData: showNoDataPopover,
             dslQuery,
+            indexPatternList,
+            isFirstExistenceFetch,
+            existingFields,
           })
         }
         loadDeps={[
@@ -197,7 +178,8 @@ export function IndexPatternDataPanel({
           dateRange.fromDate,
           dateRange.toDate,
           indexPatternList.map((x) => `${x.title}:${x.timeFieldName}`).join(','),
-          state.indexPatterns,
+          // important here to rerun the fields existence on indexPattern change (i.e. add new fields in place)
+          frame.dataViews.indexPatterns,
         ]}
       />
 
@@ -229,8 +211,6 @@ export function IndexPatternDataPanel({
       ) : (
         <MemoizedDataPanel
           currentIndexPatternId={currentIndexPatternId}
-          indexPatternRefs={indexPatternRefs}
-          indexPatterns={indexPatterns}
           query={query}
           dateRange={dateRange}
           filters={filters}
@@ -241,14 +221,12 @@ export function IndexPatternDataPanel({
           fieldFormats={fieldFormats}
           charts={charts}
           indexPatternFieldEditor={indexPatternFieldEditor}
-          onChangeIndexPattern={onChangeIndexPattern}
-          onUpdateIndexPattern={onUpdateIndexPattern}
-          existingFields={state.existingFields}
-          existenceFetchFailed={state.existenceFetchFailed}
-          existenceFetchTimeout={state.existenceFetchTimeout}
           dropOntoWorkspace={dropOntoWorkspace}
           hasSuggestionForField={hasSuggestionForField}
           uiActions={uiActions}
+          indexPatternService={indexPatternService}
+          onIndexPatternRefresh={onIndexPatternRefresh}
+          frame={frame}
         />
       )}
     </>
@@ -285,42 +263,36 @@ const fieldSearchDescriptionId = htmlId();
 
 export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   currentIndexPatternId,
-  indexPatternRefs,
-  indexPatterns,
-  existenceFetchFailed,
-  existenceFetchTimeout,
   query,
   dateRange,
   filters,
   dragDropContext,
-  onChangeIndexPattern,
-  onUpdateIndexPattern,
   core,
   data,
   dataViews,
   fieldFormats,
   indexPatternFieldEditor,
-  existingFields,
   charts,
   dropOntoWorkspace,
   hasSuggestionForField,
   uiActions,
-}: Omit<DatasourceDataPanelProps, 'state' | 'setState' | 'showNoDataPopover' | 'core'> & {
+  indexPatternService,
+  frame,
+  onIndexPatternRefresh,
+}: Omit<
+  DatasourceDataPanelProps,
+  'state' | 'setState' | 'showNoDataPopover' | 'core' | 'onChangeIndexPattern'
+> & {
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   core: CoreStart;
   currentIndexPatternId: string;
-  indexPatternRefs: IndexPatternRef[];
-  indexPatterns: Record<string, IndexPattern>;
   dragDropContext: DragContextState;
-  onChangeIndexPattern: (newId: string) => void;
-  onUpdateIndexPattern: (indexPattern: IndexPattern) => void;
-  existingFields: IndexPatternPrivateState['existingFields'];
   charts: ChartsPluginSetup;
+  frame: FramePublicAPI;
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
-  existenceFetchFailed?: boolean;
-  existenceFetchTimeout?: boolean;
+  onIndexPatternRefresh: () => void;
 }) {
   const [localState, setLocalState] = useState<DataPanelState>({
     nameFilter: '',
@@ -330,13 +302,15 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     isEmptyAccordionOpen: false,
     isMetaAccordionOpen: false,
   });
+  const { existenceFetchFailed, existenceFetchTimeout, indexPatterns, existingFields } =
+    frame.dataViews;
   const currentIndexPattern = indexPatterns[currentIndexPatternId];
+  const existingFieldsForIndexPattern = existingFields[currentIndexPattern?.title];
   const visualizeGeoFieldTrigger = uiActions.getTrigger(VISUALIZE_GEO_FIELD_TRIGGER);
   const allFields = visualizeGeoFieldTrigger
     ? currentIndexPattern.fields
     : currentIndexPattern.fields.filter(({ type }) => type !== 'geo_point' && type !== 'geo_shape');
   const clearLocalState = () => setLocalState((s) => ({ ...s, nameFilter: '', typeFilter: [] }));
-  const hasSyncedExistingFields = existingFields[currentIndexPattern.title];
   const availableFieldTypes = uniq(allFields.map(({ type }) => type)).filter(
     (type) => type in fieldTypeNames
   );
@@ -349,9 +323,10 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   const unfilteredFieldGroups: FieldGroups = useMemo(() => {
     const containsData = (field: IndexPatternField) => {
       const overallField = currentIndexPattern.getFieldByName(field.name);
-
       return (
-        overallField && fieldExists(existingFields, currentIndexPattern.title, overallField.name)
+        overallField &&
+        existingFieldsForIndexPattern &&
+        fieldExists(existingFieldsForIndexPattern, overallField.name)
       );
     };
 
@@ -463,7 +438,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     filters.length,
     existenceFetchTimeout,
     currentIndexPattern,
-    existingFields,
+    existingFieldsForIndexPattern,
   ]);
 
   const fieldGroups: FieldGroups = useMemo(() => {
@@ -490,10 +465,9 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   }, [unfilteredFieldGroups, localState.nameFilter, localState.typeFilter]);
 
   const checkFieldExists = useCallback(
-    (field) =>
-      field.type === 'document' ||
-      fieldExists(existingFields, currentIndexPattern.title, field.name),
-    [existingFields, currentIndexPattern.title]
+    (field: IndexPatternField) =>
+      fieldContainsData(field.name, currentIndexPattern, existingFieldsForIndexPattern),
+    [currentIndexPattern, existingFieldsForIndexPattern]
   );
 
   const { nameFilter, typeFilter } = localState;
@@ -518,15 +492,26 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   }, []);
 
   const refreshFieldList = useCallback(async () => {
-    const newlyMappedIndexPattern = await loadIndexPatterns({
-      indexPatternsService: dataViews,
-      cache: {},
+    const newlyMappedIndexPattern = await indexPatternService.loadIndexPatterns({
       patterns: [currentIndexPattern.id],
+      cache: {},
+      onIndexPatternRefresh,
     });
-    onUpdateIndexPattern(newlyMappedIndexPattern[currentIndexPattern.id]);
+    indexPatternService.updateDataViewsState({
+      indexPatterns: {
+        ...frame.dataViews.indexPatterns,
+        [currentIndexPattern.id]: newlyMappedIndexPattern[currentIndexPattern.id],
+      },
+    });
     // start a new session so all charts are refreshed
     data.search.session.start();
-  }, [data, dataViews, currentIndexPattern, onUpdateIndexPattern]);
+  }, [
+    indexPatternService,
+    currentIndexPattern.id,
+    onIndexPatternRefresh,
+    frame.dataViews.indexPatterns,
+    data.search.session,
+  ]);
 
   const editField = useMemo(
     () =>
@@ -538,9 +523,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 dataView: indexPatternInstance,
               },
               fieldName,
-              onSave: async () => {
-                await refreshFieldList();
-              },
+              onSave: () => refreshFieldList(),
             });
           }
         : undefined,
@@ -557,9 +540,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 dataView: indexPatternInstance,
               },
               fieldName,
-              onDelete: async () => {
-                await refreshFieldList();
-              },
+              onDelete: () => refreshFieldList(),
             });
           }
         : undefined,
@@ -709,7 +690,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
             exists={checkFieldExists}
             fieldProps={fieldProps}
             fieldGroups={fieldGroups}
-            hasSyncedExistingFields={!!hasSyncedExistingFields}
+            hasSyncedExistingFields={!!existingFieldsForIndexPattern}
             filter={filter}
             currentIndexPatternId={currentIndexPatternId}
             existenceFetchFailed={existenceFetchFailed}

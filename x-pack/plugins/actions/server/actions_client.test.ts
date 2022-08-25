@@ -32,6 +32,7 @@ import { ActionsAuthorization } from './authorization/actions_authorization';
 import {
   getAuthorizationModeBySource,
   AuthorizationMode,
+  getBulkAuthorizationModeBySource,
 } from './authorization/get_authorization_mode_by_source';
 import { actionsAuthorizationMock } from './authorization/actions_authorization.mock';
 import { trackLegacyRBACExemption } from './lib/track_legacy_rbac_exemption';
@@ -44,11 +45,15 @@ import { getOAuthJwtAccessToken } from './builtin_action_types/lib/get_oauth_jwt
 import { getOAuthClientCredentialsAccessToken } from './builtin_action_types/lib/get_oauth_client_credentials_access_token';
 import { OAuthParams } from './routes/get_oauth_access_token';
 
-jest.mock('@kbn/core/server/saved_objects/service/lib/utils', () => ({
-  SavedObjectsUtils: {
-    generateId: () => 'mock-saved-object-id',
-  },
-}));
+jest.mock('@kbn/core-saved-objects-utils-server', () => {
+  const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
+  return {
+    ...actual,
+    SavedObjectsUtils: {
+      generateId: () => 'mock-saved-object-id',
+    },
+  };
+});
 
 jest.mock('./lib/track_legacy_rbac_exemption', () => ({
   trackLegacyRBACExemption: jest.fn(),
@@ -57,6 +62,9 @@ jest.mock('./lib/track_legacy_rbac_exemption', () => ({
 jest.mock('./authorization/get_authorization_mode_by_source', () => {
   return {
     getAuthorizationModeBySource: jest.fn(() => {
+      return 1;
+    }),
+    getBulkAuthorizationModeBySource: jest.fn(() => {
       return 1;
     }),
     AuthorizationMode: {
@@ -80,6 +88,7 @@ const actionExecutor = actionExecutorMock.create();
 const authorization = actionsAuthorizationMock.create();
 const executionEnqueuer = jest.fn();
 const ephemeralExecutionEnqueuer = jest.fn();
+const bulkExecutionEnqueuer = jest.fn();
 const request = httpServerMock.createKibanaRequest();
 const auditLogger = auditLoggerMock.create();
 const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
@@ -124,6 +133,7 @@ beforeEach(() => {
     actionExecutor,
     executionEnqueuer,
     ephemeralExecutionEnqueuer,
+    bulkExecutionEnqueuer,
     request,
     authorization: authorization as unknown as ActionsAuthorization,
     auditLogger,
@@ -550,6 +560,7 @@ describe('create()', () => {
       actionExecutor,
       executionEnqueuer,
       ephemeralExecutionEnqueuer,
+      bulkExecutionEnqueuer,
       request,
       authorization: authorization as unknown as ActionsAuthorization,
       connectorTokenClient: connectorTokenClientMock.create(),
@@ -655,6 +666,7 @@ describe('get()', () => {
         actionExecutor,
         executionEnqueuer,
         ephemeralExecutionEnqueuer,
+        bulkExecutionEnqueuer,
         request,
         authorization: authorization as unknown as ActionsAuthorization,
         preconfiguredActions: [
@@ -714,6 +726,7 @@ describe('get()', () => {
         actionExecutor,
         executionEnqueuer,
         ephemeralExecutionEnqueuer,
+        bulkExecutionEnqueuer,
         request,
         authorization: authorization as unknown as ActionsAuthorization,
         preconfiguredActions: [
@@ -835,6 +848,7 @@ describe('get()', () => {
       actionExecutor,
       executionEnqueuer,
       ephemeralExecutionEnqueuer,
+      bulkExecutionEnqueuer,
       request,
       authorization: authorization as unknown as ActionsAuthorization,
       preconfiguredActions: [
@@ -909,6 +923,7 @@ describe('getAll()', () => {
         actionExecutor,
         executionEnqueuer,
         ephemeralExecutionEnqueuer,
+        bulkExecutionEnqueuer,
         request,
         authorization: authorization as unknown as ActionsAuthorization,
         preconfiguredActions: [
@@ -1050,6 +1065,7 @@ describe('getAll()', () => {
       actionExecutor,
       executionEnqueuer,
       ephemeralExecutionEnqueuer,
+      bulkExecutionEnqueuer,
       request,
       authorization: authorization as unknown as ActionsAuthorization,
       preconfiguredActions: [
@@ -1131,6 +1147,7 @@ describe('getBulk()', () => {
         actionExecutor,
         executionEnqueuer,
         ephemeralExecutionEnqueuer,
+        bulkExecutionEnqueuer,
         request,
         authorization: authorization as unknown as ActionsAuthorization,
         preconfiguredActions: [
@@ -1266,6 +1283,7 @@ describe('getBulk()', () => {
       actionExecutor,
       executionEnqueuer,
       ephemeralExecutionEnqueuer,
+      bulkExecutionEnqueuer,
       request,
       authorization: authorization as unknown as ActionsAuthorization,
       preconfiguredActions: [
@@ -1324,6 +1342,7 @@ describe('getOAuthAccessToken()', () => {
       actionExecutor,
       executionEnqueuer,
       ephemeralExecutionEnqueuer,
+      bulkExecutionEnqueuer,
       request,
       authorization: authorization as unknown as ActionsAuthorization,
       preconfiguredActions: [
@@ -2326,6 +2345,119 @@ describe('enqueueExecution()', () => {
   });
 });
 
+describe('bulkEnqueueExecution()', () => {
+  describe('authorization', () => {
+    test('ensures user is authorised to excecute actions', async () => {
+      (getBulkAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
+        return { [AuthorizationMode.RBAC]: 1, [AuthorizationMode.Legacy]: 0 };
+      });
+      await actionsClient.bulkEnqueueExecution([
+        {
+          id: uuid.v4(),
+          params: {},
+          spaceId: 'default',
+          executionId: '123abc',
+          apiKey: null,
+        },
+        {
+          id: uuid.v4(),
+          params: {},
+          spaceId: 'default',
+          executionId: '456def',
+          apiKey: null,
+        },
+      ]);
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('execute');
+    });
+
+    test('throws when user is not authorised to create the type of action', async () => {
+      (getBulkAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
+        return { [AuthorizationMode.RBAC]: 1, [AuthorizationMode.Legacy]: 0 };
+      });
+      authorization.ensureAuthorized.mockRejectedValue(
+        new Error(`Unauthorized to execute all actions`)
+      );
+
+      await expect(
+        actionsClient.bulkEnqueueExecution([
+          {
+            id: uuid.v4(),
+            params: {},
+            spaceId: 'default',
+            executionId: '123abc',
+            apiKey: null,
+          },
+          {
+            id: uuid.v4(),
+            params: {},
+            spaceId: 'default',
+            executionId: '456def',
+            apiKey: null,
+          },
+        ])
+      ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to execute all actions]`);
+
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('execute');
+    });
+
+    test('tracks legacy RBAC', async () => {
+      (getBulkAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
+        return { [AuthorizationMode.RBAC]: 0, [AuthorizationMode.Legacy]: 2 };
+      });
+
+      await actionsClient.bulkEnqueueExecution([
+        {
+          id: uuid.v4(),
+          params: {},
+          spaceId: 'default',
+          executionId: '123abc',
+          apiKey: null,
+        },
+        {
+          id: uuid.v4(),
+          params: {},
+          spaceId: 'default',
+          executionId: '456def',
+          apiKey: null,
+        },
+      ]);
+
+      expect(trackLegacyRBACExemption as jest.Mock).toBeCalledWith(
+        'bulkEnqueueExecution',
+        mockUsageCounter,
+        2
+      );
+    });
+  });
+
+  test('calls the bulkExecutionEnqueuer with the appropriate parameters', async () => {
+    (getBulkAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
+      return { [AuthorizationMode.RBAC]: 0, [AuthorizationMode.Legacy]: 0 };
+    });
+    const opts = [
+      {
+        id: uuid.v4(),
+        params: {},
+        spaceId: 'default',
+        executionId: '123abc',
+        apiKey: null,
+      },
+      {
+        id: uuid.v4(),
+        params: {},
+        spaceId: 'default',
+        executionId: '456def',
+        apiKey: null,
+      },
+    ];
+    await expect(actionsClient.bulkEnqueueExecution(opts)).resolves.toMatchInlineSnapshot(
+      `undefined`
+    );
+
+    expect(bulkExecutionEnqueuer).toHaveBeenCalledWith(unsecuredSavedObjectsClient, opts);
+  });
+});
+
 describe('isActionTypeEnabled()', () => {
   const fooActionType: ActionType = {
     id: 'foo',
@@ -2366,6 +2498,7 @@ describe('isPreconfigured()', () => {
       actionExecutor,
       executionEnqueuer,
       ephemeralExecutionEnqueuer,
+      bulkExecutionEnqueuer,
       request,
       authorization: authorization as unknown as ActionsAuthorization,
       preconfiguredActions: [
@@ -2403,6 +2536,7 @@ describe('isPreconfigured()', () => {
       actionExecutor,
       executionEnqueuer,
       ephemeralExecutionEnqueuer,
+      bulkExecutionEnqueuer,
       request,
       authorization: authorization as unknown as ActionsAuthorization,
       preconfiguredActions: [

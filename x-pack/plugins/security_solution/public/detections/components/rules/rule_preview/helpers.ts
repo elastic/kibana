@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash';
 import { Position, ScaleType } from '@elastic/charts';
 import type { EuiSelectOption } from '@elastic/eui';
 import type { Type, Language, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
@@ -16,6 +17,8 @@ import type { ChartSeriesConfigs } from '../../../../common/components/charts/co
 import { getQueryFilter } from '../../../../../common/detection_engine/get_query_filter';
 import type { FieldValueQueryBar } from '../query_bar';
 import type { ESQuery } from '../../../../../common/typed_json';
+import { DataSourceType } from '../../../pages/detection_engine/rules/types';
+
 /**
  * Determines whether or not to display noise warning.
  * Is considered noisy if alerts/hour rate > 1
@@ -165,6 +168,7 @@ export const getIsRulePreviewDisabled = ({
   isThreatQueryBarValid,
   index,
   dataViewId,
+  dataSourceType,
   threatIndex,
   threatMapping,
   machineLearningJobId,
@@ -176,14 +180,20 @@ export const getIsRulePreviewDisabled = ({
   isThreatQueryBarValid: boolean;
   index: string[];
   dataViewId: string | undefined;
+  dataSourceType: DataSourceType;
   threatIndex: string[];
   threatMapping: ThreatMapping;
   machineLearningJobId: string[];
   queryBar: FieldValueQueryBar;
   newTermsFields: string[];
 }) => {
-  if (!isQueryBarValid || ((index == null || index.length === 0) && dataViewId == null))
+  if (
+    !isQueryBarValid ||
+    (dataSourceType === DataSourceType.DataView && !dataViewId) ||
+    (dataSourceType === DataSourceType.IndexPatterns && index.length === 0)
+  ) {
     return true;
+  }
   if (ruleType === 'threat_match') {
     if (!isThreatQueryBarValid || !threatIndex.length || !threatMapping) return true;
     if (
@@ -198,7 +208,7 @@ export const getIsRulePreviewDisabled = ({
     return machineLearningJobId.length === 0;
   }
   if (ruleType === 'eql' || ruleType === 'query' || ruleType === 'threshold') {
-    return queryBar.query.query.length === 0;
+    return isEmpty(queryBar.query.query) && isEmpty(queryBar.filters);
   }
   if (ruleType === 'new_terms') {
     return newTermsFields.length === 0;
