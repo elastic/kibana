@@ -2751,6 +2751,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-application-browser-internal@link:bazel-bin/packages/core/application/core-application-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-application-browser-mocks@link:bazel-bin/packages/core/application/core-application-browser-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-application-browser@link:bazel-bin/packages/core/application/core-application-browser":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-base-browser-internal@link:bazel-bin/packages/core/base/core-base-browser-internal":
   version "0.0.0"
   uid ""
@@ -6714,6 +6726,18 @@
   uid ""
 
 "@types/kbn__core-analytics-server@link:bazel-bin/packages/core/analytics/core-analytics-server/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-application-browser-internal@link:bazel-bin/packages/core/application/core-application-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-application-browser-mocks@link:bazel-bin/packages/core/application/core-application-browser-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-application-browser@link:bazel-bin/packages/core/application/core-application-browser/npm_module_types":
   version "0.0.0"
   uid ""
 
