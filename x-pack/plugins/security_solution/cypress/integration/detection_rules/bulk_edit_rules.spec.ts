@@ -207,6 +207,30 @@ describe('Detection rules, bulk edit', () => {
       // user cancels action and modal disappears
       cancelConfirmationModal();
     });
+
+    it('should not lose rules selection after edit action', () => {
+      const rulesCount = 4;
+      // Switch to 5 rules per page, to have few pages in pagination(ideal way to test auto refresh and selection of few items)
+      changeRowsPerPageTo(numberOfRulesPerPage);
+      selectNumberOfRules(rulesCount);
+
+      // open add tags form and add 2 new tags
+      openBulkEditAddTagsForm();
+      typeTags(prePopulatedTags);
+      submitBulkEditForm();
+      waitForBulkEditActionToFinish({ rulesCount });
+
+      testMultipleSelectedRulesLabel(rulesCount);
+      // check if first four(rulesCount) rules still selected and tags are updated
+      for (let i = 0; i < rulesCount; i += 1) {
+        cy.get(RULE_CHECKBOX).eq(i).should('be.checked');
+        cy.get(RULES_TAGS_POPOVER_BTN)
+          .eq(i)
+          .each(($el) => {
+            testTagsBadge($el, prePopulatedTags);
+          });
+      }
+    });
   });
 
   describe('Tags actions', () => {
@@ -418,70 +442,46 @@ describe('Detection rules, bulk edit', () => {
       cy.contains(MODAL_ERROR_BODY, "Index patterns can't be empty");
     });
   });
-});
 
-describe('Timeline templates', () => {
-  beforeEach(() => {
-    loadPrepackagedTimelineTemplates();
-  });
+  describe('Timeline templates', () => {
+    beforeEach(() => {
+      loadPrepackagedTimelineTemplates();
+    });
 
-  it('Apply timeline template to custom rules', () => {
-    const timelineTemplateName = 'Generic Endpoint Timeline';
+    it('Apply timeline template to custom rules', () => {
+      const timelineTemplateName = 'Generic Endpoint Timeline';
 
-    selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
 
-    // open Timeline template form, check warning, select timeline template
-    clickApplyTimelineTemplatesMenuItem();
-    cy.get(RULES_BULK_EDIT_TIMELINE_TEMPLATES_WARNING).contains(
-      `You're about to apply changes to ${expectedNumberOfCustomRulesToBeEdited} selected rules. If you previously applied Timeline templates to these rules, they will be overwritten or (if you select 'None') reset to none.`
-    );
-    selectTimelineTemplate(timelineTemplateName);
+      // open Timeline template form, check warning, select timeline template
+      clickApplyTimelineTemplatesMenuItem();
+      cy.get(RULES_BULK_EDIT_TIMELINE_TEMPLATES_WARNING).contains(
+        `You're about to apply changes to ${expectedNumberOfCustomRulesToBeEdited} selected rules. If you previously applied Timeline templates to these rules, they will be overwritten or (if you select 'None') reset to none.`
+      );
+      selectTimelineTemplate(timelineTemplateName);
 
-    submitBulkEditForm();
-    waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
+      submitBulkEditForm();
+      waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
 
-    // check if timeline template has been updated to selected one
-    goToTheRuleDetailsOf(RULE_NAME);
-    getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', timelineTemplateName);
-  });
+      // check if timeline template has been updated to selected one
+      goToTheRuleDetailsOf(RULE_NAME);
+      getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', timelineTemplateName);
+    });
 
-  it('Reset timeline template to None for custom rules', () => {
-    const noneTimelineTemplate = 'None';
+    it('Reset timeline template to None for custom rules', () => {
+      const noneTimelineTemplate = 'None';
 
-    selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
 
-    // open Timeline template form, submit form without picking timeline template as None is selected by default
-    clickApplyTimelineTemplatesMenuItem();
+      // open Timeline template form, submit form without picking timeline template as None is selected by default
+      clickApplyTimelineTemplatesMenuItem();
 
-    submitBulkEditForm();
-    waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
+      submitBulkEditForm();
+      waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
 
-    // check if timeline template has been updated to selected one, by opening rule that have had timeline prior to editing
-    goToTheRuleDetailsOf(RULE_NAME);
-    getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', noneTimelineTemplate);
-  });
-
-  it('should not lose rules selection after edit action', () => {
-    const rulesCount = 4;
-    // Switch to 5 rules per page, to have few pages in pagination(ideal way to test auto refresh and selection of few items)
-    changeRowsPerPageTo(numberOfRulesPerPage);
-    selectNumberOfRules(rulesCount);
-
-    // open add tags form and add 2 new tags
-    openBulkEditAddTagsForm();
-    typeTags(prePopulatedTags);
-    submitBulkEditForm();
-    waitForBulkEditActionToFinish({ rulesCount });
-
-    testMultipleSelectedRulesLabel(rulesCount);
-    // check if first four(rulesCount) rules still selected and tags are updated
-    for (let i = 0; i < rulesCount; i += 1) {
-      cy.get(RULE_CHECKBOX).eq(i).should('be.checked');
-      cy.get(RULES_TAGS_POPOVER_BTN)
-        .eq(i)
-        .each(($el) => {
-          testTagsBadge($el, prePopulatedTags);
-        });
-    }
+      // check if timeline template has been updated to selected one, by opening rule that have had timeline prior to editing
+      goToTheRuleDetailsOf(RULE_NAME);
+      getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', noneTimelineTemplate);
+    });
   });
 });
