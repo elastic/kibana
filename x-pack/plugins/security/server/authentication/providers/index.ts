@@ -9,7 +9,7 @@ export type { AuthenticationProviderOptions, AuthenticationProviderSpecificOptio
 export { BaseAuthenticationProvider } from './base';
 export { AnonymousAuthenticationProvider } from './anonymous';
 export { BasicAuthenticationProvider } from './basic';
-export { KerberosAuthenticationProvider, WWWAuthenticateHeaderName } from './kerberos';
+export { KerberosAuthenticationProvider } from './kerberos';
 export { SAMLAuthenticationProvider, SAMLLogin } from './saml';
 export { TokenAuthenticationProvider } from './token';
 export { OIDCAuthenticationProvider, OIDCLogin } from './oidc';
