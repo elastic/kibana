@@ -84,7 +84,6 @@ export const useDashboardAppState = ({
   const services = useKibana<DashboardAppServices>().services;
   const {
     core,
-    embeddable,
     usageCollection,
     savedDashboards,
     initializerContext,
@@ -95,14 +94,15 @@ export const useDashboardAppState = ({
     screenshotModeService,
   } = services;
   const { notifications } = core;
+  const { version: kibanaVersion } = initializerContext.env.packageInfo;
 
   const {
     chrome: { docTitle },
     data: { query, search, dataViews },
+    embeddable,
     spaces: { redirectLegacyUrl },
   } = pluginServices.getServices();
   const { getStateTransfer } = embeddable;
-  const { version: kibanaVersion } = initializerContext.env.packageInfo;
 
   /**
    * This useEffect triggers when the dashboard ID changes, and is in charge of loading the saved dashboard,
@@ -126,8 +126,8 @@ export const useDashboardAppState = ({
       query,
       search,
       history,
-      embeddable,
       dataViews,
+      embeddable,
       notifications,
       kibanaVersion,
       savedDashboards,

@@ -32,6 +32,7 @@ import {
   createExtract,
   createInject,
 } from '../../../common/embeddable/dashboard_container_persistable_state';
+import { pluginServices } from '../../services/plugin_services';
 
 export type DashboardContainerFactory = EmbeddableFactory<
   DashboardContainerInput,
@@ -83,7 +84,12 @@ export class DashboardContainerFactoryDefinition
     parent?: Container
   ): Promise<DashboardContainer | ErrorEmbeddable> => {
     const services = await this.getStartServices();
-    const controlsGroupFactory = services.embeddable.getEmbeddableFactory<
+
+    const {
+      embeddable: { getEmbeddableFactory },
+    } = pluginServices.getServices();
+
+    const controlsGroupFactory = getEmbeddableFactory<
       ControlGroupInput,
       ControlGroupOutput,
       ControlGroupContainer
@@ -98,6 +104,7 @@ export class DashboardContainerFactoryDefinition
       filters,
       query,
     });
+
     const { DashboardContainer: DashboardContainerEmbeddable } = await import(
       './dashboard_container'
     );

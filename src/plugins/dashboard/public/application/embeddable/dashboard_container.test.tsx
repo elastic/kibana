@@ -11,7 +11,6 @@ import { mount } from 'enzyme';
 
 import { findTestSubject, nextTick } from '@kbn/test-jest-helpers';
 import { I18nProvider } from '@kbn/i18n-react';
-import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
   CONTEXT_MENU_TRIGGER,
@@ -38,10 +37,14 @@ import { pluginServices } from '../../services/plugin_services';
 
 const theme = coreMock.createStart().theme;
 
+const embeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
+pluginServices.getServices().embeddable.getEmbeddableFactory = jest
+  .fn()
+  .mockReturnValue(embeddableFactory);
+
 const options: DashboardContainerServices = {
   // TODO: clean up use of any
   application: {} as any,
-  embeddable: {} as any,
   notifications: {} as any,
   inspector: {} as any,
   screenshotMode: {} as any,
@@ -51,12 +54,6 @@ const options: DashboardContainerServices = {
 };
 
 beforeEach(() => {
-  const { setup, doStart } = embeddablePluginMock.createInstance();
-  setup.registerEmbeddableFactory(
-    CONTACT_CARD_EMBEDDABLE,
-    new ContactCardEmbeddableFactory((() => null) as any, {} as any)
-  );
-  options.embeddable = doStart();
   options.application = applicationServiceMock.createStartContract();
 });
 

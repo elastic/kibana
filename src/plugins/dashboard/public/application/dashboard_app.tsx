@@ -39,11 +39,11 @@ export function DashboardApp({
   redirectTo,
   history,
 }: DashboardAppProps) {
-  const { core, embeddable, onAppLeave, screenshotModeService } =
-    useKibana<DashboardAppServices>().services;
+  const { core, onAppLeave, screenshotModeService } = useKibana<DashboardAppServices>().services;
   const {
     chrome: { setBreadcrumbs, setIsVisible },
     data: { search },
+    embeddable: { getStateTransfer },
     settings: { uiSettings },
     spaces: { getLegacyUrlConflict },
   } = pluginServices.getServices();
@@ -89,10 +89,7 @@ export function DashboardApp({
   // Build app leave handler whenever hasUnsavedChanges changes
   useEffect(() => {
     onAppLeave((actions) => {
-      if (
-        dashboardAppState.hasUnsavedChanges &&
-        !embeddable.getStateTransfer().isTransferInProgress
-      ) {
+      if (dashboardAppState.hasUnsavedChanges && !getStateTransfer().isTransferInProgress) {
         return actions.confirm(
           leaveConfirmStrings.getLeaveSubtitle(),
           leaveConfirmStrings.getLeaveTitle()
@@ -104,7 +101,7 @@ export function DashboardApp({
       // reset on app leave handler so leaving from the listing page doesn't trigger a confirmation
       onAppLeave((actions) => actions.default());
     };
-  }, [onAppLeave, embeddable, dashboardAppState.hasUnsavedChanges]);
+  }, [onAppLeave, getStateTransfer, dashboardAppState.hasUnsavedChanges]);
 
   // Set breadcrumbs when dashboard's title or view mode changes
   useEffect(() => {

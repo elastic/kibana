@@ -98,7 +98,6 @@ export function DashboardTopNav({
   const {
     core,
     share,
-    embeddable,
     usageCollection,
     initializerContext,
     savedObjectsTagging,
@@ -114,10 +113,11 @@ export function DashboardTopNav({
       docTitle,
     },
     data: { query, search },
+    embeddable: { getEmbeddableFactory, getEmbeddableFactories, getStateTransfer },
+    navigation: { TopNavMenu },
     overlays,
     settings: { uiSettings, theme },
     visualizations: { get: getVisualization, getAliases: getVisTypeAliases },
-    navigation: { TopNavMenu },
   } = pluginServices.getServices();
 
   const { version: kibanaVersion } = initializerContext.env.packageInfo;
@@ -134,7 +134,7 @@ export function DashboardTopNav({
 
   const lensAlias = getVisTypeAliases().find(({ name }) => name === 'lens');
   const quickButtonVisTypes = ['markdown', 'maps'];
-  const stateTransferService = embeddable.getStateTransfer();
+  const stateTransferService = getStateTransfer();
   const IS_DARK_THEME = uiSettings.get('theme:darkMode');
   const isLabsEnabled = uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI);
 
@@ -172,8 +172,8 @@ export function DashboardTopNav({
         ...s,
         addPanelOverlay: openAddPanelFlyout({
           embeddable: dashboardAppState.dashboardContainer,
-          getAllFactories: embeddable.getEmbeddableFactories,
-          getFactory: embeddable.getEmbeddableFactory,
+          getAllFactories: getEmbeddableFactories,
+          getFactory: getEmbeddableFactory,
           notifications: core.notifications,
           overlays,
           SavedObjectFinder: getSavedObjectFinder(core.savedObjects, uiSettings),
@@ -184,8 +184,8 @@ export function DashboardTopNav({
     }
   }, [
     dashboardAppState.dashboardContainer,
-    embeddable.getEmbeddableFactories,
-    embeddable.getEmbeddableFactory,
+    getEmbeddableFactories,
+    getEmbeddableFactory,
     core.notifications,
     core.savedObjects,
     overlays,

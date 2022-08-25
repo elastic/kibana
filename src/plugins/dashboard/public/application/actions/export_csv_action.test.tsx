@@ -20,24 +20,25 @@ import {
 } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
 import { coreMock } from '@kbn/core/public/mocks';
 import { ExportCSVAction } from './export_csv_action';
-import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public/types';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { LINE_FEED_CHARACTER } from '@kbn/data-plugin/common/exports/export_csv';
 import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
+import { pluginServices } from '../../services/plugin_services';
 
 describe('Export CSV action', () => {
-  const { setup, doStart } = embeddablePluginMock.createInstance();
-  setup.registerEmbeddableFactory(
-    CONTACT_CARD_EXPORTABLE_EMBEDDABLE,
-    new ContactCardExportableEmbeddableFactory((() => null) as any, {} as any)
-  );
-  const start = doStart();
-
   let container: DashboardContainer;
   let embeddable: ContactCardEmbeddable;
   let coreStart: CoreStart;
   let dataMock: jest.Mocked<DataPublicPluginStart>;
+
+  const mockEmbeddableFactory = new ContactCardExportableEmbeddableFactory(
+    (() => null) as any,
+    {} as any
+  );
+  pluginServices.getServices().embeddable.getEmbeddableFactory = jest
+    .fn()
+    .mockReturnValue(mockEmbeddableFactory);
 
   beforeEach(async () => {
     coreStart = coreMock.createStart();
@@ -52,7 +53,6 @@ describe('Export CSV action', () => {
       ExitFullScreenButton: () => null,
       SavedObjectFinder: () => null,
       application: {} as any,
-      embeddable: start,
       inspector: {} as any,
       notifications: {} as any,
       savedObjectMetaData: {} as any,

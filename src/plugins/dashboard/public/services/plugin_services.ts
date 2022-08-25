@@ -26,6 +26,7 @@ import { overlaysServiceFactory } from './overlays/overlays_service';
 import { settingsServiceFactory } from './settings/settings_service';
 import { spacesServiceFactory } from './spaces/spaces_service';
 import { visualizationsServiceFactory } from './visualizations/visualizations_service';
+import { embeddableServiceFactory } from './embeddable/embeddable_service';
 
 const providers: PluginServiceProviders<
   DashboardServices,
@@ -34,6 +35,7 @@ const providers: PluginServiceProviders<
   chrome: new PluginServiceProvider(chromeServiceFactory),
   data: new PluginServiceProvider(dataServiceFactory),
   dataViewEditor: new PluginServiceProvider(dataViewEditorServiceFactory),
+  embeddable: new PluginServiceProvider(embeddableServiceFactory),
   http: new PluginServiceProvider(httpServiceFactory),
   navigation: new PluginServiceProvider(navigationServiceFactory),
   overlays: new PluginServiceProvider(overlaysServiceFactory),

@@ -24,7 +24,6 @@ import {
   type PanelState,
   type IEmbeddable,
   type EmbeddableInput,
-  type EmbeddableStart,
   type EmbeddableOutput,
   type EmbeddableFactory,
   ErrorEmbeddable,
@@ -62,7 +61,6 @@ export interface DashboardContainerServices {
   application: CoreStart['application'];
   inspector: InspectorStartContract;
   screenshotMode: ScreenshotModePluginStart;
-  embeddable: EmbeddableStart;
   uiActions: UiActionsStart;
   analytics?: CoreStart['analytics'];
 }
@@ -164,7 +162,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
         ...initialInput,
       },
       { embeddableLoaded: {} },
-      services.embeddable.getEmbeddableFactory,
+      pluginServices.getServices().embeddable.getEmbeddableFactory,
       parent
     );
 

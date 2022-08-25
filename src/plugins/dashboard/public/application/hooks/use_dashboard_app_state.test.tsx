@@ -83,7 +83,6 @@ const setupEmbeddableFactory = (
     notifications: services.core.notifications,
     savedObjectMetaData: {} as unknown,
     ExitFullScreenButton: () => null,
-    embeddable: services.embeddable,
     SavedObjectFinder: () => null,
     application: {} as unknown,
     inspector: {} as unknown,
@@ -95,7 +94,7 @@ const setupEmbeddableFactory = (
     containerOptions
   );
   const deferEmbeddableCreate = defer();
-  services.embeddable.getEmbeddableFactory = jest.fn().mockImplementation(
+  pluginServices.getServices().embeddable.getEmbeddableFactory = jest.fn().mockImplementation(
     () =>
       ({
         create: () => deferEmbeddableCreate.promise,

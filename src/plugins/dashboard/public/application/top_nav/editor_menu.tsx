@@ -53,18 +53,19 @@ interface UnwrappedEmbeddableFactory {
 }
 
 export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
-  const { core, embeddable, usageCollection } = useKibana<DashboardAppServices>().services;
+  const { core, usageCollection } = useKibana<DashboardAppServices>().services;
   const {
+    embeddable,
+    settings: { uiSettings },
     visualizations: {
       getAliases: getVisTypeAliases,
       getByGroup: getVisTypesByGroup,
       showNewVisModal,
     },
-    settings: { uiSettings },
   } = pluginServices.getServices();
 
   const embeddableFactories = useMemo(
-    () => (embeddable ? Array.from(embeddable.getEmbeddableFactories()) : []),
+    () => Array.from(embeddable.getEmbeddableFactories()),
     [embeddable]
   );
   const [unwrappedEmbeddableFactories, setUnwrappedEmbeddableFactories] = useState<

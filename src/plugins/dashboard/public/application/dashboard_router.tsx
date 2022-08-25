@@ -81,9 +81,9 @@ export async function mountApp({
     data: dataStart,
     share: shareStart,
     spaces: spacesApi,
-    embeddable: embeddableStart,
     savedObjectsTaggingOss,
     screenshotMode,
+    embeddable,
   } = pluginsStart;
 
   const activeSpaceId =
@@ -101,7 +101,6 @@ export async function mountApp({
     initializerContext,
     restorePreviousUrl,
     setHeaderActionMenu,
-    embeddable: embeddableStart,
     scopedHistory: () => scopedHistory,
     screenshotModeService: screenshotMode,
     savedObjectsClient: coreStart.savedObjects.client,
@@ -203,7 +202,7 @@ export async function mountApp({
   };
 
   const hasEmbeddableIncoming = Boolean(
-    dashboardServices.embeddable
+    embeddable
       .getStateTransfer()
       .getIncomingEmbeddablePackage(DashboardConstants.DASHBOARDS_ID, false)
   );

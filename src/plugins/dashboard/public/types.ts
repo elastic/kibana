@@ -22,7 +22,7 @@ import type { Filter } from '@kbn/es-query';
 import type { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import type { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 import { type EmbeddableInput, ViewMode } from '@kbn/embeddable-plugin/common';
-import type { ContainerInput, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { ContainerInput } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
@@ -123,8 +123,6 @@ export interface DashboardAppState {
  */
 export type DashboardBuildContext = Pick<
   DashboardAppServices,
-  | 'embeddable'
-  // | 'dataViews'
   | 'savedDashboards'
   | 'usageCollection'
   | 'initializerContext'
@@ -134,6 +132,7 @@ export type DashboardBuildContext = Pick<
   query: DashboardServices['data']['query'];
   search: DashboardServices['data']['search'];
   dataViews: DashboardServices['data']['dataViews'];
+  embeddable: DashboardServices['embeddable'];
 
   notifications: DashboardAppServices['core']['notifications'];
 
@@ -195,7 +194,6 @@ export interface DashboardAppCapabilities {
 export interface DashboardAppServices {
   core: CoreStart;
   share?: SharePluginStart;
-  embeddable: EmbeddableStart;
   restorePreviousUrl: () => void;
   savedObjects: SavedObjectsStart;
   allowByValueEmbeddables: boolean;

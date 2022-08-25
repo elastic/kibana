@@ -10,7 +10,6 @@ import { ExpandPanelAction } from './expand_panel_action';
 import { DashboardContainer } from '../embeddable/dashboard_container';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
 
-import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 import {
@@ -22,24 +21,21 @@ import {
 } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
 
 import { coreMock } from '@kbn/core/public/mocks';
-
-const { setup, doStart } = embeddablePluginMock.createInstance();
-
-setup.registerEmbeddableFactory(
-  CONTACT_CARD_EMBEDDABLE,
-  new ContactCardEmbeddableFactory((() => null) as any, {} as any)
-);
-const start = doStart();
+import { pluginServices } from '../../services/plugin_services';
 
 let container: DashboardContainer;
 let embeddable: ContactCardEmbeddable;
+
+const mockEmbeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
+pluginServices.getServices().embeddable.getEmbeddableFactory = jest
+  .fn()
+  .mockReturnValue(mockEmbeddableFactory);
 
 beforeEach(async () => {
   const options = {
     ExitFullScreenButton: () => null,
     SavedObjectFinder: () => null,
     application: {} as any,
-    embeddable: start,
     inspector: {} as any,
     notifications: {} as any,
     savedObjectMetaData: {} as any,
@@ -55,6 +51,7 @@ beforeEach(async () => {
       }),
     },
   });
+
   container = new DashboardContainer(input, options);
 
   const contactCardEmbeddable = await container.addNewEmbeddable<

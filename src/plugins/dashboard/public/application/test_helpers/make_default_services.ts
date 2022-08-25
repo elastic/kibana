@@ -7,7 +7,6 @@
  */
 
 import { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
-import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { PluginInitializerContext, ScopedHistory } from '@kbn/core/public';
 import { savedObjectsPluginMock } from '@kbn/saved-objects-plugin/public/mocks';
 import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
@@ -67,7 +66,6 @@ export function makeDefaultServices(): DashboardAppServices {
   return {
     screenshotModeService: screenshotModePluginMock.createSetupContract(),
     savedObjects: savedObjectsPluginMock.createStartContract(),
-    embeddable: embeddablePluginMock.createInstance().doStart(),
     savedObjectsClient: core.savedObjects.client,
     dashboardCapabilities: defaultCapabilities,
     scopedHistory: () => ({} as ScopedHistory),

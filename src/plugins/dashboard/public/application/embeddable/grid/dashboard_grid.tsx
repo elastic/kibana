@@ -229,7 +229,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
       return null;
     }
 
-    const { container, kibana } = this.props;
+    const { container } = this.props;
     const { focusedPanelIndex, panels, expandedPanelId, viewMode } = this.state;
     const isViewMode = viewMode === ViewMode.VIEW;
 
@@ -293,7 +293,6 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
         index={index + 1}
         type={type}
         container={container}
-        PanelComponent={kibana.services.embeddable.EmbeddablePanel}
         expandedPanelId={expandedPanelId}
         focusedPanelId={focusedPanelIndex}
         onPanelStatusChange={onPanelStatusChange}

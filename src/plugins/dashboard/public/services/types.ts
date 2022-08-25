@@ -9,6 +9,7 @@
 import { DashboardChromeService } from './chrome/types';
 import { DashboardDataService } from './data/types';
 import { DashboardDataViewEditorService } from './data_view_editor/types';
+import { DashboardEmbeddableService } from './embeddable/types';
 import { DashboardHTTPService } from './http/types';
 import { DashboardNavigationService } from './navigation/types';
 import { DashboardOverlaysService } from './overlays/types';
@@ -21,6 +22,7 @@ export interface DashboardServices {
   chrome: DashboardChromeService;
   data: DashboardDataService;
   dataViewEditor: DashboardDataViewEditorService; // used only for no data state
+  embeddable: DashboardEmbeddableService;
   http: DashboardHTTPService;
   navigation: DashboardNavigationService;
   overlays: DashboardOverlaysService;

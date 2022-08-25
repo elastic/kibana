@@ -31,12 +31,13 @@ import {
   ContactCardEmbeddableOutput,
   CONTACT_CARD_EMBEDDABLE,
 } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
+import { pluginServices } from '../../services/plugin_services';
 
-const { setup, doStart } = embeddablePluginMock.createInstance();
-setup.registerEmbeddableFactory(
-  CONTACT_CARD_EMBEDDABLE,
-  new ContactCardEmbeddableFactory((() => null) as any, {} as any)
-);
+const { doStart } = embeddablePluginMock.createInstance();
+const embeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
+pluginServices.getServices().embeddable.getEmbeddableFactory = jest
+  .fn()
+  .mockReturnValue(embeddableFactory);
 const start = doStart();
 
 let container: DashboardContainer;

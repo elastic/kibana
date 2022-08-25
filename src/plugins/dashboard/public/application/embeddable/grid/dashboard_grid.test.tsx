@@ -17,7 +17,6 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { DashboardGrid, DashboardGridProps } from './dashboard_grid';
 import { DashboardContainer, DashboardContainerServices } from '../dashboard_container';
 import { getSampleDashboardInput } from '../../test_helpers';
-import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import {
   ContactCardEmbeddableFactory,
   CONTACT_CARD_EMBEDDABLE,
@@ -29,14 +28,11 @@ let dashboardContainer: DashboardContainer | undefined;
 const DashboardServicesProvider = pluginServices.getContextProvider();
 
 function prepare(props?: Partial<DashboardGridProps>) {
-  const { setup, doStart } = embeddablePluginMock.createInstance();
-  setup.registerEmbeddableFactory(
-    CONTACT_CARD_EMBEDDABLE,
-    new ContactCardEmbeddableFactory((() => null) as any, {} as any)
-  );
-  const start = doStart();
+  const embeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
+  pluginServices.getServices().embeddable.getEmbeddableFactory = jest
+    .fn()
+    .mockReturnValue(embeddableFactory);
 
-  const getEmbeddableFactory = start.getEmbeddableFactory;
   const initialInput = getSampleDashboardInput({
     panels: {
       '1': {
@@ -53,12 +49,6 @@ function prepare(props?: Partial<DashboardGridProps>) {
   });
   const options: DashboardContainerServices = {
     application: {} as any,
-    embeddable: {
-      getTriggerCompatibleActions: (() => []) as any,
-      getEmbeddableFactories: start.getEmbeddableFactories,
-      getEmbeddablePanel: jest.fn(),
-      getEmbeddableFactory,
-    } as any,
     notifications: {} as any,
     inspector: {
       isAvailable: jest.fn(),
