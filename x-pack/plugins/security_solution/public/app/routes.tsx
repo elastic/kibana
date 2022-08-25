@@ -50,9 +50,7 @@ const PageRouterComponent: FC<RouterProps> = ({
         <RouteCapture>
           <Switch>
             <Route path="/">
-              <HomePage onAppLeave={onAppLeave} setHeaderActionMenu={setHeaderActionMenu}>
-                {children}
-              </HomePage>
+              <HomePage setHeaderActionMenu={setHeaderActionMenu}>{children}</HomePage>
             </Route>
             <Route>
               <NotFoundPage />

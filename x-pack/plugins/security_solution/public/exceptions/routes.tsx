@@ -15,15 +15,16 @@ import { ExceptionListsTable } from '../detections/pages/detection_engine/rules/
 import { SpyRoute } from '../common/utils/route/spy_routes';
 import { NotFoundPage } from '../app/404';
 import { useReadonlyHeader } from '../use_readonly_header';
+import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 
-const ExceptionsRoutes = () => {
-  return (
+const ExceptionsRoutes = () => (
+  <PluginTemplateWrapper>
     <TrackApplicationView viewId={SecurityPageName.exceptions}>
       <ExceptionListsTable />
       <SpyRoute pageName={SecurityPageName.exceptions} />
     </TrackApplicationView>
-  );
-};
+  </PluginTemplateWrapper>
+);
 
 const ExceptionsContainerComponent: React.FC = () => {
   useReadonlyHeader(i18n.READ_ONLY_BADGE_TOOLTIP);

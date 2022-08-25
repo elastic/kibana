@@ -52,7 +52,7 @@ jest.mock('../../../common/components/navigation/use_security_solution_navigatio
 const renderComponent = () => {
   return render(
     <TestProviders>
-      <SecuritySolutionTemplateWrapper onAppLeave={() => null}>
+      <SecuritySolutionTemplateWrapper>
         <div>{'child of wrapper'}</div>
       </SecuritySolutionTemplateWrapper>
     </TestProviders>

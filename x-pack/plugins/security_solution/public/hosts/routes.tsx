@@ -11,16 +11,19 @@ import { HostsContainer } from './pages';
 import type { SecuritySubPluginRoutes } from '../app/types';
 import { SecurityPageName } from '../app/types';
 import { HOSTS_PATH } from '../../common/constants';
+import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 
 export const HostsRoutes = () => (
-  <TrackApplicationView viewId={SecurityPageName.hosts}>
-    <HostsContainer />
-  </TrackApplicationView>
+  <PluginTemplateWrapper>
+    <TrackApplicationView viewId={SecurityPageName.hosts}>
+      <HostsContainer />
+    </TrackApplicationView>
+  </PluginTemplateWrapper>
 );
 
 export const routes: SecuritySubPluginRoutes = [
   {
     path: HOSTS_PATH,
-    render: HostsRoutes,
+    component: HostsRoutes,
   },
 ];

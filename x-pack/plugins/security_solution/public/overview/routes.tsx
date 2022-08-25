@@ -19,40 +19,49 @@ import type { SecuritySubPluginRoutes } from '../app/types';
 import { LandingPage } from './pages/landing';
 import { StatefulOverview } from './pages/overview';
 import { DetectionResponse } from './pages/detection_response';
+import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { EntityAnalyticsPage } from './pages/entity_analytics';
 
 const OverviewRoutes = () => (
-  <TrackApplicationView viewId={SecurityPageName.overview}>
-    <StatefulOverview />
-  </TrackApplicationView>
+  <PluginTemplateWrapper>
+    <TrackApplicationView viewId={SecurityPageName.overview}>
+      <StatefulOverview />
+    </TrackApplicationView>
+  </PluginTemplateWrapper>
 );
 
 const DetectionResponseRoutes = () => (
-  <TrackApplicationView viewId={SecurityPageName.detectionAndResponse}>
-    <DetectionResponse />
-  </TrackApplicationView>
+  <PluginTemplateWrapper>
+    <TrackApplicationView viewId={SecurityPageName.detectionAndResponse}>
+      <DetectionResponse />
+    </TrackApplicationView>
+  </PluginTemplateWrapper>
 );
 
 const LandingRoutes = () => (
-  <TrackApplicationView viewId={SecurityPageName.landing}>
-    <LandingPage />
-  </TrackApplicationView>
+  <PluginTemplateWrapper>
+    <TrackApplicationView viewId={SecurityPageName.landing}>
+      <LandingPage />
+    </TrackApplicationView>
+  </PluginTemplateWrapper>
 );
 
 const EntityAnalyticsRoutes = () => (
-  <TrackApplicationView viewId={SecurityPageName.entityAnalytics}>
-    <EntityAnalyticsPage />
-  </TrackApplicationView>
+  <PluginTemplateWrapper>
+    <TrackApplicationView viewId={SecurityPageName.entityAnalytics}>
+      <EntityAnalyticsPage />
+    </TrackApplicationView>
+  </PluginTemplateWrapper>
 );
 
 export const routes: SecuritySubPluginRoutes = [
   {
     path: OVERVIEW_PATH,
-    render: OverviewRoutes,
+    component: OverviewRoutes,
   },
   {
     path: DETECTION_RESPONSE_PATH,
-    render: DetectionResponseRoutes,
+    component: DetectionResponseRoutes,
   },
   {
     path: LANDING_PATH,

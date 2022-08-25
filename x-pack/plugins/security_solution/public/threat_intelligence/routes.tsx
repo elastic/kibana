@@ -20,6 +20,7 @@ import { licenseService } from '../common/hooks/use_license';
 import { SecurityPageName } from '../app/types';
 import type { SecuritySubPluginRoutes } from '../app/types';
 import { useSourcererDataView } from '../common/containers/sourcerer';
+import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 
 const ThreatIntelligence = memo(() => {
   const { threatIntelligence } = useKibana().services;
@@ -40,10 +41,12 @@ const ThreatIntelligence = memo(() => {
 
   return (
     <TrackApplicationView viewId="threat_intelligence">
-      <SecuritySolutionPageWrapper noPadding>
-        <ThreatIntelligencePlugin securitySolutionContext={securitySolutionContext} />
-        <SpyRoute pageName={SecurityPageName.threatIntelligenceIndicators} />
-      </SecuritySolutionPageWrapper>
+      <PluginTemplateWrapper>
+        <SecuritySolutionPageWrapper noPadding>
+          <ThreatIntelligencePlugin securitySolutionContext={securitySolutionContext} />
+          <SpyRoute pageName={SecurityPageName.threatIntelligenceIndicators} />
+        </SecuritySolutionPageWrapper>
+      </PluginTemplateWrapper>
     </TrackApplicationView>
   );
 });
