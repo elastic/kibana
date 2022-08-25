@@ -12,7 +12,7 @@ import type {
   ISavedObjectsRepository,
   SavedObjectsPointInTimeFinderClient,
 } from '@kbn/core-saved-objects-api-server';
-import { PointInTimeFinder } from './point_in_time_finder';
+import { PointInTimeFinder } from '../lib/point_in_time_finder';
 
 const createPointInTimeFinderMock = ({
   logger = loggerMock.create(),

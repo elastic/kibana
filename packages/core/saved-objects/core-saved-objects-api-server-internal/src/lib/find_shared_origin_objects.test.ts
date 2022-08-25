@@ -8,7 +8,7 @@
 
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import type { CreatePointInTimeFinderFn, PointInTimeFinder } from './point_in_time_finder';
-import { savedObjectsPointInTimeFinderMock } from './point_in_time_finder.mock';
+import { savedObjectsPointInTimeFinderMock } from '../mocks/point_in_time_finder.mock';
 import { findSharedOriginObjects } from './find_shared_origin_objects';
 import { createPITClientMock } from '../mocks/internal_mocks';
 

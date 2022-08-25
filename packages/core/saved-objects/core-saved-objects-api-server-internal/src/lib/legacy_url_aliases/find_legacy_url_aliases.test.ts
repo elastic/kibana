@@ -13,7 +13,7 @@ import {
   LEGACY_URL_ALIAS_TYPE,
 } from '@kbn/core-saved-objects-base-server-internal';
 import type { CreatePointInTimeFinderFn, PointInTimeFinder } from '../point_in_time_finder';
-import { savedObjectsPointInTimeFinderMock } from '../point_in_time_finder.mock';
+import { savedObjectsPointInTimeFinderMock } from '../../mocks/point_in_time_finder.mock';
 import { findLegacyUrlAliases } from './find_legacy_url_aliases';
 import { createPITClientMock } from '../../mocks/internal_mocks';
 
