@@ -7,6 +7,7 @@
 
 import { LegacyRequest } from '../../types';
 import { createTimeFilter } from '../create_query';
+import { elasticsearchLogsFilter } from './logs_filter';
 
 export interface LogsIndexCheckOpts {
   start: number;
@@ -24,11 +25,6 @@ async function doesLogsIndexExist(
   const metric = { timestampField: '@timestamp' };
   const filter = [createTimeFilter({ start, end, metric })];
 
-  const typeFilter = {
-    bool: {
-      should: [{ term: { 'service.type': 'elasticsearch' } }],
-    },
-  };
   const structuredLogsFilter = { exists: { field: 'elasticsearch.cluster' } };
   const clusterFilter = { term: { 'elasticsearch.cluster.uuid': clusterUuid } };
   const nodeFilter = { term: { 'elasticsearch.node.id': nodeUuid } };
@@ -45,7 +41,7 @@ async function doesLogsIndexExist(
   const typeExistsAtAnyTimeQuery = {
     query: {
       bool: {
-        filter: [typeFilter],
+        filter: [elasticsearchLogsFilter],
       },
     },
   };

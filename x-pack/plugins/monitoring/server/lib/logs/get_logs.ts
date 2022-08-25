@@ -15,6 +15,7 @@ import { detectReasonFromException } from './detect_reason_from_exception';
 import { LegacyRequest } from '../../types';
 import { LogsResponse } from '../../../common/types/logs';
 import { MonitoringConfig } from '../../config';
+import { elasticsearchLogsFilter } from './logs_filter';
 
 interface Log {
   timestamp?: string | number;
@@ -72,11 +73,6 @@ export async function getLogs(
   checkParam(logsIndexPattern, 'logsIndexPattern in logs/getLogs');
 
   const metric = { timestampField: '@timestamp' };
-  const typeFilter = {
-    bool: {
-      should: [{ term: { 'service.type': 'elasticsearch' } }],
-    },
-  };
 
   const filter: Array<{ term: { [x: string]: string } } | TimerangeFilter | null> = [
     createTimeFilter({ start, end, metric }),
@@ -109,7 +105,7 @@ export async function getLogs(
       sort: { '@timestamp': { order: 'desc', unmapped_type: 'long' } },
       query: {
         bool: {
-          filter: [typeFilter, ...filter],
+          filter: [elasticsearchTypeFilter, ...filter],
         },
       },
     },
