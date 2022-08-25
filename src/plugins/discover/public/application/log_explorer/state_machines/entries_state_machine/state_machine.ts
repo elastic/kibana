@@ -58,7 +58,7 @@ export const entriesStateMachine = createMachine<
         on: {
           loadAroundSucceeded: {
             actions: 'updateChunksFromLoadAround',
-            target: ['loaded', 'loaded.grid.staleAfterLoadAround'],
+            target: ['loaded.top', 'loaded.bottom', 'loaded.grid.staleAfterLoadAround'],
           },
           positionChanged: {
             actions: 'updatePosition',
@@ -197,13 +197,17 @@ export const entriesStateMachine = createMachine<
             },
           },
           grid: {
+            initial: 'unknown',
             states: {
               unknown: {
-                after: {
-                  500: {
-                    target: 'waitingForSynchronization',
-                  },
-                },
+                // always: [
+                //     {
+                //       cond: {
+                //         type: 'isEvent',
+                //         eventType: 'loadAfterSuccess',
+                //       }
+                //     }
+                // ]
               },
               staleAfterLoadAround: {
                 on: {
@@ -334,7 +338,7 @@ export const entriesStateMachine = createMachine<
         on: {
           loadBeforeSucceeded: {
             actions: 'updateChunksFromLoadBefore',
-            target: ['loaded', 'loaded.grid.staleAfterLoadBefore'],
+            target: ['loaded.top', 'loaded.grid.staleAfterLoadBefore'],
           },
           loadBeforeFailed: {
             actions: 'updateChunksFromLoadBefore',
@@ -354,17 +358,11 @@ export const entriesStateMachine = createMachine<
         on: {
           loadAfterSucceeded: {
             actions: 'updateChunksFromLoadAfter',
-            target: [
-              '#logExplorerEntries.loaded',
-              '#logExplorerEntries.loaded.grid.staleAfterLoadAfter',
-            ],
+            target: ['loaded.bottom', 'loaded.grid.staleAfterLoadAfter'],
           },
           loadAfterFailed: {
             actions: 'updateChunksFromLoadAfter',
-            target: [
-              '#logExplorerEntries.loaded.bottom.failed',
-              '#logExplorerEntries.loaded.grid.staleAfterLoadAfter',
-            ],
+            target: ['loaded.bottom.failed', 'loaded.grid.staleAfterLoadAfter'],
           },
           columnsChanged: {
             target: 'reloading',
@@ -379,11 +377,11 @@ export const entriesStateMachine = createMachine<
         on: {
           extendTopSucceeded: {
             actions: 'updateChunksFromExtendTop',
-            target: '#logExplorerEntries.loaded.top.loaded',
+            target: 'loaded.top.loaded',
           },
           extendTopFailed: {
             actions: 'updateChunksFromExtendTop',
-            target: '#logExplorerEntries.loaded.top.failed',
+            target: 'loaded.top.failed',
           },
           columnsChanged: {
             target: 'reloading',
@@ -460,11 +458,11 @@ export const entriesStateMachine = createMachine<
         onDone: [
           {
             cond: 'hasLoadedTopChunk',
-            target: ['#logExplorerEntries.loaded', '#logExplorerEntries.loaded.grid.synchronized'],
+            target: ['loaded.top', 'loaded.bottom', 'loaded.grid.synchronized'],
           },
           {
             cond: 'hasLoadedBottomChunk',
-            target: ['#logExplorerEntries.loaded', '#logExplorerEntries.loaded.grid.synchronized'],
+            target: ['loaded.top', 'loaded.bottom', 'loaded.grid.synchronized'],
           },
           {
             target: 'failedNoData',
@@ -539,7 +537,7 @@ export const entriesStateMachine = createMachine<
         },
         on: {
           stopTailing: {
-            target: 'loaded',
+            target: ['loaded.top', 'loaded.bottom', 'loaded.grid.synchronized'],
           },
         },
       },
