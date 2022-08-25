@@ -26,7 +26,7 @@ describe('<Toolbar />', () => {
     const primaryButton = <PrimaryButton label="Create chart" onClick={mockClickHandler} />;
     const children = { primaryButton };
     const component = mountWithIntl(<Toolbar children={children} />);
-    component.find('button').simulate('click')
+    component.find('button').simulate('click');
     expect(mockClickHandler).toHaveBeenCalled();
   });
 });
