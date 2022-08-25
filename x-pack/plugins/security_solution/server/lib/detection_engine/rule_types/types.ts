@@ -37,7 +37,6 @@ import type {
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 import type { ITelemetryEventsSender } from '../../telemetry/sender';
 import type { IRuleExecutionLogForExecutors, IRuleExecutionLogService } from '../rule_monitoring';
-import type { OsqueryActionPayload } from '../notifications/schedule_notification_response_actions';
 
 export interface SecurityAlertTypeReturnValue<TState extends RuleTypeState> {
   bulkCreateTimes: string[];
@@ -105,7 +104,6 @@ export interface CreateSecurityRuleTypeWrapperProps {
   ruleDataClient: IRuleDataClient;
   ruleExecutionLoggerFactory: IRuleExecutionLogService['createClientForExecutors'];
   version: string;
-  osqueryCreateAction?: (payload: OsqueryActionPayload) => void;
 }
 
 export type CreateSecurityRuleTypeWrapper = (

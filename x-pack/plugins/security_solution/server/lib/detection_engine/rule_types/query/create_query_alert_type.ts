@@ -8,14 +8,23 @@
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../common/constants';
+import type {
+  ResponseAction,
+  OsqueryActionPayload,
+} from '../../notifications/schedule_notification_response_actions';
+import { scheduleNotificationResponseActions } from '../../notifications/schedule_notification_response_actions';
 
 import type { QueryRuleParams } from '../../schemas/rule_schemas';
 import { queryRuleParams } from '../../schemas/rule_schemas';
 import { queryExecutor } from '../../signals/executors/query';
 import type { CreateRuleOptions, SecurityAlertType } from '../types';
 import { validateImmutable, validateIndexPatterns } from '../utils';
+
 export const createQueryAlertType = (
-  createOptions: CreateRuleOptions
+  createOptions: CreateRuleOptions & {
+    // TODO pass it in a more generic way
+    osqueryCreateAction?: (payload: OsqueryActionPayload) => void;
+  }
 ): SecurityAlertType<QueryRuleParams, {}, {}, 'default'> => {
   const { eventsTelemetry, experimentalFeatures, version } = createOptions;
   return {
@@ -76,6 +85,7 @@ export const createQueryAlertType = (
           primaryTimestamp,
           secondaryTimestamp,
         },
+        params: { responseActions },
         services,
         state,
       } = execOptions;
@@ -98,6 +108,16 @@ export const createQueryAlertType = (
         primaryTimestamp,
         secondaryTimestamp,
       });
+
+      if (responseActions.length && result.createdSignalsCount) {
+        scheduleNotificationResponseActions(
+          {
+            signals: result.createdSignals,
+            responseActions: responseActions as ResponseAction[],
+          },
+          createOptions.osqueryCreateAction
+        );
+      }
       return { ...result, state };
     },
   };

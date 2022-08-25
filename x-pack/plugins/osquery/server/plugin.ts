@@ -26,7 +26,7 @@ import { initSavedObjects } from './saved_objects';
 import { initUsageCollectors } from './usage';
 import type { OsqueryAppContext } from './lib/osquery_app_context_services';
 import { OsqueryAppContextService } from './lib/osquery_app_context_services';
-import type { ConfigType } from './config';
+import type { ConfigType } from '../common/config';
 import { OSQUERY_INTEGRATION_NAME } from '../common';
 import { getPackagePolicyDeleteCallback } from './lib/fleet_integration';
 import { TelemetryEventsSender } from './lib/telemetry/sender';

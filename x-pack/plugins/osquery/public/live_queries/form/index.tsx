@@ -23,11 +23,9 @@ import { useForm as useHookForm, FormProvider } from 'react-hook-form';
 
 import { isEmpty, map, find, pickBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import type { ECSMapping } from '../../../common/schemas/common';
 import type { SavedQuerySOFormData } from '../../saved_queries/form/use_saved_query_form';
-import type {
-  EcsMappingFormField,
-  EcsMappingSerialized,
-} from '../../packs/queries/ecs_mapping_editor_field';
+import type { EcsMappingFormField } from '../../packs/queries/ecs_mapping_editor_field';
 import { defaultEcsFormData } from '../../packs/queries/ecs_mapping_editor_field';
 import { convertECSMappingToObject } from '../../../common/schemas/common/utils';
 import { useKibana } from '../../common/lib/kibana';
@@ -57,7 +55,7 @@ interface DefaultLiveQueryFormFields {
   query?: string;
   agentSelection?: AgentSelection;
   savedQueryId?: string | null;
-  ecs_mapping?: EcsMappingSerialized;
+  ecs_mapping?: ECSMapping;
   packId?: string;
 }
 
@@ -117,6 +115,7 @@ interface LiveQueryFormProps {
   enabled?: boolean;
   hideAgentsField?: boolean;
   addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
+  hideSubmitButton?: boolean;
 }
 
 const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
@@ -128,6 +127,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   enabled = true,
   hideAgentsField = false,
   addToTimeline,
+  hideSubmitButton,
 }) => {
   const permissions = useKibana().services.application.capabilities.osquery;
   const canRunPacks = useMemo(
@@ -239,6 +239,10 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   const onSubmit = useCallback(
     // not sure why, but submitOnCmdEnter doesn't have proper form values so I am passing them in manually
     async (values: LiveQueryFormFields = watchedValues) => {
+      if (hideSubmitButton) {
+        return;
+      }
+
       const serializedData = pickBy(
         {
           agentSelection: values.agentSelection,
@@ -259,7 +263,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
         } catch (e) {}
       }
     },
-    [errors, mutateAsync, packId, watchedValues]
+    [errors, mutateAsync, packId, watchedValues, hideSubmitButton]
   );
   const commands = useMemo(
     () => [
@@ -445,13 +449,13 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
         setValue(
           'ecs_mapping',
           !isEmpty(defaultValue.ecs_mapping)
-            ? map(defaultValue.ecs_mapping, (value, key) => ({
+            ? (map(defaultValue.ecs_mapping, (value, key) => ({
                 key,
                 result: {
                   type: Object.keys(value)[0],
                   value: Object.values(value)[0],
                 },
-              }))
+              })) as unknown as EcsMappingFormField[])
             : [defaultEcsFormData]
         );
 
@@ -569,7 +573,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
                   queryType={queryType}
                 />
               </EuiFlexItem>
-              {submitButtonContent}
+              {!hideSubmitButton && submitButtonContent}
               <EuiSpacer />
 
               {liveQueryDetails?.queries?.length ||
@@ -590,7 +594,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           ) : (
             <>
               <EuiFlexItem>{queryFieldStepContent}</EuiFlexItem>
-              {submitButtonContent}
+              {!hideSubmitButton && submitButtonContent}
               <EuiFlexItem>{resultsStepContent}</EuiFlexItem>
             </>
           )}

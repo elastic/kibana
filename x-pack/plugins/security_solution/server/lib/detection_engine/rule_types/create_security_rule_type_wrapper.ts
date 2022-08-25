@@ -13,8 +13,6 @@ import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { createPersistenceRuleTypeWrapper } from '@kbn/rule-registry-plugin/server';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 
-import type { ResponseAction } from '../notifications/schedule_notification_response_actions';
-import { scheduleNotificationResponseActions } from '../notifications/schedule_notification_response_actions';
 import {
   checkPrivilegesFromEsClient,
   getExceptions,
@@ -43,15 +41,7 @@ import { buildTimestampRuntimeMapping } from './utils/build_timestamp_runtime_ma
 
 /* eslint-disable complexity */
 export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
-  ({
-    lists,
-    logger,
-    config,
-    ruleDataClient,
-    ruleExecutionLoggerFactory,
-    version,
-    osqueryCreateAction,
-  }) =>
+  ({ lists, logger, config, ruleDataClient, ruleExecutionLoggerFactory, version }) =>
   (type) => {
     const { alertIgnoreFields: ignoreFields, alertMergeStrategy: mergeStrategy } = config;
     const persistenceRuleType = createPersistenceRuleTypeWrapper({ ruleDataClient, logger });
@@ -419,15 +409,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   ruleParams: notificationRuleParams,
                 });
               }
-            }
-            if (responseActions.length && createdSignalsCount) {
-              scheduleNotificationResponseActions(
-                {
-                  signals: result.createdSignals,
-                  responseActions: responseActions as ResponseAction[],
-                },
-                osqueryCreateAction
-              );
             }
 
             if (result.success) {

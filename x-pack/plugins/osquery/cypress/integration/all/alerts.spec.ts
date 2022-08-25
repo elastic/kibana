@@ -8,6 +8,7 @@
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 import { login } from '../../tasks/login';
 import {
+  checkResults,
   findAndClickButton,
   findFormFieldByRowsLabelAndType,
   inputQuery,

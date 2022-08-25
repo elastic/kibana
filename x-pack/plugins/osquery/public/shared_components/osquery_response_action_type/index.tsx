@@ -5,28 +5,22 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 
 import { QueryClientProvider } from '@tanstack/react-query';
-import type { EuiAccordionProps } from '@elastic/eui';
-import { EuiSpacer } from '@elastic/eui';
 
 import uuid from 'uuid';
 import { useForm as useHookForm } from 'react-hook-form';
 import { FormProvider } from 'react-hook-form';
 import { get, isEmpty } from 'lodash';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
+import { LiveQuery } from '../../live_queries';
 import type { EcsMappingFormField } from '../../packs/queries/ecs_mapping_editor_field';
 import { defaultEcsFormData } from '../../packs/queries/ecs_mapping_editor_field';
-import { convertECSMappingToFormValue } from '../../../common/schemas/common/utils';
-import { ECSMappingEditorField } from '../../packs/queries/lazy_ecs_mapping_editor_field';
+import { convertECSMappingToObject } from '../../../common/schemas/common/utils';
 import { UseField, useFormContext } from '../../shared_imports';
 import type { ArrayItem } from '../../shared_imports';
-import { useKibana } from '../../common/lib/kibana';
-import { SavedQueriesDropdown } from '../../saved_queries/saved_queries_dropdown';
-import { LiveQueryQueryField } from '../../live_queries/form/live_query_query_field';
 import { queryClient } from '../../query_client';
-import { StyledEuiAccordion } from '../../components/accordion';
 
 const GhostFormField = () => <></>;
 
@@ -36,10 +30,11 @@ interface IProps {
 }
 
 interface OsqueryResponseActionsParamsFormFields {
-  savedQueryId: string | null;
+  savedQueryId: string | undefined;
   id: string;
   ecs_mapping: EcsMappingFormField[];
   query: string;
+  packId?: string;
 }
 
 export const OsqueryResponseActionParamsForm: React.FunctionComponent<IProps> = React.memo(
@@ -50,7 +45,6 @@ export const OsqueryResponseActionParamsForm: React.FunctionComponent<IProps> = 
         ecs_mapping: [defaultEcsFormData],
         id: uniqueId,
       },
-      mode: 'onChange',
     });
     const { watch, setValue, register } = hooksForm;
 
@@ -59,29 +53,18 @@ export const OsqueryResponseActionParamsForm: React.FunctionComponent<IProps> = 
       register('savedQueryId');
       register('id');
     }, [register]);
-    const permissions = useKibana().services.application.capabilities.osquery;
-    const [advancedContentState, setAdvancedContentState] =
-      useState<EuiAccordionProps['forceState']>('closed');
-    const handleToggle = useCallback((isOpen) => {
-      const newState = isOpen ? 'open' : 'closed';
-      setAdvancedContentState(newState);
-    }, []);
-
-    const isSavedQueryDisabled = useMemo(
-      () => !permissions.runSavedQueries || !permissions.readSavedQueries,
-      [permissions.readSavedQueries, permissions.runSavedQueries]
-    );
 
     const context = useFormContext();
 
     const data = context.getFormData();
+    const { params: defaultParams } = get(data, item.path);
 
     useEffectOnce(() => {
-      const { params: defaultParams } = get(data, item.path);
       if (defaultParams) {
         setValue('savedQueryId', defaultParams.savedQueryId);
         setValue('query', defaultParams.query);
         setValue('id', defaultParams.id);
+        setValue('packId', defaultParams.packId);
         if (!isEmpty(defaultParams.ecs_mapping)) {
           setValue('ecs_mapping', defaultParams.ecs_mapping);
         }
@@ -94,36 +77,17 @@ export const OsqueryResponseActionParamsForm: React.FunctionComponent<IProps> = 
       });
     }, [context, item.path, watchedValues]);
 
-    const handleSavedQueryChange = useCallback(
-      (savedQuery) => {
-        if (savedQuery) {
-          setValue('savedQueryId', savedQuery.savedQueryId);
-          setValue('query', savedQuery.query);
-          setValue(
-            'ecs_mapping',
-            !isEmpty(savedQuery.ecs_mapping)
-              ? convertECSMappingToFormValue(savedQuery.ecs_mapping)
-              : [defaultEcsFormData]
-          );
-        } else {
-          setValue('savedQueryId', null);
-        }
-      },
-      [setValue]
-    );
-
     return (
       <FormProvider {...hooksForm}>
         <QueryClientProvider client={queryClient}>
-          {!isSavedQueryDisabled && (
-            <>
-              <SavedQueriesDropdown
-                disabled={isSavedQueryDisabled}
-                onChange={handleSavedQueryChange}
-              />
-            </>
-          )}
-          <LiveQueryQueryField queryType={'query'} />
+          <LiveQuery
+            enabled={true}
+            query={watchedValues.query}
+            ecs_mapping={convertECSMappingToObject(watchedValues.ecs_mapping)}
+            savedQueryId={watchedValues.savedQueryId}
+            hideAgentsField={true}
+            hideSubmitButton={true}
+          />
           <UseField
             path={`${item.path}.params.query`}
             component={GhostFormField}
@@ -144,18 +108,11 @@ export const OsqueryResponseActionParamsForm: React.FunctionComponent<IProps> = 
             component={GhostFormField}
             readDefaultValueOnForm={!item.isNew}
           />
-          <>
-            <EuiSpacer size="m" />
-            <StyledEuiAccordion
-              id="advanced"
-              forceState={advancedContentState}
-              onToggle={handleToggle}
-              buttonContent="Advanced"
-            >
-              <EuiSpacer size="xs" />
-              <ECSMappingEditorField />
-            </StyledEuiAccordion>
-          </>
+          <UseField
+            path={`${item.path}.params.packId`}
+            component={GhostFormField}
+            readDefaultValueOnForm={!item.isNew}
+          />
         </QueryClientProvider>
       </FormProvider>
     );

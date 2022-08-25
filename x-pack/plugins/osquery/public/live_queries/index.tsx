@@ -10,7 +10,7 @@ import { EuiCode, EuiLoadingContent, EuiEmptyPrompt } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { EcsMappingSerialized } from '../packs/queries/ecs_mapping_editor_field';
+import type { ECSMapping } from '../../common/schemas/common';
 import { LiveQueryForm } from './form';
 import { useActionResultsPrivileges } from '../action_results/use_action_privileges';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
@@ -24,7 +24,7 @@ interface LiveQueryProps {
   onSuccess?: () => void;
   query?: string;
   savedQueryId?: string;
-  ecs_mapping?: EcsMappingSerialized;
+  ecs_mapping?: ECSMapping;
   agentsField?: boolean;
   queryField?: boolean;
   ecsMappingField?: boolean;
@@ -34,6 +34,7 @@ interface LiveQueryProps {
   packId?: string;
   agentSelection?: AgentSelection;
   addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
+  hideSubmitButton?: boolean;
 }
 
 const LiveQueryComponent: React.FC<LiveQueryProps> = ({
@@ -53,6 +54,7 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
   packId,
   agentSelection,
   addToTimeline,
+                                                        hideSubmitButton,
 }) => {
   const { data: hasActionResultsPrivileges, isLoading } = useActionResultsPrivileges();
 
@@ -128,6 +130,7 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
       formType={formType}
       enabled={enabled}
       hideAgentsField={hideAgentsField}
+      hideSubmitButton={hideSubmitButton}
       addToTimeline={addToTimeline}
     />
   );

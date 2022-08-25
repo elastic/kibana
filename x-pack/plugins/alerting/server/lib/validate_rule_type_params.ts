@@ -16,8 +16,6 @@ export function validateRuleTypeParams<Params extends RuleTypeParams>(
     return params as Params;
   }
 
-  console.log({ validate: JSON.stringify(params, null, 2) });
-
   try {
     return validator.validate(params);
   } catch (err) {

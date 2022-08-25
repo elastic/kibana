@@ -243,7 +243,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       ruleDataClient,
       ruleExecutionLoggerFactory: ruleExecutionLogService.createClientForExecutors,
       version: pluginContext.env.packageInfo.version,
-      ...(osquery ? { osqueryCreateAction: osquery.osqueryCreateAction } : {}),
     };
 
     const securityRuleTypeWrapper = createSecurityRuleTypeWrapper(securityRuleTypeOptions);
@@ -254,7 +253,14 @@ export class Plugin implements ISecuritySolutionPlugin {
       securityRuleTypeWrapper(createIndicatorMatchAlertType(ruleOptions))
     );
     plugins.alerting.registerType(securityRuleTypeWrapper(createMlAlertType(ruleOptions)));
-    plugins.alerting.registerType(securityRuleTypeWrapper(createQueryAlertType(ruleOptions)));
+    plugins.alerting.registerType(
+      securityRuleTypeWrapper(
+        createQueryAlertType({
+          ...ruleOptions,
+          ...(osquery ? { osqueryCreateAction: osquery.osqueryCreateAction } : {}),
+        })
+      )
+    );
     plugins.alerting.registerType(securityRuleTypeWrapper(createThresholdAlertType(ruleOptions)));
     plugins.alerting.registerType(securityRuleTypeWrapper(createNewTermsAlertType(ruleOptions)));
 
