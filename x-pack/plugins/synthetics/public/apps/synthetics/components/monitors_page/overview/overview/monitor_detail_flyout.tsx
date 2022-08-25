@@ -162,14 +162,13 @@ export function MonitorDetailFlyout(props: {
                   field: 'monitor.status',
                   render: (statusString: string) => (
                     <EuiBadge color={statusString === 'up' ? 'success' : 'danger'}>
-                      {status}
+                      {statusString}
                     </EuiBadge>
                   ),
                 },
               ]}
               items={monitorDetail.data ? [monitorDetail.data] : []}
               loading={monitorDetail.loading}
-              pagination={undefined}
             />
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
