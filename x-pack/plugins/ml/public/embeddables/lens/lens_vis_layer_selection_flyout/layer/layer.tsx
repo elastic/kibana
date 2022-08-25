@@ -45,7 +45,7 @@ export const Layer: FC<Props> = ({ layer, layerIndex, embeddable }) => {
           </EuiFlexGroup>
         </EuiSplitPanel.Inner>
         <EuiHorizontalRule margin="none" />
-        <EuiSplitPanel.Inner grow={false} color="subdued">
+        <EuiSplitPanel.Inner grow={false} color="plain">
           {layer.isCompatible ? (
             <CompatibleLayer layer={layer} layerIndex={layerIndex} embeddable={embeddable} />
           ) : (
