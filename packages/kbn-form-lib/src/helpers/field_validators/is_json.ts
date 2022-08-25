@@ -7,20 +7,22 @@
  */
 
 import { ValidationFunc } from '../../hook_form_lib';
-import { isEmptyString } from '../../../validators/string';
-import { isEmptyArray } from '../../../validators/array';
+import { isJSON } from '../../validators/string';
 import { ERROR_CODE } from './types';
 
-export const emptyField =
-  (message: string) =>
+export const isJsonField =
+  (message: string, { allowEmptyString = false }: { allowEmptyString?: boolean } = {}) =>
   (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
-    const [{ value, path }] = args;
+    const [{ value }] = args;
 
-    if (typeof value === 'string') {
-      return isEmptyString(value) ? { code: 'ERR_FIELD_MISSING', path, message } : undefined;
+    if (typeof value !== 'string' || (allowEmptyString && value.trim() === '')) {
+      return;
     }
 
-    if (Array.isArray(value)) {
-      return isEmptyArray(value) ? { code: 'ERR_FIELD_MISSING', path, message } : undefined;
+    if (!isJSON(value)) {
+      return {
+        code: 'ERR_JSON_FORMAT',
+        message,
+      };
     }
   };

@@ -7,30 +7,23 @@
  */
 
 import { ValidationFunc, ValidationError } from '../../hook_form_lib';
-import { containsChars } from '../../../validators/string';
+import { isUrl } from '../../validators/string';
 import { ERROR_CODE } from './types';
 
-export const containsCharsField =
-  ({
-    message,
-    chars,
-  }: {
-    message: string | ((err: Partial<ValidationError>) => string);
-    chars: string | string[];
-  }) =>
+export const urlField =
+  (message: string) =>
   (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
     const [{ value }] = args;
 
+    const error: ValidationError<ERROR_CODE> = {
+      code: 'ERR_FIELD_FORMAT',
+      formatType: 'URL',
+      message,
+    };
+
     if (typeof value !== 'string') {
-      return;
+      return error;
     }
 
-    const { doesContain, charsFound } = containsChars(chars)(value as string);
-    if (doesContain) {
-      return {
-        code: 'ERR_INVALID_CHARS',
-        charsFound,
-        message: typeof message === 'function' ? message({ charsFound }) : message,
-      };
-    }
+    return isUrl(value) ? undefined : error;
   };

@@ -7,27 +7,38 @@
  */
 
 import { ValidationFunc, ValidationError } from '../../hook_form_lib';
-import { isNumberGreaterThan } from '../../../validators/number';
+import { hasMinLengthString } from '../../validators/string';
+import { hasMinLengthArray } from '../../validators/array';
 import { ERROR_CODE } from './types';
 
-export const numberGreaterThanField =
+export const minLengthField =
   ({
-    than,
+    length = 0,
     message,
-    allowEquality = false,
   }: {
-    than: number;
+    length: number;
     message: string | ((err: Partial<ValidationError>) => string);
-    allowEquality?: boolean;
   }) =>
   (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
     const [{ value }] = args;
 
-    return isNumberGreaterThan(than, allowEquality)(value as number)
+    // Validate for Arrays
+    if (Array.isArray(value)) {
+      return hasMinLengthArray(length)(value)
+        ? undefined
+        : {
+            code: 'ERR_MIN_LENGTH',
+            length,
+            message: typeof message === 'function' ? message({ length }) : message,
+          };
+    }
+
+    // Validate for Strings
+    return hasMinLengthString(length)((value as string).trim())
       ? undefined
       : {
-          code: 'ERR_GREATER_THAN_NUMBER',
-          than,
-          message: typeof message === 'function' ? message({ than }) : message,
+          code: 'ERR_MIN_LENGTH',
+          length,
+          message: typeof message === 'function' ? message({ length }) : message,
         };
   };

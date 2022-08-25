@@ -6,7 +6,5 @@
  * Side Public License, v 1.
  */
 
-// eslint-disable-next-line import/no-extraneous-dependencies
 export type { TestBed } from '@kbn/test-jest-helpers';
-// eslint-disable-next-line import/no-extraneous-dependencies
 export { registerTestBed, getRandomString } from '@kbn/test-jest-helpers';

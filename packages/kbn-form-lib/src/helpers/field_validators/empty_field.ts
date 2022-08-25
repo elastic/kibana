@@ -7,22 +7,20 @@
  */
 
 import { ValidationFunc } from '../../hook_form_lib';
-import { isLowerCaseString } from '../../../validators/string';
+import { isEmptyString } from '../../validators/string';
+import { isEmptyArray } from '../../validators/array';
 import { ERROR_CODE } from './types';
 
-export const lowerCaseStringField =
+export const emptyField =
   (message: string) =>
   (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
-    const [{ value }] = args;
+    const [{ value, path }] = args;
 
-    if (typeof value !== 'string') {
-      return;
+    if (typeof value === 'string') {
+      return isEmptyString(value) ? { code: 'ERR_FIELD_MISSING', path, message } : undefined;
     }
 
-    if (!isLowerCaseString(value)) {
-      return {
-        code: 'ERR_LOWERCASE_STRING',
-        message,
-      };
+    if (Array.isArray(value)) {
+      return isEmptyArray(value) ? { code: 'ERR_FIELD_MISSING', path, message } : undefined;
     }
   };

@@ -7,8 +7,8 @@
  */
 
 import { ValidationFunc, ValidationError } from '../../hook_form_lib';
-import { hasMaxLengthString } from '../../../validators/string';
-import { hasMaxLengthArray } from '../../../validators/array';
+import { hasMaxLengthString } from '../../validators/string';
+import { hasMaxLengthArray } from '../../validators/array';
 import { ERROR_CODE } from './types';
 
 export const maxLengthField =

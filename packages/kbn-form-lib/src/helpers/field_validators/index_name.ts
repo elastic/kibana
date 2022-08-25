@@ -6,10 +6,50 @@
  * Side Public License, v 1.
  */
 
-import { indices } from '../../../../public';
 import { ValidationFunc } from '../../hook_form_lib';
-import { startsWith, containsChars } from '../../../validators/string';
+import { startsWith, containsChars } from '../../validators/string';
 import { ERROR_CODE } from './types';
+
+// start copy from 'es_ui_shared/public/index' plugin
+
+// TODO: remove copied code once es_ui_shared/index is moved to package
+
+const ILLEGAL_CHARACTERS_VISIBLE = ['\\', '/', '?', '"', '<', '>', '|'];
+const INDEX_ILLEGAL_CHARACTERS_VISIBLE = [...ILLEGAL_CHARACTERS_VISIBLE, '*'];
+
+function indexNameBeginsWithPeriod(indexName?: string): boolean {
+  if (indexName === undefined) {
+    return false;
+  }
+  return indexName[0] === '.';
+}
+
+function findIllegalCharactersInIndexName(indexName: string): string[] {
+  const illegalCharacters = INDEX_ILLEGAL_CHARACTERS_VISIBLE.reduce(
+    (chars: string[], char: string): string[] => {
+      if (indexName.includes(char)) {
+        chars.push(char);
+      }
+
+      return chars;
+    },
+    []
+  );
+
+  return illegalCharacters;
+}
+
+function indexNameContainsSpaces(indexName: string): boolean {
+  return indexName.includes(' ');
+}
+
+const indices = {
+  INDEX_ILLEGAL_CHARACTERS_VISIBLE,
+  indexNameBeginsWithPeriod,
+  findIllegalCharactersInIndexName,
+  indexNameContainsSpaces,
+};
+// end copy
 
 export const indexNameField =
   (i18n: any) =>

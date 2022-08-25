@@ -7,10 +7,10 @@
  */
 
 import { ValidationFunc, ValidationError } from '../../hook_form_lib';
-import { isNumberSmallerThan } from '../../../validators/number';
+import { isNumberGreaterThan } from '../../validators/number';
 import { ERROR_CODE } from './types';
 
-export const numberSmallerThanField =
+export const numberGreaterThanField =
   ({
     than,
     message,
@@ -23,10 +23,10 @@ export const numberSmallerThanField =
   (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
     const [{ value }] = args;
 
-    return isNumberSmallerThan(than, allowEquality)(value as number)
+    return isNumberGreaterThan(than, allowEquality)(value as number)
       ? undefined
       : {
-          code: 'ERR_SMALLER_THAN_NUMBER',
+          code: 'ERR_GREATER_THAN_NUMBER',
           than,
           message: typeof message === 'function' ? message({ than }) : message,
         };

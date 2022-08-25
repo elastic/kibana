@@ -39,7 +39,7 @@ export const multiSelectComponent: Record<string, SerializerFunc<string[]>> = {
   },
 };
 
-interface StripEmptyFieldsOptions {
+export interface StripEmptyFieldsOptions {
   types?: Array<'string' | 'object'>;
   recursive?: boolean;
 }
