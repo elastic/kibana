@@ -121,7 +121,6 @@ TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/prettier",
   "@npm//@types/react-dom",
-  "@npm//@types/react-redux",
   "@npm//@types/react-router-dom",
   "@npm//@types/semver",
   "@npm//@types/supertest",

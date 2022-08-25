@@ -191,6 +191,22 @@
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "backport:skip", "ci:all-cypress-suites"],
       "enabled": true
+    },
+    {
+      "groupName": "redux",
+      "packageNames": ["redux", "react-redux"],
+      "reviewers":[
+        "team:enterprise-search-frontend",
+        "team:kibana-presentation",
+        "team:kibana-data-discovery",
+        "team:platform-deployment-management",
+        "team:infra-monitoring-ui",
+        "team:kibana-gis",
+        "team:security-solution"
+      ],
+      "matchBaseBranches": ["main"],
+      "labels": ["release_note:skip", "backport:skip", "ci:all-cypress-suites"],
+      "enabled": true
     }
   ]
 }
