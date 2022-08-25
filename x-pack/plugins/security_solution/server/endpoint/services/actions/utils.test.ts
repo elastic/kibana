@@ -521,6 +521,7 @@ describe('When using Actions service utilities', () => {
           action789Responses[1] as EndpointActivityLogActionResponse
         ).item.data.EndpointActions.data.output = {
           type: 'text',
+          // @ts-expect-error need to fix ActionResponseOutput type
           content: 'some endpoint output data',
         };
 
