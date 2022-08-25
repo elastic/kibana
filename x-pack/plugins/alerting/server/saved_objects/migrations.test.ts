@@ -2398,7 +2398,7 @@ describe('successful migrations', () => {
     });
 
     describe('8.4.1', () => {
-      test('removes IsSnoozedUntil', () => {
+      test('removes isSnoozedUntil', () => {
         const migration841 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
           '8.4.1'
         ];
@@ -2412,6 +2412,15 @@ describe('successful migrations', () => {
         const migratedAlert841 = migration841(mutedAlert, migrationContext);
 
         expect(migratedAlert841.attributes.isSnoozedUntil).toBeFalsy();
+      });
+
+      test('works as expected if isSnoozedUntil is not populated', () => {
+        const migration841 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
+          '8.4.1'
+        ];
+        const mutedAlert = getMockData({}, true);
+        expect(mutedAlert.attributes.isSnoozedUntil).toBeFalsy();
+        expect(() => migration841(mutedAlert, migrationContext)).not.toThrowError();
       });
     });
 
