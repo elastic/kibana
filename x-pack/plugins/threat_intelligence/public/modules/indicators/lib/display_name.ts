@@ -214,7 +214,7 @@ const findMappingRule = (indicatorType: string | null): IndicatorDisplayNameExtr
 const rules: Record<string, IndicatorDisplayNameExtractor> = {};
 
 /**
- * Find and return indicator display name structure [field, value]
+ * Find and return indicator display name structure {field, value}
  */
 export const getDisplayName = (indicator: Indicator): IndicatorDisplayNameAsObject => {
   const indicatorType = (unwrapValue(indicator, RawIndicatorFieldId.Type) || '').toLowerCase();

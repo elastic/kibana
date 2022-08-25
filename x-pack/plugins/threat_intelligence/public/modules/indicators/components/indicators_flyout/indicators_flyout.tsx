@@ -24,7 +24,7 @@ import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indi
 import { IndicatorsFlyoutJson } from '../indicators_flyout_json/indicators_flyout_json';
 import { IndicatorsFlyoutTable } from '../indicators_flyout_table/indicators_flyout_table';
 import { unwrapValue } from '../../lib/unwrap_value';
-import { getDisplayName } from '../../lib/display_value';
+import { getDisplayName } from '../../lib/display_name';
 
 export const TITLE_TEST_ID = 'tiIndicatorFlyoutTitle';
 export const SUBTITLE_TEST_ID = 'tiIndicatorFlyoutSubtitle';

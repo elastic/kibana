@@ -20,7 +20,7 @@ import {
   TABLE_TEST_ID,
 } from './indicators_flyout_table';
 import { unwrapValue } from '../../lib/unwrap_value';
-import { getDisplayName } from '../../lib/display_value';
+import { getDisplayName } from '../../lib/display_name';
 
 const mockIndicator: Indicator = generateMockIndicator();
 const mockFieldTypesMap = generateFieldTypeMap();

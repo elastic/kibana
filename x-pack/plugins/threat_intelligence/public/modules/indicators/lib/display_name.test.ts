@@ -23,7 +23,7 @@ import {
   Indicator,
   RawIndicatorFieldId,
 } from '../../../../common/types/indicator';
-import { getDisplayName } from './display_value';
+import { getDisplayName } from './display_name';
 
 type ExpectedIndicatorValue = string | null;
 

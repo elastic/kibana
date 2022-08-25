@@ -12,7 +12,7 @@ import React from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { EMPTY_VALUE } from '../../../../../common/constants';
 import { Indicator } from '../../../../../common/types/indicator';
-import { getDisplayName } from '../../lib/display_value';
+import { getDisplayName } from '../../lib/display_name';
 import { IndicatorField } from '../indicator_field/indicator_field';
 import { IndicatorsTableContext } from './context';
 import { ActionsRowCell } from './actions_row_cell';
