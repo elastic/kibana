@@ -17,6 +17,7 @@ export const getDataSourceInfo = async (
   modelTimeField: string | undefined,
   isOverwritten: boolean,
   overwrittenIndexPattern: IndexPatternValue | undefined,
+  seriesTimeField: string | undefined,
   dataViews: DataViewsPublicPluginStart
 ) => {
   let indexPatternId =
@@ -31,7 +32,7 @@ export const getDataSourceInfo = async (
 
     if (indexPattern) {
       indexPatternId = indexPattern.id ?? '';
-      timeField = indexPattern.timeFieldName;
+      timeField = seriesTimeField ?? indexPattern.timeFieldName;
     }
   }
 

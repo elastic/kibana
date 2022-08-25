@@ -14,6 +14,7 @@ import {
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import uuid from 'uuid';
 import { Panel } from '../../../common/types';
+import { PANEL_TYPES } from '../../../common/enums';
 import { getDataViewsStart } from '../../services';
 import { getDataSourceInfo } from '../lib/datasource';
 import { getMetricsColumns, getBucketsColumns } from '../lib/series';
@@ -23,6 +24,7 @@ import {
   convertToDateHistogramColumn,
   excludeMetaFromColumn,
 } from '../lib/convert';
+import { isValidMetrics } from '../lib/metrics';
 
 const excludeMetaFromLayers = (layers: Record<string, ExtendedLayer>): Record<string, Layer> => {
   const newLayers: Record<string, Layer> = {};
@@ -47,11 +49,16 @@ export const convertToLens = async (
       continue;
     }
 
+    if (!isValidMetrics(series.metrics, PANEL_TYPES.TIMESERIES)) {
+      return null;
+    }
+
     const { indexPatternId, indexPattern, timeField } = await getDataSourceInfo(
       model.index_pattern,
       model.time_field,
       Boolean(series.override_index_pattern),
       series.series_index_pattern,
+      series.series_time_field,
       dataViews
     );
 

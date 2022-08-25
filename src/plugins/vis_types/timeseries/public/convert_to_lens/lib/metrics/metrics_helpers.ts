@@ -12,7 +12,8 @@ import dateMath from '@kbn/datemath';
 import { TimeRange, UI_SETTINGS } from '@kbn/data-plugin/common';
 import { TimeScaleUnit } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { getUISettings } from '../../../services';
-import type { Metric, MetricType } from '../../../../common/types';
+import type { Metric, MetricType, Panel, Series } from '../../../../common/types';
+import { TIME_RANGE_DATA_MODES } from '../../../../common/enums';
 import { getFilterRatioFormula } from './filter_ratio_formula';
 import { getParentPipelineSeriesFormula } from './parent_pipeline_formula';
 import { getSiblingPipelineSeriesFormula } from './sibling_pipeline_formula';
@@ -53,7 +54,19 @@ export const getPercentileRankSeries = (
   });
 };
 
-export const getWindow = (interval?: string, timeRange?: TimeRange) => {
+const shouldCalculateWindow = (timeRangeMode?: string) => {
+  return timeRangeMode === TIME_RANGE_DATA_MODES.LAST_VALUE;
+};
+
+export const getWindow = (model: Panel, series: Series, timeRange?: TimeRange) => {
+  if (
+    !shouldCalculateWindow(
+      series.override_index_pattern ? series.time_range_mode : model.time_range_mode
+    )
+  ) {
+    return undefined;
+  }
+  const interval = series.override_index_pattern ? series.series_interval : model.interval;
   let window = interval || '1h';
 
   if (timeRange && !interval) {
@@ -137,12 +150,12 @@ export const getFormulaEquivalent = (
       return `${aggFormula}()`;
     }
     case 'percentile': {
-      return `${aggregation}(${currentMetric.field}${
+      return `${aggFormula}(${currentMetric.field}${
         metaValue ? `, percentile=${metaValue}` : ''
       }${addTimeRangeToFormula(window)})`;
     }
     case 'percentile_rank': {
-      return `${aggregation}(${currentMetric.field}${
+      return `${aggFormula}(${currentMetric.field}${
         metaValue ? `, value=${metaValue}` : ''
       }${addTimeRangeToFormula(window)})`;
     }
@@ -168,7 +181,7 @@ export const getFormulaEquivalent = (
       );
     }
     case 'positive_rate': {
-      return `${aggregation}(max(${currentMetric.field}${addTimeRangeToFormula(window)}))`;
+      return `${aggFormula}(max(${currentMetric.field}${addTimeRangeToFormula(window)}))`;
     }
     case 'filter_ratio': {
       return getFilterRatioFormula(currentMetric, window);
@@ -180,17 +193,17 @@ export const getFormulaEquivalent = (
       if (currentMetric.mode === 'lower') {
         return `average(${currentMetric.field}${addTimeRangeToFormula(window)}) - ${
           currentMetric.sigma || 1.5
-        } * ${aggregation}(${currentMetric.field}${addTimeRangeToFormula(window)})`;
+        } * ${aggFormula}(${currentMetric.field}${addTimeRangeToFormula(window)})`;
       }
       if (currentMetric.mode === 'upper') {
         return `average(${currentMetric.field}${addTimeRangeToFormula(window)}) + ${
           currentMetric.sigma || 1.5
-        } * ${aggregation}(${currentMetric.field}${addTimeRangeToFormula(window)})`;
+        } * ${aggFormula}(${currentMetric.field}${addTimeRangeToFormula(window)})`;
       }
-      return `${aggregation}(${currentMetric.field})`;
+      return `${aggFormula}(${currentMetric.field})`;
     }
     default: {
-      return `${aggregation}(${currentMetric.field}${addTimeRangeToFormula(window)})`;
+      return `${aggFormula}(${currentMetric.field}${addTimeRangeToFormula(window)})`;
     }
   }
 };

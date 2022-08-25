@@ -9,7 +9,7 @@
 import uuid from 'uuid';
 import { Layer } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { Position } from '@elastic/charts';
-import { PANEL_TYPES, TIME_RANGE_DATA_MODES } from '../../../common/enums';
+import { PANEL_TYPES } from '../../../common/enums';
 import { getDataViewsStart } from '../../services';
 import { getDataSourceInfo } from '../lib/datasource';
 import { getMetricsColumns, getBucketsColumns } from '../lib/series';
@@ -48,13 +48,11 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model, timeR
       model.time_field,
       Boolean(series.override_index_pattern),
       series.series_index_pattern,
+      series.series_time_field,
       dataViews
     );
 
-    const window =
-      model.time_range_mode === TIME_RANGE_DATA_MODES.LAST_VALUE
-        ? getWindow(model.interval, timeRange)
-        : undefined;
+    const window = getWindow(model, series, timeRange);
 
     // handle multiple metrics
     const metricsColumns = getMetricsColumns(series, indexPattern!, seriesNum, window);
@@ -62,7 +60,7 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model, timeR
       return null;
     }
 
-    const bucketsColumns = getBucketsColumns(model, series, metricsColumns, indexPattern!, true);
+    const bucketsColumns = getBucketsColumns(model, series, metricsColumns, indexPattern!, false);
     if (bucketsColumns === null) {
       return null;
     }
@@ -89,17 +87,17 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model, timeR
         shouldTruncate: Boolean(model.truncate_legend),
         maxLines: model.max_lines_legend ?? 1,
       },
-      gridLinesVisibility: {
+      gridlinesVisibilitySettings: {
         x: false,
         yLeft: false,
         yRight: false,
       },
-      tickLabelsVisibility: {
+      tickLabelsVisibilitySettings: {
         x: true,
         yLeft: false,
         yRight: false,
       },
-      axisTitlesVisibility: {
+      axisTitlesVisibilitySettings: {
         x: false,
         yLeft: false,
         yRight: false,

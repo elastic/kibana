@@ -73,7 +73,7 @@ const convertFormulaScriptForAggs = (
   allAggMetrics: Metric[],
   window?: string
 ) => {
-  const script = getFormulaEquivalent(metric, allAggMetrics, window);
+  const script = getFormulaEquivalent(metric, allAggMetrics, undefined, window);
   if (!script) {
     return null;
   }

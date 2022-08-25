@@ -24,6 +24,7 @@ import {
   convertToStaticValueColumn,
   convertMetricAggregationColumnWithoutParams,
   convertToCounterRateFormulaColumn,
+  convertToStandartDeviationColumn,
 } from '../convert';
 import { getValidColumns } from './columns';
 
@@ -106,6 +107,10 @@ export const getMetricsColumns = (
     }
     case 'static': {
       const column = convertToStaticValueColumn(series, metrics, visibleSeriesCount, window);
+      return getValidColumns(column);
+    }
+    case 'std_deviation': {
+      const column = convertToStandartDeviationColumn(series, metrics, dataView, window);
       return getValidColumns(column);
     }
     default: {

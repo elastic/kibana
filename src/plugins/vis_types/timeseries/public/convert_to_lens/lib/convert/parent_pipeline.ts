@@ -47,7 +47,8 @@ type MetricAggregationWithoutParams =
   | typeof Operations.COUNTER_RATE
   | typeof Operations.MAX
   | typeof Operations.MIN
-  | typeof Operations.SUM;
+  | typeof Operations.SUM
+  | typeof Operations.STANDARD_DEVIATION;
 
 type MetricAggregation =
   | MetricAggregationWithoutParams
@@ -85,6 +86,7 @@ const SUPPORTED_METRICS_AGGS_WITHOUT_PARAMS: MetricAggregationWithoutParams[] = 
   Operations.MAX,
   Operations.MIN,
   Operations.SUM,
+  Operations.STANDARD_DEVIATION,
 ];
 
 const SUPPORTED_METRIC_AGGS: MetricAggregation[] = [
@@ -114,10 +116,10 @@ export const convertMetricAggregationColumnWithoutParams = (
   if (!isSupportedAggregationWithoutParams(aggregation.name)) {
     return null;
   }
-  const sourceField = aggregation.name !== 'count' && metric.field ? metric.field : 'document';
+  const sourceField = aggregation.isFieldRequired && metric.field ? metric.field : 'document';
 
   const field = dataView.getFieldByName(sourceField);
-  if (!field && aggregation.name !== 'count') {
+  if (!field && aggregation.isFieldRequired) {
     return null;
   }
 

@@ -225,7 +225,7 @@ function getParams(column: Column) {
     ...column.params,
     filter: column.filter,
     shift: column.timeShift,
-    window: column.window,
+    ...(column.window && { window: column.window }),
   };
 }
 
