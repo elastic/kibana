@@ -8,6 +8,7 @@
 import { createSelector } from 'reselect';
 
 import type { Filter, Query } from '@kbn/es-query';
+import type { InputsState } from './reducer';
 import type { State } from '../types';
 
 import type { InputsModel, InputsRange, GlobalQuery } from './model';
@@ -19,7 +20,8 @@ const selectGlobal = (state: State): InputsRange => state.inputs.global;
 const selectTimeline = (state: State): InputsRange => state.inputs.timeline;
 
 // TODO: remove undefined when socTrendsEnabled feature flag removed
-const selectSocTrends = (state: State): InputsRange | undefined => state.inputs.socTrends;
+const selectSocTrends = (state: State): InputsState['socTrends'] | undefined =>
+  state.inputs.socTrends;
 
 const selectGlobalQuery = (state: State, id: string): GlobalQuery =>
   state.inputs.global.queries.find((q) => q.id === id) || {

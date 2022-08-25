@@ -5,5 +5,9 @@
  * 2.0.
  */
 
-export type InputsModelId = 'global' | 'timeline' | 'socTrends';
+export const enum InputsModelId {
+  'global' = 'global',
+  'timeline' = 'timeline',
+  'socTrends' = 'socTrends',
+}
 export type TimeRangeKinds = 'absolute' | 'relative';

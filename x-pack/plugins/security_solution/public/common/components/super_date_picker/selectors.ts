@@ -7,6 +7,7 @@
 
 import { isEmpty } from 'lodash';
 import { createSelector } from 'reselect';
+import type { InputsModelId } from '../../store/inputs/constants';
 import type { State } from '../../store';
 import type { Policy, InputsRange, TimeRange, GlobalQuery } from '../../store/inputs/model';
 
@@ -16,17 +17,18 @@ export const getTimerange = (inputState: InputsRange): TimeRange => inputState.t
 
 export const getQueries = (inputState: InputsRange): GlobalQuery[] => inputState.queries;
 
-// TODO: revert 'global' | 'timeline' to InputsModelId when socTrendsEnabled feature flag removed
-export const getGlobalQueries = (state: State, id: 'global' | 'timeline'): GlobalQuery[] => {
+export const getGlobalQueries = (
+  state: State,
+  id: InputsModelId.global | InputsModelId.timeline
+): GlobalQuery[] => {
   const inputsRange = state.inputs[id];
   return !isEmpty(inputsRange.linkTo)
-    ? (inputsRange.linkTo as Array<'global' | 'timeline'>).reduce<GlobalQuery[]>(
-        (acc, linkToId) => {
-          const linkToIdInputsRange: InputsRange = state.inputs[linkToId];
-          return [...acc, ...linkToIdInputsRange.queries];
-        },
-        inputsRange.queries
-      )
+    ? (inputsRange.linkTo as Array<InputsModelId.global | InputsModelId.timeline>).reduce<
+        GlobalQuery[]
+      >((acc, linkToId) => {
+        const linkToIdInputsRange: InputsRange = state.inputs[linkToId];
+        return [...acc, ...linkToIdInputsRange.queries];
+      }, inputsRange.queries)
     : inputsRange.queries;
 };
 

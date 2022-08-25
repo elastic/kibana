@@ -8,7 +8,7 @@
 import { get } from 'lodash/fp';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
-import type { InputsModelId } from './constants';
+import { InputsModelId } from './constants';
 import { getIntervalSettings, getTimeRangeSettings } from '../../utils/default_date_settings';
 import {
   deleteAllQuery,
@@ -55,7 +55,7 @@ export const initialInputsState: InputsState = {
     },
     queries: [],
     policy: getIntervalSettings(false),
-    linkTo: ['timeline'],
+    linkTo: [InputsModelId.timeline],
     query: {
       query: '',
       language: 'kuery',
@@ -70,7 +70,7 @@ export const initialInputsState: InputsState = {
     },
     queries: [],
     policy: getIntervalSettings(false),
-    linkTo: ['global'],
+    linkTo: [InputsModelId.global],
     query: {
       query: '',
       language: 'kuery',
@@ -83,7 +83,6 @@ export const initialInputsState: InputsState = {
 export const createInitialInputsState = (socTrendsEnabled: boolean): InputsState => {
   const { from, fromStr, to, toStr, socTrends } = getTimeRangeSettings();
   const { kind, duration } = getIntervalSettings();
-  const socTrendsId: InputsModelId = 'socTrends';
   return {
     global: {
       timerange: {
@@ -98,7 +97,7 @@ export const createInitialInputsState = (socTrendsEnabled: boolean): InputsState
         kind,
         duration,
       },
-      linkTo: ['timeline', ...(socTrendsEnabled ? [socTrendsId] : [])],
+      linkTo: [InputsModelId.timeline, ...(socTrendsEnabled ? [InputsModelId.socTrends] : [])],
       query: {
         query: '',
         language: 'kuery',
@@ -119,7 +118,7 @@ export const createInitialInputsState = (socTrendsEnabled: boolean): InputsState
         kind,
         duration,
       },
-      linkTo: ['global'],
+      linkTo: [InputsModelId.global],
       query: {
         query: '',
         language: 'kuery',
@@ -131,18 +130,7 @@ export const createInitialInputsState = (socTrendsEnabled: boolean): InputsState
       ? {
           socTrends: {
             timerange: socTrends,
-            queries: [],
-            policy: {
-              kind,
-              duration,
-            },
-            linkTo: ['global'],
-            query: {
-              query: '',
-              language: 'kuery',
-            },
-            filters: [],
-            fullScreen: false,
+            linkTo: [InputsModelId.global],
           },
         }
       : {}),
@@ -155,7 +143,8 @@ export const inputsReducer = reducerWithInitialState(initialInputsState)
       ...state,
       global: {
         ...state.global,
-        linkTo: [],
+        // needs to be emptied, but socTrends should remain if defined
+        linkTo: state.global.linkTo.filter((i) => i !== InputsModelId.timeline),
       },
       timeline: {
         ...state.timeline,

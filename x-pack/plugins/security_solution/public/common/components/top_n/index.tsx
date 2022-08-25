@@ -11,6 +11,7 @@ import { connect } from 'react-redux';
 
 import type { DataViewBase, Filter, Query } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { InputsModelId } from '../../store/inputs/constants';
 import { useGlobalTime } from '../../containers/use_global_time';
 import type { BrowserFields } from '../../containers/source';
 import { useKibana } from '../../lib/kibana';
@@ -165,7 +166,9 @@ const StatefulTopNComponent: React.FC<Props> = ({
       paddingSize={paddingSize}
       query={timelineId === TimelineId.active ? EMPTY_QUERY : globalQuery}
       showLegend={showLegend}
-      setAbsoluteRangeDatePickerTarget={timelineId === TimelineId.active ? 'timeline' : 'global'}
+      setAbsoluteRangeDatePickerTarget={
+        timelineId === TimelineId.active ? InputsModelId.timeline : InputsModelId.global
+      }
       setQuery={setQuery}
       timelineId={timelineId}
       to={timelineId === TimelineId.active ? activeTimelineTo : to}

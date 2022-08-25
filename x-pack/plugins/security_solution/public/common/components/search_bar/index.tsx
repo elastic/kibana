@@ -43,7 +43,7 @@ import { useSyncSearchBarUrlParams } from '../../hooks/search_bar/use_sync_searc
 import { useSyncTimerangeUrlParam } from '../../hooks/search_bar/use_sync_timerange_url_param';
 
 interface SiemSearchBarProps {
-  id: InputsModelId;
+  id: InputsModelId.timeline | InputsModelId.global;
   indexPattern: DataViewBase;
   pollForSignalIndex?: () => void;
   timelineId?: string;
@@ -352,8 +352,7 @@ const makeMapStateToProps = () => {
       fromStr: getFromStrSelector(inputsRange),
       filterQuery: getFilterQuerySelector(inputsRange),
       isLoading: getIsLoadingSelector(inputsRange),
-      // TODO: revert 'global' | 'timeline' to InputsModelId when socTrendsEnabled feature flag removed
-      queries: getQueriesSelector(state, id as 'global' | 'timeline'),
+      queries: getQueriesSelector(state, id),
       savedQuery: getSavedQuerySelector(inputsRange),
       start: getStartSelector(inputsRange),
       toStr: getToStrSelector(inputsRange),
@@ -364,7 +363,7 @@ const makeMapStateToProps = () => {
 SearchBarComponent.displayName = 'SiemSearchBar';
 
 interface UpdateReduxSearchBar extends OnTimeChangeProps {
-  id: InputsModelId;
+  id: InputsModelId.timeline | InputsModelId.global;
   filters?: Filter[];
   filterManager: FilterManager;
   query?: Query;

@@ -26,7 +26,7 @@ import { timelineActions } from '../../../timelines/store/timeline';
 import { useUiSetting$ } from '../../lib/kibana';
 import type { inputsModel, State } from '../../store';
 import { inputsActions } from '../../store/actions';
-import type { InputsModelId } from '../../store/inputs/constants';
+import { InputsModelId } from '../../store/inputs/constants';
 import {
   policySelector,
   durationSelector,
@@ -134,7 +134,10 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
       ({ isPaused, refreshInterval }: OnRefreshChangeProps): void => {
         const isQuickSelection =
           (fromStr != null && fromStr.includes('now')) || (toStr != null && toStr.includes('now'));
-        if (duration !== refreshInterval) {
+        if (
+          (id === InputsModelId.global || id === InputsModelId.timeline) &&
+          duration !== refreshInterval
+        ) {
           setDuration({ id, duration: refreshInterval });
         }
 
@@ -331,8 +334,7 @@ export const makeMapStateToProps = () => {
       kind: getKindSelector(inputsRange),
       kqlQuery: getKqlQuerySelector(inputsRange) as inputsModel.GlobalKqlQuery,
       policy: getPolicySelector(inputsRange),
-      // TODO: revert 'global' | 'timeline' to InputsModelId when socTrendsEnabled feature flag removed
-      queries: getQueriesSelector(state, id as 'global' | 'timeline'),
+      queries: getQueriesSelector(state, id as InputsModelId.global | InputsModelId.timeline),
       start: getStartSelector(inputsRange),
       toStr: getToStrSelector(inputsRange),
     };
@@ -345,8 +347,13 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   startAutoReload: ({ id }: { id: InputsModelId }) =>
     dispatch(inputsActions.startAutoReload({ id })),
   stopAutoReload: ({ id }: { id: InputsModelId }) => dispatch(inputsActions.stopAutoReload({ id })),
-  setDuration: ({ id, duration }: { id: InputsModelId; duration: number }) =>
-    dispatch(inputsActions.setDuration({ id, duration })),
+  setDuration: ({
+    id,
+    duration,
+  }: {
+    id: InputsModelId.global | InputsModelId.timeline;
+    duration: number;
+  }) => dispatch(inputsActions.setDuration({ id, duration })),
   updateReduxTime: dispatchUpdateReduxTime(dispatch),
 });
 

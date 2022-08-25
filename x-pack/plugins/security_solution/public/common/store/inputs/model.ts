@@ -94,7 +94,7 @@ export interface InputsModel {
   global: InputsRange;
   timeline: InputsRange;
   // TODO: remove ? when isSocTrendsEnabled feature flag is removed
-  socTrends?: InputsRange;
+  socTrends?: Pick<InputsRange, 'timerange' | 'linkTo'>;
 }
 export interface UrlInputsModelInputs {
   linkTo: InputsModelId[];

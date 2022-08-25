@@ -35,7 +35,10 @@ export const setRelativeRangeDatePicker = actionCreator<{
   to: string;
 }>('SET_RELATIVE_RANGE_DATE_PICKER');
 
-export const setDuration = actionCreator<{ id: InputsModelId; duration: number }>('SET_DURATION');
+export const setDuration = actionCreator<{
+  id: InputsModelId.global | InputsModelId.timeline;
+  duration: number;
+}>('SET_DURATION');
 
 export const startAutoReload = actionCreator<{ id: InputsModelId }>('START_KQL_AUTO_RELOAD');
 
@@ -47,8 +50,7 @@ export const setFullScreen = actionCreator<{
 }>('SET_FULL_SCREEN');
 
 export const setQuery = actionCreator<{
-  // TODO: revert 'global' | 'timeline' to InputsModelId when socTrendsEnabled feature flag removed
-  inputId: 'global' | 'timeline';
+  inputId: InputsModelId.global | InputsModelId.timeline;
   id: string;
   loading: boolean;
   refetch: Refetch | RefetchKql;
@@ -56,15 +58,13 @@ export const setQuery = actionCreator<{
 }>('SET_QUERY');
 
 export const deleteOneQuery = actionCreator<{
-  // TODO: revert 'global' | 'timeline' to InputsModelId when socTrendsEnabled feature flag removed
-  inputId: 'global' | 'timeline';
+  inputId: InputsModelId.global | InputsModelId.timeline;
   id: string;
 }>('DELETE_QUERY');
 
 export const setInspectionParameter = actionCreator<{
   id: string;
-  // TODO: revert 'global' | 'timeline' to InputsModelId when socTrendsEnabled feature flag removed
-  inputId: 'global' | 'timeline';
+  inputId: InputsModelId.global | InputsModelId.timeline;
   isInspected: boolean;
   selectedInspectIndex: number;
 }>('SET_INSPECTION_PARAMETER');
