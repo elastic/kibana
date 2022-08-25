@@ -90,14 +90,6 @@ const COMMENT_ARG_ABOUT = i18n.translate(
   { defaultMessage: 'A comment to go along with the action' }
 );
 
-const UNSUPPORTED_COMMAND_INFO = i18n.translate(
-  'xpack.securitySolution.endpointConsoleCommands.suspendProcess.unsupportedCommandInfo',
-  {
-    defaultMessage:
-      'This version of the Endpoint does not support this command. Upgrade your Agent in Fleet to use the latest response actions.',
-  }
-);
-
 export const getEndpointResponseActionsConsoleCommands = ({
   endpointAgentId,
   endpointCapabilities,
@@ -110,6 +102,7 @@ export const getEndpointResponseActionsConsoleCommands = ({
     if (responderCapability) {
       return endpointCapabilities.includes(responderCapability);
     }
+    return false;
   };
   return [
     {
@@ -146,7 +139,7 @@ export const getEndpointResponseActionsConsoleCommands = ({
         aboutInfo: i18n.translate('xpack.securitySolution.endpointConsoleCommands.release.about', {
           defaultMessage: 'Release the host',
         }),
-        isSupported: doesEndpointSupportResponder(''),
+        isSupported: doesEndpointSupportResponder('release'),
       }),
       RenderComponent: ReleaseActionResult,
       meta: {

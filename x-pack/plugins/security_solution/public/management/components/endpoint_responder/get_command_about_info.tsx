@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiIconTip } from '@elastic/eui';
 
 const UNSUPPORTED_COMMAND_INFO = i18n.translate(
@@ -29,7 +30,7 @@ export const getCommandAboutInfo = ({
   isSupported: boolean;
 }) => {
   return isSupported ? (
-    { aboutInfo }
+    aboutInfo
   ) : (
     <>
       {aboutInfo}
