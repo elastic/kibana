@@ -13,11 +13,11 @@ import { v4 } from 'uuid';
 import { difference } from 'lodash';
 import {
   RuleExecutorOptions,
+  Alert,
   AlertInstanceContext,
   AlertInstanceState,
   RuleTypeParams,
   RuleTypeState,
-  Alert,
 } from '@kbn/alerting-plugin/server';
 import { ParsedExperimentalFields } from '../../common/parse_experimental_fields';
 import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
@@ -165,7 +165,7 @@ export const createLifecycleExecutor =
     > = {
       alertWithLifecycle: ({ id, fields }) => {
         currentAlerts[id] = fields;
-        return alertFactory.create(id) as Alert<InstanceState, InstanceContext, ActionGroupIds>;
+        return alertFactory.create(id);
       },
       getAlertStartedDate: (alertId: string) => state.trackedAlerts[alertId]?.started ?? null,
     };

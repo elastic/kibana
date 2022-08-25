@@ -12,9 +12,9 @@ import { Alert, PublicAlert } from './alert';
 import { processAlerts } from '../lib';
 
 export interface AlertFactory<
-  State extends AlertInstanceState = AlertInstanceState,
-  Context extends AlertInstanceContext = AlertInstanceContext,
-  ActionGroupIds extends string = string
+  State extends AlertInstanceState,
+  Context extends AlertInstanceContext,
+  ActionGroupIds extends string
 > {
   create: (id: string) => PublicAlert<State, Context, ActionGroupIds>;
   alertLimit: {
@@ -27,11 +27,14 @@ export interface AlertFactory<
 }
 
 export type PublicAlertFactory<
-  State extends AlertInstanceState = AlertInstanceState,
-  Context extends AlertInstanceContext = AlertInstanceContext,
-  ActionGroupIds extends string = string
-> = Pick<AlertFactory, 'create' | 'done'> & {
-  alertLimit: Pick<AlertFactory['alertLimit'], 'getValue' | 'setLimitReached'>;
+  State extends AlertInstanceState,
+  Context extends AlertInstanceContext,
+  ActionGroupIds extends string
+> = Pick<AlertFactory<State, Context, ActionGroupIds>, 'create' | 'done'> & {
+  alertLimit: Pick<
+    AlertFactory<State, Context, ActionGroupIds>['alertLimit'],
+    'getValue' | 'setLimitReached'
+  >;
 };
 
 export interface AlertFactoryDoneUtils<
@@ -144,18 +147,18 @@ export function createAlertFactory<
 }
 
 export function getPublicAlertFactory<
-  State extends AlertInstanceState,
-  Context extends AlertInstanceContext,
-  ActionGroupIds extends string
+  State extends AlertInstanceState = AlertInstanceState,
+  Context extends AlertInstanceContext = AlertInstanceContext,
+  ActionGroupIds extends string = string
 >(
   alertFactory: AlertFactory<State, Context, ActionGroupIds>
 ): PublicAlertFactory<State, Context, ActionGroupIds> {
   return {
     create: (...args): PublicAlert<State, Context, ActionGroupIds> => alertFactory.create(...args),
     alertLimit: {
-      getValue: () => alertFactory.alertLimit.getValue(),
-      setLimitReached: (...args) => alertFactory.alertLimit.setLimitReached(...args),
+      getValue: (): number => alertFactory.alertLimit.getValue(),
+      setLimitReached: (...args): void => alertFactory.alertLimit.setLimitReached(...args),
     },
-    done: () => alertFactory.done(),
+    done: (): AlertFactoryDoneUtils<State, Context, ActionGroupIds> => alertFactory.done(),
   };
 }
