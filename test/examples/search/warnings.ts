@@ -70,12 +70,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         },
         { override: true }
       );
+      await kibanaServer.uiSettings.update({
+        'dateFormat:tz': 'UTC',
+        defaultIndex: '0ae0bc7a-e4ca-405c-ab67-f2b5913f2a51',
+        'timepicker:timeDefaults': '{ "from": "now-1y", "to": "now" }',
+      });
     });
 
     after(async () => {
       await es.indices.delete({ index: [testIndex, testRollupIndex] });
-      await es.rollup.deleteJob({ id: testRollupIndex });
       await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.uiSettings.replace({});
     });
 
     beforeEach(async () => {
@@ -159,7 +164,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         {
           message: '2 of 4 shards failed',
           text: 'The data you are seeing might be incomplete or wrong.',
-          // reason: shardFailureReason, // FIXME do we need this?
+          reason: shardFailureReason,
           type: shardFailureType,
         },
       ]);
