@@ -50,9 +50,11 @@ export const handler: FileKindsRequestHandler<Params, unknown, Body> = async (
     }
     throw e;
   }
-  const body: Response = { ok: true, size: file.size! };
+  const body: Response = { ok: true, size: file.data.size! };
   return res.ok({ body });
 };
+
+const fourMiB = 4 * 1024 * 1024;
 
 export function register(fileKindRouter: FileKindRouter, fileKind: FileKind) {
   if (fileKind.http.create) {
@@ -69,6 +71,7 @@ export function register(fileKindRouter: FileKindRouter, fileKind: FileKind) {
             output: 'stream',
             parse: false,
             accepts: fileKind.allowedMimeTypes ?? 'application/octet-stream',
+            maxBytes: fileKind.maxSizeBytes ?? fourMiB,
           },
         },
       },
