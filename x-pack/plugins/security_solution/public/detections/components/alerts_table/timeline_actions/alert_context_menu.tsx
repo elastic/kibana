@@ -331,7 +331,7 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
   /**
    * This should be re-visited after UEBA work is merged
    */
-  const useRuleIndices = useMemo(() => {
+  const memoRuleIndices = useMemo(() => {
     if (enrichedAlert != null && enrichedAlert['kibana.alert.rule.parameters']?.index != null) {
       return Array.isArray(enrichedAlert['kibana.alert.rule.parameters'].index)
         ? enrichedAlert['kibana.alert.rule.parameters'].index
@@ -341,8 +341,17 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
         ? enrichedAlert.signal.rule.index
         : [enrichedAlert.signal.rule.index];
     }
-    return ruleIndices;
-  }, [enrichedAlert, ruleIndices]);
+    return [];
+  }, [enrichedAlert]);
+
+  const memoDataViewId = useMemo(() => {
+    if (
+      enrichedAlert != null &&
+      enrichedAlert['kibana.alert.rule.parameters']?.data_view_id != null
+    ) {
+      return enrichedAlert['kibana.alert.rule.parameters'].data_view_id;
+    }
+  }, [enrichedAlert]);
 
   const isLoading = isLoadingAlertData && isSignalIndexLoading;
 
@@ -350,7 +359,8 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
     <AddExceptionFlyout
       ruleName={ruleName}
       ruleId={ruleId}
-      ruleIndices={useRuleIndices}
+      ruleIndices={memoRuleIndices}
+      dataViewId={memoDataViewId}
       exceptionListType={exceptionListType}
       alertData={enrichedAlert}
       isAlertDataLoading={isLoading}

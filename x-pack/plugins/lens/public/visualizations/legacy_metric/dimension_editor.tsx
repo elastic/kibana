@@ -22,7 +22,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState } from 'react';
 import { ColorMode } from '@kbn/charts-plugin/common';
-import type { MetricState } from '../../../common/types';
+import type { LegacyMetricState } from '../../../common/types';
 import { isNumericFieldForDatatable } from '../../../common/expressions';
 import { applyPaletteParams, PalettePanelContainer } from '../../shared_components';
 import type { VisualizationDimensionEditorProps } from '../../types';
@@ -33,7 +33,7 @@ import './dimension_editor.scss';
 const idPrefix = htmlIdGenerator()();
 
 export function MetricDimensionEditor(
-  props: VisualizationDimensionEditorProps<MetricState> & {
+  props: VisualizationDimensionEditorProps<LegacyMetricState> & {
     paletteService: PaletteRegistry;
   }
 ) {
@@ -88,7 +88,7 @@ export function MetricDimensionEditor(
           legend={i18n.translate('xpack.lens.legacyMetric.dynamicColoring.label', {
             defaultMessage: 'Color by value',
           })}
-          data-test-subj="lnsMetric_dynamicColoring_groups"
+          data-test-subj="lnsLegacyMetric_dynamicColoring_groups"
           name="dynamicColoring"
           buttonSize="compressed"
           options={[
@@ -97,27 +97,27 @@ export function MetricDimensionEditor(
               label: i18n.translate('xpack.lens.legacyMetric.dynamicColoring.none', {
                 defaultMessage: 'None',
               }),
-              'data-test-subj': 'lnsMetric_dynamicColoring_groups_none',
+              'data-test-subj': 'lnsLegacyMetric_dynamicColoring_groups_none',
             },
             {
               id: `${idPrefix}Background`,
               label: i18n.translate('xpack.lens.legacyMetric.dynamicColoring.background', {
                 defaultMessage: 'Fill',
               }),
-              'data-test-subj': 'lnsMetric_dynamicColoring_groups_background',
+              'data-test-subj': 'lnsLegacyMetric_dynamicColoring_groups_background',
             },
             {
               id: `${idPrefix}Labels`,
               label: i18n.translate('xpack.lens.legacyMetric.dynamicColoring.text', {
                 defaultMessage: 'Text',
               }),
-              'data-test-subj': 'lnsMetric_dynamicColoring_groups_labels',
+              'data-test-subj': 'lnsLegacyMetric_dynamicColoring_groups_labels',
             },
           ]}
           idSelected={`${idPrefix}${currentColorMode}`}
           onChange={(id) => {
             const newMode = id.replace(idPrefix, '') as ColorMode;
-            const params: Partial<MetricState> = {
+            const params: Partial<LegacyMetricState> = {
               colorMode: newMode,
             };
             if (!state?.palette && newMode !== ColorMode.None) {
@@ -163,7 +163,7 @@ export function MetricDimensionEditor(
           >
             <EuiFlexItem>
               <EuiColorPaletteDisplay
-                data-test-subj="lnsMetric_dynamicColoring_palette"
+                data-test-subj="lnsLegacyMetric_dynamicColoring_palette"
                 palette={displayStops.map(({ color }) => color)}
                 type={FIXED_PROGRESSION}
                 onClick={togglePalette}
@@ -171,7 +171,7 @@ export function MetricDimensionEditor(
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                data-test-subj="lnsMetric_dynamicColoring_trigger"
+                data-test-subj="lnsLegacyMetric_dynamicColoring_trigger"
                 iconType="controlsHorizontal"
                 onClick={togglePalette}
                 size="xs"
@@ -190,6 +190,7 @@ export function MetricDimensionEditor(
                   palettes={props.paletteService}
                   activePalette={activePalette}
                   dataBounds={currentMinMax}
+                  displayInfinity={true}
                   setPalette={(newPalette) => {
                     // if the new palette is not custom, replace the rangeMin with the artificial one
                     if (

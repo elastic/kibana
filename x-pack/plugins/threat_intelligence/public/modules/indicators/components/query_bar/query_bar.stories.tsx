@@ -42,7 +42,7 @@ const Template: ComponentStory<typeof QueryBar> = (args) => (
 export const Basic = Template.bind({});
 
 Basic.args = {
-  indexPatterns: [],
+  indexPattern: {} as any,
   filterManager: {} as any,
   filters: [],
   filterQuery: { language: 'kuery', query: '' },

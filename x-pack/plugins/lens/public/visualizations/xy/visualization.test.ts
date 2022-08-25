@@ -7,7 +7,13 @@
 
 import { getXyVisualization } from './visualization';
 import { Position } from '@elastic/charts';
-import { Operation, VisualizeEditorContext, Suggestion, OperationDescriptor } from '../../types';
+import {
+  Operation,
+  VisualizeEditorContext,
+  Suggestion,
+  OperationDescriptor,
+  DatasourcePublicAPI,
+} from '../../types';
 import type {
   State,
   XYState,
@@ -17,17 +23,18 @@ import type {
   XYReferenceLineLayerConfig,
   SeriesType,
 } from './types';
-import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
 import { layerTypes } from '../../../common';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
-import { LensIconChartBar } from '../../assets/chart_bar';
+import { IconChartBar } from '@kbn/chart-icons';
 import type { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { Datatable } from '@kbn/expressions-plugin/common';
-import { themeServiceMock } from '@kbn/core/public/mocks';
+import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
 import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 
 const exampleAnnotation: EventAnnotationConfig = {
   id: 'an1',
@@ -69,12 +76,14 @@ const paletteServiceMock = chartPluginMock.createPaletteRegistry();
 const fieldFormatsMock = fieldFormatsServiceMock.createStartContract();
 
 const xyVisualization = getXyVisualization({
-  datatableUtilities: createDatatableUtilitiesMock(),
   paletteService: paletteServiceMock,
   fieldFormats: fieldFormatsMock,
   useLegacyTimeAxis: false,
   kibanaTheme: themeServiceMock.createStartContract(),
   eventAnnotationService: eventAnnotationServiceMock,
+  core: coreMock.createStart(),
+  storage: {} as IStorageWrapper,
+  data: dataPluginMock.createStartContract(),
 });
 
 describe('xy_visualization', () => {
@@ -100,7 +109,7 @@ describe('xy_visualization', () => {
     it('should show the preferredSeriesType if there are no layers', () => {
       const desc = xyVisualization.getDescription(mixedState());
 
-      expect(desc.icon).toEqual(LensIconChartBar);
+      expect(desc.icon).toEqual(IconChartBar);
       expect(desc.label).toEqual('Bar vertical');
     });
 
@@ -269,7 +278,8 @@ describe('xy_visualization', () => {
         frame.datasourceLayers = {
           first: mockDatasource.publicAPIMock,
         };
-        frame.datasourceLayers.first.getOperationForColumnId = jest.fn((accessor) => {
+        const datasourceLayers = frame.datasourceLayers as Record<string, DatasourcePublicAPI>;
+        datasourceLayers.first.getOperationForColumnId = jest.fn((accessor) => {
           if (accessor === 'a') {
             return {
               dataType: 'date',
@@ -335,6 +345,7 @@ describe('xy_visualization', () => {
       ]);
 
       frame = {
+        ...frame,
         datasourceLayers: {
           first: mockDatasource.publicAPIMock,
         },
@@ -960,7 +971,8 @@ describe('xy_visualization', () => {
         layers: [
           {
             indexPatternId: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
-            timeFieldName: 'order_date',
+            xFieldName: 'order_date',
+            xMode: 'date_histogram',
             chartType: 'area',
             axisPosition: 'left',
             palette: {
@@ -1547,7 +1559,8 @@ describe('xy_visualization', () => {
         (state.layers[0] as XYDataLayerConfig).accessors = [];
         (state.layers[1] as XYReferenceLineLayerConfig).yConfig = []; // empty the configuration
         // set the xAccessor as date_histogram
-        frame.datasourceLayers.referenceLine.getOperationForColumnId = jest.fn((accessor) => {
+        const datasourceLayers = frame.datasourceLayers as Record<string, DatasourcePublicAPI>;
+        datasourceLayers.referenceLine.getOperationForColumnId = jest.fn((accessor) => {
           if (accessor === 'b') {
             return {
               dataType: 'date',
@@ -1576,7 +1589,8 @@ describe('xy_visualization', () => {
         (state.layers[0] as XYDataLayerConfig).accessors = [];
         (state.layers[1] as XYReferenceLineLayerConfig).yConfig![0].axisMode = 'bottom';
         // set the xAccessor as date_histogram
-        frame.datasourceLayers.referenceLine.getOperationForColumnId = jest.fn((accessor) => {
+        const datasourceLayers = frame.datasourceLayers as Record<string, DatasourcePublicAPI>;
+        datasourceLayers.referenceLine.getOperationForColumnId = jest.fn((accessor) => {
           if (accessor === 'b') {
             return {
               dataType: 'date',
@@ -1618,8 +1632,9 @@ describe('xy_visualization', () => {
           { forAccessor: 'b', axisMode: 'right' },
           { forAccessor: 'a', axisMode: 'left' },
         ];
+        const datasourceLayers = frame.datasourceLayers as Record<string, DatasourcePublicAPI>;
         // set the xAccessor as number histogram
-        frame.datasourceLayers.referenceLine.getOperationForColumnId = jest.fn((accessor) => {
+        datasourceLayers.referenceLine.getOperationForColumnId = jest.fn((accessor) => {
           if (accessor === 'c') {
             return {
               dataType: 'number',
@@ -1650,7 +1665,8 @@ describe('xy_visualization', () => {
         (state.layers[0] as XYDataLayerConfig).accessors = [];
         (state.layers[1] as XYReferenceLineLayerConfig).yConfig = []; // empty the configuration
         // set the xAccessor as top values
-        frame.datasourceLayers.referenceLine.getOperationForColumnId = jest.fn((accessor) => {
+        const datasourceLayers = frame.datasourceLayers as Record<string, DatasourcePublicAPI>;
+        datasourceLayers.referenceLine.getOperationForColumnId = jest.fn((accessor) => {
           if (accessor === 'b') {
             return {
               dataType: 'string',
@@ -1679,7 +1695,8 @@ describe('xy_visualization', () => {
         (state.layers[0] as XYDataLayerConfig).accessors = [];
         (state.layers[1] as XYReferenceLineLayerConfig).yConfig![0].axisMode = 'bottom';
         // set the xAccessor as date_histogram
-        frame.datasourceLayers.referenceLine.getOperationForColumnId = jest.fn((accessor) => {
+        const datasourceLayers = frame.datasourceLayers as Record<string, DatasourcePublicAPI>;
+        datasourceLayers.referenceLine.getOperationForColumnId = jest.fn((accessor) => {
           if (accessor === 'b') {
             return {
               dataType: 'string',
@@ -1787,7 +1804,8 @@ describe('xy_visualization', () => {
         frame.datasourceLayers = {
           first: mockDatasource.publicAPIMock,
         };
-        frame.datasourceLayers.first.getOperationForColumnId = jest.fn((accessor) => {
+        const datasourceLayers = frame.datasourceLayers as Record<string, DatasourcePublicAPI>;
+        datasourceLayers.first.getOperationForColumnId = jest.fn((accessor) => {
           if (accessor === 'a') {
             return {
               dataType: 'date',
@@ -1935,7 +1953,8 @@ describe('xy_visualization', () => {
       });
 
       it('should pass name of current series along', () => {
-        (frame.datasourceLayers.first.getOperationForColumnId as jest.Mock).mockReturnValue({
+        const datasourceLayers = frame.datasourceLayers as Record<string, DatasourcePublicAPI>;
+        (datasourceLayers.first.getOperationForColumnId as jest.Mock).mockReturnValue({
           label: 'Overwritten label',
         });
         const palette = paletteServiceMock.get('default');
@@ -2418,7 +2437,8 @@ describe('xy_visualization', () => {
       };
     });
     it('should return a warning when numeric accessors contain array', () => {
-      (frame.datasourceLayers.first.getOperationForColumnId as jest.Mock).mockReturnValue({
+      const datasourceLayers = frame.datasourceLayers as Record<string, DatasourcePublicAPI>;
+      (datasourceLayers.first.getOperationForColumnId as jest.Mock).mockReturnValue({
         label: 'Label B',
       });
       const warningMessages = xyVisualization.getWarningMessages!(
