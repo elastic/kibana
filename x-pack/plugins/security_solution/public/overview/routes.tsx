@@ -12,12 +12,14 @@ import {
   OVERVIEW_PATH,
   DETECTION_RESPONSE_PATH,
   SecurityPageName,
+  ENTITY_ANALYTICS_PATH,
 } from '../../common/constants';
 import type { SecuritySubPluginRoutes } from '../app/types';
 
 import { LandingPage } from './pages/landing';
 import { StatefulOverview } from './pages/overview';
 import { DetectionResponse } from './pages/detection_response';
+import { EntityAnalyticsPage } from './pages/entity_analytics';
 
 const OverviewRoutes = () => (
   <TrackApplicationView viewId={SecurityPageName.overview}>
@@ -30,9 +32,16 @@ const DetectionResponseRoutes = () => (
     <DetectionResponse />
   </TrackApplicationView>
 );
+
 const LandingRoutes = () => (
   <TrackApplicationView viewId={SecurityPageName.landing}>
     <LandingPage />
+  </TrackApplicationView>
+);
+
+const EntityAnalyticsRoutes = () => (
+  <TrackApplicationView viewId={SecurityPageName.entityAnalytics}>
+    <EntityAnalyticsPage />
   </TrackApplicationView>
 );
 
@@ -48,5 +57,9 @@ export const routes: SecuritySubPluginRoutes = [
   {
     path: LANDING_PATH,
     render: LandingRoutes,
+  },
+  {
+    path: ENTITY_ANALYTICS_PATH,
+    render: EntityAnalyticsRoutes,
   },
 ];
