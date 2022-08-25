@@ -18,6 +18,7 @@ import {
   mergeReturns,
   mergeSearchResults,
   getSafeSortIds,
+  addToSearchAfterReturn,
 } from './utils';
 import type { SearchAfterAndBulkCreateParams, SearchAfterAndBulkCreateReturnType } from './types';
 import { withSecuritySpan } from '../../../utils/with_security_span';
@@ -145,33 +146,17 @@ export const searchAfterAndBulkCreate = async ({
           const enrichedEvents = await enrichment(limitedEvents);
           const wrappedDocs = wrapHits(enrichedEvents, buildReasonMessage);
 
-          const {
-            bulkCreateDuration: bulkDuration,
-            createdItemsCount: createdCount,
-            createdItems,
-            success: bulkSuccess,
-            errors: bulkErrors,
-          } = await bulkCreate(wrappedDocs);
+          const bulkCreateResult = await bulkCreate(wrappedDocs);
 
-          toReturn = mergeReturns([
-            toReturn,
-            createSearchAfterReturnType({
-              success: bulkSuccess,
-              createdSignalsCount: createdCount,
-              createdSignals: createdItems,
-              bulkCreateTimes: [bulkDuration],
-              errors: bulkErrors,
-            }),
-          ]);
-          signalsCreatedCount += createdCount;
+          addToSearchAfterReturn({ current: toReturn, next: bulkCreateResult });
 
-          ruleExecutionLogger.debug(`created ${createdCount} signals`);
-          ruleExecutionLogger.debug(`signalsCreatedCount: ${signalsCreatedCount}`);
+          ruleExecutionLogger.debug(`created ${bulkCreateResult.createdItemsCount} signals`);
+          ruleExecutionLogger.debug(`signalsCreatedCount: ${toReturn.createdSignalsCount}`);
           ruleExecutionLogger.debug(`enrichedEvents.hits.hits: ${enrichedEvents.length}`);
 
           sendAlertTelemetryEvents(
             enrichedEvents,
-            createdItems,
+            bulkCreateResult.createdItems,
             eventsTelemetry,
             ruleExecutionLogger
           );

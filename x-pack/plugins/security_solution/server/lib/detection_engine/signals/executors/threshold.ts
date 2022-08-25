@@ -31,7 +31,7 @@ import type {
   ThresholdAlertState,
   WrapHits,
 } from '../types';
-import { createSearchAfterReturnType } from '../utils';
+import { addToSearchAfterReturn, createSearchAfterReturnType } from '../utils';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { buildThresholdSignalHistory } from '../threshold/build_signal_history';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
@@ -71,7 +71,7 @@ export const thresholdExecutor = async ({
   secondaryTimestamp?: string;
   aggregatableTimestampField: string;
 }): Promise<SearchAfterAndBulkCreateReturnType & { state: ThresholdAlertState }> => {
-  let result = createSearchAfterReturnType();
+  const result = createSearchAfterReturnType();
   const ruleParams = completeRule.ruleParams;
 
   return withSecuritySpan('thresholdExecutor', async () => {
@@ -141,32 +141,27 @@ export const thresholdExecutor = async ({
     });
 
     // Build and index new alerts
-    const { success, bulkCreateDuration, createdItemsCount, createdItems, errors } =
-      await bulkCreateThresholdSignals({
-        buckets,
-        completeRule,
-        filter: esFilter,
-        services,
-        inputIndexPattern: inputIndex,
-        signalsIndex: ruleParams.outputIndex,
-        startedAt,
-        from: tuple.from.toDate(),
-        signalHistory,
-        bulkCreate,
-        wrapHits,
-      });
+    const createResult = await bulkCreateThresholdSignals({
+      buckets,
+      completeRule,
+      filter: esFilter,
+      services,
+      inputIndexPattern: inputIndex,
+      signalsIndex: ruleParams.outputIndex,
+      startedAt,
+      from: tuple.from.toDate(),
+      signalHistory,
+      bulkCreate,
+      wrapHits,
+    });
 
-    result = {
-      ...result,
-      success,
-      errors: [...errors, ...previousSearchErrors, ...searchErrors],
-      createdSignalsCount: createdItemsCount,
-      createdSignals: createdItems,
-      bulkCreateTimes: bulkCreateDuration ? [bulkCreateDuration] : [],
-      searchAfterTimes: searchDurations,
-    };
+    addToSearchAfterReturn({ current: result, next: createResult });
 
-    const createdAlerts = createdItems.map((alert) => {
+    result.errors.push(...previousSearchErrors);
+    result.errors.push(...searchErrors);
+    result.searchAfterTimes = searchDurations;
+
+    const createdAlerts = createResult.createdItems.map((alert) => {
       const { _id, _index, ...source } = alert;
       return {
         _id,
