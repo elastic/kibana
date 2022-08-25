@@ -9,11 +9,13 @@ import { IndicesIndexState, IndicesStatsIndicesStats } from '@elastic/elasticsea
 
 import { ByteSizeValue } from '@kbn/config-schema';
 
+import { ElasticsearchIndex } from '../../../../common/types/indices';
+
 export const mapIndexStats = (
   indexData: IndicesIndexState,
   indexStats: IndicesStatsIndicesStats,
   indexName: string
-) => {
+): Omit<ElasticsearchIndex, 'count'> & { aliases: string[] } => {
   const aliases = Object.keys(indexData.aliases!);
   const sizeInBytes = new ByteSizeValue(indexStats?.total?.store?.size_in_bytes ?? 0).toString();
 
@@ -32,6 +34,7 @@ export const mapIndexStats = (
   return {
     aliases,
     health: indexStats?.health,
+    hidden: Boolean(indexData.settings?.index?.hidden),
     name: indexName,
     status: indexStats?.status,
     total,
