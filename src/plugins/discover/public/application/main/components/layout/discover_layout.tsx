@@ -43,7 +43,7 @@ import { DiscoverDocuments } from './discover_documents';
 import { FetchStatus } from '../../../types';
 import { useDataState } from '../../hooks/use_data_state';
 import { FieldStatisticsTable } from '../field_stats_table';
-import { VIEW_MODE } from '../../../../components/view_mode_toggle';
+import { DocumentViewModeToggle, VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
 import { hasActiveFilter } from './utils';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
@@ -344,14 +344,16 @@ export function DiscoverLayout({
                           savedSearchDataTotalHits$={totalHits$}
                           stateContainer={stateContainer}
                           dataView={dataView}
-                          viewMode={viewMode}
-                          setDiscoverViewMode={setDiscoverViewMode}
                           hideChart={state.hideChart}
                           interval={state.interval}
                           isTimeBased={isTimeBased}
                         />
                       </EuiFlexItem>
                       <EuiHorizontalRule margin="none" />
+                      <DocumentViewModeToggle
+                        viewMode={viewMode}
+                        setDiscoverViewMode={setDiscoverViewMode}
+                      />
                     </>
                   )}
                   {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
