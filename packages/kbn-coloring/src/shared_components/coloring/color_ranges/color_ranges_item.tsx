@@ -31,7 +31,7 @@ import {
 } from '../../../palettes';
 
 import { RelatedIcon } from '../assets/related';
-import { isLastItem } from './utils';
+import { getAutoExtentInformation, isLastItem } from './utils';
 import { isValidColor } from '../utils';
 import {
   ColorRangeDeleteButton,
@@ -67,23 +67,6 @@ const getMode = (
   }
   return (isLast ? checkIsMaxContinuity : checkIsMinContinuity)(continuity) ? 'auto' : 'edit';
 };
-
-const getPlaceholderForAutoMode = (isLast: boolean, displayInfinity: boolean) =>
-  isLast
-    ? displayInfinity
-      ? i18n.translate('coloring.dynamicColoring.customPalette.extentPlaceholderInfinity', {
-          defaultMessage: 'Infinity',
-        })
-      : i18n.translate('coloring.dynamicColoring.customPalette.maxValuePlaceholder', {
-          defaultMessage: 'Max. value',
-        })
-    : displayInfinity
-    ? i18n.translate('coloring.dynamicColoring.customPalette.extentPlaceholderNegativeInfinity', {
-        defaultMessage: '-Infinity',
-      })
-    : i18n.translate('coloring.dynamicColoring.customPalette.minValuePlaceholder', {
-        defaultMessage: 'Min. value',
-      });
 
 const getActionButton = (mode: ColorRangeItemMode) => {
   if (mode === 'value') {
@@ -185,6 +168,13 @@ export function ColorRangeItem({
     [euiTheme.size.xl]
   );
 
+  const autoExtentInfo = getAutoExtentInformation({
+    isPercentage: rangeType === 'percent',
+    isUpper: isLast,
+    displayInfinity,
+    isAuto: mode === 'auto',
+  });
+
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false} responsive={false}>
       <EuiFlexItem grow={false} css={isLast ? styles : null}>
@@ -230,7 +220,7 @@ export function ColorRangeItem({
           }
           disabled={isDisabled}
           onChange={onValueChange}
-          placeholder={mode === 'auto' ? getPlaceholderForAutoMode(isLast, displayInfinity) : ''}
+          placeholder={mode === 'auto' ? autoExtentInfo.representation : ''}
           append={getAppend(rangeType, mode)}
           onBlur={onLeaveFocus}
           data-test-subj={`lnsPalettePanel_dynamicColoring_range_value_${index}`}
@@ -251,8 +241,9 @@ export function ColorRangeItem({
             continuity={continuity}
             rangeType={rangeType}
             colorRanges={colorRanges}
-            displayInfinity={displayInfinity}
             dispatch={dispatch}
+            tooltipContent={autoExtentInfo.actionDescription}
+            iconFactory={autoExtentInfo.icon}
             accessor={accessor}
           />
         </EuiFlexItem>
