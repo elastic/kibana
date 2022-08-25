@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { EuiDescriptionList, EuiDescriptionListProps } from '@elastic/eui';
+import {
+  EuiDescriptionList,
+  EuiDescriptionListProps,
+  EuiBadge,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { asInteger } from '../../../../common/utils/formatters';
@@ -16,45 +20,77 @@ type ServiceDetailsReturnType =
 
 interface Props {
   container: ServiceDetailsReturnType['container'];
+  kubernetes: ServiceDetailsReturnType['kubernetes'];
 }
 
-export function ContainerDetails({ container }: Props) {
+export function ContainerDetails({ container, kubernetes }: Props) {
   if (!container) {
     return null;
   }
 
   const listItems: EuiDescriptionListProps['listItems'] = [];
-  if (container.os) {
+
+  if (container?.image) {
     listItems.push({
       title: i18n.translate(
-        'xpack.apm.serviceIcons.serviceDetails.container.osLabel',
-        {
-          defaultMessage: 'OS',
-        }
+        'xpack.apm.serviceIcons.serviceDetails.container.image.name',
+        { defaultMessage: 'Container image' }
       ),
-      description: container.os,
+      description: container.image,
     });
   }
 
-  if (container.isContainerized !== undefined) {
+  if (kubernetes?.deployment) {
     listItems.push({
       title: i18n.translate(
-        'xpack.apm.serviceIcons.serviceDetails.container.containerizedLabel',
-        { defaultMessage: 'Containerized' }
+        'xpack.apm.serviceIcons.serviceDetails.kubernetes.deployments',
+        { defaultMessage: 'Deployments' }
       ),
-      description: container.isContainerized
-        ? i18n.translate(
-            'xpack.apm.serviceIcons.serviceDetails.container.yesLabel',
-            {
-              defaultMessage: 'Yes',
-            }
-          )
-        : i18n.translate(
-            'xpack.apm.serviceIcons.serviceDetails.container.noLabel',
-            {
-              defaultMessage: 'No',
-            }
-          ),
+      description: (
+        <ul>
+          {kubernetes.deployment.map((deployment, index) => (
+            <li key={index}>
+              <EuiBadge color="hollow">{deployment}</EuiBadge>
+            </li>
+          ))}
+        </ul>
+      ),
+    });
+  }
+
+  if (kubernetes?.namespace) {
+    listItems.push({
+      title: i18n.translate(
+        'xpack.apm.serviceIcons.serviceDetails.kubernetes.namespaces',
+        { defaultMessage: 'Namespaces' }
+      ),
+      description: (
+        <ul>
+          {kubernetes.namespace.map((namespace, index) => (
+            <li key={index}>
+              <EuiBadge color="hollow">{namespace}</EuiBadge>
+            </li>
+          ))}
+        </ul>
+      ),
+    });
+  }
+
+  if (kubernetes?.replicaset) {
+    listItems.push({
+      title: i18n.translate(
+        'xpack.apm.serviceIcons.serviceDetails.kubernetes.replicasets',
+        { defaultMessage: 'Replicasets' }
+      ),
+      description: (
+        <ul>
+          {kubernetes.replicaset.map((replicaset, index) => (
+            <li key={index}>
+              <EuiBadge color="hollow">{replicaset}</EuiBadge>
+            </li>
+          ))}
+        </ul>
+      ),
     });
   }
 
@@ -68,13 +104,21 @@ export function ContainerDetails({ container }: Props) {
     });
   }
 
-  if (container.type) {
+  if (kubernetes?.labels) {
     listItems.push({
       title: i18n.translate(
-        'xpack.apm.serviceIcons.serviceDetails.container.orchestrationLabel',
-        { defaultMessage: 'Orchestration' }
+        'xpack.apm.serviceIcons.serviceDetails.kubernetes.labels',
+        { defaultMessage: 'Labels' }
       ),
-      description: container.type,
+      description: (
+        <ul>
+          {kubernetes.labels.map((label, index) => (
+            <li key={index}>
+              <EuiBadge color="hollow">{label}</EuiBadge>
+            </li>
+          ))}
+        </ul>
+      ),
     });
   }
 

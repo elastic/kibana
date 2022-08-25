@@ -27,6 +27,7 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { ContainerType } from '../../../common/service_metadata';
 import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
+import { Kubernetes } from '../../../typings/es_schemas/raw/fields/kubernetes';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
 import { Setup } from '../../lib/helpers/setup_request';
 import { should } from './get_service_metadata_icons';
@@ -51,9 +52,8 @@ export interface ServiceMetadataDetails {
   };
   container?: {
     ids?: string[];
-    image?: { name: string };
+    image?: string;
     totalNumberInstances?: number;
-    type?: ContainerType;
   };
   serverless?: {
     type?: string;
@@ -68,6 +68,7 @@ export interface ServiceMetadataDetails {
     projectName?: string;
     serviceName?: string;
   };
+  kubernetes?: Kubernetes;
 }
 
 export async function getServiceMetadataDetails({

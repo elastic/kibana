@@ -75,19 +75,19 @@ export const getServiceContainerMetadata = async ({
       },
     },
     aggs: {
-      deployments: {
+      deployment: {
         terms: {
           field: KUBERNETES_DEPLOYMENT_NAME,
           size: 10,
         },
       },
-      namespaces: {
+      namespace: {
         terms: {
           field: KUBERNETES_NAMESPACE,
           size: 10,
         },
       },
-      replicasets: {
+      replicaset: {
         terms: {
           field: KUBERNETES_REPLICASET_NAME,
           size: 10,
@@ -119,13 +119,13 @@ export const getServiceContainerMetadata = async ({
         name: sources?.kubernetes?.pod.name,
         uid: sources?.kubernetes?.pod.uid,
       },
-      deployment: response.aggregations?.deployments?.buckets.map(
+      deployment: response.aggregations?.deployment?.buckets.map(
         (bucket) => bucket.key as string
       ),
-      replicaset: response.aggregations?.replicasets?.buckets.map(
+      replicaset: response.aggregations?.replicaset?.buckets.map(
         (bucket) => bucket.key as string
       ),
-      namespace: response.aggregations?.namespaces?.buckets.map(
+      namespace: response.aggregations?.namespace?.buckets.map(
         (bucket) => bucket.key as string
       ),
       labels: allLabels
