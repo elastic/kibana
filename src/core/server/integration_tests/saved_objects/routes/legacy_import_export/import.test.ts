@@ -31,7 +31,7 @@ import supertest from 'supertest';
 import { CoreUsageStatsClient } from '../../../../core_usage_data';
 import { coreUsageStatsClientMock } from '../../../../core_usage_data/core_usage_stats_client.mock';
 import { coreUsageDataServiceMock } from '../../../../core_usage_data/core_usage_data_service.mock';
-import { setupServer } from '../../../../saved_objects/test_utils';
+import { setupServer } from '../test_utils';
 import { loggerMock } from '@kbn/logging-mocks';
 import { SavedObjectsBulkResponse } from '@kbn/core-saved-objects-api-server';
 import {

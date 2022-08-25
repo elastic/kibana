@@ -13,7 +13,7 @@ import { savedObjectsClientMock } from '../../../mocks';
 import { CoreUsageStatsClient } from '../../../core_usage_data';
 import { coreUsageStatsClientMock } from '../../../core_usage_data/core_usage_stats_client.mock';
 import { coreUsageDataServiceMock } from '../../../core_usage_data/core_usage_data_service.mock';
-import { setupServer, createExportableType } from '../../../saved_objects/test_utils';
+import { setupServer, createExportableType } from './test_utils';
 import { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObjectsImporter } from '@kbn/core-saved-objects-import-export-server-internal';
 import {

@@ -11,7 +11,7 @@ import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks
 import { CoreUsageStatsClient } from '../../../core_usage_data';
 import { coreUsageStatsClientMock } from '../../../core_usage_data/core_usage_stats_client.mock';
 import { coreUsageDataServiceMock } from '../../../core_usage_data/core_usage_data_service.mock';
-import { setupServer } from '../../../saved_objects/test_utils';
+import { setupServer } from './test_utils';
 import {
   registerCreateRoute,
   type InternalSavedObjectsRequestHandlerContext,

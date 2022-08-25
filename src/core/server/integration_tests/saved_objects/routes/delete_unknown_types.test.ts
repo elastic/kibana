@@ -9,7 +9,7 @@
 import supertest from 'supertest';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
-import { setupServer } from '../../../saved_objects/test_utils';
+import { setupServer } from './test_utils';
 import { SavedObjectsType } from '../../..';
 import {
   registerDeleteUnknownTypesRoute,
