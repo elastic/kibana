@@ -34,7 +34,6 @@ describe('Entity Analytics Dashboard', () => {
     });
 
     it('shows enable host risk button', () => {
-      visit(ENTITY_ANALYTICS_URL);
       cy.get(ENABLE_HOST_RISK_SCORE_BUTTON).should('be.visible');
     });
 
@@ -54,7 +53,6 @@ describe('Entity Analytics Dashboard', () => {
     });
 
     it('renders donut chart', () => {
-      cy.get(HOSTS_DONUT_CHART).should('be.visible');
       cy.get(HOSTS_DONUT_CHART).should('include.text', '6Total');
     });
 
@@ -82,7 +80,6 @@ describe('Entity Analytics Dashboard', () => {
     });
 
     it('renders donut chart', () => {
-      cy.get(USERS_DONUT_CHART).should('be.visible');
       cy.get(USERS_DONUT_CHART).should('include.text', '6Total');
     });
 
