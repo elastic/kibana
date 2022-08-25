@@ -17,28 +17,28 @@ import {
   EuiButtonEmpty,
   EuiButton,
 } from '@elastic/eui';
-import React, {useCallback, useMemo, useState} from 'react';
-import {i18n} from '@kbn/i18n';
-import {FormattedMessage} from '@kbn/i18n-react';
-import {FormProvider} from 'react-hook-form';
+import React, { useCallback, useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { FormProvider } from 'react-hook-form';
 
-import {isEmpty, map} from 'lodash';
-import {QueryIdField, IntervalField} from '../../form';
-import {defaultEcsFormData} from './ecs_mapping_editor_field';
-import {convertECSMappingToFormValue} from '../../../common/schemas/common/utils';
-import {CodeEditorField} from '../../saved_queries/form/code_editor_field';
-import {PlatformCheckBoxGroupField} from './platform_checkbox_group_field';
-import {ALL_OSQUERY_VERSIONS_OPTIONS} from './constants';
+import { isEmpty } from 'lodash';
+import { QueryIdField, IntervalField } from '../../form';
+import { defaultEcsFormData } from './ecs_mapping_editor_field';
+import { convertECSMappingToFormValue } from '../../../common/schemas/common/utils';
+import { CodeEditorField } from '../../saved_queries/form/code_editor_field';
+import { PlatformCheckBoxGroupField } from './platform_checkbox_group_field';
+import { ALL_OSQUERY_VERSIONS_OPTIONS } from './constants';
 import type {
   UsePackQueryFormProps,
   PackQueryFormData,
   PackSOQueryFormData,
 } from './use_pack_query_form';
-import {usePackQueryForm} from './use_pack_query_form';
-import {SavedQueriesDropdown} from '../../saved_queries/saved_queries_dropdown';
-import {ECSMappingEditorField} from './lazy_ecs_mapping_editor_field';
-import {useKibana} from '../../common/lib/kibana';
-import {VersionField} from '../../form';
+import { usePackQueryForm } from './use_pack_query_form';
+import { SavedQueriesDropdown } from '../../saved_queries/saved_queries_dropdown';
+import { ECSMappingEditorField } from './lazy_ecs_mapping_editor_field';
+import { useKibana } from '../../common/lib/kibana';
+import { VersionField } from '../../form';
 
 interface QueryFlyoutProps {
   uniqueQueryIds: string[];
@@ -48,21 +48,21 @@ interface QueryFlyoutProps {
 }
 
 const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
-                                                            uniqueQueryIds,
-                                                            defaultValue,
-                                                            onSave,
-                                                            onClose,
-                                                          }) => {
+  uniqueQueryIds,
+  defaultValue,
+  onSave,
+  onClose,
+}) => {
   const permissions = useKibana().services.application.capabilities.osquery;
   const [isEditMode] = useState(!!defaultValue);
-  const {serializer, idSet, ...hooksForm} = usePackQueryForm({
+  const { serializer, idSet, ...hooksForm } = usePackQueryForm({
     uniqueQueryIds,
     defaultValue,
   });
 
   const {
     handleSubmit,
-    formState: {isSubmitting},
+    formState: { isSubmitting },
     setValue,
     clearErrors,
   } = hooksForm;
@@ -93,7 +93,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
     [clearErrors, setValue]
   );
   /* Avoids accidental closing of the flyout when the user clicks outside of the flyout */
-  const maskProps = useMemo(() => ({onClick: () => ({})}), []);
+  const maskProps = useMemo(() => ({ onClick: () => ({}) }), []);
 
   return (
     <EuiFlyout
@@ -124,26 +124,26 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
         <FormProvider {...hooksForm}>
           {!isEditMode && permissions.readSavedQueries ? (
             <>
-              <SavedQueriesDropdown onChange={handleSetQueryValue}/>
-              <EuiSpacer/>
+              <SavedQueriesDropdown onChange={handleSetQueryValue} />
+              <EuiSpacer />
             </>
           ) : null}
-          <QueryIdField idSet={idSet}/>
-          <EuiSpacer/>
-          <CodeEditorField/>
-          <EuiSpacer/>
+          <QueryIdField idSet={idSet} />
+          <EuiSpacer />
+          <CodeEditorField />
+          <EuiSpacer />
           <EuiFlexGroup>
             <EuiFlexItem>
               <IntervalField
                 // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-                euiFieldProps={{append: 's'}}
+                euiFieldProps={{ append: 's' }}
               />
-              <EuiSpacer/>
+              <EuiSpacer />
               <VersionField
                 // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
                 euiFieldProps={{
                   noSuggestions: false,
-                  singleSelection: {asPlainText: true},
+                  singleSelection: { asPlainText: true },
                   placeholder: i18n.translate('xpack.osquery.queriesTable.osqueryVersionAllLabel', {
                     defaultMessage: 'ALL',
                   }),
@@ -153,13 +153,13 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
               />
             </EuiFlexItem>
             <EuiFlexItem>
-              <PlatformCheckBoxGroupField/>
+              <PlatformCheckBoxGroupField />
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiSpacer/>
+          <EuiSpacer />
           <EuiFlexGroup>
             <EuiFlexItem>
-              <ECSMappingEditorField/>
+              <ECSMappingEditorField />
             </EuiFlexItem>
           </EuiFlexGroup>
         </FormProvider>
