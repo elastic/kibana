@@ -22,6 +22,7 @@ interface AxeContext {
 
 interface TestOptions {
   excludeTestSubj?: string | string[];
+  skipFailures?: boolean;
 }
 
 export const normalizeResult = (report: any) => {
@@ -44,15 +45,17 @@ export class AccessibilityService extends FtrService {
   private readonly Wd = this.ctx.getService('__webdriver__');
 
   public async testAppSnapshot(options: TestOptions = {}) {
-    const context = this.getAxeContext(true, options.excludeTestSubj);
+    const { excludeTestSubj, skipFailures } = options;
+    const context = this.getAxeContext(true, excludeTestSubj);
     const report = await this.captureAxeReport(context);
-    this.assertValidAxeReport(report);
+    this.assertValidAxeReport(report, skipFailures);
   }
 
   public async testGlobalSnapshot(options: TestOptions = {}) {
-    const context = this.getAxeContext(false, options.excludeTestSubj);
+    const { excludeTestSubj, skipFailures } = options;
+    const context = this.getAxeContext(false, excludeTestSubj);
     const report = await this.captureAxeReport(context);
-    this.assertValidAxeReport(report);
+    this.assertValidAxeReport(report, skipFailures);
   }
 
   private getAxeContext(global: boolean, excludeTestSubj?: string | string[]): AxeContext {
@@ -65,15 +68,31 @@ export class AccessibilityService extends FtrService {
     };
   }
 
-  private assertValidAxeReport(report: AxeReport) {
+  private assertValidAxeReport(report: AxeReport, skipFailures?: boolean) {
     const errorMsgs = [];
 
     for (const result of report.violations) {
       errorMsgs.push(printResult(chalk.red('VIOLATION'), result));
     }
 
-    if (errorMsgs.length) {
+    // if(errorMsgs.length) {
+    //   throw new Error(`a11y report:\n${errorMsgs.join('\n')}`);
+    // }
+
+    // Throw a new Error if not skipping failures
+    if (!skipFailures && errorMsgs.length) {
       throw new Error(`a11y report:\n${errorMsgs.join('\n')}`);
+    }
+
+    // Log to the console only when skipping failures
+    if (skipFailures && errorMsgs.length) {
+      // eslint-disable-next-line no-console
+      console.log(`
+========================================
+* REPORT-ONLY MODE
+========================================
+a11y report:\n${errorMsgs.join('\n')}
+      `);
     }
   }
 

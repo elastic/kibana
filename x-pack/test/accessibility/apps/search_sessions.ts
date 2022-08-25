@@ -35,11 +35,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     // https://github.com/elastic/kibana/issues/128009
-    it.skip('Search sessions management toggled on a single status meets a11y requirements ', async () => {
+    it('Search sessions management toggled on a single status meets a11y requirements ', async () => {
       await (await find.byCssSelector('[title="expired"]')).click();
 
       await retry.try(async () => {
-        await a11y.testAppSnapshot();
+        await a11y.testAppSnapshot({ skipFailures: true });
       });
       await testSubjects.click('clearSearchButton');
     });
@@ -51,7 +51,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     // https://github.com/elastic/kibana/issues/128009
-    it.skip('Session management filtered by applications meets a11y requirements', async () => {
+    it('Session management filtered by applications meets a11y requirements', async () => {
       await (await find.byCssSelector('[title="dashboards"]')).click();
       await a11y.testAppSnapshot();
     });
@@ -74,11 +74,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     // No delete button appears to exist
-    it.skip('Session management delete panel from actions pop-over meets a11y requirements ', async () => {
+    it('Session management delete panel from actions pop-over meets a11y requirements ', async () => {
       await testSubjects.click('cancelEditName');
       await testSubjects.click('sessionManagementActionsCol');
       await testSubjects.click('sessionManagementPopoverAction-delete');
-      await a11y.testAppSnapshot();
+      await a11y.testAppSnapshot({ skipFailures: true });
       await testSubjects.click('confirmModalCancelButton');
 
       await testSubjects.click('clearSearchButton');
