@@ -18,6 +18,7 @@ import type {
   XYLayerConfig,
   DataType,
 } from '@kbn/lens-plugin/public';
+import type { SerializableRecord } from '@kbn/utility-types';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { layerTypes } from '@kbn/lens-plugin/public';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
@@ -57,7 +58,7 @@ export async function redirectToADJobWizards(
   const url = await locator?.getUrl({
     page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_FROM_LENS,
     pageState: {
-      vis: vis as any,
+      vis: vis as unknown as SerializableRecord,
       from,
       to,
       query,

@@ -77,7 +77,13 @@ export const CompatibleLayer: FC<Props> = ({ layer, layerIndex, embeddable }) =>
   const [state, setState] = useState<STATE>(STATE.DEFAULT);
   const [createError, setCreateError] = useState<{ text: string; errorText: string } | null>(null);
   const quickJobCreator = useMemo(
-    () => new QuickJobCreator(data.dataViews, uiSettings, data.query.timefilter.timefilter),
+    () =>
+      new QuickJobCreator(
+        data.dataViews,
+        uiSettings,
+        data.query.timefilter.timefilter,
+        mlApiServices
+      ),
     [data, uiSettings]
   );
 
@@ -98,8 +104,7 @@ export const CompatibleLayer: FC<Props> = ({ layer, layerIndex, embeddable }) =>
       embeddable,
       startJob,
       runInRealTime,
-      layerIndex,
-      mlApiServices
+      layerIndex
     );
     const error = checkForCreationErrors(result);
     if (error === null) {

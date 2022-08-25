@@ -49,7 +49,8 @@ export class QuickJobCreator {
   constructor(
     private dataViewClient: DataViewsContract,
     private kibanaConfig: IUiSettingsClient,
-    private timeFilter: TimefilterContract
+    private timeFilter: TimefilterContract,
+    private mlApiServices: MlApiServices
   ) {}
 
   public async createAndSaveJob(
@@ -58,8 +59,7 @@ export class QuickJobCreator {
     embeddable: Embeddable,
     startJob: boolean,
     runInRealTime: boolean,
-    layerIndex: number,
-    mlApiServices: MlApiServices
+    layerIndex: number
   ): Promise<CreateState> {
     const { query, filters, to, from, vis } = getJobsItemsFromEmbeddable(embeddable);
     if (query === undefined || filters === undefined) {
@@ -98,7 +98,7 @@ export class QuickJobCreator {
     };
 
     try {
-      await mlApiServices.addJob({ jobId: job.job_id, job });
+      await this.mlApiServices.addJob({ jobId: job.job_id, job });
     } catch (error) {
       result.jobCreated.error = error;
       return result;
@@ -106,7 +106,7 @@ export class QuickJobCreator {
     result.jobCreated.success = true;
 
     try {
-      await mlApiServices.addDatafeed({ datafeedId, datafeedConfig: datafeed });
+      await this.mlApiServices.addDatafeed({ datafeedId, datafeedConfig: datafeed });
     } catch (error) {
       result.datafeedCreated.error = error;
       return result;
@@ -115,7 +115,7 @@ export class QuickJobCreator {
 
     if (startJob) {
       try {
-        await mlApiServices.openJob({ jobId });
+        await this.mlApiServices.openJob({ jobId });
       } catch (error) {
         // job may already be open, so ignore 409 error.
         if (error.body.statusCode !== 409) {
@@ -126,7 +126,11 @@ export class QuickJobCreator {
       result.jobOpened.success = true;
 
       try {
-        await mlApiServices.startDatafeed({ datafeedId, start, ...(runInRealTime ? {} : { end }) });
+        await this.mlApiServices.startDatafeed({
+          datafeedId,
+          start,
+          ...(runInRealTime ? {} : { end }),
+        });
       } catch (error) {
         result.datafeedStarted.error = error;
         return result;
