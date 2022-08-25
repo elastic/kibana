@@ -8,7 +8,9 @@
 import { FeatureCollection, Feature, Geometry } from 'geojson';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { htmlIdGenerator } from '@elastic/eui';
-import { FIELD_ORIGIN, STYLE_TYPE } from '@kbn/maps-plugin/common';
+import { FIELD_ORIGIN, STYLE_TYPE, LayerDescriptor } from '@kbn/maps-plugin/common';
+import { ESSearchSourceDescriptor } from '@kbn/maps-plugin/common/descriptor_types';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
 import { ESSearchResponse } from '@kbn/core/types/elasticsearch';
 import { VectorSourceRequestMeta } from '@kbn/maps-plugin/common';
@@ -109,10 +111,10 @@ export function getInitialAnomaliesLayers(jobId: string) {
   return initialLayers;
 }
 
-export function getInitialSourceIndexFieldLayer(sourceIndicesWithGeoFields: {
+export function getInitialSourceIndexFieldLayers(sourceIndicesWithGeoFields: {
   [key: string]: { geoFields: string[]; dataViewId: string };
 }) {
-  const initialLayers: any = [];
+  const initialLayers = [] as unknown as LayerDescriptor[] & SerializableRecord;
   for (const index in sourceIndicesWithGeoFields) {
     if (sourceIndicesWithGeoFields.hasOwnProperty(index)) {
       const { dataViewId, geoFields } = sourceIndicesWithGeoFields[index];
@@ -129,7 +131,7 @@ export function getInitialSourceIndexFieldLayer(sourceIndicesWithGeoFields: {
             indexPatternId: dataViewId,
             geoField,
             scalingType: SCALING_TYPES.MVT,
-          },
+          } as unknown as ESSearchSourceDescriptor,
         });
       });
     }

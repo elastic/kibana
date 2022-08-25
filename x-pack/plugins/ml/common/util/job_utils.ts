@@ -10,7 +10,9 @@ import semverGte from 'semver/functions/gte';
 import moment, { Duration } from 'moment';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import numeral from '@elastic/numeral';
+import { asyncForEach } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
+import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { ALLOWED_DATA_UNITS, JOB_ID_MAX_LENGTH } from '../constants/validation';
 import { parseInterval } from './parse_interval';
@@ -23,9 +25,14 @@ import { JobValidationMessage, JobValidationMessageId } from '../constants/messa
 import { ES_AGGREGATION, ML_JOB_AGGREGATION } from '../constants/aggregation_types';
 import { MLCATEGORY } from '../constants/field_types';
 import { getAggregations, getDatafeedAggregations } from './datafeed_utils';
+import { getDataViewIdFromName } from '../../public/application/util/index_utils';
 import { findAggField } from './validation_utils';
 import { getFirstKeyInObject } from './object_utils';
 import { isDefined } from '../types/guards';
+
+export interface SourceIndicesWithGeoFields {
+  [key: string]: { [key: string]: { geoFields: string[]; dataViewId: string } };
+}
 
 export interface ValidationResults {
   valid: boolean;
@@ -77,6 +84,45 @@ export function isMappableJob(job: CombinedJob, detectorIndex: number): boolean 
 export function isJobWithGeoData(job: Job): boolean {
   const { detectors } = job.analysis_config;
   return detectors.some((detector) => detector.function === ML_JOB_AGGREGATION.LAT_LONG);
+}
+// Returns an object mapping job ids to source indices which map to geo fields for that index
+export async function checkIfSourceIndicesHaveGeoField(
+  selectedJobs: any,
+  dataViewsService: any
+): Promise<SourceIndicesWithGeoFields> {
+  const sourceIndicesWithGeoFieldsMap: SourceIndicesWithGeoFields = {};
+  // Go through selected jobs
+  if (Array.isArray(selectedJobs)) {
+    await asyncForEach(selectedJobs, async (job) => {
+      const sourceIndices = job.sourceIndices ?? job.datafeed_config.indices;
+      // If job has source indices property
+      if (Array.isArray(sourceIndices)) {
+        // Check fields for each source index to see if it has geo fields
+        await asyncForEach(sourceIndices, async (sourceIndex) => {
+          const dataViewId = await getDataViewIdFromName(sourceIndex);
+
+          if (dataViewId) {
+            const dataView = await dataViewsService.get(dataViewId);
+            const geoFields = [
+              ...dataView.fields.getByType(ES_FIELD_TYPES.GEO_POINT),
+              ...dataView.fields.getByType(ES_FIELD_TYPES.GEO_SHAPE),
+            ];
+            if (geoFields.length > 0) {
+              if (sourceIndicesWithGeoFieldsMap[job.id] === undefined) {
+                sourceIndicesWithGeoFieldsMap[job.id] = {
+                  [sourceIndex]: { geoFields: [], dataViewId },
+                };
+              }
+              sourceIndicesWithGeoFieldsMap[job.id][sourceIndex].geoFields.push(
+                ...geoFields.map((field) => field.name)
+              );
+            }
+          }
+        });
+      }
+    });
+  }
+  return sourceIndicesWithGeoFieldsMap;
 }
 
 /**

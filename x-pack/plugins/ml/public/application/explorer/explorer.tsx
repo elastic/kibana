@@ -7,9 +7,7 @@
 
 import React, { FC, useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import { asyncForEach } from '@kbn/std';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
 import {
   htmlIdGenerator,
   EuiCallOut,
@@ -57,7 +55,7 @@ import {
   OverallSwimlaneData,
   AppStateSelectedCells,
 } from './explorer_utils';
-import { getDataViewIdFromName } from '../util/index_utils';
+import { checkIfSourceIndicesHaveGeoField, SourceIndicesWithGeoFields } from '../../../common/util/job_utils';
 import { AnomalyTimeline } from './anomaly_timeline';
 import { FILTER_ACTION, FilterAction } from './explorer_constants';
 // Explorer Charts
@@ -266,9 +264,8 @@ export const Explorer: FC<ExplorerUIProps> = ({
   const htmlIdGen = useMemo(() => htmlIdGenerator(), []);
 
   const [language, updateLanguage] = useState<string>(DEFAULT_QUERY_LANG);
-  const [sourceIndicesWithGeoFields, setSourceIndicesWithGeoFields] = useState<{
-    [key: string]: { [key: string]: { geoFields: string[]; dataViewId: string } };
-  }>({});
+  const [sourceIndicesWithGeoFields, setSourceIndicesWithGeoFields] =
+    useState<SourceIndicesWithGeoFields>({});
 
   const filterSettings = useObservable(
     anomalyExplorerCommonStateService.getFilterSettings$(),
@@ -431,44 +428,11 @@ export const Explorer: FC<ExplorerUIProps> = ({
 
   useEffect(() => {
     if (!noJobsSelected) {
-      const checkIfSourceIndicesHaveGeoField = async () => {
-        const sourceIndicesWithGeoFieldsMap: {
-          [key: string]: { [key: string]: { geoFields: string[]; dataViewId: string } };
-        } = {};
-        // Go through selected jobs
-        if (Array.isArray(selectedJobs)) {
-          await asyncForEach(selectedJobs, async (job) => {
-            // If job has source indices property
-            if (Array.isArray(job.sourceIndices)) {
-              // Check fields for each index to see if it has geo fields
-              await asyncForEach(job.sourceIndices, async (index) => {
-                const dataViewId = await getDataViewIdFromName(index);
-
-                if (dataViewId) {
-                  const dataView = await dataViewsService.get(dataViewId);
-                  const geoFields = [
-                    ...dataView.fields.getByType(ES_FIELD_TYPES.GEO_POINT),
-                    ...dataView.fields.getByType(ES_FIELD_TYPES.GEO_SHAPE),
-                  ];
-                  if (geoFields.length > 0) {
-                    if (sourceIndicesWithGeoFieldsMap[job.id] === undefined) {
-                      sourceIndicesWithGeoFieldsMap[job.id] = {
-                        [index]: { geoFields: [], dataViewId },
-                      };
-                    }
-                    sourceIndicesWithGeoFieldsMap[job.id][index].geoFields.push(
-                      ...geoFields.map((field) => field.name)
-                    );
-                  }
-                }
-              });
-            }
-          });
-          setSourceIndicesWithGeoFields(sourceIndicesWithGeoFieldsMap);
-        }
-      };
-
-      checkIfSourceIndicesHaveGeoField().catch(console.error); // eslint-disable-line no-console
+      checkIfSourceIndicesHaveGeoField(selectedJobs, dataViewsService)
+        .then((sourceIndicesWithGeoFieldsMap) =>
+          setSourceIndicesWithGeoFields(sourceIndicesWithGeoFieldsMap)
+        )
+        .catch(console.error); // eslint-disable-line no-console
     }
   }, [JSON.stringify(selectedJobIds)]);
 

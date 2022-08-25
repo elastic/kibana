@@ -25,7 +25,7 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { MAPS_APP_LOCATOR } from '@kbn/maps-plugin/public';
 import { mlJobService } from '../../services/job_service';
 import { getDataViewIdFromName } from '../../util/index_utils';
-import { getInitialAnomaliesLayers, getInitialSourceIndexFieldLayer } from '../../../maps/util';
+import { getInitialAnomaliesLayers, getInitialSourceIndexFieldLayers } from '../../../maps/util';
 import {
   formatHumanReadableDateTimeSeconds,
   timeFormatter,
@@ -114,14 +114,25 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     }
   ) => {
     // Create a layer for each of the geoFields
-    const initialLayers = getInitialSourceIndexFieldLayer(
+    const initialLayers = getInitialSourceIndexFieldLayers(
       sourceIndicesWithGeoFields[anomaly.jobId]
     );
+    const anomalyBucketStartMoment = moment(anomaly.time).tz(getDateFormatTz());
+    const anomalyBucketStart = anomalyBucketStartMoment.toISOString();
+    const anomalyBucketEnd = anomalyBucketStartMoment
+      .add(anomaly.source.bucket_span, 'seconds')
+      .subtract(1, 'ms')
+      .toISOString();
+    const timeRange = data.query.timefilter.timefilter.getTime();
+
+    // Set 'from' in timeRange to start bucket time for the specific anomaly
+    timeRange.from = anomalyBucketStart;
+    timeRange.to = anomalyBucketEnd;
 
     const locator = share.url.locators.get(MAPS_APP_LOCATOR);
     const location = await locator?.getLocation({
       initialLayers,
-      timeRange: data.query.timefilter.timefilter.getTime(),
+      timeRange,
       filters: data.query.filterManager.getFilters(),
       ...(anomaly.entityName && anomaly.entityValue
         ? {
@@ -664,29 +675,30 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
             />
           </EuiContextMenuItem>
         );
+      } else if (
+        props.sourceIndicesWithGeoFields &&
+        props.sourceIndicesWithGeoFields[anomaly.jobId]
+      ) {
+        items.push(
+          <EuiContextMenuItem
+            key="view_in_maps"
+            icon="gisApp"
+            onClick={async () => {
+              const mapsLink = await getAnomalySourceMapsLink(
+                anomaly,
+                props.sourceIndicesWithGeoFields
+              );
+              await application.navigateToApp(MAPS_APP_ID, { path: mapsLink?.path });
+            }}
+            data-test-subj="mlAnomaliesListRowActionViewSourceIndexInMapsButton"
+          >
+            <FormattedMessage
+              id="xpack.ml.anomaliesTable.linksMenu.viewSourceIndexInMapsLabel"
+              defaultMessage="View source index in Maps"
+            />
+          </EuiContextMenuItem>
+        );
       }
-    }
-
-    if (props.sourceIndicesWithGeoFields[anomaly.jobId]) {
-      items.push(
-        <EuiContextMenuItem
-          key="view_in_maps"
-          icon="gisApp"
-          onClick={async () => {
-            const mapsLink = await getAnomalySourceMapsLink(
-              anomaly,
-              props.sourceIndicesWithGeoFields
-            );
-            await application.navigateToApp(MAPS_APP_ID, { path: mapsLink?.path });
-          }}
-          data-test-subj="mlAnomaliesListRowActionViewSourceIndexInMapsButton"
-        >
-          <FormattedMessage
-            id="xpack.ml.anomaliesTable.linksMenu.viewSourceIndexInMapsLabel"
-            defaultMessage="View source index in Maps"
-          />
-        </EuiContextMenuItem>
-      );
     }
 
     if (application.capabilities.discover?.show && isCategorizationAnomalyRecord) {

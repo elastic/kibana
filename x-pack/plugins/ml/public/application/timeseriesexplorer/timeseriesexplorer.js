@@ -152,6 +152,7 @@ export class TimeSeriesExplorer extends React.Component {
     tableSeverity: PropTypes.number,
     zoom: PropTypes.object,
     toastNotificationService: PropTypes.object,
+    dataViewsService: PropTypes.object,
   };
 
   state = getTimeseriesexplorerDefaultState();
