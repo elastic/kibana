@@ -8,10 +8,9 @@ import type { QueryObserverResult, UseQueryOptions } from '@tanstack/react-query
 import { useQuery } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { GetAgentPoliciesResponse, GetPackagesResponse } from '@kbn/fleet-plugin/common';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { useHttp } from '../../../common/lib/kibana';
 import { MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../common/constants';
-import { sendGetAgentPolicyList, sendGetEndpointSecurityPackage } from './ingest';
+import { sendBulkGetAgentPolicyList, sendGetEndpointSecurityPackage } from './ingest';
 import type { GetPolicyListResponse } from '../../pages/policy/types';
 import { sendGetEndpointSpecificPackagePolicies } from './policies';
 import type { ServerApiError } from '../../../common/types';
@@ -53,22 +52,17 @@ export function useGetEndpointSpecificPolicies(
  * This hook returns the fleet agent policies list filtered by policy id
  */
 export function useGetAgentCountForPolicy({
-  policyIds,
+  agentPolicyIds,
   customQueryOptions,
 }: {
-  policyIds: string[];
+  agentPolicyIds: string[];
   customQueryOptions?: UseQueryOptions<GetAgentPoliciesResponse, IHttpFetchError>;
 }): QueryObserverResult<GetAgentPoliciesResponse, IHttpFetchError> {
   const http = useHttp();
   return useQuery<GetAgentPoliciesResponse, IHttpFetchError>(
-    ['endpointCountForPolicy', policyIds],
+    ['endpointCountForPolicy', agentPolicyIds],
     () => {
-      return sendGetAgentPolicyList(http, {
-        query: {
-          perPage: 50,
-          kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.package_policies: (${policyIds.join(' or ')})`,
-        },
-      });
+      return sendBulkGetAgentPolicyList(http, agentPolicyIds);
     },
     customQueryOptions
   );
