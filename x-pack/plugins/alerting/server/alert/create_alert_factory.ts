@@ -151,7 +151,7 @@ export function getPublicAlertFactory<
   alertFactory: AlertFactory<State, Context, ActionGroupIds>
 ): PublicAlertFactory<State, Context, ActionGroupIds> {
   return {
-    create: (...args) => alertFactory.create(...args),
+    create: (...args): PublicAlert<State, Context, ActionGroupIds> => alertFactory.create(...args),
     alertLimit: {
       getValue: () => alertFactory.alertLimit.getValue(),
       setLimitReached: (...args) => alertFactory.alertLimit.setLimitReached(...args),
