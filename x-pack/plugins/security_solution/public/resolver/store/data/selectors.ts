@@ -554,27 +554,8 @@ export const nodesAndEdgelines: (state: DataState) => (
       processNodePositions: visibleProcessNodePositions,
       connectingEdgeLineSegments,
     };
-  }, aaBBEqualityCheck);
+  }, aabbModel.isEqual);
 });
-
-function isAABBType(value: unknown): value is AABB {
-  const castValue = value as AABB;
-  return castValue.maximum !== undefined && castValue.minimum !== undefined;
-}
-
-/**
- * This is needed to avoid the TS error that is caused by using aabbModel.isEqual directly. Ideally we could
- * just pass that function instead of having to check the type of the parameters. It might be worth doing a PR to
- * the reselect library to correct the type.
- */
-function aaBBEqualityCheck<T>(a: T, b: T, index: number): boolean {
-  if (isAABBType(a) && isAABBType(b)) {
-    return aabbModel.isEqual(a, b);
-  } else {
-    // this is equivalent to the default equality check for defaultMemoize
-    return a === b;
-  }
-}
 
 /**
  * If there is a pending request that's for a entity ID that doesn't matche the `entityID`, then we should cancel it.
