@@ -135,7 +135,7 @@ steps:
     label: 'Populate local dev bazel cache (Linux)'
     agents:
       queue: n2-4-spot
-    timeout_in_minutes: 15
+    timeout_in_minutes: 30
     retry:
       automatic:
         - exit_status: '-1'
