@@ -29,6 +29,7 @@ import {
 } from '../../../../shared_components';
 
 const generateId = htmlIdGenerator();
+const supportedTypes = new Set(['string', 'boolean', 'number', 'ip', 'date']);
 
 export interface FieldInputsProps {
   currentConfig: PointInTimeQueryEventAnnotationConfig;
@@ -66,8 +67,12 @@ export function TooltipSection({
     },
     [setConfig, currentConfig]
   );
-  const wrappedValues = useMemo(() => {
-    return currentConfig.extraFields?.map((value) => ({ id: generateId(), value })) || [];
+  const { wrappedValues, rawValuesLookup } = useMemo(() => {
+    const rawValues = currentConfig.extraFields ?? [];
+    return {
+      wrappedValues: rawValues.map((value) => ({ id: generateId(), value })),
+      rawValuesLookup: new Set(rawValues),
+    };
   }, [currentConfig]);
 
   const { inputValue: localValues, handleInputChange } = useDebouncedValue<WrappedValue[]>({
@@ -89,7 +94,6 @@ export function TooltipSection({
     [localValues, indexPattern, handleInputChange]
   );
 
-  // diminish attention to adding fields alternative
   if (localValues.length === 0) {
     return (
       <>
@@ -117,7 +121,10 @@ export function TooltipSection({
   }
   const disableActions = localValues.length === 2 && localValues.some(({ isNew }) => isNew);
   const options = indexPattern.fields
-    .filter(({ displayName, type }) => displayName && type !== 'document')
+    .filter(
+      ({ displayName, type }) =>
+        displayName && !rawValuesLookup.has(displayName) && supportedTypes.has(type)
+    )
     .map(
       (field) =>
         ({
@@ -131,7 +138,8 @@ export function TooltipSection({
           compatible: true,
           'data-test-subj': `lnsXY-annotation-tooltip-fieldOption-${field.name}`,
         } as FieldOption<FieldOptionValue>)
-    );
+    )
+    .sort((a, b) => a.label.localeCompare(b.label));
 
   return (
     <>
