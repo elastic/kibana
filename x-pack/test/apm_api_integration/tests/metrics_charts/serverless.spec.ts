@@ -5,12 +5,8 @@
  * 2.0.
  */
 
+import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { apm, timerange } from '@kbn/apm-synthtrace';
-import {
-  APIClientRequestParamsOf,
-  APIReturnType,
-} from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { roundNumber } from '../../utils';
@@ -23,23 +19,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
 
-  async function callApi(
-    overrides?: RecursivePartial<
-      APIClientRequestParamsOf<'GET /internal/apm/services/{serviceName}/metrics/charts'>['params']
-    >
-  ) {
+  async function callApi(serviceName: string, agentName: string) {
     return await apmApiClient.readUser({
       endpoint: `GET /internal/apm/services/{serviceName}/metrics/charts`,
       params: {
-        path: { serviceName: overrides?.path?.serviceName || 'lambda-python' },
+        path: { serviceName },
         query: {
           environment: 'test',
-          agentName: 'python',
+          agentName,
           kuery: '',
           start: new Date(start).toISOString(),
           end: new Date(end).toISOString(),
           serviceRuntimeName: 'aws_lambda',
-          ...overrides?.query,
         },
       },
     });
@@ -47,7 +38,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when(
     'Serverless metrics charts when data is loaded',
-    { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
+    { config: 'basic', archives: [] },
     () => {
       const MEMORY_TOTAL = 536870912; // 0.5gb;
       const MEMORY_FREE = 94371840; // ~0.08 gb;
@@ -139,7 +130,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       describe('python', () => {
         let metrics: APIReturnType<'GET /internal/apm/services/{serviceName}/metrics/charts'>;
         before(async () => {
-          const { status, body } = await callApi();
+          const { status, body } = await callApi('lambda-python', 'pytong');
 
           expect(status).to.be(200);
           metrics = body;
@@ -219,11 +210,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       describe('nodejs', () => {
         let metrics: APIReturnType<'GET /internal/apm/services/{serviceName}/metrics/charts'>;
         before(async () => {
-          const { status, body } = await callApi({
-            path: { serviceName: 'lambda-node' },
-            query: { agentName: 'nodejs' },
-          });
-
+          const { status, body } = await callApi('lambda-node', 'nodejs');
           expect(status).to.be(200);
           metrics = body;
         });
