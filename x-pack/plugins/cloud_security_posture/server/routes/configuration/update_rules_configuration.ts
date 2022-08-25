@@ -21,13 +21,19 @@ import { PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { createCspRuleSearchFilterByPackagePolicy } from '../../../common/utils/helpers';
 
-import type { CspRule, CspRulesConfiguration } from '../../../common/schemas';
+import type {
+  CspRule,
+  CspRulesConfiguration,
+  CspRulesConfigurationV1,
+} from '../../../common/schemas';
 import {
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
   CSP_RULE_SAVED_OBJECT_TYPE,
   UPDATE_RULES_CONFIG_ROUTE_PATH,
 } from '../../../common/constants';
 import { CspRouter } from '../../types';
+
+const V1RuleFormatEnabled = false;
 
 export const getPackagePolicy = async (
   soClient: SavedObjectsClientContract,
@@ -65,7 +71,9 @@ export const getCspRules = (
   });
 };
 
-const getEnabledRulesByBenchmark = (rules: SavedObjectsFindResponse<CspRule>['saved_objects']) =>
+const deprecatedGetEnabledRulesByBenchmark = (
+  rules: SavedObjectsFindResponse<CspRule>['saved_objects']
+) =>
   rules.reduce<CspRulesConfiguration['runtime_cfg']['activated_rules']>((benchmarks, rule) => {
     const benchmark = rule.attributes.metadata.benchmark.id;
     if (!rule.attributes.enabled || !benchmark) return benchmarks;
@@ -77,15 +85,46 @@ const getEnabledRulesByBenchmark = (rules: SavedObjectsFindResponse<CspRule>['sa
     return benchmarks;
   }, {});
 
+const getEnabledRulesByBenchmarkV1 = (rules: SavedObjectsFindResponse<CspRule>['saved_objects']) =>
+  rules.reduce<CspRulesConfigurationV1['runtime_cfg']['v1']['rules']>((benchmarks, rule) => {
+    const benchmark = rule.attributes.metadata.benchmark.id;
+    if (!benchmark) return benchmarks;
+    if (!benchmarks[benchmark]) {
+      benchmarks[benchmark] = [];
+    }
+
+    const mappedRule: {} = {
+      [rule.attributes.metadata.rego_rule_id]: { enabled: rule.attributes.enabled },
+    };
+    benchmarks[benchmark].push(mappedRule);
+    return benchmarks;
+  }, {});
+
 export const createRulesConfig = (
   cspRules: SavedObjectsFindResponse<CspRule>
-): CspRulesConfiguration => ({
+): CspRulesConfigurationV1 | CspRulesConfiguration => {
+  return V1RuleFormatEnabled ? CreateRuleConfigV1(cspRules) : CreateDeprecatedRuleConfig(cspRules);
+};
+
+export const CreateRuleConfigV1 = (
+  cspRules: SavedObjectsFindResponse<CspRule>
+): CspRulesConfigurationV1 | CspRulesConfiguration => ({
   runtime_cfg: {
-    activated_rules: getEnabledRulesByBenchmark(cspRules.saved_objects),
+    v1: { rules: getEnabledRulesByBenchmarkV1(cspRules.saved_objects) },
   },
 });
 
-export const convertRulesConfigToYaml = (config: CspRulesConfiguration): string => {
+export const CreateDeprecatedRuleConfig = (
+  cspRules: SavedObjectsFindResponse<CspRule>
+): CspRulesConfiguration => ({
+  runtime_cfg: {
+    activated_rules: deprecatedGetEnabledRulesByBenchmark(cspRules.saved_objects),
+  },
+});
+
+export const convertRulesConfigToYaml = (
+  config: CspRulesConfiguration | CspRulesConfigurationV1
+): string => {
   return yaml.safeDump(config);
 };
 

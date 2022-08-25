@@ -13,4 +13,13 @@ export const cspRulesConfigSchema = rt.object({
   }),
 });
 
+// cspRulesConfigSchemaV1 has to match the 'RuntimeCfg' struct in https://github.com/elastic/cloudbeat/blob/main/config/config.go#L45-L51
+export const cspRulesConfigSchemaV1 = rt.object({
+  runtime_cfg: rt.object({
+    v1: rt.object({ rules: rt.recordOf(rt.string(), rt.arrayOf(rt.object({}))) }),
+  }),
+});
+
 export type CspRulesConfiguration = TypeOf<typeof cspRulesConfigSchema>;
+export type CspRulesConfigurationV1 = TypeOf<typeof cspRulesConfigSchemaV1>;
+export type SupportedRuleTypes = CspRulesConfiguration | CspRulesConfigurationV1;
