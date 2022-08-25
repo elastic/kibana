@@ -14,10 +14,8 @@ import { statReducer } from './stat_reducer';
 import type { StatState } from './use_soc_trends';
 
 export interface UseCriticalAlerts {
-  deleteQuery: GlobalTimeArgs['deleteQuery'];
   from: GlobalTimeArgs['from'];
   fromCompare: string;
-  setQuery: GlobalTimeArgs['setQuery'];
   skip?: boolean;
   signalIndexName: string | null;
   to: GlobalTimeArgs['to'];
@@ -129,9 +127,15 @@ export const useCriticalAlerts = ({
     });
   }, [isLoadingCurrent, isLoadingCompare]);
 
+  const current = useMemo(
+    () => dataCurrent?.aggregations?.open.critical.doc_count ?? null,
+    [dataCurrent?.aggregations?.open.critical.doc_count]
+  );
+  const compare = useMemo(
+    () => dataCompare?.aggregations?.open.critical.doc_count ?? null,
+    [dataCompare?.aggregations?.open.critical.doc_count]
+  );
   useEffect(() => {
-    const current = dataCurrent?.aggregations?.open.critical.doc_count ?? null;
-    const compare = dataCompare?.aggregations?.open.critical.doc_count ?? null;
     const percentageChange = getPercChange(current, compare);
     if (current != null) {
       dispatch({
@@ -154,7 +158,7 @@ export const useCriticalAlerts = ({
       dispatch({
         type: 'setPercentage',
         percentage: {
-          percent: isNegative ? percentageChange : `+${percentageChange}`,
+          percent: isNegative || isZero ? percentageChange : `+${percentageChange}`,
           color: isZero
             ? 'hollow'
             : isNegative
@@ -190,7 +194,7 @@ export const useCriticalAlerts = ({
       });
     }
     dispatch({ type: 'setUpdatedAt', updatedAt: Date.now() });
-  }, [dataCurrent, dataCompare]);
+  }, [current, compare]);
 
   return state;
 };

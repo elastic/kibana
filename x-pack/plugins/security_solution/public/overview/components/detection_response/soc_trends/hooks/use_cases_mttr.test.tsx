@@ -11,6 +11,8 @@ import { useCasesMttr } from './use_cases_mttr';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../../../common/mock';
 import { useKibana as useKibanaMock } from '../../../../../common/lib/kibana/__mocks__';
+import * as i18n from '../translations';
+
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
   const original = jest.requireActual('react-redux');
@@ -35,6 +37,13 @@ const props: UseCasesMttr = {
   toCompare: '2020-07-07T08:20:18.966Z',
 };
 
+const basicData = {
+  updatedAt: dateNow,
+  testRef: 'casesMttr',
+  description: i18n.CASES_MTTR_DESCRIPTION,
+  title: i18n.CASES_MTTR_STAT,
+};
+
 describe('useCasesMttr', () => {
   const wrapperContainer: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
     <TestProviders>{children}</TestProviders>
@@ -51,14 +60,14 @@ describe('useCasesMttr', () => {
       });
       await waitForNextUpdate();
       expect(result.current).toEqual({
-        casesMttr: '-',
+        stat: '-',
         isLoading: true,
         percentage: {
           percent: null,
           color: 'hollow',
-          note: 'There is no case data to compare',
+          note: i18n.NO_DATA('case'),
         },
-        updatedAt: dateNow,
+        ...basicData,
       });
     });
   });
@@ -73,14 +82,19 @@ describe('useCasesMttr', () => {
       await waitForNextUpdate();
       await waitForNextUpdate();
       expect(result.current).toEqual({
-        casesMttr: '2h',
+        stat: '2h',
         isLoading: false,
         percentage: {
-          percent: '100.0%',
+          percent: '+100.0%',
           color: 'danger',
-          note: 'Your case resolution time is up by 100.0% from 1h',
+          note: i18n.STAT_DIFFERENCE({
+            upOrDown: 'up',
+            percentageChange: '100.0%',
+            stat: '1h',
+            statType: 'case resolution time',
+          }),
         },
-        updatedAt: dateNow,
+        ...basicData,
       });
     });
   });
@@ -95,14 +109,19 @@ describe('useCasesMttr', () => {
       await waitForNextUpdate();
       await waitForNextUpdate();
       expect(result.current).toEqual({
-        casesMttr: '1h',
+        stat: '1h',
         isLoading: false,
         percentage: {
           percent: '-50.0%',
           color: 'success',
-          note: 'Your case resolution time is down by 50.0% from 2h',
+          note: i18n.STAT_DIFFERENCE({
+            upOrDown: 'down',
+            percentageChange: '50.0%',
+            stat: '2h',
+            statType: 'case resolution time',
+          }),
         },
-        updatedAt: dateNow,
+        ...basicData,
       });
     });
   });
@@ -117,14 +136,14 @@ describe('useCasesMttr', () => {
       await waitForNextUpdate();
       await waitForNextUpdate();
       expect(result.current).toEqual({
-        casesMttr: '2h',
+        stat: '2h',
         isLoading: false,
         percentage: {
           percent: '0.0%',
           color: 'hollow',
-          note: 'Your case resolution time is unchanged',
+          note: i18n.NO_CHANGE('case resolution time'),
         },
-        updatedAt: dateNow,
+        ...basicData,
       });
     });
   });
@@ -139,14 +158,14 @@ describe('useCasesMttr', () => {
       await waitForNextUpdate();
       await waitForNextUpdate();
       expect(result.current).toEqual({
-        casesMttr: '-',
+        stat: '-',
         isLoading: false,
         percentage: {
           percent: null,
           color: 'hollow',
-          note: 'There is no case data to compare from the current time range',
+          note: i18n.NO_DATA_CURRENT('case'),
         },
-        updatedAt: dateNow,
+        ...basicData,
       });
     });
   });
@@ -161,14 +180,14 @@ describe('useCasesMttr', () => {
       await waitForNextUpdate();
       await waitForNextUpdate();
       expect(result.current).toEqual({
-        casesMttr: '2h',
+        stat: '2h',
         isLoading: false,
         percentage: {
           percent: null,
           color: 'hollow',
-          note: 'There is no case data to compare from the compare time range',
+          note: i18n.NO_DATA_COMPARE('case'),
         },
-        updatedAt: dateNow,
+        ...basicData,
       });
     });
   });
@@ -187,14 +206,14 @@ describe('useCasesMttr', () => {
       await waitForNextUpdate();
       await waitForNextUpdate();
       expect(result.current).toEqual({
-        casesMttr: '2h',
+        stat: '2h',
         isLoading: false,
         percentage: {
           percent: '0.0%',
           color: 'hollow',
-          note: 'Your case resolution time is unchanged',
+          note: i18n.NO_CHANGE('case resolution time'),
         },
-        updatedAt: dateNow,
+        ...basicData,
       });
       ourProps = {
         ...props,
@@ -204,14 +223,14 @@ describe('useCasesMttr', () => {
       rerender();
       await waitForNextUpdate();
       expect(result.current).toEqual({
-        casesMttr: '-',
+        stat: '-',
         isLoading: false,
         percentage: {
           percent: null,
           color: 'hollow',
-          note: 'There is no case data to compare',
+          note: i18n.NO_DATA('case'),
         },
-        updatedAt: dateNow,
+        ...basicData,
       });
     });
   });
@@ -230,14 +249,14 @@ describe('useCasesMttr', () => {
       await waitForNextUpdate();
       await waitForNextUpdate();
       expect(result.current).toEqual({
-        casesMttr: '2h',
+        stat: '2h',
         isLoading: false,
         percentage: {
           percent: '0.0%',
           color: 'hollow',
-          note: 'Your case resolution time is unchanged',
+          note: i18n.NO_CHANGE('case resolution time'),
         },
-        updatedAt: dateNow,
+        ...basicData,
       });
       ourProps = {
         ...props,
@@ -248,14 +267,14 @@ describe('useCasesMttr', () => {
       rerender();
       await waitForNextUpdate();
       expect(result.current).toEqual({
-        casesMttr: '-',
+        stat: '-',
         isLoading: false,
         percentage: {
           percent: null,
           color: 'hollow',
-          note: 'There is no case data to compare',
+          note: i18n.NO_DATA('case'),
         },
-        updatedAt: dateNow,
+        ...basicData,
       });
     });
   });

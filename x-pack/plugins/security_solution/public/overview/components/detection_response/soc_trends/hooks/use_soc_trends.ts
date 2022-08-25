@@ -51,10 +51,8 @@ export const useSocTrends = ({ skip = false, signalIndexName }: UseSocTrends): S
   });
 
   const criticalAlerts = useCriticalAlerts({
-    deleteQuery,
     from,
     fromCompare,
-    setQuery,
     skip,
     signalIndexName,
     to,
