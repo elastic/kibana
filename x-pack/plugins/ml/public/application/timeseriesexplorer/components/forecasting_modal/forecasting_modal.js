@@ -180,10 +180,7 @@ export class ForecastingModalUI extends Component {
     this.setState({ forecastProgress: PROGRESS_STATES.ERROR });
     console.log('Time series forecast modal - error running forecast:', resp);
 
-    let errorMessage;
-    if (resp) {
-      errorMessage = extractErrorMessage(resp);
-    }
+    const errorMessage = resp ? extractErrorMessage(resp) : undefined;
 
     if (errorMessage && errorMessage.length > 0) {
       this.addMessage(
