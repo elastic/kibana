@@ -27,7 +27,6 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 RUNTIME_DEPS = [
-  "@npm//hpagent",
   "@npm//moment",
   "@npm//@elastic/elasticsearch",
   "@npm//@elastic/numeral",
