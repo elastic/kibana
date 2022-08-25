@@ -19,6 +19,7 @@ import {
 import type { BrowserFields } from '../../../common/search_strategy/index_fields';
 import { DataProviderType, EXISTS_OPERATOR } from '../../../common/types/timeline';
 import type { DataProvider, DataProvidersAnd } from '../../../common/types/timeline';
+import type { ViewSelection } from './event_rendered_view/selector';
 import { convertToBuildEsQuery, escapeQueryValue } from '../utils/keury';
 
 import { EVENTS_TABLE_CLASS_NAME } from './styles';
@@ -376,3 +377,13 @@ export const focusUtilityBarAction = (containerElement: HTMLElement | null) => {
 export const resetKeyboardFocus = () => {
   document.querySelector<HTMLAnchorElement>('header.headerGlobalNav a.euiHeaderLogo')?.focus();
 };
+
+export const isViewSelection = (value: unknown): value is ViewSelection =>
+  value === 'gridView' || value === 'eventRenderedView';
+
+/** Returns a valid default `ViewSelection` given an `unknown` value */
+export const getDefaultViewSelection = (value: unknown): ViewSelection =>
+  isViewSelection(value) ? value : 'gridView';
+
+/** This local storage key stores the `Grid / Event rendered view` selection */
+export const ALERTS_TABLE_VIEW_SELECTION_KEY = 'securitySolution.alerts.table.view-selection';

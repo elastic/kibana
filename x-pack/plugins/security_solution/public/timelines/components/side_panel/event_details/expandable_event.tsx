@@ -18,6 +18,7 @@ import {
 import React from 'react';
 import styled from 'styled-components';
 
+import type { Ecs } from '../../../../../common/ecs';
 import type { TimelineTabs } from '../../../../../common/types/timeline';
 import type { BrowserFields } from '../../../../common/containers/source';
 import { EventDetails } from '../../../../common/components/event_details/event_details';
@@ -29,6 +30,7 @@ export type HandleOnEventClosed = () => void;
 interface Props {
   browserFields: BrowserFields;
   detailsData: TimelineEventsDetailsItem[] | null;
+  detailsEcsData: Ecs | null;
   event: { eventId: string; indexName: string };
   isAlert: boolean;
   isDraggable?: boolean;
@@ -105,6 +107,7 @@ export const ExpandableEvent = React.memo<Props>(
     isDraggable,
     loading,
     detailsData,
+    detailsEcsData,
     rawEventData,
     handleOnEventClosed,
     isReadOnly,
@@ -123,6 +126,7 @@ export const ExpandableEvent = React.memo<Props>(
           <EventDetails
             browserFields={browserFields}
             data={detailsData ?? []}
+            detailsEcsData={detailsEcsData}
             id={event.eventId}
             isAlert={isAlert}
             indexName={event.indexName}

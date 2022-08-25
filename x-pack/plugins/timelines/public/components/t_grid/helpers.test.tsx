@@ -10,7 +10,14 @@ import { Filter, EsQueryConfig, FilterStateStore } from '@kbn/es-query';
 import { DataProviderType } from '../../../common/types/timeline';
 import { mockBrowserFields, mockDataProviders, mockIndexPattern } from '../../mock';
 
-import { buildGlobalQuery, combineQueries, resolverIsShowing, showGlobalFilters } from './helpers';
+import {
+  buildGlobalQuery,
+  combineQueries,
+  getDefaultViewSelection,
+  isViewSelection,
+  resolverIsShowing,
+  showGlobalFilters,
+} from './helpers';
 
 const cleanUpKqlQuery = (str: string) => str.replace(/\n/g, '').replace(/\s\s+/g, ' ');
 
@@ -555,6 +562,48 @@ describe('Combined Queries', () => {
 
     test('it returns true when `globalFullScreen` is false and `graphEventId` is an empty string, because Resolver is NOT showing', () => {
       expect(showGlobalFilters({ globalFullScreen: false, graphEventId: '' })).toBe(true);
+    });
+  });
+
+  describe('view selection', () => {
+    const validViewSelections = ['gridView', 'eventRenderedView'];
+    const invalidViewSelections = [
+      'gRiDvIeW',
+      'EvEnTrEnDeReDvIeW',
+      'anything else',
+      '',
+      1234,
+      {},
+      undefined,
+      null,
+    ];
+
+    describe('isViewSelection', () => {
+      validViewSelections.forEach((value) => {
+        test(`it returns true when value is ${value}`, () => {
+          expect(isViewSelection(value)).toBe(true);
+        });
+      });
+
+      invalidViewSelections.forEach((value) => {
+        test(`it returns false when value is ${value}`, () => {
+          expect(isViewSelection(value)).toBe(false);
+        });
+      });
+    });
+
+    describe('getDefaultViewSelection', () => {
+      validViewSelections.forEach((value) => {
+        test(`it returns ${value} when value is ${value}`, () => {
+          expect(getDefaultViewSelection(value)).toEqual(value);
+        });
+      });
+
+      invalidViewSelections.forEach((value) => {
+        test(`it returns gridView when value is ${value}`, () => {
+          expect(getDefaultViewSelection(value)).toEqual('gridView');
+        });
+      });
     });
   });
 });
