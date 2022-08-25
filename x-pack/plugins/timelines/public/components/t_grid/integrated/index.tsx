@@ -263,7 +263,8 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
 
   const hasAlerts = totalCountMinusDeleted > 0;
 
-  // Only show the table-spanning loading indicator for the initial fetch of the data.
+  // Only show the table-spanning loading indicator when the query is loading and we
+  // don't have data (e.g. for the initial fetch).
   // Subsequent fetches (e.g. for pagination) will show a small loading indicator on
   // top of the table and the table will display the current page until the next page
   // is fetched. This prevents a flicker when paginating.
