@@ -74,7 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     // No delete button appears to exist
-    it('Session management delete panel from actions pop-over meets a11y requirements ', async () => {
+    it.skip('Session management delete panel from actions pop-over meets a11y requirements ', async () => {
       await testSubjects.click('cancelEditName');
       await testSubjects.click('sessionManagementActionsCol');
       await testSubjects.click('sessionManagementPopoverAction-delete');
