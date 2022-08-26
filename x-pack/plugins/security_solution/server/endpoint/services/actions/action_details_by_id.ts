@@ -13,7 +13,6 @@ import {
   categorizeResponseResults,
   getActionCompletionInfo,
   mapToNormalizedActionRequest,
-  getAgentsMetadataInfo,
 } from './utils';
 import type {
   ActionDetails,
@@ -28,11 +27,9 @@ import { catchAndWrapError } from '../../utils';
 import { EndpointError } from '../../../../common/endpoint/errors';
 import { NotFoundError } from '../../errors';
 import { ACTION_RESPONSE_INDICES, ACTIONS_SEARCH_PAGE_SIZE } from './constants';
-import type { EndpointMetadataService } from '../metadata';
 
 export const getActionDetailsById = async (
   esClient: ElasticsearchClient,
-  metadataService: EndpointMetadataService,
   actionId: string
 ): Promise<ActionDetails> => {
   let actionRequestsLogEntries: EndpointActivityLogAction[];
@@ -109,13 +106,6 @@ export const getActionDetailsById = async (
     throw new NotFoundError(`Action with id '${actionId}' not found.`);
   }
 
-  // get host metadata info with queried agents
-  const agentsInfo = await getAgentsMetadataInfo({
-    esClient,
-    searchedAgentIds: normalizedActionRequest.agents,
-    metadataService,
-  });
-
   const { isCompleted, completedAt, wasSuccessful, errors, outputs } = getActionCompletionInfo(
     normalizedActionRequest.agents,
     actionResponses
@@ -124,10 +114,6 @@ export const getActionDetailsById = async (
   const actionDetails: ActionDetails = {
     id: actionId,
     agents: normalizedActionRequest.agents,
-    hosts: normalizedActionRequest.agents.map((id) => ({
-      id,
-      name: agentsInfo[id],
-    })),
     command: normalizedActionRequest.command,
     startedAt: normalizedActionRequest.createdAt,
     isCompleted,

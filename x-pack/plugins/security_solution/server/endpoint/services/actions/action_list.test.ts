@@ -60,16 +60,7 @@ describe('When using `getActionList()', () => {
     (endpointAppContextService.getEndpointMetadataService as jest.Mock) = jest
       .fn()
       .mockReturnValue({
-        findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([
-          {
-            agent: {
-              id: 'agent-a',
-            },
-            host: {
-              hostname: 'Host-agent-a',
-            },
-          },
-        ]),
+        findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
       });
     await expect(
       getActionList({
@@ -90,7 +81,7 @@ describe('When using `getActionList()', () => {
       data: [
         {
           agents: ['agent-a'],
-          hosts: [{ id: 'agent-a', name: 'Host-agent-a' }],
+          hosts: undefined,
           command: 'unisolate',
           completedAt: '2022-04-30T16:08:47.449Z',
           wasSuccessful: true,
@@ -104,6 +95,63 @@ describe('When using `getActionList()', () => {
           parameters: doc?.EndpointActions.data.parameters,
         },
       ],
+      showHostsInfo: false,
+      total: 1,
+    });
+  });
+
+  it('should return hosts when `showHostsInfo` is set to TRUE', async () => {
+    const doc = actionRequests.hits.hits[0]._source;
+    // mock metadataService.findHostMetadataForFleetAgents resolved value
+    (endpointAppContextService.getEndpointMetadataService as jest.Mock) = jest
+      .fn()
+      .mockReturnValue({
+        findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([
+          {
+            agent: {
+              id: 'agent-a',
+            },
+            host: {
+              hostname: 'Host-agent-a',
+            },
+          },
+        ]),
+      });
+    await expect(
+      getActionList({
+        esClient,
+        logger,
+        metadataService: endpointAppContextService.getEndpointMetadataService(),
+        page: 1,
+        pageSize: 10,
+        showHostsInfo: true,
+      })
+    ).resolves.toEqual({
+      page: 1,
+      pageSize: 10,
+      commands: undefined,
+      userIds: undefined,
+      startDate: undefined,
+      elasticAgentIds: undefined,
+      endDate: undefined,
+      data: [
+        {
+          agents: ['agent-a'],
+          hosts: { 'agent-a': { name: 'Host-agent-a' } },
+          command: 'unisolate',
+          completedAt: '2022-04-30T16:08:47.449Z',
+          wasSuccessful: true,
+          errors: undefined,
+          id: '123',
+          isCompleted: true,
+          isExpired: false,
+          startedAt: '2022-04-27T16:08:47.449Z',
+          comment: doc?.EndpointActions.data.comment,
+          createdBy: doc?.user.id,
+          parameters: doc?.EndpointActions.data.parameters,
+        },
+      ],
+      showHostsInfo: true,
       total: 1,
     });
   });

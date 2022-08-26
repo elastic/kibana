@@ -112,6 +112,7 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
         endDate: 'now',
         data: [response],
         userIds: ['elastic'],
+        showHostsInfo: false,
         total: 1,
       };
     },

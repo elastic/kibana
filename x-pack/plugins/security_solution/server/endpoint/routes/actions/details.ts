@@ -58,7 +58,6 @@ export const getActionDetailsRequestHandler = (
             (
               await context.core
             ).elasticsearch.client.asInternalUser,
-            endpointContext.service.getEndpointMetadataService(),
             req.params.action_id
           ),
         },

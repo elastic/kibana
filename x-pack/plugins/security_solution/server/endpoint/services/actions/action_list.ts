@@ -18,7 +18,7 @@ import {
   categorizeResponseResults,
   getActionCompletionInfo,
   mapToNormalizedActionRequest,
-  getAgentsMetadataInfo,
+  getAgentHostNamesWithIds,
 } from './utils';
 import type { EndpointMetadataService } from '../metadata';
 
@@ -28,6 +28,7 @@ interface OptionalFilterParams {
   endDate?: string;
   page?: number;
   pageSize?: number;
+  showHostsInfo?: boolean;
   startDate?: string;
   userIds?: string[];
 }
@@ -41,6 +42,7 @@ export const getActionList = async ({
   metadataService,
   page: _page,
   pageSize,
+  showHostsInfo = false,
   startDate,
   userIds,
 }: OptionalFilterParams & {
@@ -61,6 +63,7 @@ export const getActionList = async ({
     from,
     logger,
     metadataService,
+    showHostsInfo,
     size,
     startDate,
     userIds,
@@ -74,6 +77,7 @@ export const getActionList = async ({
     elasticAgentIds,
     userIds,
     commands,
+    showHostsInfo,
     data: actionDetails,
     total: totalRecords,
   };
@@ -93,6 +97,7 @@ const getActionDetailsList = async ({
   from,
   logger,
   metadataService,
+  showHostsInfo,
   size,
   startDate,
   userIds,
@@ -163,12 +168,16 @@ const getActionDetailsList = async ({
     results: actionResponses?.body?.hits?.hits,
   });
 
-  // get host metadata info with queried agents
-  const agentsInfo = await getAgentsMetadataInfo({
-    esClient,
-    metadataService,
-    searchedAgentIds: normalizedActionRequests.map((action) => action.agents).flat(),
-  });
+  let hosts: ActionDetails['hosts'];
+  let agentsHostInfo: { [id: string]: string };
+  if (showHostsInfo) {
+    // get host metadata info with queried agents
+    agentsHostInfo = await getAgentHostNamesWithIds({
+      esClient,
+      metadataService,
+      searchedAgentIds: normalizedActionRequests.map((action) => action.agents).flat(),
+    });
+  }
 
   // compute action details list for each action id
   const actionDetails: ActionDetails[] = normalizedActionRequests.map((action) => {
@@ -185,13 +194,16 @@ const getActionDetailsList = async ({
       matchedResponses
     );
 
+    if (showHostsInfo) {
+      hosts = action.agents.reduce<Record<string, { name: string }>>((acc, id) => {
+        acc[id] = { name: agentsHostInfo[id] };
+        return acc;
+      }, {});
+    }
     return {
       id: action.id,
       agents: action.agents,
-      hosts: action.agents.map((id) => ({
-        id,
-        name: agentsInfo[id],
-      })),
+      hosts,
       command: action.command,
       startedAt: action.createdAt,
       isCompleted,
