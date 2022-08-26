@@ -57,10 +57,12 @@ export class BulkActionsResolver {
           actionParams: ActionParams,
           retryParams: RetryParams
         ) =>
-          await new runnerMap[taskType](esClient, soClient).runActionAsyncWithRetry(
+          await new runnerMap[taskType](
+            esClient,
+            soClient,
             actionParams,
             retryParams
-          )
+          ).runActionAsyncWithRetry()
       );
     };
   }

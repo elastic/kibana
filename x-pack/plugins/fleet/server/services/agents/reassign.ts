@@ -14,7 +14,13 @@ import { AgentReassignmentError, HostedAgentPolicyRestrictionRelatedError } from
 
 import { SO_SEARCH_LIMIT } from '../../constants';
 
-import { getAgentDocuments, getAgentPolicyForAgent, updateAgent, getAgentsByKuery } from './crud';
+import {
+  getAgentDocuments,
+  getAgentPolicyForAgent,
+  updateAgent,
+  getAgentsByKuery,
+  openPointInTime,
+} from './crud';
 import type { GetAgentsOptions } from '.';
 import { createAgentAction } from './actions';
 import { searchHitToAgent } from './helpers';
@@ -117,12 +123,17 @@ export async function reassignAgents(
     if (res.total <= batchSize) {
       givenAgents = res.agents;
     } else {
-      return await new ReassignActionRunner(esClient, soClient).runActionAsyncWithRetry({
-        ...options,
-        batchSize,
-        totalAgents: res.total,
-        newAgentPolicyId,
-      });
+      return await new ReassignActionRunner(
+        esClient,
+        soClient,
+        {
+          ...options,
+          batchSize,
+          totalAgents: res.total,
+          newAgentPolicyId,
+        },
+        { pitId: await openPointInTime(esClient) }
+      ).runActionAsyncWithRetry();
     }
   }
 

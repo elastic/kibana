@@ -13,6 +13,7 @@ import { SO_SEARCH_LIMIT } from '../../constants';
 
 import { createAgentAction } from './actions';
 import type { GetAgentsOptions } from './crud';
+import { openPointInTime } from './crud';
 import { getAgentsByKuery } from './crud';
 import { getAgentById, getAgents, updateAgent, getAgentPolicyForAgent } from './crud';
 import {
@@ -87,11 +88,16 @@ export async function unenrollAgents(
     const givenAgents = await getAgents(esClient, options);
     return await unenrollBatch(soClient, esClient, givenAgents, options);
   } else {
-    return await new UnenrollActionRunner(esClient, soClient).runActionAsyncWithRetry({
-      ...options,
-      batchSize,
-      totalAgents: res.total,
-    });
+    return await new UnenrollActionRunner(
+      esClient,
+      soClient,
+      {
+        ...options,
+        batchSize,
+        totalAgents: res.total,
+      },
+      { pitId: await openPointInTime(esClient) }
+    ).runActionAsyncWithRetry();
   }
 }
 

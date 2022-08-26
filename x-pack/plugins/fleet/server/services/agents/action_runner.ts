@@ -12,12 +12,12 @@ import { withSpan } from '@kbn/apm-utils';
 
 import { isResponseError } from '@kbn/es-errors';
 
-import type { Agent, BulkActionResult, ListWithKuery } from '../../types';
+import type { Agent, BulkActionResult } from '../../types';
 import { appContextService } from '..';
 import { AGENT_ACTIONS_STATUS_INDEX, SO_SEARCH_LIMIT } from '../../../common/constants';
 
 import { getAgentActions } from './actions';
-import { closePointInTime, getAgentsByKuery, openPointInTime } from './crud';
+import { closePointInTime, getAgentsByKuery } from './crud';
 
 export interface ActionParams {
   kuery: string;
@@ -25,6 +25,7 @@ export interface ActionParams {
   batchSize?: number;
   totalAgents?: number;
   actionId?: string;
+  // additional parameters specific to an action e.g. reassign to new policy id
   [key: string]: any;
 }
 
@@ -39,12 +40,19 @@ export abstract class ActionRunner {
   protected esClient: ElasticsearchClient;
   protected soClient: SavedObjectsClientContract;
 
-  protected actionParams?: ActionParams;
-  protected retryParams?: RetryParams;
+  protected actionParams: ActionParams;
+  protected retryParams: RetryParams;
 
-  constructor(esClient: ElasticsearchClient, soClient: SavedObjectsClientContract) {
+  constructor(
+    esClient: ElasticsearchClient,
+    soClient: SavedObjectsClientContract,
+    actionParams: ActionParams,
+    retryParams: RetryParams
+  ) {
     this.esClient = esClient;
     this.soClient = soClient;
+    this.actionParams = { ...actionParams, actionId: actionParams.actionId ?? uuid() };
+    this.retryParams = retryParams;
   }
 
   protected abstract getActionType(): string;
@@ -53,35 +61,21 @@ export abstract class ActionRunner {
 
   protected abstract processAgents(agents: Agent[]): Promise<{ items: BulkActionResult[] }>;
 
-  public async runActionAsyncWithRetry(actionParams: ActionParams, retryParams?: RetryParams) {
-    const retryPs = (this.retryParams = retryParams ?? {
-      pitId: await openPointInTime(this.esClient),
-    });
-    const actionP = (this.actionParams = {
-      ...actionParams,
-      actionId: actionParams.actionId ?? uuid(),
-    });
-
+  public async runActionAsyncWithRetry() {
     appContextService
       .getLogger()
       .info(
-        `Running action asynchronously, actionId: ${actionP.actionId}, total agents: ${actionP.totalAgents}`
+        `Running action asynchronously, actionId: ${this.actionParams.actionId}, total agents: ${this.actionParams.totalAgents}`
       );
 
     withSpan({ name: this.getTaskType(), type: 'action' }, () =>
-      this.processAgentsInBatches(this.esClient, {
-        kuery: actionP.kuery,
-        showInactive: actionP.showInactive ?? false,
-        batchSize: actionP.batchSize,
-        pitId: retryPs.pitId,
-        searchAfter: retryPs.searchAfter,
-      }).catch(async (error) => {
+      this.processAgentsInBatches().catch(async (error) => {
         const createActionStatus = (errorMessage: string) =>
           this.createActionStatus(this.esClient, {
             '@timestamp': new Date().toISOString(),
             error_message: errorMessage,
             status: 'failed',
-            action_id: actionP.actionId,
+            action_id: this.actionParams.actionId,
           });
 
         // 404 error comes when PIT query is closed
@@ -92,14 +86,14 @@ export abstract class ActionRunner {
           await createActionStatus(errorMessage);
           return;
         }
-        if (retryPs.retryCount) {
+        if (this.retryParams.retryCount) {
           appContextService
             .getLogger()
             .error(
-              `Retry #${retryPs.retryCount} of task ${retryPs.taskId} failed: ${error.message}`
+              `Retry #${this.retryParams.retryCount} of task ${this.retryParams.taskId} failed: ${error.message}`
             );
 
-          if (retryPs.retryCount === 3) {
+          if (this.retryParams.retryCount === 3) {
             const errorMessage = 'Stopping after 3rd retry. Error: ' + error.message;
             appContextService.getLogger().warn(errorMessage);
             await createActionStatus(errorMessage);
@@ -109,10 +103,10 @@ export abstract class ActionRunner {
           appContextService.getLogger().error(`Action failed: ${error.message}`);
         }
         const taskId = await appContextService.getBulkActionsResolver()!.run(
-          actionP,
+          this.actionParams,
           {
-            ...retryPs,
-            retryCount: (retryPs.retryCount ?? 0) + 1,
+            ...this.retryParams,
+            retryCount: (this.retryParams.retryCount ?? 0) + 1,
           },
           this.getTaskType()
         );
@@ -133,14 +127,8 @@ export abstract class ActionRunner {
     });
   }
 
-  private async processBatch(
-    agents: Agent[],
-    searchAfter?: SortResults
-  ): Promise<{ items: BulkActionResult[] }> {
-    const retryPs = this.retryParams!;
-    retryPs.searchAfter = searchAfter;
-
-    if (retryPs.retryCount) {
+  private async processBatch(agents: Agent[]): Promise<{ items: BulkActionResult[] }> {
+    if (this.retryParams.retryCount) {
       try {
         const actions = await getAgentActions(this.esClient, this.actionParams!.actionId!);
 
@@ -158,27 +146,23 @@ export abstract class ActionRunner {
     return await this.processAgents(agents);
   }
 
-  public async processAgentsInBatches(
-    esClient: ElasticsearchClient,
-    options: Omit<ListWithKuery, 'page' | 'perPage'> & {
-      showInactive: boolean;
-      batchSize?: number;
-      pitId: string;
-      searchAfter?: SortResults;
-    }
-  ): Promise<{ items: BulkActionResult[] }> {
+  async processAgentsInBatches(): Promise<{ items: BulkActionResult[] }> {
     const start = Date.now();
-    const pitId = options.pitId;
+    const pitId = this.retryParams.pitId;
 
-    const perPage = options.batchSize ?? SO_SEARCH_LIMIT;
+    const perPage = this.actionParams.batchSize ?? SO_SEARCH_LIMIT;
 
-    const res = await getAgentsByKuery(esClient, {
-      ...options,
-      page: 1,
-      perPage,
-      pitId,
-      searchAfter: options.searchAfter,
-    });
+    const getAgents = () =>
+      getAgentsByKuery(this.esClient, {
+        kuery: this.actionParams.kuery,
+        showInactive: this.actionParams.showInactive ?? false,
+        page: 1,
+        perPage,
+        pitId,
+        searchAfter: this.retryParams.searchAfter,
+      });
+
+    const res = await getAgents();
 
     let currentAgents = res.agents;
     if (currentAgents.length === 0) {
@@ -188,21 +172,13 @@ export abstract class ActionRunner {
       return { items: [] }; // stop executing if there are no more results
     }
 
-    let results = await this.processBatch(currentAgents, options.searchAfter);
+    let results = await this.processBatch(currentAgents);
     let allAgentsProcessed = currentAgents.length;
-
-    // throw new Error('simulating error after batch processed ');
 
     while (allAgentsProcessed < res.total) {
       const lastAgent = currentAgents[currentAgents.length - 1];
-      const searchAfter = lastAgent.sort!;
-      const nextPage = await getAgentsByKuery(esClient, {
-        ...options,
-        page: 1,
-        perPage,
-        pitId,
-        searchAfter,
-      });
+      this.retryParams.searchAfter = lastAgent.sort!;
+      const nextPage = await getAgents();
       currentAgents = nextPage.agents;
       if (currentAgents.length === 0) {
         appContextService
@@ -210,14 +186,13 @@ export abstract class ActionRunner {
           .debug('currentAgents returned 0 hits, returning from bulk action query');
         break; // stop executing if there are no more results
       }
-      const currentResults = await this.processBatch(currentAgents, searchAfter);
+      // if (allAgentsProcessed > 4) throw new Error('simulating error before batch processed ' + this.retryParams.searchAfter);
+      const currentResults = await this.processBatch(currentAgents);
       results = { items: results.items.concat(currentResults.items) };
       allAgentsProcessed += currentAgents.length;
-      if (allAgentsProcessed > 4)
-        throw new Error('simulating error after batch processed ' + searchAfter);
     }
 
-    await closePointInTime(esClient, pitId);
+    await closePointInTime(this.esClient, pitId!);
 
     appContextService.getLogger().info(`processAgentsInBatches took ${Date.now() - start}ms`);
     return { ...results };
