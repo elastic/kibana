@@ -17,8 +17,7 @@ export const computeParentSeries = (
   currentMetric: Metric,
   subFunctionMetric: Metric,
   pipelineAgg: SupportedMetric,
-  meta?: number,
-  window?: string
+  { metaValue, window }: { metaValue?: number; window?: string } = {}
 ) => {
   const aggregationMap = SUPPORTED_METRICS[aggregation];
   if (!aggregationMap) {
@@ -50,8 +49,8 @@ export const computeParentSeries = (
       params: {
         ...(currentMetric.window && { window: currentMetric.window }),
         ...(timeScale && { timeScale }),
-        ...(pipelineAgg.name === 'percentile' && meta && { percentile: meta }),
-        ...(pipelineAgg.name === 'percentile_rank' && meta && { value: meta }),
+        ...(pipelineAgg.name === 'percentile' && metaValue && { percentile: metaValue }),
+        ...(pipelineAgg.name === 'percentile_rank' && metaValue && { value: metaValue }),
         ...(pipelineAgg.name === 'formula'
           ? { formula: `${pipelineAgg.formula}(${fieldName})` }
           : {}),
@@ -90,21 +89,16 @@ export const getParentPipelineSeries = (
       subFunctionMetric,
       pipelineAgg,
       aggregation,
-      metaValue,
-      window
+      { metaValue, window }
     );
     if (!formula) {
       return null;
     }
     return getFormulaSeries(formula);
   } else {
-    return computeParentSeries(
-      aggregation,
-      currentMetric,
-      subFunctionMetric,
-      pipelineAgg,
+    return computeParentSeries(aggregation, currentMetric, subFunctionMetric, pipelineAgg, {
       metaValue,
-      window
-    );
+      window,
+    });
   }
 };

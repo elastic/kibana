@@ -30,8 +30,7 @@ export const convertToPercentileColumn = (
   series: Series,
   metric: Metric,
   dataView: DataView,
-  index?: number,
-  window?: string
+  { index, window }: { index?: number; window?: string } = {}
 ): PercentileColumn | null => {
   const params = convertToPercentileParams(percentile);
   if (!params) {
@@ -42,7 +41,7 @@ export const convertToPercentileColumn = (
   if (!field) {
     return null;
   }
-  const commonColumnParams = createColumn(series, metric, field, false, false, window);
+  const commonColumnParams = createColumn(series, metric, field, { window });
   return {
     operationType: 'percentile',
     sourceField: field.name,
@@ -71,6 +70,6 @@ export const convertToPercentileColumns = (
   }
 
   return percentiles.map((p, index) =>
-    convertToPercentileColumn(p.value, series, metric, dataView, index, window)
+    convertToPercentileColumn(p.value, series, metric, dataView, { index, window })
   );
 };

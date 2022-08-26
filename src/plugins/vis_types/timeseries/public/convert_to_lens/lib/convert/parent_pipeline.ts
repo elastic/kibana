@@ -126,7 +126,7 @@ export const convertMetricAggregationColumnWithoutParams = (
   return {
     operationType: aggregation.name,
     sourceField,
-    ...createColumn(series, metric, field, false, false, window),
+    ...createColumn(series, metric, field, { window }),
     params: {},
   } as MetricAggregationColumnWithoutParams;
 };
@@ -136,8 +136,7 @@ export const convertMetricAggregationToColumn = (
   series: Series,
   metric: Metric,
   dataView: DataView,
-  meta?: number,
-  window?: string
+  { metaValue, window }: { metaValue?: number; window?: string } = {}
 ): MetricAggregationColumn | null => {
   if (!isSupportedAggregation(aggregation.name)) {
     return null;
@@ -149,18 +148,13 @@ export const convertMetricAggregationToColumn = (
   }
 
   if (aggregation.name === Operations.PERCENTILE) {
-    return convertToPercentileColumn(meta, series, metric, dataView, undefined, window);
+    return convertToPercentileColumn(metaValue, series, metric, dataView, { window });
   }
 
   if (aggregation.name === Operations.PERCENTILE_RANK) {
-    return convertToPercentileRankColumn(
-      meta?.toString() ?? '',
-      series,
-      metric,
-      dataView,
-      undefined,
-      window
-    );
+    return convertToPercentileRankColumn(metaValue?.toString() ?? '', series, metric, dataView, {
+      window,
+    });
   }
 
   if (aggregation.name === Operations.LAST_VALUE) {
@@ -177,8 +171,7 @@ export const computeParentPipelineColumns = (
   dataView: DataView,
   subFunctionMetric: Metric,
   pipelineAgg: SupportedMetric,
-  meta?: number,
-  window?: string
+  { metaValue, window }: { metaValue?: number; window?: string } = {}
 ) => {
   const agg = SUPPORTED_METRICS[currentMetric.type];
   if (!agg) {
@@ -201,8 +194,7 @@ export const computeParentPipelineColumns = (
     series,
     subFunctionMetric,
     dataView,
-    meta,
-    window
+    { metaValue, window }
   );
 
   if (!metricAggregationColumn) {
@@ -247,8 +239,7 @@ const convertMovingAvgOrDerivativeToColumns = (
       subFunctionMetric,
       pipelineAgg,
       currentMetric.type,
-      metaValue,
-      window
+      { metaValue, window }
     );
     if (!formula) {
       return null;
@@ -268,8 +259,7 @@ const convertMovingAvgOrDerivativeToColumns = (
       dataView,
       subFunctionMetric,
       pipelineAgg,
-      metaValue,
-      window
+      { metaValue, window }
     );
   }
 };

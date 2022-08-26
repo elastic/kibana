@@ -40,11 +40,19 @@ export const getLayerConfiguration = (
   chartType: string,
   model: Panel,
   series: VisSeries,
-  splitFields: string[],
-  xFieldName?: string,
-  xMode?: string,
-  splitWithDateHistogram?: boolean,
-  window?: string
+  {
+    splitFields = [],
+    xFieldName,
+    xMode,
+    splitWithDateHistogram,
+    window,
+  }: {
+    splitFields?: string[];
+    xFieldName?: string;
+    xMode?: string;
+    splitWithDateHistogram?: boolean;
+    window?: string;
+  } = {}
 ): VisualizeEditorLayersContext => {
   const layer = model.series[layerIdx];
   const palette = layer.palette as PaletteOutput;

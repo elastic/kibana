@@ -45,7 +45,7 @@ export const convertToLastValueColumn = (
   return {
     operationType: 'last_value',
     sourceField: field.name ?? 'document',
-    ...createColumn(series, currentMetric, undefined, false, false, window),
+    ...createColumn(series, currentMetric, undefined, { window }),
     params,
   };
 };

@@ -128,8 +128,7 @@ export const getPipelineAgg = (agg: MetricType) => {
 export const getFormulaEquivalent = (
   currentMetric: Metric,
   metrics: Metric[],
-  metaValue?: number,
-  window?: string
+  { metaValue, window }: { metaValue?: number; window?: string } = {}
 ) => {
   const aggregation = SUPPORTED_METRICS[currentMetric.type];
   if (!aggregation) {
@@ -176,8 +175,7 @@ export const getFormulaEquivalent = (
         subFunctionMetric,
         pipelineAgg,
         currentMetric.type,
-        metaValue,
-        window
+        { metaValue, window }
       );
     }
     case 'positive_rate': {

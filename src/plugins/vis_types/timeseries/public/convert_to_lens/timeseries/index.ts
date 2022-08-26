@@ -72,10 +72,7 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model) => {
       chartType,
       model,
       series,
-      splitFields,
-      timeField,
-      'date_histogram',
-      splitWithDateHistogram
+      { splitFields, xFieldName: timeField, xMode: 'date_histogram', splitWithDateHistogram }
     );
   }
 

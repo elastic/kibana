@@ -74,11 +74,11 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model, timeR
       'bar_horizontal',
       model,
       series,
-      splitFields,
-      undefined,
-      undefined,
-      splitWithDateHistogram,
-      window
+      {
+        splitFields,
+        splitWithDateHistogram,
+        window,
+      }
     );
   }
 

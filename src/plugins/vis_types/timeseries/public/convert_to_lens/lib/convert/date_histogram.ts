@@ -38,8 +38,7 @@ export const convertToDateHistogramColumn = (
   model: Panel,
   series: Series,
   dataView: DataView,
-  fieldName: string,
-  isSplit: boolean
+  { fieldName, isSplit }: { fieldName: string; isSplit: boolean }
 ): DateHistogramColumn | null => {
   const params = convertToDateHistogramParams(model, series);
 

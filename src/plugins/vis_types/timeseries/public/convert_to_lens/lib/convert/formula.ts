@@ -57,7 +57,7 @@ const convertFormulaScriptForPercentileAggs = (
     if (!metaValue) {
       return;
     }
-    const script = getFormulaEquivalent(metric, allAggMetrics, metaValue, window);
+    const script = getFormulaEquivalent(metric, allAggMetrics, { metaValue, window });
     if (!script) {
       return;
     }
@@ -73,7 +73,7 @@ const convertFormulaScriptForAggs = (
   allAggMetrics: Metric[],
   window?: string
 ) => {
-  const script = getFormulaEquivalent(metric, allAggMetrics, undefined, window);
+  const script = getFormulaEquivalent(metric, allAggMetrics, { window });
   if (!script) {
     return null;
   }

@@ -18,7 +18,7 @@ const createStandartDeviationFormulaColumn = (
   metrics: Metric[],
   window?: string
 ) => {
-  const script = getFormulaEquivalent(currentMetric, metrics, undefined, window);
+  const script = getFormulaEquivalent(currentMetric, metrics, { window });
   if (!script) return null;
   return createFormulaColumn(script, series, currentMetric);
 };

@@ -44,8 +44,7 @@ export const convertToCumulativeSumColumns = (
       subFunctionMetric,
       pipelineAgg,
       currentMetric.type,
-      metaValue,
-      window
+      { metaValue, window }
     );
     if (!formula) {
       return null;
@@ -65,8 +64,7 @@ export const convertToCumulativeSumColumns = (
       dataView,
       subFunctionMetric,
       pipelineAgg,
-      undefined,
-      window
+      { window }
     );
   }
 };

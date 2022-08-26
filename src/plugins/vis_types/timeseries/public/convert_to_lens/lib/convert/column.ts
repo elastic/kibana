@@ -21,14 +21,17 @@ import { ColumnWithMeta, Meta, Column } from './types';
 
 type GeneralColumn = Omit<BaseColumn<Operation, unknown>, 'operationType' | 'params'>;
 type GeneralColumnWithMeta = GenericColumnWithMeta<GeneralColumn, Meta>;
+interface ExtraColumnFields {
+  isBucketed?: boolean;
+  isSplit?: boolean;
+  window?: string;
+}
 
 export const createColumn = (
   series: Series,
   metric: Metric,
   field?: DataViewField,
-  isBucketed: boolean = false,
-  isSplit: boolean = false,
-  window?: string
+  { isBucketed = false, isSplit = false, window }: ExtraColumnFields = {}
 ): GeneralColumnWithMeta => ({
   columnId: uuid(),
   dataType: (field?.type as DataType) ?? undefined,

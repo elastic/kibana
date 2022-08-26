@@ -57,13 +57,10 @@ export const getBucketsColumns = (
       return null;
     }
     if (isDateHistogram) {
-      const dateHistogramColumn = convertToDateHistogramColumn(
-        model,
-        series,
-        dataView,
-        splitFields[0],
-        true
-      );
+      const dateHistogramColumn = convertToDateHistogramColumn(model, series, dataView, {
+        fieldName: splitFields[0],
+        isSplit: true,
+      });
       return getValidColumns(dateHistogramColumn);
     }
 

@@ -106,7 +106,7 @@ export const getMetricsColumns = (
       return getValidColumns(column);
     }
     case 'static': {
-      const column = convertToStaticValueColumn(series, metrics, visibleSeriesCount, window);
+      const column = convertToStaticValueColumn(series, metrics, { visibleSeriesCount, window });
       return getValidColumns(column);
     }
     case 'std_deviation': {

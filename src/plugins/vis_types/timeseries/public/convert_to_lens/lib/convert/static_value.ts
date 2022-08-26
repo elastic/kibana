@@ -18,8 +18,7 @@ export const convertToStaticValueParams = ({ value }: Metric): StaticValueParams
 export const convertToStaticValueColumn = (
   series: Series,
   metrics: Metric[],
-  visibleSeriesCount: number,
-  window?: string
+  { visibleSeriesCount = 0, window }: { visibleSeriesCount?: number; window?: string } = {}
 ): StaticValueColumn | null => {
   // Lens support reference lines only when at least one layer data exists
   if (visibleSeriesCount === 1) {
@@ -29,7 +28,7 @@ export const convertToStaticValueColumn = (
   return {
     operationType: 'static_value',
     references: [],
-    ...createColumn(series, currentMetric, undefined, false, false, window),
+    ...createColumn(series, currentMetric, undefined, { window }),
     params: convertToStaticValueParams(currentMetric),
   };
 };

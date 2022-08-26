@@ -15,8 +15,7 @@ export const getParentPipelineSeriesFormula = (
   subFunctionMetric: Metric,
   pipelineAgg: SupportedMetric,
   aggregation: MetricType,
-  percentileValue?: number,
-  window?: string
+  { metaValue, window }: { metaValue?: number; window?: string } = {}
 ) => {
   let formula = '';
   const aggregationMap = SUPPORTED_METRICS[aggregation];
@@ -50,7 +49,10 @@ export const getParentPipelineSeriesFormula = (
       additionalSubFunction.field ?? ''
     }${additionalFunctionArgs ?? ''})))`;
   } else {
-    const subFormula = getFormulaEquivalent(subFunctionMetric, metrics, percentileValue, window);
+    const subFormula = getFormulaEquivalent(subFunctionMetric, metrics, {
+      metaValue,
+      window,
+    });
 
     if (!subFormula) {
       return null;

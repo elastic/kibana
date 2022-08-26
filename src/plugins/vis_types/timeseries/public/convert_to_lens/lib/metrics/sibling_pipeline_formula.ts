@@ -56,7 +56,10 @@ export const getSiblingPipelineSeriesFormula = (
   } else {
     const nestedMetaValue = Number(nestedMeta?.replace(']', ''));
 
-    const subFormula = getFormulaEquivalent(subFunctionMetric, metrics, nestedMetaValue, window);
+    const subFormula = getFormulaEquivalent(subFunctionMetric, metrics, {
+      metaValue: nestedMetaValue,
+      window,
+    });
 
     if (!subFormula) {
       return null;

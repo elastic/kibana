@@ -66,13 +66,10 @@ export const convertToLens = async (
       return null;
     }
 
-    const dateHistogramColumn = convertToDateHistogramColumn(
-      model,
-      series,
-      indexPattern!,
-      timeField,
-      false
-    );
+    const dateHistogramColumn = convertToDateHistogramColumn(model, series, indexPattern!, {
+      fieldName: timeField,
+      isSplit: false,
+    });
     if (dateHistogramColumn === null) {
       return null;
     }
