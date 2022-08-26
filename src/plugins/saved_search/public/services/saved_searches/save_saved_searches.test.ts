@@ -92,6 +92,7 @@ describe('saveSavedSearch', () => {
         kibanaSavedObjectMeta: { searchSourceJSON: '{}' },
         sort: [],
         title: 'title',
+        timeRestore: false,
       },
       { references: [] }
     );
@@ -112,6 +113,7 @@ describe('saveSavedSearch', () => {
         kibanaSavedObjectMeta: { searchSourceJSON: '{}' },
         sort: [],
         title: 'title',
+        timeRestore: false,
       },
       { references: [] }
     );

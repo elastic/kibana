@@ -5,7 +5,6 @@ exports[`renders matching snapshot 1`] = `
   aria-label="Notification message list"
   data-test-subj="globalToastList"
   dismissToast={[Function]}
-  side="right"
   toastLifeTimeMs={Infinity}
   toasts={Array []}
 />
