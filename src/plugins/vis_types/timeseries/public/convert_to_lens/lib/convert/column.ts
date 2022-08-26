@@ -28,6 +28,8 @@ interface ExtraColumnFields {
   window?: string;
 }
 
+const isSupportedFormat = (format: string) => ['bytes', 'number', 'percent'].includes(format);
+
 export const getFormat = (
   series: Series,
   fieldName: string | undefined,
@@ -45,8 +47,17 @@ export const getFormat = (
 
     const formatter = dataView.getFormatterForField(field);
     const id = formatter.type.id;
+
+    if (!isSupportedFormat(id)) {
+      return {};
+    }
     return { format: { id } };
   }
+
+  if (!isSupportedFormat(series.formatter)) {
+    return {};
+  }
+
   return { format: { id: series.formatter } };
 };
 
