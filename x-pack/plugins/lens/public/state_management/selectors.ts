@@ -25,6 +25,7 @@ export const selectAutoApplyEnabled = (state: LensState) => !state.lens.autoAppl
 export const selectChangesApplied = (state: LensState) =>
   !state.lens.autoApplyDisabled || Boolean(state.lens.changesApplied);
 export const selectDatasourceStates = (state: LensState) => state.lens.datasourceStates;
+export const selectVisualizationState = (state: LensState) => state.lens.visualization;
 export const selectActiveDatasourceId = (state: LensState) => state.lens.activeDatasourceId;
 export const selectActiveData = (state: LensState) => state.lens.activeData;
 export const selectDataViews = (state: LensState) => state.lens.dataViews;
@@ -85,7 +86,9 @@ export const selectSavedObjectFormat = createSelector(
     { datasourceMap, visualizationMap, extractFilterReferences }
   ) => {
     const activeVisualization =
-      visualization.state && visualization.activeId && visualizationMap[visualization.activeId];
+      visualization.state && visualization.activeId
+        ? visualizationMap[visualization.activeId]
+        : null;
     const activeDatasource =
       datasourceStates && activeDatasourceId && !datasourceStates[activeDatasourceId].isLoading
         ? datasourceMap[activeDatasourceId]
@@ -113,6 +116,14 @@ export const selectSavedObjectFormat = createSelector(
       references.push(...savedObjectReferences);
     });
 
+    let persistibleVisualizationState = visualization.state;
+    if (activeVisualization.getPersistableState) {
+      const { state: persistableState, savedObjectReferences } =
+        activeVisualization.getPersistableState(visualization.state);
+      persistibleVisualizationState = persistableState;
+      references.push(...savedObjectReferences);
+    }
+
     const { state: persistableFilters, references: filterReferences } =
       extractFilterReferences(filters);
 
@@ -126,7 +137,7 @@ export const selectSavedObjectFormat = createSelector(
       type: 'lens',
       references,
       state: {
-        visualization: visualization.state,
+        visualization: persistibleVisualizationState,
         query,
         filters: persistableFilters,
         datasourceStates: persistibleDatasourceStates,

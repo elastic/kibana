@@ -196,9 +196,9 @@ export interface OnVisDropProps<T> {
   group?: VisualizationDimensionGroupConfig;
 }
 
-export function onDropForVisualization<T>(
+export function onDropForVisualization<T, P = unknown>(
   props: OnVisDropProps<T>,
-  activeVisualization: Visualization<T>
+  activeVisualization: Visualization<T, P>
 ) {
   const { prevState, target, frame, dropType, source, group } = props;
   const { layerId, columnId, groupId } = target;

@@ -110,10 +110,10 @@ function getLayerReferenceName(layerId: string) {
   return `xy-visualization-layer-${layerId}`;
 }
 
-export function extractReferences({ layers }: XYState) {
+export function extractReferences(state: XYState) {
   const savedObjectReferences: SavedObjectReference[] = [];
   const persistableLayers: Array<Omit<XYLayerConfig, 'indexPatternId'>> = [];
-  layers.forEach((layer) => {
+  state.layers.forEach((layer) => {
     if (isAnnotationsLayer(layer)) {
       const { indexPatternId, ...persistableLayer } = layer;
       savedObjectReferences.push({
@@ -126,14 +126,21 @@ export function extractReferences({ layers }: XYState) {
       persistableLayers.push(layer);
     }
   });
-  return { savedObjectReferences, state: { layers: persistableLayers } };
+  return { savedObjectReferences, state: { ...state, layers: persistableLayers } };
 }
 
-export function injectReferences(state: XYPersistedState, references: SavedObjectReference[]) {
+export function injectReferences(
+  state: XYPersistedState,
+  references?: SavedObjectReference[]
+): XYState {
+  if (!references || !references.length) {
+    return state as XYState;
+  }
   return {
+    ...state,
     layers: state.layers.map((layer) => {
       if (!isAnnotationsLayer(layer)) {
-        return layer;
+        return layer as XYLayerConfig;
       }
       return {
         ...layer,

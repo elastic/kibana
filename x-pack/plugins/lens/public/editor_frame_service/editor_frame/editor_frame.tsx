@@ -103,6 +103,7 @@ export function EditorFrame(props: EditorFrameProps) {
               core={props.core}
               plugins={props.plugins}
               datasourceMap={datasourceMap}
+              visualizationMap={visualizationMap}
               showNoDataPopover={props.showNoDataPopover}
               dropOntoWorkspace={dropOntoWorkspace}
               hasSuggestionForField={hasSuggestionForField}

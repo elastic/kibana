@@ -33,9 +33,10 @@ import {
   YConfig,
   YAxisMode,
   SeriesType,
+  PersistedState,
 } from './types';
 import { layerTypes } from '../../../common';
-import { extractReferences, isHorizontalChart } from './state_helpers';
+import { extractReferences, injectReferences, isHorizontalChart } from './state_helpers';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
 import { getAccessorColorConfigs, getColorAssignments } from './color_assignment';
 import { getColumnToLabelMap } from './state_helpers';
@@ -98,7 +99,7 @@ export const getXyVisualization = ({
   fieldFormats: FieldFormatsStart;
   useLegacyTimeAxis: boolean;
   kibanaTheme: ThemeServiceStart;
-}): Visualization<State> => ({
+}): Visualization<State, PersistedState> => ({
   id: XY_ID,
   visualizationTypes,
   getVisualizationTypeId(state) {
@@ -155,6 +156,10 @@ export const getXyVisualization = ({
 
   getPersistableState(state) {
     return extractReferences(state);
+  },
+
+  fromPersistableState(state, references) {
+    return injectReferences(state, references);
   },
 
   getDescription,

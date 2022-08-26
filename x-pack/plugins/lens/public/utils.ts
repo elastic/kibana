@@ -114,29 +114,16 @@ export async function refreshIndexPatternsList({
   });
 }
 
-// export function refreshIndexPatternsList({
-//   activeDatasources,
-//   indexPatternId,
-//   setDatasourceState,
-// }: {
-//   activeDatasources: Record<string, Datasource>;
-//   indexPatternId: string;
-//   setDatasourceState: StateSetter<unknown>;
-// }): void {
-//   Object.entries(activeDatasources).forEach(([id, datasource]) => {
-//     datasource?.refreshIndexPatternsList?.({
-//       indexPatternId,
-//       setState: setDatasourceState,
-//     });
-//   });
-// }
-
 export function getIndexPatternsIds({
   activeDatasources,
   datasourceStates,
+  visualizationState,
+  activeVisualization,
 }: {
   activeDatasources: Record<string, Datasource>;
   datasourceStates: DatasourceStates;
+  visualizationState: unknown;
+  activeVisualization?: Visualization;
 }): string[] {
   let currentIndexPatternId: string | undefined;
   const references: SavedObjectReference[] = [];
@@ -146,6 +133,11 @@ export function getIndexPatternsIds({
     currentIndexPatternId = indexPatternId;
     references.push(...savedObjectReferences);
   });
+
+  if (activeVisualization?.getPersistableState) {
+    const { savedObjectReferences } = activeVisualization.getPersistableState(visualizationState);
+    references.push(...savedObjectReferences);
+  }
   const referencesIds = references
     .filter(({ type }) => type === 'index-pattern')
     .map(({ id }) => id);

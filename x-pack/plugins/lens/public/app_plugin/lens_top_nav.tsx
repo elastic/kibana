@@ -210,6 +210,7 @@ export const LensTopNavMenu = ({
   onAppLeave,
   redirectToOrigin,
   datasourceMap,
+  visualizationMap,
   title,
   goBackToOriginatingApp,
   contextOriginatingApp,
@@ -310,6 +311,10 @@ export const LensTopNavMenu = ({
         {}
       ),
       datasourceStates,
+      visualizationState: visualization.state,
+      activeVisualization: visualization.activeId
+        ? visualizationMap[visualization.activeId]
+        : undefined,
     });
     const hasIndexPatternsChanged =
       indexPatterns.length + rejectedIndexPatterns.length !== indexPatternIds.length ||
@@ -334,6 +339,8 @@ export const LensTopNavMenu = ({
     activeDatasourceId,
     rejectedIndexPatterns,
     datasourceMap,
+    visualizationMap,
+    visualization,
     indexPatterns,
     dataViewsService,
   ]);

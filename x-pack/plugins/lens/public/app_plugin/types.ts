@@ -101,6 +101,7 @@ export interface LensTopNavMenuProps {
   setIsSaveModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
   runSave: RunSave;
   datasourceMap: DatasourceMap;
+  visualizationMap: VisualizationMap;
   title?: string;
   lensInspector: LensInspector;
   goBackToOriginatingApp?: () => void;
