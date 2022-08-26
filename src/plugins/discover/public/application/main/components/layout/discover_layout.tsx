@@ -198,6 +198,8 @@ export function DiscoverLayout({
     }
   }, [dataState.error, isPlainRecord]);
 
+  const resizeRef = useRef<HTMLDivElement>(null);
+
   return (
     <EuiPage className="dscPage" data-fetch-counter={fetchCounter.current}>
       <h1
@@ -282,6 +284,7 @@ export function DiscoverLayout({
           </EuiHideFor>
           <EuiFlexItem className="dscPageContent__wrapper">
             <EuiPageContent
+              panelRef={resizeRef}
               verticalPosition={contentCentered ? 'center' : undefined}
               horizontalPosition={contentCentered ? 'center' : undefined}
               paddingSize="none"
@@ -323,6 +326,7 @@ export function DiscoverLayout({
                   onAddFilter={onAddFilter as DocViewFilterFn}
                   onFieldEdited={onFieldEdited}
                   columns={columns}
+                  resizeRef={resizeRef}
                 />
               )}
             </EuiPageContent>
