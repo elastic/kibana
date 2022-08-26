@@ -40,16 +40,18 @@ const OsqueryEditorComponent = ({
   onSave,
   onCancel,
 }: EuiMarkdownEditorUiPluginEditorProps<{
-  label?: string;
-  query: string;
-  ecs_mapping: { [key: string]: {} };
+  configuration: {
+    label?: string;
+    query: string;
+    ecs_mapping: { [key: string]: {} };
+  };
 }>) => {
   const { osquery } = useKibana().services;
   const formMethods = useForm({
     defaultValues: {
-      label: node?.label,
-      query: node?.query,
-      ecs_mapping: node?.ecs_mapping,
+      label: node?.configuration?.label,
+      query: node?.configuration?.query,
+      ecs_mapping: node?.configuration?.ecs_mapping,
     },
   });
 
@@ -92,7 +94,7 @@ const OsqueryEditorComponent = ({
   return (
     <>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>{'Add Osquery query'}</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle>{`${node ? 'Edit' : 'Add'} Osquery query`}</EuiModalHeaderTitle>
       </EuiModalHeader>
 
       <EuiModalBody>
