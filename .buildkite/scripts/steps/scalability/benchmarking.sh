@@ -73,5 +73,3 @@ kill "$esPid"
 echo "--- Archive Gatling reports and upload as build artifacts"
 tar -czf "scalability_test_report.tar.gz" --exclude=simulation.log -C kibana-load-testing/target gatling
 buildkite-agent artifact upload "scalability_test_report.tar.gz"
-echo "Upload scalability traces"
-buildkite-agent artifact upload "scalability_traces.tar.gz"

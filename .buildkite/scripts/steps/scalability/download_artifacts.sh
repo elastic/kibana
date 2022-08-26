@@ -8,6 +8,10 @@ gsutil cp "$GCS_BUCKET/LATEST" "$SCALABILITY_ARTIFACTS_LOCATION/"
 HASH=`cat $SCALABILITY_ARTIFACTS_LOCATION/LATEST`
 gsutil cp -r "$GCS_BUCKET/$HASH" "$SCALABILITY_ARTIFACTS_LOCATION/"
 
+cd "$SCALABILITY_ARTIFACTS_LOCATION/$HASH"
+echo "Upload scalability traces as build artifacts"
+buildkite-agent artifact upload "scalability_traces.tar.gz"
+
 echo "Unzip kibana build, plugins and scalability traces"
 cd "$WORKSPACE"
 mkdir -p "$KIBANA_BUILD_LOCATION"
