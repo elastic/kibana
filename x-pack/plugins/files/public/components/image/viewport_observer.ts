@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { once } from 'lodash';
-import { of, Observable, Subject } from 'rxjs';
+import { of, Observable, ReplaySubject } from 'rxjs';
 import { take } from 'rxjs/operators';
 
 const supportsIntersectionObserver = 'IntersectionObserver' in window;
@@ -15,16 +15,17 @@ const supportsIntersectionObserver = 'IntersectionObserver' in window;
  * with the viewport.
  */
 export class ViewportObserver {
-  constructor() {
-    this.intersectionObserver = supportsIntersectionObserver
-      ? new IntersectionObserver(this.handleChange, {
-          root: null,
-        })
-      : undefined;
+  private intersectionObserver: IntersectionObserver | undefined;
+  private intersection$ = new ReplaySubject<void>(1);
+
+  constructor(
+    getIntersectionObserver: (
+      cb: IntersectionObserverCallback,
+      opts: IntersectionObserverInit
+    ) => IntersectionObserver | undefined
+  ) {
+    this.intersectionObserver = getIntersectionObserver(this.handleChange, { root: null });
   }
-  private intersectionObserver: undefined | IntersectionObserver;
-  private element: undefined | HTMLElement;
-  private intersection$ = new Subject<void>();
 
   /**
    * Call this function to start observing.
@@ -33,7 +34,6 @@ export class ViewportObserver {
    * element's bounding rect intersects with the viewport.
    */
   public observeElement = once((element: HTMLElement): Observable<void> => {
-    this.element = element;
     if (this.intersectionObserver) {
       this.intersectionObserver.observe(element);
       return this.intersection$.pipe(take(1));
@@ -44,19 +44,18 @@ export class ViewportObserver {
 
   private handleChange = ([{ isIntersecting }]: IntersectionObserverEntry[]) => {
     if (isIntersecting) {
-      this.intersection$.next();
+      this.intersection$.next(undefined);
       this.unobserve();
     }
   };
 
   private unobserve() {
-    if (this.element) {
-      this.intersectionObserver?.unobserve(this.element);
-    }
-    this.intersection$.complete();
+    this.intersectionObserver?.disconnect();
   }
 }
 
 export function createViewportObserver(): ViewportObserver {
-  return new ViewportObserver();
+  return new ViewportObserver((cb, opts) =>
+    supportsIntersectionObserver ? new IntersectionObserver(cb, opts) : undefined
+  );
 }

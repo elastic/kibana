@@ -18,6 +18,16 @@ export interface Props extends ImgHTMLAttributes<HTMLImageElement> {
   ref?: LegacyRef<HTMLImageElement>;
 }
 
+/**
+ * A viewport-aware component that displays an image. This component is a very
+ * thin wrapper around the img tag.
+ *
+ * @note Intended to be used with files like:
+ *
+ * ```ts
+ * <Image src={file.getDownloadSrc(file)} ... />
+ * ```
+ */
 export const Image: FunctionComponent<Props> = ({ src, alt, ref, onFirstVisible, ...rest }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [viewportObserver] = useState(() => createViewportObserver());
