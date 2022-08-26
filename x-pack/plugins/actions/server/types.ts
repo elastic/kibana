@@ -15,12 +15,14 @@ import {
   CustomRequestHandlerContext,
   SavedObjectReference,
 } from '@kbn/core/server';
+import { ObjectType } from '@kbn/config-schema';
 import { ActionTypeRegistry } from './action_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { ActionsClient } from './actions_client';
 import { ActionTypeExecutorResult } from '../common';
 import { TaskInfo } from './lib/action_executor';
 import { ConnectorTokenClient } from './builtin_action_types/lib/connector_token_client';
+import { ActionsConfigurationUtilities } from './actions_config';
 
 export type { ActionTypeExecutorResult, ActionTypeExecutorRawResult } from '../common';
 export type { GetFieldsByIssueTypeResponse as JiraGetFieldsResponse } from './builtin_action_types/jira/types';
@@ -94,7 +96,8 @@ export type ExecutorType<Config, Secrets, Params, ResultData> = (
 ) => Promise<ActionTypeExecutorResult<ResultData>>;
 
 interface ValidatorType<Type> {
-  validate(value: unknown): Type;
+  schema: ObjectType;
+  validate?: (value: Type, validatorServices: ValidatorServices) => Type;
 }
 
 export interface ActionValidationService {
@@ -103,6 +106,9 @@ export interface ActionValidationService {
   isUriAllowed(uri: string): boolean;
 }
 
+export interface ValidatorServices {
+  configurationUtilities: ActionsConfigurationUtilities;
+}
 export interface ActionType<
   Config extends ActionTypeConfig = ActionTypeConfig,
   Secrets extends ActionTypeSecrets = ActionTypeSecrets,
