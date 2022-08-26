@@ -9,13 +9,12 @@
 import React from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
-import { FILTERS } from '@kbn/es-query';
 import { EuiFlexGroup, EuiFlexItem, EuiTextColor } from '@elastic/eui';
 import { getDisplayValueFromFilter, getIndexPatternFromFilter } from '@kbn/data-plugin/public';
-import { existsOperator, isOneOfOperator } from '../../filter_bar/filter_editor';
 import { FilterBadgeGroup } from './filter_badge_group';
 import { getConditionalOperationType } from '../../filters_builder/filters_builder_utils';
 import { ConditionTypes } from '../../filters_builder/filters_builder_condition_types';
+import { FilterContent } from './filter_badge_expression_filter_content';
 
 const FILTER_ITEM_OK = '';
 const FILTER_ITEM_WARNING = 'warn';
@@ -31,66 +30,6 @@ interface LabelOptions {
   status: FilterLabelStatus;
   message?: string;
 }
-
-const FilterBadgeExpressionValue = ({ value }: { value: string | number }) => {
-  return (
-    <EuiFlexItem grow={false}>
-      <EuiTextColor color={typeof value === 'string' ? '#387765' : '#ac4e6d'}>{value}</EuiTextColor>
-    </EuiFlexItem>
-  );
-};
-
-const Prefix = ({ prefix }: { prefix?: boolean }) =>
-  prefix ? (
-    <EuiFlexItem grow={false}>
-      <EuiTextColor color="danger">NOT</EuiTextColor>
-    </EuiFlexItem>
-  ) : null;
-
-const FilterContent = ({ filter, label }: { filter: Filter; label: LabelOptions }) => {
-  switch (filter.meta.type) {
-    case FILTERS.EXISTS:
-      return (
-        <>
-          <Prefix prefix={filter.meta.negate} />
-          <EuiFlexItem grow={false}>{filter.meta.key}:</EuiFlexItem>
-          <FilterBadgeExpressionValue value={`${existsOperator.message}`} />
-        </>
-      );
-    case FILTERS.PHRASES:
-      return (
-        <>
-          <Prefix prefix={filter.meta.negate} />
-          <EuiFlexItem grow={false}>{filter.meta.key}:</EuiFlexItem>
-          <FilterBadgeExpressionValue value={`${isOneOfOperator.message} ${label.title}`} />
-        </>
-      );
-    case FILTERS.QUERY_STRING:
-      return (
-        <>
-          <Prefix prefix={filter.meta.negate} /> <FilterBadgeExpressionValue value={label.title} />
-        </>
-      );
-    case FILTERS.PHRASE:
-    case FILTERS.RANGE:
-      return (
-        <>
-          <Prefix prefix={filter.meta.negate} />
-          <EuiFlexItem grow={false}>{filter.meta.key}:</EuiFlexItem>
-          <FilterBadgeExpressionValue value={label.title} />
-        </>
-      );
-    default:
-      return (
-        <>
-          <Prefix prefix={filter.meta.negate} />
-          <FilterBadgeExpressionValue
-            value={`${JSON.stringify(filter.query) || filter.meta.value}`}
-          />
-        </>
-      );
-  }
-};
 
 function isFilterApplicable(filter: Filter, dataView: DataView[]) {
   if (!dataView.length) return true;
