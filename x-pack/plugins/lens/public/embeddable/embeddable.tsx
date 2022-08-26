@@ -819,6 +819,9 @@ export class Embeddable
   }
 
   public canViewUnderlyingData() {
+    if (!this.savedVis) {
+      return false;
+    }
     return this.loadViewUnderlyingDataArgs();
   }
 
