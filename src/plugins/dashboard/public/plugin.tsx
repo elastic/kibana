@@ -179,7 +179,6 @@ export class DashboardPlugin
       };
       return {
         SavedObjectFinder: getSavedObjectFinder(coreStart.savedObjects, coreStart.uiSettings),
-        showWriteControls: Boolean(coreStart.application.capabilities.dashboard.showWriteControls),
         notifications: coreStart.notifications,
         screenshotMode: deps.screenshotMode,
         application: coreStart.application,

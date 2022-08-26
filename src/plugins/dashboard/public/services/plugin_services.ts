@@ -18,6 +18,7 @@ import { DashboardServices } from './types';
 import { DashboardStartDependencies } from '../plugin';
 
 import { chromeServiceFactory } from './chrome/chrome_service';
+import { dashboardCapabilitiesServiceFactory } from './dashboard_capabilities/dashboard_capabilities_service';
 import { dataServiceFactory } from './data/data_service';
 import { dataViewEditorServiceFactory } from './data_view_editor/data_view_editor_service';
 import { embeddableServiceFactory } from './embeddable/embeddable_service';
@@ -34,6 +35,7 @@ const providers: PluginServiceProviders<
   KibanaPluginServiceParams<DashboardStartDependencies>
 > = {
   chrome: new PluginServiceProvider(chromeServiceFactory),
+  dashboardCapabilities: new PluginServiceProvider(dashboardCapabilitiesServiceFactory),
   data: new PluginServiceProvider(dataServiceFactory),
   dataViewEditor: new PluginServiceProvider(dataViewEditorServiceFactory),
   embeddable: new PluginServiceProvider(embeddableServiceFactory),

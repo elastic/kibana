@@ -87,7 +87,6 @@ export const useDashboardAppState = ({
     savedDashboards,
     initializerContext,
     savedObjectsTagging,
-    dashboardCapabilities,
     dashboardSessionStorage,
     scopedHistory,
     screenshotModeService,
@@ -96,6 +95,7 @@ export const useDashboardAppState = ({
 
   const {
     chrome: { docTitle },
+    dashboardCapabilities,
     data: { query, search, dataViews },
     embeddable,
     spaces: { redirectLegacyUrl },
@@ -122,19 +122,13 @@ export const useDashboardAppState = ({
      * from the dashboardId. This build context doesn't contain any extrenuous services.
      */
     const dashboardBuildContext: DashboardBuildContext = {
-      query,
-      search,
       history,
-      dataViews,
-      embeddable,
-      notifications,
       kibanaVersion,
       savedDashboards,
       kbnUrlStateStorage,
       initializerContext,
       savedObjectsTagging,
       isEmbeddedExternally,
-      dashboardCapabilities,
       dispatchDashboardStateChange,
       $checkForUnsavedChanges: new Subject(),
       $onDashboardStateChange: dashboardAppState.$onDashboardStateChange,
@@ -253,7 +247,6 @@ export const useDashboardAppState = ({
        */
       const dataViewsSubscription = syncDashboardDataViews({
         dashboardContainer,
-        // dataViews: dashboardBuildContext.dataViews,
         onUpdateDataViews: async (newDataViewIds: string[]) => {
           if (newDataViewIds?.[0]) {
             dashboardContainer.controlGroup?.setRelevantDataViewId(newDataViewIds[0]);
@@ -279,7 +272,7 @@ export const useDashboardAppState = ({
        * Any time the redux state, or the last saved state changes, compare them, set the unsaved
        * changes state, and and push the unsaved changes to session storage.
        */
-      const { timefilter } = dashboardBuildContext.query.timefilter;
+      const { timefilter } = query.timefilter;
       const lastSavedSubscription = combineLatest([
         $onLastSavedStateChange,
         dashboardAppState.$onDashboardStateChange,
@@ -336,7 +329,6 @@ export const useDashboardAppState = ({
       const updateLastSavedState = () => {
         setLastSavedState(
           savedObjectToDashboardState({
-            showWriteControls: dashboardBuildContext.dashboardCapabilities.showWriteControls,
             version: dashboardBuildContext.kibanaVersion,
             savedObjectsTagging,
             usageCollection,

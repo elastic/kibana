@@ -162,12 +162,7 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
           )}
           {this.props.container.getPanelCount() === 0 && (
             <div className="dshDashboardEmptyScreen">
-              <DashboardEmptyScreen
-                isReadonlyMode={
-                  !this.props.container.getInput().dashboardCapabilities?.showWriteControls
-                }
-                isEditMode={isEditMode}
-              />
+              <DashboardEmptyScreen isEditMode={isEditMode} />
             </div>
           )}
           {this.state.controlGroupReady && (

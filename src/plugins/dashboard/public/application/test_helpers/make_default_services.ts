@@ -13,7 +13,7 @@ import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/moc
 import { coreMock } from '@kbn/core/public/mocks';
 
 import { SavedObjectLoader, SavedObjectLoaderFindOptions } from '../../services/saved_objects';
-import { DashboardAppServices, DashboardAppCapabilities } from '../../types';
+import { DashboardAppServices } from '../../types';
 import { getSavedDashboardMock } from './get_saved_dashboard_mock';
 import { DashboardSessionStorage } from '../lib';
 
@@ -49,16 +49,6 @@ export function makeDefaultServices(): DashboardAppServices {
   } as unknown as DashboardSessionStorage;
   dashboardSessionStorage.clearState = jest.fn();
 
-  const defaultCapabilities: DashboardAppCapabilities = {
-    show: true,
-    createNew: true,
-    saveQuery: true,
-    createShortUrl: true,
-    showWriteControls: true,
-    storeSearchSession: true,
-    mapsCapabilities: { save: true },
-    visualizeCapabilities: { save: true },
-  };
   const initializerContext = {
     env: { packageInfo: { version: '8.0.0' } },
   } as PluginInitializerContext;
@@ -67,7 +57,6 @@ export function makeDefaultServices(): DashboardAppServices {
     screenshotModeService: screenshotModePluginMock.createSetupContract(),
     savedObjects: savedObjectsPluginMock.createStartContract(),
     savedObjectsClient: core.savedObjects.client,
-    dashboardCapabilities: defaultCapabilities,
     scopedHistory: () => ({} as ScopedHistory),
     setHeaderActionMenu: (mountPoint) => {},
     urlForwarding: {} as UrlForwardingStart,

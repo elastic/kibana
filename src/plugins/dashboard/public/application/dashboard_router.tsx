@@ -32,7 +32,7 @@ import { DashboardNoMatch } from './listing/dashboard_no_match';
 import { addHelpMenuToAppChrome, DashboardSessionStorage } from './lib';
 import { createDashboardListingFilterUrl } from '../dashboard_constants';
 import { createDashboardEditUrl, DashboardConstants } from '../dashboard_constants';
-import { getDashboardPageTitle, dashboardReadonlyBadge } from '../dashboard_strings';
+import { dashboardReadonlyBadge, getDashboardPageTitle } from '../dashboard_strings';
 import { DashboardAppServices, DashboardEmbedSettings, RedirectToProps } from '../types';
 import {
   DashboardFeatureFlagConfig,
@@ -108,16 +108,6 @@ export async function mountApp({
     savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
     allowByValueEmbeddables:
       initializerContext.config.get<DashboardFeatureFlagConfig>().allowByValueEmbeddables,
-    dashboardCapabilities: {
-      show: Boolean(coreStart.application.capabilities.dashboard.show),
-      saveQuery: Boolean(coreStart.application.capabilities.dashboard.saveQuery),
-      createNew: Boolean(coreStart.application.capabilities.dashboard.createNew),
-      mapsCapabilities: { save: Boolean(coreStart.application.capabilities.maps?.save) },
-      createShortUrl: Boolean(coreStart.application.capabilities.dashboard.createShortUrl),
-      showWriteControls: Boolean(coreStart.application.capabilities.dashboard.showWriteControls),
-      visualizeCapabilities: { save: Boolean(coreStart.application.capabilities.visualize?.save) },
-      storeSearchSession: Boolean(coreStart.application.capabilities.dashboard.storeSearchSession),
-    },
     dashboardSessionStorage: new DashboardSessionStorage(
       core.notifications.toasts,
       activeSpaceId || 'default'
@@ -252,7 +242,8 @@ export async function mountApp({
   );
 
   addHelpMenuToAppChrome(coreStart.chrome, coreStart.docLinks);
-  if (!dashboardServices.dashboardCapabilities.showWriteControls) {
+  // TODO: Is it safe to put this here, outside of the provider?
+  if (!pluginServices.getServices().dashboardCapabilities.showWriteControls) {
     coreStart.chrome.setBadge({
       text: dashboardReadonlyBadge.getText(),
       tooltip: dashboardReadonlyBadge.getTooltip(),

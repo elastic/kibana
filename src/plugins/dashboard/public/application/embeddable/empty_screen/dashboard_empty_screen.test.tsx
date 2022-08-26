@@ -16,7 +16,6 @@ describe('DashboardEmptyScreen', () => {
   const DashboardServicesProvider = pluginServices.getContextProvider();
 
   const defaultProps = {
-    isEditMode: false,
     onLinkClick: jest.fn(),
   };
 
@@ -24,7 +23,9 @@ describe('DashboardEmptyScreen', () => {
     const compProps = { ...defaultProps, ...props };
     return mountWithIntl(
       <DashboardServicesProvider>
-        <DashboardEmptyScreen {...compProps} />
+        <DashboardServicesProvider>
+          <DashboardEmptyScreen {...compProps} />
+        </DashboardServicesProvider>
       </DashboardServicesProvider>
     );
   }
@@ -46,7 +47,9 @@ describe('DashboardEmptyScreen', () => {
   });
 
   test('renders correctly with readonly mode', () => {
-    const component = mountComponent({ isReadonlyMode: true });
+    pluginServices.getServices().dashboardCapabilities.showWriteControls = false;
+
+    const component = mountComponent();
     expect(component.render()).toMatchSnapshot();
     const paragraph = component.find('.dshStartScreen__panelDesc');
     expect(paragraph.length).toBe(0);

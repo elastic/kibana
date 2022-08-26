@@ -20,7 +20,7 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { DashboardSavedObject } from '../..';
 import { shareModalStrings } from '../../dashboard_strings';
 import { DashboardAppLocatorParams, DASHBOARD_APP_LOCATOR } from '../../locator';
-import type { DashboardAppCapabilities, DashboardState } from '../../types';
+import type { DashboardState } from '../../types';
 import { dashboardUrlParams } from '../dashboard_router';
 import { stateToRawDashboardState } from '../lib/convert_dashboard_state';
 import { convertPanelMapToSavedPanels } from '../lib/convert_dashboard_panels';
@@ -36,14 +36,13 @@ export interface ShowShareModalProps {
   anchorElement: HTMLElement;
   savedDashboard: DashboardSavedObject;
   currentDashboardState: DashboardState;
-  dashboardCapabilities: DashboardAppCapabilities;
   dashboardSessionStorage: DashboardSessionStorage;
 }
 
 export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
   if (!anonymousUserCapabilities.dashboard) return false;
 
-  const dashboard = anonymousUserCapabilities.dashboard as unknown as DashboardAppCapabilities;
+  const dashboard = anonymousUserCapabilities.dashboard;
 
   return !!dashboard.show;
 };
@@ -54,7 +53,6 @@ export function ShowShareModal({
   kibanaVersion,
   anchorElement,
   savedDashboard,
-  dashboardCapabilities,
   currentDashboardState,
   dashboardSessionStorage,
 }: ShowShareModalProps) {
@@ -134,6 +132,7 @@ export function ShowShareModal({
   }
 
   const {
+    dashboardCapabilities: { createShortUrl: allowShortUrl },
     data: {
       query: {
         timefilter: {
@@ -157,7 +156,7 @@ export function ShowShareModal({
     isDirty,
     anchorElement,
     allowEmbed: true,
-    allowShortUrl: dashboardCapabilities.createShortUrl,
+    allowShortUrl,
     shareableUrl: setStateToKbnUrl(
       '_a',
       stateToRawDashboardState({

@@ -40,7 +40,6 @@ export const buildDashboardContainer = async ({
   getLatestDashboardState,
   initialDashboardState,
   isEmbeddedExternally,
-  dashboardCapabilities,
   incomingEmbeddable,
   savedDashboard,
   kibanaVersion,
@@ -48,6 +47,7 @@ export const buildDashboardContainer = async ({
   executionContext,
 }: BuildDashboardContainerProps) => {
   const {
+    dashboardCapabilities: { storeSearchSession: canStoreSearchSession },
     data: {
       search: { session },
     },
@@ -60,7 +60,7 @@ export const buildDashboardContainer = async ({
     savedDashboard,
     initialDashboardState,
     getLatestDashboardState,
-    canStoreSearchSession: dashboardCapabilities.storeSearchSession,
+    canStoreSearchSession,
   });
 
   if (incomingEmbeddable?.searchSessionId) {
@@ -95,7 +95,6 @@ export const buildDashboardContainer = async ({
   const initialInput = stateToDashboardContainerInput({
     isEmbeddedExternally: Boolean(isEmbeddedExternally),
     dashboardState: initialDashboardState,
-    dashboardCapabilities,
     incomingEmbeddable,
     searchSessionId,
     savedDashboard,

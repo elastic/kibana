@@ -46,7 +46,7 @@ import { DashboardPanelState } from './types';
 import { DashboardViewport } from './viewport/dashboard_viewport';
 import { PLACEHOLDER_EMBEDDABLE } from './placeholder';
 import { DASHBOARD_LOADED_EVENT } from '../../events';
-import { DashboardAppCapabilities, DashboardContainerInput } from '../../types';
+import { DashboardContainerInput } from '../../types';
 import { PanelPlacementMethod, IPanelPlacementArgs } from './panel/dashboard_panel_placement';
 import {
   combineDashboardFiltersWithControlGroupFilters,
@@ -92,17 +92,6 @@ export interface InheritedChildInput extends IndexSignature {
 
 export type DashboardReactContextValue = KibanaReactContextValue<DashboardContainerServices>;
 export type DashboardReactContext = KibanaReactContext<DashboardContainerServices>;
-
-const defaultCapabilities: DashboardAppCapabilities = {
-  show: false,
-  createNew: false,
-  saveQuery: false,
-  createShortUrl: false,
-  showWriteControls: false,
-  mapsCapabilities: { save: false },
-  visualizeCapabilities: { save: false },
-  storeSearchSession: true,
-};
 
 export class DashboardContainer extends Container<InheritedChildInput, DashboardContainerInput> {
   public readonly type = DASHBOARD_CONTAINER_TYPE;
@@ -155,19 +144,19 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     parent?: Container,
     controlGroup?: ControlGroupContainer | ErrorEmbeddable
   ) {
+    const {
+      embeddable: { getEmbeddableFactory },
+      settings: { isProjectEnabledInLabs },
+    } = pluginServices.getServices();
+
     super(
       {
-        dashboardCapabilities: defaultCapabilities,
         ...initialInput,
       },
       { embeddableLoaded: {} },
-      pluginServices.getServices().embeddable.getEmbeddableFactory,
+      getEmbeddableFactory,
       parent
     );
-
-    const {
-      settings: { isProjectEnabledInLabs },
-    } = pluginServices.getServices();
 
     if (
       controlGroup &&

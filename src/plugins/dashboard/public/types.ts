@@ -37,7 +37,6 @@ import type { DashboardAppLocatorParams } from './locator';
 import { DashboardSessionStorage } from './application/lib';
 import { DashboardPanelState, SavedDashboardPanel } from '../common/types';
 import { SavedObjectLoader, SavedObjectsStart } from './services/saved_objects';
-import { DashboardServices } from './services/types';
 
 export type { SavedDashboardPanel };
 
@@ -78,7 +77,6 @@ export interface DashboardState {
 export type RawDashboardState = Omit<DashboardState, 'panels'> & { panels: SavedDashboardPanel[] };
 
 export interface DashboardContainerInput extends ContainerInput {
-  dashboardCapabilities?: DashboardAppCapabilities;
   controlGroupInput?: PersistableControlGroupInput;
   refreshConfig?: RefreshInterval;
   isEmbeddedExternally?: boolean;
@@ -121,22 +119,12 @@ export interface DashboardAppState {
 /**
  * The shared services and tools used to build a dashboard from a saved object ID.
  */
+// TODO: Delete this maybe?
 export type DashboardBuildContext = Pick<
   DashboardAppServices,
-  | 'savedDashboards'
-  | 'usageCollection'
-  | 'initializerContext'
-  | 'savedObjectsTagging'
-  | 'dashboardCapabilities'
+  'savedDashboards' | 'usageCollection' | 'initializerContext' | 'savedObjectsTagging'
 > & {
-  query: DashboardServices['data']['query'];
-  search: DashboardServices['data']['search'];
-  dataViews: DashboardServices['data']['dataViews'];
-  embeddable: DashboardServices['embeddable'];
-  notifications: DashboardServices['notifications'];
-
   locatorState?: DashboardAppLocatorParams;
-
   history: History;
   kibanaVersion: string;
   isEmbeddedExternally: boolean;
@@ -179,17 +167,6 @@ export interface DashboardSaveOptions {
   isTitleDuplicateConfirmed: boolean;
 }
 
-export interface DashboardAppCapabilities {
-  show: boolean;
-  createNew: boolean;
-  saveQuery: boolean;
-  createShortUrl: boolean;
-  showWriteControls: boolean;
-  storeSearchSession: boolean;
-  mapsCapabilities: { save: boolean };
-  visualizeCapabilities: { save: boolean };
-}
-
 export interface DashboardAppServices {
   core: CoreStart;
   share?: SharePluginStart;
@@ -200,7 +177,6 @@ export interface DashboardAppServices {
   savedDashboards: SavedObjectLoader;
   scopedHistory: () => ScopedHistory;
   usageCollection?: UsageCollectionSetup;
-  dashboardCapabilities: DashboardAppCapabilities;
   initializerContext: PluginInitializerContext;
   onAppLeave: AppMountParameters['onAppLeave'];
   savedObjectsTagging?: SavedObjectsTaggingApi;

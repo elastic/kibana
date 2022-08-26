@@ -75,7 +75,6 @@ describe('ShowShareModal', () => {
         kibanaVersion: 'testKibanaVersion',
         savedDashboard: getSavedDashboardMock(),
         anchorElement: document.createElement('div'),
-        dashboardCapabilities: services.dashboardCapabilities,
         currentDashboardState: { panels: {} } as unknown as DashboardState,
         dashboardSessionStorage: services.dashboardSessionStorage,
       },

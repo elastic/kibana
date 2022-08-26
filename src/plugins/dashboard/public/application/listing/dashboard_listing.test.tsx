@@ -161,7 +161,8 @@ describe('after fetch', () => {
 
   test('showWriteControls', async () => {
     const services = makeDefaultServices();
-    services.dashboardCapabilities.showWriteControls = false;
+    pluginServices.getServices().dashboardCapabilities.showWriteControls = false;
+
     const { component } = mountWith({ services });
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));
@@ -172,6 +173,8 @@ describe('after fetch', () => {
 
   test('renders warning when listingLimit is exceeded', async () => {
     const services = makeDefaultServices();
+    pluginServices.getServices().dashboardCapabilities.showWriteControls = true;
+
     services.savedObjects.settings.getListingLimit = () => 1;
     const { component } = mountWith({ services });
     // Ensure all promises resolve

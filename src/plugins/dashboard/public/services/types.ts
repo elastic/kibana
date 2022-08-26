@@ -7,6 +7,7 @@
  */
 
 import { DashboardChromeService } from './chrome/types';
+import { DashboardCapabilitiesService } from './dashboard_capabilities/types';
 import { DashboardDataService } from './data/types';
 import { DashboardDataViewEditorService } from './data_view_editor/types';
 import { DashboardEmbeddableService } from './embeddable/types';
@@ -21,6 +22,7 @@ import { DashboardVisualizationsService } from './visualizations/types';
 export interface DashboardServices {
   // dependency services
   chrome: DashboardChromeService;
+  dashboardCapabilities: DashboardCapabilitiesService;
   data: DashboardDataService;
   dataViewEditor: DashboardDataViewEditorService; // used only for no data state
   embeddable: DashboardEmbeddableService;

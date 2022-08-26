@@ -30,17 +30,16 @@ export const loadSavedDashboardState = async ({
   savedDashboardId,
   initializerContext,
   savedObjectsTagging,
-  dashboardCapabilities,
 }: DashboardBuildContext & { savedDashboardId?: string }): Promise<
   LoadSavedDashboardStateReturn | undefined
 > => {
   const {
-    data: { query },
+    dashboardCapabilities: { showWriteControls },
+    data: {
+      query: { queryString },
+    },
     notifications: { toasts },
   } = pluginServices.getServices();
-
-  const { showWriteControls } = dashboardCapabilities;
-  const { queryString } = query;
 
   // BWC - remove for 8.0
   if (savedDashboardId === 'create') {
@@ -60,7 +59,6 @@ export const loadSavedDashboardState = async ({
     const savedDashboardState = savedObjectToDashboardState({
       savedDashboard,
       usageCollection,
-      showWriteControls,
       savedObjectsTagging,
       version: initializerContext.env.packageInfo.version,
     });

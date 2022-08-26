@@ -32,6 +32,7 @@ import {
   getSessionURLObservable,
   stateToDashboardContainerInput,
 } from '.';
+import { pluginServices } from '../../services/plugin_services';
 
 type SyncDashboardContainerCommon = DashboardBuildContext & {
   dashboardContainer: DashboardContainer;
@@ -93,12 +94,15 @@ export const syncDashboardContainerInput = (
 };
 
 export const applyContainerChangesToState = ({
-  query,
   applyFilters,
   dashboardContainer,
   getLatestDashboardState,
   dispatchDashboardStateChange,
 }: ApplyContainerChangesToStateProps) => {
+  const {
+    data: { query },
+  } = pluginServices.getServices();
+
   const input = dashboardContainer.getInput();
   const latestState = getLatestDashboardState();
   if (Object.keys(latestState).length === 0) {
@@ -139,16 +143,17 @@ export const applyContainerChangesToState = ({
 
 export const applyStateChangesToContainer = ({
   force,
-  search,
   history,
   savedDashboard,
   dashboardContainer,
   kbnUrlStateStorage,
-  query: queryService,
   isEmbeddedExternally,
-  dashboardCapabilities,
   getLatestDashboardState,
 }: ApplyStateChangesToContainerProps) => {
+  const {
+    data: { search },
+  } = pluginServices.getServices();
+
   const latestState = getLatestDashboardState();
   if (Object.keys(latestState).length === 0) {
     return;
@@ -156,7 +161,6 @@ export const applyStateChangesToContainer = ({
   const currentDashboardStateAsInput = stateToDashboardContainerInput({
     dashboardState: latestState,
     isEmbeddedExternally,
-    dashboardCapabilities,
     savedDashboard,
   });
   const differences = diffDashboardContainerInput(

@@ -23,14 +23,15 @@ import { pluginServices } from '../../../services/plugin_services';
 
 export interface DashboardEmptyScreenProps {
   isEditMode?: boolean;
-  isReadonlyMode?: boolean;
 }
 
-export function DashboardEmptyScreen({ isEditMode, isReadonlyMode }: DashboardEmptyScreenProps) {
+export function DashboardEmptyScreen({ isEditMode }: DashboardEmptyScreenProps) {
   const {
+    dashboardCapabilities: { showWriteControls },
     http: { basePath },
     settings: { uiSettings },
   } = pluginServices.getServices();
+  const isReadonlyMode = !showWriteControls;
 
   const IS_DARK_THEME = uiSettings.get('theme:darkMode');
   const emptyStateGraphicURL = IS_DARK_THEME

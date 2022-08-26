@@ -63,13 +63,13 @@ export const DashboardListing = ({
       savedDashboards,
       savedObjectsClient,
       savedObjectsTagging,
-      dashboardCapabilities,
       dashboardSessionStorage,
     },
   } = useKibana<DashboardAppServices>();
 
   const {
-    data,
+    dashboardCapabilities: { showWriteControls },
+    data: { query },
     notifications: { toasts },
     settings: { uiSettings, theme },
     chrome: { setBreadcrumbs },
@@ -101,7 +101,7 @@ export const DashboardListing = ({
   useEffect(() => {
     // syncs `_g` portion of url with query services
     const { stop: stopSyncingQueryServiceStateWithUrl } = syncGlobalQueryStateWithUrl(
-      data.query,
+      query,
       kbnUrlStateStorage
     );
     if (title) {
@@ -118,9 +118,8 @@ export const DashboardListing = ({
     return () => {
       stopSyncingQueryServiceStateWithUrl();
     };
-  }, [title, savedObjectsClient, redirectTo, data.query, kbnUrlStateStorage]);
+  }, [title, savedObjectsClient, redirectTo, query, kbnUrlStateStorage]);
 
-  const { showWriteControls } = dashboardCapabilities;
   const listingLimit = uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
   const defaultFilter = title ? `"${title}"` : '';

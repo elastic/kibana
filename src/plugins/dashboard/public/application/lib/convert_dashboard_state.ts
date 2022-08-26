@@ -28,7 +28,6 @@ import type {
   RawDashboardState,
   DashboardAppServices,
   DashboardContainerInput,
-  DashboardBuildContext,
 } from '../../types';
 import { convertSavedPanelsToPanelMap } from './convert_dashboard_panels';
 import { deserializeControlGroupFromDashboardSavedObject } from './dashboard_control_group';
@@ -36,7 +35,6 @@ import { pluginServices } from '../../services/plugin_services';
 
 interface SavedObjectToDashboardStateProps {
   version: string;
-  showWriteControls: boolean;
   savedDashboard: DashboardSavedObject;
   usageCollection: DashboardAppServices['usageCollection'];
   savedObjectsTagging: DashboardAppServices['savedObjectsTagging'];
@@ -48,7 +46,6 @@ interface StateToDashboardContainerInputProps {
   dashboardState: DashboardState;
   savedDashboard: DashboardSavedObject;
   incomingEmbeddable?: EmbeddablePackageState;
-  dashboardCapabilities: DashboardBuildContext['dashboardCapabilities'];
   executionContext?: KibanaExecutionContext;
 }
 
@@ -65,9 +62,12 @@ export const savedObjectToDashboardState = ({
   version,
   savedDashboard,
   usageCollection,
-  showWriteControls,
   savedObjectsTagging,
 }: SavedObjectToDashboardStateProps): DashboardState => {
+  const {
+    dashboardCapabilities: { showWriteControls },
+  } = pluginServices.getServices();
+
   const rawState = migrateAppState(
     {
       fullScreenMode: false,
@@ -97,7 +97,6 @@ export const savedObjectToDashboardState = ({
  * Converts a dashboard state object to dashboard container input
  */
 export const stateToDashboardContainerInput = ({
-  dashboardCapabilities,
   isEmbeddedExternally,
   searchSessionId,
   savedDashboard,
@@ -138,7 +137,6 @@ export const stateToDashboardContainerInput = ({
       ),
     isFullScreenMode: fullScreenMode,
     id: savedDashboard.id || '',
-    dashboardCapabilities,
     isEmbeddedExternally,
     ...(options || {}),
     controlGroupInput,

@@ -102,7 +102,6 @@ export function DashboardTopNav({
     initializerContext,
     savedObjectsTagging,
     setHeaderActionMenu,
-    dashboardCapabilities,
     dashboardSessionStorage,
     allowByValueEmbeddables,
   } = useKibana<DashboardAppServices>().services;
@@ -112,6 +111,7 @@ export function DashboardTopNav({
       recentlyAccessed: chromeRecentlyAccessed,
       docTitle,
     },
+    dashboardCapabilities,
     data: { query, search },
     embeddable: { getEmbeddableFactory, getEmbeddableFactories, getStateTransfer },
     navigation: { TopNavMenu },
@@ -414,14 +414,13 @@ export function DashboardTopNav({
         share,
         kibanaVersion,
         anchorElement,
-        dashboardCapabilities,
         dashboardSessionStorage,
         currentDashboardState: currentState,
         savedDashboard: dashboardAppState.savedDashboard,
         isDirty: Boolean(dashboardAppState.hasUnsavedChanges),
       });
     },
-    [share, kibanaVersion, dashboardAppState, dashboardCapabilities, dashboardSessionStorage]
+    [share, kibanaVersion, dashboardAppState, dashboardSessionStorage]
   );
 
   const dashboardTopNavActions = useMemo(() => {
