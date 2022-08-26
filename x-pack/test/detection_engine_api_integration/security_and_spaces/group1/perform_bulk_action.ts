@@ -1164,14 +1164,17 @@ export default ({ getService }: FtrProviderContext): void => {
                 })
                 .expect(200);
 
+              const editedRule = body.attributes.results.updated[0];
               // Check that the updated rule is returned with the response
-              expect(body.attributes.results.updated[0].actions).to.eql([
+              expect(editedRule.actions).to.eql([
                 {
                   ...webHookActionMock,
                   id: hookAction.id,
                   action_type_id: '.webhook',
                 },
               ]);
+              // version of prebuilt rule should not change
+              expect(editedRule.version).to.be(prebuiltRule.version);
 
               // Check that the updates have been persisted
               const { body: readRule } = await fetchRule(prebuiltRule.rule_id).expect(200);
@@ -1183,7 +1186,60 @@ export default ({ getService }: FtrProviderContext): void => {
                   action_type_id: '.webhook',
                 },
               ]);
+              expect(prebuiltRule.version).to.be(readRule.version);
             });
+          });
+
+          // if rule action is applied together with another edit action, that can't be applied to prebuilt rule (for example: tags action)
+          // bulk edit request should return error
+          it(`should return error if one of edit action is not eligible for prebuilt rule`, async () => {
+            await installPrePackagedRules(supertest, log);
+            const prebuiltRule = await fetchPrebuiltRule();
+            const hookAction = await createWebHookAction();
+
+            const { body } = await postBulkAction()
+              .send({
+                ids: [prebuiltRule.id],
+                action: BulkAction.edit,
+                [BulkAction.edit]: [
+                  {
+                    type: BulkActionEditType.set_rule_actions,
+                    value: {
+                      throttle: '1h',
+                      actions: [
+                        {
+                          ...webHookActionMock,
+                          id: hookAction.id,
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    type: BulkActionEditType.set_tags,
+                    value: ['tag-1'],
+                  },
+                ],
+              })
+              .expect(500);
+
+            expect(body.attributes.summary).to.eql({ failed: 1, succeeded: 0, total: 1 });
+            expect(body.attributes.errors[0]).to.eql({
+              message: "Elastic rule can't be edited",
+              status_code: 500,
+              rules: [
+                {
+                  id: prebuiltRule.id,
+                  name: prebuiltRule.name,
+                },
+              ],
+            });
+
+            // Check that the updates were not made
+            const { body: readRule } = await fetchRule(prebuiltRule.rule_id).expect(200);
+
+            expect(readRule.actions).to.eql(prebuiltRule.actions);
+            expect(readRule.tags).to.eql(prebuiltRule.tags);
+            expect(readRule.version).to.be(prebuiltRule.version);
           });
         });
 

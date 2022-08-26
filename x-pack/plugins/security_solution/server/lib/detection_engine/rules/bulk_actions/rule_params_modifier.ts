@@ -111,7 +111,10 @@ export const ruleParamsModifier = (
   );
 
   // increment version even if actions are empty, as attributes can be modified as well outside of ruleParamsModifier
-  modifiedParams.version += 1;
+  // version must not be modified for immutable rule. Otherwise prebuilt rules upgrade flow will be broken
+  if (existingRuleParams.immutable === false) {
+    modifiedParams.version += 1;
+  }
 
   return modifiedParams;
 };
