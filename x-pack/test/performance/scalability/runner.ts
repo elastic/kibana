@@ -17,10 +17,9 @@ const gatlingProjectRootPath: string =
 const journeyJsonPath = process.env.SCALABILITY_JOURNEY_PATH;
 
 /**
- *
  * ScalabilityTestRunner is used to run load simulation against local Kibana instance
- *
- * Use SCALABILITY_JOURNEY_PATH to provide path to scalability json file
+ * Use SCALABILITY_JOURNEY_PATH to set path to scalability json file
+ * Use GATLING_PROJECT_PATH to set root path to kibana-load-testing repo
  */
 export async function ScalabilityTestRunner({ getService }: FtrProviderContext) {
   const log = getService('log');
