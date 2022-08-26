@@ -32,7 +32,6 @@ const mockValues = {
 
 const mockActions = {
   fetchAnalyticsCollections: jest.fn(),
-  setIsFirstRequest: jest.fn(),
 };
 
 describe('AnalyticsOverview', () => {
@@ -51,7 +50,6 @@ describe('AnalyticsOverview', () => {
       const wrapper = shallow(<AnalyticsOverview />);
 
       expect(mockActions.fetchAnalyticsCollections).toHaveBeenCalled();
-      expect(mockActions.setIsFirstRequest).toHaveBeenCalled();
 
       expect(wrapper.find(AnalyticsCollectionTable)).toHaveLength(0);
     });
@@ -64,7 +62,6 @@ describe('AnalyticsOverview', () => {
 
       expect(wrapper.find(AnalyticsCollectionTable)).toHaveLength(1);
       expect(mockActions.fetchAnalyticsCollections).toHaveBeenCalled();
-      expect(mockActions.setIsFirstRequest).toHaveBeenCalled();
     });
   });
 });

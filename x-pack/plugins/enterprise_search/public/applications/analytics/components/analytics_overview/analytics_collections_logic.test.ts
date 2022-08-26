@@ -28,7 +28,6 @@ describe('analyticsCollectionsLogic', () => {
     hasNoAnalyticsCollections: false,
     isLoading: true,
     status: Status.IDLE,
-    isFirstRequest: true,
   };
 
   it('has expected default values', () => {
@@ -44,7 +43,6 @@ describe('analyticsCollectionsLogic', () => {
           expect.objectContaining({
             analyticsCollections: [],
             data: [],
-            isFirstRequest: false,
             isLoading: false,
           })
         );
@@ -60,44 +58,7 @@ describe('analyticsCollectionsLogic', () => {
           expect.objectContaining({
             analyticsCollections: collections,
             data: collections,
-            isFirstRequest: false,
             isLoading: false,
-          })
-        );
-      });
-    });
-
-    describe('isFirstRequest', () => {
-      it('should update to true on setIsFirstRequest', () => {
-        AnalyticsCollectionsLogic.actions.setIsFirstRequest();
-        expect(AnalyticsCollectionsLogic.values).toEqual({
-          ...DEFAULT_VALUES,
-          isFirstRequest: true,
-        });
-      });
-
-      it('should update to false on apiError', () => {
-        AnalyticsCollectionsLogic.actions.setIsFirstRequest();
-        AnalyticsCollectionsLogic.actions.apiError({} as HttpError);
-
-        expect(AnalyticsCollectionsLogic.values).toEqual(
-          expect.objectContaining({
-            isFirstRequest: false,
-            isLoading: false,
-            status: Status.ERROR,
-          })
-        );
-      });
-
-      it('should update to false on apiSuccess', () => {
-        AnalyticsCollectionsLogic.actions.setIsFirstRequest();
-        AnalyticsCollectionsLogic.actions.apiSuccess([]);
-
-        expect(AnalyticsCollectionsLogic.values).toEqual(
-          expect.objectContaining({
-            isFirstRequest: false,
-            isLoading: false,
-            status: Status.SUCCESS,
           })
         );
       });
@@ -137,7 +98,6 @@ describe('analyticsCollectionsLogic', () => {
             analyticsCollections: [],
             data: [],
             hasNoAnalyticsCollections: true,
-            isFirstRequest: false,
             isLoading: false,
             status: Status.SUCCESS,
           })

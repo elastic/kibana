@@ -27,12 +27,11 @@ export const baseBreadcrumbs = [
 ];
 
 export const AnalyticsOverview: React.FC = () => {
-  const { fetchAnalyticsCollections, setIsFirstRequest } = useActions(AnalyticsCollectionsLogic);
+  const { fetchAnalyticsCollections } = useActions(AnalyticsCollectionsLogic);
   const { analyticsCollections, isLoading, hasNoAnalyticsCollections } =
     useValues(AnalyticsCollectionsLogic);
 
   useEffect(() => {
-    setIsFirstRequest();
     fetchAnalyticsCollections();
   }, []);
 

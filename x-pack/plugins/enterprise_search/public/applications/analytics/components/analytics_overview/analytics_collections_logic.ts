@@ -17,13 +17,11 @@ export interface AnalyticsCollectionsActions {
   apiSuccess(collections: AnalyticsCollection[]): AnalyticsCollection[];
   fetchAnalyticsCollections(): void;
   makeRequest: typeof fetchAnalyticsCollectionsAPILogic.actions.makeRequest;
-  setIsFirstRequest(): void;
 }
 export interface AnalyticsCollectionsValues {
   analyticsCollections: AnalyticsCollection[];
   data: typeof fetchAnalyticsCollectionsAPILogic.values.data;
   hasNoAnalyticsCollections: boolean;
-  isFirstRequest: boolean;
   isLoading: boolean;
   status: typeof fetchAnalyticsCollectionsAPILogic.values.status;
 }
@@ -33,7 +31,6 @@ export const AnalyticsCollectionsLogic = kea<
 >({
   actions: {
     fetchAnalyticsCollections: () => {},
-    setIsFirstRequest: true,
   },
   connect: {
     actions: [fetchAnalyticsCollectionsAPILogic, ['makeRequest', 'apiSuccess', 'apiError']],
@@ -47,22 +44,12 @@ export const AnalyticsCollectionsLogic = kea<
     makeRequest: () => clearFlashMessages(),
   }),
   path: ['enterprise_search', 'analytics', 'collections'],
-  reducers: () => ({
-    isFirstRequest: [
-      true,
-      {
-        apiError: () => false,
-        apiSuccess: () => false,
-        setIsFirstRequest: () => true,
-      },
-    ],
-  }),
   selectors: ({ selectors }) => ({
     analyticsCollections: [() => [selectors.data], (data) => data || []],
     hasNoAnalyticsCollections: [() => [selectors.data], (data) => data?.length === 0],
     isLoading: [
-      () => [selectors.status, selectors.isFirstRequest],
-      (status, isFirstRequest) => [Status.LOADING, Status.IDLE].includes(status) && isFirstRequest,
+      () => [selectors.status],
+      (status) => [Status.LOADING, Status.IDLE].includes(status),
     ],
   }),
 });
