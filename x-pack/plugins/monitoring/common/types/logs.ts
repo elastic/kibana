@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-export interface FilebeatResponse {
+export interface LogsResponse {
   hits?: {
-    hits: FilebeatResponseHit[];
+    hits: LogsResponseHit[];
     total: {
       value: number;
     };
@@ -15,7 +15,7 @@ export interface FilebeatResponse {
   aggregations?: any;
 }
 
-export interface FilebeatResponseHit {
+export interface LogsResponseHit {
   _source: {
     message?: string;
     log?: {
