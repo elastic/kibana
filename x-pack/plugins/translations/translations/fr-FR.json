@@ -20124,7 +20124,6 @@
     "xpack.ml.embeddables.lensLayerFlyout.closeButton": "Fermer",
     "xpack.ml.embeddables.lensLayerFlyout.createJobButton": "Créer une tâche à partir de ce calque",
     "xpack.ml.embeddables.lensLayerFlyout.defaultLayerError": "Ce calque ne peut pas être utilisé pour créer une tâche de détection des anomalies",
-    "xpack.ml.embeddables.lensLayerFlyout.secondTitle": "Sélectionnez un calque compatible à partir de la visualisation pour créer une tâche de détection des anomalies.",
     "xpack.ml.embeddables.lensLayerFlyout.title": "Créer une tâche de détection des anomalies",
     "xpack.ml.entityFilter.addFilterTooltip": "Ajouter un filtre",
     "xpack.ml.entityFilter.removeFilterTooltip": "Supprimer le filtre",

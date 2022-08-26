@@ -20107,7 +20107,6 @@
     "xpack.ml.embeddables.lensLayerFlyout.closeButton": "閉じる",
     "xpack.ml.embeddables.lensLayerFlyout.createJobButton": "このレイヤーからジョブを作成",
     "xpack.ml.embeddables.lensLayerFlyout.defaultLayerError": "このレイヤーを使用して、異常検知ジョブを作成できません",
-    "xpack.ml.embeddables.lensLayerFlyout.secondTitle": "ビジュアライゼーションから互換性があるレイヤーを選択し、異常検知ジョブを作成してください。",
     "xpack.ml.embeddables.lensLayerFlyout.title": "異常検知ジョブの作成",
     "xpack.ml.entityFilter.addFilterTooltip": "フィルターを追加します",
     "xpack.ml.entityFilter.removeFilterTooltip": "フィルターを削除",
