@@ -15,6 +15,7 @@ import type {
   SavedObjectsClientContract as SavedObjectsApi,
   SavedObjectsFindResponse as SavedObjectsFindResponseServer,
   SavedObjectsResolveResponse,
+  SavedObjectsBulkDeleteOptions,
 } from '@kbn/core-saved-objects-api-server';
 import type {
   SavedObjectsClientContract,
@@ -29,7 +30,7 @@ import type {
   SavedObjectsBulkCreateOptions,
   SavedObjectsBulkCreateObject,
   SimpleSavedObject,
-  // SavedObjectsBulkDeleteObjects
+  SavedObjectsBulkDeleteResponse,
 } from '@kbn/core-saved-objects-api-browser';
 
 import { SimpleSavedObjectImpl } from './simple_saved_object';
@@ -259,8 +260,8 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
 
   public bulkDelete = async (
     objects: SavedObjectTypeIdTuple[],
-    options?: { force?: boolean }
-  ): ReturnType<SavedObjectsApi['bulkDelete']> => {
+    options?: SavedObjectsBulkDeleteOptions
+  ): Promise<SavedObjectsBulkDeleteResponse> => {
     const filteredObjects = objects.map(({ type, id }) => ({ type, id }));
     const queryOptions = { force: !!options?.force };
     const response = await this.performBulkDelete(filteredObjects, queryOptions);

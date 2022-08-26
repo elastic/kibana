@@ -9,7 +9,6 @@
 import { omit, isObject } from 'lodash';
 import type { Payload } from '@hapi/boom';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { BulkResponseItem, ErrorCause } from '@elastic/elasticsearch/lib/api/types';
 import * as esKuery from '@kbn/es-query';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
@@ -113,6 +112,13 @@ import {
   PreflightCheckForCreateObject,
 } from './preflight_check_for_create';
 import { deleteLegacyUrlAliases } from './legacy_url_aliases';
+import type {
+  BulkDeleteParams,
+  ExpectedBulkDeleteResult,
+  BulkDeleteItemErrorResult,
+  NewBulkItemResponse,
+  BulkDeleteExpectedBulkGetResult,
+} from './repository_bulk_delete_internal_types';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -776,12 +782,8 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     const { refresh = DEFAULT_REFRESH_SETTING, force } = options;
     const namespace = normalizeNamespace(options.namespace);
     let bulkGetRequestIndexCounter = 0;
-    // TODO: move to internal types
-    type ExpectedBulkGetResult = Either<
-      { type: string; id: string; error: Payload },
-      { type: string; id: string; version?: string; esRequestIndex?: number }
-    >;
-    const expectedBulkGetResults = objects.map<ExpectedBulkGetResult>((object) => {
+
+    const expectedBulkGetResults = objects.map<BulkDeleteExpectedBulkGetResult>((object) => {
       const { type, id } = object;
       if (!this._allowedTypes.includes(type)) {
         return {
@@ -827,27 +829,6 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     ) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
     }
-    // TODO: move to internal types
-    interface BulkDeleteParams {
-      delete: BulkDeleteParamsItem;
-    }
-    // TODO: move to internal types
-    interface BulkDeleteParamsItem {
-      if_seq_no?: number;
-      if_primary_term?: number;
-      _id: string;
-      _index: string;
-    }
-    // TODO: move to internal types
-    type ExpectedBulkDeleteResult = Either<
-      { type: string; id: string; error: Payload },
-      {
-        type: string;
-        id: string;
-        namespaces: string[];
-        esRequestIndex: number;
-      }
-    >;
 
     let bulkDeleteRequestIndexCounter = 0;
     const bulkDeleteParams: BulkDeleteParams[] = [];
@@ -947,7 +928,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       : undefined;
 
     // extracted to ensure consistency in the error results returned
-    let errorResult: { success: boolean; type: string; id: string; error: Payload };
+    let errorResult: BulkDeleteItemErrorResult;
 
     const savedObjects = await Promise.all(
       expectedBulkDeleteResults.map(async (expectedResult) => {
@@ -957,10 +938,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
         }
         const { type, id, namespaces, esRequestIndex } = expectedResult.value;
 
-        // TODO: move to internal types
-        type NewBulkItemResponse = BulkResponseItem & { error: ErrorCause & { index: string } };
-
-        // we assume this wouldn't happen but is needed to circumvent type issues
+        // we assume this wouldn't happen but is needed to ensure type consistency
         if (bulkDeleteResponse === undefined) throw new Error();
 
         const rawResponse = Object.values(

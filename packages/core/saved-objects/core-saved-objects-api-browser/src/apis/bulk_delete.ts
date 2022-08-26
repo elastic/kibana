@@ -9,14 +9,7 @@
 import { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 /** @public */
-export interface SavedObjectsBulkDeleteObject {
-  type: string;
-  id: string;
-}
-
-/** @public */
 export interface SavedObjectsBulkDeleteOptions {
-  namespace?: string;
   force?: boolean;
 }
 
@@ -25,7 +18,7 @@ export interface SavedObjectsBulkDeleteItemResponse {
   id: string;
   type: string;
   success: boolean;
-  error?: SavedObjectError | Error;
+  error?: SavedObjectError;
 }
 
 /** @public */

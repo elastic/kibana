@@ -19,12 +19,10 @@ import type {
   SavedObjectsFindOptions,
   SavedObjectsUpdateOptions,
   SavedObjectsDeleteOptions,
-} from './apis';
-import {
-  SavedObjectsBulkDeleteObject,
-  SavedObjectsBulkDeleteOptions,
   SavedObjectsBulkDeleteResponse,
-} from './apis/bulk_delete';
+  SavedObjectsBulkDeleteOptions,
+} from './apis';
+
 import type { SimpleSavedObject } from './simple_saved_object';
 
 /**
@@ -64,7 +62,7 @@ export interface SavedObjectsClientContract {
    * @returns The bulk delete result for the saved objects for the given types and ids.
    */
   bulkDelete(
-    objects: SavedObjectsBulkDeleteObject[],
+    objects: SavedObjectTypeIdTuple[],
     options?: SavedObjectsBulkDeleteOptions
   ): Promise<SavedObjectsBulkDeleteResponse>;
 
