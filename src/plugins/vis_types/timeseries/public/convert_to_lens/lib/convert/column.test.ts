@@ -12,9 +12,11 @@ import {
   stubLogstashDataView,
 } from '@kbn/data-views-plugin/common/data_view.stub';
 import { stubLogstashFieldSpecMap } from '@kbn/data-views-plugin/common/field.stub';
+import { MaxColumn as BaseMaxColumn } from '@kbn/visualizations-plugin/common';
 import { Metric } from '../../../../common/types';
 import { createSeries } from '../__mocks__';
-import { createColumn, getFormat } from './column';
+import { createColumn, excludeMetaFromColumn, getFormat, isColumnWithMeta } from './column';
+import { MaxColumn } from './types';
 
 describe('getFormat', () => {
   const series = createSeries();
@@ -168,4 +170,37 @@ describe('createColumn', () => {
       expect(typeof column.columnId === 'string' && column.columnId.length > 0).toBeTruthy();
     }
   );
+});
+
+const column1: BaseMaxColumn = {
+  sourceField: 'some-field',
+  columnId: 'some-id',
+  operationType: 'max',
+  isBucketed: false,
+  isSplit: false,
+  dataType: 'string',
+  params: {},
+};
+
+const column2: MaxColumn = {
+  ...column1,
+  meta: { metricId: 'metric-id' },
+};
+
+describe('isColumnWithMeta', () => {
+  test.each([
+    ['without meta', column1 as MaxColumn, false],
+    ['with meta', column2, true],
+  ])('should check if column is %s', (_, input, expected) => {
+    expect(isColumnWithMeta(input)).toBe(expected);
+  });
+});
+
+describe('excludeMetaFromColumn', () => {
+  test.each([
+    ['without meta', column1 as MaxColumn, column1],
+    ['with meta', column2, column1],
+  ])('should exclude meta if column is %s', (_, input, expected) => {
+    expect(excludeMetaFromColumn(input)).toEqual(expected);
+  });
 });
