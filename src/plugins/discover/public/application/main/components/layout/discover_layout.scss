@@ -29,6 +29,10 @@ discover-app {
 
 .dscPageBody__contents {
   overflow: hidden;
+
+  @include euiBreakpoint('xs', 's') {
+    flex-direction: column;
+  }
 }
 
 .dscPageContent__wrapper {
@@ -41,10 +45,12 @@ discover-app {
 }
 
 .dscPageContent {
+  // Without this height: 100% does not work on .dscPageContent__inner
+  // Seems related to https://github.com/philipwalton/flexbugs/issues/197
+  flex-basis: 0;
   border: $euiBorderThin;
 }
 
-.dscPageContent,
 .dscPageContent__inner {
   height: 100%;
 }
@@ -70,9 +76,9 @@ discover-app {
 }
 
 .dscTimechart {
+  flex-grow: 1;
   display: flex;
   flex-direction: column;
-  height: 100%;
   position: relative;
 
   // SASSTODO: the visualizing component should have an option or a modifier
