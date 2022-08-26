@@ -76,7 +76,7 @@ export function LabsSettingsFlyout() {
               <EuiFlexItem grow={false}>
                 <EuiTitle>
                   <h2>
-                    {i18n.translate('xpack.labs.title', {
+                    {i18n.translate('xpack.apm.labs', {
                       defaultMessage: 'Labs',
                     })}
                   </h2>
