@@ -51,7 +51,6 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
     updated_by: '',
     policy_id: '',
     enabled: true,
-    output_id: '',
     namespace: 'default',
     inputs: [],
     revision: 1,
@@ -183,6 +182,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
       {
         id: 'test-logs-some-uuid',
         name: 'mock-package-policy',
+        package_policy_id: 'some-uuid',
         revision: 1,
         type: 'test-logs',
         data_stream: { namespace: 'default' },
@@ -235,6 +235,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
       {
         id: 'test-logs-some-uuid',
         name: 'mock-package-policy',
+        package_policy_id: 'some-uuid',
         revision: 1,
         type: 'test-logs',
         data_stream: { namespace: 'default' },
@@ -261,6 +262,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
       {
         id: 'test-metrics-some-template-some-uuid',
         name: 'mock-package-policy',
+        package_policy_id: 'some-uuid',
         revision: 1,
         type: 'test-metrics',
         data_stream: { namespace: 'default' },
@@ -283,6 +285,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
       {
         id: 'some-uuid',
         name: 'mock-package-policy',
+        package_policy_id: 'some-uuid',
         revision: 1,
         type: 'test-metrics',
         data_stream: { namespace: 'default' },
@@ -330,6 +333,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
       {
         id: 'test-logs-some-uuid',
         name: 'mock-package-policy',
+        package_policy_id: 'some-uuid',
         revision: 1,
         type: 'test-logs',
         data_stream: { namespace: 'default' },
@@ -362,6 +366,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
       {
         id: 'test-logs-some-uuid',
         name: 'mock-package-policy',
+        package_policy_id: 'some-uuid',
         revision: 1,
         type: 'test-logs',
         data_stream: { namespace: 'default' },
@@ -425,6 +430,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
         id: 'test-logs-some-uuid',
         revision: 1,
         name: 'mock-package-policy',
+        package_policy_id: 'some-uuid',
         type: 'test-logs',
         data_stream: { namespace: 'default' },
         use_output: 'default',

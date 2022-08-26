@@ -141,7 +141,6 @@ interface CombineQueries {
   filters: Filter[];
   kqlQuery: Query;
   kqlMode: string;
-  isEventViewer?: boolean;
 }
 
 export const combineQueries = ({
@@ -152,23 +151,10 @@ export const combineQueries = ({
   filters = [],
   kqlQuery,
   kqlMode,
-  isEventViewer,
 }: CombineQueries): { filterQuery: string | undefined; kqlError: Error | undefined } | null => {
   const kuery: Query = { query: '', language: kqlQuery.language };
-  if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && isEmpty(filters) && !isEventViewer) {
+  if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && isEmpty(filters)) {
     return null;
-  } else if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && isEventViewer) {
-    const [filterQuery, kqlError] = convertToBuildEsQuery({
-      config,
-      queries: [kuery],
-      indexPattern,
-      filters,
-    });
-
-    return {
-      filterQuery,
-      kqlError,
-    };
   } else if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && !isEmpty(filters)) {
     const [filterQuery, kqlError] = convertToBuildEsQuery({
       config,
@@ -227,15 +213,6 @@ export const combineQueries = ({
     filterQuery,
     kqlError,
   };
-};
-
-export const buildCombinedQuery = (combineQueriesParams: CombineQueries) => {
-  const combinedQuery = combineQueries(combineQueriesParams);
-  return combinedQuery?.filterQuery
-    ? {
-        filterQuery: combinedQuery.filterQuery,
-      }
-    : null;
 };
 
 export const buildTimeRangeFilter = (from: string, to: string): Filter =>

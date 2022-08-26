@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation } from 'react-query';
+import { useMutation } from '@tanstack/react-query';
 import type { AgentSelection } from '../../common/schemas/common';
 import type { CreateLiveQueryRequestBodySchema } from '../../common/schemas/routes/live_query';
 import { useKibana } from '../common/lib/kibana';

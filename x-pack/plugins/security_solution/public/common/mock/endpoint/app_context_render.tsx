@@ -13,7 +13,7 @@ import type { RenderOptions, RenderResult } from '@testing-library/react';
 import { render as reactRender } from '@testing-library/react';
 import type { Action, Reducer, Store } from 'redux';
 import type { AppDeepLink } from '@kbn/core/public';
-import { QueryClient, QueryClientProvider, setLogger } from 'react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { PLUGIN_ID } from '@kbn/fleet-plugin/common';
 import type { RenderHookOptions, RenderHookResult } from '@testing-library/react-hooks';
@@ -22,7 +22,7 @@ import type {
   ReactHooksRenderer,
   WrapperComponent,
 } from '@testing-library/react-hooks/src/types/react';
-import type { UseBaseQueryResult } from 'react-query/types/react/types';
+import type { UseBaseQueryResult } from '@tanstack/react-query';
 import ReactDOM from 'react-dom';
 import { ConsoleManager } from '../../../management/components/console';
 import type { StartPlugins, StartServices } from '../../../types';
@@ -89,7 +89,6 @@ export type WaitForReactHookState =
       | 'isSuccess'
       | 'isLoading'
       | 'isError'
-      | 'isIdle'
       | 'isLoadingError'
       | 'isStale'
       | 'isFetched'
@@ -116,15 +115,6 @@ export type ReactQueryHookRenderer<
   waitForHook?: WaitForReactHookState,
   options?: RenderHookOptions<TProps>
 ) => Promise<TResult>;
-
-// hide react-query output in console
-setLogger({
-  error: () => {},
-  // eslint-disable-next-line no-console
-  log: console.log,
-  // eslint-disable-next-line no-console
-  warn: console.warn,
-});
 
 /**
  * Mocked app root context renderer
@@ -227,6 +217,14 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
         // prevent jest did not exit errors
         cacheTime: Infinity,
       },
+    },
+    // hide react-query output in console
+    logger: {
+      error: () => {},
+      // eslint-disable-next-line no-console
+      log: console.log,
+      // eslint-disable-next-line no-console
+      warn: console.warn,
     },
   });
 

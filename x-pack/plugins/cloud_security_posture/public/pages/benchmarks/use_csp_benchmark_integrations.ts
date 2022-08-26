@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import type { ListResult } from '@kbn/fleet-plugin/common';
 import { BENCHMARKS_ROUTE_PATH } from '../../../common/constants';
 import type { BenchmarksQueryParams } from '../../../common/schemas/benchmark';

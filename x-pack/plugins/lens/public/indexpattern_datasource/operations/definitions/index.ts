@@ -49,19 +49,20 @@ import { countOperation } from './count';
 import { mathOperation, formulaOperation } from './formula';
 import { staticValueOperation } from './static_value';
 import { lastValueOperation } from './last_value';
-import { FrameDatasourceAPI, OperationMetadata, ParamEditorCustomProps } from '../../../types';
+import {
+  FrameDatasourceAPI,
+  IndexPattern,
+  IndexPatternField,
+  OperationMetadata,
+  ParamEditorCustomProps,
+} from '../../../types';
 import type {
   BaseIndexPatternColumn,
   IncompleteColumn,
   GenericIndexPatternColumn,
   ReferenceBasedIndexPatternColumn,
 } from './column_types';
-import {
-  DataViewDragDropOperation,
-  IndexPattern,
-  IndexPatternField,
-  IndexPatternLayer,
-} from '../../types';
+import { DataViewDragDropOperation, IndexPatternLayer } from '../../types';
 import { DateRange, LayerType } from '../../../../common';
 import { rangeOperation } from './ranges';
 import { IndexPatternDimensionEditorProps, OperationSupportMatrix } from '../../dimension_panel';
@@ -324,6 +325,7 @@ interface BaseOperationDefinitionProps<
             fixAction?: {
               label: string;
               newState: (
+                data: DataPublicPluginStart,
                 core: CoreStart,
                 frame: FrameDatasourceAPI,
                 layerId: string
@@ -551,6 +553,7 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn, P = {}
             fixAction?: {
               label: string;
               newState: (
+                data: DataPublicPluginStart,
                 core: CoreStart,
                 frame: FrameDatasourceAPI,
                 layerId: string
