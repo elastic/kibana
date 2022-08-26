@@ -94,7 +94,7 @@ export async function unenrollAgents(
       {
         ...options,
         batchSize,
-        totalAgents: res.total,
+        total: res.total,
       },
       { pitId: await openPointInTime(esClient) }
     ).runActionAsyncWithRetry();

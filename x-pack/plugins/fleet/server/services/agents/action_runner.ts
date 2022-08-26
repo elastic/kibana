@@ -23,7 +23,7 @@ export interface ActionParams {
   kuery: string;
   showInactive?: boolean;
   batchSize?: number;
-  totalAgents?: number;
+  total?: number;
   actionId?: string;
   // additional parameters specific to an action e.g. reassign to new policy id
   [key: string]: any;
@@ -65,7 +65,7 @@ export abstract class ActionRunner {
     appContextService
       .getLogger()
       .info(
-        `Running action asynchronously, actionId: ${this.actionParams.actionId}, total agents: ${this.actionParams.totalAgents}`
+        `Running action asynchronously, actionId: ${this.actionParams.actionId}, total agents: ${this.actionParams.total}`
       );
 
     withSpan({ name: this.getTaskType(), type: 'action' }, () =>
@@ -194,7 +194,9 @@ export abstract class ActionRunner {
 
     await closePointInTime(this.esClient, pitId!);
 
-    appContextService.getLogger().info(`processAgentsInBatches took ${Date.now() - start}ms`);
+    appContextService
+      .getLogger()
+      .info(`processed ${allAgentsProcessed} agents, took ${Date.now() - start}ms`);
     return { ...results };
   }
 }

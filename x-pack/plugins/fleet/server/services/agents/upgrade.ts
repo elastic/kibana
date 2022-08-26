@@ -109,7 +109,7 @@ export async function sendUpgradeAgentsActions(
         {
           ...options,
           batchSize,
-          totalAgents: res.total,
+          total: res.total,
         },
         { pitId: await openPointInTime(esClient) }
       ).runActionAsyncWithRetry();
@@ -177,6 +177,7 @@ async function _getCancelledActionId(
   const res = await esClient.search<FleetServerAgentAction>({
     index: AGENT_ACTIONS_INDEX,
     ignore_unavailable: true,
+    size: SO_SEARCH_LIMIT,
     query: {
       bool: {
         must: [
@@ -207,6 +208,7 @@ async function _getUpgradeActions(esClient: ElasticsearchClient, now = new Date(
   const res = await esClient.search<FleetServerAgentAction>({
     index: AGENT_ACTIONS_INDEX,
     ignore_unavailable: true,
+    size: SO_SEARCH_LIMIT,
     query: {
       bool: {
         must: [

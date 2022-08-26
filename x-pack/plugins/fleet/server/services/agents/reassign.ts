@@ -129,7 +129,7 @@ export async function reassignAgents(
         {
           ...options,
           batchSize,
-          totalAgents: res.total,
+          total: res.total,
           newAgentPolicyId,
         },
         { pitId: await openPointInTime(esClient) }

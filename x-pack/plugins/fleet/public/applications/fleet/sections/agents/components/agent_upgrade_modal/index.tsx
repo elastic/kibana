@@ -202,9 +202,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
 
       if (!hasCompleted) {
         notifications.toasts.addSuccess(submittedMessage);
-      }
-
-      if (isSingleAgent && counts.success === counts.total) {
+      } else if (isSingleAgent && counts.success === counts.total) {
         notifications.toasts.addSuccess(
           i18n.translate('xpack.fleet.upgradeAgents.successSingleNotificationTitle', {
             defaultMessage: 'Upgrading {count} agent',

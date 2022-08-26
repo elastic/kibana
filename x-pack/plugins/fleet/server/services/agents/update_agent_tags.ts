@@ -60,7 +60,7 @@ export async function updateAgentTags(
         {
           ...options,
           batchSize,
-          totalAgents: res.total,
+          total: res.total,
           tagsToAdd,
           tagsToRemove,
         },

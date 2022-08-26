@@ -54,7 +54,7 @@ export const ActionStatusCallout: React.FunctionComponent<{ refreshActionStatus:
   return (
     <>
       {currentActions
-        .filter((action) => action.type !== 'UPGRADE')
+        // .filter((action) => action.type !== 'UPGRADE')
         .slice(0, 3)
         .map((currentAction) => (
           <React.Fragment key={currentAction.actionId}>

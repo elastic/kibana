@@ -8,6 +8,8 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import pMap from 'p-map';
 
+import { SO_SEARCH_LIMIT } from '../../constants';
+
 import { AGENT_ACTIONS_STATUS_INDEX } from '../../../common/constants';
 
 import type { FleetServerAgentAction, CurrentAction } from '../../types';
@@ -71,6 +73,7 @@ async function _getCancelledActionId(esClient: ElasticsearchClient) {
   const res = await esClient.search<FleetServerAgentAction>({
     index: AGENT_ACTIONS_INDEX,
     ignore_unavailable: true,
+    size: SO_SEARCH_LIMIT,
     query: {
       bool: {
         must: [
@@ -109,6 +112,7 @@ async function _getActions(esClient: ElasticsearchClient) {
   const res = await esClient.search<FleetServerAgentAction>({
     index: AGENT_ACTIONS_INDEX,
     ignore_unavailable: true,
+    size: SO_SEARCH_LIMIT,
     query: {
       bool: {
         must_not: [
