@@ -44,8 +44,9 @@ import {
   LENS_EDIT_PAGESIZE_ACTION,
 } from './visualizations/datatable/components/constants';
 import type { LensInspector } from './lens_inspector_service';
-import { DataViewsState } from './state_management/types';
-import { IndexPatternServiceAPI } from './indexpattern_service/service';
+import type { FormatSelectorOptions } from './indexpattern_datasource/dimension_panel/format_selector';
+import type { DataViewsState } from './state_management/types';
+import type { IndexPatternServiceAPI } from './indexpattern_service/service';
 
 export interface IndexPatternRef {
   id: string;
@@ -228,6 +229,9 @@ interface ChartSettings {
   fill?: string;
   legend?: Record<string, boolean | string>;
   gridLinesVisibility?: Record<string, boolean>;
+  tickLabelsVisibility?: Record<string, boolean>;
+  axisTitlesVisibility?: Record<string, boolean>;
+  valueLabels?: boolean;
   extents?: {
     yLeftExtent: AxisExtents;
     yRightExtent: AxisExtents;
@@ -538,7 +542,8 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
   layerType: LayerType | undefined;
   supportStaticValue: boolean;
   paramEditorCustomProps?: ParamEditorCustomProps;
-  supportFieldFormat?: boolean;
+  enableFormatSelector: boolean;
+  formatSelectorOptions: FormatSelectorOptions | undefined;
 };
 
 export type DatasourceDimensionTriggerProps<T> = DatasourceDimensionProps<T>;
@@ -698,7 +703,8 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   requiresPreviousColumnOnDuplicate?: boolean;
   supportStaticValue?: boolean;
   paramEditorCustomProps?: ParamEditorCustomProps;
-  supportFieldFormat?: boolean;
+  enableFormatSelector?: boolean;
+  formatSelectorOptions?: FormatSelectorOptions; // only relevant if supportFieldFormat is true
   labels?: { buttonAriaLabel: string; buttonLabel: string };
 };
 

@@ -5,58 +5,50 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { TestProvidersComponent, mockedSearchService } from '../../../common/mocks/test_providers';
+import { act, renderHook } from '@testing-library/react-hooks';
 import { BehaviorSubject } from 'rxjs';
-import { mockKibanaDataService } from '../../../common/mocks/mock_kibana_data_service';
 import { useIndicatorsTotalCount } from './use_indicators_total_count';
-import { DEFAULT_THREAT_INDEX_KEY } from '../../../../common/constants';
-
-jest.mock('../../../hooks/use_kibana');
 
 const indicatorsResponse = { rawResponse: { hits: { hits: [], total: 0 } } };
 
 describe('useIndicatorsTotalCount()', () => {
-  let mockData: ReturnType<typeof mockKibanaDataService>;
+  beforeEach(() => {
+    mockedSearchService.search.mockReturnValue(new BehaviorSubject(indicatorsResponse));
+    jest.clearAllMocks();
+  });
 
   describe('when mounted', () => {
-    beforeEach(() => {
-      mockData = mockKibanaDataService({ searchSubject: new BehaviorSubject(indicatorsResponse) });
-    });
-
     beforeEach(async () => {
-      renderHook(() => useIndicatorsTotalCount());
+      await act(async () => {
+        renderHook(() => useIndicatorsTotalCount(), {
+          wrapper: TestProvidersComponent,
+        });
+      });
     });
 
     it('should query the database for threat indicators', async () => {
-      expect(mockData.search).toHaveBeenCalledTimes(1);
-    });
-
-    it('should retrieve index patterns from settings', () => {
-      expect(mockData.getUiSetting).toHaveBeenCalledWith(DEFAULT_THREAT_INDEX_KEY);
+      expect(mockedSearchService.search).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('when rerendered', () => {
-    beforeEach(async () => {
-      mockData = mockKibanaDataService({ searchSubject: new BehaviorSubject(indicatorsResponse) });
-    });
-
     it('should not call the database when rerendered', async () => {
-      const { rerender } = renderHook(() => useIndicatorsTotalCount());
+      const { rerender } = renderHook(() => useIndicatorsTotalCount(), {
+        wrapper: TestProvidersComponent,
+      });
 
       rerender();
 
-      expect(mockData.search).toHaveBeenCalledTimes(1);
+      expect(mockedSearchService.search).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('when query succeeds', () => {
-    beforeEach(async () => {
-      mockData = mockKibanaDataService({ searchSubject: new BehaviorSubject(indicatorsResponse) });
-    });
-
     it('should return the total count', async () => {
-      const { result } = renderHook(() => useIndicatorsTotalCount());
+      const { result } = renderHook(() => useIndicatorsTotalCount(), {
+        wrapper: TestProvidersComponent,
+      });
 
       expect(result.current.count).toEqual(indicatorsResponse.rawResponse.hits.total);
       expect(result.current.isLoading).toEqual(false);
