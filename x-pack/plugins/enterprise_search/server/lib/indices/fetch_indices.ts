@@ -71,20 +71,17 @@ export const fetchIndices = async (
     .map(getIndexDataMapper(totalIndexData))
     .flatMap(({ name, aliases, ...indexData }) => {
       // expand aliases and add to results
-      const indicesAndAliases: ElasticsearchIndexWithPrivileges[] = [];
-      indicesAndAliases.push({
+
+      const indexEntry = {
         ...indexData,
         alias: false,
         count: indexCounts[name] ?? 0,
         name,
         privileges: { manage: false, read: false, ...indexPrivileges[name] },
-      });
-
-      let expandedAliases = [] as ElasticsearchIndexWithPrivileges[];
-      if (includeAliases) {
-        expandedAliases = expandAliases(name, aliases, indexData, totalIndexData);
-      }
-      return !includeAliases ? indicesAndAliases : [...indicesAndAliases, ...expandedAliases];
+      };
+      return includeAliases
+        ? [indexEntry, ...expandAliases(name, aliases, indexData, totalIndexData)]
+        : [indexEntry];
     });
 
   let indicesData = regularIndexData;
@@ -95,19 +92,15 @@ export const fetchIndices = async (
     const itemsToInclude = getAlwaysShowAliases(indexNamesAlreadyIncluded, alwaysShowMatchNames)
       .map(getIndexDataMapper(totalIndexData))
       .flatMap(({ name, aliases, ...indexData }) => {
-        const indicesAndAliases = [] as ElasticsearchIndexWithPrivileges[];
-
-        aliases.forEach((alias) => {
-          if (alias.startsWith(alwaysShowSearchPattern)) {
-            indicesAndAliases.push({
-              alias: true,
-              count: indexCounts[alias] ?? 0,
-              name: alias,
-              privileges: { manage: false, read: false, ...indexPrivileges[name] },
-              ...indexData,
-            });
-          }
-        });
+        const indicesAndAliases = aliases
+          .filter((alias) => alias.startsWith(alwaysShowSearchPattern))
+          .map((alias) => ({
+            alias: true,
+            count: indexCounts[alias] ?? 0,
+            name: alias,
+            privileges: { manage: false, read: false, ...indexPrivileges[name] },
+            ...indexData,
+          }));
 
         return indicesAndAliases;
       });

@@ -34,22 +34,25 @@ export const getIndexData = async (
   // Index names that with one of their aliases match with the alwaysShowSearchPattern
   const alwaysShowPatternMatches = new Set<string>();
 
-  const indexAndAliasNames = Object.keys(totalIndices).reduce((accum, indexName) => {
-    accum.push(indexName);
+  const indexAndAliasNames: string[] = Object.keys(totalIndices).reduce(
+    (accum: string[], indexName: string) => {
+      accum.push(indexName);
 
-    if (includeAliases) {
-      const aliases = Object.keys(totalIndices[indexName].aliases!);
-      aliases.forEach((alias) => {
-        accum.push(alias);
+      if (includeAliases) {
+        const aliases = Object.keys(totalIndices[indexName].aliases!);
+        aliases.forEach((alias) => {
+          accum.push(alias);
 
-        // Add indexName to the set if an alias matches the pattern
-        if (alwaysShowSearchPattern && alias.startsWith(alwaysShowSearchPattern)) {
-          alwaysShowPatternMatches.add(indexName);
-        }
-      });
-    }
-    return accum;
-  }, [] as string[]);
+          // Add indexName to the set if an alias matches the pattern
+          if (alwaysShowSearchPattern && alias.startsWith(alwaysShowSearchPattern)) {
+            alwaysShowPatternMatches.add(indexName);
+          }
+        });
+      }
+      return accum;
+    },
+    []
+  );
 
   const indicesNames = returnHiddenIndices
     ? Object.keys(totalIndices)
