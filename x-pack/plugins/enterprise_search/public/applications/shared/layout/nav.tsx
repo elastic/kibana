@@ -61,7 +61,7 @@ export const useEnterpriseSearchNav = () => {
       items: [
         {
           id: 'analytics_collections',
-          name: i18n.translate('xpack.enterpriseSearch.nav.analyticsTitle', {
+          name: i18n.translate('xpack.enterpriseSearch.nav.analyticsCollectionsTitle', {
             defaultMessage: 'Collections',
           }),
           ...generateNavLink({
