@@ -15,6 +15,7 @@ export const defaultPaletteParams: RequiredPaletteParamTypes = {
   ...sharedDefaultParams,
   maxSteps: 5,
   name: DEFAULT_PALETTE_NAME,
+  continuity: 'all',
   rangeType: 'number',
   steps: DEFAULT_COLOR_STEPS,
 };
