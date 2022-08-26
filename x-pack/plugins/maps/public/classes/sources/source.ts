@@ -55,6 +55,7 @@ export interface ISource {
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null;
   supportsFitToBounds(): Promise<boolean>;
   cloneDescriptor(): AbstractSourceDescriptor;
+  canSkipSourceUpdate(): boolean;
   getFieldNames(): string[];
   getApplyGlobalQuery(): boolean;
   getApplyGlobalTime(): boolean;
@@ -104,7 +105,9 @@ export class AbstractSource implements ISource {
   getAttributionProvider(): (() => Promise<Attribution[]>) | null {
     return null;
   }
-
+  canSkipSourceUpdate(): boolean {
+    return true;
+  }
   isFieldAware(): boolean {
     return false;
   }

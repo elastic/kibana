@@ -76,7 +76,7 @@ export class RasterTileLayer extends AbstractLayer {
           return source.getUpdateDueToTimeslice(prevMeta, timeslice);
         },
       });
-      if (canSkip) return;
+      if (canSkip && source.canSkipSourceUpdate()) return;
     }
     const requestToken = Symbol(`layer-source-refresh:${this.getId()} - source`);
     try {
