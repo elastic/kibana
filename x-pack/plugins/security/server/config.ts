@@ -354,13 +354,13 @@ export function createConfig(
 
   for (const [type, providerGroup] of Object.entries(providers)) {
     for (const [name, { enabled, order, accessAgreement }] of Object.entries(providerGroup ?? {})) {
-      const hasLocalAccessAgreement: boolean = !!accessAgreement?.message;
+      const hasProviderSpecificAccessAgreement: boolean = !!accessAgreement?.message;
       const hasGlobalAccessAgreement: boolean = !!config.accessAgreement?.message;
 
       if (!enabled) {
         delete providerGroup![name];
       } else {
-        const hasAccessAgreement: boolean = hasLocalAccessAgreement || hasGlobalAccessAgreement;
+        const hasAccessAgreement: boolean = hasProviderSpecificAccessAgreement || hasGlobalAccessAgreement;
 
         sortedProviders.push({
           type: type as any,

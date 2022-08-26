@@ -82,7 +82,7 @@ export interface AuthenticatorOptions {
   featureUsageService: SecurityFeatureUsageServiceStart;
   userProfileService: UserProfileServiceStartInternal;
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
-  config: Pick<ConfigType, 'authc'>;
+  config: Pick<ConfigType, 'authc' | 'accessAgreement'>;
   basePath: IBasePath;
   license: SecurityLicense;
   loggers: LoggerFactory;
@@ -90,7 +90,6 @@ export interface AuthenticatorOptions {
   session: PublicMethodsOf<Session>;
   getServerBaseURL: () => string;
   isElasticCloudDeployment: () => boolean;
-  accessAgreement: { message?: string };
 }
 
 /** @internal */
@@ -814,33 +813,22 @@ export class Authenticator {
    * @param sessionValue Current session value if any.
    */
   private shouldRedirectToAccessAgreement(sessionValue: SessionValue | null) {
-    // Request should be redirected to Access Agreement UI only if all following conditions are met:
-    if (sessionValue == null) {
+    // If user doesn't have an active session or if they already acknowledged
+    // access agreement (based on the flag we store in the session) - bail out.
+    if (sessionValue == null || sessionValue.accessAgreementAcknowledged) {
       return false;
     }
-    //  1. Request can be redirected (not API call)
 
-    //  2. Request is authenticated, but user hasn't acknowledged access agreement in the current
-    //     session yet (based on the flag we store in the session)
-    const isAccessAgreementAlreadyAcknowledged: boolean = !sessionValue.accessAgreementAcknowledged;
+    // If access agreement is neither enabled globally (for all providers)
+    // nor for the provider that authenticated user request - bail out.
+    if ((this.options.config.authc.providers as Record<string, any>)[sessionValue.provider.type]?.[
+      sessionValue.provider.name
+    ]?.accessAgreement || !!this.options.config?.accessAgreement?.message) {
+      return false;
+    }
 
-    //  3. Request is authenticated by the provider that has `accessAgreement` configured
-    const hasAccessAgreementConfigured =
-      (this.options.config.authc.providers as Record<string, any>)[sessionValue.provider.type]?.[
-        sessionValue.provider.name
-      ]?.accessAgreement || !!this.options.accessAgreement.message;
-
-    //  4. Current license allows access agreement
-    const doesCurrentLicenseAllowAccessAgreement =
-      this.options.license.getFeatures().allowAccessAgreement;
-
-    //  5. And it's not a request to the Access Agreement UI itself
-
-    return (
-      isAccessAgreementAlreadyAcknowledged &&
-      hasAccessAgreementConfigured &&
-      doesCurrentLicenseAllowAccessAgreement
-    );
+    // Check if the current license allows access agreement.
+    return this.options.license.getFeatures().allowAccessAgreement;
   }
 
   /**
