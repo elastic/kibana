@@ -7,7 +7,6 @@
 
 export type InputsModelId = 'global' | 'timeline' | 'socTrends';
 // sometimes you have to bend over backwards to please typescript
-export const globalId: InputsModelId = 'global';
 export const socTrendsId: InputsModelId = 'socTrends';
 export const timelineId: InputsModelId = 'timeline';
 
