@@ -384,15 +384,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await ml.swimLane.waitForSwimLanesToLoad();
           await ml.swimLane.assertAxisLabels(viewBySwimLaneTestSubj, 'x', [
-            '2012-07-07',
-            '2013-02-07',
-            '2013-02-08',
+            '2012-06-19',
+            '2012-11-16',
+            '2013-04-15',
+            '2013-09-12',
             '2014-02-09',
-            '2014-02-10',
-            '2015-02-11',
-            '2015-02-11',
-            '2016-02-11',
-            '2016-02-11',
+            '2014-07-09',
+            '2014-12-06',
+            '2015-05-05',
+            '2015-10-02',
           ]);
         });
 
