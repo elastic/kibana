@@ -142,19 +142,21 @@ Actions are not required on rules. You can run a rule without actions to underst
 [[controlling-rules]]
 === Snooze and disable rules
 
-The rule listing enables you to quickly snooze, disable or enable, and delete individual rules using the colored dropdown.
+The rule listing enables you to quickly snooze, disable, enable, or delete
+individual rules. For example, you can change the state of a rule:
 
 [role="screenshot"]
-image:images/individual-snooze-disable.png[The rule status dropdown enables you to snooze or disable an individual rule]
+image:images/individual-enable-disable.png[Use the rule status dropdown to enable or disable an individual rule]
 
-When you snooze a rule, the rule checks continue to run on a schedule but the alert will not trigger any actions. You can snooze for a specified period of time or indefinitely.
+When you snooze a rule, the rule checks continue to run on a schedule but the
+alert will not trigger any actions. You can snooze for a specified period of
+time, indefinitely, or schedule single or recurring downtimes:
 
 [role="screenshot"]
-image:images/snooze-panel.png[The snooze panel allows you to set the length of a rule's snooze period]
+image:images/snooze-panel.png[Snooze notifications for a rule]
 
-When a rule is in a `snoozed` state, you can cancel or change the duration of this state. You can perform these operations in bulk by multi-selecting rules, and then clicking the *Manage rules* button. 
-
-TIP: In this context, "Mute" refers to an indefinite snooze. preview:[]
+When a rule is in a `snoozed` state, you can cancel or change the duration of
+this state.
 
 [float]
 === Rule status
