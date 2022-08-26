@@ -7,31 +7,18 @@
  */
 
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
-import { CORE_USAGE_STATS_TYPE, CORE_USAGE_STATS_ID } from './constants';
-import { CoreUsageStats } from './types';
+import type { CoreUsageStats } from '@kbn/core-usage-data-server';
 import {
-  ISavedObjectsRepository,
-  SavedObjectsImportOptions,
-  SavedObjectsResolveImportErrorsOptions,
-  KibanaRequest,
-  IBasePath,
-} from '..';
-
-/** @internal */
-export interface BaseIncrementOptions {
-  request: KibanaRequest;
-}
-/** @internal */
-export type IncrementSavedObjectsImportOptions = BaseIncrementOptions &
-  Pick<SavedObjectsImportOptions, 'createNewCopies' | 'overwrite'>;
-/** @internal */
-export type IncrementSavedObjectsResolveImportErrorsOptions = BaseIncrementOptions &
-  Pick<SavedObjectsResolveImportErrorsOptions, 'createNewCopies'>;
-/** @internal */
-export type IncrementSavedObjectsExportOptions = BaseIncrementOptions & {
-  types?: string[];
-  supportedTypes: string[];
-};
+  type ICoreUsageStatsClient,
+  type BaseIncrementOptions,
+  type IncrementSavedObjectsImportOptions,
+  type IncrementSavedObjectsResolveImportErrorsOptions,
+  type IncrementSavedObjectsExportOptions,
+  CORE_USAGE_STATS_TYPE,
+  CORE_USAGE_STATS_ID,
+  REPOSITORY_RESOLVE_OUTCOME_STATS,
+} from '@kbn/core-usage-data-base-server-internal';
+import { ISavedObjectsRepository, KibanaRequest, IBasePath } from '..';
 
 export const BULK_CREATE_STATS_PREFIX = 'apiCalls.savedObjectsBulkCreate';
 export const BULK_GET_STATS_PREFIX = 'apiCalls.savedObjectsBulkGet';
@@ -49,13 +36,6 @@ export const EXPORT_STATS_PREFIX = 'apiCalls.savedObjectsExport';
 export const LEGACY_DASHBOARDS_IMPORT_STATS_PREFIX = 'apiCalls.legacyDashboardImport';
 export const LEGACY_DASHBOARDS_EXPORT_STATS_PREFIX = 'apiCalls.legacyDashboardExport';
 
-export const REPOSITORY_RESOLVE_OUTCOME_STATS = {
-  EXACT_MATCH: 'savedObjectsRepository.resolvedOutcome.exactMatch',
-  ALIAS_MATCH: 'savedObjectsRepository.resolvedOutcome.aliasMatch',
-  CONFLICT: 'savedObjectsRepository.resolvedOutcome.conflict',
-  NOT_FOUND: 'savedObjectsRepository.resolvedOutcome.notFound',
-  TOTAL: 'savedObjectsRepository.resolvedOutcome.total',
-};
 const ALL_COUNTER_FIELDS = [
   // Saved Objects Client APIs
   ...getFieldsForCounter(BULK_CREATE_STATS_PREFIX),
@@ -92,7 +72,7 @@ const ALL_COUNTER_FIELDS = [
 const SPACE_CONTEXT_REGEX = /^\/s\/([a-z0-9_\-]+)/;
 
 /** @internal */
-export class CoreUsageStatsClient {
+export class CoreUsageStatsClient implements ICoreUsageStatsClient {
   constructor(
     private readonly debugLogger: (message: string) => void,
     private readonly basePath: IBasePath,
