@@ -6,14 +6,13 @@
  * Side Public License, v 1.
  */
 
+import type { Filter, PhraseFilter, ScriptedPhraseFilter } from '@kbn/es-query';
 import { get } from 'lodash';
 import {
-  PhraseFilter,
   getPhraseFilterValue,
   getPhraseFilterField,
   FILTERS,
   isScriptedPhraseFilter,
-  Filter,
   isPhraseFilter,
 } from '@kbn/es-query';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
@@ -21,7 +20,10 @@ import { FieldFormat } from '@kbn/field-formats-plugin/common';
 const getScriptedPhraseValue = (filter: PhraseFilter) =>
   get(filter, ['query', 'script', 'script', 'params', 'value']);
 
-export function getPhraseDisplayValue(filter: PhraseFilter, formatter?: FieldFormat) {
+export function getPhraseDisplayValue(
+  filter: PhraseFilter | ScriptedPhraseFilter,
+  formatter?: FieldFormat
+) {
   const value = filter.meta.value ?? filter.meta.params.query;
   return formatter?.convert(value) ?? value ?? '';
 }

@@ -7,10 +7,20 @@
  */
 
 import { get } from 'lodash';
-import { RangeFilter, isScriptedRangeFilter, isRangeFilter, Filter, FILTERS } from '@kbn/es-query';
+import {
+  ScriptedRangeFilter,
+  RangeFilter,
+  isScriptedRangeFilter,
+  isRangeFilter,
+  Filter,
+  FILTERS,
+} from '@kbn/es-query';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 
-export function getRangeDisplayValue({ meta: { params } }: RangeFilter, formatter?: FieldFormat) {
+export function getRangeDisplayValue(
+  { meta: { params } }: RangeFilter | ScriptedRangeFilter,
+  formatter?: FieldFormat
+) {
   const left = params.gte ?? params.gt ?? -Infinity;
   const right = params.lte ?? params.lt ?? Infinity;
   if (!formatter) return `${left} to ${right}`;
