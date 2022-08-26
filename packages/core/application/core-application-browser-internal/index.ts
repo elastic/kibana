@@ -14,3 +14,10 @@ export type {
   Mounter,
   ParsedAppUrl,
 } from './src/types';
+export {
+  appendAppPath,
+  getAppInfo,
+  parseAppUrl,
+  relativeToAbsolute,
+  removeSlashes,
+} from './src/utils';

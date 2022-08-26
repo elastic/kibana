@@ -17,8 +17,8 @@ import type { App, PublicAppInfo } from '@kbn/core-application-browser';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
+import { getAppInfo } from '@kbn/core-application-browser-internal';
 import { ChromeService } from './chrome_service';
-import { getAppInfo } from '../application/utils';
 
 class FakeApp implements App {
   public title: string;
