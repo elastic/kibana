@@ -162,8 +162,7 @@ export function ServicesTable({ indexLifecyclePhase }: Props) {
             content={i18n.translate(
               'xpack.apm.settings.storageExplorer.table.samplingColumnDescription',
               {
-                defaultMessage:
-                  'The ratio of sampled transactions to the total number of transactions.',
+                defaultMessage: `The number of sampled transactions divided by total throughput. This value may differ from the configured transaction sample rate because it might be affected by the initial service's decision when using head-based sampling or by a set of policies when using tail-based sampling.`,
               }
             )}
           >
