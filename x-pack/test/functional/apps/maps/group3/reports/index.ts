@@ -15,6 +15,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const config = getService('config');
   const log = getService('log');
   const reporting = getService('reporting');
+  const png = getService('png');
 
   describe('dashboard reporting: creates a map report', () => {
     // helper function to check the difference between the new image and the baseline
@@ -31,11 +32,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       log.debug(`session report path: ${sessionReportPath}`);
 
       expect(sessionReportPath).not.to.be(null);
-      return await reporting.checkIfPngsMatch(
+      return await png.checkIfPngsMatch(
         sessionReportPath,
         PageObjects.reporting.getBaselineReportPath(fileName, 'png', REPORTS_FOLDER),
-        config.get('screenshots.directory'),
-        log
+        config.get('screenshots.directory')
       );
     };
 
