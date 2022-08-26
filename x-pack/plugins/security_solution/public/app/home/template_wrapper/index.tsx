@@ -9,7 +9,6 @@ import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { EuiPageTemplate, EuiThemeProvider, useEuiTheme } from '@elastic/eui';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
-import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useSecuritySolutionNavigation } from '../../../common/components/navigation/use_security_solution_navigation';
 import { TimelineId } from '../../../../common/types/timeline';
@@ -49,9 +48,7 @@ const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<{
   }
 `;
 
-export const SecuritySolutionTemplateWrapper: React.FC<{
-  template?: KibanaPageTemplateProps['template'] | 'noData';
-}> = React.memo(({ children, template = 'default' }) => {
+export const SecuritySolutionTemplateWrapper: React.FC = React.memo(({ children }) => {
   const solutionNav = useSecuritySolutionNavigation();
   const isPolicySettingsVisible = useIsPolicySettingsBarVisible();
   const [isTimelineBottomBarVisible] = useShowTimeline();
