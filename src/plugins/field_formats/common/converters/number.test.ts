@@ -30,9 +30,17 @@ describe('NumberFormat', () => {
 
   test('object input', () => {
     const formatter = new NumberFormat({}, getConfig);
-
     expect(
       formatter.convert({ min: 150, max: 1000, sum: 5000, value_count: 10 })
     ).toMatchInlineSnapshot(`"{\\"min\\":150,\\"max\\":1000,\\"sum\\":5000,\\"value_count\\":10}"`);
+    expect(formatter.convert({ min: 150, max: 1000, sum: 5000, value_count: 10 }, 'html'))
+      .toMatchInlineSnapshot(`
+    "{
+      \\"min\\": 150,
+      \\"max\\": 1000,
+      \\"sum\\": 5000,
+      \\"value_count\\": 10
+    }"
+  `);
   });
 });
