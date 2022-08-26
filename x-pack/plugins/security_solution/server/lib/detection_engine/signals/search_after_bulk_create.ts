@@ -52,10 +52,6 @@ export const searchAfterAndBulkCreate = async ({
     let sortIds: estypes.SortResults | undefined;
     let hasSortId = true; // default to true so we execute the search on initial run
 
-    // signalsCreatedCount keeps track of how many signals we have created,
-    // to ensure we don't exceed maxSignals
-    let signalsCreatedCount = 0;
-
     if (tuple == null || tuple.to == null || tuple.from == null) {
       ruleExecutionLogger.error(`[-] malformed date tuple`);
       return createSearchAfterReturnType({
@@ -64,8 +60,7 @@ export const searchAfterAndBulkCreate = async ({
       });
     }
 
-    signalsCreatedCount = 0;
-    while (signalsCreatedCount < tuple.maxSignals) {
+    while (toReturn.createdSignalsCount < tuple.maxSignals) {
       try {
         let mergedSearchResults = createSearchResultReturnType();
         ruleExecutionLogger.debug(`sortIds: ${sortIds}`);
@@ -142,7 +137,10 @@ export const searchAfterAndBulkCreate = async ({
         // if there is a sort id to continue the search_after with.
         if (includedEvents.length !== 0) {
           // make sure we are not going to create more signals than maxSignals allows
-          const limitedEvents = includedEvents.slice(0, tuple.maxSignals - signalsCreatedCount);
+          const limitedEvents = includedEvents.slice(
+            0,
+            tuple.maxSignals - toReturn.createdSignalsCount
+          );
           const enrichedEvents = await enrichment(limitedEvents);
           const wrappedDocs = wrapHits(enrichedEvents, buildReasonMessage);
 
