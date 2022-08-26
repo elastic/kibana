@@ -377,7 +377,7 @@ describe('create()', () => {
       supportedFeatureIds: ['alerting'],
       validate: {
         config: {
-          validateSchema: schema.object({
+          schema: schema.object({
             param1: schema.string(),
           }),
         },
@@ -1952,7 +1952,7 @@ describe('update()', () => {
       supportedFeatureIds: ['alerting'],
       validate: {
         config: {
-          validateSchema: schema.object({
+          schema: schema.object({
             param1: schema.string(),
           }),
         },

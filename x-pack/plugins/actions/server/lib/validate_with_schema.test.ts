@@ -72,13 +72,13 @@ test('should validate when validators return incoming value', () => {
     executor,
     validate: {
       params: {
-        validateSchema: selfValidator,
+        schema: selfValidator,
       },
       config: {
-        validateSchema: selfValidator,
+        schema: selfValidator,
       },
       secrets: {
-        validateSchema: selfValidator,
+        schema: selfValidator,
       },
       connector: () => null,
     },
@@ -111,13 +111,13 @@ test('should validate when validators return different values', () => {
     executor,
     validate: {
       params: {
-        validateSchema: selfValidator,
+        schema: selfValidator,
       },
       config: {
-        validateSchema: selfValidator,
+        schema: selfValidator,
       },
       secrets: {
-        validateSchema: selfValidator,
+        schema: selfValidator,
       },
       connector: () => null,
     },
@@ -153,13 +153,13 @@ test('should throw with expected error when validators fail', () => {
     executor,
     validate: {
       params: {
-        validateSchema: erroringValidator,
+        schema: erroringValidator,
       },
       config: {
-        validateSchema: erroringValidator,
+        schema: erroringValidator,
       },
       secrets: {
-        validateSchema: erroringValidator,
+        schema: erroringValidator,
       },
       connector: () => 'test error',
     },
@@ -194,13 +194,13 @@ test('should work with @kbn/config-schema', () => {
     executor,
     validate: {
       params: {
-        validateSchema: testSchema,
+        schema: testSchema,
       },
       config: {
-        validateSchema: testSchema,
+        schema: testSchema,
       },
       secrets: {
-        validateSchema: testSchema,
+        schema: testSchema,
       },
       connector: () => null,
     },
@@ -227,13 +227,13 @@ describe('validateConnectors', () => {
     executor,
     validate: {
       params: {
-        validateSchema: selfValidator,
+        schema: selfValidator,
       },
       config: {
-        validateSchema: selfValidator,
+        schema: selfValidator,
       },
       secrets: {
-        validateSchema: selfValidator,
+        schema: selfValidator,
       },
       connector: () => null,
     },

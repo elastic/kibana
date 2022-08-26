@@ -77,8 +77,8 @@ export interface ExternalServiceCredentials {
 }
 
 export interface ExternalServiceValidation {
-  config: (configObject: any, validatorServices?: ValidatorServices) => void;
-  secrets: (secrets: any, validatorServices?: ValidatorServices) => void;
+  config: (configObject: any, validatorServices: ValidatorServices) => void;
+  secrets: (secrets: any, validatorServices: ValidatorServices) => void;
   connector: (config: any, secrets: any) => string | null;
 }
 

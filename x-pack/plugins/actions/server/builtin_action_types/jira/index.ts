@@ -78,15 +78,15 @@ export function getActionType(
     ],
     validate: {
       config: {
-        validateSchema: ExternalIncidentServiceConfigurationSchema,
-        validate: validate.config,
+        schema: ExternalIncidentServiceConfigurationSchema,
+        customValidator: validate.config,
       },
       secrets: {
-        validateSchema: ExternalIncidentServiceSecretConfigurationSchema,
-        validate: validate.secrets,
+        schema: ExternalIncidentServiceSecretConfigurationSchema,
+        customValidator: validate.secrets,
       },
       params: {
-        validateSchema: ExecutorParamsSchema,
+        schema: ExecutorParamsSchema,
       },
     },
     executor: curry(executor)({ logger, configurationUtilities }),

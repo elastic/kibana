@@ -105,14 +105,14 @@ export function getActionType({
     ],
     validate: {
       config: {
-        validateSchema: ConfigSchema,
-        validate: validateActionTypeConfig,
+        schema: ConfigSchema,
+        customValidator: validateActionTypeConfig,
       },
       secrets: {
-        validateSchema: SecretsSchema,
+        schema: SecretsSchema,
       },
       params: {
-        validateSchema: ParamsSchema,
+        schema: ParamsSchema,
       },
     },
     renderParameterTemplates,
@@ -132,9 +132,9 @@ function renderParameterTemplates(
 
 function validateActionTypeConfig(
   configObject: ActionTypeConfigType,
-  validatorServices?: ValidatorServices
+  validatorServices: ValidatorServices
 ) {
-  const { configurationUtilities } = validatorServices || {};
+  const { configurationUtilities } = validatorServices;
   const configuredUrl = configObject.url;
   try {
     new URL(configuredUrl);
@@ -148,7 +148,7 @@ function validateActionTypeConfig(
   }
 
   try {
-    configurationUtilities?.ensureUriAllowed(configuredUrl);
+    configurationUtilities.ensureUriAllowed(configuredUrl);
   } catch (allowListError) {
     return i18n.translate('xpack.actions.builtin.webhook.webhookConfigurationError', {
       defaultMessage: 'error configuring webhook action: {message}',

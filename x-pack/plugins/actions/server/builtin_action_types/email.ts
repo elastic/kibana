@@ -72,13 +72,13 @@ const ConfigSchema = schema.object(ConfigSchemaProps);
 
 function validateConfig(
   configObject: ActionTypeConfigType,
-  validatorServices?: ValidatorServices
+  validatorServices: ValidatorServices
 ): string | void {
   const config = configObject;
-  const { configurationUtilities } = validatorServices || {};
+  const { configurationUtilities } = validatorServices;
 
   const emails = [config.from];
-  const invalidEmailsMessage = configurationUtilities?.validateEmailAddresses(emails);
+  const invalidEmailsMessage = configurationUtilities.validateEmailAddresses(emails);
   if (!!invalidEmailsMessage) {
     return `[from]: ${invalidEmailsMessage}`;
   }
@@ -115,7 +115,7 @@ function validateConfig(
       return '[port] is required';
     }
 
-    if (!configurationUtilities?.isHostnameAllowed(config.host)) {
+    if (!configurationUtilities.isHostnameAllowed(config.host)) {
       return `[host] value '${config.host}' is not in the allowedHosts configuration`;
     }
   } else {
@@ -124,7 +124,7 @@ function validateConfig(
     if (host == null) {
       return `[service] value '${config.service}' is not valid`;
     }
-    if (!configurationUtilities?.isHostnameAllowed(host)) {
+    if (!configurationUtilities.isHostnameAllowed(host)) {
       return `[service] value '${config.service}' resolves to host '${host}' which is not in the allowedHosts configuration`;
     }
   }
@@ -168,9 +168,9 @@ const ParamsSchema = schema.object(ParamsSchemaProps);
 
 function validateParams(
   paramsObject: unknown,
-  validatorServices?: ValidatorServices
+  validatorServices: ValidatorServices
 ): string | void {
-  const { configurationUtilities } = validatorServices || {};
+  const { configurationUtilities } = validatorServices;
 
   // avoids circular reference ...
   const params = paramsObject as ActionParamsType;
@@ -183,7 +183,7 @@ function validateParams(
   }
 
   const emails = withoutMustacheTemplate(to.concat(cc).concat(bcc));
-  const invalidEmailsMessage = configurationUtilities?.validateEmailAddresses(emails, {
+  const invalidEmailsMessage = configurationUtilities.validateEmailAddresses(emails, {
     treatMustacheTemplatesAsValid: true,
   });
   if (invalidEmailsMessage) {
@@ -233,15 +233,15 @@ export function getActionType(params: GetActionTypeParams): EmailActionType {
     ],
     validate: {
       config: {
-        validateSchema: ConfigSchema,
-        validate: validateConfig,
+        schema: ConfigSchema,
+        customValidator: validateConfig,
       },
       secrets: {
-        validateSchema: SecretsSchema,
+        schema: SecretsSchema,
       },
       params: {
-        validateSchema: ParamsSchema,
-        validate: validateParams,
+        schema: ParamsSchema,
+        customValidator: validateParams,
       },
       connector: validateConnector,
     },

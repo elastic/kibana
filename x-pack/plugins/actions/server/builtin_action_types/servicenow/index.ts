@@ -106,16 +106,16 @@ export function getServiceNowITSMActionType(
     ],
     validate: {
       config: {
-        validateSchema: ExternalIncidentServiceConfigurationSchema,
-        validate: validate.config,
+        schema: ExternalIncidentServiceConfigurationSchema,
+        customValidator: validate.config,
       },
       secrets: {
-        validateSchema: ExternalIncidentServiceSecretConfigurationSchema,
-        validate: validate.secrets,
+        schema: ExternalIncidentServiceSecretConfigurationSchema,
+        customValidator: validate.secrets,
       },
       connector: validate.connector,
       params: {
-        validateSchema: ExecutorParamsSchemaITSM,
+        schema: ExecutorParamsSchemaITSM,
       },
     },
     executor: curry(executor)({
@@ -143,16 +143,16 @@ export function getServiceNowSIRActionType(
     ],
     validate: {
       config: {
-        validateSchema: ExternalIncidentServiceConfigurationSchema,
-        validate: validate.config,
+        schema: ExternalIncidentServiceConfigurationSchema,
+        customValidator: validate.config,
       },
       secrets: {
-        validateSchema: ExternalIncidentServiceSecretConfigurationSchema,
-        validate: validate.secrets,
+        schema: ExternalIncidentServiceSecretConfigurationSchema,
+        customValidator: validate.secrets,
       },
       connector: validate.connector,
       params: {
-        validateSchema: ExecutorParamsSchemaSIR,
+        schema: ExecutorParamsSchemaSIR,
       },
     },
     executor: curry(executor)({
@@ -176,16 +176,16 @@ export function getServiceNowITOMActionType(
     supportedFeatureIds: [AlertingConnectorFeatureId, SecurityConnectorFeatureId],
     validate: {
       config: {
-        validateSchema: ExternalIncidentServiceConfigurationBaseSchema,
-        validate: validate.config,
+        schema: ExternalIncidentServiceConfigurationBaseSchema,
+        customValidator: validate.config,
       },
       secrets: {
-        validateSchema: ExternalIncidentServiceSecretConfigurationSchema,
-        validate: validate.secrets,
+        schema: ExternalIncidentServiceSecretConfigurationSchema,
+        customValidator: validate.secrets,
       },
       connector: validate.connector,
       params: {
-        validateSchema: ExecutorParamsSchemaITOM,
+        schema: ExecutorParamsSchemaITOM,
       },
     },
     executor: curry(executorITOM)({

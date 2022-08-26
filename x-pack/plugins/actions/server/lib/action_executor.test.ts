@@ -271,7 +271,7 @@ test('throws an error when config is invalid', async () => {
     supportedFeatureIds: ['alerting'],
     validate: {
       config: {
-        validateSchema: schema.object({
+        schema: schema.object({
           param1: schema.string(),
         }),
       },
@@ -355,7 +355,7 @@ test('throws an error when params is invalid', async () => {
     supportedFeatureIds: ['alerting'],
     validate: {
       params: {
-        validateSchema: schema.object({
+        schema: schema.object({
           param1: schema.string(),
         }),
       },

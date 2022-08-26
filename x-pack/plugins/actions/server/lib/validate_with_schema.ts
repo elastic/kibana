@@ -101,9 +101,9 @@ function validateWithSchema<
         case 'params':
           name = 'action params';
           if (actionType.validate.params) {
-            const params = actionType.validate.params.validateSchema.validate(value);
-            if (actionType.validate.params.validate) {
-              const result = actionType.validate.params.validate(params, validatorServices);
+            const params = actionType.validate.params.schema.validate(value);
+            if (actionType.validate.params.customValidator) {
+              const result = actionType.validate.params.customValidator(params, validatorServices);
               if (result) {
                 throw new Error(result);
               }
@@ -114,9 +114,9 @@ function validateWithSchema<
         case 'config':
           name = 'action type config';
           if (actionType.validate.config) {
-            const config = actionType.validate.config.validateSchema.validate(value);
-            if (actionType.validate.config.validate) {
-              const result = actionType.validate.config.validate(config, validatorServices);
+            const config = actionType.validate.config.schema.validate(value);
+            if (actionType.validate.config.customValidator) {
+              const result = actionType.validate.config.customValidator(config, validatorServices);
               if (result) {
                 throw new Error(result);
               }
@@ -128,9 +128,12 @@ function validateWithSchema<
         case 'secrets':
           name = 'action type secrets';
           if (actionType.validate.secrets) {
-            const secrets = actionType.validate.secrets.validateSchema.validate(value);
-            if (actionType.validate.secrets.validate) {
-              const result = actionType.validate.secrets.validate(secrets, validatorServices);
+            const secrets = actionType.validate.secrets.schema.validate(value);
+            if (actionType.validate.secrets.customValidator) {
+              const result = actionType.validate.secrets.customValidator(
+                secrets,
+                validatorServices
+              );
               if (result) {
                 throw new Error(result);
               }

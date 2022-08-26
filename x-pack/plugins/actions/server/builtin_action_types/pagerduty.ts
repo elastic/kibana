@@ -159,14 +159,14 @@ export function getActionType({
     ],
     validate: {
       config: {
-        validateSchema: ConfigSchema,
-        validate: validateActionTypeConfig,
+        schema: ConfigSchema,
+        customValidator: validateActionTypeConfig,
       },
       secrets: {
-        validateSchema: SecretsSchema,
+        schema: SecretsSchema,
       },
       params: {
-        validateSchema: ParamsSchema,
+        schema: ParamsSchema,
       },
     },
     executor: curry(executor)({ logger, configurationUtilities }),
@@ -175,11 +175,11 @@ export function getActionType({
 
 function validateActionTypeConfig(
   configObject: ActionTypeConfigType,
-  validatorServices?: ValidatorServices
+  validatorServices: ValidatorServices
 ) {
-  const { configurationUtilities } = validatorServices || {};
+  const { configurationUtilities } = validatorServices;
   try {
-    configurationUtilities?.ensureUriAllowed(getPagerDutyApiUrl(configObject));
+    configurationUtilities.ensureUriAllowed(getPagerDutyApiUrl(configObject));
   } catch (allowListError) {
     return i18n.translate('xpack.actions.builtin.pagerduty.pagerdutyConfigurationError', {
       defaultMessage: 'error configuring pagerduty action: {message}',

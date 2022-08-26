@@ -47,21 +47,21 @@ describe('Validators', () => {
     const validator = createValidator(TestSubActionConnector);
     const { config, secrets } = validator;
 
-    expect(config).toEqual({ validateSchema: TestConfigSchema });
-    expect(secrets).toEqual({ validateSchema: TestSecretsSchema });
+    expect(config).toEqual({ schema: TestConfigSchema });
+    expect(secrets).toEqual({ schema: TestSecretsSchema });
   });
 
   it('should validate the params correctly', async () => {
     const validator = createValidator(TestSubActionConnector);
     const { params } = validator;
-    expect(params.validateSchema.validate({ subAction: 'test', subActionParams: {} }));
+    expect(params.schema.validate({ subAction: 'test', subActionParams: {} }));
   });
 
   it('should allow any field in subActionParams', async () => {
     const validator = createValidator(TestSubActionConnector);
     const { params } = validator;
     expect(
-      params.validateSchema.validate({
+      params.schema.validate({
         subAction: 'test',
         subActionParams: {
           foo: 'foo',
@@ -94,6 +94,6 @@ describe('Validators', () => {
   ])('should throw if the subAction is %p', async (subAction) => {
     const validator = createValidator(TestSubActionConnector);
     const { params } = validator;
-    expect(() => params.validateSchema.validate({ subAction, subActionParams: {} })).toThrow();
+    expect(() => params.schema.validate({ subAction, subActionParams: {} })).toThrow();
   });
 });

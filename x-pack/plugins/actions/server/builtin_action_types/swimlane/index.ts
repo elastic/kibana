@@ -61,15 +61,15 @@ export function getActionType(
     ],
     validate: {
       config: {
-        validateSchema: SwimlaneServiceConfigurationSchema,
-        validate: validate.config,
+        schema: SwimlaneServiceConfigurationSchema,
+        customValidator: validate.config,
       },
       secrets: {
-        validateSchema: SwimlaneSecretsConfigurationSchema,
-        validate: validate.secrets,
+        schema: SwimlaneSecretsConfigurationSchema,
+        customValidator: validate.secrets,
       },
       params: {
-        validateSchema: ExecutorParamsSchema,
+        schema: ExecutorParamsSchema,
       },
     },
     executor: curry(executor)({ logger, configurationUtilities }),

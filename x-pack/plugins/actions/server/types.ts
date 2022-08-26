@@ -95,10 +95,10 @@ export type ExecutorType<Config, Secrets, Params, ResultData> = (
 ) => Promise<ActionTypeExecutorResult<ResultData>>;
 
 interface ValidatorType<Type> {
-  validateSchema: {
+  schema: {
     validate(value: unknown): Type;
   };
-  validate?: (value: Type, validatorServices?: ValidatorServices) => string | void;
+  customValidator?: (value: Type, validatorServices: ValidatorServices) => string | void;
 }
 
 export interface ValidatorServices {

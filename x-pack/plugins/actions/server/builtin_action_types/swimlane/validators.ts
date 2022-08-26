@@ -15,11 +15,11 @@ import { ValidatorServices } from '../../types';
 
 export const validateCommonConfig = (
   configObject: SwimlanePublicConfigurationType,
-  validatorServices?: ValidatorServices
+  validatorServices: ValidatorServices
 ) => {
-  const { configurationUtilities } = validatorServices || {};
+  const { configurationUtilities } = validatorServices;
   try {
-    configurationUtilities?.ensureUriAllowed(configObject.apiUrl);
+    configurationUtilities.ensureUriAllowed(configObject.apiUrl);
   } catch (allowedListError) {
     return i18n.ALLOWED_HOSTS_ERROR(allowedListError.message);
   }
@@ -27,7 +27,7 @@ export const validateCommonConfig = (
 
 export const validateCommonSecrets = (
   secrets: SwimlaneSecretConfigurationType,
-  validatorServices?: ValidatorServices
+  validatorServices: ValidatorServices
 ) => {};
 
 export const validate: ExternalServiceValidation = {

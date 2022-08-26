@@ -77,15 +77,15 @@ export function getActionType({
     supportedFeatureIds: [AlertingConnectorFeatureId],
     validate: {
       config: {
-        validateSchema: ConfigSchema,
-        validate: validateActionTypeConfig,
+        schema: ConfigSchema,
+        customValidator: validateActionTypeConfig,
       },
       secrets: {
-        validateSchema: SecretsSchema,
-        validate: validateActionTypeSecrets,
+        schema: SecretsSchema,
+        customValidator: validateActionTypeSecrets,
       },
       params: {
-        validateSchema: ParamsSchema,
+        schema: ParamsSchema,
       },
       connector: validateConnector,
     },
@@ -95,9 +95,9 @@ export function getActionType({
 
 function validateActionTypeConfig(
   configObject: ActionTypeConfigType,
-  validatorServices?: ValidatorServices
+  validatorServices: ValidatorServices
 ): string | undefined {
-  const { configurationUtilities } = validatorServices || {};
+  const { configurationUtilities } = validatorServices;
   const configuredUrl = configObject.configUrl;
   const usesBasic = configObject.usesBasic;
   if (!usesBasic) return;
@@ -116,7 +116,7 @@ function validateActionTypeConfig(
 
   try {
     if (configuredUrl) {
-      configurationUtilities?.ensureUriAllowed(configuredUrl);
+      configurationUtilities.ensureUriAllowed(configuredUrl);
     }
   } catch (allowListError) {
     return i18n.translate('xpack.actions.builtin.xmatters.xmattersConfigurationError', {
@@ -178,9 +178,9 @@ function validateConnector(
 
 function validateActionTypeSecrets(
   secretsObject: ActionTypeSecretsType,
-  validatorServices?: ValidatorServices
+  validatorServices: ValidatorServices
 ): string | undefined {
-  const { configurationUtilities } = validatorServices || {};
+  const { configurationUtilities } = validatorServices;
   if (!secretsObject.secretsUrl && !secretsObject.user && !secretsObject.password) {
     return i18n.translate('xpack.actions.builtin.xmatters.noSecretsProvided', {
       defaultMessage: 'Provide either secretsUrl link or user/password to authenticate',
@@ -214,7 +214,7 @@ function validateActionTypeSecrets(
     // Test that hostname is allowed
     try {
       if (secretsObject.secretsUrl) {
-        configurationUtilities?.ensureUriAllowed(secretsObject.secretsUrl);
+        configurationUtilities.ensureUriAllowed(secretsObject.secretsUrl);
       }
     } catch (allowListError) {
       return i18n.translate('xpack.actions.builtin.xmatters.xmattersHostnameNotAllowed', {

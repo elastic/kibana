@@ -73,10 +73,10 @@ export function getActionType({ logger }: { logger: Logger }): ESIndexActionType
     ],
     validate: {
       config: {
-        validateSchema: ConfigSchema,
+        schema: ConfigSchema,
       },
       params: {
-        validateSchema: ParamsSchema,
+        schema: ParamsSchema,
       },
     },
     executor: curry(executor)({ logger }),

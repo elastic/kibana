@@ -16,12 +16,12 @@ import { ValidatorServices } from '../../types';
 
 export const validateCommonConfig = (
   config: ServiceNowPublicConfigurationType,
-  validatorServices?: ValidatorServices
+  validatorServices: ValidatorServices
 ) => {
   const { isOAuth, apiUrl, userIdentifierValue, clientId, jwtKeyId } = config;
-  const { configurationUtilities } = validatorServices || {};
+  const { configurationUtilities } = validatorServices;
   try {
-    configurationUtilities?.ensureUriAllowed(apiUrl);
+    configurationUtilities.ensureUriAllowed(apiUrl);
   } catch (allowedListError) {
     return i18n.ALLOWED_HOSTS_ERROR(allowedListError.message);
   }
@@ -43,7 +43,7 @@ export const validateCommonConfig = (
 
 export const validateCommonSecrets = (
   secrets: ServiceNowSecretConfigurationType,
-  validatorServices?: ValidatorServices
+  validatorServices: ValidatorServices
 ) => {
   const { username, password, clientSecret, privateKey } = secrets;
 

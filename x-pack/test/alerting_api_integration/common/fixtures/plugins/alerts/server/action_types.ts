@@ -88,13 +88,13 @@ function getIndexRecordActionType() {
     supportedFeatureIds: ['alerting'],
     validate: {
       params: {
-        validateSchema: paramsSchema,
+        schema: paramsSchema,
       },
       config: {
-        validateSchema: configSchema,
+        schema: configSchema,
       },
       secrets: {
-        validateSchema: secretsSchema,
+        schema: secretsSchema,
       },
     },
     async executor({ config, secrets, params, services, actionId }) {
@@ -135,13 +135,13 @@ function getDelayedActionType() {
     supportedFeatureIds: ['alerting'],
     validate: {
       params: {
-        validateSchema: paramsSchema,
+        schema: paramsSchema,
       },
       config: {
-        validateSchema: configSchema,
+        schema: configSchema,
       },
       secrets: {
-        validateSchema: secretsSchema,
+        schema: secretsSchema,
       },
     },
     async executor({ config, secrets, params, services, actionId }) {
@@ -169,7 +169,7 @@ function getFailingActionType() {
     supportedFeatureIds: ['alerting'],
     validate: {
       params: {
-        validateSchema: paramsSchema,
+        schema: paramsSchema,
       },
     },
     async executor({ config, secrets, params, services }) {
@@ -205,7 +205,7 @@ function getRateLimitedActionType() {
     maxAttempts: 2,
     validate: {
       params: {
-        validateSchema: paramsSchema,
+        schema: paramsSchema,
       },
     },
     async executor({ config, params, services }) {
@@ -244,7 +244,7 @@ function getNoAttemptsRateLimitedActionType() {
     maxAttempts: 0,
     validate: {
       params: {
-        validateSchema: paramsSchema,
+        schema: paramsSchema,
       },
     },
     async executor({ config, params, services }) {
@@ -285,7 +285,7 @@ function getAuthorizationActionType(core: CoreSetup<FixtureStartDeps>) {
     supportedFeatureIds: ['alerting'],
     validate: {
       params: {
-        validateSchema: paramsSchema,
+        schema: paramsSchema,
       },
     },
     async executor({ params, services, actionId }) {

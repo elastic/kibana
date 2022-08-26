@@ -16,9 +16,9 @@ import { ValidatorServices } from '../../types';
 
 const validateConfig = (
   configObject: CasesWebhookPublicConfigurationType,
-  validatorServices?: ValidatorServices
+  validatorServices: ValidatorServices
 ) => {
-  const { configurationUtilities } = validatorServices || {};
+  const { configurationUtilities } = validatorServices;
   const {
     createCommentUrl,
     createIncidentUrl,
@@ -43,7 +43,7 @@ const validateConfig = (
         return i18n.INVALID_URL(err, url);
       }
       try {
-        configurationUtilities?.ensureUriAllowed(url);
+        configurationUtilities.ensureUriAllowed(url);
       } catch (allowListError) {
         return i18n.CONFIG_ERR(allowListError.message);
       }
@@ -63,7 +63,7 @@ export const validateConnector = (
 
 export const validateSecrets = (
   secrets: CasesWebhookSecretConfigurationType,
-  validatorServices?: ValidatorServices
+  validatorServices: ValidatorServices
 ) => {
   // user and password must be set together (or not at all)
   if (!secrets.password && !secrets.user) return;

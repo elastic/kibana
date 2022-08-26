@@ -75,11 +75,11 @@ export function getActionType({
     ],
     validate: {
       secrets: {
-        validateSchema: SecretsSchema,
-        validate: validateActionTypeConfig,
+        schema: SecretsSchema,
+        customValidator: validateActionTypeConfig,
       },
       params: {
-        validateSchema: ParamsSchema,
+        schema: ParamsSchema,
       },
     },
     executor: curry(teamsExecutor)({ logger, configurationUtilities }),
@@ -88,9 +88,9 @@ export function getActionType({
 
 function validateActionTypeConfig(
   secretsObject: ActionTypeSecretsType,
-  validatorServices?: ValidatorServices
+  validatorServices: ValidatorServices
 ) {
-  const { configurationUtilities } = validatorServices || {};
+  const { configurationUtilities } = validatorServices;
   const configuredUrl = secretsObject.webhookUrl;
   try {
     new URL(configuredUrl);
@@ -101,7 +101,7 @@ function validateActionTypeConfig(
   }
 
   try {
-    configurationUtilities?.ensureUriAllowed(configuredUrl);
+    configurationUtilities.ensureUriAllowed(configuredUrl);
   } catch (allowListError) {
     return i18n.translate('xpack.actions.builtin.teams.teamsConfigurationError', {
       defaultMessage: 'error configuring teams action: {message}',

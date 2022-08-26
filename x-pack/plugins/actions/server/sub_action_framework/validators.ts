@@ -22,13 +22,13 @@ export const buildValidators = <
 }) => {
   return {
     config: {
-      validateSchema: connector.schema.config,
+      schema: connector.schema.config,
     },
     secrets: {
-      validateSchema: connector.schema.secrets,
+      schema: connector.schema.secrets,
     },
     params: {
-      validateSchema: schema.object({
+      schema: schema.object({
         subAction: schema.string(),
         /**
          * With this validation we enforce the subActionParams to be an object.

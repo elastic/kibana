@@ -41,11 +41,11 @@ export interface ExternalServiceCredentials {
 export interface ExternalServiceValidation {
   config: (
     configObject: CasesWebhookPublicConfigurationType,
-    validatorServices?: ValidatorServices
+    validatorServices: ValidatorServices
   ) => void;
   secrets: (
     secrets: CasesWebhookSecretConfigurationType,
-    validatorServices?: ValidatorServices
+    validatorServices: ValidatorServices
   ) => void;
   connector: (
     configObject: CasesWebhookPublicConfigurationType,
