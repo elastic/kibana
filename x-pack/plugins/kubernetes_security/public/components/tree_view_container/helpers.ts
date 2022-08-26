@@ -14,33 +14,34 @@ import {
   ORCHESTRATOR_NAMESPACE,
   ORCHESTRATOR_RESOURCE_ID,
 } from '../../../common/constants';
-import {
-  KubernetesCollection,
+import type {
   QueryDslQueryContainerBool,
-  TreeNavSelection,
+  KubernetesCollectionMap,
+  KubernetesCollection,
   TreeViewIconProps,
 } from '../../types';
 
-export const KUBERNETES_COLLECTION_FIELDS = {
-  [KubernetesCollection.clusterId]: ORCHESTRATOR_CLUSTER_ID,
-  [KubernetesCollection.clusterName]: ORCHESTRATOR_CLUSTER_NAME,
-  [KubernetesCollection.namespace]: ORCHESTRATOR_NAMESPACE,
-  [KubernetesCollection.node]: CLOUD_INSTANCE_NAME,
-  [KubernetesCollection.pod]: ORCHESTRATOR_RESOURCE_ID,
-  [KubernetesCollection.containerImage]: CONTAINER_IMAGE_NAME,
+export const KUBERNETES_COLLECTION_FIELDS: KubernetesCollectionMap = {
+  clusterId: ORCHESTRATOR_CLUSTER_ID,
+  clusterName: ORCHESTRATOR_CLUSTER_NAME,
+  namespace: ORCHESTRATOR_NAMESPACE,
+  node: CLOUD_INSTANCE_NAME,
+  pod: ORCHESTRATOR_RESOURCE_ID,
+  containerImage: CONTAINER_IMAGE_NAME,
 };
 
-export const KUBERNETES_COLLECTION_ICONS_PROPS: { [key: string]: TreeViewIconProps } = {
-  [KubernetesCollection.clusterId]: { type: 'cluster', euiVarColor: 'euiColorVis0' },
-  [KubernetesCollection.namespace]: { type: 'namespace', euiVarColor: 'euiColorVis1' },
-  [KubernetesCollection.node]: { type: 'kubernetesNode', euiVarColor: 'euiColorVis3' },
-  [KubernetesCollection.pod]: { type: 'kubernetesPod', euiVarColor: 'euiColorVis9' },
-  [KubernetesCollection.containerImage]: { type: 'container', euiVarColor: 'euiColorVis8' },
+export const KUBERNETES_COLLECTION_ICONS_PROPS: KubernetesCollectionMap<TreeViewIconProps> = {
+  clusterId: { type: 'cluster', euiVarColor: 'euiColorVis0' },
+  clusterName: { type: 'cluster', euiVarColor: 'euiColorVis0' },
+  namespace: { type: 'namespace', euiVarColor: 'euiColorVis1' },
+  node: { type: 'kubernetesNode', euiVarColor: 'euiColorVis3' },
+  pod: { type: 'kubernetesPod', euiVarColor: 'euiColorVis9' },
+  containerImage: { type: 'container', euiVarColor: 'euiColorVis8' },
 };
 
 export const addTreeNavSelectionToFilterQuery = (
   filterQuery: string | undefined,
-  treeNavSelection: TreeNavSelection
+  treeNavSelection: Partial<KubernetesCollectionMap>
 ) => {
   let validFilterQuery = DEFAULT_QUERY;
 
@@ -49,17 +50,19 @@ export const addTreeNavSelectionToFilterQuery = (
     if (!(parsedFilterQuery?.bool?.filter && Array.isArray(parsedFilterQuery.bool.filter))) {
       throw new Error('Invalid filter query');
     }
+
     parsedFilterQuery.bool.filter.push(
-      ...Object.keys(treeNavSelection)
-        .filter((key) => key !== KubernetesCollection.clusterName)
-        .map((collectionKey) => {
-          const collection = collectionKey as KubernetesCollection;
+      ...Object.entries(treeNavSelection)
+        .filter(([key]) => (key as KubernetesCollection) !== 'clusterName')
+        .map((obj) => {
+          const [key, value] = obj as [KubernetesCollection, string];
+
           return {
             bool: {
               should: [
                 {
                   match: {
-                    [KUBERNETES_COLLECTION_FIELDS[collection]]: treeNavSelection[collection],
+                    [KUBERNETES_COLLECTION_FIELDS[key]]: value,
                   },
                 },
               ],
@@ -67,6 +70,7 @@ export const addTreeNavSelectionToFilterQuery = (
           };
         })
     );
+
     validFilterQuery = JSON.stringify(parsedFilterQuery);
   } catch {
     // no-op since validFilterQuery is initialized to be DEFAULT_QUERY

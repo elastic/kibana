@@ -48,23 +48,15 @@ export type QueryDslQueryContainerBool = {
   bool: BoolQuery;
 };
 
-export enum KubernetesCollection {
-  clusterId = 'clusterId',
-  clusterName = 'clusterName',
-  namespace = 'namespace',
-  node = 'node',
-  pod = 'pod',
-  containerImage = 'containerImage',
-}
+export type KubernetesCollection =
+  | 'clusterId'
+  | 'clusterName'
+  | 'namespace'
+  | 'node'
+  | 'pod'
+  | 'containerImage';
 
-export interface TreeNavSelection {
-  [KubernetesCollection.clusterId]?: string;
-  [KubernetesCollection.clusterName]?: string;
-  [KubernetesCollection.namespace]?: string;
-  [KubernetesCollection.node]?: string;
-  [KubernetesCollection.pod]?: string;
-  [KubernetesCollection.containerImage]?: string;
-}
+export type KubernetesCollectionMap<T = string> = Record<KubernetesCollection, T>;
 
 export type TreeViewIconProps = {
   euiVarColor: keyof EuiVarsColors;
