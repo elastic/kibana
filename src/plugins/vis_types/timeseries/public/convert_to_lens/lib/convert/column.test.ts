@@ -6,13 +6,15 @@
  * Side Public License, v 1.
  */
 
+import { METRIC_TYPES } from '@kbn/data-plugin/public';
 import {
   createStubDataView,
   stubLogstashDataView,
 } from '@kbn/data-views-plugin/common/data_view.stub';
 import { stubLogstashFieldSpecMap } from '@kbn/data-views-plugin/common/field.stub';
+import { Metric } from '../../../../common/types';
 import { createSeries } from '../__mocks__';
-import { getFormat } from './column';
+import { createColumn, getFormat } from './column';
 
 describe('getFormat', () => {
   const series = createSeries();
@@ -83,4 +85,87 @@ describe('getFormat', () => {
       )
     ).toEqual({});
   });
+});
+
+describe('createColumn', () => {
+  const field = stubLogstashDataView.fields[0];
+  const scaleUnit = 's';
+  const metric: Metric = {
+    id: 'some-id',
+    type: METRIC_TYPES.AVG,
+    field: field.name,
+  };
+
+  const metricWithTimeScale: Metric = {
+    id: 'some-other-id',
+    type: METRIC_TYPES.TOP_HITS,
+    field: field.name,
+    unit: `1${scaleUnit}`,
+  };
+
+  const customLabel = 'some custom';
+  const window = 'some-window';
+  const filter = { query: 'some-query', language: 'lucene' };
+
+  test.each([
+    [
+      'with default params',
+      { seriesArgs: { metrics: [metric], label: '' }, field, metric, extraFields: undefined },
+      {
+        isBucketed: false,
+        isSplit: false,
+        label: '',
+        meta: { metricId: metric.id },
+        dataType: field?.type,
+      },
+    ],
+    [
+      'with specified params',
+      {
+        seriesArgs: {
+          metrics: [metricWithTimeScale],
+          label: customLabel,
+          filter,
+        },
+        field,
+        metric: metricWithTimeScale,
+        extraFields: { window, isBucketed: true, isSplit: true },
+      },
+      {
+        isBucketed: true,
+        isSplit: true,
+        window,
+        label: customLabel,
+        meta: { metricId: metricWithTimeScale.id },
+        filter,
+        timeScale: scaleUnit,
+        dataType: field?.type,
+      },
+    ],
+    [
+      'without field',
+      {
+        seriesArgs: { metrics: [metric], label: '' },
+        field: undefined,
+        metric,
+        extraFields: undefined,
+      },
+      {
+        isBucketed: false,
+        isSplit: false,
+        label: '',
+        meta: { metricId: metric.id },
+        dataType: undefined,
+      },
+    ],
+  ])(
+    'should create column by metric %s',
+    (_, { seriesArgs, field: specifiedField, metric: specifiedMetric, extraFields }, expected) => {
+      const series = createSeries(seriesArgs);
+      const column = createColumn(series, specifiedMetric, specifiedField, extraFields);
+
+      expect(column).toEqual(expect.objectContaining(expected));
+      expect(typeof column.columnId === 'string' && column.columnId.length > 0).toBeTruthy();
+    }
+  );
 });
