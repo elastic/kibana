@@ -768,7 +768,7 @@
         "label": "getManageTimelineById",
         "description": [],
         "signature": [
-          "() => Reselect.OutputParametricSelector<unknown, string, { dataViewId: string | null; documentType: string; defaultColumns: (Pick<",
+          "() => ((state: {}, params_0: string) => { dataViewId: string | null; documentType: string; defaultColumns: (Pick<",
           "EuiDataGridColumn",
           ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & Pick<",
           "EuiDataGridColumn",
@@ -792,7 +792,9 @@
             "section": "def-public.FilterManager",
             "text": "FilterManager"
           },
-          " | undefined; footerText: React.ReactNode; loadingText: React.ReactNode; queryFields: string[]; selectAll: boolean; title: string; }, (res: ",
+          " | undefined; footerText: React.ReactNode; loadingText: React.ReactNode; queryFields: string[]; selectAll: boolean; title: string; }) & ",
+          "OutputSelectorFields",
+          "<(args_0: ",
           {
             "pluginId": "timelines",
             "scope": "public",
@@ -824,7 +826,7 @@
             "section": "def-public.FilterManager",
             "text": "FilterManager"
           },
-          " | undefined; footerText: React.ReactNode; loadingText: React.ReactNode; queryFields: string[]; selectAll: boolean; title: string; }>"
+          " | undefined; footerText: React.ReactNode; loadingText: React.ReactNode; queryFields: string[]; selectAll: boolean; title: string; } & { clearCache: () => void; }> & { clearCache: () => void; }"
         ],
         "path": "x-pack/plugins/timelines/public/store/t_grid/selectors.ts",
         "deprecated": false,
