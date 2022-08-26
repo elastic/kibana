@@ -30,7 +30,7 @@ export const updateInputFullScreen = (
 const getTimeRange = (timerange: TimeRange, inputId: InputsModelId, linkToId: InputsModelId) => {
   if (
     (inputId === InputsModelId.global || inputId === InputsModelId.timeline) &&
-    linkToId === InputsModelId.global
+    linkToId === InputsModelId.socTrends
   ) {
     return getPreviousTimeRange(timerange);
   }
