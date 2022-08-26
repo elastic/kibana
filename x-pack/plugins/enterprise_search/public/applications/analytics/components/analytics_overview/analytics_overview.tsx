@@ -22,7 +22,7 @@ import { AnalyticsCollectionsLogic } from './analytics_collections_logic';
 
 export const baseBreadcrumbs = [
   i18n.translate('xpack.enterpriseSearch.analytics.collections.breadcrumb', {
-    defaultMessage: 'Analytics Collections',
+    defaultMessage: 'Analytics collections',
   }),
 ];
 
