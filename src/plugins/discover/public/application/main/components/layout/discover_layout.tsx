@@ -18,6 +18,7 @@ import {
   EuiPageContent_Deprecated as EuiPageContent,
   EuiResizableContainer,
   EuiSpacer,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -220,6 +221,25 @@ export function DiscoverLayout({
     }
   }, [dataState.error, isPlainRecord]);
 
+  const { euiTheme } = useEuiTheme();
+  const [mainPanel, setMainPanel] = useState<HTMLDivElement>();
+
+  const { minHistogramSize, minMainSize, histogramSize, mainSize } = useMemo(() => {
+    const preferredHistogramSize = euiTheme.base * 12;
+    const resizableContainer = mainPanel?.closest('.dscPageContent__inner');
+    const resizableHeight = resizableContainer?.getBoundingClientRect()?.height;
+    const histogramHeight = resizableHeight
+      ? Math.round((preferredHistogramSize / resizableHeight) * 100)
+      : 0;
+
+    return {
+      minHistogramSize: `${euiTheme.base * 8}px`,
+      minMainSize: `${euiTheme.base * 15}px`,
+      histogramSize: histogramHeight,
+      mainSize: 100 - histogramHeight,
+    };
+  }, [euiTheme.base, mainPanel]);
+
   return (
     <EuiPage className="dscPage" data-fetch-counter={fetchCounter.current}>
       <h1
@@ -333,7 +353,11 @@ export function DiscoverLayout({
                     <>
                       {!isPlainRecord && (
                         <>
-                          <EuiResizablePanel initialSize={25} minSize="185px" paddingSize="none">
+                          <EuiResizablePanel
+                            minSize={minHistogramSize}
+                            initialSize={histogramSize}
+                            paddingSize="none"
+                          >
                             <DiscoverChartMemoized
                               resetSavedSearch={resetSavedSearch}
                               savedSearch={savedSearch}
@@ -349,7 +373,16 @@ export function DiscoverLayout({
                           <EuiResizableButton />
                         </>
                       )}
-                      <EuiResizablePanel initialSize={85} minSize="250px" paddingSize="none">
+                      <EuiResizablePanel
+                        panelRef={(panel) => {
+                          if (panel) {
+                            setMainPanel(panel);
+                          }
+                        }}
+                        minSize={minMainSize}
+                        initialSize={mainSize}
+                        paddingSize="none"
+                      >
                         <EuiFlexGroup
                           className="eui-fullHeight"
                           direction="column"
