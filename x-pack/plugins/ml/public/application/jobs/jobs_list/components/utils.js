@@ -23,6 +23,7 @@ import { parseInterval } from '../../../../../common/util/parse_interval';
 import { mlCalendarService } from '../../../services/calendar_service';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { ML_PAGES } from '../../../../../common/constants/locator';
+import { PLUGIN_ID } from '../../../../../common/constants/app';
 
 export function loadFullJob(jobId) {
   return new Promise((resolve, reject) => {
@@ -288,7 +289,7 @@ export async function cloneJob(jobId) {
       );
     }
 
-    getApplication().navigateToApp('ml', { path: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB });
+    getApplication().navigateToApp(PLUGIN_ID, { path: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB });
   } catch (error) {
     getToastNotificationService().displayErrorToast(
       error,

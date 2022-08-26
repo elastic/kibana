@@ -9,6 +9,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { ML_PAGES } from '../../../common/constants/locator';
 import { MlLicense } from '../../../common/license';
 import { showExpiredLicenseWarning } from './expired_warning';
+import { PLUGIN_ID } from '../../../common/constants/app';
 
 export class MlClientLicense extends MlLicense {
   constructor(private application: CoreStart['application']) {
@@ -16,11 +17,13 @@ export class MlClientLicense extends MlLicense {
   }
 
   private redirectToKibana() {
-    return this.application.navigateToApp('home');
+    this.application.navigateToApp('home');
+    return Promise.reject();
   }
 
   private redirectToBasic() {
-    return this.application.navigateToApp('ml', { path: ML_PAGES.DATA_VISUALIZER });
+    this.application.navigateToApp(PLUGIN_ID, { path: ML_PAGES.DATA_VISUALIZER });
+    return Promise.reject();
   }
 
   fullLicenseResolver(): Promise<void> {
