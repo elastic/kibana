@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-jest.mock('./nav', () => ({
-  useEnterpriseSearchElasticsearchNav: () => [],
-}));
-
 import React from 'react';
+
+jest.mock('../../../shared/layout/nav', () => ({
+  useEnterpriseSearchNav: () => [],
+}));
 
 import { shallow } from 'enzyme';
 
@@ -28,15 +28,13 @@ describe('EnterpriseSearchAnalyticsPageTemplate', () => {
     );
 
     expect(wrapper.type()).toEqual(EnterpriseSearchPageTemplateWrapper);
-    expect(wrapper.prop('solutionNav')).toEqual({ name: 'Elasticsearch', items: [] });
+    expect(wrapper.prop('solutionNav')).toEqual({ name: 'Enterprise Search', items: [] });
     expect(wrapper.find('.hello').text()).toEqual('world');
   });
 
   describe('page chrome', () => {
     it('takes a breadcrumb array & renders a product-specific page chrome', () => {
-      const wrapper = shallow(
-        <EnterpriseSearchAnalyticsPageTemplate pageChrome={['Some page']} />
-      );
+      const wrapper = shallow(<EnterpriseSearchAnalyticsPageTemplate pageChrome={['Some page']} />);
       const setPageChrome = wrapper
         .find(EnterpriseSearchPageTemplateWrapper)
         .prop('setPageChrome') as any;

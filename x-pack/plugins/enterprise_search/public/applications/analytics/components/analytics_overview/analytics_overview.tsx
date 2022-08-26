@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiButtonTo } from '../../../shared/react_router_helpers';
 import { COLLECTION_CREATION_PATH } from '../../routes';
 
-import { EnterpriseSearchAnalyticsPageTemplate } from '../layout';
+import { EnterpriseSearchAnalyticsPageTemplate } from '../layout/page_template';
 
 import { AnalyticsCollectionTable } from './analytics_collection_table';
 import { AnalyticsCollectionsLogic } from './analytics_collections_logic';

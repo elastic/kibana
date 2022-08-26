@@ -17,7 +17,7 @@ import { AnalyticsCollection } from '../../../../../common/types/analytics';
 
 import { AnalyticsCollectionTable } from './analytics_collection_table';
 
-import { AnalyticsOverview } from '.';
+import { AnalyticsOverview } from './analytics_overview';
 
 const mockValues = {
   analyticsCollections: [
