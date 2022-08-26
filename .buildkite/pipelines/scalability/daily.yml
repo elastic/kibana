@@ -1,0 +1,13 @@
+steps:
+  - label: ':kibana: Scalability Tests'
+    command: .buildkite/scripts/steps/scalability/benchmarking.sh
+    agents:
+      queue: kb-static-scalability
+
+  - wait: ~
+    continue_on_failure: true
+
+  - label: ':male_superhero::skin-tone-2: Post-Build'
+    command: .buildkite/scripts/lifecycle/post_build.sh
+    agents:
+      queue: kibana-default
