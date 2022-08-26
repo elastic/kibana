@@ -51,25 +51,25 @@ describe('rate per minute calculations', () => {
     arrayIterable = new EntityArrayIterable(events);
   });
   it('array iterable returns exact rate per minute', () => {
-    expect(arrayIterable.ratePerMinute()).toEqual(2);
+    expect(arrayIterable.estimatedRatePerMinute()).toEqual(2);
   });
   it('iterable returns rate per minute approximation', () => {
-    expect(iterable.ratePerMinute()).toEqual(2);
+    expect(iterable.estimatedRatePerMinute()).toEqual(2);
   });
   it('iterable returns same rate as materialized iterable', () => {
-    expect(iterable.ratePerMinute()).toEqual(arrayIterable.ratePerMinute());
+    expect(iterable.estimatedRatePerMinute()).toEqual(arrayIterable.estimatedRatePerMinute());
   });
 
   it('interval of 3 per minute returns 3', () => {
-    expect(i1r3.ratePerMinute()).toEqual(3);
+    expect(i1r3.estimatedRatePerMinute()).toEqual(3);
   });
   it('interval of 6 per 5 minutes returns 6/5', () => {
-    expect(i5r6.ratePerMinute()).toEqual(6 / 5);
+    expect(i5r6.estimatedRatePerMinute()).toEqual(6 / 5);
   });
   it('interval of 6 per 30 minutes returns 6/30', () => {
-    expect(i30r6.ratePerMinute()).toEqual(6 / 30);
+    expect(i30r6.estimatedRatePerMinute()).toEqual(6 / 30);
   });
   it('interval of 3 per second returns 60 * 3', () => {
-    expect(i1sr3.ratePerMinute()).toEqual(60 * 3);
+    expect(i1sr3.estimatedRatePerMinute()).toEqual(60 * 3);
   });
 });
