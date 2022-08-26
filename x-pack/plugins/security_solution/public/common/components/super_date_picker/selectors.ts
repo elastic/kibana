@@ -9,11 +9,19 @@ import { isEmpty } from 'lodash';
 import { createSelector } from 'reselect';
 import { InputsModelId } from '../../store/inputs/constants';
 import type { State } from '../../store';
-import type { GlobalQuery, InputsRange, Policy, TimeRange } from '../../store/inputs/model';
+import type {
+  GlobalQuery,
+  InputsRange,
+  InputsRangeTimeOnly,
+  Policy,
+  TimeRange,
+} from '../../store/inputs/model';
 
-export const getPolicy = (inputState: InputsRange): Policy => inputState.policy;
+export const getPolicy = (inputState: InputsRange | InputsRangeTimeOnly): Policy =>
+  inputState.policy;
 
-export const getTimerange = (inputState: InputsRange): TimeRange => inputState.timerange;
+export const getTimerange = (inputState: InputsRange | InputsRangeTimeOnly): TimeRange =>
+  inputState.timerange;
 
 export const getQueries = (inputState: InputsRange): GlobalQuery[] => inputState.queries;
 

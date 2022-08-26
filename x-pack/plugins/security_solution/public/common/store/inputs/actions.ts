@@ -36,7 +36,7 @@ export const setRelativeRangeDatePicker = actionCreator<{
 }>('SET_RELATIVE_RANGE_DATE_PICKER');
 
 export const setDuration = actionCreator<{
-  id: InputsModelId.global | InputsModelId.timeline;
+  id: InputsModelId;
   duration: number;
 }>('SET_DURATION');
 

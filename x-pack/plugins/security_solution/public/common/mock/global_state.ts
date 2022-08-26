@@ -269,6 +269,7 @@ export const mockGlobalState: State = {
         to: '2020-07-07T08:20:18.966Z',
       },
       linkTo: [InputsModelId.global, InputsModelId.timeline],
+      policy: { kind: DEFAULT_INTERVAL_TYPE, duration: DEFAULT_INTERVAL_VALUE },
     },
   },
   dragAndDrop: { dataProviders: {} },

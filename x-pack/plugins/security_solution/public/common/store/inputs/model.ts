@@ -43,11 +43,6 @@ export interface Policy {
   kind: 'manual' | 'interval';
   duration: number; // in ms
 }
-
-interface InspectVariables {
-  inspect: boolean;
-}
-export type RefetchWithParams = ({ inspect }: InspectVariables) => void;
 export type RefetchKql = (dispatch: Dispatch) => boolean;
 export type Refetch = () => void;
 
@@ -64,16 +59,12 @@ export interface GlobalGenericQuery {
   invalidKqlQuery?: Error;
 }
 
-export interface GlobalGraphqlQuery extends GlobalGenericQuery {
-  id: string;
-  refetch: null | Refetch | RefetchWithParams;
-}
 export interface GlobalKqlQuery extends GlobalGenericQuery {
   id: 'kql';
   refetch: RefetchKql;
 }
 
-export type GlobalQuery = GlobalGraphqlQuery | GlobalKqlQuery;
+export type GlobalQuery = GlobalKqlQuery;
 
 export interface InputsRange {
   timerange: TimeRange;
@@ -89,12 +80,13 @@ export interface InputsRange {
 export interface LinkTo {
   linkTo: InputsModelId[];
 }
+export type InputsRangeTimeOnly = Pick<InputsRange, 'timerange' | 'linkTo' | 'policy'>;
 
 export interface InputsModel {
   global: InputsRange;
   timeline: InputsRange;
   // TODO: remove ? when isSocTrendsEnabled feature flag is removed
-  socTrends?: Pick<InputsRange, 'timerange' | 'linkTo'>;
+  socTrends?: InputsRangeTimeOnly;
 }
 export interface UrlInputsModelInputs {
   linkTo: InputsModelId[];

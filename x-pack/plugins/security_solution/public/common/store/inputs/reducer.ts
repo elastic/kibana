@@ -131,6 +131,10 @@ export const createInitialInputsState = (socTrendsEnabled: boolean): InputsState
           socTrends: {
             timerange: socTrends,
             linkTo: [InputsModelId.global],
+            policy: {
+              kind,
+              duration,
+            },
           },
         }
       : {}),

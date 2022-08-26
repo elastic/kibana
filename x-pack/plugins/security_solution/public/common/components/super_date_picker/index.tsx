@@ -7,15 +7,15 @@
 
 import dateMath from '@kbn/datemath';
 import type {
-  OnRefreshChangeProps,
+  EuiSuperDatePickerProps,
   EuiSuperDatePickerRecentRange,
+  OnRefreshChangeProps,
   OnRefreshProps,
   OnTimeChangeProps,
-  EuiSuperDatePickerProps,
 } from '@elastic/eui';
 import { EuiSuperDatePicker } from '@elastic/eui';
-import { getOr, take, isEmpty } from 'lodash/fp';
-import React, { useState, useCallback } from 'react';
+import { getOr, isEmpty, take } from 'lodash/fp';
+import React, { useCallback, useState } from 'react';
 import type { ConnectedProps } from 'react-redux';
 import { connect } from 'react-redux';
 import type { Dispatch } from 'redux';
@@ -28,18 +28,18 @@ import type { inputsModel, State } from '../../store';
 import { inputsActions } from '../../store/actions';
 import { InputsModelId } from '../../store/inputs/constants';
 import {
-  policySelector,
   durationSelector,
-  kindSelector,
-  startSelector,
   endSelector,
   fromStrSelector,
-  toStrSelector,
   isLoadingSelector,
-  queriesSelector,
+  kindSelector,
   kqlQuerySelector,
+  policySelector,
+  queriesSelector,
+  startSelector,
+  toStrSelector,
 } from './selectors';
-import type { InputsRange } from '../../store/inputs/model';
+import type { InputsRange, InputsRangeTimeOnly } from '../../store/inputs/model';
 
 const MAX_RECENTLY_USED_RANGES = 9;
 
@@ -121,6 +121,7 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
           ? formatDate(newEnd, { roundUp: true })
           : formatDate(newEnd);
         if (
+          queries.length &&
           !kqlHaveBeenUpdated &&
           (!isQuickSelection || (start === currentStart && end === currentEnd))
         ) {
@@ -134,10 +135,7 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
       ({ isPaused, refreshInterval }: OnRefreshChangeProps): void => {
         const isQuickSelection =
           (fromStr != null && fromStr.includes('now')) || (toStr != null && toStr.includes('now'));
-        if (
-          (id === InputsModelId.global || id === InputsModelId.timeline) &&
-          duration !== refreshInterval
-        ) {
+        if (duration !== refreshInterval) {
           setDuration({ id, duration: refreshInterval });
         }
 
@@ -147,7 +145,11 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
           startAutoReload({ id });
         }
 
-        if (!isPaused && (!isQuickSelection || (isQuickSelection && toStr !== 'now'))) {
+        if (
+          queries.length &&
+          !isPaused &&
+          (!isQuickSelection || (isQuickSelection && toStr !== 'now'))
+        ) {
           refetchQuery(queries);
         }
       },
@@ -155,7 +157,7 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
     );
 
     const refetchQuery = (newQueries: inputsModel.GlobalQuery[]) => {
-      newQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
+      newQueries.forEach((q) => q.refetch && (q.refetch as unknown as inputsModel.Refetch)());
     };
 
     const onTimeChange = useCallback(
@@ -324,19 +326,22 @@ export const makeMapStateToProps = () => {
   const getStartSelector = startSelector();
   const getToStrSelector = toStrSelector();
   return (state: State, { id }: OwnProps) => {
-    const inputsRange: InputsRange = getOr({}, `inputs.${id}`, state);
-
+    const inputsRange: InputsRange | InputsRangeTimeOnly = getOr({}, `inputs.${id}`, state);
     return {
       duration: getDurationSelector(inputsRange),
       end: getEndSelector(inputsRange),
       fromStr: getFromStrSelector(inputsRange),
-      isLoading: getIsLoadingSelector(inputsRange),
       kind: getKindSelector(inputsRange),
-      kqlQuery: getKqlQuerySelector(inputsRange) as inputsModel.GlobalKqlQuery,
       policy: getPolicySelector(inputsRange),
-      queries: getQueriesSelector(state, id as InputsModelId.global | InputsModelId.timeline),
       start: getStartSelector(inputsRange),
       toStr: getToStrSelector(inputsRange),
+      ...(id === InputsModelId.socTrends
+        ? { isLoading: false, kqlQuery: undefined, queries: [] }
+        : {
+            isLoading: getIsLoadingSelector(inputsRange as InputsRange),
+            kqlQuery: getKqlQuerySelector(inputsRange as InputsRange),
+            queries: getQueriesSelector(state, id),
+          }),
     };
   };
 };
@@ -347,13 +352,8 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   startAutoReload: ({ id }: { id: InputsModelId }) =>
     dispatch(inputsActions.startAutoReload({ id })),
   stopAutoReload: ({ id }: { id: InputsModelId }) => dispatch(inputsActions.stopAutoReload({ id })),
-  setDuration: ({
-    id,
-    duration,
-  }: {
-    id: InputsModelId.global | InputsModelId.timeline;
-    duration: number;
-  }) => dispatch(inputsActions.setDuration({ id, duration })),
+  setDuration: ({ id, duration }: { id: InputsModelId; duration: number }) =>
+    dispatch(inputsActions.setDuration({ id, duration })),
   updateReduxTime: dispatchUpdateReduxTime(dispatch),
 });
 
