@@ -32,7 +32,7 @@ interface LabelOptions {
   message?: string;
 }
 
-const getValue = (value: string | number) => {
+const FilterBadgeExpressionValue = ({ value }: { value: string | number }) => {
   return (
     <EuiFlexItem grow={false}>
       <EuiTextColor color={typeof value === 'string' ? '#387765' : '#ac4e6d'}>{value}</EuiTextColor>
@@ -40,41 +40,53 @@ const getValue = (value: string | number) => {
   );
 };
 
-const getFilterContent = (filter: Filter, label: LabelOptions, prefix: string | JSX.Element) => {
+const Prefix = ({ prefix }: { prefix?: boolean }) =>
+  prefix ? (
+    <EuiFlexItem grow={false}>
+      <EuiTextColor color="danger">NOT</EuiTextColor>
+    </EuiFlexItem>
+  ) : null;
+
+const FilterContent = ({ filter, label }: { filter: Filter; label: LabelOptions }) => {
   switch (filter.meta.type) {
     case FILTERS.EXISTS:
       return (
         <>
-          {prefix} <EuiFlexItem grow={false}>{filter.meta.key}:</EuiFlexItem>
-          {getValue(`${existsOperator.message}`)}
+          <Prefix prefix={filter.meta.negate} />
+          <EuiFlexItem grow={false}>{filter.meta.key}:</EuiFlexItem>
+          <FilterBadgeExpressionValue value={`${existsOperator.message}`} />
         </>
       );
     case FILTERS.PHRASES:
       return (
         <>
-          {prefix} <EuiFlexItem grow={false}>{filter.meta.key}:</EuiFlexItem>
-          {getValue(`${isOneOfOperator.message} ${label.title}`)}
+          <Prefix prefix={filter.meta.negate} />
+          <EuiFlexItem grow={false}>{filter.meta.key}:</EuiFlexItem>
+          <FilterBadgeExpressionValue value={`${isOneOfOperator.message} ${label.title}`} />
         </>
       );
     case FILTERS.QUERY_STRING:
       return (
         <>
-          {prefix} {getValue(`${label.title}`)}
+          <Prefix prefix={filter.meta.negate} /> <FilterBadgeExpressionValue value={label.title} />
         </>
       );
     case FILTERS.PHRASE:
     case FILTERS.RANGE:
       return (
         <>
-          {prefix} <EuiFlexItem grow={false}>{filter.meta.key}:</EuiFlexItem>
-          {getValue(label.title)}
+          <Prefix prefix={filter.meta.negate} />
+          <EuiFlexItem grow={false}>{filter.meta.key}:</EuiFlexItem>
+          <FilterBadgeExpressionValue value={label.title} />
         </>
       );
     default:
       return (
         <>
-          {prefix}
-          {getValue(`${JSON.stringify(filter.query) || filter.meta.value}`)}
+          <Prefix prefix={filter.meta.negate} />
+          <FilterBadgeExpressionValue
+            value={`${JSON.stringify(filter.query) || filter.meta.value}`}
+          />
         </>
       );
   }
@@ -134,20 +146,9 @@ export function FilterExpressionBadge({ filter, dataView }: FilterBadgeExpressio
     message: '',
     status: FILTER_ITEM_OK,
   };
-  let prefix: any;
 
   if (!conditionalOperationType) {
     label = getValueLabel(filter, dataView);
-
-    const prefixText = filter?.meta?.negate ? ` NOT ` : '';
-    prefix =
-      filter?.meta?.negate && !filter?.meta?.disabled ? (
-        <EuiFlexItem grow={false}>
-          <EuiTextColor color="danger">{prefixText}</EuiTextColor>
-        </EuiFlexItem>
-      ) : (
-        prefixText
-      );
   }
 
   return (
@@ -168,7 +169,9 @@ export function FilterExpressionBadge({ filter, dataView }: FilterBadgeExpressio
         </>
       ) : (
         <EuiFlexItem>
-          <EuiFlexGroup gutterSize="xs">{getFilterContent(filter, label, prefix)}</EuiFlexGroup>
+          <EuiFlexGroup gutterSize="xs">
+            <FilterContent filter={filter} label={label} />
+          </EuiFlexGroup>
         </EuiFlexItem>
       )}
     </>
