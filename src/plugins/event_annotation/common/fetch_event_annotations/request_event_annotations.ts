@@ -7,7 +7,7 @@
  */
 
 import { defer, firstValueFrom } from 'rxjs';
-import { get, partition } from 'lodash';
+import { partition } from 'lodash';
 import {
   AggsStart,
   DataViewsContract,
@@ -91,9 +91,9 @@ export const requestEventAnnotations = (
           aggs: aggConfigs,
           indexPattern: dataView,
           timeFields,
-          filters: get(input, 'filters', undefined),
-          query: get(input, 'query', undefined) as any,
-          timeRange: get(input, 'timeRange', undefined),
+          filters: input?.filters,
+          query: input?.query as any,
+          timeRange: input?.timeRange,
           abortSignal,
           inspectorAdapters,
           searchSessionId: getSearchSessionId(),
@@ -283,15 +283,10 @@ function regroupForRequestOptimization(
           const manualSubgroup = acc.manual as ManualGroup | undefined;
           return {
             ...acc,
-            ['manual']: manualSubgroup
-              ? {
-                  ...manualSubgroup,
-                  annotations: [...manualSubgroup.annotations, current],
-                }
-              : {
-                  type: 'manual',
-                  annotations: [current],
-                },
+            manual: {
+              type: 'manual',
+              annotations: [...(manualSubgroup ? manualSubgroup.annotations : []), current],
+            },
           };
         } else {
           const key = `${g.dataView.value.id}-${current.timeField}`;
@@ -333,18 +328,18 @@ function regroupForRequestOptimization(
       Object.keys(currentGroup).forEach((key) => {
         if (acc[key]) {
           const currentSubGroup = currentGroup[key];
-          const accSubGroup = acc[key];
+          const requestGroup = acc[key];
 
-          if (isManualSubGroup(currentSubGroup) || isManualSubGroup(accSubGroup)) {
+          if (isManualSubGroup(currentSubGroup) || isManualSubGroup(requestGroup)) {
             acc[key] = {
-              ...accSubGroup,
-              annotations: [...accSubGroup.annotations, ...currentSubGroup.annotations],
+              ...requestGroup,
+              annotations: [...requestGroup.annotations, ...currentSubGroup.annotations],
             } as ManualGroup;
           } else {
             acc[key] = {
-              ...accSubGroup,
-              annotations: [...accSubGroup.annotations, ...currentSubGroup.annotations],
-              allFields: [...(accSubGroup.allFields || []), ...(currentSubGroup.allFields || [])],
+              ...requestGroup,
+              annotations: [...requestGroup.annotations, ...currentSubGroup.annotations],
+              allFields: [...(requestGroup.allFields || []), ...(currentSubGroup.allFields || [])],
             };
           }
         } else {

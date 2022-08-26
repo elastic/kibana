@@ -11,6 +11,7 @@ import {
   EventAnnotationConfig,
   RangeEventAnnotationConfig,
   PointInTimeEventAnnotationConfig,
+  QueryPointEventAnnotationConfig,
 } from '../../common';
 export const defaultAnnotationColor = euiLightVars.euiColorAccent;
 export const defaultAnnotationRangeColor = `#F04E981A`; // defaultAnnotationColor with opacity 0.1
@@ -32,4 +33,11 @@ export const isManualPointAnnotationConfig = (
   annotation?: EventAnnotationConfig
 ): annotation is PointInTimeEventAnnotationConfig => {
   return Boolean(annotation && 'timestamp' in annotation?.key);
+};
+
+
+export const isQueryAnnotationConfig = (
+  annotation?: EventAnnotationConfig
+): annotation is QueryPointEventAnnotationConfig => {
+  return Boolean(annotation && 'filter' in annotation);
 };

@@ -12,6 +12,7 @@ import {
   defaultAnnotationColor,
   defaultAnnotationRangeColor,
   defaultAnnotationLabel,
+  isQueryAnnotationConfig,
 } from './helpers';
 import { EventAnnotationConfig } from '../../common';
 import { RangeEventAnnotationConfig } from '../../common/types';
@@ -49,7 +50,7 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
             },
           ],
         };
-      } else if ('filter' in annotation) {
+      } else if (isQueryAnnotationConfig(annotation)) {
         const {
           extraFields,
           label,

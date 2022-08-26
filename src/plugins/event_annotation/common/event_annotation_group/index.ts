@@ -53,6 +53,7 @@ export function eventAnnotationGroup(): ExpressionFunctionDefinition<
         help: i18n.translate('eventAnnotation.group.args.annotationConfigs', {
           defaultMessage: 'Annotation configs',
         }),
+        required: true,
         multi: true,
       },
     },

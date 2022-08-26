@@ -27,5 +27,6 @@ export type {
   EventAnnotationConfig,
   RangeEventAnnotationConfig,
   PointInTimeEventAnnotationConfig,
+  QueryPointEventAnnotationConfig,
   AvailableAnnotationIcon,
 } from './types';

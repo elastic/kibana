@@ -147,8 +147,8 @@ export const postprocessAnnotations = (
 
           return modifiedRow;
         })
-        .concat(manualAnnotationDatatableRows)
     )
+    .concat(...manualAnnotationDatatableRows)
     .sort((a, b) => a.timebucket.localeCompare(b.timebucket));
 
   const skippedCountPerBucket = getSkippedCountPerBucket(modifiedRows);

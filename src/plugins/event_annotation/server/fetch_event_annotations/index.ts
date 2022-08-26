@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+// TODO: implement this on the server
+
 // import { StartServicesAccessor } from '@kbn/core/server';
 // import { EventAnnotationStartDependencies } from '../plugin';
 
