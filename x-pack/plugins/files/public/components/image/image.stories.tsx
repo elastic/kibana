@@ -6,7 +6,9 @@
  */
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
+import { action } from '@storybook/addon-actions';
 import { css } from '@emotion/react';
+
 import { Image, Props } from './image';
 import { base64dLogo } from './image.constants.stories';
 
@@ -34,16 +36,18 @@ BrokenSrc.args = {
 };
 
 export const OffScreen = Template.bind({});
-// eslint-disable-next-line no-console
-OffScreen.args = { ...defaultArgs, onFirstVisible: () => console.log('yeah!') };
+OffScreen.args = { ...defaultArgs, onFirstVisible: action('visible') };
 OffScreen.decorators = [
   (Story) => (
-    <div
-      css={css`
-        margin-top: 100vh;
-      `}
-    >
-      <Story />
-    </div>
+    <>
+      <p>Scroll down</p>
+      <div
+        css={css`
+          margin-top: 100vh;
+        `}
+      >
+        <Story />
+      </div>
+    </>
   ),
 ];
