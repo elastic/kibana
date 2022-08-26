@@ -53,9 +53,10 @@ interface UnwrappedEmbeddableFactory {
 }
 
 export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
-  const { core, usageCollection } = useKibana<DashboardAppServices>().services;
+  const { usageCollection } = useKibana<DashboardAppServices>().services;
   const {
     embeddable,
+    notifications: { toasts },
     settings: { uiSettings },
     visualizations: {
       getAliases: getVisTypeAliases,
@@ -238,7 +239,7 @@ export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
         }
 
         if (newEmbeddable) {
-          core.notifications.toasts.addSuccess({
+          toasts.addSuccess({
             title: dashboardReplacePanelAction.getSuccessMessage(
               `'${newEmbeddable.getInput().title}'` || ''
             ),

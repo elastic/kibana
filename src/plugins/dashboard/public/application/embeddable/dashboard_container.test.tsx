@@ -45,7 +45,6 @@ pluginServices.getServices().embeddable.getEmbeddableFactory = jest
 const options: DashboardContainerServices = {
   // TODO: clean up use of any
   application: {} as any,
-  notifications: {} as any,
   inspector: {} as any,
   screenshotMode: {} as any,
   SavedObjectFinder: () => null,

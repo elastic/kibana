@@ -78,10 +78,6 @@ describe('ShowShareModal', () => {
         dashboardCapabilities: services.dashboardCapabilities,
         currentDashboardState: { panels: {} } as unknown as DashboardState,
         dashboardSessionStorage: services.dashboardSessionStorage,
-        timeRange: {
-          from: '2021-10-07T00:00:00.000Z',
-          to: '2021-10-10T00:00:00.000Z',
-        },
       },
       share,
     };

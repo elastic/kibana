@@ -388,6 +388,11 @@ export const dashboardLoadingErrorStrings = {
       defaultMessage: 'Error encountered while loading saved dashboard: {message}',
       values: { message },
     }),
+  getDashboardGridError: (message: string) =>
+    i18n.translate('dashboard.loadingError.dashboardGridErrorMessage', {
+      defaultMessage: 'Unable to load dashboard: {message}',
+      values: { message },
+    }),
 };
 
 /*

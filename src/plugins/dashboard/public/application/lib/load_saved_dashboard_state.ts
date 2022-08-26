@@ -25,7 +25,6 @@ interface LoadSavedDashboardStateReturn {
  */
 export const loadSavedDashboardState = async ({
   history,
-  notifications,
   savedDashboards,
   usageCollection,
   savedDashboardId,
@@ -37,6 +36,7 @@ export const loadSavedDashboardState = async ({
 > => {
   const {
     data: { query },
+    notifications: { toasts },
   } = pluginServices.getServices();
 
   const { showWriteControls } = dashboardCapabilities;
@@ -49,7 +49,7 @@ export const loadSavedDashboardState = async ({
       pathname: DashboardConstants.CREATE_NEW_DASHBOARD_URL,
     });
 
-    notifications.toasts.addWarning(getDashboard60Warning());
+    toasts.addWarning(getDashboard60Warning());
     return;
   }
   try {
@@ -75,9 +75,7 @@ export const loadSavedDashboardState = async ({
     return { savedDashboardState, savedDashboard };
   } catch (error) {
     // E.g. a corrupt or deleted dashboard
-    notifications.toasts.addDanger(
-      dashboardLoadingErrorStrings.getDashboardLoadError(error.message)
-    );
+    toasts.addDanger(dashboardLoadingErrorStrings.getDashboardLoadError(error.message));
     history.push(DashboardConstants.LANDING_PAGE_PATH);
     return;
   }

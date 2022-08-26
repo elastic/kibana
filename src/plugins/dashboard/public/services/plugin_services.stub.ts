@@ -20,6 +20,7 @@ import { dataViewEditorServiceFactory } from './data_view_editor/data_view_edito
 import { embeddableServiceFactory } from './embeddable/embeddable.stub';
 import { httpServiceFactory } from './http/http.stub';
 import { navigationServiceFactory } from './navigation/navigation.stub';
+import { notificationsServiceFactory } from './notifications/notifications.stub';
 import { overlaysServiceFactory } from './overlays/overlays.stub';
 import { settingsServiceFactory } from './settings/settings.stub';
 import { spacesServiceFactory } from './spaces/spaces.stub';
@@ -32,6 +33,7 @@ export const providers: PluginServiceProviders<DashboardServices> = {
   embeddable: new PluginServiceProvider(embeddableServiceFactory),
   http: new PluginServiceProvider(httpServiceFactory),
   navigation: new PluginServiceProvider(navigationServiceFactory),
+  notifications: new PluginServiceProvider(notificationsServiceFactory),
   overlays: new PluginServiceProvider(overlaysServiceFactory),
   settings: new PluginServiceProvider(settingsServiceFactory),
   spaces: new PluginServiceProvider(spacesServiceFactory),

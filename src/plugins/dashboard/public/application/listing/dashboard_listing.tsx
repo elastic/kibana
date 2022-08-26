@@ -70,6 +70,7 @@ export const DashboardListing = ({
 
   const {
     data,
+    notifications: { toasts },
     settings: { uiSettings, theme },
     chrome: { setBreadcrumbs },
   } = pluginServices.getServices();
@@ -306,7 +307,7 @@ export const DashboardListing = ({
           initialPageSize={initialPageSize}
           editItem={!showWriteControls ? undefined : editItem}
           initialFilter={initialFilter ?? defaultFilter}
-          toastNotifications={core.notifications.toasts}
+          toastNotifications={toasts}
           headingId="dashboardListingHeading"
           findItems={fetchItems}
           rowHeader="title"

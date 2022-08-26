@@ -9,8 +9,6 @@
 import _ from 'lodash';
 
 import { isFilterPinned } from '@kbn/es-query';
-import type { TimefilterContract } from '@kbn/data-plugin/public';
-import type { NotificationsStart } from '@kbn/core/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { RefreshInterval } from '@kbn/data-plugin/public';
 
@@ -23,6 +21,7 @@ import type { SavedObjectSaveOpts } from '../../services/saved_objects';
 import type { DashboardSessionStorage } from './dashboard_session_storage';
 import { serializeControlGroupToDashboardSavedObject } from './dashboard_control_group';
 import { convertPanelStateToSavedDashboardPanel } from '../../../common/embeddable/embeddable_saved_object_converters';
+import { pluginServices } from '../../services/plugin_services';
 
 export type SavedDashboardSaveOpts = SavedObjectSaveOpts & { stayInEditMode?: boolean };
 
@@ -30,19 +29,15 @@ interface SaveDashboardProps {
   version: string;
   redirectTo: DashboardRedirect;
   currentState: DashboardState;
-  timefilter: TimefilterContract;
   saveOptions: SavedDashboardSaveOpts;
-  toasts: NotificationsStart['toasts'];
   savedDashboard: DashboardSavedObject;
   savedObjectsTagging?: SavedObjectsTaggingApi;
   dashboardSessionStorage: DashboardSessionStorage;
 }
 
 export const saveDashboard = async ({
-  toasts,
   version,
   redirectTo,
-  timefilter,
   saveOptions,
   currentState,
   savedDashboard,
@@ -71,6 +66,15 @@ export const saveDashboard = async ({
     savedDashboard.setTags(tags);
   }
 
+  const {
+    data: {
+      query: {
+        timefilter: { timefilter },
+      },
+    },
+    notifications,
+  } = pluginServices.getServices();
+
   const { from, to } = timefilter.getTime();
   savedDashboard.timeFrom = savedDashboard.timeRestore ? convertTimeToUTCString(from) : undefined;
   savedDashboard.timeTo = savedDashboard.timeRestore ? convertTimeToUTCString(to) : undefined;
@@ -90,7 +94,7 @@ export const saveDashboard = async ({
   try {
     const newId = await savedDashboard.save(saveOptions);
     if (newId) {
-      toasts.addSuccess({
+      notifications.toasts.addSuccess({
         title: dashboardSaveToastStrings.getSuccessString(currentState.title),
         'data-test-subj': 'saveDashboardSuccess',
       });
@@ -111,10 +115,12 @@ export const saveDashboard = async ({
     }
     return { id: newId };
   } catch (error) {
-    toasts.addDanger({
-      title: dashboardSaveToastStrings.getFailureString(currentState.title, error.message),
-      'data-test-subj': 'saveDashboardFailure',
-    });
+    notifications.toasts.addDanger(
+      dashboardSaveToastStrings.getFailureString(currentState.title, error.message),
+      {
+        'data-test-subj': 'saveDashboardFailure',
+      }
+    );
     return { error };
   }
 };

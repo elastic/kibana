@@ -46,6 +46,7 @@ export function DashboardApp({
     embeddable: { getStateTransfer },
     settings: { uiSettings },
     spaces: { getLegacyUrlConflict },
+    notifications: { toasts },
   } = pluginServices.getServices();
 
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
@@ -56,9 +57,9 @@ export function DashboardApp({
       createKbnUrlStateStorage({
         history,
         useHash: uiSettings.get('state:storeInSessionStorage'),
-        ...withNotifyOnErrors(core.notifications.toasts),
+        ...withNotifyOnErrors(toasts),
       }),
-    [core.notifications.toasts, history, uiSettings]
+    [toasts, history, uiSettings]
   );
 
   useExecutionContext(core.executionContext, {

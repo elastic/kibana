@@ -28,6 +28,8 @@ import { GridData } from '../../../../common';
 import { DashboardGridItem } from './dashboard_grid_item';
 import { DashboardLoadedEventStatus, DashboardPanelState } from '../types';
 import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../dashboard_constants';
+import { pluginServices } from '../../../services/plugin_services';
+import { dashboardLoadingErrorStrings } from '../../../dashboard_strings';
 
 let lastValidGridSize = 0;
 
@@ -147,20 +149,17 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
     this.mounted = true;
     let isLayoutInvalid = false;
     let layout;
+
+    const {
+      notifications: { toasts },
+    } = pluginServices.getServices();
+
     try {
       layout = this.buildLayoutFromPanels();
     } catch (error) {
       console.error(error); // eslint-disable-line no-console
-
       isLayoutInvalid = true;
-      this.props.kibana.notifications.toasts.danger({
-        title: this.props.intl.formatMessage({
-          id: 'dashboard.dashboardGrid.toast.unableToLoadDashboardDangerMessage',
-          defaultMessage: 'Unable to load dashboard.',
-        }),
-        body: (error as { message: string }).message,
-        toastLifeTimeMs: 5000,
-      });
+      toasts.addDanger(dashboardLoadingErrorStrings.getDashboardGridError(error.message));
     }
     this.setState({
       layout,

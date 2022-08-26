@@ -80,7 +80,6 @@ const setupEmbeddableFactory = (
   id: string
 ): SetupEmbeddableFactoryReturn => {
   const containerOptions = {
-    notifications: services.core.notifications,
     savedObjectMetaData: {} as unknown,
     ExitFullScreenButton: () => null,
     SavedObjectFinder: () => null,

@@ -83,7 +83,6 @@ export const useDashboardAppState = ({
    */
   const services = useKibana<DashboardAppServices>().services;
   const {
-    core,
     usageCollection,
     savedDashboards,
     initializerContext,
@@ -93,7 +92,6 @@ export const useDashboardAppState = ({
     scopedHistory,
     screenshotModeService,
   } = services;
-  const { notifications } = core;
   const { version: kibanaVersion } = initializerContext.env.packageInfo;
 
   const {
@@ -101,6 +99,7 @@ export const useDashboardAppState = ({
     data: { query, search, dataViews },
     embeddable,
     spaces: { redirectLegacyUrl },
+    notifications,
   } = pluginServices.getServices();
   const { getStateTransfer } = embeddable;
 

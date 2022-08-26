@@ -118,12 +118,10 @@ export function DashboardTopNav({
     overlays,
     settings: { uiSettings, theme },
     visualizations: { get: getVisualization, getAliases: getVisTypeAliases },
+    notifications,
   } = pluginServices.getServices();
 
   const { version: kibanaVersion } = initializerContext.env.packageInfo;
-  const timefilter = query.timefilter.timefilter;
-  const { notifications } = core;
-  const { toasts } = notifications;
 
   const dispatchDashboardStateChange = useDashboardDispatch();
   const dashboardState = useDashboardSelector((state) => state.dashboardStateReducer);
@@ -174,7 +172,7 @@ export function DashboardTopNav({
           embeddable: dashboardAppState.dashboardContainer,
           getAllFactories: getEmbeddableFactories,
           getFactory: getEmbeddableFactory,
-          notifications: core.notifications,
+          notifications,
           overlays,
           SavedObjectFinder: getSavedObjectFinder(core.savedObjects, uiSettings),
           reportUiCounter: usageCollection?.reportUiCounter,
@@ -186,7 +184,7 @@ export function DashboardTopNav({
     dashboardAppState.dashboardContainer,
     getEmbeddableFactories,
     getEmbeddableFactory,
-    core.notifications,
+    notifications,
     core.savedObjects,
     overlays,
     theme,
@@ -278,8 +276,6 @@ export function DashboardTopNav({
 
       dashboardAppState.savedDashboard.copyOnSave = newCopyOnSave;
       const saveResult = await saveDashboard({
-        toasts,
-        timefilter,
         redirectTo,
         saveOptions,
         savedObjectsTagging,
@@ -325,17 +321,13 @@ export function DashboardTopNav({
     docTitle,
     closeAllFlyouts,
     kibanaVersion,
-    timefilter,
     redirectTo,
-    toasts,
   ]);
 
   const runQuickSave = useCallback(async () => {
     setState((s) => ({ ...s, isSaveInProgress: true }));
     const currentState = dashboardAppState.getLatestDashboardState();
     const saveResult = await saveDashboard({
-      toasts,
-      timefilter,
       redirectTo,
       currentState,
       saveOptions: {},
@@ -357,10 +349,8 @@ export function DashboardTopNav({
     savedObjectsTagging,
     dashboardAppState,
     kibanaVersion,
-    timefilter,
     redirectTo,
     mounted,
-    toasts,
   ]);
 
   const runClone = useCallback(() => {
@@ -377,8 +367,6 @@ export function DashboardTopNav({
         onTitleDuplicate,
       };
       const saveResult = await saveDashboard({
-        toasts,
-        timefilter,
         redirectTo,
         saveOptions,
         savedObjectsTagging,
@@ -390,15 +378,7 @@ export function DashboardTopNav({
       return saveResult.id ? { id: saveResult.id } : { error: saveResult.error };
     };
     showCloneModal({ onClone, title: currentState.title });
-  }, [
-    dashboardSessionStorage,
-    savedObjectsTagging,
-    dashboardAppState,
-    kibanaVersion,
-    redirectTo,
-    timefilter,
-    toasts,
-  ]);
+  }, [dashboardSessionStorage, savedObjectsTagging, dashboardAppState, kibanaVersion, redirectTo]);
 
   const showOptions = useCallback(
     (anchorElement: HTMLElement) => {
@@ -430,10 +410,8 @@ export function DashboardTopNav({
     (anchorElement: HTMLElement) => {
       if (!share) return;
       const currentState = dashboardAppState.getLatestDashboardState();
-      const timeRange = timefilter.getTime();
       ShowShareModal({
         share,
-        timeRange,
         kibanaVersion,
         anchorElement,
         dashboardCapabilities,
@@ -443,14 +421,7 @@ export function DashboardTopNav({
         isDirty: Boolean(dashboardAppState.hasUnsavedChanges),
       });
     },
-    [
-      share,
-      timefilter,
-      kibanaVersion,
-      dashboardAppState,
-      dashboardCapabilities,
-      dashboardSessionStorage,
-    ]
+    [share, kibanaVersion, dashboardAppState, dashboardCapabilities, dashboardSessionStorage]
   );
 
   const dashboardTopNavActions = useMemo(() => {

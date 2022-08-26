@@ -133,8 +133,7 @@ export type DashboardBuildContext = Pick<
   search: DashboardServices['data']['search'];
   dataViews: DashboardServices['data']['dataViews'];
   embeddable: DashboardServices['embeddable'];
-
-  notifications: DashboardAppServices['core']['notifications'];
+  notifications: DashboardServices['notifications'];
 
   locatorState?: DashboardAppLocatorParams;
 

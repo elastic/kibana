@@ -42,7 +42,6 @@ function getProps(props?: Partial<DashboardViewportProps>): {
 
   const options: DashboardContainerServices = {
     application: applicationServiceMock.createStartContract(),
-    notifications: {} as any,
     inspector: {
       isAvailable: jest.fn(),
     } as any,

@@ -16,7 +16,6 @@ import type { SerializableControlGroupInput } from '@kbn/controls-plugin/common'
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { setStateToKbnUrl, unhashUrl } from '@kbn/kibana-utils-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import type { TimeRange } from '@kbn/es-query';
 
 import type { DashboardSavedObject } from '../..';
 import { shareModalStrings } from '../../dashboard_strings';
@@ -26,12 +25,12 @@ import { dashboardUrlParams } from '../dashboard_router';
 import { stateToRawDashboardState } from '../lib/convert_dashboard_state';
 import { convertPanelMapToSavedPanels } from '../lib/convert_dashboard_panels';
 import type { DashboardSessionStorage } from '../lib';
+import { pluginServices } from '../../services/plugin_services';
 
 const showFilterBarId = 'showFilterBar';
 
 export interface ShowShareModalProps {
   isDirty: boolean;
-  timeRange: TimeRange;
   kibanaVersion: string;
   share: SharePluginStart;
   anchorElement: HTMLElement;
@@ -52,7 +51,6 @@ export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => 
 export function ShowShareModal({
   share,
   isDirty,
-  timeRange,
   kibanaVersion,
   anchorElement,
   savedDashboard,
@@ -135,13 +133,23 @@ export function ShowShareModal({
     };
   }
 
+  const {
+    data: {
+      query: {
+        timefilter: {
+          timefilter: { getTime },
+        },
+      },
+    },
+  } = pluginServices.getServices();
+
   const locatorParams: DashboardAppLocatorParams = {
     dashboardId: savedDashboard.id,
     preserveSavedFilters: true,
     refreshInterval: undefined, // We don't share refresh interval externally
     viewMode: ViewMode.VIEW, // For share locators we always load the dashboard in view mode
     useHash: false,
-    timeRange,
+    timeRange: getTime(),
     ...unsavedStateForLocator,
   };
 

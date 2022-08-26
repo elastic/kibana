@@ -57,7 +57,6 @@ import { pluginServices } from '../../services/plugin_services';
 export interface DashboardContainerServices {
   ExitFullScreenButton: React.ComponentType<any>;
   SavedObjectFinder: React.ComponentType<any>;
-  notifications: CoreStart['notifications'];
   application: CoreStart['application'];
   inspector: InspectorStartContract;
   screenshotMode: ScreenshotModePluginStart;

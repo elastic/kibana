@@ -20,13 +20,14 @@ import { DashboardStartDependencies } from '../plugin';
 import { chromeServiceFactory } from './chrome/chrome_service';
 import { dataServiceFactory } from './data/data_service';
 import { dataViewEditorServiceFactory } from './data_view_editor/data_view_editor_service';
+import { embeddableServiceFactory } from './embeddable/embeddable_service';
 import { httpServiceFactory } from './http/http_service';
 import { navigationServiceFactory } from './navigation/navigation_service';
+import { notificationsServiceFactory } from './notifications/notifications_service';
 import { overlaysServiceFactory } from './overlays/overlays_service';
 import { settingsServiceFactory } from './settings/settings_service';
 import { spacesServiceFactory } from './spaces/spaces_service';
 import { visualizationsServiceFactory } from './visualizations/visualizations_service';
-import { embeddableServiceFactory } from './embeddable/embeddable_service';
 
 const providers: PluginServiceProviders<
   DashboardServices,
@@ -38,6 +39,7 @@ const providers: PluginServiceProviders<
   embeddable: new PluginServiceProvider(embeddableServiceFactory),
   http: new PluginServiceProvider(httpServiceFactory),
   navigation: new PluginServiceProvider(navigationServiceFactory),
+  notifications: new PluginServiceProvider(notificationsServiceFactory),
   overlays: new PluginServiceProvider(overlaysServiceFactory),
   settings: new PluginServiceProvider(settingsServiceFactory),
   spaces: new PluginServiceProvider(spacesServiceFactory),
