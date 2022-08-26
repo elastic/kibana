@@ -321,7 +321,24 @@ export const makeMapStateToProps = () => {
   const getStartSelector = startSelector();
   const getToStrSelector = toStrSelector();
   return (state: State, { id }: OwnProps) => {
-    const inputsRange: InputsRange | InputsRangeTimeOnly = getOr({}, `inputs.${id}`, state);
+    if (id === InputsModelId.socTrends) {
+      const inputsRange: InputsRangeTimeOnly = getOr({}, `inputs.${id}`, state);
+      return {
+        duration: getDurationSelector(inputsRange),
+        end: getEndSelector(inputsRange),
+        fromStr: getFromStrSelector(inputsRange),
+        kind: getKindSelector(inputsRange),
+        policy: getPolicySelector(inputsRange),
+        start: getStartSelector(inputsRange),
+        toStr: getToStrSelector(inputsRange),
+        isLoading: false,
+        // needs to be defined as undefined ¯\_(ツ)_/¯
+        kqlQuery: undefined,
+        queries: [],
+      };
+    }
+
+    const inputsRange: InputsRange = getOr({}, `inputs.${id}`, state);
     return {
       duration: getDurationSelector(inputsRange),
       end: getEndSelector(inputsRange),
@@ -330,13 +347,9 @@ export const makeMapStateToProps = () => {
       policy: getPolicySelector(inputsRange),
       start: getStartSelector(inputsRange),
       toStr: getToStrSelector(inputsRange),
-      ...(id === InputsModelId.socTrends
-        ? { isLoading: false, kqlQuery: undefined, queries: [] }
-        : {
-            isLoading: getIsLoadingSelector(inputsRange as InputsRange),
-            kqlQuery: getKqlQuerySelector(inputsRange as InputsRange),
-            queries: getQueriesSelector(state, id),
-          }),
+      isLoading: getIsLoadingSelector(inputsRange),
+      kqlQuery: getKqlQuerySelector(inputsRange),
+      queries: getQueriesSelector(state, id),
     };
   };
 };
