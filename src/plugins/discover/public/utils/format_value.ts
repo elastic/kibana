@@ -53,13 +53,6 @@ export function formatFieldValue(
       .convert(value, usedContentType, converterOptions);
   }
 
-  // format aggregate_metric_double field values
-  if (field.isRolledUpField) {
-    return fieldFormats
-      .getDefaultInstance(KBN_FIELD_TYPES.OBJECT)
-      .convert(value, usedContentType, converterOptions);
-  }
-
   // If we have a data view and field we use that fields field formatter
   return dataView.getFormatterForField(field).convert(value, usedContentType, converterOptions);
 }

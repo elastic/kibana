@@ -46,9 +46,6 @@ Object {
     Object {
       "field": "object.value",
     },
-    Object {
-      "field": "agg_metric",
-    },
   ],
   "query": Object {
     "bool": Object {
