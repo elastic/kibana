@@ -5,24 +5,25 @@
  * 2.0.
  */
 import { once } from 'lodash';
-import { of, Observable, ReplaySubject } from 'rxjs';
+import { Observable, ReplaySubject } from 'rxjs';
 import { take } from 'rxjs/operators';
-
-const supportsIntersectionObserver = 'IntersectionObserver' in window;
 
 /**
  * Check whether an element is visible and emit, only once, when it intersects
  * with the viewport.
  */
 export class ViewportObserver {
-  private intersectionObserver: IntersectionObserver | undefined;
-  private intersection$ = new ReplaySubject<void>(1);
+  private readonly intersectionObserver: IntersectionObserver;
+  private readonly intersection$ = new ReplaySubject<void>(1);
 
+  /**
+   * @param getIntersectionObserver Inject the intersection observer as a dependency.
+   */
   constructor(
     getIntersectionObserver: (
       cb: IntersectionObserverCallback,
       opts: IntersectionObserverInit
-    ) => IntersectionObserver | undefined
+    ) => IntersectionObserver
   ) {
     this.intersectionObserver = getIntersectionObserver(this.handleChange, { root: null });
   }
@@ -34,28 +35,18 @@ export class ViewportObserver {
    * element's bounding rect intersects with the viewport.
    */
   public observeElement = once((element: HTMLElement): Observable<void> => {
-    if (this.intersectionObserver) {
-      this.intersectionObserver.observe(element);
-      return this.intersection$.pipe(take(1));
-    } else {
-      return of(undefined);
-    }
+    this.intersectionObserver.observe(element);
+    return this.intersection$.pipe(take(1));
   });
 
   private handleChange = ([{ isIntersecting }]: IntersectionObserverEntry[]) => {
     if (isIntersecting) {
       this.intersection$.next(undefined);
-      this.unobserve();
+      this.intersectionObserver.disconnect();
     }
   };
-
-  private unobserve() {
-    this.intersectionObserver?.disconnect();
-  }
 }
 
 export function createViewportObserver(): ViewportObserver {
-  return new ViewportObserver((cb, opts) =>
-    supportsIntersectionObserver ? new IntersectionObserver(cb, opts) : undefined
-  );
+  return new ViewportObserver((cb, opts) => new IntersectionObserver(cb, opts));
 }

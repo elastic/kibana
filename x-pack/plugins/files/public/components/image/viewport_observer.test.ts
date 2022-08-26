@@ -57,14 +57,4 @@ describe('ViewportObserver', () => {
       expect(mockObserver.disconnect).toHaveBeenCalledTimes(4);
     });
   });
-
-  test('functions without IntersectionObserver', () => {
-    expect.assertions(2);
-    getTestScheduler().run(({ expectObservable }) => {
-      viewportObserver = new ViewportObserver(() => undefined);
-      const observe$ = viewportObserver.observeElement(document.createElement('div'));
-      expectObservable(observe$).toBe('(a|)', { a: undefined });
-      expect(mockObserver.disconnect).toHaveBeenCalledTimes(0);
-    });
-  });
 });
