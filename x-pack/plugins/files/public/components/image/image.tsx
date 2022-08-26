@@ -33,7 +33,7 @@ export const Image: FunctionComponent<Props> = ({ src, alt, ref, onFirstVisible,
   const [isVisible, setIsVisible] = useState(false);
   const [viewportObserver] = useState(() => createViewportObserver());
   const subscriptionRef = useRef<undefined | Subscription>();
-  useEffect(() => () => subscriptionRef.current?.unsubscribe());
+  useEffect(() => () => subscriptionRef.current?.unsubscribe(), []);
   return (
     <img
       {...rest}
