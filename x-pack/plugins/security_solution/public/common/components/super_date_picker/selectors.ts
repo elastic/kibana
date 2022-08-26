@@ -11,12 +11,12 @@ import { InputsModelId } from '../../store/inputs/constants';
 import type { State } from '../../store';
 import type {
   GlobalQuery,
+  GlobalKqlQuery,
   InputsRange,
   InputsRangeTimeOnly,
   Policy,
   TimeRange,
 } from '../../store/inputs/model';
-import type { GlobalKqlQuery } from '../../store/inputs/model';
 
 export const getPolicy = (inputState: InputsRange | InputsRangeTimeOnly): Policy =>
   inputState.policy;
