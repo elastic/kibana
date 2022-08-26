@@ -9,7 +9,7 @@ import { useMemo, useEffect, useState, useCallback } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import { isEqual } from 'lodash';
 import { History } from 'history';
-import { DataViewType } from '@kbn/data-views-plugin/public';
+import { DataViewType, type DataView } from '@kbn/data-views-plugin/public';
 import {
   isOfAggregateQueryType,
   getIndexPatternFromSQLQuery,
@@ -18,6 +18,7 @@ import {
 } from '@kbn/es-query';
 import { SavedSearch, getSavedSearch } from '@kbn/saved-search-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
+import { usePersistedDataView } from '../../../hooks/use_persisted_data_view';
 import { getState } from '../services/discover_state';
 import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../build_services';
@@ -310,6 +311,32 @@ export function useDiscoverState({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [config, documentState, dataViews]);
 
+  const updateHocDataViewId = useCallback(
+    async (hocDataView: DataView) => {
+      const newDataView = await dataViews.create({ ...hocDataView.toSpec(), id: undefined });
+      dataViews.clearInstanceCache(hocDataView.id);
+      savedSearch.searchSource.setField('index', newDataView);
+      return newDataView;
+    },
+    [dataViews, savedSearch.searchSource]
+  );
+
+  const openConfirmSavePrompt = usePersistedDataView(updateHocDataViewId);
+  const persistDataView = useCallback(async () => {
+    const currentDataView = savedSearch.searchSource.getField('index')!;
+    if (currentDataView && !currentDataView.isPersisted()) {
+      const createdDataView = await openConfirmSavePrompt(currentDataView);
+      if (createdDataView) {
+        savedSearch.searchSource.setField('index', createdDataView);
+        // needs to update data view id in url, should be changed in future
+        setState((prevState) => ({ ...prevState }));
+        return true;
+      }
+      return false;
+    }
+    return true;
+  }, [openConfirmSavePrompt, savedSearch.searchSource]);
+
   return {
     data$,
     dataView,
@@ -317,6 +344,8 @@ export function useDiscoverState({
     refetch$,
     resetSavedSearch,
     onChangeDataView,
+    persistDataView,
+    updateHocDataViewId,
     onUpdateQuery,
     searchSource,
     setState,

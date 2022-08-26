@@ -8,9 +8,8 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
-import { DataViewType } from '@kbn/data-views-plugin/public';
+import { DataViewType, type DataView } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
-import { usePersistedDataView } from '../../../../hooks/use_persisted_data_view';
 import { ENABLE_SQL } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverLayoutProps } from '../layout/types';
@@ -36,6 +35,8 @@ export type DiscoverTopNavProps = Pick<
   isPlainRecord: boolean;
   textBasedLanguageModeErrors?: Error;
   onFieldEdited: () => void;
+  persistDataView: () => Promise<boolean>;
+  updateHocDataViewId: (dataView: DataView) => Promise<DataView>;
 };
 
 export const DiscoverTopNav = ({
@@ -53,9 +54,10 @@ export const DiscoverTopNav = ({
   isPlainRecord,
   textBasedLanguageModeErrors,
   onFieldEdited,
+  persistDataView,
+  updateHocDataViewId,
 }: DiscoverTopNavProps) => {
   const history = useHistory();
-  const dataViewIsPersisted = usePersistedDataView(dataView);
 
   const showDatePicker = useMemo(
     () => dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP,
@@ -149,7 +151,8 @@ export const DiscoverTopNav = ({
         searchSource,
         onOpenSavedSearch,
         isPlainRecord,
-        dataViewIsPersisted,
+        persistDataView,
+        updateHocDataViewId,
       }),
     [
       dataView,
@@ -161,7 +164,8 @@ export const DiscoverTopNav = ({
       searchSource,
       onOpenSavedSearch,
       isPlainRecord,
-      dataViewIsPersisted,
+      persistDataView,
+      updateHocDataViewId,
     ]
   );
 

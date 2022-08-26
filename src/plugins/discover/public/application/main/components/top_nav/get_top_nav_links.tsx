@@ -33,7 +33,8 @@ export const getTopNavLinks = ({
   searchSource,
   onOpenSavedSearch,
   isPlainRecord,
-  dataViewIsPersisted,
+  persistDataView,
+  updateHocDataViewId,
 }: {
   dataView: DataView;
   navigateTo: (url: string) => void;
@@ -44,7 +45,8 @@ export const getTopNavLinks = ({
   searchSource: ISearchSource;
   onOpenSavedSearch: (id: string) => void;
   isPlainRecord: boolean;
-  dataViewIsPersisted: () => Promise<boolean>;
+  persistDataView: () => Promise<boolean>;
+  updateHocDataViewId: (dataView: DataView) => Promise<DataView>;
 }): TopNavMenuData[] => {
   const options = {
     id: 'options',
@@ -73,7 +75,7 @@ export const getTopNavLinks = ({
       defaultMessage: 'Alerts',
     }),
     run: async (anchorElement: HTMLElement) => {
-      if (await dataViewIsPersisted()) {
+      if (await persistDataView()) {
         openAlertsPopover({
           I18nContext: services.core.i18n.Context,
           anchorElement,
@@ -110,18 +112,17 @@ export const getTopNavLinks = ({
     iconType: 'save',
     emphasize: true,
     run: async (anchorElement: HTMLElement) => {
-      if (await dataViewIsPersisted()) {
-        onSaveSearch({
-          savedSearch,
-          services,
-          dataView,
-          navigateTo,
-          state,
-          onClose: () => {
-            anchorElement?.focus();
-          },
-        });
-      }
+      onSaveSearch({
+        savedSearch,
+        services,
+        dataView,
+        navigateTo,
+        state,
+        updateHocDataViewId,
+        onClose: () => {
+          anchorElement?.focus();
+        },
+      });
     },
   };
 
@@ -153,7 +154,7 @@ export const getTopNavLinks = ({
     }),
     testId: 'shareTopNavButton',
     run: async (anchorElement: HTMLElement) => {
-      if (!services.share || !(await dataViewIsPersisted())) {
+      if (!services.share || !(await persistDataView())) {
         return;
       }
       const sharingData = await getSharingData(

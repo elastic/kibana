@@ -75,6 +75,8 @@ export function DiscoverLayout({
   searchSource,
   state,
   stateContainer,
+  persistDataView,
+  updateHocDataViewId,
 }: DiscoverLayoutProps) {
   const {
     trackUiMetric,
@@ -254,6 +256,8 @@ export function DiscoverLayout({
         isPlainRecord={isPlainRecord}
         textBasedLanguageModeErrors={textBasedLanguageModeErrors}
         onFieldEdited={onFieldEdited}
+        persistDataView={persistDataView}
+        updateHocDataViewId={updateHocDataViewId}
       />
       <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
         <SavedSearchURLConflictCallout
@@ -349,6 +353,7 @@ export function DiscoverLayout({
                           hideChart={state.hideChart}
                           interval={state.interval}
                           isTimeBased={isTimeBased}
+                          persistDataView={persistDataView}
                         />
                       </EuiFlexItem>
                       <EuiHorizontalRule margin="none" />

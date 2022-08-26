@@ -34,10 +34,6 @@ import type { TextBasedLanguagesListProps } from './text_languages_list';
 import type { TextBasedLanguagesTransitionModalProps } from './text_languages_transition_modal';
 import { changeDataViewStyles } from './change_dataview.styles';
 
-type DataViewItem = DataViewListItem & {
-  isHoc?: boolean;
-};
-
 // local storage key for the text based languages transition modal
 const TEXT_LANG_TRANSITION_MODAL_KEY = 'data.textLangTransitionModal';
 
@@ -76,13 +72,14 @@ export function ChangeDataView({
 }: DataViewPickerPropsExtended) {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
-  const [dataViewsList, setDataViewsList] = useState<DataViewItem[]>([]);
+  const [dataViewsList, setDataViewsList] = useState<DataViewListItem[]>([]);
   const [triggerLabel, setTriggerLabel] = useState('');
   const [isTextBasedLangSelected, setIsTextBasedLangSelected] = useState(
     Boolean(textBasedLanguage)
   );
   const [isTextLangTransitionModalVisible, setIsTextLangTransitionModalVisible] = useState(false);
   const [selectedDataViewId, setSelectedDataViewId] = useState(currentDataViewId);
+  const [prevHocDataViewId, setPrevDataViewId] = useState<string | null>(null);
 
   const kibana = useKibana<IDataPluginServices>();
   const { application, data, storage } = kibana.services;
@@ -98,33 +95,23 @@ export function ChangeDataView({
     const fetchDataViews = async () => {
       const savedDataViews = await data.dataViews.getIdsWithTitle();
 
-      const currentDataView = currentDataViewId
-        ? await data.dataViews.get(currentDataViewId)
-        : undefined;
-      let hocDataView: DataViewItem | undefined;
-      if (currentDataView && !currentDataView.isPersisted()) {
-        hocDataView = {
-          title: currentDataView.title,
-          name: currentDataView.name,
-          id: currentDataView.id!,
-          isHoc: true,
+      const hocDataViewId = currentDataViewId || prevHocDataViewId;
+      const hocDataView = hocDataViewId ? await data.dataViews.get(hocDataViewId) : undefined;
+      if (hocDataView && !hocDataView.isPersisted()) {
+        const hocDataViewItem = {
+          title: hocDataView.title,
+          name: hocDataView.name,
+          id: hocDataView.id!,
         };
+        setDataViewsList([hocDataViewItem, ...savedDataViews]);
+        setPrevDataViewId(hocDataViewItem.id);
+      } else {
+        setDataViewsList(savedDataViews);
       }
-
-      setDataViewsList((prevDataViews) => {
-        const currentHocDataView = hocDataView;
-        if (currentHocDataView) {
-          return [currentHocDataView, ...savedDataViews];
-        }
-        const prevHocDataView = prevDataViews.find((dv) => dv.isHoc);
-        if (prevHocDataView) {
-          return [prevHocDataView, ...savedDataViews];
-        }
-        return savedDataViews;
-      });
     };
+
     fetchDataViews();
-  }, [data, currentDataViewId]);
+  }, [data, currentDataViewId, prevHocDataViewId]);
 
   useEffect(() => {
     if (trigger.label) {

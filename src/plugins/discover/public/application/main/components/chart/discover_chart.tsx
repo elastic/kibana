@@ -19,7 +19,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { usePersistedDataView } from '../../../../hooks/use_persisted_data_view';
 import { HitsCounter } from '../hits_counter';
 import { GetStateReturn } from '../../services/discover_state';
 import { DiscoverHistogram } from './histogram';
@@ -48,6 +47,7 @@ export function DiscoverChart({
   hideChart,
   interval,
   isTimeBased,
+  persistDataView,
 }: {
   resetSavedSearch: () => void;
   savedSearch: SavedSearch;
@@ -60,9 +60,9 @@ export function DiscoverChart({
   isTimeBased: boolean;
   hideChart?: boolean;
   interval?: string;
+  persistDataView: () => Promise<boolean>;
 }) {
   const { uiSettings, data, storage } = useDiscoverServices();
-  const dataViewIsPersisted = usePersistedDataView(dataView);
   const [showChartOptionsPopover, setShowChartOptionsPopover] = useState(false);
   const showViewModeToggle = uiSettings.get(SHOW_FIELD_STATISTICS) ?? false;
 
@@ -75,7 +75,7 @@ export function DiscoverChart({
   const [canVisualize, setCanVisualize] = useState(false);
 
   const onUpdateDiscoverViewMode = async (newViewMode: VIEW_MODE) => {
-    if (await dataViewIsPersisted()) {
+    if (await persistDataView()) {
       setDiscoverViewMode(newViewMode);
     }
   };
@@ -88,11 +88,11 @@ export function DiscoverChart({
   }, [dataView, savedSearch.columns, timeField]);
 
   const onEditVisualization = useCallback(async () => {
-    if (!timeField || !(await dataViewIsPersisted())) {
+    if (!timeField || !(await persistDataView())) {
       return;
     }
     triggerVisualizeActions(timeField, dataView.id, savedSearch.columns || []);
-  }, [dataView.id, savedSearch.columns, dataViewIsPersisted, timeField]);
+  }, [timeField, persistDataView, dataView.id, savedSearch.columns]);
 
   const onShowChartOptions = useCallback(() => {
     setShowChartOptionsPopover(!showChartOptionsPopover);

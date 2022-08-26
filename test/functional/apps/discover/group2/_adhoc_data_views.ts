@@ -14,8 +14,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const filterBar = getService('filterBar');
   const kibanaServer = getService('kibanaServer');
+  const browser = getService('browser');
   const retry = getService('retry');
   const queryBar = getService('queryBar');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects([
     'common',
     'unifiedSearch',
@@ -27,6 +29,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
   const find = getService('find');
   const security = getService('security');
+
+  const getCurrentDataViewId = async () => {
+    const currentUrl = await browser.getCurrentUrl();
+    const [indexSubstring] = currentUrl.match(/index:[^,]*/)!;
+    const dataViewId = indexSubstring.replace('index:', '');
+    return dataViewId;
+  };
 
   describe('ad hoc data views', function () {
     before(async () => {
@@ -79,6 +88,40 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await queryBar.clearQuery();
       await queryBar.submitQuery();
+    });
+
+    it('should not update data view id when saving search first time', async () => {
+      const prevDataViewId = await getCurrentDataViewId();
+
+      await PageObjects.discover.saveSearch('hoc-data-view-search');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      const newDataViewId = await getCurrentDataViewId();
+
+      expect(prevDataViewId).to.equal(newDataViewId);
+    });
+
+    it('should update data view id when saving new search copy', async () => {
+      const prevDataViewId = await getCurrentDataViewId();
+
+      await PageObjects.discover.saveSearch('hoc-data-view-search-new', true);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      const newDataViewId = await getCurrentDataViewId();
+
+      expect(prevDataViewId).not.to.equal(newDataViewId);
+    });
+
+    it('should update data view id when saving data view from hoc one', async () => {
+      const prevDataViewId = await getCurrentDataViewId();
+
+      await testSubjects.click('discoverAlertsButton');
+      await testSubjects.click('confirmModalConfirmButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      const newDataViewId = await getCurrentDataViewId();
+
+      expect(prevDataViewId).not.to.equal(newDataViewId);
     });
   });
 }

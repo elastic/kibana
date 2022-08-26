@@ -54,6 +54,8 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     inspectorAdapters,
     onChangeDataView,
     onUpdateQuery,
+    persistDataView,
+    updateHocDataViewId,
     refetch$,
     resetSavedSearch,
     searchSource,
@@ -113,6 +115,8 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
       searchSource={searchSource}
       state={state}
       stateContainer={stateContainer}
+      persistDataView={persistDataView}
+      updateHocDataViewId={updateHocDataViewId}
     />
   );
 }

@@ -35,4 +35,6 @@ export interface DiscoverLayoutProps {
   searchSource: ISearchSource;
   state: AppState;
   stateContainer: GetStateReturn;
+  persistDataView: () => Promise<boolean>;
+  updateHocDataViewId: (dataView: DataView) => Promise<DataView>;
 }

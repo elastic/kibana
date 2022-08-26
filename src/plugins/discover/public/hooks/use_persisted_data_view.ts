@@ -12,55 +12,55 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { useDiscoverServices } from './use_discover_services';
 import { showConfirmPanel } from './show_confirm_panel';
 
-export const usePersistedDataView = (dataView: DataView) => {
+export const usePersistedDataView = (
+  updateHocDataViewId: (dataView: DataView) => Promise<DataView>
+) => {
   const services = useDiscoverServices();
 
-  const persistDataView = useCallback(async () => {
-    try {
-      const response = await services.dataViews.createAndSave({
-        id: dataView.id,
-        title: dataView.title,
-        timeFieldName: dataView.timeFieldName,
-      });
+  const persistDataView: (dataView: DataView) => Promise<DataView> = useCallback(
+    async (dataView) => {
+      try {
+        const updatedDataView = await updateHocDataViewId(dataView);
 
-      const message = i18n.translate('discover.dataViewPersist.message', {
-        defaultMessage: "Saved '{dataViewName}'",
-        values: { dataViewName: response.getName() },
-      });
-      services.toastNotifications.addSuccess(message);
-      return response;
-    } catch (error) {
-      services.toastNotifications.addDanger({
-        title: i18n.translate('discover.dataViewPersistError.title', {
-          defaultMessage: 'Unable to create data view',
-        }),
-        text: error.message,
-      });
-      throw new Error(error);
-    }
-  }, [
-    dataView.id,
-    dataView.timeFieldName,
-    dataView.title,
-    services.dataViews,
-    services.toastNotifications,
-  ]);
+        const response = await services.dataViews.createAndSave({
+          id: updatedDataView.id,
+          title: updatedDataView.title,
+          timeFieldName: updatedDataView.timeFieldName,
+        });
 
-  const dataViewPersisted: () => Promise<boolean> = useCallback(async () => {
-    if (dataView.isPersisted()) {
-      return true;
-    }
+        const message = i18n.translate('discover.dataViewPersist.message', {
+          defaultMessage: "Saved '{dataViewName}'",
+          values: { dataViewName: response.getName() },
+        });
+        services.toastNotifications.addSuccess(message);
+        return response;
+      } catch (error) {
+        services.toastNotifications.addDanger({
+          title: i18n.translate('discover.dataViewPersistError.title', {
+            defaultMessage: 'Unable to create data view',
+          }),
+          text: error.message,
+        });
+        throw new Error(error);
+      }
+    },
+    [services.dataViews, services.toastNotifications, updateHocDataViewId]
+  );
 
-    return new Promise((resolve) =>
-      showConfirmPanel({
-        onConfirm: () =>
-          persistDataView()
-            .then(() => resolve(true))
-            .catch(() => resolve(false)),
-        onCancel: () => resolve(false),
-      })
-    );
-  }, [dataView, persistDataView]);
+  const persist: (dataView: DataView) => Promise<false | DataView> = useCallback(
+    async (dataView) => {
+      return new Promise((resolve) =>
+        showConfirmPanel({
+          onConfirm: () =>
+            persistDataView(dataView)
+              .then((createdDataView) => resolve(createdDataView))
+              .catch(() => resolve(false)),
+          onCancel: () => resolve(false),
+        })
+      );
+    },
+    [persistDataView]
+  );
 
-  return dataViewPersisted;
+  return persist;
 };
