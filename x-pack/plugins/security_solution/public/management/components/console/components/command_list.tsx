@@ -155,7 +155,7 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
     (
       commandsByGroup: CommandDefinition[]
     ): Array<{
-      [key: string]: { name: string; about: React.ElementType | string };
+      [key: string]: { name: string; about: React.ReactNode | string };
     }> => {
       if (commandsByGroup[0].helpGroupLabel === HELP_GROUPS.supporting.label) {
         return [...COMMON_ARGS, ...commandsByGroup].map((command) => ({
@@ -201,15 +201,23 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
                   command.RenderComponent && (
                     <EuiFlexItem grow={false}>
                       <EuiToolTip
-                        content={i18n.translate(
-                          'xpack.securitySolution.console.commandList.addButtonTooltip',
-                          { defaultMessage: 'Add to text bar' }
-                        )}
+                        content={
+                          command.helpDisabled === true
+                            ? i18n.translate(
+                                'xpack.securitySolution.console.commandList.disabledButtonTooltip',
+                                { defaultMessage: 'Unsupported command' }
+                              )
+                            : i18n.translate(
+                                'xpack.securitySolution.console.commandList.addButtonTooltip',
+                                { defaultMessage: 'Add to text bar' }
+                              )
+                        }
                       >
                         <EuiButtonIcon
                           iconType="plusInCircle"
                           aria-label={`updateTextInputCommand-${command.name}`}
                           onClick={updateInputText(`${commandNameWithArgs} `)}
+                          isDisabled={command.helpDisabled === true}
                         />
                       </EuiToolTip>
                     </EuiFlexItem>

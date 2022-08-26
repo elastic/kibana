@@ -75,11 +75,24 @@ export const ENDPOINT_DEFAULT_PAGE = 0;
 export const ENDPOINT_DEFAULT_PAGE_SIZE = 10;
 
 /**
- * The list of capabilities, reported by the endpoint in the metadata document, that are
- * needed in order for the Responder UI to be accessible
+ * The list of possible capabilities, reported by the endpoint in the metadata document
  */
 export const RESPONDER_CAPABILITIES = [
+  'isolation',
   'kill_process',
   'suspend_process',
   'running_processes',
 ] as const;
+
+export type ResponderCapabilities = typeof RESPONDER_CAPABILITIES[number];
+
+/** The list of possible responder command names **/
+export const RESPONDER_COMMANDS = [
+  'isolate',
+  'release',
+  'kill-process',
+  'suspend-process',
+  'processes',
+] as const;
+
+export type ResponderCommands = typeof RESPONDER_COMMANDS[number];
