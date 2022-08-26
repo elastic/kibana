@@ -11,7 +11,7 @@ import { type History, createMemoryHistory } from 'history';
 import { BasePath } from '@kbn/core-http-browser-internal';
 import type { IBasePath } from '@kbn/core-http-browser';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
-import { ScopedHistory } from '@kbn/core-application-browser-internal';
+import { CoreScopedHistory } from '@kbn/core-application-browser-internal';
 
 import { renderApp } from './error_application';
 
@@ -28,7 +28,7 @@ describe('renderApp', () => {
     unmount = renderApp(
       applicationServiceMock.createAppMountParameters({
         element,
-        history: new ScopedHistory(history, '/'),
+        history: new CoreScopedHistory(history, '/'),
       }),
       {
         basePath,

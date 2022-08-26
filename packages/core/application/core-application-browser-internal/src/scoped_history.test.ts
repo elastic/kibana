@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ScopedHistory } from './scoped_history';
+import { CoreScopedHistory as ScopedHistory } from './scoped_history';
 import { createMemoryHistory, History } from 'history';
 import type { ConfirmHandler } from './navigation_confirm';
 

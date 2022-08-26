@@ -10,7 +10,7 @@ import { Observable } from 'rxjs';
 import type { CoreTheme } from '@kbn/core-theme-browser';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type { AppLeaveHandler } from './app_leave';
-import type { IScopedHistory } from './scoped_history';
+import type { ScopedHistory } from './scoped_history';
 
 /**
  * A mount function called when the user navigates to this app's route.
@@ -81,7 +81,7 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    * }
    * ```
    */
-  history: IScopedHistory<HistoryLocationState>;
+  history: ScopedHistory<HistoryLocationState>;
 
   /**
    * The route path for configuring navigation to the application.

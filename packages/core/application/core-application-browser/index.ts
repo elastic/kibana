@@ -31,4 +31,4 @@ export type {
   NavigateToAppOptions,
   NavigateToUrlOptions,
 } from './src/contracts';
-export type { IScopedHistory } from './src/scoped_history';
+export type { ScopedHistory } from './src/scoped_history';

@@ -7,7 +7,7 @@
  */
 
 export { ApplicationService } from './src/application_service';
-export { ScopedHistory } from './src/scoped_history';
+export { CoreScopedHistory } from './src/scoped_history';
 export type {
   InternalApplicationSetup,
   InternalApplicationStart,

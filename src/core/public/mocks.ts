@@ -22,7 +22,7 @@ import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
-import { ScopedHistory } from '@kbn/core-application-browser-internal';
+import { CoreScopedHistory } from '@kbn/core-application-browser-internal';
 import type { AppMountParameters } from '@kbn/core-application-browser';
 import type { PluginInitializerContext } from '.';
 // Import values from their individual modules instead.
@@ -143,7 +143,7 @@ function createAppMountParametersMock(appBasePath = '') {
   // Assemble an in-memory history mock using the provided basePath
   const rawHistory = createMemoryHistory();
   rawHistory.push(appBasePath);
-  const history = new ScopedHistory(rawHistory, appBasePath);
+  const history = new CoreScopedHistory(rawHistory, appBasePath);
 
   const params: jest.Mocked<AppMountParameters> = {
     appBasePath,

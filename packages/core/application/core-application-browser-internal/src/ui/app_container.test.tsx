@@ -15,7 +15,7 @@ import { type AppMountParameters, AppStatus } from '@kbn/core-application-browse
 import { AppContainer } from './app_container';
 import { Mounter } from '../types';
 import { createMemoryHistory } from 'history';
-import { ScopedHistory } from '../scoped_history';
+import { CoreScopedHistory as ScopedHistory } from '../scoped_history';
 
 describe('AppContainer', () => {
   const appId = 'someApp';

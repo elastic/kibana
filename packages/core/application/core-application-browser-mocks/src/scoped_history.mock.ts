@@ -7,9 +7,9 @@
  */
 
 import type { Location } from 'history';
-import type { IScopedHistory } from '@kbn/core-application-browser';
+import type { ScopedHistory } from '@kbn/core-application-browser';
 
-export type ScopedHistoryMock = jest.Mocked<IScopedHistory>;
+export type ScopedHistoryMock = jest.Mocked<ScopedHistory>;
 
 const createMock = ({
   pathname = '/',

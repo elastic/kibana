@@ -17,7 +17,7 @@ import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import { type AppLeaveHandler, AppStatus } from '@kbn/core-application-browser';
 import { Mounter } from '../types';
 import { AppContainer } from './app_container';
-import { ScopedHistory } from '../scoped_history';
+import { CoreScopedHistory } from '../scoped_history';
 
 interface Props {
   mounters: Map<string, Mounter>;
@@ -44,7 +44,7 @@ export const AppRouter: FunctionComponent<Props> = ({
 }) => {
   const appStatuses = useObservable(appStatuses$, new Map());
   const createScopedHistory = useMemo(
-    () => (appPath: string) => new ScopedHistory(history, appPath),
+    () => (appPath: string) => new CoreScopedHistory(history, appPath),
     [history]
   );
 

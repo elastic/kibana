@@ -16,10 +16,14 @@ import { i18n } from '@kbn/i18n';
 import type { CoreTheme } from '@kbn/core-theme-browser';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import { APP_WRAPPER_CLASS } from '@kbn/core-application-common';
-import { AppStatus, type AppLeaveHandler, type AppUnmount } from '@kbn/core-application-browser';
+import {
+  AppStatus,
+  type AppLeaveHandler,
+  type AppUnmount,
+  type ScopedHistory,
+} from '@kbn/core-application-browser';
 import { Mounter } from '../types';
 import { AppNotFound } from './app_not_found_screen';
-import { ScopedHistory } from '../scoped_history';
 
 interface Props {
   /** Path application is mounted on without the global basePath */

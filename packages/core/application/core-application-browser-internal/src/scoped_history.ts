@@ -17,23 +17,15 @@ import {
   Href,
   Action,
 } from 'history';
-import type { IScopedHistory } from '@kbn/core-application-browser';
+import type { ScopedHistory } from '@kbn/core-application-browser';
 
 /**
- * A wrapper around a `History` instance that is scoped to a particular base path of the history stack. Behaves
- * similarly to the `basename` option except that this wrapper hides any history stack entries from outside the scope
- * of this base path.
+ * Core's internal implementation of {@link ScopedHistory}
  *
- * This wrapper also allows Core and Plugins to share a single underlying global `History` instance without exposing
- * the history of other applications.
- *
- * The {@link ScopedHistory.createSubHistory | createSubHistory} method is particularly useful for applications that
- * contain any number of "sub-apps" which should not have access to the main application's history or basePath.
- *
- * @public
+ * @internal
  */
-export class ScopedHistory<HistoryLocationState = unknown>
-  implements IScopedHistory<HistoryLocationState>
+export class CoreScopedHistory<HistoryLocationState = unknown>
+  implements ScopedHistory<HistoryLocationState>
 {
   /**
    * Tracks whether or not the user has left this history's scope. All methods throw errors if called after scope has
@@ -80,7 +72,7 @@ export class ScopedHistory<HistoryLocationState = unknown>
    * @param basePath the URL path scope for the sub history
    */
   public createSubHistory = (basePath: string) => {
-    return new ScopedHistory<HistoryLocationState>(this, basePath);
+    return new CoreScopedHistory<HistoryLocationState>(this, basePath);
   };
 
   /**
