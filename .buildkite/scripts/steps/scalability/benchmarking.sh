@@ -50,6 +50,7 @@ export TEST_ES_DISABLE_STARTUP=true
 # Pings the es server every seconds 2 mins until it is status is green
 curl --retry 120 \
   --retry-delay 1 \
+  --retry-connrefused \
   -I -XGET "${TEST_ES_URL}/_cluster/health?wait_for_nodes=>=1&wait_for_status=yellow"
 
 export ELASTIC_APM_ACTIVE=true
