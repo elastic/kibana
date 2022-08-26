@@ -109,7 +109,7 @@ export const isScriptedRangeFilter = (filter: Filter): filter is ScriptedRangeFi
  * @internal
  */
 export const getRangeFilterField = (filter: RangeFilter | ScriptedRangeFilter) => {
-  return filter.meta.field ?? (filter.query.range && Object.keys(filter.query.range)[0]);
+  return filter.meta?.field ?? (filter.query.range && Object.keys(filter.query.range)[0]);
 };
 
 const formatValue = (params: any[]) =>

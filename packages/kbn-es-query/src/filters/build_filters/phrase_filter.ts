@@ -64,7 +64,7 @@ export const isScriptedPhraseFilter = (filter: Filter): filter is ScriptedPhrase
 
 /** @internal */
 export const getPhraseFilterField = (filter: PhraseFilter | ScriptedPhraseFilter) => {
-  if (filter.meta.field) return filter.meta.field;
+  if (filter.meta?.field) return filter.meta.field;
   const queryConfig = filter.query.match_phrase ?? filter.query.match ?? {};
   return Object.keys(queryConfig)[0];
 };
