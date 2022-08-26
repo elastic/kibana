@@ -821,12 +821,11 @@ export class Authenticator {
 
     // If access agreement is neither enabled globally (for all providers)
     // nor for the provider that authenticated user request - bail out.
-    if (
-      (this.options.config.authc.providers as Record<string, any>)[sessionValue.provider.type]?.[
-        sessionValue.provider.name
-      ]?.accessAgreement ||
-      !!this.options.config?.accessAgreement?.message
-    ) {
+    const providerConfig = (this.options.config.authc.providers as Record<string, any>)[
+      sessionValue.provider.type
+    ]?.[sessionValue.provider.name];
+
+    if (!this.options.config.accessAgreement && !providerConfig?.accessAgreement) {
       return false;
     }
 
