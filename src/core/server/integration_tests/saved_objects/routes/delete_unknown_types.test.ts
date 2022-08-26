@@ -9,10 +9,12 @@
 import supertest from 'supertest';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
-import { registerDeleteUnknownTypesRoute } from '../../../saved_objects/routes/deprecations';
-import { setupServer } from '../../../saved_objects/routes/test_utils';
+import { setupServer } from './test_utils';
 import { SavedObjectsType } from '../../..';
-import type { InternalSavedObjectsRequestHandlerContext } from '../../../saved_objects/internal_types';
+import {
+  registerDeleteUnknownTypesRoute,
+  type InternalSavedObjectsRequestHandlerContext,
+} from '@kbn/core-saved-objects-server-internal';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
