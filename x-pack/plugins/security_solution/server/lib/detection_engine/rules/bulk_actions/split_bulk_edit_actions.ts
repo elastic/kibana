@@ -9,7 +9,7 @@ import type {
   BulkActionEditPayload,
   BulkActionEditForRuleAttributes,
   BulkActionEditForRuleParams,
-} from '../../../../../common/detection_engine/schemas/common/schemas';
+} from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 import { BulkActionEditType } from '../../../../../common/detection_engine/schemas/common/schemas';
 
 /**

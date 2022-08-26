@@ -9,7 +9,7 @@ import type { Type as RuleType } from '@kbn/securitysolution-io-ts-alerting-type
 import { invariant } from '../../../../../common/utils/invariant';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { BulkActionsDryRunErrCode } from '../../../../../common/constants';
-import type { BulkActionEditPayload } from '../../../../../common/detection_engine/schemas/common/schemas';
+import type { BulkActionEditPayload } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 import { BulkActionEditType } from '../../../../../common/detection_engine/schemas/common/schemas';
 import type { RuleAlertType } from '../types';
 import { isIndexPatternsBulkEditAction } from './utils';

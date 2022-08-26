@@ -21,7 +21,7 @@ import {
   getUseField,
   Field,
 } from '../../../../../../../shared_imports';
-import type { BulkActionEditPayload } from '../../../../../../../../common/detection_engine/schemas/common/schemas';
+import type { BulkActionEditPayload } from '../../../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 import { BulkActionEditType } from '../../../../../../../../common/detection_engine/schemas/common/schemas';
 import { NOTIFICATION_THROTTLE_NO_ACTIONS } from '../../../../../../../../common/constants';
 
