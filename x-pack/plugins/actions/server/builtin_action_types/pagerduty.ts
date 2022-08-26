@@ -181,12 +181,14 @@ function validateActionTypeConfig(
   try {
     configurationUtilities.ensureUriAllowed(getPagerDutyApiUrl(configObject));
   } catch (allowListError) {
-    return i18n.translate('xpack.actions.builtin.pagerduty.pagerdutyConfigurationError', {
-      defaultMessage: 'error configuring pagerduty action: {message}',
-      values: {
-        message: allowListError.message,
-      },
-    });
+    throw new Error(
+      i18n.translate('xpack.actions.builtin.pagerduty.pagerdutyConfigurationError', {
+        defaultMessage: 'error configuring pagerduty action: {message}',
+        values: {
+          message: allowListError.message,
+        },
+      })
+    );
   }
 }
 

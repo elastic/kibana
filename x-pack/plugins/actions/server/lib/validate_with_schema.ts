@@ -101,44 +101,44 @@ function validateWithSchema<
         case 'params':
           name = 'action params';
           if (actionType.validate.params) {
-            const params = actionType.validate.params.schema.validate(value);
+            const validatedValue = actionType.validate.params.schema.validate(value);
+
             if (actionType.validate.params.customValidator) {
-              const result = actionType.validate.params.customValidator(params, validatorServices);
-              if (result) {
-                throw new Error(result);
-              }
+              actionType.validate.params.customValidator(
+                validatedValue as Params,
+                validatorServices
+              );
             }
-            return params;
+            return validatedValue;
           }
           break;
         case 'config':
           name = 'action type config';
           if (actionType.validate.config) {
-            const config = actionType.validate.config.schema.validate(value);
+            const validatedValue = actionType.validate.config.schema.validate(value);
+
             if (actionType.validate.config.customValidator) {
-              const result = actionType.validate.config.customValidator(config, validatorServices);
-              if (result) {
-                throw new Error(result);
-              }
+              actionType.validate.config.customValidator(
+                validatedValue as Config,
+                validatorServices
+              );
             }
-            return config;
+            return validatedValue;
           }
 
           break;
         case 'secrets':
           name = 'action type secrets';
           if (actionType.validate.secrets) {
-            const secrets = actionType.validate.secrets.schema.validate(value);
+            const validatedValue = actionType.validate.secrets.schema.validate(value);
+
             if (actionType.validate.secrets.customValidator) {
-              const result = actionType.validate.secrets.customValidator(
-                secrets,
+              actionType.validate.secrets.customValidator(
+                validatedValue as Secrets,
                 validatorServices
               );
-              if (result) {
-                throw new Error(result);
-              }
             }
-            return secrets;
+            return validatedValue;
           }
           break;
         default:

@@ -23,20 +23,20 @@ export const validateCommonConfig = (
   try {
     configurationUtilities.ensureUriAllowed(apiUrl);
   } catch (allowedListError) {
-    return i18n.ALLOWED_HOSTS_ERROR(allowedListError.message);
+    throw new Error(i18n.ALLOWED_HOSTS_ERROR(allowedListError.message));
   }
 
   if (isOAuth) {
     if (userIdentifierValue == null) {
-      return i18n.VALIDATE_OAUTH_MISSING_FIELD_ERROR('userIdentifierValue', true);
+      throw new Error(i18n.VALIDATE_OAUTH_MISSING_FIELD_ERROR('userIdentifierValue', true));
     }
 
     if (clientId == null) {
-      return i18n.VALIDATE_OAUTH_MISSING_FIELD_ERROR('clientId', true);
+      throw new Error(i18n.VALIDATE_OAUTH_MISSING_FIELD_ERROR('clientId', true));
     }
 
     if (jwtKeyId == null) {
-      return i18n.VALIDATE_OAUTH_MISSING_FIELD_ERROR('jwtKeyId', true);
+      throw new Error(i18n.VALIDATE_OAUTH_MISSING_FIELD_ERROR('jwtKeyId', true));
     }
   }
 };
@@ -48,18 +48,18 @@ export const validateCommonSecrets = (
   const { username, password, clientSecret, privateKey } = secrets;
 
   if (!username && !password && !clientSecret && !privateKey) {
-    return i18n.CREDENTIALS_ERROR;
+    throw new Error(i18n.CREDENTIALS_ERROR);
   }
 
   if (username || password) {
     // Username and password must be set and set together
     if (!username || !password) {
-      return i18n.BASIC_AUTH_CREDENTIALS_ERROR;
+      throw new Error(i18n.BASIC_AUTH_CREDENTIALS_ERROR);
     }
   } else if (clientSecret || privateKey) {
     // Client secret and private key must be set and set together
     if (!clientSecret || !privateKey) {
-      return i18n.OAUTH_CREDENTIALS_ERROR;
+      throw new Error(i18n.OAUTH_CREDENTIALS_ERROR);
     }
   }
 };

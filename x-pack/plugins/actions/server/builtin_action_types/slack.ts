@@ -113,20 +113,24 @@ function validateActionTypeConfig(
   try {
     new URL(configuredUrl);
   } catch (err) {
-    return i18n.translate('xpack.actions.builtin.slack.slackConfigurationErrorNoHostname', {
-      defaultMessage: 'error configuring slack action: unable to parse host name from webhookUrl',
-    });
+    throw new Error(
+      i18n.translate('xpack.actions.builtin.slack.slackConfigurationErrorNoHostname', {
+        defaultMessage: 'error configuring slack action: unable to parse host name from webhookUrl',
+      })
+    );
   }
 
   try {
     configurationUtilities.ensureUriAllowed(configuredUrl);
   } catch (allowListError) {
-    return i18n.translate('xpack.actions.builtin.slack.slackConfigurationError', {
-      defaultMessage: 'error configuring slack action: {message}',
-      values: {
-        message: allowListError.message,
-      },
-    });
+    throw new Error(
+      i18n.translate('xpack.actions.builtin.slack.slackConfigurationError', {
+        defaultMessage: 'error configuring slack action: {message}',
+        values: {
+          message: allowListError.message,
+        },
+      })
+    );
   }
 }
 

@@ -40,12 +40,12 @@ const validateConfig = (
       try {
         new URL(url);
       } catch (err) {
-        return i18n.INVALID_URL(err, url);
+        throw new Error(i18n.INVALID_URL(err, url));
       }
       try {
         configurationUtilities.ensureUriAllowed(url);
       } catch (allowListError) {
-        return i18n.CONFIG_ERR(allowListError.message);
+        throw new Error(i18n.CONFIG_ERR(allowListError.message));
       }
     }
   }
@@ -68,7 +68,7 @@ export const validateSecrets = (
   // user and password must be set together (or not at all)
   if (!secrets.password && !secrets.user) return;
   if (secrets.password && secrets.user) return;
-  return i18n.INVALID_USER_PW;
+  throw new Error(i18n.INVALID_USER_PW);
 };
 
 export const validate: ExternalServiceValidation = {

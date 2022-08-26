@@ -98,7 +98,7 @@ interface ValidatorType<Type> {
   schema: {
     validate(value: unknown): Type;
   };
-  customValidator?: (value: Type, validatorServices: ValidatorServices) => string | void;
+  customValidator?: (value: Type, validatorServices: ValidatorServices) => void;
 }
 
 export interface ValidatorServices {

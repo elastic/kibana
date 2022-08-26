@@ -139,23 +139,27 @@ function validateActionTypeConfig(
   try {
     new URL(configuredUrl);
   } catch (err) {
-    return i18n.translate('xpack.actions.builtin.webhook.webhookConfigurationErrorNoHostname', {
-      defaultMessage: 'error configuring webhook action: unable to parse url: {err}',
-      values: {
-        err,
-      },
-    });
+    throw new Error(
+      i18n.translate('xpack.actions.builtin.webhook.webhookConfigurationErrorNoHostname', {
+        defaultMessage: 'error configuring webhook action: unable to parse url: {err}',
+        values: {
+          err,
+        },
+      })
+    );
   }
 
   try {
     configurationUtilities.ensureUriAllowed(configuredUrl);
   } catch (allowListError) {
-    return i18n.translate('xpack.actions.builtin.webhook.webhookConfigurationError', {
-      defaultMessage: 'error configuring webhook action: {message}',
-      values: {
-        message: allowListError.message,
-      },
-    });
+    throw new Error(
+      i18n.translate('xpack.actions.builtin.webhook.webhookConfigurationError', {
+        defaultMessage: 'error configuring webhook action: {message}',
+        values: {
+          message: allowListError.message,
+        },
+      })
+    );
   }
 }
 

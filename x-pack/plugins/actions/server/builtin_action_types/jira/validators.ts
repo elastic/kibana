@@ -22,7 +22,7 @@ export const validateCommonConfig = (
   try {
     configurationUtilities.ensureUriAllowed(configObject.apiUrl);
   } catch (allowedListError) {
-    return i18n.ALLOWED_HOSTS_ERROR(allowedListError.message);
+    throw new Error(i18n.ALLOWED_HOSTS_ERROR(allowedListError.message));
   }
 };
 

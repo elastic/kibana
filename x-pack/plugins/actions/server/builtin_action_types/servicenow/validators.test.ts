@@ -12,7 +12,7 @@ const configurationUtilities = actionsConfigMock.create();
 
 describe('validateCommonConfig', () => {
   test('config validation fails when apiUrl is not allowed', () => {
-    expect(
+    expect(() =>
       validateCommonConfig(
         {
           apiUrl: 'example.com/do-something',
@@ -31,11 +31,13 @@ describe('validateCommonConfig', () => {
           },
         }
       )
-    ).toEqual(`error configuring connector action: target url is not present in allowedHosts`);
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"error configuring connector action: target url is not present in allowedHosts"`
+    );
   });
   describe('when isOAuth = true', () => {
     test('config validation fails when userIdentifierValue is null', () => {
-      expect(
+      expect(() =>
         validateCommonConfig(
           {
             apiUrl: 'https://url',
@@ -47,10 +49,12 @@ describe('validateCommonConfig', () => {
           },
           { configurationUtilities }
         )
-      ).toEqual(`userIdentifierValue must be provided when isOAuth = true`);
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"userIdentifierValue must be provided when isOAuth = true"`
+      );
     });
     test('config validation fails when clientId is null', () => {
-      expect(
+      expect(() =>
         validateCommonConfig(
           {
             apiUrl: 'https://url',
@@ -62,10 +66,10 @@ describe('validateCommonConfig', () => {
           },
           { configurationUtilities }
         )
-      ).toEqual(`clientId must be provided when isOAuth = true`);
+      ).toThrowErrorMatchingInlineSnapshot(`"clientId must be provided when isOAuth = true"`);
     });
     test('config validation fails when jwtKeyId is null', () => {
-      expect(
+      expect(() =>
         validateCommonConfig(
           {
             apiUrl: 'https://url',
@@ -77,7 +81,7 @@ describe('validateCommonConfig', () => {
           },
           { configurationUtilities }
         )
-      ).toEqual(`jwtKeyId must be provided when isOAuth = true`);
+      ).toThrowErrorMatchingInlineSnapshot(`"jwtKeyId must be provided when isOAuth = true"`);
     });
   });
 
@@ -152,7 +156,7 @@ describe('validateCommonConfig', () => {
 
 describe('validateCommonSecrets', () => {
   test('secrets validation fails when no credentials are defined', () => {
-    expect(
+    expect(() =>
       validateCommonSecrets(
         {
           password: null,
@@ -163,11 +167,13 @@ describe('validateCommonSecrets', () => {
         },
         { configurationUtilities }
       )
-    ).toEqual(`Either basic auth or OAuth credentials must be specified`);
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Either basic auth or OAuth credentials must be specified"`
+    );
   });
 
   test('secrets validation fails when username is defined and password is not', () => {
-    expect(
+    expect(() =>
       validateCommonSecrets(
         {
           password: null,
@@ -178,11 +184,11 @@ describe('validateCommonSecrets', () => {
         },
         { configurationUtilities }
       )
-    ).toEqual(`username and password must both be specified`);
+    ).toThrowErrorMatchingInlineSnapshot(`"username and password must both be specified"`);
   });
 
   test('secrets validation fails when password is defined and username is not', () => {
-    expect(
+    expect(() =>
       validateCommonSecrets(
         {
           password: 'password',
@@ -193,11 +199,11 @@ describe('validateCommonSecrets', () => {
         },
         { configurationUtilities }
       )
-    ).toEqual(`username and password must both be specified`);
+    ).toThrowErrorMatchingInlineSnapshot(`"username and password must both be specified"`);
   });
 
   test('secrets validation fails when clientSecret is defined and privateKey is not', () => {
-    expect(
+    expect(() =>
       validateCommonSecrets(
         {
           password: null,
@@ -208,11 +214,11 @@ describe('validateCommonSecrets', () => {
         },
         { configurationUtilities }
       )
-    ).toEqual(`clientSecret and privateKey must both be specified`);
+    ).toThrowErrorMatchingInlineSnapshot(`"clientSecret and privateKey must both be specified"`);
   });
 
   test('secrets validation fails when privateKey is defined and clientSecret is not', () => {
-    expect(
+    expect(() =>
       validateCommonSecrets(
         {
           password: null,
@@ -223,7 +229,7 @@ describe('validateCommonSecrets', () => {
         },
         { configurationUtilities }
       )
-    ).toEqual(`clientSecret and privateKey must both be specified`);
+    ).toThrowErrorMatchingInlineSnapshot(`"clientSecret and privateKey must both be specified"`);
   });
 });
 
