@@ -152,7 +152,7 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
     );
 
     const refetchQuery = (newQueries: inputsModel.GlobalQuery[]) => {
-      newQueries.forEach((q) => q.refetch && (q.refetch as unknown as inputsModel.Refetch)());
+      newQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
     };
 
     const onTimeChange = useCallback(
