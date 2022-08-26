@@ -47,13 +47,12 @@ unset ELASTIC_APM_BREAKDOWN_METRICS
 export TEST_ES_URL=http://elastic:changeme@localhost:9200
 export TEST_ES_DISABLE_STARTUP=true
 
-export ELASTIC_APM_ACTIVE=true
-
 # Pings the es server every seconds 2 mins until it is status is green
 curl --retry 120 \
   --retry-delay 1 \
-  --retry-all-errors \
   -I -XGET "${TEST_ES_URL}/_cluster/health?wait_for_nodes=>=1&wait_for_status=yellow"
+
+export ELASTIC_APM_ACTIVE=true
 
 for file in scalability_traces/server/*; do
     export SCALABILITY_JOURNEY_PATH="$KIBANA_DIR/$file"
