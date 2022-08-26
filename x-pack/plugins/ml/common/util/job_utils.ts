@@ -410,6 +410,10 @@ export function prefixDatafeedId(datafeedId: string, prefix: string): string {
     : `datafeed-${prefix}${datafeedId}`;
 }
 
+export function createDatafeedId(jobId: string) {
+  return `datafeed-${jobId}`;
+}
+
 // Returns a name which is safe to use in elasticsearch aggregations for the supplied
 // field name. Aggregation names must be alpha-numeric and can only contain '_' and '-' characters,
 // so if the supplied field names contains disallowed characters, the provided index
