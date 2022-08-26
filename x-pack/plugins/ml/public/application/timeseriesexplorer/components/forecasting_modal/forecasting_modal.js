@@ -18,6 +18,7 @@ import { EuiButton, EuiToolTip } from '@elastic/eui';
 
 import { FORECAST_REQUEST_STATE, JOB_STATE } from '../../../../../common/constants/states';
 import { MESSAGE_LEVEL } from '../../../../../common/constants/message_levels';
+import { extractErrorMessage } from '../../../../../common/util/errors';
 import { isJobVersionGte } from '../../../../../common/util/job_utils';
 import { parseInterval } from '../../../../../common/util/parse_interval';
 import { Modal } from './modal';
@@ -178,8 +179,18 @@ export class ForecastingModalUI extends Component {
   runForecastErrorHandler = (resp, closeJob) => {
     this.setState({ forecastProgress: PROGRESS_STATES.ERROR });
     console.log('Time series forecast modal - error running forecast:', resp);
-    if (resp && resp.message) {
-      this.addMessage(resp.message, MESSAGE_LEVEL.ERROR, true);
+
+    const errorMessage = resp ? extractErrorMessage(resp) : undefined;
+
+    if (errorMessage && errorMessage.length > 0) {
+      this.addMessage(
+        i18n.translate('xpack.ml.timeSeriesExplorer.forecastingModal.errorRunningForecastMessage', {
+          defaultMessage: 'An error has occurred running the forecast: {errorMessage}',
+          values: { errorMessage },
+        }),
+        MESSAGE_LEVEL.ERROR,
+        true
+      );
     } else {
       this.addMessage(
         i18n.translate(
