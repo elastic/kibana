@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import type { IFieldSubTypeMulti } from '@kbn/es-query';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { AddFieldFilterHandler } from '../../types';
 
@@ -44,6 +45,7 @@ export const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
   onAddFilter,
 }) => {
   const isFilterButtonHidden = type === 'other';
+  const fieldName = (field?.subType as IFieldSubTypeMulti)?.multi?.parent ?? field.name; // TODO: check if this is a right approach for handling multi fields
 
   return (
     <EuiFlexGroup alignItems="stretch" gutterSize="s" responsive={false}>
@@ -111,9 +113,9 @@ export const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
               onClick={() => onAddFilter(field, fieldValue, '+')}
               aria-label={i18n.translate('unifiedFieldList.fieldStats.filterValueButtonAriaLabel', {
                 defaultMessage: 'Filter for {field}: "{value}"',
-                values: { value: formattedFieldValue, field: field.name },
+                values: { value: formattedFieldValue, field: fieldName },
               })}
-              data-test-subj={`plus-${field.name}-${fieldValue}`}
+              data-test-subj={`plus-${fieldName}-${fieldValue}`}
               style={{
                 minHeight: 'auto',
                 minWidth: 'auto',
@@ -132,10 +134,10 @@ export const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
                 'unifiedFieldList.fieldStats.filterOutValueButtonAriaLabel',
                 {
                   defaultMessage: 'Filter out {field}: "{value}"',
-                  values: { value: formattedFieldValue, field: field.name },
+                  values: { value: formattedFieldValue, field: fieldName },
                 }
               )}
-              data-test-subj={`minus-${field.name}-${fieldValue}`}
+              data-test-subj={`minus-${fieldName}-${fieldValue}`}
               style={{
                 minHeight: 'auto',
                 minWidth: 'auto',
