@@ -5,18 +5,11 @@
  * 2.0.
  */
 
-import { EuiText } from '@elastic/eui';
-import { BrowserField } from '@kbn/triggers-actions-ui-plugin/public/application/sections/field_browser/types';
 import React from 'react';
 import { useMemo } from 'react';
-import { RawIndicatorFieldId } from '../../../../../../common/types/indicator';
+import { EuiDataGridColumn, EuiText } from '@elastic/eui';
+import { BrowserField } from '@kbn/triggers-actions-ui-plugin/public/application/sections/field_browser/types';
 import { IndicatorsFieldBrowser } from '../../indicators_field_browser';
-import { ComputedIndicatorFieldId } from '../cell_renderer';
-
-export interface Column {
-  id: RawIndicatorFieldId | ComputedIndicatorFieldId;
-  displayAsText: string;
-}
 
 export const useToolbarOptions = ({
   browserFields,
@@ -31,7 +24,7 @@ export const useToolbarOptions = ({
   start: number;
   end: number;
   indicatorCount: number;
-  columns: Column[];
+  columns: EuiDataGridColumn[];
   onResetColumns: () => void;
   onToggleColumn: (columnId: string) => void;
 }) =>

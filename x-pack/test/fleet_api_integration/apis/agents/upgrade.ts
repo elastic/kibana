@@ -324,7 +324,6 @@ export default function (providerContext: FtrProviderContext) {
           attributes: {
             policy_id: 'fleet-server-policy',
             name: 'Fleet Server',
-            output_id: 'default',
             package: {
               name: 'fleet_server',
             },
