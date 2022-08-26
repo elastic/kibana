@@ -18,3 +18,7 @@ export * from './get_operators';
 export * from './hooks';
 export * from './operator';
 export * from './param_is_valid';
+export * from './param_contains_space';
+
+// TODO: ASK for best practice?
+export { FIELD_SPACE_WARNING as FIELD_SPACE_WARNING_TEXT } from './translations';
