@@ -263,7 +263,7 @@ export function registerTestBed<T extends string = string, P extends object = an
           .slice(1) // we remove the first row as it is the table header
           .map((row) => ({
             reactWrapper: row,
-            columns: row.find('td').map((col) => ({
+            columns: row.find('.euiTableCellContent').map((col) => ({
               reactWrapper: col,
               // We can't access the td value with col.text() because
               // eui adds an extra div in td on mobile => (.euiTableRowCell__mobileHeader)
