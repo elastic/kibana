@@ -11,6 +11,7 @@ steps:
     agents:
       queue: c2-16
     key: build
+    if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
 
   - label: ':muscle: Performance Tests with Playwright config'
     command: .buildkite/scripts/steps/functional/performance_playwright.sh

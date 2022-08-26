@@ -7,8 +7,10 @@ source .buildkite/scripts/common/util.sh
 USER_FROM_VAULT="$(retry 5 5 vault read -field=username secret/kibana-issues/dev/apm_parser_performance)"
 PASS_FROM_VAULT="$(retry 5 5 vault read -field=password secret/kibana-issues/dev/apm_parser_performance)"
 ES_SERVER_URL="https://kibana-ops-e2e-perf.es.us-central1.gcp.cloud.es.io:9243"
-BUILD_ID=${BUILDKITE_BUILD_ID}
+BUILD_ID="${BUILDKITE_BUILD_ID}"
 GCS_BUCKET="gs://kibana-performance/scalability-tests"
+OUTPUT_REL="target/scalability_tests/${BUILD_ID}"
+OUTPUT_DIR="${KIBANA_DIR}/${OUTPUT_REL}"
 
 .buildkite/scripts/bootstrap.sh
 
@@ -28,16 +30,27 @@ for i in "${scalabilityJourneys[@]}"; do
         --without-static-resources
 done
 
-echo "--- Upload Kibana build, plugins and scalability traces to the public bucket"
-mkdir "${BUILD_ID}"
-# Archive json files with traces and upload as build artifacts
-tar -czf "${BUILD_ID}/scalability_traces.tar.gz" -C target scalability_traces
-buildkite-agent artifact upload "${BUILD_ID}/scalability_traces.tar.gz"
-# Upload Kibana build, plugins, commit sha and traces to the bucket
-download_artifact kibana-default.tar.gz ./"${BUILD_ID}"
-download_artifact kibana-default-plugins.tar.gz ./"${BUILD_ID}"
-echo "${BUILDKITE_COMMIT}" > "${BUILD_ID}/KIBANA_COMMIT_HASH"
+echo "--- Creating scalability dataset in ${OUTPUT_REL}"
+mkdir -p "${OUTPUT_DIR}"
+
+echo "--- Archiving scalability trace and uploading as build artifact"
+tar -czf "${OUTPUT_DIR}/scalability_traces.tar.gz" -C target scalability_traces
+buildkite-agent artifact upload "${OUTPUT_DIR}/scalability_traces.tar.gz"
+
+echo "--- Downloading Kibana artifacts used in tests"
+download_artifact kibana-default.tar.gz "${OUTPUT_DIR}/" --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
+download_artifact kibana-default-plugins.tar.gz "${OUTPUT_DIR}/" --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
+
+echo "--- Adding commit info"
+echo "${BUILDKITE_COMMIT}" > "${OUTPUT_DIR}/KIBANA_COMMIT_HASH"
+
+echo "--- Uploading ${OUTPUT_REL} dir to ${GCS_BUCKET}"
+cd "${OUTPUT_DIR}/.."
 gsutil -m cp -r "${BUILD_ID}" "${GCS_BUCKET}"
-echo "--- Update reference to the latest CI build"
+cd -
+
+echo "--- Promoting '${BUILD_ID}' dataset to LATEST"
+cd "${OUTPUT_DIR}/.."
 echo "${BUILD_ID}" > LATEST
 gsutil cp LATEST "${GCS_BUCKET}"
+cd -
