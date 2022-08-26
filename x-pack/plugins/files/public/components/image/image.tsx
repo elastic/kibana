@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { MutableRefObject, useState } from 'react';
+import React, { MutableRefObject, useState, useRef, useEffect } from 'react';
 import type { FunctionComponent, ImgHTMLAttributes, LegacyRef } from 'react';
+import { Subscription } from 'rxjs';
 import { createViewportObserver } from './viewport_observer';
 
 export interface Props extends ImgHTMLAttributes<HTMLImageElement> {
@@ -31,12 +32,14 @@ export interface Props extends ImgHTMLAttributes<HTMLImageElement> {
 export const Image: FunctionComponent<Props> = ({ src, alt, ref, onFirstVisible, ...rest }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [viewportObserver] = useState(() => createViewportObserver());
+  const subscriptionRef = useRef<undefined | Subscription>();
+  useEffect(() => () => subscriptionRef.current?.unsubscribe());
   return (
     <img
       {...rest}
       ref={(element) => {
-        if (element) {
-          viewportObserver.observeElement(element).subscribe(() => {
+        if (element && !subscriptionRef.current) {
+          subscriptionRef.current = viewportObserver.observeElement(element).subscribe(() => {
             setIsVisible(true);
             onFirstVisible?.();
           });
