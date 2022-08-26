@@ -39,24 +39,24 @@ export const createSingleFieldMatchEnrichment: CreateFieldsMatchEnrichment = asy
     return {};
   }
 
-  const enrichemnts = await searchEnrichments({
+  const enrichments = await searchEnrichments({
     index,
     services,
     logger,
     query: queryResult,
   });
 
-  if (enrichemnts.length === 0) {
+  if (enrichments.length === 0) {
     return {};
   }
 
-  const eventsMapById = enrichemnts.reduce<EventsMapByEnrichments>((acc, enrichemnt) => {
-    const enrichmentValue = get(enrichemnt, `_source.${mappingField.enrichmentField}`);
+  const eventsMapById = enrichments.reduce<EventsMapByEnrichments>((acc, enrichment) => {
+    const enrichmentValue = get(enrichment, `_source.${mappingField.enrichmentField}`);
 
     const eventsWithoutEnrchment = eventsMapByFieldValue[enrichmentValue];
 
     eventsWithoutEnrchment.forEach((event) => {
-      acc[event._id] = [createEnrichmentFunction(enrichemnt)];
+      acc[event._id] = [createEnrichmentFunction(enrichment)];
     });
 
     return acc;
