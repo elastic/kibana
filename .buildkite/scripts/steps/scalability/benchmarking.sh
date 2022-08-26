@@ -22,7 +22,6 @@ source .buildkite/scripts/steps/scalability/download_artifacts.sh
 echo "--- Clone kibana-load-testing repo and prepare project"
 source .buildkite/scripts/steps/scalability/build_load_runner.sh
 
-
 echo "--- Run Scalability Tests with Elasticsearch started only once and Kibana restart before each journey"
 cd "$KIBANA_DIR"
 node scripts/es snapshot&
@@ -47,7 +46,7 @@ unset ELASTIC_APM_BREAKDOWN_METRICS
 export TEST_ES_URL=http://elastic:changeme@localhost:9200
 export TEST_ES_DISABLE_STARTUP=true
 
-# Pings the es server every seconds 2 mins until it is status is green
+# Pings the ES server every second for 2 mins until its status is green
 curl --retry 120 \
   --retry-delay 1 \
   --retry-connrefused \
