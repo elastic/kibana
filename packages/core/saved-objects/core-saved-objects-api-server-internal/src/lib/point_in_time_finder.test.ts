@@ -11,7 +11,7 @@ import type {
   SavedObjectsFindResult,
   SavedObjectsCreatePointInTimeFinderOptions,
 } from '@kbn/core-saved-objects-api-server';
-import { createPITClientMock } from '../mocks/internal_mocks';
+import { savedObjectsPointInTimeFinderMock } from '../mocks';
 
 import { PointInTimeFinder } from './point_in_time_finder';
 
@@ -42,11 +42,11 @@ const mockHits = [
 
 describe('createPointInTimeFinder()', () => {
   let logger: MockedLogger;
-  let repository: ReturnType<typeof createPITClientMock>;
+  let repository: ReturnType<typeof savedObjectsPointInTimeFinderMock.createClient>;
 
   beforeEach(() => {
     logger = loggerMock.create();
-    repository = createPITClientMock();
+    repository = savedObjectsPointInTimeFinderMock.createClient();
   });
 
   describe('#find', () => {

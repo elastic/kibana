@@ -68,7 +68,7 @@ import {
   encodeHitVersion,
   LEGACY_URL_ALIAS_TYPE,
 } from '@kbn/core-saved-objects-base-server-internal';
-import { createMigratorMock } from '../mocks/internal_mocks';
+import { kibanaMigratorMock } from '../mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import * as esKuery from '@kbn/es-query';
 import { errors as EsErrors } from '@elastic/elasticsearch';
@@ -104,7 +104,7 @@ const createUnsupportedTypeError = (type: string) =>
 describe('SavedObjectsRepository', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let savedObjectsRepository: SavedObjectsRepository;
-  let migrator: ReturnType<typeof createMigratorMock>;
+  let migrator: ReturnType<typeof kibanaMigratorMock.create>;
   let logger: ReturnType<typeof loggerMock.create>;
   let serializer: jest.Mocked<SavedObjectsSerializer>;
 
@@ -369,7 +369,7 @@ describe('SavedObjectsRepository', () => {
   beforeEach(() => {
     pointInTimeFinderMock.mockClear();
     client = elasticsearchClientMock.createElasticsearchClient();
-    migrator = createMigratorMock();
+    migrator = kibanaMigratorMock.create();
     migrator.migrateDocument.mockImplementation((doc) => ({
       ...doc,
       migrationVersion: { [doc.type]: '1.1.1' },

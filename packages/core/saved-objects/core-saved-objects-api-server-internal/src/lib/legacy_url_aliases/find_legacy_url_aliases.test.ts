@@ -13,17 +13,16 @@ import {
   LEGACY_URL_ALIAS_TYPE,
 } from '@kbn/core-saved-objects-base-server-internal';
 import type { CreatePointInTimeFinderFn, PointInTimeFinder } from '../point_in_time_finder';
-import { savedObjectsPointInTimeFinderMock } from '../../mocks/point_in_time_finder.mock';
 import { findLegacyUrlAliases } from './find_legacy_url_aliases';
-import { createPITClientMock } from '../../mocks/internal_mocks';
+import { savedObjectsPointInTimeFinderMock } from '../../mocks';
 
 describe('findLegacyUrlAliases', () => {
-  let savedObjectsMock: ReturnType<typeof createPITClientMock>;
+  let savedObjectsMock: ReturnType<typeof savedObjectsPointInTimeFinderMock.createClient>;
   let pointInTimeFinder: DeeplyMockedKeys<PointInTimeFinder>;
   let createPointInTimeFinder: jest.MockedFunction<CreatePointInTimeFinderFn>;
 
   beforeEach(() => {
-    savedObjectsMock = createPITClientMock();
+    savedObjectsMock = savedObjectsPointInTimeFinderMock.createClient();
     savedObjectsMock.find.mockResolvedValue({
       pit_id: 'foo',
       saved_objects: [],

@@ -8,7 +8,7 @@
 
 import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObjectsRepository } from './repository';
-import { createMigratorMock } from '../mocks/internal_mocks';
+import { kibanaMigratorMock } from '../mocks';
 import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
 
 jest.mock('./repository');
@@ -56,7 +56,7 @@ describe('SavedObjectsRepository#createRepository', () => {
     migrations: {},
   });
 
-  const migrator = createMigratorMock({ types: typeRegistry.getAllTypes() });
+  const migrator = kibanaMigratorMock.create({ types: typeRegistry.getAllTypes() });
   const RepositoryConstructor =
     SavedObjectsRepository as unknown as jest.Mock<SavedObjectsRepository>;
 

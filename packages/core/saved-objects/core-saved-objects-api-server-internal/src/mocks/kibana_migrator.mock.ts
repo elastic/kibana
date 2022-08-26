@@ -6,46 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type {
-  SavedObjectsPointInTimeFinderClient,
-  ISavedObjectsRepository,
-} from '@kbn/core-saved-objects-api-server';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import type { IKibanaMigrator } from '@kbn/core-saved-objects-base-server-internal';
 
-export const createPITClientMock = (): jest.Mocked<SavedObjectsPointInTimeFinderClient> => {
-  return {
-    find: jest.fn(),
-    openPointInTimeForType: jest.fn(),
-    closePointInTime: jest.fn(),
-  };
-};
-
-export const createRepositoryMock = () => {
-  const mock: jest.Mocked<ISavedObjectsRepository> = {
-    checkConflicts: jest.fn(),
-    create: jest.fn(),
-    bulkCreate: jest.fn(),
-    bulkUpdate: jest.fn(),
-    delete: jest.fn(),
-    bulkGet: jest.fn(),
-    find: jest.fn(),
-    get: jest.fn(),
-    closePointInTime: jest.fn(),
-    createPointInTimeFinder: jest.fn(),
-    openPointInTimeForType: jest.fn().mockResolvedValue({ id: 'some_pit_id' }),
-    bulkResolve: jest.fn(),
-    resolve: jest.fn(),
-    update: jest.fn(),
-    deleteByNamespace: jest.fn(),
-    incrementCounter: jest.fn(),
-    removeReferencesTo: jest.fn(),
-    collectMultiNamespaceReferences: jest.fn(),
-    updateObjectsSpaces: jest.fn(),
-  };
-
-  return mock;
-};
+// mock duplicated from `@kbn/core/saved-objects-migration-server-mocks` to avoid cyclic dependencies
 
 const defaultSavedObjectTypes: SavedObjectsType[] = [
   {
@@ -61,7 +25,7 @@ const defaultSavedObjectTypes: SavedObjectsType[] = [
   },
 ];
 
-export const createMigratorMock = (
+const createMigratorMock = (
   {
     types,
   }: {
@@ -80,4 +44,8 @@ export const createMigratorMock = (
   // mockMigrator.getActiveMappings.mockReturnValue(buildActiveMappings(mergeTypes(types)));
   mockMigrator.migrateDocument.mockImplementation((doc) => doc);
   return mockMigrator;
+};
+
+export const kibanaMigratorMock = {
+  create: createMigratorMock,
 };

@@ -14,6 +14,8 @@ import type {
 } from '@kbn/core-saved-objects-api-server';
 import { PointInTimeFinder } from '../lib/point_in_time_finder';
 
+// mock duplicated from `@kbn/core/saved-objects-api-server-mocks` to avoid cyclic dependencies
+
 const createPointInTimeFinderMock = ({
   logger = loggerMock.create(),
   savedObjectsMock,
@@ -43,6 +45,15 @@ const createPointInTimeFinderMock = ({
   return mock;
 };
 
+const createPointInTimeFinderClientMock = (): jest.Mocked<SavedObjectsPointInTimeFinderClient> => {
+  return {
+    find: jest.fn(),
+    openPointInTimeForType: jest.fn(),
+    closePointInTime: jest.fn(),
+  };
+};
+
 export const savedObjectsPointInTimeFinderMock = {
   create: createPointInTimeFinderMock,
+  createClient: createPointInTimeFinderClientMock,
 };
