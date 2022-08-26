@@ -16,7 +16,7 @@ SOURCE_FILES = glob(
     "**/*.stories.*",
     "**/__snapshots__",
     "**/integration_tests",
-    "**/mocks",
+    "**/mocks/*",
     "**/scripts",
     "**/storybook",
     "**/test_fixtures",
