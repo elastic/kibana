@@ -34,7 +34,6 @@ import { agentConfigurationRouteRepository } from '../settings/agent_configurati
 import { anomalyDetectionRouteRepository } from '../settings/anomaly_detection/route';
 import { apmIndicesRouteRepository } from '../settings/apm_indices/route';
 import { customLinkRouteRepository } from '../settings/custom_link/route';
-import { experimentalFeaturesRouteRepository } from '../settings/experimental_features/route';
 import { sourceMapsRouteRepository } from '../source_maps/route';
 import { spanLinksRouteRepository } from '../span_links/route';
 import { suggestionsRouteRepository } from '../suggestions/route';
@@ -74,7 +73,6 @@ function getTypedGlobalApmServerRouteRepository() {
     ...infrastructureRouteRepository,
     ...debugTelemetryRoute,
     ...timeRangeMetadataRoute,
-    ...experimentalFeaturesRouteRepository,
   };
 
   return repository;
