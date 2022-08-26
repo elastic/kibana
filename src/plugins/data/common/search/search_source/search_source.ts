@@ -58,8 +58,28 @@
  *    `appSearchSource`.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { buildEsQuery, Filter, isOfQueryType } from '@kbn/es-query';
+import {
+  buildExpression,
+  buildExpressionFunction,
+  ExpressionAstExpression,
+} from '@kbn/expressions-plugin/common';
+import { getHighlightRequest } from '@kbn/field-formats-plugin/common';
+import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/common';
 import { setWith } from '@kbn/safer-lodash-set';
-import { difference, isEqual, isFunction, isObject, keyBy, pick, uniqueId, uniqWith } from 'lodash';
+import _, {
+  difference,
+  isEqual,
+  isFunction,
+  isObject,
+  keyBy,
+  pick,
+  uniqueId,
+  uniqWith,
+} from 'lodash';
+import { defer, EMPTY, from, lastValueFrom, Observable } from 'rxjs';
 import {
   catchError,
   finalize,
@@ -70,23 +90,32 @@ import {
   switchMap,
   tap,
 } from 'rxjs/operators';
-import { defer, EMPTY, from, lastValueFrom, Observable } from 'rxjs';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { buildEsQuery, Filter, isOfQueryType } from '@kbn/es-query';
-import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/common';
-import { getHighlightRequest } from '@kbn/field-formats-plugin/common';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import {
-  ExpressionAstExpression,
-  buildExpression,
-  buildExpressionFunction,
-} from '@kbn/expressions-plugin/common';
-import _ from 'lodash';
+  AggConfigs,
+  AggConfigSerialized,
+  DataViewField,
+  EsQuerySortValue,
+  getEsQueryConfig,
+  IEsSearchResponse,
+  IKibanaSearchResponse,
+  ISearchGeneric,
+  isErrorResponse,
+  isPartialResponse,
+  SerializedSearchSourceFields,
+  UI_SETTINGS,
+} from '../..';
+import { AggsStart } from '../aggs';
+import {
+  EsdslExpressionFunctionDefinition,
+  ExpressionFunctionKibanaContext,
+  filtersToAst,
+  queryToAst,
+} from '../expressions';
+import { extractReferences } from './extract_references';
+import type { FetchHandlers, SearchRequest } from './fetch';
+import { getSearchParamsFromRequest, RequestFailure } from './fetch';
+import { getRequestInspectorStats, getResponseInspectorStats } from './inspect';
 import { normalizeSortRequest } from './normalize_sort_request';
-
-import { AggConfigSerialized, DataViewField, SerializedSearchSourceFields } from '../..';
-
-import { AggConfigs, EsQuerySortValue, IEsSearchResponse, ISearchGeneric } from '../..';
 import type {
   ISearchSource,
   SearchFieldValue,
@@ -94,25 +123,6 @@ import type {
   SearchSourceOptions,
   SearchSourceSearchOptions,
 } from './types';
-import { getSearchParamsFromRequest, RequestFailure } from './fetch';
-import type { FetchHandlers, SearchRequest } from './fetch';
-import { getRequestInspectorStats, getResponseInspectorStats } from './inspect';
-
-import {
-  getEsQueryConfig,
-  IKibanaSearchResponse,
-  isErrorResponse,
-  isPartialResponse,
-  UI_SETTINGS,
-} from '../..';
-import { AggsStart } from '../aggs';
-import { extractReferences } from './extract_references';
-import {
-  EsdslExpressionFunctionDefinition,
-  ExpressionFunctionKibanaContext,
-  filtersToAst,
-  queryToAst,
-} from '../expressions';
 
 /** @internal */
 export const searchSourceRequiredUiSettings = [
@@ -486,24 +496,30 @@ export class SearchSource {
     }
   }
 
-  private postFlightTransform(response: IEsSearchResponse<unknown>) {
+  private postFlightTransform(
+    response: IEsSearchResponse<unknown>
+  ): IEsSearchResponse<any> | undefined {
     const aggs = this.getField('aggs');
     if (aggs instanceof AggConfigs) {
       return aggs.postFlightTransform(response);
-    } else {
-      return response;
     }
   }
 
   private async fetchOthers(
     response: estypes.SearchResponse<unknown>,
     options: SearchSourceSearchOptions
-  ) {
+  ): Promise<
+    estypes.SearchResponse<any, Record<string, estypes.AggregationsAggregate>> | undefined
+  > {
     const aggs = this.getField('aggs');
+    let newResponse:
+      | estypes.SearchResponse<any, Record<string, estypes.AggregationsAggregate>>
+      | undefined;
     if (aggs instanceof AggConfigs) {
       for (const agg of aggs.aggs) {
         if (agg.enabled && typeof agg.type.postFlightRequest === 'function') {
-          response = await agg.type.postFlightRequest(
+          // BUG? each each sequential postFlightRequest overwrites the previous
+          newResponse = await agg.type.postFlightRequest(
             response,
             aggs,
             agg,
@@ -515,7 +531,7 @@ export class SearchSource {
         }
       }
     }
-    return response;
+    return newResponse;
   }
 
   /**
@@ -533,45 +549,52 @@ export class SearchSource {
 
     return search({ params, indexType: searchRequest.indexType }, options).pipe(
       switchMap((response) => {
-        return new Observable<IKibanaSearchResponse<unknown>>((obs) => {
+        return new Observable<IKibanaSearchResponse<unknown>>((obs): void => {
           if (isErrorResponse(response)) {
-            obs.error(response);
-          } else if (isPartialResponse(response)) {
-            obs.next(this.postFlightTransform(response));
-          } else {
-            if (!this.hasPostFlightRequests()) {
-              obs.next(this.postFlightTransform(response));
-              obs.complete();
-            } else {
-              // Treat the complete response as partial, then run the postFlightRequests.
-              obs.next({
-                ...this.postFlightTransform(response),
-                isPartial: true,
-                isRunning: true,
-              });
-              const sub = from(this.fetchOthers(response.rawResponse, options)).subscribe({
-                next: (responseWithOther) => {
-                  obs.next(
-                    this.postFlightTransform({
-                      ...response,
-                      rawResponse: responseWithOther!,
-                    })
-                  );
-                },
-                error: (e) => {
-                  obs.error(e);
-                  sub.unsubscribe();
-                },
-                complete: () => {
-                  obs.complete();
-                  sub.unsubscribe();
-                },
-              });
-            }
+            return obs.error(response);
           }
+
+          if (isPartialResponse(response)) {
+            const next = this.postFlightTransform(response);
+            return next && obs.next(next);
+          }
+
+          if (!this.hasPostFlightRequests()) {
+            return obs.complete();
+          }
+
+          // Treat the complete response as partial, then run the postFlightRequests.
+          const next = this.postFlightTransform(response);
+          if (next) {
+            obs.next({ ...next, isPartial: true, isRunning: true });
+          }
+          const sub = from(this.fetchOthers(response.rawResponse, options)).subscribe({
+            next: (responseWithOther) => {
+              const nextOther =
+                responseWithOther &&
+                this.postFlightTransform({
+                  ...response,
+                  rawResponse: responseWithOther,
+                });
+              return nextOther && obs.next(nextOther);
+            },
+            error: (e) => {
+              obs.error(e);
+              sub.unsubscribe();
+            },
+            complete: () => {
+              obs.complete();
+              sub.unsubscribe();
+            },
+          });
         });
       }),
-      map((response) => onResponse(searchRequest, response, options))
+      map((response) => {
+        if (response) {
+          onResponse(searchRequest, response, options);
+        }
+        return response;
+      })
     );
   }
 

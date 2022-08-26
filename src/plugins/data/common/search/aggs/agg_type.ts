@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { constant, noop, identity } from 'lodash';
+import { constant, noop } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
 import { DatatableColumnType } from '@kbn/expressions-plugin/common';
@@ -30,7 +30,7 @@ type PostFlightRequestFn<TAggConfig> = (
   inspectorRequestAdapter?: RequestAdapter,
   abortSignal?: AbortSignal,
   searchSessionId?: string
-) => Promise<estypes.SearchResponse<any>>;
+) => Promise<estypes.SearchResponse<any> | undefined>;
 
 export interface AggTypeConfig<
   TAggConfig extends AggConfig = AggConfig,
@@ -307,7 +307,7 @@ export class AggType<
     this.getRequestAggs = config.getRequestAggs || noop;
     this.getResponseAggs = config.getResponseAggs || (() => {});
     this.decorateAggConfig = config.decorateAggConfig || (() => ({}));
-    this.postFlightRequest = config.postFlightRequest || identity;
+    this.postFlightRequest = config.postFlightRequest || (() => Promise.resolve(undefined));
     this.hasPrecisionError = config.hasPrecisionError;
 
     this.getSerializedFormat =

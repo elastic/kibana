@@ -677,7 +677,7 @@ describe('AggConfigs', () => {
         },
       };
       const mergedResponse = ac.postFlightTransform(response as unknown as IEsSearchResponse<any>);
-      expect(mergedResponse.rawResponse).toEqual({
+      expect(mergedResponse?.rawResponse).toEqual({
         aggregations: {
           '1': {
             buckets: [
@@ -772,7 +772,7 @@ describe('AggConfigs', () => {
         },
       };
       const mergedResponse = ac.postFlightTransform(response as unknown as IEsSearchResponse<any>);
-      expect(mergedResponse.rawResponse).toEqual({
+      expect(mergedResponse?.rawResponse).toEqual({
         aggregations: {
           '1': {
             buckets: [
@@ -845,7 +845,7 @@ describe('AggConfigs', () => {
       const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
 
       expect(toString(ac.toExpressionAst())).toMatchInlineSnapshot(`
-        "esaggs index={indexPatternLoad id=\\"logstash-*\\"} metricsAtAllLevels=false partialRows=false 
+        "esaggs index={indexPatternLoad id=\\"logstash-*\\"} metricsAtAllLevels=false partialRows=false
           aggs={aggDateHistogram field=\\"@timestamp\\" useNormalizedEsInterval=true extendToTimeRange=false scaleMetricValues=false interval=\\"10s\\" drop_partials=false min_doc_count=1 extended_bounds={extendedBounds} id=\\"1\\" enabled=true schema=\\"segment\\"}
           aggs={aggAvg field=\\"bytes\\" id=\\"2\\" enabled=true schema=\\"metric\\"}
           aggs={aggSum field=\\"bytes\\" emptyAsNull=false id=\\"3\\" enabled=true schema=\\"metric\\"}

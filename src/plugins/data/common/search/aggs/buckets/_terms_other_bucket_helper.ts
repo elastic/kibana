@@ -325,7 +325,7 @@ export function constructMultiTermOtherFilter(
 
 export const createOtherBucketPostFlightRequest = (
   otherFilterBuilder: (requestAgg: Record<string, any>, key: string, otherAgg: IAggConfig) => Filter
-) => {
+): IAggType['postFlightRequest'] | undefined => {
   const postFlightRequest: IAggType['postFlightRequest'] = async (
     resp,
     aggConfigs,
@@ -335,11 +335,11 @@ export const createOtherBucketPostFlightRequest = (
     abortSignal,
     searchSessionId
   ) => {
-    if (!resp.aggregations) return resp;
+    if (!resp.aggregations) return;
     const nestedSearchSource = searchSource.createChild();
     if (aggConfig.params.otherBucket) {
       const filterAgg = buildOtherBucketAgg(aggConfigs, aggConfig, resp);
-      if (!filterAgg) return resp;
+      if (!filterAgg) return;
 
       nestedSearchSource.setField('aggs', filterAgg);
 

@@ -442,10 +442,7 @@ export class AggConfigs {
     ];
   }
 
-  postFlightTransform(response: IEsSearchResponse) {
-    if (!this.hasTimeShifts()) {
-      return response;
-    }
+  postFlightTransform(response: IEsSearchResponse): IEsSearchResponse<any> | undefined {
     const transformedRawResponse = cloneDeep(response.rawResponse);
     if (!transformedRawResponse.aggregations) {
       transformedRawResponse.aggregations = {

@@ -55,10 +55,8 @@ import {
   SearchSourceService,
   selectFilterFunction,
   eqlRawResponse,
-  SearchSourceSearchOptions,
 } from '../../common/search';
 import { AggsService } from './aggs';
-import { IKibanaSearchResponse, SearchRequest } from '..';
 import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
 import { createUsageCollector, SearchUsageCollector } from './collectors';
 import { getEsaggs, getEsdsl, getEssql, getEql } from './expressions';
@@ -239,8 +237,11 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       aggs,
       getConfig: uiSettings.get.bind(uiSettings),
       search,
-      onResponse: (...args: [SearchRequest, IKibanaSearchResponse, SearchSourceSearchOptions]) =>
-        handleResponse(...args, theme),
+      onResponse: (request, response, options) => {
+        if (response != null) {
+          handleResponse(request, response, options, theme);
+        }
+      },
     };
 
     const config = this.initializerContext.config.get();
@@ -268,7 +269,9 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     return {
       aggs,
       search,
-      showError: (e: Error) => {
+      showError: (e) => {
+        // eslint-disable-next-line no-console
+        console.error(e);
         this.searchInterceptor.showError(e);
       },
       session: this.sessionService,

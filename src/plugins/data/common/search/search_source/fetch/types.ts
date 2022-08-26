@@ -29,7 +29,7 @@ export interface FetchHandlers {
     request: SearchRequest,
     response: IKibanaSearchResponse,
     options: SearchSourceSearchOptions
-  ) => IKibanaSearchResponse;
+  ) => void;
 }
 
 export interface SearchError {
