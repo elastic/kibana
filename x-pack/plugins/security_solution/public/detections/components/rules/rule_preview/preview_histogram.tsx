@@ -207,7 +207,6 @@ export const PreviewHistogram = ({
       <FullScreenContainer $isFullScreen={globalFullScreen}>
         <InspectButtonContainer>
           {timelinesUi.getTGrid<'embedded'>({
-            additionalFilters: <></>,
             appId: APP_UI_ID,
             browserFields,
             columns,
@@ -238,7 +237,6 @@ export const PreviewHistogram = ({
             runtimeMappings,
             setQuery: () => {},
             sort,
-            tGridEventRenderedViewEnabled,
             type: 'embedded',
             leadingControlColumns: getPreviewTableControlColumn(1.5),
           })}

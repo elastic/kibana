@@ -370,7 +370,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
                       onRuleChange={onRuleChange}
                       pageSize={itemsPerPageStore}
                       tabType={TimelineTabs.query}
-                      tableView="gridView"
                       totalItems={totalCountMinusDeleted}
                       totalSelectAllAlerts={totalSelectAllAlerts}
                       unit={unit}

@@ -14,8 +14,6 @@ import {
   EuiDataGridStyle,
   EuiDataGridToolBarVisibilityOptions,
   EuiLoadingSpinner,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiProgress,
 } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
@@ -76,8 +74,6 @@ import { RowAction } from './row_action';
 import * as i18n from './translations';
 import { AlertCount } from '../styles';
 import { checkBoxControlColumn } from './control_columns';
-import { ViewSelection } from '../event_rendered_view/selector';
-import { EventRenderedView } from '../event_rendered_view';
 import { REMOVE_COLUMN } from './column_headers/translations';
 import { TimelinesStartPlugins } from '../../../types';
 
@@ -107,7 +103,6 @@ interface OwnProps {
   refetch: Refetch;
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
-  tableView: ViewSelection;
   tabType: TimelineTabs;
   totalItems: number;
   trailingControlColumns?: ControlColumnProps[];
@@ -299,7 +294,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
   ({
     activePage,
     additionalControls,
-    appId = '',
     browserFields,
     bulkActions = true,
     clearSelected,
@@ -331,7 +325,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     setSelected,
     showCheckboxes,
     sort,
-    tableView = 'gridView',
     tabType,
     totalItems,
     totalSelectAllAlerts,
@@ -476,48 +469,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         }
       },
       [columnHeaders, dispatch, id, defaultColumns]
-    );
-
-    const alertToolbar = useMemo(
-      () => (
-        <EuiFlexGroup gutterSize="m" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <AlertCount>{alertCountText}</AlertCount>
-          </EuiFlexItem>
-          {showBulkActions && (
-            <Suspense fallback={<EuiLoadingSpinner />}>
-              <StatefulAlertBulkActions
-                showAlertStatusActions={showAlertStatusActions}
-                data-test-subj="bulk-actions"
-                id={id}
-                totalItems={totalSelectAllAlerts ?? totalItems}
-                filterStatus={filterStatus}
-                query={filterQuery}
-                indexName={indexNames.join()}
-                onActionSuccess={onAlertStatusActionSuccess}
-                onActionFailure={onAlertStatusActionFailure}
-                customBulkActions={additionalBulkActions}
-                refetch={refetch}
-              />
-            </Suspense>
-          )}
-        </EuiFlexGroup>
-      ),
-      [
-        additionalBulkActions,
-        alertCountText,
-        filterQuery,
-        filterStatus,
-        id,
-        indexNames,
-        onAlertStatusActionFailure,
-        onAlertStatusActionSuccess,
-        refetch,
-        showAlertStatusActions,
-        showBulkActions,
-        totalItems,
-        totalSelectAllAlerts,
-      ]
     );
 
     const toolbarVisibility: EuiDataGridToolBarVisibilityOptions = useMemo(
@@ -870,48 +821,31 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     return (
       <>
         <StatefulEventContext.Provider value={activeStatefulEventContext}>
-          {tableView === 'gridView' && (
-            <EuiDataGridContainer hideLastPage={totalItems > ES_LIMIT_COUNT}>
-              <EuiDataGrid
-                id={'body-data-grid'}
-                data-test-subj="body-data-grid"
-                aria-label={i18n.TGRID_BODY_ARIA_LABEL}
-                columns={columnsWithCellActions}
-                columnVisibility={{ visibleColumns, setVisibleColumns: onSetVisibleColumns }}
-                gridStyle={gridStyle}
-                leadingControlColumns={leadingTGridControlColumns}
-                trailingControlColumns={trailingTGridControlColumns}
-                toolbarVisibility={toolbarVisibility}
-                rowCount={totalItems}
-                renderCellValue={renderTGridCellValue}
-                sorting={{ columns: sortingColumns, onSort }}
-                onColumnResize={onColumnResize}
-                pagination={{
-                  pageIndex: activePage,
-                  pageSize,
-                  pageSizeOptions: itemsPerPageOptions,
-                  onChangeItemsPerPage,
-                  onChangePage,
-                }}
-                ref={dataGridRef}
-              />
-            </EuiDataGridContainer>
-          )}
-          {tableView === 'eventRenderedView' && (
-            <EventRenderedView
-              appId={appId}
-              alertToolbar={alertToolbar}
-              events={data}
-              leadingControlColumns={leadingTGridControlColumns ?? []}
-              onChangePage={onChangePage}
-              onChangeItemsPerPage={onChangeItemsPerPage}
-              pageIndex={activePage}
-              pageSize={pageSize}
-              pageSizeOptions={itemsPerPageOptions}
-              rowRenderers={rowRenderers}
-              totalItemCount={totalItems}
+          <EuiDataGridContainer hideLastPage={totalItems > ES_LIMIT_COUNT}>
+            <EuiDataGrid
+              id={'body-data-grid'}
+              data-test-subj="body-data-grid"
+              aria-label={i18n.TGRID_BODY_ARIA_LABEL}
+              columns={columnsWithCellActions}
+              columnVisibility={{ visibleColumns, setVisibleColumns: onSetVisibleColumns }}
+              gridStyle={gridStyle}
+              leadingControlColumns={leadingTGridControlColumns}
+              trailingControlColumns={trailingTGridControlColumns}
+              toolbarVisibility={toolbarVisibility}
+              rowCount={totalItems}
+              renderCellValue={renderTGridCellValue}
+              sorting={{ columns: sortingColumns, onSort }}
+              onColumnResize={onColumnResize}
+              pagination={{
+                pageIndex: activePage,
+                pageSize,
+                pageSizeOptions: itemsPerPageOptions,
+                onChangeItemsPerPage,
+                onChangePage,
+              }}
+              ref={dataGridRef}
             />
-          )}
+          </EuiDataGridContainer>
         </StatefulEventContext.Provider>
       </>
     );

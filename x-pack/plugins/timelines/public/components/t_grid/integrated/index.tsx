@@ -6,7 +6,7 @@
  */
 
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
@@ -39,19 +39,13 @@ import type {
 
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { defaultHeaders } from '../body/column_headers/default_headers';
-import { getCombinedFilterQuery, resolverIsShowing } from '../helpers';
+import { getCombinedFilterQuery } from '../helpers';
 import { tGridActions, tGridSelectors } from '../../../store/t_grid';
 import { useTimelineEvents, InspectResponse, Refetch } from '../../../container';
 import { StatefulBody } from '../body';
-import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexGroup, UpdatedFlexItem } from '../styles';
+import { SELECTOR_TIMELINE_GLOBAL_CONTAINER } from '../styles';
 import { Sort } from '../body/sort';
-import { InspectButton, InspectButtonContainer } from '../../inspect';
-import { SummaryViewSelector, ViewSelection } from '../event_rendered_view/selector';
-import { TGridLoading, TGridEmpty, TimelineContext } from '../shared';
-
-const TitleText = styled.span`
-  margin-right: 12px;
-`;
+import { TGridLoading, TGridEmpty } from '../shared';
 
 const StyledEuiPanel = styled(EuiPanel)<{ $isFullScreen: boolean }>`
   display: flex;
@@ -80,20 +74,9 @@ const EventsContainerLoading = styled.div.attrs(({ className = '' }) => ({
   flex-direction: column;
 `;
 
-const FullWidthFlexGroup = styled(EuiFlexGroup)<{ $visible: boolean }>`
-  overflow: hidden;
-  margin: 0;
-  display: ${({ $visible }) => ($visible ? 'flex' : 'none')};
-`;
-
-const ScrollableFlexItem = styled(EuiFlexItem)`
-  overflow: auto;
-`;
-
 const SECURITY_ALERTS_CONSUMERS = [AlertConsumers.SIEM];
 
 export interface TGridIntegratedProps {
-  additionalFilters: React.ReactNode;
   appId: string;
   browserFields: BrowserFields;
   bulkActions?: BulkActionsProp;
@@ -110,9 +93,6 @@ export interface TGridIntegratedProps {
   filters: Filter[];
   filterStatus?: AlertStatus;
   globalFullScreen: boolean;
-  // If truthy, the graph viewer (Resolver) is showing
-  graphEventId?: string;
-  graphOverlay?: React.ReactNode;
   hasAlertsCrud: boolean;
   height?: number;
   id: TimelineId;
@@ -132,16 +112,14 @@ export interface TGridIntegratedProps {
   setQuery: (inspect: InspectResponse, loading: boolean, refetch: Refetch) => void;
   sort: Sort[];
   start: string;
-  tGridEventRenderedViewEnabled: boolean;
   trailingControlColumns?: ControlColumnProps[];
   unit?: (n: number) => string;
 }
 
 const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
-  additionalFilters,
   appId,
   browserFields,
-  bulkActions = true,
+  bulkActions,
   columns,
   data,
   dataProviders,
@@ -155,8 +133,6 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   filters,
   filterStatus,
   globalFullScreen,
-  graphEventId,
-  graphOverlay = null,
   hasAlertsCrud,
   id,
   indexNames,
@@ -174,7 +150,6 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   setQuery,
   sort,
   start,
-  tGridEventRenderedViewEnabled,
   trailingControlColumns,
   unit,
 }) => {
@@ -183,17 +158,13 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   const { uiSettings } = useKibana<CoreStart>().services;
   const [isQueryLoading, setIsQueryLoading] = useState(true);
 
-  const [tableView, setTableView] = useState<ViewSelection>('gridView');
   const getManageTimeline = useMemo(() => tGridSelectors.getManageTimelineById(), []);
-  const { queryFields, title } = useDeepEqualSelector((state) =>
-    getManageTimeline(state, id ?? '')
-  );
+  const { queryFields } = useDeepEqualSelector((state) => getManageTimeline(state, id ?? ''));
 
   useEffect(() => {
     dispatch(tGridActions.updateIsLoading({ id, isLoading: isQueryLoading }));
   }, [dispatch, id, isQueryLoading]);
 
-  const justTitle = useMemo(() => <TitleText data-test-subj="title">{title}</TitleText>, [title]);
   const esQueryConfig = getEsQueryConfig(uiSettings);
 
   const filterQuery = useMemo(
@@ -273,8 +244,6 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
     setIsQueryLoading(loading);
   }, [loading]);
 
-  const alignItems = tableView === 'gridView' ? 'baseline' : 'center';
-
   const isFirstUpdate = useRef(true);
   useEffect(() => {
     if (isFirstUpdate.current && !loading) {
@@ -285,7 +254,6 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   useEffect(() => {
     setQuery(inspect, loading, refetch);
   }, [inspect, loading, refetch, setQuery]);
-  const timelineContext = useMemo(() => ({ timelineId: id }), [id]);
 
   // Clear checkbox selection when new events are fetched
   useEffect(() => {
@@ -299,91 +267,56 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   }, [nonDeletedEvents, dispatch, id]);
 
   return (
-    <InspectButtonContainer>
-      <StyledEuiPanel
-        hasBorder={false}
-        hasShadow={false}
-        paddingSize="none"
-        data-test-subj="events-viewer-panel"
-        $isFullScreen={globalFullScreen}
-      >
-        {isFirstUpdate.current && <TGridLoading height="short" />}
-
-        {graphOverlay}
-
-        {canQueryTimeline && (
-          <TimelineContext.Provider value={timelineContext}>
-            <EventsContainerLoading
-              data-timeline-id={id}
-              data-test-subj={`events-container-loading-${loading}`}
-            >
-              <UpdatedFlexGroup
-                alignItems={alignItems}
-                data-test-subj="updated-flex-group"
-                gutterSize="m"
-                justifyContent="flexEnd"
-                $view={tableView}
-              >
-                <UpdatedFlexItem grow={false} $show={!loading}>
-                  <InspectButton title={justTitle} inspect={inspect} loading={loading} />
-                </UpdatedFlexItem>
-                <UpdatedFlexItem grow={false} $show={!loading}>
-                  {!resolverIsShowing(graphEventId) && additionalFilters}
-                </UpdatedFlexItem>
-                {tGridEventRenderedViewEnabled &&
-                  ['detections-page', 'detections-rules-details-page'].includes(id) && (
-                    <UpdatedFlexItem grow={false} $show={!loading}>
-                      <SummaryViewSelector viewSelected={tableView} onViewChange={setTableView} />
-                    </UpdatedFlexItem>
-                  )}
-              </UpdatedFlexGroup>
-              <>
-                {!hasAlerts && !loading && !graphOverlay && <TGridEmpty height="short" />}
-                {hasAlerts && (
-                  <FullWidthFlexGroup
-                    $visible={!graphEventId && graphOverlay == null}
-                    gutterSize="none"
-                  >
-                    <ScrollableFlexItem grow={1}>
-                      <StatefulBody
-                        activePage={pageInfo.activePage}
-                        appId={appId}
-                        browserFields={browserFields}
-                        bulkActions={bulkActions}
-                        data={nonDeletedEvents}
-                        defaultCellActions={defaultCellActions}
-                        disabledCellActions={disabledCellActions}
-                        fieldBrowserOptions={fieldBrowserOptions}
-                        filterQuery={filterQuery}
-                        filters={filters}
-                        filterStatus={filterStatus}
-                        hasAlertsCrud={hasAlertsCrud}
-                        id={id}
-                        indexNames={indexNames}
-                        isEventViewer={true}
-                        itemsPerPageOptions={itemsPerPageOptions}
-                        leadingControlColumns={leadingControlColumns}
-                        loadPage={loadPage}
-                        onRuleChange={onRuleChange}
-                        pageSize={itemsPerPage}
-                        refetch={refetch}
-                        renderCellValue={renderCellValue}
-                        rowRenderers={rowRenderers}
-                        tableView={tableView}
-                        tabType={TimelineTabs.query}
-                        totalItems={totalCountMinusDeleted}
-                        trailingControlColumns={trailingControlColumns}
-                        unit={unit}
-                      />
-                    </ScrollableFlexItem>
-                  </FullWidthFlexGroup>
-                )}
-              </>
-            </EventsContainerLoading>
-          </TimelineContext.Provider>
-        )}
-      </StyledEuiPanel>
-    </InspectButtonContainer>
+    <StyledEuiPanel
+      hasBorder={false}
+      hasShadow={false}
+      paddingSize="none"
+      data-test-subj="events-viewer-panel"
+      $isFullScreen={globalFullScreen}
+    >
+      {isFirstUpdate.current && <TGridLoading height="short" />}
+      {canQueryTimeline && (
+        <EventsContainerLoading
+          data-timeline-id={id}
+          data-test-subj={`events-container-loading-${loading}`}
+        >
+          <>
+            {!hasAlerts && !loading && <TGridEmpty height="short" />}
+            {hasAlerts && (
+              <StatefulBody
+                activePage={pageInfo.activePage}
+                appId={appId}
+                browserFields={browserFields}
+                bulkActions={bulkActions}
+                data={nonDeletedEvents}
+                defaultCellActions={defaultCellActions}
+                disabledCellActions={disabledCellActions}
+                fieldBrowserOptions={fieldBrowserOptions}
+                filterQuery={filterQuery}
+                filters={filters}
+                filterStatus={filterStatus}
+                hasAlertsCrud={hasAlertsCrud}
+                id={id}
+                indexNames={indexNames}
+                isEventViewer={true}
+                itemsPerPageOptions={itemsPerPageOptions}
+                leadingControlColumns={leadingControlColumns}
+                loadPage={loadPage}
+                onRuleChange={onRuleChange}
+                pageSize={itemsPerPage}
+                refetch={refetch}
+                renderCellValue={renderCellValue}
+                rowRenderers={rowRenderers}
+                tabType={TimelineTabs.query}
+                totalItems={totalCountMinusDeleted}
+                trailingControlColumns={trailingControlColumns}
+                unit={unit}
+              />
+            )}
+          </>
+        </EventsContainerLoading>
+      )}
+    </StyledEuiPanel>
   );
 };
 

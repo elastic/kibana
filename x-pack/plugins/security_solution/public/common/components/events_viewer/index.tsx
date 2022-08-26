@@ -5,22 +5,24 @@
  * 2.0.
  */
 
-import React, { useRef, useCallback, useMemo, useEffect } from 'react';
+import React, { useRef, useCallback, useMemo, useEffect, useState, Suspense } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import type { Filter } from '@kbn/es-query';
 import type { EntityType } from '@kbn/timelines-plugin/common';
 import type { TGridCellAction } from '@kbn/timelines-plugin/common/types';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { resolverIsShowing } from '../../../timelines/components/timeline/helpers';
 import { useBulkAddToCaseActions } from '../../../detections/components/alerts_table/timeline_actions/use_bulk_add_to_case_actions';
 import type { inputsModel, State } from '../../store';
 import { inputsActions } from '../../store/actions';
 import type { ControlColumnProps, RowRenderer } from '../../../../common/types/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
 import { APP_UI_ID } from '../../../../common/constants';
-import { timelineActions } from '../../../timelines/store/timeline';
+import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
 import type { SubsetTimelineModel } from '../../../timelines/store/timeline/model';
 import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
-import { InspectButtonContainer } from '../inspect';
+import { InspectButton, InspectButtonContainer } from '../inspect';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { eventsViewerSelector } from './selectors';
@@ -36,7 +38,13 @@ import {
   useSessionViewNavigation,
   useSessionView,
 } from '../../../timelines/components/timeline/session_tab_content/use_session_view';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import type { ViewSelection } from '../event_rendered_view/selector';
+import { SummaryViewSelector } from '../event_rendered_view/selector';
+import { EventRenderedView } from '../event_rendered_view';
+import { AlertCount } from './styles';
 
+const StatefulAlertBulkActions = lazy(() => import('../toolbar/bulk_actions/alert_bulk_actions'));
 const EMPTY_CONTROL_COLUMNS: ControlColumnProps[] = [];
 
 const FullScreenContainer = styled.div<{ $isFullScreen: boolean }>`
@@ -44,6 +52,31 @@ const FullScreenContainer = styled.div<{ $isFullScreen: boolean }>`
   flex: 1 1 auto;
   display: flex;
   width: 100%;
+`;
+
+export const UpdatedFlexGroup = styled(EuiFlexGroup)<{ $view?: ViewSelection }>`
+  ${({ $view, theme }) => ($view === 'gridView' ? `margin-right: ${theme.eui.euiSizeXL};` : '')}
+  position: absolute;
+  z-index: ${({ theme }) => theme.eui.euiZLevel1 - 3};
+  right: 0px;
+`;
+
+export const UpdatedFlexItem = styled(EuiFlexItem)<{ $show: boolean }>`
+  ${({ $show }) => ($show ? '' : 'visibility: hidden;')}
+`;
+
+const TitleText = styled.span`
+  margin-right: 12px;
+`;
+
+const FullWidthFlexGroup = styled(EuiFlexGroup)<{ $visible: boolean }>`
+  overflow: hidden;
+  margin: 0;
+  display: ${({ $visible }) => ($visible ? 'flex' : 'none')};
+`;
+
+const ScrollableFlexItem = styled(EuiFlexItem)`
+  overflow: auto;
 `;
 
 export interface Props {
@@ -205,54 +238,182 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     editorActionsRef,
   });
 
+  const [loading, { events, loadPage, pageInfo, refetch, totalCount = 0, inspect }] =
+    useTimelineEvents({
+      // We rely on entityType to determine Events vs Alerts
+      alertConsumers: SECURITY_ALERTS_CONSUMERS,
+      data,
+      dataViewId,
+      endDate: end,
+      entityType,
+      fields,
+      filterQuery,
+      id,
+      indexNames,
+      limit: itemsPerPage,
+      runtimeMappings,
+      skip: !canQueryTimeline,
+      sort: sortField,
+      startDate: start,
+    });
+
+  const totalCountMinusDeleted = useMemo(
+    () => (totalCount > 0 ? totalCount - deletedEventIds.length : 0),
+    [deletedEventIds.length, totalCount]
+  );
+
+  const hasAlerts = totalCountMinusDeleted > 0;
+
+  const nonDeletedEvents = useMemo(
+    () => events.filter((e) => !deletedEventIds.includes(e._id)),
+    [deletedEventIds, events]
+  );
+
   const isLive = input.policy.kind === 'interval';
+  const justTitle = useMemo(() => <TitleText data-test-subj="title">{title}</TitleText>, [title]);
+  const [tableView, setTableView] = useState<ViewSelection>('gridView');
+  const alignItems = tableView === 'gridView' ? 'baseline' : 'center';
+
+  const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
+  const alertToolbar = useMemo(
+    () => (
+      <EuiFlexGroup gutterSize="m" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <AlertCount>{alertCountText}</AlertCount>
+        </EuiFlexItem>
+        <Suspense fallback={<EuiLoadingSpinner />}>
+          <StatefulAlertBulkActions
+            showAlertStatusActions={showAlertStatusActions}
+            data-test-subj="bulk-actions"
+            id={id}
+            totalItems={totalSelectAllAlerts ?? totalItems}
+            filterStatus={filterStatus}
+            query={filterQuery}
+            indexName={indexNames.join()}
+            onActionSuccess={onAlertStatusActionSuccess}
+            onActionFailure={onAlertStatusActionFailure}
+            customBulkActions={additionalBulkActions}
+            refetch={refetch}
+          />
+        </Suspense>
+      </EuiFlexGroup>
+    ),
+    [
+      additionalBulkActions,
+      alertCountText,
+      filterQuery,
+      filterStatus,
+      id,
+      indexNames,
+      onAlertStatusActionFailure,
+      onAlertStatusActionSuccess,
+      refetch,
+      showAlertStatusActions,
+      totalItems,
+      totalSelectAllAlerts,
+    ]
+  );
+  const { queryFields, title } = useDeepEqualSelector((state) =>
+    getManageTimeline(state, id ?? '')
+  );
+
+  const onChangePage = useCallback(
+    (page) => {
+      loadPage(page);
+    },
+    [loadPage]
+  );
+
+  const onChangeItemsPerPage = useCallback(
+    (itemsChangedPerPage) => {
+      dispatch(timelineActions.updateItemsPerPage({ id, itemsPerPage: itemsChangedPerPage }));
+    },
+    [id, dispatch]
+  );
 
   return (
     <>
       <FullScreenContainer $isFullScreen={globalFullScreen}>
         <InspectButtonContainer>
-          {timelinesUi.getTGrid<'embedded'>({
-            additionalFilters,
-            appId: APP_UI_ID,
-            browserFields,
-            bulkActions,
-            columns,
-            dataProviders,
-            dataViewId,
-            defaultCellActions,
-            deletedEventIds,
-            disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
-            end,
-            entityType,
-            fieldBrowserOptions,
-            filters: globalFilters,
-            filterStatus: currentFilter,
-            globalFullScreen,
-            graphEventId,
-            graphOverlay,
-            hasAlertsCrud,
-            id,
-            indexNames: selectedPatterns,
-            indexPattern,
-            isLive,
-            isLoadingIndexPattern,
-            itemsPerPage,
-            itemsPerPageOptions,
-            kqlMode,
-            leadingControlColumns,
-            onRuleChange,
-            query,
-            renderCellValue,
-            rowRenderers,
-            runtimeMappings,
-            setQuery,
-            sort,
-            start,
-            tGridEventRenderedViewEnabled,
-            trailingControlColumns,
-            type: 'embedded',
-            unit,
-          })}
+          <UpdatedFlexGroup
+            alignItems={alignItems}
+            data-test-subj="updated-flex-group"
+            gutterSize="m"
+            justifyContent="flexEnd"
+            $view={tableView}
+          >
+            <UpdatedFlexItem grow={false} $show={!loading}>
+              <InspectButton title={justTitle} queryId={'test'} />
+            </UpdatedFlexItem>
+            <UpdatedFlexItem grow={false} $show={!loading}>
+              {!resolverIsShowing(graphEventId) && additionalFilters}
+            </UpdatedFlexItem>
+            {tGridEventRenderedViewEnabled &&
+              ['detections-page', 'detections-rules-details-page'].includes(id) && (
+                <UpdatedFlexItem grow={false} $show={!loading}>
+                  <SummaryViewSelector viewSelected={tableView} onViewChange={setTableView} />
+                </UpdatedFlexItem>
+              )}
+          </UpdatedFlexGroup>
+          <FullWidthFlexGroup $visible={!graphEventId} gutterSize="none">
+            <ScrollableFlexItem grow={1}>
+              {tableView === 'gridView' &&
+                timelinesUi.getTGrid<'embedded'>({
+                  appId: APP_UI_ID,
+                  browserFields,
+                  bulkActions,
+                  columns,
+                  dataProviders,
+                  dataViewId,
+                  defaultCellActions,
+                  deletedEventIds,
+                  disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
+                  end,
+                  entityType,
+                  fieldBrowserOptions,
+                  filters: globalFilters,
+                  filterStatus: currentFilter,
+                  globalFullScreen,
+                  hasAlertsCrud,
+                  id,
+                  indexNames: selectedPatterns,
+                  indexPattern,
+                  isLive,
+                  isLoadingIndexPattern,
+                  itemsPerPage,
+                  itemsPerPageOptions,
+                  kqlMode,
+                  leadingControlColumns,
+                  onRuleChange,
+                  query,
+                  renderCellValue,
+                  rowRenderers,
+                  runtimeMappings,
+                  setQuery,
+                  sort,
+                  start,
+                  trailingControlColumns,
+                  type: 'embedded',
+                  unit,
+                })}
+              {tableView === 'eventRenderedView' && (
+                <EventRenderedView
+                  appId={APP_UI_ID}
+                  alertToolbar={alertToolbar}
+                  events={events}
+                  leadingControlColumns={leadingTGridControlColumns ?? []}
+                  onChangePage={onChangePage}
+                  onChangeItemsPerPage={onChangeItemsPerPage}
+                  pageIndex={pageInfo.activePage}
+                  pageSize={pageInfo.pageSize}
+                  pageSizeOptions={itemsPerPageOptions}
+                  rowRenderers={rowRenderers}
+                  totalItemCount={totalCountMinusDeleted}
+                />
+              )}
+              {graphOverlay}
+            </ScrollableFlexItem>
+          </FullWidthFlexGroup>
         </InspectButtonContainer>
       </FullScreenContainer>
       {DetailsPanel}
