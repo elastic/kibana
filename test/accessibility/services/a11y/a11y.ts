@@ -75,10 +75,6 @@ export class AccessibilityService extends FtrService {
       errorMsgs.push(printResult(chalk.red('VIOLATION'), result));
     }
 
-    // if(errorMsgs.length) {
-    //   throw new Error(`a11y report:\n${errorMsgs.join('\n')}`);
-    // }
-
     // Throw a new Error if not skipping failures
     if (!skipFailures && errorMsgs.length) {
       throw new Error(`a11y report:\n${errorMsgs.join('\n')}`);
@@ -89,7 +85,7 @@ export class AccessibilityService extends FtrService {
       // eslint-disable-next-line no-console
       console.log(`
 ========================================
-* REPORT-ONLY MODE
+* A11Y REPORT MODE ONLY
 ========================================
 a11y report:\n${errorMsgs.join('\n')}
       `);

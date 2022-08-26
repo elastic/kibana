@@ -51,7 +51,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     // https://github.com/elastic/kibana/issues/128009
-    it('Session management filtered by applications meets a11y requirements', async () => {
+    it.skip('Session management filtered by applications meets a11y requirements', async () => {
       await (await find.byCssSelector('[title="dashboards"]')).click();
       await a11y.testAppSnapshot();
     });
@@ -78,9 +78,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('cancelEditName');
       await testSubjects.click('sessionManagementActionsCol');
       await testSubjects.click('sessionManagementPopoverAction-delete');
-      await a11y.testAppSnapshot({ skipFailures: true });
+      await a11y.testAppSnapshot();
       await testSubjects.click('confirmModalCancelButton');
-
       await testSubjects.click('clearSearchButton');
     });
   });

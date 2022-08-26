@@ -76,9 +76,9 @@ You can run the same thing that runs CI using browser plugins:
 * https://chrome.google.com/webstore/detail/axe-web-accessibility-tes/lhdoppojpmngadmnindnejefpokejbdd?hl=en-US[Chrome]
 * https://addons.mozilla.org/en-US/firefox/addon/axe-devtools/[Firefox]
 
-=== Anatomy of a failure
+=== Anatomy of a violation
 
-Failures can seem confusing if you've never seen one before. Here is a breakdown of what a failure coming from CI might look like:
+Accessibility violations can seem confusing if you've never seen one before. Here is a breakdown of what a violation coming from CI might look like:
 [source,bash]
 ----
 1)    Dashboard
@@ -102,3 +102,33 @@ Failures can seem confusing if you've never seen one before. Here is a breakdown
 * "Help: <url>" links to the axe documentation for that rule, including severity, remediation tips, and good and bad code examples.
 * "Elements:"  points to where in the DOM the failure originated (using HTML syntax). In this example, the problem came from a span with the `aria-hidden="true"` attribute and a nested `<button>` tag. If the selector is too complicated to find the source of the problem, use the browser plugins mentioned earlier to locate it. If you have a general idea where the issue is coming from, you can also try adding unique IDs to the page to narrow down the location.
 * The stack trace points to the internals of axe. The stack trace is there in case the test failure is a bug in axe and not in your code, although this is unlikely.
+
+=== Report violations without failing a test
+
+There are limited cases where it is useful to log accessibility violations to the console without failing a test. These cases include:
+
+* Products or features that previously had no accessibility tests
+* Features that are being audited by accessibility specialists and have code that may change often
+* Features that make use of new or experimental UI patterns
+
+To log accessibility violations only, add a `skipFailures` declaration to the `a11y.testAppSnapshot()` function:
+
+[source,js]
+----
+a11y.testAppSnapshot({ skipFailures: true });
+----
+
+Conditional logic has been added to prevent violations from throwing an `Error`. Violations will be logged to the console with the same output as a failing test, and will include the string below for easy full-text searching.
+
+[source,shell]
+----
+========================================
+* A11Y REPORT MODE ONLY
+========================================
+----
+
+=== Prioritize moving from reporting violations to failing tests
+
+Reporting accessibility violations is a progress step. It gives product teams the ability to put a product or feature under test without slowing them down. Teams should monitor logs for reported violations and prioritize fixing them in upcoming sprints. When code is stable, teams should remove the `skipFailures` declaration so tests will fail if regressions are introduced.
+
+Automated testing allows us to be pro-active and find issuse before they impact our users. Quality assurance engineers rely on automated tests to prioritize areas that might need additional human testing. Accessibility specialists rely on automated tests to create documentation and highlight best practices.
