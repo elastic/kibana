@@ -128,7 +128,6 @@ describe('When calling package policy', () => {
           description: '',
           policy_id: 'a5ca00c0-b30c-11ea-9732-1bb05811278c',
           enabled: true,
-          output_id: '',
           inputs: [],
           namespace: 'default',
           package: { name: 'endpoint', title: 'Elastic Endpoint', version: '0.5.0' },
@@ -222,7 +221,6 @@ describe('When calling package policy', () => {
             ],
             name: 'endpoint-1',
             namespace: 'default',
-            output_id: '',
             package: {
               name: 'endpoint',
               title: 'Elastic Endpoint',
@@ -254,7 +252,6 @@ describe('When calling package policy', () => {
           ],
           name: 'endpoint-1',
           namespace: 'default',
-          output_id: '',
           package: {
             name: 'endpoint',
             title: 'Elastic Endpoint',
@@ -322,7 +319,6 @@ describe('When calling package policy', () => {
       description: 'desc',
       policy_id: '2',
       enabled: true,
-      output_id: '3',
       inputs: [
         {
           type: 'logfile',
@@ -396,7 +392,6 @@ describe('When calling package policy', () => {
         description: '',
         policy_id: '3',
         enabled: false,
-        output_id: '',
         inputs: [
           {
             type: 'metrics',

@@ -10,7 +10,7 @@ import { DataProvider, QueryOperator } from '@kbn/timelines-plugin/common';
 import { AddToTimelineButtonProps } from '@kbn/timelines-plugin/public';
 import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui/src/components/button';
 import { EMPTY_VALUE } from '../../../../../common/constants';
-import { displayField, displayValue } from '../../../indicators/lib/display_value';
+import { getDisplayName } from '../../../indicators/lib/display_name';
 import { ComputedIndicatorFieldId } from '../../../indicators/components/indicators_table/cell_renderer';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { unwrapValue } from '../../../indicators/lib/unwrap_value';
@@ -53,9 +53,10 @@ export const AddToTimeline: VFC<AddToTimelineProps> = ({ data, field, component,
   let value: string | null;
   if (typeof data === 'string') {
     value = data;
-  } else if (field === ComputedIndicatorFieldId.DisplayValue) {
-    field = displayField(data) || '';
-    value = displayValue(data);
+  } else if (field === ComputedIndicatorFieldId.DisplayName) {
+    const displayName = getDisplayName(data);
+    field = displayName.field;
+    value = displayName.value;
   } else {
     value = unwrapValue(data, field as RawIndicatorFieldId);
   }
