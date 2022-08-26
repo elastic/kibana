@@ -12,7 +12,7 @@ import { isVersionMismatch } from '../../../common/is_version_mismatch';
 import { InitialAppData } from '../../../common/types';
 import { VersionMismatchPage } from '../shared/version_mismatch';
 
-import { AnalyticsOverview } from './components/analytics_overview'
+import { AnalyticsOverview } from './components/analytics_overview/analytics_overview';
 
 import { ROOT_PATH } from './routes';
 
