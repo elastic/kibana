@@ -82,7 +82,7 @@ export const EditIndexPattern = withRouter(
     }, [savedObjectsManagement]);
 
     useEffect(() => {
-      if (allowedTypes.length === 0) {
+      if (allowedTypes.length === 0 || !indexPattern.isPersisted()) {
         return;
       }
       const allowedAsString = allowedTypes.map((item) => item.name);
