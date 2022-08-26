@@ -7,4 +7,3 @@
  */
 
 export { loadFieldStats } from './field_stats';
-export { canProvideStatsForField } from '../../common/utils/field_stats_utils';

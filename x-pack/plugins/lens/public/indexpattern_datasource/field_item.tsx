@@ -364,7 +364,7 @@ function FieldItemPopoverContents(props: FieldItemProps) {
           }
 
           if (params?.noDataFound) {
-            // TODO: should we replace this with a default message "Summary is not available for this field?"
+            // TODO: should we replace this with a default message "Analysis is not available for this field?"
             const isUsingSampling = core.uiSettings.get('lens:useFieldExistenceSampling');
             return (
               <>
