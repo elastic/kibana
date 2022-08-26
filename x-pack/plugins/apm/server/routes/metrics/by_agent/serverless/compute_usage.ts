@@ -6,9 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { termQuery } from '@kbn/observability-plugin/server';
 import {
   FAAS_BILLED_DURATION,
   FAAS_COLDSTART_DURATION,
+  FAAS_ID,
   METRIC_SYSTEM_TOTAL_MEMORY,
 } from '../../../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../../../lib/helpers/setup_request';
@@ -57,7 +59,7 @@ export function getComputeUsage({
   kuery,
   setup,
   serviceName,
-  serviceNodeName,
+  faasId,
   start,
   end,
 }: {
@@ -65,7 +67,7 @@ export function getComputeUsage({
   kuery: string;
   setup: Setup;
   serviceName: string;
-  serviceNodeName?: string;
+  faasId?: string;
   start: number;
   end: number;
 }) {
@@ -74,14 +76,16 @@ export function getComputeUsage({
     kuery,
     setup,
     serviceName,
-    serviceNodeName,
     start,
     end,
     chartBase,
     aggs: {
       computeUsage: { avg: { script: computeUsageScript } },
     },
-    additionalFilters: [{ exists: { field: FAAS_COLDSTART_DURATION } }],
+    additionalFilters: [
+      { exists: { field: FAAS_COLDSTART_DURATION } },
+      ...termQuery(FAAS_ID, faasId),
+    ],
     operationName: 'get_compute_usage',
   });
 }

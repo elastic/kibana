@@ -22,6 +22,7 @@ export async function getMetricsChartDataByAgent({
   start,
   end,
   serviceRuntimeName,
+  faasId,
 }: {
   environment: string;
   kuery: string;
@@ -32,6 +33,7 @@ export async function getMetricsChartDataByAgent({
   start: number;
   end: number;
   serviceRuntimeName?: string;
+  faasId?: string;
 }): Promise<GenericMetricsChart[]> {
   const options = {
     environment,
@@ -49,7 +51,7 @@ export async function getMetricsChartDataByAgent({
   }
 
   if (isServerlessAgent(serviceRuntimeName)) {
-    return getServerlessAgentMetricCharts({ ...options, serviceNodeName });
+    return getServerlessAgentMetricCharts({ ...options, faasId });
   }
 
   return getDefaultMetricsCharts(options);

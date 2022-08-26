@@ -19,7 +19,7 @@ export function getServerlessAgentMetricCharts({
   kuery,
   setup,
   serviceName,
-  serviceNodeName,
+  faasId,
   start,
   end,
 }: {
@@ -27,7 +27,7 @@ export function getServerlessAgentMetricCharts({
   kuery: string;
   setup: Setup;
   serviceName: string;
-  serviceNodeName?: string;
+  faasId?: string;
   start: number;
   end: number;
 }) {
@@ -39,13 +39,14 @@ export function getServerlessAgentMetricCharts({
       serviceName,
       start,
       end,
+      faasId,
     };
     return await Promise.all([
-      getDuration({ ...options, serviceNodeName }),
-      getColdStartDuration({ ...options, serviceNodeName }),
-      getColdStartCount({ ...options, serviceNodeName }),
-      getMemoryChartData({ ...options, serviceNodeName }),
-      getComputeUsage({ ...options, serviceNodeName }),
+      getDuration(options),
+      getColdStartDuration(options),
+      getColdStartCount(options),
+      getMemoryChartData(options),
+      getComputeUsage(options),
       getActiveInstances(options),
     ]);
   });

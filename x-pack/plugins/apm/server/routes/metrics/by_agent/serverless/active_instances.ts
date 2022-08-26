@@ -6,10 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { euiLightVars as theme } from '@kbn/ui-theme';
 import {
+  FAAS_ID,
   METRICSET_NAME,
   SERVICE_NAME,
   SERVICE_NODE_NAME,
@@ -27,6 +29,7 @@ export async function getActiveInstances({
   serviceName,
   start,
   end,
+  faasId,
 }: {
   environment: string;
   kuery: string;
@@ -34,6 +37,7 @@ export async function getActiveInstances({
   serviceName: string;
   start: number;
   end: number;
+  faasId?: string;
 }): Promise<GenericMetricsChart> {
   const { apmEventClient, config } = setup;
 
@@ -59,6 +63,7 @@ export async function getActiveInstances({
             ...environmentQuery(environment),
             ...kqlQuery(kuery),
             { term: { [METRICSET_NAME]: 'transaction' } },
+            ...termQuery(FAAS_ID, faasId),
           ],
         },
       },

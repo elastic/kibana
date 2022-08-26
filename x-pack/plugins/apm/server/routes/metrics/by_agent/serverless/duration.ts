@@ -6,8 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { termQuery } from '@kbn/observability-plugin/server';
 import {
   FAAS_BILLED_DURATION,
+  FAAS_ID,
   TRANSACTION_DURATION_HISTOGRAM,
 } from '../../../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../../../lib/helpers/setup_request';
@@ -45,7 +47,7 @@ export async function getDuration({
   kuery,
   setup,
   serviceName,
-  serviceNodeName,
+  faasId,
   start,
   end,
 }: {
@@ -53,7 +55,7 @@ export async function getDuration({
   kuery: string;
   setup: Setup;
   serviceName: string;
-  serviceNodeName?: string;
+  faasId?: string;
   start: number;
   end: number;
 }): Promise<GenericMetricsChart> {
@@ -62,32 +64,40 @@ export async function getDuration({
     kuery,
     setup,
     serviceName,
-    serviceNodeName,
     start,
     end,
   };
 
-  const billedDurationMetrics = await fetchAndTransformMetrics({
-    ...options,
-    chartBase: { ...chartBase, series: { billedDurationAvg } },
-    aggs: {
-      billedDurationAvg: { avg: { field: FAAS_BILLED_DURATION } },
-    },
-    additionalFilters: [{ exists: { field: FAAS_BILLED_DURATION } }],
-    operationName: 'get_billed_duration',
-  });
-
-  const transactionDurationMetrics = await fetchAndTransformMetrics({
-    ...options,
-    chartBase: { ...chartBase, series: { transactionDurationAvg } },
-    aggs: {
-      transactionDurationAvg: {
-        avg: { field: TRANSACTION_DURATION_HISTOGRAM },
-      },
-    },
-    additionalFilters: [{ exists: { field: TRANSACTION_DURATION_HISTOGRAM } }],
-    operationName: 'get_transaction_duration',
-  });
+  const [billedDurationMetrics, transactionDurationMetrics] = await Promise.all(
+    [
+      fetchAndTransformMetrics({
+        ...options,
+        chartBase: { ...chartBase, series: { billedDurationAvg } },
+        aggs: {
+          billedDurationAvg: { avg: { field: FAAS_BILLED_DURATION } },
+        },
+        additionalFilters: [
+          { exists: { field: FAAS_BILLED_DURATION } },
+          ...termQuery(FAAS_ID, faasId),
+        ],
+        operationName: 'get_billed_duration',
+      }),
+      fetchAndTransformMetrics({
+        ...options,
+        chartBase: { ...chartBase, series: { transactionDurationAvg } },
+        aggs: {
+          transactionDurationAvg: {
+            avg: { field: TRANSACTION_DURATION_HISTOGRAM },
+          },
+        },
+        additionalFilters: [
+          { exists: { field: TRANSACTION_DURATION_HISTOGRAM } },
+          ...termQuery(FAAS_ID, faasId),
+        ],
+        operationName: 'get_transaction_duration',
+      }),
+    ]
+  );
 
   return {
     ...billedDurationMetrics,

@@ -22,6 +22,7 @@ const metricsChartsRoute = createApmServerRoute({
         agentName: t.string,
       }),
       t.partial({
+        faasId: t.string,
         serviceNodeName: t.string,
         serviceRuntimeName: t.string,
       }),
@@ -59,6 +60,7 @@ const metricsChartsRoute = createApmServerRoute({
       start,
       end,
       serviceRuntimeName,
+      faasId,
     } = params.query;
 
     const charts = await getMetricsChartDataByAgent({
@@ -71,6 +73,7 @@ const metricsChartsRoute = createApmServerRoute({
       start,
       end,
       serviceRuntimeName,
+      faasId,
     });
 
     return { charts };
