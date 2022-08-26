@@ -637,7 +637,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
         </EuiContextMenuItem>
       );
     }
-    
+
     if (showViewSeriesLink === true) {
       if (anomaly.isTimeSeriesViewRecord) {
         items.push(

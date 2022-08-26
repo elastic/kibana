@@ -27,7 +27,6 @@ import { findAggField } from './validation_utils';
 import { getFirstKeyInObject } from './object_utils';
 import { isDefined } from '../types/guards';
 
-
 export interface ValidationResults {
   valid: boolean;
   messages: JobValidationMessage[];
@@ -79,7 +78,6 @@ export function isJobWithGeoData(job: Job): boolean {
   const { detectors } = job.analysis_config;
   return detectors.some((detector) => detector.function === ML_JOB_AGGREGATION.LAT_LONG);
 }
-
 
 /**
  * Validates that composite definition only have sources that are only terms and date_histogram
