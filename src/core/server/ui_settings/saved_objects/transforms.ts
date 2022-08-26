@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsErrorHelpers } from '../../saved_objects';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
 import type { SavedObjectsClientContract } from '../../types';
 import type { UpgradeableConfigAttributes } from '../create_or_upgrade_saved_config';
 

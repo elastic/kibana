@@ -21,7 +21,7 @@ import { stubbedSavedObjectIndexPattern } from '../data_view.stub';
 
 const createFieldsFetcher = () =>
   ({
-    getFieldsForWildcard: () => [],
+    getFieldsForWildcard: jest.fn(async () => ({ fields: [], indices: [] })),
   } as any as IDataViewsApiClient);
 
 const fieldFormats = fieldFormatsMock;
@@ -56,6 +56,7 @@ describe('IndexPatterns', () => {
   let indexPatternsNoAccess: DataViewsService;
   let savedObjectsClient: SavedObjectsClientCommon;
   let SOClientGetDelay = 0;
+  let apiClient: IDataViewsApiClient;
   const uiSettings = {
     get: () => Promise.resolve(false),
     getAll: () => {},
@@ -97,10 +98,12 @@ describe('IndexPatterns', () => {
         };
       });
 
+    apiClient = createFieldsFetcher();
+
     indexPatterns = new DataViewsService({
       uiSettings,
       savedObjectsClient: savedObjectsClient as unknown as SavedObjectsClientCommon,
-      apiClient: createFieldsFetcher(),
+      apiClient,
       fieldFormats,
       onNotification: () => {},
       onError: () => {},
@@ -112,7 +115,7 @@ describe('IndexPatterns', () => {
     indexPatternsNoAccess = new DataViewsService({
       uiSettings,
       savedObjectsClient: savedObjectsClient as unknown as SavedObjectsClientCommon,
-      apiClient: createFieldsFetcher(),
+      apiClient,
       fieldFormats,
       onNotification: () => {},
       onError: () => {},
@@ -441,6 +444,13 @@ describe('IndexPatterns', () => {
       expect(defaultDataViewResult?.id).toBe('id1');
       expect(uiSettings.set).toBeCalledTimes(0);
     });
+  });
+
+  describe('refreshFields', () => {
+    beforeEach(() => {
+      // preserve mocked functionality
+      jest.clearAllMocks();
+    });
 
     test('refreshFields includes runtimeFields', async () => {
       const indexPatternSpec: DataViewSpec = {
@@ -456,9 +466,21 @@ describe('IndexPatterns', () => {
       };
 
       const indexPattern = await indexPatterns.create(indexPatternSpec);
+      await indexPatterns.refreshFields(indexPattern);
+      expect(indexPattern.fields.length).toBe(1);
+    });
+
+    test('refreshFields properly includes allowNoIndex', async () => {
+      const indexPatternSpec: DataViewSpec = {
+        allowNoIndex: true,
+        title: 'test',
+      };
+
+      const indexPattern = await indexPatterns.create(indexPatternSpec);
 
       indexPatterns.refreshFields(indexPattern);
-      expect(indexPattern.fields.length).toBe(1);
+      // @ts-expect-error
+      expect(apiClient.getFieldsForWildcard.mock.calls[0][0].allowNoIndex).toBe(true);
     });
   });
 });

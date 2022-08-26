@@ -88,7 +88,7 @@ export interface PieVisualizationState {
   layers: PieLayerState[];
   palette?: PaletteOutput;
 }
-export interface MetricState {
+export interface LegacyMetricState {
   layerId: string;
   accessor?: string;
   layerType: LayerType;
