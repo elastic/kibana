@@ -101,9 +101,9 @@ export class Plugin implements InfraClientPluginClass {
                     label: 'Infrastructure',
                     sortKey: 300,
                     entries: [
+                      { label: 'Hosts', app: 'metrics', path: '/hosts' },
                       { label: 'Inventory', app: 'metrics', path: '/inventory' },
                       { label: 'Metrics Explorer', app: 'metrics', path: '/explorer' },
-                      { label: 'Hosts', app: 'metrics', path: '/hosts' },
                     ],
                   },
                 ]

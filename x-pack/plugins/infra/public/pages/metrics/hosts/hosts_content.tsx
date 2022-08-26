@@ -12,7 +12,7 @@ import React, { useState, useCallback } from 'react';
 import { SearchBar } from '@kbn/unified-search-plugin/public';
 import { InfraLoadingPanel } from '../../../components/loading';
 import { useMetricsDataViewContext } from './hooks/use_data_view';
-import { HostsTable } from './components/hosts_list_table';
+import { HostsTable } from './components/hosts_table';
 import { InfraClientStartDeps } from '../../../types';
 
 export const HostsContent: React.FunctionComponent = () => {
@@ -65,7 +65,7 @@ export const HostsContent: React.FunctionComponent = () => {
           height="100vh"
           width="auto"
           text={i18n.translate('xpack.infra.waffle.loadingDataText', {
-            defaultMessage: 'Loading data',
+            defaultMessage: 'Loading Data View',
           })}
         />
       )}

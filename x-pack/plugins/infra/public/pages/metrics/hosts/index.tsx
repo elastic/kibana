@@ -84,7 +84,7 @@ export const HostsPage = () => {
 // This is added to facilitate a full height layout whereby the
 // inner container will set it's own height and be scrollable.
 // The "fullHeight" prop won't help us as it only applies to certain breakpoints.
-export const HostsPageWrapper = euiStyled.div`
+const HostsPageWrapper = euiStyled.div`
   .euiPage .euiPageContentBody {
     display: flex;
     flex-direction: column;
