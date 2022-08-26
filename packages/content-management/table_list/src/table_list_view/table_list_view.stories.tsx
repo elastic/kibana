@@ -36,12 +36,12 @@ const createMockItems = (total: number) => {
 
     return {
       id: i.toString(),
+      type,
       references: [],
       updatedAt: moment().subtract(i, 'day').format('YYYY-MM-DDTHH:mm:ss'),
       attributes: {
         title: chance.sentence({ words: 5 }),
         description: `Description of item ${i}`,
-        type,
       },
     };
   });

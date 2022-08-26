@@ -275,16 +275,14 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     try {
       await deleteItems!(selectedItems);
     } catch (error) {
-      notifyError({
-        title: (
-          <FormattedMessage
-            id="contentManagement.tableList.listing.unableToDeleteDangerMessage"
-            defaultMessage="Unable to delete {entityName}(s)"
-            values={{ entityName }}
-          />
-        ),
-        text: error,
-      });
+      notifyError(
+        <FormattedMessage
+          id="contentManagement.tableList.listing.unableToDeleteDangerMessage"
+          defaultMessage="Unable to delete {entityName}(s)"
+          values={{ entityName }}
+        />,
+        error
+      );
     }
 
     fetchItems();
