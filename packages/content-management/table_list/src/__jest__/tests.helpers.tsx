@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import type { ComponentType, MemoExoticComponent } from 'react';
+import type { ComponentType } from 'react';
 import { TableListViewProvider, Services } from '../table_list_view/services';
 
 export const getMockServices = (overrides?: Partial<Services>) => {
@@ -20,10 +20,7 @@ export const getMockServices = (overrides?: Partial<Services>) => {
   return services;
 };
 
-export function WithServices<P>(
-  Comp: MemoExoticComponent<ComponentType<P>>,
-  overrides: Partial<Services> = {}
-) {
+export function WithServices<P>(Comp: ComponentType<P>, overrides: Partial<Services> = {}) {
   return (props: P) => {
     const services = getMockServices(overrides);
     return (
