@@ -8,14 +8,18 @@
 
 import React, { FC, useContext } from 'react';
 import type { EuiTableFieldDataColumnType, SearchFilterConfig } from '@elastic/eui';
+import type { Observable } from 'rxjs';
 
 import { UserContentCommonSchema } from './table_list_view';
 
-type NotifyFn = (notifyArgs: { title: string | JSX.Element; text: string }) => void;
+type UnmountCallback = () => void;
+type MountPoint = (element: HTMLElement) => UnmountCallback;
+type NotifyFn = (title: JSX.Element, text?: string) => void;
 
 interface SavedObjectsReference {
-  type: string;
   id: string;
+  name: string;
+  type: string;
 }
 
 export type DateFormatter = (props: {
@@ -30,11 +34,11 @@ export interface Services {
   canEditAdvancedSettings: boolean;
   getListingLimitSettingsUrl: () => string;
   notifyError: NotifyFn;
-  getTagsColumnDefinition?: () => EuiTableFieldDataColumnType<UserContentCommonSchema> | undefined;
   searchQueryParser?: (searchQuery: string) => {
     searchQuery: string;
     references?: SavedObjectsReference[];
   };
+  getTagsColumnDefinition?: () => EuiTableFieldDataColumnType<UserContentCommonSchema> | undefined;
   getSearchBarFilters?: () => SearchFilterConfig[];
   DateFormatterComp?: DateFormatter;
 }
@@ -51,30 +55,72 @@ export const TableListViewProvider: FC<Services> = ({ children, ...services }) =
 /**
  * Kibana-specific service types.
  */
-// export interface KibanaServices {
-//   // applicationStart: Services['application'];
-//   // toastStart: Services['toast'];
-//   // savedObjectTaggingApi: Services['savedObjectTagging'];
-//   // themeServiceStart: Services['theme'];
-//   // kibanaReactToMountPoint: Services['toMountPoint'];
-// }
+
+export interface TableListViewKibanaDependencies {
+  core: {
+    application: {
+      capabilities: {
+        advancedSettings?: {
+          save: boolean;
+        };
+      };
+      getUrlForApp: (app: string, options: { path: string }) => string;
+    };
+    notifications: {
+      toasts: {
+        addDanger: (notifyArgs: { title: MountPoint; text?: string }) => void;
+      };
+    };
+  };
+  toMountPoint: (
+    node: React.ReactNode,
+    options?: { theme$: Observable<{ readonly darkMode: boolean }> }
+  ) => MountPoint;
+  savedObjectTaggingApi?: {
+    ui: {
+      getTableColumnDefinition: () => EuiTableFieldDataColumnType<UserContentCommonSchema>;
+      parseSearchQuery: (
+        query: string,
+        options?: {
+          useName?: boolean;
+          tagField?: string;
+        }
+      ) => {
+        searchTerm: string;
+        tagReferences: SavedObjectsReference[];
+        valid: boolean;
+      };
+      getSearchBarFilter: (options?: {
+        useName?: boolean;
+        tagField?: string;
+      }) => SearchFilterConfig;
+    };
+  };
+}
 
 /**
  * Kibana-specific Provider that maps to known dependency types.
  */
-export const TableListViewKibanaProvider: FC<{}> = ({ children, ...services }) => {
+export const TableListViewKibanaProvider: FC<TableListViewKibanaDependencies> = ({
+  children,
+  ...services
+}) => {
+  const { core, toMountPoint, savedObjectTaggingApi } = services;
   return (
-    <div>{children}</div>
-    // <TableListViewProvider
-    //   canEditAdvancedSettings={}
-    //   // application={services.applicationStart}
-    //   // toast={services.toastStart}
-    //   // savedObjectTagging={services.savedObjectTaggingApi}
-    //   // theme={services.themeServiceStart}
-    //   // toMountPoint={services.kibanaReactToMountPoint}
-    // >
-    //   {children}
-    // </TableListViewProvider>
+    <TableListViewProvider
+      canEditAdvancedSettings={Boolean(core.application.capabilities.advancedSettings?.save)}
+      getListingLimitSettingsUrl={() =>
+        core.application.getUrlForApp('management', {
+          path: `/kibana/settings?query=savedObjects:listingLimit`,
+        })
+      }
+      notifyError={(title, text) => {
+        core.notifications.toasts.addDanger({ title: toMountPoint(title), text });
+      }}
+      getTagsColumnDefinition={savedObjectTaggingApi?.ui.getTableColumnDefinition}
+    >
+      {children}
+    </TableListViewProvider>
   );
 };
 
