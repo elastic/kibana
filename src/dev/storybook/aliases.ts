@@ -32,6 +32,7 @@ export const storybookAliases = {
   expression_shape: 'src/plugins/expression_shape/.storybook',
   expression_tagcloud: 'src/plugins/chart_expressions/expression_tagcloud/.storybook',
   fleet: 'x-pack/plugins/fleet/.storybook',
+  form_lib: 'packages/kbn-form-lib/.storybook',
   home: 'src/plugins/home/.storybook',
   infra: 'x-pack/plugins/infra/.storybook',
   kibana_react: 'src/plugins/kibana_react/.storybook',
