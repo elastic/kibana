@@ -10,20 +10,20 @@ import { kea, MakeLogicType } from 'kea';
 import { AnalyticsCollection } from '../../../../../common/types/analytics';
 import { HttpError, Status } from '../../../../../common/types/api';
 import { flashAPIErrors, clearFlashMessages } from '../../../shared/flash_messages';
-import { fetchAnalyticsCollectionsAPILogic } from '../../api/index/fetch_analytics_collections_api_logic';
+import { FetchAnalyticsCollectionsAPILogic } from '../../api/index/fetch_analytics_collections_api_logic';
 
 export interface AnalyticsCollectionsActions {
   apiError(error: HttpError): HttpError;
   apiSuccess(collections: AnalyticsCollection[]): AnalyticsCollection[];
   fetchAnalyticsCollections(): void;
-  makeRequest: typeof fetchAnalyticsCollectionsAPILogic.actions.makeRequest;
+  makeRequest: typeof FetchAnalyticsCollectionsAPILogic.actions.makeRequest;
 }
 export interface AnalyticsCollectionsValues {
   analyticsCollections: AnalyticsCollection[];
-  data: typeof fetchAnalyticsCollectionsAPILogic.values.data;
+  data: typeof FetchAnalyticsCollectionsAPILogic.values.data;
   hasNoAnalyticsCollections: boolean;
   isLoading: boolean;
-  status: typeof fetchAnalyticsCollectionsAPILogic.values.status;
+  status: typeof FetchAnalyticsCollectionsAPILogic.values.status;
 }
 
 export const AnalyticsCollectionsLogic = kea<
@@ -33,8 +33,8 @@ export const AnalyticsCollectionsLogic = kea<
     fetchAnalyticsCollections: () => {},
   },
   connect: {
-    actions: [fetchAnalyticsCollectionsAPILogic, ['makeRequest', 'apiSuccess', 'apiError']],
-    values: [fetchAnalyticsCollectionsAPILogic, ['data', 'status']],
+    actions: [FetchAnalyticsCollectionsAPILogic, ['makeRequest', 'apiSuccess', 'apiError']],
+    values: [FetchAnalyticsCollectionsAPILogic, ['data', 'status']],
   },
   listeners: ({ actions }) => ({
     apiError: (e) => flashAPIErrors(e),
