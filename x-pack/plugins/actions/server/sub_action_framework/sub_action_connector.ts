@@ -133,6 +133,10 @@ export abstract class SubActionConnector<Config, Secrets> {
       this.ensureUriAllowed(url);
       const normalizedURL = this.normalizeURL(url);
 
+      this.logger.debug(
+        `Request to external service. Connector Id: ${this.connector.id}. Connector type: ${this.connector.type} Method: ${method}. URL: ${normalizedURL}`
+      );
+
       const res = await request({
         axios: this.axiosInstance,
         url: normalizedURL,
