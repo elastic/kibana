@@ -65,11 +65,11 @@ deprecated:[7.11.0,This setting will be removed in 8.0.0.] Reporting uses a week
 reporting job and the report content. The index is automatically created if it does not already exist.
 +
 When you divide workspaces in an Elastic cluster using multiple {kib} instances with a different `kibana.index`
-setting per instance, it is considered a multitenant configuration. When using {kib} multitenancy, reporting
-needs various other index settings to be customized in each kibana instance.
+setting per instance, it is considered a multitenant configuration. When using {kib} multitenancy, Reporting
+needs additional index settings to be customized in each {kib} instance.
 +
 - `kibana.index`: Configure a unique <<kibana-index, {kib} index>> to separate saved objects from other {kib} instances.
-- `xpack.task_manager.index`: Configure a unique index in <<task-manager-settings>>, beginning in with `.kibana_task_manager`, to separate asynchronous tasks from other {kib} instances. Defaults to `.kibana_task_manager`.
+- `xpack.task_manager.index`: Configure a unique index in <<task-manager-settings>>, beginning with `.kibana_task_manager`, to separate asynchronous tasks from other {kib} instances. Defaults to `.kibana_task_manager`.
 - `xpack.reporting.index`: Configure a unique reporting index beginning with `.reporting-`, to separate report metadata from other {kib} instances. Defaults to `.reporting-`.
 
 [float]
