@@ -26,6 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Search Sessions Management UI', () => {
     describe('New search sessions', () => {
       before(async () => {
+        await searchSessions.deleteAllSearchSessions();
         await PageObjects.common.navigateToApp('dashboard');
         log.debug('wait for dashboard landing page');
         await retry.tryForTime(10000, async () => {

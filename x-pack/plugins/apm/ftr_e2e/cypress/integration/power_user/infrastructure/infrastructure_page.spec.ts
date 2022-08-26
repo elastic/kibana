@@ -27,9 +27,9 @@ const nodeServiceInfraPageHref = url.format({
   query: { rangeFrom: start, rangeTo: end },
 });
 
-describe.skip('Infrastructure page', () => {
-  before(async () => {
-    await synthtrace.index(
+describe('Infrastructure page', () => {
+  before(() => {
+    synthtrace.index(
       generateData({
         from: new Date(start).getTime(),
         to: new Date(end).getTime(),
@@ -37,8 +37,8 @@ describe.skip('Infrastructure page', () => {
     );
   });
 
-  after(async () => {
-    await synthtrace.clean();
+  after(() => {
+    synthtrace.clean();
   });
 
   beforeEach(() => {
@@ -47,7 +47,7 @@ describe.skip('Infrastructure page', () => {
 
   describe('when data is loaded', () => {
     it('has no detectable a11y violations on load', () => {
-      cy.visit(goServiceInfraPageHref);
+      cy.visitKibana(goServiceInfraPageHref);
       cy.contains('Infrastructure');
       // set skipFailures to true to not fail the test when there are accessibility failures
       checkA11y({ skipFailures: true });
@@ -55,7 +55,7 @@ describe.skip('Infrastructure page', () => {
 
     describe('when container ids, pod names and host names are returned by the api call', () => {
       it('shows all tabs', () => {
-        cy.visit(goServiceInfraPageHref);
+        cy.visitKibana(goServiceInfraPageHref);
         cy.contains('Containers');
         cy.contains('Pods');
         cy.contains('Hosts');
@@ -64,14 +64,14 @@ describe.skip('Infrastructure page', () => {
 
     describe('when only host names are returned by the api call', () => {
       it('shows only Hosts tab', () => {
-        cy.visit(javaServiceInfraPageHref);
+        cy.visitKibana(javaServiceInfraPageHref);
         cy.contains('Hosts');
       });
     });
 
     describe('when none infrastructure attributes are returned by the api call', () => {
       it('shows no data message', () => {
-        cy.visit(nodeServiceInfraPageHref);
+        cy.visitKibana(nodeServiceInfraPageHref);
         cy.contains('No results match your search criteria.');
       });
     });
