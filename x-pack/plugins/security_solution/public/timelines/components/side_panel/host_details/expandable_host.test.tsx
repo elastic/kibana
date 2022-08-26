@@ -15,7 +15,6 @@ import { ExpandableHostDetails } from './expandable_host';
 import { mockAnomalies } from '../../../../common/components/ml/mock';
 import type { Anomalies } from '../../../../common/components/ml/types';
 import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
-import { InputsModelId } from '../../../../common/store/inputs/constants';
 const mockDispatch = jest.fn();
 jest.mock('../../../../../common/machine_learning/has_ml_user_permissions');
 jest.mock('react-redux', () => {
@@ -88,7 +87,7 @@ describe('Expandable Host Component', () => {
       expect(mockDispatch).toHaveBeenCalledWith({
         type: 'x-pack/security_solution/local/inputs/SET_ABSOLUTE_RANGE_DATE_PICKER',
         payload: {
-          id: InputsModelId.global,
+          id: 'global',
           from: '2019-06-15T06:00:00.000Z',
           to: '2019-06-17T06:00:00.000Z',
         },

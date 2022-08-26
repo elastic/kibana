@@ -9,7 +9,6 @@ import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 
-import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { timelineActions } from '../../../store/timeline';
 import { useTimelineFullScreen } from '../../../../common/containers/use_full_screen';
@@ -57,20 +56,20 @@ export const useCreateTimeline = ({ timelineId, timelineType, closeGearMenu }: P
           timelineType,
         })
       );
-      dispatch(inputsActions.addLinkTo([InputsModelId.global, InputsModelId.timeline]));
+      dispatch(inputsActions.addLinkTo(['global', 'timeline']));
       dispatch(appActions.addNotes({ notes: [] }));
       if (globalTimeRange.kind === 'absolute') {
         dispatch(
           inputsActions.setAbsoluteRangeDatePicker({
             ...globalTimeRange,
-            id: InputsModelId.timeline,
+            id: 'timeline',
           })
         );
       } else if (globalTimeRange.kind === 'relative') {
         dispatch(
           inputsActions.setRelativeRangeDatePicker({
             ...globalTimeRange,
-            id: InputsModelId.timeline,
+            id: 'timeline',
           })
         );
       }

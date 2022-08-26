@@ -13,7 +13,6 @@ import { formatDate } from '../../components/super_date_picker';
 import { isDetectionsPages } from '../../utils/global_query_string/helpers';
 import { inputsSelectors } from '../../store';
 import { inputsActions } from '../../store/inputs';
-import { InputsModelId } from '../../store/inputs/constants';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
 
 /**
@@ -44,7 +43,7 @@ export const useUpdateTimerangeOnPageChange = () => {
             to: formatDate(timelineTimerange.toStr, {
               roundUp: true,
             }),
-            id: InputsModelId.timeline,
+            id: 'timeline',
           })
         );
       }
@@ -58,7 +57,7 @@ export const useUpdateTimerangeOnPageChange = () => {
               roundUp: true,
             }),
 
-            id: InputsModelId.global,
+            id: 'global',
           })
         );
       }

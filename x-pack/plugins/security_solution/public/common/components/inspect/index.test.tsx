@@ -22,7 +22,6 @@ import { upsertQuery } from '../../store/inputs/helpers';
 
 import { InspectButton } from '.';
 import { cloneDeep } from 'lodash/fp';
-import { InputsModelId } from '../../store/inputs/constants';
 
 jest.mock('./modal', () => ({
   ModalInspectQuery: jest.fn(() => <div data-test-subj="mocker-modal" />),
@@ -33,7 +32,7 @@ describe('Inspect Button', () => {
   const state: State = mockGlobalState;
   const { storage } = createSecuritySolutionStorageMock();
   const newQuery: UpdateQueryParams = {
-    inputId: InputsModelId.global,
+    inputId: 'global',
     id: 'myQuery',
     inspect: null,
     loading: false,
@@ -52,7 +51,7 @@ describe('Inspect Button', () => {
     test('Eui Empty Button', () => {
       const wrapper = mount(
         <TestProviders store={store}>
-          <InspectButton queryId={newQuery.id} inputId={InputsModelId.timeline} title="My title" />
+          <InspectButton queryId={newQuery.id} inputId={'timeline'} title="My title" />
         </TestProviders>
       );
       expect(wrapper.find('button[data-test-subj="inspect-empty-button"]').first().exists()).toBe(
@@ -66,7 +65,7 @@ describe('Inspect Button', () => {
           <InspectButton
             compact={true}
             queryId={newQuery.id}
-            inputId={InputsModelId.timeline}
+            inputId={'timeline'}
             title="My title"
           />
         </TestProviders>
@@ -81,7 +80,7 @@ describe('Inspect Button', () => {
         <TestProviders store={store}>
           <InspectButton
             queryId={newQuery.id}
-            inputId={InputsModelId.timeline}
+            inputId={'timeline'}
             showInspectButton={false}
             title="My title"
           />
@@ -108,7 +107,7 @@ describe('Inspect Button', () => {
         <TestProviders store={store}>
           <InspectButton
             compact={true}
-            inputId={InputsModelId.timeline}
+            inputId={'timeline'}
             queryId={newQuery.id}
             title="My title"
           />

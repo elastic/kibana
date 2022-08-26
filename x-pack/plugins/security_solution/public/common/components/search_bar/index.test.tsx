@@ -14,7 +14,6 @@ import {
   TestProviders,
 } from '../../mock';
 import { render, fireEvent, waitFor } from '@testing-library/react';
-import { InputsModelId } from '../../store/inputs/constants';
 import { SearchBarComponent } from '.';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import { FilterManager } from '@kbn/data-plugin/public';
@@ -63,7 +62,7 @@ jest.mock('../../utils/global_query_string', () => ({
 
 describe('SearchBarComponent', () => {
   const props = {
-    id: InputsModelId.global as const,
+    id: 'global' as const,
     indexPattern: {
       fields: [],
       title: '',
@@ -201,7 +200,7 @@ describe('SearchBarComponent', () => {
 
     store.dispatch(
       inputsActions.setFilterQuery({
-        id: InputsModelId.global,
+        id: 'global',
         ...newQuery,
       })
     );
@@ -237,7 +236,7 @@ describe('SearchBarComponent', () => {
 
     store.dispatch(
       inputsActions.setSearchBarFilter({
-        id: InputsModelId.global,
+        id: 'global',
         filters,
       })
     );
@@ -269,7 +268,7 @@ describe('SearchBarComponent', () => {
 
     store.dispatch(
       inputsActions.setSavedQuery({
-        id: InputsModelId.global,
+        id: 'global',
         savedQuery,
       })
     );
@@ -300,15 +299,13 @@ describe('SearchBarComponent', () => {
         toStr: 'now',
       };
 
-      store.dispatch(
-        inputsActions.setRelativeRangeDatePicker({ id: InputsModelId.global, ...newTimerange })
-      );
+      store.dispatch(inputsActions.setRelativeRangeDatePicker({ id: 'global', ...newTimerange }));
 
       await waitFor(() => {
         expect(mockUpdateUrlParam).toHaveBeenCalledWith(
           expect.objectContaining({
             global: {
-              linkTo: [InputsModelId.timeline, InputsModelId.socTrends],
+              linkTo: ['timeline', 'socTrends'],
               timerange: newTimerange,
             },
           })
@@ -338,7 +335,7 @@ describe('SearchBarComponent', () => {
 
       store.dispatch(
         inputsActions.setRelativeRangeDatePicker({
-          id: InputsModelId.timeline,
+          id: 'timeline',
           ...newTimerange,
         })
       );
@@ -347,7 +344,7 @@ describe('SearchBarComponent', () => {
         expect(mockUpdateUrlParam).toHaveBeenCalledWith(
           expect.objectContaining({
             timeline: {
-              linkTo: [InputsModelId.global, InputsModelId.socTrends],
+              linkTo: ['global', 'socTrends'],
               timerange: newTimerange,
             },
           })

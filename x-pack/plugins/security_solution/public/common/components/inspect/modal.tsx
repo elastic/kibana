@@ -27,7 +27,6 @@ import { useLocation } from 'react-router-dom';
 import { NO_ALERT_INDEX } from '../../../../common/constants';
 import * as i18n from './translations';
 import { getScopeFromPath, useSourcererDataView } from '../../containers/sourcerer';
-import { InputsModelId } from '../../store/inputs/constants';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 
 const DescriptionListStyled = styled(EuiDescriptionList)`
@@ -48,7 +47,7 @@ interface ModalInspectProps {
   additionalRequests?: string[] | null;
   additionalResponses?: string[] | null;
   closeModal: () => void;
-  inputId?: InputsModelId.timeline | InputsModelId.global;
+  inputId?: 'timeline' | 'global';
   request: string;
   response: string;
   title: string | React.ReactElement | React.ReactNode;
@@ -116,7 +115,7 @@ export const ModalInspectQuery = ({
 }: ModalInspectProps) => {
   const { pathname } = useLocation();
   const { selectedPatterns } = useSourcererDataView(
-    inputId === InputsModelId.timeline ? SourcererScopeName.timeline : getScopeFromPath(pathname)
+    inputId === 'timeline' ? SourcererScopeName.timeline : getScopeFromPath(pathname)
   );
   const requests: string[] = [request, ...(additionalRequests != null ? additionalRequests : [])];
   const responses: string[] = [

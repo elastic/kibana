@@ -26,7 +26,7 @@ import { timelineActions } from '../../../timelines/store/timeline';
 import { useUiSetting$ } from '../../lib/kibana';
 import type { inputsModel, State } from '../../store';
 import { inputsActions } from '../../store/actions';
-import { InputsModelId } from '../../store/inputs/constants';
+import type { InputsModelId } from '../../store/inputs/constants';
 import {
   durationSelector,
   endSelector,
@@ -321,7 +321,7 @@ export const makeMapStateToProps = () => {
   const getStartSelector = startSelector();
   const getToStrSelector = toStrSelector();
   return (state: State, { id }: OwnProps) => {
-    if (id === InputsModelId.socTrends) {
+    if (id === 'socTrends') {
       const inputsRange: InputsRangeTimeOnly = getOr({}, `inputs.${id}`, state);
       return {
         duration: getDurationSelector(inputsRange),
