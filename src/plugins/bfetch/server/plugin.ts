@@ -62,10 +62,17 @@ export interface BfetchServerSetup {
 export interface BfetchServerStart {}
 
 const streamingHeaders = {
-  'Content-Type': 'application/x-ndjson',
+  // These headers are used for Server Sent Events / EventSource.
+  // We mimic those for higher likelihood of proxies passing through the stream.
+  'Content-Type': 'text/event-stream',
+  'Cache-Control': 'no-cache',
+
+  // This disables response buffering on proxy servers (Nginx, uwsgi, fastcgi, etc.)
+  // Otherwise, those proxies buffer responses up to 4/8 KiB.
+  'X-Accel-Buffering': 'no',
+
   Connection: 'keep-alive',
   'Transfer-Encoding': 'chunked',
-  'X-Accel-Buffering': 'no',
 };
 
 interface Query {
