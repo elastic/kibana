@@ -7,7 +7,8 @@
  */
 
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { CoreUsageData, CoreUsageDataStart } from '@kbn/core/server';
+import { CoreUsageDataStart } from '@kbn/core/server';
+import { CoreUsageData } from './core_usage_data';
 
 export function getCoreUsageCollector(
   usageCollection: UsageCollectionSetup,

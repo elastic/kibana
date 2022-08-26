@@ -10,7 +10,7 @@ import type {
   Logger,
   SavedObject,
   SavedObjectsClientContract,
-  SavedObjectsImporter,
+  ISavedObjectsImporter,
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
@@ -71,7 +71,7 @@ export async function _installPackage({
   verificationResult,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
-  savedObjectsImporter: Pick<SavedObjectsImporter, 'import' | 'resolveImportErrors'>;
+  savedObjectsImporter: Pick<ISavedObjectsImporter, 'import' | 'resolveImportErrors'>;
   savedObjectTagAssignmentService: IAssignmentService;
   savedObjectTagClient: ITagsClient;
   esClient: ElasticsearchClient;

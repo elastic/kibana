@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { REMOVED_TYPES } from '../../../saved_objects/migrations/core';
+import { REMOVED_TYPES } from '@kbn/core-saved-objects-migration-server-internal';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 
 // Types should NEVER be removed from this array

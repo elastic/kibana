@@ -13,9 +13,9 @@ import { Root } from '../../../../root';
 import {
   isWriteBlockException,
   isClusterShardLimitExceeded,
-} from '../../../../saved_objects/migrations/actions/es_errors';
-import { createIndex } from '../../../../saved_objects/migrations/actions/create_index';
-import { setWriteBlock } from '../../../../saved_objects/migrations/actions/set_write_block';
+  createIndex,
+  setWriteBlock,
+} from '@kbn/core-saved-objects-migration-server-internal';
 
 const { startES } = kbnTestServer.createTestServers({
   adjustTimeout: (t: number) => jest.setTimeout(t),
