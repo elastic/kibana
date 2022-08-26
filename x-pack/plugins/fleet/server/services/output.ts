@@ -370,7 +370,7 @@ class OutputService {
     if (data.ssl) {
       updateData.ssl = JSON.stringify(data.ssl);
     } else if (data.ssl === null) {
-      // Explicetly set to null to allow to delete the field
+      // Explicitly set to null to allow to delete the field
       updateData.ssl = null;
     }
 
