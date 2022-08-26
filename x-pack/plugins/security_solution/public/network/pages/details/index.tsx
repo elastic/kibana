@@ -137,7 +137,7 @@ const NetworkDetailsComponent: React.FC = () => {
       {indicesExist ? (
         <>
           <FiltersGlobal>
-            <SiemSearchBar indexPattern={indexPattern} id={'global'} />
+            <SiemSearchBar indexPattern={indexPattern} id="global" />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper>

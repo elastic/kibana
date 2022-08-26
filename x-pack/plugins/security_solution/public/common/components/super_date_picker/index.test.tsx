@@ -100,13 +100,13 @@ describe('SIEM Super Date Picker', () => {
     describe('Pick Relative Date', () => {
       let wrapper = mount(
         <ReduxStoreProvider store={store}>
-          <SuperDatePicker id={'global'} />
+          <SuperDatePicker id="global" />
         </ReduxStoreProvider>
       );
       beforeEach(() => {
         wrapper = mount(
           <ReduxStoreProvider store={store}>
-            <SuperDatePicker id={'global'} />
+            <SuperDatePicker id="global" />
           </ReduxStoreProvider>
         );
         wrapper
@@ -170,13 +170,13 @@ describe('SIEM Super Date Picker', () => {
     describe('Recently used date ranges', () => {
       let wrapper = mount(
         <ReduxStoreProvider store={store}>
-          <SuperDatePicker id={'global'} />
+          <SuperDatePicker id="global" />
         </ReduxStoreProvider>
       );
       beforeEach(() => {
         wrapper = mount(
           <ReduxStoreProvider store={store}>
-            <SuperDatePicker id={'global'} />
+            <SuperDatePicker id="global" />
           </ReduxStoreProvider>
         );
         wrapper
@@ -233,13 +233,13 @@ describe('SIEM Super Date Picker', () => {
     describe('Refresh Every', () => {
       let wrapper = mount(
         <ReduxStoreProvider store={store}>
-          <SuperDatePicker id={'global'} />
+          <SuperDatePicker id="global" />
         </ReduxStoreProvider>
       );
       beforeEach(() => {
         wrapper = mount(
           <ReduxStoreProvider store={store}>
-            <SuperDatePicker id={'global'} />
+            <SuperDatePicker id="global" />
           </ReduxStoreProvider>
         );
         wrapper

@@ -693,7 +693,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
         <EuiWindowEvent event="resize" handler={noop} />
         <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
           <SiemSearchBar
-            id={'global'}
+            id="global"
             pollForSignalIndex={pollForSignalIndex}
             indexPattern={indexPattern}
           />

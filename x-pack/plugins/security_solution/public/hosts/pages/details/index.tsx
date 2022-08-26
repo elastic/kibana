@@ -142,7 +142,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
         <>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
-            <SiemSearchBar indexPattern={indexPattern} id={'global'} />
+            <SiemSearchBar indexPattern={indexPattern} id="global" />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper

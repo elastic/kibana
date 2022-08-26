@@ -74,7 +74,7 @@ const OverviewComponent = () => {
       {indicesExist ? (
         <>
           <FiltersGlobal>
-            <SiemSearchBar id={'global'} indexPattern={indexPattern} />
+            <SiemSearchBar id="global" indexPattern={indexPattern} />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper>

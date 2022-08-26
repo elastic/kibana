@@ -261,7 +261,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
       </InPortal>
       <TimelineRefetch
         id={`${timelineId}-${TimelineTabs.eql}`}
-        inputId={'timeline'}
+        inputId="timeline"
         inspect={inspect}
         loading={isQueryLoading}
         refetch={refetch}
@@ -284,7 +284,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
                 />
               )}
               <DatePicker grow={10}>
-                <SuperDatePicker id={'timeline'} timelineId={timelineId} />
+                <SuperDatePicker id="timeline" timelineId={timelineId} />
               </DatePicker>
               <EuiFlexItem grow={false}>
                 <TimelineDatePickerLock />

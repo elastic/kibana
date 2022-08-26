@@ -340,7 +340,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
       </InPortal>
       <TimelineRefetch
         id={`${timelineId}-${TimelineTabs.query}`}
-        inputId={'timeline'}
+        inputId="timeline"
         inspect={inspect}
         loading={isQueryLoading}
         refetch={refetch}
@@ -365,7 +365,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
               )}
               <DatePicker grow={10}>
                 <SuperDatePicker
-                  id={'timeline'}
+                  id="timeline"
                   timelineId={timelineId}
                   disabled={isDatePickerDisabled}
                 />

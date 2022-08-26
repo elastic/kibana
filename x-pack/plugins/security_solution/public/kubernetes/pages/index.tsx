@@ -83,7 +83,7 @@ export const KubernetesContainer = React.memo(() => {
       {kubernetesSecurity.getKubernetesPage({
         filter: (
           <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId: undefined })}>
-            <SiemSearchBar id={'global'} indexPattern={indexPattern} />
+            <SiemSearchBar id="global" indexPattern={indexPattern} />
           </FiltersGlobal>
         ),
         indexPattern,

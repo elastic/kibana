@@ -172,7 +172,7 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
                   <InspectButton
                     compact
                     queryId={`${timelineId}-${activeTab}`}
-                    inputId={'timeline'}
+                    inputId="timeline"
                     inspectIndex={0}
                     isDisabled={!isDataInTimeline || combinedQueries?.filterQuery === undefined}
                     title={i18n.INSPECT_TIMELINE_TITLE}

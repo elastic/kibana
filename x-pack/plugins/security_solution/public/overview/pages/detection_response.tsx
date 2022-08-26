@@ -68,12 +68,7 @@ const DetectionResponseComponent = () => {
         <>
           <SecuritySolutionPageWrapper data-test-subj="detectionResponsePage">
             <HeaderPage title={i18n.DETECTION_RESPONSE_TITLE}>
-              <SiemSearchBar
-                id={'global'}
-                indexPattern={indexPattern}
-                hideFilterBar
-                hideQueryInput
-              />
+              <SiemSearchBar id="global" indexPattern={indexPattern} hideFilterBar hideQueryInput />
             </HeaderPage>
 
             {isSourcererLoading ? (

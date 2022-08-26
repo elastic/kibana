@@ -51,7 +51,7 @@ describe('Inspect Button', () => {
     test('Eui Empty Button', () => {
       const wrapper = mount(
         <TestProviders store={store}>
-          <InspectButton queryId={newQuery.id} inputId={'timeline'} title="My title" />
+          <InspectButton queryId={newQuery.id} inputId="timeline" title="My title" />
         </TestProviders>
       );
       expect(wrapper.find('button[data-test-subj="inspect-empty-button"]').first().exists()).toBe(
@@ -62,12 +62,7 @@ describe('Inspect Button', () => {
     test('it does NOT render the Eui Empty Button when timeline is timeline and compact is true', () => {
       const wrapper = mount(
         <TestProviders store={store}>
-          <InspectButton
-            compact={true}
-            queryId={newQuery.id}
-            inputId={'timeline'}
-            title="My title"
-          />
+          <InspectButton compact={true} queryId={newQuery.id} inputId="timeline" title="My title" />
         </TestProviders>
       );
       expect(wrapper.find('button[data-test-subj="inspect-empty-button"]').first().exists()).toBe(
@@ -80,7 +75,7 @@ describe('Inspect Button', () => {
         <TestProviders store={store}>
           <InspectButton
             queryId={newQuery.id}
-            inputId={'timeline'}
+            inputId="timeline"
             showInspectButton={false}
             title="My title"
           />
@@ -105,12 +100,7 @@ describe('Inspect Button', () => {
     test('renders the Icon Button when inputId does NOT equal global, but compact is true', () => {
       const wrapper = mount(
         <TestProviders store={store}>
-          <InspectButton
-            compact={true}
-            inputId={'timeline'}
-            queryId={newQuery.id}
-            title="My title"
-          />
+          <InspectButton compact={true} inputId="timeline" queryId={newQuery.id} title="My title" />
         </TestProviders>
       );
       expect(wrapper.find('button[data-test-subj="inspect-icon-button"]').first().exists()).toBe(
