@@ -35,11 +35,10 @@ export abstract class NumeralFormat extends FieldFormat {
   protected getConvertedValue(val: number | string | object): string {
     if (val === -Infinity) return '-∞';
     if (val === +Infinity) return '+∞';
-    if (typeof val === 'string') {
-      val = parseFloat(val);
-    }
     if (typeof val === 'object') {
       return JSON.stringify(val);
+    } else if (typeof val !== 'number') {
+      val = parseFloat(val);
     }
 
     if (isNaN(val)) return '';
