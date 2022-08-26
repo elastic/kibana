@@ -85,7 +85,7 @@ export const derivativeOperation: OperationDefinition<
       scale: 'ratio',
       references: referenceIds,
       timeScale,
-      filter: columnParams?.filter ?? getFilter(previousColumn, columnParams),
+      filter: getFilter(previousColumn, columnParams),
       timeShift: columnParams?.shift || previousColumn?.timeShift,
       params: getFormatFromPreviousColumn(previousColumn),
     };

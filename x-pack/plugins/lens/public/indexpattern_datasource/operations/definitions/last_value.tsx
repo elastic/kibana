@@ -215,10 +215,7 @@ export const lastValueOperation: OperationDefinition<
       isBucketed: false,
       scale: field.type === 'string' ? 'ordinal' : 'ratio',
       sourceField: field.name,
-      filter:
-        columnParams?.filter ||
-        getFilter(previousColumn, columnParams) ||
-        getExistsFilter(field.name),
+      filter: getFilter(previousColumn, columnParams) || getExistsFilter(field.name),
       timeShift: columnParams?.shift || previousColumn?.timeShift,
       window: columnParams?.window || previousColumn?.window,
       params: {

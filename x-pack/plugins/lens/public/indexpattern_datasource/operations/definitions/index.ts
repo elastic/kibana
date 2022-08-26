@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Query } from '@kbn/es-query';
 import {
   IUiSettingsClient,
   SavedObjectsClientContract,
@@ -441,15 +440,9 @@ interface OperationParam {
   defaultValue?: string | number;
 }
 
-/**
- * Two possibility to provide filter:
- * 1. use alredy build filter
- * 2. use kql/lucene strings
- */
 interface FilterParams {
   kql?: string;
   lucene?: string;
-  filter?: Query;
 }
 
 interface FieldlessOperationDefinition<C extends BaseIndexPatternColumn, P = {}> {
