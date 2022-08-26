@@ -36,6 +36,7 @@ import {
   setReadOnly,
   updateLayerById,
   setGotoWithCenter,
+  setEmbeddableSearchContext,
 } from '../actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
 import {
@@ -48,6 +49,7 @@ import {
 import {
   areLayersLoaded,
   getGeoFieldNames,
+  getEmbeddableSearchContext,
   getLayerList,
   getGoto,
   getMapCenter,
@@ -194,6 +196,21 @@ export class MapEmbeddable
       forceRefresh: false,
     });
 
+    const mapStateJSON = this._savedMap.getAttributes().mapStateJSON;
+    if (mapStateJSON) {
+      try {
+        const mapState = JSON.parse(mapStateJSON);
+        store.dispatch(
+          setEmbeddableSearchContext({
+            filters: mapState.filters ? mapState.filters : [],
+            query: mapState.query,
+          })
+        );
+      } catch (e) {
+        // ignore malformed mapStateJSON, not a critical error for viewing map - map will just use defaults
+      }
+    }
+
     this._unsubscribeFromStore = store.subscribe(() => {
       this._handleStoreChanges();
     });
@@ -249,20 +266,18 @@ export class MapEmbeddable
     return this._isInitialized ? this._savedMap.getAttributes().description : '';
   }
 
-  /**
-   * TODO: Implement this function once https://github.com/elastic/kibana/issues/91282 is resolved
-   * @returns []
-   */
   public async getFilters() {
-    return [];
+    const embeddableSearchContext = getEmbeddableSearchContext(
+      this._savedMap.getStore().getState()
+    );
+    return embeddableSearchContext ? embeddableSearchContext.filters : [];
   }
 
-  /**
-   * TODO: Implement this function once https://github.com/elastic/kibana/issues/91282 is resolved
-   * @returns undefined
-   */
   public async getQuery() {
-    return undefined;
+    const embeddableSearchContext = getEmbeddableSearchContext(
+      this._savedMap.getStore().getState()
+    );
+    return embeddableSearchContext?.query;
   }
 
   public supportedTriggers(): string[] {

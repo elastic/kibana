@@ -602,7 +602,7 @@
           "\nParameters drawn from the Storybook arguments collection that customize a component story."
         ],
         "signature": [
-          "{ status: any; name: any; description: any; includeAppLinks: any; simulateErrors: any; }"
+          "{ status: any; description: any; name: any; includeAppLinks: any; simulateErrors: any; }"
         ],
         "path": "packages/home/sample_data_card/src/mocks/index.ts",
         "deprecated": false,

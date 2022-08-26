@@ -8,6 +8,7 @@
 import React, { Fragment, useState, useEffect, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { Moment } from 'moment';
 
 import {
   EuiInMemoryTable,
@@ -18,12 +19,14 @@ import {
   EuiFlyout,
   EuiFlyoutHeader,
   EuiFlyoutBody,
+  EuiIcon,
 } from '@elastic/eui';
-import { ackWatchAction } from '../../../lib/api';
-import { WatchStatus } from '../../../components';
+
 import { PAGINATION } from '../../../../../common/constants';
-import { WatchDetailsContext } from '../watch_details_context';
+import { ackWatchAction } from '../../../lib/api';
+import { ActionStateBadge } from '../../../components';
 import { useAppContext } from '../../../app_context';
+import { WatchDetailsContext } from '../watch_details_context';
 
 interface ActionError {
   code: string;
@@ -71,16 +74,56 @@ export const ActionStatusesPanel = () => {
         defaultMessage: 'Name',
       }),
       sortable: true,
-      truncateText: true,
+      truncateText: false,
     },
     {
       field: 'state',
-      name: i18n.translate('xpack.watcher.sections.watchDetail.watchTable.stateHeader', {
-        defaultMessage: 'State',
-      }),
+      name: (
+        <EuiToolTip
+          content={i18n.translate(
+            'xpack.watcher.sections.watchDetail.watchTable.stateHeader.tooltipText',
+            {
+              defaultMessage: 'OK, acknowledged, throttled, or error.',
+            }
+          )}
+        >
+          <span>
+            {i18n.translate('xpack.watcher.sections.watchDetail.watchTable.stateHeader', {
+              defaultMessage: 'State',
+            })}{' '}
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </span>
+        </EuiToolTip>
+      ),
       sortable: true,
       truncateText: true,
-      render: (state: string) => <WatchStatus status={state} />,
+      render: (state: string) => <ActionStateBadge state={state} />,
+    },
+    {
+      field: 'lastExecution',
+      name: (
+        <EuiToolTip
+          content={i18n.translate(
+            'xpack.watcher.sections.watchHistory.watchActionStatusTable.lastExecuted.tooltipText',
+            {
+              defaultMessage: `The last time this action was executed.`,
+            }
+          )}
+        >
+          <span>
+            {i18n.translate(
+              'xpack.watcher.sections.watchHistory.watchActionStatusTable.lastExecuted',
+              {
+                defaultMessage: 'Last executed',
+              }
+            )}{' '}
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </span>
+        </EuiToolTip>
+      ),
+      sortable: true,
+      truncateText: false,
+      render: (lastExecution?: Moment) => lastExecution?.format() ?? '',
     },
   ];
 

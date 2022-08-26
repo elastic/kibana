@@ -317,8 +317,16 @@ export interface GetFieldsOptions {
   filter?: QueryDslQueryContainer;
 }
 
+/**
+ * FieldsForWildcard response
+ */
+export interface FieldsForWildcardResponse {
+  fields: FieldSpec[];
+  indices: string[];
+}
+
 export interface IDataViewsApiClient {
-  getFieldsForWildcard: (options: GetFieldsOptions) => Promise<FieldSpec[]>;
+  getFieldsForWildcard: (options: GetFieldsOptions) => Promise<FieldsForWildcardResponse>;
   hasUserDataView: () => Promise<boolean>;
 }
 
@@ -409,6 +417,26 @@ export type FieldSpec = DataViewFieldBase & {
    * Runtime field definition
    */
   runtimeField?: RuntimeFieldSpec;
+
+  /**
+   * list of allowed field intervals for the field
+   */
+  fixedInterval?: string[];
+
+  /**
+   * List of allowed timezones for the field
+   */
+  timeZone?: string[];
+
+  /**
+   * set to true if field is a TSDB dimension field
+   */
+  timeSeriesDimension?: boolean;
+
+  /**
+   * set if field is a TSDB metric field
+   */
+  timeSeriesMetric?: 'histogram' | 'summary' | 'gauge' | 'counter';
 
   // not persisted
 
