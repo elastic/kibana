@@ -10,11 +10,17 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ loadTestFile, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
+  const searchSessions = getService('searchSessions');
 
   describe('lens search sessions', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
+    });
+
+    after(async () => {
+      await searchSessions.deleteAllSearchSessions();
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     loadTestFile(require.resolve('./search_sessions.ts'));
