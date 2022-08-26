@@ -18,6 +18,7 @@ import { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart as TriggersActionsStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { BrowserField } from '@kbn/triggers-actions-ui-plugin/public/application/sections/field_browser/types';
 import { DataViewBase } from '@kbn/es-query';
+import { Store } from 'redux';
 
 export interface SecuritySolutionDataViewBase extends DataViewBase {
   fields: Array<FieldSpec & DataViewField>;
@@ -77,7 +78,11 @@ export interface SecuritySolutionPluginContext {
    */
   licenseService: LicenseAware;
   /**
-   * Gets Security Solution shared information like browerFields, indexPattern and selectedPatterns in DataView
+   * Gets Security Solution shared information like browerFields, indexPattern and selectedPatterns in DataView.
    */
   sourcererDataView: SourcererDataView;
+  /**
+   * Security Solution store
+   */
+  getSecuritySolutionStore: Store;
 }

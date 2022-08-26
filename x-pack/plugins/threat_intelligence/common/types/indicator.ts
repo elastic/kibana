@@ -37,8 +37,10 @@ export enum RawIndicatorFieldId {
   FileImphash = 'threat.indicator.file.imphash',
   FilePehash = 'threat.indicator.file.pehash',
   FileVhash = 'threat.indicator.file.vhash',
+  FileTelfhash = 'threat.indicator.file.elf.telfhash',
   X509Serial = 'threat.indicator.x509.serial_number',
   WindowsRegistryKey = 'threat.indicator.registry.key',
+  WindowsRegistryPath = 'threat.indicator.registry.path',
   AutonomousSystemNumber = 'threat.indicator.as.number',
   MacAddress = 'threat.indicator.mac',
   TimeStamp = '@timestamp',
@@ -46,6 +48,33 @@ export enum RawIndicatorFieldId {
   Name = 'threat.indicator.name',
   NameOrigin = 'threat.indicator.name_origin',
 }
+
+export const IndicatorFieldEventEnrichmentMap: { [id: string]: string[] } = {
+  [RawIndicatorFieldId.FileMd5]: ['file.hash.md5', 'threat.enrichments.indicator.file.hash.md5'],
+  [RawIndicatorFieldId.FileSha1]: ['file.hash.sha1', 'threat.enrichments.indicator.file.hash.sha1'],
+  [RawIndicatorFieldId.FileSha256]: [
+    'file.hash.sha256',
+    'threat.enrichments.indicator.file.hash.sha256',
+  ],
+  [RawIndicatorFieldId.FileImphash]: [
+    'file.pe.imphash',
+    'threat.enrichments.indicator.file.pe.imphash',
+  ],
+  [RawIndicatorFieldId.FileTelfhash]: [
+    'file.elf.telfhash',
+    'threat.enrichments.indicator.file.elf.telfhash',
+  ],
+  [RawIndicatorFieldId.FileSSDeep]: [
+    'file.hash.ssdeep',
+    'threat.enrichments.indicator.file.hash.ssdeep',
+  ],
+  [RawIndicatorFieldId.Ip]: ['source.ip', 'destination.ip', 'threat.enrichments.indicator.ip'],
+  [RawIndicatorFieldId.UrlFull]: ['url.full', 'threat.enrichments.indicator.url.full'],
+  [RawIndicatorFieldId.WindowsRegistryPath]: [
+    'registry.path',
+    'threat.enrichments.indicator.registry.path',
+  ],
+};
 
 /**
  * Threat Intelligence Indicator interface.

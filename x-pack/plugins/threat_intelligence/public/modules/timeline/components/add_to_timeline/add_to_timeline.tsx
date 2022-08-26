@@ -81,7 +81,7 @@ export const AddToTimeline: VFC<AddToTimelineProps> = ({ data, field, component,
   if (component) addToTimelineProps.Component = component;
 
   return (
-    <div data-test-subj={testId} css={styles.button}>
+    <div data-test-subj={testId} css={styles.inlineFlex}>
       {addToTimelineButton(addToTimelineProps)}
     </div>
   );

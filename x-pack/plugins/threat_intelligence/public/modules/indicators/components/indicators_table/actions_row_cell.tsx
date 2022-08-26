@@ -6,11 +6,15 @@
  */
 
 import React, { useContext, VFC } from 'react';
+import { InvestigateInTimeline } from '../../../timeline/components/investigate_in_timeline';
 import { Indicator } from '../../../../../common/types/indicator';
 import { OpenIndicatorFlyoutButton } from '../open_indicator_flyout_button/open_indicator_flyout_button';
 import { IndicatorsTableContext } from './context';
+import { useStyles } from './styles';
 
 export const ActionsRowCell: VFC<{ indicator: Indicator }> = ({ indicator }) => {
+  const styles = useStyles();
+
   const indicatorTableContext = useContext(IndicatorsTableContext);
 
   if (!indicatorTableContext) {
@@ -20,10 +24,13 @@ export const ActionsRowCell: VFC<{ indicator: Indicator }> = ({ indicator }) => 
   const { setExpanded, expanded } = indicatorTableContext;
 
   return (
-    <OpenIndicatorFlyoutButton
-      indicator={indicator}
-      onOpen={setExpanded}
-      isOpen={Boolean(expanded && expanded._id === indicator._id)}
-    />
+    <div css={styles.rowActionsDiv}>
+      <OpenIndicatorFlyoutButton
+        indicator={indicator}
+        onOpen={setExpanded}
+        isOpen={Boolean(expanded && expanded._id === indicator._id)}
+      />
+      <InvestigateInTimeline data={indicator} />
+    </div>
   );
 };

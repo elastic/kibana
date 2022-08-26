@@ -5,14 +5,4 @@
  * 2.0.
  */
 
-import { CSSObject } from '@emotion/react';
-
-export const useStyles = () => {
-  const inlineFlex: CSSObject = {
-    display: 'inline-flex',
-  };
-
-  return {
-    inlineFlex,
-  };
-};
+export * from './investigate_in_timeline';

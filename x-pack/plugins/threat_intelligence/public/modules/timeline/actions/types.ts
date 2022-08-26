@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import { CSSObject } from '@emotion/react';
+import { TimelineState } from '@kbn/security-solution-plugin/public/timelines/store/timeline/types';
 
-export const useStyles = () => {
-  const inlineFlex: CSSObject = {
-    display: 'inline-flex',
-  };
+export interface TimelinePluginState {
+  timeline: TimelineState;
+}
 
-  return {
-    inlineFlex,
-  };
-};
+export type State = TimelinePluginState;

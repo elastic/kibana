@@ -8,11 +8,11 @@
 import { CSSObject } from '@emotion/react';
 
 export const useStyles = () => {
-  const inlineFlex: CSSObject = {
-    display: 'inline-flex',
+  const rowActionsDiv: CSSObject = {
+    display: 'flex',
   };
 
   return {
-    inlineFlex,
+    rowActionsDiv,
   };
 };
