@@ -58,6 +58,9 @@ disabled:
   - x-pack/test/screenshot_creation/config.ts
   - x-pack/test/fleet_packages/config.ts
 
+  # Scalability testing config that we run in its own pipeline
+  - x-pack/test/performance/scalability/config.ts
+
 defaultQueue: 'n2-4-spot'
 enabled:
   - test/accessibility/config.ts
@@ -269,4 +272,3 @@ enabled:
   - x-pack/test/performance/journeys/many_fields_discover/config.ts
   - x-pack/test/performance/journeys/promotion_tracking_dashboard/config.ts
   - x-pack/test/performance/journeys/web_logs_dashboard/config.ts
-  - x-pack/test/performance/scalability/config.ts

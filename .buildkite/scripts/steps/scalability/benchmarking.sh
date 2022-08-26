@@ -64,8 +64,7 @@ for file in scalability_traces/server/*; do
     node scripts/functional_tests \
       --config x-pack/test/performance/scalability/config.ts \
       --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
-      --debug \
-      --bail
+      --debug
 done
 
 kill "$esPid"
