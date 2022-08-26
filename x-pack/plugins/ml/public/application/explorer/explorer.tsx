@@ -54,7 +54,7 @@ import {
   escapeDoubleQuotes,
   OverallSwimlaneData,
   AppStateSelectedCells,
-  checkIfSourceIndicesHaveGeoField,
+  getSourceIndicesWithGeoFields,
   SourceIndicesWithGeoFields,
 } from './explorer_utils';
 import { AnomalyTimeline } from './anomaly_timeline';
@@ -429,7 +429,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
 
   useEffect(() => {
     if (!noJobsSelected) {
-      checkIfSourceIndicesHaveGeoField(selectedJobs, dataViewsService)
+      getSourceIndicesWithGeoFields(selectedJobs, dataViewsService)
         .then((sourceIndicesWithGeoFieldsMap) =>
           setSourceIndicesWithGeoFields(sourceIndicesWithGeoFieldsMap)
         )

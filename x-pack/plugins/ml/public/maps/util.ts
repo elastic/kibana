@@ -22,6 +22,7 @@ import { MLAnomalyDoc } from '../../common/types/anomalies';
 import { SEARCH_QUERY_LANGUAGE } from '../../common/constants/search';
 import { getIndexPattern } from '../application/explorer/reducers/explorer_reducer/get_index_pattern';
 import { AnomalySource } from './anomaly_source';
+import { SourceIndexGeoFields } from '../application/explorer/explorer_utils';
 
 export const ML_ANOMALY_LAYERS = {
   TYPICAL: 'typical',
@@ -111,13 +112,11 @@ export function getInitialAnomaliesLayers(jobId: string) {
   return initialLayers;
 }
 
-export function getInitialSourceIndexFieldLayers(sourceIndicesWithGeoFields: {
-  [key: string]: { geoFields: string[]; dataViewId: string };
-}) {
+export function getInitialSourceIndexFieldLayers(sourceIndexWithGeoFields: SourceIndexGeoFields) {
   const initialLayers = [] as unknown as LayerDescriptor[] & SerializableRecord;
-  for (const index in sourceIndicesWithGeoFields) {
-    if (sourceIndicesWithGeoFields.hasOwnProperty(index)) {
-      const { dataViewId, geoFields } = sourceIndicesWithGeoFields[index];
+  for (const index in sourceIndexWithGeoFields) {
+    if (sourceIndexWithGeoFields.hasOwnProperty(index)) {
+      const { dataViewId, geoFields } = sourceIndexWithGeoFields[index];
 
       geoFields.forEach((geoField) => {
         initialLayers.push({

@@ -115,8 +115,12 @@ export interface ViewBySwimLaneData extends OverallSwimlaneData {
   cardinality: number;
 }
 
+export interface SourceIndexGeoFields {
+  [key: string]: { geoFields: string[]; dataViewId: string };
+}
+
 export interface SourceIndicesWithGeoFields {
-  [key: string]: { [key: string]: { geoFields: string[]; dataViewId: string } };
+  [key: string]: SourceIndexGeoFields;
 }
 
 // create new job objects based on standard job config objects
@@ -612,7 +616,7 @@ export function removeFilterFromQueryString(
 }
 
 // Returns an object mapping job ids to source indices which map to geo fields for that index
-export async function checkIfSourceIndicesHaveGeoField(
+export async function getSourceIndicesWithGeoFields(
   selectedJobs: Array<CombinedJob | ExplorerJob>,
   dataViewsService: any
 ): Promise<SourceIndicesWithGeoFields> {

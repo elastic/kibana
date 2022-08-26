@@ -37,7 +37,11 @@ import { getUrlForRecord, openCustomUrlWindow } from '../../util/custom_url_util
 import { ML_APP_LOCATOR, ML_PAGES } from '../../../../common/constants/locator';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../common/constants/search';
 // @ts-ignore
-import { escapeDoubleQuotes, getDateFormatTz } from '../../explorer/explorer_utils';
+import {
+  escapeDoubleQuotes,
+  getDateFormatTz,
+  SourceIndicesWithGeoFields,
+} from '../../explorer/explorer_utils';
 import { isCategorizationAnomaly, isRuleSupported } from '../../../../common/util/anomaly_utils';
 import { checkPermission } from '../../capabilities/check_capabilities';
 import type {
@@ -59,9 +63,7 @@ interface LinksMenuProps {
   interval: 'day' | 'hour' | 'second';
   showRuleEditorFlyout: (anomaly: AnomaliesTableRecord) => void;
   onItemClick: () => void;
-  sourceIndicesWithGeoFields: {
-    [key: string]: { [key: string]: { geoFields: string[]; dataViewId: string } };
-  };
+  sourceIndicesWithGeoFields: SourceIndicesWithGeoFields;
 }
 
 export const LinksMenuUI = (props: LinksMenuProps) => {
@@ -109,9 +111,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
 
   const getAnomalySourceMapsLink = async (
     anomaly: AnomaliesTableRecord,
-    sourceIndicesWithGeoFields: {
-      [key: string]: { [key: string]: { geoFields: string[]; dataViewId: string } };
-    }
+    sourceIndicesWithGeoFields: SourceIndicesWithGeoFields
   ) => {
     // Create a layer for each of the geoFields
     const initialLayers = getInitialSourceIndexFieldLayers(
@@ -637,7 +637,6 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
         </EuiContextMenuItem>
       );
     }
-
     if (showViewSeriesLink === true) {
       if (anomaly.isTimeSeriesViewRecord) {
         items.push(
