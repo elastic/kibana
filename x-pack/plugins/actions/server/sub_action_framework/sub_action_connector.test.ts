@@ -21,7 +21,6 @@ jest.mock('../lib/axios_utils', () => {
   return {
     ...originalUtils,
     request: jest.fn(),
-    patch: jest.fn(),
   };
 });
 
