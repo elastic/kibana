@@ -374,14 +374,14 @@ describe('filters', () => {
         );
         expect(
           instance
-            .find('[data-test-subj="indexPattern-filters-existingFilterContainer"]')
+            .find('div[data-test-subj="indexPattern-filters-existingFilterContainer"]')
             .at(0)
             .text()
         ).toEqual('More than one');
         expect(
           instance
-            .find('[data-test-subj="indexPattern-filters-existingFilterContainer"]')
-            .at(3)
+            .find('div[data-test-subj="indexPattern-filters-existingFilterContainer"]')
+            .at(1)
             .text()
         ).toEqual('src : 2');
       });

@@ -437,10 +437,11 @@ export const SEARCH_PLACEHOLDER = i18n.translate(
   }
 );
 
-export const SHOWING_RULES = (totalRules: number) =>
+export const SHOWING_RULES = (firstInPage: number, lastOfPage: number, totalRules: number) =>
   i18n.translate('xpack.securitySolution.detectionEngine.rules.allRules.showingRulesTitle', {
-    values: { totalRules },
-    defaultMessage: 'Showing {totalRules} {totalRules, plural, =1 {rule} other {rules}}',
+    values: { firstInPage, lastOfPage, totalRules },
+    defaultMessage:
+      'Showing {firstInPage}-{lastOfPage} of {totalRules} {totalRules, plural, =1 {rule} other {rules}}',
   });
 
 export const SELECT_ALL_RULES = (totalRules: number) =>
@@ -839,12 +840,6 @@ export const REFRESH_RULE_POPOVER_LABEL = i18n.translate(
   }
 );
 
-export const SHOWING_EXCEPTION_LISTS = (totalLists: number) =>
-  i18n.translate('xpack.securitySolution.detectionEngine.rules.allRules.showingExceptionLists', {
-    values: { totalLists },
-    defaultMessage: 'Showing {totalLists} {totalLists, plural, =1 {list} other {lists}}',
-  });
-
 /**
  * Bulk Export
  */
@@ -1074,3 +1069,17 @@ export const RULES_BULK_EDIT_FAILURE_DESCRIPTION = (rulesCount: number) =>
       defaultMessage: '{rulesCount, plural, =1 {# rule} other {# rules}} failed to update.',
     }
   );
+
+export const NEW_TERMS_TOUR_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.tour.newTermsTitle',
+  {
+    defaultMessage: 'A new Security Rule type is available!',
+  }
+);
+
+export const NEW_TERMS_TOUR_CONTENT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.tour.newTermsContent',
+  {
+    defaultMessage: '"New Terms" rules alert on values that have not previously been seen',
+  }
+);

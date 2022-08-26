@@ -26,10 +26,12 @@ import { installIndexTemplatesRoute } from './synthetics_service/install_index_t
 import { editSyntheticsMonitorRoute } from './monitor_cruds/edit_monitor';
 import { addSyntheticsMonitorRoute } from './monitor_cruds/add_monitor';
 import { addSyntheticsProjectMonitorRoute } from './monitor_cruds/add_monitor_project';
-import { SyntheticsRestApiRouteFactory } from '../legacy_uptime/routes';
+import {
+  SyntheticsRestApiRouteFactory,
+  SyntheticsStreamingRouteFactory,
+} from '../legacy_uptime/routes';
 
 export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
-  addSyntheticsProjectMonitorRoute,
   addSyntheticsMonitorRoute,
   getSyntheticsEnablementRoute,
   deleteSyntheticsMonitorRoute,
@@ -46,4 +48,8 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   getServiceAllowedRoute,
   getAPIKeySyntheticsRoute,
   createGetMonitorStatusRoute,
+];
+
+export const syntheticsAppStreamingApiRoutes: SyntheticsStreamingRouteFactory[] = [
+  addSyntheticsProjectMonitorRoute,
 ];
