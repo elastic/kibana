@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '@kbn/enterprise-search-plugin/common/constants';
+import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../common/constants';
+
 import { ConnectorStatus, SyncStatus } from '../../../../common/types/connectors';
 import { ElasticsearchIndexWithIngestion } from '../../../../common/types/indices';
 
@@ -103,5 +104,5 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
       },
       store: { size_in_bytes: '8024' },
     },
-  }
+  },
 ];
