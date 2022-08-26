@@ -13,9 +13,10 @@ import {
   EuiResizableContainer,
   EuiSpacer,
   useEuiTheme,
+  useResizeObserver,
 } from '@elastic/eui';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { RefObject, useCallback, useEffect, useState } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -49,6 +50,7 @@ export const DiscoverMainContent = ({
   onAddFilter,
   onFieldEdited,
   columns,
+  resizeRef,
 }: {
   isPlainRecord: boolean;
   dataView: DataView;
@@ -66,11 +68,13 @@ export const DiscoverMainContent = ({
   onAddFilter: DocViewFilterFn | undefined;
   onFieldEdited: () => void;
   columns: string[];
+  resizeRef: RefObject<HTMLDivElement>;
 }) => {
+  /**
+   * View mode
+   */
+
   const { trackUiMetric } = useDiscoverServices();
-  const { charts$, totalHits$ } = savedSearchData$;
-  const { euiTheme } = useEuiTheme();
-  const [mainPanel, setMainPanel] = useState<HTMLDivElement>();
 
   const setDiscoverViewMode = useCallback(
     (mode: VIEW_MODE) => {
@@ -87,38 +91,67 @@ export const DiscoverMainContent = ({
     [trackUiMetric, stateContainer]
   );
 
-  const { minHistogramSize, minMainSize, histogramSize, mainSize } = useMemo(() => {
-    const preferredHistogramSize = euiTheme.base * 12;
-    const resizableContainer = mainPanel?.closest('.dscPageContent__inner');
-    const resizableHeight = resizableContainer?.getBoundingClientRect()?.height;
-    const histogramHeight = resizableHeight
-      ? Math.round((preferredHistogramSize / resizableHeight) * 100)
-      : 0;
+  /**
+   * Panel resizing
+   */
 
-    return {
-      minHistogramSize: `${euiTheme.base * 8}px`,
-      minMainSize: `${euiTheme.base * 15}px`,
-      histogramSize: histogramHeight,
-      mainSize: 100 - histogramHeight,
-    };
-  }, [euiTheme.base, mainPanel]);
+  const { euiTheme } = useEuiTheme();
+  const preferredHistogramHeight = euiTheme.base * 12;
+  const minHistogramSize = `${euiTheme.base * 8}px`;
+  const minMainSize = `${euiTheme.base * 10}px`;
+  const histogramPanelId = 'dscHistogramPanel';
+  const { height: containerHeight } = useResizeObserver(resizeRef.current);
+  const [histogramHeight, setHistogramHeight] = useState<number>(preferredHistogramHeight);
+  const [panelSizes, setPanelSizes] = useState<{ histogramSize: number; mainSize: number }>({
+    histogramSize: 0,
+    mainSize: 0,
+  });
+
+  // Instead of setting the panel sizes directly, we convert the histogram height
+  // from a percentage of the container height to a pixel value. This will trigger
+  // the effect below to update the panel sizes.
+  const onPanelSizeChange = useCallback(
+    ({ [histogramPanelId]: histogramSize }: { [key: string]: number }) => {
+      setHistogramHeight(Math.round(containerHeight * (histogramSize / 100)));
+    },
+    [containerHeight]
+  );
+
+  // This effect will update the panel sizes based on the histogram height whenever
+  // it or the container height changes. This allows us to keep the height of the
+  // histogram panel fixed when the window is resized.
+  useEffect(() => {
+    if (!containerHeight) {
+      return;
+    }
+
+    const histogramSize = +((histogramHeight / containerHeight) * 100).toFixed(4);
+    const mainSize = 100 - histogramSize;
+
+    setPanelSizes({ histogramSize, mainSize });
+  }, [containerHeight, histogramHeight]);
 
   return (
-    <EuiResizableContainer className="dscPageContent__inner" direction="vertical">
+    <EuiResizableContainer
+      className="dscPageContent__inner"
+      direction="vertical"
+      onPanelWidthChange={onPanelSizeChange}
+    >
       {(EuiResizablePanel, EuiResizableButton) => (
         <>
           {!isPlainRecord && (
             <>
               <EuiResizablePanel
+                id={histogramPanelId}
                 minSize={minHistogramSize}
-                initialSize={histogramSize}
+                size={panelSizes.histogramSize}
                 paddingSize="none"
               >
                 <DiscoverChartMemoized
                   resetSavedSearch={resetSavedSearch}
                   savedSearch={savedSearch}
-                  savedSearchDataChart$={charts$}
-                  savedSearchDataTotalHits$={totalHits$}
+                  savedSearchDataChart$={savedSearchData$.charts$}
+                  savedSearchDataTotalHits$={savedSearchData$.totalHits$}
                   stateContainer={stateContainer}
                   dataView={dataView}
                   hideChart={state.hideChart}
@@ -129,16 +162,7 @@ export const DiscoverMainContent = ({
               <EuiResizableButton />
             </>
           )}
-          <EuiResizablePanel
-            panelRef={(panel) => {
-              if (panel) {
-                setMainPanel(panel);
-              }
-            }}
-            minSize={minMainSize}
-            initialSize={mainSize}
-            paddingSize="none"
-          >
+          <EuiResizablePanel minSize={minMainSize} size={panelSizes.mainSize} paddingSize="none">
             <EuiFlexGroup
               className="eui-fullHeight"
               direction="column"
