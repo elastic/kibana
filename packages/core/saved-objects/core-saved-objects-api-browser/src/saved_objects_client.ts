@@ -20,6 +20,11 @@ import type {
   SavedObjectsUpdateOptions,
   SavedObjectsDeleteOptions,
 } from './apis';
+import {
+  SavedObjectsBulkDeleteObject,
+  SavedObjectsBulkDeleteOptions,
+  SavedObjectsBulkDeleteResponse,
+} from './apis/bulk_delete';
 import type { SimpleSavedObject } from './simple_saved_object';
 
 /**
@@ -51,6 +56,17 @@ export interface SavedObjectsClientContract {
    * Deletes an object
    */
   delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
+
+  /**
+   * Deletes multiple documents at once
+   * @param objects - an array of objects containing id, type
+   * @param options - optional force argument to force deletion of objects in a namespace other than the scoped client
+   * @returns The bulk delete result for the saved objects for the given types and ids.
+   */
+  bulkDelete(
+    objects: SavedObjectsBulkDeleteObject[],
+    options?: SavedObjectsBulkDeleteOptions
+  ): Promise<SavedObjectsBulkDeleteResponse>;
 
   /**
    * Search for objects

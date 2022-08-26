@@ -22,4 +22,8 @@ export type {
   SavedObjectsBulkUpdateOptions,
   SavedObjectsBulkResolveResponse,
   SavedObjectsBulkCreateObject,
+  SavedObjectsBulkDeleteObject,
+  SavedObjectsBulkDeleteOptions,
+  SavedObjectsBulkDeleteItemResponse,
+  SavedObjectsBulkDeleteResponse,
 } from './apis';

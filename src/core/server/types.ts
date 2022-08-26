@@ -40,9 +40,6 @@ export type {
   SavedObjectsClientContract,
   SavedObjectReferenceWithContext,
   SavedObjectsCollectMultiNamespaceReferencesResponse,
-  SavedObjectsBulkDeleteObject,
-  SavedObjectsBulkDeleteOptions,
-  SavedObjectsBulkDeleteResponse,
 } from '@kbn/core-saved-objects-api-server';
 export type {
   DomainDeprecationDetails,
