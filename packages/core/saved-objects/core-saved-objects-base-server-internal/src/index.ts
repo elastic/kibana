@@ -27,3 +27,10 @@ export {
   type SavedObjectsMigrationConfigType,
 } from './saved_objects_config';
 export { SavedObjectTypeRegistry } from './saved_objects_type_registry';
+export type {
+  IKibanaMigrator,
+  KibanaMigratorStatus,
+  MigrationResult,
+  MigrationStatus,
+} from './migration';
+export { parseObjectKey, getObjectKey, getIndexForType } from './utils';
