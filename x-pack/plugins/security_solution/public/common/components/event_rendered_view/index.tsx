@@ -4,29 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
+import type {
   CriteriaWithPagination,
-  EuiBasicTable,
   EuiBasicTableProps,
   EuiDataGridCellValueElementProps,
   EuiDataGridControlColumn,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
 } from '@elastic/eui';
+import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ALERT_REASON, ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { get } from 'lodash';
 import moment from 'moment';
-import React, { ComponentType, useCallback, useMemo } from 'react';
+import type { ComponentType } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 
 import type { TimelineItem } from '../../../../common/search_strategy';
 import type { RowRenderer } from '../../../../common/types';
-import { RuleName } from '../../rule_name';
-import { isEventBuildingBlockType } from '../body/helpers';
+import { RuleName } from '../rule_name';
+import { isEventBuildingBlockType } from './helpers';
 
 const EventRenderedFlexItem = styled(EuiFlexItem)`
   div:first-child {
