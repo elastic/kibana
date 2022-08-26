@@ -14,14 +14,17 @@ import { InfraLoadingPanel } from '../../../components/loading';
 import { useMetricsDataViewContext } from './hooks/use_data_view';
 import { HostsTable } from './components/hosts_table';
 import { InfraClientStartDeps } from '../../../types';
+import { useSourceContext } from '../../../containers/metrics_source';
 
 export const HostsContent: React.FunctionComponent = () => {
   const {
     services: { data },
   } = useKibana<InfraClientStartDeps>();
+  const { source } = useSourceContext();
   const [dateRange, setDateRange] = useState<TimeRange>({ from: 'now-15m', to: 'now' });
   const [query, setQuery] = useState<Query>({ query: '', language: 'kuery' });
-  const { metricsDataView } = useMetricsDataViewContext();
+  const { metricsDataView, hasFailedCreatingDataView, hasFailedFetchingDataView } =
+    useMetricsDataViewContext();
   // needed to refresh the lens table when filters havent changed
   const [searchSessionId, setSearchSessionId] = useState(data.search.session.start());
 
@@ -60,6 +63,11 @@ export const HostsContent: React.FunctionComponent = () => {
             searchSessionId={searchSessionId}
           />
         </>
+      ) : hasFailedCreatingDataView || hasFailedFetchingDataView ? (
+        <div>
+          <div>There was an error trying to load or create the Data View:</div>
+          {source?.configuration.metricAlias}
+        </div>
       ) : (
         <InfraLoadingPanel
           height="100vh"

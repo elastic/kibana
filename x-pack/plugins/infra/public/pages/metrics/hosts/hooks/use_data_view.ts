@@ -10,24 +10,56 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import createContainer from 'constate';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { InfraClientStartDeps } from '../../../../types';
+import { useTrackedPromise } from '../../../../utils/use_tracked_promise';
 
 export const useDataView = ({ metricAlias }: { metricAlias: string }) => {
   const [metricsDataView, setMetricsDataView] = useState<DataView>();
   const {
     services: { dataViews },
   } = useKibana<InfraClientStartDeps>();
+
+  const [createDataViewRequest, createDataView] = useTrackedPromise(
+    {
+      createPromise: (config): Promise<DataView> => {
+        return dataViews.createAndSave(config);
+      },
+      onResolve: (response: DataView) => {
+        setMetricsDataView(response);
+      },
+      cancelPreviousOn: 'creation',
+    },
+    []
+  );
+
+  const [getDataViewRequest, getDataView] = useTrackedPromise(
+    {
+      createPromise: (indexPattern: string): Promise<DataView[]> => {
+        return dataViews.find(metricAlias, 1);
+      },
+      onResolve: (response: DataView[]) => {
+        setMetricsDataView(response[0]);
+      },
+      cancelPreviousOn: 'creation',
+    },
+    []
+  );
+
   const loadDataView = useCallback(async () => {
-    let view = (await dataViews.find(metricAlias, 1))[0];
-    if (!view) {
-      view = await dataViews.createAndSave({
-        title: metricAlias,
-        timeFieldName: '@timestamp',
-      });
+    try {
+      let view = (await getDataView(metricAlias))[0];
+      if (!view) {
+        view = await createDataView({
+          title: metricAlias,
+          timeFieldName: '@timestamp',
+        });
+      }
+    } catch (error) {
+      setMetricsDataView(undefined);
     }
-    if (view.id) {
-      setMetricsDataView(view);
-    }
-  }, [metricAlias, dataViews]);
+  }, [metricAlias, createDataView, getDataView]);
+
+  const hasFailedFetchingDataView = getDataViewRequest.state === 'rejected';
+  const hasFailedCreatingDataView = createDataViewRequest.state === 'rejected';
 
   useEffect(() => {
     loadDataView();
@@ -35,6 +67,8 @@ export const useDataView = ({ metricAlias }: { metricAlias: string }) => {
 
   return {
     metricsDataView,
+    hasFailedCreatingDataView,
+    hasFailedFetchingDataView,
   };
 };
 
