@@ -7,14 +7,18 @@
 
 import type {
   CreateExceptionListItemSchema,
-  CreateExceptionListSchema,
+  InternalCreateExceptionListSchema,
   ExceptionListItemSchema,
   ExceptionListSummarySchema,
   FoundExceptionListItemSchema,
   ListId,
   UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
+import {
+  EXCEPTION_LIST_ITEM_URL,
+  EXCEPTION_LIST_URL,
+  INTERNAL_EXCEPTION_LIST_URL,
+} from '@kbn/securitysolution-list-constants';
 import type { HttpStart } from '@kbn/core/public';
 import { MANAGEMENT_DEFAULT_PAGE, MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../common/constants';
 
@@ -31,7 +35,7 @@ export class ExceptionsListApiClient {
   constructor(
     private readonly http: HttpStart,
     public readonly listId: ListId,
-    private readonly listDefinition: CreateExceptionListSchema,
+    private readonly listDefinition: InternalCreateExceptionListSchema,
     private readonly readTransform?: (item: ExceptionListItemSchema) => ExceptionListItemSchema,
     private readonly writeTransform?: <
       T extends CreateExceptionListItemSchema | UpdateExceptionListItemSchema
@@ -54,21 +58,14 @@ export class ExceptionsListApiClient {
       this.listId,
       new Promise<void>((resolve, reject) => {
         const asyncFunction = async () => {
-          try {
-            await this.http.post<ExceptionListItemSchema>(EXCEPTION_LIST_URL, {
-              body: JSON.stringify({ ...this.listDefinition, list_id: this.listId }),
-            });
+          await this.http.post<ExceptionListItemSchema>(`${INTERNAL_EXCEPTION_LIST_URL}/_create`, {
+            body: JSON.stringify({ ...this.listDefinition, list_id: this.listId }),
+            query: {
+              ignore_existing: true,
+            },
+          });
 
-            resolve();
-          } catch (err) {
-            // Ignore 409 errors. List already created
-            if (err.response?.status !== 409) {
-              ExceptionsListApiClient.wasListCreated.delete(this.listId);
-              reject(err);
-            }
-
-            resolve();
-          }
+          resolve();
         };
         asyncFunction();
       })
@@ -100,7 +97,7 @@ export class ExceptionsListApiClient {
   public static getInstance(
     http: HttpStart,
     listId: string,
-    listDefinition: CreateExceptionListSchema,
+    listDefinition: InternalCreateExceptionListSchema,
     readTransform?: (item: ExceptionListItemSchema) => ExceptionListItemSchema,
     writeTransform?: <T extends CreateExceptionListItemSchema | UpdateExceptionListItemSchema>(
       item: T
