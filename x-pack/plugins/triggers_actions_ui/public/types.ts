@@ -246,7 +246,7 @@ export type ActionConnectorWithoutId<
 
 export type ActionConnectorTableItem = ActionConnector & {
   actionType: ActionType['name'];
-  featureIds: ActionType['supportedFeatureIds'];
+  compatibility: string[];
 };
 
 type AsActionVariables<Keys extends string> = {
