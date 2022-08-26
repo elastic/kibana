@@ -17,7 +17,7 @@ import { nullableType } from './lib/nullable';
 import { isOk, promiseResult, Result } from './lib/result_type';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
-import { request } from './lib/axios_utils';
+import { request } from '../lib/axios_utils';
 import { renderMustacheString } from '../lib/mustache_renderer';
 import {
   AlertingConnectorFeatureId,
@@ -175,7 +175,7 @@ export async function executor(
       url,
       logger,
       ...basicAuth,
-      headers,
+      headers: headers ? headers : {},
       data,
       configurationUtilities,
     })

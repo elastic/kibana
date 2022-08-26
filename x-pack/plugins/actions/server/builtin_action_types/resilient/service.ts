@@ -24,7 +24,7 @@ import {
 } from './types';
 
 import * as i18n from './translations';
-import { getErrorMessage, request, throwIfResponseIsNotValid } from '../lib/axios_utils';
+import { getErrorMessage, request, throwIfResponseIsNotValid } from '../../lib/axios_utils';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 
 const VIEW_INCIDENT_URL = `#incidents`;

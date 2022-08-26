@@ -31,7 +31,7 @@ import {
 } from './types';
 
 import * as i18n from './translations';
-import { request } from '../lib/axios_utils';
+import { request } from '../../lib/axios_utils';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 
 export const createExternalService = (

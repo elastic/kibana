@@ -9,7 +9,7 @@ import { Logger } from '@kbn/logging';
 import axios from 'axios';
 
 import { ActionsConfigurationUtilities } from '../../actions_config';
-import { getErrorMessage, request, throwIfResponseIsNotValid } from '../lib/axios_utils';
+import { getErrorMessage, request, throwIfResponseIsNotValid } from '../../lib/axios_utils';
 import { getBodyForEventAction } from './helpers';
 import {
   CreateCommentParams,
