@@ -16,10 +16,13 @@ import { getEndpointResponseActionsConsoleCommands } from './endpoint_response_a
 import { enterConsoleCommand } from '../console/mocks';
 import { waitFor } from '@testing-library/react';
 import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mocks';
+import type { ResponderCapabilities } from '../../../../common/endpoint/constants';
 import { RESPONDER_CAPABILITIES } from '../../../../common/endpoint/constants';
 
 describe('When using the suspend-process action from response actions console', () => {
-  let render: () => Promise<ReturnType<AppContextTestRender['render']>>;
+  let render: (
+    capabilities?: ResponderCapabilities[]
+  ) => Promise<ReturnType<AppContextTestRender['render']>>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let apiMocks: ReturnType<typeof responseActionsHttpMocks>;
   let consoleManagerMockAccess: ReturnType<
@@ -31,7 +34,7 @@ describe('When using the suspend-process action from response actions console', 
 
     apiMocks = responseActionsHttpMocks(mockedContext.coreStart.http);
 
-    render = async (capabilities: string[] = RESPONDER_CAPABILITIES) => {
+    render = async (capabilities: ResponderCapabilities[] = [...RESPONDER_CAPABILITIES]) => {
       renderResult = mockedContext.render(
         <ConsoleManagerTestComponent
           registerConsoleProps={() => {

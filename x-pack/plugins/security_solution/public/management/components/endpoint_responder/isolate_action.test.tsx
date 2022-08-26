@@ -17,10 +17,13 @@ import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mock
 import { enterConsoleCommand } from '../console/mocks';
 import { waitFor } from '@testing-library/react';
 import { getDeferred } from '../mocks';
+import type { ResponderCapabilities } from '../../../../common/endpoint/constants';
 import { RESPONDER_CAPABILITIES } from '../../../../common/endpoint/constants';
 
 describe('When using isolate action from response actions console', () => {
-  let render: () => Promise<ReturnType<AppContextTestRender['render']>>;
+  let render: (
+    capabilities?: ResponderCapabilities[]
+  ) => Promise<ReturnType<AppContextTestRender['render']>>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let apiMocks: ReturnType<typeof responseActionsHttpMocks>;
   let consoleManagerMockAccess: ReturnType<
@@ -32,7 +35,7 @@ describe('When using isolate action from response actions console', () => {
 
     apiMocks = responseActionsHttpMocks(mockedContext.coreStart.http);
 
-    render = async (capabilities: string[] = RESPONDER_CAPABILITIES) => {
+    render = async (capabilities: ResponderCapabilities[] = [...RESPONDER_CAPABILITIES]) => {
       renderResult = mockedContext.render(
         <ConsoleManagerTestComponent
           registerConsoleProps={() => {
