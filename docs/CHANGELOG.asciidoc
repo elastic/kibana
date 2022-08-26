@@ -62,6 +62,7 @@ To review the breaking changes in previous versions, refer to the following:
 
 Alerting::
 * Fixes alert tab crash on rule details page {kibana-pull}139372[#139372]
+* Fixes issue where some 8.3.x clusters failed to upgrade with a saved object migration failure {kibana-pull}139427[#139427]
 
 Lens & Visualizations::
 * Fixes table pagination in *Lens* and *Aggregation-based* visualization editors {kibana-pull}139160[#139160]
