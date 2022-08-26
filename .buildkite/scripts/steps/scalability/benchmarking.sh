@@ -55,6 +55,9 @@ curl --retry 120 \
 
 export ELASTIC_APM_ACTIVE=true
 
+# Overriding Gatling default configuration
+export ES_HOST="http://localhost:9200"
+
 for file in scalability_traces/server/*; do
     export SCALABILITY_JOURNEY_PATH="$KIBANA_DIR/$file"
     echo "--- Run scalability file: $SCALABILITY_JOURNEY_PATH"
