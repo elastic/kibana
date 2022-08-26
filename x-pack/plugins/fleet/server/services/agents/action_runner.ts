@@ -68,7 +68,7 @@ export abstract class ActionRunner {
         `Running action asynchronously, actionId: ${this.actionParams.actionId}, total agents: ${this.actionParams.total}`
       );
 
-    withSpan({ name: this.getTaskType(), type: 'action' }, () =>
+    withSpan({ name: this.getActionType(), type: 'action' }, () =>
       this.processAgentsInBatches().catch(async (error) => {
         const createActionStatus = (errorMessage: string) =>
           this.createActionStatus(this.esClient, {

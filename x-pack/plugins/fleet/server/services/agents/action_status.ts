@@ -43,8 +43,8 @@ export async function getActionStatuses(esClient: ElasticsearchClient): Promise<
         },
       });
 
-      const total = action.total || action.nbAgents;
-      const complete = count === total;
+      const nbAgentsActioned = action.nbAgentsActioned || action.nbAgentsActionCreated;
+      const complete = count === nbAgentsActioned;
       const isCancelled = cancelledActionIds.indexOf(action.actionId) > -1;
 
       const actionStatus = actionStatuses.find((as) => as.actionId === action.actionId);
@@ -60,7 +60,7 @@ export async function getActionStatuses(esClient: ElasticsearchClient): Promise<
           ? 'failed'
           : action.status,
         errorMessage: actionStatus?.errorMessage,
-        total,
+        nbAgentsActioned,
       };
     },
     { concurrency: 20 }
@@ -149,17 +149,17 @@ async function _getActions(esClient: ElasticsearchClient) {
           : false;
         acc[hit._source.action_id] = {
           actionId: hit._source.action_id,
-          nbAgents: 0,
+          nbAgentsActionCreated: 0,
           nbAgentsAck: 0,
           version: hit._source.data?.version as string,
           startTime,
           type: hit._source?.type,
-          total: hit._source?.total ?? 0,
+          nbAgentsActioned: hit._source?.total ?? 0,
           status: isExpired ? 'expired' : 'in progress',
         };
       }
 
-      acc[hit._source.action_id].nbAgents += hit._source.agents?.length ?? 0;
+      acc[hit._source.action_id].nbAgentsActionCreated += hit._source.agents?.length ?? 0;
 
       return acc;
     }, {} as { [k: string]: CurrentAction })

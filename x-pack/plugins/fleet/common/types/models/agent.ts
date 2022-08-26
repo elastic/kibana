@@ -109,12 +109,12 @@ export interface CurrentUpgrade {
 
 export interface CurrentAction {
   actionId: string;
-  nbAgents: number;
+  nbAgentsActionCreated: number;
   nbAgentsAck: number;
   version: string;
   startTime?: string;
   type?: string;
-  total: number;
+  nbAgentsActioned: number;
   status: 'complete' | 'expired' | 'cancelled' | 'failed' | 'in progress';
   errorMessage?: string;
 }
