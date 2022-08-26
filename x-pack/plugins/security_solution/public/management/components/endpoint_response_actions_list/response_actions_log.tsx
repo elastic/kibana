@@ -330,7 +330,6 @@ export const ResponseActionsLog = memo<
         render: (hosts: ActionDetails['hosts']) => {
           // join hostnames if the action is for multiple agents
           // and skip empty strings for names if any
-          // TODO: truncate long list of names and show a tooltip
           const hostname =
             hosts &&
             Object.values(hosts)
