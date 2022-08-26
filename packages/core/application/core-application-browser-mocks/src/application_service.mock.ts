@@ -86,7 +86,7 @@ const createInternalStartContractMock = (): jest.Mocked<InternalApplicationStart
   };
 };
 
-const createAppMountParametersMock = (parts: Partial<AppMountParameters>) => {
+const createAppMountParametersMock = (parts: Partial<AppMountParameters> = {}) => {
   const mock: AppMountParameters = {
     element: document.createElement('div'),
     history: scopedHistoryMock.create(),
