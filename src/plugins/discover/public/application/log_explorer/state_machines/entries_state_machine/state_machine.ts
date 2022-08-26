@@ -491,7 +491,6 @@ export const entriesStateMachine = createMachine<
         initial: 'loading',
         states: {
           loading: {
-            entry: 'updateTimeRange',
             invoke: {
               src: 'loadTail',
             },
@@ -506,6 +505,7 @@ export const entriesStateMachine = createMachine<
             initial: 'staleAfterLoadTail',
             after: {
               loadTailDelay: {
+                actions: 'updateTimeRangeFromTimefilter',
                 target: 'loading',
               },
             },

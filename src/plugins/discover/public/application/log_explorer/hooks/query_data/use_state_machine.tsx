@@ -27,6 +27,7 @@ import {
   entriesStateMachine,
   HistogramActorRef,
   histogramStateMachine,
+  updateTimeRangeFromTimefilter,
 } from '../../state_machines';
 
 export const useStateMachineService = ({
@@ -99,6 +100,9 @@ export const useStateMachineService = ({
                     query,
                     searchSource,
                   }),
+                },
+                actions: {
+                  updateTimeRangeFromTimefilter: updateTimeRangeFromTimefilter(timefilter),
                 },
                 delays: {
                   loadTailDelay: () => timefilter.getRefreshInterval().value,

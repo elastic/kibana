@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { TimefilterContract } from '@kbn/data-plugin/public';
 import { assign } from 'xstate';
 import { EntriesMachineContext, EntriesMachineEvent } from '../../entries_state_machine/types';
 import {
@@ -30,3 +31,13 @@ export const updateTimeRange = assign(
     };
   }
 );
+
+export const updateTimeRangeFromTimefilter = (timefilter: TimefilterContract) =>
+  assign((context: EntriesMachineContext, _event: EntriesMachineEvent) => {
+    const timeRange = timefilter.getAbsoluteTime();
+
+    return {
+      ...context,
+      timeRange,
+    };
+  });
