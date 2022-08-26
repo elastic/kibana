@@ -306,6 +306,19 @@
           },
           {
             "parentPluginId": "dataViews",
+            "id": "def-public.DataView.matchedIndices",
+            "type": "Array",
+            "tags": [],
+            "label": "matchedIndices",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
             "id": "def-public.DataView.Unnamed",
             "type": "Function",
             "tags": [],
@@ -2368,14 +2381,8 @@
                 "text": "GetFieldsOptions"
               },
               ") => Promise<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldSpec",
-                "text": "FieldSpec"
-              },
-              "[]>"
+              "FieldsForWildcardResponse",
+              ">"
             ],
             "path": "src/plugins/data_views/public/data_views/data_views_api_client.ts",
             "deprecated": false,
@@ -6599,6 +6606,19 @@
           },
           {
             "parentPluginId": "dataViews",
+            "id": "def-server.DataView.matchedIndices",
+            "type": "Array",
+            "tags": [],
+            "label": "matchedIndices",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
             "id": "def-server.DataView.Unnamed",
             "type": "Function",
             "tags": [],
@@ -9433,7 +9453,7 @@
             "signature": [
               "(options: { pattern: string | string[]; metaFields?: string[] | undefined; fieldCapsOptions?: { allow_no_indices: boolean; } | undefined; type?: string | undefined; rollupIndex?: string | undefined; filter?: ",
               "QueryDslQueryContainer",
-              " | undefined; }) => Promise<",
+              " | undefined; }) => Promise<{ fields: ",
               {
                 "pluginId": "dataViews",
                 "scope": "server",
@@ -9441,7 +9461,7 @@
                 "section": "def-server.FieldDescriptor",
                 "text": "FieldDescriptor"
               },
-              "[]>"
+              "[]; indices: string[]; }>"
             ],
             "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
             "deprecated": false,
@@ -12400,6 +12420,19 @@
             "label": "name",
             "description": [
               "\nName of the data view. Human readable name used to differentiate data view."
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.DataView.matchedIndices",
+            "type": "Array",
+            "tags": [],
+            "label": "matchedIndices",
+            "description": [],
+            "signature": [
+              "string[]"
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": false
@@ -18096,14 +18129,8 @@
                 "text": "GetFieldsOptions"
               },
               ") => Promise<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldSpec",
-                "text": "FieldSpec"
-              },
-              "[]>"
+              "FieldsForWildcardResponse",
+              ">"
             ],
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false,
