@@ -32,10 +32,9 @@ describe('ALL - Edit saved query', () => {
     }).click();
     cy.contains('Custom key/value pairs.').should('exist');
     cy.contains('Hours of uptime').should('exist');
-    cy.react('ECSComboboxFieldComponent', { props: { field: { value: 'labels' } } })
-      .parents('[data-test-subj="ECSMappingEditorForm"]')
-      .react('EuiButtonIcon', { props: { iconType: 'trash' } })
-      .click();
+    cy.react('ECSMappingEditorForm').within(() => {
+      cy.react('EuiButtonIcon', { props: { iconType: 'trash' } }).click();
+    });
 
     cy.react('PlatformCheckBoxGroupField').within(() => {
       cy.react('EuiCheckbox', {
