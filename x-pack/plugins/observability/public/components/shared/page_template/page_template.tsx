@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiPageTemplate, EuiSideNavItemType } from '@elastic/eui';
+import { EuiPageTemplate, EuiSideNavItemType, EuiPageSectionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { matchPath, useLocation } from 'react-router-dom';
@@ -37,6 +37,7 @@ export type WrappedPageTemplateProps = Pick<
 > & {
   showSolutionNav?: boolean;
   isPageDataLoaded?: boolean;
+  pageSectionProps?: EuiPageSectionProps;
 };
 
 export interface ObservabilityPageTemplateDependencies {
@@ -59,6 +60,7 @@ export function ObservabilityPageTemplate({
   showSolutionNav = true,
   isPageDataLoaded = true,
   getPageTemplateServices,
+  pageSectionProps,
   ...pageTemplateProps
 }: ObservabilityPageTemplateProps): React.ReactElement | null {
   const sections = useObservable(navigationSections$, []);
@@ -155,7 +157,7 @@ export function ObservabilityPageTemplate({
                   : undefined
               }
             >
-              <EuiPageTemplate.Section>{children}</EuiPageTemplate.Section>
+              <EuiPageTemplate.Section {...pageSectionProps}>{children}</EuiPageTemplate.Section>
             </KibanaPageTemplate>
           );
         }}
