@@ -30,17 +30,27 @@ interface ExtraColumnFields {
 
 const isSupportedFormat = (format: string) => ['bytes', 'number', 'percent'].includes(format);
 
+const findField = (series: Series, field?: string): string | undefined => {
+  const subMetric = series.metrics.find((m) => m.id === field);
+  if (subMetric) {
+    return findField(series, subMetric.field);
+  }
+  return field;
+};
+
 export const getFormat = (
   series: Series,
   fieldName: string | undefined,
   dataView: DataView
 ): FormatParams => {
   if (series.formatter === 'default') {
-    if (!fieldName) {
+    const correctFieldName = findField(series, fieldName);
+
+    if (!correctFieldName) {
       return {};
     }
 
-    const field = dataView.getFieldByName(fieldName);
+    const field = dataView.getFieldByName(correctFieldName);
     if (!field) {
       return {};
     }
