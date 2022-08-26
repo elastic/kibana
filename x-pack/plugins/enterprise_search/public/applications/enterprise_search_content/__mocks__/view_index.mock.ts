@@ -86,7 +86,6 @@ export const crawlerIndex: CrawlerViewIndex = {
   },
 };
 export const connectorCrawlerIndex: CrawlerViewIndex = {
-  count: 1,
   connector: {
     api_key_id: null,
     configuration: { foo: { label: 'bar', value: 'barbar' } },
@@ -106,6 +105,7 @@ export const connectorCrawlerIndex: CrawlerViewIndex = {
     status: ConnectorStatus.CONFIGURED,
     sync_now: false,
   },
+  count: 1,
   crawler: {
     id: '5',
     index_name: 'crawler',
