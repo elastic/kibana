@@ -132,7 +132,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         isBucketed: false,
         scale: 'ratio',
         timeScale: optionalTimeScaling ? previousColumn?.timeScale : undefined,
-        filter: columnParams?.filter ?? getFilter(previousColumn, columnParams),
+        filter: getFilter(previousColumn, columnParams),
         timeShift: columnParams?.shift || previousColumn?.timeShift,
         window: columnParams?.window || previousColumn?.window,
         params: {

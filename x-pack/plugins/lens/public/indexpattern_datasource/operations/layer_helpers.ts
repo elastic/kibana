@@ -43,11 +43,13 @@ import { FormulaIndexPatternColumn, insertOrReplaceFormulaColumn } from './defin
 import type { TimeScaleUnit } from '../../../common/expressions';
 import { documentField } from '../document_field';
 import { isColumnOfType } from './definitions/helpers';
+import { DataType } from '../..';
 
-interface ColumnAdvancedParams {
+export interface ColumnAdvancedParams {
   filter?: Query | undefined;
   timeShift?: string | undefined;
   timeScale?: TimeScaleUnit | undefined;
+  dataType?: DataType;
 }
 
 interface ColumnChange {

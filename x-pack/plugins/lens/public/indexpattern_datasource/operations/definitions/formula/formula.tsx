@@ -177,7 +177,7 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
         // carry over the filter if coming from another formula,
         // otherwise the filter has been already migrated into the formula text
         filter:
-          columnParams?.filter || previousColumn?.operationType === 'formula'
+          previousColumn?.operationType === 'formula'
             ? getFilter(previousColumn, columnParams)
             : undefined,
         timeScale: previousColumn?.timeScale,

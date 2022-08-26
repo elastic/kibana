@@ -38,12 +38,14 @@ import {
   hasTermsWithManyBuckets,
   FormulaIndexPatternColumn,
   updateColumnLabel,
+  ColumnAdvancedParams,
 } from './operations';
 import { hasField } from './pure_utils';
 import type { IndexPatternPrivateState, IndexPatternLayer } from './types';
 import { documentField } from './document_field';
 import { OperationDefinition } from './operations/definitions';
 import { insertOrReplaceFormulaColumn } from './operations/definitions/formula';
+
 export type IndexPatternSuggestion = DatasourceSuggestion<IndexPatternPrivateState>;
 
 interface ColumnChange {
@@ -54,6 +56,8 @@ interface ColumnChange {
   visualizationGroups: VisualizationDimensionGroupConfig[];
   columnParams?: Record<string, unknown>;
   references?: ColumnChange[];
+  initialParams?: { params: Record<string, unknown> };
+  incompleteParams?: ColumnAdvancedParams;
 }
 
 function buildSuggestion({
@@ -223,8 +227,14 @@ function getSourceField(column: Column, indexPattern: IndexPattern) {
 function getParams(column: Column) {
   return {
     ...column.params,
+  };
+}
+
+function getIncompleteParams(column: Column) {
+  return {
     filter: column.filter,
     shift: column.timeShift,
+    dataType: column.dataType,
     ...(column.window && { window: column.window }),
   };
 }
@@ -238,43 +248,38 @@ function getFieldWithLabel(column: Column, indexPattern: IndexPattern) {
   return field;
 }
 
+function createColumnChange(column: Column, indexPattern: IndexPattern): ColumnChange {
+  return {
+    op: column.operationType,
+    columnId: column.columnId,
+    field: getFieldWithLabel(column, indexPattern),
+    indexPattern,
+    visualizationGroups: [],
+    incompleteParams: getIncompleteParams(column),
+    initialParams: {
+      params: getParams(column),
+    },
+    columnParams: getParams(column),
+  };
+}
+
 function convertToColumnChange(columns: Layer['columns'], indexPattern: IndexPattern) {
   return columns.reduce<ColumnChange[]>((acc, column) => {
     if (!columns.some((c) => isReferenceColumn(c) && column.columnId === c.references[0])) {
-      const newColumn: ColumnChange = {
-        op: column.operationType,
-        columnId: column.columnId,
-        field: getFieldWithLabel(column, indexPattern),
-        indexPattern,
-        visualizationGroups: [],
-        columnParams: getParams(column),
-      };
+      const newColumn: ColumnChange = createColumnChange(column, indexPattern);
       if (isReferenceColumn(column)) {
         const referenceColumn = columns.find((c) => c.columnId === column.references[0])!;
-        newColumn.references = [
-          {
-            op: referenceColumn.operationType,
-            columnId: referenceColumn.columnId,
-            field: getFieldWithLabel(referenceColumn, indexPattern),
-            indexPattern,
-            visualizationGroups: [],
-            columnParams: getParams(referenceColumn),
-          },
-        ];
+        newColumn.references = [createColumnChange(referenceColumn, indexPattern)];
       }
       if (
         isTermsColumn(column) &&
         column.params.orderAgg &&
         !columns.some((c) => c.columnId === column.params.orderAgg?.columnId)
       ) {
-        const orderAggColumn: ColumnChange = {
-          op: column.params.orderAgg.operationType,
-          columnId: column.params.orderAgg.columnId,
-          field: getSourceField(column.params.orderAgg, indexPattern),
-          indexPattern,
-          visualizationGroups: [],
-          columnParams: getParams(column.params.orderAgg),
-        };
+        const orderAggColumn: ColumnChange = createColumnChange(
+          column.params.orderAgg,
+          indexPattern
+        );
         acc.push(orderAggColumn);
       }
       acc.push(newColumn);
@@ -300,8 +305,13 @@ function createNewLayerWithMetricAggregationFromVizEditor(
         FormulaIndexPatternColumn,
         'managedReference'
       >;
+      const previousColumn = layer.columns.find((c) => c.columnId === column.columnId)!;
       const newColumn = operationDefinition.buildColumn(
         {
+          previousColumn: {
+            ...previousColumn,
+            label: previousColumn?.label || '',
+          },
           indexPattern,
           layer: newLayer,
         },

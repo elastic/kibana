@@ -118,7 +118,7 @@ export const cardinalityOperation: OperationDefinition<
       scale: SCALE,
       sourceField: field.name,
       isBucketed: IS_BUCKETED,
-      filter: columnParams?.filter || getFilter(previousColumn, columnParams),
+      filter: getFilter(previousColumn, columnParams),
       timeShift: columnParams?.shift || previousColumn?.timeShift,
       window: columnParams?.window || previousColumn?.window,
       params: {

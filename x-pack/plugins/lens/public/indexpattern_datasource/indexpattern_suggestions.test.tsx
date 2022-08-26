@@ -1515,6 +1515,7 @@ describe('IndexPattern Data Source suggestions', () => {
         columns: [
           {
             operationType: 'count',
+            dataType: 'number',
             isBucketed: false,
             columnId: 'column-id-1',
             sourceField: 'document',
@@ -1698,9 +1699,6 @@ describe('IndexPattern Data Source suggestions', () => {
                     params: expect.objectContaining({
                       format: {
                         id: 'bytes',
-                        params: {
-                          decimals: 0,
-                        },
                       },
                     }),
                   }),

@@ -98,7 +98,7 @@ export const cumulativeSumOperation: OperationDefinition<
       isBucketed: false,
       scale: 'ratio',
       timeShift: columnParams?.shift || previousColumn?.timeShift,
-      filter: columnParams?.filter || getFilter(previousColumn, columnParams),
+      filter: getFilter(previousColumn, columnParams),
       references: referenceIds,
       params: getFormatFromPreviousColumn(previousColumn),
     };

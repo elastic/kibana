@@ -133,7 +133,7 @@ export const percentileOperation: OperationDefinition<
       sourceField: field.name,
       isBucketed: false,
       scale: 'ratio',
-      filter: columnParams?.filter || getFilter(previousColumn, columnParams),
+      filter: getFilter(previousColumn, columnParams),
       timeShift: columnParams?.shift || previousColumn?.timeShift,
       window: columnParams?.window || previousColumn?.window,
       params: {
