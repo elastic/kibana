@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { AppLeaveActionType } from '@kbn/core-application-browser';
 import { isConfirmAction, getLeaveAction } from './application_leave';
-import { AppLeaveActionType } from './types';
 
 describe('isConfirmAction', () => {
   it('returns true if action is confirm', () => {
