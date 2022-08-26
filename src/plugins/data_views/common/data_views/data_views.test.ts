@@ -21,7 +21,7 @@ import { stubbedSavedObjectIndexPattern } from '../data_view.stub';
 
 const createFieldsFetcher = () =>
   ({
-    getFieldsForWildcard: jest.fn(async () => []),
+    getFieldsForWildcard: jest.fn(async () => ({ fields: [], indices: [] })),
   } as any as IDataViewsApiClient);
 
 const fieldFormats = fieldFormatsMock;
