@@ -54,12 +54,13 @@ describe('TableListView', () => {
     jest.useRealTimers();
   });
 
-  type Props = TableListViewProps;
-
-  const setup = registerTestBed<string, Props>(WithServices(TableListView), {
-    defaultProps: { ...requiredProps },
-    memoryRouter: { wrapComponent: false },
-  });
+  const setup = registerTestBed<string, TableListViewProps>(
+    WithServices<TableListViewProps>(TableListView),
+    {
+      defaultProps: { ...requiredProps },
+      memoryRouter: { wrapComponent: false },
+    }
+  );
 
   test('render default empty prompt', async () => {
     let testBed: TestBed;

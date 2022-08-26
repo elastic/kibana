@@ -16,7 +16,7 @@ type UnmountCallback = () => void;
 type MountPoint = (element: HTMLElement) => UnmountCallback;
 type NotifyFn = (title: JSX.Element, text?: string) => void;
 
-interface SavedObjectsReference {
+export interface SavedObjectsReference {
   id: string;
   name: string;
   type: string;

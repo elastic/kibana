@@ -27,13 +27,9 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { Table, ConfirmDeleteModal, ListingLimitWarning } from './components';
 import { useServices } from './services';
+import type { SavedObjectsReference } from './services';
 import type { Action } from './actions';
 import { reducer } from './reducer';
-
-interface SavedObjectsReference {
-  type: string;
-  id: string;
-}
 
 export interface Props<T extends UserContentCommonSchema = UserContentCommonSchema> {
   entityName: string;
@@ -83,6 +79,7 @@ export interface UserContentCommonSchema {
   id: string;
   updatedAt: string;
   references: SavedObjectsReference[];
+  type: string;
   attributes: {
     title: string;
     description?: string;
