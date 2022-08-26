@@ -26,3 +26,4 @@ export const UPDATE_PACKAGE_BTN = 'updatePackageBtn';
 export const LATEST_VERSION = 'latestVersion';
 
 export const PACKAGE_VERSION = 'packageVersionText';
+export const INTEGRATIONS_SEARCHBAR_INPUT = 'epmList.searchBar';
