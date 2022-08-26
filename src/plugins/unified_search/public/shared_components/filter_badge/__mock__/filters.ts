@@ -42,7 +42,7 @@ export const getFilterMockOrConditional = () => [
           meta: {
             index: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
             alias: null,
-            negate: false,
+            negate: true,
             disabled: false,
             type: 'phrase',
             key: 'category.keyword',

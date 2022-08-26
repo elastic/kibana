@@ -34,7 +34,7 @@ interface LabelOptions {
 
 const getValue = (value: string | number) => {
   return (
-    <EuiFlexItem>
+    <EuiFlexItem grow={false}>
       <EuiTextColor color={typeof value === 'string' ? '#387765' : '#ac4e6d'}>{value}</EuiTextColor>
     </EuiFlexItem>
   );
@@ -45,39 +45,35 @@ const getFilterContent = (filter: Filter, label: LabelOptions, prefix: string | 
     case FILTERS.EXISTS:
       return (
         <>
-          <EuiFlexItem grow={false}>
-            {prefix} {filter.meta.key}:
-          </EuiFlexItem>
+          {prefix} <EuiFlexItem grow={false}>{filter.meta.key}:</EuiFlexItem>
           {getValue(`${existsOperator.message}`)}
         </>
       );
     case FILTERS.PHRASES:
       return (
-        <EuiFlexItem grow={false}>
-          {prefix} {filter.meta.key}:{getValue(`${isOneOfOperator.message} ${label.title}`)}
-        </EuiFlexItem>
+        <>
+          {prefix} <EuiFlexItem grow={false}>{filter.meta.key}:</EuiFlexItem>
+          {getValue(`${isOneOfOperator.message} ${label.title}`)}
+        </>
       );
     case FILTERS.QUERY_STRING:
       return (
         <>
-          <EuiFlexItem grow={false}>{prefix}</EuiFlexItem>
-          {getValue(`${label.title}`)}
+          {prefix} {getValue(`${label.title}`)}
         </>
       );
     case FILTERS.PHRASE:
     case FILTERS.RANGE:
       return (
         <>
-          <EuiFlexItem grow={false}>
-            {prefix} {filter.meta.key}:
-          </EuiFlexItem>
+          {prefix} <EuiFlexItem grow={false}>{filter.meta.key}:</EuiFlexItem>
           {getValue(label.title)}
         </>
       );
     default:
       return (
         <>
-          <EuiFlexItem grow={false}>{prefix}</EuiFlexItem>
+          {prefix}
           {getValue(`${JSON.stringify(filter.query) || filter.meta.value}`)}
         </>
       );
@@ -146,7 +142,9 @@ export function FilterExpressionBadge({ filter, dataView }: FilterBadgeExpressio
     const prefixText = filter?.meta?.negate ? ` NOT ` : '';
     prefix =
       filter?.meta?.negate && !filter?.meta?.disabled ? (
-        <EuiTextColor color="danger">{prefixText}</EuiTextColor>
+        <EuiFlexItem grow={false}>
+          <EuiTextColor color="danger">{prefixText}</EuiTextColor>
+        </EuiFlexItem>
       ) : (
         prefixText
       );
