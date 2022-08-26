@@ -16,6 +16,7 @@ import { IExecutionLog, IExecutionLogResult } from '../../common';
 
 const DEFAULT_MAX_BUCKETS_LIMIT = 1000; // do not retrieve more than this number of executions
 
+const RULE_ID_FIELD = 'rule.id';
 const PROVIDER_FIELD = 'event.provider';
 const START_FIELD = 'event.start';
 const ACTION_FIELD = 'event.action';
@@ -209,7 +210,7 @@ export function getExecutionLogAggregation({
                   top_hits: {
                     size: 1,
                     _source: {
-                      includes: ['rule.id'],
+                      includes: [RULE_ID_FIELD],
                     },
                   },
                 },
@@ -267,7 +268,13 @@ export function getExecutionLogAggregation({
                   top_hits: {
                     size: 1,
                     _source: {
-                      includes: [OUTCOME_FIELD, MESSAGE_FIELD, ERROR_MESSAGE_FIELD, VERSION_FIELD],
+                      includes: [
+                        OUTCOME_FIELD,
+                        MESSAGE_FIELD,
+                        ERROR_MESSAGE_FIELD,
+                        VERSION_FIELD,
+                        RULE_ID_FIELD,
+                      ],
                     },
                   },
                 },
