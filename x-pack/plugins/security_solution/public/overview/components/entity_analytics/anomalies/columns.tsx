@@ -57,7 +57,7 @@ export const useAnomaliesColumns = (loading: boolean): AnomaliesColumns => {
         render: (count, { status, jobId }) => {
           if (loading) return '';
 
-          if (status === 'enabled') {
+          if (count > 0 || status === 'enabled') {
             return count;
           } else {
             if (status === 'disabled') {
