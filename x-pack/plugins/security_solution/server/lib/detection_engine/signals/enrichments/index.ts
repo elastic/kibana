@@ -50,8 +50,8 @@ export const enrichEvents: EnrichEventsFunction = async ({ services, logger, eve
   const allEnrichmentsResults = await Promise.allSettled(enrichments);
 
   const allFulfilledEnrichmentsResults = allEnrichmentsResults
-    .filter(result => result.status === "fulfilled")
-    .map((result)  => (result as  PromiseFulfilledResult<EventsMapByEnrichments>)?.value) 
+    .filter((result) => result.status === 'fulfilled')
+    .map((result) => (result as PromiseFulfilledResult<EventsMapByEnrichments>)?.value);
 
   return applyEnrichmentsToEvents(events, allFulfilledEnrichmentsResults);
 };
