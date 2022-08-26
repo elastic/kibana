@@ -11,7 +11,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiBasicTable, EuiIcon } from '@elastic/eui';
+import { EuiBasicTable } from '@elastic/eui';
 
 import { AnalyticsCollection } from '../../../../../common/types/analytics';
 
@@ -44,5 +44,4 @@ describe('AnalyticsCollectionTable', () => {
 
     expect(wrapper.dive().find(EuiLinkTo).first().prop('to')).toBe('/collections/example');
   });
-
 });
