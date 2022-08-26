@@ -167,7 +167,7 @@ describe('HomePage', () => {
   it('calls useInitializeUrlParam for appQuery, filters and savedQuery', () => {
     render(
       <TestProviders>
-        <HomePage onAppLeave={jest.fn()} setHeaderActionMenu={jest.fn()}>
+        <HomePage setHeaderActionMenu={jest.fn()}>
           <span />
         </HomePage>
       </TestProviders>
@@ -193,7 +193,7 @@ describe('HomePage', () => {
 
     render(
       <TestProviders>
-        <HomePage onAppLeave={jest.fn()} setHeaderActionMenu={jest.fn()}>
+        <HomePage setHeaderActionMenu={jest.fn()}>
           <span />
         </HomePage>
       </TestProviders>
@@ -234,7 +234,7 @@ describe('HomePage', () => {
 
     render(
       <TestProviders>
-        <HomePage onAppLeave={jest.fn()} setHeaderActionMenu={jest.fn()}>
+        <HomePage setHeaderActionMenu={jest.fn()}>
           <span />
         </HomePage>
       </TestProviders>
@@ -266,7 +266,7 @@ describe('HomePage', () => {
 
       render(
         <TestProviders>
-          <HomePage onAppLeave={jest.fn()} setHeaderActionMenu={jest.fn()}>
+          <HomePage setHeaderActionMenu={jest.fn()}>
             <span />
           </HomePage>
         </TestProviders>
@@ -301,7 +301,7 @@ describe('HomePage', () => {
 
       render(
         <TestProviders store={mockStore}>
-          <HomePage onAppLeave={jest.fn()} setHeaderActionMenu={jest.fn()}>
+          <HomePage setHeaderActionMenu={jest.fn()}>
             <span />
           </HomePage>
         </TestProviders>
@@ -318,7 +318,7 @@ describe('HomePage', () => {
 
       render(
         <TestProviders>
-          <HomePage onAppLeave={jest.fn()} setHeaderActionMenu={jest.fn()}>
+          <HomePage setHeaderActionMenu={jest.fn()}>
             <span />
           </HomePage>
         </TestProviders>
@@ -360,7 +360,7 @@ describe('HomePage', () => {
 
       render(
         <TestProviders>
-          <HomePage onAppLeave={jest.fn()} setHeaderActionMenu={jest.fn()}>
+          <HomePage setHeaderActionMenu={jest.fn()}>
             <span />
           </HomePage>
         </TestProviders>
@@ -405,7 +405,7 @@ describe('HomePage', () => {
 
       render(
         <TestProviders>
-          <HomePage onAppLeave={jest.fn()} setHeaderActionMenu={jest.fn()}>
+          <HomePage setHeaderActionMenu={jest.fn()}>
             <span />
           </HomePage>
         </TestProviders>
@@ -455,7 +455,7 @@ describe('HomePage', () => {
 
       const TestComponent = () => (
         <TestProviders store={mockStore}>
-          <HomePage onAppLeave={jest.fn()} setHeaderActionMenu={jest.fn()}>
+          <HomePage setHeaderActionMenu={jest.fn()}>
             <span />
           </HomePage>
         </TestProviders>
@@ -512,7 +512,7 @@ describe('HomePage', () => {
 
       const TestComponent = () => (
         <TestProviders store={mockStore}>
-          <HomePage onAppLeave={jest.fn()} setHeaderActionMenu={jest.fn()}>
+          <HomePage setHeaderActionMenu={jest.fn()}>
             <span />
           </HomePage>
         </TestProviders>
@@ -552,7 +552,7 @@ describe('HomePage', () => {
 
       render(
         <TestProviders>
-          <HomePage onAppLeave={jest.fn()} setHeaderActionMenu={jest.fn()}>
+          <HomePage setHeaderActionMenu={jest.fn()}>
             <span />
           </HomePage>
         </TestProviders>
@@ -577,7 +577,7 @@ describe('HomePage', () => {
 
       const TestComponent = () => (
         <TestProviders store={store}>
-          <HomePage onAppLeave={jest.fn()} setHeaderActionMenu={jest.fn()}>
+          <HomePage setHeaderActionMenu={jest.fn()}>
             <span />
           </HomePage>
         </TestProviders>
@@ -605,7 +605,7 @@ describe('HomePage', () => {
 
       const TestComponent = () => (
         <TestProviders store={store}>
-          <HomePage onAppLeave={jest.fn()} setHeaderActionMenu={jest.fn()}>
+          <HomePage setHeaderActionMenu={jest.fn()}>
             <span />
           </HomePage>
         </TestProviders>
