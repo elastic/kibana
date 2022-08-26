@@ -31,6 +31,7 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
+      await searchSessions.deleteAllSearchSessions();
     });
 
     loadTestFile(require.resolve('./async_search'));
