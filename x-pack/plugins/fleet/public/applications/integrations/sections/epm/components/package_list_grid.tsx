@@ -7,6 +7,7 @@
 
 import type { ReactNode, FunctionComponent } from 'react';
 import React, { useCallback, useState, useRef, useEffect } from 'react';
+
 import {
   EuiFlexGrid,
   EuiFlexGroup,
@@ -16,7 +17,9 @@ import {
   EuiTitle,
   EuiSearchBar,
   EuiText,
+  EuiBadge,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -25,6 +28,8 @@ import { Loading } from '../../../components';
 import { useLocalSearch, searchIdField } from '../../../hooks';
 
 import type { IntegrationCardItem } from '../../../../../../common/types/models';
+
+import type { ExtendedIntegrationCategory, CategoryFacet } from '../screens/home/category_facets';
 
 import { PackageCard } from './package_card';
 
@@ -35,7 +40,9 @@ export interface Props {
   list: IntegrationCardItem[];
   featuredList?: JSX.Element | null;
   initialSearch?: string;
+  selectedCategory: ExtendedIntegrationCategory;
   setSelectedCategory: (category: string) => void;
+  categories: CategoryFacet[];
   onSearchChange: (search: string) => void;
   showMissingIntegrationMessage?: boolean;
   callout?: JSX.Element | null;
@@ -49,7 +56,9 @@ export const PackageListGrid: FunctionComponent<Props> = ({
   list,
   initialSearch,
   onSearchChange,
+  selectedCategory,
   setSelectedCategory,
+  categories,
   showMissingIntegrationMessage = false,
   featuredList = null,
   callout,
@@ -73,21 +82,25 @@ export const PackageListGrid: FunctionComponent<Props> = ({
   }, [windowScrollY, isSticky]);
 
   const onQueryChange = ({
-    queryText: userInput,
+    queryText,
     error,
   }: {
     queryText: string;
     error: { message: string } | null;
   }) => {
     if (!error) {
-      onSearchChange(userInput);
-      setSearchTerm(userInput);
+      onSearchChange(queryText);
+      setSearchTerm(queryText);
     }
   };
 
   const resetQuery = () => {
     setSearchTerm('');
   };
+
+  const selectedCategoryTitle = selectedCategory
+    ? categories.find((category) => category.id === selectedCategory)?.title
+    : undefined;
 
   const controlsContent = <ControlsColumn title={title} controls={controls} sticky={isSticky} />;
   let gridContent: JSX.Element;
@@ -123,12 +136,31 @@ export const PackageListGrid: FunctionComponent<Props> = ({
             <EuiSearchBar
               query={searchTerm || undefined}
               box={{
+                'data-test-subj': 'epmList.searchBar',
                 placeholder: i18n.translate('xpack.fleet.epmList.searchPackagesPlaceholder', {
                   defaultMessage: 'Search for integrations',
                 }),
                 incremental: true,
               }}
               onChange={onQueryChange}
+              toolsRight={
+                selectedCategoryTitle ? (
+                  <div>
+                    <EuiBadge
+                      color="accent"
+                      iconType="cross"
+                      iconSide="right"
+                      iconOnClick={() => {
+                        setSelectedCategory('');
+                      }}
+                      iconOnClickAriaLabel="Remove category"
+                      data-test-sub="epmList.categoryBadge"
+                    >
+                      {selectedCategoryTitle}
+                    </EuiBadge>
+                  </div>
+                ) : undefined
+              }
             />
             {callout ? (
               <>
