@@ -43,6 +43,11 @@ export interface Policy {
   kind: 'manual' | 'interval';
   duration: number; // in ms
 }
+
+interface InspectVariables {
+  inspect: boolean;
+}
+export type RefetchWithParams = ({ inspect }: InspectVariables) => void;
 export type RefetchKql = (dispatch: Dispatch) => boolean;
 export type Refetch = () => void;
 
@@ -59,12 +64,17 @@ export interface GlobalGenericQuery {
   invalidKqlQuery?: Error;
 }
 
+export interface GlobalGraphqlQuery extends GlobalGenericQuery {
+  id: string;
+  refetch: null | Refetch | RefetchWithParams;
+}
+
 export interface GlobalKqlQuery extends GlobalGenericQuery {
   id: 'kql';
   refetch: RefetchKql;
 }
 
-export type GlobalQuery = GlobalKqlQuery;
+export type GlobalQuery = GlobalKqlQuery | GlobalGraphqlQuery;
 
 export interface InputsRange {
   timerange: TimeRange;

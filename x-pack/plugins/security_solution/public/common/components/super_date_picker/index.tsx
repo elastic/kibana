@@ -121,7 +121,6 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
           ? formatDate(newEnd, { roundUp: true })
           : formatDate(newEnd);
         if (
-          queries.length &&
           !kqlHaveBeenUpdated &&
           (!isQuickSelection || (start === currentStart && end === currentEnd))
         ) {
@@ -145,11 +144,7 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
           startAutoReload({ id });
         }
 
-        if (
-          queries.length &&
-          !isPaused &&
-          (!isQuickSelection || (isQuickSelection && toStr !== 'now'))
-        ) {
+        if (!isPaused && (!isQuickSelection || (isQuickSelection && toStr !== 'now'))) {
           refetchQuery(queries);
         }
       },
