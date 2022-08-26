@@ -92,7 +92,7 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model: Panel
 
   return {
     type: 'lnsXY',
-    layers: excludeMetaFromLayers(extendedLayers),
+    layers: Object.values(excludeMetaFromLayers(extendedLayers)),
     configuration: {
       layers: getLayers(extendedLayers, model),
       fillOpacity: Number(model.series[0].fill) ?? 0.3,

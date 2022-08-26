@@ -76,7 +76,7 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model, timeR
 
   return {
     type: 'lnsXY',
-    layers: excludeMetaFromLayers(extendedLayers),
+    layers: Object.values(excludeMetaFromLayers(extendedLayers)),
     configuration: {
       layers: getLayers(extendedLayers, model),
       fill: model.series[0].fill ?? 0.3,

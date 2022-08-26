@@ -17,8 +17,7 @@ import type {
   IInterpreterRenderHandlers,
   Datatable,
 } from '@kbn/expressions-plugin/public';
-import type { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
-import { Layer } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import type { NavigateToLensContext } from '@kbn/visualizations-plugin/common';
 import type { Query } from '@kbn/es-query';
 import type {
   UiActionsStart,
@@ -209,35 +208,13 @@ export interface InitializationOptions {
   isFullEditor?: boolean;
 }
 
-interface AxisExtents {
-  mode: string;
-  lowerBound?: number;
-  upperBound?: number;
-}
-
-export interface VisualizeEditorContext {
-  layers: VisualizeEditorLayersContext[];
-  configuration: ChartSettings;
+export type VisualizeEditorContext = {
   savedObjectId?: string;
   embeddableId?: string;
   vizEditorOriginatingAppUrl?: string;
   originatingApp?: string;
   isVisualizeAction: boolean;
-  type: string;
-}
-
-interface ChartSettings {
-  fill?: string;
-  legend?: Record<string, boolean | string>;
-  gridLinesVisibility?: Record<string, boolean>;
-  tickLabelsVisibility?: Record<string, boolean>;
-  axisTitlesVisibility?: Record<string, boolean>;
-  valueLabels?: boolean;
-  extents?: {
-    yLeftExtent: AxisExtents;
-    yRightExtent: AxisExtents;
-  };
-}
+} & NavigateToLensContext;
 
 export interface GetDropPropsArgs<T = unknown> {
   state: T;
@@ -358,7 +335,7 @@ export interface Datasource<T = unknown, P = unknown> {
   ) => Array<DatasourceSuggestion<T>>;
   getDatasourceSuggestionsForVisualizeCharts: (
     state: T,
-    context: Layer[],
+    context: NavigateToLensContext['layers'],
     indexPatterns: IndexPatternMap
   ) => Array<DatasourceSuggestion<T>>;
   getDatasourceSuggestionsForVisualizeField: (
@@ -729,17 +706,6 @@ export interface Suggestion {
   hide?: boolean;
   changeType: TableChangeType;
   keptLayerIds: string[];
-}
-
-interface VisualizationConfigurationFromContextChangeProps<T> {
-  layerId: string;
-  prevState: T;
-  context: VisualizeEditorLayersContext;
-}
-
-interface VisualizationStateFromContextChangeProps {
-  suggestions: Suggestion[];
-  context: VisualizeEditorContext;
 }
 
 /**

@@ -17,7 +17,7 @@ export interface Layer {
 }
 
 export interface NavigateToLensContext<T extends Configuration = Configuration> {
-  layers: Record<string, Layer>;
+  layers: Layer[];
   type: string;
   configuration: T;
 }
