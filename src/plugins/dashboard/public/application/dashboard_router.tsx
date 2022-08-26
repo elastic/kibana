@@ -15,6 +15,8 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { parse, ParsedQuery } from 'query-string';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Switch, Route, RouteComponentProps, HashRouter, Redirect } from 'react-router-dom';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { TableListViewKibanaProvider } from '@kbn/content-management-table-list';
 
 import { DashboardListing } from './listing';
 import { dashboardStateStore } from './state';
@@ -93,6 +95,7 @@ export async function mountApp({
   let globalEmbedSettings: DashboardEmbedSettings | undefined;
   let routerHistory: History;
 
+  const savedObjectsTagging = savedObjectsTaggingOss?.getTaggingApi();
   const dashboardServices: DashboardAppServices = {
     navigation,
     onAppLeave,
@@ -116,7 +119,7 @@ export async function mountApp({
     savedQueryService: dataStart.query.savedQueries,
     savedObjectsClient: coreStart.savedObjects.client,
     savedDashboards: dashboardStart.getSavedDashboardLoader(),
-    savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
+    savedObjectsTagging,
     allowByValueEmbeddables:
       initializerContext.config.get<DashboardFeatureFlagConfig>().allowByValueEmbeddables,
     dashboardCapabilities: {
@@ -229,26 +232,34 @@ export async function mountApp({
         <KibanaContextProvider services={dashboardServices}>
           <presentationUtil.ContextProvider>
             <KibanaThemeProvider theme$={core.theme.theme$}>
-              <HashRouter>
-                <Switch>
-                  <Route
-                    path={[
-                      DashboardConstants.CREATE_NEW_DASHBOARD_URL,
-                      `${DashboardConstants.VIEW_DASHBOARD_URL}/:id`,
-                    ]}
-                    render={renderDashboard}
-                  />
-                  <Route
-                    exact
-                    path={DashboardConstants.LANDING_PAGE_PATH}
-                    render={renderListingPage}
-                  />
-                  <Route exact path="/">
-                    <Redirect to={DashboardConstants.LANDING_PAGE_PATH} />
-                  </Route>
-                  <Route render={renderNoMatch} />
-                </Switch>
-              </HashRouter>
+              <TableListViewKibanaProvider
+                {...{
+                  core: coreStart,
+                  toMountPoint,
+                  savedObjectsTagging,
+                }}
+              >
+                <HashRouter>
+                  <Switch>
+                    <Route
+                      path={[
+                        DashboardConstants.CREATE_NEW_DASHBOARD_URL,
+                        `${DashboardConstants.VIEW_DASHBOARD_URL}/:id`,
+                      ]}
+                      render={renderDashboard}
+                    />
+                    <Route
+                      exact
+                      path={DashboardConstants.LANDING_PAGE_PATH}
+                      render={renderListingPage}
+                    />
+                    <Route exact path="/">
+                      <Redirect to={DashboardConstants.LANDING_PAGE_PATH} />
+                    </Route>
+                    <Route render={renderNoMatch} />
+                  </Switch>
+                </HashRouter>
+              </TableListViewKibanaProvider>
             </KibanaThemeProvider>
           </presentationUtil.ContextProvider>
         </KibanaContextProvider>

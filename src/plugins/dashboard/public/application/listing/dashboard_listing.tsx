@@ -19,7 +19,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import useMount from 'react-use/lib/useMount';
-import { TableListViewKibanaProvider, TableListView } from '@kbn/content-management-table-list';
+import { TableListView } from '@kbn/content-management-table-list';
 
 import { attemptLoadDashboardByTitle } from '../lib';
 import {
@@ -82,7 +82,6 @@ export const DashboardListing = ({
       dataViews,
       savedDashboards,
       savedObjectsClient,
-      // savedObjectsTagging,
       dashboardCapabilities,
       dashboardSessionStorage,
       chrome: { setBreadcrumbs },
@@ -297,39 +296,37 @@ export const DashboardListing = ({
         <DashboardAppNoDataPage onDataViewCreated={() => setShowNoDataPage(false)} />
       )}
       {!showNoDataPage && (
-        <TableListViewKibanaProvider>
-          <TableListView<DashboardSavedObjectUserContent>
-            entityName={getEntityName()}
-            entityNamePlural={getEntityNamePlural()}
-            tableListTitle={getTableListTitle()}
-            initialFilter={initialFilter ?? defaultFilter}
-            initialPageSize={initialPageSize}
-            emptyPrompt={emptyPrompt}
-            headingId="dashboardListingHeading"
-            findItems={fetchItems}
-            getDetailViewLink={({ id, attributes: { timeRestore } }) =>
-              getDashboardListItemLink(
-                core.application,
-                kbnUrlStateStorage,
-                core.uiSettings.get('state:storeInSessionStorage'), // use hash
-                id,
-                timeRestore
-              )
+        <TableListView<DashboardSavedObjectUserContent>
+          entityName={getEntityName()}
+          entityNamePlural={getEntityNamePlural()}
+          tableListTitle={getTableListTitle()}
+          initialFilter={initialFilter ?? defaultFilter}
+          initialPageSize={initialPageSize}
+          emptyPrompt={emptyPrompt}
+          headingId="dashboardListingHeading"
+          findItems={fetchItems}
+          getDetailViewLink={({ id, attributes: { timeRestore } }) =>
+            getDashboardListItemLink(
+              core.application,
+              kbnUrlStateStorage,
+              core.uiSettings.get('state:storeInSessionStorage'), // use hash
+              id,
+              timeRestore
+            )
+          }
+          createItem={!showWriteControls ? undefined : createItem}
+          deleteItems={!showWriteControls ? undefined : deleteItems}
+          editItem={!showWriteControls ? undefined : editItem}
+          listingLimit={listingLimit}
+        >
+          <DashboardUnsavedListing
+            redirectTo={redirectTo}
+            unsavedDashboardIds={unsavedDashboardIds}
+            refreshUnsavedDashboards={() =>
+              setUnsavedDashboardIds(dashboardSessionStorage.getDashboardIdsWithUnsavedChanges())
             }
-            createItem={!showWriteControls ? undefined : createItem}
-            deleteItems={!showWriteControls ? undefined : deleteItems}
-            editItem={!showWriteControls ? undefined : editItem}
-            listingLimit={listingLimit}
-          >
-            <DashboardUnsavedListing
-              redirectTo={redirectTo}
-              unsavedDashboardIds={unsavedDashboardIds}
-              refreshUnsavedDashboards={() =>
-                setUnsavedDashboardIds(dashboardSessionStorage.getDashboardIdsWithUnsavedChanges())
-              }
-            />
-          </TableListView>
-        </TableListViewKibanaProvider>
+          />
+        </TableListView>
       )}
     </>
   );
