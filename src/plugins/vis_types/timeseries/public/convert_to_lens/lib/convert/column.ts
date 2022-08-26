@@ -12,12 +12,13 @@ import {
   Operation,
   DataType,
   ColumnWithMeta as GenericColumnWithMeta,
+  FormatParams,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import uuid from 'uuid';
 import type { Metric, Series } from '../../../../common/types';
 import { ConvertToColumnsFn } from '../../types';
 import { getTimeScale } from '../metrics';
-import { ColumnWithMeta, Meta, Column } from './types';
+import { ColumnWithMeta, Meta, Column, CommonColumnsConverterArgs } from './types';
 
 type GeneralColumn = Omit<BaseColumn<Operation, unknown>, 'operationType' | 'params'>;
 type GeneralColumnWithMeta = GenericColumnWithMeta<GeneralColumn, Meta>;
@@ -26,6 +27,28 @@ interface ExtraColumnFields {
   isSplit?: boolean;
   window?: string;
 }
+
+export const getFormat = (
+  series: Series,
+  fieldName: string | undefined,
+  dataView: DataView
+): FormatParams => {
+  if (series.formatter === 'default') {
+    if (!fieldName) {
+      return {};
+    }
+
+    const field = dataView.getFieldByName(fieldName);
+    if (!field) {
+      return {};
+    }
+
+    const formatter = dataView.getFormatterForField(field);
+    const id = formatter.type.id;
+    return { format: { id } };
+  }
+  return { format: { id: series.formatter } }; // TODO: fix this formatter later, after investigation...
+};
 
 export const createColumn = (
   series: Series,
@@ -45,12 +68,10 @@ export const createColumn = (
 });
 
 export const convertMetricsToColumns = <C extends Column>(
-  series: Series,
-  metrics: Metric[],
-  dataView: DataView,
+  { series, metrics, dataView }: CommonColumnsConverterArgs,
   convertToFn: ConvertToColumnsFn<C>,
   window?: string
-) => metrics.flatMap((metric) => convertToFn(series, metric, dataView, window));
+) => metrics.flatMap((metric) => convertToFn({ series, metric, dataView }, window));
 
 export const isColumnWithMeta = (column: Column): column is ColumnWithMeta => {
   if ((column as ColumnWithMeta).meta) {

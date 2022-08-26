@@ -12,6 +12,8 @@ import { Operations } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import {
   AvgColumn,
   CardinalityColumn,
+  CommonColumnConverterArgs,
+  CommonColumnsConverterArgs,
   CountColumn,
   CounterRateColumn,
   CumulativeSumColumn,
@@ -33,7 +35,7 @@ import {
   SupportedMetric,
   SUPPORTED_METRICS,
 } from '../metrics';
-import { createColumn } from './column';
+import { createColumn, getFormat } from './column';
 import { createFormulaColumn } from './formula';
 import { convertToMovingAverageParams } from './moving_average';
 import { convertToPercentileColumn } from './percentile';
@@ -55,9 +57,12 @@ type MetricAggregation =
   | typeof Operations.PERCENTILE
   | typeof Operations.PERCENTILE_RANK;
 
-type MetricAggregationColumnWithParams = PercentileColumn | PercentileRanksColumn | LastValueColumn;
+type MetricAggregationColumnWithSpecialParams =
+  | PercentileColumn
+  | PercentileRanksColumn
+  | LastValueColumn;
 
-type MetricAggregationColumnWithoutParams =
+type MetricAggregationColumnWithoutSpecialParams =
   | AvgColumn
   | CountColumn
   | CardinalityColumn
@@ -67,8 +72,8 @@ type MetricAggregationColumnWithoutParams =
   | SumColumn;
 
 type MetricAggregationColumn =
-  | MetricAggregationColumnWithoutParams
-  | MetricAggregationColumnWithParams;
+  | MetricAggregationColumnWithoutSpecialParams
+  | MetricAggregationColumnWithSpecialParams;
 
 type ParentPipelineAggregation =
   | typeof Operations.MOVING_AVERAGE
@@ -105,16 +110,15 @@ const isSupportedAggregationWithoutParams = (
   return (SUPPORTED_METRICS_AGGS_WITHOUT_PARAMS as string[]).includes(agg);
 };
 
-export const convertMetricAggregationColumnWithoutParams = (
+export const convertMetricAggregationColumnWithoutSpecialParams = (
   aggregation: SupportedMetric,
-  series: Series,
-  metric: Metric,
-  dataView: DataView,
+  { series, metrics, dataView }: CommonColumnsConverterArgs,
   window?: string
-): MetricAggregationColumnWithoutParams | null => {
+): MetricAggregationColumnWithoutSpecialParams | null => {
   if (!isSupportedAggregationWithoutParams(aggregation.name)) {
     return null;
   }
+  const metric = metrics[metrics.length - 1];
   const sourceField = aggregation.isFieldRequired && metric.field ? metric.field : 'document';
 
   const field = dataView.getFieldByName(sourceField);
@@ -126,8 +130,8 @@ export const convertMetricAggregationColumnWithoutParams = (
     operationType: aggregation.name,
     sourceField,
     ...createColumn(series, metric, field, { window }),
-    params: {},
-  } as MetricAggregationColumnWithoutParams;
+    params: { ...getFormat(series, field?.name, dataView) },
+  } as MetricAggregationColumnWithoutSpecialParams;
 };
 
 export const convertMetricAggregationToColumn = (
@@ -147,7 +151,7 @@ export const convertMetricAggregationToColumn = (
   }
 
   if (aggregation.name === Operations.PERCENTILE) {
-    return convertToPercentileColumn(metaValue, series, metric, dataView, { window });
+    return convertToPercentileColumn(metaValue, { series, metric, dataView }, { window });
   }
 
   if (aggregation.name === Operations.PERCENTILE_RANK) {
@@ -160,19 +164,21 @@ export const convertMetricAggregationToColumn = (
     return null;
   }
 
-  return convertMetricAggregationColumnWithoutParams(aggregation, series, metric, dataView, window);
+  return convertMetricAggregationColumnWithoutSpecialParams(
+    aggregation,
+    { series, metrics: [metric], dataView },
+    window
+  );
 };
 
 export const computeParentPipelineColumns = (
   aggregation: ParentPipelineAggregation,
-  series: Series,
-  currentMetric: Metric,
-  dataView: DataView,
+  { series, metric, dataView }: CommonColumnConverterArgs,
   subFunctionMetric: Metric,
   pipelineAgg: SupportedMetric,
   { metaValue, window }: { metaValue?: number; window?: string } = {}
 ) => {
-  const agg = SUPPORTED_METRICS[currentMetric.type];
+  const agg = SUPPORTED_METRICS[metric.type];
   if (!agg) {
     return null;
   }
@@ -185,7 +191,7 @@ export const computeParentPipelineColumns = (
       return null;
     }
     const formula = `${aggFormula}(${script})`;
-    return createFormulaColumn(formula, series, currentMetric);
+    return createFormulaColumn(formula, { series, metric, dataView });
   }
 
   const metricAggregationColumn = convertMetricAggregationToColumn(
@@ -202,7 +208,7 @@ export const computeParentPipelineColumns = (
 
   return [
     metricAggregationColumn,
-    createParentPipelineAggregationColumn(aggregation, series, currentMetric, [
+    createParentPipelineAggregationColumn(aggregation, { series, metric, dataView }, [
       metricAggregationColumn.columnId,
     ]),
   ];
@@ -210,15 +216,13 @@ export const computeParentPipelineColumns = (
 
 const convertMovingAvgOrDerivativeToColumns = (
   aggregation: typeof METRIC_TYPES.DERIVATIVE | typeof TSVB_METRIC_TYPES.MOVING_AVERAGE,
-  currentMetric: Metric,
-  series: Series,
-  metrics: Metric[],
-  dataView: DataView,
+  metric: Metric,
+  { series, metrics, dataView }: CommonColumnsConverterArgs,
   window?: string
 ) => {
   //  percentile value is derived from the field Id. It has the format xxx-xxx-xxx-xxx[percentile]
-  const [fieldId, meta] = currentMetric?.field?.split('[') ?? [];
-  const subFunctionMetric = metrics.find((metric) => metric.id === fieldId);
+  const [fieldId, meta] = metric?.field?.split('[') ?? [];
+  const subFunctionMetric = metrics.find(({ id }) => id === fieldId);
   if (!subFunctionMetric || subFunctionMetric.type === 'static') {
     return null;
   }
@@ -231,20 +235,20 @@ const convertMovingAvgOrDerivativeToColumns = (
   const subMetricField = subFunctionMetric.field;
   const [nestedFieldId, _] = subMetricField?.split('[') ?? [];
   // support nested aggs with formula
-  const additionalSubFunction = metrics.find((metric) => metric.id === nestedFieldId);
+  const additionalSubFunction = metrics.find(({ id }) => id === nestedFieldId);
   if (additionalSubFunction) {
     const formula = getParentPipelineSeriesFormula(
       metrics,
       subFunctionMetric,
       pipelineAgg,
-      currentMetric.type,
+      metric.type,
       { metaValue, window }
     );
     if (!formula) {
       return null;
     }
 
-    return createFormulaColumn(formula, series, currentMetric);
+    return createFormulaColumn(formula, { series, metric, dataView });
   } else {
     const agg = SUPPORTED_METRICS[aggregation];
     if (!agg) {
@@ -253,9 +257,7 @@ const convertMovingAvgOrDerivativeToColumns = (
 
     return computeParentPipelineColumns(
       agg.name,
-      series,
-      currentMetric,
-      dataView,
+      { series, metric, dataView },
       subFunctionMetric,
       pipelineAgg,
       { metaValue, window }
@@ -264,9 +266,7 @@ const convertMovingAvgOrDerivativeToColumns = (
 };
 
 export const convertParentPipelineAggToColumns = (
-  series: Series,
-  metrics: Metric[],
-  dataView: DataView,
+  { series, metrics, dataView }: CommonColumnsConverterArgs,
   window?: string
 ) => {
   const currentMetric = metrics[metrics.length - 1];
@@ -275,9 +275,7 @@ export const convertParentPipelineAggToColumns = (
     return convertMovingAvgOrDerivativeToColumns(
       currentMetric.type,
       currentMetric,
-      series,
-      metrics,
-      dataView,
+      { series, metrics, dataView },
       window
     );
   }
@@ -286,12 +284,14 @@ export const convertParentPipelineAggToColumns = (
 
 export const createParentPipelineAggregationColumn = (
   aggregation: ParentPipelineAggregation,
-  series: Series,
-  metric: Metric,
+  { series, metric, dataView }: CommonColumnConverterArgs,
   references: string[] = []
 ) => {
   const params =
-    aggregation === 'moving_average' ? convertToMovingAverageParams(metric) : undefined;
+    aggregation === 'moving_average'
+      ? convertToMovingAverageParams(metric)
+      : getFormat(series, metric.field, dataView);
+
   if (params === null) {
     return null;
   }

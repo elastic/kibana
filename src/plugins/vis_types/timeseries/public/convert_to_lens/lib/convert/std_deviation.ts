@@ -6,54 +6,53 @@
  * Side Public License, v 1.
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
-import type { Metric, Series } from '../../../../common/types';
+import type { Metric } from '../../../../common/types';
 import { getFormulaEquivalent, SUPPORTED_METRICS } from '../metrics';
 import { createFormulaColumn } from './formula';
-import { convertMetricAggregationColumnWithoutParams } from './parent_pipeline';
+import { convertMetricAggregationColumnWithoutSpecialParams } from './parent_pipeline';
+import { CommonColumnConverterArgs, CommonColumnsConverterArgs } from './types';
 
 const createStandartDeviationFormulaColumn = (
-  series: Series,
-  currentMetric: Metric,
+  { series, metric, dataView }: CommonColumnConverterArgs,
   metrics: Metric[],
   window?: string
 ) => {
-  const script = getFormulaEquivalent(currentMetric, metrics, { window });
+  const script = getFormulaEquivalent(metric, metrics, { window });
   if (!script) return null;
-  return createFormulaColumn(script, series, currentMetric);
+  return createFormulaColumn(script, { series, metric, dataView });
 };
 
 export const convertToStandartDeviationColumn = (
-  series: Series,
-  metrics: Metric[],
-  dataView: DataView,
+  { series, metrics, dataView }: CommonColumnsConverterArgs,
   window?: string
 ) => {
-  const currentMetric = metrics[metrics.length - 1];
+  const metric = metrics[metrics.length - 1];
 
-  const field = currentMetric.field ? dataView.getFieldByName(currentMetric.field) : undefined;
+  const field = metric.field ? dataView.getFieldByName(metric.field) : undefined;
   if (!field) {
     return null;
   }
 
   const columns = [];
 
-  if (currentMetric.mode === 'upper' || currentMetric.mode === 'lower') {
-    columns.push(createStandartDeviationFormulaColumn(series, currentMetric, metrics, window));
-  } else if (currentMetric.mode === 'band') {
+  if (metric.mode === 'upper' || metric.mode === 'lower') {
+    columns.push(
+      createStandartDeviationFormulaColumn({ series, metric, dataView }, metrics, window)
+    );
+  } else if (metric.mode === 'band') {
     [
-      { ...currentMetric, mode: 'upper' },
-      { ...currentMetric, mode: 'lower' },
-    ].forEach((metric) => {
-      columns.push(createStandartDeviationFormulaColumn(series, metric, metrics, window));
+      { ...metric, mode: 'upper' },
+      { ...metric, mode: 'lower' },
+    ].forEach((m) => {
+      columns.push(
+        createStandartDeviationFormulaColumn({ series, metric: m, dataView }, metrics, window)
+      );
     });
   } else {
     columns.push(
-      convertMetricAggregationColumnWithoutParams(
+      convertMetricAggregationColumnWithoutSpecialParams(
         SUPPORTED_METRICS.std_deviation,
-        series,
-        currentMetric,
-        dataView,
+        { series, metrics: [metric], dataView },
         window
       )
     );

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { DataView } from '@kbn/data-views-plugin/common';
 import {
   Layer as BaseLayer,
   Column as BaseColumn,
@@ -33,6 +34,7 @@ import {
   StaticValueColumn as BaseStaticValueColumn,
   AnyColumnWithReferences as BaseAnyColumnWithReferences,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import type { Metric, Series } from '../../../../common/types';
 
 export interface Meta {
   metricId: string;
@@ -96,5 +98,17 @@ export type Column = ColumnWithMeta | ColumnsWithoutMeta;
 export type Layer = Omit<BaseLayer, 'columns'> & {
   columns: Column[];
 };
+
+export interface CommonColumnsConverterArgs {
+  series: Series;
+  metrics: Metric[];
+  dataView: DataView;
+}
+
+export interface CommonColumnConverterArgs {
+  series: Series;
+  metric: Metric;
+  dataView: DataView;
+}
 
 export { FiltersColumn, TermsColumn, DateHistogramColumn };

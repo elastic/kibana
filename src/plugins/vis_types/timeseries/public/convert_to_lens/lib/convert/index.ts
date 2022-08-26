@@ -12,7 +12,7 @@ export { convertToPercentileRankColumns, isPercentileRanksColumnWithMeta } from 
 export { convertMathToFormulaColumn, convertOtherAggsToFormulaColumn } from './formula';
 export {
   convertParentPipelineAggToColumns,
-  convertMetricAggregationColumnWithoutParams,
+  convertMetricAggregationColumnWithoutSpecialParams,
 } from './parent_pipeline';
 export { convertToCumulativeSumColumns } from './cumulative_sum';
 export { convertFilterRatioToFormulaColumn } from './filter_ratio';

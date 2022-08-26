@@ -10,7 +10,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { DataType, TermsParams } from '@kbn/visualizations-plugin/common';
 import uuid from 'uuid';
 import { Series } from '../../../../common/types';
-import { excludeMetaFromColumn, isColumnWithMeta } from './column';
+import { excludeMetaFromColumn, getFormat, isColumnWithMeta } from './column';
 import { Column, TermsColumn } from './types';
 
 interface OrderByWithAgg {
@@ -109,6 +109,6 @@ export const converToTermsColumn = (
     sourceField: field.name,
     isBucketed: true,
     isSplit,
-    params,
+    params: { ...params, ...getFormat(series, field.name, dataView) },
   };
 };

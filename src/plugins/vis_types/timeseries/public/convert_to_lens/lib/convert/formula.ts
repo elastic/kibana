@@ -8,11 +8,11 @@
 
 import { METRIC_TYPES } from '@kbn/data-plugin/public';
 import { FormulaParams } from '@kbn/visualizations-plugin/common/convert_to_lens';
-import { FormulaColumn } from './types';
+import { CommonColumnConverterArgs, CommonColumnsConverterArgs, FormulaColumn } from './types';
 import { TSVB_METRIC_TYPES } from '../../../../common/enums';
-import type { Metric, Series } from '../../../../common/types';
+import type { Metric } from '../../../../common/types';
 import { getFormulaEquivalent, getSiblingPipelineSeriesFormula } from '../metrics';
-import { createColumn } from './column';
+import { createColumn, getFormat } from './column';
 
 type OtherFormulaAggregations =
   | typeof TSVB_METRIC_TYPES.POSITIVE_ONLY
@@ -27,9 +27,7 @@ const convertToFormulaParams = (formula: string): FormulaParams | null => ({
 
 export const createFormulaColumn = (
   mathScript: string,
-  series: Series,
-  metric: Metric,
-  formatParams: Omit<FormulaParams, 'formula'> = {}
+  { series, metric, dataView }: CommonColumnConverterArgs
 ): FormulaColumn | null => {
   const params = convertToFormulaParams(mathScript);
   if (!params) {
@@ -40,7 +38,7 @@ export const createFormulaColumn = (
     operationType: 'formula',
     references: [],
     ...createColumn(series, metric),
-    params: { ...params, ...formatParams },
+    params: { ...params, ...getFormat(series, metric.field, dataView) },
   };
 };
 
@@ -82,25 +80,24 @@ const convertFormulaScriptForAggs = (
 };
 
 export const convertMathToFormulaColumn = (
-  series: Series,
-  metrics: Metric[],
+  { series, metrics, dataView }: CommonColumnsConverterArgs,
   window?: string
 ): FormulaColumn | null => {
   // find the metric idx that has math expression
-  const mathMetric = metrics.find((metric) => metric.type === 'math');
+  const metric = metrics.find(({ type }) => type === 'math');
   let script: string | null | undefined = metrics[metrics.length - 1].script;
 
-  if (!mathMetric) {
+  if (!metric) {
     return null;
   }
 
-  const { variables } = mathMetric;
+  const { variables } = metric;
 
   if (!script || !variables) {
     return null;
   }
 
-  const metricsWithoutMath = metrics.filter((metric) => metric.type !== 'math');
+  const metricsWithoutMath = metrics.filter(({ type }) => type !== 'math');
 
   // create the script
   for (const notMathMetric of metricsWithoutMath) {
@@ -137,20 +134,19 @@ export const convertMathToFormulaColumn = (
     return null;
   }
 
-  return createFormulaColumn(script, series, mathMetric);
+  return createFormulaColumn(script, { series, metric, dataView });
 };
 
 export const convertOtherAggsToFormulaColumn = (
   aggregation: OtherFormulaAggregations,
-  series: Series,
-  metrics: Metric[],
+  { series, metrics, dataView }: CommonColumnsConverterArgs,
   window?: string
 ): FormulaColumn | null => {
-  const currentMetric = metrics[metrics.length - 1];
+  const metric = metrics[metrics.length - 1];
 
-  const formula = getSiblingPipelineSeriesFormula(aggregation, currentMetric, metrics, window);
+  const formula = getSiblingPipelineSeriesFormula(aggregation, metric, metrics, window);
   if (!formula) {
     return null;
   }
-  return createFormulaColumn(formula, series, currentMetric);
+  return createFormulaColumn(formula, { series, metric, dataView });
 };

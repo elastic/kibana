@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
 import { LastValueParams } from '@kbn/visualizations-plugin/common/convert_to_lens';
-import { LastValueColumn } from './types';
-import type { Metric, Series } from '../../../../common/types';
-import { createColumn } from './column';
+import { CommonColumnsConverterArgs, LastValueColumn } from './types';
+import type { Metric } from '../../../../common/types';
+import { createColumn, getFormat } from './column';
 
 const convertToLastValueParams = (metric: Metric): LastValueParams | null => ({
   sortField: metric.order_by,
@@ -18,9 +17,7 @@ const convertToLastValueParams = (metric: Metric): LastValueParams | null => ({
 });
 
 export const convertToLastValueColumn = (
-  series: Series,
-  metrics: Metric[],
-  dataView: DataView,
+  { series, metrics, dataView }: CommonColumnsConverterArgs,
   window?: string
 ): LastValueColumn | null => {
   const currentMetric = metrics[metrics.length - 1];
@@ -46,6 +43,6 @@ export const convertToLastValueColumn = (
     operationType: 'last_value',
     sourceField: field.name ?? 'document',
     ...createColumn(series, currentMetric, undefined, { window }),
-    params,
+    params: { ...params, ...getFormat(series, currentMetric.field, dataView) },
   };
 };

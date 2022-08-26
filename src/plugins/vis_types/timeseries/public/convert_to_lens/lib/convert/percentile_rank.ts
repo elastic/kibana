@@ -12,8 +12,13 @@ import {
   PercentileRanksParams,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import type { Metric, Series } from '../../../../common/types';
-import { createColumn } from './column';
-import { PercentileRanksColumn, Column, PercentileRanksColumnWithExtendedMeta } from './types';
+import { createColumn, getFormat } from './column';
+import {
+  PercentileRanksColumn,
+  Column,
+  PercentileRanksColumnWithExtendedMeta,
+  CommonColumnConverterArgs,
+} from './types';
 
 export const isPercentileRanksColumnWithMeta = (
   column: Column
@@ -50,7 +55,7 @@ export const convertToPercentileRankColumn = (
     operationType: 'percentile_rank',
     sourceField: field.name,
     ...commonColumnParams,
-    params,
+    params: { ...params, ...getFormat(series, metric.field, dataView) },
     meta:
       index !== undefined
         ? {
@@ -62,9 +67,7 @@ export const convertToPercentileRankColumn = (
 };
 
 export const convertToPercentileRankColumns = (
-  series: Series,
-  metric: Metric,
-  dataView: DataView,
+  { series, metric, dataView }: CommonColumnConverterArgs,
   window?: string
 ): Array<PercentileRanksColumn | null> | null => {
   const { values } = metric;

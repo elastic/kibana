@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
 import { NavigateToLensContext, XYConfiguration } from '@kbn/visualizations-plugin/common';
 import { TimeRange } from '@kbn/data-plugin/common';
-import type { Metric, Panel, Series } from '../../common/types';
-import { Column } from './lib/convert';
+import type { Panel } from '../../common/types';
+import { Column, CommonColumnConverterArgs } from './lib/convert';
 
 export type ConvertTsvbToLensVisualization = (
   model: Panel,
@@ -23,8 +22,6 @@ export interface Filter {
 }
 
 export type ConvertToColumnsFn<C extends Column> = (
-  series: Series,
-  metric: Metric,
-  dataView: DataView,
+  { series: Series, metric: Metric, dataView: DataView }: CommonColumnConverterArgs,
   window?: string
 ) => Array<C | null> | null;

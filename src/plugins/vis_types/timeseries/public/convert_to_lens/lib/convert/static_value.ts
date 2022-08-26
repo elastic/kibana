@@ -7,17 +7,16 @@
  */
 
 import { StaticValueParams } from '@kbn/visualizations-plugin/common/convert_to_lens';
-import { StaticValueColumn } from './types';
-import type { Metric, Series } from '../../../../common/types';
-import { createColumn } from './column';
+import { CommonColumnsConverterArgs, StaticValueColumn } from './types';
+import type { Metric } from '../../../../common/types';
+import { createColumn, getFormat } from './column';
 
 export const convertToStaticValueParams = ({ value }: Metric): StaticValueParams => ({
   value,
 });
 
 export const convertToStaticValueColumn = (
-  series: Series,
-  metrics: Metric[],
+  { series, metrics, dataView }: CommonColumnsConverterArgs,
   { visibleSeriesCount = 0, window }: { visibleSeriesCount?: number; window?: string } = {}
 ): StaticValueColumn | null => {
   // Lens support reference lines only when at least one layer data exists
@@ -29,6 +28,9 @@ export const convertToStaticValueColumn = (
     operationType: 'static_value',
     references: [],
     ...createColumn(series, currentMetric, undefined, { window }),
-    params: convertToStaticValueParams(currentMetric),
+    params: {
+      ...convertToStaticValueParams(currentMetric),
+      ...getFormat(series, currentMetric.field, dataView),
+    },
   };
 };

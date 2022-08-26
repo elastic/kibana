@@ -9,15 +9,18 @@
 import { Column } from './columns';
 import { Filter, NumberValueFormat } from './common';
 
+export interface FormatParams {
+  format?: NumberValueFormat;
+}
+
 export interface FiltersParams {
   filters: Filter[];
 }
 
-export interface RangeParams {
+export interface RangeParams extends FormatParams {
   type: 'histogram' | 'range';
   maxBars: 'auto' | number;
   ranges: Range[];
-  format?: NumberValueFormat;
   includeEmptyRows?: boolean;
   parentFormat?: {
     id: string;
@@ -29,7 +32,7 @@ export interface RangeParams {
   };
 }
 
-export interface TermsParams {
+export interface TermsParams extends FormatParams {
   size: number;
   include?: string[] | number[];
   exclude?: string[] | number[];
@@ -45,7 +48,6 @@ export interface TermsParams {
   otherBucket?: boolean;
   missingBucket?: boolean;
   secondaryFields?: string[];
-  format?: NumberValueFormat;
   parentFormat?: { id: string };
 }
 
@@ -56,78 +58,42 @@ export interface DateHistogramParams {
   dropPartials?: boolean;
 }
 
-export interface MinParams {
-  format?: NumberValueFormat;
-}
+export type MinParams = FormatParams;
+export type MaxParams = FormatParams;
+export type AvgParams = FormatParams;
+export type SumParams = FormatParams;
+export type MedianParams = FormatParams;
+export type StandardDeviationParams = FormatParams;
+export type CardinalityParams = FormatParams;
+export type CumulativeSumParams = FormatParams;
+export type CounterRateParams = FormatParams;
+export type DerivativeParams = FormatParams;
+export type CountParams = FormatParams;
 
-export interface MaxParams {
-  format?: NumberValueFormat;
-}
-
-export interface AvgParams {
-  format?: NumberValueFormat;
-}
-
-export interface SumParams {
-  format?: NumberValueFormat;
-}
-
-export interface MedianParams {
-  format?: NumberValueFormat;
-}
-
-export interface StandardDeviationParams {
-  format?: NumberValueFormat;
-}
-
-export interface CardinalityParams {
-  format?: NumberValueFormat;
-}
-
-export interface PercentileParams {
+export interface PercentileParams extends FormatParams {
   percentile: number;
-  format?: NumberValueFormat;
 }
 
 export interface PercentileRanksParams {
   value: number;
 }
 
-export interface CountParams {
-  format?: NumberValueFormat;
-}
-
-export interface LastValueParams {
+export interface LastValueParams extends FormatParams {
   sortField?: string;
   showArrayValues: boolean;
-  format?: NumberValueFormat;
-}
-
-export interface CumulativeSumParams {
-  format?: NumberValueFormat;
-}
-
-export interface CounterRateParams {
-  format?: NumberValueFormat;
-}
-
-export interface DerivativeParams {
-  format?: NumberValueFormat;
 }
 
 export interface MovingAverageParams {
   window: number;
 }
 
-export interface FormulaParams {
+export interface FormulaParams extends FormatParams {
   formula?: string;
   isFormulaBroken?: boolean;
-  format?: NumberValueFormat;
 }
 
-export interface StaticValueParams {
+export interface StaticValueParams extends FormatParams {
   value?: string;
-  format?: NumberValueFormat;
 }
 
 export interface TimeScaleParams {

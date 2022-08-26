@@ -6,11 +6,15 @@
  * Side Public License, v 1.
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
 import { Operations, PercentileParams } from '@kbn/visualizations-plugin/common/convert_to_lens';
-import type { Metric, Percentile, Series } from '../../../../common/types';
-import { createColumn } from './column';
-import { PercentileColumnWithExtendedMeta, PercentileColumn, Column } from './types';
+import type { Percentile } from '../../../../common/types';
+import { createColumn, getFormat } from './column';
+import {
+  PercentileColumnWithExtendedMeta,
+  PercentileColumn,
+  Column,
+  CommonColumnConverterArgs,
+} from './types';
 
 export const isPercentileColumnWithMeta = (
   column: Column
@@ -27,9 +31,7 @@ export const convertToPercentileParams = (value?: string | number): PercentilePa
 
 export const convertToPercentileColumn = (
   percentile: Percentile['value'],
-  series: Series,
-  metric: Metric,
-  dataView: DataView,
+  { series, metric, dataView }: CommonColumnConverterArgs,
   { index, window }: { index?: number; window?: string } = {}
 ): PercentileColumn | null => {
   const params = convertToPercentileParams(percentile);
@@ -46,7 +48,7 @@ export const convertToPercentileColumn = (
     operationType: 'percentile',
     sourceField: field.name,
     ...commonColumnParams,
-    params,
+    params: { ...params, ...getFormat(series, metric.field, dataView) },
     meta:
       index !== undefined
         ? {
@@ -58,18 +60,16 @@ export const convertToPercentileColumn = (
 };
 
 export const convertToPercentileColumns = (
-  series: Series,
-  metric: Metric,
-  dataView: DataView,
+  columnConverterArgs: CommonColumnConverterArgs,
   window?: string
 ): Array<PercentileColumn | null> | null => {
-  const { percentiles } = metric;
+  const { percentiles } = columnConverterArgs.metric;
 
   if (!percentiles) {
     return null;
   }
 
   return percentiles.map((p, index) =>
-    convertToPercentileColumn(p.value, series, metric, dataView, { index, window })
+    convertToPercentileColumn(p.value, columnConverterArgs, { index, window })
   );
 };

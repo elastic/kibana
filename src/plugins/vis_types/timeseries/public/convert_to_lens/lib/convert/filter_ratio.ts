@@ -6,23 +6,21 @@
  * Side Public License, v 1.
  */
 
-import type { Metric, Series } from '../../../../common/types';
 import { getFilterRatioFormula } from '../metrics';
 import { createFormulaColumn } from './formula';
-import { FormulaColumn } from './types';
+import { CommonColumnsConverterArgs, FormulaColumn } from './types';
 
 export const convertFilterRatioToFormulaColumn = (
-  series: Series,
-  metrics: Metric[],
+  { series, metrics, dataView }: CommonColumnsConverterArgs,
   window?: string
 ): FormulaColumn | null => {
-  const currentMetric = metrics[metrics.length - 1];
+  const metric = metrics[metrics.length - 1];
 
-  const formula = getFilterRatioFormula(currentMetric, window);
+  const formula = getFilterRatioFormula(metric, window);
 
   if (!formula) {
     return null;
   }
 
-  return createFormulaColumn(formula, series, currentMetric);
+  return createFormulaColumn(formula, { series, metric, dataView });
 };
