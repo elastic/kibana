@@ -83,7 +83,7 @@ export function StorageDetailsPerService({
   const router = useApmRouter();
   const { euiTheme } = useEuiTheme();
 
-  const { query } = useApmParams('/settings/storage-explorer');
+  const { query } = useApmParams('/storage-explorer');
   const {
     rangeFrom,
     rangeTo,

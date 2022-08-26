@@ -9,7 +9,6 @@ import * as t from 'io-ts';
 import { Outlet } from '@kbn/typed-react-router-config';
 import { i18n } from '@kbn/i18n';
 import { Redirect } from 'react-router-dom';
-import { toBooleanRt } from '@kbn/io-ts-utils';
 import { agentConfigurationPageStepRt } from '../../../../common/agent_configuration/constants';
 import { Breadcrumb } from '../../app/breadcrumb';
 import { SettingsTemplate } from '../templates/settings_template';
@@ -21,10 +20,6 @@ import { CustomLinkOverview } from '../../app/settings/custom_link';
 import { Schema } from '../../app/settings/schema';
 import { AnomalyDetection } from '../../app/settings/anomaly_detection';
 import { AgentKeys } from '../../app/settings/agent_keys';
-import { StorageExplorer } from '../../app/settings/storage_explorer';
-import { environmentRt } from '../../../../common/environment_rt';
-import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import { EnvironmentsContextProvider } from '../../../context/environments_context/environments_context';
 
 function page({
   title,
@@ -137,41 +132,6 @@ export const settings = {
         element: <AgentKeys />,
         tab: 'agent-keys',
       }),
-      '/settings/storage-explorer': {
-        ...page({
-          title: i18n.translate(
-            'xpack.apm.views.settings.storageExplorer.title',
-            { defaultMessage: 'Storage explorer' }
-          ),
-          tab: 'storage-explorer',
-          element: (
-            <EnvironmentsContextProvider>
-              <StorageExplorer />
-            </EnvironmentsContextProvider>
-          ),
-        }),
-        params: t.type({
-          query: t.intersection([
-            environmentRt,
-            t.type({
-              rangeFrom: t.string,
-              rangeTo: t.string,
-              kuery: t.string,
-            }),
-            t.partial({
-              refreshPaused: t.union([t.literal('true'), t.literal('false')]),
-              refreshInterval: t.string,
-              comparisonEnabled: toBooleanRt,
-            }),
-          ]),
-        }),
-        defaults: {
-          query: {
-            environment: ENVIRONMENT_ALL.value,
-            kuery: '',
-          },
-        },
-      },
       '/settings': {
         element: <Redirect to="/settings/agent-configuration" />,
       },

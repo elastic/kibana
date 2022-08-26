@@ -56,7 +56,7 @@ export function ServicesTable({ indexLifecyclePhase }: Props) {
       kuery,
       comparisonEnabled: urlComparisonEnabled,
     },
-  } = useApmParams('/settings/storage-explorer');
+  } = useApmParams('/storage-explorer');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 

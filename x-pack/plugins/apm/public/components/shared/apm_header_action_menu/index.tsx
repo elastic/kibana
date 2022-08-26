@@ -44,7 +44,7 @@ export function ApmHeaderActionMenu() {
     <EuiHeaderLinks gutterSize="xs">
       <EuiHeaderLink
         color="text"
-        href={apmHref('/settings/storage-explorer')}
+        href={apmHref('/storage-explorer')}
         iconType="beaker"
         data-test-subj="apmStorageExplorerHeaderLink"
       >

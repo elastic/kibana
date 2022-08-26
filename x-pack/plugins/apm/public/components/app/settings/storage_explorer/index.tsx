@@ -6,20 +6,11 @@
  */
 
 import React, { useState } from 'react';
-import {
-  EuiTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { IndexLifecyclePhaseSelectOption } from '../../../../../common/storage_explorer_types';
 import { IndexLifecyclePhaseSelect } from './index_lifecycle_phase_select';
-import { ApmDatePicker } from '../../../shared/date_picker/apm_date_picker';
-import { ApmEnvironmentFilter } from '../../../shared/environment_filter';
-import { KueryBar } from '../../../shared/kuery_bar';
-import { BetaBadge } from '../../../shared/beta_badge';
 import { ServicesTable } from './services_table';
+import { SearchBar } from '../../../shared/search_bar';
 
 export function StorageExplorer() {
   const [indexLifecyclePhase, setIndexLifecyclePhase] = useState(
@@ -28,36 +19,8 @@ export function StorageExplorer() {
 
   return (
     <>
-      <EuiFlexGroup justifyContent="flexStart" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="s">
-            <h2>
-              {i18n.translate('xpack.apm.settings.storageExplorer.title', {
-                defaultMessage: 'Storage explorer',
-              })}
-            </h2>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <BetaBadge />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiHorizontalRule />
-
-      <EuiFlexGroup>
-        <EuiFlexItem grow={5}>
-          <KueryBar />,
-        </EuiFlexItem>
-        <EuiFlexItem grow={1}>
-          <ApmDatePicker />,
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
+      <SearchBar />
       <EuiFlexGroup justifyContent="flexEnd">
-        <EuiFlexItem grow={false}>
-          <ApmEnvironmentFilter />,
-        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <IndexLifecyclePhaseSelect
             indexLifecyclePhase={indexLifecyclePhase}
@@ -65,7 +28,7 @@ export function StorageExplorer() {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-
+      <EuiSpacer />
       <ServicesTable indexLifecyclePhase={indexLifecyclePhase} />
     </>
   );
