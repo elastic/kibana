@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { Image, Props as ImageProps } from './image';
+export { Image } from './image';
+export type { Props as ImageProps } from './image';
