@@ -54,6 +54,7 @@ const toTableListViewSavedObject = (
     id: savedObject.id,
     updatedAt: savedObject.updatedAt!,
     references: savedObject.references,
+    type: savedObject.type,
     attributes: {
       title: savedObject.title ?? '',
       timeRestore: savedObject.timeRestore,

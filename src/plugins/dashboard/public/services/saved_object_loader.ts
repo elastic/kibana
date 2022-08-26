@@ -99,12 +99,14 @@ export class SavedObjectLoader {
   mapHitSource(
     attributes: DashboardAttributes,
     id: string,
+    type: string,
     references: SavedObjectReference[] = [],
     updatedAt?: string
   ) {
     return {
       ...attributes,
       id,
+      type,
       url: this.urlFor(id),
       references,
       updatedAt,
@@ -120,15 +122,17 @@ export class SavedObjectLoader {
   mapSavedObjectApiHits({
     attributes,
     id,
+    type,
     references = [],
     updatedAt,
   }: {
     attributes: DashboardAttributes;
     id: string;
+    type: string;
     references?: SavedObjectReference[];
     updatedAt?: string;
   }) {
-    return this.mapHitSource(attributes, id, references, updatedAt);
+    return this.mapHitSource(attributes, id, type, references, updatedAt);
   }
 
   /**
