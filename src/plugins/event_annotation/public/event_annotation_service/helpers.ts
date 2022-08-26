@@ -6,18 +6,15 @@
  * Side Public License, v 1.
  */
 import { i18n } from '@kbn/i18n';
-import { transparentize } from '@elastic/eui';
 import { euiLightVars } from '@kbn/ui-theme';
-import Color from 'color';
 import {
   EventAnnotationConfig,
   RangeEventAnnotationConfig,
   PointInTimeQueryEventAnnotationConfig,
 } from '../../common';
 export const defaultAnnotationColor = euiLightVars.euiColorAccent;
-export const defaultAnnotationRangeColor = new Color(
-  transparentize(defaultAnnotationColor, 0.1)
-).hexa();
+// Do not compute it live as dependencies will add tens of Kbs to the plugin
+export const defaultAnnotationRangeColor = `#F04E981A`; // defaultAnnotationColor with opacity 0.1
 
 export const defaultAnnotationLabel = i18n.translate(
   'eventAnnotation.manualAnnotation.defaultAnnotationLabel',
