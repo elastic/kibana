@@ -5,14 +5,14 @@
  * 2.0.
  */
 import { once } from 'lodash';
-import { of, Subject, Observable } from 'rxjs';
+import { of, Observable, Subject } from 'rxjs';
 import { take } from 'rxjs/operators';
 
 const supportsIntersectionObserver = 'IntersectionObserver' in window;
 
 /**
- * Check whether an element is visible and emit, only once, when it is visible
- * then clean up all resources.
+ * Check whether an element is visible and emit, only once, when it intersects
+ * with the viewport.
  */
 export class ViewportObserver {
   constructor() {
@@ -27,17 +27,17 @@ export class ViewportObserver {
   private intersection$ = new Subject<void>();
 
   /**
-   * Call this function start observing.
+   * Call this function to start observing.
    *
-   * It is callable once only per instance.
+   * It is callable once only per instance and will emit only once: when an
+   * element's bounding rect intersects with the viewport.
    */
   public observeElement = once((element: HTMLElement): Observable<void> => {
     this.element = element;
     if (this.intersectionObserver) {
-      this.intersectionObserver?.observe(element);
+      this.intersectionObserver.observe(element);
       return this.intersection$.pipe(take(1));
-    }
-    {
+    } else {
       return of(undefined);
     }
   });
