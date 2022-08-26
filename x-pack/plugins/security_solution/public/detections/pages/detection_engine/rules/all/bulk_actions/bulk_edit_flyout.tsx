@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import type { BulkActionEditPayload } from '../../../../../../../common/detection_engine/schemas/common/schemas';
+import type { BulkActionEditPayload } from '../../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 import { BulkActionEditType } from '../../../../../../../common/detection_engine/schemas/common/schemas';
 
 import { IndexPatternsForm } from './forms/index_patterns_form';

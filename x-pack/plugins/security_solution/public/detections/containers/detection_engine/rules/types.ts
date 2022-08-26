@@ -25,11 +25,8 @@ import {
 
 import { RuleExecutionSummary } from '../../../../../common/detection_engine/rule_monitoring';
 
-import type {
-  SortOrder,
-  BulkAction,
-  BulkActionEditPayload,
-} from '../../../../../common/detection_engine/schemas/common';
+import type { SortOrder, BulkAction } from '../../../../../common/detection_engine/schemas/common';
+import type { BulkActionEditPayload } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 import {
   alias_purpose as savedObjectResolveAliasPurpose,
   outcome as savedObjectResolveOutcome,

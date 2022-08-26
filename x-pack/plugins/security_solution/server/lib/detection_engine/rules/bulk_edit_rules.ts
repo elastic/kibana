@@ -9,8 +9,8 @@ import pMap from 'p-map';
 import type { RulesClient, BulkEditError } from '@kbn/alerting-plugin/server';
 import type {
   BulkActionEditPayload,
-  bulkActionEditPayloadRuleActions,
-} from '../../../../common/detection_engine/schemas/common';
+  BulkActionEditPayloadRuleActions,
+} from '../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 import { enrichFilterWithRuleTypeMapping } from './enrich_filter_with_rule_type_mappings';
 import type { MlAuthz } from '../../machine_learning/authz';
 import { ruleParamsModifier } from './bulk_actions/rule_params_modifier';
@@ -76,7 +76,7 @@ export const bulkEditRules = async ({
     .reverse()
     .find(({ type }) =>
       [BulkActionEditType.set_rule_actions, BulkActionEditType.add_rule_actions].includes(type)
-    ) as bulkActionEditPayloadRuleActions;
+    ) as BulkActionEditPayloadRuleActions;
 
   if (rulesAction) {
     const errors: BulkEditError[] = [];

@@ -14,7 +14,7 @@ import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 
 import type { Toast } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import type { BulkActionEditPayload } from '../../../../../../../common/detection_engine/schemas/common/schemas';
+import type { BulkActionEditPayload } from '../../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 import {
   BulkAction,
   BulkActionEditType,

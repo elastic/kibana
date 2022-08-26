@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import * as i18n from '../../../translations';
 import { caseInsensitiveSort } from '../../helpers';
-import type { BulkActionEditPayload } from '../../../../../../../../common/detection_engine/schemas/common/schemas';
+import type { BulkActionEditPayload } from '../../../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 import { BulkActionEditType } from '../../../../../../../../common/detection_engine/schemas/common/schemas';
 
 import type { FormSchema } from '../../../../../../../shared_imports';

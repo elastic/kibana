@@ -11,7 +11,7 @@ import { EuiCallOut } from '@elastic/eui';
 import type { FormSchema } from '../../../../../../../shared_imports';
 import { useForm, UseField } from '../../../../../../../shared_imports';
 import { PickTimeline } from '../../../../../../components/rules/pick_timeline';
-import type { BulkActionEditPayload } from '../../../../../../../../common/detection_engine/schemas/common/schemas';
+import type { BulkActionEditPayload } from '../../../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 import { BulkActionEditType } from '../../../../../../../../common/detection_engine/schemas/common/schemas';
 
 import { BulkEditFormWrapper } from './bulk_edit_form_wrapper';

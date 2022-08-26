@@ -14,7 +14,7 @@ import * as i18n from '../../../translations';
 import { DEFAULT_INDEX_KEY } from '../../../../../../../../common/constants';
 import { useKibana } from '../../../../../../../common/lib/kibana';
 
-import type { BulkActionEditPayload } from '../../../../../../../../common/detection_engine/schemas/common/schemas';
+import type { BulkActionEditPayload } from '../../../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 import { BulkActionEditType } from '../../../../../../../../common/detection_engine/schemas/common/schemas';
 
 import type { FormSchema } from '../../../../../../../shared_imports';
