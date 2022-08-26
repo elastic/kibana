@@ -129,6 +129,8 @@ export type {
   NavigateToUrlOptions,
   ScopedHistory,
 } from '@kbn/core-application-browser';
+export { CoreScopedHistory } from '@kbn/core-application-browser-internal';
+
 export type {
   SavedObjectsClientContract,
   SimpleSavedObject,

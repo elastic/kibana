@@ -22,7 +22,7 @@ import type { ScopedHistory } from '@kbn/core-application-browser';
 /**
  * Core's internal implementation of {@link ScopedHistory}
  *
- * @internal
+ * @internal Only exposed publicly for testing purpose.
  */
 export class CoreScopedHistory<HistoryLocationState = unknown>
   implements ScopedHistory<HistoryLocationState>
