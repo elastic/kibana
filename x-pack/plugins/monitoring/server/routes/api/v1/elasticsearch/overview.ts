@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { prefixIndexPatternWithCcs } from '../../../../../common/ccs_utils';
 import { CCS_REMOTE_PATTERN } from '../../../../../common/constants';
 import {
   postElasticsearchOverviewRequestParamsRT,
@@ -14,6 +13,7 @@ import {
 } from '../../../../../common/http_api/elasticsearch';
 import { getClusterStats } from '../../../../lib/cluster/get_cluster_stats';
 import { getClusterStatus } from '../../../../lib/cluster/get_cluster_status';
+import { getNewIndexPatterns } from '../../../../lib/cluster/get_index_patterns';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { getLastRecovery } from '../../../../lib/elasticsearch/get_last_recovery';
@@ -37,11 +37,14 @@ export function esOverviewRoute(server: MonitoringCore) {
     async handler(req) {
       const config = server.config;
       const clusterUuid = req.params.clusterUuid;
-      const filebeatIndexPattern = prefixIndexPatternWithCcs(
+
+      const logsIndexPattern = getNewIndexPatterns({
         config,
-        config.ui.logs.index,
-        CCS_REMOTE_PATTERN
-      );
+        type: 'logs',
+        moduleType: 'elasticsearch',
+        ccs: CCS_REMOTE_PATTERN,
+      });
+
       const { min: start, max: end } = req.payload.timeRange;
 
       try {
@@ -50,7 +53,7 @@ export function esOverviewRoute(server: MonitoringCore) {
           getMetrics(req, 'elasticsearch', metricSet),
           getLastRecovery(req, config.ui.max_bucket_size),
           // TODO this call is missing some items from the signature of `getLogs`, will need to resolve during TS conversion
-          getLogs(config, req, filebeatIndexPattern, { clusterUuid, start, end }),
+          getLogs(config, req, logsIndexPattern, { clusterUuid, start, end }),
         ]);
         const indicesUnassignedShardStats = await getIndicesUnassignedShardStats(req, clusterStats);
 
