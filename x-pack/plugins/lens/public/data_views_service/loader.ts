@@ -84,6 +84,7 @@ export function convertDataViewIntoLensIndexPattern(
       Object.fromEntries(
         Object.entries(fieldFormatMap).map(([id, format]) => [
           id,
+          // @ts-ignore
           'toJSON' in format ? format.toJSON() : format,
         ])
       ),
