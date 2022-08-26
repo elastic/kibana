@@ -60,13 +60,9 @@ const axeOptions = {
 };
 
 // @see https://github.com/component-driven/cypress-axe#cychecka11y for params
-export const checkA11y = ({ skipFailures }: { skipFailures: boolean }) => {
+export const checkA11y = () => {
   cy.injectAxe();
   cy.configureAxe(axeConfig);
   const context = '.kbnAppWrapper'; // Scopes a11y checks to only our app
-  /**
-   * We can get rid of the last two params when we don't need to add skipFailures
-   * params = (context, options, violationCallback, skipFailures)
-   */
-  cy.checkA11y(context, axeOptions, undefined, skipFailures);
+  cy.checkA11y(context, axeOptions);
 };
