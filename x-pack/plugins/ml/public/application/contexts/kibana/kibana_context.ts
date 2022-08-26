@@ -22,6 +22,7 @@ import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import type { DashboardSetup } from '@kbn/dashboard-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { CasesUiStart } from '@kbn/cases-plugin/public';
 import type { MlServicesContext } from '../../app';
 
 interface StartPlugins {
@@ -39,6 +40,7 @@ interface StartPlugins {
   dashboard: DashboardSetup;
   spacesApi: SpacesPluginStart;
   charts: ChartsPluginStart;
+  cases?: CasesUiStart;
 }
 export type StartServices = CoreStart &
   StartPlugins & {
