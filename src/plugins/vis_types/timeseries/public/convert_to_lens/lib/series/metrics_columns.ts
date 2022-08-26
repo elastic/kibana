@@ -8,7 +8,7 @@
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Series } from '../../../../common/types';
-import { getSeriesAgg } from './get_series_agg';
+import { getSeriesAgg } from './series_agg';
 import { SUPPORTED_METRICS } from '../metrics';
 import {
   Column,

@@ -30,7 +30,6 @@ import {
   getFilterRatioFormula,
   getFormulaFromMetric,
   getParentPipelineSeriesFormula,
-  getPipelineAgg,
   SupportedMetric,
   SUPPORTED_METRICS,
 } from '../metrics';
@@ -224,7 +223,7 @@ const convertMovingAvgOrDerivativeToColumns = (
     return null;
   }
 
-  const pipelineAgg = getPipelineAgg(subFunctionMetric.type);
+  const pipelineAgg = SUPPORTED_METRICS[subFunctionMetric.type];
   if (!pipelineAgg) {
     return null;
   }

@@ -16,7 +16,7 @@ export interface Layer {
   columnOrder: string[];
 }
 
-export interface NavigateToLensContext<T extends Configuration> {
+export interface NavigateToLensContext<T extends Configuration = Configuration> {
   layers: Record<string, Layer>;
   type: string;
   configuration: T;

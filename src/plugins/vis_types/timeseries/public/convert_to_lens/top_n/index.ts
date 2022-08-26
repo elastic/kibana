@@ -6,110 +6,103 @@
  * Side Public License, v 1.
  */
 
-import { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
-import { PANEL_TYPES, TIME_RANGE_DATA_MODES } from '../../../common/enums';
+import uuid from 'uuid';
+import { Layer } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import { Position } from '@elastic/charts';
+import { PANEL_TYPES } from '../../../common/enums';
 import { getDataViewsStart } from '../../services';
 import { getDataSourceInfo } from '../lib/datasource';
-import { getSeries } from '../lib/series';
-import { getFieldsForTerms } from '../../../common/fields_utils';
-import { ConvertTsvbToLensVisualization } from '../types';
-import { isSplitWithDateHistogram } from '../lib/split_chart';
-import { getLayerConfiguration } from '../lib/layers';
+import { getMetricsColumns, getBucketsColumns } from '../lib/series';
+import { getLayers } from '../lib/configurations/xy';
 import { getWindow, isValidMetrics } from '../lib/metrics';
+import { ConvertTsvbToLensVisualization } from '../types';
+import { Layer as ExtendedLayer, excludeMetaFromColumn } from '../lib/convert';
+
+const excludeMetaFromLayers = (layers: Record<string, ExtendedLayer>): Record<string, Layer> => {
+  const newLayers: Record<string, Layer> = {};
+  Object.entries(layers).forEach(([layerId, layer]) => {
+    const columns = layer.columns.map(excludeMetaFromColumn);
+    newLayers[layerId] = { ...layer, columns };
+  });
+
+  return newLayers;
+};
 
 export const convertToLens: ConvertTsvbToLensVisualization = async (model, timeRange) => {
-  const layersConfiguration: { [key: string]: VisualizeEditorLayersContext } = {};
-
-  // get the active series number
-  const seriesNum = model.series.filter((series) => !series.hidden).length;
   const dataViews = getDataViewsStart();
+  const extendedLayers: Record<number, ExtendedLayer> = {};
+  const seriesNum = model.series.filter((series) => !series.hidden).length;
 
   // handle multiple layers/series
-  for (let layerIdx = 0; layerIdx < model.series.length; layerIdx++) {
-    const layer = model.series[layerIdx];
-    if (layer.hidden) {
+  for (const [layerIdx, series] of model.series.entries()) {
+    if (series.hidden) {
       continue;
     }
 
-    if (!isValidMetrics(layer.metrics, PANEL_TYPES.TOP_N, layer.time_range_mode)) {
+    if (!isValidMetrics(series.metrics, PANEL_TYPES.TOP_N, series.time_range_mode)) {
       return null;
     }
 
-    const { indexPatternId } = await getDataSourceInfo(
+    const { indexPatternId, indexPattern } = await getDataSourceInfo(
       model.index_pattern,
       model.time_field,
-      Boolean(layer.override_index_pattern),
-      layer.series_index_pattern,
+      Boolean(series.override_index_pattern),
+      series.series_index_pattern,
+      series.series_time_field,
       dataViews
     );
 
-    const window =
-      model.time_range_mode === TIME_RANGE_DATA_MODES.LAST_VALUE
-        ? getWindow(model.interval, timeRange)
-        : undefined;
+    const window = getWindow(model, series, timeRange);
 
     // handle multiple metrics
-    const series = getSeries(layer.metrics, seriesNum, layer.split_mode, layer.color, window);
-    if (!series || !series.metrics) {
+    const metricsColumns = getMetricsColumns(series, indexPattern!, seriesNum, window);
+    if (!metricsColumns) {
       return null;
     }
 
-    const splitFields = getFieldsForTerms(layer.terms_field);
-
-    // in case of terms in a date field, we want to apply the date_histogram
-    const splitWithDateHistogram = await isSplitWithDateHistogram(
-      layer,
-      splitFields,
-      indexPatternId,
-      dataViews
-    );
-
-    if (splitWithDateHistogram === null) {
+    const bucketsColumns = getBucketsColumns(model, series, metricsColumns, indexPattern!, false);
+    if (bucketsColumns === null) {
       return null;
     }
 
-    layersConfiguration[layerIdx] = getLayerConfiguration(
+    const layerId = uuid();
+    extendedLayers[layerIdx] = {
       indexPatternId,
-      layerIdx,
-      'bar_horizontal',
-      model,
-      series,
-      {
-        splitFields,
-        splitWithDateHistogram,
-        window,
-      }
-    );
+      layerId,
+      columns: [...metricsColumns, ...bucketsColumns],
+      columnOrder: [],
+    };
   }
 
   return {
-    layers: layersConfiguration,
     type: 'lnsXY',
+    layers: excludeMetaFromLayers(extendedLayers),
     configuration: {
+      layers: getLayers(extendedLayers, model),
       fill: model.series[0].fill ?? 0.3,
       legend: {
         isVisible: Boolean(model.show_legend),
         showSingleSeries: Boolean(model.show_legend),
-        position: model.legend_position ?? 'right',
+        position: (model.legend_position as Position) ?? Position.Right,
         shouldTruncate: Boolean(model.truncate_legend),
         maxLines: model.max_lines_legend ?? 1,
       },
-      gridLinesVisibility: {
+      gridlinesVisibilitySettings: {
         x: false,
         yLeft: false,
         yRight: false,
       },
-      tickLabelsVisibility: {
+      tickLabelsVisibilitySettings: {
         x: true,
         yLeft: false,
         yRight: false,
       },
-      axisTitlesVisibility: {
+      axisTitlesVisibilitySettings: {
         x: false,
         yLeft: false,
         yRight: false,
       },
-      valueLabels: true,
+      valueLabels: 'show',
     },
   };
 };

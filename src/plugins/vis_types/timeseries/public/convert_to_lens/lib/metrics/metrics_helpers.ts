@@ -12,47 +12,12 @@ import dateMath from '@kbn/datemath';
 import { TimeRange, UI_SETTINGS } from '@kbn/data-plugin/common';
 import { TimeScaleUnit } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { getUISettings } from '../../../services';
-import type { Metric, MetricType, Panel, Series } from '../../../../common/types';
+import type { Metric, Panel, Series } from '../../../../common/types';
 import { TIME_RANGE_DATA_MODES } from '../../../../common/enums';
 import { getFilterRatioFormula } from './filter_ratio_formula';
 import { getParentPipelineSeriesFormula } from './parent_pipeline_formula';
 import { getSiblingPipelineSeriesFormula } from './sibling_pipeline_formula';
 import { getFormulaFromMetric, SUPPORTED_METRICS } from './supported_metrics';
-
-export const getPercentilesSeries = (
-  percentiles: Metric['percentiles'],
-  splitMode: string,
-  layerColor: string,
-  fieldName?: string
-) => {
-  return percentiles?.map((percentile) => {
-    return {
-      agg: 'percentile',
-      isFullReference: false,
-      color: splitMode === 'everything' ? percentile.color : layerColor,
-      fieldName: fieldName ?? 'document',
-      params: { percentile: percentile.value },
-    };
-  });
-};
-
-export const getPercentileRankSeries = (
-  values: Metric['values'],
-  colors: Metric['colors'],
-  splitMode: string,
-  layerColor: string,
-  fieldName?: string
-) => {
-  return values?.map((value, index) => {
-    return {
-      agg: 'percentile_rank',
-      isFullReference: false,
-      color: splitMode === 'everything' ? colors?.[index] : layerColor,
-      fieldName: fieldName ?? 'document',
-      params: { value },
-    };
-  });
-};
 
 const shouldCalculateWindow = (timeRangeMode?: string) => {
   return timeRangeMode === TIME_RANGE_DATA_MODES.LAST_VALUE;
@@ -102,27 +67,8 @@ export const getTimeScale = (metric: Metric): TimeScaleUnit | undefined => {
   return timeScale;
 };
 
-export const getFormulaSeries = (script: string) => {
-  return [
-    {
-      agg: 'formula',
-      isFullReference: true,
-      fieldName: 'document',
-      params: { formula: script },
-    },
-  ];
-};
-
 export const addTimeRangeToFormula = (window?: string) => {
   return window ? `, timeRange='${window}'` : '';
-};
-
-export const getPipelineAgg = (agg: MetricType) => {
-  const pipelineAggMap = SUPPORTED_METRICS[agg];
-  if (!pipelineAggMap) {
-    return null;
-  }
-  return pipelineAggMap;
 };
 
 export const getFormulaEquivalent = (
@@ -166,7 +112,7 @@ export const getFormulaEquivalent = (
       if (!subFunctionMetric) {
         return null;
       }
-      const pipelineAgg = getPipelineAgg(subFunctionMetric.type);
+      const pipelineAgg = SUPPORTED_METRICS[subFunctionMetric.type];
       if (!pipelineAgg) {
         return null;
       }
