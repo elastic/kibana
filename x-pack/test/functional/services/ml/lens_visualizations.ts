@@ -7,16 +7,23 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { MlCommonUI } from './common_ui';
 
-export function MachineLearningLensVisualizationsProvider({ getService }: FtrProviderContext) {
+export function MachineLearningLensVisualizationsProvider(
+  { getService }: FtrProviderContext,
+  mlCommonUI: MlCommonUI
+) {
   const testSubjects = getService('testSubjects');
 
   return {
     async clickCreateMLJobMenuAction() {
       await testSubjects.click('embeddablePanelAction-create-ml-ad-job-action');
     },
-    async clickCreateJobFromLayer(layerIndex: number) {
-      await testSubjects.click(`mlLensLayerCompatibleButton_${layerIndex}`);
+    async clickCreateJob(layerIndex: number) {
+      await testSubjects.clickWhenNotDisabled(`mlLensLayerCreateJobButton_${layerIndex}`);
+    },
+    async clickCreateJobFromLayerWithWizard(layerIndex: number) {
+      await testSubjects.click(`mlLensLayerCreateWithWizardButton_${layerIndex}`);
     },
     async assertLensLayerSelectorExists() {
       await testSubjects.existOrFail('mlFlyoutLensLayerSelector');
@@ -37,6 +44,38 @@ export function MachineLearningLensVisualizationsProvider({ getService }: FtrPro
         numberOfIncompatibleLayers,
         `Expected number of compatible layers to be ${numberOfIncompatibleLayers} (got '${incompatibleLayers.length}')`
       );
+    },
+    async assertJobIdValue(expectedValue: string, layerIndex: number) {
+      const actualJobId = await testSubjects.getAttribute(
+        `mlLensLayerJobIdInput_${layerIndex}`,
+        'value'
+      );
+      expect(actualJobId).to.eql(
+        expectedValue,
+        `Expected job id value to be '${expectedValue}' (got '${actualJobId}')`
+      );
+    },
+
+    async setJobId(jobId: string, layerIndex: number) {
+      await mlCommonUI.setValueWithChecks(`mlLensLayerJobIdInput_${layerIndex}`, jobId, {
+        clearWithKeyboard: true,
+      });
+      await this.assertJobIdValue(jobId, layerIndex);
+    },
+
+    async assertJobHasBeenCreated(layerIndex: number) {
+      await testSubjects.existOrFail(`mlLensLayerCompatible.jobCreated.success_${layerIndex}`, {
+        timeout: 60 * 1000,
+      });
+    },
+    async clickViewResults(layerIndex: number) {
+      await testSubjects.click(`mlLensLayerResultsButton_${layerIndex}`);
+    },
+    async singleMetricViewerPageLoaded() {
+      await testSubjects.existOrFail('~mlPageSingleMetricViewer');
+    },
+    async anomalyExplorerPageLoaded() {
+      await testSubjects.existOrFail('~mlPageAnomalyExplorer');
     },
   };
 }
