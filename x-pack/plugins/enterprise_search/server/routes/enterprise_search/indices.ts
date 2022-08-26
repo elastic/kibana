@@ -22,6 +22,7 @@ import { RouteDependencies } from '../../plugin';
 import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 import { isIndexNotFoundException } from '../../utils/identify_exceptions';
+import {createIndexPipelineDefinitions} from "@kbn/enterprise-search-plugin/server/utils/create_pipeline_definitions";
 
 export function registerIndexRoutes({ router, log }: RouteDependencies) {
   router.get(
@@ -226,6 +227,28 @@ export function registerIndexRoutes({ router, log }: RouteDependencies) {
 
       return response.ok({
         body: apiKey,
+        headers: { 'content-type': 'application/json' },
+      });
+    })
+  );
+
+  router.post(
+    {
+      path: '/internal/enterprise_search/indices/{indexName}/pipelines',
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const indexName = decodeURIComponent(request.params.indexName);
+      const { client } = (await context.core).elasticsearch;
+
+      const createResult = createIndexPipelineDefinitions(indexName, client.asCurrentUser);
+
+      return response.ok({
+        body: createResult,
         headers: { 'content-type': 'application/json' },
       });
     })
