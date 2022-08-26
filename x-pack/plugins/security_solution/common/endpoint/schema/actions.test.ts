@@ -157,6 +157,16 @@ describe('actions schemas', () => {
         });
       }).not.toThrow();
     });
+
+    it('should work with `showHostsInfo` query param', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({
+          startDate: 'now-1d', // yesterday
+          endDate: 'now', // today
+          showHostsInfo: true,
+        });
+      }).not.toThrow();
+    });
   });
 
   describe('NoParametersRequestSchema', () => {
