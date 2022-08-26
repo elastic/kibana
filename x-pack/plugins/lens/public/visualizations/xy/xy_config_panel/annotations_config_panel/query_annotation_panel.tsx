@@ -102,6 +102,7 @@ export const ConfigPanelQueryAnnotation = ({
           onChange={function (input: Query): void {
             onChange({ query: input });
           }}
+          disableAutoFocus
           indexPatternTitle={frame.dataViews.indexPatterns[layer.indexPatternId].title}
           isInvalid={false}
           onSubmit={() => {}}
