@@ -73,7 +73,7 @@ export const HostsContent: React.FunctionComponent = () => {
           height="100vh"
           width="auto"
           text={i18n.translate('xpack.infra.waffle.loadingDataText', {
-            defaultMessage: 'Loading Data View',
+            defaultMessage: 'Loading data',
           })}
         />
       )}
