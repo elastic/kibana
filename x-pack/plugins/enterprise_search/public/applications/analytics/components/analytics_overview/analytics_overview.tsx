@@ -5,20 +5,113 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
-import {
-  EuiPageTemplate,
-} from '@elastic/eui';
+import { useActions, useValues } from 'kea';
 
-import { SetAnalyticsChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
+import { EuiButtonTo } from '../../../shared/react_router_helpers';
+import { COLLECTION_CREATION_PATH } from '../../routes';
+
+import { EnterpriseSearchAnalyticsPageTemplate } from '../layout';
+
+import { AnalyticsCollectionTable } from './analytics_collection_table';
+import { AnalyticsCollectionsLogic } from './analytics_collections_logic';
+
+export const baseBreadcrumbs = [
+  i18n.translate('xpack.enterpriseSearch.analytics.collections.breadcrumb', {
+    defaultMessage: 'Analytics Collections',
+  }),
+];
 
 export const AnalyticsOverview: React.FC = () => {
+  const { fetchAnalyticsCollections, setIsFirstRequest } = useActions(AnalyticsCollectionsLogic);
+  const { analyticsCollections, isLoading, hasNoAnalyticsCollections } =
+    useValues(AnalyticsCollectionsLogic);
+
+  useEffect(() => {
+    setIsFirstRequest();
+    fetchAnalyticsCollections();
+  }, []);
+
   return (
-    <EuiPageTemplate>
-      <SetPageChrome />
-      <h1>Analytics!</h1>
-      <p>📈 Like numbers but very business</p>
-    </EuiPageTemplate>
+    <EnterpriseSearchAnalyticsPageTemplate
+      pageChrome={baseBreadcrumbs}
+      restrictWidth
+      isLoading={isLoading}
+      pageViewTelemetry="Analytics Collections Overview"
+      pageHeader={{
+        description: i18n.translate(
+          'xpack.enterpriseSearch.analytics.collections.pageDescription',
+          {
+            defaultMessage:
+              'Dashboards and tools for visualizing end-user behavior and measuring the performance of your search applications. Track trends over time, identify and investigate anomalies, and make optimizations.',
+          }
+        ),
+        pageTitle: i18n.translate('xpack.enterpriseSearch.analytics.collections.pageTitle', {
+          defaultMessage: 'Behaviorial Analytics',
+        }),
+      }}
+    >
+      {!hasNoAnalyticsCollections && (
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiTitle>
+              <h2>
+                {i18n.translate('xpack.enterpriseSearch.analytics.collections.headingTitle', {
+                  defaultMessage: 'Collections',
+                })}
+              </h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonTo fill iconType="plusInCircle" to={COLLECTION_CREATION_PATH}>
+              {i18n.translate('xpack.enterpriseSearch.analytics.collections.create.buttonTitle', {
+                defaultMessage: 'Create new collection',
+              })}
+            </EuiButtonTo>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+
+      <EuiSpacer size="l" />
+      {hasNoAnalyticsCollections ? (
+        <EuiEmptyPrompt
+          iconType="search"
+          title={
+            <h2>
+              {i18n.translate(
+                'xpack.enterpriseSearch.analytics.collections.emptyState.headingTitle',
+                {
+                  defaultMessage: 'You dont have any collections yet',
+                }
+              )}
+            </h2>
+          }
+          body={
+            <p>
+              {i18n.translate(
+                'xpack.enterpriseSearch.analytics.collections.emptyState.subHeading',
+                {
+                  defaultMessage:
+                    'An analytics collection provides a place to store the analytics events for any given search application you are building. Create a new collection to get started.',
+                }
+              )}
+            </p>
+          }
+          actions={[
+            <EuiButtonTo fill iconType="plusInCircle" to={COLLECTION_CREATION_PATH}>
+              {i18n.translate('xpack.enterpriseSearch.analytics.collections.create.buttonTitle', {
+                defaultMessage: 'Create new collection',
+              })}
+            </EuiButtonTo>,
+          ]}
+        />
+      ) : (
+        <AnalyticsCollectionTable collections={analyticsCollections} isLoading={isLoading} />
+      )}
+    </EnterpriseSearchAnalyticsPageTemplate>
   );
 };

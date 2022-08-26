@@ -10,22 +10,22 @@ import { kea, MakeLogicType } from 'kea';
 import { AnalyticsCollection } from '../../../../../common/types/analytics';
 import { HttpError, Status } from '../../../../../common/types/api';
 import { flashAPIErrors, clearFlashMessages } from '../../../shared/flash_messages';
-import { FetchAnalyticsCollectionsAPILogic } from '../../api/index/fetch_analytics_collections_api_logic';
+import { fetchAnalyticsCollectionsAPILogic } from '../../api/index/fetch_analytics_collections_api_logic';
 
 export interface AnalyticsCollectionsActions {
   apiError(error: HttpError): HttpError;
   apiSuccess(collections: AnalyticsCollection[]): AnalyticsCollection[];
   fetchAnalyticsCollections(): void;
-  makeRequest: typeof FetchAnalyticsCollectionsAPILogic.actions.makeRequest;
+  makeRequest: typeof fetchAnalyticsCollectionsAPILogic.actions.makeRequest;
   setIsFirstRequest(): void;
 }
 export interface AnalyticsCollectionsValues {
   analyticsCollections: AnalyticsCollection[];
-  data: typeof FetchAnalyticsCollectionsAPILogic.values.data;
+  data: typeof fetchAnalyticsCollectionsAPILogic.values.data;
   hasNoAnalyticsCollections: boolean;
   isFirstRequest: boolean;
   isLoading: boolean;
-  status: typeof FetchAnalyticsCollectionsAPILogic.values.status;
+  status: typeof fetchAnalyticsCollectionsAPILogic.values.status;
 }
 
 export const AnalyticsCollectionsLogic = kea<
@@ -36,8 +36,8 @@ export const AnalyticsCollectionsLogic = kea<
     setIsFirstRequest: true,
   },
   connect: {
-    actions: [FetchAnalyticsCollectionsAPILogic, ['makeRequest', 'apiSuccess', 'apiError']],
-    values: [FetchAnalyticsCollectionsAPILogic, ['data', 'status']],
+    actions: [fetchAnalyticsCollectionsAPILogic, ['makeRequest', 'apiSuccess', 'apiError']],
+    values: [fetchAnalyticsCollectionsAPILogic, ['data', 'status']],
   },
   listeners: ({ actions }) => ({
     apiError: (e) => flashAPIErrors(e),
@@ -58,7 +58,7 @@ export const AnalyticsCollectionsLogic = kea<
     ],
   }),
   selectors: ({ selectors }) => ({
-    analyticsCollections: [() => [selectors.data], (data) => data],
+    analyticsCollections: [() => [selectors.data], (data) => data || []],
     hasNoAnalyticsCollections: [() => [selectors.data], (data) => data?.length === 0],
     isLoading: [
       () => [selectors.status, selectors.isFirstRequest],

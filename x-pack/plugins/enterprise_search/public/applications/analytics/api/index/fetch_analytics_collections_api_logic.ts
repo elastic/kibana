@@ -18,7 +18,7 @@ export const fetchAnalyticsCollections = async () => {
   return response;
 };
 
-export const FetchAnalyticsCollectionsAPILogic = createApiLogic(
+export const fetchAnalyticsCollectionsAPILogic = createApiLogic(
   ['analytics', 'analytics_collections_api_logic'],
   fetchAnalyticsCollections
 );

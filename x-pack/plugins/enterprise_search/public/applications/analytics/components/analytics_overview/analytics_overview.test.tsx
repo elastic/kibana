@@ -5,20 +5,66 @@
  * 2.0.
  */
 
+import '../../../__mocks__/shallow_useeffect.mock';
+
+import { setMockValues, setMockActions } from '../../../__mocks__/kea_logic';
+
 import React from 'react';
 
-import { shallow, ShallowWrapper } from 'enzyme';
+import { shallow } from 'enzyme';
 
-import { AnalyicsOverview } from '.';
+import { AnalyticsCollection } from '../../../../../common/types/analytics';
 
-describe('Analytics overview component', () => {
-  let wrapper: ShallowWrapper;
+import { AnalyticsCollectionTable } from './analytics_collection_table';
 
-  const setup = (param: string) => {
-    Object.defineProperty(window, 'location', {
-      value: { search: param },
-      writable: true,
+import { AnalyticsOverview } from '.';
+
+const mockValues = {
+  analyticsCollections: [
+    {
+      event_retention_day_length: 180,
+      id: '1',
+      name: 'Analytics Collection 1',
+    },
+  ] as AnalyticsCollection[],
+  hasNoAnalyticsCollections: false,
+};
+
+const mockActions = {
+  fetchAnalyticsCollections: jest.fn(),
+  setIsFirstRequest: jest.fn(),
+};
+
+describe('AnalyticsOverview', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe('empty state', () => {
+    it('renders when analytics collections are empty on inital query', () => {
+      setMockValues({
+        ...mockValues,
+        analyticsCollections: [],
+        hasNoAnalyticsCollections: true,
+      });
+      setMockActions(mockActions);
+      const wrapper = shallow(<AnalyticsOverview />);
+
+      expect(mockActions.fetchAnalyticsCollections).toHaveBeenCalled();
+      expect(mockActions.setIsFirstRequest).toHaveBeenCalled();
+
+      expect(wrapper.find(AnalyticsCollectionTable)).toHaveLength(0);
     });
-    wrapper = shallow(<AnalyicsOverview />);
-  };
+
+    it('renders with Data', async () => {
+      setMockValues(mockValues);
+      setMockActions(mockActions);
+
+      const wrapper = shallow(<AnalyticsOverview />);
+
+      expect(wrapper.find(AnalyticsCollectionTable)).toHaveLength(1);
+      expect(mockActions.fetchAnalyticsCollections).toHaveBeenCalled();
+      expect(mockActions.setIsFirstRequest).toHaveBeenCalled();
+    });
+  });
 });

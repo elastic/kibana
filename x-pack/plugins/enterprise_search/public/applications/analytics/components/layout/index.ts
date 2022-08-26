@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { useEnterpriseSearchAnalyticsNav } from './nav';
 export { EnterpriseSearchAnalyticsPageTemplate } from './page_template';
