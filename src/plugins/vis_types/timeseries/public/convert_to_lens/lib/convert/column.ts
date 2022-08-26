@@ -47,7 +47,7 @@ export const getFormat = (
     const id = formatter.type.id;
     return { format: { id } };
   }
-  return { format: { id: series.formatter } }; // TODO: fix this formatter later, after investigation...
+  return { format: { id: series.formatter } };
 };
 
 export const createColumn = (
