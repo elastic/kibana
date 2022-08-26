@@ -141,7 +141,7 @@
               "\nList all file objects, of a given {@link FileKind}.\n"
             ],
             "signature": [
-              "(args: ",
+              "(args?: ",
               {
                 "pluginId": "files",
                 "scope": "common",
@@ -149,7 +149,7 @@
                 "section": "def-common.Pagination",
                 "text": "Pagination"
               },
-              ") => Promise<{ files: ",
+              " | undefined) => Promise<{ files: ",
               {
                 "pluginId": "files",
                 "scope": "common",
@@ -173,7 +173,7 @@
                   "- list files args"
                 ],
                 "signature": [
-                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"]"
+                  "(E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"]) | undefined"
                 ],
                 "path": "x-pack/plugins/files/public/types.ts",
                 "deprecated": false
@@ -280,7 +280,7 @@
               "\nStream the contents of the file to Kibana server for storage.\n"
             ],
             "signature": [
-              "(args: any) => Promise<{ ok: true; size: number; }>"
+              "(args: { body: unknown; } & { id: string; }) => Promise<{ ok: true; size: number; }>"
             ],
             "path": "x-pack/plugins/files/public/types.ts",
             "deprecated": false,
@@ -575,6 +575,53 @@
                 "deprecated": false
               }
             ]
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-public.FilesClient.getDownloadHref",
+            "type": "Function",
+            "tags": [],
+            "label": "getDownloadHref",
+            "description": [
+              "\nGet a string for downloading a file that can be passed to a button element's\nhref for download."
+            ],
+            "signature": [
+              "(file: ",
+              {
+                "pluginId": "files",
+                "scope": "common",
+                "docId": "kibFilesPluginApi",
+                "section": "def-common.FileJSON",
+                "text": "FileJSON"
+              },
+              "<unknown>) => string"
+            ],
+            "path": "x-pack/plugins/files/public/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "files",
+                "id": "def-public.FilesClient.getDownloadHref.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "file",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "files",
+                    "scope": "common",
+                    "docId": "kibFilesPluginApi",
+                    "section": "def-common.FileJSON",
+                    "text": "FileJSON"
+                  },
+                  "<unknown>"
+                ],
+                "path": "x-pack/plugins/files/public/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -637,8 +684,116 @@
       }
     ],
     "enums": [],
-    "misc": [],
-    "objects": []
+    "misc": [
+      {
+        "parentPluginId": "files",
+        "id": "def-public.FilesClientResponses",
+        "type": "Type",
+        "tags": [],
+        "label": "FilesClientResponses",
+        "description": [],
+        "signature": [
+          "{ create: { file: ",
+          {
+            "pluginId": "files",
+            "scope": "common",
+            "docId": "kibFilesPluginApi",
+            "section": "def-common.FileJSON",
+            "text": "FileJSON"
+          },
+          "<unknown>; }; delete: { ok: true; }; getById: { file: ",
+          {
+            "pluginId": "files",
+            "scope": "common",
+            "docId": "kibFilesPluginApi",
+            "section": "def-common.FileJSON",
+            "text": "FileJSON"
+          },
+          "<unknown>; }; list: { files: ",
+          {
+            "pluginId": "files",
+            "scope": "common",
+            "docId": "kibFilesPluginApi",
+            "section": "def-common.FileJSON",
+            "text": "FileJSON"
+          },
+          "<unknown>[]; }; find: { files: ",
+          {
+            "pluginId": "files",
+            "scope": "common",
+            "docId": "kibFilesPluginApi",
+            "section": "def-common.FileJSON",
+            "text": "FileJSON"
+          },
+          "<unknown>[]; }; update: { file: ",
+          {
+            "pluginId": "files",
+            "scope": "common",
+            "docId": "kibFilesPluginApi",
+            "section": "def-common.FileJSON",
+            "text": "FileJSON"
+          },
+          "<unknown>; }; upload: { ok: true; size: number; }; download: any; share: ",
+          {
+            "pluginId": "files",
+            "scope": "common",
+            "docId": "kibFilesPluginApi",
+            "section": "def-common.FileShareJSON",
+            "text": "FileShareJSON"
+          },
+          " & { token: string; }; unshare: { ok: true; }; getShare: { share: ",
+          {
+            "pluginId": "files",
+            "scope": "common",
+            "docId": "kibFilesPluginApi",
+            "section": "def-common.FileShareJSON",
+            "text": "FileShareJSON"
+          },
+          "; }; listShares: { shares: ",
+          {
+            "pluginId": "files",
+            "scope": "common",
+            "docId": "kibFilesPluginApi",
+            "section": "def-common.FileShareJSON",
+            "text": "FileShareJSON"
+          },
+          "[]; }; getMetrics: ",
+          {
+            "pluginId": "files",
+            "scope": "common",
+            "docId": "kibFilesPluginApi",
+            "section": "def-common.FilesMetrics",
+            "text": "FilesMetrics"
+          },
+          "; publicDownload: any; getDownloadHref: string; }"
+        ],
+        "path": "x-pack/plugins/files/public/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [],
+    "start": {
+      "parentPluginId": "files",
+      "id": "def-public.FilesStart",
+      "type": "Type",
+      "tags": [],
+      "label": "FilesStart",
+      "description": [],
+      "signature": [
+        {
+          "pluginId": "files",
+          "scope": "public",
+          "docId": "kibFilesPluginApi",
+          "section": "def-public.FilesSetup",
+          "text": "FilesSetup"
+        }
+      ],
+      "path": "x-pack/plugins/files/public/plugin.ts",
+      "deprecated": false,
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
   },
   "server": {
     "classes": [],
@@ -5349,10 +5504,12 @@
             "parentPluginId": "files",
             "id": "def-common.FileKind.maxSizeBytes",
             "type": "number",
-            "tags": [],
+            "tags": [
+              "default"
+            ],
             "label": "maxSizeBytes",
             "description": [
-              "\nMaximum size, in bytes, a file of this kind can be."
+              "\nMaximum size, in bytes, a file of this kind can be.\n"
             ],
             "signature": [
               "number | undefined"
@@ -5403,10 +5560,12 @@
             "parentPluginId": "files",
             "id": "def-common.FileKind.http",
             "type": "Object",
-            "tags": [],
+            "tags": [
+              "note"
+            ],
             "label": "http",
             "description": [
-              "\nOptionally specify which HTTP routes to create for the file kind"
+              "\nSpecify which HTTP routes to create for the file kind.\n\nYou can always create your own HTTP routes for working with files but\nthis interface allows you to expose basic CRUD operations, upload, download\nand sharing of files over a RESTful-like interface.\n"
             ],
             "signature": [
               "{ create?: HttpEndpointDefinition | undefined; update?: HttpEndpointDefinition | undefined; delete?: HttpEndpointDefinition | undefined; getById?: HttpEndpointDefinition | undefined; list?: HttpEndpointDefinition | undefined; download?: HttpEndpointDefinition | undefined; share?: HttpEndpointDefinition | undefined; }"
