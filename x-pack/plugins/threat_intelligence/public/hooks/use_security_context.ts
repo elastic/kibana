@@ -7,9 +7,9 @@
 
 import { useContext } from 'react';
 import { SecuritySolutionContext } from '../containers/security_solution_context';
-import { ThreatIntelligenceSecuritySolutionContext } from '../types';
+import { SecuritySolutionPluginContext } from '../types';
 
-export const useSecurityContext = (): ThreatIntelligenceSecuritySolutionContext => {
+export const useSecurityContext = (): SecuritySolutionPluginContext => {
   const contextValue = useContext(SecuritySolutionContext);
 
   if (!contextValue) {
