@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { capabilitiesServiceMock } from './test_helpers/capabilities_service.mock';
+import { capabilitiesServiceMock } from '@kbn/core-capabilities-browser-mocks';
 
 export const MockCapabilitiesService = capabilitiesServiceMock.create();
 export const CapabilitiesServiceConstructor = jest
   .fn()
   .mockImplementation(() => MockCapabilitiesService);
-jest.doMock('./capabilities', () => ({
+jest.doMock('@kbn/core-capabilities-browser-internal', () => ({
   CapabilitiesService: CapabilitiesServiceConstructor,
 }));
 

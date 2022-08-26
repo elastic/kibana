@@ -11,10 +11,10 @@ import { BehaviorSubject } from 'rxjs';
 import { createMemoryHistory, History, createHashHistory } from 'history';
 
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
-import { AppRouter, AppNotFound } from '../ui';
-import { MockedMounterMap, MockedMounterTuple } from '../test_types';
+import { AppStatus } from '@kbn/core-application-browser';
+import { AppRouter, AppNotFound } from '../src/ui';
+import { MockedMounterMap, MockedMounterTuple } from '../src/test_helpers/test_types';
 import { createRenderer, createAppMounter, getUnmounter } from './utils';
-import { AppStatus } from '../types';
 
 describe('AppRouter', () => {
   let mounters: MockedMounterMap;

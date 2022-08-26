@@ -13,12 +13,12 @@ import { createMemoryHistory, MemoryHistory } from 'history';
 
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
-import { createRenderer } from './utils';
-import { ApplicationService } from '../application_service';
-import type { MockLifecycle } from '../test_types';
+import type { AppMountParameters, AppUpdater } from '@kbn/core-application-browser';
 import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
-import type { AppMountParameters, AppUpdater } from '../types';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
+import type { MockLifecycle } from '../src/test_helpers/test_types';
+import { ApplicationService } from '../src/application_service';
+import { createRenderer } from './utils';
 
 const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 
