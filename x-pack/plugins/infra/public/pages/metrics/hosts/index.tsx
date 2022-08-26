@@ -62,7 +62,7 @@ export const HostsPage = () => {
               pageHeader={{
                 pageTitle: hostsTitle,
               }}
-              pageBodyProps={{
+              pageSectionProps={{
                 paddingSize: 'none',
               }}
             >
