@@ -92,17 +92,7 @@ export const fetchIndices = async (
     const itemsToInclude = getAlwaysShowAliases(indexNamesAlreadyIncluded, alwaysShowMatchNames)
       .map(getIndexDataMapper(totalIndexData))
       .flatMap(({ name, aliases, ...indexData }) => {
-        const indicesAndAliases = aliases
-          .filter((alias) => alias.startsWith(alwaysShowSearchPattern))
-          .map((alias) => ({
-            alias: true,
-            count: indexCounts[alias] ?? 0,
-            name: alias,
-            privileges: { manage: false, read: false, ...indexPrivileges[name] },
-            ...indexData,
-          }));
-
-        return indicesAndAliases;
+        return expandAliases(name, aliases, indexData, totalIndexData, alwaysShowSearchPattern);
       });
 
     indicesData = [...indicesData, ...itemsToInclude];

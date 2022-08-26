@@ -7,10 +7,7 @@
 
 import { SecurityHasPrivilegesPrivileges } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import {
-  ElasticsearchIndex,
-  ElasticsearchIndexWithPrivileges,
-} from '../../../../common/types/indices';
+import { ElasticsearchIndex } from '../../../../common/types/indices';
 
 export const getAlwaysShowAliases = (indexAndAliasNames: string[], alwaysShowNames: string[]) => {
   if (alwaysShowNames.length === 0) return [];
@@ -25,18 +22,17 @@ export const expandAliases = (
   indicesData: {
     indexCounts: Record<string, number>;
     indexPrivileges: Record<string, SecurityHasPrivilegesPrivileges>;
-  }
+  },
+  alwaysShowSearchPattern?: 'search-'
 ) => {
-  const expandedAliases = [] as ElasticsearchIndexWithPrivileges[];
-
-  aliases.forEach((alias) => {
-    expandedAliases.push({
-      ...index,
-      alias: true,
-      count: indicesData.indexCounts[alias] ?? 0,
-      name: alias,
-      privileges: { manage: false, read: false, ...indicesData.indexPrivileges[indexName] },
-    });
-  });
-  return expandedAliases;
+  const filteredAliases = alwaysShowSearchPattern
+    ? aliases.filter((alias) => alias.startsWith(alwaysShowSearchPattern))
+    : aliases;
+  return filteredAliases.map((alias) => ({
+    alias: true,
+    count: indicesData.indexCounts[alias] ?? 0,
+    name: alias,
+    privileges: { manage: false, read: false, ...indicesData.indexPrivileges[indexName] },
+    ...index,
+  }));
 };
