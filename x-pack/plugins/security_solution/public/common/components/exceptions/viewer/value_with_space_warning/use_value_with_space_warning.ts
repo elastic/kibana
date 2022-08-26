@@ -11,13 +11,17 @@ interface UseValueWithSpaceWarningResult {
   showSpaceWarningIcon: boolean;
   warningText: string;
 }
+interface UseValueWithSpaceWarningProps {
+  value: string | string[];
+  tooltipIconText?: string;
+}
 
-export const useValueWithSpaceWarning = (
-  value: string | string[],
-  tooltipIconText?: string
-): UseValueWithSpaceWarningResult => {
+export const useValueWithSpaceWarning = ({
+  value,
+  tooltipIconText,
+}: UseValueWithSpaceWarningProps): UseValueWithSpaceWarningResult => {
   const showSpaceWarningIcon = Array.isArray(value)
-    ? value.find((v) => paramContainsSpace(v))
+    ? value.find(paramContainsSpace)
     : paramContainsSpace(value);
 
   return {
