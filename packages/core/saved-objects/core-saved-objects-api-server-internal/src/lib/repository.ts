@@ -9,6 +9,7 @@
 import { omit, isObject } from 'lodash';
 import type { Payload } from '@hapi/boom';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { BulkResponseItem, ErrorCause } from '@elastic/elasticsearch/lib/api/types';
 import * as esKuery from '@kbn/es-query';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
@@ -54,6 +55,9 @@ import type {
   SavedObjectsClosePointInTimeOptions,
   SavedObjectsCreatePointInTimeFinderOptions,
   SavedObjectsFindOptions,
+  SavedObjectsBulkDeleteObject,
+  SavedObjectsBulkDeleteOptions,
+  SavedObjectsBulkDeleteResponse,
 } from '@kbn/core-saved-objects-api-server';
 import type {
   SavedObjectSanitizedDoc,
@@ -760,6 +764,245 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
         response: { body, statusCode },
       })}`
     );
+  }
+
+  /**
+   *  {@inheritDoc ISvedObjectsRepository.bulkDelete}
+   */
+  async bulkDelete(
+    objects: SavedObjectsBulkDeleteObject[],
+    options: SavedObjectsBulkDeleteOptions
+  ): Promise<SavedObjectsBulkDeleteResponse> {
+    const { refresh = DEFAULT_REFRESH_SETTING, force } = options;
+    const namespace = normalizeNamespace(options.namespace);
+    let bulkGetRequestIndexCounter = 0;
+    // TODO: move to internal types
+    type ExpectedBulkGetResult = Either<
+      { type: string; id: string; error: Payload },
+      { type: string; id: string; version?: string; esRequestIndex?: number }
+    >;
+    const expectedBulkGetResults = objects.map<ExpectedBulkGetResult>((object) => {
+      const { type, id } = object;
+      if (!this._allowedTypes.includes(type)) {
+        return {
+          tag: 'Left',
+          value: {
+            id,
+            type,
+            error: errorContent(SavedObjectsErrorHelpers.createUnsupportedTypeError(type)),
+          },
+        };
+      }
+      const requiresNamespacesCheck = this._registry.isMultiNamespace(type);
+      return {
+        tag: 'Right',
+        value: {
+          type,
+          id,
+          ...(requiresNamespacesCheck && { esRequestIndex: bulkGetRequestIndexCounter++ }),
+        },
+      };
+    });
+
+    // get multi-namespace saved objects.
+    const bulkGetDocs = expectedBulkGetResults
+      .filter(isRight)
+      .filter(({ value }) => value.esRequestIndex !== undefined)
+      .map(({ value: { type, id } }) => ({
+        _id: this._serializer.generateRawId(namespace, type, id),
+        _index: this.getIndexForType(type),
+        _source: ['type', 'namespaces'],
+      }));
+
+    const bulkGetResponse = bulkGetDocs.length
+      ? await this.client.mget({ body: { docs: bulkGetDocs } }, { ignore: [404], meta: true })
+      : undefined;
+    // fail fast if we can't verify a 404 response is from Elasticsearch
+    if (
+      bulkGetResponse &&
+      isNotFoundFromUnsupportedServer({
+        statusCode: bulkGetResponse.statusCode,
+        headers: bulkGetResponse.headers,
+      })
+    ) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
+    }
+    // TODO: move to internal types
+    interface BulkDeleteParams {
+      delete: BulkDeleteParamsItem;
+    }
+    // TODO: move to internal types
+    interface BulkDeleteParamsItem {
+      if_seq_no?: number;
+      if_primary_term?: number;
+      _id: string;
+      _index: string;
+    }
+    // TODO: move to internal types
+    type ExpectedBulkDeleteResult = Either<
+      { type: string; id: string; error: Payload },
+      {
+        type: string;
+        id: string;
+        namespaces: string[];
+        esRequestIndex: number;
+      }
+    >;
+
+    let bulkDeleteRequestIndexCounter = 0;
+    const bulkDeleteParams: BulkDeleteParams[] = [];
+
+    const expectedBulkDeleteResults = await Promise.all(
+      expectedBulkGetResults.map<Promise<ExpectedBulkDeleteResult>>(
+        async (expectedBulkGetResult) => {
+          if (isLeft(expectedBulkGetResult)) {
+            return { ...expectedBulkGetResult };
+          }
+          const { esRequestIndex, id, type, version } = expectedBulkGetResult.value;
+
+          let namespaces;
+          let versionProperties;
+
+          if (esRequestIndex !== undefined) {
+            const indexFound = bulkGetResponse?.statusCode !== 404;
+
+            const actualResult = indexFound
+              ? bulkGetResponse?.body.docs[esRequestIndex]
+              : undefined;
+
+            const docFound = indexFound && isMgetDoc(actualResult) && actualResult.found;
+
+            if (!docFound) {
+              return {
+                tag: 'Left',
+                value: {
+                  id,
+                  type,
+                  error: errorContent(
+                    SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)
+                  ),
+                },
+              };
+            }
+            if (
+              // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
+              !this.rawDocExistsInNamespace(actualResult, namespace) &&
+              !force
+            ) {
+              // the document exists but not in the namespace for this client. Deleting the doc is still possible but one needs to force the action.
+              return {
+                tag: 'Left',
+                value: {
+                  success: false,
+                  id,
+                  type,
+                  error: errorContent(
+                    SavedObjectsErrorHelpers.createBadRequestError(
+                      `Unable to delete saved object id: ${id}, type: ${type} that exists in multiple namespaces, use the "force" option to delete all saved objects`
+                    )
+                  ),
+                },
+              };
+            }
+            // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
+            namespaces = actualResult!._source.namespaces ?? [
+              // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
+              SavedObjectsUtils.namespaceIdToString(actualResult!._source.namespace),
+            ];
+            versionProperties = getExpectedVersionProperties(version);
+          } else {
+            if (this._registry.isSingleNamespace(type)) {
+              namespaces = [SavedObjectsUtils.namespaceIdToString(namespace)];
+            }
+            versionProperties = getExpectedVersionProperties(version);
+          }
+
+          const expectedResult = {
+            type,
+            id,
+            namespaces,
+            esRequestIndex: bulkDeleteRequestIndexCounter++,
+          };
+
+          bulkDeleteParams.push({
+            delete: {
+              _id: this._serializer.generateRawId(namespace, type, id),
+              _index: this.getIndexForType(type),
+              ...versionProperties,
+            },
+          });
+
+          return { tag: 'Right', value: expectedResult };
+        }
+      )
+    );
+
+    const bulkDeleteResponse = bulkDeleteParams.length
+      ? await this.client.bulk({
+          refresh,
+          body: bulkDeleteParams,
+          _source_includes: ['originId'],
+          require_alias: true,
+        })
+      : undefined;
+
+    // extracted to ensure consistency in the error results returned
+    let errorResult: { success: boolean; type: string; id: string; error: Payload };
+
+    const savedObjects = await Promise.all(
+      expectedBulkDeleteResults.map(async (expectedResult) => {
+        if (isLeft(expectedResult)) {
+          errorResult = { ...expectedResult.value, success: false };
+          return errorResult;
+        }
+        const { type, id, namespaces, esRequestIndex } = expectedResult.value;
+
+        // TODO: move to internal types
+        type NewBulkItemResponse = BulkResponseItem & { error: ErrorCause & { index: string } };
+
+        // we assume this wouldn't happen but is needed to circumvent type issues
+        if (bulkDeleteResponse === undefined) throw new Error();
+
+        const rawResponse = Object.values(
+          bulkDeleteResponse.items[esRequestIndex]
+        )[0] as NewBulkItemResponse;
+
+        const error = getBulkOperationError(type, id, rawResponse);
+        if (error) {
+          errorResult = { success: false, type, id, error };
+          return errorResult;
+        }
+        const deleted = rawResponse.result === 'deleted';
+        if (deleted) {
+          if (namespaces) {
+            await deleteLegacyUrlAliases({
+              mappings: this._mappings,
+              registry: this._registry,
+              client: this.client,
+              getIndexForType: this.getIndexForType.bind(this),
+              type,
+              id,
+              ...(namespaces.includes(ALL_NAMESPACES_STRING)
+                ? { namespaces: [], deleteBehavior: 'exclusive' } // delete legacy URL aliases for this type/ID for all spaces
+                : { namespaces, deleteBehavior: 'inclusive' }), // delete legacy URL aliases for this type/ID for these specific spaces
+            }).catch((err) => {
+              // The object has already been deleted, but we caught an error when attempting to delete aliases.
+              // A consumer cannot attempt to delete the object again, so just log the error and swallow it.
+              this._logger.error(
+                `Unable to delete aliases when deleting an object: ${err.message}`
+              );
+            });
+          }
+        }
+        const successfulResult = {
+          success: true,
+          id,
+          type,
+        };
+        return successfulResult;
+      })
+    );
+    return { statuses: [...savedObjects] };
   }
 
   /**

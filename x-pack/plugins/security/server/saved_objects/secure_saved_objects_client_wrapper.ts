@@ -9,6 +9,9 @@ import type {
   SavedObjectReferenceWithContext,
   SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
+  SavedObjectsBulkDeleteObject,
+  SavedObjectsBulkDeleteOptions,
+  SavedObjectsBulkDeleteResponse,
   SavedObjectsBulkGetObject,
   SavedObjectsBulkResolveObject,
   SavedObjectsBulkUpdateObject,
@@ -222,6 +225,14 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     );
 
     return await this.baseClient.delete(type, id, options);
+  }
+
+  // TODO: Implement
+  public async bulkDelete(
+    objects: SavedObjectsBulkDeleteObject[],
+    options?: SavedObjectsBulkDeleteOptions
+  ): Promise<SavedObjectsBulkDeleteResponse> {
+    throw new Error('Method not implemented.');
   }
 
   public async find<T = unknown, A = unknown>(options: SavedObjectsFindOptions) {
