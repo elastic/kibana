@@ -360,7 +360,8 @@ export function createConfig(
       if (!enabled) {
         delete providerGroup![name];
       } else {
-        const hasAccessAgreement: boolean = hasProviderSpecificAccessAgreement || hasGlobalAccessAgreement;
+        const hasAccessAgreement: boolean =
+          hasProviderSpecificAccessAgreement || hasGlobalAccessAgreement;
 
         sortedProviders.push({
           type: type as any,
