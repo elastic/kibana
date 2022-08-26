@@ -14,7 +14,7 @@ import {
   createUserRiskEnrichments,
   getIsUserRiskScoreAvailable,
 } from './enrichment_by_type/user_risk';
-import type { EnrichEventsFunction } from './types';
+import type { EnrichEventsFunction, EventsMapByEnrichments } from './types';
 import { applyEnrichmentsToEvents } from './utils/trasnforms';
 
 export const enrichEvents: EnrichEventsFunction = async ({ services, logger, events, spaceId }) => {
@@ -36,7 +36,7 @@ export const enrichEvents: EnrichEventsFunction = async ({ services, logger, eve
     );
   }
 
-  if (isUserRiskScoreIndexExist) {
+  if (true || isUserRiskScoreIndexExist) {
     enrichments.push(
       createUserRiskEnrichments({
         services,
@@ -47,7 +47,11 @@ export const enrichEvents: EnrichEventsFunction = async ({ services, logger, eve
     );
   }
 
-  const allEnrichmentsResults = await Promise.all(enrichments);
+  const allEnrichmentsResults = await Promise.allSettled(enrichments);
 
-  return applyEnrichmentsToEvents(events, allEnrichmentsResults);
+  const allFulfilledEnrichmentsResults = allEnrichmentsResults
+    .filter(result => result.status === "fulfilled")
+    .map((result)  => (result as  PromiseFulfilledResult<EventsMapByEnrichments>)?.value) 
+
+  return applyEnrichmentsToEvents(events, allFulfilledEnrichmentsResults);
 };
