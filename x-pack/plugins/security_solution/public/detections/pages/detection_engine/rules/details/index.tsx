@@ -20,7 +20,7 @@ import {
 import { i18n as i18nTranslate } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { noop } from 'lodash/fp';
+import { noop, omit } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import type { ConnectedProps } from 'react-redux';
@@ -46,6 +46,7 @@ import {
   getEditRuleUrl,
   getRulesUrl,
   getDetectionEngineUrl,
+  getRuleDetailsTabUrl,
 } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import { SiemSearchBar } from '../../../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../../../common/components/page_wrapper';
@@ -125,6 +126,7 @@ import {
 } from '../../../../components/alerts_table/alerts_filter_group';
 import { useSignalHelpers } from '../../../../../common/containers/sourcerer/use_signal_helpers';
 import { HeaderPage } from '../../../../../common/components/header_page';
+import type { NavTab } from '../../../../../common/components/navigation/types';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -234,40 +236,36 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const isLoading = ruleLoading && rule == null;
 
   const ruleDetailTabs = useMemo(
-    () => [
-      {
+    (): Record<RuleDetailTabs, NavTab> => ({
+      [RuleDetailTabs.alerts]: {
         id: RuleDetailTabs.alerts,
         name: RULE_DETAILS_TAB_NAME[RuleDetailTabs.alerts],
         disabled: false,
-        dataTestSubj: 'alertsTab',
         href: `/rules/id/${ruleId}/${RuleDetailTabs.alerts}`,
       },
-      {
+      [RuleDetailTabs.exceptions]: {
         id: RuleDetailTabs.exceptions,
         name: RULE_DETAILS_TAB_NAME[RuleDetailTabs.exceptions],
         disabled: false,
-        dataTestSubj: 'exceptionsTab',
         href: `/rules/id/${ruleId}/${RuleDetailTabs.exceptions}`,
       },
-      {
+      [RuleDetailTabs.executionResults]: {
         id: RuleDetailTabs.executionResults,
         name: RULE_DETAILS_TAB_NAME[RuleDetailTabs.executionResults],
         disabled: !isExistingRule,
-        dataTestSubj: 'executionResultsTab',
         href: `/rules/id/${ruleId}/${RuleDetailTabs.executionResults}`,
       },
-      {
+      [RuleDetailTabs.executionEvents]: {
         id: RuleDetailTabs.executionEvents,
         name: RULE_DETAILS_TAB_NAME[RuleDetailTabs.executionEvents],
         disabled: !isExistingRule,
-        dataTestSubj: 'executionEventsTab',
         href: `/rules/id/${ruleId}/${RuleDetailTabs.executionEvents}`,
       },
-    ],
+    }),
     [isExistingRule, ruleId]
   );
 
-  const [pageTabs, setTabs] = useState(ruleDetailTabs);
+  const [pageTabs, setTabs] = useState<Record<RuleDetailTabs, NavTab>>(ruleDetailTabs);
   const { aboutRuleData, modifiedAboutRuleDetailsData, defineRuleData, scheduleRuleData } =
     rule != null
       ? getStepsData({ rule, detailsView: true })
@@ -320,6 +318,13 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     }
     return true;
   }, [actions, rule?.actions]);
+
+  const navigateToAlertsTab = useCallback(() => {
+    navigateToApp(APP_UI_ID, {
+      deepLinkId: SecurityPageName.rules,
+      path: getRuleDetailsTabUrl(ruleId ?? '', 'alerts', ''),
+    });
+  }, [navigateToApp, ruleId]);
 
   // persist rule until refresh is complete
   useEffect(() => {
@@ -375,16 +380,16 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const ruleExecutionSettings = useRuleExecutionSettings();
 
   useEffect(() => {
-    let visibleTabs = ruleDetailTabs;
+    const hiddenTabs = [];
 
     if (!hasIndexRead) {
-      visibleTabs = visibleTabs.filter(({ id }) => id !== RuleDetailTabs.alerts);
+      hiddenTabs.push(RuleDetailTabs.alerts);
     }
     if (!ruleExecutionSettings.extendedLogging.isEnabled) {
-      visibleTabs = visibleTabs.filter(({ id }) => id !== RuleDetailTabs.executionEvents);
+      hiddenTabs.push(RuleDetailTabs.executionEvents);
     }
 
-    setTabs(visibleTabs);
+    setTabs(omit(hiddenTabs, ruleDetailTabs));
   }, [hasIndexRead, ruleDetailTabs, ruleExecutionSettings]);
 
   const showUpdating = useMemo(
@@ -860,7 +865,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                 />
               )}
               {pageTabName === RuleDetailTabs.executionResults && (
-                <ExecutionLogTable ruleId={ruleId} selectAlertsTab={() => {}} />
+                <ExecutionLogTable ruleId={ruleId} selectAlertsTab={navigateToAlertsTab} />
               )}
               {pageTabName === RuleDetailTabs.executionEvents && (
                 <ExecutionEventsTable ruleId={ruleId} />
