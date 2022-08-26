@@ -15,6 +15,7 @@ import {
   isRangeFilter,
   isScriptedPhraseFilter,
   isScriptedRangeFilter,
+  getFilterField,
 } from '@kbn/es-query';
 import { getPhraseDisplayValue } from './mappers/map_phrase';
 import { getPhrasesDisplayValue } from './mappers/map_phrases';
@@ -39,17 +40,20 @@ function getValueFormatter(indexPattern?: DataView, key?: string) {
 }
 
 export function getFieldDisplayValueFromFilter(filter: Filter, indexPatterns: DataView[]): string {
-  const { key } = filter.meta;
   const indexPattern = getIndexPatternFromFilter(filter, indexPatterns);
   if (!indexPattern) return '';
-  const field = indexPattern.fields.find((f: DataViewField) => f.name === key);
+
+  const fieldName = getFilterField(filter);
+  if (!fieldName) return '';
+
+  const field = indexPattern.fields.find((f: DataViewField) => f.name === fieldName);
   return field?.customLabel ?? '';
 }
 
 export function getDisplayValueFromFilter(filter: Filter, indexPatterns: DataView[]): string {
-  const { key, value } = filter.meta;
   const indexPattern = getIndexPatternFromFilter(filter, indexPatterns);
-  const valueFormatter = getValueFormatter(indexPattern, key);
+  const fieldName = getFilterField(filter);
+  const valueFormatter = getValueFormatter(indexPattern, fieldName);
 
   if (isPhraseFilter(filter) || isScriptedPhraseFilter(filter)) {
     return getPhraseDisplayValue(filter, valueFormatter);
@@ -57,5 +61,5 @@ export function getDisplayValueFromFilter(filter: Filter, indexPatterns: DataVie
     return getPhrasesDisplayValue(filter, valueFormatter);
   } else if (isRangeFilter(filter) || isScriptedRangeFilter(filter)) {
     return getRangeDisplayValue(filter, valueFormatter);
-  } else return value ?? '';
+  } else return filter.meta.value ?? '';
 }

@@ -39,7 +39,6 @@ const getParams = (filter: PhraseFilter) => {
     key,
     params,
     type: FILTERS.PHRASE,
-    value: query,
   };
 };
 
