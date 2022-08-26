@@ -45,3 +45,7 @@ export const inventoryTitle = i18n.translate('xpack.infra.metrics.inventoryPageT
 export const metricsExplorerTitle = i18n.translate('xpack.infra.metrics.metricsExplorerTitle', {
   defaultMessage: 'Metrics Explorer',
 });
+
+export const hostsTitle = i18n.translate('xpack.infra.metrics.hostsTitle', {
+  defaultMessage: 'Hosts',
+});
