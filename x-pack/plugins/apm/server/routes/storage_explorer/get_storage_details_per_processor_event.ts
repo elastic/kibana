@@ -12,24 +12,24 @@ import {
   rangeQuery,
 } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { Setup } from '../../../lib/helpers/setup_request';
+import { Setup } from '../../lib/helpers/setup_request';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
   TIER,
   INDEX,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../common/elasticsearch_fieldnames';
 import {
   IndexLifecyclePhaseSelectOption,
   indexLifeCyclePhaseToDataTier,
-} from '../../../../common/storage_explorer_types';
-import { environmentQuery } from '../../../../common/utils/environment_query';
-import { ApmPluginRequestHandlerContext } from '../../typings';
+} from '../../../common/storage_explorer_types';
+import { environmentQuery } from '../../../common/utils/environment_query';
+import { ApmPluginRequestHandlerContext } from '../typings';
 import {
   getTotalIndicesStats,
   getEstimatedSizeForDocumentsInIndex,
 } from './indices_stats_helpers';
-import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
+import { RandomSampler } from '../../lib/helpers/get_random_sampler';
 
 export async function getStorageDetailsPerProcessorEvent({
   setup,

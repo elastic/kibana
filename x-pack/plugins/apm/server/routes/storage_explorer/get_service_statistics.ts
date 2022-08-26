@@ -11,12 +11,12 @@ import {
   rangeQuery,
 } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { ApmPluginRequestHandlerContext } from '../../typings';
-import { Setup } from '../../../lib/helpers/setup_request';
+import { ApmPluginRequestHandlerContext } from '../typings';
+import { Setup } from '../../lib/helpers/setup_request';
 import {
   IndexLifecyclePhaseSelectOption,
   indexLifeCyclePhaseToDataTier,
-} from '../../../../common/storage_explorer_types';
+} from '../../../common/storage_explorer_types';
 import { getTotalTransactionsPerService } from './get_total_transactions_per_service';
 import {
   PROCESSOR_EVENT,
@@ -26,14 +26,14 @@ import {
   TRANSACTION_SAMPLED,
   AGENT_NAME,
   INDEX,
-} from '../../../../common/elasticsearch_fieldnames';
-import { environmentQuery } from '../../../../common/utils/environment_query';
-import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
+} from '../../../common/elasticsearch_fieldnames';
+import { environmentQuery } from '../../../common/utils/environment_query';
+import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import {
   getTotalIndicesStats,
   getEstimatedSizeForDocumentsInIndex,
 } from './indices_stats_helpers';
-import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
+import { RandomSampler } from '../../lib/helpers/get_random_sampler';
 
 async function getMainServiceStatistics({
   setup,

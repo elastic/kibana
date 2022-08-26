@@ -7,10 +7,10 @@
 
 import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { IndexLifecyclePhaseSelectOption } from '../../../../../common/storage_explorer_types';
+import { IndexLifecyclePhaseSelectOption } from '../../../../common/storage_explorer_types';
 import { IndexLifecyclePhaseSelect } from './index_lifecycle_phase_select';
 import { ServicesTable } from './services_table';
-import { SearchBar } from '../../../shared/search_bar';
+import { SearchBar } from '../../shared/search_bar';
 
 export function StorageExplorer() {
   const [indexLifecyclePhase, setIndexLifecyclePhase] = useState(

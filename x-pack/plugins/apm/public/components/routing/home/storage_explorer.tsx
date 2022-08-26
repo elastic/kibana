@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiTitle, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { StorageExplorer } from '../../app/settings/storage_explorer';
+import { StorageExplorer } from '../../app/storage_explorer';
 import { BetaBadge } from '../../shared/beta_badge';
 import { ApmMainTemplate } from '../templates/apm_main_template';
 import { Breadcrumb } from '../../app/breadcrumb';

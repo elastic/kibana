@@ -6,8 +6,8 @@
  */
 import { uniq } from 'lodash';
 import { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
-import { Setup } from '../../../lib/helpers/setup_request';
-import { ApmPluginRequestHandlerContext } from '../../typings';
+import { Setup } from '../../lib/helpers/setup_request';
+import { ApmPluginRequestHandlerContext } from '../typings';
 
 export async function getTotalIndicesStats({
   context,

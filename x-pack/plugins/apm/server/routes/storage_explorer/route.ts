@@ -7,20 +7,20 @@
 
 import * as t from 'io-ts';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
-import { getSearchAggregatedTransactions } from '../../../lib/helpers/transactions';
-import { setupRequest } from '../../../lib/helpers/setup_request';
-import { indexLifecyclePhaseRt } from '../../../../common/storage_explorer_types';
+import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
+import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
+import { setupRequest } from '../../lib/helpers/setup_request';
+import { indexLifecyclePhaseRt } from '../../../common/storage_explorer_types';
 import { getServiceStatistics } from './get_service_statistics';
 import {
   probabilityRt,
   environmentRt,
   kueryRt,
   rangeRt,
-} from '../../default_api_types';
-import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
+} from '../default_api_types';
+import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { getStorageDetailsPerProcessorEvent } from './get_storage_details_per_processor_event';
-import { getRandomSampler } from '../../../lib/helpers/get_random_sampler';
+import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
 
 const storageExplorerRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/storage_explorer',

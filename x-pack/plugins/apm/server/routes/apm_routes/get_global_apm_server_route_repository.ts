@@ -40,7 +40,7 @@ import { suggestionsRouteRepository } from '../suggestions/route';
 import { timeRangeMetadataRoute } from '../time_range_metadata/route';
 import { traceRouteRepository } from '../traces/route';
 import { transactionRouteRepository } from '../transactions/route';
-import { storageExplorerRouteRepository } from '../settings/storage_explorer/route';
+import { storageExplorerRouteRepository } from '../storage_explorer/route';
 
 function getTypedGlobalApmServerRouteRepository() {
   const repository = {

@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiSuperSelect, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IndexLifecyclePhaseSelectOption } from '../../../../../common/storage_explorer_types';
+import { IndexLifecyclePhaseSelectOption } from '../../../../common/storage_explorer_types';
 
 interface Props {
   indexLifecyclePhase: IndexLifecyclePhaseSelectOption;

@@ -17,22 +17,22 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ValuesType } from 'utility-types';
-import { EnvironmentBadge } from '../../../../shared/environment_badge';
-import { asPercent } from '../../../../../../common/utils/formatters';
-import { ServiceLink } from '../../../../shared/service_link';
-import { TruncateWithTooltip } from '../../../../shared/truncate_with_tooltip';
+import { EnvironmentBadge } from '../../../shared/environment_badge';
+import { asPercent } from '../../../../../common/utils/formatters';
+import { ServiceLink } from '../../../shared/service_link';
+import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { StorageDetailsPerService } from './storage_details_per_service';
-import { getComparisonEnabled } from '../../../../shared/time_comparison/get_comparison_enabled';
-import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
-import { asDynamicBytes } from '../../../../../../common/utils/formatters';
-import { NOT_AVAILABLE_LABEL } from '../../../../../../common/i18n';
-import { IndexLifecyclePhaseSelectOption } from '../../../../../../common/storage_explorer_types';
-import { useApmParams } from '../../../../../hooks/use_apm_params';
-import { FETCH_STATUS } from '../../../../../hooks/use_fetcher';
-import { useProgressiveFetcher } from '../../../../../hooks/use_progressive_fetcher';
-import { useTimeRange } from '../../../../../hooks/use_time_range';
+import { getComparisonEnabled } from '../../../shared/time_comparison/get_comparison_enabled';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { asDynamicBytes } from '../../../../../common/utils/formatters';
+import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
+import { IndexLifecyclePhaseSelectOption } from '../../../../../common/storage_explorer_types';
+import { useApmParams } from '../../../../hooks/use_apm_params';
+import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { useProgressiveFetcher } from '../../../../hooks/use_progressive_fetcher';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 import { SizeLabel } from './size_label';
-import type { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 
 type StorageExplorerItems =
   APIReturnType<'GET /internal/apm/storage_explorer'>['serviceStatistics'];

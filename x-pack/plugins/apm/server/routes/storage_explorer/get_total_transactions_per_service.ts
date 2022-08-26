@@ -10,21 +10,18 @@ import {
   kqlQuery,
   rangeQuery,
 } from '@kbn/observability-plugin/server';
-import { Setup } from '../../../lib/helpers/setup_request';
+import { Setup } from '../../lib/helpers/setup_request';
 import {
   getProcessorEventForTransactions,
   getDocumentTypeFilterForTransactions,
-} from '../../../lib/helpers/transactions';
-import {
-  SERVICE_NAME,
-  TIER,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../lib/helpers/transactions';
+import { SERVICE_NAME, TIER } from '../../../common/elasticsearch_fieldnames';
 import {
   IndexLifecyclePhaseSelectOption,
   indexLifeCyclePhaseToDataTier,
-} from '../../../../common/storage_explorer_types';
-import { environmentQuery } from '../../../../common/utils/environment_query';
-import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
+} from '../../../common/storage_explorer_types';
+import { environmentQuery } from '../../../common/utils/environment_query';
+import { RandomSampler } from '../../lib/helpers/get_random_sampler';
 
 export async function getTotalTransactionsPerService({
   setup,
