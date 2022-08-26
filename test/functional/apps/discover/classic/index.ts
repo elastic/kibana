@@ -22,8 +22,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
     loadTestFile(require.resolve('./_discover_fields_api'));
     loadTestFile(require.resolve('./_doc_table'));
-    loadTestFile(require.resolve('./_doc_table_newline'));
-    loadTestFile(require.resolve('./_field_data'));
+    // loadTestFile(require.resolve('./_doc_table_newline'));
+    // loadTestFile(require.resolve('./_field_data'));
     // loadTestFile(require.resolve('./_field_data_with_fields_api'));
     // loadTestFile(require.resolve('./_classic_table_doc_navigation'));
     // loadTestFile(require.resolve('./_hide_announcements'));
