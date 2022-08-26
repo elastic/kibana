@@ -28,6 +28,7 @@ export const createUserRiskEnrichments: CreateRiskEnrichment = async ({
   events,
   spaceId,
 }) => {
+  throw new Error('user risk score');
   return createSingleFieldMatchEnrichment({
     index: [getUserRiskIndex(spaceId)],
     services,
@@ -37,9 +38,13 @@ export const createUserRiskEnrichments: CreateRiskEnrichment = async ({
       eventField: 'user.name',
       enrichmentField: 'user.name',
     },
-    createEnrichmentFunction: (enrichemnt) => (event) => {
+    createEnrichmentFunction: (enrichment) => (event) => {
+      const risk = get(enrichment, `_source.risk`);
+      if (!risk) {
+        return event;
+      }
       const newEvent = cloneDeep(event);
-      set(newEvent, '_source.user.risk.calculated_level', get(enrichemnt, `_source.risk`));
+      set(newEvent, '_source.user.risk.calculated_level', risk);
       return newEvent;
     },
   });

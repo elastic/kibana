@@ -38,9 +38,13 @@ export const createHostRiskEnrichments: CreateRiskEnrichment = async ({
       eventField: 'host.name',
       enrichmentField: 'host.name',
     },
-    createEnrichmentFunction: (enrichemnt) => (event) => {
+    createEnrichmentFunction: (enrichment) => (event) => {
+      const risk = get(enrichment, `_source.risk`);
+      if (!risk) {
+        return event;
+      }
       const newEvent = cloneDeep(event);
-      set(newEvent, '_source.host.risk.calculated_level', get(enrichemnt, `_source.risk`));
+      set(newEvent, '_source.host.risk.calculated_level', risk);
       return newEvent;
     },
   });
