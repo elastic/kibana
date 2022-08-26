@@ -79,8 +79,8 @@ export interface UpdateRulesOptions {
 
 export interface PatchRulesOptions {
   rulesClient: RulesClient;
-  params: PatchRulesSchema;
-  rule: RuleAlertType | null | undefined;
+  nextParams: PatchRulesSchema;
+  existingRule: RuleAlertType | null | undefined;
 }
 
 export interface ReadRuleOptions {
