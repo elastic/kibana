@@ -113,11 +113,12 @@ export const ExceptionItemCardConditions = memo<CriteriaConditionsProps>(
                 <EuiFlexItemNested grow={false}>
                   <EuiExpression description={''} value={nestedField} color="subdued" />
                 </EuiFlexItemNested>
-
-                <EuiExpression
-                  description={getEntryOperator(nestedType, nestedOperator)}
-                  value={getEntryValue(nestedType, nestedValue)}
-                />
+                <EuiFlexItemNested grow={false}>
+                  <EuiExpression
+                    description={getEntryOperator(nestedType, nestedOperator)}
+                    value={getEntryValue(nestedType, nestedValue)}
+                  />
+                </EuiFlexItemNested>
                 <ValueWithSpaceWarning value={nestedValue} />
               </EuiFlexGroupNested>
             );
