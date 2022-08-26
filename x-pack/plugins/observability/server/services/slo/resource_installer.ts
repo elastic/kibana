@@ -22,9 +22,9 @@ import { sloIndexTemplate } from '../../assets/index_templates/slo_index_templat
 
 const DEFAULT_INSTALLATION_TIMEOUT = 60 * 1000; // 1 minute
 
-type ResourceInstallerConfig = {
+interface ResourceInstallerConfig {
   installationTimeout: number;
-};
+}
 
 export class ResourceInstaller {
   constructor(
