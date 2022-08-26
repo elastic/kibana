@@ -36,6 +36,8 @@ export interface Observer {
   version_major: number;
 }
 
+export type ApmLabels = Partial<Record<`labels.${string}`, string>>;
+
 export type ApmFields = Fields &
   Partial<{
     'timestamp.us'?: number;
@@ -104,4 +106,5 @@ export type ApmFields = Fields &
     'faas.trigger.type': string;
     'faas.trigger.request_id': string;
   }> &
-  ApmApplicationMetricFields;
+  ApmApplicationMetricFields &
+  ApmLabels;
