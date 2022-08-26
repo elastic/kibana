@@ -33,6 +33,12 @@ import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stat
 const DiscoverChartMemoized = React.memo(DiscoverChart);
 const FieldStatisticsTableMemoized = React.memo(FieldStatisticsTable);
 
+const percentToPixels = (containerHeight: number, percentage: number) =>
+  Math.round(containerHeight * (percentage / 100));
+
+const pixelsToPercent = (containerHeight: number, pixels: number) =>
+  +((pixels / containerHeight) * 100).toFixed(4);
+
 export const DiscoverMainContent = ({
   isPlainRecord,
   dataView,
@@ -97,22 +103,19 @@ export const DiscoverMainContent = ({
 
   const { euiTheme } = useEuiTheme();
   const preferredHistogramHeight = euiTheme.base * 12;
-  const minHistogramSize = `${euiTheme.base * 8}px`;
-  const minMainSize = `${euiTheme.base * 10}px`;
+  const minHistogramHeight = euiTheme.base * 8;
+  const minMainHeight = euiTheme.base * 10;
   const histogramPanelId = 'dscHistogramPanel';
   const { height: containerHeight } = useResizeObserver(resizeRef.current);
   const [histogramHeight, setHistogramHeight] = useState<number>(preferredHistogramHeight);
-  const [panelSizes, setPanelSizes] = useState<{ histogramSize: number; mainSize: number }>({
-    histogramSize: 0,
-    mainSize: 0,
-  });
+  const [panelSizes, setPanelSizes] = useState({ histogramSize: 0, mainSize: 0 });
 
   // Instead of setting the panel sizes directly, we convert the histogram height
   // from a percentage of the container height to a pixel value. This will trigger
   // the effect below to update the panel sizes.
   const onPanelSizeChange = useCallback(
     ({ [histogramPanelId]: histogramSize }: { [key: string]: number }) => {
-      setHistogramHeight(Math.round(containerHeight * (histogramSize / 100)));
+      setHistogramHeight(percentToPixels(containerHeight, histogramSize));
     },
     [containerHeight]
   );
@@ -125,11 +128,26 @@ export const DiscoverMainContent = ({
       return;
     }
 
-    const histogramSize = +((histogramHeight / containerHeight) * 100).toFixed(4);
-    const mainSize = 100 - histogramSize;
+    let histogramSize: number;
 
-    setPanelSizes({ histogramSize, mainSize });
-  }, [containerHeight, histogramHeight]);
+    // If the container height is less than the minimum main content height
+    // plus the current histogram height, then we need to make some adjustments.
+    if (containerHeight < minMainHeight + histogramHeight) {
+      const newHistogramHeight = containerHeight - minMainHeight;
+
+      // Try to make the histogram height fit within the container, but if it
+      // doesn't then just use the minimum height.
+      if (newHistogramHeight < minHistogramHeight) {
+        histogramSize = pixelsToPercent(containerHeight, minHistogramHeight);
+      } else {
+        histogramSize = pixelsToPercent(containerHeight, newHistogramHeight);
+      }
+    } else {
+      histogramSize = pixelsToPercent(containerHeight, histogramHeight);
+    }
+
+    setPanelSizes({ histogramSize, mainSize: 100 - histogramSize });
+  }, [containerHeight, histogramHeight, minHistogramHeight, minMainHeight]);
 
   return (
     <EuiResizableContainer
@@ -143,7 +161,7 @@ export const DiscoverMainContent = ({
             <>
               <EuiResizablePanel
                 id={histogramPanelId}
-                minSize={minHistogramSize}
+                minSize={`${minHistogramHeight}px`}
                 size={panelSizes.histogramSize}
                 paddingSize="none"
               >
@@ -162,7 +180,11 @@ export const DiscoverMainContent = ({
               <EuiResizableButton />
             </>
           )}
-          <EuiResizablePanel minSize={minMainSize} size={panelSizes.mainSize} paddingSize="none">
+          <EuiResizablePanel
+            minSize={`${minMainHeight}px`}
+            size={panelSizes.mainSize}
+            paddingSize="none"
+          >
             <EuiFlexGroup
               className="eui-fullHeight"
               direction="column"
