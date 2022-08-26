@@ -7,9 +7,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AppCategory } from '../types';
+import type { AppCategory } from './app_category';
 
-/** @internal */
+/** @public */
 export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze({
   kibana: {
     id: 'kibana',

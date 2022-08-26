@@ -37,12 +37,14 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 RUNTIME_DEPS = [
-  "@npm//react"
+  "@npm//react",
+  "//packages/kbn-i18n",
 ]
 
 TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
+  "//packages/kbn-i18n:npm_module_types",
 ]
 
 jsts_transpiler(

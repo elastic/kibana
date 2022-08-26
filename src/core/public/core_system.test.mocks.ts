@@ -10,7 +10,7 @@ import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
-import { applicationServiceMock } from './application/application_service.mock';
+import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { chromeServiceMock } from './chrome/chrome_service.mock';
 import { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
@@ -102,7 +102,7 @@ export const MockApplicationService = applicationServiceMock.create();
 export const ApplicationServiceConstructor = jest
   .fn()
   .mockImplementation(() => MockApplicationService);
-jest.doMock('./application', () => ({
+jest.doMock('@kbn/core-application-browser-internal', () => ({
   ApplicationService: ApplicationServiceConstructor,
 }));
 

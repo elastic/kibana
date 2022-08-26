@@ -6,11 +6,7 @@
  * Side Public License, v 1.
  */
 
-/**
- * Use * syntax so that these exports do not break when internal
- * types are stripped.
- */
-export * from './app_category';
+export type { AppCategory } from '@kbn/core-application-common';
 export type { Capabilities } from '@kbn/core-capabilities-common';
 export type {
   SavedObject,

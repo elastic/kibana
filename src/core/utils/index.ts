@@ -6,5 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { DEFAULT_APP_CATEGORIES } from './default_app_categories';
-export { APP_WRAPPER_CLASS } from './app_wrapper_class';
+export {
+  APP_WRAPPER_CLASS,
+  DEFAULT_APP_CATEGORIES,
+  type AppCategory,
+} from '@kbn/core-application-common';
