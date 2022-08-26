@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { Switch } from 'react-router-dom';
+import { Redirect, Switch } from 'react-router-dom';
 
 import { Route } from '@kbn/kibana-react-plugin/public';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
@@ -18,6 +18,7 @@ import { RuleDetailsPage } from '../detections/pages/detection_engine/rules/deta
 import { EditRulePage } from '../detections/pages/detection_engine/rules/edit';
 import { useReadonlyHeader } from '../use_readonly_header';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
+import { SpyRoute } from '../common/utils/route/spy_routes';
 
 const RulesSubRoutes = [
   {
@@ -27,6 +28,11 @@ const RulesSubRoutes = [
   },
   {
     path: '/rules/id/:detailName',
+    main: RuleDetailsPage,
+    exact: true,
+  },
+  {
+    path: '/rules/id/:detailName/:tabName',
     main: RuleDetailsPage,
     exact: true,
   },
@@ -49,6 +55,21 @@ const RulesContainerComponent: React.FC = () => {
     <PluginTemplateWrapper>
       <TrackApplicationView viewId={SecurityPageName.rules}>
         <Switch>
+          {/* Because '/rules/id/:detailName/edit' would match '/rules/id/:detailName/:tabName' need
+          to add a redirect to ensure that it continues to work as expected */}
+          <Route
+            path="/rules/id/:detailName"
+            exact
+            strict
+            render={({ location: { search = '' }, match: { params } }) => (
+              <Redirect
+                to={{
+                  pathname: `/rules/id/${params.detailName}/alerts`,
+                  search,
+                }}
+              />
+            )}
+          />
           {RulesSubRoutes.map((route, index) => (
             <Route
               key={`rules-route-${route.path}`}
@@ -59,6 +80,7 @@ const RulesContainerComponent: React.FC = () => {
             </Route>
           ))}
           <Route component={NotFoundPage} />
+          <SpyRoute pageName={SecurityPageName.rules} />
         </Switch>
       </TrackApplicationView>
     </PluginTemplateWrapper>

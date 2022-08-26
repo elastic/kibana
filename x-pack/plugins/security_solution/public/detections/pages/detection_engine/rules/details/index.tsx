@@ -14,8 +14,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiTab,
-  EuiTabs,
   EuiToolTip,
   EuiWindowEvent,
 } from '@elastic/eui';
@@ -34,6 +32,7 @@ import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { Dispatch } from 'redux';
 import { isTab } from '@kbn/timelines-plugin/public';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
+import { SecuritySolutionTabNavigation } from '../../../../../common/components/navigation';
 import {
   useDeepEqualSelector,
   useShallowEqualSelector,
@@ -145,37 +144,17 @@ const StyledMinHeightTabContainer = styled.div`
 
 export enum RuleDetailTabs {
   alerts = 'alerts',
-  exceptions = 'exceptions',
+  exceptions = 'rule_exceptions',
   executionResults = 'executionResults',
   executionEvents = 'executionEvents',
 }
 
-const ruleDetailTabs = [
-  {
-    id: RuleDetailTabs.alerts,
-    name: detectionI18n.ALERT,
-    disabled: false,
-    dataTestSubj: 'alertsTab',
-  },
-  {
-    id: RuleDetailTabs.exceptions,
-    name: i18n.EXCEPTIONS_TAB,
-    disabled: false,
-    dataTestSubj: 'exceptionsTab',
-  },
-  {
-    id: RuleDetailTabs.executionResults,
-    name: i18n.EXECUTION_RESULTS_TAB,
-    disabled: false,
-    dataTestSubj: 'executionResultsTab',
-  },
-  {
-    id: RuleDetailTabs.executionEvents,
-    name: i18n.EXECUTION_EVENTS_TAB,
-    disabled: false,
-    dataTestSubj: 'executionEventsTab',
-  },
-];
+export const RULE_DETAILS_TAB_NAME: Record<string, string> = {
+  [RuleDetailTabs.alerts]: detectionI18n.ALERT,
+  [RuleDetailTabs.exceptions]: i18n.EXCEPTIONS_TAB,
+  [RuleDetailTabs.executionResults]: i18n.EXECUTION_RESULTS_TAB,
+  [RuleDetailTabs.executionEvents]: i18n.EXECUTION_EVENTS_TAB,
+};
 
 type DetectionEngineComponentProps = PropsFromRedux;
 
@@ -240,7 +219,10 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   } = useSourcererDataView(SourcererScopeName.detections);
 
   const loading = userInfoLoading || listsConfigLoading;
-  const { detailName: ruleId } = useParams<{ detailName: string }>();
+  const { detailName: ruleId, tabName: pageTabName } = useParams<{
+    detailName: string;
+    tabName: string;
+  }>();
   const {
     rule: maybeRule,
     refresh: refreshRule,
@@ -250,7 +232,41 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const { pollForSignalIndex } = useSignalHelpers();
   const [rule, setRule] = useState<Rule | null>(null);
   const isLoading = ruleLoading && rule == null;
-  const [ruleDetailTab, setRuleDetailTab] = useState(RuleDetailTabs.alerts);
+
+  const ruleDetailTabs = useMemo(
+    () => [
+      {
+        id: RuleDetailTabs.alerts,
+        name: RULE_DETAILS_TAB_NAME[RuleDetailTabs.alerts],
+        disabled: false,
+        dataTestSubj: 'alertsTab',
+        href: `/rules/id/${ruleId}/${RuleDetailTabs.alerts}`,
+      },
+      {
+        id: RuleDetailTabs.exceptions,
+        name: RULE_DETAILS_TAB_NAME[RuleDetailTabs.exceptions],
+        disabled: false,
+        dataTestSubj: 'exceptionsTab',
+        href: `/rules/id/${ruleId}/${RuleDetailTabs.exceptions}`,
+      },
+      {
+        id: RuleDetailTabs.executionResults,
+        name: RULE_DETAILS_TAB_NAME[RuleDetailTabs.executionResults],
+        disabled: !isExistingRule,
+        dataTestSubj: 'executionResultsTab',
+        href: `/rules/id/${ruleId}/${RuleDetailTabs.executionResults}`,
+      },
+      {
+        id: RuleDetailTabs.executionEvents,
+        name: RULE_DETAILS_TAB_NAME[RuleDetailTabs.executionEvents],
+        disabled: !isExistingRule,
+        dataTestSubj: 'executionEventsTab',
+        href: `/rules/id/${ruleId}/${RuleDetailTabs.executionEvents}`,
+      },
+    ],
+    [isExistingRule, ruleId]
+  );
+
   const [pageTabs, setTabs] = useState(ruleDetailTabs);
   const { aboutRuleData, modifiedAboutRuleDetailsData, defineRuleData, scheduleRuleData } =
     rule != null
@@ -360,19 +376,16 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
 
   useEffect(() => {
     let visibleTabs = ruleDetailTabs;
-    let currentTab = RuleDetailTabs.alerts;
 
     if (!hasIndexRead) {
       visibleTabs = visibleTabs.filter(({ id }) => id !== RuleDetailTabs.alerts);
-      currentTab = RuleDetailTabs.exceptions;
     }
     if (!ruleExecutionSettings.extendedLogging.isEnabled) {
       visibleTabs = visibleTabs.filter(({ id }) => id !== RuleDetailTabs.executionEvents);
     }
 
     setTabs(visibleTabs);
-    setRuleDetailTab(currentTab);
-  }, [hasIndexRead, ruleExecutionSettings]);
+  }, [hasIndexRead, ruleDetailTabs, ruleExecutionSettings]);
 
   const showUpdating = useMemo(
     () => isLoadingIndexPattern || isAlertsLoading || loading,
@@ -477,30 +490,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const alertMergedFilters = useMemo(
     () => [...alertDefaultFilters, ...filters],
     [alertDefaultFilters, filters]
-  );
-
-  const tabs = useMemo(
-    () => (
-      <EuiTabs>
-        {pageTabs.map((tab) => (
-          <EuiTab
-            onClick={() => setRuleDetailTab(tab.id)}
-            isSelected={tab.id === ruleDetailTab}
-            disabled={
-              tab.disabled ||
-              ((tab.id === RuleDetailTabs.executionResults ||
-                tab.id === RuleDetailTabs.executionEvents) &&
-                !isExistingRule)
-            }
-            key={tab.id}
-            data-test-subj={tab.dataTestSubj}
-          >
-            {tab.name}
-          </EuiTab>
-        ))}
-      </EuiTabs>
-    ),
-    [isExistingRule, ruleDetailTab, setRuleDetailTab, pageTabs]
   );
 
   const lastExecution = rule?.execution_summary?.last_execution;
@@ -664,10 +653,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
   );
 
-  const selectAlertsTabCallback = useCallback(() => {
-    setRuleDetailTab(RuleDetailTabs.alerts);
-  }, []);
-
   if (
     redirectToDetections(
       isSignalIndexExists,
@@ -808,11 +793,11 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiSpacer />
-              {tabs}
+              <SecuritySolutionTabNavigation navTabs={pageTabs} />
               <EuiSpacer />
             </Display>
             <StyledMinHeightTabContainer>
-              {ruleDetailTab === RuleDetailTabs.alerts && hasIndexRead && (
+              {pageTabName === RuleDetailTabs.alerts && hasIndexRead && (
                 <>
                   <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
                     <EuiFlexItem grow={false}>
@@ -862,7 +847,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                   )}
                 </>
               )}
-              {ruleDetailTab === RuleDetailTabs.exceptions && (
+              {pageTabName === RuleDetailTabs.exceptions && (
                 <ExceptionsViewer
                   ruleId={ruleId ?? ''}
                   ruleName={rule?.name ?? ''}
@@ -874,10 +859,10 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                   onRuleChange={refreshRule}
                 />
               )}
-              {ruleDetailTab === RuleDetailTabs.executionResults && (
-                <ExecutionLogTable ruleId={ruleId} selectAlertsTab={selectAlertsTabCallback} />
+              {pageTabName === RuleDetailTabs.executionResults && (
+                <ExecutionLogTable ruleId={ruleId} selectAlertsTab={() => {}} />
               )}
-              {ruleDetailTab === RuleDetailTabs.executionEvents && (
+              {pageTabName === RuleDetailTabs.executionEvents && (
                 <ExecutionEventsTable ruleId={ruleId} />
               )}
             </StyledMinHeightTabContainer>
