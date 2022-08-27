@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Series } from '../../../../common/types';
+import { PANEL_TYPES } from '../../../../common/enums';
+import { Panel, Series } from '../../../../common/types';
 
 export const createSeries = (partialSeries?: Partial<Series>): Series => ({
   axis_position: 'right',
@@ -32,4 +33,29 @@ export const createSeries = (partialSeries?: Partial<Series>): Series => ({
   series_max_bars: 0,
   steps: 0,
   ...partialSeries,
+});
+
+export const createPanel = (parialPanel?: Partial<Panel>): Panel => ({
+  annotations: [],
+  axis_formatter: '',
+  axis_max: 100,
+  axis_min: 0,
+  axis_position: 'right',
+  axis_scale: '',
+  bar_color_rules: [],
+  drop_last_bucket: 0,
+  hide_last_value_indicator: false,
+  id: 'some-id',
+  ignore_daylight_time: true,
+  index_pattern: { id: 'test' },
+  interval: '',
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  markdown_openLinksInNewTab: 0,
+  markdown_scrollbars: 0,
+  max_bars: 0,
+  series: [createSeries()],
+  show_grid: 0,
+  show_legend: 0,
+  type: PANEL_TYPES.TIMESERIES,
+  ...parialPanel,
 });

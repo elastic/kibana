@@ -40,13 +40,13 @@ export const convertToDateHistogramColumn = (
   dataView: DataView,
   { fieldName, isSplit }: { fieldName: string; isSplit: boolean }
 ): DateHistogramColumn | null => {
-  const params = convertToDateHistogramParams(model, series);
-
   const dateField = dataView.getFieldByName(fieldName);
 
   if (!dateField) {
     return null;
   }
+
+  const params = convertToDateHistogramParams(model, series);
 
   return {
     columnId: uuid(),
