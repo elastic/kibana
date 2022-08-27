@@ -147,7 +147,7 @@ export const getFormulaEquivalent = (
       return `${aggFormula}(${currentMetric.field})`;
     }
     default: {
-      return `${aggFormula}(${currentMetric.field}${addTimeRangeToFormula(window)})`;
+      return `${aggFormula}(${currentMetric.field ?? ''}${addTimeRangeToFormula(window)})`;
     }
   }
 };

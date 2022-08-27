@@ -17,9 +17,6 @@ export const convertToCumulativeSumColumns = (
   window?: string
 ) => {
   const metric = metrics[metrics.length - 1];
-  if (!metric) {
-    return null;
-  }
 
   //  percentile and percentile_rank value is derived from the field Id. It has the format xxx-xxx-xxx-xxx[percentile]
   const [fieldId, meta] = metric?.field?.split('[') ?? [];
@@ -47,9 +44,6 @@ export const convertToCumulativeSumColumns = (
     return createFormulaColumn(formula, { series, metric, dataView });
   } else {
     const agg = SUPPORTED_METRICS[METRIC_TYPES.CUMULATIVE_SUM];
-    if (!agg) {
-      return null;
-    }
 
     return computeParentPipelineColumns(
       agg.name,

@@ -11,6 +11,7 @@ import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import type { Metric } from '../../../../common/types';
 import { createSeries } from '../__mocks__';
 import { convertToCounterRateFormulaColumn } from './counter_rate';
+import { CommonColumnsConverterArgs, FormulaColumn } from './types';
 
 describe('convertToCounterRateFormulaColumn', () => {
   const dataView = stubLogstashDataView;
@@ -20,7 +21,7 @@ describe('convertToCounterRateFormulaColumn', () => {
     type: TSVB_METRIC_TYPES.POSITIVE_RATE,
   };
 
-  test.each([
+  test.each<[string, CommonColumnsConverterArgs, Partial<FormulaColumn> | null]>([
     ['null if metric contains empty field param', { series, metrics: [metric], dataView }, null],
     [
       'formula column if metric contains field param',
@@ -44,6 +45,10 @@ describe('convertToCounterRateFormulaColumn', () => {
       },
     ],
   ])('should return %s', (_, input, expected) => {
-    expect(convertToCounterRateFormulaColumn(input)).toEqual(expect.objectContaining(expected));
+    if (expected === null) {
+      expect(convertToCounterRateFormulaColumn(input)).toBeNull();
+    } else {
+      expect(convertToCounterRateFormulaColumn(input)).toEqual(expect.objectContaining(expected));
+    }
   });
 });

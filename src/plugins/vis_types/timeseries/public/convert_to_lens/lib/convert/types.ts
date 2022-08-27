@@ -101,7 +101,7 @@ export type Layer = Omit<BaseLayer, 'columns'> & {
 
 export interface CommonColumnsConverterArgs {
   series: Series;
-  metrics: Metric[];
+  metrics: [Metric, ...Metric[]];
   dataView: DataView;
 }
 

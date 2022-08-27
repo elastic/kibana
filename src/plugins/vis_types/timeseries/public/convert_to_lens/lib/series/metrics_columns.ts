@@ -7,7 +7,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { Series } from '../../../../common/types';
+import type { Metric, Series } from '../../../../common/types';
 import { getSeriesAgg } from './series_agg';
 import { SUPPORTED_METRICS } from '../metrics';
 import {
@@ -34,7 +34,14 @@ export const getMetricsColumns = (
   visibleSeriesCount: number,
   window?: string
 ): Column[] | null => {
-  const { metrics, seriesAgg } = getSeriesAgg(series.metrics);
+  const { metrics: validMetrics, seriesAgg } = getSeriesAgg(
+    series.metrics as [Metric, ...Metric[]]
+  );
+
+  if (!validMetrics.length) {
+    return null;
+  }
+  const metrics = validMetrics as [Metric, ...Metric[]];
   // series agg supported as collapseFn if we have split
   if (seriesAgg && series.split_mode === 'everything') {
     return null;
