@@ -15,7 +15,6 @@ export const convertFilterRatioToFormulaColumn = (
   window?: string
 ): FormulaColumn | null => {
   const metric = metrics[metrics.length - 1];
-
   const formula = getFilterRatioFormula(metric, window);
 
   if (!formula) {
