@@ -227,12 +227,50 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     return await this.baseClient.delete(type, id, options);
   }
 
-  // TODO: Implement
   public async bulkDelete(
     objects: SavedObjectsBulkDeleteObject[],
-    options?: SavedObjectsBulkDeleteOptions
+    options: SavedObjectsBulkDeleteOptions
   ): Promise<SavedObjectsBulkDeleteResponse> {
-    throw new Error('Method not implemented.');
+    try {
+      const args = { objects, options };
+      await this.legacyEnsureAuthorized(
+        this.getUniqueObjectTypes(objects),
+        'bulk_delete',
+        options?.namespace,
+        {
+          args,
+        }
+      );
+    } catch (error) {
+      objects.forEach(({ type, id }) =>
+        this.auditLogger.log(
+          savedObjectEvent({
+            action: SavedObjectAction.DELETE,
+            savedObject: { type, id },
+            error,
+          })
+        )
+      );
+      throw error;
+    }
+    const response = await this.baseClient.bulkDelete(objects, options);
+
+    response.statuses.forEach(({ id, type, success, error }) => {
+      if (!error) {
+        const auditEventOutcome = success === true ? 'success' : 'failure';
+        this.auditLogger.log(
+          savedObjectEvent({
+            action: SavedObjectAction.DELETE,
+            savedObject: { type, id },
+            outcome: auditEventOutcome,
+            error: error ? error : undefined,
+          })
+        );
+      }
+    });
+    // the response only contains saved objects' type and id and there's no direct object namespace to delete.
+    // However, the id might contain a reference to a space and we may need to redact that.
+    return response;
   }
 
   public async find<T = unknown, A = unknown>(options: SavedObjectsFindOptions) {

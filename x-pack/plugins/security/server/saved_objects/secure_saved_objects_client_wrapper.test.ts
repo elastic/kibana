@@ -11,6 +11,7 @@ import type {
   EcsEventOutcome,
   SavedObject,
   SavedObjectReferenceWithContext,
+  SavedObjectsBulkDeleteResponse,
   SavedObjectsErrorHelpers,
   SavedObjectsResolveResponse,
   SavedObjectsUpdateObjectsSpacesResponseObject,
@@ -551,7 +552,7 @@ describe('#bulkUpdate', () => {
   test(`checks privileges for user, actions, and namespace`, async () => {
     const objects = [obj1, obj2];
     const options = { namespace };
-    const namespaces = [options.namespace]; // the bulkUpdate function always checks privileges as an array
+    const namespaces = [options.namespace]; // the bulkDelete function always checks privileges as an array??
     await expectPrivilegeCheck(client.bulkUpdate, { objects, options }, namespaces);
   });
 
@@ -592,14 +593,44 @@ describe('#bulkUpdate', () => {
 });
 
 describe('#bulkDelete', () => {
-  test.todo(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {});
-  test.todo(`throws decorated ForbiddenError when unauthorized`, async () => {});
-  test.todo(`returns result of baseClient.bulkUpdate when authorized`, async () => {});
-  test.todo(`checks privileges for user, actions, and namespace`, async () => {});
-  test.todo(`checks privileges for object namespaces if present`, async () => {});
-  test.todo(`filters namespaces that the user doesn't have access to`, async () => {});
-  test.todo(`adds audit event when successful`, async () => {});
-  test.todo(`adds audit event when not successful`, async () => {});
+  const obj1 = Object.freeze({ type: 'foo', id: 'foo-id' });
+  const obj2 = Object.freeze({ type: 'bar', id: 'bar-id' });
+  const namespace = 'some-ns';
+
+  test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
+    const objects = [obj1];
+    await expectGeneralError(client.bulkDelete, { objects });
+  });
+
+  test(`throws decorated ForbiddenError when unauthorized`, async () => {
+    const objects = [obj1, obj2];
+    const options = { namespace };
+    await expectForbiddenError(client.bulkDelete, { objects, options });
+  });
+
+  test(`returns result of baseClient.bulkDelete when authorized`, async () => {
+    const apiCallReturnValue = {
+      statuses: [obj1, obj2].map((obj) => {
+        return { ...obj, success: true };
+      }),
+    };
+    clientOpts.baseClient.bulkDelete.mockReturnValue(apiCallReturnValue as any);
+
+    const objects = [obj1, obj2];
+    const options = { namespace };
+    const result = await expectSuccess(client.bulkDelete, { objects, options });
+    expect(result).toEqual(apiCallReturnValue);
+  });
+
+  test(`checks privileges for user, actions, and namespace`, async () => {
+    const objects = [obj1, obj2];
+    const options = { namespace };
+    await expectPrivilegeCheck(client.bulkDelete, { objects, options }, namespace);
+  });
+  // test.todo(`checks privileges for object namespaces if present`, async () => {});
+  // test.todo(`filters namespaces that the user doesn't have access to`, async () => {});
+  // test.todo(`adds audit event when successful`, async () => {});
+  // test.todo(`adds audit event when not successful`, async () => {});
 });
 
 describe('#checkConflicts', () => {
