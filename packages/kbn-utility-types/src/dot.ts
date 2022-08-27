@@ -49,7 +49,7 @@ export type DotObject<
   }>
 >;
 
-type DotKeysOf<TObject extends Record<string, any>> = keyof DotObject<TObject>;
+export type DotKeysOf<TObject extends Record<string, any>> = keyof DotObject<TObject>;
 
 export type PickDotted<
   TObject extends Record<string, any>,
