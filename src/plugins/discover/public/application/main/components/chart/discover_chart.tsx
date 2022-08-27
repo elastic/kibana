@@ -195,27 +195,21 @@ export function DiscoverChart({
       </EuiFlexItem>
       {isTimeBased && !hideChart && (
         <EuiFlexItem>
-          <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
-            <EuiFlexItem>
-              <section
-                ref={(element) => (chartRef.current.element = element)}
-                tabIndex={-1}
-                aria-label={i18n.translate('discover.histogramOfFoundDocumentsAriaLabel', {
-                  defaultMessage: 'Histogram of found documents',
-                })}
-                className="dscTimechart"
-              >
-                <DiscoverHistogramMemoized
-                  savedSearchData$={savedSearchDataChart$}
-                  timefilterUpdateHandler={timefilterUpdateHandler}
-                  stateContainer={stateContainer}
-                />
-              </section>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiSpacer size="m" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <section
+            ref={(element) => (chartRef.current.element = element)}
+            tabIndex={-1}
+            aria-label={i18n.translate('discover.histogramOfFoundDocumentsAriaLabel', {
+              defaultMessage: 'Histogram of found documents',
+            })}
+            className="dscTimechart"
+          >
+            <DiscoverHistogramMemoized
+              savedSearchData$={savedSearchDataChart$}
+              timefilterUpdateHandler={timefilterUpdateHandler}
+              stateContainer={stateContainer}
+            />
+          </section>
+          <EuiSpacer size="m" />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
