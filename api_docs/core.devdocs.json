@@ -5399,7 +5399,7 @@
             "label": "size",
             "description": [],
             "signature": [
-              "\"s\" | \"m\" | \"l\" | undefined"
+              "\"m\" | \"s\" | \"l\" | undefined"
             ],
             "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
             "deprecated": false
@@ -9956,7 +9956,7 @@
         "signature": [
           "{ options?: string[] | number[] | undefined; type?: ",
           "UiSettingsType",
-          " | undefined; metric?: { type: string; name: string; } | undefined; name?: string | undefined; order?: number | undefined; value?: unknown; description?: string | undefined; category?: string[] | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; deprecation?: ",
+          " | undefined; metric?: { type: string; name: string; } | undefined; value?: unknown; description?: string | undefined; name?: string | undefined; order?: number | undefined; category?: string[] | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; deprecation?: ",
           "DeprecationSettings",
           " | undefined; }"
         ],
@@ -10025,9 +10025,9 @@
         "label": "SavedObjectsFindOptions",
         "description": [],
         "signature": [
-          "{ type: string | string[]; filter?: any; search?: string | undefined; page?: number | undefined; aggs?: Record<string, ",
+          "{ type: string | string[]; filter?: any; search?: string | undefined; aggs?: Record<string, ",
           "AggregationsAggregationContainer",
-          "> | undefined; fields?: string[] | undefined; perPage?: number | undefined; sortField?: string | undefined; searchFields?: string[] | undefined; hasReference?: ",
+          "> | undefined; fields?: string[] | undefined; page?: number | undefined; perPage?: number | undefined; sortField?: string | undefined; searchFields?: string[] | undefined; hasReference?: ",
           "SavedObjectsFindOptionsReference",
           " | ",
           "SavedObjectsFindOptionsReference",
@@ -10123,7 +10123,7 @@
         "signature": [
           "Pick<",
           "Toast",
-          ", \"children\" | \"onError\" | \"color\" | \"className\" | \"lang\" | \"style\" | \"role\" | \"tabIndex\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChange\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onErrorCapture\" | \"onKeyDown\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClick\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"data-test-subj\" | \"hidden\" | \"security\" | \"defaultValue\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"translate\" | \"radioGroup\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"toastLifeTimeMs\" | \"iconType\" | \"onClose\"> & { title?: string | ",
+          ", \"children\" | \"onError\" | \"hidden\" | \"color\" | \"className\" | \"onChange\" | \"onKeyDown\" | \"onClick\" | \"security\" | \"defaultValue\" | \"lang\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"toastLifeTimeMs\" | \"iconType\" | \"onClose\" | \"data-test-subj\"> & { title?: string | ",
           "MountPoint",
           "<HTMLElement> | undefined; text?: string | ",
           "MountPoint",
@@ -10162,7 +10162,7 @@
         "signature": [
           "Pick<",
           "Toast",
-          ", \"children\" | \"onError\" | \"color\" | \"className\" | \"lang\" | \"style\" | \"role\" | \"tabIndex\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChange\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onErrorCapture\" | \"onKeyDown\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClick\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"data-test-subj\" | \"hidden\" | \"security\" | \"defaultValue\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"translate\" | \"radioGroup\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"toastLifeTimeMs\" | \"iconType\" | \"onClose\"> & { title?: string | ",
+          ", \"children\" | \"onError\" | \"hidden\" | \"color\" | \"className\" | \"onChange\" | \"onKeyDown\" | \"onClick\" | \"security\" | \"defaultValue\" | \"lang\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"toastLifeTimeMs\" | \"iconType\" | \"onClose\" | \"data-test-subj\"> & { title?: string | ",
           "MountPoint",
           "<HTMLElement> | undefined; text?: string | ",
           "MountPoint",
@@ -10498,9 +10498,1472 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.SavedObjectsErrorHelpers",
+        "type": "Class",
+        "tags": [],
+        "label": "SavedObjectsErrorHelpers",
+        "description": [],
+        "signature": [
+          "SavedObjectsErrorHelpers"
+        ],
+        "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsErrorHelpers.isSavedObjectsClientError",
+            "type": "Function",
+            "tags": [],
+            "label": "isSavedObjectsClientError",
+            "description": [],
+            "signature": [
+              "(error: any) => error is ",
+              "DecoratedError"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsErrorHelpers.isSavedObjectsClientError.$1",
+                "type": "Any",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsErrorHelpers.decorateBadRequestError",
+            "type": "Function",
+            "tags": [],
+            "label": "decorateBadRequestError",
+            "description": [],
+            "signature": [
+              "(error: Error, reason?: string | undefined) => ",
+              "DecoratedError"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsErrorHelpers.decorateBadRequestError.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "Error"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsErrorHelpers.decorateBadRequestError.$2",
+                "type": "string",
+                "tags": [],
+                "label": "reason",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsErrorHelpers.createBadRequestError",
+            "type": "Function",
+            "tags": [],
+            "label": "createBadRequestError",
+            "description": [],
+            "signature": [
+              "(reason?: string | undefined) => ",
+              "DecoratedError"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsErrorHelpers.createBadRequestError.$1",
+                "type": "string",
+                "tags": [],
+                "label": "reason",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsErrorHelpers.createUnsupportedTypeError",
+            "type": "Function",
+            "tags": [],
+            "label": "createUnsupportedTypeError",
+            "description": [],
+            "signature": [
+              "(type: string) => ",
+              "DecoratedError"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsErrorHelpers.createUnsupportedTypeError.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsErrorHelpers.isBadRequestError",
+            "type": "Function",
+            "tags": [],
+            "label": "isBadRequestError",
+            "description": [],
+            "signature": [
+              "(error: Error | ",
+              "DecoratedError",
+              ") => boolean"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsErrorHelpers.isBadRequestError.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "Error | ",
+                  "DecoratedError"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsErrorHelpers.createInvalidVersionError",
+            "type": "Function",
+            "tags": [],
+            "label": "createInvalidVersionError",
+            "description": [],
+            "signature": [
+              "(versionInput?: string | undefined) => ",
+              "DecoratedError"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsErrorHelpers.createInvalidVersionError.$1",
+                "type": "string",
+                "tags": [],
+                "label": "versionInput",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsErrorHelpers.isInvalidVersionError",
+            "type": "Function",
+            "tags": [],
+            "label": "isInvalidVersionError",
+            "description": [],
+            "signature": [
+              "(error: Error | ",
+              "DecoratedError",
+              ") => boolean"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsErrorHelpers.isInvalidVersionError.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "Error | ",
+                  "DecoratedError"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsErrorHelpers.decorateNotAuthorizedError",
+            "type": "Function",
+            "tags": [],
+            "label": "decorateNotAuthorizedError",
+            "description": [],
+            "signature": [
+              "(error: Error, reason?: string | undefined) => ",
+              "DecoratedError"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsErrorHelpers.decorateNotAuthorizedError.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "Error"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsErrorHelpers.decorateNotAuthorizedError.$2",
+                "type": "string",
+                "tags": [],
+                "label": "reason",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsErrorHelpers.isNotAuthorizedError",
+            "type": "Function",
+            "tags": [],
+            "label": "isNotAuthorizedError",
+            "description": [],
+            "signature": [
+              "(error: Error | ",
+              "DecoratedError",
+              ") => boolean"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsErrorHelpers.isNotAuthorizedError.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "Error | ",
+                  "DecoratedError"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsErrorHelpers.decorateForbiddenError",
+            "type": "Function",
+            "tags": [],
+            "label": "decorateForbiddenError",
+            "description": [],
+            "signature": [
+              "(error: Error, reason?: string | undefined) => ",
+              "DecoratedError"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsErrorHelpers.decorateForbiddenError.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "Error"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsErrorHelpers.decorateForbiddenError.$2",
+                "type": "string",
+                "tags": [],
+                "label": "reason",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsErrorHelpers.isForbiddenError",
+            "type": "Function",
+            "tags": [],
+            "label": "isForbiddenError",
+            "description": [],
+            "signature": [
+              "(error: Error | ",
+              "DecoratedError",
+              ") => boolean"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsErrorHelpers.isForbiddenError.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "Error | ",
+                  "DecoratedError"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsErrorHelpers.decorateRequestEntityTooLargeError",
+            "type": "Function",
+            "tags": [],
+            "label": "decorateRequestEntityTooLargeError",
+            "description": [],
+            "signature": [
+              "(error: Error, reason?: string | undefined) => ",
+              "DecoratedError"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsErrorHelpers.decorateRequestEntityTooLargeError.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "Error"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsErrorHelpers.decorateRequestEntityTooLargeError.$2",
+                "type": "string",
+                "tags": [],
+                "label": "reason",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsErrorHelpers.isRequestEntityTooLargeError",
+            "type": "Function",
+            "tags": [],
+            "label": "isRequestEntityTooLargeError",
+            "description": [],
+            "signature": [
+              "(error: Error | ",
+              "DecoratedError",
+              ") => boolean"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsErrorHelpers.isRequestEntityTooLargeError.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "Error | ",
+                  "DecoratedError"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsErrorHelpers.createGenericNotFoundError",
+            "type": "Function",
+            "tags": [],
+            "label": "createGenericNotFoundError",
+            "description": [],
+            "signature": [
+              "(type?: string | null | undefined, id?: string | null | undefined) => ",
+              "DecoratedError"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsErrorHelpers.createGenericNotFoundError.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string | null | undefined"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsErrorHelpers.createGenericNotFoundError.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string | null | undefined"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsErrorHelpers.createIndexAliasNotFoundError",
+            "type": "Function",
+            "tags": [],
+            "label": "createIndexAliasNotFoundError",
+            "description": [],
+            "signature": [
+              "(alias: string) => ",
+              "DecoratedError"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsErrorHelpers.createIndexAliasNotFoundError.$1",
+                "type": "string",
+                "tags": [],
+                "label": "alias",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsErrorHelpers.decorateIndexAliasNotFoundError",
+            "type": "Function",
+            "tags": [],
+            "label": "decorateIndexAliasNotFoundError",
+            "description": [],
+            "signature": [
+              "(error: Error, alias: string) => ",
+              "DecoratedError"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsErrorHelpers.decorateIndexAliasNotFoundError.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "Error"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsErrorHelpers.decorateIndexAliasNotFoundError.$2",
+                "type": "string",
+                "tags": [],
+                "label": "alias",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsErrorHelpers.isNotFoundError",
+            "type": "Function",
+            "tags": [],
+            "label": "isNotFoundError",
+            "description": [],
+            "signature": [
+              "(error: Error | ",
+              "DecoratedError",
+              ") => boolean"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsErrorHelpers.isNotFoundError.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "Error | ",
+                  "DecoratedError"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsErrorHelpers.decorateConflictError",
+            "type": "Function",
+            "tags": [],
+            "label": "decorateConflictError",
+            "description": [],
+            "signature": [
+              "(error: Error, reason?: string | undefined) => ",
+              "DecoratedError"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsErrorHelpers.decorateConflictError.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "Error"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsErrorHelpers.decorateConflictError.$2",
+                "type": "string",
+                "tags": [],
+                "label": "reason",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsErrorHelpers.createConflictError",
+            "type": "Function",
+            "tags": [],
+            "label": "createConflictError",
+            "description": [],
+            "signature": [
+              "(type: string, id: string, reason?: string | undefined) => ",
+              "DecoratedError"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsErrorHelpers.createConflictError.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsErrorHelpers.createConflictError.$2",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsErrorHelpers.createConflictError.$3",
+                "type": "string",
+                "tags": [],
+                "label": "reason",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsErrorHelpers.isConflictError",
+            "type": "Function",
+            "tags": [],
+            "label": "isConflictError",
+            "description": [],
+            "signature": [
+              "(error: Error | ",
+              "DecoratedError",
+              ") => boolean"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsErrorHelpers.isConflictError.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "Error | ",
+                  "DecoratedError"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsErrorHelpers.decorateTooManyRequestsError",
+            "type": "Function",
+            "tags": [],
+            "label": "decorateTooManyRequestsError",
+            "description": [],
+            "signature": [
+              "(error: Error, reason?: string | undefined) => ",
+              "DecoratedError"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsErrorHelpers.decorateTooManyRequestsError.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "Error"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsErrorHelpers.decorateTooManyRequestsError.$2",
+                "type": "string",
+                "tags": [],
+                "label": "reason",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsErrorHelpers.createTooManyRequestsError",
+            "type": "Function",
+            "tags": [],
+            "label": "createTooManyRequestsError",
+            "description": [],
+            "signature": [
+              "(type: string, id: string) => ",
+              "DecoratedError"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsErrorHelpers.createTooManyRequestsError.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsErrorHelpers.createTooManyRequestsError.$2",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsErrorHelpers.isTooManyRequestsError",
+            "type": "Function",
+            "tags": [],
+            "label": "isTooManyRequestsError",
+            "description": [],
+            "signature": [
+              "(error: Error | ",
+              "DecoratedError",
+              ") => boolean"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsErrorHelpers.isTooManyRequestsError.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "Error | ",
+                  "DecoratedError"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsErrorHelpers.decorateEsCannotExecuteScriptError",
+            "type": "Function",
+            "tags": [],
+            "label": "decorateEsCannotExecuteScriptError",
+            "description": [],
+            "signature": [
+              "(error: Error, reason?: string | undefined) => ",
+              "DecoratedError"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsErrorHelpers.decorateEsCannotExecuteScriptError.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "Error"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsErrorHelpers.decorateEsCannotExecuteScriptError.$2",
+                "type": "string",
+                "tags": [],
+                "label": "reason",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsErrorHelpers.isEsCannotExecuteScriptError",
+            "type": "Function",
+            "tags": [],
+            "label": "isEsCannotExecuteScriptError",
+            "description": [],
+            "signature": [
+              "(error: Error | ",
+              "DecoratedError",
+              ") => boolean"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsErrorHelpers.isEsCannotExecuteScriptError.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "Error | ",
+                  "DecoratedError"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsErrorHelpers.decorateEsUnavailableError",
+            "type": "Function",
+            "tags": [],
+            "label": "decorateEsUnavailableError",
+            "description": [],
+            "signature": [
+              "(error: Error, reason?: string | undefined) => ",
+              "DecoratedError"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsErrorHelpers.decorateEsUnavailableError.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "Error"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsErrorHelpers.decorateEsUnavailableError.$2",
+                "type": "string",
+                "tags": [],
+                "label": "reason",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsErrorHelpers.isEsUnavailableError",
+            "type": "Function",
+            "tags": [],
+            "label": "isEsUnavailableError",
+            "description": [],
+            "signature": [
+              "(error: Error | ",
+              "DecoratedError",
+              ") => boolean"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsErrorHelpers.isEsUnavailableError.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "Error | ",
+                  "DecoratedError"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsErrorHelpers.decorateGeneralError",
+            "type": "Function",
+            "tags": [],
+            "label": "decorateGeneralError",
+            "description": [],
+            "signature": [
+              "(error: Error, reason?: string | undefined) => ",
+              "DecoratedError"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsErrorHelpers.decorateGeneralError.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "Error"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsErrorHelpers.decorateGeneralError.$2",
+                "type": "string",
+                "tags": [],
+                "label": "reason",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsErrorHelpers.isGeneralError",
+            "type": "Function",
+            "tags": [],
+            "label": "isGeneralError",
+            "description": [],
+            "signature": [
+              "(error: Error | ",
+              "DecoratedError",
+              ") => boolean"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsErrorHelpers.isGeneralError.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "Error | ",
+                  "DecoratedError"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError",
+            "type": "Function",
+            "tags": [],
+            "label": "createGenericNotFoundEsUnavailableError",
+            "description": [],
+            "signature": [
+              "(type?: string | null | undefined, id?: string | null | undefined) => ",
+              "DecoratedError"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string | null | undefined"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string | null | undefined"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.SavedObjectsUtils",
+        "type": "Class",
+        "tags": [],
+        "label": "SavedObjectsUtils",
+        "description": [],
+        "signature": [
+          "SavedObjectsUtils"
+        ],
+        "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsUtils.namespaceIdToString",
+            "type": "Function",
+            "tags": [],
+            "label": "namespaceIdToString",
+            "description": [
+              "\nConverts a given saved object namespace ID to its string representation. All namespace IDs have an identical string representation, with\nthe exception of the `undefined` namespace ID (which has a namespace string of `'default'`).\n"
+            ],
+            "signature": [
+              "(namespace?: string | undefined) => string"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsUtils.namespaceIdToString.$1",
+                "type": "string",
+                "tags": [],
+                "label": "namespace",
+                "description": [
+                  "The namespace ID, which must be either a non-empty string or `undefined`."
+                ],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsUtils.namespaceStringToId",
+            "type": "Function",
+            "tags": [],
+            "label": "namespaceStringToId",
+            "description": [
+              "\nConverts a given saved object namespace string to its ID representation. All namespace strings have an identical ID representation, with\nthe exception of the `'default'` namespace string (which has a namespace ID of `undefined`).\n"
+            ],
+            "signature": [
+              "(namespace: string) => string | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsUtils.namespaceStringToId.$1",
+                "type": "string",
+                "tags": [],
+                "label": "namespace",
+                "description": [
+                  "The namespace string, which must be non-empty."
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsUtils.createEmptyFindResponse",
+            "type": "Function",
+            "tags": [],
+            "label": "createEmptyFindResponse",
+            "description": [
+              "\nCreates an empty response for a find operation. This is only intended to be used by saved objects client wrappers."
+            ],
+            "signature": [
+              "<T, A>({ page, perPage, }: ",
+              "SavedObjectsFindOptions",
+              ") => ",
+              "SavedObjectsFindResponse",
+              "<T, A>"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsUtils.createEmptyFindResponse.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "__0",
+                "description": [],
+                "signature": [
+                  "SavedObjectsFindOptions"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsUtils.generateId",
+            "type": "Function",
+            "tags": [],
+            "label": "generateId",
+            "description": [
+              "\nGenerates a random ID for a saved objects."
+            ],
+            "signature": [
+              "() => string"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsUtils.isRandomId",
+            "type": "Function",
+            "tags": [
+              "todo"
+            ],
+            "label": "isRandomId",
+            "description": [
+              "\nValidates that a saved object ID has been randomly generated.\n"
+            ],
+            "signature": [
+              "(id: string | undefined) => boolean"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsUtils.isRandomId.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [
+                  "The ID of a saved object."
+                ],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsUtils.getConvertedObjectId",
+            "type": "Function",
+            "tags": [],
+            "label": "getConvertedObjectId",
+            "description": [
+              "\nUses a single-namespace object's \"legacy ID\" to determine what its new ID will be after it is converted to a multi-namespace type.\n"
+            ],
+            "signature": [
+              "(namespace: string | undefined, type: string, id: string) => string"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsUtils.getConvertedObjectId.$1",
+                "type": "string",
+                "tags": [],
+                "label": "namespace",
+                "description": [
+                  "The namespace of the saved object before it is converted."
+                ],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsUtils.getConvertedObjectId.$2",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [
+                  "The type of the saved object before it is converted."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsUtils.getConvertedObjectId.$3",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [
+                  "The ID of the saved object before it is converted."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "The ID of the saved object after it is converted."
+            ]
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "functions": [
+      {
+        "parentPluginId": "core",
+        "id": "def-server.mergeSavedObjectMigrationMaps",
+        "type": "Function",
+        "tags": [],
+        "label": "mergeSavedObjectMigrationMaps",
+        "description": [
+          "\nMerges two saved object migration maps.\n\nIf there is a migration for a given version on only one of the maps,\nthat migration function will be used:\n\nmergeSavedObjectMigrationMaps({ '1.2.3': f }, { '4.5.6': g }) -> { '1.2.3': f, '4.5.6': g }\n\nIf there is a migration for a given version on both maps, the migrations will be composed:\n\nmergeSavedObjectMigrationMaps({ '1.2.3': f }, { '1.2.3': g }) -> { '1.2.3': (doc, context) => f(g(doc, context), context) }\n"
+        ],
+        "signature": [
+          "(map1: ",
+          "SavedObjectMigrationMap",
+          ", map2: ",
+          "SavedObjectMigrationMap",
+          ") => ",
+          "SavedObjectMigrationMap"
+        ],
+        "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.mergeSavedObjectMigrationMaps.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "map1",
+            "description": [],
+            "signature": [
+              "SavedObjectMigrationMap"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.mergeSavedObjectMigrationMaps.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "map2",
+            "description": [],
+            "signature": [
+              "SavedObjectMigrationMap"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-utils-server/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "core",
         "id": "def-server.pollEsNodesVersion",
@@ -15798,7 +17261,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
-              ">; }; name: string | symbol; transform: ",
+              ">; }; cluster: ",
+              "default",
+              "; eql: ",
               "default",
               "; search: { <TDocument = unknown, TAggregations = Record<string, ",
               "AggregationsAggregate",
@@ -15832,11 +17297,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; cluster: ",
-              "default",
-              "; eql: ",
-              "default",
-              "; create: { <TDocument = unknown>(this: That, params: ",
+              "<TDocument, TAggregations>>; }; create: { <TDocument = unknown>(this: That, params: ",
               "CreateRequest",
               "<TDocument> | ",
               "CreateRequest",
@@ -15866,7 +17327,7 @@
               "default",
               "; security: ",
               "default",
-              "; index: { <TDocument = unknown>(this: That, params: ",
+              "; name: string | symbol; index: { <TDocument = unknown>(this: That, params: ",
               "IndexRequest",
               "<TDocument> | ",
               "IndexRequest",
@@ -16877,6 +18338,8 @@
               " | undefined): Promise<",
               "TermvectorsResponse",
               ">; }; textStructure: ",
+              "default",
+              "; transform: ",
               "default",
               "; updateByQuery: { (this: That, params: ",
               "UpdateByQueryRequest",
@@ -20724,7 +22187,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
-              ">; }; name: string | symbol; transform: ",
+              ">; }; cluster: ",
+              "default",
+              "; eql: ",
               "default",
               "; search: { <TDocument = unknown, TAggregations = Record<string, ",
               "AggregationsAggregate",
@@ -20758,11 +22223,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; cluster: ",
-              "default",
-              "; eql: ",
-              "default",
-              "; create: { <TDocument = unknown>(this: That, params: ",
+              "<TDocument, TAggregations>>; }; create: { <TDocument = unknown>(this: That, params: ",
               "CreateRequest",
               "<TDocument> | ",
               "CreateRequest",
@@ -20792,7 +22253,7 @@
               "default",
               "; security: ",
               "default",
-              "; index: { <TDocument = unknown>(this: That, params: ",
+              "; name: string | symbol; index: { <TDocument = unknown>(this: That, params: ",
               "IndexRequest",
               "<TDocument> | ",
               "IndexRequest",
@@ -21803,6 +23264,8 @@
               " | undefined): Promise<",
               "TermvectorsResponse",
               ">; }; textStructure: ",
+              "default",
+              "; transform: ",
               "default",
               "; updateByQuery: { (this: That, params: ",
               "UpdateByQueryRequest",
@@ -21927,7 +23390,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
-              ">; }; name: string | symbol; transform: ",
+              ">; }; cluster: ",
+              "default",
+              "; eql: ",
               "default",
               "; search: { <TDocument = unknown, TAggregations = Record<string, ",
               "AggregationsAggregate",
@@ -21961,11 +23426,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; cluster: ",
-              "default",
-              "; eql: ",
-              "default",
-              "; create: { <TDocument = unknown>(this: That, params: ",
+              "<TDocument, TAggregations>>; }; create: { <TDocument = unknown>(this: That, params: ",
               "CreateRequest",
               "<TDocument> | ",
               "CreateRequest",
@@ -21995,7 +23456,7 @@
               "default",
               "; security: ",
               "default",
-              "; index: { <TDocument = unknown>(this: That, params: ",
+              "; name: string | symbol; index: { <TDocument = unknown>(this: That, params: ",
               "IndexRequest",
               "<TDocument> | ",
               "IndexRequest",
@@ -23006,6 +24467,8 @@
               " | undefined): Promise<",
               "TermvectorsResponse",
               ">; }; textStructure: ",
+              "default",
+              "; transform: ",
               "default",
               "; updateByQuery: { (this: That, params: ",
               "UpdateByQueryRequest",
@@ -24281,7 +25744,7 @@
             "label": "level",
             "description": [],
             "signature": [
-              "\"error\" | \"all\" | \"off\" | \"info\" | \"debug\" | \"trace\" | \"warn\" | \"fatal\""
+              "\"error\" | \"all\" | \"info\" | \"debug\" | \"off\" | \"trace\" | \"warn\" | \"fatal\""
             ],
             "path": "node_modules/@types/kbn__core-logging-server/index.d.ts",
             "deprecated": false
@@ -26222,7 +27685,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
-              ">; }; name: string | symbol; transform: ",
+              ">; }; cluster: ",
+              "default",
+              "; eql: ",
               "default",
               "; search: { <TDocument = unknown, TAggregations = Record<string, ",
               "AggregationsAggregate",
@@ -26256,11 +27721,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; cluster: ",
-              "default",
-              "; eql: ",
-              "default",
-              "; create: { <TDocument = unknown>(this: That, params: ",
+              "<TDocument, TAggregations>>; }; create: { <TDocument = unknown>(this: That, params: ",
               "CreateRequest",
               "<TDocument> | ",
               "CreateRequest",
@@ -26290,7 +27751,7 @@
               "default",
               "; security: ",
               "default",
-              "; index: { <TDocument = unknown>(this: That, params: ",
+              "; name: string | symbol; index: { <TDocument = unknown>(this: That, params: ",
               "IndexRequest",
               "<TDocument> | ",
               "IndexRequest",
@@ -27301,6 +28762,8 @@
               " | undefined): Promise<",
               "TermvectorsResponse",
               ">; }; textStructure: ",
+              "default",
+              "; transform: ",
               "default",
               "; updateByQuery: { (this: That, params: ",
               "UpdateByQueryRequest",
@@ -36951,7 +38414,7 @@
         "label": "EcsEventType",
         "description": [],
         "signature": [
-          "\"start\" | \"error\" | \"connection\" | \"end\" | \"group\" | \"user\" | \"info\" | \"admin\" | \"protocol\" | \"access\" | \"allowed\" | \"change\" | \"creation\" | \"deletion\" | \"denied\" | \"installation\""
+          "\"start\" | \"error\" | \"connection\" | \"user\" | \"info\" | \"group\" | \"end\" | \"admin\" | \"protocol\" | \"access\" | \"allowed\" | \"change\" | \"creation\" | \"deletion\" | \"denied\" | \"installation\""
         ],
         "path": "node_modules/@types/kbn__logging/index.d.ts",
         "deprecated": false,
@@ -37019,7 +38482,9 @@
           "TransportRequestOptions",
           " | undefined): Promise<",
           "WriteResponseBase",
-          ">; }; name: string | symbol; transform: ",
+          ">; }; cluster: ",
+          "default",
+          "; eql: ",
           "default",
           "; search: { <TDocument = unknown, TAggregations = Record<string, ",
           "AggregationsAggregate",
@@ -37053,11 +38518,7 @@
           "TransportRequestOptions",
           " | undefined): Promise<",
           "SearchResponse",
-          "<TDocument, TAggregations>>; }; cluster: ",
-          "default",
-          "; eql: ",
-          "default",
-          "; create: { <TDocument = unknown>(this: That, params: ",
+          "<TDocument, TAggregations>>; }; create: { <TDocument = unknown>(this: That, params: ",
           "CreateRequest",
           "<TDocument> | ",
           "CreateRequest",
@@ -37087,7 +38548,7 @@
           "default",
           "; security: ",
           "default",
-          "; index: { <TDocument = unknown>(this: That, params: ",
+          "; name: string | symbol; index: { <TDocument = unknown>(this: That, params: ",
           "IndexRequest",
           "<TDocument> | ",
           "IndexRequest",
@@ -38098,6 +39559,8 @@
           " | undefined): Promise<",
           "TermvectorsResponse",
           ">; }; textStructure: ",
+          "default",
+          "; transform: ",
           "default",
           "; updateByQuery: { (this: That, params: ",
           "UpdateByQueryRequest",
@@ -39404,7 +40867,7 @@
         "signature": [
           "{ options?: string[] | number[] | undefined; type?: ",
           "UiSettingsType",
-          " | undefined; metric?: { type: string; name: string; } | undefined; name?: string | undefined; order?: number | undefined; value?: unknown; description?: string | undefined; category?: string[] | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; deprecation?: ",
+          " | undefined; metric?: { type: string; name: string; } | undefined; value?: unknown; description?: string | undefined; name?: string | undefined; order?: number | undefined; category?: string[] | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; deprecation?: ",
           "DeprecationSettings",
           " | undefined; }"
         ],
