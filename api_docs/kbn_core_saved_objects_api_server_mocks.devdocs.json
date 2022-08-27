@@ -1,0 +1,118 @@
+{
+  "id": "@kbn/core-saved-objects-api-server-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-saved-objects-api-server-mocks",
+        "id": "def-server.savedObjectsClientMock",
+        "type": "Object",
+        "tags": [],
+        "label": "savedObjectsClientMock",
+        "description": [],
+        "path": "packages/core/saved-objects/core-saved-objects-api-server-mocks/src/saved_objects_client.mock.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server-mocks",
+            "id": "def-server.savedObjectsClientMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "SavedObjectsClientContract",
+              ">"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server-mocks/src/saved_objects_client.mock.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-api-server-mocks",
+        "id": "def-server.savedObjectsClientProviderMock",
+        "type": "Object",
+        "tags": [],
+        "label": "savedObjectsClientProviderMock",
+        "description": [],
+        "path": "packages/core/saved-objects/core-saved-objects-api-server-mocks/src/scoped_client_provider.mock.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server-mocks",
+            "id": "def-server.savedObjectsClientProviderMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "ISavedObjectsClientProvider",
+              ">"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server-mocks/src/scoped_client_provider.mock.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-api-server-mocks",
+        "id": "def-server.savedObjectsRepositoryMock",
+        "type": "Object",
+        "tags": [],
+        "label": "savedObjectsRepositoryMock",
+        "description": [],
+        "path": "packages/core/saved-objects/core-saved-objects-api-server-mocks/src/repository.mock.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server-mocks",
+            "id": "def-server.savedObjectsRepositoryMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "ISavedObjectsRepository",
+              ">"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server-mocks/src/repository.mock.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

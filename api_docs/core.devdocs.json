@@ -11679,6 +11679,1599 @@
       },
       {
         "parentPluginId": "core",
+        "id": "def-server.SavedObjectsExportError",
+        "type": "Class",
+        "tags": [],
+        "label": "SavedObjectsExportError",
+        "description": [],
+        "signature": [
+          "SavedObjectsExportError",
+          " extends Error"
+        ],
+        "path": "node_modules/@types/kbn__core-saved-objects-import-export-server-internal/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsExportError.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "node_modules/@types/kbn__core-saved-objects-import-export-server-internal/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsExportError.attributes",
+            "type": "Object",
+            "tags": [],
+            "label": "attributes",
+            "description": [],
+            "signature": [
+              "Record<string, any> | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-import-export-server-internal/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsExportError.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-import-export-server-internal/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsExportError.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-import-export-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsExportError.Unnamed.$2",
+                "type": "string",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-import-export-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsExportError.Unnamed.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "attributes",
+                "description": [],
+                "signature": [
+                  "Record<string, any> | undefined"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-import-export-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsExportError.exportSizeExceeded",
+            "type": "Function",
+            "tags": [],
+            "label": "exportSizeExceeded",
+            "description": [],
+            "signature": [
+              "(limit: number) => ",
+              "SavedObjectsExportError"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-import-export-server-internal/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsExportError.exportSizeExceeded.$1",
+                "type": "number",
+                "tags": [],
+                "label": "limit",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-import-export-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsExportError.objectFetchError",
+            "type": "Function",
+            "tags": [],
+            "label": "objectFetchError",
+            "description": [],
+            "signature": [
+              "(objects: ",
+              "SavedObject",
+              "<unknown>[]) => ",
+              "SavedObjectsExportError"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-import-export-server-internal/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsExportError.objectFetchError.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "objects",
+                "description": [],
+                "signature": [
+                  "SavedObject",
+                  "<unknown>[]"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-import-export-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsExportError.objectTransformError",
+            "type": "Function",
+            "tags": [],
+            "label": "objectTransformError",
+            "description": [
+              "\nError returned when a {@link SavedObjectsExportTransform | export transform} threw an error"
+            ],
+            "signature": [
+              "(objects: ",
+              "SavedObject",
+              "<unknown>[], cause: Error) => ",
+              "SavedObjectsExportError"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-import-export-server-internal/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsExportError.objectTransformError.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "objects",
+                "description": [],
+                "signature": [
+                  "SavedObject",
+                  "<unknown>[]"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-import-export-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsExportError.objectTransformError.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "cause",
+                "description": [],
+                "signature": [
+                  "Error"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-import-export-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsExportError.invalidTransformError",
+            "type": "Function",
+            "tags": [],
+            "label": "invalidTransformError",
+            "description": [
+              "\nError returned when a {@link SavedObjectsExportTransform | export transform} performed an invalid operation\nduring the transform, such as removing objects from the export, or changing an object's type or id."
+            ],
+            "signature": [
+              "(objectKeys: string[]) => ",
+              "SavedObjectsExportError"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-import-export-server-internal/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsExportError.invalidTransformError.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "objectKeys",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-import-export-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.SavedObjectsImportError",
+        "type": "Class",
+        "tags": [],
+        "label": "SavedObjectsImportError",
+        "description": [],
+        "signature": [
+          "SavedObjectsImportError",
+          " extends Error"
+        ],
+        "path": "node_modules/@types/kbn__core-saved-objects-import-export-server-internal/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsImportError.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "node_modules/@types/kbn__core-saved-objects-import-export-server-internal/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsImportError.attributes",
+            "type": "Object",
+            "tags": [],
+            "label": "attributes",
+            "description": [],
+            "signature": [
+              "Record<string, any> | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-import-export-server-internal/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsImportError.importSizeExceeded",
+            "type": "Function",
+            "tags": [],
+            "label": "importSizeExceeded",
+            "description": [],
+            "signature": [
+              "(limit: number) => ",
+              "SavedObjectsImportError"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-import-export-server-internal/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsImportError.importSizeExceeded.$1",
+                "type": "number",
+                "tags": [],
+                "label": "limit",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-import-export-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsImportError.nonUniqueImportObjects",
+            "type": "Function",
+            "tags": [],
+            "label": "nonUniqueImportObjects",
+            "description": [],
+            "signature": [
+              "(nonUniqueEntries: string[]) => ",
+              "SavedObjectsImportError"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-import-export-server-internal/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsImportError.nonUniqueImportObjects.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "nonUniqueEntries",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-import-export-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsImportError.nonUniqueRetryObjects",
+            "type": "Function",
+            "tags": [],
+            "label": "nonUniqueRetryObjects",
+            "description": [],
+            "signature": [
+              "(nonUniqueRetryObjects: string[]) => ",
+              "SavedObjectsImportError"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-import-export-server-internal/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsImportError.nonUniqueRetryObjects.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "nonUniqueRetryObjects",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-import-export-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsImportError.nonUniqueRetryDestinations",
+            "type": "Function",
+            "tags": [],
+            "label": "nonUniqueRetryDestinations",
+            "description": [],
+            "signature": [
+              "(nonUniqueRetryDestinations: string[]) => ",
+              "SavedObjectsImportError"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-import-export-server-internal/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsImportError.nonUniqueRetryDestinations.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "nonUniqueRetryDestinations",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-import-export-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsImportError.referencesFetchError",
+            "type": "Function",
+            "tags": [],
+            "label": "referencesFetchError",
+            "description": [],
+            "signature": [
+              "(objects: ",
+              "SavedObject",
+              "<unknown>[]) => ",
+              "SavedObjectsImportError"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-import-export-server-internal/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsImportError.referencesFetchError.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "objects",
+                "description": [],
+                "signature": [
+                  "SavedObject",
+                  "<unknown>[]"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-import-export-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.SavedObjectsRepository",
+        "type": "Class",
+        "tags": [],
+        "label": "SavedObjectsRepository",
+        "description": [],
+        "signature": [
+          "SavedObjectsRepository",
+          " implements ",
+          "ISavedObjectsRepository"
+        ],
+        "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsRepository.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [
+              "\n{@inheritDoc ISavedObjectsRepository.create}"
+            ],
+            "signature": [
+              "<T = unknown>(type: string, attributes: T, options?: ",
+              "SavedObjectsCreateOptions",
+              " | undefined) => Promise<",
+              "SavedObject",
+              "<T>>"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.create.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.create.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "attributes",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.create.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "SavedObjectsCreateOptions",
+                  " | undefined"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsRepository.bulkCreate",
+            "type": "Function",
+            "tags": [],
+            "label": "bulkCreate",
+            "description": [
+              "\n{@inheritDoc ISavedObjectsRepository.bulkCreate}"
+            ],
+            "signature": [
+              "<T = unknown>(objects: ",
+              "SavedObjectsBulkCreateObject",
+              "<T>[], options?: ",
+              "SavedObjectsCreateOptions",
+              " | undefined) => Promise<",
+              "SavedObjectsBulkResponse",
+              "<T>>"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.bulkCreate.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "objects",
+                "description": [],
+                "signature": [
+                  "SavedObjectsBulkCreateObject",
+                  "<T>[]"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.bulkCreate.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "SavedObjectsCreateOptions",
+                  " | undefined"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsRepository.checkConflicts",
+            "type": "Function",
+            "tags": [],
+            "label": "checkConflicts",
+            "description": [
+              "\n{@inheritDoc ISavedObjectsRepository.checkConflicts}"
+            ],
+            "signature": [
+              "(objects?: ",
+              "SavedObjectsCheckConflictsObject",
+              "[] | undefined, options?: ",
+              "SavedObjectsBaseOptions",
+              " | undefined) => Promise<",
+              "SavedObjectsCheckConflictsResponse",
+              ">"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.checkConflicts.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "objects",
+                "description": [],
+                "signature": [
+                  "SavedObjectsCheckConflictsObject",
+                  "[] | undefined"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.checkConflicts.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "SavedObjectsBaseOptions",
+                  " | undefined"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsRepository.delete",
+            "type": "Function",
+            "tags": [],
+            "label": "delete",
+            "description": [
+              "\n{@inheritDoc ISavedObjectsRepository.delete}"
+            ],
+            "signature": [
+              "(type: string, id: string, options?: ",
+              "SavedObjectsDeleteOptions",
+              " | undefined) => Promise<{}>"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.delete.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.delete.$2",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.delete.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "SavedObjectsDeleteOptions",
+                  " | undefined"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsRepository.deleteByNamespace",
+            "type": "Function",
+            "tags": [],
+            "label": "deleteByNamespace",
+            "description": [
+              "\n{@inheritDoc ISavedObjectsRepository.deleteByNamespace}"
+            ],
+            "signature": [
+              "(namespace: string, options?: ",
+              "SavedObjectsDeleteByNamespaceOptions",
+              " | undefined) => Promise<any>"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.deleteByNamespace.$1",
+                "type": "string",
+                "tags": [],
+                "label": "namespace",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.deleteByNamespace.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "SavedObjectsDeleteByNamespaceOptions",
+                  " | undefined"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsRepository.find",
+            "type": "Function",
+            "tags": [],
+            "label": "find",
+            "description": [
+              "\n{@inheritDoc ISavedObjectsRepository.find}"
+            ],
+            "signature": [
+              "<T = unknown, A = unknown>(options: ",
+              "SavedObjectsFindOptions",
+              ") => Promise<",
+              "SavedObjectsFindResponse",
+              "<T, A>>"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.find.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "SavedObjectsFindOptions"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsRepository.bulkGet",
+            "type": "Function",
+            "tags": [],
+            "label": "bulkGet",
+            "description": [
+              "\n{@inheritDoc ISavedObjectsRepository.bulkGet}"
+            ],
+            "signature": [
+              "<T = unknown>(objects?: ",
+              "SavedObjectsBulkGetObject",
+              "[] | undefined, options?: ",
+              "SavedObjectsBaseOptions",
+              " | undefined) => Promise<",
+              "SavedObjectsBulkResponse",
+              "<T>>"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.bulkGet.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "objects",
+                "description": [],
+                "signature": [
+                  "SavedObjectsBulkGetObject",
+                  "[] | undefined"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.bulkGet.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "SavedObjectsBaseOptions",
+                  " | undefined"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsRepository.bulkResolve",
+            "type": "Function",
+            "tags": [],
+            "label": "bulkResolve",
+            "description": [
+              "\n{@inheritDoc ISavedObjectsRepository.bulkResolve}"
+            ],
+            "signature": [
+              "<T = unknown>(objects: ",
+              "SavedObjectsBulkResolveObject",
+              "[], options?: ",
+              "SavedObjectsBaseOptions",
+              " | undefined) => Promise<",
+              "SavedObjectsBulkResolveResponse",
+              "<T>>"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.bulkResolve.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "objects",
+                "description": [],
+                "signature": [
+                  "SavedObjectsBulkResolveObject",
+                  "[]"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.bulkResolve.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "SavedObjectsBaseOptions",
+                  " | undefined"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsRepository.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [
+              "\n{@inheritDoc ISavedObjectsRepository.get}"
+            ],
+            "signature": [
+              "<T = unknown>(type: string, id: string, options?: ",
+              "SavedObjectsBaseOptions",
+              " | undefined) => Promise<",
+              "SavedObject",
+              "<T>>"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.get.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.get.$2",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.get.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "SavedObjectsBaseOptions",
+                  " | undefined"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsRepository.resolve",
+            "type": "Function",
+            "tags": [],
+            "label": "resolve",
+            "description": [
+              "\n{@inheritDoc ISavedObjectsRepository.resolve}"
+            ],
+            "signature": [
+              "<T = unknown>(type: string, id: string, options?: ",
+              "SavedObjectsBaseOptions",
+              " | undefined) => Promise<",
+              "SavedObjectsResolveResponse",
+              "<T>>"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.resolve.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.resolve.$2",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.resolve.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "SavedObjectsBaseOptions",
+                  " | undefined"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsRepository.update",
+            "type": "Function",
+            "tags": [],
+            "label": "update",
+            "description": [
+              "\n{@inheritDoc ISavedObjectsRepository.update}"
+            ],
+            "signature": [
+              "<T = unknown>(type: string, id: string, attributes: Partial<T>, options?: ",
+              "SavedObjectsUpdateOptions",
+              "<T> | undefined) => Promise<",
+              "SavedObjectsUpdateResponse",
+              "<T>>"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.update.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.update.$2",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.update.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "attributes",
+                "description": [],
+                "signature": [
+                  "Partial<T>"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.update.$4",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "SavedObjectsUpdateOptions",
+                  "<T> | undefined"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsRepository.collectMultiNamespaceReferences",
+            "type": "Function",
+            "tags": [],
+            "label": "collectMultiNamespaceReferences",
+            "description": [
+              "\n{@inheritDoc ISavedObjectsRepository.collectMultiNamespaceReferences}"
+            ],
+            "signature": [
+              "(objects: ",
+              "SavedObjectsCollectMultiNamespaceReferencesObject",
+              "[], options?: ",
+              "SavedObjectsCollectMultiNamespaceReferencesOptions",
+              " | undefined) => Promise<",
+              "SavedObjectsCollectMultiNamespaceReferencesResponse",
+              ">"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.collectMultiNamespaceReferences.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "objects",
+                "description": [],
+                "signature": [
+                  "SavedObjectsCollectMultiNamespaceReferencesObject",
+                  "[]"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.collectMultiNamespaceReferences.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "SavedObjectsCollectMultiNamespaceReferencesOptions",
+                  " | undefined"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsRepository.updateObjectsSpaces",
+            "type": "Function",
+            "tags": [],
+            "label": "updateObjectsSpaces",
+            "description": [
+              "\n{@inheritDoc ISavedObjectsRepository.updateObjectsSpaces}"
+            ],
+            "signature": [
+              "(objects: ",
+              "SavedObjectsUpdateObjectsSpacesObject",
+              "[], spacesToAdd: string[], spacesToRemove: string[], options?: ",
+              "SavedObjectsUpdateObjectsSpacesOptions",
+              " | undefined) => Promise<",
+              "SavedObjectsUpdateObjectsSpacesResponse",
+              ">"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.updateObjectsSpaces.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "objects",
+                "description": [],
+                "signature": [
+                  "SavedObjectsUpdateObjectsSpacesObject",
+                  "[]"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.updateObjectsSpaces.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "spacesToAdd",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.updateObjectsSpaces.$3",
+                "type": "Array",
+                "tags": [],
+                "label": "spacesToRemove",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.updateObjectsSpaces.$4",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "SavedObjectsUpdateObjectsSpacesOptions",
+                  " | undefined"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsRepository.bulkUpdate",
+            "type": "Function",
+            "tags": [],
+            "label": "bulkUpdate",
+            "description": [
+              "\n{@inheritDoc ISavedObjectsRepository.bulkUpdate}"
+            ],
+            "signature": [
+              "<T = unknown>(objects: ",
+              "SavedObjectsBulkUpdateObject",
+              "<T>[], options?: ",
+              "SavedObjectsBulkUpdateOptions",
+              " | undefined) => Promise<",
+              "SavedObjectsBulkUpdateResponse",
+              "<T>>"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.bulkUpdate.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "objects",
+                "description": [],
+                "signature": [
+                  "SavedObjectsBulkUpdateObject",
+                  "<T>[]"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.bulkUpdate.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "SavedObjectsBulkUpdateOptions",
+                  " | undefined"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsRepository.removeReferencesTo",
+            "type": "Function",
+            "tags": [],
+            "label": "removeReferencesTo",
+            "description": [
+              "\n{@inheritDoc ISavedObjectsRepository.removeReferencesTo}"
+            ],
+            "signature": [
+              "(type: string, id: string, options?: ",
+              "SavedObjectsRemoveReferencesToOptions",
+              " | undefined) => Promise<",
+              "SavedObjectsRemoveReferencesToResponse",
+              ">"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.removeReferencesTo.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.removeReferencesTo.$2",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.removeReferencesTo.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "SavedObjectsRemoveReferencesToOptions",
+                  " | undefined"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsRepository.incrementCounter",
+            "type": "Function",
+            "tags": [],
+            "label": "incrementCounter",
+            "description": [
+              "\n{@inheritDoc ISavedObjectsRepository.incrementCounter}"
+            ],
+            "signature": [
+              "<T = unknown>(type: string, id: string, counterFields: (string | ",
+              "SavedObjectsIncrementCounterField",
+              ")[], options?: ",
+              "SavedObjectsIncrementCounterOptions",
+              "<T> | undefined) => Promise<",
+              "SavedObject",
+              "<T>>"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.incrementCounter.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.incrementCounter.$2",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.incrementCounter.$3",
+                "type": "Array",
+                "tags": [],
+                "label": "counterFields",
+                "description": [],
+                "signature": [
+                  "(string | ",
+                  "SavedObjectsIncrementCounterField",
+                  ")[]"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.incrementCounter.$4",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "SavedObjectsIncrementCounterOptions",
+                  "<T> | undefined"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsRepository.openPointInTimeForType",
+            "type": "Function",
+            "tags": [],
+            "label": "openPointInTimeForType",
+            "description": [
+              "\n{@inheritDoc ISavedObjectsRepository.openPointInTimeForType}"
+            ],
+            "signature": [
+              "(type: string | string[], { keepAlive, preference }?: ",
+              "SavedObjectsOpenPointInTimeOptions",
+              " | undefined) => Promise<",
+              "SavedObjectsOpenPointInTimeResponse",
+              ">"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.openPointInTimeForType.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string | string[]"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.openPointInTimeForType.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "{ keepAlive, preference }",
+                "description": [],
+                "signature": [
+                  "SavedObjectsOpenPointInTimeOptions",
+                  " | undefined"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsRepository.closePointInTime",
+            "type": "Function",
+            "tags": [],
+            "label": "closePointInTime",
+            "description": [
+              "\n{@inheritDoc ISavedObjectsRepository.closePointInTime}"
+            ],
+            "signature": [
+              "(id: string, options?: ",
+              "SavedObjectsBaseOptions",
+              " | undefined) => Promise<",
+              "SavedObjectsClosePointInTimeResponse",
+              ">"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.closePointInTime.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.closePointInTime.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "SavedObjectsBaseOptions",
+                  " | undefined"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsRepository.createPointInTimeFinder",
+            "type": "Function",
+            "tags": [],
+            "label": "createPointInTimeFinder",
+            "description": [
+              "\n{@inheritDoc ISavedObjectsRepository.createPointInTimeFinder}"
+            ],
+            "signature": [
+              "<T = unknown, A = unknown>(findOptions: ",
+              "SavedObjectsCreatePointInTimeFinderOptions",
+              ", dependencies?: ",
+              "SavedObjectsCreatePointInTimeFinderDependencies",
+              " | undefined) => ",
+              "ISavedObjectsPointInTimeFinder",
+              "<T, A>"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.createPointInTimeFinder.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "findOptions",
+                "description": [],
+                "signature": [
+                  "SavedObjectsCreatePointInTimeFinderOptions"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsRepository.createPointInTimeFinder.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "dependencies",
+                "description": [],
+                "signature": [
+                  "SavedObjectsCreatePointInTimeFinderDependencies",
+                  " | undefined"
+                ],
+                "path": "node_modules/@types/kbn__core-saved-objects-api-server-internal/index.d.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
         "id": "def-server.SavedObjectsUtils",
         "type": "Class",
         "tags": [],
@@ -13594,6 +15187,178 @@
       },
       {
         "parentPluginId": "core",
+        "id": "def-server.CoreConfigUsageData",
+        "type": "Interface",
+        "tags": [],
+        "label": "CoreConfigUsageData",
+        "description": [
+          "\nUsage data on this cluster's configuration of Core features"
+        ],
+        "signature": [
+          "CoreConfigUsageData"
+        ],
+        "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreConfigUsageData.elasticsearch",
+            "type": "Object",
+            "tags": [],
+            "label": "elasticsearch",
+            "description": [],
+            "signature": [
+              "{ sniffOnStart: boolean; sniffIntervalMs?: number | undefined; sniffOnConnectionFault: boolean; numberOfHostsConfigured: number; requestHeadersWhitelistConfigured: boolean; customHeadersConfigured: boolean; shardTimeoutMs: number; requestTimeoutMs: number; pingTimeoutMs: number; logQueries: boolean; ssl: { verificationMode: \"none\" | \"full\" | \"certificate\"; certificateAuthoritiesConfigured: boolean; certificateConfigured: boolean; keyConfigured: boolean; keystoreConfigured: boolean; truststoreConfigured: boolean; alwaysPresentCertificate: boolean; }; apiVersion: string; healthCheckDelayMs: number; principal: \"unknown\" | \"elastic_user\" | \"kibana_user\" | \"kibana_system_user\" | \"other_user\" | \"kibana_service_account\"; }"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreConfigUsageData.http",
+            "type": "Object",
+            "tags": [],
+            "label": "http",
+            "description": [],
+            "signature": [
+              "{ basePathConfigured: boolean; maxPayloadInBytes: number; rewriteBasePath: boolean; keepaliveTimeout: number; socketTimeout: number; compression: { enabled: boolean; referrerWhitelistConfigured: boolean; }; xsrf: { disableProtection: boolean; allowlistConfigured: boolean; }; requestId: { allowFromAnyIp: boolean; ipAllowlistConfigured: boolean; }; ssl: { certificateAuthoritiesConfigured: boolean; certificateConfigured: boolean; cipherSuites: string[]; keyConfigured: boolean; keystoreConfigured: boolean; truststoreConfigured: boolean; redirectHttpFromPortConfigured: boolean; supportedProtocols: string[]; clientAuthentication: \"optional\" | \"none\" | \"required\"; }; securityResponseHeaders: { strictTransportSecurity: string; xContentTypeOptions: string; referrerPolicy: string; permissionsPolicyConfigured: boolean; disableEmbedding: boolean; }; }"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreConfigUsageData.logging",
+            "type": "Object",
+            "tags": [],
+            "label": "logging",
+            "description": [],
+            "signature": [
+              "{ appendersTypesUsed: string[]; loggersConfiguredCount: number; }"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreConfigUsageData.savedObjects",
+            "type": "Object",
+            "tags": [],
+            "label": "savedObjects",
+            "description": [],
+            "signature": [
+              "{ customIndex: boolean; maxImportPayloadBytes: number; maxImportExportSize: number; }"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreConfigUsageData.deprecatedKeys",
+            "type": "Object",
+            "tags": [],
+            "label": "deprecatedKeys",
+            "description": [],
+            "signature": [
+              "{ set: string[]; unset: string[]; }"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.CoreEnvironmentUsageData",
+        "type": "Interface",
+        "tags": [],
+        "label": "CoreEnvironmentUsageData",
+        "description": [
+          "\nUsage data on this Kibana node's runtime environment."
+        ],
+        "signature": [
+          "CoreEnvironmentUsageData"
+        ],
+        "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreEnvironmentUsageData.memory",
+            "type": "Object",
+            "tags": [],
+            "label": "memory",
+            "description": [],
+            "signature": [
+              "{ heapTotalBytes: number; heapUsedBytes: number; heapSizeLimit: number; }"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.CoreIncrementCounterParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "CoreIncrementCounterParams",
+        "description": [],
+        "signature": [
+          "CoreIncrementCounterParams"
+        ],
+        "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreIncrementCounterParams.counterName",
+            "type": "string",
+            "tags": [],
+            "label": "counterName",
+            "description": [
+              "The name of the counter"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreIncrementCounterParams.counterType",
+            "type": "string",
+            "tags": [],
+            "label": "counterType",
+            "description": [
+              "The counter type (\"count\" by default)"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreIncrementCounterParams.incrementBy",
+            "type": "number",
+            "tags": [],
+            "label": "incrementBy",
+            "description": [
+              "Increment the counter by this number (1 if not specified)"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
         "id": "def-server.CorePreboot",
         "type": "Interface",
         "tags": [],
@@ -13766,6 +15531,37 @@
               }
             ],
             "path": "src/core/server/core_route_handler_context.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.CoreServicesUsageData",
+        "type": "Interface",
+        "tags": [],
+        "label": "CoreServicesUsageData",
+        "description": [
+          "\nUsage data from Core services"
+        ],
+        "signature": [
+          "CoreServicesUsageData"
+        ],
+        "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreServicesUsageData.savedObjects",
+            "type": "Object",
+            "tags": [],
+            "label": "savedObjects",
+            "description": [],
+            "signature": [
+              "{ indices: { alias: string; docsCount: number; docsDeleted: number; storeSizeBytes: number; primaryStoreSizeBytes: number; savedObjectsDocsCount: number; }[]; legacyUrlAliases: { activeCount: number; inactiveCount: number; disabledCount: number; totalCount: number; }; }"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
             "deprecated": false
           }
         ],
@@ -14034,13 +15830,7 @@
               "{@link DeprecationsServiceSetup}"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.DeprecationsServiceSetup",
-                "text": "DeprecationsServiceSetup"
-              }
+              "DeprecationsServiceSetup"
             ],
             "path": "src/core/server/index.ts",
             "deprecated": false
@@ -14280,6 +16070,1721 @@
       },
       {
         "parentPluginId": "core",
+        "id": "def-server.CoreUsageCounter",
+        "type": "Interface",
+        "tags": [],
+        "label": "CoreUsageCounter",
+        "description": [],
+        "signature": [
+          "CoreUsageCounter"
+        ],
+        "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+        "deprecated": false,
+        "children": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.CoreUsageData",
+        "type": "Interface",
+        "tags": [],
+        "label": "CoreUsageData",
+        "description": [
+          "\nType describing Core's usage data payload"
+        ],
+        "signature": [
+          "CoreUsageData",
+          " extends ",
+          "CoreUsageStats"
+        ],
+        "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageData.config",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              "CoreConfigUsageData"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageData.services",
+            "type": "Object",
+            "tags": [],
+            "label": "services",
+            "description": [],
+            "signature": [
+              "CoreServicesUsageData"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageData.environment",
+            "type": "Object",
+            "tags": [],
+            "label": "environment",
+            "description": [],
+            "signature": [
+              "CoreEnvironmentUsageData"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.CoreUsageDataSetup",
+        "type": "Interface",
+        "tags": [
+          "note"
+        ],
+        "label": "CoreUsageDataSetup",
+        "description": [
+          "\nInternal API for registering the Usage Tracker used for Core's usage data payload.\n"
+        ],
+        "signature": [
+          "CoreUsageDataSetup"
+        ],
+        "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageDataSetup.registerUsageCounter",
+            "type": "Function",
+            "tags": [],
+            "label": "registerUsageCounter",
+            "description": [
+              "\nAPI for a usage tracker plugin to inject the {@link CoreUsageCounter} to use\nwhen tracking events."
+            ],
+            "signature": [
+              "(usageCounter: ",
+              "CoreUsageCounter",
+              ") => void"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.CoreUsageDataSetup.registerUsageCounter.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "usageCounter",
+                "description": [],
+                "signature": [
+                  "CoreUsageCounter"
+                ],
+                "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.CoreUsageDataStart",
+        "type": "Interface",
+        "tags": [
+          "note"
+        ],
+        "label": "CoreUsageDataStart",
+        "description": [
+          "\nInternal API for getting Core's usage data payload.\n"
+        ],
+        "signature": [
+          "CoreUsageDataStart"
+        ],
+        "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageDataStart.getConfigsUsageData",
+            "type": "Function",
+            "tags": [],
+            "label": "getConfigsUsageData",
+            "description": [],
+            "signature": [
+              "() => Promise<",
+              "ConfigUsageData",
+              ">"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.CoreUsageStats",
+        "type": "Interface",
+        "tags": [],
+        "label": "CoreUsageStats",
+        "description": [],
+        "signature": [
+          "CoreUsageStats"
+        ],
+        "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkCreate.total",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsBulkCreate.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkCreate.namespace.default.total",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsBulkCreate.namespace.default.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkCreate.namespace.default.kibanaRequest.yes",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsBulkCreate.namespace.default.kibanaRequest.yes'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkCreate.namespace.default.kibanaRequest.no",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsBulkCreate.namespace.default.kibanaRequest.no'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkCreate.namespace.custom.total",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsBulkCreate.namespace.custom.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkCreate.namespace.custom.kibanaRequest.yes",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsBulkCreate.namespace.custom.kibanaRequest.yes'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkCreate.namespace.custom.kibanaRequest.no",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsBulkCreate.namespace.custom.kibanaRequest.no'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkGet.total",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsBulkGet.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkGet.namespace.default.total",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsBulkGet.namespace.default.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkGet.namespace.default.kibanaRequest.yes",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsBulkGet.namespace.default.kibanaRequest.yes'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkGet.namespace.default.kibanaRequest.no",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsBulkGet.namespace.default.kibanaRequest.no'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkGet.namespace.custom.total",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsBulkGet.namespace.custom.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkGet.namespace.custom.kibanaRequest.yes",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsBulkGet.namespace.custom.kibanaRequest.yes'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkGet.namespace.custom.kibanaRequest.no",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsBulkGet.namespace.custom.kibanaRequest.no'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkResolve.total",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsBulkResolve.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkResolve.namespace.default.total",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsBulkResolve.namespace.default.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkResolve.namespace.default.kibanaRequest.yes",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsBulkResolve.namespace.default.kibanaRequest.yes'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkResolve.namespace.default.kibanaRequest.no",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsBulkResolve.namespace.default.kibanaRequest.no'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkResolve.namespace.custom.total",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsBulkResolve.namespace.custom.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkResolve.namespace.custom.kibanaRequest.yes",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsBulkResolve.namespace.custom.kibanaRequest.yes'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkResolve.namespace.custom.kibanaRequest.no",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsBulkResolve.namespace.custom.kibanaRequest.no'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkUpdate.total",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsBulkUpdate.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkUpdate.namespace.default.total",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsBulkUpdate.namespace.default.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkUpdate.namespace.default.kibanaRequest.yes",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsBulkUpdate.namespace.default.kibanaRequest.yes'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkUpdate.namespace.default.kibanaRequest.no",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsBulkUpdate.namespace.default.kibanaRequest.no'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkUpdate.namespace.custom.total",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsBulkUpdate.namespace.custom.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkUpdate.namespace.custom.kibanaRequest.yes",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsBulkUpdate.namespace.custom.kibanaRequest.yes'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkUpdate.namespace.custom.kibanaRequest.no",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsBulkUpdate.namespace.custom.kibanaRequest.no'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsCreate.total",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsCreate.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsCreate.namespace.default.total",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsCreate.namespace.default.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsCreate.namespace.default.kibanaRequest.yes",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsCreate.namespace.default.kibanaRequest.yes'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsCreate.namespace.default.kibanaRequest.no",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsCreate.namespace.default.kibanaRequest.no'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsCreate.namespace.custom.total",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsCreate.namespace.custom.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsCreate.namespace.custom.kibanaRequest.yes",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsCreate.namespace.custom.kibanaRequest.yes'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsCreate.namespace.custom.kibanaRequest.no",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsCreate.namespace.custom.kibanaRequest.no'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsDelete.total",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsDelete.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsDelete.namespace.default.total",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsDelete.namespace.default.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsDelete.namespace.default.kibanaRequest.yes",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsDelete.namespace.default.kibanaRequest.yes'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsDelete.namespace.default.kibanaRequest.no",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsDelete.namespace.default.kibanaRequest.no'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsDelete.namespace.custom.total",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsDelete.namespace.custom.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsDelete.namespace.custom.kibanaRequest.yes",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsDelete.namespace.custom.kibanaRequest.yes'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsDelete.namespace.custom.kibanaRequest.no",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsDelete.namespace.custom.kibanaRequest.no'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsFind.total",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsFind.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsFind.namespace.default.total",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsFind.namespace.default.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsFind.namespace.default.kibanaRequest.yes",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsFind.namespace.default.kibanaRequest.yes'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsFind.namespace.default.kibanaRequest.no",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsFind.namespace.default.kibanaRequest.no'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsFind.namespace.custom.total",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsFind.namespace.custom.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsFind.namespace.custom.kibanaRequest.yes",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsFind.namespace.custom.kibanaRequest.yes'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsFind.namespace.custom.kibanaRequest.no",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsFind.namespace.custom.kibanaRequest.no'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsGet.total",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsGet.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsGet.namespace.default.total",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsGet.namespace.default.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsGet.namespace.default.kibanaRequest.yes",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsGet.namespace.default.kibanaRequest.yes'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsGet.namespace.default.kibanaRequest.no",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsGet.namespace.default.kibanaRequest.no'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsGet.namespace.custom.total",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsGet.namespace.custom.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsGet.namespace.custom.kibanaRequest.yes",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsGet.namespace.custom.kibanaRequest.yes'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsGet.namespace.custom.kibanaRequest.no",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsGet.namespace.custom.kibanaRequest.no'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsResolve.total",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsResolve.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsResolve.namespace.default.total",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsResolve.namespace.default.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsResolve.namespace.default.kibanaRequest.yes",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsResolve.namespace.default.kibanaRequest.yes'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsResolve.namespace.default.kibanaRequest.no",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsResolve.namespace.default.kibanaRequest.no'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsResolve.namespace.custom.total",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsResolve.namespace.custom.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsResolve.namespace.custom.kibanaRequest.yes",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsResolve.namespace.custom.kibanaRequest.yes'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsResolve.namespace.custom.kibanaRequest.no",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsResolve.namespace.custom.kibanaRequest.no'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsUpdate.total",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsUpdate.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsUpdate.namespace.default.total",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsUpdate.namespace.default.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsUpdate.namespace.default.kibanaRequest.yes",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsUpdate.namespace.default.kibanaRequest.yes'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsUpdate.namespace.default.kibanaRequest.no",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsUpdate.namespace.default.kibanaRequest.no'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsUpdate.namespace.custom.total",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsUpdate.namespace.custom.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsUpdate.namespace.custom.kibanaRequest.yes",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsUpdate.namespace.custom.kibanaRequest.yes'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsUpdate.namespace.custom.kibanaRequest.no",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsUpdate.namespace.custom.kibanaRequest.no'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsImport.total",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsImport.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsImport.namespace.default.total",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsImport.namespace.default.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsImport.namespace.default.kibanaRequest.yes",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsImport.namespace.default.kibanaRequest.yes'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsImport.namespace.default.kibanaRequest.no",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsImport.namespace.default.kibanaRequest.no'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsImport.namespace.custom.total",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsImport.namespace.custom.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsImport.namespace.custom.kibanaRequest.yes",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsImport.namespace.custom.kibanaRequest.yes'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsImport.namespace.custom.kibanaRequest.no",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsImport.namespace.custom.kibanaRequest.no'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsImport.createNewCopiesEnabled.yes",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsImport.createNewCopiesEnabled.yes'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsImport.createNewCopiesEnabled.no",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsImport.createNewCopiesEnabled.no'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsImport.overwriteEnabled.yes",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsImport.overwriteEnabled.yes'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsImport.overwriteEnabled.no",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsImport.overwriteEnabled.no'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsResolveImportErrors.total",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsResolveImportErrors.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsResolveImportErrors.namespace.default.total",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsResolveImportErrors.namespace.default.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsResolveImportErrors.namespace.default.kibanaRequest.yes",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsResolveImportErrors.namespace.default.kibanaRequest.yes'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsResolveImportErrors.namespace.default.kibanaRequest.no",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsResolveImportErrors.namespace.default.kibanaRequest.no'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsResolveImportErrors.namespace.custom.total",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsResolveImportErrors.namespace.custom.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsResolveImportErrors.namespace.custom.kibanaRequest.yes",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsResolveImportErrors.namespace.custom.kibanaRequest.yes'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsResolveImportErrors.namespace.custom.kibanaRequest.no",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsResolveImportErrors.namespace.custom.kibanaRequest.no'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsResolveImportErrors.createNewCopiesEnabled.yes",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsResolveImportErrors.createNewCopiesEnabled.yes'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsResolveImportErrors.createNewCopiesEnabled.no",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsResolveImportErrors.createNewCopiesEnabled.no'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsExport.total",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsExport.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsExport.namespace.default.total",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsExport.namespace.default.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsExport.namespace.default.kibanaRequest.yes",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsExport.namespace.default.kibanaRequest.yes'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsExport.namespace.default.kibanaRequest.no",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsExport.namespace.default.kibanaRequest.no'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsExport.namespace.custom.total",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsExport.namespace.custom.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsExport.namespace.custom.kibanaRequest.yes",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsExport.namespace.custom.kibanaRequest.yes'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsExport.namespace.custom.kibanaRequest.no",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsExport.namespace.custom.kibanaRequest.no'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsExport.allTypesSelected.yes",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsExport.allTypesSelected.yes'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsExport.allTypesSelected.no",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.savedObjectsExport.allTypesSelected.no'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.legacyDashboardExport.total",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.legacyDashboardExport.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.legacyDashboardExport.namespace.default.total",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.legacyDashboardExport.namespace.default.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.legacyDashboardExport.namespace.default.kibanaRequest.yes",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.legacyDashboardExport.namespace.default.kibanaRequest.yes'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.legacyDashboardExport.namespace.default.kibanaRequest.no",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.legacyDashboardExport.namespace.default.kibanaRequest.no'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.legacyDashboardExport.namespace.custom.total",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.legacyDashboardExport.namespace.custom.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.legacyDashboardExport.namespace.custom.kibanaRequest.yes",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.legacyDashboardExport.namespace.custom.kibanaRequest.yes'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.legacyDashboardExport.namespace.custom.kibanaRequest.no",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.legacyDashboardExport.namespace.custom.kibanaRequest.no'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.legacyDashboardImport.total",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.legacyDashboardImport.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.legacyDashboardImport.namespace.default.total",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.legacyDashboardImport.namespace.default.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.legacyDashboardImport.namespace.default.kibanaRequest.yes",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.legacyDashboardImport.namespace.default.kibanaRequest.yes'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.legacyDashboardImport.namespace.default.kibanaRequest.no",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.legacyDashboardImport.namespace.default.kibanaRequest.no'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.legacyDashboardImport.namespace.custom.total",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.legacyDashboardImport.namespace.custom.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.legacyDashboardImport.namespace.custom.kibanaRequest.yes",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.legacyDashboardImport.namespace.custom.kibanaRequest.yes'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.apiCalls.legacyDashboardImport.namespace.custom.kibanaRequest.no",
+            "type": "number",
+            "tags": [],
+            "label": "'apiCalls.legacyDashboardImport.namespace.custom.kibanaRequest.no'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.savedObjectsRepository.resolvedOutcome.exactMatch",
+            "type": "number",
+            "tags": [],
+            "label": "'savedObjectsRepository.resolvedOutcome.exactMatch'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.savedObjectsRepository.resolvedOutcome.aliasMatch",
+            "type": "number",
+            "tags": [],
+            "label": "'savedObjectsRepository.resolvedOutcome.aliasMatch'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.savedObjectsRepository.resolvedOutcome.conflict",
+            "type": "number",
+            "tags": [],
+            "label": "'savedObjectsRepository.resolvedOutcome.conflict'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.savedObjectsRepository.resolvedOutcome.notFound",
+            "type": "number",
+            "tags": [],
+            "label": "'savedObjectsRepository.resolvedOutcome.notFound'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreUsageStats.savedObjectsRepository.resolvedOutcome.total",
+            "type": "number",
+            "tags": [],
+            "label": "'savedObjectsRepository.resolvedOutcome.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
         "id": "def-server.CustomHttpResponseOptions",
         "type": "Interface",
         "tags": [],
@@ -14470,7 +17975,10 @@
         "description": [
           "\nThe deprecations service provides a way for the Kibana platform to communicate deprecated\nfeatures and configs with its users. These deprecations are only communicated\nif the deployment is using these features. Allowing for a user tailored experience\nfor upgrading the stack version.\n\nThe Deprecation service is consumed by the upgrade assistant to assist with the upgrade\nexperience.\n\nIf a deprecated feature can be resolved without manual user intervention.\nUsing correctiveActions.api allows the Upgrade Assistant to use this api to correct the\ndeprecation upon a user trigger.\n"
         ],
-        "path": "src/core/server/deprecations/deprecations_service.ts",
+        "signature": [
+          "DeprecationsServiceSetup"
+        ],
+        "path": "node_modules/@types/kbn__core-deprecations-server/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -14482,16 +17990,10 @@
             "description": [],
             "signature": [
               "(deprecationContext: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.RegisterDeprecationsConfig",
-                "text": "RegisterDeprecationsConfig"
-              },
+              "RegisterDeprecationsConfig",
               ") => void"
             ],
-            "path": "src/core/server/deprecations/deprecations_service.ts",
+            "path": "node_modules/@types/kbn__core-deprecations-server/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -14502,15 +18004,9 @@
                 "label": "deprecationContext",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.RegisterDeprecationsConfig",
-                    "text": "RegisterDeprecationsConfig"
-                  }
+                  "RegisterDeprecationsConfig"
                 ],
-                "path": "src/core/server/deprecations/deprecations_service.ts",
+                "path": "node_modules/@types/kbn__core-deprecations-server/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -15859,7 +19355,10 @@
         "tags": [],
         "label": "GetDeprecationsContext",
         "description": [],
-        "path": "src/core/server/deprecations/types.ts",
+        "signature": [
+          "GetDeprecationsContext"
+        ],
+        "path": "node_modules/@types/kbn__core-deprecations-server/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -15872,7 +19371,7 @@
             "signature": [
               "IScopedClusterClient"
             ],
-            "path": "src/core/server/deprecations/types.ts",
+            "path": "node_modules/@types/kbn__core-deprecations-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -15885,7 +19384,7 @@
             "signature": [
               "SavedObjectsClientContract"
             ],
-            "path": "src/core/server/deprecations/types.ts",
+            "path": "node_modules/@types/kbn__core-deprecations-server/index.d.ts",
             "deprecated": false
           }
         ],
@@ -28977,7 +32476,10 @@
         "tags": [],
         "label": "RegisterDeprecationsConfig",
         "description": [],
-        "path": "src/core/server/deprecations/types.ts",
+        "signature": [
+          "RegisterDeprecationsConfig"
+        ],
+        "path": "node_modules/@types/kbn__core-deprecations-server/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -28989,20 +32491,14 @@
             "description": [],
             "signature": [
               "(context: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.GetDeprecationsContext",
-                "text": "GetDeprecationsContext"
-              },
+              "GetDeprecationsContext",
               ") => ",
               "MaybePromise",
               "<",
               "DeprecationsDetails",
               "[]>"
             ],
-            "path": "src/core/server/deprecations/types.ts",
+            "path": "node_modules/@types/kbn__core-deprecations-server/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -29013,15 +32509,9 @@
                 "label": "context",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.GetDeprecationsContext",
-                    "text": "GetDeprecationsContext"
-                  }
+                  "GetDeprecationsContext"
                 ],
-                "path": "src/core/server/deprecations/types.ts",
+                "path": "node_modules/@types/kbn__core-deprecations-server/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -34082,6 +37572,14 @@
               {
                 "plugin": "dashboard",
                 "path": "src/plugins/dashboard/server/saved_objects/migrations_730.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/document_migrator.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/migration_logger.ts"
               }
             ],
             "children": [
@@ -38202,6 +41700,54 @@
         ],
         "path": "node_modules/@types/kbn__config/index.d.ts",
         "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.ConfigUsageData",
+        "type": "Type",
+        "tags": [],
+        "label": "ConfigUsageData",
+        "description": [
+          "\nType describing Core's usage data payload"
+        ],
+        "signature": [
+          "{ [x: string]: any; }"
+        ],
+        "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.CoreIncrementUsageCounter",
+        "type": "Type",
+        "tags": [],
+        "label": "CoreIncrementUsageCounter",
+        "description": [],
+        "signature": [
+          "(params: ",
+          "CoreIncrementCounterParams",
+          ") => void"
+        ],
+        "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreIncrementUsageCounter.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "CoreIncrementCounterParams"
+            ],
+            "path": "node_modules/@types/kbn__core-usage-data-server/index.d.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
