@@ -81,7 +81,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
 
   const getAnomaliesMapsLink = async (anomaly: AnomaliesTableRecord) => {
     const initialLayers = getInitialAnomaliesLayers(anomaly.jobId);
-    const anomalyBucketStartMoment = moment(anomaly.time).tz(getDateFormatTz());
+    const anomalyBucketStartMoment = moment(anomaly.source.timestamp).tz(getDateFormatTz());
     const anomalyBucketStart = anomalyBucketStartMoment.toISOString();
     const anomalyBucketEnd = anomalyBucketStartMoment
       .add(anomaly.source.bucket_span, 'seconds')
@@ -117,11 +117,12 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     const initialLayers = getInitialSourceIndexFieldLayers(
       sourceIndicesWithGeoFields[anomaly.jobId]
     );
-    const anomalyBucketStartMoment = moment(anomaly.time).tz(getDateFormatTz());
-    const anomalyBucketStart = anomalyBucketStartMoment.toISOString();
+    // Widen the timerange by one bucket span on start/end to increase chances of always having data on the map
+    const anomalyBucketStartMoment = moment(anomaly.source.timestamp).tz(getDateFormatTz());
+    const anomalyBucketStart = anomalyBucketStartMoment.subtract(anomaly.source.bucket_span, 'seconds')
+      .toISOString();
     const anomalyBucketEnd = anomalyBucketStartMoment
-      .add(anomaly.source.bucket_span, 'seconds')
-      .subtract(1, 'ms')
+      .add(anomaly.source.bucket_span * 3, 'seconds')
       .toISOString();
     const timeRange = data.query.timefilter.timefilter.getTime();
 
