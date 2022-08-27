@@ -2070,7 +2070,7 @@ paths:
       summary: >-
         Returns information about the users who opened cases in the default
         space.
-      operationId: getCaseReportersDefaultCase
+      operationId: getCaseReportersDefaultSpace
       description: >
         You must have read privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
@@ -2110,6 +2110,7 @@ paths:
   /api/cases/status:
     get:
       summary: Returns the number of cases that are open, closed, and in progress.
+      operationId: getCaseStatusDefaultSpace
       description: >
         You must have `read` privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
@@ -5397,6 +5398,7 @@ paths:
   /s/{spaceId}/api/cases/status:
     get:
       summary: Returns the number of cases that are open, closed, and in progress.
+      operationId: getCaseStatus
       description: >
         You must have `read` privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana

@@ -2405,7 +2405,7 @@
     "/api/cases/reporters": {
       "get": {
         "summary": "Returns information about the users who opened cases in the default space.",
-        "operationId": "getCaseReportersDefaultCase",
+        "operationId": "getCaseReportersDefaultSpace",
         "description": "You must have read privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases. The API returns information about the users as they existed at the time of the case creation, including their name, full name, and email address. If any of those details change thereafter or if a user is deleted, the information returned by this API is unchanged.\n",
         "tags": [
           "cases",
@@ -2462,6 +2462,7 @@
     "/api/cases/status": {
       "get": {
         "summary": "Returns the number of cases that are open, closed, and in progress.",
+        "operationId": "getCaseStatusDefaultSpace",
         "description": "You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.\n",
         "tags": [
           "cases",
@@ -6438,6 +6439,7 @@
     "/s/{spaceId}/api/cases/status": {
       "get": {
         "summary": "Returns the number of cases that are open, closed, and in progress.",
+        "operationId": "getCaseStatus",
         "description": "You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.\n",
         "deprecated": true,
         "tags": [
