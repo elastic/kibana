@@ -14,29 +14,29 @@ import { createSeries } from '../__mocks__';
 import { convertToCumulativeSumColumns } from './cumulative_sum';
 import { Column, CommonColumnsConverterArgs, FormulaColumn } from './types';
 
-describe('convertToCumulativeSumColumns', () => {
-  const dataView = stubLogstashDataView;
-  const series = createSeries();
-  const metric: Metric = {
-    id: 'some-id',
-    type: METRIC_TYPES.CUMULATIVE_SUM,
-  };
-  const subAggMetric: Metric = {
-    id: 'some-random-value',
-    type: METRIC_TYPES.AVG,
-    field: dataView.fields[0].name,
-  };
-  const notSupportedSubAggMetric: Metric = {
-    id: 'some-random-value',
-    type: METRIC_TYPES.MEDIAN,
-  };
-  const staticSubAggMetric: Metric = {
-    id: 'some-random-value',
-    type: TSVB_METRIC_TYPES.STATIC,
-  };
-  const metaValue = `50`;
-  const window = '1h';
+const dataView = stubLogstashDataView;
+const series = createSeries();
+const metric: Metric = {
+  id: 'some-id',
+  type: METRIC_TYPES.CUMULATIVE_SUM,
+};
+const subAggMetric: Metric = {
+  id: 'some-random-value',
+  type: METRIC_TYPES.AVG,
+  field: dataView.fields[0].name,
+};
+const notSupportedSubAggMetric: Metric = {
+  id: 'some-random-value',
+  type: METRIC_TYPES.MEDIAN,
+};
+const staticSubAggMetric: Metric = {
+  id: 'some-random-value',
+  type: TSVB_METRIC_TYPES.STATIC,
+};
+const metaValue = `50`;
+const window = '1h';
 
+describe('convertToCumulativeSumColumns', () => {
   test.each<
     [
       string,

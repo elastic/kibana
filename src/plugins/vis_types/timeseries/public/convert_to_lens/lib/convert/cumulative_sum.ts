@@ -44,7 +44,6 @@ export const convertToCumulativeSumColumns = (
     return createFormulaColumn(formula, { series, metric, dataView });
   } else {
     const agg = SUPPORTED_METRICS[METRIC_TYPES.CUMULATIVE_SUM];
-
     return computeParentPipelineColumns(
       agg.name,
       { series, metric, dataView },
