@@ -81,15 +81,13 @@ export const convertMathToFormulaColumn = (
 ): FormulaColumn | null => {
   // find the metric idx that has math expression
   const metric = metrics.find(({ type }) => type === 'math');
-  let script: string | null | undefined = metrics[metrics.length - 1].script;
-
   if (!metric) {
     return null;
   }
 
   const { variables } = metric;
-
-  if (!script || !variables) {
+  let script: string | null | undefined = metrics[metrics.length - 1].script;
+  if (!script || !variables || !variables.length) {
     return null;
   }
 

@@ -7,7 +7,7 @@
  */
 
 import { createSeries } from '../__mocks__';
-import { createFormulaColumn } from './formula';
+import { createFormulaColumn, convertMathToFormulaColumn } from './formula';
 import { FormulaColumn } from './types';
 import { Metric } from '../../../../common/types';
 import { TSVB_METRIC_TYPES } from '../../../../common/enums';
@@ -118,6 +118,176 @@ describe('createFormulaColumn', () => {
       expect(createFormulaColumn(...input)).toEqual(expected.map(expect.objectContaining));
     } else {
       expect(createFormulaColumn(...input)).toEqual(expect.objectContaining(expected));
+    }
+  });
+});
+
+describe('convertMathToFormulaColumn', () => {
+  const dataView = stubLogstashDataView;
+  const dataViewWithInvalidFormats = createStubDataView({
+    spec: {
+      id: 'logstash-*',
+      title: 'logstash-*',
+      timeFieldName: 'time',
+      fields: stubLogstashFieldSpecMap,
+    },
+  });
+
+  dataViewWithInvalidFormats.getFormatterForField = jest.fn().mockImplementation(() => ({
+    type: {
+      id: 'date',
+    },
+  }));
+
+  const series = createSeries();
+  const avgMetric: Metric = {
+    id: 'some-id-0',
+    type: METRIC_TYPES.AVG,
+    field: dataView.fields[0].name,
+  };
+
+  const notSupportedMetric: Metric = {
+    id: 'some-id-0',
+    type: METRIC_TYPES.MEDIAN,
+    field: dataView.fields[0].name,
+  };
+
+  const notSupportedTopHitMetricWithSize: Metric = {
+    id: 'some-id-0',
+    type: TSVB_METRIC_TYPES.TOP_HIT,
+    field: dataView.fields[0].name,
+    size: 2,
+  };
+
+  const notSupportedAvgMetric: Metric = {
+    ...avgMetric,
+    order: 'asc',
+  };
+
+  const script = 'params.avg_bytes / 2';
+
+  const mathMetricWithoutScript: Metric = {
+    id: 'some-id-1',
+    type: TSVB_METRIC_TYPES.MATH,
+  };
+
+  const mathMetricWithoutVariables: Metric = {
+    ...mathMetricWithoutScript,
+    script,
+  };
+
+  const mathMetric: Metric = {
+    ...mathMetricWithoutVariables,
+    variables: [{ id: 'params.avg_bytes-id', field: avgMetric.id, name: 'avg_bytes' }],
+  };
+
+  const percentileScript = 'params.percentile_bytes / 2';
+
+  const percentileMetric: Metric = {
+    id: 'percentile_id',
+    type: TSVB_METRIC_TYPES.PERCENTILE,
+    field: dataView.fields[0].name,
+  };
+
+  const mathMetricWithPercentile: Metric = {
+    ...mathMetricWithoutVariables,
+    script: percentileScript,
+    variables: [
+      {
+        id: 'params.percentile_bytes_id',
+        field: `${percentileMetric.id}[50]`,
+        name: 'percentile_bytes',
+      },
+    ],
+  };
+
+  const percentileRankMetric: Metric = {
+    id: 'percentile_rank_id',
+    type: TSVB_METRIC_TYPES.PERCENTILE_RANK,
+    field: dataView.fields[0].name,
+  };
+
+  const mathMetricWithPercentileRank: Metric = {
+    ...mathMetricWithoutVariables,
+    script: percentileScript,
+    variables: [
+      {
+        id: 'params.percentile_bytes_id',
+        field: `${percentileRankMetric.id}[50]`,
+        name: 'percentile_bytes',
+      },
+    ],
+  };
+
+  test.each<[string, Parameters<typeof convertMathToFormulaColumn>, Partial<FormulaColumn> | null]>(
+    [
+      ['null if no math metric was provided', [{ series, metrics: [avgMetric], dataView }], null],
+      [
+        "null if math metric doesn't contain script",
+        [{ series, metrics: [mathMetricWithoutScript], dataView }],
+        null,
+      ],
+      [
+        'null if not supported metric is provided',
+        [{ series, metrics: [notSupportedMetric], dataView }],
+        null,
+      ],
+      [
+        "null if math metric doesn't contain variables",
+        [{ series, metrics: [mathMetricWithoutVariables], dataView }],
+        null,
+      ],
+      [
+        "null if math metric's script contains params, not covered by other metrics",
+        [{ series, metrics: [mathMetric], dataView }],
+        null,
+      ],
+      [
+        'null if some of the metrics is top_hit with size more than 1',
+        [{ series, metrics: [notSupportedTopHitMetricWithSize, mathMetric], dataView }],
+        null,
+      ],
+      [
+        'null if some of the metrics contains order=asc',
+        [{ series, metrics: [notSupportedAvgMetric, mathMetric], dataView }],
+        null,
+      ],
+      [
+        'formula column if it is possible to convert script with vars to math formula',
+        [{ series, metrics: [avgMetric, mathMetric], dataView }],
+        {
+          meta: { metricId: 'some-id-1' },
+          operationType: 'formula',
+          params: { formula: 'average(bytes) / 2' },
+        },
+      ],
+      [
+        'formula column if percentile metric is provided',
+        [{ series, metrics: [percentileMetric, mathMetricWithPercentile], dataView }],
+        {
+          meta: { metricId: 'some-id-1' },
+          operationType: 'formula',
+          params: { formula: 'percentile(bytes, percentile=50) / 2' },
+        },
+      ],
+      [
+        'formula column if percentile_rank metric is provided',
+        [{ series, metrics: [percentileRankMetric, mathMetricWithPercentileRank], dataView }],
+        {
+          meta: { metricId: 'some-id-1' },
+          operationType: 'formula',
+          params: { formula: 'percentile_rank(bytes, value=50) / 2' },
+        },
+      ],
+    ]
+  )('should return %s', (_, input, expected) => {
+    if (expected === null) {
+      expect(convertMathToFormulaColumn(...input)).toBeNull();
+    }
+    if (Array.isArray(expected)) {
+      expect(convertMathToFormulaColumn(...input)).toEqual(expected.map(expect.objectContaining));
+    } else {
+      expect(convertMathToFormulaColumn(...input)).toEqual(expect.objectContaining(expected));
     }
   });
 });
