@@ -119,7 +119,8 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     );
     // Widen the timerange by one bucket span on start/end to increase chances of always having data on the map
     const anomalyBucketStartMoment = moment(anomaly.source.timestamp).tz(getDateFormatTz());
-    const anomalyBucketStart = anomalyBucketStartMoment.subtract(anomaly.source.bucket_span, 'seconds')
+    const anomalyBucketStart = anomalyBucketStartMoment
+      .subtract(anomaly.source.bucket_span, 'seconds')
       .toISOString();
     const anomalyBucketEnd = anomalyBucketStartMoment
       .add(anomaly.source.bucket_span * 3, 'seconds')
