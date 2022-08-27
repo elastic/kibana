@@ -47,7 +47,6 @@ describe('filter manager utilities', () => {
       expect(results[3].meta).toHaveProperty('key', 'bytes');
       expect(results[3].meta).toHaveProperty('value', { gt: 1024, lt: 2048 });
       expect(results[4].meta).toHaveProperty('key', '_type');
-      expect(results[4].meta).toHaveProperty('value', 'apache');
     });
   });
 });

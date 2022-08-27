@@ -12,7 +12,7 @@ import { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 describe('filter manager utilities', () => {
   describe('mapPhrase()', () => {
-    test('should return the key and value for matching filters', async () => {
+    test('should return the key for matching filters', async () => {
       const filter = {
         meta: { index: 'logstash-*' },
         query: { match: { _type: { query: 'apache', type: 'phrase' } } },
@@ -21,7 +21,6 @@ describe('filter manager utilities', () => {
       const result = mapPhrase(filter);
 
       expect(result).toHaveProperty('key', '_type');
-      expect(result).toHaveProperty('value', 'apache');
     });
 
     test('should return undefined for none matching', async (done) => {
