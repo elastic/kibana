@@ -7,7 +7,11 @@
  */
 
 import { createSeries } from '../__mocks__';
-import { createFormulaColumn, convertMathToFormulaColumn } from './formula';
+import {
+  createFormulaColumn,
+  convertMathToFormulaColumn,
+  convertOtherAggsToFormulaColumn,
+} from './formula';
 import { FormulaColumn } from './types';
 import { Metric } from '../../../../common/types';
 import { TSVB_METRIC_TYPES } from '../../../../common/enums';
@@ -302,6 +306,59 @@ describe('convertMathToFormulaColumn', () => {
       expect(convertMathToFormulaColumn(...input)).toEqual(expected.map(expect.objectContaining));
     } else {
       expect(convertMathToFormulaColumn(...input)).toEqual(expect.objectContaining(expected));
+    }
+  });
+});
+
+describe('convertOtherAggsToFormulaColumn', () => {
+  const dataView = stubLogstashDataView;
+  const series = createSeries();
+  const avgMetric: Metric = {
+    id: 'some-id-0',
+    type: METRIC_TYPES.AVG,
+    field: dataView.fields[0].name,
+  };
+
+  const field = `${avgMetric.id}`;
+  const id = 'some-id-1[50]';
+
+  test.each<
+    [string, Parameters<typeof convertOtherAggsToFormulaColumn>, Partial<FormulaColumn> | null]
+  >([
+    [
+      'null if no nested metric was provided',
+      [
+        TSVB_METRIC_TYPES.POSITIVE_ONLY,
+        { series, metrics: [{ type: TSVB_METRIC_TYPES.POSITIVE_ONLY, id, field }], dataView },
+      ],
+      null,
+    ],
+    [
+      'formula column if no nested metric was provided',
+      [
+        TSVB_METRIC_TYPES.POSITIVE_ONLY,
+        {
+          series,
+          metrics: [avgMetric, { type: TSVB_METRIC_TYPES.POSITIVE_ONLY, id, field }],
+          dataView,
+        },
+      ],
+      {
+        meta: { metricId: id },
+        operationType: 'formula',
+        params: { formula: 'pick_max(average(bytes), 0)' },
+      },
+    ],
+  ])('should return %s', (_, input, expected) => {
+    if (expected === null) {
+      expect(convertOtherAggsToFormulaColumn(...input)).toBeNull();
+    }
+    if (Array.isArray(expected)) {
+      expect(convertOtherAggsToFormulaColumn(...input)).toEqual(
+        expected.map(expect.objectContaining)
+      );
+    } else {
+      expect(convertOtherAggsToFormulaColumn(...input)).toEqual(expect.objectContaining(expected));
     }
   });
 });
