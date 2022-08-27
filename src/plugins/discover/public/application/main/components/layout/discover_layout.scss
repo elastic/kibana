@@ -47,7 +47,8 @@ discover-app {
 .dscPageContent {
   // Without this height: 100% does not work on .dscPageContent__inner
   // Seems related to https://github.com/philipwalton/flexbugs/issues/197
-  flex-basis: 0;
+  // flex-basis: 0;
+  min-height: 0;
   border: $euiBorderThin;
 }
 
