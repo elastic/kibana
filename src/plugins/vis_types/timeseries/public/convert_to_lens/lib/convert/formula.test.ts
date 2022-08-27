@@ -279,6 +279,20 @@ describe('convertMathToFormulaColumn', () => {
           params: { formula: 'percentile_rank(bytes, value=50) / 2' },
         },
       ],
+      [
+        'formula column if script is purely math and has something except static number',
+        [{ series, metrics: [{ ...mathMetric, script: 'a' }], dataView }],
+        {
+          meta: { metricId: 'some-id-1' },
+          operationType: 'formula',
+          params: { formula: 'a' },
+        },
+      ],
+      [
+        'null if script is purely math and contains static number only',
+        [{ series, metrics: [{ ...mathMetric, script: '1' }], dataView }],
+        null,
+      ],
     ]
   )('should return %s', (_, input, expected) => {
     if (expected === null) {
