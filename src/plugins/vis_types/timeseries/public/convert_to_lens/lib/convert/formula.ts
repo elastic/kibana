@@ -21,19 +21,15 @@ type OtherFormulaAggregations =
   | typeof METRIC_TYPES.MIN_BUCKET
   | typeof METRIC_TYPES.SUM_BUCKET;
 
-const convertToFormulaParams = (formula: string): FormulaParams | null => ({
+const convertToFormulaParams = (formula: string): FormulaParams => ({
   formula,
 });
 
 export const createFormulaColumn = (
-  mathScript: string,
+  formula: string,
   { series, metric, dataView }: CommonColumnConverterArgs
 ): FormulaColumn | null => {
-  const params = convertToFormulaParams(mathScript);
-  if (!params) {
-    return null;
-  }
-
+  const params = convertToFormulaParams(formula);
   return {
     operationType: 'formula',
     references: [],
