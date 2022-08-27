@@ -63,6 +63,11 @@ describe('URL compatibility', () => {
     cy.url().should('include', ruleDetailsUrl(RULE_ID));
   });
 
+  it('Redirects to rule details alerts tab from old Detections rule details URL', () => {
+    visit(ruleDetailsUrl(RULE_ID));
+    cy.url().should('include', `${ruleDetailsUrl(RULE_ID)}/alerts`);
+  });
+
   it('Redirects to rule edit from old Detections rule edit URL', () => {
     visit(detectionRuleEditUrl(RULE_ID));
     cy.url().should('include', ruleEditUrl(RULE_ID));

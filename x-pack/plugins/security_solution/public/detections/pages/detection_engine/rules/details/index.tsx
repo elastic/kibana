@@ -265,7 +265,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     [isExistingRule, ruleId]
   );
 
-  const [pageTabs, setTabs] = useState<Record<RuleDetailTabs, NavTab>>(ruleDetailTabs);
+  const [pageTabs, setTabs] = useState<Partial<Record<RuleDetailTabs, NavTab>>>(ruleDetailTabs);
   const { aboutRuleData, modifiedAboutRuleDetailsData, defineRuleData, scheduleRuleData } =
     rule != null
       ? getStepsData({ rule, detailsView: true })
@@ -389,7 +389,9 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       hiddenTabs.push(RuleDetailTabs.executionEvents);
     }
 
-    setTabs(omit(hiddenTabs, ruleDetailTabs));
+    const tabs = omit<Record<RuleDetailTabs, NavTab>>(hiddenTabs, ruleDetailTabs);
+
+    setTabs(tabs);
   }, [hasIndexRead, ruleDetailTabs, ruleExecutionSettings]);
 
   const showUpdating = useMemo(
