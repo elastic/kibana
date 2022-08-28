@@ -375,75 +375,87 @@ export const patchTypeSpecificSnakeToCamel = (
 };
 
 const versionExcludedKeys = ['enabled', 'id', 'rule_id'];
-const shouldUpdateVersion = (params: PatchRulesSchema): boolean => {
-  for (const key in params) {
+const incrementVersion = (nextParams: PatchRulesSchema, existingRule: RuleParams) => {
+  // The the version from nextParams if it's provided
+  if (nextParams.version) {
+    return nextParams.version;
+  }
+
+  // If the rule is immutable, keep the current version
+  if (existingRule.immutable) {
+    return existingRule.version;
+  }
+
+  // For custom rules, check modified params to deicide whether version increment is needed
+  for (const key in nextParams) {
     if (!versionExcludedKeys.includes(key)) {
-      return true;
+      return existingRule.version + 1;
     }
   }
-  return false;
+  return existingRule.version;
 };
 
 // eslint-disable-next-line complexity
 export const convertPatchAPIToInternalSchema = (
-  params: PatchRulesSchema & {
+  nextParams: PatchRulesSchema & {
     related_integrations?: RelatedIntegrationArray;
     required_fields?: RequiredFieldArray;
     setup?: SetupGuide;
   },
   existingRule: SanitizedRule<RuleParams>
 ): InternalRuleUpdate => {
-  const typeSpecificParams = patchTypeSpecificSnakeToCamel(params, existingRule.params);
+  const typeSpecificParams = patchTypeSpecificSnakeToCamel(nextParams, existingRule.params);
   const existingParams = existingRule.params;
   return {
-    name: params.name ?? existingRule.name,
-    tags: params.tags ?? existingRule.tags,
+    name: nextParams.name ?? existingRule.name,
+    tags: nextParams.tags ?? existingRule.tags,
     params: {
-      author: params.author ?? existingParams.author,
-      buildingBlockType: params.building_block_type ?? existingParams.buildingBlockType,
-      description: params.description ?? existingParams.description,
+      author: nextParams.author ?? existingParams.author,
+      buildingBlockType: nextParams.building_block_type ?? existingParams.buildingBlockType,
+      description: nextParams.description ?? existingParams.description,
       ruleId: existingParams.ruleId,
-      falsePositives: params.false_positives ?? existingParams.falsePositives,
-      from: params.from ?? existingParams.from,
+      falsePositives: nextParams.false_positives ?? existingParams.falsePositives,
+      from: nextParams.from ?? existingParams.from,
       immutable: existingParams.immutable,
-      license: params.license ?? existingParams.license,
-      outputIndex: params.output_index ?? existingParams.outputIndex,
-      timelineId: params.timeline_id ?? existingParams.timelineId,
-      timelineTitle: params.timeline_title ?? existingParams.timelineTitle,
-      meta: params.meta ?? existingParams.meta,
-      maxSignals: params.max_signals ?? existingParams.maxSignals,
-      relatedIntegrations: params.related_integrations ?? existingParams.relatedIntegrations,
-      requiredFields: params.required_fields ?? existingParams.requiredFields,
-      riskScore: params.risk_score ?? existingParams.riskScore,
-      riskScoreMapping: params.risk_score_mapping ?? existingParams.riskScoreMapping,
-      ruleNameOverride: params.rule_name_override ?? existingParams.ruleNameOverride,
-      setup: params.setup ?? existingParams.setup,
-      severity: params.severity ?? existingParams.severity,
-      severityMapping: params.severity_mapping ?? existingParams.severityMapping,
-      threat: params.threat ?? existingParams.threat,
-      timestampOverride: params.timestamp_override ?? existingParams.timestampOverride,
+      license: nextParams.license ?? existingParams.license,
+      outputIndex: nextParams.output_index ?? existingParams.outputIndex,
+      timelineId: nextParams.timeline_id ?? existingParams.timelineId,
+      timelineTitle: nextParams.timeline_title ?? existingParams.timelineTitle,
+      meta: nextParams.meta ?? existingParams.meta,
+      maxSignals: nextParams.max_signals ?? existingParams.maxSignals,
+      relatedIntegrations: nextParams.related_integrations ?? existingParams.relatedIntegrations,
+      requiredFields: nextParams.required_fields ?? existingParams.requiredFields,
+      riskScore: nextParams.risk_score ?? existingParams.riskScore,
+      riskScoreMapping: nextParams.risk_score_mapping ?? existingParams.riskScoreMapping,
+      ruleNameOverride: nextParams.rule_name_override ?? existingParams.ruleNameOverride,
+      setup: nextParams.setup ?? existingParams.setup,
+      severity: nextParams.severity ?? existingParams.severity,
+      severityMapping: nextParams.severity_mapping ?? existingParams.severityMapping,
+      threat: nextParams.threat ?? existingParams.threat,
+      timestampOverride: nextParams.timestamp_override ?? existingParams.timestampOverride,
       timestampOverrideFallbackDisabled:
-        params.timestamp_override_fallback_disabled ??
+        nextParams.timestamp_override_fallback_disabled ??
         existingParams.timestampOverrideFallbackDisabled,
-      to: params.to ?? existingParams.to,
-      references: params.references ?? existingParams.references,
-      namespace: params.namespace ?? existingParams.namespace,
-      note: params.note ?? existingParams.note,
+      to: nextParams.to ?? existingParams.to,
+      references: nextParams.references ?? existingParams.references,
+      namespace: nextParams.namespace ?? existingParams.namespace,
+      note: nextParams.note ?? existingParams.note,
       // Always use the version from the request if specified. If it isn't specified, leave immutable rules alone and
       // increment the version of mutable rules by 1.
-      version:
-        params.version ?? existingParams.immutable
-          ? existingParams.version
-          : shouldUpdateVersion(params)
-          ? existingParams.version + 1
-          : existingParams.version,
-      exceptionsList: params.exceptions_list ?? existingParams.exceptionsList,
+      version: incrementVersion(nextParams, existingParams),
+      exceptionsList: nextParams.exceptions_list ?? existingParams.exceptionsList,
       ...typeSpecificParams,
     },
-    schedule: { interval: params.interval ?? existingRule.schedule.interval },
-    actions: params.actions ? params.actions.map(transformRuleToAlertAction) : existingRule.actions,
-    throttle: params.throttle ? transformToAlertThrottle(params.throttle) : existingRule.throttle,
-    notifyWhen: params.throttle ? transformToNotifyWhen(params.throttle) : existingRule.notifyWhen,
+    schedule: { interval: nextParams.interval ?? existingRule.schedule.interval },
+    actions: nextParams.actions
+      ? nextParams.actions.map(transformRuleToAlertAction)
+      : existingRule.actions,
+    throttle: nextParams.throttle
+      ? transformToAlertThrottle(nextParams.throttle)
+      : existingRule.throttle,
+    notifyWhen: nextParams.throttle
+      ? transformToNotifyWhen(nextParams.throttle)
+      : existingRule.notifyWhen,
   };
 };
 
