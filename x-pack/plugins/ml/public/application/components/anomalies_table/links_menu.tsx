@@ -54,6 +54,26 @@ import { useMlKibana } from '../../contexts/kibana';
 import { getFieldTypeFromMapping } from '../../services/mapping_service';
 import type { AnomaliesTableRecord } from '../../../../common/types/anomalies';
 
+function getQueryStringForInfluencers(
+  influencers: AnomaliesTableRecord['influencers'] = [],
+  entityName?: string
+) {
+  let filterString = '';
+
+  if (influencers.length) {
+    influencers.forEach((influencer, index) => {
+      for (const influencerFieldName in influencer) {
+        if (influencerFieldName === entityName) continue;
+        filterString += `${influencerFieldName}: ${influencer[influencerFieldName]}${
+          index === influencers.length - 1 ? ')' : ' or '
+        }`;
+      }
+    });
+  }
+
+  return filterString;
+}
+
 interface LinksMenuProps {
   anomaly: AnomaliesTableRecord;
   bounds: TimeRangeBounds;
@@ -131,6 +151,12 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     timeRange.from = anomalyBucketStart;
     timeRange.to = anomalyBucketEnd;
 
+    // Create query string for influencers
+    const influencersQueryString = getQueryStringForInfluencers(
+      anomaly.influencers,
+      anomaly.entityName
+    );
+
     const locator = share.url.locators.get(MAPS_APP_LOCATOR);
     const location = await locator?.getLocation({
       initialLayers,
@@ -140,7 +166,9 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
         ? {
             query: {
               language: SEARCH_QUERY_LANGUAGE.KUERY,
-              query: `${escapeKuery(anomaly.entityName)}:${escapeKuery(anomaly.entityValue)}`,
+              query: `${escapeKuery(anomaly.entityName)}:${escapeKuery(anomaly.entityValue)}${
+                influencersQueryString !== '' ? ' and (' : ''
+              }${influencersQueryString}`,
             },
           }
         : {}),
