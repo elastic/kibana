@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { ActionParamsProps } from '../../../../types';
 import { TorqActionParams } from '../types';
 import { JsonEditorWithMessageVariables } from '../../json_editor_with_message_variables';
+import * as i18n from './translations';
 
 const TorqParamsFields: React.FunctionComponent<ActionParamsProps<TorqActionParams>> = ({
   actionParams,
@@ -24,18 +24,8 @@ const TorqParamsFields: React.FunctionComponent<ActionParamsProps<TorqActionPara
       messageVariables={messageVariables}
       paramsProperty={'body'}
       inputTargetValue={body}
-      label={i18n.translate(
-        'xpack.triggersActionsUI.components.builtinActionTypes.torqAction.bodyFieldLabel',
-        {
-          defaultMessage: 'Body',
-        }
-      )}
-      aria-label={i18n.translate(
-        'xpack.triggersActionsUI.components.builtinActionTypes.torqAction.bodyCodeEditorAriaLabel',
-        {
-          defaultMessage: 'Code editor',
-        }
-      )}
+      label={i18n.BODY_FIELD_LABEL}
+      aria-label={i18n.BODY_FIELD_ARIA_LABEL}
       errors={errors.body as string[]}
       onDocumentsChange={(json: string) => {
         editAction('body', json, index);

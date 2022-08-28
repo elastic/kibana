@@ -6,19 +6,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { curry, isString } from 'lodash';
+import { curry } from 'lodash';
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, getOrElse } from 'fp-ts/lib/Option';
 import { Logger } from '@kbn/core/server';
 import { getRetryAfterIntervalFromHeaders } from './lib/http_rersponse_retry_header';
-import { nullableType } from './lib/nullable';
 import { isOk, promiseResult, Result } from './lib/result_type';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
-import { ActionsConfigurationUtilities, getActionsConfigurationUtilities } from '../actions_config';
+import { ActionsConfigurationUtilities } from '../actions_config';
 import { request } from './lib/axios_utils';
-import * as crypto from 'crypto';
 import { renderMustacheString } from '../lib/mustache_renderer';
 import {
   AlertingConnectorFeatureId,
@@ -138,7 +136,8 @@ function validateActionTypeConfig(
 
   if (configureUrlObj.hostname !== 'hooks.torq.io') {
     return i18n.translate('xpack.actions.builtin.torq.torqConfigurationErrorInvalidHostname', {
-      defaultMessage: 'error configuring send to Torq action: url must begin with https://hooks.torq.io',
+      defaultMessage:
+        'error configuring send to Torq action: url must begin with https://hooks.torq.io',
     });
   }
 }
@@ -165,7 +164,7 @@ export async function executor(
       url: webhook_integration_url,
       method: 'post',
       headers: {
-        "X-Torq-Token": token || "",
+        'X-Torq-Token': token || '',
       },
       params: {},
       data,
@@ -174,7 +173,7 @@ export async function executor(
     })
   );
 
-  logger.debug(`torq action result: ${result}`);
+  logger.debug(`torq action result: ${JSON.stringify(result)}`);
 
   if (isOk(result)) {
     const {

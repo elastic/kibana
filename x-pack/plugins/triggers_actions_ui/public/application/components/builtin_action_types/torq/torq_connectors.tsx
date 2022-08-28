@@ -6,39 +6,22 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiCallOut } from '@elastic/eui';
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiButtonIcon,
-  EuiTitle,
-  EuiButtonEmpty,
-  EuiCallOut,
-} from '@elastic/eui';
-import {
-  UseArray,
   UseField,
-  useFormContext,
-  useFormData,
   ValidationError,
   ValidationFunc,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import {
-  Field,
-  SelectField,
-  TextField,
-  ToggleField,
-} from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import { isUrl } from '@kbn/es-ui-shared-plugin/static/validators/string';
+import { ERROR_CODE } from '@kbn/es-ui-shared-plugin/static/forms/helpers/field_validators/types';
 import { ActionConnectorFieldsProps } from '../../../../types';
 import * as i18n from './translations';
 import { PasswordField } from '../../password_field';
-import { isUrl } from '@kbn/es-ui-shared-plugin/static/validators/string';
-import { ERROR_CODE } from '@kbn/es-ui-shared-plugin/static/forms/helpers/field_validators/types';
 
-const { emptyField, urlField } = fieldValidators;
+const { urlField } = fieldValidators;
 
 const Callout: React.FC<{ title: string; dataTestSubj: string }> = ({ title, dataTestSubj }) => {
   return (
@@ -50,29 +33,29 @@ const Callout: React.FC<{ title: string; dataTestSubj: string }> = ({ title, dat
   );
 };
 
-const torqWebhookEndpoint = (message: string) => (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
-  const [{ value }] = args;
-  const error: ValidationError<ERROR_CODE> = {
-    code: 'ERR_FIELD_FORMAT',
-    formatType: 'URL',
-    message,
+const torqWebhookEndpoint =
+  (message: string) =>
+  (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
+    const [{ value }] = args;
+    const error: ValidationError<ERROR_CODE> = {
+      code: 'ERR_FIELD_FORMAT',
+      formatType: 'URL',
+      message,
+    };
+    // TODO: Fix casting
+    if (!isUrl(value as string)) return error;
+    const hostname = new URL(value as string).hostname;
+    return hostname === 'hooks.torq.io' ? undefined : error;
   };
-  if (!isUrl(value)) return error;
-  const hostname = new URL(value).hostname;
-  return hostname === "hooks.torq.io" ? undefined : error;
-};
 
 const TorqActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   readOnly,
 }) => {
-
   return (
     <>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem>
-          <Callout
-            title={i18n.TORQ_HOW_TO_TEXT}
-          />
+          <Callout title={i18n.HOW_TO_TEXT} dataTestSubj="torq-how-to" />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup justifyContent="spaceBetween">
@@ -98,13 +81,13 @@ const TorqActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
           />
         </EuiFlexItem>
         <EuiFlexItem>
-            <PasswordField
-              path="secrets.token"
-              label={i18n.TORQ_TOKEN_LABEL}
-              readOnly={readOnly}
-              helpText={i18n.TORQ_TOKEN_HELP_TEXT}
-              data-test-subj="torqTokenInput"
-            />
+          <PasswordField
+            path="secrets.token"
+            label={i18n.TORQ_TOKEN_LABEL}
+            readOnly={readOnly}
+            helpText={i18n.TORQ_TOKEN_HELP_TEXT}
+            data-test-subj="torqTokenInput"
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />

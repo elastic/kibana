@@ -71,7 +71,7 @@ describe('secrets validation', () => {
 
   test('fails when secret token is not provided', () => {
     expect(() => {
-      validateSecrets(actionType, { });
+      validateSecrets(actionType, {});
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type secrets: token is required"`
     );
@@ -79,9 +79,7 @@ describe('secrets validation', () => {
 });
 
 describe('config validation', () => {
-  const defaultValues: Record<string, string | null> = {
-
-  };
+  const defaultValues: Record<string, string | null> = {};
 
   test('config validation passes with an appropriate endpoint', () => {
     const config: Record<string, string | boolean> = {
@@ -99,7 +97,9 @@ describe('config validation', () => {
     };
     expect(() => {
       validateConfig(actionType, config);
-    }).toThrowErrorMatchingInlineSnapshot(`"error validating action type config: error configuring send to Torq action: unable to parse url: TypeError: Invalid URL: iamnotavalidurl"`);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type config: error configuring send to Torq action: unable to parse url: TypeError: Invalid URL: iamnotavalidurl"`
+    );
   });
 
   test('config validation failed when a url is invalid', () => {
@@ -119,7 +119,9 @@ describe('config validation', () => {
     };
     expect(() => {
       validateConfig(actionType, config);
-    }).toThrowErrorMatchingInlineSnapshot(`"error validating action type config: error configuring send to Torq action: url must begin with https://hooks.torq.io"`);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type config: error configuring send to Torq action: url must begin with https://hooks.torq.io"`
+    );
   });
 
   test('config validation returns an error if the specified URL isnt added to allowedHosts', () => {
@@ -191,96 +193,7 @@ describe('execute()', () => {
       actionId: 'some-id',
       services,
       config,
-      secrets: { token: "1234" },
-      params: { body: 'some data' },
-    });
-
-    delete requestMock.mock.calls[0][0].configurationUtilities;
-    expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(
-    `Object {
-      "axios": undefined,
-      "data": "some data",
-      "headers": Object {
-        "X-Torq-Token": "1234",
-      },
-      "logger": Object {
-        "context": Array [],
-        "debug": [MockFunction] {
-          "calls": Array [
-            Array [
-              "torq action result: {\\"tag\\":\\"ok\\",\\"value\\":{\\"status\\":200,\\"statusText\\":\\"\\",\\"data\\":\\"\\",\\"headers\\":[],\\"config\\":{}}}",
-            ],
-            Array [
-              "response from Torq action \\"some-id\\": [HTTP 200] ",
-            ],
-          ],
-          "results": Array [
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-          ],
-        },
-        "error": [MockFunction],
-        "fatal": [MockFunction],
-        "get": [MockFunction],
-        "info": [MockFunction],
-        "log": [MockFunction],
-        "trace": [MockFunction],
-        "warn": [MockFunction],
-      },
-      "method": "post",
-      "params": Object {},
-      "url": "https://hooks.torq.io/v1/test",
-    }`);
-  });
-
-  test('execute with exception maxContentLength size exceeded should log the proper error', async () => {
-    const config: ActionTypeConfigType = {
-      url: 'https://abc.def/my-webhook',
-      method: WebhookMethods.POST,
-      headers: {
-        aheader: 'a value',
-      },
-      hasAuth: true,
-    };
-    requestMock.mockReset();
-    requestMock.mockRejectedValueOnce({
-      tag: 'err',
-      isAxiosError: true,
-      message: 'maxContentLength size of 1000000 exceeded',
-    });
-    await actionType.executor({
-      actionId: 'some-id',
-      services,
-      config,
-      secrets: { user: 'abc', password: '123' },
-      params: { body: 'some data' },
-    });
-    expect(mockedLogger.error).toBeCalledWith(
-      'error on some-id webhook event: maxContentLength size of 1000000 exceeded'
-    );
-  });
-
-  test('execute without username/password sends request without basic auth', async () => {
-    const config: ActionTypeConfigType = {
-      url: 'https://abc.def/my-webhook',
-      method: WebhookMethods.POST,
-      headers: {
-        aheader: 'a value',
-      },
-      hasAuth: false,
-    };
-    const secrets: ActionTypeSecretsType = { user: null, password: null };
-    await actionType.executor({
-      actionId: 'some-id',
-      services,
-      config,
-      secrets,
+      secrets: { token: '1234' },
       params: { body: 'some data' },
     });
 
@@ -290,17 +203,24 @@ describe('execute()', () => {
         "axios": undefined,
         "data": "some data",
         "headers": Object {
-          "aheader": "a value",
+          "X-Torq-Token": "1234",
         },
         "logger": Object {
           "context": Array [],
           "debug": [MockFunction] {
             "calls": Array [
               Array [
-                "response from webhook action \\"some-id\\": [HTTP 200] ",
+                "torq action result: {\\"tag\\":\\"ok\\",\\"value\\":{\\"status\\":200,\\"statusText\\":\\"\\",\\"data\\":\\"\\",\\"headers\\":[],\\"config\\":{}}}",
+              ],
+              Array [
+                "response from Torq action \\"some-id\\": [HTTP 200] ",
               ],
             ],
             "results": Array [
+              Object {
+                "type": "return",
+                "value": undefined,
+              },
               Object {
                 "type": "return",
                 "value": undefined,
@@ -316,7 +236,8 @@ describe('execute()', () => {
           "warn": [MockFunction],
         },
         "method": "post",
-        "url": "https://abc.def/my-webhook",
+        "params": Object {},
+        "url": "https://hooks.torq.io/v1/test",
       }
     `);
   });

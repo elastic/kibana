@@ -48,7 +48,7 @@ describe('TorqActionConnectorFields renders', () => {
       actionTypeId: '.torq',
       name: 'torq',
       config: {
-        webhook_integration_url: "https://hooks.torq.io/v1/webhooks/fjdksla",
+        webhook_integration_url: 'https://hooks.torq.io/v1/webhooks/fjdksla',
       },
       secrets: {
         token: 'testtoken',
@@ -59,11 +59,6 @@ describe('TorqActionConnectorFields renders', () => {
     beforeEach(() => {
       jest.clearAllMocks();
     });
-
-    const tests: Array<[string, string]> = [
-      ['torqUrlText', 'not-valid'],
-      ['torqTokenInput', ''],
-    ];
 
     it('connector validation succeeds when connector config is valid', async () => {
       const { getByTestId } = render(
@@ -85,7 +80,7 @@ describe('TorqActionConnectorFields renders', () => {
           actionTypeId: '.torq',
           name: 'torq',
           config: {
-            webhook_integration_url: "https://hooks.torq.io/v1/webhooks/fjdksla",
+            webhook_integration_url: 'https://hooks.torq.io/v1/webhooks/fjdksla',
           },
           secrets: {
             token: 'testtoken',
@@ -96,11 +91,39 @@ describe('TorqActionConnectorFields renders', () => {
       });
     });
 
+    it('connector validation fails when there is no token', async () => {
+      const connector = {
+        ...actionConnector,
+        secrets: {
+          token: '',
+        },
+      };
+
+      const { getByTestId } = render(
+        <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
+          <TorqActionConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await act(async () => {
+        userEvent.click(getByTestId('form-test-provide-submit'));
+      });
+
+      expect(onSubmit).toBeCalledWith({
+        data: {},
+        isValid: false,
+      });
+    });
+
     it('connector validation fails when there is no webhook URL', async () => {
       const connector = {
         ...actionConnector,
         config: {
-          webhook_integration_url: "",
+          webhook_integration_url: '',
         },
       };
 

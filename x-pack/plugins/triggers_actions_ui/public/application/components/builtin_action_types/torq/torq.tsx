@@ -6,36 +6,22 @@
  */
 
 import { lazy } from 'react';
-import { i18n } from '@kbn/i18n';
 import { ActionTypeModel, GenericValidationResult } from '../../../../types';
 import { TorqActionParams, TorqConfig, TorqSecrets } from '../types';
+import * as i18n from './translations';
 
-export function getActionType(): ActionTypeModel<
-  TorqConfig,
-  TorqSecrets,
-  TorqActionParams
-> {
+export function getActionType(): ActionTypeModel<TorqConfig, TorqSecrets, TorqActionParams> {
   return {
     id: '.torq',
     iconClass: lazy(() => import('./logo')),
-    selectMessage: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.torqAction.selectMessageText',
-      {
-        defaultMessage: 'Trigger a Torq workflow.', // TODO: add translations
-      }
-    ),
-    actionTypeTitle: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.torqAction.actionTypeTitle',
-      {
-        defaultMessage: 'Alert data', // TODO: add translations
-      }
-    ),
+    selectMessage: i18n.TORQ_SELECT_MESSAGE,
+    actionTypeTitle: i18n.TORQ_ACTION_TYPE_TITLE,
     validateParams: async (
       actionParams: TorqActionParams
     ): Promise<GenericValidationResult<TorqActionParams>> => {
       const translations = await import('./translations');
       const errors = {
-        body: [] as Array<string>,
+        body: [] as string[],
       }; // TODO: consider adding validations
       const validationResult = { errors };
       validationResult.errors = errors;
