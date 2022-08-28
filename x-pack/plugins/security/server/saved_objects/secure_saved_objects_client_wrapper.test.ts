@@ -627,10 +627,29 @@ describe('#bulkDelete', () => {
     const options = { namespace };
     await expectPrivilegeCheck(client.bulkDelete, { objects, options }, namespace);
   });
-  // test.todo(`checks privileges for object namespaces if present`, async () => {});
-  // test.todo(`filters namespaces that the user doesn't have access to`, async () => {});
-  // test.todo(`adds audit event when successful`, async () => {});
-  // test.todo(`adds audit event when not successful`, async () => {});
+
+  test(`adds audit event when successful`, async () => {
+    const apiCallReturnValue = {
+      statuses: [obj1, obj2].map((obj) => {
+        return { ...obj, success: true };
+      }),
+    };
+    clientOpts.baseClient.bulkDelete.mockReturnValue(apiCallReturnValue as any);
+
+    const objects = [obj1, obj2];
+    const options = { namespace };
+    await expectSuccess(client.bulkDelete, { objects, options });
+    expect(clientOpts.auditLogger.log).toHaveBeenCalledTimes(2);
+    expectAuditEvent('saved_object_delete', 'success', { type: obj1.type, id: obj1.id });
+    expectAuditEvent('saved_object_delete', 'success', { type: obj2.type, id: obj2.id });
+  });
+  test(`adds audit event when not successful`, async () => {
+    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockRejectedValue(new Error());
+    await expect(() => client.bulkDelete<any>([obj1, obj2], { namespace })).rejects.toThrow();
+    expect(clientOpts.auditLogger.log).toHaveBeenCalledTimes(2);
+    expectAuditEvent('saved_object_delete', 'failure', { type: obj1.type, id: obj1.id });
+    expectAuditEvent('saved_object_delete', 'failure', { type: obj2.type, id: obj2.id });
+  });
 });
 
 describe('#checkConflicts', () => {
