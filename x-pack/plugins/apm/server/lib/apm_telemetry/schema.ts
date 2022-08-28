@@ -12,10 +12,13 @@ import {
   TimeframeMap,
   TimeframeMap1d,
   TimeframeMapAll,
+  APMPerService,
 } from './types';
 import { ElasticAgentName } from '../../../typings/es_schemas/ui/fields/agent';
 
 const long: { type: 'long' } = { type: 'long' };
+
+const keyword: { type: 'keyword' } = { type: 'keyword' };
 
 const aggregatedTransactionCountSchema: MakeSchemaFrom<AggregatedTransactionsCounts> =
   {
@@ -113,6 +116,47 @@ const apmPerAgentSchema: Pick<
   },
 };
 
+export const apmPerServiceSchema: MakeSchemaFrom<APMPerService> = {
+  service_id: keyword,
+  timed_out: { type: 'boolean' },
+  cloud: {
+    availability_zones: { type: 'array', items: { type: 'keyword' } },
+    regions: { type: 'array', items: { type: 'keyword' } },
+    providers: { type: 'array', items: { type: 'keyword' } },
+  },
+  faas: {
+    trigger: {
+      type: { type: 'array', items: { type: 'keyword' } },
+    },
+  },
+  agent: {
+    name: keyword,
+    version: keyword,
+  },
+  service: {
+    language: {
+      name: keyword,
+      version: keyword,
+    },
+    framework: {
+      name: keyword,
+      version: keyword,
+    },
+    runtime: {
+      name: keyword,
+      version: keyword,
+    },
+  },
+  kubernetes: {
+    pod: {
+      name: keyword,
+    },
+  },
+  container: {
+    id: keyword,
+  },
+};
+
 export const apmSchema: MakeSchemaFrom<APMUsage> = {
   ...apmPerAgentSchema,
   has_any_services: { type: 'boolean' },
@@ -192,6 +236,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
   service_groups: {
     kuery_fields: { type: 'array', items: { type: 'keyword' } },
   },
+  per_service: { type: 'array', items: { ...apmPerServiceSchema } },
   tasks: {
     aggregated_transactions: { took: { ms: long } },
     cloud: { took: { ms: long } },
@@ -207,5 +252,6 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
     cardinality: { took: { ms: long } },
     environments: { took: { ms: long } },
     service_groups: { took: { ms: long } },
+    per_service: { took: { ms: long } },
   },
 };

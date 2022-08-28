@@ -6,7 +6,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { docLinksServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { setupServer } from '@kbn/core/server/test_utils';
 import supertest from 'supertest';
 import { ReportingCore } from '../../..';
@@ -47,11 +47,22 @@ describe('POST /diagnose/browser', () => {
       () => ({ usesUiCapabilities: () => false })
     );
 
+    const docLinksSetupMock = docLinksServiceMock.createSetupContract();
     core = await createMockReportingCore(
       config,
       createMockPluginSetup({
         router: httpSetup.createRouter(''),
         security: null,
+        docLinks: {
+          ...docLinksSetupMock,
+          links: {
+            ...docLinksSetupMock.links,
+            reporting: {
+              browserSystemDependencies:
+                'https://www.elastic.co/guide/en/kibana/test-branch/secure-reporting.html#install-reporting-packages',
+            },
+          },
+        },
       })
     );
 
@@ -93,7 +104,7 @@ describe('POST /diagnose/browser', () => {
         expect(body).toMatchInlineSnapshot(`
           Object {
             "help": Array [
-              "The browser couldn't locate a default font. Please see https://www.elastic.co/guide/en/kibana/current/reporting-troubleshooting.html#reporting-troubleshooting-system-dependencies to fix this issue.",
+              "The browser couldn't locate a default font. Please see https://www.elastic.co/guide/en/kibana/test-branch/secure-reporting.html#install-reporting-packages to fix this issue.",
             ],
             "logs": "Could not find the default font",
             "success": false,
@@ -115,7 +126,7 @@ describe('POST /diagnose/browser', () => {
         expect(body).toMatchInlineSnapshot(`
           Object {
             "help": Array [
-              "The browser couldn't locate a default font. Please see https://www.elastic.co/guide/en/kibana/current/reporting-troubleshooting.html#reporting-troubleshooting-system-dependencies to fix this issue.",
+              "The browser couldn't locate a default font. Please see https://www.elastic.co/guide/en/kibana/test-branch/secure-reporting.html#install-reporting-packages to fix this issue.",
             ],
             "logs": "DevTools listening on (ws://localhost:4000)
           Could not find the default font",

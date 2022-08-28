@@ -12,7 +12,10 @@ import { nextTick } from '@kbn/test-jest-helpers';
 import { IndexExistsApiLogic } from '../../api/index/index_exists_api_logic';
 
 import { UNIVERSAL_LANGUAGE_VALUE } from './constants';
+import { flashIndexCreatedToast } from './new_index_created_toast';
 import { NewSearchIndexLogic, NewSearchIndexValues } from './new_search_index_logic';
+
+jest.mock('./new_index_created_toast', () => ({ flashIndexCreatedToast: jest.fn() }));
 
 const DEFAULT_VALUES: NewSearchIndexValues = {
   data: undefined as any,
@@ -106,6 +109,27 @@ describe('NewSearchIndexLogic', () => {
           fullIndexNameExists: true,
           rawName: 'indexname',
         });
+      });
+    });
+    describe('apiIndexCreated', () => {
+      it('calls flash index created toast', () => {
+        NewSearchIndexLogic.actions.apiIndexCreated({ indexName: 'indexName' });
+        expect(flashIndexCreatedToast).toHaveBeenCalled();
+      });
+    });
+    describe('connectorIndexCreated', () => {
+      it('calls flash index created toast', () => {
+        NewSearchIndexLogic.actions.connectorIndexCreated({
+          id: 'connectorId',
+          indexName: 'indexName',
+        });
+        expect(flashIndexCreatedToast).toHaveBeenCalled();
+      });
+    });
+    describe('crawlerIndexCreated', () => {
+      it('calls flash index created toast', () => {
+        NewSearchIndexLogic.actions.crawlerIndexCreated({ created: 'indexName' });
+        expect(flashIndexCreatedToast).toHaveBeenCalled();
       });
     });
   });

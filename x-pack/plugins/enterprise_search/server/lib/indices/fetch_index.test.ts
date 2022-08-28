@@ -24,6 +24,7 @@ jest.mock('../crawler/fetch_crawlers', () => ({
 describe('fetchIndex lib function', () => {
   const mockClient = {
     asCurrentUser: {
+      count: jest.fn().mockReturnValue({ count: 100 }),
       index: jest.fn(),
       indices: {
         get: jest.fn(),
@@ -42,6 +43,7 @@ describe('fetchIndex lib function', () => {
     indices: {
       index_name: {
         health: 'green',
+        hidden: false,
         size: new ByteSizeValue(108000).toString(),
         status: 'open',
         total: {
@@ -60,7 +62,9 @@ describe('fetchIndex lib function', () => {
 
   const result = {
     aliases: [],
+    count: 100,
     health: 'green',
+    hidden: false,
     name: 'index_name',
     status: 'open',
     total: {

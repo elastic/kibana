@@ -10,6 +10,8 @@ import { ElasticsearchIndexWithIngestion } from '../../../../common/types/indice
 
 export const indices: ElasticsearchIndexWithIngestion[] = [
   {
+    count: 1,
+    hidden: false,
     name: 'api',
     total: {
       docs: {
@@ -39,6 +41,8 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
       status: ConnectorStatus.CONFIGURED,
       sync_now: false,
     },
+    count: 1,
+    hidden: false,
     name: 'connector',
     total: {
       docs: {
@@ -49,10 +53,12 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
     },
   },
   {
+    count: 1,
     crawler: {
       id: '3',
       index_name: 'crawler',
     },
+    hidden: false,
     name: 'crawler',
     total: {
       docs: {

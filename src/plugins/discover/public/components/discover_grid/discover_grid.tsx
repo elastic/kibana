@@ -23,6 +23,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { getSchemaDetectors } from './discover_grid_schema';
 import { DiscoverGridFlyout } from './discover_grid_flyout';
@@ -43,7 +44,6 @@ import {
   SHOW_MULTIFIELDS,
 } from '../../../common';
 import { DiscoverGridDocumentToolbarBtn } from './discover_grid_document_selection';
-import { SortPairArr } from '../doc_table/utils/get_sort';
 import { getFieldsToShow } from '../../utils/get_fields_to_show';
 import type { DataTableRecord, ValueToStringConverter } from '../../types';
 import { useRowHeightsOptions } from '../../hooks/use_row_heights_options';
@@ -74,9 +74,9 @@ export interface DiscoverGridProps {
    */
   expandedDoc?: DataTableRecord;
   /**
-   * The used index pattern
+   * The used data view
    */
-  indexPattern: DataView;
+  dataView: DataView;
   /**
    * Determines if data is currently loaded
    */
@@ -141,7 +141,7 @@ export interface DiscoverGridProps {
   /**
    * Current sort setting
    */
-  sort: SortPairArr[];
+  sort: SortOrder[];
   /**
    * How the data is fetched
    */
@@ -187,7 +187,7 @@ const CONTROL_COLUMN_IDS_DEFAULT = ['openDetails', 'select'];
 export const DiscoverGrid = ({
   ariaLabelledBy,
   columns,
-  indexPattern,
+  dataView,
   isLoading,
   expandedDoc,
   onAddColumn,
@@ -220,7 +220,7 @@ export const DiscoverGrid = ({
   const services = useDiscoverServices();
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
   const [isFilterActive, setIsFilterActive] = useState(false);
-  const displayedColumns = getDisplayedColumns(columns, indexPattern);
+  const displayedColumns = getDisplayedColumns(columns, dataView);
   const defaultColumns = displayedColumns.includes('_source');
   const usedSelectedDocs = useMemo(() => {
     if (!selectedDocs.length || !rows?.length) {
@@ -255,13 +255,13 @@ export const DiscoverGrid = ({
       return convertValueToString({
         rowIndex,
         rows: displayedRows,
-        dataView: indexPattern,
+        dataView,
         columnId,
         services,
         options,
       });
     },
-    [displayedRows, indexPattern, services]
+    [displayedRows, dataView, services]
   );
 
   /**
@@ -331,9 +331,9 @@ export const DiscoverGrid = ({
   const showMultiFields = services.uiSettings.get(SHOW_MULTIFIELDS);
 
   const fieldsToShow = useMemo(() => {
-    const indexPatternFields = indexPattern.fields.getAll().map((fld) => fld.name);
-    return getFieldsToShow(indexPatternFields, indexPattern, showMultiFields);
-  }, [indexPattern, showMultiFields]);
+    const dataViewFields = dataView.fields.getAll().map((fld) => fld.name);
+    return getFieldsToShow(dataViewFields, dataView, showMultiFields);
+  }, [dataView, showMultiFields]);
 
   /**
    * Cell rendering
@@ -341,14 +341,14 @@ export const DiscoverGrid = ({
   const renderCellValue = useMemo(
     () =>
       getRenderCellValueFn(
-        indexPattern,
+        dataView,
         displayedRows,
         useNewFieldsApi,
         fieldsToShow,
         services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED),
         () => dataGridRef.current?.closeCellPopover()
       ),
-    [indexPattern, displayedRows, useNewFieldsApi, fieldsToShow, services.uiSettings]
+    [dataView, displayedRows, useNewFieldsApi, fieldsToShow, services.uiSettings]
   );
 
   /**
@@ -372,7 +372,7 @@ export const DiscoverGrid = ({
         ? (fieldName: string) => {
             closeFieldEditor.current = services.dataViewFieldEditor.openEditor({
               ctx: {
-                dataView: indexPattern,
+                dataView,
               },
               fieldName,
               onSave: async () => {
@@ -381,7 +381,7 @@ export const DiscoverGrid = ({
             });
           }
         : undefined,
-    [indexPattern, onFieldEdited, services.dataViewFieldEditor]
+    [dataView, onFieldEdited, services.dataViewFieldEditor]
   );
 
   const euiGridColumns = useMemo(
@@ -390,7 +390,7 @@ export const DiscoverGrid = ({
         columns: displayedColumns,
         rowsCount: displayedRows.length,
         settings,
-        indexPattern,
+        dataView,
         showTimeCol,
         defaultColumns,
         isSortEnabled,
@@ -403,7 +403,7 @@ export const DiscoverGrid = ({
       onFilter,
       displayedColumns,
       displayedRows,
-      indexPattern,
+      dataView,
       showTimeCol,
       settings,
       defaultColumns,
@@ -421,12 +421,12 @@ export const DiscoverGrid = ({
   const schemaDetectors = useMemo(() => getSchemaDetectors(), []);
   const columnsVisibility = useMemo(
     () => ({
-      visibleColumns: getVisibleColumns(displayedColumns, indexPattern, showTimeCol) as string[],
+      visibleColumns: getVisibleColumns(displayedColumns, dataView, showTimeCol) as string[],
       setVisibleColumns: (newColumns: string[]) => {
         onSetColumns(newColumns, hideTimeColumn);
       },
     }),
-    [displayedColumns, indexPattern, showTimeCol, hideTimeColumn, onSetColumns]
+    [displayedColumns, dataView, showTimeCol, hideTimeColumn, onSetColumns]
   );
   const sorting = useMemo(() => {
     if (isSortEnabled) {
@@ -526,7 +526,7 @@ export const DiscoverGrid = ({
         setExpanded: setExpandedDoc,
         rows: displayedRows,
         onFilter,
-        indexPattern,
+        dataView,
         isDarkMode: services.uiSettings.get('theme:darkMode'),
         selectedDocs: usedSelectedDocs,
         setSelectedDocs: (newSelectedDocs) => {
@@ -616,7 +616,7 @@ export const DiscoverGrid = ({
         )}
         {setExpandedDoc && expandedDoc && (
           <DiscoverGridFlyout
-            indexPattern={indexPattern}
+            dataView={dataView}
             hit={expandedDoc}
             hits={displayedRows}
             // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them

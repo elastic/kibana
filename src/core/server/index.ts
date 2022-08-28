@@ -60,11 +60,14 @@ import {
 } from '@kbn/core-elasticsearch-server';
 import { configSchema as elasticsearchConfigSchema } from '@kbn/core-elasticsearch-server-internal';
 import type { CapabilitiesSetup, CapabilitiesStart } from '@kbn/core-capabilities-server';
+import type {
+  SavedObjectsServiceSetup,
+  SavedObjectsServiceStart,
+} from '@kbn/core-saved-objects-server';
 
 import { HttpResources } from './http_resources';
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
 import { UiSettingsServiceSetup, UiSettingsServiceStart } from './ui_settings';
-import { SavedObjectsServiceSetup, SavedObjectsServiceStart } from './saved_objects';
 import { StatusServiceSetup } from './status';
 import { CoreUsageDataStart, CoreUsageDataSetup } from './core_usage_data';
 import { I18nServiceSetup } from './i18n';
@@ -274,15 +277,6 @@ export type {
   ExposedToBrowserDescriptor,
 } from './plugins';
 
-export {
-  SavedObjectsClient,
-  SavedObjectsErrorHelpers,
-  SavedObjectsSerializer,
-  SavedObjectTypeRegistry,
-  SavedObjectsUtils,
-  mergeSavedObjectMigrationMaps,
-} from './saved_objects';
-
 export type {
   SavedObject,
   SavedObjectAttribute,
@@ -351,6 +345,8 @@ export type {
   SavedObjectsPitParams,
 } from '@kbn/core-saved-objects-api-server';
 export type {
+  SavedObjectsServiceSetup,
+  SavedObjectsServiceStart,
   SavedObjectsClientProviderOptions,
   SavedObjectsClientWrapperFactory,
   SavedObjectsClientWrapperOptions,
@@ -363,15 +359,13 @@ export type {
   SavedObjectMigrationContext,
   SavedObjectsMigrationLogger,
   SavedObjectsRawDoc,
+  SavedObjectsRawDocSource,
   SavedObjectsRawDocParseOptions,
   SavedObjectSanitizedDoc,
   SavedObjectUnsanitizedDoc,
   SavedObjectsRepositoryFactory,
   SavedObjectsResolveImportErrorsOptions,
-  SavedObjectsServiceStart,
-  SavedObjectsServiceSetup,
   SavedObjectStatusMeta,
-  SavedObjectsRepository,
   SavedObjectsFieldMapping,
   SavedObjectsTypeMappingDefinition,
   SavedObjectsMappingProperties,
@@ -380,23 +374,35 @@ export type {
   SavedObjectsTypeManagementDefinition,
   SavedObjectMigrationMap,
   SavedObjectMigrationFn,
-  SavedObjectsExporter,
   ISavedObjectsExporter,
   SavedObjectExportBaseOptions,
   SavedObjectsExportByObjectOptions,
   SavedObjectsExportByTypeOptions,
-  SavedObjectsExportError,
   SavedObjectsExportTransform,
   SavedObjectsExportTransformContext,
-  SavedObjectsImporter,
   ISavedObjectsImporter,
-  SavedObjectsImportError,
   SavedObjectsImportHook,
   SavedObjectsImportHookResult,
   SavedObjectsValidationMap,
   SavedObjectsValidationSpec,
+  ISavedObjectsSerializer,
   SavedObjectsRequestHandlerContext,
+} from '@kbn/core-saved-objects-server';
+export {
+  SavedObjectsErrorHelpers,
+  SavedObjectsUtils,
+  mergeSavedObjectMigrationMaps,
+} from '@kbn/core-saved-objects-utils-server';
+export { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
+
+export type {
+  SavedObjectsRepository,
+  SavedObjectsExporter,
+  SavedObjectsExportError,
+  SavedObjectsImporter,
+  SavedObjectsImportError,
 } from './saved_objects';
+export { SavedObjectsClient } from './saved_objects';
 
 export type {
   IUiSettingsClient,

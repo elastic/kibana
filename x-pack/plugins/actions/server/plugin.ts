@@ -47,6 +47,7 @@ import { ActionTypeRegistry } from './action_type_registry';
 import {
   createExecutionEnqueuerFunction,
   createEphemeralExecutionEnqueuerFunction,
+  createBulkExecutionEnqueuerFunction,
 } from './create_execute_function';
 import { registerBuiltInActionTypes } from './builtin_action_types';
 import { registerActionsUsageCollector } from './usage';
@@ -447,6 +448,12 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
           isESOCanEncrypt: isESOCanEncrypt!,
           preconfiguredActions,
         }),
+        bulkExecutionEnqueuer: createBulkExecutionEnqueuerFunction({
+          taskManager: plugins.taskManager,
+          actionTypeRegistry: actionTypeRegistry!,
+          isESOCanEncrypt: isESOCanEncrypt!,
+          preconfiguredActions,
+        }),
         auditLogger: this.security?.audit.asScoped(request),
         usageCounter: this.usageCounter,
         connectorTokenClient: new ConnectorTokenClient({
@@ -631,6 +638,12 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
               preconfiguredActions,
             }),
             executionEnqueuer: createExecutionEnqueuerFunction({
+              taskManager,
+              actionTypeRegistry: actionTypeRegistry!,
+              isESOCanEncrypt: isESOCanEncrypt!,
+              preconfiguredActions,
+            }),
+            bulkExecutionEnqueuer: createBulkExecutionEnqueuerFunction({
               taskManager,
               actionTypeRegistry: actionTypeRegistry!,
               isESOCanEncrypt: isESOCanEncrypt!,

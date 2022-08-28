@@ -8,7 +8,8 @@
 
 import { i18n } from '@kbn/i18n';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
-import React, { useState, useCallback, Dispatch, FocusEvent, useContext } from 'react';
+import React, { useState, useCallback, Dispatch, FocusEvent, useContext, useMemo } from 'react';
+import { css } from '@emotion/react';
 
 import {
   EuiFieldNumber,
@@ -19,6 +20,7 @@ import {
   EuiColorPickerSwatch,
   EuiButtonIcon,
   EuiFieldNumberProps,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import {
@@ -50,6 +52,7 @@ export interface ColorRangesItemProps {
   continuity: PaletteContinuity;
   accessor: ColorRangeAccessor;
   validation?: ColorRangeValidation;
+  displayInfinity: boolean;
 }
 
 type ColorRangeItemMode = 'value' | 'auto' | 'edit';
@@ -65,10 +68,18 @@ const getMode = (
   return (isLast ? checkIsMaxContinuity : checkIsMinContinuity)(continuity) ? 'auto' : 'edit';
 };
 
-const getPlaceholderForAutoMode = (isLast: boolean) =>
+const getPlaceholderForAutoMode = (isLast: boolean, displayInfinity: boolean) =>
   isLast
-    ? i18n.translate('coloring.dynamicColoring.customPalette.maxValuePlaceholder', {
-        defaultMessage: 'Max. value',
+    ? displayInfinity
+      ? i18n.translate('coloring.dynamicColoring.customPalette.extentPlaceholderInfinity', {
+          defaultMessage: 'Infinity',
+        })
+      : i18n.translate('coloring.dynamicColoring.customPalette.maxValuePlaceholder', {
+          defaultMessage: 'Max. value',
+        })
+    : displayInfinity
+    ? i18n.translate('coloring.dynamicColoring.customPalette.extentPlaceholderNegativeInfinity', {
+        defaultMessage: '-Infinity',
       })
     : i18n.translate('coloring.dynamicColoring.customPalette.minValuePlaceholder', {
         defaultMessage: 'Min. value',
@@ -100,6 +111,7 @@ export function ColorRangeItem({
   validation,
   continuity,
   dispatch,
+  displayInfinity,
 }: ColorRangesItemProps) {
   const { dataBounds, palettes } = useContext(ColorRangesContext);
   const [popoverInFocus, setPopoverInFocus] = useState<boolean>(false);
@@ -110,6 +122,8 @@ export function ColorRangeItem({
   const isColorValid = isValidColor(colorRange.color);
   const ActionButton = getActionButton(mode);
   const isValid = validation?.isValid ?? true;
+
+  const { euiTheme } = useEuiTheme();
 
   const onLeaveFocus = useCallback(
     (e: FocusEvent<HTMLDivElement>) => {
@@ -162,15 +176,28 @@ export function ColorRangeItem({
     }
   );
 
+  const styles = useMemo(
+    () => css`
+      display: block;
+      min-width: ${euiTheme.size.xl};
+      text-align: center;
+    `,
+    [euiTheme.size.xl]
+  );
+
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false} responsive={false}>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} css={isLast ? styles : null}>
         {!isLast ? (
           <EuiColorPicker
             onChange={onUpdateColor}
             button={
               isColorValid ? (
-                <EuiColorPickerSwatch color={colorRange.color} aria-label={selectNewColorText} />
+                <EuiColorPickerSwatch
+                  color={colorRange.color}
+                  aria-label={selectNewColorText}
+                  style={{ width: euiTheme.size.xl, height: euiTheme.size.xl }}
+                />
               ) : (
                 <EuiButtonIcon
                   color="danger"
@@ -190,7 +217,7 @@ export function ColorRangeItem({
             isInvalid={!isColorValid}
           />
         ) : (
-          <EuiIcon type={RelatedIcon} size="l" />
+          <EuiIcon type={RelatedIcon} size="m" color={euiTheme.colors.disabled} />
         )}
       </EuiFlexItem>
       <EuiFlexItem grow={true}>
@@ -203,7 +230,7 @@ export function ColorRangeItem({
           }
           disabled={isDisabled}
           onChange={onValueChange}
-          placeholder={mode === 'auto' ? getPlaceholderForAutoMode(isLast) : ''}
+          placeholder={mode === 'auto' ? getPlaceholderForAutoMode(isLast, displayInfinity) : ''}
           append={getAppend(rangeType, mode)}
           onBlur={onLeaveFocus}
           data-test-subj={`lnsPalettePanel_dynamicColoring_range_value_${index}`}
@@ -224,6 +251,7 @@ export function ColorRangeItem({
             continuity={continuity}
             rangeType={rangeType}
             colorRanges={colorRanges}
+            displayInfinity={displayInfinity}
             dispatch={dispatch}
             accessor={accessor}
           />

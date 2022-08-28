@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { EcsEventType, KibanaRequest } from '@kbn/core/server';
+import { EcsEventType } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
-import { Space } from '@kbn/spaces-plugin/server';
 import { CasesSupportedOperations } from '@kbn/security-plugin/server';
 
 /**
@@ -18,8 +17,6 @@ export interface Verbs {
   progressive: string;
   past: string;
 }
-
-export type GetSpaceFn = (request: KibanaRequest) => Promise<Space | undefined>;
 
 /**
  * Read operations for the cases APIs.
@@ -80,7 +77,7 @@ export interface OperationDetails {
    */
   name: CasesSupportedOperations;
   /**
-   * The ECS `event.action` field, should be in the form of <entity>_<operation> e.g comment_get, case_fined
+   * The ECS `event.action` field, should be in the form of <entity>_<operation> e.g comment_get, case_find
    */
   action: string;
   /**

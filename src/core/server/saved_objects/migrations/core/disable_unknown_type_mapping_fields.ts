@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsMappingProperties, IndexMapping } from '../../mappings';
+import type { SavedObjectsMappingProperties } from '@kbn/core-saved-objects-server';
+import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 
 /**
  * Merges the active mappings and the source mappings while disabling the

@@ -2857,6 +2857,53 @@
         }
       ]
     },
+    "/api/cases/{caseId}/alerts": {
+      "get": {
+        "summary": "Gets all alerts attached to a case in the default space.",
+        "description": "You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.\n",
+        "operationId": "getCaseAlertsDefaultSpace",
+        "tags": [
+          "cases",
+          "kibana"
+        ],
+        "x-technical-preview": true,
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/case_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json; charset=utf-8": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/alert_response_properties"
+                  }
+                },
+                "examples": {
+                  "createCaseCommentResponse": {
+                    "$ref": "#/components/examples/get_case_alerts_response"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
     "/api/cases/{caseId}/comments": {
       "post": {
         "summary": "Adds a comment or alert to a case in the default space.",
@@ -6511,6 +6558,56 @@
         }
       ]
     },
+    "/s/{spaceId}/api/cases/{caseId}/alerts": {
+      "get": {
+        "summary": "Gets all alerts attached to a case.",
+        "description": "You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.\n",
+        "x-technical-preview": true,
+        "operationId": "getCaseAlerts",
+        "tags": [
+          "cases",
+          "kibana"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/case_id"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json; charset=utf-8": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/alert_response_properties"
+                  }
+                },
+                "examples": {
+                  "createCaseCommentResponse": {
+                    "$ref": "#/components/examples/get_case_alerts_response"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
     "/s/{spaceId}/api/cases/{caseId}/comments": {
       "post": {
         "summary": "Adds a comment or alert to a case.",
@@ -7738,6 +7835,23 @@
         ],
         "example": "close-by-user"
       },
+      "alert_response_properties": {
+        "type": "object",
+        "properties": {
+          "attached_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "id": {
+            "description": "The alert identifier.",
+            "type": "string"
+          },
+          "index": {
+            "description": "The alert index.",
+            "type": "string"
+          }
+        }
+      },
       "add_alert_comment_request_properties": {
         "type": "object",
         "properties": {
@@ -8758,6 +8872,16 @@
           },
           "external_service": null
         }
+      },
+      "get_case_alerts_response": {
+        "summary": "Retrieves all alerts attached to a case",
+        "value": [
+          {
+            "id": "f6a7d0c3-d52d-432c-b2e6-447cd7fce04d",
+            "index": ".alerts-observability.logs.alerts-default",
+            "attached_at": "2022-07-25T20:09:40.963Z"
+          }
+        ]
       },
       "add_comment_request": {
         "summary": "Adds a comment to a case.",

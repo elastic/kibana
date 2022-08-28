@@ -14,9 +14,9 @@ import type {
   SavedObjectsCollectMultiNamespaceReferencesResponse,
   SavedObjectReferenceWithContext,
 } from '@kbn/core-saved-objects-api-server';
-import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
-import type { SavedObjectsSerializer } from '../../serialization';
-import { SavedObjectsErrorHelpers } from './errors';
+import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
+import type { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
 import { findLegacyUrlAliases } from './legacy_url_aliases';
 import { getRootFields } from './included_fields';
 import {

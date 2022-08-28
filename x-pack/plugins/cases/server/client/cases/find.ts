@@ -36,7 +36,11 @@ export const find = async (
   params: CasesFindRequest,
   clientArgs: CasesClientArgs
 ): Promise<CasesFindResponse> => {
-  const { caseService, authorization, logger } = clientArgs;
+  const {
+    services: { caseService },
+    authorization,
+    logger,
+  } = clientArgs;
 
   try {
     const fields = asArray(params.fields);
@@ -58,6 +62,7 @@ export const find = async (
       owner: queryParams.owner,
       from: queryParams.from,
       to: queryParams.to,
+      assignees: queryParams.assignees,
     };
 
     const statusStatsOptions = constructQueryOptions({

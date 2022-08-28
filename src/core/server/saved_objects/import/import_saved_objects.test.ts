@@ -24,12 +24,15 @@ import type {
   SavedObjectsImportFailure,
   SavedObjectsImportWarning,
 } from '@kbn/core-saved-objects-common';
-import { SavedObjectsClientContract, SavedObjectsType } from '../types';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type {
+  SavedObjectsType,
+  ISavedObjectTypeRegistry,
+  SavedObjectsImportHook,
+} from '@kbn/core-saved-objects-server';
+import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { savedObjectsClientMock } from '../../mocks';
-import { ISavedObjectTypeRegistry } from '..';
-import { typeRegistryMock } from '../saved_objects_type_registry.mock';
 import { importSavedObjectsFromStream, ImportSavedObjectsOptions } from './import_saved_objects';
-import { SavedObjectsImportHook } from './types';
 import type { ImportStateMap } from './lib';
 
 describe('#importSavedObjectsFromStream', () => {

@@ -16,9 +16,11 @@ import {
 } from '../types';
 
 export const apiIndex: ApiViewIndex = {
+  count: 1,
   ingestionMethod: IngestionMethod.API,
   ingestionStatus: IngestionStatus.CONNECTED,
   lastUpdated: null,
+  hidden: false,
   name: 'api',
   total: {
     docs: {
@@ -48,6 +50,8 @@ export const connectorIndex: ConnectorViewIndex = {
     status: ConnectorStatus.CONFIGURED,
     sync_now: false,
   },
+  count: 1,
+  hidden: false,
   ingestionMethod: IngestionMethod.CONNECTOR,
   ingestionStatus: IngestionStatus.INCOMPLETE,
   lastUpdated: 'never',
@@ -61,10 +65,12 @@ export const connectorIndex: ConnectorViewIndex = {
   },
 };
 export const crawlerIndex: CrawlerViewIndex = {
+  count: 1,
   crawler: {
     id: '3',
     index_name: 'crawler',
   },
+  hidden: false,
   ingestionMethod: IngestionMethod.CRAWLER,
   ingestionStatus: IngestionStatus.INCOMPLETE,
   lastUpdated: null,

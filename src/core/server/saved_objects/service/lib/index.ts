@@ -9,17 +9,6 @@
 export type { SavedObjectsRepository } from './repository';
 export { SavedObjectsClientProvider } from './scoped_client_provider';
 
-export type {
-  SavedObjectsClientWrapperFactory,
-  SavedObjectsClientWrapperOptions,
-  ISavedObjectsClientProvider,
-  SavedObjectsClientProviderOptions,
-  SavedObjectsClientFactory,
-  SavedObjectsClientFactoryProvider,
-} from './scoped_client_provider';
-
-export { SavedObjectsErrorHelpers } from './errors';
-
-export { SavedObjectsUtils } from './utils';
+export type { ISavedObjectsClientProvider } from './scoped_client_provider';
 
 export { getIndexForType } from './get_index_for_type';

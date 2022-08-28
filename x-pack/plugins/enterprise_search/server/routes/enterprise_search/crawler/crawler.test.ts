@@ -689,6 +689,16 @@ describe('crawler routes', () => {
       mockRouter.shouldValidate(request);
     });
 
+    it('validates correctly with page[current]', () => {
+      const request = { params: { indexName: 'index-name' }, query: { 'page[current]': 4 } };
+      mockRouter.shouldValidate(request);
+    });
+
+    it('validates correctly with page[size]', () => {
+      const request = { params: { indexName: 'index-name' }, query: { 'page[size]': 100 } };
+      mockRouter.shouldValidate(request);
+    });
+
     it('fails validation without name', () => {
       const request = { params: {} };
       mockRouter.shouldThrow(request);

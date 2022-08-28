@@ -2,9 +2,11 @@
 
 standard_list="url,index-pattern,query,graph-workspace,tag,visualization,canvas-element,canvas-workpad,dashboard,search,lens,map,cases,uptime-dynamic-settings,osquery-saved-query,osquery-pack,infrastructure-ui-source,metrics-explorer-view,inventory-view,infrastructure-monitoring-log-view,apm-indices"
 
-orig_archive="x-pack/test/functional/es_archives/banners/multispace"
-new_archive="x-pack/test/functional/fixtures/kbn_archiver/banners/multispace"
-test_config="x-pack/test/functional/apps/spaces/config.ts"
+orig_archive="x-pack/test/functional/es_archives/reporting/ecommerce_kibana_spaces"
+new_archive="x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce_kibana_spaces"
+newArchives=("x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce_kibana_non_default_space")
+newArchives+=("x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce_kibana_non_timezone_space")
+test_config="x-pack/test/reporting_api_integration/reporting_and_security.config.ts"
 
 arrayify_csv() {
   local xs=${1}
@@ -28,6 +30,11 @@ intersection() {
 
   echo "${intersections[@]}"
 }
+
+# Just a note that this is using Gnu date.
+# On OSX if you don't install this, and instead use the native date you only get seconds.
+# With gdate you can something like nanoseconds.
+alias timestamp='while read line; do echo "[`gdate +%H:%M:%S.%N`] $line"; done'
 
 is_zipped() {
   local archive=$1
@@ -91,7 +98,6 @@ _find_config() {
 
   local current
   local parent
-  local grandParent
   local greatGrand
   current=$(dirname "$test_file")
   parent=$(dirname "$current")
@@ -277,6 +283,16 @@ load_kbn() {
   set +x
 }
 
+load_kbns() {
+  local space=${1:-default}
+
+  for x in "${newArchives[@]}"; do
+    set -x
+    node scripts/kbn_archiver.js --config "$test_config" load "$x" --space "$space"
+    set +x
+  done
+}
+
 load_created_kbn_archive() {
   set -x
   node scripts/kbn_archiver.js --config "$test_config" load "$new_archive"
@@ -287,6 +303,16 @@ unload_kbn() {
   set -x
   node scripts/kbn_archiver.js --config "$test_config" unload "$new_archive"
   set +x
+}
+
+unload_kbns() {
+  local space=${1:-default}
+
+  for x in "${newArchives[@]}"; do
+    set -x
+    node scripts/kbn_archiver.js --config "$test_config" unload "$x"
+    set +x
+  done
 }
 
 ping_server() {
@@ -309,6 +335,14 @@ run_test() {
 
   set -x
   node scripts/functional_test_runner --config "$config"
+  set +x
+}
+
+run_test_with_timestamp() {
+  local config=${1:-$test_config}
+
+  set -x
+  node scripts/functional_test_runner --config "$config" | timestamp
   set +x
 }
 

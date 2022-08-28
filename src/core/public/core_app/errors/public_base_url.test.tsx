@@ -9,7 +9,7 @@
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 
-import { notificationServiceMock } from '../../notifications/notifications_service.mock';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { setupPublicBaseUrlConfigWarning } from './public_base_url';
 
 describe('publicBaseUrl warning', () => {

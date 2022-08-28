@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import pMap from 'p-map';
 
-import { SavedObject } from '@kbn/core/public';
+import { SavedObject } from '@kbn/core/server';
 import { Actions, ActionTypes, CommentAttributes } from '../../../common/api';
 import { CASE_SAVED_OBJECT, MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import { CasesClientArgs } from '../types';
@@ -51,9 +51,7 @@ export async function deleteAll(
   const {
     user,
     unsecuredSavedObjectsClient,
-    caseService,
-    attachmentService,
-    userActionService,
+    services: { caseService, attachmentService, userActionService },
     logger,
     authorization,
   } = clientArgs;
@@ -118,8 +116,7 @@ export async function deleteComment(
   const {
     user,
     unsecuredSavedObjectsClient,
-    attachmentService,
-    userActionService,
+    services: { attachmentService, userActionService },
     logger,
     authorization,
   } = clientArgs;
