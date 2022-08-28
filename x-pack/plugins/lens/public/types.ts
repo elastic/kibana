@@ -108,8 +108,8 @@ export interface EditorFrameSetup {
   registerDatasource: <T, P>(
     datasource: Datasource<T, P> | (() => Promise<Datasource<T, P>>)
   ) => void;
-  registerVisualization: <T>(
-    visualization: Visualization<T> | (() => Promise<Visualization<T>>)
+  registerVisualization: <T, P>(
+    visualization: Visualization<T, P> | (() => Promise<Visualization<T, P>>)
   ) => void;
 }
 
