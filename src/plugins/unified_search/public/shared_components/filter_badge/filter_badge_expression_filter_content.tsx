@@ -10,22 +10,8 @@ import React from 'react';
 import { EuiFlexItem, EuiTextColor } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { FILTERS } from '@kbn/es-query';
+import type { LabelOptions } from './filter_badge_utils';
 import { existsOperator, isOneOfOperator } from '../../filter_bar/filter_editor';
-
-const FILTER_ITEM_OK = '';
-const FILTER_ITEM_WARNING = 'warn';
-const FILTER_ITEM_ERROR = 'error';
-
-export type FilterLabelStatus =
-  | typeof FILTER_ITEM_OK
-  | typeof FILTER_ITEM_WARNING
-  | typeof FILTER_ITEM_ERROR;
-
-interface LabelOptions {
-  title: string;
-  status: FilterLabelStatus;
-  message?: string;
-}
 
 const FilterBadgeExpressionValue = ({ value }: { value: string | number }) => {
   return (
