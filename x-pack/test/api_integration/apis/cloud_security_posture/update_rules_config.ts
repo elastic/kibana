@@ -35,7 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
 
-    it(`Should return 404 when package policy id does not exist`, async () => {
+    it(`returns 404 when package policy id does not exist`, async () => {
       const packagePolicyId = chance.guid();
 
       const { body: response } = await supertest

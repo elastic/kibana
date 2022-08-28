@@ -37,7 +37,7 @@ import {
   removeCspRulesInstancesCallback,
 } from './fleet_integration/fleet_integration';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
-import { updatePackagePolicyVars } from './routes/configuration/update_rules_configuration';
+import { updatePackagePolicyRuntimeCfgVar, getAllPackagePolicyCspRulesSO } from './routes/configuration/update_rules_configuration';
 
 import {
   removeFindingsStatsTask,
@@ -105,7 +105,12 @@ export class CspPlugin
 
             await onPackagePolicyPostCreateCallback(this.logger, packagePolicy, soClient);
 
-            const updatedPackagePolicy = await updatePackagePolicyVars({
+            const updatedPackagePolicy = await updatePackagePolicyRuntimeCfgVar({
+              rules: await getAllPackagePolicyCspRulesSO(
+                soClient,
+                packagePolicy.id,
+                packagePolicy.policy_id
+              ),
               packagePolicy,
               packagePolicyService: plugins.fleet.packagePolicyService,
               esClient,
@@ -163,4 +168,4 @@ export class CspPlugin
   ) {
     setupFindingsStatsTask(taskManager, coreStartServices, logger);
   }
-}
+
