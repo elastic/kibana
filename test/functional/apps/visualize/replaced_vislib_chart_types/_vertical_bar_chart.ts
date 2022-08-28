@@ -16,13 +16,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const inspector = getService('inspector');
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
-  const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'visualize',
+    'visEditor',
+    'visChart',
+    'common',
+    'timePicker',
+  ]);
+  const from = 'Sep 20, 2015 @ 06:31:44.000';
+  const to = 'Sep 22, 2015 @ 18:31:44.000';
 
   const xyChartSelector = 'xyVisChart';
 
   describe('vertical bar chart', function () {
     before(async () => {
       await PageObjects.visualize.initTests();
+      await PageObjects.common.setTime({ from, to });
+    });
+
+    after(async () => {
+      await PageObjects.common.unsetTime();
     });
 
     const vizName1 = 'Visualization VerticalBarChart';
@@ -33,7 +46,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('clickVerticalBarChart');
       await PageObjects.visualize.clickVerticalBarChart();
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
       log.debug('Bucket = X-Axis');
       await PageObjects.visEditor.clickBucket('X-axis');
       log.debug('Aggregation = Date Histogram');
@@ -64,7 +76,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualize.navigateToNewAggBasedVisualization();
         await PageObjects.visualize.clickVerticalBarChart();
         await PageObjects.visualize.clickNewSearch();
-        await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.visEditor.clickBucket('X-axis');
         await PageObjects.visEditor.selectAggregation('Date Range');
         await PageObjects.visEditor.selectField('@timestamp');
@@ -88,7 +99,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualize.navigateToNewAggBasedVisualization();
         await PageObjects.visualize.clickVerticalBarChart();
         await PageObjects.visualize.clickNewSearch();
-        await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.visEditor.clickBucket('X-axis');
         log.debug('Aggregation = Date Range');
         await PageObjects.visEditor.selectAggregation('Date Range');
@@ -162,11 +172,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should have `drop partial buckets` option', async () => {
-      const fromTime = 'Sep 20, 2015 @ 06:31:44.000';
-      const toTime = 'Sep 22, 2015 @ 18:31:44.000';
-
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-
       let expectedChartValues = [
         82, 218, 341, 440, 480, 517, 522, 446, 403, 321, 258, 172, 95, 55, 38, 24, 3, 4, 11, 14, 17,
         38, 49, 115, 152, 216, 315, 402, 446, 513, 520, 474, 421, 307, 230, 170, 99, 48, 30, 15, 10,
