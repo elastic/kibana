@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { AlertSummary } from '../alert_details/components';
+import { AlertSummary } from './components';
 import { useKibana } from '../../utils/kibana_react';
 import { ObservabilityAppServices } from '../../application/types';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -18,25 +18,22 @@ import { ALERTS_BREADCRUMB_TEXT } from '../alerts/translations';
 // import { AlertDetailsPathParams } from './types';
 
 export function AlertDetailsPage() {
-    const {
-        http
-    } = useKibana<ObservabilityAppServices>().services;
+  const { http } = useKibana<ObservabilityAppServices>().services;
 
-    const { ObservabilityPageTemplate } = usePluginContext();
-    // const { alertId } = useParams<AlertDetailsPathParams>();
-    const alert = {};
+  const { ObservabilityPageTemplate } = usePluginContext();
+  // const { alertId } = useParams<AlertDetailsPathParams>();
+  const alert = {};
 
-    useBreadcrumbs([
-        {
-            href: http.basePath.prepend(paths.observability.alerts),
-            text: ALERTS_BREADCRUMB_TEXT,
-        }
-    ]);
+  useBreadcrumbs([
+    {
+      href: http.basePath.prepend(paths.observability.alerts),
+      text: ALERTS_BREADCRUMB_TEXT,
+    },
+  ]);
 
-    return (
-        <ObservabilityPageTemplate
-            data-test-subj="alertDetails">
-            <AlertSummary alert={alert} />
-        </ObservabilityPageTemplate>
-    );
+  return (
+    <ObservabilityPageTemplate data-test-subj="alertDetails">
+      <AlertSummary alert={alert} />
+    </ObservabilityPageTemplate>
+  );
 }
