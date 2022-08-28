@@ -11,6 +11,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { EuiFlexGroup, EuiFlexItem, EuiTextColor } from '@elastic/eui';
 import { getDisplayValueFromFilter, getIndexPatternFromFilter } from '@kbn/data-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { FilterBadgeGroup } from './filter_badge_group';
 import { getConditionalOperationType } from '../../filters_builder/filters_builder_utils';
 import { ConditionTypes } from '../../filters_builder/filters_builder_condition_types';
@@ -31,7 +32,13 @@ interface LabelOptions {
   message?: string;
 }
 
+/**
+ * Checks if filter field exists in any of the index patterns provided,
+ * Because if so, a filter for the wrong index pattern may still be applied.
+ * This function makes this behavior explicit, but it needs to be revised.
+ */
 function isFilterApplicable(filter: Filter, dataView: DataView[]) {
+  // Any filter is applicable if no index patterns were provided to FilterBar.
   if (!dataView.length) return true;
 
   const ip = getIndexPatternFromFilter(filter, dataView);
@@ -59,14 +66,21 @@ function getValueLabel(filter: Filter, dataView: DataView): LabelOptions {
     try {
       label.title = getDisplayValueFromFilter(filter, [dataView]);
     } catch (e) {
-      label.status = FILTER_ITEM_ERROR;
-      label.title = `Error`;
+      label.status = FILTER_ITEM_WARNING;
+      label.title = i18n.translate('unifiedSearch.filter.filterBar.labelWarningText', {
+        defaultMessage: `Warning`,
+      });
       label.message = e.message;
     }
   } else {
     label.status = FILTER_ITEM_WARNING;
-    label.title = `Warning`;
-    label.message = 'Field {fieldName} does not exist in current view';
+    label.title = i18n.translate('unifiedSearch.filter.filterBar.labelWarningText', {
+      defaultMessage: `Warning`,
+    });
+    label.message = i18n.translate('unifiedSearch.filter.filterBar.labelWarningInfo', {
+      defaultMessage: `Field {fieldName} does not exist in current view`,
+      values: { fieldName: filter.meta.key },
+    });
   }
 
   return label;
