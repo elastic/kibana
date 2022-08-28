@@ -10,6 +10,7 @@ import React from 'react';
 import { EuiFlexItem, EuiTextColor } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { FILTERS } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import type { LabelOptions } from './filter_badge_utils';
 import { existsOperator, isOneOfOperator } from '../../filter_bar/filter_editor';
 
@@ -24,7 +25,11 @@ const FilterBadgeExpressionValue = ({ value }: { value: string | number }) => {
 const Prefix = ({ prefix }: { prefix?: boolean }) =>
   prefix ? (
     <EuiFlexItem grow={false}>
-      <EuiTextColor color="danger">NOT</EuiTextColor>
+      <EuiTextColor color="danger">
+        {i18n.translate('unifiedSearch.filter.filterBar.negatedFilterPrefix', {
+          defaultMessage: 'NOT ',
+        })}
+      </EuiTextColor>
     </EuiFlexItem>
   ) : null;
 

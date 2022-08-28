@@ -7,9 +7,10 @@
  */
 
 import { getDisplayValueFromFilter, getIndexPatternFromFilter } from '@kbn/data-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { Filter } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
+import { ConditionTypes } from './filter_badge_condition_types';
 
 export const FILTER_ITEM_OK = '';
 export const FILTER_ITEM_WARNING = 'warn';
@@ -79,3 +80,16 @@ export function getValueLabel(filter: Filter, dataView: DataView): LabelOptions 
 
   return label;
 }
+
+/** @internal **/
+export type FilterItem = Filter | FilterItem[];
+
+export const isOrFilter = (filter: Filter) => Boolean(filter?.meta?.type === 'OR');
+
+export const getConditionalOperationType = (filter: FilterItem) => {
+  if (Array.isArray(filter)) {
+    return ConditionTypes.AND;
+  } else if (isOrFilter(filter)) {
+    return ConditionTypes.OR;
+  }
+};

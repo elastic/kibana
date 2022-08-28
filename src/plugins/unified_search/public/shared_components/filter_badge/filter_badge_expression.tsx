@@ -11,11 +11,10 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { EuiFlexGroup, EuiFlexItem, EuiTextColor } from '@elastic/eui';
 import { FilterBadgeGroup } from './filter_badge_group';
-import { getConditionalOperationType } from '../../filters_builder/filters_builder_utils';
 import type { LabelOptions } from './filter_badge_utils';
-import { FILTER_ITEM_OK, getValueLabel } from './filter_badge_utils';
+import { FILTER_ITEM_OK, getValueLabel, getConditionalOperationType } from './filter_badge_utils';
 import { FilterContent } from './filter_badge_expression_filter_content';
-import { ConditionTypes } from '../../filters_builder/filters_builder_condition_types';
+import { ConditionTypes } from './filter_badge_condition_types';
 
 export interface FilterBadgeExpressionProps {
   filter: Filter;
