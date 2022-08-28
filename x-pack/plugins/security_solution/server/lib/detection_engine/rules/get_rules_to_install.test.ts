@@ -9,10 +9,11 @@ import { getRulesToInstall } from './get_rules_to_install';
 import { getRuleMock } from '../routes/__mocks__/request_responses';
 import { getAddPrepackagedRulesSchemaMock } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema.mock';
 import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
+import { prepackagedRulesToMap, rulesToMap } from './utils';
 
 describe('get_rules_to_install', () => {
   test('should return empty array if both rule sets are empty', () => {
-    const update = getRulesToInstall([], []);
+    const update = getRulesToInstall(prepackagedRulesToMap([]), rulesToMap([]));
     expect(update).toEqual([]);
   });
 
@@ -22,7 +23,10 @@ describe('get_rules_to_install', () => {
 
     const installedRule = getRuleMock(getQueryRuleParams());
     installedRule.params.ruleId = 'rule-1';
-    const update = getRulesToInstall([ruleFromFileSystem], [installedRule]);
+    const update = getRulesToInstall(
+      prepackagedRulesToMap([ruleFromFileSystem]),
+      rulesToMap([installedRule])
+    );
     expect(update).toEqual([]);
   });
 
@@ -32,7 +36,10 @@ describe('get_rules_to_install', () => {
 
     const installedRule = getRuleMock(getQueryRuleParams());
     installedRule.params.ruleId = 'rule-2';
-    const update = getRulesToInstall([ruleFromFileSystem], [installedRule]);
+    const update = getRulesToInstall(
+      prepackagedRulesToMap([ruleFromFileSystem]),
+      rulesToMap([installedRule])
+    );
     expect(update).toEqual([ruleFromFileSystem]);
   });
 
@@ -45,7 +52,10 @@ describe('get_rules_to_install', () => {
 
     const installedRule = getRuleMock(getQueryRuleParams());
     installedRule.params.ruleId = 'rule-3';
-    const update = getRulesToInstall([ruleFromFileSystem1, ruleFromFileSystem2], [installedRule]);
+    const update = getRulesToInstall(
+      prepackagedRulesToMap([ruleFromFileSystem1, ruleFromFileSystem2]),
+      rulesToMap([installedRule])
+    );
     expect(update).toEqual([ruleFromFileSystem1, ruleFromFileSystem2]);
   });
 
@@ -62,8 +72,8 @@ describe('get_rules_to_install', () => {
     const installedRule = getRuleMock(getQueryRuleParams());
     installedRule.params.ruleId = 'rule-3';
     const update = getRulesToInstall(
-      [ruleFromFileSystem1, ruleFromFileSystem2, ruleFromFileSystem3],
-      [installedRule]
+      prepackagedRulesToMap([ruleFromFileSystem1, ruleFromFileSystem2, ruleFromFileSystem3]),
+      rulesToMap([installedRule])
     );
     expect(update).toEqual([ruleFromFileSystem1, ruleFromFileSystem2]);
   });

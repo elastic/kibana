@@ -11,7 +11,7 @@ exports[`Storyshots components/ToolTipShortcut with alt 1`] = `
   }
 >
   <div
-    className="emotion-euiText-xs-euiTextColor-ghost-euiTextAlign-center"
+    className="euiText emotion-euiText-xs-euiTextColor-ghost-euiTextAlign-center"
     style={Object {}}
   >
     ⌥  +  P
@@ -30,7 +30,7 @@ exports[`Storyshots components/ToolTipShortcut with cmd 1`] = `
   }
 >
   <div
-    className="emotion-euiText-xs-euiTextColor-ghost-euiTextAlign-center"
+    className="euiText emotion-euiText-xs-euiTextColor-ghost-euiTextAlign-center"
     style={Object {}}
   >
     ⌘  +  D
@@ -49,7 +49,7 @@ exports[`Storyshots components/ToolTipShortcut with down arrow 1`] = `
   }
 >
   <div
-    className="emotion-euiText-xs-euiTextColor-ghost-euiTextAlign-center"
+    className="euiText emotion-euiText-xs-euiTextColor-ghost-euiTextAlign-center"
     style={Object {}}
   >
     ⌘  +  SHIFT  +  ↓
@@ -68,7 +68,7 @@ exports[`Storyshots components/ToolTipShortcut with left arrow 1`] = `
   }
 >
   <div
-    className="emotion-euiText-xs-euiTextColor-ghost-euiTextAlign-center"
+    className="euiText emotion-euiText-xs-euiTextColor-ghost-euiTextAlign-center"
     style={Object {}}
   >
     ←
@@ -87,7 +87,7 @@ exports[`Storyshots components/ToolTipShortcut with right arrow 1`] = `
   }
 >
   <div
-    className="emotion-euiText-xs-euiTextColor-ghost-euiTextAlign-center"
+    className="euiText emotion-euiText-xs-euiTextColor-ghost-euiTextAlign-center"
     style={Object {}}
   >
     →
@@ -106,7 +106,7 @@ exports[`Storyshots components/ToolTipShortcut with shortcut 1`] = `
   }
 >
   <div
-    className="emotion-euiText-xs-euiTextColor-ghost-euiTextAlign-center"
+    className="euiText emotion-euiText-xs-euiTextColor-ghost-euiTextAlign-center"
     style={Object {}}
   >
     G
@@ -125,7 +125,7 @@ exports[`Storyshots components/ToolTipShortcut with up arrow 1`] = `
   }
 >
   <div
-    className="emotion-euiText-xs-euiTextColor-ghost-euiTextAlign-center"
+    className="euiText emotion-euiText-xs-euiTextColor-ghost-euiTextAlign-center"
     style={Object {}}
   >
     ⌘  +  SHIFT  +  ↑

@@ -9,10 +9,10 @@ import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { useBulkActionItems } from '@kbn/timelines-plugin/public';
-import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
+import type { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { timelineActions } from '../../../../timelines/store/timeline';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
-import { SetEventsDeletedProps, SetEventsLoadingProps } from '../types';
+import type { SetEventsDeletedProps, SetEventsLoadingProps } from '../types';
 interface Props {
   alertStatus?: Status;
   closePopover: () => void;

@@ -7,10 +7,8 @@
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
-import {
-  NetworkDetailsRequestOptions,
-  NetworkQueries,
-} from '../../../../../../../common/search_strategy';
+import type { NetworkDetailsRequestOptions } from '../../../../../../../common/search_strategy';
+import { NetworkQueries } from '../../../../../../../common/search_strategy';
 
 export const mockOptions: NetworkDetailsRequestOptions = {
   defaultIndex: [

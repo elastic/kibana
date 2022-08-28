@@ -7,9 +7,9 @@
 
 import { transformDataToNdjson } from '@kbn/securitysolution-utils';
 
-import { Logger } from '@kbn/core/server';
-import { ExceptionListClient } from '@kbn/lists-plugin/server';
-import { RulesClient, RuleExecutorServices } from '@kbn/alerting-plugin/server';
+import type { Logger } from '@kbn/core/server';
+import type { ExceptionListClient } from '@kbn/lists-plugin/server';
+import type { RulesClient, RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import { getNonPackagedRules } from './get_existing_prepackaged_rules';
 import { getExportDetailsNdjson } from './get_export_details_ndjson';
 import { transformAlertsToRules } from '../routes/rules/utils';

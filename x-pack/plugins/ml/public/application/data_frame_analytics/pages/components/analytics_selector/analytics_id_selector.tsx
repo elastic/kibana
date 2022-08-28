@@ -140,7 +140,7 @@ export function AnalyticsIdSelector({
         await getDataFrameAnalytics();
       setAnalyticsJobs(dataFrameAnalytics);
     } catch (e) {
-      console.error('Error fetching analytics', e); // eslint-disable-line
+      console.error('Error fetching analytics', e); // eslint-disable-line no-console
       displayErrorToast(
         e,
         i18n.translate('xpack.ml.analyticsSelector.analyticsFetchErrorMessage', {
@@ -157,7 +157,7 @@ export function AnalyticsIdSelector({
       const response = await trainedModelsApiService.getTrainedModels();
       setTrainedModels(response);
     } catch (e) {
-      console.error('Error fetching trained models', e); // eslint-disable-line
+      console.error('Error fetching trained models', e); // eslint-disable-line no-console
       displayErrorToast(
         e,
         i18n.translate('xpack.ml.analyticsSelector.trainedModelsFetchErrorMessage', {

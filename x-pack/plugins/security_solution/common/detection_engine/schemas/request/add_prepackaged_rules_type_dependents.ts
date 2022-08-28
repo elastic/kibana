@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AddPrepackagedRulesSchema } from './add_prepackaged_rules_schema';
+import type { AddPrepackagedRulesSchema } from './add_prepackaged_rules_schema';
 
 export const validateTimelineId = (rule: AddPrepackagedRulesSchema): string[] => {
   if (rule.timeline_id != null) {

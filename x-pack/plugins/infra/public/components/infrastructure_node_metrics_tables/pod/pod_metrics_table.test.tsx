@@ -137,8 +137,8 @@ function createFetchMock(): NodeMetricsTableFetchMock {
 
   const mockData: DataResponseMock = {
     series: [
-      createPod('358d96e3-026f-4440-a487-f6c2301884c0', 'some-pod', 23000000, 76, 3671700000),
-      createPod('358d96e3-026f-4440-a487-f6c2301884c1', 'some-other-pod', 32000000, 67, 716300000),
+      createPod('358d96e3-026f-4440-a487-f6c2301884c0', 'some-pod', 76, 3671700000),
+      createPod('358d96e3-026f-4440-a487-f6c2301884c1', 'some-other-pod', 67, 716300000),
     ],
   };
 
@@ -157,7 +157,6 @@ function createFetchMock(): NodeMetricsTableFetchMock {
 function createPod(
   id: string,
   name: string,
-  startTime: number,
   cpuUsagePct: number,
   memoryUsageBytes: number
 ): Partial<MetricsExplorerSeries> {
@@ -166,7 +165,6 @@ function createPod(
     keys: [id, name],
     rows: [
       {
-        [metricByField['kubernetes.pod.start_time']]: startTime,
         [metricByField['kubernetes.pod.cpu.usage.limit.pct']]: cpuUsagePct,
         [metricByField['kubernetes.pod.memory.usage.bytes']]: memoryUsageBytes,
       } as MetricsExplorerSeries['rows'][number],

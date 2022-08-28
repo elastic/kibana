@@ -38,6 +38,7 @@ export const StreamPageContent: React.FunctionComponent = () => {
       <LogStreamPageWrapper className={APP_WRAPPER_CLASS}>
         <LogsPageTemplate
           hasData={logViewStatus?.index !== 'missing'}
+          isDataLoading={isLoading}
           pageHeader={{
             pageTitle: streamTitle,
           }}

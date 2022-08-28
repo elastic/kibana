@@ -1,5 +1,6 @@
 delete:
-  summary: Deletes a comment or alert from a case.
+  summary: Deletes a comment or alert from a case in the default space.
+  operationId: deleteCaseCommentDefaultSpace
   description: >
     You must have `all` privileges for the **Cases** feature in the
     **Management**, **Observability**, or **Security** section of the Kibana
@@ -18,7 +19,8 @@ delete:
     - url: https://localhost:5601
 
 get:
-  summary: Retrieves a comment from a case.
+  summary: Retrieves a comment from a case in the default space.
+  operationId: getCaseCommentDefaultSpace
   description: >
     You must have `read` privileges for the **Cases** feature in the **Management**,
     **Observability**, or **Security** section of the Kibana feature privileges,

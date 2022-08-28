@@ -1,0 +1,7 @@
+{
+  "description": "Tiny/Dummy PyTorch model (fill_mask)",
+  "model_type": "pytorch",
+  "inference_config": {
+    "fill_mask": {}
+  }
+}

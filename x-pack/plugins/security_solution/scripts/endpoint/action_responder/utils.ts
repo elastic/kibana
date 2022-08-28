@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { KbnClient } from '@kbn/test';
-import { Client } from '@elastic/elasticsearch';
+import type { KbnClient } from '@kbn/test';
+import type { Client } from '@elastic/elasticsearch';
 import { AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import { sendEndpointMetadataUpdate } from '../common/endpoint_metadata_services';
 import { FleetActionGenerator } from '../../../common/endpoint/data_generators/fleet_action_generator';
@@ -14,16 +14,16 @@ import {
   ENDPOINT_ACTION_RESPONSES_INDEX,
   ENDPOINTS_ACTION_LIST_ROUTE,
 } from '../../../common/endpoint/constants';
-import {
+import type {
   ActionDetails,
   ActionListApiResponse,
   EndpointActionData,
   EndpointActionResponse,
   LogsEndpointActionResponse,
   ActionResponseOutput,
-  ProcessesEntry,
+  GetProcessesActionOutputContent,
 } from '../../../common/endpoint/types';
-import { EndpointActionListRequestQuery } from '../../../common/endpoint/schema/actions';
+import type { EndpointActionListRequestQuery } from '../../../common/endpoint/schema/actions';
 import { EndpointActionGenerator } from '../../../common/endpoint/data_generators/endpoint_action_generator';
 
 const ES_INDEX_OPTIONS = { headers: { 'X-elastic-product-origin': 'fleet' } };
@@ -95,8 +95,8 @@ export const sendEndpointActionResponse = async (
       data: {
         command: action.command as EndpointActionData['command'],
         comment: '',
+        ...getOutputDataIfNeeded(action.command as EndpointActionData['command']),
       },
-      ...getOutputDataIfNeeded(action.command as EndpointActionData['command']),
       started_at: action.startedAt,
     },
   });
@@ -158,6 +158,6 @@ const getOutputDataIfNeeded = (
             entries: endpointActionGenerator.randomResponseActionProcesses(100),
           },
         },
-      } as { output: ActionResponseOutput<ProcessesEntry> })
+      } as { output: ActionResponseOutput<GetProcessesActionOutputContent> })
     : {};
 };

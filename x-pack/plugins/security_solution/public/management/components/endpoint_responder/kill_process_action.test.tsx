@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { AppContextTestRender, createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import {
   ConsoleManagerTestComponent,
   getConsoleManagerMockRenderResultQueriesAndActions,
@@ -15,9 +16,13 @@ import { getEndpointResponseActionsConsoleCommands } from './endpoint_response_a
 import { enterConsoleCommand } from '../console/mocks';
 import { waitFor } from '@testing-library/react';
 import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mocks';
+import type { ResponderCapabilities } from '../../../../common/endpoint/constants';
+import { RESPONDER_CAPABILITIES } from '../../../../common/endpoint/constants';
 
 describe('When using the kill-process action from response actions console', () => {
-  let render: () => Promise<ReturnType<AppContextTestRender['render']>>;
+  let render: (
+    capabilities?: ResponderCapabilities[]
+  ) => Promise<ReturnType<AppContextTestRender['render']>>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let apiMocks: ReturnType<typeof responseActionsHttpMocks>;
   let consoleManagerMockAccess: ReturnType<
@@ -29,14 +34,17 @@ describe('When using the kill-process action from response actions console', () 
 
     apiMocks = responseActionsHttpMocks(mockedContext.coreStart.http);
 
-    render = async () => {
+    render = async (capabilities: ResponderCapabilities[] = [...RESPONDER_CAPABILITIES]) => {
       renderResult = mockedContext.render(
         <ConsoleManagerTestComponent
           registerConsoleProps={() => {
             return {
               consoleProps: {
                 'data-test-subj': 'test',
-                commands: getEndpointResponseActionsConsoleCommands('a.b.c'),
+                commands: getEndpointResponseActionsConsoleCommands({
+                  endpointAgentId: 'a.b.c',
+                  endpointCapabilities: [...capabilities],
+                }),
               },
             };
           }}
@@ -50,6 +58,15 @@ describe('When using the kill-process action from response actions console', () 
 
       return renderResult;
     };
+  });
+
+  it('should show an error if the `kill_process` capability is not present in the endpoint', async () => {
+    await render([]);
+    enterConsoleCommand(renderResult, 'kill-process --pid 123');
+
+    expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
+      'The current version of the Agent does not support this feature. Upgrade your Agent through Fleet to use this feature and new response actions such as killing and suspending processes.'
+    );
   });
 
   it('should call `kill-process` api when command is entered', async () => {
@@ -119,6 +136,33 @@ describe('When using the kill-process action from response actions console', () 
     );
   });
 
+  it('should check the pid has a non-negative value', async () => {
+    await render();
+    enterConsoleCommand(renderResult, 'kill-process --pid -123');
+
+    expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+      'Invalid argument value: --pid. Argument must be a positive number representing the PID of a process'
+    );
+  });
+
+  it('should check the pid is a number', async () => {
+    await render();
+    enterConsoleCommand(renderResult, 'kill-process --pid asd');
+
+    expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+      'Invalid argument value: --pid. Argument must be a positive number representing the PID of a process'
+    );
+  });
+
+  it('should check the pid is a safe number', async () => {
+    await render();
+    enterConsoleCommand(renderResult, 'kill-process --pid 123123123123123123123');
+
+    expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+      'Invalid argument value: --pid. Argument must be a positive number representing the PID of a process'
+    );
+  });
+
   it('should check the entityId has a given value', async () => {
     await render();
     enterConsoleCommand(renderResult, 'kill-process --entityId');
@@ -177,6 +221,21 @@ describe('When using the kill-process action from response actions console', () 
     await waitFor(() => {
       expect(renderResult.getByTestId('killProcessErrorCallout').textContent).toMatch(
         /error one \| error two/
+      );
+    });
+  });
+
+  it('should show error if kill-process API fails', async () => {
+    apiMocks.responseProvider.killProcess.mockRejectedValueOnce({
+      status: 500,
+      message: 'this is an error',
+    } as never);
+    await render();
+    enterConsoleCommand(renderResult, 'kill-process --pid 123');
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('killProcessAPIErrorCallout').textContent).toMatch(
+        /this is an error/
       );
     });
   });

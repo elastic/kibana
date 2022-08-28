@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TabNavigationItemProps } from '../../../common/components/navigation/tab_navigation/types';
+import type { TabNavigationItemProps } from '../../../common/components/navigation/tab_navigation/types';
 import { HostsTableType } from '../../store/model';
 import { navTabsHostDetails } from './nav_tabs';
 

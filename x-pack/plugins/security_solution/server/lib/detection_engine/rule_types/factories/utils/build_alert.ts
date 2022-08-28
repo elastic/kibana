@@ -43,7 +43,7 @@ import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
 import { createHash } from 'crypto';
 
-import { BaseSignalHit, SimpleHit, ThresholdResult } from '../../../signals/types';
+import type { BaseSignalHit, SimpleHit, ThresholdResult } from '../../../signals/types';
 import {
   getField,
   getValidDateFromDoc,
@@ -51,7 +51,7 @@ import {
   isWrappedSignalHit,
 } from '../../../signals/utils';
 import { SERVER_APP_ID } from '../../../../../../common/constants';
-import { SearchTypes } from '../../../../telemetry/types';
+import type { SearchTypes } from '../../../../telemetry/types';
 import {
   ALERT_ANCESTORS,
   ALERT_DEPTH,
@@ -74,13 +74,13 @@ import {
   ALERT_RULE_EXCEPTIONS_LIST,
   ALERT_RULE_IMMUTABLE,
 } from '../../../../../../common/field_maps/field_names';
-import { CompleteRule, RuleParams } from '../../../schemas/rule_schemas';
+import type { CompleteRule, RuleParams } from '../../../schemas/rule_schemas';
 import {
   commonParamsCamelToSnake,
   typeSpecificCamelToSnake,
 } from '../../../schemas/rule_converters';
 import { transformAlertToRuleAction } from '../../../../../../common/detection_engine/transform_actions';
-import {
+import type {
   AncestorLatest,
   BaseFieldsLatest,
 } from '../../../../../../common/detection_engine/schemas/alerts';
@@ -178,7 +178,7 @@ export const buildAlert = (
 
   const originalTime = getValidDateFromDoc({
     doc: docs[0],
-    timestampOverride: undefined,
+    primaryTimestamp: TIMESTAMP,
   });
 
   return {

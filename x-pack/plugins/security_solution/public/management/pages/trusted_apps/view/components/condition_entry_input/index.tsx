@@ -5,22 +5,15 @@
  * 2.0.
  */
 
-import React, { ChangeEventHandler, memo, useCallback, useMemo, useState } from 'react';
+import type { ChangeEventHandler } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiButtonIcon,
-  EuiFieldText,
-  EuiFormRow,
-  EuiSuperSelect,
-  EuiSuperSelectOption,
-  EuiText,
-} from '@elastic/eui';
+import type { EuiSuperSelectOption } from '@elastic/eui';
+import { EuiButtonIcon, EuiFieldText, EuiFormRow, EuiSuperSelect, EuiText } from '@elastic/eui';
 import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
-import {
-  TrustedAppConditionEntry,
-  OperatorFieldIds,
-} from '../../../../../../../common/endpoint/types';
+import type { TrustedAppConditionEntry } from '../../../../../../../common/endpoint/types';
+import { OperatorFieldIds } from '../../../../../../../common/endpoint/types';
 
 import {
   CONDITION_FIELD_DESCRIPTION,

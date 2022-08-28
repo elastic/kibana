@@ -9,8 +9,8 @@ import { buildThreatMappingFilter } from './build_threat_mapping_filter';
 import { getFilter } from '../get_filter';
 import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
 import { buildReasonMessageForThreatMatchAlert } from '../reason_formatters';
-import { CreateEventSignalOptions } from './types';
-import { SearchAfterAndBulkCreateReturnType, SignalSourceHit } from '../types';
+import type { CreateEventSignalOptions } from './types';
+import type { SearchAfterAndBulkCreateReturnType, SignalSourceHit } from '../types';
 import { getAllThreatListHits } from './get_threat_list';
 import {
   enrichSignalThreatMatches,
@@ -19,7 +19,6 @@ import {
 
 export const createEventSignal = async ({
   alertId,
-  buildRuleMessage,
   bulkCreate,
   completeRule,
   currentResult,
@@ -30,9 +29,9 @@ export const createEventSignal = async ({
   inputIndex,
   language,
   listClient,
-  logger,
   outputIndex,
   query,
+  ruleExecutionLogger,
   savedId,
   searchAfterSize,
   services,
@@ -48,6 +47,8 @@ export const createEventSignal = async ({
   threatPitId,
   reassignThreatPitId,
   runtimeMappings,
+  primaryTimestamp,
+  secondaryTimestamp,
 }: CreateEventSignalOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const threatFilter = buildThreatMappingFilter({
     threatMapping,
@@ -58,10 +59,8 @@ export const createEventSignal = async ({
   if (!threatFilter.query || threatFilter.query?.bool.should.length === 0) {
     // empty event list and we do not want to return everything as being
     // a hit so opt to return the existing result.
-    logger.debug(
-      buildRuleMessage(
-        'Indicator items are empty after filtering for missing data, returning without attempting a match'
-      )
+    ruleExecutionLogger.debug(
+      'Indicator items are empty after filtering for missing data, returning without attempting a match'
     );
     return currentResult;
   } else {
@@ -72,8 +71,7 @@ export const createEventSignal = async ({
       query: threatQuery,
       language: threatLanguage,
       index: threatIndex,
-      logger,
-      buildRuleMessage,
+      ruleExecutionLogger,
       threatListConfig: {
         _source: [`${threatIndicatorPath}.*`, 'threat.feed.*'],
         fields: undefined,
@@ -109,10 +107,8 @@ export const createEventSignal = async ({
       lists: exceptionItems,
     });
 
-    logger.debug(
-      buildRuleMessage(
-        `${ids?.length} matched signals found from ${threatListHits.length} indicators`
-      )
+    ruleExecutionLogger.debug(
+      `${ids?.length} matched signals found from ${threatListHits.length} indicators`
     );
 
     const threatEnrichment = (signals: SignalSourceHit[]): Promise<SignalSourceHit[]> =>
@@ -125,34 +121,32 @@ export const createEventSignal = async ({
 
     const result = await searchAfterAndBulkCreate({
       buildReasonMessage: buildReasonMessageForThreatMatchAlert,
-      buildRuleMessage,
       bulkCreate,
       completeRule,
       enrichment: threatEnrichment,
       eventsTelemetry,
       exceptionsList: exceptionItems,
       filter: esFilter,
-      id: alertId,
       inputIndexPattern: inputIndex,
       listClient,
-      logger,
       pageSize: searchAfterSize,
+      ruleExecutionLogger,
       services,
       sortOrder: 'desc',
       trackTotalHits: false,
       tuple,
       wrapHits,
       runtimeMappings,
+      primaryTimestamp,
+      secondaryTimestamp,
     });
 
-    logger.debug(
-      buildRuleMessage(
-        `${
-          threatFilter.query?.bool.should.length
-        } items have completed match checks and the total times to search were ${
-          result.searchAfterTimes.length !== 0 ? result.searchAfterTimes : '(unknown) '
-        }ms`
-      )
+    ruleExecutionLogger.debug(
+      `${
+        threatFilter.query?.bool.should.length
+      } items have completed match checks and the total times to search were ${
+        result.searchAfterTimes.length !== 0 ? result.searchAfterTimes : '(unknown) '
+      }ms`
     );
     return result;
   }

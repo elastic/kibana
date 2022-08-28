@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { PackageInfo } from '@kbn/core/server';
+import type { PackageInfo } from '@kbn/core/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { SearchUsageCollector } from './collectors';

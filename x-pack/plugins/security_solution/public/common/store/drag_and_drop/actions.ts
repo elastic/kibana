@@ -7,7 +7,7 @@
 
 import actionCreatorFactory from 'typescript-fsa';
 
-import { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
+import type { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/drag_and_drop');
 

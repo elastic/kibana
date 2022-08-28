@@ -9,13 +9,13 @@ import { euiLightVars as lightTheme, euiDarkVars as darkTheme } from '@kbn/ui-th
 import React from 'react';
 
 import { DEFAULT_DARK_MODE } from '../../../../common/constants';
-import { DescriptionList } from '../../../../common/utility_types';
+import type { DescriptionList } from '../../../../common/utility_types';
 import { useUiSetting$ } from '../../../common/lib/kibana';
-import {
+import type {
   FlowTargetSourceDest,
   NetworkDetailsStrategyResponse,
 } from '../../../../common/search_strategy';
-import { networkModel } from '../../store';
+import type { networkModel } from '../../store';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 
 import {
@@ -33,7 +33,7 @@ import {
 import * as i18n from './translations';
 import { OverviewWrapper } from '../../../common/components/page';
 import { Loader } from '../../../common/components/loader';
-import { Anomalies, NarrowDateRange } from '../../../common/components/ml/types';
+import type { Anomalies, NarrowDateRange } from '../../../common/components/ml/types';
 import { AnomalyScores } from '../../../common/components/ml/score/anomaly_scores';
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';

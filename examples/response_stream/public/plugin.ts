@@ -14,7 +14,7 @@ export interface ResponseStreamSetupPlugins {
   developerExamples: DeveloperExamplesSetup;
 }
 
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ResponseStreamStartPlugins {}
 
 export class ResponseStreamPlugin implements Plugin {

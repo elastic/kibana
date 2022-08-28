@@ -81,7 +81,7 @@ export const RelevanceTuningForm: React.FC = () => {
               buttonContent={
                 <RelevanceTuningItem
                   name={fieldName}
-                  type={schema[fieldName]}
+                  type={schema[fieldName].type}
                   boosts={searchSettings.boosts && searchSettings.boosts[fieldName]}
                   field={searchSettings.search_fields[fieldName]}
                 />
@@ -90,7 +90,7 @@ export const RelevanceTuningForm: React.FC = () => {
             >
               <RelevanceTuningItemContent
                 name={fieldName}
-                type={schema[fieldName]}
+                type={schema[fieldName].type}
                 boosts={searchSettings.boosts && searchSettings.boosts[fieldName]}
                 field={searchSettings.search_fields[fieldName]}
               />

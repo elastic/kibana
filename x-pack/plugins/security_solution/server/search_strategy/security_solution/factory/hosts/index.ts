@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import type { FactoryQueryTypes } from '../../../../../common/search_strategy/security_solution';
 import {
-  FactoryQueryTypes,
   HostsQueries,
   HostsKpiQueries,
 } from '../../../../../common/search_strategy/security_solution';
 
-import { SecuritySolutionFactory } from '../types';
+import type { SecuritySolutionFactory } from '../types';
 import { allHosts } from './all';
 import { hostDetails } from './details';
 import { hostOverview } from './overview';

@@ -5,8 +5,29 @@
  * 2.0.
  */
 
-import { allCases, allCasesSnake } from '../containers/mock';
-import { convertAllCasesToCamel, convertArrayToCamelCase, convertToCamelCase } from './utils';
+import {
+  allCases,
+  allCasesSnake,
+  caseWithRegisteredAttachments,
+  caseWithRegisteredAttachmentsSnake,
+  externalReferenceAttachment,
+  externalReferenceAttachmentSnake,
+  persistableStateAttachmentSnake,
+  persistableStateAttachment,
+  caseUserActionsWithRegisteredAttachments,
+  caseUserActionsWithRegisteredAttachmentsSnake,
+} from '../containers/mock';
+import {
+  convertAllCasesToCamel,
+  convertArrayToCamelCase,
+  convertCaseResolveToCamelCase,
+  convertCasesToCamelCase,
+  convertCaseToCamelCase,
+  convertToCamelCase,
+  convertAttachmentsToCamelCase,
+  convertAttachmentToCamelCase,
+  convertUserActionsToCamelCase,
+} from './utils';
 
 describe('utils', () => {
   describe('convertArrayToCamelCase', () => {
@@ -37,6 +58,66 @@ describe('utils', () => {
   describe('convertAllCasesToCamel', () => {
     it('converts the find response to camel case', () => {
       expect(convertAllCasesToCamel(allCasesSnake)).toEqual(allCases);
+    });
+  });
+
+  describe('convertCaseToCamelCase', () => {
+    it('converts a case to camel case without converting registered attachments', () => {
+      expect(convertCaseToCamelCase(caseWithRegisteredAttachmentsSnake)).toEqual(
+        caseWithRegisteredAttachments
+      );
+    });
+  });
+
+  describe('convertCasesToCamelCase', () => {
+    it('converts multiple cases to camel case without converting registered attachments', () => {
+      expect(convertCasesToCamelCase([caseWithRegisteredAttachmentsSnake])).toEqual([
+        caseWithRegisteredAttachments,
+      ]);
+    });
+  });
+
+  describe('convertCaseResolveToCamelCase', () => {
+    it('converts multiple cases to camel case without converting registered attachments', () => {
+      expect(
+        convertCaseResolveToCamelCase({
+          outcome: 'aliasMatch',
+          case: caseWithRegisteredAttachmentsSnake,
+        })
+      ).toEqual({
+        outcome: 'aliasMatch',
+        case: caseWithRegisteredAttachments,
+      });
+    });
+  });
+
+  describe('convertAttachmentsToCamelCase', () => {
+    it('converts attachments camel case without converting registered attachments', () => {
+      expect(convertAttachmentsToCamelCase(caseWithRegisteredAttachmentsSnake.comments)).toEqual(
+        caseWithRegisteredAttachments.comments
+      );
+    });
+  });
+
+  describe('convertAttachmentToCamelCase', () => {
+    it('converts an external reference attachment to camel case without converting externalReferenceMetadata', () => {
+      expect(convertAttachmentToCamelCase(externalReferenceAttachmentSnake)).toEqual(
+        externalReferenceAttachment
+      );
+    });
+
+    it('converts a persistable state attachment to camel case without converting externalReferenceMetadata', () => {
+      expect(convertAttachmentToCamelCase(persistableStateAttachmentSnake)).toEqual(
+        persistableStateAttachment
+      );
+    });
+  });
+
+  describe('convertUserActionsToCamelCase', () => {
+    it('converts attachments camel case without converting registered attachments', () => {
+      expect(convertUserActionsToCamelCase(caseUserActionsWithRegisteredAttachmentsSnake)).toEqual(
+        caseUserActionsWithRegisteredAttachments
+      );
     });
   });
 });

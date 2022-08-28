@@ -7,6 +7,7 @@
  */
 
 import * as Rx from 'rxjs';
+import { SomeDevLog } from '@kbn/some-dev-log';
 
 import { ToolingLogTextWriter, ToolingLogTextWriterConfig } from './tooling_log_text_writer';
 import { Writer } from './writer';
@@ -26,7 +27,7 @@ export interface ToolingLogOptions {
   parent?: ToolingLog;
 }
 
-export class ToolingLog {
+export class ToolingLog implements SomeDevLog {
   private indentWidth$: Rx.BehaviorSubject<number>;
   private writers$: Rx.BehaviorSubject<Writer[]>;
   private readonly written$: Rx.Subject<Message>;

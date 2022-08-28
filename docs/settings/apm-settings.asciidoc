@@ -43,8 +43,6 @@ If you'd like to change any of the default values,
 copy and paste the relevant settings into your `kibana.yml` configuration file.
 Changing these settings may disable features of the APM App.
 
-`xpack.apm.maxServiceEnvironments` {ess-icon}::
-Maximum number of unique service environments recognized by the UI. Defaults to `100`.
 
 `xpack.apm.maxSuggestions` {ess-icon}::
 Maximum number of suggestions fetched in autocomplete selection boxes. Defaults to `100`.

@@ -7,10 +7,10 @@
 
 import LRU from 'lru-cache';
 import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { Logger } from '@kbn/core/server';
-import { PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
+import type { Logger } from '@kbn/core/server';
+import type { PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
 import { createPackagePolicyServiceMock } from '@kbn/fleet-plugin/server/mocks';
-import { ExceptionListClient } from '@kbn/lists-plugin/server';
+import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { listMock } from '@kbn/lists-plugin/server/mocks';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
@@ -21,7 +21,8 @@ import {
   getEmptyMockArtifacts,
 } from '../../../lib/artifacts/mocks';
 import { createEndpointArtifactClientMock, getManifestClientMock } from '../mocks';
-import { ManifestManager, ManifestManagerContext } from './manifest_manager';
+import type { ManifestManagerContext } from './manifest_manager';
+import { ManifestManager } from './manifest_manager';
 import { parseExperimentalConfigValue } from '../../../../../common/experimental_features';
 
 export const createExceptionListResponse = (data: ExceptionListItemSchema[], total?: number) => ({

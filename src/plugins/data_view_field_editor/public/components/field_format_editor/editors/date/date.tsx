@@ -17,7 +17,7 @@ import { formatId } from './constants';
 
 import { FormatEditorSamples } from '../../samples';
 
-interface DateFormatEditorFormatParams {
+export interface DateFormatEditorFormatParams {
   pattern: string;
 }
 

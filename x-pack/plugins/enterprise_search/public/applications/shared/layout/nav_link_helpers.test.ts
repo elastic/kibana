@@ -6,13 +6,13 @@
  */
 
 import { mockKibanaValues } from '../../__mocks__/kea_logic';
+import '../../__mocks__/react_router';
 
-jest.mock('../react_router_helpers', () => ({
-  generateReactRouterProps: ({ to }: { to: string }) => ({
-    href: `/app/enterprise_search${to}`,
-    onClick: () => mockKibanaValues.navigateToUrl(to),
-  }),
+jest.mock('../react_router_helpers/link_events', () => ({
+  letBrowserHandleEvent: jest.fn(),
 }));
+
+import { letBrowserHandleEvent } from '../react_router_helpers/link_events';
 
 import { generateNavLink, getNavLinkActive } from './nav_link_helpers';
 
@@ -23,6 +23,8 @@ describe('generateNavLink', () => {
   });
 
   it('generates React Router props for use within an EuiSideNavItem obj', () => {
+    (letBrowserHandleEvent as jest.Mock).mockReturnValueOnce(false);
+
     const navItem = generateNavLink({ to: '/test' });
 
     expect(navItem).toEqual({
@@ -31,8 +33,10 @@ describe('generateNavLink', () => {
       isSelected: false,
     });
 
-    navItem.onClick({} as any);
-    expect(mockKibanaValues.navigateToUrl).toHaveBeenCalledWith('/test');
+    navItem.onClick({ preventDefault: jest.fn() } as any);
+    expect(mockKibanaValues.navigateToUrl).toHaveBeenCalledWith('/test', {
+      shouldNotCreateHref: false,
+    });
   });
 
   describe('isSelected / getNavLinkActive', () => {
@@ -50,19 +54,20 @@ describe('generateNavLink', () => {
       expect(isSelected).toEqual(false);
     });
 
-    describe('isRoot', () => {
-      it('returns true if the current path is "/"', () => {
-        mockKibanaValues.history.location.pathname = '/';
-        const isSelected = getNavLinkActive({ to: '/overview', isRoot: true });
-
-        expect(isSelected).toEqual(true);
+    it('returns true when to includes a basePath and shouldNotCreateHref=true', () => {
+      mockKibanaValues.history.location.pathname = '/test';
+      const isSelected = getNavLinkActive({
+        shouldNotCreateHref: true,
+        to: '/app/enterprise_search/test',
       });
+
+      expect(isSelected).toEqual(true);
     });
 
     describe('shouldShowActiveForSubroutes', () => {
       it('returns true if the current path is a subroute of the passed path', () => {
         mockKibanaValues.history.location.pathname = '/hello/world';
-        const isSelected = getNavLinkActive({ to: '/hello', shouldShowActiveForSubroutes: true });
+        const isSelected = getNavLinkActive({ shouldShowActiveForSubroutes: true, to: '/hello' });
 
         expect(isSelected).toEqual(true);
       });
@@ -76,9 +81,9 @@ describe('generateNavLink', () => {
       it('returns false if subroutes already have their own items subnav (with active state)', () => {
         mockKibanaValues.history.location.pathname = '/items/123/settings';
         const isSelected = getNavLinkActive({
-          to: '/items',
-          shouldShowActiveForSubroutes: true,
           items: [{ id: 'settings', name: 'Settings' }],
+          shouldShowActiveForSubroutes: true,
+          to: '/items',
         });
 
         expect(isSelected).toEqual(false);
@@ -86,7 +91,7 @@ describe('generateNavLink', () => {
 
       it('returns false if not a valid subroute', () => {
         mockKibanaValues.history.location.pathname = '/hello/world';
-        const isSelected = getNavLinkActive({ to: '/world', shouldShowActiveForSubroutes: true });
+        const isSelected = getNavLinkActive({ shouldShowActiveForSubroutes: true, to: '/world' });
 
         expect(isSelected).toEqual(false);
       });
@@ -97,11 +102,22 @@ describe('generateNavLink', () => {
 
         expect(isSelected).toEqual(false);
       });
+
+      it('returns true when to includes a basePath and shouldNotCreateHref=true', () => {
+        mockKibanaValues.history.location.pathname = '/hello/world';
+        const isSelected = getNavLinkActive({
+          shouldNotCreateHref: true,
+          shouldShowActiveForSubroutes: true,
+          to: '/app/enterprise_search/hello',
+        });
+
+        expect(isSelected).toEqual(true);
+      });
     });
   });
 
   it('optionally passes items', () => {
-    const navItem = generateNavLink({ to: '/test', items: [] });
+    const navItem = generateNavLink({ items: [], to: '/test' });
 
     expect(navItem.items).toEqual([]);
   });

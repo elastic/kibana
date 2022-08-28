@@ -9,10 +9,11 @@ import React, { memo } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiHideFor, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { OperatingSystem } from '@kbn/securitysolution-utils';
-import { TrustedAppConditionEntry } from '../../../../../../../common/endpoint/types';
+import type { OperatingSystem } from '@kbn/securitysolution-utils';
+import type { TrustedAppConditionEntry } from '../../../../../../../common/endpoint/types';
 import { AndOrBadge } from '../../../../../../common/components/and_or_badge';
-import { ConditionEntryInput, ConditionEntryInputProps } from '../condition_entry_input';
+import type { ConditionEntryInputProps } from '../condition_entry_input';
+import { ConditionEntryInput } from '../condition_entry_input';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 
 const ConditionGroupFlexGroup = styled(EuiFlexGroup)`

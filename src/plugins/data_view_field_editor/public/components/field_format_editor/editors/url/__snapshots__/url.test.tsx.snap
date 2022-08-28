@@ -185,7 +185,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
             External link
           </span>
           <span
-            class="euiScreenReaderOnly"
+            class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
           >
             (opens in a new tab or window)
           </span>
@@ -250,7 +250,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
             External link
           </span>
           <span
-            class="euiScreenReaderOnly"
+            class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
           >
             (opens in a new tab or window)
           </span>
@@ -303,7 +303,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
             tabindex="-1"
           >
             <caption
-              class="euiScreenReaderOnly euiTableCaption"
+              class="euiTableCaption emotion-euiScreenReaderOnly"
             />
             <thead>
               <tr>

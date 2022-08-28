@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 export const POLICY_ARTIFACT_FLYOUT_LABELS = Object.freeze({
   flyoutWarningCalloutTitle: i18n.translate(

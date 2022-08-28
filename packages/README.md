@@ -30,9 +30,6 @@ instead be:
 "@kbn/i18n": "link:../../kibana/packages/kbn-i18n"
 ```
 
-How all of this works is described in more detail in the
-[`@kbn/pm` docs](./kbn-pm#how-it-works).
-
 ## Creating a new package
 
 Create a new sub-folder. The name of the folder should mirror the `name` in the

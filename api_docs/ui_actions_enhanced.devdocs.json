@@ -3402,7 +3402,7 @@
         },
         ",Pick<",
         "UiActionsServiceEnhancements",
-        ", \"telemetry\" | \"extract\" | \"inject\" | \"getActionFactory\" | \"hasActionFactory\" | \"getActionFactories\">"
+        ", \"telemetry\" | \"inject\" | \"extract\" | \"getActionFactory\" | \"hasActionFactory\" | \"getActionFactories\">"
       ],
       "path": "src/plugins/ui_actions_enhanced/public/plugin.ts",
       "deprecated": false,

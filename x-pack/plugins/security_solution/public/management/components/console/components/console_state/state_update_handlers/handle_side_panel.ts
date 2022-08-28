@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConsoleDataAction, ConsoleStoreReducer } from '../types';
+import type { ConsoleDataAction, ConsoleStoreReducer } from '../types';
 
 type SidePanelAction = ConsoleDataAction & {
   type: 'showSidePanel';

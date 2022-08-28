@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { KibanaRequest, Logger } from '@kbn/core/server';
-import { ExceptionListClient } from '@kbn/lists-plugin/server';
-import { PluginStartContract as AlertsStartContract } from '@kbn/alerting-plugin/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { ExceptionListClient } from '@kbn/lists-plugin/server';
+import type { PluginStartContract as AlertsStartContract } from '@kbn/alerting-plugin/server';
 import { createDetectionIndex } from '../../lib/detection_engine/routes/index/create_index_route';
 import { createPrepackagedRules } from '../../lib/detection_engine/routes/rules/add_prepackaged_rules_route';
-import { SecuritySolutionApiRequestHandlerContext } from '../../types';
+import type { SecuritySolutionApiRequestHandlerContext } from '../../types';
 
 export interface InstallPrepackagedRulesProps {
   logger: Logger;

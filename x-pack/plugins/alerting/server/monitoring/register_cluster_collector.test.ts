@@ -18,7 +18,7 @@ jest.setSystemTime(new Date('2020-03-09').getTime());
 describe('registerClusterCollector()', () => {
   const monitoringCollection = monitoringCollectionMock.createSetup();
   const coreSetup = coreMock.createSetup() as unknown as CoreSetup<AlertingPluginsStart, unknown>;
-  const taskManagerFetch = jest.fn();
+  const taskManagerAggregate = jest.fn();
 
   beforeEach(() => {
     (coreSetup.getStartServices as jest.Mock).mockImplementation(async () => {
@@ -26,7 +26,7 @@ describe('registerClusterCollector()', () => {
         undefined,
         {
           taskManager: {
-            fetch: taskManagerFetch,
+            aggregate: taskManagerAggregate,
           },
         },
       ];
@@ -44,22 +44,19 @@ describe('registerClusterCollector()', () => {
     expect(metricTypes.length).toBe(1);
     expect(metricTypes[0]).toBe('cluster_rules');
 
-    const nowInMs = +new Date();
-    const docs = [
-      {
-        runAt: nowInMs - 1000,
-      },
-      {
-        retryAt: nowInMs - 1000,
-      },
-    ];
-    taskManagerFetch.mockImplementation(async () => ({ docs }));
+    taskManagerAggregate.mockImplementation(async () => ({
+      took: 1,
+      timed_out: false,
+      _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+      hits: { total: { value: 12, relation: 'eq' }, max_score: null, hits: [] },
+      aggregations: { overdueByPercentiles: { values: { '50.0': 108525, '99.0': 322480 } } },
+    }));
 
     const result = (await metrics.cluster_rules.fetch()) as ClusterRulesMetric;
-    expect(result.overdue.count).toBe(docs.length);
-    expect(result.overdue.delay.p50).toBe(1000);
-    expect(result.overdue.delay.p99).toBe(1000);
-    expect(taskManagerFetch).toHaveBeenCalledWith({
+    expect(result.overdue.count).toEqual(12);
+    expect(result.overdue.delay.p50).toEqual(108525);
+    expect(result.overdue.delay.p99).toEqual(322480);
+    expect(taskManagerAggregate).toHaveBeenCalledWith({
       query: {
         bool: {
           must: [
@@ -126,10 +123,38 @@ describe('registerClusterCollector()', () => {
           ],
         },
       },
+      runtime_mappings: {
+        overdueBy: {
+          type: 'long',
+          script: {
+            source: `
+            def runAt = doc['task.runAt'];
+            if(!runAt.empty) {
+              emit(new Date().getTime() - runAt.value.getMillis());
+            } else {
+              def retryAt = doc['task.retryAt'];
+              if(!retryAt.empty) {
+                emit(new Date().getTime() - retryAt.value.getMillis());
+              } else {
+                emit(0);
+              }
+            }
+          `,
+          },
+        },
+      },
+      aggs: {
+        overdueByPercentiles: {
+          percentiles: {
+            field: 'overdueBy',
+            percents: [50, 99],
+          },
+        },
+      },
     });
   });
 
-  it('should calculate accurate p50 and p99', async () => {
+  it('should handle null results', async () => {
     const metrics: Record<string, Metric<unknown>> = {};
     monitoringCollection.registerMetric.mockImplementation((metric) => {
       metrics[metric.type] = metric;
@@ -140,19 +165,61 @@ describe('registerClusterCollector()', () => {
     expect(metricTypes.length).toBe(1);
     expect(metricTypes[0]).toBe('cluster_rules');
 
-    const nowInMs = +new Date();
-    const docs = [
-      { runAt: nowInMs - 1000 },
-      { runAt: nowInMs - 2000 },
-      { runAt: nowInMs - 3000 },
-      { runAt: nowInMs - 4000 },
-      { runAt: nowInMs - 40000 },
-    ];
-    taskManagerFetch.mockImplementation(async () => ({ docs }));
+    taskManagerAggregate.mockImplementation(async () => ({
+      took: 1,
+      timed_out: false,
+      _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+      hits: { total: { value: null, relation: 'eq' }, max_score: null, hits: [] },
+      aggregations: {},
+    }));
 
     const result = (await metrics.cluster_rules.fetch()) as ClusterRulesMetric;
-    expect(result.overdue.count).toBe(docs.length);
-    expect(result.overdue.delay.p50).toBe(3000);
-    expect(result.overdue.delay.p99).toBe(40000);
+    expect(result.overdue.count).toEqual(0);
+    expect(result.overdue.delay.p50).toEqual(0);
+    expect(result.overdue.delay.p99).toEqual(0);
+  });
+
+  it('should handle null percentile values', async () => {
+    const metrics: Record<string, Metric<unknown>> = {};
+    monitoringCollection.registerMetric.mockImplementation((metric) => {
+      metrics[metric.type] = metric;
+    });
+    registerClusterCollector({ monitoringCollection, core: coreSetup });
+
+    const metricTypes = Object.keys(metrics);
+    expect(metricTypes.length).toBe(1);
+    expect(metricTypes[0]).toBe('cluster_rules');
+
+    taskManagerAggregate.mockImplementation(async () => ({
+      took: 1,
+      timed_out: false,
+      _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+      hits: { total: { value: null, relation: 'eq' }, max_score: null, hits: [] },
+      aggregations: { overdueByPercentiles: { values: { '50.0': null, '99.0': null } } },
+    }));
+
+    const result = (await metrics.cluster_rules.fetch()) as ClusterRulesMetric;
+    expect(result.overdue.count).toEqual(0);
+    expect(result.overdue.delay.p50).toEqual(0);
+    expect(result.overdue.delay.p99).toEqual(0);
+  });
+
+  it('should gracefully handle search errors', async () => {
+    const metrics: Record<string, Metric<unknown>> = {};
+    monitoringCollection.registerMetric.mockImplementation((metric) => {
+      metrics[metric.type] = metric;
+    });
+    registerClusterCollector({ monitoringCollection, core: coreSetup });
+
+    const metricTypes = Object.keys(metrics);
+    expect(metricTypes.length).toBe(1);
+    expect(metricTypes[0]).toBe('cluster_rules');
+
+    taskManagerAggregate.mockRejectedValue(new Error('Failure'));
+
+    const result = (await metrics.cluster_rules.fetch()) as ClusterRulesMetric;
+    expect(result.overdue.count).toEqual(0);
+    expect(result.overdue.delay.p50).toEqual(0);
+    expect(result.overdue.delay.p99).toEqual(0);
   });
 });

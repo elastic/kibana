@@ -21,7 +21,7 @@ export const enum EventAction {
   fork = 'fork',
   exec = 'exec',
   end = 'end',
-  output = 'output',
+  text_output = 'text_output',
 }
 
 export interface User {
@@ -60,6 +60,17 @@ export interface Teletype {
     major?: number;
     minor?: number;
   };
+  rows?: number;
+  columns?: number;
+}
+
+export interface IOLine {
+  event: ProcessEvent;
+  value: string;
+}
+
+export interface IOFields {
+  text?: string;
 }
 
 export interface ProcessFields {
@@ -91,6 +102,7 @@ export interface ProcessSelf extends ProcessFields {
   session_leader?: ProcessFields;
   entry_leader?: ProcessFields;
   group_leader?: ProcessFields;
+  io?: IOFields;
 }
 
 export interface ProcessEventHost {
@@ -151,6 +163,7 @@ export interface ProcessEvent {
   };
   container?: ProcessEventContainer;
   orchestrator?: ProcessEventOrchestrator;
+  cloud?: ProcessEventCloud;
 }
 
 export interface ProcessEventsPage {
@@ -208,13 +221,27 @@ export interface ProcessEventOrchestrator {
     name?: string;
     type?: string;
     ip?: string;
+    parent?: {
+      type?: string;
+    };
   };
   namespace?: string;
   cluster?: {
     name?: string;
     id?: string;
   };
-  parent?: {
-    type?: string;
+}
+
+export interface ProcessEventCloud {
+  instance?: {
+    name?: string;
   };
+  account?: {
+    id?: string;
+  };
+  project?: {
+    id?: string;
+  };
+  provider?: string;
+  region?: string;
 }

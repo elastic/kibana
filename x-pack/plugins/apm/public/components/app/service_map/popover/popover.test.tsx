@@ -10,12 +10,13 @@ import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import * as stories from './popover.stories';
 
-const { Backend, ExternalsList, Resource, Service } = composeStories(stories);
+const { Dependency, ExternalsList, Resource, Service } =
+  composeStories(stories);
 
 describe('Popover', () => {
-  describe('with backend data', () => {
+  describe('with dependency data', () => {
     it('renders a dependency link', async () => {
-      render(<Backend />);
+      render(<Dependency />);
 
       await waitFor(() => {
         expect(

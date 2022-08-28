@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
-import { JsonObject, JsonValue } from '@kbn/utility-types';
-import { FieldsObject, ResolverSchema } from '../../../../../../common/endpoint/types';
-import { NodeID, TimeRange, docValueFields, validIDs } from '../utils';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { JsonObject, JsonValue } from '@kbn/utility-types';
+import type { FieldsObject, ResolverSchema } from '../../../../../../common/endpoint/types';
+import type { NodeID, TimeRange } from '../utils';
+import { validIDs, resolverFields } from '../utils';
 
 interface LifecycleParams {
   schema: ResolverSchema;
@@ -24,10 +25,10 @@ export class LifecycleQuery {
   private readonly schema: ResolverSchema;
   private readonly indexPatterns: string | string[];
   private readonly timeRange: TimeRange;
-  private readonly docValueFields: JsonValue[];
   private readonly isInternalRequest: boolean;
+  private readonly resolverFields: JsonValue[];
   constructor({ schema, indexPatterns, timeRange, isInternalRequest }: LifecycleParams) {
-    this.docValueFields = docValueFields(schema);
+    this.resolverFields = resolverFields(schema);
     this.schema = schema;
     this.indexPatterns = indexPatterns;
     this.timeRange = timeRange;
@@ -37,7 +38,7 @@ export class LifecycleQuery {
   private query(nodes: NodeID[]): JsonObject {
     return {
       _source: false,
-      docvalue_fields: this.docValueFields,
+      fields: this.resolverFields,
       size: nodes.length,
       collapse: {
         field: this.schema.id,

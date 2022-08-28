@@ -39,7 +39,11 @@ export function TimeComparison() {
   const { isSmall } = useBreakpoints();
   const {
     query: { rangeFrom, rangeTo, comparisonEnabled, offset },
-  } = useAnyOfApmParams('/services', '/backends/*', '/services/{serviceName}');
+  } = useAnyOfApmParams(
+    '/services',
+    '/dependencies/*',
+    '/services/{serviceName}'
+  );
 
   const location = useLocation();
   const apmRouter = useApmRouter();

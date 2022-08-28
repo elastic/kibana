@@ -8,7 +8,11 @@
 import React from 'react';
 import { EuiSplitPanel, EuiText } from '@elastic/eui';
 import { useStyles } from './styles';
-import type { IndexPattern, GlobalFilter } from '../../types';
+import { IndexPattern, GlobalFilter } from '../../types';
+import { TreeNav } from './tree_nav';
+import { Breadcrumb } from './breadcrumb';
+import { TreeViewContextProvider, useTreeViewContext } from './contexts';
+import { EmptyState } from './empty_state';
 
 export interface TreeViewContainerDeps {
   globalFilter: GlobalFilter;
@@ -16,20 +20,43 @@ export interface TreeViewContainerDeps {
   indexPattern?: IndexPattern;
 }
 
-export const TreeViewContainer = ({ globalFilter, renderSessionsView }: TreeViewContainerDeps) => {
+export const TreeViewContainer = ({
+  globalFilter,
+  renderSessionsView,
+  indexPattern,
+}: TreeViewContainerDeps) => {
+  return (
+    <TreeViewContextProvider indexPattern={indexPattern} globalFilter={globalFilter}>
+      <TreeViewContainerComponent renderSessionsView={renderSessionsView} />
+    </TreeViewContextProvider>
+  );
+};
+
+const TreeViewContainerComponent = ({
+  renderSessionsView,
+}: Pick<TreeViewContainerDeps, 'renderSessionsView'>) => {
   const styles = useStyles();
-  // TODO: combine filterQuery with filters from tree view nav
+
+  const { hasSelection, treeNavSelection, sessionViewFilter, onTreeNavSelect, noResults } =
+    useTreeViewContext();
 
   return (
     <EuiSplitPanel.Outer direction="row" hasBorder borderRadius="m" css={styles.outerPanel}>
-      <EuiSplitPanel.Inner color="subdued" grow={false} css={styles.navPanel}>
-        <EuiText css={styles.treeViewNav}>
-          <p>Tree view nav panel</p>
-        </EuiText>
-      </EuiSplitPanel.Inner>
-      <EuiSplitPanel.Inner css={styles.sessionsPanel}>
-        {renderSessionsView(globalFilter.filterQuery)}
-      </EuiSplitPanel.Inner>
+      {noResults ? (
+        <EmptyState />
+      ) : (
+        <>
+          <EuiSplitPanel.Inner color="subdued" grow={false} css={styles.navPanel}>
+            <EuiText>
+              <TreeNav />
+            </EuiText>
+          </EuiSplitPanel.Inner>
+          <EuiSplitPanel.Inner css={styles.sessionsPanel}>
+            <Breadcrumb treeNavSelection={treeNavSelection} onSelect={onTreeNavSelect} />
+            {hasSelection && renderSessionsView(sessionViewFilter)}
+          </EuiSplitPanel.Inner>
+        </>
+      )}
     </EuiSplitPanel.Outer>
   );
 };

@@ -22,6 +22,7 @@ const DEPRECATED_HIDDEN_TIMELINE_ROUTES: readonly string[] = [
   '/explore',
   '/dashboards',
   '/manage',
+  '/cloud_security_posture*',
 ];
 
 const isTimelinePathVisible = (

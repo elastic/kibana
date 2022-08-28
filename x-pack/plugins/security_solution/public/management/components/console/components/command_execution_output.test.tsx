@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { ConsoleProps } from '..';
-import { AppContextTestRender } from '../../../../common/mock/endpoint';
+import type { ConsoleProps } from '..';
+import type { AppContextTestRender } from '../../../../common/mock/endpoint';
 import { getConsoleTestSetup } from '../mocks';
 import { act } from '@testing-library/react';
-import { CommandExecutionComponentProps } from '../types';
+import type { CommandExecutionComponentProps } from '../types';
 
 describe('When using CommandExecutionOutput component', () => {
   let render: (props?: Partial<ConsoleProps>) => ReturnType<AppContextTestRender['render']>;

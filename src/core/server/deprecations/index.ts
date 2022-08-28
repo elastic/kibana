@@ -7,17 +7,12 @@
  */
 
 export type {
-  BaseDeprecationDetails,
-  DeprecationsDetails,
-  ConfigDeprecationDetails,
-  FeatureDeprecationDetails,
+  DeprecationsServiceSetup,
   GetDeprecationsContext,
   RegisterDeprecationsConfig,
-  DeprecationsGetResponse,
-} from './types';
+} from '@kbn/core-deprecations-server';
 
 export type {
-  DeprecationsServiceSetup,
   InternalDeprecationsServiceSetup,
   InternalDeprecationsServiceStart,
   DeprecationsClient,

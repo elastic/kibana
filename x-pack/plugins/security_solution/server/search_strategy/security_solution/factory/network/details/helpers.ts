@@ -10,8 +10,8 @@ import {
   unflattenObject,
   transformLocationFields,
 } from '../../../../helpers/format_response_object_values';
-import { GeoEcs } from '../../../../../../common/ecs/geo';
-import {
+import type { GeoEcs } from '../../../../../../common/ecs/geo';
+import type {
   AutonomousSystem,
   NetworkHit,
 } from '../../../../../../common/search_strategy/security_solution/network';

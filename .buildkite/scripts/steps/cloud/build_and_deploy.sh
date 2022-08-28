@@ -9,11 +9,12 @@ source .buildkite/scripts/common/util.sh
 export KBN_NP_PLUGINS_BUILT=true
 
 VERSION="$(jq -r '.version' package.json)-SNAPSHOT"
+ECCTL_LOGS=$(mktemp --suffix ".json")
 
 echo "--- Download Kibana Distribution"
 
 mkdir -p ./target
-buildkite-agent artifact download "kibana-$VERSION-linux-x86_64.tar.gz" ./target --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
+download_artifact "kibana-$VERSION-linux-x86_64.tar.gz" ./target --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
 
 echo "--- Build Cloud Distribution"
 ELASTICSEARCH_MANIFEST_URL="https://storage.googleapis.com/kibana-ci-es-snapshots-daily/$(jq -r '.version' package.json)/manifest-latest-verified.json"
@@ -46,9 +47,19 @@ fi
 
 docker logout docker.elastic.co
 
+if is_pr_with_label "ci:cloud-redeploy"; then
+  echo "--- Shutdown Previous Deployment"
+  CLOUD_DEPLOYMENT_ID=$(ecctl deployment list --output json | jq -r '.deployments[] | select(.name == "'$CLOUD_DEPLOYMENT_NAME'") | .id')
+  if [ -z "${CLOUD_DEPLOYMENT_ID}" ]; then
+    echo "No deployment to remove"
+  else
+    echo "Shutting down previous deployment..."
+    ecctl deployment shutdown "$CLOUD_DEPLOYMENT_ID" --force --track --output json > "$ECCTL_LOGS"
+  fi
+fi
+
 echo "--- Create Deployment"
 CLOUD_DEPLOYMENT_ID=$(ecctl deployment list --output json | jq -r '.deployments[] | select(.name == "'$CLOUD_DEPLOYMENT_NAME'") | .id')
-JSON_FILE=$(mktemp --suffix ".json")
 if [ -z "${CLOUD_DEPLOYMENT_ID}" ]; then
   jq '
     .resources.kibana[0].plan.kibana.docker_image = "'$KIBANA_CLOUD_IMAGE'" |
@@ -60,45 +71,49 @@ if [ -z "${CLOUD_DEPLOYMENT_ID}" ]; then
     .resources.integrations_server[0].plan.integrations_server.version = "'$VERSION'"
     ' .buildkite/scripts/steps/cloud/deploy.json > /tmp/deploy.json
 
-  echo -n "Creating deployment..."
-  ecctl deployment create --track --output json --file /tmp/deploy.json > "$JSON_FILE"
-  echo "done"
+  echo "Creating deployment..."
+  ecctl deployment create --track --output json --file /tmp/deploy.json > "$ECCTL_LOGS"
 
-  CLOUD_DEPLOYMENT_USERNAME=$(jq --slurp '.[]|select(.resources).resources[] | select(.credentials).credentials.username' "$JSON_FILE")
-  CLOUD_DEPLOYMENT_PASSWORD=$(jq --slurp '.[]|select(.resources).resources[] | select(.credentials).credentials.password' "$JSON_FILE")
-  CLOUD_DEPLOYMENT_ID=$(jq -r --slurp '.[0].id' "$JSON_FILE")
-  CLOUD_DEPLOYMENT_STATUS_MESSAGES=$(jq --slurp '[.[]|select(.resources == null)]' "$JSON_FILE")
+  CLOUD_DEPLOYMENT_USERNAME=$(jq --slurp '.[]|select(.resources).resources[] | select(.credentials).credentials.username' "$ECCTL_LOGS")
+  CLOUD_DEPLOYMENT_PASSWORD=$(jq --slurp '.[]|select(.resources).resources[] | select(.credentials).credentials.password' "$ECCTL_LOGS")
+  CLOUD_DEPLOYMENT_ID=$(jq -r --slurp '.[0].id' "$ECCTL_LOGS")
+  CLOUD_DEPLOYMENT_STATUS_MESSAGES=$(jq --slurp '[.[]|select(.resources == null)]' "$ECCTL_LOGS")
 
-  echo -n "Writing to vault..."
+  echo "Writing to vault..."
   VAULT_ROLE_ID="$(retry 5 15 gcloud secrets versions access latest --secret=kibana-buildkite-vault-role-id)"
   VAULT_SECRET_ID="$(retry 5 15 gcloud secrets versions access latest --secret=kibana-buildkite-vault-secret-id)"
   VAULT_TOKEN=$(retry 5 30 vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
   retry 5 30 vault login -no-print "$VAULT_TOKEN"
   retry 5 5 vault write "secret/kibana-issues/dev/cloud-deploy/$CLOUD_DEPLOYMENT_NAME" username="$CLOUD_DEPLOYMENT_USERNAME" password="$CLOUD_DEPLOYMENT_PASSWORD"
 
-  echo -n "Enabling Stack Monitoring..."
+  echo "Enabling Stack Monitoring..."
   jq '
     .settings.observability.metrics.destination.deployment_id = "'$CLOUD_DEPLOYMENT_ID'" |
     .settings.observability.logging.destination.deployment_id = "'$CLOUD_DEPLOYMENT_ID'"
     ' .buildkite/scripts/steps/cloud/stack_monitoring.json > /tmp/stack_monitoring.json
-  ecctl deployment update "$CLOUD_DEPLOYMENT_ID" --track --output json --file /tmp/stack_monitoring.json > "$JSON_FILE"
-  echo "done"
 
-  echo -n "Enabling verbose logging..."
+  # After a deployment is created, a new Kibana plan is automatically added to update settings
+  # and restart Kibana.  Polling for a plan state isn't especially reliable because it flips
+  # between empty and queued, and then empty again depending on how quickly setup is run in cloud.
+  # We want to enable monitoring after the automatic plan has run, if not we get an error:
+  # * deployments.resource_plan_state_error: Kibana resource [main-kibana] has a plan still pending, cancel that or wait for it to complete (settings.observability.plan)
+  # This adds a sleep and retry to see if we can make this step more reliable
+  sleep 120
+  retry 5 60 ecctl deployment update "$CLOUD_DEPLOYMENT_ID" --track --output json --file /tmp/stack_monitoring.json > "$ECCTL_LOGS"
+
+  echo "Enabling verbose logging..."
   ecctl deployment show "$CLOUD_DEPLOYMENT_ID" --generate-update-payload | jq '
     .resources.kibana[0].plan.kibana.user_settings_yaml = "logging.root.level: all"
     ' > /tmp/verbose_logging.json
-  ecctl deployment update "$CLOUD_DEPLOYMENT_ID" --track --output json --file /tmp/verbose_logging.json > "$JSON_FILE"
-  echo "done"
+  ecctl deployment update "$CLOUD_DEPLOYMENT_ID" --track --output json --file /tmp/verbose_logging.json > "$ECCTL_LOGS"
 else
-ecctl deployment show "$CLOUD_DEPLOYMENT_ID" --generate-update-payload | jq '
-  .resources.kibana[0].plan.kibana.docker_image = "'$KIBANA_CLOUD_IMAGE'" |
-  (.. | select(.version? != null).version) = "'$VERSION'"
-  ' > /tmp/deploy.json
+  ecctl deployment show "$CLOUD_DEPLOYMENT_ID" --generate-update-payload | jq '
+    .resources.kibana[0].plan.kibana.docker_image = "'$KIBANA_CLOUD_IMAGE'" |
+    (.. | select(.version? != null).version) = "'$VERSION'"
+    ' > /tmp/deploy.json
 
-  echo -n "Updating deployment..."
-  ecctl deployment update "$CLOUD_DEPLOYMENT_ID" --track --output json --file /tmp/deploy.json > "$JSON_FILE"
-  echo "done"
+  echo "Updating deployment..."
+  ecctl deployment update "$CLOUD_DEPLOYMENT_ID" --track --output json --file /tmp/deploy.json > "$ECCTL_LOGS"
 fi
 
 CLOUD_DEPLOYMENT_KIBANA_URL=$(ecctl deployment show "$CLOUD_DEPLOYMENT_ID" | jq -r '.resources.kibana[0].info.metadata.aliased_url')
@@ -119,3 +134,4 @@ cat << EOF | buildkite-agent annotate --style "info" --context cloud
 EOF
 
 buildkite-agent meta-data set pr_comment:deploy_cloud:head "* [Cloud Deployment](${CLOUD_DEPLOYMENT_KIBANA_URL})"
+buildkite-agent meta-data set pr_comment:early_comment_job_id "$BUILDKITE_JOB_ID"

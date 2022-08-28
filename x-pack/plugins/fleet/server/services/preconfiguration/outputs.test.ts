@@ -112,6 +112,26 @@ describe('output preconfiguration', () => {
     expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
   });
 
+  it('should create preconfigured logstash output that does not exist', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+      {
+        id: 'non-existing-output-1',
+        name: 'Output 1',
+        type: 'logstash',
+        is_default: false,
+        is_default_monitoring: false,
+        hosts: ['test.fr'],
+        ssl: { certificate: 'test', key: 'test' },
+      },
+    ]);
+
+    expect(mockedOutputService.create).toBeCalled();
+    expect(mockedOutputService.update).not.toBeCalled();
+    expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
+  });
+
   it('should set default hosts if hosts is not set output that does not exists', async () => {
     const soClient = savedObjectsClientMock.create();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -189,15 +209,14 @@ describe('output preconfiguration', () => {
     expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
   });
 
-  it('should not delete default output if preconfigured default output exists and changed', async () => {
+  it('should not update output if preconfigured output exists and did not changed', async () => {
     const soClient = savedObjectsClientMock.create();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     soClient.find.mockResolvedValue({ saved_objects: [], page: 0, per_page: 0, total: 0 });
-    mockedOutputService.getDefaultDataOutputId.mockResolvedValue('existing-output-1');
     await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
       {
         id: 'existing-output-1',
-        is_default: true,
+        is_default: false,
         is_default_monitoring: false,
         name: 'Output 1',
         type: 'elasticsearch',
@@ -205,7 +224,6 @@ describe('output preconfiguration', () => {
       },
     ]);
 
-    expect(mockedOutputService.delete).not.toBeCalled();
     expect(mockedOutputService.create).not.toBeCalled();
     expect(mockedOutputService.update).toBeCalled();
     expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();

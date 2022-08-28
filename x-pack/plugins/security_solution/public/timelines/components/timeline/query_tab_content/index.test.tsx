@@ -14,9 +14,10 @@ import { defaultHeaders, mockTimelineData } from '../../../../common/mock';
 import '../../../../common/mock/match_media';
 import { TestProviders } from '../../../../common/mock/test_providers';
 
-import { QueryTabContentComponent, Props as QueryTabContentComponentProps } from '.';
+import type { Props as QueryTabContentComponentProps } from '.';
+import { QueryTabContentComponent } from '.';
 import { defaultRowRenderers } from '../body/renderers';
-import { Sort } from '../body/sort';
+import type { Sort } from '../body/sort';
 import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { TimelineId, TimelineStatus, TimelineTabs } from '../../../../../common/types/timeline';
@@ -205,7 +206,6 @@ describe('Timeline', () => {
     test('it does render the timeline table when the source is loading with no events', () => {
       (useSourcererDataView as jest.Mock).mockReturnValue({
         browserFields: {},
-        docValueFields: [],
         loading: true,
         indexPattern: {},
         selectedPatterns: [],

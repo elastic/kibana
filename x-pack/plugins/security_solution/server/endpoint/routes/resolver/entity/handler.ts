@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { RequestHandler } from '@kbn/core/server';
-import { TypeOf } from '@kbn/config-schema';
-import { validateEntities } from '../../../../../common/endpoint/schema/resolver';
-import { ResolverEntityIndex } from '../../../../../common/endpoint/types';
+import type { RequestHandler } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
+import type { validateEntities } from '../../../../../common/endpoint/schema/resolver';
+import type { ResolverEntityIndex } from '../../../../../common/endpoint/types';
 import { resolverEntity } from './utils/build_resolver_entity';
 
 /**

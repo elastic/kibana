@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { DataProvider, IS_OPERATOR } from '../data_provider';
+import type { DataProvider } from '../data_provider';
+import { IS_OPERATOR } from '../data_provider';
 
 interface NameToEventCount<TValue> {
   [name: string]: TValue;
@@ -27,9 +28,6 @@ const mockSourceNameToEventCount: NameToEventCount<number> = {
   'Provider 9': 706,
   'Provider 10': 863,
 };
-
-/** Returns a collection of mock data provider names */
-export const mockDataProviderNames = (): string[] => Object.keys(mockSourceNameToEventCount);
 
 /** Returns a count of the events for a mock data provider */
 export const getEventCount = (dataProviderName: string): number =>

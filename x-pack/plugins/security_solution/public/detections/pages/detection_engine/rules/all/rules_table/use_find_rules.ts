@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import {
-  useFindRulesQuery,
-  FindRulesQueryArgs,
-} from '../../../../../containers/detection_engine/rules/use_find_rules_query';
+import type { FindRulesQueryArgs } from '../../../../../containers/detection_engine/rules/use_find_rules_query';
+import { useFindRulesQuery } from '../../../../../containers/detection_engine/rules/use_find_rules_query';
 
 interface UseFindRulesArgs extends FindRulesQueryArgs {
   isInMemorySorting: boolean;

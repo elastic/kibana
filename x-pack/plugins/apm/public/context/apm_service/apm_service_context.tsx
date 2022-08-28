@@ -6,6 +6,8 @@
  */
 
 import React, { createContext, ReactNode } from 'react';
+import { useHistory } from 'react-router-dom';
+import { History } from 'history';
 import { isRumAgentName } from '../../../common/agent_name';
 import {
   TRANSACTION_PAGE_LOAD,
@@ -16,6 +18,7 @@ import { useServiceAgentFetcher } from './use_service_agent_fetcher';
 import { useApmParams } from '../../hooks/use_apm_params';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { useFallbackToTransactionsFetcher } from '../../hooks/use_fallback_to_transactions_fetcher';
+import { replace } from '../../components/shared/links/url_helpers';
 
 export interface APMServiceContextValue {
   serviceName: string;
@@ -37,6 +40,8 @@ export function ApmServiceContextProvider({
 }: {
   children: ReactNode;
 }) {
+  const history = useHistory();
+
   const {
     path: { serviceName },
     query,
@@ -57,10 +62,11 @@ export function ApmServiceContextProvider({
     end,
   });
 
-  const transactionType = getTransactionType({
+  const transactionType = getOrRedirectToTransactionType({
     transactionType: query.transactionType,
     transactionTypes,
     agentName,
+    history,
   });
 
   const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
@@ -82,16 +88,18 @@ export function ApmServiceContextProvider({
   );
 }
 
-export function getTransactionType({
+export function getOrRedirectToTransactionType({
   transactionType,
   transactionTypes,
   agentName,
+  history,
 }: {
   transactionType?: string;
   transactionTypes: string[];
   agentName?: string;
+  history: History;
 }) {
-  if (transactionType) {
+  if (transactionType && transactionTypes.includes(transactionType)) {
     return transactionType;
   }
 
@@ -105,7 +113,13 @@ export function getTransactionType({
     : TRANSACTION_REQUEST;
 
   // If the default transaction type is not in transactionTypes the first in the list is returned
-  return transactionTypes.includes(defaultTransactionType)
+  const currentTransactionType = transactionTypes.includes(
+    defaultTransactionType
+  )
     ? defaultTransactionType
     : transactionTypes[0];
+
+  // Replace transactionType in the URL in case it is not one of the types returned by the API
+  replace(history, { query: { transactionType: currentTransactionType } });
+  return currentTransactionType;
 }

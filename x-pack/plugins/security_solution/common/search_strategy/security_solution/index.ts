@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IEsSearchRequest } from '@kbn/data-plugin/common';
-import { ESQuery } from '../../typed_json';
-import {
+import type { ESQuery } from '../../typed_json';
+import type {
   HostDetailsStrategyResponse,
   HostDetailsRequestOptions,
   HostsOverviewStrategyResponse,
@@ -23,7 +22,7 @@ import {
   HostsKpiUniqueIpsStrategyResponse,
   HostsKpiUniqueIpsRequestOptions,
 } from './hosts';
-import {
+import type {
   NetworkQueries,
   NetworkDetailsStrategyResponse,
   NetworkDetailsRequestOptions,
@@ -53,13 +52,13 @@ import {
   NetworkKpiUniquePrivateIpsStrategyResponse,
   NetworkKpiUniquePrivateIpsRequestOptions,
 } from './network';
-import {
+import type {
   MatrixHistogramQuery,
   MatrixHistogramRequestOptions,
   MatrixHistogramStrategyResponse,
 } from './matrix_histogram';
-import { TimerangeInput, SortField, PaginationInput, PaginationInputPaginated } from '../common';
-import {
+import type { TimerangeInput, SortField, PaginationInputPaginated } from '../common';
+import type {
   CtiEventEnrichmentRequestOptions,
   CtiEventEnrichmentStrategyResponse,
   CtiQueries,
@@ -67,31 +66,31 @@ import {
   CtiDataSourceStrategyResponse,
 } from './cti';
 
-import {
+import type {
   RiskScoreStrategyResponse,
   RiskQueries,
   RiskScoreRequestOptions,
   KpiRiskScoreStrategyResponse,
   KpiRiskScoreRequestOptions,
 } from './risk_score';
-import { UsersQueries } from './users';
-import { UserDetailsRequestOptions, UserDetailsStrategyResponse } from './users/details';
-import {
+import type { UsersQueries } from './users';
+import type { UserDetailsRequestOptions, UserDetailsStrategyResponse } from './users/details';
+import type {
   TotalUsersKpiRequestOptions,
   TotalUsersKpiStrategyResponse,
 } from './users/kpi/total_users';
 
-import {
+import type {
   UsersKpiAuthenticationsRequestOptions,
   UsersKpiAuthenticationsStrategyResponse,
 } from './users/kpi/authentications';
 
-import { UsersRequestOptions, UsersStrategyResponse } from './users/all';
-import {
+import type { UsersRequestOptions, UsersStrategyResponse } from './users/all';
+import type {
   UserAuthenticationsRequestOptions,
   UserAuthenticationsStrategyResponse,
 } from './users/authentications';
-import {
+import type {
   FirstLastSeenQuery,
   FirstLastSeenRequestOptions,
   FirstLastSeenStrategyResponse,
@@ -120,16 +119,10 @@ export interface RequestBasicOptions extends IEsSearchRequest {
   timerange: TimerangeInput;
   filterQuery: ESQuery | string | undefined;
   defaultIndex: string[];
-  docValueFields?: estypes.QueryDslFieldAndFormat[];
   factoryQueryType?: FactoryQueryTypes;
 }
 
 /** A mapping of semantic fields to their document counterparts */
-
-export interface RequestOptions<Field = string> extends RequestBasicOptions {
-  pagination: PaginationInput;
-  sort: SortField<Field>;
-}
 
 export interface RequestOptionsPaginated<Field = string> extends RequestBasicOptions {
   pagination: PaginationInputPaginated;
@@ -260,11 +253,6 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? KpiRiskScoreRequestOptions
   : never;
 
-export interface DocValueFieldsInput {
-  field: string;
-
-  format: string;
-}
 export interface CommonFields {
   '@timestamp'?: string[];
 }

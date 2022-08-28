@@ -69,6 +69,7 @@ export function AlertingPopoverAndFlyout({
       iconType="arrowDown"
       iconSide="right"
       onClick={() => setPopoverOpen((prevState) => !prevState)}
+      data-test-subj="apmAlertAndRulesHeaderLink"
     >
       {alertLabel}
     </EuiHeaderLink>
@@ -84,6 +85,7 @@ export function AlertingPopoverAndFlyout({
               {
                 name: createThresholdAlertLabel,
                 panel: CREATE_THRESHOLD_PANEL_ID,
+                'data-test-subj': 'apmAlertsMenuItemCreateThreshold',
               },
               ...(canReadAnomalies
                 ? [
@@ -93,6 +95,7 @@ export function AlertingPopoverAndFlyout({
                         setAlertType(AlertType.Anomaly);
                         setPopoverOpen(false);
                       },
+                      'data-test-subj': 'apmAlertsMenuItemCreateAnomaly',
                     },
                   ]
                 : []),
@@ -102,6 +105,7 @@ export function AlertingPopoverAndFlyout({
                   setAlertType(AlertType.ErrorCount);
                   setPopoverOpen(false);
                 },
+                'data-test-subj': 'apmAlertsMenuItemErrorCount',
               },
             ]
           : []),
@@ -114,6 +118,7 @@ export function AlertingPopoverAndFlyout({
                 ),
                 href: observability.useRulesLink().href,
                 icon: 'tableOfContents',
+                'data-test-subj': 'apmAlertsMenuItemManageRules',
               },
             ]
           : []),

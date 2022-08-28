@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import type React from 'react';
 import { i18n } from '@kbn/i18n';
 
 export const POLICY_ARTIFACT_LAYOUT_LABELS = Object.freeze({

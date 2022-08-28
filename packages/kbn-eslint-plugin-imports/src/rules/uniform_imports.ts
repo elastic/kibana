@@ -14,6 +14,7 @@ import { getRelativeImportReq, getPackageRelativeImportReq } from '@kbn/import-r
 
 import { report } from '../helpers/report';
 import { visitAllImportStatements } from '../helpers/visit_all_import_statements';
+import { getSourcePath } from '../helpers/source';
 import { getImportResolver } from '../get_import_resolver';
 
 // TODO: get rid of all the special cases in here by moving more things to packages
@@ -27,19 +28,15 @@ export const UniformImportsRule: Eslint.Rule.RuleModule = {
   meta: {
     fixable: 'code',
     docs: {
-      url: 'https://github.com/elastic/kibana/blob/main/packages/kbn-eslint-plugin-imports/README.md#kbnimportsuniform_imports',
+      url: 'https://github.com/elastic/kibana/blob/main/packages/kbn-eslint-plugin-imports/README.mdx#kbnimportsuniform_imports',
     },
   },
 
   create(context) {
     const resolver = getImportResolver(context);
-    const sourceFilename = context.getPhysicalFilename
-      ? context.getPhysicalFilename()
-      : context.getFilename();
-
-    const sourceDirname = Path.dirname(sourceFilename);
-
-    const ownPackageId = resolver.getPackageIdForPath(sourceFilename);
+    const sourcePath = getSourcePath(context);
+    const sourceDirname = Path.dirname(sourcePath);
+    const ownPackageId = resolver.getPackageIdForPath(sourcePath);
 
     return visitAllImportStatements((req, { node, type }) => {
       if (!req) {

@@ -7,27 +7,25 @@
 import { filter } from 'rxjs/operators';
 import { noop, omit } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useMemo } from 'react';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
-import { OptionalSignalArgs, useObservable } from '@kbn/securitysolution-hook-utils';
+import type { OptionalSignalArgs } from '@kbn/securitysolution-hook-utils';
+import { useObservable } from '@kbn/securitysolution-hook-utils';
 
-import { IKibanaSearchResponse } from '@kbn/data-plugin/common';
-import {
-  DataPublicPluginStart,
-  isCompleteResponse,
-  isErrorResponse,
-} from '@kbn/data-plugin/public';
+import type { IKibanaSearchResponse } from '@kbn/data-plugin/common';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/public';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import * as i18n from './translations';
 
-import {
+import type {
   FactoryQueryTypes,
   RequestBasicOptions,
   StrategyRequestType,
   StrategyResponseType,
 } from '../../../../common/search_strategy/security_solution';
 import { getInspectResponse } from '../../../helpers';
-import { inputsModel } from '../../store';
+import type { inputsModel } from '../../store';
 import { useKibana } from '../../lib/kibana';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 

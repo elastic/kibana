@@ -23,7 +23,7 @@ import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
 import { orderBy, get } from 'lodash';
 
-import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/detection_engine/schemas/common';
+import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/detection_engine/rule_monitoring';
 import {
   EqlCreateSchema,
   QueryCreateSchema,
@@ -1019,7 +1019,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
             [ALERT_WORKFLOW_STATUS]: 'open',
-            [ALERT_REASON]: `event created high alert Signal Testing Query.`,
+            [ALERT_REASON]: `event with process sshd, created high alert Signal Testing Query.`,
             [ALERT_RULE_UUID]: fullSignal[ALERT_RULE_UUID],
             [ALERT_ORIGINAL_TIME]: fullSignal[ALERT_ORIGINAL_TIME],
             [ALERT_DEPTH]: 1,
@@ -1041,6 +1041,80 @@ export default ({ getService }: FtrProviderContext) => {
               count: 21,
               from: '2019-02-19T20:22:03.561Z',
             },
+          });
+        });
+
+        describe('Timestamp override and fallback', async () => {
+          before(async () => {
+            await esArchiver.load(
+              'x-pack/test/functional/es_archives/security_solution/timestamp_fallback'
+            );
+          });
+
+          after(async () => {
+            await esArchiver.unload(
+              'x-pack/test/functional/es_archives/security_solution/timestamp_fallback'
+            );
+          });
+
+          it('applies timestamp override when using single field', async () => {
+            const rule: ThresholdCreateSchema = {
+              ...getThresholdRuleForSignalTesting(['timestamp-fallback-test']),
+              threshold: {
+                field: 'host.name',
+                value: 1,
+              },
+              timestamp_override: 'event.ingested',
+            };
+            const { id } = await createRule(supertest, log, rule);
+            await waitForRuleSuccessOrStatus(supertest, log, id);
+            await waitForSignalsToBePresent(supertest, log, 2, [id]);
+            const signalsOpen = await getSignalsByIds(supertest, log, [id]);
+            expect(signalsOpen.hits.hits.length).eql(4);
+
+            for (const hit of signalsOpen.hits.hits) {
+              const originalTime = hit._source?.[ALERT_ORIGINAL_TIME];
+              const hostName = hit._source?.['host.name'];
+              if (hostName === 'host-1') {
+                expect(originalTime).eql('2020-12-16T15:15:18.570Z');
+              } else if (hostName === 'host-2') {
+                expect(originalTime).eql('2020-12-16T15:16:18.570Z');
+              } else if (hostName === 'host-3') {
+                expect(originalTime).eql('2020-12-16T16:15:18.570Z');
+              } else {
+                expect(originalTime).eql('2020-12-16T16:16:18.570Z');
+              }
+            }
+          });
+
+          it('applies timestamp override when using multiple fields', async () => {
+            const rule: ThresholdCreateSchema = {
+              ...getThresholdRuleForSignalTesting(['timestamp-fallback-test']),
+              threshold: {
+                field: ['host.name', 'source.ip'],
+                value: 1,
+              },
+              timestamp_override: 'event.ingested',
+            };
+            const { id } = await createRule(supertest, log, rule);
+            await waitForRuleSuccessOrStatus(supertest, log, id);
+            await waitForSignalsToBePresent(supertest, log, 2, [id]);
+            const signalsOpen = await getSignalsByIds(supertest, log, [id]);
+            expect(signalsOpen.hits.hits.length).eql(4);
+
+            for (const hit of signalsOpen.hits.hits) {
+              const originalTime = hit._source?.[ALERT_ORIGINAL_TIME];
+              const hostName = hit._source?.['host.name'];
+              if (hostName === 'host-1') {
+                expect(originalTime).eql('2020-12-16T15:15:18.570Z');
+              } else if (hostName === 'host-2') {
+                expect(originalTime).eql('2020-12-16T15:16:18.570Z');
+              } else if (hostName === 'host-3') {
+                expect(originalTime).eql('2020-12-16T16:15:18.570Z');
+              } else {
+                expect(originalTime).eql('2020-12-16T16:16:18.570Z');
+              }
+            }
           });
         });
       });

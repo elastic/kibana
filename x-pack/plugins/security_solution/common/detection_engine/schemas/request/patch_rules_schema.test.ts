@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { patchRulesSchema, PatchRulesSchema } from './patch_rules_schema';
+import type { PatchRulesSchema } from './patch_rules_schema';
+import { patchRulesSchema } from './patch_rules_schema';
 import { getPatchRulesSchemaMock } from './patch_rules_schema.mock';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { pipe } from 'fp-ts/lib/pipeable';

@@ -16,7 +16,7 @@ import {
   clearFlashMessages,
 } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
-import { Schema, SchemaConflicts } from '../../../shared/schema/types';
+import { AdvancedSchema, SchemaConflicts } from '../../../shared/schema/types';
 
 import { EngineLogic } from '../engine';
 
@@ -39,7 +39,7 @@ import {
 
 interface RelevanceTuningProps {
   searchSettings: SearchSettings;
-  schema: Schema;
+  schema: AdvancedSchema;
   schemaConflicts?: SchemaConflicts;
 }
 
@@ -94,7 +94,7 @@ interface RelevanceTuningActions {
 
 interface RelevanceTuningValues {
   searchSettings: SearchSettings;
-  schema: Schema;
+  schema: AdvancedSchema;
   schemaFields: string[];
   schemaFieldsWithConflicts: string[];
   filteredSchemaFields: string[];
@@ -107,6 +107,7 @@ interface RelevanceTuningValues {
   dataLoading: boolean;
   searchResults: SearchResult[] | null;
   resultsLoading: boolean;
+  isPrecisionTuningEnabled: boolean;
 }
 
 export const RelevanceTuningLogic = kea<
@@ -152,6 +153,7 @@ export const RelevanceTuningLogic = kea<
         search_fields: {},
         boosts: {},
         precision: 2,
+        precision_enabled: false,
       },
       {
         onInitializeRelevanceTuning: (_, { searchSettings }) => searchSettings,
@@ -219,7 +221,18 @@ export const RelevanceTuningLogic = kea<
     ],
   }),
   selectors: ({ selectors }) => ({
-    schemaFields: [() => [selectors.schema], (schema: Schema) => Object.keys(schema)],
+    schemaFields: [
+      () => [selectors.schema],
+      (schema: AdvancedSchema) =>
+        Object.entries(schema).reduce(
+          (fields: string[], [fieldName, { capabilities: fieldCapabilities }]) => {
+            return fieldCapabilities.fulltext || fieldCapabilities.boost
+              ? [...fields, fieldName]
+              : fields;
+          },
+          []
+        ),
+    ],
     schemaFieldsWithConflicts: [
       () => [selectors.schemaConflicts],
       (schemaConflicts: SchemaConflicts) => Object.keys(schemaConflicts),
@@ -235,8 +248,12 @@ export const RelevanceTuningLogic = kea<
         filterIfTerm(schemaFieldsWithConflicts, filterInputValue),
     ],
     engineHasSchemaFields: [
-      () => [selectors.schema],
-      (schema: Schema): boolean => Object.keys(schema).length >= 2,
+      () => [selectors.schemaFields],
+      (schemaFields: string[]): boolean => schemaFields.length > 0,
+    ],
+    isPrecisionTuningEnabled: [
+      () => [selectors.searchSettings],
+      (searchSettings: SearchSettings): boolean => searchSettings.precision_enabled,
     ],
   }),
   listeners: ({ actions, values }) => ({
@@ -277,6 +294,7 @@ export const RelevanceTuningLogic = kea<
       actions.setResultsLoading(true);
 
       const filteredBoosts = removeEmptyValueBoosts(boosts);
+      const precisionSettings = values.isPrecisionTuningEnabled ? { precision } : {};
 
       try {
         const response = await http.post<{ results: SearchResult[] }>(url, {
@@ -286,7 +304,7 @@ export const RelevanceTuningLogic = kea<
           body: JSON.stringify({
             boosts: isEmpty(filteredBoosts) ? undefined : filteredBoosts,
             search_fields: isEmpty(searchFields) ? undefined : searchFields,
-            precision,
+            ...precisionSettings,
           }),
         });
 
@@ -447,7 +465,7 @@ export const RelevanceTuningLogic = kea<
       const { searchSettings } = values;
       const { boosts } = searchSettings;
       const updatedBoosts = cloneDeep(boosts[name]);
-      const fieldType = values.schema[name];
+      const fieldType = values.schema[name].type;
       updatedBoosts[boostIndex].center = parseBoostCenter(fieldType, value);
 
       actions.setSearchSettings({

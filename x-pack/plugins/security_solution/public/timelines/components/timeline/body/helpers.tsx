@@ -7,14 +7,11 @@
 
 import { isEmpty } from 'lodash/fp';
 
-import { Ecs } from '../../../../../common/ecs';
-import { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
-import {
-  TimelineEventsType,
-  TimelineTypeLiteral,
-  TimelineType,
-} from '../../../../../common/types/timeline';
-import { OnPinEvent, OnUnPinEvent } from '../events';
+import type { Ecs } from '../../../../../common/ecs';
+import type { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
+import type { TimelineEventsType, TimelineTypeLiteral } from '../../../../../common/types/timeline';
+import { TimelineType } from '../../../../../common/types/timeline';
+import type { OnPinEvent, OnUnPinEvent } from '../events';
 import * as i18n from './translations';
 
 export const omitTypenameAndEmpty = (
@@ -129,7 +126,5 @@ export const getEventType = (event: Ecs): Omit<TimelineEventsType, 'all'> => {
   }
   return 'raw';
 };
-
-export const ROW_RENDERER_CLASS_NAME = 'row-renderer';
 
 export const NOTE_CONTENT_CLASS_NAME = 'note-content';

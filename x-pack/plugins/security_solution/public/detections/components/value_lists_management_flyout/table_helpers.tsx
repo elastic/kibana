@@ -12,7 +12,7 @@ import { EuiButtonIcon, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { FormattedDate } from '../../../common/components/formatted_date';
 import * as i18n from './translations';
-import { TableItemCallback, TableProps } from './types';
+import type { TableItemCallback, TableProps } from './types';
 import { listFormOptions } from './form';
 
 const AlignedSpinner = styled(EuiLoadingSpinner)`

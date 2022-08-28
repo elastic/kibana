@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CaseRegistry } from './registry';
+import { AttachmentTypeRegistry } from './registry';
 
 export const ExpressionComponent: React.FunctionComponent = () => {
   return null;
@@ -15,18 +15,18 @@ const getItem = (id: string = 'test') => {
   return { id };
 };
 
-describe('CaseRegistry', () => {
+describe('AttachmentTypeRegistry', () => {
   beforeEach(() => jest.resetAllMocks());
 
   describe('has()', () => {
     it('returns false for unregistered items', () => {
-      const registry = new CaseRegistry('TestRegistry');
+      const registry = new AttachmentTypeRegistry('TestRegistry');
 
       expect(registry.has('test')).toEqual(false);
     });
 
     it('returns true after registering an item', () => {
-      const registry = new CaseRegistry('TestRegistry');
+      const registry = new AttachmentTypeRegistry('TestRegistry');
       registry.register(getItem());
 
       expect(registry.has('test'));
@@ -35,14 +35,14 @@ describe('CaseRegistry', () => {
 
   describe('register()', () => {
     it('able to register items', () => {
-      const registry = new CaseRegistry('TestRegistry');
+      const registry = new AttachmentTypeRegistry('TestRegistry');
       registry.register(getItem());
 
       expect(registry.has('test')).toEqual(true);
     });
 
     it('throws error if item is already registered', () => {
-      const registry = new CaseRegistry('TestRegistry');
+      const registry = new AttachmentTypeRegistry('TestRegistry');
       registry.register(getItem('test'));
 
       expect(() => registry.register(getItem('test'))).toThrowErrorMatchingInlineSnapshot(
@@ -53,7 +53,7 @@ describe('CaseRegistry', () => {
 
   describe('get()', () => {
     it('returns item', () => {
-      const registry = new CaseRegistry('TestRegistry');
+      const registry = new AttachmentTypeRegistry('TestRegistry');
       registry.register(getItem());
       const actionType = registry.get('test');
 
@@ -63,7 +63,7 @@ describe('CaseRegistry', () => {
     });
 
     it(`throw error when action type doesn't exist`, () => {
-      const registry = new CaseRegistry('TestRegistry');
+      const registry = new AttachmentTypeRegistry('TestRegistry');
       expect(() => registry.get('not-exist-item')).toThrowErrorMatchingInlineSnapshot(
         `"Item \\"not-exist-item\\" is not registered on registry TestRegistry"`
       );
@@ -72,7 +72,7 @@ describe('CaseRegistry', () => {
 
   describe('list()', () => {
     it('returns list of items', () => {
-      const actionTypeRegistry = new CaseRegistry('TestRegistry');
+      const actionTypeRegistry = new AttachmentTypeRegistry('TestRegistry');
       actionTypeRegistry.register(getItem());
       const actionTypes = actionTypeRegistry.list();
 

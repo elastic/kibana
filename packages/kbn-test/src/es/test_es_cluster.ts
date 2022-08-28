@@ -19,10 +19,10 @@ import type { ChildProcess } from 'child_process';
 import { Cluster } from '@kbn/es';
 import { Client, HttpConnection } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { REPO_ROOT } from '@kbn/utils';
+
 import { CI_PARALLEL_PROCESS_PREFIX } from '../ci_parallel_process_prefix';
 import { esTestConfig } from './es_test_config';
-
-import { KIBANA_ROOT } from '..';
 
 interface TestEsClusterNodesOptions {
   name: string;
@@ -168,7 +168,7 @@ export function createTestEsCluster<
     password = 'changeme',
     license = 'basic',
     log,
-    basePath = Path.resolve(KIBANA_ROOT, '.es'),
+    basePath = Path.resolve(REPO_ROOT, '.es'),
     esFrom = esTestConfig.getBuildFrom(),
     dataArchive,
     nodes = [{ name: 'node-01' }],
@@ -196,7 +196,7 @@ export function createTestEsCluster<
   const config = {
     version: esTestConfig.getVersion(),
     installPath: Path.resolve(basePath, clusterName),
-    sourcePath: Path.resolve(KIBANA_ROOT, '../elasticsearch'),
+    sourcePath: Path.resolve(REPO_ROOT, '../elasticsearch'),
     password,
     license,
     basePath,
@@ -321,7 +321,7 @@ export function createTestEsCluster<
       }
 
       const uuid = Uuid.v4();
-      const debugPath = Path.resolve(KIBANA_ROOT, `data/es_debug_${uuid}.tar.gz`);
+      const debugPath = Path.resolve(REPO_ROOT, `data/es_debug_${uuid}.tar.gz`);
       log.error(`[es] debug files found, archiving install to ${debugPath}`);
       const archiver = createArchiver('tar', { gzip: true });
       const promise = pipeline(archiver, Fs.createWriteStream(debugPath));

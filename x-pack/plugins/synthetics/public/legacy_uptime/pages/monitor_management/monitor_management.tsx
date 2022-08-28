@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { useSelector } from 'react-redux';
 import { EuiCallOut, EuiButton, EuiSpacer, EuiLink } from '@elastic/eui';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
+import { ManageLocationsPortal } from '../../components/monitor_management/manage_locations/manage_locations';
 import { monitorManagementListSelector } from '../../state/selectors';
 import { useMonitorManagementBreadcrumbs } from './use_monitor_management_breadcrumbs';
 import { MonitorListContainer } from '../../components/monitor_management/monitor_list/monitor_list_container';
@@ -91,6 +92,7 @@ export const MonitorManagementPage: React.FC = () => {
           pageState={pageState}
           dispatchPageAction={dispatchPageAction}
         />
+        <ManageLocationsPortal />
       </Loader>
       {showEmptyState && <EnablementEmptyState focusButton={shouldFocusEnablementButton} />}
     </>

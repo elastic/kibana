@@ -17,6 +17,16 @@ import { SUPPORTED_PYTORCH_TASKS } from '../../../../../../../common/constants/t
 
 export class ZeroShotClassificationInference extends InferenceBase<TextClassificationResponse> {
   protected inferenceType = SUPPORTED_PYTORCH_TASKS.ZERO_SHOT_CLASSIFICATION;
+  protected inferenceTypeLabel = i18n.translate(
+    'xpack.ml.trainedModels.testModelsFlyout.zeroShotClassification.label',
+    { defaultMessage: 'Zero shot classification' }
+  );
+  protected info = [
+    i18n.translate('xpack.ml.trainedModels.testModelsFlyout.zeroShotClassification.info1', {
+      defaultMessage:
+        'Provide a set of labels and test how well the model classifies your input text.',
+    }),
+  ];
 
   public labelsText$ = new BehaviorSubject<string>('');
 

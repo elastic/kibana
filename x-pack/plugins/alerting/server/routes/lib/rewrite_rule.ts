@@ -23,8 +23,9 @@ export const rewriteRule = ({
   scheduledTaskId,
   snoozeSchedule,
   isSnoozedUntil,
+  activeSnoozes,
   ...rest
-}: SanitizedRule<RuleTypeParams>) => ({
+}: SanitizedRule<RuleTypeParams> & { activeSnoozes?: string[] }) => ({
   ...rest,
   rule_type_id: alertTypeId,
   created_by: createdBy,
@@ -38,6 +39,7 @@ export const rewriteRule = ({
   scheduled_task_id: scheduledTaskId,
   snooze_schedule: snoozeSchedule,
   ...(isSnoozedUntil != null ? { is_snoozed_until: isSnoozedUntil } : {}),
+  ...(activeSnoozes != null ? { active_snoozes: activeSnoozes } : {}),
   execution_status: executionStatus && {
     ...omit(executionStatus, 'lastExecutionDate', 'lastDuration'),
     last_execution_date: executionStatus.lastExecutionDate,

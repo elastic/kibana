@@ -9,7 +9,7 @@ import React, { useEffect, useState } from 'react';
 import { getOr } from 'lodash/fp';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { useNetworkUsers, ID } from '../../containers/users';
-import { IPQueryTabBodyProps } from './types';
+import type { IPQueryTabBodyProps } from './types';
 import { UsersTable } from '../../components/users_table';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { createPackagePolicyServiceMock } from '@kbn/fleet-plugin/server/mocks';
-import { PackagePolicy } from '@kbn/fleet-plugin/common/types/models';
-import { PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models';
+import type { PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
 import { getAllEndpointPackagePolicies } from './endpoint_package_policies';
 
 describe('endpoint_package_policies', () => {

@@ -7,7 +7,7 @@
  */
 
 export { getFieldByName, findIndexPatternById } from './utils';
-export type { FieldDescriptor } from './fetcher';
+export type { FieldDescriptor, RollupIndexCapability } from './fetcher';
 export { IndexPatternsFetcher, getCapabilitiesForRollupIndices } from './fetcher';
 export type {
   DataViewsServerPluginStart,

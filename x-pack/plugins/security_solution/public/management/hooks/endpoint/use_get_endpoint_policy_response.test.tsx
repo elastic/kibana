@@ -6,7 +6,7 @@
  */
 
 import { useGetEndpointPolicyResponse } from './use_get_endpoint_policy_response';
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 import { useHttp } from '../../../common/lib/kibana';
 import { getFakeHttpService, renderQuery } from '../test_utils';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Direction, FirstLastSeenRequestOptions } from '../../../../../common/search_strategy';
+import type { FirstLastSeenRequestOptions } from '../../../../../common/search_strategy';
+import { Direction } from '../../../../../common/search_strategy';
 import * as buildQuery from './query.first_or_last_seen.dsl';
 import { firstOrLastSeen } from '.';
 import {

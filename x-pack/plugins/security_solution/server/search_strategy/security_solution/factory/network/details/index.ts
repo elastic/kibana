@@ -9,14 +9,14 @@ import { getOr } from 'lodash/fp';
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
-import {
+import type {
   NetworkDetailsStrategyResponse,
   NetworkQueries,
   NetworkDetailsRequestOptions,
 } from '../../../../../../common/search_strategy/security_solution/network';
 
 import { inspectStringifyObject } from '../../../../../utils/build_query';
-import { SecuritySolutionFactory } from '../../types';
+import type { SecuritySolutionFactory } from '../../types';
 
 import { getNetworkDetailsAgg } from './helpers';
 import { buildNetworkDetailsQuery } from './query.details_network.dsl';

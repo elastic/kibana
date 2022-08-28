@@ -8,19 +8,18 @@
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import { DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  Draggable,
+import type {
   DraggableProvided,
   DraggableStateSnapshot,
   DraggingStyle,
-  Droppable,
   NotDraggingStyle,
 } from 'react-beautiful-dnd';
+import { Draggable, Droppable } from 'react-beautiful-dnd';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import { dragAndDropActions } from '../../store/drag_and_drop';
-import { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
+import type { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../../../timelines/components/row_renderers_browser/constants';
 
 import { TruncatableText } from '../truncatable_text';

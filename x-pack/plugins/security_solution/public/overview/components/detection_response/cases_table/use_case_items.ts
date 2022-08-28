@@ -7,8 +7,8 @@
 
 import { useState, useEffect, useMemo } from 'react';
 
-import { CaseStatuses } from '@kbn/cases-plugin/common';
-import { Cases } from '@kbn/cases-plugin/common/ui';
+import type { CaseStatuses } from '@kbn/cases-plugin/common';
+import type { Cases } from '@kbn/cases-plugin/common/ui';
 
 import uuid from 'uuid';
 import { APP_ID } from '../../../../../common/constants';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 
 export const checkInFleetAgent = async (esClient: Client, agentId: string) => {

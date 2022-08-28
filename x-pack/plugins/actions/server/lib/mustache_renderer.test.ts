@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { renderMustacheString, renderMustacheObject, Escape } from './mustache_renderer';
+import {
+  renderMustacheString,
+  renderMustacheStringNoEscape,
+  renderMustacheObject,
+  Escape,
+} from './mustache_renderer';
 
 const variables = {
   a: 1,
@@ -28,6 +33,7 @@ const variables = {
   st: '*',
   ul: '_',
   st_lt: '*<',
+  vl: '|',
 };
 
 describe('mustache_renderer', () => {
@@ -77,6 +83,7 @@ describe('mustache_renderer', () => {
       expect(renderMustacheString('{{bs}}', variables, 'markdown')).toBe('\\' + variables.bs);
       expect(renderMustacheString('{{st}}', variables, 'markdown')).toBe('\\' + variables.st);
       expect(renderMustacheString('{{ul}}', variables, 'markdown')).toBe('\\' + variables.ul);
+      expect(renderMustacheString('{{vl}}', variables, 'markdown')).toBe('\\' + variables.vl);
     });
 
     it('handles triple escapes', () => {
@@ -114,6 +121,139 @@ describe('mustache_renderer', () => {
 
     it('handles errors', () => {
       expect(renderMustacheString('{{a}', variables, 'none')).toMatchInlineSnapshot(
+        `"error rendering mustache template \\"{{a}\\": Unclosed tag at 4"`
+      );
+    });
+  });
+  describe('renderMustacheStringNoEscape()', () => {
+    const id = 'cool_id';
+    const title = 'cool_title';
+    const summary = 'A cool good summary';
+    const description = 'A cool good description';
+    const tags = ['cool', 'neat', 'nice'];
+    const str = 'https://coolsite.net/browse/{{{external.system.title}}}';
+
+    const objStr =
+      '{\n' +
+      '\t"fields": {\n' +
+      '\t  "summary": {{{case.title}}},\n' +
+      '\t  "description": {{{case.description}}},\n' +
+      '\t  "labels": {{{case.tags}}},\n' +
+      '\t  "project":{"key":"ROC"},\n' +
+      '\t  "issuetype":{"id":"10024"}\n' +
+      '\t}\n' +
+      '}';
+    const objStrDouble =
+      '{\n' +
+      '\t"fields": {\n' +
+      '\t  "summary": {{case.title}},\n' +
+      '\t  "description": {{case.description}},\n' +
+      '\t  "labels": {{case.tags}},\n' +
+      '\t  "project":{"key":"ROC"},\n' +
+      '\t  "issuetype":{"id":"10024"}\n' +
+      '\t}\n' +
+      '}';
+    const caseVariables = {
+      case: {
+        title: summary,
+        description,
+        tags,
+      },
+    };
+    const caseVariablesStr = {
+      case: {
+        title: JSON.stringify(summary),
+        description: JSON.stringify(description),
+        tags: JSON.stringify(tags),
+      },
+    };
+    it('Inserts variables into string without quotes', () => {
+      const urlVariables = {
+        external: {
+          system: {
+            id,
+            title,
+          },
+        },
+      };
+      expect(renderMustacheStringNoEscape(str, urlVariables)).toBe(
+        `https://coolsite.net/browse/cool_title`
+      );
+    });
+    it('Inserts variables into url with quotes whens stringified', () => {
+      const urlVariablesStr = {
+        external: {
+          system: {
+            id: JSON.stringify(id),
+            title: JSON.stringify(title),
+          },
+        },
+      };
+      expect(renderMustacheStringNoEscape(str, urlVariablesStr)).toBe(
+        `https://coolsite.net/browse/"cool_title"`
+      );
+    });
+    it('Inserts variables into JSON non-escaped when triple brackets and JSON.stringified variables', () => {
+      expect(renderMustacheStringNoEscape(objStr, caseVariablesStr)).toBe(
+        `{
+\t"fields": {
+\t  "summary": "A cool good summary",
+\t  "description": "A cool good description",
+\t  "labels": ["cool","neat","nice"],
+\t  "project":{"key":"ROC"},
+\t  "issuetype":{"id":"10024"}
+\t}
+}`
+      );
+    });
+    it('Inserts variables into JSON without quotes when triple brackets and NON stringified variables', () => {
+      expect(renderMustacheStringNoEscape(objStr, caseVariables)).toBe(
+        `{
+\t"fields": {
+\t  "summary": A cool good summary,
+\t  "description": A cool good description,
+\t  "labels": cool,neat,nice,
+\t  "project":{"key":"ROC"},
+\t  "issuetype":{"id":"10024"}
+\t}
+}`
+      );
+    });
+    it('Inserts variables into JSON escaped when double brackets and JSON.stringified variables', () => {
+      expect(renderMustacheStringNoEscape(objStrDouble, caseVariablesStr)).toBe(
+        `{
+\t"fields": {
+\t  "summary": &quot;A cool good summary&quot;,
+\t  "description": &quot;A cool good description&quot;,
+\t  "labels": [&quot;cool&quot;,&quot;neat&quot;,&quot;nice&quot;],
+\t  "project":{"key":"ROC"},
+\t  "issuetype":{"id":"10024"}
+\t}
+}`
+      );
+    });
+    it('Inserts variables into JSON without quotes when double brackets and NON stringified variables', () => {
+      expect(renderMustacheStringNoEscape(objStrDouble, caseVariables)).toBe(
+        `{
+\t"fields": {
+\t  "summary": A cool good summary,
+\t  "description": A cool good description,
+\t  "labels": cool,neat,nice,
+\t  "project":{"key":"ROC"},
+\t  "issuetype":{"id":"10024"}
+\t}
+}`
+      );
+    });
+
+    it('handles errors triple bracket', () => {
+      expect(renderMustacheStringNoEscape('{{{a}}', variables)).toMatchInlineSnapshot(
+        `"error rendering mustache template \\"{{{a}}\\": Unclosed tag at 6"`
+      );
+    });
+
+    it('handles errors double bracket', () => {
+      expect(renderMustacheStringNoEscape('{{a}', variables)).toMatchInlineSnapshot(
         `"error rendering mustache template \\"{{a}\\": Unclosed tag at 4"`
       );
     });

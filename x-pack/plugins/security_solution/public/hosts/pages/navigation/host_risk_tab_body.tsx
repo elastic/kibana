@@ -9,7 +9,7 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
-import { HostsComponentsQueryProps } from './types';
+import type { HostsComponentsQueryProps } from './types';
 import * as i18n from '../translations';
 import { HostRiskInformationButtonEmpty } from '../../components/host_risk_information';
 import { HostRiskScoreQueryId, useHostRiskScore } from '../../../risk_score/containers';

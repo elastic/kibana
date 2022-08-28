@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UsersKpiAuthenticationsRequestOptions } from '../../../../../../../common/search_strategy';
+import type { UsersKpiAuthenticationsRequestOptions } from '../../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../../utils/build_query';
 
 export const buildUsersKpiAuthenticationsQuery = ({

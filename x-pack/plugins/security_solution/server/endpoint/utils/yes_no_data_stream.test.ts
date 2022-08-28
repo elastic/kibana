@@ -11,7 +11,7 @@ import {
   savedObjectsClientMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
-import { SecuritySolutionRequestHandlerContext } from '../../types';
+import type { SecuritySolutionRequestHandlerContext } from '../../types';
 import { createRouteHandlerContext } from '../mocks';
 import {
   doLogsEndpointActionDsExists,

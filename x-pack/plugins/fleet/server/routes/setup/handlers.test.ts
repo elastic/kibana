@@ -8,7 +8,7 @@
 import type { AwaitedProperties } from '@kbn/utility-types';
 import { httpServerMock, savedObjectsClientMock, coreMock } from '@kbn/core/server/mocks';
 
-import type { PostFleetSetupResponse } from '../../../common';
+import type { PostFleetSetupResponse } from '../../../common/types';
 import { RegistryError } from '../../errors';
 import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
 import { agentServiceMock } from '../../services/agents/agent_service.mock';

@@ -7,7 +7,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { ErrorLike } from '@kbn/expressions-plugin';
+import { ErrorLike } from '@kbn/expressions-plugin/common';
 import { Adapters } from '../types';
 import { IContainer } from '../containers/i_container';
 import { EmbeddableInput } from '../../../common/types';
@@ -18,6 +18,8 @@ export type { EmbeddableInput };
 export interface EmbeddableOutput {
   // Whether the embeddable is actively loading.
   loading?: boolean;
+  // Whether the embeddable is rendered.
+  rendered?: boolean;
   // Whether the embeddable finished loading with an error.
   error?: EmbeddableError;
   editUrl?: string;
@@ -84,6 +86,14 @@ export interface IEmbeddable<
   fatalError?: Error;
 
   /**
+   * This method returns false by default.
+   * It should be set to true for any embeddable type that utilizes the `loading` and `rendered`
+   * output variables to notify a container of their loading progress. If set to false, a container should assume
+   * the embeddable is loaded immediately.
+   */
+  reportsEmbeddableLoad(): boolean;
+
+  /**
    * A functional representation of the isContainer variable, but helpful for typescript to
    * know the shape if this returns true
    */
@@ -131,6 +141,12 @@ export interface IEmbeddable<
    * @param changes
    */
   updateInput(changes: Partial<I>): void;
+
+  /**
+   * Updates output state with the given changes.
+   * @param changes
+   */
+  updateOutput(changes: Partial<O>): void;
 
   /**
    * Returns an observable which will be notified when input state changes.

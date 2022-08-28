@@ -26,5 +26,5 @@ test('renders DashboardSaveModal', () => {
       showCopyOnSave={true}
     />
   );
-  expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(component).toMatchSnapshot();
 });

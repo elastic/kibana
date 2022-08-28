@@ -10,7 +10,8 @@ import { useDispatch } from 'react-redux';
 import { getDataProvider } from '../../../../common/components/event_details/table/use_action_cell_data_provider';
 import { sourcererActions } from '../../../../common/store/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { DataProvider, TimelineId, TimelineType } from '../../../../../common/types/timeline';
+import type { DataProvider } from '../../../../../common/types/timeline';
+import { TimelineId, TimelineType } from '../../../../../common/types/timeline';
 import { useCreateTimeline } from '../../../../timelines/components/timeline/properties/use_create_timeline';
 import { updateProviders } from '../../../../timelines/store/timeline/actions';
 

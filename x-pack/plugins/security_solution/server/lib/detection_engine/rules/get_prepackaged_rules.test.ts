@@ -7,7 +7,7 @@
 
 import { getPrepackagedRules } from './get_prepackaged_rules';
 import { isEmpty } from 'lodash/fp';
-import { AddPrepackagedRulesSchema } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
+import type { AddPrepackagedRulesSchema } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
 
 describe('get_existing_prepackaged_rules', () => {
   test('should not throw any errors with the existing checked in pre-packaged rules', () => {

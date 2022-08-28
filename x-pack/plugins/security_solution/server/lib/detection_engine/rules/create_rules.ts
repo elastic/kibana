@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { SanitizedRule } from '@kbn/alerting-plugin/common';
+import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { NOTIFICATION_THROTTLE_NO_ACTIONS } from '../../../../common/constants';
-import { CreateRulesOptions } from './types';
+import type { CreateRulesOptions } from './types';
 import { convertCreateAPIToInternalSchema } from '../schemas/rule_converters';
-import { RuleParams } from '../schemas/rule_schemas';
+import type { RuleParams } from '../schemas/rule_schemas';
 
 export const createRules = async ({
   rulesClient,

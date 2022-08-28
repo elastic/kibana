@@ -56,6 +56,7 @@ export interface RulesListNotifyBadgeProps {
   snoozeRule: (schedule: SnoozeSchedule, muteAll?: boolean) => Promise<void>;
   unsnoozeRule: (scheduleIds?: string[]) => Promise<void>;
   showTooltipInline?: boolean;
+  showOnHover?: boolean;
 }
 
 const openSnoozePanelAriaLabel = i18n.translate(
@@ -69,8 +70,11 @@ export const isRuleSnoozed = (rule: { isSnoozedUntil?: Date | null; muteAll: boo
   );
 
 const getNextRuleSnoozeSchedule = (rule: { snoozeSchedule?: RuleSnooze }) => {
-  if (!rule.snoozeSchedule || rule.snoozeSchedule.length === 0) return null;
-  const nextSchedule = rule.snoozeSchedule.reduce(
+  if (!rule.snoozeSchedule) return null;
+  // Disregard any snoozes without ids; these are non-scheduled snoozes
+  const explicitlyScheduledSnoozes = rule.snoozeSchedule.filter((s) => Boolean(s.id));
+  if (explicitlyScheduledSnoozes.length === 0) return null;
+  const nextSchedule = explicitlyScheduledSnoozes.reduce(
     (a: RuleSnoozeSchedule, b: RuleSnoozeSchedule) => {
       if (moment(b.rRule.dtstart).isBefore(moment(a.rRule.dtstart))) return b;
       return a;
@@ -90,6 +94,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
     onRuleChanged,
     snoozeRule,
     unsnoozeRule,
+    showOnHover = false,
     showTooltipInline = false,
   } = props;
 
@@ -205,6 +210,10 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
   }, [formattedSnoozeText, isLoading, isEditable, onClick]);
 
   const unsnoozedButton = useMemo(() => {
+    // This show on hover is needed because we need style sheets to achieve the
+    // show on hover effect in the rules list. However we don't want this to be
+    // a default behaviour of this component.
+    const showOnHoverClass = showOnHover ? 'ruleSidebarItem__action' : '';
     return (
       <EuiButtonIcon
         size="s"
@@ -213,12 +222,12 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         display={isLoading ? 'base' : 'empty'}
         data-test-subj="rulesListNotifyBadge-unsnoozed"
         aria-label={openSnoozePanelAriaLabel}
-        className={isOpen || isLoading ? '' : 'ruleSidebarItem__action'}
+        className={isOpen || isLoading ? '' : showOnHoverClass}
         iconType="bell"
         onClick={onClick}
       />
     );
-  }, [isOpen, isLoading, isEditable, onClick]);
+  }, [isOpen, isLoading, isEditable, showOnHover, onClick]);
 
   const indefiniteSnoozeButton = useMemo(() => {
     return (
@@ -311,6 +320,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
       closePopover={onClosePopover}
       button={buttonWithToolTip}
       anchorPosition="rightCenter"
+      panelStyle={{ maxHeight: '100vh', overflowY: 'auto' }}
     >
       <SnoozePanel
         snoozeRule={onApplySnooze}
@@ -318,6 +328,8 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         interval={futureTimeToInterval(isSnoozedUntil)}
         showCancel={isSnoozed}
         scheduledSnoozes={rule.snoozeSchedule ?? []}
+        activeSnoozes={rule.activeSnoozes ?? []}
+        inPopover
       />
     </EuiPopover>
   );

@@ -9,7 +9,7 @@ import { Transform } from 'stream';
 import { has, isString } from 'lodash/fp';
 import { createMapStream, createFilterStream } from '@kbn/utils';
 
-import { ImportRulesSchema } from '../../../common/detection_engine/schemas/request/import_rules_schema';
+import type { ImportRulesSchema } from '../../../common/detection_engine/schemas/request/import_rules_schema';
 
 export interface RulesObjectsExportResultDetails {
   /** number of successfully exported objects */
@@ -31,12 +31,6 @@ export const parseNdjsonStrings = (): Transform => {
 export const filterExportedCounts = (): Transform => {
   return createFilterStream<ImportRulesSchema | RulesObjectsExportResultDetails>(
     (obj) => obj != null && !has('exported_count', obj)
-  );
-};
-
-export const filterExceptions = (): Transform => {
-  return createFilterStream<ImportRulesSchema | RulesObjectsExportResultDetails>(
-    (obj) => obj != null && !has('list_id', obj)
   );
 };
 

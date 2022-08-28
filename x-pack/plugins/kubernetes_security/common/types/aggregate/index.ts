@@ -5,11 +5,24 @@
  * 2.0.
  */
 
-export interface AggregateResult {
+interface Aggregate {
   key: string | number;
-  key_as_string?: string;
   doc_count: number;
-  count_by_aggs: {
+}
+
+interface Bucket extends Aggregate {
+  key_as_string?: string;
+  count_by_aggs?: {
     value: number;
   };
+}
+
+export interface AggregateResult {
+  buckets: Bucket[];
+  hasNextPage: boolean;
+}
+
+export interface AggregateBucketPaginationResult {
+  buckets: Bucket[];
+  hasNextPage: boolean;
 }

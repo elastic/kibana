@@ -228,6 +228,13 @@ export class LegacyCoreEditor implements CoreEditor {
     );
   }
 
+  detachCompleter() {
+    // In some situations we need to detach the autocomplete suggestions element manually,
+    // such as when navigating away from Console when the suggestions list is open.
+    const completer = (this.editor as unknown as { completer: { detach(): void } }).completer;
+    return completer?.detach();
+  }
+
   private forceRetokenize() {
     const session = this.editor.getSession();
     return new Promise<void>((resolve) => {

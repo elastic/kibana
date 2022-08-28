@@ -8,7 +8,7 @@
 import { hydrateSavedObjects } from './hydrate_saved_object';
 import { DecryptedSyntheticsMonitorSavedObject } from '../../common/types';
 import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
-import { getUptimeESMockClient } from '../legacy_uptime/lib/requests/helper';
+import { getUptimeESMockClient } from '../legacy_uptime/lib/requests/test_helpers';
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 
 import moment from 'moment';

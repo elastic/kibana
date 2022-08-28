@@ -17,7 +17,8 @@ import {
 import classNames from 'classnames';
 import { SolutionNavPanel } from './solution_grouped_nav_panel';
 import { EuiListGroupItemStyled } from './solution_grouped_nav.styles';
-import { DefaultSideNavItem, SideNavItem, isCustomItem, isDefaultItem } from './types';
+import type { DefaultSideNavItem, SideNavItem } from './types';
+import { isCustomItem, isDefaultItem } from './types';
 import { EuiIconSpaces } from './icons/spaces';
 import type { LinkCategories } from '../../../links';
 

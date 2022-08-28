@@ -6,7 +6,7 @@
  */
 
 import { getImportRulesSchemaMock } from './import_rules_schema.mock';
-import { ImportRulesSchema } from './import_rules_schema';
+import type { ImportRulesSchema } from './import_rules_schema';
 import { importRuleValidateTypeDependents } from './import_rules_type_dependents';
 
 describe('import_rules_type_dependents', () => {

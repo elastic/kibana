@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FirstLastSeenRequestOptions } from '../../../../../common/search_strategy/security_solution/first_last_seen';
+import type { FirstLastSeenRequestOptions } from '../../../../../common/search_strategy/security_solution/first_last_seen';
 
 export const buildFirstOrLastSeenQuery = ({
   field,

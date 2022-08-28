@@ -7,8 +7,7 @@
 
 import React, { FC, useEffect } from 'react';
 import PropTypes from 'prop-types';
-// @ts-expect-error untyped library
-import Style from 'style-it';
+import { css } from '@emotion/react';
 // @ts-expect-error untyped local
 import { WorkpadPage } from '../workpad_page';
 import { RoutingLink } from '../routing';
@@ -33,9 +32,12 @@ export const ExportApp: FC<Props> = ({ workpad, selectedPageIndex, initializeWor
         <div className="canvasLayout__stageHeader">
           <RoutingLink to={`/workpad/${id}`}>Edit Workpad</RoutingLink>
         </div>
-        {Style.it(
-          workpad.css,
-          <div className="canvasExport__stageContent" data-shared-items-count={pageElementCount}>
+        {
+          <div
+            css={css(workpad.css)}
+            className="canvasExport__stageContent"
+            data-shared-items-count={pageElementCount}
+          >
             <WorkpadPage
               isSelected
               key={activePage.id}
@@ -46,7 +48,7 @@ export const ExportApp: FC<Props> = ({ workpad, selectedPageIndex, initializeWor
               unregisterLayout={() => {}}
             />
           </div>
-        )}
+        }
       </div>
     </div>
   );

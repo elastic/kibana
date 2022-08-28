@@ -8,7 +8,7 @@
 import { has, snakeCase } from 'lodash/fp';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
 
-import {
+import type {
   RouteValidationFunction,
   KibanaResponseFactory,
   CustomHttpResponseOptions,

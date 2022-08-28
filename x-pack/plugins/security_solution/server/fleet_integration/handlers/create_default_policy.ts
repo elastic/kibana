@@ -9,8 +9,9 @@ import {
   policyFactory as policyConfigFactory,
   policyFactoryWithoutPaidFeatures as policyConfigFactoryWithoutPaidFeatures,
 } from '../../../common/endpoint/models/policy_config';
-import { isAtLeast, LicenseService } from '../../../common/license/license';
-import { PolicyConfig } from '../../../common/endpoint/types';
+import type { LicenseService } from '../../../common/license/license';
+import { isAtLeast } from '../../../common/license/license';
+import type { PolicyConfig } from '../../../common/endpoint/types';
 
 /**
  * Create the default endpoint policy based on the current license
