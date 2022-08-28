@@ -24,7 +24,7 @@ export const HAS_AUTH_LABEL = i18n.translate(
 export const URL_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.urlTextFieldLabel',
   {
-    defaultMessage: 'Torq integration endpoint URL',
+    defaultMessage: 'Torq endpoint URL',
   }
 );
 
@@ -108,7 +108,7 @@ export const USERNAME_REQUIRED = i18n.translate(
 export const TORQ_TOKEN_LABEL = i18n.translate(
   'xpack.triggersActionsUI.sections.addAction.torqAction.token',
   {
-    defaultMessage: 'Torq integration token',
+    defaultMessage: 'Torq webhook authentication header secret',
   }
 );
 
@@ -129,7 +129,7 @@ export const BODY_REQUIRED = i18n.translate(
 export const TORQ_TOKEN_HELP_TEXT = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.torq.tokenHelpText',
   {
-    defaultMessage: 'Enter the token generated when you created the Elastic Security integration on Torq.',
+    defaultMessage: 'Enter the webhook authentication header secret generated when you created the Elastic Security integration.',
   }
 );
 

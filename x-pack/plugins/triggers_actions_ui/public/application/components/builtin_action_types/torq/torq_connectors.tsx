@@ -22,6 +22,8 @@ import {
   UseField,
   useFormContext,
   useFormData,
+  ValidationError,
+  ValidationFunc,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
   Field,
@@ -34,6 +36,7 @@ import { ActionConnectorFieldsProps } from '../../../../types';
 import * as i18n from './translations';
 import { PasswordField } from '../../password_field';
 import { isUrl } from '@kbn/es-ui-shared-plugin/static/validators/string';
+import { ERROR_CODE } from '@kbn/es-ui-shared-plugin/static/forms/helpers/field_validators/types';
 
 const { emptyField, urlField } = fieldValidators;
 
@@ -62,10 +65,6 @@ const torqWebhookEndpoint = (message: string) => (...args: Parameters<Validation
 const TorqActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   readOnly,
 }) => {
-  const { getFieldDefaultValue } = useFormContext();
-  const [{ config, __internal__ }] = useFormData({
-    watch: [],
-  });
 
   return (
     <>
