@@ -50,7 +50,8 @@ export type UrlStateType =
   | 'dashboards'
   | 'indicators'
   | 'cloud_posture'
-  | 'findings';
+  | 'findings'
+  | 'entity_analytics';
 
 export type SecurityNavGroup = Record<SecurityNavGroupKey, NavGroupTab>;
 export interface NavTab {
@@ -87,6 +88,7 @@ export const securityNavKeys = [
   SecurityPageName.cloudSecurityPostureFindings,
   SecurityPageName.cloudSecurityPostureBenchmarks,
   SecurityPageName.cloudSecurityPostureRules,
+  SecurityPageName.entityAnalytics,
 ] as const;
 export type SecurityNavKey = typeof securityNavKeys[number];
 
