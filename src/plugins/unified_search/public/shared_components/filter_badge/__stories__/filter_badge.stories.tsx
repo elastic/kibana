@@ -36,7 +36,7 @@ Default.decorators = [
   ),
 ];
 
-const mockedDataView = {
+export const mockedDataView = {
   id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
   title: 'logstash-*',
   fields: [

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { DataView } from '@kbn/data-views-plugin/common';
@@ -28,9 +28,6 @@ const cursor = css`
 const rootLevelConditionType = ConditionTypes.AND;
 
 function FilterBadge({ filters, dataView, iconOnClick, onClick }: FilterBadgeProps) {
-  const iconOnClickBadge = useCallback(() => iconOnClick(), [iconOnClick]);
-  const onClickBadge = useCallback(() => onClick(), [onClick]);
-
   if (!dataView) {
     return null;
   }
@@ -43,10 +40,10 @@ function FilterBadge({ filters, dataView, iconOnClick, onClick }: FilterBadgePro
           color="hollow"
           iconType="cross"
           iconSide="right"
-          iconOnClick={() => iconOnClickBadge()}
+          iconOnClick={() => iconOnClick()}
           onClickAriaLabel="Filter actions"
           iconOnClickAriaLabel="Remove filter"
-          onClick={() => onClickBadge()}
+          onClick={() => onClick()}
           title=""
         >
           <EuiFlexGroup wrap responsive={false} gutterSize="xs">
