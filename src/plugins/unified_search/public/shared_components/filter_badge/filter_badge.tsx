@@ -27,7 +27,7 @@ const cursor = css`
 
 const rootLevelConditionType = ConditionTypes.AND;
 
-export function FilterBadge({ filters, dataView, iconOnClick, onClick }: FilterBadgeProps) {
+function FilterBadge({ filters, dataView, iconOnClick, onClick }: FilterBadgeProps) {
   const iconOnClickBadge = useCallback(() => iconOnClick(), [iconOnClick]);
   const onClickBadge = useCallback(() => onClick(), [onClick]);
 
@@ -61,3 +61,7 @@ export function FilterBadge({ filters, dataView, iconOnClick, onClick }: FilterB
     </EuiFlexGroup>
   );
 }
+
+// React.lazy support
+// eslint-disable-next-line import/no-default-export
+export default FilterBadge;

@@ -14,7 +14,7 @@ import { action } from '@storybook/addon-actions';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { FilterBadgeProps } from '../filter_badge';
-import { FilterBadge } from '../filter_badge';
+import FilterBadge from '../filter_badge';
 import { getFilterMockOrConditional } from '../__mock__/filters';
 
 export default {
