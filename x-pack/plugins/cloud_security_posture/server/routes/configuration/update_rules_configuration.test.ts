@@ -235,6 +235,7 @@ describe('Update rules configuration API', () => {
     packagePolicyServiceMock.update.mockReturnValue(Promise.resolve(packagePolicyMock));
 
     const updatedPackagePolicy = await updatePackagePolicyRuntimeCfgVar({
+      rules: mocks.enabledRules,
       packagePolicy: packagePolicyMock,
       soClient: soClientMock,
       esClient: esClientMock.asCurrentUser,
@@ -266,6 +267,7 @@ describe('Update rules configuration API', () => {
     packagePolicyServiceMock.update.mockReturnValue(Promise.resolve(packagePolicyMock));
 
     const updatedPackagePolicy = await updatePackagePolicyRuntimeCfgVar({
+      rules: mocks.enabledRules,
       packagePolicy: packagePolicyMock,
       soClient: soClientMock,
       esClient: esClientMock.asCurrentUser,
@@ -290,6 +292,7 @@ describe('Update rules configuration API', () => {
       disabledRules,
       requestMock,
       soClientMock,
+      packagePolicyMock,
       packagePolicyServiceMock,
       cspContext,
     } = mocks;
@@ -297,7 +300,7 @@ describe('Update rules configuration API', () => {
     packagePolicyServiceMock.update.mockReturnValue(Promise.reject('some error'));
 
     try {
-      await updatePackagePolicyCspRules(cspContext, requestMock.body);
+      await updatePackagePolicyCspRules(cspContext, packagePolicyMock, requestMock.body.rules);
     } catch (e) {
       expect(soClientMock.bulkUpdate).toHaveBeenNthCalledWith(1, enabledRules);
       expect(soClientMock.bulkUpdate).toHaveBeenNthCalledWith(2, disabledRules);
@@ -316,7 +319,7 @@ describe('Update rules configuration API', () => {
 
     packagePolicyServiceMock.update.mockReturnValue(Promise.resolve(packagePolicyMock));
 
-    await updatePackagePolicyCspRules(cspContext, requestMock.body);
+    await updatePackagePolicyCspRules(cspContext, packagePolicyMock, requestMock.body.rules);
 
     expect(packagePolicyServiceMock.update.mock.calls[0][4]).toMatchObject({
       user: cspContext.user,
