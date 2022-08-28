@@ -61,7 +61,7 @@ const TorqActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem>
           <UseField
-            path="config.webhook_integration_url"
+            path="config.webhookIntegrationUrl"
             config={{
               label: i18n.URL_LABEL,
               validations: [

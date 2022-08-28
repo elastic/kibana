@@ -13,12 +13,12 @@ import { act, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 describe('TorqActionConnectorFields renders', () => {
-  test('all connector fields is rendered', async () => {
+  test('all connector fields are rendered', async () => {
     const actionConnector = {
       actionTypeId: '.torq',
       name: 'torq',
       config: {
-        webhook_integration_url: 'https://hooks.torq.io/v1/webhooks/fjdkljfekdfjlsa',
+        webhookIntegrationUrl: 'https://hooks.torq.io/v1/webhooks/fjdkljfekdfjlsa',
       },
       secrets: {
         token: 'testtoken',
@@ -48,7 +48,7 @@ describe('TorqActionConnectorFields renders', () => {
       actionTypeId: '.torq',
       name: 'torq',
       config: {
-        webhook_integration_url: 'https://hooks.torq.io/v1/webhooks/fjdksla',
+        webhookIntegrationUrl: 'https://hooks.torq.io/v1/webhooks/fjdksla',
       },
       secrets: {
         token: 'testtoken',
@@ -80,7 +80,7 @@ describe('TorqActionConnectorFields renders', () => {
           actionTypeId: '.torq',
           name: 'torq',
           config: {
-            webhook_integration_url: 'https://hooks.torq.io/v1/webhooks/fjdksla',
+            webhookIntegrationUrl: 'https://hooks.torq.io/v1/webhooks/fjdksla',
           },
           secrets: {
             token: 'testtoken',
@@ -123,7 +123,7 @@ describe('TorqActionConnectorFields renders', () => {
       const connector = {
         ...actionConnector,
         config: {
-          webhook_integration_url: '',
+          webhookIntegrationUrl: '',
         },
       };
 
@@ -151,7 +151,7 @@ describe('TorqActionConnectorFields renders', () => {
       const connector = {
         ...actionConnector,
         config: {
-          webhook_integration_url: 'https://test.com',
+          webhookIntegrationUrl: 'https://test.com',
         },
       };
 

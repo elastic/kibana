@@ -52,7 +52,7 @@ export const TORQ_TOKEN_LABEL = i18n.translate(
 export const BODY_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredWebhookBodyText',
   {
-    defaultMessage: 'Torq webhook authentication header secret',
+    defaultMessage: 'Body is required.',
   }
 );
 
@@ -87,7 +87,7 @@ export const URL_HELP_TEXT = i18n.translate(
 );
 
 export const HOW_TO_TEXT = i18n.translate(
-  'xpack.triggersActionsUI.components.torq.torqActionConnectorFields.calloutTitle', // TODO: translations
+  'xpack.triggersActionsUI.components.torq.torqActionConnectorFields.calloutTitle',
   {
     defaultMessage:
       'Create an Elastic Security integration on Torq, and then come back and paste the endpoint URL and token generated for your integration.',

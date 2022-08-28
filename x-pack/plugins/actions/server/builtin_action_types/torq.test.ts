@@ -83,7 +83,7 @@ describe('config validation', () => {
 
   test('config validation passes with an appropriate endpoint', () => {
     const config: Record<string, string | boolean> = {
-      webhook_integration_url: 'https://hooks.torq.io/v1/test',
+      webhookIntegrationUrl: 'https://hooks.torq.io/v1/test',
     };
     expect(validateConfig(actionType, config)).toEqual({
       ...defaultValues,
@@ -91,31 +91,22 @@ describe('config validation', () => {
     });
   });
 
-  test('should validate and throw error when an invalid URL is provided', () => {
-    const config: Record<string, string> = {
-      webhook_integration_url: 'iamnotavalidurl',
-    };
-    expect(() => {
-      validateConfig(actionType, config);
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: error configuring send to Torq action: unable to parse url: TypeError: Invalid URL: iamnotavalidurl"`
-    );
-  });
-
-  test('config validation failed when a url is invalid', () => {
-    const config: Record<string, string> = {
-      webhook_integration_url: 'example.com/do-something',
-    };
-    expect(() => {
-      validateConfig(actionType, config);
-    }).toThrowErrorMatchingInlineSnapshot(
-      '"error validating action type config: error configuring send to Torq action: unable to parse url: TypeError: Invalid URL: example.com/do-something"'
-    );
+  ['iamnotavalidurl', 'example.com/do-something'].forEach((url) => {
+    test('should validate and throw error when an invalid URL is provided', () => {
+      const config: Record<string, string> = {
+        webhookIntegrationUrl: url,
+      };
+      expect(() => {
+        validateConfig(actionType, config);
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"error validating action type config: error configuring send to Torq action: unable to parse url: TypeError: Invalid URL: ${url}"`
+      );
+    });
   });
 
   test('fails when URL is not a Torq webhook endpoint', () => {
     const config: Record<string, string> = {
-      webhook_integration_url: 'http://mylisteningserver:9200/endpoint',
+      webhookIntegrationUrl: 'http://mylisteningserver:9200/endpoint',
     };
     expect(() => {
       validateConfig(actionType, config);
@@ -124,7 +115,7 @@ describe('config validation', () => {
     );
   });
 
-  test('config validation returns an error if the specified URL isnt added to allowedHosts', () => {
+  test("config validation returns an error if the specified URL isn't added to allowedHosts", () => {
     actionType = getActionType({
       logger: mockedLogger,
       configurationUtilities: {
@@ -138,7 +129,7 @@ describe('config validation', () => {
     // any for testing
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const config: Record<string, any> = {
-      webhook_integration_url: 'http://mylisteningserver.com:9200/endpoint',
+      webhookIntegrationUrl: 'http://mylisteningserver.com:9200/endpoint',
     };
 
     expect(() => {
@@ -150,14 +141,9 @@ describe('config validation', () => {
 });
 
 describe('params validation', () => {
-  test('param validation passes when no fields are provided as none are required', () => {
-    const params: Record<string, string> = {};
-    expect(validateParams(actionType, params)).toEqual({});
-  });
-
   test('params validation passes when a valid body is provided', () => {
     const params: Record<string, string> = {
-      body: 'count: {{ctx.payload.hits.total}}',
+      body: '{"message": "Hello"}',
     };
     expect(validateParams(actionType, params)).toEqual({
       ...params,
@@ -187,7 +173,7 @@ describe('execute()', () => {
 
   test('execute with token happy flow', async () => {
     const config: ActionTypeConfigType = {
-      webhook_integration_url: 'https://hooks.torq.io/v1/test',
+      webhookIntegrationUrl: 'https://hooks.torq.io/v1/test',
     };
     await actionType.executor({
       actionId: 'some-id',

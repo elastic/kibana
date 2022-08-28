@@ -24,7 +24,6 @@ import {
   SecurityConnectorFeatureId,
 } from '../../common';
 
-
 export type TorqActionType = ActionType<
   ActionTypeConfigType,
   ActionTypeSecretsType,
@@ -38,7 +37,7 @@ export type TorqActionTypeExecutorOptions = ActionTypeExecutorOptions<
 >;
 
 const configSchemaProps = {
-  webhook_integration_url: schema.string(),
+  webhookIntegrationUrl: schema.string(),
 };
 const ConfigSchema = schema.object(configSchemaProps);
 export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
@@ -102,7 +101,7 @@ function renderParameterTemplates(
 ): ActionParamsType {
   if (!params.body) return params;
   return {
-    body: renderMustacheString(params.body, variables, 'json'), // TODO: add default template here
+    body: renderMustacheString(params.body, variables, 'json'),
   };
 }
 
@@ -110,7 +109,7 @@ function validateActionTypeConfig(
   configurationUtilities: ActionsConfigurationUtilities,
   configObject: ActionTypeConfigType
 ) {
-  const configuredUrl = configObject.webhook_integration_url;
+  const configuredUrl = configObject.webhookIntegrationUrl;
   let configureUrlObj: URL;
   try {
     configureUrlObj = new URL(configuredUrl);
@@ -151,7 +150,7 @@ export async function executor(
   execOptions: TorqActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult<unknown>> {
   const actionId = execOptions.actionId;
-  const { webhook_integration_url } = execOptions.config;
+  const { webhookIntegrationUrl } = execOptions.config;
   const { body: data } = execOptions.params;
 
   const secrets: ActionTypeSecretsType = execOptions.secrets;
@@ -161,7 +160,7 @@ export async function executor(
   const result: Result<AxiosResponse, AxiosError<{ message: string }>> = await promiseResult(
     request({
       axios: axiosInstance,
-      url: webhook_integration_url,
+      url: webhookIntegrationUrl,
       method: 'post',
       headers: {
         'X-Torq-Token': token || '',
