@@ -10,6 +10,10 @@ import { ActionTypeModel, GenericValidationResult } from '../../../../types';
 import { TorqActionParams, TorqConfig, TorqSecrets } from '../types';
 import * as i18n from './translations';
 
+function replaceReferencesWithNumbers(body: string) {
+  return body.replace(/\{\{[.\w]+\}\}/gm, "42");
+}
+
 export function getActionType(): ActionTypeModel<TorqConfig, TorqSecrets, TorqActionParams> {
   return {
     id: '.torq',
@@ -27,6 +31,11 @@ export function getActionType(): ActionTypeModel<TorqConfig, TorqSecrets, TorqAc
       validationResult.errors = errors;
       if (!actionParams.body?.length) {
         errors.body.push(translations.BODY_REQUIRED);
+      }
+      try {
+        JSON.parse(replaceReferencesWithNumbers(actionParams.body || ""));
+      } catch (e) {
+        errors.body.push(translations.INVALID_JSON);
       }
       return validationResult;
     },

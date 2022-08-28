@@ -56,6 +56,13 @@ export const BODY_REQUIRED = i18n.translate(
   }
 );
 
+export const INVALID_JSON = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.error.requireValidJSONBody',
+  {
+    defaultMessage: 'Body must be a valid JSON.',
+  }
+);
+
 export const TORQ_SELECT_MESSAGE = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.torqAction.selectMessageText',
   {
