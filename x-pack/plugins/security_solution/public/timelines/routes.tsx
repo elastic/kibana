@@ -12,16 +12,19 @@ import { TIMELINES_PATH } from '../../common/constants';
 
 import type { SecuritySubPluginRoutes } from '../app/types';
 import { SecurityPageName } from '../app/types';
+import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 
 const TimelinesRoutes = () => (
-  <TrackApplicationView viewId={SecurityPageName.timelines}>
-    <Timelines />
-  </TrackApplicationView>
+  <PluginTemplateWrapper>
+    <TrackApplicationView viewId={SecurityPageName.timelines}>
+      <Timelines />
+    </TrackApplicationView>
+  </PluginTemplateWrapper>
 );
 
 export const routes: SecuritySubPluginRoutes = [
   {
     path: TIMELINES_PATH,
-    render: TimelinesRoutes,
+    component: TimelinesRoutes,
   },
 ];

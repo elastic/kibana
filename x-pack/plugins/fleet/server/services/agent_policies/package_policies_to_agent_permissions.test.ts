@@ -31,8 +31,10 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
     expect(permissions).toBeUndefined();
   });
 
-  it('Throw an error for string package policies', async () => {
-    await expect(() => storedPackagePoliciesToAgentPermissions(soClient, ['foo'])).rejects.toThrow(
+  it('Throw an error if package policies is not an array', async () => {
+    await expect(() =>
+      storedPackagePoliciesToAgentPermissions(soClient, undefined)
+    ).rejects.toThrow(
       /storedPackagePoliciesToAgentPermissions should be called with a PackagePolicy/
     );
   });
@@ -143,7 +145,6 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
         updated_by: '',
         revision: 1,
         policy_id: '',
-        output_id: '',
       },
     ];
 
@@ -238,7 +239,6 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
         updated_by: '',
         revision: 1,
         policy_id: '',
-        output_id: '',
       },
     ];
 
@@ -338,7 +338,6 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
         updated_by: '',
         revision: 1,
         policy_id: '',
-        output_id: '',
       },
     ];
 
@@ -447,7 +446,6 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
         updated_by: '',
         revision: 1,
         policy_id: '',
-        output_id: '',
       },
     ];
 

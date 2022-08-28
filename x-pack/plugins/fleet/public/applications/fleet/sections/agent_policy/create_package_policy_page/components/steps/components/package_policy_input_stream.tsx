@@ -132,7 +132,7 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
                 <Fragment>
                   <EuiSpacer size="s" />
                   <EuiText size="s" color="subdued">
-                    <ReactMarkdown source={packageInputStream.description} />
+                    <ReactMarkdown>{packageInputStream.description}</ReactMarkdown>
                   </EuiText>
                 </Fragment>
               ) : null}
