@@ -8,9 +8,9 @@
 import React, { memo, useCallback, useState } from 'react';
 import { EuiButton, EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EndpointResponderExtensionComponentProps } from './types';
-import { ResponseActionsList } from '../../pages/response_actions/view/response_actions_list';
-import { UX_MESSAGES } from '../../pages/response_actions/translations';
+import type { EndpointResponderExtensionComponentProps } from './types';
+import { ResponseActionsLog } from '../endpoint_response_actions_list/response_actions_log';
+import { UX_MESSAGES } from '../endpoint_response_actions_list/translations';
 
 export const ActionLogButton = memo<EndpointResponderExtensionComponentProps>((props) => {
   const [showActionLogFlyout, setShowActionLogFlyout] = useState<boolean>(false);
@@ -22,21 +22,31 @@ export const ActionLogButton = memo<EndpointResponderExtensionComponentProps>((p
 
   return (
     <>
-      <EuiButton onClick={toggleActionLog} disabled={showActionLogFlyout} iconType="list">
+      <EuiButton
+        onClick={toggleActionLog}
+        disabled={showActionLogFlyout}
+        iconType="list"
+        data-test-subj="responderShowActionLogButton"
+      >
         <FormattedMessage
           id="xpack.securitySolution.actionLogButton.label"
-          defaultMessage="Action log"
+          defaultMessage="Actions log"
         />
       </EuiButton>
       {showActionLogFlyout && (
-        <EuiFlyout onClose={toggleActionLog} size="l">
-          <EuiFlyoutHeader>
-            <EuiTitle size="s">
-              <h2>{UX_MESSAGES.flyoutTitle(props.meta.endpoint.host.hostname)}</h2>
+        <EuiFlyout
+          onClose={toggleActionLog}
+          size="m"
+          paddingSize="l"
+          data-test-subj="responderActionLogFlyout"
+        >
+          <EuiFlyoutHeader hasBorder>
+            <EuiTitle size="m">
+              <h1>{UX_MESSAGES.flyoutTitle(props.meta.endpoint.host.hostname)}</h1>
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
-            <ResponseActionsList hideHeader agentIds={props.meta.endpoint.agent.id} />
+            <ResponseActionsLog agentIds={props.meta.endpoint.agent.id} />
           </EuiFlyoutBody>
         </EuiFlyout>
       )}

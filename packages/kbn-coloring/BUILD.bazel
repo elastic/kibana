@@ -41,7 +41,6 @@ NPM_MODULE_EXTRA_FILES = [
 RUNTIME_DEPS = [
   "//packages/kbn-i18n",
   "//packages/kbn-i18n-react",
-  "//packages/kbn-shared-ux-storybook",
   "//packages/kbn-interpreter",
   "//packages/kbn-utility-types",
   "//packages/kbn-shared-ux-utility",
@@ -65,7 +64,6 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "//packages/kbn-i18n:npm_module_types",
   "//packages/kbn-i18n-react:npm_module_types",
-  "//packages/kbn-shared-ux-storybook:npm_module_types",
   "//packages/kbn-interpreter:npm_module_types",
   "//packages/kbn-utility-types:npm_module_types",
   "//packages/kbn-shared-ux-utility:npm_module_types",
@@ -81,12 +79,14 @@ jsts_transpiler(
   name = "target_node",
   srcs = SRCS,
   build_pkg_name = package_name(),
+  root_input_dir = "src",
 )
 
 jsts_transpiler(
   name = "target_web",
   srcs = SRCS,
   build_pkg_name = package_name(),
+  root_input_dir = "src",
   web = True,
   additional_args = [
     "--copy-files",
@@ -109,6 +109,7 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
+  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
   root_dir = "src",

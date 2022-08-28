@@ -61,7 +61,10 @@ export const callEnterpriseSearchConfigAPI = async ({
   try {
     const enterpriseSearchUrl = encodeURI(`${config.host}${ENDPOINT}`);
     const options = {
-      headers: { Authorization: request.headers.authorization as string },
+      headers: {
+        Authorization: request.headers.authorization as string,
+        ...config.customHeaders,
+      },
       signal: controller.signal,
       agent: entSearchHttpAgent.getHttpAgent(),
     };

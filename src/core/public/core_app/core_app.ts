@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { UnregisterCallback } from 'history';
+import type { UnregisterCallback } from 'history';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import type { HttpSetup, HttpStart } from '@kbn/core-http-browser';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { NotificationsSetup, NotificationsStart } from '@kbn/core-notifications-browser';
 import {
-  InternalApplicationSetup,
-  InternalApplicationStart,
+  type InternalApplicationSetup,
+  type InternalApplicationStart,
   AppNavLinkStatus,
-  AppMountParameters,
+  type AppMountParameters,
 } from '../application';
-import type { HttpSetup, HttpStart } from '../http';
-import type { NotificationsSetup, NotificationsStart } from '../notifications';
-import type { IUiSettingsClient } from '../ui_settings';
 import {
   renderApp as renderErrorApp,
   setupPublicBaseUrlConfigWarning,

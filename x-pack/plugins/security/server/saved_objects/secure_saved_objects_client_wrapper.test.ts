@@ -11,7 +11,7 @@ import type {
   EcsEventOutcome,
   SavedObject,
   SavedObjectReferenceWithContext,
-  SavedObjectsClientContract,
+  SavedObjectsErrorHelpers,
   SavedObjectsResolveResponse,
   SavedObjectsUpdateObjectsSpacesResponseObject,
 } from '@kbn/core/server';
@@ -23,11 +23,12 @@ import { Actions } from '../authorization';
 import type { SavedObjectActions } from '../authorization/actions/saved_object';
 import { SecureSavedObjectsClientWrapper } from './secure_saved_objects_client_wrapper';
 
-jest.mock('@kbn/core/server/saved_objects/service/lib/utils', () => {
-  const { SavedObjectsUtils } = jest.requireActual(
-    '@kbn/core/server/saved_objects/service/lib/utils'
+jest.mock('@kbn/core-saved-objects-utils-server', () => {
+  const { SavedObjectsUtils, ...actual } = jest.requireActual(
+    '@kbn/core-saved-objects-utils-server'
   );
   return {
+    ...actual,
     SavedObjectsUtils: {
       ...SavedObjectsUtils,
       createEmptyFindResponse: SavedObjectsUtils.createEmptyFindResponse,
@@ -54,7 +55,7 @@ const createSecureSavedObjectsClientWrapperOptions = () => {
     decorateGeneralError: jest.fn().mockReturnValue(generalError),
     createBadRequestError: jest.fn().mockImplementation((message) => new Error(message)),
     isNotFoundError: jest.fn().mockReturnValue(false),
-  } as unknown as jest.Mocked<SavedObjectsClientContract['errors']>;
+  } as unknown as jest.Mocked<typeof SavedObjectsErrorHelpers>;
   const getSpacesService = jest.fn().mockReturnValue({
     namespaceToSpaceId: (namespace?: string) => (namespace ? namespace : 'default'),
   });

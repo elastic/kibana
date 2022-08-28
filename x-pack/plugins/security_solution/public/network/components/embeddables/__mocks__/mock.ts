@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IndexPatternMapping } from '../types';
-import { IndexPatternSavedObject } from '../../../../common/hooks/types';
+import type { IndexPatternMapping } from '../types';
+import type { IndexPatternSavedObject } from '../../../../common/hooks/types';
 import { LAYER_TYPE } from '@kbn/maps-plugin/common';
 
 export const mockIndexPatternIds: IndexPatternMapping[] = [

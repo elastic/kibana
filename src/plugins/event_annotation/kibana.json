@@ -8,7 +8,8 @@
     "common"
   ],
   "requiredPlugins": [
-    "expressions"
+    "expressions",
+    "data"
   ],
   "owner": {
     "name": "Vis Editors",

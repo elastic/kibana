@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { RequestHandler, RouteConfig, KibanaRequest } from '@kbn/core/server';
+import type { RequestHandler, RouteConfig, KibanaRequest } from '@kbn/core/server';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { requestContextMock } from './request_context';
 import { responseMock as responseFactoryMock } from './response_factory';
 import { requestMock } from '.';
 import { responseAdapter } from './test_adapters';
-import { SecuritySolutionRequestHandlerContext } from '../../../../types';
+import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
 
 interface Route {
   config: RouteConfig<unknown, unknown, unknown, 'get' | 'post' | 'delete' | 'patch' | 'put'>;

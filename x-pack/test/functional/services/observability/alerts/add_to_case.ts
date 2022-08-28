@@ -55,7 +55,7 @@ export function ObservabilityAlertsAddToCaseProvider({ getService }: FtrProvider
     return await (await testSubjects.find('euiFlyoutCloseButton')).click();
   };
 
-  const getAddtoExistingCaseModalOrFail = async () => {
+  const getAddToExistingCaseModalOrFail = async () => {
     return await testSubjects.existOrFail(SELECT_CASE_MODAL);
   };
 
@@ -70,6 +70,6 @@ export function ObservabilityAlertsAddToCaseProvider({ getService }: FtrProvider
     closeFlyout,
     addToNewCaseButtonClick,
     addToExistingCaseButtonClick,
-    getAddtoExistingCaseModalOrFail,
+    getAddToExistingCaseModalOrFail,
   };
 }

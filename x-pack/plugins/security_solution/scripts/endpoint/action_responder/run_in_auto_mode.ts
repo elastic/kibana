@@ -8,8 +8,9 @@
 import type { RunContext } from '@kbn/dev-cli-runner';
 import { set } from 'lodash';
 import { SUPPORTED_TOKENS } from './constants';
-import { ActionDetails } from '../../../common/endpoint/types';
-import { createRuntimeServices, RuntimeServices } from '../common/stack_services';
+import type { ActionDetails } from '../../../common/endpoint/types';
+import type { RuntimeServices } from '../common/stack_services';
+import { createRuntimeServices } from '../common/stack_services';
 
 import {
   fetchEndpointActionList,

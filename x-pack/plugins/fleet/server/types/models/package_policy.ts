@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { isValidNamespace } from '../../../common';
+import { isValidNamespace } from '../../../common/services';
 
 export const NamespaceSchema = schema.string({
   minLength: 1,
@@ -89,7 +89,8 @@ const PackagePolicyBaseSchema = {
       version: schema.string(),
     })
   ),
-  output_id: schema.string(),
+  // Deprecated TODO create remove issue
+  output_id: schema.maybe(schema.string()),
   inputs: schema.arrayOf(schema.object(PackagePolicyInputsSchema)),
   vars: schema.maybe(ConfigRecordSchema),
 };
@@ -112,6 +113,7 @@ const CreatePackagePolicyProps = {
       version: schema.string(),
     })
   ),
+  // Deprecated TODO create remove issue
   output_id: schema.maybe(schema.string()),
   inputs: schema.arrayOf(
     schema.object({

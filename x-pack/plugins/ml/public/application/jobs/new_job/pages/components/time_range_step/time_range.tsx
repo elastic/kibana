@@ -79,10 +79,10 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
   }, [jobCreatorUpdated]);
 
   function fullTimeRangeCallback(range: GetTimeFieldRangeResponse) {
-    if (range.start.epoch !== null && range.end.epoch !== null) {
+    if (range.start !== null && range.end !== null) {
       setTimeRange({
-        start: range.start.epoch,
-        end: range.end.epoch,
+        start: range.start,
+        end: range.end,
       });
     } else {
       const { toasts } = services.notifications;

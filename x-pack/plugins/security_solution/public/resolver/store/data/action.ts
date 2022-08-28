@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import {
+import type {
   NewResolverTree,
   SafeEndpointEvent,
   SafeResolverEvent,
   ResolverSchema,
 } from '../../../../common/endpoint/types';
-import { TreeFetcherParameters, PanelViewAndParameters } from '../../types';
+import type { TreeFetcherParameters, PanelViewAndParameters } from '../../types';
 
 interface ServerReturnedResolverData {
   readonly type: 'serverReturnedResolverData';

@@ -33,7 +33,7 @@ import {
 export interface ReferenceLineAnnotationConfig {
   id: string;
   name?: string;
-  value: number;
+  value?: number;
   nextValue?: number;
   icon?: AvailableReferenceLineIcon;
   lineWidth?: number;
@@ -103,7 +103,7 @@ export const ReferenceLineAnnotations: FC<Props> = ({
   const dataValues = {
     dataValue: value,
     header: name,
-    details: formatter?.convert(value) || value.toString(),
+    details: formatter?.convert(value) || value?.toString(),
   };
 
   const line = (

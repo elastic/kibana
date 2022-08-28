@@ -7,7 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { SuccessfulRunResult } from '@kbn/task-manager-plugin/server/task';
+import type { SuccessfulRunResult } from '@kbn/task-manager-plugin/server/task';
 import { SecurityTelemetryTask } from './task';
 import {
   createMockTaskInstance,

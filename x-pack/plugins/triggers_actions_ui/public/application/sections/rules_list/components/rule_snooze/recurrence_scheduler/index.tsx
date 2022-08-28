@@ -8,12 +8,11 @@
 import {
   EuiButtonGroup,
   EuiDatePicker,
-  EuiFieldNumber,
   EuiFormControlLayout,
   EuiFormRow,
   EuiHorizontalRule,
-  EuiPanel,
   EuiSelect,
+  EuiSplitPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
@@ -21,6 +20,7 @@ import { Moment } from 'moment';
 import React from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
+import { NumberField } from '../helpers/number_field';
 import { RRuleFrequency, RecurrenceSchedule } from '../../../../../../types';
 import { i18nMonthDayDate } from '../../../../../lib/i18n_month_day_date';
 import {
@@ -37,6 +37,8 @@ import {
   recurrenceSummary,
 } from './helpers';
 import { i18nNthWeekday } from './translations';
+
+import './recurrence_scheduler.scss';
 
 interface ComponentOpts {
   startDate: Moment | null;
@@ -56,7 +58,7 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
   const [recurrenceEnds, setRecurrenceEnds] = useState('never');
 
   const [customFrequency, setCustomFrequency] = useState<CustomFrequencyState>({
-    freq: RRuleFrequency.DAILY,
+    freq: RRuleFrequency.WEEKLY,
     interval: 1,
     byweekday: [],
     bymonthday: [],
@@ -66,14 +68,19 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
   const [recurrenceEndDate, setRecurrenceEndDate] = useState(endDate);
   const [occurrences, setOccurrrences] = useState(1);
 
-  const disableDailyOption = useMemo(() => {
-    if (!startDate || !endDate) return false;
-    return Math.abs(startDate.diff(endDate, 'hours')) >= 24;
+  const snoozeDurationInDays = useMemo(() => {
+    if (!startDate || !endDate) return 0;
+    return Math.abs(startDate.diff(endDate, 'days'));
   }, [startDate, endDate]);
 
+  const disableDailyOption = useMemo(() => {
+    return snoozeDurationInDays > 0;
+  }, [snoozeDurationInDays]);
+
   useEffect(() => {
-    if (disableDailyOption && frequency === RRuleFrequency.DAILY)
+    if (disableDailyOption && frequency === RRuleFrequency.DAILY) {
       setFrequency(RRuleFrequency.WEEKLY);
+    }
   }, [disableDailyOption, frequency]);
 
   useEffect(() => {
@@ -173,7 +180,7 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
           }
         : {};
     if (frequency === 'CUSTOM') {
-      return { ...customFrequency, ...recurrenceEndProps };
+      return { ...rewriteCustomFrequency(customFrequency), ...recurrenceEndProps };
     }
     return {
       freq: frequency,
@@ -187,8 +194,8 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
   }, [compiledRecurrenceSchedule, onChange]);
 
   return (
-    <EuiPanel hasShadow={false} hasBorder={true} paddingSize="none">
-      <div style={{ padding: '16px', backgroundColor: '#f8fafd' }}>
+    <EuiSplitPanel.Outer hasShadow={false} hasBorder={true}>
+      <EuiSplitPanel.Inner color="subdued" className="ramRecurrenceScheduler">
         <EuiFormRow
           display="columnCompressed"
           style={{ alignItems: 'center' }}
@@ -211,6 +218,7 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
             startDate={startDate}
             onChange={setCustomFrequency}
             initialState={customFrequency}
+            minimumRecurrenceDays={snoozeDurationInDays + 1}
           />
         )}
         <EuiFormRow
@@ -268,23 +276,31 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
                 }
               )}
             >
-              <EuiFieldNumber
+              <NumberField
                 compressed
                 min={1}
                 value={occurrences}
-                onChange={(e) => setOccurrrences(Number(e.target.value))}
+                onChange={(value) => setOccurrrences(Number(value))}
               />
             </EuiFormControlLayout>
           </EuiFormRow>
         )}
-      </div>
+      </EuiSplitPanel.Inner>
       <EuiHorizontalRule margin="none" />
-      <div style={{ padding: '16px' }}>
+      <EuiSplitPanel.Inner style={{ maxWidth: '400px' }}>
         {i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.repeatsSummary', {
           defaultMessage: 'Repeats {summary}',
           values: { summary: recurrenceSummary(compiledRecurrenceSchedule) },
         })}
-      </div>
-    </EuiPanel>
+      </EuiSplitPanel.Inner>
+    </EuiSplitPanel.Outer>
   );
+};
+
+const rewriteCustomFrequency = (customFreq: CustomFrequencyState) => {
+  const result: RecurrenceSchedule = { ...customFreq };
+  if (result.byweekday?.length === 0) delete result.byweekday;
+  if (result.bymonth?.length === 0) delete result.bymonth;
+  if (result.bymonthday?.length === 0) delete result.bymonthday;
+  return result;
 };

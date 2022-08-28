@@ -11,30 +11,30 @@ import { useDispatch } from 'react-redux';
 import type { SetEventsDeleted, SetEventsLoading } from '@kbn/timelines-plugin/common';
 import { StatefulEventContext } from '@kbn/timelines-plugin/public';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
-import {
+import type {
   ColumnHeaderOptions,
   CellValueElementProps,
   ControlColumnProps,
   RowRenderer,
   TimelineExpandedDetailType,
-  TimelineId,
-  TimelineTabs,
 } from '../../../../../../common/types/timeline';
-import {
+import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
+import type {
   TimelineItem,
   TimelineNonEcsData,
 } from '../../../../../../common/search_strategy/timeline';
-import { OnRowSelected } from '../../events';
+import type { OnRowSelected } from '../../events';
 import { STATEFUL_EVENT_CSS_CLASS_NAME } from '../../helpers';
 import { EventsTrGroup, EventsTrSupplement, EventsTrSupplementContainer } from '../../styles';
 import { isEventBuildingBlockType, getEventType, isEvenEqlSequence } from '../helpers';
 import { NoteCards } from '../../../notes/note_cards';
 import { useEventDetailsWidthContext } from '../../../../../common/components/events_viewer/event_details_width_context';
 import { EventColumnView } from './event_column_view';
-import { appSelectors, inputsModel } from '../../../../../common/store';
+import type { inputsModel } from '../../../../../common/store';
+import { appSelectors } from '../../../../../common/store';
 import { timelineActions, timelineSelectors } from '../../../../store/timeline';
 import { activeTimeline } from '../../../../containers/active_timeline_context';
-import { TimelineResultNote } from '../../../open_timeline/types';
+import type { TimelineResultNote } from '../../../open_timeline/types';
 import { getRowRenderer } from '../renderers/get_row_renderer';
 import { StatefulRowRenderer } from './stateful_row_renderer';
 import { NOTES_BUTTON_CLASS_NAME } from '../../properties/helpers';

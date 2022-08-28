@@ -9,6 +9,7 @@
 import { PluginServices } from '@kbn/presentation-util-plugin/public';
 import { ControlsDataViewsService } from './data_views';
 import { ControlsOverlaysService } from './overlays';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { registry as stubRegistry } from './stub';
 import { ControlsPluginStart } from '../types';
 import { ControlsDataService } from './data';
@@ -17,6 +18,7 @@ import { ControlsService } from './controls';
 import { ControlsHTTPService } from './http';
 import { ControlsOptionsListService } from './options_list';
 import { ControlsSettingsService } from './settings';
+import { ControlsThemeService } from './theme';
 
 export interface ControlsServices {
   // dependency services
@@ -26,6 +28,7 @@ export interface ControlsServices {
   unifiedSearch: ControlsUnifiedSearchService;
   http: ControlsHTTPService;
   settings: ControlsSettingsService;
+  theme: ControlsThemeService;
 
   // controls plugin's own services
   controls: ControlsService;

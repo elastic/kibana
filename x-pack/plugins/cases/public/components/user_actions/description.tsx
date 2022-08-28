@@ -27,7 +27,6 @@ type GetDescriptionUserActionArgs = Pick<
   | 'caseData'
   | 'commentRefs'
   | 'manageMarkdownEditIds'
-  | 'userCanCrud'
   | 'handleManageMarkdownEditId'
   | 'handleManageQuote'
 > &
@@ -38,7 +37,6 @@ export const getDescriptionUserAction = ({
   commentRefs,
   manageMarkdownEditIds,
   isLoadingDescription,
-  userCanCrud,
   onUpdateField,
   handleManageMarkdownEditId,
   handleManageQuote,
@@ -67,7 +65,7 @@ export const getDescriptionUserAction = ({
         onChangeEditable={handleManageMarkdownEditId}
       />
     ),
-    timelineIcon: (
+    timelineAvatar: (
       <UserActionAvatar
         username={caseData.createdBy.username}
         fullName={caseData.createdBy.fullName}
@@ -85,7 +83,6 @@ export const getDescriptionUserAction = ({
         isLoading={isLoadingDescription}
         onEdit={handleManageMarkdownEditId.bind(null, DESCRIPTION_ID)}
         onQuote={handleManageQuote.bind(null, caseData.description)}
-        userCanCrud={userCanCrud}
       />
     ),
   };

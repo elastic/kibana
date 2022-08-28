@@ -107,10 +107,7 @@ const ExplorerPage: FC<ExplorerPageProps> = ({
       <EuiPageHeaderSection style={{ width: '100%' }}>
         <JobSelector {...jobSelectorProps} />
 
-        {noInfluencersConfigured === false &&
-        influencers !== undefined &&
-        indexPattern &&
-        updateLanguage ? (
+        {indexPattern && updateLanguage ? (
           <>
             <ExplorerQueryBar
               filterActive={!!filterActive}
@@ -569,21 +566,21 @@ export const Explorer: FC<ExplorerUIProps> = ({
 
           <EuiSpacer size="m" />
 
-          <div className="euiText explorer-charts">
-            {showCharts ? (
-              <ExplorerChartsContainer
-                {...{
-                  ...chartsData,
-                  severity,
-                  timefilter,
-                  mlLocator,
-                  timeBuckets,
-                  onSelectEntity: applyFilter,
-                  chartsService,
-                }}
-              />
-            ) : null}
-          </div>
+          {showCharts ? (
+            <ExplorerChartsContainer
+              {...{
+                ...chartsData,
+                severity,
+                timefilter,
+                mlLocator,
+                timeBuckets,
+                onSelectEntity: applyFilter,
+                chartsService,
+              }}
+            />
+          ) : null}
+
+          <EuiSpacer size="m" />
 
           <AnomaliesTable bounds={bounds} tableData={tableData} influencerFilter={applyFilter} />
         </EuiPanel>
@@ -602,6 +599,8 @@ export const Explorer: FC<ExplorerUIProps> = ({
       queryString={queryString}
       updateLanguage={updateLanguage}
     >
+      <EuiSpacer size={'m'} />
+
       {noInfluencersConfigured ? (
         <EuiFlexGroup gutterSize={'s'}>
           <EuiFlexItem grow={false}>
@@ -618,8 +617,6 @@ export const Explorer: FC<ExplorerUIProps> = ({
         </EuiFlexGroup>
       ) : (
         <div>
-          <EuiSpacer size={'m'} />
-
           <EuiResizableContainer
             direction={isMobile ? 'vertical' : 'horizontal'}
             onPanelWidthChange={onPanelWidthChange}

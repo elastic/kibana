@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Datatable } from '@kbn/expressions-plugin';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import type { DatasourcePublicAPI } from '../../types';
 
 /**
@@ -45,7 +45,7 @@ export function validateAxisDomain(extents?: { lowerBound?: number; upperBound?:
  * @returns boolean
  */
 export function hasNumericHistogramDimension(
-  datasourceLayer: DatasourcePublicAPI,
+  datasourceLayer: DatasourcePublicAPI | undefined,
   columnId?: string
 ) {
   if (!columnId) {

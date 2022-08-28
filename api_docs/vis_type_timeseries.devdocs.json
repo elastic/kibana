@@ -128,13 +128,7 @@
               "text": "DataRequestHandlerContext"
             },
             ", fakeRequest: ",
-            {
-              "pluginId": "core",
-              "scope": "server",
-              "docId": "kibCoreHttpPluginApi",
-              "section": "def-server.KibanaRequest",
-              "text": "KibanaRequest"
-            },
+            "KibanaRequest",
             "<unknown, unknown, unknown, any>, options: any) => Promise<",
             "TimeseriesVisData",
             ">"
@@ -170,13 +164,7 @@
               "label": "fakeRequest",
               "description": [],
               "signature": [
-                {
-                  "pluginId": "core",
-                  "scope": "server",
-                  "docId": "kibCoreHttpPluginApi",
-                  "section": "def-server.KibanaRequest",
-                  "text": "KibanaRequest"
-                },
+                "KibanaRequest",
                 "<unknown, unknown, unknown, any>"
               ],
               "path": "src/plugins/vis_types/timeseries/server/plugin.ts",

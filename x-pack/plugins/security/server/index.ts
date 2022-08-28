@@ -35,6 +35,13 @@ export type { SecurityPluginSetup, SecurityPluginStart };
 export type { AuthenticatedUser } from '../common/model';
 export { ROUTE_TAG_CAN_REDIRECT } from './routes/tags';
 export type { AuditServiceSetup } from './audit';
+export type {
+  UserProfileServiceStart,
+  UserProfileBulkGetParams,
+  UserProfileSuggestParams,
+  UserProfileRequiredPrivileges,
+  UserProfileGetCurrentParams,
+} from './user_profile';
 
 export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {
   schema: ConfigSchema,

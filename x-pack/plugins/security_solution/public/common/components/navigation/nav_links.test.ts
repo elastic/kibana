@@ -7,10 +7,10 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { SecurityPageName } from '../../../app/types';
-import { AppLinkItems } from '../../links';
+import type { AppLinkItems } from '../../links';
 import { TestProviders } from '../../mock';
 import { useAppNavLinks, useAppRootNavLink } from './nav_links';
-import { NavLinkItem } from './types';
+import type { NavLinkItem } from './types';
 
 const mockNavLinks: AppLinkItems = [
   {

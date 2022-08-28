@@ -26,7 +26,7 @@ Slicing up components into smaller chunks, designing clear interfaces for those 
 
 State management tools are most powerful when used to coordinate state across an entire application, or large slices of that application. To do that well, state needs to be shared and it needs to be clear where in the existing state to find what information. We do this by separating API data from component data.
 
-This means API interactions and their data should live in their own logic files, and the resulting data and API status should be imported by other logic files or directly by components consuming that data. Those API logic files should contain all interactions with APIs, and the current status of those API requests. We have a util function to help you create those, located in [create_api_logic.ts](public/applications/shared/api_logic/create_api_logic.ts). You can grab the `status`, `data` and `error` values from any API created with that util. And you can listen to the `initiateCall`, `apiSuccess`, `apiError` and `apiReset` actions in other listeners.
+This means API interactions and their data should live in their own logic files, and the resulting data and API status should be imported by other logic files or directly by components consuming that data. Those API logic files should contain all interactions with APIs, and the current status of those API requests. We have a util function to help you create those, located in [create_api_logic.ts](public/applications/shared/api_logic/create_api_logic.ts). You can grab the `status`, `data` and `error` values from any API created with that util. And you can listen to the `makeRequest`, `apiSuccess`, `apiError` and `apiReset` actions in other listeners.
 
 You will need to provide a function that actually makes the api call, as well as the logic path. The function will need to accept and return a single object, not separate values.
 
@@ -73,7 +73,7 @@ export const AddCustomSourceLogic = kea<
   MakeLogicType<AddCustomSourceValues, AddCustomSourceActions, AddCustomSourceProps>
 >({
   connect: {
-    actions: [AddCustomSourceApiLogic, ['initiateCall', 'apiSuccess', ]],
+    actions: [AddCustomSourceApiLogic, ['makeRequest', 'apiSuccess', ]],
     values: [AddCustomSourceApiLogic, ['status']],
   },
   path: ['enterprise_search', 'workplace_search', 'add_custom_source_logic'],
@@ -85,7 +85,7 @@ export const AddCustomSourceLogic = kea<
     createContentSource: () => {
       const { customSourceNameValue } = values;
       const { baseServiceType } = props;
-      actions.initiateCall({ source: customSourceNameValue, baseServiceType });
+      actions.makeRequest({ source: customSourceNameValue, baseServiceType });
     },
     addSourceSuccess: (customSource: CustomSource) => {
       actions.setNewCustomSource(customSource);

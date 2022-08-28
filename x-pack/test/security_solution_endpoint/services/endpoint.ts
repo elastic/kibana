@@ -23,6 +23,7 @@ import { GetTransformsResponseSchema } from '@kbn/transform-plugin/common/api_sc
 import { catchAndWrapError } from '@kbn/security-solution-plugin/server/endpoint/utils';
 import { installOrUpgradeEndpointFleetPackage } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/setup_fleet_for_endpoint';
 import { EndpointError } from '@kbn/security-solution-plugin/common/endpoint/errors';
+import { STARTED_TRANSFORM_STATES } from '@kbn/security-solution-plugin/common/constants';
 import { FtrService } from '../../functional/ftr_provider_context';
 
 export class EndpointTestResources extends FtrService {
@@ -89,11 +90,14 @@ export class EndpointTestResources extends FtrService {
   }
 
   private async startTransform(transformId: string) {
-    const transformsResponse = await this.esClient.transform.getTransform({
+    const transformsResponse = await this.esClient.transform.getTransformStats({
       transform_id: `${transformId}*`,
     });
     return Promise.all(
       transformsResponse.transforms.map((transform) => {
+        if (STARTED_TRANSFORM_STATES.has(transform.state)) {
+          return Promise.resolve();
+        }
         return this.esClient.transform.startTransform({ transform_id: transform.id });
       })
     );
@@ -137,6 +141,7 @@ export class EndpointTestResources extends FtrService {
     if (waitUntilTransformed) {
       // need this before indexing docs so that the united transform doesn't
       // create a checkpoint with a timestamp after the doc timestamps
+      await this.stopTransform(metadataTransformPrefix);
       await this.stopTransform(METADATA_UNITED_TRANSFORM);
     }
 
@@ -158,6 +163,7 @@ export class EndpointTestResources extends FtrService {
         );
 
     if (waitUntilTransformed) {
+      await this.startTransform(metadataTransformPrefix);
       const metadataIds = Array.from(new Set(indexedData.hosts.map((host) => host.agent.id)));
       await this.waitForEndpoints(metadataIds, waitTimeout);
       await this.startTransform(METADATA_UNITED_TRANSFORM);

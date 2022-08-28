@@ -7,7 +7,6 @@
  */
 
 import { Subject } from 'rxjs';
-import { TelemetryCounterType } from '@kbn/analytics-client';
 import type { Event, EventContext, IShipper, TelemetryCounter } from '@kbn/core/public';
 
 export interface Action {
@@ -26,7 +25,7 @@ export class CustomShipper implements IShipper {
     this.actions$.next({ action: 'reportEvents', meta: events });
     events.forEach((event) => {
       this.telemetryCounter$.next({
-        type: TelemetryCounterType.succeeded,
+        type: `succeeded`,
         event_type: event.event_type,
         code: '200',
         count: 1,

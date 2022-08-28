@@ -38,24 +38,8 @@ export const COMMENTS_HIDE = (comments: number) =>
     defaultMessage: 'Hide ({comments}) {comments, plural, =1 {Comment} other {Comments}}',
   });
 
-export const DATE_CREATED = i18n.translate('xpack.securitySolution.exceptions.dateCreatedLabel', {
-  defaultMessage: 'Date created',
-});
-
-export const CREATED_BY = i18n.translate('xpack.securitySolution.exceptions.createdByLabel', {
-  defaultMessage: 'Created by',
-});
-
 export const NAME = i18n.translate('xpack.securitySolution.exceptions.nameLabel', {
   defaultMessage: 'Name',
-});
-
-export const DATE_MODIFIED = i18n.translate('xpack.securitySolution.exceptions.dateModifiedLabel', {
-  defaultMessage: 'Date modified',
-});
-
-export const MODIFIED_BY = i18n.translate('xpack.securitySolution.exceptions.modifiedByLabel', {
-  defaultMessage: 'Modified by',
 });
 
 export const COMMENT = i18n.translate('xpack.securitySolution.exceptions.commentLabel', {
@@ -65,13 +49,6 @@ export const COMMENT = i18n.translate('xpack.securitySolution.exceptions.comment
 export const COMMENT_EVENT = i18n.translate('xpack.securitySolution.exceptions.commentEventLabel', {
   defaultMessage: 'added a comment',
 });
-
-export const OPERATING_SYSTEM = i18n.translate(
-  'xpack.securitySolution.exceptions.operatingSystemLabel',
-  {
-    defaultMessage: 'OS',
-  }
-);
 
 export const OPERATING_SYSTEM_LABEL = i18n.translate(
   'xpack.securitySolution.exceptions.operatingSystemFullLabel',

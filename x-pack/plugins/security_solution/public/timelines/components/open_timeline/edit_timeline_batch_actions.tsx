@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { EuiContextMenuPanel, EuiContextMenuItem, EuiBasicTable } from '@elastic/eui';
+import type { EuiBasicTable } from '@elastic/eui';
+import { EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
 import { TimelineType } from '../../../../common/types/timeline';
 
 import * as i18n from './translations';
-import { DeleteTimelines, OpenTimelineResult } from './types';
+import type { DeleteTimelines, OpenTimelineResult } from './types';
 import { EditTimelineActions } from './export_timeline';
 import { useEditTimelineActions } from './edit_timeline_actions';
 

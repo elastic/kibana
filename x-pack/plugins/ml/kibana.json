@@ -8,6 +8,7 @@
   ],
   "requiredPlugins": [
     "aiops",
+    "charts",
     "cloud",
     "data",
     "dataViews",
@@ -25,7 +26,6 @@
   ],
   "optionalPlugins": [
     "alerting",
-    "charts",
     "dashboard",
     "home",
     "lens",
@@ -34,11 +34,13 @@
     "maps",
     "security",
     "spaces",
-    "usageCollection"
+    "usageCollection",
+    "cases"
   ],
   "server": true,
   "ui": true,
   "requiredBundles": [
+    "cases",
     "charts",
     "dashboard",
     "esUiShared",

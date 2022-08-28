@@ -13,9 +13,6 @@ import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
 } from '@kbn/cases-plugin/common/constants';
-import { TransportResult } from '@elastic/elasticsearch';
-import { GetResponse } from '@elastic/elasticsearch/lib/api/types';
-import { SavedObjectsRawDocSource } from '@kbn/core/server/saved_objects/serialization';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   defaultUser,
@@ -33,6 +30,7 @@ import {
   bulkCreateAttachments,
   updateComment,
   getSOFromKibanaIndex,
+  getReferenceFromEsResponse,
 } from '../../../../common/lib/utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -40,6 +38,10 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
 
+  /**
+   * Attachment types are being registered in
+   * x-pack/test/cases_api_integration/common/fixtures/plugins/cases/server/plugin.ts
+   */
   describe('External references', () => {
     afterEach(async () => {
       await deleteAllCaseItems(es);
@@ -144,7 +146,10 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       const commentOnES = esResponse.body._source?.[CASE_COMMENT_SAVED_OBJECT];
-      const ref = getReference(esResponse, postExternalReferenceSOReq.externalReferenceId);
+      const ref = getReferenceFromEsResponse(
+        esResponse,
+        postExternalReferenceSOReq.externalReferenceId
+      );
 
       const comment = removeServerGeneratedPropertiesFromSavedObject(commentOnES);
       const { externalReferenceId, ...withoutId } = postExternalReferenceSOReq;
@@ -182,7 +187,10 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       const commentOnES = esResponse.body._source?.[CASE_USER_ACTION_SAVED_OBJECT]?.payload.comment;
-      const ref = getReference(esResponse, postExternalReferenceSOReq.externalReferenceId);
+      const ref = getReferenceFromEsResponse(
+        esResponse,
+        postExternalReferenceSOReq.externalReferenceId
+      );
 
       const { externalReferenceId, ...withoutId } = postExternalReferenceSOReq;
       expect(ref).to.eql({
@@ -210,7 +218,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const commentOnES = esResponse.body._source?.[CASE_COMMENT_SAVED_OBJECT];
       const comment = removeServerGeneratedPropertiesFromSavedObject(commentOnES);
-      const ref = getReference(esResponse, postExternalReferenceSOReq.externalReferenceId);
+      const ref = getReferenceFromEsResponse(
+        esResponse,
+        postExternalReferenceSOReq.externalReferenceId
+      );
 
       expect(ref).to.be(undefined);
       expect(comment).to.eql({
@@ -242,7 +253,10 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       const commentOnES = esResponse.body._source?.[CASE_USER_ACTION_SAVED_OBJECT]?.payload.comment;
-      const ref = getReference(esResponse, postExternalReferenceSOReq.externalReferenceId);
+      const ref = getReferenceFromEsResponse(
+        esResponse,
+        postExternalReferenceSOReq.externalReferenceId
+      );
 
       expect(ref).to.be(undefined);
       expect(commentOnES).to.eql(postExternalReferenceESReq);
@@ -268,7 +282,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const commentOnES = esResponse.body._source?.[CASE_COMMENT_SAVED_OBJECT];
 
-      const ref = getReference(esResponse, postExternalReferenceSOReq.externalReferenceId);
+      const ref = getReferenceFromEsResponse(
+        esResponse,
+        postExternalReferenceSOReq.externalReferenceId
+      );
 
       const comment = removeServerGeneratedPropertiesFromSavedObject(commentOnES);
       const { externalReferenceId, ...withoutId } = postExternalReferenceSOReq;
@@ -308,7 +325,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const commentOnES = esResponse.body._source?.[CASE_COMMENT_SAVED_OBJECT];
       const comment = removeServerGeneratedPropertiesFromSavedObject(commentOnES);
-      const ref = getReference(esResponse, postExternalReferenceESReq.externalReferenceId);
+      const ref = getReferenceFromEsResponse(
+        esResponse,
+        postExternalReferenceESReq.externalReferenceId
+      );
 
       expect(ref).to.be(undefined);
       expect(comment).to.eql({
@@ -347,7 +367,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const commentOnES = esResponse.body._source?.[CASE_COMMENT_SAVED_OBJECT];
       const comment = removeServerGeneratedPropertiesFromSavedObject(commentOnES);
-      const ref = getReference(esResponse, 'my-new-id');
+      const ref = getReferenceFromEsResponse(esResponse, 'my-new-id');
       const { externalReferenceId, ...withoutId } = postExternalReferenceSOReq;
 
       expect(ref).to.eql({
@@ -439,10 +459,15 @@ export default ({ getService }: FtrProviderContext): void => {
         expectedHttpCode: 400,
       });
     });
+
+    it('400s when creating a non registered external reference attachment type', async () => {
+      const postedCase = await createCase(supertest, postCaseReq);
+      await createComment({
+        supertest,
+        caseId: postedCase.id,
+        params: { ...postExternalReferenceSOReq, externalReferenceAttachmentTypeId: 'not-exists' },
+        expectedHttpCode: 400,
+      });
+    });
   });
 };
-
-const getReference = (
-  esResponse: TransportResult<GetResponse<SavedObjectsRawDocSource>, unknown>,
-  id: string
-) => esResponse.body._source?.references?.find((r) => r.id === id);

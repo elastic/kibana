@@ -11,7 +11,7 @@
         "label": "LazyLogStreamWrapper",
         "description": [],
         "signature": [
-          "(props: React.PropsWithChildren<",
+          "(props: ",
           {
             "pluginId": "infra",
             "scope": "public",
@@ -19,7 +19,7 @@
             "section": "def-public.LogStreamProps",
             "text": "LogStreamProps"
           },
-          ">) => JSX.Element"
+          ") => JSX.Element"
         ],
         "path": "x-pack/plugins/infra/public/components/log_stream/lazy_log_stream_wrapper.tsx",
         "deprecated": false,
@@ -27,20 +27,18 @@
           {
             "parentPluginId": "infra",
             "id": "def-public.LazyLogStreamWrapper.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "infra",
                 "scope": "public",
                 "docId": "kibInfraPluginApi",
                 "section": "def-public.LogStreamProps",
                 "text": "LogStreamProps"
-              },
-              ">"
+              }
             ],
             "path": "x-pack/plugins/infra/public/components/log_stream/lazy_log_stream_wrapper.tsx",
             "deprecated": false,
@@ -267,10 +265,10 @@
           },
           {
             "parentPluginId": "infra",
-            "id": "def-public.FORMATTERS.highPercision",
+            "id": "def-public.FORMATTERS.highPrecision",
             "type": "Function",
             "tags": [],
-            "label": "highPercision",
+            "label": "highPrecision",
             "description": [],
             "signature": [
               "(val: number) => string"
@@ -281,7 +279,7 @@
             "children": [
               {
                 "parentPluginId": "infra",
-                "id": "def-public.FORMATTERS.highPercision.$1",
+                "id": "def-public.FORMATTERS.highPrecision.$1",
                 "type": "number",
                 "tags": [],
                 "label": "val",
@@ -616,13 +614,7 @@
           "description": [],
           "signature": [
             "(savedObjectsClient: ",
-            {
-              "pluginId": "core",
-              "scope": "server",
-              "docId": "kibCoreSavedObjectsPluginApi",
-              "section": "def-server.SavedObjectsClientContract",
-              "text": "SavedObjectsClientContract"
-            },
+            "SavedObjectsClientContract",
             ", sourceId?: string | undefined) => Promise<string>"
           ],
           "path": "x-pack/plugins/infra/server/types.ts",
@@ -636,13 +628,7 @@
               "label": "savedObjectsClient",
               "description": [],
               "signature": [
-                {
-                  "pluginId": "core",
-                  "scope": "server",
-                  "docId": "kibCoreSavedObjectsPluginApi",
-                  "section": "def-server.SavedObjectsClientContract",
-                  "text": "SavedObjectsClientContract"
-                }
+                "SavedObjectsClientContract"
               ],
               "path": "x-pack/plugins/infra/server/types.ts",
               "deprecated": false,

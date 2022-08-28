@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+import { Subscription } from 'rxjs';
+
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 
 import { AIOPS_ENABLED } from '../common';
 
+import { isActiveLicense } from './lib/license';
 import {
+  AiopsLicense,
   AiopsPluginSetup,
   AiopsPluginStart,
   AiopsPluginSetupDeps,
@@ -22,19 +26,29 @@ export class AiopsPlugin
   implements Plugin<AiopsPluginSetup, AiopsPluginStart, AiopsPluginSetupDeps, AiopsPluginStartDeps>
 {
   private readonly logger: Logger;
+  private licenseSubscription: Subscription | null = null;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup<AiopsPluginStartDeps>, deps: AiopsPluginSetupDeps) {
+  public setup(core: CoreSetup<AiopsPluginStartDeps>, plugins: AiopsPluginSetupDeps) {
     this.logger.debug('aiops: Setup');
+
+    // Subscribe to license changes and store the current license in `currentLicense`.
+    // This way we can pass on license changes to the route factory having always
+    // the current license because it's stored in a mutable attribute.
+    const aiopsLicense: AiopsLicense = { isActivePlatinumLicense: false };
+    this.licenseSubscription = plugins.licensing.license$.subscribe(async (license) => {
+      aiopsLicense.isActivePlatinumLicense = isActiveLicense('platinum', license);
+    });
+
     const router = core.http.createRouter<DataRequestHandlerContext>();
 
     // Register server side APIs
     if (AIOPS_ENABLED) {
       core.getStartServices().then(([_, depsStart]) => {
-        defineExplainLogRateSpikesRoute(router, this.logger);
+        defineExplainLogRateSpikesRoute(router, aiopsLicense, this.logger);
       });
     }
 
@@ -46,5 +60,8 @@ export class AiopsPlugin
     return {};
   }
 
-  public stop() {}
+  public stop() {
+    this.logger.debug('aiops: Stop');
+    this.licenseSubscription?.unsubscribe();
+  }
 }

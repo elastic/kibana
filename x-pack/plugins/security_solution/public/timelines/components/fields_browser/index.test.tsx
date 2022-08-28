@@ -7,27 +7,22 @@
 
 import React from 'react';
 import { render, act } from '@testing-library/react';
-import {
-  useFieldBrowserOptions,
-  UseFieldBrowserOptionsProps,
-  UseFieldBrowserOptions,
-  FieldEditorActionsRef,
-} from '.';
-import {
-  indexPatternFieldEditorPluginMock,
-  Start,
-} from '@kbn/data-view-field-editor-plugin/public/mocks';
+import type { UseFieldBrowserOptionsProps, UseFieldBrowserOptions, FieldEditorActionsRef } from '.';
+import { useFieldBrowserOptions } from '.';
+import type { Start } from '@kbn/data-view-field-editor-plugin/public/mocks';
+import { indexPatternFieldEditorPluginMock } from '@kbn/data-view-field-editor-plugin/public/mocks';
 
 import { TestProviders } from '../../../common/mock';
 import { useKibana } from '../../../common/lib/kibana';
 import type { DataView, DataViewField } from '@kbn/data-plugin/common';
 import { TimelineId } from '../../../../common/types';
-import { renderHook, RenderHookResult } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { removeColumn, upsertColumn } from '../../store/timeline/actions';
 import { defaultColumnHeaderType } from '../timeline/body/column_headers/default_headers';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/constants';
-import { BrowserFieldItem } from '@kbn/timelines-plugin/common/types';
+import type { BrowserFieldItem } from '@kbn/timelines-plugin/common/types';
 import { EuiInMemoryTable } from '@elastic/eui';
 
 let mockIndexPatternFieldEditor: Start;

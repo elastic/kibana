@@ -6,10 +6,10 @@
  */
 
 import { Logger } from '@kbn/logging';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { SERVICE_NAME } from '../../../../common/elasticsearch_fieldnames';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { Environment } from '../../../../common/environment_rt';
-import { ProcessorEvent } from '../../../../common/processor_event';
 import { joinByKey } from '../../../../common/utils/join_by_key';
 import { ServiceGroup } from '../../../../common/service_groups';
 import { Setup } from '../../../lib/helpers/setup_request';
@@ -22,6 +22,7 @@ export async function getSortedAndFilteredServices({
   environment,
   logger,
   serviceGroup,
+  maxNumberOfServices,
 }: {
   setup: Setup;
   start: number;
@@ -29,6 +30,7 @@ export async function getSortedAndFilteredServices({
   environment: Environment;
   logger: Logger;
   serviceGroup: ServiceGroup | null;
+  maxNumberOfServices: number;
 }) {
   const { apmEventClient } = setup;
 
@@ -48,7 +50,7 @@ export async function getSortedAndFilteredServices({
           ],
         },
         body: {
-          size: 500,
+          size: maxNumberOfServices,
           field: SERVICE_NAME,
         },
       }

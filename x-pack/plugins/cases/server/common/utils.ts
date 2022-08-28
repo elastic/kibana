@@ -27,7 +27,6 @@ import {
   CommentRequestActionsType,
   CommentRequestAlertType,
   CommentRequestExternalReferenceSOType,
-  CommentRequestExternalReferenceType,
   CommentRequestUserType,
   CommentResponse,
   CommentsResponse,
@@ -70,6 +69,7 @@ export const transformNewCase = ({
   status: CaseStatuses.open,
   updated_at: null,
   updated_by: null,
+  assignees: newCase.assignees ?? [],
 });
 
 export const transformCases = ({
@@ -210,7 +210,7 @@ export const transformNewComment = ({
 };
 
 /**
- * A type narrowing function for user comments. Exporting so integration tests can use it.
+ * A type narrowing function for user comments.
  */
 export const isCommentRequestTypeUser = (
   context: CommentRequest
@@ -219,7 +219,7 @@ export const isCommentRequestTypeUser = (
 };
 
 /**
- * A type narrowing function for actions comments. Exporting so integration tests can use it.
+ * A type narrowing function for actions comments.
  */
 export const isCommentRequestTypeActions = (
   context: CommentRequest
@@ -228,7 +228,7 @@ export const isCommentRequestTypeActions = (
 };
 
 /**
- * A type narrowing function for alert comments. Exporting so integration tests can use it.
+ * A type narrowing function for alert comments.
  */
 export const isCommentRequestTypeAlert = (
   context: CommentRequest
@@ -237,16 +237,7 @@ export const isCommentRequestTypeAlert = (
 };
 
 /**
- * A type narrowing function for external reference attachments. Exporting so integration tests can use it.
- */
-export const isCommentRequestTypeExternalReference = (
-  context: CommentRequest
-): context is CommentRequestExternalReferenceType => {
-  return context.type === CommentType.externalReference;
-};
-
-/**
- * A type narrowing function for external reference so attachments. Exporting so integration tests can use it.
+ * A type narrowing function for external reference so attachments.
  */
 export const isCommentRequestTypeExternalReferenceSO = (
   context: Partial<CommentRequest>

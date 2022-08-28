@@ -17,7 +17,28 @@ export const initElasticsearchHelpers = (getService) => {
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   let indicesCreated = [];
+  let datastreamCreated = [];
+  let indexTemplatesCreated = [];
   let componentTemplatesCreated = [];
+
+  const createDatastream = (datastream) => {
+    datastreamCreated.push(datastream);
+    return es.indices.createDataStream({ name: datastream });
+  };
+
+  const deleteDatastream = (datastream) => {
+    return es.indices.deleteDataStream({ name: datastream });
+  };
+
+  const cleanupDatastreams = () =>
+    Promise.all(datastreamCreated.map(deleteDatastream))
+      .then(() => {
+        datastreamCreated = [];
+      })
+      .catch((err) => {
+        // eslint-disable-next-line no-console
+        console.log(`[Cleanup error] Error deleting ES resources: ${err.message}`);
+      });
 
   const createIndex = (index = getRandomString(), body) => {
     indicesCreated.push(index);
@@ -36,6 +57,18 @@ export const initElasticsearchHelpers = (getService) => {
   const cleanUp = () => deleteAllIndices();
 
   const catTemplate = (name) => es.cat.templates({ name, format: 'json' }, { meta: true });
+
+  const createIndexTemplate = (indexTemplate, shouldCacheTemplate) => {
+    if (shouldCacheTemplate) {
+      indexTemplatesCreated.push(indexTemplate.name);
+    }
+
+    return es.indices.putIndexTemplate(indexTemplate, { meta: true });
+  };
+
+  const deleteIndexTemplate = (indexTemplateName) => {
+    return es.indices.deleteIndexTemplate({ name: indexTemplateName }, { meta: true });
+  };
 
   const createComponentTemplate = (componentTemplate, shouldCacheTemplate) => {
     if (shouldCacheTemplate) {
@@ -59,13 +92,29 @@ export const initElasticsearchHelpers = (getService) => {
         console.log(`[Cleanup error] Error deleting ES resources: ${err.message}`);
       });
 
+  const cleanUpIndexTemplates = () =>
+    Promise.all(indexTemplatesCreated.map(deleteIndexTemplate))
+      .then(() => {
+        indexTemplatesCreated = [];
+      })
+      .catch((err) => {
+        // eslint-disable-next-line no-console
+        console.log(`[Cleanup error] Error deleting ES resources: ${err.message}`);
+      });
+
   return {
     createIndex,
     deleteAllIndices,
     catIndex,
     indexStats,
+    createDatastream,
+    deleteDatastream,
+    cleanupDatastreams,
     cleanUp,
     catTemplate,
+    createIndexTemplate,
+    deleteIndexTemplate,
+    cleanUpIndexTemplates,
     createComponentTemplate,
     deleteComponentTemplate,
     cleanUpComponentTemplates,

@@ -38,8 +38,6 @@ NPM_MODULE_EXTRA_FILES = [
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
   "@npm//react",
-  "@npm//@elastic/eui",
-  "//packages/kbn-i18n-react",
   "//packages/kbn-logging"
 ]
 
@@ -56,8 +54,6 @@ TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
   "@npm//@types/react",
-  "@npm//@elastic/eui",
-  "//packages/kbn-i18n-react:npm_module_types",
   "//packages/kbn-logging:npm_module_types"
 ]
 
@@ -65,12 +61,14 @@ jsts_transpiler(
   name = "target_node",
   srcs = SRCS,
   build_pkg_name = package_name(),
+  root_input_dir = "src",
 )
 
 jsts_transpiler(
   name = "target_web",
   srcs = SRCS,
   build_pkg_name = package_name(),
+  root_input_dir = "src",
   web = True,
 )
 
@@ -89,6 +87,7 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
+  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
   root_dir = "src",

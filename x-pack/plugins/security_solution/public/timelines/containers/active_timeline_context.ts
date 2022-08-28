@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import {
+import type {
   TimelineExpandedDetail,
   TimelineExpandedDetailType,
-  TimelineTabs,
 } from '../../../common/types/timeline';
-import {
+import { TimelineTabs } from '../../../common/types/timeline';
+import type {
   TimelineEqlRequestOptions,
   TimelineEventsAllRequestOptions,
 } from '../../../common/search_strategy/timeline';
-import { TimelineArgs } from '.';
+import type { TimelineArgs } from '.';
 
 /*
  * Future Engineer

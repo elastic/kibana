@@ -10,8 +10,7 @@ import React, { useState } from 'react';
 import { EuiPopover, EuiPopoverTitle, EuiSelectableProps } from '@elastic/eui';
 import { ToolbarButton, ToolbarButtonProps } from '@kbn/kibana-react-plugin/public';
 import { DataViewsList } from '@kbn/unified-search-plugin/public';
-import { IndexPatternRef } from './types';
-import { trackUiEvent } from '../lens_ui_telemetry';
+import type { IndexPatternRef } from '../types';
 
 export type ChangeIndexPatternTriggerProps = ToolbarButtonProps & {
   label: string;
@@ -81,7 +80,6 @@ export function ChangeIndexPattern({
           <DataViewsList
             dataViewsList={indexPatternRefs}
             onChangeDataView={(newId) => {
-              trackUiEvent('indexpattern_changed');
               onChangeIndexPattern(newId);
               setPopoverIsOpen(false);
             }}

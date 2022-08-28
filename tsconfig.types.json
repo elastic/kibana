@@ -5,6 +5,7 @@
     "outDir": "./target/types",
     "stripInternal": false,
     "declaration": true,
+    "declarationMap": true,
     "emitDeclarationOnly": true,
     "declarationMap": true,
     "rootDir": "./src"

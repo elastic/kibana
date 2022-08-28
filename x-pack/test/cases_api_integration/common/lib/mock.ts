@@ -21,6 +21,7 @@ import {
   ExternalReferenceStorageType,
   CommentRequestExternalReferenceSOType,
   CommentRequestExternalReferenceNoSOType,
+  CommentRequestPersistableStateType,
 } from '@kbn/cases-plugin/common/api';
 
 export const defaultUser = { email: null, full_name: null, username: 'elastic' };
@@ -44,6 +45,7 @@ export const postCaseReq: CasePostRequest = {
     syncAlerts: true,
   },
   owner: 'securitySolutionFixture',
+  assignees: [],
 };
 
 /**
@@ -95,6 +97,13 @@ export const postExternalReferenceESReq: CommentRequestExternalReferenceNoSOType
 export const postExternalReferenceSOReq: CommentRequestExternalReferenceSOType = {
   ...postExternalReferenceESReq,
   externalReferenceStorage: { type: ExternalReferenceStorageType.savedObject, soType: 'test-type' },
+};
+
+export const persistableStateAttachment: CommentRequestPersistableStateType = {
+  type: CommentType.persistableState,
+  owner: 'securitySolutionFixture',
+  persistableStateAttachmentTypeId: '.test',
+  persistableStateAttachmentState: { foo: 'foo', injectedId: 'testRef' },
 };
 
 export const postCaseResp = (

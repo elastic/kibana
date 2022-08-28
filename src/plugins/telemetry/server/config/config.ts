@@ -9,6 +9,7 @@
 import { schema, TypeOf, Type } from '@kbn/config-schema';
 import { getConfigPath } from '@kbn/utils';
 import { PluginConfigDescriptor } from '@kbn/core/server';
+import { labelsSchema } from './telemetry_labels';
 
 const clusterEnvSchema: [Type<'prod'>, Type<'staging'>] = [
   schema.literal('prod'),
@@ -32,6 +33,8 @@ const configSchema = schema.object({
   sendUsageFrom: schema.oneOf([schema.literal('server'), schema.literal('browser')], {
     defaultValue: 'server',
   }),
+  // Used for extra enrichment of telemetry
+  labels: labelsSchema,
 });
 
 export type TelemetryConfigType = TypeOf<typeof configSchema>;
@@ -45,6 +48,7 @@ export const config: PluginConfigDescriptor<TelemetryConfigType> = {
     sendUsageFrom: true,
     sendUsageTo: true,
     hidePrivacyStatement: true,
+    labels: true,
   },
   deprecations: () => [
     (cfg) => {

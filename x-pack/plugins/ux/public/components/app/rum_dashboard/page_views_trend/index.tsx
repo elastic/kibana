@@ -7,15 +7,12 @@
 
 import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { I18LABELS } from '../translations';
 import { BreakdownFilter } from '../breakdowns/breakdown_filter';
 import { PageViewsChart } from '../charts/page_views_chart';
 import { BreakdownItem } from '../../../../../typings/ui_filters';
 
 export function PageViewsTrend() {
-  const { uxUiFilters } = useLegacyUrlParams();
-
   const [breakdown, setBreakdown] = useState<BreakdownItem | null>(null);
 
   return (
@@ -34,7 +31,7 @@ export function PageViewsTrend() {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <PageViewsChart breakdown={breakdown} uiFilters={uxUiFilters} />
+      <PageViewsChart breakdown={breakdown} />
     </div>
   );
 }

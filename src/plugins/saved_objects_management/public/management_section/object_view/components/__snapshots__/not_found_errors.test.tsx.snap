@@ -38,7 +38,7 @@ exports[`NotFoundErrors component renders correctly for index-pattern type 1`] =
           External link
         </span>
         <span
-          class="euiScreenReaderOnly"
+          class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
         >
           (opens in a new tab or window)
         </span>
@@ -87,7 +87,7 @@ exports[`NotFoundErrors component renders correctly for index-pattern-field type
           External link
         </span>
         <span
-          class="euiScreenReaderOnly"
+          class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
         >
           (opens in a new tab or window)
         </span>
@@ -136,7 +136,7 @@ exports[`NotFoundErrors component renders correctly for search type 1`] = `
           External link
         </span>
         <span
-          class="euiScreenReaderOnly"
+          class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
         >
           (opens in a new tab or window)
         </span>
@@ -183,7 +183,7 @@ exports[`NotFoundErrors component renders correctly for unknown type 1`] = `
           External link
         </span>
         <span
-          class="euiScreenReaderOnly"
+          class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
         >
           (opens in a new tab or window)
         </span>

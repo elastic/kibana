@@ -6,18 +6,19 @@
  */
 
 import React from 'react';
-import { EuiButtonIcon, EuiBasicTableColumn, EuiToolTip } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 
 import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import { DEFAULT_RELATIVE_DATE_THRESHOLD } from '../../../../../../../common/constants';
-import { FormatUrl } from '../../../../../../common/components/link_to';
+import type { FormatUrl } from '../../../../../../common/components/link_to';
 import { PopoverItems } from '../../../../../../common/components/popover_items';
 import { FormattedRelativePreferenceDate } from '../../../../../../common/components/formatted_date';
 import { getRuleDetailsUrl } from '../../../../../../common/components/link_to/redirect_to_detection_engine';
 import { LinkAnchor } from '../../../../../../common/components/links';
 import * as i18n from './translations';
-import { ExceptionListInfo } from './use_all_exception_lists';
-import { ExceptionsTableItem } from './types';
+import type { ExceptionListInfo } from './use_all_exception_lists';
+import type { ExceptionsTableItem } from './types';
 
 export type AllExceptionListsColumns = EuiBasicTableColumn<ExceptionsTableItem>;
 

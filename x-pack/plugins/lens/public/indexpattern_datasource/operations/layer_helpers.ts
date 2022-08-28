@@ -9,10 +9,13 @@ import { partition, mapValues, pickBy, isArray } from 'lodash';
 import { CoreStart } from '@kbn/core/public';
 import type { Query } from '@kbn/es-query';
 import memoizeOne from 'memoize-one';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
 import type {
   DatasourceFixAction,
   FrameDatasourceAPI,
+  IndexPattern,
+  IndexPatternField,
   OperationMetadata,
   VisualizationDimensionGroupConfig,
 } from '../../types';
@@ -27,8 +30,6 @@ import {
 } from './definitions';
 import type {
   DataViewDragDropOperation,
-  IndexPattern,
-  IndexPatternField,
   IndexPatternLayer,
   IndexPatternPrivateState,
 } from '../types';
@@ -503,17 +504,14 @@ export function replaceColumn({
 
           tempLayer = {
             ...tempLayer,
+            columnOrder: getColumnOrder(tempLayer),
             columns: {
               ...tempLayer.columns,
               [columnId]: column,
             },
           };
           return updateDefaultLabels(
-            {
-              ...tempLayer,
-              columnOrder: getColumnOrder(tempLayer),
-              columns: adjustColumnReferencesForChangedColumn(tempLayer, columnId),
-            },
+            adjustColumnReferencesForChangedColumn(tempLayer, columnId),
             indexPattern
           );
         } else if (
@@ -573,11 +571,14 @@ export function replaceColumn({
       }
 
       return updateDefaultLabels(
-        {
-          ...tempLayer,
-          columnOrder: getColumnOrder(newLayer),
-          columns: adjustColumnReferencesForChangedColumn(newLayer, columnId),
-        },
+        adjustColumnReferencesForChangedColumn(
+          {
+            ...tempLayer,
+            columnOrder: getColumnOrder(newLayer),
+            columns: newLayer.columns,
+          },
+          columnId
+        ),
         indexPattern
       );
     }
@@ -592,13 +593,18 @@ export function replaceColumn({
         indexPattern
       );
 
-      const newLayer = { ...tempLayer, columns: { ...tempLayer.columns, [columnId]: newColumn } };
+      const newLayer = {
+        ...tempLayer,
+        columns: { ...tempLayer.columns, [columnId]: newColumn },
+      };
       return updateDefaultLabels(
-        {
-          ...tempLayer,
-          columnOrder: getColumnOrder(newLayer),
-          columns: adjustColumnReferencesForChangedColumn(newLayer, columnId),
-        },
+        adjustColumnReferencesForChangedColumn(
+          {
+            ...newLayer,
+            columnOrder: getColumnOrder(newLayer),
+          },
+          columnId
+        ),
         indexPattern
       );
     }
@@ -650,11 +656,13 @@ export function replaceColumn({
     }
     const newLayer = { ...tempLayer, columns: { ...tempLayer.columns, [columnId]: newColumn } };
     return updateDefaultLabels(
-      {
-        ...tempLayer,
-        columnOrder: getColumnOrder(newLayer),
-        columns: adjustColumnReferencesForChangedColumn(newLayer, columnId),
-      },
+      adjustColumnReferencesForChangedColumn(
+        {
+          ...newLayer,
+          columnOrder: getColumnOrder(newLayer),
+        },
+        columnId
+      ),
       indexPattern
     );
   } else if (
@@ -677,11 +685,13 @@ export function replaceColumn({
       { ...layer, columns: { ...layer.columns, [columnId]: newColumn } },
       columnId
     );
-    return {
-      ...newLayer,
-      columnOrder: getColumnOrder(newLayer),
-      columns: adjustColumnReferencesForChangedColumn(newLayer, columnId),
-    };
+    return adjustColumnReferencesForChangedColumn(
+      {
+        ...newLayer,
+        columnOrder: getColumnOrder(newLayer),
+      },
+      columnId
+    );
   } else {
     throw new Error('nothing changed');
   }
@@ -836,11 +846,13 @@ function applyReferenceTransition({
           },
         },
       };
-      layer = {
-        ...layer,
-        columnOrder: getColumnOrder(newLayer),
-        columns: adjustColumnReferencesForChangedColumn(newLayer, newId),
-      };
+      layer = adjustColumnReferencesForChangedColumn(
+        {
+          ...newLayer,
+          columnOrder: getColumnOrder(newLayer),
+        },
+        newId
+      );
       return newId;
     }
 
@@ -977,11 +989,13 @@ function applyReferenceTransition({
     },
   };
   return updateDefaultLabels(
-    {
-      ...layer,
-      columnOrder: getColumnOrder(layer),
-      columns: adjustColumnReferencesForChangedColumn(layer, columnId),
-    },
+    adjustColumnReferencesForChangedColumn(
+      {
+        ...layer,
+        columnOrder: getColumnOrder(layer),
+      },
+      columnId
+    ),
     indexPattern
   );
 }
@@ -1044,11 +1058,13 @@ function addBucket(
     columns: { ...layer.columns, [addedColumnId]: column },
     columnOrder: updatedColumnOrder,
   };
-  return {
-    ...tempLayer,
-    columns: adjustColumnReferencesForChangedColumn(tempLayer, addedColumnId),
-    columnOrder: getColumnOrder(tempLayer),
-  };
+  return adjustColumnReferencesForChangedColumn(
+    {
+      ...tempLayer,
+      columnOrder: getColumnOrder(tempLayer),
+    },
+    addedColumnId
+  );
 }
 
 export function reorderByGroups(
@@ -1108,11 +1124,13 @@ function addMetric(
       [addedColumnId]: column,
     },
   };
-  return {
-    ...tempLayer,
-    columnOrder: getColumnOrder(tempLayer),
-    columns: adjustColumnReferencesForChangedColumn(tempLayer, addedColumnId),
-  };
+  return adjustColumnReferencesForChangedColumn(
+    {
+      ...tempLayer,
+      columnOrder: getColumnOrder(tempLayer),
+    },
+    addedColumnId
+  );
 }
 
 export function getMetricOperationTypes(field: IndexPatternField) {
@@ -1146,7 +1164,7 @@ export function updateColumnLabel<C extends GenericIndexPatternColumn>({
   };
 }
 
-export function updateColumnParam<C extends GenericIndexPatternColumn>({
+export function updateColumnParam({
   layer,
   columnId,
   paramName,
@@ -1157,15 +1175,15 @@ export function updateColumnParam<C extends GenericIndexPatternColumn>({
   paramName: string;
   value: unknown;
 }): IndexPatternLayer {
-  const oldColumn = layer.columns[columnId];
+  const currentColumn = layer.columns[columnId];
   return {
     ...layer,
     columns: {
       ...layer.columns,
       [columnId]: {
-        ...oldColumn,
+        ...currentColumn,
         params: {
-          ...('params' in oldColumn ? oldColumn.params : {}),
+          ...('params' in currentColumn ? currentColumn.params : {}),
           [paramName]: value,
         },
       },
@@ -1210,7 +1228,10 @@ export function adjustColumnReferencesForChangedColumn(
         : currentColumn;
     }
   });
-  return newColumns;
+  return {
+    ...layer,
+    columns: newColumns,
+  };
 }
 
 export function deleteColumn({
@@ -1238,13 +1259,13 @@ export function deleteColumn({
   const hypotheticalColumns = { ...layer.columns };
   delete hypotheticalColumns[columnId];
 
-  let newLayer = {
-    ...layer,
-    columns: adjustColumnReferencesForChangedColumn(
-      { ...layer, columns: hypotheticalColumns },
-      columnId
-    ),
-  };
+  let newLayer = adjustColumnReferencesForChangedColumn(
+    {
+      ...layer,
+      columns: hypotheticalColumns,
+    },
+    columnId
+  );
 
   extraDeletions.forEach((id) => {
     newLayer = deleteColumn({ layer: newLayer, columnId: id, indexPattern });
@@ -1355,7 +1376,8 @@ export function getErrorMessages(
   indexPattern: IndexPattern,
   state: IndexPatternPrivateState,
   layerId: string,
-  core: CoreStart
+  core: CoreStart,
+  data: DataPublicPluginStart
 ):
   | Array<
       | string
@@ -1397,7 +1419,7 @@ export function getErrorMessages(
                 ...state,
                 layers: {
                   ...state.layers,
-                  [layerId]: await errorMessage.fixAction!.newState(core, frame, layerId),
+                  [layerId]: await errorMessage.fixAction!.newState(data, core, frame, layerId),
                 },
               }),
             }
@@ -1496,13 +1518,14 @@ export function isOperationAllowedAsReference({
   let hasValidMetadata = true;
   if (field && operationDefinition.input === 'field') {
     const metadata = operationDefinition.getPossibleOperationForField(field);
-    hasValidMetadata = Boolean(metadata) && validation.validateMetadata(metadata!);
+    hasValidMetadata =
+      Boolean(metadata) && validation.validateMetadata(metadata!, operationType, field.name);
   } else if (operationDefinition.input === 'none') {
     const metadata = operationDefinition.getPossibleOperation();
-    hasValidMetadata = Boolean(metadata) && validation.validateMetadata(metadata!);
+    hasValidMetadata = Boolean(metadata) && validation.validateMetadata(metadata!, operationType);
   } else if (operationDefinition.input === 'fullReference') {
     const metadata = operationDefinition.getPossibleOperation(indexPattern);
-    hasValidMetadata = Boolean(metadata) && validation.validateMetadata(metadata!);
+    hasValidMetadata = Boolean(metadata) && validation.validateMetadata(metadata!, operationType);
   } else {
     // TODO: How can we validate the metadata without a specific field?
   }
@@ -1578,7 +1601,11 @@ export function isColumnValidAsReference({
       column,
       validation,
     }) &&
-    validation.validateMetadata(column)
+    validation.validateMetadata(
+      column,
+      operationType,
+      'sourceField' in column ? column.sourceField : undefined
+    )
   );
 }
 
@@ -1626,7 +1653,9 @@ export function computeLayerFromContext(
         FormulaIndexPatternColumn,
         'managedReference'
       >;
-      const tempLayer = { indexPatternId: indexPattern.id, columns: {}, columnOrder: [] };
+      const tempLayer = isLast
+        ? { indexPatternId: indexPattern.id, columns: {}, columnOrder: [] }
+        : computeLayerFromContext(metricsArray.length === 1, metricsArray, indexPattern);
       let newColumn = operationDefinition.buildColumn({
         indexPattern,
         layer: tempLayer,
@@ -1715,7 +1744,8 @@ export function computeLayerFromContext(
 export function getSplitByTermsLayer(
   indexPattern: IndexPattern,
   splitFields: IndexPatternField[],
-  dateField: IndexPatternField | undefined,
+  xField: IndexPatternField | undefined,
+  xMode: string | undefined,
   layer: VisualizeEditorLayersContext
 ): IndexPatternLayer {
   const { termsParams, metrics, timeInterval, splitWithDateHistogram, dropPartialBuckets } = layer;
@@ -1734,18 +1764,21 @@ export function getSplitByTermsLayer(
 
   let termsLayer = insertNewColumn({
     op: splitWithDateHistogram ? 'date_histogram' : 'terms',
-    layer: insertNewColumn({
-      op: 'date_histogram',
-      layer: computedLayer,
-      columnId: generateId(),
-      field: dateField,
-      indexPattern,
-      visualizationGroups: [],
-      columnParams: {
-        interval: timeInterval,
-        dropPartials: dropPartialBuckets,
-      },
-    }),
+    layer:
+      xField && xMode
+        ? insertNewColumn({
+            op: xMode,
+            layer: computedLayer,
+            columnId: generateId(),
+            field: xField,
+            indexPattern,
+            visualizationGroups: [],
+            columnParams: {
+              interval: timeInterval,
+              dropPartials: dropPartialBuckets,
+            },
+          })
+        : computedLayer,
     columnId,
     field: baseField,
     indexPattern,
@@ -1796,7 +1829,8 @@ export function getSplitByTermsLayer(
 
 export function getSplitByFiltersLayer(
   indexPattern: IndexPattern,
-  dateField: IndexPatternField | undefined,
+  xField: IndexPatternField | undefined,
+  xMode: string | undefined,
   layer: VisualizeEditorLayersContext
 ): IndexPatternLayer {
   const { splitFilters, metrics, timeInterval, dropPartialBuckets } = layer;
@@ -1822,18 +1856,21 @@ export function getSplitByFiltersLayer(
   const columnId = generateId();
   let filtersLayer = insertNewColumn({
     op: 'filters',
-    layer: insertNewColumn({
-      op: 'date_histogram',
-      layer: computedLayer,
-      columnId: generateId(),
-      field: dateField,
-      indexPattern,
-      visualizationGroups: [],
-      columnParams: {
-        interval: timeInterval,
-        dropPartials: dropPartialBuckets,
-      },
-    }),
+    layer:
+      xField && xMode
+        ? insertNewColumn({
+            op: xMode,
+            layer: computedLayer,
+            columnId: generateId(),
+            field: xField,
+            indexPattern,
+            visualizationGroups: [],
+            columnParams: {
+              interval: timeInterval,
+              dropPartials: dropPartialBuckets,
+            },
+          })
+        : computedLayer,
     columnId,
     field: undefined,
     indexPattern,

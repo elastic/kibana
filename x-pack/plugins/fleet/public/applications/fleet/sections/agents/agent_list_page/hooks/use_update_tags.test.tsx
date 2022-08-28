@@ -7,12 +7,17 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 
-import { sendPutAgentTagsUpdate, useStartServices } from '../../../../hooks';
+import {
+  sendPostBulkAgentTagsUpdate,
+  sendPutAgentTagsUpdate,
+  useStartServices,
+} from '../../../../hooks';
 
 import { useUpdateTags } from './use_update_tags';
 
 jest.mock('../../../../hooks', () => ({
   sendPutAgentTagsUpdate: jest.fn(),
+  sendPostBulkAgentTagsUpdate: jest.fn(),
   useStartServices: jest.fn().mockReturnValue({
     notifications: {
       toasts: {
@@ -24,6 +29,7 @@ jest.mock('../../../../hooks', () => ({
 }));
 
 const mockSendPutAgentTagsUpdate = sendPutAgentTagsUpdate as jest.Mock;
+const mockSendPostBulkAgentTagsUpdate = sendPostBulkAgentTagsUpdate as jest.Mock;
 
 describe('useUpdateTags', () => {
   const mockOnSuccess = jest.fn();
@@ -47,6 +53,29 @@ describe('useUpdateTags', () => {
 
     const { result } = renderHook(() => useUpdateTags());
     await act(() => result.current.updateTags('agent1', ['tag1'], mockOnSuccess));
+    expect(mockOnSuccess).not.toHaveBeenCalled();
+    expect(useStartServices().notifications.toasts.addError as jest.Mock).toHaveBeenCalledWith(
+      'error',
+      { title: 'Tags update failed' }
+    );
+  });
+
+  it('should call onSuccess when bulk update tags succeeds', async () => {
+    mockSendPostBulkAgentTagsUpdate.mockResolvedValueOnce({});
+
+    const { result } = renderHook(() => useUpdateTags());
+    await act(() => result.current.bulkUpdateTags('query', ['tag1'], [], mockOnSuccess));
+    expect(mockOnSuccess).toHaveBeenCalled();
+    expect(useStartServices().notifications.toasts.addSuccess as jest.Mock).toHaveBeenCalledWith(
+      'Tags updated'
+    );
+  });
+
+  it('should call show error toast when bulk update tags fails', async () => {
+    mockSendPostBulkAgentTagsUpdate.mockRejectedValueOnce({ error: 'error' });
+
+    const { result } = renderHook(() => useUpdateTags());
+    await act(() => result.current.bulkUpdateTags('query', ['tag1'], [], mockOnSuccess));
     expect(mockOnSuccess).not.toHaveBeenCalled();
     expect(useStartServices().notifications.toasts.addError as jest.Mock).toHaveBeenCalledWith(
       'error',

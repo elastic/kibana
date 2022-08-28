@@ -27,7 +27,7 @@ const createRecentlyAccessed = (length) => {
 
 test('render', () => {
   const component = shallow(<RecentlyAccessed recentlyAccessed={createRecentlyAccessed(2)} />);
-  expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(component).toMatchSnapshot();
 });
 
 describe('more popover', () => {

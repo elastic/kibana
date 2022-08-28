@@ -7,7 +7,6 @@
  */
 
 import type { TelemetryCounter } from '@kbn/analytics-client';
-import { TelemetryCounterType } from '@kbn/analytics-client';
 import { coreMock } from '@kbn/core/server/mocks';
 import { createUsageCollectionSetupMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { registerEbtCounters } from './register_ebt_counters';
@@ -37,7 +36,7 @@ describe('registerEbtCounters', () => {
     registerEbtCounters(core.analytics, usageCollection);
     expect(telemetryCounter$Spy).toHaveBeenCalledTimes(1);
     internalListener({
-      type: TelemetryCounterType.succeeded,
+      type: 'succeeded',
       source: 'test-shipper',
       event_type: 'test-event',
       code: 'test-code',
@@ -57,7 +56,7 @@ describe('registerEbtCounters', () => {
     registerEbtCounters(core.analytics, usageCollection);
     expect(telemetryCounter$Spy).toHaveBeenCalledTimes(1);
     internalListener({
-      type: TelemetryCounterType.succeeded,
+      type: 'succeeded',
       source: 'test-shipper',
       event_type: 'test-event',
       code: 'test-code',

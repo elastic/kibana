@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SearchTypes } from '../../../../../../common/detection_engine/types';
+import type { SearchTypes } from '../../../../../../common/detection_engine/types';
 import { recursiveUnboxingFields } from './recursive_unboxing_fields';
-import { FieldsType } from '../types';
+import type { FieldsType } from '../types';
 
 describe('recursive_unboxing_fields', () => {
   beforeAll(() => {

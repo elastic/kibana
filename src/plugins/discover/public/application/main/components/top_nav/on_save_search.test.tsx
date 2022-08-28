@@ -10,7 +10,7 @@ import { showSaveModal } from '@kbn/saved-objects-plugin/public';
 jest.mock('@kbn/saved-objects-plugin/public');
 
 import { onSaveSearch } from './on_save_search';
-import { indexPatternMock } from '../../../../__mocks__/index_pattern';
+import { dataViewMock } from '../../../../__mocks__/data_view';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { DiscoverServices } from '../../../../build_services';
 import { GetStateReturn } from '../../services/discover_state';
@@ -22,10 +22,16 @@ test('onSaveSearch', async () => {
       i18n: i18nServiceMock.create(),
     },
   } as unknown as DiscoverServices;
-  const stateMock = {} as unknown as GetStateReturn;
+  const stateMock = {
+    appStateContainer: {
+      getState: () => ({
+        rowsPerPage: 250,
+      }),
+    },
+  } as unknown as GetStateReturn;
 
   await onSaveSearch({
-    indexPattern: indexPatternMock,
+    dataView: dataViewMock,
     navigateTo: jest.fn(),
     savedSearch: savedSearchMock,
     services: serviceMock,

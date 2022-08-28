@@ -10,7 +10,7 @@ import React, { useState, useRef, useEffect, FC } from 'react';
 import { EuiLoadingChart } from '@elastic/eui';
 import classNames from 'classnames';
 
-import { EmbeddableChildPanel, ViewMode } from '../../../services/embeddable';
+import { EmbeddableChildPanel, EmbeddablePhaseEvent, ViewMode } from '../../../services/embeddable';
 import { useLabs } from '../../../services/presentation_util';
 import { DashboardPanelState } from '../types';
 import { DashboardContainer } from '..';
@@ -27,6 +27,7 @@ interface Props extends PanelProps, DivProps {
   expandedPanelId?: string;
   key: string;
   isRenderable?: boolean;
+  onPanelStatusChange?: (info: EmbeddablePhaseEvent) => void;
 }
 
 const Item = React.forwardRef<HTMLDivElement, Props>(
@@ -39,6 +40,7 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
       index,
       PanelComponent,
       type,
+      onPanelStatusChange,
       isRenderable = true,
       // The props below are passed from ReactGridLayoutn and need to be merged with their counterparts.
       // https://github.com/react-grid-layout/react-grid-layout/issues/1241#issuecomment-658306889
@@ -73,6 +75,7 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
               key={type}
               embeddableId={id}
               index={index}
+              onPanelStatusChange={onPanelStatusChange}
               {...{ container, PanelComponent }}
             />
             {children}

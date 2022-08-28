@@ -9,7 +9,7 @@ import { Route } from '@kbn/kibana-react-plugin/public';
 import React, { memo } from 'react';
 import { MANAGEMENT_ROUTING_RESPONSE_ACTIONS_PATH } from '../../common/constants';
 import { NotFoundPage } from '../../../app/404';
-import { ResponseActionsList } from './view/response_actions_list';
+import { ResponseActionsListPage } from './view/response_actions_list_page';
 
 export const ResponseActionsContainer = memo(() => {
   return (
@@ -17,7 +17,7 @@ export const ResponseActionsContainer = memo(() => {
       <Route
         path={MANAGEMENT_ROUTING_RESPONSE_ACTIONS_PATH}
         exact
-        component={ResponseActionsList}
+        component={ResponseActionsListPage}
       />
       <Route path="*" component={NotFoundPage} />
     </Switch>

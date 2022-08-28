@@ -17,6 +17,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import { buildDataTableRecord } from '../utils/build_data_record';
 
+const index = 'test-index';
 const mockSearchResult = new Subject();
 const services = {
   data: {
@@ -37,19 +38,30 @@ const services = {
 
 describe('Test of <Doc /> helper / hook', () => {
   test('buildSearchBody given useNewFieldsApi is false', () => {
-    const indexPattern = {
+    const dataView = {
       getComputedFields: () => ({ storedFields: [], scriptFields: [], docvalueFields: [] }),
     } as unknown as DataView;
-    const actual = buildSearchBody('1', indexPattern, false);
+    const actual = buildSearchBody('1', index, dataView, false);
     expect(actual).toMatchInlineSnapshot(`
       Object {
         "body": Object {
           "_source": true,
           "fields": Array [],
           "query": Object {
-            "ids": Object {
-              "values": Array [
-                "1",
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "ids": Object {
+                    "values": Array [
+                      "1",
+                    ],
+                  },
+                },
+                Object {
+                  "term": Object {
+                    "_index": "test-index",
+                  },
+                },
               ],
             },
           },
@@ -62,10 +74,10 @@ describe('Test of <Doc /> helper / hook', () => {
   });
 
   test('buildSearchBody useNewFieldsApi is true', () => {
-    const indexPattern = {
+    const dataView = {
       getComputedFields: () => ({ storedFields: [], scriptFields: [], docvalueFields: [] }),
     } as unknown as DataView;
-    const actual = buildSearchBody('1', indexPattern, true);
+    const actual = buildSearchBody('1', index, dataView, true);
     expect(actual).toMatchInlineSnapshot(`
       Object {
         "body": Object {
@@ -76,9 +88,20 @@ describe('Test of <Doc /> helper / hook', () => {
             },
           ],
           "query": Object {
-            "ids": Object {
-              "values": Array [
-                "1",
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "ids": Object {
+                    "values": Array [
+                      "1",
+                    ],
+                  },
+                },
+                Object {
+                  "term": Object {
+                    "_index": "test-index",
+                  },
+                },
               ],
             },
           },
@@ -92,10 +115,10 @@ describe('Test of <Doc /> helper / hook', () => {
   });
 
   test('buildSearchBody with requestSource', () => {
-    const indexPattern = {
+    const dataView = {
       getComputedFields: () => ({ storedFields: [], scriptFields: [], docvalueFields: [] }),
     } as unknown as DataView;
-    const actual = buildSearchBody('1', indexPattern, true, true);
+    const actual = buildSearchBody('1', index, dataView, true, true);
     expect(actual).toMatchInlineSnapshot(`
       Object {
         "body": Object {
@@ -107,9 +130,20 @@ describe('Test of <Doc /> helper / hook', () => {
             },
           ],
           "query": Object {
-            "ids": Object {
-              "values": Array [
-                "1",
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "ids": Object {
+                    "values": Array [
+                      "1",
+                    ],
+                  },
+                },
+                Object {
+                  "term": Object {
+                    "_index": "test-index",
+                  },
+                },
               ],
             },
           },
@@ -123,7 +157,7 @@ describe('Test of <Doc /> helper / hook', () => {
   });
 
   test('buildSearchBody with runtime fields', () => {
-    const indexPattern = {
+    const dataView = {
       getComputedFields: () => ({
         storedFields: [],
         scriptFields: [],
@@ -138,7 +172,7 @@ describe('Test of <Doc /> helper / hook', () => {
         },
       }),
     } as unknown as DataView;
-    const actual = buildSearchBody('1', indexPattern, true);
+    const actual = buildSearchBody('1', index, dataView, true);
     expect(actual).toMatchInlineSnapshot(`
       Object {
         "body": Object {
@@ -149,9 +183,20 @@ describe('Test of <Doc /> helper / hook', () => {
             },
           ],
           "query": Object {
-            "ids": Object {
-              "values": Array [
-                "1",
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "ids": Object {
+                    "values": Array [
+                      "1",
+                    ],
+                  },
+                },
+                Object {
+                  "term": Object {
+                    "_index": "test-index",
+                  },
+                },
               ],
             },
           },
@@ -172,13 +217,13 @@ describe('Test of <Doc /> helper / hook', () => {
   });
 
   test('useEsDocSearch loading', async () => {
-    const indexPattern = {
+    const dataView = {
       getComputedFields: () => [],
     };
     const props = {
       id: '1',
       index: 'index1',
-      indexPattern,
+      dataView,
     } as unknown as DocProps;
 
     const hook = renderHook((p: DocProps) => useEsDocSearch(p), {
@@ -192,7 +237,7 @@ describe('Test of <Doc /> helper / hook', () => {
   });
 
   test('useEsDocSearch ignore partial results', async () => {
-    const indexPattern = {
+    const dataView = {
       getComputedFields: () => [],
     };
 
@@ -201,7 +246,7 @@ describe('Test of <Doc /> helper / hook', () => {
     const props = {
       id: '1',
       index: 'index1',
-      indexPattern,
+      dataView,
     } as unknown as DocProps;
 
     const hook = renderHook((p: DocProps) => useEsDocSearch(p), {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFormRow, EuiRange, EuiRangeProps } from '@elastic/eui';
+import { EuiFieldNumber, EuiRange } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { AggFunctionsMapping, METRIC_TYPES } from '@kbn/data-plugin/public';
@@ -29,6 +29,8 @@ import { FieldBasedIndexPatternColumn } from './column_types';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { useDebouncedValue } from '../../../shared_components';
 import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
+import { FormRow } from './shared_components';
+import { getColumnWindowError } from '../../window_utils';
 
 export interface PercentileIndexPatternColumn extends FieldBasedIndexPatternColumn {
   operationType: 'percentile';
@@ -43,7 +45,12 @@ export interface PercentileIndexPatternColumn extends FieldBasedIndexPatternColu
   };
 }
 
-function ofName(name: string, percentile: number, timeShift: string | undefined) {
+function ofName(
+  name: string,
+  percentile: number,
+  timeShift: string | undefined,
+  window: string | undefined
+) {
   return adjustTimeScaleLabelSuffix(
     i18n.translate('xpack.lens.indexPattern.percentileOf', {
       defaultMessage:
@@ -53,7 +60,9 @@ function ofName(name: string, percentile: number, timeShift: string | undefined)
     undefined,
     undefined,
     undefined,
-    timeShift
+    timeShift,
+    undefined,
+    window
   );
 }
 
@@ -64,9 +73,11 @@ const supportedFieldTypes = ['number', 'histogram'];
 export const percentileOperation: OperationDefinition<
   PercentileIndexPatternColumn,
   'field',
-  { percentile: number }
+  { percentile: number },
+  true
 > = {
   type: 'percentile',
+  allowAsReference: true,
   displayName: i18n.translate('xpack.lens.indexPattern.percentile', {
     defaultMessage: 'Percentile',
   }),
@@ -76,6 +87,7 @@ export const percentileOperation: OperationDefinition<
   ],
   filterable: true,
   shiftable: true,
+  windowable: true,
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type: fieldType }) => {
     if (supportedFieldTypes.includes(fieldType) && aggregatable && !aggregationRestrictions) {
       return {
@@ -99,7 +111,8 @@ export const percentileOperation: OperationDefinition<
     ofName(
       getSafeName(column.sourceField, indexPattern),
       column.params.percentile,
-      column.timeShift
+      column.timeShift,
+      column.window
     ),
   buildColumn: ({ field, previousColumn, indexPattern }, columnParams) => {
     const existingPercentileParam =
@@ -112,7 +125,8 @@ export const percentileOperation: OperationDefinition<
       label: ofName(
         getSafeName(field.name, indexPattern),
         newPercentileParam,
-        previousColumn?.timeShift
+        previousColumn?.timeShift,
+        previousColumn?.window
       ),
       dataType: 'number',
       operationType: 'percentile',
@@ -121,6 +135,7 @@ export const percentileOperation: OperationDefinition<
       scale: 'ratio',
       filter: getFilter(previousColumn, columnParams),
       timeShift: columnParams?.shift || previousColumn?.timeShift,
+      window: columnParams?.window || previousColumn?.window,
       params: {
         percentile: newPercentileParam,
         ...getFormatFromPreviousColumn(previousColumn),
@@ -130,7 +145,12 @@ export const percentileOperation: OperationDefinition<
   onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
-      label: ofName(field.displayName, oldColumn.params.percentile, oldColumn.timeShift),
+      label: ofName(
+        field.displayName,
+        oldColumn.params.percentile,
+        oldColumn.timeShift,
+        oldColumn.window
+      ),
       sourceField: field.name,
     };
   },
@@ -266,14 +286,20 @@ export const percentileOperation: OperationDefinition<
     combineErrorMessages([
       getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
       getDisallowedPreviousShiftMessage(layer, columnId),
+      getColumnWindowError(layer, columnId, indexPattern),
     ]),
   paramEditor: function PercentileParamEditor({
-    layer,
-    updateLayer,
+    paramEditorUpdater,
     currentColumn,
-    columnId,
     indexPattern,
+    paramEditorCustomProps,
   }) {
+    const { labels, isInline } = paramEditorCustomProps || {};
+    const percentileLabel =
+      labels?.[0] ||
+      i18n.translate('xpack.lens.indexPattern.percentile.percentileValue', {
+        defaultMessage: 'Percentile',
+      });
     const onChange = useCallback(
       (value) => {
         if (
@@ -282,29 +308,24 @@ export const percentileOperation: OperationDefinition<
         ) {
           return;
         }
-        updateLayer({
-          ...layer,
-          columns: {
-            ...layer.columns,
-            [columnId]: {
-              ...currentColumn,
-              label: currentColumn.customLabel
-                ? currentColumn.label
-                : ofName(
-                    indexPattern.getFieldByName(currentColumn.sourceField)?.displayName ||
-                      currentColumn.sourceField,
-                    Number(value),
-                    currentColumn.timeShift
-                  ),
-              params: {
-                ...currentColumn.params,
-                percentile: Number(value),
-              },
-            } as PercentileIndexPatternColumn,
+        paramEditorUpdater({
+          ...currentColumn,
+          label: currentColumn.customLabel
+            ? currentColumn.label
+            : ofName(
+                indexPattern.getFieldByName(currentColumn.sourceField)?.displayName ||
+                  currentColumn.sourceField,
+                Number(value),
+                currentColumn.timeShift,
+                currentColumn.window
+              ),
+          params: {
+            ...currentColumn.params,
+            percentile: Number(value),
           },
-        });
+        } as PercentileIndexPatternColumn);
       },
-      [updateLayer, layer, columnId, currentColumn, indexPattern]
+      [paramEditorUpdater, currentColumn, indexPattern]
     );
     const { inputValue, handleInputChange: handleInputChangeWithoutValidation } = useDebouncedValue<
       string | undefined
@@ -314,16 +335,15 @@ export const percentileOperation: OperationDefinition<
     });
     const inputValueIsValid = isValidNumber(inputValue, true, 99, 1);
 
-    const handleInputChange: EuiRangeProps['onChange'] = useCallback(
+    const handleInputChange = useCallback(
       (e) => handleInputChangeWithoutValidation(String(e.currentTarget.value)),
       [handleInputChangeWithoutValidation]
     );
 
     return (
-      <EuiFormRow
-        label={i18n.translate('xpack.lens.indexPattern.percentile.percentileValue', {
-          defaultMessage: 'Percentile',
-        })}
+      <FormRow
+        isInline={isInline}
+        label={percentileLabel}
         data-test-subj="lns-indexPattern-percentile-form"
         display="rowCompressed"
         fullWidth
@@ -335,20 +355,33 @@ export const percentileOperation: OperationDefinition<
           })
         }
       >
-        <EuiRange
-          data-test-subj="lns-indexPattern-percentile-input"
-          compressed
-          value={inputValue ?? ''}
-          min={1}
-          max={99}
-          step={1}
-          onChange={handleInputChange}
-          showInput
-          aria-label={i18n.translate('xpack.lens.indexPattern.percentile.percentileValue', {
-            defaultMessage: 'Percentile',
-          })}
-        />
-      </EuiFormRow>
+        {isInline ? (
+          <EuiFieldNumber
+            fullWidth
+            data-test-subj="lns-indexPattern-percentile-input"
+            compressed
+            value={inputValue ?? ''}
+            min={1}
+            max={99}
+            step={1}
+            onChange={handleInputChange}
+            aria-label={percentileLabel}
+          />
+        ) : (
+          <EuiRange
+            fullWidth
+            data-test-subj="lns-indexPattern-percentile-input"
+            compressed
+            value={inputValue ?? ''}
+            min={1}
+            max={99}
+            step={1}
+            onChange={handleInputChange}
+            showInput
+            aria-label={percentileLabel}
+          />
+        )}
+      </FormRow>
     );
   },
   documentation: {

@@ -6,7 +6,8 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiBadge, EuiBadgeProps } from '@elastic/eui';
+import type { EuiBadgeProps } from '@elastic/eui';
+import { EuiBadge } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 
 import styled from 'styled-components';

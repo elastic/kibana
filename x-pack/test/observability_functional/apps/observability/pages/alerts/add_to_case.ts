@@ -25,7 +25,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
     });
 
-    describe('When user has all priviledges for cases', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/133799
+    describe.skip('When user has all priviledges for cases', () => {
       before(async () => {
         await observability.users.setTestUserRole(
           observability.users.defineBasicObservabilityRole({
@@ -62,7 +63,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
         await retry.try(async () => {
           await observability.alerts.addToCase.addToExistingCaseButtonClick();
-          await observability.alerts.addToCase.getAddtoExistingCaseModalOrFail();
+          await observability.alerts.addToCase.getAddToExistingCaseModalOrFail();
         });
       });
     });

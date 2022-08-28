@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-// a11y tests for spaces, space selection and space creation and feature controls
-
+// a11y tests for stack monitoring
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -50,12 +50,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('a11y tests for Kibana Overview', async function () {
       await clusterOverview.clickKibanaOverview();
-      await kibanaOverview.isOnOverview();
-      await a11y.testAppSnapshot();
+      expect(await kibanaOverview.isOnOverview()).to.be(true);
+      await retry.try(async () => {
+        await a11y.testAppSnapshot();
+      });
     });
 
     it('a11y tests for Kibana Instances Page', async function () {
       await kibanaOverview.isOnOverview();
+      await retry.waitForWithTimeout(
+        'Make sure Kibana instances tab is visble',
+        30000,
+        async () => {
+          return await testSubjects.isDisplayed('kibanaInstancesPage');
+        }
+      );
       await kibanaOverview.clickInstanceTab();
       await a11y.testAppSnapshot();
     });

@@ -22,7 +22,6 @@ import type {
   Logger,
   LoggerFactory,
   OnPreResponseToolkit,
-  UnauthorizedError,
   UnauthorizedErrorHandler,
   UnauthorizedErrorHandlerToolkit,
 } from '@kbn/core/server';
@@ -34,6 +33,7 @@ import {
   httpServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
+import type { UnauthorizedError } from '@kbn/es-errors';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import type { AuthenticatedUser, SecurityLicense } from '../../common';

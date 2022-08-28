@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useQuery, useMutation, useQueryClient } from 'react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { FunctionKeys } from 'utility-types';
 import type { SavedObjectsFindOptions, SimpleSavedObject } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
@@ -12,10 +12,10 @@ import {
   UPDATE_RULES_CONFIG_ROUTE_PATH,
   CSP_RULE_SAVED_OBJECT_TYPE,
 } from '../../../common/constants';
-import type { CspRuleType } from '../../../common/schemas';
+import type { CspRule } from '../../../common/schemas';
 import { useKibana } from '../../common/hooks/use_kibana';
 
-export type RuleSavedObject = Omit<SimpleSavedObject<CspRuleType>, FunctionKeys<SimpleSavedObject>>;
+export type RuleSavedObject = Omit<SimpleSavedObject<CspRule>, FunctionKeys<SimpleSavedObject>>;
 
 export type RulesQuery = Required<
   Pick<SavedObjectsFindOptions, 'search' | 'page' | 'perPage' | 'filter'>
@@ -26,7 +26,7 @@ export const useFindCspRules = ({ search, page, perPage, filter }: RulesQuery) =
   const { savedObjects } = useKibana().services;
 
   return useQuery([CSP_RULE_SAVED_OBJECT_TYPE, { search, page, perPage }], () =>
-    savedObjects.client.find<CspRuleType>({
+    savedObjects.client.find<CspRule>({
       type: CSP_RULE_SAVED_OBJECT_TYPE,
       search: search ? `"${search}"*` : '',
       searchFields: ['metadata.name.text'],
@@ -52,7 +52,7 @@ export const useBulkUpdateCspRules = () => {
       packagePolicyId,
     }: {
       savedObjectRules: RuleSavedObject[];
-      packagePolicyId: CspRuleType['package_policy_id'];
+      packagePolicyId: CspRule['package_policy_id'];
     }) => {
       await savedObjects.client.bulkUpdate<RuleSavedObject>(
         savedObjectRules.map((savedObjectRule) => ({
@@ -74,10 +74,7 @@ export const useBulkUpdateCspRules = () => {
       },
       onSettled: () =>
         // Invalidate all queries for simplicity
-        queryClient.invalidateQueries({
-          queryKey: CSP_RULE_SAVED_OBJECT_TYPE,
-          exact: false,
-        }),
+        queryClient.invalidateQueries([CSP_RULE_SAVED_OBJECT_TYPE]),
     }
   );
 };

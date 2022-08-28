@@ -12,8 +12,9 @@ import { ThemeProvider } from 'styled-components';
 
 import '../../../../common/mock/match_media';
 import { mockTimelineResults } from '../../../../common/mock/timeline_results';
-import { OpenTimelineResult } from '../types';
-import { TimelinesTable, TimelinesTableProps } from '.';
+import type { OpenTimelineResult } from '../types';
+import type { TimelinesTableProps } from '.';
+import { TimelinesTable } from '.';
 import { getMockTimelinesTableProps } from './mocks';
 
 import * as i18n from '../translations';

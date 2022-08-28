@@ -12,7 +12,7 @@ import expect from '@kbn/expect';
 
 import type { ApiExplainLogRateSpikes } from '@kbn/aiops-plugin/common/api';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 import { parseStream } from './parse_stream';
 
@@ -28,15 +28,19 @@ export default ({ getService }: FtrProviderContext) => {
     deviationMin: 1561986810992,
     end: 2147483647000,
     index: 'ft_ecommerce',
-    kuery: '',
+    searchQuery: '{"bool":{"filter":[],"must":[{"match_all":{}}],"must_not":[]}}',
     start: 0,
     timeFieldName: 'order_date',
   };
 
   const expected = {
-    chunksLength: 7,
-    actionsLength: 6,
-    actionFilter: 'add_change_points',
+    chunksLength: 13,
+    actionsLength: 12,
+    noIndexChunksLength: 4,
+    noIndexActionsLength: 3,
+    changePointFilter: 'add_change_points',
+    histogramFilter: 'add_change_points_histogram',
+    errorFilter: 'add_error',
     changePoints: [
       {
         fieldName: 'day_of_week',
@@ -57,6 +61,7 @@ export default ({ getService }: FtrProviderContext) => {
         normalizedScore: 0.7661649691018979,
       },
     ],
+    histogramLength: 20,
   };
 
   describe('POST /internal/aiops/explain_log_rate_spikes', () => {
@@ -97,7 +102,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(typeof d.type).to.be('string');
       });
 
-      const addChangePointsActions = data.filter((d) => d.type === expected.actionFilter);
+      const addChangePointsActions = data.filter((d) => d.type === expected.changePointFilter);
       expect(addChangePointsActions.length).to.greaterThan(0);
 
       const changePoints = addChangePointsActions
@@ -117,6 +122,15 @@ export default ({ getService }: FtrProviderContext) => {
         expect(cp.doc_count).to.equal(ecp.doc_count);
         expect(cp.bg_count).to.equal(ecp.bg_count);
       });
+
+      const histogramActions = data.filter((d) => d.type === expected.histogramFilter);
+      const histograms = histogramActions.flatMap((d) => d.payload);
+      // for each change point we should get a histogram
+      expect(histogramActions.length).to.be(changePoints.length);
+      // each histogram should have a length of 20 items.
+      histograms.forEach((h, index) => {
+        expect(h.histogram.length).to.be(20);
+      });
     });
 
     it('should return data in chunks with streaming', async () => {
@@ -128,6 +142,9 @@ export default ({ getService }: FtrProviderContext) => {
         },
         body: JSON.stringify(requestBody),
       });
+
+      expect(response.ok).to.be(true);
+      expect(response.status).to.be(200);
 
       const stream = response.body;
 
@@ -142,7 +159,7 @@ export default ({ getService }: FtrProviderContext) => {
         }
 
         expect(data.length).to.be(expected.actionsLength);
-        const addChangePointsActions = data.filter((d) => d.type === expected.actionFilter);
+        const addChangePointsActions = data.filter((d) => d.type === expected.changePointFilter);
         expect(addChangePointsActions.length).to.greaterThan(0);
 
         const changePoints = addChangePointsActions
@@ -162,7 +179,52 @@ export default ({ getService }: FtrProviderContext) => {
           expect(cp.doc_count).to.equal(ecp.doc_count);
           expect(cp.bg_count).to.equal(ecp.bg_count);
         });
+
+        const histogramActions = data.filter((d) => d.type === expected.histogramFilter);
+        const histograms = histogramActions.flatMap((d) => d.payload);
+        // for each change point we should get a histogram
+        expect(histogramActions.length).to.be(changePoints.length);
+        // each histogram should have a length of 20 items.
+        histograms.forEach((h, index) => {
+          expect(h.histogram.length).to.be(20);
+        });
       }
+    });
+
+    it('should return an error for non existing index without streaming', async () => {
+      const resp = await supertest
+        .post(`/internal/aiops/explain_log_rate_spikes`)
+        .set('kbn-xsrf', 'kibana')
+        .send({
+          ...requestBody,
+          index: 'does_not_exist',
+        })
+        .expect(200);
+
+      const chunks: string[] = resp.body.toString().split('\n');
+
+      expect(chunks.length).to.be(expected.noIndexChunksLength);
+
+      const lastChunk = chunks.pop();
+      expect(lastChunk).to.be('');
+
+      let data: any[] = [];
+
+      expect(() => {
+        data = chunks.map((c) => JSON.parse(c));
+      }).not.to.throwError();
+
+      expect(data.length).to.be(expected.noIndexActionsLength);
+      data.forEach((d) => {
+        expect(typeof d.type).to.be('string');
+      });
+
+      const errorActions = data.filter((d) => d.type === expected.errorFilter);
+      expect(errorActions.length).to.be(1);
+
+      expect(errorActions[0].payload).to.be(
+        'ResponseError: index_not_found_exception: [index_not_found_exception] Reason: no such index [does_not_exist]'
+      );
     });
   });
 };

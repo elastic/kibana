@@ -21,9 +21,10 @@ import {
 import { css } from '@emotion/react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import { KibanaPageTemplate } from '@kbn/shared-ux-components';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { getServices } from '../../kibana_services';
+import { KEY_ENABLE_WELCOME } from '../home';
 import { UseCaseCard } from './use_case_card';
 
 const homeBreadcrumb = i18n.translate('home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
@@ -35,10 +36,10 @@ const title = i18n.translate('home.guidedOnboarding.gettingStarted.useCaseSelect
 });
 const subtitle = i18n.translate('home.guidedOnboarding.gettingStarted.useCaseSelectionSubtitle', {
   defaultMessage:
-    'Select an option below to get a quick tour of the most valuable features based on your preferences.',
+    'Select a starting point for a quick tour of how Elastic can help you do even more with your data.',
 });
 const skipText = i18n.translate('home.guidedOnboarding.gettingStarted.skip.buttonLabel', {
-  defaultMessage: `I'd like to do something else (Skip)`,
+  defaultMessage: `No thanks, I’ll explore on my own.`,
 });
 
 export const GettingStarted = () => {
@@ -62,6 +63,8 @@ export const GettingStarted = () => {
 
   const onSkip = () => {
     trackUiMetric(METRIC_TYPE.CLICK, 'guided_onboarding__skipped');
+    // disable welcome screen on the home page
+    localStorage.setItem(KEY_ENABLE_WELCOME, JSON.stringify(false));
     application.navigateToApp('home');
   };
   const { euiTheme } = useEuiTheme();

@@ -66,7 +66,7 @@ export class EMSTMSSource extends AbstractSource implements ITMSSource {
   }
 
   async getImmutableProperties() {
-    const displayName = await this.getDisplayName();
+    const tileServiceName = await this._getTileServiceName();
     const autoSelectMsg = i18n.translate('xpack.maps.source.emsTile.isAutoSelectLabel', {
       defaultMessage: 'autoselect based on Kibana theme',
     });
@@ -80,7 +80,9 @@ export class EMSTMSSource extends AbstractSource implements ITMSSource {
         label: i18n.translate('xpack.maps.source.emsTile.serviceId', {
           defaultMessage: `Tile service`,
         }),
-        value: this._descriptor.isAutoSelect ? `${displayName} - ${autoSelectMsg}` : displayName,
+        value: this._descriptor.isAutoSelect
+          ? `${tileServiceName} - ${autoSelectMsg}`
+          : tileServiceName,
       },
     ];
 
@@ -114,6 +116,12 @@ export class EMSTMSSource extends AbstractSource implements ITMSSource {
   }
 
   async getDisplayName() {
+    return i18n.translate('xpack.maps.source.emsTile.basemapLabel', {
+      defaultMessage: 'Basemap',
+    });
+  }
+
+  async _getTileServiceName() {
     try {
       const emsTMSService = await this._getEMSTMSService();
       return emsTMSService.getDisplayName();

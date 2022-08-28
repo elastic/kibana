@@ -171,7 +171,7 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
         onJobsFetched({ groupsMap, jobsMap: resp.jobsMap });
       }
     } catch (e) {
-      console.error('Error fetching jobs with time range', e); // eslint-disable-line
+      console.error('Error fetching jobs with time range', e); // eslint-disable-line no-console
       const { toasts } = notifications;
       toasts.addDanger({
         title: i18n.translate('xpack.ml.jobSelector.jobFetchErrorMessage', {

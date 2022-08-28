@@ -28,6 +28,7 @@ export * from './search';
 export type {
   RefreshInterval,
   TimeRangeBounds,
+  TimeRange,
   GetConfigFn,
   SavedQuery,
   SavedQueryAttributes,

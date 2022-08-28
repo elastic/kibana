@@ -4,10 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  ExceptionListTypeEnum,
-  CreateExceptionListSchema,
-} from '@kbn/securitysolution-io-ts-list-types';
+import type { CreateExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import {
   ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_DESCRIPTION,
   ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,

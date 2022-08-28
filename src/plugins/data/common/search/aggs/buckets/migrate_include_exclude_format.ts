@@ -40,6 +40,13 @@ export const migrateIncludeExcludeFormat = {
       if (parsedValue.length) {
         output.params[this.name] = parsedValue;
       }
+    } else if (Array.isArray(value) && value.length > 0 && isStringType(aggConfig)) {
+      // check if is regex
+      const filtered = value.filter((val) => val !== '');
+      if (filtered.length) {
+        const isRegularExpression = aggConfig.getParam(`${this.name}IsRegex`);
+        output.params[this.name] = isRegularExpression ? filtered[0] : filtered;
+      }
     } else if (isObject(value)) {
       output.params[this.name] = (value as any).pattern;
     } else if (value && isStringType(aggConfig)) {

@@ -20,6 +20,7 @@ import {
   DatasourceMock,
   mountWithProvider,
 } from '../../../mocks';
+import { createIndexPatternServiceMock } from '../../../mocks/data_views_service_mock';
 
 jest.mock('../../../id_generator');
 
@@ -96,6 +97,8 @@ describe('LayerPanel', () => {
       isFullscreen: false,
       toggleFullscreen: jest.fn(),
       onEmptyDimensionAdd: jest.fn(),
+      onChangeIndexPattern: jest.fn(),
+      indexPatternService: createIndexPatternServiceMock(),
     };
   }
 
@@ -163,6 +166,10 @@ describe('LayerPanel', () => {
       );
       act(() => {
         instance.find('[data-test-subj="lnsLayerRemove"]').first().simulate('click');
+      });
+      instance.update();
+      act(() => {
+        instance.find('[data-test-subj="lnsLayerRemoveConfirmButton"]').first().simulate('click');
       });
       expect(cb).toHaveBeenCalled();
     });
@@ -825,6 +832,7 @@ describe('LayerPanel', () => {
         .find(DragDrop)
         .at(1)
         .find('[data-test-subj="lnsDragDrop-keyboardHandler"]')
+        .at(1)
         .instance();
       const focusedEl = document.activeElement;
       expect(focusedEl).toEqual(secondButton);

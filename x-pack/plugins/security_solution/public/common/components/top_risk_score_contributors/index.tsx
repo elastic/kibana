@@ -7,19 +7,14 @@
 
 import React, { useMemo } from 'react';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiInMemoryTable,
-  EuiTableFieldDataColumnType,
-} from '@elastic/eui';
+import type { EuiTableFieldDataColumnType } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiInMemoryTable } from '@elastic/eui';
 
 import { HeaderSection } from '../header_section';
 import { InspectButton, InspectButtonContainer } from '../inspect';
 import * as i18n from './translations';
 
-import { RuleRisk } from '../../../../common/search_strategy';
+import type { RuleRisk } from '../../../../common/search_strategy';
 
 import { RuleLink } from '../../../detections/pages/detection_engine/rules/all/use_columns';
 

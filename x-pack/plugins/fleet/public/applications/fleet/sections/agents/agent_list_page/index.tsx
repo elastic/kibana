@@ -19,7 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 
-import type { Agent, AgentPolicy, PackagePolicy, SimplifiedAgentStatus } from '../../../types';
+import type { Agent, AgentPolicy, SimplifiedAgentStatus } from '../../../types';
 import {
   usePagination,
   useAuthz,
@@ -32,10 +32,15 @@ import {
   useKibanaVersion,
   useStartServices,
   useFlyoutContext,
+  sendGetAgentTags,
 } from '../../../hooks';
 import { AgentEnrollmentFlyout, AgentPolicySummaryLine } from '../../../components';
-import { AgentStatusKueryHelper, isAgentUpgradeable } from '../../../services';
-import { AGENTS_PREFIX, FLEET_SERVER_PACKAGE, SO_SEARCH_LIMIT } from '../../../constants';
+import {
+  AgentStatusKueryHelper,
+  isAgentUpgradeable,
+  policyHasFleetServer,
+} from '../../../services';
+import { AGENTS_PREFIX, SO_SEARCH_LIMIT } from '../../../constants';
 import {
   AgentReassignAgentPolicyModal,
   AgentHealth,
@@ -220,17 +225,23 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     },
   };
 
+  const isLoadingVar = useRef<boolean>(false);
+
   // Request to fetch agents and agent status
   const currentRequestRef = useRef<number>(0);
   const fetchData = useCallback(
     ({ refreshTags = false }: { refreshTags?: boolean } = {}) => {
       async function fetchDataAsync() {
+        // skipping refresh if previous request is in progress
+        if (isLoadingVar.current) {
+          return;
+        }
         currentRequestRef.current++;
         const currentRequest = currentRequestRef.current;
-
+        isLoadingVar.current = true;
         try {
           setIsLoading(true);
-          const [agentsRequest, agentsStatusRequest] = await Promise.all([
+          const [agentsResponse, agentsStatusResponse, agentTagsResponse] = await Promise.all([
             sendGetAgents({
               page: pagination.currentPage,
               perPage: pagination.pageSize,
@@ -243,35 +254,44 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             sendGetAgentStatus({
               kuery: kuery && kuery !== '' ? kuery : undefined,
             }),
+            sendGetAgentTags({
+              kuery: kuery && kuery !== '' ? kuery : undefined,
+              showInactive,
+            }),
           ]);
-          // Return if a newer request as been triggered
+          isLoadingVar.current = false;
+          // Return if a newer request has been triggered
           if (currentRequestRef.current !== currentRequest) {
             return;
           }
-          if (agentsRequest.error) {
-            throw agentsRequest.error;
+          if (agentsResponse.error) {
+            throw agentsResponse.error;
           }
-          if (!agentsRequest.data) {
+          if (!agentsResponse.data) {
             throw new Error('Invalid GET /agents response');
           }
-          if (agentsStatusRequest.error) {
-            throw agentsStatusRequest.error;
+          if (agentsStatusResponse.error) {
+            throw agentsStatusResponse.error;
           }
-          if (!agentsStatusRequest.data) {
-            throw new Error('Invalid GET /agents-status response');
+          if (!agentsStatusResponse.data) {
+            throw new Error('Invalid GET /agents_status response');
+          }
+          if (agentTagsResponse.error) {
+            throw agentsStatusResponse.error;
+          }
+          if (!agentTagsResponse.data) {
+            throw new Error('Invalid GET /agent/tags response');
           }
 
           setAgentsStatus({
-            healthy: agentsStatusRequest.data.results.online,
-            unhealthy: agentsStatusRequest.data.results.error,
-            offline: agentsStatusRequest.data.results.offline,
-            updating: agentsStatusRequest.data.results.updating,
-            inactive: agentsRequest.data.totalInactive,
+            healthy: agentsStatusResponse.data.results.online,
+            unhealthy: agentsStatusResponse.data.results.error,
+            offline: agentsStatusResponse.data.results.offline,
+            updating: agentsStatusResponse.data.results.updating,
+            inactive: agentsResponse.data.totalInactive,
           });
 
-          const newAllTags = Array.from(
-            new Set(agentsRequest.data.items.flatMap((agent) => agent.tags ?? []))
-          );
+          const newAllTags = agentTagsResponse.data.items;
 
           // We only want to update the list of available tags if
           // - We haven't set any tags yet
@@ -281,9 +301,9 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             setAllTags(newAllTags);
           }
 
-          setAgents(agentsRequest.data.items);
-          setTotalAgents(agentsRequest.data.total);
-          setTotalInactiveAgents(agentsRequest.data.totalInactive);
+          setAgents(agentsResponse.data.items);
+          setTotalAgents(agentsResponse.data.total);
+          setTotalInactiveAgents(agentsResponse.data.totalInactive);
         } catch (error) {
           notifications.toasts.addError(error, {
             title: i18n.translate('xpack.fleet.agentList.errorFetchingDataTitle', {
@@ -353,6 +373,11 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         selectedAgents.length > 0 && differenceBy(selectedAgents, agents, 'id').length === 0;
       if (areSelectedAgentsStillVisible) {
         setSelectionMode('manual');
+      } else {
+        // force selecting all agents on current page if staying in query mode
+        if (tableRef?.current) {
+          tableRef.current.setSelection(agents);
+        }
       }
     }
   };
@@ -368,10 +393,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       return false;
     }
 
-    return agentPolicy.package_policies.some(
-      (ap: string | PackagePolicy) =>
-        typeof ap !== 'string' && ap.package?.name === FLEET_SERVER_PACKAGE
-    );
+    return policyHasFleetServer(agentPolicy);
   }, [agentToUnenroll, agentPoliciesIndexedById]);
 
   // Fleet server unhealthy status
@@ -428,7 +450,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
 
         return (
           <EuiFlexGroup gutterSize="none" style={{ minWidth: 0 }} direction="column">
-            {agentPolicy && <AgentPolicySummaryLine policy={agentPolicy} />}
+            {agentPolicy && <AgentPolicySummaryLine policy={agentPolicy} agent={agent} />}
             {showWarning && (
               <EuiFlexItem grow={false}>
                 <EuiText color="subdued" size="xs" className="eui-textNoWrap">
@@ -513,7 +535,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
                   setAgentToAddRemoveTags(agent);
                   setShowTagsAddRemove(!showTagsAddRemove);
                 }}
-                allTags={allTags ?? []}
               />
             );
           },
@@ -584,6 +605,9 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           onTagsUpdated={() => {
             fetchData();
           }}
+          onClosePopover={() => {
+            setShowTagsAddRemove(false);
+          }}
         />
       )}
       {isFleetServerUnhealthy && (
@@ -627,6 +651,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           Promise.all([fetchData({ refreshTags }), refreshUpgrades()])
         }
         onClickAddAgent={() => setEnrollmentFlyoutState({ isOpen: true })}
+        onClickAddFleetServer={onClickAddFleetServer}
+        visibleAgents={agents}
       />
       <EuiSpacer size="m" />
       {/* Agent total, bulk actions and status bar */}

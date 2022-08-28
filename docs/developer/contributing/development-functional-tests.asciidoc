@@ -219,6 +219,7 @@ export default function ({ getService, getPageObject }) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   // for historical reasons, PageObjects are loaded in a single API call
   // and returned on an object with a key/value for each requested PageObject
@@ -231,8 +232,8 @@ export default function ({ getService, getPageObject }) {
     // app/page and restores some archives into {es} with esArchiver
     before(async () => {
       await Promise.all([
-        // start with an empty .kibana index
-        esArchiver.load('test/functional/fixtures/es_archiver/empty_kibana'),
+        // start by clearing Saved Objects from the .kibana index
+        await kibanaServer.savedObjects.cleanStandardList();
         // load some basic log data only if the index doesn't exist
         esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/makelogs')
       ]);
@@ -243,10 +244,10 @@ export default function ({ getService, getPageObject }) {
     // right after the before() hook definition, add the teardown steps
     // that will tidy up {es} for other test suites
     after(async () => {
-      // we unload the empty_kibana archive but not the makelogs
+      // we clear Kibana Saved Objects but not the makelogs
       // archive because we don't make any changes to it, and subsequent
       // suites could use it if they call `.loadIfNeeded()`.
-      await esArchiver.unload('test/functional/fixtures/es_archiver/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     // This series of tests illustrate how tests generally verify

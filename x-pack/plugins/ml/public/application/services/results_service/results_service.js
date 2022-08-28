@@ -61,7 +61,7 @@ export function resultsServiceProvider(mlApiServices) {
           {
             range: {
               anomaly_score: {
-                gt: swimLaneSeverity,
+                gte: swimLaneSeverity,
               },
             },
           },

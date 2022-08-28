@@ -9,9 +9,12 @@ import { RouteDependencies } from '../../../types';
 
 import { registerGetOneRoute, registerGetAllRoute } from './register_get_route';
 import { registerDeleteRoute } from './register_delete_route';
+import { registerPostOneApplyLatestMappings, registerPostOneRollover } from './register_post_route';
 
 export function registerDataStreamRoutes(dependencies: RouteDependencies) {
   registerGetOneRoute(dependencies);
+  registerPostOneApplyLatestMappings(dependencies);
+  registerPostOneRollover(dependencies);
   registerGetAllRoute(dependencies);
   registerDeleteRoute(dependencies);
 }

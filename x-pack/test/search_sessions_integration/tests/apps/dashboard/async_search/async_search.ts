@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const queryBar = getService('queryBar');
   const elasticChart = getService('elasticChart');
-  const xyChartSelector = 'visTypeXyChart';
+  const xyChartSelector = 'xyVisChart';
 
   const enableNewChartLibraryDebug = async () => {
     await elasticChart.setNewChartUiDebugFlag();
@@ -36,7 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.loadSavedDashboard('Not Delayed');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.missingOrFail('embeddableErrorLabel');
+      await testSubjects.missingOrFail('embeddableError');
       await enableNewChartLibraryDebug();
       const data = await PageObjects.visChart.getBarChartData(xyChartSelector, 'Sum of bytes');
       expect(data.length).to.be(5);
@@ -46,7 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.loadSavedDashboard('Delayed 5s');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.missingOrFail('embeddableErrorLabel');
+      await testSubjects.missingOrFail('embeddableError');
       await enableNewChartLibraryDebug();
       const data = await PageObjects.visChart.getBarChartData(xyChartSelector, 'Sum of bytes');
       expect(data.length).to.be(5);
@@ -56,7 +56,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.loadSavedDashboard('Delayed 15s');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.existOrFail('embeddableErrorLabel');
+      await testSubjects.existOrFail('embeddableError');
       await testSubjects.existOrFail('searchTimeoutError');
     });
 
@@ -64,9 +64,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.loadSavedDashboard('Multiple delayed');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.existOrFail('embeddableErrorLabel');
+      await testSubjects.existOrFail('embeddableError');
       // there should be two failed panels
-      expect((await testSubjects.findAll('embeddableErrorLabel')).length).to.be(2);
+      expect((await testSubjects.findAll('embeddableError')).length).to.be(2);
       // but only single error toast because searches are grouped
       expect((await testSubjects.findAll('searchTimeoutError')).length).to.be(1);
 

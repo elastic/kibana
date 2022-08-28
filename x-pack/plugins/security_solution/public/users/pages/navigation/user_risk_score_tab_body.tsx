@@ -8,10 +8,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { noop } from 'lodash/fp';
 
-import { UsersComponentsQueryProps } from './types';
+import type { UsersComponentsQueryProps } from './types';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import { State } from '../../../common/store';
+import type { State } from '../../../common/store';
 
 import { UserRiskScoreTable } from '../../components/user_risk_score_table';
 import { usersSelectors } from '../../store';

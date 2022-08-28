@@ -19,6 +19,7 @@ def _collect_inputs_deps_and_transitive_types_deps(ctx):
   """Returns an array with all transitively referenced files on deps in the pos 0 and all types deps in pos 1"""
   deps_files_depsets = []
   transitive_types_deps = []
+
   for dep in ctx.attr.deps:
     # Collect whatever is in the "data"
     deps_files_depsets.append(dep.data_runfiles.files)
@@ -29,6 +30,7 @@ def _collect_inputs_deps_and_transitive_types_deps(ctx):
     # Collect transitive type deps to propagate in the provider
     if DeclarationInfo in dep:
       transitive_types_deps.append(dep)
+      deps_files_depsets.append(dep[DeclarationInfo].transitive_declarations)
 
   deps_files = depset(transitive = deps_files_depsets).to_list()
   return [deps_files, transitive_types_deps]
@@ -97,6 +99,9 @@ def _pkg_npm_types_impl(ctx):
     mnemonic = "AssembleNpmTypesPackage",
     progress_message = "Assembling npm types package %s" % package_dir.short_path,
     executable = "_packager",
+    env = {
+      "FORCE_COLOR": "1"
+    }
   )
 
   # this is a tree artifact, so correctly build the return
@@ -109,6 +114,11 @@ def _pkg_npm_types_impl(ctx):
     ),
     declaration_info(
       declarations = depset([package_dir]),
+      # this includes all the dependencies and transitive dependnecies of the ts_project, but the
+      # actual dependencies of the type summarizer output are just a subset of these. We don't currently
+      # know any way to pass the list of dependecies from the type summarizer back to bazel, so we use
+      # this larger-than-necessary list for accuracy, but we will likely need to figure this out once
+      # we have a much larger dependency graph.
       deps = transitive_types_deps,
     ),
     LinkablePackageInfo(
@@ -143,7 +153,7 @@ pkg_npm_types = rule(
       doc = "Target that executes the npm types package assembler binary",
       executable = True,
       cfg = "target",
-      default = Label("//packages/kbn-type-summarizer:bazel-cli"),
+      default = Label("//packages/kbn-type-summarizer-cli:bazel-cli"),
     ),
   },
 )

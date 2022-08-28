@@ -1,7 +1,5 @@
 on:
   pull_request_target:
-    branches:
-      - main
     types:
       - closed
       - labeled
@@ -12,12 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     if: |
       github.event.pull_request.merged == true
-      && (
-        contains(github.event.pull_request.labels.*.name, 'backport:prev-minor')
-        || contains(github.event.pull_request.labels.*.name, 'backport:prev-major')
-        || contains(github.event.pull_request.labels.*.name, 'backport:all-open')
-        || contains(github.event.pull_request.labels.*.name, 'backport:auto-version')
-      )
+      && !contains(github.event.pull_request.labels.*.name, 'auto-backport')
       && (
         (
           github.event.action == 'labeled' && (

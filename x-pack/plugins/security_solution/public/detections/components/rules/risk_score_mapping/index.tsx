@@ -19,12 +19,12 @@ import {
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { noop } from 'lodash/fp';
-import { RiskScoreMapping } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { RiskScoreMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import { FieldComponent } from '@kbn/securitysolution-autocomplete';
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
-import { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import * as i18n from './translations';
-import { AboutStepRiskScore } from '../../../pages/detection_engine/rules/types';
+import type { AboutStepRiskScore } from '../../../pages/detection_engine/rules/types';
 
 const NestedContent = styled.div`
   margin-left: 24px;

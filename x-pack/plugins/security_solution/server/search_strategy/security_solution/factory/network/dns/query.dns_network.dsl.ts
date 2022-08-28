@@ -6,12 +6,8 @@
  */
 
 import { assertUnreachable } from '../../../../../../common/utility_types';
-import {
-  Direction,
-  SortField,
-  NetworkDnsRequestOptions,
-  NetworkDnsFields,
-} from '../../../../../../common/search_strategy';
+import type { SortField, NetworkDnsRequestOptions } from '../../../../../../common/search_strategy';
+import { Direction, NetworkDnsFields } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 
 const HUGE_QUERY_SIZE = 1000000;

@@ -6,6 +6,7 @@
  */
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { EuiDescriptionListProps } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,7 +17,6 @@ import {
   EuiLink,
   EuiPortal,
 } from '@elastic/eui';
-import type { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 

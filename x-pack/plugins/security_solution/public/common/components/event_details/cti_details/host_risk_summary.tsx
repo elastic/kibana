@@ -12,8 +12,8 @@ import * as i18n from './translations';
 import { RISKY_HOSTS_DOC_LINK } from '../../../../overview/components/overview_risky_host_links/risky_hosts_disabled_module';
 import { EnrichedDataRow, ThreatSummaryPanelHeader } from './threat_summary_view';
 import { RiskScore } from '../../severity/common';
-import { RiskSeverity } from '../../../../../common/search_strategy';
-import { HostRisk } from '../../../../risk_score/containers';
+import type { RiskSeverity } from '../../../../../common/search_strategy';
+import type { HostRisk } from '../../../../risk_score/containers';
 
 const HostRiskSummaryComponent: React.FC<{
   hostRisk: HostRisk;

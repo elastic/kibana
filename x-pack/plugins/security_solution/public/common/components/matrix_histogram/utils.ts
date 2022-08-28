@@ -8,9 +8,9 @@
 import { ScaleType, Position } from '@elastic/charts';
 import { get, groupBy, map, toPairs } from 'lodash/fp';
 
-import { UpdateDateRange, ChartSeriesData } from '../charts/common';
-import { MatrixHistogramMappingTypes, BarchartConfigs } from './types';
-import { MatrixHistogramData } from '../../../../common/search_strategy';
+import type { UpdateDateRange, ChartSeriesData } from '../charts/common';
+import type { MatrixHistogramMappingTypes, BarchartConfigs } from './types';
+import type { MatrixHistogramData } from '../../../../common/search_strategy';
 import { histogramDateTimeFormatter } from '../utils';
 
 interface GetBarchartConfigsProps {

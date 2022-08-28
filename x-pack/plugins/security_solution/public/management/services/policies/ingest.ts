@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import { HttpFetchOptions, HttpStart } from '@kbn/core/public';
-import {
+import type { HttpFetchOptions, HttpStart } from '@kbn/core/public';
+import type {
   GetAgentStatusResponse,
   GetAgentsResponse,
-  DeletePackagePoliciesResponse,
-  DeletePackagePoliciesRequest,
   GetPackagesResponse,
   GetAgentPoliciesRequest,
   GetAgentPoliciesResponse,
+  GetPackagePoliciesResponse,
 } from '@kbn/fleet-plugin/common';
-import { NewPolicyData } from '../../../../common/endpoint/types';
-import { GetPolicyResponse, UpdatePolicyResponse } from '../../pages/policy/types';
+import type { NewPolicyData } from '../../../../common/endpoint/types';
+import type { GetPolicyResponse, UpdatePolicyResponse } from '../../pages/policy/types';
 
 const INGEST_API_ROOT = `/api/fleet`;
 export const INGEST_API_PACKAGE_POLICIES = `${INGEST_API_ROOT}/package_policies`;
@@ -24,7 +23,6 @@ export const INGEST_API_AGENT_POLICIES = `${INGEST_API_ROOT}/agent_policies`;
 const INGEST_API_FLEET_AGENT_STATUS = `${INGEST_API_ROOT}/agent_status`;
 export const INGEST_API_FLEET_AGENTS = `${INGEST_API_ROOT}/agents`;
 export const INGEST_API_EPM_PACKAGES = `${INGEST_API_ROOT}/epm/packages`;
-const INGEST_API_DELETE_PACKAGE_POLICY = `${INGEST_API_PACKAGE_POLICIES}/delete`;
 
 /**
  * Retrieves a single package policy based on ID from ingest
@@ -41,19 +39,22 @@ export const sendGetPackagePolicy = (
 };
 
 /**
- * Retrieves a single package policy based on ID from ingest
+ * Retrieves multiple package policies by ids
  * @param http
- * @param body
+ * @param packagePolicyIds
  * @param options
  */
-export const sendDeletePackagePolicy = (
+export const sendBulkGetPackagePolicies = (
   http: HttpStart,
-  body: DeletePackagePoliciesRequest,
+  packagePolicyIds: string[],
   options?: HttpFetchOptions
 ) => {
-  return http.post<DeletePackagePoliciesResponse>(INGEST_API_DELETE_PACKAGE_POLICY, {
+  return http.post<GetPackagePoliciesResponse>(`${INGEST_API_PACKAGE_POLICIES}/_bulk_get`, {
     ...options,
-    body: JSON.stringify(body.body),
+    body: JSON.stringify({
+      ids: packagePolicyIds,
+      ignoreMissing: true,
+    }),
   });
 };
 
@@ -67,6 +68,26 @@ export const sendGetAgentPolicyList = (
   options: HttpFetchOptions & GetAgentPoliciesRequest
 ) => {
   return http.get<GetAgentPoliciesResponse>(INGEST_API_AGENT_POLICIES, options);
+};
+
+/**
+ * Retrieve a list of Agent Policies
+ * @param http
+ * @param options
+ */
+export const sendBulkGetAgentPolicyList = (
+  http: HttpStart,
+  ids: string[],
+  options: HttpFetchOptions = {}
+) => {
+  return http.post<GetAgentPoliciesResponse>(`${INGEST_API_AGENT_POLICIES}/_bulk_get`, {
+    ...options,
+    body: JSON.stringify({
+      ids,
+      ignoreMissing: true,
+      full: true,
+    }),
+  });
 };
 
 /**

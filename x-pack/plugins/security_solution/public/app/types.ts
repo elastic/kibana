@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   Reducer,
   AnyAction,
   Middleware,
@@ -15,10 +15,10 @@ import {
   StateFromReducersMapObject,
   CombinedState,
 } from 'redux';
-import { RouteProps } from 'react-router-dom';
-import { AppMountParameters } from '@kbn/core/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { StartServices } from '../types';
+import type { RouteProps } from 'react-router-dom';
+import type { AppMountParameters } from '@kbn/core/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { StartServices } from '../types';
 
 /**
  * The React properties used to render `SecurityApp` as well as the `element` to render it into.
@@ -30,10 +30,10 @@ export interface RenderAppProps extends AppMountParameters {
   usageCollection?: UsageCollectionSetup;
 }
 
-import { State, SubPluginsInitReducer } from '../common/store';
-import { Immutable } from '../../common/endpoint/types';
-import { AppAction } from '../common/store/actions';
-import { TimelineState } from '../timelines/store/timeline/types';
+import type { State, SubPluginsInitReducer } from '../common/store';
+import type { Immutable } from '../../common/endpoint/types';
+import type { AppAction } from '../common/store/actions';
+import type { TimelineState } from '../timelines/store/timeline/types';
 
 export { SecurityPageName } from '../../common/constants';
 

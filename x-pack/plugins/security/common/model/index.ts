@@ -6,13 +6,16 @@
  */
 
 export type { ApiKey, ApiKeyToInvalidate, ApiKeyRoleDescriptors } from './api_key';
-export type { User, EditUser } from './user';
+export type { User, EditUser, GetUserDisplayNameParams } from './user';
 export type {
-  AuthenticatedUserProfile,
+  GetUserProfileResponse,
   UserProfile,
-  UserData,
-  UserInfo,
-  UserAvatarData,
+  UserProfileUserInfo,
+  UserProfileWithSecurity,
+  UserProfileData,
+  UserProfileLabels,
+  UserProfileUserInfoWithSecurity,
+  UserProfileAvatarData,
 } from './user_profile';
 export {
   getUserAvatarColor,

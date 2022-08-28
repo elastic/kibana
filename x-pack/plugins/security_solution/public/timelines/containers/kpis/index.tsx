@@ -11,16 +11,15 @@ import deepEqual from 'fast-deep-equal';
 import { Subscription } from 'rxjs';
 
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/public';
-import { inputsModel } from '../../../common/store';
+import type { inputsModel } from '../../../common/store';
 import { useKibana } from '../../../common/lib/kibana';
-import {
-  DocValueFields,
-  TimelineEventsQueries,
+import type {
   TimelineKpiStrategyRequest,
   TimelineKpiStrategyResponse,
   TimerangeInput,
 } from '../../../../common/search_strategy';
-import { ESQuery } from '../../../../common/typed_json';
+import { TimelineEventsQueries } from '../../../../common/search_strategy';
+import type { ESQuery } from '../../../../common/typed_json';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import * as i18n from './translations';
 
@@ -28,14 +27,12 @@ export interface UseTimelineKpiProps {
   timerange: TimerangeInput;
   filterQuery?: ESQuery | string | undefined;
   defaultIndex: string[];
-  docValueFields?: DocValueFields[];
   isBlankTimeline: boolean;
 }
 
 export const useTimelineKpis = ({
   timerange,
   filterQuery,
-  docValueFields,
   defaultIndex,
   isBlankTimeline,
 }: UseTimelineKpiProps): [boolean, TimelineKpiStrategyResponse | null] => {
@@ -96,7 +93,6 @@ export const useTimelineKpis = ({
     setTimelineKpiRequest((prevRequest) => {
       const myRequest = {
         ...(prevRequest ?? {}),
-        docValueFields,
         defaultIndex,
         timerange,
         filterQuery,
@@ -107,7 +103,7 @@ export const useTimelineKpis = ({
       }
       return prevRequest;
     });
-  }, [docValueFields, defaultIndex, timerange, filterQuery]);
+  }, [defaultIndex, timerange, filterQuery]);
 
   useEffect(() => {
     if (!isBlankTimeline) {

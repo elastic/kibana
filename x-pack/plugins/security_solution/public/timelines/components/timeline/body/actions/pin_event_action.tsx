@@ -12,7 +12,7 @@ import { DEFAULT_ACTION_BUTTON_WIDTH } from '@kbn/timelines-plugin/public';
 import { EventsTdContent } from '../../styles';
 import { eventHasNotes, getPinTooltip } from '../helpers';
 import { Pin } from '../../pin';
-import { TimelineType } from '../../../../../../common/types/timeline';
+import type { TimelineType } from '../../../../../../common/types/timeline';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 
 interface PinEventActionProps {

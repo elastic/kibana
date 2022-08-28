@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Action } from 'redux-actions';
-import { IHttpFetchError } from '@kbn/core/public';
+import type { Action } from 'redux-actions';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
-import { UptimeAlertTypeParams } from '../alerts/alerts';
+import type { UptimeAlertTypeParams } from '../alerts/alerts';
 
 export interface AsyncAction<Payload, SuccessPayload> {
   get: (payload: Payload) => Action<Payload>;

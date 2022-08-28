@@ -284,14 +284,16 @@ export function DashboardTopNav({
     };
 
     const lastDashboardId = dashboardAppState.savedDashboard.id;
-    const currentTags = savedObjectsTagging?.ui.hasTagDecoration(dashboardAppState.savedDashboard)
+    const savedTags = savedObjectsTagging?.ui.hasTagDecoration(dashboardAppState.savedDashboard)
       ? dashboardAppState.savedDashboard.getTags()
       : [];
+    const currentTagsSet = new Set([...savedTags, ...currentState.tags]);
+
     const dashboardSaveModal = (
       <DashboardSaveModal
         onSave={onSave}
         onClose={() => {}}
-        tags={currentTags}
+        tags={Array.from(currentTagsSet)}
         title={currentState.title}
         timeRestore={currentState.timeRestore}
         description={currentState.description}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectMigrationMap } from '@kbn/core/server';
+import type { SavedObjectMigrationMap } from '@kbn/core/server';
 import { migrateTimelineIdToReferences } from './utils';
 
 export const pinnedEventsMigrations: SavedObjectMigrationMap = {

@@ -21,6 +21,7 @@ import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/publ
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { ElasticV3BrowserShipper } from '@kbn/analytics-shippers-elastic-v3-browser';
 
+import { of } from 'rxjs';
 import { TelemetrySender, TelemetryService, TelemetryNotifications } from './services';
 import type {
   TelemetrySavedObjectAttributes,
@@ -104,6 +105,8 @@ export interface TelemetryPluginConfig {
   userCanChangeSettings?: boolean;
   /** Should we hide the privacy statement notice? Useful on some environments, e.g. Cloud */
   hidePrivacyStatement?: boolean;
+  /** Extra labels to add to the telemetry context */
+  labels: Record<string, unknown>;
 }
 
 function getTelemetryConstants(docLinks: DocLinksStart): TelemetryConstants {
@@ -144,6 +147,19 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
     getStartServices().then(([{ docLinks }]) => {
       telemetryConstants = getTelemetryConstants(docLinks);
+    });
+
+    analytics.registerContextProvider({
+      name: 'telemetry labels',
+      context$: of({ labels: this.config.labels }),
+      schema: {
+        labels: {
+          type: 'pass_through',
+          _meta: {
+            description: 'Custom labels added to the telemetry.labels config in the kibana.yml',
+          },
+        },
+      },
     });
 
     analytics.registerShipper(ElasticV3BrowserShipper, {

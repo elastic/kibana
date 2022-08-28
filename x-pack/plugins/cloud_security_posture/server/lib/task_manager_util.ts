@@ -20,7 +20,7 @@ export async function scheduleTaskSafe(
 ): Promise<boolean> {
   try {
     await taskManager.ensureScheduled(taskConfig);
-    logger.info(`Task: ${taskConfig.id} is scheduled`);
+    logger.info(`Scheduled task successfully [Task: ${taskConfig.id}]`);
   } catch (errMsg) {
     const error = transformError(errMsg);
     logger.error(`Error scheduling task, received ${error.message}`);
@@ -37,7 +37,7 @@ export async function removeTaskSafe(
 ): Promise<boolean> {
   try {
     await taskManager.remove(taskId);
-    logger.info(`Task: ${taskId} removed`);
+    logger.info(`Deleted task successfully [Task: ${taskId}]`);
   } catch (errMsg) {
     logger.error(`Failed to remove task: ${taskId}`);
     return false;

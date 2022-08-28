@@ -5,15 +5,10 @@
  * 2.0.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiToolTip,
-} from '@elastic/eui';
-import React, { useMemo, useCallback, SyntheticEvent, MouseEventHandler, MouseEvent } from 'react';
+import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiToolTip } from '@elastic/eui';
+import type { SyntheticEvent, MouseEventHandler, MouseEvent } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { isArray, isNil } from 'lodash/fp';
 import { IP_REPUTATION_LINKS_SETTING, APP_UI_ID } from '../../../../common/constants';
 import { encodeIpv6 } from '../../lib/helpers';
@@ -26,27 +21,25 @@ import {
   useFormatUrl,
   useGetSecuritySolutionUrl,
 } from '../link_to';
-import {
-  FlowTarget,
-  FlowTargetSourceDest,
-} from '../../../../common/search_strategy/security_solution/network';
+import type { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
+import { FlowTarget } from '../../../../common/search_strategy/security_solution/network';
 import { useUiSetting$, useKibana, useNavigateTo } from '../../lib/kibana';
 import { isUrlInvalid } from '../../utils/validators';
 
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../app/types';
 import { getTabsOnUsersDetailsUrl, getUsersDetailsUrl } from '../link_to/redirect_to_users';
+import type { ReputationLinkSetting } from './helpers';
 import {
   LinkAnchor,
   GenericLinkButton,
   PortContainer,
   Comma,
   LinkButton,
-  ReputationLinkSetting,
   ReputationLinksOverflow,
 } from './helpers';
-import { HostsTableType } from '../../../hosts/store/model';
-import { UsersTableType } from '../../../users/store/model';
+import type { HostsTableType } from '../../../hosts/store/model';
+import type { UsersTableType } from '../../../users/store/model';
 
 export { LinkButton, LinkAnchor } from './helpers';
 
@@ -220,32 +213,24 @@ const NetworkDetailsLinkComponent: React.FC<{
   onClick?: (e: SyntheticEvent) => void | undefined;
   title?: string;
 }> = ({ Component, children, ip, flowTarget = FlowTarget.source, isButton, onClick, title }) => {
-  const { formatUrl, search } = useFormatUrl(SecurityPageName.network);
-  const { navigateToApp } = useKibana().services.application;
-  const goToNetworkDetails = useCallback(
-    (ev, cIp: string) => {
-      ev.preventDefault();
-      navigateToApp(APP_UI_ID, {
-        deepLinkId: SecurityPageName.network,
-        path: getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(cIp)), flowTarget, search),
-      });
-    },
-    [flowTarget, navigateToApp, search]
-  );
-  const getHref = useCallback(
-    (cIp: string) => formatUrl(getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(cIp)))),
-    [formatUrl]
-  );
+  const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
 
   const getLink = useCallback(
-    (cIp: string, i: number) =>
-      isButton ? (
+    (cIp: string, i: number) => {
+      const { onClick: onClickNavigation, href } = getSecuritySolutionLinkProps({
+        deepLinkId: SecurityPageName.network,
+        path: getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(cIp)), flowTarget),
+      });
+
+      const onLinkClick = onClick ?? ((e: SyntheticEvent) => onClickNavigation(e as MouseEvent));
+
+      return isButton ? (
         <GenericLinkButton
           Component={Component}
           key={`${cIp}-${i}`}
           dataTestSubj="data-grid-network-details"
-          onClick={onClick ?? ((e: SyntheticEvent) => goToNetworkDetails(e, cIp))}
-          href={getHref(cIp)}
+          onClick={onLinkClick}
+          href={href}
           title={title ?? cIp}
         >
           {children}
@@ -253,14 +238,15 @@ const NetworkDetailsLinkComponent: React.FC<{
       ) : (
         <LinkAnchor
           key={`${cIp}-${i}`}
-          onClick={onClick ?? ((e: SyntheticEvent) => goToNetworkDetails(e, cIp))}
-          href={getHref(cIp)}
+          onClick={onLinkClick}
+          href={href}
           data-test-subj="network-details"
         >
           {children ? children : cIp}
         </LinkAnchor>
-      ),
-    [Component, children, getHref, goToNetworkDetails, isButton, onClick, title]
+      );
+    },
+    [children, Component, flowTarget, getSecuritySolutionLinkProps, onClick, isButton, title]
   );
   return isArray(ip) ? <>{ip.map(getLink)}</> : getLink(ip, 0);
 };

@@ -5,29 +5,26 @@
  * 2.0.
  */
 import React from 'react';
-import { act, cleanup } from '@testing-library/react';
-import { fireEvent } from '@testing-library/dom';
+import { act, cleanup, fireEvent } from '@testing-library/react';
 import { stubIndexPattern } from '@kbn/data-plugin/common/stubs';
 import { useFetchIndex } from '../../../../../common/containers/source';
 import { NAME_ERROR } from '../event_filters_list';
 import { useCurrentUser, useKibana } from '../../../../../common/lib/kibana';
 import { licenseService } from '../../../../../common/hooks/use_license';
-import {
-  AppContextTestRender,
-  createAppRootMockRenderer,
-} from '../../../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
 import userEvent from '@testing-library/user-event';
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '@kbn/securitysolution-list-constants';
-import {
+import type {
   ArtifactFormComponentOnChangeCallbackProps,
   ArtifactFormComponentProps,
 } from '../../../../components/artifact_list_page';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { EventFiltersForm } from './form';
 import { EndpointDocGenerator } from '../../../../../../common/endpoint/generate_data';
-import { PolicyData } from '../../../../../../common/endpoint/types';
+import type { PolicyData } from '../../../../../../common/endpoint/types';
 
 jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../../common/containers/source');
@@ -189,9 +186,7 @@ describe('Event filter form', () => {
       render();
       expect(renderResult.queryByText(NAME_ERROR)).toBeNull();
       const nameInput = renderResult.getByTestId(`${formPrefix}-name-input`);
-      act(() => {
-        fireEvent.blur(nameInput);
-      });
+      fireEvent.blur(nameInput);
       rerenderWithLatestProps();
       expect(renderResult.queryByText(NAME_ERROR)).not.toBeNull();
     });

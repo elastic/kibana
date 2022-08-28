@@ -8,10 +8,11 @@
 import React, { FC, Suspense } from 'react';
 
 import { EuiErrorBoundary, EuiLoadingContent } from '@elastic/eui';
+import type { ExplainLogRateSpikesAppStateProps } from './components/explain_log_rate_spikes';
 
-import type { ExplainLogRateSpikesProps } from './components/explain_log_rate_spikes';
-
-const ExplainLogRateSpikesLazy = React.lazy(() => import('./components/explain_log_rate_spikes'));
+const ExplainLogRateSpikesAppStateLazy = React.lazy(
+  () => import('./components/explain_log_rate_spikes')
+);
 
 const LazyWrapper: FC = ({ children }) => (
   <EuiErrorBoundary>
@@ -20,11 +21,11 @@ const LazyWrapper: FC = ({ children }) => (
 );
 
 /**
- * Lazy-wrapped ExplainLogRateSpikes React component
- * @param {ExplainLogRateSpikesProps}  props - properties specifying the data on which to run the analysis.
+ * Lazy-wrapped ExplainLogRateSpikesAppState React component
+ * @param {ExplainLogRateSpikesAppStateProps}  props - properties specifying the data on which to run the analysis.
  */
-export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = (props) => (
+export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesAppStateProps> = (props) => (
   <LazyWrapper>
-    <ExplainLogRateSpikesLazy {...props} />
+    <ExplainLogRateSpikesAppStateLazy {...props} />
   </LazyWrapper>
 );

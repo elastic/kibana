@@ -8,25 +8,25 @@
 import React, { useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
-import {
+import type {
   Columns,
   Criteria,
   ItemsPerRow,
-  PaginatedTable,
   SortingBasicTable,
 } from '../../../common/components/paginated_table';
+import { PaginatedTable } from '../../../common/components/paginated_table';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { hostsActions, hostsModel, hostsSelectors } from '../../store';
 import { getHostsColumns } from './columns';
 import * as i18n from './translations';
-import {
+import type {
   HostsEdges,
   HostItem,
   HostsSortField,
-  HostsFields,
 } from '../../../../common/search_strategy/security_solution/hosts';
-import { Direction, RiskSeverity } from '../../../../common/search_strategy';
-import { HostEcs, OsEcs } from '../../../../common/ecs/host';
+import { HostsFields } from '../../../../common/search_strategy/security_solution/hosts';
+import type { Direction, RiskSeverity } from '../../../../common/search_strategy';
+import type { HostEcs, OsEcs } from '../../../../common/ecs/host';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { SecurityPageName } from '../../../../common/constants';
 import { HostsTableType } from '../../store/model';

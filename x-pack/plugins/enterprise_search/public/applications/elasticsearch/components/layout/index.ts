@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { useEnterpriseSearchElasticsearchNav } from './nav';
 export { EnterpriseSearchElasticsearchPageTemplate } from './page_template';

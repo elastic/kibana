@@ -13,7 +13,8 @@ import {
   processAggregations,
   generateAgentSelection,
 } from './helpers';
-import { AGENT_GROUP_KEY, GroupOption, Overlap, SelectedGroups } from './types';
+import type { GroupOption, Overlap, SelectedGroups } from './types';
+import { AGENT_GROUP_KEY } from './types';
 
 describe('generateAgentSelection', () => {
   it('should handle empty input', () => {

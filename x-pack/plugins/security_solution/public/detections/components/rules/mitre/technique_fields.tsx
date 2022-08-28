@@ -17,10 +17,10 @@ import { kebabCase, camelCase } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import styled, { css } from 'styled-components';
 
-import { Threats, ThreatTechnique } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { Threats, ThreatTechnique } from '@kbn/securitysolution-io-ts-alerting-types';
 import { techniquesOptions } from '../../../mitre/mitre_tactics_techniques';
 import * as Rulei18n from '../../../pages/detection_engine/rules/translations';
-import { FieldHook } from '../../../../shared_imports';
+import type { FieldHook } from '../../../../shared_imports';
 import { MyAddItemButton } from '../add_item_form';
 import { hasSubtechniqueOptions } from './helpers';
 import * as i18n from './translations';

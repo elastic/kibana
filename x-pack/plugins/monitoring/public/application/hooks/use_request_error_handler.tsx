@@ -8,7 +8,7 @@ import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
 import { includes } from 'lodash';
-import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 import { toMountPoint, useKibana } from '@kbn/kibana-react-plugin/public';

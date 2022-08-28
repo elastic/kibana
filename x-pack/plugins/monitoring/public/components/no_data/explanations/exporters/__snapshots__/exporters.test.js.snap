@@ -93,7 +93,7 @@ Array [
             External link
           </span>
           <span
-            class="euiScreenReaderOnly"
+            class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
           >
             (opens in a new tab or window)
           </span>
@@ -113,7 +113,7 @@ Array [
             External link
           </span>
           <span
-            class="euiScreenReaderOnly"
+            class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
           >
             (opens in a new tab or window)
           </span>
@@ -133,7 +133,7 @@ Array [
             External link
           </span>
           <span
-            class="euiScreenReaderOnly"
+            class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
           >
             (opens in a new tab or window)
           </span>

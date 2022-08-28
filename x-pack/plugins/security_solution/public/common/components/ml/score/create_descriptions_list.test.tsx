@@ -10,7 +10,7 @@ import React from 'react';
 import { mockAnomalies } from '../mock';
 import { createDescriptionList } from './create_description_list';
 import { EuiDescriptionList } from '@elastic/eui';
-import { Anomaly } from '../types';
+import type { Anomaly } from '../types';
 import { waitFor } from '@testing-library/dom';
 
 jest.mock('../../../lib/kibana');

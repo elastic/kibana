@@ -1346,64 +1346,58 @@ Then this dependencies will be used to embed Actions form or register your own a
 2. Add Actions form to React component:
 
 ```
- import React, { useCallback } from 'react';
- import { ActionForm } from '../../../../../../../../../plugins/triggers_actions_ui/public';
- import { RuleAction } from '../../../../../../../../../plugins/triggers_actions_ui/public/types';
+import React, { useCallback } from 'react';
+import { ActionForm } from '../../../../../../../../../plugins/triggers_actions_ui/public';
+import { RuleAction } from '../../../../../../../../../plugins/triggers_actions_ui/public/types';
 
- const ALOWED_BY_PLUGIN_ACTION_TYPES = [
-   { id: '.email', name: 'Email', enabled: true },
-   { id: '.index', name: 'Index', enabled: false },
-   { id: '.example-action', name: 'Example Action', enabled: false },
- ];
-
- export const ComponentWithActionsForm: () => {
-   const { http, triggersActionsUi, notifications } = useKibana().services;
-   const actionTypeRegistry = triggersActionsUi.actionTypeRegistry;
-   const initialAlert = ({
-        name: 'test',
-        params: {},
-        consumer: 'alerts',
-        alertTypeId: '.index-threshold',
-        schedule: {
-          interval: '1m',
+export const ComponentWithActionsForm: () => {
+  const { http, triggersActionsUi, notifications } = useKibana().services;
+  const actionTypeRegistry = triggersActionsUi.actionTypeRegistry;
+  const initialAlert = ({
+    name: 'test',
+    params: {},
+    consumer: 'alerts',
+    alertTypeId: '.index-threshold',
+    schedule: {
+      interval: '1m',
+    },
+    actions: [
+      {
+        group: 'default',
+        id: 'test',
+        actionTypeId: '.index',
+        params: {
+          message: '',
         },
-        actions: [
-          {
-            group: 'default',
-            id: 'test',
-            actionTypeId: '.index',
-            params: {
-              message: '',
-            },
-          },
-        ],
-        tags: [],
-        muteAll: false,
-        enabled: false,
-        mutedInstanceIds: [],
-      } as unknown) as Alert;
+      },
+    ],
+    tags: [],
+    muteAll: false,
+    enabled: false,
+    mutedInstanceIds: [],
+  } as unknown) as Alert;
 
-   return (
-     <ActionForm
-          actions={initialAlert.actions}
-          messageVariables={[ { name: 'testVar1', description: 'test var1' } ]}
-          defaultActionGroupId={'default'}
-          setActionIdByIndex={(id: string, index: number) => {
-            initialAlert.actions[index].id = id;
-          }}
-          setRuleProperty={(_updatedActions: RuleAction[]) => {}}
-          setActionParamsProperty={(key: string, value: any, index: number) =>
-            (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
-          }
-          http={http}
-          actionTypeRegistry={actionTypeRegistry}
-          defaultActionMessage={'Alert [{{ctx.metadata.name}}] has exceeded the threshold'}
-          actionTypes={ALOWED_BY_PLUGIN_ACTION_TYPES}
-          toastNotifications={notifications.toasts}
-          consumer={initialAlert.consumer}
-        />
-   );
- };
+  return (
+    <ActionForm
+      actions={initialAlert.actions}
+      messageVariables={[ { name: 'testVar1', description: 'test var1' } ]}
+      defaultActionGroupId={'default'}
+      setActionIdByIndex={(id: string, index: number) => {
+        initialAlert.actions[index].id = id;
+      }}
+      setRuleProperty={(_updatedActions: RuleAction[]) => {}}
+      setActionParamsProperty={(key: string, value: any, index: number) =>
+        (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
+      }
+      http={http}
+      actionTypeRegistry={actionTypeRegistry}
+      defaultActionMessage={'Alert [{{ctx.metadata.name}}] has exceeded the threshold'}
+      featureId="alerting"
+      toastNotifications={notifications.toasts}
+      consumer={initialAlert.consumer}
+    />
+  );
+};
 ```
 
 ActionForm Props definition:
@@ -1420,7 +1414,7 @@ interface ActionAccordionFormProps {
   actionTypeRegistry: ActionTypeRegistryContract;
   toastNotifications: ToastsSetup;
   docLinks: DocLinksStart;
-  actionTypes?: ActionType[];
+  featureId: string;
   messageVariables?: ActionVariable[];
   defaultActionMessage?: string;
   capabilities: ApplicationStart['capabilities'];
@@ -1441,7 +1435,7 @@ interface ActionAccordionFormProps {
 | actionTypeRegistry      | Registry for action types.                                                                                                                                                                       |
 | toastNotifications      | Toast messages  Plugin Setup Contract.                                                                                                                                                           |
 | docLinks                | Documentation links Plugin Start Contract.                                                                                                                                                       |
-| actionTypes             | Optional property, which allows to define a list of available actions specific for a current plugin.                                                                                             |
+| featureId             | Property that filters which action types are loaded when the flyout is opened. Each action type configures the feature ids it is available in during [server side registration](https://github.com/elastic/kibana/tree/main/x-pack/plugins/actions#action-types).                                                                                            |
 | messageVariables        | Optional property, which allows to define a list of variables for action 'message' property. Set `useWithTripleBracesInTemplates` to true if you don't want the variable escaped when rendering. |
 | defaultActionMessage    | Optional property, which allows to define a message value for action with 'message' property.                                                                                                    |
 | capabilities            | Kibana core's Capabilities ApplicationStart['capabilities'].                                                                                                                                     |
@@ -1485,18 +1479,18 @@ import { ActionsConnectorsContextProvider, CreateConnectorFlyout } from '../../.
 const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
 const onClose = useCallback(() => setAddFlyoutVisibility(false), []);
 
-// load required dependancied
+// load required dependancies
 const { http, triggersActionsUi, notifications, application, docLinks } = useKibana().services;
 
 const connector = {
-      secrets: {},
-      id: 'test',
-      actionTypeId: '.index',
-      actionType: 'Index',
-      name: 'action-connector',
-      referencedByCount: 0,
-      config: {},
-    };
+  secrets: {},
+  id: 'test',
+  actionTypeId: '.index',
+  actionType: 'Index',
+  name: 'action-connector',
+  referencedByCount: 0,
+  config: {},
+};
 
 // UI control item for open flyout
 <EuiButton
@@ -1512,18 +1506,11 @@ const connector = {
 </EuiButton>
 
 // in render section of component
-        <CreateConnectorFlyout
-          actionTypeRegistry={triggersActionsUi.actionTypeRegistry}
-          onClose={onClose}
-          setAddFlyoutVisibility={setAddFlyoutVisibility}
-          supportedActionTypes={[
-            {
-              id: '.index',
-              enabled: true,
-              name: 'Index',
-            },
-          ]}
-        />
+<CreateConnectorFlyout
+  actionTypeRegistry={triggersActionsUi.actionTypeRegistry}
+  onClose={onClose}
+  setAddFlyoutVisibility={setAddFlyoutVisibility}
+/>
 ```
 
 CreateConnectorFlyout Props definition:
@@ -1531,7 +1518,7 @@ CreateConnectorFlyout Props definition:
 export interface ConnectorAddFlyoutProps {
   actionTypeRegistry: ActionTypeRegistryContract;
   onClose: () => void;
-  supportedActionTypes?: ActionType[];
+  featureId?: string;
   onConnectorCreated?: (connector: ActionConnector) => void;
   onTestConnector?: (connector: ActionConnector) => void;
 }
@@ -1541,7 +1528,7 @@ export interface ConnectorAddFlyoutProps {
 | -------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | actionTypeRegistry   | The action type registry.                                                                                         |
 | onClose              | Called when closing the flyout                                                                                    |
-| supportedActionTypes | Optional property, that allows to define only specific action types list which is available for a current plugin. |
+| featureId | Optional property that filters which action types are loaded when the flyout is opened. Each action type configures the feature ids it is available in during [server side registration](https://github.com/elastic/kibana/tree/main/x-pack/plugins/actions#action-types).  |
 | onConnectorCreated   | Optional property. Function to be called after the creation of the connector.                                     |
 | onTestConnector      | Optional property. Function to be called when the user press the Save & Test button.                              |
 

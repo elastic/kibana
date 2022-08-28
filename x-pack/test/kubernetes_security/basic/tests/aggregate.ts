@@ -42,12 +42,13 @@ export default function aggregateTests({ getService }: FtrProviderContext) {
           groupBy: ORCHESTRATOR_NAMESPACE_PROPERTY,
           page: 0,
           index: MOCK_INDEX,
+          perPage: 10,
         });
       expect(response.status).to.be(200);
-      expect(response.body.length).to.be(10);
+      expect(response.body.buckets.length).to.be(10);
 
       namespaces.forEach((namespace, i) => {
-        expect(response.body[i].key).to.be(namespace);
+        expect(response.body.buckets[i].key).to.be(namespace);
       });
     });
 
@@ -62,8 +63,8 @@ export default function aggregateTests({ getService }: FtrProviderContext) {
           index: MOCK_INDEX,
         });
       expect(response.status).to.be(200);
-      expect(response.body.length).to.be(1);
-      expect(response.body[0].key).to.be('namespace11');
+      expect(response.body.buckets.length).to.be(1);
+      expect(response.body.buckets[0].key).to.be('namespace11');
     });
 
     it(`${AGGREGATE_ROUTE} return countBy value for each aggregation`, async () => {
@@ -78,10 +79,10 @@ export default function aggregateTests({ getService }: FtrProviderContext) {
           index: MOCK_INDEX,
         });
       expect(response.status).to.be(200);
-      expect(response.body.length).to.be(10);
+      expect(response.body.buckets.length).to.be(10);
 
       // when groupBy and countBy use the same field, count_by_aggs.value will always be 1
-      response.body.forEach((agg: any) => {
+      response.body.buckets.forEach((agg: any) => {
         expect(agg.count_by_aggs.value).to.be(1);
       });
     });
@@ -99,9 +100,9 @@ export default function aggregateTests({ getService }: FtrProviderContext) {
           sortByCount: 'desc',
         });
       expect(response.status).to.be(200);
-      expect(response.body.length).to.be(10);
-      expect(response.body[0].count_by_aggs.value).to.be(2);
-      expect(response.body[1].count_by_aggs.value).to.be(1);
+      expect(response.body.buckets.length).to.be(10);
+      expect(response.body.buckets[0].count_by_aggs.value).to.be(2);
+      expect(response.body.buckets[1].count_by_aggs.value).to.be(1);
     });
 
     it(`${AGGREGATE_ROUTE} allows a range query`, async () => {
@@ -122,7 +123,7 @@ export default function aggregateTests({ getService }: FtrProviderContext) {
           index: MOCK_INDEX,
         });
       expect(response.status).to.be(200);
-      expect(response.body.length).to.be(3);
+      expect(response.body.buckets.length).to.be(3);
     });
 
     it(`${AGGREGATE_ROUTE} handles a bad request`, async () => {

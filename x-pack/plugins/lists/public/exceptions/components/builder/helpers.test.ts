@@ -18,8 +18,9 @@ import {
   ListOperatorTypeEnum as OperatorTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
+  ALL_OPERATORS,
   BuilderEntry,
-  EXCEPTION_OPERATORS,
+  DETECTION_ENGINE_EXCEPTION_OPERATORS,
   EXCEPTION_OPERATORS_SANS_LISTS,
   EmptyEntry,
   ExceptionsBuilderExceptionItem,
@@ -596,13 +597,6 @@ describe('Exception builder helpers', () => {
       expect(output).toEqual(expected);
     });
 
-    test('it returns all operator options if "listType" is "detection"', () => {
-      const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
-      const output = getOperatorOptions(payloadItem, 'detection', false);
-      const expected: OperatorOption[] = EXCEPTION_OPERATORS;
-      expect(output).toEqual(expected);
-    });
-
     test('it returns "isOperator", "isNotOperator", "doesNotExistOperator" and "existsOperator" if field type is boolean', () => {
       const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
       const output = getOperatorOptions(payloadItem, 'detection', true);
@@ -618,13 +612,48 @@ describe('Exception builder helpers', () => {
     test('it returns list operators if specified to', () => {
       const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
       const output = getOperatorOptions(payloadItem, 'detection', false, true);
-      expect(output).toEqual(EXCEPTION_OPERATORS);
+      expect(output.some((operator) => operator.value === 'is_not_in_list')).toBeTruthy();
+      expect(output.some((operator) => operator.value === 'is_in_list')).toBeTruthy();
     });
 
     test('it does not return list operators if specified not to', () => {
-      const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
+      const payloadItem: FormattedBuilderEntry = {
+        ...getMockBuilderEntry(),
+        field: getField('@tags'),
+      };
       const output = getOperatorOptions(payloadItem, 'detection', false, false);
       expect(output).toEqual(EXCEPTION_OPERATORS_SANS_LISTS);
+    });
+
+    test('it returns all possible operators if list type is not "detection"', () => {
+      const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
+      const output = getOperatorOptions(payloadItem, 'endpoint_events', false, true);
+      expect(output).toEqual(ALL_OPERATORS);
+    });
+
+    test('it returns all operators supported by detection engine if list type is "detection"', () => {
+      const payloadItem: FormattedBuilderEntry = {
+        ...getMockBuilderEntry(),
+        field: getField('@tags'),
+      };
+      const output = getOperatorOptions(payloadItem, 'detection', false, true);
+      expect(output).toEqual(DETECTION_ENGINE_EXCEPTION_OPERATORS);
+    });
+
+    test('it excludes wildcard operators if list type is "detection" and field is not a string', () => {
+      const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
+      const output = getOperatorOptions(payloadItem, 'detection', false, true);
+      const expected: OperatorOption[] = [
+        isOperator,
+        isNotOperator,
+        isOneOfOperator,
+        isNotOneOfOperator,
+        existsOperator,
+        doesNotExistOperator,
+        isInListOperator,
+        isNotInListOperator,
+      ];
+      expect(output).toEqual(expected);
     });
   });
 

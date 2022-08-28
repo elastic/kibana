@@ -6,14 +6,14 @@
  */
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFieldNumber, EuiFormLabel, EuiSpacer } from '@elastic/eui';
+import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { OperationDefinition } from '.';
 import {
   ReferenceBasedIndexPatternColumn,
   GenericIndexPatternColumn,
   ValueFormatConfig,
 } from './column_types';
-import type { IndexPattern } from '../../types';
+import type { IndexPattern } from '../../../types';
 import { useDebouncedValue } from '../../../shared_components';
 import { getFormatFromPreviousColumn, isValidNumber } from './helpers';
 import { getColumnOrder } from '../layer_helpers';
@@ -153,7 +153,7 @@ export const staticValueOperation: OperationDefinition<
   },
 
   paramEditor: function StaticValueEditor({
-    updateLayer,
+    paramEditorUpdater,
     currentColumn,
     columnId,
     activeData,
@@ -168,7 +168,7 @@ export const staticValueOperation: OperationDefinition<
         }
         // Because of upstream specific UX flows, we need fresh layer state here
         // so need to use the updater pattern
-        updateLayer((newLayer) => {
+        paramEditorUpdater((newLayer) => {
           const newColumn = newLayer.columns[columnId] as StaticValueIndexPatternColumn;
           return {
             ...newLayer,
@@ -186,7 +186,7 @@ export const staticValueOperation: OperationDefinition<
           };
         });
       },
-      [columnId, updateLayer, currentColumn?.params?.value]
+      [columnId, paramEditorUpdater, currentColumn?.params?.value]
     );
 
     // Pick the data from the current activeData (to be used when the current operation is not static_value)
@@ -215,17 +215,16 @@ export const staticValueOperation: OperationDefinition<
     );
 
     return (
-      <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded lnsIndexPatternDimensionEditor__section--shaded">
-        <EuiFormLabel>{paramEditorCustomProps?.label || defaultLabel}</EuiFormLabel>
-        <EuiSpacer size="s" />
+      <EuiFormRow label={paramEditorCustomProps?.labels?.[0] || defaultLabel} fullWidth>
         <EuiFieldNumber
+          fullWidth
           data-test-subj="lns-indexPattern-static_value-input"
           compressed
           value={inputValue ?? ''}
           onChange={onChangeHandler}
           step="any"
         />
-      </div>
+      </EuiFormRow>
     );
   },
 };

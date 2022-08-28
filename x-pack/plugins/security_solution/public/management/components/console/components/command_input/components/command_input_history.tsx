@@ -6,11 +6,12 @@
  */
 
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { EuiSelectable, EuiSelectableOption, EuiSelectableProps } from '@elastic/eui';
+import type { EuiSelectableOption, EuiSelectableProps } from '@elastic/eui';
+import { EuiSelectable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { InputHistoryItem } from '../../console_state/types';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { useWithInputTextEntered } from '../../../hooks/state_selectors/use_with_input_text_entered';
-import { useIsMounted } from '../../../../../hooks/use_is_mounted';
 import { UserCommandInput } from '../../user_command_input';
 import { useConsoleStateDispatch } from '../../../hooks/state_selectors/use_console_state_dispatch';
 import { useWithInputHistory } from '../../../hooks/state_selectors/use_with_input_history';
@@ -22,22 +23,18 @@ const NO_HISTORY_EMPTY_MESSAGE = i18n.translate(
 );
 
 export const CommandInputHistory = memo(() => {
-  const isMounted = useIsMounted();
   const dispatch = useConsoleStateDispatch();
   const inputHistory = useWithInputHistory();
-  const [priorInputText] = useState(useWithInputTextEntered());
+  const [priorInputState] = useState(useWithInputTextEntered());
   const optionWasSelected = useRef(false);
   const getTestId = useTestIdGenerator(useDataTestSubj());
-  const hasInputHistory = inputHistory.length > 0;
-
-  const optionListRef = useRef(); // TODO:PT remove when https://github.com/elastic/eui/pull/5978 becomes available in kibana (task #4179)
 
   const selectableHistoryOptions = useMemo(() => {
     return inputHistory.map<EuiSelectableProps['options'][number]>((inputItem, index) => {
       return {
         label: inputItem.input,
         key: inputItem.id,
-        'data-input': inputItem.input, // TODO:PT remove when https://github.com/elastic/eui/pull/5978 becomes available in kibana (task #4179)
+        data: inputItem,
       };
     });
   }, [inputHistory]);
@@ -53,9 +50,6 @@ export const CommandInputHistory = memo(() => {
           // @ts-expect-error
           ev._CONSOLE_IGNORE_KEY = true;
         }
-      },
-      windowProps: {
-        outerRef: optionListRef, // TODO:PT remove when https://github.com/elastic/eui/pull/5978 becomes available in kibana (task #4179)
       },
     };
   }, []);
@@ -82,55 +76,23 @@ export const CommandInputHistory = memo(() => {
     [dispatch]
   );
 
+  const handleOnActiveOptionChange: EuiSelectableProps['onActiveOptionChange'] = useCallback(
+    (option) => {
+      if (option) {
+        dispatch({
+          type: 'updateInputPlaceholderState',
+          payload: {
+            placeholder: (option.data as InputHistoryItem).input,
+          },
+        });
+      }
+    },
+    [dispatch]
+  );
+
   const handleRenderOption = useCallback((option) => {
     return <UserCommandInput input={option.label} />;
   }, []);
-
-  // TODO:PT remove when https://github.com/elastic/eui/pull/5978 becomes available in kibana (task #4179)
-  const [checkObserverTrigger, setCheckObserverTrigger] = useState(1);
-
-  // TODO:PT remove when https://github.com/elastic/eui/pull/5978 becomes available in kibana (task #4179)
-  useEffect(() => {
-    if (!hasInputHistory) {
-      return;
-    }
-
-    let observer: MutationObserver;
-
-    if (optionListRef.current) {
-      observer = new MutationObserver((mutationList) => {
-        const focusedOption = mutationList.find((mutatedEl) =>
-          (mutatedEl.target as HTMLLIElement).classList.contains('euiSelectableListItem-isFocused')
-        );
-
-        if (focusedOption) {
-          dispatch({
-            type: 'updateInputPlaceholderState',
-            payload: {
-              placeholder: (focusedOption.target as HTMLLIElement).dataset.input as string,
-            },
-          });
-        }
-      });
-
-      observer.observe(optionListRef.current, {
-        attributes: true,
-        subtree: true,
-      });
-    } else {
-      setTimeout(() => {
-        if (isMounted) {
-          setCheckObserverTrigger(checkObserverTrigger + 1);
-        }
-      }, 5);
-    }
-
-    return () => {
-      if (observer) {
-        observer.disconnect();
-      }
-    };
-  }, [checkObserverTrigger, dispatch, hasInputHistory, isMounted]);
 
   // When first loaded, clear out the current text entered, and when this component
   // unloads, if no option from the history was selected, then set the prior text
@@ -140,16 +102,23 @@ export const CommandInputHistory = memo(() => {
 
     return () => {
       if (!optionWasSelected.current) {
-        dispatch({ type: 'updateInputTextEnteredState', payload: { textEntered: priorInputText } });
+        dispatch({
+          type: 'updateInputTextEnteredState',
+          payload: {
+            textEntered: priorInputState.textEntered,
+            rightOfCursor: priorInputState.rightOfCursor,
+          },
+        });
         dispatch({ type: 'updateInputPlaceholderState', payload: { placeholder: '' } });
       }
     };
-  }, [dispatch, optionWasSelected, priorInputText]);
+  }, [dispatch, optionWasSelected, priorInputState]);
 
   return (
     <EuiSelectable
       options={selectableHistoryOptions}
       onChange={handleSelectableOnChange}
+      onActiveOptionChange={handleOnActiveOptionChange}
       renderOption={handleRenderOption}
       listProps={selectableListProps}
       singleSelection={true}

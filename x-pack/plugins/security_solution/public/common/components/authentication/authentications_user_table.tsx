@@ -23,7 +23,7 @@ import { useQueryInspector } from '../page/manage_query';
 import { useQueryToggle } from '../../containers/query_toggle';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { usersActions, usersModel, usersSelectors } from '../../../users/store';
-import { AuthenticationsUserTableProps } from './types';
+import type { AuthenticationsUserTableProps } from './types';
 
 const TABLE_QUERY_ID = 'authenticationsUsersTableQuery';
 

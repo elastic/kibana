@@ -19,12 +19,13 @@ const IndexPatternFlyoutContentContainer = ({
   defaultTypeIsRollup,
   requireTimestampField = false,
   editData,
+  allowAdHocDataView,
 }: DataViewEditorProps) => {
   const {
     services: { dataViews, notifications },
   } = useKibana<DataViewEditorContext>();
 
-  const onSaveClick = async (dataViewSpec: DataViewSpec) => {
+  const onSaveClick = async (dataViewSpec: DataViewSpec, persist: boolean = true) => {
     try {
       let saveResponse;
       if (editData) {
@@ -32,9 +33,13 @@ const IndexPatternFlyoutContentContainer = ({
         editData.title = title;
         editData.name = name;
         editData.timeFieldName = timeFieldName;
-        saveResponse = await dataViews.updateSavedObject(editData);
+        saveResponse = editData.isPersisted()
+          ? await dataViews.updateSavedObject(editData)
+          : editData;
       } else {
-        saveResponse = await dataViews.createAndSave(dataViewSpec);
+        saveResponse = persist
+          ? await dataViews.createAndSave(dataViewSpec)
+          : await dataViews.create(dataViewSpec);
       }
 
       if (saveResponse && !(saveResponse instanceof Error)) {
@@ -61,6 +66,7 @@ const IndexPatternFlyoutContentContainer = ({
       defaultTypeIsRollup={defaultTypeIsRollup}
       requireTimestampField={requireTimestampField}
       editData={editData}
+      allowAdHoc={allowAdHocDataView || false}
     />
   );
 };

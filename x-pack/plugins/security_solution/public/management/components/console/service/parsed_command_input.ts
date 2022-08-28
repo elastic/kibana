@@ -7,7 +7,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { CommandDefinition } from '..';
+import type { CommandDefinition } from '..';
 
 export type ParsedArgData = string[];
 
@@ -135,9 +135,10 @@ export const getCommandNameFromTextInput = (input: string): string => {
   return trimmedInput.substring(0, firstSpacePosition);
 };
 
-export const getArgumentsForCommand = (command: CommandDefinition): string => {
+export const getArgumentsForCommand = (command: CommandDefinition): string[] => {
   let requiredArgs = '';
   let optionalArgs = '';
+  const exclusiveOrArgs = [];
 
   if (command.args) {
     for (const [argName, argDefinition] of Object.entries(command.args)) {
@@ -146,6 +147,8 @@ export const getArgumentsForCommand = (command: CommandDefinition): string => {
           requiredArgs += ' ';
         }
         requiredArgs += `--${argName}`;
+      } else if (argDefinition.exclusiveOr) {
+        exclusiveOrArgs.push(`--${argName}`);
       } else {
         if (optionalArgs.length) {
           optionalArgs += ' ';
@@ -155,5 +158,29 @@ export const getArgumentsForCommand = (command: CommandDefinition): string => {
     }
   }
 
-  return `${requiredArgs} ${optionalArgs.length > 0 ? `[${optionalArgs}]` : ''}`.trim();
+  const buildArgumentText = ({
+    required,
+    exclusive,
+    optional,
+  }: {
+    required?: string;
+    exclusive?: string;
+    optional?: string;
+  }) => {
+    return `${required ? required : ''}${exclusive ? ` ${exclusive}` : ''} ${
+      optional && optional.length > 0 ? `[${optional}]` : ''
+    }`.trim();
+  };
+
+  return exclusiveOrArgs.length > 0
+    ? exclusiveOrArgs.map((exclusiveArg) => {
+        return buildArgumentText({
+          required: requiredArgs,
+          exclusive: exclusiveArg,
+          optional: optionalArgs,
+        });
+      })
+    : requiredArgs || optionalArgs
+    ? [buildArgumentText({ required: requiredArgs, optional: optionalArgs })]
+    : [];
 };

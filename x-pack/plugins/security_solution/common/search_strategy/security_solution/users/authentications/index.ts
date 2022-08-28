@@ -7,10 +7,10 @@
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
-import { UserEcs } from '../../../../ecs/user';
-import { SourceEcs } from '../../../../ecs/source';
-import { HostEcs } from '../../../../ecs/host';
-import {
+import type { UserEcs } from '../../../../ecs/user';
+import type { SourceEcs } from '../../../../ecs/source';
+import type { HostEcs } from '../../../../ecs/host';
+import type {
   CursorType,
   Inspect,
   Maybe,
@@ -19,7 +19,7 @@ import {
   Hit,
   TotalHit,
 } from '../../../common';
-import { CommonFields, RequestOptionsPaginated } from '../..';
+import type { CommonFields, RequestOptionsPaginated } from '../..';
 
 export interface UserAuthenticationsStrategyResponse extends IEsSearchResponse {
   edges: AuthenticationsEdges[];

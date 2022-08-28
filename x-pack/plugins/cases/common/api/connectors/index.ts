@@ -14,7 +14,6 @@ import type { ActionType } from '@kbn/actions-plugin/common';
  * disable the linting for the moment
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { ActionResult } from '@kbn/actions-plugin/server/types';
 import { JiraFieldsRT } from './jira';
 import { ResilientFieldsRT } from './resilient';
@@ -41,6 +40,7 @@ export const ConnectorFieldsRt = rt.union([
 ]);
 
 export enum ConnectorTypes {
+  casesWebhook = '.cases-webhook',
   jira = '.jira',
   none = '.none',
   resilient = '.resilient',
@@ -49,7 +49,10 @@ export enum ConnectorTypes {
   swimlane = '.swimlane',
 }
 
-export const connectorTypes = Object.values(ConnectorTypes);
+const ConnectorCasesWebhookTypeFieldsRt = rt.type({
+  type: rt.literal(ConnectorTypes.casesWebhook),
+  fields: rt.null,
+});
 
 const ConnectorJiraTypeFieldsRt = rt.type({
   type: rt.literal(ConnectorTypes.jira),
@@ -84,6 +87,7 @@ const ConnectorNoneTypeFieldsRt = rt.type({
 export const NONE_CONNECTOR_ID: string = 'none';
 
 export const ConnectorTypeFieldsRt = rt.union([
+  ConnectorCasesWebhookTypeFieldsRt,
   ConnectorJiraTypeFieldsRt,
   ConnectorNoneTypeFieldsRt,
   ConnectorResilientTypeFieldsRt,
@@ -96,6 +100,7 @@ export const ConnectorTypeFieldsRt = rt.union([
  * This type represents the connector's format when it is encoded within a user action.
  */
 export const CaseUserActionConnectorRt = rt.union([
+  rt.intersection([ConnectorCasesWebhookTypeFieldsRt, rt.type({ name: rt.string })]),
   rt.intersection([ConnectorJiraTypeFieldsRt, rt.type({ name: rt.string })]),
   rt.intersection([ConnectorNoneTypeFieldsRt, rt.type({ name: rt.string })]),
   rt.intersection([ConnectorResilientTypeFieldsRt, rt.type({ name: rt.string })]),
@@ -114,6 +119,7 @@ export const CaseConnectorRt = rt.intersection([
 export type CaseUserActionConnector = rt.TypeOf<typeof CaseUserActionConnectorRt>;
 export type CaseConnector = rt.TypeOf<typeof CaseConnectorRt>;
 export type ConnectorTypeFields = rt.TypeOf<typeof ConnectorTypeFieldsRt>;
+export type ConnectorCasesWebhookTypeFields = rt.TypeOf<typeof ConnectorCasesWebhookTypeFieldsRt>;
 export type ConnectorJiraTypeFields = rt.TypeOf<typeof ConnectorJiraTypeFieldsRt>;
 export type ConnectorResilientTypeFields = rt.TypeOf<typeof ConnectorResilientTypeFieldsRt>;
 export type ConnectorSwimlaneTypeFields = rt.TypeOf<typeof ConnectorSwimlaneTypeFieldsRt>;

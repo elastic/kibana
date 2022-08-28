@@ -13,7 +13,7 @@
   // Another override: Because an update to the table replaces the DOM, the same
   // icon would still again fade in with an animation. If the table refreshes with
   // e.g. 1s this would result in a blinking icon effect.
-  .euiIcon-isLoaded {
+  .euiIcon[data-is-loaded] {
     animation: none !important;
   }
 }

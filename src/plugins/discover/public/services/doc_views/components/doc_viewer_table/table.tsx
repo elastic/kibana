@@ -103,7 +103,7 @@ const updateSearchText = debounce(
 export const DocViewerTable = ({
   columns,
   hit,
-  indexPattern: dataView,
+  dataView,
   filter,
   onAddColumn,
   onRemoveColumn,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useMemo } from 'react';
 
 import { EuiButtonEmpty, EuiTabbedContent } from '@elastic/eui';
 import { Optional } from '@kbn/utility-types';
@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { stringHash } from '@kbn/ml-string-hash';
 
 import moment from 'moment-timezone';
+import { isDefined } from '../../../../../../common/types/common';
 import { TransformListRow } from '../../../../common';
 import { useAppDependencies } from '../../../../app_dependencies';
 import { ExpandedRowDetailsPane, SectionConfig, SectionItem } from './expanded_row_details_pane';
@@ -70,37 +71,52 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
     position: 'right',
   };
 
-  const configItems: Item[] = [
-    {
-      title: 'transform_id',
-      description: item.id,
-    },
-    {
-      title: 'transform_version',
-      description: item.config.version,
-    },
-    {
-      title: 'description',
-      description: item.config.description ?? '',
-    },
-    {
-      title: 'create_time',
-      description:
-        formatHumanReadableDateTimeSeconds(moment(item.config.create_time).unix() * 1000) ?? '',
-    },
-    {
-      title: 'source_index',
-      description: Array.isArray(item.config.source.index)
-        ? item.config.source.index[0]
-        : item.config.source.index,
-    },
-    {
-      title: 'destination_index',
-      description: Array.isArray(item.config.dest.index)
-        ? item.config.dest.index[0]
-        : item.config.dest.index,
-    },
-  ];
+  const configItems = useMemo(() => {
+    const configs: Item[] = [
+      {
+        title: 'transform_id',
+        description: item.id,
+      },
+      {
+        title: 'transform_version',
+        description: item.config.version,
+      },
+      {
+        title: 'description',
+        description: item.config.description ?? '',
+      },
+      {
+        title: 'create_time',
+        description:
+          formatHumanReadableDateTimeSeconds(moment(item.config.create_time).unix() * 1000) ?? '',
+      },
+      {
+        title: 'source_index',
+        description: Array.isArray(item.config.source.index)
+          ? item.config.source.index[0]
+          : item.config.source.index,
+      },
+      {
+        title: 'destination_index',
+        description: Array.isArray(item.config.dest.index)
+          ? item.config.dest.index[0]
+          : item.config.dest.index,
+      },
+      {
+        title: 'authorization',
+        description: item.config.authorization ? JSON.stringify(item.config.authorization) : '',
+      },
+    ];
+    if (isDefined(item.config.settings?.num_failure_retries)) {
+      configs.push({
+        title: 'num_failure_retries',
+        description: item.config.settings?.num_failure_retries ?? '',
+      });
+    }
+    return configs;
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [item?.config]);
 
   const general: SectionConfig = {
     title: 'General',

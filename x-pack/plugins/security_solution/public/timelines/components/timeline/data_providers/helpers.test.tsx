@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataProvider, DataProvidersAnd } from './data_provider';
+import type { DataProvider, DataProvidersAnd } from './data_provider';
 import {
   addContentToTimeline,
   addProviderToGroup,

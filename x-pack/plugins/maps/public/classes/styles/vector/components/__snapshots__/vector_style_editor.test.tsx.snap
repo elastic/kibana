@@ -193,6 +193,26 @@ exports[`should render 1`] = `
   <EuiSpacer
     size="m"
   />
+  <LabelZoomRangeEditor
+    disabled={true}
+    disabledBy="labelText"
+    handlePropertyChange={[Function]}
+    styleProperty={
+      LabelZoomRangeProperty {
+        "_layerMaxZoom": 24,
+        "_layerMinZoom": 0,
+        "_options": Object {
+          "maxZoom": 24,
+          "minZoom": 0,
+          "useLayerZoomRange": true,
+        },
+        "_styleName": "labelZoomRange",
+      }
+    }
+  />
+  <EuiSpacer
+    size="m"
+  />
   <VectorStyleColorEditor
     defaultDynamicStyleOptions={
       Object {
@@ -543,6 +563,26 @@ exports[`should render with no style fields 1`] = `
           "value": "",
         },
         "_styleName": "labelText",
+      }
+    }
+  />
+  <EuiSpacer
+    size="m"
+  />
+  <LabelZoomRangeEditor
+    disabled={true}
+    disabledBy="labelText"
+    handlePropertyChange={[Function]}
+    styleProperty={
+      LabelZoomRangeProperty {
+        "_layerMaxZoom": 24,
+        "_layerMinZoom": 0,
+        "_options": Object {
+          "maxZoom": 24,
+          "minZoom": 0,
+          "useLayerZoomRange": true,
+        },
+        "_styleName": "labelZoomRange",
       }
     }
   />

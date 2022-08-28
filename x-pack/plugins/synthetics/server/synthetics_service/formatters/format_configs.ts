@@ -11,20 +11,9 @@ import {
   ConfigKey,
   MonitorFields,
   SyntheticsMonitor,
-  SyntheticsMonitorWithId,
+  HeartbeatConfig,
 } from '../../../common/runtime_types';
 import { formatters } from '.';
-
-export type SyntheticsConfig = SyntheticsMonitorWithId & {
-  fields_under_root: boolean;
-  fields: {
-    config_id: string;
-    run_once?: boolean;
-    test_run_id?: string;
-    'monitor.project.name'?: string;
-    'monitor.project.id'?: string;
-  };
-};
 
 const UI_KEYS_TO_SKIP = [
   ConfigKey.JOURNEY_ID,
@@ -36,6 +25,8 @@ const UI_KEYS_TO_SKIP = [
   ConfigKey.IS_THROTTLING_ENABLED,
   ConfigKey.REVISION,
   ConfigKey.CUSTOM_HEARTBEAT_ID,
+  ConfigKey.FORM_MONITOR_TYPE,
+  ConfigKey.TEXT_ASSERTION,
   'secrets',
 ];
 
@@ -82,7 +73,7 @@ export const formatHeartbeatRequest = ({
   customHeartbeatId?: string;
   runOnce?: boolean;
   testRunId?: string;
-}): SyntheticsConfig => {
+}): HeartbeatConfig => {
   const projectId = (monitor as BrowserFields)[ConfigKey.PROJECT_ID];
   return {
     ...monitor,

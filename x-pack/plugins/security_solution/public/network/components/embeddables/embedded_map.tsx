@@ -8,16 +8,16 @@
 import { EuiAccordion, EuiLink, EuiText } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
-import { createPortalNode, InPortal } from 'react-reverse-portal';
+import { createHtmlPortalNode, InPortal } from 'react-reverse-portal';
 import styled, { css } from 'styled-components';
 
 import type { Filter, Query } from '@kbn/es-query';
-import { ErrorEmbeddable, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { MapEmbeddable } from '@kbn/maps-plugin/public/embeddable';
+import type { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
+import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
+import type { MapEmbeddable } from '@kbn/maps-plugin/public/embeddable';
 import { Loader } from '../../../common/components/loader';
 import { displayErrorToast, useStateToaster } from '../../../common/components/toasters';
-import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
+import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { Embeddable } from './embeddable';
 import { createEmbeddable } from './embedded_map_helpers';
 import { IndexPatternsMissingPrompt } from './index_patterns_missing_prompt';
@@ -127,7 +127,7 @@ export const EmbeddedMapComponent = ({
   // own component tree instead of the embeddables (default). This is necessary to have access to
   // the Redux store, theme provider, etc, which is required to register and un-register the draggable
   // Search InPortal/OutPortal for implementation touch points
-  const portalNode = React.useMemo(() => createPortalNode(), []);
+  const portalNode = React.useMemo(() => createHtmlPortalNode(), []);
 
   useEffect(() => {
     setMapIndexPatterns((prevMapIndexPatterns) => {

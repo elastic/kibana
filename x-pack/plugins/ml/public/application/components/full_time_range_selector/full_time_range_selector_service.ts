@@ -37,9 +37,10 @@ export async function setFullTimeRange(
       query: excludeFrozenData ? addExcludeFrozenToQuery(query) : query,
       ...(isPopulatedObject(runtimeMappings) ? { runtimeMappings } : {}),
     });
+
     timefilter.setTime({
-      from: moment(resp.start.epoch).toISOString(),
-      to: moment(resp.end.epoch).toISOString(),
+      from: moment(resp.start).toISOString(),
+      to: moment(resp.end).toISOString(),
     });
     return resp;
   } catch (resp) {

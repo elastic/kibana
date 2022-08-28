@@ -43,6 +43,10 @@ it('matches snapshot', () => {
       "kibana.alert.end": Object {
         "type": "date",
       },
+      "kibana.alert.instance.id": Object {
+        "required": true,
+        "type": "keyword",
+      },
       "kibana.alert.reason": Object {
         "array": false,
         "required": false,

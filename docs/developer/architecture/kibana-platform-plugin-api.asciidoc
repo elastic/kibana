@@ -57,7 +57,7 @@ It should return an instance of its plugin class for
 
 [source,typescript]
 ----
-import type { PluginInitializerContext } from 'kibana/server';
+import type { PluginInitializerContext } from '@kbn/core/server';
 import { MyPlugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
@@ -73,7 +73,7 @@ for first-party Elastic plugins].
 
 [source,typescript]
 ----
-import type { Plugin, PluginInitializerContext, CoreSetup, CoreStart } from 'kibana/server';
+import type { Plugin, PluginInitializerContext, CoreSetup, CoreStart } from '@kbn/core/server';
 
 export class MyPlugin implements Plugin {
   constructor(initializerContext: PluginInitializerContext) {}
@@ -99,7 +99,7 @@ entry-point:
 
 [source,typescript]
 ----
-import type { PluginInitializerContext } from 'kibana/server';
+import type { PluginInitializerContext } from '@kbn/core/server';
 import { MyPlugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
@@ -112,7 +112,7 @@ shape of this plugin is the same as it’s client-side counter-part:
 
 [source,typescript]
 ----
-import type { Plugin, PluginInitializerContext, CoreSetup, CoreStart } from 'kibana/server';
+import type { Plugin, PluginInitializerContext, CoreSetup, CoreStart } from '@kbn/core/server';
 
 export class MyPlugin implements Plugin {
   constructor(initializerContext: PluginInitializerContext) {}
@@ -190,7 +190,7 @@ an HTTP route handler, a plugin just accesses it off of the first argument:
 
 [source, typescript]
 ----
-import type { CoreSetup } from 'kibana/server';
+import type { CoreSetup } from '@kbn/core/server';
 
 export class MyPlugin {
   public setup(core: CoreSetup) {
@@ -252,7 +252,7 @@ encouraged to expose types for their plugin interfaces.
 
 [source, typescript]
 ----
-import type { Plugin } from 'kibana/server';
+import type { Plugin } from '@kbn/core/server';
 export interface FoobarPluginSetup { <1>
   getFoo(): string;
 }
@@ -305,7 +305,7 @@ are then available via the second argument of `setup` and/or `start`:
 
 [source,typescript]
 ----
-import type { CoreSetup, CoreStart } from 'kibana/server';
+import type { CoreSetup, CoreStart } from '@kbn/core/server';
 import type { FoobarPluginSetup, FoobarPluginStart } from '../../foobar/server';
 
 interface DemoSetupPlugins { <1>
