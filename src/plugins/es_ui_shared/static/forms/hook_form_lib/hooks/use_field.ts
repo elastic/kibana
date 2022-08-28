@@ -633,13 +633,6 @@ export const useField = <T, FormType = FormData, I = T>(
         setIsChangingValue(false);
       }
     });
-
-    return () => {
-      if (debounceTimeout.current) {
-        clearTimeout(debounceTimeout.current);
-        debounceTimeout.current = null;
-      }
-    };
   }, [valueHasChanged, runValidationsOnValueChange]);
 
   // Value change: set "isModified" state
@@ -676,6 +669,11 @@ export const useField = <T, FormType = FormData, I = T>(
 
     return () => {
       isMounted.current = false;
+
+      if (debounceTimeout.current) {
+        clearTimeout(debounceTimeout.current);
+        debounceTimeout.current = null;
+      }
     };
   }, []);
 

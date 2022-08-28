@@ -17,8 +17,8 @@ import {
   getCoreSettingsMock,
 } from './ui_settings_service.test.mock';
 import { UiSettingsService, SetupDeps } from './ui_settings_service';
-import { savedObjectsClientMock } from '../mocks';
-import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { uiSettingsType } from './saved_objects';
 import { UiSettingsDefaultsClient } from './ui_settings_defaults_client';
 
