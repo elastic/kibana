@@ -31,6 +31,7 @@ import { ObservabilityAppServices } from '../../../application/types';
 import { RULE_DETAILS_PAGE_ID } from '../../rule_details/types';
 import type { TopAlert } from '../containers/alerts_page/alerts_page';
 import { ObservabilityRuleTypeRegistry } from '../../..';
+import { ALERT_DETAILS_PAGE_ID } from '../../alert_details/types';
 
 export type ObservabilityActionsProps = Pick<
   ActionProps,
@@ -74,16 +75,21 @@ export function ObservabilityActions({
     pageId !== RULE_DETAILS_PAGE_ID && ruleId
       ? http.basePath.prepend(paths.observability.ruleDetails(ruleId))
       : null;
+  const alertId = alert.fields['kibana.alert.uuid'] ?? null;
+  const linkToAlert =
+    pageId !== ALERT_DETAILS_PAGE_ID && alertId
+      ? http.basePath.prepend(paths.observability.alertDetails(alertId))
+      : null;
   const caseAttachments: CaseAttachmentsWithoutOwner = useMemo(() => {
     return ecsData?._id
       ? [
-          {
-            alertId: ecsData?._id ?? '',
-            index: ecsData?._index ?? '',
-            type: CommentType.alert,
-            rule: cases.helpers.getRuleIdFromEvent({ ecs: ecsData, data: data ?? [] }),
-          },
-        ]
+        {
+          alertId: ecsData?._id ?? '',
+          index: ecsData?._index ?? '',
+          type: CommentType.alert,
+          rule: cases.helpers.getRuleIdFromEvent({ ecs: ecsData, data: data ?? [] }),
+        },
+      ]
       : [];
   }, [ecsData, cases.helpers, data]);
 
@@ -105,33 +111,33 @@ export function ObservabilityActions({
     return [
       ...(userCasesPermissions.create && userCasesPermissions.read
         ? [
-            <EuiContextMenuItem
-              data-test-subj="add-to-existing-case-action"
-              onClick={handleAddToExistingCaseClick}
-              size="s"
-            >
-              {ADD_TO_EXISTING_CASE}
-            </EuiContextMenuItem>,
-            <EuiContextMenuItem
-              data-test-subj="add-to-new-case-action"
-              onClick={handleAddToNewCaseClick}
-              size="s"
-            >
-              {ADD_TO_NEW_CASE}
-            </EuiContextMenuItem>,
-          ]
+          <EuiContextMenuItem
+            data-test-subj="add-to-existing-case-action"
+            onClick={handleAddToExistingCaseClick}
+            size="s"
+          >
+            {ADD_TO_EXISTING_CASE}
+          </EuiContextMenuItem>,
+          <EuiContextMenuItem
+            data-test-subj="add-to-new-case-action"
+            onClick={handleAddToNewCaseClick}
+            size="s"
+          >
+            {ADD_TO_NEW_CASE}
+          </EuiContextMenuItem>,
+        ]
         : []),
 
       ...(!!linkToRule
         ? [
-            <EuiContextMenuItem
-              key="viewRuleDetails"
-              data-test-subj="viewRuleDetails"
-              href={linkToRule}
-            >
-              {translations.alertsTable.viewRuleDetailsButtonText}
-            </EuiContextMenuItem>,
-          ]
+          <EuiContextMenuItem
+            key="viewRuleDetails"
+            data-test-subj="viewRuleDetails"
+            href={linkToRule}
+          >
+            {translations.alertsTable.viewRuleDetailsButtonText}
+          </EuiContextMenuItem>,
+        ]
         : []),
 
       ...[
@@ -146,6 +152,18 @@ export function ObservabilityActions({
           {translations.alertsTable.viewAlertDetailsButtonText}
         </EuiContextMenuItem>,
       ],
+
+      ...(!!linkToAlert
+        ? [
+          <EuiContextMenuItem
+            key="viewAlertDetailsPage"
+            data-test-subj="viewAlertDetailsPage"
+            href={linkToAlert}
+          >
+            {translations.alertsTable.viewAlertDetailsPageButtonText}
+          </EuiContextMenuItem>,
+        ]
+        : []),
     ];
   }, [
     userCasesPermissions.create,
