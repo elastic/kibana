@@ -306,7 +306,7 @@ export const LegendControls = ({
             <SwatchLabel
               color={last(paletteColors)!}
               label={i18n.translate('xpack.infra.legendControls.maxLabel', {
-                defaultMessage: 'Maxium',
+                defaultMessage: 'Maximum',
               })}
             />
           }
