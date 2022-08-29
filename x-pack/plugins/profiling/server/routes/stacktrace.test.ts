@@ -43,8 +43,12 @@ describe('Stack trace operations', () => {
     }> = [
       {
         original: {
-          FrameIDs: frameID.A + frameID.B + frameID.C,
-          Types: runLengthEncodeReverse(frameTypeA).toString('base64url'),
+          Stacktrace: {
+            frame: {
+              ids: frameID.A + frameID.B + frameID.C,
+              types: runLengthEncodeReverse(frameTypeA).toString('base64url'),
+            },
+          },
         } as EncodedStackTrace,
         expected: {
           FileIDs: [fileID.C, fileID.B, fileID.A],
@@ -54,8 +58,12 @@ describe('Stack trace operations', () => {
       },
       {
         original: {
-          FrameIDs: frameID.D + frameID.E + frameID.F + frameID.G,
-          Types: runLengthEncodeReverse(frameTypeB).toString('base64url'),
+          Stacktrace: {
+            frame: {
+              ids: frameID.D + frameID.E + frameID.F + frameID.G,
+              types: runLengthEncodeReverse(frameTypeB).toString('base64url'),
+            },
+          },
         } as EncodedStackTrace,
         expected: {
           FileIDs: [fileID.F, fileID.F, fileID.E, fileID.D],

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { ProfilingESField } from './elasticsearch';
+
 export enum StackTracesDisplayOption {
   StackTraces = 'stackTraces',
   Percentage = 'percentage',
@@ -20,10 +22,10 @@ export enum TopNType {
 
 export function getFieldNameForTopNType(type: TopNType): string {
   return {
-    [TopNType.Containers]: 'ContainerName',
-    [TopNType.Deployments]: 'PodName',
-    [TopNType.Threads]: 'ThreadName',
-    [TopNType.Hosts]: 'HostID',
-    [TopNType.Traces]: 'StackTraceID',
+    [TopNType.Containers]: ProfilingESField.ContainerName,
+    [TopNType.Deployments]: ProfilingESField.OrchestratorResourceName,
+    [TopNType.Threads]: ProfilingESField.ProcessThreadName,
+    [TopNType.Hosts]: ProfilingESField.HostID,
+    [TopNType.Traces]: ProfilingESField.StacktraceID,
   }[type];
 }

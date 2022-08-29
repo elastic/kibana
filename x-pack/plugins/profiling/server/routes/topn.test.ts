@@ -9,6 +9,7 @@ import { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
+import { ProfilingESField } from '../../common/elasticsearch';
 import { ProfilingESClient } from '../utils/create_profiling_es_client';
 import { topNElasticSearchQuery } from './topn';
 
@@ -56,7 +57,7 @@ describe('TopN data from Elasticsearch', () => {
         logger,
         timeFrom: 456,
         timeTo: 789,
-        searchField: 'StackTraceID',
+        searchField: ProfilingESField.StacktraceID,
         highCardinality: false,
         kuery: '',
         response: kibanaResponseFactory,

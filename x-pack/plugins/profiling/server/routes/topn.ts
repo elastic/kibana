@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import type { IRouter, KibanaResponseFactory, Logger } from '@kbn/core/server';
 import { RouteRegisterParameters } from '.';
 import { fromMapToRecord, getRoutePaths, INDEX_EVENTS } from '../../common';
+import { ProfilingESField } from '../../common/elasticsearch';
 import { groupStackFrameMetadataByStackTrace, StackTraceID } from '../../common/profiling';
 import { getFieldNameForTopNType, TopNType } from '../../common/stack_traces';
 import { createTopNSamples, getTopNAggregationRequest } from '../../common/topn';
@@ -83,7 +84,7 @@ export async function topNElasticSearchQuery({
 
   logger.info('total sampled stacktraces: ' + totalSampledStackTraces);
 
-  if (searchField !== 'StackTraceID') {
+  if (searchField !== ProfilingESField.StacktraceID) {
     return response.ok({
       body: { TotalCount: totalSampledStackTraces, TopN: topN, Metadata: {} },
     });
@@ -170,6 +171,8 @@ export function queryTopNCommon(
           kuery,
         });
       } catch (e) {
+        logger.error(e);
+
         return response.customError({
           statusCode: e.statusCode ?? 500,
           body: {

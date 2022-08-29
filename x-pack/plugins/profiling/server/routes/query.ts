@@ -7,6 +7,7 @@
 
 import { QueryDslBoolQuery } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { kqlQuery } from '@kbn/observability-plugin/server';
+import { ProfilingESField } from '../../common/elasticsearch';
 
 export interface ProjectTimeQuery {
   bool: QueryDslBoolQuery;
@@ -27,7 +28,7 @@ export function createCommonFilter({
         ...kqlQuery(kuery),
         {
           range: {
-            '@timestamp': {
+            [ProfilingESField.Timestamp]: {
               gte: String(timeFrom),
               lt: String(timeTo),
               format: 'epoch_second',

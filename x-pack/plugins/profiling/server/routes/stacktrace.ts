@@ -10,6 +10,9 @@ import { chunk } from 'lodash';
 import LRUCache from 'lru-cache';
 import { INDEX_EXECUTABLES, INDEX_FRAMES, INDEX_TRACES } from '../../common';
 import {
+  DedotObject,
+  PickFlattened,
+  ProfilingESField,
   ProfilingExecutable,
   ProfilingStackFrame,
   ProfilingStackTrace,
@@ -24,7 +27,6 @@ import {
 } from '../../common/profiling';
 import { ProfilingESClient } from '../utils/create_profiling_es_client';
 import { withProfilingSpan } from '../utils/with_profiling_span';
-import { getDocs } from './compat';
 import { DownsampledEventsIndex } from './downsampling';
 import { logExecutionLatency } from './logger';
 import { ProjectTimeQuery } from './query';
@@ -35,7 +37,7 @@ const fileIDChunkToFileIDCache = new LRUCache<string, FileID>({ max: 100000 });
 const BASE64_FILE_ID_LENGTH = 22;
 const BASE64_FRAME_ID_LENGTH = 32;
 
-export interface EncodedStackTrace {
+export type EncodedStackTrace = DedotObject<{
   // This field is a base64-encoded byte string. The string represents a
   // serialized list of frame IDs in which the order of frames are
   // reversed to allow for prefix compression (leaf frame last). Each
@@ -47,12 +49,12 @@ export interface EncodedStackTrace {
   // +----------------+--------+----------------+--------+----
   // |     File ID    |  Addr  |     File ID    |  Addr  |
   // +----------------+--------+----------------+--------+----
-  FrameIDs: string;
+  [ProfilingESField.StacktraceFrameIDs]: string;
 
   // This field is a run-length encoding of a list of uint8s. The order is
   // reversed from the original input.
-  Types: string;
-}
+  [ProfilingESField.StacktraceFrameTypes]: string;
+}>;
 
 // runLengthEncodeReverse encodes the reversed input array using a
 // run-length encoding.
@@ -127,7 +129,9 @@ export function runLengthDecodeReverse(input: Buffer, outputSize?: number): numb
 
 // decodeStackTrace unpacks an encoded stack trace from Elasticsearch
 export function decodeStackTrace(input: EncodedStackTrace): StackTrace {
-  const countsFrameIDs = input.FrameIDs.length / BASE64_FRAME_ID_LENGTH;
+  const inputFrameIDs = input.Stacktrace.frame.ids;
+  const inputFrameTypes = input.Stacktrace.frame.types;
+  const countsFrameIDs = inputFrameIDs.length / BASE64_FRAME_ID_LENGTH;
 
   const fileIDs: string[] = new Array(countsFrameIDs);
   const frameIDs: string[] = new Array(countsFrameIDs);
@@ -141,8 +145,8 @@ export function decodeStackTrace(input: EncodedStackTrace): StackTrace {
   // However, since the file ID is base64-encoded using 21.33 bytes
   // (16 * 4 / 3), then the 22 bytes have an extra 4 bits from the
   // address (see diagram in definition of EncodedStackTrace).
-  for (let i = 0; i < input.FrameIDs.length; i += BASE64_FRAME_ID_LENGTH) {
-    const frameID = input.FrameIDs.slice(i, i + BASE64_FRAME_ID_LENGTH);
+  for (let i = 0; i < inputFrameIDs.length; i += BASE64_FRAME_ID_LENGTH) {
+    const frameID = inputFrameIDs.slice(i, i + BASE64_FRAME_ID_LENGTH);
     const fileIDChunk = frameID.slice(0, BASE64_FILE_ID_LENGTH);
     const fileID = fileIDChunkToFileIDCache.get(fileIDChunk) as string;
 
@@ -162,7 +166,7 @@ export function decodeStackTrace(input: EncodedStackTrace): StackTrace {
   }
 
   // Step 2: Convert the run-length byte encoding into a list of uint8s.
-  const types = Buffer.from(input.Types, 'base64url');
+  const types = Buffer.from(inputFrameTypes.toString(), 'base64url');
   const typeIDs = runLengthDecodeReverse(types, countsFrameIDs);
 
   return {
@@ -192,7 +196,7 @@ export async function searchEventsGroupByStackTrace({
         terms: {
           // 'size' should be max 100k, but might be slightly more. Better be on the safe side.
           size: 150000,
-          field: 'StackTraceID',
+          field: ProfilingESField.StacktraceID,
           // 'execution_hint: map' skips the slow building of ordinals that we don't need.
           // Especially with high cardinality fields, this makes aggregations really slow.
           // E.g. it reduces the latency from 70s to 0.7s on our 8.1. MVP cluster (as of 28.04.2022).
@@ -201,14 +205,14 @@ export async function searchEventsGroupByStackTrace({
         aggs: {
           count: {
             sum: {
-              field: 'Count',
+              field: ProfilingESField.StacktraceCount,
             },
           },
         },
       },
       total_count: {
         sum: {
-          field: 'Count',
+          field: ProfilingESField.StacktraceCount,
         },
       },
     },
@@ -254,15 +258,20 @@ export async function mgetStackTraces({
   const stackResponses = await withProfilingSpan('mget_stacktraces', () =>
     Promise.all(
       chunks.map((ids) => {
-        return client.mget<Pick<ProfilingStackTrace, 'FrameIDs' | 'Types'>>(
-          'mget_stacktraces_chunk',
-          {
-            index: INDEX_TRACES,
-            ids,
-            realtime: true,
-            _source_includes: ['FrameIDs', 'Types'],
-          }
-        );
+        return client.mget<
+          PickFlattened<
+            ProfilingStackTrace,
+            ProfilingESField.StacktraceFrameIDs | ProfilingESField.StacktraceFrameTypes
+          >
+        >('mget_stacktraces_chunk', {
+          index: INDEX_TRACES,
+          ids,
+          realtime: true,
+          _source_includes: [
+            ProfilingESField.StacktraceFrameIDs,
+            ProfilingESField.StacktraceFrameTypes,
+          ],
+        });
       })
     )
   );
@@ -275,7 +284,10 @@ export async function mgetStackTraces({
   await logExecutionLatency(logger, 'processing data', async () => {
     // flatMap() is significantly slower than an explicit for loop
     for (const res of stackResponses) {
-      for (const trace of getDocs(res)) {
+      for (const trace of res.docs) {
+        if ('error' in trace) {
+          continue;
+        }
         // Sometimes we don't find the trace.
         // This is due to ES delays writing (data is not immediately seen after write).
         // Also, ES doesn't know about transactions.
@@ -337,10 +349,19 @@ export async function mgetStackFrames({
   // Create a lookup map StackFrameID -> StackFrame.
   let framesFound = 0;
   await logExecutionLatency(logger, 'processing data', async () => {
-    const docs = getDocs(resStackFrames);
+    const docs = resStackFrames.docs;
     for (const frame of docs) {
+      if ('error' in frame) {
+        continue;
+      }
       if (frame.found) {
-        stackFrames.set(frame._id, frame._source);
+        stackFrames.set(frame._id, {
+          FileName: frame._source!.Stackframe.file?.name,
+          FunctionName: frame._source!.Stackframe.function?.name,
+          FunctionOffset: frame._source!.Stackframe.function?.offset,
+          LineNumber: frame._source!.Stackframe.line?.number,
+          SourceType: frame._source!.Stackframe.source?.type,
+        });
         framesFound++;
       } else {
         stackFrames.set(frame._id, {
@@ -377,16 +398,21 @@ export async function mgetExecutables({
   const resExecutables = await client.mget<ProfilingExecutable>('mget_executables', {
     index: INDEX_EXECUTABLES,
     ids: [...executableIDs],
-    _source_includes: ['FileName'],
+    _source_includes: [ProfilingESField.ExecutableFileName],
   });
 
   // Create a lookup map StackFrameID -> StackFrame.
   let exeFound = 0;
   await logExecutionLatency(logger, 'processing data', async () => {
-    const docs = getDocs(resExecutables);
+    const docs = resExecutables.docs;
     for (const exe of docs) {
+      if ('error' in exe) {
+        continue;
+      }
       if (exe.found) {
-        executables.set(exe._id, exe._source);
+        executables.set(exe._id, {
+          FileName: exe._source!.Executable.file.name,
+        });
         exeFound++;
       } else {
         executables.set(exe._id, {
