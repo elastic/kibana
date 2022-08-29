@@ -6,36 +6,36 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { AlertSummary } from './components';
 import { useKibana } from '../../utils/kibana_react';
 import { ObservabilityAppServices } from '../../application/types';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { paths } from '../../config/paths';
-import { i18n } from '@kbn/i18n';
 
 // import { useParams } from 'react-router';
 // import { AlertDetailsPathParams } from './types';
 
 export function AlertDetailsPage() {
-    const { http } = useKibana<ObservabilityAppServices>().services;
+  const { http } = useKibana<ObservabilityAppServices>().services;
 
-    const { ObservabilityPageTemplate } = usePluginContext();
-    // const { alertId } = useParams<AlertDetailsPathParams>();
-    const alert = {};
+  const { ObservabilityPageTemplate } = usePluginContext();
+  // const { alertId } = useParams<AlertDetailsPathParams>();
+  const alert = {};
 
-    useBreadcrumbs([
-        {
-            href: http.basePath.prepend(paths.observability.alerts),
-            text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
-                defaultMessage: 'Alerts',
-            })
-        }
-    ]);
+  useBreadcrumbs([
+    {
+      href: http.basePath.prepend(paths.observability.alerts),
+      text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
+        defaultMessage: 'Alerts',
+      }),
+    },
+  ]);
 
-    return (
-        <ObservabilityPageTemplate data-test-subj="alertDetails">
-            <AlertSummary alert={alert} />
-        </ObservabilityPageTemplate>
-    );
+  return (
+    <ObservabilityPageTemplate data-test-subj="alertDetails">
+      <AlertSummary alert={alert} />
+    </ObservabilityPageTemplate>
+  );
 }
