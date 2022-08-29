@@ -31,7 +31,7 @@ describe('actionTypeRegistry.get() works', () => {
 describe('torq action params validation', () => {
   test('action params validation succeeds when action params is valid', async () => {
     const actionParams = {
-      body: 'message {test}',
+      body: '{"message": "{test}"}',
     };
 
     expect(await actionTypeModel.validateParams(actionParams)).toEqual({
@@ -39,7 +39,17 @@ describe('torq action params validation', () => {
     });
   });
 
-  test('params validation fails when body is not valid', async () => {
+  test('action params validation succeeds when action params is valid - mustache', async () => {
+    const actionParams = {
+      body: '{"message": {{number}}}',
+    };
+
+    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+      errors: { body: [] },
+    });
+  });
+
+  test('params validation fails when body is empty', async () => {
     const actionParams = {
       body: '',
     };
@@ -47,6 +57,18 @@ describe('torq action params validation', () => {
     expect(await actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
         body: ['Body is required.'],
+      },
+    });
+  });
+
+  test('params validation fails when body is not a valid JSON', async () => {
+    const actionParams = {
+      body: 'some text',
+    };
+
+    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+      errors: {
+        body: ['Body is not a valid JSON.'],
       },
     });
   });
