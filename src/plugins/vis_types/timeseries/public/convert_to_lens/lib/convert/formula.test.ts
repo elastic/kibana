@@ -117,8 +117,7 @@ describe('createFormulaColumn', () => {
   ])('should return %s', (_, input, expected) => {
     if (expected === null) {
       expect(createFormulaColumn(...input)).toBeNull();
-    }
-    if (Array.isArray(expected)) {
+    } else if (Array.isArray(expected)) {
       expect(createFormulaColumn(...input)).toEqual(expected.map(expect.objectContaining));
     } else {
       expect(createFormulaColumn(...input)).toEqual(expect.objectContaining(expected));
@@ -301,8 +300,7 @@ describe('convertMathToFormulaColumn', () => {
   )('should return %s', (_, input, expected) => {
     if (expected === null) {
       expect(convertMathToFormulaColumn(...input)).toBeNull();
-    }
-    if (Array.isArray(expected)) {
+    } else if (Array.isArray(expected)) {
       expect(convertMathToFormulaColumn(...input)).toEqual(expected.map(expect.objectContaining));
     } else {
       expect(convertMathToFormulaColumn(...input)).toEqual(expect.objectContaining(expected));
@@ -376,8 +374,7 @@ describe('convertOtherAggsToFormulaColumn', () => {
   ])('should return %s', (_, input, expected) => {
     if (expected === null) {
       expect(convertOtherAggsToFormulaColumn(...input)).toBeNull();
-    }
-    if (Array.isArray(expected)) {
+    } else if (Array.isArray(expected)) {
       expect(convertOtherAggsToFormulaColumn(...input)).toEqual(
         expected.map(expect.objectContaining)
       );

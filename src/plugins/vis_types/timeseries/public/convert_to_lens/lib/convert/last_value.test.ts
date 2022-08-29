@@ -93,8 +93,7 @@ describe('convertToLastValueColumn', () => {
   )('should return %s', (_, input, expected) => {
     if (expected === null) {
       expect(convertToLastValueColumn(...input)).toBeNull();
-    }
-    if (Array.isArray(expected)) {
+    } else if (Array.isArray(expected)) {
       expect(convertToLastValueColumn(...input)).toEqual(expected.map(expect.objectContaining));
     } else {
       expect(convertToLastValueColumn(...input)).toEqual(expect.objectContaining(expected));

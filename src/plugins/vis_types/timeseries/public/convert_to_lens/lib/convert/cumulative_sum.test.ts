@@ -208,8 +208,7 @@ describe('convertToCumulativeSumColumns', () => {
   ])('should return %s', (_, input, expected) => {
     if (expected === null) {
       expect(convertToCumulativeSumColumns(...input)).toBeNull();
-    }
-    if (Array.isArray(expected)) {
+    } else if (Array.isArray(expected)) {
       expect(convertToCumulativeSumColumns(...input)).toEqual(
         expected.map(expect.objectContaining)
       );

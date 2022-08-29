@@ -47,8 +47,7 @@ describe('convertToPercentileRankParams', () => {
   ])('should return %s', (_, input, expected) => {
     if (expected === null) {
       expect(convertToPercentileRankParams(...input)).toBeNull();
-    }
-    if (Array.isArray(expected)) {
+    } else if (Array.isArray(expected)) {
       expect(convertToPercentileRankParams(...input)).toEqual(
         expected.map(expect.objectContaining)
       );

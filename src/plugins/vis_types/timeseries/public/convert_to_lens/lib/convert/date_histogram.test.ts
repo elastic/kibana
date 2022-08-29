@@ -53,8 +53,7 @@ describe('convertToDateHistogramParams', () => {
   ])('should return date histogram params %s', (_, input, expected) => {
     if (expected === null) {
       expect(convertToDateHistogramParams(...input)).toBeNull();
-    }
-    if (Array.isArray(expected)) {
+    } else if (Array.isArray(expected)) {
       expect(convertToDateHistogramParams(...input)).toEqual(expected.map(expect.objectContaining));
     } else {
       expect(convertToDateHistogramParams(...input)).toEqual(expect.objectContaining(expected));
@@ -121,8 +120,7 @@ describe('convertToDateHistogramColumn', () => {
   ])('should return %s', (_, input, expected) => {
     if (expected === null) {
       expect(convertToDateHistogramColumn(...input)).toBeNull();
-    }
-    if (Array.isArray(expected)) {
+    } else if (Array.isArray(expected)) {
       expect(convertToDateHistogramColumn(...input)).toEqual(expected.map(expect.objectContaining));
     } else {
       expect(convertToDateHistogramColumn(...input)).toEqual(expect.objectContaining(expected));

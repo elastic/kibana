@@ -62,8 +62,7 @@ describe('convertToFiltersParams', () => {
   ])('should return %s', (_, input, expected) => {
     if (expected === null) {
       expect(convertToFiltersParams(...input)).toBeNull();
-    }
-    if (Array.isArray(expected)) {
+    } else if (Array.isArray(expected)) {
       expect(convertToFiltersParams(...input)).toEqual(expected.map(expect.objectContaining));
     } else {
       expect(convertToFiltersParams(...input)).toEqual(expect.objectContaining(expected));
@@ -120,8 +119,7 @@ describe('convertToFiltersColumn', () => {
   ])('should return %s', (_, input, expected) => {
     if (expected === null) {
       expect(convertToFiltersColumn(...input)).toBeNull();
-    }
-    if (Array.isArray(expected)) {
+    } else if (Array.isArray(expected)) {
       expect(convertToFiltersColumn(...input)).toEqual(expected.map(expect.objectContaining));
     } else {
       expect(convertToFiltersColumn(...input)).toEqual(expect.objectContaining(expected));
