@@ -11,6 +11,7 @@ import { FtrService } from '../ftr_provider_context';
 export class UnifiedSearchPageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly testSubjects = this.ctx.getService('testSubjects');
+  private readonly find = this.ctx.getService('find');
 
   public async switchDataView(switchButtonSelector: string, dataViewTitle: string) {
     await this.testSubjects.click(switchButtonSelector);
@@ -34,5 +35,29 @@ export class UnifiedSearchPageObject extends FtrService {
     });
 
     return visibleText;
+  }
+
+  public async clickCreateNewDataView() {
+    await this.retry.waitForWithTimeout('data create new to be visible', 15000, async () => {
+      return await this.testSubjects.isDisplayed('dataview-create-new');
+    });
+    await this.testSubjects.click('dataview-create-new');
+    await this.retry.waitForWithTimeout(
+      'index pattern editor form to be visible',
+      15000,
+      async () => {
+        return await (await this.find.byClassName('indexPatternEditor__form')).isDisplayed();
+      }
+    );
+    await (await this.find.byClassName('indexPatternEditor__form')).click();
+  }
+
+  public async createNewDataView(dataViewName: string, adHoc?: boolean) {
+    await this.clickCreateNewDataView();
+    await this.testSubjects.setValue('createIndexPatternTitleInput', dataViewName, {
+      clearWithKeyboard: true,
+      typeCharByChar: true,
+    });
+    await this.testSubjects.click(adHoc ? 'exploreIndexPatternButton' : 'saveIndexPatternButton');
   }
 }

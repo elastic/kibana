@@ -3124,13 +3124,7 @@
             "label": "context",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.GetDeprecationsContext",
-                "text": "GetDeprecationsContext"
-              }
+              "GetDeprecationsContext"
             ],
             "path": "x-pack/plugins/security/common/model/deprecations.ts",
             "deprecated": false

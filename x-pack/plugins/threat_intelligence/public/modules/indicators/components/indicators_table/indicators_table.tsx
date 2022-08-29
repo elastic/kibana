@@ -36,7 +36,7 @@ const defaultColumns: EuiDataGridColumn[] = [
     }),
   },
   {
-    id: ComputedIndicatorFieldId.DisplayValue,
+    id: ComputedIndicatorFieldId.DisplayName,
     displayAsText: i18n.translate('xpack.threatIntelligence.indicator.table.indicatorColumTitle', {
       defaultMessage: 'Indicator',
     }),
