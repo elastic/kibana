@@ -9,17 +9,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
-import deepEqual from 'fast-deep-equal';
 import {
   BehaviorSubject,
-  catchError,
-  distinctUntilChanged,
-  EMPTY,
-  map,
-  merge,
-  pipe,
   Subscription,
-  switchMap,
 } from 'rxjs';
 import uuid from 'uuid';
 import { CoreStart, IUiSettingsClient, KibanaExecutionContext } from '@kbn/core/public';
@@ -200,34 +192,10 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     }
 
     /**
-     * Create a pipe that outputs the child's ID, any time any child's output changes.
-     */
-    const anyChildChangePipe = pipe(
-      map(() => this.getChildIds()),
-      distinctUntilChanged(deepEqual),
-
-      // children may change, so make sure we subscribe/unsubscribe with switchMap
-      switchMap((newChildIds: string[]) =>
-        merge(
-          ...newChildIds.map((childId) =>
-            this.getChild(childId)
-              .getOutput$()
-              .pipe(
-                // Embeddables often throw errors into their output streams.
-                catchError(() => EMPTY),
-                map(() => childId)
-              )
-          )
-        )
-      )
-    );
-
-    /**
      * run OnChildOutputChanged when any child's output has changed
      */
     this.subscriptions.add(
-      this.getOutput$()
-        .pipe(anyChildChangePipe)
+      this.getAnyChildOutputChange$()
         .subscribe(() => {
           for (const child of Object.values(this.children)) {
             const isLoading = child.getOutput().loading;

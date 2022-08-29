@@ -7,18 +7,14 @@
  */
 
 import {
-  map,
   skip,
-  switchMap,
-  catchError,
   debounceTime,
   distinctUntilChanged,
 } from 'rxjs/operators';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import deepEqual from 'fast-deep-equal';
 import { Filter, uniqFilters } from '@kbn/es-query';
-import { EMPTY, merge, pipe, Subject, Subscription } from 'rxjs';
+import { merge, Subject, Subscription } from 'rxjs';
 import { EuiContextMenuPanel } from '@elastic/eui';
 
 import {
@@ -228,34 +224,10 @@ export class ControlGroupContainer extends Container<
     );
 
     /**
-     * Create a pipe that outputs the child's ID, any time any child's output changes.
-     */
-    const anyChildChangePipe = pipe(
-      map(() => this.getChildIds()),
-      distinctUntilChanged(deepEqual),
-
-      // children may change, so make sure we subscribe/unsubscribe with switchMap
-      switchMap((newChildIds: string[]) =>
-        merge(
-          ...newChildIds.map((childId) =>
-            this.getChild(childId)
-              .getOutput$()
-              .pipe(
-                // Embeddables often throw errors into their output streams.
-                catchError(() => EMPTY),
-                map(() => childId)
-              )
-          )
-        )
-      )
-    );
-
-    /**
      * run OnChildOutputChanged when any child's output has changed
      */
     this.subscriptions.add(
-      this.getOutput$()
-        .pipe(anyChildChangePipe)
+      this.getAnyChildOutputChange$()
         .subscribe((childOutputChangedId) => {
           this.recalculateDataViews();
           ControlGroupChainingSystems[this.getInput().chainingSystem].onChildChange({
