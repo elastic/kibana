@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
+import React, { memo, ReactElement, useCallback, useEffect, useRef, useState } from 'react';
 import moment from 'moment';
 import {
   EuiButtonIcon,
@@ -13,7 +13,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
-  EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -43,6 +42,7 @@ export function DiscoverChart({
   hideChart,
   interval,
   isTimeBased,
+  appendHistogram,
 }: {
   resetSavedSearch: () => void;
   savedSearch: SavedSearch;
@@ -53,6 +53,7 @@ export function DiscoverChart({
   isTimeBased: boolean;
   hideChart?: boolean;
   interval?: string;
+  appendHistogram?: ReactElement;
 }) {
   const { data, storage } = useDiscoverServices();
   const [showChartOptionsPopover, setShowChartOptionsPopover] = useState(false);
@@ -209,7 +210,7 @@ export function DiscoverChart({
               stateContainer={stateContainer}
             />
           </section>
-          <EuiSpacer size="m" />
+          {appendHistogram}
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
