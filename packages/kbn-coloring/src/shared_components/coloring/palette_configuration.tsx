@@ -33,7 +33,6 @@ export interface CustomizablePaletteProps {
   showRangeTypeSelector?: boolean;
   disableSwitchingContinuity?: boolean;
   showExtraActions?: boolean;
-  displayInfinity?: boolean;
 }
 
 export const CustomizablePalette = ({
@@ -44,7 +43,6 @@ export const CustomizablePalette = ({
   showExtraActions = true,
   showRangeTypeSelector = true,
   disableSwitchingContinuity = false,
-  displayInfinity = false,
 }: CustomizablePaletteProps) => {
   const idPrefix = useMemo(() => htmlIdGenerator()(), []);
   const colorRangesToShow = toColorRanges(
@@ -192,9 +190,6 @@ export const CustomizablePalette = ({
             showExtraActions={showExtraActions}
             paletteConfiguration={localState.activePalette?.params}
             colorRanges={localState.colorRanges}
-            displayInfinity={
-              displayInfinity && localState.activePalette.params?.rangeType !== 'percent'
-            }
             dispatch={dispatch}
           />
         </ColorRangesContext.Provider>
