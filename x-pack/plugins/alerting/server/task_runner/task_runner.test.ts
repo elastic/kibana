@@ -2896,6 +2896,15 @@ describe('Task Runner', () => {
             reason: errorReason,
           },
         },
+        timings: {
+          claim_to_start_duration_ms: 0,
+          prepare_rule_duration_ms: 0,
+          process_alerts_duration_ms: 0,
+          process_rule_duration_ms: 0,
+          rule_type_run_duration_ms: 0,
+          total_run_duration_ms: 0,
+          trigger_actions_duration_ms: 0,
+        },
       });
     } else if (status === 'warning') {
       expect(alertingEventLogger.done).toHaveBeenCalledWith({
@@ -2919,6 +2928,15 @@ describe('Task Runner', () => {
             reason: errorReason,
           },
         },
+        timings: {
+          claim_to_start_duration_ms: 0,
+          prepare_rule_duration_ms: 0,
+          process_alerts_duration_ms: 0,
+          process_rule_duration_ms: 0,
+          rule_type_run_duration_ms: 0,
+          total_run_duration_ms: 0,
+          trigger_actions_duration_ms: 0,
+        },
       });
     } else {
       expect(alertingEventLogger.done).toHaveBeenCalledWith({
@@ -2937,6 +2955,15 @@ describe('Task Runner', () => {
         status: {
           lastExecutionDate: new Date('1970-01-01T00:00:00.000Z'),
           status,
+        },
+        timings: {
+          claim_to_start_duration_ms: 0,
+          prepare_rule_duration_ms: 0,
+          process_alerts_duration_ms: 0,
+          process_rule_duration_ms: 0,
+          rule_type_run_duration_ms: 0,
+          total_run_duration_ms: 0,
+          trigger_actions_duration_ms: 0,
         },
       });
     }
