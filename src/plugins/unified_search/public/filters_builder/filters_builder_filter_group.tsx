@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText, EuiPanel } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import type { Path } from './filters_builder_types';
-import { ConditionTypes } from './filters_builder_condition_types';
+import { ConditionTypes } from '../utils';
 import { FilterItem } from './filters_builder_filter_item';
 import { FiltersBuilderContextType } from './filters_builder_context';
 import { getPathInArray } from './filters_builder_utils';

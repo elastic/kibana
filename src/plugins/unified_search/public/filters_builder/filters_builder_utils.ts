@@ -9,13 +9,11 @@
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { buildEmptyFilter, Filter } from '@kbn/es-query';
 import { cloneDeep } from 'lodash';
-import { ConditionTypes } from './filters_builder_condition_types';
+import { ConditionTypes, getConditionalOperationType, isOrFilter } from '../utils';
+import type { FilterItem } from '../utils';
 import type { Operator } from '../filter_bar/filter_editor';
 
 const PATH_SEPARATOR = '.';
-
-/** @internal **/
-export type FilterItem = Filter | FilterItem[];
 
 /** to: @kbn/es-query **/
 const buildOrFilter = (filters: FilterItem) => {
@@ -29,17 +27,6 @@ const buildOrFilter = (filters: FilterItem) => {
       params: filters,
     },
   };
-};
-
-/** to: @kbn/es-query **/
-export const isOrFilter = (filter: Filter) => Boolean(filter?.meta?.type === 'OR');
-
-export const getConditionalOperationType = (filter: FilterItem) => {
-  if (Array.isArray(filter)) {
-    return ConditionTypes.AND;
-  } else if (isOrFilter(filter)) {
-    return ConditionTypes.OR;
-  }
 };
 
 export const getPathInArray = (path: string) => path.split(PATH_SEPARATOR).map((i) => +i);

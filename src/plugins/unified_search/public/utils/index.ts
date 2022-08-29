@@ -8,3 +8,6 @@
 
 export { onRaf } from './on_raf';
 export { shallowEqual } from './shallow_equal';
+
+export type { FilterItem } from './or_filter';
+export { ConditionTypes, isOrFilter, getConditionalOperationType } from './or_filter';
