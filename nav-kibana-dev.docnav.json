@@ -104,6 +104,9 @@
       "label": "Tutorials",
       "items": [
         {
+          "id": "kibDevTutorialAddingPerformanceMetrics"
+        },
+        {
           "id": "kibDevTutorialSetupWindowsDevWSL"
         },
         {
