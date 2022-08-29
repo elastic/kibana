@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { FETCH_ALERTS } from '../../../../common/lib/apm/http_requests';
+import { ALERTS_QUERY_NAMES } from '../../../../detections/containers/detection_engine/alerts/constants';
 
 import {
   from,
@@ -75,7 +75,7 @@ describe('useRuleAlertsItems', () => {
       query: severityRuleAlertsQuery,
       indexName: 'signal-alerts',
       skip: false,
-      monitoringKey: FETCH_ALERTS.BY_SEVERITY,
+      queryName: ALERTS_QUERY_NAMES.BY_SEVERITY,
     });
   });
 
@@ -120,7 +120,7 @@ describe('useRuleAlertsItems', () => {
       query: severityRuleAlertsQuery,
       indexName: 'signal-alerts',
       skip: true,
-      monitoringKey: FETCH_ALERTS.BY_SEVERITY,
+      queryName: ALERTS_QUERY_NAMES.BY_SEVERITY,
     });
 
     expect(result.current).toEqual({

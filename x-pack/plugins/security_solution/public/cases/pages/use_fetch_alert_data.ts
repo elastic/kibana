@@ -9,10 +9,12 @@ import { useMemo } from 'react';
 import type { Ecs } from '@kbn/cases-plugin/common';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
-import { useQueryAlerts } from '../../detections/containers/detection_engine/alerts/use_query';
+import {
+  useQueryAlerts,
+  ALERTS_QUERY_NAMES,
+} from '../../detections/containers/detection_engine/alerts/use_query';
 import type { SignalHit } from '../../common/utils/alerts';
 import { buildAlertsQuery, formatAlertToEcsSignal } from '../../common/utils/alerts';
-import { FETCH_ALERTS } from '../../common/lib/apm/http_requests';
 
 export const useFetchAlertData = (alertIds: string[]): [boolean, Record<string, unknown>] => {
   const { selectedPatterns } = useSourcererDataView(SourcererScopeName.detections);
@@ -21,7 +23,7 @@ export const useFetchAlertData = (alertIds: string[]): [boolean, Record<string, 
   const { loading: isLoadingAlerts, data: alertsData } = useQueryAlerts<SignalHit, unknown>({
     query: alertsQuery,
     indexName: selectedPatterns[0],
-    monitoringKey: FETCH_ALERTS.CASES,
+    queryName: ALERTS_QUERY_NAMES.CASES,
   });
 
   const alerts = useMemo(

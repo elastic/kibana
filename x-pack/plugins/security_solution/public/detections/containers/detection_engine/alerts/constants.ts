@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { APP_UI_ID } from '../../../../common/constants';
+import { APP_UI_ID } from '../../../../../common/constants';
 
-export const FETCH_ALERTS = {
+export const ALERTS_QUERY_NAMES = {
   ADD_EXCEPTION_FLYOUT: `${APP_UI_ID} fetchAlerts addExceptionFlyout`,
   BY_ID: `${APP_UI_ID} fetchAlerts byId`,
   BY_RULE_ID: `${APP_UI_ID} fetchAlerts byRuleId`,

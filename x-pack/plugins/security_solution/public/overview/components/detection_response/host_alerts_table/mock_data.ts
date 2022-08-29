@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FETCH_ALERTS } from '../../../../common/lib/apm/http_requests';
+import { ALERTS_QUERY_NAMES } from '../../../../detections/containers/detection_engine/alerts/constants';
 import { buildVulnerableHostAggregationQuery } from './use_host_alerts_items';
 
 export const mockVulnerableHostsBySeverityResult = {
@@ -127,5 +127,5 @@ export const mockQuery = () => ({
   }),
   indexName: 'signal-alerts',
   skip: false,
-  monitoringKey: FETCH_ALERTS.VULNERABLE_HOSTS,
+  queryName: ALERTS_QUERY_NAMES.VULNERABLE_HOSTS,
 });

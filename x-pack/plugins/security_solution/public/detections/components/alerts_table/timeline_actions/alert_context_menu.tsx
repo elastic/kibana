@@ -28,7 +28,10 @@ import type { inputsModel, State } from '../../../../common/store';
 import { inputsSelectors } from '../../../../common/store';
 import { TimelineId } from '../../../../../common/types';
 import type { AlertData, EcsHit } from '../../../../common/components/exceptions/types';
-import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
+import {
+  useQueryAlerts,
+  ALERTS_QUERY_NAMES,
+} from '../../../containers/detection_engine/alerts/use_query';
 import { useSignalIndex } from '../../../containers/detection_engine/alerts/use_signal_index';
 import { EventFiltersFlyout } from '../../../../management/pages/event_filters/view/components/event_filters_flyout';
 import { useAlertsActions } from './use_alerts_actions';
@@ -40,7 +43,6 @@ import { ATTACH_ALERT_TO_CASE_FOR_ROW } from '../../../../timelines/components/t
 import { useEventFilterAction } from './use_event_filter_action';
 import { useAddToCaseActions } from './use_add_to_case_actions';
 import { isAlertFromEndpointAlert } from '../../../../common/utils/endpoint_alert_check';
-import { FETCH_ALERTS } from '../../../../common/lib/apm/http_requests';
 
 interface AlertContextMenuProps {
   ariaLabel?: string;
@@ -316,7 +318,7 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
   const { loading: isLoadingAlertData, data } = useQueryAlerts<EcsHit, {}>({
     query: buildGetAlertByIdQuery(eventId),
     indexName: signalIndexName,
-    monitoringKey: FETCH_ALERTS.ADD_EXCEPTION_FLYOUT,
+    queryName: ALERTS_QUERY_NAMES.ADD_EXCEPTION_FLYOUT,
   });
 
   const enrichedAlert: AlertData | undefined = useMemo(() => {

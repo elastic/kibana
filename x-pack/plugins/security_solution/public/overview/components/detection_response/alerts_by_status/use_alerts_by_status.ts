@@ -8,7 +8,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { useQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/use_query';
+import {
+  useQueryAlerts,
+  ALERTS_QUERY_NAMES,
+} from '../../../../detections/containers/detection_engine/alerts/use_query';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import type { AlertsByStatusAgg, AlertsByStatusResponse, ParsedAlertsData } from './types';
 import {
@@ -17,7 +20,6 @@ import {
   STATUS_LOW_LABEL,
   STATUS_MEDIUM_LABEL,
 } from '../translations';
-import { FETCH_ALERTS } from '../../../../common/lib/apm/http_requests';
 
 export const severityLabels: Record<Severity, string> = {
   critical: STATUS_CRITICAL_LABEL,
@@ -110,7 +112,7 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
     }),
     indexName: signalIndexName,
     skip,
-    monitoringKey: FETCH_ALERTS.BY_STATUS,
+    queryName: ALERTS_QUERY_NAMES.BY_STATUS,
   });
 
   useEffect(() => {

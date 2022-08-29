@@ -24,7 +24,10 @@ import type { UpdateDateRange } from '../../../../common/components/charts/commo
 import type { LegendItem } from '../../../../common/components/charts/draggable_legend_item';
 import { escapeDataProviderId } from '../../../../common/components/drag_and_drop/helpers';
 import { HeaderSection } from '../../../../common/components/header_section';
-import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
+import {
+  useQueryAlerts,
+  ALERTS_QUERY_NAMES,
+} from '../../../containers/detection_engine/alerts/use_query';
 import { getDetectionEngineUrl, useFormatUrl } from '../../../../common/components/link_to';
 import { defaultLegendColors } from '../../../../common/components/matrix_histogram/utils';
 import { InspectButtonContainer } from '../../../../common/components/inspect';
@@ -49,7 +52,6 @@ import { KpiPanel, StackByComboBox } from '../common/components';
 import { useInspectButton } from '../common/hooks';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { GROUP_BY_TOP_LABEL } from '../common/translations';
-import { FETCH_ALERTS } from '../../../../common/lib/apm/http_requests';
 
 const defaultTotalAlertsObj: AlertsTotal = {
   value: 0,
@@ -192,7 +194,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
       ),
       indexName: signalIndexName,
       skip: querySkip,
-      monitoringKey: FETCH_ALERTS.HISTOGRAM,
+      queryName: ALERTS_QUERY_NAMES.HISTOGRAM,
     });
 
     const kibana = useKibana();

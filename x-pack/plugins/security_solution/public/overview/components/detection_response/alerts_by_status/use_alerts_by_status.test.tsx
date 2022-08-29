@@ -6,8 +6,8 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { FETCH_ALERTS } from '../../../../common/lib/apm/http_requests';
 import { TestProviders } from '../../../../common/mock';
+import { ALERTS_QUERY_NAMES } from '../../../../detections/containers/detection_engine/alerts/constants';
 import { from, mockAlertsData, alertsByStatusQuery, parsedMockAlertsData, to } from './mock_data';
 import type { UseAlertsByStatus, UseAlertsByStatusProps } from './use_alerts_by_status';
 import { useAlertsByStatus } from './use_alerts_by_status';
@@ -73,7 +73,7 @@ describe('useAlertsByStatus', () => {
       query: alertsByStatusQuery,
       indexName: 'signal-alerts',
       skip: false,
-      monitoringKey: FETCH_ALERTS.BY_STATUS,
+      queryName: ALERTS_QUERY_NAMES.BY_STATUS,
     });
   });
 
@@ -119,7 +119,7 @@ describe('useAlertsByStatus', () => {
       query: alertsByStatusQuery,
       indexName: 'signal-alerts',
       skip: true,
-      monitoringKey: FETCH_ALERTS.BY_STATUS,
+      queryName: ALERTS_QUERY_NAMES.BY_STATUS,
     });
 
     expect(result.current).toEqual({

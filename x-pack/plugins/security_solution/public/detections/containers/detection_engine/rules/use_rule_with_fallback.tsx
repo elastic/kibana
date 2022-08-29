@@ -13,12 +13,11 @@ import { expandDottedObject } from '../../../../../common/utils/expand_dotted';
 
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import type { AlertSearchResponse } from '../alerts/types';
-import { useQueryAlerts } from '../alerts/use_query';
+import { useQueryAlerts, ALERTS_QUERY_NAMES } from '../alerts/use_query';
 import { fetchRuleById } from './api';
 import { transformInput } from './transforms';
 import * as i18n from './translations';
 import type { Rule } from './types';
-import { FETCH_ALERTS } from '../../../../common/lib/apm/http_requests';
 
 interface UseRuleWithFallback {
   error: unknown;
@@ -99,7 +98,7 @@ export const useRuleWithFallback = (ruleId: string): UseRuleWithFallback => {
   const { loading: alertsLoading, data: alertsData } = useQueryAlerts<AlertHit, undefined>({
     query: buildLastAlertQuery(ruleId),
     skip: isExistingRule,
-    monitoringKey: FETCH_ALERTS.BY_RULE_ID,
+    queryName: ALERTS_QUERY_NAMES.BY_RULE_ID,
   });
 
   useEffect(() => {

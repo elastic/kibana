@@ -13,6 +13,10 @@ import type { fetchQueryRuleRegistryAlerts } from './api';
 import { fetchQueryAlerts } from './api';
 import type { AlertSearchResponse, QueryAlerts } from './types';
 import { useTrackHttpRequest } from '../../../../common/lib/apm/use_track_http_request';
+import { ALERTS_QUERY_NAMES } from './constants';
+
+export { ALERTS_QUERY_NAMES };
+export type AlertsQueryName = typeof ALERTS_QUERY_NAMES[keyof typeof ALERTS_QUERY_NAMES];
 
 type Func = () => Promise<void>;
 
@@ -26,26 +30,27 @@ export interface ReturnQueryAlerts<Hit, Aggs> {
 }
 
 type FetchMethod = typeof fetchQueryAlerts | typeof fetchQueryRuleRegistryAlerts;
-interface AlertsQueryParams {
+export interface AlertsQueryParams {
   fetchMethod?: FetchMethod;
   query: object;
   indexName?: string | null;
   skip?: boolean;
-  monitoringKey?: string;
+  /**
+   * The query name is used for performance monitoring using APM
+   */
+  queryName: AlertsQueryName;
 }
 
 /**
  * Wrapped `fetchMethod` hook that integrates
  * http-request monitoring using APM transactions.
  */
-const useMonitoredFetchMethod = (fetchMethod: FetchMethod, monitoringKey?: string): FetchMethod => {
+const useTrackedFetchMethod = (fetchMethod: FetchMethod, queryName: string): FetchMethod => {
   const { startTracking } = useTrackHttpRequest();
 
   const monitoredFetchMethod = useMemo<FetchMethod>(() => {
-    if (!monitoringKey) return fetchMethod;
-
     return async <Hit, Aggs>(params: QueryAlerts) => {
-      const { endTracking } = startTracking({ name: monitoringKey });
+      const { endTracking } = startTracking({ name: queryName });
       let result: AlertSearchResponse<Hit, Aggs>;
       try {
         result = await fetchMethod<Hit, Aggs>(params);
@@ -56,7 +61,7 @@ const useMonitoredFetchMethod = (fetchMethod: FetchMethod, monitoringKey?: strin
       }
       return result;
     };
-  }, [fetchMethod, monitoringKey, startTracking]);
+  }, [fetchMethod, queryName, startTracking]);
 
   return monitoredFetchMethod;
 };
@@ -72,7 +77,7 @@ export const useQueryAlerts = <Hit, Aggs>({
   query: initialQuery,
   indexName,
   skip,
-  monitoringKey,
+  queryName,
 }: AlertsQueryParams): ReturnQueryAlerts<Hit, Aggs> => {
   const [query, setQuery] = useState(initialQuery);
   const [alerts, setAlerts] = useState<
@@ -86,7 +91,7 @@ export const useQueryAlerts = <Hit, Aggs>({
   });
   const [loading, setLoading] = useState(false);
 
-  const fetchAlerts = useMonitoredFetchMethod(fetchMethod, monitoringKey);
+  const fetchAlerts = useTrackedFetchMethod(fetchMethod, queryName);
 
   useEffect(() => {
     let isSubscribed = true;

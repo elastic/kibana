@@ -10,9 +10,11 @@ import { useCallback, useEffect, useState } from 'react';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import type { GenericBuckets } from '../../../../../common/search_strategy';
-import { useQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/use_query';
+import {
+  useQueryAlerts,
+  ALERTS_QUERY_NAMES,
+} from '../../../../detections/containers/detection_engine/alerts/use_query';
 import { getPageCount, ITEMS_PER_PAGE } from '../utils';
-import { FETCH_ALERTS } from '../../../../common/lib/apm/http_requests';
 
 const USERS_BY_SEVERITY_AGG = 'usersBySeverity';
 const defaultPagination = {
@@ -74,7 +76,7 @@ export const useUserAlertsItems: UseUserAlertsItems = ({ skip, queryId, signalIn
     }),
     indexName: signalIndexName,
     skip,
-    monitoringKey: FETCH_ALERTS.VULNERABLE_USERS,
+    queryName: ALERTS_QUERY_NAMES.VULNERABLE_USERS,
   });
 
   useEffect(() => {

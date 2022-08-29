@@ -17,13 +17,15 @@ import { useGlobalTime } from '../../containers/use_global_time';
 import { AlertsTreemap, DEFAULT_MIN_CHART_HEIGHT } from '../alerts_treemap';
 import { KpiPanel } from '../../../detections/components/alerts_kpis/common/components';
 import { useInspectButton } from '../../../detections/components/alerts_kpis/common/hooks';
-import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
+import {
+  useQueryAlerts,
+  ALERTS_QUERY_NAMES,
+} from '../../../detections/containers/detection_engine/alerts/use_query';
 import { FieldSelection } from '../field_selection';
 import { HeaderSection } from '../header_section';
 import { InspectButtonContainer } from '../inspect';
 import { DEFAULT_STACK_BY_FIELD0_SIZE, getAlertsRiskQuery } from '../alerts_treemap/query';
 import type { AlertsTreeMapAggregation } from '../alerts_treemap/types';
-import { FETCH_ALERTS } from '../../lib/apm/http_requests';
 
 const DEFAULT_HEIGHT = DEFAULT_MIN_CHART_HEIGHT + 134; // px
 
@@ -118,7 +120,7 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
     }),
     skip: !isPanelExpanded,
     indexName: signalIndexName,
-    monitoringKey: FETCH_ALERTS.TREE_MAP,
+    queryName: ALERTS_QUERY_NAMES.TREE_MAP,
   });
 
   useEffect(() => {

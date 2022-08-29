@@ -15,7 +15,10 @@ import { buildEsQuery } from '@kbn/es-query';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { HeaderSection } from '../../../../common/components/header_section';
 
-import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
+import {
+  useQueryAlerts,
+  ALERTS_QUERY_NAMES,
+} from '../../../containers/detection_engine/alerts/use_query';
 import { InspectButtonContainer } from '../../../../common/components/inspect';
 
 import { getAlertsCountQuery } from './helpers';
@@ -26,7 +29,6 @@ import { KpiPanel } from '../common/components';
 import { useInspectButton } from '../common/hooks';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { FieldSelection } from '../../../../common/components/field_selection';
-import { FETCH_ALERTS } from '../../../../common/lib/apm/http_requests';
 
 export const DETECTIONS_ALERTS_COUNT_ID = 'detections-alerts-count';
 
@@ -126,7 +128,7 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
       }),
       indexName: signalIndexName,
       skip: querySkip,
-      monitoringKey: FETCH_ALERTS.COUNT,
+      queryName: ALERTS_QUERY_NAMES.COUNT,
     });
 
     useEffect(() => {
