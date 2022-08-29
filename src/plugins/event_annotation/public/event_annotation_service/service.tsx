@@ -6,11 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { queryToAst } from '@kbn/data-plugin/common';
 import { EventAnnotationServiceType } from './types';
 import {
   defaultAnnotationColor,
   defaultAnnotationRangeColor,
   defaultAnnotationLabel,
+  isQueryAnnotationConfig,
 } from './helpers';
 import { EventAnnotationConfig } from '../../common';
 import { RangeEventAnnotationConfig } from '../../common/types';
@@ -44,6 +46,42 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
                 color: [color || defaultAnnotationRangeColor],
                 outside: [Boolean(outside)],
                 isHidden: [Boolean(isHidden)],
+              },
+            },
+          ],
+        };
+      } else if (isQueryAnnotationConfig(annotation)) {
+        const {
+          extraFields,
+          label,
+          isHidden,
+          color,
+          lineStyle,
+          lineWidth,
+          icon,
+          filter,
+          textVisibility,
+          timeField,
+          textField,
+        } = annotation;
+        return {
+          type: 'expression',
+          chain: [
+            {
+              type: 'function',
+              function: 'query_point_event_annotation',
+              arguments: {
+                filter: filter ? [queryToAst(filter)] : [],
+                timeField: [timeField],
+                textField: [textField],
+                label: [label || defaultAnnotationLabel],
+                color: [color || defaultAnnotationColor],
+                lineWidth: [lineWidth || 1],
+                lineStyle: [lineStyle || 'solid'],
+                icon: hasIcon(icon) ? [icon] : ['triangle'],
+                textVisibility: [textVisibility || false],
+                isHidden: [Boolean(isHidden)],
+                extraFields: extraFields || [],
               },
             },
           ],
