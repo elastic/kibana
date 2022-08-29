@@ -24,16 +24,16 @@ export const useAnomaliesColumns = (loading: boolean): AnomaliesColumns => {
   const columns: AnomaliesColumns = useMemo(
     () => [
       {
-        field: 'name',
+        field: 'jobId',
         name: i18n.ANOMALY_NAME,
         truncateText: true,
         mobileOptions: { show: true },
         'data-test-subj': 'anomalies-table-column-name',
-        render: (name, { status }) => {
+        render: (jobId, { status }) => {
           if (status === 'enabled') {
-            return name;
+            return jobId;
           } else {
-            return <MediumShadeText>{name}</MediumShadeText>;
+            return <MediumShadeText>{jobId}</MediumShadeText>;
           }
         },
       },

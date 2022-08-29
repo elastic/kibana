@@ -16,10 +16,7 @@ import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useInstalledSecurityJobs } from '../hooks/use_installed_security_jobs';
 import { notableAnomaliesSearch } from '../api/anomalies_search';
 import type { NotableAnomaliesJobId } from '../../../../overview/components/entity_analytics/anomalies/config';
-import {
-  NOTABLE_ANOMALIES_CONFIG,
-  NOTABLE_ANOMALIES_IDS,
-} from '../../../../overview/components/entity_analytics/anomalies/config';
+import { NOTABLE_ANOMALIES_IDS } from '../../../../overview/components/entity_analytics/anomalies/config';
 import { getAggregatedAnomaliesQuery } from '../../../../overview/components/entity_analytics/anomalies/query';
 import type { inputsModel } from '../../../store';
 import { isJobFailed, isJobStarted } from '../../../../../common/machine_learning/helpers';
@@ -28,7 +25,6 @@ type AnomalyJobStatus = 'enabled' | 'disabled' | 'uninstalled' | 'failed';
 
 export interface AnomaliesCount {
   jobId: NotableAnomaliesJobId;
-  name: string;
   count: number;
   status: AnomalyJobStatus;
 }
@@ -150,7 +146,6 @@ function formatResultData(
 
     return {
       jobId,
-      name: NOTABLE_ANOMALIES_CONFIG[jobId].name,
       count: bucket?.doc_count ?? 0,
       status,
     };

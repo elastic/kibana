@@ -49,48 +49,6 @@ export const VIEW_ALL_ANOMALIES = i18n.translate(
   }
 );
 
-export const UNUSUAL_SOURCE_IP = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.anomalies.unusualSourceIP',
-  {
-    defaultMessage: 'Unusual Source IP for a User to Logon from',
-  }
-);
-
-export const DNS_TUNNELING = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.anomalies.dnsTunneling',
-  {
-    defaultMessage: 'DNS Tunneling',
-  }
-);
-
-export const UNUSUAL_NETWORK_DESTINATION = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.anomalies.unusualNetworkDestination',
-  {
-    defaultMessage: 'Unusual Network Destination Domain Name',
-  }
-);
-
-export const UNUSUAL_DNS_ACTIVITY = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.anomalies.unusualDnsActivity',
-  {
-    defaultMessage: 'Unusual DNS Activity',
-  }
-);
-
-export const UNUSUAL_LOGIN_ACTIVITY = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.anomalies.unusualLoginActivity',
-  {
-    defaultMessage: 'Unusual Login Activity',
-  }
-);
-
-export const SUSPICIOUS_POWERSHELL_SCRIPT = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.anomalies.suspiciousPowershellScript',
-  {
-    defaultMessage: 'Suspicious Powershell Script',
-  }
-);
-
 export const RUN_JOB = i18n.translate(
   'xpack.securitySolution.entityAnalytics.anomalies.enableJob',
   {
