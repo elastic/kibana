@@ -6,10 +6,13 @@
  * Side Public License, v 1.
  */
 
-export type { GetDeprecationsContext, RegisterDeprecationsConfig } from './types';
-
 export type {
   DeprecationsServiceSetup,
+  GetDeprecationsContext,
+  RegisterDeprecationsConfig,
+} from '@kbn/core-deprecations-server';
+
+export type {
   InternalDeprecationsServiceSetup,
   InternalDeprecationsServiceStart,
   DeprecationsClient,
