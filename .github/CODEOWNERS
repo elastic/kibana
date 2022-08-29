@@ -14,8 +14,10 @@
 /x-pack/plugins/discover_enhanced/ @elastic/kibana-data-discovery
 /x-pack/test/functional/apps/discover/ @elastic/kibana-data-discovery
 /test/functional/apps/discover/ @elastic/kibana-data-discovery
+/test/api_integration/apis/unified_field_list/ @elastic/kibana-data-discovery
 /x-pack/plugins/graph/ @elastic/kibana-data-discovery
 /x-pack/test/functional/apps/graph @elastic/kibana-data-discovery
+/src/plugins/unified_field_list/ @elastic/kibana-data-discovery
 
 # Vis Editors
 /x-pack/plugins/lens/ @elastic/kibana-vis-editors
@@ -42,7 +44,10 @@
 /src/plugins/url_forwarding/ @elastic/kibana-vis-editors
 /packages/kbn-tinymath/ @elastic/kibana-vis-editors
 /x-pack/test/functional/apps/lens @elastic/kibana-vis-editors
+/x-pack/test/api_integration/apis/lens/ @elastic/kibana-vis-editors
 /test/functional/apps/visualize/ @elastic/kibana-vis-editors
+/src/plugins/unified_field_list/ @elastic/kibana-vis-editors
+/test/api_integration/apis/unified_field_list/ @elastic/kibana-vis-editors
 
 # Application Services
 /examples/bfetch_explorer/ @elastic/kibana-app-services
@@ -88,6 +93,7 @@
 /x-pack/test/search_sessions_integration/ @elastic/kibana-app-services
 /src/plugins/dashboard/public/application/embeddable/viewport/print_media @elastic/kibana-app-services
 x-pack/plugins/files @elastic/kibana-app-services
+x-pack/examples/files_example @elastic/kibana-app-services
 
 ### Observability Plugins
 
@@ -178,6 +184,7 @@ x-pack/plugins/files @elastic/kibana-app-services
 /src/plugins/controls/ @elastic/kibana-presentation
 /test/functional/apps/dashboard/  @elastic/kibana-presentation
 /test/functional/apps/dashboard_elements/  @elastic/kibana-presentation
+/test/functional/services/dashboard/  @elastic/kibana-presentation
 /x-pack/plugins/canvas/  @elastic/kibana-presentation
 /x-pack/plugins/dashboard_enhanced/ @elastic/kibana-presentation
 /x-pack/test/functional/apps/canvas/  @elastic/kibana-presentation

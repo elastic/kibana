@@ -2240,6 +2240,130 @@
       },
       {
         "parentPluginId": "lens",
+        "id": "def-public.LegacyMetricState",
+        "type": "Interface",
+        "tags": [],
+        "label": "LegacyMetricState",
+        "description": [],
+        "path": "x-pack/plugins/lens/common/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.LegacyMetricState.layerId",
+            "type": "string",
+            "tags": [],
+            "label": "layerId",
+            "description": [],
+            "path": "x-pack/plugins/lens/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.LegacyMetricState.accessor",
+            "type": "string",
+            "tags": [],
+            "label": "accessor",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/lens/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.LegacyMetricState.layerType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "layerType",
+            "description": [],
+            "signature": [
+              "\"data\" | \"referenceLine\" | \"annotations\""
+            ],
+            "path": "x-pack/plugins/lens/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.LegacyMetricState.colorMode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "colorMode",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "charts",
+                "scope": "common",
+                "docId": "kibChartsPluginApi",
+                "section": "def-common.ColorMode",
+                "text": "ColorMode"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/lens/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.LegacyMetricState.palette",
+            "type": "Object",
+            "tags": [],
+            "label": "palette",
+            "description": [],
+            "signature": [
+              "PaletteOutput",
+              "<",
+              "CustomPaletteParams",
+              "> | undefined"
+            ],
+            "path": "x-pack/plugins/lens/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.LegacyMetricState.titlePosition",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "titlePosition",
+            "description": [],
+            "signature": [
+              "\"top\" | \"bottom\" | undefined"
+            ],
+            "path": "x-pack/plugins/lens/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.LegacyMetricState.size",
+            "type": "string",
+            "tags": [],
+            "label": "size",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/lens/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.LegacyMetricState.textAlign",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "textAlign",
+            "description": [],
+            "signature": [
+              "\"left\" | \"right\" | \"center\" | undefined"
+            ],
+            "path": "x-pack/plugins/lens/common/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
         "id": "def-public.LegendConfig",
         "type": "Interface",
         "tags": [],
@@ -2809,130 +2933,6 @@
               " | undefined; }"
             ],
             "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/formula/math.tsx",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lens",
-        "id": "def-public.MetricState",
-        "type": "Interface",
-        "tags": [],
-        "label": "MetricState",
-        "description": [],
-        "path": "x-pack/plugins/lens/common/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "lens",
-            "id": "def-public.MetricState.layerId",
-            "type": "string",
-            "tags": [],
-            "label": "layerId",
-            "description": [],
-            "path": "x-pack/plugins/lens/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-public.MetricState.accessor",
-            "type": "string",
-            "tags": [],
-            "label": "accessor",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/lens/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-public.MetricState.layerType",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "layerType",
-            "description": [],
-            "signature": [
-              "\"data\" | \"referenceLine\" | \"annotations\""
-            ],
-            "path": "x-pack/plugins/lens/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-public.MetricState.colorMode",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "colorMode",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "charts",
-                "scope": "common",
-                "docId": "kibChartsPluginApi",
-                "section": "def-common.ColorMode",
-                "text": "ColorMode"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/lens/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-public.MetricState.palette",
-            "type": "Object",
-            "tags": [],
-            "label": "palette",
-            "description": [],
-            "signature": [
-              "PaletteOutput",
-              "<",
-              "CustomPaletteParams",
-              "> | undefined"
-            ],
-            "path": "x-pack/plugins/lens/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-public.MetricState.titlePosition",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "titlePosition",
-            "description": [],
-            "signature": [
-              "\"top\" | \"bottom\" | undefined"
-            ],
-            "path": "x-pack/plugins/lens/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-public.MetricState.size",
-            "type": "string",
-            "tags": [],
-            "label": "size",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/lens/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-public.MetricState.textAlign",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "textAlign",
-            "description": [],
-            "signature": [
-              "\"left\" | \"right\" | \"center\" | undefined"
-            ],
-            "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false
           }
         ],
@@ -7839,14 +7839,16 @@
             "section": "def-public.DatatableVisualizationState",
             "text": "DatatableVisualizationState"
           },
-          "> | LensAttributes<\"lnsMetric\", ",
+          "> | LensAttributes<\"lnsLegacyMetric\", ",
           {
             "pluginId": "lens",
             "scope": "common",
             "docId": "kibLensPluginApi",
-            "section": "def-common.MetricState",
-            "text": "MetricState"
+            "section": "def-common.LegacyMetricState",
+            "text": "LegacyMetricState"
           },
+          "> | LensAttributes<\"lnsMetric\", ",
+          "MetricVisualizationState",
           "> | LensAttributes<\"lnsHeatmap\", ",
           {
             "pluginId": "lens",
@@ -9115,6 +9117,48 @@
       },
       {
         "parentPluginId": "lens",
+        "id": "def-server.LensDocShape840",
+        "type": "Type",
+        "tags": [],
+        "label": "LensDocShape840",
+        "description": [],
+        "signature": [
+          "Omit<",
+          {
+            "pluginId": "lens",
+            "scope": "server",
+            "docId": "kibLensPluginApi",
+            "section": "def-server.LensDocShape715",
+            "text": "LensDocShape715"
+          },
+          "<VisualizationState>, \"filters\" | \"state\"> & { filters: ",
+          "Filter",
+          "[]; state: Omit<{ datasourceMetaData: { filterableIndexPatterns: { id: string; title: string; }[]; }; datasourceStates: { indexpattern: { currentIndexPatternId: string; layers: Record<string, { columnOrder: string[]; columns: Record<string, Record<string, unknown>>; }>; }; }; visualization: VisualizationState; query: ",
+          "Query",
+          "; filters: ",
+          {
+            "pluginId": "lens",
+            "scope": "common",
+            "docId": "kibLensPluginApi",
+            "section": "def-common.PersistableFilter",
+            "text": "PersistableFilter"
+          },
+          "[]; }, \"datasourceStates\"> & { datasourceStates: { indexpattern: Omit<{ currentIndexPatternId: string; layers: Record<string, { columnOrder: string[]; columns: Record<string, Record<string, unknown>>; }>; }, \"layers\"> & { layers: Record<string, Omit<{ columnOrder: string[]; columns: Record<string, Record<string, unknown>>; }, \"columns\"> & { columns: Record<string, { [key: string]: unknown; operationType: \"terms\"; params: { secondaryFields?: string[] | undefined; }; } | { [key: string]: unknown; operationType: ",
+          {
+            "pluginId": "lens",
+            "scope": "server",
+            "docId": "kibLensPluginApi",
+            "section": "def-server.OperationTypePost712",
+            "text": "OperationTypePost712"
+          },
+          "; params: Record<string, unknown>; }>; }>; }; }; }; }"
+        ],
+        "path": "x-pack/plugins/lens/server/migrations/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
         "id": "def-server.OperationTypePost712",
         "type": "Type",
         "tags": [],
@@ -9169,6 +9213,26 @@
         "type": "Type",
         "tags": [],
         "label": "VisState830",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "lens",
+            "scope": "server",
+            "docId": "kibLensPluginApi",
+            "section": "def-server.XYVisualizationState830",
+            "text": "XYVisualizationState830"
+          }
+        ],
+        "path": "x-pack/plugins/lens/server/migrations/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-server.VisState840",
+        "type": "Type",
+        "tags": [],
+        "label": "VisState840",
         "description": [],
         "signature": [
           {
@@ -9456,42 +9520,6 @@
     "interfaces": [
       {
         "parentPluginId": "lens",
-        "id": "def-common.BucketedAggregation",
-        "type": "Interface",
-        "tags": [],
-        "label": "BucketedAggregation",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "lens",
-            "scope": "common",
-            "docId": "kibLensPluginApi",
-            "section": "def-common.BucketedAggregation",
-            "text": "BucketedAggregation"
-          },
-          "<KeyType>"
-        ],
-        "path": "x-pack/plugins/lens/common/api.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.BucketedAggregation.buckets",
-            "type": "Array",
-            "tags": [],
-            "label": "buckets",
-            "description": [],
-            "signature": [
-              "{ key: KeyType; count: number; }[]"
-            ],
-            "path": "x-pack/plugins/lens/common/api.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lens",
         "id": "def-common.DateRange",
         "type": "Interface",
         "tags": [],
@@ -9561,119 +9589,17 @@
       },
       {
         "parentPluginId": "lens",
-        "id": "def-common.FieldStatsResponse",
+        "id": "def-common.LegacyMetricState",
         "type": "Interface",
         "tags": [],
-        "label": "FieldStatsResponse",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "lens",
-            "scope": "common",
-            "docId": "kibLensPluginApi",
-            "section": "def-common.FieldStatsResponse",
-            "text": "FieldStatsResponse"
-          },
-          "<KeyType>"
-        ],
-        "path": "x-pack/plugins/lens/common/api.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.FieldStatsResponse.totalDocuments",
-            "type": "number",
-            "tags": [],
-            "label": "totalDocuments",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "x-pack/plugins/lens/common/api.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.FieldStatsResponse.sampledDocuments",
-            "type": "number",
-            "tags": [],
-            "label": "sampledDocuments",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "x-pack/plugins/lens/common/api.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.FieldStatsResponse.sampledValues",
-            "type": "number",
-            "tags": [],
-            "label": "sampledValues",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "x-pack/plugins/lens/common/api.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.FieldStatsResponse.histogram",
-            "type": "Object",
-            "tags": [],
-            "label": "histogram",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "lens",
-                "scope": "common",
-                "docId": "kibLensPluginApi",
-                "section": "def-common.BucketedAggregation",
-                "text": "BucketedAggregation"
-              },
-              "<KeyType> | undefined"
-            ],
-            "path": "x-pack/plugins/lens/common/api.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.FieldStatsResponse.topValues",
-            "type": "Object",
-            "tags": [],
-            "label": "topValues",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "lens",
-                "scope": "common",
-                "docId": "kibLensPluginApi",
-                "section": "def-common.BucketedAggregation",
-                "text": "BucketedAggregation"
-              },
-              "<KeyType> | undefined"
-            ],
-            "path": "x-pack/plugins/lens/common/api.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lens",
-        "id": "def-common.MetricState",
-        "type": "Interface",
-        "tags": [],
-        "label": "MetricState",
+        "label": "LegacyMetricState",
         "description": [],
         "path": "x-pack/plugins/lens/common/types.ts",
         "deprecated": false,
         "children": [
           {
             "parentPluginId": "lens",
-            "id": "def-common.MetricState.layerId",
+            "id": "def-common.LegacyMetricState.layerId",
             "type": "string",
             "tags": [],
             "label": "layerId",
@@ -9683,7 +9609,7 @@
           },
           {
             "parentPluginId": "lens",
-            "id": "def-common.MetricState.accessor",
+            "id": "def-common.LegacyMetricState.accessor",
             "type": "string",
             "tags": [],
             "label": "accessor",
@@ -9696,7 +9622,7 @@
           },
           {
             "parentPluginId": "lens",
-            "id": "def-common.MetricState.layerType",
+            "id": "def-common.LegacyMetricState.layerType",
             "type": "CompoundType",
             "tags": [],
             "label": "layerType",
@@ -9709,7 +9635,7 @@
           },
           {
             "parentPluginId": "lens",
-            "id": "def-common.MetricState.colorMode",
+            "id": "def-common.LegacyMetricState.colorMode",
             "type": "CompoundType",
             "tags": [],
             "label": "colorMode",
@@ -9729,7 +9655,7 @@
           },
           {
             "parentPluginId": "lens",
-            "id": "def-common.MetricState.palette",
+            "id": "def-common.LegacyMetricState.palette",
             "type": "Object",
             "tags": [],
             "label": "palette",
@@ -9745,7 +9671,7 @@
           },
           {
             "parentPluginId": "lens",
-            "id": "def-common.MetricState.titlePosition",
+            "id": "def-common.LegacyMetricState.titlePosition",
             "type": "CompoundType",
             "tags": [],
             "label": "titlePosition",
@@ -9758,7 +9684,7 @@
           },
           {
             "parentPluginId": "lens",
-            "id": "def-common.MetricState.size",
+            "id": "def-common.LegacyMetricState.size",
             "type": "string",
             "tags": [],
             "label": "size",
@@ -9771,7 +9697,7 @@
           },
           {
             "parentPluginId": "lens",
-            "id": "def-common.MetricState.textAlign",
+            "id": "def-common.LegacyMetricState.textAlign",
             "type": "CompoundType",
             "tags": [],
             "label": "textAlign",
@@ -9780,69 +9706,6 @@
               "\"left\" | \"right\" | \"center\" | undefined"
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lens",
-        "id": "def-common.NumberStatsResult",
-        "type": "Interface",
-        "tags": [],
-        "label": "NumberStatsResult",
-        "description": [],
-        "path": "x-pack/plugins/lens/common/api.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.NumberStatsResult.count",
-            "type": "number",
-            "tags": [],
-            "label": "count",
-            "description": [],
-            "path": "x-pack/plugins/lens/common/api.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.NumberStatsResult.histogram",
-            "type": "Object",
-            "tags": [],
-            "label": "histogram",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "lens",
-                "scope": "common",
-                "docId": "kibLensPluginApi",
-                "section": "def-common.BucketedAggregation",
-                "text": "BucketedAggregation"
-              },
-              "<number>"
-            ],
-            "path": "x-pack/plugins/lens/common/api.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.NumberStatsResult.topValues",
-            "type": "Object",
-            "tags": [],
-            "label": "topValues",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "lens",
-                "scope": "common",
-                "docId": "kibLensPluginApi",
-                "section": "def-common.BucketedAggregation",
-                "text": "BucketedAggregation"
-              },
-              "<number>"
-            ],
-            "path": "x-pack/plugins/lens/common/api.ts",
             "deprecated": false
           }
         ],
@@ -10173,49 +10036,6 @@
               "boolean | undefined"
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lens",
-        "id": "def-common.TopValuesResult",
-        "type": "Interface",
-        "tags": [],
-        "label": "TopValuesResult",
-        "description": [],
-        "path": "x-pack/plugins/lens/common/api.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.TopValuesResult.count",
-            "type": "number",
-            "tags": [],
-            "label": "count",
-            "description": [],
-            "path": "x-pack/plugins/lens/common/api.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.TopValuesResult.topValues",
-            "type": "Object",
-            "tags": [],
-            "label": "topValues",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "lens",
-                "scope": "common",
-                "docId": "kibLensPluginApi",
-                "section": "def-common.BucketedAggregation",
-                "text": "BucketedAggregation"
-              },
-              "<string>"
-            ],
-            "path": "x-pack/plugins/lens/common/api.ts",
             "deprecated": false
           }
         ],

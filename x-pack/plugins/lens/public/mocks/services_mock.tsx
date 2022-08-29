@@ -16,6 +16,7 @@ import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { dashboardPluginMock } from '@kbn/dashboard-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 
 import {
@@ -158,6 +159,7 @@ export function makeDefaultServices(
       clear: jest.fn(),
     },
     spaces: spacesPluginMock.createStartContract(),
+    charts: chartPluginMock.createSetupContract(),
     dataViewFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),
     dataViewEditor: indexPatternEditorPluginMock.createStartContract(),
   };

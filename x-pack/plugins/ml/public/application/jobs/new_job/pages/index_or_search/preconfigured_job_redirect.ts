@@ -44,9 +44,11 @@ async function getWizardUrlFromCloningJob(createdBy: string | undefined, dataVie
 
   switch (created) {
     case CREATED_BY_LABEL.SINGLE_METRIC:
+    case CREATED_BY_LABEL.SINGLE_METRIC_FROM_LENS:
       page = JOB_TYPE.SINGLE_METRIC;
       break;
     case CREATED_BY_LABEL.MULTI_METRIC:
+    case CREATED_BY_LABEL.MULTI_METRIC_FROM_LENS:
       page = JOB_TYPE.MULTI_METRIC;
       break;
     case CREATED_BY_LABEL.POPULATION:

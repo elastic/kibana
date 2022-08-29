@@ -6,14 +6,7 @@
  */
 
 import { isEmpty, reduce } from 'lodash';
-
-export const convertECSMappingToArray = (ecsMapping: Record<string, object> | undefined) =>
-  ecsMapping
-    ? Object.entries(ecsMapping).map((item) => ({
-        key: item[0],
-        value: item[1],
-      }))
-    : undefined;
+import type { ECSMapping } from './schemas';
 
 export const convertECSMappingToObject = (
   ecsMapping: Array<{
@@ -23,7 +16,7 @@ export const convertECSMappingToObject = (
       value: string;
     };
   }>
-): Record<string, { field?: string; value?: string }> =>
+): ECSMapping =>
   reduce(
     ecsMapping,
     (acc, value) => {
