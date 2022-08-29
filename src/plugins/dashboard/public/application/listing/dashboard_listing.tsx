@@ -305,7 +305,10 @@ export const DashboardListing = ({
           entityNamePlural={getEntityNamePlural()}
           tableListTitle={getTableListTitle()}
           entityName={getEntityName()}
-          emptyPrompt={emptyPrompt}
+          {...{
+            emptyPrompt,
+            listingLimit,
+          }}
           headingId="dashboardListingHeading"
           findItems={fetchItems}
           getDetailViewLink={({ id, attributes: { timeRestore } }) =>
@@ -317,7 +320,6 @@ export const DashboardListing = ({
               timeRestore
             )
           }
-          listingLimit={listingLimit}
         >
           <DashboardUnsavedListing
             redirectTo={redirectTo}
