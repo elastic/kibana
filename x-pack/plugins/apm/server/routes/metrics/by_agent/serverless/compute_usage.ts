@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { euiLightVars as theme } from '@kbn/ui-theme';
 import {
   kqlQuery,
   rangeQuery,
@@ -23,6 +24,7 @@ import { environmentQuery } from '../../../../../common/utils/environment_query'
 import { getMetricsDateHistogramParams } from '../../../../lib/helpers/metrics';
 import { Setup } from '../../../../lib/helpers/setup_request';
 import { ChartBase } from '../../types';
+import { getVizColorForIndex } from '../../../../../common/viz_colors';
 
 const chartBase: ChartBase = {
   title: i18n.translate('xpack.apm.agentMetrics.serverless.computeUsage', {
@@ -147,6 +149,7 @@ export async function getComputeUsage({
                 faasBilledDuration: aggregations?.avgFaasBilledDuration.value,
                 totalMemory: aggregations?.avgTotalMemory.value,
               }),
+              color: getVizColorForIndex(0, theme),
               data:
                 timeseriesData?.buckets.map((bucket) => {
                   const computeUsage = calculateComputeUsageGBSeconds({
