@@ -10,31 +10,35 @@ import { isDeepStrictEqual } from 'util';
 import { Agent as HttpAgent } from 'http';
 import { Agent as HttpsAgent } from 'https';
 import { ConnectionOptions, HttpAgentOptions, UndiciAgentOptions } from '@elastic/elasticsearch';
+import { Logger } from '@kbn/logging';
 
 export type NetworkAgent = HttpAgent | HttpsAgent;
 export type AgentFactory = (connectionOpts: ConnectionOptions) => NetworkAgent;
 
 /** @internal **/
 export class AgentManager {
-  // keep references to agents by type, for each protocol, e.g.:
+  // store Agent instances by protocol => type => configuration, e.g.:
   // {
   //   'https:': {
-  //     data: [dataAgentInstance, dataAgentConfig],
-  //     monitoring: [monitoringAgentInstance, monitoringAgentConfig]
+  //     data: [[dataAgentConfig1, dataAgentInstance1], [dataAgentConfig2, dataAgentInstance2]]
+  //     monitoring: [[monitoringAgentConfig1, monitoringAgentInstance1]]
   //     }
   // }
-  private agentsMaps: Record<string, Record<string, [NetworkAgent, HttpAgentOptions]>>;
+  private agentStore: Record<string, Record<string, Array<[HttpAgentOptions, NetworkAgent]>>>;
+  private logger: Logger;
 
   constructor(
+    logger: Logger,
     private defaultAgentConfig: HttpAgentOptions = {
       keepAlive: true,
       keepAliveMsecs: 1000,
-      maxSockets: Infinity,
+      maxSockets: 256,
       maxFreeSockets: 256,
       scheduling: 'lifo',
     }
   ) {
-    this.agentsMaps = {
+    this.logger = logger;
+    this.agentStore = {
       'http:': {},
       'https:': {},
     };
@@ -54,33 +58,43 @@ export class AgentManager {
     const baseConfig = Object.assign({}, this.defaultAgentConfig, validAgentConfig);
 
     return (connectionOpts: ConnectionOptions): NetworkAgent => {
-      const agentMap = this.agentsMaps[connectionOpts.url.protocol];
+      const agentsByType = this.agentStore[connectionOpts.url.protocol];
 
-      const currentConfig = Object.assign({}, baseConfig, connectionOpts.tls);
-
-      if (!agentMap) {
+      if (!agentsByType) {
         throw new Error(`Unsupported protocol: '${connectionOpts.url.protocol}'`);
       }
 
-      const agentTuple = agentMap[type];
+      let agentInstances = agentsByType[type];
+      const firstOfType = !agentInstances;
 
-      if (agentTuple) {
-        const [agent, initialConfig] = agentTuple;
-
-        if (!isDeepStrictEqual(initialConfig, currentConfig)) {
-          throw new Error(
-            `Attempted to retrieve HTTP Agent instances of the same type '${type}' using different configurations`
-          );
-        }
-        return agent;
+      if (firstOfType) {
+        agentInstances = [];
+        agentsByType[type] = agentInstances;
       }
 
+      const currentConfig = Object.assign({}, baseConfig, connectionOpts.tls);
+
+      const agentTuple = agentInstances.find(([config]) =>
+        isDeepStrictEqual(config, currentConfig)
+      );
+
+      if (agentTuple) {
+        return agentTuple[1];
+      }
+
+      if (!firstOfType) {
+        this.logger.warn(
+          `Requesting HTTP Agent of type ${type} with a new configuration. This is not optimal since the existing instance cannot be reused`
+        );
+      }
+      // we did NOT find an agent for the same protocol, type and configuration => create one
       const agent =
         connectionOpts.url.protocol === 'http:'
           ? new HttpAgent(currentConfig)
           : new HttpsAgent(currentConfig);
 
-      agentMap[type] = [agent, currentConfig];
+      // add the new tuple [config, agentInstance] to the list of tuples for that type
+      agentInstances.push([currentConfig, agent]);
 
       return agent;
     };
