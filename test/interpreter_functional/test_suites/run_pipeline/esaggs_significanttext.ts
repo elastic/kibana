@@ -16,8 +16,7 @@ export default function ({
 }: FtrProviderContext & { updateBaselines: boolean }) {
   let expectExpression: ExpectExpression;
 
-  // Failing: See https://github.com/elastic/kibana/issues/136751
-  describe.skip('esaggs_significanttext', () => {
+  describe('esaggs_significanttext', () => {
     before(() => {
       expectExpression = expectExpressionProvider({ getService, updateBaselines });
     });
