@@ -135,6 +135,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
 
   return {
     anomaliesTable,
+    anomalyCharts,
     anomalyExplorer,
     alerting,
     api,
