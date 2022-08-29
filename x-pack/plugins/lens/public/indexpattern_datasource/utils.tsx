@@ -465,6 +465,14 @@ export function getFiltersInLayer(
   indexPattern: IndexPattern,
   timeRange: TimeRange | undefined
 ) {
+  if (indexPattern.spec) {
+    return {
+      error: i18n.translate('xpack.lens.indexPattern.adHocDataViewError', {
+        defaultMessage:
+          '"Explore data in Discover" does not support unsaved data views. Save the data view to switch to Discover.',
+      }),
+    };
+  }
   const filtersGroupedByState = collectFiltersFromMetrics(layer, columnIds);
   const [enabledFiltersFromMetricsByLanguage, disabledFitleredFromMetricsByLanguage] = (
     ['enabled', 'disabled'] as const

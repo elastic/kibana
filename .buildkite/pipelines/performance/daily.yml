@@ -19,6 +19,7 @@ steps:
       queue: kb-static-ubuntu
     depends_on: build
     key: tests
+    timeout_in_minutes: 60
 
   - label: ':shipit: Performance Tests dataset extraction for scalability benchmarking'
     command: .buildkite/scripts/steps/functional/scalability_dataset_extraction.sh
