@@ -23,6 +23,7 @@ import styled from 'styled-components';
 interface KeyValue {
   key: string;
   value: any | undefined;
+  showFilterByOption: boolean;
 }
 
 const StyledEuiAccordion = styled(EuiAccordion)`
@@ -78,12 +79,12 @@ export function KeyValueFilterList({
       buttonClassName="buttonContentContainer"
     >
       <StyledEuiDescriptionList type="column">
-        {nonEmptyKeyValueList.map(({ key, value }) => {
+        {nonEmptyKeyValueList.map(({ key, value, showFilterByOption }) => {
           return (
             <Fragment key={key}>
               <EuiDescriptionListTitle
                 className="descriptionList__title"
-                style={{ width: '20%' }}
+                style={{ width: '20%', height: '40px' }}
               >
                 <EuiText size="s" style={{ fontWeight: 'bold' }}>
                   {key}
@@ -91,25 +92,27 @@ export function KeyValueFilterList({
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription
                 className="descriptionList__description"
-                style={{ width: '80%' }}
+                style={{ width: '80%', height: '40px' }}
               >
                 <ValueContainer>
-                  <EuiButtonEmpty
-                    onClick={() => {
-                      onClickFilter({ key, value });
-                    }}
-                    data-test-subj={`filter_by_${key}`}
-                  >
-                    <EuiToolTip
-                      position="top"
-                      content={i18n.translate(
-                        'xpack.apm.keyValueFilterList.actionFilterLabel',
-                        { defaultMessage: 'Filter by value' }
-                      )}
+                  {showFilterByOption && (
+                    <EuiButtonEmpty
+                      onClick={() => {
+                        onClickFilter({ key, value });
+                      }}
+                      data-test-subj={`filter_by_${key}`}
                     >
-                      <EuiIcon type="filter" color="text" size="m" />
-                    </EuiToolTip>
-                  </EuiButtonEmpty>
+                      <EuiToolTip
+                        position="top"
+                        content={i18n.translate(
+                          'xpack.apm.keyValueFilterList.actionFilterLabel',
+                          { defaultMessage: 'Filter by value' }
+                        )}
+                      >
+                        <EuiIcon type="filter" color="text" size="m" />
+                      </EuiToolTip>
+                    </EuiButtonEmpty>
+                  )}
                   <EuiText size="s">{value}</EuiText>
                 </ValueContainer>
               </EuiDescriptionListDescription>
