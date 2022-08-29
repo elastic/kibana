@@ -25,7 +25,7 @@ import {
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 import { updateColumnParam } from '../layer_helpers';
-import { getColumnWindowError } from '../../window_utils';
+import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
 
 const supportedTypes = new Set([
   'string',
@@ -43,7 +43,7 @@ const SCALE = 'ratio';
 const OPERATION_TYPE = 'unique_count';
 const IS_BUCKETED = false;
 
-function ofName(name: string, timeShift: string | undefined, window: string | undefined) {
+function ofName(name: string, timeShift: string | undefined, reducedTimeRange: string | undefined) {
   return adjustTimeScaleLabelSuffix(
     i18n.translate('xpack.lens.indexPattern.cardinalityOf', {
       defaultMessage: 'Unique count of {name}',
@@ -56,7 +56,7 @@ function ofName(name: string, timeShift: string | undefined, window: string | un
     undefined,
     timeShift,
     undefined,
-    window
+    reducedTimeRange
   );
 }
 
@@ -93,7 +93,7 @@ export const cardinalityOperation: OperationDefinition<
     combineErrorMessages([
       getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
       getDisallowedPreviousShiftMessage(layer, columnId),
-      getColumnWindowError(layer, columnId, indexPattern),
+      getColumnReducedTimeRangeError(layer, columnId, indexPattern),
     ]),
   isTransferable: (column, newIndexPattern) => {
     const newField = newIndexPattern.getFieldByName(column.sourceField);
@@ -107,12 +107,16 @@ export const cardinalityOperation: OperationDefinition<
   },
   filterable: true,
   shiftable: true,
-  windowable: true,
+  canReduceTimeRange: true,
   getDefaultLabel: (column, indexPattern) =>
-    ofName(getSafeName(column.sourceField, indexPattern), column.timeShift, column.window),
+    ofName(
+      getSafeName(column.sourceField, indexPattern),
+      column.timeShift,
+      column.reducedTimeRange
+    ),
   buildColumn({ field, previousColumn }, columnParams) {
     return {
-      label: ofName(field.displayName, previousColumn?.timeShift, previousColumn?.window),
+      label: ofName(field.displayName, previousColumn?.timeShift, previousColumn?.reducedTimeRange),
       dataType: 'number',
       operationType: OPERATION_TYPE,
       scale: SCALE,
@@ -120,7 +124,7 @@ export const cardinalityOperation: OperationDefinition<
       isBucketed: IS_BUCKETED,
       filter: getFilter(previousColumn, columnParams),
       timeShift: columnParams?.shift || previousColumn?.timeShift,
-      window: columnParams?.window || previousColumn?.window,
+      reducedTimeRange: columnParams?.reducedTimeRange || previousColumn?.reducedTimeRange,
       params: {
         ...getFormatFromPreviousColumn(previousColumn),
         emptyAsNull:
@@ -185,7 +189,7 @@ export const cardinalityOperation: OperationDefinition<
   onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
-      label: ofName(field.displayName, oldColumn.timeShift, oldColumn.window),
+      label: ofName(field.displayName, oldColumn.timeShift, oldColumn.reducedTimeRange),
       sourceField: field.name,
     };
   },

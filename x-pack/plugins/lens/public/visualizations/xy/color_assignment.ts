@@ -12,7 +12,7 @@ import { euiLightVars } from '@kbn/ui-theme';
 import {
   defaultAnnotationColor,
   defaultAnnotationRangeColor,
-  isRangeAnnotation,
+  isRangeAnnotationConfig,
 } from '@kbn/event-annotation-plugin/public';
 import type { AccessorConfig, FramePublicAPI } from '../../types';
 import { getColumnToLabelMap } from './state_helpers';
@@ -126,7 +126,9 @@ export function getAssignedColorConfig(
     return {
       columnId: accessor,
       triggerIcon: annotation?.isHidden ? ('invisible' as const) : ('color' as const),
-      color: isRangeAnnotation(annotation) ? defaultAnnotationRangeColor : defaultAnnotationColor,
+      color: isRangeAnnotationConfig(annotation)
+        ? defaultAnnotationRangeColor
+        : defaultAnnotationColor,
     };
   }
   const layerContainsSplits = isDataLayer(layer) && !layer.collapseFn && layer.splitAccessor;

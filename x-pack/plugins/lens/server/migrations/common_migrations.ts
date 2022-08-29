@@ -347,6 +347,27 @@ export const getLensFilterMigrations = (
     },
   }));
 
+export const getLensDataViewMigrations = (
+  dataViewMigrations: MigrateFunctionsObject
+): MigrateFunctionsObject =>
+  mapValues(dataViewMigrations, (migrate) => (lensDoc: { attributes: LensDocShape }) => ({
+    ...lensDoc,
+    attributes: {
+      ...lensDoc.attributes,
+      state: {
+        ...lensDoc.attributes.state,
+        adHocDataViews: !lensDoc.attributes.state.adHocDataViews
+          ? undefined
+          : Object.fromEntries(
+              Object.entries(lensDoc.attributes.state.adHocDataViews).map(([id, spec]) => [
+                id,
+                migrate(spec),
+              ])
+            ),
+      },
+    },
+  }));
+
 export const fixLensTopValuesCustomFormatting = (attributes: LensDocShape810): LensDocShape810 => {
   const newAttributes = cloneDeep(attributes);
   const datasourceLayers = newAttributes.state.datasourceStates.indexpattern.layers || {};
