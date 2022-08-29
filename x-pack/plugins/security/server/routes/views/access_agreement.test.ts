@@ -139,7 +139,7 @@ describe('Access agreement view routes', () => {
       });
     });
 
-    it('returns non-empty local `accessAgreement` only if it is configured.', async () => {
+    it('returns non-empty provider specific `accessAgreement` only if it is configured.', async () => {
       const request = httpServerMock.createKibanaRequest();
 
       config.authc = routeDefinitionParamsMock.create({
@@ -174,7 +174,7 @@ describe('Access agreement view routes', () => {
       }
     });
 
-    it('returns global `accessAgreement` instead of local `accessAgreement` if it is not configured locally', async () => {
+    it('returns global `accessAgreement` when  provider specific `accessAgreement` is not configured', async () => {
       const request = httpServerMock.createKibanaRequest();
 
       config.authc = routeDefinitionParamsMock.create({
