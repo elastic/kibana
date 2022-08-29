@@ -12,6 +12,7 @@ import { createSeries } from '../__mocks__';
 import { Metric } from '../../../../common/types';
 import {
   convertToPercentileRankColumn,
+  convertToPercentileRankColumns,
   convertToPercentileRankParams,
   isPercentileRanksColumnWithMeta,
 } from './percentile_rank';
@@ -136,6 +137,72 @@ describe('convertToPercentileRankColumn', () => {
       );
     } else {
       expect(convertToPercentileRankColumn(...input)).toEqual(expect.objectContaining(expected));
+    }
+  });
+});
+
+describe('convertToPercentileRankColumns', () => {
+  const series = createSeries();
+  const dataView = stubLogstashDataView;
+  const metric: Metric = {
+    id: 'some-id',
+    type: TSVB_METRIC_TYPES.PERCENTILE_RANK,
+  };
+  test.each<
+    [
+      string,
+      Parameters<typeof convertToPercentileRankColumns>,
+      Array<Partial<PercentileRanksColumnWithExtendedMeta> | null> | null
+    ]
+  >([
+    ['null if values arr is empty', [{ series, metric, dataView }], null],
+    [
+      'array with null if values arr contains empty value',
+      [{ series, metric: { ...metric, values: [undefined as unknown as string] }, dataView }],
+      [null],
+    ],
+    [
+      'array with null if values arr contains NaN value',
+      [{ series, metric: { ...metric, values: ['unvalid value'] }, dataView }],
+      [null],
+    ],
+    [
+      'percentile rank columns',
+      [{ series, metric: { ...metric, field: dataView.fields[0].name, values: ['75'] }, dataView }],
+      [
+        {
+          meta: { metricId: 'some-id', reference: 'some-id.0' },
+          operationType: 'percentile_rank',
+          params: { format: { id: 'bytes' }, value: 75 },
+          sourceField: 'bytes',
+        },
+      ],
+    ],
+    [
+      'percentile rank columns with window',
+      [
+        { series, metric: { ...metric, field: dataView.fields[0].name, values: ['75'] }, dataView },
+        '50',
+      ],
+      [
+        {
+          meta: { metricId: 'some-id', reference: 'some-id.0' },
+          operationType: 'percentile_rank',
+          params: { format: { id: 'bytes' }, value: 75 },
+          sourceField: 'bytes',
+          window: '50',
+        },
+      ],
+    ],
+  ])('should return %s', (_, input, expected) => {
+    if (expected === null) {
+      expect(convertToPercentileRankColumns(...input)).toBeNull();
+    } else if (Array.isArray(expected)) {
+      expect(convertToPercentileRankColumns(...input)).toEqual(
+        expected.map(expect.objectContaining)
+      );
+    } else {
+      expect(convertToPercentileRankColumns(...input)).toEqual(expect.objectContaining(expected));
     }
   });
 });

@@ -74,7 +74,7 @@ export interface PercentileParams extends FormatParams {
   percentile: number;
 }
 
-export interface PercentileRanksParams {
+export interface PercentileRanksParams extends FormatParams {
   value: number;
 }
 
