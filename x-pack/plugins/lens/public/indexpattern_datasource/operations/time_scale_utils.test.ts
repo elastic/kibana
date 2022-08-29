@@ -187,7 +187,7 @@ describe('time scale utils', () => {
       ).toEqual('abc per day -4h');
     });
 
-    it('should change window', () => {
+    it('should change reduced time range', () => {
       expect(
         adjustTimeScaleLabelSuffix(
           'abc per second last 5m',

@@ -28,7 +28,7 @@ import {
 } from '../time_scale_utils';
 import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 import { updateColumnParam } from '../layer_helpers';
-import { getColumnWindowError } from '../../window_utils';
+import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
 
 const countLabel = i18n.translate('xpack.lens.indexPattern.countOf', {
   defaultMessage: 'Count of records',
@@ -50,7 +50,7 @@ function ofName(
   field: IndexPatternField | undefined,
   timeShift: string | undefined,
   timeScale: string | undefined,
-  window: string | undefined
+  reducedTimeRange: string | undefined
 ) {
   return adjustTimeScaleLabelSuffix(
     field?.type !== 'document'
@@ -66,7 +66,7 @@ function ofName(
     undefined,
     timeShift,
     undefined,
-    window
+    reducedTimeRange
   );
 }
 
@@ -91,13 +91,13 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
     combineErrorMessages([
       getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
       getDisallowedPreviousShiftMessage(layer, columnId),
-      getColumnWindowError(layer, columnId, indexPattern),
+      getColumnReducedTimeRangeError(layer, columnId, indexPattern),
     ]),
   allowAsReference: true,
   onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
-      label: ofName(field, oldColumn.timeShift, oldColumn.timeShift, oldColumn.window),
+      label: ofName(field, oldColumn.timeShift, oldColumn.timeShift, oldColumn.reducedTimeRange),
       sourceField: field.name,
     };
   },
@@ -113,7 +113,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
   },
   getDefaultLabel: (column, indexPattern) => {
     const field = indexPattern.getFieldByName(column.sourceField);
-    return ofName(field, column.timeShift, column.timeScale, column.window);
+    return ofName(field, column.timeShift, column.timeScale, column.reducedTimeRange);
   },
   buildColumn({ field, previousColumn }, columnParams) {
     return {
@@ -121,7 +121,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
         field,
         previousColumn?.timeShift,
         previousColumn?.timeScale,
-        previousColumn?.window
+        previousColumn?.reducedTimeRange
       ),
       dataType: 'number',
       operationType: 'count',
@@ -131,7 +131,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       timeScale: previousColumn?.timeScale,
       filter: getFilter(previousColumn, columnParams),
       timeShift: columnParams?.shift || previousColumn?.timeShift,
-      window: columnParams?.window || previousColumn?.window,
+      reducedTimeRange: columnParams?.reducedTimeRange || previousColumn?.reducedTimeRange,
       params: {
         ...getFormatFromPreviousColumn(previousColumn),
         emptyAsNull:
@@ -219,7 +219,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
   },
   timeScalingMode: 'optional',
   filterable: true,
-  windowable: true,
+  canReduceTimeRange: true,
   documentation: {
     section: 'elasticsearch',
     signature: i18n.translate('xpack.lens.indexPattern.count.signature', {
