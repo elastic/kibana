@@ -42,7 +42,7 @@ export const enrichEvents: EnrichEventsFunction = async ({ services, logger, eve
     );
   }
 
-  if (true || isUserRiskScoreIndexExist) {
+  if (isUserRiskScoreIndexExist) {
     enrichments.push(
       createUserRiskEnrichments({
         services,
