@@ -44,7 +44,7 @@ import { ChildDragDropProvider, DragContextState } from '../drag_drop';
 import type { IndexPatternPrivateState } from './types';
 import { Loader } from '../loader';
 import { LensFieldIcon } from '../shared_components/field_picker/lens_field_icon';
-import { getFieldType } from './utils';
+import { getFieldType } from './pure_utils';
 import { FieldGroups, FieldList } from './field_list';
 import { fieldContainsData, fieldExists } from '../shared_components';
 import { IndexPatternServiceAPI } from '../indexpattern_service/service';
@@ -315,7 +315,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   const clearLocalState = () => setLocalState((s) => ({ ...s, nameFilter: '', typeFilter: [] }));
   const availableFieldTypes = uniq([
     ...uniq(allFields.map(getFieldType)).filter((type) => type in fieldTypeNames),
-    // always include current selection - there might be no match for an existing type filter on data view switch
+    // always include current field type filters - there may not be any fields of the type of an existing type filter on data view switch, but we still need to include the existing filter in the list so that the user can remove it
     ...localState.typeFilter,
   ]);
 

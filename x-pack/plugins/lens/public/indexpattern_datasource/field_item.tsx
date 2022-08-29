@@ -41,7 +41,7 @@ import { VisualizeGeoFieldButton } from './visualize_geo_field_button';
 import { getVisualizeGeoFieldMessage } from '../utils';
 import type { LensAppServices } from '../app_plugin/types';
 import { debouncedComponent } from '../debounced_component';
-import { getFieldType } from './utils';
+import { getFieldType } from './pure_utils';
 
 export interface FieldItemProps {
   core: DatasourceDataPanelProps['core'];

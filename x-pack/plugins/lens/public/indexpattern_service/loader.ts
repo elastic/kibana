@@ -47,7 +47,7 @@ export function convertDataViewIntoLensIndexPattern(
         runtime: Boolean(field.runtimeField),
         timeSeriesMetricType: field.timeSeriesMetric,
         timeSeriesRollup: field.isRolledUpField,
-        softRestrictions: field.isRolledUpField
+        partiallyApplicableFunctions: field.isRolledUpField
           ? {
               percentile: true,
               percentile_rank: true,

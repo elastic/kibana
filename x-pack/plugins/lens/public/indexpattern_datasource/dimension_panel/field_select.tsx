@@ -15,6 +15,7 @@ import type { OperationSupportMatrix } from './operation_support';
 import { FieldOption, FieldOptionValue, FieldPicker } from '../../shared_components/field_picker';
 import { fieldContainsData } from '../../shared_components';
 import type { ExistingFieldsMap, IndexPattern } from '../../types';
+import { getFieldType } from '../pure_utils';
 
 export type FieldChoiceWithOperationType = FieldOptionValue & {
   operationType: OperationType;
@@ -73,12 +74,13 @@ export function FieldSelect({
           const compatible =
             markAllFieldsCompatible || isCompatibleWithCurrentOperation(field) ? 1 : 0;
           const exists = containsData(field);
+          const fieldInstance = currentIndexPattern.getFieldByName(field);
           return {
             label: currentIndexPattern.getFieldByName(field)?.displayName,
             value: {
               type: 'field',
               field,
-              dataType: currentIndexPattern.getFieldByName(field)?.type,
+              dataType: fieldInstance ? getFieldType(fieldInstance) : undefined,
               // Use the operation directly, or choose the first compatible operation.
               // All fields are guaranteed to have at least one operation because they
               // won't appear in the list otherwise
