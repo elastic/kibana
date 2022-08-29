@@ -35,10 +35,11 @@ export type MergeEnrichments = <T extends BaseFieldsLatest>(
   allEnrichmentsResults: EventsMapByEnrichments[]
 ) => EventsMapByEnrichments;
 
-export type ApplyEnrichmentsToEvents = <T extends BaseFieldsLatest>(
-  events: Array<EventsForEnrichment<T>>,
-  allEnrichmentsResults: EventsMapByEnrichments[]
-) => Array<EventsForEnrichment<T>>;
+export type ApplyEnrichmentsToEvents = <T extends BaseFieldsLatest>(params: {
+  events: Array<EventsForEnrichment<T>>;
+  enrichmentsList: EventsMapByEnrichments[];
+  logger: IRuleExecutionLogForExecutors;
+}) => Array<EventsForEnrichment<T>>;
 
 interface BasedEnrichParamters<T extends BaseFieldsLatest> {
   services: RuleServices;
@@ -75,6 +76,7 @@ export type CreateRiskEnrichment = <T extends BaseFieldsLatest>(
 
 export type CreateFieldsMatchEnrichment = <T extends BaseFieldsLatest>(
   params: BasedEnrichParamters<T> & {
+    name: string;
     index: string[];
     mappingField: SingleMappingField;
     createEnrichmentFunction: (enrichmentDoc: EnrichmentType) => EnrichmentFunction;

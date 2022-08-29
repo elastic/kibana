@@ -24,6 +24,8 @@ import { applyEnrichmentsToEvents } from './utils/trasnforms';
 export const enrichEvents: EnrichEventsFunction = async ({ services, logger, events, spaceId }) => {
   const enrichments = [];
 
+  logger.debug('Alert enrichments started');
+
   const [isHostRiskScoreIndexExist, isUserRiskScoreIndexExist] = await Promise.all([
     getIsHostRiskScoreAvailable({ spaceId, services }),
     getIsUserRiskScoreAvailable({ spaceId, services }),
@@ -57,7 +59,7 @@ export const enrichEvents: EnrichEventsFunction = async ({ services, logger, eve
     .filter((result) => result.status === 'fulfilled')
     .map((result) => (result as PromiseFulfilledResult<EventsMapByEnrichments>)?.value);
 
-  return applyEnrichmentsToEvents(events, allFulfilledEnrichmentsResults);
+  return applyEnrichmentsToEvents({events, enrichmentsList: allFulfilledEnrichmentsResults, logger});
 };
 
 export const createEnrichEventsFunction: CreateEnrichEventsFunction =

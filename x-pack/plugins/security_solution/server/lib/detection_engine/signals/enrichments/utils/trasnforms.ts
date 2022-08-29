@@ -18,11 +18,14 @@ const mergeEnrichments: MergeEnrichments = (enrichmentsList) => {
   return enrichmentsList.reduce((acc, val) => mergeWith(acc, val, customizer), {});
 };
 
-export const applyEnrichmentsToEvents: ApplyEnrichmentsToEvents = (
+export const applyEnrichmentsToEvents: ApplyEnrichmentsToEvents = ({
   events,
-  allEnrichmentsResults
+  enrichmentsList,
+  logger
+}
 ) => {
-  const mergedEnrichments = mergeEnrichments(allEnrichmentsResults);
+  const mergedEnrichments = mergeEnrichments(enrichmentsList);
+  logger.debug(`${Object.keys(mergedEnrichments).length} events ready to be enriched`)
   const enrichedEvents = events.map((event) => {
     const enrichFunctions = mergedEnrichments[event._id];
 
