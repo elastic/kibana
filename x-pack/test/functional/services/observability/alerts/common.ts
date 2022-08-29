@@ -19,7 +19,7 @@ const DATE_WITH_DATA = {
 
 const ALERTS_FLYOUT_SELECTOR = 'alertsFlyout';
 const FILTER_FOR_VALUE_BUTTON_SELECTOR = 'filterForValue';
-const ALERTS_TABLE_CONTAINER_SELECTOR = 'events-viewer-panel';
+const ALERTS_TABLE_CONTAINER_SELECTOR = 'alertsTable';
 const VIEW_RULE_DETAILS_SELECTOR = 'viewRuleDetails';
 const VIEW_RULE_DETAILS_FLYOUT_SELECTOR = 'viewRuleDetailsFlyout';
 
@@ -119,7 +119,7 @@ export function ObservabilityAlertsCommonProvider({
   };
 
   const getNoDataStateOrFail = async () => {
-    return await testSubjects.existOrFail('tGridEmptyState');
+    return await testSubjects.existOrFail('alertsStateTableEmptyState');
   };
 
   // Query Bar

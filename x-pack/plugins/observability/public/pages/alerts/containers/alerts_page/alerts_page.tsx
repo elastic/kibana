@@ -19,6 +19,8 @@ import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
 import { AlertConsumers, TIMESTAMP } from '@kbn/rule-data-utils';
 import { AlertsTableStateProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/alerts_table_state';
 import { AlertStatusFilterButton } from '../../../../../common/typings';
+import { useGetUserCasesPermissions } from '../../../../hooks/use_get_user_cases_permissions';
+import { observabilityFeatureId } from '../../../../../common';
 import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
 import { useAlertIndexNames } from '../../../../hooks/use_alert_index_names';
 import { useHasData } from '../../../../hooks/use_has_data';
@@ -51,6 +53,7 @@ function AlertsPage() {
   const { rangeFrom, setRangeFrom, rangeTo, setRangeTo, kuery, setKuery } =
     useAlertsPageStateContainer();
   const {
+    cases,
     dataViews,
     docLinks,
     http,
@@ -218,6 +221,9 @@ function AlertsPage() {
   // If there is any data, set hasData to true otherwise we need to wait till all the data is loaded before setting hasData to true or false; undefined indicates the data is still loading.
   const hasData = hasAnyData === true || (isAllRequestsComplete === false ? undefined : false);
 
+  const CasesContext = cases.ui.getCasesContext();
+  const userCasesPermissions = useGetUserCasesPermissions();
+
   if (!hasAnyData && !isAllRequestsComplete) {
     return <LoadingObservability />;
   }
@@ -260,7 +266,13 @@ function AlertsPage() {
         </EuiFlexItem>
 
         <EuiFlexItem>
-          <AlertsStateTable {...alertStateProps} />
+          <CasesContext
+            owner={[observabilityFeatureId]}
+            permissions={userCasesPermissions}
+            features={{ alerts: { sync: false } }}
+          >
+            <AlertsStateTable {...alertStateProps} />
+          </CasesContext>
         </EuiFlexItem>
       </EuiFlexGroup>
     </ObservabilityPageTemplate>
