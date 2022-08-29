@@ -7,13 +7,14 @@
  */
 
 import { createSeries } from '../__mocks__';
-import { MetricType } from '../../../../common/types';
+import { Metric, MetricType } from '../../../../common/types';
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import {
   computeParentPipelineColumns,
   convertMetricAggregationColumnWithoutSpecialParams,
   convertMetricAggregationToColumn,
   convertParentPipelineAggToColumns,
+  createParentPipelineAggregationColumn,
   MetricAggregationColumn,
   ParentPipelineAggColumn,
 } from './parent_pipeline';
@@ -545,6 +546,117 @@ describe('convertParentPipelineAggToColumns', () => {
       );
     } else {
       expect(convertParentPipelineAggToColumns(...input)).toEqual(
+        expect.objectContaining(expected)
+      );
+    }
+  });
+});
+
+describe('createParentPipelineAggregationColumn', () => {
+  const dataView = stubLogstashDataView;
+  const series = createSeries();
+  const movingAvgMetric: Metric = {
+    id: 'some-id-0',
+    type: TSVB_METRIC_TYPES.MOVING_AVERAGE,
+    field: dataView.fields[0].name,
+  };
+
+  const cumulativeSumMetric: Metric = {
+    id: 'some-id-0',
+    type: METRIC_TYPES.CUMULATIVE_SUM,
+    field: dataView.fields[0].name,
+  };
+
+  const derivativeMetric: Metric = {
+    id: 'some-id-0',
+    type: METRIC_TYPES.DERIVATIVE,
+    field: dataView.fields[0].name,
+  };
+
+  test.each<
+    [
+      string,
+      Parameters<typeof createParentPipelineAggregationColumn>,
+      Partial<ParentPipelineAggColumn>
+    ]
+  >([
+    [
+      'moving average column',
+      [
+        Operations.MOVING_AVERAGE,
+        {
+          series,
+          metric: movingAvgMetric,
+          dataView,
+        },
+      ],
+      {
+        meta: { metricId: 'some-id-0' },
+        operationType: 'moving_average',
+        params: { window: 0 },
+      },
+    ],
+    [
+      'moving average column with window',
+      [
+        Operations.MOVING_AVERAGE,
+        {
+          series,
+          metric: {
+            ...movingAvgMetric,
+            window: 10,
+          },
+          dataView,
+        },
+      ],
+      {
+        meta: { metricId: 'some-id-0' },
+        operationType: 'moving_average',
+        params: { window: 10 },
+      },
+    ],
+    [
+      'cumulative sum column',
+      [
+        Operations.CUMULATIVE_SUM,
+        {
+          series,
+          metric: cumulativeSumMetric,
+          dataView,
+        },
+      ],
+      {
+        meta: { metricId: 'some-id-0' },
+        operationType: 'cumulative_sum',
+        params: { format: { id: 'bytes' } },
+      },
+    ],
+    [
+      'derivative column',
+      [
+        Operations.DIFFERENCES,
+        {
+          series,
+          metric: derivativeMetric,
+          dataView,
+        },
+      ],
+      {
+        meta: { metricId: 'some-id-0' },
+        operationType: 'differences',
+        params: { format: { id: 'bytes' } },
+      },
+    ],
+  ])('should return %s', (_, input, expected) => {
+    if (expected === null) {
+      expect(createParentPipelineAggregationColumn(...input)).toBeNull();
+    }
+    if (Array.isArray(expected)) {
+      expect(createParentPipelineAggregationColumn(...input)).toEqual(
+        expected.map(expect.objectContaining)
+      );
+    } else {
+      expect(createParentPipelineAggregationColumn(...input)).toEqual(
         expect.objectContaining(expected)
       );
     }
