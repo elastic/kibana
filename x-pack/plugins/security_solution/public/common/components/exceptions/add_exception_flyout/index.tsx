@@ -447,7 +447,6 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       maybeRule?.type === 'threat_match',
     [maybeRule]
   );
-  console.log(exceptionItemsToAdd);
 
   return (
     <EuiFlyout
