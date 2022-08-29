@@ -23,6 +23,7 @@ import type {
  */
 export const getExceptionFilterFromExceptionListId = async ({
   exceptionListId,
+  namespaceType,
   alias,
   excludeExceptions,
   chunkSize,
@@ -32,6 +33,7 @@ export const getExceptionFilterFromExceptionListId = async ({
     method: 'POST',
     body: JSON.stringify({
       exceptionListId,
+      namespaceType,
       type: 'exceptionListId',
       alias,
       excludeExceptions,

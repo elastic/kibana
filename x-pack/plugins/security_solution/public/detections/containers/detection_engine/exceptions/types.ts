@@ -9,6 +9,7 @@ import type { Filter } from '@kbn/es-query';
 import type {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
+  NamespaceType,
 } from '@kbn/securitysolution-io-ts-list-types';
 
 export interface GetExceptionFilterOptionalProps {
@@ -21,6 +22,7 @@ export interface GetExceptionFilterOptionalProps {
 export interface GetExceptionFilterFromExceptionListIdProps
   extends GetExceptionFilterOptionalProps {
   exceptionListId: string;
+  namespaceType: NamespaceType;
 }
 
 export interface GetExceptionFilterFromExceptionsProps extends GetExceptionFilterOptionalProps {

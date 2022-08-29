@@ -6,7 +6,10 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  CreateExceptionListItemSchema,
+  ExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import { getExceptionFilterSchema } from '../../../../../common/detection_engine/schemas/request';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_EXCEPTIONS_GET_FILTER } from '../../../../../common/constants';
@@ -42,13 +45,13 @@ export const getExceptionFilterRoute = (
         }
         const exceptionListClient = ctx.securitySolution.getExceptionListClient();
 
-        const exceptionItems: ExceptionListItemSchema[] = [];
+        const exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema> = [];
         const { type } = request.body;
         if (type === 'exceptionListId') {
-          const { exceptionListId } = request.body;
+          const { exceptionListId, namespaceType } = request.body;
           const exceptionList = await exceptionListClient?.findExceptionListItem({
             listId: exceptionListId,
-            namespaceType: 'single', // TODO: get this from somewhere
+            namespaceType,
             page: undefined,
             perPage: undefined,
             filter: undefined,

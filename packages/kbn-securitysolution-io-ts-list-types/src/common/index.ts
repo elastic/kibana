@@ -41,6 +41,7 @@ export * from './lists_default_array';
 export * from './max_size';
 export * from './meta';
 export * from './name';
+export * from './namespace_type';
 export * from './non_empty_entries_array';
 export * from './non_empty_nested_entries_array';
 export * from './os_type';

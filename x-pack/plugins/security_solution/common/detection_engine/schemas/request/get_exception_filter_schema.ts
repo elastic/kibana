@@ -5,15 +5,20 @@
  * 2.0.
  */
 
-import { exceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import {
+  createExceptionListItemSchema,
+  exceptionListItemSchema,
+  namespaceType,
+} from '@kbn/securitysolution-io-ts-list-types';
 import * as t from 'io-ts';
 
 export const exceptionListId = t.type({
   exceptionListId: t.string,
+  namespaceType,
   type: t.literal('exceptionListId'),
 });
 export const exceptions = t.type({
-  exceptions: t.array(exceptionListItemSchema),
+  exceptions: t.array(t.union([exceptionListItemSchema, createExceptionListItemSchema])),
   type: t.literal('exceptionItems'),
 });
 const optionalExceptionParams = t.exact(

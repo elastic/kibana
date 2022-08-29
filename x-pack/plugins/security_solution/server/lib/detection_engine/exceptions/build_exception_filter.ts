@@ -18,6 +18,7 @@ import type {
   EntryMatchWildcard,
   Entry,
   Type,
+  CreateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
   entriesExists,
@@ -45,10 +46,10 @@ export interface NestedFilter {
   nested: estypes.QueryDslNestedQuery;
 }
 
-export const chunkExceptions = (
-  exceptions: ExceptionListItemSchema[],
+export const chunkExceptions = <T extends ExceptionListItemSchema | CreateExceptionListItemSchema>(
+  exceptions: T[],
   chunkSize: number
-): ExceptionListItemSchema[][] => {
+): T[][] => {
   return chunk(chunkSize, exceptions);
 };
 
@@ -128,8 +129,10 @@ export const buildExceptionItemFilterWithOsType = async (
   return isUnprocessable ? undefined : exceptionItemFilter;
 };
 
-export const buildExceptionItemFilter = async (
-  exceptionItem: ExceptionListItemSchema,
+export const buildExceptionItemFilter = async <
+  T extends ExceptionListItemSchema | CreateExceptionListItemSchema
+>(
+  exceptionItem: T,
   listClient: ListClient
 ): Promise<Array<BooleanFilter | NestedFilter> | undefined> => {
   let isUnprocessable = false;
@@ -175,14 +178,16 @@ export const buildExceptionItemFilter = async (
   }
 };
 
-export const createOrClauses = async (
-  exceptionItems: ExceptionListItemSchema[],
+export const createOrClauses = async <
+  T extends ExceptionListItemSchema | CreateExceptionListItemSchema
+>(
+  exceptionItems: T[],
   listClient: ListClient
 ): Promise<{
   orClauses: Array<BooleanFilter | NestedFilter>;
-  unprocessableExceptionItems: ExceptionListItemSchema[];
+  unprocessableExceptionItems: T[];
 }> => {
-  const unprocessableExceptionItems: ExceptionListItemSchema[] = [];
+  const unprocessableExceptionItems: T[] = [];
   const orClauses: Array<Array<BooleanFilter | NestedFilter>> = [];
   await Promise.all(
     exceptionItems.map(async (exceptionItem) => {
@@ -201,12 +206,14 @@ export const createOrClauses = async (
 const isListTypeProcessable = (type: Type): boolean =>
   type === 'keyword' || type === 'ip' || type === 'ip_range';
 
-export const filterOutUnprocessableValueLists = async (
-  exceptionItems: ExceptionListItemSchema[],
+export const filterOutUnprocessableValueLists = async <
+  T extends ExceptionListItemSchema | CreateExceptionListItemSchema
+>(
+  exceptionItems: T[],
   listClient: ListClient
 ): Promise<{
-  filteredExceptions: ExceptionListItemSchema[];
-  unprocessableValueListExceptions: ExceptionListItemSchema[];
+  filteredExceptions: T[];
+  unprocessableValueListExceptions: T[];
 }> => {
   const exceptionBooleans = await Promise.all(
     exceptionItems.map(async (exceptionItem) => {
@@ -247,36 +254,36 @@ export const filterOutUnprocessableValueLists = async (
   return { filteredExceptions, unprocessableValueListExceptions };
 };
 
-export const buildExceptionFilter = async ({
+export const buildExceptionFilter = async <
+  T extends ExceptionListItemSchema | CreateExceptionListItemSchema
+>({
   lists,
   excludeExceptions,
   chunkSize,
   alias = null,
   listClient,
 }: {
-  lists: ExceptionListItemSchema[];
+  lists: T[];
   excludeExceptions: boolean;
   chunkSize: number;
   alias: string | null;
   listClient: ListClient;
-}): Promise<{ filter: Filter | undefined; unprocessedExceptions: ExceptionListItemSchema[] }> => {
+}): Promise<{ filter: Filter | undefined; unprocessedExceptions: T[] }> => {
   // Remove exception items with large value lists. These are evaluated
   // elsewhere for the moment being.
   const [exceptionsWithoutValueLists, valueListExceptions] = partition(
     lists,
-    (item): item is ExceptionListItemSchema => !hasLargeValueList(item.entries)
+    (item): item is T => !hasLargeValueList(item.entries)
   );
 
   // Exceptions that we will convert into Filters and put into an ES request
-  const exceptionsWithoutLargeValueLists: ExceptionListItemSchema[] = [
-    ...exceptionsWithoutValueLists,
-  ];
+  const exceptionsWithoutLargeValueLists: T[] = [...exceptionsWithoutValueLists];
 
   // Exceptions that contain large value list exceptions and will be processed later on in rule execution
-  const unprocessedExceptions: ExceptionListItemSchema[] = [];
+  const unprocessedExceptions: T[] = [];
 
   const { filteredExceptions, unprocessableValueListExceptions } =
-    await filterOutUnprocessableValueLists(valueListExceptions, listClient);
+    await filterOutUnprocessableValueLists<T>(valueListExceptions, listClient);
   exceptionsWithoutLargeValueLists.push(...filteredExceptions);
   unprocessedExceptions.push(...unprocessableValueListExceptions);
 
@@ -296,7 +303,7 @@ export const buildExceptionFilter = async ({
   if (exceptionsWithoutLargeValueLists.length === 0) {
     return { filter: undefined, unprocessedExceptions };
   } else if (exceptionsWithoutLargeValueLists.length <= chunkSize) {
-    const { orClauses: clause, unprocessableExceptionItems } = await createOrClauses(
+    const { orClauses: clause, unprocessableExceptionItems } = await createOrClauses<T>(
       exceptionsWithoutLargeValueLists,
       listClient
     );
@@ -309,7 +316,7 @@ export const buildExceptionFilter = async ({
 
     const filters = await Promise.all(
       chunks.map(async (exceptionsChunk) => {
-        const { orClauses, unprocessableExceptionItems } = await createOrClauses(
+        const { orClauses, unprocessableExceptionItems } = await createOrClauses<T>(
           exceptionsChunk,
           listClient
         );
