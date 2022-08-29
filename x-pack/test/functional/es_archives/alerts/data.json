@@ -1194,3 +1194,41 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alert:4d973df0-23df-11ed-8ae4-e988ad0f6fa7",
+    "index": ".kibana_1",
+    "source": {
+      "alert": {
+          "alertTypeId": "example.always-firing",
+          "apiKey": null,
+          "apiKeyOwner": null,
+          "consumer": "alerts",
+          "createdAt": "2022-08-24T19:02:30.889Z",
+          "createdBy": "elastic",
+          "enabled": false,
+          "muteAll": false,
+          "mutedInstanceIds": [],
+          "name": "remove snoozed",
+          "params": {},
+          "schedule": {
+              "interval": "1m"
+          },
+          "scheduledTaskId": null,
+          "tags": [],
+          "throttle": null,
+          "updatedBy": "elastic",
+          "isSnoozedUntil": "2022-08-24T19:05:49.817Z"
+      },
+      "migrationVersion": {
+          "alert": "8.3.0"
+      },
+      "references": [
+      ],
+      "type": "alert",
+      "updated_at": "2022-08-24T19:05:50.159Z"
+    }
+  }
+}
