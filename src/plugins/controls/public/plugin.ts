@@ -19,8 +19,7 @@ import {
 import { OptionsListEmbeddableFactory, OptionsListEmbeddableInput } from './options_list';
 import { RangeSliderEmbeddableFactory, RangeSliderEmbeddableInput } from './range_slider';
 import { TimeSliderEmbeddableFactory, TimeSliderControlEmbeddableInput } from './time_slider';
-import { pluginServices } from './services';
-import { controlsService } from './services/kibana/controls';
+import { controlsService } from './services/controls/controls_service';
 import {
   ControlsPluginSetup,
   ControlsPluginStart,
@@ -43,7 +42,7 @@ export class ControlsPlugin
     coreStart: CoreStart,
     startPlugins: ControlsPluginStartDeps
   ) {
-    const { registry } = await import('./services/kibana');
+    const { registry, pluginServices } = await import('./services/plugin_services');
     pluginServices.setRegistry(registry.start({ coreStart, startPlugins }));
   }
 

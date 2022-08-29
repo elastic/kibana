@@ -27,18 +27,19 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
-import {
-  OptionsListField,
-  OPTIONS_LIST_CONTROL,
-  OptionsListReduxState,
-  OptionsListEmbeddableInput,
-} from '../types';
+import { OptionsListReduxState } from '../types';
 import { pluginServices } from '../../services';
-import { ControlInput, ControlOutput } from '../..';
+import {
+  ControlInput,
+  ControlOutput,
+  OptionsListEmbeddableInput,
+  OPTIONS_LIST_CONTROL,
+} from '../..';
 import { optionsListReducers } from '../options_list_reducers';
-import { ControlsDataViewsService } from '../../services/data_views';
 import { OptionsListControl } from '../components/options_list_control';
-import { ControlsOptionsListService } from '../../services/options_list';
+import { ControlsDataViewsService } from '../../services/data_views/types';
+import { ControlsOptionsListService } from '../../services/options_list/types';
+import { OptionsListField } from '../../../common/options_list/types';
 
 const diffDataFetchProps = (
   last?: OptionsListDataFetchProps,
