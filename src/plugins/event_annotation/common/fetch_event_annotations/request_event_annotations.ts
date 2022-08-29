@@ -170,7 +170,7 @@ const prepareEsaggsForQueryGroups = async (
     }, []);
 
   const loadedDataViews = await Promise.all(
-    uniqueDataViewsToLoad.map(async (dataView) => dataViews.create(dataView, true))
+    uniqueDataViewsToLoad.map((dataView) => dataViews.create(dataView, true))
   );
 
   return queryGroups.map((group) => {
@@ -228,7 +228,7 @@ const prepareEsaggsForQueryGroups = async (
       },
     };
 
-    const fieldsTopMetric = (group.allFields || [])?.map((field) => ({
+    const fieldsTopMetric = (group.allFields || []).map((field) => ({
       type: 'agg_type',
       value: {
         enabled: true,
@@ -257,6 +257,7 @@ const prepareEsaggsForQueryGroups = async (
         group.allFields?.reduce<Record<string, string>>(
           (acc, fieldName, i) => ({
             ...acc,
+            // esaggs names the columns col-0-1 (filters), col-1-2(date histogram), col-2-3(timefield), col-3-4(count), col-4-5 (all the extra fields, that's why we start with `col-${i + 4}-${i + 5}`)
             [fieldName]: `col-${i + 4}-${i + 5}`,
           }),
           {}
@@ -280,14 +281,11 @@ function regroupForRequestOptimization(
           if (!isInRange(current, input?.timeRange)) {
             return acc;
           }
-          const manualSubgroup = acc.manual as ManualGroup | undefined;
-          return {
-            ...acc,
-            manual: {
-              type: 'manual',
-              annotations: [...(manualSubgroup ? manualSubgroup.annotations : []), current],
-            },
-          };
+          if (!acc.manual) {
+            acc.manual = { type: 'manual', annotations: [] };
+          }
+          (acc.manual as ManualGroup).annotations.push(current);
+          return acc;
         } else {
           const key = `${g.dataView.value.id}-${current.timeField}`;
           const subGroup = acc[key] as QueryGroup;
@@ -305,12 +303,10 @@ function regroupForRequestOptimization(
               },
             };
           }
-
           let allFields = current.extraFields || [];
           if (current.textField) {
             allFields = [...allFields, current.textField];
           }
-
           return {
             ...acc,
             [key]: {
@@ -339,7 +335,12 @@ function regroupForRequestOptimization(
             acc[key] = {
               ...requestGroup,
               annotations: [...requestGroup.annotations, ...currentSubGroup.annotations],
-              allFields: [...(requestGroup.allFields || []), ...(currentSubGroup.allFields || [])],
+              allFields: [
+                ...new Set([
+                  ...(requestGroup.allFields || []),
+                  ...(currentSubGroup.allFields || []),
+                ]),
+              ],
             };
           }
         } else {

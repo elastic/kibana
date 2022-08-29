@@ -113,40 +113,39 @@ export const postprocessAnnotations = (
 
   const modifiedRows = esaggsResponses
     .flatMap(({ response, fieldsColIdMap }) =>
-      response.rows
-        .map((row) => {
-          const annotationConfig = queryAnnotationConfigs.find(({ id }) => id === row['col-0-1']);
-          if (!annotationConfig) {
-            throw new Error(`Could not find annotation config for id: ${row['col-0-1']}`);
-          }
+      response.rows.map((row) => {
+        const annotationConfig = queryAnnotationConfigs.find(({ id }) => id === row['col-0-1']);
+        if (!annotationConfig) {
+          throw new Error(`Could not find annotation config for id: ${row['col-0-1']}`);
+        }
 
-          let modifiedRow: TimebucketRow = {
-            ...passStylesFromAnnotationConfig(annotationConfig),
-            id: row['col-0-1'],
-            timebucket: moment(row['col-1-2']).toISOString(),
-            time: row['col-3-4'],
-            type: 'point',
-            label: annotationConfig.textField
-              ? row[fieldsColIdMap[annotationConfig.textField]]
-              : annotationConfig.label,
+        let modifiedRow: TimebucketRow = {
+          ...passStylesFromAnnotationConfig(annotationConfig),
+          id: row['col-0-1'],
+          timebucket: moment(row['col-1-2']).toISOString(),
+          time: row['col-3-4'],
+          type: 'point',
+          label: annotationConfig.textField
+            ? row[fieldsColIdMap[annotationConfig.textField]]
+            : annotationConfig.label,
+        };
+        const countRow = row['col-2-3'];
+        if (countRow > ANNOTATIONS_PER_BUCKET) {
+          modifiedRow = {
+            skippedCount: countRow - ANNOTATIONS_PER_BUCKET,
+            ...modifiedRow,
           };
-          const countRow = row['col-2-3'];
-          if (countRow > ANNOTATIONS_PER_BUCKET) {
-            modifiedRow = {
-              skippedCount: countRow - ANNOTATIONS_PER_BUCKET,
-              ...modifiedRow,
-            };
-          }
+        }
 
-          if (annotationConfig?.extraFields?.length) {
-            modifiedRow.extraFields = annotationConfig.extraFields.reduce(
-              (acc, field) => ({ ...acc, [`field:${field}`]: row[fieldsColIdMap[field]] }),
-              {}
-            );
-          }
+        if (annotationConfig?.extraFields?.length) {
+          modifiedRow.extraFields = annotationConfig.extraFields.reduce(
+            (acc, field) => ({ ...acc, [`field:${field}`]: row[fieldsColIdMap[field]] }),
+            {}
+          );
+        }
 
-          return modifiedRow;
-        })
+        return modifiedRow;
+      })
     )
     .concat(...manualAnnotationDatatableRows)
     .sort((a, b) => a.timebucket.localeCompare(b.timebucket));

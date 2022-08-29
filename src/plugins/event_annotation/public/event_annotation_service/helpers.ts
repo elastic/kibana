@@ -35,7 +35,6 @@ export const isManualPointAnnotationConfig = (
   return Boolean(annotation && 'timestamp' in annotation?.key);
 };
 
-
 export const isQueryAnnotationConfig = (
   annotation?: EventAnnotationConfig
 ): annotation is QueryPointEventAnnotationConfig => {
