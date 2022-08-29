@@ -124,6 +124,7 @@ export const eqlExecutor = async ({
           logger: ruleExecutionLogger,
         })
       );
+
       addToSearchAfterReturn({ current: result, next: createResult });
     }
     return result;

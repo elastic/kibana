@@ -30,7 +30,7 @@ import type { SignalSource } from '../../signals/types';
 import { validateIndexPatterns } from '../utils';
 import { parseDateString, validateHistoryWindowStart } from './utils';
 import { addToSearchAfterReturn, createSearchAfterReturnType } from '../../signals/utils';
-import { createEnrichEventsFunction } from '../../signals/enrichments'
+import { createEnrichEventsFunction } from '../../signals/enrichments';
 
 interface BulkCreateResults {
   bulkCreateTimes: string[];
@@ -59,7 +59,6 @@ const addBulkCreateResults = (
     alertsWereTruncated: results.alertsWereTruncated || newResults.alertsWereTruncated,
   };
 };
-
 
 export const createNewTermsAlertType = (
   createOptions: CreateRuleOptions
@@ -308,7 +307,7 @@ export const createNewTermsAlertType = (
             params.maxSignals - result.createdSignalsCount,
             createEnrichEventsFunction({
               services,
-              logger: ruleExecutionLogger
+              logger: ruleExecutionLogger,
             })
           );
 

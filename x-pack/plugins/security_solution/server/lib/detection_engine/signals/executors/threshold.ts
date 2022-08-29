@@ -169,7 +169,7 @@ export const thresholdExecutor = async ({
         signalHistory,
         bulkCreate,
         wrapHits,
-        ruleExecutionLogger
+        ruleExecutionLogger,
       });
 >>>>>>> 77b886e2fae (Add enrichmenst for other rule types)
 

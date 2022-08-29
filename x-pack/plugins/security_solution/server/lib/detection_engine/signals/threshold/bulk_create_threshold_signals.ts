@@ -20,8 +20,8 @@ import type { ThresholdSignalHistory, BulkCreate, WrapHits } from '../types';
 import type { CompleteRule, ThresholdRuleParams } from '../../schemas/rule_schemas';
 import type { BaseFieldsLatest } from '../../../../../common/detection_engine/schemas/alerts';
 import type { ThresholdBucket } from './types';
-import { createEnrichEventsFunction } from '../enrichments'
-import { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
+import { createEnrichEventsFunction } from '../enrichments';
+import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 
 interface BulkCreateThresholdSignalsParams {
   buckets: ThresholdBucket[];
@@ -92,8 +92,12 @@ export const bulkCreateThresholdSignals = async (
     ruleParams.ruleId
   );
 
-  return params.bulkCreate(params.wrapHits(ecsResults, buildReasonMessageForThresholdAlert), undefined, createEnrichEventsFunction({
-    services: params.services,
-    logger: params.ruleExecutionLogger
-  }) );
+  return params.bulkCreate(
+    params.wrapHits(ecsResults, buildReasonMessageForThresholdAlert),
+    undefined,
+    createEnrichEventsFunction({
+      services: params.services,
+      logger: params.ruleExecutionLogger,
+    })
+  );
 };

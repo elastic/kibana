@@ -14,7 +14,11 @@ import {
   createUserRiskEnrichments,
   getIsUserRiskScoreAvailable,
 } from './enrichment_by_type/user_risk';
-import type { EnrichEventsFunction, EventsMapByEnrichments, CreateEnrichEventsFunction  } from './types';
+import type {
+  EnrichEventsFunction,
+  EventsMapByEnrichments,
+  CreateEnrichEventsFunction,
+} from './types';
 import { applyEnrichmentsToEvents } from './utils/trasnforms';
 
 export const enrichEvents: EnrichEventsFunction = async ({ services, logger, events, spaceId }) => {
@@ -56,14 +60,12 @@ export const enrichEvents: EnrichEventsFunction = async ({ services, logger, eve
   return applyEnrichmentsToEvents(events, allFulfilledEnrichmentsResults);
 };
 
-
-export const createEnrichEventsFunction: CreateEnrichEventsFunction = ({services, logger }) => (
-  events,
-  { spaceId }: { spaceId: string }
-) =>
-  enrichEvents({
-    events,
-    services,
-    logger,
-    spaceId,
-  })
+export const createEnrichEventsFunction: CreateEnrichEventsFunction =
+  ({ services, logger }) =>
+  (events, { spaceId }: { spaceId: string }) =>
+    enrichEvents({
+      events,
+      services,
+      logger,
+      spaceId,
+    });
