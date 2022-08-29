@@ -6,15 +6,22 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { termQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import {
+  kqlQuery,
+  rangeQuery,
+  termQuery,
+} from '@kbn/observability-plugin/server';
 import {
   FAAS_BILLED_DURATION,
   FAAS_COLDSTART_DURATION,
   FAAS_ID,
   METRIC_SYSTEM_TOTAL_MEMORY,
+  SERVICE_NAME,
 } from '../../../../../common/elasticsearch_fieldnames';
+import { environmentQuery } from '../../../../../common/utils/environment_query';
+import { getMetricsDateHistogramParams } from '../../../../lib/helpers/metrics';
 import { Setup } from '../../../../lib/helpers/setup_request';
-import { fetchAndTransformMetrics } from '../../fetch_and_transform_metrics';
 import { ChartBase } from '../../types';
 
 const chartBase: ChartBase = {
@@ -38,23 +45,27 @@ const chartBase: ChartBase = {
  * But the result of this calculation is in Bytes-milliseconds, as the "system.memory.total" is stored in bytes and the "faas.billed_duration" is stored in milliseconds.
  * But to calculate the overall cost AWS uses GB-second, so we need to convert the result to this unit.
  */
-const computeUsageScript = {
-  lang: 'painless',
-  source: `
-    if(doc.containsKey('${METRIC_SYSTEM_TOTAL_MEMORY}') && doc.containsKey('${FAAS_BILLED_DURATION}')){
-      double faasBilledDurationValueMs =  doc['${FAAS_BILLED_DURATION}'].value;
-      double totalMemoryValueBytes = doc['${METRIC_SYSTEM_TOTAL_MEMORY}'].value;
-      double bytesMsResult = totalMemoryValueBytes * faasBilledDurationValueMs;
-      //Converts result in GB-seconds
-      double gigabytesSecondsResult = bytesMsResult / (1024L*1024L*1024L*1000L);
-      return gigabytesSecondsResult;
-    }
-    
-    return null;
-  `,
-} as const;
+function calculateComputeUsageGBSeconds({
+  faasBilledDuration,
+  totalMemory,
+}: {
+  faasBilledDuration?: number | null;
+  totalMemory?: number | null;
+}) {
+  if (
+    faasBilledDuration === undefined ||
+    faasBilledDuration === null ||
+    totalMemory === undefined ||
+    totalMemory === null
+  ) {
+    return 0;
+  }
+  const bytesMsResult = totalMemory * faasBilledDuration;
+  const GBSeconds = 1024 * 1024 * 1024 * 1000;
+  return bytesMsResult / GBSeconds;
+}
 
-export function getComputeUsage({
+export async function getComputeUsage({
   environment,
   kuery,
   setup,
@@ -71,21 +82,83 @@ export function getComputeUsage({
   start: number;
   end: number;
 }) {
-  return fetchAndTransformMetrics({
-    environment,
-    kuery,
-    setup,
-    serviceName,
-    start,
-    end,
-    chartBase,
-    aggs: {
-      computeUsage: { avg: { script: computeUsageScript } },
+  const { apmEventClient, config } = setup;
+
+  const aggs = {
+    avgFaasBilledDuration: { avg: { field: FAAS_BILLED_DURATION } },
+    avgTotalMemory: { avg: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
+  };
+
+  const params = {
+    apm: {
+      events: [ProcessorEvent.metric],
     },
-    additionalFilters: [
-      { exists: { field: FAAS_COLDSTART_DURATION } },
-      ...termQuery(FAAS_ID, faasId),
-    ],
-    operationName: 'get_compute_usage',
-  });
+    body: {
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            { term: { [SERVICE_NAME]: serviceName } },
+            ...rangeQuery(start, end),
+            ...environmentQuery(environment),
+            ...kqlQuery(kuery),
+            ...termQuery(FAAS_ID, faasId),
+            { exists: { field: FAAS_COLDSTART_DURATION } },
+          ],
+        },
+      },
+      aggs: {
+        timeseriesData: {
+          date_histogram: getMetricsDateHistogramParams({
+            start,
+            end,
+            metricsInterval: config.metricsInterval,
+          }),
+          aggs,
+        },
+        ...aggs,
+      },
+    },
+  };
+
+  const { hits, aggregations } = await apmEventClient.search(
+    'get_compute_usage',
+    params
+  );
+  const timeseriesData = aggregations?.timeseriesData;
+
+  return {
+    title: chartBase.title,
+    key: chartBase.key,
+    yUnit: chartBase.yUnit,
+    series:
+      hits.total.value === 0
+        ? []
+        : [
+            {
+              title: i18n.translate(
+                'xpack.apm.agentMetrics.serverless.computeUsage',
+                { defaultMessage: 'Compute usage' }
+              ),
+              key: 'compute_usage',
+              type: 'linemark',
+              yUnit: 'number',
+              overallValue: calculateComputeUsageGBSeconds({
+                faasBilledDuration: aggregations?.avgFaasBilledDuration.value,
+                totalMemory: aggregations?.avgTotalMemory.value,
+              }),
+              data:
+                timeseriesData?.buckets.map((bucket) => {
+                  const computeUsage = calculateComputeUsageGBSeconds({
+                    faasBilledDuration: bucket.avgFaasBilledDuration.value,
+                    totalMemory: bucket.avgTotalMemory.value,
+                  });
+                  return {
+                    x: bucket.key,
+                    y: computeUsage,
+                  };
+                }) || [],
+            },
+          ],
+  };
 }
