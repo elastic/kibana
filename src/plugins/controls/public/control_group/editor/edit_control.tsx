@@ -34,11 +34,11 @@ interface EditControlResult {
 
 export const EditControlButton = ({ embeddableId }: { embeddableId: string }) => {
   // Controls Services Context
-  const { overlays, controls, theme } = pluginServices.getHooks();
-  const { getControlFactory } = controls.useService();
-  const { openFlyout, openConfirm } = overlays.useService();
-  const themeService = theme.useService();
-
+  const {
+    overlays: { openFlyout, openConfirm },
+    controls: { getControlFactory },
+    theme: { theme$ },
+  } = pluginServices.getServices();
   // Redux embeddable container Context
   const reduxContainerContext = useReduxContainerContext<
     ControlGroupReduxState,
@@ -161,7 +161,7 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
               }}
             />
           </ControlsServicesProvider>,
-          { theme$: themeService.theme$ }
+          { theme$ }
         ),
         {
           'aria-label': ControlGroupStrings.manageControl.getFlyoutEditTitle(),

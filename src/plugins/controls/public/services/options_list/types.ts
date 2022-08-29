@@ -6,4 +6,11 @@
  * Side Public License, v 1.
  */
 
-export { pluginServices } from './plugin_services';
+import { OptionsListRequest, OptionsListResponse } from '../../../common/options_list/types';
+
+export interface ControlsOptionsListService {
+  runOptionsListRequest: (
+    request: OptionsListRequest,
+    abortSignal: AbortSignal
+  ) => Promise<OptionsListResponse>;
+}
