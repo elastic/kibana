@@ -59,7 +59,6 @@ describe('Color Ranges', () => {
         continuity: 'none',
       },
       showExtraActions: true,
-      displayInfinity: false,
       dispatch,
     };
   });

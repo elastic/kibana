@@ -31,7 +31,7 @@ import {
 } from '../../../palettes';
 
 import { RelatedIcon } from '../assets/related';
-import { getAutoExtentInformation, isLastItem } from './utils';
+import { getAutoBoundInformation, isLastItem } from './utils';
 import { isValidColor } from '../utils';
 import {
   ColorRangeDeleteButton,
@@ -52,7 +52,6 @@ export interface ColorRangesItemProps {
   continuity: PaletteContinuity;
   accessor: ColorRangeAccessor;
   validation?: ColorRangeValidation;
-  displayInfinity: boolean;
 }
 
 type ColorRangeItemMode = 'value' | 'auto' | 'edit';
@@ -94,7 +93,6 @@ export function ColorRangeItem({
   validation,
   continuity,
   dispatch,
-  displayInfinity,
 }: ColorRangesItemProps) {
   const { dataBounds, palettes } = useContext(ColorRangesContext);
   const [popoverInFocus, setPopoverInFocus] = useState<boolean>(false);
@@ -168,10 +166,9 @@ export function ColorRangeItem({
     [euiTheme.size.xl]
   );
 
-  const autoExtentInfo = getAutoExtentInformation({
+  const autoBoundInfo = getAutoBoundInformation({
     isPercentage: rangeType === 'percent',
     isUpper: isLast,
-    displayInfinity,
     isAuto: mode === 'auto',
   });
 
@@ -220,7 +217,7 @@ export function ColorRangeItem({
           }
           disabled={isDisabled}
           onChange={onValueChange}
-          placeholder={mode === 'auto' ? autoExtentInfo.representation : ''}
+          placeholder={mode === 'auto' ? autoBoundInfo.representation : ''}
           append={getAppend(rangeType, mode)}
           onBlur={onLeaveFocus}
           data-test-subj={`lnsPalettePanel_dynamicColoring_range_value_${index}`}
@@ -242,8 +239,8 @@ export function ColorRangeItem({
             rangeType={rangeType}
             colorRanges={colorRanges}
             dispatch={dispatch}
-            tooltipContent={autoExtentInfo.actionDescription}
-            iconFactory={autoExtentInfo.icon}
+            tooltipContent={autoBoundInfo.actionDescription}
+            iconFactory={autoBoundInfo.icon}
             accessor={accessor}
           />
         </EuiFlexItem>

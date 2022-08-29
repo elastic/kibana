@@ -132,15 +132,13 @@ export const getValueForContinuity = (
 /**
  * Returns information about an automatic bound (the top and bottom boundaries of the palette range)
  */
-export const getAutoExtentInformation = ({
+export const getAutoBoundInformation = ({
   isPercentage,
   isUpper,
-  displayInfinity,
   isAuto,
 }: {
   isPercentage: boolean;
   isUpper: boolean;
-  displayInfinity: boolean;
   isAuto: boolean;
 }) => {
   const representation = isUpper
@@ -148,23 +146,15 @@ export const getAutoExtentInformation = ({
       ? i18n.translate('coloring.dynamicColoring.customPalette.maxValuePlaceholderPercentage', {
           defaultMessage: '100%',
         })
-      : displayInfinity
-      ? i18n.translate('coloring.dynamicColoring.customPalette.maxValuePlaceholderInfinity', {
-          defaultMessage: '∞',
-        })
       : i18n.translate('coloring.dynamicColoring.customPalette.maxValuePlaceholder', {
-          defaultMessage: 'Max. value',
+          defaultMessage: 'All numbers above',
         })
     : isPercentage
     ? i18n.translate('coloring.dynamicColoring.customPalette.minValuePlaceholderPercentage', {
         defaultMessage: '0%',
       })
-    : displayInfinity
-    ? i18n.translate('coloring.dynamicColoring.customPalette.minValuePlaceholderNegativeInfinity', {
-        defaultMessage: '-∞',
-      })
     : i18n.translate('coloring.dynamicColoring.customPalette.minValuePlaceholder', {
-        defaultMessage: 'Min. value',
+        defaultMessage: 'All numbers below',
       });
 
   const actionDescription = isUpper
@@ -172,26 +162,18 @@ export const getAutoExtentInformation = ({
       ? i18n.translate('coloring.dynamicColoring.customPalette.useAutoMaxValuePercentage', {
           defaultMessage: `Use maximum percentage`,
         })
-      : displayInfinity
-      ? i18n.translate('coloring.dynamicColoring.customPalette.useAutoMaxValueInfinity', {
-          defaultMessage: `Use positive infinity`,
-        })
       : i18n.translate('coloring.dynamicColoring.customPalette.useAutoMaxValue', {
-          defaultMessage: `Use maximum data value`,
+          defaultMessage: `Use all numbers above (positive infinity)`,
         })
     : isPercentage
     ? i18n.translate('coloring.dynamicColoring.customPalette.useAutoMaxValuePercentage', {
         defaultMessage: `Use minimum percentage`,
       })
-    : displayInfinity
-    ? i18n.translate('coloring.dynamicColoring.customPalette.useAutoMinValueInfinity', {
-        defaultMessage: `Use negative infinity`,
-      })
     : i18n.translate('coloring.dynamicColoring.customPalette.useAutoMinValue', {
-        defaultMessage: `Use minimum data value`,
+        defaultMessage: `Use all numbers below (negative infinity)`,
       });
 
-  const icon = displayInfinity ? InfinityIcon : isUpper ? ValueMaxIcon : ValueMinIcon;
+  const icon = !isPercentage ? InfinityIcon : isUpper ? ValueMaxIcon : ValueMinIcon;
 
   return { representation, actionDescription, icon };
 };

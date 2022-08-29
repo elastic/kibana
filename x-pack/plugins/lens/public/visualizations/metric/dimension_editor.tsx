@@ -400,7 +400,6 @@ function PrimaryMetricEditor(props: SubProps) {
                     palettes={props.paletteService}
                     activePalette={activePalette}
                     dataBounds={currentMinMax}
-                    displayInfinity={true}
                     showRangeTypeSelector={Boolean(
                       state.breakdownByAccessor ||
                         state.maxAccessor ||
