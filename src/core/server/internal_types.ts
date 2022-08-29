@@ -44,7 +44,7 @@ import type { CapabilitiesSetup, CapabilitiesStart } from '@kbn/core-capabilitie
 import {
   InternalSavedObjectsServiceSetup,
   InternalSavedObjectsServiceStart,
-} from './saved_objects';
+} from '@kbn/core-saved-objects-server-internal';
 import {
   InternalUiSettingsServicePreboot,
   InternalUiSettingsServiceSetup,
