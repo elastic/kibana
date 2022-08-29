@@ -211,6 +211,48 @@ describe('mapFiltersToKueryNode', () => {
     `);
   });
 
+  test('should handle exact match search Text on rule name and tag', () => {
+    expect(
+      toElasticsearchQuery(
+        mapFiltersToKueryNode({
+          searchText: '"fo"',
+        }) as KueryNode
+      )
+    ).toMatchInlineSnapshot(`
+      Object {
+        "bool": Object {
+          "minimum_should_match": 1,
+          "should": Array [
+            Object {
+              "bool": Object {
+                "minimum_should_match": 1,
+                "should": Array [
+                  Object {
+                    "match_phrase": Object {
+                      "alert.attributes.name": "\\"fo\\"",
+                    },
+                  },
+                ],
+              },
+            },
+            Object {
+              "bool": Object {
+                "minimum_should_match": 1,
+                "should": Array [
+                  Object {
+                    "match_phrase": Object {
+                      "alert.attributes.tags": "\\"fo\\"",
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      }
+    `);
+  });
+
   test('should handle typesFilter, actionTypesFilter, ruleExecutionStatusesFilter, and tagsFilter', () => {
     expect(
       toElasticsearchQuery(
