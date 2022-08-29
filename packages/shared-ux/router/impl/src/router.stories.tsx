@@ -32,5 +32,3 @@ export const RouteComponentExample = (params: NoDataConfigStorybookParams) => {
     </Route>
     )
 };
-
-

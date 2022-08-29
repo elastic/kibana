@@ -1093,6 +1093,59 @@
           },
           {
             "parentPluginId": "discover",
+            "id": "def-public.SavedSearch.timeRestore",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "timeRestore",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/saved_search/public/services/saved_searches/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.SavedSearch.timeRange",
+            "type": "Object",
+            "tags": [],
+            "label": "timeRange",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/saved_search/public/services/saved_searches/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.SavedSearch.refreshInterval",
+            "type": "Object",
+            "tags": [],
+            "label": "refreshInterval",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.RefreshInterval",
+                "text": "RefreshInterval"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/saved_search/public/services/saved_searches/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "discover",
             "id": "def-public.SavedSearch.rowsPerPage",
             "type": "number",
             "tags": [],

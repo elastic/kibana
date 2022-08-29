@@ -29,7 +29,7 @@ export const getUptimeIndexPattern = async ({
   // we have to catch errors here to avoid all endpoints returning 500 for users without APM data
   // (would be a bad first time experience)
   try {
-    const fields = await indexPatternsFetcher.getFieldsForWildcard({
+    const { fields } = await indexPatternsFetcher.getFieldsForWildcard({
       pattern: dynamicSettings.heartbeatIndices,
     });
 
