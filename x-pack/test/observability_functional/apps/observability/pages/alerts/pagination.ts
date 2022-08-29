@@ -82,7 +82,7 @@ export default ({ getService }: FtrProviderContext) => {
         it('Shows up to 25 rows per page', async () => {
           await retry.try(async () => {
             await (await observability.alerts.pagination.getPageSizeSelector()).click();
-            await (await observability.alerts.pagination.getTwentyFiveRowsPageSelector()).click();
+            await (await observability.alerts.pagination.getTwentyRowsPageSelector()).click();
             const tableRows = await observability.alerts.common.getTableCellsInRows();
             expect(tableRows.length).to.not.be.greaterThan(25);
           });
