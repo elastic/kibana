@@ -266,7 +266,7 @@ export async function mgetStackTraces({
         >('mget_stacktraces_chunk', {
           index: INDEX_TRACES,
           ids,
-          realtime: false,
+          realtime: true,
           _source_includes: [
             ProfilingESField.StacktraceFrameIDs,
             ProfilingESField.StacktraceFrameTypes,
@@ -343,7 +343,7 @@ export async function mgetStackFrames({
   const resStackFrames = await client.mget<ProfilingStackFrame>('mget_stackframes', {
     index: INDEX_FRAMES,
     ids: [...stackFrameIDs],
-    realtime: false,
+    realtime: true,
   });
 
   // Create a lookup map StackFrameID -> StackFrame.
