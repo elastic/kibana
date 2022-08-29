@@ -60,6 +60,7 @@ export const TextBasedLanguagesList = (props: TextBasedLanguagesListProps) => (
 export function ChangeDataView({
   isMissingCurrent,
   currentDataViewId,
+  adHocDataViews,
   onChangeDataView,
   onAddField,
   onDataViewCreated,
@@ -93,25 +94,22 @@ export function ChangeDataView({
 
   useEffect(() => {
     const fetchDataViews = async () => {
-      const savedDataViews = await data.dataViews.getIdsWithTitle();
-
-      const hocDataViewId = currentDataViewId || prevHocDataViewId;
-      const hocDataView = hocDataViewId ? await data.dataViews.get(hocDataViewId) : undefined;
-      if (hocDataView && !hocDataView.isPersisted()) {
-        const hocDataViewItem = {
-          title: hocDataView.title,
-          name: hocDataView.name,
-          id: hocDataView.id!,
-        };
-        setDataViewsList([hocDataViewItem, ...savedDataViews]);
-        setPrevDataViewId(hocDataViewItem.id);
-      } else {
-        setDataViewsList(savedDataViews);
+      const dataViewsRefs = await data.dataViews.getIdsWithTitle();
+      if (adHocDataViews?.length) {
+        adHocDataViews.forEach((adHocDataView) => {
+          if (adHocDataView.id) {
+            dataViewsRefs.push({
+              title: adHocDataView.title,
+              name: adHocDataView.name,
+              id: adHocDataView.id,
+            });
+          }
+        });
       }
+      setDataViewsList(dataViewsRefs);
     };
-
     fetchDataViews();
-  }, [data, currentDataViewId, prevHocDataViewId]);
+  }, [data, currentDataViewId, adHocDataViews]);
 
   useEffect(() => {
     if (trigger.label) {
@@ -141,7 +139,7 @@ export function ChangeDataView({
         color={isMissingCurrent ? 'danger' : 'primary'}
         iconSide="right"
         iconType="arrowDown"
-        title={title}
+        title={triggerLabel}
         fullWidth={fullWidth}
         {...rest}
       >
