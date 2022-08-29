@@ -11,6 +11,7 @@
       "jest",
       "node",
       "react",
+      "@kbn/ambient-ui-types",
     ]
   },
   "include": [

@@ -8,7 +8,10 @@
 
 import React from 'react';
 import { Route } from './router';
+import { KibanaPageTemplate as Component } from '@kbn/shared-ux-page-kibana-template';
+import { NoDataConfigStorybookMock, NoDataConfigStorybookParams } from '@kbn/shared-ux-page-kibana-template-mocks';
 import mdx from '../README.mdx';
+
 
 export default {
   title: 'Router',
@@ -20,8 +23,14 @@ export default {
   },
 };
 
-export const Component = () => {
-  return <Route path="/app" />;
+const noDataConfigMock = new NoDataConfigStorybookMock();
+
+export const RouteComponentExample = (params: NoDataConfigStorybookParams) => {
+  return (
+    <Route path="/" >
+       <Component {...noDataConfigMock.getProps(params)} />
+    </Route>
+    )
 };
 
 
