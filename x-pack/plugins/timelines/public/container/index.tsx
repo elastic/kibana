@@ -131,7 +131,7 @@ const useApmTracking = (timelineId: string) => {
     // The blocking span needs to be ended manually when the batched request finishes.
     const span = transaction?.startSpan('batched search', 'http-request', { blocking: true });
     return {
-      endTracking: (result: 'success' | 'error' | 'aborted' | 'malformed') => {
+      endTracking: (result: 'success' | 'error' | 'aborted' | 'invalid') => {
         transaction?.addLabels({ result });
         span?.end();
       },
@@ -269,7 +269,7 @@ export const useTimelineEvents = ({
 
                   searchSubscription$.current.unsubscribe();
                 } else if (isErrorResponse(response)) {
-                  endTracking('malformed');
+                  endTracking('invalid');
                   setLoading(false);
                   addWarning(i18n.ERROR_TIMELINE_EVENTS);
                   searchSubscription$.current.unsubscribe();

@@ -12,7 +12,7 @@ interface UseTrackHttpRequestOptions {
   spanName?: string;
 }
 
-export type RequestResult = 'success' | 'error' | 'aborted' | 'malformed';
+export type RequestResult = 'success' | 'error' | 'aborted' | 'invalid';
 
 export const useTrackHttpRequest = () => {
   const { startTransaction } = useStartTransaction();

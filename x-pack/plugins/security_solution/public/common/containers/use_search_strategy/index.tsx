@@ -47,6 +47,7 @@ export const useSearch = <QueryType extends FactoryQueryTypes>(
   factoryQueryType: QueryType
 ): UseSearchFunction<QueryType> => {
   const { data } = useKibana().services;
+  const { addWarning } = useAppToasts();
   const { startTracking } = useTrackHttpRequest();
 
   const search = useCallback<UseSearchFunction<QueryType>>(
@@ -69,7 +70,8 @@ export const useSearch = <QueryType extends FactoryQueryTypes>(
       observable.subscribe({
         next: (response) => {
           if (isErrorResponse(response)) {
-            endTracking('malformed');
+            addWarning(i18n.INVALID_RESPONSE_WARNING_SEARCH_STRATEGY(factoryQueryType));
+            endTracking('invalid');
           } else {
             endTracking('success');
           }
@@ -81,7 +83,7 @@ export const useSearch = <QueryType extends FactoryQueryTypes>(
 
       return observable;
     },
-    [data.search, factoryQueryType, startTracking]
+    [addWarning, data.search, factoryQueryType, startTracking]
   );
 
   return search;
@@ -158,7 +160,6 @@ export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
 
   const [formattedResult, inspect] = useMemo(() => {
     if (isErrorResponse(result)) {
-      // TODO: Call addWarning() toast using an additional `warningMessage` prop. List at https://github.com/elastic/kibana/issues/129054
       return [initialResult, EMPTY_INSPECT];
     }
     return [
