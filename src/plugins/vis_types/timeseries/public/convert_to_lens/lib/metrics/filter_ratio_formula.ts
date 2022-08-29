@@ -38,16 +38,16 @@ export const getFilterRatioFormula = (currentMetric: Metric, window?: string) =>
   const operation = metric_agg && metric_agg !== 'count' ? `${aggFormula}('${field}',` : 'count(';
 
   if (aggregation.name === 'counter_rate') {
-    const numeratorFormula = constructFilterRationFormula(
-      `${aggregation.name}(max('${field}',`,
+    const numeratorFormula = `max(${constructFilterRationFormula(
+      `differences(max('${field}',`,
       numerator,
       window
-    );
-    const denominatorFormula = constructFilterRationFormula(
-      `${aggregation.name}(max('${field}',`,
+    )})`;
+    const denominatorFormula = `max(${constructFilterRationFormula(
+      `differences(max('${field}',`,
       denominator,
       window
-    );
+    )})`;
     return `${numeratorFormula}) / ${denominatorFormula})`;
   } else {
     const numeratorFormula = constructFilterRationFormula(operation, numerator, window);

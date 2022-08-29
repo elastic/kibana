@@ -22,6 +22,6 @@ export const convertToCounterRateFormulaColumn = ({
     return null;
   }
 
-  const formula = buildCounterRateFormula(metric, field);
+  const formula = buildCounterRateFormula(metric, field.name);
   return createFormulaColumn(formula, { series, metric, dataView });
 };

@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { DataViewField } from '@kbn/data-views-plugin/common';
 import type { Metric } from '../../../../common/types';
 import { TimeScaleValue, isTimeScaleValue } from './metrics_helpers';
 
@@ -22,8 +21,8 @@ const buildDifferencesFormula = (selector: string, shift?: TimeScaleValue) => {
   return `differences(${selector}${shift ? `, shift=${shift}` : ''})`;
 };
 
-export const buildCounterRateFormula = (metric: Metric, field: DataViewField) => {
-  const maxFormula = buildMaxFormula(field.name);
+export const buildCounterRateFormula = (metric: Metric, fieldName: string) => {
+  const maxFormula = buildMaxFormula(fieldName);
 
   const unit = metric.unit && isTimeScaleValue(metric.unit) ? metric.unit : undefined;
   const diffOfMaxFormula = buildDifferencesFormula(maxFormula, unit);
