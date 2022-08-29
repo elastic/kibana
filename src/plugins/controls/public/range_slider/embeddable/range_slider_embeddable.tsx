@@ -29,13 +29,18 @@ import { i18n } from '@kbn/i18n';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { ReduxEmbeddableTools, ReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
 
-import { ControlInput, ControlOutput } from '../..';
+import {
+  ControlInput,
+  ControlOutput,
+  RangeSliderEmbeddableInput,
+  RANGE_SLIDER_CONTROL,
+} from '../..';
 import { pluginServices } from '../../services';
-import { ControlsDataService } from '../../services/data';
-import { ControlsDataViewsService } from '../../services/data_views';
 import { RangeSliderControl } from '../components/range_slider_control';
 import { getDefaultComponentState, rangeSliderReducers } from '../range_slider_reducers';
-import { RangeSliderEmbeddableInput, RangeSliderReduxState, RANGE_SLIDER_CONTROL } from '../types';
+import { RangeSliderReduxState } from '../types';
+import { ControlsDataService } from '../../services/data/types';
+import { ControlsDataViewsService } from '../../services/data_views/types';
 
 const diffDataFetchProps = (
   current?: RangeSliderDataFetchProps,

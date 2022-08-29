@@ -19,7 +19,7 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewField, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { ControlInput } from '../common/types';
-import { ControlsService } from './services/controls';
+import { ControlsServiceType } from './services/controls/types';
 
 export interface CommonControlOutput {
   filters?: Filter[];
@@ -71,12 +71,12 @@ export interface DataControlFieldRegistry {
  * Plugin types
  */
 export interface ControlsPluginSetup {
-  registerControlType: ControlsService['registerControlType'];
+  registerControlType: ControlsServiceType['registerControlType'];
 }
 
 export interface ControlsPluginStart {
-  getControlFactory: ControlsService['getControlFactory'];
-  getControlTypes: ControlsService['getControlTypes'];
+  getControlFactory: ControlsServiceType['getControlFactory'];
+  getControlTypes: ControlsServiceType['getControlTypes'];
 }
 
 export interface ControlsPluginSetupDeps {

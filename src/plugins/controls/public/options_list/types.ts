@@ -7,11 +7,8 @@
  */
 
 import { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
-
 import { ControlOutput } from '../types';
 import { OptionsListEmbeddableInput, OptionsListField } from '../../common/options_list/types';
-
-export * from '../../common/options_list/types';
 
 // Component state is only used by public components.
 export interface OptionsListComponentState {

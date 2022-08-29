@@ -14,12 +14,8 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { EmbeddableReduxContext } from '@kbn/presentation-util-plugin/public/redux_embeddables/use_redux_embeddable_context';
 
 import { OptionsListPopover, OptionsListPopoverProps } from './options_list_popover';
-import {
-  OptionsListComponentState,
-  OptionsListEmbeddableInput,
-  OptionsListReduxState,
-} from '../types';
-import { ControlOutput } from '../..';
+import { OptionsListComponentState, OptionsListReduxState } from '../types';
+import { ControlOutput, OptionsListEmbeddableInput } from '../..';
 import { mockOptionsListContext } from '../../../common/mocks';
 
 describe('Options list popover', () => {

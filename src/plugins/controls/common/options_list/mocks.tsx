@@ -8,12 +8,9 @@
 
 import { ReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public/redux_embeddables/types';
 import { ControlOutput } from '../../public/types';
-import {
-  OptionsListComponentState,
-  OptionsListEmbeddableInput,
-  OptionsListReduxState,
-} from '../../public/options_list/types';
+import { OptionsListComponentState, OptionsListReduxState } from '../../public/options_list/types';
 import { optionsListReducers } from '../../public/options_list/options_list_reducers';
+import { OptionsListEmbeddableInput } from './types';
 
 const mockOptionsListComponentState = {
   field: undefined,

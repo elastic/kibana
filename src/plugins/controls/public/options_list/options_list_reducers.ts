@@ -10,7 +10,8 @@ import { WritableDraft } from 'immer/dist/types/types-external';
 
 import { Filter } from '@kbn/es-query';
 
-import { OptionsListField, OptionsListReduxState, OptionsListComponentState } from './types';
+import { OptionsListReduxState, OptionsListComponentState } from './types';
+import { OptionsListField } from '../../common/options_list/types';
 
 export const optionsListReducers = {
   deselectOption: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<string>) => {
