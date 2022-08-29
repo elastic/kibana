@@ -20,6 +20,7 @@ import type {
   TaskManagerStartContract as TaskManagerPluginStart,
 } from '@kbn/task-manager-plugin/server';
 import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
+import type { CreateLiveQueryRequestBodySchema } from '../common/schemas/routes/live_query';
 
 export interface OsqueryActionPayload {
   agentIds: string[];
@@ -27,8 +28,9 @@ export interface OsqueryActionPayload {
   ecs_mapping?: Record<string, Record<'field', string>>;
   id?: string;
 }
+
 export interface OsqueryPluginSetup {
-  osqueryCreateAction: (payload: OsqueryActionPayload) => void;
+  osqueryCreateAction: (payload: CreateLiveQueryRequestBodySchema) => void;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

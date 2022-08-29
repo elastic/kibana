@@ -51,7 +51,7 @@ export interface SecuritySolutionPluginSetupDependencies {
   telemetry?: TelemetryPluginSetup;
   usageCollection?: UsageCollectionPluginSetup;
   licensing: LicensingPluginSetup;
-  osquery?: OsqueryPluginSetup;
+  osquery: OsqueryPluginSetup;
 }
 
 export interface SecuritySolutionPluginStartDependencies {

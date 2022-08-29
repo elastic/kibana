@@ -6,4 +6,3 @@
  */
 
 export * from './create_action_handler';
-export * from './osquery_create_action';

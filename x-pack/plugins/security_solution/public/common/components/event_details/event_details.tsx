@@ -46,15 +46,17 @@ import { Insights } from './insights/insights';
 
 type EventViewTab = EuiTabbedContentTab;
 
-// TODO ADJUST TO RESPONSE_ACTIONS
 export interface AlertRawEventData {
+  _id: string;
   fields: {
     ['agent.id']?: string[];
-    ['kibana.alert.rule.response_actions.action_type_id']: string[];
+    ['kibana.alert.rule.parameters']: Array<{
+      response_actions: Array<{
+        action_type_id: string;
+        params: Record<string, unknown>;
+      }>;
+    }>;
     ['kibana.alert.rule.name']: string[];
-    ['kibana.alert.rule.response_actions.params.id']: string[];
-    ['kibana.alert.rule.response_actions.params.query']: string[];
-    ['kibana.alert.rule.response_actions.params.ecs_mapping']: unknown[];
   };
   [key: string]: unknown;
 }

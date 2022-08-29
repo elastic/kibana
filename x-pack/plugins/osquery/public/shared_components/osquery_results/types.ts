@@ -10,7 +10,7 @@ import type React from 'react';
 export interface OsqueryActionResultsProps {
   agentIds?: string[];
   ruleName?: string[];
-  ruleActions?: string[];
+  alertId: string;
   eventDetailId: string;
   addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
 }

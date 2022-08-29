@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { uniq } from 'lodash';
+import { map, uniq } from 'lodash';
+import { convertECSMappingToObject } from '../../../../common/detection_engine/transform_actions';
+import type { SetupPlugins } from '../../../plugin_contract';
 
 interface OsqueryResponseAction {
   actionTypeId: string;
@@ -17,13 +19,6 @@ interface OsqueryResponseAction {
   };
 }
 
-export interface OsqueryActionPayload {
-  agentIds: string[];
-  query: string;
-  ecs_mapping?: Record<string, Record<'field', string>>;
-  id?: string;
-}
-
 export type ResponseAction = OsqueryResponseAction;
 
 interface ScheduleNotificationActions {
@@ -32,19 +27,38 @@ interface ScheduleNotificationActions {
 }
 
 interface IAlert {
-  agent?: {
+  agent: {
     id: string;
   };
 }
 
 export const scheduleNotificationResponseActions = (
   { signals, responseActions }: ScheduleNotificationActions,
-  osqueryCreateAction?: (payload: OsqueryActionPayload) => void
+  osqueryCreateAction?: SetupPlugins['osquery']['osqueryCreateAction']
 ) => {
-  const agentIds = uniq((signals as IAlert[]).map((alert: IAlert) => alert.agent?.id));
+  const filteredAlerts = (signals as IAlert[]).filter((alert) => alert.agent?.id);
+  const agentIds = uniq(filteredAlerts.map((alert: IAlert) => alert.agent?.id));
+  const alertIds = map(filteredAlerts, '_id');
+
   responseActions.forEach((responseActionParam) => {
     if (responseActionParam.actionTypeId === '.osquery' && osqueryCreateAction) {
-      osqueryCreateAction({ ...responseActionParam.params, agentIds: agentIds as string[] });
+      const { savedQueryId, ...rest } = responseActionParam.params;
+      return osqueryCreateAction({
+        agent_all: undefined,
+        agent_platforms: undefined,
+        agent_policy_ids: undefined,
+        case_ids: undefined,
+        event_ids: undefined,
+        metadata: undefined,
+        pack_id: undefined,
+        queries: undefined,
+        ...rest,
+        // TODO WHY do we have to do it here? Find place where ecs_mapping is transformed for API, wrong type, should be Record<field> and is array...
+        ecs_mapping: convertECSMappingToObject(responseActionParam.params.ecs_mapping),
+        saved_query_id: savedQueryId,
+        agent_ids: agentIds,
+        alert_ids: alertIds,
+      });
     }
   });
 };

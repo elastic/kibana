@@ -122,4 +122,5 @@ export interface CreateRuleOptions {
   ml?: SetupPlugins['ml'];
   eventsTelemetry?: ITelemetryEventsSender | undefined;
   version: string;
+  osqueryCreateAction?: SetupPlugins['osquery']['osqueryCreateAction'];
 }

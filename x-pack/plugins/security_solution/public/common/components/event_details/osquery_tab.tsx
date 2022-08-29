@@ -8,6 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiNotificationBadge } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
+import { RESPONSE_ACTION_TYPES } from '../../../detections/components/response_actions/constants';
 import { useKibana } from '../../lib/kibana';
 import type { AlertRawEventData } from './event_details';
 import { EventsViewType } from './event_details';
@@ -31,19 +32,22 @@ export const useOsqueryTab = ({
   } = useKibana();
   const handleAddToTimeline = useHandleAddToTimeline();
 
-  if (!osquery) {
+  if (!osquery || !rawEventData) {
     return;
   }
 
   const { OsqueryResults } = osquery;
-  const osqueryActionsLength = rawEventData?.fields[
-    'kibana.alert.rule.response_actions.action_type_id'
-  ]?.filter((action: string) => action === '.osquery')?.length;
+  const parameters = rawEventData.fields['kibana.alert.rule.parameters'];
+  const responseActions = parameters[0].response_actions;
 
-  const agentIds = rawEventData?.fields['agent.id'];
-  const ruleName = rawEventData?.fields['kibana.alert.rule.name'];
-  const ruleActions = rawEventData?.fields['kibana.alert.rule.response_actions.params.id'];
+  const osqueryActionsLength = responseActions?.filter(
+    (action: { action_type_id: string }) => action.action_type_id === RESPONSE_ACTION_TYPES.OSQUERY
+  )?.length;
 
+  const agentIds = rawEventData.fields['agent.id'];
+  const ruleName = rawEventData.fields['kibana.alert.rule.name'];
+
+  const alertId = rawEventData._id;
   return osqueryActionsLength
     ? {
         id: EventsViewType.osqueryView,
@@ -71,8 +75,8 @@ export const useOsqueryTab = ({
               <OsqueryResults
                 agentIds={agentIds}
                 ruleName={ruleName}
-                ruleActions={ruleActions}
                 eventDetailId={id}
+                alertId={alertId}
                 addToTimeline={handleAddToTimeline}
               />
             </TabContentWrapper>

@@ -17,7 +17,7 @@ import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 
-import { curry } from 'lodash';
+import type { CreateLiveQueryRequestBodySchema } from '../common/schemas/routes/live_query';
 import { createConfig } from './create_config';
 import type { OsqueryPluginSetup, OsqueryPluginStart, SetupPlugins, StartPlugins } from './types';
 import { defineRoutes } from './routes';
@@ -34,7 +34,7 @@ import { TelemetryReceiver } from './lib/telemetry/receiver';
 import { initializeTransformsIndices } from './create_indices/create_transforms_indices';
 import { initializeTransforms } from './create_transforms/create_transforms';
 import { createDataViews } from './create_data_views';
-import { OsqueryCreateAction } from './handlers/action';
+import { createActionHandler } from './handlers/action';
 
 import { registerFeatures } from './utils/register_features';
 
@@ -89,9 +89,8 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     this.telemetryEventsSender.setup(this.telemetryReceiver, plugins.taskManager, core.analytics);
 
     return {
-      osqueryCreateAction: curry(OsqueryCreateAction)({
-        osqueryContext,
-      }),
+      osqueryCreateAction: (params: CreateLiveQueryRequestBodySchema) =>
+        createActionHandler(osqueryContext, params),
     };
   }
 

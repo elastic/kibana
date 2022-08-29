@@ -8,10 +8,7 @@
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../common/constants';
-import type {
-  ResponseAction,
-  OsqueryActionPayload,
-} from '../../notifications/schedule_notification_response_actions';
+import type { ResponseAction } from '../../notifications/schedule_notification_response_actions';
 import { scheduleNotificationResponseActions } from '../../notifications/schedule_notification_response_actions';
 
 import type { QueryRuleParams } from '../../schemas/rule_schemas';
@@ -21,12 +18,9 @@ import type { CreateRuleOptions, SecurityAlertType } from '../types';
 import { validateImmutable, validateIndexPatterns } from '../utils';
 
 export const createQueryAlertType = (
-  createOptions: CreateRuleOptions & {
-    // TODO pass it in a more generic way
-    osqueryCreateAction?: (payload: OsqueryActionPayload) => void;
-  }
+  createOptions: CreateRuleOptions
 ): SecurityAlertType<QueryRuleParams, {}, {}, 'default'> => {
-  const { eventsTelemetry, experimentalFeatures, version } = createOptions;
+  const { eventsTelemetry, experimentalFeatures, version, osqueryCreateAction } = createOptions;
   return {
     id: QUERY_RULE_TYPE_ID,
     name: 'Custom Query Rule',
@@ -115,7 +109,7 @@ export const createQueryAlertType = (
             signals: result.createdSignals,
             responseActions: responseActions as ResponseAction[],
           },
-          createOptions.osqueryCreateAction
+          osqueryCreateAction
         );
       }
       return { ...result, state };

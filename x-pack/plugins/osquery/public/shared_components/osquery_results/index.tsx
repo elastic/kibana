@@ -9,29 +9,26 @@ import {
   EuiErrorBoundary,
   EuiCodeBlock,
   EuiComment,
-  EuiLoadingContent,
   EuiText,
   EuiSpacer,
   EuiFlexItem,
 } from '@elastic/eui';
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import type { CoreStart } from '@kbn/core/public';
 
 import { FormattedRelative } from '@kbn/i18n-react';
-import { useInView } from 'react-intersection-observer';
 
 import styled from 'styled-components';
+import { useAllLiveQueries } from '../../actions/use_all_live_queries';
 import { AGENT, AGENT_QUERY, ATTACHED_QUERY } from '../../agents/translations';
-import type { OsqueryActionType } from '../../../common/types';
-import { useInfiniteAllActions } from '../../actions/use_all_actions';
 import { ResultTabs } from '../../routes/saved_queries/edit/tabs';
 import { KibanaContextProvider } from '../../common/lib/kibana';
+import { Direction } from '../../../common/search_strategy';
 
 import { queryClient } from '../../query_client';
 import { KibanaThemeProvider } from '../../shared_imports';
 import type { StartPlugins } from '../../types';
-import { Direction } from '../../../common/search_strategy';
 import type { OsqueryActionResultsProps } from './types';
 
 const StyledScrolledEuiFlexItem = styled(EuiFlexItem)`
@@ -42,31 +39,16 @@ const StyledScrolledEuiFlexItem = styled(EuiFlexItem)`
 const OsqueryActionResultsComponent: React.FC<OsqueryActionResultsProps> = ({
   agentIds,
   ruleName,
-  ruleActions,
-  eventDetailId,
+  alertId,
   addToTimeline,
 }) => {
-  const { ref, inView } = useInView();
-
-  const {
-    data: actionsData,
-    fetchNextPage,
-    isFetchingNextPage,
-  } = useInfiniteAllActions({
+  const { data: actionsData } = useAllLiveQueries({
+    filterQuery: { term: { alert_ids: alertId } },
     activePage: 0,
     limit: 100,
     direction: Direction.desc,
     sortField: '@timestamp',
-    eventDetailId,
-    // @ts-expect-error terms is fine
-    filterQuery: { terms: { 'data.id': ruleActions } },
   });
-
-  useEffect(() => {
-    if (inView) {
-      fetchNextPage();
-    }
-  }, [fetchNextPage, inView]);
 
   const agentsList = useMemo(
     () => (
@@ -81,57 +63,55 @@ const OsqueryActionResultsComponent: React.FC<OsqueryActionResultsProps> = ({
 
   return (
     <div data-test-subj={'osquery-results'}>
-      {actionsData?.pages.map((page) =>
-        (page.actions as Array<{ _source: OsqueryActionType; _id: string }>)?.map((ruleAction) => {
-          const actionId = ruleAction._source.action_id;
-          const query = ruleAction._source.data?.query as string;
-          const startDate = ruleAction?._source['@timestamp'];
+      {actionsData?.data.items.map((item) => {
+        const actionId = item.fields?.action_id[0];
+        const query = item.fields?.['queries.query'][0];
+        const startDate = item.fields?.['@timestamp'][0];
 
-          return (
-            <EuiComment
-              username={ruleName && ruleName[0]}
-              timestamp={<FormattedRelative value={startDate} />}
-              event={ATTACHED_QUERY}
-              data-test-subj={'osquery-results-comment'}
-              key={ruleAction._id}
+        return (
+          <EuiComment
+            username={ruleName && ruleName[0]}
+            timestamp={<FormattedRelative value={startDate} />}
+            event={ATTACHED_QUERY}
+            data-test-subj={'osquery-results-comment'}
+            key={item._id}
+          >
+            <EuiSpacer size="m" />
+            <EuiText>
+              <h6>{AGENT}</h6>
+            </EuiText>
+            <EuiCodeBlock
+              language="sql"
+              fontSize="m"
+              paddingSize="m"
+              transparentBackground={agentIds && !agentIds[0].length}
             >
-              <EuiSpacer size="m" />
-              <EuiText>
-                <h6>{AGENT}</h6>
-              </EuiText>
-              <EuiCodeBlock
-                language="sql"
-                fontSize="m"
-                paddingSize="m"
-                transparentBackground={agentIds && !agentIds[0].length}
-              >
-                {agentsList}
-              </EuiCodeBlock>
-              <EuiSpacer size="m" />
-              <EuiText>
-                <h6>{AGENT_QUERY}</h6>
-              </EuiText>
-              <EuiCodeBlock
-                language="sql"
-                fontSize="m"
-                paddingSize="m"
-                transparentBackground={!query.length}
-              >
-                {query}
-              </EuiCodeBlock>
-              <EuiSpacer size="xxl" />
-              <ResultTabs
-                actionId={actionId}
-                agentIds={agentIds}
-                startDate={startDate}
-                addToTimeline={addToTimeline}
-              />
-            </EuiComment>
-          );
-        })
-      )}
+              {agentsList}
+            </EuiCodeBlock>
+            <EuiSpacer size="m" />
+            <EuiText>
+              <h6>{AGENT_QUERY}</h6>
+            </EuiText>
+            <EuiCodeBlock
+              language="sql"
+              fontSize="m"
+              paddingSize="m"
+              transparentBackground={!query.length}
+            >
+              {query}
+            </EuiCodeBlock>
+            <EuiSpacer size="xxl" />
+            <ResultTabs
+              actionId={actionId}
+              agentIds={agentIds}
+              startDate={startDate}
+              addToTimeline={addToTimeline}
+            />
+          </EuiComment>
+        );
+      })}
 
-      <div ref={ref}>{isFetchingNextPage && <EuiLoadingContent lines={5} />}</div>
+      {/* <div ref={ref}>{isFetchingNextPage && <EuiLoadingContent lines={5} />}</div>*/}
     </div>
   );
 };
