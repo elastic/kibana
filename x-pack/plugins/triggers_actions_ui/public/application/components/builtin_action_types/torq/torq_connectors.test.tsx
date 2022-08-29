@@ -12,6 +12,8 @@ import { ConnectorFormTestProvider, waitForComponentToUpdate } from '../test_uti
 import { act, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
+const EMPTY_FUNC = () => {};
+
 describe('TorqActionConnectorFields renders', () => {
   test('all connector fields are rendered', async () => {
     const actionConnector = {
@@ -31,7 +33,7 @@ describe('TorqActionConnectorFields renders', () => {
         <TorqActionConnectorFields
           readOnly={false}
           isEdit={false}
-          registerPreSubmitValidator={() => {}}
+          registerPreSubmitValidator={EMPTY_FUNC}
         />
       </ConnectorFormTestProvider>
     );
@@ -66,7 +68,7 @@ describe('TorqActionConnectorFields renders', () => {
           <TorqActionConnectorFields
             readOnly={false}
             isEdit={false}
-            registerPreSubmitValidator={() => {}}
+            registerPreSubmitValidator={EMPTY_FUNC}
           />
         </ConnectorFormTestProvider>
       );
@@ -104,7 +106,7 @@ describe('TorqActionConnectorFields renders', () => {
           <TorqActionConnectorFields
             readOnly={false}
             isEdit={false}
-            registerPreSubmitValidator={() => {}}
+            registerPreSubmitValidator={EMPTY_FUNC}
           />
         </ConnectorFormTestProvider>
       );
@@ -132,7 +134,7 @@ describe('TorqActionConnectorFields renders', () => {
           <TorqActionConnectorFields
             readOnly={false}
             isEdit={false}
-            registerPreSubmitValidator={() => {}}
+            registerPreSubmitValidator={EMPTY_FUNC}
           />
         </ConnectorFormTestProvider>
       );
@@ -160,7 +162,7 @@ describe('TorqActionConnectorFields renders', () => {
           <TorqActionConnectorFields
             readOnly={false}
             isEdit={false}
-            registerPreSubmitValidator={() => {}}
+            registerPreSubmitValidator={EMPTY_FUNC}
           />
         </ConnectorFormTestProvider>
       );

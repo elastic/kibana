@@ -36,15 +36,14 @@ const Callout: React.FC<{ title: string; dataTestSubj: string }> = ({ title, dat
 const torqWebhookEndpoint =
   (message: string) =>
   (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
-    const [{ value }] = args;
+    const [{ value }] = args as Array<{ value: string }>;
     const error: ValidationError<ERROR_CODE> = {
       code: 'ERR_FIELD_FORMAT',
       formatType: 'URL',
       message,
     };
-    // TODO: Fix casting
-    if (!isUrl(value as string)) return error;
-    const hostname = new URL(value as string).hostname;
+    if (!isUrl(value)) return error;
+    const hostname = new URL(value).hostname;
     return hostname === 'hooks.torq.io' ? undefined : error;
   };
 

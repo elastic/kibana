@@ -15,30 +15,31 @@ function replaceReferencesWithNumbers(body: string) {
 }
 
 export function getActionType(): ActionTypeModel<TorqConfig, TorqSecrets, TorqActionParams> {
+  const validateParams = async (
+    actionParams: TorqActionParams
+  ): Promise<GenericValidationResult<TorqActionParams>> => {
+    const translations = await import('./translations');
+    const errors = {
+      body: [] as string[],
+    };
+    const validationResult = { errors };
+    validationResult.errors = errors;
+    if (!actionParams.body?.length) {
+      errors.body.push(translations.BODY_REQUIRED);
+    }
+    try {
+      JSON.parse(replaceReferencesWithNumbers(actionParams.body || ""));
+    } catch (e) {
+      errors.body.push(translations.INVALID_JSON);
+    }
+    return validationResult;
+  };
   return {
     id: '.torq',
     iconClass: lazy(() => import('./logo')),
     selectMessage: i18n.TORQ_SELECT_MESSAGE,
     actionTypeTitle: i18n.TORQ_ACTION_TYPE_TITLE,
-    validateParams: async (
-      actionParams: TorqActionParams
-    ): Promise<GenericValidationResult<TorqActionParams>> => {
-      const translations = await import('./translations');
-      const errors = {
-        body: [] as string[],
-      };
-      const validationResult = { errors };
-      validationResult.errors = errors;
-      if (!actionParams.body?.length) {
-        errors.body.push(translations.BODY_REQUIRED);
-      }
-      try {
-        JSON.parse(replaceReferencesWithNumbers(actionParams.body || ""));
-      } catch (e) {
-        errors.body.push(translations.INVALID_JSON);
-      }
-      return validationResult;
-    },
+    validateParams,
     actionConnectorFields: lazy(() => import('./torq_connectors')),
     actionParamsFields: lazy(() => import('./torq_params')),
   };

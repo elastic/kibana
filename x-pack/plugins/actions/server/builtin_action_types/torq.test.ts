@@ -22,6 +22,8 @@ import {
 
 import * as utils from './lib/axios_utils';
 
+const ACTION_TYPE_ID = '.torq';
+
 jest.mock('axios');
 jest.mock('./lib/axios_utils', () => {
   const originalUtils = jest.requireActual('./lib/axios_utils');
@@ -32,12 +34,9 @@ jest.mock('./lib/axios_utils', () => {
   };
 });
 
-axios.create = jest.fn(() => axios);
 const requestMock = utils.request as jest.Mock;
 
 axios.create = jest.fn(() => axios);
-
-const ACTION_TYPE_ID = '.torq';
 
 const services: Services = actionsMock.createServices();
 
@@ -91,28 +90,32 @@ describe('config validation', () => {
     });
   });
 
-  ['iamnotavalidurl', 'example.com/do-something'].forEach((url) => {
-    test('should validate and throw error when an invalid URL is provided', () => {
+  const errorCases: Array<{ name: string; url: string; errorMsg: string }> = [
+    {
+      name: 'invalid URL leads to error',
+      url: 'iamnotavalidurl',
+      errorMsg: `"error validating action type config: error configuring send to Torq action: unable to parse url: TypeError: Invalid URL: iamnotavalidurl"`,
+    },
+    {
+      name: 'incomplete URL leads to error',
+      url: 'example.com/do-something',
+      errorMsg: `"error validating action type config: error configuring send to Torq action: unable to parse url: TypeError: Invalid URL: example.com/do-something"`,
+    },
+    {
+      name: 'fails when URL is not a Torq webhook endpoint',
+      url: 'http://mylisteningserver:9200/endpoint',
+      errorMsg: `"error validating action type config: error configuring send to Torq action: url must begin with https://hooks.torq.io"`,
+    },
+  ];
+  errorCases.forEach(({ name, url, errorMsg }) => {
+    test(name, () => {
       const config: Record<string, string> = {
         webhookIntegrationUrl: url,
       };
       expect(() => {
         validateConfig(actionType, config);
-      }).toThrowErrorMatchingInlineSnapshot(
-        `"error validating action type config: error configuring send to Torq action: unable to parse url: TypeError: Invalid URL: ${url}"`
-      );
+      }).toThrowErrorMatchingInlineSnapshot(errorMsg);
     });
-  });
-
-  test('fails when URL is not a Torq webhook endpoint', () => {
-    const config: Record<string, string> = {
-      webhookIntegrationUrl: 'http://mylisteningserver:9200/endpoint',
-    };
-    expect(() => {
-      validateConfig(actionType, config);
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: error configuring send to Torq action: url must begin with https://hooks.torq.io"`
-    );
   });
 
   test("config validation returns an error if the specified URL isn't added to allowedHosts", () => {
@@ -127,8 +130,7 @@ describe('config validation', () => {
     });
 
     // any for testing
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const config: Record<string, any> = {
+    const config: Record<string, string> = {
       webhookIntegrationUrl: 'http://mylisteningserver.com:9200/endpoint',
     };
 
@@ -151,7 +153,7 @@ describe('params validation', () => {
   });
 });
 
-describe('execute()', () => {
+describe('execute Torq action', () => {
   beforeAll(() => {
     requestMock.mockReset();
     actionType = getActionType({
@@ -196,7 +198,10 @@ describe('execute()', () => {
           "debug": [MockFunction] {
             "calls": Array [
               Array [
-                "torq action result: {\\"tag\\":\\"ok\\",\\"value\\":{\\"status\\":200,\\"statusText\\":\\"\\",\\"data\\":\\"\\",\\"headers\\":[],\\"config\\":{}}}",
+                "torq action result: {
+        tag: 'ok',
+        value: { status: 200, statusText: '', data: '', headers: [], config: {} }
+      }",
               ],
               Array [
                 "response from Torq action \\"some-id\\": [HTTP 200] ",

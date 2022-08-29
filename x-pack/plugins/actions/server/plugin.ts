@@ -102,7 +102,6 @@ import { createSubActionConnectorFramework } from './sub_action_framework';
 import { IServiceAbstract, SubActionConnectorType } from './sub_action_framework/types';
 import { SubActionConnector } from './sub_action_framework/sub_action_connector';
 import { CaseConnector } from './sub_action_framework/case';
-import { TorqConnector, TorqConfigSchema, TorqSecretSchema } from './sub_action_framework/torq';
 
 export interface PluginSetupContract {
   registerType<
