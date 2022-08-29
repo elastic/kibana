@@ -18,6 +18,7 @@ import type {
   PreconfiguredAgentPolicy,
   PreconfiguredPackage,
   PackagePolicy,
+  PackageInfo,
 } from '../../common/types';
 import type { PreconfigurationError } from '../../common/constants';
 import { PRECONFIGURATION_LATEST_KEYWORD } from '../../common/constants';
@@ -327,13 +328,23 @@ async function addPreconfiguredPolicyPackages(
   defaultOutput: Output,
   bumpAgentPolicyRevison = false
 ) {
+  // Cache package info objects so we don't waste lookup time on the latest package
+  // every time we call `getPackageInfo`
+  const packageInfoMap = new Map<string, PackageInfo>();
+
   // Add packages synchronously to avoid overwriting
   for (const { installedPackage, id, name, description, inputs } of installedPackagePolicies) {
-    const packageInfo = await getPackageInfo({
-      savedObjectsClient: soClient,
-      pkgName: installedPackage.name,
-      pkgVersion: installedPackage.version,
-    });
+    let packageInfo: PackageInfo;
+
+    if (packageInfoMap.has(installedPackage.name)) {
+      packageInfo = packageInfoMap.get(installedPackage.name)!;
+    } else {
+      packageInfo = await getPackageInfo({
+        savedObjectsClient: soClient,
+        pkgName: installedPackage.name,
+        pkgVersion: installedPackage.version,
+      });
+    }
 
     await addPackageToAgentPolicy(
       soClient,
@@ -341,6 +352,7 @@ async function addPreconfiguredPolicyPackages(
       installedPackage,
       agentPolicy,
       defaultOutput,
+      packageInfo,
       name,
       id,
       description,
