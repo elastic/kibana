@@ -25,6 +25,7 @@ import { getMetricsDateHistogramParams } from '../../../../lib/helpers/metrics';
 import { Setup } from '../../../../lib/helpers/setup_request';
 import { ChartBase } from '../../types';
 import { getVizColorForIndex } from '../../../../../common/viz_colors';
+import { GenericMetricsChart } from '../../fetch_and_transform_metrics';
 
 const chartBase: ChartBase = {
   title: i18n.translate('xpack.apm.agentMetrics.serverless.computeUsage', {
@@ -83,7 +84,7 @@ export async function getComputeUsage({
   faasId?: string;
   start: number;
   end: number;
-}) {
+}): Promise<GenericMetricsChart> {
   const { apmEventClient, config } = setup;
 
   const aggs = {
@@ -144,7 +145,6 @@ export async function getComputeUsage({
               ),
               key: 'compute_usage',
               type: 'linemark',
-              yUnit: 'number',
               overallValue: calculateComputeUsageGBSeconds({
                 faasBilledDuration: aggregations?.avgFaasBilledDuration.value,
                 totalMemory: aggregations?.avgTotalMemory.value,
