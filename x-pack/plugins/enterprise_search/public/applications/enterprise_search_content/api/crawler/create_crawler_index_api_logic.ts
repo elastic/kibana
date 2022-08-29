@@ -19,19 +19,35 @@ interface CreateCrawlerIndexRequest {
   language: LanguageForOptimization;
 }
 
+interface AddConnectorValue {
+  id: string;
+  index_name: string;
+}
+
 export interface CreateCrawlerIndexResponse {
   created: string; // the name of the newly created index
 }
 
 export const createCrawlerIndex = async ({ indexName, language }: CreateCrawlerIndexArgs) => {
-  const route = '/internal/enterprise_search/crawler';
+  const conn_route = '/internal/enterprise_search/connectors';
+  const conn_params = {
+    delete_existing_connector: true,
+    index_name: indexName,
+    service_type: 'elastic-crawler',
+    language,
+  };
 
+  await HttpLogic.values.http.post<AddConnectorValue>(conn_route, {
+    body: JSON.stringify(conn_params),
+  });
+
+  const route = `/internal/enterprise_search/crawler/${indexName}`;
   const params: CreateCrawlerIndexRequest = {
     index_name: indexName,
     language,
   };
 
-  return await HttpLogic.values.http.post<CreateCrawlerIndexResponse>(route, {
+  return await HttpLogic.values.http.put<CreateCrawlerIndexResponse>(route, {
     body: JSON.stringify(params),
   });
 };

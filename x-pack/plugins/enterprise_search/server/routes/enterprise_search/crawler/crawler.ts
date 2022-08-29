@@ -23,9 +23,9 @@ import { registerCrawlerSitemapRoutes } from './crawler_sitemaps';
 export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
   const { router, enterpriseSearchRequestHandler, log } = routeDependencies;
 
-  router.post(
+  router.put(
     {
-      path: '/internal/enterprise_search/crawler',
+      path: '/internal/enterprise_search/crawler/{indexName}',
       validate: {
         body: schema.object({
           index_name: schema.string(),
@@ -35,24 +35,6 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-
-      const indexExists = await client.asCurrentUser.indices.exists({
-        index: request.body.index_name,
-      });
-
-      if (indexExists) {
-        return createError({
-          errorCode: ErrorCode.INDEX_ALREADY_EXISTS,
-          message: i18n.translate(
-            'xpack.enterpriseSearch.server.routes.addCrawler.indexExistsError',
-            {
-              defaultMessage: 'This index already exists',
-            }
-          ),
-          response,
-          statusCode: 409,
-        });
-      }
 
       const crawler = await fetchCrawlerByIndexName(client, request.body.index_name);
 
@@ -70,24 +52,8 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
         });
       }
 
-      const connector = await fetchConnectorByIndexName(client, request.body.index_name);
-
-      if (connector) {
-        return createError({
-          errorCode: ErrorCode.CONNECTOR_DOCUMENT_ALREADY_EXISTS,
-          message: i18n.translate(
-            'xpack.enterpriseSearch.server.routes.addCrawler.connectorExistsError',
-            {
-              defaultMessage: 'A connector for this index already exists',
-            }
-          ),
-          response,
-          statusCode: 409,
-        });
-      }
-
       return enterpriseSearchRequestHandler.createRequest({
-        path: '/api/ent/v1/internal/indices',
+        path: '/api/ent/v1/internal/indices/:indexName',
       })(context, request, response);
     })
   );
