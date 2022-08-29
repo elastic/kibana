@@ -89,7 +89,7 @@ Set this property to `false` to prevent the filter editor and KQL autocomplete
 from suggesting values for fields.
 
 [[autocomplete-valuesuggestionmethod]]`autocomplete:valueSuggestionMethod`::
-When set to `terms_enum`, autocomplete uses the terms enum API for value suggestions. Kibana returns results faster, but suggestions are approximate, sorted alphabetically, and can be outside the selected time range.
+When set to `terms_enum`, autocomplete uses the terms enum API for value suggestions. Kibana returns results faster, but suggestions are approximate, sorted alphabetically, and can be outside the selected time range. (Note that this API is incompatible with {ref}/document-level-security.html[Document-Level-Security].)
 When set to `terms_agg`, Kibana uses a terms aggregation for value suggestions, which is
 slower, but suggestions include all values that optionally match your time range and are sorted by popularity.
 
