@@ -297,11 +297,14 @@ export const DashboardListing = ({
       )}
       {!showNoDataPage && (
         <TableListView<DashboardSavedObjectUserContent>
-          entityName={getEntityName()}
+          createItem={!showWriteControls ? undefined : createItem}
+          deleteItems={!showWriteControls ? undefined : deleteItems}
+          initialPageSize={initialPageSize}
+          editItem={!showWriteControls ? undefined : editItem}
+          initialFilter={initialFilter ?? defaultFilter}
           entityNamePlural={getEntityNamePlural()}
           tableListTitle={getTableListTitle()}
-          initialFilter={initialFilter ?? defaultFilter}
-          initialPageSize={initialPageSize}
+          entityName={getEntityName()}
           emptyPrompt={emptyPrompt}
           headingId="dashboardListingHeading"
           findItems={fetchItems}
@@ -314,9 +317,6 @@ export const DashboardListing = ({
               timeRestore
             )
           }
-          createItem={!showWriteControls ? undefined : createItem}
-          deleteItems={!showWriteControls ? undefined : deleteItems}
-          editItem={!showWriteControls ? undefined : editItem}
           listingLimit={listingLimit}
         >
           <DashboardUnsavedListing
