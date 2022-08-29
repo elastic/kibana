@@ -67,7 +67,10 @@ function getMockOptions({
     loggers: loggingSystemMock.create(),
     getServerBaseURL: jest.fn(),
     config: createConfig(
-      ConfigSchema.validate({ authc: { selector, providers, http } }),
+      ConfigSchema.validate({
+        authc: { selector, providers, http } ,
+        accessAgreement: { message: accessAgreementMessage || undefined},
+      }),
       loggingSystemMock.create().get(),
       { isTLSEnabled: false }
     ),
@@ -75,7 +78,6 @@ function getMockOptions({
     featureUsageService: securityFeatureUsageServiceMock.createStartContract(),
     userProfileService: userProfileServiceMock.createStart(),
     isElasticCloudDeployment: jest.fn().mockReturnValue(false),
-    accessAgreement: { message: accessAgreementMessage },
   };
 }
 
