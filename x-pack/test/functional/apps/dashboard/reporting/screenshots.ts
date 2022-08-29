@@ -264,57 +264,5 @@ export default function ({
         await kibanaServer.uiSettings.replace({});
       });
     });
-
-    describe('Sample data from Kibana 7.6', () => {
-      const reportFileName = 'sample_data_ecommerce_76';
-      let sessionReportPath: string;
-
-      before(async () => {
-        await kibanaServer.uiSettings.replace({
-          defaultIndex: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
-        });
-
-        await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce_76');
-        await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce_76.json'
-        );
-
-        await PageObjects.common.navigateToApp('dashboard');
-        await PageObjects.dashboard.loadSavedDashboard('[K7.6-eCommerce] Revenue Dashboard');
-
-        await PageObjects.reporting.openPngReportingPanel();
-        await PageObjects.reporting.forceSharedItemsContainerSize({ width: 1405 });
-        await PageObjects.reporting.clickGenerateReportButton();
-        await PageObjects.reporting.removeForceSharedItemsContainerSize();
-
-        const url = await PageObjects.reporting.getReportURL(60000);
-        const reportData = await PageObjects.reporting.getRawPdfReportData(url);
-        sessionReportPath = await PageObjects.reporting.writeSessionReport(
-          reportFileName,
-          'png',
-          reportData,
-          REPORTS_FOLDER
-        );
-      });
-
-      after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce_76');
-        await kibanaServer.importExport.unload(
-          'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce_76.json'
-        );
-      });
-
-      it('PNG file matches the baseline image', async function () {
-        this.timeout(300000);
-        const percentDiff = await png.compareAgainstBaseline(
-          sessionReportPath,
-          PageObjects.reporting.getBaselineReportPath(reportFileName, 'png', REPORTS_FOLDER),
-          REPORTS_FOLDER,
-          updateBaselines
-        );
-
-        expect(percentDiff).to.be.lessThan(0.09);
-      });
-    });
   });
 }
