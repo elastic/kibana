@@ -9,12 +9,12 @@
 
 import type { CommandDefinition } from '..';
 
-export type ParsedArgData = string[];
+export type ParsedArgData<T = string> = T[];
 
 interface ParsedCommandInput<TArgs extends object = any> {
   name: string;
   args: {
-    [key in keyof TArgs]: ParsedArgData;
+    [key in keyof TArgs]: ParsedArgData<Required<TArgs>[key]>;
   };
 }
 const parseInputString = (rawInput: string): ParsedCommandInput => {

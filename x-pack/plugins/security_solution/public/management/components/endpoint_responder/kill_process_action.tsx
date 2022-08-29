@@ -23,7 +23,7 @@ import { ACTION_DETAILS_REFRESH_INTERVAL } from './constants';
 
 export const KillProcessActionResult = memo<
   CommandExecutionComponentProps<
-    { comment?: string; pid?: number; entityId?: string },
+    { comment?: string; pid?: string; entityId?: string },
     {
       actionId?: string;
       actionRequestSent?: boolean;
