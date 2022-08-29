@@ -26,7 +26,7 @@ export function getActionType(): ActionTypeModel<TorqConfig, TorqSecrets, TorqAc
       const translations = await import('./translations');
       const errors = {
         body: [] as string[],
-      }; // TODO: consider adding validations
+      };
       const validationResult = { errors };
       validationResult.errors = errors;
       if (!actionParams.body?.length) {
