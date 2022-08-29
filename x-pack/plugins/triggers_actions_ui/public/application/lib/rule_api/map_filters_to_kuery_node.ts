@@ -84,7 +84,7 @@ export const mapFiltersToKueryNode = ({
 
   if (searchText && searchText !== '') {
     // if the searchText includes quotes, treat it as an exact match query
-    const value = searchText.match(/(["'`])(.*?)(?:(?=(\?))\2.)*?\1/g)
+    const value = searchText.match(/(['"`])(.*?)\1/g)
       ? nodeTypes.literal.buildNode(searchText, true)
       : nodeTypes.wildcard.buildNode(searchText);
     filterKueryNode.push(
