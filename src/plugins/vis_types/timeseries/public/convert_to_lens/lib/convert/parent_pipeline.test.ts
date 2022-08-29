@@ -13,6 +13,7 @@ import {
   computeParentPipelineColumns,
   convertMetricAggregationColumnWithoutSpecialParams,
   convertMetricAggregationToColumn,
+  convertParentPipelineAggToColumns,
   MetricAggregationColumn,
   ParentPipelineAggColumn,
 } from './parent_pipeline';
@@ -454,5 +455,98 @@ describe('computeParentPipelineColumns', () => {
       ParentPipelineAggColumn
     ];
     expect(parentPipelineColumn.references).toContain(metricColumn.columnId);
+  });
+});
+
+describe('convertParentPipelineAggToColumns', () => {
+  const dataView = stubLogstashDataView;
+  const series = createSeries();
+  const field = dataView.fields[0].name;
+  const id = 'some-id';
+  const id1 = 'some-id-1';
+  const id2 = 'some-id-2';
+
+  test.each<
+    [
+      string,
+      Parameters<typeof convertParentPipelineAggToColumns>,
+      (
+        | Partial<FormulaColumn>
+        | Array<Partial<MetricAggregationColumn> | Partial<ParentPipelineAggColumn>>
+        | null
+      )
+    ]
+  >([
+    [
+      'null for metric which is not moving_average or derivative',
+      [{ series, metrics: [{ id, field, type: TSVB_METRIC_TYPES.POSITIVE_ONLY }], dataView }],
+      null,
+    ],
+    [
+      'column for moving_average',
+      [
+        {
+          series,
+          metrics: [
+            { id, field, type: METRIC_TYPES.MAX },
+            { id: id1, field: `${id}[75]`, type: METRIC_TYPES.AVG },
+            { id: id2, field: `${id1}[50]`, type: TSVB_METRIC_TYPES.MOVING_AVERAGE },
+          ],
+          dataView,
+        },
+      ],
+      {
+        meta: { metricId: 'some-id-2' },
+        operationType: 'formula',
+        params: { formula: 'moving_average(average(max(bytes)))' },
+      },
+    ],
+    [
+      'column for derivative',
+      [
+        {
+          series,
+          metrics: [
+            { id, field, type: METRIC_TYPES.MAX },
+            { id: id1, field: `${id}[75]`, type: METRIC_TYPES.AVG },
+            { id: id2, field: `${id1}[50]`, type: METRIC_TYPES.DERIVATIVE },
+          ],
+          dataView,
+        },
+      ],
+      {
+        meta: { metricId: 'some-id-2' },
+        operationType: 'formula',
+        params: { formula: 'differences(average(max(bytes)))' },
+      },
+    ],
+    [
+      'null for static sub metric (unsupported)',
+      [
+        {
+          series,
+          metrics: [
+            { id, field, type: METRIC_TYPES.MAX },
+            { id: id1, field: `${id}[75]`, type: TSVB_METRIC_TYPES.STATIC },
+            { id: id2, field: `${id1}[50]`, type: METRIC_TYPES.DERIVATIVE },
+          ],
+          dataView,
+        },
+      ],
+      null,
+    ],
+  ])('should return %s', (_, input, expected) => {
+    if (expected === null) {
+      expect(convertParentPipelineAggToColumns(...input)).toBeNull();
+    }
+    if (Array.isArray(expected)) {
+      expect(convertParentPipelineAggToColumns(...input)).toEqual(
+        expected.map(expect.objectContaining)
+      );
+    } else {
+      expect(convertParentPipelineAggToColumns(...input)).toEqual(
+        expect.objectContaining(expected)
+      );
+    }
   });
 });
