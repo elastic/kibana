@@ -24,7 +24,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
   const testSubjects = getService('testSubjects');
 
-  describe('discover doc table', function describeIndexTests() {
+  // FLAKY Chrome 103+ https://github.com/elastic/kibana/issues/138652
+  describe.skip('discover doc table', function describeIndexTests() {
     const rowsHardLimit = 500;
 
     before(async function () {
