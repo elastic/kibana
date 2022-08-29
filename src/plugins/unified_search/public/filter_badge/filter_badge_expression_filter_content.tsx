@@ -12,7 +12,7 @@ import type { Filter } from '@kbn/es-query';
 import { FILTERS } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import type { LabelOptions } from './filter_badge_utils';
-import { existsOperator, isOneOfOperator } from '../../filter_bar/filter_editor';
+import { existsOperator, isOneOfOperator } from '../filter_bar/filter_editor';
 
 const FilterBadgeExpressionValue = ({ value }: { value: string | number }) => {
   return (
