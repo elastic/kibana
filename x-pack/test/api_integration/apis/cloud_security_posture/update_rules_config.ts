@@ -12,12 +12,13 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const chance = new Chance();
+  const kibanaServer = getService('kibanaServer');
 
   describe('POST /internal/cloud_security_posture/update_rules_config', () => {
     let agentPolicyId: string;
 
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
 
       const { body: agentPolicyResponse } = await supertest
@@ -31,7 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
 
@@ -60,7 +61,6 @@ export default function ({ getService }: FtrProviderContext) {
           namespace: 'default',
           policy_id: agentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'cloud_security_posture',
