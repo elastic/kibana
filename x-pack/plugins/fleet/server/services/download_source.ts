@@ -63,7 +63,7 @@ class DownloadSourceService {
   public async create(
     soClient: SavedObjectsClientContract,
     downloadSource: DownloadSourceBase,
-    options?: { id?: string }
+    options?: { id?: string; overwrite?: boolean }
   ): Promise<DownloadSource> {
     const data: DownloadSourceAttributes = downloadSource;
 
@@ -89,6 +89,7 @@ class DownloadSourceService {
       data,
       {
         id: options?.id,
+        overwrite: options?.overwrite ?? false,
       }
     );
     return savedObjectToDownloadSource(newSo);
@@ -171,6 +172,7 @@ class DownloadSourceService {
 
       return await this.create(soClient, newDefaultDS, {
         id: DEFAULT_DOWNLOAD_SOURCE_ID,
+        overwrite: true,
       });
     }
 
