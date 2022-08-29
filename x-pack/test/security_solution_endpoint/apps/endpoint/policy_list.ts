@@ -50,8 +50,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.policy.ensureIsOnListPage();
       });
     });
-    // FLAKY: https://github.com/elastic/kibana/issues/135558
-    describe.skip('with policies', () => {
+    describe('with policies', () => {
       let indexedData: IndexedHostsAndAlertsResponse;
       let policyInfo: PolicyTestResourceInfo;
       before(async () => {
