@@ -50,7 +50,7 @@ describe('logging service', () => {
 
       await root.preboot();
       await root.setup();
-    }, 30000);
+    });
 
     beforeEach(() => {
       mockConsoleLog.mockClear();
@@ -154,7 +154,7 @@ describe('logging service', () => {
       await root.preboot();
       setup = await root.setup();
       setup.logging.configure(['plugins', 'myplugin'], loggingConfig$);
-    }, 30000);
+    });
 
     beforeEach(() => {
       mockConsoleLog.mockClear();

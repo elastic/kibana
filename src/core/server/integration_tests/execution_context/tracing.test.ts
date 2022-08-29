@@ -186,7 +186,7 @@ describe('trace', () => {
           },
         });
         await rootExecutionContextDisabled.preboot();
-      }, 30000);
+      });
 
       afterEach(async () => {
         await rootExecutionContextDisabled.shutdown();

@@ -44,7 +44,7 @@ describe('node service global context', () => {
 
         await root.preboot();
         await root.setup();
-      }, 30000);
+      });
 
       beforeEach(() => {
         mockConsoleLog.mockClear();
