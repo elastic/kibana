@@ -25,7 +25,6 @@ import { type EmbeddableInput, ViewMode } from '@kbn/embeddable-plugin/common';
 import type { ContainerInput } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -181,7 +180,6 @@ export interface DashboardAppServices {
   onAppLeave: AppMountParameters['onAppLeave'];
   savedObjectsTagging?: SavedObjectsTaggingApi;
   savedObjectsClient: SavedObjectsClientContract;
-  screenshotModeService: ScreenshotModePluginStart;
   dashboardSessionStorage: DashboardSessionStorage;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
 }

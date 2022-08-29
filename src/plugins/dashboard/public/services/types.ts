@@ -15,6 +15,7 @@ import { DashboardHTTPService } from './http/types';
 import { DashboardNavigationService } from './navigation/types';
 import { DashboardNotificationsService } from './notifications/types';
 import { DashboardOverlaysService } from './overlays/types';
+import { DashboardScreenshotModeService } from './screenshot_mode/types';
 import { DashboardSettingsService } from './settings/types';
 import { DashboardSpacesService } from './spaces/types';
 import { DashboardVisualizationsService } from './visualizations/types';
@@ -30,6 +31,7 @@ export interface DashboardServices {
   navigation: DashboardNavigationService;
   notifications: DashboardNotificationsService;
   overlays: DashboardOverlaysService;
+  screenshotMode: DashboardScreenshotModeService;
   settings: DashboardSettingsService;
   spaces: DashboardSpacesService;
   visualizations: DashboardVisualizationsService;

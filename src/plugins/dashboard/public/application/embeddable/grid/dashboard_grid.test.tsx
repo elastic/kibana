@@ -21,7 +21,6 @@ import {
   ContactCardEmbeddableFactory,
   CONTACT_CARD_EMBEDDABLE,
 } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
-import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 import { pluginServices } from '../../../services/plugin_services';
 
 let dashboardContainer: DashboardContainer | undefined;
@@ -57,7 +56,6 @@ function prepare(props?: Partial<DashboardGridProps>) {
     uiActions: {
       getTriggerCompatibleActions: (() => []) as any,
     } as any,
-    screenshotMode: screenshotModePluginMock.createSetupContract(),
   };
   dashboardContainer = new DashboardContainer(initialInput, options);
   const defaultTestProps: DashboardGridProps = {

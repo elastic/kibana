@@ -82,7 +82,6 @@ export async function mountApp({
     share: shareStart,
     spaces: spacesApi,
     savedObjectsTaggingOss,
-    screenshotMode,
     embeddable,
   } = pluginsStart;
 
@@ -102,7 +101,6 @@ export async function mountApp({
     restorePreviousUrl,
     setHeaderActionMenu,
     scopedHistory: () => scopedHistory,
-    screenshotModeService: screenshotMode,
     savedObjectsClient: coreStart.savedObjects.client,
     savedDashboards: dashboardStart.getSavedDashboardLoader(),
     savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),

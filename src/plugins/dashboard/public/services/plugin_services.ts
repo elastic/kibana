@@ -26,6 +26,7 @@ import { httpServiceFactory } from './http/http_service';
 import { navigationServiceFactory } from './navigation/navigation_service';
 import { notificationsServiceFactory } from './notifications/notifications_service';
 import { overlaysServiceFactory } from './overlays/overlays_service';
+import { screenshotModeServiceFactory } from './screenshot_mode/screenshot_mode_service';
 import { settingsServiceFactory } from './settings/settings_service';
 import { spacesServiceFactory } from './spaces/spaces_service';
 import { visualizationsServiceFactory } from './visualizations/visualizations_service';
@@ -43,6 +44,7 @@ const providers: PluginServiceProviders<
   navigation: new PluginServiceProvider(navigationServiceFactory),
   notifications: new PluginServiceProvider(notificationsServiceFactory),
   overlays: new PluginServiceProvider(overlaysServiceFactory),
+  screenshotMode: new PluginServiceProvider(screenshotModeServiceFactory),
   settings: new PluginServiceProvider(settingsServiceFactory),
   spaces: new PluginServiceProvider(spacesServiceFactory),
   visualizations: new PluginServiceProvider(visualizationsServiceFactory),

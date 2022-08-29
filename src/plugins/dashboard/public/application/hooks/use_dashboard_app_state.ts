@@ -89,7 +89,6 @@ export const useDashboardAppState = ({
     savedObjectsTagging,
     dashboardSessionStorage,
     scopedHistory,
-    screenshotModeService,
   } = services;
   const { version: kibanaVersion } = initializerContext.env.packageInfo;
 
@@ -98,6 +97,7 @@ export const useDashboardAppState = ({
     dashboardCapabilities,
     data: { query, search, dataViews },
     embeddable,
+    screenshotMode: { isScreenshotMode, getScreenshotContext },
     spaces: { redirectLegacyUrl },
     notifications,
   } = pluginServices.getServices();
@@ -173,7 +173,7 @@ export const useDashboardAppState = ({
           savedDashboard.aliasId
         );
         const aliasPurpose = savedDashboard.aliasPurpose;
-        if (screenshotModeService?.isScreenshotMode()) {
+        if (isScreenshotMode()) {
           scopedHistory().replace(path);
         } else {
           await redirectLegacyUrl?.({ path, aliasPurpose });
@@ -196,9 +196,7 @@ export const useDashboardAppState = ({
         savedDashboard,
       });
 
-      const printLayoutDetected =
-        screenshotModeService?.isScreenshotMode() &&
-        screenshotModeService.getScreenshotContext('layout') === 'print';
+      const printLayoutDetected = isScreenshotMode() && getScreenshotContext('layout') === 'print';
 
       const initialDashboardState = {
         ...savedDashboardState,
@@ -394,7 +392,8 @@ export const useDashboardAppState = ({
     showNoDataPage,
     setShowNoDataPage,
     redirectLegacyUrl,
-    screenshotModeService,
+    getScreenshotContext,
+    isScreenshotMode,
   ]);
 
   /**

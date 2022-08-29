@@ -29,7 +29,6 @@ import {
   ErrorEmbeddable,
   isErrorEmbeddable,
 } from '@kbn/embeddable-plugin/public';
-import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
 import {
   KibanaContextProvider,
   KibanaReactContext,
@@ -59,7 +58,6 @@ export interface DashboardContainerServices {
   SavedObjectFinder: React.ComponentType<any>;
   application: CoreStart['application'];
   inspector: InspectorStartContract;
-  screenshotMode: ScreenshotModePluginStart;
   uiActions: UiActionsStart;
   analytics?: CoreStart['analytics'];
 }

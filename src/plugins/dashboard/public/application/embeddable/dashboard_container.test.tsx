@@ -46,7 +46,6 @@ const options: DashboardContainerServices = {
   // TODO: clean up use of any
   application: {} as any,
   inspector: {} as any,
-  screenshotMode: {} as any,
   SavedObjectFinder: () => null,
   ExitFullScreenButton: () => null,
   uiActions: {} as any,

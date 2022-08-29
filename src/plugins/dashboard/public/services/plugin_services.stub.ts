@@ -26,6 +26,7 @@ import { overlaysServiceFactory } from './overlays/overlays.stub';
 import { settingsServiceFactory } from './settings/settings.stub';
 import { spacesServiceFactory } from './spaces/spaces.stub';
 import { visualizationsServiceFactory } from './visualizations/visualizations.stub';
+import { screenshotModeServiceFactory } from './screenshot_mode/screenshot_mode.stub';
 
 export const providers: PluginServiceProviders<DashboardServices> = {
   chrome: new PluginServiceProvider(chromeServiceFactory),
@@ -37,6 +38,7 @@ export const providers: PluginServiceProviders<DashboardServices> = {
   navigation: new PluginServiceProvider(navigationServiceFactory),
   notifications: new PluginServiceProvider(notificationsServiceFactory),
   overlays: new PluginServiceProvider(overlaysServiceFactory),
+  screenshotMode: new PluginServiceProvider(screenshotModeServiceFactory),
   settings: new PluginServiceProvider(settingsServiceFactory),
   spaces: new PluginServiceProvider(spacesServiceFactory),
   visualizations: new PluginServiceProvider(visualizationsServiceFactory),
