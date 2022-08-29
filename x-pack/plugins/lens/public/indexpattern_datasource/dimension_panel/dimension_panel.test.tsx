@@ -244,6 +244,8 @@ describe('IndexPatternDimensionEditorPanel', () => {
       isFullscreen: false,
       supportStaticValue: false,
       toggleFullscreen: jest.fn(),
+      enableFormatSelector: true,
+      formatSelectorOptions: undefined,
     };
 
     jest.clearAllMocks();

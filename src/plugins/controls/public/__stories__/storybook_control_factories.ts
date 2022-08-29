@@ -7,8 +7,7 @@
  */
 
 import { OptionsListEmbeddableFactory } from '../options_list';
-import { RangeSliderEmbeddableFactory } from '../control_types/range_slider';
-import { TimesliderEmbeddableFactory } from '../control_types/time_slider';
+import { RangeSliderEmbeddableFactory } from '../range_slider';
 import { ControlsService } from '../services/controls';
 import { ControlFactory } from '..';
 
@@ -26,9 +25,4 @@ export const populateStorybookControlFactories = (controlsServiceStub: ControlsS
   const rangeSliderControlFactory = rangeSliderFactoryStub as unknown as ControlFactory;
   rangeSliderControlFactory.getDefaultInput = () => ({});
   controlsServiceStub.registerControlType(rangeSliderControlFactory);
-
-  const timesliderFactoryStub = new TimesliderEmbeddableFactory();
-  const timeSliderControlFactory = timesliderFactoryStub as unknown as ControlFactory;
-  timeSliderControlFactory.getDefaultInput = () => ({});
-  controlsServiceStub.registerControlType(timeSliderControlFactory);
 };
