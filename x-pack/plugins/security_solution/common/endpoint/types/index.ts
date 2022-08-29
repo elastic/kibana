@@ -1007,6 +1007,7 @@ export interface PolicyConfig {
       process: boolean;
       network: boolean;
       session_data: boolean;
+      tty_io: boolean;
     };
     malware: ProtectionFields & BlocklistFields;
     behavior_protection: ProtectionFields & SupportedFields;

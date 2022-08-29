@@ -146,6 +146,39 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'linux.advanced.tty_io.max_kilobytes_per_process',
+    first_supported_version: '8.5',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.tty_io.max_kilobytes_per_process',
+      {
+        defaultMessage:
+          'The maximum kilobytes of terminal output to record for a single process. Default: 512',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.tty_io.max_kilobytes_per_event',
+    first_supported_version: '8.5',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.tty_io.max_kilobytes_per_event',
+      {
+        defaultMessage:
+          'The maximum kilobytes of terminal output to record in a single event. Default: 512',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.tty_io.max_event_interval_seconds',
+    first_supported_version: '8.5',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.tty_io.max_event_interval_seconds',
+      {
+        defaultMessage:
+          'The maximum amount of time (seconds) to batch terminal output in a single event. Default: 30',
+      }
+    ),
+  },
+  {
     key: 'mac.advanced.agent.connection_delay',
     first_supported_version: '7.9',
     documentation: i18n.translate(
