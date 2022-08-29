@@ -95,7 +95,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
     toggleFullscreen,
     isFullscreen,
     supportStaticValue,
-    supportFieldFormat = true,
+    enableFormatSelector = true,
+    formatSelectorOptions,
     layerType,
     paramEditorCustomProps,
   } = props;
@@ -1078,11 +1079,15 @@ export function DimensionEditor(props: DimensionEditorProps) {
               />
             )}
 
-            {supportFieldFormat &&
+            {enableFormatSelector &&
             !isFullscreen &&
             selectedColumn &&
             (selectedColumn.dataType === 'number' || selectedColumn.operationType === 'range') ? (
-              <FormatSelector selectedColumn={selectedColumn} onChange={onFormatChange} />
+              <FormatSelector
+                selectedColumn={selectedColumn}
+                onChange={onFormatChange}
+                options={formatSelectorOptions}
+              />
             ) : null}
           </>
         </div>
