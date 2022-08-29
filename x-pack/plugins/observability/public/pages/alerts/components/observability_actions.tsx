@@ -83,13 +83,13 @@ export function ObservabilityActions({
   const caseAttachments: CaseAttachmentsWithoutOwner = useMemo(() => {
     return ecsData?._id
       ? [
-        {
-          alertId: ecsData?._id ?? '',
-          index: ecsData?._index ?? '',
-          type: CommentType.alert,
-          rule: cases.helpers.getRuleIdFromEvent({ ecs: ecsData, data: data ?? [] }),
-        },
-      ]
+          {
+            alertId: ecsData?._id ?? '',
+            index: ecsData?._index ?? '',
+            type: CommentType.alert,
+            rule: cases.helpers.getRuleIdFromEvent({ ecs: ecsData, data: data ?? [] }),
+          },
+        ]
       : [];
   }, [ecsData, cases.helpers, data]);
 
@@ -111,33 +111,33 @@ export function ObservabilityActions({
     return [
       ...(userCasesPermissions.create && userCasesPermissions.read
         ? [
-          <EuiContextMenuItem
-            data-test-subj="add-to-existing-case-action"
-            onClick={handleAddToExistingCaseClick}
-            size="s"
-          >
-            {ADD_TO_EXISTING_CASE}
-          </EuiContextMenuItem>,
-          <EuiContextMenuItem
-            data-test-subj="add-to-new-case-action"
-            onClick={handleAddToNewCaseClick}
-            size="s"
-          >
-            {ADD_TO_NEW_CASE}
-          </EuiContextMenuItem>,
-        ]
+            <EuiContextMenuItem
+              data-test-subj="add-to-existing-case-action"
+              onClick={handleAddToExistingCaseClick}
+              size="s"
+            >
+              {ADD_TO_EXISTING_CASE}
+            </EuiContextMenuItem>,
+            <EuiContextMenuItem
+              data-test-subj="add-to-new-case-action"
+              onClick={handleAddToNewCaseClick}
+              size="s"
+            >
+              {ADD_TO_NEW_CASE}
+            </EuiContextMenuItem>,
+          ]
         : []),
 
       ...(!!linkToRule
         ? [
-          <EuiContextMenuItem
-            key="viewRuleDetails"
-            data-test-subj="viewRuleDetails"
-            href={linkToRule}
-          >
-            {translations.alertsTable.viewRuleDetailsButtonText}
-          </EuiContextMenuItem>,
-        ]
+            <EuiContextMenuItem
+              key="viewRuleDetails"
+              data-test-subj="viewRuleDetails"
+              href={linkToRule}
+            >
+              {translations.alertsTable.viewRuleDetailsButtonText}
+            </EuiContextMenuItem>,
+          ]
         : []),
 
       ...[
@@ -155,14 +155,14 @@ export function ObservabilityActions({
 
       ...(linkToAlert
         ? [
-          <EuiContextMenuItem
-            key="viewAlertDetailsPage"
-            data-test-subj="viewAlertDetailsPage"
-            href={linkToAlert}
-          >
-            {translations.alertsTable.viewAlertDetailsPageButtonText}
-          </EuiContextMenuItem>,
-        ]
+            <EuiContextMenuItem
+              key="viewAlertDetailsPage"
+              data-test-subj="viewAlertDetailsPage"
+              href={linkToAlert}
+            >
+              {translations.alertsTable.viewAlertDetailsPageButtonText}
+            </EuiContextMenuItem>,
+          ]
         : []),
     ];
   }, [
