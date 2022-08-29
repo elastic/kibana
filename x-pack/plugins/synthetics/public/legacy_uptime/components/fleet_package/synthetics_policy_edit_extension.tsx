@@ -35,7 +35,7 @@ export const SyntheticsPolicyEditExtension = memo<SyntheticsPolicyEditExtensionP
 
     useUpdatePolicy({
       defaultConfig,
-      config: policyConfig[monitorType],
+      config: policyConfig[monitorType] as Partial<MonitorFields>,
       newPolicy,
       onChange,
       validate,

@@ -11,12 +11,15 @@
  * 2.0.
  */
 
-import { RequestHandler } from '@kbn/core/server';
+import type { RequestHandler } from '@kbn/core/server';
 import type { EndpointActionListRequestQuery } from '../../../../common/endpoint/schema/actions';
 import { getActionList } from '../../services';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 import type { EndpointAppContext } from '../../types';
 import { errorHandler } from '../error_handler';
+
+const formatStringIds = (value: string | string[] | undefined): undefined | string[] =>
+  typeof value === 'string' ? [value] : value;
 
 export const actionListHandler = (
   endpointContext: EndpointAppContext
@@ -36,14 +39,14 @@ export const actionListHandler = (
 
     try {
       const body = await getActionList({
-        commands,
+        commands: formatStringIds(commands),
         esClient,
-        elasticAgentIds,
+        elasticAgentIds: formatStringIds(elasticAgentIds),
         page,
         pageSize,
         startDate,
         endDate,
-        userIds,
+        userIds: formatStringIds(userIds),
         logger,
       });
       return res.ok({

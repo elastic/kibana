@@ -24,6 +24,7 @@ describe('RuleRunMetricsStore', () => {
     expect(ruleRunMetricsStore.getNumberOfRecoveredAlerts()).toBe(0);
     expect(ruleRunMetricsStore.getNumberOfNewAlerts()).toBe(0);
     expect(ruleRunMetricsStore.getStatusByConnectorType('any')).toBe(undefined);
+    expect(ruleRunMetricsStore.getHasReachedAlertLimit()).toBe(false);
   });
 
   test('sets and returns numSearches', () => {
@@ -77,6 +78,23 @@ describe('RuleRunMetricsStore', () => {
     expect(ruleRunMetricsStore.getTriggeredActionsStatus()).toBe(ActionsCompletion.PARTIAL);
   });
 
+  test('sets and returns hasReachedAlertLimit', () => {
+    ruleRunMetricsStore.setHasReachedAlertLimit(true);
+    expect(ruleRunMetricsStore.getHasReachedAlertLimit()).toBe(true);
+  });
+
+  test('sets search metrics', () => {
+    const metricsStore = new RuleRunMetricsStore();
+    metricsStore.setSearchMetrics([
+      { numSearches: 2, totalSearchDurationMs: 2222, esSearchDurationMs: 222 },
+      { numSearches: 3, totalSearchDurationMs: 3333, esSearchDurationMs: 333 },
+    ]);
+
+    expect(metricsStore.getNumSearches()).toEqual(5);
+    expect(metricsStore.getTotalSearchDurationMs()).toEqual(5555);
+    expect(metricsStore.getEsSearchDurationMs()).toEqual(555);
+  });
+
   test('gets metrics', () => {
     expect(ruleRunMetricsStore.getMetrics()).toEqual({
       triggeredActionsStatus: 'partial',
@@ -88,6 +106,7 @@ describe('RuleRunMetricsStore', () => {
       numberOfRecoveredAlerts: 11,
       numberOfTriggeredActions: 5,
       totalSearchDurationMs: 2,
+      hasReachedAlertLimit: true,
     });
   });
 
@@ -97,7 +116,22 @@ describe('RuleRunMetricsStore', () => {
     expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toBe(6);
   });
 
-  test('increments incrementNumberOfGeneratedActions by x', () => {
+  test('increments numSearches by x', () => {
+    ruleRunMetricsStore.incrementNumSearches(3);
+    expect(ruleRunMetricsStore.getNumSearches()).toBe(4);
+  });
+
+  test('increments totalSearchDurationMs by x', () => {
+    ruleRunMetricsStore.incrementTotalSearchDurationMs(2454);
+    expect(ruleRunMetricsStore.getTotalSearchDurationMs()).toBe(2456);
+  });
+
+  test('increments incrementEsSearchDurationMs by x', () => {
+    ruleRunMetricsStore.incrementEsSearchDurationMs(78758);
+    expect(ruleRunMetricsStore.getEsSearchDurationMs()).toBe(78761);
+  });
+
+  test('increments numberOfGeneratedActions by x', () => {
     ruleRunMetricsStore.incrementNumberOfGeneratedActions(2);
     expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toBe(17);
   });

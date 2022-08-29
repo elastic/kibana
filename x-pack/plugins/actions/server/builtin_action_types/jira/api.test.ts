@@ -31,7 +31,7 @@ describe('api', () => {
         id: 'incident-1',
         title: 'CK-1',
         pushedDate: '2020-04-27T10:59:46.202Z',
-        url: 'https://siem-kibana.atlassian.net/browse/CK-1',
+        url: 'https://coolsite.net/browse/CK-1',
         comments: [
           {
             commentId: 'case-comment-1',
@@ -57,7 +57,7 @@ describe('api', () => {
         id: 'incident-1',
         title: 'CK-1',
         pushedDate: '2020-04-27T10:59:46.202Z',
-        url: 'https://siem-kibana.atlassian.net/browse/CK-1',
+        url: 'https://coolsite.net/browse/CK-1',
       });
     });
 
@@ -150,7 +150,7 @@ describe('api', () => {
         id: 'incident-1',
         title: 'CK-1',
         pushedDate: '2020-04-27T10:59:46.202Z',
-        url: 'https://siem-kibana.atlassian.net/browse/CK-1',
+        url: 'https://coolsite.net/browse/CK-1',
         comments: [
           {
             commentId: 'case-comment-1',
@@ -176,7 +176,7 @@ describe('api', () => {
         id: 'incident-1',
         title: 'CK-1',
         pushedDate: '2020-04-27T10:59:46.202Z',
-        url: 'https://siem-kibana.atlassian.net/browse/CK-1',
+        url: 'https://coolsite.net/browse/CK-1',
       });
     });
 

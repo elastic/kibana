@@ -106,7 +106,12 @@ export class AssignmentService {
     });
   }
 
-  public async updateTagAssignments({ tags, assign, unassign }: UpdateTagAssignmentsOptions) {
+  public async updateTagAssignments({
+    tags,
+    assign,
+    unassign,
+    refresh,
+  }: UpdateTagAssignmentsOptions) {
     const updatedTypes = uniq([...assign, ...unassign].map(({ type }) => type));
 
     const untaggableTypes = difference(updatedTypes, taggableTypes);
@@ -149,7 +154,7 @@ export class AssignmentService {
       };
     });
 
-    await this.soClient.bulkUpdate(updatedObjects);
+    await this.soClient.bulkUpdate(updatedObjects, { refresh });
   }
 }
 

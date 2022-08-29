@@ -13,8 +13,8 @@ import { waitFor } from '@testing-library/react';
 
 import '../../../common/mock/match_media';
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../pages/timelines_page';
-import { OpenTimelineResult, OpenTimelineProps } from './types';
-import { TimelinesTableProps } from './timelines_table';
+import type { OpenTimelineResult, OpenTimelineProps } from './types';
+import type { TimelinesTableProps } from './timelines_table';
 import { mockTimelineResults } from '../../../common/mock/timeline_results';
 import { OpenTimeline } from './open_timeline';
 import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from './constants';
@@ -35,9 +35,7 @@ jest.mock('react-router-dom', () => {
 const mockTheme = getMockTheme({
   eui: {
     euiSizeL: '10px',
-    paddingSizes: {
-      s: '10px',
-    },
+    euiSizeS: '10px',
     euiBreakpoints: {
       l: '1200px',
     },

@@ -273,4 +273,11 @@ export const ControlGroupStrings = {
         defaultMessage: 'Remove control',
       }),
   },
+  ariaActions: {
+    getMoveControlButtonAction: (controlTitle?: string) =>
+      i18n.translate('controls.controlGroup.ariaActions.moveControlButtonAction', {
+        defaultMessage: 'Move control {controlTitle}',
+        values: { controlTitle: controlTitle ?? '' },
+      }),
+  },
 };

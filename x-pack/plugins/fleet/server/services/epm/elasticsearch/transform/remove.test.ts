@@ -7,8 +7,7 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { savedObjectsClientMock } from '@kbn/core/server/saved_objects/service/saved_objects_client.mock';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import type { EsAssetReference } from '../../../../../common/types/models';
 

@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { Filter, RangeFilter } from '@kbn/es-query';
+import { Filter, RangeFilter, FilterStateStore, Query, TimeRange } from '@kbn/es-query';
 import { EmbeddableToDashboardDrilldown } from './embeddable_to_dashboard_drilldown';
 import { AbstractDashboardDrilldownConfig as Config } from '../abstract_dashboard_drilldown';
 import { savedObjectsServiceMock } from '@kbn/core/public/mocks';
-import { FilterStateStore, Query, TimeRange } from '@kbn/data-plugin/common';
 import { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
 import {
   DashboardAppLocatorDefinition,

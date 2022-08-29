@@ -9,8 +9,8 @@ import uuid from 'uuid';
 
 import {
   EndpointActionListRequestSchema,
-  HostIsolationRequestSchema,
-  KillProcessRequestSchema,
+  NoParametersRequestSchema,
+  KillOrSuspendProcessRequestSchema,
 } from './actions';
 
 describe('actions schemas', () => {
@@ -27,10 +27,10 @@ describe('actions schemas', () => {
       }).toThrow();
     });
 
-    it('should not accept an agent ID if not in an array', () => {
+    it('should accept an agent ID if not in an array', () => {
       expect(() => {
         EndpointActionListRequestSchema.query.validate({ agentIds: uuid.v4() });
-      }).toThrow();
+      }).not.toThrow();
     });
 
     it('should accept an agent ID in an array', () => {
@@ -68,9 +68,21 @@ describe('actions schemas', () => {
       }).not.toThrow();
     });
 
-    it('should not work without allowed page and pageSize params', () => {
+    it('should not work with invalid value for `page` query param', () => {
       expect(() => {
-        EndpointActionListRequestSchema.query.validate({ pageSize: 101 });
+        EndpointActionListRequestSchema.query.validate({ page: -1 });
+      }).toThrow();
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({ page: 0 });
+      }).toThrow();
+    });
+
+    it('should not work with invalid value for `pageSize` query param', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({ pageSize: 100001 });
+      }).toThrow();
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({ pageSize: 0 });
       }).toThrow();
     });
 
@@ -147,16 +159,16 @@ describe('actions schemas', () => {
     });
   });
 
-  describe('HostIsolationRequestSchema', () => {
+  describe('NoParametersRequestSchema', () => {
     it('should require at least 1 Endpoint ID', () => {
       expect(() => {
-        HostIsolationRequestSchema.body.validate({});
+        NoParametersRequestSchema.body.validate({});
       }).toThrow();
     });
 
     it('should accept an Endpoint ID as the only required field', () => {
       expect(() => {
-        HostIsolationRequestSchema.body.validate({
+        NoParametersRequestSchema.body.validate({
           endpoint_ids: ['ABC-XYZ-000'],
         });
       }).not.toThrow();
@@ -164,7 +176,7 @@ describe('actions schemas', () => {
 
     it('should accept a comment', () => {
       expect(() => {
-        HostIsolationRequestSchema.body.validate({
+        NoParametersRequestSchema.body.validate({
           endpoint_ids: ['ABC-XYZ-000'],
           comment: 'a user comment',
         });
@@ -173,7 +185,7 @@ describe('actions schemas', () => {
 
     it('should accept alert IDs', () => {
       expect(() => {
-        HostIsolationRequestSchema.body.validate({
+        NoParametersRequestSchema.body.validate({
           endpoint_ids: ['ABC-XYZ-000'],
           alert_ids: ['0000000-000-00'],
         });
@@ -182,7 +194,7 @@ describe('actions schemas', () => {
 
     it('should accept case IDs', () => {
       expect(() => {
-        HostIsolationRequestSchema.body.validate({
+        NoParametersRequestSchema.body.validate({
           endpoint_ids: ['ABC-XYZ-000'],
           case_ids: ['000000000-000-000'],
         });
@@ -190,16 +202,16 @@ describe('actions schemas', () => {
     });
   });
 
-  describe('KillProcessRequestSchema', () => {
+  describe('KillOrSuspendProcessRequestSchema', () => {
     it('should require at least 1 Endpoint ID', () => {
       expect(() => {
-        HostIsolationRequestSchema.body.validate({});
+        NoParametersRequestSchema.body.validate({});
       }).toThrow();
     });
 
     it('should accept pid', () => {
       expect(() => {
-        KillProcessRequestSchema.body.validate({
+        KillOrSuspendProcessRequestSchema.body.validate({
           endpoint_ids: ['ABC-XYZ-000'],
           parameters: {
             pid: 1234,
@@ -210,10 +222,10 @@ describe('actions schemas', () => {
 
     it('should accept entity_id', () => {
       expect(() => {
-        KillProcessRequestSchema.body.validate({
+        KillOrSuspendProcessRequestSchema.body.validate({
           endpoint_ids: ['ABC-XYZ-000'],
           parameters: {
-            entity_id: 5678,
+            entity_id: 'abc123',
           },
         });
       }).not.toThrow();
@@ -221,11 +233,11 @@ describe('actions schemas', () => {
 
     it('should reject pid and entity_id together', () => {
       expect(() => {
-        KillProcessRequestSchema.body.validate({
+        KillOrSuspendProcessRequestSchema.body.validate({
           endpoint_ids: ['ABC-XYZ-000'],
           parameters: {
             pid: 1234,
-            entity_id: 5678,
+            entity_id: 'abc123',
           },
         });
       }).toThrow();
@@ -233,7 +245,7 @@ describe('actions schemas', () => {
 
     it('should reject if no pid or entity_id', () => {
       expect(() => {
-        KillProcessRequestSchema.body.validate({
+        KillOrSuspendProcessRequestSchema.body.validate({
           endpoint_ids: ['ABC-XYZ-000'],
           comment: 'a user comment',
           parameters: {},
@@ -243,7 +255,7 @@ describe('actions schemas', () => {
 
     it('should accept a comment', () => {
       expect(() => {
-        KillProcessRequestSchema.body.validate({
+        KillOrSuspendProcessRequestSchema.body.validate({
           endpoint_ids: ['ABC-XYZ-000'],
           comment: 'a user comment',
           parameters: {

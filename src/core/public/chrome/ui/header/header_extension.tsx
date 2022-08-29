@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { MountPoint } from '../../../types';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
 
 interface Props {
   extension?: MountPoint<HTMLDivElement>;

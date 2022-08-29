@@ -19,7 +19,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { useDiscoverServices } from '../../../../utils/use_discover_services';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useDiscoverTourContext } from '../../../../components/discover_tour';
 
 export const CALLOUT_STATE_KEY = 'discover:docExplorerUpdateCalloutClosed';

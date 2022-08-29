@@ -333,7 +333,7 @@ export function defineRoutes(
 
   router.post(
     {
-      path: `/api/alerting_actions_telemetry/run_now`,
+      path: `/api/alerting_actions_telemetry/run_soon`,
       validate: {
         body: schema.object({
           taskId: schema.string({
@@ -359,7 +359,7 @@ export function defineRoutes(
       const { taskId } = req.body;
       try {
         const taskManager = await taskManagerStart;
-        return res.ok({ body: await taskManager.runNow(taskId) });
+        return res.ok({ body: await taskManager.runSoon(taskId) });
       } catch (err) {
         return res.ok({ body: { id: taskId, error: `${err}` } });
       }

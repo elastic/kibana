@@ -15,6 +15,8 @@ import { FleetIntegrations } from './fleet_integrations_page';
 import { DetectionsPageObject } from '../../security_solution_ftr/page_objects/detections';
 import { HostsPageObject } from '../../security_solution_ftr/page_objects/hosts';
 import { ArtifactEntriesListPageProvider } from './artifact_entries_list_page';
+import { EndpointResponderPageObjects } from './endpoint_responder';
+import { TimelinePageObject } from '../../security_solution_ftr/page_objects/timeline';
 
 export const pageObjects = {
   ...xpackFunctionalPageObjects,
@@ -26,5 +28,7 @@ export const pageObjects = {
   ingestManagerCreatePackagePolicy: IngestManagerCreatePackagePolicy,
   fleetIntegrations: FleetIntegrations,
   detections: DetectionsPageObject,
+  timeline: TimelinePageObject,
   hosts: HostsPageObject,
+  responder: EndpointResponderPageObjects,
 };

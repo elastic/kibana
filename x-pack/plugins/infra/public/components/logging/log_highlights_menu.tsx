@@ -169,7 +169,7 @@ const ActiveHighlightsIndicator = euiStyled(EuiIcon).attrs(({ theme }) => ({
   size: 'm',
   color: theme?.eui.euiColorAccent,
 }))`
-  padding-left: ${(props) => props.theme.eui.paddingSizes.xs};
+  padding-left: ${(props) => props.theme.eui.euiSizeXS};
 `;
 
 const LogHighlightsMenuContent = euiStyled.div`

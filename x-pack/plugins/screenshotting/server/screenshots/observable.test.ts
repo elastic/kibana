@@ -47,17 +47,27 @@ describe('ScreenshotObservableHandler', () => {
     });
 
     it('catches TimeoutError and references the timeout config in a custom message', async () => {
-      const test$ = interval(1000).pipe(screenshots.waitUntil(200, 'Test Config'));
+      const test$ = interval(1000).pipe(
+        screenshots.waitUntil({
+          timeoutValue: 200,
+          label: 'Test Config',
+          configValue: 'xpack.screenshotting.testConfig',
+        })
+      );
 
       const testPipeline = () => test$.toPromise();
       await expect(testPipeline).rejects.toMatchInlineSnapshot(
-        `[Error: The "Test Config" phase took longer than 0.2 seconds.]`
+        `[Error: Screenshotting encountered a timeout error: "Test Config" took longer than 0.2 seconds. You may need to increase "xpack.screenshotting.testConfig" in kibana.yml.]`
       );
     });
 
-    it('catches other Errors and explains where they were thrown', async () => {
+    it('catches other Errors', async () => {
       const test$ = throwError(new Error(`Test Error to Throw`)).pipe(
-        screenshots.waitUntil(200, 'Test Config')
+        screenshots.waitUntil({
+          timeoutValue: 200,
+          label: 'Test Config',
+          configValue: 'xpack.screenshotting.testConfig',
+        })
       );
 
       const testPipeline = () => test$.toPromise();
@@ -67,7 +77,13 @@ describe('ScreenshotObservableHandler', () => {
     });
 
     it('is a pass-through if there is no Error', async () => {
-      const test$ = of('nice to see you').pipe(screenshots.waitUntil(20, 'xxxxxxxxxxx'));
+      const test$ = of('nice to see you').pipe(
+        screenshots.waitUntil({
+          timeoutValue: 20,
+          label: 'xxxxxxxxxxx',
+          configValue: 'xpack.screenshotting.testConfig',
+        })
+      );
 
       await expect(test$.toPromise()).resolves.toBe(`nice to see you`);
     });

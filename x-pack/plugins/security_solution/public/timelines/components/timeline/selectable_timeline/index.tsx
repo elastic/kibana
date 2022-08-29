@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiSelectableOption, EuiSelectableProps } from '@elastic/eui';
 import {
   EuiSelectable,
   EuiHighlight,
@@ -12,34 +13,29 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiTextColor,
-  EuiSelectableOption,
-  EuiSelectableProps,
   EuiFilterButton,
+  EuiToolTip,
 } from '@elastic/eui';
 import { isEmpty, debounce } from 'lodash/fp';
 import React, { memo, useCallback, useMemo, useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 
-import {
+import type {
   TimelineTypeLiteralWithNull,
   TimelineTypeLiteral,
-  SortFieldTimeline,
 } from '../../../../../common/types/timeline';
+import { SortFieldTimeline } from '../../../../../common/types/timeline';
 
 import { useGetAllTimeline } from '../../../containers/all';
 import { isUntitled } from '../../open_timeline/helpers';
 import * as i18nTimeline from '../../open_timeline/translations';
-import { OpenTimelineResult } from '../../open_timeline/types';
+import type { OpenTimelineResult } from '../../open_timeline/types';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import * as i18n from '../translations';
 import { Direction } from '../../../../../common/search_strategy';
 
-const MyEuiFlexItem = styled(EuiFlexItem)`
-  display: inline-block;
-  max-width: 296px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+const TimelineContentItem = styled(EuiFlexItem)`
+  max-width: calc(100% - 56px);
 `;
 
 const StyledEuiFilterButton = styled(EuiFilterButton)`
@@ -50,6 +46,16 @@ const StyledEuiFilterButton = styled(EuiFilterButton)`
 export const ORIGINAL_PAGE_SIZE = 50;
 const POPOVER_HEIGHT = 260;
 const TIMELINE_ITEM_HEIGHT = 50;
+
+/**
+ * Modifies options by creating new property `timelineTitle`(with value of `title`), and by setting `title` to undefined.
+ * Thus prevents appearing default browser tooltip on option hover (attribute `title` that gets rendered on li element)
+ *
+ * @param {EuiSelectableOption[]} options
+ * @returns {EuiSelectableOption[]} modified options
+ */
+const replaceTitleInOptions = (options: EuiSelectableOption[]): EuiSelectableOption[] =>
+  options.map(({ title, ...props }) => ({ ...props, title: undefined, timelineTitle: title }));
 
 export interface GetSelectableOptions {
   timelines: OpenTimelineResult[];
@@ -73,6 +79,7 @@ export interface SelectableTimelineProps {
     graphEventId?: string
   ) => void;
   timelineType: TimelineTypeLiteral;
+  placeholder?: string;
 }
 
 const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
@@ -81,6 +88,7 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
   onClosePopover,
   onTimelineChange,
   timelineType,
+  placeholder,
 }) => {
   const [pageSize, setPageSize] = useState(ORIGINAL_PAGE_SIZE);
   const [heightTrigger, setHeightTrigger] = useState(0);
@@ -126,8 +134,16 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
     [heightTrigger, pageSize]
   );
 
-  const renderTimelineOption = useCallback(
-    (option, searchValue) => (
+  const renderTimelineOption = useCallback((option, searchValue) => {
+    const title: string = isUntitled({ ...option, title: option.timelineTitle })
+      ? i18nTimeline.UNTITLED_TIMELINE
+      : option.timelineTitle;
+    const description: string | null =
+      option.description != null && option.description.trim().length > 0
+        ? option.description
+        : null;
+
+    return (
       <EuiFlexGroup
         gutterSize="s"
         justifyContent="spaceBetween"
@@ -137,24 +153,22 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
         <EuiFlexItem grow={false}>
           <EuiIcon type={`${option.checked === 'on' ? 'check' : 'empty'}`} color="primary" />
         </EuiFlexItem>
-        <EuiFlexItem grow={true}>
-          <EuiFlexGroup gutterSize="none" direction="column">
-            <MyEuiFlexItem data-test-subj="timeline" grow={false}>
-              <EuiHighlight search={searchValue}>
-                {isUntitled(option) ? i18nTimeline.UNTITLED_TIMELINE : option.title}
-              </EuiHighlight>
-            </MyEuiFlexItem>
-            <MyEuiFlexItem grow={false}>
-              <EuiTextColor color="subdued" component="span">
-                <small>
-                  {option.description != null && option.description.trim().length > 0
-                    ? option.description
-                    : getEmptyTagValue()}
-                </small>
-              </EuiTextColor>
-            </MyEuiFlexItem>
+        <TimelineContentItem grow={true}>
+          <EuiFlexGroup gutterSize="none" direction="column" responsive={false}>
+            <EuiFlexItem data-test-subj="timeline">
+              <EuiToolTip content={title} anchorClassName="eui-textTruncate eui-alignMiddle">
+                <EuiHighlight search={searchValue}>{title}</EuiHighlight>
+              </EuiToolTip>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiToolTip content={description} anchorClassName="eui-textTruncate eui-alignMiddle">
+                <EuiTextColor color="subdued" component="span">
+                  <small>{description ?? getEmptyTagValue()}</small>
+                </EuiTextColor>
+              </EuiToolTip>
+            </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiFlexItem>
+        </TimelineContentItem>
         <EuiFlexItem grow={false}>
           <EuiIcon
             type={`${
@@ -163,9 +177,8 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-    ),
-    []
-  );
+    );
+  }, []);
 
   const handleTimelineChange = useCallback(
     (options) => {
@@ -174,9 +187,9 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
       );
       if (selectedTimeline != null && selectedTimeline.length > 0) {
         onTimelineChange(
-          isEmpty(selectedTimeline[0].title)
+          isEmpty(selectedTimeline[0].timelineTitle)
             ? i18nTimeline.UNTITLED_TIMELINE
-            : selectedTimeline[0].title,
+            : selectedTimeline[0].timelineTitle,
           selectedTimeline[0].id === '-1' ? null : selectedTimeline[0].id,
           selectedTimeline[0].graphEventId ?? ''
         );
@@ -199,9 +212,9 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
   const searchProps: EuiSelectableProps['searchProps'] = useMemo(
     () => ({
       'data-test-subj': 'timeline-super-select-search-box',
-      placeholder: i18n.SEARCH_BOX_TIMELINE_PLACEHOLDER(timelineType),
+      placeholder: placeholder ?? i18n.SEARCH_BOX_TIMELINE_PLACEHOLDER(timelineType),
       onSearch: onSearchTimeline,
-      incremental: true,
+      incremental: false,
       append: (
         <StyledEuiFilterButton
           data-test-subj="only-favorites-toggle"
@@ -212,7 +225,7 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
         </StyledEuiFilterButton>
       ),
     }),
-    [handleOnToggleOnlyFavorites, onSearchTimeline, onlyFavorites, timelineType]
+    [handleOnToggleOnlyFavorites, onSearchTimeline, onlyFavorites, timelineType, placeholder]
   );
 
   const listProps: EuiSelectableProps['listProps'] = useMemo(
@@ -261,12 +274,14 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
       searchable
       searchProps={searchProps}
       singleSelection={true}
-      options={getSelectableOptions({
-        timelines: timelines ?? [],
-        onlyFavorites,
-        searchTimelineValue,
-        timelineType,
-      })}
+      options={replaceTitleInOptions(
+        getSelectableOptions({
+          timelines: timelines ?? [],
+          onlyFavorites,
+          searchTimelineValue,
+          timelineType,
+        })
+      )}
     >
       {EuiSelectableContent}
     </EuiSelectable>

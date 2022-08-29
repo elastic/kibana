@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CreateRulesSchema } from './rule_schemas';
+import type { CreateRulesSchema } from './rule_schemas';
 
 export const validateTimelineId = (rule: CreateRulesSchema): string[] => {
   if (rule.timeline_id != null) {

@@ -14,7 +14,7 @@ export const ValuesInput = ({
   value,
   onChange,
   minValue = 1,
-  maxValue = 1000,
+  maxValue = 10000,
   label = i18n.translate('xpack.lens.indexPattern.terms.size', {
     defaultMessage: 'Number of values',
   }),
@@ -77,6 +77,7 @@ export const ValuesInput = ({
       }
     >
       <EuiFieldNumber
+        fullWidth
         min={minValue}
         max={maxValue}
         step={1}

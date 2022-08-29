@@ -5,83 +5,78 @@
  * 2.0.
  */
 
+import React, { useMemo } from 'react';
 import { EuiSwitch, EuiSwitchEvent, EuiLoadingSpinner } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { FETCH_STATUS, useFetcher } from '@kbn/observability-plugin/public';
-
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { FETCH_STATUS } from '@kbn/observability-plugin/public';
+import { useCanEditSynthetics } from '../../../../../../hooks/use_capabilities';
 import { ConfigKey, EncryptedSyntheticsMonitor } from '../../../../../../../common/runtime_types';
-import { fetchUpsertMonitor } from '../../../../state';
-
 import * as labels from './labels';
+import { useMonitorEnableHandler } from '../../../../hooks/use_monitor_enable_handler';
 
 interface Props {
   id: string;
   monitor: EncryptedSyntheticsMonitor;
   reloadPage: () => void;
-  isDisabled?: boolean;
+  initialLoading?: boolean;
+  isSwitchable?: boolean;
 }
 
-export const MonitorEnabled = ({ id, monitor, reloadPage, isDisabled }: Props) => {
-  const [isEnabled, setIsEnabled] = useState<boolean | null>(null);
+export const MonitorEnabled = ({
+  id,
+  monitor,
+  reloadPage,
+  initialLoading = false,
+  isSwitchable = true,
+}: Props) => {
+  const isDisabled = !useCanEditSynthetics();
 
-  const { notifications } = useKibana();
+  const monitorName = monitor[ConfigKey.NAME];
+  const statusLabels = useMemo(() => {
+    return {
+      failureLabel: labels.getMonitorEnabledUpdateFailureMessage(monitorName),
+      enabledSuccessLabel: labels.getMonitorEnabledSuccessLabel(monitorName),
+      disabledSuccessLabel: labels.getMonitorDisabledSuccessLabel(monitorName),
+    };
+  }, [monitorName]);
 
-  const { status } = useFetcher(() => {
-    if (isEnabled !== null) {
-      return fetchUpsertMonitor({ id, monitor: { ...monitor, [ConfigKey.ENABLED]: isEnabled } });
-    }
-  }, [isEnabled]);
-
-  useEffect(() => {
-    if (status === FETCH_STATUS.FAILURE) {
-      notifications.toasts.danger({
-        title: (
-          <p data-test-subj="uptimeMonitorEnabledUpdateFailure">
-            {labels.getMonitorEnabledUpdateFailureMessage(monitor[ConfigKey.NAME])}
-          </p>
-        ),
-        toastLifeTimeMs: 3000,
-      });
-      setIsEnabled(null);
-    } else if (status === FETCH_STATUS.SUCCESS) {
-      notifications.toasts.success({
-        title: (
-          <p data-test-subj="uptimeMonitorEnabledUpdateSuccess">
-            {isEnabled
-              ? labels.getMonitorEnabledSuccessLabel(monitor[ConfigKey.NAME])
-              : labels.getMonitorDisabledSuccessLabel(monitor[ConfigKey.NAME])}
-          </p>
-        ),
-        toastLifeTimeMs: 3000,
-      });
-      reloadPage();
-    }
-  }, [status]); // eslint-disable-line react-hooks/exhaustive-deps
+  const { isEnabled, updateMonitorEnabledState, status } = useMonitorEnableHandler({
+    id,
+    reloadPage,
+    labels: statusLabels,
+  });
 
   const enabled = isEnabled ?? monitor[ConfigKey.ENABLED];
   const isLoading = status === FETCH_STATUS.LOADING;
 
   const handleEnabledChange = (event: EuiSwitchEvent) => {
     const checked = event.target.checked;
-    setIsEnabled(checked);
+    updateMonitorEnabledState(monitor, checked);
   };
 
   return (
     <>
-      {isLoading ? (
+      {isLoading || initialLoading ? (
         <EuiLoadingSpinner size="m" />
       ) : (
-        <EuiSwitch
+        <SwitchWithCursor
+          compressed={true}
           checked={enabled}
           disabled={isLoading || isDisabled}
           showLabel={false}
           label={enabled ? labels.DISABLE_MONITOR_LABEL : labels.ENABLE_MONITOR_LABEL}
           title={enabled ? labels.DISABLE_MONITOR_LABEL : labels.ENABLE_MONITOR_LABEL}
           data-test-subj="syntheticsIsMonitorEnabled"
+          isSwitchable={isSwitchable}
           onChange={handleEnabledChange}
         />
       )}
     </>
   );
 };
+
+const SwitchWithCursor = euiStyled(EuiSwitch)<{ isSwitchable: boolean }>`
+  & > button {
+    cursor: ${({ isSwitchable }) => (isSwitchable ? undefined : 'not-allowed')};
+  }
+`;

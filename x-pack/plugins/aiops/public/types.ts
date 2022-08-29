@@ -17,5 +17,5 @@ export type AiopsPluginSetup = ReturnType<AiopsPlugin['setup']>;
  */
 export type AiopsPluginStart = ReturnType<AiopsPlugin['start']>;
 
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type AppPluginStartDependencies = {};

@@ -36,7 +36,7 @@ export function convertToShortUrl(series: SeriesUrl) {
     [URL_KEYS.SELECTED_METRIC]: selectedMetricField,
     [URL_KEYS.HIDDEN]: hidden,
     [URL_KEYS.NAME]: name,
-    [URL_KEYS.COLOR]: color,
+    [URL_KEYS.COLOR]: color ? escape(color) : undefined,
     ...restSeries,
   };
 }
@@ -50,8 +50,26 @@ export function createExploratoryViewUrl(
 
   return (
     baseHref +
-    `/app/${appId}/exploratory-view/#?reportType=${reportType}&sr=${rison.encode(
-      allShortSeries as unknown as RisonValue
+    `/app/${appId}/exploratory-view/#?reportType=${reportType}&sr=${encodeUriIfNeeded(
+      rison.encode(allShortSeries as unknown as RisonValue)
     )}`
   );
+}
+
+/**
+ * Encodes the uri if it contains characters (`/?@&=+#`).
+ * It doesn't consider `,` and `:` as they are part of [Rison]{@link https://www.npmjs.com/package/rison-node} syntax.
+ *
+ * @param uri Non encoded URI
+ */
+export function encodeUriIfNeeded(uri: string) {
+  if (!uri) {
+    return uri;
+  }
+
+  if (/[\/?@&=+#]/.test(uri)) {
+    return encodeURIComponent(uri);
+  }
+
+  return uri;
 }

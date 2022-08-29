@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { DataAccessLayer, TimeRange } from '../../types';
+import type { DataAccessLayer, TimeRange } from '../../types';
 import { mockTreeWithOneNodeAndTwoPagesOfRelatedEvents } from '../../mocks/resolver_tree';
-import {
+import type {
   ResolverRelatedEvents,
   ResolverEntityIndex,
   SafeResolverEvent,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Maybe } from '../../../..';
+import type { Maybe } from '../../../..';
 
 export interface KpiHistogramData {
   x?: Maybe<number>;

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, ChangeEvent } from 'react';
+import type { ChangeEvent } from 'react';
+import React, { useState, useCallback } from 'react';
 import styled, { css } from 'styled-components';
 
 import {

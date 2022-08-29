@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { buildQueryFilter, buildEmptyFilter } from '@kbn/es-query';
 import { mapDefault } from './map_default';
-import { buildQueryFilter, buildEmptyFilter } from '../../../../../common';
 
 describe('filter manager utilities', () => {
   describe('mapDefault()', () => {

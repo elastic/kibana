@@ -113,7 +113,7 @@ export const WaterfallChartSidebarContainerFlexGroup = euiStyled(EuiFlexGroup)`
 // Ensures flex items honour no-wrap of children, rather than trying to extend to the full width of children.
 export const WaterfallChartSidebarFlexItem = euiStyled(EuiFlexItem)`
   min-width: 0;
-  padding-right: ${(props) => props.theme.eui.paddingSizes.s};
+  padding-right: ${(props) => props.theme.eui.euiSizeS};
   justify-content: space-around;
 `;
 
@@ -143,7 +143,7 @@ export const WaterfallChartLegendContainer = euiStyled.div`
   bottom: 0;
   z-index: ${(props) => props.theme.eui.euiZLevel4};
   background-color: ${(props) => props.theme.eui.euiColorLightestShade};
-  padding: ${(props) => props.theme.eui.paddingSizes.xs};
+  padding: ${(props) => props.theme.eui.euiSizeXS};
   font-size: ${(props) => props.theme.eui.euiFontSizeXS};
   box-shadow: 0px -1px 4px 0px ${(props) => props.theme.eui.euiColorLightShade};
 `; // NOTE: EuiShadowColor is a little too dark to work with the background-color
@@ -157,7 +157,7 @@ export const WaterfallChartTooltip = euiStyled(WaterfallTooltipResponsiveMaxWidt
   background-color: ${(props) => props.theme.eui.euiColorDarkestShade};
   border-radius: ${(props) => props.theme.eui.euiBorderRadius};
   color: ${(props) => props.theme.eui.euiColorLightestShade};
-  padding: ${(props) => props.theme.eui.paddingSizes.s};
+  padding: ${(props) => props.theme.eui.euiSizeS};
   .euiToolTip__arrow {
     background-color: ${(props) => props.theme.eui.euiColorDarkestShade};
   }
@@ -165,7 +165,7 @@ export const WaterfallChartTooltip = euiStyled(WaterfallTooltipResponsiveMaxWidt
 
 export const NetworkRequestsTotalStyle = euiStyled(EuiText)`
   line-height: 28px;
-  padding: 0 ${(props) => props.theme.eui.paddingSizes.m};
+  padding: 0 ${(props) => props.theme.eui.euiSizeM};
   border-bottom: 0.3px solid ${(props) => props.theme.eui.euiColorLightShade};
   z-index: ${(props) => props.theme.eui.euiZLevel5};
 `;

@@ -17,3 +17,9 @@ exports[`xyVis it should throw error if splitColumnAccessor is pointing to the a
 exports[`xyVis it should throw error if splitRowAccessor is pointing to the absent column 1`] = `"Provided column name or index is invalid: absent-accessor"`;
 
 exports[`xyVis throws the error if showLines is provided to the not line/area chart 1`] = `"Lines visibility can be controlled only at line charts"`;
+
+exports[`xyVis throws the error if the x axis extent is enabled for a date histogram 1`] = `"X axis extent is only supported for numeric histograms."`;
+
+exports[`xyVis throws the error if the x axis extent is enabled with the full mode 1`] = `"For x axis extent, the full mode is not supported."`;
+
+exports[`xyVis throws the error if the x axis extent is enabled without a histogram defined 1`] = `"X axis extent is only supported for numeric histograms."`;

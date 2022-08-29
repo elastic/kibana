@@ -6,7 +6,7 @@
  */
 
 import { DatatableColumnType } from '@kbn/expressions-plugin/common';
-import { Query, Filter, TimeRange } from '@kbn/data-plugin/public';
+import type { Query, Filter, TimeRange } from '@kbn/es-query';
 import { Embeddable, EmbeddableInput, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
 
 export const createPoint = ({

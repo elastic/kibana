@@ -49,8 +49,8 @@ const LineNumberContainer = euiStyled.div<{ isLibraryFrame: boolean }>`
 const LineNumber = euiStyled.div<{ highlight: boolean }>`
   position: relative;
   min-width: 42px;
-  padding-left: ${({ theme }) => theme.eui.paddingSizes.s};
-  padding-right: ${({ theme }) => theme.eui.paddingSizes.xs};
+  padding-left: ${({ theme }) => theme.eui.euiSizeS};
+  padding-right: ${({ theme }) => theme.eui.euiSizeXS};
   color: ${({ theme }) => theme.eui.euiColorMediumShade};
   line-height: ${LINE_HEIGHT}px;
   text-align: right;

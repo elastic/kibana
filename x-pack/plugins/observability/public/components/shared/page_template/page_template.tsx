@@ -12,10 +12,17 @@ import { matchPath, useLocation } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 import type { ApplicationStart } from '@kbn/core/public';
-import { SharedUxServicesProvider } from '@kbn/shared-ux-services';
-import type { SharedUXPluginStart } from '@kbn/shared-ux-plugin/public';
-import { KibanaPageTemplate, KibanaPageTemplateProps } from '@kbn/shared-ux-components';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import {
+  KibanaPageTemplate,
+  KibanaPageTemplateKibanaProvider,
+} from '@kbn/shared-ux-page-kibana-template';
+import type {
+  KibanaPageTemplateProps,
+  KibanaPageTemplateKibanaDependencies,
+} from '@kbn/shared-ux-page-kibana-template';
 import type { NavigationSection } from '../../../services/navigation_registry';
+import { ObservabilityTour } from '../tour';
 import { NavNameWithBadge, hideBadge } from './nav_name_with_badge';
 
 export type WrappedPageTemplateProps = Pick<
@@ -33,6 +40,7 @@ export type WrappedPageTemplateProps = Pick<
   | 'noDataConfig'
 > & {
   showSolutionNav?: boolean;
+  isPageDataLoaded?: boolean;
 };
 
 export interface ObservabilityPageTemplateDependencies {
@@ -40,7 +48,7 @@ export interface ObservabilityPageTemplateDependencies {
   getUrlForApp: ApplicationStart['getUrlForApp'];
   navigateToApp: ApplicationStart['navigateToApp'];
   navigationSections$: Observable<NavigationSection[]>;
-  getSharedUXContext: SharedUXPluginStart['getContextServices'];
+  getPageTemplateServices: () => KibanaPageTemplateKibanaDependencies;
 }
 
 export type ObservabilityPageTemplateProps = ObservabilityPageTemplateDependencies &
@@ -52,14 +60,16 @@ export function ObservabilityPageTemplate({
   getUrlForApp,
   navigateToApp,
   navigationSections$,
-  getSharedUXContext,
   showSolutionNav = true,
+  isPageDataLoaded = true,
+  getPageTemplateServices,
   ...pageTemplateProps
 }: ObservabilityPageTemplateProps): React.ReactElement | null {
   const sections = useObservable(navigationSections$, []);
   const currentAppId = useObservable(currentAppId$, undefined);
   const { pathname: currentPath } = useLocation();
-  const sharedUXServices = getSharedUXContext();
+
+  const { services } = useKibana();
 
   const sideNavItems = useMemo<Array<EuiSideNavItemType<unknown>>>(
     () =>
@@ -90,6 +100,7 @@ export function ObservabilityPageTemplate({
             ),
             href,
             isSelected,
+            'data-nav-id': entry.label.toLowerCase().split(' ').join('_'),
             onClick: (event) => {
               if (entry.onClick) {
                 entry.onClick(event);
@@ -123,23 +134,37 @@ export function ObservabilityPageTemplate({
   );
 
   return (
-    <SharedUxServicesProvider {...sharedUXServices}>
-      <KibanaPageTemplate
-        restrictWidth={false}
-        {...pageTemplateProps}
-        solutionNav={
-          showSolutionNav
-            ? {
-                icon: 'logoObservability',
-                items: sideNavItems,
-                name: sideNavTitle,
-              }
-            : undefined
-        }
+    <KibanaPageTemplateKibanaProvider {...getPageTemplateServices()}>
+      <ObservabilityTour
+        navigateToApp={navigateToApp}
+        prependBasePath={services?.http?.basePath.prepend}
+        isPageDataLoaded={isPageDataLoaded}
+        // The tour is dependent on the solution nav, and should not render if it is not visible
+        showTour={showSolutionNav}
       >
-        {children}
-      </KibanaPageTemplate>
-    </SharedUxServicesProvider>
+        {({ isTourVisible }) => {
+          return (
+            <KibanaPageTemplate
+              restrictWidth={false}
+              {...pageTemplateProps}
+              solutionNav={
+                showSolutionNav
+                  ? {
+                      icon: 'logoObservability',
+                      items: sideNavItems,
+                      name: sideNavTitle,
+                      // Only false if tour is active
+                      canBeCollapsed: isTourVisible === false,
+                    }
+                  : undefined
+              }
+            >
+              {children}
+            </KibanaPageTemplate>
+          );
+        }}
+      </ObservabilityTour>
+    </KibanaPageTemplateKibanaProvider>
   );
 }
 

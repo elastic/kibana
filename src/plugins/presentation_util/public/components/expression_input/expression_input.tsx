@@ -33,6 +33,7 @@ export const ExpressionInput = (props: ExpressionInputProps) => {
     height,
     style,
     editorRef,
+    onEditorDidMount,
     ...rest
   } = props;
   const [expression, setExpression] = useState(initialExpression);
@@ -54,6 +55,8 @@ export const ExpressionInput = (props: ExpressionInputProps) => {
   const editorDidMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
     const model = editor.getModel();
     model?.updateOptions({ tabSize: 2 });
+
+    onEditorDidMount?.(editor);
 
     if (editorRef) {
       editorRef.current = editor;

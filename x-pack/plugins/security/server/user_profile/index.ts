@@ -8,6 +8,11 @@
 export { UserProfileService } from './user_profile_service';
 export type {
   UserProfileServiceStart,
+  UserProfileServiceStartInternal,
   UserProfileServiceStartParams,
+  UserProfileSuggestParams,
+  UserProfileBulkGetParams,
+  UserProfileRequiredPrivileges,
+  UserProfileGetCurrentParams,
 } from './user_profile_service';
 export type { UserProfileGrant } from './user_profile_grant';

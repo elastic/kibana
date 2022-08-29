@@ -19,7 +19,8 @@ import {
   OnRefreshProps,
   OnTimeChangeProps,
 } from '@elastic/eui';
-import { TimeHistoryContract, TimeRange } from '@kbn/data-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
+import { TimeHistoryContract } from '@kbn/data-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 
 import { wrapWithTheme, toMountPoint } from '@kbn/kibana-react-plugin/public';

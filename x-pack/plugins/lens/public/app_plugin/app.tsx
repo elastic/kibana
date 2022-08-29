@@ -25,11 +25,14 @@ import {
   LensAppState,
   DispatchSetState,
   selectSavedObjectFormat,
+  updateIndexPatterns,
 } from '../state_management';
 import { SaveModalContainer, runSaveLensVisualization } from './save_modal_container';
 import { LensInspector } from '../lens_inspector_service';
 import { getEditPath } from '../../common';
 import { isLensEqual } from './lens_document_equality';
+import { IndexPatternServiceAPI, createIndexPatternService } from '../indexpattern_service/service';
+import { replaceIndexpattern } from '../state_management/lens_slice';
 
 export type SaveProps = Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
   returnToOrigin: boolean;
@@ -66,6 +69,7 @@ export function App({
     getOriginatingAppName,
     spaces,
     http,
+    notifications,
     executionContext,
     // Temporarily required until the 'by value' paradigm is default.
     dashboardFeatureFlag,
@@ -360,6 +364,29 @@ export function App({
     );
   }, [initialContext]);
 
+  const indexPatternService = useMemo(
+    () =>
+      createIndexPatternService({
+        dataViews: lensAppServices.dataViews,
+        uiSettings: lensAppServices.uiSettings,
+        uiActions: lensAppServices.uiActions,
+        core: { http, notifications },
+        updateIndexPatterns: (newIndexPatternsState, options) => {
+          dispatch(updateIndexPatterns(newIndexPatternsState));
+          if (options?.applyImmediately) {
+            dispatch(applyChanges());
+          }
+        },
+        replaceIndexPattern: (newIndexPattern, oldId, options) => {
+          dispatch(replaceIndexpattern({ newIndexPattern, oldId }));
+          if (options?.applyImmediately) {
+            dispatch(applyChanges());
+          }
+        },
+      }),
+    [dispatch, http, notifications, lensAppServices]
+  );
+
   return (
     <>
       <div className="lnsApp" data-test-subj="lnsApp">
@@ -381,6 +408,7 @@ export function App({
           topNavMenuEntryGenerators={topNavMenuEntryGenerators}
           initialContext={initialContext}
           theme$={theme$}
+          indexPatternService={indexPatternService}
         />
         {getLegacyUrlConflictCallout()}
         {(!isLoading || persistedDoc) && (
@@ -388,6 +416,7 @@ export function App({
             editorFrame={editorFrame}
             showNoDataPopover={showNoDataPopover}
             lensInspector={lensInspector}
+            indexPatternService={indexPatternService}
           />
         )}
       </div>
@@ -449,13 +478,19 @@ const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
   editorFrame,
   showNoDataPopover,
   lensInspector,
+  indexPatternService,
 }: {
   editorFrame: EditorFrameInstance;
   lensInspector: LensInspector;
   showNoDataPopover: () => void;
+  indexPatternService: IndexPatternServiceAPI;
 }) {
   const { EditorFrameContainer } = editorFrame;
   return (
-    <EditorFrameContainer showNoDataPopover={showNoDataPopover} lensInspector={lensInspector} />
+    <EditorFrameContainer
+      showNoDataPopover={showNoDataPopover}
+      lensInspector={lensInspector}
+      indexPatternService={indexPatternService}
+    />
   );
 });

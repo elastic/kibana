@@ -1,5 +1,5 @@
 steps:
-  - command: .buildkite/scripts/steps/cloud/purge.sh
+  - command: .buildkite/scripts/steps/cloud/purge_deployments.sh
     label: Purge old cloud deployments
     timeout_in_minutes: 10
     agents:

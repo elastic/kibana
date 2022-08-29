@@ -11,14 +11,15 @@ import { defer } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { Adapters } from '@kbn/inspector-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { Filter, TimeRange } from '@kbn/es-query';
 
-import { calculateBounds, Filter, Query, TimeRange } from '../../..';
+import { calculateBounds, Query } from '../../..';
 
 import { IAggConfigs } from '../../aggs';
 import { ISearchStartSearchSource } from '../../search_source';
 import { tabifyAggResponse } from '../../tabify';
 
-interface RequestHandlerParams {
+export interface RequestHandlerParams {
   abortSignal?: AbortSignal;
   aggs: IAggConfigs;
   filters?: Filter[];

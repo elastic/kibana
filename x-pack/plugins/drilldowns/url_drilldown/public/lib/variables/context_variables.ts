@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
 import { getFlattenedObject } from '@kbn/std';
-import type { Filter, Query, TimeRange } from '@kbn/data-plugin/public';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { EmbeddableInput, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
 import type { UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
 import { txtValue } from './i18n';

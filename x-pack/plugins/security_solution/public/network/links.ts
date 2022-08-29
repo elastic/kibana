@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { NETWORK_PATH, SecurityPageName } from '../../common/constants';
 import { NETWORK } from '../app/translations';
-import { LinkItem } from '../common/links/types';
+import type { LinkItem } from '../common/links/types';
 import networkPageImg from '../common/images/network_page.png';
 
 export const links: LinkItem = {
@@ -48,19 +48,19 @@ export const links: LinkItem = {
       path: `${NETWORK_PATH}/tls`,
     },
     {
-      id: SecurityPageName.networkExternalAlerts,
-      title: i18n.translate('xpack.securitySolution.appLinks.network.externalAlerts', {
-        defaultMessage: 'External Alerts',
-      }),
-      path: `${NETWORK_PATH}/external-alerts`,
-    },
-    {
       id: SecurityPageName.networkAnomalies,
       title: i18n.translate('xpack.securitySolution.appLinks.hosts.anomalies', {
         defaultMessage: 'Anomalies',
       }),
       path: `${NETWORK_PATH}/anomalies`,
       licenseType: 'gold',
+    },
+    {
+      id: SecurityPageName.networkEvents,
+      title: i18n.translate('xpack.securitySolution.appLinks.network.events', {
+        defaultMessage: 'Events',
+      }),
+      path: `${NETWORK_PATH}/events`,
     },
   ],
 };

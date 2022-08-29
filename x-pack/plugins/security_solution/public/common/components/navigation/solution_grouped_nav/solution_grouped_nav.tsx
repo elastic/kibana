@@ -17,7 +17,8 @@ import {
 import classNames from 'classnames';
 import { SolutionNavPanel } from './solution_grouped_nav_panel';
 import { EuiListGroupItemStyled } from './solution_grouped_nav.styles';
-import { DefaultSideNavItem, SideNavItem, isCustomItem, isDefaultItem } from './types';
+import type { DefaultSideNavItem, SideNavItem } from './types';
+import { isCustomItem, isDefaultItem } from './types';
 import { EuiIconSpaces } from './icons/spaces';
 import type { LinkCategories } from '../../../links';
 
@@ -25,6 +26,7 @@ export interface SolutionGroupedNavProps {
   items: SideNavItem[];
   selectedId: string;
   footerItems?: SideNavItem[];
+  bottomOffset?: string;
 }
 export interface SolutionNavItemsProps {
   items: SideNavItem[];
@@ -52,6 +54,7 @@ export const SolutionGroupedNavComponent: React.FC<SolutionGroupedNavProps> = ({
   items,
   selectedId,
   footerItems = [],
+  bottomOffset,
 }) => {
   const isMobileSize = useIsWithinBreakpoints(['xs', 's']);
 
@@ -108,9 +111,10 @@ export const SolutionGroupedNavComponent: React.FC<SolutionGroupedNavProps> = ({
         items={panelItems}
         title={title}
         categories={categories}
+        bottomOffset={bottomOffset}
       />
     );
-  }, [activePanelNavId, navItemsById, onClosePanelNav, onOutsidePanelClick]);
+  }, [activePanelNavId, bottomOffset, navItemsById, onClosePanelNav, onOutsidePanelClick]);
 
   return (
     <>

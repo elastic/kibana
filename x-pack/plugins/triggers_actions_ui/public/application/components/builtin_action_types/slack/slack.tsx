@@ -7,13 +7,8 @@
 
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  ActionTypeModel,
-  GenericValidationResult,
-  ConnectorValidationResult,
-} from '../../../../types';
-import { SlackActionParams, SlackSecrets, SlackActionConnector } from '../types';
-import { isValidUrl } from '../../../lib/value_validators';
+import { ActionTypeModel, GenericValidationResult } from '../../../../types';
+import { SlackActionParams, SlackSecrets } from '../types';
 
 export function getActionType(): ActionTypeModel<unknown, SlackSecrets, SlackActionParams> {
   return {
@@ -31,25 +26,6 @@ export function getActionType(): ActionTypeModel<unknown, SlackSecrets, SlackAct
         defaultMessage: 'Send to Slack',
       }
     ),
-    validateConnector: async (
-      action: SlackActionConnector
-    ): Promise<ConnectorValidationResult<unknown, SlackSecrets>> => {
-      const translations = await import('./translations');
-      const secretsErrors = {
-        webhookUrl: new Array<string>(),
-      };
-      const validationResult = { config: { errors: {} }, secrets: { errors: secretsErrors } };
-      if (!action.secrets.webhookUrl) {
-        secretsErrors.webhookUrl.push(translations.WEBHOOK_URL_REQUIRED);
-      } else if (action.secrets.webhookUrl) {
-        if (!isValidUrl(action.secrets.webhookUrl)) {
-          secretsErrors.webhookUrl.push(translations.WEBHOOK_URL_INVALID);
-        } else if (!isValidUrl(action.secrets.webhookUrl, 'https:')) {
-          secretsErrors.webhookUrl.push(translations.WEBHOOK_URL_HTTP_INVALID);
-        }
-      }
-      return validationResult;
-    },
     validateParams: async (
       actionParams: SlackActionParams
     ): Promise<GenericValidationResult<SlackActionParams>> => {

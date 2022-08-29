@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { CommonFields, Maybe, RiskSeverity, SortField } from '../../..';
-import { HostEcs } from '../../../../ecs/host';
-import { UserEcs } from '../../../../ecs/user';
+import type { CommonFields, Maybe, RiskSeverity, SortField } from '../../..';
+import type { HostEcs } from '../../../../ecs/host';
+import type { UserEcs } from '../../../../ecs/user';
 
 export const enum UserRiskScoreFields {
   timestamp = '@timestamp',

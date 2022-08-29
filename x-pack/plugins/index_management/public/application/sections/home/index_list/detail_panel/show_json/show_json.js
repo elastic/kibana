@@ -26,6 +26,6 @@ export class ShowJson extends React.PureComponent {
       return null;
     }
     const json = JSON.stringify(data, null, 2);
-    return <EuiCodeBlock lang="json">{json}</EuiCodeBlock>;
+    return <EuiCodeBlock language="json">{json}</EuiCodeBlock>;
   }
 }

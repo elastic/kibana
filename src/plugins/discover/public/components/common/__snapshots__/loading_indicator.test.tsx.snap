@@ -9,7 +9,7 @@ exports[`Loading indicator default renders correctly 1`] = `
   >
     <span
       aria-label="Loading"
-      class="euiLoadingSpinner css-lh9wx8-euiLoadingSpinner-l"
+      class="euiLoadingSpinner emotion-euiLoadingSpinner-l"
       role="progressbar"
     />
   </div>
@@ -25,7 +25,7 @@ exports[`Loading indicator elastic renders correctly 1`] = `
   >
     <span
       aria-label="Loading"
-      class="euiLoadingElastic css-1gqpwx6-euiLoadingElastic"
+      class="euiLoadingElastic emotion-euiLoadingElastic"
       role="progressbar"
     >
       <span

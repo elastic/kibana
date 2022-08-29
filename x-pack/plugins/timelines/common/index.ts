@@ -27,7 +27,6 @@ export type {
   ControlColumnProps,
   DataProvidersAnd,
   DataProvider,
-  FieldBrowserOptions,
   GenericActionRowCellRenderProps,
   HeaderActionProps,
   HeaderCellRender,
@@ -47,7 +46,6 @@ export type {
   BrowserField,
   BrowserFields,
   CursorType,
-  DocValueFields,
   EqlOptionsData,
   EqlOptionsSelected,
   FieldsEqlOptions,
@@ -82,6 +80,5 @@ export {
   EntityType,
   LastEventIndexKey,
   EMPTY_BROWSER_FIELDS,
-  EMPTY_DOCVALUE_FIELD,
   EMPTY_INDEX_FIELDS,
 } from './search_strategy';

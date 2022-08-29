@@ -12,7 +12,7 @@ import { omit } from 'lodash';
 
 import { nextTick } from '@kbn/test-jest-helpers';
 
-import { Schema, SchemaConflicts, SchemaType } from '../../../shared/schema/types';
+import { AdvancedSchema, SchemaConflicts, SchemaType } from '../../../shared/schema/types';
 
 import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 
@@ -45,6 +45,7 @@ describe('ResultSettingsLogic', () => {
   };
 
   const SELECTORS = {
+    validResultFields: {},
     serverResultFields: {},
     reducedServerResultFields: {},
     resultFieldsEmpty: true,
@@ -55,8 +56,11 @@ describe('ResultSettingsLogic', () => {
     queryPerformanceScore: 0,
   };
 
+  const FUNCTIONAL_SELECTORS = ['isSnippetAllowed'];
+
   // Values without selectors
-  const resultSettingLogicValues = () => omit(ResultSettingsLogic.values, Object.keys(SELECTORS));
+  const resultSettingLogicValues = () =>
+    omit(ResultSettingsLogic.values, FUNCTIONAL_SELECTORS, Object.keys(SELECTORS));
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -65,7 +69,7 @@ describe('ResultSettingsLogic', () => {
 
   it('has expected default values', () => {
     mount();
-    expect(ResultSettingsLogic.values).toEqual({
+    expect(omit(ResultSettingsLogic.values, FUNCTIONAL_SELECTORS)).toEqual({
       ...DEFAULT_VALUES,
       ...SELECTORS,
     });
@@ -77,10 +81,10 @@ describe('ResultSettingsLogic', () => {
         foo: { raw: { size: 5 } },
         bar: { raw: { size: 5 } },
       };
-      const schema: Schema = {
-        foo: SchemaType.Text,
-        bar: SchemaType.Number,
-        baz: SchemaType.Text,
+      const schema: AdvancedSchema = {
+        foo: { type: SchemaType.Text, capabilities: {} },
+        bar: { type: SchemaType.Number, capabilities: {} },
+        baz: { type: SchemaType.Text, capabilities: {} },
       };
       const schemaConflicts: SchemaConflicts = {
         foo: {
@@ -213,10 +217,16 @@ describe('ResultSettingsLogic', () => {
           foo: { raw: true, snippet: true, snippetFallback: true },
           bar: { raw: true, snippet: true, snippetFallback: true },
         },
+        schema: {
+          foo: { type: SchemaType.Text, capabilities: {} },
+          bar: { type: SchemaType.Number, capabilities: {} },
+        },
       };
 
       it('should update settings for an individual field', () => {
-        mount(initialValues);
+        mount({
+          ...initialValues,
+        });
 
         ResultSettingsLogic.actions.updateField('foo', {
           raw: true,
@@ -226,6 +236,7 @@ describe('ResultSettingsLogic', () => {
 
         expect(resultSettingLogicValues()).toEqual({
           ...DEFAULT_VALUES,
+          ...initialValues,
           // the settings for foo are updated below for any *ResultFields state in which they appear
           resultFields: {
             foo: { raw: true, snippet: false, snippetFallback: false },
@@ -268,13 +279,54 @@ describe('ResultSettingsLogic', () => {
   });
 
   describe('selectors', () => {
+    describe('validResultFields', () => {
+      it('should filter out nested fields and keep subfields only', () => {
+        mount({
+          schema: {
+            simple_field: { type: SchemaType.Text, capabilities: {} },
+            nested_object: { type: SchemaType.Nested, capabilities: {} },
+            'nested_object.subfield': { type: SchemaType.Text, capabilities: {} },
+            'simple_object.subfield': { type: SchemaType.Number, capabilities: {} },
+          },
+          resultFields: {
+            simple_field: { raw: true },
+            nested_object: { raw: true },
+            'nested_object.subfield': { raw: true },
+            'simple_object.subfield': { raw: true },
+          },
+        });
+
+        expect(ResultSettingsLogic.values.validResultFields).toEqual({
+          simple_field: { raw: true },
+          'nested_object.subfield': { raw: true },
+          'simple_object.subfield': { raw: true },
+        });
+      });
+
+      it('should filter out field that are missing in the schema', () => {
+        mount({
+          schema: {
+            simple_field: { type: SchemaType.Text, capabilities: {} },
+          },
+          resultFields: {
+            simple_field: { raw: true },
+            invalid_field: { raw: true },
+          },
+        });
+
+        expect(ResultSettingsLogic.values.validResultFields).toEqual({
+          simple_field: { raw: true },
+        });
+      });
+    });
+
     describe('textResultFields', () => {
       it('should return only resultFields that have a type of "text" in the engine schema', () => {
         mount({
           schema: {
-            foo: 'text',
-            bar: 'number',
-            baz: 'text',
+            foo: { type: SchemaType.Text, capabilities: {} },
+            bar: { type: SchemaType.Number, capabilities: {} },
+            baz: { type: SchemaType.Text, capabilities: {} },
           },
           resultFields: {
             foo: { raw: true, rawSize: 5 },
@@ -294,9 +346,9 @@ describe('ResultSettingsLogic', () => {
       it('should return only resultFields that have a type other than "text" in the engine schema', () => {
         mount({
           schema: {
-            foo: 'text',
-            bar: 'number',
-            baz: 'text',
+            foo: { type: SchemaType.Text, capabilities: {} },
+            bar: { type: SchemaType.Number, capabilities: {} },
+            baz: { type: SchemaType.Text, capabilities: {} },
           },
           resultFields: {
             foo: { raw: true, rawSize: 5 },
@@ -311,12 +363,37 @@ describe('ResultSettingsLogic', () => {
       });
     });
 
+    describe('isSnippetAllowed', () => {
+      it('should return true if field have the snippet capability', () => {
+        mount({
+          schema: {
+            foo: { type: SchemaType.Text, capabilities: { snippet: true } },
+          },
+        });
+
+        expect(ResultSettingsLogic.values.isSnippetAllowed('foo')).toEqual(true);
+      });
+
+      it('should return false otherwise', () => {
+        mount({
+          schema: {
+            foo: { type: SchemaType.Text, capabilities: {} },
+          },
+        });
+        expect(ResultSettingsLogic.values.isSnippetAllowed('foo')).toEqual(false);
+      });
+    });
+
     describe('resultFieldsAtDefaultSettings', () => {
       it('should return true if all fields are at their default settings', () => {
         mount({
           resultFields: {
             foo: { raw: true, snippet: false, snippetFallback: false },
             bar: { raw: true, snippet: false, snippetFallback: false },
+          },
+          schema: {
+            foo: { type: SchemaType.Text, capabilities: {} },
+            bar: { type: SchemaType.Text, capabilities: {} },
           },
         });
 
@@ -328,6 +405,10 @@ describe('ResultSettingsLogic', () => {
           resultFields: {
             foo: { raw: true, snippet: false, snippetFallback: false },
             bar: { raw: true, snippet: true, snippetFallback: false },
+          },
+          schema: {
+            foo: { type: SchemaType.Text, capabilities: {} },
+            bar: { type: SchemaType.Text, capabilities: {} },
           },
         });
 
@@ -401,6 +482,11 @@ describe('ResultSettingsLogic', () => {
               snippetFallback: false,
             },
           },
+          schema: {
+            foo: { type: SchemaType.Text, capabilities: {} },
+            bar: { type: SchemaType.Number, capabilities: {} },
+            baz: { type: SchemaType.Text, capabilities: {} },
+          },
         });
 
         expect(ResultSettingsLogic.values.serverResultFields).toEqual({
@@ -424,6 +510,10 @@ describe('ResultSettingsLogic', () => {
             },
             bar: {},
           },
+          schema: {
+            foo: { type: SchemaType.Text, capabilities: {} },
+            bar: { type: SchemaType.Number, capabilities: {} },
+          },
         });
 
         expect(ResultSettingsLogic.values.reducedServerResultFields).toEqual({
@@ -438,7 +528,7 @@ describe('ResultSettingsLogic', () => {
         it('considers a text value with raw set (but no size) as worth 1.5', () => {
           mount({
             resultFields: { foo: { raw: true } },
-            schema: { foo: SchemaType.Text },
+            schema: { foo: { type: SchemaType.Text, capabilities: {} } },
           });
           expect(ResultSettingsLogic.values.queryPerformanceScore).toEqual(1.5);
         });
@@ -446,7 +536,7 @@ describe('ResultSettingsLogic', () => {
         it('considers a text value with raw set and a size over 250 as also worth 1.5', () => {
           mount({
             resultFields: { foo: { raw: true, rawSize: 251 } },
-            schema: { foo: SchemaType.Text },
+            schema: { foo: { type: SchemaType.Text, capabilities: {} } },
           });
           expect(ResultSettingsLogic.values.queryPerformanceScore).toEqual(1.5);
         });
@@ -454,7 +544,7 @@ describe('ResultSettingsLogic', () => {
         it('considers a text value with raw set and a size less than or equal to 250 as worth 1', () => {
           mount({
             resultFields: { foo: { raw: true, rawSize: 250 } },
-            schema: { foo: SchemaType.Text },
+            schema: { foo: { type: SchemaType.Text, capabilities: {} } },
           });
           expect(ResultSettingsLogic.values.queryPerformanceScore).toEqual(1);
         });
@@ -462,7 +552,7 @@ describe('ResultSettingsLogic', () => {
         it('considers a text value with a snippet set as worth 2', () => {
           mount({
             resultFields: { foo: { snippet: true, snippetSize: 50, snippetFallback: true } },
-            schema: { foo: SchemaType.Text },
+            schema: { foo: { type: SchemaType.Text, capabilities: {} } },
           });
           expect(ResultSettingsLogic.values.queryPerformanceScore).toEqual(2);
         });
@@ -470,7 +560,7 @@ describe('ResultSettingsLogic', () => {
         it('will sum raw and snippet values if both are set', () => {
           mount({
             resultFields: { foo: { snippet: true, raw: true } },
-            schema: { foo: SchemaType.Text },
+            schema: { foo: { type: SchemaType.Text, capabilities: {} } },
           });
           // 1.5 (raw) + 2 (snippet) = 3.5
           expect(ResultSettingsLogic.values.queryPerformanceScore).toEqual(3.5);
@@ -479,7 +569,7 @@ describe('ResultSettingsLogic', () => {
         it('considers a non-text value with raw set as 0.2', () => {
           mount({
             resultFields: { foo: { raw: true } },
-            schema: { foo: SchemaType.Number },
+            schema: { foo: { type: SchemaType.Number, capabilities: {} } },
           });
           expect(ResultSettingsLogic.values.queryPerformanceScore).toEqual(0.2);
         });
@@ -492,9 +582,9 @@ describe('ResultSettingsLogic', () => {
               baz: { raw: true },
             },
             schema: {
-              foo: SchemaType.Text,
-              bar: SchemaType.Text,
-              baz: SchemaType.Number,
+              foo: { type: SchemaType.Text, capabilities: {} },
+              bar: { type: SchemaType.Number, capabilities: {} },
+              baz: { type: SchemaType.Text, capabilities: {} },
             },
           });
           // 1.5 (foo) + 3.5 (bar) + baz (.2) = 5.2
@@ -522,8 +612,8 @@ describe('ResultSettingsLogic', () => {
       },
     };
     const schema = {
-      foo: 'text',
-      bar: 'number',
+      foo: { type: SchemaType.Text, capabilities: {} },
+      bar: { type: SchemaType.Number, capabilities: {} },
     };
     const schemaConflicts = {
       baz: {
@@ -680,10 +770,10 @@ describe('ResultSettingsLogic', () => {
         );
       });
 
-      it('should remove rawSize value when toggling off', () => {
+      it('should remove rawSize and snippetFallback value when toggling off', () => {
         mount({
           resultFields: {
-            bar: { raw: false, snippet: true, snippetSize: 5 },
+            bar: { raw: false, snippet: true, snippetSize: 5, snippetFallback: true },
           },
         });
         jest.spyOn(ResultSettingsLogic.actions, 'updateField');
@@ -696,6 +786,7 @@ describe('ResultSettingsLogic', () => {
           {
             raw: false,
             snippet: false,
+            snippetFallback: false,
           }
         );
       });

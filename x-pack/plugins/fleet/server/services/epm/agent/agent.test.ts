@@ -199,6 +199,95 @@ pcap: false
     });
   });
 
+  describe('escape_string helper', () => {
+    const streamTemplate = `
+input: log
+password: {{escape_string password}}
+      `;
+
+    const streamTemplateWithNewlinesAndEscapes = `
+input: log
+text_var: {{escape_string text_var}}
+      `;
+
+    it('should wrap in single quotes and escape any single quotes in the string', () => {
+      const vars = {
+        password: { type: 'password', value: "ab'c'" },
+      };
+
+      const output = compileTemplate(vars, streamTemplate);
+      expect(output).toEqual({
+        input: 'log',
+        password: "ab'c'",
+      });
+    });
+
+    it('should respect new lines and literal escapes', () => {
+      const vars = {
+        text_var: {
+          type: 'text',
+          value: `This is a text with
+New lines and \\n escaped values.`,
+        },
+      };
+
+      const output = compileTemplate(vars, streamTemplateWithNewlinesAndEscapes);
+      expect(output).toEqual({
+        input: 'log',
+        text_var: `This is a text with
+New lines and \\n escaped values.`,
+      });
+    });
+  });
+
+  describe('to_json helper', () => {
+    const streamTemplate = `
+input: log
+json_var: {{to_json json_var}}
+      `;
+
+    const streamTemplateWithNewYaml = `
+input: log
+yaml_var: {{to_json yaml_var}}
+      `;
+
+    it('should parse a json string into a json object', () => {
+      const vars = {
+        json_var: { type: 'text', value: `{"foo":["bar","bazz"]}` },
+      };
+
+      const output = compileTemplate(vars, streamTemplate);
+      expect(output).toEqual({
+        input: 'log',
+        json_var: {
+          foo: ['bar', 'bazz'],
+        },
+      });
+    });
+
+    it('should parse a yaml string into a json object', () => {
+      const vars = {
+        yaml_var: {
+          type: 'yaml',
+          value: `foo:
+  bar:
+    - a
+    - b`,
+        },
+      };
+
+      const output = compileTemplate(vars, streamTemplateWithNewYaml);
+      expect(output).toEqual({
+        input: 'log',
+        yaml_var: {
+          foo: {
+            bar: ['a', 'b'],
+          },
+        },
+      });
+    });
+  });
+
   it('should support optional yaml values at root level', () => {
     const streamTemplate = `
 input: logs

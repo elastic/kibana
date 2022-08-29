@@ -7,9 +7,9 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { TimeRange } from '@kbn/es-query';
 import { TimefilterService, TimeHistoryContract, TimefilterContract } from '.';
 import { Observable } from 'rxjs';
-import { TimeRange } from '../../../common';
 
 export type TimefilterServiceClientContract = PublicMethodsOf<TimefilterService>;
 

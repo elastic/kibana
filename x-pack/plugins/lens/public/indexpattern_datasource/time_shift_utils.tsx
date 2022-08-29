@@ -9,18 +9,24 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { uniq } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Datatable } from '@kbn/expressions-plugin';
+import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import { search } from '@kbn/data-plugin/public';
 import { parseTimeShift } from '@kbn/data-plugin/common';
-import {
-  IndexPattern,
+import type {
   GenericIndexPatternColumn,
   IndexPatternLayer,
   IndexPatternPrivateState,
 } from './types';
-import { FramePublicAPI } from '../types';
+import type { FramePublicAPI, IndexPattern } from '../types';
 
 export const timeShiftOptions = [
+  {
+    label: i18n.translate('xpack.lens.indexPattern.timeShift.none', {
+      defaultMessage: 'None',
+    }),
+    value: '',
+  },
   {
     label: i18n.translate('xpack.lens.indexPattern.timeShift.hour', {
       defaultMessage: '1 hour ago (1h)',
@@ -98,6 +104,7 @@ export const timeShiftOptionOrder = timeShiftOptions.reduce<{ [key: string]: num
 );
 
 export function getDateHistogramInterval(
+  datatableUtilities: DatatableUtilitiesService,
   layer: IndexPatternLayer,
   indexPattern: IndexPattern,
   activeData: Record<string, Datatable> | undefined,
@@ -112,8 +119,7 @@ export function getDateHistogramInterval(
   if (dateHistogramColumn && activeData && activeData[layerId] && activeData[layerId]) {
     const column = activeData[layerId].columns.find((col) => col.id === dateHistogramColumn);
     if (column) {
-      const expression =
-        search.aggs.getDateHistogramMetaDataByDatatableColumn(column)?.interval || '';
+      const expression = datatableUtilities.getDateHistogramMeta(column)?.interval || '';
       return {
         interval: search.aggs.parseInterval(expression),
         expression,
@@ -184,17 +190,19 @@ export function getDisallowedPreviousShiftMessage(
 }
 
 export function getStateTimeShiftWarningMessages(
+  datatableUtilities: DatatableUtilitiesService,
   state: IndexPatternPrivateState,
-  { activeData }: FramePublicAPI
+  { activeData, dataViews }: FramePublicAPI
 ) {
   if (!state) return;
   const warningMessages: React.ReactNode[] = [];
   Object.entries(state.layers).forEach(([layerId, layer]) => {
-    const layerIndexPattern = state.indexPatterns[layer.indexPatternId];
+    const layerIndexPattern = dataViews.indexPatterns[layer.indexPatternId];
     if (!layerIndexPattern) {
       return;
     }
     const dateHistogramInterval = getDateHistogramInterval(
+      datatableUtilities,
       layer,
       layerIndexPattern,
       activeData,

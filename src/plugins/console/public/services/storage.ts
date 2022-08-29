@@ -12,6 +12,8 @@ type IStorageEngine = typeof window.localStorage;
 
 export enum StorageKeys {
   WIDTH = 'widths',
+  FOLDS = 'folds',
+  VARIABLES = 'variables',
 }
 
 export class Storage {

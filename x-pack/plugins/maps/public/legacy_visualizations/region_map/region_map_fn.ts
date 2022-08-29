@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';
-import type { Query, TimeRange } from '@kbn/data-plugin/common';
+import type { Query, TimeRange } from '@kbn/es-query';
 import type { ExpressionValueSearchContext } from '@kbn/data-plugin/common/search/expressions/kibana_context_type';
 import type { ExpressionFunctionDefinition, Render } from '@kbn/expressions-plugin/public';
 import { REGION_MAP_RENDER, REGION_MAP_VIS_TYPE, RegionMapVisConfig } from './types';
@@ -45,6 +45,7 @@ export const createRegionMapFn = (): RegionMapExpressionFunctionDefinition => ({
     },
   },
   async fn(input, args) {
+    const query = input.query;
     return {
       type: 'render',
       as: REGION_MAP_RENDER,
@@ -52,7 +53,7 @@ export const createRegionMapFn = (): RegionMapExpressionFunctionDefinition => ({
         visType: REGION_MAP_VIS_TYPE,
         visConfig: JSON.parse(args.visConfig),
         filters: input.filters,
-        query: Array.isArray(input.query) ? input.query[0] : input.query,
+        query: Array.isArray(query) ? query[0] : query,
         timeRange: input.timeRange,
       },
     };

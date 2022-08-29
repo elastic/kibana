@@ -18,6 +18,8 @@ import type {
 
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 
+import { AGENT_POLICY_INDEX } from '../../common';
+
 import { agentPolicyService } from './agent_policy';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
 
@@ -25,6 +27,7 @@ import { getAgentsByKuery } from './agents';
 import { packagePolicyService } from './package_policy';
 import { appContextService } from './app_context';
 import { outputService } from './output';
+import { downloadSourceService } from './download_source';
 import { getFullAgentPolicy } from './agent_policies';
 
 function getSavedObjectMock(agentPolicyAttributes: any) {
@@ -60,15 +63,20 @@ function getSavedObjectMock(agentPolicyAttributes: any) {
 }
 
 jest.mock('./output');
+jest.mock('./download_source');
 jest.mock('./agent_policy_update');
 jest.mock('./agents');
 jest.mock('./package_policy');
 jest.mock('./app_context');
 jest.mock('./agent_policies/full_agent_policy');
-jest.mock('uuid/v5');
 
 const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
 const mockedOutputService = outputService as jest.Mocked<typeof outputService>;
+const mockedDownloadSourceService = downloadSourceService as jest.Mocked<
+  typeof downloadSourceService
+>;
+const mockedPackagePolicyService = packagePolicyService as jest.Mocked<typeof packagePolicyService>;
+
 const mockedGetFullAgentPolicy = getFullAgentPolicy as jest.Mock<
   ReturnType<typeof getFullAgentPolicy>
 >;
@@ -138,6 +146,11 @@ describe('agent policy', () => {
 
     beforeEach(() => {
       soClient = getSavedObjectMock({ revision: 1, package_policies: ['package-1'] });
+      mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
+        {
+          id: 'package-1',
+        },
+      ] as any);
       esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
       (getAgentsByKuery as jest.Mock).mockResolvedValue({
@@ -147,10 +160,10 @@ describe('agent policy', () => {
         perPage: 10,
       });
 
-      (packagePolicyService.delete as jest.Mock).mockResolvedValue([
+      mockedPackagePolicyService.delete.mockResolvedValue([
         {
           id: 'package-1',
-        },
+        } as any,
       ]);
     });
 
@@ -257,6 +270,83 @@ describe('agent policy', () => {
     });
   });
 
+  describe('removeDefaultSourceFromAll', () => {
+    let mockedAgentPolicyServiceUpdate: jest.SpyInstance<
+      ReturnType<typeof agentPolicyService['update']>
+    >;
+    beforeEach(() => {
+      mockedAgentPolicyServiceUpdate = jest
+        .spyOn(agentPolicyService, 'update')
+        .mockResolvedValue({} as any);
+    });
+
+    afterEach(() => {
+      mockedAgentPolicyServiceUpdate.mockRestore();
+    });
+
+    it('should update policies using deleted download source host', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      mockedDownloadSourceService.getDefaultDownloadSourceId.mockResolvedValue(
+        'default-download-source-id'
+      );
+      soClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test-ds-1',
+            attributes: {
+              download_source_id: 'ds-id-1',
+            },
+          },
+          {
+            id: 'test-ds-2',
+            attributes: {
+              download_source_id: 'default-download-source-id',
+            },
+          },
+        ],
+      } as any);
+
+      await agentPolicyService.removeDefaultSourceFromAll(
+        soClient,
+        esClient,
+        'default-download-source-id'
+      );
+
+      expect(mockedAgentPolicyServiceUpdate).toHaveBeenCalledTimes(2);
+      expect(mockedAgentPolicyServiceUpdate).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        'test-ds-1',
+        { download_source_id: 'ds-id-1' }
+      );
+      expect(mockedAgentPolicyServiceUpdate).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        'test-ds-2',
+        { download_source_id: null }
+      );
+    });
+  });
+
+  describe('bumpAllAgentPoliciesForDownloadSource', () => {
+    it('should call agentPolicyUpdateEventHandler with updated event once', async () => {
+      const soClient = getSavedObjectMock({
+        revision: 1,
+        monitoring_enabled: ['metrics'],
+      });
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      await agentPolicyService.bumpAllAgentPoliciesForDownloadSource(
+        soClient,
+        esClient,
+        'test-id-1'
+      );
+
+      expect(agentPolicyUpdateEventHandler).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('update', () => {
     it('should update is_managed property, if given', async () => {
       // ignore unrelated unique name constraint
@@ -301,11 +391,15 @@ describe('agent policy', () => {
       mockedOutputService.getDefaultDataOutputId.mockResolvedValue('default-output');
       mockedGetFullAgentPolicy.mockResolvedValue(null);
 
-      soClient.get.mockResolvedValue({
+      const mockSo = {
         attributes: {},
         id: 'policy123',
         type: 'mocked',
         references: [],
+      };
+      soClient.get.mockResolvedValue(mockSo);
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [mockSo],
       });
       await agentPolicyService.deployPolicy(soClient, 'policy123');
 
@@ -327,24 +421,36 @@ describe('agent policy', () => {
         ],
       } as FullAgentPolicy);
 
-      soClient.get.mockResolvedValue({
+      const mockSo = {
         attributes: {},
         id: 'policy123',
         type: 'mocked',
         references: [],
+      };
+      soClient.get.mockResolvedValue(mockSo);
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [mockSo],
       });
       await agentPolicyService.deployPolicy(soClient, 'policy123');
 
-      expect(esClient.create).toBeCalledWith(
+      expect(esClient.bulk).toBeCalledWith(
         expect.objectContaining({
-          index: '.fleet-policies',
-          body: expect.objectContaining({
-            '@timestamp': expect.anything(),
-            data: { id: 'policy123', inputs: [{ id: 'input-123' }], revision: 1 },
-            default_fleet_server: false,
-            policy_id: 'policy123',
-            revision_idx: 1,
-          }),
+          index: AGENT_POLICY_INDEX,
+          body: [
+            expect.objectContaining({
+              index: {
+                _id: expect.anything(),
+              },
+            }),
+            expect.objectContaining({
+              '@timestamp': expect.anything(),
+              data: { id: 'policy123', inputs: [{ id: 'input-123' }], revision: 1 },
+              default_fleet_server: false,
+              policy_id: 'policy123',
+              revision_idx: 1,
+            }),
+          ],
+          refresh: 'wait_for',
         })
       );
     });

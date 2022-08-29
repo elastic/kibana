@@ -16,12 +16,15 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
 
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
-      await esArchiver.load('x-pack/test/functional/es_archives/dashboard/drilldowns');
+      await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/dashboard_drilldowns/drilldowns'
+      );
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/dashboard/drilldowns');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     loadTestFile(require.resolve('./dashboard_to_dashboard_drilldown'));

@@ -75,3 +75,7 @@ export const getQuerystring = (params: object) => {
 
 export const delay = (ms: number) =>
   new Promise((resolve) => setTimeout(resolve, ms));
+
+export const byLensTestId = (id: string) => `[data-test-embeddable-id="${id}"]`;
+export const byLensDataLayerId = (id: string) =>
+  `[data-ech-series-name="${id}"]`;

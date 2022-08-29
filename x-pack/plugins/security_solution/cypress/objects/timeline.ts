@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TimelineResponse } from '../../common/types/timeline';
+import type { TimelineResponse } from '../../common/types/timeline';
 
 export interface Timeline {
   title: string;
@@ -72,13 +72,6 @@ export const getTimelineModifiedSourcerer = () => ({
 export const getTimelineNonValidQuery = (): CompleteTimeline => ({
   ...getTimeline(),
   query: 'query_to_intentionally_find_nothing: *',
-});
-
-export const caseTimeline = (): Timeline => ({
-  title: 'SIEM test',
-  description: 'description',
-  query: 'host.name: *',
-  id: '0162c130-78be-11ea-9718-118a926974a4',
 });
 
 export const expectedExportedTimelineTemplate = (

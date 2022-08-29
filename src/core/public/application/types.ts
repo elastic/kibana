@@ -5,14 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import type { ButtonColor } from '@elastic/eui';
 import { Observable } from 'rxjs';
 import { History } from 'history';
 import { RecursiveReadonly } from '@kbn/utility-types';
 
 import type { CoreTheme } from '@kbn/core-theme-browser';
-import { MountPoint } from '../types';
-import { Capabilities } from './capabilities';
+import type { Capabilities } from '@kbn/core-capabilities-common';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import { PluginOpaqueId } from '../plugins';
 import { AppCategory } from '../../types';
 import { ScopedHistory } from './scoped_history';
@@ -762,6 +763,10 @@ export interface NavigateToUrlOptions {
    * if true will force a full page reload/refresh/assign, overriding the outcome of other url checks against current the location (effectively using `window.location.assign` instead of `push`)
    */
   forceRedirect?: boolean;
+  /**
+   * optional state to forward to the application
+   */
+  state?: unknown;
 }
 
 /** @public */

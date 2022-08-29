@@ -94,7 +94,8 @@ export const createCachedFieldValueFormatter = (
       return convert(cachedFormatter);
     }
 
-    if (dataView && !excludedFieldFormatsIds.includes(dataView.fieldFormatMap?.[fieldName]?.id)) {
+    const formatId = dataView?.fieldFormatMap?.[fieldName]?.id as FIELD_FORMAT_IDS;
+    if (dataView && !excludedFieldFormatsIds.includes(formatId)) {
       const field = dataView.fields.getByName(fieldName);
       if (field) {
         const formatter = dataView.getFormatterForField(field);

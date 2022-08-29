@@ -22,13 +22,14 @@ import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider, KibanaServices } from '@kbn/kibana-react-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { setIndexPatterns } from '@kbn/unified-search-plugin/public/services';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
+import { DataViewSpec } from '@kbn/data-views-plugin/public';
+import { rumFieldFormats } from './configurations/rum/field_formats';
 import { ObservabilityPublicPluginsStart } from '../../../plugin';
 import * as useAppDataViewHook from './hooks/use_app_data_view';
 import { DataViewContext, DataViewContextProvider } from './hooks/use_app_data_view';
@@ -365,12 +366,19 @@ export const mockHistory = {
   },
 };
 
+const fieldFormatMap: DataViewSpec['fieldFormats'] = {};
+
+rumFieldFormats.forEach(({ field, format }) => {
+  fieldFormatMap[field] = format;
+});
+
 export const mockDataView = createStubDataView({
   spec: {
     id: 'apm-*',
     title: 'apm-*',
     timeFieldName: '@timestamp',
     fields: JSON.parse(dataViewData.attributes.fields),
+    fieldFormats: fieldFormatMap,
   },
 });
 

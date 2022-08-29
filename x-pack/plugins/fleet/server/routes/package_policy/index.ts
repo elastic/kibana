@@ -14,6 +14,8 @@ import {
   DeletePackagePoliciesRequestSchema,
   UpgradePackagePoliciesRequestSchema,
   DryRunPackagePoliciesRequestSchema,
+  DeleteOnePackagePolicyRequestSchema,
+  BulkGetPackagePoliciesRequestSchema,
 } from '../../types';
 import type { FleetAuthzRouter } from '../security';
 
@@ -25,6 +27,9 @@ import {
   deletePackagePolicyHandler,
   upgradePackagePolicyHandler,
   dryRunUpgradePackagePolicyHandler,
+  getOrphanedPackagePolicies,
+  deleteOnePackagePolicyHandler,
+  bulkGetPackagePoliciesHandler,
 } from './handlers';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
@@ -40,6 +45,17 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     getPackagePoliciesHandler
   );
 
+  router.post(
+    {
+      path: PACKAGE_POLICY_API_ROUTES.BULK_GET_PATTERN,
+      validate: BulkGetPackagePoliciesRequestSchema,
+      fleetAuthz: {
+        integrations: { readIntegrationPolicies: true },
+      },
+    },
+    bulkGetPackagePoliciesHandler
+  );
+
   // Get one
   router.get(
     {
@@ -50,6 +66,17 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
     },
     getOnePackagePolicyHandler
+  );
+
+  router.get(
+    {
+      path: PACKAGE_POLICY_API_ROUTES.ORPHANED_INTEGRATION_POLICIES,
+      validate: {},
+      fleetAuthz: {
+        integrations: { readIntegrationPolicies: true },
+      },
+    },
+    getOrphanedPackagePolicies
   );
 
   // Create
@@ -86,6 +113,17 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
     },
     deletePackagePolicyHandler
+  );
+
+  router.delete(
+    {
+      path: PACKAGE_POLICY_API_ROUTES.INFO_PATTERN,
+      validate: DeleteOnePackagePolicyRequestSchema,
+      fleetAuthz: {
+        integrations: { writeIntegrationPolicies: true },
+      },
+    },
+    deleteOnePackagePolicyHandler
   );
 
   // Upgrade

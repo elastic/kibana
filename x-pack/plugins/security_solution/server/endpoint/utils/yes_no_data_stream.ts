@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
-import { SecuritySolutionRequestHandlerContext } from '../../types';
+import type { Logger } from '@kbn/core/server';
+import type { SecuritySolutionRequestHandlerContext } from '../../types';
 
 export const doLogsEndpointActionDsExists = async ({
   context,

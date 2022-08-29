@@ -31,6 +31,12 @@ export const manualPointEventAnnotation: ExpressionFunctionDefinition<
   }),
   inputTypes: ['null'],
   args: {
+    id: {
+      types: ['string'],
+      help: i18n.translate('eventAnnotation.manualAnnotation.args.id', {
+        defaultMessage: `Id for annotation`,
+      }),
+    },
     time: {
       types: ['string'],
       help: i18n.translate('eventAnnotation.manualAnnotation.args.time', {
@@ -100,20 +106,26 @@ export const manualRangeEventAnnotation: ExpressionFunctionDefinition<
   name: 'manual_range_event_annotation',
   aliases: [],
   type: 'manual_range_event_annotation',
-  help: i18n.translate('eventAnnotation.manualAnnotation.description', {
+  help: i18n.translate('eventAnnotation.rangeAnnotation.description', {
     defaultMessage: `Configure manual annotation`,
   }),
   inputTypes: ['null'],
   args: {
+    id: {
+      types: ['string'],
+      help: i18n.translate('eventAnnotation.rangeAnnotation.args.id', {
+        defaultMessage: `Id for annotation`,
+      }),
+    },
     time: {
       types: ['string'],
-      help: i18n.translate('eventAnnotation.manualAnnotation.args.time', {
+      help: i18n.translate('eventAnnotation.rangeAnnotation.args.time', {
         defaultMessage: `Timestamp for annotation`,
       }),
     },
     endTime: {
       types: ['string'],
-      help: i18n.translate('eventAnnotation.manualAnnotation.args.endTime', {
+      help: i18n.translate('eventAnnotation.rangeAnnotation.args.endTime', {
         defaultMessage: `Timestamp for range annotation`,
       }),
       required: false,
@@ -125,19 +137,19 @@ export const manualRangeEventAnnotation: ExpressionFunctionDefinition<
     },
     label: {
       types: ['string'],
-      help: i18n.translate('eventAnnotation.manualAnnotation.args.label', {
+      help: i18n.translate('eventAnnotation.rangeAnnotation.args.label', {
         defaultMessage: `The name of the annotation`,
       }),
     },
     color: {
       types: ['string'],
-      help: i18n.translate('eventAnnotation.manualAnnotation.args.color', {
+      help: i18n.translate('eventAnnotation.rangeAnnotation.args.color', {
         defaultMessage: 'The color of the line',
       }),
     },
     isHidden: {
       types: ['boolean'],
-      help: i18n.translate('eventAnnotation.manualAnnotation.args.isHidden', {
+      help: i18n.translate('eventAnnotation.rangeAnnotation.args.isHidden', {
         defaultMessage: `Switch to hide annotation`,
       }),
     },

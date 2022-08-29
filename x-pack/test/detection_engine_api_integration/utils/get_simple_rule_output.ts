@@ -24,7 +24,7 @@ export const getSimpleRuleOutput = (ruleId = 'rule-1', enabled = false): Partial
   interval: '5m',
   rule_id: ruleId,
   language: 'kuery',
-  output_index: '.siem-signals-default',
+  output_index: '',
   max_signals: 100,
   related_integrations: [],
   required_fields: [],

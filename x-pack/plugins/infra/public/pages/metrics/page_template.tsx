@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
-import { KibanaPageTemplateProps } from '@kbn/shared-ux-components';
+import type { NoDataConfig } from '@kbn/shared-ux-page-kibana-template';
+import React from 'react';
+import {
+  noMetricIndicesPromptDescription,
+  noMetricIndicesPromptPrimaryActionTitle,
+} from '../../components/empty_states';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 
 interface MetricsPageTemplateProps extends LazyObservabilityPageTemplateProps {
@@ -29,7 +33,7 @@ export const MetricsPageTemplate: React.FC<MetricsPageTemplateProps> = ({
     },
   } = useKibanaContextForPlugin();
 
-  const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = hasData
+  const noDataConfig: NoDataConfig | undefined = hasData
     ? undefined
     : {
         solution: i18n.translate('xpack.infra.metrics.noDataConfig.solutionName', {
@@ -37,13 +41,8 @@ export const MetricsPageTemplate: React.FC<MetricsPageTemplateProps> = ({
         }),
         action: {
           beats: {
-            title: i18n.translate('xpack.infra.metrics.noDataConfig.beatsCard.title', {
-              defaultMessage: 'Add a metrics integration',
-            }),
-            description: i18n.translate('xpack.infra.metrics.noDataConfig.beatsCard.description', {
-              defaultMessage:
-                'Use Beats to send metrics data to Elasticsearch. We make it easy with modules for many popular systems and apps.',
-            }),
+            title: noMetricIndicesPromptPrimaryActionTitle,
+            description: noMetricIndicesPromptDescription,
           },
         },
         docsLink: docLinks.links.observability.guide,

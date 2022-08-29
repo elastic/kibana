@@ -99,4 +99,28 @@ describe('useGetAppInfo', () => {
       })
     ).rejects.toThrow('An error occurred');
   });
+
+  it('it throws an error when fetch fails', async () => {
+    expect.assertions(1);
+    getAppInfoMock.mockImplementation(() => {
+      const error = new Error('An error occurred');
+      error.name = 'TypeError';
+      throw error;
+    });
+
+    const { result } = renderHook<UseGetAppInfoProps, UseGetAppInfo>(() =>
+      useGetAppInfo({
+        actionTypeId,
+        http,
+      })
+    );
+
+    await expect(() =>
+      act(async () => {
+        await result.current.fetchAppInfo(actionConnector);
+      })
+    ).rejects.toThrow(
+      'Failed to fetch. Check the URL or the CORS configuration of your ServiceNow instance.'
+    );
+  });
 });

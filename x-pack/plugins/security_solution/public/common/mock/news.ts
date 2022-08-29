@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RawNewsApiResponse } from '../components/news_feed/types';
+import type { RawNewsApiResponse } from '../components/news_feed/types';
 
 /** A (typed) sample raw API response from a news feed */
 export const rawNewsApiResponse: RawNewsApiResponse = {

@@ -10,9 +10,13 @@ import styled from 'styled-components';
 import React from 'react';
 import { EndpointIsolateSuccess } from '../../../../../common/components/endpoint/host_isolation';
 import { HostIsolationPanel } from '../../../../../detections/components/host_isolation';
-import { BrowserFields, TimelineEventsDetailsItem } from '../../../../../../common/search_strategy';
-import { ExpandableEvent, HandleOnEventClosed } from '../expandable_event';
-import { HostRisk } from '../../../../../risk_score/containers';
+import type {
+  BrowserFields,
+  TimelineEventsDetailsItem,
+} from '../../../../../../common/search_strategy';
+import type { HandleOnEventClosed } from '../expandable_event';
+import { ExpandableEvent } from '../expandable_event';
+import type { HostRisk } from '../../../../../risk_score/containers';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflow {
@@ -23,7 +27,7 @@ const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
     .euiFlyoutBody__overflowContent {
       flex: 1;
       overflow: hidden;
-      padding: ${({ theme }) => `0 ${theme.eui.paddingSizes.m} ${theme.eui.paddingSizes.m}`};
+      padding: ${({ theme }) => `0 ${theme.eui.euiSizeM} ${theme.eui.euiSizeM}`};
     }
   }
 `;

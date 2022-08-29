@@ -7,7 +7,8 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useKibana } from '../../lib/kibana';
-import { useMessagesStorage, UseMessagesStorage } from './use_messages_storage';
+import type { UseMessagesStorage } from './use_messages_storage';
+import { useMessagesStorage } from './use_messages_storage';
 
 jest.mock('../../lib/kibana');
 

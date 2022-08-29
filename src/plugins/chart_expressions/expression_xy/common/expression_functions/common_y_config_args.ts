@@ -6,22 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { YAxisModes } from '../constants';
 import { strings } from '../i18n';
-import { YConfigFn, ExtendedYConfigFn } from '../types';
+import { DataDecorationConfigFn, ReferenceLineDecorationConfigFn } from '../types';
 
-type CommonYConfigFn = YConfigFn | ExtendedYConfigFn;
+type CommonDecorationConfigFn = DataDecorationConfigFn | ReferenceLineDecorationConfigFn;
 
-export const commonYConfigArgs: CommonYConfigFn['args'] = {
+export const commonDecorationConfigArgs: CommonDecorationConfigFn['args'] = {
   forAccessor: {
     types: ['string'],
     help: strings.getForAccessorHelp(),
   },
-  axisMode: {
+  axisId: {
     types: ['string'],
-    options: [...Object.values(YAxisModes)],
-    help: strings.getAxisModeHelp(),
-    strict: true,
+    help: strings.getAxisIdHelp(),
   },
   color: {
     types: ['string'],

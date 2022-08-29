@@ -7,16 +7,27 @@
  */
 import execa from 'execa';
 import { readFileSync } from 'fs';
-import { resolve } from 'path';
+import Path from 'path';
 import { REPO_ROOT } from '@kbn/utils';
 import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
 
 import { FTR_CONFIGS_MANIFEST_PATHS } from './ftr_configs_manifest';
 
+const THIS_PATH = Path.resolve(
+  REPO_ROOT,
+  'packages/kbn-test/src/functional_test_runner/lib/config/run_check_ftr_configs_cli.ts'
+);
+const THIS_REL = Path.relative(REPO_ROOT, THIS_PATH);
+
+const IGNORED_PATHS = [
+  THIS_PATH,
+  Path.resolve(REPO_ROOT, 'packages/kbn-test/src/jest/run_check_jest_configs_cli.ts'),
+];
+
 export async function runCheckFtrConfigsCli() {
   run(
-    async () => {
+    async ({ log }) => {
       const { stdout } = await execa('git', [
         'ls-tree',
         '--full-tree',
@@ -28,10 +39,10 @@ export async function runCheckFtrConfigsCli() {
       const files = stdout
         .trim()
         .split('\n')
-        .map((file) => resolve(REPO_ROOT, file));
+        .map((file) => Path.resolve(REPO_ROOT, file));
 
       const possibleConfigs = files.filter((file) => {
-        if (file.includes('run_check_ftr_configs_cli.ts')) {
+        if (IGNORED_PATHS.includes(file)) {
           return false;
         }
 
@@ -51,17 +62,24 @@ export async function runCheckFtrConfigsCli() {
           return false;
         }
 
+        if (file.match(/jest.config.(t|j)s$/)) {
+          return false;
+        }
+
         return readFileSync(file)
           .toString()
           .match(/(testRunner)|(testFiles)/);
       });
 
-      for (const config of possibleConfigs) {
-        if (!FTR_CONFIGS_MANIFEST_PATHS.includes(config)) {
-          throw createFailError(
-            `${config} looks like a new FTR config. Please add it to .buildkite/ftr_configs.yml. If it's not an FTR config, please contact #kibana-operations`
-          );
-        }
+      const invalid = possibleConfigs.filter((path) => !FTR_CONFIGS_MANIFEST_PATHS.includes(path));
+      if (invalid.length) {
+        const invalidList = invalid.map((path) => Path.relative(REPO_ROOT, path)).join('\n  - ');
+        log.error(
+          `The following files look like FTR configs which are not listed in .buildkite/ftr_configs.yml:\n  - ${invalidList}`
+        );
+        throw createFailError(
+          `Please add the listed paths to .buildkite/ftr_configs.yml. If it's not an FTR config, you can add it to the IGNORED_PATHS in ${THIS_REL} or contact #kibana-operations`
+        );
       }
     },
     {

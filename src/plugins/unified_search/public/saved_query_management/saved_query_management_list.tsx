@@ -48,6 +48,10 @@ interface SelectableProps {
   checked?: 'on' | 'off' | undefined;
 }
 
+interface RenderOptionProps extends SelectableProps {
+  attributes?: SavedQueryAttributes;
+}
+
 interface DurationRange {
   end: ShortDate;
   label?: string;
@@ -206,7 +210,7 @@ export function SavedQueryManagementList({
     return savedQueriesReordered.map((savedQuery) => {
       return {
         key: savedQuery.id,
-        label: itemLabel(savedQuery.attributes),
+        label: savedQuery.attributes.title,
         title: itemTitle(savedQuery.attributes, format),
         'data-test-subj': `load-saved-query-${savedQuery.attributes.title}-button`,
         value: savedQuery.id,
@@ -215,6 +219,9 @@ export function SavedQueryManagementList({
           (selectedSavedQuery && savedQuery.id === selectedSavedQuery.id)
             ? 'on'
             : undefined,
+        data: {
+          attributes: savedQuery.attributes,
+        },
         append: !!showSaveQuery && (
           <EuiButtonIcon
             css={css`
@@ -237,6 +244,10 @@ export function SavedQueryManagementList({
         ),
       };
     }) as unknown as SelectableProps[];
+  };
+
+  const renderOption = (option: RenderOptionProps) => {
+    return <>{option.attributes ? itemLabel(option.attributes) : option.label}</>;
   };
 
   const canEditSavedObjects = application.capabilities.savedObjectsManagement.edit;
@@ -274,6 +285,7 @@ export function SavedQueryManagementList({
               listProps={{
                 isVirtualized: true,
               }}
+              renderOption={renderOption}
             >
               {(list, search) => (
                 <>

@@ -18,6 +18,9 @@ export const FLEET_SYNTHETICS_PACKAGE = 'synthetics';
 export const FLEET_KUBERNETES_PACKAGE = 'kubernetes';
 export const FLEET_CLOUD_SECURITY_POSTURE_PACKAGE = 'cloud_security_posture';
 
+export const PACKAGE_TEMPLATE_SUFFIX = '@package';
+export const USER_SETTINGS_TEMPLATE_SUFFIX = '@custom';
+
 export const FLEET_ELASTIC_AGENT_DETAILS_DASHBOARD_ID =
   'elastic_agent-f47f18cc-9c7d-4278-b2ea-a6dee816d395';
 /*

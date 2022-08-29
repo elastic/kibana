@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.saveDashboard(DASHBOARD_NAME);
     });
 
-    describe('panel titles - by value', () => {
+    describe('by value', () => {
       it('new panel by value has empty title', async () => {
         await PageObjects.lens.createAndAddLensFromDashboard({});
         const newPanelTitle = (await PageObjects.dashboard.getPanelTitles())[0];
@@ -103,7 +103,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('panel titles - by reference', () => {
+    describe('by reference', () => {
       it('linking a by value panel with a custom title to the library will overwrite the custom title with the library title', async () => {
         await dashboardPanelActions.setCustomPanelTitle(CUSTOM_TITLE);
         await dashboardPanelActions.saveToLibrary(LIBRARY_TITLE_FOR_CUSTOM_TESTS);

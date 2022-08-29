@@ -7,14 +7,15 @@
 
 import { errors } from '@kbn/screenshotting-plugin/common';
 import {
-  UnknownError,
-  ReportingError,
   BrowserCouldNotLaunchError,
-  BrowserUnexpectedlyClosedError,
   BrowserScreenshotError,
-  PdfWorkerOutOfMemoryError,
-  VisualReportingSoftDisabledError,
+  BrowserUnexpectedlyClosedError,
+  DisallowedOutgoingUrl,
   InvalidLayoutParametersError,
+  PdfWorkerOutOfMemoryError,
+  ReportingError,
+  UnknownError,
+  VisualReportingSoftDisabledError,
 } from '.';
 
 /**
@@ -33,6 +34,8 @@ export function mapToReportingError(error: unknown): ReportingError {
   switch (true) {
     case error instanceof errors.InvalidLayoutParametersError:
       return new InvalidLayoutParametersError((error as Error).message);
+    case error instanceof errors.DisallowedOutgoingUrl:
+      return new DisallowedOutgoingUrl((error as Error).message);
     case error instanceof errors.BrowserClosedUnexpectedly:
       return new BrowserUnexpectedlyClosedError((error as Error).message);
     case error instanceof errors.FailedToCaptureScreenshot:

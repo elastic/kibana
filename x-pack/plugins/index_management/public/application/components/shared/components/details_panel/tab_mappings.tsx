@@ -18,7 +18,7 @@ export const TabMappings: React.FunctionComponent<Props> = ({ mappings }) => {
   if (mappings && Object.keys(mappings).length) {
     return (
       <div data-test-subj="mappingsTabContent">
-        <EuiCodeBlock lang="json" isCopyable={true}>
+        <EuiCodeBlock isCopyable={true} language="json">
           {JSON.stringify(mappings, null, 2)}
         </EuiCodeBlock>
       </div>

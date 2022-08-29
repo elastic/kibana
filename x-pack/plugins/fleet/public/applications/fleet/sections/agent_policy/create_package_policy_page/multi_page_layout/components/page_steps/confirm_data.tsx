@@ -12,17 +12,35 @@ import { useStartServices } from '../../../../../../hooks';
 
 import {
   ConfirmIncomingDataWithPreview,
+  ConfirmIncomingDataStandalone,
   CreatePackagePolicyFinalBottomBar,
   NotObscuredByBottomBar,
 } from '..';
 
 export const ConfirmDataPageStep: React.FC<MultiPageStepLayoutProps> = (props) => {
-  const { enrolledAgentIds, packageInfo } = props;
+  const { enrolledAgentIds, packageInfo, isManaged } = props;
   const core = useStartServices();
 
   const [agentDataConfirmed, setAgentDataConfirmed] = useState(false);
   const { docLinks } = core;
   const troubleshootLink = docLinks.links.fleet.troubleshooting;
+
+  const bottomBar = (
+    <>
+      <NotObscuredByBottomBar />
+      <CreatePackagePolicyFinalBottomBar pkgkey={`${packageInfo.name}-${packageInfo.version}`} />
+    </>
+  );
+
+  if (!isManaged) {
+    return (
+      <>
+        <ConfirmIncomingDataStandalone troubleshootLink={troubleshootLink} />
+        {bottomBar}
+      </>
+    );
+  }
+
   return (
     <>
       <ConfirmIncomingDataWithPreview
@@ -33,14 +51,7 @@ export const ConfirmDataPageStep: React.FC<MultiPageStepLayoutProps> = (props) =
         troubleshootLink={troubleshootLink}
       />
 
-      {!!agentDataConfirmed && (
-        <>
-          <NotObscuredByBottomBar />
-          <CreatePackagePolicyFinalBottomBar
-            pkgkey={`${packageInfo.name}-${packageInfo.version}`}
-          />
-        </>
-      )}
+      {!!agentDataConfirmed && bottomBar}
     </>
   );
 };

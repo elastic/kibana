@@ -13,7 +13,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { PACKAGES_SAVED_OBJECT_TYPE, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../common';
-import type { PackagePolicySOAttributes, RegistryPackage } from '../../../../common';
+import type { PackagePolicySOAttributes, RegistryPackage } from '../../../../common/types';
 
 import * as Registry from '../registry';
 
@@ -42,7 +42,6 @@ describe('When using EPM `get` services', () => {
             namespace: 'default',
             policy_id: '22222-22222-2222-2222',
             enabled: true,
-            output_id: '',
             inputs: [],
             package: { name: 'system', title: 'System', version: '0.10.4' },
             revision: 1,
@@ -66,7 +65,6 @@ describe('When using EPM `get` services', () => {
             package: { name: 'system', title: 'System', version: '0.10.4' },
             enabled: true,
             policy_id: '11111-111111-11111-11111', // << duplicate id with plicy below
-            output_id: 'ca111b80-43c1-11eb-84bf-7177b74381c5',
             inputs: [],
             revision: 1,
             created_at: '2020-12-21T19:22:04.902Z',
@@ -89,7 +87,6 @@ describe('When using EPM `get` services', () => {
             namespace: 'default',
             policy_id: '11111-111111-11111-11111',
             enabled: true,
-            output_id: '',
             inputs: [],
             package: { name: 'system', title: 'System', version: '0.10.4' },
             revision: 1,
@@ -113,7 +110,6 @@ describe('When using EPM `get` services', () => {
             namespace: 'default',
             policy_id: '33333-33333-333333-333333',
             enabled: true,
-            output_id: '',
             inputs: [],
             package: { name: 'system', title: 'System', version: '0.10.4' },
             revision: 1,
@@ -363,6 +359,32 @@ describe('When using EPM `get` services', () => {
             savedObjectsClient: soClient,
             pkgName: 'my-package',
             pkgVersion: '1.0.0',
+            skipArchive: true,
+          })
+        ).resolves.toMatchObject({
+          latestVersion: '1.0.0',
+          status: 'not_installed',
+        });
+
+        expect(MockRegistry.getRegistryPackage).not.toHaveBeenCalled();
+      });
+
+      // when calling the get package endpoint without a package version we
+      // were previously incorrectly getting the info from archive
+      it('avoids loading archive when skipArchive = true and no version supplied', async () => {
+        const soClient = savedObjectsClientMock.create();
+        soClient.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+        MockRegistry.fetchInfo.mockResolvedValue({
+          name: 'my-package',
+          version: '1.0.0',
+          assets: [],
+        } as unknown as RegistryPackage);
+
+        await expect(
+          getPackageInfo({
+            savedObjectsClient: soClient,
+            pkgName: 'my-package',
+            pkgVersion: '',
             skipArchive: true,
           })
         ).resolves.toMatchObject({

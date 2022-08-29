@@ -9,8 +9,7 @@
 import { memoize } from 'lodash';
 
 import dateMath from '@kbn/datemath';
-import { buildEsQuery } from '@kbn/es-query';
-import { TimeRange } from '@kbn/data-plugin/public';
+import { buildEsQuery, type TimeRange } from '@kbn/es-query';
 import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 
 import {
@@ -18,7 +17,7 @@ import {
   OptionsListResponse,
   OptionsListRequestBody,
   OptionsListField,
-} from '../../control_types/options_list/types';
+} from '../../options_list/types';
 import { ControlsHTTPService } from '../http';
 import { ControlsDataService } from '../data';
 import { ControlsPluginStartDeps } from '../../types';
@@ -87,7 +86,7 @@ class OptionsListService implements ControlsOptionsListService {
       ...passThroughProps,
       filters: esFilters,
       fieldName: field.name,
-      fieldSpec: field.toSpec?.(),
+      fieldSpec: field,
       textFieldName: (field as OptionsListField).textFieldName,
     };
   };

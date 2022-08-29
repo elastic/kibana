@@ -17,8 +17,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import useDebounce from 'react-use/lib/useDebounce';
 import moment from 'moment';
+import { i18n } from '@kbn/i18n';
 import * as TEST_SUBJECTS from './test_subjects';
-import * as TEXT from './translations';
 import { RulesBulkActionsMenu } from './rules_bulk_actions_menu';
 
 interface RulesTableToolbarProps {
@@ -33,6 +33,7 @@ interface RulesTableToolbarProps {
   searchValue: string;
   isSearching: boolean;
   lastModified: string | null;
+  canUpdate: boolean;
 }
 
 interface CounterProps {
@@ -65,6 +66,7 @@ export const RulesTableHeader = ({
   searchValue,
   isSearching,
   lastModified,
+  canUpdate,
 }: RulesTableToolbarProps) => (
   <div>
     {lastModified && <LastModificationLabel lastModified={lastModified} />}
@@ -77,6 +79,7 @@ export const RulesTableHeader = ({
         select={selectAll}
       />
       <BulkMenu
+        canUpdate={canUpdate}
         bulkEnable={bulkEnable}
         bulkDisable={bulkDisable}
         selectedRulesCount={selectedRulesCount}
@@ -113,20 +116,24 @@ const BulkMenu = ({
   bulkEnable,
   bulkDisable,
   selectedRulesCount,
-}: Pick<RulesTableToolbarProps, 'bulkDisable' | 'bulkEnable' | 'selectedRulesCount'>) => (
+  canUpdate,
+}: Pick<
+  RulesTableToolbarProps,
+  'bulkDisable' | 'bulkEnable' | 'selectedRulesCount' | 'canUpdate'
+>) => (
   <EuiFlexItem grow={false}>
     <RulesBulkActionsMenu
       items={[
         {
           icon: 'eye',
-          disabled: !selectedRulesCount,
+          disabled: !selectedRulesCount || !canUpdate,
           children: <ActivateRulesMenuItemText count={selectedRulesCount} />,
           'data-test-subj': TEST_SUBJECTS.CSP_RULES_TABLE_BULK_ENABLE_BUTTON,
           onClick: bulkEnable,
         },
         {
           icon: 'eyeClosed',
-          disabled: !selectedRulesCount,
+          disabled: !selectedRulesCount || !canUpdate,
           children: <DeactivateRulesMenuItemText count={selectedRulesCount} />,
           'data-test-subj': TEST_SUBJECTS.CSP_RULES_TABLE_BULK_DISABLE_BUTTON,
           onClick: bulkDisable,
@@ -151,7 +158,9 @@ const SearchField = ({
     <EuiFlexItem grow={true} style={{ alignItems: 'flex-end' }}>
       <EuiFieldSearch
         isLoading={isSearching}
-        placeholder={TEXT.SEARCH}
+        placeholder={i18n.translate('xpack.csp.rules.rulesTable.searchPlaceholder', {
+          defaultMessage: 'Search',
+        })}
         value={localValue}
         onChange={(e) => setLocalValue(e.target.value)}
         style={{ minWidth: 150 }}
@@ -233,7 +242,10 @@ const RefreshButton = ({ onClick }: ButtonProps) => (
       iconType={'refresh'}
       data-test-subj={TEST_SUBJECTS.CSP_RULES_TABLE_REFRESH_BUTTON}
     >
-      {TEXT.REFRESH}
+      <FormattedMessage
+        id="xpack.csp.rules.rulesTable.refreshButtonLabel"
+        defaultMessage="Refresh"
+      />
     </EuiButtonEmpty>
   </EuiFlexItem>
 );

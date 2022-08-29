@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { IconType } from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import React from 'react';
 
-import { RowRendererId, RowRenderer } from '../../../../../../../common/types/timeline';
+import type { RowRenderer } from '../../../../../../../common/types/timeline';
+import { RowRendererId } from '../../../../../../../common/types/timeline';
 
 import { RowRendererContainer } from '../row_renderer';
 import { AuditdGenericDetails } from './generic_details';

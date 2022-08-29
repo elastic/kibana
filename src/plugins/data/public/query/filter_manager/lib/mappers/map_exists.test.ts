@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { buildExistsFilter, buildEmptyFilter, DataViewFieldBase } from '@kbn/es-query';
 import { mapExists } from './map_exists';
 import { mapQueryString } from './map_query_string';
-import { buildExistsFilter, buildEmptyFilter } from '../../../../../common';
-import { DataViewFieldBase } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 
 describe('filter manager utilities', () => {

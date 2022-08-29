@@ -7,15 +7,15 @@
 
 import { get } from 'lodash/fp';
 
-import { ChromeBreadcrumb } from '@kbn/core/public';
+import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { hostsModel } from '../../store';
 import { HostsTableType } from '../../store/model';
 import { getHostDetailsUrl } from '../../../common/components/link_to/redirect_to_hosts';
 
 import * as i18n from '../translations';
-import { HostRouteSpyState } from '../../../common/utils/route/types';
+import type { HostRouteSpyState } from '../../../common/utils/route/types';
 import { SecurityPageName } from '../../../app/types';
-import { GetSecuritySolutionUrl } from '../../../common/components/link_to';
+import type { GetSecuritySolutionUrl } from '../../../common/components/link_to';
 
 export const type = hostsModel.HostsType.details;
 
@@ -25,7 +25,6 @@ const TabNameMappedToI18nKey: Record<HostsTableType, string> = {
   [HostsTableType.uncommonProcesses]: i18n.NAVIGATION_UNCOMMON_PROCESSES_TITLE,
   [HostsTableType.anomalies]: i18n.NAVIGATION_ANOMALIES_TITLE,
   [HostsTableType.events]: i18n.NAVIGATION_EVENTS_TITLE,
-  [HostsTableType.alerts]: i18n.NAVIGATION_ALERTS_TITLE,
   [HostsTableType.risk]: i18n.NAVIGATION_HOST_RISK_TITLE,
   [HostsTableType.sessions]: i18n.NAVIGATION_SESSIONS_TITLE,
 };

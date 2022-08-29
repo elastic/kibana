@@ -10,7 +10,7 @@ import { share } from 'rxjs/operators';
 import { HttpStart, IUiSettingsClient } from '@kbn/core/public';
 import { PersistableStateService, VersionedState } from '@kbn/kibana-utils-plugin/common';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { buildEsQuery } from '@kbn/es-query';
+import { buildEsQuery, TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { FilterManager } from './filter_manager';
 import { createAddToQueryLog } from './lib';
@@ -24,7 +24,7 @@ import {
 import { getQueryState, QueryState } from './query_state';
 import type { QueryStringContract } from './query_string';
 import { QueryStringManager } from './query_string';
-import { getEsQueryConfig, TimeRange } from '../../common';
+import { getEsQueryConfig } from '../../common';
 import { getUiSettings } from '../services';
 import { NowProviderInternalContract } from '../now_provider';
 import {

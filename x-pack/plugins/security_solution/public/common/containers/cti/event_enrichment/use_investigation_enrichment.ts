@@ -10,7 +10,7 @@ import { useDispatch } from 'react-redux';
 import { isEmpty, isEqual } from 'lodash';
 import usePrevious from 'react-use/lib/usePrevious';
 
-import { EventFields } from '../../../../../common/search_strategy/security_solution/cti';
+import type { EventFields } from '../../../../../common/search_strategy/security_solution/cti';
 import {
   DEFAULT_EVENT_ENRICHMENT_FROM,
   DEFAULT_EVENT_ENRICHMENT_TO,

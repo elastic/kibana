@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { type Subject, ReplaySubject } from 'rxjs';
 import { loggerMock } from '@kbn/logging-mocks';
 import { RuleDataService } from './rule_data_plugin_service';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
@@ -18,8 +19,16 @@ jest.mock('../rule_data_client/rule_data_client', () => ({
 }));
 
 describe('ruleDataPluginService', () => {
+  let pluginStop$: Subject<void>;
+
   beforeEach(() => {
     jest.resetAllMocks();
+    pluginStop$ = new ReplaySubject(1);
+  });
+
+  afterEach(() => {
+    pluginStop$.next();
+    pluginStop$.complete();
   });
 
   describe('isRegistrationContextDisabled', () => {
@@ -34,6 +43,7 @@ describe('ruleDataPluginService', () => {
         isWriteEnabled: true,
         disabledRegistrationContexts: ['observability.logs'],
         isWriterCacheEnabled: true,
+        pluginStop$,
       });
       expect(ruleDataService.isRegistrationContextDisabled('observability.logs')).toBe(true);
     });
@@ -49,6 +59,7 @@ describe('ruleDataPluginService', () => {
         isWriteEnabled: true,
         disabledRegistrationContexts: ['observability.logs'],
         isWriterCacheEnabled: true,
+        pluginStop$,
       });
       expect(ruleDataService.isRegistrationContextDisabled('observability.apm')).toBe(false);
     });
@@ -66,6 +77,7 @@ describe('ruleDataPluginService', () => {
         isWriteEnabled: true,
         disabledRegistrationContexts: ['observability.logs'],
         isWriterCacheEnabled: true,
+        pluginStop$,
       });
 
       expect(ruleDataService.isWriteEnabled('observability.logs')).toBe(false);
@@ -84,6 +96,7 @@ describe('ruleDataPluginService', () => {
         isWriteEnabled: true,
         disabledRegistrationContexts: ['observability.logs'],
         isWriterCacheEnabled: true,
+        pluginStop$,
       });
       const indexOptions = {
         feature: AlertConsumers.LOGS,

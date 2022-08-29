@@ -68,7 +68,7 @@ describe('HeadlessChromiumDriverFactory', () => {
   });
 
   describe('createPage', () => {
-    it('returns browser driver, unexpected process exit observable, and close callback', async () => {
+    it('returns browser driver, error observable, and close callback', async () => {
       await expect(
         factory
           .createPage({ openUrlTimeout: 0, defaultViewport: DEFAULT_VIEWPORT })
@@ -77,7 +77,7 @@ describe('HeadlessChromiumDriverFactory', () => {
       ).resolves.toEqual(
         expect.objectContaining({
           driver: expect.anything(),
-          unexpectedExit$: expect.anything(),
+          error$: expect.anything(),
           close: expect.anything(),
         })
       );

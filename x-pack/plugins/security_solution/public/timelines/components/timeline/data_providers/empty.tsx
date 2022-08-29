@@ -9,7 +9,7 @@ import { EuiBadge, EuiText } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 
-import { BrowserFields } from '../../../../common/containers/source';
+import type { BrowserFields } from '../../../../common/containers/source';
 import { AndOrBadge } from '../../../../common/components/and_or_badge';
 import { AddDataProviderPopover } from './add_data_provider_popover';
 
@@ -91,7 +91,7 @@ export const Empty = React.memo<Props>(({ showSmallMsg = false, browserFields, t
     {!showSmallMsg && (
       <>
         <NoWrap>
-          <Text color="subdued" size="s">
+          <Text color="subdued" size="s" className="timeline-drop-area-empty__text">
             {i18n.DROP_ANYTHING}
           </Text>
           <HighlightedBackground>
@@ -99,11 +99,11 @@ export const Empty = React.memo<Props>(({ showSmallMsg = false, browserFields, t
               {i18n.HIGHLIGHTED}
             </BadgeHighlighted>
           </HighlightedBackground>
-          <Text color="subdued" size="s">
+          <Text color="subdued" size="s" className="timeline-drop-area-empty__text">
             {i18n.HERE_TO_BUILD_AN}
           </Text>
           <AndOrBadge type="or" />
-          <Text color="subdued" size="s">
+          <Text color="subdued" size="s" className="timeline-drop-area-empty__text">
             {i18n.QUERY}
           </Text>
         </NoWrap>

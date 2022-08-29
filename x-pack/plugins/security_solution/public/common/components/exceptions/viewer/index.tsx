@@ -23,8 +23,9 @@ import { useKibana } from '../../../lib/kibana';
 import { Panel } from '../../panel';
 import { Loader } from '../../loader';
 import { ExceptionsViewerHeader } from './exceptions_viewer_header';
-import { ExceptionListItemIdentifiers, Filter } from '../types';
-import { allExceptionItemsReducer, State, ViewerFlyoutName } from './reducer';
+import type { ExceptionListItemIdentifiers, Filter } from '../types';
+import type { State, ViewerFlyoutName } from './reducer';
+import { allExceptionItemsReducer } from './reducer';
 
 import { ExceptionsViewerPagination } from './exceptions_pagination';
 import { ExceptionsViewerUtility } from './exceptions_utility';
@@ -56,6 +57,7 @@ interface ExceptionsViewerProps {
   ruleId: string;
   ruleName: string;
   ruleIndices: string[];
+  dataViewId?: string;
   exceptionListsMeta: ExceptionListIdentifiers[];
   availableListTypes: ExceptionListTypeEnum[];
   commentsAccordionId: string;
@@ -66,6 +68,7 @@ const ExceptionsViewerComponent = ({
   ruleId,
   ruleName,
   ruleIndices,
+  dataViewId,
   exceptionListsMeta,
   availableListTypes,
   commentsAccordionId,
@@ -258,7 +261,6 @@ const ExceptionsViewerComponent = ({
         lists: exceptionListsMeta,
         exception,
       });
-
       setCurrentModal('editException');
     },
     [setCurrentModal, exceptionListsMeta]
@@ -326,8 +328,7 @@ const ExceptionsViewerComponent = ({
     `security/detections/rules/id/${encodeURI(ruleId)}/edit`
   );
 
-  const showEmpty: boolean =
-    !isInitLoading && !loadingList && totalEndpointItems === 0 && totalDetectionsItems === 0;
+  const showEmpty: boolean = !isInitLoading && !loadingList && exceptions.length === 0;
 
   const showNoResults: boolean =
     exceptions.length === 0 && (totalEndpointItems > 0 || totalDetectionsItems > 0);
@@ -341,6 +342,7 @@ const ExceptionsViewerComponent = ({
             ruleName={ruleName}
             ruleId={ruleId}
             ruleIndices={ruleIndices}
+            dataViewId={dataViewId}
             exceptionListType={exceptionListTypeToEdit}
             exceptionItem={exceptionToEdit}
             onCancel={handleOnCancelExceptionModal}
@@ -353,6 +355,7 @@ const ExceptionsViewerComponent = ({
         <AddExceptionFlyout
           ruleName={ruleName}
           ruleIndices={ruleIndices}
+          dataViewId={dataViewId}
           ruleId={ruleId}
           exceptionListType={exceptionListTypeToEdit}
           onCancel={handleOnCancelExceptionModal}
@@ -392,7 +395,6 @@ const ExceptionsViewerComponent = ({
           isInitLoading={isInitLoading}
           exceptions={exceptions}
           loadingItemIds={loadingItemIds}
-          commentsAccordionId={commentsAccordionId}
           onDeleteException={handleDeleteException}
           onEditExceptionItem={handleEditException}
         />

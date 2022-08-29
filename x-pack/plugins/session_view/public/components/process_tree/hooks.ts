@@ -41,7 +41,7 @@ export class ProcessImpl implements Process {
   children: Process[];
   parent: Process | undefined;
   autoExpand: boolean;
-  searchMatched: string | null;
+  searchMatched: number[] | null;
   orphans: Process[];
 
   constructor(id: string) {
@@ -140,7 +140,7 @@ export class ProcessImpl implements Process {
   }
 
   hasOutput() {
-    return !!this.findEventByAction(this.events, EventAction.output);
+    return !!this.findEventByAction(this.events, EventAction.text_output);
   }
 
   hasAlerts() {

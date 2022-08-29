@@ -6,13 +6,13 @@
  */
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
-import {
+import type {
   NetworkKpiQueries,
   NetworkKpiDnsStrategyResponse,
   NetworkKpiDnsRequestOptions,
 } from '../../../../../../../common/search_strategy/security_solution/network';
 import { inspectStringifyObject } from '../../../../../../utils/build_query';
-import { SecuritySolutionFactory } from '../../../types';
+import type { SecuritySolutionFactory } from '../../../types';
 import { buildDnsQuery } from './query.network_kpi_dns.dsl';
 
 export const networkKpiDns: SecuritySolutionFactory<NetworkKpiQueries.dns> = {

@@ -53,14 +53,26 @@ export const ManifestLocationCodec = t.interface({
   status: LocationStatusCodec,
 });
 
-export const ServiceLocationCodec = t.interface({
-  id: t.string,
-  label: t.string,
-  geo: LocationGeoCodec,
-  url: t.string,
-  isServiceManaged: t.boolean,
-  status: LocationStatusCodec,
-});
+export const ServiceLocationCodec = t.intersection([
+  t.interface({
+    id: t.string,
+    label: t.string,
+    isServiceManaged: t.boolean,
+  }),
+  t.partial({
+    url: t.string,
+    geo: LocationGeoCodec,
+    status: LocationStatusCodec,
+    isInvalid: t.boolean,
+  }),
+]);
+
+export const PublicLocationCodec = t.intersection([
+  ServiceLocationCodec,
+  t.interface({ url: t.string }),
+]);
+
+export const PublicLocationsCodec = t.array(PublicLocationCodec);
 
 export const MonitorServiceLocationCodec = t.intersection([
   t.interface({
@@ -71,6 +83,7 @@ export const MonitorServiceLocationCodec = t.intersection([
     label: t.string,
     geo: LocationGeoCodec,
     url: t.string,
+    isInvalid: t.boolean,
   }),
 ]);
 
@@ -129,3 +142,5 @@ export type ServiceLocationsApiResponse = t.TypeOf<typeof ServiceLocationsApiRes
 export type ServiceLocationErrors = t.TypeOf<typeof ServiceLocationErrors>;
 export type ThrottlingOptions = t.TypeOf<typeof ThrottlingOptionsCodec>;
 export type Locations = t.TypeOf<typeof LocationsCodec>;
+export type PublicLocation = t.TypeOf<typeof PublicLocationCodec>;
+export type PublicLocations = t.TypeOf<typeof PublicLocationsCodec>;

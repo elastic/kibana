@@ -22,6 +22,7 @@ import moment from 'moment';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type {
   ManualPointEventAnnotationArgs,
+  ManualPointEventAnnotationOutput,
   ManualRangeEventAnnotationOutput,
 } from '@kbn/event-annotation-plugin/common';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
@@ -50,7 +51,7 @@ export interface AnnotationsProps {
   formatter?: FieldFormat;
   isHorizontal: boolean;
   paddingMap: Partial<Record<Position, number>>;
-  hide?: boolean;
+  simpleView?: boolean;
   minInterval?: number;
   isBarChart?: boolean;
   outsideDimension: number;
@@ -63,7 +64,10 @@ const groupVisibleConfigsByInterval = (
 ) => {
   return layers
     .flatMap(({ annotations }) =>
-      annotations.filter((a) => !a.isHidden && a.type === 'manual_point_event_annotation')
+      annotations.filter(
+        (a): a is ManualPointEventAnnotationOutput =>
+          !a.isHidden && a.type === 'manual_point_event_annotation'
+      )
     )
     .sort((a, b) => moment(a.time).valueOf() - moment(b.time).valueOf())
     .reduce<Record<string, ManualPointEventAnnotationArgs[]>>((acc, current) => {
@@ -155,7 +159,7 @@ export const getAnnotationsGroupedByInterval = (
     collectiveConfig = {
       ...configArr[0],
       roundedTimestamp: Number(roundedTimestamp),
-      axisMode: 'bottom',
+      position: 'bottom',
     };
     if (configArr.length > 1) {
       const commonStyles = getCommonStyles(configArr);
@@ -179,7 +183,7 @@ export const Annotations = ({
   formatter,
   isHorizontal,
   paddingMap,
-  hide,
+  simpleView,
   minInterval,
   isBarChart,
   outsideDimension,
@@ -198,7 +202,7 @@ export const Annotations = ({
         const header =
           formatter?.convert(isGrouped ? roundedTimestamp : exactTimestamp) ||
           moment(isGrouped ? roundedTimestamp : exactTimestamp).toISOString();
-        const strokeWidth = hide ? 1 : annotation.lineWidth || 1;
+        const strokeWidth = simpleView ? 1 : annotation.lineWidth || 1;
         const dataValue = isGrouped
           ? moment(
               isBarChart && minInterval ? roundedTimestamp + minInterval / 2 : roundedTimestamp
@@ -210,7 +214,7 @@ export const Annotations = ({
             key={id}
             domainType={AnnotationDomainType.XDomain}
             marker={
-              !hide ? (
+              !simpleView ? (
                 <Marker
                   {...{
                     config: annotation,
@@ -223,7 +227,7 @@ export const Annotations = ({
               ) : undefined
             }
             markerBody={
-              !hide ? (
+              !simpleView ? (
                 <MarkerBody
                   label={
                     annotation.textVisibility && !hasReducedPadding ? annotation.label : undefined

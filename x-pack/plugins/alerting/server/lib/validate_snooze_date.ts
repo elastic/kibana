@@ -5,9 +5,15 @@
  * 2.0.
  */
 
-export const validateSnoozeDate = (date: string) => {
+export const validateSnoozeEndDate = (date: string) => {
   const parsedValue = Date.parse(date);
   if (isNaN(parsedValue)) return `Invalid date: ${date}`;
   if (parsedValue <= Date.now()) return `Invalid snooze date as it is in the past: ${date}`;
+  return;
+};
+
+export const validateSnoozeStartDate = (date: string) => {
+  const parsedValue = Date.parse(date);
+  if (isNaN(parsedValue)) return `Invalid date: ${date}`;
   return;
 };

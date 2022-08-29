@@ -10,6 +10,7 @@ import {
   DataPublicPluginStart,
   isCompleteResponse,
 } from '@kbn/data-plugin/public';
+import { IKibanaSearchRequest } from '@kbn/data-plugin/common';
 import {
   FetchDataParams,
   HasDataParams,
@@ -23,49 +24,34 @@ import {
   DEFAULT_RANKS,
 } from '../../../services/data/core_web_vitals_query';
 import { callApmApi } from '../../../services/rest/create_call_apm_api';
+import {
+  formatHasRumResult,
+  hasRumDataQuery,
+} from '../../../services/data/has_rum_data_query';
 
 export { createCallApmApi } from '../../../services/rest/create_call_apm_api';
 
-type FetchUxOverviewDateParams = FetchDataParams & {
-  dataStartPlugin: DataPublicPluginStart;
-};
+type WithDataPlugin<T> = T & { dataStartPlugin: DataPublicPluginStart };
 
 async function getCoreWebVitalsResponse({
   absoluteTime,
   serviceName,
   dataStartPlugin,
-}: FetchUxOverviewDateParams) {
-  const dataView = await callApmApi('GET /internal/apm/data_view/dynamic', {
-    signal: null,
-  });
-  return new Promise<
-    ESSearchResponse<{}, ReturnType<typeof coreWebVitalsQuery>>
-  >((resolve) => {
-    const search$ = dataStartPlugin.search
-      .search(
-        {
-          params: {
-            index: dataView.dynamicDataView?.title,
-            ...coreWebVitalsQuery(
-              absoluteTime.start,
-              absoluteTime.end,
-              undefined,
-              {
-                serviceName: serviceName ? [serviceName] : undefined,
-              }
-            ),
-          },
-        },
-        {}
-      )
-      .subscribe({
-        next: (result) => {
-          if (isCompleteResponse(result)) {
-            resolve(result.rawResponse as any);
-            search$.unsubscribe();
-          }
-        },
-      });
+}: WithDataPlugin<FetchDataParams>) {
+  const dataViewResponse = await callApmApi(
+    'GET /internal/apm/data_view/title',
+    {
+      signal: null,
+    }
+  );
+
+  return await esQuery<ReturnType<typeof coreWebVitalsQuery>>(dataStartPlugin, {
+    params: {
+      index: dataViewResponse.apmDataViewTitle,
+      ...coreWebVitalsQuery(absoluteTime.start, absoluteTime.end, undefined, {
+        serviceName: serviceName ? [serviceName] : undefined,
+      }),
+    },
   });
 }
 
@@ -82,7 +68,7 @@ const CORE_WEB_VITALS_DEFAULTS: UXMetrics = {
 };
 
 export const fetchUxOverviewDate = async (
-  params: FetchUxOverviewDateParams
+  params: WithDataPlugin<FetchDataParams>
 ): Promise<UxFetchDataResponse> => {
   const coreWebVitalsResponse = await getCoreWebVitalsResponse(params);
   return {
@@ -94,18 +80,46 @@ export const fetchUxOverviewDate = async (
 };
 
 export async function hasRumData(
-  params: HasDataParams
+  params: WithDataPlugin<HasDataParams>
 ): Promise<UXHasDataResponse> {
-  return await callApmApi('GET /api/apm/observability_overview/has_rum_data', {
-    signal: null,
-    params: {
-      query: params?.absoluteTime
-        ? {
-            start: new Date(params.absoluteTime.start).toISOString(),
-            end: new Date(params.absoluteTime.end).toISOString(),
-            uiFilters: '',
-          }
-        : undefined,
-    },
+  const dataViewResponse = await callApmApi(
+    'GET /internal/apm/data_view/title',
+    {
+      signal: null,
+    }
+  );
+
+  const esQueryResponse = await esQuery<ReturnType<typeof hasRumDataQuery>>(
+    params.dataStartPlugin,
+    {
+      params: {
+        index: dataViewResponse.apmDataViewTitle,
+        ...hasRumDataQuery({
+          start: params?.absoluteTime?.start,
+          end: params?.absoluteTime?.end,
+        }),
+      },
+    }
+  );
+
+  return formatHasRumResult(esQueryResponse, dataViewResponse.apmDataViewTitle);
+}
+
+async function esQuery<T>(
+  dataStartPlugin: DataPublicPluginStart,
+  query: IKibanaSearchRequest<T> & { params: { index?: string } }
+) {
+  return new Promise<ESSearchResponse<{}, T>>((resolve, reject) => {
+    const search$ = dataStartPlugin.search.search(query).subscribe({
+      next: (result) => {
+        if (isCompleteResponse(result)) {
+          resolve(result.rawResponse as any);
+          search$.unsubscribe();
+        }
+      },
+      error: (err) => {
+        reject(err);
+      },
+    });
   });
 }

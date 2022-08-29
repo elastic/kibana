@@ -102,7 +102,7 @@ function getTest(
         method: mocks.packageClient.getRegistryPackage.bind(mocks.packageClient),
         args: ['package name', '8.0.0'],
         spy: jest.spyOn(epmRegistry, 'getRegistryPackage'),
-        spyArgs: ['package name', '8.0.0'],
+        spyArgs: ['package name', '8.0.0', undefined],
         spyResponse: {
           packageInfo: { name: 'getRegistryPackage test' },
           paths: ['/some/test/path'],

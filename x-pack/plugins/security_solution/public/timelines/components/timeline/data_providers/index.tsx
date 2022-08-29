@@ -35,7 +35,7 @@ const DropTargetDataProvidersContainer = styled.div`
     background: ${({ theme }) => rgba(theme.eui.euiColorSuccess, 0.1)};
     border: 0.2rem dashed ${({ theme }) => theme.eui.euiColorSuccess};
 
-    & .euiTextColor--subdued {
+    & .timeline-drop-area-empty__text {
       color: ${({ theme }) => theme.eui.euiColorSuccess};
     }
 

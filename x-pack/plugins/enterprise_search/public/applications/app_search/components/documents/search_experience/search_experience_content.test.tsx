@@ -12,7 +12,6 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-// @ts-expect-error types are not available for this package yet
 import { Results } from '@elastic/react-search-ui';
 
 import { Loading } from '../../../../shared/loading';

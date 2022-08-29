@@ -23,8 +23,7 @@ describe('copyValueToClipboard', () => {
   const valueToStringConverter: ValueToStringConverter = (rowIndex, columnId, options) =>
     convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      rowsFlattened: discoverGridContextComplexMock.rowsFlattened,
-      dataView: discoverGridContextComplexMock.indexPattern,
+      dataView: discoverGridContextComplexMock.dataView,
       services: discoverServiceMock,
       rowIndex,
       columnId,

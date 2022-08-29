@@ -11,10 +11,10 @@ import { useDeepEqualSelector } from './use_selector';
 import { TimelineId } from '../../../common/types/timeline';
 import { timelineSelectors } from '../../timelines/store/timeline';
 import { timelineDefaults } from '../../timelines/store/timeline/defaults';
-import { decodeRisonUrlState, encodeRisonUrlState } from '../components/url_state/helpers';
+import { decodeRisonUrlState, encodeRisonUrlState } from '../utils/global_query_string/helpers';
 import { useKibana } from '../lib/kibana';
-import { TimelineUrl } from '../../timelines/store/timeline/model';
-import { CONSTANTS } from '../components/url_state/constants';
+import type { TimelineUrl } from '../../timelines/store/timeline/model';
+import { URL_PARAM_KEY } from './use_url_state';
 
 /**
  * This hooks is specifically for use with the resolve api that was introduced as part of 7.16
@@ -33,7 +33,7 @@ export const useResolveRedirect = () => {
 
   const redirect = useCallback(() => {
     const searchQuery = new URLSearchParams(search);
-    const timelineRison = searchQuery.get(CONSTANTS.timeline) ?? undefined;
+    const timelineRison = searchQuery.get(URL_PARAM_KEY.timeline) ?? undefined;
 
     // Try to get state on URL, but default to what's in Redux in case of decodeRisonFailure
     const currentTimelineState = {
@@ -65,12 +65,12 @@ export const useResolveRedirect = () => {
       id: newObjectId,
     };
     const newTimelineRison = encodeRisonUrlState(newTimelineSearch);
-    searchQuery.set(CONSTANTS.timeline, newTimelineRison);
+    searchQuery.set(URL_PARAM_KEY.timeline, newTimelineRison);
     const newPath = `${pathname}?${searchQuery.toString()}`;
     spaces.ui.redirectLegacyUrl({
       path: newPath,
       aliasPurpose: resolveTimelineConfig.alias_purpose,
-      objectNoun: CONSTANTS.timeline,
+      objectNoun: URL_PARAM_KEY.timeline,
     });
     // Prevent the effect from being called again as the url change takes place in location rather than a true redirect
     updateHasRedirected(true);

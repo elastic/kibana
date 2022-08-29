@@ -34,7 +34,7 @@ journey('UX JsErrors', async ({ page, params }) => {
     });
     await loginToKibana({
       page,
-      user: { username: 'viewer_user', password: 'changeme' },
+      user: { username: 'viewer', password: 'changeme' },
     });
   });
 

@@ -7,7 +7,7 @@
  */
 
 import { Embeddable, IContainer, ContainerInput } from '@kbn/embeddable-plugin/public';
-import { TimeRange } from '@kbn/data-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
 import { TimeRangeInput } from './custom_time_range_action';
 
 interface ContainerTimeRangeInput extends ContainerInput<TimeRangeInput> {

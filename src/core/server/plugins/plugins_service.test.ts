@@ -16,9 +16,10 @@ import { schema } from '@kbn/config-schema';
 import { ConfigPath, ConfigService, Env } from '@kbn/config';
 
 import { rawConfigServiceMock, getEnvOptions } from '@kbn/config-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { environmentServiceMock } from '@kbn/core-environment-server-mocks';
+import { nodeServiceMock } from '@kbn/core-node-server-mocks';
 import { coreMock } from '../mocks';
-import { loggingSystemMock } from '../logging/logging_system.mock';
-import { environmentServiceMock } from '../environment/environment_service.mock';
 import { PluginDiscoveryError } from './discovery';
 import { PluginWrapper } from './plugin';
 import { PluginsService } from './plugins_service';
@@ -37,6 +38,7 @@ let env: Env;
 let prebootMockPluginSystem: jest.Mocked<PluginsSystem<PluginType.preboot>>;
 let standardMockPluginSystem: jest.Mocked<PluginsSystem<PluginType.standard>>;
 let environmentPreboot: ReturnType<typeof environmentServiceMock.createPrebootContract>;
+let nodePreboot: ReturnType<typeof nodeServiceMock.createInternalPrebootContract>;
 
 const prebootDeps = coreMock.createInternalPreboot();
 const setupDeps = coreMock.createInternalSetup();
@@ -140,6 +142,7 @@ async function testSetup() {
   standardMockPluginSystem.getPlugins.mockReturnValue([]);
 
   environmentPreboot = environmentServiceMock.createPrebootContract();
+  nodePreboot = nodeServiceMock.createInternalPrebootContract();
 }
 
 afterEach(() => {
@@ -158,8 +161,8 @@ describe('PluginsService', () => {
         plugin$: from([]),
       });
 
-      await expect(pluginsService.discover({ environment: environmentPreboot })).rejects
-        .toMatchInlineSnapshot(`
+      await expect(pluginsService.discover({ environment: environmentPreboot, node: nodePreboot }))
+        .rejects.toMatchInlineSnapshot(`
               [Error: Failed to initialize plugins:
               	Invalid JSON (invalid-manifest, path-1)]
             `);
@@ -180,8 +183,8 @@ describe('PluginsService', () => {
         plugin$: from([]),
       });
 
-      await expect(pluginsService.discover({ environment: environmentPreboot })).rejects
-        .toMatchInlineSnapshot(`
+      await expect(pluginsService.discover({ environment: environmentPreboot, node: nodePreboot }))
+        .rejects.toMatchInlineSnapshot(`
               [Error: Failed to initialize plugins:
               	Incompatible version (incompatible-version, path-3)]
             `);
@@ -216,7 +219,7 @@ describe('PluginsService', () => {
       });
 
       await expect(
-        pluginsService.discover({ environment: environmentPreboot })
+        pluginsService.discover({ environment: environmentPreboot, node: nodePreboot })
       ).rejects.toMatchInlineSnapshot(
         `[Error: Plugin with id "conflicting-id" is already registered!]`
       );
@@ -250,7 +253,7 @@ describe('PluginsService', () => {
       });
 
       await expect(
-        pluginsService.discover({ environment: environmentPreboot })
+        pluginsService.discover({ environment: environmentPreboot, node: nodePreboot })
       ).rejects.toMatchInlineSnapshot(
         `[Error: Plugin with id "conflicting-id" is already registered!]`
       );
@@ -288,16 +291,18 @@ describe('PluginsService', () => {
       }
 
       async function expectError() {
-        await expect(pluginsService.discover({ environment: environmentPreboot })).rejects.toThrow(
+        await expect(
+          pluginsService.discover({ environment: environmentPreboot, node: nodePreboot })
+        ).rejects.toThrow(
           `X-Pack plugin or bundle with id "xPackPlugin" is required by OSS plugin "sourcePlugin", which is prohibited. Consider making this an optional dependency instead.`
         );
         expect(standardMockPluginSystem.addPlugin).not.toHaveBeenCalled();
       }
 
       async function expectSuccess() {
-        await expect(pluginsService.discover({ environment: environmentPreboot })).resolves.toEqual(
-          expect.anything()
-        );
+        await expect(
+          pluginsService.discover({ environment: environmentPreboot, node: nodePreboot })
+        ).resolves.toEqual(expect.anything());
         expect(standardMockPluginSystem.addPlugin).toHaveBeenCalled();
       }
 
@@ -433,7 +438,7 @@ describe('PluginsService', () => {
         ]),
       });
 
-      await pluginsService.discover({ environment: environmentPreboot });
+      await pluginsService.discover({ environment: environmentPreboot, node: nodePreboot });
       await pluginsService.preboot(prebootDeps);
       const setup = await pluginsService.setup(setupDeps);
 
@@ -521,6 +526,7 @@ describe('PluginsService', () => {
 
       const { preboot, standard } = await pluginsService.discover({
         environment: environmentPreboot,
+        node: nodePreboot,
       });
       expect(mockDiscover).toHaveBeenCalledTimes(1);
 
@@ -562,6 +568,7 @@ describe('PluginsService', () => {
 
       const { preboot, standard } = await pluginsService.discover({
         environment: environmentPreboot,
+        node: nodePreboot,
       });
       expect(preboot.pluginTree).toBeUndefined();
       expect(standard.pluginTree).toBeUndefined();
@@ -630,6 +637,7 @@ describe('PluginsService', () => {
 
       const { standard, preboot } = await pluginsService.discover({
         environment: environmentPreboot,
+        node: nodePreboot,
       });
       expect(mockDiscover).toHaveBeenCalledTimes(1);
 
@@ -696,7 +704,7 @@ describe('PluginsService', () => {
         plugin$: from([...prebootPlugins, ...standardPlugins]),
       });
 
-      await pluginsService.discover({ environment: environmentPreboot });
+      await pluginsService.discover({ environment: environmentPreboot, node: nodePreboot });
       expect(prebootMockPluginSystem.addPlugin).toHaveBeenCalledTimes(2);
       for (const plugin of prebootPlugins) {
         expect(prebootMockPluginSystem.addPlugin).toHaveBeenCalledWith(plugin);
@@ -708,8 +716,8 @@ describe('PluginsService', () => {
       }
 
       expect(mockDiscover).toHaveBeenCalledTimes(1);
-      expect(mockDiscover).toHaveBeenCalledWith(
-        {
+      expect(mockDiscover).toHaveBeenCalledWith({
+        config: {
           additionalPluginPaths: [],
           initialize: true,
           pluginSearchPaths: [
@@ -719,9 +727,10 @@ describe('PluginsService', () => {
             resolve(process.cwd(), '..', 'kibana-extra'),
           ],
         },
-        { coreId, env, logger, configService },
-        { uuid: 'uuid' }
-      );
+        coreContext: { coreId, env, logger, configService },
+        instanceInfo: { uuid: 'uuid' },
+        nodeInfo: { roles: { backgroundTasks: true, ui: true } },
+      });
 
       const logs = loggingSystemMock.collect(logger);
       expect(logs.info).toHaveLength(0);
@@ -756,7 +765,7 @@ describe('PluginsService', () => {
           }),
         ]),
       });
-      await pluginsService.discover({ environment: environmentPreboot });
+      await pluginsService.discover({ environment: environmentPreboot, node: nodePreboot });
       expect(configService.setSchema).toBeCalledWith('path-preboot', configSchema);
       expect(configService.setSchema).toBeCalledWith('path-standard', configSchema);
     });
@@ -794,7 +803,7 @@ describe('PluginsService', () => {
           }),
         ]),
       });
-      await pluginsService.discover({ environment: environmentPreboot });
+      await pluginsService.discover({ environment: environmentPreboot, node: nodePreboot });
       expect(configService.addDeprecationProvider).toBeCalledWith(
         'config-path-preboot',
         prebootDeprecationProvider
@@ -837,6 +846,7 @@ describe('PluginsService', () => {
 
       const { preboot, standard } = await pluginsService.discover({
         environment: environmentPreboot,
+        node: nodePreboot,
       });
 
       expect(preboot.pluginPaths).toEqual(['/plugin-A-path-preboot', '/plugin-B-path-preboot']);
@@ -926,7 +936,7 @@ describe('PluginsService', () => {
         ]),
       });
 
-      await pluginsService.discover({ environment: environmentPreboot });
+      await pluginsService.discover({ environment: environmentPreboot, node: nodePreboot });
 
       // eslint-disable-next-line dot-notation
       expect(pluginsService['pluginConfigUsageDescriptors']).toMatchInlineSnapshot(`
@@ -1008,6 +1018,7 @@ describe('PluginsService', () => {
 
       const { preboot, standard } = await pluginsService.discover({
         environment: environmentPreboot,
+        node: nodePreboot,
       });
 
       const prebootUIConfig$ = preboot.uiPlugins.browserConfigs.get('plugin-with-expose-preboot')!;
@@ -1062,6 +1073,7 @@ describe('PluginsService', () => {
 
       const { preboot, standard } = await pluginsService.discover({
         environment: environmentPreboot,
+        node: nodePreboot,
       });
       expect(preboot.uiPlugins.browserConfigs.size).toBe(0);
       expect(standard.uiPlugins.browserConfigs.size).toBe(0);
@@ -1125,6 +1137,7 @@ describe('PluginsService', () => {
     await expect(
       pluginsService.discover({
         environment: environmentPreboot,
+        node: nodePreboot,
       })
     ).resolves.not.toThrow(); // If the rename is not applied, it'll fail
   });
@@ -1185,6 +1198,7 @@ describe('PluginsService', () => {
       });
       const { preboot, standard } = await pluginsService.discover({
         environment: environmentPreboot,
+        node: nodePreboot,
       });
       expect(preboot.uiPlugins.internal).toMatchInlineSnapshot(`
         Map {
@@ -1228,6 +1242,7 @@ describe('PluginsService', () => {
       });
       const { preboot, standard } = await pluginsService.discover({
         environment: environmentPreboot,
+        node: nodePreboot,
       });
       expect([...preboot.uiPlugins.internal.keys()].sort()).toMatchInlineSnapshot(`
         Array [
@@ -1245,7 +1260,7 @@ describe('PluginsService', () => {
 
     it('#preboot does initialize `preboot` plugins if plugins.initialize is true', async () => {
       config$.next({ plugins: { initialize: true } });
-      await pluginsService.discover({ environment: environmentPreboot });
+      await pluginsService.discover({ environment: environmentPreboot, node: nodePreboot });
       await pluginsService.preboot(prebootDeps);
 
       expect(prebootMockPluginSystem.setupPlugins).toHaveBeenCalledTimes(1);
@@ -1255,7 +1270,7 @@ describe('PluginsService', () => {
 
     it('#preboot does not initialize `preboot` plugins if plugins.initialize is false', async () => {
       config$.next({ plugins: { initialize: false } });
-      await pluginsService.discover({ environment: environmentPreboot });
+      await pluginsService.discover({ environment: environmentPreboot, node: nodePreboot });
       await pluginsService.preboot(prebootDeps);
 
       expect(prebootMockPluginSystem.setupPlugins).not.toHaveBeenCalled();
@@ -1264,7 +1279,7 @@ describe('PluginsService', () => {
 
     it('#setup does initialize `standard` plugins if plugins.initialize is true', async () => {
       config$.next({ plugins: { initialize: true } });
-      await pluginsService.discover({ environment: environmentPreboot });
+      await pluginsService.discover({ environment: environmentPreboot, node: nodePreboot });
       await pluginsService.preboot(prebootDeps);
 
       const { initialized } = await pluginsService.setup(setupDeps);
@@ -1275,7 +1290,7 @@ describe('PluginsService', () => {
 
     it('#setup does not initialize `standard` plugins if plugins.initialize is false', async () => {
       config$.next({ plugins: { initialize: false } });
-      await pluginsService.discover({ environment: environmentPreboot });
+      await pluginsService.discover({ environment: environmentPreboot, node: nodePreboot });
       await pluginsService.preboot(prebootDeps);
       const { initialized } = await pluginsService.setup(setupDeps);
       expect(standardMockPluginSystem.setupPlugins).not.toHaveBeenCalled();
@@ -1312,7 +1327,7 @@ describe('PluginsService', () => {
     it('does not try to stop `preboot` plugins and start `standard` ones if plugins.initialize is `false`', async () => {
       config$.next({ plugins: { initialize: false } });
 
-      await pluginsService.discover({ environment: environmentPreboot });
+      await pluginsService.discover({ environment: environmentPreboot, node: nodePreboot });
       await pluginsService.preboot(prebootDeps);
       await pluginsService.setup(setupDeps);
 
@@ -1325,7 +1340,7 @@ describe('PluginsService', () => {
     });
 
     it('stops `preboot` plugins and starts `standard` ones', async () => {
-      await pluginsService.discover({ environment: environmentPreboot });
+      await pluginsService.discover({ environment: environmentPreboot, node: nodePreboot });
       await pluginsService.preboot(prebootDeps);
       await pluginsService.setup(setupDeps);
 

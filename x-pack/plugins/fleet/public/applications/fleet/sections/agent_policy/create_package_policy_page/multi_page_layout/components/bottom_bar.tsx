@@ -84,6 +84,40 @@ export const CreatePackagePolicyBottomBar: React.FC<{
   );
 };
 
+export const AgentStandaloneBottomBar: React.FC<{
+  cancelClickHandler: React.ReactEventHandler;
+  cancelUrl?: string;
+  onNext: () => void;
+  noAnimation?: boolean;
+}> = ({ onNext, cancelClickHandler, cancelUrl, noAnimation = false }) => {
+  const Bar = noAnimation ? NoAnimationCenteredRoundedBottomBar : CenteredRoundedBottomBar;
+  return (
+    <Bar>
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false}>
+            {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+            <EuiButtonEmpty color="ghost" size="s" href={cancelUrl} onClick={cancelClickHandler}>
+              <FormattedMessage
+                id="xpack.fleet.agentStandaloneBottomBar.backButton"
+                defaultMessage="Go back"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton color="primary" fill size="m" onClick={onNext}>
+            <FormattedMessage
+              id="xpack.fleet.agentStandaloneBottomBar.viewIncomingDataBtn"
+              defaultMessage="View incoming data"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </Bar>
+  );
+};
+
 export const CreatePackagePolicyFinalBottomBar: React.FC<{
   pkgkey: string;
 }> = ({ pkgkey }) => {

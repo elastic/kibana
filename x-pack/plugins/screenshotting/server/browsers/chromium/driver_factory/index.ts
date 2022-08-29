@@ -20,8 +20,8 @@ import {
   catchError,
   concatMap,
   ignoreElements,
-  map,
   mergeMap,
+  map,
   reduce,
   takeUntil,
   tap,
@@ -42,7 +42,7 @@ interface CreatePageOptions {
 
 interface CreatePageResult {
   driver: HeadlessChromiumDriver;
-  unexpectedExit$: Rx.Observable<never>;
+  error$: Rx.Observable<Error>;
   /**
    * Close the page and the browser.
    *
@@ -258,14 +258,13 @@ export class HeadlessChromiumDriverFactory {
           page
         );
 
-        // Rx.Observable<never>: stream to interrupt page capture
-        const unexpectedExit$ = this.getPageExit(browser, page);
+        const error$ = Rx.concat(driver.screenshottingError$, this.getPageExit(browser, page)).pipe(
+          mergeMap((err) => Rx.throwError(err))
+        );
 
-        observer.next({
-          driver,
-          unexpectedExit$,
-          close: () => Rx.from(childProcess.kill()),
-        });
+        const close = () => Rx.from(childProcess.kill());
+
+        observer.next({ driver, error$, close });
 
         // unsubscribe logic makes a best-effort attempt to delete the user data directory used by chromium
         observer.add(() => {
@@ -376,15 +375,13 @@ export class HeadlessChromiumDriverFactory {
     return processClose$; // ideally, this would also merge with observers for stdout and stderr
   }
 
-  getPageExit(browser: Browser, page: Page) {
+  getPageExit(browser: Browser, page: Page): Rx.Observable<Error> {
     const pageError$ = Rx.fromEvent<Error>(page, 'error').pipe(
-      mergeMap((err) => {
-        return Rx.throwError(`Reporting encountered an error: ${err.toString()}`);
-      })
+      map((err) => new Error(`Reporting encountered an error: ${err.toString()}`))
     );
 
     const browserDisconnect$ = Rx.fromEvent(browser, 'disconnected').pipe(
-      mergeMap(() => Rx.throwError(getChromiumDisconnectedError()))
+      map(() => getChromiumDisconnectedError())
     );
 
     return Rx.merge(pageError$, browserDisconnect$);

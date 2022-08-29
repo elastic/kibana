@@ -33,7 +33,7 @@
             ],
             "signature": [
               "(log: ",
-              "ToolingLog",
+              "SomeDevLog",
               ") => ",
               {
                 "pluginId": "@kbn/ci-stats-reporter",
@@ -54,7 +54,7 @@
                 "label": "log",
                 "description": [],
                 "signature": [
-                  "ToolingLog"
+                  "SomeDevLog"
                 ],
                 "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
                 "deprecated": false,
@@ -99,7 +99,7 @@
                 "label": "log",
                 "description": [],
                 "signature": [
-                  "ToolingLog"
+                  "SomeDevLog"
                 ],
                 "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
                 "deprecated": false,
@@ -302,6 +302,38 @@
                     "section": "def-server.CiStatsReportTestsOptions",
                     "text": "CiStatsReportTestsOptions"
                   }
+                ],
+                "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ci-stats-reporter",
+            "id": "def-server.CiStatsReporter.reportPerformanceMetrics",
+            "type": "Function",
+            "tags": [],
+            "label": "reportPerformanceMetrics",
+            "description": [],
+            "signature": [
+              "(metrics: ",
+              "PerformanceMetrics",
+              ") => Promise<boolean | undefined>"
+            ],
+            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ci-stats-reporter",
+                "id": "def-server.CiStatsReporter.reportPerformanceMetrics.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "metrics",
+                "description": [],
+                "signature": [
+                  "PerformanceMetrics"
                 ],
                 "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
                 "deprecated": false,

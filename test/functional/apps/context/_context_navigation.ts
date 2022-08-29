@@ -30,7 +30,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update({
-        'doc_table:legacy': false,
         defaultIndex: 'logstash-*',
       });
       await PageObjects.common.navigateToApp('discover');
@@ -73,6 +72,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await rowActions[1].click();
           await PageObjects.context.waitUntilContextLoadingHasFinished();
 
+          await find.clickByCssSelector(`[data-test-subj="breadcrumb first"]`);
+          await PageObjects.discover.waitForDocTableLoadingComplete();
+
+          for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
+            expect(await filterBar.hasFilter(columnName, value)).to.eql(true);
+          }
+          expect(await PageObjects.timePicker.getTimeConfigAsAbsoluteTimes()).to.eql({
+            start: 'Sep 18, 2015 @ 06:31:44.000',
+            end: 'Sep 23, 2015 @ 18:31:44.000',
+          });
+          return true;
+        }
+      );
+    });
+
+    it('should go back via breadcrumbs with preserved state after a page refresh', async function () {
+      await retry.waitFor(
+        'user navigating to context and returning to discover via breadcrumbs',
+        async () => {
+          await dataGrid.clickRowToggle({ rowIndex: 0 });
+          const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
+          await rowActions[1].click();
+          await PageObjects.context.waitUntilContextLoadingHasFinished();
+          await browser.refresh();
+          await PageObjects.context.waitUntilContextLoadingHasFinished();
           await find.clickByCssSelector(`[data-test-subj="breadcrumb first"]`);
           await PageObjects.discover.waitForDocTableLoadingComplete();
 

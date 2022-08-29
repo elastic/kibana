@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import { ENDPOINT_DEFAULT_PAGE_SIZE } from '../../../../common/endpoint/constants';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import type { ActionDetails, ActionListApiResponse } from '../../../../common/endpoint/types';
 
-import {
-  getActions,
-  getActionResponses,
-  getTimeSortedActionListLogEntries,
-} from '../../utils/action_list_helpers';
+import { getActions, getActionResponses } from '../../utils/action_list_helpers';
 
 import {
   formatEndpointActionResults,
@@ -46,12 +44,12 @@ export const getActionList = async ({
   esClient: ElasticsearchClient;
   logger: Logger;
 }): Promise<ActionListApiResponse> => {
-  const size = pageSize ?? 10;
-  const page = (_page ?? 1) - 1;
+  const size = pageSize ?? ENDPOINT_DEFAULT_PAGE_SIZE;
+  const page = _page ?? 1;
   // # of hits to skip
-  const from = page * size;
+  const from = (page - 1) * size;
 
-  const data = await getActionDetailsList({
+  const { actionDetails, totalRecords } = await getActionDetailsList({
     commands,
     elasticAgentIds,
     esClient,
@@ -65,14 +63,14 @@ export const getActionList = async ({
 
   return {
     page,
-    pageSize,
+    pageSize: size,
     startDate,
     endDate,
     elasticAgentIds,
     userIds,
     commands,
-    data,
-    total: data.length,
+    data: actionDetails,
+    total: totalRecords,
   };
 };
 
@@ -92,7 +90,10 @@ const getActionDetailsList = async ({
   size,
   startDate,
   userIds,
-}: GetActionDetailsListParam): Promise<ActionDetails[]> => {
+}: GetActionDetailsListParam): Promise<{
+  actionDetails: ActionDetails[];
+  totalRecords: number;
+}> => {
   let actionRequests;
   let actionReqIds;
   let actionResponses;
@@ -123,10 +124,11 @@ const getActionDetailsList = async ({
   }
 
   // return empty details array
-  if (!actionRequests?.body?.hits?.hits) return [];
+  if (!actionRequests?.body?.hits?.hits) return { actionDetails: [], totalRecords: 0 };
 
   // format endpoint actions into { type, item } structure
   const formattedActionRequests = formatEndpointActionResults(actionRequests?.body?.hits?.hits);
+  const totalRecords = (actionRequests?.body?.hits?.total as unknown as SearchTotalHits).value;
 
   // normalized actions with a flat structure to access relevant values
   const normalizedActionRequests: Array<ReturnType<typeof mapToNormalizedActionRequest>> =
@@ -157,10 +159,6 @@ const getActionDetailsList = async ({
 
   // compute action details list for each action id
   const actionDetails: ActionDetails[] = normalizedActionRequests.map((action) => {
-    // pick only those actions that match the current action id
-    const matchedActions = formattedActionRequests.filter(
-      (categorizedAction) => categorizedAction.item.data.EndpointActions.action_id === action.id
-    );
     // pick only those responses that match the current action id
     const matchedResponses = categorizedResponses.filter((categorizedResponse) =>
       categorizedResponse.type === 'response'
@@ -179,15 +177,16 @@ const getActionDetailsList = async ({
       agents: action.agents,
       command: action.command,
       startedAt: action.createdAt,
-      // sort the list by @timestamp in desc order, newest first
-      logEntries: getTimeSortedActionListLogEntries([...matchedActions, ...matchedResponses]),
       isCompleted,
       completedAt,
       wasSuccessful,
       errors,
       isExpired: !isCompleted && action.expiration < new Date().toISOString(),
+      createdBy: action.createdBy,
+      comment: action.comment,
+      parameters: action.parameters,
     };
   });
 
-  return actionDetails;
+  return { actionDetails, totalRecords };
 };

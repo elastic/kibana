@@ -18,7 +18,7 @@ import { authenticationServiceMock } from '../../authentication/authentication_s
 import type { Session } from '../../session_management';
 import { sessionMock } from '../../session_management/session.mock';
 import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
-import type { UserProfileServiceStart } from '../../user_profile';
+import type { UserProfileServiceStartInternal } from '../../user_profile';
 import { userProfileServiceMock } from '../../user_profile/user_profile_service.mock';
 import { routeDefinitionParamsMock } from '../index.mock';
 import { defineUpdateUserProfileDataRoute } from './update';
@@ -34,7 +34,7 @@ function getMockContext() {
 describe('Update profile routes', () => {
   let router: jest.Mocked<SecurityRouter>;
   let session: jest.Mocked<PublicMethodsOf<Session>>;
-  let userProfileService: jest.Mocked<UserProfileServiceStart>;
+  let userProfileService: jest.Mocked<UserProfileServiceStartInternal>;
   let authc: DeeplyMockedKeys<InternalAuthenticationServiceStart>;
   beforeEach(() => {
     const routeParamsMock = routeDefinitionParamsMock.create();

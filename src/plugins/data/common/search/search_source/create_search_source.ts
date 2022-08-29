@@ -41,7 +41,11 @@ export const createSearchSource = (
 
     // hydrating index pattern
     if (searchSourceFields.index) {
-      fields.index = await indexPatterns.get(searchSourceFields.index);
+      if (typeof searchSourceFields.index === 'string') {
+        fields.index = await indexPatterns.get(searchSourceFields.index);
+      } else {
+        fields.index = await indexPatterns.create(searchSourceFields.index);
+      }
     }
 
     if (searchSourceFields.parent) {

@@ -35,12 +35,18 @@ export const TopMetricsTypeRT = rt.type({
   ),
 });
 
+export const MaxPeriodFilterExistsTypeRT = rt.type({
+  doc_count: rt.number,
+  period: BasicMetricValueRT,
+});
+
 export const MetricValueTypeRT = rt.union([
   BasicMetricValueRT,
   NormalizedMetricValueRT,
   PercentilesTypeRT,
   PercentilesKeyedTypeRT,
   TopMetricsTypeRT,
+  MaxPeriodFilterExistsTypeRT,
 ]);
 export type MetricValueType = rt.TypeOf<typeof MetricValueTypeRT>;
 

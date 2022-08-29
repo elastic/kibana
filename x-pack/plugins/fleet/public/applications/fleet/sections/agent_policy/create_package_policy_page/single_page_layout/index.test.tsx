@@ -84,6 +84,9 @@ jest.mock('react-router-dom', () => ({
   useLocation: jest.fn().mockReturnValue({ search: '' }),
   useHistory: jest.fn().mockReturnValue({
     push: jest.fn(),
+    location: {
+      search: '',
+    },
   }),
 }));
 
@@ -250,7 +253,6 @@ describe('when on the package policy create page', () => {
       ],
       name: 'nginx-1',
       namespace: 'default',
-      output_id: '',
       package: {
         name: 'nginx',
         title: 'Nginx',

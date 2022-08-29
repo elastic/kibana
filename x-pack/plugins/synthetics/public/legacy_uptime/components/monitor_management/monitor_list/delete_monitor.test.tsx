@@ -14,6 +14,12 @@ import { FETCH_STATUS, useFetcher as originalUseFetcher } from '@kbn/observabili
 import { spyOnUseFetcher } from '../../../lib/helper/spy_use_fetcher';
 import { Actions } from './actions';
 import { DeleteMonitor } from './delete_monitor';
+import {
+  BrowserFields,
+  ConfigKey,
+  MonitorManagementListResult,
+  SourceType,
+} from '../../../../../common/runtime_types';
 
 describe('<Actions />', () => {
   const onUpdate = jest.fn();
@@ -37,7 +43,23 @@ describe('<Actions />', () => {
   it('calls set refresh when deletion is successful', () => {
     const id = 'test-id';
     const name = 'sample monitor';
-    render(<Actions id={id} name={name} onUpdate={onUpdate} monitors={[]} />);
+    render(
+      <Actions
+        id={id}
+        name={name}
+        onUpdate={onUpdate}
+        monitors={
+          [
+            {
+              id: 'test-id',
+              attributes: {
+                [ConfigKey.MONITOR_SOURCE_TYPE]: SourceType.PROJECT,
+              } as BrowserFields,
+            },
+          ] as unknown as MonitorManagementListResult['monitors']
+        }
+      />
+    );
 
     userEvent.click(screen.getByLabelText('Delete monitor'));
 
@@ -51,7 +73,23 @@ describe('<Actions />', () => {
       status: FETCH_STATUS.LOADING,
       refetch: () => {},
     });
-    render(<Actions id={id} name="sample name" onUpdate={onUpdate} monitors={[]} />);
+    render(
+      <Actions
+        id={id}
+        name="sample name"
+        onUpdate={onUpdate}
+        monitors={
+          [
+            {
+              id: 'test-id',
+              attributes: {
+                [ConfigKey.MONITOR_SOURCE_TYPE]: SourceType.PROJECT,
+              } as BrowserFields,
+            },
+          ] as unknown as MonitorManagementListResult['monitors']
+        }
+      />
+    );
 
     expect(screen.getByLabelText('Deleting monitor...')).toBeInTheDocument();
   });

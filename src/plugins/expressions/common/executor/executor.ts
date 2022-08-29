@@ -10,6 +10,7 @@
 
 import { cloneDeep, mapValues } from 'lodash';
 import { Observable } from 'rxjs';
+import type { Logger } from '@kbn/logging';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { SavedObjectReference } from '@kbn/core/types';
 import {
@@ -87,9 +88,10 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
   implements PersistableStateService<ExpressionAstExpression>
 {
   static createWithDefaults<Ctx extends Record<string, unknown> = Record<string, unknown>>(
+    logger?: Logger,
     state?: ExecutorState<Ctx>
   ): Executor<Ctx> {
-    const executor = new Executor<Ctx>(state);
+    const executor = new Executor<Ctx>(logger, state);
     for (const type of typeSpecs) executor.registerType(type);
 
     return executor;
@@ -107,34 +109,14 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
    */
   public readonly types: TypesRegistry;
 
-  protected parent?: Executor<Context>;
-
-  constructor(state?: ExecutorState<Context>) {
+  constructor(private readonly logger?: Logger, state?: ExecutorState<Context>) {
     this.functions = new FunctionsRegistry(this as Executor);
     this.types = new TypesRegistry(this as Executor);
     this.container = createExecutorContainer<Context>(state);
   }
 
   public get state(): ExecutorState<Context> {
-    const parent = this.parent?.state;
-    const state = this.container.get();
-
-    return {
-      ...(parent ?? {}),
-      ...state,
-      types: {
-        ...(parent?.types ?? {}),
-        ...state.types,
-      },
-      functions: {
-        ...(parent?.functions ?? {}),
-        ...state.functions,
-      },
-      context: {
-        ...(parent?.context ?? {}),
-        ...state.context,
-      },
-    };
+    return this.container.get();
   }
 
   public registerFunction(
@@ -148,7 +130,10 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
 
   public getFunction(name: string, namespace?: string): ExpressionFunction | undefined {
     const fn = this.container.get().functions[name];
-    if (!fn?.namespace || fn.namespace === namespace) return fn;
+
+    if (!fn?.namespace || fn.namespace === namespace) {
+      return fn;
+    }
   }
 
   public getFunctions(namespace?: string): Record<string, ExpressionFunction> {
@@ -170,21 +155,15 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
   }
 
   public getType(name: string): ExpressionType | undefined {
-    return this.container.get().types[name] ?? this.parent?.getType(name);
+    return this.container.get().types[name];
   }
 
   public getTypes(): Record<string, ExpressionType> {
-    return {
-      ...(this.parent?.getTypes() ?? {}),
-      ...this.container.get().types,
-    };
+    return this.container.get().types;
   }
 
   public get context(): Record<string, unknown> {
-    return {
-      ...(this.parent?.context ?? {}),
-      ...this.container.selectors.getContext(),
-    };
+    return this.container.selectors.getContext();
   }
 
   /**
@@ -215,7 +194,7 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     if (typeof ast === 'string') executionParams.expression = ast;
     else executionParams.ast = ast;
 
-    const execution = new Execution<Input, Output>(executionParams);
+    const execution = new Execution<Input, Output>(executionParams, this.logger);
 
     return execution;
   }
@@ -368,12 +347,5 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
 
       return migrations[version](link) as ExpressionAstExpression;
     });
-  }
-
-  public fork(): Executor<Context> {
-    const fork = new Executor<Context>();
-    fork.parent = this;
-
-    return fork;
   }
 }

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { getExportByObjectIds, getRulesFromObjects, RulesErrors } from './get_export_by_object_ids';
+import type { RulesErrors } from './get_export_by_object_ids';
+import { getExportByObjectIds, getRulesFromObjects } from './get_export_by_object_ids';
+import type { FindHit } from '../routes/__mocks__/request_responses';
 import {
   getRuleMock,
   getFindResultWithSingleHit,
-  FindHit,
   getEmptySavedObjectsResponse,
 } from '../routes/__mocks__/request_responses';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
@@ -23,7 +24,7 @@ import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 import { getExceptionListClientMock } from '@kbn/lists-plugin/server/services/exception_lists/exception_list_client.mock';
 
 const exceptionsClient = getExceptionListClientMock();
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import type { loggingSystemMock } from '@kbn/core/server/mocks';
 import { requestContextMock } from '../routes/__mocks__/request_context';
 
 describe('get_export_by_object_ids', () => {

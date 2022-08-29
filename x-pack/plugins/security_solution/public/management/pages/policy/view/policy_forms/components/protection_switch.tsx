@@ -13,14 +13,14 @@ import { cloneDeep } from 'lodash';
 import { useLicense } from '../../../../../../common/hooks/use_license';
 import { policyConfig } from '../../../store/policy_details/selectors';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
-import { AppAction } from '../../../../../../common/store/actions';
-import {
+import type { AppAction } from '../../../../../../common/store/actions';
+import type {
   ImmutableArray,
-  ProtectionModes,
   UIPolicyConfig,
   AdditionalOnSwitchChangeParams,
 } from '../../../../../../../common/endpoint/types';
-import { PolicyProtection, MacPolicyProtection, LinuxPolicyProtection } from '../../../types';
+import { ProtectionModes } from '../../../../../../../common/endpoint/types';
+import type { PolicyProtection, MacPolicyProtection, LinuxPolicyProtection } from '../../../types';
 
 export const ProtectionSwitch = React.memo(
   ({

@@ -21,6 +21,7 @@ import {
 import {
   ActionType,
   ActionTypeExecutorResult,
+  ActionTypeExecutorRawResult,
   ActionTypeRegistryContract,
   GetServicesFunction,
   PreConfiguredAction,
@@ -203,7 +204,7 @@ export class ActionExecutor {
 
         eventLogger.logEvent(startEvent);
 
-        let rawResult: ActionTypeExecutorResult<unknown>;
+        let rawResult: ActionTypeExecutorRawResult<unknown>;
         try {
           const { validatedParams, validatedConfig, validatedSecrets } = validateAction({
             actionId,
@@ -231,6 +232,7 @@ export class ActionExecutor {
               status: 'error',
               message: 'an error occurred while running the action',
               serviceMessage: err.message,
+              error: err,
               retry: false,
             };
           }
@@ -256,6 +258,12 @@ export class ActionExecutor {
           event.message = `action execution failure: ${actionLabel}`;
           event.error = event.error || {};
           event.error.message = actionErrorToMessage(result);
+          if (result.error) {
+            logger.error(result.error, {
+              tags: [actionTypeId, actionId, 'action-run-failed'],
+              error: { stack_trace: result.error.stack },
+            });
+          }
           logger.warn(`action execution failure: ${actionLabel}: ${event.error.message}`);
         } else {
           span?.setOutcome('failure');
@@ -269,7 +277,8 @@ export class ActionExecutor {
         }
 
         eventLogger.logEvent(event);
-        return result;
+        const { error, ...resultWithoutError } = result;
+        return resultWithoutError;
       }
     );
   }
@@ -393,7 +402,7 @@ async function getActionInfoInternal(
   };
 }
 
-function actionErrorToMessage(result: ActionTypeExecutorResult<unknown>): string {
+function actionErrorToMessage(result: ActionTypeExecutorRawResult<unknown>): string {
   let message = result.message || 'unknown error running action';
 
   if (result.serviceMessage) {

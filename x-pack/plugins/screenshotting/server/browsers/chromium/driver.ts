@@ -5,16 +5,20 @@
  * 2.0.
  */
 
-import { truncate } from 'lodash';
-import open from 'opn';
-import puppeteer, { ElementHandle, EvaluateFn, Page, SerializableOrJSHandle } from 'puppeteer';
-import { parse as parseUrl } from 'url';
 import { Headers, Logger } from '@kbn/core/server';
 import {
   KBN_SCREENSHOT_MODE_HEADER,
   ScreenshotModePluginSetup,
 } from '@kbn/screenshot-mode-plugin/server';
+import { truncate } from 'lodash';
+import open from 'opn';
+import puppeteer, { ElementHandle, EvaluateFn, Page, SerializableOrJSHandle } from 'puppeteer';
+import { Subject } from 'rxjs';
+import { parse as parseUrl } from 'url';
+import { getDisallowedOutgoingUrlError } from '.';
 import { ConfigType } from '../../config';
+import { Layout } from '../../layouts';
+import { getPrintLayoutSelectors } from '../../layouts/print_layout';
 import { allowRequest } from '../network_policy';
 import { stripUnsafeHeaders } from './strip_unsafe_headers';
 import { getFooterTemplate, getHeaderTemplate } from './templates';
@@ -72,18 +76,14 @@ interface InterceptedRequest {
 
 const WAIT_FOR_DELAY_MS: number = 100;
 
-function getDisallowedOutgoingUrlError(interceptedUrl: string) {
-  return new Error(
-    `Received disallowed outgoing URL: "${interceptedUrl}". Failing the request and closing the browser.`
-  );
-}
-
 /**
  * @internal
  */
 export class HeadlessChromiumDriver {
   private listenersAttached = false;
   private interceptedCount = 0;
+  private screenshottingErrorSubject = new Subject<Error>();
+  readonly screenshottingError$ = this.screenshottingErrorSubject.asObservable();
 
   constructor(
     private screenshotMode: ScreenshotModePluginSetup,
@@ -106,7 +106,7 @@ export class HeadlessChromiumDriver {
   /*
    * Call Page.goto and wait to see the Kibana DOM content
    */
-  async open(
+  public async open(
     url: string,
     { headers, context, waitForSelector: pageLoadSelector, timeout }: OpenOptions,
     logger: Logger
@@ -183,8 +183,57 @@ export class HeadlessChromiumDriver {
     }
   }
 
-  async printA4Pdf({ title, logo }: { title: string; logo?: string }): Promise<Buffer> {
+  /**
+   * Timeout errors may occur when waiting for data or the brower render events to complete. This mutates the
+   * page, and has the drawback anything were to interact with the page after we ran this function, it may lead
+   * to issues. Ideally, timeout errors wouldn't occur because ES would return pre-loaded results data
+   * statically.
+   */
+  private async injectScreenshottingErrorHeader(error: Error, containerSelector: string) {
+    await this.page.evaluate(
+      (selector: string, text: string) => {
+        let container = document.querySelector(selector);
+        if (!container) {
+          container = document.querySelector('body');
+        }
+
+        const errorBoundary = document.createElement('div');
+        errorBoundary.className = 'euiErrorBoundary';
+
+        const divNode = document.createElement('div');
+        divNode.className = 'euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge';
+
+        const preNode = document.createElement('pre');
+        preNode.className = 'euiCodeBlock__pre euiCodeBlock__pre--whiteSpacePreWrap';
+
+        const codeNode = document.createElement('code');
+        codeNode.className = 'euiCodeBlock__code';
+
+        errorBoundary.appendChild(divNode);
+        divNode.appendChild(preNode);
+        preNode.appendChild(codeNode);
+        codeNode.appendChild(document.createTextNode(text));
+
+        container?.insertBefore(errorBoundary, container.firstChild);
+      },
+      containerSelector,
+      error.toString()
+    );
+  }
+
+  public async printA4Pdf({
+    title,
+    logo,
+    error,
+  }: {
+    title: string;
+    logo?: string;
+    error?: Error;
+  }): Promise<Buffer> {
     await this.workaroundWebGLDrivenCanvases();
+    if (error) {
+      await this.injectScreenshottingErrorHeader(error, getPrintLayoutSelectors().screenshot);
+    }
     return this.page.pdf({
       format: 'a4',
       preferCSSPageSize: true,
@@ -199,7 +248,19 @@ export class HeadlessChromiumDriver {
   /*
    * Receive a PNG buffer of the page screenshot from Chromium
    */
-  async screenshot(elementPosition: ElementPosition): Promise<Buffer | undefined> {
+  public async screenshot({
+    elementPosition,
+    layout,
+    error,
+  }: {
+    elementPosition: ElementPosition;
+    layout: Layout;
+    error?: Error;
+  }): Promise<Buffer | undefined> {
+    if (error) {
+      await this.injectScreenshottingErrorHeader(error, layout.selectors.screenshot);
+    }
+
     const { boundingClientRect, scroll } = elementPosition;
     const screenshot = await this.page.screenshot({
       clip: {
@@ -228,7 +289,7 @@ export class HeadlessChromiumDriver {
     return this.page.evaluate(fn, ...args);
   }
 
-  async waitForSelector(
+  public async waitForSelector(
     selector: string,
     opts: WaitForSelectorOpts,
     context: EvaluateMetaOpts,
@@ -262,7 +323,7 @@ export class HeadlessChromiumDriver {
    * Setting the viewport is required to ensure that all capture elements are visible: anything not in the
    * viewport can not be captured.
    */
-  async setViewport(
+  public async setViewport(
     { width: _width, height: _height, zoom }: { zoom: number; width: number; height: number },
     logger: Logger
   ): Promise<void> {
@@ -308,7 +369,9 @@ export class HeadlessChromiumDriver {
           requestId,
         });
         this.page.browser().close();
-        logger.error(getDisallowedOutgoingUrlError(interceptedUrl));
+        const error = getDisallowedOutgoingUrlError(interceptedUrl);
+        this.screenshottingErrorSubject.next(error);
+        logger.error(error);
         return;
       }
 
@@ -358,7 +421,9 @@ export class HeadlessChromiumDriver {
 
       if (!allowed || !this.allowRequest(interceptedUrl)) {
         this.page.browser().close();
-        logger.error(getDisallowedOutgoingUrlError(interceptedUrl));
+        const error = getDisallowedOutgoingUrlError(interceptedUrl);
+        this.screenshottingErrorSubject.next(error);
+        logger.error(error);
         return;
       }
     });

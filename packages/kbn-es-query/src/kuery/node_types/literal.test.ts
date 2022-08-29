@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-// @ts-ignore
-import { buildNode, toElasticsearchQuery } from './literal';
+import { buildNode, KQL_NODE_TYPE_LITERAL, toElasticsearchQuery } from './literal';
 
 jest.mock('../grammar');
 
@@ -17,7 +16,7 @@ describe('kuery node types', () => {
       test('should return a node representing the given value', () => {
         const result = buildNode('foo');
 
-        expect(result).toHaveProperty('type', 'literal');
+        expect(result).toHaveProperty('type', KQL_NODE_TYPE_LITERAL);
         expect(result).toHaveProperty('value', 'foo');
       });
     });

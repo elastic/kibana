@@ -29,11 +29,32 @@ const mockUseSourcererDataView = jest.fn(
 jest.mock('../../containers/sourcerer', () => ({
   useSourcererDataView: () => mockUseSourcererDataView(),
 }));
-const mockedUseIsGroupedNavigationEnabled = jest.fn();
 
+const mockedUseIsGroupedNavigationEnabled = jest.fn();
 jest.mock('../../components/navigation/helpers', () => ({
   useIsGroupedNavigationEnabled: () => mockedUseIsGroupedNavigationEnabled(),
 }));
+
+const mockSiemUserCanRead = jest.fn(() => true);
+jest.mock('../../lib/kibana', () => {
+  const original = jest.requireActual('../../lib/kibana');
+
+  return {
+    ...original,
+    useKibana: () => ({
+      services: {
+        ...original.useKibana().services,
+        application: {
+          capabilities: {
+            siem: {
+              show: mockSiemUserCanRead(),
+            },
+          },
+        },
+      },
+    }),
+  };
+});
 
 describe('use show timeline', () => {
   beforeAll(() => {
@@ -153,6 +174,20 @@ describe('use show timeline', () => {
 
     it('should not show timeline when dataViewId is not null and indices does not exist', () => {
       mockUseSourcererDataView.mockReturnValueOnce({ indicesExist: false, dataViewId: 'test' });
+      const { result } = renderHook(() => useShowTimeline());
+      expect(result.current).toEqual([false]);
+    });
+  });
+
+  describe('Security solution capabilities', () => {
+    it('should show timeline when user has read capabilities', () => {
+      mockSiemUserCanRead.mockReturnValueOnce(true);
+      const { result } = renderHook(() => useShowTimeline());
+      expect(result.current).toEqual([true]);
+    });
+
+    it('should not show timeline when user does not have read capabilities', () => {
+      mockSiemUserCanRead.mockReturnValueOnce(false);
       const { result } = renderHook(() => useShowTimeline());
       expect(result.current).toEqual([false]);
     });

@@ -8,8 +8,7 @@
 import React, { memo, useEffect, useMemo } from 'react';
 import { PackagePolicyCreateExtensionComponentProps } from '@kbn/fleet-plugin/public';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
-import { DataStream } from './types';
-import { PolicyConfig } from './types';
+import { DataStream, PolicyConfig, MonitorFields } from './types';
 import { usePolicyConfigContext } from './contexts';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
 import { CustomFields } from './custom_fields';
@@ -39,8 +38,8 @@ export const SyntheticsPolicyCreateExtension = memo<PackagePolicyCreateExtension
 
     useUpdatePolicy({
       monitorType,
-      defaultConfig: defaultConfig[monitorType],
-      config: policyConfig[monitorType],
+      defaultConfig: defaultConfig[monitorType] as Partial<MonitorFields>,
+      config: policyConfig[monitorType] as Partial<MonitorFields>,
       newPolicy,
       onChange,
       validate,

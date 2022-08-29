@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsMigrationVersion, SavedObjectsResolveResponse } from '@kbn/core/public';
+import type { SavedObjectsMigrationVersion, ResolvedSimpleSavedObject } from '@kbn/core/public';
 import {
   IAggConfigs,
   SerializedSearchSourceFields,
@@ -38,9 +38,9 @@ export interface ISavedVis {
   savedSearchRefName?: string;
   savedSearchId?: string;
   sharingSavedObjectProps?: {
-    outcome?: SavedObjectsResolveResponse['outcome'];
-    aliasTargetId?: SavedObjectsResolveResponse['alias_target_id'];
-    aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
+    outcome?: ResolvedSimpleSavedObject['outcome'];
+    aliasTargetId?: ResolvedSimpleSavedObject['alias_target_id'];
+    aliasPurpose?: ResolvedSimpleSavedObject['alias_purpose'];
     errorJSON?: string;
   };
 }
@@ -48,7 +48,7 @@ export interface ISavedVis {
 export interface VisSavedObject extends ISavedVis {
   lastSavedTitle: string;
   getEsType: () => string;
-  getDisplayName?: () => string;
+  getDisplayName: () => string;
   displayName: string;
   migrationVersion?: SavedObjectsMigrationVersion;
   searchSource?: ISearchSource;

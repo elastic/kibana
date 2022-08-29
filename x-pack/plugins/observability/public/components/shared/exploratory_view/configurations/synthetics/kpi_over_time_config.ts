@@ -12,6 +12,7 @@ import {
   REPORT_METRIC_FIELD,
   PERCENTILE,
   ReportTypes,
+  FORMULA_COLUMN,
 } from '../constants';
 import {
   CLS_LABEL,
@@ -75,7 +76,6 @@ export function getSyntheticsKPIConfig({ dataView }: ConfigProps): SeriesConfig 
       PERCENTILE,
     ],
     baseFilters: [],
-    palette: { type: 'palette', name: 'status' },
     definitionFields: [
       { field: 'monitor.name', nested: SYNTHETICS_STEP_NAME, singleSelection: true },
       { field: 'url.full', filters: buildExistsFilter('summary.up', dataView) },
@@ -88,16 +88,24 @@ export function getSyntheticsKPIConfig({ dataView }: ConfigProps): SeriesConfig 
         columnType: OPERATION_COLUMN,
       },
       {
+        label: 'Monitor availability',
+        id: 'monitor_availability',
+        columnType: FORMULA_COLUMN,
+        formula: "1- (count(kql='summary.down > 0') / count())",
+      },
+      {
         field: SUMMARY_UP,
         id: SUMMARY_UP,
         label: UP_LABEL,
         columnType: OPERATION_COLUMN,
+        palette: { type: 'palette', name: 'status' },
       },
       {
         field: SUMMARY_DOWN,
         id: SUMMARY_DOWN,
         label: DOWN_LABEL,
         columnType: OPERATION_COLUMN,
+        palette: { type: 'palette', name: 'status' },
       },
       {
         label: STEP_DURATION_LABEL,

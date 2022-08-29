@@ -13,16 +13,6 @@ Object {
   \\"track_total_hits\\": false,
   \\"body\\": {
     \\"aggregations\\": {
-      \\"first_seen\\": {
-        \\"min\\": {
-          \\"field\\": \\"@timestamp\\"
-        }
-      },
-      \\"last_seen\\": {
-        \\"max\\": {
-          \\"field\\": \\"@timestamp\\"
-        }
-      },
       \\"user_id\\": {
         \\"terms\\": {
           \\"field\\": \\"user.id\\",

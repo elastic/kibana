@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { DurationRange } from '@elastic/eui/src/components/date_picker/types';
+import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { DurationRange } from '@elastic/eui/src/components/date_picker/types';
 import React, { createContext, useContext, useMemo, useState } from 'react';
 import { RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY } from '../../../../../../common/constants';
-import {
-  AggregateRuleExecutionEvent,
+import type {
+  RuleExecutionResult,
   RuleExecutionStatus,
-} from '../../../../../../common/detection_engine/schemas/common';
+} from '../../../../../../common/detection_engine/rule_monitoring';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { RuleDetailTabs } from '.';
@@ -63,7 +63,7 @@ export interface ExecutionLogTableState {
     pageSize: number;
   };
   sort: {
-    sortField: keyof AggregateRuleExecutionEvent;
+    sortField: keyof RuleExecutionResult;
     sortDirection: SortOrder;
   };
 }
@@ -101,14 +101,14 @@ export interface ExecutionLogTableActions {
   setShowMetricColumns: React.Dispatch<React.SetStateAction<boolean>>;
   setPageIndex: React.Dispatch<React.SetStateAction<number>>;
   setPageSize: React.Dispatch<React.SetStateAction<number>>;
-  setSortField: React.Dispatch<React.SetStateAction<keyof AggregateRuleExecutionEvent>>;
+  setSortField: React.Dispatch<React.SetStateAction<keyof RuleExecutionResult>>;
   setSortDirection: React.Dispatch<React.SetStateAction<SortOrder>>;
 }
 
 export interface RuleDetailsContextType {
   // TODO: Add section for RuleDetailTabs.exceptions and store query/pagination/etc.
   // TODO: Let's discuss how to integration with ExceptionsViewerComponent state mgmt
-  [RuleDetailTabs.executionLogs]: {
+  [RuleDetailTabs.executionResults]: {
     state: ExecutionLogTableState;
     actions: ExecutionLogTableActions;
   };
@@ -139,13 +139,13 @@ export const RuleDetailsContextProvider = ({ children }: RuleDetailsContextProvi
   // Pagination state
   const [pageIndex, setPageIndex] = useState(1);
   const [pageSize, setPageSize] = useState(5);
-  const [sortField, setSortField] = useState<keyof AggregateRuleExecutionEvent>('timestamp');
+  const [sortField, setSortField] = useState<keyof RuleExecutionResult>('timestamp');
   const [sortDirection, setSortDirection] = useState<SortOrder>('desc');
   // // End Execution Log Table tab
 
   const providerValue = useMemo<RuleDetailsContextType>(
     () => ({
-      [RuleDetailTabs.executionLogs]: {
+      [RuleDetailTabs.executionResults]: {
         state: {
           superDatePicker: {
             recentlyUsedRanges,
@@ -211,6 +211,3 @@ export const useRuleDetailsContext = (): RuleDetailsContextType => {
   );
   return ruleDetailsContext;
 };
-
-export const useRuleDetailsContextOptional = (): RuleDetailsContextType | null =>
-  useContext(RuleDetailsContext);

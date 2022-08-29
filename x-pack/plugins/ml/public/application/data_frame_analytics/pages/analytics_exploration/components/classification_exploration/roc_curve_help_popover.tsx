@@ -5,29 +5,15 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  HelpPopover,
-  HelpPopoverButton,
-} from '../../../../../components/help_popover/help_popover';
+import { HelpPopover } from '../../../../../components/help_popover/help_popover';
 
-export const RocCurveHelpPopover = () => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
+export const RocCurveHelpPopover: FC = () => {
   return (
     <HelpPopover
       anchorPosition="upCenter"
-      button={
-        <HelpPopoverButton
-          onClick={() => {
-            setIsPopoverOpen(!isPopoverOpen);
-          }}
-        />
-      }
-      closePopover={() => setIsPopoverOpen(false)}
-      isOpen={isPopoverOpen}
       title={i18n.translate('xpack.ml.dataframe.analytics.rocCurvePopoverTitle', {
         defaultMessage: 'Receiver operating characteristic (ROC) curve',
       })}

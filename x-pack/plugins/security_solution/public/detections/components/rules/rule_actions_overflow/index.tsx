@@ -24,10 +24,11 @@ import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { useKibana } from '../../../../common/lib/kibana';
 import { getToolTipContent } from '../../../../common/utils/privileges';
-import { Rule } from '../../../containers/detection_engine/rules';
+import type { Rule } from '../../../containers/detection_engine/rules';
 import {
   executeRulesBulkAction,
   goToRuleEditPage,
+  bulkExportRules,
 } from '../../../pages/detection_engine/rules/all/actions';
 import * as i18nActions from '../../../pages/detection_engine/rules/translations';
 import * as i18n from './translations';
@@ -108,9 +109,8 @@ const RuleActionsOverflowComponent = ({
               onClick={async () => {
                 startTransaction({ name: SINGLE_RULE_ACTIONS.EXPORT });
                 closePopover();
-                await executeRulesBulkAction({
+                await bulkExportRules({
                   action: BulkAction.export,
-                  onSuccess: noop,
                   search: { ids: [rule.id] },
                   toasts,
                 });

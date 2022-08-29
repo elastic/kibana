@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { ManagedConsoleExtensionComponentProps } from '../console';
-import { HostMetadata } from '../../../../common/endpoint/types';
+import type { ManagedConsoleExtensionComponentProps } from '../console';
+import type { ActionDetails, HostMetadata } from '../../../../common/endpoint/types';
+import type { CommandExecutionComponentProps } from '../console/types';
 
 export interface EndpointCommandDefinitionMeta {
   endpointId: string;
@@ -15,3 +16,17 @@ export interface EndpointCommandDefinitionMeta {
 export type EndpointResponderExtensionComponentProps = ManagedConsoleExtensionComponentProps<{
   endpoint: HostMetadata;
 }>;
+
+export interface ActionRequestState {
+  requestSent: boolean;
+  actionId?: string;
+}
+
+export type ActionRequestComponentProps = CommandExecutionComponentProps<
+  { comment?: string },
+  {
+    actionRequest?: ActionRequestState;
+    completedActionDetails?: ActionDetails;
+  },
+  EndpointCommandDefinitionMeta
+>;

@@ -97,39 +97,35 @@ Array [
 exports[`extend index management ilm summary extension should return extension when index has lifecycle error 1`] = `
 Array [
   <h3
-    class="euiTitle css-1mr6cet-euiTitle-s"
+    class="euiTitle emotion-euiTitle-s"
   >
     Index lifecycle management
   </h3>,
   <div
-    class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />,
   <div
-    class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--danger euiPanel--noShadow euiPanel--noBorder euiCallOut euiCallOut--danger css-1flvw80-euiCallOut"
+    class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger emotion-euiPanel-none-m-danger-euiCallOut"
   >
     <p
-      class="euiTitle euiCallOutHeader__title css-st4zhi-euiTitle-xs-euiCallOutHeader-danger"
+      class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-danger"
     >
       <span
         aria-hidden="true"
-        class="css-15maws8-euiCallOut__icon"
+        class="emotion-euiCallOut__icon"
         color="inherit"
         data-euiicon-type="cross"
       />
       Index lifecycle error
     </p>
     <div
-      class="euiText euiText--small css-i7i3v9-euiCallOut__description"
+      class="euiText emotion-euiText-s-euiTextColor-default-euiCallOut__description"
     >
-      <div
-        class="euiTextColor euiTextColor--default"
-      >
-        illegal_argument_exception: setting [index.lifecycle.rollover_alias] for index [testy3] is empty or not defined
-      </div>
+      illegal_argument_exception: setting [index.lifecycle.rollover_alias] for index [testy3] is empty or not defined
     </div>
   </div>,
   <div
-    class="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
+    class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
   />,
   <div
     class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -138,20 +134,21 @@ Array [
       class="euiFlexItem"
     >
       <dl
-        class="euiDescriptionList euiDescriptionList--column"
+        class="euiDescriptionList emotion-euiDescriptionList-column-left"
+        data-type="column"
       >
         <dt
-          class="euiDescriptionList__title"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
         >
           <strong>
             Lifecycle policy
           </strong>
         </dt>
         <dd
-          class="euiDescriptionList__description"
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
         >
           <a
-            class="euiLink css-102pf9n-euiLink-primary"
+            class="euiLink emotion-euiLink-primary"
             href="management/data/index_lifecycle_management//policies/edit/testy"
             rel="noreferrer"
           >
@@ -159,26 +156,26 @@ Array [
           </a>
         </dd>
         <dt
-          class="euiDescriptionList__title"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
         >
           <strong>
             Current action
           </strong>
         </dt>
         <dd
-          class="euiDescriptionList__description"
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
         >
           rollover
         </dd>
         <dt
-          class="euiDescriptionList__title"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
         >
           <strong>
             Failed step
           </strong>
         </dt>
         <dd
-          class="euiDescriptionList__description"
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
         >
           check-rollover-ready
         </dd>
@@ -188,51 +185,52 @@ Array [
       class="euiFlexItem"
     >
       <dl
-        class="euiDescriptionList euiDescriptionList--column"
+        class="euiDescriptionList emotion-euiDescriptionList-column-left"
+        data-type="column"
       >
         <dt
-          class="euiDescriptionList__title"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
         >
           <strong>
             Current phase
           </strong>
         </dt>
         <dd
-          class="euiDescriptionList__description"
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
         >
           hot
         </dd>
         <dt
-          class="euiDescriptionList__title"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
         >
           <strong>
             Current action time
           </strong>
         </dt>
         <dd
-          class="euiDescriptionList__description"
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
         >
           2018-12-07 13:02:55
         </dd>
         <dt
-          class="euiDescriptionList__title"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
         >
           <strong>
             Phase definition
           </strong>
         </dt>
         <dd
-          class="euiDescriptionList__description"
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
         >
           <div
-            class="euiPopover euiPopover--anchorDownCenter"
+            class="euiPopover emotion-euiPopover"
             id="phaseExecutionPopover"
           >
             <div
-              class="euiPopover__anchor"
+              class="euiPopover__anchor css-16vtueo-render"
             >
               <button
-                class="euiLink css-102pf9n-euiLink-primary"
+                class="euiLink emotion-euiLink-primary"
                 type="button"
               >
                 Show definition
@@ -249,12 +247,12 @@ Array [
 exports[`extend index management ilm summary extension should return extension when index has lifecycle policy 1`] = `
 Array [
   <h3
-    class="euiTitle css-1mr6cet-euiTitle-s"
+    class="euiTitle emotion-euiTitle-s"
   >
     Index lifecycle management
   </h3>,
   <div
-    class="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
+    class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
   />,
   <div
     class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -263,20 +261,21 @@ Array [
       class="euiFlexItem"
     >
       <dl
-        class="euiDescriptionList euiDescriptionList--column"
+        class="euiDescriptionList emotion-euiDescriptionList-column-left"
+        data-type="column"
       >
         <dt
-          class="euiDescriptionList__title"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
         >
           <strong>
             Lifecycle policy
           </strong>
         </dt>
         <dd
-          class="euiDescriptionList__description"
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
         >
           <a
-            class="euiLink css-102pf9n-euiLink-primary"
+            class="euiLink emotion-euiLink-primary"
             href="management/data/index_lifecycle_management//policies/edit/testy"
             rel="noreferrer"
           >
@@ -284,26 +283,26 @@ Array [
           </a>
         </dd>
         <dt
-          class="euiDescriptionList__title"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
         >
           <strong>
             Current action
           </strong>
         </dt>
         <dd
-          class="euiDescriptionList__description"
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
         >
           complete
         </dd>
         <dt
-          class="euiDescriptionList__title"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
         >
           <strong>
             Failed step
           </strong>
         </dt>
         <dd
-          class="euiDescriptionList__description"
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
         >
           -
         </dd>
@@ -313,29 +312,30 @@ Array [
       class="euiFlexItem"
     >
       <dl
-        class="euiDescriptionList euiDescriptionList--column"
+        class="euiDescriptionList emotion-euiDescriptionList-column-left"
+        data-type="column"
       >
         <dt
-          class="euiDescriptionList__title"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
         >
           <strong>
             Current phase
           </strong>
         </dt>
         <dd
-          class="euiDescriptionList__description"
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
         >
           new
         </dd>
         <dt
-          class="euiDescriptionList__title"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
         >
           <strong>
             Current action time
           </strong>
         </dt>
         <dd
-          class="euiDescriptionList__description"
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
         >
           2018-12-07 13:02:55
         </dd>

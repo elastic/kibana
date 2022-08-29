@@ -8,9 +8,10 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSwitch, EuiSelect } from '@elastic/eui';
-import { IndexPatternLayer, IndexPatternField } from '../types';
+import { IndexPatternLayer } from '../types';
 import { hasField } from '../pure_utils';
 import { GenericIndexPatternColumn } from '../operations';
+import { IndexPatternField } from '../../types';
 
 function nestColumn(columnOrder: string[], outer: string, inner: string) {
   const result = columnOrder.filter((c) => c !== inner);
@@ -64,7 +65,7 @@ export function BucketNestingEditor({
       defaultMessage: 'Group by this field first',
     });
     return (
-      <EuiFormRow label={useAsTopLevelAggCopy} display="columnCompressedSwitch">
+      <EuiFormRow label={useAsTopLevelAggCopy} display="columnCompressedSwitch" fullWidth>
         <EuiSwitch
           compressed
           label={useAsTopLevelAggCopy}

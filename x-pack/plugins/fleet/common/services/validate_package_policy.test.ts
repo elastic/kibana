@@ -10,7 +10,11 @@ import { safeLoad } from 'js-yaml';
 import { installationStatuses } from '../constants';
 import type { PackageInfo, NewPackagePolicy, RegistryPolicyTemplate } from '../types';
 
-import { validatePackagePolicy, validationHasErrors } from './validate_package_policy';
+import {
+  validatePackagePolicy,
+  validatePackagePolicyConfig,
+  validationHasErrors,
+} from './validate_package_policy';
 import { AWS_PACKAGE, INVALID_AWS_POLICY, VALID_AWS_POLICY } from './fixtures/aws_package';
 
 describe('Fleet - validatePackagePolicy()', () => {
@@ -159,7 +163,6 @@ describe('Fleet - validatePackagePolicy()', () => {
       namespace: 'default',
       policy_id: 'test-policy',
       enabled: true,
-      output_id: 'test-output',
       inputs: [
         {
           type: 'foo',
@@ -647,7 +650,6 @@ describe('Fleet - validatePackagePolicy()', () => {
             ],
             name: 'linux-3d13ada6-a9ae-46df-8e57-ff5050f4b671',
             namespace: 'default',
-            output_id: '',
             package: {
               name: 'linux',
               title: 'Linux Metrics',
@@ -868,5 +870,79 @@ describe('Fleet - validationHasErrors()', () => {
         },
       })
     ).toBe(false);
+  });
+});
+
+describe('Fleet - validatePackagePolicyConfig', () => {
+  describe('Integer', () => {
+    it('should return an error message for invalid integer', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'integer',
+          value: 'test',
+        },
+        {
+          name: 'myvariable',
+          type: 'integer',
+        },
+        'myvariable',
+        safeLoad
+      );
+
+      expect(res).toEqual(['Invalid integer']);
+    });
+
+    it('should accept valid integer', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'integer',
+          value: '12',
+        },
+        {
+          name: 'myvariable',
+          type: 'integer',
+        },
+        'myvariable',
+        safeLoad
+      );
+
+      expect(res).toBeNull();
+    });
+
+    it('should return an error message for invalid multi integers', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'integer',
+          value: ['test'],
+        },
+        {
+          name: 'myvariable',
+          type: 'integer',
+          multi: true,
+        },
+        'myvariable',
+        safeLoad
+      );
+
+      expect(res).toEqual(['Invalid integer']);
+    });
+
+    it('should accept valid multi integer', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'integer',
+          value: ['12'],
+        },
+        {
+          name: 'myvariable',
+          type: 'integer',
+          multi: true,
+        },
+        'myvariable',
+        safeLoad
+      );
+
+      expect(res).toBeNull();
+    });
   });
 });

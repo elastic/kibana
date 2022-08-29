@@ -9,7 +9,7 @@ import { EuiModalBody, EuiModalHeader, EuiSpacer } from '@elastic/eui';
 import React, { Fragment, memo, useMemo } from 'react';
 import styled from 'styled-components';
 
-import { OpenTimelineProps, ActionTimelineToShow } from '../types';
+import type { OpenTimelineProps, ActionTimelineToShow } from '../types';
 import { SearchRow } from '../search_row';
 import { TimelinesTable } from '../timelines_table';
 import { TitleRow } from '../title_row';

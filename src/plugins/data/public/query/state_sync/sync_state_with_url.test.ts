@@ -8,9 +8,10 @@
 
 import { Subscription } from 'rxjs';
 import { createBrowserHistory, History } from 'history';
+import { Filter, FilterStateStore } from '@kbn/es-query';
 import { FilterManager } from '../filter_manager';
 import { getFilter } from '../filter_manager/test_helpers/get_stub_filter';
-import { Filter, FilterStateStore, UI_SETTINGS } from '../../../common';
+import { UI_SETTINGS } from '../../../common';
 import { coreMock } from '@kbn/core/public/mocks';
 import {
   createKbnUrlStateStorage,

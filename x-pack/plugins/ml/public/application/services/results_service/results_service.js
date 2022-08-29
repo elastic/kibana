@@ -7,6 +7,8 @@
 
 import { each, get } from 'lodash';
 
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
 import { escapeForElasticsearchQuery } from '../../util/string_utils';
 import {
@@ -14,7 +16,6 @@ import {
   SWIM_LANE_DEFAULT_PAGE_SIZE,
 } from '../../explorer/explorer_constants';
 import { aggregationTypeTransform } from '../../../../common/util/anomaly_utils';
-import { isPopulatedObject } from '../../../../common/util/object_utils';
 
 /**
  * Service for carrying out Elasticsearch queries to obtain data for the Ml Results dashboards.
@@ -60,7 +61,7 @@ export function resultsServiceProvider(mlApiServices) {
           {
             range: {
               anomaly_score: {
-                gt: swimLaneSeverity,
+                gte: swimLaneSeverity,
               },
             },
           },

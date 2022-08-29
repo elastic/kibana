@@ -8,7 +8,8 @@
 import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { errorSchema, ErrorSchema } from './error_schema';
+import type { ErrorSchema } from './error_schema';
+import { errorSchema } from './error_schema';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { getErrorSchemaMock } from './error_schema.mocks';
 

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EndpointAction } from '../../management/pages/endpoint_hosts/store/action';
-import { PolicyDetailsAction } from '../../management/pages/policy/store/policy_details';
+import type { EndpointAction } from '../../management/pages/endpoint_hosts/store/action';
+import type { PolicyDetailsAction } from '../../management/pages/policy/store/policy_details';
 
 export { appActions } from './app';
 export { dragAndDropActions } from './drag_and_drop';
 export { inputsActions } from './inputs';
 export { sourcererActions } from './sourcerer';
-import { RoutingAction } from './routing';
+import type { RoutingAction } from './routing';
 
 export type AppAction = EndpointAction | RoutingAction | PolicyDetailsAction;

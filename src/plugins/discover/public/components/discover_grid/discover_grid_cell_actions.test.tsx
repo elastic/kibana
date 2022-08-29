@@ -14,13 +14,13 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('../../utils/use_discover_services', () => {
+jest.mock('../../hooks/use_discover_services', () => {
   const services = {
     toastNotifications: {
       addInfo: jest.fn(),
     },
   };
-  const originalModule = jest.requireActual('../../utils/use_discover_services');
+  const originalModule = jest.requireActual('../../hooks/use_discover_services');
   return {
     ...originalModule,
     useDiscoverServices: () => services,
@@ -57,8 +57,50 @@ describe('Discover cell actions ', function () {
     const button = findTestSubject(component, 'filterForButton');
     await button.simulate('click');
     expect(discoverGridContextMock.onFilter).toHaveBeenCalledWith(
-      discoverGridContextMock.indexPattern.fields.getByName('extension'),
+      discoverGridContextMock.dataView.fields.getByName('extension'),
       'jpg',
+      '+'
+    );
+  });
+  it('triggers filter function when FilterInBtn is clicked for a non-provided value', async () => {
+    const component = mountWithIntl(
+      <DiscoverGridContext.Provider value={discoverGridContextMock}>
+        <FilterInBtn
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          Component={(props: any) => <EuiButton {...props} />}
+          rowIndex={0}
+          colIndex={1}
+          columnId="extension"
+          isExpanded={false}
+        />
+      </DiscoverGridContext.Provider>
+    );
+    const button = findTestSubject(component, 'filterForButton');
+    await button.simulate('click');
+    expect(discoverGridContextMock.onFilter).toHaveBeenCalledWith(
+      discoverGridContextMock.dataView.fields.getByName('extension'),
+      undefined,
+      '+'
+    );
+  });
+  it('triggers filter function when FilterInBtn is clicked for an empty string value', async () => {
+    const component = mountWithIntl(
+      <DiscoverGridContext.Provider value={discoverGridContextMock}>
+        <FilterInBtn
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          Component={(props: any) => <EuiButton {...props} />}
+          rowIndex={4}
+          colIndex={1}
+          columnId="message"
+          isExpanded={false}
+        />
+      </DiscoverGridContext.Provider>
+    );
+    const button = findTestSubject(component, 'filterForButton');
+    await button.simulate('click');
+    expect(discoverGridContextMock.onFilter).toHaveBeenCalledWith(
+      discoverGridContextMock.dataView.fields.getByName('message'),
+      '',
       '+'
     );
   });
@@ -78,7 +120,7 @@ describe('Discover cell actions ', function () {
     const button = findTestSubject(component, 'filterOutButton');
     await button.simulate('click');
     expect(discoverGridContextMock.onFilter).toHaveBeenCalledWith(
-      discoverGridContextMock.indexPattern.fields.getByName('extension'),
+      discoverGridContextMock.dataView.fields.getByName('extension'),
       'jpg',
       '-'
     );

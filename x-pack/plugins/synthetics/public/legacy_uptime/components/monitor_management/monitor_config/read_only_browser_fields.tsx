@@ -6,9 +6,17 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiAccordion, EuiCallOut, EuiFormRow, EuiFieldText, EuiSpacer } from '@elastic/eui';
-import { ConfigKey } from '../../../../../common/runtime_types';
+import {
+  EuiAccordion,
+  EuiCallOut,
+  EuiFormRow,
+  EuiFieldText,
+  EuiSpacer,
+  EuiCode,
+} from '@elastic/eui';
+import { ConfigKey, MonacoEditorLangId } from '../../../../../common/runtime_types';
 import {
   useBrowserSimpleFieldsContext,
   useBrowserAdvancedFieldsContext,
@@ -19,6 +27,7 @@ import { ComboBox } from '../../fleet_package/combo_box';
 import { MonitorNameAndLocation } from './monitor_name_location';
 import { ThrottlingFields } from '../../fleet_package/browser/throttling_fields';
 import { OptionalLabel } from '../../fleet_package/optional_label';
+import { CodeEditor } from '../../fleet_package/code_editor';
 import { DescribedFormGroupWithWrap } from '../../fleet_package/common/described_form_group_with_wrap';
 
 const noop = () => {};
@@ -110,6 +119,36 @@ export const ProjectBrowserReadonlyFields = ({ minColumnWidth }: { minColumnWidt
             onBlur={noop}
             data-test-subj="syntheticsTags"
             readOnly={true}
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.params.label"
+              defaultMessage="Parameters"
+            />
+          }
+          labelAppend={<OptionalLabel />}
+          helpText={
+            <FormattedMessage
+              id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.params.helpText"
+              defaultMessage="Use JSON to define parameters that can be referenced in your script with {code}"
+              values={{ code: <EuiCode>params.value</EuiCode> }}
+            />
+          }
+        >
+          <CodeEditor
+            ariaLabel={i18n.translate(
+              'xpack.synthetics.createPackagePolicy.stepConfigure.requestBody.codeEditor.json.ariaLabel',
+              {
+                defaultMessage: 'JSON code editor',
+              }
+            )}
+            id="jsonParamsEditor"
+            languageId={MonacoEditorLangId.JSON}
+            value={fields[ConfigKey.PARAMS]}
+            readOnly={true}
+            data-test-subj="syntheticsBrowserParams"
           />
         </EuiFormRow>
       </DescribedFormGroupWithWrap>

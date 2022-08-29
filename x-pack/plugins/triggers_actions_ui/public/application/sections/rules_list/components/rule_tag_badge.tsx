@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiPopover, EuiBadge, EuiPopoverTitle } from '@elastic/eui';
+import { EuiPopover, EuiBadge, EuiPopoverTitle, EuiFlexGroup } from '@elastic/eui';
 
 const tagTitle = i18n.translate(
   'xpack.triggersActionsUI.sections.rules_list.rules_tag_badge.tagTitle',
@@ -16,15 +16,27 @@ const tagTitle = i18n.translate(
   }
 );
 
-export interface RuleTagBadgeProps {
+export type RuleTagBadgeOptions = 'tagsOutPopover' | 'default';
+
+export interface RuleTagBadgeBasicOptions {
   isOpen: boolean;
-  tags: string[];
   onClick: React.MouseEventHandler<HTMLButtonElement>;
   onClose: () => void;
+}
+
+export interface RuleTagBadgeCommonProps {
+  tagsOutPopover?: boolean;
+  tags: string[];
   badgeDataTestSubj?: string;
   titleDataTestSubj?: string;
   tagItemDataTestSubj?: (tag: string) => string;
 }
+
+export type RuleTagBadgeProps<T extends RuleTagBadgeOptions = 'default'> = T extends 'default'
+  ? RuleTagBadgeBasicOptions & RuleTagBadgeCommonProps
+  : T extends 'tagsOutPopover'
+  ? RuleTagBadgeCommonProps
+  : never;
 
 const containerStyle = {
   width: '300px',
@@ -32,16 +44,15 @@ const containerStyle = {
 
 const getTagItemDataTestSubj = (tag: string) => `ruleTagBadgeItem-${tag}`;
 
-export const RuleTagBadge = (props: RuleTagBadgeProps) => {
+export const RuleTagBadge = <T extends RuleTagBadgeOptions>(props: RuleTagBadgeProps<T>) => {
   const {
-    isOpen = false,
+    tagsOutPopover = false,
     tags = [],
-    onClick,
-    onClose,
     badgeDataTestSubj = 'ruleTagBadge',
     titleDataTestSubj = 'ruleTagPopoverTitle',
     tagItemDataTestSubj = getTagItemDataTestSubj,
   } = props;
+  const { isOpen, onClose, onClick } = props as RuleTagBadgeBasicOptions;
 
   const badge = useMemo(() => {
     return (
@@ -59,7 +70,7 @@ export const RuleTagBadge = (props: RuleTagBadgeProps) => {
         {tags.length}
       </EuiBadge>
     );
-  }, [tags, badgeDataTestSubj, onClick]);
+  }, [badgeDataTestSubj, onClick, tags.length]);
 
   const tagBadges = useMemo(
     () =>
@@ -76,9 +87,22 @@ export const RuleTagBadge = (props: RuleTagBadgeProps) => {
       )),
     [tags, tagItemDataTestSubj]
   );
+  if (tagsOutPopover) {
+    return (
+      // Put 0 to fix negative left margin value.
+      <EuiFlexGroup data-test-subj="tagsOutPopover" style={{ marginLeft: 0 }} wrap={true}>
+        {tagBadges}
+      </EuiFlexGroup>
+    );
+  }
 
   return (
-    <EuiPopover button={badge} anchorPosition="upCenter" isOpen={isOpen} closePopover={onClose}>
+    <EuiPopover
+      button={badge}
+      anchorPosition="upCenter"
+      isOpen={isOpen} // The props exists as it's required in props types
+      closePopover={onClose}
+    >
       <EuiPopoverTitle data-test-subj={titleDataTestSubj}>{tagTitle}</EuiPopoverTitle>
       <div style={containerStyle}>{tagBadges}</div>
     </EuiPopover>

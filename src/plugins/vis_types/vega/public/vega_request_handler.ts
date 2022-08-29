@@ -7,8 +7,8 @@
  */
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { Filter, buildEsQuery } from '@kbn/es-query';
-import { getEsQueryConfig, TimeRange, Query } from '@kbn/data-plugin/public';
+import { Filter, buildEsQuery, TimeRange, Query } from '@kbn/es-query';
+import { getEsQueryConfig } from '@kbn/data-plugin/public';
 
 import { SearchAPI } from './data_model/search_api';
 import { TimeCache } from './data_model/time_cache';

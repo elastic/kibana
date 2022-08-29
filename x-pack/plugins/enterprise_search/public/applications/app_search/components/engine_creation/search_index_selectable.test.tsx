@@ -5,123 +5,45 @@
  * 2.0.
  */
 
+import '../../../__mocks__/react_router';
 import '../../../__mocks__/shallow_useeffect.mock';
-import { setMockActions, setMockValues } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
 
-import { shallow, mount } from 'enzyme';
+import { shallow } from 'enzyme';
 
-import { EuiSelectable, EuiIcon, EuiHighlight } from '@elastic/eui';
+import { IndexStatusDetails, SearchIndexSelectableOption } from './search_index_selectable';
 
-import { SearchIndexSelectable, SearchIndexSelectableOption } from './search_index_selectable';
+const mockOption: SearchIndexSelectableOption = {
+  count: 123,
+  label: 'string',
+  alias: true,
+  badge: {
+    color: 'string',
+    label: 'string',
+    toolTipTitle: 'string',
+    toolTipContent: 'string',
+  },
+  disabled: true,
+  total: {
+    docs: {
+      count: 123,
+      deleted: 123,
+    },
+    store: {
+      size_in_bytes: 'string',
+    },
+  },
+};
 
-describe('SearchIndexSelectable', () => {
-  const DEFAULT_VALUES = {
-    isIndicesLoading: false,
-    indicesFormatted: [
-      {
-        label: 'search-test-index-1',
-        health: 'green',
-        status: 'open',
-        total: {
-          docs: {
-            count: 100,
-            deleted: 0,
-          },
-          store: {
-            size_in_bytes: '108Kb',
-          },
-        },
-      },
-      {
-        label: 'search-test-index-2',
-        health: 'green',
-        status: 'open',
-        total: {
-          docs: {
-            count: 100,
-            deleted: 0,
-          },
-          store: {
-            size_in_bytes: '108Kb',
-          },
-        },
-        checked: 'on',
-      },
-    ],
-  };
-  const MOCK_ACTIONS = { loadIndices: jest.fn(), setSelectedIndex: jest.fn() };
-  beforeEach(() => {
-    jest.clearAllMocks();
-    setMockValues(DEFAULT_VALUES);
-    setMockActions(MOCK_ACTIONS);
+describe('IndexStatusDetails', () => {
+  it('does not render anything if an option is not provided', () => {
+    const wrapper = shallow(<IndexStatusDetails />);
+    expect(wrapper.find('.entSearch__indexListItem')).toHaveLength(0);
   });
 
-  it('renders', () => {
-    const wrapper = shallow(<SearchIndexSelectable />);
-    const selectable = wrapper.find(EuiSelectable);
-    expect(wrapper.find('[data-test-subj="SearchIndexSelectable"]')).toHaveLength(1);
-    expect(selectable.prop('emptyMessage')).toEqual('No Elasticsearch indices available');
-    expect(selectable.prop('loadingMessage')).toEqual('Loading Elasticsearch indices');
-  });
-
-  it('renders custom options', () => {
-    const wrapper = shallow(<SearchIndexSelectable />);
-    const selectable = wrapper.find(EuiSelectable);
-    const customOptions = selectable.prop('renderOption')!;
-    const renderedOptions = mount(
-      <>
-        {customOptions(
-          DEFAULT_VALUES.indicesFormatted[0] as SearchIndexSelectableOption,
-          'search-'
-        )}
-      </>
-    );
-
-    expect(renderedOptions.find(EuiHighlight).text()).toEqual('search-test-index-1');
-    expect(renderedOptions.find(EuiIcon).prop('color')).toEqual('success');
-    expect(renderedOptions.find('[data-test-subj="optionStatus"]').text()).toEqual(
-      'Status:\u00a0open'
-    );
-    expect(renderedOptions.find('[data-test-subj="optionDocs"]').text()).toEqual(
-      'Docs count:\u00a0100'
-    );
-    expect(renderedOptions.find('[data-test-subj="optionStorage"]').text()).toEqual(
-      'Storage size:\u00a0108Kb'
-    );
-  });
-
-  it('calls loadIndices on mount', () => {
-    shallow(<SearchIndexSelectable />);
-    expect(MOCK_ACTIONS.loadIndices).toHaveBeenCalled();
-  });
-
-  it('renders - on rows for missing information', () => {
-    const wrapper = shallow(<SearchIndexSelectable />);
-    const selectable = wrapper.find(EuiSelectable);
-    const customOptions = selectable.prop('renderOption')!;
-    const renderedOptions = mount(
-      <>{customOptions({ label: 'search-missing-data' }, 'search-')}</>
-    );
-
-    expect(renderedOptions.find(EuiHighlight).text()).toEqual('search-missing-data');
-    expect(renderedOptions.find(EuiIcon).prop('color')).toEqual('');
-    expect(renderedOptions.find('[data-test-subj="optionStatus"]').text()).toEqual(
-      'Status:\u00a0-'
-    );
-    expect(renderedOptions.find('[data-test-subj="optionDocs"]').text()).toEqual(
-      'Docs count:\u00a0-'
-    );
-    expect(renderedOptions.find('[data-test-subj="optionStorage"]').text()).toEqual(
-      'Storage size:\u00a0-'
-    );
-  });
-
-  it('calls setSelectedIndex onChange', () => {
-    const wrapper = shallow(<SearchIndexSelectable />);
-    const onChangeHandler = wrapper.find(EuiSelectable).prop('onChange')!;
-    onChangeHandler(DEFAULT_VALUES.indicesFormatted as SearchIndexSelectableOption[]);
-    expect(MOCK_ACTIONS.setSelectedIndex).toHaveBeenCalledWith('search-test-index-2');
+  it('renders if there is an option provided', () => {
+    const wrapper = shallow(<IndexStatusDetails option={mockOption} />);
+    expect(wrapper.find('.entSearch__indexListItem')).toHaveLength(1);
   });
 });

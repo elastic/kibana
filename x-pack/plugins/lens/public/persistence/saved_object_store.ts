@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { Filter } from '@kbn/es-query';
+import { Filter, Query } from '@kbn/es-query';
 import {
   SavedObjectAttributes,
   SavedObjectsClientContract,
   SavedObjectReference,
   ResolvedSimpleSavedObject,
 } from '@kbn/core/public';
-import { Query } from '@kbn/data-plugin/public';
+import { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { DOC_TYPE } from '../../common';
 import { LensSavedObjectAttributes } from '../async_services';
 
@@ -31,6 +31,8 @@ export interface Document {
       state?: unknown;
     };
     filters: Filter[];
+    adHocDataViews?: Record<string, DataViewSpec>;
+    internalReferences?: SavedObjectReference[];
   };
   references: SavedObjectReference[];
 }

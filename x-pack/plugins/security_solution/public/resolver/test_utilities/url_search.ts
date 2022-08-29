@@ -6,7 +6,7 @@
  */
 
 import { encode } from 'rison-node';
-import { PanelViewAndParameters } from '../types';
+import type { PanelViewAndParameters } from '../types';
 
 /**
  * Calculate the expected URL search based on options.

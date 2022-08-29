@@ -24,6 +24,7 @@ import {
   createJavaAgentInstructions,
   createDotNetAgentInstructions,
   createPhpAgentInstructions,
+  createOpenTelemetryAgentInstructions,
 } from '../../../common/tutorial/instructions/apm_agent_instructions';
 import { APMConfig } from '../..';
 import { getOnPremApmServerInstructionSet } from './on_prem_apm_server_instruction_set';
@@ -131,6 +132,13 @@ function getApmAgentInstructionSet(
       {
         id: INSTRUCTION_VARIANT.PHP,
         instructions: createPhpAgentInstructions(apmServerUrl, secretToken),
+      },
+      {
+        id: INSTRUCTION_VARIANT.OPEN_TELEMETRY,
+        instructions: createOpenTelemetryAgentInstructions(
+          apmServerUrl,
+          secretToken
+        ),
       },
     ],
   };

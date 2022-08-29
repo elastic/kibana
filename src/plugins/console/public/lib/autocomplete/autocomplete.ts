@@ -303,7 +303,7 @@ export function getCurrentMethodAndTokenPaths(
   return ret;
 }
 
-// eslint-disable-next-line
+// eslint-disable-next-line import/no-default-export
 export default function ({
   coreEditor: editor,
   parser,
@@ -1104,6 +1104,9 @@ export default function ({
       case 'paren.rparen':
       case 'punctuation.colon':
       case 'punctuation.comma':
+      case 'comment.line':
+      case 'comment.punctuation':
+      case 'comment.block':
       case 'UNKNOWN':
         return;
     }

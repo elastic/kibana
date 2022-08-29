@@ -10,8 +10,9 @@ import { render } from '@testing-library/react';
 import { SecurityPageName } from '../../../../app/types';
 import { TestProviders } from '../../../mock';
 import { SecuritySideNav } from './security_side_nav';
-import { SolutionGroupedNavProps } from '../solution_grouped_nav/solution_grouped_nav';
-import { NavLinkItem } from '../types';
+import type { SolutionGroupedNavProps } from '../solution_grouped_nav/solution_grouped_nav';
+import type { NavLinkItem } from '../types';
+import { bottomNavOffset } from '../../../lib/helpers';
 
 const manageNavLink: NavLinkItem = {
   id: SecurityPageName.administration,
@@ -23,6 +24,7 @@ const manageNavLink: NavLinkItem = {
       id: SecurityPageName.endpoints,
       title: 'title 2',
       description: 'description 2',
+      isBeta: true,
     },
   ],
 };
@@ -55,6 +57,15 @@ jest.mock('../../links', () => ({
     ({ deepLinkId }: { deepLinkId: SecurityPageName }) => ({
       href: `/${deepLinkId}`,
     }),
+}));
+
+const mockUseShowTimeline = jest.fn((): [boolean] => [false]);
+jest.mock('../../../utils/timeline/use_show_timeline', () => ({
+  useShowTimeline: () => mockUseShowTimeline(),
+}));
+const mockUseIsPolicySettingsBarVisible = jest.fn((): boolean => false);
+jest.mock('../../../../management/pages/policy/view/policy_hooks', () => ({
+  useIsPolicySettingsBarVisible: () => mockUseIsPolicySettingsBarVisible(),
 }));
 
 const renderNav = () =>
@@ -119,6 +130,7 @@ describe('SecuritySideNav', () => {
                 label: 'title 2',
                 description: 'description 2',
                 href: '/endpoints',
+                isBeta: true,
               },
             ],
           },
@@ -138,6 +150,7 @@ describe('SecuritySideNav', () => {
             title: 'title 2',
             description: 'description 2',
             disabled: true,
+            isBeta: true,
           },
         ],
       },
@@ -177,5 +190,40 @@ describe('SecuritySideNav', () => {
         ],
       })
     );
+  });
+
+  describe('bottom offset', () => {
+    it('should render with bottom offset when timeline bar visible', () => {
+      mockUseIsPolicySettingsBarVisible.mockReturnValueOnce(false);
+      mockUseShowTimeline.mockReturnValueOnce([true]);
+      renderNav();
+      expect(mockSolutionGroupedNav).toHaveBeenCalledWith(
+        expect.objectContaining({
+          bottomOffset: bottomNavOffset,
+        })
+      );
+    });
+
+    it('should render with bottom offset when policy settings bar visible', () => {
+      mockUseShowTimeline.mockReturnValueOnce([false]);
+      mockUseIsPolicySettingsBarVisible.mockReturnValueOnce(true);
+      renderNav();
+      expect(mockSolutionGroupedNav).toHaveBeenCalledWith(
+        expect.objectContaining({
+          bottomOffset: bottomNavOffset,
+        })
+      );
+    });
+
+    it('should not render with bottom offset when not needed', () => {
+      mockUseShowTimeline.mockReturnValueOnce([false]);
+      mockUseIsPolicySettingsBarVisible.mockReturnValueOnce(false);
+      renderNav();
+      expect(mockSolutionGroupedNav).toHaveBeenCalledWith(
+        expect.not.objectContaining({
+          bottomOffset: bottomNavOffset,
+        })
+      );
+    });
   });
 });

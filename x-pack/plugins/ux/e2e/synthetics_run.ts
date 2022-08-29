@@ -5,11 +5,11 @@
  * 2.0.
  */
 import { FtrConfigProviderContext } from '@kbn/test';
-import { argv } from '@kbn/synthetics-plugin/e2e/parse_args_params';
-import { SyntheticsRunner } from '@kbn/synthetics-plugin/e2e/synthetics_start';
+import { argv } from '@kbn/observability-plugin/e2e/parse_args_params';
 import path from 'path';
+import { SyntheticsRunner } from '@kbn/observability-plugin/e2e/synthetics_runner';
 
-const { headless, grep, pauseOnError } = argv;
+const { headless, grep, bail: pauseOnError } = argv;
 
 async function runE2ETests({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaConfig = await readConfigFile(

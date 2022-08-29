@@ -9,21 +9,23 @@ import { cloneDeep } from 'lodash';
 import { URL } from 'url';
 import { transformDataToNdjson } from '@kbn/securitysolution-utils';
 
-import { Logger } from '@kbn/core/server';
-import { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import axios, { AxiosInstance } from 'axios';
-import {
+import type { Logger } from '@kbn/core/server';
+import type { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { AxiosInstance } from 'axios';
+import axios from 'axios';
+import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { ITelemetryReceiver } from './receiver';
+import type { ITelemetryReceiver } from './receiver';
 import { copyAllowlistedFields, endpointAllowlistFields } from './filterlists';
 import { createTelemetryTaskConfigs } from './tasks';
 import { createUsageCounterLabel } from './helpers';
 import type { TelemetryEvent } from './types';
 import { TELEMETRY_MAX_BUFFER_SIZE } from './constants';
-import { SecurityTelemetryTask, SecurityTelemetryTaskConfig } from './task';
+import type { SecurityTelemetryTaskConfig } from './task';
+import { SecurityTelemetryTask } from './task';
 
 const usageLabelPrefix: string[] = ['security_telemetry', 'sender'];
 
@@ -35,6 +37,7 @@ export interface ITelemetryEventsSender {
     telemetryUsageCounter?: UsageCounter
   ): void;
 
+  getTelemetryUsageCluster(): UsageCounter | undefined;
   getClusterID(): string | undefined;
 
   start(
@@ -94,6 +97,10 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
         }
       );
     }
+  }
+
+  public getTelemetryUsageCluster(): UsageCounter | undefined {
+    return this.telemetryUsageCounter;
   }
 
   public getClusterID(): string | undefined {

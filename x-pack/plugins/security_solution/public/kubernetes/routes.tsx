@@ -9,18 +9,22 @@ import React from 'react';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { KubernetesContainer } from './pages';
 
-import { SecurityPageName, SecuritySubPluginRoutes } from '../app/types';
+import type { SecuritySubPluginRoutes } from '../app/types';
+import { SecurityPageName } from '../app/types';
 import { KUBERNETES_PATH } from '../../common/constants';
+import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 
 export const KubernetesRoutes = () => (
-  <TrackApplicationView viewId={SecurityPageName.kubernetes}>
-    <KubernetesContainer />
-  </TrackApplicationView>
+  <PluginTemplateWrapper>
+    <TrackApplicationView viewId={SecurityPageName.kubernetes}>
+      <KubernetesContainer />
+    </TrackApplicationView>
+  </PluginTemplateWrapper>
 );
 
 export const routes: SecuritySubPluginRoutes = [
   {
     path: KUBERNETES_PATH,
-    render: KubernetesRoutes,
+    component: KubernetesRoutes,
   },
 ];

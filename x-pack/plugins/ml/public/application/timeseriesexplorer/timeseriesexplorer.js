@@ -31,6 +31,7 @@ import {
   EuiTitle,
   EuiAccordion,
   EuiBadge,
+  EuiTextColor,
 } from '@elastic/eui';
 import { ResizeChecker } from '@kbn/kibana-utils-plugin/public';
 import { TimeSeriesExplorerHelpPopover } from './timeseriesexplorer_help_popover';
@@ -1080,10 +1081,10 @@ export class TimeSeriesExplorer extends React.Component {
           (fullRefresh === false || loading === false) &&
           hasResults === true && (
             <div>
-              <div className="results-container">
-                <EuiFlexGroup gutterSize="xs" alignItems="center">
-                  <EuiTitle className="panel-title">
-                    <h2 style={{ display: 'inline' }}>
+              <EuiFlexGroup gutterSize="xs" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size={'xs'}>
+                    <h2>
                       <span>
                         {i18n.translate(
                           'xpack.ml.timeSeriesExplorer.singleTimeSeriesAnalysisTitle',
@@ -1095,7 +1096,7 @@ export class TimeSeriesExplorer extends React.Component {
                       </span>
                       &nbsp;
                       {chartDetails.entityData.count === 1 && (
-                        <span className="entity-count-text">
+                        <EuiTextColor color={'success'} size={'s'} component={'span'}>
                           {chartDetails.entityData.entities.length > 0 && '('}
                           {chartDetails.entityData.entities
                             .map((entity) => {
@@ -1103,10 +1104,10 @@ export class TimeSeriesExplorer extends React.Component {
                             })
                             .join(', ')}
                           {chartDetails.entityData.entities.length > 0 && ')'}
-                        </span>
+                        </EuiTextColor>
                       )}
                       {chartDetails.entityData.count !== 1 && (
-                        <span className="entity-count-text">
+                        <EuiTextColor color={'success'} size={'s'} component={'span'}>
                           {chartDetails.entityData.entities.map((countData, i) => {
                             return (
                               <Fragment key={countData.fieldName}>
@@ -1134,107 +1135,107 @@ export class TimeSeriesExplorer extends React.Component {
                               </Fragment>
                             );
                           })}
-                        </span>
+                        </EuiTextColor>
                       )}
                     </h2>
                   </EuiTitle>
+                </EuiFlexItem>
+
+                <EuiFlexItem grow={false}>
+                  <TimeSeriesExplorerHelpPopover />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiFlexGroup style={{ float: 'right' }}>
+                {showModelBoundsCheckbox && (
                   <EuiFlexItem grow={false}>
-                    <TimeSeriesExplorerHelpPopover />
+                    <EuiCheckbox
+                      id="toggleModelBoundsCheckbox"
+                      label={i18n.translate('xpack.ml.timeSeriesExplorer.showModelBoundsLabel', {
+                        defaultMessage: 'show model bounds',
+                      })}
+                      checked={showModelBounds}
+                      onChange={this.toggleShowModelBoundsHandler}
+                    />
                   </EuiFlexItem>
-                </EuiFlexGroup>
-                <EuiFlexGroup style={{ float: 'right' }}>
-                  {showModelBoundsCheckbox && (
-                    <EuiFlexItem grow={false}>
-                      <EuiCheckbox
-                        id="toggleModelBoundsCheckbox"
-                        label={i18n.translate('xpack.ml.timeSeriesExplorer.showModelBoundsLabel', {
-                          defaultMessage: 'show model bounds',
-                        })}
-                        checked={showModelBounds}
-                        onChange={this.toggleShowModelBoundsHandler}
-                      />
-                    </EuiFlexItem>
-                  )}
-
-                  {showAnnotationsCheckbox && (
-                    <EuiFlexItem grow={false}>
-                      <EuiCheckbox
-                        id="toggleAnnotationsCheckbox"
-                        label={i18n.translate('xpack.ml.timeSeriesExplorer.annotationsLabel', {
-                          defaultMessage: 'annotations',
-                        })}
-                        checked={showAnnotations}
-                        onChange={this.toggleShowAnnotationsHandler}
-                      />
-                    </EuiFlexItem>
-                  )}
-
-                  {showForecastCheckbox && (
-                    <EuiFlexItem grow={false}>
-                      <EuiCheckbox
-                        id="toggleShowForecastCheckbox"
-                        label={
-                          <span data-test-subj={'mlForecastCheckbox'}>
-                            {i18n.translate('xpack.ml.timeSeriesExplorer.showForecastLabel', {
-                              defaultMessage: 'show forecast',
-                            })}
-                          </span>
-                        }
-                        checked={showForecast}
-                        onChange={this.toggleShowForecastHandler}
-                      />
-                    </EuiFlexItem>
-                  )}
-                </EuiFlexGroup>
-
-                <TimeSeriesChartWithTooltips
-                  chartProps={chartProps}
-                  contextAggregationInterval={contextAggregationInterval}
-                  bounds={bounds}
-                  detectorIndex={selectedDetectorIndex}
-                  renderFocusChartOnly={renderFocusChartOnly}
-                  selectedJob={selectedJob}
-                  selectedEntities={this.props.selectedEntities}
-                  showAnnotations={showAnnotations}
-                  showForecast={showForecast}
-                  showModelBounds={showModelBounds}
-                  lastRefresh={lastRefresh}
-                />
-                {focusAnnotationError !== undefined && (
-                  <>
-                    <EuiTitle
-                      className="panel-title"
-                      data-test-subj="mlAnomalyExplorerAnnotations error"
-                    >
-                      <h2>
-                        <FormattedMessage
-                          id="xpack.ml.timeSeriesExplorer.annotationsErrorTitle"
-                          defaultMessage="Annotations"
-                        />
-                      </h2>
-                    </EuiTitle>
-                    <EuiPanel>
-                      <EuiCallOut
-                        title={i18n.translate(
-                          'xpack.ml.timeSeriesExplorer.annotationsErrorCallOutTitle',
-                          {
-                            defaultMessage: 'An error occurred loading annotations:',
-                          }
-                        )}
-                        color="danger"
-                        iconType="alert"
-                      >
-                        <p>{focusAnnotationError}</p>
-                      </EuiCallOut>
-                    </EuiPanel>
-                    <EuiSpacer size="m" />
-                  </>
                 )}
-                {focusAnnotationData && focusAnnotationData.length > 0 && (
+
+                {showAnnotationsCheckbox && (
+                  <EuiFlexItem grow={false}>
+                    <EuiCheckbox
+                      id="toggleAnnotationsCheckbox"
+                      label={i18n.translate('xpack.ml.timeSeriesExplorer.annotationsLabel', {
+                        defaultMessage: 'annotations',
+                      })}
+                      checked={showAnnotations}
+                      onChange={this.toggleShowAnnotationsHandler}
+                    />
+                  </EuiFlexItem>
+                )}
+
+                {showForecastCheckbox && (
+                  <EuiFlexItem grow={false}>
+                    <EuiCheckbox
+                      id="toggleShowForecastCheckbox"
+                      label={
+                        <span data-test-subj={'mlForecastCheckbox'}>
+                          {i18n.translate('xpack.ml.timeSeriesExplorer.showForecastLabel', {
+                            defaultMessage: 'show forecast',
+                          })}
+                        </span>
+                      }
+                      checked={showForecast}
+                      onChange={this.toggleShowForecastHandler}
+                    />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+
+              <TimeSeriesChartWithTooltips
+                chartProps={chartProps}
+                contextAggregationInterval={contextAggregationInterval}
+                bounds={bounds}
+                detectorIndex={selectedDetectorIndex}
+                renderFocusChartOnly={renderFocusChartOnly}
+                selectedJob={selectedJob}
+                selectedEntities={this.props.selectedEntities}
+                showAnnotations={showAnnotations}
+                showForecast={showForecast}
+                showModelBounds={showModelBounds}
+                lastRefresh={lastRefresh}
+              />
+              {focusAnnotationError !== undefined && (
+                <>
+                  <EuiTitle data-test-subj="mlAnomalyExplorerAnnotations error" size={'xs'}>
+                    <h2>
+                      <FormattedMessage
+                        id="xpack.ml.timeSeriesExplorer.annotationsErrorTitle"
+                        defaultMessage="Annotations"
+                      />
+                    </h2>
+                  </EuiTitle>
+                  <EuiPanel>
+                    <EuiCallOut
+                      title={i18n.translate(
+                        'xpack.ml.timeSeriesExplorer.annotationsErrorCallOutTitle',
+                        {
+                          defaultMessage: 'An error occurred loading annotations:',
+                        }
+                      )}
+                      color="danger"
+                      iconType="alert"
+                    >
+                      <p>{focusAnnotationError}</p>
+                    </EuiCallOut>
+                  </EuiPanel>
+                  <EuiSpacer size="m" />
+                </>
+              )}
+              {focusAnnotationData && focusAnnotationData.length > 0 && (
+                <>
                   <EuiAccordion
                     id={'mlAnnotationsAccordion'}
                     buttonContent={
-                      <EuiTitle className="panel-title">
+                      <EuiTitle size={'xs'}>
                         <h2>
                           <FormattedMessage
                             id="xpack.ml.timeSeriesExplorer.annotationsTitle"
@@ -1265,32 +1266,33 @@ export class TimeSeriesExplorer extends React.Component {
                       isSingleMetricViewerLinkVisible={false}
                       isNumberBadgeVisible={true}
                     />
-                    <EuiSpacer size="l" />
                   </EuiAccordion>
-                )}
-                <AnnotationFlyout
-                  chartDetails={chartDetails}
-                  detectorIndex={selectedDetectorIndex}
-                  detectors={detectors}
-                />
-                <EuiTitle className="panel-title">
-                  <h2>
-                    <FormattedMessage
-                      id="xpack.ml.timeSeriesExplorer.anomaliesTitle"
-                      defaultMessage="Anomalies"
-                    />
-                  </h2>
-                </EuiTitle>
-                <EuiFlexGroup direction="row" gutterSize="l" responsive={true}>
-                  <EuiFlexItem grow={false}>
-                    <SelectSeverity />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <SelectInterval />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-                <EuiSpacer size="m" />
-              </div>
+                  <EuiSpacer size="m" />
+                </>
+              )}
+              <AnnotationFlyout
+                chartDetails={chartDetails}
+                detectorIndex={selectedDetectorIndex}
+                detectors={detectors}
+              />
+              <EuiTitle size={'xs'}>
+                <h2>
+                  <FormattedMessage
+                    id="xpack.ml.timeSeriesExplorer.anomaliesTitle"
+                    defaultMessage="Anomalies"
+                  />
+                </h2>
+              </EuiTitle>
+              <EuiSpacer size="s" />
+              <EuiFlexGroup direction="row" gutterSize="l" responsive={true}>
+                <EuiFlexItem grow={false}>
+                  <SelectSeverity />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <SelectInterval />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiSpacer size="m" />
             </div>
           )}
         {arePartitioningFieldsProvided && jobs.length > 0 && hasResults === true && (

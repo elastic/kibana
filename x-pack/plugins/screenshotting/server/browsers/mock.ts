@@ -92,7 +92,7 @@ export function createMockBrowserDriverFactory(
     createPage: jest.fn(() =>
       of({
         driver: driver ?? createMockBrowserDriver(),
-        unexpectedExit$: NEVER,
+        error$: NEVER,
         close: () => of({}),
       })
     ),

@@ -18,7 +18,10 @@ export type {
   ValidLayer,
   XYDataLayerConfig,
   XYAnnotationLayerConfig,
-} from './xy_visualization/types';
+  YAxisMode,
+  SeriesType,
+  YConfig,
+} from './visualizations/xy/types';
 export type {
   DatasourcePublicAPI,
   DataType,
@@ -29,15 +32,15 @@ export type {
   VisualizationSuggestion,
 } from './types';
 export type {
-  MetricState,
+  LegacyMetricState as MetricState,
   ValueLabelConfig,
   PieVisualizationState,
   PieLayerState,
   SharedPieLayerState,
 } from '../common/types';
 
-export type { DatatableVisualizationState } from './datatable_visualization/visualization';
-export type { HeatmapVisualizationState } from './heatmap_visualization/types';
+export type { DatatableVisualizationState } from './visualizations/datatable/visualization';
+export type { HeatmapVisualizationState } from './visualizations/heatmap/types';
 export type { GaugeVisualizationState } from './visualizations/gauge/constants';
 export type {
   IndexPatternPersistedState,
@@ -56,6 +59,7 @@ export type {
   CardinalityIndexPatternColumn,
   SumIndexPatternColumn,
   MedianIndexPatternColumn,
+  StandardDeviationIndexPatternColumn,
   PercentileIndexPatternColumn,
   PercentileRanksIndexPatternColumn,
   CountIndexPatternColumn,
@@ -74,13 +78,10 @@ export type {
 } from './indexpattern_datasource/types';
 export type {
   XYArgs,
-  ExtendedYConfig,
   XYRender,
   LayerType,
-  YAxisMode,
   LineStyle,
   FillStyle,
-  SeriesType,
   YScaleType,
   XScaleType,
   AxisConfig,
@@ -88,7 +89,6 @@ export type {
   XYChartProps,
   LegendConfig,
   IconPosition,
-  ExtendedYConfigResult,
   DataLayerArgs,
   ValueLabelMode,
   AxisExtentMode,
@@ -97,14 +97,9 @@ export type {
   AxisExtentConfig,
   LegendConfigResult,
   AxesSettingsConfig,
-  GridlinesConfigResult,
-  TickLabelsConfigResult,
   AxisExtentConfigResult,
   ReferenceLineLayerArgs,
-  LabelsOrientationConfig,
   ReferenceLineLayerConfig,
-  LabelsOrientationConfigResult,
-  AxisTitlesVisibilityConfigResult,
 } from '@kbn/expression-xy-plugin/common';
 export type { LensEmbeddableInput, LensSavedObjectAttributes, Embeddable } from './embeddable';
 

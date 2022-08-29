@@ -11,8 +11,8 @@ import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import sinon from 'sinon';
 import { StubBrowserStorage } from '@kbn/test-jest-helpers';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { ChromeNavLink, DEFAULT_APP_CATEGORIES } from '../../..';
-import { httpServiceMock } from '../../../http/http_service.mock';
 import { ChromeRecentlyAccessedHistoryItem } from '../../recently_accessed';
 import { CollapsibleNav } from './collapsible_nav';
 
@@ -78,7 +78,7 @@ function clickGroup(component: ReactWrapper, group: string) {
 }
 
 describe('CollapsibleNav', () => {
-  // this test is mostly an "EUI works as expected" sanity check
+  // this test is mostly an "EUI works as expected" check
   it('renders the default nav', () => {
     const component = mount(<CollapsibleNav {...mockProps()} />);
     expect(component).toMatchSnapshot();

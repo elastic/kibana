@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const PageObjects = getPageObjects(['settings', 'tagManagement', 'savedObjects', 'common']);
@@ -36,16 +36,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await testSubjects.click('savedObjectSearchBar');
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/115320
-  describe.skip('saved objects management integration', () => {
+  describe('saved objects management integration', () => {
     before(async () => {
-      await esArchiver.load(
-        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/so_management'
+      await kibanaServer.importExport.load(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/so_management/data.json'
       );
     });
     after(async () => {
-      await esArchiver.unload(
-        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/so_management'
+      await kibanaServer.importExport.unload(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/so_management/data.json'
       );
     });
 

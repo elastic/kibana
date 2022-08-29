@@ -75,7 +75,7 @@ exports[`Storyshots arguments/AxisConfig extended 1`] = `
     </div>
   </div>
   <div
-    className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
+    className="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />
 </div>
 `;
@@ -155,7 +155,7 @@ exports[`Storyshots arguments/AxisConfig/components extended 1`] = `
     </div>
   </div>
   <div
-    className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
+    className="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />
 </div>
 `;
@@ -171,16 +171,12 @@ exports[`Storyshots arguments/AxisConfig/components extended disabled 1`] = `
   }
 >
   <div
-    className="euiText euiText--extraSmall"
+    className="euiText emotion-euiText-xs-euiTextColor-subdued"
+    style={Object {}}
   >
-    <div
-      className="euiTextColor euiTextColor--subdued"
-      style={Object {}}
-    >
-      <p>
-        Switch on to view axis settings
-      </p>
-    </div>
+    <p>
+      Switch on to view axis settings
+    </p>
   </div>
 </div>
 `;

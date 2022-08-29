@@ -6,54 +6,95 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { debounce } from 'lodash';
 import {
   EuiFormRow,
-  EuiSwitch,
   EuiSpacer,
   EuiComboBox,
   EuiComboBoxOptionOption,
-  EuiSelect,
   EuiTitle,
   EuiIconTip,
   EuiLink,
 } from '@elastic/eui';
+import {
+  FieldConfig,
+  getFieldValidityAndErrorMessage,
+  UseField,
+  useFormContext,
+  useFormData,
+  VALIDATION_TYPES,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import { ToggleField, SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { DocLinksStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { debounce } from 'lodash';
 import { ActionConnectorFieldsProps } from '../../../../types';
-import { EsIndexActionConnector } from '../types';
 import { getTimeFieldOptions } from '../../../../common/lib/get_time_options';
 import { firstFieldOption, getFields, getIndexOptions } from '../../../../common/index_controls';
 import { useKibana } from '../../../../common/lib/kibana';
+import * as translations from './translations';
 
 interface TimeFieldOptions {
   value: string;
   text: string;
 }
 
-const IndexActionConnectorFields: React.FunctionComponent<
-  ActionConnectorFieldsProps<EsIndexActionConnector>
-> = ({ action, editActionConfig, errors, readOnly }) => {
+const { indexPatternField, emptyField } = fieldValidators;
+
+const getIndexConfig = (docLinks: DocLinksStart): FieldConfig => ({
+  label: translations.INDEX_LABEL,
+  helpText: (
+    <>
+      <FormattedMessage
+        id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.howToBroadenSearchQueryDescription"
+        defaultMessage="Use * to broaden your query."
+      />
+      <EuiSpacer size="s" />
+      <EuiLink href={docLinks.links.alerting.indexAction} target="_blank">
+        <FormattedMessage
+          id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.configureIndexHelpLabel"
+          defaultMessage="Configuring index connector."
+        />
+      </EuiLink>
+    </>
+  ),
+  validations: [
+    {
+      validator: emptyField(translations.INDEX_IS_NOT_VALID),
+    },
+    {
+      validator: indexPatternField(i18n),
+      type: VALIDATION_TYPES.ARRAY_ITEM,
+    },
+  ],
+});
+
+const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
+  readOnly,
+}) => {
   const { http, docLinks } = useKibana().services;
-  const { index, refresh, executionTimeField } = action.config;
-  const [showTimeFieldCheckbox, setShowTimeFieldCheckboxState] = useState<boolean>(
-    executionTimeField != null
-  );
-  const [hasTimeFieldCheckbox, setHasTimeFieldCheckboxState] = useState<boolean>(
-    executionTimeField != null
-  );
+  const { getFieldDefaultValue } = useFormContext();
+  const [{ config, __internal__ }] = useFormData({
+    watch: ['config.executionTimeField', 'config.index', '__internal__.hasTimeFieldCheckbox'],
+  });
+
+  const { index = null } = config ?? {};
 
   const [indexOptions, setIndexOptions] = useState<EuiComboBoxOptionOption[]>([]);
   const [timeFieldOptions, setTimeFieldOptions] = useState<TimeFieldOptions[]>([]);
   const [areIndiciesLoading, setAreIndicesLoading] = useState<boolean>(false);
 
+  const hasTimeFieldCheckboxDefaultValue = !!getFieldDefaultValue<string | undefined>(
+    'config.executionTimeField'
+  );
+  const showTimeFieldCheckbox = index != null && timeFieldOptions.length > 0;
+  const showTimeFieldSelect = __internal__ != null ? __internal__.hasTimeFieldCheckbox : false;
+
   const setTimeFields = (fields: TimeFieldOptions[]) => {
     if (fields.length > 0) {
-      setShowTimeFieldCheckboxState(true);
       setTimeFieldOptions([firstFieldOption, ...fields]);
     } else {
-      setHasTimeFieldCheckboxState(false);
-      setShowTimeFieldCheckboxState(false);
       setTimeFieldOptions([]);
     }
   };
@@ -68,14 +109,13 @@ const IndexActionConnectorFields: React.FunctionComponent<
     const indexPatternsFunction = async () => {
       if (index) {
         const currentEsFields = await getFields(http!, [index]);
-        setTimeFields(getTimeFieldOptions(currentEsFields as any));
+        if (Array.isArray(currentEsFields)) {
+          setTimeFields(getTimeFieldOptions(currentEsFields as any));
+        }
       }
     };
     indexPatternsFunction();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-  const isIndexInvalid: boolean =
-    errors.index !== undefined && errors.index.length > 0 && index !== undefined;
+  }, [http, index]);
 
   return (
     <>
@@ -88,57 +128,13 @@ const IndexActionConnectorFields: React.FunctionComponent<
         </h5>
       </EuiTitle>
       <EuiSpacer size="m" />
-      <EuiFormRow
-        id="indexConnectorSelectSearchBox"
-        fullWidth
-        label={
-          <FormattedMessage
-            id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.indicesToQueryLabel"
-            defaultMessage="Index"
-          />
-        }
-        isInvalid={isIndexInvalid}
-        error={errors.index}
-        helpText={
-          <>
-            <FormattedMessage
-              id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.howToBroadenSearchQueryDescription"
-              defaultMessage="Use * to broaden your query."
-            />
-            <EuiSpacer size="s" />
-            <EuiLink href={docLinks.links.alerting.indexAction} target="_blank">
-              <FormattedMessage
-                id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.configureIndexHelpLabel"
-                defaultMessage="Configuring index connector."
-              />
-            </EuiLink>
-          </>
-        }
-      >
-        <EuiComboBox
-          fullWidth
-          singleSelection={{ asPlainText: true }}
-          async
-          isLoading={areIndiciesLoading}
-          isInvalid={isIndexInvalid}
-          noSuggestions={!indexOptions.length}
-          options={indexOptions}
-          data-test-subj="connectorIndexesComboBox"
-          data-testid="connectorIndexesComboBox"
-          selectedOptions={
-            index
-              ? [
-                  {
-                    value: index,
-                    label: index,
-                  },
-                ]
-              : []
-          }
-          isDisabled={readOnly}
-          onChange={async (selected: EuiComboBoxOptionOption[]) => {
-            editActionConfig('index', selected.length > 0 ? selected[0].value : '');
-            const indices = selected.map((s) => s.value as string);
+      <UseField path="config.index" config={getIndexConfig(docLinks)}>
+        {(field) => {
+          const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+
+          const onComboChange = async (options: EuiComboBoxOptionOption[]) => {
+            field.setValue(options.length > 0 ? options[0].value : '');
+            const indices = options.map((s) => s.value as string);
 
             // reset time field and expression fields if indices are deleted
             if (indices.length === 0) {
@@ -147,117 +143,149 @@ const IndexActionConnectorFields: React.FunctionComponent<
             }
             const currentEsFields = await getFields(http!, indices);
             setTimeFields(getTimeFieldOptions(currentEsFields as any));
-          }}
-          onSearchChange={loadIndexOptions}
-          onBlur={() => {
-            if (!index) {
-              editActionConfig('index', '');
+          };
+
+          const onSearchComboChange = (value: string) => {
+            if (value !== undefined) {
+              field.clearErrors(VALIDATION_TYPES.ARRAY_ITEM);
             }
-          }}
-        />
-      </EuiFormRow>
-      <EuiSpacer size="m" />
-      <EuiSwitch
-        data-test-subj="indexRefreshCheckbox"
-        checked={refresh || false}
-        disabled={readOnly}
-        onChange={(e) => {
-          editActionConfig('refresh', e.target.checked);
-        }}
-        label={
-          <>
-            <FormattedMessage
-              id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.refreshLabel"
-              defaultMessage="Refresh index"
-            />{' '}
-            <EuiIconTip
-              position="right"
-              type="questionInCircle"
-              content={i18n.translate(
-                'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.refreshTooltip',
-                {
-                  defaultMessage:
-                    'Refresh the affected shards to make this operation visible to search.',
+
+            loadIndexOptions(value);
+          };
+
+          return (
+            <EuiFormRow
+              id="indexConnectorSelectSearchBox"
+              fullWidth
+              label={
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.indicesToQueryLabel"
+                  defaultMessage="Index"
+                />
+              }
+              isInvalid={isInvalid}
+              error={errorMessage}
+              helpText={
+                <>
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.howToBroadenSearchQueryDescription"
+                    defaultMessage="Use * to broaden your query."
+                  />
+                  <EuiSpacer size="s" />
+                  <EuiLink href={docLinks.links.alerting.indexAction} target="_blank">
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.configureIndexHelpLabel"
+                      defaultMessage="Configuring index connector."
+                    />
+                  </EuiLink>
+                </>
+              }
+            >
+              <EuiComboBox
+                fullWidth
+                singleSelection={{ asPlainText: true }}
+                async
+                isLoading={areIndiciesLoading}
+                isInvalid={isInvalid}
+                noSuggestions={!indexOptions.length}
+                options={indexOptions}
+                data-test-subj="connectorIndexesComboBox"
+                data-testid="connectorIndexesComboBox"
+                selectedOptions={
+                  index
+                    ? [
+                        {
+                          value: index,
+                          label: index,
+                        },
+                      ]
+                    : []
                 }
-              )}
-            />
-          </>
-        }
+                isDisabled={readOnly}
+                onChange={onComboChange}
+                onSearchChange={onSearchComboChange}
+              />
+            </EuiFormRow>
+          );
+        }}
+      </UseField>
+      <EuiSpacer size="m" />
+      <UseField
+        path="config.refresh"
+        component={ToggleField}
+        config={{
+          defaultValue: false,
+        }}
+        componentProps={{
+          euiFieldProps: {
+            label: (
+              <>
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.refreshLabel"
+                  defaultMessage="Refresh index"
+                />{' '}
+                <EuiIconTip
+                  position="right"
+                  type="questionInCircle"
+                  content={translations.REFRESH_FIELD_TOGGLE_TOOLTIP}
+                />
+              </>
+            ),
+            disabled: readOnly,
+            'data-test-subj': 'indexRefreshCheckbox',
+          },
+        }}
       />
       <EuiSpacer size="m" />
-      {showTimeFieldCheckbox && (
-        <EuiSwitch
-          data-test-subj="hasTimeFieldCheckbox"
-          checked={hasTimeFieldCheckbox || false}
-          disabled={readOnly}
-          onChange={() => {
-            setHasTimeFieldCheckboxState(!hasTimeFieldCheckbox);
-            // if changing from checked to not checked (hasTimeField === true),
-            // set time field to null
-            if (hasTimeFieldCheckbox) {
-              editActionConfig('executionTimeField', null);
-            }
+      {showTimeFieldCheckbox ? (
+        <UseField
+          path="__internal__.hasTimeFieldCheckbox"
+          component={ToggleField}
+          config={{ defaultValue: hasTimeFieldCheckboxDefaultValue }}
+          componentProps={{
+            euiFieldProps: {
+              label: (
+                <>
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.defineTimeFieldLabel"
+                    defaultMessage="Define time field for each document"
+                  />
+                  <EuiIconTip
+                    position="right"
+                    type="questionInCircle"
+                    content={translations.SHOW_TIME_FIELD_TOGGLE_TOOLTIP}
+                  />
+                </>
+              ),
+              disabled: readOnly,
+              'data-test-subj': 'hasTimeFieldCheckbox',
+            },
           }}
-          label={
-            <>
-              <FormattedMessage
-                id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.defineTimeFieldLabel"
-                defaultMessage="Define time field for each document"
-              />
-              <EuiIconTip
-                position="right"
-                type="questionInCircle"
-                content={i18n.translate(
-                  'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.definedateFieldTooltip',
-                  {
-                    defaultMessage: `Set this time field to the time the document was indexed.`,
-                  }
-                )}
-              />
-            </>
-          }
         />
-      )}
-      {hasTimeFieldCheckbox && (
+      ) : null}
+      {showTimeFieldSelect ? (
         <>
           <EuiSpacer size="m" />
-          <EuiFormRow
-            id="executionTimeField"
-            fullWidth
-            label={
-              <FormattedMessage
-                id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.executionTimeFieldLabel"
-                defaultMessage="Time field"
-              />
-            }
-          >
-            <EuiSelect
-              options={timeFieldOptions}
-              fullWidth
-              name="executionTimeField"
-              data-test-subj="executionTimeFieldSelect"
-              value={executionTimeField ?? ''}
-              onChange={(e) => {
-                editActionConfig('executionTimeField', nullableString(e.target.value));
-              }}
-              onBlur={() => {
-                if (executionTimeField === undefined) {
-                  editActionConfig('executionTimeField', null);
-                }
-              }}
-            />
-          </EuiFormRow>
+          <UseField
+            path="config.executionTimeField"
+            component={SelectField}
+            config={{
+              label: translations.EXECUTION_TIME_LABEL,
+            }}
+            componentProps={{
+              euiFieldProps: {
+                'data-test-subj': 'executionTimeFieldSelect',
+                options: timeFieldOptions,
+                fullWidth: true,
+                readOnly,
+              },
+            }}
+          />
         </>
-      )}
+      ) : null}
     </>
   );
 };
-
-// if the string == null or is empty, return null, else return string
-function nullableString(str: string | null | undefined) {
-  if (str == null || str.trim() === '') return null;
-  return str;
-}
 
 // eslint-disable-next-line import/no-default-export
 export { IndexActionConnectorFields as default };

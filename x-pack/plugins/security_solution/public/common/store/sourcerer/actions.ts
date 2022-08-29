@@ -7,14 +7,18 @@
 
 import actionCreatorFactory from 'typescript-fsa';
 
-import { KibanaDataView, SelectedDataView, SourcererDataView, SourcererScopeName } from './model';
-import { SecurityDataView } from '../../containers/sourcerer/api';
+import type {
+  KibanaDataView,
+  SelectedDataView,
+  SourcererDataView,
+  SourcererScopeName,
+} from './model';
+import type { SecurityDataView } from '../../containers/sourcerer/api';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/sourcerer');
 
 export const setDataView = actionCreator<{
   browserFields: SourcererDataView['browserFields'];
-  docValueFields: SourcererDataView['docValueFields'];
   id: SourcererDataView['id'];
   indexFields: SourcererDataView['indexFields'];
   loading: SourcererDataView['loading'];

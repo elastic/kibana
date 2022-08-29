@@ -9,13 +9,8 @@
 
 import rison from 'rison-node';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { type Filter, isFilterPinned } from '@kbn/es-query';
-import type {
-  TimeRange,
-  Query,
-  GlobalQueryStateFromUrl,
-  RefreshInterval,
-} from '@kbn/data-plugin/public';
+import { type Filter, isFilterPinned, type TimeRange, type Query } from '@kbn/es-query';
+import type { GlobalQueryStateFromUrl, RefreshInterval } from '@kbn/data-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import type { LayerDescriptor } from '../common/descriptor_types';
@@ -191,7 +186,6 @@ export interface MapsAppRegionMapLocatorParams extends SerializableRecord {
   termsSize?: number;
   colorSchema: string;
   indexPatternId?: string;
-  indexPatternTitle?: string;
   metricAgg: string;
   metricFieldName?: string;
   timeRange?: TimeRange;
@@ -224,7 +218,6 @@ export class MapsAppRegionMapLocatorDefinition
       termsSize,
       colorSchema,
       indexPatternId,
-      indexPatternTitle,
       metricAgg,
       metricFieldName,
       filters,
@@ -242,7 +235,6 @@ export class MapsAppRegionMapLocatorDefinition
       termsSize,
       colorSchema,
       indexPatternId,
-      indexPatternTitle,
       metricAgg,
       metricFieldName,
     });

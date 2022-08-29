@@ -7,7 +7,7 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
-import { DraggableStateSnapshot, DraggingStyle } from 'react-beautiful-dnd';
+import type { DraggableStateSnapshot, DraggingStyle } from 'react-beautiful-dnd';
 import { waitFor } from '@testing-library/react';
 import '../../mock/match_media';
 import { mockBrowserFields } from '../../containers/source/mock';

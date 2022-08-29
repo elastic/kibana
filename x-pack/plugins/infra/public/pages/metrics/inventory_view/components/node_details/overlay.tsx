@@ -182,9 +182,9 @@ export const NodeContextPopover = ({
 };
 
 const OverlayHeader = euiStyled.div`
-  padding-top: ${(props) => props.theme.eui.paddingSizes.m};
-  padding-right: ${(props) => props.theme.eui.paddingSizes.m};
-  padding-left: ${(props) => props.theme.eui.paddingSizes.m};
+  padding-top: ${(props) => props.theme.eui.euiSizeM};
+  padding-right: ${(props) => props.theme.eui.euiSizeM};
+  padding-left: ${(props) => props.theme.eui.euiSizeM};
   background-color: ${(props) => props.theme.eui.euiPageBackgroundColor};
   box-shadow: inset 0 -1px ${(props) => props.theme.eui.euiBorderColor};
 `;

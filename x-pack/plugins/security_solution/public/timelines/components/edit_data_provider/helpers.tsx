@@ -6,14 +6,12 @@
  */
 
 import { findIndex } from 'lodash/fp';
-import { EuiComboBoxOptionOption } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 
-import { BrowserField, BrowserFields, getAllFieldsByName } from '../../../common/containers/source';
-import {
-  QueryOperator,
-  EXISTS_OPERATOR,
-  IS_OPERATOR,
-} from '../timeline/data_providers/data_provider';
+import type { BrowserField, BrowserFields } from '../../../common/containers/source';
+import { getAllFieldsByName } from '../../../common/containers/source';
+import type { QueryOperator } from '../timeline/data_providers/data_provider';
+import { EXISTS_OPERATOR, IS_OPERATOR } from '../timeline/data_providers/data_provider';
 
 import * as i18n from './translations';
 

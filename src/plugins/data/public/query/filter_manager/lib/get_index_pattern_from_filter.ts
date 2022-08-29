@@ -7,7 +7,7 @@
  */
 
 import { DataView } from '@kbn/data-views-plugin/public';
-import { Filter } from '../../../../common';
+import { Filter } from '@kbn/es-query';
 
 export function getIndexPatternFromFilter(
   filter: Filter,

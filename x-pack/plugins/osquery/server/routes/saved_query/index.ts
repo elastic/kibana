@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 
 import { createSavedQueryRoute } from './create_saved_query_route';
 import { deleteSavedQueryRoute } from './delete_saved_query_route';
 import { findSavedQueryRoute } from './find_saved_query_route';
 import { readSavedQueryRoute } from './read_saved_query_route';
 import { updateSavedQueryRoute } from './update_saved_query_route';
-import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
 export const initSavedQueryRoutes = (router: IRouter, context: OsqueryAppContext) => {
   createSavedQueryRoute(router, context);

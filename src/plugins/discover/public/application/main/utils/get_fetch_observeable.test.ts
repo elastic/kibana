@@ -11,7 +11,7 @@ import { getFetch$ } from './get_fetch_observable';
 import { FetchStatus } from '../../types';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { createSearchSessionMock } from '../../../__mocks__/search_session';
-import { DataRefetch$ } from './use_saved_search';
+import { DataRefetch$ } from '../hooks/use_saved_search';
 import { savedSearchMock, savedSearchMockWithTimeField } from '../../../__mocks__/saved_search';
 
 function createDataMock(

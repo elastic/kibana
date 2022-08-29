@@ -9,7 +9,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 
-import { IntegrationDetails } from '../integration_details';
+import type { IntegrationDetails } from '../integration_details';
 import * as i18n from '../translations';
 
 const PaddedBadge = styled(EuiBadge)`
@@ -49,7 +49,9 @@ const IntegrationStatusBadgeComponent: React.FC<IntegrationStatusBadgeProps> = (
 
   return (
     <EuiToolTip content={badgeTooltip}>
-      <PaddedBadge color={badgeColor}>{badgeText}</PaddedBadge>
+      <PaddedBadge color={badgeColor} data-test-subj={'statusBadge'}>
+        {badgeText}
+      </PaddedBadge>
     </EuiToolTip>
   );
 };

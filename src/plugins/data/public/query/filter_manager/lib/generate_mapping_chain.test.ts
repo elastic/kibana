@@ -8,7 +8,7 @@
 
 import sinon from 'sinon';
 import { generateMappingChain } from './generate_mapping_chain';
-import { buildEmptyFilter } from '../../../../common';
+import { buildEmptyFilter } from '@kbn/es-query';
 
 describe('filter manager utilities', () => {
   let mapping: any;

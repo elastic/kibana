@@ -61,7 +61,7 @@ export interface AllCasesListProps {
 
 export const AllCasesList = React.memo<AllCasesListProps>(
   ({ hiddenStatuses = [], isSelectorView = false, onRowClick, doRefresh }) => {
-    const { owner, userCanCrud } = useCasesContext();
+    const { owner, permissions } = useCasesContext();
     const availableSolutions = useAvailableCasesOwners();
     const [refresh, setRefresh] = useState(0);
 
@@ -70,7 +70,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     const firstAvailableStatus = head(difference(caseStatuses, hiddenStatuses));
     const initialFilterOptions = {
       ...(!isEmpty(hiddenStatuses) && firstAvailableStatus && { status: firstAvailableStatus }),
-      owner: hasOwner ? owner : availableSolutions,
+      owner: hasOwner ? owner : [],
     };
     const [filterOptions, setFilterOptions] = useState<FilterOptions>({
       ...DEFAULT_FILTER_OPTIONS,
@@ -185,14 +185,17 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       [deselectCases, setFilterOptions, refreshCases, setQueryParams]
     );
 
-    const showActions = userCanCrud && !isSelectorView;
+    /**
+     * At the time of changing this from all to delete the only bulk action we have is to delete. When we add more
+     * actions we'll need to revisit this to allow more granular checks around the bulk actions.
+     */
+    const showActions = permissions.delete && !isSelectorView;
 
     const columns = useCasesColumns({
       filterStatus: filterOptions.status ?? StatusAll,
       handleIsLoading,
       refreshCases,
       isSelectorView,
-      userCanCrud,
       connectors,
       onRowClick,
       showSolutionColumn: !hasOwner && availableSolutions.length > 1,
@@ -241,6 +244,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           availableSolutions={hasOwner ? [] : availableSolutions}
           initial={{
             search: filterOptions.search,
+            searchFields: filterOptions.searchFields,
             reporters: filterOptions.reporters,
             tags: filterOptions.tags,
             status: filterOptions.status,
@@ -271,7 +275,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           sorting={sorting}
           tableRef={tableRef}
           tableRowProps={tableRowProps}
-          userCanCrud={userCanCrud}
         />
       </>
     );

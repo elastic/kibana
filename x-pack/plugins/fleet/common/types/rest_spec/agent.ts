@@ -24,6 +24,10 @@ export interface GetAgentsResponse extends ListResult<Agent> {
   list?: Agent[];
 }
 
+export interface GetAgentTagsResponse {
+  items: string[];
+}
+
 export interface GetOneAgentRequest {
   params: {
     agentId: string;
@@ -132,6 +136,14 @@ export type PostBulkAgentReassignResponse = Record<
   }
 >;
 
+export type PostBulkUpdateAgentTagsResponse = Record<
+  Agent['id'],
+  {
+    success: boolean;
+    error?: string;
+  }
+>;
+
 export interface DeleteAgentRequest {
   params: {
     agentId: string;
@@ -143,7 +155,16 @@ export interface UpdateAgentRequest {
     agentId: string;
   };
   body: {
-    user_provided_metadata: Record<string, any>;
+    user_provided_metadata?: Record<string, any>;
+    tags?: string[];
+  };
+}
+
+export interface PostBulkUpdateAgentTagsRequest {
+  body: {
+    agents: string[] | string;
+    tagsToAdd?: string[];
+    tagsToRemove?: string[];
   };
 }
 
@@ -183,4 +204,7 @@ export interface GetAgentIncomingDataResponse {
 
 export interface GetCurrentUpgradesResponse {
   items: CurrentUpgrade[];
+}
+export interface GetAvailableVersionsResponse {
+  items: string[];
 }

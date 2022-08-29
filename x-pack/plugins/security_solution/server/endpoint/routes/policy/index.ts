@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
-import { EndpointAppContext } from '../../types';
+import type { IRouter } from '@kbn/core/server';
+import type { EndpointAppContext } from '../../types';
 import {
   GetPolicyResponseSchema,
   GetAgentPolicySummaryRequestSchema,

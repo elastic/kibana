@@ -227,6 +227,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
         name: i18n.translate('xpack.ml.navMenu.aiopsTabLinkText', {
           defaultMessage: 'AIOps',
         }),
+        disabled: disableLinks,
         items: [
           {
             id: 'explainlogratespikes',

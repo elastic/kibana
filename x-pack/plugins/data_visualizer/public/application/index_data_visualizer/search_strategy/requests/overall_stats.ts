@@ -9,16 +9,16 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { get } from 'lodash';
 import { Query } from '@kbn/es-query';
 import { IKibanaSearchResponse } from '@kbn/data-plugin/common';
+import type { AggCardinality } from '@kbn/ml-agg-utils';
+import { buildSamplerAggregation, getSamplerAggregationsResponsePath } from '@kbn/ml-agg-utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import {
   buildBaseFilterCriteria,
-  buildSamplerAggregation,
   getSafeAggregationName,
-  getSamplerAggregationsResponsePath,
 } from '../../../../../common/utils/query_utils';
 import { getDatafeedAggregations } from '../../../../../common/utils/datafeed_utils';
-import { isPopulatedObject } from '../../../../../common/utils/object_utils';
 import { AggregatableField, NonAggregatableField } from '../../types/overall_stats';
-import { AggCardinality, Aggs } from '../../../../../common/types/field_stats';
+import { Aggs } from '../../../../../common/types/field_stats';
 
 export const checkAggregatableFieldsExistRequest = (
   dataViewTitle: string,
@@ -91,10 +91,18 @@ export interface AggregatableFieldOverallStats extends IKibanaSearchResponse {
   aggregatableFields: string[];
 }
 
+export type NonAggregatableFieldOverallStats = IKibanaSearchResponse;
+
 export function isAggregatableFieldOverallStats(
   arg: unknown
 ): arg is AggregatableFieldOverallStats {
   return isPopulatedObject(arg, ['aggregatableFields']);
+}
+
+export function isNonAggregatableFieldOverallStats(
+  arg: unknown
+): arg is NonAggregatableFieldOverallStats {
+  return isPopulatedObject(arg, ['rawResponse']);
 }
 
 export const processAggregatableFieldsExistResponse = (

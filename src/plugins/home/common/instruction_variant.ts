@@ -27,6 +27,7 @@ export const INSTRUCTION_VARIANT = {
   LINUX: 'linux',
   PHP: 'php',
   FLEET: 'fleet',
+  OPEN_TELEMETRY: 'openTelemetry',
 };
 
 const DISPLAY_MAP = {
@@ -50,6 +51,7 @@ const DISPLAY_MAP = {
   [INSTRUCTION_VARIANT.FLEET]: i18n.translate('home.tutorial.instruction_variant.fleet', {
     defaultMessage: 'Elastic APM in Fleet',
   }),
+  [INSTRUCTION_VARIANT.OPEN_TELEMETRY]: 'OpenTelemetry',
 };
 
 /**

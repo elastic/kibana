@@ -6,9 +6,11 @@
  */
 
 import { AGENT_POLLING_THRESHOLD_MS } from '../constants';
-import type { Agent, AgentStatus } from '../types';
+import type { Agent, AgentStatus, FleetServerAgent } from '../types';
 
-export function getAgentStatus(agent: Agent): AgentStatus {
+const offlineTimeoutIntervalCount = 10; // 30s*10 = 5m timeout
+
+export function getAgentStatus(agent: Agent | FleetServerAgent): AgentStatus {
   const { last_checkin: lastCheckIn } = agent;
 
   if (!agent.active) {
@@ -31,10 +33,18 @@ export function getAgentStatus(agent: Agent): AgentStatus {
   if (agent.last_checkin_status === 'degraded') {
     return 'degraded';
   }
-  if (agent.upgrade_started_at && !agent.upgraded_at) {
+
+  const policyRevision =
+    'policy_revision' in agent
+      ? agent.policy_revision
+      : 'policy_revision_idx' in agent
+      ? agent.policy_revision_idx
+      : undefined;
+
+  if (!policyRevision || (agent.upgrade_started_at && !agent.upgraded_at)) {
     return 'updating';
   }
-  if (intervalsSinceLastCheckIn >= 4) {
+  if (intervalsSinceLastCheckIn >= offlineTimeoutIntervalCount) {
     return 'offline';
   }
 
@@ -63,7 +73,7 @@ export function buildKueryForErrorAgents(path: string = '') {
 
 export function buildKueryForOfflineAgents(path: string = '') {
   return `${path}last_checkin < now-${
-    (4 * AGENT_POLLING_THRESHOLD_MS) / 1000
+    (offlineTimeoutIntervalCount * AGENT_POLLING_THRESHOLD_MS) / 1000
   }s AND not (${buildKueryForErrorAgents(path)}) AND not ( ${buildKueryForUpdatingAgents(path)} )`;
 }
 
@@ -74,7 +84,7 @@ export function buildKueryForUpgradingAgents(path: string = '') {
 export function buildKueryForUpdatingAgents(path: string = '') {
   return `(${buildKueryForUpgradingAgents(path)}) or (${buildKueryForEnrollingAgents(
     path
-  )}) or (${buildKueryForUnenrollingAgents(path)})`;
+  )}) or (${buildKueryForUnenrollingAgents(path)}) or (not ${path}policy_revision_idx:*)`;
 }
 
 export function buildKueryForInactiveAgents(path: string = '') {

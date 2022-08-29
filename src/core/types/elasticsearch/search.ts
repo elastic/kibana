@@ -147,6 +147,14 @@ export type AggregateOf<
         q2: number | null;
         q3: number | null;
       };
+      bucket_correlation: {
+        value: number | null;
+      };
+      bucket_count_ks_test: {
+        less: number;
+        greater: number;
+        two_sided: number;
+      };
       bucket_script: {
         value: unknown;
       };
@@ -536,6 +544,7 @@ export type AggregateOf<
           {
             doc_count: number;
             key: string | number;
+            key_as_string?: string;
           } & SubAggregateOf<TAggregationContainer, TDocument>
         >;
       };

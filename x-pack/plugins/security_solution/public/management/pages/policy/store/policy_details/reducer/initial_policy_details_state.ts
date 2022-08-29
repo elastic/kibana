@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Immutable } from '../../../../../../../common/endpoint/types';
-import { PolicyDetailsState } from '../../../types';
+import type { Immutable } from '../../../../../../../common/endpoint/types';
+import type { PolicyDetailsState } from '../../../types';
 import {
   MANAGEMENT_DEFAULT_PAGE,
   MANAGEMENT_DEFAULT_PAGE_SIZE,

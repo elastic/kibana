@@ -76,6 +76,7 @@ describe('findRulesRoute', () => {
       Array [
         Object {
           "excludeFromPublicApi": true,
+          "includeSnoozeData": true,
           "options": Object {
             "defaultSearchOperator": "OR",
             "page": 1,

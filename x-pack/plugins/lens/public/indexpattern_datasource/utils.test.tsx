@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
+import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
 import { getPrecisionErrorWarningMessages } from './utils';
 import type { IndexPatternPrivateState, GenericIndexPatternColumn } from './types';
 import type { FramePublicAPI } from '../types';
@@ -18,6 +19,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 describe('indexpattern_datasource utils', () => {
   describe('getPrecisionErrorWarningMessages', () => {
+    const datatableUtilitites = createDatatableUtilitiesMock();
     let state: IndexPatternPrivateState;
     let framePublicAPI: FramePublicAPI;
     let docLinks: DocLinksStart;
@@ -39,11 +41,6 @@ describe('indexpattern_datasource utils', () => {
             },
           },
         },
-        indexPatterns: {
-          one: {
-            getFieldByName: (x: string) => ({ name: x, displayName: x }),
-          },
-        },
       } as unknown as IndexPatternPrivateState;
       framePublicAPI = {
         activeData: {
@@ -60,6 +57,13 @@ describe('indexpattern_datasource utils', () => {
             ],
           },
         },
+        dataViews: {
+          indexPatterns: {
+            one: {
+              getFieldByName: (x: string) => ({ name: x, displayName: x }),
+            },
+          },
+        },
       } as unknown as FramePublicAPI;
 
       docLinks = {
@@ -72,7 +76,13 @@ describe('indexpattern_datasource utils', () => {
     });
     test('should not show precisionError if hasPrecisionError is false', () => {
       expect(
-        getPrecisionErrorWarningMessages(state, framePublicAPI, docLinks, () => {})
+        getPrecisionErrorWarningMessages(
+          datatableUtilitites,
+          state,
+          framePublicAPI,
+          docLinks,
+          () => {}
+        )
       ).toHaveLength(0);
     });
 
@@ -80,7 +90,13 @@ describe('indexpattern_datasource utils', () => {
       delete framePublicAPI.activeData!.id.columns[0].meta.sourceParams!.hasPrecisionError;
 
       expect(
-        getPrecisionErrorWarningMessages(state, framePublicAPI, docLinks, () => {})
+        getPrecisionErrorWarningMessages(
+          datatableUtilitites,
+          state,
+          framePublicAPI,
+          docLinks,
+          () => {}
+        )
       ).toHaveLength(0);
     });
 
@@ -95,6 +111,7 @@ describe('indexpattern_datasource utils', () => {
         const setStateMock = jest.fn();
 
         const warningMessages = getPrecisionErrorWarningMessages(
+          datatableUtilitites,
           state,
           framePublicAPI,
           docLinks,
@@ -119,6 +136,7 @@ describe('indexpattern_datasource utils', () => {
         (state.layers.id.columns.col1 as TermsIndexPatternColumn).params.accuracyMode = true;
 
         const warningMessages = getPrecisionErrorWarningMessages(
+          datatableUtilitites,
           state,
           framePublicAPI,
           docLinks,
@@ -157,7 +175,13 @@ describe('indexpattern_datasource utils', () => {
         } as unknown as GenericIndexPatternColumn,
       };
       const setState = jest.fn();
-      const warnings = getPrecisionErrorWarningMessages(state, framePublicAPI, docLinks, setState);
+      const warnings = getPrecisionErrorWarningMessages(
+        datatableUtilitites,
+        state,
+        framePublicAPI,
+        docLinks,
+        setState
+      );
 
       expect(warnings).toHaveLength(1);
       const DummyComponent = () => <>{warnings[0]}</>;

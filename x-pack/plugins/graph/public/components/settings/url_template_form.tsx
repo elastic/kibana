@@ -264,6 +264,7 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
           <div role="listbox">
             {urlTemplateIconChoices.map((icon) => (
               <LegacyIcon
+                aria-label={icon.label}
                 key={icon.class}
                 selected={icon === currentTemplate.icon}
                 icon={icon}
