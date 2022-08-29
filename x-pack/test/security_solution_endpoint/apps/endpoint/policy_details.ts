@@ -128,7 +128,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/92567
-    describe.skip('and the save button is clicked', () => {
+    describe('and the save button is clicked', () => {
       let policyInfo: PolicyTestResourceInfo;
 
       beforeEach(async () => {
