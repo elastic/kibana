@@ -19,7 +19,7 @@ export const createSingleFieldMatchEnrichment: CreateFieldsMatchEnrichment = asy
   createEnrichmentFunction,
   name,
 }) => {
-  logger.debug(`Enrichment ${name}: started`)
+  logger.debug(`Enrichment ${name}: started`);
 
   const eventsWithField = events.filter((event) =>
     get(event, `_source.${mappingField.eventField}`)
@@ -39,7 +39,7 @@ export const createSingleFieldMatchEnrichment: CreateFieldsMatchEnrichment = asy
   });
 
   if (queryResult.query?.bool?.should?.length === 0) {
-    logger.debug(`Enrichment ${name}: events doesn't have any field to enrich`)
+    logger.debug(`Enrichment ${name}: events doesn't have any field to enrich`);
     return {};
   }
 
@@ -51,7 +51,7 @@ export const createSingleFieldMatchEnrichment: CreateFieldsMatchEnrichment = asy
   });
 
   if (enrichments.length === 0) {
-    logger.debug(`Enrichment ${name}: no enrichment found`)
+    logger.debug(`Enrichment ${name}: no enrichment found`);
     return {};
   }
 
@@ -67,6 +67,8 @@ export const createSingleFieldMatchEnrichment: CreateFieldsMatchEnrichment = asy
     return acc;
   }, {});
 
-  logger.debug(`Enrichment ${name}: finished with ${Object.keys(eventsMapById).length} events to enrich`)
+  logger.debug(
+    `Enrichment ${name}: finished with ${Object.keys(eventsMapById).length} events to enrich`
+  );
   return eventsMapById;
 };

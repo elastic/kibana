@@ -29,7 +29,7 @@ export const createUserRiskEnrichments: CreateRiskEnrichment = async ({
   spaceId,
 }) => {
   return createSingleFieldMatchEnrichment({
-    name: "User Risk",
+    name: 'User Risk',
     index: [getUserRiskIndex(spaceId)],
     services,
     logger,

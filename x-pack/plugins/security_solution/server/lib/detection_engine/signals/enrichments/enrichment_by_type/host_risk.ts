@@ -30,7 +30,7 @@ export const createHostRiskEnrichments: CreateRiskEnrichment = async ({
   spaceId,
 }) => {
   return createSingleFieldMatchEnrichment({
-    name: "Host Risk",
+    name: 'Host Risk',
     index: [getHostRiskIndex(spaceId)],
     services,
     logger,
