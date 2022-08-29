@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { MutableRefObject, useState, useRef, useEffect } from 'react';
+import React, { MutableRefObject } from 'react';
 import type { ImgHTMLAttributes } from 'react';
-import { Subscription } from 'rxjs';
-import { createViewportObserver } from './viewport_observer';
+import { useViewportObserver } from './use_viewport_observer';
 
 export interface Props extends ImgHTMLAttributes<HTMLImageElement> {
   src: string;
@@ -30,20 +29,12 @@ export interface Props extends ImgHTMLAttributes<HTMLImageElement> {
  */
 export const Image = React.forwardRef<HTMLImageElement, Props>(
   ({ src, alt, onFirstVisible, ...rest }, ref) => {
-    const [isVisible, setIsVisible] = useState(false);
-    const [viewportObserver] = useState(() => createViewportObserver());
-    const subscriptionRef = useRef<undefined | Subscription>();
-    useEffect(() => () => subscriptionRef.current?.unsubscribe(), []);
+    const { isVisible, ref: observerRef } = useViewportObserver({ onFirstVisible });
     return (
       <img
         {...rest}
         ref={(element) => {
-          if (element && !subscriptionRef.current) {
-            subscriptionRef.current = viewportObserver.observeElement(element).subscribe(() => {
-              setIsVisible(true);
-              onFirstVisible?.();
-            });
-          }
+          observerRef(element);
           if (ref) {
             if (typeof ref === 'function') ref(element);
             else (ref as MutableRefObject<HTMLImageElement | null>).current = element;
