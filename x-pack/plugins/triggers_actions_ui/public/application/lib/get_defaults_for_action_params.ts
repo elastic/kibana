@@ -20,7 +20,6 @@ export const getDefaultsForActionParams = (
   actionGroupId: string,
   isRecoveryActionGroup: boolean
 ): DefaultActionParams => {
-  console.log('get defaults called');
   switch (actionTypeId) {
     case '.pagerduty':
       const pagerDutyDefaults = {
