@@ -245,7 +245,7 @@ export function registerIndexRoutes({ router, log }: RouteDependencies) {
       const indexName = decodeURIComponent(request.params.indexName);
       const { client } = (await context.core).elasticsearch;
 
-      const createResult = createIndexPipelineDefinitions(indexName, client.asCurrentUser);
+      const createResult = await createIndexPipelineDefinitions(indexName, client.asCurrentUser);
 
       return response.ok({
         body: createResult,

@@ -7,6 +7,10 @@
 
 import { ElasticsearchClient } from '@kbn/core/target/types/server';
 
+export interface CreatedPipelines {
+  created: string[];
+}
+
 /**
  * Used to create index-specific Ingest Pipelines to be used in conjunction with Enterprise Search
  * ingestion mechanisms. Three pipelines are created:
@@ -19,42 +23,40 @@ import { ElasticsearchClient } from '@kbn/core/target/types/server';
  * @param indexName the index for which the pipelines should be created.
  * @param esClient the Elasticsearch Client with which to create the pipelines.
  */
-export function createIndexPipelineDefinitions(indexName: string, esClient: ElasticsearchClient) {
-  // TODO: check responses from ES
-  // TODO: add back descriptions
+export const createIndexPipelineDefinitions = (
+  indexName: string,
+  esClient: ElasticsearchClient
+): CreatedPipelines => {
+  // TODO: add back descriptions (see: https://github.com/elastic/elasticsearch-specification/issues/1827)
   esClient.ingest.putPipeline({
+    description: `Enterprise Search Machine Learning Inference pipeline for the '${indexName}' index`,
     id: `${indexName}@ml-inference`,
-    version: 1,
-    description: `Enterprise Search Machine Learning Inference pipeline for ${indexName}`,
     processors: [],
+    version: 1,
   });
   esClient.ingest.putPipeline({
+    description: `Enterprise Search customizable ingest pipeline for the '${indexName}' index`,
     id: `${indexName}@custom`,
-    version: 1,
-    description: `Enterprise Search custom ingest pipeline for ${indexName}`,
     processors: [],
+    version: 1,
   });
   esClient.ingest.putPipeline({
-    id: `${indexName}`,
-    version: 1,
-    description: 'Enterprise Search ingest pipeline for <index name>',
     _meta: {
-      managed_by: 'Enterprise Search',
       managed: true,
+      managed_by: 'Enterprise Search',
     },
+    description: `Enterprise Search ingest pipeline for the '${indexName}' index`,
+    id: `${indexName}`,
     processors: [
       {
         attachment: {
-          // description: 'Extract text from binary attachments',
           field: '_attachment',
-          target_field: '_extracted_attachment',
+          if: 'ctx?._extract_binary_content == true',
           ignore_missing: true,
           indexed_chars_field: '_attachment_indexed_chars',
-          if: 'ctx?._extract_binary_content == true',
           on_failure: [
             {
               append: {
-                // description: 'Record error information',
                 field: '_ingestion_errors',
                 value: [
                   [
@@ -64,20 +66,16 @@ export function createIndexPipelineDefinitions(indexName: string, esClient: Elas
               },
             },
           ],
+          target_field: '_extracted_attachment',
         },
       },
       {
         set: {
-          tag: 'set_body',
-          // description: "Set any extracted text on the 'body' field",
           field: 'body',
-          value: '{{{_extracted_attachment.content}}}',
-          // ignore_empty_value: true,
           if: 'ctx?._extract_binary_content == true',
           on_failure: [
             {
               append: {
-                // description: 'Record error information',
                 field: '_ingestion_errors',
                 value: [
                   [
@@ -87,18 +85,17 @@ export function createIndexPipelineDefinitions(indexName: string, esClient: Elas
               },
             },
           ],
+          tag: 'set_body',
+          value: '{{{_extracted_attachment.content}}}',
         },
       },
       {
         pipeline: {
-          tag: 'index_ml_inference_pipeline',
-          // description: 'Run an inner pipeline for Machine Learning Inference',
-          name: `${indexName}@ml-inference`,
           if: 'ctx?._run_ml_inference == true',
+          name: `${indexName}@ml-inference`,
           on_failure: [
             {
               append: {
-                // description: 'Record error information',
                 field: '_ingestion_errors',
                 value: [
                   "Processor 'pipeline' with tag 'index_ml_inference_pipeline' in pipeline '{{ _ingest.on_failure_pipeline }}' failed with message '{{ _ingest.on_failure_message }}'",
@@ -106,17 +103,15 @@ export function createIndexPipelineDefinitions(indexName: string, esClient: Elas
               },
             },
           ],
+          tag: 'index_ml_inference_pipeline',
         },
       },
       {
         pipeline: {
-          tag: 'index_custom_pipeline',
-          // description: 'Run a custom inner pipeline',
           name: `${indexName}@custom`,
           on_failure: [
             {
               append: {
-                // description: 'Record error information',
                 field: '_ingestion_errors',
                 value: [
                   "Processor 'pipeline' with tag 'index_custom_pipeline' in pipeline '{{ _ingest.on_failure_pipeline }}' failed with message '{{ _ingest.on_failure_message }}'",
@@ -124,21 +119,17 @@ export function createIndexPipelineDefinitions(indexName: string, esClient: Elas
               },
             },
           ],
+          tag: 'index_custom_pipeline',
         },
       },
       {
         gsub: {
-          tag: 'remove_replacement_chars',
-          // description: "Remove unicode 'replacement' characters",
           field: 'body',
-          pattern: '�',
-          replacement: '',
-          ignore_missing: true,
           if: 'ctx?._extract_binary_content == true',
+          ignore_missing: true,
           on_failure: [
             {
               append: {
-                // description: 'Record error information',
                 field: '_ingestion_errors',
                 value: [
                   "Processor 'gsub' with tag 'remove_replacement_chars' in pipeline '{{ _ingest.on_failure_pipeline }}' failed with message '{{ _ingest.on_failure_message }}'",
@@ -146,24 +137,24 @@ export function createIndexPipelineDefinitions(indexName: string, esClient: Elas
               },
             },
           ],
+          pattern: '�',
+          replacement: '',
+          tag: 'remove_replacement_chars',
         },
       },
       {
         remove: {
-          tag: 'remove_attachment_fields',
-          // description: 'Remove meta fields related to binary content extraction',
           field: [
             '_attachment',
             '_attachment_indexed_chars',
             '_extracted_attachment',
             '_extract_binary_content',
           ],
-          ignore_missing: true,
           if: 'ctx?._extract_binary_content == true',
+          ignore_missing: true,
           on_failure: [
             {
               append: {
-                // description: 'Record error information',
                 field: '_ingestion_errors',
                 value: [
                   "Processor 'remove' with tag 'remove_attachment_fields' in pipeline '{{ _ingest.on_failure_pipeline }}' failed with message '{{ _ingest.on_failure_message }}'",
@@ -171,21 +162,17 @@ export function createIndexPipelineDefinitions(indexName: string, esClient: Elas
               },
             },
           ],
+          tag: 'remove_attachment_fields',
         },
       },
       {
         gsub: {
-          tag: 'remove_extra_whitespace',
-          // description: 'Squish whitespace',
           field: 'body',
-          pattern: '\\s+',
-          replacement: ' ',
-          ignore_missing: true,
           if: 'ctx?._reduce_whitespace == true',
+          ignore_missing: true,
           on_failure: [
             {
               append: {
-                // description: 'Record error information',
                 field: '_ingestion_errors',
                 value: [
                   "Processor 'gsub' with tag 'remove_extra_whitespace' in pipeline '{{ _ingest.on_failure_pipeline }}' failed with message '{{ _ingest.on_failure_message }}'",
@@ -193,18 +180,19 @@ export function createIndexPipelineDefinitions(indexName: string, esClient: Elas
               },
             },
           ],
+          pattern: '\\s+',
+          replacement: ' ',
+          tag: 'remove_extra_whitespace',
         },
       },
       {
         trim: {
-          // description: 'Trim leading and trailing whitespace',
           field: 'body',
-          ignore_missing: true,
           if: 'ctx?._reduce_whitespace == true',
+          ignore_missing: true,
           on_failure: [
             {
               append: {
-                // description: 'Record error information',
                 field: '_ingestion_errors',
                 value: [
                   "Processor 'trim' in pipeline '{{ _ingest.on_failure_pipeline }}' failed with message '{{ _ingest.on_failure_message }}'",
@@ -216,15 +204,12 @@ export function createIndexPipelineDefinitions(indexName: string, esClient: Elas
       },
       {
         remove: {
-          tag: 'remove_whitespace_fields',
-          // description: 'Remove meta fields related to whitespace reduction',
           field: ['_reduce_whitespace'],
-          ignore_missing: true,
           if: 'ctx?._reduce_whitespace == true',
+          ignore_missing: true,
           on_failure: [
             {
               append: {
-                // description: 'Record error information',
                 field: '_ingestion_errors',
                 value: [
                   "Processor 'remove' with tag 'remove_whitespace_fields' in pipeline '{{ _ingest.on_failure_pipeline }}' failed with message '{{ _ingest.on_failure_message }}'",
@@ -232,9 +217,11 @@ export function createIndexPipelineDefinitions(indexName: string, esClient: Elas
               },
             },
           ],
+          tag: 'remove_whitespace_fields',
         },
       },
     ],
+    version: 1,
   });
   return { created: [indexName, `${indexName}@custom`, `${indexName}@ml-inference`] };
-}
+};
