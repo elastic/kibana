@@ -82,7 +82,7 @@ type ParentPipelineAggregation =
   | typeof Operations.DIFFERENCES
   | typeof Operations.CUMULATIVE_SUM;
 
-type ParentPipelineAggColumn = MovingAverageColumn | DerivativeColumn | CumulativeSumColumn;
+export type ParentPipelineAggColumn = MovingAverageColumn | DerivativeColumn | CumulativeSumColumn;
 
 const SUPPORTED_METRICS_AGGS_WITHOUT_PARAMS: MetricAggregationWithoutParams[] = [
   Operations.AVERAGE,
@@ -292,10 +292,6 @@ export const createParentPipelineAggregationColumn = (
     aggregation === 'moving_average'
       ? convertToMovingAverageParams(metric)
       : getFormat(series, metric.field, dataView);
-
-  if (params === null) {
-    return null;
-  }
 
   return {
     operationType: aggregation,

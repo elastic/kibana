@@ -10,14 +10,17 @@ import { createSeries } from '../__mocks__';
 import { MetricType } from '../../../../common/types';
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import {
+  computeParentPipelineColumns,
   convertMetricAggregationColumnWithoutSpecialParams,
   convertMetricAggregationToColumn,
   MetricAggregationColumn,
+  ParentPipelineAggColumn,
 } from './parent_pipeline';
 import { SupportedMetric, SUPPORTED_METRICS } from '../metrics';
-import { ColumnWithMeta } from './types';
+import { ColumnWithMeta, FormulaColumn } from './types';
 import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import { METRIC_TYPES } from '@kbn/data-plugin/public';
+import { Operations } from '@kbn/visualizations-plugin/common';
 
 describe('convertMetricAggregationColumnWithoutSpecialParams', () => {
   const dataView = stubLogstashDataView;
@@ -315,5 +318,141 @@ describe('convertMetricAggregationToColumn', () => {
     } else {
       expect(convertMetricAggregationToColumn(...input)).toEqual(expect.objectContaining(expected));
     }
+  });
+});
+
+describe('computeParentPipelineColumns', () => {
+  const dataView = stubLogstashDataView;
+  const series = createSeries();
+  const field = dataView.fields[0].name;
+  const field2 = dataView.fields[2].name;
+  const id = 'some-id';
+
+  test.each<
+    [
+      string,
+      Parameters<typeof computeParentPipelineColumns>,
+      (
+        | Partial<FormulaColumn>
+        | Array<Partial<MetricAggregationColumn> | Partial<ParentPipelineAggColumn>>
+        | null
+      )
+    ]
+  >([
+    [
+      'null for percentile if metaValue is empty',
+      [
+        Operations.MOVING_AVERAGE,
+        { series, metric: { id, field, type: METRIC_TYPES.MEDIAN }, dataView },
+        { id, field: field2, type: TSVB_METRIC_TYPES.PERCENTILE },
+        SUPPORTED_METRICS.avg,
+      ],
+      null,
+    ],
+    [
+      'formula column if sub metric is filter ratio',
+      [
+        Operations.MOVING_AVERAGE,
+        { series, metric: { id, field, type: TSVB_METRIC_TYPES.PERCENTILE }, dataView },
+        { id, field: field2, type: TSVB_METRIC_TYPES.FILTER_RATIO },
+        SUPPORTED_METRICS.avg,
+      ],
+      {
+        meta: { metricId: 'some-id' },
+        operationType: 'formula',
+        params: { format: { id: 'bytes' }, formula: "percentile(count(kql='*') / count(kql='*'))" },
+      },
+    ],
+    [
+      'null if sub metric is filter ratio and metric_agg is set and not supported',
+      [
+        Operations.MOVING_AVERAGE,
+        { series, metric: { id, field, type: TSVB_METRIC_TYPES.PERCENTILE }, dataView },
+        {
+          id,
+          field: field2,
+          type: TSVB_METRIC_TYPES.FILTER_RATIO,
+          metric_agg: METRIC_TYPES.MEDIAN,
+        },
+        SUPPORTED_METRICS.avg,
+      ],
+      null,
+    ],
+    [
+      'formula column if sub metric is filter ratio and metric_agg is set',
+      [
+        Operations.MOVING_AVERAGE,
+        { series, metric: { id, field, type: TSVB_METRIC_TYPES.PERCENTILE }, dataView },
+        { id, field, type: TSVB_METRIC_TYPES.FILTER_RATIO, metric_agg: METRIC_TYPES.AVG },
+        SUPPORTED_METRICS.avg,
+      ],
+      {
+        meta: { metricId: 'some-id' },
+        operationType: 'formula',
+        params: {
+          format: { id: 'bytes' },
+          formula: "percentile(average('bytes',kql='*') / average('bytes',kql='*'))",
+        },
+      },
+    ],
+    [
+      'null if pipeline aggregation is not supported',
+      [
+        Operations.MOVING_AVERAGE,
+        { series, metric: { id, field, type: METRIC_TYPES.AVG }, dataView },
+        { id, field, type: TSVB_METRIC_TYPES.PERCENTILE },
+        SUPPORTED_METRICS.avg_bucket,
+      ],
+      null,
+    ],
+    [
+      'metric aggregation column if pipeline aggregation is supported',
+      [
+        Operations.MOVING_AVERAGE,
+        { series, metric: { id, field, type: METRIC_TYPES.AVG }, dataView },
+        { id, field, type: TSVB_METRIC_TYPES.PERCENTILE },
+        SUPPORTED_METRICS.avg,
+      ],
+      [
+        {
+          meta: { metricId: 'some-id' },
+          operationType: 'average',
+          params: { format: { id: 'bytes' } },
+          sourceField: 'bytes',
+        },
+        {
+          meta: { metricId: 'some-id' },
+          operationType: 'moving_average',
+          params: { window: 0 },
+        },
+      ],
+    ],
+  ])('should return %s', (_, input, expected) => {
+    if (expected === null) {
+      expect(computeParentPipelineColumns(...input)).toBeNull();
+    }
+    if (Array.isArray(expected)) {
+      expect(computeParentPipelineColumns(...input)).toEqual(expected.map(expect.objectContaining));
+    } else {
+      expect(computeParentPipelineColumns(...input)).toEqual(expect.objectContaining(expected));
+    }
+  });
+
+  test('pipeline aggregation columns with correct references', () => {
+    const result = computeParentPipelineColumns(
+      Operations.MOVING_AVERAGE,
+      { series, metric: { id, field, type: METRIC_TYPES.AVG }, dataView },
+      { id, field, type: TSVB_METRIC_TYPES.PERCENTILE },
+      SUPPORTED_METRICS.avg
+    );
+    expect(result).not.toBeNull();
+
+    expect(Array.isArray(result)).toBeTruthy();
+
+    const [metricColumn, parentPipelineColumn] = result as [
+      MetricAggregationColumn,
+      ParentPipelineAggColumn
+    ];
+    expect(parentPipelineColumn.references).toContain(metricColumn.columnId);
   });
 });
