@@ -49,6 +49,7 @@ const OsqueryActionResultsComponent: React.FC<OsqueryActionResultsProps> = ({
     direction: Direction.desc,
     sortField: '@timestamp',
   });
+  console.log({ actionsData });
 
   const agentsList = useMemo(
     () => (
@@ -65,7 +66,7 @@ const OsqueryActionResultsComponent: React.FC<OsqueryActionResultsProps> = ({
     <div data-test-subj={'osquery-results'}>
       {actionsData?.data.items.map((item) => {
         const actionId = item.fields?.action_id[0];
-        const query = item.fields?.['queries.query'][0];
+        const query = item.fields?.['queries.query']?.[0];
         const startDate = item.fields?.['@timestamp'][0];
 
         return (
@@ -92,14 +93,19 @@ const OsqueryActionResultsComponent: React.FC<OsqueryActionResultsProps> = ({
             <EuiText>
               <h6>{AGENT_QUERY}</h6>
             </EuiText>
-            <EuiCodeBlock
-              language="sql"
-              fontSize="m"
-              paddingSize="m"
-              transparentBackground={!query.length}
-            >
-              {query}
-            </EuiCodeBlock>
+            {query?.length ? (
+              <EuiCodeBlock
+                language="sql"
+                fontSize="m"
+                paddingSize="m"
+                transparentBackground={!query.length}
+              >
+                {query}
+              </EuiCodeBlock>
+            ) : (
+              <div>pack</div>
+            )}
+
             <EuiSpacer size="xxl" />
             <ResultTabs
               actionId={actionId}
