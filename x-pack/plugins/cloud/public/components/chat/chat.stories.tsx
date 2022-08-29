@@ -93,14 +93,14 @@ export const Component = ({ id, email, chatURL, jwt }: Params) => {
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <Chat onHide={() => setIsHidden(true)} />
+      {isHidden ? null : <Chat onHide={() => setIsHidden(true)} />}
     </ServicesProvider>
   );
 };
 
 Component.args = {
   id: '1234567890',
-  email: 'email.address@elasticsearch.com',
+  email: 'email.address@elastic.co',
   chatURL: 'https://elasticcloud-production-chat-us-east-1.s3.amazonaws.com/drift-iframe.html',
-  jwt: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNTE2MjM5MDIyfQ.L8i6g3PfcHlioHCCPURC9pmXT7gdJpx3kOoyAfNUwCc',
+  jwt: 'abcdefghijklmnopqrstuvwxyz',
 };
