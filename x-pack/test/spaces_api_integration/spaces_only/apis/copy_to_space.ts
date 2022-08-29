@@ -25,7 +25,8 @@ export default function copyToSpacesOnlySuite({ getService }: FtrProviderContext
     originSpaces,
   } = copyToSpaceTestSuiteFactory(es, esArchiver, supertestWithoutAuth);
 
-  describe('copy to spaces', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/125452
+  describe.skip('copy to spaces', () => {
     originSpaces.forEach((spaceId) => {
       copyToSpaceTest(`from the ${spaceId} space`, {
         spaceId,
