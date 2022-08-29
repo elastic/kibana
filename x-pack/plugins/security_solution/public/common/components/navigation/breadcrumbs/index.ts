@@ -15,6 +15,7 @@ import { getTrailingBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../../n
 import { getTrailingBreadcrumbs as getDetectionRulesBreadcrumbs } from '../../../../detections/pages/detection_engine/rules/utils';
 import { getTrailingBreadcrumbs as getUsersBreadcrumbs } from '../../../../users/pages/details/utils';
 import { getTrailingBreadcrumbs as getKubernetesBreadcrumbs } from '../../../../kubernetes/pages/utils/breadcrumbs';
+import { getTrailingBreadcrumbs as getAlertDetailBreadcrumbs } from '../../../../detections/pages/alert_details/utils/breadcrumbs';
 import { SecurityPageName } from '../../../../app/types';
 import type {
   RouteSpyState,
@@ -22,6 +23,7 @@ import type {
   NetworkRouteSpyState,
   AdministrationRouteSpyState,
   UsersRouteSpyState,
+  AlertDetailRouteSpyState,
 } from '../../../utils/route/types';
 import { timelineActions } from '../../../../timelines/store/timeline';
 import { TimelineId } from '../../../../../common/types/timeline';
@@ -117,6 +119,9 @@ const getTrailingBreadcrumbsForRoutes = (
   if (isHostsRoutes(spyState)) {
     return getHostDetailsBreadcrumbs(spyState, getSecuritySolutionUrl);
   }
+  if (isAlertsRoutes(spyState)) {
+    return getAlertDetailBreadcrumbs(spyState, getSecuritySolutionUrl);
+  }
   if (isNetworkRoutes(spyState)) {
     return getIPDetailsBreadcrumbs(spyState, getSecuritySolutionUrl);
   }
@@ -141,6 +146,9 @@ const isNetworkRoutes = (spyState: RouteSpyState): spyState is NetworkRouteSpySt
 
 const isHostsRoutes = (spyState: RouteSpyState): spyState is HostRouteSpyState =>
   spyState.pageName === SecurityPageName.hosts;
+
+const isAlertsRoutes = (spyState: RouteSpyState): spyState is AlertDetailRouteSpyState =>
+  spyState.pageName === SecurityPageName.alerts;
 
 const isUsersRoutes = (spyState: RouteSpyState): spyState is UsersRouteSpyState =>
   spyState.pageName === SecurityPageName.users;
