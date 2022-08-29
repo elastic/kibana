@@ -11,7 +11,7 @@ import {
   SLO_COMPONENT_TEMPLATE_MAPPINGS_NAME,
   SLO_COMPONENT_TEMPLATE_SETTINGS_NAME,
   SLO_INDEX_TEMPLATE_NAME,
-} from '../../assets/common';
+} from '../../assets/constants';
 import { ResourceInstaller } from './resource_installer';
 
 describe('resourceInstaller', () => {
@@ -34,25 +34,6 @@ describe('resourceInstaller', () => {
       );
       expect(mockClusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(
         expect.objectContaining({ name: SLO_INDEX_TEMPLATE_NAME })
-      );
-    });
-
-    it('fails when common resources installation take too long', async () => {
-      const TIMEOUT = 1;
-      const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
-      mockClusterClient.indices.existsIndexTemplate.mockResponseOnce(false);
-      mockClusterClient.cluster.putComponentTemplate.mockImplementationOnce(
-        () =>
-          new Promise((resolve) => {
-            setTimeout(() => resolve, TIMEOUT * 2000);
-          })
-      );
-      const installer = new ResourceInstaller(mockClusterClient, loggerMock.create(), {
-        installationTimeout: TIMEOUT,
-      });
-
-      await expect(installer.ensureCommonResourcesInstalled()).rejects.toThrowError(
-        'Failure installing resources shared between all SLO indices. Timeout: it took more than 1ms'
       );
     });
   });

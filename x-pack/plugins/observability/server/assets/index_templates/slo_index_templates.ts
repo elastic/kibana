@@ -5,17 +5,11 @@
  * 2.0.
  */
 
-import {
-  SLO_COMPONENT_TEMPLATE_MAPPINGS_NAME,
-  SLO_COMPONENT_TEMPLATE_SETTINGS_NAME,
-  SLO_INDEX_TEMPLATE_NAME,
-} from '../common';
-
-export const sloIndexTemplate = {
-  index_patterns: [`${SLO_INDEX_TEMPLATE_NAME}-*`],
-  composed_of: [SLO_COMPONENT_TEMPLATE_MAPPINGS_NAME, SLO_COMPONENT_TEMPLATE_SETTINGS_NAME],
+export const getSloIndexTemplate = (indexPattern: string, composedOf: string[]) => ({
+  index_patterns: [indexPattern],
+  composed_of: composedOf,
   priority: 500,
   _meta: {
     description: 'Template for SLO rollup data',
   },
-};
+});
