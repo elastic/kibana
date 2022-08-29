@@ -26,7 +26,7 @@ export const isPercentileRanksColumnWithMeta = (
   column.operationType === Operations.PERCENTILE_RANK &&
   Boolean((column as PercentileRanksColumnWithExtendedMeta).meta?.reference);
 
-export const convertToPercentileRankParams = (value: string): PercentileRanksParams | null =>
+export const convertToPercentileRankParams = (value?: string): PercentileRanksParams | null =>
   value !== undefined && !isNaN(Number(value))
     ? {
         value: Number(value),
@@ -34,7 +34,7 @@ export const convertToPercentileRankParams = (value: string): PercentileRanksPar
     : null;
 
 export const convertToPercentileRankColumn = (
-  value: string,
+  value: string | undefined,
   series: Series,
   metric: Metric,
   dataView: DataView,

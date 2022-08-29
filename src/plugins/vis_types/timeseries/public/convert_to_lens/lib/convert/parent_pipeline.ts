@@ -7,7 +7,6 @@
  */
 
 import { METRIC_TYPES } from '@kbn/data-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import { Operations } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import {
   AvgColumn,
@@ -28,7 +27,7 @@ import {
   FormulaColumn,
 } from './types';
 import { TSVB_METRIC_TYPES } from '../../../../common/enums';
-import { Metric, Series } from '../../../../common/types';
+import { Metric } from '../../../../common/types';
 import {
   getFilterRatioFormula,
   getFormulaFromMetric,
@@ -74,7 +73,7 @@ type MetricAggregationColumnWithoutSpecialParams =
   | MinColumn
   | SumColumn;
 
-type MetricAggregationColumn =
+export type MetricAggregationColumn =
   | MetricAggregationColumnWithoutSpecialParams
   | MetricAggregationColumnWithSpecialParams;
 
@@ -139,9 +138,7 @@ export const convertMetricAggregationColumnWithoutSpecialParams = (
 
 export const convertMetricAggregationToColumn = (
   aggregation: SupportedMetric,
-  series: Series,
-  metric: Metric,
-  dataView: DataView,
+  { series, metric, dataView }: CommonColumnConverterArgs,
   { metaValue, window }: { metaValue?: number; window?: string } = {}
 ): MetricAggregationColumn | null => {
   if (!isSupportedAggregation(aggregation.name)) {
@@ -149,7 +146,7 @@ export const convertMetricAggregationToColumn = (
   }
 
   const field = dataView.getFieldByName(metric.field ?? 'document');
-  if (!field) {
+  if (!field && aggregation.isFieldRequired) {
     return null;
   }
 
@@ -158,7 +155,7 @@ export const convertMetricAggregationToColumn = (
   }
 
   if (aggregation.name === Operations.PERCENTILE_RANK) {
-    return convertToPercentileRankColumn(metaValue?.toString() ?? '', series, metric, dataView, {
+    return convertToPercentileRankColumn(metaValue?.toString(), series, metric, dataView, {
       window,
     });
   }
@@ -202,9 +199,7 @@ export const computeParentPipelineColumns = (
 
   const metricAggregationColumn = convertMetricAggregationToColumn(
     pipelineAgg,
-    series,
-    subFunctionMetric,
-    dataView,
+    { series, metric: subFunctionMetric, dataView },
     { metaValue, window }
   );
 

@@ -9,9 +9,15 @@
 import { createSeries } from '../__mocks__';
 import { MetricType } from '../../../../common/types';
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { convertMetricAggregationColumnWithoutSpecialParams } from './parent_pipeline';
+import {
+  convertMetricAggregationColumnWithoutSpecialParams,
+  convertMetricAggregationToColumn,
+  MetricAggregationColumn,
+} from './parent_pipeline';
 import { SupportedMetric, SUPPORTED_METRICS } from '../metrics';
 import { ColumnWithMeta } from './types';
+import { TSVB_METRIC_TYPES } from '../../../../common/enums';
+import { METRIC_TYPES } from '@kbn/data-plugin/public';
 
 describe('convertMetricAggregationColumnWithoutSpecialParams', () => {
   const dataView = stubLogstashDataView;
@@ -135,5 +141,179 @@ describe('convertMetricAggregationColumnWithoutSpecialParams', () => {
         ],
       })
     ).toEqual(expect.objectContaining(expected));
+  });
+});
+
+describe('convertMetricAggregationToColumn', () => {
+  const dataView = stubLogstashDataView;
+  const series = createSeries();
+  test('should return null for not supported metric aggregation', () => {
+    expect(
+      convertMetricAggregationToColumn(SUPPORTED_METRICS.math, {
+        series,
+        dataView,
+        metric: { type: TSVB_METRIC_TYPES.MATH, id: 'some-id', field: dataView.fields[0].name },
+      })
+    ).toBeNull();
+  });
+
+  test('should return null for supported metric aggregation with empty field if it is required', () => {
+    expect(
+      convertMetricAggregationToColumn(SUPPORTED_METRICS.avg, {
+        series,
+        dataView,
+        metric: { type: METRIC_TYPES.AVG, id: 'some-id' },
+      })
+    ).toBeNull();
+  });
+
+  test('should return column for supported metric aggregation with empty field if it is not required', () => {
+    expect(
+      convertMetricAggregationToColumn(SUPPORTED_METRICS.count, {
+        series,
+        dataView,
+        metric: { type: METRIC_TYPES.COUNT, id: 'some-id' },
+      })
+    ).toEqual(
+      expect.objectContaining({
+        meta: { metricId: 'some-id' },
+        operationType: 'count',
+        params: {},
+      })
+    );
+  });
+
+  const field = dataView.fields[0].name;
+  const id = 'some-id';
+
+  test.each<
+    [
+      string,
+      Parameters<typeof convertMetricAggregationToColumn>,
+      Partial<MetricAggregationColumn> | null
+    ]
+  >([
+    [
+      'null for percentile if metaValue is empty',
+      [
+        SUPPORTED_METRICS.percentile,
+        { series, metric: { id, field, type: TSVB_METRIC_TYPES.PERCENTILE }, dataView },
+      ],
+      null,
+    ],
+    [
+      'percentile column for percentile if metaValue is set',
+      [
+        SUPPORTED_METRICS.percentile,
+        { series, metric: { id, field, type: TSVB_METRIC_TYPES.PERCENTILE }, dataView },
+        { metaValue: 50 },
+      ],
+      {
+        meta: { metricId: 'some-id' },
+        operationType: 'percentile',
+        params: { format: { id: 'bytes' }, percentile: 50 },
+      },
+    ],
+    [
+      'percentile column for percentile if metaValue is set and window is passed',
+      [
+        SUPPORTED_METRICS.percentile,
+        { series, metric: { id, field, type: TSVB_METRIC_TYPES.PERCENTILE }, dataView },
+        { metaValue: 50, window: '10' },
+      ],
+      {
+        meta: { metricId: 'some-id' },
+        operationType: 'percentile',
+        params: { format: { id: 'bytes' }, percentile: 50 },
+        window: '10',
+      },
+    ],
+    [
+      'null for percentile rank if metaValue is empty',
+      [
+        SUPPORTED_METRICS.percentile_rank,
+        { series, metric: { id, field, type: TSVB_METRIC_TYPES.PERCENTILE_RANK }, dataView },
+      ],
+      null,
+    ],
+    [
+      'percentile rank column for percentile rank if metaValue is set',
+      [
+        SUPPORTED_METRICS.percentile_rank,
+        { series, metric: { id, field, type: TSVB_METRIC_TYPES.PERCENTILE_RANK }, dataView },
+        { metaValue: 50 },
+      ],
+      {
+        meta: { metricId: 'some-id' },
+        operationType: 'percentile_rank',
+        params: { format: { id: 'bytes' }, value: 50 },
+      },
+    ],
+    [
+      'percentile rank column for percentile rank if metaValue is set and window is passed',
+      [
+        SUPPORTED_METRICS.percentile_rank,
+        { series, metric: { id, field, type: TSVB_METRIC_TYPES.PERCENTILE_RANK }, dataView },
+        { metaValue: 50, window: '10' },
+      ],
+      {
+        meta: { metricId: 'some-id' },
+        operationType: 'percentile_rank',
+        params: { format: { id: 'bytes' }, value: 50 },
+        window: '10',
+      },
+    ],
+    [
+      'null for counter rate if field in metric is empty',
+      [
+        SUPPORTED_METRICS.positive_rate,
+        { series, metric: { id, type: TSVB_METRIC_TYPES.POSITIVE_RATE }, dataView },
+      ],
+      null,
+    ],
+    [
+      'formula column for counter rate',
+      [
+        SUPPORTED_METRICS.positive_rate,
+        { series, metric: { id, field, type: TSVB_METRIC_TYPES.POSITIVE_RATE }, dataView },
+      ],
+      {
+        meta: { metricId: 'some-id' },
+        operationType: 'formula',
+        params: { format: { id: 'bytes' }, formula: 'pick_max(differences(max(bytes)), 0)' },
+      },
+    ],
+    [
+      'null for last value (unsupported)',
+      [
+        SUPPORTED_METRICS.top_hit,
+        { series, metric: { id, field, type: TSVB_METRIC_TYPES.TOP_HIT }, dataView },
+      ],
+      null,
+    ],
+    [
+      'column for other supported metrics',
+      [
+        SUPPORTED_METRICS.count,
+        { series, metric: { id, field, type: METRIC_TYPES.COUNT }, dataView },
+      ],
+      {
+        meta: { metricId: 'some-id' },
+        operationType: 'count',
+        params: {},
+        sourceField: 'document',
+      },
+    ],
+  ])('should return %s', (_, input, expected) => {
+    if (expected === null) {
+      expect(convertMetricAggregationToColumn(...input)).toBeNull();
+    }
+    if (Array.isArray(expected)) {
+      expect(convertMetricAggregationToColumn(...input)).toEqual(
+        expected.map(expect.objectContaining)
+      );
+    } else {
+      expect(convertMetricAggregationToColumn(...input)).toEqual(expect.objectContaining(expected));
+    }
   });
 });
