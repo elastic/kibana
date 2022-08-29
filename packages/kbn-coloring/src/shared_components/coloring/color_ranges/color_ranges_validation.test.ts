@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { validateColorRanges, isAllColorRangesValid } from './color_ranges_validation';
+import { validateColorRanges, allRangesValid } from './color_ranges_validation';
 
 describe('Color ranges validation', () => {
   describe('validateColorRanges', () => {
@@ -63,10 +63,10 @@ describe('Color ranges validation', () => {
           color: '#ccc',
         },
       ];
-      let isValid = isAllColorRangesValid(colorRanges);
+      let isValid = allRangesValid(colorRanges);
       expect(isValid).toBeFalsy();
       colorRanges[colorRanges.length - 1].end = 30;
-      isValid = isAllColorRangesValid(colorRanges);
+      isValid = allRangesValid(colorRanges);
       expect(isValid).toBeTruthy();
     });
   });
