@@ -385,6 +385,7 @@ x-pack/examples/files_example @elastic/kibana-app-services
 /x-pack/plugins/triggers_actions_ui/ @elastic/response-ops
 /x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/ @elastic/response-ops
 /x-pack/test/functional_with_es_ssl/fixtures/plugins/alerts/ @elastic/response-ops
+/x-pack/plugins/alerting/server/saved_objects/ @elastic/mlr-qa
 /docs/user/alerting/ @elastic/response-ops @elastic/mlr-docs
 /docs/management/connectors/ @elastic/response-ops @elastic/mlr-docs
 #CC# /x-pack/plugins/stack_alerts/ @elastic/response-ops
