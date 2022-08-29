@@ -11,20 +11,12 @@ import { SLO } from '../types/models';
 
 export const slo: SavedObjectsType = {
   name: 'slo',
-  hidden: true,
+  hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: {
+    dynamic: false,
     properties: {
-      id: { type: 'keyword' },
-      name: {
-        type: 'text',
-        fields: {
-          keyword: {
-            type: 'keyword',
-            normalizer: 'lowercase',
-          },
-        },
-      },
+      name: { type: 'text' },
       description: { type: 'text' },
       indicator: {
         properties: {
