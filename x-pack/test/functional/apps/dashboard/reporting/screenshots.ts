@@ -6,13 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import fs from 'fs';
 import path from 'path';
-import { promisify } from 'util';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-
-const writeFileAsync = promisify(fs.writeFile);
-const mkdirAsync = promisify(fs.mkdir);
 
 const REPORTS_FOLDER = path.resolve(__dirname, 'reports');
 
@@ -156,20 +151,6 @@ export default function ({
       after(async () => {
         await unloadEcommerce();
       });
-
-      const writeSessionReport = async (name: string, rawPdf: Buffer, reportExt: string) => {
-        const sessionDirectory = path.resolve(REPORTS_FOLDER, 'session');
-        await mkdirAsync(sessionDirectory, { recursive: true });
-        const sessionReportPath = path.resolve(sessionDirectory, `${name}.${reportExt}`);
-        await writeFileAsync(sessionReportPath, rawPdf);
-        return sessionReportPath;
-      };
-      const getBaselineReportPath = (fileName: string, reportExt: string) => {
-        const baselineFolder = path.resolve(REPORTS_FOLDER, 'baseline');
-        const fullPath = path.resolve(baselineFolder, `${fileName}.${reportExt}`);
-        log.debug(`getBaselineReportPath (${fullPath})`);
-        return fullPath;
-      };
 
       it('downloads a PNG file: small dashboard', async function () {
         this.timeout(300000);
