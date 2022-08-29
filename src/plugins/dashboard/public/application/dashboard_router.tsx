@@ -206,36 +206,32 @@ export async function mountApp({
     window.dispatchEvent(new HashChangeEvent('hashchange'));
   });
 
-  const DashboardServicesProvider = pluginServices.getContextProvider();
-
   const app = (
     <I18nProvider>
       <Provider store={dashboardStateStore}>
         <KibanaContextProvider services={dashboardServices}>
-          <DashboardServicesProvider>
-            <KibanaThemeProvider theme$={core.theme.theme$}>
-              <HashRouter>
-                <Switch>
-                  <Route
-                    path={[
-                      DashboardConstants.CREATE_NEW_DASHBOARD_URL,
-                      `${DashboardConstants.VIEW_DASHBOARD_URL}/:id`,
-                    ]}
-                    render={renderDashboard}
-                  />
-                  <Route
-                    exact
-                    path={DashboardConstants.LANDING_PAGE_PATH}
-                    render={renderListingPage}
-                  />
-                  <Route exact path="/">
-                    <Redirect to={DashboardConstants.LANDING_PAGE_PATH} />
-                  </Route>
-                  <Route render={renderNoMatch} />
-                </Switch>
-              </HashRouter>
-            </KibanaThemeProvider>
-          </DashboardServicesProvider>
+          <KibanaThemeProvider theme$={core.theme.theme$}>
+            <HashRouter>
+              <Switch>
+                <Route
+                  path={[
+                    DashboardConstants.CREATE_NEW_DASHBOARD_URL,
+                    `${DashboardConstants.VIEW_DASHBOARD_URL}/:id`,
+                  ]}
+                  render={renderDashboard}
+                />
+                <Route
+                  exact
+                  path={DashboardConstants.LANDING_PAGE_PATH}
+                  render={renderListingPage}
+                />
+                <Route exact path="/">
+                  <Redirect to={DashboardConstants.LANDING_PAGE_PATH} />
+                </Route>
+                <Route render={renderNoMatch} />
+              </Switch>
+            </HashRouter>
+          </KibanaThemeProvider>
         </KibanaContextProvider>
       </Provider>
     </I18nProvider>
