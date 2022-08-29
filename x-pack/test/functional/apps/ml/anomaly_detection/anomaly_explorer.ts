@@ -61,11 +61,12 @@ const cellSize = 15;
 const overallSwimLaneTestSubj = 'mlAnomalyExplorerSwimlaneOverall';
 const viewBySwimLaneTestSubj = 'mlAnomalyExplorerSwimlaneViewBy';
 
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
   const elasticChart = getService('elasticChart');
   const browser = getService('browser');
+  const PageObjects = getPageObjects(['common', 'timePicker']);
 
   describe('anomaly explorer', function () {
     this.tags(['ml']);
@@ -370,6 +371,29 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('updates table pagination');
           await ml.anomaliesTable.setRowsNumberPerPage(10);
           await ml.anomaliesTable.assertTableRowsCount(10);
+        });
+
+        it('renders swim lanes correctly on the time bounds change', async () => {
+          const fromTime = 'Jul 7, 2012 @ 00:00:00.000';
+          const toTime = 'Feb 12, 2016 @ 23:59:54.000';
+
+          await PageObjects.timePicker.pauseAutoRefresh();
+          await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+
+          await ml.commonUI.waitForDatePickerIndicatorLoaded();
+
+          await ml.swimLane.waitForSwimLanesToLoad();
+          await ml.swimLane.assertAxisLabels(viewBySwimLaneTestSubj, 'x', [
+            '2012-06-19',
+            '2012-11-16',
+            '2013-04-15',
+            '2013-09-12',
+            '2014-02-09',
+            '2014-07-09',
+            '2014-12-06',
+            '2015-05-05',
+            '2015-10-02',
+          ]);
         });
 
         describe('Anomaly Swim Lane as embeddable', function () {
