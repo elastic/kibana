@@ -1,0 +1,59 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import { SavedObject } from '@kbn/core/server';
+import { SLO } from '../types/models';
+
+export const slo: SavedObjectsType = {
+  name: 'slo',
+  hidden: true,
+  namespaceType: 'multiple-isolated',
+  mappings: {
+    properties: {
+      id: { type: 'keyword' },
+      name: {
+        type: 'text',
+        fields: {
+          keyword: {
+            type: 'keyword',
+            normalizer: 'lowercase',
+          },
+        },
+      },
+      description: { type: 'text' },
+      indicator: {
+        properties: {
+          type: { type: 'keyword' },
+          params: { type: 'flattened' },
+        },
+      },
+      time_window: {
+        properties: {
+          duration: { type: 'keyword' },
+          is_rolling: { type: 'boolean' },
+        },
+      },
+      budgeting_method: { type: 'keyword' },
+      objective: {
+        properties: {
+          target: { type: 'float' },
+        },
+      },
+      created_at: { type: 'date' },
+      updated_at: { type: 'date' },
+      schema_version: { type: 'integer' },
+    },
+  },
+  management: {
+    displayName: 'SLO',
+    importableAndExportable: true,
+    getTitle(sloSavedObject: SavedObject<SLO>) {
+      return `SLO: [${sloSavedObject.attributes.name}]`;
+    },
+  },
+};
