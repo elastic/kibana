@@ -25,6 +25,7 @@ import {
   PercentileColumn,
   PercentileRanksColumn,
   SumColumn,
+  FormulaColumn,
 } from './types';
 import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import { Metric, Series } from '../../../../common/types';
@@ -40,6 +41,7 @@ import { createFormulaColumn } from './formula';
 import { convertToMovingAverageParams } from './moving_average';
 import { convertToPercentileColumn } from './percentile';
 import { convertToPercentileRankColumn } from './percentile_rank';
+import { convertToCounterRateFormulaColumn } from './counter_rate';
 
 type MetricAggregationWithoutParams =
   | typeof Operations.AVERAGE
@@ -60,7 +62,8 @@ type MetricAggregation =
 type MetricAggregationColumnWithSpecialParams =
   | PercentileColumn
   | PercentileRanksColumn
-  | LastValueColumn;
+  | LastValueColumn
+  | FormulaColumn;
 
 type MetricAggregationColumnWithoutSpecialParams =
   | AvgColumn
@@ -86,7 +89,6 @@ const SUPPORTED_METRICS_AGGS_WITHOUT_PARAMS: MetricAggregationWithoutParams[] = 
   Operations.AVERAGE,
   Operations.COUNT,
   Operations.UNIQUE_COUNT,
-  Operations.COUNTER_RATE,
   Operations.MAX,
   Operations.MIN,
   Operations.SUM,
@@ -98,6 +100,7 @@ const SUPPORTED_METRIC_AGGS: MetricAggregation[] = [
   Operations.LAST_VALUE,
   Operations.PERCENTILE,
   Operations.PERCENTILE_RANK,
+  Operations.COUNTER_RATE,
 ];
 
 const isSupportedAggregation = (agg: string): agg is MetricAggregation => {
@@ -158,6 +161,9 @@ export const convertMetricAggregationToColumn = (
     return convertToPercentileRankColumn(metaValue?.toString() ?? '', series, metric, dataView, {
       window,
     });
+  }
+  if (aggregation.name === Operations.COUNTER_RATE) {
+    return convertToCounterRateFormulaColumn({ series, metrics: [metric], dataView });
   }
 
   if (aggregation.name === Operations.LAST_VALUE) {
