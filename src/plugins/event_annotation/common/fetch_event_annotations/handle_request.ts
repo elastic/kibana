@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { getFetchEventAnnotationsMeta } from './fetch_event_annotations_fn';
-export { requestEventAnnotations } from './request_event_annotations';
-export * from './types';
+import { handleEsaggsRequest, RequestHandlerParams } from '@kbn/data-plugin/common';
+
+// in a separate file to solve a mocking problem for tests
+export const handleRequest = (args: RequestHandlerParams) => handleEsaggsRequest(args);
