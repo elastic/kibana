@@ -62,7 +62,9 @@ export const validateColorRange = (
 ) => {
   const errors: ColorRangeValidationErrors[] = [];
 
-  if (Number.isNaN(colorRange[accessor])) {
+  const value = colorRange[accessor];
+
+  if (Number.isNaN(value)) {
     errors.push('invalidValue');
   }
 
@@ -75,11 +77,7 @@ export const validateColorRange = (
   }
 
   if (isPercent) {
-    const isInvalidPercent = (percent: number) =>
-      ![-Infinity, Infinity].includes(percent) && (0 > percent || percent > 100);
-    const valuesToCheck =
-      accessor !== 'end' ? [colorRange[accessor]] : [colorRange.start, colorRange.end];
-    if (valuesToCheck.map(isInvalidPercent).some((invalid) => invalid)) {
+    if (![-Infinity, Infinity].includes(value) && (value < 0 || value > 100)) {
       errors.push('percentOutOfBounds');
     }
   }
