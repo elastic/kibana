@@ -144,7 +144,7 @@ const StyledMinHeightTabContainer = styled.div`
 
 export enum RuleDetailTabs {
   alerts = 'alerts',
-  exceptions = 'exceptions',
+  exceptions = 'ruleExceptions',
   endpointExceptions = 'endpointExceptions',
   executionResults = 'executionResults',
   executionEvents = 'executionEvents',

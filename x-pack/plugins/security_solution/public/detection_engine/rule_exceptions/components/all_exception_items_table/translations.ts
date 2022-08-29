@@ -10,14 +10,14 @@ import { i18n } from '@kbn/i18n';
 export const EXCEPTION_NO_SEARCH_RESULTS_PROMPT_TITLE = i18n.translate(
   'xpack.securitySolution.exceptions.allItems.noSearchResultsPromptTitle',
   {
-    defaultMessage: 'No results',
+    defaultMessage: 'No results match your search criteria',
   }
 );
 
 export const EXCEPTION_NO_SEARCH_RESULTS_PROMPT_BODY = i18n.translate(
   'xpack.securitySolution.exceptions.allItems.noSearchResultsPromptBody',
   {
-    defaultMessage: 'No matching exception items were found in your search.',
+    defaultMessage: 'Try modifying your search.',
   }
 );
 
@@ -54,13 +54,6 @@ export const EXCEPTION_EMPTY_PROMPT_ENDPOINT_BUTTON = i18n.translate(
   'xpack.securitySolution.exceptions.allItems.endpoint.emptyPromptButtonLabel',
   {
     defaultMessage: 'Add endpoint exception',
-  }
-);
-
-export const EXCEPTION_LOADING_TITLE = i18n.translate(
-  'xpack.securitySolution.exceptions.allItems.loadingExceptionsTitle',
-  {
-    defaultMessage: 'Loading exceptions',
   }
 );
 

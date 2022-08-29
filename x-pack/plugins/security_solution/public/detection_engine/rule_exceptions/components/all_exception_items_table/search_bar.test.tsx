@@ -19,6 +19,7 @@ describe('ExceptionsViewerSearchBar', () => {
         listType={ExceptionListTypeEnum.DETECTION}
         onSearch={jest.fn()}
         onAddExceptionClick={jest.fn()}
+        isSearching={false}
         isReadOnly
       />
     );
@@ -32,6 +33,7 @@ describe('ExceptionsViewerSearchBar', () => {
       <ExceptionsViewerSearchBar
         isReadOnly={false}
         listType={ExceptionListTypeEnum.DETECTION}
+        isSearching={false}
         onSearch={jest.fn()}
         onAddExceptionClick={mockOnAddExceptionClick}
       />
@@ -51,6 +53,7 @@ describe('ExceptionsViewerSearchBar', () => {
       <ExceptionsViewerSearchBar
         isReadOnly={false}
         listType={ExceptionListTypeEnum.ENDPOINT}
+        isSearching={false}
         onSearch={jest.fn()}
         onAddExceptionClick={mockOnAddExceptionClick}
       />

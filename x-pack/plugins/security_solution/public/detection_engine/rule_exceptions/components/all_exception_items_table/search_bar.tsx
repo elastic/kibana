@@ -46,6 +46,7 @@ interface ExceptionsViewerSearchBarProps {
   // Exception list type used to determine what type of item is
   // being created when "onAddExceptionClick" is invoked
   listType: ExceptionListTypeEnum;
+  isSearching: boolean;
   onSearch: (arg: string) => void;
   onAddExceptionClick: (type: ExceptionListTypeEnum) => void;
 }
@@ -56,6 +57,7 @@ interface ExceptionsViewerSearchBarProps {
 const ExceptionsViewerSearchBarComponent = ({
   isReadOnly,
   listType,
+  isSearching,
   onSearch,
   onAddExceptionClick,
 }: ExceptionsViewerSearchBarProps): JSX.Element => {
@@ -94,6 +96,7 @@ const ExceptionsViewerSearchBarComponent = ({
           <EuiButton
             data-test-subj="exceptionsHeaderAddExceptionBtn"
             onClick={handleAddException}
+            isDisabled={isSearching}
             fill
           >
             {addExceptionButtonText}

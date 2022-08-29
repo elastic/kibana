@@ -362,6 +362,8 @@ export interface FindExceptionListItemOptions {
   perPage: PerPageOrUndefined;
   /** The Point in Time (pit) id if there is one, otherwise "undefined" can be send in */
   pit?: PitOrUndefined;
+  /** The simple search parameter if there is one, otherwise "undefined" can be sent in */
+  search?: SearchOrUndefined;
   /** The search_after parameter if there is one, otherwise "undefined" can be sent in */
   searchAfter?: SearchAfterOrUndefined;
   /** The page number or "undefined" if there is no page number to continue from */

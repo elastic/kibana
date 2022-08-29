@@ -37,7 +37,14 @@ import * as i18n from './translations';
 import { useFindExceptionListReferences } from '../../logic/use_find_references';
 import type { Rule } from '../../../../detections/containers/detection_engine/rules/types';
 
-const STATES_SEARCH_HIDDEN: ViewerState[] = ['error', 'empty', 'loading'];
+const STATES_SEARCH_HIDDEN: ViewerState[] = ['error', 'empty'];
+const STATES_PAGINATION_UTILITY_HIDDEN: ViewerState[] = [
+  'loading',
+  'empty_search',
+  'empty',
+  'error',
+  'searching',
+];
 
 const initialState: State = {
   pagination: {
@@ -137,7 +144,7 @@ const ExceptionsViewerComponent = ({
               page: pagination.pageIndex + 1,
               perPage: pagination.pageSize,
             };
-
+            console.log({exceptionLists})
       const {
         page: pageIndex,
         per_page: itemsPerPage,
@@ -299,9 +306,10 @@ const ExceptionsViewerComponent = ({
 
   useEffect(() => {
     if (exceptionLists.length > 0) {
+      console.log('LENGTH', exceptionLists.length > 0)
       handleGetExceptionListItems();
     } else {
-      setViewerState('loading');
+      setViewerState('empty');
     }
   }, [exceptionLists, handleGetExceptionListItems, setViewerState]);
 
@@ -339,14 +347,16 @@ const ExceptionsViewerComponent = ({
       <EuiPanel hasBorder={false} hasShadow={false}>
         <>
           {!STATES_SEARCH_HIDDEN.includes(viewerState) && (
+            <ExceptionsViewerSearchBar
+              isReadOnly={isReadOnly}
+              listType={listType}
+              isSearching={viewerState === 'searching'}
+              onSearch={handleSearch}
+              onAddExceptionClick={handleAddException}
+            />
+          )}
+          {!STATES_PAGINATION_UTILITY_HIDDEN.includes(viewerState) && (
             <>
-              <ExceptionsViewerSearchBar
-                isReadOnly={isReadOnly}
-                listType={listType}
-                onSearch={handleSearch}
-                onAddExceptionClick={handleAddException}
-              />
-
               <EuiSpacer size="l" />
 
               <ExceptionsViewerUtility pagination={pagination} lastUpdated={lastUpdated} />
@@ -364,7 +374,7 @@ const ExceptionsViewerComponent = ({
             onCreateExceptionListItem={handleAddException}
           />
 
-          {!STATES_SEARCH_HIDDEN.includes(viewerState) && (
+          {!STATES_PAGINATION_UTILITY_HIDDEN.includes(viewerState) && (
             <ExceptionsViewerPagination
               onPaginationChange={handleGetExceptionListItems}
               pagination={pagination}
