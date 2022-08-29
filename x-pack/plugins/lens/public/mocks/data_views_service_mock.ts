@@ -8,6 +8,7 @@
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import {
   createIndexPatternService,
   IndexPatternServiceProps,
@@ -18,7 +19,16 @@ export function createIndexPatternServiceMock({
   core = coreMock.createStart(),
   uiSettings = uiSettingsServiceMock.createStartContract(),
   dataViews = dataViewPluginMocks.createStartContract(),
+  uiActions = uiActionsPluginMock.createStartContract(),
   updateIndexPatterns = jest.fn(),
+  replaceIndexPattern = jest.fn(),
 }: Partial<IndexPatternServiceProps> = {}): IndexPatternServiceAPI {
-  return createIndexPatternService({ core, uiSettings, updateIndexPatterns, dataViews });
+  return createIndexPatternService({
+    core,
+    uiSettings,
+    updateIndexPatterns,
+    replaceIndexPattern,
+    dataViews,
+    uiActions,
+  });
 }
