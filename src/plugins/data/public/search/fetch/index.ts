@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { handleWarning } from './handle_warning';
+export { handleWarnings } from './handle_warnings';
 export { extractWarnings } from './extract_warnings';

@@ -14,20 +14,40 @@ import React from 'react';
 import { SearchRequest } from '..';
 import { getNotifications } from '../../services';
 import { ShardFailureOpenModalButton } from '../../shard_failure_modal';
-import { SearchResponseWarning } from '../types';
+import { SearchResponseWarning, WarningHandlerCallback } from '../types';
+import { extractWarnings } from './extract_warnings';
 
 /**
  * @internal
+ * All warnings are expected to come from the same response. Therefore all "text" properties, which contain the
+ * response, will be the same.
  */
-export function handleWarning(
-  warning: SearchResponseWarning,
+export function handleWarnings(
   request: SearchRequest,
   response: estypes.SearchResponse,
-  theme: ThemeServiceStart
+  theme: ThemeServiceStart,
+  cb?: WarningHandlerCallback
 ) {
+  const warnings = extractWarnings(response);
+  if (warnings.length === 0) {
+    return;
+  }
+
+  let internal: SearchResponseWarning[] = [];
+  if (cb) {
+    internal = filterWarnings(warnings, cb);
+  } else {
+    internal = warnings;
+  }
+
+  if (internal.length === 0) {
+    return;
+  }
+
+  const [warning] = internal;
   const title = warning.message;
 
-  // if warning message contains text, show in ShardFailureOpenModalButton
+  // if warning message contains text (warning response), show in ShardFailureOpenModalButton
   if (warning.text) {
     const text = toMountPoint(
       <>
@@ -49,4 +69,21 @@ export function handleWarning(
 
   // timeout warning, or shard warning with no failure reason
   getNotifications().toasts.addWarning({ title });
+}
+
+/**
+ * @internal
+ */
+export function filterWarnings(warnings: SearchResponseWarning[], cb: WarningHandlerCallback) {
+  const unfiltered: SearchResponseWarning[] = [];
+
+  // use the consumer's callback as a filter to receive warnings to handle on our side
+  warnings.forEach((warning) => {
+    const consumerHandled = cb?.(warning);
+    if (!consumerHandled) {
+      unfiltered.push(warning);
+    }
+  });
+
+  return unfiltered;
 }

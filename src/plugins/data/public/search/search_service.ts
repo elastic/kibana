@@ -67,7 +67,7 @@ import { createUsageCollector, SearchUsageCollector } from './collectors';
 import { getEql, getEsaggs, getEsdsl, getEssql } from './expressions';
 import { getKibanaContext } from './expressions/kibana_context';
 import { extractWarnings } from './fetch';
-import { handleWarning } from './fetch/handle_warning';
+import { filterWarnings, handleWarnings } from './fetch/handle_warnings';
 import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
 import { ISessionsClient, ISessionService, SessionsClient, SessionService } from './session';
 import { registerSearchSessionsMgmt } from './session/sessions_mgmt';
@@ -238,11 +238,10 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       getConfig: uiSettings.get.bind(uiSettings),
       search,
       onResponse: (request, response, options) => {
-        extractWarnings(response.rawResponse).forEach((warning) => {
-          if (!options.disableShardFailureWarning) {
-            handleWarning(warning, request, response.rawResponse, theme);
-          }
-        });
+        if (!options.disableShardFailureWarning) {
+          const { rawResponse } = response;
+          handleWarnings(request, rawResponse, theme);
+        }
         return response;
       },
     };
@@ -281,15 +280,11 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
             request.response?.json as { rawResponse: estypes.SearchResponse | undefined }
           )?.rawResponse;
 
-          if (rawResponse) {
-            const warnings = extractWarnings(rawResponse);
-            warnings.forEach((warning) => {
-              const consumerHandled = cb?.(warning);
-              if (!consumerHandled) {
-                handleWarning(warning, request, rawResponse, theme);
-              }
-            });
+          if (!rawResponse) {
+            return;
           }
+
+          handleWarnings(request, rawResponse, theme, cb);
         });
       },
       session: this.sessionService,

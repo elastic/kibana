@@ -62,7 +62,7 @@ describe('extract search response warnings', () => {
     ]);
   });
 
-  it('should extract shards failed warning notification', () => {
+  it('should extract shards failed warnings', () => {
     const warnings = {
       _shards: {
         failed: 77,
@@ -94,7 +94,7 @@ describe('extract search response warnings', () => {
     ]);
   });
 
-  it('extracts multiple warning notifications', () => {
+  it('extracts multiple warnings', () => {
     const warnings = extractWarnings({
       timed_out: true,
       _shards: {
