@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { curry } from 'lodash';
+import { inspect } from 'util';
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -172,7 +173,7 @@ export async function executor(
     })
   );
 
-  logger.debug(`torq action result: ${JSON.stringify(result)}`);
+  logger.debug(`torq action result: ${inspect(result)}`);
 
   if (isOk(result)) {
     const {
