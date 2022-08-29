@@ -12,6 +12,7 @@ management systems:
 * {sn-sir}
 * {swimlane}
 * {webhook-cm}
+* {torq}
 
 NOTE: To create connectors and send cases to external systems, you must have the
 appropriate {kib} feature privileges. Refer to <<setup-cases>>.
@@ -35,7 +36,7 @@ image::images/cases-connectors.png[]
 
 . Enter your required settings. Refer to <<resilient-action-type>>,
 <<jira-action-type>>, <<servicenow-action-type>>, <<servicenow-sir-action-type>>,
-<<swimlane-action-type>>, or <<cases-webhook-action-type>> for connector
+<<swimlane-action-type>>, <<torq-action-type>>, or <<cases-webhook-action-type>> for connector
 configuration details.
 
 . Click *Save*.

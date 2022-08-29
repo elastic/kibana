@@ -8,11 +8,13 @@
 import { RuleActionParam } from '@kbn/alerting-plugin/common';
 import { EventActionOptions } from '../components/builtin_action_types/types';
 import { AlertProvidedActionVariables } from './action_variables';
+import { torqDefaultBody } from './default_params';
 
 export type DefaultActionParams = Record<string, RuleActionParam> | undefined;
 export type DefaultActionParamsGetter = (
   actionTypeId: string,
-  actionGroupId: string
+  actionGroupId: string,
+  isRecoveryActionGroup: boolean,
 ) => DefaultActionParams;
 export const getDefaultsForActionParams = (
   actionTypeId: string,
@@ -38,5 +40,10 @@ export const getDefaultsForActionParams = (
         spaceId: `{{${AlertProvidedActionVariables.ruleSpaceId}}}`,
       };
       return xmattersDefaults;
+    case '.torq':
+      const torqDefaults = {
+        body: torqDefaultBody,
+      };
+      return torqDefaults;
   }
 };

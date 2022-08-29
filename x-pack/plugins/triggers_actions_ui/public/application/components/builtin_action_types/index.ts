@@ -14,6 +14,7 @@ import { getPagerDutyActionType } from './pagerduty';
 import { getSwimlaneActionType } from './swimlane';
 import { getCasesWebhookActionType } from './cases_webhook';
 import { getWebhookActionType } from './webhook';
+import { getTorqActionType } from './torq';
 import { getXmattersActionType } from './xmatters';
 import { TypeRegistry } from '../../type_registry';
 import { ActionTypeModel } from '../../../types';
@@ -55,4 +56,5 @@ export function registerBuiltInActionTypes({
   actionTypeRegistry.register(getJiraActionType());
   actionTypeRegistry.register(getResilientActionType());
   actionTypeRegistry.register(getTeamsActionType());
+  actionTypeRegistry.register(getTorqActionType());
 }
