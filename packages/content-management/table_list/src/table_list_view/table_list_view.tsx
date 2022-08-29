@@ -29,7 +29,7 @@ import { Table, ConfirmDeleteModal, ListingLimitWarning } from './components';
 import { useServices } from './services';
 import type { SavedObjectsReference } from './services';
 import type { Action } from './actions';
-import { reducer } from './reducer';
+import { getReducer } from './reducer';
 
 export interface Props<T extends UserContentCommonSchema = UserContentCommonSchema> {
   entityName: string;
@@ -112,7 +112,12 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     getTagsColumnDefinition,
     searchQueryParser,
     notifyError,
+    DateFormatterComp,
   } = useServices();
+
+  const reducer = useMemo(() => {
+    return getReducer<T>({ DateFormatterComp });
+  }, [DateFormatterComp]);
 
   const [state, dispatch] = useReducer<(state: State<T>, action: Action<T>) => State<T>>(reducer, {
     items: [],

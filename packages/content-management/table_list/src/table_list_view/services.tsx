@@ -9,6 +9,7 @@
 import React, { FC, useContext } from 'react';
 import type { EuiTableFieldDataColumnType, SearchFilterConfig } from '@elastic/eui';
 import type { Observable } from 'rxjs';
+import type { FormattedRelative } from '@kbn/i18n-react';
 
 import { UserContentCommonSchema } from './table_list_view';
 
@@ -24,8 +25,8 @@ export interface SavedObjectsReference {
 
 export type DateFormatter = (props: {
   value: number;
-  children: (formattedDate: string) => React.ReactElement;
-}) => React.ReactElement;
+  children: (formattedDate: string) => JSX.Element;
+}) => JSX.Element;
 
 /**
  * Abstract external services for this component.
@@ -57,6 +58,7 @@ export const TableListViewProvider: FC<Services> = ({ children, ...services }) =
  */
 
 export interface TableListViewKibanaDependencies {
+  /** CoreStart contract */
   core: {
     application: {
       capabilities: {
@@ -72,10 +74,25 @@ export interface TableListViewKibanaDependencies {
       };
     };
   };
+  /**
+   * Handler from the '@kbn/kibana-react-plugin/public' Plugin
+   *
+   * ```
+   * import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+   * ```
+   */
   toMountPoint: (
     node: React.ReactNode,
     options?: { theme$: Observable<{ readonly darkMode: boolean }> }
   ) => MountPoint;
+  /**
+   * The public API from the savedObjectsTaggingOss plugin.
+   * It is returned by calling `getTaggingApi()` from the SavedObjectTaggingOssPluginStart
+   *
+   * ```js
+   * const savedObjectsTagging = savedObjectsTaggingOss?.getTaggingApi()
+   * ```
+   */
   savedObjectTaggingApi?: {
     ui: {
       getTableColumnDefinition: () => EuiTableFieldDataColumnType<UserContentCommonSchema>;
@@ -96,6 +113,8 @@ export interface TableListViewKibanaDependencies {
       }) => SearchFilterConfig;
     };
   };
+  /** The <FormattedRelative /> component from the @kbn/i18n-react package */
+  FormattedRelative: typeof FormattedRelative;
 }
 
 /**
@@ -105,7 +124,7 @@ export const TableListViewKibanaProvider: FC<TableListViewKibanaDependencies> = 
   children,
   ...services
 }) => {
-  const { core, toMountPoint, savedObjectTaggingApi } = services;
+  const { core, toMountPoint, savedObjectTaggingApi, FormattedRelative } = services;
   return (
     <TableListViewProvider
       canEditAdvancedSettings={Boolean(core.application.capabilities.advancedSettings?.save)}
@@ -118,6 +137,7 @@ export const TableListViewKibanaProvider: FC<TableListViewKibanaDependencies> = 
         core.notifications.toasts.addDanger({ title: toMountPoint(title), text });
       }}
       getTagsColumnDefinition={savedObjectTaggingApi?.ui.getTableColumnDefinition}
+      DateFormatterComp={(props) => <FormattedRelative {...props} />}
     >
       {children}
     </TableListViewProvider>
