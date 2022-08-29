@@ -13,10 +13,10 @@ import { CasesUiSetup } from '@kbn/cases-plugin/public';
 import { CoreStart } from '@kbn/core/public';
 import { PersistableStateAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
+import { getEmbeddableComponent } from '../embeddables';
 import { MlStartDependencies } from '../plugin';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE, AnomalySwimlaneEmbeddableInput } from '..';
 import { PLUGIN_ICON } from '../../common/constants/app';
-import { getAnomalySwimLaneEmbeddableComponent } from '../embeddables/anomaly_swimlane';
 
 const AttachmentActions: React.FC = () => {
   return (
@@ -52,7 +52,11 @@ export function registerAnomalySwimLaneCasesAttachment(
       actions: <AttachmentActions />,
       children: React.lazy(() => {
         return Promise.resolve().then(() => {
-          const EmbeddableComponent = getAnomalySwimLaneEmbeddableComponent(coreStart, pluginStart);
+          const EmbeddableComponent = getEmbeddableComponent(
+            ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+            coreStart,
+            pluginStart
+          );
 
           return {
             default: React.memo((props: PersistableStateAttachmentViewProps) => {
