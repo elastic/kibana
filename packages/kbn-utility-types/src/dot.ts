@@ -30,24 +30,32 @@ export type DedotObject<TObject extends Record<string, any>> = UnionToIntersecti
   >
 >;
 
+type ToArray<TObject> = TObject extends Record<string, any>
+  ? {
+      [TKey in keyof TObject]: Array<TObject[TKey]>;
+    }
+  : never;
+
 type DotKey<
   TObject extends Record<string, any>,
   TKey extends keyof TObject & string,
   TPrefix extends string
-> = TObject[TKey] extends Record<string, any>
+> = TObject[TKey] extends Array<infer TValueType>
+  ? ToArray<DotObject<TValueType, `${TPrefix}${TKey}.`>>
+  : TObject[TKey] extends Record<string, any>
   ? DotObject<TObject[TKey], `${TPrefix}${TKey}.`>
   : { [key in `${TPrefix}${TKey}`]: TObject[TKey] };
+
+type _DotObject<TObject extends Record<string, any>, TPrefix extends string = ''> = ValuesType<{
+  [TKey in keyof TObject & string]: {} extends Pick<TObject, TKey>
+    ? Partial<DotKey<Required<TObject>, TKey, TPrefix>>
+    : DotKey<TObject, TKey, TPrefix>;
+}>;
 
 export type DotObject<
   TObject extends Record<string, any>,
   TPrefix extends string = ''
-> = UnionToIntersection<
-  ValuesType<{
-    [TKey in keyof TObject & string]: {} extends Pick<TObject, TKey>
-      ? Partial<DotKey<Required<TObject>, TKey, TPrefix>>
-      : DotKey<TObject, TKey, TPrefix>;
-  }>
->;
+> = UnionToIntersection<_DotObject<TObject, TPrefix>>;
 
 export type DotKeysOf<TObject extends Record<string, any>> = keyof DotObject<TObject>;
 

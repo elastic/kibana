@@ -81,6 +81,24 @@ const foo2: { baz: string } = {} as DotObject<TestB>;
 const foo3: { my: { dotted: { key: string }; partial: { key: number } } } =
   {} as DedotObject<TestA>;
 
+interface ObjectWithArray {
+  span: {
+    links: Array<{
+      trace: {
+        id: string;
+      };
+      span: {
+        id: string;
+      };
+    }>;
+  };
+}
+
+const objectWithArray: DotObject<ObjectWithArray> = {
+  'span.links.span.id': [''],
+  'span.links.trace.id': [''],
+};
+
 // eslint-disable-next-line no-console
 console.log({
   dotted1,
@@ -94,4 +112,5 @@ console.log({
   bar,
   baz,
   qux,
+  objectWithArray,
 });
