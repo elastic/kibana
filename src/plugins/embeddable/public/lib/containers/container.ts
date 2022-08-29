@@ -9,7 +9,16 @@
 import uuid from 'uuid';
 import { isEqual, xor } from 'lodash';
 import { EMPTY, merge, Subscription } from 'rxjs';
-import { catchError, combineLatestWith, distinctUntilChanged, map, mergeMap, pairwise, switchMap, take } from 'rxjs/operators';
+import {
+  catchError,
+  combineLatestWith,
+  distinctUntilChanged,
+  map,
+  mergeMap,
+  pairwise,
+  switchMap,
+  take,
+} from 'rxjs/operators';
 import deepEqual from 'fast-deep-equal';
 
 import {
@@ -85,26 +94,25 @@ export abstract class Container<
         this.maybeUpdateChildren(currentPanels, prevPanels);
       });
 
-    this.anyChildOutputChange$ = this.getOutput$()
-      .pipe(
-        map(() => this.getChildIds()),
-        distinctUntilChanged(deepEqual),
+    this.anyChildOutputChange$ = this.getOutput$().pipe(
+      map(() => this.getChildIds()),
+      distinctUntilChanged(deepEqual),
 
-        // children may change, so make sure we subscribe/unsubscribe with switchMap
-        switchMap((newChildIds: string[]) =>
-          merge(
-            ...newChildIds.map((childId) =>
-              this.getChild(childId)
-                .getOutput$()
-                .pipe(
-                  // Embeddables often throw errors into their output streams.
-                  catchError(() => EMPTY),
-                  map(() => childId)
-                )
-            )
+      // children may change, so make sure we subscribe/unsubscribe with switchMap
+      switchMap((newChildIds: string[]) =>
+        merge(
+          ...newChildIds.map((childId) =>
+            this.getChild(childId)
+              .getOutput$()
+              .pipe(
+                // Embeddables often throw errors into their output streams.
+                catchError(() => EMPTY),
+                map(() => childId)
+              )
           )
         )
-      );
+      )
+    );
   }
 
   public setChildLoaded(embeddable: IEmbeddable) {

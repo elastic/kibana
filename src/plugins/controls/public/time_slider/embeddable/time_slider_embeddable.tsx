@@ -82,20 +82,20 @@ export class TimeSliderControlEmbeddable extends Embeddable<
 
     this.inputSubscription = this.getInput$().subscribe(() => this.onInputChange());
 
-
-    this.waitForControlOutputConsumersToLoad$ = parent && 'anyControlOutputConsumerLoading$' in (parent as ControlGroupContainer)
-      ? (parent as ControlGroupContainer).anyControlOutputConsumerLoading$.pipe(
-        debounceTime(300),
-        first((isAnyControlOutputConsumerLoading: boolean) => {
-          return !isAnyControlOutputConsumerLoading;
-        }),
-        map(() => {
-          // Observable notifies subscriber when loading is finished
-          // Return void to not expose internal implemenation details of observabale
-          return;
-        })
-      )
-      : undefined;
+    this.waitForControlOutputConsumersToLoad$ =
+      parent && 'anyControlOutputConsumerLoading$' in (parent as ControlGroupContainer)
+        ? (parent as ControlGroupContainer).anyControlOutputConsumerLoading$.pipe(
+            debounceTime(300),
+            first((isAnyControlOutputConsumerLoading: boolean) => {
+              return !isAnyControlOutputConsumerLoading;
+            }),
+            map(() => {
+              // Observable notifies subscriber when loading is finished
+              // Return void to not expose internal implemenation details of observabale
+              return;
+            })
+          )
+        : undefined;
 
     this.initialize();
   }

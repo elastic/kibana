@@ -22,10 +22,10 @@ interface Props {
 }
 
 export const TimeSliderPrepend: FC<Props> = (props: Props) => {
-  const {
-    useEmbeddableDispatch,
-    actions,
-  } = useReduxEmbeddableContext<TimeSliderReduxState, typeof timeSliderReducers>();
+  const { useEmbeddableDispatch, actions } = useReduxEmbeddableContext<
+    TimeSliderReduxState,
+    typeof timeSliderReducers
+  >();
   const dispatch = useEmbeddableDispatch();
 
   const [isPaused, setIsPaused] = useState(true);
@@ -38,7 +38,8 @@ export const TimeSliderPrepend: FC<Props> = (props: Props) => {
 
     if (props.waitForControlOutputConsumersToLoad$) {
       const subscription = props.waitForControlOutputConsumersToLoad$
-        .pipe(first()).subscribe(() => {
+        .pipe(first())
+        .subscribe(() => {
           // use timeout to display frame for small time period before moving to next frame
           const nextTimeoutId = window.setTimeout(() => {
             playNextFrame();
@@ -81,21 +82,23 @@ export const TimeSliderPrepend: FC<Props> = (props: Props) => {
           defaultMessage: 'Previous time window',
         })}
       />
-      {props.waitForControlOutputConsumersToLoad$ === undefined ? null : <EuiButtonIcon
-        onClick={isPaused ? onPlay : onPause}
-        iconType={isPaused ? 'playFilled' : 'pause'}
-        size="s"
-        display="fill"
-        aria-label={
-          isPaused
-            ? i18n.translate('controls.timeSlider.playLabel', {
-                defaultMessage: 'Play',
-              })
-            : i18n.translate('controls.timeSlider.pauseLabel', {
-                defaultMessage: 'Pause',
-              })
-        }
-      />}
+      {props.waitForControlOutputConsumersToLoad$ === undefined ? null : (
+        <EuiButtonIcon
+          onClick={isPaused ? onPlay : onPause}
+          iconType={isPaused ? 'playFilled' : 'pause'}
+          size="s"
+          display="fill"
+          aria-label={
+            isPaused
+              ? i18n.translate('controls.timeSlider.playLabel', {
+                  defaultMessage: 'Play',
+                })
+              : i18n.translate('controls.timeSlider.pauseLabel', {
+                  defaultMessage: 'Pause',
+                })
+          }
+        />
+      )}
       <EuiButtonIcon
         onClick={() => {
           onPause();

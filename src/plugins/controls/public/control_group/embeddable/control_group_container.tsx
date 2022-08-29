@@ -6,11 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  skip,
-  debounceTime,
-  distinctUntilChanged,
-} from 'rxjs/operators';
+import { skip, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Filter, uniqFilters } from '@kbn/es-query';
@@ -227,16 +223,15 @@ export class ControlGroupContainer extends Container<
      * run OnChildOutputChanged when any child's output has changed
      */
     this.subscriptions.add(
-      this.getAnyChildOutputChange$()
-        .subscribe((childOutputChangedId) => {
-          this.recalculateDataViews();
-          ControlGroupChainingSystems[this.getInput().chainingSystem].onChildChange({
-            childOutputChangedId,
-            childOrder: cachedChildEmbeddableOrder(this.getInput().panels),
-            getChild: (id) => this.getChild(id),
-            recalculateFilters$: this.recalculateFilters$,
-          });
-        })
+      this.getAnyChildOutputChange$().subscribe((childOutputChangedId) => {
+        this.recalculateDataViews();
+        ControlGroupChainingSystems[this.getInput().chainingSystem].onChildChange({
+          childOutputChangedId,
+          childOrder: cachedChildEmbeddableOrder(this.getInput().panels),
+          getChild: (id) => this.getChild(id),
+          recalculateFilters$: this.recalculateFilters$,
+        });
+      })
     );
 
     /**

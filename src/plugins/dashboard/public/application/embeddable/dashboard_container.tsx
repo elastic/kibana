@@ -188,21 +188,20 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     }
 
     this.subscriptions.add(
-      this.getAnyChildOutputChange$()
-        .subscribe(() => {
-          if (!this.controlGroup) {
+      this.getAnyChildOutputChange$().subscribe(() => {
+        if (!this.controlGroup) {
+          return;
+        }
+
+        for (const child of Object.values(this.children)) {
+          const isLoading = child.getOutput().loading;
+          if (isLoading) {
+            this.controlGroup.anyControlOutputConsumerLoading$.next(true);
             return;
           }
-
-          for (const child of Object.values(this.children)) {
-            const isLoading = child.getOutput().loading;
-            if (isLoading) {
-              this.controlGroup.anyControlOutputConsumerLoading$.next(true);
-              return;
-            }
-          }
-          this.controlGroup.anyControlOutputConsumerLoading$.next(false);
-        })
+        }
+        this.controlGroup.anyControlOutputConsumerLoading$.next(false);
+      })
     );
   }
 
