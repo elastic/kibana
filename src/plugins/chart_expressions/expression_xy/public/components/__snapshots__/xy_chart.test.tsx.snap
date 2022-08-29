@@ -18,6 +18,7 @@ exports[`XYChart component annotations should render basic line annotation 1`] =
     <Marker
       config={
         Object {
+          "id": "annotation",
           "label": "Annotation",
           "position": "bottom",
           "roundedTimestamp": 1647591917100,
@@ -115,6 +116,7 @@ exports[`XYChart component annotations should render grouped line annotations pr
           "color": "red",
           "customTooltipDetails": [Function],
           "icon": "3",
+          "id": "event1",
           "label": "Event 1",
           "lineStyle": "dashed",
           "lineWidth": 3,
@@ -174,6 +176,7 @@ exports[`XYChart component annotations should render grouped line annotations wi
           "color": "#f04e98",
           "customTooltipDetails": [Function],
           "icon": "2",
+          "id": "event1",
           "label": "Event 1",
           "lineStyle": "solid",
           "lineWidth": 1,
