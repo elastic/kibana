@@ -17,6 +17,7 @@ describe('convertToMovingAverageParams', () => {
     type: TSVB_METRIC_TYPES.MOVING_AVERAGE,
   };
   const window = 10;
+
   test.each<[string, Parameters<typeof convertToMovingAverageParams>, MovingAverageParams]>([
     ['params with default window if no window is specified in metric', [metric], { window: 0 }],
     ['params with window', [{ ...metric, window }], { window }],
