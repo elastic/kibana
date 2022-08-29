@@ -11,7 +11,6 @@ import type {
   EcsEventOutcome,
   SavedObject,
   SavedObjectReferenceWithContext,
-  SavedObjectsBulkDeleteResponse,
   SavedObjectsErrorHelpers,
   SavedObjectsResolveResponse,
   SavedObjectsUpdateObjectsSpacesResponseObject,
@@ -643,9 +642,10 @@ describe('#bulkDelete', () => {
     expectAuditEvent('saved_object_delete', 'success', { type: obj1.type, id: obj1.id });
     expectAuditEvent('saved_object_delete', 'success', { type: obj2.type, id: obj2.id });
   });
+
   test(`adds audit event when not successful`, async () => {
     clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockRejectedValue(new Error());
-    await expect(() => client.bulkDelete<any>([obj1, obj2], { namespace })).rejects.toThrow();
+    await expect(() => client.bulkDelete([obj1, obj2], { namespace })).rejects.toThrow();
     expect(clientOpts.auditLogger.log).toHaveBeenCalledTimes(2);
     expectAuditEvent('saved_object_delete', 'failure', { type: obj1.type, id: obj1.id });
     expectAuditEvent('saved_object_delete', 'failure', { type: obj2.type, id: obj2.id });

@@ -134,7 +134,6 @@ describe('404s from proxies', () => {
   describe('requests when a proxy relays request/responses with the correct product header', () => {
     let repository: ISavedObjectsRepository;
     let myOtherType: SavedObject;
-    let myBulkDeleteType: SavedObject;
     const myOtherTypeDocs: SavedObject[] = [];
     const myBulkDeleteTypeDocs: SavedObject[] = [];
 
@@ -159,11 +158,6 @@ describe('404s from proxies', () => {
         namespace: 'default',
       });
 
-      myBulkDeleteType = await repository.create(
-        'my_bulk_delete_type',
-        { title: 'my_bulk_delete_type1' },
-        { overwrite: false, references: [] }
-      );
       for (let i = 1; i < 11; i++) {
         myBulkDeleteTypeDocs.push({
           type: 'my_bulk_delete_type',
