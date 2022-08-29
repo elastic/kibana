@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DETECTION_ENGINE_RULES_URL_FIND } from '../../../common/constants';
 import { rawRules } from '../../../server/lib/detection_engine/rules/prepackaged_rules';
 import {
   COLLAPSED_ACTION_BTN,
@@ -59,7 +60,7 @@ describe('Prebuilt rules', () => {
 
       changeRowsPerPageTo(rowsPerPage);
 
-      cy.request({ url: '/api/detection_engine/rules/_find' }).then(({ body }) => {
+      cy.request({ url: DETECTION_ENGINE_RULES_URL_FIND }).then(({ body }) => {
         // Assert the total number of loaded rules equals the expected number of in-memory rules
         expect(body.total).to.equal(rawRules.length);
         // Assert the table was refreshed with the rules returned by the API request
