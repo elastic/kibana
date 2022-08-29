@@ -30,6 +30,36 @@ import type { SignalSource } from '../../signals/types';
 import { validateIndexPatterns } from '../utils';
 import { parseDateString, validateHistoryWindowStart } from './utils';
 import { addToSearchAfterReturn, createSearchAfterReturnType } from '../../signals/utils';
+import { createEnrichEventsFunction } from '../../signals/enrichments'
+
+interface BulkCreateResults {
+  bulkCreateTimes: string[];
+  createdSignalsCount: number;
+  createdSignals: unknown[];
+  success: boolean;
+  errors: string[];
+  alertsWereTruncated: boolean;
+}
+
+interface SearchAfterResults {
+  searchDurations: string[];
+  searchErrors: string[];
+}
+
+const addBulkCreateResults = (
+  results: BulkCreateResults,
+  newResults: GenericBulkCreateResponse<BaseFieldsLatest>
+): BulkCreateResults => {
+  return {
+    bulkCreateTimes: [...results.bulkCreateTimes, newResults.bulkCreateDuration],
+    createdSignalsCount: results.createdSignalsCount + newResults.createdItemsCount,
+    createdSignals: [...results.createdSignals, ...newResults.createdItems],
+    success: results.success && newResults.success,
+    errors: [...results.errors, ...newResults.errors],
+    alertsWereTruncated: results.alertsWereTruncated || newResults.alertsWereTruncated,
+  };
+};
+
 
 export const createNewTermsAlertType = (
   createOptions: CreateRuleOptions
@@ -275,7 +305,11 @@ export const createNewTermsAlertType = (
 
           const bulkCreateResult = await bulkCreate(
             wrappedAlerts,
-            params.maxSignals - result.createdSignalsCount
+            params.maxSignals - result.createdSignalsCount,
+            createEnrichEventsFunction({
+              services,
+              logger: ruleExecutionLogger
+            })
           );
 
           addToSearchAfterReturn({ current: result, next: bulkCreateResult });

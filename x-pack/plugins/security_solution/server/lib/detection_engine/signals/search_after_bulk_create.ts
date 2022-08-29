@@ -22,7 +22,7 @@ import {
 } from './utils';
 import type { SearchAfterAndBulkCreateParams, SearchAfterAndBulkCreateReturnType } from './types';
 import { withSecuritySpan } from '../../../utils/with_security_span';
-import { enrichEvents } from './enrichments';
+import { createEnrichEventsFunction } from './enrichments';
 import type { EnrichEvents } from './enrichments/types';
 
 // search_after through documents and re-index using bulk endpoint.
@@ -122,8 +122,7 @@ export const searchAfterAndBulkCreate = async ({
 
         if (totalHits === 0 || mergedSearchResults.hits.hits.length === 0) {
           ruleExecutionLogger.debug(
-            `${
-              totalHits === 0 ? 'totalHits' : 'searchResult.hits.hits.length'
+            `${totalHits === 0 ? 'totalHits' : 'searchResult.hits.hits.length'
             } was 0, exiting early`
           );
           break;
@@ -162,16 +161,6 @@ export const searchAfterAndBulkCreate = async ({
           const enrichedEvents = await enrichment(limitedEvents);
           const wrappedDocs = wrapHits(enrichedEvents, buildReasonMessage);
 
-          const enrichEventsAfterDeduplicaton: EnrichEvents = (
-            events,
-            { spaceId }: { spaceId: string }
-          ) =>
-            enrichEvents({
-              events,
-              services,
-              logger: ruleExecutionLogger,
-              spaceId,
-            });
 
           const {
             bulkCreateDuration: bulkDuration,
@@ -179,7 +168,10 @@ export const searchAfterAndBulkCreate = async ({
             createdItems,
             success: bulkSuccess,
             errors: bulkErrors,
-          } = await bulkCreate(wrappedDocs, undefined, enrichEventsAfterDeduplicaton);
+          } = await bulkCreate(wrappedDocs, undefined, createEnrichEventsFunction({
+            services,
+            logger: ruleExecutionLogger,
+          }));
 
           toReturn = mergeReturns([
             toReturn,

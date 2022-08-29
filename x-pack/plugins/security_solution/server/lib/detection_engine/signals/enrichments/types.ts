@@ -87,6 +87,11 @@ export type EnrichEventsFunction = <T extends BaseFieldsLatest>(
   }
 ) => Promise<Array<EventsForEnrichment<T>>>;
 
+export type CreateEnrichEventsFunction = <T extends BaseFieldsLatest>(params: {
+  services: RuleServices,
+  logger: IRuleExecutionLogForExecutors,
+}) => EnrichEvents;
+
 export type EnrichEvents = <T extends BaseFieldsLatest>(
   alerts: Array<EventsForEnrichment<T>>,
   params: { spaceId: string }
