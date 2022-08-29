@@ -35,7 +35,7 @@ export interface NewAgentPolicy {
 export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
   id: string;
   status: ValueOf<AgentPolicyStatus>;
-  package_policies: string[] | PackagePolicy[];
+  package_policies?: PackagePolicy[];
   is_managed: boolean; // required for created policy
   updated_at: string;
   updated_by: string;
