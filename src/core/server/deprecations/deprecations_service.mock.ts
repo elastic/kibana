@@ -7,13 +7,14 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { DeprecationsServiceSetup } from '@kbn/core-deprecations-server';
 import {
   DeprecationsService,
   InternalDeprecationsServiceSetup,
-  DeprecationsServiceSetup,
   InternalDeprecationsServiceStart,
   DeprecationsClient,
 } from './deprecations_service';
+
 type DeprecationsServiceContract = PublicMethodsOf<DeprecationsService>;
 
 const createSetupContractMock = () => {
