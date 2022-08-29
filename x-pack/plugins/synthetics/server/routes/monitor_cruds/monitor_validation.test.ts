@@ -12,6 +12,7 @@ import {
   CommonFields,
   ConfigKey,
   DataStream,
+  FormMonitorType,
   HTTPAdvancedFields,
   HTTPFields,
   HTTPSimpleFields,
@@ -75,6 +76,7 @@ describe('validateMonitor', () => {
         },
       ],
       [ConfigKey.NAMESPACE]: 'testnamespace',
+      [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.MULTISTEP,
     };
     testMetaData = {
       is_tls_enabled: false,
@@ -90,6 +92,7 @@ describe('validateMonitor', () => {
       [ConfigKey.HOSTS]: 'test-hosts',
       [ConfigKey.WAIT]: '',
       [ConfigKey.MONITOR_TYPE]: DataStream.ICMP,
+      [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.ICMP,
     };
 
     testTLSFields = {
@@ -105,6 +108,7 @@ describe('validateMonitor', () => {
       ...testCommonFields,
       [ConfigKey.METADATA]: testMetaData,
       [ConfigKey.HOSTS]: 'https://host1.com',
+      [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.TCP,
     };
 
     testTCPAdvancedFields = {
@@ -126,6 +130,7 @@ describe('validateMonitor', () => {
       [ConfigKey.METADATA]: testMetaData,
       [ConfigKey.MAX_REDIRECTS]: '3',
       [ConfigKey.URLS]: 'https://example.com',
+      [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.HTTP,
     };
 
     testHTTPAdvancedFields = {
@@ -162,6 +167,7 @@ describe('validateMonitor', () => {
     testBrowserSimpleFields = {
       ...testZipUrlTLSFields,
       ...testCommonFields,
+      [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.MULTISTEP,
       [ConfigKey.MONITOR_SOURCE_TYPE]: SourceType.PROJECT,
       [ConfigKey.JOURNEY_ID]: '',
       [ConfigKey.PROJECT_ID]: '',
@@ -414,6 +420,7 @@ function getJsonPayload() {
     '  "response.include_body": "never",' +
     '  "check.response.headers": {},' +
     '  "response.include_headers": true,' +
+    '  "form_monitor_type": "http",' +
     '  "check.response.status": [' +
     '    "200",' +
     '    "201"' +
