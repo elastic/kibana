@@ -13,7 +13,14 @@ import {
   validateSecrets,
   validateConnector,
 } from './validate_with_schema';
-import { ActionType, ExecutorType } from '../types';
+import {
+  ActionType,
+  ActionTypeConfig,
+  ActionTypeParams,
+  ActionTypeSecrets,
+  ExecutorType,
+  ValidatorServices,
+} from '../types';
 import { actionsConfigMock } from '../actions_config.mock';
 
 const executor: ExecutorType<{}, {}, {}, void> = async (options) => {
@@ -214,6 +221,97 @@ test('should work with @kbn/config-schema', () => {
   ).toThrowErrorMatchingInlineSnapshot(
     `"error validating action params: [foo]: expected value of type [string] but got [undefined]"`
   );
+});
+
+test('should validate when custom validator is defined', () => {
+  const schemaValidator = {
+    validate: (value: ActionTypeParams | ActionTypeConfig | ActionTypeSecrets) => value,
+  };
+  const customValidator = jest.fn();
+
+  const actionType: ActionType = {
+    id: 'foo',
+    name: 'bar',
+    minimumLicenseRequired: 'basic',
+    supportedFeatureIds: ['alerting'],
+    executor,
+    validate: {
+      params: {
+        schema: schemaValidator,
+        customValidator,
+      },
+      config: {
+        schema: schemaValidator,
+        customValidator,
+      },
+      secrets: {
+        schema: schemaValidator,
+        customValidator,
+      },
+    },
+  };
+
+  let result;
+  const testValue = { any: ['old', 'thing'] };
+
+  result = validateParams(actionType, testValue, { configurationUtilities });
+  expect(result).toEqual(testValue);
+
+  result = validateConfig(actionType, testValue, { configurationUtilities });
+  expect(result).toEqual(testValue);
+
+  result = validateSecrets(actionType, testValue, { configurationUtilities });
+  expect(result).toEqual(testValue);
+
+  expect(customValidator).toBeCalledTimes(3);
+});
+
+test('should throw an error when custom validators fail', () => {
+  const schemaValidator = {
+    validate: (value: ActionTypeParams | ActionTypeConfig | ActionTypeSecrets) => value,
+  };
+  const customValidator = (
+    value: ActionTypeParams | ActionTypeConfig | ActionTypeSecrets,
+    services: ValidatorServices
+  ) => {
+    throw new Error('test error');
+  };
+
+  const actionType: ActionType = {
+    id: 'foo',
+    name: 'bar',
+    minimumLicenseRequired: 'basic',
+    supportedFeatureIds: ['alerting'],
+    executor,
+    validate: {
+      params: {
+        schema: schemaValidator,
+        customValidator,
+      },
+      config: {
+        schema: schemaValidator,
+        customValidator,
+      },
+      secrets: {
+        schema: schemaValidator,
+        customValidator,
+      },
+    },
+  };
+
+  const testValue = { any: ['old', 'thing'] };
+
+  expect(() =>
+    validateParams(actionType, testValue, { configurationUtilities })
+  ).toThrowErrorMatchingInlineSnapshot(`"error validating action params: test error"`);
+
+  expect(() =>
+    validateConfig(actionType, testValue, { configurationUtilities })
+  ).toThrowErrorMatchingInlineSnapshot(`"error validating action type config: test error"`);
+
+  expect(() =>
+    validateSecrets(actionType, testValue, { configurationUtilities })
+  ).toThrowErrorMatchingInlineSnapshot(`"error validating action type secrets: test error"`);
 });
 
 describe('validateConnectors', () => {
