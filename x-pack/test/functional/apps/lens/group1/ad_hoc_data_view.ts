@@ -105,7 +105,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should allow adding an ad-hoc chart to a dashboard', async () => {
-      await PageObjects.lens.switchToVisualization('lnsMetric');
+      await PageObjects.lens.switchToVisualization('lnsLegacyMetric');
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsLegacyMetric_metricDimensionPanel > lns-empty-dimension',
@@ -135,7 +135,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         field: 'bytes',
       });
 
-      await PageObjects.lens.switchToVisualization('lnsMetric');
+      await PageObjects.lens.switchToVisualization('lnsLegacyMetric');
 
       await PageObjects.lens.waitForVisualization('legacyMtrVis');
       await PageObjects.lens.save('Lens with adhoc data view');
