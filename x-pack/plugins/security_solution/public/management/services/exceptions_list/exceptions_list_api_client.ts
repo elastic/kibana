@@ -58,14 +58,22 @@ export class ExceptionsListApiClient {
       this.listId,
       new Promise<void>((resolve, reject) => {
         const asyncFunction = async () => {
-          await this.http.post<ExceptionListItemSchema>(`${INTERNAL_EXCEPTION_LIST_URL}/_create`, {
-            body: JSON.stringify({ ...this.listDefinition, list_id: this.listId }),
-            query: {
-              ignore_existing: true,
-            },
-          });
+          try {
+            await this.http.post<ExceptionListItemSchema>(
+              `${INTERNAL_EXCEPTION_LIST_URL}/_create`,
+              {
+                body: JSON.stringify({ ...this.listDefinition, list_id: this.listId }),
+                query: {
+                  ignore_existing: true,
+                },
+              }
+            );
 
-          resolve();
+            resolve();
+          } catch (err) {
+            ExceptionsListApiClient.wasListCreated.delete(this.listId);
+            reject(err);
+          }
         };
         asyncFunction();
       })
