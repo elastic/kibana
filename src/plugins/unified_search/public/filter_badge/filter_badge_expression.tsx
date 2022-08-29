@@ -12,9 +12,9 @@ import type { Filter } from '@kbn/es-query';
 import { EuiFlexGroup, EuiFlexItem, EuiTextColor } from '@elastic/eui';
 import { FilterBadgeGroup } from './filter_badge_group';
 import type { LabelOptions } from './filter_badge_utils';
-import { FILTER_ITEM_OK, getValueLabel, getConditionalOperationType } from './filter_badge_utils';
+import { FILTER_ITEM_OK, getValueLabel } from './filter_badge_utils';
 import { FilterContent } from './filter_badge_expression_filter_content';
-import { ConditionTypes } from './filter_badge_condition_types';
+import { ConditionTypes, getConditionalOperationType } from '../utils';
 
 export interface FilterBadgeExpressionProps {
   filter: Filter;

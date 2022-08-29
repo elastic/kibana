@@ -11,7 +11,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { EuiFlexItem, EuiTextColor } from '@elastic/eui';
 import { FilterExpressionBadge } from './filter_badge_expression';
-import { ConditionTypes } from './filter_badge_condition_types';
+import { ConditionTypes } from '../utils';
 
 export interface FilterBadgeGroupProps {
   filters: Filter[];

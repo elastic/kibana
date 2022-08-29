@@ -12,7 +12,7 @@ import { css } from '@emotion/css';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { Filter } from '@kbn/es-query';
 import { FilterBadgeGroup } from './filter_badge_group';
-import { ConditionTypes } from './filter_badge_condition_types';
+import { ConditionTypes } from '../utils';
 
 export interface FilterBadgeProps {
   filters: Filter[];
