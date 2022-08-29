@@ -18,7 +18,6 @@ reportPerformanceMetricEvent(analytics, {
     // fields that are searchable-as-keywords but not aggregateable
     kibana_version: this.coreContext.env.packageInfo.version,
     protocol      : window.location.protocol,
-    ...fetchOptionalMemoryInfo(),
   },
   duration: timing[LOAD_FIRST_NAV],
   key1    : LOAD_START,
@@ -31,6 +30,20 @@ reportPerformanceMetricEvent(analytics, {
   value4  : timing[LOAD_SETUP_DONE],
   key5    : LOAD_START_DONE,
   value5  : timing[LOAD_START_DONE],
+});
+
+reportPerformanceMetricEvent(analytics, {
+  eventName: "dashboard_loaded",
+  meta: {
+    // fields that are searchable-as-keywords but not aggregateable
+    kibana_version: this.coreContext.env.packageInfo.version,
+    protocol      : window.location.protocol,
+  },
+  duration: 2265,
+  key1    : "time_to_data",
+  value1  : 1801,
+  key2    : "num_of_panels",
+  value2  : 7,
 });
 ```
 
