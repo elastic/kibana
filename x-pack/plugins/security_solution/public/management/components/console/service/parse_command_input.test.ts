@@ -48,8 +48,8 @@ describe('when using parsed command input utils', () => {
         parsedCommandWith({
           input,
           args: {
-            one: [''],
-            two: [''],
+            one: [true],
+            two: [true],
           },
         })
       );
