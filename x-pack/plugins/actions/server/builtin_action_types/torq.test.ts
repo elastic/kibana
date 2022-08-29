@@ -245,7 +245,7 @@ describe('execute()', () => {
     try {
       paramsObject = JSON.parse(`${params.body}`);
     } catch (err) {
-      expect(err).toBe(null); // kinda weird, but test should fail if it can't parse
+      expect(err).toBe(null);
     }
 
     expect(paramsObject.x).toBe(rogue);
