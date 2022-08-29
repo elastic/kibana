@@ -65,11 +65,11 @@ export const KeyCapture = memo<KeyCaptureProps>(({ onCapture, focusRef, onStateC
   // We don't need the actual value that was last input in this component, because
   // `setLastInput()` is used with a function that returns the typed character.
   // This state is used like this:
-  //    1. user presses a keyboard key
-  //    2. `input` event is triggered - we store the letter typed
-  //    3. the next event to be triggered (after `input`) that we listen for is `keyup`,
-  //       and when that is triggered, we take the input letter (already stored) and
-  //       call `onCapture()` with it and then set the lastInput state back to an empty string
+  //    1. User presses a keyboard key down
+  //    2. We store the key that was pressed
+  //    3. When the 'keyup' event is triggered, we call `onCapture()`
+  //        with all of the character that were entered
+  //    4. We set the last input back to an empty string
   const [, setLastInput] = useState('');
   const getTestId = useTestIdGenerator(useDataTestSubj());
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -141,13 +141,47 @@ export const KeyCapture = memo<KeyCaptureProps>(({ onCapture, focusRef, onStateC
     [isCapturing, onCapture]
   );
 
-  const handleOnInput = useCallback<FormEventHandler<HTMLInputElement>>((ev) => {
-    const newValue = ev.currentTarget.value;
+  // 1. Determine if the key press is one that we need to store ex) letters, digits, values that we see
+  // 2. If the user clicks a key we don't need to store as text, but we need to do logic with ex) backspace, delete, l/r arrows, we must call onCapture
+  const handleOnKeyDown = useCallback<KeyboardEventHandler>(
+    (ev) => {
+      const newValue = ev.key;
 
-    setLastInput((prevState) => {
+      const controlKeys = [8, 13, 37, 39, 36, 35, 46];
+
+      // @ts-expect-error
+      if (!isCapturing || ev._CONSOLE_IGNORE_KEY) {
+        // @ts-expect-error
+        if (ev._CONSOLE_IGNORE_KEY) {
+          // @ts-expect-error
+          ev._CONSOLE_IGNORE_KEY = false;
+        }
+
+        return;
+      }
+
+      ev.stopPropagation();
+
+      const eventDetails = pick(ev, [
+        'key',
+        'altKey',
+        'ctrlKey',
+        'keyCode',
+        'metaKey',
+        'repeat',
+        'shiftKey',
+      ]);
+
+      onCapture({
+        value: controlKeys.includes(ev.keyCode) ? '' : newValue,
+        eventDetails,
+      });
+      /*  setLastInput((prevState) => {
       return `${prevState || ''}${newValue}`;
-    });
-  }, []);
+      });*/
+    },
+    [isCapturing, onCapture]
+  );
 
   const keyCaptureFocusMethods = useMemo<KeyCaptureFocusInterface>(() => {
     return {
@@ -183,8 +217,8 @@ export const KeyCapture = memo<KeyCaptureProps>(({ onCapture, focusRef, onStateC
         spellCheck="false"
         value=""
         tabIndex={-1}
-        onInput={handleOnInput}
-        onKeyUp={handleOnKeyUp}
+        onKeyDown={handleOnKeyDown}
+        // onKeyUp={handleOnKeyUp}
         onBlur={handleInputOnBlur}
         onFocus={handleInputOnFocus}
         onChange={NOOP} // this just silences Jest output warnings
