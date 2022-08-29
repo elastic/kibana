@@ -15,7 +15,6 @@ import type {
 } from '../../common/search_strategy';
 
 import type { ESQuery } from '../../common/typed_json';
-import type { ArrayItem } from '../shared_imports';
 
 export const createFilter = (filterQuery: ESQuery | string | undefined) =>
   isString(filterQuery) ? filterQuery : JSON.stringify(filterQuery);
@@ -44,7 +43,7 @@ export const getInspectResponse = <T extends FactoryQueryTypes>(
     response != null ? [JSON.stringify(response.rawResponse, null, 2)] : prevResponse?.response,
 });
 
-export const prepareEcsFieldsToValidate = (ecsMapping: ArrayItem[]): string[] =>
+export const prepareEcsFieldsToValidate = (ecsMapping: Array<{ id: string }>): string[] =>
   ecsMapping
     ?.map((_: unknown, index: number) => [
       `ecs_mapping[${index}].result.value`,

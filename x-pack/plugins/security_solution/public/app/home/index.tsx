@@ -8,7 +8,7 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 
-import type { AppLeaveHandler, AppMountParameters } from '@kbn/core/public';
+import type { AppMountParameters } from '@kbn/core/public';
 import { DragDropContextWrapper } from '../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import { SecuritySolutionAppWrapper } from '../../common/components/page';
 
@@ -20,7 +20,6 @@ import {
 } from '../../common/containers/sourcerer';
 import { useUpgradeSecurityPackages } from '../../common/hooks/use_upgrade_security_packages';
 import { GlobalHeader } from './global_header';
-import { SecuritySolutionTemplateWrapper } from './template_wrapper';
 import { ConsoleManager } from '../../management/components/console/components/console_manager';
 
 import { TourContextProvider } from '../../common/components/guided_onboarding';
@@ -30,15 +29,10 @@ import { useUpdateBrowserTitle } from '../../common/hooks/use_update_browser_tit
 
 interface HomePageProps {
   children: React.ReactNode;
-  onAppLeave: (handler: AppLeaveHandler) => void;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
 }
 
-const HomePageComponent: React.FC<HomePageProps> = ({
-  children,
-  onAppLeave,
-  setHeaderActionMenu,
-}) => {
+const HomePageComponent: React.FC<HomePageProps> = ({ children, setHeaderActionMenu }) => {
   const { pathname } = useLocation();
   useInitSourcerer(getScopeFromPath(pathname));
   useUrlState();
@@ -59,9 +53,7 @@ const HomePageComponent: React.FC<HomePageProps> = ({
           <>
             <GlobalHeader setHeaderActionMenu={setHeaderActionMenu} />
             <DragDropContextWrapper browserFields={browserFields}>
-              <SecuritySolutionTemplateWrapper onAppLeave={onAppLeave}>
-                {children}
-              </SecuritySolutionTemplateWrapper>
+              {children}
             </DragDropContextWrapper>
             <HelpMenu />
           </>
