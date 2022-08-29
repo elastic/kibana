@@ -71,7 +71,7 @@ export class ClusterClient implements ICustomClusterClient {
     });
     this.rootScopedClient = configureClient(config, {
       logger,
-      type: `${type}-scoped`,
+      type,
       getExecutionContext,
       scoped: true,
       agentManager,

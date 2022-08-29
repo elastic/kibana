@@ -83,11 +83,13 @@ describe('ClusterClient', () => {
     expect(configureClientMock).toHaveBeenCalledTimes(2);
     expect(configureClientMock).toHaveBeenCalledWith(config, {
       logger,
+      agentManager: undefined,
       type: 'custom-type',
       getExecutionContext: getExecutionContextMock,
     });
     expect(configureClientMock).toHaveBeenCalledWith(config, {
       logger,
+      agentManager: undefined,
       type: 'custom-type',
       getExecutionContext: getExecutionContextMock,
       scoped: true,
