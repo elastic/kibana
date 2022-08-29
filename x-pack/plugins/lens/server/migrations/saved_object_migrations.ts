@@ -16,6 +16,7 @@ import {
 import type { Query, Filter } from '@kbn/es-query';
 import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
 import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { PersistableFilter } from '../../common';
 import {
   LensDocShapePost712,
@@ -51,6 +52,7 @@ import {
   commonFixValueLabelsInXY,
   commonLockOldMetricVisSettings,
   commonPreserveOldLegendSizeDefault,
+  getLensDataViewMigrations,
   commonMigrateMetricIds,
 } from './common_migrations';
 
@@ -103,6 +105,7 @@ export interface LensDocShape<VisualizationState = unknown> {
     visualization: VisualizationState;
     query: Query;
     filters: PersistableFilter[];
+    adHocDataViews?: Record<string, DataViewSpec>;
   };
 }
 
@@ -542,12 +545,16 @@ const lensMigrations: SavedObjectMigrationMap = {
 
 export const getAllMigrations = (
   filterMigrations: MigrateFunctionsObject,
+  dataViewMigrations: MigrateFunctionsObject,
   customVisualizationMigrations: CustomVisualizationMigrations
 ): SavedObjectMigrationMap =>
   mergeSavedObjectMigrationMaps(
     mergeSavedObjectMigrationMaps(
-      lensMigrations,
-      getLensFilterMigrations(filterMigrations) as unknown as SavedObjectMigrationMap
+      mergeSavedObjectMigrationMaps(
+        lensMigrations,
+        getLensFilterMigrations(filterMigrations) as unknown as SavedObjectMigrationMap
+      ),
+      getLensCustomVisualizationMigrations(customVisualizationMigrations)
     ),
-    getLensCustomVisualizationMigrations(customVisualizationMigrations)
+    getLensDataViewMigrations(dataViewMigrations) as unknown as SavedObjectMigrationMap
   );
