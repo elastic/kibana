@@ -613,7 +613,7 @@ export function FormulaEditor({
     value: text ?? '',
     onChange: setText,
     options: {
-      automaticLayout: false,
+      automaticLayout: true,
       fontSize: 14,
       folding: false,
       lineNumbers: 'off',
