@@ -11,7 +11,7 @@ import { CommonColumnsConverterArgs, LastValueColumn } from './types';
 import type { Metric } from '../../../../common/types';
 import { createColumn, getFormat } from './column';
 
-const convertToLastValueParams = (metric: Metric): LastValueParams | null => ({
+export const convertToLastValueParams = (metric: Metric): LastValueParams => ({
   sortField: metric.order_by,
   showArrayValues: false,
 });
@@ -29,11 +29,6 @@ export const convertToLastValueColumn = (
     return null;
   }
 
-  const params = convertToLastValueParams(currentMetric);
-  if (!params) {
-    return null;
-  }
-
   const field = dataView.getFieldByName(currentMetric.field ?? 'document');
   if (!field) {
     return null;
@@ -43,6 +38,9 @@ export const convertToLastValueColumn = (
     operationType: 'last_value',
     sourceField: field.name ?? 'document',
     ...createColumn(series, currentMetric, undefined, { window }),
-    params: { ...params, ...getFormat(series, currentMetric.field, dataView) },
+    params: {
+      ...convertToLastValueParams(currentMetric),
+      ...getFormat(series, currentMetric.field, dataView),
+    },
   };
 };
