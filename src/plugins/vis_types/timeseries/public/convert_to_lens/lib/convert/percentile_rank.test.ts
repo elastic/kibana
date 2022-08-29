@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Operations } from '@kbn/visualizations-plugin/common';
-import { isPercentileRanksColumnWithMeta } from './percentile_rank';
+import { Operations, PercentileRanksParams } from '@kbn/visualizations-plugin/common';
+import { convertToPercentileRankParams, isPercentileRanksColumnWithMeta } from './percentile_rank';
 import { PercentileRanksColumn, PercentileRanksColumnWithExtendedMeta } from './types';
 
 describe('isPercentileRanksColumnWithMeta', () => {
@@ -34,5 +34,26 @@ describe('isPercentileRanksColumnWithMeta', () => {
     ['true if meta contains reference', [percentileRankColumn], true],
   ])('should return %s', (_, input, expected) => {
     expect(isPercentileRanksColumnWithMeta(...input)).toBe(expected);
+  });
+});
+
+describe('convertToPercentileRankParams', () => {
+  test.each<
+    [string, Parameters<typeof convertToPercentileRankParams>, PercentileRanksParams | null]
+  >([
+    ['null if value is undefined', [undefined], null],
+    ['null if value is NaN', ['some-nan-value'], null],
+    ['percentile ranks params if value is present and valid', ['100'], { value: 100 }],
+  ])('should return %s', (_, input, expected) => {
+    if (expected === null) {
+      expect(convertToPercentileRankParams(...input)).toBeNull();
+    }
+    if (Array.isArray(expected)) {
+      expect(convertToPercentileRankParams(...input)).toEqual(
+        expected.map(expect.objectContaining)
+      );
+    } else {
+      expect(convertToPercentileRankParams(...input)).toEqual(expect.objectContaining(expected));
+    }
   });
 });
