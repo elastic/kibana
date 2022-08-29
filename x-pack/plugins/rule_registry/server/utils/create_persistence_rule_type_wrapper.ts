@@ -88,7 +88,11 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 let enrichedAlerts = filteredAlerts;
 
                 if (enrichAlerts) {
-                  enrichedAlerts = await enrichAlerts(filteredAlerts, { spaceId: options.spaceId });
+                  try {
+                    enrichedAlerts = await enrichAlerts(filteredAlerts, { spaceId: options.spaceId });
+                  } catch(e) {
+                    logger.debug('Enrichemnts failed');
+                  }
                 }
 
                 let alertsWereTruncated = false;
