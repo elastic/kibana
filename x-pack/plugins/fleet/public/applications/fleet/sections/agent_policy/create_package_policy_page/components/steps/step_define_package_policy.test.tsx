@@ -112,7 +112,6 @@ describe('StepDefinePackagePolicy', () => {
       namespace: 'default',
       policy_id: '',
       enabled: true,
-      output_id: '',
       inputs: [],
     };
     testRenderer = createFleetTestRendererMock();
@@ -137,7 +136,6 @@ describe('StepDefinePackagePolicy', () => {
           name: 'apache-1',
           namespace: 'default',
           policy_id: 'agent-policy-1',
-          output_id: '',
           package: {
             name: 'apache',
             title: 'Apache',

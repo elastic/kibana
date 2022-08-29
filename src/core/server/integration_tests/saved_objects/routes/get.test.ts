@@ -7,17 +7,19 @@
  */
 
 import supertest from 'supertest';
-import { registerGetRoute } from '../../../saved_objects/routes/get';
 import { ContextService } from '@kbn/core-http-context-server-internal';
 import type { HttpService, InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import { createHttpServer, createCoreContext } from '@kbn/core-http-server-mocks';
-import { savedObjectsClientMock } from '../../../saved_objects/service/saved_objects_client.mock';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { CoreUsageStatsClient } from '../../../core_usage_data';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { coreUsageStatsClientMock } from '../../../core_usage_data/core_usage_stats_client.mock';
 import { coreUsageDataServiceMock } from '../../../core_usage_data/core_usage_data_service.mock';
 import { contextServiceMock, coreMock } from '../../../mocks';
-import type { InternalSavedObjectsRequestHandlerContext } from '../../../saved_objects/internal_types';
+import {
+  registerGetRoute,
+  type InternalSavedObjectsRequestHandlerContext,
+} from '@kbn/core-saved-objects-server-internal';
 
 const coreId = Symbol('core');
 

@@ -24,7 +24,7 @@ import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indi
 import { IndicatorsFlyoutJson } from '../indicators_flyout_json/indicators_flyout_json';
 import { IndicatorsFlyoutTable } from '../indicators_flyout_table/indicators_flyout_table';
 import { unwrapValue } from '../../lib/unwrap_value';
-import { displayValue } from '../../lib/display_value';
+import { getDisplayName } from '../../lib/display_name';
 
 export const TITLE_TEST_ID = 'tiIndicatorFlyoutTitle';
 export const SUBTITLE_TEST_ID = 'tiIndicatorFlyoutSubtitle';
@@ -36,11 +36,23 @@ const enum TAB_IDS {
 }
 
 export interface IndicatorsFlyoutProps {
+  /**
+   * Indicator passed down to the different tabs (table and json views).
+   */
   indicator: Indicator;
+  /**
+   * Object mapping each field with their type to ease display in the {@link IndicatorsFlyoutTable} component.
+   */
   fieldTypesMap: { [id: string]: string };
+  /**
+   * Event to close flyout (used by {@link EuiFlyout}).
+   */
   closeFlyout: () => void;
 }
 
+/**
+ * Leverages the {@link EuiFlyout} from the @elastic/eui library to dhow the details of a specific {@link Indicator}.
+ */
 export const IndicatorsFlyout: VFC<IndicatorsFlyoutProps> = ({
   indicator,
   fieldTypesMap,
@@ -91,7 +103,8 @@ export const IndicatorsFlyout: VFC<IndicatorsFlyoutProps> = ({
   );
 
   const firstSeen: string = unwrapValue(indicator, RawIndicatorFieldId.FirstSeen) as string;
-  const value = displayValue(indicator) || EMPTY_VALUE;
+  const displayName = getDisplayName(indicator);
+  const displayNameValue = displayName.value || EMPTY_VALUE;
   const flyoutTitleId = useGeneratedHtmlId({
     prefix: 'simpleFlyoutTitle',
   });
@@ -104,7 +117,7 @@ export const IndicatorsFlyout: VFC<IndicatorsFlyoutProps> = ({
             <FormattedMessage
               id="xpack.threatIntelligence.indicator.flyout.panelTitle"
               defaultMessage="Indicator: {title}"
-              values={{ title: value }}
+              values={{ title: displayNameValue }}
             />
           </h2>
         </EuiTitle>

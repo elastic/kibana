@@ -28,15 +28,18 @@ import {
   getLensCustomVisualizationMigrations,
   getLensFilterMigrations,
   getLensDataViewMigrations,
+  commonMigrateMetricIds,
 } from '../migrations/common_migrations';
 import {
   CustomVisualizationMigrations,
   LensDocShape713,
   LensDocShape715,
   LensDocShape810,
+  LensDocShape840,
   LensDocShapePre712,
   VisState716,
   VisState810,
+  VisState840,
   VisStatePre715,
   VisStatePre830,
 } from '../migrations/types';
@@ -124,6 +127,14 @@ export const makeLensEmbeddableFactory =
                 migratedLensState = commonFixValueLabelsInXY(
                   migratedLensState as LensDocShape810<VisStatePre830>
                 );
+                return {
+                  ...lensState,
+                  attributes: migratedLensState,
+                } as unknown as SerializableRecord;
+              },
+              '8.5.0': (state) => {
+                const lensState = state as unknown as { attributes: LensDocShape840<VisState840> };
+                const migratedLensState = commonMigrateMetricIds(lensState.attributes);
                 return {
                   ...lensState,
                   attributes: migratedLensState,
