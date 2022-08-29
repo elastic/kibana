@@ -13,7 +13,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { type AppMountParameters, AppStatus } from '@kbn/core-application-browser';
 import { AppContainer } from './app_container';
-import { Mounter } from '../types';
+import type { Mounter } from '../types';
 import { createMemoryHistory } from 'history';
 import { CoreScopedHistory as ScopedHistory } from '../scoped_history';
 

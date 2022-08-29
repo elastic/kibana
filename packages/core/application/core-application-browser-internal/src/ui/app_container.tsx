@@ -22,7 +22,7 @@ import {
   type AppUnmount,
   type ScopedHistory,
 } from '@kbn/core-application-browser';
-import { Mounter } from '../types';
+import type { Mounter } from '../types';
 import { AppNotFound } from './app_not_found_screen';
 
 interface Props {
