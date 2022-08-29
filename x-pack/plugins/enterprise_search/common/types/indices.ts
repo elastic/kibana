@@ -18,6 +18,7 @@ import { Crawler } from './crawler';
 export interface ElasticsearchIndex {
   count: number; // Elasticsearch _count
   health?: HealthStatus;
+  hidden: boolean;
   name: IndexName;
   status?: IndicesStatsIndexMetadataState;
   total: {
@@ -35,23 +36,17 @@ export interface ElasticsearchIndex {
 export interface ConnectorIndex extends ElasticsearchIndex {
   connector: Connector;
 }
-
 export interface CrawlerIndex extends ElasticsearchIndex {
   crawler: Crawler;
+  connector?: Connector;
 }
-export interface ConnectorIndex extends ElasticsearchIndex {
-  connector: Connector;
-}
+
 export interface ElasticsearchIndexWithPrivileges extends ElasticsearchIndex {
   alias: boolean;
   privileges: {
     manage: boolean;
     read: boolean;
   };
-}
-
-export interface CrawlerIndex extends ElasticsearchIndex {
-  crawler: Crawler;
 }
 
 export type ElasticsearchIndexWithIngestion = ElasticsearchIndex | ConnectorIndex | CrawlerIndex;
