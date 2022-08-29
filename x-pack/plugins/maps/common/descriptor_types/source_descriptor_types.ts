@@ -107,7 +107,6 @@ export type ESPewPewSourceDescriptor = AbstractESAggSourceDescriptor & {
 };
 
 export type ESTermSourceDescriptor = AbstractESAggSourceDescriptor & {
-  indexPatternTitle?: string;
   term: string; // term field name
   whereQuery?: Query;
   size?: number;

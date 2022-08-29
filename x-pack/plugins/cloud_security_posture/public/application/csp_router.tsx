@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { QueryClient, QueryClientProvider } from 'react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Redirect, Route, RouteComponentProps, type RouteProps, Switch } from 'react-router-dom';
 import { CLOUD_SECURITY_POSTURE_BASE_PATH, type CspSecuritySolutionContext } from '..';
 import { cloudPosturePages } from '../common/navigation/constants';

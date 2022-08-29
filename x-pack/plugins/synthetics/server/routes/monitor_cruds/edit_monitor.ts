@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { mergeWith } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import {
   SavedObjectsUpdateResponse,
@@ -20,6 +20,7 @@ import {
   SyntheticsMonitorWithSecrets,
   SyntheticsMonitor,
   ConfigKey,
+  FormMonitorType,
 } from '../../../common/runtime_types';
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS } from '../../../common/constants';
@@ -77,10 +78,7 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
         );
       const normalizedPreviousMonitor = normalizeSecrets(decryptedPreviousMonitor).attributes;
 
-      const editedMonitor = {
-        ...normalizedPreviousMonitor,
-        ...monitor,
-      };
+      const editedMonitor = mergeWith(normalizedPreviousMonitor, monitor, customizer);
 
       const validationResult = validateMonitor(editedMonitor as MonitorFields);
 
@@ -94,12 +92,15 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
         revision: (previousMonitor.attributes[ConfigKey.REVISION] || 0) + 1,
       };
       const formattedMonitor = formatSecrets(monitorWithRevision);
+      const isMultiStepMonitor =
+        monitor.type === 'browser' &&
+        monitor[ConfigKey.FORM_MONITOR_TYPE] !== FormMonitorType.SINGLE;
 
       const editedMonitorSavedObject: SavedObjectsUpdateResponse<EncryptedSyntheticsMonitor> =
         await savedObjectsClient.update<MonitorFields>(
           syntheticsMonitorType,
           monitorId,
-          monitor.type === 'browser' ? { ...formattedMonitor, urls: '' } : formattedMonitor
+          isMultiStepMonitor ? { ...formattedMonitor, urls: '' } : formattedMonitor
         );
 
       const errors = await syncEditedMonitor({
@@ -183,5 +184,12 @@ export const syncEditedMonitor = async ({
     );
 
     throw e;
+  }
+};
+
+// Ensure that METADATA is merged deeply, to protect AAD and prevent decryption errors
+const customizer = (_: any, srcValue: any, key: string) => {
+  if (key !== ConfigKey.METADATA) {
+    return srcValue;
   }
 };

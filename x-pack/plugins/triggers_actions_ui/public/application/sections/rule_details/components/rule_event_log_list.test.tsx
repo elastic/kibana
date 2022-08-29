@@ -139,7 +139,8 @@ const mockErrorLogResponse = {
   ],
 };
 
-describe('rule_event_log_list', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/139062
+describe.skip('rule_event_log_list', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     useKibanaMock().services.uiSettings.get = jest.fn().mockImplementation((value: string) => {

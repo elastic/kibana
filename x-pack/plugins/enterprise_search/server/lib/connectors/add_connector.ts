@@ -11,7 +11,6 @@ import { CONNECTORS_INDEX } from '../..';
 import { ConnectorDocument, ConnectorStatus } from '../../../common/types/connectors';
 import { ErrorCode } from '../../../common/types/error_codes';
 import { setupConnectorsIndices } from '../../index_management/setup_indices';
-import { isIndexNotFoundException } from '../../utils/identify_exceptions';
 
 import { fetchCrawlerByIndexName } from '../crawler/fetch_crawlers';
 import { textAnalysisSettings } from '../indices/text_analysis';
@@ -80,21 +79,11 @@ export const addConnector = async (
     status: ConnectorStatus.CREATED,
     sync_now: false,
   };
-  try {
-    return await createConnector(
-      document,
-      client,
-      input.language,
-      !!input.delete_existing_connector
-    );
-  } catch (error) {
-    if (isIndexNotFoundException(error)) {
-      // This means .ent-search-connectors index doesn't exist yet
-      // So we first have to create it, and then try inserting the document again
-      await setupConnectorsIndices(client.asCurrentUser);
-      return await createConnector(document, client, input.language, false);
-    } else {
-      throw error;
-    }
+  const connectorsIndexExists = await client.asCurrentUser.indices.exists({
+    index: CONNECTORS_INDEX,
+  });
+  if (!connectorsIndexExists) {
+    await setupConnectorsIndices(client.asCurrentUser);
   }
+  return await createConnector(document, client, input.language, !!input.delete_existing_connector);
 };

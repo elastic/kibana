@@ -10,8 +10,17 @@ SOURCE_FILES = glob(
     "src/**/*.ts",
   ],
   exclude = [
+    "**/*.config.js",
+    "**/*.mock.*",
     "**/*.test.*",
     "**/*.stories.*",
+    "**/__snapshots__",
+    "**/integration_tests",
+    "**/mocks",
+    "**/scripts",
+    "**/storybook",
+    "**/test_fixtures",
+    "**/test_helpers",
   ],
 )
 
@@ -38,6 +47,7 @@ NPM_MODULE_EXTRA_FILES = [
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
   "@npm//@storybook/addon-actions",
+  "@npm//react",
   "//packages/shared-ux/storybook/mock",
 ]
 
@@ -51,9 +61,10 @@ RUNTIME_DEPS = [
 #
 #  References to NPM packages work the same as RUNTIME_DEPS
 TYPES_DEPS = [
-  "@npm//@types/node",
-  "@npm//@types/jest",
   "@npm//@storybook/addon-actions",
+  "@npm//@types/jest",
+  "@npm//@types/node",
+  "@npm//@types/react",
   "//packages/shared-ux/prompt/no_data_views/types:npm_module_types",
   "//packages/shared-ux/storybook/mock:npm_module_types",
 ]
@@ -63,6 +74,14 @@ jsts_transpiler(
   srcs = SRCS,
   build_pkg_name = package_name(),
   root_input_dir = "src",
+)
+
+jsts_transpiler(
+  name = "target_web",
+  srcs = SRCS,
+  build_pkg_name = package_name(),
+  root_input_dir = "src",
+  web = True,
 )
 
 ts_config(
@@ -90,7 +109,7 @@ ts_project(
 js_library(
   name = PKG_DIRNAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS + [":target_node"],
+  deps = RUNTIME_DEPS + [":target_node", ":target_web"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )

@@ -6,6 +6,7 @@
  */
 
 import { fireEvent, render, screen } from '@testing-library/react';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import React from 'react';
 
 import { RESET_GROUP_BY_FIELDS } from '../../../../../common/components/chart_settings_popover/configurations/default/translations';
@@ -40,7 +41,7 @@ describe('ChartContextMenu', () => {
     ).toBeInTheDocument();
   });
 
-  test('it renders the Inspect menu item', () => {
+  test('it renders the Inspect menu item', async () => {
     render(
       <TestProviders>
         <ChartContextMenu
@@ -55,11 +56,12 @@ describe('ChartContextMenu', () => {
 
     const menuButton = screen.getByRole('button', { name: CHART_SETTINGS_POPOVER_ARIA_LABEL });
     menuButton.click();
+    await waitForEuiPopoverOpen();
 
     expect(screen.getByRole('button', { name: INSPECT })).toBeInTheDocument();
   });
 
-  test('it invokes `setStackBy` and `setStackByField1` when the Reset group by fields menu item selected', () => {
+  test('it invokes `setStackBy` and `setStackByField1` when the Reset group by fields menu item selected', async () => {
     const setStackBy = jest.fn();
     const setStackByField1 = jest.fn();
 
@@ -77,6 +79,7 @@ describe('ChartContextMenu', () => {
 
     const menuButton = screen.getByRole('button', { name: CHART_SETTINGS_POPOVER_ARIA_LABEL });
     menuButton.click();
+    await waitForEuiPopoverOpen();
 
     const resetMenuItem = screen.getByRole('button', { name: RESET_GROUP_BY_FIELDS });
     resetMenuItem.click();
@@ -85,7 +88,7 @@ describe('ChartContextMenu', () => {
     expect(setStackByField1).toBeCalledWith('host.name');
   });
 
-  test('it invokes `onReset` when the `Reset group by fields` menu item clicked', () => {
+  test('it invokes `onReset` when the `Reset group by fields` menu item clicked', async () => {
     const onReset = jest.fn();
 
     render(
@@ -103,6 +106,7 @@ describe('ChartContextMenu', () => {
 
     const menuButton = screen.getByRole('button', { name: CHART_SETTINGS_POPOVER_ARIA_LABEL });
     fireEvent.click(menuButton);
+    await waitForEuiPopoverOpen();
 
     const resetMenuItem = screen.getByRole('button', { name: RESET_GROUP_BY_FIELDS });
     fireEvent.click(resetMenuItem);

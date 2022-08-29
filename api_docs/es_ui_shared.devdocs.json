@@ -1215,7 +1215,7 @@
             "label": "method",
             "description": [],
             "signature": [
-              "\"get\" | \"delete\" | \"post\" | \"put\" | \"patch\" | \"head\""
+              "\"get\" | \"post\" | \"put\" | \"delete\" | \"patch\" | \"head\""
             ],
             "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
             "deprecated": false

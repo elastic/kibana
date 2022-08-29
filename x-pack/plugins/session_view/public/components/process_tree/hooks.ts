@@ -140,7 +140,7 @@ export class ProcessImpl implements Process {
   }
 
   hasOutput() {
-    return !!this.findEventByAction(this.events, EventAction.output);
+    return !!this.findEventByAction(this.events, EventAction.text_output);
   }
 
   hasAlerts() {

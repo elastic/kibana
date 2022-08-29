@@ -6,11 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { TimeRange } from '@kbn/data-plugin/common';
 import { NavigateToLensContext } from '@kbn/visualizations-plugin/public';
 import type { Panel } from '../../common/types';
 
 export type ConvertTsvbToLensVisualization = (
-  model: Panel
+  model: Panel,
+  timeRange?: TimeRange
 ) => Promise<NavigateToLensContext | null>;
 
 export interface Filter {

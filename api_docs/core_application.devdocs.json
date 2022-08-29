@@ -1509,6 +1509,10 @@
                 "path": "x-pack/plugins/security_solution/public/app/index.tsx"
               },
               {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/plugin.tsx"
+              },
+              {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/public/authentication/logout/logout_app.test.ts"
               }
@@ -1991,27 +1995,11 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/app/home/template_wrapper/bottom_bar/index.tsx"
+            "path": "x-pack/plugins/security_solution/public/types.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/app/home/template_wrapper/bottom_bar/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/app/home/template_wrapper/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/app/home/template_wrapper/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/app/home/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/app/home/index.tsx"
+            "path": "x-pack/plugins/security_solution/public/types.ts"
           },
           {
             "plugin": "securitySolution",
@@ -2168,7 +2156,7 @@
             "section": "def-public.AppStatus",
             "text": "AppStatus"
           },
-          " | undefined; tooltip?: string | undefined; searchable?: boolean | undefined; deepLinks?: ",
+          " | undefined; searchable?: boolean | undefined; deepLinks?: ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -2184,7 +2172,7 @@
             "section": "def-public.AppNavLinkStatus",
             "text": "AppNavLinkStatus"
           },
-          " | undefined; defaultPath?: string | undefined; }"
+          " | undefined; defaultPath?: string | undefined; tooltip?: string | undefined; }"
         ],
         "path": "src/core/public/application/types.ts",
         "deprecated": false,

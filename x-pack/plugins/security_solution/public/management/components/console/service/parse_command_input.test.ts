@@ -6,7 +6,7 @@
  */
 
 import type { ParsedCommandInterface } from './parsed_command_input';
-import { parseCommandInput, parsedPidOrEntityIdParameter } from './parsed_command_input';
+import { parseCommandInput } from './parsed_command_input';
 
 describe('when using parsed command input utils', () => {
   describe('when using parseCommandInput()', () => {
@@ -143,23 +143,6 @@ describe('when using parsed command input utils', () => {
           },
         })
       );
-    });
-  });
-
-  describe('when using parsedPidOrEntityIdParameter()', () => {
-    it('should parse a pid as a number and return proper params', () => {
-      const parameters = parsedPidOrEntityIdParameter({ pid: ['123'] });
-      expect(parameters).toEqual({ pid: 123 });
-    });
-
-    it('should parse an entity id correctly and return proper params', () => {
-      const parameters = parsedPidOrEntityIdParameter({ entityId: ['123qwe'] });
-      expect(parameters).toEqual({ entity_id: '123qwe' });
-    });
-
-    it('should return undefined if no params are defined', () => {
-      const parameters = parsedPidOrEntityIdParameter({});
-      expect(parameters).toEqual(undefined);
     });
   });
 });

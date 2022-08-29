@@ -12,7 +12,7 @@ import { ThemeProvider } from 'styled-components';
 
 import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { QueryClient, QueryClientProvider } from 'react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { CasesCapabilities, CasesFeatures, CasesPermissions } from '../../../common/ui/types';
 import { CasesProvider } from '../../components/cases_context';

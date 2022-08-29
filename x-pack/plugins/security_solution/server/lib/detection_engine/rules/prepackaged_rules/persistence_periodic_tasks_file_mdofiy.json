@@ -17,6 +17,23 @@
     "https://www.oreilly.com/library/view/mac-os-x/0596003706/re328.html",
     "https://github.com/D00MFist/PersistentJXA/blob/master/PeriodicPersist.js"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.category",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "file.path",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 21,
   "rule_id": "48ec9452-e1fd-4513-a376-10a1a26d2c83",
   "severity": "low",
@@ -53,5 +70,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 2
 }

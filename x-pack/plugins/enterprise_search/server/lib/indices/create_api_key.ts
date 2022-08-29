@@ -6,7 +6,10 @@
  */
 
 import { KibanaRequest } from '@kbn/core/server';
+
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
+
+import { toAlphanumeric } from '../../../common/utils/to_alphanumeric';
 
 export const createApiKey = async (
   request: KibanaRequest,
@@ -17,7 +20,7 @@ export const createApiKey = async (
   return await security.authc.apiKeys.create(request, {
     name: keyName,
     role_descriptors: {
-      [`${indexName}-key-role`]: {
+      [`${toAlphanumeric(indexName)}-key-role`]: {
         cluster: [],
         index: [
           {

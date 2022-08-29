@@ -37,10 +37,10 @@ jest.doMock('@kbn/config', () => ({
   ConfigService: jest.fn(() => mockConfigService),
 }));
 
-import { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 
 export const mockSavedObjectsService = savedObjectsServiceMock.create();
-jest.doMock('./saved_objects/saved_objects_service', () => ({
+jest.doMock('@kbn/core-saved-objects-server-internal', () => ({
   SavedObjectsService: jest.fn(() => mockSavedObjectsService),
 }));
 

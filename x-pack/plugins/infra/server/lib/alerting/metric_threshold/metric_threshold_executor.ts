@@ -322,28 +322,32 @@ const formatAlertResult = <AlertResult>(
     alertResult;
   const noDataValue = i18n.translate(
     'xpack.infra.metrics.alerting.threshold.noDataFormattedValue',
-    {
-      defaultMessage: '[NO DATA]',
-    }
+    { defaultMessage: '[NO DATA]' }
   );
-  if (!metric.endsWith('.pct'))
+  const thresholdToFormat = useWarningThreshold ? warningThreshold! : threshold;
+  const comparatorToUse = useWarningThreshold ? warningComparator! : comparator;
+
+  if (metric.endsWith('.pct')) {
+    const formatter = createFormatter('percent');
     return {
       ...alertResult,
-      currentValue: currentValue ?? noDataValue,
+      currentValue:
+        currentValue !== null && currentValue !== undefined ? formatter(currentValue) : noDataValue,
+      threshold: Array.isArray(thresholdToFormat)
+        ? thresholdToFormat.map((v: number) => formatter(v))
+        : formatter(thresholdToFormat),
+      comparator: comparatorToUse,
     };
-  const formatter = createFormatter('percent');
-  const thresholdToFormat = useWarningThreshold ? warningThreshold! : threshold;
-  const comparatorToFormat = useWarningThreshold ? warningComparator! : comparator;
+  }
 
+  const formatter = createFormatter('highPrecision');
   return {
     ...alertResult,
     currentValue:
-      currentValue !== null && typeof currentValue !== 'undefined'
-        ? formatter(currentValue)
-        : noDataValue,
+      currentValue !== null && currentValue !== undefined ? formatter(currentValue) : noDataValue,
     threshold: Array.isArray(thresholdToFormat)
       ? thresholdToFormat.map((v: number) => formatter(v))
-      : thresholdToFormat,
-    comparator: comparatorToFormat,
+      : formatter(thresholdToFormat),
+    comparator: comparatorToUse,
   };
 };

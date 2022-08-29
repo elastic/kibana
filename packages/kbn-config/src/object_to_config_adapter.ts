@@ -7,7 +7,7 @@
  */
 
 import { cloneDeep, get, has } from 'lodash';
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import { getFlattenedObject } from '@kbn/std';
 
 import { Config, ConfigPath } from '.';

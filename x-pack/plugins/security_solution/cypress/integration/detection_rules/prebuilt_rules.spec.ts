@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { DETECTION_ENGINE_RULES_URL_FIND } from '../../../common/constants';
+import { rawRules } from '../../../server/lib/detection_engine/rules/prepackaged_rules';
 import {
   COLLAPSED_ACTION_BTN,
   ELASTIC_RULES_BTN,
@@ -12,11 +14,10 @@ import {
   RELOAD_PREBUILT_RULES_BTN,
   RULES_EMPTY_PROMPT,
   RULE_SWITCH,
-  SHOWING_RULES_TEXT,
   RULES_MONITORING_TABLE,
   SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
+  RULE_NAME,
 } from '../../screens/alerts_detection_rules';
-
 import {
   deleteFirstRule,
   deleteSelectedRules,
@@ -59,7 +60,16 @@ describe('Prebuilt rules', () => {
 
       changeRowsPerPageTo(rowsPerPage);
 
-      cy.get(SHOWING_RULES_TEXT).should('have.text', `Showing ${expectedNumberOfRules} rules`);
+      cy.request({ url: DETECTION_ENGINE_RULES_URL_FIND }).then(({ body }) => {
+        // Assert the total number of loaded rules equals the expected number of in-memory rules
+        expect(body.total).to.equal(rawRules.length);
+        // Assert the table was refreshed with the rules returned by the API request
+        const ruleNames = rawRules.map((rule) => rule.name);
+        cy.get(RULE_NAME).each(($item) => {
+          expect($item.text()).to.be.oneOf(ruleNames);
+        });
+      });
+
       cy.get(pageSelector(expectedNumberOfPages)).should('exist');
     });
 

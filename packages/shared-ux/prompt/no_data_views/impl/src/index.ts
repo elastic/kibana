@@ -8,7 +8,7 @@
 
 export type {
   NoDataViewsPromptComponentProps,
-  NoDataViewsPromptKibanaServices,
+  NoDataViewsPromptKibanaDependencies,
   NoDataViewsPromptProps,
   NoDataViewsPromptServices,
 } from '@kbn/shared-ux-prompt-no-data-views-types';

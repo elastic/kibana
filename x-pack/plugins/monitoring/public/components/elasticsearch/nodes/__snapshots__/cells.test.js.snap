@@ -26,10 +26,10 @@ exports[`Node Listing Metric Cell should format a non-percentage metric 1`] = `
         class="euiFlexItem euiFlexItem--flexGrowZero"
       >
         <div
-          class="euiPopover euiPopover--anchorDownCenter"
+          class="euiPopover emotion-euiPopover"
         >
           <div
-            class="euiPopover__anchor"
+            class="euiPopover__anchor css-16vtueo-render"
           >
             <button
               aria-label="More information about this metric"
@@ -80,10 +80,10 @@ exports[`Node Listing Metric Cell should format a percentage metric 1`] = `
         class="euiFlexItem euiFlexItem--flexGrowZero"
       >
         <div
-          class="euiPopover euiPopover--anchorDownCenter"
+          class="euiPopover emotion-euiPopover"
         >
           <div
-            class="euiPopover__anchor"
+            class="euiPopover__anchor css-16vtueo-render"
           >
             <button
               aria-label="More information about this metric"

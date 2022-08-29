@@ -72,7 +72,6 @@ const HistogramPanel = styled(Panel)<{ height?: number }>`
 export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> = ({
   chartHeight,
   defaultStackByOption,
-  docValueFields,
   endDate,
   errorMessage,
   filterQuery,
@@ -176,7 +175,6 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     stackByField: selectedStackByOption.value,
     runtimeMappings,
     isPtrIncluded,
-    docValueFields,
     skip: querySkip,
   };
   const [loading, { data, inspect, totalCount, refetch }] =

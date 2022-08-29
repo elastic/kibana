@@ -69,18 +69,7 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
 
   beforeEach(() => {
     state = {
-      indexPatternRefs: [],
-      indexPatterns: mockDataViews(),
       currentIndexPatternId: 'first',
-      isFirstExistenceFetch: false,
-      existingFields: {
-        first: {
-          timestamp: true,
-          bytes: true,
-          memory: true,
-          source: true,
-        },
-      },
       layers: {
         first: mockedLayers.singleColumnLayer(),
         second: mockedLayers.emptyLayer(),
@@ -96,6 +85,7 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
       state,
       setState,
       dimensionGroups: [],
+      indexPatterns: mockDataViews(),
     };
 
     jest.clearAllMocks();
@@ -1506,19 +1496,9 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
           setState = jest.fn();
 
           props = {
+            indexPatterns: mockDataViews(),
             state: {
-              indexPatternRefs: [],
-              indexPatterns: mockDataViews(),
               currentIndexPatternId: 'first',
-              isFirstExistenceFetch: false,
-              existingFields: {
-                first: {
-                  timestamp: true,
-                  bytes: true,
-                  memory: true,
-                  source: true,
-                },
-              },
               layers: {
                 first: mockedLayers.singleColumnLayer(),
                 second: mockedLayers.multipleColumnsLayer('col2', 'col3', 'col4', 'col5'),
@@ -2062,6 +2042,7 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
             setState: jest.fn(),
             dropType: 'move_compatible',
 
+            indexPatterns: mockDataViews(),
             state: {
               layers: {
                 first: {
@@ -2114,18 +2095,7 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
                   columnOrder: ['second', 'secondX0'],
                 },
               },
-              indexPatternRefs: [],
-              indexPatterns: mockDataViews(),
               currentIndexPatternId: 'first',
-              isFirstExistenceFetch: false,
-              existingFields: {
-                first: {
-                  timestamp: true,
-                  bytes: true,
-                  memory: true,
-                  source: true,
-                },
-              },
             },
             source: {
               columnId: 'firstColumn',

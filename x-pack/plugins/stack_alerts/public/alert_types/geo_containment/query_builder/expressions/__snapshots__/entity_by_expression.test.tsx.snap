@@ -2,11 +2,11 @@
 
 exports[`should render entity by expression with aggregatable field options for entity 1`] = `
 <div
-  class="euiPopover euiPopover--anchorDownLeft euiPopover--displayBlock"
+  class="euiPopover emotion-euiPopover"
   id="popoverForExpression"
 >
   <div
-    class="euiPopover__anchor"
+    class="euiPopover__anchor css-zih94u-render"
   >
     <button
       class="euiExpression emotion-euiExpression-isClickable-success-columns"

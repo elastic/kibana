@@ -8,6 +8,7 @@
 import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 import { act, RenderResult, waitFor, within } from '@testing-library/react';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
 import { CaseSeverity, CommentType, ConnectorTypes } from '../../../common/api';
@@ -225,7 +226,8 @@ describe('Create case', () => {
       await fillFormReactTestingLib(renderResult);
 
       userEvent.click(renderResult.getByTestId('case-severity-selection'));
-      expect(renderResult.getByTestId('case-severity-selection-high')).toBeTruthy();
+      await waitForEuiPopoverOpen();
+      expect(renderResult.getByTestId('case-severity-selection-high')).toBeVisible();
       userEvent.click(renderResult.getByTestId('case-severity-selection-high'));
 
       userEvent.click(renderResult.getByTestId('create-case-submit'));
@@ -763,6 +765,7 @@ describe('Create case', () => {
     await fillFormReactTestingLib(wrapper);
     expect(wrapper.queryByTestId('connector-fields-jira')).toBeFalsy();
     userEvent.click(wrapper.getByTestId('dropdown-connectors'));
+    await waitForEuiPopoverOpen();
     await act(async () => {
       userEvent.click(wrapper.getByTestId('dropdown-connector-jira-1'));
     });

@@ -33,6 +33,7 @@ const mockValues = {
 const mockActions = {
   fetchIndices: jest.fn(),
   onPaginate: jest.fn(),
+  setIsFirstRequest: jest.fn(),
 };
 
 describe('SearchIndices', () => {
@@ -55,6 +56,7 @@ describe('SearchIndices', () => {
 
       expect(wrapper.find(GettingStartedSteps)).toHaveLength(1);
       expect(wrapper.find(ElasticsearchResources)).toHaveLength(1);
+      expect(mockActions.setIsFirstRequest).toHaveBeenCalled();
     });
   });
 

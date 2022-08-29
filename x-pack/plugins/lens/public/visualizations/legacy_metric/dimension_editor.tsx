@@ -22,7 +22,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState } from 'react';
 import { ColorMode } from '@kbn/charts-plugin/common';
-import type { MetricState } from '../../../common/types';
+import type { LegacyMetricState } from '../../../common/types';
 import { isNumericFieldForDatatable } from '../../../common/expressions';
 import { applyPaletteParams, PalettePanelContainer } from '../../shared_components';
 import type { VisualizationDimensionEditorProps } from '../../types';
@@ -33,7 +33,7 @@ import './dimension_editor.scss';
 const idPrefix = htmlIdGenerator()();
 
 export function MetricDimensionEditor(
-  props: VisualizationDimensionEditorProps<MetricState> & {
+  props: VisualizationDimensionEditorProps<LegacyMetricState> & {
     paletteService: PaletteRegistry;
   }
 ) {
@@ -117,7 +117,7 @@ export function MetricDimensionEditor(
           idSelected={`${idPrefix}${currentColorMode}`}
           onChange={(id) => {
             const newMode = id.replace(idPrefix, '') as ColorMode;
-            const params: Partial<MetricState> = {
+            const params: Partial<LegacyMetricState> = {
               colorMode: newMode,
             };
             if (!state?.palette && newMode !== ColorMode.None) {
@@ -190,6 +190,7 @@ export function MetricDimensionEditor(
                   palettes={props.paletteService}
                   activePalette={activePalette}
                   dataBounds={currentMinMax}
+                  displayInfinity={true}
                   setPalette={(newPalette) => {
                     // if the new palette is not custom, replace the rangeMin with the artificial one
                     if (

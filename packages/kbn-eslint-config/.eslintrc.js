@@ -123,6 +123,14 @@ module.exports = {
           to: '@kbn/kibana-utils-plugin/common',
           exact: true,
         },
+        {
+          from: '@elastic/safer-lodash-set',
+          to: '@kbn/safer-lodash-set',
+        },
+        {
+          from: '@elastic/apm-synthtrace',
+          to: '@kbn/apm-synthtrace',
+        },
       ],
     ],
 

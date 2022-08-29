@@ -27,13 +27,13 @@ data-type="inline"
 
 Use drag and drop to organize the columns and improve the view of the data.
 
-To reorder columns, do one of the following:
+* To move a single column, click its header. In the dropdown menu,
+click *Move left* or *Move right*.
 
-* Click *Columns*. In the pop-up, select the column you want to move and drag it to the new location.
+* To move multiple columns, click *Columns*.
+In the pop-up, drag the column names to their new order.
 
-* Click the header of the column you want to move. In the dropdown menu, click *Move left* or *Move right*.
-
-To resize a column, drag the right edge of the column header until the column is the width that you want.
+* To resize a column, drag the right edge of the column header until the column is the width that you want.
 
 Column widths are stored with a saved search.  When you visualize saved searches on dashboards, the saved search appears the same as in **Discover**.
 
@@ -104,7 +104,7 @@ You can view the document in two ways. The **Table** view displays the document 
 The **JSON** (JavaScript Object Notation) view allows you to look at how {es} returns the document.
 +
 [role="screenshot"]
-image::images/document-explorer-expand.png[Expanded view of the document table]
+image::images/document-table-expanded.png[Expanded view of the document table]
 +
 . In the *Table* view, scan through the fields and their values, or search for a field by name.
 
@@ -152,4 +152,4 @@ By default, the document table displays 100 rows per page. To change this number
 click *Rows per page*.
 
 [role="screenshot"]
-image::images/document-table-rows-per-page.png["Menu with options for setting the number of rows in the document table", width=50%]
+image::images/document-table-rows-per-page.png["Menu with options for setting the number of rows in the document table"]

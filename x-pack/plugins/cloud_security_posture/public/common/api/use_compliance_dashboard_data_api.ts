@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type QueryObserverOptions, useQuery } from 'react-query';
+import { type QueryObserverOptions, useQuery } from '@tanstack/react-query';
 import { useKibana } from '../hooks/use_kibana';
 import { ComplianceDashboardData } from '../../../common/types';
 import { STATS_ROUTE_PATH } from '../../../common/constants';

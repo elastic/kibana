@@ -14,6 +14,7 @@ import { UserProfilesPopover } from './user_profiles_popover';
 const userProfiles = [
   {
     uid: 'u_BOulL4QMPSyV9jg5lQI2JmCkUnokHTazBnet3xVHNv0_0',
+    enabled: true,
     data: {},
     user: {
       username: 'delighted_nightingale',
@@ -23,6 +24,7 @@ const userProfiles = [
   },
   {
     uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
+    enabled: true,
     data: {},
     user: {
       username: 'damaged_raccoon',
@@ -32,6 +34,7 @@ const userProfiles = [
   },
   {
     uid: 'u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0',
+    enabled: true,
     data: {},
     user: {
       username: 'physical_dinosaur',
@@ -41,6 +44,7 @@ const userProfiles = [
   },
   {
     uid: 'u_9xDEQqUqoYCnFnPPLq5mIRHKL8gBTo_NiKgOnd5gGk0_0',
+    enabled: true,
     data: {},
     user: {
       username: 'wet_dingo',
@@ -73,8 +77,9 @@ describe('UserProfilesPopover', () => {
           </button>
         }
         closePopover={[MockFunction]}
-        display="inlineBlock"
+        display="inline-block"
         hasArrow={true}
+        initialFocus="#searchInput_generated-id"
         isOpen={false}
         ownFocus={true}
         panelPaddingSize="none"
@@ -88,6 +93,7 @@ describe('UserProfilesPopover', () => {
               Array [
                 Object {
                   "data": Object {},
+                  "enabled": true,
                   "uid": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
                   "user": Object {
                     "email": "damaged_raccoon@profiles.elastic.co",
@@ -97,10 +103,12 @@ describe('UserProfilesPopover', () => {
                 },
               ]
             }
+            searchInputId="searchInput_generated-id"
             selectedOptions={
               Array [
                 Object {
                   "data": Object {},
+                  "enabled": true,
                   "uid": "u_BOulL4QMPSyV9jg5lQI2JmCkUnokHTazBnet3xVHNv0_0",
                   "user": Object {
                     "email": "delighted_nightingale@profiles.elastic.co",
@@ -114,5 +122,26 @@ describe('UserProfilesPopover', () => {
         </EuiContextMenuPanel>
       </EuiPopover>
     `);
+  });
+
+  it('should set `initialFocus` and `searchInputId` props correctly', async () => {
+    const [firstOption, secondOption] = userProfiles;
+    const wrapper = shallow(
+      <UserProfilesPopover
+        title="Title"
+        button={<button>Toggle</button>}
+        closePopover={jest.fn()}
+        selectableProps={{
+          selectedOptions: [firstOption],
+          defaultOptions: [secondOption],
+        }}
+        isOpen
+      />
+    );
+
+    expect(wrapper.find('EuiPopover').prop('initialFocus')).toBe('#searchInput_generated-id');
+    expect(wrapper.find('UserProfilesSelectable').prop('searchInputId')).toBe(
+      'searchInput_generated-id'
+    );
   });
 });

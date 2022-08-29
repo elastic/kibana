@@ -10,9 +10,10 @@ import moment from 'moment';
 import {
   defaultAnnotationColor,
   defaultAnnotationRangeColor,
-  isRangeAnnotation,
+  isRangeAnnotationConfig,
 } from '@kbn/event-annotation-plugin/public';
 import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
+import { IconChartBarAnnotations } from '@kbn/chart-icons';
 import { layerTypes } from '../../../../common';
 import type { FramePublicAPI, Visualization } from '../../../types';
 import { isHorizontalChart } from '../state_helpers';
@@ -24,7 +25,6 @@ import {
   getDataLayers,
   isAnnotationsLayer,
 } from '../visualization_helpers';
-import { LensIconChartBarAnnotations } from '../../../assets/chart_bar_annotations';
 import { generateId } from '../../../id_generator';
 
 const MAX_DATE = 8640000000000000;
@@ -106,7 +106,7 @@ export const getAnnotationsSupportedLayer = (
     label: i18n.translate('xpack.lens.xyChart.addAnnotationsLayerLabel', {
       defaultMessage: 'Annotations',
     }),
-    icon: LensIconChartBarAnnotations,
+    icon: IconChartBarAnnotations,
     disabled: !hasDateHistogram,
     toolTipContent: !hasDateHistogram
       ? i18n.translate('xpack.lens.xyChart.addAnnotationsLayerLabelDisabledHelp', {
@@ -359,7 +359,7 @@ export const getSingleColorAnnotationConfig = (annotation: EventAnnotationConfig
   triggerIcon: annotation.isHidden ? ('invisible' as const) : ('color' as const),
   color:
     annotation?.color ||
-    (isRangeAnnotation(annotation) ? defaultAnnotationRangeColor : defaultAnnotationColor),
+    (isRangeAnnotationConfig(annotation) ? defaultAnnotationRangeColor : defaultAnnotationColor),
 });
 
 export const getAnnotationsAccessorColorConfig = (layer: XYAnnotationLayerConfig) =>

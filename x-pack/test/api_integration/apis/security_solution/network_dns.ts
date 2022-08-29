@@ -38,7 +38,6 @@ export default function ({ getService }: FtrProviderContext) {
           supertest,
           options: {
             defaultIndex: ['packetbeat-*'],
-            docValueFields: [],
             factoryQueryType: NetworkQueries.dns,
             filterQuery:
               '{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}}',
@@ -69,7 +68,6 @@ export default function ({ getService }: FtrProviderContext) {
             ip: '151.205.0.17',
             defaultIndex: ['packetbeat-*'],
             factoryQueryType: NetworkQueries.dns,
-            docValueFields: [],
             inspect: false,
             pagination: {
               activePage: 0,

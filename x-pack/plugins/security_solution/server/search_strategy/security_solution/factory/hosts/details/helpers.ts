@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { set } from '@elastic/safer-lodash-set/fp';
+import { set } from '@kbn/safer-lodash-set/fp';
 import { get, has, head } from 'lodash/fp';
 import type {
   IScopedClusterClient,

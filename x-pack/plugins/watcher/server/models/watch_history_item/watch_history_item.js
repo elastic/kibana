@@ -10,7 +10,7 @@ import { get, cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
 import { getMoment } from '../../../common/lib/get_moment';
-import { WatchStatusModel } from '../watch_status_model';
+import { buildServerWatchStatusModel, buildClientWatchStatusModel } from '../watch_status_model';
 
 export class WatchHistoryItem {
   constructor(props) {
@@ -24,7 +24,7 @@ export class WatchHistoryItem {
 
     const watchStatusJson = get(this.watchHistoryItemJson, 'status');
     const state = get(this.watchHistoryItemJson, 'state');
-    this.watchStatus = WatchStatusModel.fromUpstreamJson({
+    this.watchStatus = buildServerWatchStatusModel({
       id: this.watchId,
       watchStatusJson,
       state,
@@ -37,7 +37,7 @@ export class WatchHistoryItem {
       watchId: this.watchId,
       details: this.includeDetails ? this.details : null,
       startTime: this.startTime.toISOString(),
-      watchStatus: this.watchStatus.downstreamJson,
+      watchStatus: buildClientWatchStatusModel(this.watchStatus),
     };
   }
 

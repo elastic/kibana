@@ -8,7 +8,6 @@
 import type { DataViewBase } from '@kbn/es-query';
 import type { Optional } from 'utility-types';
 
-import type { NarrowDateRange } from '../../../common/components/ml/types';
 import type { ESTermQuery } from '../../../../common/typed_json';
 
 import type { NavTab } from '../../../common/components/navigation/types';
@@ -16,23 +15,17 @@ import type { FlowTargetSourceDest } from '../../../../common/search_strategy/se
 import type { networkModel } from '../../store';
 import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 
-import type { SetAbsoluteRangeDatePicker } from '../types';
-import type { DocValueFields } from '../../../common/containers/source';
-
 export interface QueryTabBodyProps extends Pick<GlobalTimeArgs, 'setQuery' | 'deleteQuery'> {
   endDate: string;
   filterQuery?: string | ESTermQuery;
   indexNames: string[];
   ip?: string;
-  narrowDateRange?: NarrowDateRange;
   skip: boolean;
   startDate: string;
   type: networkModel.NetworkType;
 }
 
-export type NetworkComponentQueryProps = QueryTabBodyProps & {
-  docValueFields?: DocValueFields[];
-};
+export type NetworkComponentQueryProps = QueryTabBodyProps;
 
 export type IPsQueryTabBodyProps = QueryTabBodyProps & {
   flowTarget: FlowTargetSourceDest;
@@ -50,12 +43,10 @@ export type IPQueryTabBodyProps = FTQueryTabBodyProps & {
 export type HttpQueryTabBodyProps = QueryTabBodyProps;
 
 export type NetworkRoutesProps = GlobalTimeArgs & {
-  docValueFields: DocValueFields[];
   type: networkModel.NetworkType;
   filterQuery?: string | ESTermQuery;
   indexPattern: DataViewBase;
   indexNames: string[];
-  setAbsoluteRangeDatePicker: SetAbsoluteRangeDatePicker;
 };
 
 export enum NetworkRouteType {

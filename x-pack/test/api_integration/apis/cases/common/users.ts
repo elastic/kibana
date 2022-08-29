@@ -16,9 +16,11 @@ import {
   casesAll,
   casesNoDelete,
   casesOnlyDelete,
+  casesRead,
   obsCasesAll,
   obsCasesNoDelete,
   obsCasesOnlyDelete,
+  obsCasesRead,
   secAll,
   secAllCasesNoDelete,
   secAllCasesNone,
@@ -110,6 +112,12 @@ export const casesAllUser: User = {
   roles: [casesAll.name],
 };
 
+export const casesReadUser: User = {
+  username: 'cases_read_user',
+  password: 'password',
+  roles: [casesRead.name],
+};
+
 /**
  * Users for Cases in Observability
  */
@@ -132,6 +140,12 @@ export const obsCasesAllUser: User = {
   roles: [obsCasesAll.name],
 };
 
+export const obsCasesReadUser: User = {
+  username: 'obs_cases_read_user',
+  password: 'password',
+  roles: [obsCasesRead.name],
+};
+
 export const users = [
   secAllCasesOnlyDeleteUser,
   secAllCasesNoDeleteUser,
@@ -145,7 +159,9 @@ export const users = [
   casesOnlyDeleteUser,
   casesNoDeleteUser,
   casesAllUser,
+  casesReadUser,
   obsCasesOnlyDeleteUser,
   obsCasesNoDeleteUser,
   obsCasesAllUser,
+  obsCasesReadUser,
 ];

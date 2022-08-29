@@ -80,7 +80,7 @@ describe('JsonWatch', () => {
     beforeEach(() => {
       upstreamJson = {
         id: 'id',
-        watchStatusJson: {},
+        watchStatusJson: { state: { active: true } },
         watchJson: {
           trigger: 'trigger',
           input: 'input',

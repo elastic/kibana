@@ -7,7 +7,9 @@
 
 import expect from '@kbn/expect';
 
+import type { SwimlaneType } from '@kbn/ml-plugin/public/application/explorer/explorer_constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import type { CreateCaseParams } from '../cases/create';
 
 export function MachineLearningAnomalyExplorerProvider({
   getPageObject,
@@ -16,6 +18,7 @@ export function MachineLearningAnomalyExplorerProvider({
   const dashboardPage = getPageObject('dashboard');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const cases = getService('cases');
 
   return {
     async assertAnomalyExplorerEmptyListMessageExists() {
@@ -84,6 +87,18 @@ export function MachineLearningAnomalyExplorerProvider({
       await testSubjects.click('mlAnomalyTimelinePanelMenu');
       await testSubjects.click('mlAnomalyTimelinePanelAddToDashboardButton');
       await testSubjects.existOrFail('mlAddToDashboardModal');
+    },
+
+    async attachSwimLaneToCase(swimLaneType: SwimlaneType = 'overall', params: CreateCaseParams) {
+      const attachTestSubject =
+        swimLaneType === 'overall'
+          ? 'mlAnomalyTimelinePanelAttachOverallButton'
+          : 'mlAnomalyTimelinePanelAttachViewByButton';
+      await testSubjects.click('mlAnomalyTimelinePanelMenu');
+      await testSubjects.click('mlAnomalyTimelinePanelAttachToCaseButton');
+      await testSubjects.click(attachTestSubject);
+
+      await cases.create.createCaseFromModal(params);
     },
 
     async addAndEditSwimlaneInDashboard(dashboardTitle: string) {

@@ -249,4 +249,5 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
   return { ...state, ...callbacks };
 };
 
-export const LogPositionState = createContainer(useLogPositionState);
+export const [LogPositionStateProvider, useLogPositionStateContext] =
+  createContainer(useLogPositionState);

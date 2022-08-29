@@ -26,6 +26,8 @@ interface GetFailedAndUnrecognizedTasksAggregationBucket extends AggregationsStr
 }
 
 interface GetFailedAndUnrecognizedTasksResults {
+  hasErrors: boolean;
+  errorMessage?: string;
   countFailedAndUnrecognizedTasks: number;
   countFailedAndUnrecognizedTasksByStatus: Record<string, number>;
   countFailedAndUnrecognizedTasksByStatusByType: Record<string, Record<string, number>>;
@@ -115,10 +117,12 @@ export async function getFailedAndUnrecognizedTasksPerDay({
       aggregations.by_status.buckets as GetFailedAndUnrecognizedTasksAggregationBucket[];
 
     return {
+      hasErrors: false,
       ...parseBucket(aggregationsByStatus),
       countFailedAndUnrecognizedTasks: totalFailedAndUnrecognizedTasks ?? 0,
     };
   } catch (err) {
+    const errorMessage = err && err.message ? err.message : err.toString();
     logger.warn(
       `Error executing alerting telemetry task: getFailedAndUnrecognizedTasksPerDay - ${JSON.stringify(
         err
@@ -129,6 +133,8 @@ export async function getFailedAndUnrecognizedTasksPerDay({
       }
     );
     return {
+      hasErrors: true,
+      errorMessage,
       countFailedAndUnrecognizedTasks: 0,
       countFailedAndUnrecognizedTasksByStatus: {},
       countFailedAndUnrecognizedTasksByStatusByType: {},

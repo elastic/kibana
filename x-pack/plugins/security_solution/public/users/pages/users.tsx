@@ -102,7 +102,7 @@ const UsersComponent = () => {
     return filters;
   }, [severitySelection, tabName, filters]);
 
-  const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
+  const { indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
   const [filterQuery, kqlError] = useMemo(
     () =>
       convertToBuildEsQuery({
@@ -150,7 +150,7 @@ const UsersComponent = () => {
     [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
   );
 
-  const narrowDateRange = useCallback<UpdateDateRange>(
+  const updateDateRange = useCallback<UpdateDateRange>(
     ({ x }) => {
       if (!x) {
         return;
@@ -199,7 +199,7 @@ const UsersComponent = () => {
               setQuery={setQuery}
               to={to}
               skip={isInitializing || !filterQuery}
-              narrowDateRange={narrowDateRange}
+              updateDateRange={updateDateRange}
             />
 
             <EuiSpacer />
@@ -210,12 +210,10 @@ const UsersComponent = () => {
 
             <UsersTabs
               deleteQuery={deleteQuery}
-              docValueFields={docValueFields}
               filterQuery={tabsFilterQuery || ''}
               from={from}
               indexNames={selectedPatterns}
               isInitializing={isInitializing}
-              setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
               setQuery={setQuery}
               to={to}
               type={usersModel.UsersType.page}

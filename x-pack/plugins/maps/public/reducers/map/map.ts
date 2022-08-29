@@ -21,6 +21,7 @@ import {
   MAP_EXTENT_CHANGED,
   MAP_READY,
   MAP_DESTROYED,
+  SET_EMBEDDABLE_SEARCH_CONTEXT,
   SET_QUERY,
   UPDATE_LAYER,
   UPDATE_LAYER_PROP,
@@ -312,6 +313,14 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: Record<string, 
           ...layer,
           visible: !action.hiddenLayerIds.includes(layer.id),
         })),
+      };
+    case SET_EMBEDDABLE_SEARCH_CONTEXT:
+      return {
+        ...state,
+        mapState: {
+          ...state.mapState,
+          embeddableSearchContext: action.embeddableSearchContext,
+        },
       };
     default:
       return state;

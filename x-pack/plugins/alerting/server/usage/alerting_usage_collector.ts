@@ -126,11 +126,12 @@ export function createAlertingUsageCollector(
         // get the accumulated state from the recurring task
         const { runs, ...state } = get(doc, 'state') as AlertingUsage & { runs: number };
 
-        return {
-          ...state,
-        };
+        return state;
       } catch (err) {
+        const errMessage = err && err.message ? err.message : err.toString();
         return {
+          has_errors: true,
+          error_messages: [errMessage],
           count_total: 0,
           count_active_total: 0,
           count_disabled_total: 0,
@@ -202,6 +203,11 @@ export function createAlertingUsageCollector(
       }
     },
     schema: {
+      has_errors: { type: 'boolean' },
+      error_messages: {
+        type: 'array',
+        items: { type: 'text' },
+      },
       count_total: { type: 'long' },
       count_active_total: { type: 'long' },
       count_disabled_total: { type: 'long' },

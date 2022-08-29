@@ -43,6 +43,7 @@ export const createKbnFieldTypes = (): KbnFieldType[] => [
       ES_FIELD_TYPES.SHORT,
       ES_FIELD_TYPES.BYTE,
       ES_FIELD_TYPES.TOKEN_COUNT,
+      ES_FIELD_TYPES.AGGREGATE_METRIC_DOUBLE,
     ],
   }),
   new KbnFieldType({

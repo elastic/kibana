@@ -38,7 +38,7 @@ export const processDryRunResult = (response: BulkActionResponse | undefined): D
  */
 export const transformExportDetailsToDryRunResult = (details: ExportRulesDetails): DryRunResult => {
   return {
-    succeededRulesCount: details.exported_count,
+    succeededRulesCount: details.exported_rules_count,
     failedRulesCount: details.missing_rules_count,
     // if there are rules that can't be exported, it means they are immutable. So we can safely put error code as immutable
     ruleErrors: details.missing_rules.length
