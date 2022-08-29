@@ -81,8 +81,8 @@ import type {
 export type { PackageInfo, EnvironmentMode } from '@kbn/config';
 export type { DomainDeprecationDetails } from '@kbn/core-deprecations-common';
 export type { CoreContext } from '@kbn/core-base-browser-internal';
+export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '@kbn/core-application-common';
 export type { CoreSystem } from './core_system';
-export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '../utils';
 export type { AppCategory } from '../types';
 export type {
   UiSettingsParams,
