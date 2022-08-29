@@ -8,8 +8,9 @@
 import React, { memo } from 'react';
 import { Redirect } from 'react-router-dom';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
-import type { ThreatIntelligenceSecuritySolutionContext } from '@kbn/threat-intelligence-plugin/public';
+import type { SecuritySolutionPluginContext } from '@kbn/threat-intelligence-plugin/public';
 import { THREAT_INTELLIGENCE_BASE_PATH } from '@kbn/threat-intelligence-plugin/public';
+import type { SourcererDataView } from '@kbn/threat-intelligence-plugin/public/types';
 import { useKibana } from '../common/lib/kibana';
 import { FiltersGlobal } from '../common/components/filters_global';
 import { SpyRoute } from '../common/utils/route/spy_routes';
@@ -18,27 +19,34 @@ import { useIsExperimentalFeatureEnabled } from '../common/hooks/use_experimenta
 import { licenseService } from '../common/hooks/use_license';
 import { SecurityPageName } from '../app/types';
 import type { SecuritySubPluginRoutes } from '../app/types';
+import { useSourcererDataView } from '../common/containers/sourcerer';
+import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 
 const ThreatIntelligence = memo(() => {
   const { threatIntelligence } = useKibana().services;
   const ThreatIntelligencePlugin = threatIntelligence.getComponent();
+
+  const sourcererDataView = useSourcererDataView();
 
   const enabled = useIsExperimentalFeatureEnabled('threatIntelligenceEnabled');
   if (!enabled) {
     return <Redirect to="/" />;
   }
 
-  const securitySolutionContext: ThreatIntelligenceSecuritySolutionContext = {
+  const securitySolutionContext: SecuritySolutionPluginContext = {
     getFiltersGlobalComponent: () => FiltersGlobal,
     licenseService,
+    sourcererDataView: sourcererDataView as unknown as SourcererDataView,
   };
 
   return (
     <TrackApplicationView viewId="threat_intelligence">
-      <SecuritySolutionPageWrapper noPadding>
-        <ThreatIntelligencePlugin securitySolutionContext={securitySolutionContext} />
-        <SpyRoute pageName={SecurityPageName.threatIntelligenceIndicators} />
-      </SecuritySolutionPageWrapper>
+      <PluginTemplateWrapper>
+        <SecuritySolutionPageWrapper noPadding>
+          <ThreatIntelligencePlugin securitySolutionContext={securitySolutionContext} />
+          <SpyRoute pageName={SecurityPageName.threatIntelligenceIndicators} />
+        </SecuritySolutionPageWrapper>
+      </PluginTemplateWrapper>
     </TrackApplicationView>
   );
 });
