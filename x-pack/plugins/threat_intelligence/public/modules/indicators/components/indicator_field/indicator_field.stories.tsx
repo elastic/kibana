@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_FORMAT_TZ } from '../../../../../common/constants';
+import { generateFieldTypeMap } from '../../../../common/mocks/mock_field_type_map';
+import { mockUiSettingsService } from '../../../../common/mocks/mock_kibana_ui_settings_service';
 import { generateMockIndicator } from '../../../../../common/types/indicator';
 import { IndicatorField } from './indicator_field';
 
@@ -18,13 +18,12 @@ export default {
 };
 
 const mockIndicator = generateMockIndicator();
-const mockFieldTypesMap: { [id: string]: string } = {
-  'threat.indicator.ip': 'ip',
-  'threat.indicator.first_seen': 'date',
-};
+
+const mockFieldTypesMap = generateFieldTypeMap();
 
 export function Default() {
   const mockField = 'threat.indicator.ip';
+
   return (
     <IndicatorField indicator={mockIndicator} field={mockField} fieldTypesMap={mockFieldTypesMap} />
   );
@@ -32,27 +31,16 @@ export function Default() {
 
 export function IncorrectField() {
   const mockField = 'abc';
+
   return (
     <IndicatorField indicator={mockIndicator} field={mockField} fieldTypesMap={mockFieldTypesMap} />
   );
 }
 
 export function HandlesDates() {
-  const coreMock = {
-    uiSettings: {
-      get: (key: string) => {
-        const settings = {
-          [DEFAULT_DATE_FORMAT]: '',
-          [DEFAULT_DATE_FORMAT_TZ]: 'UTC',
-        };
-        // @ts-expect-error
-        return settings[key];
-      },
-    },
-  } as unknown as CoreStart;
-  const KibanaReactContext = createKibanaReactContext(coreMock);
-
+  const KibanaReactContext = createKibanaReactContext({ uiSettings: mockUiSettingsService() });
   const mockField = 'threat.indicator.first_seen';
+
   return (
     <KibanaReactContext.Provider>
       <IndicatorField

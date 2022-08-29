@@ -4620,7 +4620,8 @@
             "type": "string"
           },
           "output_id": {
-            "type": "string"
+            "type": "string",
+            "deprecated": true
           },
           "inputs": {
             "type": "array",
@@ -5030,7 +5031,9 @@
             "type": "string"
           },
           "output_id": {
-            "type": "string"
+            "type": "string",
+            "description": "Not supported output can be set at the agent policy level only",
+            "deprecated": true
           },
           "inputs": {
             "type": "array",

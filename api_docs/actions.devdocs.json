@@ -2572,6 +2572,37 @@
       },
       {
         "parentPluginId": "actions",
+        "id": "def-common.getConnectorCompatibility",
+        "type": "Function",
+        "tags": [],
+        "label": "getConnectorCompatibility",
+        "description": [],
+        "signature": [
+          "(featureIds: string[] | undefined) => string[]"
+        ],
+        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.getConnectorCompatibility.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "featureIds",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "deprecated": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
         "id": "def-common.getConnectorFeatureName",
         "type": "Function",
         "tags": [],
@@ -3751,6 +3782,16 @@
             "description": [],
             "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.AlertingConnectorFeature.compatibility",
+            "type": "string",
+            "tags": [],
+            "label": "compatibility",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -3781,6 +3822,16 @@
             "type": "string",
             "tags": [],
             "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.CasesConnectorFeature.compatibility",
+            "type": "string",
+            "tags": [],
+            "label": "compatibility",
             "description": [],
             "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
             "deprecated": false
@@ -3828,6 +3879,16 @@
             "type": "string",
             "tags": [],
             "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.SecuritySolutionFeature.compatibility",
+            "type": "string",
+            "tags": [],
+            "label": "compatibility",
             "description": [],
             "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
             "deprecated": false
@@ -4089,6 +4150,16 @@
             "type": "string",
             "tags": [],
             "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.UptimeConnectorFeature.compatibility",
+            "type": "string",
+            "tags": [],
+            "label": "compatibility",
             "description": [],
             "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
             "deprecated": false
