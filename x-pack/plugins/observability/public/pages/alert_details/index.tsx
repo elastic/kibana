@@ -12,7 +12,7 @@ import { ObservabilityAppServices } from '../../application/types';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { paths } from '../../config/paths';
-import { ALERTS_BREADCRUMB_TEXT } from '../alerts/translations';
+import { i18n } from '@kbn/i18n';
 
 // import { useParams } from 'react-router';
 // import { AlertDetailsPathParams } from './types';
@@ -29,7 +29,9 @@ export function AlertDetailsPage() {
     useBreadcrumbs([
         {
             href: http.basePath.prepend(paths.observability.alerts),
-            text: ALERTS_BREADCRUMB_TEXT,
+            text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
+                defaultMessage: 'Alerts',
+            })
         }
     ]);
 

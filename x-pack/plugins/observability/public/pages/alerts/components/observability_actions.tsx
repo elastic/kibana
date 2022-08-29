@@ -153,7 +153,7 @@ export function ObservabilityActions({
         </EuiContextMenuItem>,
       ],
 
-      ...(!!linkToAlert
+      ...(linkToAlert
         ? [
           <EuiContextMenuItem
             key="viewAlertDetailsPage"
@@ -172,6 +172,7 @@ export function ObservabilityActions({
     handleAddToNewCaseClick,
     linkToRule,
     alert,
+    linkToAlert,
     setFlyoutAlert,
     closeActionsPopover,
   ]);
