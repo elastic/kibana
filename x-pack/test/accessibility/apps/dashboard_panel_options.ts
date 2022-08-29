@@ -13,7 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'header', 'home']);
   const toasts = getService('toasts');
   const inspector = getService('inspector');
-  let header;
+  let header: string;
 
   describe('Dashboard panel options a11y tests', () => {
     before(async () => {
