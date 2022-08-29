@@ -1924,7 +1924,7 @@ describe('Authenticator', () => {
         expect(auditLogger.log).not.toHaveBeenCalled();
       });
 
-      it('redirects to global Access Agreement when local Access Agreement is not configured.', async () => {
+      it('redirects to global Access Agreement when provider specific Access Agreement is not configured.', async () => {
         mockOptions = getMockOptions({
           providers: {
             basic: { basic1: { order: 0 } },
