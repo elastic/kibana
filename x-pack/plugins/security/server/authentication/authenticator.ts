@@ -825,7 +825,10 @@ export class Authenticator {
       sessionValue.provider.type
     ]?.[sessionValue.provider.name];
 
-    if (!this.options.config.accessAgreement?.message && !providerConfig?.accessAgreement?.message) {
+    if (
+      !this.options.config.accessAgreement?.message &&
+      !providerConfig?.accessAgreement?.message
+    ) {
       return false;
     }
 

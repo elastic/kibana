@@ -68,8 +68,8 @@ function getMockOptions({
     getServerBaseURL: jest.fn(),
     config: createConfig(
       ConfigSchema.validate({
-        authc: { selector, providers, http } ,
-        accessAgreement: { message: accessAgreementMessage || undefined},
+        authc: { selector, providers, http },
+        accessAgreement: { message: accessAgreementMessage || undefined },
       }),
       loggingSystemMock.create().get(),
       { isTLSEnabled: false }
