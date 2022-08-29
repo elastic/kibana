@@ -22,6 +22,9 @@ import { EntityField } from '../../common/util/anomaly_utils';
 import {
   ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
   ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+  AnomalyExplorerChartsEmbeddableType,
+  AnomalySwimLaneEmbeddableType,
+  MlEmbeddableTypes,
 } from './constants';
 import { MlResultsService } from '../application/services/results_service';
 
@@ -127,3 +130,10 @@ export function isAnomalyExplorerEmbeddable(
     arg.embeddable.type === ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE
   );
 }
+
+export type MappedEmbeddableTypeOf<TEmbeddableType extends MlEmbeddableTypes> =
+  TEmbeddableType extends AnomalySwimLaneEmbeddableType
+    ? AnomalySwimlaneEmbeddableInput
+    : TEmbeddableType extends AnomalyExplorerChartsEmbeddableType
+    ? AnomalyChartsEmbeddableInput
+    : unknown;

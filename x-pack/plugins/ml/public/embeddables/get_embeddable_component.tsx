@@ -14,20 +14,9 @@ import {
   useEmbeddableFactory,
 } from '@kbn/embeddable-plugin/public';
 import { EuiLoadingChart } from '@elastic/eui';
-import { AnomalyChartsEmbeddableInput, AnomalySwimlaneEmbeddableInput } from './types';
+import type { MappedEmbeddableTypeOf } from './types';
 import type { MlStartDependencies } from '../plugin';
 import type { MlEmbeddableTypes } from './constants';
-import type {
-  AnomalyExplorerChartsEmbeddableType,
-  AnomalySwimLaneEmbeddableType,
-} from './constants';
-
-type MappedEmbeddableTypeOf<TEmbeddableType extends MlEmbeddableTypes> =
-  TEmbeddableType extends AnomalySwimLaneEmbeddableType
-    ? AnomalySwimlaneEmbeddableInput
-    : TEmbeddableType extends AnomalyExplorerChartsEmbeddableType
-    ? AnomalyChartsEmbeddableInput
-    : unknown;
 
 /**
  * Gets an instance of an embeddable component of requested type.
