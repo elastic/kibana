@@ -328,13 +328,37 @@ describe('convertOtherAggsToFormulaColumn', () => {
     [
       'null if no nested metric was provided',
       [
+        METRIC_TYPES.AVG_BUCKET,
+        { series, metrics: [{ type: METRIC_TYPES.AVG_BUCKET, id, field }], dataView },
+      ],
+      null,
+    ],
+    [
+      'formula column if no nested metric was provided',
+      [
+        METRIC_TYPES.AVG_BUCKET,
+        {
+          series,
+          metrics: [avgMetric, { type: METRIC_TYPES.AVG_BUCKET, id, field }],
+          dataView,
+        },
+      ],
+      {
+        meta: { metricId: 'some-id-1[50]' },
+        operationType: 'formula',
+        params: { formula: 'overall_average(average(bytes))' },
+      },
+    ],
+    [
+      'null if no nested metric was provided and aggregation is positive_only',
+      [
         TSVB_METRIC_TYPES.POSITIVE_ONLY,
         { series, metrics: [{ type: TSVB_METRIC_TYPES.POSITIVE_ONLY, id, field }], dataView },
       ],
       null,
     ],
     [
-      'formula column if no nested metric was provided',
+      'formula column if no nested metric was provided and aggregation is positive_only',
       [
         TSVB_METRIC_TYPES.POSITIVE_ONLY,
         {
