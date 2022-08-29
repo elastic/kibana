@@ -22,6 +22,10 @@ export const getParentPipelineSeriesFormula = (
   if (!aggregationMap) {
     return null;
   }
+  if (subFunctionMetric.type === 'static') {
+    return null;
+  }
+
   const aggFormula = getFormulaFromMetric(aggregationMap);
   const pipelineFormula = getFormulaFromMetric(pipelineAgg);
 
