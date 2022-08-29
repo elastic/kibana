@@ -9,7 +9,7 @@
 
 import React from 'react';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
-import type { AppLeaveHandler } from '@kbn/core/public';
+import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { AutoSaveWarningMsg } from '../../../../timelines/components/timeline/auto_save_warning';
 import { Flyout } from '../../../../timelines/components/flyout';
@@ -17,17 +17,18 @@ import { useResolveRedirect } from '../../../../common/hooks/use_resolve_redirec
 
 export const BOTTOM_BAR_CLASSNAME = 'timeline-bottom-bar';
 
-export const SecuritySolutionBottomBar = React.memo(
-  ({ onAppLeave }: { onAppLeave: (handler: AppLeaveHandler) => void }) => {
-    useResolveRedirect();
-    return (
-      <>
-        <AutoSaveWarningMsg />
-        <Flyout timelineId={TimelineId.active} onAppLeave={onAppLeave} />
-      </>
-    );
-  }
-);
+export const SecuritySolutionBottomBar = React.memo(() => {
+  useResolveRedirect();
+
+  const { onAppLeave } = useKibana().services;
+
+  return (
+    <>
+      <AutoSaveWarningMsg />
+      <Flyout timelineId={TimelineId.active} onAppLeave={onAppLeave} />
+    </>
+  );
+});
 
 export const SecuritySolutionBottomBarProps: KibanaPageTemplateProps['bottomBarProps'] = {
   className: BOTTOM_BAR_CLASSNAME,
