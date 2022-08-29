@@ -73,7 +73,7 @@ export const TORQ_SELECT_MESSAGE = i18n.translate(
 export const TORQ_ACTION_TYPE_TITLE = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.torqAction.actionTypeTitle',
   {
-    defaultMessage: 'Alert data', // TODO: other message?
+    defaultMessage: 'Alert data',
   }
 );
 
