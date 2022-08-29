@@ -280,8 +280,8 @@ describe('AlertsTableState', () => {
     it('should refetch the alert when refreshNow is updated', async () => {
       const result = render(<AlertsTableWithLocale {...tableProps} />);
       const props = { ...tableProps, refreshNow: 123456789 };
-      result.rerender(<AlertsTableWithLocale {...props} /> );
+      result.rerender(<AlertsTableWithLocale {...props} />);
       expect(refecthMock).toBeCalledTimes(1);
     });
-  })
+  });
 });
