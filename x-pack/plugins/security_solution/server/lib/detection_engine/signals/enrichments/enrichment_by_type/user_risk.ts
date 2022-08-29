@@ -28,7 +28,6 @@ export const createUserRiskEnrichments: CreateRiskEnrichment = async ({
   events,
   spaceId,
 }) => {
-  throw new Error('user risk score');
   return createSingleFieldMatchEnrichment({
     index: [getUserRiskIndex(spaceId)],
     services,
