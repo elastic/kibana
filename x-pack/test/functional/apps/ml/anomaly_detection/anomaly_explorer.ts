@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import { stringHash } from '@kbn/ml-string-hash';
 import { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
-import { AnomalySwimlaneEmbeddableInput } from '@kbn/ml-plugin/public';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { USER } from '../../../services/ml/security_common';
 
 // @ts-expect-error not full interface
 const JOB_CONFIG: Job = {
@@ -395,7 +392,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             '2015-10-02',
           ]);
         });
-
 
         it('adds swim lane embeddable to a dashboard', async () => {
           // should be the last step because it navigates away from the Anomaly Explorer page
