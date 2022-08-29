@@ -7,7 +7,7 @@
  */
 
 import _ from 'lodash';
-import { BehaviorSubject } from 'rxjs';
+import { debounceTime, first, map } from 'rxjs/operators';
 import moment from 'moment-timezone';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
 import { ReduxEmbeddableTools, ReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
@@ -39,7 +39,7 @@ export class TimeSliderControlEmbeddable extends Embeddable<
   private getDateFormat: ControlsSettingsService['getDateFormat'];
   private getTimezone: ControlsSettingsService['getTimezone'];
   private timefilter: ControlsDataService['timefilter'];
-  private waitForPanelsToLoad$ = new BehaviorSubject<boolean>(false);
+  private readonly waitForControlOutputConsumersToLoad$;
 
   private reduxEmbeddableTools: ReduxEmbeddableTools<
     TimeSliderReduxState,
@@ -80,6 +80,19 @@ export class TimeSliderControlEmbeddable extends Embeddable<
     });
 
     this.inputSubscription = this.getInput$().subscribe(() => this.onInputChange());
+
+    this.waitForControlOutputConsumersToLoad$ = parent?.anyControlOutputConsumerLoading$.pipe(
+      debounceTime(300),
+      first((isAnyControlOutputConsumerLoading: boolean) => {
+        console.log('isAnyControlOutputConsumerLoading', isAnyControlOutputConsumerLoading);
+        return !isAnyControlOutputConsumerLoading;
+      }),
+      map(() => {
+        // Observable notifies subscriber when loading is finished
+        // Return void to not expose internal implemenation details of observabale
+        return;
+      })
+    );
 
     this.initialize();
   }
@@ -134,10 +147,6 @@ export class TimeSliderControlEmbeddable extends Embeddable<
 
   public reload() {
     return;
-  }
-
-  public setAllDashboardPanelsLoaded(value: boolean) {
-    this.waitForPanelsToLoad$.next(value);
   }
 
   private debouncedPublishChange = _.debounce((value?: [number, number]) => {
@@ -246,7 +255,7 @@ export class TimeSliderControlEmbeddable extends Embeddable<
         <TimeSliderPrepend
           onNext={this.onNext}
           onPrevious={this.onPrevious}
-          waitForPanelsToLoad$={this.waitForPanelsToLoad$}
+          waitForControlOutputConsumersToLoad$={this.waitForControlOutputConsumersToLoad$}
         />
       </TimeSliderControlReduxWrapper>
     );

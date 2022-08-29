@@ -9,10 +9,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
-import {
-  BehaviorSubject,
-  Subscription,
-} from 'rxjs';
+import { Subscription } from 'rxjs';
 import uuid from 'uuid';
 import { CoreStart, IUiSettingsClient, KibanaExecutionContext } from '@kbn/core/public';
 import { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
@@ -118,7 +115,6 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   public readonly type = DASHBOARD_CONTAINER_TYPE;
 
   private onDestroyControlGroup?: () => void;
-  private anyChildLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(true);
   private subscriptions: Subscription = new Subscription();
 
   public controlGroup?: ControlGroupContainer;
@@ -191,24 +187,21 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       );
     }
 
-    /**
-     * run OnChildOutputChanged when any child's output has changed
-     */
     this.subscriptions.add(
       this.getAnyChildOutputChange$()
         .subscribe(() => {
+          if (!this.controlGroup) {
+            return;
+          }
+
           for (const child of Object.values(this.children)) {
             const isLoading = child.getOutput().loading;
             if (isLoading) {
-              this.anyChildLoading$.next(true);
-              console.log('one child loading');
-              this.controlGroup?.setAllPanelsLoadedState(false);
+              this.controlGroup.anyControlOutputConsumerLoading$.next(true);
               return;
             }
           }
-          this.anyChildLoading$.next(false);
-          console.log('no children loading');
-          this.controlGroup?.setAllPanelsLoadedState(true);
+          this.controlGroup.anyControlOutputConsumerLoading$.next(false);
         })
     );
   }
@@ -374,6 +367,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
   public destroy() {
     super.destroy();
+    this.subscriptions.unsubscribe();
     this.onDestroyControlGroup?.();
     if (this.domNode) ReactDOM.unmountComponentAtNode(this.domNode);
   }

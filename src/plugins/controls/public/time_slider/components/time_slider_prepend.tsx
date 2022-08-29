@@ -18,7 +18,7 @@ import { TimeSliderReduxState } from '../types';
 interface Props {
   onNext: () => void;
   onPrevious: () => void;
-  waitForPanelsToLoad$: Observable<void>;
+  waitForControlOutputConsumersToLoad$?: Observable<void>;
 }
 
 export const TimeSliderPrepend: FC<Props> = (props: Props) => {
@@ -37,19 +37,18 @@ export const TimeSliderPrepend: FC<Props> = (props: Props) => {
     // advance to next frame
     props.onNext();
 
-    // use waitForPanelsToLoad$ observable to wait until next frame loaded
-    const subscription = props.waitForPanelsToLoad$
-      .pipe(first((value) => value === true, false))
-      .subscribe((ready: boolean) => {
-        if (ready) {
+    if (props.waitForControlOutputConsumersToLoad$) {
+      // use waitForPanelsToLoad$ observable to wait until next frame loaded
+      const subscription = props.waitForControlOutputConsumersToLoad$
+        .pipe(first()).subscribe(() => {
           // use timeout to display frame for small time period before moving to next frame
           const nextTimeoutId = window.setTimeout(() => {
             playNextFrame();
           }, 1750);
           setTimeoutId(nextTimeoutId);
-        }
-      });
-    setSubscription(subscription);
+        });
+      setSubscription(subscription);
+    }
   };
 
   const onPlay = () => {
@@ -84,7 +83,7 @@ export const TimeSliderPrepend: FC<Props> = (props: Props) => {
           defaultMessage: 'Previous time window',
         })}
       />
-      <EuiButtonIcon
+      {props.waitForControlOutputConsumersToLoad$ === undefined ? null : <EuiButtonIcon
         onClick={isPaused ? onPlay : onPause}
         iconType={isPaused ? 'playFilled' : 'pause'}
         size="s"
@@ -98,7 +97,7 @@ export const TimeSliderPrepend: FC<Props> = (props: Props) => {
                 defaultMessage: 'Pause',
               })
         }
-      />
+      />}
       <EuiButtonIcon
         onClick={() => {
           onPause();

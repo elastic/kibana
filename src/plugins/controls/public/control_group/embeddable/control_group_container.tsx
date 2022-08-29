@@ -46,7 +46,7 @@ import { controlGroupReducers } from '../state/control_group_reducers';
 import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
 import { CreateControlButton, CreateControlButtonTypes } from '../editor/create_control';
 import { CreateTimeSliderControlButton } from '../editor/create_time_slider_control';
-import { TimeSliderControlEmbeddable, TIME_SLIDER_CONTROL } from '../../time_slider';
+import { TIME_SLIDER_CONTROL } from '../../time_slider';
 
 let flyoutRef: OverlayRef | undefined;
 export const setFlyoutRef = (newRef: OverlayRef | undefined) => {
@@ -59,11 +59,12 @@ export class ControlGroupContainer extends Container<
   ControlGroupOutput
 > {
   public readonly type = CONTROL_GROUP_TYPE;
+  public readonly anyControlOutputConsumerLoading$: Subject<boolean> = new Subject();
 
   private subscriptions: Subscription = new Subscription();
   private domNode?: HTMLElement;
   private recalculateFilters$: Subject<null>;
-
+  
   private relevantDataViewId?: string;
   private lastUsedDataViewId?: string;
 
@@ -353,19 +354,6 @@ export class ControlGroupContainer extends Container<
     }
     return Promise.resolve();
   };
-
-  public setAllPanelsLoadedState(allDashboardPanelsLoaded: boolean) {
-    console.log(`setAllPanelsLoadedState:: ${allDashboardPanelsLoaded}`);
-    const childIds = this.getChildIds();
-    childIds.forEach((id) => {
-      const child = this.getChild(id);
-      if (child.type === TIME_SLIDER_CONTROL) {
-        (child as TimeSliderControlEmbeddable).setAllDashboardPanelsLoaded(
-          allDashboardPanelsLoaded
-        );
-      }
-    });
-  }
 
   public render(dom: HTMLElement) {
     if (this.domNode) {
