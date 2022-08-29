@@ -24,7 +24,7 @@ import { useAppToasts } from '../../hooks/use_app_toasts';
 import { sourcererActions } from '../../store/sourcerer';
 import * as i18n from './translations';
 import { SourcererScopeName } from '../../store/sourcerer/model';
-import { getSourcererDataView } from '../sourcerer/api';
+import { getSourcererDataView } from '../sourcerer/get_sourcerer_data_view';
 
 export type IndexFieldSearch = (param: {
   dataViewId: string;
@@ -113,13 +113,10 @@ export const useDataView = (): {
         };
         setLoading({ id: dataViewId, loading: true });
         if (needToBeInit) {
-          const dataViewToUpdate = await getSourcererDataView(
-            dataViewId,
-            abortCtrl.current[dataViewId].signal
-          );
+          const dataView = await getSourcererDataView(dataViewId, data.dataViews);
           dispatch(
             sourcererActions.updateSourcererDataViews({
-              dataView: dataViewToUpdate,
+              dataView,
             })
           );
         }
@@ -200,7 +197,7 @@ export const useDataView = (): {
       }
       return asyncSearch();
     },
-    [addError, addWarning, data.search, dispatch, setLoading]
+    [addError, addWarning, data.search, dispatch, setLoading, data.dataViews]
   );
 
   useEffect(() => {

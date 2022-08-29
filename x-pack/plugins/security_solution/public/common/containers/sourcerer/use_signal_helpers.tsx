@@ -12,10 +12,11 @@ import { sourcererSelectors } from '../../store';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { useSourcererDataView } from '.';
 import { SourcererScopeName } from '../../store/sourcerer/model';
-import { postSourcererDataView } from './api';
-import { sourcererActions } from '../../store/sourcerer';
 import { useDataView } from '../source/use_data_view';
 import { useAppToasts } from '../../hooks/use_app_toasts';
+import { useKibana } from '../../lib/kibana';
+import { createSourcererDataView } from './create_sourcerer_data_view';
+import { sourcererActions } from '../../store/sourcerer';
 
 export const useSignalHelpers = (): {
   /* when defined, signal index has been initiated but does not exist */
@@ -23,11 +24,14 @@ export const useSignalHelpers = (): {
   /* when false, signal index has been initiated */
   signalIndexNeedsInit: boolean;
 } => {
-  const { indicesExist } = useSourcererDataView(SourcererScopeName.detections);
+  const { indicesExist, dataViewId } = useSourcererDataView(SourcererScopeName.detections);
   const { indexFieldsSearch } = useDataView();
   const dispatch = useDispatch();
   const { addError } = useAppToasts();
   const abortCtrl = useRef(new AbortController());
+  const {
+    data: { dataViews },
+  } = useKibana().services;
 
   const getDefaultDataViewSelector = useMemo(
     () => sourcererSelectors.defaultDataViewSelector(),
@@ -53,19 +57,21 @@ export const useSignalHelpers = (): {
     const asyncSearch = async () => {
       abortCtrl.current = new AbortController();
       try {
-        const response = await postSourcererDataView({
+        const sourcererDataView = await createSourcererDataView({
           body: { patternList: defaultDataView.title.split(',') },
           signal: abortCtrl.current.signal,
+          dataViewId,
+          dataViewService: dataViews,
         });
 
         if (
           signalIndexNameSourcerer !== null &&
-          response.defaultDataView.patternList.includes(signalIndexNameSourcerer)
+          sourcererDataView?.defaultDataView.patternList.includes(signalIndexNameSourcerer)
         ) {
           // first time signals is defined and validated in the sourcerer
           // redo indexFieldsSearch
-          indexFieldsSearch({ dataViewId: response.defaultDataView.id });
-          dispatch(sourcererActions.setSourcererDataViews(response));
+          indexFieldsSearch({ dataViewId: sourcererDataView.defaultDataView.id });
+          dispatch(sourcererActions.setSourcererDataViews(sourcererDataView));
         }
       } catch (err) {
         addError(err, {
@@ -83,7 +89,15 @@ export const useSignalHelpers = (): {
       abortCtrl.current.abort();
       asyncSearch();
     }
-  }, [addError, defaultDataView.title, dispatch, indexFieldsSearch, signalIndexNameSourcerer]);
+  }, [
+    addError,
+    dataViewId,
+    dataViews,
+    defaultDataView.title,
+    dispatch,
+    indexFieldsSearch,
+    signalIndexNameSourcerer,
+  ]);
 
   return {
     ...(shouldWePollForIndex ? { pollForSignalIndex } : {}),

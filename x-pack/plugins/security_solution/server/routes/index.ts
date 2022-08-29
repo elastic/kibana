@@ -66,7 +66,6 @@ import type {
 } from '../lib/detection_engine/rule_types/types';
 // eslint-disable-next-line no-restricted-imports
 import { legacyCreateLegacyNotificationRoute } from '../lib/detection_engine/routes/rules/legacy_create_legacy_notification';
-import { createSourcererDataViewRoute, getSourcererDataViewRoute } from '../lib/sourcerer/routes';
 import type { ITelemetryReceiver } from '../lib/telemetry/receiver';
 import { telemetryDetectionRulesPreviewRoute } from '../lib/detection_engine/routes/telemetry/telemetry_detection_rules_preview_route';
 import { readPrebuiltDevToolContentRoute } from '../lib/prebuilt_dev_tool_content/routes/read_prebuilt_dev_tool_content_route';
@@ -170,10 +169,6 @@ export const initRoutes = (
 
   // Privileges API to get the generic user privileges
   readPrivilegesRoute(router, hasEncryptionKey);
-
-  // Sourcerer API to generate default pattern
-  createSourcererDataViewRoute(router, getStartServices);
-  getSourcererDataViewRoute(router, getStartServices);
 
   const { previewTelemetryUrlEnabled } = config.experimentalFeatures;
   if (previewTelemetryUrlEnabled) {

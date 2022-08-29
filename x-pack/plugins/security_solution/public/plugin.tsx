@@ -45,8 +45,8 @@ import {
   APP_ICON_SOLUTION,
   DETECTION_ENGINE_INDEX_URL,
   SERVER_APP_ID,
-  SOURCERER_API_URL,
   ENABLE_GROUPED_NAVIGATION,
+  DEFAULT_DATA_VIEW_ID,
 } from '../common/constants';
 
 import { getDeepLinks, registerDeepLinksUpdater } from './app/deep_links';
@@ -67,8 +67,7 @@ import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_custom_assets_extension';
 import type { SourcererModel, KibanaDataView } from './common/store/sourcerer/model';
 import { initDataView } from './common/store/sourcerer/model';
-import type { SecurityDataView } from './common/containers/sourcerer/api';
-
+import { createSourcererDataView } from './common/containers/sourcerer/create_sourcerer_data_view';
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   readonly kibanaVersion: string;
   private config: SecuritySolutionUiConfigType;
@@ -393,12 +392,21 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       let kibanaDataViews: SourcererModel['kibanaDataViews'];
       try {
         // check for/generate default Security Solution Kibana data view
-        const sourcererDataViews: SecurityDataView = await coreStart.http.fetch(SOURCERER_API_URL, {
-          method: 'POST',
-          body: JSON.stringify({
+        const sourcererDataViews = await createSourcererDataView({
+          body: {
             patternList: [...configPatternList, ...(signal.name != null ? [signal.name] : [])],
-          }),
+          },
+          dataViewService: startPlugins.data.dataViews,
+          dataViewId: `${DEFAULT_DATA_VIEW_ID}-${
+            (
+              await startPlugins.spaces?.getActiveSpace()
+            )?.id
+          }`,
         });
+
+        if (sourcererDataViews === undefined) {
+          throw new Error('');
+        }
         defaultDataView = { ...initDataView, ...sourcererDataViews.defaultDataView };
         kibanaDataViews = sourcererDataViews.kibanaDataViews.map((dataView: KibanaDataView) => ({
           ...initDataView,
