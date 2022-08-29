@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import { first, startsWith } from 'lodash';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
 import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';

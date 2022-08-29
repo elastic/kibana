@@ -59,6 +59,7 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
       ...functionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...functionalConfig.get('kbnTestServer.serverArgs'),
+        `--telemetry.optIn=true`,
         `--telemetry.labels=${JSON.stringify(telemetryLabels)}`,
       ],
       env: {

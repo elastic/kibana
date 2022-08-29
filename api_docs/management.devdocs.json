@@ -492,7 +492,7 @@
             "description": [],
             "signature": [
               "(crumbs: ",
-              "EuiBreadcrumb",
+              "EuiBreadcrumbProps",
               "[]) => void"
             ],
             "path": "src/plugins/management/public/types.ts",
@@ -506,7 +506,7 @@
                 "label": "crumbs",
                 "description": [],
                 "signature": [
-                  "EuiBreadcrumb",
+                  "EuiBreadcrumbProps",
                   "[]"
                 ],
                 "path": "src/plugins/management/public/types.ts",

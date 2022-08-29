@@ -50,6 +50,7 @@ import {
 jest.mock('../../../services/policies/ingest', () => ({
   sendGetAgentConfigList: () => Promise.resolve({ items: [] }),
   sendGetAgentPolicyList: () => Promise.resolve({ items: [] }),
+  sendBulkGetPackagePolicies: () => Promise.resolve({ items: [] }),
   sendGetEndpointSecurityPackage: () => Promise.resolve({ version: '1.1.1' }),
   sendGetFleetAgentsWithEndpoint: () => Promise.resolve({ total: 0 }),
 }));

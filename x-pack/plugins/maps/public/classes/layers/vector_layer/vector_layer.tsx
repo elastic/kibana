@@ -98,6 +98,7 @@ export interface IVectorLayer extends ILayer {
   hasJoins(): boolean;
   showJoinEditor(): boolean;
   canShowTooltip(): boolean;
+  areTooltipsDisabled(): boolean;
   supportsFeatureEditing(): boolean;
   getLeftJoinFields(): Promise<IField[]>;
   addFeature(geometry: Geometry | Position[]): Promise<void>;
@@ -115,6 +116,7 @@ export const NO_RESULTS_ICON_AND_TOOLTIPCONTENT = {
 export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
   protected readonly _style: VectorStyle;
   private readonly _joins: InnerJoin[];
+  protected readonly _descriptor: VectorLayerDescriptor;
 
   static createDescriptor(
     options: Partial<VectorLayerDescriptor>,
@@ -132,6 +134,8 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
       layerDescriptor.joins = [];
     }
 
+    layerDescriptor.disableTooltips = options.disableTooltips ?? false;
+
     return layerDescriptor;
   }
 
@@ -147,6 +151,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
       source,
     });
     this._joins = joins;
+    this._descriptor = AbstractVectorLayer.createDescriptor(layerDescriptor);
     this._style = new VectorStyle(
       layerDescriptor.style,
       source,
@@ -932,8 +937,21 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     return allProperties;
   }
 
+  /**
+   * Check if there are any properties we can display in a tooltip. If `false` the "Show tooltips" switch
+   * is disabled in Layer settings.
+   * @returns {boolean}
+   */
   canShowTooltip() {
     return this.getSource().hasTooltipProperties() || this.getJoins().length > 0;
+  }
+
+  /**
+   * Users can toggle tooltips on hover or click in the Layer settings. Tooltips are enabled by default.
+   * @returns {boolean}
+   */
+  areTooltipsDisabled(): boolean {
+    return this._descriptor.disableTooltips ?? false;
   }
 
   getFeatureId(feature: Feature): string | number | undefined {

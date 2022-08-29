@@ -36,6 +36,8 @@ const getDefaultQueryParameters = (customFilter: string | undefined = '') => ({
   },
 });
 
+jest.setTimeout(10000);
+
 describe('Policy details artifacts list', () => {
   let render: (externalPrivileges?: boolean) => Promise<ReturnType<AppContextTestRender['render']>>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
@@ -67,7 +69,10 @@ describe('Policy details artifacts list', () => {
             getArtifactPath={getEventFiltersListPath}
           />
         );
-        await waitFor(mockedApi.responseProvider.eventFiltersList);
+        await waitFor(() => expect(mockedApi.responseProvider.eventFiltersList).toHaveBeenCalled());
+        await waitFor(() =>
+          expect(renderResult.queryByTestId('artifacts-collapsed-list-loader')).toBeFalsy()
+        );
       });
       return renderResult;
     };
@@ -99,7 +104,9 @@ describe('Policy details artifacts list', () => {
 
   it('should expand an item when expand is clicked', async () => {
     await render();
-    expect(renderResult.getAllByTestId('artifacts-collapsed-list-card')).toHaveLength(1);
+    await waitFor(() => {
+      expect(renderResult.getAllByTestId('artifacts-collapsed-list-card')).toHaveLength(1);
+    });
 
     userEvent.click(
       renderResult.getByTestId('artifacts-collapsed-list-card-header-expandCollapse')
