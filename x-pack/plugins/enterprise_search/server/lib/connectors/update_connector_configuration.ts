@@ -16,10 +16,13 @@ import {
   ConnectorStatus,
 } from '../../../common/types/connectors';
 
+import { encryptConfiguration } from './fetch_encryption_key';
+
 export const updateConnectorConfiguration = async (
   client: IScopedClusterClient,
   connectorId: string,
-  configuration: ConnectorConfiguration
+  configuration: ConnectorConfiguration,
+  encryptionKey?: Buffer
 ) => {
   const connectorResult = await client.asCurrentUser.get<ConnectorDocument>({
     id: connectorId,
@@ -27,12 +30,20 @@ export const updateConnectorConfiguration = async (
   });
   const connector = connectorResult._source;
   if (connector) {
+    const parsedConfiguration =
+      encryptionKey && connector.encryption
+        ? await encryptConfiguration(
+            configuration,
+            encryptionKey,
+            connector.encryption?.initialization_vector
+          )
+        : configuration;
     const status =
       connector.status === ConnectorStatus.NEEDS_CONFIGURATION
         ? ConnectorStatus.CONFIGURED
         : connector.status;
     return await client.asCurrentUser.index<ConnectorDocument>({
-      document: { ...connector, configuration, status },
+      document: { ...connector, configuration: parsedConfiguration, status },
       id: connectorId,
       index: CONNECTORS_INDEX,
     });

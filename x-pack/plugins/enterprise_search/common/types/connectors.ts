@@ -5,12 +5,19 @@
  * 2.0.
  */
 
-export interface KeyValuePair {
+export interface BaseConfigurationEntry {
   label: string;
   value: string;
 }
 
-export type ConnectorConfiguration = Record<string, KeyValuePair | null>;
+export interface EncryptedConfigurationEntry extends BaseConfigurationEntry {
+  encrypted?: boolean;
+  initialization_vector?: string;
+}
+
+export type ConfigurationEntry = EncryptedConfigurationEntry | BaseConfigurationEntry;
+
+export type ConnectorConfiguration = Record<string, ConfigurationEntry | null>;
 export interface ConnectorScheduling {
   enabled: boolean;
   interval: string;
@@ -32,6 +39,11 @@ export enum SyncStatus {
 export interface Connector {
   api_key_id: string | null;
   configuration: ConnectorConfiguration;
+  encryption?: {
+    client_public_key: string;
+    connector_public_key?: string;
+    initialization_vector: string;
+  };
   id: string;
   index_name: string;
   language: string | null;

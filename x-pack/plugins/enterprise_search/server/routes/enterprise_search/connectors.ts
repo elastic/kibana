@@ -10,6 +10,11 @@ import { i18n } from '@kbn/i18n';
 
 import { ErrorCode } from '../../../common/types/error_codes';
 import { addConnector } from '../../lib/connectors/add_connector';
+import { fetchConnectorById } from '../../lib/connectors/fetch_connectors';
+import {
+  fetchConnectorEncryptionKey,
+  fetchSharedEncryptionKey,
+} from '../../lib/connectors/fetch_encryption_key';
 import { startConnectorSync } from '../../lib/connectors/start_sync';
 import { updateConnectorConfiguration } from '../../lib/connectors/update_connector_configuration';
 import { updateConnectorScheduling } from '../../lib/connectors/update_connector_scheduling';
@@ -18,7 +23,12 @@ import { RouteDependencies } from '../../plugin';
 import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 
-export function registerConnectorRoutes({ router, log }: RouteDependencies) {
+export function registerConnectorRoutes({
+  getEncryptedSavedObjectsService,
+  getSavedObjectsService,
+  router,
+  log,
+}: RouteDependencies) {
   router.post(
     {
       path: '/internal/enterprise_search/connectors',
@@ -33,7 +43,14 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       try {
-        const body = await addConnector(client, request.body);
+        const encryption = await fetchConnectorEncryptionKey(
+          getSavedObjectsService().createInternalRepository(),
+          getEncryptedSavedObjectsService().getClient()
+        );
+        const body = await addConnector(client, {
+          ...request.body,
+          publicKey: encryption?.public_key ?? '',
+        });
         return response.ok({ body });
       } catch (error) {
         if (
@@ -73,7 +90,21 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      await updateConnectorConfiguration(client, request.params.connectorId, request.body);
+      const connector = await fetchConnectorById(client, request.params.connectorId);
+      const publicKey = connector?.encryption?.connector_public_key;
+      const encryptionKey = publicKey
+        ? await fetchSharedEncryptionKey(
+            getSavedObjectsService!().createInternalRepository(),
+            getEncryptedSavedObjectsService().getClient(),
+            publicKey
+          )
+        : undefined;
+      await updateConnectorConfiguration(
+        client,
+        request.params.connectorId,
+        request.body,
+        encryptionKey
+      );
       return response.ok();
     })
   );

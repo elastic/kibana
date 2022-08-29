@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { randomBytes } from 'node:crypto';
+
 import { IScopedClusterClient } from '@kbn/core/server';
 
 import { CONNECTORS_INDEX } from '../..';
@@ -62,11 +64,20 @@ const createConnector = async (
 
 export const addConnector = async (
   client: IScopedClusterClient,
-  input: { delete_existing_connector?: boolean; index_name: string; language: string | null }
+  input: {
+    delete_existing_connector?: boolean;
+    index_name: string;
+    language: string | null;
+    publicKey: string;
+  }
 ): Promise<{ id: string; index_name: string }> => {
   const document: ConnectorDocument = {
     api_key_id: null,
     configuration: {},
+    encryption: {
+      client_public_key: input.publicKey,
+      initialization_vector: randomBytes(16).toString('hex'),
+    },
     index_name: input.index_name,
     language: input.language,
     last_seen: null,

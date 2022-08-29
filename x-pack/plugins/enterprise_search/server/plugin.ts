@@ -16,6 +16,10 @@ import {
   DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/server';
 import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
+import {
+  EncryptedSavedObjectsPluginSetup,
+  EncryptedSavedObjectsPluginStart,
+} from '@kbn/encrypted-saved-objects-plugin/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { InfraPluginSetup } from '@kbn/infra-plugin/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -55,30 +59,38 @@ import { registerTelemetryRoute } from './routes/enterprise_search/telemetry';
 import { registerWorkplaceSearchRoutes } from './routes/workplace_search';
 
 import { appSearchTelemetryType } from './saved_objects/app_search/telemetry';
+import {
+  ConnectorsEncryptionKey,
+  connectorsEncryptionKeyType,
+  CONNECTORS_ENCRYPTION_KEY_TYPE,
+} from './saved_objects/enterprise_search/connectors_encryption_key';
 import { enterpriseSearchTelemetryType } from './saved_objects/enterprise_search/telemetry';
 import { workplaceSearchTelemetryType } from './saved_objects/workplace_search/telemetry';
 
 import { ConfigType } from '.';
 
 interface PluginsSetup {
-  usageCollection?: UsageCollectionSetup;
-  security: SecurityPluginSetup;
+  customIntegrations?: CustomIntegrationsPluginSetup;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   features: FeaturesPluginSetup;
   infra: InfraPluginSetup;
-  customIntegrations?: CustomIntegrationsPluginSetup;
+  security: SecurityPluginSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 interface PluginsStart {
-  spaces: SpacesPluginStart;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   security: SecurityPluginStart;
+  spaces: SpacesPluginStart;
 }
 
 export interface RouteDependencies {
-  router: IRouter;
   config: ConfigType;
-  log: Logger;
   enterpriseSearchRequestHandler: IEnterpriseSearchRequestHandler;
-  getSavedObjectsService?(): SavedObjectsServiceStart;
+  getEncryptedSavedObjectsService(): EncryptedSavedObjectsPluginStart;
+  getSavedObjectsService(): SavedObjectsServiceStart;
+  log: Logger;
+  router: IRouter;
 }
 
 export class EnterpriseSearchPlugin implements Plugin {
@@ -92,7 +104,14 @@ export class EnterpriseSearchPlugin implements Plugin {
 
   public setup(
     { capabilities, http, savedObjects, getStartServices }: CoreSetup<PluginsStart>,
-    { usageCollection, security, features, infra, customIntegrations }: PluginsSetup
+    {
+      encryptedSavedObjects,
+      usageCollection,
+      security,
+      features,
+      infra,
+      customIntegrations,
+    }: PluginsSetup
   ) {
     const config = this.config;
     const log = this.logger;
@@ -160,7 +179,16 @@ export class EnterpriseSearchPlugin implements Plugin {
      */
     const router = http.createRouter();
     const enterpriseSearchRequestHandler = new EnterpriseSearchRequestHandler({ config, log });
-    const dependencies = { router, config, log, enterpriseSearchRequestHandler };
+    let encryptedSavedObjectsStarted: EncryptedSavedObjectsPluginStart;
+    let savedObjectsStarted: SavedObjectsServiceStart;
+    const dependencies = {
+      config,
+      enterpriseSearchRequestHandler,
+      getEncryptedSavedObjectsService: () => encryptedSavedObjectsStarted,
+      getSavedObjectsService: () => savedObjectsStarted,
+      log,
+      router,
+    };
 
     registerConfigDataRoute(dependencies);
     registerAppSearchRoutes(dependencies);
@@ -171,6 +199,61 @@ export class EnterpriseSearchPlugin implements Plugin {
     registerCrawlerRoutes(dependencies);
     registerAnalyticsRoutes(dependencies);
 
+    /**
+     * Bootstrap the connectors encryption key
+     */
+    if (encryptedSavedObjects.canEncrypt) {
+      savedObjects.registerType(connectorsEncryptionKeyType);
+      encryptedSavedObjects.registerType({
+        attributesToEncrypt: new Set(['private_key', 'public_key']),
+        type: CONNECTORS_ENCRYPTION_KEY_TYPE,
+      });
+      getStartServices().then(
+        async ([coreStart, { encryptedSavedObjects: encryptedSavedObjectsStart }]) => {
+          encryptedSavedObjectsStarted = encryptedSavedObjectsStart;
+          const baseSavedObjectResponse = await coreStart.savedObjects
+            .createInternalRepository([CONNECTORS_ENCRYPTION_KEY_TYPE])
+            .find<ConnectorsEncryptionKey>({ type: CONNECTORS_ENCRYPTION_KEY_TYPE });
+          if (baseSavedObjectResponse.saved_objects[0]) {
+            this.logger.info('Connectors encryption key is present');
+            this.logger.info(JSON.stringify(baseSavedObjectResponse.saved_objects));
+          } else {
+            const crypto = await import('node:crypto');
+            const keyPair = await crypto.generateKeyPairSync('x25519', {
+              privateKeyEncoding: {
+                format: 'pem',
+                type: 'pkcs8',
+              },
+              publicKeyEncoding: {
+                format: 'pem',
+                type: 'spki',
+              },
+            });
+            const client = coreStart.savedObjects.createInternalRepository([
+              CONNECTORS_ENCRYPTION_KEY_TYPE,
+            ]);
+            const result = await client.create(CONNECTORS_ENCRYPTION_KEY_TYPE, {
+              private_key: keyPair.privateKey,
+              public_key: keyPair.publicKey,
+            });
+            const saved = await client.get(CONNECTORS_ENCRYPTION_KEY_TYPE, result.id);
+            this.logger.info(JSON.stringify(saved));
+            const privateKey = await encryptedSavedObjectsStart
+              .getClient({ includedHiddenTypes: [CONNECTORS_ENCRYPTION_KEY_TYPE] })
+              .createPointInTimeFinderDecryptedAsInternalUser({
+                type: CONNECTORS_ENCRYPTION_KEY_TYPE,
+              });
+            this.logger.info(JSON.stringify(privateKey));
+            this.logger.info('Created connectors encryption key');
+          }
+        }
+      );
+    } else {
+      this.logger.warn(
+        'Encrypted connector fields are disabled because the Encrypted Saved Objects plugin is missing an encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml or use the bin/kibana-encryption-keys command.'
+      );
+    }
+
     getStartServices().then(([, { security: securityStart }]) => {
       registerCreateAPIKeyRoute(dependencies, securityStart);
     });
@@ -178,10 +261,10 @@ export class EnterpriseSearchPlugin implements Plugin {
     /**
      * Bootstrap the routes, saved objects, and collector for telemetry
      */
+
     savedObjects.registerType(enterpriseSearchTelemetryType);
     savedObjects.registerType(appSearchTelemetryType);
     savedObjects.registerType(workplaceSearchTelemetryType);
-    let savedObjectsStarted: SavedObjectsServiceStart;
 
     getStartServices().then(([coreStart]) => {
       savedObjectsStarted = coreStart.savedObjects;
@@ -192,7 +275,7 @@ export class EnterpriseSearchPlugin implements Plugin {
         registerWSTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
       }
     });
-    registerTelemetryRoute({ ...dependencies, getSavedObjectsService: () => savedObjectsStarted });
+    registerTelemetryRoute(dependencies);
 
     /*
      * Register logs source configuration, used by LogStream components

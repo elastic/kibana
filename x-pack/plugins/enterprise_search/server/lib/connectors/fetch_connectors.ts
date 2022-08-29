@@ -15,17 +15,23 @@ import { setupConnectorsIndices } from '../../index_management/setup_indices';
 import { isIndexNotFoundException } from '../../utils/identify_exceptions';
 import { fetchAll } from '../fetch_all';
 
+import { decryptConfiguration } from './fetch_encryption_key';
+
 export const fetchConnectorById = async (
   client: IScopedClusterClient,
-  connectorId: string
+  connectorId: string,
+  secret: Buffer
 ): Promise<Connector | undefined> => {
   try {
     const connectorResult = await client.asCurrentUser.get<ConnectorDocument>({
       id: connectorId,
       index: CONNECTORS_INDEX,
     });
+    const configuration = connectorResult._source?.configuration
+      ? decryptConfiguration(connectorResult._source.configuration, secret)
+      : {};
     return connectorResult._source
-      ? { ...connectorResult._source, id: connectorResult._id }
+      ? { ...connectorResult._source, configuration, id: connectorResult._id }
       : undefined;
   } catch (error) {
     if (isIndexNotFoundException(error)) {
