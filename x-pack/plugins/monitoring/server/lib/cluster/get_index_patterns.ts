@@ -123,7 +123,9 @@ export function getDsIndexPattern({
   config,
   ccs,
 }: CommonIndexPatternArgs & { type?: string }): string {
-  const datasetsPattern = `${moduleType ?? '*'}.${type === DS_INDEX_PATTERN_METRICS ? 'stack_monitoring.' : ''}${dataset ?? '*'}`;
+  const datasetsPattern = `${moduleType ?? '*'}.${
+    type === DS_INDEX_PATTERN_METRICS ? 'stack_monitoring.' : ''
+  }${dataset ?? '*'}`;
   return prefixIndexPatternWithCcs(config, `${type}-${datasetsPattern}-${namespace ?? '*'}`, ccs);
 }
 
