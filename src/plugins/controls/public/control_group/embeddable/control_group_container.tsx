@@ -64,7 +64,6 @@ export class ControlGroupContainer extends Container<
   private subscriptions: Subscription = new Subscription();
   private domNode?: HTMLElement;
   private recalculateFilters$: Subject<null>;
-  
   private relevantDataViewId?: string;
   private lastUsedDataViewId?: string;
 

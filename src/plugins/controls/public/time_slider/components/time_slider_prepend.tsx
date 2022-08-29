@@ -37,7 +37,6 @@ export const TimeSliderPrepend: FC<Props> = (props: Props) => {
     props.onNext();
 
     if (props.waitForControlOutputConsumersToLoad$) {
-      // use waitForPanelsToLoad$ observable to wait until next frame loaded
       const subscription = props.waitForControlOutputConsumersToLoad$
         .pipe(first()).subscribe(() => {
           // use timeout to display frame for small time period before moving to next frame

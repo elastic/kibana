@@ -87,7 +87,6 @@ export class TimeSliderControlEmbeddable extends Embeddable<
       ? (parent as ControlGroupContainer).anyControlOutputConsumerLoading$.pipe(
         debounceTime(300),
         first((isAnyControlOutputConsumerLoading: boolean) => {
-          console.log('isAnyControlOutputConsumerLoading', isAnyControlOutputConsumerLoading);
           return !isAnyControlOutputConsumerLoading;
         }),
         map(() => {
