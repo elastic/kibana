@@ -84,7 +84,7 @@ export const convertToTermsParams = (
 };
 
 export const converToTermsColumn = (
-  termFields: string[],
+  termFields: [string, ...string[]],
   series: Series,
   columns: Column[],
   dataView: DataView,
@@ -99,7 +99,7 @@ export const converToTermsColumn = (
 
   const params = convertToTermsParams(series, columns, secondaryFields);
   if (!params) {
-    return params;
+    return null;
   }
 
   return {

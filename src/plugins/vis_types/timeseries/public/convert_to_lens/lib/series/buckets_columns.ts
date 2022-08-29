@@ -64,7 +64,17 @@ export const getBucketsColumns = (
       return getValidColumns(dateHistogramColumn);
     }
 
-    const termsColumn = converToTermsColumn(splitFields, series, columns, dataView, isSplit);
+    if (!splitFields.length) {
+      return null;
+    }
+
+    const termsColumn = converToTermsColumn(
+      splitFields as [string, ...string[]],
+      series,
+      columns,
+      dataView,
+      isSplit
+    );
     return getValidColumns(termsColumn);
   }
   return [];
