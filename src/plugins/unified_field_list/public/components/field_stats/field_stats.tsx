@@ -251,8 +251,8 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
             .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
             .convert(totalDocuments)}
         </strong>{' '}
-        {i18n.translate('unifiedFieldList.fieldStats.ofDocumentsLabel', {
-          defaultMessage: 'documents',
+        {i18n.translate('unifiedFieldList.fieldStats.ofRecordsLabel', {
+          defaultMessage: 'records',
         })}
       </EuiText>
     ) : (
@@ -363,48 +363,47 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
 
     if (field.type === 'date') {
       return combineWithTitleAndFooter(
-        <Chart
-          data-test-subj={`${dataTestSubject}-histogram`}
-          size={{ height: 200, width: 300 - 32 }}
-        >
-          <Settings
-            tooltip={{ type: TooltipType.None }}
-            theme={customChartTheme}
-            baseTheme={chartBaseTheme}
-            xDomain={
-              fromDateParsed && toDateParsed
-                ? {
-                    min: fromDateParsed.valueOf(),
-                    max: toDateParsed.valueOf(),
-                    minInterval: Math.round(
-                      (toDateParsed.valueOf() - fromDateParsed.valueOf()) / 10
-                    ),
-                  }
-                : undefined
-            }
-          />
+        <div data-test-subj={`${dataTestSubject}-histogram`}>
+          <Chart size={{ height: 200, width: 300 - 32 }}>
+            <Settings
+              tooltip={{ type: TooltipType.None }}
+              theme={customChartTheme}
+              baseTheme={chartBaseTheme}
+              xDomain={
+                fromDateParsed && toDateParsed
+                  ? {
+                      min: fromDateParsed.valueOf(),
+                      max: toDateParsed.valueOf(),
+                      minInterval: Math.round(
+                        (toDateParsed.valueOf() - fromDateParsed.valueOf()) / 10
+                      ),
+                    }
+                  : undefined
+              }
+            />
 
-          <Axis
-            id="key"
-            position={Position.Bottom}
-            tickFormat={
-              fromDateParsed && toDateParsed
-                ? niceTimeFormatter([fromDateParsed.valueOf(), toDateParsed.valueOf()])
-                : undefined
-            }
-            showOverlappingTicks={true}
-          />
+            <Axis
+              id="key"
+              position={Position.Bottom}
+              tickFormat={
+                fromDateParsed && toDateParsed
+                  ? niceTimeFormatter([fromDateParsed.valueOf(), toDateParsed.valueOf()])
+                  : undefined
+              }
+              showOverlappingTicks={true}
+            />
 
-          <HistogramBarSeries
-            data={histogram.buckets}
-            id={specId}
-            xAccessor={'key'}
-            yAccessors={['count']}
-            xScaleType={ScaleType.Time}
-            yScaleType={ScaleType.Linear}
-            timeZone="local"
-          />
-        </Chart>
+            <HistogramBarSeries
+              data={histogram.buckets}
+              id={specId}
+              xAccessor={'key'}
+              yAccessors={['count']}
+              xScaleType={ScaleType.Time}
+              yScaleType={ScaleType.Linear}
+              timeZone="local"
+            />
+          </Chart>
+        </div>
       );
     }
 
