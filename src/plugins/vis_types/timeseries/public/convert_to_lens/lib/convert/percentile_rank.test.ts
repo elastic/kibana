@@ -6,9 +6,21 @@
  * Side Public License, v 1.
  */
 
+import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { Operations, PercentileRanksParams } from '@kbn/visualizations-plugin/common';
-import { convertToPercentileRankParams, isPercentileRanksColumnWithMeta } from './percentile_rank';
-import { PercentileRanksColumn, PercentileRanksColumnWithExtendedMeta } from './types';
+import { createSeries } from '../__mocks__';
+import { Metric } from '../../../../common/types';
+import {
+  convertToPercentileRankColumn,
+  convertToPercentileRankParams,
+  isPercentileRanksColumnWithMeta,
+} from './percentile_rank';
+import {
+  PercentileRanksColumn,
+  PercentileRanksColumnWithCommonMeta,
+  PercentileRanksColumnWithExtendedMeta,
+} from './types';
+import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 
 describe('isPercentileRanksColumnWithMeta', () => {
   const percentileRankColumnWithoutMeta = {
@@ -53,6 +65,77 @@ describe('convertToPercentileRankParams', () => {
       );
     } else {
       expect(convertToPercentileRankParams(...input)).toEqual(expect.objectContaining(expected));
+    }
+  });
+});
+
+describe('convertToPercentileRankColumn', () => {
+  const series = createSeries();
+  const dataView = stubLogstashDataView;
+  const metric: Metric = {
+    id: 'some-id',
+    type: TSVB_METRIC_TYPES.PERCENTILE_RANK,
+  };
+  test.each<
+    [
+      string,
+      Parameters<typeof convertToPercentileRankColumn>,
+      (
+        | Partial<PercentileRanksColumnWithCommonMeta>
+        | Partial<PercentileRanksColumnWithExtendedMeta>
+        | null
+      )
+    ]
+  >([
+    ['null if value is undefined', [undefined, series, metric, dataView], null],
+    ['null if value is NaN', ['some-nan-value', series, metric, dataView], null],
+    ['null if field is not present', ['50', series, metric, dataView], null],
+    [
+      'precentile rank column',
+      ['50', series, { ...metric, field: dataView.fields[0].name }, dataView],
+      {
+        meta: { metricId: 'some-id' },
+        operationType: 'percentile_rank',
+        params: { format: { id: 'bytes' }, value: 50 },
+        sourceField: 'bytes',
+      } as Partial<PercentileRanksColumnWithCommonMeta>,
+    ],
+    [
+      'precentile rank column with reference in meta',
+      ['50', series, { ...metric, field: dataView.fields[0].name }, dataView, { index: 0 }],
+      {
+        meta: { metricId: 'some-id', reference: 'some-id.0' },
+        operationType: 'percentile_rank',
+        params: { format: { id: 'bytes' }, value: 50 },
+        sourceField: 'bytes',
+      } as Partial<PercentileRanksColumnWithExtendedMeta>,
+    ],
+    [
+      'precentile rank column with reference in meta and window',
+      [
+        '50',
+        series,
+        { ...metric, field: dataView.fields[0].name },
+        dataView,
+        { index: 0, window: '10' },
+      ],
+      {
+        meta: { metricId: 'some-id', reference: 'some-id.0' },
+        operationType: 'percentile_rank',
+        params: { format: { id: 'bytes' }, value: 50 },
+        sourceField: 'bytes',
+        window: '10',
+      } as Partial<PercentileRanksColumnWithExtendedMeta>,
+    ],
+  ])('should return %s', (_, input, expected) => {
+    if (expected === null) {
+      expect(convertToPercentileRankColumn(...input)).toBeNull();
+    } else if (Array.isArray(expected)) {
+      expect(convertToPercentileRankColumn(...input)).toEqual(
+        expected.map(expect.objectContaining)
+      );
+    } else {
+      expect(convertToPercentileRankColumn(...input)).toEqual(expect.objectContaining(expected));
     }
   });
 });
