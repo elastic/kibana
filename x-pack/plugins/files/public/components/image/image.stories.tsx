@@ -25,7 +25,7 @@ const baseStyle = css`
 `;
 
 const Template: ComponentStory<typeof Image> = (props: Props) => (
-  <Image css={baseStyle} {...props} />
+  <Image css={baseStyle} {...props} ref={action('ref')} />
 );
 
 export const Basic = Template.bind({});
