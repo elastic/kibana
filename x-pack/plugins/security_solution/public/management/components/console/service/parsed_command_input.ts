@@ -9,7 +9,11 @@
 
 import type { CommandDefinition } from '..';
 
-export type ParsedArgData<T = string> = T[];
+export type PossibleArgDataTypes = string | boolean;
+
+export type ParsedArgData<T = PossibleArgDataTypes> = Array<
+  T extends PossibleArgDataTypes ? T : never
+>;
 
 interface ParsedCommandInput<TArgs extends object = any> {
   name: string;
