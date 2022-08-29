@@ -55,6 +55,7 @@ import type {
 } from '@kbn/core/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { BrushTriggerEvent, ClickTriggerEvent } from '@kbn/charts-plugin/public';
+import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import { getExecutionContextEvents, trackUiCounterEvents } from '../lens_ui_telemetry';
 import { Document } from '../persistence';
 import { ExpressionWrapper, ExpressionWrapperProps } from './expression_wrapper';
@@ -770,8 +771,20 @@ export class Embeddable
 
     this.activeDataInfo.activeDatasource = this.deps.datasourceMap[activeDatasourceId];
     const docDatasourceState = this.savedVis?.state.datasourceStates[activeDatasourceId];
+    const adHocDataviews = await Promise.all(
+      Object.values(this.savedVis?.state.adHocDataViews || {})
+        .map((persistedSpec) => {
+          return DataViewPersistableStateService.inject(
+            persistedSpec,
+            this.savedVis?.references || []
+          );
+        })
+        .map((spec) => this.deps.dataViews.create(spec))
+    );
 
-    const indexPatternsCache = this.indexPatterns.reduce(
+    const allIndexPatterns = [...this.indexPatterns, ...adHocDataviews];
+
+    const indexPatternsCache = allIndexPatterns.reduce(
       (acc, indexPattern) => ({
         [indexPattern.id!]: convertDataViewIntoLensIndexPattern(indexPattern),
         ...acc,
@@ -782,7 +795,7 @@ export class Embeddable
     if (!this.activeDataInfo.activeDatasourceState) {
       this.activeDataInfo.activeDatasourceState = this.activeDataInfo.activeDatasource.initialize(
         docDatasourceState,
-        this.savedVis?.references,
+        [...(this.savedVis?.references || []), ...(this.savedVis?.state.internalReferences || [])],
         undefined,
         undefined,
         indexPatternsCache
@@ -831,6 +844,13 @@ export class Embeddable
       this.savedVis?.references.map(({ id }) => id) || [],
       this.deps.dataViews
     );
+    (
+      await Promise.all(
+        Object.values(this.savedVis?.state.adHocDataViews || {}).map((spec) =>
+          this.deps.dataViews.create(spec)
+        )
+      )
+    ).forEach((dataView) => indexPatterns.push(dataView));
 
     this.indexPatterns = uniqBy(indexPatterns, 'id');
 
