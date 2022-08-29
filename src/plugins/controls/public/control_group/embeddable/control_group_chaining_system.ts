@@ -113,7 +113,7 @@ export const ControlGroupChainingSystems: {
         const nextControl = getChild(childOrder.idsInOrder[nextOrder]);
 
         // make the next chained embeddable updateInputFromParent
-        if (nextControl.isChained()) {
+        if (nextControl?.isChained?.()) {
           setTimeout(
             () => nextControl.refreshInputFromParent(),
             1 // run on next tick

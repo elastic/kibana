@@ -100,7 +100,7 @@ export const dashboardStateSlice = createSlice({
     setQuery: (state, action: PayloadAction<Query>) => {
       state.query = action.payload;
     },
-    setTimeslice: (state, action: PayloadAction<[number, number]>) => {
+    setTimeslice: (state, action: PayloadAction<[number, number] | undefined>) => {
       state.timeslice = action.payload;
     },
   },

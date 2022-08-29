@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { ReactNode } from 'react';
 import { Filter } from '@kbn/es-query';
-
 import {
   EmbeddableFactory,
   EmbeddableOutput,
@@ -38,7 +38,10 @@ export type ControlFactory<T extends ControlInput = ControlInput> = EmbeddableFa
 export type ControlEmbeddable<
   TControlEmbeddableInput extends ControlInput = ControlInput,
   TControlEmbeddableOutput extends ControlOutput = ControlOutput
-> = IEmbeddable<TControlEmbeddableInput, TControlEmbeddableOutput>;
+> = IEmbeddable<TControlEmbeddableInput, TControlEmbeddableOutput> & {
+  isChained?: () => boolean;
+  renderPrepend?: () => ReactNode | undefined;
+};
 
 /**
  * Control embeddable editor types
