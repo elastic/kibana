@@ -19,7 +19,7 @@ const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
 describe('Build a column button to copy to clipboard', () => {
   it('should copy a column name to clipboard on click', () => {
     const { label, iconType, onClick } = buildCopyColumnNameButton({
-      columnId: 'test-field-name',
+      columnDisplayName: 'test-field-name',
       services: discoverServiceMock,
     });
     execCommandMock.mockImplementationOnce(() => true);
@@ -98,7 +98,7 @@ describe('Build a column button to copy to clipboard', () => {
 
   it('should not copy to clipboard on click', () => {
     const { label, iconType, onClick } = buildCopyColumnNameButton({
-      columnId: 'test-field-name',
+      columnDisplayName: 'test-field-name',
       services: discoverServiceMock,
     });
     execCommandMock.mockImplementationOnce(() => false);
