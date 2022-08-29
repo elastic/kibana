@@ -6,10 +6,9 @@
  */
 
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { noop } from 'lodash/fp';
+import { filter, head, noop, orderBy, pipe } from 'lodash/fp';
 import type { MlSummaryJob } from '@kbn/ml-plugin/common';
 import { DEFAULT_ANOMALY_SCORE } from '../../../../../common/constants';
-
 import * as i18n from './translations';
 import { useUiSetting$ } from '../../../lib/kibana';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
@@ -21,10 +20,16 @@ import { getAggregatedAnomaliesQuery } from '../../../../overview/components/ent
 import type { inputsModel } from '../../../store';
 import { isJobFailed, isJobStarted } from '../../../../../common/machine_learning/helpers';
 
-type AnomalyJobStatus = 'enabled' | 'disabled' | 'uninstalled' | 'failed';
+export enum AnomalyJobStatus {
+  'enabled',
+  'disabled',
+  'uninstalled',
+  'failed',
+}
 
 export interface AnomaliesCount {
-  jobId: NotableAnomaliesJobId;
+  name: NotableAnomaliesJobId;
+  jobId?: string;
   count: number;
   status: AnomalyJobStatus;
 }
@@ -44,7 +49,7 @@ export const useNotableAnomaliesSearch = ({
   data: AnomaliesCount[];
   refetch: inputsModel.Refetch;
 } => {
-  const [data, setData] = useState<AnomaliesCount[]>(formatResultData([], [], []));
+  const [data, setData] = useState<AnomaliesCount[]>(formatResultData([], []));
   const refetch = useRef<inputsModel.Refetch>(noop);
 
   const {
@@ -56,21 +61,22 @@ export const useNotableAnomaliesSearch = ({
   const { addError } = useAppToasts();
   const [anomalyScoreThreshhold] = useUiSetting$<number>(DEFAULT_ANOMALY_SCORE);
 
-  const { filteredJobs, query, filteredJobIds } = useMemo(() => {
-    const newFilteredJobs = installedSecurityJobs.filter(({ id }) =>
-      NOTABLE_ANOMALIES_IDS.includes(id as NotableAnomaliesJobId)
+  const { notableAnomaliesJobs, query } = useMemo(() => {
+    const newNotableAnomaliesJobs = installedSecurityJobs.filter(({ id }) =>
+      NOTABLE_ANOMALIES_IDS.some((notableJobId) => matchJobId(id, notableJobId))
     );
 
-    const newFilteredJobIds = newFilteredJobs.map(({ id }) => id);
-
     const newQuery = getAggregatedAnomaliesQuery({
-      jobIds: newFilteredJobIds,
+      jobIds: newNotableAnomaliesJobs.map(({ id }) => id),
       anomalyScoreThreshhold: anomalyScoreThreshhold ?? 50,
       from,
       to,
     });
 
-    return { query: newQuery, filteredJobs: newFilteredJobs, filteredJobIds: newFilteredJobIds };
+    return {
+      query: newQuery,
+      notableAnomaliesJobs: newNotableAnomaliesJobs,
+    };
   }, [installedSecurityJobs, anomalyScoreThreshhold, from, to]);
 
   useEffect(() => {
@@ -80,7 +86,7 @@ export const useNotableAnomaliesSearch = ({
     async function fetchAnomaliesSearch() {
       if (!isSubscribed) return;
 
-      if (skip || !isMlUser || filteredJobIds.length === 0) {
+      if (skip || !isMlUser || notableAnomaliesJobs.length === 0) {
         setLoading(false);
         return;
       }
@@ -89,7 +95,7 @@ export const useNotableAnomaliesSearch = ({
       try {
         const response = await notableAnomaliesSearch(
           {
-            jobIds: filteredJobIds,
+            jobIds: notableAnomaliesJobs.map(({ id }) => id),
             query,
           },
           abortCtrl.signal
@@ -98,7 +104,7 @@ export const useNotableAnomaliesSearch = ({
         if (isSubscribed) {
           setLoading(false);
           const buckets = response.aggregations.number_of_anomalies.buckets;
-          setData(formatResultData(buckets, filteredJobs, filteredJobIds));
+          setData(formatResultData(buckets, notableAnomaliesJobs));
         }
       } catch (error) {
         if (isSubscribed && error.name !== 'AbortError') {
@@ -114,40 +120,61 @@ export const useNotableAnomaliesSearch = ({
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [skip, isMlUser, addError, query, filteredJobIds, filteredJobs]);
+  }, [skip, isMlUser, addError, query, notableAnomaliesJobs]);
 
   return { isLoading: loading || installedJobsLoading, data, refetch: refetch.current };
 };
 
-const getMLJobStatus = (jobId: string, job: MlSummaryJob | undefined, filteredJobIds: string[]) => {
+const getMLJobStatus = (
+  notableJobId: NotableAnomaliesJobId,
+  job: MlSummaryJob | undefined,
+  notableAnomaliesJobs: MlSummaryJob[]
+) => {
   if (job) {
     if (isJobStarted(job.jobState, job.datafeedState)) {
-      return 'enabled';
+      return AnomalyJobStatus.enabled;
     }
     if (isJobFailed(job.jobState, job.datafeedState)) {
-      return 'failed';
+      return AnomalyJobStatus.failed;
     }
   }
-
-  return filteredJobIds.includes(jobId) ? 'disabled' : 'uninstalled';
+  return notableAnomaliesJobs.some(({ id }) => matchJobId(id, notableJobId))
+    ? AnomalyJobStatus.disabled
+    : AnomalyJobStatus.uninstalled;
 };
 function formatResultData(
   buckets: Array<{
-    key: NotableAnomaliesJobId;
+    key: string;
     doc_count: number;
   }>,
-  filteredJobs: MlSummaryJob[],
-  filteredJobIds: string[]
-) {
-  return NOTABLE_ANOMALIES_IDS.map((jobId) => {
-    const bucket = buckets.find(({ key }) => jobId === key);
-    const job = filteredJobs.find(({ id }) => id === jobId);
-    const status: AnomalyJobStatus = getMLJobStatus(jobId, job, filteredJobIds);
+  notableAnomaliesJobs: MlSummaryJob[]
+): AnomaliesCount[] {
+  return NOTABLE_ANOMALIES_IDS.map((notableJobId) => {
+    const job = findJobWithId(notableJobId)(notableAnomaliesJobs);
+    const bucket = buckets.find(({ key }) => key === job?.id);
 
     return {
-      jobId,
+      name: notableJobId,
+      jobId: job?.id,
       count: bucket?.doc_count ?? 0,
-      status,
+      status: getMLJobStatus(notableJobId, job, notableAnomaliesJobs),
     };
   });
 }
+
+/**
+ * ML module allows users to add a prefix to the job id.
+ * So we need to match jobs that end with the notableJobId.
+ */
+const matchJobId = (jobId: string, notableJobId: NotableAnomaliesJobId) =>
+  jobId.endsWith(notableJobId);
+
+/**
+ * When multiple jobs match a notable job id, it returns the most recent one.
+ */
+const findJobWithId = (notableJobId: NotableAnomaliesJobId) =>
+  pipe<MlSummaryJob[][], MlSummaryJob[], MlSummaryJob[], MlSummaryJob | undefined>(
+    filter<MlSummaryJob>(({ id }) => matchJobId(id, notableJobId)),
+    orderBy<MlSummaryJob>('latestTimestampSortValue', 'desc'),
+    head
+  );

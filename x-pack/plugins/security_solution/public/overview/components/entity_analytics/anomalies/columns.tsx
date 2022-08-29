@@ -11,8 +11,8 @@ import { EuiLink } from '@elastic/eui';
 import { ML_PAGES, useMlHref } from '@kbn/ml-plugin/public';
 import * as i18n from './translations';
 import type { AnomaliesCount } from '../../../../common/components/ml/anomaly/use_anomalies_search';
+import { AnomalyJobStatus } from '../../../../common/components/ml/anomaly/use_anomalies_search';
 import { useKibana } from '../../../../common/lib/kibana';
-import type { NotableAnomaliesJobId } from './config';
 
 type AnomaliesColumns = Array<EuiBasicTableColumn<AnomaliesCount>>;
 
@@ -24,26 +24,26 @@ export const useAnomaliesColumns = (loading: boolean): AnomaliesColumns => {
   const columns: AnomaliesColumns = useMemo(
     () => [
       {
-        field: 'jobId',
+        field: 'name',
         name: i18n.ANOMALY_NAME,
         truncateText: true,
         mobileOptions: { show: true },
         'data-test-subj': 'anomalies-table-column-name',
-        render: (jobId, { status }) => {
-          if (status === 'enabled') {
-            return jobId;
+        render: (name, { status, count }) => {
+          if (count > 0 || status === AnomalyJobStatus.enabled) {
+            return name;
           } else {
-            return <MediumShadeText>{jobId}</MediumShadeText>;
+            return <MediumShadeText>{name}</MediumShadeText>;
           }
         },
       },
       {
         field: 'count',
         sortable: ({ count, status }) => {
-          if (status === 'enabled') {
+          if (count > 0) {
             return count;
           }
-          if (status === 'disabled') {
+          if (status === AnomalyJobStatus.disabled) {
             return -1;
           }
           return -2;
@@ -57,14 +57,14 @@ export const useAnomaliesColumns = (loading: boolean): AnomaliesColumns => {
         render: (count, { status, jobId }) => {
           if (loading) return '';
 
-          if (count > 0 || status === 'enabled') {
+          if (count > 0 || status === AnomalyJobStatus.enabled) {
             return count;
           } else {
-            if (status === 'disabled') {
+            if (status === AnomalyJobStatus.disabled && jobId) {
               return <EnableJobLink jobId={jobId} />;
             }
 
-            return <MediumShadeText>{status}</MediumShadeText>;
+            return <MediumShadeText>{I18N_JOB_STATUS[status]}</MediumShadeText>;
           }
         },
       },
@@ -74,7 +74,13 @@ export const useAnomaliesColumns = (loading: boolean): AnomaliesColumns => {
   return columns;
 };
 
-const EnableJobLink = ({ jobId }: { jobId: NotableAnomaliesJobId }) => {
+const I18N_JOB_STATUS = {
+  [AnomalyJobStatus.disabled]: i18n.JOB_STATUS_DISABLED,
+  [AnomalyJobStatus.failed]: i18n.JOB_STATUS_FAILED,
+  [AnomalyJobStatus.uninstalled]: i18n.JOB_STATUS_UNINSTALLED,
+};
+
+const EnableJobLink = ({ jobId }: { jobId: string }) => {
   const {
     services: { ml, http },
   } = useKibana();
