@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { EuiPanel, EuiThemeProvider, useEuiTheme } from '@elastic/eui';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
-import type { AppLeaveHandler } from '@kbn/core/public';
+import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useSecuritySolutionNavigation } from '../../../common/components/navigation/use_security_solution_navigation';
 import { TimelineId } from '../../../../common/types/timeline';
@@ -32,10 +32,6 @@ const NO_DATA_PAGE_MAX_WIDTH = 950;
 const NO_DATA_PAGE_TEMPLATE_PROPS = {
   restrictWidth: NO_DATA_PAGE_MAX_WIDTH,
   template: 'centeredBody',
-  pageContentProps: {
-    hasShadow: false,
-    color: 'transparent',
-  },
 };
 
 /**
@@ -73,70 +69,69 @@ const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<{
   `}
 `;
 
-interface SecuritySolutionPageWrapperProps {
-  onAppLeave: (handler: AppLeaveHandler) => void;
-}
+export const SecuritySolutionTemplateWrapper: React.FC<{
+  template?: KibanaPageTemplateProps['template'] | 'noData';
+}> = React.memo(({ children, template = 'default' }) => {
+  const solutionNav = useSecuritySolutionNavigation();
+  const isPolicySettingsVisible = useIsPolicySettingsBarVisible();
+  const [isTimelineBottomBarVisible] = useShowTimeline();
+  const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
+  const { show: isShowingTimelineOverlay } = useDeepEqualSelector((state) =>
+    getTimelineShowStatus(state, TimelineId.active)
+  );
+  const isGroupedNavEnabled = useIsGroupedNavigationEnabled();
+  const addBottomPadding =
+    isTimelineBottomBarVisible || isPolicySettingsVisible || isGroupedNavEnabled;
 
-export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapperProps> =
-  React.memo(({ children, onAppLeave }) => {
-    const solutionNav = useSecuritySolutionNavigation();
-    const isPolicySettingsVisible = useIsPolicySettingsBarVisible();
-    const [isTimelineBottomBarVisible] = useShowTimeline();
-    const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
-    const { show: isShowingTimelineOverlay } = useDeepEqualSelector((state) =>
-      getTimelineShowStatus(state, TimelineId.active)
-    );
-    const isGroupedNavEnabled = useIsGroupedNavigationEnabled();
-    const addBottomPadding =
-      isTimelineBottomBarVisible || isPolicySettingsVisible || isGroupedNavEnabled;
+  const showEmptyState = useShowPagesWithEmptyView();
 
-    const showEmptyState = useShowPagesWithEmptyView();
-    const emptyStateProps = showEmptyState
+  const emptyStateProps =
+    showEmptyState || template === 'noData'
       ? {
           ...NO_DATA_PAGE_TEMPLATE_PROPS,
-          template: 'centeredContent',
-          pageContentProps: { verticalPosition: 'top' },
+          template: 'centeredContent' as const,
         }
-      : {};
+      : { template };
 
-    // The bottomBar by default has a set 'dark' colorMode that doesn't match the global colorMode from the Advanced Settings
-    // To keep the mode in sync, we pass in the globalColorMode to the bottom bar here
-    const { colorMode: globalColorMode } = useEuiTheme();
-    /*
-     * StyledKibanaPageTemplate is a styled EuiPageTemplate. Security solution currently passes the header
-     * and page content as the children of StyledKibanaPageTemplate, as opposed to using the pageHeader prop,
-     * which may account for any style discrepancies, such as the bottom border not extending the full width of the page,
-     * between EuiPageTemplate and the security solution pages.
-     */
-    return (
-      <StyledKibanaPageTemplate
-        $addBottomPadding={addBottomPadding}
-        $isShowingTimelineOverlay={isShowingTimelineOverlay}
-        bottomBarProps={SecuritySolutionBottomBarProps}
-        bottomBar={
-          isTimelineBottomBarVisible && (
-            <EuiThemeProvider colorMode={globalColorMode}>
-              <SecuritySolutionBottomBar onAppLeave={onAppLeave} />
-            </EuiThemeProvider>
-          )
-        }
-        paddingSize="none"
-        solutionNav={solutionNav}
-        restrictWidth={false}
-        template="default"
-        {...emptyStateProps}
-      >
-        <>
-          <GlobalKQLHeader />
-          <EuiPanel
-            className="securityPageWrapper"
-            data-test-subj="pageContainer"
-            hasShadow={false}
-            paddingSize="l"
-          >
-            {children}
-          </EuiPanel>
-        </>
-      </StyledKibanaPageTemplate>
-    );
-  });
+  // The bottomBar by default has a set 'dark' colorMode that doesn't match the global colorMode from the Advanced Settings
+  // To keep the mode in sync, we pass in the globalColorMode to the bottom bar here
+  const { colorMode: globalColorMode } = useEuiTheme();
+  /*
+   * StyledKibanaPageTemplate is a styled EuiPageTemplate. Security solution currently passes the header
+   * and page content as the children of StyledKibanaPageTemplate, as opposed to using the pageHeader prop,
+   * which may account for any style discrepancies, such as the bottom border not extending the full width of the page,
+   * between EuiPageTemplate and the security solution pages.
+   */
+  return (
+    <StyledKibanaPageTemplate
+      $addBottomPadding={addBottomPadding}
+      $isShowingTimelineOverlay={isShowingTimelineOverlay}
+      bottomBarProps={SecuritySolutionBottomBarProps}
+      bottomBar={
+        isTimelineBottomBarVisible && (
+          <EuiThemeProvider colorMode={globalColorMode}>
+            <SecuritySolutionBottomBar />
+          </EuiThemeProvider>
+        )
+      }
+      paddingSize="none"
+      solutionNav={solutionNav}
+      restrictWidth={false}
+      {...emptyStateProps}
+    >
+      <>
+        <GlobalKQLHeader />
+        <EuiPanel
+          className="securityPageWrapper"
+          data-test-subj="pageContainer"
+          hasShadow={false}
+          paddingSize="l"
+        >
+          {children}
+        </EuiPanel>
+      </>
+    </StyledKibanaPageTemplate>
+  );
+});
+
+SecuritySolutionTemplateWrapper.displayName = 'SecuritySolutionTemplateWrapper';
