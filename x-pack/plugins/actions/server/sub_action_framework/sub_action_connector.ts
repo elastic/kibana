@@ -138,6 +138,7 @@ export abstract class SubActionConnector<Config, Secrets> {
       );
 
       const res = await request({
+        ...config,
         axios: this.axiosInstance,
         url: normalizedURL,
         logger: this.logger,
@@ -145,7 +146,6 @@ export abstract class SubActionConnector<Config, Secrets> {
         data: this.normalizeData(data),
         configurationUtilities: this.configurationUtilities,
         headers: this.getHeaders(headers),
-        ...config,
       });
 
       this.validateResponse(responseSchema, res.data);
