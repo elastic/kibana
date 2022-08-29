@@ -29,7 +29,7 @@ export class AgentManager {
     private defaultAgentConfig: HttpAgentOptions = {
       keepAlive: true,
       keepAliveMsecs: 1000,
-      maxSockets: 256,
+      maxSockets: Infinity,
       maxFreeSockets: 256,
       scheduling: 'lifo',
     }
@@ -44,17 +44,19 @@ export class AgentManager {
     type: string,
     agentOptions?: HttpAgentOptions | UndiciAgentOptions | AgentFactory | false
   ): AgentFactory {
-    const validAgentConfig = assertValidAgentConfig(agentOptions);
-
-    if (isAgentFactory(validAgentConfig)) {
+    if (isAgentFactory(agentOptions)) {
       // use the user-provided factory directly
-      return validAgentConfig;
+      return agentOptions;
     }
 
-    const currentConfig = Object.assign({}, this.defaultAgentConfig, validAgentConfig);
+    const validAgentConfig = assertValidAgentConfig(agentOptions);
+
+    const baseConfig = Object.assign({}, this.defaultAgentConfig, validAgentConfig);
 
     return (connectionOpts: ConnectionOptions): NetworkAgent => {
       const agentMap = this.agentsMaps[connectionOpts.url.protocol];
+
+      const currentConfig = Object.assign({}, baseConfig, connectionOpts.tls);
 
       if (!agentMap) {
         throw new Error(`Unsupported protocol: '${connectionOpts.url.protocol}'`);
@@ -74,9 +76,9 @@ export class AgentManager {
       }
 
       const agent =
-        connectionOpts.url.protocol === 'https:'
-          ? new HttpsAgent(currentConfig)
-          : new HttpAgent(currentConfig);
+        connectionOpts.url.protocol === 'http:'
+          ? new HttpAgent(currentConfig)
+          : new HttpsAgent(currentConfig);
 
       agentMap[type] = [agent, currentConfig];
 
@@ -86,11 +88,9 @@ export class AgentManager {
 }
 
 const assertValidAgentConfig = (
-  agentOptions?: HttpAgentOptions | UndiciAgentOptions | AgentFactory | false
-): HttpAgentOptions | AgentFactory => {
-  if (typeof agentOptions === 'function') {
-    return agentOptions;
-  } else if (!agentOptions) {
+  agentOptions?: HttpAgentOptions | UndiciAgentOptions | false
+): HttpAgentOptions => {
+  if (!agentOptions) {
     return {};
   } else if (isHttpAgentOptions(agentOptions)) {
     return agentOptions;
@@ -100,7 +100,7 @@ const assertValidAgentConfig = (
 };
 
 const isAgentFactory = (
-  agentOptions: HttpAgentOptions | AgentFactory
+  agentOptions?: HttpAgentOptions | UndiciAgentOptions | AgentFactory | false
 ): agentOptions is AgentFactory => {
   return typeof agentOptions === 'function';
 };
