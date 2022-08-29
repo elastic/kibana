@@ -109,6 +109,8 @@ export class ProjectMonitorFormatter {
   }
 
   public configureAllProjectMonitors = async () => {
+    this.subject?.next(`Configuring all monitors${new Array(1024 * 5).fill('.').join('')}`);
+
     this.staleMonitorsMap = await this.getAllProjectMonitorsForProject();
     for (const monitor of this.monitors) {
       await this.configureProjectMonitor({ monitor });
