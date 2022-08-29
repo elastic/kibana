@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+
 import { i18n } from '@kbn/i18n';
 
 import { ErrorCode } from '../../../common/types/error_codes';
@@ -20,9 +21,9 @@ import { fetchIndices } from '../../lib/indices/fetch_indices';
 import { generateApiKey } from '../../lib/indices/generate_api_key';
 import { RouteDependencies } from '../../plugin';
 import { createError } from '../../utils/create_error';
+import { createIndexPipelineDefinitions } from '../../utils/create_pipeline_definitions';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 import { isIndexNotFoundException } from '../../utils/identify_exceptions';
-import {createIndexPipelineDefinitions} from "@kbn/enterprise-search-plugin/server/utils/create_pipeline_definitions";
 
 export function registerIndexRoutes({ router, log }: RouteDependencies) {
   router.get(
