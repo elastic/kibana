@@ -58,20 +58,18 @@ function getQueryStringForInfluencers(
   influencers: AnomaliesTableRecord['influencers'] = [],
   entityName?: string
 ) {
-  let filterString = '';
-
+  const influencersToFilter: string[] = [];
   if (influencers.length) {
     influencers.forEach((influencer, index) => {
       for (const influencerFieldName in influencer) {
-        if (influencerFieldName === entityName) continue;
-        filterString += `${influencerFieldName}: ${influencer[influencerFieldName]}${
-          index === influencers.length - 1 ? ')' : ' or '
-        }`;
+        if (!(influencerFieldName === entityName)) {
+          influencersToFilter.push(`${influencerFieldName}: ${influencer[influencerFieldName]}`);
+        }
       }
     });
   }
 
-  return filterString;
+  return `(${influencersToFilter.join(' or ')})`;
 }
 
 interface LinksMenuProps {
@@ -167,7 +165,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
             query: {
               language: SEARCH_QUERY_LANGUAGE.KUERY,
               query: `${escapeKuery(anomaly.entityName)}:${escapeKuery(anomaly.entityValue)}${
-                influencersQueryString !== '' ? ' and (' : ''
+                influencersQueryString !== '' ? ' and ' : ''
               }${influencersQueryString}`,
             },
           }
