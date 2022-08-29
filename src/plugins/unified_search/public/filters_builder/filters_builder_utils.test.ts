@@ -7,17 +7,17 @@
  */
 
 import { buildEmptyFilter, Filter } from '@kbn/es-query';
-import { ConditionTypes } from './filters_builder_condition_types';
+import { ConditionTypes } from '../utils';
 import {
   getFilterByPath,
-  getConditionalOperationType,
   getPathInArray,
   addFilter,
-  FilterItem,
   removeFilter,
   moveFilter,
   normalizeFilters,
 } from './filters_builder_utils';
+import type { FilterItem } from '../utils';
+import { getConditionalOperationType } from '../utils';
 
 import {
   getDataAfterNormalized,

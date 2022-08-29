@@ -11,7 +11,7 @@ import { EuiDragDropContext, DragDropContextProps } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { FiltersBuilderContextType } from './filters_builder_context';
-import { ConditionTypes } from './filters_builder_condition_types';
+import { ConditionTypes } from '../utils';
 import { FilterGroup } from './filters_builder_filter_group';
 import { FiltersBuilderReducer } from './filters_builder_reducer';
 
