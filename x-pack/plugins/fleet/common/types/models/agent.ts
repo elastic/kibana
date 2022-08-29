@@ -29,13 +29,7 @@ export type AgentStatus =
 
 export type SimplifiedAgentStatus = 'healthy' | 'unhealthy' | 'updating' | 'offline' | 'inactive';
 
-export type AgentActionType =
-  | 'POLICY_CHANGE'
-  | 'UNENROLL'
-  | 'UPGRADE'
-  | 'SETTINGS'
-  | 'POLICY_REASSIGN'
-  | 'CANCEL';
+export type AgentActionType = 'UNENROLL' | 'UPGRADE' | 'SETTINGS' | 'POLICY_REASSIGN' | 'CANCEL';
 
 export interface NewAgentAction {
   type: AgentActionType;
