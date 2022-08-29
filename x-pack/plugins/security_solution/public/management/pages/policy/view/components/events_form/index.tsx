@@ -12,7 +12,6 @@ import {
   EuiSpacer,
   EuiText,
   htmlIdGenerator,
-  EuiSwitch,
   EuiIconTip,
   EuiBetaBadge,
   EuiFlexItem,
@@ -24,6 +23,8 @@ import type {
   PolicyOperatingSystem,
   UIPolicyConfig,
 } from '../../../../../../../common/endpoint/types';
+import { usePolicyDetailsSelector } from '../../policy_hooks';
+import { policyConfig } from '../../../store/policy_details/selectors';
 import { ConfigForm, ConfigFormHeading } from '../config_form';
 
 const OPERATING_SYSTEM_TO_TEST_SUBJ: { [K in OperatingSystem]: string } = {
@@ -49,10 +50,14 @@ export interface EventFormOption<T extends OperatingSystem> {
 }
 
 export interface SupplementalEventFormOption<T extends OperatingSystem> {
+  title?: string;
+  description?: string;
   name: string;
   protectionField: ProtectionField<T>;
   tooltipText?: string;
   beta?: boolean;
+  indented?: boolean;
+  isDisabled?(policyConfig: UIPolicyConfig): boolean;
 }
 
 export interface EventsFormProps<T extends OperatingSystem> {
@@ -70,6 +75,7 @@ const InnerEventsForm = <T extends OperatingSystem>({
   onValueSelection,
   supplementalOptions,
 }: EventsFormProps<T>) => {
+  const policyDetailsConfig = usePolicyDetailsSelector(policyConfig);
   const theme = useContext(ThemeContext);
   const countSelected = useCallback(() => {
     const supplementalSelectionFields: string[] = supplementalOptions
@@ -120,34 +126,63 @@ const InnerEventsForm = <T extends OperatingSystem>({
         );
       })}
       {supplementalOptions &&
-        supplementalOptions.map(({ name, protectionField, tooltipText, beta }) => {
-          return (
-            <div key={String(protectionField)} style={{ paddingLeft: theme.eui.euiSizeS }}>
-              <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <EuiSpacer size="s" />
-                  <EuiSwitch
-                    id={htmlIdGenerator()()}
-                    label={name}
-                    data-test-subj={`policy${OPERATING_SYSTEM_TO_TEST_SUBJ[os]}Event_${protectionField}`}
-                    checked={selection[protectionField]}
-                    onChange={(event) => onValueSelection(protectionField, event.target.checked)}
-                  />
-                </EuiFlexItem>
-                {tooltipText && (
-                  <EuiFlexItem grow={false}>
-                    <EuiIconTip position="right" content={tooltipText} />
-                  </EuiFlexItem>
+        supplementalOptions.map(
+          ({
+            title,
+            description,
+            name,
+            protectionField,
+            tooltipText,
+            beta,
+            indented,
+            isDisabled,
+          }) => {
+            return (
+              <div
+                key={String(protectionField)}
+                style={indented ? { paddingLeft: theme.eui.euiSizeL } : {}}
+              >
+                {title && (
+                  <>
+                    <EuiSpacer size="m" />
+                    <ConfigFormHeading>{title}</ConfigFormHeading>
+                  </>
                 )}
-                {beta && (
-                  <EuiFlexItem grow={false}>
-                    <EuiBetaBadge label="beta" size="s" />
-                  </EuiFlexItem>
+                {description && (
+                  <>
+                    <EuiSpacer size="s" />
+                    <EuiText size="xs" color="subdued">
+                      {description}
+                    </EuiText>
+                  </>
                 )}
-              </EuiFlexGroup>
-            </div>
-          );
-        })}
+                <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiSpacer size="s" />
+                    <EuiCheckbox
+                      id={htmlIdGenerator()()}
+                      label={name}
+                      data-test-subj={`policy${OPERATING_SYSTEM_TO_TEST_SUBJ[os]}Event_${protectionField}`}
+                      checked={selection[protectionField]}
+                      onChange={(event) => onValueSelection(protectionField, event.target.checked)}
+                      disabled={isDisabled ? isDisabled(policyDetailsConfig) : false}
+                    />
+                  </EuiFlexItem>
+                  {tooltipText && (
+                    <EuiFlexItem grow={false}>
+                      <EuiIconTip position="right" content={tooltipText} />
+                    </EuiFlexItem>
+                  )}
+                  {beta && (
+                    <EuiFlexItem grow={false}>
+                      <EuiBetaBadge label="beta" size="s" />
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
+              </div>
+            );
+          }
+        )}
     </ConfigForm>
   );
 };
