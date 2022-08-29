@@ -19,7 +19,7 @@ describe('OpenInDevConsoleButton', () => {
       <TestProviders>
         <OpenInDevConsoleButton
           enableButton={true}
-          loadFromUrl="http://localhost:1234/test"
+          href="http://localhost:1234/test"
           tooltipContent="popover"
           title="open in dev console"
         />
@@ -33,7 +33,7 @@ describe('OpenInDevConsoleButton', () => {
       <TestProviders>
         <OpenInDevConsoleButton
           enableButton={true}
-          loadFromUrl="http://localhost:1234/s/myspace/test"
+          href="/s/myspace/app/dev_tools#/console?load_from=http://localhost:1234/s/myspace/test"
           tooltipContent="popover"
           title="open in dev console"
         />
@@ -49,7 +49,7 @@ describe('OpenInDevConsoleButton', () => {
       <TestProviders>
         <OpenInDevConsoleButton
           enableButton={false}
-          loadFromUrl="http://localhost:1234/test"
+          href="http://localhost:1234/test"
           title="open in dev console"
         />
       </TestProviders>
@@ -62,7 +62,7 @@ describe('OpenInDevConsoleButton', () => {
       <TestProviders>
         <OpenInDevConsoleButton
           enableButton={false}
-          loadFromUrl="http://localhost:1234/test"
+          href="http://localhost:1234/test"
           title="open in dev console"
           tooltipContent="tooltipContent"
         />
