@@ -329,15 +329,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       actionsConfigUtils,
     });
 
-    // subActionFramework.registerConnector({
-    //   id: '.torq',
-    //   name: 'Send to Torq',
-    //   minimumLicenseRequired: 'basic' as const,
-    //   schema: { config: TorqConfigSchema, secrets: TorqSecretSchema },
-    //   supportedFeatureIds: ['alerting'],
-    //   Service: TorqConnector,
-    // });
-
     // Routes
     defineRoutes({
       router: core.http.createRouter<ActionsRequestHandlerContext>(),
