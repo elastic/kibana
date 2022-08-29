@@ -63,7 +63,7 @@ describe('Build a column button to copy to clipboard', () => {
     await wrapper.find(EuiButton).simulate('click');
 
     // first row out of 3 rows does not have a value
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith('custom_extension\n\njpg\ngif');
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith('"custom_extension"\n\njpg\ngif');
 
     const {
       label: labelSource,
@@ -88,7 +88,7 @@ describe('Build a column button to copy to clipboard', () => {
     // first row out of 3 rows does not have a value
     expect(navigator.clipboard.writeText).toHaveBeenNthCalledWith(
       2,
-      '"Document"\n{"bytes":20,"date":"2020-20-01T12:12:12.123","message":"test1","_index":"i","_score":1}\n' +
+      'Document\n{"bytes":20,"date":"2020-20-01T12:12:12.123","message":"test1","_index":"i","_score":1}\n' +
         '{"date":"2020-20-01T12:12:12.124","extension":"jpg","name":"test2","_index":"i","_score":1}\n' +
         '{"bytes":50,"date":"2020-20-01T12:12:12.124","extension":"gif","name":"test3","_index":"i","_score":1}'
     );

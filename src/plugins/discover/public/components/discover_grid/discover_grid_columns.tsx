@@ -99,7 +99,7 @@ function buildEuiGridColumn({
     id: columnName,
     schema: getSchemaByKbnType(dataViewField?.type),
     isSortable: isSortEnabled && dataViewField?.sortable === true,
-    display: columnDisplayName,
+    displayAsText: columnDisplayName,
     actions: {
       showHide:
         defaultColumns || columnName === dataView.timeFieldName
