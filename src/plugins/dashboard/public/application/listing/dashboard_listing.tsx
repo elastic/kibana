@@ -302,6 +302,8 @@ export const DashboardListing = ({
           initialPageSize={initialPageSize}
           editItem={!showWriteControls ? undefined : editItem}
           initialFilter={initialFilter ?? defaultFilter}
+          headingId="dashboardListingHeading"
+          findItems={fetchItems}
           entityNamePlural={getEntityNamePlural()}
           tableListTitle={getTableListTitle()}
           entityName={getEntityName()}
@@ -309,8 +311,6 @@ export const DashboardListing = ({
             emptyPrompt,
             listingLimit,
           }}
-          headingId="dashboardListingHeading"
-          findItems={fetchItems}
           getDetailViewLink={({ id, attributes: { timeRestore } }) =>
             getDashboardListItemLink(
               core.application,
