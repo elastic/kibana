@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/target/types/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 
 import { createIndexPipelineDefinitions } from './create_pipeline_definitions';
 
-describe('createPipelineDefintions util function', () => {
+describe('createIndexPipelineDefinitions util function', () => {
   const indexName = 'my-index';
 
   const mockClient = {

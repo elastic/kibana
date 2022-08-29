@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/target/types/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 
 export interface CreatedPipelines {
   created: string[];
