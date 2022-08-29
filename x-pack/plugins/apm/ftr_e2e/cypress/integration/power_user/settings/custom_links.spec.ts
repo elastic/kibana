@@ -13,13 +13,13 @@ describe('Custom links', () => {
   });
 
   it('shows empty message and create button', () => {
-    cy.visit(basePath);
+    cy.visitKibana(basePath);
     cy.contains('No links found');
     cy.contains('Create custom link');
   });
 
   it('creates custom link', () => {
-    cy.visit(basePath);
+    cy.visitKibana(basePath);
     const emptyPrompt = cy.get('[data-test-subj="customLinksEmptyPrompt"]');
     cy.contains('Create custom link').click();
     cy.contains('Create link');
@@ -36,7 +36,11 @@ describe('Custom links', () => {
   });
 
   it('clears filter values when field is selected', () => {
-    cy.visit(basePath);
+    cy.visitKibana(basePath);
+
+    // wait for empty prompt
+    cy.get('[data-test-subj="customLinksEmptyPrompt"]').should('be.visible');
+
     cy.contains('Create custom link').click();
     cy.get('[data-test-subj="filter-0"]').select('service.name');
     cy.get(
