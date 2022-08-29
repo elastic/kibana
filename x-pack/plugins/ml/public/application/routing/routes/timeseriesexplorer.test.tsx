@@ -112,9 +112,9 @@ describe('TimeSeriesExplorerUrlStateManager', () => {
 
     render(
       <MlContext.Provider value={kibanaContextValueMock}>
-      <I18nProvider>
-        <TimeSeriesExplorerUrlStateManager {...props} />
-      </I18nProvider>
+        <I18nProvider>
+          <TimeSeriesExplorerUrlStateManager {...props} />
+        </I18nProvider>
       </MlContext.Provider>
     );
 
