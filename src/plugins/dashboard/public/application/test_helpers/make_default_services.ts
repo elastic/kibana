@@ -39,6 +39,7 @@ export function makeDefaultServices(): DashboardAppServices {
         description: `dashboard${i} desc`,
         references: [],
         timeRestore: true,
+        type: '',
         url: '',
         updatedAt: '',
         panelsJSON: '',
