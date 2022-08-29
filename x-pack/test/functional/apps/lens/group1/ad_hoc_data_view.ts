@@ -105,21 +105,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should allow adding an ad-hoc chart to a dashboard', async () => {
-      await PageObjects.lens.switchToVisualization('lnsLegacyMetric');
+      await PageObjects.lens.switchToVisualization('lnsMetric');
 
       await PageObjects.lens.configureDimension({
-        dimension: 'lnsLegacyMetric_metricDimensionPanel > lns-empty-dimension',
+        dimension: 'lnsMetric_primaryMetricDimensionPanel > lns-empty-dimension',
         operation: 'average',
         field: 'bytes',
       });
 
-      await PageObjects.lens.waitForVisualization('legacyMtrVis');
-      await PageObjects.lens.assertLegacyMetric('Average of bytes', '5,727.322');
+      await PageObjects.lens.waitForVisualization('mtrVis');
+      const metricData = await PageObjects.lens.getMetricVisualizationData();
+      expect(metricData[0].value).to.eql('5.73K');
+      expect(metricData[0].title).to.eql('Average of bytes');
       await PageObjects.lens.save('New Lens from Modal', false, false, false, 'new');
 
       await PageObjects.dashboard.waitForRenderComplete();
-
-      await PageObjects.lens.assertLegacyMetric('Average of bytes', '5,727.322');
+      expect(metricData[0].value).to.eql('5.73K');
 
       const panelCount = await PageObjects.dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
@@ -135,12 +136,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         field: 'bytes',
       });
 
-      await PageObjects.lens.switchToVisualization('lnsLegacyMetric');
+      await PageObjects.lens.switchToVisualization('lnsMetric');
 
-      await PageObjects.lens.waitForVisualization('legacyMtrVis');
+      await PageObjects.lens.waitForVisualization('mtrVis');
       await PageObjects.lens.save('Lens with adhoc data view');
-      await PageObjects.lens.waitForVisualization('legacyMtrVis');
-      await PageObjects.lens.assertLegacyMetric('Average of bytes', '5,727.322');
+      await PageObjects.lens.waitForVisualization('mtrVis');
+      const metricData = await PageObjects.lens.getMetricVisualizationData();
+      expect(metricData[0].value).to.eql('5.73K');
+      expect(metricData[0].title).to.eql('Average of bytes');
     });
   });
 }

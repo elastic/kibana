@@ -7,11 +7,13 @@
 
 import expect from '@kbn/expect';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
+import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { logWrapper } from './log_wrapper';
 
 export function LensPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
+  const findService = getService('find');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const elasticChart = getService('elasticChart');
@@ -1110,6 +1112,47 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async assertColor(color: string) {
       // TODO: target dimensionTrigger color element after merging https://github.com/elastic/kibana/pull/76871
       await testSubjects.getAttribute('~indexPattern-dimension-colorPicker', color);
+    },
+    async getMetricTiles() {
+      return findService.allByCssSelector('[data-test-subj="mtrVis"] .echChart li');
+    },
+
+    async getMetricElementIfExists(selector: string, container: WebElementWrapper) {
+      return (await findService.descendantExistsByCssSelector(selector, container))
+        ? await container.findByCssSelector(selector)
+        : undefined;
+    },
+
+    async getMetricDatum(tile: WebElementWrapper) {
+      return {
+        title: await (await this.getMetricElementIfExists('h2', tile))?.getVisibleText(),
+        subtitle: await (
+          await this.getMetricElementIfExists('.echMetricText__subtitle', tile)
+        )?.getVisibleText(),
+        extraText: await (
+          await this.getMetricElementIfExists('.echMetricText__extra', tile)
+        )?.getVisibleText(),
+        value: await (
+          await this.getMetricElementIfExists('.echMetricText__value', tile)
+        )?.getVisibleText(),
+        color: await (
+          await this.getMetricElementIfExists('.echMetric', tile)
+        )?.getComputedStyle('background-color'),
+      };
+    },
+
+    async getMetricVisualizationData() {
+      const tiles = await this.getMetricTiles();
+      const showingBar = Boolean(await findService.existsByCssSelector('.echSingleMetricProgress'));
+
+      const metricData = [];
+      for (const tile of tiles) {
+        metricData.push({
+          ...(await this.getMetricDatum(tile)),
+          showingBar,
+        });
+      }
+      return metricData;
     },
 
     /**
