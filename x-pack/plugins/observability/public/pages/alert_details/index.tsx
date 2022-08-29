@@ -18,11 +18,11 @@ import { i18n } from '@kbn/i18n';
 // import { AlertDetailsPathParams } from './types';
 
 export function AlertDetailsPage() {
-  const { http } = useKibana<ObservabilityAppServices>().services;
+    const { http } = useKibana<ObservabilityAppServices>().services;
 
-  const { ObservabilityPageTemplate } = usePluginContext();
-  // const { alertId } = useParams<AlertDetailsPathParams>();
-  const alert = {};
+    const { ObservabilityPageTemplate } = usePluginContext();
+    // const { alertId } = useParams<AlertDetailsPathParams>();
+    const alert = {};
 
     useBreadcrumbs([
         {
@@ -33,9 +33,9 @@ export function AlertDetailsPage() {
         }
     ]);
 
-  return (
-    <ObservabilityPageTemplate data-test-subj="alertDetails">
-      <AlertSummary alert={alert} />
-    </ObservabilityPageTemplate>
-  );
+    return (
+        <ObservabilityPageTemplate data-test-subj="alertDetails">
+            <AlertSummary alert={alert} />
+        </ObservabilityPageTemplate>
+    );
 }
