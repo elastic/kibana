@@ -6,13 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import { AppUnmount } from '@kbn/core-application-browser';
 import { Mounter } from '../types';
 import { ApplicationService } from '../application_service';
 
-/** @internal */
-export type ApplicationServiceContract = PublicMethodsOf<ApplicationService>;
 /** @internal */
 export type MockedUnmount = jest.Mocked<AppUnmount>;
 
