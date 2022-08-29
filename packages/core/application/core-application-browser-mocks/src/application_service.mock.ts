@@ -9,6 +9,7 @@
 import { History } from 'history';
 import { BehaviorSubject, Subject } from 'rxjs';
 
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import { capabilitiesServiceMock } from '@kbn/core-capabilities-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
@@ -20,10 +21,12 @@ import {
   AppMountParameters,
 } from '@kbn/core-application-browser';
 import type {
+  ApplicationService,
   InternalApplicationStart,
   InternalApplicationSetup,
 } from '@kbn/core-application-browser-internal';
-import { ApplicationServiceContract } from './test_types';
+
+type ApplicationServiceContract = PublicMethodsOf<ApplicationService>;
 
 const createSetupContractMock = (): jest.Mocked<ApplicationSetup> => ({
   register: jest.fn(),
