@@ -37,7 +37,7 @@ export const TimeSliderPrepend: FC<Props> = (props: Props) => {
     props.onNext();
 
     if (props.waitForControlOutputConsumersToLoad$) {
-      const subscription = props.waitForControlOutputConsumersToLoad$
+      const nextFrameSubscription = props.waitForControlOutputConsumersToLoad$
         .pipe(first())
         .subscribe(() => {
           // use timeout to display frame for small time period before moving to next frame
@@ -46,7 +46,7 @@ export const TimeSliderPrepend: FC<Props> = (props: Props) => {
           }, 1750);
           setTimeoutId(nextTimeoutId);
         });
-      setSubscription(subscription);
+      setSubscription(nextFrameSubscription);
     }
   };
 
