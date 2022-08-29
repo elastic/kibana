@@ -26,22 +26,6 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('POST /agents/{agentId}/actions', () => {
-      it('should return a 200 if this a valid actions request', async () => {
-        const { body: apiResponse } = await supertest
-          .post(`/api/fleet/agents/agent1/actions`)
-          .set('kbn-xsrf', 'xx')
-          .send({
-            action: {
-              type: 'POLICY_CHANGE',
-              data: { data: 'action_data' },
-            },
-          })
-          .expect(200);
-
-        expect(apiResponse.item.type).to.eql('POLICY_CHANGE');
-        expect(apiResponse.item.data).to.eql({ data: 'action_data' });
-      });
-
       it('should return a 200 if this a valid SETTINGS action request', async () => {
         const { body: apiResponse } = await supertest
           .post(`/api/fleet/agents/agent1/actions`)
@@ -96,8 +80,8 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xx')
           .send({
             action: {
-              type: 'POLICY_CHANGE',
-              data: { data: 'action_data' },
+              type: 'SETTINGS',
+              data: { log_level: 'debug' },
             },
           })
           .expect(404);
@@ -110,8 +94,8 @@ export default function (providerContext: FtrProviderContext) {
           .auth(testUsers.fleet_no_access.username, testUsers.fleet_no_access.password)
           .send({
             action: {
-              type: 'POLICY_CHANGE',
-              data: { data: 'action_data' },
+              type: 'SETTINGS',
+              data: { log_level: 'debug' },
             },
           })
           .expect(403);
