@@ -8,52 +8,43 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButtonIcon, EuiDescriptionList } from '@elastic/eui';
+import { EuiDescriptionList } from '@elastic/eui';
 import type { CasesUiSetup } from '@kbn/cases-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { PersistableStateAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
-import { getEmbeddableComponent } from '../embeddables';
+import {
+  ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
+  AnomalyChartsEmbeddableInput,
+  getEmbeddableComponent,
+} from '../embeddables';
 import type { MlStartDependencies } from '../plugin';
-import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE, AnomalySwimlaneEmbeddableInput } from '..';
 import { PLUGIN_ICON } from '../../common/constants/app';
 
-const AttachmentActions: React.FC = () => {
-  return (
-    <EuiButtonIcon
-      data-test-subj="test-attachment-action"
-      onClick={() => {}}
-      iconType="boxesHorizontal"
-      aria-label="See attachment"
-    />
-  );
-};
-
-export function registerAnomalySwimLaneCasesAttachment(
+export function registerAnomalyChartsCasesAttachment(
   cases: CasesUiSetup,
   coreStart: CoreStart,
   pluginStart: MlStartDependencies
 ) {
   cases.attachmentFramework.registerPersistableState({
-    id: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+    id: ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
     icon: PLUGIN_ICON,
     // TODO check where this name is presented
-    displayName: i18n.translate('xpack.ml.cases.anomalySwimLane.displayName', {
-      defaultMessage: 'Anomaly swim lane',
+    displayName: i18n.translate('xpack.ml.cases.anomalyCharts.displayName', {
+      defaultMessage: 'Anomaly charts',
     }),
     getAttachmentViewObject: () => ({
       event: (
         <FormattedMessage
-          id="xpack.ml.cases.anomalySwimLane.embeddableAddedEvent"
-          defaultMessage="added the Anomaly Swim Lane embeddable"
+          id="xpack.ml.cases.anomalyCharts.embeddableAddedEvent"
+          defaultMessage="added the Anomaly Charts embeddable"
         />
       ),
       timelineAvatar: PLUGIN_ICON,
-      actions: <AttachmentActions />,
       children: React.lazy(() => {
         return Promise.resolve().then(() => {
           const EmbeddableComponent = getEmbeddableComponent(
-            ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+            ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
             coreStart,
             pluginStart
           );
@@ -67,7 +58,7 @@ export function registerAnomalySwimLaneCasesAttachment(
               });
 
               const inputProps =
-                persistableStateAttachmentState as unknown as AnomalySwimlaneEmbeddableInput;
+                persistableStateAttachmentState as unknown as AnomalyChartsEmbeddableInput;
 
               return (
                 <>
@@ -78,29 +69,16 @@ export function registerAnomalySwimLaneCasesAttachment(
                       {
                         title: (
                           <FormattedMessage
-                            id="xpack.ml.cases.anomalySwimLane.description.jobIdsLabel"
+                            id="xpack.ml.cases.anomalyCharts.description.jobIdsLabel"
                             defaultMessage="Job IDs"
                           />
                         ),
                         description: inputProps.jobIds.join(', '),
                       },
-                      ...(inputProps.viewBy
-                        ? [
-                            {
-                              title: (
-                                <FormattedMessage
-                                  id="xpack.ml.cases.anomalySwimLane.description.viewByLabel"
-                                  defaultMessage="View by"
-                                />
-                              ),
-                              description: inputProps.viewBy,
-                            },
-                          ]
-                        : []),
                       {
                         title: (
                           <FormattedMessage
-                            id="xpack.ml.cases.anomalySwimLane.description.timeRangeLabel"
+                            id="xpack.ml.cases.anomalyCharts.description.timeRangeLabel"
                             defaultMessage="Time range"
                           />
                         ),
