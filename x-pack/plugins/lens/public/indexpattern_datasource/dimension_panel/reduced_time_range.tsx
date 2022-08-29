@@ -19,10 +19,14 @@ import {
 } from '../operations';
 import type { IndexPatternLayer } from '../types';
 import type { IndexPattern } from '../../types';
-import { windowOptions } from '../window_utils';
+import { reducedTimeRangeOptions } from '../reduced_time_range_utils';
 
-export function setWindow(columnId: string, layer: IndexPatternLayer, window: string | undefined) {
-  const trimmedWindow = window?.trim();
+export function setReducedTimeRange(
+  columnId: string,
+  layer: IndexPatternLayer,
+  reducedTimeRange: string | undefined
+) {
+  const trimmedReducedTimeRange = reducedTimeRange?.trim();
   const currentColumn = layer.columns[columnId];
   const label = currentColumn.customLabel
     ? currentColumn.label
@@ -32,8 +36,8 @@ export function setWindow(columnId: string, layer: IndexPatternLayer, window: st
         currentColumn.timeScale,
         currentColumn.timeShift,
         currentColumn.timeShift,
-        currentColumn.window,
-        trimmedWindow
+        currentColumn.reducedTimeRange,
+        trimmedReducedTimeRange
       );
   return {
     ...layer,
@@ -41,7 +45,7 @@ export function setWindow(columnId: string, layer: IndexPatternLayer, window: st
       ...layer.columns,
       [columnId]: {
         ...layer.columns[columnId],
-        window: trimmedWindow,
+        reducedTimeRange: trimmedReducedTimeRange,
         label,
       },
     },
@@ -52,7 +56,7 @@ function isInvalid(value: Duration | 'previous' | 'invalid') {
   return value === 'previous' || value === 'invalid';
 }
 
-export function Window({
+export function ReducedTimeRange({
   selectedColumn,
   columnId,
   layer,
@@ -65,28 +69,28 @@ export function Window({
   updateLayer: (newLayer: IndexPatternLayer) => void;
   indexPattern: IndexPattern;
 }) {
-  const [localValue, setLocalValue] = useState(selectedColumn.window);
+  const [localValue, setLocalValue] = useState(selectedColumn.reducedTimeRange);
   useEffect(() => {
-    setLocalValue(selectedColumn.window);
-  }, [selectedColumn.window]);
+    setLocalValue(selectedColumn.reducedTimeRange);
+  }, [selectedColumn.reducedTimeRange]);
   const selectedOperation = operationDefinitionMap[selectedColumn.operationType];
   const hasDateHistogram = Object.values(layer.columns).some(
     (c) => c.operationType === 'date_histogram'
   );
   if (
-    !selectedOperation.windowable ||
-    (!selectedColumn.window && (hasDateHistogram || !indexPattern.timeFieldName))
+    !selectedOperation.canReduceTimeRange ||
+    (!selectedColumn.reducedTimeRange && (hasDateHistogram || !indexPattern.timeFieldName))
   ) {
     return null;
   }
 
   const parsedLocalValue = localValue && parseTimeShift(localValue);
   const isLocalValueInvalid = Boolean(parsedLocalValue && isInvalid(parsedLocalValue));
-  const shouldNotUseWindow = Boolean(hasDateHistogram || !indexPattern.timeFieldName);
+  const shouldNotUseReducedTimeRange = Boolean(hasDateHistogram || !indexPattern.timeFieldName);
 
   function getSelectedOption() {
     if (!localValue) return [];
-    const goodPick = windowOptions.filter(({ value }) => value === localValue);
+    const goodPick = reducedTimeRangeOptions.filter(({ value }) => value === localValue);
     if (goodPick.length > 0) return goodPick;
     return [
       {
@@ -101,27 +105,27 @@ export function Window({
       <EuiFormRow
         display="rowCompressed"
         fullWidth
-        data-test-subj="indexPattern-dimension-window-row"
-        label={i18n.translate('xpack.lens.indexPattern.window.label', {
+        data-test-subj="indexPattern-dimension-reducedTimeRange-row"
+        label={i18n.translate('xpack.lens.indexPattern.reducedTimeRange.label', {
           defaultMessage: 'Reduced time range',
         })}
-        helpText={i18n.translate('xpack.lens.indexPattern.window.help', {
+        helpText={i18n.translate('xpack.lens.indexPattern.reducedTimeRange.help', {
           defaultMessage:
             'Reduces the time range specified in the global time filter from the end of the global time filter.',
         })}
         error={
-          shouldNotUseWindow
-            ? i18n.translate('xpack.lens.indexPattern.window.notApplicableHelp', {
+          shouldNotUseReducedTimeRange
+            ? i18n.translate('xpack.lens.indexPattern.reducedTimeRange.notApplicableHelp', {
                 defaultMessage:
                   'Additional time range filter can not be used together with date histogram or without a default time field specified on the data view',
               })
             : isLocalValueInvalid
-            ? i18n.translate('xpack.lens.indexPattern.window.genericInvalidHelp', {
+            ? i18n.translate('xpack.lens.indexPattern.reducedTimeRange.genericInvalidHelp', {
                 defaultMessage: 'Time range value is not valid.',
               })
             : undefined
         }
-        isInvalid={isLocalValueInvalid || shouldNotUseWindow}
+        isInvalid={isLocalValueInvalid || shouldNotUseReducedTimeRange}
       >
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem>
@@ -129,25 +133,25 @@ export function Window({
               fullWidth
               compressed
               isClearable={true}
-              data-test-subj="indexPattern-dimension-window"
-              placeholder={i18n.translate('xpack.lens.indexPattern.windowPlaceholder', {
+              data-test-subj="indexPattern-dimension-reducedTimeRange"
+              placeholder={i18n.translate('xpack.lens.indexPattern.reducedTimeRangePlaceholder', {
                 defaultMessage: 'Type custom values (e.g. 12m)',
               })}
-              options={windowOptions}
+              options={reducedTimeRangeOptions}
               selectedOptions={getSelectedOption()}
               singleSelection={{ asPlainText: true }}
               isInvalid={isLocalValueInvalid}
               onCreateOption={(val) => {
                 const parsedVal = parseTimeShift(val);
                 if (!isInvalid(parsedVal)) {
-                  updateLayer(setWindow(columnId, layer, val));
+                  updateLayer(setReducedTimeRange(columnId, layer, val));
                 } else {
                   setLocalValue(val);
                 }
               }}
               onChange={(choices) => {
                 if (choices.length === 0) {
-                  updateLayer(setWindow(columnId, layer, ''));
+                  updateLayer(setReducedTimeRange(columnId, layer, ''));
                   setLocalValue('');
                   return;
                 }
@@ -155,7 +159,7 @@ export function Window({
                 const choice = choices[0].value as string;
                 const parsedVal = parseTimeShift(choice);
                 if (!isInvalid(parsedVal)) {
-                  updateLayer(setWindow(columnId, layer, choice));
+                  updateLayer(setReducedTimeRange(columnId, layer, choice));
                 } else {
                   setLocalValue(choice);
                 }
