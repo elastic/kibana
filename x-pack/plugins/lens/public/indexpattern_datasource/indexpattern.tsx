@@ -41,6 +41,7 @@ import {
   injectReferences,
   loadInitialState,
   onRefreshIndexPattern,
+  renameIndexPattern,
   triggerActionOnIndexPatternChange,
 } from './loader';
 import { toExpression } from './to_expression';
@@ -464,6 +465,9 @@ export function getIndexPatternDatasource({
       }
       return changeIndexPattern({ indexPatternId, state, storage, indexPatterns });
     },
+    onIndexPatternRename: (state, oldIndexPatternId, newIndexPatternId) => {
+      return renameIndexPattern({ state, oldIndexPatternId, newIndexPatternId });
+    },
     getRenderEventCounters(state: IndexPatternPrivateState): string[] {
       const additionalEvents = {
         time_shift: false,
@@ -550,15 +554,18 @@ export function getIndexPatternDatasource({
           }
           return null;
         },
-        getSourceId: () => layer.indexPatternId,
-        getFilters: (activeData: FramePublicAPI['activeData'], timeRange?: TimeRange) =>
-          getFiltersInLayer(
+        getSourceId: () => {
+          return layer.indexPatternId;
+        },
+        getFilters: (activeData: FramePublicAPI['activeData'], timeRange?: TimeRange) => {
+          return getFiltersInLayer(
             layer,
             visibleColumnIds,
             activeData?.[layerId],
             indexPatterns[layer.indexPatternId],
             timeRange
-          ),
+          );
+        },
         getVisualDefaults: () => getVisualDefaultsForLayer(layer),
         getMaxPossibleNumValues: (columnId) => {
           if (layer && layer.columns[columnId]) {
