@@ -12,7 +12,7 @@ import { schema } from '@kbn/config-schema';
 import { RequestHandlerContext, ElasticsearchClient } from '@kbn/core/server';
 import { CoreSetup, Logger } from '@kbn/core/server';
 import { RuntimeField } from '@kbn/data-views-plugin/common';
-import { DataViewsService, DataView, FieldSpec } from '@kbn/data-views-plugin/common';
+import { DataViewsService, DataView, FieldSpec, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { UI_SETTINGS } from '@kbn/data-plugin/server';
 import { BASE_API_URL } from '../../common';
 import { FIELD_EXISTENCE_SETTING } from '../ui_settings';
@@ -51,6 +51,7 @@ export async function existingFieldsRoute(setup: CoreSetup<PluginStartContract>,
           fromDate: schema.maybe(schema.string()),
           toDate: schema.maybe(schema.string()),
           timeFieldName: schema.maybe(schema.string()),
+          spec: schema.object({}, { unknowns: 'allow' }),
         }),
       },
     },
@@ -110,6 +111,7 @@ async function fetchFieldExistence({
   fromDate,
   toDate,
   timeFieldName,
+  spec,
   includeFrozen,
   useSampling,
 }: {
@@ -120,6 +122,7 @@ async function fetchFieldExistence({
   fromDate?: string;
   toDate?: string;
   timeFieldName?: string;
+  spec?: DataViewSpec;
   includeFrozen: boolean;
   useSampling: boolean;
 }) {
@@ -132,13 +135,17 @@ async function fetchFieldExistence({
       fromDate,
       toDate,
       timeFieldName,
+      spec,
       includeFrozen,
     });
   }
 
   const uiSettingsClient = (await context.core).uiSettings.client;
   const metaFields: string[] = await uiSettingsClient.get(UI_SETTINGS.META_FIELDS);
-  const dataView = await dataViewsService.get(indexPatternId);
+  const dataView =
+    spec && Object.keys(spec).length !== 0
+      ? await dataViewsService.create(spec)
+      : await dataViewsService.get(indexPatternId);
   const allFields = buildFieldList(dataView, metaFields);
   const existingFieldList = await dataViewsService.getFieldsForIndexPattern(dataView, {
     // filled in by data views service
@@ -159,6 +166,7 @@ async function legacyFetchFieldExistenceSampling({
   fromDate,
   toDate,
   timeFieldName,
+  spec,
   includeFrozen,
 }: {
   indexPatternId: string;
@@ -168,11 +176,15 @@ async function legacyFetchFieldExistenceSampling({
   fromDate?: string;
   toDate?: string;
   timeFieldName?: string;
+  spec?: DataViewSpec;
   includeFrozen: boolean;
 }) {
   const coreContext = await context.core;
   const metaFields: string[] = await coreContext.uiSettings.client.get(UI_SETTINGS.META_FIELDS);
-  const indexPattern = await dataViewsService.get(indexPatternId);
+  const indexPattern =
+    spec && Object.keys(spec).length !== 0
+      ? await dataViewsService.create(spec)
+      : await dataViewsService.get(indexPatternId);
 
   const fields = buildFieldList(indexPattern, metaFields);
   const runtimeMappings = indexPattern.getRuntimeMappings();
