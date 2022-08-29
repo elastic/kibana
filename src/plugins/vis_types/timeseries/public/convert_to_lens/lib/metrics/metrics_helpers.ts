@@ -18,6 +18,7 @@ import { getFilterRatioFormula } from './filter_ratio_formula';
 import { getParentPipelineSeriesFormula } from './parent_pipeline_formula';
 import { getSiblingPipelineSeriesFormula } from './sibling_pipeline_formula';
 import { getFormulaFromMetric, SUPPORTED_METRICS } from './supported_metrics';
+import { buildCounterRateFormula } from './counter_rate_formula';
 
 const shouldCalculateWindow = (timeRangeMode?: string) => {
   return timeRangeMode === TIME_RANGE_DATA_MODES.LAST_VALUE;
@@ -125,7 +126,7 @@ export const getFormulaEquivalent = (
       );
     }
     case 'positive_rate': {
-      return `${aggFormula}(max(${currentMetric.field}${addTimeRangeToFormula(window)}))`;
+      return buildCounterRateFormula(currentMetric, currentMetric.field!);
     }
     case 'filter_ratio': {
       return getFilterRatioFormula(currentMetric, window);
