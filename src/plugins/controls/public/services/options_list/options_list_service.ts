@@ -17,7 +17,7 @@ import {
   OptionsListResponse,
   OptionsListRequestBody,
   OptionsListField,
-} from '../../options_list/types';
+} from '../../../common/options_list/types';
 import { ControlsHTTPService } from '../http/types';
 import { ControlsDataService } from '../data/types';
 import { ControlsPluginStartDeps } from '../../types';

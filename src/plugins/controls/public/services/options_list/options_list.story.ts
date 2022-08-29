@@ -9,7 +9,7 @@
 import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 
 import { ControlsOptionsListService } from './types';
-import { OptionsListRequest, OptionsListResponse } from '../../options_list/types';
+import { OptionsListRequest, OptionsListResponse } from '../../../common/options_list/types';
 
 export type OptionsListServiceFactory = PluginServiceFactory<ControlsOptionsListService>;
 

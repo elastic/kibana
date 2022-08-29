@@ -26,5 +26,3 @@ export type OptionsListReduxState = ReduxEmbeddableState<
   ControlOutput,
   OptionsListComponentState
 >;
-
-export * from '../../common/options_list/types';

@@ -35,7 +35,7 @@ import { injectStorybookDataView } from '../services/data_views/data_views.story
 import { replaceOptionsListMethod } from '../services/options_list/options_list.story';
 import { populateStorybookControlFactories } from './storybook_control_factories';
 import { replaceValueSuggestionMethod } from '../services/unified_search/unified_search.story';
-import { OptionsListResponse, OptionsListRequest } from '../options_list/types';
+import { OptionsListResponse, OptionsListRequest } from '../../common/options_list/types';
 
 export default {
   title: 'Controls',

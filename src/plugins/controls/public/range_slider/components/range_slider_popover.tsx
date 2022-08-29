@@ -20,9 +20,10 @@ import {
 } from '@elastic/eui';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
+import { RangeValue } from '../../../common/range_slider/types';
 import { pluginServices } from '../../services';
 import { rangeSliderReducers } from '../range_slider_reducers';
-import { RangeSliderReduxState, RangeValue } from '../types';
+import { RangeSliderReduxState } from '../types';
 import { RangeSliderStrings } from './range_slider_strings';
 
 export const RangeSliderPopover: FC = () => {
