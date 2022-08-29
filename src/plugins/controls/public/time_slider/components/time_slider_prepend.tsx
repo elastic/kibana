@@ -24,7 +24,6 @@ interface Props {
 export const TimeSliderPrepend: FC<Props> = (props: Props) => {
   const {
     useEmbeddableDispatch,
-    useEmbeddableSelector: select,
     actions,
   } = useReduxEmbeddableContext<TimeSliderReduxState, typeof timeSliderReducers>();
   const dispatch = useEmbeddableDispatch();

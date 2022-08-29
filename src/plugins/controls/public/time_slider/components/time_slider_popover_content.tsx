@@ -21,7 +21,7 @@ interface Props {
 }
 
 export function TimeSliderPopoverContent(props: Props) {
-  function onChange(value: [number | string, number | string]) {
+  function onChange(value?: [number | string, number | string]) {
     props.onChange(value as [number, number]);
   }
 

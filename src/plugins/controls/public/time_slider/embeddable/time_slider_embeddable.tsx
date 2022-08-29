@@ -21,6 +21,7 @@ import { pluginServices } from '../../services';
 import { ControlsSettingsService } from '../../services/settings';
 import { ControlsDataService } from '../../services/data';
 import { ControlOutput } from '../../types';
+import { ControlGroupContainer } from '../../control_group/embeddable/control_group_container';
 import { TimeSlider, TimeSliderPrepend } from '../components';
 import { timeSliderReducers } from '../time_slider_reducers';
 import { TimeSliderReduxState } from '../types';
@@ -81,18 +82,21 @@ export class TimeSliderControlEmbeddable extends Embeddable<
 
     this.inputSubscription = this.getInput$().subscribe(() => this.onInputChange());
 
-    this.waitForControlOutputConsumersToLoad$ = parent?.anyControlOutputConsumerLoading$.pipe(
-      debounceTime(300),
-      first((isAnyControlOutputConsumerLoading: boolean) => {
-        console.log('isAnyControlOutputConsumerLoading', isAnyControlOutputConsumerLoading);
-        return !isAnyControlOutputConsumerLoading;
-      }),
-      map(() => {
-        // Observable notifies subscriber when loading is finished
-        // Return void to not expose internal implemenation details of observabale
-        return;
-      })
-    );
+
+    this.waitForControlOutputConsumersToLoad$ = parent && 'anyControlOutputConsumerLoading$' in (parent as ControlGroupContainer)
+      ? (parent as ControlGroupContainer).anyControlOutputConsumerLoading$.pipe(
+        debounceTime(300),
+        first((isAnyControlOutputConsumerLoading: boolean) => {
+          console.log('isAnyControlOutputConsumerLoading', isAnyControlOutputConsumerLoading);
+          return !isAnyControlOutputConsumerLoading;
+        }),
+        map(() => {
+          // Observable notifies subscriber when loading is finished
+          // Return void to not expose internal implemenation details of observabale
+          return;
+        })
+      )
+      : undefined;
 
     this.initialize();
   }
