@@ -344,10 +344,13 @@ export function DimensionEditor(props: DimensionEditorProps) {
           <>
             {' '}
             <EuiIconTip
-              content={i18n.translate('xpack.lens.indexPattern.helpIncompatibleFieldDotLabel', {
-                defaultMessage:
-                  'This function is not supported by the full time range of your data. This happens when you use rolled up historical data. You can still use this function, but the results might be partial and the visualization displays a warning.',
-              })}
+              content={i18n.translate(
+                'xpack.lens.indexPattern.helpPartiallyApplicableFunctionLabel',
+                {
+                  defaultMessage:
+                    'This function is not supported by the full time range of your data. This happens when you use rolled up historical data. You can still use this function, but the results might be partial and the visualization displays a warning.',
+                }
+              )}
               position="left"
               size="s"
               type="partial"
