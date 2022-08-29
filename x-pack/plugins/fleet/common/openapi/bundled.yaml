@@ -2847,7 +2847,6 @@ components:
             type:
               type: string
               enum:
-                - POLICY_CHANGE
                 - UNENROLL
                 - UPGRADE
                 - POLICY_REASSIGN
@@ -2923,6 +2922,7 @@ components:
           type: string
         output_id:
           type: string
+          deprecated: true
         inputs:
           type: array
           items:
@@ -3186,6 +3186,8 @@ components:
           type: string
         output_id:
           type: string
+          description: Not supported output can be set at the agent policy level only
+          deprecated: true
         inputs:
           type: array
           items:

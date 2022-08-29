@@ -317,8 +317,16 @@ export interface GetFieldsOptions {
   filter?: QueryDslQueryContainer;
 }
 
+/**
+ * FieldsForWildcard response
+ */
+export interface FieldsForWildcardResponse {
+  fields: FieldSpec[];
+  indices: string[];
+}
+
 export interface IDataViewsApiClient {
-  getFieldsForWildcard: (options: GetFieldsOptions) => Promise<FieldSpec[]>;
+  getFieldsForWildcard: (options: GetFieldsOptions) => Promise<FieldsForWildcardResponse>;
   hasUserDataView: () => Promise<boolean>;
 }
 
