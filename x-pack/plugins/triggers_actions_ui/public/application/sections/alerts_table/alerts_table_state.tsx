@@ -275,7 +275,8 @@ const AlertsTableState = ({
     if (!isLoading && refreshNow) {
       refresh();
     }
-  }, [refreshNow])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshNow]);
 
   return hasAlertsTableConfiguration ? (
     <>
