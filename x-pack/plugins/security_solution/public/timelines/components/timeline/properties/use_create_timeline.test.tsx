@@ -134,15 +134,13 @@ describe('useCreateTimelineButton', () => {
           'x-pack/security_solution/local/timeline/CREATE_TIMELINE'
         );
         expect(mockDispatch.mock.calls[2][0].type).toEqual(
-          'x-pack/security_solution/local/inputs/ADD_GLOBAL_LINK_TO'
+          'x-pack/security_solution/local/inputs/ADD_LINK_TO'
         );
+        expect(mockDispatch.mock.calls[2][0].payload).toEqual(['global', 'timeline']);
         expect(mockDispatch.mock.calls[3][0].type).toEqual(
-          'x-pack/security_solution/local/inputs/ADD_TIMELINE_LINK_TO'
-        );
-        expect(mockDispatch.mock.calls[4][0].type).toEqual(
           'x-pack/security_solution/local/app/ADD_NOTE'
         );
-        expect(mockDispatch.mock.calls[5][0].type).toEqual(
+        expect(mockDispatch.mock.calls[4][0].type).toEqual(
           'x-pack/security_solution/local/inputs/SET_RELATIVE_RANGE_DATE_PICKER'
         );
       });

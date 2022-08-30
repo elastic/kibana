@@ -9,7 +9,7 @@
 import _ from 'lodash';
 
 import { functions } from '../functions';
-import type { DataViewBase, KueryNode, KueryQueryOptions } from '../..';
+import type { DataViewBase, KueryNode, KueryQueryOptions } from '../../..';
 import type { FunctionName, FunctionTypeBuildNode } from './types';
 import type { KqlContext } from '../types';
 

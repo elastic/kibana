@@ -8,7 +8,8 @@
 
 import { HttpSetup } from '@kbn/core/public';
 import { DataViewMissingIndices } from '../../common/lib';
-import { FieldSpec, GetFieldsOptions, IDataViewsApiClient } from '../../common';
+import { GetFieldsOptions, IDataViewsApiClient } from '../../common';
+import { FieldsForWildcardResponse } from '../../common/types';
 
 const API_BASE_URL: string = `/api/index_patterns/`;
 
@@ -50,14 +51,16 @@ export class DataViewsApiClient implements IDataViewsApiClient {
    */
   getFieldsForWildcard(options: GetFieldsOptions) {
     const { pattern, metaFields, type, rollupIndex, allowNoIndex, filter } = options;
-    return this._request<{ fields: FieldSpec[] }>(this._getUrl(['_fields_for_wildcard']), {
+    return this._request<FieldsForWildcardResponse>(this._getUrl(['_fields_for_wildcard']), {
       pattern,
       meta_fields: metaFields,
       type,
       rollup_index: rollupIndex,
       allow_no_index: allowNoIndex,
       filter,
-    }).then((resp) => resp?.fields || []);
+    }).then((response) => {
+      return response || { fields: [], indices: [] };
+    });
   }
 
   /**

@@ -1,0 +1,185 @@
+{
+  "id": "@kbn/core-saved-objects-server-internal",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server-internal",
+        "id": "def-server.SavedObjectsService",
+        "type": "Class",
+        "tags": [],
+        "label": "SavedObjectsService",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-saved-objects-server-internal",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsServerInternalPluginApi",
+            "section": "def-server.SavedObjectsService",
+            "text": "SavedObjectsService"
+          },
+          " implements ",
+          "CoreService",
+          "<",
+          "InternalSavedObjectsServiceSetup",
+          ", ",
+          "SavedObjectsServiceStart",
+          ">"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/saved_objects_service.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server-internal",
+            "id": "def-server.SavedObjectsService.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/saved_objects_service.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server-internal",
+                "id": "def-server.SavedObjectsService.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "coreContext",
+                "description": [],
+                "signature": [
+                  "CoreContext"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/saved_objects_service.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server-internal",
+            "id": "def-server.SavedObjectsService.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "signature": [
+              "(setupDeps: ",
+              "SavedObjectsSetupDeps",
+              ") => Promise<",
+              "InternalSavedObjectsServiceSetup",
+              ">"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/saved_objects_service.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server-internal",
+                "id": "def-server.SavedObjectsService.setup.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "setupDeps",
+                "description": [],
+                "signature": [
+                  "SavedObjectsSetupDeps"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/saved_objects_service.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server-internal",
+            "id": "def-server.SavedObjectsService.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "({ elasticsearch, pluginsInitialized, docLinks, }: ",
+              "SavedObjectsStartDeps",
+              ") => Promise<",
+              "SavedObjectsServiceStart",
+              ">"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/saved_objects_service.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server-internal",
+                "id": "def-server.SavedObjectsService.start.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{\n    elasticsearch,\n    pluginsInitialized = true,\n    docLinks,\n  }",
+                "description": [],
+                "signature": [
+                  "SavedObjectsStartDeps"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/saved_objects_service.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server-internal",
+            "id": "def-server.SavedObjectsService.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/saved_objects_service.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server-internal",
+        "id": "def-server.InternalSavedObjectsServiceStart",
+        "type": "Type",
+        "tags": [],
+        "label": "InternalSavedObjectsServiceStart",
+        "description": [],
+        "signature": [
+          "SavedObjectsServiceStart"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/saved_objects_service.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

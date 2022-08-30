@@ -57,6 +57,7 @@ import { TrainedModelsProvider } from './trained_models';
 import { TrainedModelsTableProvider } from './trained_models_table';
 import { MachineLearningJobAnnotationsProvider } from './job_annotations_table';
 import { MlNodesPanelProvider } from './ml_nodes_list';
+import { MachineLearningCasesProvider } from './cases';
 
 export function MachineLearningProvider(context: FtrProviderContext) {
   const commonAPI = MachineLearningCommonAPIProvider(context);
@@ -110,7 +111,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const jobWizardCommon = MachineLearningJobWizardCommonProvider(context, commonUI, customUrls);
   const jobWizardMultiMetric = MachineLearningJobWizardMultiMetricProvider(context);
   const jobWizardPopulation = MachineLearningJobWizardPopulationProvider(context);
-  const lensVisualizations = MachineLearningLensVisualizationsProvider(context);
+  const lensVisualizations = MachineLearningLensVisualizationsProvider(context, commonUI);
   const navigation = MachineLearningNavigationProvider(context);
   const overviewPage = MachineLearningOverviewPageProvider(context);
   const securityCommon = MachineLearningSecurityCommonProvider(context);
@@ -128,11 +129,14 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const trainedModelsTable = TrainedModelsTableProvider(context, commonUI);
   const mlNodesPanel = MlNodesPanelProvider(context);
 
+  const cases = MachineLearningCasesProvider(context, swimLane);
+
   return {
     anomaliesTable,
     anomalyExplorer,
     alerting,
     api,
+    cases,
     commonAPI,
     commonConfig,
     commonDataGrid,
