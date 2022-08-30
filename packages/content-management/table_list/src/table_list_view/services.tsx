@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useContext } from 'react';
+import React, { FC, useContext, useMemo } from 'react';
 import type { EuiTableFieldDataColumnType, SearchFilterConfig } from '@elastic/eui';
 import type { Observable } from 'rxjs';
 import type { FormattedRelative } from '@kbn/i18n-react';
@@ -125,6 +125,25 @@ export const TableListViewKibanaProvider: FC<TableListViewKibanaDependencies> = 
   ...services
 }) => {
   const { core, toMountPoint, savedObjectsTagging, FormattedRelative } = services;
+
+  const getSearchBarFilters = useMemo(() => {
+    if (savedObjectsTagging) {
+      return () => [savedObjectsTagging.ui.getSearchBarFilter({ useName: true })];
+    }
+  }, [savedObjectsTagging]);
+
+  const searchQueryParser = useMemo(() => {
+    if (savedObjectsTagging) {
+      return (searchQuery: string) => {
+        const res = savedObjectsTagging.ui.parseSearchQuery(searchQuery, { useName: true });
+        return {
+          searchQuery: res.searchTerm,
+          references: res.tagReferences,
+        };
+      };
+    }
+  }, [savedObjectsTagging]);
+
   return (
     <TableListViewProvider
       canEditAdvancedSettings={Boolean(core.application.capabilities.advancedSettings?.save)}
@@ -137,6 +156,8 @@ export const TableListViewKibanaProvider: FC<TableListViewKibanaDependencies> = 
         core.notifications.toasts.addDanger({ title: toMountPoint(title), text });
       }}
       getTagsColumnDefinition={savedObjectsTagging?.ui.getTableColumnDefinition}
+      getSearchBarFilters={getSearchBarFilters}
+      searchQueryParser={searchQueryParser}
       DateFormatterComp={(props) => <FormattedRelative {...props} />}
     >
       {children}
