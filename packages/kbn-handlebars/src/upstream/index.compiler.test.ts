@@ -5,7 +5,7 @@
  * See `packages/kbn-handlebars/LICENSE` for more information.
  */
 
-import Handlebars from '..';
+import Handlebars from '../..';
 
 describe('compiler', () => {
   const compileFns = ['compile', 'compileAST'];

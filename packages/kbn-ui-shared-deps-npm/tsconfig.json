@@ -6,12 +6,15 @@
     "declarationMap": true,
     "emitDeclarationOnly": true,
     "outDir": "./target_types",
-    "rootDir": "src",
     "types": [
       "node",
     ]
   },
   "include": [
-    "src/**/*",
+    "**/*.ts",
+    "**/*.js",
+  ],
+  "exclude": [
+    "**/*.config.js",
   ]
 }

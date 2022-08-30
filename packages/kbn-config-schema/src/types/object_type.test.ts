@@ -7,7 +7,7 @@
  */
 
 import { expectType } from 'tsd';
-import { schema } from '..';
+import { schema } from '../..';
 import { TypeOf } from './object_type';
 
 test('returns value by default', () => {

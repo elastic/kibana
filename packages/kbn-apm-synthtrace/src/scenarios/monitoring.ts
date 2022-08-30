@@ -8,7 +8,7 @@
 
 // Run with: node ./src/scripts/run ./src/scripts/examples/03_monitoring.ts --target=http://elastic:changeme@localhost:9200
 
-import { stackMonitoring, timerange } from '..';
+import { stackMonitoring, timerange } from '../..';
 import { Scenario } from '../cli/scenario';
 import { getLogger } from '../cli/utils/get_common_services';
 import { RunOptions } from '../cli/utils/parse_run_cli_flags';

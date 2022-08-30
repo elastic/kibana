@@ -6,7 +6,6 @@
     "emitDeclarationOnly": true,
     "incremental": false,
     "outDir": "target_types",
-    "rootDir": "src",
     "skipLibCheck": true,
     "target": "es2015",
     "types": [
@@ -15,7 +14,7 @@
     ]
   },
   "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx"
+    "**/*.ts",
+    "**/*.tsx"
   ]
 }

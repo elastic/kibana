@@ -6,9 +6,10 @@
     "emitDeclarationOnly": true,
     "outDir": "./target_types",
     "stripInternal": true,
-    "rootDir": "src",
     "types": ["jest", "node"]
   },
-  "include": ["src/**/*"],
-  "exclude": ["**/__fixtures__/**/*"]
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
 }
