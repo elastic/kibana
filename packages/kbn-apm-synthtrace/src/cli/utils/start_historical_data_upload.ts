@@ -13,7 +13,7 @@ import pLimit from 'p-limit';
 import { cpus } from 'os';
 import { RunOptions } from './parse_run_cli_flags';
 import { getScenario } from './get_scenario';
-import { ApmSynthtraceEsClient, LogLevel } from '../..';
+import { ApmSynthtraceEsClient, LogLevel } from '../../..';
 import { Logger } from '../../lib/utils/create_logger';
 
 export async function startHistoricalDataUpload(

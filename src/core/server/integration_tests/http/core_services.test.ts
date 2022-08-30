@@ -25,7 +25,7 @@ describe('http service', () => {
   beforeEach(async () => {
     esClient = elasticsearchClientMock.createInternalClient();
     MockElasticsearchClient.mockImplementation(() => esClient);
-  }, 30000);
+  });
 
   afterEach(async () => {
     MockElasticsearchClient.mockClear();
@@ -39,7 +39,7 @@ describe('http service', () => {
         elasticsearch: { skipStartupConnectionCheck: true },
       });
       await root.preboot();
-    }, 30000);
+    });
 
     afterEach(async () => {
       await root.shutdown();
@@ -190,7 +190,7 @@ describe('http service', () => {
         elasticsearch: { skipStartupConnectionCheck: true },
       });
       await root.preboot();
-    }, 30000);
+    });
 
     afterEach(async () => {
       MockElasticsearchClient.mockClear();
