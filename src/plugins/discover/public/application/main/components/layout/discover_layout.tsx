@@ -354,7 +354,6 @@ export function DiscoverLayout({
                           hideChart={state.hideChart}
                           interval={state.interval}
                           isTimeBased={isTimeBased}
-                          persistDataView={persistDataView}
                         />
                       </EuiFlexItem>
                       <EuiHorizontalRule margin="none" />

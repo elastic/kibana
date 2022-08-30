@@ -113,7 +113,6 @@ async function mountComponent(isTimeBased: boolean = false) {
     viewMode: VIEW_MODE.DOCUMENT_LEVEL,
     setDiscoverViewMode: jest.fn(),
     isTimeBased,
-    persistDataView: () => Promise.resolve({} as DataView),
   };
 
   let instance: ReactWrapper = {} as ReactWrapper;

@@ -47,7 +47,6 @@ export function DiscoverChart({
   hideChart,
   interval,
   isTimeBased,
-  persistDataView,
 }: {
   resetSavedSearch: () => void;
   savedSearch: SavedSearch;
@@ -60,7 +59,6 @@ export function DiscoverChart({
   isTimeBased: boolean;
   hideChart?: boolean;
   interval?: string;
-  persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
 }) {
   const { uiSettings, data, storage } = useDiscoverServices();
   const [showChartOptionsPopover, setShowChartOptionsPopover] = useState(false);
@@ -75,14 +73,7 @@ export function DiscoverChart({
   const [canVisualize, setCanVisualize] = useState(false);
 
   const onUpdateDiscoverViewMode = async (newViewMode: VIEW_MODE) => {
-    let shouldUpdate = true;
-    if (newViewMode === VIEW_MODE.AGGREGATED_LEVEL) {
-      shouldUpdate = !!(await persistDataView(dataView));
-    }
-
-    if (shouldUpdate) {
-      setDiscoverViewMode(newViewMode);
-    }
+    setDiscoverViewMode(newViewMode);
   };
 
   useEffect(() => {
