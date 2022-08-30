@@ -38,7 +38,7 @@ function flatten(
   return target;
 }
 
-export function mockSyntheticSource(object: Record<string, any>) {
+export function fakeSyntheticSource(object: Record<string, any>) {
   const flattened = flatten({}, object, false, '');
 
   const unflattened = {};

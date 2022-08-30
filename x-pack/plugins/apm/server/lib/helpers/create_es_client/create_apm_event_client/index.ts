@@ -38,7 +38,7 @@ import {
   unpackProcessorEvents,
   processorEventsToIndex,
 } from './unpack_processor_events';
-import { mockSyntheticSource } from './mock_synthetic_source';
+import { fakeSyntheticSource } from './fake_synthetic_source';
 
 export type APMEventESSearchRequest = Omit<ESSearchRequest, 'index'> & {
   apm: {
@@ -188,7 +188,7 @@ export class APMEventClient {
             ) {
               return {
                 ...hit,
-                _source: mockSyntheticSource(hit._source),
+                _source: fakeSyntheticSource(hit._source),
               };
             }
             return hit;

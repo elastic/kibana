@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { mockSyntheticSource } from './mock_synthetic_source';
+import { fakeSyntheticSource } from './fake_synthetic_source';
 
-describe('mockSyntheticSource', () => {
+describe('fakeSyntheticSource', () => {
   it('flattens and unflattens objects', () => {
     const obj = {
       service: {
@@ -19,7 +19,7 @@ describe('mockSyntheticSource', () => {
       },
     };
 
-    expect(mockSyntheticSource(obj)).toEqual(obj);
+    expect(fakeSyntheticSource(obj)).toEqual(obj);
   });
 
   it('drops null and undefined values', () => {
@@ -33,7 +33,7 @@ describe('mockSyntheticSource', () => {
       },
     };
 
-    expect(mockSyntheticSource(obj)).toEqual({
+    expect(fakeSyntheticSource(obj)).toEqual({
       transaction: {
         type: 'request',
         name: 'GET /api/my-transaction',
@@ -51,7 +51,7 @@ describe('mockSyntheticSource', () => {
       },
     };
 
-    expect(mockSyntheticSource(obj)).toEqual({
+    expect(fakeSyntheticSource(obj)).toEqual({
       span: {
         links: {
           trace: {
@@ -76,7 +76,7 @@ describe('mockSyntheticSource', () => {
       },
     };
 
-    expect(mockSyntheticSource(obj)).toEqual({
+    expect(fakeSyntheticSource(obj)).toEqual({
       span: {
         links: {
           trace: {
