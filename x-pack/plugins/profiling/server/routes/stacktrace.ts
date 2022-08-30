@@ -32,9 +32,7 @@ import { logExecutionLatency } from './logger';
 import { ProjectTimeQuery } from './query';
 
 const traceLRU = new LRUCache<StackTraceID, StackTrace>({ max: 20000 });
-const fileIDChunkToFileIDCache = new LRUCache<string, FileID>({ max: 100000 });
 
-const BASE64_FILE_ID_LENGTH = 22;
 const BASE64_FRAME_ID_LENGTH = 32;
 
 export type EncodedStackTrace = DedotObject<{
@@ -135,6 +133,7 @@ export function decodeStackTrace(input: EncodedStackTrace): StackTrace {
 
   const fileIDs: string[] = new Array(countsFrameIDs);
   const frameIDs: string[] = new Array(countsFrameIDs);
+  const addressOrLines: number[] = new Array(countsFrameIDs);
 
   // Step 1: Convert the base64-encoded frameID list into two separate
   // lists (frame IDs and file IDs), both of which are also base64-encoded.
@@ -147,22 +146,14 @@ export function decodeStackTrace(input: EncodedStackTrace): StackTrace {
   // address (see diagram in definition of EncodedStackTrace).
   for (let i = 0; i < inputFrameIDs.length; i += BASE64_FRAME_ID_LENGTH) {
     const frameID = inputFrameIDs.slice(i, i + BASE64_FRAME_ID_LENGTH);
-    const fileIDChunk = frameID.slice(0, BASE64_FILE_ID_LENGTH);
-    const fileID = fileIDChunkToFileIDCache.get(fileIDChunk) as string;
+    const buf = Buffer.from(frameID, 'base64url');
 
     // the frames are stored in reverse order, leaf frame first
     const j = countsFrameIDs - Math.floor(i / BASE64_FRAME_ID_LENGTH) - 1;
 
+    fileIDs[j] = buf.toString('base64url', 0, 16);
+    addressOrLines[j] = Number(buf.readBigUInt64BE(16));
     frameIDs[j] = frameID;
-
-    if (fileID) {
-      fileIDs[j] = fileID;
-    } else {
-      const buf = Buffer.from(fileIDChunk, 'base64url');
-
-      fileIDs[j] = buf.toString('base64url', 0, 16);
-      fileIDChunkToFileIDCache.set(fileIDChunk, fileIDs[j]);
-    }
   }
 
   // Step 2: Convert the run-length byte encoding into a list of uint8s.
@@ -170,6 +161,7 @@ export function decodeStackTrace(input: EncodedStackTrace): StackTrace {
   const typeIDs = runLengthDecodeReverse(types, countsFrameIDs);
 
   return {
+    AddressOrLines: addressOrLines,
     FileIDs: fileIDs,
     FrameIDs: frameIDs,
     Types: typeIDs,

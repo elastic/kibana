@@ -41,8 +41,9 @@ export interface StackTraceEvent {
 }
 
 export interface StackTrace {
-  FileIDs: string[];
   FrameIDs: string[];
+  FileIDs: string[];
+  AddressOrLines: number[];
   Types: number[];
 }
 
@@ -161,14 +162,15 @@ export function groupStackFrameMetadataByStackTrace(
     for (let i = 0; i < trace.FrameIDs.length; i++) {
       const frameID = trace.FrameIDs[i];
       const fileID = trace.FileIDs[i];
+      const addressOrLine = trace.AddressOrLines[i];
       const frame = stackFrames.get(frameID)!;
       const executable = executables.get(fileID)!;
 
       const metadata = createStackFrameMetadata({
         FrameID: frameID,
         FileID: fileID,
+        AddressOrLine: addressOrLine,
         FrameType: trace.Types[i],
-        AddressOrLine: frame.LineNumber,
         FunctionName: frame.FunctionName,
         FunctionOffset: frame.FunctionOffset,
         SourceLine: frame.LineNumber,
