@@ -8,7 +8,7 @@
 import axios, { AxiosResponse } from 'axios';
 import { Logger } from '@kbn/core/server';
 import { Services } from '../../types';
-import { request } from './axios_utils';
+import { request } from '../../lib/axios_utils';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 
 interface PostPagerdutyOptions {

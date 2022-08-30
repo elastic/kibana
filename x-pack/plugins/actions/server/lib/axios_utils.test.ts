@@ -19,8 +19,8 @@ import {
   createAxiosResponse,
 } from './axios_utils';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { actionsConfigMock } from '../../actions_config.mock';
-import { getCustomAgents } from './get_custom_agents';
+import { actionsConfigMock } from '../actions_config.mock';
+import { getCustomAgents } from '../builtin_action_types/lib/get_custom_agents';
 
 const TestUrl = 'https://elastic.co/foo/bar/baz';
 

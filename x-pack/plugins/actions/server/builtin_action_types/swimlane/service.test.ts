@@ -10,7 +10,7 @@ import axios from 'axios';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { Logger } from '@kbn/core/server';
 import { actionsConfigMock } from '../../actions_config.mock';
-import { request, createAxiosResponse } from '../lib/axios_utils';
+import { request, createAxiosResponse } from '../../lib/axios_utils';
 import { createExternalService } from './service';
 import { mappings } from './mocks';
 import { ExternalService } from './types';
@@ -18,8 +18,8 @@ import { ExternalService } from './types';
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 jest.mock('axios');
-jest.mock('../lib/axios_utils', () => {
-  const originalUtils = jest.requireActual('../lib/axios_utils');
+jest.mock('../../lib/axios_utils', () => {
+  const originalUtils = jest.requireActual('../../lib/axios_utils');
   return {
     ...originalUtils,
     request: jest.fn(),
