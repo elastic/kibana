@@ -18,10 +18,9 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { AlertSummaryItemProps, PageHeaderProps } from '../types';
+import { PageHeaderProps } from '../types';
 import { useKibana } from '../../../utils/kibana_react';
 import { AlertStatusIndicator } from '../../../components/shared/alert_status_indicator';
-import { i18n } from '@kbn/i18n';
 
 export function AlertSummary({ alert }: PageHeaderProps) {
   const { triggersActionsUi } = useKibana().services;
@@ -43,32 +42,56 @@ export function AlertSummary({ alert }: PageHeaderProps) {
         <EuiSpacer size="s" />
         <EuiPanel hasBorder={true} hasShadow={false}>
           <EuiFlexGroup>
-            <AlertSummaryItem
-              formattedMessageId="xpack.observability.pages.alertDetails.alertSummary.alertName"
-              defaultMessage="Alert">
+            <EuiFlexItem>
+              <EuiTitle size="xxs">
+                <h5>
+                  <FormattedMessage
+                    id="xpack.observability.pages.alertDetails.alertSummary.alertName"
+                    defaultMessage="Alert" />
+                </h5>
+              </EuiTitle>
+              <EuiSpacer size="s" />
               <EuiText size="s" color="subdued">
                 #200-230
               </EuiText>
-            </AlertSummaryItem>
-            <AlertSummaryItem
-              formattedMessageId="xpack.observability.pages.alertDetails.alertSummary.averageValue"
-              defaultMessage="Average Value">
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiTitle size="xxs">
+                <h5>
+                  <FormattedMessage
+                    id="xpack.observability.pages.alertDetails.alertSummary.averageValue"
+                    defaultMessage="Average Value" />
+                </h5>
+              </EuiTitle>
+              <EuiSpacer size="s" />
               <EuiText size="s" color="subdued">
                 55 ms (84% above the threshold of 30ms)
               </EuiText>
-            </AlertSummaryItem>
-            <AlertSummaryItem
-              formattedMessageId="xpack.observability.pages.alertDetails.alertSummary.duration"
-              defaultMessage="Duration">
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiTitle size="xxs">
+                <h5>
+                  <FormattedMessage
+                    id="xpack.observability.pages.alertDetails.alertSummary.duration"
+                    defaultMessage="Duration" />
+                </h5>
+              </EuiTitle>
+              <EuiSpacer size="s" />
               <EuiText size="s" color="subdued">
                 5 minutes (threshold breached 10 times)
               </EuiText>
-            </AlertSummaryItem>
-            <AlertSummaryItem
-              formattedMessageId="xpack.observability.pages.alertDetails.alertSummary.alertStatus"
-              defaultMessage="Status">
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiTitle size="xxs">
+                <h5>
+                  <FormattedMessage
+                    id="xpack.observability.pages.alertDetails.alertSummary.alertStatus"
+                    defaultMessage="Status" />
+                </h5>
+              </EuiTitle>
+              <EuiSpacer size="s" />
               <AlertStatusIndicator alertStatus="active" />
-            </AlertSummaryItem>
+            </EuiFlexItem>
           </EuiFlexGroup>
           <EuiFlexGroup>
             <EuiFlexItem>
@@ -91,23 +114,41 @@ export function AlertSummary({ alert }: PageHeaderProps) {
                   onClick={() => { }} />
               </EuiLink>
             </EuiFlexItem>
-            <AlertSummaryItem
-              formattedMessageId="xpack.observability.pages.alertDetails.alertSummary.started"
-              defaultMessage="Started">
+            <EuiFlexItem>
+              <EuiTitle size="xxs">
+                <h5>
+                  <FormattedMessage
+                    id="xpack.observability.pages.alertDetails.alertSummary.started"
+                    defaultMessage="Started" />
+                </h5>
+              </EuiTitle>
+              <EuiSpacer size="s" />
               <EuiText size="s" color="subdued">
                 Jul 22 2021
               </EuiText>
-            </AlertSummaryItem>
-            <AlertSummaryItem
-              formattedMessageId="xpack.observability.pages.alertDetails.alertSummary.lastStatusUpdate"
-              defaultMessage="Last Status Update">
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiTitle size="xxs">
+                <h5>
+                  <FormattedMessage
+                    id="xpack.observability.pages.alertDetails.alertSummary.lastStatusUpdate"
+                    defaultMessage="Last Status Update" />
+                </h5>
+              </EuiTitle>
+              <EuiSpacer size="s" />
               <EuiText size="s" color="subdued">
                 2h ago
               </EuiText>
-            </AlertSummaryItem>
-            <AlertSummaryItem
-              formattedMessageId="xpack.observability.pages.alertDetails.alertSummary.tags"
-              defaultMessage="Tags">
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiTitle size="xxs">
+                <h5>
+                  <FormattedMessage
+                    id="xpack.observability.pages.alertDetails.alertSummary.tags"
+                    defaultMessage="Tags" />
+                </h5>
+              </EuiTitle>
+              <EuiSpacer size="s" />
               <div>
                 <EuiSpacer size="s" />
                 {triggersActionsUi.getRuleTagBadge<'tagsOutPopover'>({
@@ -115,28 +156,11 @@ export function AlertSummary({ alert }: PageHeaderProps) {
                   tags: ['tag1', 'tag2', 'tag3'],
                 })}
               </div>
-            </AlertSummaryItem>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>
       </EuiPanel>
       <EuiSpacer size="xs" />
     </>
-  );
-}
-
-function AlertSummaryItem({ formattedMessageId, defaultMessage, children }: AlertSummaryItemProps) {
-  return (
-    <EuiFlexItem>
-      <EuiTitle size="xxs">
-        <h5>
-          {i18n.translate(formattedMessageId, { defaultMessage })}
-          {/* <FormattedMessage
-            id={formattedMessageId}
-            defaultMessage={defaultMessage} /> */}
-        </h5>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      {children}
-    </EuiFlexItem>
   );
 }
