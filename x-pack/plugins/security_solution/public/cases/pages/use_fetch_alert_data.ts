@@ -9,10 +9,8 @@ import { useMemo } from 'react';
 import type { Ecs } from '@kbn/cases-plugin/common';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
-import {
-  useQueryAlerts,
-  ALERTS_QUERY_NAMES,
-} from '../../detections/containers/detection_engine/alerts/use_query';
+import { useQueryAlerts } from '../../detections/containers/detection_engine/alerts/use_query';
+import { ALERTS_QUERY_NAMES } from '../../detections/containers/detection_engine/alerts/constants';
 import type { SignalHit } from '../../common/utils/alerts';
 import { buildAlertsQuery, formatAlertToEcsSignal } from '../../common/utils/alerts';
 

@@ -13,10 +13,7 @@ import type { fetchQueryRuleRegistryAlerts } from './api';
 import { fetchQueryAlerts } from './api';
 import type { AlertSearchResponse, QueryAlerts } from './types';
 import { useTrackHttpRequest } from '../../../../common/lib/apm/use_track_http_request';
-import { ALERTS_QUERY_NAMES } from './constants';
-
-export { ALERTS_QUERY_NAMES };
-export type AlertsQueryName = typeof ALERTS_QUERY_NAMES[keyof typeof ALERTS_QUERY_NAMES];
+import type { ALERTS_QUERY_NAMES } from './constants';
 
 type Func = () => Promise<void>;
 
@@ -29,6 +26,8 @@ export interface ReturnQueryAlerts<Hit, Aggs> {
   refetch: Func | null;
 }
 
+type AlertsQueryName = typeof ALERTS_QUERY_NAMES[keyof typeof ALERTS_QUERY_NAMES];
+
 type FetchMethod = typeof fetchQueryAlerts | typeof fetchQueryRuleRegistryAlerts;
 export interface AlertsQueryParams {
   fetchMethod?: FetchMethod;
@@ -36,7 +35,7 @@ export interface AlertsQueryParams {
   indexName?: string | null;
   skip?: boolean;
   /**
-   * The query name is used for performance monitoring using APM
+   * The query name is used for performance monitoring with APM
    */
   queryName: AlertsQueryName;
 }

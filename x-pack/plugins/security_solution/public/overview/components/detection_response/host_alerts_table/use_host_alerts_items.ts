@@ -10,10 +10,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import type { GenericBuckets } from '../../../../../common/search_strategy';
-import {
-  useQueryAlerts,
-  ALERTS_QUERY_NAMES,
-} from '../../../../detections/containers/detection_engine/alerts/use_query';
+import { useQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/use_query';
+import { ALERTS_QUERY_NAMES } from '../../../../detections/containers/detection_engine/alerts/constants';
 import { getPageCount, ITEMS_PER_PAGE } from '../utils';
 
 const HOSTS_BY_SEVERITY_AGG = 'hostsBySeverity';

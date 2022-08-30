@@ -28,10 +28,8 @@ import type { inputsModel, State } from '../../../../common/store';
 import { inputsSelectors } from '../../../../common/store';
 import { TimelineId } from '../../../../../common/types';
 import type { AlertData, EcsHit } from '../../../../common/components/exceptions/types';
-import {
-  useQueryAlerts,
-  ALERTS_QUERY_NAMES,
-} from '../../../containers/detection_engine/alerts/use_query';
+import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
+import { ALERTS_QUERY_NAMES } from '../../../containers/detection_engine/alerts/constants';
 import { useSignalIndex } from '../../../containers/detection_engine/alerts/use_signal_index';
 import { EventFiltersFlyout } from '../../../../management/pages/event_filters/view/components/event_filters_flyout';
 import { useAlertsActions } from './use_alerts_actions';

@@ -15,10 +15,8 @@ import { buildEsQuery } from '@kbn/es-query';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { HeaderSection } from '../../../../common/components/header_section';
 
-import {
-  useQueryAlerts,
-  ALERTS_QUERY_NAMES,
-} from '../../../containers/detection_engine/alerts/use_query';
+import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
+import { ALERTS_QUERY_NAMES } from '../../../containers/detection_engine/alerts/constants';
 import { InspectButtonContainer } from '../../../../common/components/inspect';
 
 import { getAlertsCountQuery } from './helpers';

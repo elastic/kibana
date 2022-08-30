@@ -24,10 +24,8 @@ import type { UpdateDateRange } from '../../../../common/components/charts/commo
 import type { LegendItem } from '../../../../common/components/charts/draggable_legend_item';
 import { escapeDataProviderId } from '../../../../common/components/drag_and_drop/helpers';
 import { HeaderSection } from '../../../../common/components/header_section';
-import {
-  useQueryAlerts,
-  ALERTS_QUERY_NAMES,
-} from '../../../containers/detection_engine/alerts/use_query';
+import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
+import { ALERTS_QUERY_NAMES } from '../../../containers/detection_engine/alerts/constants';
 import { getDetectionEngineUrl, useFormatUrl } from '../../../../common/components/link_to';
 import { defaultLegendColors } from '../../../../common/components/matrix_histogram/utils';
 import { InspectButtonContainer } from '../../../../common/components/inspect';

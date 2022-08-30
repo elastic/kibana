@@ -13,7 +13,8 @@ import { expandDottedObject } from '../../../../../common/utils/expand_dotted';
 
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import type { AlertSearchResponse } from '../alerts/types';
-import { useQueryAlerts, ALERTS_QUERY_NAMES } from '../alerts/use_query';
+import { useQueryAlerts } from '../alerts/use_query';
+import { ALERTS_QUERY_NAMES } from '../alerts/constants';
 import { fetchRuleById } from './api';
 import { transformInput } from './transforms';
 import * as i18n from './translations';
