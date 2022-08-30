@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import { PluginInitializerContext, ScopedHistory } from '@kbn/core/public';
 import { savedObjectsPluginMock } from '@kbn/saved-objects-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -57,7 +56,6 @@ export function makeDefaultServices(): DashboardAppServices {
     savedObjectsClient: core.savedObjects.client,
     scopedHistory: () => ({} as ScopedHistory),
     setHeaderActionMenu: (mountPoint) => {},
-    urlForwarding: {} as UrlForwardingStart,
     allowByValueEmbeddables: true,
     restorePreviousUrl: () => {},
     onAppLeave: (handler) => {},

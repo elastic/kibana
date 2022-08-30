@@ -19,7 +19,6 @@ import type {
   KibanaExecutionContext,
 } from '@kbn/core/public';
 import type { Filter } from '@kbn/es-query';
-import type { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import type { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 import { type EmbeddableInput, ViewMode } from '@kbn/embeddable-plugin/common';
 import type { ContainerInput } from '@kbn/embeddable-plugin/public';
@@ -172,7 +171,6 @@ export interface DashboardAppServices {
   restorePreviousUrl: () => void;
   savedObjects: SavedObjectsStart;
   allowByValueEmbeddables: boolean;
-  urlForwarding: UrlForwardingStart;
   savedDashboards: SavedObjectLoader;
   scopedHistory: () => ScopedHistory;
   usageCollection?: UsageCollectionSetup;

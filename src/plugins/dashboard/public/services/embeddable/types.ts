@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 
 export interface DashboardEmbeddableService {
   getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];

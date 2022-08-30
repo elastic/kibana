@@ -18,12 +18,12 @@ import { DashboardOverlaysService } from './overlays/types';
 import { DashboardScreenshotModeService } from './screenshot_mode/types';
 import { DashboardSettingsService } from './settings/types';
 import { DashboardSpacesService } from './spaces/types';
+import { DashboardUrlForwardingService } from './url_forwarding/types';
 import { DashboardVisualizationsService } from './visualizations/types';
 
 export interface DashboardServices {
   // dependency services
   chrome: DashboardChromeService;
-  dashboardCapabilities: DashboardCapabilitiesService;
   data: DashboardDataService;
   dataViewEditor: DashboardDataViewEditorService; // used only for no data state
   embeddable: DashboardEmbeddableService;
@@ -34,5 +34,9 @@ export interface DashboardServices {
   screenshotMode: DashboardScreenshotModeService;
   settings: DashboardSettingsService;
   spaces: DashboardSpacesService;
+  urlForwarding: DashboardUrlForwardingService;
   visualizations: DashboardVisualizationsService;
+
+  // dashboard plugin's own services
+  dashboardCapabilities: DashboardCapabilitiesService;
 }

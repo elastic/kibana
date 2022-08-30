@@ -29,6 +29,7 @@ import { overlaysServiceFactory } from './overlays/overlays_service';
 import { screenshotModeServiceFactory } from './screenshot_mode/screenshot_mode_service';
 import { settingsServiceFactory } from './settings/settings_service';
 import { spacesServiceFactory } from './spaces/spaces_service';
+import { urlForwardingServiceFactory } from './url_forwarding/url_forwarding_service';
 import { visualizationsServiceFactory } from './visualizations/visualizations_service';
 
 const providers: PluginServiceProviders<
@@ -36,7 +37,6 @@ const providers: PluginServiceProviders<
   KibanaPluginServiceParams<DashboardStartDependencies>
 > = {
   chrome: new PluginServiceProvider(chromeServiceFactory),
-  dashboardCapabilities: new PluginServiceProvider(dashboardCapabilitiesServiceFactory),
   data: new PluginServiceProvider(dataServiceFactory),
   dataViewEditor: new PluginServiceProvider(dataViewEditorServiceFactory),
   embeddable: new PluginServiceProvider(embeddableServiceFactory),
@@ -47,7 +47,10 @@ const providers: PluginServiceProviders<
   screenshotMode: new PluginServiceProvider(screenshotModeServiceFactory),
   settings: new PluginServiceProvider(settingsServiceFactory),
   spaces: new PluginServiceProvider(spacesServiceFactory),
+  urlForwarding: new PluginServiceProvider(urlForwardingServiceFactory),
   visualizations: new PluginServiceProvider(visualizationsServiceFactory),
+
+  dashboardCapabilities: new PluginServiceProvider(dashboardCapabilitiesServiceFactory),
 };
 
 export const pluginServices = new PluginServices<DashboardServices>();

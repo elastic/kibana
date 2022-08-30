@@ -77,7 +77,6 @@ export async function mountApp({
 
   const {
     savedObjects,
-    urlForwarding,
     data: dataStart,
     share: shareStart,
     spaces: spacesApi,
@@ -93,7 +92,6 @@ export async function mountApp({
   const dashboardServices: DashboardAppServices = {
     onAppLeave,
     savedObjects,
-    urlForwarding,
     usageCollection,
     core: coreStart,
     share: shareStart,

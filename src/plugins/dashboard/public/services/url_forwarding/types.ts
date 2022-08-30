@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
+import type { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 
-export interface DashboardScreenshotModeService {
-  isScreenshotMode: ScreenshotModePluginStart['isScreenshotMode'];
-  getScreenshotContext: ScreenshotModePluginStart['getScreenshotContext'];
+export interface DashboardUrlForwardingService {
+  navigateToLegacyKibanaUrl: UrlForwardingStart['navigateToLegacyKibanaUrl'];
 }

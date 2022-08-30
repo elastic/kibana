@@ -26,11 +26,12 @@ export const DashboardNoMatch = ({ history }: { history: RouteComponentProps['hi
   const {
     settings: { theme },
     overlays: { banners },
+    urlForwarding: { navigateToLegacyKibanaUrl },
   } = pluginServices.getServices();
 
   useEffect(() => {
     services.restorePreviousUrl();
-    const { navigated } = services.urlForwarding.navigateToLegacyKibanaUrl(
+    const { navigated } = navigateToLegacyKibanaUrl(
       history.location.pathname + history.location.search
     );
 
@@ -66,7 +67,7 @@ export const DashboardNoMatch = ({ history }: { history: RouteComponentProps['hi
 
       history.replace(DashboardConstants.LANDING_PAGE_PATH);
     }
-  }, [services, banners, theme, history]);
+  }, [services, navigateToLegacyKibanaUrl, banners, theme, history]);
 
   return null;
 };
