@@ -68,17 +68,19 @@ export const copyValueToClipboard = ({
 
 export const copyColumnValuesToClipboard = async ({
   columnId,
+  columnDisplayName,
   services,
   valueToStringConverter,
   rowsCount,
 }: {
   columnId: string;
+  columnDisplayName: string;
   services: DiscoverServices;
   valueToStringConverter: ValueToStringConverter;
   rowsCount: number;
 }): Promise<string | null> => {
   const { toastNotifications } = services;
-  const nameFormattedResult = convertNameToString(columnId);
+  const nameFormattedResult = convertNameToString(columnDisplayName);
   let withFormula = nameFormattedResult.withFormula;
 
   const valuesFormatted = [...Array(rowsCount)].map((_, rowIndex) => {
@@ -108,7 +110,7 @@ export const copyColumnValuesToClipboard = async ({
 
   const toastTitle = i18n.translate('discover.grid.copyColumnValuesToClipboard.toastTitle', {
     defaultMessage: 'Values of "{column}" column copied to clipboard',
-    values: { column: columnId },
+    values: { column: columnDisplayName },
   });
 
   if (withFormula) {
@@ -126,15 +128,15 @@ export const copyColumnValuesToClipboard = async ({
 };
 
 export const copyColumnNameToClipboard = ({
-  columnId,
+  columnDisplayName,
   services,
 }: {
-  columnId: string;
+  columnDisplayName: string;
   services: DiscoverServices;
 }): string | null => {
   const { toastNotifications } = services;
 
-  const nameFormattedResult = convertNameToString(columnId);
+  const nameFormattedResult = convertNameToString(columnDisplayName);
   const textToCopy = nameFormattedResult.formattedString;
   const copied = copyToClipboard(textToCopy);
 

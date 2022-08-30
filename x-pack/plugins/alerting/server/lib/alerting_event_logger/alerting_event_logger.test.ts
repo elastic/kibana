@@ -26,6 +26,7 @@ import {
 } from '../../types';
 import { RuleRunMetrics } from '../rule_run_metrics_store';
 import { EVENT_LOG_ACTIONS } from '../../plugin';
+import { TaskRunnerTimerSpan } from '../../task_runner/task_runner_timer';
 
 const mockNow = '2020-01-01T02:00:00.000Z';
 const eventLogger = eventLoggerMock.create();
@@ -680,6 +681,118 @@ describe('AlertingEventLogger', () => {
                   number_of_searches: 6,
                   es_search_duration_ms: 3300,
                   total_search_duration_ms: 10333,
+                },
+              },
+            },
+          },
+        },
+      };
+
+      expect(alertingEventLogger.getEvent()).toEqual(loggedEvent);
+      expect(eventLogger.logEvent).toHaveBeenCalledWith(loggedEvent);
+    });
+
+    test('should set fields from execution timings if provided', () => {
+      alertingEventLogger.initialize(context);
+      alertingEventLogger.start();
+      alertingEventLogger.done({
+        timings: {
+          [TaskRunnerTimerSpan.StartTaskRun]: 10,
+          [TaskRunnerTimerSpan.TotalRunDuration]: 20,
+          [TaskRunnerTimerSpan.PrepareRule]: 30,
+          [TaskRunnerTimerSpan.RuleTypeRun]: 40,
+          [TaskRunnerTimerSpan.ProcessAlerts]: 50,
+          [TaskRunnerTimerSpan.TriggerActions]: 60,
+          [TaskRunnerTimerSpan.ProcessRuleRun]: 70,
+        },
+      });
+
+      const event = initializeExecuteRecord(contextWithScheduleDelay);
+      const loggedEvent = {
+        ...event,
+        kibana: {
+          ...event.kibana,
+          alert: {
+            ...event.kibana?.alert,
+            rule: {
+              ...event.kibana?.alert?.rule,
+              execution: {
+                ...event.kibana?.alert?.rule?.execution,
+                metrics: {
+                  claim_to_start_duration_ms: 10,
+                  total_run_duration_ms: 20,
+                  prepare_rule_duration_ms: 30,
+                  rule_type_run_duration_ms: 40,
+                  process_alerts_duration_ms: 50,
+                  trigger_actions_duration_ms: 60,
+                  process_rule_duration_ms: 70,
+                },
+              },
+            },
+          },
+        },
+      };
+
+      expect(alertingEventLogger.getEvent()).toEqual(loggedEvent);
+      expect(eventLogger.logEvent).toHaveBeenCalledWith(loggedEvent);
+    });
+
+    test('should set fields from execution metrics and timings if both provided', () => {
+      alertingEventLogger.initialize(context);
+      alertingEventLogger.start();
+      alertingEventLogger.done({
+        metrics: {
+          numberOfTriggeredActions: 1,
+          numberOfGeneratedActions: 2,
+          numberOfActiveAlerts: 3,
+          numberOfNewAlerts: 4,
+          numberOfRecoveredAlerts: 5,
+          numSearches: 6,
+          esSearchDurationMs: 3300,
+          totalSearchDurationMs: 10333,
+          hasReachedAlertLimit: false,
+          triggeredActionsStatus: ActionsCompletion.COMPLETE,
+        },
+        timings: {
+          [TaskRunnerTimerSpan.StartTaskRun]: 10,
+          [TaskRunnerTimerSpan.TotalRunDuration]: 20,
+          [TaskRunnerTimerSpan.PrepareRule]: 30,
+          [TaskRunnerTimerSpan.RuleTypeRun]: 40,
+          [TaskRunnerTimerSpan.ProcessAlerts]: 50,
+          [TaskRunnerTimerSpan.TriggerActions]: 60,
+          [TaskRunnerTimerSpan.ProcessRuleRun]: 70,
+        },
+      });
+
+      const event = initializeExecuteRecord(contextWithScheduleDelay);
+      const loggedEvent = {
+        ...event,
+        kibana: {
+          ...event.kibana,
+          alert: {
+            ...event.kibana?.alert,
+            rule: {
+              ...event.kibana?.alert?.rule,
+              execution: {
+                ...event.kibana?.alert?.rule?.execution,
+                metrics: {
+                  number_of_triggered_actions: 1,
+                  number_of_generated_actions: 2,
+                  alert_counts: {
+                    active: 3,
+                    new: 4,
+                    recovered: 5,
+                  },
+                  number_of_searches: 6,
+                  es_search_duration_ms: 3300,
+                  total_search_duration_ms: 10333,
+                  claim_to_start_duration_ms: 10,
+                  total_run_duration_ms: 20,
+                  prepare_rule_duration_ms: 30,
+                  rule_type_run_duration_ms: 40,
+                  process_alerts_duration_ms: 50,
+                  trigger_actions_duration_ms: 60,
+                  process_rule_duration_ms: 70,
                 },
               },
             },

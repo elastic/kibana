@@ -6,7 +6,6 @@
  */
 
 import { curry } from 'lodash';
-import { schema } from '@kbn/config-schema';
 import { Logger } from '@kbn/core/server';
 import { CasesConnectorFeatureId } from '../../../common';
 import {
@@ -22,8 +21,8 @@ import { ActionsConfigurationUtilities } from '../../actions_config';
 import { createExternalService } from './service';
 import {
   ExecutorParamsSchema,
-  ExternalIncidentServiceConfiguration,
-  ExternalIncidentServiceSecretConfiguration,
+  ExternalIncidentServiceConfigurationSchema,
+  ExternalIncidentServiceSecretConfigurationSchema,
 } from './schema';
 import { api } from './api';
 import { validate } from './validators';
@@ -50,13 +49,17 @@ export function getActionType({
     minimumLicenseRequired: 'gold',
     name: i18n.NAME,
     validate: {
-      config: schema.object(ExternalIncidentServiceConfiguration, {
-        validate: curry(validate.config)(configurationUtilities),
-      }),
-      secrets: schema.object(ExternalIncidentServiceSecretConfiguration, {
-        validate: curry(validate.secrets),
-      }),
-      params: ExecutorParamsSchema,
+      config: {
+        schema: ExternalIncidentServiceConfigurationSchema,
+        customValidator: validate.config,
+      },
+      secrets: {
+        schema: ExternalIncidentServiceSecretConfigurationSchema,
+        customValidator: validate.secrets,
+      },
+      params: {
+        schema: ExecutorParamsSchema,
+      },
       connector: validate.connector,
     },
     executor: curry(executor)({ logger, configurationUtilities }),
