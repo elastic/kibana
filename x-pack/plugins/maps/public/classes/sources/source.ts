@@ -18,6 +18,7 @@ import {
   StyleDescriptor,
   Timeslice,
 } from '../../../common/descriptor_types';
+import { DataRequest } from '../util/data_request';
 import { IStyle } from '../styles/style';
 import { LICENSED_FEATURES } from '../../licensed_features';
 
@@ -55,7 +56,7 @@ export interface ISource {
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null;
   supportsFitToBounds(): Promise<boolean>;
   cloneDescriptor(): AbstractSourceDescriptor;
-  canSkipSourceUpdate(): boolean;
+  canSkipSourceUpdate(dataRequest:DataRequest,nextRequestMeta:DataRequestMeta): Promise<boolean>;
   getFieldNames(): string[];
   getApplyGlobalQuery(): boolean;
   getApplyGlobalTime(): boolean;
@@ -105,7 +106,7 @@ export class AbstractSource implements ISource {
   getAttributionProvider(): (() => Promise<Attribution[]>) | null {
     return null;
   }
-  canSkipSourceUpdate(): boolean {
+  async canSkipSourceUpdate(dataRequest:DataRequest,nextRequestMeta:DataRequestMeta): Promise<boolean>{
     return true;
   }
   isFieldAware(): boolean {

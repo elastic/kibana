@@ -5,9 +5,15 @@
  * 2.0.
  */
 
+import { RasterTileSource } from '@kbn/mapbox-gl';
 import { DataFilters } from '../../../../common/descriptor_types';
 import { ISource } from '../source';
 
+export interface RasterTileSourceData {
+  url: string;
+}
+
 export interface ITMSSource extends ISource {
   getUrlTemplate(dataFilters: DataFilters): Promise<string>;
+  isSourceStale(mbSource:RasterTileSource,sourceDataRequest:object):boolean;
 }
