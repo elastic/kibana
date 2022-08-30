@@ -502,13 +502,13 @@ function getQueryValidationErrors(
       }
     }
 
-    if (arg.name === 'timeRange') {
-      const parsedWindow = parseTimeShift(arg.value || '');
-      if (parsedWindow === 'invalid' || parsedWindow === 'previous') {
+    if (arg.name === 'reducedTimeRange') {
+      const parsedReducedTimeRange = parseTimeShift(arg.value || '');
+      if (parsedReducedTimeRange === 'invalid' || parsedReducedTimeRange === 'previous') {
         errors.push({
-          message: i18n.translate('xpack.lens.indexPattern.invalidWindow', {
+          message: i18n.translate('xpack.lens.indexPattern.invalidReducedTimeRange', {
             defaultMessage:
-              'Invalid window interval. Enter positive integer amount followed by one of the units s, m, h, d, w, M, y. For example 3h for 3 hours',
+              'Invalid reduced time range. Enter positive integer amount followed by one of the units s, m, h, d, w, M, y. For example 3h for 3 hours',
           }),
           locations: [arg.location],
         });
