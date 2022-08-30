@@ -24,21 +24,43 @@ import type {
   HttpApiInterfaceEntryDefinition,
 } from '../common/api_routes';
 
+type UnscopedClientMethodFrom<E extends HttpApiInterfaceEntryDefinition> = (
+  args: E['inputs']['body'] & E['inputs']['params'] & E['inputs']['query']
+) => Promise<E['output']>;
+
 /**
  * @param args - Input to the endpoint which includes body, params and query of the RESTful endpoint.
  */
 type ClientMethodFrom<E extends HttpApiInterfaceEntryDefinition> = (
-  args: E['inputs']['body'] & E['inputs']['params'] & E['inputs']['query']
+  args: Parameters<UnscopedClientMethodFrom<E>>[0] & { kind: string }
 ) => Promise<E['output']>;
 
-type ClientMethodOptionalArgsFrom<E extends HttpApiInterfaceEntryDefinition> = (
-  args?: E['inputs']['body'] & E['inputs']['params'] & E['inputs']['query']
-) => Promise<E['output']>;
+interface GlobalEndpoints {
+  /**
+   * Get metrics of file system, like storage usage.
+   *
+   * @param args - Get metrics arguments
+   */
+  getMetrics: UnscopedClientMethodFrom<FilesMetricsHttpEndpoint>;
+  /**
+   * Download a file, bypassing regular security by way of a
+   * secret share token.
+   *
+   * @param args - Get public download arguments.
+   */
+  publicDownload: UnscopedClientMethodFrom<FilePublicDownloadHttpEndpoint>;
+  /**
+   * Find a set of files given some filters.
+   *
+   * @param args - File filters
+   */
+  find: UnscopedClientMethodFrom<FindFilesHttpEndpoint>;
+}
 
 /**
  * A client that can be used to manage a specific {@link FileKind}.
  */
-export interface ScopedFilesClient {
+export interface FilesClient extends GlobalEndpoints {
   /**
    * Create a new file object with the provided metadata.
    *
@@ -62,13 +84,7 @@ export interface ScopedFilesClient {
    *
    * @param args - list files args
    */
-  list: ClientMethodOptionalArgsFrom<ListFileKindHttpEndpoint>;
-  /**
-   * Find a set of files given some filters.
-   *
-   * @param args - File filters
-   */
-  find: ClientMethodFrom<FindFilesHttpEndpoint>;
+  list: ClientMethodFrom<ListFileKindHttpEndpoint>;
   /**
    * Update a set of of metadata values of the file object.
    *
@@ -87,6 +103,11 @@ export interface ScopedFilesClient {
    * @param args - download file args
    */
   download: ClientMethodFrom<DownloadFileKindHttpEndpoint>;
+  /**
+   * Get a string for downloading a file that can be passed to a button element's
+   * href for download.
+   */
+  getDownloadHref: (file: FileJSON) => string;
   /**
    * Share a file by creating a new file share instance.
    *
@@ -115,35 +136,29 @@ export interface ScopedFilesClient {
    * @param args - Get file share arguments
    */
   listShares: ClientMethodFrom<FileListSharesHttpEndpoint>;
-  /**
-   * Get metrics of file system, like storage usage.
-   *
-   * @param args - Get metrics arguments
-   */
-  getMetrics: ClientMethodFrom<FilesMetricsHttpEndpoint>;
-  /**
-   * Download a file, bypassing regular security by way of a
-   * secret share token.
-   *
-   * @param args - Get public download arguments.
-   */
-  publicDownload: ClientMethodFrom<FilePublicDownloadHttpEndpoint>;
-
-  /**
-   * Get a string for downloading a file that can be passed to a button element's
-   * href for download.
-   */
-  getDownloadHref: (file: FileJSON) => string;
 }
 
 export type FilesClientResponses = {
-  [K in keyof ScopedFilesClient]: Awaited<ReturnType<ScopedFilesClient[K]>>;
+  [K in keyof FilesClient]: Awaited<ReturnType<FilesClient[K]>>;
+};
+
+/**
+ * A files client that is scoped to a specific {@link FileKind}.
+ *
+ * More convenient if you want to re-use the same client for the same file kind
+ * and not specify the kind every time.
+ */
+export type ScopedFilesClient = {
+  [K in keyof FilesClient]: K extends 'list'
+    ? (arg?: Omit<Parameters<FilesClient[K]>[0], 'kind'>) => ReturnType<FilesClient[K]>
+    : (arg: Omit<Parameters<FilesClient[K]>[0], 'kind'>) => ReturnType<FilesClient[K]>;
 };
 
 /**
  * A factory for creating a {@link ScopedFilesClient}
  */
 export interface FilesClientFactory {
+  asUnscoped(): FilesClient;
   /**
    * Create a {@link FileClient} for a given {@link FileKind}.
    *
