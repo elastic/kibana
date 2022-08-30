@@ -456,6 +456,7 @@ export default function ({ getService }: FtrProviderContext) {
                 from: '2016-02-07T00:00:00.000Z',
                 to: '2016-02-11T23:59:54.000Z',
               },
+              maxSeriesToPlot: 6,
             } as AnomalyChartsEmbeddableInput;
 
             expectedAttachment.id = stringHash(JSON.stringify(expectedAttachment)).toString();
@@ -468,7 +469,7 @@ export default function ({ getService }: FtrProviderContext) {
                 reporter: USER.ML_POWERUSER,
               },
               expectedAttachment,
-              5
+              6
             );
           });
         });
