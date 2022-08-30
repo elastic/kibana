@@ -33,13 +33,7 @@ export function handleWarnings(
     return;
   }
 
-  let internal: SearchResponseWarning[] = [];
-  if (cb) {
-    internal = filterWarnings(warnings, cb);
-  } else {
-    internal = warnings;
-  }
-
+  const internal = cb ? filterWarnings(warnings, cb) : warnings;
   if (internal.length === 0) {
     return;
   }
