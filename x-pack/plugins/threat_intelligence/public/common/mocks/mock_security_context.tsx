@@ -13,6 +13,10 @@ export const getSecuritySolutionContextMock = (): SecuritySolutionPluginContext 
     () =>
     ({ children }) =>
       <div>{children}</div>,
+  getPageWrapper:
+    () =>
+    ({ children }) =>
+      <div>{children}</div>,
   licenseService: {
     isEnterprise() {
       return true;
@@ -22,5 +26,6 @@ export const getSecuritySolutionContextMock = (): SecuritySolutionPluginContext 
     browserFields: {},
     selectedPatterns: [],
     indexPattern: { fields: [], title: '' },
+    loading: false,
   },
 });
