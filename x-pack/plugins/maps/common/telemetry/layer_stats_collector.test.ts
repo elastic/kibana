@@ -8,7 +8,7 @@
 // @ts-ignore
 import mapSavedObjects from './test_resources/sample_map_saved_objects.json';
 import { LayerStatsCollector } from './layer_stats_collector';
-import { MapSavedObjectAttributes } from '../map_saved_object_type';
+import { LayerDescriptor } from '../descriptor_types';
 
 const expecteds = [
   {
@@ -68,15 +68,13 @@ const expecteds = [
   },
 ];
 
-const testsToRun = mapSavedObjects.map(
-  (savedObject: { attributes: MapSavedObjectAttributes }, index: number) => {
-    const { attributes } = savedObject;
-    return [attributes, expecteds[index]] as const;
-  }
-);
+const testsToRun = mapSavedObjects.map(({ attributes }, index: number) => {
+  const layerList: LayerDescriptor[] = JSON.parse(attributes.layerListJSON);
+  return [layerList, expecteds[index]] as const;
+});
 
-describe.each(testsToRun)('LayerStatsCollector %#', (attributes, expected) => {
-  const statsCollector = new LayerStatsCollector(attributes);
+describe.each(testsToRun)('LayerStatsCollector %#', (layerList, expected) => {
+  const statsCollector = new LayerStatsCollector(layerList);
   test('getLayerCount', () => {
     expect(statsCollector.getLayerCount()).toBe(expected.layerCount);
   });

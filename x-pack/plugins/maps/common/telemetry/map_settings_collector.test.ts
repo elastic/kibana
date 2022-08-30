@@ -8,7 +8,7 @@
 // @ts-ignore
 import mapSavedObjects from './test_resources/sample_map_saved_objects.json';
 import { MapSettingsCollector } from './map_settings_collector';
-import { MapSavedObjectAttributes } from '../map_saved_object_type';
+import { MapSettings } from '../descriptor_types';
 
 const expecteds = [
   {
@@ -25,19 +25,17 @@ const expecteds = [
   },
   {
     customIconsCount: 3,
-    autoFitToDataBounds: true,
   },
 ];
 
-const testsToRun = mapSavedObjects.map(
-  (savedObject: { attributes: MapSavedObjectAttributes }, index: number) => {
-    const { attributes } = savedObject;
-    return [attributes, expecteds[index]] as const;
-  }
-);
+const testsToRun = mapSavedObjects.map(({ attributes }, index: number) => {
+  const mapState = JSON.parse(attributes.mapStateJSON);
+  const mapSettings: Partial<MapSettings> = mapState.settings;
+  return [mapSettings, expecteds[index]] as const;
+});
 
-describe.each(testsToRun)('MapSettingsCollector %#', (attributes, expected) => {
-  const statsCollector = new MapSettingsCollector(attributes);
+describe.each(testsToRun)('MapSettingsCollector %#', (mapSettings, expected) => {
+  const statsCollector = new MapSettingsCollector(mapSettings);
   test('getCustomIconsCount', () => {
     expect(statsCollector.getCustomIconsCount()).toBe(expected.customIconsCount);
   });

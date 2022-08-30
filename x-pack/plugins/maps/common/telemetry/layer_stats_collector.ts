@@ -19,7 +19,6 @@ import {
   LayerDescriptor,
   VectorLayerDescriptor,
 } from '../descriptor_types';
-import { MapSavedObjectAttributes } from '../map_saved_object_type';
 import { EMS_BASEMAP_KEYS, JOIN_KEYS, LAYER_KEYS, RESOLUTION_KEYS, SCALING_KEYS } from './types';
 
 export class LayerStatsCollector {
@@ -34,18 +33,7 @@ export class LayerStatsCollector {
   private _layerTypeCounts: { [key: string]: number } = {};
   private _sourceIds: Set<string> = new Set();
 
-  constructor(attributes: MapSavedObjectAttributes) {
-    if (!attributes || !attributes.layerListJSON) {
-      return;
-    }
-
-    let layerList: LayerDescriptor[] = [];
-    try {
-      layerList = JSON.parse(attributes.layerListJSON);
-    } catch (e) {
-      return;
-    }
-
+  constructor(layerList: LayerDescriptor[]) {
     this._layerCount = layerList.length;
     layerList.forEach((layerDescriptor) => {
       this._updateCounts(getBasemapKey(layerDescriptor), this._basemapCounts);

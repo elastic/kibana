@@ -139,20 +139,18 @@ export class SavedMap {
       }
     }
 
-    this._reportUsage();
-
+    let mapSettings: Partial<MapSettings> = {};
     if (this._mapEmbeddableInput && this._mapEmbeddableInput.mapSettings !== undefined) {
-      this._store.dispatch(setMapSettingsFromEncodedState(this._mapEmbeddableInput.mapSettings));
+      mapSettings = this._mapEmbeddableInput.mapSettings;
     } else if (this._attributes?.mapStateJSON) {
       try {
         const mapState = JSON.parse(this._attributes.mapStateJSON) as SerializedMapState;
-        if (mapState.settings) {
-          this._store.dispatch(setMapSettingsFromEncodedState(mapState.settings));
-        }
+        mapSettings = mapState.settings;
       } catch (e) {
         // ignore malformed mapStateJSON, not a critical error for viewing map - map will just use defaults
       }
     }
+    this._store.dispatch(setMapSettingsFromEncodedState(mapSettings));
 
     let isLayerTOCOpen = DEFAULT_IS_LAYER_TOC_OPEN;
     if (this._mapEmbeddableInput && this._mapEmbeddableInput.isLayerTOCOpen !== undefined) {
@@ -232,6 +230,8 @@ export class SavedMap {
     if (this._defaultLayerWizard) {
       this._store.dispatch<any>(setAutoOpenLayerWizardId(this._defaultLayerWizard));
     }
+
+    this._reportUsage({ mapSettings, layerList });
   }
 
   hasUnsavedChanges = () => {
@@ -275,15 +275,21 @@ export class SavedMap {
       : this._attributes!.title;
   }
 
-  private _reportUsage(): void {
+  private _reportUsage({
+    mapSettings,
+    layerList,
+  }: {
+    mapSettings: Partial<MapSettings>;
+    layerList: LayerDescriptor[];
+  }): void {
     const usageCollector = getUsageCollection();
-    if (!usageCollector || !this._attributes) {
+    if (!usageCollector) {
       return;
     }
 
-    const mapSettingsStatsCollector = new MapSettingsCollector(this._attributes);
+    const mapSettingsStatsCollector = new MapSettingsCollector(mapSettings);
 
-    const layerStatsCollector = new LayerStatsCollector(this._attributes);
+    const layerStatsCollector = new LayerStatsCollector(layerList);
 
     const uiCounterEvents = {
       layer: layerStatsCollector.getLayerCounts(),

@@ -17,6 +17,7 @@ import { LayerStatsCollector } from '../../../common/telemetry/layer_stats_colle
 import { MapSettingsCollector } from '../../../common/telemetry/map_settings_collector';
 
 import { ClusterCountStats, MapStats } from './types';
+import { LayerDescriptor, MapSettings } from '../../../common/descriptor_types';
 
 /*
  * Use MapStatsCollector instance to track map saved object stats.
@@ -45,78 +46,90 @@ export class MapStatsCollector {
 
     this._mapCount++;
 
-    const mapSettingsCollector = new MapSettingsCollector(attributes);
-    if (mapSettingsCollector) {
-      const customIconsCount = mapSettingsCollector.getCustomIconsCount();
-      if (this._customIconsCountStats) {
-        const customIconsCountTotal = this._customIconsCountStats.total + customIconsCount;
-        this._customIconsCountStats = {
-          min: Math.min(customIconsCount, this._customIconsCountStats.min),
-          max: Math.max(customIconsCount, this._customIconsCountStats.max),
-          total: customIconsCountTotal,
-          avg: customIconsCountTotal / this._mapCount,
-        };
-      } else {
-        this._customIconsCountStats = {
-          min: customIconsCount,
-          max: customIconsCount,
-          total: customIconsCount,
-          avg: customIconsCount,
-        };
+    try {
+      const mapState = JSON.parse(attributes.mapStateJSON);
+      const mapSettings: Partial<MapSettings> = mapState.settings ?? {};
+      const mapSettingsCollector = new MapSettingsCollector(mapSettings);
+
+      if (mapSettingsCollector) {
+        const customIconsCount = mapSettingsCollector.getCustomIconsCount();
+        if (this._customIconsCountStats) {
+          const customIconsCountTotal = this._customIconsCountStats.total + customIconsCount;
+          this._customIconsCountStats = {
+            min: Math.min(customIconsCount, this._customIconsCountStats.min),
+            max: Math.max(customIconsCount, this._customIconsCountStats.max),
+            total: customIconsCountTotal,
+            avg: customIconsCountTotal / this._mapCount,
+          };
+        } else {
+          this._customIconsCountStats = {
+            min: customIconsCount,
+            max: customIconsCount,
+            total: customIconsCount,
+            avg: customIconsCount,
+          };
+        }
       }
+    } catch (e) {
+      // ignore malformed mapStateJSON, not a critical error for gathering map stats
     }
 
-    const layerStatsCollector = new LayerStatsCollector(attributes);
-    if (layerStatsCollector) {
-      const layerCount = layerStatsCollector.getLayerCount();
-      if (this._layerCountStats) {
-        const layerCountTotal = this._layerCountStats.total + layerCount;
-        this._layerCountStats = {
-          min: Math.min(layerCount, this._layerCountStats.min),
-          max: Math.max(layerCount, this._layerCountStats.max),
-          total: layerCountTotal,
-          avg: layerCountTotal / this._mapCount,
-        };
-      } else {
-        this._layerCountStats = {
-          min: layerCount,
-          max: layerCount,
-          total: layerCount,
-          avg: layerCount,
-        };
-      }
+    try {
+      const layerList: LayerDescriptor[] = JSON.parse(attributes.layerListJSON);
+      const layerStatsCollector = new LayerStatsCollector(layerList);
+      if (layerStatsCollector) {
+        const layerCount = layerStatsCollector.getLayerCount();
+        if (this._layerCountStats) {
+          const layerCountTotal = this._layerCountStats.total + layerCount;
+          this._layerCountStats = {
+            min: Math.min(layerCount, this._layerCountStats.min),
+            max: Math.max(layerCount, this._layerCountStats.max),
+            total: layerCountTotal,
+            avg: layerCountTotal / this._mapCount,
+          };
+        } else {
+          this._layerCountStats = {
+            min: layerCount,
+            max: layerCount,
+            total: layerCount,
+            avg: layerCount,
+          };
+        }
 
-      const sourceCount = layerStatsCollector.getSourceCount();
-      if (this._sourceCountStats) {
-        const sourceCountTotal = this._sourceCountStats.total + sourceCount;
-        this._sourceCountStats = {
-          min: Math.min(sourceCount, this._sourceCountStats.min),
-          max: Math.max(sourceCount, this._sourceCountStats.max),
-          total: sourceCountTotal,
-          avg: sourceCountTotal / this._mapCount,
-        };
-      } else {
-        this._sourceCountStats = {
-          min: sourceCount,
-          max: sourceCount,
-          total: sourceCount,
-          avg: sourceCount,
-        };
-      }
+        const sourceCount = layerStatsCollector.getSourceCount();
+        if (this._sourceCountStats) {
+          const sourceCountTotal = this._sourceCountStats.total + sourceCount;
+          this._sourceCountStats = {
+            min: Math.min(sourceCount, this._sourceCountStats.min),
+            max: Math.max(sourceCount, this._sourceCountStats.max),
+            total: sourceCountTotal,
+            avg: sourceCountTotal / this._mapCount,
+          };
+        } else {
+          this._sourceCountStats = {
+            min: sourceCount,
+            max: sourceCount,
+            total: sourceCount,
+            avg: sourceCount,
+          };
+        }
 
-      this._updateClusterStats(this._basemapClusterStats, layerStatsCollector.getBasemapCounts());
-      this._updateClusterStats(this._joinClusterStats, layerStatsCollector.getJoinCounts());
-      this._updateClusterStats(this._layerClusterStats, layerStatsCollector.getLayerCounts());
-      this._updateClusterStats(
-        this._resolutionClusterStats,
-        layerStatsCollector.getResolutionCounts()
-      );
-      this._updateClusterStats(this._scalingClusterStats, layerStatsCollector.getScalingCounts());
-      this._updateClusterStats(this._emsFileClusterStats, layerStatsCollector.getEmsFileCounts());
-      this._updateClusterStats(
-        this._layerTypeClusterStats,
-        layerStatsCollector.getLayerTypeCounts()
-      );
+        this._updateClusterStats(this._basemapClusterStats, layerStatsCollector.getBasemapCounts());
+        this._updateClusterStats(this._joinClusterStats, layerStatsCollector.getJoinCounts());
+        this._updateClusterStats(this._layerClusterStats, layerStatsCollector.getLayerCounts());
+        this._updateClusterStats(
+          this._resolutionClusterStats,
+          layerStatsCollector.getResolutionCounts()
+        );
+        this._updateClusterStats(this._scalingClusterStats, layerStatsCollector.getScalingCounts());
+        this._updateClusterStats(this._emsFileClusterStats, layerStatsCollector.getEmsFileCounts());
+        this._updateClusterStats(
+          this._layerTypeClusterStats,
+          layerStatsCollector.getLayerTypeCounts()
+        );
+      }
+    } catch (e) {
+      // ignore malformed layerListJSON, not a critical error for gathering layer stats
     }
   }
 
