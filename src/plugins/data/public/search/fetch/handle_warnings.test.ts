@@ -26,6 +26,24 @@ jest.mock('./extract_warnings', () => ({
 }));
 
 const theme = themeServiceMock.createStartContract();
+const warnings: SearchResponseWarning[] = [
+  {
+    type: 'timed_out' as const,
+    message: 'Something timed out!',
+    reason: undefined,
+  },
+  {
+    type: 'shard_failure' as const,
+    message: 'Some shards failed!',
+    text: 'test text',
+    reason: { type: 'illegal_argument_exception', reason: 'Illegal argument! Go to jail!' },
+  },
+  {
+    type: 'shard_failure' as const,
+    message: 'Some shards failed!',
+    reason: { type: 'generic_shard_failure' },
+  },
+];
 
 describe('Filtering and showing warnings', () => {
   const notifications = notificationServiceMock.createStartContract();
@@ -33,116 +51,77 @@ describe('Filtering and showing warnings', () => {
   describe('handleWarnings', () => {
     const request = { body: {} };
     beforeEach(() => {
+      jest.resetAllMocks();
       setNotifications(notifications);
       (notifications.toasts.addWarning as jest.Mock).mockReset();
-      jest.resetAllMocks();
+      (extract.extractWarnings as jest.Mock).mockImplementation(() => warnings);
     });
 
     test('should notify if timed out', () => {
-      (extract.extractWarnings as jest.Mock).mockImplementation(() => [
-        {
-          message: 'request timed out',
-          type: 'timeout_warning',
-        },
-      ]);
+      (extract.extractWarnings as jest.Mock).mockImplementation(() => [warnings[0]]);
       const response = { rawResponse: { timed_out: true } } as unknown as estypes.SearchResponse;
       handleWarnings(request, response, theme);
+
       expect(notifications.toasts.addWarning).toBeCalledTimes(1);
-      expect(notifications.toasts.addWarning).toBeCalledWith({ title: 'request timed out' });
+      expect(notifications.toasts.addWarning).toBeCalledWith({ title: 'Something timed out!' });
     });
 
     test('should notify if shards failed for unknown type/reason', () => {
-      (extract.extractWarnings as jest.Mock).mockImplementation(() => [
-        {
-          message: 'shards failed',
-          type: 'something_no_one_has_ever_seen',
-        },
-      ]);
+      (extract.extractWarnings as jest.Mock).mockImplementation(() => [warnings[2]]);
       const response = {
         rawResponse: { _shards: { failed: 1, total: 2, successful: 1, skipped: 1 } },
       } as unknown as estypes.SearchResponse;
       handleWarnings(request, response, theme);
+
       expect(notifications.toasts.addWarning).toBeCalledTimes(1);
-      expect(notifications.toasts.addWarning).toBeCalledWith({ title: 'shards failed' });
+      expect(notifications.toasts.addWarning).toBeCalledWith({ title: 'Some shards failed!' });
     });
 
     test('should add mount point for shard modal failure button if warning.text is provided', () => {
-      (extract.extractWarnings as jest.Mock).mockImplementation(() => [
-        {
-          message: 'shards failed',
-          type: 'something_no_one_has_ever_seen',
-          text: 'It was the best of times, it was the worst of times.',
-        },
-      ]);
+      (extract.extractWarnings as jest.Mock).mockImplementation(() => [warnings[1]]);
       const response = {
         rawResponse: { _shards: { failed: 1, total: 2, successful: 1, skipped: 1 } },
       } as unknown as estypes.SearchResponse;
       handleWarnings(request, response, theme);
+
       expect(notifications.toasts.addWarning).toBeCalledTimes(1);
       expect(notifications.toasts.addWarning).toBeCalledWith({
-        title: 'shards failed',
+        title: 'Some shards failed!',
         text: expect.any(Function),
       });
     });
 
     test('should notify once if the response contains multiple failures', () => {
-      (extract.extractWarnings as jest.Mock).mockImplementation(() => [
-        {
-          message: 'shards failed',
-          type: 'something_no_one_has_ever_seen',
-        },
-        {
-          message: 'more shards failed',
-          type: 'another_thing_no_one_has_ever_seen',
-        },
-      ]);
+      (extract.extractWarnings as jest.Mock).mockImplementation(() => [warnings[1], warnings[2]]);
       const response = {
         rawResponse: { _shards: { failed: 1, total: 2, successful: 1, skipped: 1 } },
       } as unknown as estypes.SearchResponse;
       handleWarnings(request, response, theme);
+
       expect(notifications.toasts.addWarning).toBeCalledTimes(1);
-      expect(notifications.toasts.addWarning).toBeCalledWith({ title: 'shards failed' });
+      expect(notifications.toasts.addWarning).toBeCalledWith({
+        title: 'Some shards failed!',
+        text: expect.any(Function),
+      });
     });
 
     test('should notify once if the response contains some unfiltered failures', () => {
-      (extract.extractWarnings as jest.Mock).mockImplementation(() => [
-        {
-          message: 'shards failed',
-          type: 'something_no_one_has_ever_seen',
-        },
-        {
-          message: 'more shards failed',
-          type: 'another_thing_no_one_has_ever_seen',
-        },
-      ]);
+      const callback = (warning: SearchResponseWarning) =>
+        warning.reason?.type !== 'generic_shard_failure';
       const response = {
         rawResponse: { _shards: { failed: 1, total: 2, successful: 1, skipped: 1 } },
       } as unknown as estypes.SearchResponse;
-
-      const callback = (warning: SearchResponseWarning) =>
-        warning.type !== 'another_thing_no_one_has_ever_seen';
       handleWarnings(request, response, theme, callback);
 
       expect(notifications.toasts.addWarning).toBeCalledTimes(1);
-      expect(notifications.toasts.addWarning).toBeCalledWith({ title: 'more shards failed' });
+      expect(notifications.toasts.addWarning).toBeCalledWith({ title: 'Some shards failed!' });
     });
 
     test('should not notify if the response contains no unfiltered failures', () => {
-      (extract.extractWarnings as jest.Mock).mockImplementation(() => [
-        {
-          message: 'shards failed',
-          type: 'something_no_one_has_ever_seen',
-        },
-        {
-          message: 'more shards failed',
-          type: 'another_thing_no_one_has_ever_seen',
-        },
-      ]);
+      const callback = () => true;
       const response = {
         rawResponse: { _shards: { failed: 1, total: 2, successful: 1, skipped: 1 } },
       } as unknown as estypes.SearchResponse;
-
-      const callback = () => true;
       handleWarnings(request, response, theme, callback);
 
       expect(notifications.toasts.addWarning).toBeCalledTimes(0);
@@ -151,10 +130,6 @@ describe('Filtering and showing warnings', () => {
 
   describe('filterWarnings', () => {
     const callback = jest.fn();
-    const warnings = [
-      { message: 'request timed out', type: 'timeout_warning' },
-      { message: 'shards failed', type: 'something_no_one_has_ever_seen' },
-    ];
 
     beforeEach(() => {
       callback.mockImplementation(() => {
@@ -169,19 +144,14 @@ describe('Filtering and showing warnings', () => {
 
     it('filters out some', () => {
       callback.mockImplementation(
-        (warning: SearchResponseWarning) => warning.type !== 'something_no_one_has_ever_seen'
+        (warning: SearchResponseWarning) => warning.reason?.type !== 'generic_shard_failure'
       );
-      expect(filterWarnings(warnings, callback)).toEqual([
-        { message: 'shards failed', type: 'something_no_one_has_ever_seen' },
-      ]);
+      expect(filterWarnings(warnings, callback)).toEqual([warnings[2]]);
     });
 
     it('filters out none', () => {
       callback.mockImplementation(() => false);
-      expect(filterWarnings(warnings, callback)).toEqual([
-        { message: 'request timed out', type: 'timeout_warning' },
-        { message: 'shards failed', type: 'something_no_one_has_ever_seen' },
-      ]);
+      expect(filterWarnings(warnings, callback)).toEqual(warnings);
     });
   });
 });

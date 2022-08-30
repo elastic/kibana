@@ -22,6 +22,7 @@ export function extractWarnings(rawResponse: estypes.SearchResponse): SearchResp
       message: i18n.translate('data.search.searchSource.fetch.requestTimedOutNotificationMessage', {
         defaultMessage: 'Data might be incomplete because your request timed out',
       }),
+      reason: undefined, // exists so that callers do not have to cast when working with shard warnings.
     });
   }
 
@@ -44,15 +45,23 @@ export function extractWarnings(rawResponse: estypes.SearchResponse): SearchResp
     if (rawResponse._shards.failures) {
       rawResponse._shards.failures?.forEach((f) => {
         warnings.push({
-          type: f.reason.type,
-          reason: f.reason.reason,
+          type: 'shard_failure',
           message,
           text,
+          reason: {
+            type: f.reason.type,
+            reason: f.reason.reason,
+          },
         });
       });
     } else {
       // unknown type and reason
-      warnings.push({ type: 'generic_shard_warning', message, text });
+      warnings.push({
+        type: 'shard_failure',
+        message,
+        text,
+        reason: { type: 'generic_shard_warning' },
+      });
     }
   }
 

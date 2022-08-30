@@ -123,7 +123,7 @@ describe('Search service', () => {
         callback = jest.fn(() => false);
       });
 
-      it('no notifications', () => {
+      it('can show no notifications', () => {
         const responder = inspector.adapter.start('request1');
         shards = { total: 4, successful: 4, skipped: 0, failed: 0 };
         responder.ok(getMockResponseWithShards(shards));
@@ -132,7 +132,7 @@ describe('Search service', () => {
         expect(notifications.toasts.addWarning).toBeCalledTimes(0);
       });
 
-      it('notifications if no callback is provided', () => {
+      it('can show notifications if no callback is provided', () => {
         const responder = inspector.adapter.start('request1');
         responder.ok(getMockResponseWithShards(shards));
         data.showWarnings(inspector.adapter);
@@ -144,7 +144,7 @@ describe('Search service', () => {
         });
       });
 
-      it('no notifications when all warnings are filtered out', () => {
+      it("won't show notifications when all warnings are filtered out", () => {
         callback = () => true;
         const responder = inspector.adapter.start('request1');
         responder.ok(getMockResponseWithShards(shards));
@@ -153,8 +153,8 @@ describe('Search service', () => {
         expect(notifications.toasts.addWarning).toBeCalledTimes(0);
       });
 
-      it('able to single notification when some warnings are filtered', () => {
-        callback = (warning) => warning.type === 'illegal_argument_exception';
+      it('will show single notification when some warnings are filtered', () => {
+        callback = (warning) => warning.reason?.type === 'illegal_argument_exception';
         shards.failures = [
           {
             reason: {
@@ -182,8 +182,9 @@ describe('Search service', () => {
         });
       });
 
-      it('timed_out warning', () => {
+      it('can show a timed_out warning', () => {
         const responder = inspector.adapter.start('request1');
+        shards = { total: 4, successful: 4, skipped: 0, failed: 0 };
         const response1 = getMockResponseWithShards(shards);
         response1.json.rawResponse.timed_out = true;
         responder.ok(response1);
@@ -195,15 +196,24 @@ describe('Search service', () => {
         });
       });
 
-      it('multiple warning notifications when multiple responses have shard failures', () => {
-        const responder1 = inspector.adapter.start('request1');
+      it('can show two warnings if response has shard failures and also timed_out', () => {
+        const responder = inspector.adapter.start('request1');
         const response1 = getMockResponseWithShards(shards);
-        responder1.ok(response1);
+        response1.json.rawResponse.timed_out = true;
+        responder.ok(response1);
+        data.showWarnings(inspector.adapter, callback);
 
-        const response2 = getMockResponseWithShards(shards);
-        response2.json.rawResponse.timed_out = true;
+        expect(notifications.toasts.addWarning).toBeCalledTimes(2);
+        expect(notifications.toasts.addWarning).toBeCalledWith({
+          title: 'Data might be incomplete because your request timed out',
+        });
+      });
+
+      it('will show multiple warnings when multiple responses have shard failures', () => {
+        const responder1 = inspector.adapter.start('request1');
         const responder2 = inspector.adapter.start('request2');
-        responder2.ok(response2);
+        responder1.ok(getMockResponseWithShards(shards));
+        responder2.ok(getMockResponseWithShards(shards));
 
         data.showWarnings(inspector.adapter, callback);
 
@@ -213,7 +223,8 @@ describe('Search service', () => {
           text: expect.any(Function),
         });
         expect(notifications.toasts.addWarning).nthCalledWith(2, {
-          title: 'Data might be incomplete because your request timed out',
+          title: '2 of 4 shards failed',
+          text: expect.any(Function),
         });
       });
     });

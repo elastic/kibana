@@ -182,10 +182,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const warnings = await getTestJson('warningsTab', 'warningsCodeBlock');
       expect(warnings).to.eql([
         {
+          type: 'shard_failure',
           message: '2 of 4 shards failed',
+          reason: { reason: shardFailureReason, type: shardFailureType },
           text: 'The data you are seeing might be incomplete or wrong.',
-          reason: shardFailureReason,
-          type: shardFailureType,
         },
       ]);
     });

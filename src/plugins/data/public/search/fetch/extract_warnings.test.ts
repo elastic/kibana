@@ -38,11 +38,15 @@ describe('extract search response warnings', () => {
 
     expect(extractWarnings(response)).toEqual([
       {
+        type: 'shard_failure',
         message: '2 of 4 shards failed',
-        reason:
-          'Field [kubernetes.container.memory.available.bytes] of type [aggregate_metric_double] is not supported for aggregation [percentiles]',
+        reason: {
+          type: 'illegal_argument_exception',
+          reason:
+            'Field [kubernetes.container.memory.available.bytes] of type' +
+            ' [aggregate_metric_double] is not supported for aggregation [percentiles]',
+        },
         text: 'The data you are seeing might be incomplete or wrong.',
-        type: 'illegal_argument_exception',
       },
     ]);
   });
@@ -56,8 +60,8 @@ describe('extract search response warnings', () => {
     };
     expect(extractWarnings(warnings)).toEqual([
       {
-        message: 'Data might be incomplete because your request timed out',
         type: 'timed_out',
+        message: 'Data might be incomplete because your request timed out',
       },
     ]);
   });
@@ -71,9 +75,10 @@ describe('extract search response warnings', () => {
     } as estypes.SearchResponse;
     expect(extractWarnings(warnings)).toEqual([
       {
+        type: 'shard_failure',
         message: '77 of 79 shards failed',
+        reason: { type: 'generic_shard_warning' },
         text: 'The data you are seeing might be incomplete or wrong.',
-        type: 'generic_shard_warning',
       },
     ]);
   });
@@ -87,9 +92,10 @@ describe('extract search response warnings', () => {
     } as estypes.SearchResponse);
     expect(warnings).toEqual([
       {
+        type: 'shard_failure',
         message: '77 of 79 shards failed',
+        reason: { type: 'generic_shard_warning' },
         text: 'The data you are seeing might be incomplete or wrong.',
-        type: 'generic_shard_warning',
       },
     ]);
   });

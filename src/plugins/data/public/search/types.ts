@@ -96,18 +96,33 @@ export interface SearchServiceStartDependencies {
 }
 
 /**
- * Format of warnings of failed shards or internal ES timeouts that surface from search responses
+ * A warning object for a search response with internal ES timeouts
  * @public
  */
-export interface SearchResponseWarning {
+export interface SearchResponseTimeoutWarning {
   /**
-   * type: failure code from Elasticsearch
+   * type: for sorting out timeout warnings
    */
-  type: 'timed_out' | 'generic_shard_warning' | estypes.ShardFailure['reason']['type'];
+  type: 'timed_out';
   /**
-   * reason: failure reason from Elasticsearch
+   * message: human-friendly message
    */
-  reason?: estypes.ShardFailure['reason']['reason'];
+  message: string;
+  /**
+   * reason: not given for timeout. This exists so that callers do not have to cast when working with shard failure warnings.
+   */
+  reason: undefined;
+}
+
+/**
+ * A warning object for a search response with internal ES shard failures
+ * @public
+ */
+export interface SearchResponseShardFailureWarning {
+  /**
+   * type: for sorting out shard failure warnings
+   */
+  type: 'shard_failure';
   /**
    * message: human-friendly message
    */
@@ -116,7 +131,28 @@ export interface SearchResponseWarning {
    * text: text to show in ShardFailureModal (optional)
    */
   text?: string;
+  /**
+   * reason: ShardFailureReason from es client
+   */
+  reason: {
+    /**
+     * type: failure code from Elasticsearch
+     */
+    type: 'generic_shard_warning' | estypes.ShardFailure['reason']['type'];
+    /**
+     * reason: failure reason from Elasticsearch
+     */
+    reason?: estypes.ShardFailure['reason']['reason'];
+  };
 }
+
+/**
+ * A warning object for a search response with warnings
+ * @public
+ */
+export type SearchResponseWarning =
+  | SearchResponseTimeoutWarning
+  | SearchResponseShardFailureWarning;
 
 /**
  * A callback function which can intercept warnings when passed to {@link showWarnings}. Pass `true` from the

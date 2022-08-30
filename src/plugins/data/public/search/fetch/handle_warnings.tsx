@@ -14,7 +14,11 @@ import React from 'react';
 import { SearchRequest } from '..';
 import { getNotifications } from '../../services';
 import { ShardFailureOpenModalButton, ShardFailureRequest } from '../../shard_failure_modal';
-import { SearchResponseWarning, WarningHandlerCallback } from '../types';
+import {
+  SearchResponseShardFailureWarning,
+  SearchResponseWarning,
+  WarningHandlerCallback,
+} from '../types';
 import { extractWarnings } from './extract_warnings';
 
 /**
@@ -38,7 +42,21 @@ export function handleWarnings(
     return;
   }
 
-  const [warning] = internal;
+  // timeout notification
+  const [timeout] = internal.filter((w) => w.type === 'timed_out');
+  if (timeout) {
+    getNotifications().toasts.addWarning({
+      title: timeout.message,
+    });
+  }
+
+  // shard warning failure notification
+  const shardFailures = internal.filter((w) => w.type === 'shard_failure');
+  if (shardFailures.length === 0) {
+    return;
+  }
+
+  const [warning] = shardFailures as SearchResponseShardFailureWarning[];
   const title = warning.message;
 
   // if warning message contains text (warning response), show in ShardFailureOpenModalButton
