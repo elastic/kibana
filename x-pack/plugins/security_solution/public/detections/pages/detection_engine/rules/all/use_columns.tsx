@@ -11,7 +11,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { IntegrationsPopover } from '../../../../components/rules/related_integrations/integrations_popover';
 import {
-  APP_UI_ID,
   DEFAULT_RELATIVE_DATE_THRESHOLD,
   SecurityPageName,
   SHOW_RELATED_INTEGRATIONS_SETTING,
@@ -19,8 +18,6 @@ import {
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { FormattedRelativePreferenceDate } from '../../../../../common/components/formatted_date';
-import { LinkAnchor } from '../../../../../common/components/links';
-import { useFormatUrl } from '../../../../../common/components/link_to';
 import { getRuleDetailsUrl } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import { PopoverItems } from '../../../../../common/components/popover_items';
 import { useKibana, useUiSetting$ } from '../../../../../common/lib/kibana';
@@ -44,6 +41,7 @@ import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { useStartTransaction } from '../../../../../common/lib/apm/use_start_transaction';
 import { useInvalidateRules } from '../../../../containers/detection_engine/rules/use_find_rules_query';
 import { useInvalidatePrePackagedRulesStatus } from '../../../../containers/detection_engine/rules/use_pre_packaged_rules_status';
+import { SecuritySolutionLinkAnchor } from '../../../../../common/components/links';
 
 export type TableColumn = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
 
@@ -90,24 +88,15 @@ const useEnabledColumn = ({ hasPermissions }: ColumnsProps): TableColumn => {
 };
 
 export const RuleLink = ({ name, id }: Pick<Rule, 'id' | 'name'>) => {
-  const { formatUrl } = useFormatUrl(SecurityPageName.rules);
-  const { navigateToApp } = useKibana().services.application;
-
   return (
     <EuiToolTip content={name} anchorClassName="eui-textTruncate">
-      <LinkAnchor
+      <SecuritySolutionLinkAnchor
         data-test-subj="ruleName"
-        onClick={(ev: { preventDefault: () => void }) => {
-          ev.preventDefault();
-          navigateToApp(APP_UI_ID, {
-            deepLinkId: SecurityPageName.rules,
-            path: getRuleDetailsUrl(id),
-          });
-        }}
-        href={formatUrl(getRuleDetailsUrl(id))}
+        deepLinkId={SecurityPageName.rules}
+        path={getRuleDetailsUrl(id)}
       >
         {name}
-      </LinkAnchor>
+      </SecuritySolutionLinkAnchor>
     </EuiToolTip>
   );
 };

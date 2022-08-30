@@ -18,11 +18,11 @@ import {
   EuiWindowEvent,
 } from '@elastic/eui';
 import { i18n as i18nTranslate } from '@kbn/i18n';
-
+import { Route } from '@kbn/kibana-react-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { noop, omit } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { Switch, useParams } from 'react-router-dom';
 import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
 import styled from 'styled-components';
@@ -146,9 +146,9 @@ const StyledMinHeightTabContainer = styled.div`
 
 export enum RuleDetailTabs {
   alerts = 'alerts',
-  exceptions = 'ruleExceptions',
-  executionResults = 'executionResults',
-  executionEvents = 'executionEvents',
+  exceptions = 'rule_exceptions',
+  executionResults = 'execution_results',
+  executionEvents = 'execution_events',
 }
 
 export const RULE_DETAILS_TAB_NAME: Record<string, string> = {
@@ -804,74 +804,76 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
               <EuiSpacer />
             </Display>
             <StyledMinHeightTabContainer>
-              {pageTabName === RuleDetailTabs.alerts && hasIndexRead && (
-                <>
-                  <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-                    <EuiFlexItem grow={false}>
-                      <AlertsTableFilterGroup
-                        status={filterGroup}
-                        onFilterGroupChanged={onFilterGroupChangedCallback}
+              <Switch>
+                <Route path={`/rules/id/${ruleId}/:tabName(${RuleDetailTabs.alerts})`}>
+                  <>
+                    <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+                      <EuiFlexItem grow={false}>
+                        <AlertsTableFilterGroup
+                          status={filterGroup}
+                          onFilterGroupChanged={onFilterGroupChangedCallback}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        {updatedAt &&
+                          timelinesUi.getLastUpdated({
+                            updatedAt: updatedAt || Date.now(),
+                            showUpdating,
+                          })}
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                    <EuiSpacer size="l" />
+                    <Display show={!globalFullScreen}>
+                      <AlertsHistogramPanel
+                        filters={alertMergedFilters}
+                        query={query}
+                        signalIndexName={signalIndexName}
+                        defaultStackByOption={defaultRuleStackByOption}
+                        updateDateRange={updateDateRangeCallback}
+                        runtimeMappings={runtimeMappings}
                       />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      {updatedAt &&
-                        timelinesUi.getLastUpdated({
-                          updatedAt: updatedAt || Date.now(),
-                          showUpdating,
-                        })}
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                  <EuiSpacer size="l" />
-                  <Display show={!globalFullScreen}>
-                    <AlertsHistogramPanel
-                      filters={alertMergedFilters}
-                      query={query}
-                      signalIndexName={signalIndexName}
-                      defaultStackByOption={defaultRuleStackByOption}
-                      updateDateRange={updateDateRangeCallback}
-                      runtimeMappings={runtimeMappings}
-                    />
-                    <EuiSpacer />
-                  </Display>
-                  {ruleId != null && (
-                    <AlertsTable
-                      filterGroup={filterGroup}
-                      timelineId={TimelineId.detectionsRulesDetailsPage}
-                      defaultFilters={alertsTableDefaultFilters}
-                      hasIndexWrite={hasIndexWrite ?? false}
-                      hasIndexMaintenance={hasIndexMaintenance ?? false}
-                      from={from}
-                      loading={loading}
-                      showBuildingBlockAlerts={showBuildingBlockAlerts}
-                      showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
-                      onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChangedCallback}
-                      onShowOnlyThreatIndicatorAlertsChanged={
-                        onShowOnlyThreatIndicatorAlertsCallback
-                      }
-                      onRuleChange={refreshRule}
-                      to={to}
-                    />
-                  )}
-                </>
-              )}
-              {pageTabName === RuleDetailTabs.exceptions && (
-                <ExceptionsViewer
-                  ruleId={ruleId ?? ''}
-                  ruleName={rule?.name ?? ''}
-                  ruleIndices={rule?.index ?? DEFAULT_INDEX_PATTERN}
-                  dataViewId={rule?.data_view_id}
-                  availableListTypes={exceptionLists.allowedExceptionListTypes}
-                  commentsAccordionId={'ruleDetailsTabExceptions'}
-                  exceptionListsMeta={exceptionLists.lists}
-                  onRuleChange={refreshRule}
-                />
-              )}
-              {pageTabName === RuleDetailTabs.executionResults && (
-                <ExecutionLogTable ruleId={ruleId} selectAlertsTab={navigateToAlertsTab} />
-              )}
-              {pageTabName === RuleDetailTabs.executionEvents && (
-                <ExecutionEventsTable ruleId={ruleId} />
-              )}
+                      <EuiSpacer />
+                    </Display>
+                    {ruleId != null && (
+                      <AlertsTable
+                        filterGroup={filterGroup}
+                        timelineId={TimelineId.detectionsRulesDetailsPage}
+                        defaultFilters={alertsTableDefaultFilters}
+                        hasIndexWrite={hasIndexWrite ?? false}
+                        hasIndexMaintenance={hasIndexMaintenance ?? false}
+                        from={from}
+                        loading={loading}
+                        showBuildingBlockAlerts={showBuildingBlockAlerts}
+                        showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
+                        onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChangedCallback}
+                        onShowOnlyThreatIndicatorAlertsChanged={
+                          onShowOnlyThreatIndicatorAlertsCallback
+                        }
+                        onRuleChange={refreshRule}
+                        to={to}
+                      />
+                    )}
+                  </>
+                </Route>
+                <Route path={`/rules/id/${ruleId}/:tabName(${RuleDetailTabs.exceptions})`}>
+                  <ExceptionsViewer
+                    ruleId={ruleId ?? ''}
+                    ruleName={rule?.name ?? ''}
+                    ruleIndices={rule?.index ?? DEFAULT_INDEX_PATTERN}
+                    dataViewId={rule?.data_view_id}
+                    availableListTypes={exceptionLists.allowedExceptionListTypes}
+                    commentsAccordionId={'ruleDetailsTabExceptions'}
+                    exceptionListsMeta={exceptionLists.lists}
+                    onRuleChange={refreshRule}
+                  />
+                </Route>
+                <Route path={`/rules/id/${ruleId}/:tabName(${RuleDetailTabs.executionResults})`}>
+                  <ExecutionLogTable ruleId={ruleId} selectAlertsTab={navigateToAlertsTab} />
+                </Route>
+                <Route path={`/rules/id/${ruleId}/:tabName(${RuleDetailTabs.executionEvents})`}>
+                  <ExecutionEventsTable ruleId={ruleId} />
+                </Route>
+              </Switch>
             </StyledMinHeightTabContainer>
           </SecuritySolutionPageWrapper>
         </RuleDetailsContextProvider>

@@ -51,7 +51,7 @@ describe('Display not found page', () => {
   });
 
   it('navigates to the rules details page with incorrect link', () => {
-    visit(`${ruleDetailsUrl(mockRuleId)}/test/randomUrl`);
+    visit(`${ruleDetailsUrl(mockRuleId)}/randomUrl`);
     cy.get(NOT_FOUND).should('exist');
   });
 
