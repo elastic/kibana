@@ -9,6 +9,7 @@ import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/e
 import { Teletype } from '../../../common/types/process_tree';
 import { DEFAULT_TTY_FONT_SIZE } from '../../../common/constants';
 import { ZOOM_IN, ZOOM_FIT, ZOOM_OUT } from './translations';
+import { useStyles } from './styles';
 
 export interface TTYTextSizerDeps {
   tty?: Teletype;
@@ -27,6 +28,7 @@ export const TTYTextSizer = ({
   fontSize,
   onFontSizeChanged,
 }: TTYTextSizerDeps) => {
+  const styles = useStyles();
   const onFitFontSize = useMemo(() => {
     if (tty?.rows && containerHeight) {
       const lineHeight = DEFAULT_TTY_FONT_SIZE * LINE_HEIGHT_SCALE_RATIO;
@@ -61,14 +63,7 @@ export const TTYTextSizer = ({
       direction="row"
     >
       <EuiFlexItem>
-        <EuiToolTip content={ZOOM_IN}>
-          <EuiButtonIcon
-            data-test-subj="sessionView:TTYZoomIn"
-            aria-label={ZOOM_IN}
-            iconType="magnifyWithPlus"
-            onClick={onZoomIn}
-          />
-        </EuiToolTip>
+        <div css={styles.separator} />
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiToolTip content={ZOOM_FIT}>
@@ -81,11 +76,27 @@ export const TTYTextSizer = ({
         </EuiToolTip>
       </EuiFlexItem>
       <EuiFlexItem>
+        <div css={styles.separator} />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiToolTip content={ZOOM_IN}>
+          <EuiButtonIcon
+            data-test-subj="sessionView:TTYZoomIn"
+            aria-label={ZOOM_IN}
+            iconType="plusInCircle"
+            onClick={onZoomIn}
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
+      <EuiFlexItem component="span" css={styles.ratio}>
+        {`${Math.round((fontSize / DEFAULT_TTY_FONT_SIZE) * 100)}%`}
+      </EuiFlexItem>
+      <EuiFlexItem>
         <EuiToolTip content={ZOOM_OUT}>
           <EuiButtonIcon
             data-test-subj="sessionView:TTYZoomOut"
             aria-label={ZOOM_OUT}
-            iconType="magnifyWithMinus"
+            iconType="minusInCircle"
             onClick={onZoomOut}
           />
         </EuiToolTip>
