@@ -119,6 +119,7 @@ export function loadInitial(
         datasourceMap,
         datasourceStates: lens.datasourceStates,
         initialContext,
+        adHocDataViews: lens.persistedDoc?.state.adHocDataViews,
         ...loaderSharedArgs,
       },
       {
@@ -190,10 +191,11 @@ export function loadInitial(
             {
               datasourceMap,
               datasourceStates: docDatasourceStates,
-              references: doc.references,
+              references: [...doc.references, ...(doc.state.internalReferences || [])],
               initialContext,
               dataViews: lensServices.dataViews,
               storage: lensServices.storage,
+              adHocDataViews: doc.state.adHocDataViews,
               defaultIndexPatternId: lensServices.uiSettings.get('defaultIndex'),
             },
             { isFullEditor: true }

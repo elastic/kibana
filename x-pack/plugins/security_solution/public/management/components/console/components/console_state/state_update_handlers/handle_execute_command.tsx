@@ -25,6 +25,7 @@ import type { ParsedCommandInterface } from '../../../service/parsed_command_inp
 import { parseCommandInput } from '../../../service/parsed_command_input';
 import { UnknownCommand } from '../../unknown_comand';
 import { BadArgument } from '../../bad_argument';
+import { ValidationError } from '../../validation_error';
 import type { Command, CommandDefinition, CommandExecutionComponentProps } from '../../../types';
 
 const toCliArgumentOption = (argName: string) => `--${argName}`;
@@ -449,7 +450,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
       return updateStateWithNewCommandHistoryItem(
         state,
         createCommandHistoryEntry(
-          cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
+          cloneCommandDefinitionWithNewRenderComponent(command, ValidationError),
           createCommandExecutionState({
             errorMessage: validationResult,
           }),

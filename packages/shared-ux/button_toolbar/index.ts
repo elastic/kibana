@@ -16,3 +16,7 @@ export type {
 
 export { ToolbarPopover } from './src/popover';
 export type { ToolbarPopoverProps } from './src/popover';
+
+export { Toolbar } from './src/toolbar';
+export type { ToolbarProps } from './src/toolbar';
+export type { ToolbarButton } from './src/toolbar';
