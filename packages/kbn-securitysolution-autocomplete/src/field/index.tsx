@@ -32,6 +32,7 @@ export const FieldComponent: React.FC<FieldProps> = ({
     selectedComboOptions,
     fieldWidth,
 
+    renderFields,
     handleTouch,
     handleValuesChange,
   } = useField({
@@ -57,6 +58,7 @@ export const FieldComponent: React.FC<FieldProps> = ({
       data-test-subj="fieldAutocompleteComboBox"
       style={fieldWidth}
       fullWidth
+      renderOption={renderFields}
     />
   );
 };

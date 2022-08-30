@@ -6,8 +6,11 @@
  * Side Public License, v 1.
  */
 
-interface FieldDisabledType {
+interface DisabledTypesTextType {
   [typeName: string]: string;
 }
+import * as i18n from '../translations';
 
-export const fieldDisabledTypes: FieldDisabledType = { binary: 'binary' };
+export const disabledTypesWithTooltipText: DisabledTypesTextType = {
+  binary: i18n.BINARY_TYPE_NOT_SUPPORTED,
+};

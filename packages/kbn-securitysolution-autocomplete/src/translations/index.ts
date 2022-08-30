@@ -27,3 +27,8 @@ export const NUMBER_ERR = i18n.translate('autocomplete.invalidNumberError', {
 export const DATE_ERR = i18n.translate('autocomplete.invalidDateError', {
   defaultMessage: 'Not a valid date',
 });
+
+export const BINARY_TYPE_NOT_SUPPORTED = i18n.translate('autocomplete.invalidBinaryType', {
+  defaultMessage:
+    'Binary field is unsupported at the moment, this will be supported in the future.',
+});

@@ -7,6 +7,7 @@
  */
 
 import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import { GetGenericComboBoxPropsReturn } from '../get_generic_combo_box_props';
 
 export interface FieldProps extends FieldBaseProps {
   isClearable: boolean;
@@ -18,12 +19,20 @@ export interface FieldBaseProps {
   indexPattern: DataViewBase | undefined;
   fieldTypeFilter?: string[];
   isRequired?: boolean;
-  selectedField: DataViewFieldBase | undefined;
+  selectedField?: DataViewFieldBase | undefined;
   fieldInputWidth?: number;
   onChange: (a: DataViewFieldBase[]) => void;
 }
 
 export interface ComboBoxFields {
-  availableFields: DataViewFieldBase[];
-  selectedFields: DataViewFieldBase[];
+  availableFields: DataViewField[];
+  selectedFields: DataViewField[];
+}
+
+export interface GetFieldComboBoxPropsReturn extends GetGenericComboBoxPropsReturn {
+  disabledLabelTooltipTexts: { [label: string]: string };
+}
+
+export interface DataViewField extends DataViewFieldBase {
+  esTypes?: string[];
 }
