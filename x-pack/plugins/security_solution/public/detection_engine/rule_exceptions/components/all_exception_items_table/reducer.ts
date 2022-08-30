@@ -41,6 +41,10 @@ export type Action =
       exceptions: ExceptionListItemSchema[];
       pagination: Pagination;
     }
+  | {
+      type: 'setExceptionLists';
+      lists: ListArray;
+    }
   | { type: 'updateFlyoutOpen'; flyoutType: ViewerFlyoutName }
   | {
       type: 'updateExceptionToEdit';
@@ -67,6 +71,12 @@ export const allExceptionItemsReducer =
             totalItemCount: pagination.total ?? 0,
           },
           exceptions,
+        };
+      }
+      case 'setExceptionLists': {
+        return {
+          ...state,
+          exceptionLists: action.lists,
         };
       }
       case 'updateExceptionToEdit': {

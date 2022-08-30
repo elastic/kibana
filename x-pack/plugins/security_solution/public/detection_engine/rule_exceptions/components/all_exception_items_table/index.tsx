@@ -61,7 +61,7 @@ const initialState: State = {
 };
 
 interface ExceptionsViewerProps {
-  rule: Rule;
+  rule: Rule | null;
   listType: ExceptionListTypeEnum;
   onRuleChange?: () => void;
 }
@@ -83,10 +83,6 @@ const ExceptionsViewerComponent = ({
     dispatch,
   ] = useReducer(allExceptionItemsReducer(), {
     ...initialState,
-    exceptionLists:
-      rule != null && rule.exceptions_list != null
-        ? rule.exceptions_list.filter((list) => list.type === listType)
-        : [],
   });
 
   // Reducer actions
@@ -116,6 +112,16 @@ const ExceptionsViewerComponent = ({
     [dispatch]
   );
 
+  const setExceptionLists = useCallback(
+    (lists: ListArray): void => {
+      dispatch({
+        type: 'setExceptionLists',
+        lists,
+      });
+    },
+    [dispatch]
+  );
+
   const setFlyoutType = useCallback(
     (flyoutType: ViewerFlyoutName): void => {
       dispatch({
@@ -126,9 +132,7 @@ const ExceptionsViewerComponent = ({
     [dispatch]
   );
 
-  const [_, allReferences] = useFindExceptionListReferences(
-    rule != null ? rule.exceptions_list ?? [] : []
-  );
+  const [_, allReferences] = useFindExceptionListReferences(exceptionLists);
 
   const handleFetchItems = useCallback(
     async (options?: { pagination?: Partial<Pagination>; search?: string; filters?: string }) => {
@@ -144,7 +148,6 @@ const ExceptionsViewerComponent = ({
               page: pagination.pageIndex + 1,
               perPage: pagination.pageSize,
             };
-            console.log({exceptionLists})
       const {
         page: pageIndex,
         per_page: itemsPerPage,
@@ -268,7 +271,7 @@ const ExceptionsViewerComponent = ({
   }, [setFlyoutType, handleGetExceptionListItems]);
 
   const handleDeleteException = useCallback(
-    async ({ id: itemId, namespaceType }: ExceptionListItemIdentifiers) => {
+    async ({ id: itemId, name, namespaceType }: ExceptionListItemIdentifiers) => {
       const abortCtrl = new AbortController();
 
       try {
@@ -281,9 +284,12 @@ const ExceptionsViewerComponent = ({
           signal: abortCtrl.signal,
         });
 
-        await handleGetExceptionListItems();
+        toasts.addSuccess({
+          title: i18n.EXCEPTION_ITEM_DELETE_TITLE,
+          text: i18n.EXCEPTION_ITEM_DELETE_TEXT(name),
+        });
 
-        setViewerState(null);
+        await handleGetExceptionListItems();
       } catch (e) {
         setViewerState('error');
 
@@ -305,11 +311,20 @@ const ExceptionsViewerComponent = ({
   }, [setReadOnly, canUserCRUD, hasIndexWrite]);
 
   useEffect(() => {
-    if (exceptionLists.length > 0) {
-      console.log('LENGTH', exceptionLists.length > 0)
-      handleGetExceptionListItems();
+    if (rule != null) {
+      const lists =
+        rule != null && rule.exceptions_list != null
+          ? rule.exceptions_list.filter((list) => list.type === listType)
+          : [];
+      setExceptionLists(lists);
     } else {
-      setViewerState('empty');
+      setViewerState('loading');
+    }
+  }, [listType, rule, setViewerState, setExceptionLists]);
+
+  useEffect(() => {
+    if (exceptionLists.length > 0) {
+      handleGetExceptionListItems();
     }
   }, [exceptionLists, handleGetExceptionListItems, setViewerState]);
 

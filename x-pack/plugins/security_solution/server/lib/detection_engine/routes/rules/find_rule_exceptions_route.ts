@@ -46,7 +46,7 @@ export const findRuleExceptionReferencesRoute = (router: SecuritySolutionPluginR
 
         if (ids.length !== namespaceTypes.length || ids.length !== listIds.length) {
           return siemResponse.error({
-            body: `"ids", "list_ids" and "namespace_types" need to have the same comma separated number of values. Expected "ids" length: ${ids.length} to equal "namespace_types" length: ${namespaceTypes.length} and "list_ids" legnth: ${listIds.length}.`,
+            body: `"ids", "list_ids" and "namespace_types" need to have the same comma separated number of values. Expected "ids" length: ${ids.length} to equal "namespace_types" length: ${namespaceTypes.length} and "list_ids" length: ${listIds.length}.`,
             statusCode: 400,
           });
         }
@@ -55,7 +55,7 @@ export const findRuleExceptionReferencesRoute = (router: SecuritySolutionPluginR
           ids.map(async (id, index) => {
             return rulesClient.find({
               options: {
-                perPage: 1000,
+                perPage: 10000,
                 filter: enrichFilterWithRuleTypeMapping(null),
                 hasReference: {
                   id,
@@ -66,16 +66,15 @@ export const findRuleExceptionReferencesRoute = (router: SecuritySolutionPluginR
           })
         );
 
-        const references = results.reduce<RuleReferencesSchema[]>((acc, { data }, index) => {
+        const references = results.map<RuleReferencesSchema>(({ data }, index) => {
           const wantedData = data.map(({ name, id, params }) => ({
             name,
             id,
             rule_id: params.ruleId,
             exception_lists: params.exceptionsList,
           }));
-
-          return [...acc, { [listIds[index]]: wantedData }];
-        }, []);
+          return { [listIds[index]]: wantedData };
+        });
 
         const [validated, errors] = validate({ references }, rulesReferencedByExceptionListsSchema);
 

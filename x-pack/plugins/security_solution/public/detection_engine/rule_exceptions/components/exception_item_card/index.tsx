@@ -42,9 +42,10 @@ const ExceptionItemCardComponent = ({
   const handleDelete = useCallback((): void => {
     onDeleteException({
       id: exceptionItem.id,
+      name: exceptionItem.name,
       namespaceType: exceptionItem.namespace_type,
     });
-  }, [onDeleteException, exceptionItem.id, exceptionItem.namespace_type]);
+  }, [onDeleteException, exceptionItem.id, exceptionItem.name, exceptionItem.namespace_type]);
 
   const handleEdit = useCallback((): void => {
     onEditException(exceptionItem);

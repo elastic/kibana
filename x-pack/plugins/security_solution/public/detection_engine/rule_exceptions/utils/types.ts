@@ -11,6 +11,7 @@ import type { CodeSignature } from '../../../../common/ecs/file';
 
 export interface ExceptionListItemIdentifiers {
   id: string;
+  name: string;
   namespaceType: NamespaceType;
 }
 

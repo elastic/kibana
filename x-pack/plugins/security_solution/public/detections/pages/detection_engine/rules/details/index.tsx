@@ -246,13 +246,13 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       [RuleDetailTabs.exceptions]: {
         id: RuleDetailTabs.exceptions,
         name: RULE_DETAILS_TAB_NAME[RuleDetailTabs.exceptions],
-        disabled: false,
+        disabled: rule == null,
         href: `/rules/id/${ruleId}/${RuleDetailTabs.exceptions}`,
       },
       [RuleDetailTabs.endpointExceptions]: {
         id: RuleDetailTabs.endpointExceptions,
         name: RULE_DETAILS_TAB_NAME[RuleDetailTabs.endpointExceptions],
-        disabled: false,
+        disabled: rule == null,
         href: `/rules/id/${ruleId}/${RuleDetailTabs.endpointExceptions}`,
       },
       [RuleDetailTabs.executionResults]: {
@@ -268,7 +268,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
         href: `/rules/id/${ruleId}/${RuleDetailTabs.executionEvents}`,
       },
     }),
-    [isExistingRule, ruleId]
+    [isExistingRule, rule, ruleId]
   );
 
   const [pageTabs, setTabs] = useState<Partial<Record<RuleDetailTabs, NavTab>>>(ruleDetailTabs);
@@ -395,11 +395,19 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     if (!ruleExecutionSettings.extendedLogging.isEnabled) {
       hiddenTabs.push(RuleDetailTabs.executionEvents);
     }
+    if (rule != null) {
+      const hasEndpointList = (rule.exceptions_list ?? []).some(
+        (list) => list.type === ExceptionListTypeEnum.ENDPOINT
+      );
+      if (!hasEndpointList) {
+        hiddenTabs.push(RuleDetailTabs.endpointExceptions);
+      }
+    }
 
     const tabs = omit<Record<RuleDetailTabs, NavTab>>(hiddenTabs, ruleDetailTabs);
 
     setTabs(tabs);
-  }, [hasIndexRead, ruleDetailTabs, ruleExecutionSettings]);
+  }, [hasIndexRead, rule, ruleDetailTabs, ruleExecutionSettings]);
 
   const showUpdating = useMemo(
     () => isLoadingIndexPattern || isAlertsLoading || loading,

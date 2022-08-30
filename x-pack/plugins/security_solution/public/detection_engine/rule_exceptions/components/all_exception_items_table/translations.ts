@@ -99,3 +99,16 @@ export const EXCEPTION_ITEMS_PAGINATION_ARIA_LABEL = i18n.translate(
     defaultMessage: 'Exception item table pagination',
   }
 );
+
+export const EXCEPTION_ITEM_DELETE_TITLE = i18n.translate(
+  'xpack.securitySolution.exceptions.allItems.exceptionItemDeleteSuccessTitle',
+  {
+    defaultMessage: 'Exception deleted',
+  }
+);
+
+export const EXCEPTION_ITEM_DELETE_TEXT = (itemName: string) =>
+  i18n.translate('xpack.securitySolution.exceptions.allItems.exceptionItemDeleteSuccessText', {
+    values: { itemName },
+    defaultMessage: '"{itemName}" deleted successfully.',
+  });
