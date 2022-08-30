@@ -326,17 +326,15 @@ export async function getAssignees(
     );
 
     const { filter: authorizationFilter } = await authorization.getAuthorizationFilter(
-      Operations.findCases
+      Operations.getAssignees
     );
 
     const filter = combineAuthorizedAndOwnerFilter(queryParams.owner, authorizationFilter);
 
-    const tags = await caseService.getAssignees({
+    return caseService.getAssignees({
       unsecuredSavedObjectsClient,
       filter,
     });
-
-    return tags;
   } catch (error) {
     throw createCaseError({ message: `Failed to get assignees: ${error}`, error, logger });
   }

@@ -10,12 +10,13 @@ import expect from '@kbn/expect';
 import { findCasesResp, getPostCaseRequest, postCaseReq } from '../../../../common/lib/mock';
 import {
   createCase,
-  suggestUserProfiles,
   getCase,
   findCases,
   updateCase,
   deleteAllCaseItems,
 } from '../../../../common/lib/utils';
+
+import { suggestUserProfiles } from '../../../../common/lib/user_profiles';
 
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { bulkGetUserProfiles } from '../../../../common/lib/user_profiles';

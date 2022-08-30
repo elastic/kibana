@@ -11,15 +11,3 @@ import { CaseUserProfileRt } from './user_profiles';
 export const CaseAssigneesRt = rt.array(CaseUserProfileRt);
 
 export type CaseAssignees = rt.TypeOf<typeof CaseAssigneesRt>;
-
-export const FindAssigneesRequestRt = rt.intersection([
-  rt.type({
-    searchTerm: rt.string,
-    owners: rt.union([rt.array(rt.string), rt.string]),
-  }),
-  rt.partial({
-    size: rt.number,
-  }),
-]);
-
-export type FindAssigneesRequest = rt.TypeOf<typeof FindAssigneesRequestRt>;

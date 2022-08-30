@@ -10,6 +10,7 @@ Array [
   "cases:1.0.0-zeta1:observability/getComment",
   "cases:1.0.0-zeta1:observability/getTags",
   "cases:1.0.0-zeta1:observability/getReporters",
+  "cases:1.0.0-zeta1:observability/getAssignees",
   "cases:1.0.0-zeta1:observability/getUserActions",
   "cases:1.0.0-zeta1:observability/findConfigurations",
   "cases:1.0.0-zeta1:observability/updateCase",
@@ -47,6 +48,7 @@ Array [
   "cases:1.0.0-zeta1:observability/getComment",
   "cases:1.0.0-zeta1:observability/getTags",
   "cases:1.0.0-zeta1:observability/getReporters",
+  "cases:1.0.0-zeta1:observability/getAssignees",
   "cases:1.0.0-zeta1:observability/getUserActions",
   "cases:1.0.0-zeta1:observability/findConfigurations",
 ]

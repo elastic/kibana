@@ -87,22 +87,20 @@ export class UserProfileService {
 
       // if we didn't receive a search term just return all the assignees within cases
       if (isEmpty(searchTerm)) {
-        return securityPluginStart.userProfiles.bulkGet({
+        const assignedUserProfiles = await securityPluginStart.userProfiles.bulkGet({
           uids: assigneesWithinAllCases,
           dataPath: 'avatar',
         });
+
+        return assignedUserProfiles.slice(0, size ?? MAX_SUGGESTION_SIZE);
       }
 
-      const suggestedUsers = await securityPluginStart.userProfiles.suggest({
-        name: searchTerm,
+      const suggestedUsers = await UserProfileService.suggestUsers({
+        securityPluginStart,
+        spaceId: spaces.spacesService.getSpaceId(request),
+        owners,
+        searchTerm,
         size,
-        dataPath: 'avatar',
-        requiredPrivileges: {
-          spaceId: spaces.spacesService.getSpaceId(request),
-          privileges: {
-            kibana: UserProfileService.buildRequiredPrivileges(owners, securityPluginStart),
-          },
-        },
       });
 
       return suggestedUsers.reduce<UserProfile[]>((acc, suggestedUser) => {
@@ -119,6 +117,32 @@ export class UserProfileService {
         error,
       });
     }
+  }
+
+  private static suggestUsers({
+    securityPluginStart,
+    spaceId,
+    searchTerm,
+    size,
+    owners,
+  }: {
+    securityPluginStart: SecurityPluginStart;
+    spaceId: string;
+    searchTerm: string;
+    size?: number;
+    owners: string[];
+  }) {
+    return securityPluginStart.userProfiles.suggest({
+      name: searchTerm,
+      size,
+      dataPath: 'avatar',
+      requiredPrivileges: {
+        spaceId,
+        privileges: {
+          kibana: UserProfileService.buildRequiredPrivileges(owners, securityPluginStart),
+        },
+      },
+    });
   }
 
   public async suggest(request: KibanaRequest): Promise<UserProfile[]> {
@@ -149,16 +173,12 @@ export class UserProfileService {
 
       const { securityPluginStart } = securityPluginFields;
 
-      return securityPluginStart.userProfiles.suggest({
-        name,
+      return UserProfileService.suggestUsers({
+        searchTerm: name,
         size,
-        dataPath: 'avatar',
-        requiredPrivileges: {
-          spaceId: spaces.spacesService.getSpaceId(request),
-          privileges: {
-            kibana: UserProfileService.buildRequiredPrivileges(owners, securityPluginStart),
-          },
-        },
+        owners,
+        securityPluginStart,
+        spaceId: spaces.spacesService.getSpaceId(request),
       });
     } catch (error) {
       throw createCaseError({
