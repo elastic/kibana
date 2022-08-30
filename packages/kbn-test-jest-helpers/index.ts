@@ -28,7 +28,7 @@ export * from './src/testbed';
 
 export * from './src/axe_helpers';
 
-export { safeAct } from './safe_act';
+export { safeAct } from './src/safe_act';
 
 export const nextTick = () => new Promise((res) => process.nextTick(res));
 
