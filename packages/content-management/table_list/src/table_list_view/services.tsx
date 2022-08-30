@@ -93,7 +93,7 @@ export interface TableListViewKibanaDependencies {
    * const savedObjectsTagging = savedObjectsTaggingOss?.getTaggingApi()
    * ```
    */
-  savedObjectTaggingApi?: {
+  savedObjectsTagging?: {
     ui: {
       getTableColumnDefinition: () => EuiTableFieldDataColumnType<UserContentCommonSchema>;
       parseSearchQuery: (
@@ -124,7 +124,7 @@ export const TableListViewKibanaProvider: FC<TableListViewKibanaDependencies> = 
   children,
   ...services
 }) => {
-  const { core, toMountPoint, savedObjectTaggingApi, FormattedRelative } = services;
+  const { core, toMountPoint, savedObjectsTagging, FormattedRelative } = services;
   return (
     <TableListViewProvider
       canEditAdvancedSettings={Boolean(core.application.capabilities.advancedSettings?.save)}
@@ -136,7 +136,7 @@ export const TableListViewKibanaProvider: FC<TableListViewKibanaDependencies> = 
       notifyError={(title, text) => {
         core.notifications.toasts.addDanger({ title: toMountPoint(title), text });
       }}
-      getTagsColumnDefinition={savedObjectTaggingApi?.ui.getTableColumnDefinition}
+      getTagsColumnDefinition={savedObjectsTagging?.ui.getTableColumnDefinition}
       DateFormatterComp={(props) => <FormattedRelative {...props} />}
     >
       {children}
