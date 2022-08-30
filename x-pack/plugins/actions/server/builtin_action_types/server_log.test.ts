@@ -14,16 +14,19 @@ import {
   ServerLogActionType,
   ServerLogActionTypeExecutorOptions,
 } from './server_log';
+import { ActionsConfigurationUtilities } from '../actions_config';
 
 const ACTION_TYPE_ID = '.server-log';
 
 let actionType: ServerLogActionType;
 let mockedLogger: jest.Mocked<Logger>;
+let configurationUtilities: ActionsConfigurationUtilities;
 
 beforeAll(() => {
   const { logger, actionTypeRegistry } = createActionTypeRegistry();
   actionType = actionTypeRegistry.get<{}, {}, ActionParamsType>(ACTION_TYPE_ID);
   mockedLogger = logger;
+  configurationUtilities = actionTypeRegistry.getUtils();
   expect(actionType).toBeTruthy();
 });
 
@@ -36,15 +39,25 @@ describe('get()', () => {
 
 describe('validateParams()', () => {
   test('should validate and pass when params is valid', () => {
-    expect(validateParams(actionType, { message: 'a message', level: 'info' })).toEqual({
+    expect(
+      validateParams(
+        actionType,
+        { message: 'a message', level: 'info' },
+        { configurationUtilities }
+      )
+    ).toEqual({
       message: 'a message',
       level: 'info',
     });
     expect(
-      validateParams(actionType, {
-        message: 'a message',
-        level: 'info',
-      })
+      validateParams(
+        actionType,
+        {
+          message: 'a message',
+          level: 'info',
+        },
+        { configurationUtilities }
+      )
     ).toEqual({
       message: 'a message',
       level: 'info',
@@ -53,19 +66,19 @@ describe('validateParams()', () => {
 
   test('should validate and throw error when params is invalid', () => {
     expect(() => {
-      validateParams(actionType, {});
+      validateParams(actionType, {}, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action params: [message]: expected value of type [string] but got [undefined]"`
     );
 
     expect(() => {
-      validateParams(actionType, { message: 1 });
+      validateParams(actionType, { message: 1 }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action params: [message]: expected value of type [string] but got [number]"`
     );
 
     expect(() => {
-      validateParams(actionType, { message: 'x', level: 2 });
+      validateParams(actionType, { message: 'x', level: 2 }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(`
 "error validating action params: [level]: types that failed validation:
 - [level.0]: expected value to equal [trace]
@@ -77,7 +90,7 @@ describe('validateParams()', () => {
 `);
 
     expect(() => {
-      validateParams(actionType, { message: 'x', level: 'foo' });
+      validateParams(actionType, { message: 'x', level: 'foo' }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(`
 "error validating action params: [level]: types that failed validation:
 - [level.0]: expected value to equal [trace]
