@@ -97,7 +97,14 @@ export const useSavedQueryForm = ({ defaultValue }: UseSavedQueryFormProps) => {
     serializer: savedQueryDataSerializer,
     idSet,
     ...useHookForm<SavedQueryFormData>({
-      defaultValues: defaultValue ? deserializer(defaultValue) : {},
+      defaultValues: defaultValue
+        ? deserializer(defaultValue)
+        : {
+            id: '',
+            query: '',
+            interval: 3600,
+            ecs_mapping: [defaultEcsFormData],
+          },
     }),
   };
 };
