@@ -615,16 +615,6 @@
           },
           {
             "parentPluginId": "fleet",
-            "id": "def-public.NewPackagePolicy.output_id",
-            "type": "string",
-            "tags": [],
-            "label": "output_id",
-            "description": [],
-            "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "fleet",
             "id": "def-public.NewPackagePolicy.package",
             "type": "Object",
             "tags": [],
@@ -1381,7 +1371,7 @@
                       "The updated Integration Policy to be merged back and included in the API call"
                     ],
                     "signature": [
-                      "{ id?: string | number | undefined; name?: string | undefined; description?: string | undefined; namespace?: string | undefined; enabled?: boolean | undefined; is_managed?: boolean | undefined; policy_id?: string | undefined; output_id?: string | undefined; package?: ",
+                      "{ id?: string | number | undefined; name?: string | undefined; description?: string | undefined; namespace?: string | undefined; enabled?: boolean | undefined; is_managed?: boolean | undefined; policy_id?: string | undefined; package?: ",
                       {
                         "pluginId": "fleet",
                         "scope": "common",
@@ -10443,12 +10433,12 @@
           {
             "parentPluginId": "fleet",
             "id": "def-common.NewOutput.ca_sha256",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "ca_sha256",
             "description": [],
             "signature": [
-              "string | undefined"
+              "string | null | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/output.ts",
             "deprecated": false
@@ -10456,12 +10446,12 @@
           {
             "parentPluginId": "fleet",
             "id": "def-common.NewOutput.ca_trusted_fingerprint",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "ca_trusted_fingerprint",
             "description": [],
             "signature": [
-              "string | undefined"
+              "string | null | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/output.ts",
             "deprecated": false
@@ -10469,12 +10459,12 @@
           {
             "parentPluginId": "fleet",
             "id": "def-common.NewOutput.config_yaml",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "config_yaml",
             "description": [],
             "signature": [
-              "string | undefined"
+              "string | null | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/output.ts",
             "deprecated": false
@@ -10482,12 +10472,12 @@
           {
             "parentPluginId": "fleet",
             "id": "def-common.NewOutput.ssl",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "ssl",
             "description": [],
             "signature": [
-              "{ certificate_authorities?: string[] | undefined; certificate?: string | undefined; key?: string | undefined; } | undefined"
+              "{ certificate_authorities?: string[] | undefined; certificate?: string | undefined; key?: string | undefined; } | null | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/output.ts",
             "deprecated": false
@@ -10580,16 +10570,6 @@
             "type": "string",
             "tags": [],
             "label": "policy_id",
-            "description": [],
-            "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.NewPackagePolicy.output_id",
-            "type": "string",
-            "tags": [],
-            "label": "output_id",
             "description": [],
             "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
             "deprecated": false

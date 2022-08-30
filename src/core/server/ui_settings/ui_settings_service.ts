@@ -13,7 +13,7 @@ import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { InternalSavedObjectsServiceSetup } from '../saved_objects';
+import { InternalSavedObjectsServiceSetup } from '@kbn/core-saved-objects-server-internal';
 import { UiSettingsConfigType, config as uiConfigDefinition } from './ui_settings_config';
 import { UiSettingsClient } from './ui_settings_client';
 import {
