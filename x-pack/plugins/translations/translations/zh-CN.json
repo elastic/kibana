@@ -28786,7 +28786,6 @@
     "xpack.securitySolution.responseActionsList.list.command": "命令",
     "xpack.securitySolution.responseActionsList.list.comments": "注释",
     "xpack.securitySolution.responseActionsList.list.errorMessage": "检索响应操作时出错",
-    "xpack.securitySolution.responseActionsList.list.host": "主机",
     "xpack.securitySolution.responseActionsList.list.item.badge.completed": "已完成",
     "xpack.securitySolution.responseActionsList.list.item.badge.failed": "失败",
     "xpack.securitySolution.responseActionsList.list.item.badge.pending": "待处理",

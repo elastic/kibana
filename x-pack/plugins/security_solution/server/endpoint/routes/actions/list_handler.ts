@@ -42,6 +42,7 @@ export const actionListHandler = (
         commands: formatStringIds(commands),
         esClient,
         elasticAgentIds: formatStringIds(elasticAgentIds),
+        metadataService: endpointContext.service.getEndpointMetadataService(),
         page,
         pageSize,
         startDate,

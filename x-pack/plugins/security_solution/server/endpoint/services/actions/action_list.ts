@@ -18,7 +18,9 @@ import {
   categorizeResponseResults,
   getActionCompletionInfo,
   mapToNormalizedActionRequest,
+  getAgentHostNamesWithIds,
 } from './utils';
+import type { EndpointMetadataService } from '../metadata';
 
 interface OptionalFilterParams {
   commands?: string[];
@@ -41,6 +43,7 @@ export const getActionList = async ({
   esClient,
   endDate,
   logger,
+  metadataService,
   page: _page,
   pageSize,
   startDate,
@@ -49,6 +52,7 @@ export const getActionList = async ({
 }: OptionalFilterParams & {
   esClient: ElasticsearchClient;
   logger: Logger;
+  metadataService: EndpointMetadataService;
 }): Promise<ActionListApiResponse> => {
   const size = pageSize ?? ENDPOINT_DEFAULT_PAGE_SIZE;
   const page = _page ?? 1;
@@ -62,6 +66,7 @@ export const getActionList = async ({
     endDate,
     from,
     logger,
+    metadataService,
     size,
     startDate,
     userIds,
@@ -94,17 +99,19 @@ const getActionDetailsList = async ({
   endDate,
   from,
   logger,
+  metadataService,
   size,
   startDate,
   userIds,
   unExpiredOnly,
-}: GetActionDetailsListParam): Promise<{
+}: GetActionDetailsListParam & { metadataService: EndpointMetadataService }): Promise<{
   actionDetails: ActionListApiResponse['data'];
   totalRecords: number;
 }> => {
   let actionRequests;
   let actionReqIds;
   let actionResponses;
+  let agentsHostInfo: { [id: string]: string };
 
   try {
     // fetch actions with matching agent_ids if any
@@ -146,11 +153,19 @@ const getActionDetailsList = async ({
 
   try {
     // get all responses for given action Ids and agent Ids
-    actionResponses = await getActionResponses({
-      actionIds: actionReqIds,
-      elasticAgentIds,
-      esClient,
-    });
+    // and get host metadata info with queried agents
+    [actionResponses, agentsHostInfo] = await Promise.all([
+      getActionResponses({
+        actionIds: actionReqIds,
+        elasticAgentIds,
+        esClient,
+      }),
+      await getAgentHostNamesWithIds({
+        esClient,
+        metadataService,
+        agentIds: normalizedActionRequests.map((action) => action.agents).flat(),
+      }),
+    ]);
   } catch (error) {
     // all other errors
     const err = new CustomHttpRequestError(
@@ -189,6 +204,10 @@ const getActionDetailsList = async ({
     return {
       id: action.id,
       agents: action.agents,
+      hosts: action.agents.reduce<ActionDetails['hosts']>((acc, id) => {
+        acc[id] = { name: agentsHostInfo[id] };
+        return acc;
+      }, {}),
       command: action.command,
       startedAt: action.createdAt,
       isCompleted,

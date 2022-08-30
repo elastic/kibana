@@ -57,6 +57,11 @@ describe('Endpoint Pending Action Summary API', () => {
 
     endpointActionGenerator = new EndpointActionGenerator('seed');
     endpointAppContextService = new EndpointAppContextService();
+    (endpointAppContextService.getEndpointMetadataService as jest.Mock) = jest
+      .fn()
+      .mockReturnValue({
+        findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
+      });
 
     endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
     endpointAppContextService.start(createMockEndpointAppContextServiceStartContract());

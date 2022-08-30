@@ -28778,7 +28778,6 @@
     "xpack.securitySolution.responseActionsList.list.command": "Commande",
     "xpack.securitySolution.responseActionsList.list.comments": "Commentaires",
     "xpack.securitySolution.responseActionsList.list.errorMessage": "Erreur lors de la récupération des actions de réponse",
-    "xpack.securitySolution.responseActionsList.list.host": "Hôte",
     "xpack.securitySolution.responseActionsList.list.item.badge.completed": "Terminé",
     "xpack.securitySolution.responseActionsList.list.item.badge.failed": "Échoué",
     "xpack.securitySolution.responseActionsList.list.item.badge.pending": "En attente",
