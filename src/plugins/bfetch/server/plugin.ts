@@ -65,7 +65,7 @@ const streamingHeaders = {
   'Content-Type': 'application/x-ndjson',
   Connection: 'keep-alive',
   'Transfer-Encoding': 'chunked',
-  'X-Accel-Buffering': 'no'
+  'X-Accel-Buffering': 'no',
 };
 
 interface Query {
