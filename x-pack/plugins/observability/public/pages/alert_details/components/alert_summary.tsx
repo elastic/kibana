@@ -18,10 +18,10 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { AlertSummaryItemProps, PageHeaderProps } from '../types';
 import { useKibana } from '../../../utils/kibana_react';
 import { AlertStatusIndicator } from '../../../components/shared/alert_status_indicator';
-import { i18n } from '@kbn/i18n';
 
 export function AlertSummary({ alert }: PageHeaderProps) {
   const { triggersActionsUi } = useKibana().services;
@@ -33,7 +33,8 @@ export function AlertSummary({ alert }: PageHeaderProps) {
           <div>
             <FormattedMessage
               id="xpack.observability.pages.alertDetails.alertSummary"
-              defaultMessage="Alert Summary" />
+              defaultMessage="Alert Summary"
+            />
             &nbsp;&nbsp;
             <EuiToolTip content="Alert summary info here">
               <EuiIcon type="questionInCircle" color="subdued" />
@@ -45,28 +46,32 @@ export function AlertSummary({ alert }: PageHeaderProps) {
           <EuiFlexGroup>
             <AlertSummaryItem
               formattedMessageId="xpack.observability.pages.alertDetails.alertSummary.alertName"
-              defaultMessage="Alert">
+              defaultMessage="Alert"
+            >
               <EuiText size="s" color="subdued">
                 #200-230
               </EuiText>
             </AlertSummaryItem>
             <AlertSummaryItem
               formattedMessageId="xpack.observability.pages.alertDetails.alertSummary.averageValue"
-              defaultMessage="Average Value">
+              defaultMessage="Average Value"
+            >
               <EuiText size="s" color="subdued">
                 55 ms (84% above the threshold of 30ms)
               </EuiText>
             </AlertSummaryItem>
             <AlertSummaryItem
               formattedMessageId="xpack.observability.pages.alertDetails.alertSummary.duration"
-              defaultMessage="Duration">
+              defaultMessage="Duration"
+            >
               <EuiText size="s" color="subdued">
                 5 minutes (threshold breached 10 times)
               </EuiText>
             </AlertSummaryItem>
             <AlertSummaryItem
               formattedMessageId="xpack.observability.pages.alertDetails.alertSummary.alertStatus"
-              defaultMessage="Status">
+              defaultMessage="Status"
+            >
               <AlertStatusIndicator alertStatus="active" />
             </AlertSummaryItem>
           </EuiFlexGroup>
@@ -76,7 +81,8 @@ export function AlertSummary({ alert }: PageHeaderProps) {
                 <h5>
                   <FormattedMessage
                     id="xpack.observability.pages.alertDetails.alertSummary.runbook"
-                    defaultMessage="Runbook" />
+                    defaultMessage="Runbook"
+                  />
                   &nbsp;&nbsp;
                   <EuiToolTip content="Runbook info here">
                     <EuiIcon type="questionInCircle" color="subdued" />
@@ -84,30 +90,35 @@ export function AlertSummary({ alert }: PageHeaderProps) {
                 </h5>
               </EuiTitle>
               <EuiSpacer size="s" />
-              <EuiLink>https://github.com...
+              <EuiLink>
+                https://github.com...
                 <EuiButtonEmpty
                   data-test-subj="ruleDetailsEditButton"
                   iconType={'pencil'}
-                  onClick={() => { }} />
+                  onClick={() => {}}
+                />
               </EuiLink>
             </EuiFlexItem>
             <AlertSummaryItem
               formattedMessageId="xpack.observability.pages.alertDetails.alertSummary.started"
-              defaultMessage="Started">
+              defaultMessage="Started"
+            >
               <EuiText size="s" color="subdued">
                 Jul 22 2021
               </EuiText>
             </AlertSummaryItem>
             <AlertSummaryItem
               formattedMessageId="xpack.observability.pages.alertDetails.alertSummary.lastStatusUpdate"
-              defaultMessage="Last Status Update">
+              defaultMessage="Last Status Update"
+            >
               <EuiText size="s" color="subdued">
                 2h ago
               </EuiText>
             </AlertSummaryItem>
             <AlertSummaryItem
               formattedMessageId="xpack.observability.pages.alertDetails.alertSummary.tags"
-              defaultMessage="Tags">
+              defaultMessage="Tags"
+            >
               <div>
                 <EuiSpacer size="s" />
                 {triggersActionsUi.getRuleTagBadge<'tagsOutPopover'>({
