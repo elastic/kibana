@@ -62,7 +62,10 @@ export const CustomizablePalette = ({
       if (
         (localState.activePalette !== activePalette ||
           colorRangesToShow !== localState.colorRanges) &&
-        allRangesValid(localState.colorRanges, activePalette.params?.rangeType === 'percent')
+        allRangesValid(
+          localState.colorRanges,
+          localState.activePalette.params?.rangeType === 'percent'
+        )
       ) {
         setPalette(localState.activePalette);
       }
