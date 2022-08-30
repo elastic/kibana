@@ -37,7 +37,7 @@ import type { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import type { SavedSearch } from '@kbn/discover-plugin/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type {
   Vis,
   VisualizeEmbeddableContract,

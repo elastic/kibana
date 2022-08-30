@@ -150,7 +150,7 @@ export const annotateTestFailures = async () => {
   }
 
   exec(
-    `buildkite-agent artifact download --include-retried-jobs "target/test_failures/*.json" "${failureDir}"`
+    `.buildkite/scripts/common/download_artifact.sh --include-retried-jobs "target/test_failures/*.json" "${failureDir}"`
   );
 
   const failures: TestFailure[] = recursiveReadDir(failureDir)

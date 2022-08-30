@@ -188,7 +188,6 @@ const NetworkDetailsComponent: React.FC = () => {
               indexNames={selectedPatterns}
               skip={shouldSkip}
               setQuery={setQuery}
-              narrowDateRange={narrowDateRange}
               indexPattern={indexPattern}
               flowTarget={flowTarget}
             />

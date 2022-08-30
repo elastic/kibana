@@ -565,6 +565,7 @@ export default function ({ getService }: FtrProviderContext) {
             'should start the transform and finish processing'
           );
           await transform.wizard.startTransform();
+          await transform.wizard.assertErrorToastsNotExist();
           await transform.wizard.waitForProgressBarComplete();
 
           await transform.testExecution.logTestStep('should return to the management page');

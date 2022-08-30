@@ -9,10 +9,12 @@
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ThemeServiceStart } from '@kbn/core/public';
+import { css } from '@emotion/react';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { PaletteRegistry } from '@kbn/coloring';
+import { PersistedState } from '@kbn/visualizations-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
@@ -133,13 +135,16 @@ export const getXyChartRenderer = ({
       import('../helpers/interval'),
     ]);
 
+    const chartContainerStyle = css({
+      position: 'relative',
+      width: '100%',
+      height: '100%',
+    });
+
     ReactDOM.render(
       <KibanaThemeProvider theme$={deps.kibanaTheme.theme$}>
         <I18nProvider>
-          <div
-            style={{ width: '100%', height: '100%', overflowX: 'hidden' }}
-            data-test-subj="xyVisChart"
-          >
+          <div css={chartContainerStyle} data-test-subj="xyVisChart">
             <XYChartReportable
               {...config}
               data={deps.data}
@@ -157,6 +162,7 @@ export const getXyChartRenderer = ({
               renderMode={handlers.getRenderMode()}
               syncColors={handlers.isSyncColorsEnabled()}
               syncTooltips={handlers.isSyncTooltipsEnabled()}
+              uiState={handlers.uiState as PersistedState}
               renderComplete={renderComplete}
             />
           </div>{' '}

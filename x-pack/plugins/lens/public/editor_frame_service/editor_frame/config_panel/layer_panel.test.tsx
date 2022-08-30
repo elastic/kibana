@@ -20,6 +20,7 @@ import {
   DatasourceMock,
   mountWithProvider,
 } from '../../../mocks';
+import { createIndexPatternServiceMock } from '../../../mocks/data_views_service_mock';
 
 jest.mock('../../../id_generator');
 
@@ -96,6 +97,8 @@ describe('LayerPanel', () => {
       isFullscreen: false,
       toggleFullscreen: jest.fn(),
       onEmptyDimensionAdd: jest.fn(),
+      onChangeIndexPattern: jest.fn(),
+      indexPatternService: createIndexPatternServiceMock(),
     };
   }
 

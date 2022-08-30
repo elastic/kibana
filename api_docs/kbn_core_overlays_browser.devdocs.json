@@ -293,7 +293,7 @@
             "label": "size",
             "description": [],
             "signature": [
-              "\"s\" | \"m\" | \"l\" | undefined"
+              "\"m\" | \"s\" | \"l\" | undefined"
             ],
             "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
             "deprecated": false

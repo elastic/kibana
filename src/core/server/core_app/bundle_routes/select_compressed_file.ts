@@ -40,10 +40,6 @@ export async function selectCompressedFile(acceptEncodingHeader: string | undefi
       fileEncoding = 'br';
       fd = await tryToOpenFile(`${path}.br`);
     }
-    if (!fd && supportedEncodings.includes('gzip')) {
-      fileEncoding = 'gzip';
-      fd = await tryToOpenFile(`${path}.gz`);
-    }
   }
 
   if (!fd) {

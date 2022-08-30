@@ -10,6 +10,7 @@ import { UserProfile } from '@kbn/security-plugin/common';
 export const userProfiles: UserProfile[] = [
   {
     uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
+    enabled: true,
     data: {},
     user: {
       username: 'damaged_raccoon',
@@ -19,6 +20,7 @@ export const userProfiles: UserProfile[] = [
   },
   {
     uid: 'u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0',
+    enabled: true,
     data: {},
     user: {
       username: 'physical_dinosaur',
@@ -28,6 +30,7 @@ export const userProfiles: UserProfile[] = [
   },
   {
     uid: 'u_9xDEQqUqoYCnFnPPLq5mIRHKL8gBTo_NiKgOnd5gGk0_0',
+    enabled: true,
     data: {},
     user: {
       username: 'wet_dingo',

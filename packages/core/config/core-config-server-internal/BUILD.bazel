@@ -26,7 +26,7 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 RUNTIME_DEPS = [
-  "//packages/elastic-safer-lodash-set",
+  "//packages/kbn-safer-lodash-set",
   "//packages/kbn-config",
   "//packages/core/base/core-base-server-internal",
   "//packages/kbn-config-mocks",
@@ -36,7 +36,7 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
-  "//packages/elastic-safer-lodash-set:npm_module_types",
+  "//packages/kbn-safer-lodash-set:npm_module_types",
   "//packages/kbn-config:npm_module_types",
   "//packages/kbn-config-mocks:npm_module_types",
   "//packages/core/base/core-base-server-internal:npm_module_types",

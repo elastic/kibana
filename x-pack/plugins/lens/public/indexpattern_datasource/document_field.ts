@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { DOCUMENT_FIELD_NAME } from '../../common';
-import { IndexPatternField } from './types';
+import type { IndexPatternField } from '../types';
 
 /**
  * This is a special-case field which allows us to perform

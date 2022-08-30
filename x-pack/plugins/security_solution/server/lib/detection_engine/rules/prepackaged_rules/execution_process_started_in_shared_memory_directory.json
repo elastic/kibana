@@ -13,10 +13,32 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Binary Executed from Shared Memory Directory",
-  "query": "process where event.type == \"start\" and \n    event.action == \"exec\" and user.name == \"root\" and \n    process.executable : (\n        \"/dev/shm/*\",\n        \"/run/shm/*\",\n        \"/var/run/*\",\n        \"/var/lock/*\"\n    )\n",
+  "query": "process where event.type == \"start\" and \n    event.action == \"exec\" and user.name == \"root\" and \n    process.executable : (\n        \"/dev/shm/*\",\n        \"/run/shm/*\",\n        \"/var/run/*\",\n        \"/var/lock/*\"\n    ) and\n    not process.executable : ( \"/var/run/docker/*\")\n",
   "references": [
     "https://linuxsecurity.com/features/fileless-malware-on-linux",
     "https://twitter.com/GossiTheDog/status/1522964028284411907"
+  ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.action",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.executable",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "user.name",
+      "type": "keyword"
+    }
   ],
   "risk_score": 73,
   "rule_id": "3f3f9fe2-d095-11ec-95dc-f661ea17fbce",
@@ -48,5 +70,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 3
 }

@@ -28,12 +28,6 @@ journey('uptime', ({ page, params }) => {
     await page.click('[data-test-subj=loginSubmit]');
   });
 
-  step('dismiss synthetics notice', async () => {
-    await page.click('[data-test-subj=uptimeDismissSyntheticsCallout]', {
-      timeout: 60 * 1000,
-    });
-  });
-
   step('change uptime index pattern', async () => {
     await page.click(byTestId('settings-page-link'));
 

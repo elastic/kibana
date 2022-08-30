@@ -47,7 +47,7 @@ export const AddFilterPopover = React.memo(function AddFilterPopover({
         iconType="plusInCircleFilled"
         aria-label={buttonIconLabel}
         data-test-subj="addFilter"
-        onClick={() => setIsAddFilterPopoverOpen(!isAddFilterPopoverOpen)}
+        onClick={() => setIsAddFilterPopoverOpen((isOpen) => !isOpen)}
         size="m"
         {...buttonProps}
       />
@@ -63,6 +63,7 @@ export const AddFilterPopover = React.memo(function AddFilterPopover({
         closePopover={() => setIsAddFilterPopoverOpen(false)}
         anchorPosition="downLeft"
         panelPaddingSize="none"
+        panelProps={{ 'data-test-subj': 'addFilterPopover' }}
         initialFocus=".filterEditor__hiddenItem"
         ownFocus
         repositionOnScroll

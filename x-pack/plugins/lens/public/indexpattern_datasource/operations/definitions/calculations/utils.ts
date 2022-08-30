@@ -8,9 +8,10 @@
 import { i18n } from '@kbn/i18n';
 import type { AstFunction } from '@kbn/interpreter';
 import memoizeOne from 'memoize-one';
+import type { IndexPattern } from '../../../../types';
 import { LayerType, layerTypes } from '../../../../../common';
 import type { TimeScaleUnit } from '../../../../../common/expressions';
-import type { IndexPattern, IndexPatternLayer } from '../../../types';
+import type { IndexPatternLayer } from '../../../types';
 import { adjustTimeScaleLabelSuffix } from '../../time_scale_utils';
 import type { ReferenceBasedIndexPatternColumn } from '../column_types';
 import { getManagedColumnsFrom, isColumnValidAsReference } from '../../layer_helpers';

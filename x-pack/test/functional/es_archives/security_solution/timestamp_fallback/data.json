@@ -7,6 +7,9 @@
       "@timestamp": "2020-12-16T15:15:18.570Z",
       "host": {
         "name": "host-1"
+      },
+      "source": {
+        "ip": "127.0.0.1"
       }
     },
     "type": "_doc"
@@ -25,6 +28,9 @@
       },
       "host": {
         "name": "host-2"
+      },
+      "source": {
+        "ip": "127.0.0.1"
       }
     },
     "type": "_doc"
@@ -40,6 +46,9 @@
       "@timestamp": "2020-12-16T16:15:18.570Z",
       "host": {
         "name": "host-3"
+      },
+      "source": {
+        "ip": "127.0.0.2"
       }
     },
     "type": "_doc"
@@ -58,6 +67,9 @@
       },
       "host": {
         "name": "host-4"
+      },
+      "source": {
+        "ip": "127.0.0.2"
       }
     },
     "type": "_doc"

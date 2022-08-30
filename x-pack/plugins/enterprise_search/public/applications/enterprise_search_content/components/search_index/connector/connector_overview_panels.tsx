@@ -7,13 +7,13 @@
 
 import React from 'react';
 
-import { generatePath } from 'react-router-dom';
-
 import { useValues } from 'kea';
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+
+import { generateEncodedPath } from '../../../../shared/encode_path_params';
 
 import { EuiLinkTo } from '../../../../shared/react_router_helpers';
 
@@ -78,7 +78,7 @@ export const ConnectorOverviewPanels: React.FC = () => {
       <EuiFlexItem grow={1}>
         {ingestionStatus === IngestionStatus.INCOMPLETE ? (
           <EuiLinkTo
-            to={generatePath(SEARCH_INDEX_TAB_PATH, {
+            to={generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
               indexName: index.name,
               tabId: SearchIndexTabId.CONFIGURATION,
             })}

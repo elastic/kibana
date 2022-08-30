@@ -56,7 +56,7 @@ export const UnknownCommand = memo<CommandExecutionComponentProps>(({ command, s
   return (
     <UnsupportedMessageCallout
       header={
-        <ConsoleCodeBlock textColor="error">
+        <ConsoleCodeBlock textColor="danger">
           <FormattedMessage
             id="xpack.securitySolution.console.unknownCommand.title"
             defaultMessage="Unsupported text/command"

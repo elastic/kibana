@@ -18,9 +18,10 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createMockedIndexPattern } from '../../mocks';
 import { percentileRanksOperation } from '.';
-import { IndexPattern, IndexPatternLayer } from '../../types';
+import { IndexPatternLayer } from '../../types';
 import type { PercentileRanksIndexPatternColumn } from './percentile_ranks';
 import { TermsIndexPatternColumn } from './terms';
+import { IndexPattern } from '../../../types';
 
 jest.mock('lodash', () => {
   const original = jest.requireActual('lodash');

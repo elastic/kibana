@@ -466,18 +466,16 @@
             "type": "Function",
             "tags": [],
             "label": "getFilters",
-            "description": [
-              "\nTODO: Implement this function once https://github.com/elastic/kibana/issues/91282 is resolved"
-            ],
+            "description": [],
             "signature": [
-              "() => Promise<never[]>"
+              "() => Promise<",
+              "Filter",
+              "[]>"
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
             "children": [],
-            "returnComment": [
-              "[]"
-            ]
+            "returnComment": []
           },
           {
             "parentPluginId": "maps",
@@ -485,18 +483,16 @@
             "type": "Function",
             "tags": [],
             "label": "getQuery",
-            "description": [
-              "\nTODO: Implement this function once https://github.com/elastic/kibana/issues/91282 is resolved"
-            ],
+            "description": [],
             "signature": [
-              "() => Promise<undefined>"
+              "() => Promise<",
+              "Query",
+              " | undefined>"
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
             "children": [],
-            "returnComment": [
-              "undefined"
-            ]
+            "returnComment": []
           },
           {
             "parentPluginId": "maps",
@@ -1344,6 +1340,23 @@
             "signature": [
               "Query",
               " | undefined"
+            ],
+            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.BoundsRequestMeta.embeddableSearchContext",
+            "type": "Object",
+            "tags": [],
+            "label": "embeddableSearchContext",
+            "description": [],
+            "signature": [
+              "{ query?: ",
+              "Query",
+              " | undefined; filters: ",
+              "Filter",
+              "[]; } | undefined"
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false
@@ -3990,7 +4003,7 @@
           "AbstractSourceDescriptor",
           " & { id: string; indexPatternId: string; geoField?: string | undefined; applyGlobalQuery: boolean; applyGlobalTime: boolean; applyForceRefresh: boolean; } & { metrics: ",
           "AggDescriptor",
-          "[]; } & { indexPatternTitle?: string | undefined; term: string; whereQuery?: ",
+          "[]; } & { term: string; whereQuery?: ",
           "Query",
           " | undefined; size?: number | undefined; type: ",
           {
@@ -4199,7 +4212,7 @@
             "section": "def-common.VectorStyleDescriptor",
             "text": "VectorStyleDescriptor"
           },
-          "; }"
+          "; disableTooltips?: boolean | undefined; }"
         ],
         "path": "x-pack/plugins/maps/common/descriptor_types/layer_descriptor_types.ts",
         "deprecated": false,

@@ -108,6 +108,27 @@ describe('TagsAddRemove', () => {
     );
   });
 
+  it('should show allow to add new tag when agent do not have any tags', () => {
+    allTags = [];
+    selectedTags = [];
+    const result = renderComponent('agent1');
+    const searchInput = result.getByTestId('addRemoveTags');
+
+    fireEvent.input(searchInput, {
+      target: { value: 'tag' },
+    });
+
+    fireEvent.click(result.getByTestId('createTagBtn'));
+
+    expect(mockUpdateTags).toHaveBeenCalledWith(
+      'agent1',
+      ['tag'],
+      expect.anything(),
+      'Tag created',
+      'Tag creation failed'
+    );
+  });
+
   it('should add new tag when not found in search and button clicked', () => {
     const result = renderComponent('agent1');
     const searchInput = result.getByRole('combobox');

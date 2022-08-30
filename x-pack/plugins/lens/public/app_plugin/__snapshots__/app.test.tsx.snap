@@ -4,6 +4,15 @@ exports[`Lens App renders the editor frame 1`] = `
 Array [
   Array [
     Object {
+      "indexPatternService": Object {
+        "ensureIndexPattern": [Function],
+        "getDefaultIndex": [Function],
+        "loadIndexPatternRefs": [Function],
+        "loadIndexPatterns": [Function],
+        "refreshExistingFields": [Function],
+        "replaceDataViewId": [Function],
+        "updateDataViewsState": [Function],
+      },
       "lensInspector": Object {
         "adapters": Object {
           "expression": ExpressionsInspectorAdapter {

@@ -18,28 +18,10 @@ export const expectedCompleteUnitedIndexQuery = {
             },
           },
           filter: [
-            {
-              terms: {
-                'united.agent.policy_id': ['test-endpoint-policy-id'],
-              },
-            },
-            {
-              exists: {
-                field: 'united.endpoint.agent.id',
-              },
-            },
-            {
-              exists: {
-                field: 'united.agent.agent.id',
-              },
-            },
-            {
-              term: {
-                'united.agent.active': {
-                  value: true,
-                },
-              },
-            },
+            { terms: { 'united.agent.policy_id': ['test-endpoint-policy-id'] } },
+            { exists: { field: 'united.endpoint.agent.id' } },
+            { exists: { field: 'united.agent.agent.id' } },
+            { term: { 'united.agent.active': { value: true } } },
           ],
         },
       },
@@ -53,15 +35,7 @@ export const expectedCompleteUnitedIndexQuery = {
                     filter: [
                       {
                         bool: {
-                          should: [
-                            {
-                              range: {
-                                'united.agent.last_checkin': {
-                                  lt: 'now-300s',
-                                },
-                              },
-                            },
-                          ],
+                          should: [{ range: { 'united.agent.last_checkin': { lt: 'now-300s' } } }],
                           minimum_should_match: 1,
                         },
                       },
@@ -168,6 +142,22 @@ export const expectedCompleteUnitedIndexQuery = {
                                               minimum_should_match: 1,
                                             },
                                           },
+                                          {
+                                            bool: {
+                                              must_not: {
+                                                bool: {
+                                                  should: [
+                                                    {
+                                                      exists: {
+                                                        field: 'united.agent.policy_revision_idx',
+                                                      },
+                                                    },
+                                                  ],
+                                                  minimum_should_match: 1,
+                                                },
+                                              },
+                                            },
+                                          },
                                         ],
                                         minimum_should_match: 1,
                                       },
@@ -191,9 +181,7 @@ export const expectedCompleteUnitedIndexQuery = {
                                         bool: {
                                           should: [
                                             {
-                                              exists: {
-                                                field: 'united.agent.upgrade_started_at',
-                                              },
+                                              exists: { field: 'united.agent.upgrade_started_at' },
                                             },
                                           ],
                                           minimum_should_match: 1,
@@ -204,11 +192,7 @@ export const expectedCompleteUnitedIndexQuery = {
                                           must_not: {
                                             bool: {
                                               should: [
-                                                {
-                                                  exists: {
-                                                    field: 'united.agent.upgraded_at',
-                                                  },
-                                                },
+                                                { exists: { field: 'united.agent.upgraded_at' } },
                                               ],
                                               minimum_should_match: 1,
                                             },
@@ -223,11 +207,7 @@ export const expectedCompleteUnitedIndexQuery = {
                                     must_not: {
                                       bool: {
                                         should: [
-                                          {
-                                            exists: {
-                                              field: 'united.agent.last_checkin',
-                                            },
-                                          },
+                                          { exists: { field: 'united.agent.last_checkin' } },
                                         ],
                                         minimum_should_match: 1,
                                       },
@@ -237,13 +217,21 @@ export const expectedCompleteUnitedIndexQuery = {
                                 {
                                   bool: {
                                     should: [
-                                      {
-                                        exists: {
-                                          field: 'united.agent.unenrollment_started_at',
-                                        },
-                                      },
+                                      { exists: { field: 'united.agent.unenrollment_started_at' } },
                                     ],
                                     minimum_should_match: 1,
+                                  },
+                                },
+                                {
+                                  bool: {
+                                    must_not: {
+                                      bool: {
+                                        should: [
+                                          { exists: { field: 'united.agent.policy_revision_idx' } },
+                                        ],
+                                        minimum_should_match: 1,
+                                      },
+                                    },
                                   },
                                 },
                               ],
@@ -268,11 +256,7 @@ export const expectedCompleteUnitedIndexQuery = {
                             {
                               bool: {
                                 should: [
-                                  {
-                                    match: {
-                                      'united.agent.last_checkin_status': 'error',
-                                    },
-                                  },
+                                  { match: { 'united.agent.last_checkin_status': 'error' } },
                                 ],
                                 minimum_should_match: 1,
                               },
@@ -280,11 +264,7 @@ export const expectedCompleteUnitedIndexQuery = {
                             {
                               bool: {
                                 should: [
-                                  {
-                                    match: {
-                                      'united.agent.last_checkin_status': 'degraded',
-                                    },
-                                  },
+                                  { match: { 'united.agent.last_checkin_status': 'degraded' } },
                                 ],
                                 minimum_should_match: 1,
                               },
@@ -305,9 +285,7 @@ export const expectedCompleteUnitedIndexQuery = {
                                         bool: {
                                           should: [
                                             {
-                                              exists: {
-                                                field: 'united.agent.upgrade_started_at',
-                                              },
+                                              exists: { field: 'united.agent.upgrade_started_at' },
                                             },
                                           ],
                                           minimum_should_match: 1,
@@ -318,11 +296,7 @@ export const expectedCompleteUnitedIndexQuery = {
                                           must_not: {
                                             bool: {
                                               should: [
-                                                {
-                                                  exists: {
-                                                    field: 'united.agent.upgraded_at',
-                                                  },
-                                                },
+                                                { exists: { field: 'united.agent.upgraded_at' } },
                                               ],
                                               minimum_should_match: 1,
                                             },
@@ -337,11 +311,7 @@ export const expectedCompleteUnitedIndexQuery = {
                                     must_not: {
                                       bool: {
                                         should: [
-                                          {
-                                            exists: {
-                                              field: 'united.agent.last_checkin',
-                                            },
-                                          },
+                                          { exists: { field: 'united.agent.last_checkin' } },
                                         ],
                                         minimum_should_match: 1,
                                       },
@@ -351,13 +321,21 @@ export const expectedCompleteUnitedIndexQuery = {
                                 {
                                   bool: {
                                     should: [
-                                      {
-                                        exists: {
-                                          field: 'united.agent.unenrollment_started_at',
-                                        },
-                                      },
+                                      { exists: { field: 'united.agent.unenrollment_started_at' } },
                                     ],
                                     minimum_should_match: 1,
+                                  },
+                                },
+                                {
+                                  bool: {
+                                    must_not: {
+                                      bool: {
+                                        should: [
+                                          { exists: { field: 'united.agent.policy_revision_idx' } },
+                                        ],
+                                        minimum_should_match: 1,
+                                      },
+                                    },
                                   },
                                 },
                               ],
@@ -381,13 +359,7 @@ export const expectedCompleteUnitedIndexQuery = {
                           filter: [
                             {
                               bool: {
-                                should: [
-                                  {
-                                    exists: {
-                                      field: 'united.agent.upgrade_started_at',
-                                    },
-                                  },
-                                ],
+                                should: [{ exists: { field: 'united.agent.upgrade_started_at' } }],
                                 minimum_should_match: 1,
                               },
                             },
@@ -395,13 +367,7 @@ export const expectedCompleteUnitedIndexQuery = {
                               bool: {
                                 must_not: {
                                   bool: {
-                                    should: [
-                                      {
-                                        exists: {
-                                          field: 'united.agent.upgraded_at',
-                                        },
-                                      },
-                                    ],
+                                    should: [{ exists: { field: 'united.agent.upgraded_at' } }],
                                     minimum_should_match: 1,
                                   },
                                 },
@@ -414,13 +380,7 @@ export const expectedCompleteUnitedIndexQuery = {
                         bool: {
                           must_not: {
                             bool: {
-                              should: [
-                                {
-                                  exists: {
-                                    field: 'united.agent.last_checkin',
-                                  },
-                                },
-                              ],
+                              should: [{ exists: { field: 'united.agent.last_checkin' } }],
                               minimum_should_match: 1,
                             },
                           },
@@ -428,14 +388,18 @@ export const expectedCompleteUnitedIndexQuery = {
                       },
                       {
                         bool: {
-                          should: [
-                            {
-                              exists: {
-                                field: 'united.agent.unenrollment_started_at',
-                              },
-                            },
-                          ],
+                          should: [{ exists: { field: 'united.agent.unenrollment_started_at' } }],
                           minimum_should_match: 1,
+                        },
+                      },
+                      {
+                        bool: {
+                          must_not: {
+                            bool: {
+                              should: [{ exists: { field: 'united.agent.policy_revision_idx' } }],
+                              minimum_should_match: 1,
+                            },
+                          },
                         },
                       },
                     ],
@@ -449,13 +413,7 @@ export const expectedCompleteUnitedIndexQuery = {
       },
       {
         bool: {
-          should: [
-            {
-              exists: {
-                field: 'united.endpoint.host.os.name',
-              },
-            },
-          ],
+          should: [{ exists: { field: 'united.endpoint.host.os.name' } }],
           minimum_should_match: 1,
         },
       },

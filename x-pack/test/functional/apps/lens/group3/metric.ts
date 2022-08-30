@@ -6,52 +6,18 @@
  */
 
 import expect from '@kbn/expect';
-import { WebElementWrapper } from '../../../../../../test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header']);
-  const findService = getService('find');
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
   const retry = getService('retry');
 
-  const getMetricTiles = () =>
-    findService.allByCssSelector('[data-test-subj="mtrVis"] .echChart li');
-
-  const getIfExists = async (selector: string, container: WebElementWrapper) =>
-    (await findService.descendantExistsByCssSelector(selector, container))
-      ? await container.findByCssSelector(selector)
-      : undefined;
-
-  const getMetricDatum = async (tile: WebElementWrapper) => {
-    return {
-      title: await (await getIfExists('h2', tile))?.getVisibleText(),
-      subtitle: await (await getIfExists('.echMetricText__subtitle', tile))?.getVisibleText(),
-      extraText: await (await getIfExists('.echMetricText__extra', tile))?.getVisibleText(),
-      value: await (await getIfExists('.echMetricText__value', tile))?.getVisibleText(),
-      color: await (await getIfExists('.echMetric', tile))?.getComputedStyle('background-color'),
-    };
-  };
-
-  const getMetricData = async () => {
-    const tiles = await getMetricTiles();
-    const showingBar = Boolean(await findService.existsByCssSelector('.echSingleMetricProgress'));
-
-    const metricData = [];
-    for (const tile of tiles) {
-      metricData.push({
-        ...(await getMetricDatum(tile)),
-        showingBar,
-      });
-    }
-    return metricData;
-  };
-
   const clickMetric = async (title: string) => {
-    const tiles = await getMetricTiles();
+    const tiles = await PageObjects.lens.getMetricTiles();
     for (const tile of tiles) {
-      const datum = await getMetricDatum(tile);
+      const datum = await PageObjects.lens.getMetricDatum(tile);
       if (datum.title === title) {
         await tile.click();
         return;
@@ -59,14 +25,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     }
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/138295
-  describe.skip('lens metric', () => {
+  describe('lens metric', () => {
     it('should render a metric', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
       await PageObjects.lens.goToTimeRange();
 
-      await PageObjects.lens.switchToVisualization('lnsMetricNew', 'Metric');
+      await PageObjects.lens.switchToVisualization('lnsMetric', 'Metric');
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsMetric_primaryMetricDimensionPanel > lns-empty-dimension',
@@ -80,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         field: 'bytes',
       });
 
-      expect((await getMetricData()).length).to.be.equal(1);
+      expect((await PageObjects.lens.getMetricVisualizationData()).length).to.be.equal(1);
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsMetric_breakdownByDimensionPanel > lns-empty-dimension',
@@ -90,11 +55,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.waitForVisualization('mtrVis');
 
-      expect(await getMetricData()).to.eql([
+      expect(await PageObjects.lens.getMetricVisualizationData()).to.eql([
         {
           title: '97.220.3.248',
           subtitle: 'Average of bytes',
-          extraText: '19.76K',
+          extraText: 'Average of bytes 19.76K',
           value: '19.76K',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: false,
@@ -102,7 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         {
           title: '169.228.188.120',
           subtitle: 'Average of bytes',
-          extraText: '18.99K',
+          extraText: 'Average of bytes 18.99K',
           value: '18.99K',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: false,
@@ -110,7 +75,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         {
           title: '78.83.247.30',
           subtitle: 'Average of bytes',
-          extraText: '17.25K',
+          extraText: 'Average of bytes 17.25K',
           value: '17.25K',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: false,
@@ -118,7 +83,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         {
           title: '226.82.228.233',
           subtitle: 'Average of bytes',
-          extraText: '15.69K',
+          extraText: 'Average of bytes 15.69K',
           value: '15.69K',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: false,
@@ -126,7 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         {
           title: '93.28.27.24',
           subtitle: 'Average of bytes',
-          extraText: '15.61K',
+          extraText: 'Average of bytes 15.61K',
           value: '15.61K',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: false,
@@ -134,7 +99,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         {
           title: 'Other',
           subtitle: 'Average of bytes',
-          extraText: '5.72K',
+          extraText: 'Average of bytes 5.72K',
           value: '5.72K',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: false,
@@ -147,7 +112,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.waitForVisualization('mtrVis');
 
-      expect((await getMetricData())[0].showingBar).to.be(true);
+      expect((await PageObjects.lens.getMetricVisualizationData())[0].showingBar).to.be(true);
 
       await PageObjects.lens.closeDimensionEditor();
       await PageObjects.lens.removeDimension('lnsMetric_maxDimensionPanel');
@@ -158,7 +123,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const title = '93.28.27.24';
       await clickMetric(title);
 
-      retry.try(async () => {
+      await retry.try(async () => {
         const labels = await filterBar.getFiltersLabel();
         expect(labels.length).to.be(1);
         expect(labels[0]).to.be(`ip: ${title}`);
@@ -174,11 +139,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
 
       const colorPicker = await testSubjects.find('euiColorPickerAnchor');
+
+      await colorPicker.clearValue();
       await colorPicker.type('#000000');
 
       await PageObjects.lens.waitForVisualization('mtrVis');
 
-      const data = await getMetricData();
+      const data = await PageObjects.lens.getMetricVisualizationData();
 
       expect(data.map(({ color }) => color)).to.be.eql(new Array(6).fill('rgba(0, 0, 0, 1)'));
     });
@@ -197,12 +164,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.waitForVisualization('mtrVis');
 
-      const data = await getMetricData();
+      const data = await PageObjects.lens.getMetricVisualizationData();
       expect(data.map(({ color }) => color)).to.eql(expectedDynamicColors);
     });
 
     it('converts color stops to number', async () => {
       await PageObjects.lens.openPalettePanel('lnsMetric');
+      await PageObjects.common.sleep(1000);
       await testSubjects.click('lnsPalettePanel_dynamicColoring_rangeType_groups_number');
       expect([
         await testSubjects.getAttribute('lnsPalettePanel_dynamicColoring_range_value_1', 'value'),
@@ -211,11 +179,43 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.waitForVisualization('mtrVis');
 
-      expect((await getMetricData()).map(({ color }) => color)).to.eql(expectedDynamicColors); // colors shouldn't change
+      expect(
+        (await PageObjects.lens.getMetricVisualizationData()).map(({ color }) => color)
+      ).to.eql(expectedDynamicColors); // colors shouldn't change
+
+      await PageObjects.lens.closePaletteEditor();
+      await PageObjects.lens.closeDimensionEditor();
+    });
+
+    it('makes visualization scrollable if too tall', async () => {
+      await PageObjects.lens.removeDimension('lnsMetric_breakdownByDimensionPanel');
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsMetric_breakdownByDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+        keepOpen: true,
+      });
+
+      await testSubjects.setValue('lnsMetric_max_cols', '1');
+
+      await PageObjects.lens.waitForVisualization('mtrVis');
+
+      await PageObjects.lens.closeDimensionEditor();
+
+      const tiles = await await PageObjects.lens.getMetricTiles();
+      const lastTile = tiles[tiles.length - 1];
+
+      const initialPosition = await lastTile.getPosition();
+      await lastTile.scrollIntoViewIfNecessary();
+      const scrolledPosition = await lastTile.getPosition();
+      expect(scrolledPosition.y).to.be.below(initialPosition.y);
     });
 
     it("doesn't error with empty formula", async () => {
-      await PageObjects.lens.closePaletteEditor();
+      await PageObjects.lens.openDimensionEditor(
+        'lnsMetric_primaryMetricDimensionPanel > lns-dimensionTrigger'
+      );
 
       await PageObjects.lens.switchToFormula();
       await PageObjects.lens.typeFormula('');

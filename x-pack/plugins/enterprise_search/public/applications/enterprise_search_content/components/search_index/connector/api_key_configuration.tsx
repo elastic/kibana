@@ -17,6 +17,7 @@ import {
   EuiSpacer,
   EuiConfirmModal,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 
 import { Status } from '../../../../../../common/types/api';

@@ -793,7 +793,7 @@
           "Type",
           "<string[]>; clientAuthentication: ",
           "Type",
-          "<\"none\" | \"required\" | \"optional\">; }>"
+          "<\"optional\" | \"none\" | \"required\">; }>"
         ],
         "path": "packages/kbn-server-http-tools/src/ssl/ssl_config.ts",
         "deprecated": false,

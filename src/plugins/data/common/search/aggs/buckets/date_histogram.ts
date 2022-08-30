@@ -219,9 +219,12 @@ export const getDateHistogramBucketAgg = ({
             // this DSL will anyway not be used before we're passing this code with an actual interval.
             return;
           }
+
+          const shouldForceFixedInterval: boolean = agg.params.field?.meta?.fixed_interval?.length;
+
           output.params = {
             ...output.params,
-            ...dateHistogramInterval(interval.expression),
+            ...dateHistogramInterval(interval.expression, shouldForceFixedInterval),
           };
 
           const scaleMetrics =
@@ -272,7 +275,10 @@ export const getDateHistogramBucketAgg = ({
             getConfig,
             aggExecutionContext
           );
-          output.params.time_zone = tz;
+
+          const shouldForceTimeZone = agg.params.field?.meta?.time_zone?.includes('UTC');
+
+          output.params.time_zone = shouldForceTimeZone ? 'UTC' : tz;
         },
       },
       {

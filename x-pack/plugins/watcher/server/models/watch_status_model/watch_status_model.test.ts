@@ -135,7 +135,7 @@ describe('WatchStatusModel', () => {
       expect(serverWatchStatusModel.isActive).toBe(clientWatchStatusModel.isActive);
       expect(serverWatchStatusModel.lastChecked).toBe(clientWatchStatusModel.lastChecked);
       expect(serverWatchStatusModel.lastMetCondition).toBe(clientWatchStatusModel.lastMetCondition);
-      expect(clientWatchStatusModel.state).toBe(WATCH_STATES.OK);
+      expect(clientWatchStatusModel.state).toBe(WATCH_STATES.ACTIVE);
       expect(clientWatchStatusModel.comment).toBe(WATCH_STATE_COMMENTS.OK);
       expect(
         clientWatchStatusModel.actionStatuses && clientWatchStatusModel.actionStatuses.length

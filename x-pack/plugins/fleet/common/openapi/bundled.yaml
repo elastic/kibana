@@ -1355,6 +1355,45 @@ paths:
               required:
                 - name
         description: ''
+  /agent_policies/_bulk_get:
+    post:
+      summary: Agent policies - Bulk Get
+      tags: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  type: array
+                  items:
+                    type: string
+                  description: list of agent policy ids
+                full:
+                  type: boolean
+                  description: get full policies with package policies populated
+                ignoreMissing:
+                  type: boolean
+              required:
+                - ids
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/agent_policy'
+                required:
+                  - items
+      operationId: bulk-get-agent-policies
+      security: []
+      parameters: []
   /agent_policies/delete:
     post:
       summary: Agent policy - Delete
@@ -1662,6 +1701,42 @@ paths:
                       type: boolean
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
+  /package_policies/_bulk_get:
+    post:
+      summary: Package policies - Bulk Get
+      tags: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  type: array
+                  items:
+                    type: string
+                  description: list of package policy ids
+                ignoreMissing:
+                  type: boolean
+              required:
+                - ids
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/package_policy'
+                required:
+                  - items
+      operationId: bulk-get-package-policies
+      security: []
+      parameters: []
   /package_policies/delete:
     post:
       summary: Package policy - Delete
@@ -1820,6 +1895,32 @@ paths:
                   - sucess
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
+    delete:
+      summary: Package policy - Delete
+      tags: []
+      operationId: delete-package-policy
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                required:
+                  - id
+      parameters:
+        - schema:
+            type: string
+          name: packagePolicyId
+          in: path
+          required: true
+        - schema:
+            type: boolean
+          name: force
+          in: query
   /outputs:
     get:
       summary: Outputs
@@ -2716,26 +2817,25 @@ components:
               items:
                 type: string
               description: list of agent IDs
+        force:
+          type: boolean
+          description: Force upgrade, skipping validation (should be used with caution)
       required:
         - agents
         - version
     upgrade_agent:
       title: Upgrade agent
-      oneOf:
-        - type: object
-          properties:
-            version:
-              type: string
-          required:
-            - version
-        - type: object
-          properties:
-            version:
-              type: string
-            source_uri:
-              type: string
-          required:
-            - version
+      type: object
+      properties:
+        version:
+          type: string
+        source_uri:
+          type: string
+        force:
+          type: boolean
+          description: Force upgrade, skipping validation (should be used with caution)
+      required:
+        - version
     agent_action:
       title: Agent action
       oneOf:
@@ -2747,7 +2847,6 @@ components:
             type:
               type: string
               enum:
-                - POLICY_CHANGE
                 - UNENROLL
                 - UPGRADE
                 - POLICY_REASSIGN
@@ -2823,6 +2922,7 @@ components:
           type: string
         output_id:
           type: string
+          deprecated: true
         inputs:
           type: array
           items:
@@ -3086,6 +3186,8 @@ components:
           type: string
         output_id:
           type: string
+          description: Not supported output can be set at the agent policy level only
+          deprecated: true
         inputs:
           type: array
           items:

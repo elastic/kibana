@@ -14,13 +14,38 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Azure Blob Container Access Level Modification",
-  "note": "## Config\n\nThe Azure Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "note": "",
   "query": "event.dataset:azure.activitylogs and azure.activitylogs.operation_name:\"MICROSOFT.STORAGE/STORAGEACCOUNTS/BLOBSERVICES/CONTAINERS/WRITE\" and event.outcome:(Success or success)\n",
   "references": [
     "https://docs.microsoft.com/en-us/azure/storage/blobs/anonymous-read-access-prevent"
   ],
+  "related_integrations": [
+    {
+      "integration": "activitylogs",
+      "package": "azure",
+      "version": "0.12.0"
+    }
+  ],
+  "required_fields": [
+    {
+      "ecs": false,
+      "name": "azure.activitylogs.operation_name",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.dataset",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.outcome",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 21,
   "rule_id": "2636aa6c-88b5-4337-9c31-8d0192a8ef45",
+  "setup": "The Azure Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
   "severity": "low",
   "tags": [
     "Elastic",
@@ -64,5 +89,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 5
+  "version": 7
 }

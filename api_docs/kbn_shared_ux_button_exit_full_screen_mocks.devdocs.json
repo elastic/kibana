@@ -9,10 +9,18 @@
     "objects": []
   },
   "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/shared-ux-button-exit-full-screen-mocks",
-        "id": "def-server.StorybookMock",
+        "id": "def-common.StorybookMock",
         "type": "Class",
         "tags": [],
         "label": "StorybookMock",
@@ -22,9 +30,9 @@
         "signature": [
           {
             "pluginId": "@kbn/shared-ux-button-exit-full-screen-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnSharedUxButtonExitFullScreenMocksPluginApi",
-            "section": "def-server.StorybookMock",
+            "section": "def-common.StorybookMock",
             "text": "StorybookMock"
           },
           " extends ",
@@ -40,7 +48,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-button-exit-full-screen-mocks",
-            "id": "def-server.StorybookMock.propArguments",
+            "id": "def-common.StorybookMock.propArguments",
             "type": "Object",
             "tags": [],
             "label": "propArguments",
@@ -50,7 +58,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-button-exit-full-screen-mocks",
-                "id": "def-server.StorybookMock.propArguments.toggleChrome",
+                "id": "def-common.StorybookMock.propArguments.toggleChrome",
                 "type": "Object",
                 "tags": [],
                 "label": "toggleChrome",
@@ -60,7 +68,7 @@
                 "children": [
                   {
                     "parentPluginId": "@kbn/shared-ux-button-exit-full-screen-mocks",
-                    "id": "def-server.StorybookMock.propArguments.toggleChrome.control",
+                    "id": "def-common.StorybookMock.propArguments.toggleChrome.control",
                     "type": "string",
                     "tags": [],
                     "label": "control",
@@ -70,7 +78,7 @@
                   },
                   {
                     "parentPluginId": "@kbn/shared-ux-button-exit-full-screen-mocks",
-                    "id": "def-server.StorybookMock.propArguments.toggleChrome.defaultValue",
+                    "id": "def-common.StorybookMock.propArguments.toggleChrome.defaultValue",
                     "type": "boolean",
                     "tags": [],
                     "label": "defaultValue",
@@ -84,7 +92,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-button-exit-full-screen-mocks",
-            "id": "def-server.StorybookMock.serviceArguments",
+            "id": "def-common.StorybookMock.serviceArguments",
             "type": "Object",
             "tags": [],
             "label": "serviceArguments",
@@ -95,7 +103,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-button-exit-full-screen-mocks",
-            "id": "def-server.StorybookMock.dependencies",
+            "id": "def-common.StorybookMock.dependencies",
             "type": "Array",
             "tags": [],
             "label": "dependencies",
@@ -108,7 +116,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-button-exit-full-screen-mocks",
-            "id": "def-server.StorybookMock.getProps",
+            "id": "def-common.StorybookMock.getProps",
             "type": "Function",
             "tags": [],
             "label": "getProps",
@@ -117,9 +125,9 @@
               "(params?: ",
               {
                 "pluginId": "@kbn/shared-ux-button-exit-full-screen-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnSharedUxButtonExitFullScreenMocksPluginApi",
-                "section": "def-server.Params",
+                "section": "def-common.Params",
                 "text": "Params"
               },
               " | undefined) => ",
@@ -130,7 +138,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-button-exit-full-screen-mocks",
-                "id": "def-server.StorybookMock.getProps.$1",
+                "id": "def-common.StorybookMock.getProps.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "params",
@@ -138,9 +146,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/shared-ux-button-exit-full-screen-mocks",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnSharedUxButtonExitFullScreenMocksPluginApi",
-                    "section": "def-server.Params",
+                    "section": "def-common.Params",
                     "text": "Params"
                   },
                   " | undefined"
@@ -154,7 +162,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-button-exit-full-screen-mocks",
-            "id": "def-server.StorybookMock.getServices",
+            "id": "def-common.StorybookMock.getServices",
             "type": "Function",
             "tags": [],
             "label": "getServices",
@@ -175,7 +183,7 @@
     "functions": [
       {
         "parentPluginId": "@kbn/shared-ux-button-exit-full-screen-mocks",
-        "id": "def-server.getKibanaDependenciesMock",
+        "id": "def-common.getKibanaDependenciesMock",
         "type": "Function",
         "tags": [],
         "label": "getKibanaDependenciesMock",
@@ -194,7 +202,7 @@
       },
       {
         "parentPluginId": "@kbn/shared-ux-button-exit-full-screen-mocks",
-        "id": "def-server.getServicesMock",
+        "id": "def-common.getServicesMock",
         "type": "Function",
         "tags": [],
         "label": "getServicesMock",
@@ -217,7 +225,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/shared-ux-button-exit-full-screen-mocks",
-        "id": "def-server.Params",
+        "id": "def-common.Params",
         "type": "Type",
         "tags": [],
         "label": "Params",
@@ -232,14 +240,6 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": []
   }
 }

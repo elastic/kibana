@@ -21,6 +21,7 @@ describe('getLayerMetaInfo', () => {
         createMockDatasource('testDatasource'),
         {},
         undefined,
+        {},
         undefined,
         capabilities
       ).error
@@ -36,6 +37,7 @@ describe('getLayerMetaInfo', () => {
           datatable1: { type: 'datatable', columns: [], rows: [] },
           datatable2: { type: 'datatable', columns: [], rows: [] },
         },
+        {},
         undefined,
         capabilities
       ).error
@@ -43,7 +45,7 @@ describe('getLayerMetaInfo', () => {
   });
 
   it('should return error in case of missing activeDatasource', () => {
-    expect(getLayerMetaInfo(undefined, {}, undefined, undefined, capabilities).error).toBe(
+    expect(getLayerMetaInfo(undefined, {}, undefined, {}, undefined, capabilities).error).toBe(
       'Visualization has no data available to show'
     );
   });
@@ -53,6 +55,7 @@ describe('getLayerMetaInfo', () => {
       getLayerMetaInfo(
         createMockDatasource('testDatasource'),
         undefined,
+        {},
         {},
         undefined,
         capabilities
@@ -81,7 +84,7 @@ describe('getLayerMetaInfo', () => {
     };
     mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
     expect(
-      getLayerMetaInfo(createMockDatasource('testDatasource'), {}, {}, undefined, capabilities)
+      getLayerMetaInfo(createMockDatasource('testDatasource'), {}, {}, {}, undefined, capabilities)
         .error
     ).toBe('Visualization has no data available to show');
   });
@@ -105,6 +108,7 @@ describe('getLayerMetaInfo', () => {
         {
           datatable1: { type: 'datatable', columns: [], rows: [] },
         },
+        {},
         undefined,
         capabilities
       ).error
@@ -120,6 +124,7 @@ describe('getLayerMetaInfo', () => {
         {
           datatable1: { type: 'datatable', columns: [], rows: [] },
         },
+        {},
         undefined,
         {
           navLinks: { discover: false },
@@ -134,6 +139,7 @@ describe('getLayerMetaInfo', () => {
         {
           datatable1: { type: 'datatable', columns: [], rows: [] },
         },
+        {},
         undefined,
         {
           navLinks: { discover: true },
@@ -167,6 +173,7 @@ describe('getLayerMetaInfo', () => {
       {
         datatable1: { type: 'datatable', columns: [], rows: [] },
       },
+      {},
       undefined,
       capabilities
     );

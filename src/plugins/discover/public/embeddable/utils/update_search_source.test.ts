@@ -8,7 +8,7 @@
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { updateSearchSource } from './update_search_source';
 import { dataViewMock } from '../../__mocks__/data_view';
-import type { SortOrder } from '../../services/saved_searches';
+import type { SortOrder } from '@kbn/saved-search-plugin/public';
 
 describe('updateSearchSource', () => {
   const defaults = {

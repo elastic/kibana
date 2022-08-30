@@ -15,7 +15,7 @@ if your data is stored in {es} and contains a time field, you can use the
 *{data-viz}* to identify possible fields for {anomaly-detect}:
 
 [role="screenshot"]
-image::user/ml/images/ml-data-visualizer-sample.jpg[{data-viz} for sample flight data]
+image::user/ml/images/ml-data-visualizer-sample.png[{data-viz} for sample flight data]
 
 You can also upload a CSV, NDJSON, or log file. The *{data-viz}*
 identifies the file format and field mappings. You can then optionally import
