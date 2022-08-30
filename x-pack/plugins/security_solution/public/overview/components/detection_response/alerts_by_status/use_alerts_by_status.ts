@@ -9,6 +9,7 @@ import { useCallback, useEffect, useState } from 'react';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/use_query';
+import { ALERTS_QUERY_NAMES } from '../../../../detections/containers/detection_engine/alerts/constants';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import type { AlertsByStatusAgg, AlertsByStatusResponse, ParsedAlertsData } from './types';
 import {
@@ -109,6 +110,7 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
     }),
     indexName: signalIndexName,
     skip,
+    queryName: ALERTS_QUERY_NAMES.BY_STATUS,
   });
 
   useEffect(() => {
