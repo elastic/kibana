@@ -9,12 +9,12 @@ export const getAggregatedAnomaliesQuery = ({
   from,
   to,
   jobIds,
-  anomalyScoreThreshhold,
+  anomalyScoreThreshold,
 }: {
   from: string;
   to: string;
   jobIds: string[];
-  anomalyScoreThreshhold: number;
+  anomalyScoreThreshold: number;
 }) => ({
   size: 0,
   query: {
@@ -28,7 +28,7 @@ export const getAggregatedAnomaliesQuery = ({
         {
           range: {
             record_score: {
-              gte: anomalyScoreThreshhold,
+              gte: anomalyScoreThreshold,
             },
           },
         },

@@ -59,7 +59,7 @@ export const useNotableAnomaliesSearch = ({
   } = useInstalledSecurityJobs();
   const [loading, setLoading] = useState(true);
   const { addError } = useAppToasts();
-  const [anomalyScoreThreshhold] = useUiSetting$<number>(DEFAULT_ANOMALY_SCORE);
+  const [anomalyScoreThreshold] = useUiSetting$<number>(DEFAULT_ANOMALY_SCORE);
 
   const { notableAnomaliesJobs, query } = useMemo(() => {
     const newNotableAnomaliesJobs = installedSecurityJobs.filter(({ id }) =>
@@ -68,7 +68,7 @@ export const useNotableAnomaliesSearch = ({
 
     const newQuery = getAggregatedAnomaliesQuery({
       jobIds: newNotableAnomaliesJobs.map(({ id }) => id),
-      anomalyScoreThreshhold: anomalyScoreThreshhold ?? 50,
+      anomalyScoreThreshold,
       from,
       to,
     });
@@ -77,7 +77,7 @@ export const useNotableAnomaliesSearch = ({
       query: newQuery,
       notableAnomaliesJobs: newNotableAnomaliesJobs,
     };
-  }, [installedSecurityJobs, anomalyScoreThreshhold, from, to]);
+  }, [installedSecurityJobs, anomalyScoreThreshold, from, to]);
 
   useEffect(() => {
     let isSubscribed = true;

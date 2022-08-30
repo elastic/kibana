@@ -13,13 +13,9 @@ import type { AnomaliesCount } from './use_anomalies_search';
 import { useNotableAnomaliesSearch, AnomalyJobStatus } from './use_anomalies_search';
 
 const jobId = 'auth_rare_source_ip_for_a_user';
-
 const from = 'now-24h';
 const to = 'now';
-
-const JOBS = [
-  { id: 'auth_rare_source_ip_for_a_user', jobState: 'started', datafeedState: 'started' },
-];
+const JOBS = [{ id: jobId, jobState: 'started', datafeedState: 'started' }];
 
 const mockuseInstalledSecurityJobs = jest.fn().mockReturnValue({
   loading: false,

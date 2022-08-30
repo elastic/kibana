@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiLink } from '@elastic/eui';
 import { ML_PAGES, useMlHref } from '@kbn/ml-plugin/public';
 import * as i18n from './translations';
 import type { AnomaliesCount } from '../../../../common/components/ml/anomaly/use_anomalies_search';
 import { AnomalyJobStatus } from '../../../../common/components/ml/anomaly/use_anomalies_search';
 import { useKibana } from '../../../../common/lib/kibana';
+import { LinkAnchor } from '../../../../common/components/links';
 
 type AnomaliesColumns = Array<EuiBasicTableColumn<AnomaliesCount>>;
 
@@ -82,7 +82,11 @@ const I18N_JOB_STATUS = {
 
 const EnableJobLink = ({ jobId }: { jobId: string }) => {
   const {
-    services: { ml, http },
+    services: {
+      ml,
+      http,
+      application: { navigateToUrl },
+    },
   } = useKibana();
 
   const jobUrl = useMlHref(ml, http.basePath.get(), {
@@ -92,9 +96,17 @@ const EnableJobLink = ({ jobId }: { jobId: string }) => {
     },
   });
 
+  const onClick = useCallback(
+    (ev) => {
+      ev.preventDefault();
+      navigateToUrl(jobUrl);
+    },
+    [jobUrl, navigateToUrl]
+  );
+
   return (
-    <EuiLink data-test-subj="jobs-table-link" href={jobUrl}>
+    <LinkAnchor data-test-subj="jobs-table-link" href={jobUrl} onClick={onClick}>
       {i18n.RUN_JOB}
-    </EuiLink>
+    </LinkAnchor>
   );
 };
