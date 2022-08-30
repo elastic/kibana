@@ -166,7 +166,7 @@ export const getAutoBoundInformation = ({
           defaultMessage: `Use all numbers above (positive infinity)`,
         })
     : isPercentage
-    ? i18n.translate('coloring.dynamicColoring.customPalette.useAutoMaxValuePercentage', {
+    ? i18n.translate('coloring.dynamicColoring.customPalette.useAutoMinValuePercentage', {
         defaultMessage: `Use minimum percentage`,
       })
     : i18n.translate('coloring.dynamicColoring.customPalette.useAutoMinValue', {
