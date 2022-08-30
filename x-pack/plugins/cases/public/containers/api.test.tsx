@@ -13,6 +13,7 @@ import { ConnectorTypes, CommentType, CaseStatuses, CaseSeverity } from '../../c
 import {
   CASES_URL,
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
+  INTERNAL_FIND_ASSIGNEES_URL,
   SECURITY_SOLUTION_OWNER,
 } from '../../common/constants';
 
@@ -23,7 +24,6 @@ import {
   getCase,
   getCases,
   getCaseUserActions,
-  getReporters,
   getTags,
   patchCase,
   patchCasesStatus,
@@ -34,6 +34,7 @@ import {
   resolveCase,
   getFeatureIds,
   postComment,
+  findAssignees,
 } from './api';
 
 import {
@@ -48,8 +49,6 @@ import {
   cases,
   caseUserActions,
   pushedCase,
-  reporters,
-  respReporters,
   tags,
   caseUserActionsSnake,
   casesStatusSnake,
@@ -62,6 +61,7 @@ import {
 
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
 import { getCasesStatus } from '../api';
+import { userProfiles } from './user_profiles/api.mock';
 
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;
@@ -212,7 +212,7 @@ describe('Cases API', () => {
       await getCases({
         filterOptions: {
           ...DEFAULT_FILTER_OPTIONS,
-          reporters: [...respReporters, { username: null, full_name: null, email: null }],
+          assignees: ['123'],
           tags,
           status: CaseStatuses.open,
           search: 'hello',
@@ -225,7 +225,7 @@ describe('Cases API', () => {
         method: 'GET',
         query: {
           ...DEFAULT_QUERY_PARAMS,
-          reporters,
+          assignees: ['123'],
           tags: ['coke', 'pepsi'],
           search: 'hello',
           searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
@@ -285,7 +285,7 @@ describe('Cases API', () => {
       await getCases({
         filterOptions: {
           ...DEFAULT_FILTER_OPTIONS,
-          reporters: [...respReporters, { username: null, full_name: null, email: null }],
+          assignees: ['123'],
           tags: weirdTags,
           status: CaseStatuses.open,
           search: 'hello',
@@ -298,7 +298,7 @@ describe('Cases API', () => {
         method: 'GET',
         query: {
           ...DEFAULT_QUERY_PARAMS,
-          reporters,
+          assignees: ['123'],
           tags: ['(', '"double"'],
           search: 'hello',
           searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
@@ -378,26 +378,37 @@ describe('Cases API', () => {
     });
   });
 
-  describe('getReporters', () => {
+  describe('findAssignees', () => {
     beforeEach(() => {
       fetchMock.mockClear();
-      fetchMock.mockResolvedValue(respReporters);
+      fetchMock.mockResolvedValue(userProfiles);
     });
 
     test('should be called with correct check url, method, signal', async () => {
-      await getReporters(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
-      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/reporters`, {
+      await findAssignees({
+        signal: abortCtrl.signal,
+        owners: [SECURITY_SOLUTION_OWNER],
+        searchTerm: 'user',
+        size: 1,
+      });
+      expect(fetchMock).toHaveBeenCalledWith(INTERNAL_FIND_ASSIGNEES_URL, {
         method: 'GET',
         signal: abortCtrl.signal,
         query: {
-          owner: [SECURITY_SOLUTION_OWNER],
+          searchTerm: 'user',
+          size: 1,
+          owners: [SECURITY_SOLUTION_OWNER],
         },
       });
     });
 
     test('should return correct response', async () => {
-      const resp = await getReporters(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
-      expect(resp).toEqual(respReporters);
+      const resp = await findAssignees({
+        signal: abortCtrl.signal,
+        owners: [SECURITY_SOLUTION_OWNER],
+        searchTerm: 'user',
+      });
+      expect(resp).toEqual(userProfiles);
     });
   });
 

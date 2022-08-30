@@ -14,8 +14,6 @@ import { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { StatusAll, CaseStatusWithAllStatus, CaseSeverityWithAll } from '../../../common/ui/types';
 import { CaseStatuses } from '../../../common/api';
 import { FilterOptions } from '../../containers/types';
-// TODO: we probably need to remove all this code for reporters from the UI?
-// import { useGetReporters } from '../../containers/use_get_reporters';
 import { FilterPopover } from '../filter_popover';
 import { StatusFilter } from './status_filter';
 import * as i18n from './translations';
@@ -101,13 +99,6 @@ const CasesTableFiltersComponent = ({
     },
     [selectedAssignees, onFilterChanged]
   );
-
-  // useEffect(() => {
-  //   if (selectedAssignees.length > 0) {
-  //     const newAssignees = selectedAssignees.filter((assignee) => assignees.includes(assignee));
-  //     handleSelectedAssignees(newAssignees);
-  //   }
-  // }, [assignees, handleSelectedAssignees, selectedAssignees]);
 
   const handleSelectedTags = useCallback(
     (newTags) => {
@@ -218,13 +209,6 @@ const CasesTableFiltersComponent = ({
             onSelectionChange={handleSelectedAssignees}
             setFetchAssignees={setFetchAssignees}
           />
-          {/* <FilterPopover
-            buttonLabel={i18n.ASSIGNEES}
-            onSelectedOptionsChanged={handleSelectedAssignees}
-            selectedOptions={selectedAssignees}
-            options={assignees}
-            optionsEmptyLabel={i18n.NO_REPORTERS_AVAILABLE}
-          /> */}
           <FilterPopover
             buttonLabel={i18n.TAGS}
             onSelectedOptionsChanged={handleSelectedTags}

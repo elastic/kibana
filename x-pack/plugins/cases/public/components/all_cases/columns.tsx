@@ -54,12 +54,6 @@ export type CasesColumns =
   | EuiTableComputedColumnType<Case>
   | EuiTableFieldDataColumnType<Case>;
 
-// const OverlappingFlexItems = euiStyled(EuiFlexItem)`
-//   &:not(:first-child) {
-//     margin-left: -4px
-//   }
-// `;
-
 const MediumShadeText = styled.p`
   color: ${({ theme }) => theme.eui.euiColorMediumShade};
 `;
@@ -83,27 +77,14 @@ const AssigneesColumn: React.FC<{
   }
 
   return (
-    <EuiFlexGroup
-      gutterSize="none"
-      data-test-subj="case-table-column-assignee"
-      wrap
-      // css={{ position: 'relative' }}
-      // alignItems="center"
-    >
-      {allAssignees.map((assignee, index) => {
-        // shift each avatar over to the left 20 pixels
-        const left = index * 20;
-        // apply reverse ordering so that the first avatar is on top
-        // TODO: figure out how to style them appropriately when they wrap
-        // const zIndex = (assignees.length - index) * 10;
-        return (
-          <EuiFlexItem grow={false} key={assignee.uid}>
-            <UserToolTip profile={assignee.profile}>
-              <CaseUserAvatar size="s" profile={assignee.profile} />
-            </UserToolTip>
-          </EuiFlexItem>
-        );
-      })}
+    <EuiFlexGroup gutterSize="none" data-test-subj="case-table-column-assignee" wrap>
+      {allAssignees.map((assignee, index) => (
+        <EuiFlexItem grow={false} key={assignee.uid}>
+          <UserToolTip profile={assignee.profile}>
+            <CaseUserAvatar size="s" profile={assignee.profile} />
+          </UserToolTip>
+        </EuiFlexItem>
+      ))}
     </EuiFlexGroup>
   );
 };

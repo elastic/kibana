@@ -10,14 +10,12 @@ import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import useDebounce from 'react-use/lib/useDebounce';
 import { UserProfile } from '@kbn/security-plugin/common';
 import { isEmpty } from 'lodash';
-import { DEFAULT_USER_SIZE } from '../../../common/constants';
+import { DEFAULT_USER_SIZE, SEARCH_DEBOUNCE_MS } from '../../../common/constants';
 import * as i18n from '../translations';
 import { useKibana, useToasts } from '../../common/lib/kibana';
 import { ServerError } from '../../types';
 import { USER_PROFILES_CACHE_KEY, USER_PROFILES_SUGGEST_CACHE_KEY } from '../constants';
 import { suggestUserProfiles, SuggestUserProfilesArgs } from './api';
-
-const DEBOUNCE_MS = 500;
 
 export const useSuggestUserProfiles = ({
   name,
@@ -27,7 +25,7 @@ export const useSuggestUserProfiles = ({
   const { http } = useKibana().services;
   const [debouncedName, setDebouncedName] = useState(name);
 
-  useDebounce(() => setDebouncedName(name), DEBOUNCE_MS, [name]);
+  useDebounce(() => setDebouncedName(name), SEARCH_DEBOUNCE_MS, [name]);
 
   const toasts = useToasts();
 

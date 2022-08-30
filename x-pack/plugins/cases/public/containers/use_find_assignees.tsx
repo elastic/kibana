@@ -9,15 +9,12 @@ import { UserProfile } from '@kbn/user-profile-components';
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
-import { DEFAULT_USER_SIZE } from '../../common/constants';
+import { DEFAULT_USER_SIZE, SEARCH_DEBOUNCE_MS } from '../../common/constants';
 import { useToasts } from '../common/lib/kibana';
 import { ServerError } from '../types';
 import { findAssignees, FindAssigneesProps } from './api';
 import { CASE_ASSIGNEES_CACHE_KEY } from './constants';
 import * as i18n from './translations';
-
-// TODO: move to common place
-const DEBOUNCE_MS = 500;
 
 export const useFindAssignees = ({
   searchTerm,
@@ -31,7 +28,7 @@ export const useFindAssignees = ({
 
   const [debounceSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
 
-  useDebounce(() => setDebouncedSearchTerm(searchTerm), DEBOUNCE_MS, [searchTerm]);
+  useDebounce(() => setDebouncedSearchTerm(searchTerm), SEARCH_DEBOUNCE_MS, [searchTerm]);
 
   const key = [
     ...(cacheKey ? [cacheKey] : []),

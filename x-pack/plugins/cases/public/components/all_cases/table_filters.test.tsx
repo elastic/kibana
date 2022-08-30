@@ -13,16 +13,16 @@ import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { CaseStatuses } from '../../../common/api';
 import { OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../common/mock';
-import { useGetReporters } from '../../containers/use_get_reporters';
 import { DEFAULT_FILTER_OPTIONS } from '../../containers/use_get_cases';
 import { CasesTableFilters } from './table_filters';
 import { useGetTags } from '../../containers/use_get_tags';
+import { useFindAssignees } from '../../containers/use_find_assignees';
+import { userProfiles } from '../../containers/user_profiles/api.mock';
 
-jest.mock('../../containers/use_get_reporters');
+jest.mock('../../containers/use_find_assignees');
 jest.mock('../../containers/use_get_tags');
 
 const onFilterChanged = jest.fn();
-const fetchReporters = jest.fn();
 const refetch = jest.fn();
 const setFilterRefetch = jest.fn();
 
@@ -42,13 +42,7 @@ describe('CasesTableFilters ', () => {
     appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
     (useGetTags as jest.Mock).mockReturnValue({ data: ['coke', 'pepsi'], refetch });
-    (useGetReporters as jest.Mock).mockReturnValue({
-      reporters: ['casetester'],
-      respReporters: [{ username: 'casetester' }],
-      isLoading: true,
-      isError: false,
-      fetchReporters,
-    });
+    (useFindAssignees as jest.Mock).mockReturnValue(userProfiles);
   });
 
   it('should render the case status filter dropdown', () => {
@@ -87,23 +81,33 @@ describe('CasesTableFilters ', () => {
     expect(onFilterChanged).toBeCalledWith({ tags: ['coke'] });
   });
 
-  it('should call onFilterChange when selected reporters change', () => {
+  it.only('should call onFilterChange when selected assignees change', async () => {
     const wrapper = mount(
       <TestProviders>
         <CasesTableFilters {...props} />
       </TestProviders>
     );
-    wrapper
-      .find(`[data-test-subj="options-filter-popover-button-Reporter"]`)
-      .last()
-      .simulate('click');
+
+    // appMockRender.render(<CasesTableFilters {...props} />);
+
+    // fireEvent.click(screen.getByTestId('options-filter-popover-button-assignees'));
+
+    // fireEvent.click(screen.getByText('Physical Dinosaur'));
 
     wrapper
-      .find(`[data-test-subj="options-filter-popover-item-casetester"]`)
+      .find(`[data-test-subj="options-filter-popover-button-assignees"]`)
       .last()
       .simulate('click');
+    // await waitForEuiPopoverOpen();
 
-    expect(onFilterChanged).toBeCalledWith({ reporters: [{ username: 'casetester' }] });
+    console.log(wrapper.debug());
+    wrapper
+      .findWhere((node) => {
+        return node.type() != null && node.name() != null && node.text() === 'Physical Dinosaur';
+      })
+      .simulate('click');
+
+    expect(onFilterChanged.mock.calls[0][0]).toMatchInlineSnapshot();
   });
 
   it('should call onFilterChange when search changes', () => {

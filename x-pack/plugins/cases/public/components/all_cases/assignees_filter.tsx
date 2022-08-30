@@ -105,7 +105,7 @@ const AssigneesFilterPopoverComponent: React.FC<AssigneesFilterPopoverProps> = (
           numActiveFilters={selectedAssignees.length}
           aria-label={i18n.FILTER_ASSIGNEES_ARIA_LABEL}
         >
-          {'Assignees'}
+          {i18n.ASSIGNEES}
         </EuiFilterButton>
       }
       selectableProps={{

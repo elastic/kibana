@@ -553,6 +553,7 @@ export const pushedCaseSnake = {
   external_service: { ...basicPushSnake, connector_id: pushConnectorId },
 };
 
+// TODO: remove these
 export const reporters: string[] = ['alexis', 'kim', 'maria', 'steph'];
 export const respReporters = [
   { username: 'alexis', full_name: null, email: null },
