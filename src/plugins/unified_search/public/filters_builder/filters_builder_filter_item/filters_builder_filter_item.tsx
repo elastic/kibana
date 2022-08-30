@@ -173,7 +173,7 @@ export function FilterItem({
           isDropDisabled={disableAnd}
         >
           <EuiDraggable
-            spacing="m"
+            spacing="s"
             key={JSON.stringify(filter)}
             index={index}
             draggableId={`${path}`}

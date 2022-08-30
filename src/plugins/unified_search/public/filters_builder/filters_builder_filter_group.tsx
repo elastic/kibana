@@ -34,7 +34,7 @@ export interface FilterGroupProps {
 
 const Delimiter = () => (
   <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-    <EuiFlexItem grow={1}>
+    <EuiFlexItem grow={1} style={{ marginLeft: '-5px', flexGrow: 0.12 }}>
       <EuiHorizontalRule margin="s" />
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
@@ -44,7 +44,7 @@ const Delimiter = () => (
         })}
       </EuiText>
     </EuiFlexItem>
-    <EuiFlexItem grow={10}>
+    <EuiFlexItem grow={10} style={{ marginRight: '-5px' }}>
       <EuiHorizontalRule margin="s" />
     </EuiFlexItem>
   </EuiFlexGroup>
@@ -84,8 +84,12 @@ export const FilterGroup = ({
   return (
     <EuiPanel color={color} paddingSize="s" hasShadow={false}>
       {filters.map((filter, index, acc) => (
-        <EuiFlexGroup direction="column" gutterSize="xs">
-          <EuiFlexItem className={cx({ [border]: shouldDrawBorder(filter) })}>
+        <EuiFlexGroup direction="column" gutterSize="none">
+          <EuiFlexItem
+            className={cx({
+              [border]: shouldDrawBorder(filter),
+            })}
+          >
             <FilterItem
               filter={filter}
               path={`${path}${path ? '.' : ''}${index}`}
