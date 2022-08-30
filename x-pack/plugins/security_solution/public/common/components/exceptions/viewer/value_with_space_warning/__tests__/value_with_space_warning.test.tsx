@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
+import { ThemeProvider } from 'styled-components';
 
 import { ValueWithSpaceWarning } from '..';
 
@@ -34,12 +35,20 @@ describe('ValueWithSpaceWarning', () => {
     const container = render(<ValueWithSpaceWarning value="Test" />);
     expect(container).toMatchSnapshot();
   });
-  it('should not render if showSpaceWarning is truthy', () => {
-    const container = render(<ValueWithSpaceWarning value="Test" />);
+  it('should render if showSpaceWarning is truthy', () => {
+    const container = render(
+      <ThemeProvider theme={() => ({ eui: { euiSizeXS: '4px' } })}>
+        <ValueWithSpaceWarning value="Test" />
+      </ThemeProvider>
+    );
     expect(container).toMatchSnapshot();
   });
-  it('should not show the tooltip when the icon is clicked', async () => {
-    const container = render(<ValueWithSpaceWarning value="Test" />);
+  it('should show the tooltip when the icon is clicked', async () => {
+    const container = render(
+      <ThemeProvider theme={() => ({ eui: { euiSizeXS: '4px' } })}>
+        <ValueWithSpaceWarning value="Test" />
+      </ThemeProvider>
+    );
 
     fireEvent.mouseOver(container.getByTestId('value_with_space_warning_tooltip'));
     expect(await container.findByText('Warning Text')).toBeInTheDocument();
