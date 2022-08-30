@@ -15,7 +15,6 @@ const DEFAULT_ROWS_PER_PAGE = 50;
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
 
-  // FAILING: https://github.com/elastic/kibana/issues/113486
   describe('Observability alerts pagination', function () {
     this.tags('includeFirefox');
 
