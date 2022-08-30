@@ -110,6 +110,13 @@ export const mockedServices = {
     getFieldBrowser: jest.fn().mockReturnValue(null),
   },
   timelines: timelinesServiceMock,
+  securityLayout: {
+    getPluginWrapper:
+      () =>
+      ({ children }: any) => {
+        return <>{children}</>;
+      },
+  },
 };
 
 export const TestProvidersComponent: FC = ({ children }) => (

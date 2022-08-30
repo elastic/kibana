@@ -42,6 +42,7 @@ export type Services = {
   dataViews: DataViewsPublicPluginStart;
   triggersActionsUi: TriggersActionsStart;
   timelines: TimelinesUIStart;
+  securityLayout: any;
 } & CoreStart;
 
 export interface LicenseAware {
@@ -54,6 +55,7 @@ export interface SourcererDataView {
   indexPattern: SecuritySolutionDataViewBase;
   browserFields: BrowserFields;
   selectedPatterns: string[];
+  loading: boolean;
 }
 
 /**
@@ -64,6 +66,12 @@ export interface SecuritySolutionPluginContext {
    * Gets the `FiltersGlobal` component for embedding a filter bar in the security solution application.
    * */
   getFiltersGlobalComponent: () => ComponentType<{ children: ReactNode }>;
+
+  /**
+   * Gets the `PageWrapper` component for embedding a filter bar in the security solution application.
+   * */
+  getPageWrapper: () => ComponentType<{ children: ReactNode }>;
+
   /**
    * Get the user's license to drive the Threat Intelligence plugin's visibility.
    */

@@ -12,7 +12,7 @@ import {
   isCompleteResponse,
 } from '@kbn/data-plugin/common';
 import { useKibana } from '../../../hooks/use_kibana';
-import { RawIndicatorsResponse } from './use_indicators';
+import type { RawIndicatorsResponse } from './use_indicators';
 import { useSourcererDataView } from './use_sourcerer_data_view';
 
 export const useIndicatorsTotalCount = () => {
@@ -24,7 +24,7 @@ export const useIndicatorsTotalCount = () => {
   const [count, setCount] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const { selectedPatterns } = useSourcererDataView();
+  const { selectedPatterns, loading: loadingDataView } = useSourcererDataView();
 
   useEffect(() => {
     const query = {
@@ -71,5 +71,5 @@ export const useIndicatorsTotalCount = () => {
       });
   }, [searchService, selectedPatterns]);
 
-  return { count, isLoading };
+  return { count, isLoading: isLoading || loadingDataView };
 };
