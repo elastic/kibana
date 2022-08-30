@@ -37,9 +37,9 @@ export function getEmbeddableComponent<EmbeddableType extends MlEmbeddableTypes>
     throw new Error(`Embeddable type "${embeddableType}" has not been registered.`);
   }
 
-  return (props: MappedEmbeddableTypeOf<EmbeddableType>) => {
+  return React.memo((props: MappedEmbeddableTypeOf<EmbeddableType>) => {
     return <EmbeddableRootWrapper factory={factory} input={props} />;
-  };
+  });
 }
 
 interface EmbeddableRootWrapperProps<TMlEmbeddableInput extends EmbeddableInput> {
