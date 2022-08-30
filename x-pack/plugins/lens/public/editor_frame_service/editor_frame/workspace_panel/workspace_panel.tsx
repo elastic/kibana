@@ -81,9 +81,8 @@ import {
   DatasourceStates,
 } from '../../../state_management';
 import type { LensInspector } from '../../../lens_inspector_service';
-import { inferTimeField } from '../../../utils';
+import { inferTimeField, DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../../utils';
 import { setChangesApplied } from '../../../state_management/lens_slice';
-import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../config_panel/dimension_container';
 
 export interface WorkspacePanelProps {
   visualizationMap: VisualizationMap;

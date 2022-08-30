@@ -28,8 +28,13 @@ interface OptionalFilterParams {
   pageSize?: number;
   startDate?: string;
   userIds?: string[];
+  /** Will filter out the action requests so that only those show `expiration` date is greater than now */
+  unExpiredOnly?: boolean;
 }
 
+/**
+ * Retrieve a list of Actions (`ActionDetails`)
+ */
 export const getActionList = async ({
   commands,
   elasticAgentIds,
@@ -40,6 +45,7 @@ export const getActionList = async ({
   pageSize,
   startDate,
   userIds,
+  unExpiredOnly = false,
 }: OptionalFilterParams & {
   esClient: ElasticsearchClient;
   logger: Logger;
@@ -59,6 +65,7 @@ export const getActionList = async ({
     size,
     startDate,
     userIds,
+    unExpiredOnly,
   });
 
   return {
@@ -90,8 +97,9 @@ const getActionDetailsList = async ({
   size,
   startDate,
   userIds,
+  unExpiredOnly,
 }: GetActionDetailsListParam): Promise<{
-  actionDetails: ActionDetails[];
+  actionDetails: ActionListApiResponse['data'];
   totalRecords: number;
 }> => {
   let actionRequests;
@@ -109,13 +117,15 @@ const getActionDetailsList = async ({
       from,
       size,
       userIds,
+      unExpiredOnly,
     });
     actionRequests = _actionRequests;
     actionReqIds = actionIds;
   } catch (error) {
     // all other errors
     const err = new CustomHttpRequestError(
-      error.meta?.meta?.body?.error?.reason ?? 'Unknown error while fetching action requests',
+      error.meta?.meta?.body?.error?.reason ??
+        `Unknown error while fetching action requests (${error.message})`,
       error.meta?.meta?.statusCode ?? 500,
       error
     );
@@ -144,7 +154,8 @@ const getActionDetailsList = async ({
   } catch (error) {
     // all other errors
     const err = new CustomHttpRequestError(
-      error.meta?.meta?.body?.error?.reason ?? 'Unknown error while fetching action responses',
+      error.meta?.meta?.body?.error?.reason ??
+        `Unknown error while fetching action responses (${error.message})`,
       error.meta?.meta?.statusCode ?? 500,
       error
     );
@@ -167,11 +178,14 @@ const getActionDetailsList = async ({
     );
 
     // find the specific response's details using that set of matching responses
-    const { isCompleted, completedAt, wasSuccessful, errors } = getActionCompletionInfo(
+    const { isCompleted, completedAt, wasSuccessful, errors, agentState } = getActionCompletionInfo(
       action.agents,
       matchedResponses
     );
 
+    // NOTE: `outputs` is not returned in this service because including it on a list of data
+    // could result in a very large response unnecessarily. In the future, we might include
+    // an option to optionally include it.
     return {
       id: action.id,
       agents: action.agents,
@@ -181,6 +195,7 @@ const getActionDetailsList = async ({
       completedAt,
       wasSuccessful,
       errors,
+      agentState,
       isExpired: !isCompleted && action.expiration < new Date().toISOString(),
       createdBy: action.createdBy,
       comment: action.comment,
