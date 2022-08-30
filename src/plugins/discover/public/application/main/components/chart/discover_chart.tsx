@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useRef } from 'react';
 import moment from 'moment';
 import {
   EuiButtonIcon,
@@ -13,24 +13,24 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
-  EuiToolTip,
   EuiSpacer,
+  EuiToolTip,
 } from '@elastic/eui';
+import { useInterpret, useSelector } from '@xstate/react';
+import { inspect } from '@xstate/inspect';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { chartOptionsMachine, createCanVisualizeMachine } from './discover_chart_state';
 import { HitsCounter } from '../hits_counter';
 import { GetStateReturn } from '../../services/discover_state';
 import { DiscoverHistogram } from './histogram';
 import { DataCharts$, DataTotalHits$ } from '../../hooks/use_saved_search';
 import { useChartPanels } from './use_chart_panels';
-import { VIEW_MODE, DocumentViewModeToggle } from '../../../../components/view_mode_toggle';
+import { DocumentViewModeToggle, VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { SHOW_FIELD_STATISTICS } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import {
-  getVisualizeInformation,
-  triggerVisualizeActions,
-} from '../sidebar/lib/visualize_trigger_utils';
+import { triggerVisualizeActions } from '../sidebar/lib/visualize_trigger_utils';
 
 const DiscoverHistogramMemoized = memo(DiscoverHistogram);
 export const CHART_HIDDEN_KEY = 'discover:chartHidden';
@@ -60,8 +60,23 @@ export function DiscoverChart({
   hideChart?: boolean;
   interval?: string;
 }) {
+  useEffect(() => {
+    const xstateInspector = inspect({
+      iframe: false,
+    });
+
+    return xstateInspector?.disconnect;
+  }, []);
   const { uiSettings, data, storage } = useDiscoverServices();
-  const [showChartOptionsPopover, setShowChartOptionsPopover] = useState(false);
+  const timeField = dataView.timeFieldName && dataView.getFieldByName(dataView.timeFieldName);
+  const chartOptionsService = useInterpret(() => chartOptionsMachine, { devTools: true });
+  const getVisualizeService = useInterpret(() => createCanVisualizeMachine(dataView, savedSearch), {
+    devTools: true,
+  });
+
+  const isChartOpen = useSelector(chartOptionsService, (state) => state.value);
+  const canVisualize = useSelector(getVisualizeService, (state) => state.context.canVisualize);
+
   const showViewModeToggle = uiSettings.get(SHOW_FIELD_STATISTICS) ?? false;
 
   const chartRef = useRef<{ element: HTMLElement | null; moveFocus: boolean }>({
@@ -69,30 +84,12 @@ export function DiscoverChart({
     moveFocus: false,
   });
 
-  const timeField = dataView.timeFieldName && dataView.getFieldByName(dataView.timeFieldName);
-  const [canVisualize, setCanVisualize] = useState(false);
-
-  useEffect(() => {
-    if (!timeField) return;
-    getVisualizeInformation(timeField, dataView.id, savedSearch.columns || []).then((info) => {
-      setCanVisualize(Boolean(info));
-    });
-  }, [dataView, savedSearch.columns, timeField]);
-
   const onEditVisualization = useCallback(() => {
     if (!timeField) {
       return;
     }
     triggerVisualizeActions(timeField, dataView.id, savedSearch.columns || []);
   }, [dataView.id, savedSearch, timeField]);
-
-  const onShowChartOptions = useCallback(() => {
-    setShowChartOptionsPopover(!showChartOptionsPopover);
-  }, [showChartOptionsPopover]);
-
-  const closeChartOptions = useCallback(() => {
-    setShowChartOptionsPopover(false);
-  }, [setShowChartOptionsPopover]);
 
   useEffect(() => {
     if (chartRef.current.moveFocus && chartRef.current.element) {
@@ -120,7 +117,7 @@ export function DiscoverChart({
   const panels = useChartPanels(
     toggleHideChart,
     (newInterval) => stateContainer.setAppState({ interval: newInterval }),
-    () => setShowChartOptionsPopover(false),
+    () => chartOptionsService.send('TOGGLE'),
     hideChart,
     interval
   );
@@ -181,7 +178,7 @@ export function DiscoverChart({
                         <EuiButtonIcon
                           size="xs"
                           iconType="gear"
-                          onClick={onShowChartOptions}
+                          onClick={() => chartOptionsService.send('TOGGLE')}
                           data-test-subj="discoverChartOptionsToggle"
                           aria-label={i18n.translate('discover.chartOptionsButton', {
                             defaultMessage: 'Chart options',
@@ -189,8 +186,8 @@ export function DiscoverChart({
                         />
                       </EuiToolTip>
                     }
-                    isOpen={showChartOptionsPopover}
-                    closePopover={closeChartOptions}
+                    isOpen={isChartOpen === 'active'}
+                    closePopover={() => chartOptionsService.send('TOGGLE')}
                     panelPaddingSize="none"
                     anchorPosition="downLeft"
                   >
