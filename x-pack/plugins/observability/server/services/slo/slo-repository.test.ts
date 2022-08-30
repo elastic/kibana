@@ -6,11 +6,14 @@
  */
 
 import { SavedObject } from '@kbn/core-saved-objects-common';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import uuid from 'uuid';
 
-import { SLO } from '../../types/models';
-import { KibanaSavedObjectsSloRepository } from './slo-repository';
+import { SLO, StoredSLO } from '../../types/models';
+import { KibanaSavedObjectsSLORepository } from './slo-repository';
+
+const SO_SLO_TYPE = 'slo-type';
 
 const anSLO: SLO = {
   id: uuid.v1(),
@@ -34,34 +37,52 @@ const anSLO: SLO = {
   objective: {
     target: 0.999,
   },
-  created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString(),
 };
 
+function aStoredSLO(slo: SLO): SavedObject<StoredSLO> {
+  return {
+    id: slo.id,
+    attributes: {
+      ...slo,
+      updated_at: new Date().toISOString(),
+      created_at: new Date().toISOString(),
+    },
+    type: SO_SLO_TYPE,
+    references: [],
+  };
+}
+
 describe('sloRepository', () => {
+  let soClientMock: jest.Mocked<SavedObjectsClientContract>;
+
+  beforeEach(() => {
+    soClientMock = savedObjectsClientMock.create();
+  });
+
   it('saves the SLO', async () => {
-    const soClientMock = savedObjectsClientMock.create();
-    const repository = new KibanaSavedObjectsSloRepository(soClientMock);
+    soClientMock.create.mockResolvedValueOnce(aStoredSLO(anSLO));
+    const repository = new KibanaSavedObjectsSLORepository(soClientMock, SO_SLO_TYPE);
 
     const savedSLO = await repository.save(anSLO);
 
     expect(savedSLO).toEqual(anSLO);
     expect(soClientMock.create).toHaveBeenCalledWith(
-      'slo',
+      SO_SLO_TYPE,
       expect.objectContaining({
         ...anSLO,
+        updated_at: expect.anything(),
+        created_at: expect.anything(),
       })
     );
   });
 
   it('finds an existing SLO', async () => {
-    const soClientMock = savedObjectsClientMock.create();
-    const repository = new KibanaSavedObjectsSloRepository(soClientMock);
-    soClientMock.get.mockResolvedValueOnce({ attributes: anSLO } as SavedObject<SLO>);
+    const repository = new KibanaSavedObjectsSLORepository(soClientMock, SO_SLO_TYPE);
+    soClientMock.get.mockResolvedValueOnce(aStoredSLO(anSLO));
 
     const foundSLO = await repository.findById(anSLO.id);
 
     expect(foundSLO).toEqual(anSLO);
-    expect(soClientMock.get).toHaveBeenCalledWith('slo', anSLO.id);
+    expect(soClientMock.get).toHaveBeenCalledWith(SO_SLO_TYPE, anSLO.id);
   });
 });

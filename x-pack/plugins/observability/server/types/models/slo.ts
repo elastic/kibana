@@ -19,8 +19,12 @@ const baseSLOSchema = t.type({
   objective: t.type({
     target: t.number,
   }),
-  created_at: t.string,
-  updated_at: t.string,
 });
 
+const storedSLOSchema = t.intersection([
+  baseSLOSchema,
+  t.type({ created_at: t.string, updated_at: t.string }),
+]);
+
 export type SLO = t.TypeOf<typeof baseSLOSchema>;
+export type StoredSLO = t.TypeOf<typeof storedSLOSchema>;
