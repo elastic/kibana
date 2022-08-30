@@ -185,3 +185,10 @@ export function inferTimeField(
     })
     .find(Boolean);
 }
+
+/**
+ * The dimension container is set up to close when it detects a click outside it.
+ * Use this CSS class to exclude particular elements from this behavior.
+ */
+export const DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS =
+  'lensDontCloseDimensionContainerOnClick';
