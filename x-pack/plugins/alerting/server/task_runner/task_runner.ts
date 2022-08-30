@@ -72,6 +72,12 @@ import { TaskRunnerTimer, TaskRunnerTimerSpan } from './task_runner_timer';
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
 
+interface StackTraceLog {
+  message: string;
+  tags: string[];
+  stack_trace?: string;
+}
+
 export const getDefaultRuleMonitoring = (): RuleMonitoring => ({
   execution: {
     history: [],
@@ -113,6 +119,7 @@ export class TaskRunner<
   private usageCounter?: UsageCounter;
   private searchAbortController: AbortController;
   private cancelled: boolean;
+  private stackTraceLogs: StackTraceLog[];
 
   constructor(
     ruleType: NormalizedRuleType<
@@ -143,6 +150,7 @@ export class TaskRunner<
     this.alerts = {};
     this.timer = new TaskRunnerTimer({ logger: this.logger });
     this.alertingEventLogger = new AlertingEventLogger(this.context.eventLogger);
+    this.stackTraceLogs = [];
   }
 
   private getExecutionHandler(
@@ -386,9 +394,10 @@ export class TaskRunner<
               `rule execution failure: ${ruleLabel}`,
               err.message
             );
-            this.logger.error(err, {
+            this.stackTraceLogs.push({
+              message: err,
               tags: [this.ruleType.id, ruleId, 'rule-run-failed'],
-              error: { stack_trace: err.stack },
+              stack_trace: err.stack,
             });
             throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Execute, err);
           }
@@ -711,7 +720,7 @@ export class TaskRunner<
       timings: this.timer.toJson(),
     });
 
-    return {
+    const result = {
       state: map<RuleTaskStateAndMetrics, ElasticsearchError, RuleTaskState>(
         stateWithMetrics,
         (ruleRunStateWithMetrics: RuleTaskStateAndMetrics) =>
@@ -723,9 +732,10 @@ export class TaskRunner<
           if (isAlertSavedObjectNotFoundError(err, ruleId)) {
             this.logger.debug(message);
           } else {
-            this.logger.error(message, {
+            this.stackTraceLogs.push({
+              message,
               tags: [this.ruleType.id, ruleId, 'rule-run-failed'],
-              error: { stack_trace: err.stack },
+              stack_trace: err.stack,
             });
           }
           return originalState;
@@ -754,6 +764,16 @@ export class TaskRunner<
       }),
       monitoring,
     };
+
+    this.stackTraceLogs.forEach((log) => {
+      this.logger.error(log.message, {
+        tags: log.tags,
+        error: { stack_trace: log.stack_trace },
+      });
+    });
+    this.stackTraceLogs = [];
+
+    return result;
   }
 
   async cancel(): Promise<void> {
