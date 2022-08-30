@@ -1,0 +1,1171 @@
+{
+  "id": "@kbn/core-saved-objects-api-server-internal",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+        "id": "def-server.SavedObjectsRepository",
+        "type": "Class",
+        "tags": [],
+        "label": "SavedObjectsRepository",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server-internal",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsApiServerInternalPluginApi",
+            "section": "def-server.SavedObjectsRepository",
+            "text": "SavedObjectsRepository"
+          },
+          " implements ",
+          "ISavedObjectsRepository"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+            "id": "def-server.SavedObjectsRepository.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [
+              "\n{@inheritDoc ISavedObjectsRepository.create}"
+            ],
+            "signature": [
+              "<T = unknown>(type: string, attributes: T, options?: ",
+              "SavedObjectsCreateOptions",
+              ") => Promise<",
+              "SavedObject",
+              "<T>>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.create.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.create.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "attributes",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.create.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "SavedObjectsCreateOptions"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+            "id": "def-server.SavedObjectsRepository.bulkCreate",
+            "type": "Function",
+            "tags": [],
+            "label": "bulkCreate",
+            "description": [
+              "\n{@inheritDoc ISavedObjectsRepository.bulkCreate}"
+            ],
+            "signature": [
+              "<T = unknown>(objects: ",
+              "SavedObjectsBulkCreateObject",
+              "<T>[], options?: ",
+              "SavedObjectsCreateOptions",
+              ") => Promise<",
+              "SavedObjectsBulkResponse",
+              "<T>>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.bulkCreate.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "objects",
+                "description": [],
+                "signature": [
+                  "SavedObjectsBulkCreateObject",
+                  "<T>[]"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.bulkCreate.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "SavedObjectsCreateOptions"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+            "id": "def-server.SavedObjectsRepository.checkConflicts",
+            "type": "Function",
+            "tags": [],
+            "label": "checkConflicts",
+            "description": [
+              "\n{@inheritDoc ISavedObjectsRepository.checkConflicts}"
+            ],
+            "signature": [
+              "(objects?: ",
+              "SavedObjectsCheckConflictsObject",
+              "[], options?: ",
+              "SavedObjectsBaseOptions",
+              ") => Promise<",
+              "SavedObjectsCheckConflictsResponse",
+              ">"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.checkConflicts.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "objects",
+                "description": [],
+                "signature": [
+                  "SavedObjectsCheckConflictsObject",
+                  "[]"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.checkConflicts.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "SavedObjectsBaseOptions"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+            "id": "def-server.SavedObjectsRepository.delete",
+            "type": "Function",
+            "tags": [],
+            "label": "delete",
+            "description": [
+              "\n{@inheritDoc ISavedObjectsRepository.delete}"
+            ],
+            "signature": [
+              "(type: string, id: string, options?: ",
+              "SavedObjectsDeleteOptions",
+              ") => Promise<{}>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.delete.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.delete.$2",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.delete.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "SavedObjectsDeleteOptions"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+            "id": "def-server.SavedObjectsRepository.deleteByNamespace",
+            "type": "Function",
+            "tags": [],
+            "label": "deleteByNamespace",
+            "description": [
+              "\n{@inheritDoc ISavedObjectsRepository.deleteByNamespace}"
+            ],
+            "signature": [
+              "(namespace: string, options?: ",
+              "SavedObjectsDeleteByNamespaceOptions",
+              ") => Promise<any>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.deleteByNamespace.$1",
+                "type": "string",
+                "tags": [],
+                "label": "namespace",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.deleteByNamespace.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "SavedObjectsDeleteByNamespaceOptions"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+            "id": "def-server.SavedObjectsRepository.find",
+            "type": "Function",
+            "tags": [],
+            "label": "find",
+            "description": [
+              "\n{@inheritDoc ISavedObjectsRepository.find}"
+            ],
+            "signature": [
+              "<T = unknown, A = unknown>(options: ",
+              "SavedObjectsFindOptions",
+              ") => Promise<",
+              "SavedObjectsFindResponse",
+              "<T, A>>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.find.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "SavedObjectsFindOptions"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+            "id": "def-server.SavedObjectsRepository.bulkGet",
+            "type": "Function",
+            "tags": [],
+            "label": "bulkGet",
+            "description": [
+              "\n{@inheritDoc ISavedObjectsRepository.bulkGet}"
+            ],
+            "signature": [
+              "<T = unknown>(objects?: ",
+              "SavedObjectsBulkGetObject",
+              "[], options?: ",
+              "SavedObjectsBaseOptions",
+              ") => Promise<",
+              "SavedObjectsBulkResponse",
+              "<T>>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.bulkGet.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "objects",
+                "description": [],
+                "signature": [
+                  "SavedObjectsBulkGetObject",
+                  "[]"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.bulkGet.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "SavedObjectsBaseOptions"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+            "id": "def-server.SavedObjectsRepository.bulkResolve",
+            "type": "Function",
+            "tags": [],
+            "label": "bulkResolve",
+            "description": [
+              "\n{@inheritDoc ISavedObjectsRepository.bulkResolve}"
+            ],
+            "signature": [
+              "<T = unknown>(objects: ",
+              "SavedObjectsBulkResolveObject",
+              "[], options?: ",
+              "SavedObjectsBaseOptions",
+              ") => Promise<",
+              "SavedObjectsBulkResolveResponse",
+              "<T>>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.bulkResolve.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "objects",
+                "description": [],
+                "signature": [
+                  "SavedObjectsBulkResolveObject",
+                  "[]"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.bulkResolve.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "SavedObjectsBaseOptions"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+            "id": "def-server.SavedObjectsRepository.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [
+              "\n{@inheritDoc ISavedObjectsRepository.get}"
+            ],
+            "signature": [
+              "<T = unknown>(type: string, id: string, options?: ",
+              "SavedObjectsBaseOptions",
+              ") => Promise<",
+              "SavedObject",
+              "<T>>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.get.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.get.$2",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.get.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "SavedObjectsBaseOptions"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+            "id": "def-server.SavedObjectsRepository.resolve",
+            "type": "Function",
+            "tags": [],
+            "label": "resolve",
+            "description": [
+              "\n{@inheritDoc ISavedObjectsRepository.resolve}"
+            ],
+            "signature": [
+              "<T = unknown>(type: string, id: string, options?: ",
+              "SavedObjectsBaseOptions",
+              ") => Promise<",
+              "SavedObjectsResolveResponse",
+              "<T>>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.resolve.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.resolve.$2",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.resolve.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "SavedObjectsBaseOptions"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+            "id": "def-server.SavedObjectsRepository.update",
+            "type": "Function",
+            "tags": [],
+            "label": "update",
+            "description": [
+              "\n{@inheritDoc ISavedObjectsRepository.update}"
+            ],
+            "signature": [
+              "<T = unknown>(type: string, id: string, attributes: Partial<T>, options?: ",
+              "SavedObjectsUpdateOptions",
+              "<T>) => Promise<",
+              "SavedObjectsUpdateResponse",
+              "<T>>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.update.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.update.$2",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.update.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "attributes",
+                "description": [],
+                "signature": [
+                  "Partial<T>"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.update.$4",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "SavedObjectsUpdateOptions",
+                  "<T>"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+            "id": "def-server.SavedObjectsRepository.collectMultiNamespaceReferences",
+            "type": "Function",
+            "tags": [],
+            "label": "collectMultiNamespaceReferences",
+            "description": [
+              "\n{@inheritDoc ISavedObjectsRepository.collectMultiNamespaceReferences}"
+            ],
+            "signature": [
+              "(objects: ",
+              "SavedObjectsCollectMultiNamespaceReferencesObject",
+              "[], options?: ",
+              "SavedObjectsCollectMultiNamespaceReferencesOptions",
+              " | undefined) => Promise<",
+              "SavedObjectsCollectMultiNamespaceReferencesResponse",
+              ">"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.collectMultiNamespaceReferences.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "objects",
+                "description": [],
+                "signature": [
+                  "SavedObjectsCollectMultiNamespaceReferencesObject",
+                  "[]"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.collectMultiNamespaceReferences.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "SavedObjectsCollectMultiNamespaceReferencesOptions",
+                  " | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+            "id": "def-server.SavedObjectsRepository.updateObjectsSpaces",
+            "type": "Function",
+            "tags": [],
+            "label": "updateObjectsSpaces",
+            "description": [
+              "\n{@inheritDoc ISavedObjectsRepository.updateObjectsSpaces}"
+            ],
+            "signature": [
+              "(objects: ",
+              "SavedObjectsUpdateObjectsSpacesObject",
+              "[], spacesToAdd: string[], spacesToRemove: string[], options?: ",
+              "SavedObjectsUpdateObjectsSpacesOptions",
+              " | undefined) => Promise<",
+              "SavedObjectsUpdateObjectsSpacesResponse",
+              ">"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.updateObjectsSpaces.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "objects",
+                "description": [],
+                "signature": [
+                  "SavedObjectsUpdateObjectsSpacesObject",
+                  "[]"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.updateObjectsSpaces.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "spacesToAdd",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.updateObjectsSpaces.$3",
+                "type": "Array",
+                "tags": [],
+                "label": "spacesToRemove",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.updateObjectsSpaces.$4",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "SavedObjectsUpdateObjectsSpacesOptions",
+                  " | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+            "id": "def-server.SavedObjectsRepository.bulkUpdate",
+            "type": "Function",
+            "tags": [],
+            "label": "bulkUpdate",
+            "description": [
+              "\n{@inheritDoc ISavedObjectsRepository.bulkUpdate}"
+            ],
+            "signature": [
+              "<T = unknown>(objects: ",
+              "SavedObjectsBulkUpdateObject",
+              "<T>[], options?: ",
+              "SavedObjectsBulkUpdateOptions",
+              ") => Promise<",
+              "SavedObjectsBulkUpdateResponse",
+              "<T>>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.bulkUpdate.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "objects",
+                "description": [],
+                "signature": [
+                  "SavedObjectsBulkUpdateObject",
+                  "<T>[]"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.bulkUpdate.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "SavedObjectsBulkUpdateOptions"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+            "id": "def-server.SavedObjectsRepository.removeReferencesTo",
+            "type": "Function",
+            "tags": [],
+            "label": "removeReferencesTo",
+            "description": [
+              "\n{@inheritDoc ISavedObjectsRepository.removeReferencesTo}"
+            ],
+            "signature": [
+              "(type: string, id: string, options?: ",
+              "SavedObjectsRemoveReferencesToOptions",
+              ") => Promise<",
+              "SavedObjectsRemoveReferencesToResponse",
+              ">"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.removeReferencesTo.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.removeReferencesTo.$2",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.removeReferencesTo.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "SavedObjectsRemoveReferencesToOptions"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+            "id": "def-server.SavedObjectsRepository.incrementCounter",
+            "type": "Function",
+            "tags": [],
+            "label": "incrementCounter",
+            "description": [
+              "\n{@inheritDoc ISavedObjectsRepository.incrementCounter}"
+            ],
+            "signature": [
+              "<T = unknown>(type: string, id: string, counterFields: (string | ",
+              "SavedObjectsIncrementCounterField",
+              ")[], options?: ",
+              "SavedObjectsIncrementCounterOptions",
+              "<T> | undefined) => Promise<",
+              "SavedObject",
+              "<T>>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.incrementCounter.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.incrementCounter.$2",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.incrementCounter.$3",
+                "type": "Array",
+                "tags": [],
+                "label": "counterFields",
+                "description": [],
+                "signature": [
+                  "(string | ",
+                  "SavedObjectsIncrementCounterField",
+                  ")[]"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.incrementCounter.$4",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "SavedObjectsIncrementCounterOptions",
+                  "<T> | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+            "id": "def-server.SavedObjectsRepository.openPointInTimeForType",
+            "type": "Function",
+            "tags": [],
+            "label": "openPointInTimeForType",
+            "description": [
+              "\n{@inheritDoc ISavedObjectsRepository.openPointInTimeForType}"
+            ],
+            "signature": [
+              "(type: string | string[], { keepAlive, preference }?: ",
+              "SavedObjectsOpenPointInTimeOptions",
+              ") => Promise<",
+              "SavedObjectsOpenPointInTimeResponse",
+              ">"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.openPointInTimeForType.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string | string[]"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.openPointInTimeForType.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "{ keepAlive = '5m', preference }",
+                "description": [],
+                "signature": [
+                  "SavedObjectsOpenPointInTimeOptions"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+            "id": "def-server.SavedObjectsRepository.closePointInTime",
+            "type": "Function",
+            "tags": [],
+            "label": "closePointInTime",
+            "description": [
+              "\n{@inheritDoc ISavedObjectsRepository.closePointInTime}"
+            ],
+            "signature": [
+              "(id: string, options?: ",
+              "SavedObjectsBaseOptions",
+              " | undefined) => Promise<",
+              "SavedObjectsClosePointInTimeResponse",
+              ">"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.closePointInTime.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.closePointInTime.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "SavedObjectsBaseOptions",
+                  " | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+            "id": "def-server.SavedObjectsRepository.createPointInTimeFinder",
+            "type": "Function",
+            "tags": [],
+            "label": "createPointInTimeFinder",
+            "description": [
+              "\n{@inheritDoc ISavedObjectsRepository.createPointInTimeFinder}"
+            ],
+            "signature": [
+              "<T = unknown, A = unknown>(findOptions: ",
+              "SavedObjectsCreatePointInTimeFinderOptions",
+              ", dependencies?: ",
+              "SavedObjectsCreatePointInTimeFinderDependencies",
+              " | undefined) => ",
+              "ISavedObjectsPointInTimeFinder",
+              "<T, A>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.createPointInTimeFinder.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "findOptions",
+                "description": [],
+                "signature": [
+                  "SavedObjectsCreatePointInTimeFinderOptions"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.createPointInTimeFinder.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "dependencies",
+                "description": [],
+                "signature": [
+                  "SavedObjectsCreatePointInTimeFinderDependencies",
+                  " | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}
