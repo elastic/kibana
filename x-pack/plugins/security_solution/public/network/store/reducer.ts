@@ -21,13 +21,14 @@ import {
   setNetworkDetailsTablesActivePageToZero,
   setNetworkTablesActivePageToZero,
   updateNetworkTable,
+  updateNetworkAnomaliesJobIdFilter,
 } from './actions';
 import {
   setNetworkDetailsQueriesActivePageToZero,
   setNetworkPageQueriesActivePageToZero,
 } from './helpers';
 import type { NetworkModel } from './model';
-import { NetworkDetailsTableType, NetworkTableType } from './model';
+import { NetworkType, NetworkDetailsTableType, NetworkTableType } from './model';
 
 export type NetworkState = NetworkModel;
 
@@ -94,6 +95,9 @@ export const initialNetworkState: NetworkState = {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
       },
+      [NetworkTableType.anomalies]: {
+        jobIdSelection: [],
+      },
     },
   },
   details: {
@@ -153,6 +157,9 @@ export const initialNetworkState: NetworkState = {
           direction: Direction.asc,
         },
       },
+      [NetworkDetailsTableType.anomalies]: {
+        jobIdSelection: [],
+      },
     },
     flowTarget: FlowTarget.source,
   },
@@ -190,4 +197,33 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       queries: setNetworkDetailsQueriesActivePageToZero(state),
     },
   }))
+  .case(updateNetworkAnomaliesJobIdFilter, (state, { jobIds, networkType }) => {
+    if (networkType === NetworkType.page) {
+      return {
+        ...state,
+        page: {
+          ...state.page,
+          queries: {
+            ...state.page.queries,
+            anomalies: {
+              jobIdSelection: jobIds,
+            },
+          },
+        },
+      };
+    } else {
+      return {
+        ...state,
+        details: {
+          ...state.details,
+          queries: {
+            ...state.details.queries,
+            anomalies: {
+              jobIdSelection: jobIds,
+            },
+          },
+        },
+      };
+    }
+  })
   .build();

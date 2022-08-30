@@ -44,7 +44,7 @@ export const JobIdFilter: React.FC<{
         isSelected={isPopoverOpen}
         numActiveFilters={selectedJobIds.length}
         onClick={onButtonClick}
-        contentProps={{ style: { minWidth: '120px' } }} // avoid resizing when selecting job id
+        contentProps={{ style: { minWidth: 120 } }} // avoid resizing when selecting job id
       >
         {title}
       </EuiFilterButton>

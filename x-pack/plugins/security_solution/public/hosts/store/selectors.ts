@@ -30,3 +30,6 @@ export const hostRiskScoreSeverityFilterSelector = () =>
 
 export const uncommonProcessesSelector = () =>
   createSelector(selectHosts, (hosts) => hosts.queries.uncommonProcesses);
+
+export const hostsAnomaliesJobIdFilterSelector = () =>
+  createSelector(selectHosts, (hosts) => hosts.queries[HostsTableType.anomalies].jobIdSelection);

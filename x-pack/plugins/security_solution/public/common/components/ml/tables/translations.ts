@@ -65,3 +65,7 @@ export const NETWORK_NAME = i18n.translate('xpack.securitySolution.ml.table.netw
 export const TIME_STAMP = i18n.translate('xpack.securitySolution.ml.table.timestampTitle', {
   defaultMessage: 'Timestamp',
 });
+
+export const JOB_ID = i18n.translate('xpack.securitySolution.ml.table.jobIdFilter', {
+  defaultMessage: 'Job',
+});

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { useAnomaliesTableData } from '../anomaly/use_anomalies_table_data';
 import { HeaderSection } from '../../header_section';
 
@@ -21,6 +22,11 @@ import { networkEquality } from './network_equality';
 import { getCriteriaFromNetworkType } from '../criteria/get_criteria_from_network_type';
 import { Panel } from '../../panel';
 import { useQueryToggle } from '../../../containers/query_toggle';
+import { useInstalledSecurityJobsIds } from '../hooks/use_installed_security_jobs';
+import { useDeepEqualSelector } from '../../../hooks/use_selector';
+import type { State } from '../../../store';
+import { JobIdFilter } from './job_id_filter';
+import { networkActions, networkSelectors } from '../../../../network/store';
 
 const sorting = {
   sort: {
@@ -38,7 +44,7 @@ const AnomaliesNetworkTableComponent: React.FC<AnomaliesNetworkTableProps> = ({
   flowTarget,
 }) => {
   const capabilities = useMlCapabilities();
-
+  const dispatch = useDispatch();
   const { toggleStatus, setToggleStatus } = useQueryToggle(`AnomaliesNetwork-${flowTarget}`);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
   useEffect(() => {
@@ -53,11 +59,34 @@ const AnomaliesNetworkTableComponent: React.FC<AnomaliesNetworkTableProps> = ({
     [setQuerySkip, setToggleStatus]
   );
 
+  const jobIds = useInstalledSecurityJobsIds();
+
+  const getAnomaliesUserTableFilterQuerySelector = useMemo(
+    () => networkSelectors.networkAnomaliesJobIdFilterSelector(),
+    []
+  );
+
+  const selectedJobIds = useDeepEqualSelector((state: State) =>
+    getAnomaliesUserTableFilterQuerySelector(state, type)
+  );
+
+  const onSelectJobId = useCallback(
+    (newSelection: string[]) => {
+      dispatch(
+        networkActions.updateNetworkAnomaliesJobIdFilter({
+          jobIds: newSelection,
+          networkType: type,
+        })
+      );
+    },
+    [dispatch, type]
+  );
   const [loading, tableData] = useAnomaliesTableData({
     startDate,
     endDate,
     skip: querySkip,
     criteriaFields: getCriteriaFromNetworkType(type, ip, flowTarget),
+    jobIds: selectedJobIds.length > 0 ? selectedJobIds : jobIds,
   });
 
   const networks = convertAnomaliesToNetwork(tableData, ip);
@@ -84,6 +113,16 @@ const AnomaliesNetworkTableComponent: React.FC<AnomaliesNetworkTableProps> = ({
           toggleQuery={toggleQuery}
           toggleStatus={toggleStatus}
           isInspectDisabled={skip}
+          headerFilters={
+            jobIds.length > 0 && (
+              <JobIdFilter
+                title={i18n.JOB_ID}
+                onSelect={onSelectJobId}
+                selectedJobIds={selectedJobIds}
+                jobIds={jobIds}
+              />
+            )
+          }
         />
         {toggleStatus && (
           <BasicTable

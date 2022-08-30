@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { useDispatch } from 'react-redux';
 import { useAnomaliesTableData } from '../anomaly/use_anomalies_table_data';
 import { HeaderSection } from '../../header_section';
 
@@ -22,6 +23,11 @@ import { getCriteriaFromHostType } from '../criteria/get_criteria_from_host_type
 import { Panel } from '../../panel';
 import { anomaliesTableDefaultEquality } from './default_equality';
 import { useQueryToggle } from '../../../containers/query_toggle';
+import { useInstalledSecurityJobsIds } from '../hooks/use_installed_security_jobs';
+import { useDeepEqualSelector } from '../../../hooks/use_selector';
+import type { State } from '../../../store';
+import { JobIdFilter } from './job_id_filter';
+import { hostsActions, hostsSelectors } from '../../../../hosts/store';
 
 const sorting = {
   sort: {
@@ -37,6 +43,7 @@ const AnomaliesHostTableComponent: React.FC<AnomaliesHostTableProps> = ({
   skip,
   type,
 }) => {
+  const dispatch = useDispatch();
   const capabilities = useMlCapabilities();
   const { toggleStatus, setToggleStatus } = useQueryToggle(`AnomaliesHostTable`);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
@@ -52,6 +59,29 @@ const AnomaliesHostTableComponent: React.FC<AnomaliesHostTableProps> = ({
     [setQuerySkip, setToggleStatus]
   );
 
+  const jobIds = useInstalledSecurityJobsIds();
+
+  const getAnomaliesHostsTableFilterQuerySelector = useMemo(
+    () => hostsSelectors.hostsAnomaliesJobIdFilterSelector(),
+    []
+  );
+
+  const selectedJobIds = useDeepEqualSelector((state: State) =>
+    getAnomaliesHostsTableFilterQuerySelector(state, type)
+  );
+
+  const onSelectJobId = useCallback(
+    (newSelection: string[]) => {
+      dispatch(
+        hostsActions.updateHostsAnomaliesJobIdFilter({
+          jobIds: newSelection,
+          hostsType: type,
+        })
+      );
+    },
+    [dispatch, type]
+  );
+
   const [loading, tableData] = useAnomaliesTableData({
     startDate,
     endDate,
@@ -60,6 +90,7 @@ const AnomaliesHostTableComponent: React.FC<AnomaliesHostTableProps> = ({
     filterQuery: {
       exists: { field: 'host.name' },
     },
+    jobIds: selectedJobIds.length > 0 ? selectedJobIds : jobIds,
   });
 
   const hosts = convertAnomaliesToHosts(tableData, hostName);
@@ -87,6 +118,16 @@ const AnomaliesHostTableComponent: React.FC<AnomaliesHostTableProps> = ({
           toggleStatus={toggleStatus}
           tooltip={i18n.TOOLTIP}
           isInspectDisabled={skip}
+          headerFilters={
+            jobIds.length > 0 && (
+              <JobIdFilter
+                title={i18n.JOB_ID}
+                onSelect={onSelectJobId}
+                selectedJobIds={selectedJobIds}
+                jobIds={jobIds}
+              />
+            )
+          }
         />
         {toggleStatus && (
           <BasicTable

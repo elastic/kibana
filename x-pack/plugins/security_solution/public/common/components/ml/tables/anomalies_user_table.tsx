@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 
+import { useDispatch } from 'react-redux';
 import { useAnomaliesTableData } from '../anomaly/use_anomalies_table_data';
 import { HeaderSection } from '../../header_section';
 
@@ -24,6 +25,11 @@ import { anomaliesTableDefaultEquality } from './default_equality';
 import { convertAnomaliesToUsers } from './convert_anomalies_to_users';
 import { getAnomaliesUserTableColumnsCurated } from './get_anomalies_user_table_columns';
 import { useQueryToggle } from '../../../containers/query_toggle';
+import { JobIdFilter } from './job_id_filter';
+import { useDeepEqualSelector } from '../../../hooks/use_selector';
+import { usersActions, usersSelectors } from '../../../../users/store';
+import type { State } from '../../../store/types';
+import { useInstalledSecurityJobsIds } from '../hooks/use_installed_security_jobs';
 
 const sorting = {
   sort: {
@@ -39,6 +45,7 @@ const AnomaliesUserTableComponent: React.FC<AnomaliesUserTableProps> = ({
   skip,
   type,
 }) => {
+  const dispatch = useDispatch();
   const capabilities = useMlCapabilities();
 
   const { toggleStatus, setToggleStatus } = useQueryToggle(`AnomaliesUserTable`);
@@ -55,6 +62,29 @@ const AnomaliesUserTableComponent: React.FC<AnomaliesUserTableProps> = ({
     [setQuerySkip, setToggleStatus]
   );
 
+  const jobIds = useInstalledSecurityJobsIds();
+
+  const getAnomaliesUserTableFilterQuerySelector = useMemo(
+    () => usersSelectors.usersAnomaliesJobIdFilterSelector(),
+    []
+  );
+
+  const selectedJobIds = useDeepEqualSelector((state: State) =>
+    getAnomaliesUserTableFilterQuerySelector(state, type)
+  );
+
+  const onSelectJobId = useCallback(
+    (newSelection: string[]) => {
+      dispatch(
+        usersActions.updateUsersAnomaliesJobIdFilter({
+          jobIds: newSelection,
+          usersType: type,
+        })
+      );
+    },
+    [dispatch, type]
+  );
+
   const [loading, tableData] = useAnomaliesTableData({
     startDate,
     endDate,
@@ -63,6 +93,7 @@ const AnomaliesUserTableComponent: React.FC<AnomaliesUserTableProps> = ({
     filterQuery: {
       exists: { field: 'user.name' },
     },
+    jobIds: selectedJobIds.length > 0 ? selectedJobIds : jobIds,
   });
 
   const users = convertAnomaliesToUsers(tableData, userName);
@@ -90,6 +121,16 @@ const AnomaliesUserTableComponent: React.FC<AnomaliesUserTableProps> = ({
           toggleStatus={toggleStatus}
           tooltip={i18n.TOOLTIP}
           isInspectDisabled={skip}
+          headerFilters={
+            jobIds.length > 0 && (
+              <JobIdFilter
+                title={i18n.JOB_ID}
+                onSelect={onSelectJobId}
+                selectedJobIds={selectedJobIds}
+                jobIds={jobIds}
+              />
+            )
+          }
         />
 
         {toggleStatus && (

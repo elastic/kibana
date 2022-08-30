@@ -14,6 +14,7 @@ import {
   updateTableLimit,
   updateTableSorting,
   updateUserRiskScoreSeverityFilter,
+  updateUsersAnomaliesJobIdFilter,
 } from './actions';
 import { setUsersPageQueriesActivePageToZero } from './helpers';
 import type { UsersModel } from './model';
@@ -46,7 +47,9 @@ export const initialUsersState: UsersModel = {
         },
         severitySelection: [],
       },
-      [UsersTableType.anomalies]: null,
+      [UsersTableType.anomalies]: {
+        jobIdSelection: [],
+      },
       [UsersTableType.events]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
@@ -55,7 +58,9 @@ export const initialUsersState: UsersModel = {
   },
   details: {
     queries: {
-      [UsersTableType.anomalies]: null,
+      [UsersTableType.anomalies]: {
+        jobIdSelection: [],
+      },
       [UsersTableType.events]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
@@ -126,4 +131,35 @@ export const usersReducer = reducerWithInitialState(initialUsersState)
       },
     },
   }))
+  .case(updateUsersAnomaliesJobIdFilter, (state, { jobIds, usersType }) => {
+    if (usersType === 'page') {
+      return {
+        ...state,
+        page: {
+          ...state.page,
+          queries: {
+            ...state.page.queries,
+            [UsersTableType.anomalies]: {
+              ...state[usersType].queries[UsersTableType.anomalies],
+              jobIdSelection: jobIds,
+            },
+          },
+        },
+      };
+    } else {
+      return {
+        ...state,
+        details: {
+          ...state.details,
+          queries: {
+            ...state.details.queries,
+            [UsersTableType.anomalies]: {
+              ...state[usersType].queries[UsersTableType.anomalies],
+              jobIdSelection: jobIds,
+            },
+          },
+        },
+      };
+    }
+  })
   .build();
