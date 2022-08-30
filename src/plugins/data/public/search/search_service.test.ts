@@ -204,8 +204,12 @@ describe('Search service', () => {
         data.showWarnings(inspector.adapter, callback);
 
         expect(notifications.toasts.addWarning).toBeCalledTimes(2);
-        expect(notifications.toasts.addWarning).toBeCalledWith({
+        expect(notifications.toasts.addWarning).nthCalledWith(1, {
           title: 'Data might be incomplete because your request timed out',
+        });
+        expect(notifications.toasts.addWarning).nthCalledWith(2, {
+          title: '2 of 4 shards failed',
+          text: expect.any(Function),
         });
       });
 

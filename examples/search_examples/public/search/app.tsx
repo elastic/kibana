@@ -678,7 +678,7 @@ export const SearchExamplesApp = ({
                 <EuiText size="xs" color="subdued" className="searchExampleStepDsc">
                   <FormattedMessage
                     id="searchExamples.buttonText"
-                    defaultMessage="Bucket and metrics aggregations, without other bucket or default warnings."
+                    defaultMessage="Bucket and metrics aggregations, without other bucket and with custom logic to handle warnings."
                   />
                 </EuiText>
               </EuiText>
