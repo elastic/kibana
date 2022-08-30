@@ -19,7 +19,7 @@ export interface FieldTopValuesProps {
   field: DataViewField;
   sampledValuesCount: number;
   color?: string;
-  testSubject: string;
+  'data-test-subj': string;
   onAddFilter?: AddFieldFilterHandler;
 }
 
@@ -29,7 +29,7 @@ export const FieldTopValues: React.FC<FieldTopValuesProps> = ({
   field,
   sampledValuesCount,
   color = getDefaultColor(),
-  testSubject,
+  'data-test-subj': dataTestSubject,
   onAddFilter,
 }) => {
   if (!buckets?.length) {
@@ -43,7 +43,7 @@ export const FieldTopValues: React.FC<FieldTopValuesProps> = ({
   );
 
   return (
-    <div data-test-subj={`${testSubject}-topValues`}>
+    <div data-test-subj={`${dataTestSubject}-topValues`}>
       {buckets.map((bucket, index) => {
         const fieldValue = bucket.key;
         const formatted = formatter.convert(fieldValue);
@@ -62,7 +62,7 @@ export const FieldTopValues: React.FC<FieldTopValuesProps> = ({
               )}
               progressValue={getProgressValue(bucket.count, sampledValuesCount)}
               color={color}
-              testSubject={testSubject}
+              data-test-subj={dataTestSubject}
               onAddFilter={onAddFilter}
             />
           </Fragment>
@@ -82,7 +82,7 @@ export const FieldTopValues: React.FC<FieldTopValuesProps> = ({
             )}
             progressValue={getProgressValue(otherCount, sampledValuesCount)}
             color={color}
-            testSubject={testSubject}
+            data-test-subj={dataTestSubject}
             onAddFilter={onAddFilter}
           />
         </>

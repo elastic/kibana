@@ -448,7 +448,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
         field={field}
         sampledValuesCount={sampledValues!}
         color={color}
-        testSubject={dataTestSubject}
+        data-test-subj={dataTestSubject}
         onAddFilter={onAddFilter}
       />
     );

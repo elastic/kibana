@@ -29,7 +29,7 @@ export interface FieldTopValuesBucketProps {
   formattedPercentage: string;
   progressValue: number;
   color: string;
-  testSubject: string;
+  'data-test-subj': string;
   onAddFilter?: AddFieldFilterHandler;
 }
 
@@ -41,11 +41,11 @@ export const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
   formattedPercentage,
   progressValue,
   color,
-  testSubject,
+  'data-test-subj': dataTestSubject,
   onAddFilter,
 }) => {
   const isFilterButtonHidden = type === 'other';
-  const fieldName = (field?.subType as IFieldSubTypeMulti)?.multi?.parent ?? field.name; // TODO: check if this is a right approach for handling multi fields
+  const testSubjFieldName = (field?.subType as IFieldSubTypeMulti)?.multi?.parent ?? field.name;
 
   return (
     <EuiFlexGroup alignItems="stretch" gutterSize="s" responsive={false}>
@@ -59,7 +59,7 @@ export const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
           <EuiFlexItem
             grow={true}
             className="eui-textTruncate"
-            data-test-subj={`${testSubject}-topValues-formattedFieldValue`}
+            data-test-subj={`${dataTestSubject}-topValues-formattedFieldValue`}
           >
             {(formattedFieldValue?.length ?? 0) > 0 ? (
               <EuiToolTip content={formattedFieldValue} delay="long">
@@ -81,7 +81,10 @@ export const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
               </EuiText>
             )}
           </EuiFlexItem>
-          <EuiFlexItem grow={false} data-test-subj={`${testSubject}-topValues-formattedPercentage`}>
+          <EuiFlexItem
+            grow={false}
+            data-test-subj={`${dataTestSubject}-topValues-formattedPercentage`}
+          >
             <EuiText size="xs" textAlign="left" color={color}>
               {formattedPercentage}
             </EuiText>
@@ -113,9 +116,9 @@ export const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
               onClick={() => onAddFilter(field, fieldValue, '+')}
               aria-label={i18n.translate('unifiedFieldList.fieldStats.filterValueButtonAriaLabel', {
                 defaultMessage: 'Filter for {field}: "{value}"',
-                values: { value: formattedFieldValue, field: fieldName },
+                values: { value: formattedFieldValue, field: testSubjFieldName },
               })}
-              data-test-subj={`plus-${fieldName}-${fieldValue}`}
+              data-test-subj={`plus-${testSubjFieldName}-${fieldValue}`}
               style={{
                 minHeight: 'auto',
                 minWidth: 'auto',
@@ -134,10 +137,10 @@ export const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
                 'unifiedFieldList.fieldStats.filterOutValueButtonAriaLabel',
                 {
                   defaultMessage: 'Filter out {field}: "{value}"',
-                  values: { value: formattedFieldValue, field: fieldName },
+                  values: { value: formattedFieldValue, field: testSubjFieldName },
                 }
               )}
-              data-test-subj={`minus-${fieldName}-${fieldValue}`}
+              data-test-subj={`minus-${testSubjFieldName}-${fieldValue}`}
               style={{
                 minHeight: 'auto',
                 minWidth: 'auto',
