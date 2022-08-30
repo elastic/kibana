@@ -72,7 +72,7 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model: Panel
     }
     // handle multiple metrics
     const metricsColumns = getMetricsColumns(series, indexPattern!, seriesNum);
-    if (!metricsColumns) {
+    if (metricsColumns === null) {
       return null;
     }
 
