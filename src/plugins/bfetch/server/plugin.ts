@@ -62,9 +62,10 @@ export interface BfetchServerSetup {
 export interface BfetchServerStart {}
 
 const streamingHeaders = {
-  'Content-Type': 'text/event-stream',
+  'Content-Type': 'application/x-ndjson',
   Connection: 'keep-alive',
   'Transfer-Encoding': 'chunked',
+  'X-Accel-Buffering': 'no'
 };
 
 interface Query {
