@@ -72,10 +72,6 @@ export function DiscoverChart({
   const timeField = dataView.timeFieldName && dataView.getFieldByName(dataView.timeFieldName);
   const [canVisualize, setCanVisualize] = useState(false);
 
-  const onUpdateDiscoverViewMode = async (newViewMode: VIEW_MODE) => {
-    setDiscoverViewMode(newViewMode);
-  };
-
   useEffect(() => {
     if (!timeField) return;
     getVisualizeInformation(timeField, dataView.id, savedSearch.columns || []).then((info) => {
@@ -83,12 +79,12 @@ export function DiscoverChart({
     });
   }, [dataView, savedSearch.columns, timeField]);
 
-  const onEditVisualization = useCallback(async () => {
+  const onEditVisualization = useCallback(() => {
     if (!timeField) {
       return;
     }
     triggerVisualizeActions(timeField, dataView.id, savedSearch.columns || []);
-  }, [dataView.id, savedSearch.columns, timeField]);
+  }, [dataView.id, savedSearch, timeField]);
 
   const onShowChartOptions = useCallback(() => {
     setShowChartOptionsPopover(!showChartOptionsPopover);
@@ -147,7 +143,7 @@ export function DiscoverChart({
             <EuiFlexItem grow={false}>
               <DocumentViewModeToggle
                 viewMode={viewMode}
-                onUpdateDiscoverViewMode={onUpdateDiscoverViewMode}
+                setDiscoverViewMode={setDiscoverViewMode}
               />
             </EuiFlexItem>
           )}

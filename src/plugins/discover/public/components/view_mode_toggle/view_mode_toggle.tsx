@@ -15,10 +15,10 @@ import './_index.scss';
 
 export const DocumentViewModeToggle = ({
   viewMode,
-  onUpdateDiscoverViewMode,
+  setDiscoverViewMode,
 }: {
   viewMode: VIEW_MODE;
-  onUpdateDiscoverViewMode: (viewMode: VIEW_MODE) => void;
+  setDiscoverViewMode: (viewMode: VIEW_MODE) => void;
 }) => {
   const toggleButtons = useMemo(
     () => [
@@ -58,7 +58,7 @@ export const DocumentViewModeToggle = ({
       buttonSize={'compressed'}
       options={toggleButtons}
       idSelected={viewMode}
-      onChange={(id: string) => onUpdateDiscoverViewMode(id as VIEW_MODE)}
+      onChange={(id: string) => setDiscoverViewMode(id as VIEW_MODE)}
       data-test-subj={'dscViewModeToggle'}
     />
   );

@@ -81,7 +81,7 @@ export const getTopNavLinks = ({
           I18nContext: services.core.i18n.Context,
           anchorElement,
           searchSource: savedSearch.searchSource,
-          services, // invalid data view here
+          services,
           savedQueryId: state.appStateContainer.getState().savedQuery,
         });
       }
@@ -112,7 +112,7 @@ export const getTopNavLinks = ({
     testId: 'discoverSaveButton',
     iconType: 'save',
     emphasize: true,
-    run: async (anchorElement: HTMLElement) => {
+    run: (anchorElement: HTMLElement) => {
       onSaveSearch({
         savedSearch,
         services,
