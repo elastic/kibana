@@ -56,7 +56,6 @@ export const TableListViewProvider: FC<Services> = ({ children, ...services }) =
 /**
  * Kibana-specific service types.
  */
-
 export interface TableListViewKibanaDependencies {
   /** CoreStart contract */
   core: {
