@@ -17,6 +17,7 @@ import { DashboardNotificationsService } from './notifications/types';
 import { DashboardOverlaysService } from './overlays/types';
 import { DashboardScreenshotModeService } from './screenshot_mode/types';
 import { DashboardSettingsService } from './settings/types';
+import { DashboardShareService } from './share/types';
 import { DashboardSpacesService } from './spaces/types';
 import { DashboardUrlForwardingService } from './url_forwarding/types';
 import { DashboardVisualizationsService } from './visualizations/types';
@@ -33,7 +34,8 @@ export interface DashboardServices {
   overlays: DashboardOverlaysService;
   screenshotMode: DashboardScreenshotModeService;
   settings: DashboardSettingsService;
-  spaces: DashboardSpacesService;
+  share: DashboardShareService; // TODO: make this optional in follow up
+  spaces: DashboardSpacesService; // TODO: make this optional in follow up
   urlForwarding: DashboardUrlForwardingService;
   visualizations: DashboardVisualizationsService;
 

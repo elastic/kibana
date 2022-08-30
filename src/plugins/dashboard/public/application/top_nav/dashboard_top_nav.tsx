@@ -97,7 +97,6 @@ export function DashboardTopNav({
 }: DashboardTopNavProps) {
   const {
     core,
-    share,
     usageCollection,
     initializerContext,
     savedObjectsTagging,
@@ -115,10 +114,11 @@ export function DashboardTopNav({
     data: { query, search },
     embeddable: { getEmbeddableFactory, getEmbeddableFactories, getStateTransfer },
     navigation: { TopNavMenu },
+    notifications,
     overlays,
     settings: { uiSettings, theme },
+    share,
     visualizations: { get: getVisualization, getAliases: getVisTypeAliases },
-    notifications,
   } = pluginServices.getServices();
 
   const { version: kibanaVersion } = initializerContext.env.packageInfo;
@@ -408,10 +408,8 @@ export function DashboardTopNav({
 
   const showShare = useCallback(
     (anchorElement: HTMLElement) => {
-      if (!share) return;
       const currentState = dashboardAppState.getLatestDashboardState();
       ShowShareModal({
-        share,
         kibanaVersion,
         anchorElement,
         dashboardSessionStorage,
@@ -420,7 +418,7 @@ export function DashboardTopNav({
         isDirty: Boolean(dashboardAppState.hasUnsavedChanges),
       });
     },
-    [share, kibanaVersion, dashboardAppState, dashboardSessionStorage]
+    [kibanaVersion, dashboardAppState, dashboardSessionStorage]
   );
 
   const dashboardTopNavActions = useMemo(() => {
@@ -434,7 +432,8 @@ export function DashboardTopNav({
       [TopNavIds.CLONE]: runClone,
     } as { [key: string]: NavAction };
 
-    if (share) {
+    if (share !== {}) {
+      // TODO: Clean up this logic once share is optional
       actions[TopNavIds.SHARE] = showShare;
     }
 

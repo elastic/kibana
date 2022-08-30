@@ -26,7 +26,6 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { RefreshInterval } from '@kbn/data-plugin/public';
 import type { Query, TimeRange } from '@kbn/es-query';
 import type { DashboardContainer, DashboardSavedObject } from '.';
@@ -167,7 +166,6 @@ export interface DashboardSaveOptions {
 
 export interface DashboardAppServices {
   core: CoreStart;
-  share?: SharePluginStart;
   restorePreviousUrl: () => void;
   savedObjects: SavedObjectsStart;
   allowByValueEmbeddables: boolean;

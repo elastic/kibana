@@ -15,7 +15,6 @@ import type { Capabilities } from '@kbn/core/public';
 import type { SerializableControlGroupInput } from '@kbn/controls-plugin/common';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { setStateToKbnUrl, unhashUrl } from '@kbn/kibana-utils-plugin/public';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
 
 import type { DashboardSavedObject } from '../..';
 import { shareModalStrings } from '../../dashboard_strings';
@@ -32,7 +31,6 @@ const showFilterBarId = 'showFilterBar';
 export interface ShowShareModalProps {
   isDirty: boolean;
   kibanaVersion: string;
-  share: SharePluginStart;
   anchorElement: HTMLElement;
   savedDashboard: DashboardSavedObject;
   currentDashboardState: DashboardState;
@@ -48,7 +46,6 @@ export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => 
 };
 
 export function ShowShareModal({
-  share,
   isDirty,
   kibanaVersion,
   anchorElement,
@@ -56,6 +53,20 @@ export function ShowShareModal({
   currentDashboardState,
   dashboardSessionStorage,
 }: ShowShareModalProps) {
+  const {
+    dashboardCapabilities: { createShortUrl: allowShortUrl },
+    data: {
+      query: {
+        timefilter: {
+          timefilter: { getTime },
+        },
+      },
+    },
+    share: { toggleShareContextMenu },
+  } = pluginServices.getServices();
+
+  if (!toggleShareContextMenu) return; // TODO: Make this logic cleaner once share is an optional service
+
   const EmbedUrlParamExtension = ({
     setParamValue,
   }: {
@@ -131,17 +142,6 @@ export function ShowShareModal({
     };
   }
 
-  const {
-    dashboardCapabilities: { createShortUrl: allowShortUrl },
-    data: {
-      query: {
-        timefilter: {
-          timefilter: { getTime },
-        },
-      },
-    },
-  } = pluginServices.getServices();
-
   const locatorParams: DashboardAppLocatorParams = {
     dashboardId: savedDashboard.id,
     preserveSavedFilters: true,
@@ -152,7 +152,7 @@ export function ShowShareModal({
     ...unsavedStateForLocator,
   };
 
-  share.toggleShareContextMenu({
+  toggleShareContextMenu({
     isDirty,
     anchorElement,
     allowEmbed: true,

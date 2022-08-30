@@ -25,9 +25,10 @@ import { notificationsServiceFactory } from './notifications/notifications.stub'
 import { overlaysServiceFactory } from './overlays/overlays.stub';
 import { screenshotModeServiceFactory } from './screenshot_mode/screenshot_mode.stub';
 import { settingsServiceFactory } from './settings/settings.stub';
+import { shareServiceFactory } from './share/share.stub';
 import { spacesServiceFactory } from './spaces/spaces.stub';
-import { urlForwardingServiceFactory } from './url_forwarding/url_fowarding.stub';
 import { visualizationsServiceFactory } from './visualizations/visualizations.stub';
+import { urlForwardingServiceFactory } from './url_forwarding/url_fowarding.stub';
 
 export const providers: PluginServiceProviders<DashboardServices> = {
   chrome: new PluginServiceProvider(chromeServiceFactory),
@@ -40,6 +41,7 @@ export const providers: PluginServiceProviders<DashboardServices> = {
   overlays: new PluginServiceProvider(overlaysServiceFactory),
   screenshotMode: new PluginServiceProvider(screenshotModeServiceFactory),
   settings: new PluginServiceProvider(settingsServiceFactory),
+  share: new PluginServiceProvider(shareServiceFactory),
   spaces: new PluginServiceProvider(spacesServiceFactory),
   urlForwarding: new PluginServiceProvider(urlForwardingServiceFactory),
   visualizations: new PluginServiceProvider(visualizationsServiceFactory),

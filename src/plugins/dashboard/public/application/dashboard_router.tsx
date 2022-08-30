@@ -78,7 +78,6 @@ export async function mountApp({
   const {
     savedObjects,
     data: dataStart,
-    share: shareStart,
     spaces: spacesApi,
     savedObjectsTaggingOss,
     embeddable,
@@ -94,7 +93,6 @@ export async function mountApp({
     savedObjects,
     usageCollection,
     core: coreStart,
-    share: shareStart,
     initializerContext,
     restorePreviousUrl,
     setHeaderActionMenu,

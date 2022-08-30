@@ -7,13 +7,13 @@
  */
 
 import { Capabilities } from '@kbn/core/public';
-import { SharePluginStart } from '@kbn/share-plugin/public';
 
 import { DashboardState } from '../../types';
 import { DashboardAppLocatorParams } from '../..';
 import { stateToRawDashboardState } from '../lib/convert_dashboard_state';
 import { getSavedDashboardMock, makeDefaultServices } from '../test_helpers';
 import { showPublicUrlSwitch, ShowShareModal, ShowShareModalProps } from './show_share_modal';
+import { pluginServices } from '../../services/plugin_services';
 
 describe('showPublicUrlSwitch', () => {
   test('returns false if "dashboard" app is not available', () => {
@@ -60,33 +60,32 @@ describe('ShowShareModal', () => {
   const unsavedStateKeys = ['query', 'filters', 'options', 'savedQuery', 'panels'] as Array<
     keyof DashboardAppLocatorParams
   >;
+  const toggleShareMenuSpy = jest.spyOn(
+    pluginServices.getServices().share,
+    'toggleShareContextMenu'
+  );
 
-  const getPropsAndShare = (
-    unsavedState?: Partial<DashboardState>
-  ): { share: SharePluginStart; showModalProps: ShowShareModalProps } => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const getPropsAndShare = (unsavedState?: Partial<DashboardState>): ShowShareModalProps => {
     const services = makeDefaultServices();
-    const share = {} as unknown as SharePluginStart;
-    share.toggleShareContextMenu = jest.fn();
     services.dashboardSessionStorage.getState = jest.fn().mockReturnValue(unsavedState);
     return {
-      showModalProps: {
-        share,
-        isDirty: true,
-        kibanaVersion: 'testKibanaVersion',
-        savedDashboard: getSavedDashboardMock(),
-        anchorElement: document.createElement('div'),
-        currentDashboardState: { panels: {} } as unknown as DashboardState,
-        dashboardSessionStorage: services.dashboardSessionStorage,
-      },
-      share,
+      isDirty: true,
+      kibanaVersion: 'testKibanaVersion',
+      savedDashboard: getSavedDashboardMock(),
+      anchorElement: document.createElement('div'),
+      currentDashboardState: { panels: {} } as unknown as DashboardState,
+      dashboardSessionStorage: services.dashboardSessionStorage,
     };
   };
 
   it('locatorParams is missing all unsaved state when none is given', () => {
-    const { share, showModalProps } = getPropsAndShare();
-    const toggleShareMenuSpy = jest.spyOn(share, 'toggleShareContextMenu');
+    const showModalProps = getPropsAndShare();
     ShowShareModal(showModalProps);
-    expect(share.toggleShareContextMenu).toHaveBeenCalledTimes(1);
+    expect(toggleShareMenuSpy).toHaveBeenCalledTimes(1);
     const shareLocatorParams = (
       toggleShareMenuSpy.mock.calls[0][0].sharingData as {
         locatorParams: { params: DashboardAppLocatorParams };
@@ -128,10 +127,9 @@ describe('ShowShareModal', () => {
       query: { query: 'bye', language: 'kuery' },
       savedQuery: 'amazingSavedQuery',
     } as unknown as DashboardState;
-    const { share, showModalProps } = getPropsAndShare(unsavedDashboardState);
-    const toggleShareMenuSpy = jest.spyOn(share, 'toggleShareContextMenu');
+    const showModalProps = getPropsAndShare(unsavedDashboardState);
     ShowShareModal(showModalProps);
-    expect(share.toggleShareContextMenu).toHaveBeenCalledTimes(1);
+    expect(toggleShareMenuSpy).toHaveBeenCalledTimes(1);
     const shareLocatorParams = (
       toggleShareMenuSpy.mock.calls[0][0].sharingData as {
         locatorParams: { params: DashboardAppLocatorParams };

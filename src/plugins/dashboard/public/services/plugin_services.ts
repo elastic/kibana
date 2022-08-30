@@ -28,6 +28,7 @@ import { notificationsServiceFactory } from './notifications/notifications_servi
 import { overlaysServiceFactory } from './overlays/overlays_service';
 import { screenshotModeServiceFactory } from './screenshot_mode/screenshot_mode_service';
 import { settingsServiceFactory } from './settings/settings_service';
+import { shareServiceFactory } from './share/share_services';
 import { spacesServiceFactory } from './spaces/spaces_service';
 import { urlForwardingServiceFactory } from './url_forwarding/url_forwarding_service';
 import { visualizationsServiceFactory } from './visualizations/visualizations_service';
@@ -46,6 +47,7 @@ const providers: PluginServiceProviders<
   overlays: new PluginServiceProvider(overlaysServiceFactory),
   screenshotMode: new PluginServiceProvider(screenshotModeServiceFactory),
   settings: new PluginServiceProvider(settingsServiceFactory),
+  share: new PluginServiceProvider(shareServiceFactory),
   spaces: new PluginServiceProvider(spacesServiceFactory),
   urlForwarding: new PluginServiceProvider(urlForwardingServiceFactory),
   visualizations: new PluginServiceProvider(visualizationsServiceFactory),
