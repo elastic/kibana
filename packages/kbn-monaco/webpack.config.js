@@ -7,6 +7,7 @@
  */
 
 const path = require('path');
+const TerserPlugin = require('terser-webpack-plugin');
 
 const createLangWorkerConfig = (lang) => {
   const entry =
@@ -23,6 +24,32 @@ const createLangWorkerConfig = (lang) => {
     },
     resolve: {
       extensions: ['.js', '.ts', '.tsx'],
+    },
+    optimization: {
+      minimizer: [
+        new TerserPlugin({
+          cache: false,
+          extractComments: false,
+          parallel: false,
+          sourceMap: false,
+          minify: async (file) => {
+            return require('@swc/core').minify(file, {
+              compress: {
+                ecma: 2020,
+                dead_code: true,
+                keep_classnames: true,
+              },
+              mangle: {
+                keep_classnames: true,
+                topLevel: false,
+              },
+              format: {
+                comments: 'some',
+              },
+            });
+          },
+        }),
+      ],
     },
     stats: 'errors-only',
     module: {

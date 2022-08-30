@@ -288,13 +288,26 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
       minimizer: [
         new TerserPlugin({
           cache: false,
-          sourceMap: false,
           extractComments: false,
           parallel: false,
-          terserOptions: {
-            compress: { passes: 2 },
-            keep_classnames: true,
-            mangle: true,
+          sourceMap: false,
+          minify: async (file: string) => {
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
+            return require('@swc/core').minify(file, {
+              compress: {
+                ecma: 2020,
+                dead_code: true,
+                keep_classnames: true,
+              },
+              mangle: {
+                keep_classnames: true,
+                keep_private_props: true,
+                topLevel: false,
+              },
+              format: {
+                comments: 'some',
+              },
+            });
           },
         }),
       ],
