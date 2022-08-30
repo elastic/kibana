@@ -95,9 +95,10 @@ export const ControlEditor = ({
   getRelevantDataViewId,
   setLastUsedDataViewId,
 }: EditControlProps) => {
-  const { dataViews, controls } = pluginServices.getHooks();
-  const { getIdsWithTitle, getDefaultId, get } = dataViews.useService();
-  const { getControlTypes, getControlFactory } = controls.useService();
+  const {
+    dataViews: { getIdsWithTitle, getDefaultId, get },
+    controls: { getControlTypes, getControlFactory },
+  } = pluginServices.getServices();
   const [state, setState] = useState<ControlEditorState>({
     dataViewListItems: [],
   });
