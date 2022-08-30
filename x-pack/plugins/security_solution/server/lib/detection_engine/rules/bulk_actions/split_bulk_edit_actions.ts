@@ -34,6 +34,7 @@ export const splitBulkEditActions = (actions: BulkActionEditPayload[]) => {
       case BulkActionEditType.delete_tags:
       case BulkActionEditType.add_rule_actions:
       case BulkActionEditType.set_rule_actions:
+      case BulkActionEditType.set_schedule:
         acc.attributesActions.push(action);
         break;
       default:
