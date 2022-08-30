@@ -10,9 +10,9 @@ import { i18n } from '@kbn/i18n';
 import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
 import { lazyLoadReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
 import {
-  createOptionsListExtract,
-  createOptionsListInject,
-} from '../../../common/options_list/options_list_persistable_state';
+  createTimeSliderExtract,
+  createTimeSliderInject,
+} from '../../../common/time_slider/time_slider_persistable_state';
 import { TIME_SLIDER_CONTROL } from '../..';
 import { ControlInput, IEditableControlFactory } from '../../types';
 
@@ -46,6 +46,6 @@ export class TimeSliderEmbeddableFactory
       defaultMessage: 'Add a slider for selecting a time range',
     });
 
-  public inject = createOptionsListInject();
-  public extract = createOptionsListExtract();
+  public inject = createTimeSliderInject();
+  public extract = createTimeSliderExtract();
 }
