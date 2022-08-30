@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-import type { RouteComponentProps } from 'react-router-dom';
-
-export type NetworkComponentProps = Partial<RouteComponentProps<{}>> & {
-  hasMlUserPermissions: boolean;
-  capabilitiesFetched: boolean;
-};
+export { SocTrends } from './soc_trends';
