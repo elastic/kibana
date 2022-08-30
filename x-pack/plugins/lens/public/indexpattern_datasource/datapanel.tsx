@@ -644,6 +644,10 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 }
                 button={
                   <EuiFilterButton
+                    aria-label={i18n.translate('xpack.lens.indexPatterns.filterByTypeAriaLabel', {
+                      defaultMessage: 'Filter by type',
+                    })}
+                    color="primary"
                     isSelected={localState.isTypeFilterOpen}
                     numFilters={localState.typeFilter.length}
                     hasActiveFilters={!!localState.typeFilter.length}

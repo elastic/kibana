@@ -348,12 +348,13 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 'xpack.lens.indexPattern.helpPartiallyApplicableFunctionLabel',
                 {
                   defaultMessage:
-                    'This function is not supported by the full time range of your data. This happens when you use rolled up historical data. You can still use this function, but the results might be partial and the visualization displays a warning.',
+                    'This function may only return partial results, as it is unable to support the full time range of rolled-up historical data.',
                 }
               )}
               position="left"
               size="s"
               type="partial"
+              color="warning"
             />
           </>
         );
