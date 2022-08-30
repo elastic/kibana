@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { NavLinksService } from './nav_links_service';
-import { take, map, takeLast } from 'rxjs/operators';
-import { App } from '../../application';
 import { BehaviorSubject } from 'rxjs';
+import { take, map, takeLast } from 'rxjs/operators';
+import type { App } from '@kbn/core-application-browser';
+import { NavLinksService } from './nav_links_service';
 
 const availableApps = new Map([
   ['app1', { id: 'app1', order: 0, title: 'App 1', icon: 'app1' }],

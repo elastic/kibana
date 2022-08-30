@@ -7,11 +7,11 @@
  */
 
 import {
-  PublicAppInfo,
   AppNavLinkStatus,
   AppStatus,
-  PublicAppDeepLinkInfo,
-} from '../../application';
+  type PublicAppInfo,
+  type PublicAppDeepLinkInfo,
+} from '@kbn/core-application-browser';
 import { toNavLink } from './to_nav_link';
 
 import { httpServiceMock } from '../../mocks';

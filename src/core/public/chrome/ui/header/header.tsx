@@ -23,6 +23,7 @@ import React, { createRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 import type { HttpStart } from '@kbn/core-http-browser';
+import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 
 import { LoadingIndicator } from '..';
 import type {
@@ -32,7 +33,6 @@ import type {
   ChromeNavLink,
   ChromeRecentlyAccessedHistoryItem,
 } from '../..';
-import type { InternalApplicationStart } from '../../../application/types';
 import type {
   ChromeBreadcrumbsAppendExtension,
   ChromeHelpExtension,
