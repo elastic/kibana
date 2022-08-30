@@ -74,13 +74,15 @@ Review the following information about the {kib} 8.4.0 release.
 [[known-issue-8.4.0]]
 === Known issues
 
-If you have alerting rules that have been snoozed, do not upgrade {kib} to 8.4.0.
+If you have alerting rules that have been snoozed, do not upgrade {kib} to 8.4.0. Upgrade to 8.4.1 instead.
 
-To determine if you have snoozed alerting rules, open the main menu, then click **Stack Management** -> **Rules and Connectors**.
-Filter the rule list by selecting **View** -> **Snoozed**.
-For each space, cancel the snooze for all affected rules before you upgrade.
+To determine if you have snoozed alerting rules, open the main menu, then click
+**{stack-manage-app}** -> **rules-ui**. Filter the rule list by selecting
+**View** -> **Snoozed**. If you must upgrade to 8.4.0, for each space, cancel
+the snooze for all affected rules before you upgrade.
 
-To identify snoozed rules in all Spaces using **Dev Tools**, run the following query:
+To identify snoozed rules in all Spaces using **Dev Tools**, run the following
+query:
 
 [source,console]
 ----
@@ -94,14 +96,15 @@ GET /.kibana/_search
 }
 ----
 
-When you upgrade {kib} to 8.4.0, and you have alerting rules configured to snooze notifications, you will receive the following error message:
+If you upgraded {kib} to 8.4.0 and you have alerting rules configured to
+snooze notifications, you will receive the following error message:
 
 [source,text]
 ----
 FATAL  Error: Unable to complete saved object migrations for the [.kibana] index.
 ----
 
-Before you retry the upgrade, restore your previous version, then cancel any alerting rules with snooze notifications.
+To fix that problem, restore your previous version, then upgrade to 8.4.1 instead.
 
 [float]
 [[breaking-changes-8.4.0]]
