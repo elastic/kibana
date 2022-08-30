@@ -40,7 +40,7 @@ export function createLensVisToADJobAction(getStartServices: MlCoreSetup['getSta
       }
     },
     async isCompatible(context: { embeddable: Embeddable }) {
-      if (context.embeddable.type !== 'lens') {
+      if (context.embeddable.type !== 'lens' || !context.embeddable.getSavedVis()) {
         return false;
       }
 
