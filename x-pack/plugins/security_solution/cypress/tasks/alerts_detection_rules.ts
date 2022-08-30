@@ -161,7 +161,6 @@ export const goToCreateNewRule = () => {
 };
 
 export const goToRuleDetails = () => {
-  cy.wait(5000);
   cy.get(RULE_NAME).first().click({ force: true });
 };
 
