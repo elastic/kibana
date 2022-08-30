@@ -61,11 +61,11 @@ export const CaseViewActivity = ({
   const userActionProfileUids = Array.from(userActionsData?.profileUids.values() ?? []);
   const uidsToRetrieve = uniq([...userActionProfileUids, ...assignees]);
 
-  const { data: userProfiles, isLoading: isLoadingUserProfiles } = useBulkGetUserProfiles({
+  const { data: userProfiles, isFetching: isLoadingUserProfiles } = useBulkGetUserProfiles({
     uids: uidsToRetrieve,
   });
 
-  const { data: currentUserProfile, isLoading: isLoadingCurrentUserProfile } =
+  const { data: currentUserProfile, isFetching: isLoadingCurrentUserProfile } =
     useGetCurrentUserProfile();
 
   const onShowAlertDetails = useCallback(

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { getUserDisplayName } from '@kbn/security-plugin/common';
-import { UserProfileUserInfo } from '@kbn/user-profile-components/target_types/user_profile';
+import { getUserDisplayName, UserProfileUserInfo } from '@kbn/user-profile-components';
 import { isEmpty } from 'lodash';
 import * as i18n from './translations';
 
