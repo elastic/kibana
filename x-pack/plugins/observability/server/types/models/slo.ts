@@ -19,6 +19,9 @@ const baseSLOSchema = t.type({
   objective: t.type({
     target: t.number,
   }),
+  settings: t.partial({
+    destination_index: t.string,
+  }),
 });
 
 const storedSLOSchema = t.intersection([

@@ -7,6 +7,7 @@
 
 import { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { SavedObject } from '@kbn/core/server';
+
 import { SLO } from '../types/models';
 
 export const slo: SavedObjectsType = {
@@ -36,9 +37,13 @@ export const slo: SavedObjectsType = {
           target: { type: 'float' },
         },
       },
+      settings: {
+        properties: {
+          destination_index: { type: 'text' },
+        },
+      },
       created_at: { type: 'date' },
       updated_at: { type: 'date' },
-      schema_version: { type: 'integer' },
     },
   },
   management: {

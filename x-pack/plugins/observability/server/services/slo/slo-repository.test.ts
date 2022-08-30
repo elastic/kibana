@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import uuid from 'uuid';
 import { SavedObject } from '@kbn/core-saved-objects-common';
 import { SavedObjectsClientContract } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import uuid from 'uuid';
 
 import { SLO, StoredSLO } from '../../types/models';
 import { KibanaSavedObjectsSLORepository } from './slo-repository';
@@ -36,6 +36,9 @@ const anSLO: SLO = {
   budgeting_method: 'occurrences',
   objective: {
     target: 0.999,
+  },
+  settings: {
+    destination_index: 'some-index',
   },
 };
 
