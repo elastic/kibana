@@ -135,7 +135,7 @@ export async function onSaveSearch({
     savedSearch.rowsPerPage = uiSettings.get(DOC_TABLE_LEGACY)
       ? currentRowsPerPage
       : state.appStateContainer.getState().rowsPerPage;
-    if (savedObjectsTagging && newTags.length) {
+    if (savedObjectsTagging) {
       savedSearch.tags = newTags;
     }
     const saveOptions: SaveSavedSearchOptions = {
