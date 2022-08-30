@@ -22,7 +22,7 @@ export const isSplitWithDateHistogram = (
   splitFields: string[],
   dataView: DataView
 ) => {
-  if (series.terms_field && series.split_mode === 'terms' && splitFields) {
+  if (series.terms_field && series.split_mode === 'terms' && splitFields.length) {
     for (const f of splitFields) {
       const fieldType = dataView.getFieldByName(f)?.type;
 
