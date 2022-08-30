@@ -91,6 +91,6 @@ export const THEMSELVES = i18n.translate('xpack.cases.caseView.assignee.themselv
   defaultMessage: 'themselves',
 });
 
-export const AND_SPACE = i18n.translate('xpack.cases.caseView.assignee.and', {
-  defaultMessage: 'and ',
+export const AND = i18n.translate('xpack.cases.caseView.assignee.and', {
+  defaultMessage: 'and',
 });

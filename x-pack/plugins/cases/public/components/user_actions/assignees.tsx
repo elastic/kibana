@@ -26,8 +26,7 @@ const FormatListItem: React.FC<{
   if (shouldAddAnd(index, listSize)) {
     return (
       <>
-        {i18n.AND_SPACE}
-        {children}
+        {i18n.AND} {children}
       </>
     );
   } else if (shouldAddComma(index, listSize)) {
@@ -82,7 +81,7 @@ interface AssigneesProps {
 const AssigneesComponent = ({ assignees, createdByUser }: AssigneesProps) => (
   <>
     {assignees.length > 0 && (
-      <EuiFlexGroup alignItems="center" gutterSize="xs">
+      <EuiFlexGroup alignItems="center" gutterSize="xs" wrap>
         {assignees.map((assignee, index) => {
           const usernameDataTestSubj = getUsernameDataTestSubj(assignee);
 
