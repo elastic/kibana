@@ -28,7 +28,7 @@ describe('Color ranges validation', () => {
           color: '#aaa',
         },
       ];
-      const validation = validateColorRanges(colorRanges);
+      const validation = validateColorRanges(colorRanges, false);
       expect(validation['0']).toEqual({
         errors: [],
         isValid: true,
@@ -40,6 +40,48 @@ describe('Color ranges validation', () => {
       expect(validation.last).toEqual({
         errors: ['greaterThanMaxValue'],
         isValid: false,
+      });
+    });
+
+    it('should check percentage values', () => {
+      const colorRanges = [
+        {
+          start: -30, // Under 0 should be flagged
+          end: 10,
+          color: '#aaa',
+        },
+        {
+          start: 10,
+          end: 120,
+          color: '#aaa',
+        },
+        {
+          start: 120, // Over 100 should be flagged
+          end: Infinity, // Infinity should not be flagged
+          color: '#aaa',
+        },
+      ];
+
+      const validation = validateColorRanges(colorRanges, true);
+
+      expect(validation[0]).toEqual({
+        errors: ['percentOutOfBounds'],
+        isValid: false,
+      });
+
+      expect(validation[1]).toEqual({
+        errors: [],
+        isValid: true,
+      });
+
+      expect(validation[2]).toEqual({
+        errors: ['percentOutOfBounds'],
+        isValid: false,
+      });
+
+      expect(validation.last).toEqual({
+        errors: [],
+        isValid: true,
       });
     });
   });
@@ -63,10 +105,10 @@ describe('Color ranges validation', () => {
           color: '#ccc',
         },
       ];
-      let isValid = allRangesValid(colorRanges);
+      let isValid = allRangesValid(colorRanges, false);
       expect(isValid).toBeFalsy();
       colorRanges[colorRanges.length - 1].end = 30;
-      isValid = allRangesValid(colorRanges);
+      isValid = allRangesValid(colorRanges, false);
       expect(isValid).toBeTruthy();
     });
   });
