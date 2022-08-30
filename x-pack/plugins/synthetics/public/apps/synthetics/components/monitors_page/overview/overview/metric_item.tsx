@@ -7,13 +7,14 @@
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { Chart, Settings, Metric, MetricTrendShape } from '@elastic/charts';
-import { EuiPanel, EuiLoadingChart } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 import { DARK_THEME } from '@elastic/charts';
 import { useTheme } from '@kbn/observability-plugin/public';
 import { useLocationName, useStatusByLocation } from '../../../../hooks';
 import { formatDuration } from '../../../../utils/formatting';
 import { MonitorOverviewItem, Ping } from '../../../../../../../common/runtime_types';
 import { ActionsPopover } from './actions_popover';
+import { OverviewGridItemLoader } from './overview_grid_item_loader';
 
 export const getColor = (theme: ReturnType<typeof useTheme>, isEnabled: boolean, ping?: Ping) => {
   if (!isEnabled) {
@@ -101,7 +102,7 @@ export const MetricItem = ({
           )}
         </EuiPanel>
       ) : (
-        <EuiLoadingChart mono />
+        <OverviewGridItemLoader />
       )}
     </div>
   );

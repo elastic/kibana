@@ -14,21 +14,25 @@ import { OverviewPaginationInfo } from './overview_pagination_info';
 import { OverviewGridItem } from './overview_grid_item';
 import { SortFields } from './sort_fields';
 import { useMonitorsSortedByStatus } from '../../../../hooks/use_monitors_sorted_by_status';
+import { OverviewLoader } from './overview_loader';
 
 export const OverviewGrid = () => {
   const {
     data: { monitors },
     loaded,
-    pageState: { perPage, sortField, sortOrder },
+    pageState: { perPage, sortField },
   } = useSelector(selectOverviewState);
-  const { monitorsSortedByStatus } = useMonitorsSortedByStatus(sortField === 'status');
+
+  const { monitorsSortedByStatus } = useMonitorsSortedByStatus(
+    sortField === 'status' && monitors.length !== 0
+  );
   const [page, setPage] = useState(1);
   const currentMonitors = getCurrentMonitors({
     monitors,
     monitorsSortedByStatus,
     perPage,
+    page,
     sortField,
-    sortOrder,
   });
   const intersectionRef = useRef(null);
   const intersection = useIntersection(intersectionRef, {
@@ -43,48 +47,52 @@ export const OverviewGrid = () => {
     }
   }, [hasIntersected]);
 
-  return loaded ? (
+  return (
     <>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <OverviewPaginationInfo page={page} />
+          <OverviewPaginationInfo page={page} loading={!loaded} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <SortFields />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
-      <EuiFlexGrid columns={4}>
-        {currentMonitors.map((monitor) => (
-          <EuiFlexItem
-            key={`${monitor.id}-${monitor.location?.id}`}
-            data-test-subj="syntheticsOverviewGridItem"
-          >
-            <OverviewGridItem monitor={monitor} />
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGrid>
+      {loaded && currentMonitors.length ? (
+        <EuiFlexGrid columns={4}>
+          {currentMonitors.map((monitor) => (
+            <EuiFlexItem
+              key={`${monitor.id}-${monitor.location?.id}`}
+              data-test-subj="syntheticsOverviewGridItem"
+            >
+              <OverviewGridItem monitor={monitor} />
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGrid>
+      ) : (
+        <OverviewLoader />
+      )}
       <span ref={intersectionRef} />
     </>
-  ) : null;
+  );
 };
 
 const getCurrentMonitors = ({
   sortField,
-  sortOrder,
   perPage,
+  page,
   monitors,
   monitorsSortedByStatus,
 }: {
   sortField: string;
-  sortOrder: string;
   perPage: number;
+  page: number;
   monitors: MonitorOverviewItem[];
   monitorsSortedByStatus: MonitorOverviewItem[];
 }) => {
   if (sortField === 'status') {
-    return monitorsSortedByStatus.slice(0, perPage);
+    return monitorsSortedByStatus.slice(0, perPage * page);
   } else {
-    return monitors.slice(0, perPage);
+    return monitors.slice(0, perPage * page);
   }
 };
