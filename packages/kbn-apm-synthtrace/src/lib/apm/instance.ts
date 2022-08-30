@@ -12,6 +12,7 @@ import { Metricset } from './metricset';
 import { Span } from './span';
 import { Transaction } from './transaction';
 import { ApmApplicationMetricFields, ApmFields } from './apm_fields';
+import url from 'url';
 
 export class Instance extends Entity<ApmFields> {
   transaction(transactionName: string, transactionType = 'request') {
@@ -20,6 +21,45 @@ export class Instance extends Entity<ApmFields> {
       'transaction.name': transactionName,
       'transaction.type': transactionType,
     });
+  }
+
+  dbExitSpan({ spanName, subType }: { spanName: string; subType?: string }) {
+    const exitSpan = new Span({
+      ...this.fields,
+      'service.target.type': subType,
+      'span.destination.service.name': '', //deprecated
+      'span.destination.service.resource': subType,
+      'span.destination.service.type': '', //deprecated
+      'span.name': spanName,
+      'span.subtype': subType,
+      'span.type': 'db',
+    });
+
+    return exitSpan;
+  }
+
+  messagingExitSpan(mesageQueueName: string) {}
+
+  httpExitSpan({ spanName, destination }: { spanName: string; destination: string }) {
+    // host: 'opbeans-go:3000',
+    // hostname: 'opbeans-go',
+    // port: '3000',
+    const parsed = new url.URL(destination);
+
+    const exitSpan = new Span({
+      ...this.fields,
+      'destination.address': parsed.hostname,
+      'destination.port': parseInt(parsed.port, 10),
+      'service.target.name': parsed.host,
+      'span.destination.service.name': '', //deprecated
+      'span.destination.service.resource': parsed.host,
+      'span.destination.service.type': '', //deprecated
+      'span.name': spanName,
+      'span.subtype': 'http',
+      'span.type': 'external',
+    });
+
+    return exitSpan;
   }
 
   span(spanName: string, spanType: string, spanSubtype?: string) {
