@@ -32,8 +32,15 @@ export const PLATFORM_TYPE_LINUX_BUTTON = 'platformTypeLinux';
 export const ADVANCED_FLEET_SERVER_ADD_HOST_BUTTON = 'fleetServerAddHostBtn';
 export const ADVANCED_FLEET_SERVER_GENERATE_SERVICE_TOKEN_BUTTON =
   'fleetServerGenerateServiceTokenBtn';
-export const AGENT_POLICIES_CREATE_AGENT_POLICY_BUTTON = 'createAgentPolicyButton';
-export const AGENT_POLICIES_CREATE_AGENT_POLICY_FLYOUT_TITLE = 'createAgentPolicyFlyoutTitle';
+
+export const AGENT_POLICIES_CREATE_AGENT_POLICY_FLYOUT = {
+  TITLE: 'createAgentPolicyFlyoutTitle',
+  CREATE_BUTTON: 'createAgentPolicyButton',
+  ADVANCED_BTN: 'AgentPolicyAdvancedOptions.AccordionBtn',
+  COLLECT_LOGS_CHECKBOX: 'collectLogsCheckbox',
+  COLLECT_METRICS_CHECKBOX: 'collectMetricsCheckbox',
+};
+
 export const AGENT_POLICY_CREATE_AGENT_POLICY_NAME_FIELD = 'createAgentPolicyNameField';
 export const AGENT_POLICIES_FLYOUT_ADVANCED_DEFAULT_NAMESPACE_HEADER = 'defaultNamespaceHeader';
 export const AGENT_POLICY_FLYOUT_CREATE_BUTTON = 'createAgentPolicyFlyoutBtn';

@@ -16,8 +16,7 @@ import {
   ADVANCED_FLEET_SERVER_ADD_HOST_BUTTON,
   ADVANCED_FLEET_SERVER_GENERATE_SERVICE_TOKEN_BUTTON,
   AGENT_POLICIES_TAB,
-  AGENT_POLICIES_CREATE_AGENT_POLICY_BUTTON,
-  AGENT_POLICIES_CREATE_AGENT_POLICY_FLYOUT_TITLE,
+  AGENT_POLICIES_CREATE_AGENT_POLICY_FLYOUT,
   AGENT_POLICY_CREATE_AGENT_POLICY_NAME_FIELD,
   AGENT_POLICIES_FLYOUT_ADVANCED_DEFAULT_NAMESPACE_HEADER,
   AGENT_POLICY_FLYOUT_CREATE_BUTTON,
@@ -72,16 +71,16 @@ describe('Home page', () => {
   describe('Agent Policies', () => {
     before(() => {
       cy.getBySel(AGENT_POLICIES_TAB).click();
-      cy.getBySel(AGENT_POLICIES_CREATE_AGENT_POLICY_BUTTON, { timeout: 15000 }).should(
-        'be.visible'
-      );
+      cy.getBySel(AGENT_POLICIES_CREATE_AGENT_POLICY_FLYOUT.CREATE_BUTTON, {
+        timeout: 15000,
+      }).should('be.visible');
     });
     it('Agent Table', () => {
       checkA11y({ skipFailures: false });
     });
     it('Create Policy Flyout', () => {
-      cy.getBySel(AGENT_POLICIES_CREATE_AGENT_POLICY_BUTTON).click();
-      cy.getBySel(AGENT_POLICIES_CREATE_AGENT_POLICY_FLYOUT_TITLE, { timeout: 15000 }).should(
+      cy.getBySel(AGENT_POLICIES_CREATE_AGENT_POLICY_FLYOUT.CREATE_BUTTON).click();
+      cy.getBySel(AGENT_POLICIES_CREATE_AGENT_POLICY_FLYOUT.TITLE, { timeout: 15000 }).should(
         'be.visible'
       );
       cy.getBySel(AGENT_POLICY_CREATE_AGENT_POLICY_NAME_FIELD).type('testName');

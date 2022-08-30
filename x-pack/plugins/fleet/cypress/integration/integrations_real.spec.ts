@@ -25,13 +25,18 @@ import {
   UPDATE_PACKAGE_BTN,
   INTEGRATIONS_SEARCHBAR_INPUT,
   SETTINGS,
+  INTEGRATION_POLICIES_UPGRADE_CHECKBOX
 } from '../screens/integrations';
 import { LOADING_SPINNER } from '../screens/navigation';
 import { ADD_PACKAGE_POLICY_BTN } from '../screens/fleet';
 import { cleanupAgentPolicies } from '../tasks/cleanup';
 
 describe('Add Integration - Real API', () => {
-  const integration = 'Apache';
+  const integration = 'apache';
+
+  // before(() => {
+  //   cleanupAgentPolicies();
+  // });
 
   after(() => {
     cleanupAgentPolicies();
@@ -57,9 +62,9 @@ describe('Add Integration - Real API', () => {
 
     navigateTo(INTEGRATIONS);
     cy.wait('@packages');
-    cy.get(LOADING_SPINNER).should('not.exist');
-    cy.get(INTEGRATIONS_SEARCHBAR_INPUT).type('Apache');
-    cy.get(getIntegrationCard(integration)).contains(integration).click();
+    cy.getBySel(LOADING_SPINNER).should('not.exist');
+    cy.getBySel(INTEGRATIONS_SEARCHBAR_INPUT).type('Apache');
+    cy.getBySel(getIntegrationCard(integration)).click();
     addIntegration();
     cy.getBySel(INTEGRATION_NAME_LINK).contains('apache-1');
   }
@@ -67,19 +72,19 @@ describe('Add Integration - Real API', () => {
   it('should install integration without policy', () => {
     cy.visit('/app/integrations/detail/tomcat/settings');
 
-    cy.get(SETTINGS.INSTALL_ASSETS_BTN).click();
+    cy.getBySel(SETTINGS.INSTALL_ASSETS_BTN).click();
     cy.get('.euiCallOut').contains('This action will install 1 assets');
     cy.getBySel(CONFIRM_MODAL_BTN).click();
 
-    cy.get(LOADING_SPINNER).should('not.exist');
+    cy.getBySel(LOADING_SPINNER).should('not.exist');
 
-    cy.get(SETTINGS.UNINSTALL_ASSETS_BTN).click();
+    cy.getBySel(SETTINGS.UNINSTALL_ASSETS_BTN, { timeout: 10000 }).click();
     cy.getBySel(CONFIRM_MODAL_BTN).click();
-    cy.get(LOADING_SPINNER).should('not.exist');
-    cy.get(SETTINGS.INSTALL_ASSETS_BTN).should('exist');
+    cy.getBySel(LOADING_SPINNER).should('not.exist');
+    cy.getBySel(SETTINGS.INSTALL_ASSETS_BTN).should('exist');
   });
 
-  it('should display Apache integration in the Policies list once installed ', () => {
+  it.only('should display Apache integration in the Policies list once installed ', () => {
     addAndVerifyIntegration();
     cy.getBySel(AGENT_POLICY_NAME_LINK).contains('Agent policy 1');
   });
@@ -88,14 +93,15 @@ describe('Add Integration - Real API', () => {
     const agentPolicyId = 'policy_1';
     cy.request({
       method: 'POST',
-      url: `/api/fleet/agent_policies/${agentPolicyId}'`,
+      url: `/api/fleet/agent_policies`,
       body: {
+        id: `${agentPolicyId}`,
         name: 'Agent policy 1',
         description: 'desc',
         namespace: 'default',
         monitoring_enabled: ['logs', 'metrics'],
       },
-      headers: { 'kbn-xsrf': 'kibana' },
+      headers: { 'kbn-xsrf': 'cypress' },
     });
 
     cy.request('/api/fleet/agent_policies').then((response: any) => {
@@ -116,10 +122,9 @@ describe('Add Integration - Real API', () => {
 
       cy.getBySel(ADD_PACKAGE_POLICY_BTN).click();
       cy.wait('@packages');
-
-      cy.get(LOADING_SPINNER).should('not.exist');
-      cy.get(INTEGRATIONS_SEARCHBAR_INPUT).type('Apache');
-      cy.get(getIntegrationCard(integration)).contains(integration).click();
+      cy.getBySel(LOADING_SPINNER).should('not.exist');
+      cy.getBySel(INTEGRATIONS_SEARCHBAR_INPUT).type('Apache');
+      cy.getBySel(getIntegrationCard(integration)).click();
       addIntegration({ useExistingPolicy: true });
       cy.get('.euiBasicTable-loading').should('not.exist');
       cy.get('.euiTitle').contains('Agent policy 1');
@@ -146,7 +151,7 @@ describe('Add Integration - Real API', () => {
 
     cy.getBySel(LATEST_VERSION).then(($title) => {
       const newVersion = $title.text();
-      cy.get('#upgradePoliciesCheckbox').should('not.exist');
+      cy.getBySel(INTEGRATION_POLICIES_UPGRADE_CHECKBOX).should('not.exist');
       cy.getBySel(POLICIES_TAB).click();
       cy.getBySel(PACKAGE_VERSION).contains(oldVersion).should('not.exist');
       cy.getBySel(PACKAGE_VERSION).contains(newVersion);

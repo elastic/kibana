@@ -35,7 +35,7 @@ export function navigateToTab(tab: string) {
 
 export function navigateToAgentPolicy(name: string) {
   cy.get('.euiLink').contains(name).click();
-  cy.get(LOADING_SPINNER).should('not.exist');
+  cy.getBySel(LOADING_SPINNER).should('not.exist');
 }
 
 export function navigateToEnrollmentTokens() {
