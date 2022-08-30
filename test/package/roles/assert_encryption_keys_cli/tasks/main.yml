@@ -1,0 +1,13 @@
+- name: "help generate"
+  become: true
+  command:
+    cmd: /usr/share/kibana/bin/kibana-encryption-keys help generate
+  register: kibana_encryption_keys_help_generate
+
+- debug:
+    msg: "{{ kibana_encryption_keys_help_generate }}"
+
+- name: assert kibana-encryption-keys provides help
+  assert:
+    that:
+      - kibana_encryption_keys_help_generate.failed == false
