@@ -7,4 +7,3 @@
  */
 
 export { handleWarnings } from './handle_warnings';
-export { extractWarnings } from './extract_warnings';
