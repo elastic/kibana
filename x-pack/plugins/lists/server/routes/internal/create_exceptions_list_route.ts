@@ -7,11 +7,10 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
-  InternalCreateExceptionListSchemaDecoded,
-  internalCreateExceptionListQuerySchema,
-  internalCreateExceptionListSchema,
+  CreateExceptionListSchemaDecoded,
+  createExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { INTERNAL_EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
+import { INTERNAL_EXCEPTIONS_LIST_ENSURE_CREATED_URL } from '@kbn/securitysolution-list-constants';
 
 import { createExceptionListHandler } from '../../handlers/create_exception_list_handler';
 import type { ListsPluginRouter } from '../../types';
@@ -23,19 +22,20 @@ export const internalCreateExceptionListRoute = (router: ListsPluginRouter): voi
       options: {
         tags: ['access:lists-all'],
       },
-      path: `${INTERNAL_EXCEPTION_LIST_URL}/_create`,
+      path: INTERNAL_EXCEPTIONS_LIST_ENSURE_CREATED_URL,
       validate: {
         body: buildRouteValidation<
-          typeof internalCreateExceptionListSchema,
-          InternalCreateExceptionListSchemaDecoded
-        >(internalCreateExceptionListSchema),
-        query: buildRouteValidation(internalCreateExceptionListQuerySchema),
+          typeof createExceptionListSchema,
+          CreateExceptionListSchemaDecoded
+        >(createExceptionListSchema),
       },
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        return await createExceptionListHandler(context, request, response, siemResponse);
+        return await createExceptionListHandler(context, request, response, siemResponse, {
+          ignoreExisting: true,
+        });
       } catch (err) {
         const error = transformError(err);
         return siemResponse.error({

@@ -34,12 +34,7 @@ export const createExceptionListRoute = (router: ListsPluginRouter): void => {
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        return await createExceptionListHandler(
-          context,
-          { body: request.body },
-          response,
-          siemResponse
-        );
+        return await createExceptionListHandler(context, request, response, siemResponse);
       } catch (err) {
         const error = transformError(err);
         return siemResponse.error({

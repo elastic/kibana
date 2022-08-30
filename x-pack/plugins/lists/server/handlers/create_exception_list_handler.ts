@@ -7,23 +7,20 @@
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import {
-  InternalCreateExceptionListQuerySchema,
-  InternalCreateExceptionListSchemaDecoded,
+  CreateExceptionListSchemaDecoded,
   exceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { IKibanaResponse, KibanaResponseFactory } from '@kbn/core-http-server';
+import { IKibanaResponse, KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 
 import { SiemResponseFactory, getExceptionListClient } from '../routes';
 import { ListsRequestHandlerContext } from '../types';
 
 export const createExceptionListHandler = async (
   context: ListsRequestHandlerContext,
-  request: {
-    body: InternalCreateExceptionListSchemaDecoded;
-    query?: InternalCreateExceptionListQuerySchema;
-  },
+  request: KibanaRequest<unknown, unknown, CreateExceptionListSchemaDecoded, 'post'>,
   response: KibanaResponseFactory,
-  siemResponse: SiemResponseFactory
+  siemResponse: SiemResponseFactory,
+  options: { ignoreExisting: boolean } = { ignoreExisting: false }
 ): Promise<IKibanaResponse> => {
   const {
     name,
@@ -43,7 +40,7 @@ export const createExceptionListHandler = async (
   });
 
   if (exceptionList != null) {
-    if (request.query && request.query.ignore_existing) {
+    if (options.ignoreExisting) {
       return response.ok({ body: exceptionList });
     }
     return siemResponse.error({

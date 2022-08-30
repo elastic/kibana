@@ -7,17 +7,19 @@
 
 import type {
   CreateExceptionListItemSchema,
-  InternalCreateExceptionListSchema,
+  CreateExceptionListSchema,
   ExceptionListItemSchema,
+  ExceptionListSchema,
   ExceptionListSummarySchema,
   FoundExceptionListItemSchema,
   ListId,
   UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+
 import {
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_URL,
-  INTERNAL_EXCEPTION_LIST_URL,
+  INTERNAL_EXCEPTIONS_LIST_ENSURE_CREATED_URL,
 } from '@kbn/securitysolution-list-constants';
 import type { HttpStart } from '@kbn/core/public';
 import { MANAGEMENT_DEFAULT_PAGE, MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../common/constants';
@@ -35,7 +37,7 @@ export class ExceptionsListApiClient {
   constructor(
     private readonly http: HttpStart,
     public readonly listId: ListId,
-    private readonly listDefinition: InternalCreateExceptionListSchema,
+    private readonly listDefinition: CreateExceptionListSchema,
     private readonly readTransform?: (item: ExceptionListItemSchema) => ExceptionListItemSchema,
     private readonly writeTransform?: <
       T extends CreateExceptionListItemSchema | UpdateExceptionListItemSchema
@@ -47,7 +49,7 @@ export class ExceptionsListApiClient {
   }
 
   /**
-   * PrivateStatic method that creates the list and don't throw if list already exists.
+   * PrivateStatic method that creates the list.
    * This method is being used when initializing an instance only once.
    */
   private async createExceptionList(): Promise<void> {
@@ -59,15 +61,9 @@ export class ExceptionsListApiClient {
       new Promise<void>((resolve, reject) => {
         const asyncFunction = async () => {
           try {
-            await this.http.post<ExceptionListItemSchema>(
-              `${INTERNAL_EXCEPTION_LIST_URL}/_create`,
-              {
-                body: JSON.stringify({ ...this.listDefinition, list_id: this.listId }),
-                query: {
-                  ignore_existing: true,
-                },
-              }
-            );
+            await this.http.post<ExceptionListSchema>(INTERNAL_EXCEPTIONS_LIST_ENSURE_CREATED_URL, {
+              body: JSON.stringify({ ...this.listDefinition, list_id: this.listId }),
+            });
 
             resolve();
           } catch (err) {
@@ -105,7 +101,7 @@ export class ExceptionsListApiClient {
   public static getInstance(
     http: HttpStart,
     listId: string,
-    listDefinition: InternalCreateExceptionListSchema,
+    listDefinition: CreateExceptionListSchema,
     readTransform?: (item: ExceptionListItemSchema) => ExceptionListItemSchema,
     writeTransform?: <T extends CreateExceptionListItemSchema | UpdateExceptionListItemSchema>(
       item: T
