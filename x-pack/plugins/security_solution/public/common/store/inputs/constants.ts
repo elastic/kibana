@@ -5,5 +5,9 @@
  * 2.0.
  */
 
-export type InputsModelId = 'global' | 'timeline';
+export type InputsModelId = 'global' | 'timeline' | 'socTrends';
+// sometimes you have to bend over backwards to please typescript
+export const socTrendsId: InputsModelId = 'socTrends';
+export const timelineId: InputsModelId = 'timeline';
+
 export type TimeRangeKinds = 'absolute' | 'relative';

@@ -50,7 +50,7 @@ export const InvestigateInTimelineButton: React.FunctionComponent<{
         })
       );
       // Unlock the time range from the global time range
-      dispatch(inputsActions.removeGlobalLinkTo());
+      dispatch(inputsActions.removeLinkTo(['timeline', 'global']));
     }
   }, [dispatch, clearTimeline, dataProviders]);
 

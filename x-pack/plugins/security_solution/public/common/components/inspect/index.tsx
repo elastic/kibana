@@ -8,8 +8,6 @@
 import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import React from 'react';
 
-import type { InputsModelId } from '../../store/inputs/constants';
-
 import { HoverVisibilityContainer } from '../hover_visibility_container';
 
 import { ModalInspectQuery } from './modal';
@@ -34,7 +32,7 @@ export const InspectButtonContainer: React.FC<InspectButtonContainerProps> = ({
 
 interface InspectButtonProps {
   compact?: boolean;
-  inputId?: InputsModelId;
+  inputId?: 'global' | 'timeline';
   inspectIndex?: number;
   isDisabled?: boolean;
   multiple?: boolean;

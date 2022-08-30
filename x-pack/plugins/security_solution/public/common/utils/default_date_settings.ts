@@ -9,6 +9,7 @@ import dateMath from '@kbn/datemath';
 import moment from 'moment';
 import { isBoolean, isNumber, isString } from 'lodash/fp';
 
+import { getPreviousTimeRange } from './get_time_range';
 import {
   DEFAULT_APP_TIME_RANGE,
   DEFAULT_APP_REFRESH_INTERVAL,
@@ -52,7 +53,10 @@ export const getTimeRangeSettings = (uiSettings = true) => {
   const toStr = (isString(timeRange?.to) && timeRange?.to) || DEFAULT_TO;
   const from = parseDateWithDefault(fromStr, DEFAULT_FROM_MOMENT).toISOString();
   const to = parseDateWithDefault(toStr, DEFAULT_TO_MOMENT, true).toISOString();
-  return { from, fromStr, to, toStr };
+
+  const socTrends = getPreviousTimeRange({ to, from });
+
+  return { from, fromStr, to, toStr, socTrends };
 };
 
 /**

@@ -53,6 +53,11 @@ export const allowedExperimentalValues = Object.freeze({
    * - We show a table with plain execution logs on the Rule Details page.
    */
   extendedRuleExecutionLoggingEnabled: false,
+
+  /**
+   * Enables the SOC trends timerange and stats on D&R page
+   */
+  socTrendsEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

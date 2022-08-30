@@ -27,7 +27,6 @@ import { useLocation } from 'react-router-dom';
 import { NO_ALERT_INDEX } from '../../../../common/constants';
 import * as i18n from './translations';
 import { getScopeFromPath, useSourcererDataView } from '../../containers/sourcerer';
-import type { InputsModelId } from '../../store/inputs/constants';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 
 const DescriptionListStyled = styled(EuiDescriptionList)`
@@ -48,7 +47,7 @@ interface ModalInspectProps {
   additionalRequests?: string[] | null;
   additionalResponses?: string[] | null;
   closeModal: () => void;
-  inputId?: InputsModelId;
+  inputId?: 'timeline' | 'global';
   request: string;
   response: string;
   title: string | React.ReactElement | React.ReactNode;
