@@ -49,8 +49,9 @@ export const ControlFrame = ({
   const controlStyle = select((state) => state.explicitInput.controlStyle);
 
   // Controls Services Context
-  const { overlays } = pluginServices.getHooks();
-  const { openConfirm } = overlays.useService();
+  const {
+    overlays: { openConfirm },
+  } = pluginServices.getServices();
 
   const embeddable = useChildEmbeddable({ untilEmbeddableLoaded, embeddableId, embeddableType });
 
