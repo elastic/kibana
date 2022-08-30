@@ -38,7 +38,7 @@ type ClientMethodOptionalArgsFrom<E extends HttpApiInterfaceEntryDefinition> = (
 /**
  * A client that can be used to manage a specific {@link FileKind}.
  */
-export interface FilesClient {
+export interface ScopedFilesClient {
   /**
    * Create a new file object with the provided metadata.
    *
@@ -137,17 +137,19 @@ export interface FilesClient {
 }
 
 export type FilesClientResponses = {
-  [K in keyof FilesClient]: Awaited<ReturnType<FilesClient[K]>>;
+  [K in keyof ScopedFilesClient]: Awaited<ReturnType<ScopedFilesClient[K]>>;
 };
 
 /**
- * A factory for creating a {@link FilesClient}
+ * A factory for creating a {@link ScopedFilesClient}
  */
 export interface FilesClientFactory {
   /**
    * Create a {@link FileClient} for a given {@link FileKind}.
    *
+   * This version of the file client is scoped to a file kind.
+   *
    * @param fileKind - The {@link FileKind} to create a client for.
    */
-  asScoped(fileKind: string): FilesClient;
+  asScoped(fileKind: string): ScopedFilesClient;
 }

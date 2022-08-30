@@ -7,7 +7,7 @@
 
 import { FilesPlugin } from './plugin';
 export type { FilesSetup, FilesStart } from './plugin';
-export type { FilesClient, FilesClientFactory, FilesClientResponses } from './types';
+export type { ScopedFilesClient, FilesClientFactory, FilesClientResponses } from './types';
 
 export function plugin() {
   return new FilesPlugin();

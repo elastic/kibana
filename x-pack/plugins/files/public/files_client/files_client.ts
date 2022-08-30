@@ -8,7 +8,7 @@
 import { pipe } from 'fp-ts/lib/function';
 import * as qs from 'query-string';
 import type { HttpStart } from '@kbn/core/public';
-import type { FilesClient } from '../types';
+import type { ScopedFilesClient } from '../types';
 import {
   API_BASE_PATH,
   FILES_API_BASE_PATH,
@@ -76,8 +76,8 @@ const commonBodyHeaders = {
   },
 };
 
-export const createFilesClient = ({ http, fileKind }: Args): FilesClient => {
-  const api: FilesClient = {
+export const createFilesClient = ({ http, fileKind }: Args): ScopedFilesClient => {
+  const api: ScopedFilesClient = {
     create: (args) => {
       return http.post(apiRoutes.getCreateFileRoute(fileKind), {
         headers: commonBodyHeaders,
