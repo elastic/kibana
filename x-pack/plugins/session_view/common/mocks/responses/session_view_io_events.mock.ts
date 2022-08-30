@@ -92,7 +92,7 @@ export const sessionViewIOEventsMock: ProcessEventResults = {
           id: '1',
         },
         process: {
-          entity_id: '3',
+          entity_id: '2',
           name: 'vim',
           executable: '/bin/vi',
           entry_leader: {
@@ -128,7 +128,7 @@ export const sessionViewIOEventsMock: ProcessEventResults = {
           id: '1',
         },
         process: {
-          entity_id: '4',
+          entity_id: '2',
           name: 'vim',
           executable: '/bin/vi',
           entry_leader: {
@@ -164,7 +164,7 @@ export const sessionViewIOEventsMock: ProcessEventResults = {
           id: '1',
         },
         process: {
-          entity_id: '5',
+          entity_id: '2',
           name: 'vim',
           executable: '/bin/vi',
           entry_leader: {
@@ -200,7 +200,7 @@ export const sessionViewIOEventsMock: ProcessEventResults = {
           id: '1',
         },
         process: {
-          entity_id: '6',
+          entity_id: '2',
           name: 'vim',
           executable: '/bin/vi',
           entry_leader: {
@@ -236,7 +236,7 @@ export const sessionViewIOEventsMock: ProcessEventResults = {
           id: '1',
         },
         process: {
-          entity_id: '6',
+          entity_id: '2',
           name: 'vim',
           executable: '/bin/vi',
           entry_leader: {
@@ -272,7 +272,7 @@ export const sessionViewIOEventsMock: ProcessEventResults = {
           id: '1',
         },
         process: {
-          entity_id: '7',
+          entity_id: '1',
           name: 'bash',
           executable: '/bin/bash',
           entry_leader: {
