@@ -280,6 +280,37 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+        "id": "def-server.getIndexForType",
+        "type": "Function",
+        "tags": [],
+        "label": "getIndexForType",
+        "description": [],
+        "signature": [
+          "({ type, typeRegistry, defaultIndex, kibanaVersion, }: GetIndexForTypeOptions) => string"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/utils/get_index_for_type.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+            "id": "def-server.getIndexForType.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  type,\n  typeRegistry,\n  defaultIndex,\n  kibanaVersion,\n}",
+            "description": [],
+            "signature": [
+              "GetIndexForTypeOptions"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/utils/get_index_for_type.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
         "id": "def-server.getProperty",
         "type": "Function",
         "tags": [],
