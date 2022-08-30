@@ -23,8 +23,6 @@ const ALERTS_TABLE_CONTAINER_SELECTOR = 'alertsTable';
 const VIEW_RULE_DETAILS_SELECTOR = 'viewRuleDetails';
 const VIEW_RULE_DETAILS_FLYOUT_SELECTOR = 'viewRuleDetailsFlyout';
 
-const ACTION_COLUMN_INDEX = 1;
-
 type WorkflowStatus = 'open' | 'acknowledged' | 'closed';
 
 export function ObservabilityAlertsCommonProvider({
@@ -204,11 +202,7 @@ export function ObservabilityAlertsCommonProvider({
   };
 
   const openActionsMenuForRow = async (rowIndex: number) => {
-    const rows = await getTableCellsInRows();
-    const actionsOverflowButton = await testSubjects.findDescendant(
-      'alertsTableRowActionMore',
-      rows[rowIndex][ACTION_COLUMN_INDEX]
-    );
+    const actionsOverflowButton = await getActionsButtonByIndex(rowIndex);
     await actionsOverflowButton.click();
   };
 

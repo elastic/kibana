@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiFlyoutSize } from '@elastic/eui';
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { DataViewBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { getTime } from '@kbn/data-plugin/common';
@@ -49,7 +49,7 @@ function AlertsPage() {
   const [alertFilterStatus, setAlertFilterStatus] = useState(
     ALL_ALERTS.query as AlertStatusFilterButton
   );
-  const refetch = useRef<() => void>();
+  // const [refreshNow, setRefreshNow] = useState<number>();
   const { rangeFrom, setRangeFrom, rangeTo, setRangeTo, kuery, setKuery } =
     useAlertsPageStateContainer();
   const {
@@ -164,17 +164,28 @@ function AlertsPage() {
     configurationId: AlertConsumers.OBSERVABILITY,
     id: ALERTS_TABLE_ID,
     flyoutSize: 's' as EuiFlyoutSize,
-    // TODO: check what is this featureIds exactly?
-    featureIds: [AlertConsumers.APM, AlertConsumers.INFRASTRUCTURE, AlertConsumers.LOGS],
+    featureIds: [
+      AlertConsumers.APM,
+      AlertConsumers.INFRASTRUCTURE,
+      AlertConsumers.LOGS,
+      AlertConsumers.UPTIME,
+    ],
     query: esFilters,
     showExpandToDetails: false,
     pageSize: 50,
+    // refreshNow,
   };
+
+  // const onRefresh = () => {
+  //   setRefreshNow(new Date().getTime());
+  // };
 
   const onQueryChange = useCallback(
     ({ dateRange, query }) => {
       if (rangeFrom === dateRange.from && rangeTo === dateRange.to && kuery === (query ?? '')) {
-        return refetch.current && refetch.current();
+        // TODO Enable refresh after merging https://github.com/elastic/kibana/pull/139669
+        // return onRefresh();
+        return;
       }
       timeFilterService.setTime(dateRange);
       setRangeFrom(dateRange.from);

@@ -29,7 +29,7 @@ const getO11yAlertsTableConfiguration = (
   sort: [
     {
       [TIMESTAMP]: {
-        order: 'asc' as SortOrder,
+        order: 'desc' as SortOrder,
       },
     },
   ],
