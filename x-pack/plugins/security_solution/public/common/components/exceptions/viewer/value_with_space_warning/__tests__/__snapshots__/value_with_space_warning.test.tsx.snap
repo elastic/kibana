@@ -65,26 +65,41 @@ exports[`ValueWithSpaceWarning should not render if showSpaceWarning is truthy 1
 Object {
   "asFragment": [Function],
   "baseElement": <body>
-    <div>
+    .c0 {
+  margin-left: 4px;
+  display: inline;
+}
+
+<div>
+      <div
+        class="c0"
+      >
+        <span
+          class="euiToolTipAnchor"
+        >
+          <span
+            color="warning"
+            data-euiicon-type="iInCircle"
+            data-test-subj="value_with_space_warning_tooltip"
+          />
+        </span>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      class="sc-AxjAm kREtoY"
+    >
       <span
         class="euiToolTipAnchor"
       >
         <span
+          color="warning"
           data-euiicon-type="iInCircle"
           data-test-subj="value_with_space_warning_tooltip"
         />
       </span>
     </div>
-  </body>,
-  "container": <div>
-    <span
-      class="euiToolTipAnchor"
-    >
-      <span
-        data-euiicon-type="iInCircle"
-        data-test-subj="value_with_space_warning_tooltip"
-      />
-    </span>
   </div>,
   "debug": [Function],
   "findAllByAltText": [Function],
