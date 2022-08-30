@@ -59,7 +59,8 @@ describe('TaskRunnerTimer', () => {
     });
   });
 
-  describe('runWithTimer', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/139634
+  describe.skip('runWithTimer', () => {
     test('should calculate time it takes to run callback function for a given timer span', async () => {
       const result = await timer.runWithTimer(TaskRunnerTimerSpan.ProcessAlerts, async () => {
         await new Promise((resolve) => setTimeout(resolve, 2000));
