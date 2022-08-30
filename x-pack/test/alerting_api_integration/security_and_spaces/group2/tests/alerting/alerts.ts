@@ -1332,6 +1332,28 @@ instanceStateValue: true
     expect(event?.kibana?.alert?.rule?.execution?.metrics?.alert_counts?.new).to.be(1);
     expect(event?.kibana?.alert?.rule?.execution?.metrics?.alert_counts?.recovered).to.be(0);
 
+    expect(
+      event?.kibana?.alert?.rule?.execution?.metrics?.claim_to_start_duration_ms
+    ).to.be.greaterThan(0);
+    expect(event?.kibana?.alert?.rule?.execution?.metrics?.total_run_duration_ms).to.be.greaterThan(
+      0
+    );
+    expect(
+      event?.kibana?.alert?.rule?.execution?.metrics?.prepare_rule_duration_ms
+    ).to.be.greaterThan(0);
+    expect(
+      event?.kibana?.alert?.rule?.execution?.metrics?.rule_type_run_duration_ms
+    ).to.be.greaterThan(0);
+    expect(
+      event?.kibana?.alert?.rule?.execution?.metrics?.process_alerts_duration_ms
+    ).to.be.greaterThan(0);
+    expect(
+      event?.kibana?.alert?.rule?.execution?.metrics?.trigger_actions_duration_ms
+    ).to.be.greaterThan(0);
+    expect(
+      event?.kibana?.alert?.rule?.execution?.metrics?.process_rule_duration_ms
+    ).to.be.greaterThan(0);
+
     expect(event?.rule).to.eql({
       id: alertId,
       license: 'basic',
