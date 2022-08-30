@@ -300,9 +300,9 @@ export const dispatchUpdateReduxTime =
         })
       );
     }
-    if (kql) {
+    if (kql && kql.refetch) {
       return {
-        kqlHaveBeenUpdated: kql.refetch(dispatch),
+        kqlHaveBeenUpdated: kql.refetch(dispatch) ?? false,
       };
     }
 

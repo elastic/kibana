@@ -316,7 +316,7 @@ describe('selectors', () => {
         queries: [
           {
             loading: true,
-            id: '1',
+            id: 'kql',
             inspect: { dsl: [], response: [] },
             isInspected: false,
             refetch: null,
@@ -334,7 +334,7 @@ describe('selectors', () => {
         queries: [
           {
             loading: false,
-            id: '1',
+            id: 'kql',
             inspect: { dsl: [], response: [] },
             isInspected: false,
             refetch: null,
@@ -342,7 +342,7 @@ describe('selectors', () => {
           },
           {
             loading: false,
-            id: '1',
+            id: 'kql',
             inspect: { dsl: [], response: [] },
             isInspected: false,
             refetch: null,
@@ -360,7 +360,7 @@ describe('selectors', () => {
         queries: [
           {
             loading: false,
-            id: '1',
+            id: 'kql',
             inspect: { dsl: [], response: [] },
             isInspected: false,
             refetch: null,
@@ -368,7 +368,7 @@ describe('selectors', () => {
           },
           {
             loading: true,
-            id: '1',
+            id: 'kql',
             inspect: { dsl: [], response: [] },
             isInspected: false,
             refetch: null,
@@ -427,7 +427,7 @@ describe('selectors', () => {
             queries: [
               {
                 loading: false,
-                id: '1',
+                id: 'kql',
                 inspect: { dsl: [], response: [] },
                 isInspected: false,
                 refetch: null,

@@ -370,7 +370,7 @@ describe('SIEM Super Date Picker', () => {
         clone.inputs.global.queries = [
           {
             loading: true,
-            id: '1',
+            id: 'kql',
             inspect: { dsl: [], response: [] },
             isInspected: false,
             refetch: null,
@@ -388,7 +388,7 @@ describe('SIEM Super Date Picker', () => {
         clone.inputs.global.queries = [
           {
             loading: true,
-            id: '1',
+            id: 'kql',
             inspect: { dsl: [], response: [] },
             isInspected: false,
             refetch: null,
