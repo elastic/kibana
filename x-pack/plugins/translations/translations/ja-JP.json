@@ -32100,7 +32100,6 @@
     "xpack.triggersActionsUI.sections.rulesList.attentionBannerTitle": "{totalStatusesError, plural, other  {# 件のルール}}でエラーが見つかりました。",
     "xpack.triggersActionsUI.sections.rulesList.collapsedItemActions.snoozedUntil": "{snoozeTime}までスヌーズ",
     "xpack.triggersActionsUI.sections.rulesList.hideAllErrors": "{totalStatusesError, plural, other {件のエラー}}を非表示",
-    "xpack.triggersActionsUI.sections.rulesList.removeAllSnoozeSchedulesConfirmText": "{count, plural, other {# 件のスケジュールされたスヌーズ}}がこのルールから削除されます。よろしいですか？",
     "xpack.triggersActionsUI.sections.rulesList.rulesListAutoRefresh.lastUpdateText": "更新された{lastUpdateText}",
     "xpack.triggersActionsUI.sections.rulesList.rulesListNotifyBadge.snoozedTooltip": "通知は{snoozeTime}間スヌーズされます",
     "xpack.triggersActionsUI.sections.rulesList.rulesListNotifyBadge.snoozeScheduledTooltip": "通知は{schedStart}からスヌーズされるようにスケジュールされました",
