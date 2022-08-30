@@ -24,6 +24,7 @@ import type { Panel } from '../../../../common/types';
 
 export interface SearchCapabilitiesOptions {
   timezone?: string;
+  forceFixedInterval?: boolean;
   maxBucketsLimit: number;
   panel?: Panel;
 }
@@ -42,11 +43,13 @@ const convertAggsToRestriction = (allAvailableAggs: string[]) =>
 export class DefaultSearchCapabilities {
   public timezone: SearchCapabilitiesOptions['timezone'];
   public maxBucketsLimit: SearchCapabilitiesOptions['maxBucketsLimit'];
+  public forceFixedInterval: SearchCapabilitiesOptions['forceFixedInterval'];
   public panel?: Panel;
 
   constructor(options: SearchCapabilitiesOptions) {
     this.timezone = options.timezone;
     this.maxBucketsLimit = options.maxBucketsLimit;
+    this.forceFixedInterval = options.forceFixedInterval;
     this.panel = options.panel;
   }
 
