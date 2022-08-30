@@ -6,12 +6,15 @@
  */
 
 import expect from '@kbn/expect';
+import { ProvidedType } from '@kbn/test';
 import { DebugState } from '@elastic/charts';
 import { DebugStateAxis } from '@elastic/charts/dist/state/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 
 type HeatmapDebugState = Required<Pick<DebugState, 'heatmap' | 'axes' | 'legend'>>;
+
+export type MlAnomalySwimLane = ProvidedType<typeof SwimLaneProvider>;
 
 export function SwimLaneProvider({ getService }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');

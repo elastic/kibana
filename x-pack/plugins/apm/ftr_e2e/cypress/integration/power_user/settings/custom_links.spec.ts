@@ -37,6 +37,10 @@ describe('Custom links', () => {
 
   it('clears filter values when field is selected', () => {
     cy.visitKibana(basePath);
+
+    // wait for empty prompt
+    cy.get('[data-test-subj="customLinksEmptyPrompt"]').should('be.visible');
+
     cy.contains('Create custom link').click();
     cy.get('[data-test-subj="filter-0"]').select('service.name');
     cy.get(

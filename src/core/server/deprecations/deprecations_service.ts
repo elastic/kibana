@@ -14,88 +14,13 @@ import type { DomainDeprecationDetails } from '@kbn/core-deprecations-common';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type {
+  DeprecationsServiceSetup,
+  DeprecationRegistryProvider,
+} from '@kbn/core-deprecations-server';
 import { DeprecationsFactory } from './deprecations_factory';
-import { RegisterDeprecationsConfig } from './types';
 import { registerRoutes } from './routes';
 import { config as deprecationConfig, DeprecationConfigType } from './deprecation_config';
-
-/**
- * The deprecations service provides a way for the Kibana platform to communicate deprecated
- * features and configs with its users. These deprecations are only communicated
- * if the deployment is using these features. Allowing for a user tailored experience
- * for upgrading the stack version.
- *
- * The Deprecation service is consumed by the upgrade assistant to assist with the upgrade
- * experience.
- *
- * If a deprecated feature can be resolved without manual user intervention.
- * Using correctiveActions.api allows the Upgrade Assistant to use this api to correct the
- * deprecation upon a user trigger.
- *
- * @example
- * ```ts
- * import { DeprecationsDetails, GetDeprecationsContext, CoreSetup } from 'src/core/server';
- * import { i18n } from '@kbn/i18n';
- *
- * async function getDeprecations({ esClient, savedObjectsClient }: GetDeprecationsContext): Promise<DeprecationsDetails[]> {
- *   const deprecations: DeprecationsDetails[] = [];
- *   const count = await getFooCount(savedObjectsClient);
- *   if (count > 0) {
- *     deprecations.push({
- *       title: i18n.translate('xpack.foo.deprecations.title', {
- *         defaultMessage: `Foo's are deprecated`
- *       }),
- *       message: i18n.translate('xpack.foo.deprecations.message', {
- *         defaultMessage: `You have {count} Foo's. Migrate your Foo's to a dashboard to continue using them.`,
- *         values: { count },
- *       }),
- *       documentationUrl:
- *         'https://www.elastic.co/guide/en/kibana/current/foo.html',
- *       level: 'warning',
- *       correctiveActions: {
- *         manualSteps: [
- *            i18n.translate('xpack.foo.deprecations.manualStepOneMessage', {
- *              defaultMessage: 'Navigate to the Kibana Dashboard and click "Create dashboard".',
- *            }),
- *            i18n.translate('xpack.foo.deprecations.manualStepTwoMessage', {
- *              defaultMessage: 'Select Foo from the "New Visualization" window.',
- *            }),
- *         ],
- *         api: {
- *           path: '/internal/security/users/test_dashboard_user',
- *           method: 'POST',
- *           body: {
- *             username: 'test_dashboard_user',
- *             roles: [
- *               "machine_learning_user",
- *               "enrich_user",
- *               "kibana_admin"
- *             ],
- *             full_name: "Alison Goryachev",
- *             email: "alisongoryachev@gmail.com",
- *             metadata: {},
- *             enabled: true
- *           }
- *         },
- *       },
- *     });
- *   }
- *   return deprecations;
- * }
- *
- *
- * export class Plugin() {
- *   setup: (core: CoreSetup) => {
- *     core.deprecations.registerDeprecations({ getDeprecations });
- *   }
- * }
- * ```
- *
- * @public
- */
-export interface DeprecationsServiceSetup {
-  registerDeprecations: (deprecationContext: RegisterDeprecationsConfig) => void;
-}
 
 /**
  * Server-side client that provides access to fetch all Kibana deprecations
@@ -118,9 +43,7 @@ export interface InternalDeprecationsServiceStart {
 }
 
 /** @internal */
-export interface InternalDeprecationsServiceSetup {
-  getRegistry: (domainId: string) => DeprecationsServiceSetup;
-}
+export type InternalDeprecationsServiceSetup = DeprecationRegistryProvider;
 
 /** @internal */
 export interface DeprecationsSetupDeps {
