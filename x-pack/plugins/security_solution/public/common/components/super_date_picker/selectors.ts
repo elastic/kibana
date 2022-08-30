@@ -11,7 +11,6 @@ import { InputsModelId } from '../../store/inputs/constants';
 import type { State } from '../../store';
 import type {
   GlobalQuery,
-  GlobalKqlQuery,
   InputsRange,
   InputsRangeTimeOnly,
   Policy,
@@ -63,7 +62,4 @@ export const queriesSelector = () =>
   createSelector(getGlobalQueries, (queries) => queries.filter((q) => q.id !== 'kql'));
 
 export const kqlQuerySelector = () =>
-  createSelector(
-    getQueries,
-    (queries) => queries.find((q) => q.id === 'kql') as unknown as GlobalKqlQuery | undefined
-  );
+  createSelector(getQueries, (queries) => queries.find((q) => q.id === 'kql'));
