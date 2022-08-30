@@ -25,21 +25,15 @@ import { SpyRoute } from '../common/utils/route/spy_routes';
 
 const RulesSubRoutes = [
   {
-    path: `/rules/id/:detailName/:tabName(${RuleDetailTabs.alerts}|${RuleDetailTabs.exceptions}|${RuleDetailTabs.executionResults}|${RuleDetailTabs.executionEvents})`,
-    main: RuleDetailsPage,
-    exact: true,
-  },
-  {
     path: '/rules/id/:detailName/edit',
     main: EditRulePage,
     exact: true,
   },
-
-  // {
-  //   path: '/rules/id/:detailName',
-  //   main: RuleDetailsPage,
-  //   exact: true,
-  // },
+  {
+    path: `/rules/id/:detailName/:tabName(${RuleDetailTabs.alerts}|${RuleDetailTabs.exceptions}|${RuleDetailTabs.executionResults}|${RuleDetailTabs.executionEvents})`,
+    main: RuleDetailsPage,
+    exact: true,
+  },
   {
     path: '/rules/create',
     main: CreateRulePage,

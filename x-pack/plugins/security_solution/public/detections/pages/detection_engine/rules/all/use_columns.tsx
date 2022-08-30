@@ -18,7 +18,7 @@ import {
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { FormattedRelativePreferenceDate } from '../../../../../common/components/formatted_date';
-import { getRuleDetailsUrl } from '../../../../../common/components/link_to/redirect_to_detection_engine';
+import { getRuleDetailsTabUrl } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import { PopoverItems } from '../../../../../common/components/popover_items';
 import { useKibana, useUiSetting$ } from '../../../../../common/lib/kibana';
 import { canEditRuleWithActions, getToolTipContent } from '../../../../../common/utils/privileges';
@@ -42,6 +42,7 @@ import { useStartTransaction } from '../../../../../common/lib/apm/use_start_tra
 import { useInvalidateRules } from '../../../../containers/detection_engine/rules/use_find_rules_query';
 import { useInvalidatePrePackagedRulesStatus } from '../../../../containers/detection_engine/rules/use_pre_packaged_rules_status';
 import { SecuritySolutionLinkAnchor } from '../../../../../common/components/links';
+import { RuleDetailTabs } from '../details';
 
 export type TableColumn = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
 
@@ -93,7 +94,7 @@ export const RuleLink = ({ name, id }: Pick<Rule, 'id' | 'name'>) => {
       <SecuritySolutionLinkAnchor
         data-test-subj="ruleName"
         deepLinkId={SecurityPageName.rules}
-        path={getRuleDetailsUrl(id)}
+        path={getRuleDetailsTabUrl(id, RuleDetailTabs.alerts)}
       >
         {name}
       </SecuritySolutionLinkAnchor>
