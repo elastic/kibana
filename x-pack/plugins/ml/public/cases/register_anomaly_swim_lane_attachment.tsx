@@ -34,6 +34,12 @@ export function registerAnomalySwimLaneCasesAttachment(
   coreStart: CoreStart,
   pluginStart: MlStartDependencies
 ) {
+  const EmbeddableComponent = getEmbeddableComponent(
+    ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+    coreStart,
+    pluginStart
+  );
+
   cases.attachmentFramework.registerPersistableState({
     id: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
     icon: PLUGIN_ICON,
@@ -51,12 +57,6 @@ export function registerAnomalySwimLaneCasesAttachment(
       actions: <AttachmentActions />,
       children: React.lazy(() => {
         return Promise.resolve().then(() => {
-          const EmbeddableComponent = getEmbeddableComponent(
-            ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
-            coreStart,
-            pluginStart
-          );
-
           return {
             default: React.memo((props: PersistableStateAttachmentViewProps) => {
               const { persistableStateAttachmentState } = props;

@@ -26,6 +26,12 @@ export function registerAnomalyChartsCasesAttachment(
   coreStart: CoreStart,
   pluginStart: MlStartDependencies
 ) {
+  const EmbeddableComponent = getEmbeddableComponent(
+    ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
+    coreStart,
+    pluginStart
+  );
+
   cases.attachmentFramework.registerPersistableState({
     id: ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
     icon: PLUGIN_ICON,
@@ -42,12 +48,6 @@ export function registerAnomalyChartsCasesAttachment(
       timelineAvatar: PLUGIN_ICON,
       children: React.lazy(() => {
         return Promise.resolve().then(() => {
-          const EmbeddableComponent = getEmbeddableComponent(
-            ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
-            coreStart,
-            pluginStart
-          );
-
           return {
             default: React.memo((props: PersistableStateAttachmentViewProps) => {
               const { persistableStateAttachmentState } = props;
