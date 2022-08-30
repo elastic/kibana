@@ -8,7 +8,6 @@
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 import { login } from '../../tasks/login';
 import {
-  checkResults,
   findAndClickButton,
   findFormFieldByRowsLabelAndType,
   inputQuery,
@@ -80,7 +79,8 @@ describe('Alert Event Details', () => {
     cy.contains('1 agent selected.');
     inputQuery('select * from uptime;');
     submitQuery();
-    checkResults();
+    cy.contains('Results');
+    cy.contains('Add to timeline investigation');
     cy.contains('Save for later').click();
     cy.contains('Save query');
     cy.get('.euiButtonEmpty--flushLeft').contains('Cancel').click();

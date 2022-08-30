@@ -133,8 +133,8 @@ export const SessionView = ({
   } = useFetchSessionViewAlerts(sessionEntityId, investigatedAlertId);
 
   const handleRefresh = useCallback(() => {
-    refetch({ refetchPage: (page, index, allPages) => allPages.length - 1 === index });
-    refetchAlerts({ refetchPage: (page, index, allPages) => allPages.length - 1 === index });
+    refetch({ refetchPage: (_page, index, allPages) => allPages.length - 1 === index });
+    refetchAlerts({ refetchPage: (_page, index, allPages) => allPages.length - 1 === index });
   }, [refetch, refetchAlerts]);
 
   const alerts = useMemo(() => {

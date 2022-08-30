@@ -94,6 +94,7 @@ describe('T1 Analyst - READ + runSavedQueries ', () => {
     cy.contains('New live query').click();
     selectAllAgents();
     cy.get(LIVE_QUERY_EDITOR).should('not.exist');
-    cy.contains('Submit').should('be.disabled');
+    submitQuery();
+    cy.contains('Query is a required field');
   });
 });

@@ -10,7 +10,8 @@ import { createTimeFilter, TimerangeFilter } from '../create_query';
 import { detectReason } from './detect_reason';
 import { detectReasonFromException } from './detect_reason_from_exception';
 import { LegacyRequest } from '../../types';
-import { FilebeatResponse } from '../../../common/types/filebeat';
+import { LogsResponse } from '../../../common/types/logs';
+import { elasticsearchLogsFilter } from './logs_filter';
 
 interface LogType {
   level?: string;
@@ -18,9 +19,9 @@ interface LogType {
 }
 
 async function handleResponse(
-  response: FilebeatResponse,
+  response: LogsResponse,
   req: LegacyRequest,
-  filebeatIndexPattern: string,
+  logsIndexPattern: string,
   opts: { clusterUuid?: string; nodeUuid?: string; indexUuid?: string; start: number; end: number }
 ) {
   const result: { enabled: boolean; types: LogType[]; reason?: any } = {
@@ -43,7 +44,7 @@ async function handleResponse(
       };
     });
   } else {
-    result.reason = await detectReason(req, filebeatIndexPattern, opts);
+    result.reason = await detectReason(req, logsIndexPattern, opts);
   }
 
   return result;
@@ -51,7 +52,7 @@ async function handleResponse(
 
 export async function getLogTypes(
   req: LegacyRequest,
-  filebeatIndexPattern: string,
+  logsIndexPattern: string,
   {
     clusterUuid,
     nodeUuid,
@@ -60,13 +61,14 @@ export async function getLogTypes(
     end,
   }: { clusterUuid?: string; nodeUuid?: string; indexUuid?: string; start: number; end: number }
 ) {
-  checkParam(filebeatIndexPattern, 'filebeatIndexPattern in logs/getLogTypes');
+  checkParam(logsIndexPattern, 'logsIndexPattern in logs/getLogTypes');
 
   const metric = { timestampField: '@timestamp' };
+
   const filter: Array<{ term: { [x: string]: string } } | TimerangeFilter | null> = [
-    { term: { 'service.type': 'elasticsearch' } },
     createTimeFilter({ start, end, metric }),
   ];
+
   if (clusterUuid) {
     filter.push({ term: { 'elasticsearch.cluster.uuid': clusterUuid } });
   }
@@ -78,7 +80,7 @@ export async function getLogTypes(
   }
 
   const params = {
-    index: filebeatIndexPattern,
+    index: logsIndexPattern,
     size: 0,
     filter_path: ['aggregations.levels.buckets', 'aggregations.types.buckets'],
     ignore_unavailable: true,
@@ -86,7 +88,7 @@ export async function getLogTypes(
       sort: { '@timestamp': { order: 'desc', unmapped_type: 'long' } },
       query: {
         bool: {
-          filter,
+          filter: [elasticsearchLogsFilter, ...filter],
         },
       },
       aggs: {
@@ -113,7 +115,7 @@ export async function getLogTypes(
   };
   try {
     const response = await callWithRequest(req, 'search', params);
-    result = await handleResponse(response, req, filebeatIndexPattern, {
+    result = await handleResponse(response, req, logsIndexPattern, {
       clusterUuid,
       nodeUuid,
       indexUuid,

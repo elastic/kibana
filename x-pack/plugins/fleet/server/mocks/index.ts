@@ -121,6 +121,7 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyServi
     getUpgradeDryRunDiff: jest.fn(),
     getUpgradePackagePolicyInfo: jest.fn(),
     enrichPolicyWithDefaultsFromPackage: jest.fn(),
+    findAllForAgentPolicy: jest.fn(),
   };
 };
 

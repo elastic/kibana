@@ -35,17 +35,17 @@ describe('Span links', () => {
 
   describe('when data is loaded', () => {
     let ids: Awaited<ReturnType<typeof generateSpanLinksData>>;
-    before(async () => {
-      ids = await generateSpanLinksData();
+    before(() => {
+      ids = generateSpanLinksData();
     });
 
-    after(async () => {
-      await synthtrace.clean();
+    after(() => {
+      synthtrace.clean();
     });
 
     describe('span links count on trace waterfall', () => {
       it('Shows two children and no parents on producer-internal-only Span A', () => {
-        cy.visit(
+        cy.visitKibana(
           getServiceInventoryUrl({ serviceName: 'producer-internal-only' })
         );
         cy.contains('Transaction A').click();
@@ -59,7 +59,7 @@ describe('Span links', () => {
       });
 
       it('Shows one parent and one children on producer-external-only Span B', () => {
-        cy.visit(
+        cy.visitKibana(
           getServiceInventoryUrl({ serviceName: 'producer-external-only' })
         );
         cy.contains('Transaction B').click();
@@ -73,7 +73,9 @@ describe('Span links', () => {
       });
 
       it('Shows one parent and one children on producer-consumer Transaction C', () => {
-        cy.visit(getServiceInventoryUrl({ serviceName: 'producer-consumer' }));
+        cy.visitKibana(
+          getServiceInventoryUrl({ serviceName: 'producer-consumer' })
+        );
         cy.contains('Transaction C').click();
         cy.contains('2 Span links');
         cy.get(
@@ -85,7 +87,9 @@ describe('Span links', () => {
       });
 
       it('Shows no parent and one children on producer-consumer Span C', () => {
-        cy.visit(getServiceInventoryUrl({ serviceName: 'producer-consumer' }));
+        cy.visitKibana(
+          getServiceInventoryUrl({ serviceName: 'producer-consumer' })
+        );
         cy.contains('Transaction C').click();
         cy.contains('1 Span link');
         cy.get(
@@ -97,7 +101,9 @@ describe('Span links', () => {
       });
 
       it('Shows two parents and one children on consumer-multiple Transaction D', () => {
-        cy.visit(getServiceInventoryUrl({ serviceName: 'consumer-multiple' }));
+        cy.visitKibana(
+          getServiceInventoryUrl({ serviceName: 'consumer-multiple' })
+        );
         cy.contains('Transaction D').click();
         cy.contains('2 Span links');
         cy.get(
@@ -109,7 +115,9 @@ describe('Span links', () => {
       });
 
       it('Shows two parents and one children on consumer-multiple Span E', () => {
-        cy.visit(getServiceInventoryUrl({ serviceName: 'consumer-multiple' }));
+        cy.visitKibana(
+          getServiceInventoryUrl({ serviceName: 'consumer-multiple' })
+        );
         cy.contains('Transaction D').click();
         cy.contains('2 Span links');
         cy.get(
@@ -123,7 +131,7 @@ describe('Span links', () => {
 
     describe('span link flyout', () => {
       it('Shows children details on producer-internal-only Span A', () => {
-        cy.visit(
+        cy.visitKibana(
           getServiceInventoryUrl({ serviceName: 'producer-internal-only' })
         );
         cy.contains('Transaction A').click();
@@ -154,7 +162,7 @@ describe('Span links', () => {
       });
 
       it('Shows children and parents details on producer-external-only Span B', () => {
-        cy.visit(
+        cy.visitKibana(
           getServiceInventoryUrl({ serviceName: 'producer-external-only' })
         );
         cy.contains('Transaction B').click();
@@ -178,7 +186,9 @@ describe('Span links', () => {
       });
 
       it('Shows children and parents details on producer-consumer Transaction C', () => {
-        cy.visit(getServiceInventoryUrl({ serviceName: 'producer-consumer' }));
+        cy.visitKibana(
+          getServiceInventoryUrl({ serviceName: 'producer-consumer' })
+        );
         cy.contains('Transaction C').click();
         cy.get(
           `[aria-controls="${ids.producerConsumerIds.transactionCId}"]`
@@ -210,7 +220,9 @@ describe('Span links', () => {
       });
 
       it('Shows children and parents details on producer-consumer Span C', () => {
-        cy.visit(getServiceInventoryUrl({ serviceName: 'producer-consumer' }));
+        cy.visitKibana(
+          getServiceInventoryUrl({ serviceName: 'producer-consumer' })
+        );
         cy.contains('Transaction C').click();
         cy.contains('Span C').click();
         cy.get('[data-test-subj="spanLinksTab"]').click();
@@ -232,7 +244,9 @@ describe('Span links', () => {
       });
 
       it('Shows children and parents details on consumer-multiple Transaction D', () => {
-        cy.visit(getServiceInventoryUrl({ serviceName: 'consumer-multiple' }));
+        cy.visitKibana(
+          getServiceInventoryUrl({ serviceName: 'consumer-multiple' })
+        );
         cy.contains('Transaction D').click();
         cy.get(
           `[aria-controls="${ids.producerMultipleIds.transactionDId}"]`
@@ -266,7 +280,9 @@ describe('Span links', () => {
       });
 
       it('Shows children and parents details on consumer-multiple Span E', () => {
-        cy.visit(getServiceInventoryUrl({ serviceName: 'consumer-multiple' }));
+        cy.visitKibana(
+          getServiceInventoryUrl({ serviceName: 'consumer-multiple' })
+        );
         cy.contains('Transaction D').click();
         cy.contains('Span E').click();
         cy.get('[data-test-subj="spanLinksTab"]').click();

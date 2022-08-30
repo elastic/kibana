@@ -8,10 +8,14 @@
 
 const preset = require('../jest-preset');
 
+const presetClone = { ...preset };
+
+delete presetClone.testEnvironment; // simply redefining as `testEnvironment: 'node'` has some weird side-effects (https://github.com/elastic/kibana/pull/138877)
+
 /** @typedef {import("@jest/types").Config.InitialOptions} JestConfig */
 /** @type {JestConfig} */
 module.exports = {
-  ...preset,
+  ...presetClone,
   testMatch: ['**/integration_tests**/*.test.{js,mjs,ts,tsx}'],
   testPathIgnorePatterns: preset.testPathIgnorePatterns.filter(
     (pattern) => !pattern.includes('integration_tests')
@@ -40,7 +44,6 @@ module.exports = {
     ? [['json', { file: 'jest-integration.json' }]]
     : ['html', 'text'],
 
-  testEnvironment: 'node',
   snapshotSerializers: [],
   setupFiles: ['<rootDir>/node_modules/@kbn/test/target_node/jest/setup/babel_polyfill.js'],
   haste: {

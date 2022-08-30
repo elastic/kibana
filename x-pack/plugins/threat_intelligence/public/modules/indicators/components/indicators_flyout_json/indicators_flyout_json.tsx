@@ -14,9 +14,16 @@ export const EMPTY_PROMPT_TEST_ID = 'tiFlyoutJsonEmptyPrompt';
 export const CODE_BLOCK_TEST_ID = 'tiFlyoutJsonCodeBlock';
 
 export interface IndicatorsFlyoutJsonProps {
+  /**
+   * Indicator to display in json format.
+   */
   indicator: Indicator;
 }
 
+/**
+ * Displays all the properties and values of an {@link Indicator} in json view,
+ * using the {@link EuiCodeBlock} from the @elastic/eui library.
+ */
 export const IndicatorsFlyoutJson: VFC<IndicatorsFlyoutJsonProps> = ({ indicator }) => {
   return Object.keys(indicator).length === 0 ? (
     <EuiEmptyPrompt
