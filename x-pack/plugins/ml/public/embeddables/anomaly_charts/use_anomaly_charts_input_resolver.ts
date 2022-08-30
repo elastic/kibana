@@ -83,7 +83,7 @@ export function useAnomalyChartsInputResolver(
 
           let influencersFilterQuery: InfluencersFilterQuery | undefined;
           try {
-            if (filters && query) {
+            if (filters || query) {
               influencersFilterQuery = processFilters(filters, query);
             }
           } catch (e) {
