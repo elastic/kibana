@@ -6,12 +6,19 @@
  * Side Public License, v 1.
  */
 
+import { EuiDelayRender, EuiLoadingContent } from '@elastic/eui';
 import React from 'react';
 import type { SavedObjectFinderProps } from './saved_object_finder';
 
 const LazySavedObjectFinder = React.lazy(() => import('./saved_object_finder'));
 const SavedObjectFinder = (props: SavedObjectFinderProps) => (
-  <React.Suspense fallback={null}>
+  <React.Suspense
+    fallback={
+      <EuiDelayRender delay={300}>
+        <EuiLoadingContent />
+      </EuiDelayRender>
+    }
+  >
     <LazySavedObjectFinder {...props} />
   </React.Suspense>
 );

@@ -42,7 +42,6 @@ export const useSearchItems = (defaultSavedObjectId: string | undefined) => {
         search: appDeps.data.search,
         savedObjectsClient: appDeps.savedObjects.client,
         spaces: appDeps.spaces,
-        savedObjectsTagging: appDeps.savedObjectTagging,
       });
 
       if (fetchedSavedSearch?.sharingSavedObjectProps?.errorJSON) {

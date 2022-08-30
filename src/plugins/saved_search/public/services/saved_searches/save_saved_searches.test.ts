@@ -13,7 +13,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 import { saveSavedSearch } from './save_saved_searches';
 import type { SavedSearch } from './types';
-import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 
 describe('saveSavedSearch', () => {
   let savedObjectsClient: SavedObjectsStart['client'];

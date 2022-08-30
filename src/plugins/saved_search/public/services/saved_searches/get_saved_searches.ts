@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsStart } from '@kbn/core/public';
+import type { SavedObjectsClientContract } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { injectSearchSourceReferences, parseSearchSourceJSON } from '@kbn/data-plugin/public';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
-import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SavedSearchAttributes, SavedSearch } from './types';
 
 import { SAVED_SEARCH_TYPE } from './constants';
@@ -19,9 +19,9 @@ import { fromSavedSearchAttributes } from './saved_searches_utils';
 
 interface GetSavedSearchDependencies {
   search: DataPublicPluginStart['search'];
-  savedObjectsClient: SavedObjectsStart['client'];
+  savedObjectsClient: SavedObjectsClientContract;
   spaces?: SpacesApi;
-  savedObjectsTagging: SavedObjectsTaggingApi | undefined;
+  savedObjectsTagging?: SavedObjectsTaggingApi;
 }
 
 const getEmptySavedSearch = ({
@@ -56,10 +56,9 @@ const findSavedSearch = async (
     savedSearch.references
   );
 
-  const tags =
-    savedObjectsTagging && savedSearch.references?.length
-      ? savedObjectsTagging.ui.getTagIdsFromReferences(savedSearch.references)
-      : [];
+  const tags = savedObjectsTagging
+    ? savedObjectsTagging.ui.getTagIdsFromReferences(savedSearch.references)
+    : undefined;
 
   return fromSavedSearchAttributes(
     savedSearchId,

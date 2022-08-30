@@ -37,7 +37,6 @@ export function OpenSearchPanel(props: OpenSearchPanelProps) {
     core,
     uiSettings,
     savedObjectsManagement,
-    savedObjectsPlugin,
     savedObjectsTagging,
   } = useDiscoverServices();
   const hasSavedObjectPermission =
@@ -61,7 +60,6 @@ export function OpenSearchPanel(props: OpenSearchPanelProps) {
             savedObjects: core.savedObjects,
             uiSettings,
             savedObjectsManagement,
-            savedObjectsPlugin,
             savedObjectsTagging,
           }}
           noItemsMessage={

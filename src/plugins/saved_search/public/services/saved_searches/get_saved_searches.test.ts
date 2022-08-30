@@ -27,7 +27,6 @@ describe('getSavedSearch', () => {
     const savedSearch = await getSavedSearch(undefined, {
       savedObjectsClient,
       search,
-      savedObjectsTagging: undefined,
     });
 
     expect(search.searchSource.createEmpty).toHaveBeenCalled();
@@ -54,7 +53,6 @@ describe('getSavedSearch', () => {
       await getSavedSearch('ccf1af80-2297-11ec-86e0-1155ffb9c7a7', {
         savedObjectsClient,
         search,
-        savedObjectsTagging: undefined,
       });
     } catch (error) {
       errorMessage = error.message;
@@ -97,7 +95,6 @@ describe('getSavedSearch', () => {
     const savedSearch = await getSavedSearch('ccf1af80-2297-11ec-86e0-1155ffb9c7a7', {
       savedObjectsClient,
       search,
-      savedObjectsTagging: undefined,
     });
 
     expect(savedObjectsClient.resolve).toHaveBeenCalled();
@@ -153,7 +150,7 @@ describe('getSavedSearch', () => {
             "desc",
           ],
         ],
-        "tags": Array [],
+        "tags": undefined,
         "timeRange": undefined,
         "timeRestore": undefined,
         "title": "test1",
@@ -195,7 +192,6 @@ describe('getSavedSearch', () => {
     const savedSearch = await getSavedSearch('ccf1af80-2297-11ec-86e0-1155ffb9c7a7', {
       savedObjectsClient,
       search,
-      savedObjectsTagging: undefined,
     });
 
     expect(savedObjectsClient.resolve).toHaveBeenCalled();
@@ -251,7 +247,7 @@ describe('getSavedSearch', () => {
             "desc",
           ],
         ],
-        "tags": Array [],
+        "tags": undefined,
         "timeRange": undefined,
         "timeRestore": undefined,
         "title": "test2",

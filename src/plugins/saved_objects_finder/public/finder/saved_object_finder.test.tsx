@@ -20,7 +20,6 @@ import * as sinon from 'sinon';
 import { SavedObjectFinderUi as SavedObjectFinder } from './saved_object_finder';
 import { coreMock } from '@kbn/core/public/mocks';
 import { savedObjectsManagementPluginMock } from '@kbn/saved-objects-management-plugin/public/mocks';
-import { savedObjectsPluginMock } from '@kbn/saved-objects-plugin/public/mocks';
 import { findTestSubject } from '@kbn/test-jest-helpers';
 import { SavedObjectManagementTypeInfo } from '@kbn/saved-objects-management-plugin/public';
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
@@ -81,9 +80,6 @@ describe('SavedObjectsFinder', () => {
     ({ selectedTags }) => selectedTags as any
   );
 
-  const savedObjectsPlugin = savedObjectsPluginMock.createStartContract();
-  jest.spyOn(savedObjectsPlugin.settings, 'getListingLimit').mockImplementation(() => 10);
-
   const savedObjectsTagging = {
     ui: {
       getTableColumnDefinition: jest.fn(() => ({
@@ -109,6 +105,7 @@ describe('SavedObjectsFinder', () => {
     (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
       Promise.resolve({ savedObjects: [doc] })
     );
+    core.uiSettings.get.mockImplementation(() => 10);
 
     const wrapper = shallow(
       <SavedObjectFinder
@@ -116,7 +113,6 @@ describe('SavedObjectsFinder', () => {
           savedObjects: core.savedObjects,
           uiSettings: core.uiSettings,
           savedObjectsManagement,
-          savedObjectsPlugin,
           savedObjectsTagging,
         }}
         savedObjectMetaData={searchMetaData}
@@ -142,6 +138,7 @@ describe('SavedObjectsFinder', () => {
     (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
       Promise.resolve({ savedObjects: [doc] })
     );
+    core.uiSettings.get.mockImplementation(() => 10);
 
     const wrapper = shallow(
       <SavedObjectFinder
@@ -149,7 +146,6 @@ describe('SavedObjectsFinder', () => {
           savedObjects: core.savedObjects,
           uiSettings: core.uiSettings,
           savedObjectsManagement,
-          savedObjectsPlugin,
           savedObjectsTagging,
         }}
         savedObjectMetaData={searchMetaData}
@@ -172,6 +168,7 @@ describe('SavedObjectsFinder', () => {
     (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
       Promise.resolve({ savedObjects: [doc] })
     );
+    core.uiSettings.get.mockImplementation(() => 10);
 
     const wrapper = mount(
       <SavedObjectFinder
@@ -179,7 +176,6 @@ describe('SavedObjectsFinder', () => {
           savedObjects: core.savedObjects,
           uiSettings: core.uiSettings,
           savedObjectsManagement,
-          savedObjectsPlugin,
           savedObjectsTagging,
         }}
         onChoose={chooseStub}
@@ -202,6 +198,7 @@ describe('SavedObjectsFinder', () => {
       (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
         Promise.resolve({ savedObjects: [doc, doc3, doc2] })
       );
+      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
@@ -209,7 +206,6 @@ describe('SavedObjectsFinder', () => {
             savedObjects: core.savedObjects,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
-            savedObjectsPlugin,
             savedObjectsTagging,
           }}
           savedObjectMetaData={metaDataConfig}
@@ -233,6 +229,7 @@ describe('SavedObjectsFinder', () => {
       (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
         Promise.resolve({ savedObjects: [doc, doc3, doc2] })
       );
+      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
@@ -240,7 +237,6 @@ describe('SavedObjectsFinder', () => {
             savedObjects: core.savedObjects,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
-            savedObjectsPlugin,
             savedObjectsTagging,
           }}
           savedObjectMetaData={metaDataConfig}
@@ -268,6 +264,7 @@ describe('SavedObjectsFinder', () => {
       (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
         Promise.resolve({ savedObjects: [doc, doc2] })
       );
+      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
@@ -275,7 +272,6 @@ describe('SavedObjectsFinder', () => {
             savedObjects: core.savedObjects,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
-            savedObjectsPlugin,
             savedObjectsTagging,
           }}
           savedObjectMetaData={searchMetaData}
@@ -295,6 +291,7 @@ describe('SavedObjectsFinder', () => {
       (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
         Promise.resolve({ savedObjects: [doc, doc2] })
       );
+      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
@@ -302,7 +299,6 @@ describe('SavedObjectsFinder', () => {
             savedObjects: core.savedObjects,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
-            savedObjectsPlugin,
             savedObjectsTagging,
           }}
           savedObjectMetaData={searchMetaData}
@@ -325,6 +321,7 @@ describe('SavedObjectsFinder', () => {
       (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
         Promise.resolve({ savedObjects: [doc, doc3, doc2] })
       );
+      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
@@ -332,7 +329,6 @@ describe('SavedObjectsFinder', () => {
             savedObjects: core.savedObjects,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
-            savedObjectsPlugin,
             savedObjectsTagging,
           }}
           savedObjectMetaData={metaDataConfig}
@@ -356,6 +352,7 @@ describe('SavedObjectsFinder', () => {
       (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
         Promise.resolve({ savedObjects: [doc, doc3, doc2] })
       );
+      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
@@ -363,7 +360,6 @@ describe('SavedObjectsFinder', () => {
             savedObjects: core.savedObjects,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
-            savedObjectsPlugin,
             savedObjectsTagging,
           }}
           savedObjectMetaData={metaDataConfig}
@@ -392,6 +388,7 @@ describe('SavedObjectsFinder', () => {
     (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
       Promise.resolve({ savedObjects: [doc, doc2] })
     );
+    core.uiSettings.get.mockImplementation(() => 10);
 
     const wrapper = shallow(
       <SavedObjectFinder
@@ -399,7 +396,6 @@ describe('SavedObjectsFinder', () => {
           savedObjects: core.savedObjects,
           uiSettings: core.uiSettings,
           savedObjectsManagement,
-          savedObjectsPlugin,
           savedObjectsTagging,
         }}
         savedObjectMetaData={[
@@ -426,6 +422,7 @@ describe('SavedObjectsFinder', () => {
       (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
         Promise.resolve({ savedObjects: [doc, doc2] })
       );
+      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
@@ -433,7 +430,6 @@ describe('SavedObjectsFinder', () => {
             savedObjects: core.savedObjects,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
-            savedObjectsPlugin,
             savedObjectsTagging,
           }}
           savedObjectMetaData={searchMetaData}
@@ -460,6 +456,7 @@ describe('SavedObjectsFinder', () => {
     it('should include additional fields in search if listed in meta data', async () => {
       const core = coreMock.createStart();
       (core.savedObjects.client.find as jest.Mock).mockResolvedValue({ savedObjects: [] });
+      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
@@ -467,7 +464,6 @@ describe('SavedObjectsFinder', () => {
             savedObjects: core.savedObjects,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
-            savedObjectsPlugin,
             savedObjectsTagging,
           }}
           savedObjectMetaData={[
@@ -509,6 +505,7 @@ describe('SavedObjectsFinder', () => {
       (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
         Promise.resolve({ savedObjects: [doc, doc2] })
       );
+      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
@@ -516,7 +513,6 @@ describe('SavedObjectsFinder', () => {
             savedObjects: core.savedObjects,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
-            savedObjectsPlugin,
             savedObjectsTagging,
           }}
           savedObjectMetaData={searchMetaData}
@@ -539,6 +535,7 @@ describe('SavedObjectsFinder', () => {
     (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
       Promise.resolve({ savedObjects: [doc, doc2] })
     );
+    core.uiSettings.get.mockImplementation(() => 10);
 
     const wrapper = shallow(
       <SavedObjectFinder
@@ -546,7 +543,6 @@ describe('SavedObjectsFinder', () => {
           savedObjects: core.savedObjects,
           uiSettings: core.uiSettings,
           savedObjectsManagement,
-          savedObjectsPlugin,
           savedObjectsTagging,
         }}
         savedObjectMetaData={[
@@ -585,6 +581,7 @@ describe('SavedObjectsFinder', () => {
           savedObjects: [doc, doc2, doc3],
         })
       );
+      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
@@ -592,7 +589,6 @@ describe('SavedObjectsFinder', () => {
             savedObjects: core.savedObjects,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
-            savedObjectsPlugin,
             savedObjectsTagging,
           }}
           showFilter={true}
@@ -614,6 +610,7 @@ describe('SavedObjectsFinder', () => {
           savedObjects: [doc, doc2, doc3],
         })
       );
+      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
@@ -621,7 +618,6 @@ describe('SavedObjectsFinder', () => {
             savedObjects: core.savedObjects,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
-            savedObjectsPlugin,
             savedObjectsTagging,
           }}
           showFilter={false}
@@ -641,6 +637,7 @@ describe('SavedObjectsFinder', () => {
           savedObjects: [doc, doc2],
         })
       );
+      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
@@ -648,7 +645,6 @@ describe('SavedObjectsFinder', () => {
             savedObjects: core.savedObjects,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
-            savedObjectsPlugin,
             savedObjectsTagging,
           }}
           showFilter={true}
@@ -669,6 +665,7 @@ describe('SavedObjectsFinder', () => {
           savedObjects: [doc, doc2, doc3],
         })
       );
+      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
@@ -676,7 +673,6 @@ describe('SavedObjectsFinder', () => {
             savedObjects: core.savedObjects,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
-            savedObjectsPlugin,
             savedObjectsTagging: undefined,
           }}
           showFilter={true}
@@ -697,6 +693,7 @@ describe('SavedObjectsFinder', () => {
           savedObjects: [doc, doc2, doc3],
         })
       );
+      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
@@ -704,7 +701,6 @@ describe('SavedObjectsFinder', () => {
             savedObjects: core.savedObjects,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
-            savedObjectsPlugin,
             savedObjectsTagging,
           }}
           showFilter={true}
@@ -747,6 +743,7 @@ describe('SavedObjectsFinder', () => {
           savedObjects: [doc, doc2, doc3],
         })
       );
+      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
@@ -754,7 +751,6 @@ describe('SavedObjectsFinder', () => {
             savedObjects: core.savedObjects,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
-            savedObjectsPlugin,
             savedObjectsTagging,
           }}
           showFilter={true}
@@ -796,6 +792,7 @@ describe('SavedObjectsFinder', () => {
     (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
       Promise.resolve({ savedObjects: [] })
     );
+    core.uiSettings.get.mockImplementation(() => 10);
 
     const noItemsMessage = <span id="myNoItemsMessage" />;
     const wrapper = mount(
@@ -804,7 +801,6 @@ describe('SavedObjectsFinder', () => {
           savedObjects: core.savedObjects,
           uiSettings: core.uiSettings,
           savedObjectsManagement,
-          savedObjectsPlugin,
           savedObjectsTagging,
         }}
         noItemsMessage={noItemsMessage}
@@ -832,6 +828,7 @@ describe('SavedObjectsFinder', () => {
       (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
         Promise.resolve({ savedObjects: longItemList })
       );
+      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
@@ -839,7 +836,6 @@ describe('SavedObjectsFinder', () => {
             savedObjects: core.savedObjects,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
-            savedObjectsPlugin,
             savedObjectsTagging,
           }}
           initialPageSize={15}
@@ -861,6 +857,7 @@ describe('SavedObjectsFinder', () => {
       (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
         Promise.resolve({ savedObjects: longItemList })
       );
+      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
@@ -868,7 +865,6 @@ describe('SavedObjectsFinder', () => {
             savedObjects: core.savedObjects,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
-            savedObjectsPlugin,
             savedObjectsTagging,
           }}
           initialPageSize={15}
@@ -896,6 +892,7 @@ describe('SavedObjectsFinder', () => {
       (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
         Promise.resolve({ savedObjects: longItemList })
       );
+      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
@@ -903,7 +900,6 @@ describe('SavedObjectsFinder', () => {
             savedObjects: core.savedObjects,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
-            savedObjectsPlugin,
             savedObjectsTagging,
           }}
           initialPageSize={15}
@@ -934,6 +930,7 @@ describe('SavedObjectsFinder', () => {
       (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
         Promise.resolve({ savedObjects: longItemList })
       );
+      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
@@ -941,7 +938,6 @@ describe('SavedObjectsFinder', () => {
             savedObjects: core.savedObjects,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
-            savedObjectsPlugin,
             savedObjectsTagging,
           }}
           fixedPageSize={33}
@@ -963,6 +959,7 @@ describe('SavedObjectsFinder', () => {
       (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
         Promise.resolve({ savedObjects: longItemList })
       );
+      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
@@ -970,7 +967,6 @@ describe('SavedObjectsFinder', () => {
             savedObjects: core.savedObjects,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
-            savedObjectsPlugin,
             savedObjectsTagging,
           }}
           fixedPageSize={33}
@@ -1001,6 +997,7 @@ describe('SavedObjectsFinder', () => {
     it('should display a loading indicator during initial loading', () => {
       const core = coreMock.createStart();
       (core.savedObjects.client.find as jest.Mock).mockResolvedValue({ savedObjects: [] });
+      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
@@ -1008,7 +1005,6 @@ describe('SavedObjectsFinder', () => {
             savedObjects: core.savedObjects,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
-            savedObjectsPlugin,
             savedObjectsTagging,
           }}
           savedObjectMetaData={searchMetaData}
@@ -1023,6 +1019,7 @@ describe('SavedObjectsFinder', () => {
       (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
         Promise.resolve({ savedObjects: [doc] })
       );
+      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
@@ -1030,7 +1027,6 @@ describe('SavedObjectsFinder', () => {
             savedObjects: core.savedObjects,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
-            savedObjectsPlugin,
             savedObjectsTagging,
           }}
           savedObjectMetaData={[
@@ -1054,6 +1050,7 @@ describe('SavedObjectsFinder', () => {
       (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
         Promise.resolve({ savedObjects: [doc] })
       );
+      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
@@ -1061,7 +1058,6 @@ describe('SavedObjectsFinder', () => {
             savedObjects: core.savedObjects,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
-            savedObjectsPlugin,
             savedObjectsTagging,
           }}
           savedObjectMetaData={searchMetaData}
@@ -1085,6 +1081,7 @@ describe('SavedObjectsFinder', () => {
     (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
       Promise.resolve({ savedObjects: [doc, doc2] })
     );
+    core.uiSettings.get.mockImplementation(() => 10);
 
     const wrapper = mount(
       <SavedObjectFinder
@@ -1092,7 +1089,6 @@ describe('SavedObjectsFinder', () => {
           savedObjects: core.savedObjects,
           uiSettings: core.uiSettings,
           savedObjectsManagement,
-          savedObjectsPlugin,
           savedObjectsTagging,
         }}
         savedObjectMetaData={[
@@ -1120,6 +1116,7 @@ describe('SavedObjectsFinder', () => {
       (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
         Promise.resolve({ savedObjects: [doc, doc2, doc3] })
       );
+      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
@@ -1127,7 +1124,6 @@ describe('SavedObjectsFinder', () => {
             savedObjects: core.savedObjects,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
-            savedObjectsPlugin,
             savedObjectsTagging,
           }}
           savedObjectMetaData={metaDataConfig}
@@ -1148,6 +1144,7 @@ describe('SavedObjectsFinder', () => {
       (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
         Promise.resolve({ savedObjects: [doc, doc2] })
       );
+      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
@@ -1155,7 +1152,6 @@ describe('SavedObjectsFinder', () => {
             savedObjects: core.savedObjects,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
-            savedObjectsPlugin,
             savedObjectsTagging,
           }}
           savedObjectMetaData={searchMetaData}
@@ -1176,6 +1172,7 @@ describe('SavedObjectsFinder', () => {
       (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
         Promise.resolve({ savedObjects: [doc, doc2, doc3] })
       );
+      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
@@ -1183,7 +1180,6 @@ describe('SavedObjectsFinder', () => {
             savedObjects: core.savedObjects,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
-            savedObjectsPlugin,
             savedObjectsTagging: undefined,
           }}
           savedObjectMetaData={metaDataConfig}

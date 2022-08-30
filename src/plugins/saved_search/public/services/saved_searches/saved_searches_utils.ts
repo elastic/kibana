@@ -27,7 +27,7 @@ export const throwErrorOnSavedSearchUrlConflict = async (savedSearch: SavedSearc
 export const fromSavedSearchAttributes = (
   id: string,
   attributes: SavedSearchAttributes,
-  tags: string[],
+  tags: string[] | undefined,
   searchSource: SavedSearch['searchSource'],
   sharingSavedObjectProps: SavedSearch['sharingSavedObjectProps']
 ): SavedSearch => ({

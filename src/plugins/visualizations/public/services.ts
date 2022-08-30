@@ -25,7 +25,7 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { TypesStart } from './vis_types';
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');

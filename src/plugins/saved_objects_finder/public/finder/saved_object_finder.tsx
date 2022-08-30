@@ -9,7 +9,7 @@
 import { debounce } from 'lodash';
 import PropTypes from 'prop-types';
 import React from 'react';
-import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 
 import {
   EuiInMemoryTable,
@@ -25,9 +25,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { SimpleSavedObject, CoreStart, SavedObject } from '@kbn/core/public';
-import { SavedObjectsStart as SavedObjectsPlugin } from '@kbn/saved-objects-plugin/public/plugin';
-import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type {
+  SimpleSavedObject,
+  SavedObject,
+  SavedObjectsStart,
+  IUiSettingsClient,
+} from '@kbn/core/public';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import { LISTING_LIMIT_SETTING } from '@kbn/saved-objects-plugin/common';
 
 export interface SavedObjectMetaData<T = unknown> {
   type: string;
@@ -60,10 +65,9 @@ interface SavedObjectFinderState {
 }
 
 interface SavedObjectFinderServices {
-  savedObjects: CoreStart['savedObjects'];
-  uiSettings: CoreStart['uiSettings'];
+  savedObjects: SavedObjectsStart;
+  uiSettings: IUiSettingsClient;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
-  savedObjectsPlugin: SavedObjectsPlugin;
   savedObjectsTagging: SavedObjectsTaggingApi | undefined;
 }
 
@@ -131,7 +135,7 @@ export class SavedObjectFinderUi extends React.Component<
       return col;
     }, []);
 
-    const perPage = this.props.services.savedObjectsPlugin.settings.getListingLimit();
+    const perPage = this.props.services.uiSettings.get(LISTING_LIMIT_SETTING);
     const response = await this.props.services.savedObjects.client.find<FinderAttributes>({
       type: visibleTypes ?? Object.keys(metaDataMap),
       fields: [...new Set(fields)],
@@ -220,11 +224,6 @@ export class SavedObjectFinderUi extends React.Component<
     );
   };
 
-  // server-side paging not supported
-  // 1) saved object client does not support sorting by title because title is only mapped as analyzed
-  // 2) can not search on anything other than title because all other fields are stored in opaque JSON strings,
-  //    for example, visualizations need to be search by isLab but this is not possible in Elasticsearch side
-  //    with the current mappings
   public render() {
     const { onChoose, savedObjectMetaData } = this.props;
     const taggingApi = this.props.services.savedObjectsTagging;

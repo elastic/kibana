@@ -1,8 +1,8 @@
 {
   "id": "savedObjectsFinder",
   "owner": {
-    "name": "Kibana Core",
-    "githubTeam": "kibana-core"
+    "name": "Data Discovery",
+    "githubTeam": "kibana-data-discovery"
   },
   "version": "kibana",
   "ui": true
