@@ -323,7 +323,7 @@ export const EndpointList = () => {
 
   const setTableRowProps = useCallback((endpoint: HostInfo) => {
     return {
-      'data-endpoint-Id': endpoint.metadata.agent.id,
+      'data-endpoint-id': endpoint.metadata.agent.id,
     };
   }, []);
 

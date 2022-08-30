@@ -7,7 +7,7 @@ for %%I in ("%SCRIPT_DIR%..") do set DIR=%%~dpfI
 
 set NODE=%DIR%\node\node.exe
 
-set NODE_ENV="production"
+set NODE_ENV=production
 
 If Not Exist "%NODE%" (
   Echo unable to find usable node.js executable.

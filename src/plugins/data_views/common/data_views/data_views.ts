@@ -478,7 +478,7 @@ export class DataViewsService {
    */
   getFieldsForWildcard = async (options: GetFieldsOptions): Promise<FieldSpec[]> => {
     const metaFields = await this.config.get<string[]>(META_FIELDS);
-    return this.apiClient.getFieldsForWildcard({
+    const { fields } = await this.apiClient.getFieldsForWildcard({
       pattern: options.pattern,
       metaFields,
       type: options.type,
@@ -486,6 +486,7 @@ export class DataViewsService {
       allowNoIndex: options.allowNoIndex,
       filter: options.filter,
     });
+    return fields;
   };
 
   /**
@@ -505,13 +506,36 @@ export class DataViewsService {
       pattern: indexPattern.title as string,
     });
 
+  private getFieldsAndIndicesForDataView = async (dataView: DataView) => {
+    const metaFields = await this.config.get<string[]>(META_FIELDS);
+    return this.apiClient.getFieldsForWildcard({
+      type: dataView.type,
+      rollupIndex: dataView?.typeMeta?.params?.rollup_index,
+      allowNoIndex: dataView.allowNoIndex,
+      pattern: dataView.title as string,
+      metaFields,
+    });
+  };
+
+  private getFieldsAndIndicesForWildcard = async (options: GetFieldsOptions) => {
+    const metaFields = await this.config.get<string[]>(META_FIELDS);
+    return await this.apiClient.getFieldsForWildcard({
+      pattern: options.pattern,
+      metaFields,
+      type: options.type,
+      rollupIndex: options.rollupIndex,
+      allowNoIndex: options.allowNoIndex,
+      filter: options.filter,
+    });
+  };
+
   /**
    * Refresh field list for a given index pattern.
    * @param indexPattern
    */
   refreshFields = async (indexPattern: DataView) => {
     try {
-      const fields = (await this.getFieldsForIndexPattern(indexPattern)) as FieldSpec[];
+      const { fields, indices } = await this.getFieldsAndIndicesForDataView(indexPattern);
       fields.forEach((field) => (field.isMapped = true));
       const scripted = indexPattern.getScriptedFields().map((field) => field.spec);
       const fieldAttrs = indexPattern.getFieldAttrs();
@@ -527,6 +551,7 @@ export class DataViewsService {
           !fieldsWithSavedAttrs.find((mappedField) => mappedField.name === runtimeField.name)
       );
       indexPattern.fields.replaceAll([...runtimeFieldsArray, ...fieldsWithSavedAttrs]);
+      indexPattern.matchedIndices = indices;
     } catch (err) {
       if (err instanceof DataViewMissingIndices) {
         this.onNotification(
@@ -567,7 +592,7 @@ export class DataViewsService {
     const scriptedFields = fieldsAsArr.filter((field) => field.scripted);
     try {
       let updatedFieldList: FieldSpec[];
-      const newFields = (await this.getFieldsForWildcard(options)) as FieldSpec[];
+      const { fields: newFields, indices } = await this.getFieldsAndIndicesForWildcard(options);
       newFields.forEach((field) => (field.isMapped = true));
 
       // If allowNoIndex, only update field list if field caps finds fields. To support
@@ -578,7 +603,7 @@ export class DataViewsService {
         updatedFieldList = fieldsAsArr;
       }
 
-      return this.fieldArrayToMap(updatedFieldList, fieldAttrs);
+      return { fields: this.fieldArrayToMap(updatedFieldList, fieldAttrs), indices };
     } catch (err) {
       if (err instanceof DataViewMissingIndices) {
         this.onNotification(
@@ -693,8 +718,10 @@ export class DataViewsService {
       ? JSON.parse(savedObject.attributes.fieldAttrs)
       : {};
 
+    let matchedIndices: string[] = [];
+
     try {
-      spec.fields = await this.refreshFieldSpecMap(
+      const { fields, indices } = await this.refreshFieldSpecMap(
         spec.fields || {},
         savedObject.id,
         spec.title as string,
@@ -707,6 +734,9 @@ export class DataViewsService {
         },
         spec.fieldAttrs
       );
+
+      spec.fields = fields;
+      matchedIndices = indices || [];
 
       const runtimeFieldSpecs = this.getRuntimeFields(runtimeFieldMap, spec.fieldAttrs);
       // mapped fields overwrite runtime fields
@@ -740,6 +770,7 @@ export class DataViewsService {
       : {};
 
     const indexPattern = await this.create(spec, true);
+    indexPattern.matchedIndices = matchedIndices;
     indexPattern.resetOriginalSavedObjectBody();
     return indexPattern;
   };

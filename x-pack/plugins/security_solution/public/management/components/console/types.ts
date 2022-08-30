@@ -7,7 +7,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { ComponentType } from 'react';
+import type { ComponentType, ReactNode } from 'react';
 import type { CommonProps } from '@elastic/eui';
 import type { CommandExecutionResultComponent } from './components/command_execution_result';
 import type { CommandExecutionState } from './components/console_state/types';
@@ -35,7 +35,7 @@ export interface CommandArgs {
 
 export interface CommandDefinition<TMeta = any> {
   name: string;
-  about: ComponentType | string;
+  about: ReactNode;
   /**
    * The Component that will be used to render the Command
    */
@@ -53,6 +53,10 @@ export interface CommandDefinition<TMeta = any> {
    * the console's built in output.
    */
   HelpComponent?: CommandExecutionComponent;
+  /**
+   * If defined, the button to add to the text bar will be disabled.
+   */
+  helpDisabled?: boolean;
   /**
    * A store for any data needed when the command is executed.
    * The entire `CommandDefinition` is passed along to the component

@@ -78,7 +78,7 @@ const customRoles = {
     applications: [
       {
         application: 'apm',
-        privileges: [PrivilegeType.AGENT_CONFIG, PrivilegeType.EVENT, PrivilegeType.SOURCEMAP],
+        privileges: [PrivilegeType.AGENT_CONFIG, PrivilegeType.EVENT],
         resources: ['*'],
       },
     ],
