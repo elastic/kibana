@@ -30,7 +30,6 @@ const isRangeAnnotation = (
 export function getEventAnnotationService(): EventAnnotationServiceType {
   return {
     toExpression: (annotation) => {
-      console.log(annotation);
       if (isRangeAnnotation(annotation)) {
         const { label, isHidden, color, key, outside, id } = annotation;
         const { timestamp: time, endTimestamp: endTime } = key;
