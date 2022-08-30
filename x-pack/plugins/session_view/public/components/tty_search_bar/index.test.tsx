@@ -28,7 +28,7 @@ describe('TTYSearchBar component', () => {
     const events = sessionViewIOEventsMock?.events?.map((event) => event._source);
     const pages: ProcessEventsPage[] = [{ events, total: events?.length }];
     const { result } = renderHook(() => useIOLines(pages));
-    const lines = result.current;
+    const lines = result.current.lines;
 
     props = {
       lines,
