@@ -56,8 +56,7 @@ export const useCreateTimeline = ({ timelineId, timelineType, closeGearMenu }: P
           timelineType,
         })
       );
-      dispatch(inputsActions.addGlobalLinkTo({ linkToId: 'timeline' }));
-      dispatch(inputsActions.addTimelineLinkTo({ linkToId: 'global' }));
+      dispatch(inputsActions.addLinkTo(['global', 'timeline']));
       dispatch(appActions.addNotes({ notes: [] }));
       if (globalTimeRange.kind === 'absolute') {
         dispatch(

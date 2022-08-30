@@ -73,7 +73,7 @@ function showErrorDialog({
           <EuiModalHeader>
             <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
           </EuiModalHeader>
-          <EuiModalBody>
+          <EuiModalBody data-test-subj="errorModalBody">
             <EuiCallOut size="s" color="danger" iconType="alert" title={error.message} />
             {text && (
               <React.Fragment>
@@ -112,6 +112,7 @@ export function ErrorToast({
         <EuiButton
           size="s"
           color="danger"
+          data-test-subj="errorToastBtn"
           onClick={() => showErrorDialog({ title, error, openModal, i18nContext })}
         >
           <FormattedMessage

@@ -7,7 +7,7 @@
 
 import axios, { AxiosResponse } from 'axios';
 import { Logger } from '@kbn/core/server';
-import { request } from './axios_utils';
+import { request } from '../../lib/axios_utils';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 
 interface PostXmattersOptions {
