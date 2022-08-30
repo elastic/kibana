@@ -10,11 +10,10 @@ import { useDispatch } from 'react-redux';
 
 import type { inputsModel } from '../../../common/store';
 import { inputsActions } from '../../../common/store/actions';
-import type { InputsModelId } from '../../../common/store/inputs/constants';
 
 export interface TimelineRefetchProps {
   id: string;
-  inputId: InputsModelId;
+  inputId: 'global' | 'timeline';
   inspect: inputsModel.InspectQuery | null;
   loading: boolean;
   refetch: inputsModel.Refetch;
