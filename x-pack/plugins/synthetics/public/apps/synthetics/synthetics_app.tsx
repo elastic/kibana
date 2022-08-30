@@ -83,6 +83,7 @@ const Application = (props: SyntheticsAppProps) => {
                 triggersActionsUi: startPlugins.triggersActionsUi,
                 observability: startPlugins.observability,
                 cases: startPlugins.cases,
+                spaces: startPlugins.spaces,
               }}
             >
               <Router history={appMountParameters.history}>

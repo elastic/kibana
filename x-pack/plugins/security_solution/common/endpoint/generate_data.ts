@@ -1643,7 +1643,6 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       updated_by: 'elastic',
       policy_id: this.seededUUIDv4(),
       enabled: true,
-      output_id: '',
       inputs: [
         {
           type: 'endpoint',
@@ -1689,7 +1688,6 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       revision: 2,
       updated_at: '2020-07-22T16:36:49.196Z',
       updated_by: 'elastic',
-      package_policies: ['852491f0-cc39-11ea-bac2-cdbf95b4b41a'],
       agents: 0,
     };
   }

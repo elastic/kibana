@@ -15,12 +15,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'home', 'settings', 'discover', 'timePicker']);
+  const kibanaServer = getService('kibanaServer');
 
   describe('Index patterns on aliases', function () {
     before(async function () {
+      await kibanaServer.savedObjects.cleanStandardList();
       await security.testUser.setRoles(['kibana_admin', 'test_alias_reader']);
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/alias');
-      await esArchiver.load('test/functional/fixtures/es_archiver/empty_kibana');
       await es.indices.updateAliases({
         body: {
           actions: [
@@ -76,6 +77,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       after(async () => {
         await PageObjects.common.unsetTime();
         await security.testUser.restoreDefaults();
+        await kibanaServer.savedObjects.cleanStandardList();
         await esArchiver.unload('test/functional/fixtures/es_archiver/alias');
       });
     });

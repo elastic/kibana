@@ -28,6 +28,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { Result } from '../../../../../shared/result/result';
+import { resultMetaData } from '../../../../../shared/result/result_metadata';
 
 import { DocumentsLogic } from '../../documents_logic';
 
@@ -84,12 +85,7 @@ export const DocumentList: React.FC = () => {
       {results.map((result) => {
         return (
           <React.Fragment key={result._id}>
-            <Result
-              fields={resultToField(result)}
-              metaData={{
-                id: result._id,
-              }}
-            />
+            <Result fields={resultToField(result)} metaData={resultMetaData(result)} />
             <EuiSpacer size="s" />
           </React.Fragment>
         );

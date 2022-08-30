@@ -101,6 +101,13 @@ const PreviewButton = styled(EuiButton)`
 
 const defaultTimeRange: Unit = 'h';
 
+const refreshedTimeframe = (startDate: string, endDate: string) => {
+  return {
+    start: dateMath.parse(startDate) || moment().subtract(1, 'hour'),
+    end: dateMath.parse(endDate) || moment(),
+  };
+};
+
 const RulePreviewComponent: React.FC<RulePreviewProps> = ({
   index,
   indexPattern,
@@ -129,8 +136,19 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
     }
   }, [spaces]);
 
+  // Raw timeframe as a string
   const [startDate, setStartDate] = useState('now-1h');
   const [endDate, setEndDate] = useState('now');
+
+  // Parsed timeframe as a Moment object
+  const [timeframeStart, setTimeframeStart] = useState(moment().subtract(1, 'hour'));
+  const [timeframeEnd, setTimeframeEnd] = useState(moment());
+
+  useEffect(() => {
+    const { start, end } = refreshedTimeframe(startDate, endDate);
+    setTimeframeStart(start);
+    setTimeframeEnd(end);
+  }, [startDate, endDate]);
 
   const { form } = useForm<AdvancedPreviewForm>({
     defaultValue: advancedOptionsDefaultValue,
@@ -180,21 +198,22 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
   const showAdvancedOptions = queryPreviewIdSelected === ADVANCED_QUERY_SELECT_ID;
   const advancedOptions = useMemo(
     () =>
-      showAdvancedOptions && startDate && endDate && formInterval && formLookback
+      showAdvancedOptions && formInterval && formLookback
         ? {
-            timeframeStart: dateMath.parse(startDate) || moment().subtract(1, 'hour'),
-            timeframeEnd: dateMath.parse(endDate) || moment(),
+            timeframeStart,
+            timeframeEnd,
             interval: formInterval,
             lookback: formLookback,
           }
         : undefined,
-    [endDate, formInterval, formLookback, showAdvancedOptions, startDate]
+    [formInterval, formLookback, showAdvancedOptions, timeframeEnd, timeframeStart]
   );
 
   const [timeFrame, setTimeFrame] = useState<Unit>(defaultTimeRange);
   const {
     addNoiseWarning,
     createPreview,
+    clearPreview,
     isPreviewRequestInProgress,
     previewId,
     logs,
@@ -228,10 +247,27 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
 
   const { startTransaction } = useStartTransaction();
 
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  useEffect(() => {
+    if (!isRefreshing) {
+      return;
+    }
+    createPreview();
+    setIsRefreshing(false);
+  }, [isRefreshing, createPreview]);
+
   const handlePreviewClick = useCallback(() => {
     startTransaction({ name: SINGLE_RULE_ACTIONS.PREVIEW });
-    createPreview();
-  }, [createPreview, startTransaction]);
+    if (showAdvancedOptions) {
+      // Refresh timeframe on Preview button click to make sure that relative times recalculated based on current time
+      const { start, end } = refreshedTimeframe(startDate, endDate);
+      setTimeframeStart(start);
+      setTimeframeEnd(end);
+    } else {
+      clearPreview();
+    }
+    setIsRefreshing(true);
+  }, [clearPreview, endDate, showAdvancedOptions, startDate, startTransaction]);
 
   const onTimeChange = useCallback(
     ({ start: newStart, end: newEnd, isInvalid }: OnTimeChangeProps) => {

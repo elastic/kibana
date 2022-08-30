@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { UseQueryOptions, UseQueryResult } from 'react-query';
+import type { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import type { EndpointActionListRequestQuery } from '../../../../common/endpoint/schema/actions';
 import { useHttp } from '../../../common/lib/kibana';
 import { ENDPOINTS_ACTION_LIST_ROUTE } from '../../../../common/endpoint/constants';

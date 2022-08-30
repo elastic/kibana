@@ -9,10 +9,12 @@
     "stripInternal": false,
     "types": [
       "jest",
-      "node"
+      "node",
+      "react"
     ]
   },
   "include": [
-    "src/**/*"
+    "**/*.ts",
+    "**/*.tsx",
   ]
 }

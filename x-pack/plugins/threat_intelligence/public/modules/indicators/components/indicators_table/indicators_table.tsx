@@ -5,34 +5,38 @@
  * 2.0.
  */
 
-import React, { VFC, useState, useMemo } from 'react';
+import React, { VFC, useState, useMemo, useEffect, useCallback } from 'react';
 import {
   EuiDataGrid,
+  EuiDataGridColumnCellActionProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiPanel,
-  EuiText,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { DataView } from '@kbn/data-views-plugin/common';
+import { EuiDataGridColumn } from '@elastic/eui/src/components/datagrid/data_grid_types';
+import { BrowserFields, SecuritySolutionDataViewBase } from '../../../../types';
 import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
-import { UseIndicatorsValue } from '../../hooks/use_indicators';
 import { cellRendererFactory, ComputedIndicatorFieldId } from './cell_renderer';
 import { EmptyState } from '../../../../components/empty_state';
+import { AddToTimeline } from '../../../timeline/components/add_to_timeline';
 import { IndicatorsTableContext, IndicatorsTableContextValue } from './context';
 import { IndicatorsFlyout } from '../indicators_flyout/indicators_flyout';
+import { Pagination } from '../../hooks/use_indicators';
+import { useToolbarOptions } from './hooks/use_toolbar_options';
 
-interface Column {
-  id: RawIndicatorFieldId | ComputedIndicatorFieldId;
-  displayAsText: string;
-}
-
-const columns: Column[] = [
+const defaultColumns: EuiDataGridColumn[] = [
   {
-    id: ComputedIndicatorFieldId.DisplayValue,
+    id: RawIndicatorFieldId.TimeStamp,
+    displayAsText: i18n.translate('xpack.threatIntelligence.indicator.table.timestampColumnTitle', {
+      defaultMessage: '@timestamp',
+    }),
+  },
+  {
+    id: ComputedIndicatorFieldId.DisplayName,
     displayAsText: i18n.translate('xpack.threatIntelligence.indicator.table.indicatorColumTitle', {
       defaultMessage: 'Indicator',
     }),
@@ -64,22 +68,28 @@ const columns: Column[] = [
       defaultMessage: 'Last seen',
     }),
   },
-  {
-    id: RawIndicatorFieldId.MarkingTLP,
-    displayAsText: i18n.translate(
-      'xpack.threatIntelligence.indicator.table.tlpMarketingColumTitle',
-      {
-        defaultMessage: 'TLP Marking',
-      }
-    ),
-  },
 ];
 
-export type IndicatorsTableProps = Omit<UseIndicatorsValue, 'handleRefresh'> & {
-  indexPatterns: DataView[];
-};
+export interface IndicatorsTableProps {
+  indicators: Indicator[];
+  indicatorCount: number;
+  pagination: Pagination;
+  onChangeItemsPerPage: (value: number) => void;
+  onChangePage: (value: number) => void;
+  loading: boolean;
+  indexPattern: SecuritySolutionDataViewBase;
+  browserFields: BrowserFields;
+}
 
 export const TABLE_TEST_ID = 'tiIndicatorsTable';
+export const CELL_TIMELINE_BUTTON_TEST_ID = 'tiIndicatorsTableCellTimelineButton';
+
+const gridStyle = {
+  border: 'horizontal',
+  header: 'underline',
+  cellPadding: 'm',
+  fontSize: 's',
+} as const;
 
 export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
   indicators,
@@ -88,9 +98,12 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
   onChangeItemsPerPage,
   pagination,
   loading,
-  indexPatterns,
+  indexPattern,
+  browserFields,
 }) => {
-  const [visibleColumns, setVisibleColumns] = useState<Array<Column['id']>>(
+  const [columns, setColumns] = useState<EuiDataGridColumn[]>(defaultColumns);
+
+  const [visibleColumns, setVisibleColumns] = useState<Array<EuiDataGridColumn['id']>>(
     columns.map((column) => column.id)
   );
 
@@ -103,12 +116,12 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
 
   // field name to field type map to allow the cell_renderer to format dates
   const fieldTypesMap: { [id: string]: string } = useMemo(() => {
-    if (!indexPatterns || indexPatterns.length === 0) return {};
+    if (!indexPattern) return {};
 
     const res: { [id: string]: string } = {};
-    indexPatterns[0].fields.map((field) => (res[field.name] = field.type));
+    indexPattern.fields.map((field) => (res[field.name] = field.type));
     return res;
-  }, [indexPatterns]);
+  }, [indexPattern]);
 
   const indicatorTableContextValue = useMemo<IndicatorsTableContextValue>(
     () => ({ expanded, setExpanded, indicators, fieldTypesMap }),
@@ -147,6 +160,56 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
     [renderCellValue]
   );
 
+  const handleToggleColumn = useCallback((columnId: string) => {
+    setColumns((currentColumns) => {
+      const columnsMatchingId = ({ id }: EuiDataGridColumn) => id === columnId;
+      const columnsNotMatchingId = (column: EuiDataGridColumn) => !columnsMatchingId(column);
+
+      const enabled = Boolean(currentColumns.find(columnsMatchingId));
+
+      if (enabled) {
+        return currentColumns.filter(columnsNotMatchingId);
+      }
+
+      return [...currentColumns, { id: columnId as any, displayAsText: columnId }];
+    });
+  }, []);
+
+  const handleResetColumns = useCallback(() => setColumns(defaultColumns), []);
+
+  /**
+   * Whenever selected columns change, we make sure they are in sync with visible cols
+   */
+  useEffect(() => {
+    setVisibleColumns(columns.map(({ id }) => id));
+  }, [columns]);
+
+  useMemo(() => {
+    columns.map(
+      (col: EuiDataGridColumn) =>
+        (col.cellActions = [
+          ({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => (
+            <AddToTimeline
+              data={indicators[rowIndex % pagination.pageSize]}
+              field={columnId}
+              component={Component}
+              testId={CELL_TIMELINE_BUTTON_TEST_ID}
+            />
+          ),
+        ])
+    );
+  }, [columns, indicators, pagination]);
+
+  const toolbarOptions = useToolbarOptions({
+    browserFields,
+    start,
+    end,
+    indicatorCount,
+    columns,
+    onResetColumns: handleResetColumns,
+    onToggleColumn: handleToggleColumn,
+  });
+
   if (loading) {
     return (
       <EuiFlexGroup justifyContent="spaceAround">
@@ -167,7 +230,7 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
     <div>
       <IndicatorsTableContext.Provider value={indicatorTableContextValue}>
         <EuiDataGrid
-          aria-labelledby={'indicators-table'}
+          aria-labelledby="indicators-table"
           leadingControlColumns={leadingControlColumns}
           columns={columns}
           columnVisibility={{
@@ -176,31 +239,13 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
           }}
           rowCount={indicatorCount}
           renderCellValue={renderCellValue}
-          toolbarVisibility={{
-            showDisplaySelector: false,
-            showFullScreenSelector: false,
-            additionalControls: {
-              left: {
-                prepend: (
-                  <EuiText style={{ display: 'inline' }} size="xs">
-                    Showing {start + 1}-{end > indicatorCount ? indicatorCount : end} of{' '}
-                    {indicatorCount} indicators
-                  </EuiText>
-                ),
-              },
-            },
-          }}
+          toolbarVisibility={toolbarOptions}
           pagination={{
             ...pagination,
             onChangeItemsPerPage,
             onChangePage,
           }}
-          gridStyle={{
-            border: 'horizontal',
-            header: 'underline',
-            cellPadding: 'm',
-            fontSize: 's',
-          }}
+          gridStyle={gridStyle}
           data-test-subj={TABLE_TEST_ID}
         />
         {flyoutFragment}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PackagePolicy, GetAgentPoliciesResponseItem } from '@kbn/fleet-plugin/common';
+import type { PackagePolicy, AgentPolicy } from '@kbn/fleet-plugin/common';
 import type { CspRuleMetadata } from './schemas/csp_rule_metadata';
 
 export type Evaluation = 'passed' | 'failed' | 'NA';
@@ -49,7 +49,7 @@ export interface ComplianceDashboardData {
   trend: PostureTrend[];
 }
 
-export type Status =
+export type CspStatusCode =
   | 'indexed' // latest findings index exists and has results
   | 'indexing' // index timeout was not surpassed since installation, assumes data is being indexed
   | 'index-timeout' // index timeout was surpassed since installation
@@ -58,16 +58,16 @@ export type Status =
 
 interface BaseCspSetupStatus {
   latestPackageVersion: string;
-  installedIntegrations: number;
+  installedPackagePolicies: number;
   healthyAgents: number;
 }
 
 interface CspSetupNotInstalledStatus extends BaseCspSetupStatus {
-  status: Extract<Status, 'not-installed'>;
+  status: Extract<CspStatusCode, 'not-installed'>;
 }
 
 interface CspSetupInstalledStatus extends BaseCspSetupStatus {
-  status: Exclude<Status, 'not-installed'>;
+  status: Exclude<CspStatusCode, 'not-installed'>;
   // if installedPackageVersion == undefined but status != 'not-installed' it means the integration was installed in the past and findings were found
   // status can be `indexed` but return with undefined package information in this case
   installedPackageVersion: string | undefined;
@@ -80,6 +80,8 @@ export interface CspRulesStatus {
   enabled: number;
   disabled: number;
 }
+
+export type AgentPolicyStatus = Pick<AgentPolicy, 'id' | 'name'> & { agents: number };
 
 export interface Benchmark {
   package_policy: Pick<
@@ -94,7 +96,7 @@ export interface Benchmark {
     | 'created_at'
     | 'created_by'
   >;
-  agent_policy: Pick<GetAgentPoliciesResponseItem, 'id' | 'name' | 'agents'>;
+  agent_policy: AgentPolicyStatus;
   rules: CspRulesStatus;
 }
 

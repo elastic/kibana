@@ -79,7 +79,6 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
       await run(Tasks.BuildCanvasShareableRuntime);
     }
     await run(Tasks.BuildKibanaPlatformPlugins);
-    await run(Tasks.TranspileBabel);
     await run(Tasks.CreatePackageJson);
     await run(Tasks.InstallDependencies);
     await run(Tasks.GeneratePackagesOptimizedAssets);
@@ -94,7 +93,6 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await run(Tasks.UpdateLicenseFile);
     await run(Tasks.RemovePackageJsonDeps);
     await run(Tasks.CleanPackageManagerRelatedFiles);
-    await run(Tasks.CleanTypescript);
     await run(Tasks.CleanExtraFilesFromModules);
     await run(Tasks.CleanEmptyFolders);
     await run(Tasks.FleetDownloadElasticGpgKey);

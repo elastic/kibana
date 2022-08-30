@@ -23,8 +23,6 @@ describe('SessionView component', () => {
   let mockedContext: AppContextTestRender;
   let mockedApi: AppContextTestRender['coreStart']['http']['get'];
 
-  const waitForApiCall = () => waitFor(() => expect(mockedApi).toHaveBeenCalled());
-
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
     mockedApi = mockedContext.coreStart.http.get;
@@ -47,10 +45,11 @@ describe('SessionView component', () => {
         // make the request wait
         mockedApi.mockReturnValue(new Promise((resolve) => (releaseApiResponse = resolve)));
         render();
-        await waitForApiCall();
 
         // see if loader is present
-        expect(renderResult.getByTestId('sectionLoading')).toBeTruthy();
+        await waitFor(() => {
+          expect(renderResult.getByTestId('sectionLoading')).toBeTruthy();
+        });
 
         // release the request
         releaseApiResponse!(mockedApi);
@@ -61,13 +60,15 @@ describe('SessionView component', () => {
 
       it('should show the Empty message', async () => {
         render();
-        await waitForApiCall();
-        expect(renderResult.getByTestId('sessionView:sessionViewProcessEventsEmpty')).toBeTruthy();
+        await waitFor(() => {
+          expect(
+            renderResult.getByTestId('sessionView:sessionViewProcessEventsEmpty')
+          ).toBeTruthy();
+        });
       });
 
       it('should not display the search bar', async () => {
         render();
-        await waitForApiCall();
         expect(
           renderResult.queryByTestId('sessionView:sessionViewProcessEventsSearch')
         ).toBeFalsy();
@@ -85,10 +86,11 @@ describe('SessionView component', () => {
         // make the request wait
         mockedApi.mockReturnValue(new Promise((resolve) => (releaseApiResponse = resolve)));
         render();
-        await waitForApiCall();
 
         // see if loader is present
-        expect(renderResult.getByTestId('sectionLoading')).toBeTruthy();
+        await waitFor(() => {
+          expect(renderResult.getByTestId('sectionLoading')).toBeTruthy();
+        });
 
         // release the request
         releaseApiResponse!(mockedApi);
@@ -99,20 +101,28 @@ describe('SessionView component', () => {
 
       it('should display the search bar', async () => {
         render();
-        await waitForApiCall();
-        expect(renderResult.getByTestId('sessionView:sessionViewProcessEventsSearch')).toBeTruthy();
+
+        await waitFor(() => {
+          expect(
+            renderResult.getByTestId('sessionView:sessionViewProcessEventsSearch')
+          ).toBeTruthy();
+        });
       });
 
       it('should show items on the list, and auto selects session leader', async () => {
         render();
-        await waitForApiCall();
 
-        expect(renderResult.getAllByTestId('sessionView:processTreeNode')).toBeTruthy();
+        await waitFor(() => {
+          expect(renderResult.getAllByTestId('sessionView:processTreeNode')).toBeTruthy();
+        });
       });
 
       it('should toggle detail panel visibilty when detail button clicked', async () => {
         render();
-        await waitForApiCall();
+
+        await waitFor(() => {
+          expect(renderResult.getByTestId('sessionView:sessionViewDetailPanelToggle')).toBeTruthy();
+        });
 
         userEvent.click(renderResult.getByTestId('sessionView:sessionViewDetailPanelToggle'));
         expect(renderResult.getByText('Process')).toBeTruthy();
@@ -122,7 +132,11 @@ describe('SessionView component', () => {
 
       it('should render session view options button and its options when clicked', async () => {
         render();
-        await waitForApiCall();
+
+        await waitFor(() => {
+          expect(renderResult.getByTestId('sessionView:sessionViewOptionButton')).toBeTruthy();
+        });
+
         userEvent.click(renderResult.getByTestId('sessionView:sessionViewOptionButton'));
         expect(renderResult.getByText('Display options')).toBeTruthy();
         expect(renderResult.getByText('Timestamp')).toBeTruthy();
@@ -131,9 +145,10 @@ describe('SessionView component', () => {
 
       it('should show refresh button', async () => {
         render();
-        await waitForApiCall();
 
-        expect(renderResult.getAllByTestId('sessionView:sessionViewRefreshButton')).toBeTruthy();
+        await waitFor(() => {
+          expect(renderResult.getAllByTestId('sessionView:sessionViewRefreshButton')).toBeTruthy();
+        });
       });
     });
 
@@ -150,9 +165,10 @@ describe('SessionView component', () => {
         });
 
         render();
-        await waitForApiCall();
 
-        expect(renderResult.queryByTestId('sessionView:TTYPlayerToggle')).toBeTruthy();
+        await waitFor(() => {
+          expect(renderResult.queryByTestId('sessionView:TTYPlayerToggle')).toBeTruthy();
+        });
       });
 
       it('should NOT show tty player button, if session has no output', async () => {
@@ -171,9 +187,10 @@ describe('SessionView component', () => {
         });
 
         render();
-        await waitForApiCall();
 
-        expect(renderResult.queryByTestId('sessionView:TTYPlayerToggle')).toBeFalsy();
+        await waitFor(() => {
+          expect(renderResult.queryByTestId('sessionView:TTYPlayerToggle')).toBeFalsy();
+        });
       });
     });
   });

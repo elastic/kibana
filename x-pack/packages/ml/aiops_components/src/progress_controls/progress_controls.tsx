@@ -66,6 +66,7 @@ export function ProgressControls({
       <EuiFlexItem grow={false}>
         {!isRunning && (
           <EuiButton
+            data-test-subj={`aiopsRerunAnalysisButton${shouldRerunAnalysis ? ' shouldRerun' : ''}`}
             size="s"
             onClick={onRefresh}
             color={shouldRerunAnalysis ? 'warning' : 'primary'}
@@ -96,8 +97,8 @@ export function ProgressControls({
           </EuiButton>
         )}
         {isRunning && (
-          <EuiButton size="s" onClick={onCancel}>
-            <FormattedMessage id="xpack.aiops.cancelButtonTitle" defaultMessage="Cancel" />
+          <EuiButton data-test-subj="aiopsCancelAnalysisButton" size="s" onClick={onCancel}>
+            <FormattedMessage id="xpack.aiops.cancelAnalysisButtonTitle" defaultMessage="Cancel" />
           </EuiButton>
         )}
       </EuiFlexItem>

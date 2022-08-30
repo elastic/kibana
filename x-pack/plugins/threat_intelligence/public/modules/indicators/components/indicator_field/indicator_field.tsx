@@ -12,17 +12,23 @@ import { DateFormatter } from '../../../../components/date_formatter';
 import { unwrapValue } from '../../lib/unwrap_value';
 
 export interface IndicatorFieldProps {
+  /**
+   * Indicator to display the field value from (see {@link Indicator}).
+   */
   indicator: Indicator;
+  /**
+   * The field to get the indicator's value for.
+   */
   field: string;
+  /**
+   * An object to know what type the field is ('file', 'date', ...).
+   */
   fieldTypesMap: { [id: string]: string };
 }
 
 /**
- * Takes an indicator object, a field and a field => type object to returns the correct value to display
- * @param indicator see {@link Indicator}
- * @param field the field to get the indicator's value for
- * @param fieldTypesMap an object to know what type ('file', 'date', ...) the field is
- * @returns If the type is a 'date', returns the {@link DateFormatter} component, else returns the value or {@link EMPTY_VALUE}
+ * Takes an indicator object, a field and a field => type object to returns the correct value to display.
+ * @returns If the type is a 'date', returns the {@link DateFormatter} component, else returns the value or {@link EMPTY_VALUE}.
  */
 export const IndicatorField: VFC<IndicatorFieldProps> = ({ indicator, field, fieldTypesMap }) => {
   const value = unwrapValue(indicator, field as RawIndicatorFieldId);

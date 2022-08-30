@@ -90,6 +90,9 @@ export const rowsPerPageSelector = (count: number) =>
 export const pageSelector = (pageNumber: number) =>
   `[data-test-subj="pagination-button-${pageNumber - 1}"]`;
 
+export const ruleCheckboxByIdSelector = (id: string) =>
+  `[data-test-subj="checkboxSelectRow-${id}"]`;
+
 export const SELECT_ALL_RULES_BTN = '[data-test-subj="selectAllRules"]';
 
 export const RULES_EMPTY_PROMPT = '[data-test-subj="rulesEmptyPrompt"]';
@@ -116,7 +119,7 @@ export const INPUT_FILE = 'input[type=file]';
 
 export const TOASTER = '[data-test-subj="euiToastHeader"]';
 
-export const TOASTER_BODY = '[data-test-subj="globalToastList"] .euiToastBody';
+export const TOASTER_BODY = '[data-test-subj="globalToastList"] [data-test-subj="euiToastBody"]';
 
 export const RULE_IMPORT_OVERWRITE_CHECKBOX = '[id="import-data-modal-checkbox-label"]';
 

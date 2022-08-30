@@ -201,6 +201,22 @@ export const selectNumberOfRules = (numberOfRules: number) => {
   }
 };
 
+/**
+ * Unselects a passed number of rules. To use together with selectNumberOfRules
+ * as this utility will expect and check the passed number of rules
+ * to have been previously checked.
+ * @param numberOfRules The number of rules to click/check
+ */
+export const unselectNumberOfRules = (numberOfRules: number) => {
+  for (let i = 0; i < numberOfRules; i++) {
+    cy.get(RULE_CHECKBOX)
+      .eq(i)
+      .should('be.checked')
+      .pipe(($el) => $el.trigger('click'))
+      .should('not.be.checked');
+  }
+};
+
 export const selectAllRules = () => {
   cy.get(SELECT_ALL_RULES_BTN).contains('Select all').click();
   cy.get(SELECT_ALL_RULES_BTN).contains('Clear');

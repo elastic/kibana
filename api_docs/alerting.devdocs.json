@@ -43,7 +43,7 @@
               "The rule to view"
             ],
             "signature": [
-              "{ params: never; tags: string[]; id: string; name: string; monitoring?: ",
+              "{ params: never; tags: string[]; id: string; monitoring?: ",
               {
                 "pluginId": "alerting",
                 "scope": "common",
@@ -51,7 +51,7 @@
                 "section": "def-common.RuleMonitoring",
                 "text": "RuleMonitoring"
               },
-              " | undefined; enabled: boolean; actions: ",
+              " | undefined; name: string; enabled: boolean; actions: ",
               {
                 "pluginId": "alerting",
                 "scope": "common",
@@ -5817,7 +5817,7 @@
         "label": "SanitizedRule",
         "description": [],
         "signature": [
-          "{ params: Params; tags: string[]; id: string; name: string; monitoring?: ",
+          "{ params: Params; tags: string[]; id: string; monitoring?: ",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -5825,7 +5825,7 @@
             "section": "def-common.RuleMonitoring",
             "text": "RuleMonitoring"
           },
-          " | undefined; enabled: boolean; actions: ",
+          " | undefined; name: string; enabled: boolean; actions: ",
           {
             "pluginId": "alerting",
             "scope": "common",

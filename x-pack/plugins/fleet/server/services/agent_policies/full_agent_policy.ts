@@ -188,8 +188,8 @@ export function transformOutputToFullPolicyOutput(
   };
 
   if (output.type === outputType.Elasticsearch && standalone) {
-    newOutput.username = '{ES_USERNAME}';
-    newOutput.password = '{ES_PASSWORD}';
+    newOutput.username = '${ES_USERNAME}';
+    newOutput.password = '${ES_PASSWORD}';
   }
 
   return newOutput;

@@ -259,10 +259,6 @@ oss plugins.
 generating deep links to other apps using locators, and creating short URLs.
 
 
-|{kib-repo}blob/{branch}/src/plugins/shared_ux/README.md[sharedUX]
-|Our mission is to make consistency in our user experience a product.
-
-
 |{kib-repo}blob/{branch}/src/plugins/telemetry/README.md[telemetry]
 |Telemetry allows Kibana features to have usage tracked in the wild. The general term "telemetry" refers to multiple things:
 
@@ -301,6 +297,10 @@ In general this plugin provides:
 
 |{kib-repo}blob/{branch}/src/plugins/ui_actions_enhanced/README.md[uiActionsEnhanced]
 |Registers commercially licensed generic actions like per panel time range and contains some code that supports drilldown work.
+
+
+|{kib-repo}blob/{branch}/src/plugins/unified_field_list/README.md[unifiedFieldList]
+|This Kibana plugin contains components and services for field list UI (as in fields sidebar on Discover and Lens pages).
 
 
 |{kib-repo}blob/{branch}/src/plugins/unified_search/README.md[unifiedSearch]

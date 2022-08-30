@@ -20,7 +20,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { useMutation, useQuery } from 'react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -58,7 +58,7 @@ export const IntegrationDebugger: React.FunctionComponent = () => {
   const [isReinstallModalVisible, setIsReinstallModalVisible] = useState(false);
   const [isUninstallModalVisible, setIsUninstallModalVisible] = useState(false);
 
-  const integrations = useQuery('debug-integrations', fetchInstalledIntegrations);
+  const integrations = useQuery(['debug-integrations'], fetchInstalledIntegrations);
 
   const uninstallMutation = useMutation(async (integration: PackageListItem) => {
     const response = await sendRemovePackage(integration.name, integration.version, true);
@@ -86,7 +86,7 @@ export const IntegrationDebugger: React.FunctionComponent = () => {
     setSelectedIntegrationId(undefined);
     setIsUninstallModalVisible(false);
 
-    queryClient.invalidateQueries('debug-integrations');
+    queryClient.invalidateQueries(['debug-integrations']);
 
     return response.data;
   });
@@ -132,7 +132,7 @@ export const IntegrationDebugger: React.FunctionComponent = () => {
     setSelectedIntegrationId(undefined);
     setIsReinstallModalVisible(false);
 
-    queryClient.invalidateQueries('debug-integrations');
+    queryClient.invalidateQueries(['debug-integrations']);
 
     return installResponse.data;
   });

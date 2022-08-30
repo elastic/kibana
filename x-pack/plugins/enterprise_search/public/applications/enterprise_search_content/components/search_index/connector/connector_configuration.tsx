@@ -146,8 +146,8 @@ export const ConnectorConfiguration: React.FC = () => {
                         {`${
                           apiKeyData?.encoded
                             ? `elasticsearch:
-              api_key: "${apiKeyData?.encoded}"
-            `
+  api_key: "${apiKeyData?.encoded}"
+`
                             : ''
                         }connector_id: "${indexData.connector.id}"
             `}

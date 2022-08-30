@@ -9,7 +9,7 @@
 import { readFileSync } from 'fs';
 import { safeLoad } from 'js-yaml';
 
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import { isPlainObject } from 'lodash';
 import { ensureDeepObject } from './ensure_deep_object';
 

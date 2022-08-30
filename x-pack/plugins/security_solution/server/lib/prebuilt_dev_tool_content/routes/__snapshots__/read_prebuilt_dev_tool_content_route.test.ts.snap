@@ -4,7 +4,7 @@ exports[`readPrebuiltDevToolContentRoute should read content from "enable_host_r
 "# Click the run button of each step to enable the module
 # Upload scripts
 # 1. Script to assign risk level based on risk score
-PUT _scripts/ml_userriskscore_levels_script_default
+PUT _scripts/ml_userriskscore_levels_script
 {
   \\"script\\": {
     \\"lang\\": \\"painless\\",
@@ -13,7 +13,7 @@ PUT _scripts/ml_userriskscore_levels_script_default
 }
 
 # 2. Map script for the User Risk Score transform
-PUT _scripts/ml_userriskscore_map_script_default
+PUT _scripts/ml_userriskscore_map_script
 {
   \\"script\\": {
     \\"lang\\": \\"painless\\", \\"source\\": \\"// Get running sum of risk score per rule name per shard\\\\\\\\\\\\\\\\\\\\nString rule_name = doc[\\\\\\"signal.rule.name\\\\\\"].value;\\\\ndef stats = state.rule_risk_stats.getOrDefault(rule_name, 0.0);\\\\nstats = doc[\\\\\\"signal.rule.risk_score\\\\\\"].value;\\\\nstate.rule_risk_stats.put(rule_name, stats);\\"
@@ -21,7 +21,7 @@ PUT _scripts/ml_userriskscore_map_script_default
 }
 
 # 3. Reduce script for the User Risk Score transform
-PUT _scripts/ml_userriskscore_reduce_script_default
+PUT _scripts/ml_userriskscore_reduce_script
 {
   \\"script\\": {
     \\"lang\\": \\"painless\\",
@@ -31,7 +31,7 @@ PUT _scripts/ml_userriskscore_reduce_script_default
 
 # 4. Upload ingest pipeline
 # Ingest pipeline to add ingest timestamp and risk level to documents
-PUT _ingest/pipeline/ml_userriskscore_ingest_pipeline_default
+PUT _ingest/pipeline/ml_userriskscore_ingest_pipeline
 {
   \\"processors\\": [
     {
@@ -52,7 +52,7 @@ PUT _ingest/pipeline/ml_userriskscore_ingest_pipeline_default
     },
     {
       \\"script\\": {
-        \\"id\\": \\"ml_userriskscore_levels_script_default\\",
+        \\"id\\": \\"ml_userriskscore_levels_script\\",
         \\"params\\": {
           \\"risk_score\\": \\"risk_stats.risk_score\\"
         }
@@ -100,7 +100,7 @@ PUT _transform/ml_userriskscore_pivot_transform_default
 {
   \\"dest\\": {
     \\"index\\": \\"ml_user_risk_score_default\\",
-    \\"pipeline\\": \\"ml_userriskscore_ingest_pipeline_default\\"
+    \\"pipeline\\": \\"ml_userriskscore_ingest_pipeline\\"
   },
   \\"frequency\\": \\"1h\\",
   \\"pivot\\": {
@@ -115,7 +115,7 @@ PUT _transform/ml_userriskscore_pivot_transform_default
           \\"combine_script\\": \\"return state\\",
           \\"init_script\\": \\"state.rule_risk_stats = new HashMap();\\",
           \\"map_script\\": {
-            \\"id\\": \\"ml_userriskscore_map_script_default\\"
+            \\"id\\": \\"ml_userriskscore_map_script\\"
           },
           \\"params\\": {
             \\"max_risk\\": 100,
@@ -123,7 +123,7 @@ PUT _transform/ml_userriskscore_pivot_transform_default
             \\"zeta_constant\\": 2.612
           },
           \\"reduce_script\\": {
-            \\"id\\": \\"ml_userriskscore_reduce_script_default\\"
+            \\"id\\": \\"ml_userriskscore_reduce_script\\"
           }
         }
       }
@@ -138,7 +138,7 @@ PUT _transform/ml_userriskscore_pivot_transform_default
   },
   \\"source\\": {
     \\"index\\": [
-      \\".siem-signals-default\\"
+      \\".alerts-security.alerts-default\\"
     ],
     \\"query\\": {
       \\"bool\\": {

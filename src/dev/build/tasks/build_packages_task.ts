@@ -8,6 +8,7 @@
 
 import Path from 'path';
 
+import { REPO_ROOT } from '@kbn/utils';
 import { discoverBazelPackages } from '@kbn/bazel-packages';
 import { runBazel } from '@kbn/bazel-runner';
 
@@ -16,7 +17,7 @@ import { Task, scanCopy, write } from '../lib';
 export const BuildBazelPackages: Task = {
   description: 'Building distributable versions of Bazel packages',
   async run(config, log, build) {
-    const packages = (await discoverBazelPackages()).filter((pkg) => !pkg.isDevOnly());
+    const packages = (await discoverBazelPackages(REPO_ROOT)).filter((pkg) => !pkg.isDevOnly());
 
     log.info(`Preparing Bazel projects production build non-devOnly packages`);
     await runBazel(['build', '//packages:build']);
