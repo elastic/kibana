@@ -18,8 +18,7 @@ const createAgentDocs = (kibanaVersion: string) => [
 ];
 
 let docs: any[] = [];
-// TODO: create fleet server, fix version of agent to upgrade to an allowed version (>= fleet server's, < kibana)
-// https://github.com/elastic/kibana/issues/138121
+
 describe('View agents', () => {
   before(() => {
     deleteFleetServerDocs(true);
@@ -36,8 +35,22 @@ describe('View agents', () => {
     deleteAgentDocs();
   });
   beforeEach(() => {
-    cy.intercept('/api/fleet/agents/setup', { isReady: true });
+    cy.intercept('/api/fleet/agents/setup', {
+      isReady: true,
+      missing_optional_features: [],
+      missing_requirements: [],
+    });
     cy.intercept('/api/fleet/setup', { isInitialized: true, nonFatalErrors: [] });
+    cy.intercept('/api/fleet/agents_status', {
+      total: 18,
+      inactive: 0,
+      online: 18,
+      error: 0,
+      offline: 0,
+      updating: 0,
+      other: 0,
+      events: 0,
+    });
     cy.intercept(/\/api\/fleet\/agent_policies(\?.*)?$/, {
       items: [
         {
@@ -100,7 +113,7 @@ describe('View agents', () => {
 
       cy.getBySel(FLEET_AGENT_LIST_PAGE.SHOW_UPGRADEABLE).click();
       cy.getBySel(FLEET_AGENT_LIST_PAGE.SHOW_UPGRADEABLE).click();
-      cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).find('tr').should('have.length', 18);
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).find('tr').should('have.length', 19);
       cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).contains('agent-1');
       cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).contains('agent-2');
     });
@@ -193,7 +206,7 @@ describe('View agents', () => {
       cy.get('button').contains('healthy').click();
       cy.get('button').contains('Unhealthy').click();
 
-      cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).find('tr').should('have.length', 18);
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).find('tr').should('have.length', 19);
       cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).contains('agent-1');
       cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).contains('agent-2');
     });

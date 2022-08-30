@@ -35,7 +35,7 @@ export function setupFleetServer() {
   cy.wrap(null).then(() => {
     cy.task('insertDocs', {
       index: '.fleet-agents',
-      docs: [createAgentDoc('agent1', policyId, 'online', kibanaVersion)],
+      docs: [createAgentDoc('fleet-server', policyId, 'online', kibanaVersion)],
     });
     cy.task('insertDocs', {
       index: '.fleet-servers',
