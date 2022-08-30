@@ -7,6 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { map, bufferCount, filter, Subject } from 'rxjs';
+import { differenceWith, isEqual } from 'lodash';
 
 import { ValidationFunc, FieldConfig } from '../../shared_imports';
 import type { Field } from '../../types';
@@ -14,6 +16,16 @@ import type { Context } from '../field_editor_context';
 import { schema } from './form_schema';
 import type { Props } from './field_editor';
 import { RUNTIME_FIELD_OPTIONS_PRIMITIVE } from './constants';
+import { ChangeType, FieldPreview } from '../preview/types';
+
+import { RuntimePrimitiveTypes } from '../../shared_imports';
+
+export interface Change {
+  changeType: ChangeType;
+  type?: RuntimePrimitiveTypes;
+}
+
+export type ChangeSet = Record<string, Change>;
 
 const createNameNotAllowedValidator =
   (namesNotAllowed: Context['namesNotAllowed']): ValidationFunc<{}, string, string> =>
@@ -75,3 +87,33 @@ export const getNameFieldConfig = (
 
 export const valueToComboBoxOption = (value: string) =>
   RUNTIME_FIELD_OPTIONS_PRIMITIVE.find(({ value: optionValue }) => optionValue === value);
+
+export const getFieldPreviewChanges = (subject: Subject<FieldPreview[]>) =>
+  subject.pipe(
+    map((items) =>
+      // reduce the fields to make diffing easier
+      items.map((item) => {
+        const key = item.key.slice(item.key.search('\\.') + 1);
+        return { name: key, type: item.type! };
+      })
+    ),
+    bufferCount(2, 1),
+    // convert values into diff descriptions
+    map(([prev, next]) => {
+      const changes = differenceWith(next, prev, isEqual).reduce<ChangeSet>((col, item) => {
+        col[item.name] = {
+          changeType: ChangeType.UPSERT,
+          type: item.type as RuntimePrimitiveTypes,
+        };
+        return col;
+      }, {} as ChangeSet);
+
+      prev.forEach((prevItem) => {
+        if (!next.find((nextItem) => nextItem.name === prevItem.name)) {
+          changes[prevItem.name] = { changeType: ChangeType.DELETE };
+        }
+      });
+      return changes;
+    }),
+    filter((fields) => Object.keys(fields).length > 0)
+  );

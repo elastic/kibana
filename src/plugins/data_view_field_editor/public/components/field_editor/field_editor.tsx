@@ -10,8 +10,7 @@ import React, { useEffect, useMemo, useRef, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiCallOut } from '@elastic/eui';
-import { map, bufferCount, filter, BehaviorSubject } from 'rxjs';
-import { differenceWith, isEqual } from 'lodash';
+import { BehaviorSubject } from 'rxjs';
 
 import {
   Form,
@@ -30,18 +29,12 @@ import { useFieldPreviewContext } from '../preview';
 
 import { RUNTIME_FIELD_OPTIONS } from './constants';
 import { schema } from './form_schema';
-import { getNameFieldConfig } from './lib';
+import { getNameFieldConfig, getFieldPreviewChanges } from './lib';
 import { TypeField } from './form_fields';
 import { FieldDetail } from './field_detail';
 import { CompositeEditor } from './composite_editor';
 import { TypeSelection } from './types';
 import { ChangeType, FieldPreview } from '../preview/types';
-export interface Change {
-  changeType: ChangeType;
-  type?: RuntimePrimitiveTypes;
-}
-
-export type ChangeSet = Record<string, Change>;
 
 export interface FieldEditorFormState {
   isValid: boolean | undefined;
@@ -174,34 +167,7 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
     const subLastPreview = fieldPreview$.subscribe((val) => {
       lastPreview.current = val;
     });
-    const changes$ = fieldPreview$.pipe(
-      map((items) =>
-        // reduce the fields to make diffing easier
-        items.map((item) => {
-          const key = item.key.slice(item.key.search('\\.') + 1);
-          return { name: key, type: item.type! };
-        })
-      ),
-      bufferCount(2, 1),
-      // convert values into diff descriptions
-      map(([prev, next]) => {
-        const changes = differenceWith(next, prev, isEqual).reduce<ChangeSet>((col, item) => {
-          col[item.name] = {
-            changeType: ChangeType.UPSERT,
-            type: item.type as RuntimePrimitiveTypes,
-          };
-          return col;
-        }, {} as ChangeSet);
-
-        prev.forEach((prevItem) => {
-          if (!next.find((nextItem) => nextItem.name === prevItem.name)) {
-            changes[prevItem.name] = { changeType: ChangeType.DELETE };
-          }
-        });
-        return changes;
-      }),
-      filter((fields) => Object.keys(fields).length > 0)
-    );
+    const changes$ = getFieldPreviewChanges(fieldPreview$);
 
     const subChanges = changes$.subscribe((previewFields) => {
       const { fields } = form.getFormData();
