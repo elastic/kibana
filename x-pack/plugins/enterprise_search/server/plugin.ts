@@ -143,16 +143,16 @@ export class EnterpriseSearchPlugin implements Plugin {
         navLinks: {
           enterpriseSearch: showEnterpriseSearch,
           enterpriseSearchContent: showEnterpriseSearch,
+          enterpriseSearchAnalytics: showEnterpriseSearch,
           elasticsearch: showEnterpriseSearch,
-          analytics: showEnterpriseSearch,
           appSearch: hasAppSearchAccess,
           workplaceSearch: hasWorkplaceSearchAccess,
         },
         catalogue: {
           enterpriseSearch: showEnterpriseSearch,
           enterpriseSearchContent: showEnterpriseSearch,
+          enterpriseSearchAnalytics: showEnterpriseSearch,
           elasticsearch: showEnterpriseSearch,
-          analytics: showEnterpriseSearch,
           appSearch: hasAppSearchAccess,
           workplaceSearch: hasWorkplaceSearchAccess,
         },
