@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildEsQuery } from './buildEsQuery';
+import { buildEsQuery } from './build_es_query';
 
 describe('buildEsQuery', () => {
   const from = '2022-08-30T15:23:23.721Z';

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { buildEsQuery } from './buildEsQuery';
+export { buildEsQuery } from './build_es_query';
