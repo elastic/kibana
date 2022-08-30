@@ -139,7 +139,7 @@ export const SearchIndex: React.FC = () => {
     ...ALL_INDICES_TABS,
     ...(isConnectorIndex(indexData) ? CONNECTOR_TABS : []),
     ...(isCrawlerIndex(indexData) ? CRAWLER_TABS : []),
-    ...(powerupsEnabled ? POWERUPS_TAB : []),
+    ...(powerupsEnabled && isConnectorIndex(indexData) ? POWERUPS_TAB : []),
   ];
 
   const selectedTab = tabs.find((tab) => tab.id === tabId);
