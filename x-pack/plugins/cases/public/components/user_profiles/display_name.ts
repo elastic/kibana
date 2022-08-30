@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getUserDisplayName } from '@kbn/security-plugin/common';
 import { UserProfileUserInfo } from '@kbn/user-profile-components/target_types/user_profile';
 import { isEmpty } from 'lodash';
 import * as i18n from './translations';
@@ -14,18 +15,6 @@ export const getName = (user?: UserProfileUserInfo): string => {
     return i18n.UNKNOWN;
   }
 
-  return (
-    getIfNotEmpty(user.full_name) ??
-    getIfNotEmpty(user.email) ??
-    getIfNotEmpty(user.username) ??
-    i18n.UNKNOWN
-  );
-};
-
-const getIfNotEmpty = (field?: string) => {
-  if (isEmpty(field)) {
-    return;
-  }
-
-  return field;
+  const displayName = getUserDisplayName(user);
+  return !isEmpty(displayName) ? displayName : i18n.UNKNOWN;
 };
