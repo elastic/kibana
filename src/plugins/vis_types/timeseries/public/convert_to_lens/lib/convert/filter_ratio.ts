@@ -12,10 +12,10 @@ import { CommonColumnsConverterArgs, FormulaColumn } from './types';
 
 export const convertFilterRatioToFormulaColumn = (
   { series, metrics, dataView }: CommonColumnsConverterArgs,
-  window?: string
+  reducedTimeRange?: string
 ): FormulaColumn | null => {
   const metric = metrics[metrics.length - 1];
-  const formula = getFilterRatioFormula(metric, window);
+  const formula = getFilterRatioFormula(metric, reducedTimeRange);
 
   if (!formula) {
     return null;

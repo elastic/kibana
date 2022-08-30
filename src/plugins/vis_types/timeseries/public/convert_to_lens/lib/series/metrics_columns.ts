@@ -32,7 +32,7 @@ export const getMetricsColumns = (
   series: Series,
   dataView: DataView,
   visibleSeriesCount: number,
-  window?: string
+  reducedTimeRange?: string
 ): Column[] | null => {
   const { metrics: validMetrics, seriesAgg } = getSeriesAgg(
     series.metrics as [Metric, ...Metric[]]
@@ -59,7 +59,7 @@ export const getMetricsColumns = (
       const percentileColumns = convertMetricsToColumns(
         columnsConverterArgs,
         convertToPercentileColumns,
-        window
+        reducedTimeRange
       );
       return getValidColumns(percentileColumns);
     }
@@ -67,28 +67,34 @@ export const getMetricsColumns = (
       const percentileRankColumns = convertMetricsToColumns(
         columnsConverterArgs,
         convertToPercentileRankColumns,
-        window
+        reducedTimeRange
       );
       return getValidColumns(percentileRankColumns);
     }
     case 'math': {
-      const formulaColumn = convertMathToFormulaColumn(columnsConverterArgs, window);
+      const formulaColumn = convertMathToFormulaColumn(columnsConverterArgs, reducedTimeRange);
       return getValidColumns(formulaColumn);
     }
     case 'derivative':
     case 'moving_average': {
       const movingAverageOrDerivativeColumns = convertParentPipelineAggToColumns(
         columnsConverterArgs,
-        window
+        reducedTimeRange
       );
       return getValidColumns(movingAverageOrDerivativeColumns);
     }
     case 'cumulative_sum': {
-      const cumulativeSumColumns = convertToCumulativeSumColumns(columnsConverterArgs, window);
+      const cumulativeSumColumns = convertToCumulativeSumColumns(
+        columnsConverterArgs,
+        reducedTimeRange
+      );
       return getValidColumns(cumulativeSumColumns);
     }
     case 'filter_ratio': {
-      const formulaColumn = convertFilterRatioToFormulaColumn(columnsConverterArgs, window);
+      const formulaColumn = convertFilterRatioToFormulaColumn(
+        columnsConverterArgs,
+        reducedTimeRange
+      );
       return getValidColumns(formulaColumn);
     }
     case 'positive_rate': {
@@ -103,30 +109,30 @@ export const getMetricsColumns = (
       const formulaColumn = convertOtherAggsToFormulaColumn(
         aggregation,
         columnsConverterArgs,
-        window
+        reducedTimeRange
       );
       return getValidColumns(formulaColumn);
     }
     case 'top_hit': {
-      const column = convertToLastValueColumn(columnsConverterArgs, window);
+      const column = convertToLastValueColumn(columnsConverterArgs, reducedTimeRange);
       return getValidColumns(column);
     }
     case 'static': {
       const column = convertToStaticValueColumn(columnsConverterArgs, {
         visibleSeriesCount,
-        window,
+        reducedTimeRange,
       });
       return getValidColumns(column);
     }
     case 'std_deviation': {
-      const column = convertToStandartDeviationColumn(columnsConverterArgs, window);
+      const column = convertToStandartDeviationColumn(columnsConverterArgs, reducedTimeRange);
       return getValidColumns(column);
     }
     default: {
       const column = convertMetricAggregationColumnWithoutSpecialParams(
         aggregationMap,
         columnsConverterArgs,
-        window
+        reducedTimeRange
       );
       return getValidColumns(column);
     }

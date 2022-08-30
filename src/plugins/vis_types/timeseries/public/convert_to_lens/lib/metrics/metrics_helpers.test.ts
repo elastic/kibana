@@ -18,7 +18,7 @@ import { TimeRange } from '@kbn/data-plugin/common';
 import { METRIC_TYPES } from '@kbn/data-plugin/public';
 import type { Metric, Series, Panel } from '../../../../common/types';
 import { TIME_RANGE_DATA_MODES, TSVB_METRIC_TYPES } from '../../../../common/enums';
-import { getFormulaEquivalent, getWindow } from './metrics_helpers';
+import { getFormulaEquivalent, getReducedTimeRange } from './metrics_helpers';
 import { createPanel, createSeries } from '../__mocks__';
 
 jest.mock('../../../services', () => ({
@@ -109,7 +109,9 @@ describe('getFormulaEquivalent', () => {
     field: 'test-1',
   };
 
-  test.each<[string, [Metric, Metric[], { metaValue?: number; window?: string }], string | null]>([
+  test.each<
+    [string, [Metric, Metric[], { metaValue?: number; reducedTimeRange?: string }], string | null]
+  >([
     ['null if metric is not supported', [notSupportedMetric, [notSupportedMetric], {}], null],
     [
       'correct formula if metric is sibling pipeline agg',
@@ -154,9 +156,9 @@ describe('getFormulaEquivalent', () => {
       'average(test-1)',
     ],
     [
-      'correct formula if metric is supported and window is provided',
-      [supportedMetric, [supportedMetric], { window: '1h' }],
-      "average(test-1, timeRange='1h')",
+      'correct formula if metric is supported and reducedTimeRange is provided',
+      [supportedMetric, [supportedMetric], { reducedTimeRange: '1h' }],
+      "average(test-1, reducedTimeRange='1h')",
     ],
   ])('should return %s', (_, input, expected) => {
     if (expected === null) {
@@ -166,7 +168,7 @@ describe('getFormulaEquivalent', () => {
   });
 });
 
-describe('getWindow', () => {
+describe('getReducedTimeRange', () => {
   const timeRange: TimeRange = {
     from: '2022-02-04',
     to: '2022-02-05',
@@ -234,8 +236,8 @@ describe('getWindow', () => {
     ],
   ])('should return %s', (_, input, expected) => {
     if (expected === undefined) {
-      expect(getWindow(...input)).toBeUndefined();
+      expect(getReducedTimeRange(...input)).toBeUndefined();
     }
-    expect(getWindow(...input)).toEqual(expected);
+    expect(getReducedTimeRange(...input)).toEqual(expected);
   });
 });

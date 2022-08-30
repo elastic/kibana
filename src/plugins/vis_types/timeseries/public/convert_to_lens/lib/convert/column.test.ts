@@ -106,7 +106,7 @@ describe('createColumn', () => {
   };
 
   const customLabel = 'some custom';
-  const window = 'some-window';
+  const reducedTimeRange = '10h';
   const filter = { query: 'some-query', language: 'lucene' };
 
   test.each([
@@ -131,12 +131,12 @@ describe('createColumn', () => {
         },
         field,
         metric: metricWithTimeScale,
-        extraFields: { window, isBucketed: true, isSplit: true },
+        extraFields: { reducedTimeRange, isBucketed: true, isSplit: true },
       },
       {
         isBucketed: true,
         isSplit: true,
-        window,
+        reducedTimeRange,
         label: customLabel,
         meta: { metricId: metricWithTimeScale.id },
         filter,

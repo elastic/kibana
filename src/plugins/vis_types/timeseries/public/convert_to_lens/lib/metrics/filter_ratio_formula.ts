@@ -15,15 +15,19 @@ const escapeQuotes = (str: string) => {
   return str?.replace(/'/g, "\\'");
 };
 
-const constructFilterRationFormula = (operation: string, metric?: Query, window?: string) => {
+const constructFilterRationFormula = (
+  operation: string,
+  metric?: Query,
+  reducedTimeRange?: string
+) => {
   return `${operation}${metric?.language === 'lucene' ? 'lucene' : 'kql'}='${
     metric?.query && typeof metric?.query === 'string'
       ? escapeQuotes(metric?.query)
       : metric?.query ?? '*'
-  }'${addTimeRangeToFormula(window)})`;
+  }'${addTimeRangeToFormula(reducedTimeRange)})`;
 };
 
-export const getFilterRatioFormula = (currentMetric: Metric, window?: string) => {
+export const getFilterRatioFormula = (currentMetric: Metric, reducedTimeRange?: string) => {
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { numerator, denominator, metric_agg, field } = currentMetric;
   let aggregation: SupportedMetric | null | undefined = SUPPORTED_METRICS.count;
@@ -41,17 +45,21 @@ export const getFilterRatioFormula = (currentMetric: Metric, window?: string) =>
     const numeratorFormula = `max(${constructFilterRationFormula(
       `differences(max('${field}',`,
       numerator,
-      window
+      reducedTimeRange
     )})`;
     const denominatorFormula = `max(${constructFilterRationFormula(
       `differences(max('${field}',`,
       denominator,
-      window
+      reducedTimeRange
     )})`;
     return `${numeratorFormula}) / ${denominatorFormula})`;
   } else {
-    const numeratorFormula = constructFilterRationFormula(operation, numerator, window);
-    const denominatorFormula = constructFilterRationFormula(operation, denominator, window);
+    const numeratorFormula = constructFilterRationFormula(operation, numerator, reducedTimeRange);
+    const denominatorFormula = constructFilterRationFormula(
+      operation,
+      denominator,
+      reducedTimeRange
+    );
     return `${numeratorFormula} / ${denominatorFormula}`;
   }
 };

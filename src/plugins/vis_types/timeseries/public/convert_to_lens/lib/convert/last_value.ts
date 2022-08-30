@@ -18,7 +18,7 @@ export const convertToLastValueParams = (metric: Metric): LastValueParams => ({
 
 export const convertToLastValueColumn = (
   { series, metrics, dataView }: CommonColumnsConverterArgs,
-  window?: string
+  reducedTimeRange?: string
 ): LastValueColumn | null => {
   const currentMetric = metrics[metrics.length - 1];
   // We can only support top_hit with size 1
@@ -37,7 +37,7 @@ export const convertToLastValueColumn = (
   return {
     operationType: 'last_value',
     sourceField: field.name ?? 'document',
-    ...createColumn(series, currentMetric, undefined, { window }),
+    ...createColumn(series, currentMetric, undefined, { reducedTimeRange }),
     params: {
       ...convertToLastValueParams(currentMetric),
       ...getFormat(series, currentMetric.field, dataView),

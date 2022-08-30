@@ -41,7 +41,7 @@ export interface BaseColumn<OperationType extends Operation, Params = undefined>
   dataType: DataType;
   timeScale?: TimeScaleUnit; // ?
   timeShift?: string;
-  window?: string;
+  reducedTimeRange?: string;
   isStaticValue?: boolean;
   filter?: FilterQuery;
   params: Params;

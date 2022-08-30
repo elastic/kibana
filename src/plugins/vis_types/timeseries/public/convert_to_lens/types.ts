@@ -23,5 +23,5 @@ export interface Filter {
 
 export type ConvertToColumnsFn<C extends Column> = (
   { series: Series, metric: Metric, dataView: DataView }: CommonColumnConverterArgs,
-  window?: string
+  reducedTimeRange?: string
 ) => Array<C | null> | null;

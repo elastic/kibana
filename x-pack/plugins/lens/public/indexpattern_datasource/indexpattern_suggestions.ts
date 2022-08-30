@@ -235,7 +235,7 @@ function getIncompleteParams(column: Column) {
     filter: column.filter,
     shift: column.timeShift,
     dataType: column.dataType,
-    ...(column.window && { window: column.window }),
+    ...(column.reducedTimeRange && { reducedTimeRange: column.reducedTimeRange }),
   };
 }
 

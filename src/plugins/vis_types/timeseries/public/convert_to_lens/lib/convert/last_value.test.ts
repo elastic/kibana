@@ -80,13 +80,13 @@ describe('convertToLastValueColumn', () => {
         },
       ],
       [
-        'last value column with window',
-        [{ series, metrics: [metric], dataView }, '10'],
+        'last value column with reducedTimeRange',
+        [{ series, metrics: [metric], dataView }, '10m'],
         {
           meta: { metricId: 'some-id-0' },
           operationType: 'last_value',
           params: { format: { id: 'bytes' }, showArrayValues: false, sortField: '@timestamp' },
-          window: '10',
+          reducedTimeRange: '10m',
         },
       ],
     ]

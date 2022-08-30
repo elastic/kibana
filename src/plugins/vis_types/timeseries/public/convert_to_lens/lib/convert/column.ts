@@ -25,7 +25,7 @@ type GeneralColumnWithMeta = GenericColumnWithMeta<GeneralColumn, Meta>;
 interface ExtraColumnFields {
   isBucketed?: boolean;
   isSplit?: boolean;
-  window?: string;
+  reducedTimeRange?: string;
 }
 
 const isSupportedFormat = (format: string) => ['bytes', 'number', 'percent'].includes(format);
@@ -75,14 +75,14 @@ export const createColumn = (
   series: Series,
   metric: Metric,
   field?: DataViewField,
-  { isBucketed = false, isSplit = false, window }: ExtraColumnFields = {}
+  { isBucketed = false, isSplit = false, reducedTimeRange }: ExtraColumnFields = {}
 ): GeneralColumnWithMeta => ({
   columnId: uuid(),
   dataType: (field?.type as DataType) ?? undefined,
   label: series.label,
   isBucketed,
   isSplit,
-  window,
+  reducedTimeRange,
   filter: series.filter,
   timeScale: getTimeScale(metric),
   meta: { metricId: metric.id },
@@ -91,8 +91,8 @@ export const createColumn = (
 export const convertMetricsToColumns = <C extends Column>(
   { series, metrics, dataView }: CommonColumnsConverterArgs,
   convertToFn: ConvertToColumnsFn<C>,
-  window?: string
-) => metrics.flatMap((metric) => convertToFn({ series, metric, dataView }, window));
+  reducedTimeRange?: string
+) => metrics.flatMap((metric) => convertToFn({ series, metric, dataView }, reducedTimeRange));
 
 export const isColumnWithMeta = (column: Column): column is ColumnWithMeta => {
   if ((column as ColumnWithMeta).meta) {

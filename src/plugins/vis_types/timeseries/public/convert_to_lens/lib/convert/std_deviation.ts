@@ -15,16 +15,16 @@ import { CommonColumnConverterArgs, CommonColumnsConverterArgs } from './types';
 const createStandartDeviationFormulaColumn = (
   { series, metric, dataView }: CommonColumnConverterArgs,
   metrics: Metric[],
-  window?: string
+  reducedTimeRange?: string
 ) => {
-  const script = getFormulaEquivalent(metric, metrics, { window });
+  const script = getFormulaEquivalent(metric, metrics, { reducedTimeRange });
   if (!script) return null;
   return createFormulaColumn(script, { series, metric, dataView });
 };
 
 export const convertToStandartDeviationColumn = (
   { series, metrics, dataView }: CommonColumnsConverterArgs,
-  window?: string
+  reducedTimeRange?: string
 ) => {
   const metric = metrics[metrics.length - 1];
 
@@ -37,7 +37,7 @@ export const convertToStandartDeviationColumn = (
 
   if (metric.mode === 'upper' || metric.mode === 'lower') {
     columns.push(
-      createStandartDeviationFormulaColumn({ series, metric, dataView }, metrics, window)
+      createStandartDeviationFormulaColumn({ series, metric, dataView }, metrics, reducedTimeRange)
     );
   } else if (metric.mode === 'band') {
     [
@@ -45,7 +45,11 @@ export const convertToStandartDeviationColumn = (
       { ...metric, mode: 'lower' },
     ].forEach((m) => {
       columns.push(
-        createStandartDeviationFormulaColumn({ series, metric: m, dataView }, metrics, window)
+        createStandartDeviationFormulaColumn(
+          { series, metric: m, dataView },
+          metrics,
+          reducedTimeRange
+        )
       );
     });
   } else {
@@ -53,7 +57,7 @@ export const convertToStandartDeviationColumn = (
       convertMetricAggregationColumnWithoutSpecialParams(
         SUPPORTED_METRICS.std_deviation,
         { series, metrics: [metric], dataView },
-        window
+        reducedTimeRange
       )
     );
   }
