@@ -46,9 +46,6 @@ function getProps(props?: Partial<DashboardViewportProps>): {
     } as any,
     SavedObjectFinder: () => null,
     ExitFullScreenButton,
-    uiActions: {
-      getTriggerCompatibleActions: (() => []) as any,
-    } as any,
   };
 
   const input = getSampleDashboardInput({

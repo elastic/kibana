@@ -175,15 +175,9 @@ export class DashboardPlugin
       };
       return {
         SavedObjectFinder: getSavedObjectFinder(coreStart.savedObjects, coreStart.uiSettings),
-        notifications: coreStart.notifications,
-        screenshotMode: deps.screenshotMode,
         application: coreStart.application,
-        overlays: coreStart.overlays,
         analytics: coreStart.analytics,
-        embeddable: deps.embeddable,
-        uiActions: deps.uiActions,
         inspector: deps.inspector,
-        theme: coreStart.theme,
         ExitFullScreenButton,
       };
     };
@@ -245,10 +239,10 @@ export class DashboardPlugin
       },
     });
 
-    getStartServices().then((coreStart) => {
+    core.getStartServices().then(([, deps]) => {
       const dashboardContainerFactory = new DashboardContainerFactoryDefinition(
         getStartServices,
-        coreStart.embeddable
+        deps.embeddable
       );
       embeddable.registerEmbeddableFactory(
         dashboardContainerFactory.type,

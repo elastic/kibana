@@ -35,7 +35,6 @@ import {
   KibanaReactContextValue,
   KibanaThemeProvider,
 } from '@kbn/kibana-react-plugin/public';
-import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { RefreshInterval } from '@kbn/data-plugin/public';
 import type { Query } from '@kbn/es-query';
 
@@ -58,7 +57,6 @@ export interface DashboardContainerServices {
   SavedObjectFinder: React.ComponentType<any>;
   application: CoreStart['application'];
   inspector: InspectorStartContract;
-  uiActions: UiActionsStart;
   analytics?: CoreStart['analytics'];
 }
 

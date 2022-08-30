@@ -48,7 +48,6 @@ const options: DashboardContainerServices = {
   inspector: {} as any,
   SavedObjectFinder: () => null,
   ExitFullScreenButton: () => null,
-  uiActions: {} as any,
 };
 
 beforeEach(() => {

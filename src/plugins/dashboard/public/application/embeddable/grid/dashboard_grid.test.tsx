@@ -53,9 +53,6 @@ function prepare(props?: Partial<DashboardGridProps>) {
     } as any,
     SavedObjectFinder: () => null,
     ExitFullScreenButton: () => null,
-    uiActions: {
-      getTriggerCompatibleActions: (() => []) as any,
-    } as any,
   };
   dashboardContainer = new DashboardContainer(initialInput, options);
   const defaultTestProps: DashboardGridProps = {
