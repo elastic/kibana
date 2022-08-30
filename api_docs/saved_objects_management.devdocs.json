@@ -286,7 +286,7 @@
                 "section": "def-public.SavedObjectsManagementRecord",
                 "text": "SavedObjectsManagementRecord"
               },
-              ") => React.ReactNode) | undefined; hidden?: boolean | undefined; color?: string | undefined; className?: string | undefined; title?: string | undefined; onChange?: React.FormEventHandler<HTMLTableDataCellElement> | undefined; onKeyDown?: React.KeyboardEventHandler<HTMLTableDataCellElement> | undefined; onClick?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; id?: string | undefined; description?: string | undefined; security?: string | undefined; name: React.ReactNode; field: (string & {}) | keyof ",
+              ") => React.ReactNode) | undefined; hidden?: boolean | undefined; color?: string | undefined; id?: string | undefined; className?: string | undefined; title?: string | undefined; onChange?: React.FormEventHandler<HTMLTableDataCellElement> | undefined; onKeyDown?: React.KeyboardEventHandler<HTMLTableDataCellElement> | undefined; onClick?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; description?: string | undefined; security?: string | undefined; name: React.ReactNode; field: (string & {}) | keyof ",
               {
                 "pluginId": "savedObjectsManagement",
                 "scope": "public",
