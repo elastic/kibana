@@ -163,7 +163,7 @@ export const SessionView = ({
   );
 
   const { data: totalTTYOutputBytes } = useFetchGetTotalIOBytes(sessionEntityId);
-  const hasTTYOutput = true; // !!totalTTYOutputBytes;
+  const hasTTYOutput = !!totalTTYOutputBytes;
 
   useEffect(() => {
     if (newUpdatedAlertsStatus) {

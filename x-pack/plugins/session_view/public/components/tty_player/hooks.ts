@@ -31,7 +31,7 @@ import {
   TTY_LINE_SPLITTER_REGEX,
 } from '../../../common/constants';
 
-const MOCK_DEBUG = true; // This code will be removed once we have an agent to test with.
+const MOCK_DEBUG = false; // This code will be removed once we have an agent to test with.
 
 export const useFetchIOEvents = (sessionEntityId: string) => {
   const { http } = useKibana<CoreStart>().services;
