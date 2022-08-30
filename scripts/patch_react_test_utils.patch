@@ -1,0 +1,47 @@
+diff --git a/react-dom-test-utils.development.js b/react-dom-test-utils.development.js
+index a3adf21..a2ebf49 100644
+--- a/react-dom-test-utils.development.js
++++ b/react-dom-test-utils.development.js
+@@ -996,14 +996,18 @@ var flushWork = Scheduler.unstable_flushAllWithoutAsserting || function () {
+   return didFlushWork;
+ };
+ 
+-function flushWorkAndMicroTasks(onDone) {
++function flushWorkAndMicroTasks(onDone, ex) {
+   try {
+     flushWork();
+     enqueueTask(function () {
+-      if (flushWork()) {
+-        flushWorkAndMicroTasks(onDone);
+-      } else {
+-        onDone();
++      try {
++        if (flushWork()) {
++          flushWorkAndMicroTasks(onDone);
++        } else {
++          onDone();
++        }
++      } catch (error) {
++        throw ex || error;
+       }
+     });
+   } catch (err) {
+@@ -1064,6 +1068,9 @@ function act(callback) {
+     // effects and  microtasks in a loop until flushPassiveEffects() === false,
+     // and cleans up
+ 
++    const {testPath, currentTestName} = expect.getState();
++    const ex = new Error(`${testPath}::${currentTestName}`);
++    ex.name = 'Test Failed';
+ 
+     return {
+       then: function (resolve, reject) {
+@@ -1085,7 +1092,7 @@ function act(callback) {
+             } else {
+               resolve();
+             }
+-          });
++          }, ex);
+         }, function (err) {
+           onDone();
+           reject(err);

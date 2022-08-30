@@ -8,6 +8,10 @@ is_test_execution_step
 
 .buildkite/scripts/bootstrap.sh
 
+echo "--- patch react-dom/test-utils"
+node scripts/patch_react_test_utils.js
+echo "✅"
+
 JOB=${BUILDKITE_PARALLEL_JOB:-0}
 
 echo '--- Jest'
