@@ -30,7 +30,6 @@ export const syncDashboardUrlState = ({
   dispatchDashboardStateChange,
   getLatestDashboardState,
   kbnUrlStateStorage,
-  usageCollection,
   savedDashboard,
   kibanaVersion,
 }: SyncDashboardUrlStateProps) => {
@@ -43,7 +42,7 @@ export const syncDashboardUrlState = ({
 
     let panelsMap: DashboardPanelMap = {};
     if (rawAppStateInUrl.panels && rawAppStateInUrl.panels.length > 0) {
-      const rawState = migrateAppState(rawAppStateInUrl, kibanaVersion, usageCollection);
+      const rawState = migrateAppState(rawAppStateInUrl, kibanaVersion);
       panelsMap = convertSavedPanelsToPanelMap(rawState.panels);
     }
 

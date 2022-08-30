@@ -32,6 +32,7 @@ import { shareServiceFactory } from './share/share_services';
 import { spacesServiceFactory } from './spaces/spaces_service';
 import { urlForwardingServiceFactory } from './url_forwarding/url_forwarding_service';
 import { visualizationsServiceFactory } from './visualizations/visualizations_service';
+import { usageCollectionServiceFactory } from './usage_collection/usage_collection_service';
 
 const providers: PluginServiceProviders<
   DashboardServices,
@@ -50,6 +51,7 @@ const providers: PluginServiceProviders<
   share: new PluginServiceProvider(shareServiceFactory),
   spaces: new PluginServiceProvider(spacesServiceFactory),
   urlForwarding: new PluginServiceProvider(urlForwardingServiceFactory),
+  usageCollection: new PluginServiceProvider(usageCollectionServiceFactory),
   visualizations: new PluginServiceProvider(visualizationsServiceFactory),
 
   dashboardCapabilities: new PluginServiceProvider(dashboardCapabilitiesServiceFactory),

@@ -26,7 +26,6 @@ interface LoadSavedDashboardStateReturn {
 export const loadSavedDashboardState = async ({
   history,
   savedDashboards,
-  usageCollection,
   savedDashboardId,
   initializerContext,
   savedObjectsTagging,
@@ -58,7 +57,6 @@ export const loadSavedDashboardState = async ({
     })) as DashboardSavedObject;
     const savedDashboardState = savedObjectToDashboardState({
       savedDashboard,
-      usageCollection,
       savedObjectsTagging,
       version: initializerContext.env.packageInfo.version,
     });

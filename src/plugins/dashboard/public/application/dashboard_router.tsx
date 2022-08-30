@@ -34,12 +34,7 @@ import { createDashboardListingFilterUrl } from '../dashboard_constants';
 import { createDashboardEditUrl, DashboardConstants } from '../dashboard_constants';
 import { dashboardReadonlyBadge, getDashboardPageTitle } from '../dashboard_strings';
 import { DashboardAppServices, DashboardEmbedSettings, RedirectToProps } from '../types';
-import {
-  DashboardFeatureFlagConfig,
-  DashboardSetupDependencies,
-  DashboardStart,
-  DashboardStartDependencies,
-} from '../plugin';
+import { DashboardFeatureFlagConfig, DashboardStart, DashboardStartDependencies } from '../plugin';
 import { pluginServices } from '../services/plugin_services';
 
 export const dashboardUrlParams = {
@@ -59,7 +54,6 @@ export interface DashboardMountProps {
   onAppLeave: AppMountParameters['onAppLeave'];
   core: CoreSetup<DashboardStartDependencies, DashboardStart>;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-  usageCollection: DashboardSetupDependencies['usageCollection'];
 }
 
 export async function mountApp({
@@ -68,7 +62,6 @@ export async function mountApp({
   onAppLeave,
   appUnMounted,
   scopedHistory,
-  usageCollection,
   initializerContext,
   restorePreviousUrl,
   setHeaderActionMenu,
@@ -91,7 +84,6 @@ export async function mountApp({
   const dashboardServices: DashboardAppServices = {
     onAppLeave,
     savedObjects,
-    usageCollection,
     core: coreStart,
     initializerContext,
     restorePreviousUrl,

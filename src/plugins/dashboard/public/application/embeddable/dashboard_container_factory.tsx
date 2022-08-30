@@ -109,6 +109,8 @@ export class DashboardContainerFactoryDefinition
       './dashboard_container'
     );
 
-    return new DashboardContainerEmbeddable(initialInput, services, parent, controlGroup);
+    return Promise.resolve(
+      new DashboardContainerEmbeddable(initialInput, services, parent, controlGroup)
+    );
   };
 }

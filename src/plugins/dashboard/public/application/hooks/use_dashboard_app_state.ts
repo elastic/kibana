@@ -83,7 +83,6 @@ export const useDashboardAppState = ({
    */
   const services = useKibana<DashboardAppServices>().services;
   const {
-    usageCollection,
     savedDashboards,
     initializerContext,
     savedObjectsTagging,
@@ -329,7 +328,6 @@ export const useDashboardAppState = ({
           savedObjectToDashboardState({
             version: dashboardBuildContext.kibanaVersion,
             savedObjectsTagging,
-            usageCollection,
             savedDashboard,
           })
         );
@@ -379,7 +377,6 @@ export const useDashboardAppState = ({
     savedDashboardId,
     getStateTransfer,
     savedDashboards,
-    usageCollection,
     scopedHistory,
     notifications,
     dataViews,

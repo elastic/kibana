@@ -46,7 +46,10 @@ import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/public';
 import { createKbnUrlTracker } from '@kbn/kibana-utils-plugin/public';
 import type { VisualizationsStart } from '@kbn/visualizations-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type {
+  UsageCollectionSetup,
+  UsageCollectionStart,
+} from '@kbn/usage-collection-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
@@ -91,30 +94,31 @@ export interface DashboardSetupDependencies {
   data: DataPublicPluginSetup;
   embeddable: EmbeddableSetup;
   home?: HomePublicPluginSetup;
-  urlForwarding: UrlForwardingSetup;
-  share?: SharePluginSetup;
-  uiActions: UiActionsSetup;
-  usageCollection?: UsageCollectionSetup;
   screenshotMode: ScreenshotModePluginSetup;
+  share?: SharePluginSetup;
+  usageCollection?: UsageCollectionSetup;
+  uiActions: UiActionsSetup;
+  urlForwarding: UrlForwardingSetup;
   // unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 export interface DashboardStartDependencies {
   data: DataPublicPluginStart;
-  urlForwarding: UrlForwardingStart;
+  dataViewEditor: DataViewEditorStart;
   embeddable: EmbeddableStart;
   inspector: InspectorStartContract;
   navigation: NavigationPublicPluginStart;
-  savedObjectsClient: SavedObjectsClientContract;
-  share?: SharePluginStart;
-  uiActions: UiActionsStart;
-  savedObjects: SavedObjectsStart;
   presentationUtil: PresentationUtilPluginStart;
+  savedObjects: SavedObjectsStart;
+  savedObjectsClient: SavedObjectsClientContract;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
-  spaces?: SpacesPluginStart;
-  visualizations: VisualizationsStart;
   screenshotMode: ScreenshotModePluginStart;
-  dataViewEditor: DataViewEditorStart;
+  share?: SharePluginStart;
+  spaces?: SpacesPluginStart;
+  uiActions: UiActionsStart;
+  urlForwarding: UrlForwardingStart;
+  usageCollection?: UsageCollectionStart;
+  visualizations: VisualizationsStart;
   // unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
@@ -277,7 +281,6 @@ export class DashboardPlugin
         return mountApp({
           core,
           appUnMounted,
-          usageCollection,
           restorePreviousUrl,
           element: params.element,
           onAppLeave: params.onAppLeave,

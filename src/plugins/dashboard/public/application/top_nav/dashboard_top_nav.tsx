@@ -97,7 +97,6 @@ export function DashboardTopNav({
 }: DashboardTopNavProps) {
   const {
     core,
-    usageCollection,
     initializerContext,
     savedObjectsTagging,
     setHeaderActionMenu,
@@ -118,6 +117,7 @@ export function DashboardTopNav({
     overlays,
     settings: { uiSettings, theme },
     share,
+    usageCollection,
     visualizations: { get: getVisualization, getAliases: getVisTypeAliases },
   } = pluginServices.getServices();
 
@@ -136,7 +136,7 @@ export function DashboardTopNav({
   const IS_DARK_THEME = uiSettings.get('theme:darkMode');
   const isLabsEnabled = uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI);
 
-  const trackUiMetric = usageCollection?.reportUiCounter.bind(
+  const trackUiMetric = usageCollection.reportUiCounter?.bind(
     usageCollection,
     DashboardConstants.DASHBOARD_ID
   );
@@ -175,7 +175,7 @@ export function DashboardTopNav({
           notifications,
           overlays,
           SavedObjectFinder: getSavedObjectFinder(core.savedObjects, uiSettings),
-          reportUiCounter: usageCollection?.reportUiCounter,
+          reportUiCounter: usageCollection.reportUiCounter,
           theme,
         }),
       }));

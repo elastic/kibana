@@ -20,6 +20,7 @@ import { DashboardSettingsService } from './settings/types';
 import { DashboardShareService } from './share/types';
 import { DashboardSpacesService } from './spaces/types';
 import { DashboardUrlForwardingService } from './url_forwarding/types';
+import { DashboardUsageCollectionService } from './usage_collection/types';
 import { DashboardVisualizationsService } from './visualizations/types';
 
 export interface DashboardServices {
@@ -37,6 +38,7 @@ export interface DashboardServices {
   share: DashboardShareService; // TODO: make this optional in follow up
   spaces: DashboardSpacesService; // TODO: make this optional in follow up
   urlForwarding: DashboardUrlForwardingService;
+  usageCollection: DashboardUsageCollectionService; // TODO: make this optional in follow up
   visualizations: DashboardVisualizationsService;
 
   // dashboard plugin's own services

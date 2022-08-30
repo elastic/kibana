@@ -36,7 +36,6 @@ import { pluginServices } from '../../services/plugin_services';
 interface SavedObjectToDashboardStateProps {
   version: string;
   savedDashboard: DashboardSavedObject;
-  usageCollection: DashboardAppServices['usageCollection'];
   savedObjectsTagging: DashboardAppServices['savedObjectsTagging'];
 }
 
@@ -61,7 +60,6 @@ interface StateToRawDashboardStateProps {
 export const savedObjectToDashboardState = ({
   version,
   savedDashboard,
-  usageCollection,
   savedObjectsTagging,
 }: SavedObjectToDashboardStateProps): DashboardState => {
   const {
@@ -81,8 +79,7 @@ export const savedObjectToDashboardState = ({
       viewMode: savedDashboard.id || showWriteControls ? ViewMode.EDIT : ViewMode.VIEW,
       options: savedDashboard.optionsJSON ? JSON.parse(savedDashboard.optionsJSON) : {},
     },
-    version,
-    usageCollection
+    version
   );
   if (rawState.timeRestore) {
     rawState.timeRange = { from: savedDashboard.timeFrom, to: savedDashboard.timeTo } as TimeRange;

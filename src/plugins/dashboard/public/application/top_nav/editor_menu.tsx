@@ -17,7 +17,6 @@ import {
 } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { type BaseVisType, VisGroups, type VisTypeAlias } from '@kbn/visualizations-plugin/public';
 import { SolutionToolbarPopover } from '@kbn/presentation-util-plugin/public';
 import type {
@@ -26,7 +25,6 @@ import type {
   EmbeddableInput,
 } from '@kbn/embeddable-plugin/public';
 
-import type { DashboardAppServices } from '../../types';
 import { DashboardContainer } from '..';
 import { DashboardConstants } from '../../dashboard_constants';
 import { dashboardReplacePanelAction } from '../../dashboard_strings';
@@ -53,11 +51,11 @@ interface UnwrappedEmbeddableFactory {
 }
 
 export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
-  const { usageCollection } = useKibana<DashboardAppServices>().services;
   const {
     embeddable,
     notifications: { toasts },
     settings: { uiSettings },
+    usageCollection,
     visualizations: {
       getAliases: getVisTypeAliases,
       getByGroup: getVisTypesByGroup,
@@ -87,7 +85,7 @@ export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
   const IS_DARK_THEME = uiSettings.get('theme:darkMode');
   const LABS_ENABLED = uiSettings.get('visualize:enableLabs');
 
-  const trackUiMetric = usageCollection?.reportUiCounter.bind(
+  const trackUiMetric = usageCollection.reportUiCounter?.bind(
     usageCollection,
     DashboardConstants.DASHBOARD_ID
   );
