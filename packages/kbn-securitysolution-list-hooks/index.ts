@@ -14,6 +14,7 @@ export * from './src/use_exception_list_items';
 export * from './src/use_exception_lists';
 export * from './src/use_export_list';
 export * from './src/use_find_lists';
+export * from './src/use_find_small_lists';
 export * from './src/use_import_list';
 export * from './src/use_persist_exception_item';
 export * from './src/use_persist_exception_list';
