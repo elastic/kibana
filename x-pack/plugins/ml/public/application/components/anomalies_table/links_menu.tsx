@@ -69,7 +69,7 @@ function getQueryStringForInfluencers(
     });
   }
 
-  return `(${influencersToFilter.join(' or ')})`;
+  return `${influencersToFilter.join(' or ')}`;
 }
 
 interface LinksMenuProps {
@@ -142,6 +142,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       .toISOString();
     const anomalyBucketEnd = anomalyBucketStartMoment
       .add(anomaly.source.bucket_span * 3, 'seconds')
+      .subtract(1, 'ms')
       .toISOString();
     const timeRange = data.query.timefilter.timefilter.getTime();
 
@@ -165,8 +166,8 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
             query: {
               language: SEARCH_QUERY_LANGUAGE.KUERY,
               query: `${escapeKuery(anomaly.entityName)}:${escapeKuery(anomaly.entityValue)}${
-                influencersQueryString !== '' ? ' and ' : ''
-              }${influencersQueryString}`,
+                influencersQueryString !== '' ? ` and (${influencersQueryString})` : ''
+              }`,
             },
           }
         : {}),
