@@ -8,7 +8,8 @@
 import React, { ReactNode, VFC } from 'react';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { CoreStart, IUiSettingsClient } from '@kbn/core/public';
+import { IUiSettingsClient } from '@kbn/core/public';
+import { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import { SecuritySolutionContext } from '../../containers/security_solution_context';
 import { getSecuritySolutionContextMock } from './mock_security_context';
 
@@ -21,6 +22,10 @@ export interface KibanaContextMock {
    * For the core ui-settings package (see {@link IUiSettingsClient})
    */
   uiSettings?: IUiSettingsClient;
+  /**
+   * For the timelines plugin
+   */
+  timelines: TimelinesUIStart;
 }
 
 export interface StoryProvidersComponentProps {
@@ -42,7 +47,7 @@ export const StoryProvidersComponent: VFC<StoryProvidersComponentProps> = ({
   children,
   kibana,
 }) => {
-  const KibanaReactContext = createKibanaReactContext(kibana as CoreStart);
+  const KibanaReactContext = createKibanaReactContext(kibana);
   const securitySolutionContextMock = getSecuritySolutionContextMock();
 
   return (

@@ -28,6 +28,7 @@ import type {
 } from '@kbn/observability-plugin/public';
 // import type { OsqueryPluginStart } from '../../osquery/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { UnwrapPromise } from '../common/utility_types';
 import type {
   SourceProviderProps,
@@ -73,6 +74,7 @@ export interface InfraClientStartDeps {
   embeddable?: EmbeddableStart;
   osquery?: unknown; // OsqueryPluginStart;
   share: SharePluginStart;
+  lens: LensPublicStart;
 }
 
 export type InfraClientCoreSetup = CoreSetup<InfraClientStartDeps, InfraClientStartExports>;

@@ -94,7 +94,6 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
     namespace: 'default',
     policy_id: '',
     enabled: true,
-    output_id: '',
     inputs: [],
   });
 

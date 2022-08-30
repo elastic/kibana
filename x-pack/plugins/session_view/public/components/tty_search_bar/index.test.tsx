@@ -56,7 +56,9 @@ describe('TTYSearchBar component', () => {
     // there is a slight delay in the seek in xtermjs, so we wait 100ms before trying to highlight a result.
     await new Promise((r) => setTimeout(r, 100));
 
-    expect(props.xTermSearchFn).toHaveBeenCalledTimes(1);
+    expect(props.xTermSearchFn).toHaveBeenCalledTimes(2);
+    expect(props.xTermSearchFn).toHaveBeenNthCalledWith(1, '', 0);
+    expect(props.xTermSearchFn).toHaveBeenNthCalledWith(2, '-h', 6);
   });
 
   it('calls seekToline and xTermSearchFn when currentMatch changes', async () => {
@@ -76,12 +78,13 @@ describe('TTYSearchBar component', () => {
 
     // two calls, first instance -h is at line 22, 2nd at line 42
     expect(props.seekToLine).toHaveBeenCalledTimes(2);
-    expect(props.seekToLine).toHaveBeenNthCalledWith(1, 22);
-    expect(props.seekToLine).toHaveBeenNthCalledWith(2, 42);
+    expect(props.seekToLine).toHaveBeenNthCalledWith(1, 24);
+    expect(props.seekToLine).toHaveBeenNthCalledWith(2, 94);
 
-    expect(props.xTermSearchFn).toHaveBeenCalledTimes(2);
-    expect(props.xTermSearchFn).toHaveBeenNthCalledWith(1, '-h', 6);
-    expect(props.xTermSearchFn).toHaveBeenNthCalledWith(2, '-h', 13);
+    expect(props.xTermSearchFn).toHaveBeenCalledTimes(3);
+    expect(props.xTermSearchFn).toHaveBeenNthCalledWith(1, '', 0);
+    expect(props.xTermSearchFn).toHaveBeenNthCalledWith(2, '-h', 6);
+    expect(props.xTermSearchFn).toHaveBeenNthCalledWith(3, '-h', 13);
   });
 
   it('calls xTermSearchFn with empty query when search is cleared', async () => {
@@ -97,6 +100,6 @@ describe('TTYSearchBar component', () => {
     userEvent.click(renderResult.getByTestId('clearSearchButton'));
     await new Promise((r) => setTimeout(r, 100));
 
-    expect(props.xTermSearchFn).toHaveBeenNthCalledWith(2, '', 0);
+    expect(props.xTermSearchFn).toHaveBeenNthCalledWith(3, '', 0);
   });
 });

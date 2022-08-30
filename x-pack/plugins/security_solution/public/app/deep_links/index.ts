@@ -43,6 +43,7 @@ import {
   OVERVIEW,
   POLICIES,
   RESPONSE_ACTIONS,
+  ENTITY_ANALYTICS,
   RULES,
   TIMELINES,
   TRUSTED_APPLICATIONS,
@@ -65,6 +66,7 @@ import {
   OVERVIEW_PATH,
   POLICIES_PATH,
   RESPONSE_ACTIONS_PATH,
+  ENTITY_ANALYTICS_PATH,
   RULES_CREATE_PATH,
   RULES_PATH,
   SERVER_APP_ID,
@@ -165,6 +167,19 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
       {
         ...getSecuritySolutionLink<SecurityPageName>('dashboard'),
         features: [FEATURE.general],
+      },
+      {
+        id: SecurityPageName.entityAnalytics,
+        title: ENTITY_ANALYTICS,
+        path: ENTITY_ANALYTICS_PATH,
+        features: [FEATURE.general],
+        experimentalKey: 'entityAnalyticsDashboardEnabled',
+        isPremium: true,
+        keywords: [
+          i18n.translate('xpack.securitySolution.search.entityAnalytics', {
+            defaultMessage: 'Entity Analytics',
+          }),
+        ],
       },
     ],
   },
