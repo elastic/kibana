@@ -14,7 +14,7 @@ export const getSiblingPipelineSeriesFormula = (
   aggregation: MetricType,
   currentMetric: Metric,
   metrics: Metric[],
-  window?: string
+  reducedTimeRange?: string
 ) => {
   const [nestedFieldId, nestedMeta] = currentMetric.field?.split('[') ?? [];
   const subFunctionMetric = metrics.find((metric) => metric.id === nestedFieldId);
@@ -58,7 +58,7 @@ export const getSiblingPipelineSeriesFormula = (
 
     const subFormula = getFormulaEquivalent(subFunctionMetric, metrics, {
       metaValue: nestedMetaValue,
-      window,
+      reducedTimeRange,
     });
 
     if (!subFormula) {

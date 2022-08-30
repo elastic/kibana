@@ -14,7 +14,7 @@ import { getDataViewsStart } from '../../services';
 import { getDataSourceInfo } from '../lib/datasource';
 import { getMetricsColumns, getBucketsColumns } from '../lib/series';
 import { getLayers } from '../lib/configurations/xy';
-import { getWindow, isValidMetrics } from '../lib/metrics';
+import { getReducedTimeRange, isValidMetrics } from '../lib/metrics';
 import { ConvertTsvbToLensVisualization } from '../types';
 import { Layer as ExtendedLayer, excludeMetaFromColumn } from '../lib/convert';
 
@@ -52,10 +52,10 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model, timeR
       dataViews
     );
 
-    const window = getWindow(model, series, timeRange);
+    const reducedTimeRange = getReducedTimeRange(model, series, timeRange);
 
     // handle multiple metrics
-    const metricsColumns = getMetricsColumns(series, indexPattern!, seriesNum, window);
+    const metricsColumns = getMetricsColumns(series, indexPattern!, seriesNum, reducedTimeRange);
     if (!metricsColumns) {
       return null;
     }

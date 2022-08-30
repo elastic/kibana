@@ -43,7 +43,7 @@ const convertFormulaScriptForPercentileAggs = (
   variables: Exclude<Metric['variables'], undefined>,
   metric: Metric,
   allAggMetrics: Metric[],
-  window?: string
+  reducedTimeRange?: string
 ) => {
   variables.forEach((variable) => {
     const [_, meta] = variable?.field?.split('[') ?? [];
@@ -51,7 +51,7 @@ const convertFormulaScriptForPercentileAggs = (
     if (!metaValue) {
       return;
     }
-    const script = getFormulaEquivalent(metric, allAggMetrics, { metaValue, window });
+    const script = getFormulaEquivalent(metric, allAggMetrics, { metaValue, reducedTimeRange });
     if (!script) {
       return;
     }
@@ -65,9 +65,9 @@ const convertFormulaScriptForAggs = (
   variables: Exclude<Metric['variables'], undefined>,
   metric: Metric,
   allAggMetrics: Metric[],
-  window?: string
+  reducedTimeRange?: string
 ) => {
-  const script = getFormulaEquivalent(metric, allAggMetrics, { window });
+  const script = getFormulaEquivalent(metric, allAggMetrics, { reducedTimeRange });
   if (!script) {
     return null;
   }
@@ -77,7 +77,7 @@ const convertFormulaScriptForAggs = (
 
 export const convertMathToFormulaColumn = (
   { series, metrics, dataView }: CommonColumnsConverterArgs,
-  window?: string
+  reducedTimeRange?: string
 ): FormulaColumn | null => {
   // find the metric idx that has math expression
   const metric = metrics.find(({ type }) => type === 'math');
@@ -112,10 +112,16 @@ export const convertMathToFormulaColumn = (
         variables,
         notMathMetric,
         metrics,
-        window
+        reducedTimeRange
       );
     } else {
-      script = convertFormulaScriptForAggs(script!, variables, notMathMetric, metrics, window);
+      script = convertFormulaScriptForAggs(
+        script!,
+        variables,
+        notMathMetric,
+        metrics,
+        reducedTimeRange
+      );
     }
   }
 
@@ -134,11 +140,11 @@ export const convertMathToFormulaColumn = (
 export const convertOtherAggsToFormulaColumn = (
   aggregation: OtherFormulaAggregations,
   { series, metrics, dataView }: CommonColumnsConverterArgs,
-  window?: string
+  reducedTimeRange?: string
 ): FormulaColumn | null => {
   const metric = metrics[metrics.length - 1];
 
-  const formula = getSiblingPipelineSeriesFormula(aggregation, metric, metrics, window);
+  const formula = getSiblingPipelineSeriesFormula(aggregation, metric, metrics, reducedTimeRange);
   if (!formula) {
     return null;
   }

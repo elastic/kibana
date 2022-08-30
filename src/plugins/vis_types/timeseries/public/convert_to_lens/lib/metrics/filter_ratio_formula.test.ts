@@ -45,9 +45,9 @@ describe('getFilterRatioFormula', () => {
       "average('test-1',kql='*') / average('test-1',kql='*')",
     ],
     [
-      'filter ratio formula if window is provided',
+      'filter ratio formula if reducedTimeRange is provided',
       [metricWithMetricAgg, '1h'],
-      "average('test-1',kql='*', timeRange='1h') / average('test-1',kql='*', timeRange='1h')",
+      "average('test-1',kql='*', reducedTimeRange='1h') / average('test-1',kql='*', reducedTimeRange='1h')",
     ],
   ])('should return %s', (_, input, expected) => {
     if (expected === null) {

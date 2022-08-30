@@ -112,20 +112,20 @@ describe('convertToPercentileRankColumn', () => {
       } as Partial<PercentileRanksColumnWithExtendedMeta>,
     ],
     [
-      'precentile rank column with reference in meta and window',
+      'precentile rank column with reference in meta and reducedTimeRange',
       [
         '50',
         series,
         { ...metric, field: dataView.fields[0].name },
         dataView,
-        { index: 0, window: '10' },
+        { index: 0, reducedTimeRange: '10m' },
       ],
       {
         meta: { metricId: 'some-id', reference: 'some-id.0' },
         operationType: 'percentile_rank',
         params: { format: { id: 'bytes' }, value: 50 },
         sourceField: 'bytes',
-        window: '10',
+        reducedTimeRange: '10m',
       } as Partial<PercentileRanksColumnWithExtendedMeta>,
     ],
   ])('should return %s', (_, input, expected) => {
@@ -179,10 +179,10 @@ describe('convertToPercentileRankColumns', () => {
       ],
     ],
     [
-      'percentile rank columns with window',
+      'percentile rank columns with reducedTimeRange',
       [
         { series, metric: { ...metric, field: dataView.fields[0].name, values: ['75'] }, dataView },
-        '50',
+        '50m',
       ],
       [
         {
@@ -190,7 +190,7 @@ describe('convertToPercentileRankColumns', () => {
           operationType: 'percentile_rank',
           params: { format: { id: 'bytes' }, value: 75 },
           sourceField: 'bytes',
-          window: '50',
+          reducedTimeRange: '50m',
         },
       ],
     ],

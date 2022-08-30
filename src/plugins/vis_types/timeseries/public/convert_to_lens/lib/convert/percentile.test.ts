@@ -108,18 +108,18 @@ describe('convertToPercentileColumn', () => {
       } as Partial<PercentileColumnWithExtendedMeta>,
     ],
     [
-      'precentile column with reference in meta and window',
+      'precentile column with reference in meta and reducedTimeRange',
       [
         '50',
         { series, metric: { ...metric, field: dataView.fields[0].name }, dataView },
-        { index: 0, window: '10' },
+        { index: 0, reducedTimeRange: '10m' },
       ],
       {
         meta: { metricId: 'some-id', reference: 'some-id.0' },
         operationType: 'percentile',
         params: { format: { id: 'bytes' }, percentile: 50 },
         sourceField: 'bytes',
-        window: '10',
+        reducedTimeRange: '10m',
       } as Partial<PercentileColumnWithExtendedMeta>,
     ],
   ])('should return %s', (_, input, expected) => {
@@ -196,7 +196,7 @@ describe('convertToPercentileColumns', () => {
       ],
     ],
     [
-      'percentile columns with window',
+      'percentile columns with reducedTimeRange',
       [
         {
           series,
@@ -207,7 +207,7 @@ describe('convertToPercentileColumns', () => {
           },
           dataView,
         },
-        '50',
+        '50m',
       ],
       [
         {
@@ -215,7 +215,7 @@ describe('convertToPercentileColumns', () => {
           operationType: 'percentile',
           params: { format: { id: 'bytes' }, percentile: 75 },
           sourceField: 'bytes',
-          window: '50',
+          reducedTimeRange: '50m',
         },
       ],
     ],

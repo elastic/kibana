@@ -14,7 +14,7 @@ import { CommonColumnsConverterArgs } from './types';
 
 export const convertToCumulativeSumColumns = (
   { series, metrics, dataView }: CommonColumnsConverterArgs,
-  window?: string
+  reducedTimeRange?: string
 ) => {
   const metric = metrics[metrics.length - 1];
 
@@ -35,7 +35,7 @@ export const convertToCumulativeSumColumns = (
     const metaValue = Number(meta?.replace(']', ''));
     formula = getParentPipelineSeriesFormula(metrics, subFunctionMetric, pipelineAgg, metric.type, {
       metaValue,
-      window,
+      reducedTimeRange,
     });
     if (!formula) {
       return null;
@@ -49,7 +49,7 @@ export const convertToCumulativeSumColumns = (
       { series, metric, dataView },
       subFunctionMetric,
       pipelineAgg,
-      { window }
+      { reducedTimeRange }
     );
   }
 };

@@ -115,7 +115,7 @@ const isSupportedAggregationWithoutParams = (
 export const convertMetricAggregationColumnWithoutSpecialParams = (
   aggregation: SupportedMetric,
   { series, metrics, dataView }: CommonColumnsConverterArgs,
-  window?: string
+  reducedTimeRange?: string
 ): MetricAggregationColumnWithoutSpecialParams | null => {
   if (!isSupportedAggregationWithoutParams(aggregation.name)) {
     return null;
@@ -131,7 +131,7 @@ export const convertMetricAggregationColumnWithoutSpecialParams = (
   return {
     operationType: aggregation.name,
     sourceField,
-    ...createColumn(series, metric, field, { window }),
+    ...createColumn(series, metric, field, { reducedTimeRange }),
     params: { ...getFormat(series, field?.name, dataView) },
   } as MetricAggregationColumnWithoutSpecialParams;
 };
@@ -139,7 +139,7 @@ export const convertMetricAggregationColumnWithoutSpecialParams = (
 export const convertMetricAggregationToColumn = (
   aggregation: SupportedMetric,
   { series, metric, dataView }: CommonColumnConverterArgs,
-  { metaValue, window }: { metaValue?: number; window?: string } = {}
+  { metaValue, reducedTimeRange }: { metaValue?: number; reducedTimeRange?: string } = {}
 ): MetricAggregationColumn | null => {
   if (!isSupportedAggregation(aggregation.name)) {
     return null;
@@ -151,12 +151,12 @@ export const convertMetricAggregationToColumn = (
   }
 
   if (aggregation.name === Operations.PERCENTILE) {
-    return convertToPercentileColumn(metaValue, { series, metric, dataView }, { window });
+    return convertToPercentileColumn(metaValue, { series, metric, dataView }, { reducedTimeRange });
   }
 
   if (aggregation.name === Operations.PERCENTILE_RANK) {
     return convertToPercentileRankColumn(metaValue?.toString(), series, metric, dataView, {
-      window,
+      reducedTimeRange,
     });
   }
   if (aggregation.name === Operations.COUNTER_RATE) {
@@ -170,7 +170,7 @@ export const convertMetricAggregationToColumn = (
   return convertMetricAggregationColumnWithoutSpecialParams(
     aggregation,
     { series, metrics: [metric], dataView },
-    window
+    reducedTimeRange
   );
 };
 
@@ -179,7 +179,7 @@ export const computeParentPipelineColumns = (
   { series, metric, dataView }: CommonColumnConverterArgs,
   subFunctionMetric: Metric,
   pipelineAgg: SupportedMetric,
-  { metaValue, window }: { metaValue?: number; window?: string } = {}
+  { metaValue, reducedTimeRange }: { metaValue?: number; reducedTimeRange?: string } = {}
 ) => {
   const agg = SUPPORTED_METRICS[metric.type];
   if (!agg) {
@@ -189,7 +189,7 @@ export const computeParentPipelineColumns = (
   const aggFormula = getFormulaFromMetric(agg);
 
   if (subFunctionMetric.type === 'filter_ratio') {
-    const script = getFilterRatioFormula(subFunctionMetric, window);
+    const script = getFilterRatioFormula(subFunctionMetric, reducedTimeRange);
     if (!script) {
       return null;
     }
@@ -200,7 +200,7 @@ export const computeParentPipelineColumns = (
   const metricAggregationColumn = convertMetricAggregationToColumn(
     pipelineAgg,
     { series, metric: subFunctionMetric, dataView },
-    { metaValue, window }
+    { metaValue, reducedTimeRange }
   );
 
   if (!metricAggregationColumn) {
@@ -219,7 +219,7 @@ const convertMovingAvgOrDerivativeToColumns = (
   aggregation: typeof METRIC_TYPES.DERIVATIVE | typeof TSVB_METRIC_TYPES.MOVING_AVERAGE,
   metric: Metric,
   { series, metrics, dataView }: CommonColumnsConverterArgs,
-  window?: string
+  reducedTimeRange?: string
 ) => {
   //  percentile value is derived from the field Id. It has the format xxx-xxx-xxx-xxx[percentile]
   const [fieldId, meta] = metric?.field?.split('[') ?? [];
@@ -243,7 +243,7 @@ const convertMovingAvgOrDerivativeToColumns = (
       subFunctionMetric,
       pipelineAgg,
       metric.type,
-      { metaValue, window }
+      { metaValue, reducedTimeRange }
     );
     if (!formula) {
       return null;
@@ -261,14 +261,14 @@ const convertMovingAvgOrDerivativeToColumns = (
       { series, metric, dataView },
       subFunctionMetric,
       pipelineAgg,
-      { metaValue, window }
+      { metaValue, reducedTimeRange }
     );
   }
 };
 
 export const convertParentPipelineAggToColumns = (
   { series, metrics, dataView }: CommonColumnsConverterArgs,
-  window?: string
+  reducedTimeRange?: string
 ) => {
   const currentMetric = metrics[metrics.length - 1];
 
@@ -277,7 +277,7 @@ export const convertParentPipelineAggToColumns = (
       currentMetric.type,
       currentMetric,
       { series, metrics, dataView },
-      window
+      reducedTimeRange
     );
   }
   return null;

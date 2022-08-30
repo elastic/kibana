@@ -20,20 +20,20 @@ import { getSiblingPipelineSeriesFormula } from './sibling_pipeline_formula';
 import { getFormulaFromMetric, SUPPORTED_METRICS } from './supported_metrics';
 import { buildCounterRateFormula } from './counter_rate_formula';
 
-const shouldCalculateWindow = (timeRangeMode?: string) => {
+const shouldCalculateReducedTimeRange = (timeRangeMode?: string) => {
   return timeRangeMode === TIME_RANGE_DATA_MODES.LAST_VALUE;
 };
 
-export const getWindow = (model: Panel, series: Series, timeRange?: TimeRange) => {
+export const getReducedTimeRange = (model: Panel, series: Series, timeRange?: TimeRange) => {
   if (
-    !shouldCalculateWindow(
+    !shouldCalculateReducedTimeRange(
       series.override_index_pattern ? series.time_range_mode : model.time_range_mode
     )
   ) {
     return undefined;
   }
   const interval = series.override_index_pattern ? series.series_interval : model.interval;
-  let window = interval || '1h';
+  let reducedTimeRange = interval || '1h';
 
   if (timeRange && !interval) {
     const { from, to } = timeRange;
@@ -47,10 +47,10 @@ export const getWindow = (model: Panel, series: Series, timeRange?: TimeRange) =
         return Number.isInteger(value);
       }) || 'ms';
 
-    window = `${duration.as(unit)}${unit}`;
+    reducedTimeRange = `${duration.as(unit)}${unit}`;
   }
 
-  return window;
+  return reducedTimeRange;
 };
 
 export type TimeScaleValue = `1${TimeScaleUnit}`;
@@ -68,14 +68,14 @@ export const getTimeScale = (metric: Metric): TimeScaleUnit | undefined => {
   return timeScale;
 };
 
-export const addTimeRangeToFormula = (window?: string) => {
-  return window ? `, timeRange='${window}'` : '';
+export const addTimeRangeToFormula = (reducedTimeRange?: string) => {
+  return reducedTimeRange ? `, reducedTimeRange='${reducedTimeRange}'` : '';
 };
 
 export const getFormulaEquivalent = (
   currentMetric: Metric,
   metrics: Metric[],
-  { metaValue, window }: { metaValue?: number; window?: string } = {}
+  { metaValue, reducedTimeRange }: { metaValue?: number; reducedTimeRange?: string } = {}
 ) => {
   const aggregation = SUPPORTED_METRICS[currentMetric.type];
   if (!aggregation) {
@@ -90,7 +90,12 @@ export const getFormulaEquivalent = (
     case 'min_bucket':
     case 'sum_bucket':
     case 'positive_only': {
-      return getSiblingPipelineSeriesFormula(currentMetric.type, currentMetric, metrics, window);
+      return getSiblingPipelineSeriesFormula(
+        currentMetric.type,
+        currentMetric,
+        metrics,
+        reducedTimeRange
+      );
     }
     case 'count': {
       return `${aggFormula}()`;
@@ -98,12 +103,12 @@ export const getFormulaEquivalent = (
     case 'percentile': {
       return `${aggFormula}(${currentMetric.field}${
         metaValue ? `, percentile=${metaValue}` : ''
-      }${addTimeRangeToFormula(window)})`;
+      }${addTimeRangeToFormula(reducedTimeRange)})`;
     }
     case 'percentile_rank': {
       return `${aggFormula}(${currentMetric.field}${
         metaValue ? `, value=${metaValue}` : ''
-      }${addTimeRangeToFormula(window)})`;
+      }${addTimeRangeToFormula(reducedTimeRange)})`;
     }
     case 'cumulative_sum':
     case 'derivative':
@@ -122,33 +127,35 @@ export const getFormulaEquivalent = (
         subFunctionMetric,
         pipelineAgg,
         currentMetric.type,
-        { metaValue, window }
+        { metaValue, reducedTimeRange }
       );
     }
     case 'positive_rate': {
       return buildCounterRateFormula(currentMetric, currentMetric.field!);
     }
     case 'filter_ratio': {
-      return getFilterRatioFormula(currentMetric, window);
+      return getFilterRatioFormula(currentMetric, reducedTimeRange);
     }
     case 'static': {
       return `${currentMetric.value}`;
     }
     case 'std_deviation': {
       if (currentMetric.mode === 'lower') {
-        return `average(${currentMetric.field}${addTimeRangeToFormula(window)}) - ${
+        return `average(${currentMetric.field}${addTimeRangeToFormula(reducedTimeRange)}) - ${
           currentMetric.sigma || 1.5
-        } * ${aggFormula}(${currentMetric.field}${addTimeRangeToFormula(window)})`;
+        } * ${aggFormula}(${currentMetric.field}${addTimeRangeToFormula(reducedTimeRange)})`;
       }
       if (currentMetric.mode === 'upper') {
-        return `average(${currentMetric.field}${addTimeRangeToFormula(window)}) + ${
+        return `average(${currentMetric.field}${addTimeRangeToFormula(reducedTimeRange)}) + ${
           currentMetric.sigma || 1.5
-        } * ${aggFormula}(${currentMetric.field}${addTimeRangeToFormula(window)})`;
+        } * ${aggFormula}(${currentMetric.field}${addTimeRangeToFormula(reducedTimeRange)})`;
       }
       return `${aggFormula}(${currentMetric.field})`;
     }
     default: {
-      return `${aggFormula}(${currentMetric.field ?? ''}${addTimeRangeToFormula(window)})`;
+      return `${aggFormula}(${currentMetric.field ?? ''}${addTimeRangeToFormula(
+        reducedTimeRange
+      )})`;
     }
   }
 };

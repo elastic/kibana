@@ -57,13 +57,16 @@ describe('convertToStaticValueColumn', () => {
       },
     ],
     [
-      'static value column with window',
-      [{ series, metrics: [{ ...metric, value: 'some value' }], dataView }, { window: '100' }],
+      'static value column with reducedTimeRange',
+      [
+        { series, metrics: [{ ...metric, value: 'some value' }], dataView },
+        { reducedTimeRange: '10h' },
+      ],
       {
         meta: { metricId: 'some-id' },
         operationType: 'static_value',
         params: { value: 'some value' },
-        window: '100',
+        reducedTimeRange: '10h',
       },
     ],
   ])('should return %s', (_, input, expected) => {

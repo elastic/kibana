@@ -34,13 +34,13 @@ const staticSubAggMetric: Metric = {
   type: TSVB_METRIC_TYPES.STATIC,
 };
 const metaValue = `50`;
-const window = '1h';
+const reducedTimeRange = '1h';
 
 describe('convertToCumulativeSumColumns', () => {
   test.each<
     [
       string,
-      [common: CommonColumnsConverterArgs, window?: string],
+      [common: CommonColumnsConverterArgs, reducedTimeRange?: string],
       Partial<FormulaColumn> | Array<Partial<Column>> | null
     ]
   >([
@@ -185,7 +185,7 @@ describe('convertToCumulativeSumColumns', () => {
       },
     ],
     [
-      'formula with time range if submetric is percentile and window is specified',
+      'formula with time range if submetric is percentile and reducedTimeRange is specified',
       [
         {
           series,
@@ -195,13 +195,13 @@ describe('convertToCumulativeSumColumns', () => {
           ],
           dataView,
         },
-        window,
+        reducedTimeRange,
       ],
       {
         operationType: 'formula',
         meta: { metricId: metric.id },
         params: {
-          formula: `cumulative_sum(percentile(${subAggMetric.field}, percentile=${metaValue}, timeRange='${window}'))`,
+          formula: `cumulative_sum(percentile(${subAggMetric.field}, percentile=${metaValue}, reducedTimeRange='${reducedTimeRange}'))`,
         },
       },
     ],
