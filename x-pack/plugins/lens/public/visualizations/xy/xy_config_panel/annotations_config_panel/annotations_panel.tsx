@@ -38,6 +38,7 @@ import {
 import Color from 'color';
 import { getDataLayers } from '../../visualization_helpers';
 import { FormatFactory } from '../../../../../common';
+import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../../../utils';
 import {
   DimensionEditorSection,
   NameInput,
@@ -473,6 +474,7 @@ const ConfigPanelRangeDatePicker = ({
           }
         >
           <EuiDatePicker
+            calendarClassName={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
             fullWidth
             showTimeSelect
             selected={value}
@@ -483,6 +485,7 @@ const ConfigPanelRangeDatePicker = ({
         </EuiFormControlLayout>
       ) : (
         <EuiDatePicker
+          calendarClassName={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
           fullWidth
           showTimeSelect
           selected={value}
