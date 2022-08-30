@@ -38,10 +38,10 @@ function buildCopyColumnButton({
 }
 
 export function buildCopyColumnNameButton({
-  columnId,
+  columnDisplayName,
   services,
 }: {
-  columnId: string;
+  columnDisplayName: string;
   services: DiscoverServices;
 }): EuiListGroupItemProps {
   return buildCopyColumnButton({
@@ -51,18 +51,20 @@ export function buildCopyColumnNameButton({
         defaultMessage="Copy name"
       />
     ),
-    onCopy: () => copyColumnNameToClipboard({ columnId, services }),
+    onCopy: () => copyColumnNameToClipboard({ columnDisplayName, services }),
     dataTestSubj: 'gridCopyColumnNameToClipBoardButton',
   });
 }
 
 export function buildCopyColumnValuesButton({
   columnId,
+  columnDisplayName,
   services,
   rowsCount,
   valueToStringConverter,
 }: {
   columnId: string;
+  columnDisplayName: string;
   services: DiscoverServices;
   rowsCount: number;
   valueToStringConverter: ValueToStringConverter;
@@ -77,6 +79,7 @@ export function buildCopyColumnValuesButton({
     onCopy: () =>
       copyColumnValuesToClipboard({
         columnId,
+        columnDisplayName,
         services,
         rowsCount,
         valueToStringConverter,
