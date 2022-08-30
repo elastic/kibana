@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { slo } from './slo';
+export { slo, SO_SLO_TYPE } from './slo';

@@ -10,8 +10,10 @@ import { SavedObject } from '@kbn/core/server';
 
 import { SLO } from '../types/models';
 
+export const SO_SLO_TYPE = 'slo';
+
 export const slo: SavedObjectsType = {
-  name: 'slo',
+  name: SO_SLO_TYPE,
   hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: {

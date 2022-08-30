@@ -11,9 +11,8 @@ import { SavedObjectsClientContract } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { SLO, StoredSLO } from '../../types/models';
+import { SO_SLO_TYPE } from '../../saved_objects';
 import { KibanaSavedObjectsSLORepository } from './slo-repository';
-
-const SO_SLO_TYPE = 'slo-type';
 
 const anSLO: SLO = {
   id: uuid.v1(),
@@ -64,7 +63,7 @@ describe('sloRepository', () => {
 
   it('saves the SLO', async () => {
     soClientMock.create.mockResolvedValueOnce(aStoredSLO(anSLO));
-    const repository = new KibanaSavedObjectsSLORepository(soClientMock, SO_SLO_TYPE);
+    const repository = new KibanaSavedObjectsSLORepository(soClientMock);
 
     const savedSLO = await repository.save(anSLO);
 
@@ -80,7 +79,7 @@ describe('sloRepository', () => {
   });
 
   it('finds an existing SLO', async () => {
-    const repository = new KibanaSavedObjectsSLORepository(soClientMock, SO_SLO_TYPE);
+    const repository = new KibanaSavedObjectsSLORepository(soClientMock);
     soClientMock.get.mockResolvedValueOnce(aStoredSLO(anSLO));
 
     const foundSLO = await repository.findById(anSLO.id);

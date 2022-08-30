@@ -8,6 +8,7 @@
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
 import { StoredSLO, SLO } from '../../types/models';
+import { SO_SLO_TYPE } from '../../saved_objects';
 
 export interface SLORepository {
   save(slo: SLO): Promise<SLO>;
@@ -15,11 +16,11 @@ export interface SLORepository {
 }
 
 export class KibanaSavedObjectsSLORepository implements SLORepository {
-  constructor(private soClient: SavedObjectsClientContract, private soType: string = 'slo') {}
+  constructor(private soClient: SavedObjectsClientContract) {}
 
   async save(slo: SLO): Promise<SLO> {
     const now = new Date().toISOString();
-    const savedSLO = await this.soClient.create<StoredSLO>(this.soType, {
+    const savedSLO = await this.soClient.create<StoredSLO>(SO_SLO_TYPE, {
       ...slo,
       created_at: now,
       updated_at: now,
@@ -29,7 +30,7 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
   }
 
   async findById(id: string): Promise<SLO> {
-    const slo = await this.soClient.get<StoredSLO>(this.soType, id);
+    const slo = await this.soClient.get<StoredSLO>(SO_SLO_TYPE, id);
     return toSLOModel(slo.attributes);
   }
 }
