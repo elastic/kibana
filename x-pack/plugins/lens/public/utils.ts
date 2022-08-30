@@ -93,14 +93,11 @@ export async function refreshIndexPatternsList({
     .map((datasource) => datasource?.onRefreshIndexPattern)
     .filter(Boolean);
 
-  const [newlyMappedIndexPattern, indexPatternRefs] = await Promise.all([
-    indexPatternService.loadIndexPatterns({
-      cache: {},
-      patterns: [indexPatternId],
-      onIndexPatternRefresh: () => onRefreshCallbacks.forEach((fn) => fn()),
-    }),
-    indexPatternService.loadIndexPatternRefs({ isFullEditor: true }),
-  ]);
+  const newlyMappedIndexPattern = await indexPatternService.loadIndexPatterns({
+    cache: {},
+    patterns: [indexPatternId],
+    onIndexPatternRefresh: () => onRefreshCallbacks.forEach((fn) => fn()),
+  });
   const indexPattern = newlyMappedIndexPattern[indexPatternId];
   // But what about existingFields here?
   // When the indexPatterns cache object gets updated, the data panel will
@@ -110,7 +107,6 @@ export async function refreshIndexPatternsList({
       ...indexPatternsCache,
       [indexPatternId]: indexPattern,
     },
-    indexPatternRefs,
   });
 }
 
