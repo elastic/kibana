@@ -8,7 +8,6 @@ import { EVENT_ACTION, TIMESTAMP } from '@kbn/rule-data-utils';
 import {
   GET_TOTAL_IO_BYTES_ROUTE,
   PROCESS_EVENTS_INDEX,
-  ENTRY_SESSION_ENTITY_ID_PROPERTY,
   TOTAL_BYTES_CAPTURED_PROPERTY,
   TTY_CHAR_DEVICE_MAJOR_PROPERTY,
   TTY_CHAR_DEVICE_MINOR_PROPERTY,
@@ -47,12 +46,14 @@ export const registerGetTotalIOBytesRoute = (router: IRouter) => {
                   { term: { [TTY_CHAR_DEVICE_MINOR_PROPERTY]: ttyPredicates.ttyMinor } },
                   { term: { [HOST_BOOT_ID_PROPERTY]: ttyPredicates.bootId } },
                   { term: { [EVENT_ACTION]: 'text_output' } },
-                  { range: {
-                    [TIMESTAMP]: {
-                      gte: ttyPredicates.range[0],
-                      lte: ttyPredicates.range[1],
+                  {
+                    range: {
+                      [TIMESTAMP]: {
+                        gte: ttyPredicates.range[0],
+                        lte: ttyPredicates.range[1],
+                      },
                     },
-                  }},
+                  },
                 ],
               },
             },
