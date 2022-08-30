@@ -246,7 +246,7 @@ describe('CreateConnectorFlyout', () => {
       expect(getByText('Select a connector')).toBeInTheDocument();
     });
 
-    it('shows the feature id badges when the connector type is selected', async () => {
+    it('shows the compatibility badges when the connector type is selected', async () => {
       const { getByTestId, getByText } = appMockRenderer.render(
         <CreateConnectorFlyout
           actionTypeRegistry={actionTypeRegistry}
@@ -266,9 +266,8 @@ describe('CreateConnectorFlyout', () => {
         expect(getByTestId('test-connector-text-field')).toBeInTheDocument();
       });
 
-      expect(getByTestId('create-connector-flyout-header-availability')).toBeInTheDocument();
-      expect(getByText('Alerting')).toBeInTheDocument();
-      expect(getByText('Security Solution')).toBeInTheDocument();
+      expect(getByTestId('create-connector-flyout-header-compatibility')).toBeInTheDocument();
+      expect(getByText('Alerting Rules')).toBeInTheDocument();
     });
 
     it('shows the icon when the connector type is selected', async () => {

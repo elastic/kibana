@@ -29,6 +29,7 @@ import {
   POLICIES,
   EXPLORE,
   MANAGE,
+  ENTITY_ANALYTICS,
 } from '../../screens/security_header';
 
 import { login, visit } from '../../tasks/login';
@@ -58,6 +59,7 @@ import {
   CSP_BENCHMARKS_URL,
   CSP_FINDINGS_URL,
   POLICIES_URL,
+  ENTITY_ANALYTICS_URL,
   INDICATORS_URL,
 } from '../../urls/navigation';
 import {
@@ -97,6 +99,11 @@ describe('top-level navigation common to all pages in the Security app', () => {
   it('navigates to the Detection & Response page', () => {
     navigateFromHeaderTo(DETECTION_RESPONSE);
     cy.url().should('include', DETECTION_RESPONSE_URL);
+  });
+
+  it('navigates to the Entity Analytics page', () => {
+    navigateFromHeaderTo(ENTITY_ANALYTICS);
+    cy.url().should('include', ENTITY_ANALYTICS_URL);
   });
 
   it('navigates to the Kubernetes page', () => {

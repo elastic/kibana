@@ -90,7 +90,7 @@ describe('migration v2 with corrupt saved object documents', () => {
       await root.start();
       expect(true).toEqual(false);
     } catch (err) {
-      const errorMessage = err.message;
+      const errorMessage = err.message as string;
       const errorLines = errorMessage.split('\n');
       const errorMessageWithoutStack = errorLines
         .filter((line: string) => !line.includes(' at '))
@@ -117,7 +117,7 @@ describe('migration v2 with corrupt saved object documents', () => {
         },
         {
           mode: 'contain',
-          value: 'at transform',
+          value: 'at tryTransformDoc',
         },
         {
           mode: 'equal',
@@ -129,7 +129,7 @@ describe('migration v2 with corrupt saved object documents', () => {
         },
         {
           mode: 'contain',
-          value: 'at migrationFn',
+          value: 'at 7.14.0',
         },
         {
           mode: 'equal',
@@ -137,7 +137,7 @@ describe('migration v2 with corrupt saved object documents', () => {
         },
         {
           mode: 'contain',
-          value: 'at transform',
+          value: 'at tryTransformDoc',
         },
         {
           mode: 'equal',
@@ -149,7 +149,7 @@ describe('migration v2 with corrupt saved object documents', () => {
         },
         {
           mode: 'contain',
-          value: 'at migrationFn',
+          value: 'at 7.14.0',
         },
       ]);
     }
