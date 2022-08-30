@@ -219,6 +219,12 @@ export const RulesTables = React.memo<RulesTableProps>(
            */
           if (isSelectAllCalled.current) {
             isSelectAllCalled.current = false;
+            // Handle special case of unselecting all rules via checkbox
+            // after all rules were selected via Bulk select.
+            if (selected.length === 0) {
+              setIsAllSelected(false);
+              setSelectedRuleIds([]);
+            }
           } else {
             setSelectedRuleIds(selected.map(({ id }) => id));
             setIsAllSelected(false);
