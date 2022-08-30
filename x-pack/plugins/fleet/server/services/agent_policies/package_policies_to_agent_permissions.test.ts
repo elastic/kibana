@@ -6,9 +6,6 @@
  */
 
 jest.mock('../epm/packages');
-import type { SavedObjectsClientContract } from '@kbn/core/server';
-
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import type { PackagePolicy, RegistryDataStream } from '../../types';
 
@@ -141,11 +138,6 @@ packageInfoCache.set('osquery_manager', {
 });
 
 describe('storedPackagePoliciesToAgentPermissions()', () => {
-  let soClient: jest.Mocked<SavedObjectsClientContract>;
-  beforeEach(() => {
-    soClient = savedObjectsClientMock.create();
-  });
-
   it('Returns `undefined` if there are no package policies', async () => {
     const permissions = await storedPackagePoliciesToAgentPermissions(packageInfoCache, []);
     expect(permissions).toBeUndefined();
