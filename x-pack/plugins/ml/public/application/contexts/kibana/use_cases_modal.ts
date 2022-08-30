@@ -31,7 +31,11 @@ export const useCasesModal = <EmbeddableType extends MlEmbeddableTypes>(
         id: stringHash(JSON.stringify(persistableState)).toString(),
       };
 
-      selectCaseModal!.open({
+      if (!selectCaseModal) {
+        throw new Error('Cases modal is not available');
+      }
+
+      selectCaseModal.open({
         attachments: [
           {
             type: CommentType.persistableState,
