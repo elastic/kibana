@@ -41,7 +41,7 @@ interface GlobalEndpoints {
    *
    * @param args - Get metrics arguments
    */
-  getMetrics: UnscopedClientMethodFrom<FilesMetricsHttpEndpoint>;
+  getMetrics: () => Promise<FilesMetricsHttpEndpoint['output']>;
   /**
    * Download a file, bypassing regular security by way of a
    * secret share token.
