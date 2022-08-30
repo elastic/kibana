@@ -6,7 +6,7 @@
  */
 
 import React, { ChangeEvent, Component } from 'react';
-import { EuiForm, EuiFormRow, EuiSelect } from '@elastic/eui';
+import { EuiForm, EuiFormRow, EuiSelect, EuiSwitch, EuiSwitchEvent, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { GeoFilePicker, OnFileSelectParameters } from './geo_file_picker';
@@ -28,12 +28,14 @@ interface Props {
   geoFieldType: ES_FIELD_TYPES.GEO_POINT | ES_FIELD_TYPES.GEO_SHAPE;
   indexName: string;
   indexNameError?: string;
+  slowConnection: boolean;
   onFileClear: () => void;
   onFileSelect: (onFileSelectParameters: OnFileSelectParameters) => void;
   onGeoFieldTypeSelect: (geoFieldType: ES_FIELD_TYPES.GEO_POINT | ES_FIELD_TYPES.GEO_SHAPE) => void;
   onIndexNameChange: (name: string, error?: string) => void;
   onIndexNameValidationStart: () => void;
   onIndexNameValidationEnd: () => void;
+  onSlowConnectionChange: (slowConnection: boolean) => void;
 }
 
 interface State {
@@ -96,6 +98,10 @@ export class GeoUploadForm extends Component<Props, State> {
     );
   };
 
+  _onSlowConnectionChange = (event: EuiSwitchEvent) => {
+    this.props.onSlowConnectionChange(event.target.checked);
+  };
+
   _renderGeoFieldTypeSelect() {
     return this.state.hasFile && this.state.isPointsOnly ? (
       <EuiFormRow
@@ -119,13 +125,32 @@ export class GeoUploadForm extends Component<Props, State> {
         <GeoFilePicker onSelect={this._onFileSelect} onClear={this._onFileClear} />
         {this._renderGeoFieldTypeSelect()}
         {this.state.hasFile ? (
-          <IndexNameForm
-            indexName={this.props.indexName}
-            indexNameError={this.props.indexNameError}
-            onIndexNameChange={this.props.onIndexNameChange}
-            onIndexNameValidationStart={this.props.onIndexNameValidationStart}
-            onIndexNameValidationEnd={this.props.onIndexNameValidationEnd}
-          />
+          <>
+            <IndexNameForm
+              indexName={this.props.indexName}
+              indexNameError={this.props.indexNameError}
+              onIndexNameChange={this.props.onIndexNameChange}
+              onIndexNameValidationStart={this.props.onIndexNameValidationStart}
+              onIndexNameValidationEnd={this.props.onIndexNameValidationEnd}
+            />
+            <EuiFormRow display="columnCompressedSwitch">
+              <EuiToolTip
+                position="top" 
+                content={i18n.translate('xpack.fileUpload.slowConnection.tooltip', {
+                  defaultMessage: 'Enable to upload file in smaller chunks.',
+                })}
+              >
+                <EuiSwitch
+                  label={i18n.translate('xpack.fileUpload.slowConnection.switchLabel', {
+                    defaultMessage: 'Slow connection',
+                  })}
+                  checked={this.props.slowConnection}
+                  onChange={this._onSlowConnectionChange}
+                  compressed
+                />
+              </EuiToolTip>
+            </EuiFormRow>
+          </>
         ) : null}
       </EuiForm>
     );

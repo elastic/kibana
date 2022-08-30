@@ -128,11 +128,19 @@ export class ImportCompleteView extends Component<Props, {}> {
     }
 
     if (!this.props.importResults || !this.props.importResults.success) {
+      let reason: string | undefined;
+      if (this.props.importResults?.error?.body?.message) {
+        // Display http request error message
+        reason = this.props.importResults.error.body.message;
+      } else if (this.props.importResults?.error?.error?.reason) {
+        // Display elasticxsearch request error message
+        reason = this.props.importResults.error.error.reason;
+      }
       const errorMsg =
-        this.props.importResults && this.props.importResults.error
+        reason
           ? i18n.translate('xpack.fileUpload.importComplete.uploadFailureMsgErrorBlock', {
               defaultMessage: 'Error: {reason}',
-              values: { reason: this.props.importResults.error.error.reason },
+              values: { reason },
             })
           : '';
       return (

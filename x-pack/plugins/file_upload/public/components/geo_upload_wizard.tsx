@@ -40,6 +40,7 @@ interface State {
   indexNameError?: string;
   dataViewResp?: object;
   phase: PHASE;
+  slowConnection: boolean;
 }
 
 export class GeoUploadWizard extends Component<FileUploadComponentProps, State> {
@@ -52,6 +53,7 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
     importStatus: '',
     indexName: '',
     phase: PHASE.CONFIGURE,
+    slowConnection: false,
   };
 
   componentDidMount() {
@@ -156,7 +158,8 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
             importStatus: getWritingToIndexMsg(progress),
           });
         }
-      }
+      },
+      this.state.slowConnection,
     );
     if (!this._isMounted) {
       return;
@@ -281,6 +284,10 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
     }
   };
 
+  _onSlowConnectionChange = (slowConnection: boolean) => {
+    this.setState({ slowConnection });
+  }
+
   render() {
     if (this.state.phase === PHASE.IMPORT) {
       return (
@@ -311,10 +318,12 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
         indexNameError={this.state.indexNameError}
         onFileClear={this._onFileClear}
         onFileSelect={this._onFileSelect}
+        slowConnection={this.state.slowConnection}
         onGeoFieldTypeSelect={this._onGeoFieldTypeSelect}
         onIndexNameChange={this._onIndexNameChange}
         onIndexNameValidationStart={this.props.disableImportBtn}
         onIndexNameValidationEnd={this.props.enableImportBtn}
+        onSlowConnectionChange={this._onSlowConnectionChange}
       />
     );
   }

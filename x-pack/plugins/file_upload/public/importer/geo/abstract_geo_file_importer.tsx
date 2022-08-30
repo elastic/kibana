@@ -78,7 +78,8 @@ export class AbstractGeoFileImporter extends Importer implements GeoFileImporter
     id: string,
     index: string,
     pipelineId: string | undefined,
-    setImportProgress: (progress: number) => void
+    setImportProgress: (progress: number) => void,
+    slowConnection: boolean,
   ): Promise<ImportResults> {
     if (!id || !index) {
       return {
@@ -89,6 +90,7 @@ export class AbstractGeoFileImporter extends Importer implements GeoFileImporter
       };
     }
 
+    const maxChunkCharCount = slowConnection ? MAX_CHUNK_CHAR_COUNT / 10 : MAX_CHUNK_CHAR_COUNT;
     let success = true;
     const failures: ImportFailure[] = [...this._invalidFeatures];
     let error;
@@ -120,7 +122,7 @@ export class AbstractGeoFileImporter extends Importer implements GeoFileImporter
       }
 
       // Import block in chunks to avoid sending too much data to Elasticsearch at a time.
-      const chunks = createChunks(this._features, this._geoFieldType, MAX_CHUNK_CHAR_COUNT);
+      const chunks = createChunks(this._features, this._geoFieldType, maxChunkCharCount);
       const blockSizeInBytes = this._blockSizeInBytes;
 
       // reset block for next read
@@ -209,6 +211,7 @@ export class AbstractGeoFileImporter extends Importer implements GeoFileImporter
 
           retries--;
         } catch (err) {
+          console.log(err);
           resp.success = false;
           resp.error = err;
           retries = 0;
