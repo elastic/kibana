@@ -29,6 +29,10 @@ const buildOrFilter = (filters: FilterItem) => {
   };
 };
 
+/**
+ * The method returns the filter nesting identification number as an array.
+ * @param {string} path - variable is used to identify the filter and its nesting in the filter group.
+ */
 export const getPathInArray = (path: string) => path.split(PATH_SEPARATOR).map((i) => +i);
 
 const getGroupedFilters = (filter: FilterItem) =>
@@ -68,6 +72,10 @@ const getContainerMetaByPath = (filters: FilterItem[], pathInArray: number[]) =>
 const getParentFilterPath = (pathInArray: number[]) =>
   pathInArray.slice(0, -1).join(PATH_SEPARATOR);
 
+/**
+ * The method corrects the positions of the filters after removing some filter from the filters.
+ * @param {FilterItem[]} filters - an array of filters that may contain filters that are incorrectly nested for later display in the UI.
+ */
 export const normalizeFilters = (filters: FilterItem[]) => {
   const doRecursive = (f: FilterItem, parent: FilterItem) => {
     if (Array.isArray(f)) {
@@ -116,9 +124,21 @@ export const normalizeFilters = (filters: FilterItem[]) => {
   return normalizeArray(filters, filters) as Filter[];
 };
 
+/**
+ * Find filter by path.
+ * @param {FilterItem[]} filters - filters in which the search for the desired filter will occur.
+ * @param {string} path - path to filter.
+ */
 export const getFilterByPath = (filters: FilterItem[], path: string) =>
   doForFilterByPath(filters, path, (f) => f);
 
+/**
+ * Method to add a filter to a specified location in a filter group.
+ * @param {Filter[]} filters - array of filters where the new filter will be added.
+ * @param {FilterItem} filter - new filter.
+ * @param {string} path - path to filter.
+ * @param {ConditionTypes} conditionalType - OR/AND relationships between filters.
+ */
 export const addFilter = (
   filters: Filter[],
   filter: FilterItem,
@@ -144,6 +164,11 @@ export const addFilter = (
   return newFilters;
 };
 
+/**
+ * Remove filter from specified location.
+ * @param {Filter[]} filters - array of filters.
+ * @param {string} path - path to filter.
+ */
 export const removeFilter = (filters: Filter[], path: string) => {
   const newFilters = cloneDeep(filters);
   const pathInArray = getPathInArray(path);
@@ -155,6 +180,13 @@ export const removeFilter = (filters: Filter[], path: string) => {
   return normalizeFilters(newFilters);
 };
 
+/**
+ * Moving the filter on drag and drop.
+ * @param {Filter[]} filters - array of filters.
+ * @param {string} from - filter path before moving.
+ * @param {string} to - filter path where the filter will be moved.
+ * @param {ConditionTypes} conditionalType - OR/AND relationships between filters.
+ */
 export const moveFilter = (
   filters: Filter[],
   from: string,
@@ -214,6 +246,14 @@ export const moveFilter = (
   }
 };
 
+/**
+ * Method to update values inside filter.
+ * @param {Filter[]} filters - filter array
+ * @param {string} path - path to filter
+ * @param {DataViewField} field - DataViewField property inside a filter
+ * @param {Operator} operator - defines a relation by property and value
+ * @param {Filter['meta']['params']} params - filter value
+ */
 export const updateFilter = (
   filters: Filter[],
   path: string,

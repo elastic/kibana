@@ -21,6 +21,10 @@ export type FilterItem = Filter | FilterItem[];
 /** to: @kbn/es-query **/
 export const isOrFilter = (filter: Filter) => Boolean(filter?.meta?.type === 'OR');
 
+/**
+ * Defines a conditional operation type (AND/OR) from the filter otherwise returns undefined.
+ * @param {FilterItem} filter
+ */
 export const getConditionalOperationType = (filter: FilterItem) => {
   if (Array.isArray(filter)) {
     return ConditionTypes.AND;
