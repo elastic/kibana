@@ -18,7 +18,12 @@ export {
 } from './src/mappings';
 export { SavedObjectsSerializer } from './src/serialization';
 export { SavedObjectsTypeValidator } from './src/validation';
-export { decodeRequestVersion, decodeVersion, encodeVersion, encodeHitVersion } from './src/version';
+export {
+  decodeRequestVersion,
+  decodeVersion,
+  encodeVersion,
+  encodeHitVersion,
+} from './src/version';
 export {
   savedObjectsConfig,
   savedObjectsMigrationConfig,
