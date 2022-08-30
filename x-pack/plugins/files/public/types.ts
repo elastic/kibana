@@ -158,11 +158,12 @@ export type ScopedFilesClient = {
  * A factory for creating a {@link ScopedFilesClient}
  */
 export interface FilesClientFactory {
+  /**
+   * Create a files client.
+   */
   asUnscoped(): FilesClient;
   /**
-   * Create a {@link FileClient} for a given {@link FileKind}.
-   *
-   * This version of the file client is scoped to a file kind.
+   * Create a {@link ScopedFileClient} for a given {@link FileKind}.
    *
    * @param fileKind - The {@link FileKind} to create a client for.
    */
