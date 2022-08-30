@@ -9,7 +9,7 @@
 import type { EuiPopoverProps, EuiContextMenuPanelProps } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import { EuiPopover, EuiContextMenuPanel } from '@elastic/eui';
+import { EuiPopover, EuiContextMenuPanel, useGeneratedHtmlId } from '@elastic/eui';
 
 import { UserProfilesSelectable, UserProfilesSelectableProps } from './user_profiles_selectable';
 
@@ -38,10 +38,15 @@ export const UserProfilesPopover: FunctionComponent<UserProfilesPopoverProps> = 
   selectableProps,
   ...popoverProps
 }) => {
+  const searchInputId = useGeneratedHtmlId({
+    prefix: 'searchInput',
+    conditionalId: selectableProps.searchInputId,
+  });
+
   return (
-    <EuiPopover panelPaddingSize="none" {...popoverProps}>
+    <EuiPopover panelPaddingSize="none" initialFocus={`#${searchInputId}`} {...popoverProps}>
       <EuiContextMenuPanel title={title}>
-        <UserProfilesSelectable {...selectableProps} />
+        <UserProfilesSelectable {...selectableProps} searchInputId={searchInputId} />
       </EuiContextMenuPanel>
     </EuiPopover>
   );

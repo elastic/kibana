@@ -99,12 +99,15 @@ const TopNav = ({
   useEffect(() => {
     const asyncGetTriggerContext = async () => {
       if (vis.type.navigateToLens) {
-        const triggerConfig = await vis.type.navigateToLens(vis.params);
+        const triggerConfig = await vis.type.navigateToLens(
+          vis.params,
+          services.data.query.timefilter.timefilter.getAbsoluteTime()
+        );
         setEditInLensConfig(triggerConfig);
       }
     };
     asyncGetTriggerContext();
-  }, [vis.params, vis.type]);
+  }, [services.data.query.timefilter.timefilter, vis.params, vis.type]);
 
   const displayEditInLensItem = Boolean(vis.type.navigateToLens && editInLensConfig);
   const config = useMemo(() => {

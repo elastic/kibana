@@ -21,8 +21,9 @@ import type { Query } from '@kbn/es-query';
 import { GenericIndexPatternColumn, operationDefinitionMap } from '../operations';
 import { validateQuery } from '../operations/definitions/filters';
 import { QueryInput } from '../query_input';
-import type { IndexPattern, IndexPatternLayer } from '../types';
+import type { IndexPatternLayer } from '../types';
 import { useDebouncedValue } from '../../shared_components';
+import type { IndexPattern } from '../../types';
 
 const filterByLabel = i18n.translate('xpack.lens.indexPattern.filterBy.label', {
   defaultMessage: 'Filter by',

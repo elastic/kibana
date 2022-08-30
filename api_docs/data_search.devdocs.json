@@ -349,15 +349,15 @@
               "\nSearch sessions SO CRUD\n{@link ISessionsClient}"
             ],
             "signature": [
-              "{ create: ({ name, appId, locatorId, initialState, restoreState, sessionId, }: { name: string; appId: string; locatorId: string; initialState: Record<string, unknown>; restoreState: Record<string, unknown>; sessionId: string; }) => Promise<",
+              "{ get: (sessionId: string) => Promise<",
+              "SearchSessionSavedObject",
+              ">; delete: (sessionId: string) => Promise<void>; create: ({ name, appId, locatorId, initialState, restoreState, sessionId, }: { name: string; appId: string; locatorId: string; initialState: Record<string, unknown>; restoreState: Record<string, unknown>; sessionId: string; }) => Promise<",
               "SearchSessionSavedObject",
               ">; find: (options: Omit<",
               "SavedObjectsFindOptions",
               ", \"type\">) => Promise<",
               "SavedObjectsFindResponse",
-              "<unknown, unknown>>; get: (sessionId: string) => Promise<",
-              "SearchSessionSavedObject",
-              ">; update: (sessionId: string, attributes: unknown) => Promise<",
+              "<unknown, unknown>>; update: (sessionId: string, attributes: unknown) => Promise<",
               "SavedObjectsUpdateResponse",
               "<",
               {
@@ -387,7 +387,7 @@
                 "section": "def-common.SearchSessionSavedObjectAttributes",
                 "text": "SearchSessionSavedObjectAttributes"
               },
-              ", unknown>>; delete: (sessionId: string) => Promise<void>; }"
+              ", unknown>>; }"
             ],
             "path": "src/plugins/data/public/search/types.ts",
             "deprecated": false
@@ -697,15 +697,15 @@
               "\nSearch sessions SO CRUD\n{@link ISessionsClient}"
             ],
             "signature": [
-              "{ create: ({ name, appId, locatorId, initialState, restoreState, sessionId, }: { name: string; appId: string; locatorId: string; initialState: Record<string, unknown>; restoreState: Record<string, unknown>; sessionId: string; }) => Promise<",
+              "{ get: (sessionId: string) => Promise<",
+              "SearchSessionSavedObject",
+              ">; delete: (sessionId: string) => Promise<void>; create: ({ name, appId, locatorId, initialState, restoreState, sessionId, }: { name: string; appId: string; locatorId: string; initialState: Record<string, unknown>; restoreState: Record<string, unknown>; sessionId: string; }) => Promise<",
               "SearchSessionSavedObject",
               ">; find: (options: Omit<",
               "SavedObjectsFindOptions",
               ", \"type\">) => Promise<",
               "SavedObjectsFindResponse",
-              "<unknown, unknown>>; get: (sessionId: string) => Promise<",
-              "SearchSessionSavedObject",
-              ">; update: (sessionId: string, attributes: unknown) => Promise<",
+              "<unknown, unknown>>; update: (sessionId: string, attributes: unknown) => Promise<",
               "SavedObjectsUpdateResponse",
               "<",
               {
@@ -735,7 +735,7 @@
                 "section": "def-common.SearchSessionSavedObjectAttributes",
                 "text": "SearchSessionSavedObjectAttributes"
               },
-              ", unknown>>; delete: (sessionId: string) => Promise<void>; }"
+              ", unknown>>; }"
             ],
             "path": "src/plugins/data/public/search/types.ts",
             "deprecated": false
@@ -1212,15 +1212,15 @@
         "label": "ISessionsClient",
         "description": [],
         "signature": [
-          "{ create: ({ name, appId, locatorId, initialState, restoreState, sessionId, }: { name: string; appId: string; locatorId: string; initialState: Record<string, unknown>; restoreState: Record<string, unknown>; sessionId: string; }) => Promise<",
+          "{ get: (sessionId: string) => Promise<",
+          "SearchSessionSavedObject",
+          ">; delete: (sessionId: string) => Promise<void>; create: ({ name, appId, locatorId, initialState, restoreState, sessionId, }: { name: string; appId: string; locatorId: string; initialState: Record<string, unknown>; restoreState: Record<string, unknown>; sessionId: string; }) => Promise<",
           "SearchSessionSavedObject",
           ">; find: (options: Omit<",
           "SavedObjectsFindOptions",
           ", \"type\">) => Promise<",
           "SavedObjectsFindResponse",
-          "<unknown, unknown>>; get: (sessionId: string) => Promise<",
-          "SearchSessionSavedObject",
-          ">; update: (sessionId: string, attributes: unknown) => Promise<",
+          "<unknown, unknown>>; update: (sessionId: string, attributes: unknown) => Promise<",
           "SavedObjectsUpdateResponse",
           "<",
           {
@@ -1250,7 +1250,7 @@
             "section": "def-common.SearchSessionSavedObjectAttributes",
             "text": "SearchSessionSavedObjectAttributes"
           },
-          ", unknown>>; delete: (sessionId: string) => Promise<void>; }"
+          ", unknown>>; }"
         ],
         "path": "src/plugins/data/public/search/session/sessions_client.ts",
         "deprecated": false,
@@ -2720,9 +2720,9 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "{ filter?: any; search?: string | undefined; page?: number | undefined; aggs?: Record<string, ",
+                  "{ filter?: any; search?: string | undefined; aggs?: Record<string, ",
                   "AggregationsAggregationContainer",
-                  "> | undefined; fields?: string[] | undefined; searchAfter?: string[] | undefined; perPage?: number | undefined; sortField?: string | undefined; sortOrder?: ",
+                  "> | undefined; fields?: string[] | undefined; searchAfter?: string[] | undefined; page?: number | undefined; perPage?: number | undefined; sortField?: string | undefined; sortOrder?: ",
                   "SortOrder",
                   " | undefined; searchFields?: string[] | undefined; rootSearchFields?: string[] | undefined; hasReference?: ",
                   "SavedObjectsFindOptionsReference",
@@ -11308,7 +11308,7 @@
           "\nChecks whether a given Elasticsearch interval is a calendar or fixed interval\nand returns an object containing the appropriate date_histogram property for that\ninterval. So it will return either an object containing the fixed_interval key for\nthat interval or a calendar_interval. If the specified interval was not a valid Elasticsearch\ninterval this method will throw an error.\n\nYou can simply spread the returned value of this method into your date_histogram."
         ],
         "signature": [
-          "(interval: string) => Interval"
+          "(interval: string, shouldForceFixed: boolean | undefined) => Interval"
         ],
         "path": "src/plugins/data/common/search/aggs/utils/date_interval_utils/date_histogram_interval.ts",
         "deprecated": false,
@@ -11328,6 +11328,20 @@
             "path": "src/plugins/data/common/search/aggs/utils/date_interval_utils/date_histogram_interval.ts",
             "deprecated": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.dateHistogramInterval.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "shouldForceFixed",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/utils/date_interval_utils/date_histogram_interval.ts",
+            "deprecated": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -13926,7 +13940,15 @@
         "label": "handleRequest",
         "description": [],
         "signature": [
-          "({ abortSignal, aggs, filters, indexPattern, inspectorAdapters, query, searchSessionId, searchSourceService, timeFields, timeRange, getNow, executionContext, }: RequestHandlerParams) => ",
+          "({ abortSignal, aggs, filters, indexPattern, inspectorAdapters, query, searchSessionId, searchSourceService, timeFields, timeRange, getNow, executionContext, }: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.RequestHandlerParams",
+            "text": "RequestHandlerParams"
+          },
+          ") => ",
           "Observable",
           "<",
           {
@@ -13949,7 +13971,13 @@
             "label": "{\n  abortSignal,\n  aggs,\n  filters,\n  indexPattern,\n  inspectorAdapters,\n  query,\n  searchSessionId,\n  searchSourceService,\n  timeFields,\n  timeRange,\n  getNow,\n  executionContext,\n}",
             "description": [],
             "signature": [
-              "RequestHandlerParams"
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.RequestHandlerParams",
+                "text": "RequestHandlerParams"
+              }
             ],
             "path": "src/plugins/data/common/search/expressions/esaggs/request_handler.ts",
             "deprecated": false,
@@ -20375,7 +20403,7 @@
             "label": "exclude",
             "description": [],
             "signature": [
-              "number[] | string[] | undefined"
+              "string[] | number[] | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
             "deprecated": false
@@ -20388,7 +20416,7 @@
             "label": "include",
             "description": [],
             "signature": [
-              "number[] | string[] | undefined"
+              "string[] | number[] | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
             "deprecated": false
@@ -20467,7 +20495,7 @@
             "label": "aggregate",
             "description": [],
             "signature": [
-              "\"min\" | \"max\" | \"sum\" | \"concat\" | \"average\""
+              "\"min\" | \"max\" | \"sum\" | \"average\" | \"concat\""
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/top_hit.ts",
             "deprecated": false
@@ -24615,6 +24643,206 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-common.RequestHandlerParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "RequestHandlerParams",
+        "description": [],
+        "path": "src/plugins/data/common/search/expressions/esaggs/request_handler.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.RequestHandlerParams.abortSignal",
+            "type": "Object",
+            "tags": [],
+            "label": "abortSignal",
+            "description": [],
+            "signature": [
+              "AbortSignal | undefined"
+            ],
+            "path": "src/plugins/data/common/search/expressions/esaggs/request_handler.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.RequestHandlerParams.aggs",
+            "type": "Object",
+            "tags": [],
+            "label": "aggs",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggConfigs",
+                "text": "AggConfigs"
+              }
+            ],
+            "path": "src/plugins/data/common/search/expressions/esaggs/request_handler.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.RequestHandlerParams.filters",
+            "type": "Array",
+            "tags": [],
+            "label": "filters",
+            "description": [],
+            "signature": [
+              "Filter",
+              "[] | undefined"
+            ],
+            "path": "src/plugins/data/common/search/expressions/esaggs/request_handler.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.RequestHandlerParams.indexPattern",
+            "type": "Object",
+            "tags": [],
+            "label": "indexPattern",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/expressions/esaggs/request_handler.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.RequestHandlerParams.inspectorAdapters",
+            "type": "Object",
+            "tags": [],
+            "label": "inspectorAdapters",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Adapters",
+                "text": "Adapters"
+              }
+            ],
+            "path": "src/plugins/data/common/search/expressions/esaggs/request_handler.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.RequestHandlerParams.query",
+            "type": "Object",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "Query",
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/expressions/esaggs/request_handler.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.RequestHandlerParams.searchSessionId",
+            "type": "string",
+            "tags": [],
+            "label": "searchSessionId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data/common/search/expressions/esaggs/request_handler.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.RequestHandlerParams.searchSourceService",
+            "type": "Object",
+            "tags": [],
+            "label": "searchSourceService",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.ISearchStartSearchSource",
+                "text": "ISearchStartSearchSource"
+              }
+            ],
+            "path": "src/plugins/data/common/search/expressions/esaggs/request_handler.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.RequestHandlerParams.timeFields",
+            "type": "Array",
+            "tags": [],
+            "label": "timeFields",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/plugins/data/common/search/expressions/esaggs/request_handler.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.RequestHandlerParams.timeRange",
+            "type": "Object",
+            "tags": [],
+            "label": "timeRange",
+            "description": [],
+            "signature": [
+              "TimeRange",
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/expressions/esaggs/request_handler.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.RequestHandlerParams.getNow",
+            "type": "Function",
+            "tags": [],
+            "label": "getNow",
+            "description": [],
+            "signature": [
+              "(() => Date) | undefined"
+            ],
+            "path": "src/plugins/data/common/search/expressions/esaggs/request_handler.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.RequestHandlerParams.executionContext",
+            "type": "Object",
+            "tags": [],
+            "label": "executionContext",
+            "description": [],
+            "signature": [
+              "KibanaExecutionContext",
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/expressions/esaggs/request_handler.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-common.ResponseWithShardFailure",
         "type": "Interface",
         "tags": [],
@@ -26174,9 +26402,9 @@
             "section": "def-common.IAggType",
             "text": "IAggType"
           },
-          "; id?: string | undefined; enabled?: boolean | undefined; params?: {} | ",
+          "; params?: {} | ",
           "SerializableRecord",
-          " | undefined; schema?: string | undefined; }"
+          " | undefined; id?: string | undefined; enabled?: boolean | undefined; schema?: string | undefined; }"
         ],
         "path": "src/plugins/data/common/search/aggs/agg_config.ts",
         "deprecated": false,
@@ -26990,9 +27218,9 @@
             "section": "def-common.IAggType",
             "text": "IAggType"
           },
-          "; id?: string | undefined; enabled?: boolean | undefined; params?: {} | ",
+          "; params?: {} | ",
           "SerializableRecord",
-          " | undefined; schema?: string | undefined; }"
+          " | undefined; id?: string | undefined; enabled?: boolean | undefined; schema?: string | undefined; }"
         ],
         "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
         "deprecated": false,
@@ -28627,7 +28855,7 @@
         "label": "GeoPoint",
         "description": [],
         "signature": [
-          "string | [number, number] | Point"
+          "string | Point | [number, number]"
         ],
         "path": "src/plugins/data/common/search/expressions/geo_point.ts",
         "deprecated": false,
@@ -29633,7 +29861,7 @@
         "label": "SearchTypes",
         "description": [],
         "signature": [
-          "string | number | boolean | object | number[] | string[] | boolean[] | object[] | undefined"
+          "string | number | boolean | object | string[] | number[] | boolean[] | object[] | undefined"
         ],
         "path": "src/plugins/data/common/search/expressions/eql_raw_response.ts",
         "deprecated": false,

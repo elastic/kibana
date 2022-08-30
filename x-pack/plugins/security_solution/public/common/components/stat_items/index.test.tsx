@@ -26,7 +26,7 @@ import {
   mockData,
   mockEnableChartsData,
   mockNoChartMappings,
-  mockNarrowDateRange,
+  mockUpdateDateRange,
 } from '../../../network/components/kpi_network/mock';
 import {
   createSecuritySolutionStorageMock,
@@ -75,7 +75,7 @@ describe('Stat Items Component', () => {
     loading: false,
     setQuerySkip: mockSetQuerySkip,
     to,
-    narrowDateRange: mockNarrowDateRange,
+    updateDateRange: mockUpdateDateRange,
   };
   beforeEach(() => {
     jest.clearAllMocks();
@@ -281,7 +281,7 @@ describe('useKpiMatrixStatus', () => {
       'statItem',
       from,
       to,
-      mockNarrowDateRange,
+      mockUpdateDateRange,
       mockSetQuerySkip,
       false
     );

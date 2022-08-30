@@ -42,11 +42,63 @@ export async function createEsDocuments(
   await esTestIndexTool.waitForDocs(DOCUMENT_SOURCE, DOCUMENT_REFERENCE, totalDocuments);
 }
 
+interface CreateEsDocumentsOpts {
+  es: Client;
+  esTestIndexTool: ESTestIndexTool;
+  endDate?: string;
+  intervals?: number;
+  intervalMillis?: number;
+  groups?: number;
+  groupOffset?: number;
+  indexName?: string;
+}
+
+// Create a set of es documents to run the queries against.
+// Will create `groups` documents for each interval.
+// The difference between the dates of the docs will be intervalMillis.
+// The date of the last documents will be startDate - intervalMillis / 2.
+// So the documents will be written in the middle of each interval range.
+// The data value written to each doc is a power of 2 + the group index, with
+// 2^0 as the value of the last documents, the values increasing for older
+// documents.
+export async function createEsDocumentsWithGroups({
+  es,
+  esTestIndexTool,
+  endDate = END_DATE,
+  intervals = 1,
+  intervalMillis = 1000,
+  groups = 2,
+  groupOffset = 0,
+  indexName = ES_TEST_INDEX_NAME,
+}: CreateEsDocumentsOpts) {
+  const endDateMillis = Date.parse(endDate) - intervalMillis / 2;
+
+  const promises: Array<Promise<unknown>> = [];
+  times(intervals, (interval) => {
+    const date = endDateMillis - interval * intervalMillis;
+
+    // base value for each window is 2^interval
+    const testedValue = 2 ** interval;
+
+    // don't need await on these, wait at the end of the function
+    times(groups, (group) => {
+      promises.push(
+        createEsDocument(es, date, testedValue + group, indexName, `group-${group + groupOffset}`)
+      );
+    });
+  });
+  await Promise.all(promises);
+
+  const totalDocuments = intervals * groups;
+  await esTestIndexTool.waitForDocs(DOCUMENT_SOURCE, DOCUMENT_REFERENCE, totalDocuments);
+}
+
 async function createEsDocument(
   es: Client,
   epochMillis: number,
   testedValue: number,
-  indexName: string
+  indexName: string,
+  group?: string
 ) {
   const document = {
     source: DOCUMENT_SOURCE,
@@ -54,7 +106,9 @@ async function createEsDocument(
     date: new Date(epochMillis).toISOString(),
     date_epoch_millis: epochMillis,
     testedValue,
+    testedValueUnsigned: '18446744073709551615',
     '@timestamp': new Date(epochMillis).toISOString(),
+    ...(group ? { group } : {}),
   };
 
   const response = await es.index({

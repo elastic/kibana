@@ -75,7 +75,7 @@ export const createUserAttachmentUserActionBuilder = ({
           })}
         />
       ),
-      timelineIcon: (
+      timelineAvatar: (
         <UserActionAvatar
           username={comment.createdBy.username}
           fullName={comment.createdBy.fullName}

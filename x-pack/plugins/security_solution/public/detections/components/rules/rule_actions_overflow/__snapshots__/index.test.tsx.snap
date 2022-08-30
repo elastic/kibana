@@ -22,7 +22,7 @@ exports[`RuleActionsOverflow snapshots renders correctly against snapshot 1`] = 
     }
     closePopover={[Function]}
     data-test-subj="rules-details-popover"
-    display="inlineBlock"
+    display="inline-block"
     hasArrow={true}
     id="ruleActionsOverflow"
     isOpen={false}

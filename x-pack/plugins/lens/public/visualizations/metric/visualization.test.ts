@@ -517,12 +517,8 @@ describe('metric visualization', () => {
   it('clears a layer', () => {
     expect(visualization.clearLayer(fullState, 'some-id')).toMatchInlineSnapshot(`
       Object {
-        "color": "static-color",
         "layerId": "first",
         "layerType": "data",
-        "maxCols": 5,
-        "progressDirection": "vertical",
-        "subtitle": "subtitle",
       }
     `);
   });
@@ -634,6 +630,7 @@ describe('metric visualization', () => {
 
       expect(removed).not.toHaveProperty('metricAccessor');
       expect(removed).not.toHaveProperty('palette');
+      expect(removed).not.toHaveProperty('color');
     });
     it('removes secondary metric dimension', () => {
       const removed = visualization.removeDimension({
@@ -651,6 +648,7 @@ describe('metric visualization', () => {
       });
 
       expect(removed).not.toHaveProperty('maxAccessor');
+      expect(removed).not.toHaveProperty('progressDirection');
     });
     it('removes breakdown-by dimension', () => {
       const removed = visualization.removeDimension({
@@ -660,6 +658,7 @@ describe('metric visualization', () => {
 
       expect(removed).not.toHaveProperty('breakdownByAccessor');
       expect(removed).not.toHaveProperty('collapseFn');
+      expect(removed).not.toHaveProperty('maxCols');
     });
   });
 

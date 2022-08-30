@@ -84,11 +84,8 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
   const { timelineFullScreen } = useTimelineFullScreen();
 
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const graphEventId = useDeepEqualSelector(
-    (state) => (getTimeline(state, timelineId) ?? timelineDefaults).graphEventId
-  );
-  const sessionViewConfig = useDeepEqualSelector(
-    (state) => (getTimeline(state, timelineId) ?? timelineDefaults).sessionViewConfig
+  const { graphEventId, sessionViewConfig } = useDeepEqualSelector(
+    (state) => getTimeline(state, timelineId) ?? timelineDefaults
   );
 
   const fullScreen = useMemo(

@@ -109,7 +109,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
       </EuiDescribedFormGroup>
       <EuiDescribedFormGroup
         title={
-          <h4>
+          <h4 data-test-subj="defaultNamespaceHeader">
             <FormattedMessage
               id="xpack.fleet.agentPolicyForm.namespaceFieldLabel"
               defaultMessage="Default namespace"

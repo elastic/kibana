@@ -16,6 +16,63 @@
     "https://research.ifcr.dk/certifried-active-directory-domain-privilege-escalation-cve-2022-26923-9e098fe298f4",
     "https://portal.msrc.microsoft.com/en-US/security-guidance/advisory/CVE-2022-26923"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.action",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.outcome",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "host.id",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "source.ip",
+      "type": "ip"
+    },
+    {
+      "ecs": true,
+      "name": "user.domain",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "user.name",
+      "type": "keyword"
+    },
+    {
+      "ecs": false,
+      "name": "winlog.event_data.DnsHostName",
+      "type": "unknown"
+    },
+    {
+      "ecs": false,
+      "name": "winlog.event_data.SubjectLogonId",
+      "type": "keyword"
+    },
+    {
+      "ecs": false,
+      "name": "winlog.event_data.SubjectUserName",
+      "type": "keyword"
+    },
+    {
+      "ecs": false,
+      "name": "winlog.event_data.TargetLogonId",
+      "type": "keyword"
+    },
+    {
+      "ecs": false,
+      "name": "winlog.logon.type",
+      "type": "unknown"
+    }
+  ],
   "risk_score": 73,
   "rule_id": "6bed021a-0afb-461c-acbe-ffdb9574d3f3",
   "severity": "high",
@@ -57,5 +114,5 @@
     }
   ],
   "type": "eql",
-  "version": 1
+  "version": 2
 }

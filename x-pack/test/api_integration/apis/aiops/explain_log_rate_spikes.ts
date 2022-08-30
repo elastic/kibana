@@ -12,7 +12,7 @@ import expect from '@kbn/expect';
 
 import type { ApiExplainLogRateSpikes } from '@kbn/aiops-plugin/common/api';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 import { parseStream } from './parse_stream';
 

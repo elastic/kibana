@@ -12,9 +12,12 @@ describe('ReadConsoleRequestSchema', () => {
     expect(() => ReadConsoleRequestSchema.params.validate({ console_id: '123' })).toThrow();
   });
 
-  it.each([['enable_host_risk_score']])('should allow console_id %p', async (template) => {
-    expect(ReadConsoleRequestSchema.params.validate({ console_id: template })).toEqual({
-      console_id: template,
-    });
-  });
+  it.each([['enable_host_risk_score', 'enable_user_risk_score']])(
+    'should allow console_id %p',
+    async (template) => {
+      expect(ReadConsoleRequestSchema.params.validate({ console_id: template })).toEqual({
+        console_id: template,
+      });
+    }
+  );
 });

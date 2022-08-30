@@ -10,9 +10,9 @@ import { EuiButtonIcon, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { DRAW_SHAPE } from '../../../../../common/constants';
-import { VectorCircleIcon } from '../../icons/vector_circle_icon';
-import { VectorLineIcon } from '../../icons/vector_line_icon';
-import { VectorSquareIcon } from '../../icons/vector_square_icon';
+import { VectorCircleIcon } from './vector_circle_icon';
+import { VectorLineIcon } from './vector_line_icon';
+import { VectorSquareIcon } from './vector_square_icon';
 
 export interface ReduxStateProps {
   drawShape?: string;

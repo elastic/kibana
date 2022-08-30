@@ -62,6 +62,7 @@ describe('ALL - Add Integration', () => {
     cy.get('.euiTableCellContent').get('.euiPopover__anchor').get(`[aria-label="Open"]`).click();
     cy.contains(/^Delete integration$/).click();
     closeModalIfVisible();
+    cy.contains(/^Deleted integration 'osquery_manager-1'$/);
     cy.contains(/^Settings$/).click();
     cy.contains(/^Uninstall Osquery Manager$/).click();
     closeModalIfVisible();
@@ -77,10 +78,9 @@ describe('ALL - Add Integration', () => {
     cy.contains('osquery_manager-');
   });
 
-  it.skip('should have integration and packs copied when upgrading integration', () => {
+  it('should have integration and packs copied when upgrading integration', () => {
     const packageName = 'osquery_manager';
     const oldVersion = '1.2.0';
-    const newVersion = '1.3.1';
 
     cy.visit(`app/integrations/detail/${packageName}-${oldVersion}/overview`);
     cy.contains('Add Osquery Manager').click();
@@ -100,7 +100,10 @@ describe('ALL - Add Integration', () => {
     navigateTo('app/osquery/packs');
     findAndClickButton('Add pack');
     findFormFieldByRowsLabelAndType('Name', 'Integration');
-    findFormFieldByRowsLabelAndType('Scheduled agent policies (optional)', '{downArrow} {enter}');
+    findFormFieldByRowsLabelAndType(
+      'Scheduled agent policies (optional)',
+      'Agent policy 1 {downArrow} {enter}'
+    );
     findAndClickButton('Add query');
     cy.react('EuiComboBox', {
       props: { placeholder: 'Search for a query to run, or write a new query below' },
@@ -109,6 +112,7 @@ describe('ALL - Add Integration', () => {
       .type('{downArrow} {enter}');
     cy.contains(/^Save$/).click();
     cy.contains(/^Save pack$/).click();
+    cy.contains(/^Successfully created "Integration" pack$/).click();
     cy.visit('app/fleet/policies');
     cy.contains('Agent policy 1').click();
     cy.contains('Upgrade').click();
@@ -119,14 +123,15 @@ describe('ALL - Add Integration', () => {
     cy.contains(/^Advanced$/).click();
     cy.contains('"Integration":');
     cy.contains('Cancel').click();
+    closeModalIfVisible();
     cy.get('tr')
       .should('contain', 'osquery_manager-2')
       .and('contain', 'Osquery Manager')
-      .and('contain', `v${newVersion}`);
+      .and('contain', 'v')
+      .and('not.contain', `v${oldVersion}`);
     cy.contains('Actions').click();
     cy.contains('View policy').click();
     cy.contains('name: osquery_manager-2');
-    cy.contains(`version: ${newVersion}`);
 
     // test list of prebuilt queries
     navigateTo('/app/osquery/saved_queries');

@@ -19,6 +19,7 @@ import type {
 import type { Filter } from '@kbn/es-query';
 import type { RuleAction } from '@kbn/alerting-plugin/common';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
+import type { Unit } from '@kbn/datemath';
 
 import type { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import type { FieldValueQueryBar } from '../../../components/rules/query_bar';
@@ -240,6 +241,11 @@ export interface ActionsStepRuleJson {
   enabled: boolean;
   throttle?: string | null;
   meta?: unknown;
+}
+
+export interface QuickQueryPreviewOptions {
+  timeframe: Unit;
+  timeframeEnd: moment.Moment;
 }
 
 export interface AdvancedPreviewForm {

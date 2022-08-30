@@ -282,12 +282,6 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
           level: 11,
         },
       }),
-      new CompressionPlugin({
-        algorithm: 'gzip',
-        filename: '[path].gz',
-        test: /\.(js|css)$/,
-        cache: false,
-      }),
     ],
 
     optimization: {

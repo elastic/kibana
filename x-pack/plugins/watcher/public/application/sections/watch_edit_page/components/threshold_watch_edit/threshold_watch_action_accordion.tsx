@@ -244,7 +244,7 @@ export const WatchActionsAccordion: React.FunctionComponent<Props> = ({
                   (actionItem: ActionType) => actionItem.id === action.id
                 );
 
-                if (actionStatus && actionStatus.lastExecutionSuccessful === false) {
+                if (actionStatus && actionStatus.isLastExecutionSuccessful === false) {
                   const message = actionStatus.lastExecutionReason || action.simulateFailMessage;
                   return toasts.addDanger(message);
                 }

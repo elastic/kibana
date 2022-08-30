@@ -57,7 +57,7 @@ export class PercentileAggField extends AggField implements IESAggField {
     }
 
     const suffix = getOrdinalSuffix(this._percentile);
-    return `${this._percentile}${suffix} ${this._source.getAggLabel(
+    return `${this._percentile}${suffix} ${await this._source.getAggLabel(
       this._getAggType(),
       this.getRootName()
     )}`;

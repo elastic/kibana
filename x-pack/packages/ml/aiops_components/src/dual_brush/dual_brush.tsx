@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEqual } from 'lodash';
 import React, { useEffect, useRef } from 'react';
 
 import * as d3Brush from 'd3-brush';
@@ -74,7 +75,14 @@ export function DualBrush({
 }: DualBrushProps) {
   const d3BrushContainer = useRef(null);
   const brushes = useRef<DualBrush[]>([]);
+
+  // We need to pass props to refs here because the d3-brush code doesn't consider
+  // native React prop changes. The brush code does its own check whether these props changed then.
+  // The initialized brushes might otherwise act on stale data.
   const widthRef = useRef(width);
+  const minRef = useRef(min);
+  const maxRef = useRef(max);
+  const snapTimestampsRef = useRef(snapTimestamps);
 
   const { baselineMin, baselineMax, deviationMin, deviationMax } = windowParameters;
 
@@ -93,11 +101,14 @@ export function DualBrush({
         function brushend(this: d3Selection.BaseType) {
           const currentWidth = widthRef.current;
 
-          const x = d3.scaleLinear().domain([min, max]).rangeRound([0, currentWidth]);
+          const x = d3
+            .scaleLinear()
+            .domain([minRef.current, maxRef.current])
+            .rangeRound([0, currentWidth]);
 
           const px2ts = (px: number) => Math.round(x.invert(px));
-          const xMin = x(min) ?? 0;
-          const xMax = x(max) ?? 0;
+          const xMin = x(minRef.current) ?? 0;
+          const xMax = x(maxRef.current) ?? 0;
           const minExtentPx = Math.round((xMax - xMin) / 100);
 
           const baselineBrush = d3.select('#aiops-brush-baseline');
@@ -157,8 +168,8 @@ export function DualBrush({
             newWindowParameters.baselineMax = px2ts(newBaselineMax);
           }
 
-          const snappedWindowParameters = snapTimestamps
-            ? getSnappedWindowParameters(newWindowParameters, snapTimestamps)
+          const snappedWindowParameters = snapTimestampsRef.current
+            ? getSnappedWindowParameters(newWindowParameters, snapTimestampsRef.current)
             : newWindowParameters;
 
           const newBrushPx = {
@@ -223,6 +234,10 @@ export function DualBrush({
           .attr('id', (b: DualBrush) => {
             return 'aiops-brush-' + b.id;
           })
+          .attr('data-test-subj', (b: DualBrush) => {
+            // Uppercase the first character of the `id` so we get aiopsBrushBaseline/aiopsBrushDeviation.
+            return 'aiopsBrush' + b.id.charAt(0).toUpperCase() + b.id.slice(1);
+          })
           .each((brushObject: DualBrush, i, n) => {
             const x = d3.scaleLinear().domain([min, max]).rangeRound([0, widthRef.current]);
             brushObject.brush(d3.select(n[i]));
@@ -235,7 +250,7 @@ export function DualBrush({
         mlBrushSelection
           .attr('class', 'brush')
           .selectAll('.overlay')
-          .attr('width', width)
+          .attr('width', widthRef.current)
           .style('pointer-events', 'none');
 
         mlBrushSelection
@@ -252,10 +267,13 @@ export function DualBrush({
           .data<DualBrush>(brushes.current, (d) => (d as DualBrush).id);
 
         mlBrushSelection.each(function (brushObject, i, n) {
-          const x = d3.scaleLinear().domain([min, max]).rangeRound([0, widthRef.current]);
+          const x = d3
+            .scaleLinear()
+            .domain([minRef.current, maxRef.current])
+            .rangeRound([0, widthRef.current]);
           brushObject.brush.extent([
             [0, BRUSH_MARGIN],
-            [width, BRUSH_HEIGHT - BRUSH_MARGIN],
+            [widthRef.current, BRUSH_HEIGHT - BRUSH_MARGIN],
           ]);
           brushObject.brush(d3.select(n[i] as SVGGElement));
           const xStart = x(brushObject.start) ?? 0;
@@ -268,11 +286,17 @@ export function DualBrush({
         widthRef.current = width;
         newBrush('baseline', baselineMin, baselineMax);
         newBrush('deviation', deviationMin, deviationMax);
-      } else {
-        if (widthRef.current !== width) {
-          widthRef.current = width;
-          updateBrushes();
-        }
+      } else if (
+        widthRef.current !== width ||
+        minRef.current !== min ||
+        maxRef.current !== max ||
+        !isEqual(snapTimestampsRef.current, snapTimestamps)
+      ) {
+        widthRef.current = width;
+        minRef.current = min;
+        maxRef.current = max;
+        snapTimestampsRef.current = snapTimestamps;
+        updateBrushes();
       }
 
       drawBrushes();
@@ -294,6 +318,7 @@ export function DualBrush({
       {width > 0 && (
         <svg
           className="aiops-dual-brush"
+          data-test-subj="aiopsDualBrush"
           width={width}
           height={BRUSH_HEIGHT}
           style={{ marginLeft }}

@@ -101,11 +101,13 @@ const getTableColumns: GetTableColumns = (handleClick) => [
   {
     field: 'hostName',
     name: i18n.HOST_ALERTS_HOSTNAME_COLUMN,
-    truncateText: true,
-    textOnly: true,
     'data-test-subj': 'hostSeverityAlertsTable-hostName',
     render: (hostName: string) => (
-      <EuiToolTip title={i18n.OPEN_HOST_DETAIL_TOOLTIP} content={hostName}>
+      <EuiToolTip
+        title={i18n.OPEN_HOST_DETAIL_TOOLTIP}
+        content={hostName}
+        anchorClassName="eui-textTruncate"
+      >
         <HostDetailsLink hostName={hostName} />
       </EuiToolTip>
     ),

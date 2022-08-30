@@ -34,13 +34,16 @@ describe('readPrebuiltDevToolContentRoute', () => {
     readPrebuiltDevToolContentRoute(server.router);
   });
 
-  test('should read content from enable_host_risk_score template', async () => {
-    const response = await server.inject(
-      readPrebuiltDevToolContentRequest('enable_host_risk_score'),
-      requestContextMock.convertContext(context)
-    );
+  it.each([['enable_host_risk_score', 'enable_user_risk_score']])(
+    'should read content from %p template',
+    async () => {
+      const response = await server.inject(
+        readPrebuiltDevToolContentRequest('enable_user_risk_score'),
+        requestContextMock.convertContext(context)
+      );
 
-    expect(response.status).toEqual(200);
-    expect(response.body).toMatchSnapshot();
-  });
+      expect(response.status).toEqual(200);
+      expect(response.body).toMatchSnapshot();
+    }
+  );
 });

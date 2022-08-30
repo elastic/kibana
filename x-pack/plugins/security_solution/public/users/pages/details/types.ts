@@ -22,11 +22,6 @@ interface UsersDetailsComponentReduxProps {
 }
 
 interface UserBodyComponentDispatchProps {
-  setAbsoluteRangeDatePicker: ActionCreator<{
-    id: InputsModelId;
-    from: string;
-    to: string;
-  }>;
   detailName: string;
   usersDetailsPagePath: string;
 }

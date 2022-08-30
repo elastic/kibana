@@ -14,6 +14,18 @@
   "references": [
     "https://oddvar.moe/2018/04/10/persistence-using-globalflags-in-image-file-execution-options-hidden-from-autoruns-exe/"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "registry.data.strings",
+      "type": "wildcard"
+    },
+    {
+      "ecs": true,
+      "name": "registry.path",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 41,
   "rule_id": "6839c821-011d-43bd-bd5b-acff00257226",
   "severity": "medium",
@@ -50,5 +62,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 5
+  "version": 6
 }

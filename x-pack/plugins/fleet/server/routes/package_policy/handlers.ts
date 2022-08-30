@@ -24,8 +24,11 @@ import type {
   DryRunPackagePoliciesRequestSchema,
   FleetRequestHandler,
   PackagePolicy,
+  DeleteOnePackagePolicyRequestSchema,
+  BulkGetPackagePoliciesRequestSchema,
 } from '../../types';
 import type {
+  BulkGetPackagePoliciesResponse,
   CreatePackagePolicyResponse,
   DeletePackagePoliciesResponse,
   NewPackagePolicy,
@@ -33,7 +36,7 @@ import type {
   UpgradePackagePolicyResponse,
 } from '../../../common/types';
 import { installationStatuses } from '../../../common/constants';
-import { defaultIngestErrorHandler } from '../../errors';
+import { defaultIngestErrorHandler, PackagePolicyNotFoundError } from '../../errors';
 import { getInstallations } from '../../services/epm/packages';
 import { PACKAGES_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../constants';
 
@@ -56,6 +59,34 @@ export const getPackagePoliciesHandler: RequestHandler<
       },
     });
   } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
+  }
+};
+
+export const bulkGetPackagePoliciesHandler: RequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof BulkGetPackagePoliciesRequestSchema.body>
+> = async (context, request, response) => {
+  const soClient = (await context.core).savedObjects.client;
+  const { ids, ignoreMissing } = request.body;
+  try {
+    const items = await packagePolicyService.getByIDs(soClient, ids, {
+      ignoreMissing,
+    });
+
+    const body: BulkGetPackagePoliciesResponse = { items: items ?? [] };
+
+    return response.ok({
+      body,
+    });
+  } catch (error) {
+    if (error instanceof PackagePolicyNotFoundError) {
+      return response.notFound({
+        body: { message: error.message },
+      });
+    }
+
     return defaultIngestErrorHandler({ error, response });
   }
 };
@@ -143,6 +174,8 @@ export const createPackagePolicyHandler: FleetRequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
   const { force, ...newPolicy } = request.body;
+  // TODO Remove deprecated APIs https://github.com/elastic/kibana/issues/121485
+  delete newPolicy.output_id;
   const spaceId = fleetContext.spaceId;
   try {
     const newPackagePolicy = await packagePolicyService.enrichPolicyWithDefaultsFromPackage(
@@ -203,6 +236,8 @@ export const updatePackagePolicyHandler: RequestHandler<
   }
 
   const { force, ...body } = request.body;
+  // TODO Remove deprecated APIs https://github.com/elastic/kibana/issues/121485
+  delete body.output_id;
   // removed fields not recognized by schema
   const packagePolicyInputs = packagePolicy.inputs.map((input) => {
     const newInput = {
@@ -216,6 +251,7 @@ export const updatePackagePolicyHandler: RequestHandler<
     delete newInput.compiled_input;
     return newInput;
   });
+
   // listing down accepted properties, because loaded packagePolicy contains some that are not accepted in update
   let newData = {
     ...body,
@@ -224,7 +260,6 @@ export const updatePackagePolicyHandler: RequestHandler<
     namespace: body.namespace ?? packagePolicy.namespace,
     policy_id: body.policy_id ?? packagePolicy.policy_id,
     enabled: body.enabled ?? packagePolicy.enabled,
-    output_id: body.output_id ?? packagePolicy.output_id,
     package: body.package ?? packagePolicy.package,
     inputs: body.inputs ?? packagePolicyInputs,
     vars: body.vars ?? packagePolicy.vars,
@@ -284,6 +319,53 @@ export const deletePackagePolicyHandler: RequestHandler<
     }
     return response.ok({
       body,
+    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
+  }
+};
+
+export const deleteOnePackagePolicyHandler: RequestHandler<
+  TypeOf<typeof DeleteOnePackagePolicyRequestSchema.params>,
+  TypeOf<typeof DeleteOnePackagePolicyRequestSchema.query>,
+  unknown
+> = async (context, request, response) => {
+  const coreContext = await context.core;
+  const soClient = coreContext.savedObjects.client;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
+  try {
+    const res = await packagePolicyService.delete(
+      soClient,
+      esClient,
+      [request.params.packagePolicyId],
+      { user, force: request.query.force, skipUnassignFromAgentPolicies: request.query.force }
+    );
+
+    if (
+      res[0] &&
+      res[0].success === false &&
+      res[0].statusCode !== 404 // ignore 404 to allow that call to be idempotent
+    ) {
+      return response.customError({
+        statusCode: res[0].statusCode ?? 500,
+        body: res[0].body,
+      });
+    }
+    try {
+      await packagePolicyService.runExternalCallbacks(
+        'postPackagePolicyDelete',
+        res,
+        context,
+        request
+      );
+    } catch (error) {
+      const logger = appContextService.getLogger();
+      logger.error(`An error occurred executing external callback: ${error}`);
+      logger.error(error);
+    }
+    return response.ok({
+      body: { id: request.params.packagePolicyId },
     });
   } catch (error) {
     return defaultIngestErrorHandler({ error, response });

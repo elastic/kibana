@@ -1,65 +1,210 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ImportDataModal renders correctly against snapshot 1`] = `
-<Fragment>
-  <EuiModal
-    maxWidth="750px"
-    onClose={[MockFunction]}
+Object {
+  "asFragment": [Function],
+  "baseElement": <body
+    class="euiBody-hasOverlayMask"
   >
-    <EuiModalHeader>
-      <EuiModalHeaderTitle>
-        title
-      </EuiModalHeaderTitle>
-    </EuiModalHeader>
-    <EuiModalBody>
-      <EuiText
-        size="s"
+    <div />
+    <div
+      class="euiOverlayMask euiOverlayMask--aboveHeader"
+    >
+      <div
+        data-eui="EuiFocusTrap"
       >
-        <h4>
-          description
-        </h4>
-      </EuiText>
-      <EuiSpacer
-        size="s"
-      />
-      <EuiFilePicker
-        accept=".ndjson"
-        compressed={false}
-        display="large"
-        fullWidth={true}
-        id="rule-file-picker"
-        initialPromptText="subtitle"
-        isLoading={false}
-        onChange={[Function]}
-      />
-      <EuiSpacer
-        size="s"
-      />
-      <EuiCheckbox
-        checked={false}
-        compressed={false}
-        disabled={false}
-        id="import-data-modal-checkbox-label"
-        indeterminate={false}
-        label="checkBoxLabel"
-        onChange={[Function]}
-      />
-    </EuiModalBody>
-    <EuiModalFooter>
-      <EuiButtonEmpty
-        onClick={[Function]}
-      >
-        Cancel
-      </EuiButtonEmpty>
-      <EuiButton
-        data-test-subj="import-data-modal-button"
-        disabled={true}
-        fill={true}
-        onClick={[Function]}
-      >
-        submitBtnText
-      </EuiButton>
-    </EuiModalFooter>
-  </EuiModal>
-</Fragment>
+        <div
+          class="euiModal"
+          style="max-width: 750px;"
+          tabindex="0"
+        >
+          <button
+            aria-label="Closes this modal window"
+            class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiModal__closeIcon"
+            type="button"
+          >
+            <span
+              aria-hidden="true"
+              class="euiButtonIcon__icon"
+              color="inherit"
+              data-euiicon-type="cross"
+            />
+          </button>
+          <div
+            class="euiModal__flex"
+          >
+            <div
+              class="euiModalHeader"
+            >
+              <div
+                class="euiModalHeader__title"
+              >
+                <h1>
+                  title
+                </h1>
+              </div>
+            </div>
+            <div
+              class="euiModalBody"
+            >
+              <div
+                class="euiModalBody__overflow"
+              >
+                <div
+                  class="euiText emotion-euiText-s"
+                >
+                  <h4>
+                    description
+                  </h4>
+                </div>
+                <div
+                  class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+                />
+                <div
+                  class="euiFilePicker euiFilePicker--large euiFilePicker--fullWidth"
+                >
+                  <div
+                    class="euiFilePicker__wrap"
+                  >
+                    <input
+                      accept=".ndjson"
+                      aria-describedby="rule-file-picker-filePicker__prompt"
+                      class="euiFilePicker__input"
+                      data-test-subj="rule-file-picker"
+                      id="rule-file-picker"
+                      type="file"
+                    />
+                    <div
+                      class="euiFilePicker__prompt"
+                      id="rule-file-picker-filePicker__prompt"
+                    >
+                      <span
+                        aria-hidden="true"
+                        class="euiFilePicker__icon"
+                        data-euiicon-type="importAction"
+                      />
+                      <div
+                        class="euiFilePicker__promptText"
+                      >
+                        subtitle
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+                />
+                <div
+                  class="euiCheckbox"
+                >
+                  <input
+                    class="euiCheckbox__input"
+                    data-test-subj="import-data-modal-checkbox-label"
+                    id="import-data-modal-checkbox-label"
+                    type="checkbox"
+                  />
+                  <div
+                    class="euiCheckbox__square"
+                  />
+                  <label
+                    class="euiCheckbox__label"
+                    for="import-data-modal-checkbox-label"
+                  >
+                    checkBoxLabel
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiModalFooter"
+            >
+              <button
+                class="euiButtonEmpty euiButtonEmpty--primary"
+                type="button"
+              >
+                <span
+                  class="euiButtonContent euiButtonEmpty__content"
+                >
+                  <span
+                    class="euiButtonEmpty__text"
+                  >
+                    Cancel
+                  </span>
+                </span>
+              </button>
+              <button
+                class="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
+                data-test-subj="import-data-modal-button"
+                disabled=""
+                type="button"
+              >
+                <span
+                  class="euiButtonContent euiButton__content"
+                >
+                  <span
+                    class="euiButton__text"
+                  >
+                    submitBtnText
+                  </span>
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>,
+  "container": <div />,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
 `;

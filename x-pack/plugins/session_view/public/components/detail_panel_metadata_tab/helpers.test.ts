@@ -47,14 +47,14 @@ const MOCK_ORCHESTRATOR_DATA: ProcessEventOrchestrator = {
     name: 'pdcsi-node-6hvsp',
     type: 'pod',
     ip: 'PLACEHOLDER_FOR_RESOURCE.IP',
+    parent: {
+      type: 'PLACEHOLDER_FOR_RESOURCE.PARENT.TYPE',
+    },
   },
   namespace: 'kube-system',
   cluster: {
     name: 'elastic-k8s-cluster',
     id: 'PLACEHOLDER_FOR_CLUSTER.ID',
-  },
-  parent: {
-    type: 'PLACEHOLDER_FOR_PARENT.TYPE',
   },
 };
 
@@ -164,14 +164,14 @@ describe('detail panel host tab helpers tests', () => {
         name: undefined,
         type: 'pod',
         ip: undefined,
+        parent: {
+          type: 'PLACEHOLDER_FOR_RESOURCE.PARENT.TYPE',
+        },
       },
       namespace: 'kube-system',
       cluster: {
         name: 'elastic-k8s-cluster',
         id: undefined,
-      },
-      parent: {
-        type: 'PLACEHOLDER_FOR_PARENT.TYPE',
       },
     });
     expect(result.resource.name).toEqual(DASH);
@@ -180,7 +180,7 @@ describe('detail panel host tab helpers tests', () => {
     expect(result.namespace).toEqual(MOCK_ORCHESTRATOR_DATA?.namespace);
     expect(result.cluster.name).toEqual(MOCK_ORCHESTRATOR_DATA?.cluster?.name);
     expect(result.cluster.id).toEqual(DASH);
-    expect(result.parent.type).toEqual(MOCK_ORCHESTRATOR_DATA?.parent?.type);
+    expect(result.resource.parent.type).toEqual(MOCK_ORCHESTRATOR_DATA?.resource?.parent?.type);
   });
 
   it('getOchestratorData returns all data provided', () => {
@@ -191,7 +191,7 @@ describe('detail panel host tab helpers tests', () => {
     expect(result.namespace).toEqual(MOCK_ORCHESTRATOR_DATA?.namespace);
     expect(result.cluster.name).toEqual(MOCK_ORCHESTRATOR_DATA?.cluster?.name);
     expect(result.cluster.id).toEqual(MOCK_ORCHESTRATOR_DATA?.cluster?.id);
-    expect(result.parent.type).toEqual(MOCK_ORCHESTRATOR_DATA?.parent?.type);
+    expect(result.resource.parent.type).toEqual(MOCK_ORCHESTRATOR_DATA?.resource?.parent?.type);
   });
 
   it('getCloudData returns dashes for missing fields', () => {

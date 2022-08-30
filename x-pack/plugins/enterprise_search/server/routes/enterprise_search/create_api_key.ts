@@ -11,9 +11,10 @@ import { SecurityPluginStart } from '@kbn/security-plugin/server';
 
 import { createApiKey } from '../../lib/indices/create_api_key';
 import { RouteDependencies } from '../../plugin';
+import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 
 export function registerCreateAPIKeyRoute(
-  { router }: RouteDependencies,
+  { log, router }: RouteDependencies,
   security: SecurityPluginStart
 ) {
   router.post(
@@ -28,24 +29,20 @@ export function registerCreateAPIKeyRoute(
         }),
       },
     },
-    async (context, request, response) => {
-      const { indexName } = request.params;
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const indexName = decodeURIComponent(request.params.indexName);
       const { keyName } = request.body;
-      try {
-        const createResponse = await createApiKey(request, security, indexName, keyName);
-        if (!createResponse) {
-          throw new Error('Unable to create API Key');
-        }
-        return response.ok({
-          body: { apiKey: createResponse },
-          headers: { 'content-type': 'application/json' },
-        });
-      } catch (error) {
-        return response.customError({
-          body: 'Error creating API Key',
-          statusCode: 502,
-        });
+
+      const createResponse = await createApiKey(request, security, indexName, keyName);
+
+      if (!createResponse) {
+        throw new Error('Unable to create API Key');
       }
-    }
+
+      return response.ok({
+        body: { apiKey: createResponse },
+        headers: { 'content-type': 'application/json' },
+      });
+    })
   );
 }

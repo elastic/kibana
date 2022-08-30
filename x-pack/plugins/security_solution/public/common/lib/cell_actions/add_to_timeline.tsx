@@ -12,7 +12,10 @@ import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common/search_str
 import type { DataProvider } from '@kbn/timelines-plugin/common/types';
 import { getPageRowIndex } from '@kbn/timelines-plugin/public';
 import { useGetMappedNonEcsValue } from '../../../timelines/components/timeline/body/data_driven_columns';
-import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
+import {
+  EXISTS_OPERATOR,
+  IS_OPERATOR,
+} from '../../../timelines/components/timeline/data_providers/data_provider';
 import { escapeDataProviderId } from '../../components/drag_and_drop/helpers';
 import { EmptyComponent, useKibanaServices } from './helpers';
 
@@ -41,23 +44,39 @@ export const getAddToTimelineCellAction = ({
           [timelines]
         );
 
-        const dataProvider: DataProvider[] = useMemo(
-          () =>
-            value?.map((x) => ({
-              and: [],
-              enabled: true,
-              id: `${escapeDataProviderId(columnId)}-row-${rowIndex}-col-${columnId}-val-${x}`,
-              name: x,
-              excluded: false,
-              kqlQuery: '',
-              queryMatch: {
-                field: columnId,
-                value: x,
-                operator: IS_OPERATOR,
+        const dataProvider: DataProvider[] = useMemo(() => {
+          const queryIdPrefix = `${escapeDataProviderId(columnId)}-row-${rowIndex}-col-${columnId}`;
+          if (!value) {
+            return [
+              {
+                and: [],
+                enabled: true,
+                kqlQuery: '',
+                id: `${queryIdPrefix}`,
+                name: '',
+                excluded: true,
+                queryMatch: {
+                  field: columnId,
+                  value: '',
+                  operator: EXISTS_OPERATOR,
+                },
               },
-            })) ?? [],
-          [columnId, rowIndex, value]
-        );
+            ];
+          }
+          return value.map((x) => ({
+            and: [],
+            enabled: true,
+            excluded: false,
+            kqlQuery: '',
+            id: `${queryIdPrefix}-val-${x}`,
+            name: x,
+            queryMatch: {
+              field: columnId,
+              value: x,
+              operator: IS_OPERATOR,
+            },
+          }));
+        }, [columnId, rowIndex, value]);
         const addToTimelineProps = useMemo(() => {
           return {
             Component,

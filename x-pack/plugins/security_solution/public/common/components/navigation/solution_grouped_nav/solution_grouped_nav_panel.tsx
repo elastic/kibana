@@ -23,10 +23,10 @@ import {
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 import classNames from 'classnames';
-import { EuiBetaBadgeStyled, EuiPanelStyled, FlexLink } from './solution_grouped_nav_panel.styles';
+import { EuiPanelStyled, FlexLink } from './solution_grouped_nav_panel.styles';
 import type { DefaultSideNavItem } from './types';
 import type { LinkCategories } from '../../../links/types';
-import { BETA } from '../../../translations';
+import { NavItemBetaBadge } from '../nav_item_beta_badge';
 
 export interface SolutionNavPanelProps {
   onClose: () => void;
@@ -170,7 +170,7 @@ const SolutionNavPanelItems: React.FC<SolutionNavPanelItemsProps> = ({ items, on
             }}
           >
             {label}
-            {isBeta && <EuiBetaBadgeStyled label={BETA} size="s" />}
+            {isBeta && <NavItemBetaBadge />}
           </FlexLink>
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription>{description}</EuiDescriptionListDescription>

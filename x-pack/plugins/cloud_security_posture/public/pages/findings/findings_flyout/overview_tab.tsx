@@ -7,6 +7,7 @@
 
 import {
   EuiAccordion,
+  EuiBadge,
   EuiDescriptionList,
   EuiLink,
   EuiPanel,
@@ -33,6 +34,18 @@ const getDetailsList = (data: CspFinding, discoverIndexLink: string | undefined)
       defaultMessage: 'Rule Name',
     }),
     description: data.rule.name,
+  },
+  {
+    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.ruleTagsTitle', {
+      defaultMessage: 'Rule Tags',
+    }),
+    description: (
+      <>
+        {data.rule.tags.map((tag) => (
+          <EuiBadge>{tag}</EuiBadge>
+        ))}
+      </>
+    ),
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.evaluatedAtTitle', {

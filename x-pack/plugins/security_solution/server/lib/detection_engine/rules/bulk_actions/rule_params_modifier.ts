@@ -35,7 +35,11 @@ const applyBulkActionEditToRuleParams = (
         "Index patterns can't be added. Machine learning rule doesn't have index patterns property"
       );
 
-      if (action.overwriteDataViews) {
+      if (ruleParams.dataViewId != null && !action.overwrite_data_views) {
+        break;
+      }
+
+      if (action.overwrite_data_views) {
         ruleParams.dataViewId = undefined;
       }
 
@@ -48,6 +52,14 @@ const applyBulkActionEditToRuleParams = (
         "Index patterns can't be deleted. Machine learning rule doesn't have index patterns property"
       );
 
+      if (ruleParams.dataViewId != null && !action.overwrite_data_views) {
+        break;
+      }
+
+      if (action.overwrite_data_views) {
+        ruleParams.dataViewId = undefined;
+      }
+
       if (ruleParams.index) {
         ruleParams.index = deleteItemsFromArray(ruleParams.index, action.value);
       }
@@ -59,7 +71,11 @@ const applyBulkActionEditToRuleParams = (
         "Index patterns can't be overwritten. Machine learning rule doesn't have index patterns property"
       );
 
-      if (action.overwriteDataViews) {
+      if (ruleParams.dataViewId != null && !action.overwrite_data_views) {
+        break;
+      }
+
+      if (action.overwrite_data_views) {
         ruleParams.dataViewId = undefined;
       }
 

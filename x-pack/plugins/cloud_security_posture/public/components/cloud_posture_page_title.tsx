@@ -8,6 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 export const CloudPosturePageTitle = ({ title, isBeta }: { title: string; isBeta: boolean }) => (
   <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -17,7 +18,15 @@ export const CloudPosturePageTitle = ({ title, isBeta }: { title: string; isBeta
       </EuiTitle>
     </EuiFlexItem>
     {isBeta && (
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem
+        grow={false}
+        css={css`
+          // tooltipContent wraps EuiBetaBadge with a span element which breaks alignment
+          .euiToolTipAnchor {
+            display: flex;
+          }
+        `}
+      >
         <EuiBetaBadge
           label={i18n.translate('xpack.csp.common.cloudPosturePageTitle.BetaBadgeLabel', {
             defaultMessage: 'Beta',

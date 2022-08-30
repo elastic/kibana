@@ -10,7 +10,39 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Process Termination followed by Deletion",
-  "query": "sequence by host.id with maxspan=5s\n   [process where event.type == \"end\" and \n    process.code_signature.trusted == false and\n    not process.executable : (\"C:\\\\Windows\\\\SoftwareDistribution\\\\*.exe\", \"C:\\\\Windows\\\\WinSxS\\\\*.exe\")\n   ] by process.executable\n   [file where event.type == \"deletion\" and file.extension : (\"exe\", \"scr\", \"com\")] by file.path\n",
+  "query": "sequence by host.id with maxspan=5s\n   [process where event.type == \"end\" and \n    process.code_signature.trusted == false and\n    not process.executable : (\"C:\\\\Windows\\\\SoftwareDistribution\\\\*.exe\", \"C:\\\\Windows\\\\WinSxS\\\\*.exe\")\n   ] by process.executable\n   [file where event.type == \"deletion\" and file.extension : (\"exe\", \"scr\", \"com\") and\n    not process.executable :\n             (\"?:\\\\Program Files\\\\*.exe\",\n              \"?:\\\\Program Files (x86)\\\\*.exe\",\n              \"?:\\\\Windows\\\\System32\\\\svchost.exe\",\n              \"?:\\\\Windows\\\\System32\\\\drvinst.exe\") and\n    not file.path : (\"?:\\\\Program Files\\\\*.exe\", \"?:\\\\Program Files (x86)\\\\*.exe\")\n   ] by file.path\n",
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "file.extension",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "file.path",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "host.id",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.code_signature.trusted",
+      "type": "boolean"
+    },
+    {
+      "ecs": true,
+      "name": "process.executable",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 47,
   "rule_id": "09443c92-46b3-45a4-8f25-383b028b258d",
   "severity": "medium",
@@ -46,5 +78,5 @@
     }
   ],
   "type": "eql",
-  "version": 3
+  "version": 5
 }

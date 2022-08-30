@@ -19,7 +19,7 @@ const getFullPath = (relativePath: string) => path.join(path.dirname(__filename)
 // example: https://beats-ci.elastic.co/blue/organizations/jenkins/Ingest-manager%2Fpackage-storage/detail/snapshot/74/pipeline/257#step-302-log-1.
 // It should be updated any time there is a new Docker image published for the Snapshot Distribution of the Package Registry.
 export const dockerImage =
-  'docker.elastic.co/package-registry/distribution:production-v2-experimental-1658837582506';
+  'docker.elastic.co/package-registry/distribution:production-v2-experimental';
 
 export const BUNDLED_PACKAGE_DIR = '/tmp/fleet_bundled_packages';
 

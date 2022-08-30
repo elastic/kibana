@@ -356,12 +356,13 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         ],
       };
 
-      const bulkEditResponse = await retry.try(async () =>
-        supertest
-          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_bulk_edit`)
-          .set('kbn-xsrf', 'foo')
-          .send(payload)
-          .expect(200)
+      const bulkEditResponse = await retry.try(
+        async () =>
+          await supertest
+            .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_bulk_edit`)
+            .set('kbn-xsrf', 'foo')
+            .send(payload)
+            .expect(200)
       );
 
       // after applying bulk edit action monitoring still available

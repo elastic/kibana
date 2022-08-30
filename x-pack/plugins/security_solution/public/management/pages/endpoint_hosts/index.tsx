@@ -25,6 +25,3 @@ export const EndpointsContainer = memo(() => {
 });
 
 EndpointsContainer.displayName = 'EndpointsContainer';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-export { endpointListFleetApisHttpMock } from './mocks';
-export type { EndpointListFleetApisHttpMockInterface } from './mocks';
