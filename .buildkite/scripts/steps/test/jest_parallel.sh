@@ -58,6 +58,7 @@ while read -r config; do
     exitCode=10
     echo "Jest exited with code $lastCode"
     echo "^^^ +++"
+    exit $exitCode
   fi
 done <<< "$configs"
 
