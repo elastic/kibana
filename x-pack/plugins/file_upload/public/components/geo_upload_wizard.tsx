@@ -159,7 +159,7 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
           });
         }
       },
-      this.state.slowConnection,
+      this.state.slowConnection
     );
     if (!this._isMounted) {
       return;
@@ -286,7 +286,7 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
 
   _onSlowConnectionChange = (slowConnection: boolean) => {
     this.setState({ slowConnection });
-  }
+  };
 
   render() {
     if (this.state.phase === PHASE.IMPORT) {

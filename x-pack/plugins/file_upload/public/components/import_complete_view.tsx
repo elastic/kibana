@@ -136,13 +136,12 @@ export class ImportCompleteView extends Component<Props, {}> {
         // Display elasticxsearch request error message
         reason = this.props.importResults.error.error.reason;
       }
-      const errorMsg =
-        reason
-          ? i18n.translate('xpack.fileUpload.importComplete.uploadFailureMsgErrorBlock', {
-              defaultMessage: 'Error: {reason}',
-              values: { reason },
-            })
-          : '';
+      const errorMsg = reason
+        ? i18n.translate('xpack.fileUpload.importComplete.uploadFailureMsgErrorBlock', {
+            defaultMessage: 'Error: {reason}',
+            values: { reason },
+          })
+        : '';
       return (
         <EuiCallOut
           title={i18n.translate('xpack.fileUpload.importComplete.uploadFailureTitle', {

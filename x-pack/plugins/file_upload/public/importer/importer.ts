@@ -100,7 +100,7 @@ export abstract class Importer implements IImporter {
     index: string,
     pipelineId: string | undefined,
     setImportProgress: (progress: number) => void,
-    slowConnection: boolean,
+    slowConnection: boolean
   ): Promise<ImportResults> {
     if (!id || !index) {
       return {

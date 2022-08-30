@@ -6,7 +6,14 @@
  */
 
 import React, { ChangeEvent, Component } from 'react';
-import { EuiForm, EuiFormRow, EuiSelect, EuiSwitch, EuiSwitchEvent, EuiToolTip } from '@elastic/eui';
+import {
+  EuiForm,
+  EuiFormRow,
+  EuiSelect,
+  EuiSwitch,
+  EuiSwitchEvent,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { GeoFilePicker, OnFileSelectParameters } from './geo_file_picker';
@@ -135,7 +142,7 @@ export class GeoUploadForm extends Component<Props, State> {
             />
             <EuiFormRow display="columnCompressedSwitch">
               <EuiToolTip
-                position="top" 
+                position="top"
                 content={i18n.translate('xpack.fileUpload.slowConnection.tooltip', {
                   defaultMessage: 'Enable to upload file in smaller chunks.',
                 })}
