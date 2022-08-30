@@ -72,12 +72,6 @@ import { TaskRunnerTimer, TaskRunnerTimerSpan } from './task_runner_timer';
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
 
-interface StackTraceLog {
-  message: string;
-  tags: string[];
-  stack_trace?: string;
-}
-
 export const getDefaultRuleMonitoring = (): RuleMonitoring => ({
   execution: {
     history: [],
@@ -119,7 +113,7 @@ export class TaskRunner<
   private usageCounter?: UsageCounter;
   private searchAbortController: AbortController;
   private cancelled: boolean;
-  private stackTraceLogs: StackTraceLog[];
+  private stackTraceLog: string | null;
 
   constructor(
     ruleType: NormalizedRuleType<
@@ -150,7 +144,7 @@ export class TaskRunner<
     this.alerts = {};
     this.timer = new TaskRunnerTimer({ logger: this.logger });
     this.alertingEventLogger = new AlertingEventLogger(this.context.eventLogger);
-    this.stackTraceLogs = [];
+    this.stackTraceLog = null;
   }
 
   private getExecutionHandler(
@@ -394,11 +388,7 @@ export class TaskRunner<
               `rule execution failure: ${ruleLabel}`,
               err.message
             );
-            this.stackTraceLogs.push({
-              message: err,
-              tags: [this.ruleType.id, ruleId, 'rule-run-failed'],
-              stack_trace: err.stack,
-            });
+            this.stackTraceLog = err.stack;
             throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Execute, err);
           }
         }
@@ -732,11 +722,11 @@ export class TaskRunner<
           if (isAlertSavedObjectNotFoundError(err, ruleId)) {
             this.logger.debug(message);
           } else {
-            this.stackTraceLogs.push({
-              message,
+            this.logger.error(message, {
               tags: [this.ruleType.id, ruleId, 'rule-run-failed'],
-              stack_trace: err.stack,
+              error: { stack_trace: this.stackTraceLog ? this.stackTraceLog : err.stack },
             });
+            this.stackTraceLog = null;
           }
           return originalState;
         }
@@ -764,14 +754,6 @@ export class TaskRunner<
       }),
       monitoring,
     };
-
-    this.stackTraceLogs.forEach((log) => {
-      this.logger.error(log.message, {
-        tags: log.tags,
-        error: { stack_trace: log.stack_trace },
-      });
-    });
-    this.stackTraceLogs = [];
 
     return result;
   }
