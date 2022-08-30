@@ -21,12 +21,12 @@ import {
   WebhookMethods,
 } from './webhook';
 
-import * as utils from './lib/axios_utils';
+import * as utils from '../lib/axios_utils';
 import { ActionsConfigurationUtilities } from '../actions_config';
 
 jest.mock('axios');
-jest.mock('./lib/axios_utils', () => {
-  const originalUtils = jest.requireActual('./lib/axios_utils');
+jest.mock('../lib/axios_utils', () => {
+  const originalUtils = jest.requireActual('../lib/axios_utils');
   return {
     ...originalUtils,
     request: jest.fn(),
