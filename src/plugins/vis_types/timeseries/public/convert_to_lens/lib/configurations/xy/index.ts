@@ -9,3 +9,4 @@
 export * from './layers';
 export * from './extents';
 export * from './chart_type';
+export * from './configuration';

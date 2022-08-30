@@ -8,12 +8,11 @@
 
 import uuid from 'uuid';
 import { Layer } from '@kbn/visualizations-plugin/common/convert_to_lens';
-import { Position } from '@elastic/charts';
 import { PANEL_TYPES } from '../../../common/enums';
 import { getDataViewsStart } from '../../services';
 import { getDataSourceInfo } from '../lib/datasource';
 import { getMetricsColumns, getBucketsColumns } from '../lib/series';
-import { getLayers } from '../lib/configurations/xy';
+import { getConfigurationForTopN as getConfiguration, getLayers } from '../lib/configurations/xy';
 import { getReducedTimeRange, isValidMetrics } from '../lib/metrics';
 import { ConvertTsvbToLensVisualization } from '../types';
 import { Layer as ExtendedLayer, excludeMetaFromColumn } from '../lib/convert';
@@ -77,32 +76,6 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model, timeR
   return {
     type: 'lnsXY',
     layers: Object.values(excludeMetaFromLayers(extendedLayers)),
-    configuration: {
-      layers: getLayers(extendedLayers, model),
-      fill: model.series[0].fill ?? 0.3,
-      legend: {
-        isVisible: Boolean(model.show_legend),
-        showSingleSeries: Boolean(model.show_legend),
-        position: (model.legend_position as Position) ?? Position.Right,
-        shouldTruncate: Boolean(model.truncate_legend),
-        maxLines: model.max_lines_legend ?? 1,
-      },
-      gridlinesVisibilitySettings: {
-        x: false,
-        yLeft: false,
-        yRight: false,
-      },
-      tickLabelsVisibilitySettings: {
-        x: true,
-        yLeft: false,
-        yRight: false,
-      },
-      axisTitlesVisibilitySettings: {
-        x: false,
-        yLeft: false,
-        yRight: false,
-      },
-      valueLabels: 'show',
-    },
+    configuration: getConfiguration(model, getLayers(extendedLayers, model)),
   };
 };

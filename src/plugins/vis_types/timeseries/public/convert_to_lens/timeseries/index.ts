@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { Position } from '@elastic/charts';
 import { Layer } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import uuid from 'uuid';
 import { Panel } from '../../../common/types';
@@ -14,7 +13,10 @@ import { PANEL_TYPES } from '../../../common/enums';
 import { getDataViewsStart } from '../../services';
 import { getDataSourceInfo } from '../lib/datasource';
 import { getMetricsColumns, getBucketsColumns } from '../lib/series';
-import { getLayers, getYExtents } from '../lib/configurations/xy';
+import {
+  getConfigurationForTimeseries as getConfiguration,
+  getLayers,
+} from '../lib/configurations/xy';
 import {
   Layer as ExtendedLayer,
   convertToDateHistogramColumn,
@@ -88,28 +90,9 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model: Panel
     };
   }
 
-  const extents = getYExtents(model);
-
   return {
     type: 'lnsXY',
     layers: Object.values(excludeMetaFromLayers(extendedLayers)),
-    configuration: {
-      layers: getLayers(extendedLayers, model),
-      fillOpacity: Number(model.series[0].fill) ?? 0.3,
-      legend: {
-        isVisible: Boolean(model.show_legend),
-        showSingleSeries: Boolean(model.show_legend),
-        position: (model.legend_position as Position) ?? Position.Right,
-        shouldTruncate: Boolean(model.truncate_legend),
-        maxLines: model.max_lines_legend ?? 1,
-      },
-      gridlinesVisibilitySettings: {
-        x: Boolean(model.show_grid),
-        yLeft: Boolean(model.show_grid),
-        yRight: Boolean(model.show_grid),
-      },
-      yLeftExtent: extents.yLeftExtent,
-      yRightExtent: extents.yRightExtent,
-    },
+    configuration: getConfiguration(model, getLayers(extendedLayers, model)),
   };
 };
