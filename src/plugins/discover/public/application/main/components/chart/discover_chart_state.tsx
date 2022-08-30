@@ -26,7 +26,7 @@ export const chartOptionsMachine = createMachine<
   ChartOptionsMachineContext,
   ChartOptionsMachineEvent,
   ChartOptionsMachineState
-  >({
+>({
   initial: 'inactive',
   states: {
     active: {
@@ -45,7 +45,6 @@ export const chartOptionsMachine = createMachine<
     },
   },
 });
-
 
 export function createCanVisualizeMachine(dataView: DataView, savedSearch: SavedSearch) {
   return createMachine({
