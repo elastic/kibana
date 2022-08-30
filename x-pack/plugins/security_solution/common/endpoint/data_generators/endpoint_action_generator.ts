@@ -121,6 +121,14 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       createdBy: 'auserid',
       parameters: undefined,
       outputs: {},
+      agentState: {
+        'agent-a': {
+          errors: undefined,
+          isCompleted: true,
+          completedAt: '2022-04-30T16:08:47.449Z',
+          wasSuccessful: true,
+        },
+      },
     };
 
     return merge(details, overrides);

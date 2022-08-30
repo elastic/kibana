@@ -54,6 +54,13 @@ describe('When using `getActionDetailsById()', () => {
       createdBy: doc?.user.id,
       parameters: doc?.EndpointActions.data.parameters,
       outputs: {},
+      agentState: {
+        'agent-a': {
+          completedAt: '2022-04-30T16:08:47.449Z',
+          isCompleted: true,
+          wasSuccessful: true,
+        },
+      },
     });
   });
 

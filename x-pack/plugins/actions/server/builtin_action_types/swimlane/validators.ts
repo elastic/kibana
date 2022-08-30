@@ -5,22 +5,30 @@
  * 2.0.
  */
 
-import { ActionsConfigurationUtilities } from '../../actions_config';
-import { ExternalServiceValidation, SwimlanePublicConfigurationType } from './types';
+import {
+  ExternalServiceValidation,
+  SwimlanePublicConfigurationType,
+  SwimlaneSecretConfigurationType,
+} from './types';
 import * as i18n from './translations';
+import { ValidatorServices } from '../../types';
 
 export const validateCommonConfig = (
-  configurationUtilities: ActionsConfigurationUtilities,
-  configObject: SwimlanePublicConfigurationType
+  configObject: SwimlanePublicConfigurationType,
+  validatorServices: ValidatorServices
 ) => {
+  const { configurationUtilities } = validatorServices;
   try {
     configurationUtilities.ensureUriAllowed(configObject.apiUrl);
   } catch (allowedListError) {
-    return i18n.ALLOWED_HOSTS_ERROR(allowedListError.message);
+    throw new Error(i18n.ALLOWED_HOSTS_ERROR(allowedListError.message));
   }
 };
 
-export const validateCommonSecrets = () => {};
+export const validateCommonSecrets = (
+  secrets: SwimlaneSecretConfigurationType,
+  validatorServices: ValidatorServices
+) => {};
 
 export const validate: ExternalServiceValidation = {
   config: validateCommonConfig,
