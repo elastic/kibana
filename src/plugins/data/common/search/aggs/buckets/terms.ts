@@ -121,7 +121,11 @@ export const getTermsBucketAgg = () =>
       {
         name: 'shardSize',
         write: (aggConfig, output) => {
-          output.params.shard_size = aggConfig.params.shardSize;
+          if (aggConfig.params.shardSize) {
+            output.params.shard_size = aggConfig.params.shardSize;
+          } else if (aggConfig.params.size <= 10) {
+            output.params.shard_size = 25;
+          }
         },
       },
       {

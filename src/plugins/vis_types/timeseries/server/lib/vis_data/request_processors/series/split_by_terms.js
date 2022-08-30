@@ -46,6 +46,9 @@ export function splitByTerms(req, panel, series, esQueryConfig, seriesIndex) {
       }
 
       overwrite(doc, `aggs.${series.id}.${termsType}.size`, series.terms_size);
+      if (series.terms_size <= 10) {
+        overwrite(doc, `aggs.${series.id}.${termsType}.shard_size`, 25);
+      }
 
       if (metric && metric.type !== 'count' && ~basicAggs.indexOf(metric.type)) {
         const sortAggKey = `${orderByTerms}-SORT`;

@@ -234,6 +234,7 @@ export async function getStringSamples(
           terms: {
             ...fieldRef,
             size,
+            shard_size: size <= 10 ? 25 : undefined,
           },
         },
       },
