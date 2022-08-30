@@ -4271,7 +4271,7 @@
                 "section": "def-common.LayerType",
                 "text": "LayerType"
               },
-              ") => T) | undefined"
+              ", indexPatternId?: string | undefined) => T) | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
@@ -4323,6 +4323,20 @@
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.appendLayer.$4",
+                "type": "string",
+                "tags": [],
+                "label": "indexPatternId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -5605,6 +5619,64 @@
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.Visualization.onIndexPatternRename",
+            "type": "Function",
+            "tags": [],
+            "label": "onIndexPatternRename",
+            "description": [],
+            "signature": [
+              "((state: T, oldIndexPatternId: string, newIndexPatternId: string) => T) | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.onIndexPatternRename.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.onIndexPatternRename.$2",
+                "type": "string",
+                "tags": [],
+                "label": "oldIndexPatternId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.onIndexPatternRename.$3",
+                "type": "string",
+                "tags": [],
+                "label": "newIndexPatternId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -7496,7 +7568,17 @@
           "Query",
           "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; filters: ",
           "Filter",
-          "[]; }; references: ",
+          "[]; adHocDataViews?: Record<string, ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewSpec",
+            "text": "DataViewSpec"
+          },
+          "> | undefined; internalReferences?: ",
+          "SavedObjectReference",
+          "[] | undefined; }; references: ",
           "SavedObjectReference",
           "[]; visualizationType: string | null; }"
         ],
