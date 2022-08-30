@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { observer, timerange } from '..';
+import { observer, timerange } from '../..';
 import { Scenario } from '../cli/scenario';
 import { getLogger } from '../cli/utils/get_common_services';
 import { RunOptions } from '../cli/utils/parse_run_cli_flags';
