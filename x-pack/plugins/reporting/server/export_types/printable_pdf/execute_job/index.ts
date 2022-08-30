@@ -10,8 +10,8 @@ import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
 import { REPORTING_TRANSACTION_TYPE } from '../../../../common/constants';
 import { TaskRunResult } from '../../../lib/tasks';
-import { PdfScreenshotOptions, RunTaskFn, RunTaskFnFactory } from '../../../types';
-import { decryptJobHeaders, getFullUrls, getCustomLogo } from '../../common';
+import { RunTaskFn, RunTaskFnFactory } from '../../../types';
+import { decryptJobHeaders, getCustomLogo, getFullUrls } from '../../common';
 import { generatePdfObservable } from '../lib/generate_pdf';
 import { TaskPayloadPDF } from '../types';
 
@@ -43,12 +43,7 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDF>> =
             urls,
             browserTimezone,
             headers,
-            layout: {
-              ...layout,
-              // TODO: We do not do a runtime check for supported layout id types for now. But technically
-              // we should.
-              id: layout?.id,
-            } as PdfScreenshotOptions['layout'],
+            layout,
           });
         }),
         tap(({ buffer }) => {

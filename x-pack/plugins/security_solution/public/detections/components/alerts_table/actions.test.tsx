@@ -8,7 +8,7 @@
 import sinon from 'sinon';
 import moment from 'moment';
 
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import { sendAlertToTimelineAction, determineToAndFrom } from './actions';
 import {
@@ -18,9 +18,10 @@ import {
   mockTimelineDetails,
   mockTimelineResult,
   mockAADEcsDataWithAlert,
+  mockGetOneTimelineResult,
 } from '../../../common/mock';
-import { CreateTimeline, UpdateTimelineLoading } from './types';
-import { Ecs } from '../../../../common/ecs';
+import type { CreateTimeline, UpdateTimelineLoading } from './types';
+import type { Ecs } from '../../../../common/ecs';
 import {
   TimelineId,
   TimelineType,
@@ -133,6 +134,90 @@ describe('alert actions', () => {
     },
   });
 
+  const ecsDataMockWithNoTemplateTimelineAndNoFilters = getThresholdDetectionAlertAADMock({
+    ...mockAADEcsDataWithAlert,
+    kibana: {
+      alert: {
+        ...mockAADEcsDataWithAlert.kibana?.alert,
+        rule: {
+          ...mockAADEcsDataWithAlert.kibana?.alert?.rule,
+          parameters: {
+            ...mockAADEcsDataWithAlert.kibana?.alert?.rule?.parameters,
+            threshold: {
+              field: ['destination.ip'],
+              value: 1,
+            },
+            filters: undefined,
+          },
+          name: ['mock threshold rule'],
+          saved_id: [],
+          type: ['threshold'],
+          uuid: ['c5ba41ab-aaf3-4f43-971b-bdf9434ce0ea'],
+          timeline_id: undefined,
+          timeline_title: undefined,
+        },
+        threshold_result: {
+          count: 99,
+          from: '2021-01-10T21:11:45.839Z',
+          cardinality: [
+            {
+              field: 'source.ip',
+              value: 1,
+            },
+          ],
+          terms: [
+            {
+              field: 'destination.ip',
+              value: 1,
+            },
+          ],
+        },
+      },
+    },
+  });
+
+  const ecsDataMockWithTemplateTimeline = getThresholdDetectionAlertAADMock({
+    ...mockAADEcsDataWithAlert,
+    kibana: {
+      alert: {
+        ...mockAADEcsDataWithAlert.kibana?.alert,
+        rule: {
+          ...mockAADEcsDataWithAlert.kibana?.alert?.rule,
+          parameters: {
+            ...mockAADEcsDataWithAlert.kibana?.alert?.rule?.parameters,
+            threshold: {
+              field: ['destination.ip'],
+              value: 1,
+            },
+            filters: undefined,
+          },
+          name: ['mock threshold rule'],
+          saved_id: [],
+          type: ['threshold'],
+          uuid: ['c5ba41ab-aaf3-4f43-971b-bdf9434ce0ea'],
+          timeline_id: ['timeline-id'],
+          timeline_title: ['timeline-title'],
+        },
+        threshold_result: {
+          count: 99,
+          from: '2021-01-10T21:11:45.839Z',
+          cardinality: [
+            {
+              field: 'source.ip',
+              value: 1,
+            },
+          ],
+          terms: [
+            {
+              field: 'destination.ip',
+              value: 1,
+            },
+          ],
+        },
+      },
+    },
+  });
+
   beforeEach(() => {
     // jest carries state between mocked implementations when using
     // spyOn. So now we're doing all three of these.
@@ -207,7 +292,8 @@ describe('alert actions', () => {
               {
                 columnHeaderType: 'not-filtered',
                 id: '@timestamp',
-                type: 'number',
+                type: 'date',
+                esTypes: ['date'],
                 initialWidth: 190,
               },
               {
@@ -532,7 +618,7 @@ describe('alert actions', () => {
     });
 
     describe('Threshold', () => {
-      beforeEach(() => {
+      test('Exceptions and filters are included', async () => {
         fetchMock.mockResolvedValue({
           hits: {
             hits: [
@@ -544,9 +630,6 @@ describe('alert actions', () => {
             ],
           },
         });
-      });
-
-      test('Exceptions and filters are included', async () => {
         mockGetExceptions.mockResolvedValue([getExceptionListItemSchemaMock()]);
         await sendAlertToTimelineAction({
           createTimeline,
@@ -655,6 +738,104 @@ describe('alert actions', () => {
                   kind: ['kuery'],
                 },
                 serializedQuery: ['user.id:1'],
+              },
+            },
+            resolveTimelineConfig: undefined,
+          },
+          from: expectedFrom,
+          to: expectedTo,
+        });
+      });
+
+      test('Does not crash when no filters provided', async () => {
+        fetchMock.mockResolvedValue({
+          hits: {
+            hits: [
+              {
+                _id: ecsDataMockWithNoTemplateTimelineAndNoFilters[0]._id,
+                _index: 'mock',
+                _source: ecsDataMockWithNoTemplateTimelineAndNoFilters[0],
+              },
+            ],
+          },
+        });
+        mockGetExceptions.mockResolvedValue([getExceptionListItemSchemaMock()]);
+        await sendAlertToTimelineAction({
+          createTimeline,
+          ecsData: ecsDataMockWithNoTemplateTimelineAndNoFilters,
+          updateTimelineIsLoading,
+          searchStrategyClient,
+          getExceptions: mockGetExceptions,
+        });
+
+        expect(createTimeline).not.toThrow();
+        expect(toastMock).not.toHaveBeenCalled();
+      });
+
+      test('columns from timeline template are used', async () => {
+        fetchMock.mockResolvedValue({
+          hits: {
+            hits: [
+              {
+                _id: ecsDataMockWithTemplateTimeline[0]._id,
+                _index: 'mock',
+                _source: ecsDataMockWithTemplateTimeline[0],
+              },
+            ],
+          },
+        });
+        await sendAlertToTimelineAction({
+          createTimeline,
+          ecsData: ecsDataMockWithTemplateTimeline,
+          updateTimelineIsLoading,
+          searchStrategyClient,
+          getExceptions: mockGetExceptions,
+        });
+
+        const expectedFrom = '2021-01-10T21:11:45.839Z';
+        const expectedTo = '2021-01-10T21:12:45.839Z';
+
+        expect(updateTimelineIsLoading).toHaveBeenCalled();
+        expect(mockGetExceptions).toHaveBeenCalled();
+        expect(createTimeline).toHaveBeenCalledTimes(1);
+        expect(createTimeline).toHaveBeenCalledWith({
+          ...defaultTimelineProps,
+          timeline: {
+            ...defaultTimelineProps.timeline,
+            columns: mockGetOneTimelineResult.columns,
+            dataProviders: [],
+            dateRange: {
+              start: expectedFrom,
+              end: expectedTo,
+            },
+            description: '_id: 1',
+            filters: [
+              {
+                $state: {
+                  store: 'appState',
+                },
+                meta: {
+                  key: 'host.name',
+                  negate: false,
+                  params: {
+                    query: 'apache',
+                  },
+                  type: 'phrase',
+                },
+                query: {
+                  match_phrase: {
+                    'host.name': 'apache',
+                  },
+                },
+              },
+            ],
+            kqlQuery: {
+              filterQuery: {
+                kuery: {
+                  expression: '',
+                  kind: ['kuery'],
+                },
+                serializedQuery: '',
               },
             },
             resolveTimelineConfig: undefined,

@@ -26,7 +26,7 @@ export const getNotificationsSettings = (): Record<string, UiSettingsParams> => 
           'core.ui_settings.params.notifications.banner.markdownLinkText',
         values: {
           markdownLink:
-            `<a href="https://help.github.com/articles/basic-writing-and-formatting-syntax/"
+            `<a href="https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax/"
             target="_blank" rel="noopener">` +
             i18n.translate('core.ui_settings.params.notifications.banner.markdownLinkText', {
               defaultMessage: 'Markdown supported',

@@ -6,11 +6,13 @@
  */
 
 import React, { memo } from 'react';
-import { CommonProps, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import type { CommonProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
 import { DateFieldValue } from './date_field_value';
-import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
-import { CardActionsFlexItem, CardActionsFlexItemProps } from './card_actions_flex_item';
+import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
+import type { CardActionsFlexItemProps } from './card_actions_flex_item';
+import { CardActionsFlexItem } from './card_actions_flex_item';
 
 export interface CardHeaderProps
   extends CardActionsFlexItemProps,

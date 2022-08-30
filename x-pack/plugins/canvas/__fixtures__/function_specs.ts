@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExpressionFunction } from '@kbn/expressions-plugin';
+import { ExpressionFunction } from '@kbn/expressions-plugin/common';
 import { functionSpecs as shapeFunctionSpecs } from '@kbn/expression-shape-plugin/__fixtures__';
 import { functionSpecs as imageFunctionSpecs } from '@kbn/expression-image-plugin/__fixtures__';
 import { functionSpecs as metricFunctionSpecs } from '@kbn/expression-metric-plugin/__fixtures__';

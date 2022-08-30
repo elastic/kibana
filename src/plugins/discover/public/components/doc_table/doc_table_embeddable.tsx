@@ -11,20 +11,26 @@ import './index.scss';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { SAMPLE_SIZE_SETTING } from '../../../common';
-import { usePager } from '../../utils/use_pager';
-import { ToolBarPagination } from './components/pager/tool_bar_pagination';
+import { usePager } from '../../hooks/use_pager';
+import {
+  ToolBarPagination,
+  MAX_ROWS_PER_PAGE_OPTION,
+} from './components/pager/tool_bar_pagination';
 import { DocTableProps, DocTableRenderProps, DocTableWrapper } from './doc_table_wrapper';
 import { TotalDocuments } from '../../application/main/components/total_documents/total_documents';
-import { useDiscoverServices } from '../../utils/use_discover_services';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
 
 export interface DocTableEmbeddableProps extends DocTableProps {
   totalHitCount: number;
+  rowsPerPageState?: number;
+  onUpdateRowsPerPage?: (rowsPerPage?: number) => void;
 }
 
 const DocTableWrapperMemoized = memo(DocTableWrapper);
 
 export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
   const services = useDiscoverServices();
+  const onUpdateRowsPerPage = props.onUpdateRowsPerPage;
   const tableWrapperRef = useRef<HTMLDivElement>(null);
   const {
     curPageIndex,
@@ -35,7 +41,10 @@ export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
     changePageIndex,
     changePageSize,
   } = usePager({
-    initialPageSize: 50,
+    initialPageSize:
+      typeof props.rowsPerPageState === 'number' && props.rowsPerPageState > 0
+        ? Math.min(props.rowsPerPageState, MAX_ROWS_PER_PAGE_OPTION)
+        : 50,
     totalItems: props.rows.length,
   });
   const showPagination = totalPages !== 0;
@@ -63,8 +72,9 @@ export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
     (size: number) => {
       scrollTop();
       changePageSize(size);
+      onUpdateRowsPerPage?.(size); // to update `rowsPerPage` input param for the embeddable
     },
-    [changePageSize, scrollTop]
+    [changePageSize, scrollTop, onUpdateRowsPerPage]
   );
 
   const shouldShowLimitedResultsWarning = useMemo(

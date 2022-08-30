@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { apm, timerange } from '@elastic/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -54,7 +54,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when(
     'Service node metadata when data is loaded',
-    { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
+    { config: 'basic', archives: [] },
     () => {
       before(async () => {
         const instance = apm.service(serviceName, 'production', 'go').instance(instanceName);
@@ -64,6 +64,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .rate(1)
             .generator((timestamp) =>
               instance
+                .containerId(instanceName)
                 .transaction('GET /api/product/list')
                 .timestamp(timestamp)
                 .duration(1000)

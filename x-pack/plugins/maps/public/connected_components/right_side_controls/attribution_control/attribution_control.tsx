@@ -11,6 +11,7 @@ import { EuiText, EuiLink } from '@elastic/eui';
 import classNames from 'classnames';
 import { Attribution } from '../../../../common/descriptor_types';
 import { ILayer } from '../../../classes/layers/layer';
+import { isScreenshotMode } from '../../../kibana_services';
 
 export interface Props {
   isFullScreen: boolean;
@@ -74,11 +75,9 @@ export class AttributionControl extends Component<Props, State> {
   };
 
   _renderAttribution({ url, label }: Attribution) {
-    if (!url) {
-      return label;
-    }
-
-    return (
+    return !url || isScreenshotMode() ? (
+      label
+    ) : (
       <EuiLink color="text" href={url} target="_blank">
         {label}
       </EuiLink>
@@ -108,9 +107,7 @@ export class AttributionControl extends Component<Props, State> {
         })}
       >
         <EuiText size="xs">
-          <small>
-            <strong>{this._renderAttributions()}</strong>
-          </small>
+          <small>{this._renderAttributions()}</small>
         </EuiText>
       </div>
     );

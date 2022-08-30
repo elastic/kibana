@@ -7,37 +7,60 @@
  */
 
 import {
-  DataLayerConfigResult,
-  ReferenceLineLayerConfigResult,
-  XYLayerConfigResult,
-  AnnotationLayerConfigResult,
+  LayerTypes,
+  REFERENCE_LINE,
+  REFERENCE_LINE_LAYER,
+  EXTENDED_REFERENCE_LINE_DECORATION_CONFIG,
+} from '../../common/constants';
+import {
+  CommonXYLayerConfig,
+  CommonXYDataLayerConfig,
+  CommonXYReferenceLineLayerConfig,
+  CommonXYAnnotationLayerConfig,
+  ReferenceLineLayerConfig,
+  ReferenceLineConfig,
+  ReferenceLineDecorationConfigResult,
+  ExtendedReferenceLineDecorationConfig,
 } from '../../common/types';
-import { LayerTypes } from '../../common/constants';
 
-export const isDataLayer = (layer: XYLayerConfigResult): layer is DataLayerConfigResult =>
+export const isDataLayer = (layer: CommonXYLayerConfig): layer is CommonXYDataLayerConfig =>
   layer.layerType === LayerTypes.DATA || !layer.layerType;
 
-export const getDataLayers = (layers: XYLayerConfigResult[]) =>
-  (layers || []).filter((layer): layer is DataLayerConfigResult => isDataLayer(layer));
+export const getDataLayers = (layers: CommonXYLayerConfig[]) =>
+  (layers || []).filter((layer): layer is CommonXYDataLayerConfig => isDataLayer(layer));
 
-export const isReferenceLayer = (
-  layer: XYLayerConfigResult
-): layer is ReferenceLineLayerConfigResult => layer.layerType === LayerTypes.REFERENCELINE;
+export const isReferenceLayer = (layer: CommonXYLayerConfig): layer is ReferenceLineLayerConfig =>
+  layer.layerType === LayerTypes.REFERENCELINE && layer.type === REFERENCE_LINE_LAYER;
 
-export const getReferenceLayers = (layers: XYLayerConfigResult[]) =>
-  (layers || []).filter((layer): layer is ReferenceLineLayerConfigResult =>
-    isReferenceLayer(layer)
+export const isReferenceLine = (layer: CommonXYLayerConfig): layer is ReferenceLineConfig =>
+  layer.type === REFERENCE_LINE;
+
+export const isReferenceLineDecorationConfig = (
+  decoration: ExtendedReferenceLineDecorationConfig | ReferenceLineDecorationConfigResult
+): decoration is ExtendedReferenceLineDecorationConfig =>
+  decoration.type === EXTENDED_REFERENCE_LINE_DECORATION_CONFIG;
+
+export const isReferenceLineOrLayer = (
+  layer: CommonXYLayerConfig
+): layer is CommonXYReferenceLineLayerConfig => layer.layerType === LayerTypes.REFERENCELINE;
+
+export const getReferenceLayers = (layers: CommonXYLayerConfig[]) =>
+  (layers || []).filter(
+    (layer): layer is CommonXYReferenceLineLayerConfig =>
+      isReferenceLayer(layer) || isReferenceLine(layer)
   );
 
 const isAnnotationLayerCommon = (
-  layer: XYLayerConfigResult
-): layer is AnnotationLayerConfigResult => layer.layerType === LayerTypes.ANNOTATIONS;
+  layer: CommonXYLayerConfig
+): layer is CommonXYAnnotationLayerConfig => layer.layerType === LayerTypes.ANNOTATIONS;
 
 export const isAnnotationsLayer = (
-  layer: XYLayerConfigResult
-): layer is AnnotationLayerConfigResult => isAnnotationLayerCommon(layer);
+  layer: CommonXYLayerConfig
+): layer is CommonXYAnnotationLayerConfig => isAnnotationLayerCommon(layer);
 
 export const getAnnotationsLayers = (
-  layers: XYLayerConfigResult[]
-): AnnotationLayerConfigResult[] =>
-  (layers || []).filter((layer): layer is AnnotationLayerConfigResult => isAnnotationsLayer(layer));
+  layers: CommonXYLayerConfig[]
+): CommonXYAnnotationLayerConfig[] =>
+  (layers || []).filter((layer): layer is CommonXYAnnotationLayerConfig =>
+    isAnnotationsLayer(layer)
+  );

@@ -25,10 +25,13 @@ interface CreateTestConfigOptions {
   customizeLocalHostSsl?: boolean;
   rejectUnauthorized?: boolean; // legacy
   emailDomainsAllowed?: string[];
+  testFiles?: string[];
+  useDedicatedTaskRunner: boolean;
 }
 
 // test.not-enabled is specifically not enabled
 const enabledActionTypes = [
+  '.cases-webhook',
   '.email',
   '.index',
   '.pagerduty',
@@ -42,6 +45,8 @@ const enabledActionTypes = [
   '.slack',
   '.webhook',
   '.xmatters',
+  '.test-sub-action-connector',
+  '.test-sub-action-connector-without-sub-actions',
   'test.authorization',
   'test.failing',
   'test.index-record',
@@ -64,6 +69,8 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     customizeLocalHostSsl = false,
     rejectUnauthorized = true, // legacy
     emailDomainsAllowed = undefined,
+    testFiles = undefined,
+    useDedicatedTaskRunner,
   } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
@@ -139,7 +146,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       : [];
 
     return {
-      testFiles: [require.resolve(`../${name}/tests/`)],
+      testFiles: testFiles ? testFiles : [require.resolve(`../${name}/tests/`)],
       servers,
       services,
       junit: {
@@ -158,6 +165,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       },
       kbnTestServer: {
         ...xPackApiIntegrationTestsConfig.get('kbnTestServer'),
+        useDedicatedTaskRunner,
         serverArgs: [
           ...xPackApiIntegrationTestsConfig.get('kbnTestServer.serverArgs'),
           ...(options.publicBaseUrl ? ['--server.publicBaseUrl=https://localhost:5601'] : []),
@@ -170,6 +178,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           '--xpack.alerting.invalidateApiKeysTask.interval="15s"',
           '--xpack.alerting.healthCheck.interval="1s"',
           '--xpack.alerting.rules.minimumScheduleInterval.value="1s"',
+          '--xpack.alerting.rules.run.alerts.max=20',
           `--xpack.alerting.rules.run.actions.connectorTypeOverrides=${JSON.stringify([
             { id: 'test.capped', max: '1' },
           ])}`,
@@ -200,6 +209,17 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
               config: {
                 apiUrl: 'https://ven04334.service-now.com',
                 usesTableApi: true,
+              },
+              secrets: {
+                username: 'elastic_integration',
+                password: 'somepassword',
+              },
+            },
+            'my-deprecated-servicenow-default': {
+              actionTypeId: '.servicenow',
+              name: 'ServiceNow#xyz',
+              config: {
+                apiUrl: 'https://ven04334.service-now.com',
               },
               secrets: {
                 username: 'elastic_integration',

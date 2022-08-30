@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-import { getSearchParams, getValidTimefieldSort, tryToParseAsDate } from './executor';
-import { OnlyEsQueryAlertParams } from './types';
+import {
+  getSearchParams,
+  getValidTimefieldSort,
+  tryToParseAsDate,
+  getContextConditionsDescription,
+} from './executor';
+import { OnlyEsQueryRuleParams } from './types';
+import { Comparator } from '../../../common/comparator_types';
 
 describe('es_query executor', () => {
   const defaultProps = {
@@ -18,6 +24,7 @@ describe('es_query executor', () => {
     esQuery: '{ "query": "test-query" }',
     index: ['test-index'],
     timeField: '',
+    searchType: 'esQuery',
   };
   describe('tryToParseAsDate', () => {
     it.each<[string | number]>([['2019-01-01T00:00:00.000Z'], [1546300800000]])(
@@ -48,13 +55,13 @@ describe('es_query executor', () => {
 
   describe('getSearchParams', () => {
     it('should return search params correctly', () => {
-      const result = getSearchParams(defaultProps as OnlyEsQueryAlertParams);
+      const result = getSearchParams(defaultProps as OnlyEsQueryRuleParams);
       expect(result.parsedQuery.query).toBe('test-query');
     });
 
     it('should throw invalid query error', () => {
       expect(() =>
-        getSearchParams({ ...defaultProps, esQuery: '' } as OnlyEsQueryAlertParams)
+        getSearchParams({ ...defaultProps, esQuery: '' } as OnlyEsQueryRuleParams)
       ).toThrow('invalid query specified: "" - query must be JSON');
     });
 
@@ -63,7 +70,7 @@ describe('es_query executor', () => {
         getSearchParams({
           ...defaultProps,
           esQuery: '{ "someProperty": "test-query" }',
-        } as OnlyEsQueryAlertParams)
+        } as OnlyEsQueryRuleParams)
       ).toThrow('invalid query specified: "{ "someProperty": "test-query" }" - query must be JSON');
     });
 
@@ -73,8 +80,25 @@ describe('es_query executor', () => {
           ...defaultProps,
           timeWindowSize: 5,
           timeWindowUnit: 'r',
-        } as OnlyEsQueryAlertParams)
+        } as OnlyEsQueryRuleParams)
       ).toThrow('invalid format for windowSize: "5r"');
+    });
+  });
+
+  describe('getContextConditionsDescription', () => {
+    it('should return conditions correctly', () => {
+      const result = getContextConditionsDescription(Comparator.GT, [10]);
+      expect(result).toBe(`Number of matching documents is greater than 10`);
+    });
+
+    it('should return conditions correctly when isRecovered is true', () => {
+      const result = getContextConditionsDescription(Comparator.GT, [10], true);
+      expect(result).toBe(`Number of matching documents is NOT greater than 10`);
+    });
+
+    it('should return conditions correctly when multiple thresholds provided', () => {
+      const result = getContextConditionsDescription(Comparator.BETWEEN, [10, 20], true);
+      expect(result).toBe(`Number of matching documents is NOT between 10 and 20`);
     });
   });
 });

@@ -13,10 +13,20 @@ import {
   getFindResultWithSingleHit,
   getDeleteRequestById,
   getEmptySavedObjectsResponse,
+  getRuleMock,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { deleteRulesRoute } from './delete_rules_route';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
+import { legacyMigrate } from '../../rules/utils';
+
+jest.mock('../../rules/utils', () => {
+  const actual = jest.requireActual('../../rules/utils');
+  return {
+    ...actual,
+    legacyMigrate: jest.fn(),
+  };
+});
 
 describe('delete_rules', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -28,6 +38,8 @@ describe('delete_rules', () => {
 
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
     clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse());
+
+    (legacyMigrate as jest.Mock).mockResolvedValue(getRuleMock(getQueryRuleParams()));
 
     deleteRulesRoute(server.router);
   });
@@ -54,6 +66,7 @@ describe('delete_rules', () => {
 
     test('returns 404 when deleting a single rule that does not exist with a valid actionClient and alertClient', async () => {
       clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
+      (legacyMigrate as jest.Mock).mockResolvedValue(null);
       const response = await server.inject(
         getDeleteRequest(),
         requestContextMock.convertContext(context)

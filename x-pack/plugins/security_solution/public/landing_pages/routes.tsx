@@ -8,30 +8,49 @@
 import React from 'react';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 
-import { SecurityPageName, SecuritySubPluginRoutes } from '../app/types';
-import { DASHBOARDS_PATH, THREAT_HUNTING_PATH } from '../../common/constants';
-import { ThreatHuntingLandingPage } from './pages/threat_hunting';
+import type { SecuritySubPluginRoutes } from '../app/types';
+import { SecurityPageName } from '../app/types';
+import { DASHBOARDS_PATH, MANAGE_PATH, EXPLORE_PATH } from '../../common/constants';
+import { ExploreLandingPage } from './pages/explore';
 import { DashboardsLandingPage } from './pages/dashboards';
+import { ManageLandingPage } from './pages/manage';
+import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 
 export const ThreatHuntingRoutes = () => (
-  <TrackApplicationView viewId={SecurityPageName.threatHuntingLanding}>
-    <ThreatHuntingLandingPage />
-  </TrackApplicationView>
+  <PluginTemplateWrapper>
+    <TrackApplicationView viewId={SecurityPageName.exploreLanding}>
+      <ExploreLandingPage />
+    </TrackApplicationView>
+  </PluginTemplateWrapper>
 );
 
 export const DashboardRoutes = () => (
-  <TrackApplicationView viewId={SecurityPageName.dashboardsLanding}>
-    <DashboardsLandingPage />
-  </TrackApplicationView>
+  <PluginTemplateWrapper>
+    <TrackApplicationView viewId={SecurityPageName.dashboardsLanding}>
+      <DashboardsLandingPage />
+    </TrackApplicationView>
+  </PluginTemplateWrapper>
+);
+
+export const ManageRoutes = () => (
+  <PluginTemplateWrapper>
+    <TrackApplicationView viewId={SecurityPageName.administration}>
+      <ManageLandingPage />
+    </TrackApplicationView>
+  </PluginTemplateWrapper>
 );
 
 export const routes: SecuritySubPluginRoutes = [
   {
-    path: THREAT_HUNTING_PATH,
-    render: ThreatHuntingRoutes,
+    path: EXPLORE_PATH,
+    component: ThreatHuntingRoutes,
   },
   {
     path: DASHBOARDS_PATH,
-    render: DashboardRoutes,
+    component: DashboardRoutes,
+  },
+  {
+    path: MANAGE_PATH,
+    component: ManageRoutes,
   },
 ];

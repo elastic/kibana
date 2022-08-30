@@ -51,8 +51,8 @@ const apisToIntercept = [
 ];
 
 describe.skip('Service overview: Time Comparison', () => {
-  before(async () => {
-    await synthtrace.index(
+  before(() => {
+    synthtrace.index(
       opbeans({
         from: new Date(start).getTime(),
         to: new Date(end).getTime(),
@@ -60,23 +60,23 @@ describe.skip('Service overview: Time Comparison', () => {
     );
   });
 
-  after(async () => {
-    await synthtrace.clean();
+  after(() => {
+    synthtrace.clean();
   });
 
   beforeEach(() => {
-    cy.loginAsReadOnlyUser();
+    cy.loginAsViewerUser();
   });
 
   it('enables by default the time comparison feature with Last 24 hours selected', () => {
-    cy.visit(serviceOverviewPath);
+    cy.visitKibana(serviceOverviewPath);
     cy.url().should('include', 'comparisonEnabled=true');
     cy.url().should('include', 'offset=1d');
   });
 
   describe('when comparison is toggled off', () => {
     it('disables select box', () => {
-      cy.visit(serviceOverviewHref);
+      cy.visitKibana(serviceOverviewHref);
       cy.contains('opbeans-java');
 
       // Comparison is enabled by default
@@ -91,7 +91,7 @@ describe.skip('Service overview: Time Comparison', () => {
       apisToIntercept.map(({ endpoint, name }) => {
         cy.intercept('GET', endpoint).as(name);
       });
-      cy.visit(serviceOverviewHref);
+      cy.visitKibana(serviceOverviewHref);
 
       cy.get('[data-test-subj="comparisonSelect"]').should('be.enabled');
       const offset = `offset=1d`;
@@ -125,7 +125,7 @@ describe.skip('Service overview: Time Comparison', () => {
     apisToIntercept.map(({ endpoint, name }) => {
       cy.intercept('GET', endpoint).as(name);
     });
-    cy.visit(serviceOverviewPath);
+    cy.visitKibana(serviceOverviewPath);
     cy.contains('opbeans-java');
     // opens the page with "Day before" selected
     cy.get('[data-test-subj="comparisonSelect"]').should('have.value', '1d');
@@ -136,7 +136,7 @@ describe.skip('Service overview: Time Comparison', () => {
   });
 
   it('changes comparison type when a new time range is selected', () => {
-    cy.visit(serviceOverviewHref);
+    cy.visitKibana(serviceOverviewHref);
     cy.contains('opbeans-java');
     // Time comparison default value
     cy.get('[data-test-subj="comparisonSelect"]').should('have.value', '1d');
@@ -189,7 +189,7 @@ describe.skip('Service overview: Time Comparison', () => {
     apisToIntercept.map(({ endpoint, name }) => {
       cy.intercept('GET', endpoint).as(name);
     });
-    cy.visit(
+    cy.visitKibana(
       url.format({
         pathname: serviceOverviewPath,
         query: {
@@ -203,7 +203,7 @@ describe.skip('Service overview: Time Comparison', () => {
     cy.get('[data-test-subj="throughput"]')
       .get('#echHighlighterClipPath__throughput')
       .realHover({ position: 'center' });
-    cy.contains('Previous period');
+    cy.contains('Week before');
     cy.contains('0 tpm');
 
     cy.contains('Throughput');

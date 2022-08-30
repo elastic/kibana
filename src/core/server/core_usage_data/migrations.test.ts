@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectUnsanitizedDoc } from '../saved_objects';
+import type { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
+import type { CoreUsageStats } from '@kbn/core-usage-data-server';
 import { migrateTo7141 } from './migrations';
-import type { CoreUsageStats } from './types';
 
 const type = 'obj-type';
 const id = 'obj-id';

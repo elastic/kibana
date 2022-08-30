@@ -23,7 +23,7 @@ import { indexService } from '../services/es_index_service';
 export const useDeleteIndexAndTargetIndex = (items: TransformListRow[]) => {
   const {
     http,
-    savedObjects,
+    data: { dataViews: dataViewsContract },
     ml: { extractErrorMessage },
     application: { capabilities },
   } = useAppDependencies();
@@ -46,9 +46,8 @@ export const useDeleteIndexAndTargetIndex = (items: TransformListRow[]) => {
   const checkDataViewExists = useCallback(
     async (indexName: string) => {
       try {
-        if (await indexService.dataViewExists(savedObjects.client, indexName)) {
-          setDataViewExists(true);
-        }
+        const dvExists = await indexService.dataViewExists(dataViewsContract, indexName);
+        setDataViewExists(dvExists);
       } catch (e) {
         const error = extractErrorMessage(e);
 
@@ -63,7 +62,7 @@ export const useDeleteIndexAndTargetIndex = (items: TransformListRow[]) => {
         );
       }
     },
-    [savedObjects.client, toastNotifications, extractErrorMessage]
+    [dataViewsContract, toastNotifications, extractErrorMessage]
   );
 
   const checkUserIndexPermission = useCallback(async () => {

@@ -9,12 +9,13 @@ import React, { useCallback, useEffect, useReducer } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import type { DataViewBase } from '@kbn/es-query';
-import { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import { ListItemComponent } from './list_item';
 import { AndOrBadge } from '../and_or_badge';
 import { LogicButtons } from './logic_buttons';
-import { ThreatMapEntries } from './types';
-import { State, reducer } from './reducer';
+import type { ThreatMapEntries } from './types';
+import type { State } from './reducer';
+import { reducer } from './reducer';
 import { getDefaultEmptyEntry, getNewItem, filterItems } from './helpers';
 
 const MyInvisibleAndBadge = styled(EuiFlexItem)`

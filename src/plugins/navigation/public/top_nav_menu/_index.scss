@@ -4,6 +4,12 @@
   }
 }
 
+.kbnTopNavMenu__wrapper {
+  &--hidden {
+    display: none;
+  }
+}
+
 .kbnTopNavMenu__badgeWrapper {
   display: flex;
   align-items: baseline;

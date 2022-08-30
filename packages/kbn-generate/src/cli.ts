@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { RunWithCommands } from '@kbn/dev-utils';
+import { RunWithCommands } from '@kbn/dev-cli-runner';
 
 import { Render } from './lib/render';
 import { ContextExtensions } from './generate_command';

@@ -15,9 +15,14 @@ import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import { AlertingAuthorization } from '../../authorization/alerting_authorization';
 import { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
-import { InvalidatePendingApiKey } from '../../types';
 import { getBeforeSetup, setGlobalDate } from './lib';
+import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 
+jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
+  bulkMarkApiKeysForInvalidation: jest.fn(),
+}));
+
+const bulkMarkApiKeysForInvalidationMock = bulkMarkApiKeysForInvalidation as jest.Mock;
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
@@ -89,15 +94,6 @@ describe('updateApiKey()', () => {
   beforeEach(() => {
     rulesClient = new RulesClient(rulesClientParams);
     unsecuredSavedObjectsClient.get.mockResolvedValue(existingAlert);
-    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
-      id: '1',
-      type: 'api_key_pending_invalidation',
-      attributes: {
-        apiKeyId: '234',
-        createdAt: '2019-02-12T21:01:22.479Z',
-      },
-      references: [],
-    });
     encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingEncryptedAlert);
   });
 
@@ -140,8 +136,11 @@ describe('updateApiKey()', () => {
       },
       { version: '123' }
     );
-    expect(unsecuredSavedObjectsClient.create.mock.calls[0][0]).toBe(
-      'api_key_pending_invalidation'
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+      { apiKeys: ['MTIzOmFiYw=='] },
+      expect.any(Object),
+      expect.any(Object)
     );
   });
 
@@ -162,15 +161,6 @@ describe('updateApiKey()', () => {
       result: { id: '234', name: '123', api_key: 'abc' },
     });
     encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValueOnce(new Error('Fail'));
-    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
-      id: '1',
-      type: 'api_key_pending_invalidation',
-      attributes: {
-        apiKeyId: '123',
-        createdAt: '2019-02-12T21:01:22.479Z',
-      },
-      references: [],
-    });
 
     await rulesClient.updateApiKey({ id: '1' });
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledWith('alert', '1');
@@ -210,33 +200,26 @@ describe('updateApiKey()', () => {
   });
 
   test('swallows error when invalidate API key throws', async () => {
-    unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('Fail'));
+    bulkMarkApiKeysForInvalidationMock.mockImplementationOnce(() => new Error('Fail'));
 
     await rulesClient.updateApiKey({ id: '1' });
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalled();
-    expect(unsecuredSavedObjectsClient.create.mock.calls[0][0]).toBe(
-      'api_key_pending_invalidation'
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+      { apiKeys: ['MTIzOmFiYw=='] },
+      expect.any(Object),
+      expect.any(Object)
     );
   });
 
   test('swallows error when getting decrypted object throws', async () => {
     encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValueOnce(new Error('Fail'));
-    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
-      id: '1',
-      type: 'api_key_pending_invalidation',
-      attributes: {
-        apiKeyId: '234',
-        createdAt: '2019-02-12T21:01:22.479Z',
-      },
-      references: [],
-    });
 
     await rulesClient.updateApiKey({ id: '1' });
     expect(rulesClientParams.logger.error).toHaveBeenCalledWith(
       'updateApiKey(): Failed to load API key to invalidate on alert 1: Fail'
     );
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalled();
-    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
   });
 
   test('throws when unsecuredSavedObjectsClient update fails and invalidates newly created API key', async () => {
@@ -245,22 +228,16 @@ describe('updateApiKey()', () => {
       result: { id: '234', name: '234', api_key: 'abc' },
     });
     unsecuredSavedObjectsClient.update.mockRejectedValueOnce(new Error('Fail'));
-    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
-      id: '1',
-      type: 'api_key_pending_invalidation',
-      attributes: {
-        apiKeyId: '234',
-        createdAt: '2019-02-12T21:01:22.479Z',
-      },
-      references: [],
-    });
 
     await expect(rulesClient.updateApiKey({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Fail"`
     );
-    expect(
-      (unsecuredSavedObjectsClient.create.mock.calls[0][1] as InvalidatePendingApiKey).apiKeyId
-    ).toBe('234');
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+      { apiKeys: ['MjM0OmFiYw=='] },
+      expect.any(Object),
+      expect.any(Object)
+    );
   });
 
   describe('authorization', () => {

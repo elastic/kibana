@@ -6,7 +6,8 @@
  */
 
 import React, { memo } from 'react';
-import { EuiLink, EuiLinkAnchorProps, EuiToolTip } from '@elastic/eui';
+import type { EuiLinkAnchorProps } from '@elastic/eui';
+import { EuiLink, EuiToolTip } from '@elastic/eui';
 
 type MarkdownLinkProps = { disableLinks?: boolean } & EuiLinkAnchorProps;
 

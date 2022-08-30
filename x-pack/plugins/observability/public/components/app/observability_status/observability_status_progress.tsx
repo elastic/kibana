@@ -24,9 +24,11 @@ import { useGuidedSetupProgress } from '../../../hooks/use_guided_setup_progress
 
 interface ObservabilityStatusProgressProps {
   onViewDetailsClick: () => void;
+  onDismissClick?: () => void;
 }
 export function ObservabilityStatusProgress({
   onViewDetailsClick,
+  onDismissClick,
 }: ObservabilityStatusProgressProps) {
   const { hasDataMap, isAllRequestsComplete } = useHasData();
   const trackMetric = useUiTracker({ app: 'observability-overview' });
@@ -52,8 +54,11 @@ export function ObservabilityStatusProgress({
 
   const dismissGuidedSetup = useCallback(() => {
     dismissGuidedSetupProgress();
+    if (onDismissClick) {
+      onDismissClick();
+    }
     trackMetric({ metric: 'guided_setup_progress_dismiss' });
-  }, [dismissGuidedSetupProgress, trackMetric]);
+  }, [dismissGuidedSetupProgress, trackMetric, onDismissClick]);
 
   const showDetails = () => {
     onViewDetailsClick();

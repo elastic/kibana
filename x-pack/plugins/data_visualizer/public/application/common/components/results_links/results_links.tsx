@@ -9,12 +9,26 @@ import React, { FC, useState, useEffect } from 'react';
 import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiCard, EuiIcon } from '@elastic/eui';
-import { TimeRange, RefreshInterval } from '@kbn/data-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
+import { RefreshInterval } from '@kbn/data-plugin/public';
 import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
+import { flatten } from 'lodash';
+import { LinkCardProps } from '../link_card/link_card';
 import { useDataVisualizerKibana } from '../../../kibana_context';
+import { isDefined } from '../../util/is_defined';
 
 type LinkType = 'file' | 'index';
+
+export interface GetAdditionalLinksParams {
+  dataViewId: string;
+  dataViewTitle?: string;
+  globalState?: any;
+}
+
+export type GetAdditionalLinks = Array<
+  (params: GetAdditionalLinksParams) => Promise<ResultLink[] | undefined>
+>;
 
 export interface ResultLink {
   id: string;
@@ -24,7 +38,7 @@ export interface ResultLink {
   description: string;
   getUrl(params?: any): Promise<string>;
   canDisplay(params?: any): Promise<boolean>;
-  dataTestSubj?: string;
+  'data-test-subj'?: string;
 }
 
 interface Props {
@@ -34,7 +48,7 @@ interface Props {
   timeFieldName?: string;
   createDataView: boolean;
   showFilebeatFlyout(): void;
-  additionalLinks: ResultLink[];
+  getAdditionalLinks?: GetAdditionalLinks;
 }
 
 interface GlobalState {
@@ -51,7 +65,7 @@ export const ResultsLinks: FC<Props> = ({
   timeFieldName,
   createDataView,
   showFilebeatFlyout,
-  additionalLinks,
+  getAdditionalLinks,
 }) => {
   const {
     services: {
@@ -70,7 +84,7 @@ export const ResultsLinks: FC<Props> = ({
   const [discoverLink, setDiscoverLink] = useState('');
   const [indexManagementLink, setIndexManagementLink] = useState('');
   const [dataViewsManagementLink, setDataViewsManagementLink] = useState('');
-  const [generatedLinks, setGeneratedLinks] = useState<Record<string, string>>({});
+  const [asyncHrefCards, setAsyncHrefCards] = useState<LinkCardProps[]>();
 
   useEffect(() => {
     let unmounted = false;
@@ -93,22 +107,30 @@ export const ResultsLinks: FC<Props> = ({
 
     getDiscoverUrl();
 
-    Promise.all(
-      additionalLinks.map(async ({ canDisplay, getUrl }) => {
-        if ((await canDisplay({ indexPatternId: dataViewId })) === false) {
-          return null;
-        }
-        return getUrl({ globalState, indexPatternId: dataViewId });
-      })
-    ).then((urls) => {
-      const linksById = urls.reduce((acc, url, i) => {
-        if (url !== null) {
-          acc[additionalLinks[i].id] = url;
-        }
-        return acc;
-      }, {} as Record<string, string>);
-      setGeneratedLinks(linksById);
-    });
+    if (Array.isArray(getAdditionalLinks)) {
+      Promise.all(
+        getAdditionalLinks.map(async (asyncCardGetter) => {
+          const results = await asyncCardGetter({
+            dataViewId,
+          });
+          if (Array.isArray(results)) {
+            return await Promise.all(
+              results.map(async (c) => ({
+                ...c,
+                canDisplay: await c.canDisplay(),
+                href: await c.getUrl(),
+              }))
+            );
+          }
+        })
+      ).then((cards) => {
+        setAsyncHrefCards(
+          flatten(cards)
+            .filter(isDefined)
+            .filter((d) => d.canDisplay === true)
+        );
+      });
+    }
 
     if (!unmounted) {
       setIndexManagementLink(
@@ -244,16 +266,15 @@ export const ResultsLinks: FC<Props> = ({
           onClick={showFilebeatFlyout}
         />
       </EuiFlexItem>
-      {additionalLinks
-        .filter(({ id }) => generatedLinks[id] !== undefined)
-        .map((link) => (
+      {Array.isArray(asyncHrefCards) &&
+        asyncHrefCards.map((link) => (
           <EuiFlexItem>
             <EuiCard
               icon={<EuiIcon size="xxl" type={link.icon} />}
               data-test-subj="fileDataVisLink"
               title={link.title}
               description={link.description}
-              href={generatedLinks[link.id]}
+              href={link.href}
             />
           </EuiFlexItem>
         ))}

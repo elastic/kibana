@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import { getEmailConnector, EmailConnector } from '../objects/connector';
-import {
+import type { EmailConnector } from '../objects/connector';
+import { getEmailConnector } from '../objects/connector';
+import type {
   CustomRule,
   MachineLearningRule,
-  getMachineLearningRule,
   OverrideRule,
   ThreatIndicatorRule,
   ThresholdRule,
+  NewTermsRule,
 } from '../objects/rule';
+import { getMachineLearningRule } from '../objects/rule';
 import {
   ABOUT_CONTINUE_BTN,
   ABOUT_EDIT_TAB,
@@ -81,7 +83,6 @@ import {
   THREAT_MATCH_INDICATOR_INDICATOR_INDEX,
   THREAT_MATCH_OR_BUTTON,
   THREAT_MATCH_QUERY_INPUT,
-  THRESHOLD_FIELD_SELECTION,
   THRESHOLD_INPUT_AREA,
   THRESHOLD_TYPE,
   CONNECTOR_NAME_INPUT,
@@ -92,11 +93,18 @@ import {
   EMAIL_CONNECTOR_PASSWORD_INPUT,
   EMAIL_CONNECTOR_SERVICE_SELECTOR,
   PREVIEW_HISTOGRAM,
+  DATA_VIEW_COMBO_BOX,
+  DATA_VIEW_OPTION,
+  NEW_TERMS_TYPE,
+  NEW_TERMS_HISTORY_SIZE,
+  NEW_TERMS_HISTORY_TIME_TYPE,
+  NEW_TERMS_INPUT_AREA,
 } from '../screens/create_new_rule';
 import { TOAST_ERROR } from '../screens/shared';
 import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
 import { TIMELINE } from '../screens/timelines';
 import { refreshPage } from './security_header';
+import { EUI_FILTER_SELECT_ITEM } from '../screens/common/controls';
 
 export const createAndEnableRule = () => {
   cy.get(SCHEDULE_CONTINUE_BUTTON).click({ force: true });
@@ -252,9 +260,14 @@ export const fillAboutRuleWithOverrideAndContinue = (rule: OverrideRule) => {
 export const fillDefineCustomRuleWithImportedQueryAndContinue = (
   rule: CustomRule | OverrideRule
 ) => {
+  if (rule.dataSource.type === 'dataView') {
+    cy.get(DATA_VIEW_OPTION).click();
+    cy.get(DATA_VIEW_COMBO_BOX).type(`${rule.dataSource.dataView}{enter}`);
+  }
   cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
   cy.get(TIMELINE(rule.timeline.id)).click();
   cy.get(CUSTOM_QUERY_INPUT).should('have.value', rule.customQuery);
+
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
 
   cy.get(CUSTOM_QUERY_INPUT).should('not.exist');
@@ -275,16 +288,18 @@ export const fillDefineThresholdRule = (rule: ThresholdRule) => {
   cy.get(TIMELINE(rule.timeline.id)).click();
   cy.get(COMBO_BOX_CLEAR_BTN).first().click();
 
-  rule.index.forEach((index) => {
-    cy.get(COMBO_BOX_INPUT).first().type(`${index}{enter}`);
-  });
+  if (rule.dataSource.type === 'indexPatterns') {
+    rule.dataSource.index.forEach((index) => {
+      cy.get(COMBO_BOX_INPUT).first().type(`${index}{enter}`);
+    });
+  }
 
   cy.get(CUSTOM_QUERY_INPUT).should('have.value', rule.customQuery);
   cy.get(THRESHOLD_INPUT_AREA)
     .find(INPUT)
     .then((inputs) => {
       cy.wrap(inputs[thresholdField]).type(rule.thresholdField);
-      cy.get(THRESHOLD_FIELD_SELECTION).click({ force: true });
+      cy.get(EUI_FILTER_SELECT_ITEM).click({ force: true });
       cy.wrap(inputs[threshold]).clear().type(rule.threshold);
     });
 };
@@ -304,7 +319,7 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
     .then((inputs) => {
       cy.wrap(inputs[thresholdField]).click();
       cy.wrap(inputs[thresholdField]).pipe(typeThresholdField);
-      cy.get(THRESHOLD_FIELD_SELECTION).click({ force: true });
+      cy.get(EUI_FILTER_SELECT_ITEM).click({ force: true });
       cy.wrap(inputs[threshold]).clear().type(rule.threshold);
     });
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
@@ -316,6 +331,7 @@ export const fillDefineEqlRuleAndContinue = (rule: CustomRule) => {
   if (rule.customQuery == null) {
     throw new TypeError('The rule custom query should never be undefined or null ');
   }
+
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('exist');
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('be.visible');
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).type(rule.customQuery);
@@ -336,6 +352,24 @@ export const fillDefineEqlRuleAndContinue = (rule: CustomRule) => {
 
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
   cy.get(`${RULES_CREATION_FORM} ${EQL_QUERY_INPUT}`).should('not.exist');
+};
+
+export const fillDefineNewTermsRuleAndContinue = (rule: NewTermsRule) => {
+  cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
+  cy.get(TIMELINE(rule.timeline.id)).click();
+  cy.get(CUSTOM_QUERY_INPUT).should('have.value', rule.customQuery);
+  cy.get(NEW_TERMS_INPUT_AREA).find(INPUT).click().type(rule.newTermsFields[0], { delay: 35 });
+  cy.get(EUI_FILTER_SELECT_ITEM).click({ force: true });
+  cy.get(NEW_TERMS_INPUT_AREA)
+    .find(NEW_TERMS_HISTORY_SIZE)
+    .type('{selectAll}')
+    .type(rule.historyWindowSize.interval);
+  cy.get(NEW_TERMS_INPUT_AREA)
+    .find(NEW_TERMS_HISTORY_TIME_TYPE)
+    .select(rule.historyWindowSize.timeType);
+  cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
+
+  cy.get(CUSTOM_QUERY_INPUT).should('not.exist');
 };
 
 /**
@@ -394,6 +428,7 @@ export const fillIndexAndIndicatorIndexPattern = (
   indicatorIndex?: string[]
 ) => {
   getIndexPatternClearButton().click();
+
   getIndicatorIndex().type(`${indexPattern}{enter}`);
   getIndicatorIndicatorIndex().type(`{backspace}{enter}${indicatorIndex}{enter}`);
 };
@@ -442,7 +477,9 @@ export const getAboutContinueButton = () => cy.get(ABOUT_CONTINUE_BTN);
 export const getDefineContinueButton = () => cy.get(DEFINE_CONTINUE_BUTTON);
 
 /** Returns the indicator index pattern */
-export const getIndicatorIndex = () => cy.get(THREAT_MATCH_INDICATOR_INDEX).eq(0);
+export const getIndicatorIndex = () => {
+  return cy.get(THREAT_MATCH_INDICATOR_INDEX).eq(0);
+};
 
 /** Returns the indicator's indicator index */
 export const getIndicatorIndicatorIndex = () =>
@@ -465,7 +502,9 @@ export const getCustomQueryInvalidationText = () => cy.contains(CUSTOM_QUERY_REQ
  * @param rule The rule to use to fill in everything
  */
 export const fillDefineIndicatorMatchRuleAndContinue = (rule: ThreatIndicatorRule) => {
-  fillIndexAndIndicatorIndexPattern(rule.index, rule.indicatorIndexPattern);
+  if (rule.dataSource.type === 'indexPatterns') {
+    fillIndexAndIndicatorIndexPattern(rule.dataSource.index, rule.indicatorIndexPattern);
+  }
   fillIndicatorMatchRow({
     indexField: rule.indicatorMappingField,
     indicatorIndexField: rule.indicatorIndexField,
@@ -517,6 +556,10 @@ export const selectMachineLearningRuleType = () => {
 
 export const selectThresholdRuleType = () => {
   cy.get(THRESHOLD_TYPE).click({ force: true });
+};
+
+export const selectNewTermsRuleType = () => {
+  cy.get(NEW_TERMS_TYPE).click({ force: true });
 };
 
 export const previewResults = () => {

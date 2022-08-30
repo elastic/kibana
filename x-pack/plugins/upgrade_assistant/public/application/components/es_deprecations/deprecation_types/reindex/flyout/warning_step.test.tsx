@@ -18,9 +18,7 @@ import { idForWarning, WarningsFlyoutStep } from './warnings_step';
 const kibanaVersion = new SemVer(MAJOR_VERSION);
 
 jest.mock('../../../../../app_context', () => {
-  const { docLinksServiceMock } = jest.requireActual(
-    '@kbn/core/public/doc_links/doc_links_service.mock'
-  );
+  const { docLinksServiceMock } = jest.requireActual('@kbn/core-doc-links-browser-mocks');
 
   return {
     useAppContext: () => {

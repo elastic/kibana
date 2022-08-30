@@ -10,7 +10,12 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FETCH_STATUS, useFetcher } from '@kbn/observability-plugin/public';
-import { ConfigKey, EncryptedSyntheticsMonitor } from '../../../../../common/runtime_types';
+import { usePrivateLocationPermissions } from '../hooks/use_private_location_permission';
+import {
+  BrowserFields,
+  ConfigKey,
+  EncryptedSyntheticsMonitor,
+} from '../../../../../common/runtime_types';
 import { setMonitor } from '../../../state/api';
 
 interface Props {
@@ -24,6 +29,8 @@ export const MonitorEnabled = ({ id, monitor, onUpdate, isDisabled }: Props) => 
   const [isEnabled, setIsEnabled] = useState<boolean | null>(null);
 
   const { notifications } = useKibana();
+
+  const { canUpdatePrivateMonitor } = usePrivateLocationPermissions(monitor as BrowserFields);
 
   const { status } = useFetcher(() => {
     if (isEnabled !== null) {
@@ -69,7 +76,7 @@ export const MonitorEnabled = ({ id, monitor, onUpdate, isDisabled }: Props) => 
     <div css={{ position: 'relative' }} aria-busy={isLoading}>
       <EuiSwitch
         checked={enabled}
-        disabled={isLoading || isDisabled}
+        disabled={isLoading || isDisabled || !canUpdatePrivateMonitor}
         showLabel={false}
         label={enabled ? DISABLE_MONITOR_LABEL : ENABLE_MONITOR_LABEL}
         title={enabled ? DISABLE_MONITOR_LABEL : ENABLE_MONITOR_LABEL}

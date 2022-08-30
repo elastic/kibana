@@ -20,8 +20,7 @@ export function createJWTAssertion(
   logger: Logger,
   privateKey: string,
   privateKeyPassword: string | null,
-  reservedClaims: JWTClaims,
-  customClaims?: Record<string, string>
+  reservedClaims: JWTClaims
 ): string {
   const { subject, audience, issuer, expireInMilliseconds, keyId } = reservedClaims;
   const iat = Math.floor(Date.now() / 1000);
@@ -34,7 +33,6 @@ export function createJWTAssertion(
     iss: issuer, // issuer claim identifies the principal that issued the JWT
     iat, // issued at claim identifies the time at which the JWT was issued
     exp: iat + (expireInMilliseconds ?? 3600), // expiration time claim identifies the expiration time on or after which the JWT MUST NOT be accepted for processing
-    ...(customClaims ?? {}),
   };
 
   try {

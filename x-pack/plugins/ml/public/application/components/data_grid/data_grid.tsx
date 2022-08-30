@@ -27,6 +27,7 @@ import {
 } from '@elastic/eui';
 
 import { CoreSetup } from '@kbn/core/public';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { DEFAULT_SAMPLER_SHARD_SIZE } from '../../../../common/constants/field_histograms';
 
 import { ANALYSIS_CONFIG_TYPE, INDEX_STATUS } from '../../data_frame_analytics/common';
@@ -44,7 +45,6 @@ import {
   FeatureImportance,
   TopClasses,
 } from '../../../../common/types/feature_importance';
-import { isPopulatedObject } from '../../../../common/util/object_utils';
 import { DEFAULT_RESULTS_FIELD } from '../../../../common/constants/data_frame_analytics';
 import { DataFrameAnalysisConfigType } from '../../../../common/types/data_frame_analytics';
 

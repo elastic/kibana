@@ -15,10 +15,20 @@ import { Logger } from '@kbn/core/server';
 import { getRetryAfterIntervalFromHeaders } from './lib/http_rersponse_retry_header';
 import { nullableType } from './lib/nullable';
 import { isOk, promiseResult, Result } from './lib/result_type';
-import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
+import {
+  ActionType,
+  ActionTypeExecutorOptions,
+  ActionTypeExecutorResult,
+  ValidatorServices,
+} from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
-import { request } from './lib/axios_utils';
+import { request } from '../lib/axios_utils';
 import { renderMustacheString } from '../lib/mustache_renderer';
+import {
+  AlertingConnectorFeatureId,
+  UptimeConnectorFeatureId,
+  SecurityConnectorFeatureId,
+} from '../../common';
 
 // config definition
 export enum WebhookMethods {
@@ -88,12 +98,22 @@ export function getActionType({
     name: i18n.translate('xpack.actions.builtin.webhookTitle', {
       defaultMessage: 'Webhook',
     }),
+    supportedFeatureIds: [
+      AlertingConnectorFeatureId,
+      UptimeConnectorFeatureId,
+      SecurityConnectorFeatureId,
+    ],
     validate: {
-      config: schema.object(configSchemaProps, {
-        validate: curry(validateActionTypeConfig)(configurationUtilities),
-      }),
-      secrets: SecretsSchema,
-      params: ParamsSchema,
+      config: {
+        schema: ConfigSchema,
+        customValidator: validateActionTypeConfig,
+      },
+      secrets: {
+        schema: SecretsSchema,
+      },
+      params: {
+        schema: ParamsSchema,
+      },
     },
     renderParameterTemplates,
     executor: curry(executor)({ logger, configurationUtilities }),
@@ -111,30 +131,35 @@ function renderParameterTemplates(
 }
 
 function validateActionTypeConfig(
-  configurationUtilities: ActionsConfigurationUtilities,
-  configObject: ActionTypeConfigType
+  configObject: ActionTypeConfigType,
+  validatorServices: ValidatorServices
 ) {
+  const { configurationUtilities } = validatorServices;
   const configuredUrl = configObject.url;
   try {
     new URL(configuredUrl);
   } catch (err) {
-    return i18n.translate('xpack.actions.builtin.webhook.webhookConfigurationErrorNoHostname', {
-      defaultMessage: 'error configuring webhook action: unable to parse url: {err}',
-      values: {
-        err,
-      },
-    });
+    throw new Error(
+      i18n.translate('xpack.actions.builtin.webhook.webhookConfigurationErrorNoHostname', {
+        defaultMessage: 'error configuring webhook action: unable to parse url: {err}',
+        values: {
+          err,
+        },
+      })
+    );
   }
 
   try {
     configurationUtilities.ensureUriAllowed(configuredUrl);
   } catch (allowListError) {
-    return i18n.translate('xpack.actions.builtin.webhook.webhookConfigurationError', {
-      defaultMessage: 'error configuring webhook action: {message}',
-      values: {
-        message: allowListError.message,
-      },
-    });
+    throw new Error(
+      i18n.translate('xpack.actions.builtin.webhook.webhookConfigurationError', {
+        defaultMessage: 'error configuring webhook action: {message}',
+        values: {
+          message: allowListError.message,
+        },
+      })
+    );
   }
 }
 
@@ -158,14 +183,14 @@ export async function executor(
 
   const axiosInstance = axios.create();
 
-  const result: Result<AxiosResponse, AxiosError> = await promiseResult(
+  const result: Result<AxiosResponse, AxiosError<{ message: string }>> = await promiseResult(
     request({
       axios: axiosInstance,
       method,
       url,
       logger,
       ...basicAuth,
-      headers,
+      headers: headers ? headers : {},
       data,
       configurationUtilities,
     })

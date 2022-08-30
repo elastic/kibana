@@ -24,7 +24,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { dataTypes } from '../../../../../../../common';
+import { dataTypes } from '../../../../../../../common/constants';
 import type { NewAgentPolicy, AgentPolicy } from '../../../../types';
 import { useAuthz, useStartServices, sendCreateAgentPolicy } from '../../../../hooks';
 import { AgentPolicyForm, agentPolicyFormValidation } from '../../components';
@@ -33,7 +33,7 @@ const FlyoutWithHigherZIndex = styled(EuiFlyout)`
   z-index: ${(props) => props.theme.eui.euiZLevel5};
 `;
 
-interface Props extends EuiFlyoutProps {
+interface Props extends Omit<EuiFlyoutProps, 'onClose'> {
   onClose: (createdAgentPolicy?: AgentPolicy) => void;
 }
 
@@ -68,7 +68,7 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
   const header = (
     <EuiFlyoutHeader hasBorder aria-labelledby="CreateAgentPolicyFlyoutTitle">
       <EuiTitle size="m">
-        <h2 id="CreateAgentPolicyFlyoutTitle">
+        <h2 id="CreateAgentPolicyFlyoutTitle" data-test-subj="createAgentPolicyFlyoutTitle">
           <FormattedMessage
             id="xpack.fleet.createAgentPolicy.flyoutTitle"
             defaultMessage="Create agent policy"

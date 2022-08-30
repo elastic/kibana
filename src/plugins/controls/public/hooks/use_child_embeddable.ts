@@ -11,9 +11,11 @@ import { ControlEmbeddable } from '../types';
 export const useChildEmbeddable = ({
   untilEmbeddableLoaded,
   embeddableId,
+  embeddableType,
 }: {
   untilEmbeddableLoaded: (embeddableId: string) => Promise<ControlEmbeddable>;
   embeddableId: string;
+  embeddableType: string;
 }) => {
   const [embeddable, setEmbeddable] = useState<ControlEmbeddable>();
 
@@ -27,7 +29,7 @@ export const useChildEmbeddable = ({
     return () => {
       mounted = false;
     };
-  }, [untilEmbeddableLoaded, embeddableId]);
+  }, [untilEmbeddableLoaded, embeddableId, embeddableType]);
 
   return embeddable;
 };

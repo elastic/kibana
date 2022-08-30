@@ -6,7 +6,8 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { useControl, UseControlsReturn } from './use_control';
+import type { UseControlsReturn } from './use_control';
+import { useControl } from './use_control';
 
 describe('useControl', () => {
   it('init', async () => {

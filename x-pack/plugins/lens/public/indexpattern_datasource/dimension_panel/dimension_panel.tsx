@@ -10,6 +10,8 @@ import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/c
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DatasourceDimensionTriggerProps, DatasourceDimensionEditorProps } from '../../types';
 import { GenericIndexPatternColumn } from '../indexpattern';
 import { isColumnInvalid } from '../utils';
@@ -32,7 +34,9 @@ export type IndexPatternDimensionEditorProps =
     layerId: string;
     http: HttpSetup;
     data: DataPublicPluginStart;
+    fieldFormats: FieldFormatsStart;
     unifiedSearch: UnifiedSearchPublicPluginStart;
+    dataViews: DataViewsPublicPluginStart;
     uniqueLabel: string;
     dateRange: DateRange;
   };
@@ -49,7 +53,7 @@ export const IndexPatternDimensionTriggerComponent = function IndexPatternDimens
 ) {
   const layerId = props.layerId;
   const layer = props.state.layers[layerId];
-  const currentIndexPattern = props.state.indexPatterns[layer.indexPatternId];
+  const currentIndexPattern = props.indexPatterns[layer.indexPatternId];
   const { columnId, uniqueLabel, invalid, invalidMessage, hideTooltip } = props;
 
   const currentColumnHasErrors = useMemo(
@@ -79,8 +83,7 @@ export const IndexPatternDimensionEditorComponent = function IndexPatternDimensi
   props: IndexPatternDimensionEditorProps
 ) {
   const layerId = props.layerId;
-  const currentIndexPattern =
-    props.state.indexPatterns[props.state.layers[layerId]?.indexPatternId];
+  const currentIndexPattern = props.indexPatterns[props.state.layers[layerId]?.indexPatternId];
   if (!currentIndexPattern) {
     return null;
   }

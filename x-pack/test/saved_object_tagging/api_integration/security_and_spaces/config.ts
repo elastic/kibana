@@ -31,6 +31,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...apiIntegrationConfig.get('kbnTestServer.serverArgs'),
         '--server.xsrf.disableProtection=true',
+        `--xpack.fleet.registryUrl=http://localhost:12345`, // setting to invalid registry url to prevent installing preconfigured packages
       ],
     },
   };

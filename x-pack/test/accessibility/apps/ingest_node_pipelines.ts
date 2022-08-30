@@ -14,7 +14,7 @@ export default function ({ getService, getPageObjects }: any) {
   const log = getService('log');
   const a11y = getService('a11y'); /* this is the wrapping service around axe */
 
-  describe('Ingest Pipelines', async () => {
+  describe('Ingest Pipelines Accessibility', async () => {
     before(async () => {
       await putSamplePipeline(esClient);
       await common.navigateToApp('ingestPipelines');

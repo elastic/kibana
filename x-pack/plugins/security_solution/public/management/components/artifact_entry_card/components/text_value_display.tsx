@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import React, { memo, PropsWithChildren, useMemo } from 'react';
-import { CommonProps, EuiText, EuiToolTip } from '@elastic/eui';
+import type { PropsWithChildren } from 'react';
+import React, { memo, useMemo } from 'react';
+import type { CommonProps } from '@elastic/eui';
+import { EuiText, EuiToolTip } from '@elastic/eui';
 import classNames from 'classnames';
 import { getEmptyValue } from '../../../../common/components/empty_value';
 

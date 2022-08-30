@@ -9,8 +9,7 @@
 import React, { PureComponent, ReactNode } from 'react';
 import { isEmpty } from 'lodash';
 import classNames from 'classnames';
-
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 
 import useRafState from 'react-use/lib/useRafState';
 import { QuerySuggestion } from '../autocomplete';
@@ -146,15 +145,6 @@ export default class SuggestionsComponent extends PureComponent<SuggestionsCompo
   });
 }
 
-const StyledSuggestionsListDiv = styled.div`
-  ${(props: { left: number; width: number; verticalListPosition: string }) => `
-      position: absolute;
-      z-index: 4001;
-      left: ${props.left}px;
-      width: ${props.width}px;
-      ${props.verticalListPosition}`}
-`;
-
 const ResizableSuggestionsListDiv: React.FC<{
   inputContainer: HTMLElement;
   suggestionsSize?: SuggestionsListSize;
@@ -174,12 +164,16 @@ const ResizableSuggestionsListDiv: React.FC<{
     ? `top: ${pageYOffset + containerRect.bottom - SUGGESTIONS_LIST_REQUIRED_TOP_OFFSET}px;`
     : `bottom: ${documentHeight - (pageYOffset + containerRect.top)}px;`;
 
+  const divPosition = css`
+    position: absolute;
+    z-index: 4001;
+    left: ${containerRect.left}px;
+    width: ${containerRect.width}px;
+    ${verticalListPosition}
+  `;
+
   return (
-    <StyledSuggestionsListDiv
-      left={containerRect.left}
-      width={containerRect.width}
-      verticalListPosition={verticalListPosition}
-    >
+    <div css={divPosition}>
       <div
         className={classNames('kbnTypeahead', {
           'kbnTypeahead--small': props.suggestionsSize === 's',
@@ -194,7 +188,7 @@ const ResizableSuggestionsListDiv: React.FC<{
           {props.children(containerRect)}
         </div>
       </div>
-    </StyledSuggestionsListDiv>
+    </div>
   );
 });
 

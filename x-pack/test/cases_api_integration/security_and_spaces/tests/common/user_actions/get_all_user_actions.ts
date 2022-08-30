@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 
 import {
   CaseResponse,
+  CaseSeverity,
   CaseStatuses,
   CommentType,
   ConnectorTypes,
@@ -106,6 +107,30 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(statusUserAction.payload).to.eql({ status: 'closed' });
     });
 
+    it('creates a severity update user action when changing the severity', async () => {
+      const theCase = await createCase(supertest, postCaseReq);
+      await updateCase({
+        supertest,
+        params: {
+          cases: [
+            {
+              id: theCase.id,
+              version: theCase.version,
+              severity: CaseSeverity.HIGH,
+            },
+          ],
+        },
+      });
+
+      const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
+      const statusUserAction = userActions[1];
+
+      expect(userActions.length).to.eql(2);
+      expect(statusUserAction.type).to.eql('severity');
+      expect(statusUserAction.action).to.eql('update');
+      expect(statusUserAction.payload).to.eql({ severity: 'high' });
+    });
+
     it('creates a connector update user action', async () => {
       const newConnector = {
         id: '123',
@@ -170,6 +195,37 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(deleteTagsUserAction.type).to.eql('tags');
       expect(deleteTagsUserAction.action).to.eql('delete');
       expect(deleteTagsUserAction.payload).to.eql({ tags: ['defacement'] });
+    });
+
+    it('creates an add and delete assignees user action', async () => {
+      const theCase = await createCase(
+        supertest,
+        getPostCaseRequest({ assignees: [{ uid: '1' }] })
+      );
+      await updateCase({
+        supertest,
+        params: {
+          cases: [
+            {
+              id: theCase.id,
+              version: theCase.version,
+              assignees: [{ uid: '2' }, { uid: '3' }],
+            },
+          ],
+        },
+      });
+
+      const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
+      const addAssigneesUserAction = userActions[1];
+      const deleteAssigneesUserAction = userActions[2];
+
+      expect(userActions.length).to.eql(3);
+      expect(addAssigneesUserAction.type).to.eql('assignees');
+      expect(addAssigneesUserAction.action).to.eql('add');
+      expect(addAssigneesUserAction.payload).to.eql({ assignees: [{ uid: '2' }, { uid: '3' }] });
+      expect(deleteAssigneesUserAction.type).to.eql('assignees');
+      expect(deleteAssigneesUserAction.action).to.eql('delete');
+      expect(deleteAssigneesUserAction.payload).to.eql({ assignees: [{ uid: '1' }] });
     });
 
     it('creates an update title user action', async () => {

@@ -7,7 +7,12 @@
 
 import expect from '@kbn/expect';
 import { CASES_URL } from '@kbn/cases-plugin/common/constants';
-import { CaseResponse, CaseStatuses, CommentType } from '@kbn/cases-plugin/common/api';
+import {
+  CaseResponse,
+  CaseSeverity,
+  CaseStatuses,
+  CommentType,
+} from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
@@ -114,6 +119,45 @@ export default ({ getService }: FtrProviderContext): void => {
           count_open_cases: 1,
           count_closed_cases: 1,
           count_in_progress_cases: 0,
+        });
+      });
+
+      it('filters by severity', async () => {
+        await createCase(supertest, postCaseReq);
+        const theCase = await createCase(supertest, postCaseReq);
+        const patchedCase = await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: theCase.id,
+                version: theCase.version,
+                severity: CaseSeverity.HIGH,
+              },
+            ],
+          },
+        });
+
+        const cases = await findCases({ supertest, query: { severity: CaseSeverity.HIGH } });
+
+        expect(cases).to.eql({
+          ...findCasesResp,
+          total: 1,
+          cases: [patchedCase[0]],
+          count_open_cases: 1,
+        });
+      });
+
+      it('filters by severity (none found)', async () => {
+        await createCase(supertest, postCaseReq);
+        await createCase(supertest, postCaseReq);
+
+        const cases = await findCases({ supertest, query: { severity: CaseSeverity.CRITICAL } });
+
+        expect(cases).to.eql({
+          ...findCasesResp,
+          total: 0,
+          cases: [],
         });
       });
 
@@ -234,6 +278,58 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('unhappy path - 400s when bad query supplied', async () => {
         await findCases({ supertest, query: { perPage: true }, expectedHttpCode: 400 });
+      });
+
+      for (const field of ['owner', 'tags', 'severity', 'status']) {
+        it(`should return a 400 when attempting to query a keyword field [${field}] when using a wildcard query`, async () => {
+          await findCases({
+            supertest,
+            query: { searchFields: [field], search: 'some search string*' },
+            expectedHttpCode: 400,
+          });
+        });
+      }
+
+      describe('search and searchField', () => {
+        beforeEach(async () => {
+          await createCase(supertest, postCaseReq);
+        });
+
+        it('should successfully find a case when using valid searchFields', async () => {
+          const cases = await findCases({
+            supertest,
+            query: { searchFields: ['title', 'description'], search: 'Issue' },
+          });
+
+          expect(cases.total).to.be(1);
+        });
+
+        it('should successfully find a case when not passing the searchFields parameter', async () => {
+          const cases = await findCases({
+            supertest,
+            query: { search: 'Issue' },
+          });
+
+          expect(cases.total).to.be(1);
+        });
+
+        it('should not find any cases when it does not use a wildcard and the string does not match', async () => {
+          const cases = await findCases({
+            supertest,
+            query: { search: 'Iss' },
+          });
+
+          expect(cases.total).to.be(0);
+        });
+
+        it('should find a case when it uses a wildcard', async () => {
+          const cases = await findCases({
+            supertest,
+            query: { search: 'Iss*' },
+          });
+
+          expect(cases.total).to.be(1);
+        });
       });
     });
 
@@ -800,6 +896,55 @@ export default ({ getService }: FtrProviderContext): void => {
 
           // Only security solution cases are being returned
           ensureSavedObjectIsAuthorized(res.cases, 1, ['securitySolutionFixture']);
+        });
+      });
+
+      describe('RBAC query filter', () => {
+        it('should return the correct cases when trying to query filter by severity', async () => {
+          await Promise.all([
+            createCase(
+              supertestWithoutAuth,
+              getPostCaseRequest({ owner: 'securitySolutionFixture', severity: CaseSeverity.HIGH }),
+              200,
+              {
+                user: obsSec,
+                space: 'space1',
+              }
+            ),
+            createCase(
+              supertestWithoutAuth,
+              getPostCaseRequest({ owner: 'securitySolutionFixture', severity: CaseSeverity.HIGH }),
+              200,
+              {
+                user: obsSec,
+                space: 'space1',
+              }
+            ),
+            createCase(
+              supertestWithoutAuth,
+              getPostCaseRequest({ owner: 'observabilityFixture', severity: CaseSeverity.HIGH }),
+              200,
+              {
+                user: obsOnly,
+                space: 'space1',
+              }
+            ),
+          ]);
+
+          // User with permissions only to security solution should get only the security solution cases
+          const res = await findCases({
+            supertest: supertestWithoutAuth,
+            query: {
+              severity: CaseSeverity.HIGH,
+            },
+            auth: {
+              user: secOnly,
+              space: 'space1',
+            },
+          });
+
+          // Only security solution cases are being returned
+          ensureSavedObjectIsAuthorized(res.cases, 2, ['securitySolutionFixture']);
         });
       });
     });

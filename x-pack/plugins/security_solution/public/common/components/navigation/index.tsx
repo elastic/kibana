@@ -6,17 +6,15 @@
  */
 
 import React, { useEffect } from 'react';
-import { connect } from 'react-redux';
-import { compose } from 'redux';
+
 import deepEqual from 'fast-deep-equal';
 
 import { useKibana } from '../../lib/kibana';
-import { RouteSpyState } from '../../utils/route/types';
+import type { RouteSpyState } from '../../utils/route/types';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
-import { makeMapStateToProps } from '../url_state/helpers';
 import { useSetBreadcrumbs } from './breadcrumbs';
 import { TabNavigation } from './tab_navigation';
-import { TabNavigationComponentProps, SecuritySolutionTabNavigationProps } from './types';
+import type { TabNavigationComponentProps, SecuritySolutionTabNavigationProps } from './types';
 
 /**
  * @description - This component handels all of the tab navigation seen within a Security Soluton application page, not the Security Solution primary side navigation
@@ -25,18 +23,7 @@ import { TabNavigationComponentProps, SecuritySolutionTabNavigationProps } from 
 export const TabNavigationComponent: React.FC<
   RouteSpyState & SecuritySolutionTabNavigationProps & TabNavigationComponentProps
 > = React.memo(
-  ({
-    detailName,
-    display,
-    flowTarget,
-    navTabs,
-    pageName,
-    pathName,
-    search,
-    state,
-    tabName,
-    urlState,
-  }) => {
+  ({ detailName, display, flowTarget, navTabs, pageName, pathName, search, state, tabName }) => {
     const {
       chrome,
       application: { getUrlForApp, navigateToUrl },
@@ -49,22 +36,15 @@ export const TabNavigationComponent: React.FC<
         setBreadcrumbs(
           {
             detailName,
-            filters: urlState.filters,
             flowTarget,
             navTabs,
             pageName,
             pathName,
-            query: urlState.query,
-            savedQuery: urlState.savedQuery,
             search,
-            sourcerer: urlState.sourcerer,
             state,
             tabName,
-            timeline: urlState.timeline,
-            timerange: urlState.timerange,
           },
           chrome,
-          getUrlForApp,
           navigateToUrl
         );
       }
@@ -74,7 +54,6 @@ export const TabNavigationComponent: React.FC<
       pathName,
       search,
       navTabs,
-      urlState,
       state,
       detailName,
       flowTarget,
@@ -86,35 +65,24 @@ export const TabNavigationComponent: React.FC<
 
     return (
       <TabNavigation
-        query={urlState.query}
         display={display}
-        filters={urlState.filters}
         navTabs={navTabs}
         pageName={pageName}
         pathName={pathName}
-        sourcerer={urlState.sourcerer}
-        savedQuery={urlState.savedQuery}
         tabName={tabName}
-        timeline={urlState.timeline}
-        timerange={urlState.timerange}
       />
     );
   }
 );
 TabNavigationComponent.displayName = 'TabNavigationComponent';
 
-export const SecuritySolutionTabNavigationRedux = compose<
-  React.ComponentClass<SecuritySolutionTabNavigationProps & RouteSpyState>
->(connect(makeMapStateToProps))(
-  React.memo(
-    TabNavigationComponent,
-    (prevProps, nextProps) =>
-      prevProps.pathName === nextProps.pathName &&
-      prevProps.search === nextProps.search &&
-      deepEqual(prevProps.navTabs, nextProps.navTabs) &&
-      deepEqual(prevProps.urlState, nextProps.urlState) &&
-      deepEqual(prevProps.state, nextProps.state)
-  )
+export const SecuritySolutionTabNavigationRedux = React.memo(
+  TabNavigationComponent,
+  (prevProps, nextProps) =>
+    prevProps.pathName === nextProps.pathName &&
+    prevProps.search === nextProps.search &&
+    deepEqual(prevProps.navTabs, nextProps.navTabs) &&
+    deepEqual(prevProps.state, nextProps.state)
 );
 
 export const SecuritySolutionTabNavigation: React.FC<SecuritySolutionTabNavigationProps> =

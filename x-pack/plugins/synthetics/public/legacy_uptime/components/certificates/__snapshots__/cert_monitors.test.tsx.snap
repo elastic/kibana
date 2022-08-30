@@ -7,7 +7,7 @@ exports[`CertMonitors renders expected elements for valid props 1`] = `
       class="euiToolTipAnchor"
     >
       <button
-        class="euiLink euiLink--primary"
+        class="euiLink emotion-euiLink-primary"
         type="button"
       >
         <a
@@ -25,7 +25,7 @@ exports[`CertMonitors renders expected elements for valid props 1`] = `
       class="euiToolTipAnchor"
     >
       <button
-        class="euiLink euiLink--primary"
+        class="euiLink emotion-euiLink-primary"
         type="button"
       >
         <a
@@ -43,7 +43,7 @@ exports[`CertMonitors renders expected elements for valid props 1`] = `
       class="euiToolTipAnchor"
     >
       <button
-        class="euiLink euiLink--primary"
+        class="euiLink emotion-euiLink-primary"
         type="button"
       >
         <a

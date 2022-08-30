@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { NewsfeedApi } from '../lib/api';
@@ -31,6 +31,9 @@ export const NewsfeedNavButton = ({ newsfeedApi }: Props) => {
     return newsFetchResult ? newsFetchResult.hasNew : false;
   }, [newsFetchResult]);
 
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
+  const setButtonRef = (node: HTMLButtonElement | null) => (buttonRef.current = node);
+
   useEffect(() => {
     const subscription = newsfeedApi.fetchResults$.subscribe((results) => {
       setNewsFetchResult(results);
@@ -49,6 +52,7 @@ export const NewsfeedNavButton = ({ newsfeedApi }: Props) => {
     <NewsfeedContext.Provider value={{ setFlyoutVisible, newsFetchResult }}>
       <>
         <EuiHeaderSectionItemButton
+          ref={setButtonRef}
           data-test-subj="newsfeed"
           aria-controls="keyPadMenu"
           aria-expanded={flyoutVisible}
@@ -67,7 +71,7 @@ export const NewsfeedNavButton = ({ newsfeedApi }: Props) => {
         >
           <EuiIcon type="cheer" size="m" />
         </EuiHeaderSectionItemButton>
-        {flyoutVisible ? <NewsfeedFlyout /> : null}
+        {flyoutVisible ? <NewsfeedFlyout focusTrapProps={{ shards: [buttonRef] }} /> : null}
       </>
     </NewsfeedContext.Provider>
   );

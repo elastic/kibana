@@ -36,6 +36,7 @@ describe('PalettePicker', function () {
       vis: {
         type: {
           editorConfig: {
+            enableDataViewChange: true,
             collections: {
               legendPositions: [
                 {

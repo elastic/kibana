@@ -9,6 +9,7 @@
 import { PointStyleProps, RangeStyleProps } from '../types';
 
 export type ManualPointEventAnnotationArgs = {
+  id: string;
   time: string;
 } & PointStyleProps;
 
@@ -17,6 +18,7 @@ export type ManualPointEventAnnotationOutput = ManualPointEventAnnotationArgs & 
 };
 
 export type ManualRangeEventAnnotationArgs = {
+  id: string;
   time: string;
   endTime: string;
 } & RangeStyleProps;
@@ -25,7 +27,6 @@ export type ManualRangeEventAnnotationOutput = ManualRangeEventAnnotationArgs & 
   type: 'manual_range_event_annotation';
 };
 
-export type EventAnnotationArgs = ManualPointEventAnnotationArgs | ManualRangeEventAnnotationArgs;
-export type EventAnnotationOutput =
+export type ManualEventAnnotationOutput =
   | ManualPointEventAnnotationOutput
   | ManualRangeEventAnnotationOutput;

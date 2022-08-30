@@ -14,7 +14,8 @@ import execa from 'execa';
 import * as Rx from 'rxjs';
 import { mergeMap, reduce } from 'rxjs/operators';
 import { supportsColor } from 'chalk';
-import { run, createFailError } from '@kbn/dev-utils';
+import { run } from '@kbn/dev-cli-runner';
+import { createFailError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/utils';
 
 import { PROJECTS } from '../typescript/projects';

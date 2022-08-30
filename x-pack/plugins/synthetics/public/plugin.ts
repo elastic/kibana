@@ -30,6 +30,7 @@ import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/p
 
 import { FleetStart } from '@kbn/fleet-plugin/public';
 import {
+  enableNewSyntheticsView,
   FetchDataParams,
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
@@ -37,9 +38,11 @@ import {
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import { CasesUiStart } from '@kbn/cases-plugin/public';
-import { CloudSetup } from '@kbn/cloud-plugin/public';
+import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { PLUGIN } from '../common/constants/plugin';
+import { MONITORS_ROUTE } from '../common/constants/ui';
 import {
   LazySyntheticsPolicyCreateExtension,
   LazySyntheticsPolicyEditExtension,
@@ -50,6 +53,8 @@ import {
   alertTypeInitializers,
   legacyAlertTypeInitializers,
 } from './legacy_uptime/lib/alert_types';
+import { monitorDetailNavigatorParams } from './apps/locators/monitor_detail';
+import { editMonitorNavigatorParams } from './apps/locators/edit_monitor';
 
 export interface ClientPluginsSetup {
   home?: HomePublicPluginSetup;
@@ -72,6 +77,8 @@ export interface ClientPluginsStart {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   cases: CasesUiStart;
   dataViews: DataViewsPublicPluginStart;
+  spaces: SpacesPluginStart;
+  cloud?: CloudStart;
 }
 
 export interface UptimePluginServices extends Partial<CoreStart> {
@@ -109,13 +116,15 @@ export class UptimePlugin
     };
 
     plugins.share.url.locators.create(uptimeOverviewNavigatorParams);
+    plugins.share.url.locators.create(monitorDetailNavigatorParams);
+    plugins.share.url.locators.create(editMonitorNavigatorParams);
 
     plugins.observability.dashboard.register({
       appName: 'synthetics',
       hasData: async () => {
         const dataHelper = await getUptimeDataHelper();
         const status = await dataHelper.indexStatus();
-        return { hasData: status.docCount > 0, indices: status.indices };
+        return { hasData: status.indexExists, indices: status.indices };
       },
       fetchData: async (params: FetchDataParams) => {
         const dataHelper = await getUptimeDataHelper();
@@ -123,41 +132,7 @@ export class UptimePlugin
       },
     });
 
-    plugins.observability.navigation.registerSections(
-      from(core.getStartServices()).pipe(
-        map(([coreStart]) => {
-          if (coreStart.application.capabilities.uptime.show) {
-            return [
-              {
-                label: 'Uptime',
-                sortKey: 500,
-                entries: [
-                  {
-                    label: i18n.translate('xpack.synthetics.overview.heading', {
-                      defaultMessage: 'Monitors',
-                    }),
-                    app: 'uptime',
-                    path: '/',
-                    matchFullPath: true,
-                    ignoreTrailingSlash: true,
-                  },
-                  {
-                    label: i18n.translate('xpack.synthetics.certificatesPage.heading', {
-                      defaultMessage: 'TLS Certificates',
-                    }),
-                    app: 'uptime',
-                    path: '/certificates',
-                    matchFullPath: true,
-                  },
-                ],
-              },
-            ];
-          }
-
-          return [];
-        })
-      )
-    );
+    registerUptimeRoutesWithNavigation(core, plugins);
 
     const { observabilityRuleTypeRegistry } = plugins.observability;
 
@@ -191,16 +166,18 @@ export class UptimePlugin
 
     const appKeywords = [
       'Synthetics',
-      'pings',
-      'checks',
       'availability',
-      'response duration',
-      'response time',
-      'outside in',
+      'browser',
+      'checks',
+      'digital',
       'reachability',
       'reachable',
-      'digital',
+      'response duration',
+      'response time',
+      'monitors',
+      'outside in',
       'performance',
+      'pings',
       'web performance',
       'web perf',
     ];
@@ -219,28 +196,33 @@ export class UptimePlugin
       ],
       mount: async (params: AppMountParameters) => {
         const [coreStart, corePlugins] = await core.getStartServices();
-
         const { renderApp } = await import('./legacy_uptime/app/render_app');
         return renderApp(coreStart, plugins, corePlugins, params, this.initContext.env.mode.dev);
       },
     });
 
-    // Register the Synthetics UI plugin
-    core.application.register({
-      id: 'synthetics',
-      euiIconType: 'logoObservability',
-      order: 8400,
-      title: PLUGIN.SYNTHETICS,
-      category: DEFAULT_APP_CATEGORIES.observability,
-      keywords: appKeywords,
-      deepLinks: [],
-      mount: async (params: AppMountParameters) => {
-        const [coreStart, corePlugins] = await core.getStartServices();
+    const isSyntheticsViewEnabled = core.uiSettings.get<boolean>(enableNewSyntheticsView);
 
-        const { renderApp } = await import('./apps/synthetics/render_app');
-        return renderApp(coreStart, plugins, corePlugins, params, this.initContext.env.mode.dev);
-      },
-    });
+    if (isSyntheticsViewEnabled) {
+      registerSyntheticsRoutesWithNavigation(core, plugins);
+
+      // Register the Synthetics UI plugin
+      core.application.register({
+        id: 'synthetics',
+        euiIconType: 'logoObservability',
+        order: 8400,
+        title: PLUGIN.SYNTHETICS,
+        category: DEFAULT_APP_CATEGORIES.observability,
+        keywords: appKeywords,
+        deepLinks: [],
+        mount: async (params: AppMountParameters) => {
+          const [coreStart, corePlugins] = await core.getStartServices();
+
+          const { renderApp } = await import('./apps/synthetics/render_app');
+          return renderApp(coreStart, plugins, corePlugins, params, this.initContext.env.mode.dev);
+        },
+      });
+    }
   }
 
   public start(start: CoreStart, plugins: ClientPluginsStart): void {
@@ -269,4 +251,78 @@ export class UptimePlugin
   }
 
   public stop(): void {}
+}
+
+function registerSyntheticsRoutesWithNavigation(
+  core: CoreSetup<ClientPluginsStart, unknown>,
+  plugins: ClientPluginsSetup
+) {
+  plugins.observability.navigation.registerSections(
+    from(core.getStartServices()).pipe(
+      map(([coreStart]) => {
+        if (coreStart.application.capabilities.uptime.show) {
+          return [
+            {
+              label: 'Synthetics',
+              sortKey: 499,
+              entries: [
+                {
+                  label: i18n.translate('xpack.synthetics.overview.heading', {
+                    defaultMessage: 'Monitors',
+                  }),
+                  app: 'synthetics',
+                  path: MONITORS_ROUTE,
+                  matchFullPath: true,
+                  ignoreTrailingSlash: true,
+                },
+              ],
+            },
+          ];
+        }
+
+        return [];
+      })
+    )
+  );
+}
+
+function registerUptimeRoutesWithNavigation(
+  core: CoreSetup<ClientPluginsStart, unknown>,
+  plugins: ClientPluginsSetup
+) {
+  plugins.observability.navigation.registerSections(
+    from(core.getStartServices()).pipe(
+      map(([coreStart]) => {
+        if (coreStart.application.capabilities.uptime.show) {
+          return [
+            {
+              label: 'Uptime',
+              sortKey: 500,
+              entries: [
+                {
+                  label: i18n.translate('xpack.synthetics.overview.heading', {
+                    defaultMessage: 'Monitors',
+                  }),
+                  app: 'uptime',
+                  path: '/',
+                  matchFullPath: true,
+                  ignoreTrailingSlash: true,
+                },
+                {
+                  label: i18n.translate('xpack.synthetics.certificatesPage.heading', {
+                    defaultMessage: 'TLS Certificates',
+                  }),
+                  app: 'uptime',
+                  path: '/certificates',
+                  matchFullPath: true,
+                },
+              ],
+            },
+          ];
+        }
+
+        return [];
+      })
+    )
+  );
 }

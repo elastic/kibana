@@ -70,6 +70,7 @@ const activeAlert: TopAlert = {
   },
   active: true,
   start: 1630587249674,
+  lastUpdated: 1630588131750,
 };
 
 const recoveredAlert: TopAlert = {
@@ -98,4 +99,5 @@ const recoveredAlert: TopAlert = {
   },
   active: false,
   start: 1630587936699,
+  lastUpdated: 1630588125729,
 };

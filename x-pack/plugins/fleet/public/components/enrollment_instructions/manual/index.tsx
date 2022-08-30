@@ -16,6 +16,8 @@ export const ManualInstructions = (
 ) => {
   const enrollArgs = getfleetServerHostsEnrollArgs(apiKey, fleetServerHosts);
 
+  const k8sCommand = 'kubectl apply -f elastic-agent-managed-kubernetes.yaml';
+
   const linuxCommand = `curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-linux-x86_64.tar.gz
 tar xzvf elastic-agent-${kibanaVersion}-linux-x86_64.tar.gz
 cd elastic-agent-${kibanaVersion}-linux-x86_64
@@ -26,8 +28,9 @@ tar xzvf elastic-agent-${kibanaVersion}-darwin-x86_64.tar.gz
 cd elastic-agent-${kibanaVersion}-darwin-x86_64
 sudo ./elastic-agent install ${enrollArgs}`;
 
-  const windowsCommand = `wget https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-windows-x86_64.zip -OutFile elastic-agent-${kibanaVersion}-windows-x86_64.zip
-Expand-Archive .\\elastic-agent-${kibanaVersion}-windows-x86_64.zip
+  const windowsCommand = `$ProgressPreference = 'SilentlyContinue'
+Invoke-WebRequest -Uri https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-windows-x86_64.zip -OutFile elastic-agent-${kibanaVersion}-windows-x86_64.zip
+Expand-Archive .\\elastic-agent-${kibanaVersion}-windows-x86_64.zip -DestinationPath .
 cd elastic-agent-${kibanaVersion}-windows-x86_64
 .\\elastic-agent.exe install ${enrollArgs}`;
 
@@ -45,5 +48,6 @@ sudo elastic-agent enroll ${enrollArgs} \nsudo systemctl enable elastic-agent \n
     windows: windowsCommand,
     deb: linuxDebCommand,
     rpm: linuxRpmCommand,
+    kubernetes: k8sCommand,
   };
 };

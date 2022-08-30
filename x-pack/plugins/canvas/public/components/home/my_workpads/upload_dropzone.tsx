@@ -6,8 +6,6 @@
  */
 
 import React, { FC, useState } from 'react';
-// @ts-expect-error untyped library
-import Dropzone from 'react-dropzone';
 
 import { useNotifyService } from '../../../services';
 import { ErrorStrings } from '../../../../i18n';

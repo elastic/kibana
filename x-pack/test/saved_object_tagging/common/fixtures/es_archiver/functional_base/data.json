@@ -1,200 +1,134 @@
 {
-  "type": "doc",
-  "value": {
-    "id": "space:default",
-    "index": ".kibana",
-    "source": {
-      "space": {
-        "_reserved": true,
-        "description": "This is the default space",
-        "name": "Default Space"
-      },
-      "type": "space",
-      "updated_at": "2017-09-21T18:49:16.270Z"
-    },
-    "type": "doc"
-  }
+  "id": "tag-1",
+  "type": "tag",
+  "attributes": {
+    "name": "tag-1",
+    "description": "My first tag!",
+    "color": "#FF00FF"
+  },
+  "references": [],
+  "updated_at": "2021-06-17T18:57:58.076Z"
 }
 
 {
-  "type": "doc",
-  "value": {
-    "id": "tag:tag-1",
-    "index": ".kibana",
-    "source": {
-      "tag": {
-        "name": "tag-1",
-        "description": "My first tag!",
-        "color": "#FF00FF"
-      },
-      "type": "tag",
-      "updated_at": "2017-09-21T18:49:16.270Z"
-    },
-    "type": "doc"
-  }
+  "id": "tag-2",
+  "type": "tag",
+  "attributes": {
+    "name": "tag-2",
+    "description": "Another awesome tag",
+    "color": "#FFFFFF"
+  },
+  "references": [],
+  "updated_at": "2021-06-17T18:57:58.076Z"
 }
 
 {
-  "type": "doc",
-  "value": {
-    "id": "tag:tag-2",
-    "index": ".kibana",
-    "source": {
-      "tag": {
-        "name": "tag-2",
-        "description": "Another awesome tag",
-        "color": "#FFFFFF"
-      },
-      "type": "tag",
-      "updated_at": "2017-09-21T18:49:16.270Z"
-    },
-    "type": "doc"
-  }
+  "id": "tag-3",
+  "type": "tag",
+  "attributes": {
+    "name": "tag-3",
+    "description": "Last but not least",
+    "color": "#000000"
+  },
+  "references": [],
+  "updated_at": "2021-06-17T18:57:58.076Z"
 }
 
 {
-  "type": "doc",
-  "value": {
-    "id": "tag:tag-3",
-    "index": ".kibana",
-    "source": {
-      "tag": {
-        "name": "tag-3",
-        "description": "Last but not least",
-        "color": "#000000"
-      },
-      "type": "tag",
-      "updated_at": "2017-09-21T18:49:16.270Z"
-    },
-    "type": "doc"
-  }
+  "id": "tag-with-whitespace",
+  "type": "tag",
+  "attributes": {
+    "name": "tag with whitespace",
+    "description": "I have some whitespaces in my name",
+    "color": "#FC7D4E"
+  },
+  "references": [],
+  "updated_at": "2021-06-17T18:57:58.076Z"
 }
 
 {
-  "type": "doc",
-  "value": {
-    "id": "tag:tag-with-whitespace",
-    "index": ".kibana",
-    "source": {
-      "tag": {
-        "name": "tag with whitespace",
-        "description": "I have some whitespaces in my name",
-        "color": "#FC7D4E"
-      },
-      "type": "tag",
-      "updated_at": "2017-09-21T18:49:16.270Z"
-    },
-    "type": "doc"
-  }
+  "id": "another-tag",
+  "type": "tag",
+  "attributes": {
+    "name": "my-favorite-tag",
+    "description": "This one is really the best",
+    "color": "#123456"
+  },
+  "references": [],
+  "updated_at": "2021-06-17T18:57:58.076Z"
 }
 
 {
-  "type": "doc",
-  "value": {
-    "id": "tag:another-tag",
-    "index": ".kibana",
-    "source": {
-      "tag": {
-        "name": "my-favorite-tag",
-        "description": "This one is really the best",
-        "color": "#123456"
-      },
-      "type": "tag",
-      "updated_at": "2017-09-21T18:49:16.270Z"
-    },
-    "type": "doc"
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
-    "index": ".kibana",
-    "id": "visualization:ref-to-tag-1",
-    "source": {
-      "type": "visualization",
-      "updated_at": "2017-09-21T18:51:23.794Z",
-      "visualization": {
-        "title": "Vis with ref to tag-1",
-        "visState": "{}",
-        "uiStateJSON": "{\"spy\":{\"mode\":{\"name\":null,\"fill\":false}}}",
-        "description": "",
-        "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
-        }
-      },
-      "references": [
-        {
-          "type": "tag",
-          "id": "tag-1",
-          "name": "tag-1"
-        }
-      ]
+  "id": "ref-to-tag-1",
+  "type": "visualization",
+  "attributes": {
+    "title": "Vis with ref to tag-1",
+    "visState": "{}",
+    "uiStateJSON": "{\"spy\":{\"mode\":{\"name\":null,\"fill\":false}}}",
+    "description": "",
+    "version": 1,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
     }
-  }
+  },
+  "references": [
+    {
+      "type": "tag",
+      "id": "tag-1",
+      "name": "tag-1"
+    }
+  ],
+  "updated_at": "2021-06-17T18:57:58.076Z"
 }
 
 {
-  "type": "doc",
-  "value": {
-    "index": ".kibana",
-    "id": "visualization:ref-to-tag-1-and-tag-2",
-    "source": {
-      "type": "visualization",
-      "updated_at": "2017-09-21T18:51:23.794Z",
-      "visualization": {
-        "title": "Vis with ref to tag-1 and tag-2",
-        "visState": "{}",
-        "uiStateJSON": "{\"spy\":{\"mode\":{\"name\":null,\"fill\":false}}}",
-        "description": "",
-        "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
-        }
-      },
-      "references": [
-        {
-          "type": "tag",
-          "id": "tag-1",
-          "name": "tag-1"
-        },
-        {
-          "type": "tag",
-          "id": "tag-2",
-          "name": "tag-2"
-        }
-      ]
+  "id": "ref-to-tag-1-and-tag-2",
+  "type": "visualization",
+  "attributes": {
+    "title": "Vis with ref to tag-1 and tag-2",
+    "visState": "{}",
+    "uiStateJSON": "{\"spy\":{\"mode\":{\"name\":null,\"fill\":false}}}",
+    "description": "",
+    "version": 1,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
     }
-  }
+  },
+  "references": [
+    {
+      "type": "tag",
+      "id": "tag-1",
+      "name": "tag-1"
+    },
+    {
+      "type": "tag",
+      "id": "tag-2",
+      "name": "tag-2"
+    }
+  ],
+  "updated_at": "2021-06-17T18:57:58.076Z"
 }
 
 {
-  "type": "doc",
-  "value": {
-    "index": ".kibana",
-    "id": "visualization:ref-to-tag-2",
-    "source": {
-      "type": "visualization",
-      "updated_at": "2017-09-21T18:51:23.794Z",
-      "visualization": {
-        "title": "Vis with ref to tag-2",
-        "visState": "{}",
-        "uiStateJSON": "{\"spy\":{\"mode\":{\"name\":null,\"fill\":false}}}",
-        "description": "",
-        "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
-        }
-      },
-      "references": [
-        {
-          "type": "tag",
-          "id": "tag-2",
-          "name": "tag-2"
-        }
-      ]
+  "id": "ref-to-tag-2",
+  "type": "visualization",
+  "attributes": {
+    "title": "Vis with ref to tag-2",
+    "visState": "{}",
+    "uiStateJSON": "{\"spy\":{\"mode\":{\"name\":null,\"fill\":false}}}",
+    "description": "",
+    "version": 1,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
     }
-  }
+  },
+  "references": [
+    {
+      "type": "tag",
+      "id": "tag-2",
+      "name": "tag-2"
+    }
+  ],
+  "updated_at": "2021-06-17T18:57:58.076Z"
 }
 

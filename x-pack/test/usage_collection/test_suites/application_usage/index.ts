@@ -11,7 +11,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Application Usage', function () {
-    this.tags('ciGroup1');
     const { common } = getPageObjects(['common']);
     const browser = getService('browser');
 

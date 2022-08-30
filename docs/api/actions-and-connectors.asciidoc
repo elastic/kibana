@@ -23,13 +23,13 @@ For deprecated APIs, refer to <<actions-and-connectors-legacy-apis>>.
 
 For information about the actions and connectors that {kib} supports, refer to <<action-types,Action and connector types>>.
 
-include::actions-and-connectors/get.asciidoc[]
-include::actions-and-connectors/get_all.asciidoc[]
+include::actions-and-connectors/create.asciidoc[leveloffset=+1]
+include::actions-and-connectors/delete.asciidoc[leveloffset=+1]
+include::actions-and-connectors/get.asciidoc[leveloffset=+1]
+include::actions-and-connectors/get_all.asciidoc[leveloffset=+1]
 include::actions-and-connectors/list.asciidoc[]
-include::actions-and-connectors/create.asciidoc[]
-include::actions-and-connectors/update.asciidoc[]
-include::actions-and-connectors/execute.asciidoc[]
-include::actions-and-connectors/delete.asciidoc[]
+include::actions-and-connectors/execute.asciidoc[leveloffset=+1]
+include::actions-and-connectors/update.asciidoc[leveloffset=+1]
 include::actions-and-connectors/legacy/index.asciidoc[]
 include::actions-and-connectors/legacy/get.asciidoc[]
 include::actions-and-connectors/legacy/get_all.asciidoc[]

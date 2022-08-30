@@ -5,15 +5,9 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash/fp';
-
 import { assertUnreachable } from '../../../../../../common/utility_types';
-import {
-  Direction,
-  SortField,
-  NetworkDnsRequestOptions,
-  NetworkDnsFields,
-} from '../../../../../../common/search_strategy';
+import type { SortField, NetworkDnsRequestOptions } from '../../../../../../common/search_strategy';
+import { Direction, NetworkDnsFields } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 
 const HUGE_QUERY_SIZE = 1000000;
@@ -66,7 +60,6 @@ const createIncludePTRFilter = (isPtrIncluded: boolean) =>
 
 export const buildDnsQuery = ({
   defaultIndex,
-  docValueFields,
   filterQuery,
   isPtrIncluded,
   sort,
@@ -92,7 +85,6 @@ export const buildDnsQuery = ({
     index: defaultIndex,
     ignore_unavailable: true,
     body: {
-      ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       aggregations: {
         ...getCountAgg(),
         dns_name_query_count: {
@@ -132,6 +124,14 @@ export const buildDnsQuery = ({
           ...createIncludePTRFilter(isPtrIncluded),
         },
       },
+      _source: false,
+      fields: [
+        'dns.question.registered_domain',
+        {
+          field: '@timestamp',
+          format: 'strict_date_optional_time',
+        },
+      ],
     },
     size: 0,
     track_total_hits: false,

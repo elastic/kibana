@@ -276,6 +276,20 @@
     "misc": [
       {
         "parentPluginId": "@kbn/securitysolution-hook-utils",
+        "id": "def-common.Action",
+        "type": "Type",
+        "tags": [],
+        "label": "Action",
+        "description": [],
+        "signature": [
+          "{ type: \"setResult\"; result: T; } | { type: \"setError\"; error: unknown; } | { type: \"load\"; }"
+        ],
+        "path": "packages/kbn-securitysolution-hook-utils/src/use_observable/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-hook-utils",
         "id": "def-common.OptionalSignalArgs",
         "type": "Type",
         "tags": [],

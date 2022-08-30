@@ -12,7 +12,7 @@ import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
-import { FlowTarget } from '../../../../../common/search_strategy';
+import type { FlowTargetSourceDest } from '../../../../../common/search_strategy';
 import { NetworkDetailsLink } from '../../../../common/components/links';
 import { IpOverview } from '../../../../network/components/details';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
@@ -30,7 +30,7 @@ import { useAnomaliesTableData } from '../../../../common/components/ml/anomaly/
 import { LandingCards } from '../../../../common/components/landing_cards';
 
 interface ExpandableNetworkProps {
-  expandedNetwork: { ip: string; flowTarget: FlowTarget };
+  expandedNetwork: { ip: string; flowTarget: FlowTargetSourceDest };
 }
 
 const StyledTitle = styled.h4`
@@ -98,7 +98,7 @@ export const ExpandableNetworkDetails = ({
     services: { uiSettings },
   } = useKibana();
 
-  const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
+  const { indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
   const [filterQuery, kqlError] = convertToBuildEsQuery({
     config: getEsQueryConfig(uiSettings),
     indexPattern,
@@ -107,7 +107,6 @@ export const ExpandableNetworkDetails = ({
   });
 
   const [loading, { id, networkDetails }] = useNetworkDetails({
-    docValueFields,
     skip: isInitializing || filterQuery === undefined,
     filterQuery,
     indexNames: selectedPatterns,
@@ -139,6 +138,7 @@ export const ExpandableNetworkDetails = ({
       startDate={from}
       endDate={to}
       narrowDateRange={narrowDateRange}
+      indexPatterns={selectedPatterns}
     />
   ) : (
     <LandingCards />

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useContext } from 'react';
+import React from 'react';
 
 import type { EuiStepProps } from '@elastic/eui';
 import { EuiButton, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
@@ -13,7 +13,7 @@ import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { agentFlyoutContext } from '../../../sections/agents';
+import { useFleetStatus, useFlyoutContext } from '../../../hooks';
 
 export function getConfirmFleetServerConnectionStep({
   disabled,
@@ -40,7 +40,13 @@ export function getConfirmFleetServerConnectionStep({
 const ConfirmFleetServerConnectionStepContent: React.FunctionComponent<{
   isFleetServerReady: boolean;
 }> = ({ isFleetServerReady }) => {
-  const addAgentFlyout = useContext(agentFlyoutContext);
+  const flyoutContext = useFlyoutContext();
+  const fleetStatus = useFleetStatus();
+
+  const handleContinueClick = () => {
+    fleetStatus.forceDisplayInstructions = false;
+    flyoutContext.openEnrollmentFlyout();
+  };
 
   return isFleetServerReady ? (
     <>
@@ -53,7 +59,7 @@ const ConfirmFleetServerConnectionStepContent: React.FunctionComponent<{
 
       <EuiSpacer size="m" />
 
-      <EuiButton color="primary" onClick={addAgentFlyout?.openEnrollmentFlyout}>
+      <EuiButton color="primary" onClick={handleContinueClick}>
         <FormattedMessage
           id="xpack.fleet.fleetServerFlyout.continueEnrollingButton"
           defaultMessage="Continue enrolling Elastic Agent"

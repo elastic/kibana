@@ -9,8 +9,9 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
-import { SortFieldTimeline, TimelineId } from '../../../../common/types/timeline';
-import { TimelineModel } from '../../store/timeline/model';
+import type { SortFieldTimeline } from '../../../../common/types/timeline';
+import { TimelineId } from '../../../../common/types/timeline';
+import type { TimelineModel } from '../../store/timeline/model';
 import { timelineSelectors } from '../../store/timeline';
 import {
   createTimeline as dispatchCreateNewTimeline,
@@ -24,7 +25,7 @@ import { defaultHeaders } from '../timeline/body/column_headers/default_headers'
 import { OpenTimeline } from './open_timeline';
 import { OPEN_TIMELINE_CLASS_NAME, queryTimelineById, dispatchUpdateTimeline } from './helpers';
 import { OpenTimelineModalBody } from './open_timeline_modal/open_timeline_modal_body';
-import {
+import type {
   ActionTimelineToShow,
   DeleteTimelines,
   EuiSearchBarQuery,
@@ -44,7 +45,7 @@ import { DEFAULT_SORT_FIELD, DEFAULT_SORT_DIRECTION } from './constants';
 import { useTimelineTypes } from './use_timeline_types';
 import { useTimelineStatus } from './use_timeline_status';
 import { deleteTimelinesByIds } from '../../containers/api';
-import { Direction } from '../../../../common/search_strategy';
+import type { Direction } from '../../../../common/search_strategy';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 

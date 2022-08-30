@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { PluginConfigDescriptor } from '@kbn/core/server';
+import type { PluginConfigDescriptor } from '@kbn/core/server';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { sslSchema } from '@kbn/server-http-tools';
 
@@ -18,6 +17,7 @@ const serviceConfig = schema.object({
   syncInterval: schema.maybe(schema.string()),
   tls: schema.maybe(sslSchema),
   devUrl: schema.maybe(schema.string()),
+  showExperimentalLocations: schema.maybe(schema.boolean()),
 });
 
 const uptimeConfig = schema.object({

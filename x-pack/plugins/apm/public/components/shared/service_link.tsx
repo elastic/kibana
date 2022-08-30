@@ -42,7 +42,9 @@ export function ServiceLink({
         <EuiFlexItem grow={false}>
           <AgentIcon agentName={agentName} />
         </EuiFlexItem>
-        <EuiFlexItem>{serviceName}</EuiFlexItem>
+        <EuiFlexItem className="eui-textTruncate">
+          <span className="eui-textTruncate">{serviceName}</span>
+        </EuiFlexItem>
       </EuiFlexGroup>
     </StyledLink>
   );

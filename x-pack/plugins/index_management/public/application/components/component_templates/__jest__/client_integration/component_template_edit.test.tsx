@@ -50,6 +50,9 @@ describe('<ComponentTemplateEdit />', () => {
       COMPONENT_TEMPLATE_TO_EDIT.name,
       COMPONENT_TEMPLATE_TO_EDIT
     );
+    httpRequestsMockHelpers.setGetComponentTemplateDatastream(COMPONENT_TEMPLATE_TO_EDIT.name, {
+      data_streams: [],
+    });
 
     await act(async () => {
       testBed = await setup(httpSetup);
@@ -74,9 +77,19 @@ describe('<ComponentTemplateEdit />', () => {
     expect(nameInput.props().disabled).toEqual(true);
   });
 
+  it('should allow to go directly to a step', async () => {
+    await act(async () => {
+      testBed = await setup(httpSetup, '?step=mappings');
+    });
+
+    testBed.component.update();
+
+    expect(testBed.exists('mappingsEditor')).toBe(true);
+  });
+
   describe('form payload', () => {
     it('should send the correct payload with changed values', async () => {
-      const { actions, component, form } = testBed;
+      const { actions, component, form, coreStart } = testBed;
 
       await act(async () => {
         form.setInputValue('versionField.input', '1');
@@ -110,6 +123,108 @@ describe('<ComponentTemplateEdit />', () => {
           }),
         })
       );
+      // Mapping rollout modal should not be opened if the component template is not managed by Fleet
+      expect(coreStart.overlays.openModal).not.toBeCalled();
+    });
+  });
+
+  describe('managed by fleet', () => {
+    const DATASTREAM_NAME = 'logs-test-default';
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadComponentTemplateResponse(
+        COMPONENT_TEMPLATE_TO_EDIT.name,
+        Object.assign({}, COMPONENT_TEMPLATE_TO_EDIT, {
+          _meta: { managed_by: 'fleet' },
+        })
+      );
+
+      httpRequestsMockHelpers.setGetComponentTemplateDatastream(COMPONENT_TEMPLATE_TO_EDIT.name, {
+        data_streams: [DATASTREAM_NAME],
+      });
+
+      await act(async () => {
+        testBed = await setup(httpSetup);
+      });
+
+      testBed.component.update();
+    });
+
+    it('should show mappings rollover modal on save if apply mappings call failed', async () => {
+      httpRequestsMockHelpers.setPostDatastreamMappingsFromTemplate(
+        DATASTREAM_NAME,
+        {},
+        { message: 'Bad request', statusCode: 400 }
+      );
+      const { actions, component, form, coreStart } = testBed;
+
+      await act(async () => {
+        form.setInputValue('versionField.input', '1');
+      });
+
+      await act(async () => {
+        actions.clickNextButton();
+      });
+
+      component.update();
+
+      await actions.completeStepSettings();
+      await actions.completeStepMappings();
+      await actions.completeStepAliases();
+
+      await act(async () => {
+        actions.clickNextButton();
+      });
+
+      component.update();
+
+      expect(httpSetup.put).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/component_templates/${COMPONENT_TEMPLATE_TO_EDIT.name}`,
+        expect.anything()
+      );
+      expect(httpSetup.post).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/data_streams/${DATASTREAM_NAME}/mappings_from_template`,
+        expect.anything()
+      );
+
+      expect(coreStart.overlays.openModal).toBeCalled();
+    });
+
+    it('should not show mappings rollover modal on save if apply mappings call succeed', async () => {
+      httpRequestsMockHelpers.setPostDatastreamMappingsFromTemplate(DATASTREAM_NAME, {
+        success: true,
+      });
+      const { actions, component, form, coreStart } = testBed;
+
+      await act(async () => {
+        form.setInputValue('versionField.input', '1');
+      });
+
+      await act(async () => {
+        actions.clickNextButton();
+      });
+
+      component.update();
+
+      await actions.completeStepSettings();
+      await actions.completeStepMappings();
+      await actions.completeStepAliases();
+
+      await act(async () => {
+        actions.clickNextButton();
+      });
+
+      component.update();
+
+      expect(httpSetup.put).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/component_templates/${COMPONENT_TEMPLATE_TO_EDIT.name}`,
+        expect.anything()
+      );
+      expect(httpSetup.post).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/data_streams/${DATASTREAM_NAME}/mappings_from_template`,
+        expect.anything()
+      );
+
+      expect(coreStart.overlays.openModal).not.toBeCalled();
     });
   });
 });

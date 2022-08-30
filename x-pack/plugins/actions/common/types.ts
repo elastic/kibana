@@ -14,6 +14,7 @@ export interface ActionType {
   enabledInConfig: boolean;
   enabledInLicense: boolean;
   minimumLicenseRequired: LicenseType;
+  supportedFeatureIds: string[];
 }
 
 export enum InvalidEmailReason {
@@ -49,6 +50,10 @@ export interface ActionTypeExecutorResult<Data> {
   data?: Data;
   retry?: null | boolean | Date;
 }
+
+export type ActionTypeExecutorRawResult<Data> = ActionTypeExecutorResult<Data> & {
+  error?: Error;
+};
 
 export function isActionTypeExecutorResult(
   result: unknown

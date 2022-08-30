@@ -5,7 +5,7 @@
  * 2.0.
  */
 import semverLte from 'semver/functions/lte';
-import { ImmutableArray } from '../../types';
+import type { ImmutableArray } from '../../types';
 
 const minSupportedVersion = '7.14.0';
 const minCapabilitiesVersion = '7.15.0';

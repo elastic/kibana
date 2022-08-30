@@ -6,7 +6,7 @@
  */
 import type { ElasticsearchClient } from '@kbn/core/server';
 
-import type { ListResult } from '../../../common';
+import type { ListResult } from '../../../common/types';
 
 import { ArtifactsClientAccessDeniedError, ArtifactsClientError } from '../../errors';
 

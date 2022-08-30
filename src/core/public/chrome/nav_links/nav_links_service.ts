@@ -7,12 +7,13 @@
  */
 
 import { sortBy } from 'lodash';
-import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
+import { BehaviorSubject, type Observable, ReplaySubject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
+import type { HttpStart, IBasePath } from '@kbn/core-http-browser';
+import type { PublicAppDeepLinkInfo, PublicAppInfo } from '@kbn/core-application-browser';
+import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 
-import { InternalApplicationStart, PublicAppDeepLinkInfo, PublicAppInfo } from '../../application';
-import { HttpStart, IBasePath } from '../../http';
-import { ChromeNavLink, NavLinkWrapper } from './nav_link';
+import type { ChromeNavLink, NavLinkWrapper } from './nav_link';
 import { toNavLink } from './to_nav_link';
 
 interface StartDeps {

@@ -9,9 +9,11 @@
 import sinon from 'sinon';
 import { createListStream, createPromiseFromStreams, createConcatStream } from '@kbn/utils';
 
-import { createStubClient, createStubStats } from './__mocks__/stubs';
+import { createStubClient, createStubLogger, createStubStats } from './__mocks__/stubs';
 
 import { createGenerateIndexRecordsStream } from './generate_index_records_stream';
+
+const log = createStubLogger();
 
 describe('esArchiver: createGenerateIndexRecordsStream()', () => {
   it('consumes index names and queries for the mapping of each', async () => {
@@ -21,7 +23,7 @@ describe('esArchiver: createGenerateIndexRecordsStream()', () => {
 
     await createPromiseFromStreams([
       createListStream(indices),
-      createGenerateIndexRecordsStream({ client, stats }),
+      createGenerateIndexRecordsStream({ client, stats, log }),
     ]);
 
     expect(stats.getTestSummary()).toEqual({
@@ -40,7 +42,7 @@ describe('esArchiver: createGenerateIndexRecordsStream()', () => {
 
     await createPromiseFromStreams([
       createListStream(['index1']),
-      createGenerateIndexRecordsStream({ client, stats }),
+      createGenerateIndexRecordsStream({ client, stats, log }),
     ]);
 
     const params = (client.indices.get as sinon.SinonSpy).args[0][0];
@@ -58,7 +60,7 @@ describe('esArchiver: createGenerateIndexRecordsStream()', () => {
 
     const indexRecords = await createPromiseFromStreams<any[]>([
       createListStream(['index1', 'index2', 'index3']),
-      createGenerateIndexRecordsStream({ client, stats }),
+      createGenerateIndexRecordsStream({ client, stats, log }),
       createConcatStream([]),
     ]);
 
@@ -83,7 +85,7 @@ describe('esArchiver: createGenerateIndexRecordsStream()', () => {
 
     const indexRecords = await createPromiseFromStreams([
       createListStream(['index1']),
-      createGenerateIndexRecordsStream({ client, stats }),
+      createGenerateIndexRecordsStream({ client, stats, log }),
       createConcatStream([]),
     ]);
 
@@ -107,7 +109,7 @@ describe('esArchiver: createGenerateIndexRecordsStream()', () => {
 
       const indexRecords = await createPromiseFromStreams([
         createListStream(['.kibana_7.16.0_001']),
-        createGenerateIndexRecordsStream({ client, stats }),
+        createGenerateIndexRecordsStream({ client, stats, log }),
         createConcatStream([]),
       ]);
 
@@ -122,7 +124,7 @@ describe('esArchiver: createGenerateIndexRecordsStream()', () => {
 
       const indexRecords = await createPromiseFromStreams([
         createListStream(['.foo']),
-        createGenerateIndexRecordsStream({ client, stats }),
+        createGenerateIndexRecordsStream({ client, stats, log }),
         createConcatStream([]),
       ]);
 
@@ -137,7 +139,7 @@ describe('esArchiver: createGenerateIndexRecordsStream()', () => {
 
       const indexRecords = await createPromiseFromStreams([
         createListStream(['.kibana_7.16.0_001']),
-        createGenerateIndexRecordsStream({ client, stats, keepIndexNames: true }),
+        createGenerateIndexRecordsStream({ client, stats, log, keepIndexNames: true }),
         createConcatStream([]),
       ]);
 

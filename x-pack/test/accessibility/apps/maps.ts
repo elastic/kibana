@@ -11,9 +11,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const a11y = getService('a11y');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const inspector = getService('inspector');
   const PageObjects = getPageObjects(['common', 'settings', 'header', 'home', 'maps']);
 
-  describe('Maps app meets ally validations', () => {
+  describe('Maps app Accessibility', () => {
     before(async () => {
       await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
@@ -61,12 +62,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('map inspector view chooser requests', async function () {
-      await testSubjects.click('inspectorViewChooserRequests');
+    it('map inspector panel - view requests', async function () {
+      await inspector.openInspectorRequestsView();
       await a11y.testAppSnapshot();
     });
 
-    it('map inspector view chooser requests', async function () {
+    it('map inspector panel - view maps', async function () {
       await PageObjects.maps.openInspectorMapView();
       await a11y.testAppSnapshot();
     });

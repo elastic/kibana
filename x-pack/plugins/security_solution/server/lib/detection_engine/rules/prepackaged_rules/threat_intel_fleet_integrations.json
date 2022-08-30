@@ -21,6 +21,38 @@
   "references": [
     "https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-threatintel.html"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "destination.ip",
+      "type": "ip"
+    },
+    {
+      "ecs": false,
+      "name": "file.hash.*",
+      "type": "unknown"
+    },
+    {
+      "ecs": true,
+      "name": "file.pe.imphash",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "registry.path",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "source.ip",
+      "type": "ip"
+    },
+    {
+      "ecs": true,
+      "name": "url.full",
+      "type": "wildcard"
+    }
+  ],
   "risk_score": 99,
   "rule_id": "0c9a14d9-d65d-486f-9b5b-91e4e6b22bd0",
   "severity": "critical",
@@ -194,5 +226,5 @@
   "timeline_id": "495ad7a7-316e-4544-8a0f-9c098daee76e",
   "timeline_title": "Generic Threat Match Timeline",
   "type": "threat_match",
-  "version": 3
+  "version": 4
 }

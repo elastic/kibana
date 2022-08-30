@@ -11,7 +11,7 @@ import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import { createKibanaSupertestProvider } from '../../services';
 
 export default async function ({ readConfigFile }) {
-  const httpConfig = await readConfigFile(require.resolve('../../config'));
+  const httpConfig = await readConfigFile(require.resolve('../../config.base.js'));
   const certificateAuthorities = [readFileSync(CA_CERT_PATH)];
 
   return {

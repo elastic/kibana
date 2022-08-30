@@ -1,4 +1,4 @@
-/* eslint-disable */
+/* eslint-disable @kbn/eslint/require-license-header,prettier/prettier,eqeqeq,no-nested-ternary,one-var,no-var */
 
 // Copied from https://github.com/yahoo/intl-relativeformat/tree/master/dist/locale-data
 

@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import { HEADER_SUBTITLE } from '../../screens/users/all_users';
+import { HEADER_SUBTITLE, ALL_USERS_TABLE } from '../../screens/users/all_users';
 import { ANOMALIES_TAB, ANOMALIES_TAB_CONTENT } from '../../screens/users/user_anomalies';
 import {
   AUTHENTICATIONS_TAB,
   AUTHENTICATIONS_TABLE,
 } from '../../screens/users/user_authentications';
 import { EVENTS_TAB, EVENTS_TAB_CONTENT } from '../../screens/users/user_events';
-import {
-  EXTERNAL_ALERTS_TAB,
-  EXTERNAL_ALERTS_TAB_CONTENT,
-} from '../../screens/users/user_external_alerts';
 import { RISK_SCORE_TAB, RISK_SCORE_TAB_CONTENT } from '../../screens/users/user_risk_score';
 import { cleanKibana } from '../../tasks/common';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
@@ -39,7 +35,9 @@ describe('Users stats and tables', () => {
     it(`renders all users`, () => {
       const totalUsers = 1;
 
-      cy.get(HEADER_SUBTITLE).should('have.text', `Showing: ${totalUsers} user`);
+      cy.get(ALL_USERS_TABLE)
+        .find(HEADER_SUBTITLE)
+        .should('have.text', `Showing: ${totalUsers} user`);
     });
 
     it(`renders all authentications`, () => {
@@ -62,12 +60,6 @@ describe('Users stats and tables', () => {
       cy.get(EVENTS_TAB).click({ force: true });
 
       cy.get(EVENTS_TAB_CONTENT).should('exist');
-    });
-
-    it(`renders external alerts tab`, () => {
-      cy.get(EXTERNAL_ALERTS_TAB).click({ force: true });
-
-      cy.get(EXTERNAL_ALERTS_TAB_CONTENT).should('exist');
     });
 
     it(`renders users risk tab`, () => {

@@ -18,8 +18,8 @@ import { FormatEditorSamples } from '../../samples';
 import { sample } from './sample';
 import { formatId } from './constants';
 
-interface TruncateFormatEditorFormatParams {
-  fieldLength: number;
+export interface TruncateFormatEditorFormatParams {
+  fieldLength: number | null;
 }
 
 export class TruncateFormatEditor extends DefaultFormatEditor<TruncateFormatEditorFormatParams> {
@@ -46,7 +46,7 @@ export class TruncateFormatEditor extends DefaultFormatEditor<TruncateFormatEdit
           error={error}
         >
           <EuiFieldNumber
-            defaultValue={formatParams.fieldLength}
+            defaultValue={formatParams.fieldLength ?? undefined}
             min={1}
             data-test-subj={'truncateEditorLength'}
             onChange={(e) => {

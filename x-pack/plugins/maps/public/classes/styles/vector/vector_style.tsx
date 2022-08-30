@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import React, { CSSProperties, ReactElement } from 'react';
 import { FeatureIdentifier, Map as MbMap } from '@kbn/mapbox-gl';
 import { FeatureCollection } from 'geojson';
@@ -27,7 +26,7 @@ import {
 } from '../../../../common/constants';
 import { StyleMeta } from './style_meta';
 // @ts-expect-error
-import { getMakiSymbol, PREFERRED_ICONS } from './symbol_utils';
+import { getMakiSymbol } from './symbol_utils';
 import { VectorIcon } from './components/legend/vector_icon';
 import { VectorStyleLegend } from './components/legend/vector_style_legend';
 import { getHasLabel } from './style_util';
@@ -41,6 +40,7 @@ import { StaticOrientationProperty } from './properties/static_orientation_prope
 import { DynamicOrientationProperty } from './properties/dynamic_orientation_property';
 import { StaticTextProperty } from './properties/static_text_property';
 import { DynamicTextProperty } from './properties/dynamic_text_property';
+import { LabelZoomRangeProperty } from './properties/label_zoom_range_property';
 import { LabelBorderSizeProperty } from './properties/label_border_size_property';
 import { extractColorFromStyleProperty } from './components/legend/extract_color_from_style_property';
 import { SymbolizeAsProperty } from './properties/symbolize_as_property';
@@ -104,6 +104,7 @@ export interface IVectorStyle extends IStyle {
 
   getIsPointsOnly(): boolean;
   isTimeAware(): boolean;
+  getPropertiesDescriptor(): VectorStylePropertiesDescriptor;
   getPrimaryColor(): string;
   getIcon(showIncompleteIndicator: boolean): ReactElement;
   getIconSvg(symbolId: string): string | undefined;
@@ -116,6 +117,12 @@ export interface IVectorStyle extends IStyle {
     mbMap: MbMap,
     mbSourceId: string
   ) => boolean;
+
+  /*
+   * Returns true when "Label" style configuration is complete and map shows a label for layer features.
+   */
+  hasLabels: () => boolean;
+
   arePointsSymbolizedAsCircles: () => boolean;
   setMBPaintProperties: ({
     alpha,
@@ -172,6 +179,7 @@ export class VectorStyle implements IVectorStyle {
   private readonly _iconSizeStyleProperty: StaticSizeProperty | DynamicSizeProperty;
   private readonly _iconOrientationProperty: StaticOrientationProperty | DynamicOrientationProperty;
   private readonly _labelStyleProperty: StaticTextProperty | DynamicTextProperty;
+  private readonly _labelZoomRangeProperty: LabelZoomRangeProperty;
   private readonly _labelSizeStyleProperty: StaticSizeProperty | DynamicSizeProperty;
   private readonly _labelColorStyleProperty: StaticColorProperty | DynamicColorProperty;
   private readonly _labelBorderColorStyleProperty: StaticColorProperty | DynamicColorProperty;
@@ -245,6 +253,12 @@ export class VectorStyle implements IVectorStyle {
     this._labelStyleProperty = this._makeLabelProperty(
       this._descriptor.properties[VECTOR_STYLES.LABEL_TEXT]
     );
+    this._labelZoomRangeProperty = new LabelZoomRangeProperty(
+      this._descriptor.properties[VECTOR_STYLES.LABEL_ZOOM_RANGE].options,
+      VECTOR_STYLES.LABEL_ZOOM_RANGE,
+      layer.getMinZoom(),
+      layer.getMaxZoom()
+    );
     this._labelSizeStyleProperty = this._makeSizeProperty(
       this._descriptor.properties[VECTOR_STYLES.LABEL_SIZE],
       VECTOR_STYLES.LABEL_SIZE,
@@ -273,7 +287,7 @@ export class VectorStyle implements IVectorStyle {
     previousFields: IField[],
     mapColors: string[]
   ) {
-    const originalProperties = this.getRawProperties();
+    const originalProperties = this.getPropertiesDescriptor();
     const invalidStyleNames: VECTOR_STYLES[] = (
       Object.keys(originalProperties) as VECTOR_STYLES[]
     ).filter((key) => {
@@ -433,7 +447,7 @@ export class VectorStyle implements IVectorStyle {
         )
       : // Deletions or additions
         await this._deleteFieldsFromDescriptorAndUpdateStyling(
-          this.getRawProperties(),
+          this.getPropertiesDescriptor(),
           false,
           styleFieldsHelper,
           mapColors
@@ -454,6 +468,7 @@ export class VectorStyle implements IVectorStyle {
       this._iconSizeStyleProperty,
       this._iconOrientationProperty,
       this._labelStyleProperty,
+      this._labelZoomRangeProperty,
       this._labelSizeStyleProperty,
       this._labelColorStyleProperty,
       this._labelBorderColorStyleProperty,
@@ -471,7 +486,7 @@ export class VectorStyle implements IVectorStyle {
     onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void,
     onCustomIconsChange: (customIcons: CustomIcon[]) => void
   ) {
-    const rawProperties = this.getRawProperties();
+    const rawProperties = this.getPropertiesDescriptor();
     const handlePropertyChange = (propertyName: VECTOR_STYLES, stylePropertyDescriptor: any) => {
       rawProperties[propertyName] = stylePropertyDescriptor; // override single property, but preserve the rest
       const vectorStyleDescriptor = VectorStyle.createDescriptor(rawProperties, this.isTimeAware());
@@ -523,7 +538,7 @@ export class VectorStyle implements IVectorStyle {
     return this._descriptor.isTimeAware;
   }
 
-  getRawProperties(): VectorStylePropertiesDescriptor {
+  getPropertiesDescriptor(): VectorStylePropertiesDescriptor {
     return this._descriptor.properties || {};
   }
 
@@ -675,14 +690,14 @@ export class VectorStyle implements IVectorStyle {
   }
 
   _getLegendDetailStyleProperties = () => {
-    const hasLabel = getHasLabel(this._labelStyleProperty);
+    const hasLabels = this.hasLabels();
     return this.getDynamicPropertiesArray().filter((styleProperty) => {
       const styleName = styleProperty.getStyleName();
       if ([VECTOR_STYLES.ICON_ORIENTATION, VECTOR_STYLES.LABEL_TEXT].includes(styleName)) {
         return false;
       }
 
-      if (!hasLabel && LABEL_STYLES.includes(styleName)) {
+      if (!hasLabels && LABEL_STYLES.includes(styleName)) {
         // do not render legend for label styles when there is no label
         return false;
       }
@@ -769,6 +784,10 @@ export class VectorStyle implements IVectorStyle {
     return !this._symbolizeAsStyleProperty.isSymbolizedAsIcon();
   }
 
+  hasLabels() {
+    return getHasLabel(this._labelStyleProperty);
+  }
+
   setMBPaintProperties({
     alpha,
     mbMap,
@@ -813,6 +832,7 @@ export class VectorStyle implements IVectorStyle {
     textLayerId: string;
   }) {
     this._labelStyleProperty.syncTextFieldWithMb(textLayerId, mbMap);
+    this._labelZoomRangeProperty.syncLabelZoomRange(textLayerId, mbMap);
     this._labelColorStyleProperty.syncLabelColorWithMb(textLayerId, mbMap, alpha);
     this._labelSizeStyleProperty.syncLabelSizeWithMb(textLayerId, mbMap);
     this._labelBorderSizeStyleProperty.syncLabelBorderSizeWithMb(textLayerId, mbMap);

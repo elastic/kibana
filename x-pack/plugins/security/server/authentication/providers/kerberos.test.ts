@@ -135,6 +135,7 @@ describe('KerberosAuthenticationProvider', () => {
           { ...user, authentication_provider: { type: 'kerberos', name: 'kerberos' } },
           {
             authHeaders: { authorization: 'Bearer some-token' },
+            userProfileGrant: { type: 'accessToken', accessToken: 'some-token' },
             state: { accessToken: 'some-token', refreshToken: 'some-refresh-token' },
           }
         )
@@ -170,6 +171,7 @@ describe('KerberosAuthenticationProvider', () => {
           {
             authHeaders: { authorization: 'Bearer some-token' },
             authResponseHeaders: { 'WWW-Authenticate': 'Negotiate response-token' },
+            userProfileGrant: { type: 'accessToken', accessToken: 'some-token' },
             state: { accessToken: 'some-token', refreshToken: 'some-refresh-token' },
           }
         )

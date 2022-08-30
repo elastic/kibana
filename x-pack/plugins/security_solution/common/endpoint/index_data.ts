@@ -5,21 +5,20 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
 import seedrandom from 'seedrandom';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { KbnClient } from '@kbn/test';
-import { AxiosResponse } from 'axios';
-import {
-  CreatePackagePolicyResponse,
-  EPM_API_ROUTES,
-  GetPackagesResponse,
-} from '@kbn/fleet-plugin/common';
-import { EndpointDocGenerator, TreeOptions } from './generate_data';
-import {
-  deleteIndexedEndpointHosts,
+import type { KbnClient } from '@kbn/test';
+import type { AxiosResponse } from 'axios';
+import type { CreatePackagePolicyResponse, GetPackagesResponse } from '@kbn/fleet-plugin/common';
+import { EPM_API_ROUTES } from '@kbn/fleet-plugin/common';
+import type { TreeOptions } from './generate_data';
+import { EndpointDocGenerator } from './generate_data';
+import type {
   DeleteIndexedEndpointHostsResponse,
   IndexedHostsResponse,
+} from './data_loaders/index_endpoint_hosts';
+import {
+  deleteIndexedEndpointHosts,
   indexEndpointHostDocs,
 } from './data_loaders/index_endpoint_hosts';
 import { enableFleetServerIfNecessary } from './data_loaders/index_fleet_server';

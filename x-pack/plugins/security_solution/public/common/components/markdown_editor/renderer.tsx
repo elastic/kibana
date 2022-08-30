@@ -7,7 +7,8 @@
 
 import React, { memo, useMemo } from 'react';
 import { cloneDeep } from 'lodash/fp';
-import { EuiMarkdownFormat, EuiLinkAnchorProps } from '@elastic/eui';
+import type { EuiLinkAnchorProps } from '@elastic/eui';
+import { EuiMarkdownFormat } from '@elastic/eui';
 
 import { parsingPlugins, processingPlugins } from './plugins';
 import { MarkdownLink } from './markdown_link';

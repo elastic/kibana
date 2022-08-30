@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
-import { MlSummaryJob } from '@kbn/ml-plugin/public';
+import type { HttpSetup } from '@kbn/core/public';
+import type { MlSummaryJob } from '@kbn/ml-plugin/public';
 
 export interface GetJobsSummaryArgs {
   http: HttpSetup;

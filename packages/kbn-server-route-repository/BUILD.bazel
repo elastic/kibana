@@ -7,10 +7,20 @@ PKG_REQUIRE_NAME = "@kbn/server-route-repository"
 
 SOURCE_FILES = glob(
   [
-    "src/**/*.ts",
+    "**/*.ts",
   ],
   exclude = [
+    "**/*.config.js",
+    "**/*.mock.*",
     "**/*.test.*",
+    "**/*.stories.*",
+    "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/mocks/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
   ],
 )
 
@@ -40,6 +50,7 @@ TYPES_DEPS = [
   "//packages/kbn-io-ts-utils:npm_module_types",
   "@npm//@hapi/boom",
   "@npm//fp-ts",
+  "@npm//io-ts",
   "@npm//utility-types",
   "@npm//@types/jest",
   "@npm//@types/lodash",
@@ -50,6 +61,17 @@ jsts_transpiler(
   name = "target_node",
   srcs = SRCS,
   build_pkg_name = package_name(),
+)
+
+jsts_transpiler(
+  name = "target_web",
+  srcs = [
+    "web_index.ts",
+    "src/format_request.ts",
+    "src/parse_endpoint.ts",
+  ],
+  build_pkg_name = package_name(),
+  web = True,
 )
 
 ts_config(
@@ -67,16 +89,16 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
+  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  root_dir = "src",
   tsconfig = ":tsconfig",
 )
 
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS + [":target_node"],
+  deps = RUNTIME_DEPS + [":target_node", ":target_web"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )

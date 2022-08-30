@@ -23,7 +23,7 @@ import { getMonitorRouteFromMonitorId } from '../../../../common/utils/get_monit
 import { MonitorStatusTranslations } from '../../../../common/translations';
 import { CLIENT_ALERT_TYPES } from '../../../../common/constants/alerts';
 
-const { defaultActionMessage, description } = MonitorStatusTranslations;
+const { defaultActionMessage, defaultRecoveryMessage, description } = MonitorStatusTranslations;
 
 const MonitorStatusAlert = React.lazy(() => import('./lazy_wrapper/monitor_status'));
 
@@ -54,6 +54,7 @@ export const initMonitorStatusAlertType: AlertTypeInitializer = ({
     return validateFunc ? validateFunc(ruleParams) : ({} as ValidationResult);
   },
   defaultActionMessage,
+  defaultRecoveryMessage,
   requiresAppContext: false,
   format: ({ fields }) => ({
     reason: fields[ALERT_REASON] || '',

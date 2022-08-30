@@ -256,6 +256,24 @@
     "functions": [
       {
         "parentPluginId": "@kbn/test-jest-helpers",
+        "id": "def-server.clearBroadcastChannelInstances",
+        "type": "Function",
+        "tags": [],
+        "label": "clearBroadcastChannelInstances",
+        "description": [
+          "\nRemoves all BroadcastChannel instances."
+        ],
+        "signature": [
+          "() => void"
+        ],
+        "path": "packages/kbn-test-jest-helpers/src/stub_broadcast_channel.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-jest-helpers",
         "id": "def-server.delay",
         "type": "Function",
         "tags": [],
@@ -429,6 +447,26 @@
           }
         ],
         "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-jest-helpers",
+        "id": "def-server.getBroadcastChannelInstances",
+        "type": "Function",
+        "tags": [],
+        "label": "getBroadcastChannelInstances",
+        "description": [
+          "\nReturns all BroadcastChannel instances."
+        ],
+        "signature": [
+          "() => BroadcastChannel[]"
+        ],
+        "path": "packages/kbn-test-jest-helpers/src/stub_broadcast_channel.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [
+          "BroadcastChannel[]"
+        ],
         "initialIsOpen": false
       },
       {
@@ -1380,6 +1418,24 @@
         "returnComment": [
           "The wrapper instance around the rendered output with intl object in context"
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-jest-helpers",
+        "id": "def-server.stubBroadcastChannel",
+        "type": "Function",
+        "tags": [],
+        "label": "stubBroadcastChannel",
+        "description": [
+          "\nStubs the global window.BroadcastChannel for use in jest tests."
+        ],
+        "signature": [
+          "() => void"
+        ],
+        "path": "packages/kbn-test-jest-helpers/src/stub_broadcast_channel.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {

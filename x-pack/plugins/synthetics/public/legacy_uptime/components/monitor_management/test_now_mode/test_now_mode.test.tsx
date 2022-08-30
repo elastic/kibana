@@ -10,7 +10,7 @@ import { screen } from '@testing-library/react';
 import { render } from '../../../lib/helper/rtl_helpers';
 import { TestNowMode } from './test_now_mode';
 import { kibanaService } from '../../../state/kibana_service';
-import { Locations, MonitorFields } from '../../../../../common/runtime_types';
+import { Locations, MonitorFields, LocationStatus } from '../../../../../common/runtime_types';
 import * as runOnceErrorHooks from '../hooks/use_run_once_errors';
 
 describe('TestNowMode', function () {
@@ -21,6 +21,7 @@ describe('TestNowMode', function () {
       geo: { lat: 33.333, lon: 73.333 },
       url: 'test-url',
       isServiceManaged: true,
+      status: LocationStatus.GA,
     },
   ];
   const testMonitor = {

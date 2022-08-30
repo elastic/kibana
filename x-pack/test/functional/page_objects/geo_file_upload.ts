@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import { FtrService } from '../ftr_provider_context';
 
 export class GeoFileUploadPageObject extends FtrService {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LensAttributes } from '../../types';
+import type { LensAttributes } from '../../types';
 
 /* Exported from Kibana Saved Object */
 export const dnsTopDomainsLensAttributes: LensAttributes = {

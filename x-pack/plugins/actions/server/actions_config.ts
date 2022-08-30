@@ -76,7 +76,7 @@ function isAllowed({ allowedHosts }: ActionsConfig, hostname: string | null): bo
 
 function isHostnameAllowedInUri(config: ActionsConfig, uri: string): boolean {
   return pipe(
-    tryCatch(() => url.parse(uri)),
+    tryCatch(() => url.parse(uri, false /* parseQueryString */, true /* slashesDenoteHost */)),
     map((parsedUrl) => parsedUrl.hostname),
     mapNullable((hostname) => isAllowed(config, hostname)),
     getOrElse<boolean>(() => false)

@@ -93,6 +93,14 @@ export const getHttp = (basepath = BASE_PATH) => {
         };
       }
 
+      if (path.match('/api/fleet/agent_download_sources')) {
+        return {
+          items: [
+            { name: 'Default Download Source', is_default: true, host: 'https://www.example.com' },
+          ],
+        };
+      }
+
       action(path)(`UNSUPPORTED ROUTE: GET ${path}`);
       return {};
     }) as HttpHandler,

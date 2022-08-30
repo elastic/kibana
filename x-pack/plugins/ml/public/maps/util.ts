@@ -7,20 +7,76 @@
 
 import { FeatureCollection, Feature, Geometry } from 'geojson';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { htmlIdGenerator } from '@elastic/eui';
+import { FIELD_ORIGIN, STYLE_TYPE } from '@kbn/maps-plugin/common';
 import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
 import { ESSearchResponse } from '@kbn/core/types/elasticsearch';
 import { VectorSourceRequestMeta } from '@kbn/maps-plugin/common';
+import { LAYER_TYPE } from '@kbn/maps-plugin/common';
+import { SEVERITY_COLOR_RAMP } from '../../common';
 import { formatHumanReadableDateTimeSeconds } from '../../common/util/date_utils';
 import type { MlApiServices } from '../application/services/ml_api_service';
 import { MLAnomalyDoc } from '../../common/types/anomalies';
 import { SEARCH_QUERY_LANGUAGE } from '../../common/constants/search';
 import { getIndexPattern } from '../application/explorer/reducers/explorer_reducer/get_index_pattern';
+import { AnomalySource } from './anomaly_source';
 
 export const ML_ANOMALY_LAYERS = {
   TYPICAL: 'typical',
   ACTUAL: 'actual',
   TYPICAL_TO_ACTUAL: 'typical to actual',
 } as const;
+
+export const CUSTOM_COLOR_RAMP = {
+  type: STYLE_TYPE.DYNAMIC,
+  options: {
+    customColorRamp: SEVERITY_COLOR_RAMP,
+    field: {
+      name: 'record_score',
+      origin: FIELD_ORIGIN.SOURCE,
+    },
+    useCustomColorRamp: true,
+  },
+};
+
+export const ACTUAL_STYLE = {
+  type: 'VECTOR',
+  properties: {
+    fillColor: CUSTOM_COLOR_RAMP,
+    lineColor: CUSTOM_COLOR_RAMP,
+  },
+  isTimeAware: false,
+};
+
+export const TYPICAL_STYLE = {
+  type: 'VECTOR',
+  properties: {
+    fillColor: {
+      type: 'STATIC',
+      options: {
+        color: '#98A2B2',
+      },
+    },
+    lineColor: {
+      type: 'STATIC',
+      options: {
+        color: '#fff',
+      },
+    },
+    lineWidth: {
+      type: 'STATIC',
+      options: {
+        size: 2,
+      },
+    },
+    iconSize: {
+      type: 'STATIC',
+      options: {
+        size: 6,
+      },
+    },
+  },
+};
 
 export type MlAnomalyLayersType = typeof ML_ANOMALY_LAYERS[keyof typeof ML_ANOMALY_LAYERS];
 
@@ -30,6 +86,27 @@ function getCoordinates(latLonString: string): number[] {
     .split(',')
     .map((coordinate: string) => Number(coordinate))
     .reverse();
+}
+
+export function getInitialAnomaliesLayers(jobId: string) {
+  const initialLayers = [];
+  for (const layer in ML_ANOMALY_LAYERS) {
+    if (ML_ANOMALY_LAYERS.hasOwnProperty(layer)) {
+      initialLayers.push({
+        id: htmlIdGenerator()(),
+        type: LAYER_TYPE.GEOJSON_VECTOR,
+        sourceDescriptor: AnomalySource.createDescriptor({
+          jobId,
+          typicalActual: ML_ANOMALY_LAYERS[layer as keyof typeof ML_ANOMALY_LAYERS],
+        }),
+        style:
+          ML_ANOMALY_LAYERS[layer as keyof typeof ML_ANOMALY_LAYERS] === ML_ANOMALY_LAYERS.TYPICAL
+            ? TYPICAL_STYLE
+            : ACTUAL_STYLE,
+      });
+    }
+  }
+  return initialLayers;
 }
 
 export async function getResultsForJobId(

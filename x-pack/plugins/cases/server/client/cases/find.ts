@@ -25,6 +25,7 @@ import { constructQueryOptions } from '../utils';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 import { Operations } from '../../authorization';
 import { CasesClientArgs } from '..';
+import { ConstructQueryParams } from '../types';
 
 /**
  * Retrieves a case and optionally its comments.
@@ -35,7 +36,11 @@ export const find = async (
   params: CasesFindRequest,
   clientArgs: CasesClientArgs
 ): Promise<CasesFindResponse> => {
-  const { caseService, authorization, logger } = clientArgs;
+  const {
+    services: { caseService },
+    authorization,
+    logger,
+  } = clientArgs;
 
   try {
     const fields = asArray(params.fields);
@@ -48,14 +53,16 @@ export const find = async (
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
       await authorization.getAuthorizationFilter(Operations.findCases);
 
-    const queryArgs = {
+    const queryArgs: ConstructQueryParams = {
       tags: queryParams.tags,
       reporters: queryParams.reporters,
       sortByField: queryParams.sortField,
       status: queryParams.status,
+      severity: queryParams.severity,
       owner: queryParams.owner,
       from: queryParams.from,
       to: queryParams.to,
+      assignees: queryParams.assignees,
     };
 
     const statusStatsOptions = constructQueryOptions({

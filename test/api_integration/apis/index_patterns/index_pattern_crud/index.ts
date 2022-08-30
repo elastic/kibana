@@ -14,5 +14,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./get_index_pattern'));
     loadTestFile(require.resolve('./delete_index_pattern'));
     loadTestFile(require.resolve('./update_index_pattern'));
+    loadTestFile(require.resolve('./get_data_views'));
   });
 }

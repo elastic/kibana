@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import {
   ENDPOINT_LIST_ID,
   ENDPOINT_EVENT_FILTERS_LIST_ID,
@@ -18,9 +18,9 @@ import {
 } from '../constants';
 import type { ESClusterInfo, ESLicense } from '../types';
 import { batchTelemetryRecords, templateExceptionList } from '../helpers';
-import { ITelemetryEventsSender } from '../sender';
-import { ITelemetryReceiver } from '../receiver';
-import { TaskExecutionPeriod } from '../task';
+import type { ITelemetryEventsSender } from '../sender';
+import type { ITelemetryReceiver } from '../receiver';
+import type { TaskExecutionPeriod } from '../task';
 
 export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number) {
   return {
@@ -51,9 +51,9 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
         licenseInfoPromise.status === 'fulfilled'
           ? licenseInfoPromise.value
           : ({} as ESLicense | undefined);
+      const FETCH_VALUE_LIST_META_DATA_INTERVAL_IN_HOURS = 24;
 
       // Lists Telemetry: Trusted Applications
-
       const trustedApps = await receiver.fetchTrustedApplications();
       if (trustedApps?.data) {
         const trustedAppsJson = templateExceptionList(
@@ -109,6 +109,13 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
         }
       }
 
+      // Value list meta data
+      const valueListMetaData = await receiver.fetchValueListMetaData(
+        FETCH_VALUE_LIST_META_DATA_INTERVAL_IN_HOURS
+      );
+      if (valueListMetaData?.total_list_count) {
+        await sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, [valueListMetaData]);
+      }
       return count;
     },
   };

@@ -13,18 +13,16 @@ import { Case } from '../../../containers/types';
 import { CasesContextStoreActionsList } from '../../cases_context/cases_context_reducer';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { useCasesAddToNewCaseFlyout } from '../../create/flyout/use_cases_add_to_new_case_flyout';
-import { CaseAttachments } from '../../../types';
+import { CaseAttachmentsWithoutOwner } from '../../../types';
 import { useCreateAttachments } from '../../../containers/use_create_attachments';
 
 type AddToExistingFlyoutProps = AllCasesSelectorModalProps & {
   toastTitle?: string;
   toastContent?: string;
-  attachments?: CaseAttachments;
 };
 
-export const useCasesAddToExistingCaseModal = (props: AddToExistingFlyoutProps) => {
+export const useCasesAddToExistingCaseModal = (props: AddToExistingFlyoutProps = {}) => {
   const createNewCaseFlyout = useCasesAddToNewCaseFlyout({
-    attachments: props.attachments,
     onClose: props.onClose,
     // TODO there's no need for onSuccess to be async. This will be fixed
     // in a follow up clean up
@@ -53,28 +51,28 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingFlyoutProps) 
   }, [dispatch]);
 
   const handleOnRowClick = useCallback(
-    async (theCase?: Case) => {
+    async (theCase: Case | undefined, attachments: CaseAttachmentsWithoutOwner) => {
       // when the case is undefined in the modal
       // the user clicked "create new case"
       if (theCase === undefined) {
         closeModal();
-        createNewCaseFlyout.open();
+        createNewCaseFlyout.open({ attachments });
         return;
       }
 
       try {
         // add attachments to the case
-        const attachments = props.attachments;
         if (attachments !== undefined && attachments.length > 0) {
           await createAttachments({
             caseId: theCase.id,
+            caseOwner: theCase.owner,
             data: attachments,
             throwOnError: true,
           });
 
           casesToasts.showSuccessAttach({
             theCase,
-            attachments: props.attachments,
+            attachments,
             title: props.toastTitle,
             content: props.toastContent,
           });
@@ -91,22 +89,28 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingFlyoutProps) 
     [casesToasts, closeModal, createNewCaseFlyout, createAttachments, props]
   );
 
-  const openModal = useCallback(() => {
-    dispatch({
-      type: CasesContextStoreActionsList.OPEN_ADD_TO_CASE_MODAL,
-      payload: {
-        ...props,
-        hiddenStatuses: [CaseStatuses.closed, StatusAll],
-        onRowClick: handleOnRowClick,
-        onClose: () => {
-          closeModal();
-          if (props.onClose) {
-            return props.onClose();
-          }
+  const openModal = useCallback(
+    ({ attachments }: { attachments?: CaseAttachmentsWithoutOwner } = {}) => {
+      dispatch({
+        type: CasesContextStoreActionsList.OPEN_ADD_TO_CASE_MODAL,
+        payload: {
+          ...props,
+          hiddenStatuses: [CaseStatuses.closed, StatusAll],
+          onRowClick: (theCase?: Case) => {
+            const caseAttachments = attachments ?? [];
+            handleOnRowClick(theCase, caseAttachments);
+          },
+          onClose: () => {
+            closeModal();
+            if (props.onClose) {
+              return props.onClose();
+            }
+          },
         },
-      },
-    });
-  }, [closeModal, dispatch, handleOnRowClick, props]);
+      });
+    },
+    [closeModal, dispatch, handleOnRowClick, props]
+  );
   return {
     open: openModal,
     close: closeModal,

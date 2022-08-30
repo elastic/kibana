@@ -5,48 +5,59 @@
  * 2.0.
  */
 
-import numeral from '@elastic/numeral';
 import moment from 'moment';
 import React, { useMemo } from 'react';
 
+import * as i18n from './translations';
+
 interface Props {
   duration: number;
-  isMillis?: boolean;
+  isSeconds?: boolean;
   allowZero?: boolean;
 }
 
-export function getFormattedDuration(value: number) {
+export const getFormattedDuration = (value: number) => {
   if (!value) {
     return '00:00:00:000';
   }
   const duration = moment.duration(value);
-  const hours = Math.floor(duration.asHours()).toString().padStart(2, '0');
-  const minutes = Math.floor(duration.asMinutes()).toString().padStart(2, '0');
+  const days = Math.floor(duration.asDays()).toString().padStart(3, '0');
+  const hours = Math.floor(duration.asHours() % 24)
+    .toString()
+    .padStart(2, '0');
+  const minutes = Math.floor(duration.asMinutes() % 60)
+    .toString()
+    .padStart(2, '0');
   const seconds = duration.seconds().toString().padStart(2, '0');
   const ms = duration.milliseconds().toString().padStart(3, '0');
-  return `${hours}:${minutes}:${seconds}:${ms}`;
-}
 
-export function getFormattedMilliseconds(value: number) {
-  const formatted = numeral(value).format('0,0');
-  return `${formatted} ms`;
-}
+  if (Math.floor(duration.asDays()) > 0) {
+    if (Math.floor(duration.asDays()) >= 365) {
+      return i18n.GREATER_THAN_YEAR;
+    } else {
+      return `${days}:${hours}:${minutes}:${seconds}:${ms}`;
+    }
+  } else {
+    return `${hours}:${minutes}:${seconds}:${ms}`;
+  }
+};
 
 /**
- * Formats duration as (hh:mm:ss:SSS)
- * @param props duration default as nanos, set isMillis:true to pass in ms
+ * Formats duration as (hh:mm:ss:SSS) by default, overflowing to include days
+ * as (ddd:hh:mm:ss:SSS) if necessary, and then finally to `> 1 Year`
+ * @param props duration as millis, set isSeconds:true to pass in seconds
  * @constructor
  */
 const RuleDurationFormatComponent = (props: Props) => {
-  const { duration, isMillis = false, allowZero = true } = props;
+  const { duration, isSeconds = false, allowZero = true } = props;
 
   const formattedDuration = useMemo(() => {
     // Durations can be buggy and return negative
     if (allowZero && duration >= 0) {
-      return getFormattedDuration(isMillis ? duration * 1000 : duration);
+      return getFormattedDuration(isSeconds ? duration * 1000 : duration);
     }
-    return 'N/A';
-  }, [allowZero, duration, isMillis]);
+    return i18n.DURATION_NOT_AVAILABLE;
+  }, [allowZero, duration, isSeconds]);
 
   return <span data-test-subj="rule-duration-format-value">{formattedDuration}</span>;
 };

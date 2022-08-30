@@ -34,6 +34,6 @@ describe('Header', () => {
       }
     );
 
-    expect(component).toMatchSnapshot();
+    expect(component.render()).toMatchSnapshot();
   });
 });

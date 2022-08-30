@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import React, { ComponentType, memo, useCallback, useMemo } from 'react';
-import {
-  AnyArtifact,
-  ArtifactEntryCollapsibleCard,
-  ArtifactEntryCollapsibleCardProps,
-} from '../artifact_entry_card';
-import { PaginatedContent as _PaginatedContent, PaginatedContentProps } from '../paginated_content';
+import type { ComponentType } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
+import type { AnyArtifact, ArtifactEntryCollapsibleCardProps } from '../artifact_entry_card';
+import { ArtifactEntryCollapsibleCard } from '../artifact_entry_card';
+import type { PaginatedContentProps } from '../paginated_content';
+import { PaginatedContent as _PaginatedContent } from '../paginated_content';
 import { GridHeader } from './components/grid_header';
-import { MaybeImmutable } from '../../../../common/endpoint/types';
-import { useTestIdGenerator } from '../hooks/use_test_id_generator';
+import type { MaybeImmutable } from '../../../../common/endpoint/types';
+import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 
 const PaginatedContent: ArtifactsPaginatedComponent = _PaginatedContent;
 

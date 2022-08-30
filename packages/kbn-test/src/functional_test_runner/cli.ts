@@ -6,17 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { resolve } from 'path';
+import Path from 'path';
 import { inspect } from 'util';
 
-import { run, createFlagError, Flags } from '@kbn/dev-utils';
+import { run, Flags } from '@kbn/dev-cli-runner';
+import { createFlagError } from '@kbn/dev-cli-errors';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import exitHook from 'exit-hook';
 
 import { FunctionalTestRunner } from './functional_test_runner';
 
-const makeAbsolutePath = (v: string) => resolve(process.cwd(), v);
+const makeAbsolutePath = (v: string) => Path.resolve(process.cwd(), v);
 const toArray = (v: string | string[]) => ([] as string[]).concat(v || []);
 const parseInstallDir = (flags: Flags) => {
   const flag = flags['kibana-install-dir'];
@@ -42,9 +43,15 @@ export function runFtrCli() {
         throw createFlagError('expected --es-version to be a string');
       }
 
+      const configRel = flags.config;
+      if (typeof configRel !== 'string' || !configRel) {
+        throw createFlagError('--config is required');
+      }
+      const configPath = makeAbsolutePath(configRel);
+
       const functionalTestRunner = new FunctionalTestRunner(
         log,
-        makeAbsolutePath(flags.config as string),
+        configPath,
         {
           mochaOpts: {
             bail: flags.bail,
@@ -68,6 +75,8 @@ export function runFtrCli() {
         },
         esVersion
       );
+
+      await functionalTestRunner.readConfigFile();
 
       if (flags.throttle) {
         process.env.TEST_THROTTLE_NETWORK = '1';
@@ -98,11 +107,7 @@ export function runFtrCli() {
           });
         }
 
-        try {
-          await functionalTestRunner.close();
-        } finally {
-          process.exit();
-        }
+        process.exit();
       };
 
       process.on('unhandledRejection', (err) =>
@@ -153,9 +158,6 @@ export function runFtrCli() {
           'headless',
           'dry-run',
         ],
-        default: {
-          config: 'test/functional/config.js',
-        },
         help: `
           --config=path      path to a config file
           --bail             stop tests after the first failure

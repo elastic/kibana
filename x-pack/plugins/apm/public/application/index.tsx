@@ -18,7 +18,6 @@ import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { ConfigSchema } from '..';
 import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 import { createCallApmApi } from '../services/rest/create_call_apm_api';
-import { createStaticDataView } from '../services/rest/data_view';
 import { setHelpExtension } from '../set_help_extension';
 import { setReadonlyBadge } from '../update_badge';
 import { ApmAppRoot } from '../components/routing/app_root';
@@ -52,18 +51,14 @@ export const renderApp = ({
     inspector: pluginsStart.inspector,
     observability: pluginsStart.observability,
     observabilityRuleTypeRegistry,
+    dataViews: pluginsStart.dataViews,
+    unifiedSearch: pluginsStart.unifiedSearch,
   };
 
   // render APM feedback link in global help menu
   setHelpExtension(coreStart);
   setReadonlyBadge(coreStart);
   createCallApmApi(coreStart);
-
-  // Automatically creates static data view and stores as saved object
-  createStaticDataView().catch((e) => {
-    // eslint-disable-next-line no-console
-    console.log('Error creating static data view', e);
-  });
 
   // add .kbnAppWrappers class to root element
   element.classList.add(APP_WRAPPER_CLASS);

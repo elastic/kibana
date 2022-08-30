@@ -13,7 +13,6 @@ import {
   MapEmbeddable,
   MapEmbeddableInput,
   MapEmbeddableOutput,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '@kbn/maps-plugin/public/embeddable';
 import { MAP_SAVED_OBJECT_TYPE, RenderTooltipContentParams } from '@kbn/maps-plugin/public';
 import {
@@ -108,7 +107,7 @@ export function EmbeddedMapComponent({
 
     setupEmbeddable();
     // we want this effect to execute exactly once after the component mounts
-    // eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

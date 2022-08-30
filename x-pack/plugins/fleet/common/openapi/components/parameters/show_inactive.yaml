@@ -1,0 +1,5 @@
+name: showInactive
+in: query
+required: false
+schema:
+  type: boolean

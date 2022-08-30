@@ -19,15 +19,11 @@ import { settings } from './settings';
 import { ApmMainTemplate } from './templates/apm_main_template';
 import { ServiceGroupsList } from '../app/service_groups';
 import { ServiceGroupsRedirect } from './service_groups_redirect';
-import { offsetRt } from '../../../common/offset_rt';
+import { offsetRt } from '../../../common/comparison_rt';
 
-const ServiceGroupsBreadcrumnbLabel = i18n.translate(
-  'xpack.apm.views.serviceGroups.breadcrumbLabel',
-  { defaultMessage: 'Services' }
-);
 const ServiceGroupsTitle = i18n.translate(
   'xpack.apm.views.serviceGroups.title',
-  { defaultMessage: 'Service groups' }
+  { defaultMessage: 'Services' }
 );
 
 /**
@@ -47,6 +43,7 @@ const apmRoutes = {
         query: t.partial({
           rangeFrom: t.string,
           rangeTo: t.string,
+          waterfallItemId: t.string,
         }),
       }),
     ]),
@@ -77,10 +74,7 @@ const apmRoutes = {
       // this route fails on navigation unless it's defined before home
       '/service-groups': {
         element: (
-          <Breadcrumb
-            title={ServiceGroupsBreadcrumnbLabel}
-            href={'/service-groups'}
-          >
+          <Breadcrumb title={ServiceGroupsTitle} href={'/service-groups'}>
             <ApmMainTemplate
               pageTitle={ServiceGroupsTitle}
               environmentFilter={false}

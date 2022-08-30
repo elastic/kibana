@@ -14,7 +14,7 @@ See <<scoped-services>> and <<development-security>>.
 
 [source,typescript]
 ----
-import { CoreStart, Plugin } from 'kibana/public';
+import { CoreStart, Plugin } from '@kbn/core/public';
 
 export class MyPlugin implements Plugin {
   public start(core: CoreStart) {

@@ -510,7 +510,7 @@
             "tags": [],
             "label": "id",
             "description": [
-              "\nThe unique identifier of the application"
+              "\nThe unique identifier of the application.\n\nCan only be composed of alphanumeric characters, `-`, `:` and `_`"
             ],
             "path": "src/core/public/application/types.ts",
             "deprecated": false
@@ -1210,7 +1210,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [],
+                "description": [
+                  "- navigation options"
+                ],
                 "signature": [
                   {
                     "pluginId": "core",
@@ -1507,6 +1509,10 @@
                 "path": "x-pack/plugins/security_solution/public/app/index.tsx"
               },
               {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/plugin.tsx"
+              },
+              {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/public/authentication/logout/logout_app.test.ts"
               }
@@ -1546,13 +1552,7 @@
             ],
             "signature": [
               "(menuMount: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.MountPoint",
-                "text": "MountPoint"
-              },
+              "MountPoint",
               "<HTMLElement> | undefined) => void"
             ],
             "path": "src/core/public/application/types.ts",
@@ -1566,13 +1566,7 @@
                 "label": "menuMount",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.MountPoint",
-                    "text": "MountPoint"
-                  },
+                  "MountPoint",
                   "<HTMLElement> | undefined"
                 ],
                 "path": "src/core/public/application/types.ts",
@@ -1594,13 +1588,7 @@
             "signature": [
               "Observable",
               "<",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreTheme",
-                "text": "CoreTheme"
-              },
+              "CoreTheme",
               ">"
             ],
             "path": "src/core/public/application/types.ts",
@@ -1830,6 +1818,21 @@
             ],
             "path": "src/core/public/application/types.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.NavigateToUrlOptions.state",
+            "type": "Unknown",
+            "tags": [],
+            "label": "state",
+            "description": [
+              "\noptional state to forward to the application"
+            ],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/core/public/application/types.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -1992,27 +1995,11 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/app/home/template_wrapper/bottom_bar/index.tsx"
+            "path": "x-pack/plugins/security_solution/public/types.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/app/home/template_wrapper/bottom_bar/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/app/home/template_wrapper/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/app/home/template_wrapper/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/app/home/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/app/home/index.tsx"
+            "path": "x-pack/plugins/security_solution/public/types.ts"
           },
           {
             "plugin": "securitySolution",

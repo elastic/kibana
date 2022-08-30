@@ -18,7 +18,6 @@ export default function ({
   const PageObjects = getPageObjects(['common', 'header']);
 
   describe('ui actions explorer', function () {
-    this.tags('ciGroup11');
     before(async () => {
       await browser.setWindowSize(1300, 900);
       await PageObjects.common.navigateToApp('uiActionsExplorer');

@@ -59,7 +59,8 @@ export const MultiSelectPicker: FC<{
   title?: string;
   checkedOptions: string[];
   dataTestSubj: string;
-}> = ({ options, onChange, title, checkedOptions, dataTestSubj }) => {
+  postfix?: React.ReactElement;
+}> = ({ options, onChange, title, checkedOptions, dataTestSubj, postfix }) => {
   const euiTheme = useCurrentEuiTheme();
 
   const [items, setItems] = useState<Option[]>(options);
@@ -161,6 +162,7 @@ export const MultiSelectPicker: FC<{
           )}
         </div>
       </EuiPopover>
+      {postfix ? postfix : null}
     </EuiFilterGroup>
   );
 };

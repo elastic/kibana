@@ -7,7 +7,7 @@
 
 import { Subject } from 'rxjs';
 import { Filter } from '@kbn/es-query';
-import { Query } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
 
 export interface MapsAppState {
   query?: Query | null;

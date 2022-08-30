@@ -15,6 +15,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiComboBoxOptionOption,
+  withEuiTheme,
+  WithEuiThemeProps,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -24,8 +26,9 @@ import { collectionActions } from './lib/collection_actions';
 import { ColorPicker, ColorPickerProps } from './color_picker';
 import { TimeseriesVisParams } from '../../types';
 import { Operator } from '../../../common/operators_utils';
+import { tsvbEditorRowStyles } from '../styles/common.styles';
 
-export interface ColorRulesProps {
+export interface ColorRulesProps extends WithEuiThemeProps {
   name: keyof TimeseriesVisParams;
   model: TimeseriesVisParams;
   onChange: (partialModel: Partial<TimeseriesVisParams>) => void;
@@ -101,7 +104,7 @@ const operatorOptions = colorRulesOperatorsList.map((operator) => ({
   value: operator.method,
 }));
 
-export class ColorRules extends Component<ColorRulesProps> {
+class ColorRulesUI extends Component<ColorRulesProps> {
   constructor(props: ColorRulesProps) {
     super(props);
     this.renderRow = this.renderRow.bind(this);
@@ -184,7 +187,7 @@ export class ColorRules extends Component<ColorRulesProps> {
         gutterSize="s"
         key={model.id}
         alignItems="center"
-        className="tvbColorRules__rule"
+        css={tsvbEditorRowStyles(this.props.theme.euiTheme)}
       >
         <EuiFlexItem grow={false}>
           <EuiFormLabel style={labelStyle}>
@@ -262,3 +265,5 @@ export class ColorRules extends Component<ColorRulesProps> {
     return !model[name] ? <div /> : <div>{(model[name] as ColorRule[]).map(this.renderRow)}</div>;
   }
 }
+
+export const ColorRules = withEuiTheme(ColorRulesUI);

@@ -45,9 +45,8 @@ exports[`ValueAxesPanel component should init with the default set of props 1`] 
   <EuiSpacer
     size="s"
   />
-  <EuiAccordion
+  <EuiAccordionClass
     aria-label="Toggle ValueAxis-1 options"
-    arrowDisplay="left"
     buttonClassName="eui-textTruncate"
     buttonContent={
       <React.Fragment>
@@ -66,10 +65,8 @@ exports[`ValueAxesPanel component should init with the default set of props 1`] 
       </React.Fragment>
     }
     buttonContentClassName="visEditorSidebar__aggGroupAccordionButtonContent eui-textTruncate"
-    buttonElement="button"
     className="visEditorSidebar__section visEditorSidebar__collapsible"
     data-test-subj="toggleYAxisOptions-ValueAxis-1"
-    element="div"
     extraAction={
       <EuiToolTip
         content="Remove Y-axis"
@@ -88,10 +85,7 @@ exports[`ValueAxesPanel component should init with the default set of props 1`] 
     }
     id="yAxisAccordionValueAxis-1"
     initialIsOpen={false}
-    isLoading={false}
-    isLoadingMessage={false}
     key="ValueAxis-1"
-    paddingSize="none"
   >
     <EuiSpacer
       size="m"
@@ -156,10 +150,9 @@ exports[`ValueAxesPanel component should init with the default set of props 1`] 
         }
       }
     />
-  </EuiAccordion>
-  <EuiAccordion
+  </EuiAccordionClass>
+  <EuiAccordionClass
     aria-label="Toggle ValueAxis-1 options"
-    arrowDisplay="left"
     buttonClassName="eui-textTruncate"
     buttonContent={
       <React.Fragment>
@@ -178,10 +171,8 @@ exports[`ValueAxesPanel component should init with the default set of props 1`] 
       </React.Fragment>
     }
     buttonContentClassName="visEditorSidebar__aggGroupAccordionButtonContent eui-textTruncate"
-    buttonElement="button"
     className="visEditorSidebar__section visEditorSidebar__collapsible"
     data-test-subj="toggleYAxisOptions-ValueAxis-2"
-    element="div"
     extraAction={
       <EuiToolTip
         content="Remove Y-axis"
@@ -200,10 +191,7 @@ exports[`ValueAxesPanel component should init with the default set of props 1`] 
     }
     id="yAxisAccordionValueAxis-2"
     initialIsOpen={false}
-    isLoading={false}
-    isLoadingMessage={false}
     key="ValueAxis-2"
-    paddingSize="none"
   >
     <EuiSpacer
       size="m"
@@ -268,6 +256,6 @@ exports[`ValueAxesPanel component should init with the default set of props 1`] 
         }
       }
     />
-  </EuiAccordion>
+  </EuiAccordionClass>
 </EuiPanel>
 `;

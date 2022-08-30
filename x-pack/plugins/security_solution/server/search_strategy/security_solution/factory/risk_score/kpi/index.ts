@@ -12,8 +12,8 @@ import type {
   KpiRiskScoreRequestOptions,
   KpiRiskScoreStrategyResponse,
   RiskQueries,
+  RiskSeverity,
 } from '../../../../../../common/search_strategy';
-import { RiskSeverity } from '../../../../../../common/search_strategy';
 
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import type { SecuritySolutionFactory } from '../../types';

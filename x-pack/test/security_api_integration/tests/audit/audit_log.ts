@@ -8,10 +8,11 @@
 import Path from 'path';
 import Fs from 'fs';
 import expect from '@kbn/expect';
+import { RetryService } from '../../../../../test/common/services/retry';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 class FileWrapper {
-  constructor(private readonly path: string) {}
+  constructor(private readonly path: string, private readonly retry: RetryService) {}
   async reset() {
     // "touch" each file to ensure it exists and is empty before each test
     await Fs.promises.writeFile(this.path, '');
@@ -21,15 +22,17 @@ class FileWrapper {
     return content.trim().split('\n');
   }
   async readJSON() {
-    const content = await this.read();
-    try {
-      return content.map((l) => JSON.parse(l));
-    } catch (err) {
-      const contentString = content.join('\n');
-      throw new Error(
-        `Failed to parse audit log JSON, error: "${err.message}", audit.log contents:\n${contentString}`
-      );
-    }
+    return this.retry.try(async () => {
+      const content = await this.read();
+      try {
+        return content.map((l) => JSON.parse(l));
+      } catch (err) {
+        const contentString = content.join('\n');
+        throw new Error(
+          `Failed to parse audit log JSON, error: "${err.message}", audit.log contents:\n${contentString}`
+        );
+      }
+    });
   }
   // writing in a file is an async operation. we use this method to make sure logs have been written.
   async isNotEmpty() {
@@ -44,10 +47,9 @@ export default function ({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const { username, password } = getService('config').get('servers.kibana');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/119267
-  describe.skip('Audit Log', function () {
+  describe('Audit Log', function () {
     const logFilePath = Path.resolve(__dirname, '../../fixtures/audit/audit.log');
-    const logFile = new FileWrapper(logFilePath);
+    const logFile = new FileWrapper(logFilePath, retry);
 
     beforeEach(async () => {
       await logFile.reset();

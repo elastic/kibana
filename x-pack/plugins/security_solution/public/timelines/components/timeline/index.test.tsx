@@ -11,7 +11,7 @@ import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import { DragDropContextWrapper } from '../../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import '../../../common/mock/match_media';
-import { mockBrowserFields, mockDocValueFields } from '../../../common/containers/source/mock';
+import { mockBrowserFields } from '../../../common/containers/source/mock';
 import { TimelineId } from '../../../../common/types/timeline';
 import {
   createSecuritySolutionStorageMock,
@@ -23,7 +23,8 @@ import {
   TestProviders,
 } from '../../../common/mock';
 
-import { StatefulTimeline, Props as StatefulTimelineOwnProps } from '.';
+import type { Props as StatefulTimelineOwnProps } from '.';
+import { StatefulTimeline } from '.';
 import { useTimelineEvents } from '../../containers';
 import { DefaultCellRenderer } from './cell_rendering/default_cell_renderer';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER } from './styles';
@@ -31,15 +32,25 @@ import { defaultRowRenderers } from './body/renderers';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { createStore } from '../../../common/store';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { useGetUserCasesPermissions } from '../../../common/lib/kibana';
 
 jest.mock('../../containers', () => ({
   useTimelineEvents: jest.fn(),
 }));
 
-jest.mock('./tabs_content');
+jest.mock('./tabs_content', () => ({
+  TabsContent: () => <div data-test-subj="tabs-content" />,
+}));
 
 jest.mock('../../../common/lib/kibana');
-jest.mock('../../../common/components/url_state/normalize_time_range');
+const originalKibanaLib = jest.requireActual('../../../common/lib/kibana');
+
+// Restore the useGetUserCasesPermissions so the calling functions can receive a valid permissions object
+// The returned permissions object will indicate that the user does not have permissions by default
+const mockUseGetUserCasesPermissions = useGetUserCasesPermissions as jest.Mock;
+mockUseGetUserCasesPermissions.mockImplementation(originalKibanaLib.useGetUserCasesPermissions);
+
+jest.mock('../../../common/utils/normalize_time_range');
 jest.mock('@kbn/i18n-react', () => {
   const originalModule = jest.requireActual('@kbn/i18n-react');
   const FormattedRelative = jest.fn().mockImplementation(() => '20 hours ago');
@@ -83,7 +94,6 @@ jest.mock('../../../common/containers/sourcerer');
 const mockDataView = {
   dataViewId: mockGlobalState.timeline.timelineById.test?.dataViewId,
   browserFields: mockBrowserFields,
-  docValueFields: mockDocValueFields,
   loading: false,
   indexPattern: mockIndexPattern,
   pageInfo: { activePage: 0, querySize: 0 },

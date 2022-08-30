@@ -7,16 +7,17 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiProgress, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import { ShapeTreeNode } from '@elastic/charts';
-import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { ShapeTreeNode } from '@elastic/charts';
+import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import styled from 'styled-components';
-import { DonutChart, FillColor } from '../../../../common/components/charts/donutchart';
+import type { FillColor } from '../../../../common/components/charts/donutchart';
+import { DonutChart } from '../../../../common/components/charts/donutchart';
 import { SecurityPageName } from '../../../../../common/constants';
 import { useNavigation } from '../../../../common/lib/kibana';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { HoverVisibilityContainer } from '../../../../common/components/hover_visibility_container';
 import { BUTTON_CLASS as INPECT_BUTTON_CLASS } from '../../../../common/components/inspect';
-import { LegendItem } from '../../../../common/components/charts/legend_item';
+import type { LegendItem } from '../../../../common/components/charts/legend_item';
 import { useAlertsByStatus } from './use_alerts_by_status';
 import {
   ALERTS,
@@ -131,6 +132,7 @@ export const AlertsByStatus = ({ signalIndexName }: AlertsByStatusProps) => {
           <HeaderSection
             id={DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}
             title={ALERTS_TEXT}
+            titleSize="s"
             subtitle={<LastUpdatedAt isUpdating={loading} updatedAt={updatedAt} />}
             inspectMultiple
             toggleStatus={toggleStatus}

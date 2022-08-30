@@ -27,6 +27,13 @@ export const createCaseSavedObjectType = (
   convertToMultiNamespaceTypeVersion: '8.0.0',
   mappings: {
     properties: {
+      assignees: {
+        properties: {
+          uid: {
+            type: 'keyword',
+          },
+        },
+      },
       closed_at: {
         type: 'date',
       },
@@ -151,6 +158,9 @@ export const createCaseSavedObjectType = (
             type: 'boolean',
           },
         },
+      },
+      severity: {
+        type: 'keyword',
       },
     },
   },

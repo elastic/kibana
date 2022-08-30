@@ -1,7 +1,7 @@
 .kbnPageTemplateSolutionNavAvatar {
   @include euiBottomShadowSmall;
 
-  &--xxl {
+  &.kbnPageTemplateSolutionNavAvatar--xxl {
     @include euiBottomShadowMedium;
     @include size(100px);
     line-height: 100px;

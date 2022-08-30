@@ -12,7 +12,7 @@ describe('Actions Plugin', () => {
   describe('setup()', () => {
     const emails = ['bob@elastic.co', 'jim@somewhere.org', 'not an email'];
 
-    it('should allow all emails when not using email allowlist config', async () => {
+    it('should allow all the valid emails when not using email allowlist config', async () => {
       const context = coreMock.createPluginInitializerContext({});
       const plugin = new Plugin(context);
       const pluginSetup = plugin.setup();
@@ -29,7 +29,8 @@ describe('Actions Plugin', () => {
           },
           Object {
             "address": "not an email",
-            "valid": true,
+            "reason": "invalid",
+            "valid": false,
           },
         ]
       `);

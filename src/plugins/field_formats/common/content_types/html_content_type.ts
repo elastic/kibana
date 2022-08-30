@@ -33,10 +33,11 @@ export const setup = (
   htmlContextTypeConvert?: HtmlContextTypeConvert
 ): HtmlContextTypeConvert => {
   const convert = getConvertFn(format, htmlContextTypeConvert);
+  const highlight = (text: string) => `<span class="ffArray__highlight">${text}</span>`;
 
   const recurse: HtmlContextTypeConvert = (value, options = {}) => {
     if (value == null) {
-      return asPrettyString(value);
+      return asPrettyString(value, options);
     }
 
     if (!value || !isFunction(value.map)) {
@@ -46,11 +47,23 @@ export const setup = (
     const subValues = value.map((v: unknown) => recurse(v, options));
     const useMultiLine = subValues.some((sub: string) => sub.indexOf('\n') > -1);
 
-    return subValues.join(',' + (useMultiLine ? '\n' : ' '));
+    return subValues.join(highlight(',') + (useMultiLine ? '\n' : ' '));
   };
 
   const wrap: HtmlContextTypeConvert = (value, options) => {
-    return recurse(value, options);
+    const convertedValue = recurse(value, options);
+
+    if (!Array.isArray(value) || value.length < 2) {
+      return convertedValue;
+    }
+
+    if (convertedValue.includes('\n')) {
+      const indentedValue = convertedValue.replaceAll(/(\n+)/g, '$1  ');
+
+      return highlight('[') + `\n  ${indentedValue}\n` + highlight(']');
+    }
+
+    return highlight('[') + convertedValue + highlight(']');
   };
 
   return wrap;

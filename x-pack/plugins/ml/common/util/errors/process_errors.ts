@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import {
   ErrorType,
   MLErrorObject,
@@ -14,7 +15,6 @@ import {
   isEsErrorBody,
   isMLResponseError,
 } from './types';
-import { isPopulatedObject } from '../object_utils';
 
 export const extractErrorProperties = (error: ErrorType): MLErrorObject => {
   // extract properties of the error object from within the response error

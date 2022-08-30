@@ -6,27 +6,36 @@
  */
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-
+import { i18n } from '@kbn/i18n';
 import { InferenceBase, InferResponse } from '../inference_base';
 import { getGeneralInputComponent } from '../text_input';
 import { getNerOutputComponent } from './ner_output';
+import { SUPPORTED_PYTORCH_TASKS } from '../../../../../../../common/constants/trained_models';
 
 export type FormattedNerResponse = Array<{
   value: string;
   entity: estypes.MlTrainedModelEntities | null;
 }>;
 
-export type NerResponse = InferResponse<
-  FormattedNerResponse,
-  estypes.MlInferTrainedModelDeploymentResponse
->;
+export type NerResponse = InferResponse<FormattedNerResponse, estypes.MlInferTrainedModelResponse>;
 
 export class NerInference extends InferenceBase<NerResponse> {
+  protected inferenceType = SUPPORTED_PYTORCH_TASKS.NER;
+  protected inferenceTypeLabel = i18n.translate(
+    'xpack.ml.trainedModels.testModelsFlyout.ner.label',
+    { defaultMessage: 'Named entity recognition' }
+  );
+  protected info = [
+    i18n.translate('xpack.ml.trainedModels.testModelsFlyout.ner.info1', {
+      defaultMessage: 'Test how well the model identifies named entities in your input text.',
+    }),
+  ];
+
   public async infer() {
     try {
       this.setRunning();
-      const inputText = this.inputText$.value;
-      const payload = { docs: { [this.inputField]: inputText } };
+      const inputText = this.inputText$.getValue();
+      const payload = { docs: [{ [this.inputField]: inputText }] };
       const resp = await this.trainedModelsApi.inferTrainedModel(
         this.model.model_id,
         payload,
@@ -48,7 +57,10 @@ export class NerInference extends InferenceBase<NerResponse> {
   }
 
   public getInputComponent(): JSX.Element {
-    return getGeneralInputComponent(this);
+    const placeholder = i18n.translate('xpack.ml.trainedModels.testModelsFlyout.ner.inputText', {
+      defaultMessage: 'Enter a phrase to test',
+    });
+    return getGeneralInputComponent(this, placeholder);
   }
 
   public getOutputComponent(): JSX.Element {
@@ -56,8 +68,8 @@ export class NerInference extends InferenceBase<NerResponse> {
   }
 }
 
-function parseResponse(resp: estypes.MlInferTrainedModelDeploymentResponse): FormattedNerResponse {
-  const { predicted_value: predictedValue, entities } = resp;
+function parseResponse(resp: estypes.MlInferTrainedModelResponse): FormattedNerResponse {
+  const [{ predicted_value: predictedValue, entities }] = resp.inference_results;
   const splitWordsAndEntitiesRegex = /(\[.*?\]\(.*?&.*?\))/;
   const matchEntityRegex = /(\[.*?\])\((.*?)&(.*?)\)/;
   if (predictedValue === undefined || entities === undefined) {

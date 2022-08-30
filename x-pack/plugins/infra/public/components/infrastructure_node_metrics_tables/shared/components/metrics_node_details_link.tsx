@@ -17,12 +17,14 @@ type ExtractStrict<T, U extends T> = Extract<T, U>;
 
 interface MetricsNodeDetailsLinkProps {
   id: string;
+  label: string;
   nodeType: ExtractStrict<InventoryItemType, 'host' | 'container' | 'pod'>;
   timerange: Pick<MetricsExplorerTimeOptions, 'from' | 'to'>;
 }
 
 export const MetricsNodeDetailsLink = ({
   id,
+  label,
   nodeType,
   timerange,
 }: MetricsNodeDetailsLinkProps) => {
@@ -35,5 +37,5 @@ export const MetricsNodeDetailsLink = ({
     })
   );
 
-  return <EuiLink href={linkProps.href}>{id}</EuiLink>;
+  return <EuiLink href={linkProps.href}>{label}</EuiLink>;
 };

@@ -7,7 +7,7 @@
 
 import { EuiSpacer, EuiWindowEvent } from '@elastic/eui';
 import { noop } from 'lodash/fp';
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
 import type { Filter } from '@kbn/es-query';
@@ -28,7 +28,7 @@ import { SpyRoute } from '../../../common/utils/route/spy_routes';
 
 import { UsersDetailsTabs } from './details_tabs';
 import { navTabsUsersDetails } from './nav_tabs';
-import { UsersDetailsProps } from './types';
+import type { UsersDetailsProps } from './types';
 import { type } from './utils';
 import { getUsersDetailsPageFilters } from './helpers';
 import { showGlobalFilters } from '../../../timelines/components/timeline/helpers';
@@ -52,6 +52,7 @@ import { UsersType } from '../../store/model';
 import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { LandingPageComponent } from '../../../common/components/landing_page';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 const QUERY_ID = 'UsersDetailsQueryId';
 
 const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
@@ -59,6 +60,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
   usersDetailsPagePath,
 }) => {
   const dispatch = useDispatch();
+  const riskyUsersFeatureEnabled = useIsExperimentalFeatureEnabled('riskyUsersEnabled');
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const graphEventId = useShallowEqualSelector(
     (state) => (getTimeline(state, TimelineId.hostsPageEvents) ?? timelineDefaults).graphEventId
@@ -81,7 +83,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
   );
   const getFilters = () => [...usersDetailsPageFilters, ...filters];
 
-  const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
+  const { indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
 
   const [filterQuery, kqlError] = convertToBuildEsQuery({
     config: getEsQueryConfig(kibana.services.uiSettings),
@@ -116,6 +118,20 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
 
   useQueryInspector({ setQuery, deleteQuery, refetch, inspect, loading, queryId: QUERY_ID });
 
+  const narrowDateRange = useCallback(
+    (score, interval) => {
+      const fromTo = scoreIntervalToDateTime(score, interval);
+      dispatch(
+        setAbsoluteRangeDatePicker({
+          id: 'global',
+          from: fromTo.from,
+          to: fromTo.to,
+        })
+      );
+    },
+    [dispatch]
+  );
+
   return (
     <>
       {indicesExist ? (
@@ -130,7 +146,6 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
               border
               subtitle={
                 <LastEventTime
-                  docValueFields={docValueFields}
                   indexKey={LastEventIndexKey.userDetails}
                   indexNames={selectedPatterns}
                   userName={detailName}
@@ -155,14 +170,8 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
                   loading={loading}
                   startDate={from}
                   endDate={to}
-                  narrowDateRange={(score, interval) => {
-                    const fromTo = scoreIntervalToDateTime(score, interval);
-                    setAbsoluteRangeDatePicker({
-                      id: 'global',
-                      from: fromTo.from,
-                      to: fromTo.to,
-                    });
-                  }}
+                  narrowDateRange={narrowDateRange}
+                  indexPatterns={selectedPatterns}
                 />
               )}
             </AnomalyTableProvider>
@@ -170,7 +179,11 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
             <EuiSpacer />
 
             <SecuritySolutionTabNavigation
-              navTabs={navTabsUsersDetails(detailName, hasMlUserPermissions(capabilities))}
+              navTabs={navTabsUsersDetails(
+                detailName,
+                hasMlUserPermissions(capabilities),
+                riskyUsersFeatureEnabled
+              )}
             />
 
             <EuiSpacer />
@@ -178,14 +191,12 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
             <UsersDetailsTabs
               deleteQuery={deleteQuery}
               detailName={detailName}
-              docValueFields={docValueFields}
               filterQuery={filterQuery}
               from={from}
               indexNames={selectedPatterns}
               indexPattern={indexPattern}
               isInitializing={isInitializing}
               pageFilters={usersDetailsPageFilters}
-              setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
               setQuery={setQuery}
               to={to}
               type={type}

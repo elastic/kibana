@@ -10,7 +10,8 @@ import Path from 'path';
 
 import { REPO_ROOT } from '@kbn/utils';
 import { lastValueFrom } from 'rxjs';
-import { run, createFlagError, Flags } from '@kbn/dev-utils';
+import { run, Flags } from '@kbn/dev-cli-runner';
+import { createFlagError } from '@kbn/dev-cli-errors';
 
 import { logOptimizerState } from './log_optimizer_state';
 import { logOptimizerProgress } from './log_optimizer_progress';

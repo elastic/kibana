@@ -26,11 +26,8 @@ import { NotePreviews } from './note_previews';
 import { OPEN_TIMELINE_CLASS_NAME, queryTimelineById } from './helpers';
 import { StatefulOpenTimeline } from '.';
 import { TimelineTabsStyle } from './types';
-import {
-  useTimelineTypes,
-  UseTimelineTypesArgs,
-  UseTimelineTypesResult,
-} from './use_timeline_types';
+import type { UseTimelineTypesArgs, UseTimelineTypesResult } from './use_timeline_types';
+import { useTimelineTypes } from './use_timeline_types';
 import { deleteTimelinesByIds } from '../../containers/api';
 
 jest.mock('react-router-dom', () => {
@@ -627,7 +624,7 @@ describe('StatefulOpenTimeline', () => {
     await waitFor(() => {
       wrapper
         .find(`[data-test-subj="title-${mockOpenTimelineQueryResults.timeline[0].savedObjectId}"]`)
-        .first()
+        .last()
         .simulate('click');
 
       expect((queryTimelineById as jest.Mock).mock.calls[0][0].timelineId).toEqual(

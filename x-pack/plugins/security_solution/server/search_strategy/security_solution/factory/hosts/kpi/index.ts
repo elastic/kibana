@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export * from './authentications';
 export * from './common';
 export * from './hosts';
 export * from './unique_ips';

@@ -7,11 +7,13 @@
  */
 
 import expect from '@kbn/expect';
+import { OPTIONS_LIST_CONTROL } from '@kbn/controls-plugin/common';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
+  const security = getService('security');
   const { dashboardControls, common, dashboard, timePicker } = getPageObjects([
     'dashboardControls',
     'timePicker',
@@ -31,31 +33,39 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     };
 
     before(async () => {
+      await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader', 'animals']);
       await common.navigateToApp('dashboard');
       await dashboard.gotoDashboardLandingPage();
       await dashboard.clickNewDashboard();
       await timePicker.setDefaultDataRange();
 
       // populate an initial set of controls and get their ids.
-      await dashboardControls.createOptionsListControl({
+      await dashboardControls.createControl({
+        controlType: OPTIONS_LIST_CONTROL,
         dataViewTitle: 'animals-*',
         fieldName: 'animal.keyword',
         title: 'Animal',
       });
 
-      await dashboardControls.createOptionsListControl({
+      await dashboardControls.createControl({
+        controlType: OPTIONS_LIST_CONTROL,
         dataViewTitle: 'animals-*',
         fieldName: 'name.keyword',
         title: 'Animal Name',
       });
 
-      await dashboardControls.createOptionsListControl({
+      await dashboardControls.createControl({
+        controlType: OPTIONS_LIST_CONTROL,
         dataViewTitle: 'animals-*',
         fieldName: 'sound.keyword',
         title: 'Animal Sound',
       });
 
       controlIds = await dashboardControls.getAllControlIds();
+    });
+
+    after(async () => {
+      await security.testUser.restoreDefaults();
     });
 
     it('Shows all available options in first Options List control', async () => {

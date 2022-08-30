@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import { get, uniq } from 'lodash';
 import { CollectorFetchContext, UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { get, uniq } from 'lodash';
 import {
-  METRICBEAT_INDEX_NAME_UNIQUE_TOKEN,
-  ELASTICSEARCH_SYSTEM_ID,
   APM_SYSTEM_ID,
-  KIBANA_SYSTEM_ID,
   BEATS_SYSTEM_ID,
-  LOGSTASH_SYSTEM_ID,
+  ELASTICSEARCH_SYSTEM_ID,
   KIBANA_STATS_TYPE_MONITORING,
+  KIBANA_SYSTEM_ID,
+  LOGSTASH_SYSTEM_ID,
+  METRICBEAT_INDEX_NAME_UNIQUE_TOKEN,
 } from '../../../../common/constants';
+import { TimeRange } from '../../../../common/http_api/shared';
 import { LegacyRequest } from '../../../types';
 import { getLivesNodes } from '../../elasticsearch/nodes/get_nodes/get_live_nodes';
 
@@ -31,7 +32,7 @@ interface Bucket {
 const NUMBER_OF_SECONDS_AGO_TO_LOOK = 30;
 
 const getRecentMonitoringDocuments = async (
-  req: LegacyRequest,
+  req: LegacyRequest<unknown, unknown, { timeRange?: TimeRange }>,
   indexPatterns: Record<string, string>,
   clusterUuid?: string,
   nodeUuid?: string,
@@ -300,7 +301,7 @@ function isBeatFromAPM(bucket: Bucket) {
   return get(beatType, 'buckets[0].key') === 'apm-server';
 }
 
-async function hasNecessaryPermissions(req: LegacyRequest) {
+async function hasNecessaryPermissions(req: LegacyRequest<unknown, unknown, unknown>) {
   const licenseService = await req.server.plugins.monitoring.info.getLicenseService();
   const securityFeature = licenseService.getSecurityFeature();
   if (!securityFeature.isAvailable || !securityFeature.isEnabled) {
@@ -366,7 +367,7 @@ async function getLiveKibanaInstance(usageCollection?: UsageCollectionSetup) {
   );
 }
 
-async function getLiveElasticsearchClusterUuid(req: LegacyRequest) {
+async function getLiveElasticsearchClusterUuid(req: LegacyRequest<unknown, unknown, unknown>) {
   const params = {
     path: '/_cluster/state/cluster_uuid',
     method: 'GET',
@@ -377,7 +378,9 @@ async function getLiveElasticsearchClusterUuid(req: LegacyRequest) {
   return clusterUuid;
 }
 
-async function getLiveElasticsearchCollectionEnabled(req: LegacyRequest) {
+async function getLiveElasticsearchCollectionEnabled(
+  req: LegacyRequest<unknown, unknown, unknown>
+) {
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('admin');
   const response = await callWithRequest(req, 'transport.request', {
     method: 'GET',
@@ -425,7 +428,7 @@ async function getLiveElasticsearchCollectionEnabled(req: LegacyRequest) {
  * @param {*} skipLiveData Optional and will not make any live api calls if set to true
  */
 export const getCollectionStatus = async (
-  req: LegacyRequest,
+  req: LegacyRequest<unknown, unknown, { timeRange?: TimeRange }>,
   indexPatterns: Record<string, string>,
   clusterUuid?: string,
   nodeUuid?: string,

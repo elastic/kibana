@@ -14,7 +14,7 @@ import {
 } from './discover_state';
 import { createBrowserHistory, History } from 'history';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import type { SavedSearch } from '../../../services/saved_searches';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../common';
 
 let history: History;
@@ -26,6 +26,8 @@ const uiSettingsMock = {
 } as IUiSettingsClient;
 
 describe('Test discover state', () => {
+  let stopSync = () => {};
+
   beforeEach(async () => {
     history = createBrowserHistory();
     history.push('/');
@@ -35,10 +37,11 @@ describe('Test discover state', () => {
       uiSettings: uiSettingsMock,
     });
     await state.replaceUrlAppState({});
-    await state.startSync();
+    stopSync = state.startSync();
   });
   afterEach(() => {
-    state.stopSync();
+    stopSync();
+    stopSync = () => {};
   });
   test('setting app state and syncing to URL', async () => {
     state.setAppState({ index: 'modified' });
@@ -77,6 +80,13 @@ describe('Test discover state', () => {
     state.setAppState({ index: 'second' });
     expect(state.getPreviousAppState()).toEqual(stateA);
   });
+
+  test('pauseAutoRefreshInterval sets refreshInterval.pause to true', async () => {
+    history.push('/#?_g=(refreshInterval:(pause:!f,value:5000))');
+    expect(getCurrentUrl()).toBe('/#?_g=(refreshInterval:(pause:!f,value:5000))');
+    await state.pauseAutoRefreshInterval();
+    expect(getCurrentUrl()).toBe('/#?_g=(refreshInterval:(pause:!t,value:5000))');
+  });
 });
 describe('Test discover initial state sort handling', () => {
   test('Non-empty sort in URL should not fallback to state defaults', async () => {
@@ -89,7 +99,7 @@ describe('Test discover initial state sort handling', () => {
       uiSettings: uiSettingsMock,
     });
     await state.replaceUrlAppState({});
-    await state.startSync();
+    const stopSync = state.startSync();
     expect(state.appStateContainer.getState().sort).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -98,6 +108,7 @@ describe('Test discover initial state sort handling', () => {
         ],
       ]
     `);
+    stopSync();
   });
   test('Empty sort in URL should allow fallback state defaults', async () => {
     history = createBrowserHistory();
@@ -109,7 +120,7 @@ describe('Test discover initial state sort handling', () => {
       uiSettings: uiSettingsMock,
     });
     await state.replaceUrlAppState({});
-    await state.startSync();
+    const stopSync = state.startSync();
     expect(state.appStateContainer.getState().sort).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -118,6 +129,7 @@ describe('Test discover initial state sort handling', () => {
         ],
       ]
     `);
+    stopSync();
   });
 });
 

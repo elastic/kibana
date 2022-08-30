@@ -5,42 +5,45 @@
  * 2.0.
  */
 
+import type {
+  EuiBasicTableProps,
+  EuiGlobalToastListToast as Toast,
+  EuiTableRowCellProps,
+} from '@elastic/eui';
 import {
   EuiBasicTable,
-  EuiBasicTableProps,
   EuiButtonEmpty,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiGlobalToastListToast as Toast,
   EuiLoadingContent,
   EuiPagination,
   EuiPopover,
-  EuiTableRowCellProps,
 } from '@elastic/eui';
 import { noop } from 'lodash/fp';
-import React, { FC, memo, useState, useMemo, useEffect, ComponentType, useCallback } from 'react';
+import type { FC, ComponentType } from 'react';
+import React, { memo, useState, useMemo, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 
-import { Direction } from '../../../../common/search_strategy';
+import type { Direction } from '../../../../common/search_strategy';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../common/constants';
-import { HostsTableColumns } from '../../../hosts/components/hosts_table';
-import { NetworkDnsColumns } from '../../../network/components/network_dns_table/columns';
-import { NetworkHttpColumns } from '../../../network/components/network_http_table/columns';
-import {
+import type { HostsTableColumns } from '../../../hosts/components/hosts_table';
+import type { NetworkDnsColumns } from '../../../network/components/network_dns_table/columns';
+import type { NetworkHttpColumns } from '../../../network/components/network_http_table/columns';
+import type {
   NetworkTopNFlowColumns,
   NetworkTopNFlowColumnsNetworkDetails,
 } from '../../../network/components/network_top_n_flow_table/columns';
-import {
+import type {
   NetworkTopCountriesColumns,
   NetworkTopCountriesColumnsNetworkDetails,
 } from '../../../network/components/network_top_countries_table/columns';
-import { TlsColumns } from '../../../network/components/tls_table/columns';
-import { UncommonProcessTableColumns } from '../../../hosts/components/uncommon_process_table';
-import { HostRiskScoreColumns } from '../../../hosts/components/host_risk_score_table';
+import type { TlsColumns } from '../../../network/components/tls_table/columns';
+import type { UncommonProcessTableColumns } from '../../../hosts/components/uncommon_process_table';
+import type { HostRiskScoreColumns } from '../../../hosts/components/host_risk_score_table';
 
-import { UsersColumns } from '../../../network/components/users_table/columns';
+import type { UsersColumns } from '../../../network/components/users_table/columns';
 import { HeaderSection } from '../header_section';
 import { Loader } from '../loader';
 import { useStateToaster } from '../toasters';
@@ -49,8 +52,8 @@ import * as i18n from './translations';
 import { Panel } from '../panel';
 import { InspectButtonContainer } from '../inspect';
 import { useQueryToggle } from '../../containers/query_toggle';
-import { UsersTableColumns } from '../../../users/components/all_users';
-import { AuthTableColumns } from '../authentication/types';
+import type { UsersTableColumns } from '../../../users/components/all_users';
+import type { AuthTableColumns } from '../authentication/types';
 
 const DEFAULT_DATA_TEST_SUBJ = 'paginated-table';
 
@@ -273,7 +276,6 @@ const PaginatedTableComponent: FC<SiemTables> = ({
     <InspectButtonContainer show={!loadingInitial}>
       <Panel data-test-subj={`${dataTestSubj}-loading-${loading}`} loading={loading}>
         <HeaderSection
-          height={!toggleStatus ? 40 : undefined}
           toggleStatus={toggleStatus}
           toggleQuery={toggleQuery}
           headerFilters={headerFilters}

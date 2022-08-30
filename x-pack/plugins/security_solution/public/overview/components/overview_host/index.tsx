@@ -6,13 +6,13 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
 
 import { DEFAULT_NUMBER_FORMAT, APP_UI_ID } from '../../../../common/constants';
-import { ESQuery } from '../../../../common/typed_json';
+import type { ESQuery } from '../../../../common/typed_json';
 import { ID as OverviewHostQueryId, useHostOverview } from '../../containers/overview_host';
 import { HeaderSection } from '../../../common/components/header_section';
 import { useUiSetting$, useKibana } from '../../../common/lib/kibana';
@@ -20,7 +20,7 @@ import { getHostDetailsUrl, useFormatUrl } from '../../../common/components/link
 import { getOverviewHostStats, OverviewHostStats } from '../overview_host_stats';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { InspectButtonContainer } from '../../../common/components/inspect';
-import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
+import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { SecurityPageName } from '../../../app/types';
 import { LinkButton } from '../../../common/components/links';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
@@ -130,33 +130,30 @@ const OverviewHostComponent: React.FC<OverviewHostProps> = ({
   );
 
   return (
-    <EuiFlexItem>
-      <InspectButtonContainer show={toggleStatus}>
-        <EuiPanel hasBorder>
-          <HeaderSection
-            id={OverviewHostQueryId}
-            height={!toggleStatus ? 30 : undefined}
-            subtitle={subtitle}
-            toggleStatus={toggleStatus}
-            toggleQuery={toggleQuery}
-            title={title}
-            isInspectDisabled={filterQuery === undefined}
-          >
-            <>{hostPageButton}</>
-          </HeaderSection>
-          {toggleStatus && (
-            <OverviewHostStatsManage
-              loading={loading}
-              data={overviewHost}
-              setQuery={setQuery}
-              id={id}
-              inspect={inspect}
-              refetch={refetch}
-            />
-          )}
-        </EuiPanel>
-      </InspectButtonContainer>
-    </EuiFlexItem>
+    <InspectButtonContainer show={toggleStatus}>
+      <EuiPanel hasBorder>
+        <HeaderSection
+          id={OverviewHostQueryId}
+          subtitle={subtitle}
+          toggleStatus={toggleStatus}
+          toggleQuery={toggleQuery}
+          title={title}
+          isInspectDisabled={filterQuery === undefined}
+        >
+          <>{hostPageButton}</>
+        </HeaderSection>
+        {toggleStatus && (
+          <OverviewHostStatsManage
+            loading={loading}
+            data={overviewHost}
+            setQuery={setQuery}
+            id={id}
+            inspect={inspect}
+            refetch={refetch}
+          />
+        )}
+      </EuiPanel>
+    </InspectButtonContainer>
   );
 };
 

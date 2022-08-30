@@ -8,7 +8,8 @@
 import { noop } from 'lodash/fp';
 import React, { useState } from 'react';
 
-import { DataProvider, DataProviderType, IS_OPERATOR } from './data_provider';
+import type { DataProvider } from './data_provider';
+import { DataProviderType, IS_OPERATOR } from './data_provider';
 import { ProviderItemBadge } from './provider_item_badge';
 
 interface OwnProps {

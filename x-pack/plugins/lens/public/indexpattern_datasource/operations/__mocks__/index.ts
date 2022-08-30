@@ -16,6 +16,7 @@ jest.spyOn(actualHelpers, 'copyColumn');
 jest.spyOn(actualHelpers, 'insertOrReplaceColumn');
 jest.spyOn(actualHelpers, 'insertNewColumn');
 jest.spyOn(actualHelpers, 'replaceColumn');
+jest.spyOn(actualHelpers, 'adjustColumnReferencesForChangedColumn');
 jest.spyOn(actualHelpers, 'getErrorMessages');
 jest.spyOn(actualHelpers, 'getColumnOrder');
 
@@ -50,6 +51,7 @@ export const {
   isOperationAllowedAsReference,
   canTransition,
   isColumnValidAsReference,
+  adjustColumnReferencesForChangedColumn,
   getManagedColumnsFrom,
 } = actualHelpers;
 

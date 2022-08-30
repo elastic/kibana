@@ -34,10 +34,8 @@ import {
   MemoryInputValidatorResult,
 } from '../../../../../../../common/util/validators';
 import { DATA_FRAME_TASK_STATE } from '../analytics_list/common';
-import {
-  useRefreshAnalyticsList,
-  UpdateDataFrameAnalyticsConfig,
-} from '../../../../common/analytics';
+import { useRefreshAnalyticsList } from '../../../../common/analytics';
+import { UpdateDataFrameAnalyticsConfig } from '../../../../../../../common/types/data_frame_analytics';
 
 import { EditAction } from './use_edit_action';
 
@@ -51,7 +49,9 @@ export const EditActionFlyout: FC<Required<EditAction>> = ({ closeFlyout, item }
 
   const [allowLazyStart, setAllowLazyStart] = useState<string>(initialAllowLazyStart);
   const [description, setDescription] = useState<string>(config.description || '');
-  const [modelMemoryLimit, setModelMemoryLimit] = useState<string>(config.model_memory_limit);
+  const [modelMemoryLimit, setModelMemoryLimit] = useState<string | undefined>(
+    config.model_memory_limit
+  );
   const [mmlValidationError, setMmlValidationError] = useState<string | undefined>();
   const [maxNumThreads, setMaxNumThreads] = useState<number | undefined>(config.max_num_threads);
 
@@ -112,7 +112,7 @@ export const EditActionFlyout: FC<Required<EditAction>> = ({ closeFlyout, item }
       refresh();
       closeFlyout();
     } catch (e) {
-      // eslint-disable-next-line
+      // eslint-disable-next-line no-console
       console.error(e);
 
       toastNotificationService.displayErrorToast(

@@ -6,7 +6,7 @@
  */
 
 import type { IUiSettingsClient } from '@kbn/core/public';
-import { partition } from 'lodash';
+import { partition, uniq } from 'lodash';
 import {
   AggFunctionsMapping,
   EsaggsExpressionFunctionDefinition,
@@ -22,12 +22,13 @@ import {
 } from '@kbn/expressions-plugin/public';
 import { GenericIndexPatternColumn } from './indexpattern';
 import { operationDefinitionMap } from './operations';
-import { IndexPattern, IndexPatternPrivateState, IndexPatternLayer } from './types';
+import { IndexPatternPrivateState, IndexPatternLayer } from './types';
 import { DateHistogramIndexPatternColumn, RangeIndexPatternColumn } from './operations/definitions';
 import { FormattedIndexPatternColumn } from './operations/definitions/column_types';
 import { isColumnFormatted, isColumnOfType } from './operations/definitions/helpers';
+import type { IndexPattern, IndexPatternMap } from '../types';
 
-type OriginalColumn = { id: string } & GenericIndexPatternColumn;
+export type OriginalColumn = { id: string } & GenericIndexPatternColumn;
 
 declare global {
   interface Window {
@@ -37,6 +38,15 @@ declare global {
     ELASTIC_LENS_DELAY_SECONDS?: number;
   }
 }
+
+// esAggs column ID manipulation functions
+const extractEsAggId = (id: string) => id.split('.')[0].split('-')[2];
+const updatePositionIndex = (currentId: string, newIndex: number) => {
+  const [fullId, percentile] = currentId.split('.');
+  const idParts = fullId.split('-');
+  idParts[1] = String(newIndex);
+  return idParts.join('-') + (percentile ? `.${percentile}` : '');
+};
 
 function getExpressionForLayer(
   layer: IndexPatternLayer,
@@ -93,9 +103,10 @@ function getExpressionForLayer(
       operationDefinitionMap[col.operationType]?.input === 'fullReference' ||
       operationDefinitionMap[col.operationType]?.input === 'managedReference'
   );
+  const hasDateHistogram = columnEntries.some(([, c]) => c.operationType === 'date_histogram');
 
   if (referenceEntries.length || esAggEntries.length) {
-    const aggs: ExpressionAstExpressionBuilder[] = [];
+    let aggs: ExpressionAstExpressionBuilder[] = [];
     const expressions: ExpressionAstFunction[] = [];
 
     sortedReferences(referenceEntries).forEach((colId) => {
@@ -107,19 +118,29 @@ function getExpressionForLayer(
     });
 
     const orderedColumnIds = esAggEntries.map(([colId]) => colId);
+    let esAggsIdMap: Record<string, OriginalColumn[]> = {};
+    const aggExpressionToEsAggsIdMap: Map<ExpressionAstExpressionBuilder, string> = new Map();
     esAggEntries.forEach(([colId, col], index) => {
       const def = operationDefinitionMap[col.operationType];
       if (def.input !== 'fullReference' && def.input !== 'managedReference') {
+        const aggId = String(index);
+
         const wrapInFilter = Boolean(def.filterable && col.filter);
+        const wrapInTimeFilter =
+          def.canReduceTimeRange &&
+          !hasDateHistogram &&
+          col.reducedTimeRange &&
+          indexPattern.timeFieldName;
         let aggAst = def.toEsAggsFn(
           col,
-          wrapInFilter ? `${index}-metric` : String(index),
+          wrapInFilter ? `${aggId}-metric` : aggId,
           indexPattern,
           layer,
           uiSettings,
-          orderedColumnIds
+          orderedColumnIds,
+          operationDefinitionMap
         );
-        if (wrapInFilter) {
+        if (wrapInFilter || wrapInTimeFilter) {
           aggAst = buildExpressionFunction<AggFunctionsMapping['aggFilteredMetric']>(
             'aggFilteredMetric',
             {
@@ -132,6 +153,8 @@ function getExpressionForLayer(
                   enabled: true,
                   schema: 'bucket',
                   filter: col.filter && queryToAst(col.filter),
+                  timeWindow: wrapInTimeFilter ? col.reducedTimeRange : undefined,
+                  timeShift: col.timeShift,
                 }),
               ]),
               customMetric: buildExpression({ type: 'expression', chain: [aggAst] }),
@@ -139,12 +162,25 @@ function getExpressionForLayer(
             }
           ).toAst();
         }
-        aggs.push(
-          buildExpression({
-            type: 'expression',
-            chain: [aggAst],
-          })
-        );
+
+        const expressionBuilder = buildExpression({
+          type: 'expression',
+          chain: [aggAst],
+        });
+        aggs.push(expressionBuilder);
+
+        const esAggsId = window.ELASTIC_LENS_DELAY_SECONDS
+          ? `col-${index + (col.isBucketed ? 0 : 1)}-${aggId}`
+          : `col-${index}-${aggId}`;
+
+        esAggsIdMap[esAggsId] = [
+          {
+            ...col,
+            id: colId,
+          },
+        ];
+
+        aggExpressionToEsAggsIdMap.set(expressionBuilder, esAggsId);
       }
     });
 
@@ -164,19 +200,63 @@ function getExpressionForLayer(
       );
     }
 
-    const idMap = esAggEntries.reduce((currentIdMap, [colId, column], index) => {
-      const esAggsId = window.ELASTIC_LENS_DELAY_SECONDS
-        ? `col-${index + (column.isBucketed ? 0 : 1)}-${index}`
-        : `col-${index}-${index}`;
+    uniq(esAggEntries.map(([_, column]) => column.operationType)).forEach((type) => {
+      const optimizeAggs = operationDefinitionMap[type].optimizeEsAggs?.bind(
+        operationDefinitionMap[type]
+      );
+      if (optimizeAggs) {
+        const { aggs: newAggs, esAggsIdMap: newIdMap } = optimizeAggs(
+          aggs,
+          esAggsIdMap,
+          aggExpressionToEsAggsIdMap
+        );
 
-      return {
-        ...currentIdMap,
-        [esAggsId]: {
-          ...column,
-          id: colId,
-        },
-      };
-    }, {} as Record<string, OriginalColumn>);
+        aggs = newAggs;
+        esAggsIdMap = newIdMap;
+      }
+    });
+
+    /*
+      Update ID mappings with new agg array positions.
+
+      Given this esAggs-ID-to-original-column map after percentile (for example) optimization:
+      col-0-0:    column1
+      col-?-1.34: column2 (34th percentile)
+      col-2-2:    column3
+      col-?-1.98: column4 (98th percentile)
+
+      and this array of aggs
+      0: { id: 0 }
+      1: { id: 2 }
+      2: { id: 1 }
+
+      We need to update the anticipated agg indicies to match the aggs array:
+      col-0-0:    column1
+      col-2-1.34: column2 (34th percentile)
+      col-1-2:    column3
+      col-3-3.98: column4 (98th percentile)
+    */
+
+    const updatedEsAggsIdMap: Record<string, OriginalColumn[]> = {};
+    let counter = 0;
+
+    const esAggsIds = Object.keys(esAggsIdMap);
+    aggs.forEach((builder) => {
+      const esAggId = builder.functions[0].getArgument('id')?.[0];
+      const matchingEsAggColumnIds = esAggsIds.filter((id) => extractEsAggId(id) === esAggId);
+
+      matchingEsAggColumnIds.forEach((currentId) => {
+        const currentColumn = esAggsIdMap[currentId][0];
+        const aggIndex = window.ELASTIC_LENS_DELAY_SECONDS
+          ? counter + (currentColumn.isBucketed ? 0 : 1)
+          : counter;
+        const newId = updatePositionIndex(currentId, aggIndex);
+        updatedEsAggsIdMap[newId] = esAggsIdMap[currentId];
+
+        counter++;
+      });
+    });
+
     const columnsWithFormatters = columnEntries.filter(
       ([, col]) =>
         (isColumnOfType<RangeIndexPatternColumn>('range', col) && col.params?.parentFormat) ||
@@ -277,6 +357,7 @@ function getExpressionForLayer(
     return {
       type: 'expression',
       chain: [
+        { type: 'function', function: 'kibana', arguments: {} },
         buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
           index: buildExpression([
             buildExpressionFunction<IndexPatternLoadExpressionFunctionDefinition>(
@@ -291,9 +372,9 @@ function getExpressionForLayer(
         }).toAst(),
         {
           type: 'function',
-          function: 'lens_rename_columns',
+          function: 'lens_map_to_columns',
           arguments: {
-            idMap: [JSON.stringify(idMap)],
+            idMap: [JSON.stringify(updatedEsAggsIdMap)],
           },
         },
         ...expressions,
@@ -336,12 +417,13 @@ function sortedReferences(columns: Array<readonly [string, GenericIndexPatternCo
 export function toExpression(
   state: IndexPatternPrivateState,
   layerId: string,
+  indexPatterns: IndexPatternMap,
   uiSettings: IUiSettingsClient
 ) {
   if (state.layers[layerId]) {
     return getExpressionForLayer(
       state.layers[layerId],
-      state.indexPatterns[state.layers[layerId].indexPatternId],
+      indexPatterns[state.layers[layerId].indexPatternId],
       uiSettings
     );
   }

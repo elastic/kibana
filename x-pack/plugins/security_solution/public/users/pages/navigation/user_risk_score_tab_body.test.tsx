@@ -29,23 +29,22 @@ describe('All users query tab body', () => {
     endDate: '2019-06-25T06:31:59.345Z',
     type: UsersType.page,
   };
+
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
+
     mockUseUserRiskScore.mockReturnValue([
       false,
       {
-        authentications: [],
-        id: '123',
         inspect: {
           dsl: [],
           response: [],
         },
         isInspected: false,
         totalCount: 0,
-        pageInfo: { activePage: 1, fakeTotalCount: 100, showMorePagesIndicator: false },
-        loadPage: jest.fn(),
         refetch: jest.fn(),
+        isModuleEnabled: true,
       },
     ]);
     mockUseUserRiskScoreKpi.mockReturnValue({
@@ -59,6 +58,7 @@ describe('All users query tab body', () => {
       },
     });
   });
+
   it('toggleStatus=true, do not skip', () => {
     render(
       <TestProviders>
@@ -68,6 +68,7 @@ describe('All users query tab body', () => {
     expect(mockUseUserRiskScore.mock.calls[0][0].skip).toEqual(false);
     expect(mockUseUserRiskScoreKpi.mock.calls[0][0].skip).toEqual(false);
   });
+
   it('toggleStatus=false, skip', () => {
     mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: jest.fn() });
     render(

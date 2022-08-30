@@ -94,11 +94,18 @@ export const mapSortingColumns = ({
     direction: 'asc' | 'desc';
   }>;
 }): SortColumnTimeline[] =>
-  columns.map(({ id, direction }) => ({
-    columnId: id,
-    columnType: columnHeaders.find((ch) => ch.id === id)?.type ?? 'text',
-    sortDirection: direction,
-  }));
+  columns.map(({ id, direction }) => {
+    const columnHeader = columnHeaders.find((ch) => ch.id === id);
+    const columnType = columnHeader?.type ?? '';
+    const esTypes = columnHeader?.esTypes ?? [];
+
+    return {
+      columnId: id,
+      columnType,
+      esTypes,
+      sortDirection: direction,
+    };
+  });
 
 export const allowSorting = ({
   browserField,

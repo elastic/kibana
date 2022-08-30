@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { RefreshInterval, TimeRange, Query, Filter } from '../..';
+import type { TimeRange, Query, Filter } from '@kbn/es-query';
+import { RefreshInterval } from '../..';
 
 export type SavedQueryTimeFilter = TimeRange & {
   refreshInterval: RefreshInterval;

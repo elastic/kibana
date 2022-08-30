@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { InputsModelId } from '../../store/inputs/constants';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 
 export type LensAttributes = TypedLensByValueInput['attributes'];
 export type GetLensAttributes = (stackByField?: string) => LensAttributes;
@@ -14,7 +13,7 @@ export type GetLensAttributes = (stackByField?: string) => LensAttributes;
 export interface VisualizationActionsProps {
   className?: string;
   getLensAttributes?: GetLensAttributes;
-  inputId?: InputsModelId;
+  inputId?: 'global' | 'timeline';
   inspectIndex?: number;
   isInspectButtonDisabled?: boolean;
   isMultipleQuery?: boolean;

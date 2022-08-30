@@ -15,7 +15,7 @@ import { SavedObjectsClient } from '@kbn/core/server';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
-import { SavedObjectsUtils } from '@kbn/core/server';
+import { SavedObjectsUtils, SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import { ElasticsearchAssetType } from '../../../types';
@@ -44,11 +44,9 @@ export async function removeInstallation(options: {
   esClient: ElasticsearchClient;
   force?: boolean;
 }): Promise<AssetReference[]> {
-  const { savedObjectsClient, pkgName, pkgVersion, esClient, force } = options;
+  const { savedObjectsClient, pkgName, pkgVersion, esClient } = options;
   const installation = await getInstallation({ savedObjectsClient, pkgName });
   if (!installation) throw Boom.badRequest(`${pkgName} is not installed`);
-  if (installation.removable === false && !force)
-    throw Boom.badRequest(`${pkgName} is installed by default and cannot be removed`);
 
   const { total } = await packagePolicyService.list(savedObjectsClient, {
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
@@ -130,6 +128,8 @@ function deleteESAssets(
       return deleteTransforms(esClient, [id]);
     } else if (assetType === ElasticsearchAssetType.dataStreamIlmPolicy) {
       return deleteIlms(esClient, [id]);
+    } else if (assetType === ElasticsearchAssetType.ilmPolicy) {
+      return deleteIlms(esClient, [id]);
     } else if (assetType === ElasticsearchAssetType.mlModel) {
       return deleteMlModel(esClient, [id]);
     }
@@ -176,7 +176,7 @@ async function deleteAssets(
     ]);
   } catch (err) {
     // in the rollback case, partial installs are likely, so missing assets are not an error
-    if (!savedObjectsClient.errors.isNotFoundError(err)) {
+    if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
       logger.error(err);
     }
   }
@@ -224,7 +224,7 @@ export async function deleteKibanaSavedObjectsAssets({
     await deleteKibanaAssets(assetsToDelete, spaceId);
   } catch (err) {
     // in the rollback case, partial installs are likely, so missing assets are not an error
-    if (!savedObjectsClient.errors.isNotFoundError(err)) {
+    if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
       logger.error(err);
     }
   }

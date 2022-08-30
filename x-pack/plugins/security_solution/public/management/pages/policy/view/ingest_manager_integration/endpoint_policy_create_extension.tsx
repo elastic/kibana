@@ -8,7 +8,7 @@
 import React, { memo, useEffect } from 'react';
 import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { PackagePolicyCreateExtensionComponentProps } from '@kbn/fleet-plugin/public';
+import type { PackagePolicyCreateExtensionComponentProps } from '@kbn/fleet-plugin/public';
 
 /**
  * Exports Endpoint-specific package policy instructions
@@ -38,7 +38,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
             <p>
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.ingestManager.createPackagePolicy.endpointConfiguration"
-                defaultMessage="We'll save your integration with our recommended defaults. You can change this later by editing the Endpoint Security integration within your agent policy."
+                defaultMessage="We'll save your integration with our recommended defaults. You can change this later by editing the Endpoint and Cloud Security integration within your agent policy."
               />
             </p>
           </EuiText>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FindRulesSchema } from './find_rules_schema';
+import type { FindRulesSchema } from './find_rules_schema';
 
 export const validateSortOrder = (find: FindRulesSchema): string[] => {
   if (find.sort_order != null || find.sort_field != null) {

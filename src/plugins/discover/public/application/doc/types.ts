@@ -11,5 +11,5 @@ export enum ElasticRequestState {
   NotFound,
   Found,
   Error,
-  NotFoundIndexPattern,
+  NotFoundDataView,
 }

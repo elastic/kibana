@@ -8,8 +8,8 @@
 import actionCreatorFactory, { Action } from 'typescript-fsa';
 import { i18n } from '@kbn/i18n';
 import { takeLatest, call, put, select, cps } from 'redux-saga/effects';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import { GraphWorkspaceSavedObject, IndexPatternSavedObject, Workspace } from '../types';
+import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
+import { GraphWorkspaceSavedObject, Workspace } from '../types';
 import { GraphStoreDependencies, GraphState, submitSearch } from '.';
 import { datasourceSelector } from './datasource';
 import { setDatasource, IndexpatternDatasource } from './datasource';
@@ -28,7 +28,7 @@ import { getEditPath } from '../services/url';
 import { saveSavedWorkspace } from '../helpers/saved_workspace_utils';
 
 export interface LoadSavedWorkspacePayload {
-  indexPatterns: IndexPatternSavedObject[];
+  dataViews: DataViewListItem[];
   savedWorkspace: GraphWorkspaceSavedObject;
   urlQuery: string | null;
 }
@@ -51,8 +51,8 @@ export const loadingSaga = ({
   indexPatternProvider,
 }: GraphStoreDependencies) => {
   function* deserializeWorkspace(action: Action<LoadSavedWorkspacePayload>): Generator {
-    const { indexPatterns, savedWorkspace, urlQuery } = action.payload;
-    const migrationStatus = migrateLegacyIndexPatternRef(savedWorkspace, indexPatterns);
+    const { dataViews, savedWorkspace, urlQuery } = action.payload;
+    const migrationStatus = migrateLegacyIndexPatternRef(savedWorkspace, dataViews);
     if (!migrationStatus.success) {
       notifications.toasts.addDanger(
         i18n.translate('xpack.graph.loadWorkspace.missingDataViewErrorMessage', {

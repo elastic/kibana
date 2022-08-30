@@ -38,6 +38,7 @@ export const ConfirmIncomingData: React.FunctionComponent<Props> = ({
   if (!isLoading && enrolledAgents > 0 && numAgentsWithData > 0) {
     setAgentDataConfirmed(true);
   }
+
   if (!agentDataConfirmed) {
     return (
       <EuiText>

@@ -14,3 +14,5 @@ export const ModelsTableToConfigMapping = {
   type: 'type',
   modelType: 'model_type',
 } as const;
+
+export { TrainedModelLink } from './model_link';

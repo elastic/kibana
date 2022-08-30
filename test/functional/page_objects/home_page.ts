@@ -13,7 +13,6 @@ export class HomePageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly find = this.ctx.getService('find');
   private readonly common = this.ctx.getPageObject('common');
-  private readonly log = this.ctx.getService('log');
 
   async clickSynopsis(title: string) {
     await this.testSubjects.click(`homeSynopsisLink${title}`);
@@ -27,11 +26,19 @@ export class HomePageObject extends FtrService {
     return await this.testSubjects.exists(`sampleDataSetCard${id}`);
   }
 
+  async openSampleDataAccordion() {
+    const accordion = await this.testSubjects.find('showSampleDataAccordion');
+    const className = await accordion.getAttribute('class');
+
+    if (!className.includes('euiAccordion-isOpen')) {
+      await this.testSubjects.click('showSampleDataButton');
+    }
+  }
+
   async isSampleDataSetInstalled(id: string) {
     const sampleDataCard = await this.testSubjects.find(`sampleDataSetCard${id}`);
-    const sampleDataCardInnerHTML = await sampleDataCard.getAttribute('innerHTML');
-    this.log.debug(sampleDataCardInnerHTML);
-    return sampleDataCardInnerHTML.includes('removeSampleDataSet');
+    const deleteButton = await sampleDataCard.findAllByTestSubject(`removeSampleDataSet${id}`);
+    return deleteButton.length > 0;
   }
 
   async isWelcomeInterstitialDisplayed() {
@@ -46,7 +53,13 @@ export class HomePageObject extends FtrService {
     return panelAttributes.map((attributeValue) => attributeValue.split('homSolutionPanel_')[1]);
   }
 
+  async goToSampleDataPage() {
+    await this.testSubjects.click('addSampleData');
+    await this.doesSampleDataSetExist('ecommerce');
+  }
+
   async addSampleDataSet(id: string) {
+    await this.openSampleDataAccordion();
     const isInstalled = await this.isSampleDataSetInstalled(id);
     if (!isInstalled) {
       await this.retry.waitFor('wait until sample data is installed', async () => {
@@ -58,6 +71,7 @@ export class HomePageObject extends FtrService {
   }
 
   async removeSampleDataSet(id: string) {
+    await this.openSampleDataAccordion();
     // looks like overkill but we're hitting flaky cases where we click but it doesn't remove
     await this.testSubjects.waitForEnabled(`removeSampleDataSet${id}`);
     // https://github.com/elastic/kibana/issues/65949
@@ -65,6 +79,7 @@ export class HomePageObject extends FtrService {
     // where it appears the click just didn't work.
     await this.common.sleep(1010);
     await this.testSubjects.click(`removeSampleDataSet${id}`);
+    await this.common.sleep(1010);
     await this._waitForSampleDataLoadingAction(id);
   }
 
@@ -76,6 +91,11 @@ export class HomePageObject extends FtrService {
       // before action is complete
       await sampleDataCard.waitForDeletedByCssSelector('.euiLoadingSpinner');
     });
+  }
+
+  async launchSampleDiscover(id: string) {
+    await this.launchSampleDataSet(id);
+    await this.find.clickByLinkText('Discover');
   }
 
   async launchSampleDashboard(id: string) {
@@ -129,6 +149,7 @@ export class HomePageObject extends FtrService {
   async clickOnConsole() {
     await this.clickSynopsis('console');
   }
+
   async clickOnLogo() {
     await this.testSubjects.click('logo');
   }

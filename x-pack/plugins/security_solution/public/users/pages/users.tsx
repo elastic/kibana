@@ -11,7 +11,7 @@ import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { isTab } from '@kbn/timelines-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { SecurityPageName } from '../../app/types';
@@ -26,7 +26,8 @@ import { useGlobalFullScreen } from '../../common/containers/use_full_screen';
 import { useGlobalTime } from '../../common/containers/use_global_time';
 import { useKibana } from '../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../common/lib/keury';
-import { inputsSelectors, State } from '../../common/store';
+import type { State } from '../../common/store';
+import { inputsSelectors } from '../../common/store';
 import { setAbsoluteRangeDatePicker } from '../../common/store/inputs/actions';
 
 import { SpyRoute } from '../../common/utils/route/spy_routes';
@@ -42,7 +43,7 @@ import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
 import { UsersKpiComponent } from '../components/kpi_users';
-import { UpdateDateRange } from '../../common/components/charts/common';
+import type { UpdateDateRange } from '../../common/components/charts/common';
 import { LastEventIndexKey } from '../../../common/search_strategy';
 import { generateSeverityFilter } from '../../hosts/store/helpers';
 import { UsersTableType } from '../store/model';
@@ -89,7 +90,7 @@ const UsersComponent = () => {
 
   const { tabName } = useParams<{ tabName: string }>();
   const tabsFilters: Filter[] = React.useMemo(() => {
-    if (tabName === UsersTableType.alerts || tabName === UsersTableType.events) {
+    if (tabName === UsersTableType.events) {
       return filters.length > 0 ? [...filters, ...userNameExistsFilter] : userNameExistsFilter;
     }
 
@@ -101,7 +102,7 @@ const UsersComponent = () => {
     return filters;
   }, [severitySelection, tabName, filters]);
 
-  const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
+  const { indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
   const [filterQuery, kqlError] = useMemo(
     () =>
       convertToBuildEsQuery({
@@ -149,7 +150,7 @@ const UsersComponent = () => {
     [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
   );
 
-  const narrowDateRange = useCallback<UpdateDateRange>(
+  const updateDateRange = useCallback<UpdateDateRange>(
     ({ x }) => {
       if (!x) {
         return;
@@ -185,11 +186,7 @@ const UsersComponent = () => {
           <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
             <HeaderPage
               subtitle={
-                <LastEventTime
-                  docValueFields={docValueFields}
-                  indexKey={LastEventIndexKey.users}
-                  indexNames={selectedPatterns}
-                />
+                <LastEventTime indexKey={LastEventIndexKey.users} indexNames={selectedPatterns} />
               }
               border
               title={i18n.PAGE_TITLE}
@@ -202,7 +199,7 @@ const UsersComponent = () => {
               setQuery={setQuery}
               to={to}
               skip={isInitializing || !filterQuery}
-              narrowDateRange={narrowDateRange}
+              updateDateRange={updateDateRange}
             />
 
             <EuiSpacer />
@@ -213,12 +210,10 @@ const UsersComponent = () => {
 
             <UsersTabs
               deleteQuery={deleteQuery}
-              docValueFields={docValueFields}
               filterQuery={tabsFilterQuery || ''}
               from={from}
               indexNames={selectedPatterns}
               isInitializing={isInitializing}
-              setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
               setQuery={setQuery}
               to={to}
               type={usersModel.UsersType.page}

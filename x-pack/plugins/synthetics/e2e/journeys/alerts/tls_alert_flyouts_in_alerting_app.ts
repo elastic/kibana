@@ -6,7 +6,7 @@
  */
 
 import { journey, step, before } from '@elastic/synthetics';
-import { assertText, byTestId, waitForLoadingToFinish } from '../utils';
+import { assertText, byTestId, waitForLoadingToFinish } from '@kbn/observability-plugin/e2e/utils';
 import { loginPageProvider } from '../../page_objects/login';
 
 journey('TlsFlyoutInAlertingApp', async ({ page, params }) => {
@@ -27,7 +27,7 @@ journey('TlsFlyoutInAlertingApp', async ({ page, params }) => {
   step('Open tls alert flyout', async () => {
     await page.click(byTestId('createFirstRuleButton'));
     await waitForLoadingToFinish({ page });
-    await page.click(byTestId('"xpack.synthetics.alerts.tlsCertificate-SelectOption"'));
+    await page.click(byTestId('"xpack.uptime.alerts.tlsCertificate-SelectOption"'));
     await waitForLoadingToFinish({ page });
     await assertText({ page, text: 'has a certificate expiring within' });
   });

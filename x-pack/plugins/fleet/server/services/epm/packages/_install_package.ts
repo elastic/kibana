@@ -10,28 +10,37 @@ import type {
   Logger,
   SavedObject,
   SavedObjectsClientContract,
-  SavedObjectsImporter,
+  ISavedObjectsImporter,
 } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+
+import type { IAssignmentService, ITagsClient } from '@kbn/saved-objects-tagging-plugin/server';
 
 import {
   MAX_TIME_COMPLETE_INSTALL,
   ASSETS_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
-} from '../../../../common';
-import type { InstallablePackage, InstallSource, PackageAssetReference } from '../../../../common';
-import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
-import type { AssetReference, Installation, InstallType } from '../../../types';
-import { installTemplates } from '../elasticsearch/template/install';
+} from '../../../../common/constants';
+import { PACKAGES_SAVED_OBJECT_TYPE, FLEET_INSTALL_FORMAT_VERSION } from '../../../constants';
+import type {
+  AssetReference,
+  Installation,
+  InstallType,
+  InstallablePackage,
+  InstallSource,
+  PackageAssetReference,
+  PackageVerificationResult,
+} from '../../../types';
+import { prepareToInstallTemplates } from '../elasticsearch/template/install';
 import { removeLegacyTemplates } from '../elasticsearch/template/remove_legacy';
 import {
-  installPipelines,
+  prepareToInstallPipelines,
   isTopLevelPipeline,
   deletePreviousPipelines,
 } from '../elasticsearch/ingest_pipeline';
-import { getAllTemplateRefs } from '../elasticsearch/template/install';
 import { installILMPolicy } from '../elasticsearch/ilm/install';
-import { installKibanaAssets, getKibanaAssets } from '../kibana/assets/install';
+import { installKibanaAssetsAndReferences } from '../kibana/assets/install';
 import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
 import { installTransform } from '../elasticsearch/transform/install';
 import { installMlModel } from '../elasticsearch/ml_model';
@@ -40,8 +49,7 @@ import { saveArchiveEntries } from '../archive/storage';
 import { ConcurrentInstallOperationError } from '../../../errors';
 import { packagePolicyService } from '../..';
 
-import { createInstallation, saveKibanaAssetsRefs, updateVersion } from './install';
-import { deleteKibanaSavedObjectsAssets } from './remove';
+import { createInstallation, updateEsAssetReferences, restartInstallation } from './install';
 import { withPackageSpan } from './utils';
 
 // this is only exported for testing
@@ -50,6 +58,8 @@ import { withPackageSpan } from './utils';
 export async function _installPackage({
   savedObjectsClient,
   savedObjectsImporter,
+  savedObjectTagAssignmentService,
+  savedObjectTagClient,
   esClient,
   logger,
   installedPkg,
@@ -58,9 +68,12 @@ export async function _installPackage({
   installType,
   installSource,
   spaceId,
+  verificationResult,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
-  savedObjectsImporter: Pick<SavedObjectsImporter, 'import' | 'resolveImportErrors'>;
+  savedObjectsImporter: Pick<ISavedObjectsImporter, 'import' | 'resolveImportErrors'>;
+  savedObjectTagAssignmentService: IAssignmentService;
+  savedObjectTagClient: ITagsClient;
   esClient: ElasticsearchClient;
   logger: Logger;
   installedPkg?: SavedObject<Installation>;
@@ -69,8 +82,9 @@ export async function _installPackage({
   installType: InstallType;
   installSource: InstallSource;
   spaceId: string;
+  verificationResult?: PackageVerificationResult;
 }): Promise<AssetReference[]> {
-  const { name: pkgName, version: pkgVersion } = packageInfo;
+  const { name: pkgName, version: pkgVersion, title: pkgTitle } = packageInfo;
 
   try {
     // if some installation already exists
@@ -90,11 +104,12 @@ export async function _installPackage({
       } else {
         // if no installation is running, or the installation has been running longer than MAX_TIME_COMPLETE_INSTALL
         // (it might be stuck) update the saved object and proceed
-        await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
-          install_version: pkgVersion,
-          install_status: 'installing',
-          install_started_at: new Date().toISOString(),
-          install_source: installSource,
+        await restartInstallation({
+          savedObjectsClient,
+          pkgName,
+          pkgVersion,
+          installSource,
+          verificationResult,
         });
       }
     } else {
@@ -103,50 +118,94 @@ export async function _installPackage({
         packageInfo,
         installSource,
         spaceId,
+        verificationResult,
       });
     }
 
-    const installedKibanaAssetsRefs = await withPackageSpan('Install Kibana assets', async () => {
-      const kibanaAssets = await getKibanaAssets(paths);
-      if (installedPkg) await deleteKibanaSavedObjectsAssets({ savedObjectsClient, installedPkg });
-      // save new kibana refs before installing the assets
-      const assetRefs = await saveKibanaAssetsRefs(savedObjectsClient, pkgName, kibanaAssets);
-
-      await installKibanaAssets({
-        logger,
+    const kibanaAssetPromise = withPackageSpan('Install Kibana assets', () =>
+      installKibanaAssetsAndReferences({
+        savedObjectsClient,
         savedObjectsImporter,
+        savedObjectTagAssignmentService,
+        savedObjectTagClient,
         pkgName,
-        kibanaAssets,
-      });
+        pkgTitle,
+        paths,
+        installedPkg,
+        logger,
+      })
+    );
+    // Necessary to avoid async promise rejection warning
+    // See https://stackoverflow.com/questions/40920179/should-i-refrain-from-handling-promise-rejection-asynchronously
+    kibanaAssetPromise.catch(() => {});
 
-      return assetRefs;
-    });
+    // Use a shared array that is updated by each operation. This allows each operation to accurately update the
+    // installation object with it's references without requiring a refresh of the SO index on each update (faster).
+    let esReferences = installedPkg?.attributes.installed_es ?? [];
 
     // the rest of the installation must happen in sequential order
     // currently only the base package has an ILM policy
     // at some point ILM policies can be installed/modified
     // per data stream and we should then save them
-    await withPackageSpan('Install ILM policies', () =>
-      installILMPolicy(packageInfo, paths, esClient, logger)
+    esReferences = await withPackageSpan('Install ILM policies', () =>
+      installILMPolicy(packageInfo, paths, esClient, savedObjectsClient, logger, esReferences)
     );
 
-    const installedDataStreamIlm = await withPackageSpan('Install Data Stream ILM policies', () =>
-      installIlmForDataStream(packageInfo, paths, esClient, savedObjectsClient, logger)
-    );
+    ({ esReferences } = await withPackageSpan('Install Data Stream ILM policies', () =>
+      installIlmForDataStream(
+        packageInfo,
+        paths,
+        esClient,
+        savedObjectsClient,
+        logger,
+        esReferences
+      )
+    ));
 
     // installs ml models
-    const installedMlModel = await withPackageSpan('Install ML models', () =>
-      installMlModel(packageInfo, paths, esClient, savedObjectsClient, logger)
+    esReferences = await withPackageSpan('Install ML models', () =>
+      installMlModel(packageInfo, paths, esClient, savedObjectsClient, logger, esReferences)
     );
 
-    // installs versionized pipelines without removing currently installed ones
-    const installedPipelines = await withPackageSpan('Install ingest pipelines', () =>
-      installPipelines(packageInfo, paths, esClient, savedObjectsClient, logger)
+    /**
+     * In order to install assets in parallel, we need to split the preparation step from the installation step. This
+     * allows us to know which asset references are going to be installed so that we can save them on the packages
+     * SO before installation begins. In the case of a failure during installing any individual asset, we'll have the
+     * references necessary to remove any assets in that were successfully installed during the rollback phase.
+     *
+     * This split of prepare/install could be extended to all asset types. Besides performance, it also allows us to
+     * more easily write unit tests against the asset generation code without needing to mock ES responses.
+     */
+    const preparedIngestPipelines = prepareToInstallPipelines(packageInfo, paths);
+    const preparedIndexTemplates = prepareToInstallTemplates(packageInfo, paths, esReferences);
+
+    // Update the references for the templates and ingest pipelines together. Need to be done togther to avoid race
+    // conditions on updating the installed_es field at the same time
+    // These must be saved before we actually attempt to install the templates or pipelines so that we know what to
+    // cleanup in the case that a single asset fails to install.
+    esReferences = await updateEsAssetReferences(
+      savedObjectsClient,
+      packageInfo.name,
+      esReferences,
+      {
+        assetsToRemove: preparedIndexTemplates.assetsToRemove,
+        assetsToAdd: [
+          ...preparedIngestPipelines.assetsToAdd,
+          ...preparedIndexTemplates.assetsToAdd,
+        ],
+      }
     );
-    // install or update the templates referencing the newly installed pipelines
-    const installedTemplates = await withPackageSpan('Install index templates', () =>
-      installTemplates(packageInfo, esClient, logger, paths, savedObjectsClient)
-    );
+
+    // Install index templates and ingest pipelines in parallel since they typically take the longest
+    const [installedTemplates] = await Promise.all([
+      withPackageSpan('Install index templates', () =>
+        preparedIndexTemplates.install(esClient, logger)
+      ),
+      // installs versionized pipelines without removing currently installed ones
+      withPackageSpan('Install ingest pipelines', () =>
+        preparedIngestPipelines.install(esClient, logger)
+      ),
+    ]);
 
     try {
       await removeLegacyTemplates({ packageInfo, esClient, logger });
@@ -159,9 +218,9 @@ export async function _installPackage({
       updateCurrentWriteIndices(esClient, logger, installedTemplates)
     );
 
-    const installedTransforms = await withPackageSpan('Install transforms', () =>
-      installTransform(packageInfo, paths, esClient, savedObjectsClient, logger)
-    );
+    ({ esReferences } = await withPackageSpan('Install transforms', () =>
+      installTransform(packageInfo, paths, esClient, savedObjectsClient, logger, esReferences)
+    ));
 
     // If this is an update or retrying an update, delete the previous version's pipelines
     // Top-level pipeline assets will not be removed on upgrade as of ml model package addition which requires previous
@@ -171,28 +230,30 @@ export async function _installPackage({
       (installType === 'update' || installType === 'reupdate') &&
       installedPkg
     ) {
-      await withPackageSpan('Delete previous ingest pipelines', () =>
+      esReferences = await withPackageSpan('Delete previous ingest pipelines', () =>
         deletePreviousPipelines(
           esClient,
           savedObjectsClient,
           pkgName,
-          installedPkg.attributes.version
+          installedPkg!.attributes.version,
+          esReferences
         )
       );
     }
     // pipelines from a different version may have installed during a failed update
     if (installType === 'rollback' && installedPkg) {
-      await await withPackageSpan('Delete previous ingest pipelines', () =>
+      esReferences = await withPackageSpan('Delete previous ingest pipelines', () =>
         deletePreviousPipelines(
           esClient,
           savedObjectsClient,
           pkgName,
-          installedPkg.attributes.install_version
+          installedPkg!.attributes.install_version,
+          esReferences
         )
       );
     }
-    const installedTemplateRefs = getAllTemplateRefs(installedTemplates);
 
+    const installedKibanaAssetsRefs = await kibanaAssetPromise;
     const packageAssetResults = await withPackageSpan('Update archive entries', () =>
       saveArchiveEntries({
         savedObjectsClient,
@@ -208,14 +269,13 @@ export async function _installPackage({
       })
     );
 
-    // update to newly installed version when all assets are successfully installed
-    if (installedPkg) await updateVersion(savedObjectsClient, pkgName, pkgVersion);
-
     const updatedPackage = await withPackageSpan('Update install status', () =>
       savedObjectsClient.update<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
+        version: pkgVersion,
         install_version: pkgVersion,
         install_status: 'installed',
         package_assets: packageAssetRefs,
+        install_format_schema_version: FLEET_INSTALL_FORMAT_VERSION,
       })
     );
 
@@ -233,16 +293,9 @@ export async function _installPackage({
       });
     }
 
-    return [
-      ...installedKibanaAssetsRefs,
-      ...installedPipelines,
-      ...installedDataStreamIlm,
-      ...installedTemplateRefs,
-      ...installedTransforms,
-      ...installedMlModel,
-    ];
+    return [...installedKibanaAssetsRefs, ...esReferences];
   } catch (err) {
-    if (savedObjectsClient.errors.isConflictError(err)) {
+    if (SavedObjectsErrorHelpers.isConflictError(err)) {
       throw new ConcurrentInstallOperationError(
         `Concurrent installation or upgrade of ${pkgName || 'unknown'}-${
           pkgVersion || 'unknown'

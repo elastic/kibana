@@ -14,10 +14,16 @@ export { QueryStringInput } from './query_string_input';
 export type { StatefulSearchBarProps, SearchBarProps } from './search_bar';
 export type { UnifiedSearchPublicPluginStart, UnifiedSearchPluginSetup } from './types';
 export { SearchBar } from './search_bar';
-export { FilterLabel, FilterItem } from './filter_bar';
+export type { FilterItemsProps } from './filter_bar';
+export { FilterLabel, FilterItem, FilterItems } from './filter_bar';
+export { DataViewsList } from './dataview_picker/dataview_list';
+export { DataViewPicker } from './dataview_picker';
+
+export type { DataViewPickerProps } from './dataview_picker';
 
 export type { ApplyGlobalFilterActionContext } from './actions';
-export { ACTION_GLOBAL_APPLY_FILTER } from './actions';
+export { ACTION_GLOBAL_APPLY_FILTER, UPDATE_FILTER_REFERENCES_ACTION } from './actions';
+export { UPDATE_FILTER_REFERENCES_TRIGGER } from './triggers';
 
 /*
  * Autocomplete query suggestions:

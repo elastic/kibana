@@ -8,6 +8,7 @@
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import { registerCloudDeploymentIdAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
 import { CloudConfigType } from './config';
 import { registerCloudUsageCollector } from './collectors';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
@@ -35,7 +36,7 @@ export interface CloudSetup {
 export class CloudPlugin implements Plugin<CloudSetup> {
   private readonly logger: Logger;
   private readonly config: CloudConfigType;
-  private isDev: boolean;
+  private readonly isDev: boolean;
 
   constructor(private readonly context: PluginInitializerContext) {
     this.logger = this.context.logger.get();
@@ -46,7 +47,12 @@ export class CloudPlugin implements Plugin<CloudSetup> {
   public setup(core: CoreSetup, { usageCollection, security }: PluginsSetup): CloudSetup {
     this.logger.debug('Setting up Cloud plugin');
     const isCloudEnabled = getIsCloudEnabled(this.config.id);
+    registerCloudDeploymentIdAnalyticsContext(core.analytics, this.config.id);
     registerCloudUsageCollector(usageCollection, { isCloudEnabled });
+
+    if (isCloudEnabled) {
+      security?.setIsElasticCloudDeployment();
+    }
 
     if (this.config.full_story.enabled) {
       registerFullstoryRoute({

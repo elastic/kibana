@@ -9,14 +9,15 @@
 
 import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiBasicTableColumn, EuiButtonEmpty, EuiSpacer, EuiInMemoryTable } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiButtonEmpty, EuiSpacer, EuiInMemoryTable } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useSelector } from 'react-redux';
 import { Breadcrumbs } from './breadcrumbs';
 import * as event from '../../../../common/endpoint/models/event';
-import { EventStats } from '../../../../common/endpoint/types';
+import type { EventStats } from '../../../../common/endpoint/types';
 import * as selectors from '../../store/selectors';
-import { ResolverState } from '../../types';
+import type { ResolverState } from '../../types';
 import { StyledPanel } from '../styles';
 import { PanelLoading } from './panel_loading';
 import { useLinkProps } from '../use_link_props';

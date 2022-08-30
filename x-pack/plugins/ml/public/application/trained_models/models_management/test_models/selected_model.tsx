@@ -9,13 +9,13 @@ import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React, { FC } from 'react';
 
 import { NerInference } from './models/ner';
-
-import { LangIdentInference } from './models/lang_ident';
+import { QuestionAnsweringInference } from './models/question_answering';
 
 import {
   TextClassificationInference,
   FillMaskInference,
   ZeroShotClassificationInference,
+  LangIdentInference,
 } from './models/text_classification';
 
 import { TextEmbeddingInference } from './models/text_embedding';
@@ -63,6 +63,11 @@ export const SelectedModel: FC<Props> = ({ model }) => {
 
     if (Object.keys(model.inference_config)[0] === SUPPORTED_PYTORCH_TASKS.FILL_MASK) {
       const inferrer = new FillMaskInference(trainedModels, model);
+      return <InferenceInputForm inferrer={inferrer} />;
+    }
+
+    if (Object.keys(model.inference_config)[0] === SUPPORTED_PYTORCH_TASKS.QUESTION_ANSWERING) {
+      const inferrer = new QuestionAnsweringInference(trainedModels, model);
       return <InferenceInputForm inferrer={inferrer} />;
     }
   }

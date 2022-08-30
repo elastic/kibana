@@ -7,15 +7,13 @@
 
 import { act, waitFor } from '@testing-library/react';
 import React from 'react';
-import {
-  AppContextTestRender,
-  createAppRootMockRenderer,
-} from '../../../../../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../../../common/mock/endpoint';
 import { getEventFiltersListPath } from '../../../../../../common/routing';
 import { eventFiltersListQueryHttpMock } from '../../../../../event_filters/test_utils';
 import { getEndpointPrivilegesInitialStateMock } from '../../../../../../../common/components/user_privileges/endpoint/mocks';
 import { useToasts } from '../../../../../../../common/lib/kibana';
-import { EventFiltersApiClient } from '../../../../../event_filters/service/event_filters_api_client';
+import { EventFiltersApiClient } from '../../../../../event_filters/service/api_client';
 import { FleetArtifactsCard } from './fleet_artifacts_card';
 import { EVENT_FILTERS_LABELS } from '..';
 

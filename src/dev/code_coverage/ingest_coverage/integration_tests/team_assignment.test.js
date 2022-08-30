@@ -8,7 +8,7 @@
 
 import { resolve } from 'path';
 import execa from 'execa';
-import shell from 'shelljs';
+import del from 'del';
 
 const ROOT_DIR = resolve(__dirname, '../../../../..');
 const MOCKS_DIR = resolve(__dirname, './mocks');
@@ -31,7 +31,7 @@ describe('Team Assignment', () => {
   });
 
   afterAll(() => {
-    shell.rm(teamAssignmentsPath);
+    del.sync(teamAssignmentsPath);
   });
 
   describe(`when the codeowners file contains #CC#`, () => {

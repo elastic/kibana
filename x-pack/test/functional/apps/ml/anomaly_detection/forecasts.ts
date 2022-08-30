@@ -40,7 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
 
   describe('forecasts', function () {
-    this.tags(['mlqa']);
+    this.tags(['ml']);
 
     describe('with single metric job', function () {
       before(async () => {

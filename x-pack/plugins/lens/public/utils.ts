@@ -11,16 +11,18 @@ import moment from 'moment-timezone';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { IUiSettingsClient, SavedObjectReference } from '@kbn/core/public';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
-import { search } from '@kbn/data-plugin/public';
+import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
+import { BrushTriggerEvent, ClickTriggerEvent } from '@kbn/charts-plugin/public';
 import type { Document } from './persistence/saved_object_store';
 import type {
   Datasource,
   DatasourceMap,
-  LensBrushEvent,
-  LensFilterEvent,
   Visualization,
+  IndexPatternMap,
+  IndexPatternRef,
 } from './types';
 import type { DatasourceStates, VisualizationState } from './state_management';
+import { IndexPatternServiceAPI } from './indexpattern_service/service';
 
 export function getVisualizeGeoFieldMessage(fieldType: string) {
   return i18n.translate('xpack.lens.visualizeGeoFieldMessage', {
@@ -63,6 +65,51 @@ export const getInitialDatasourceId = (datasourceMap: DatasourceMap, doc?: Docum
   return (doc && getActiveDatasourceIdFromDoc(doc)) || Object.keys(datasourceMap)[0] || null;
 };
 
+export function getInitialDataViewsObject(
+  indexPatterns: IndexPatternMap,
+  indexPatternRefs: IndexPatternRef[]
+) {
+  return {
+    indexPatterns,
+    indexPatternRefs,
+    existingFields: {},
+    isFirstExistenceFetch: true,
+  };
+}
+
+export async function refreshIndexPatternsList({
+  activeDatasources,
+  indexPatternService,
+  indexPatternId,
+  indexPatternsCache,
+}: {
+  indexPatternService: IndexPatternServiceAPI;
+  activeDatasources: Record<string, Datasource>;
+  indexPatternId: string;
+  indexPatternsCache: IndexPatternMap;
+}) {
+  // collect all the onRefreshIndex callbacks from datasources
+  const onRefreshCallbacks = Object.values(activeDatasources)
+    .map((datasource) => datasource?.onRefreshIndexPattern)
+    .filter(Boolean);
+
+  const newlyMappedIndexPattern = await indexPatternService.loadIndexPatterns({
+    cache: {},
+    patterns: [indexPatternId],
+    onIndexPatternRefresh: () => onRefreshCallbacks.forEach((fn) => fn()),
+  });
+  const indexPattern = newlyMappedIndexPattern[indexPatternId];
+  // But what about existingFields here?
+  // When the indexPatterns cache object gets updated, the data panel will
+  // notice it and refetch the fields list existence map
+  indexPatternService.updateDataViewsState({
+    indexPatterns: {
+      ...indexPatternsCache,
+      [indexPatternId]: indexPattern,
+    },
+  });
+}
+
 export function getIndexPatternsIds({
   activeDatasources,
   datasourceStates,
@@ -70,24 +117,28 @@ export function getIndexPatternsIds({
   activeDatasources: Record<string, Datasource>;
   datasourceStates: DatasourceStates;
 }): string[] {
+  let currentIndexPatternId: string | undefined;
   const references: SavedObjectReference[] = [];
   Object.entries(activeDatasources).forEach(([id, datasource]) => {
     const { savedObjectReferences } = datasource.getPersistableState(datasourceStates[id].state);
+    const indexPatternId = datasource.getCurrentIndexPatternId(datasourceStates[id].state);
+    currentIndexPatternId = indexPatternId;
     references.push(...savedObjectReferences);
   });
-
-  const uniqueFilterableIndexPatternIds = uniq(
-    references.filter(({ type }) => type === 'index-pattern').map(({ id }) => id)
-  );
-
-  return uniqueFilterableIndexPatternIds;
+  const referencesIds = references
+    .filter(({ type }) => type === 'index-pattern')
+    .map(({ id }) => id);
+  if (currentIndexPatternId) {
+    referencesIds.unshift(currentIndexPatternId);
+  }
+  return uniq(referencesIds);
 }
 
 export async function getIndexPatternsObjects(
   ids: string[],
-  indexPatternsService: DataViewsContract
+  dataViews: DataViewsContract
 ): Promise<{ indexPatterns: DataView[]; rejectedIds: string[] }> {
-  const responses = await Promise.allSettled(ids.map((id) => indexPatternsService.get(id)));
+  const responses = await Promise.allSettled(ids.map((id) => dataViews.get(id)));
   const fullfilled = responses.filter(
     (response): response is PromiseFulfilledResult<DataView> => response.status === 'fulfilled'
   );
@@ -111,7 +162,10 @@ export function getRemoveOperation(
   return layerCount === 1 ? 'clear' : 'remove';
 }
 
-export function inferTimeField(context: LensBrushEvent['data'] | LensFilterEvent['data']) {
+export function inferTimeField(
+  datatableUtilities: DatatableUtilitiesService,
+  context: BrushTriggerEvent['data'] | ClickTriggerEvent['data']
+) {
   const tablesAndColumns =
     'table' in context
       ? [{ table: context.table, column: context.column }]
@@ -123,7 +177,7 @@ export function inferTimeField(context: LensBrushEvent['data'] | LensFilterEvent
     .map(({ table, column }) => {
       const tableColumn = table.columns[column];
       const hasTimeRange = Boolean(
-        tableColumn && search.aggs.getDateHistogramMetaDataByDatatableColumn(tableColumn)?.timeRange
+        tableColumn && datatableUtilities.getDateHistogramMeta(tableColumn)?.timeRange
       );
       if (hasTimeRange) {
         return tableColumn.meta.field;
@@ -131,3 +185,10 @@ export function inferTimeField(context: LensBrushEvent['data'] | LensFilterEvent
     })
     .find(Boolean);
 }
+
+/**
+ * The dimension container is set up to close when it detects a click outside it.
+ * Use this CSS class to exclude particular elements from this behavior.
+ */
+export const DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS =
+  'lensDontCloseDimensionContainerOnClick';

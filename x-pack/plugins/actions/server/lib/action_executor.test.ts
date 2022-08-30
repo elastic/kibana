@@ -59,6 +59,7 @@ test('successfully executes', async () => {
     id: 'test',
     name: 'Test',
     minimumLicenseRequired: 'basic',
+    supportedFeatureIds: ['alerting'],
     executor: jest.fn(),
   };
   const actionSavedObject = {
@@ -183,6 +184,7 @@ test('successfully executes as a task', async () => {
     id: 'test',
     name: 'Test',
     minimumLicenseRequired: 'basic',
+    supportedFeatureIds: ['alerting'],
     executor: jest.fn(),
   };
   const actionSavedObject = {
@@ -233,6 +235,7 @@ test('provides empty config when config and / or secrets is empty', async () => 
     id: 'test',
     name: 'Test',
     minimumLicenseRequired: 'basic',
+    supportedFeatureIds: ['alerting'],
     executor: jest.fn(),
   };
   const actionSavedObject = {
@@ -265,10 +268,13 @@ test('throws an error when config is invalid', async () => {
     id: 'test',
     name: 'Test',
     minimumLicenseRequired: 'basic',
+    supportedFeatureIds: ['alerting'],
     validate: {
-      config: schema.object({
-        param1: schema.string(),
-      }),
+      config: {
+        schema: schema.object({
+          param1: schema.string(),
+        }),
+      },
     },
     executor: jest.fn(),
   };
@@ -305,6 +311,7 @@ test('throws an error when connector is invalid', async () => {
     id: 'test',
     name: 'Test',
     minimumLicenseRequired: 'basic',
+    supportedFeatureIds: ['alerting'],
     validate: {
       connector: () => {
         return 'error';
@@ -345,10 +352,13 @@ test('throws an error when params is invalid', async () => {
     id: 'test',
     name: 'Test',
     minimumLicenseRequired: 'basic',
+    supportedFeatureIds: ['alerting'],
     validate: {
-      params: schema.object({
-        param1: schema.string(),
-      }),
+      params: {
+        schema: schema.object({
+          param1: schema.string(),
+        }),
+      },
     },
     executor: jest.fn(),
   };
@@ -392,6 +402,7 @@ test('throws an error if actionType is not enabled', async () => {
     id: 'test',
     name: 'Test',
     minimumLicenseRequired: 'basic',
+    supportedFeatureIds: ['alerting'],
     executor: jest.fn(),
   };
   const actionSavedObject = {
@@ -427,6 +438,7 @@ test('should not throws an error if actionType is preconfigured', async () => {
     id: 'test',
     name: 'Test',
     minimumLicenseRequired: 'basic',
+    supportedFeatureIds: ['alerting'],
     executor: jest.fn(),
   };
   const actionSavedObject = {
@@ -516,13 +528,19 @@ test('logs a warning when alert executor has an error', async () => {
   );
 });
 
-test('logs a warning when alert executor throws an error', async () => {
+test('logs a warning and error when alert executor throws an error', async () => {
   const executorMock = setupActionExecutorMock();
-  executorMock.mockRejectedValue(new Error('this action execution is intended to fail'));
+  const err = new Error('this action execution is intended to fail');
+  err.stack = 'foo error\n  stack 1\n  stack 2\n  stack 3';
+  executorMock.mockRejectedValue(err);
   await actionExecutor.execute(executeParams);
   expect(loggerMock.warn).toBeCalledWith(
-    'action execution failure: test:1: action-1: an error occurred while running the action executor: this action execution is intended to fail'
+    'action execution failure: test:1: action-1: an error occurred while running the action: this action execution is intended to fail'
   );
+  expect(loggerMock.error).toBeCalledWith(err, {
+    error: { stack_trace: 'foo error\n  stack 1\n  stack 2\n  stack 3' },
+    tags: ['test', '1', 'action-run-failed'],
+  });
 });
 
 test('logs a warning when alert executor returns invalid status', async () => {
@@ -739,6 +757,7 @@ function setupActionExecutorMock() {
     id: 'test',
     name: 'Test',
     minimumLicenseRequired: 'basic',
+    supportedFeatureIds: ['alerting'],
     executor: jest.fn(),
   };
   const actionSavedObject = {

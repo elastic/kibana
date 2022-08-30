@@ -7,7 +7,7 @@
 import { IScopedClusterClient } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { isPopulatedObject } from '../common/utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 export async function getTimeFieldRange(
   client: IScopedClusterClient,

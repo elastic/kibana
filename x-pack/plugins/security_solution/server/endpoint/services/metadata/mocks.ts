@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsServiceStart } from '@kbn/core/server';
+import type { SavedObjectsServiceStart } from '@kbn/core/server';
 import { loggingSystemMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
 import {
   createMockAgentPolicyService,
@@ -13,12 +13,10 @@ import {
   createMockPackageService,
   createPackagePolicyServiceMock,
 } from '@kbn/fleet-plugin/server/mocks';
-import { AgentPolicyServiceInterface, AgentService } from '@kbn/fleet-plugin/server';
+import type { AgentPolicyServiceInterface, AgentService } from '@kbn/fleet-plugin/server';
 import { EndpointMetadataService } from './endpoint_metadata_service';
-import {
-  EndpointFleetServicesFactory,
-  EndpointInternalFleetServicesInterface,
-} from '../fleet/endpoint_fleet_services_factory';
+import type { EndpointInternalFleetServicesInterface } from '../fleet/endpoint_fleet_services_factory';
+import { EndpointFleetServicesFactory } from '../fleet/endpoint_fleet_services_factory';
 
 const createCustomizedPackagePolicyService = () => {
   const service = createPackagePolicyServiceMock();

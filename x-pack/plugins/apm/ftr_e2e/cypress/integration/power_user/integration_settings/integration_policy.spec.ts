@@ -52,12 +52,12 @@ const apisToIntercept = [
   },
 ];
 
-describe('when navigating to integration page', () => {
+describe.skip('when navigating to integration page', () => {
   beforeEach(() => {
     const integrationsPath = '/app/integrations/browse';
 
-    cy.loginAsPowerUser();
-    cy.visit(integrationsPath);
+    cy.loginAsEditorUser();
+    cy.visitKibana(integrationsPath);
 
     // open integration policy form
     cy.get('[data-test-subj="integration-card:epr:apm:featured').click();
@@ -78,61 +78,18 @@ describe('when navigating to integration page', () => {
     });
   });
 
-  it('adds a new policy without agent', () => {
-    apisToIntercept.map(({ endpoint, method, name }) => {
-      cy.intercept(method, endpoint).as(name);
-    });
-
-    cy.url().should('include', 'app/fleet/integrations/apm/add-integration');
-    policyFormFields.map((field) => {
-      cy.get(`[data-test-subj="${field.selector}"`).clear().type(field.value);
-    });
-    cy.contains('Save and continue').click();
-    cy.wait('@fleetAgentPolicies');
-    cy.wait('@fleetAgentStatus');
-    cy.wait('@fleetPackagePolicies');
-
-    cy.get('[data-test-subj="confirmModalCancelButton').click();
-
-    cy.url().should('include', '/app/integrations/detail/apm/policies');
-    cy.contains(policyName);
-  });
-
-  it('updates an existing policy', () => {
-    apisToIntercept.map(({ endpoint, method, name }) => {
-      cy.intercept(method, endpoint).as(name);
-    });
-
-    policyFormFields.map((field) => {
-      cy.get(`[data-test-subj="${field.selector}"`)
-        .clear()
-        .type(`${field.value}-new`);
-    });
-
-    cy.contains('Save and continue').click();
-    cy.wait('@fleetAgentPolicies');
-    cy.wait('@fleetAgentStatus');
-    cy.wait('@fleetPackagePolicies');
-
-    cy.get('[data-test-subj="confirmModalCancelButton').click();
-    cy.contains(`${policyName}-new`).click();
-
-    policyFormFields.map((field) => {
-      cy.get(`[data-test-subj="${field.selector}"`)
-        .clear()
-        .type(`${field.value}-updated`);
-    });
-    cy.contains('Save integration').click();
-    cy.contains(`${policyName}-updated`);
-  });
-
   it('should display Tail-based section on latest version', () => {
-    cy.visit('/app/fleet/integrations/apm/add-integration');
+    cy.visitKibana('/app/fleet/integrations/apm/add-integration');
     cy.contains('Tail-based sampling').should('exist');
   });
 
   it('should hide Tail-based section for 8.0.0 apm package', () => {
-    cy.visit('/app/fleet/integrations/apm-8.0.0/add-integration');
+    cy.visitKibana('/app/fleet/integrations/apm-8.0.0/add-integration');
     cy.contains('Tail-based sampling').should('not.exist');
+  });
+
+  it('should Display Debug section', () => {
+    cy.visitKibana('/app/fleet/integrations/apm-8.0.0/add-integration');
+    cy.contains('Debug settings').should('exist');
   });
 });

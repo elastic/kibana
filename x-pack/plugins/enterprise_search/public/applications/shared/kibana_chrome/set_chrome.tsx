@@ -14,11 +14,18 @@ import { KibanaLogic } from '../kibana';
 import {
   useGenerateBreadcrumbs,
   useEnterpriseSearchBreadcrumbs,
+  useEnterpriseSearchContentBreadcrumbs,
+  useElasticsearchBreadcrumbs,
   useAppSearchBreadcrumbs,
   useWorkplaceSearchBreadcrumbs,
   BreadcrumbTrail,
 } from './generate_breadcrumbs';
-import { enterpriseSearchTitle, appSearchTitle, workplaceSearchTitle } from './generate_title';
+import {
+  enterpriseSearchTitle,
+  elasticsearchTitle,
+  appSearchTitle,
+  workplaceSearchTitle,
+} from './generate_title';
 
 /**
  * Helpers for setting Kibana chrome (breadcrumbs, doc titles) on React view mount
@@ -56,6 +63,23 @@ export const SetEnterpriseSearchChrome: React.FC<SetChromeProps> = ({ trail = []
   return null;
 };
 
+export const SetElasticsearchChrome: React.FC<SetChromeProps> = ({ trail = [] }) => {
+  const { setBreadcrumbs, setDocTitle } = useValues(KibanaLogic);
+
+  const title = reverseArray(trail);
+  const docTitle = elasticsearchTitle(title);
+
+  const crumbs = useGenerateBreadcrumbs(trail);
+  const breadcrumbs = useElasticsearchBreadcrumbs(crumbs);
+
+  useEffect(() => {
+    setBreadcrumbs(breadcrumbs);
+    setDocTitle(docTitle);
+  }, [trail]);
+
+  return null;
+};
+
 export const SetAppSearchChrome: React.FC<SetChromeProps> = ({ trail = [] }) => {
   const { setBreadcrumbs, setDocTitle } = useValues(KibanaLogic);
 
@@ -81,6 +105,23 @@ export const SetWorkplaceSearchChrome: React.FC<SetChromeProps> = ({ trail = [] 
 
   const crumbs = useGenerateBreadcrumbs(trail);
   const breadcrumbs = useWorkplaceSearchBreadcrumbs(crumbs);
+
+  useEffect(() => {
+    setBreadcrumbs(breadcrumbs);
+    setDocTitle(docTitle);
+  }, [trail]);
+
+  return null;
+};
+
+export const SetEnterpriseSearchContentChrome: React.FC<SetChromeProps> = ({ trail = [] }) => {
+  const { setBreadcrumbs, setDocTitle } = useValues(KibanaLogic);
+
+  const title = reverseArray(trail);
+  const docTitle = appSearchTitle(title);
+
+  const crumbs = useGenerateBreadcrumbs(trail);
+  const breadcrumbs = useEnterpriseSearchContentBreadcrumbs(crumbs);
 
   useEffect(() => {
     setBreadcrumbs(breadcrumbs);

@@ -6,16 +6,27 @@
  * Side Public License, v 1.
  */
 
+import { AnnotationTooltipFormatter } from '@elastic/charts';
+import {
+  AvailableAnnotationIcon,
+  ManualPointEventAnnotationArgs,
+} from '@kbn/event-annotation-plugin/common';
 import { XY_VIS_RENDERER } from '../constants';
-import { LensMultiTable, XYArgs } from './expression_functions';
+import { XYProps } from './expression_functions';
 
 export interface XYChartProps {
-  data: LensMultiTable;
-  args: XYArgs;
+  args: XYProps;
 }
 
 export interface XYRender {
   type: 'render';
   as: typeof XY_VIS_RENDERER;
   value: XYChartProps;
+}
+
+export interface CollectiveConfig extends Omit<ManualPointEventAnnotationArgs, 'icon'> {
+  roundedTimestamp: number;
+  position: 'bottom';
+  icon?: AvailableAnnotationIcon | string;
+  customTooltipDetails?: AnnotationTooltipFormatter | undefined;
 }

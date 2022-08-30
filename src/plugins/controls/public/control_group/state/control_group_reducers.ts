@@ -10,33 +10,45 @@ import { PayloadAction } from '@reduxjs/toolkit';
 import { WritableDraft } from 'immer/dist/types/types-external';
 
 import { ControlWidth } from '../../types';
-import { ControlGroupInput } from '../types';
+import { ControlGroupInput, ControlGroupReduxState } from '../types';
 
 export const controlGroupReducers = {
   setControlStyle: (
-    state: WritableDraft<ControlGroupInput>,
+    state: WritableDraft<ControlGroupReduxState>,
     action: PayloadAction<ControlGroupInput['controlStyle']>
   ) => {
-    state.controlStyle = action.payload;
+    state.explicitInput.controlStyle = action.payload;
   },
   setDefaultControlWidth: (
-    state: WritableDraft<ControlGroupInput>,
+    state: WritableDraft<ControlGroupReduxState>,
     action: PayloadAction<ControlGroupInput['defaultControlWidth']>
   ) => {
-    state.defaultControlWidth = action.payload;
+    state.explicitInput.defaultControlWidth = action.payload;
+  },
+  setDefaultControlGrow: (
+    state: WritableDraft<ControlGroupReduxState>,
+    action: PayloadAction<ControlGroupInput['defaultControlGrow']>
+  ) => {
+    state.explicitInput.defaultControlGrow = action.payload;
   },
   setControlWidth: (
-    state: WritableDraft<ControlGroupInput>,
+    state: WritableDraft<ControlGroupReduxState>,
     action: PayloadAction<{ width: ControlWidth; embeddableId: string }>
   ) => {
-    state.panels[action.payload.embeddableId].width = action.payload.width;
+    state.explicitInput.panels[action.payload.embeddableId].width = action.payload.width;
+  },
+  setControlGrow: (
+    state: WritableDraft<ControlGroupReduxState>,
+    action: PayloadAction<{ grow: boolean; embeddableId: string }>
+  ) => {
+    state.explicitInput.panels[action.payload.embeddableId].grow = action.payload.grow;
   },
   setControlOrders: (
-    state: WritableDraft<ControlGroupInput>,
+    state: WritableDraft<ControlGroupReduxState>,
     action: PayloadAction<{ ids: string[] }>
   ) => {
     action.payload.ids.forEach((id, index) => {
-      state.panels[id].order = index;
+      state.explicitInput.panels[id].order = index;
     });
   },
 };

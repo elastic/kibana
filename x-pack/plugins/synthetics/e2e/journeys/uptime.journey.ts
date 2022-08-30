@@ -6,7 +6,7 @@
  */
 
 import { journey, step, before } from '@elastic/synthetics';
-import { byTestId, waitForLoadingToFinish } from './utils';
+import { byTestId, waitForLoadingToFinish } from '@kbn/observability-plugin/e2e/utils';
 
 journey('uptime', ({ page, params }) => {
   before(async () => {
@@ -26,12 +26,6 @@ journey('uptime', ({ page, params }) => {
     await page.fill('[data-test-subj=loginPassword]', 'changeme');
 
     await page.click('[data-test-subj=loginSubmit]');
-  });
-
-  step('dismiss synthetics notice', async () => {
-    await page.click('[data-test-subj=uptimeDismissSyntheticsCallout]', {
-      timeout: 60 * 1000,
-    });
   });
 
   step('change uptime index pattern', async () => {

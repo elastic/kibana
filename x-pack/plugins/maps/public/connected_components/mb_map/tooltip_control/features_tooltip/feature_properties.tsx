@@ -214,10 +214,10 @@ export class FeatureProperties extends Component<Props, State> {
         <table className="eui-yScrollWithShadows mapFeatureTooltip_table" ref={this._tableRef}>
           <tbody>
             <tr>
-              <td className="eui-textOverflowWrap mapFeatureTooltip__propertyLabel">
+              <td className="eui-textBreakWord mapFeatureTooltip__propertyLabel">
                 {tooltipProperty.getPropertyName()}
               </td>
-              <td className="eui-textOverflowWrap">{tooltipProperty.getHtmlDisplayValue()}</td>
+              <td className="eui-textBreakWord">{tooltipProperty.getHtmlDisplayValue()}</td>
             </tr>
           </tbody>
         </table>
@@ -326,19 +326,21 @@ export class FeatureProperties extends Component<Props, State> {
     const rows = this.state.properties.map((tooltipProperty) => {
       return (
         <tr key={tooltipProperty.getPropertyKey()} className="mapFeatureTooltip_row">
-          <td className="eui-textOverflowWrap mapFeatureTooltip__propertyLabel">
+          <td className="eui-textBreakWord mapFeatureTooltip__propertyLabel">
             {tooltipProperty.getPropertyName()}
           </td>
-          <td className="eui-textOverflowWrap">{tooltipProperty.getHtmlDisplayValue()}</td>
+          <td className="eui-textBreakWord">{tooltipProperty.getHtmlDisplayValue()}</td>
           {this._renderFilterCell(tooltipProperty)}
         </tr>
       );
     });
 
     return (
-      <table className="eui-yScrollWithShadows mapFeatureTooltip_table" ref={this._tableRef}>
-        <tbody>{rows}</tbody>
-      </table>
+      <div className="mapFeatureTooltip_tableWrapper">
+        <table className="eui-yScrollWithShadows mapFeatureTooltip_table" ref={this._tableRef}>
+          <tbody>{rows}</tbody>
+        </table>
+      </div>
     );
   }
 }

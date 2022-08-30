@@ -25,7 +25,7 @@ import path from 'path';
 import chalk from 'chalk';
 import parser from 'intl-messageformat-parser';
 
-import { createFailError } from '@kbn/dev-utils';
+import { createFailError } from '@kbn/dev-cli-errors';
 
 const ESCAPE_LINE_BREAK_REGEX = /(?<!\\)\\\n/g;
 const HTML_LINE_BREAK_REGEX = /[\s]*\n[\s]*/g;

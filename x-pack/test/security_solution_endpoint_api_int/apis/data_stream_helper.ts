@@ -137,7 +137,7 @@ export function bulkIndex(
 
   return client.bulk({
     index,
-    refresh: true,
+    refresh: 'wait_for',
     body,
   });
 }

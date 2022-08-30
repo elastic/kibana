@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import { mockKibanaValues, setMockValues } from '../../../../../__mocks__/kea_logic';
+import { setMockActions, setMockValues } from '../../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
 import { mount } from 'enzyme';
 
-import { EuiButton } from '@elastic/eui';
+import { EuiButtonTo } from '../../../../../shared/react_router_helpers';
 
 import { staticSourceData } from '../../source_data';
 
 import { ConfigurationChoice } from './configuration_choice';
 
 describe('ConfigurationChoice', () => {
-  const { navigateToUrl } = mockKibanaValues;
   const props = {
     sourceData: staticSourceData[0],
   };
@@ -28,31 +27,23 @@ describe('ConfigurationChoice', () => {
       categories: [],
     },
   };
+  const mockActions = {
+    initializeSources: jest.fn(),
+    resetSourcesState: jest.fn(),
+  };
 
   beforeEach(() => {
-    setMockValues(mockValues);
     jest.clearAllMocks();
+    setMockValues(mockValues);
+    setMockActions(mockActions);
   });
 
   it('renders internal connector if available', () => {
     const wrapper = mount(<ConfigurationChoice {...{ ...props }} />);
 
-    expect(wrapper.find('EuiCard')).toHaveLength(1);
-    expect(wrapper.find(EuiButton)).toHaveLength(1);
-  });
-  it('should navigate to internal connector on internal connector click', () => {
-    const wrapper = mount(<ConfigurationChoice {...props} />);
-    const button = wrapper.find(EuiButton);
-    button.simulate('click');
-    expect(navigateToUrl).toHaveBeenCalledWith('/sources/add/box/internal/');
-  });
-  it('should call prop function when provided on internal connector click', () => {
-    const advanceSpy = jest.fn();
-    const wrapper = mount(<ConfigurationChoice {...{ ...props, goToInternalStep: advanceSpy }} />);
-    const button = wrapper.find(EuiButton);
-    button.simulate('click');
-    expect(navigateToUrl).not.toHaveBeenCalled();
-    expect(advanceSpy).toHaveBeenCalled();
+    const internalConnectorCard = wrapper.find('[data-test-subj="InternalConnectorCard"]');
+    expect(internalConnectorCard).toHaveLength(1);
+    expect(internalConnectorCard.find(EuiButtonTo).prop('to')).toEqual('/sources/add/box/');
   });
 
   it('renders external connector if available', () => {
@@ -62,32 +53,37 @@ describe('ConfigurationChoice', () => {
           ...props,
           sourceData: {
             ...props.sourceData,
-            internalConnectorAvailable: false,
-            externalConnectorAvailable: true,
+            serviceType: 'share_point',
           },
         }}
       />
     );
 
-    expect(wrapper.find('EuiCard')).toHaveLength(1);
-    expect(wrapper.find(EuiButton)).toHaveLength(1);
+    const externalConnectorCard = wrapper.find('[data-test-subj="ExternalConnectorCard"]');
+    expect(externalConnectorCard.find(EuiButtonTo).prop('to')).toEqual(
+      '/sources/add/share_point/external/connector_registration'
+    );
   });
-  it('should navigate to external connector on external connector click', () => {
+
+  it('directs user to external connector settings page if external connector is available but already configured', () => {
+    setMockValues({ ...mockValues, externalConfigured: true });
+
     const wrapper = mount(
       <ConfigurationChoice
         {...{
           ...props,
           sourceData: {
             ...props.sourceData,
-            internalConnectorAvailable: false,
-            externalConnectorAvailable: true,
+            serviceType: 'share_point',
           },
         }}
       />
     );
-    const button = wrapper.find(EuiButton);
-    button.simulate('click');
-    expect(navigateToUrl).toHaveBeenCalledWith('/sources/add/box/external/');
+
+    const externalConnectorCard = wrapper.find('[data-test-subj="ExternalConnectorCard"]');
+    expect(externalConnectorCard.find(EuiButtonTo).prop('to')).toEqual(
+      '/settings/connectors/external/edit'
+    );
   });
 
   it('renders custom connector if available', () => {
@@ -97,33 +93,16 @@ describe('ConfigurationChoice', () => {
           ...props,
           sourceData: {
             ...props.sourceData,
-            internalConnectorAvailable: false,
-            externalConnectorAvailable: false,
-            customConnectorAvailable: true,
+            serviceType: 'share_point_server',
           },
         }}
       />
     );
 
-    expect(wrapper.find('EuiCard')).toHaveLength(1);
-    expect(wrapper.find(EuiButton)).toHaveLength(1);
-  });
-  it('should navigate to custom connector on custom connector click', () => {
-    const wrapper = mount(
-      <ConfigurationChoice
-        {...{
-          ...props,
-          sourceData: {
-            ...props.sourceData,
-            internalConnectorAvailable: false,
-            externalConnectorAvailable: false,
-            customConnectorAvailable: true,
-          },
-        }}
-      />
+    const customConnectorCard = wrapper.find('[data-test-subj="CustomConnectorCard"]');
+    expect(customConnectorCard).toHaveLength(1);
+    expect(customConnectorCard.find(EuiButtonTo).prop('to')).toEqual(
+      '/sources/add/share_point_server/custom'
     );
-    const button = wrapper.find(EuiButton);
-    button.simulate('click');
-    expect(navigateToUrl).toHaveBeenCalledWith('/sources/add/box/custom/');
   });
 });

@@ -14,6 +14,7 @@ import {
   DocLinksStart,
   HttpSetup,
   ApplicationStart,
+  ThemeServiceStart,
 } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
@@ -24,6 +25,7 @@ import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { IndexPatternManagementStart } from '.';
 
 export interface IndexPatternManagmentContext {
@@ -44,6 +46,8 @@ export interface IndexPatternManagmentContext {
   IndexPatternEditor: DataViewEditorStart['IndexPatternEditorComponent'];
   fieldFormats: FieldFormatsStart;
   spaces?: SpacesPluginStart;
+  theme: ThemeServiceStart;
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
 }
 
 export type IndexPatternManagmentContextValue =

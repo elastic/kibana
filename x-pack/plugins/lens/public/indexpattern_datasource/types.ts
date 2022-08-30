@@ -4,12 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { IndexPatternAggRestrictions } from '@kbn/data-plugin/public';
-import type { FieldSpec } from '@kbn/data-plugin/common';
-import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import type { DragDropIdentifier } from '../drag_drop/providers';
 import type { IncompleteColumn, GenericIndexPatternColumn } from './operations';
+import type { DragDropOperation } from '../types';
+import type { IndexPattern, IndexPatternField } from '../types';
 
 export type {
   GenericIndexPatternColumn,
@@ -26,7 +24,9 @@ export type {
   CardinalityIndexPatternColumn,
   SumIndexPatternColumn,
   MedianIndexPatternColumn,
+  StandardDeviationIndexPatternColumn,
   PercentileIndexPatternColumn,
+  PercentileRanksIndexPatternColumn,
   CountIndexPatternColumn,
   LastValueIndexPatternColumn,
   CumulativeSumIndexPatternColumn,
@@ -47,29 +47,6 @@ export type DraggedField = DragDropIdentifier & {
   indexPatternId: string;
 };
 
-export interface IndexPattern {
-  id: string;
-  fields: IndexPatternField[];
-  getFieldByName(name: string): IndexPatternField | undefined;
-  title: string;
-  timeFieldName?: string;
-  fieldFormatMap?: Record<
-    string,
-    {
-      id: string;
-      params: FieldFormatParams;
-    }
-  >;
-  hasRestrictions: boolean;
-}
-
-export type IndexPatternField = FieldSpec & {
-  displayName: string;
-  aggregationRestrictions?: Partial<IndexPatternAggRestrictions>;
-  meta?: boolean;
-  runtime?: boolean;
-};
-
 export interface IndexPatternLayer {
   columnOrder: string[];
   columns: Record<string, GenericIndexPatternColumn>;
@@ -88,21 +65,10 @@ export type PersistedIndexPatternLayer = Omit<IndexPatternLayer, 'indexPatternId
 export interface IndexPatternPrivateState {
   currentIndexPatternId: string;
   layers: Record<string, IndexPatternLayer>;
-  indexPatternRefs: IndexPatternRef[];
-  indexPatterns: Record<string, IndexPattern>;
-
-  /**
-   * indexPatternId -> fieldName -> boolean
-   */
-  existingFields: Record<string, Record<string, boolean>>;
-  isFirstExistenceFetch: boolean;
-  existenceFetchFailed?: boolean;
-  existenceFetchTimeout?: boolean;
-
   isDimensionClosePrevented?: boolean;
 }
 
-export interface IndexPatternRef {
-  id: string;
-  title: string;
+export interface DataViewDragDropOperation extends DragDropOperation {
+  dataView: IndexPattern;
+  column?: GenericIndexPatternColumn;
 }

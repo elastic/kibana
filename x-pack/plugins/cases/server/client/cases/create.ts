@@ -14,12 +14,13 @@ import { SavedObjectsUtils } from '@kbn/core/server';
 
 import {
   throwErrors,
-  excess,
   CaseResponseRt,
   CaseResponse,
   CasePostRequest,
   ActionTypes,
   CasePostRequestRt,
+  excess,
+  CaseSeverity,
 } from '../../../common/api';
 import { MAX_TITLE_LENGTH } from '../../../common/constants';
 import { isInvalidTag } from '../../../common/utils/validators';
@@ -40,8 +41,7 @@ export const create = async (
 ): Promise<CaseResponse> => {
   const {
     unsecuredSavedObjectsClient,
-    caseService,
-    userActionService,
+    services: { caseService, userActionService },
     user,
     logger,
     authorization: auth,
@@ -78,6 +78,7 @@ export const create = async (
         newCase: query,
       }),
       id: savedObjectID,
+      refresh: false,
     });
 
     await userActionService.createUserAction({
@@ -85,7 +86,11 @@ export const create = async (
       unsecuredSavedObjectsClient,
       caseId: newCase.id,
       user,
-      payload: query,
+      payload: {
+        ...query,
+        severity: query.severity ?? CaseSeverity.LOW,
+        assignees: query.assignees ?? [],
+      },
       owner: newCase.attributes.owner,
     });
 

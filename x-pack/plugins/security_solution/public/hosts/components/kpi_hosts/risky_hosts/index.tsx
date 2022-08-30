@@ -33,7 +33,8 @@ import {
   HOST_RISK_INFO_BUTTON_CLASS,
 } from '../../host_risk_information';
 import { HoverVisibilityContainer } from '../../../../common/components/hover_visibility_container';
-import { KpiRiskScoreStrategyResponse, RiskSeverity } from '../../../../../common/search_strategy';
+import type { KpiRiskScoreStrategyResponse } from '../../../../../common/search_strategy';
+import { RiskSeverity } from '../../../../../common/search_strategy';
 import { RiskScore } from '../../../../common/components/severity/common';
 
 const KpiBaseComponentLoader: React.FC = () => (

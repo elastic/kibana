@@ -16,9 +16,10 @@ interface Props {
   onChange: (schedule: MonitorFields[ConfigKey.SCHEDULE]) => void;
   onBlur: () => void;
   unit: ScheduleUnit;
+  readOnly?: boolean;
 }
 
-export const ScheduleField = ({ number, onChange, onBlur, unit }: Props) => {
+export const ScheduleField = ({ number, onChange, onBlur, unit, readOnly = false }: Props) => {
   const { allowedScheduleUnits } = usePolicyConfigContext();
   const options = !allowedScheduleUnits?.length
     ? allOptions
@@ -55,6 +56,7 @@ export const ScheduleField = ({ number, onChange, onBlur, unit }: Props) => {
 
             onBlur();
           }}
+          readOnly={readOnly}
         />
       </EuiFlexItem>
       <EuiFlexItem>
@@ -74,6 +76,7 @@ export const ScheduleField = ({ number, onChange, onBlur, unit }: Props) => {
             onChange({ number, unit: updatedUnit as ScheduleUnit });
           }}
           onBlur={() => onBlur()}
+          disabled={readOnly}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

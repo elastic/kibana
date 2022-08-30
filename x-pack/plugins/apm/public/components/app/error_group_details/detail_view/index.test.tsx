@@ -5,10 +5,33 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
+import { render } from '@testing-library/react';
 import React from 'react';
 import { mockMoment } from '../../../../utils/test_helpers';
 import { DetailView } from '.';
+import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
+import { createMemoryHistory } from 'history';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+
+const history = createMemoryHistory({
+  initialEntries: [
+    '/services/opbeans-java/errors/0000?rangeFrom=now-15m&rangeTo=now',
+  ],
+});
+
+function MockContext({ children }: { children: React.ReactElement }) {
+  return (
+    <EuiThemeProvider>
+      <MockApmPluginContextWrapper history={history}>
+        {children}
+      </MockApmPluginContextWrapper>
+    </EuiThemeProvider>
+  );
+}
+
+function renderWithMockContext(element: React.ReactElement) {
+  return render(element, { wrapper: MockContext });
+}
 
 describe('DetailView', () => {
   beforeEach(() => {
@@ -17,10 +40,10 @@ describe('DetailView', () => {
   });
 
   it('should render empty state', () => {
-    const wrapper = shallow(
+    const wrapper = renderWithMockContext(
       <DetailView errorGroup={{} as any} urlParams={{}} kuery="" />
     );
-    expect(wrapper.isEmptyRender()).toBe(true);
+    expect(wrapper.baseElement.innerHTML).toBe('<div></div>');
   });
 
   it('should render Discover button', () => {
@@ -35,23 +58,25 @@ describe('DetailView', () => {
         url: { full: 'myUrl' },
         service: { name: 'myService' },
         user: { id: 'myUserId' },
-        error: { exception: { handled: true } },
+        error: { exception: [{ handled: true }] },
         transaction: { id: 'myTransactionId', sampled: true },
       } as any,
     };
 
-    const wrapper = shallow(
+    const discoverLink = renderWithMockContext(
       <DetailView errorGroup={errorGroup} urlParams={{}} kuery="" />
-    ).find('DiscoverErrorLink');
+    ).getByText(`View 10 occurrences in Discover`);
 
-    expect(wrapper.exists()).toBe(true);
-    expect(wrapper).toMatchSnapshot();
+    expect(discoverLink).toBeInTheDocument();
   });
 
   it('should render a Summary', () => {
     const errorGroup = {
       occurrencesCount: 10,
       error: {
+        service: {
+          name: 'opbeans-python',
+        },
         error: {},
         timestamp: {
           us: 0,
@@ -59,11 +84,14 @@ describe('DetailView', () => {
       } as any,
       transaction: undefined,
     };
-    const wrapper = shallow(
-      <DetailView errorGroup={errorGroup} urlParams={{}} kuery="" />
-    ).find('Summary');
 
-    expect(wrapper.exists()).toBe(true);
+    const rendered = renderWithMockContext(
+      <DetailView errorGroup={errorGroup} urlParams={{}} kuery="" />
+    );
+
+    expect(
+      rendered.getByText('1337 minutes ago (mocking 0)')
+    ).toBeInTheDocument();
   });
 
   it('should render tabs', () => {
@@ -79,12 +107,14 @@ describe('DetailView', () => {
         user: {},
       } as any,
     };
-    const wrapper = shallow(
-      <DetailView errorGroup={errorGroup} urlParams={{}} kuery="" />
-    ).find('EuiTabs');
 
-    expect(wrapper.exists()).toBe(true);
-    expect(wrapper).toMatchSnapshot();
+    const rendered = renderWithMockContext(
+      <DetailView errorGroup={errorGroup} urlParams={{}} kuery="" />
+    );
+
+    expect(rendered.getByText('Exception stack trace')).toBeInTheDocument();
+
+    expect(rendered.getByText('Metadata')).toBeInTheDocument();
   });
 
   it('should render TabContent', () => {
@@ -92,19 +122,23 @@ describe('DetailView', () => {
       occurrencesCount: 10,
       transaction: undefined,
       error: {
+        service: {
+          name: 'opbeans-python',
+        },
         timestamp: {
           us: 0,
         },
-        error: {},
+        error: {
+          exception: [{ handled: true }],
+        },
         context: {},
       } as any,
     };
-    const wrapper = shallow(
+    const rendered = renderWithMockContext(
       <DetailView errorGroup={errorGroup} urlParams={{}} kuery="" />
-    ).find('TabContent');
+    );
 
-    expect(wrapper.exists()).toBe(true);
-    expect(wrapper).toMatchSnapshot();
+    expect(rendered.getByText('No stack trace available.')).toBeInTheDocument();
   });
 
   it('should render without http request info', () => {
@@ -115,16 +149,20 @@ describe('DetailView', () => {
         timestamp: {
           us: 0,
         },
+        error: {
+          exception: [{ handled: true }],
+        },
         http: { response: { status_code: 404 } },
         url: { full: 'myUrl' },
         service: { name: 'myService' },
         user: { id: 'myUserId' },
-        error: { exception: { handled: true } },
         transaction: { id: 'myTransactionId', sampled: true },
       } as any,
     };
     expect(() =>
-      shallow(<DetailView errorGroup={errorGroup} urlParams={{}} kuery="" />)
+      renderWithMockContext(
+        <DetailView errorGroup={errorGroup} urlParams={{}} kuery="" />
+      )
     ).not.toThrowError();
   });
 });

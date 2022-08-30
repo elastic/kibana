@@ -9,7 +9,7 @@
 
 import chalk from 'chalk';
 import { KibanaRequest } from '@kbn/core/server';
-import { RequestStatus } from '@kbn/inspector-plugin';
+import { RequestStatus } from '@kbn/inspector-plugin/common';
 import { WrappedElasticsearchClientError } from '@kbn/observability-plugin/server';
 import { getInspectResponse } from '@kbn/observability-plugin/server';
 import { inspectableEsQueriesMap } from '../../../routes/apm_routes/register_apm_server_routes';
@@ -36,7 +36,7 @@ export async function callAsyncWithDebug<T>({
   requestParams: Record<string, any>;
   operationName: string;
   isCalledWithInternalUser: boolean; // only allow inspection of queries that were retrieved with credentials of the end user
-}) {
+}): Promise<T> {
   if (!debug) {
     return cb();
   }

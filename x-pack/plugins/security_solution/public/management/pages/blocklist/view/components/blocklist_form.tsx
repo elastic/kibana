@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo, useState, useCallback, memo, useEffect, useRef } from 'react';
+import type { EuiSuperSelectOption, EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiForm,
   EuiFormRow,
@@ -15,26 +16,21 @@ import {
   EuiText,
   EuiSpacer,
   EuiSuperSelect,
-  EuiSuperSelectOption,
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
   EuiToolTip,
   EuiIcon,
 } from '@elastic/eui';
-import {
-  OperatingSystem,
-  BlocklistConditionEntryField,
-  isPathValid,
-} from '@kbn/securitysolution-utils';
+import type { BlocklistConditionEntryField } from '@kbn/securitysolution-utils';
+import { OperatingSystem, isPathValid } from '@kbn/securitysolution-utils';
 import { isOneOfOperator } from '@kbn/securitysolution-list-utils';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { uniq } from 'lodash';
 
 import { OS_TITLES } from '../../../../common/translations';
-import { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
+import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
 import {
   CONDITIONS_HEADER,
   CONDITIONS_HEADER_DESCRIPTION,
@@ -52,10 +48,8 @@ import {
   ERRORS,
   VALUE_LABEL_HELPER,
 } from '../../translations';
-import {
-  EffectedPolicySelect,
-  EffectedPolicySelection,
-} from '../../../../components/effected_policy_select';
+import type { EffectedPolicySelection } from '../../../../components/effected_policy_select';
+import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
 import {
   GLOBAL_ARTIFACT_TAG,
   BY_POLICY_ARTIFACT_TAG_PREFIX,
@@ -65,7 +59,7 @@ import { isValidHash } from '../../../../../../common/endpoint/service/artifacts
 import { isArtifactGlobal } from '../../../../../../common/endpoint/service/artifacts';
 import type { PolicyData } from '../../../../../../common/endpoint/types';
 import { isGlobalPolicyEffected } from '../../../../components/effected_policy_select/utils';
-import { useTestIdGenerator } from '../../../../components/hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 
 const testIdPrefix = 'blocklist-form';
 
@@ -167,8 +161,11 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
     }, [item?.os_types]);
 
     const selectedValues = useMemo(() => {
-      return blocklistEntry.value.map((label) => ({ label }));
-    }, [blocklistEntry.value]);
+      return blocklistEntry.value.map((label) => ({
+        label,
+        'data-test-subj': getTestId(`values-input-${label}`),
+      }));
+    }, [blocklistEntry.value, getTestId]);
 
     const osOptions: Array<EuiSuperSelectOption<OperatingSystem>> = useMemo(
       () =>
@@ -186,17 +183,19 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
         value: field,
         inputDisplay: CONDITION_FIELD_TITLE[field],
         dropdownDisplay: getDropdownDisplay(field),
+        'data-test-subj': getTestId(field),
       }));
       if (selectedOs === OperatingSystem.WINDOWS) {
         selectableFields.push({
           value: 'file.Ext.code_signature',
           inputDisplay: CONDITION_FIELD_TITLE['file.Ext.code_signature'],
           dropdownDisplay: getDropdownDisplay('file.Ext.code_signature'),
+          'data-test-subj': getTestId('file.Ext.code_signature'),
         });
       }
 
       return selectableFields;
-    }, [selectedOs]);
+    }, [selectedOs, getTestId]);
 
     const valueLabel = useMemo(() => {
       return (

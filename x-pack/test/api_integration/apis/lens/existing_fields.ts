@@ -14,7 +14,7 @@ const TEST_END_TIME = '2023-09-23T18:31:44.000';
 const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
 };
-const metaFields = ['_id', '_index', '_score', '_source', '_type'];
+const metaFields = ['_id', '_index', '_score', '_source'];
 
 const fieldsWithData = [
   'ts',

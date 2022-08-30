@@ -10,7 +10,7 @@
  *       package includes them.
  */
 
-import { IconType, ToolTipPositions } from '@elastic/eui';
+import { IconType } from '@elastic/eui';
 import { CommonProps } from '@elastic/eui/src/components/common';
 
 declare module '@elastic/eui' {

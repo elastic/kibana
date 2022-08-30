@@ -13,9 +13,6 @@ import {
 } from '@kbn/home-plugin/server';
 import { CloudSetup } from '@kbn/cloud-plugin/server';
 import { APMConfig } from '..';
-import { APM_STATIC_INDEX_PATTERN_ID } from '../../common/index_pattern_constants';
-import { getApmDataViewAttributes } from '../routes/data_view/get_apm_data_view_attributes';
-import { getApmDataViewTitle } from '../routes/data_view/get_apm_data_view_title';
 import { ApmIndicesConfig } from '../routes/settings/apm_indices/get_apm_indices';
 import { createElasticCloudInstructions } from './envs/elastic_cloud';
 import { onPremInstructions } from './envs/on_prem';
@@ -39,15 +36,6 @@ export const tutorialProvider =
     isFleetPluginEnabled: boolean;
   }) =>
   () => {
-    const dataViewTitle = getApmDataViewTitle(apmIndices);
-    const savedObjects = [
-      {
-        id: APM_STATIC_INDEX_PATTERN_ID,
-        attributes: getApmDataViewAttributes(dataViewTitle),
-        type: 'index-pattern',
-      },
-    ];
-
     const artifacts: ArtifactsSchema = {
       dashboards: [
         {
@@ -109,13 +97,5 @@ It allows you to monitor the performance of thousands of applications in real ti
         cloudSetup: cloud,
       }),
       previewImagePath: '/plugins/apm/assets/apm.png',
-      savedObjects,
-      savedObjectsInstallMsg: i18n.translate(
-        'xpack.apm.tutorial.specProvider.savedObjectsInstallMsg',
-        {
-          defaultMessage:
-            'An APM data view is required for some features in the APM UI.',
-        }
-      ),
     } as TutorialSchema;
   };

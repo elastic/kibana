@@ -65,7 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
     describe('field list pagination', function () {
-      const EXPECTED_FIELD_COUNT = 86;
+      const EXPECTED_FIELD_COUNT = 85;
       it('makelogs data should have expected number of fields', async function () {
         await retry.try(async function () {
           const TabCount = await PageObjects.settings.getFieldsTabCount();

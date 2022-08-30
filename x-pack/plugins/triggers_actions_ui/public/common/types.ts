@@ -24,3 +24,5 @@ export interface GroupByType {
   value: string;
   validNormalizedTypes: string[];
 }
+
+export type { RuleStatus } from '../types';

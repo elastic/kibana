@@ -8,12 +8,13 @@
 import { i18n } from '@kbn/i18n';
 import { useContext } from 'react';
 import { useSelector } from 'react-redux';
-import { KibanaPageTemplateProps, useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { NoDataConfig } from '@kbn/shared-ux-page-kibana-template';
 import { UptimeSettingsContext } from '../contexts';
 import { ClientPluginsStart } from '../../plugin';
 import { indexStatusSelector } from '../state/selectors';
 
-export function useNoDataConfig(): KibanaPageTemplateProps['noDataConfig'] {
+export function useNoDataConfig(): NoDataConfig | undefined {
   const { basePath } = useContext(UptimeSettingsContext);
 
   const {
@@ -28,7 +29,7 @@ export function useNoDataConfig(): KibanaPageTemplateProps['noDataConfig'] {
       solution: i18n.translate('xpack.synthetics.noDataConfig.solutionName', {
         defaultMessage: 'Observability',
       }),
-      actions: {
+      action: {
         beats: {
           title: i18n.translate('xpack.synthetics.noDataConfig.beatsCard.title', {
             defaultMessage: 'Add monitors with Heartbeat',

@@ -10,7 +10,9 @@ import { FtrConfigProviderContext } from '@kbn/test';
 import { services } from '../functional/services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const xpackFunctionalConfig = await readConfigFile(require.resolve('../functional/config'));
+  const xpackFunctionalConfig = await readConfigFile(
+    require.resolve('../functional/config.base.js')
+  );
 
   return {
     // default to the xpack functional config

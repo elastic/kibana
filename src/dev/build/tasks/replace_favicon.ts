@@ -13,6 +13,11 @@ export const ReplaceFavicon: Task = {
 
   async run(config, log, build) {
     await copy(
+      config.resolveFromRepo('src/core/server/core_app/assets/favicons/favicon.distribution.ico'),
+      build.resolvePath('src/core/server/core_app/assets/favicons/favicon.ico')
+    );
+
+    await copy(
       config.resolveFromRepo('src/core/server/core_app/assets/favicons/favicon.distribution.png'),
       build.resolvePath('src/core/server/core_app/assets/favicons/favicon.png')
     );

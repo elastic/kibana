@@ -25,11 +25,12 @@ const getDataViewTitleFromTargetIndex = (item: TransformListRow) =>
 
 export type DiscoverAction = ReturnType<typeof useDiscoverAction>;
 export const useDiscoverAction = (forceDisable: boolean) => {
-  const appDeps = useAppDependencies();
-  const { share } = appDeps;
-  const savedObjectsClient = appDeps.savedObjects.client;
-  const dataViews = appDeps.data.dataViews;
-  const isDiscoverAvailable = !!appDeps.application.capabilities.discover?.show;
+  const {
+    share,
+    data: { dataViews: dataViewsContract },
+    application: { capabilities },
+  } = useAppDependencies();
+  const isDiscoverAvailable = !!capabilities.discover?.show;
 
   const { getDataViewIdByTitle, loadDataViews } = useSearchItems(undefined);
 
@@ -37,12 +38,12 @@ export const useDiscoverAction = (forceDisable: boolean) => {
 
   useEffect(() => {
     async function checkDataViewAvailability() {
-      await loadDataViews(savedObjectsClient, dataViews);
+      await loadDataViews(dataViewsContract);
       setDataViewsLoaded(true);
     }
 
     checkDataViewAvailability();
-  }, [dataViews, loadDataViews, savedObjectsClient]);
+  }, [loadDataViews, dataViewsContract]);
 
   const clickHandler = useCallback(
     (item: TransformListRow) => {

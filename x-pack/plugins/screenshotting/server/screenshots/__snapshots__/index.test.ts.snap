@@ -20,7 +20,7 @@ Array [
         },
       },
     ],
-    "error": [Error: The "wait for elements" phase encountered an error: Error: An error occurred when trying to read the page for visualization panel info: Mock error!],
+    "error": [Error: The "wait for elements" phase encountered an error: Error: Mock error!],
     "renderErrors": undefined,
     "screenshots": Array [
       Object {
@@ -63,7 +63,7 @@ Array [
         },
       },
     ],
-    "error": [Error: The "wait for elements" phase encountered an error: Error: An error occurred when trying to read the page for visualization panel info: Mock error!],
+    "error": [Error: The "wait for elements" phase encountered an error: Error: Mock error!],
     "renderErrors": undefined,
     "screenshots": Array [
       Object {

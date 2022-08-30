@@ -52,9 +52,27 @@ describe('FullStoryShipper', () => {
     });
 
     describe('FS.setUserVars', () => {
-      test('calls `setUserVars` when version is provided', () => {
-        fullstoryShipper.extendContext({ version: '1.2.3' });
+      test('calls `setUserVars` when isElasticCloudUser: true is provided', () => {
+        fullstoryShipper.extendContext({ isElasticCloudUser: true });
         expect(fullStoryApiMock.setUserVars).toHaveBeenCalledWith({
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          isElasticCloudUser_bool: true,
+        });
+      });
+
+      test('calls `setUserVars` when isElasticCloudUser: false is provided', () => {
+        fullstoryShipper.extendContext({ isElasticCloudUser: false });
+        expect(fullStoryApiMock.setUserVars).toHaveBeenCalledWith({
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          isElasticCloudUser_bool: false,
+        });
+      });
+    });
+
+    describe('FS.setVars', () => {
+      test('calls `setVars` when version is provided', () => {
+        fullstoryShipper.extendContext({ version: '1.2.3' });
+        expect(fullStoryApiMock.setVars).toHaveBeenCalledWith('page', {
           version_str: '1.2.3',
           version_major_int: 1,
           version_minor_int: 2,
@@ -62,14 +80,20 @@ describe('FullStoryShipper', () => {
         });
       });
 
-      test('calls `setUserVars` when cloudId is provided', () => {
+      test('calls `setVars` when cloudId is provided', () => {
         fullstoryShipper.extendContext({ cloudId: 'test-es-org-id' });
-        expect(fullStoryApiMock.setUserVars).toHaveBeenCalledWith({ org_id_str: 'test-es-org-id' });
+        expect(fullStoryApiMock.setVars).toHaveBeenCalledWith('page', {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          cloudId_str: 'test-es-org-id',
+          org_id_str: 'test-es-org-id',
+        });
       });
 
       test('merges both: version and cloudId if both are provided', () => {
         fullstoryShipper.extendContext({ version: '1.2.3', cloudId: 'test-es-org-id' });
-        expect(fullStoryApiMock.setUserVars).toHaveBeenCalledWith({
+        expect(fullStoryApiMock.setVars).toHaveBeenCalledWith('page', {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          cloudId_str: 'test-es-org-id',
           org_id_str: 'test-es-org-id',
           version_str: '1.2.3',
           version_major_int: 1,
@@ -77,9 +101,7 @@ describe('FullStoryShipper', () => {
           version_patch_int: 3,
         });
       });
-    });
 
-    describe('FS.setVars', () => {
       test('adds the rest of the context to `setVars`', () => {
         const context = {
           userId: 'test-user-id',
@@ -88,7 +110,16 @@ describe('FullStoryShipper', () => {
           foo: 'bar',
         };
         fullstoryShipper.extendContext(context);
-        expect(fullStoryApiMock.setVars).toHaveBeenCalledWith('page', { foo_str: 'bar' });
+        expect(fullStoryApiMock.setVars).toHaveBeenCalledWith('page', {
+          version_str: '1.2.3',
+          version_major_int: 1,
+          version_minor_int: 2,
+          version_patch_int: 3,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          cloudId_str: 'test-es-org-id',
+          org_id_str: 'test-es-org-id',
+          foo_str: 'bar',
+        });
       });
     });
   });
@@ -119,7 +150,7 @@ describe('FullStoryShipper', () => {
         {
           event_type: 'test-event-2',
           timestamp: '2020-01-01T00:00:00.000Z',
-          properties: { test: 'test-2' },
+          properties: { other_property: 'test-2' },
           context: { pageName: 'test-page-1' },
         },
       ]);
@@ -129,6 +160,49 @@ describe('FullStoryShipper', () => {
         test_str: 'test-1',
       });
       expect(fullStoryApiMock.event).toHaveBeenCalledWith('test-event-2', {
+        other_property_str: 'test-2',
+      });
+    });
+
+    test('filters the events by the allow-list', () => {
+      fullstoryShipper = new FullStoryShipper(
+        {
+          eventTypesAllowlist: ['valid-event-1', 'valid-event-2'],
+          debug: true,
+          fullStoryOrgId: 'test-org-id',
+        },
+        {
+          logger: loggerMock.create(),
+          sendTo: 'staging',
+          isDev: true,
+        }
+      );
+      fullstoryShipper.reportEvents([
+        {
+          event_type: 'test-event-1', // Should be filtered out.
+          timestamp: '2020-01-01T00:00:00.000Z',
+          properties: { test: 'test-1' },
+          context: { pageName: 'test-page-1' },
+        },
+        {
+          event_type: 'valid-event-1',
+          timestamp: '2020-01-01T00:00:00.000Z',
+          properties: { test: 'test-1' },
+          context: { pageName: 'test-page-1' },
+        },
+        {
+          event_type: 'valid-event-2',
+          timestamp: '2020-01-01T00:00:00.000Z',
+          properties: { test: 'test-2' },
+          context: { pageName: 'test-page-1' },
+        },
+      ]);
+
+      expect(fullStoryApiMock.event).toHaveBeenCalledTimes(2);
+      expect(fullStoryApiMock.event).toHaveBeenCalledWith('valid-event-1', {
+        test_str: 'test-1',
+      });
+      expect(fullStoryApiMock.event).toHaveBeenCalledWith('valid-event-2', {
         test_str: 'test-2',
       });
     });

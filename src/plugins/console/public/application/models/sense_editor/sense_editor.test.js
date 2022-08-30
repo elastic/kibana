@@ -10,6 +10,7 @@ import './sense_editor.test.mocks';
 
 import $ from 'jquery';
 import _ from 'lodash';
+import { URL } from 'url';
 
 import { create } from './create';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
@@ -19,6 +20,8 @@ const { collapseLiteralStrings } = XJson;
 
 describe('Editor', () => {
   let input;
+  let oldUrl;
+  let olldWindow;
 
   beforeEach(function () {
     // Set up our document body
@@ -31,8 +34,19 @@ describe('Editor', () => {
     input = create(document.querySelector('#ConAppEditor'));
     $(input.getCoreEditor().getContainer()).show();
     input.autocomplete._test.removeChangeListener();
+    oldUrl = global.URL;
+    olldWindow = { ...global.window };
+    global.URL = URL;
+    global.window = Object.create(window);
+    Object.defineProperty(window, 'location', {
+      value: {
+        origin: 'http://localhost:5620',
+      },
+    });
   });
   afterEach(function () {
+    global.URL = oldUrl;
+    global.window = olldWindow;
     $(input.getCoreEditor().getContainer()).hide();
     input.autocomplete._test.addChangeListener();
   });
@@ -475,5 +489,21 @@ curl -XPOST "http://localhost:9200/_sql?format=txt" -H "kbn-xsrf: reporting" -H 
   "query": "SELECT prenom FROM claude_index WHERE prenom = '\\''claude'\\'' ",
   "fetch_size": 1
 }'`.trim()
+  );
+
+  multiReqCopyAsCurlTest(
+    'with date math index',
+    editorInput1,
+    { start: { lineNumber: 35 }, end: { lineNumber: 35 } },
+    `
+    curl -XGET "http://localhost:9200/%3Cindex_1-%7Bnow%2Fd-2d%7D%3E%2C%3Cindex_1-%7Bnow%2Fd-1d%7D%3E%2C%3Cindex_1-%7Bnow%2Fd%7D%3E%2F_search?pretty" -H "kbn-xsrf: reporting"`.trim()
+  );
+
+  multiReqCopyAsCurlTest(
+    'with Kibana API request',
+    editorInput1,
+    { start: { lineNumber: 37 }, end: { lineNumber: 37 } },
+    `
+curl -XGET "http://localhost:5620/api/spaces/space" -H \"kbn-xsrf: reporting\"`.trim()
   );
 });

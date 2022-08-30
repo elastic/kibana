@@ -18,6 +18,8 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiSteps } from '@elastic/eui';
 
+import { ELASTICSEARCH_PLUGIN } from '../../../../common/constants';
+
 import { EuiLinkTo } from '../react_router_helpers';
 
 import { IconRow } from './icon_row';
@@ -42,13 +44,13 @@ describe('GettingStartedSteps', () => {
         ...rest,
       }));
 
-    expect(steps[0].title).toEqual('Add your documents and data to Enterprise Search');
+    expect(steps[0].title).toEqual('Add your documents to Enterprise Search');
     expect(steps[0].status).toEqual('current');
     expect(steps[0].children.find(IconRow).length).toEqual(1);
 
     expect(steps[1].title).toEqual('Build a search experience');
     expect(steps[1].status).toEqual('incomplete');
-    expect(steps[1].children.find(EuiLinkTo).prop('to')).toEqual('/elasticsearch_guide');
+    expect(steps[1].children.find(EuiLinkTo).prop('to')).toEqual(ELASTICSEARCH_PLUGIN.URL);
 
     expect(steps[2].title).toEqual('Tune your search relevance');
     expect(steps[2].status).toEqual('incomplete');

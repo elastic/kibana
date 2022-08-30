@@ -7,8 +7,8 @@
 
 import { flatten, orderBy, last } from 'lodash';
 import { rangeQuery, kqlQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { asPercent } from '../../../../common/utils/formatters';
-import { ProcessorEvent } from '../../../../common/processor_event';
 import {
   SERVICE_NAME,
   SPAN_SUBTYPE,

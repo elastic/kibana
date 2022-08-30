@@ -12,10 +12,13 @@ Use the information in this section to inspect Elasticsearch requests and find s
 [float]
 === Inspect Elasticsearch requests
 
-Maps uses the {ref}/search-search.html[{es} search API] to get documents and aggregation results from {es}. To troubleshoot these requests, open the Inspector, which shows the most recent requests for each layer. You can switch between different requests using the *Request* dropdown.
+Maps uses the {ref}/search-vector-tile-api.html[{es} vector tile search API] and the {ref}/search-search.html[{es} search API] to get documents and aggregation results from {es}. Use *Vector tiles* inspector to view {es} vector tile search API requests. Use *Requests* inspector to view {es} search API requests.
 
 [role="screenshot"]
-image::maps/images/inspector.png[]
+image::maps/images/vector_tile_inspector.png[]
+
+[role="screenshot"]
+image::maps/images/requests_inspector.png[]
 
 [float]
 === Solutions to common problems

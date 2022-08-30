@@ -6,17 +6,20 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 import uuid from 'uuid';
 import { CoreStart, IUiSettingsClient, KibanaExecutionContext } from '@kbn/core/public';
 import { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 
 import { ControlGroupContainer } from '@kbn/controls-plugin/public';
+import { Filter, TimeRange } from '@kbn/es-query';
+import { DataView } from '@kbn/data-views-plugin/public';
+
 import { UiActionsStart } from '../../services/ui_actions';
-import { RefreshInterval, TimeRange, Query, Filter } from '../../services/data';
+import { RefreshInterval, Query } from '../../services/data';
 import {
   ViewMode,
   Container,
@@ -40,6 +43,7 @@ import {
   KibanaThemeProvider,
 } from '../../services/kibana_react';
 import { PLACEHOLDER_EMBEDDABLE } from './placeholder';
+import { DASHBOARD_LOADED_EVENT } from '../../events';
 import { DashboardAppCapabilities, DashboardContainerInput } from '../../types';
 import { PresentationUtilPluginStart } from '../../services/presentation_util';
 import type { ScreenshotModePluginStart } from '../../services/screenshot_mode';
@@ -63,6 +67,14 @@ export interface DashboardContainerServices {
   uiActions: UiActionsStart;
   theme: CoreStart['theme'];
   http: CoreStart['http'];
+  analytics?: CoreStart['analytics'];
+}
+
+export interface DashboardLoadedInfo {
+  timeToData: number;
+  timeToDone: number;
+  numOfPanels: number;
+  status: string;
 }
 
 interface IndexSignature {
@@ -103,6 +115,24 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   private onDestroyControlGroup?: () => void;
   public controlGroup?: ControlGroupContainer;
   private domNode?: HTMLElement;
+
+  private allDataViews: DataView[] = [];
+
+  /**
+   * Gets all the dataviews that are actively being used in the dashboard
+   * @returns An array of dataviews
+   */
+  public getAllDataViews = () => {
+    return this.allDataViews;
+  };
+
+  /**
+   * Use this to set the dataviews that are used in the dashboard when they change/update
+   * @param newDataViews The new array of dataviews that will overwrite the old dataviews array
+   */
+  public setAllDataViews = (newDataViews: DataView[]) => {
+    this.allDataViews = newDataViews;
+  };
 
   public getPanelCount = () => {
     return Object.keys(this.getInput().panels).length;
@@ -151,6 +181,19 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
           this.onDestroyControlGroup = onDestroyControlGroup;
         }
       );
+    }
+  }
+
+  private onDataLoaded(data: DashboardLoadedInfo) {
+    if (this.services.analytics) {
+      reportPerformanceMetricEvent(this.services.analytics, {
+        eventName: DASHBOARD_LOADED_EVENT,
+        duration: data.timeToDone,
+        key1: 'time_to_data',
+        value1: data.timeToData,
+        key2: 'num_of_panels',
+        value2: data.numOfPanels,
+      });
     }
   }
 
@@ -290,6 +333,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
                 controlsEnabled={controlsEnabled}
                 container={this}
                 controlGroup={this.controlGroup}
+                onDataLoaded={this.onDataLoaded.bind(this)}
               />
             </this.services.presentationUtil.ContextProvider>
           </KibanaThemeProvider>

@@ -9,7 +9,7 @@
 import {
   doesNotExistOperator,
   EVENT_FILTERS_OPERATORS,
-  EXCEPTION_OPERATORS,
+  ALL_OPERATORS,
   existsOperator,
   isNotOperator,
   isOperator,
@@ -53,6 +53,6 @@ describe('#getOperators', () => {
   test('it returns all operator types when field type is not null, boolean, or nested', () => {
     const operator = getOperators(getField('machine.os.raw'));
 
-    expect(operator).toEqual(EXCEPTION_OPERATORS);
+    expect(operator).toEqual(ALL_OPERATORS);
   });
 });

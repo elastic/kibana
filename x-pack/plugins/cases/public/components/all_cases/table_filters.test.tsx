@@ -7,21 +7,23 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
+import userEvent from '@testing-library/user-event';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 import { CaseStatuses } from '../../../common/api';
 import { OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
-import { TestProviders } from '../../common/mock';
-import { useGetTags } from '../../containers/use_get_tags';
+import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../common/mock';
 import { useGetReporters } from '../../containers/use_get_reporters';
 import { DEFAULT_FILTER_OPTIONS } from '../../containers/use_get_cases';
 import { CasesTableFilters } from './table_filters';
+import { useGetTags } from '../../containers/use_get_tags';
 
 jest.mock('../../containers/use_get_reporters');
 jest.mock('../../containers/use_get_tags');
 
 const onFilterChanged = jest.fn();
 const fetchReporters = jest.fn();
-const fetchTags = jest.fn();
+const refetch = jest.fn();
 const setFilterRefetch = jest.fn();
 
 const props = {
@@ -35,9 +37,11 @@ const props = {
 };
 
 describe('CasesTableFilters ', () => {
+  let appMockRender: AppMockRenderer;
   beforeEach(() => {
+    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
-    (useGetTags as jest.Mock).mockReturnValue({ tags: ['coke', 'pepsi'], fetchTags });
+    (useGetTags as jest.Mock).mockReturnValue({ data: ['coke', 'pepsi'], refetch });
     (useGetReporters as jest.Mock).mockReturnValue({
       reporters: ['casetester'],
       respReporters: [{ username: 'casetester' }],
@@ -55,6 +59,20 @@ describe('CasesTableFilters ', () => {
     );
 
     expect(wrapper.find(`[data-test-subj="case-status-filter"]`).first().exists()).toBeTruthy();
+  });
+
+  it('should render the case severity filter dropdown', () => {
+    const result = appMockRender.render(<CasesTableFilters {...props} />);
+    expect(result.getByTestId('case-severity-filter')).toBeTruthy();
+  });
+
+  it('should call onFilterChange when the severity filter changes', async () => {
+    const result = appMockRender.render(<CasesTableFilters {...props} />);
+    userEvent.click(result.getByTestId('case-severity-filter'));
+    await waitForEuiPopoverOpen();
+    userEvent.click(result.getByTestId('case-severity-filter-high'));
+
+    expect(onFilterChanged).toBeCalledWith({ severity: 'high' });
   });
 
   it('should call onFilterChange when selected tags change', () => {
@@ -174,7 +192,7 @@ describe('CasesTableFilters ', () => {
     );
   });
 
-  describe('dynamic Solution filter', () => {
+  describe('Solution filter', () => {
     it('shows Solution filter when provided more than 1 availableSolutions', () => {
       const wrapper = mount(
         <TestProviders>
@@ -199,28 +217,58 @@ describe('CasesTableFilters ', () => {
         wrapper.find(`[data-test-subj="options-filter-popover-button-Solution"]`).exists()
       ).toBeFalsy();
     });
-  });
 
-  it('should call onFilterChange when selected solution changes', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <CasesTableFilters
-          {...props}
-          availableSolutions={[SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER]}
-        />
-      </TestProviders>
-    );
-    wrapper
-      .find(`[data-test-subj="options-filter-popover-button-Solution"]`)
-      .last()
-      .simulate('click');
+    it('should call onFilterChange when selected solution changes', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <CasesTableFilters
+            {...props}
+            availableSolutions={[SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER]}
+          />
+        </TestProviders>
+      );
+      wrapper
+        .find(`[data-test-subj="options-filter-popover-button-Solution"]`)
+        .last()
+        .simulate('click');
 
-    wrapper
-      .find(`[data-test-subj="options-filter-popover-item-${SECURITY_SOLUTION_OWNER}"]`)
-      .last()
-      .simulate('click');
+      wrapper
+        .find(`[data-test-subj="options-filter-popover-item-${SECURITY_SOLUTION_OWNER}"]`)
+        .last()
+        .simulate('click');
 
-    expect(onFilterChanged).toBeCalledWith({ owner: [SECURITY_SOLUTION_OWNER] });
+      expect(onFilterChanged).toBeCalledWith({ owner: [SECURITY_SOLUTION_OWNER] });
+    });
+
+    it('should deselect all solutions', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <CasesTableFilters
+            {...props}
+            availableSolutions={[SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER]}
+          />
+        </TestProviders>
+      );
+
+      wrapper
+        .find(`[data-test-subj="options-filter-popover-button-Solution"]`)
+        .last()
+        .simulate('click');
+
+      wrapper
+        .find(`[data-test-subj="options-filter-popover-item-${SECURITY_SOLUTION_OWNER}"]`)
+        .last()
+        .simulate('click');
+
+      expect(onFilterChanged).toBeCalledWith({ owner: [SECURITY_SOLUTION_OWNER] });
+
+      wrapper
+        .find(`[data-test-subj="options-filter-popover-item-${SECURITY_SOLUTION_OWNER}"]`)
+        .last()
+        .simulate('click');
+
+      expect(onFilterChanged).toBeCalledWith({ owner: [] });
+    });
   });
 
   describe('create case button', () => {

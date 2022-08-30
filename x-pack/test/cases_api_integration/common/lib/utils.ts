@@ -13,6 +13,7 @@ import expect from '@kbn/expect';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { TransportResult } from '@elastic/elasticsearch';
 import type { Client } from '@elastic/elasticsearch';
+import { GetResponse } from '@elastic/elasticsearch/lib/api/types';
 
 import type SuperTest from 'supertest';
 import {
@@ -23,6 +24,7 @@ import {
   CASE_REPORTERS_URL,
   CASE_STATUS_URL,
   CASE_TAGS_URL,
+  INTERNAL_SUGGEST_USER_PROFILES_URL,
 } from '@kbn/cases-plugin/common/constants';
 import {
   CasesConfigureRequest,
@@ -52,12 +54,15 @@ import {
   BulkCreateCommentRequest,
   CommentType,
   CasesMetricsResponse,
+  SuggestUserProfilesRequest,
 } from '@kbn/cases-plugin/common/api';
 import { getCaseUserActionUrl } from '@kbn/cases-plugin/common/api/helpers';
 import { SignalHit } from '@kbn/security-solution-plugin/server/lib/detection_engine/signals/types';
 import { ActionResult, FindActionResult } from '@kbn/actions-plugin/server/types';
 import { ESCasesConfigureAttributes } from '@kbn/cases-plugin/server/services/configure/types';
 import { ESCaseAttributes } from '@kbn/cases-plugin/server/services/cases/types';
+import type { SavedObjectsRawDocSource } from '@kbn/core/server';
+import { UserProfileService } from '@kbn/cases-plugin/server/services';
 import { User } from './authentication/types';
 import { superUser } from './authentication/users';
 import { getPostCaseRequest, postCaseReq } from './mock';
@@ -245,6 +250,34 @@ export const getJiraConnector = () => ({
   config: {
     apiUrl: 'http://some.non.existent.com',
     projectKey: 'pkey',
+  },
+});
+
+export const getCasesWebhookConnector = () => ({
+  name: 'Cases Webhook Connector',
+  connector_type_id: '.cases-webhook',
+  secrets: {
+    user: 'user',
+    password: 'pass',
+  },
+  config: {
+    createCommentJson: '{"body":{{{case.comment}}}}',
+    createCommentMethod: 'post',
+    createCommentUrl: 'http://some.non.existent.com/{{{external.system.id}}}/comment',
+    createIncidentJson:
+      '{"fields":{"summary":{{{case.title}}},"description":{{{case.description}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
+    createIncidentMethod: 'post',
+    createIncidentResponseKey: 'id',
+    createIncidentUrl: 'http://some.non.existent.com/',
+    getIncidentResponseExternalTitleKey: 'key',
+    hasAuth: true,
+    headers: { [`content-type`]: 'application/json' },
+    viewIncidentUrl: 'http://some.non.existent.com/browse/{{{external.system.title}}}',
+    getIncidentUrl: 'http://some.non.existent.com/{{{external.system.id}}}',
+    updateIncidentJson:
+      '{"fields":{"summary":{{{case.title}}},"description":{{{case.description}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
+    updateIncidentMethod: 'put',
+    updateIncidentUrl: 'http://some.non.existent.com/{{{external.system.id}}}',
   },
 });
 
@@ -1010,13 +1043,13 @@ export const getCaseMetrics = async ({
 }: {
   supertest: SuperTest.SuperTest<SuperTest.Test>;
   caseId: string;
-  features: string[];
+  features: string[] | string;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
 }): Promise<SingleCaseMetricsResponse> => {
   const { body: metricsResponse } = await supertest
     .get(`${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/metrics/${caseId}`)
-    .query({ features: JSON.stringify(features) })
+    .query({ features })
     .auth(auth.user.username, auth.user.password)
     .expect(expectedHttpCode);
 
@@ -1277,16 +1310,83 @@ export const getCasesMetrics = async ({
   auth = { user: superUser, space: null },
 }: {
   supertest: SuperTest.SuperTest<SuperTest.Test>;
-  features: string[];
+  features: string[] | string;
   query?: Record<string, unknown>;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
 }): Promise<CasesMetricsResponse> => {
   const { body: metricsResponse } = await supertest
     .get(`${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/metrics`)
-    .query({ features: JSON.stringify(features), ...query })
+    .query({ features, ...query })
     .auth(auth.user.username, auth.user.password)
     .expect(expectedHttpCode);
 
   return metricsResponse;
+};
+
+export const getSOFromKibanaIndex = async ({
+  es,
+  soType,
+  soId,
+}: {
+  es: Client;
+  soType: string;
+  soId: string;
+}) => {
+  const esResponse = await es.get<SavedObjectsRawDocSource>(
+    {
+      index: '.kibana',
+      id: `${soType}:${soId}`,
+    },
+    { meta: true }
+  );
+
+  return esResponse;
+};
+
+export const getReferenceFromEsResponse = (
+  esResponse: TransportResult<GetResponse<SavedObjectsRawDocSource>, unknown>,
+  id: string
+) => esResponse.body._source?.references?.find((r) => r.id === id);
+
+export const suggestUserProfiles = async ({
+  supertest,
+  req,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  req: SuggestUserProfilesRequest;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): ReturnType<UserProfileService['suggest']> => {
+  const { body: profiles } = await supertest
+    .post(`${getSpaceUrlPrefix(auth.space)}${INTERNAL_SUGGEST_USER_PROFILES_URL}`)
+    .auth(auth.user.username, auth.user.password)
+    .set('kbn-xsrf', 'true')
+    .send(req)
+    .expect(expectedHttpCode);
+
+  return profiles;
+};
+
+export const loginUsers = async ({
+  supertest,
+  users = [superUser],
+}: {
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  users?: User[];
+}) => {
+  for (const user of users) {
+    await supertest
+      .post('/internal/security/login')
+      .set('kbn-xsrf', 'xxx')
+      .send({
+        providerType: 'basic',
+        providerName: 'basic',
+        currentURL: '/',
+        params: { username: user.username, password: user.password },
+      })
+      .expect(200);
+  }
 };

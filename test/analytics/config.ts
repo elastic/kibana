@@ -19,7 +19,7 @@ import { services } from './services';
  */
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const commonConfig = await readConfigFile(require.resolve('../common/config'));
-  const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
+  const functionalConfig = await readConfigFile(require.resolve('../functional/config.base.js'));
 
   return {
     testFiles: [require.resolve('./tests')],
@@ -34,10 +34,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...functionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...functionalConfig.get('kbnTestServer.serverArgs'),
-        // Disabling telemetry so it doesn't call opt-in before the tests run.
-        '--telemetry.enabled=false',
-        `--plugin-path=${path.resolve(__dirname, './__fixtures__/plugins/analytics_plugin_a')}`,
-        `--plugin-path=${path.resolve(__dirname, './__fixtures__/plugins/analytics_ftr_helpers')}`,
+        '--telemetry.optIn=true',
+        `--plugin-path=${path.resolve(__dirname, './fixtures/plugins/analytics_plugin_a')}`,
+        `--plugin-path=${path.resolve(__dirname, './fixtures/plugins/analytics_ftr_helpers')}`,
       ],
     },
   };

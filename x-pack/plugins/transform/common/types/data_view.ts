@@ -6,8 +6,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-
-import { isPopulatedObject } from '../shared_imports';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 // Custom minimal type guard for DataView to check against the attributes used in transforms code.
 export function isDataView(arg: any): arg is DataView {

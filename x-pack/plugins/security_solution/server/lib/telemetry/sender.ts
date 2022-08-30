@@ -9,21 +9,23 @@ import { cloneDeep } from 'lodash';
 import { URL } from 'url';
 import { transformDataToNdjson } from '@kbn/securitysolution-utils';
 
-import { Logger } from '@kbn/core/server';
-import { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import axios, { AxiosInstance } from 'axios';
-import {
+import type { Logger } from '@kbn/core/server';
+import type { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { AxiosInstance } from 'axios';
+import axios from 'axios';
+import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { ITelemetryReceiver } from './receiver';
+import type { ITelemetryReceiver } from './receiver';
 import { copyAllowlistedFields, endpointAllowlistFields } from './filterlists';
 import { createTelemetryTaskConfigs } from './tasks';
 import { createUsageCounterLabel } from './helpers';
 import type { TelemetryEvent } from './types';
 import { TELEMETRY_MAX_BUFFER_SIZE } from './constants';
-import { SecurityTelemetryTask, SecurityTelemetryTaskConfig } from './task';
+import type { SecurityTelemetryTaskConfig } from './task';
+import { SecurityTelemetryTask } from './task';
 
 const usageLabelPrefix: string[] = ['security_telemetry', 'sender'];
 
@@ -35,6 +37,7 @@ export interface ITelemetryEventsSender {
     telemetryUsageCounter?: UsageCounter
   ): void;
 
+  getTelemetryUsageCluster(): UsageCounter | undefined;
   getClusterID(): string | undefined;
 
   start(
@@ -46,6 +49,7 @@ export interface ITelemetryEventsSender {
   stop(): void;
   queueTelemetryEvents(events: TelemetryEvent[]): void;
   isTelemetryOptedIn(): Promise<boolean>;
+  isTelemetryServicesReachable(): Promise<boolean>;
   sendIfDue(axiosInstance?: AxiosInstance): Promise<void>;
   processEvents(events: TelemetryEvent[]): TelemetryEvent[];
   sendOnDemand(channel: string, toSend: unknown[], axiosInstance?: AxiosInstance): Promise<void>;
@@ -63,7 +67,10 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
   private isSending = false;
   private receiver: ITelemetryReceiver | undefined;
   private queue: TelemetryEvent[] = [];
-  private isOptedIn?: boolean = true; // Assume true until the first check
+
+  // Assume both true until the first check
+  private isOptedIn?: boolean = true;
+  private isElasticTelemetryReachable?: boolean = true;
 
   private telemetryUsageCounter?: UsageCounter;
   private telemetryTasks?: SecurityTelemetryTask[];
@@ -90,6 +97,10 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
         }
       );
     }
+  }
+
+  public getTelemetryUsageCluster(): UsageCounter | undefined {
+    return this.telemetryUsageCounter;
   }
 
   public getClusterID(): string | undefined {
@@ -158,6 +169,67 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
     return this.isOptedIn === true;
   }
 
+  /**
+   * Issue: https://github.com/elastic/kibana/issues/133321
+   *
+   * As of 8.3 - Telemetry is opted in by default, but the Kibana instance may
+   * be deployed in a network where outbound connections are restricted. This
+   * causes hanging connections in backend telemetry code. A previous bugfix
+   * included a default timeout for the client, but this code shouldn't be
+   * reachable if we cannot connect to Elastic Telemetry Services. This
+   * function call can be utilized to check if the Kibana instance can
+   * call out.
+   *
+   * Please note that this function should be used with care. DO NOT call this
+   * function in a way that does not take into consideration if the deployment
+   * opted out of telemetry. For example,
+   *
+   * DO NOT
+   * --------
+   *
+   * if (isTelemetryServicesReachable() && isTelemetryOptedIn()) {
+   *   ...
+   * }
+   *
+   * DO
+   * --------
+   *
+   * if (isTelemetryOptedIn() && isTelemetryServicesReachable()) {
+   *   ...
+   * }
+   *
+   * Is ok because the call to `isTelemetryServicesReachable()` is never called
+   * because `isTelemetryOptedIn()` short-circuits the conditional.
+   *
+   * DO NOT
+   * --------
+   *
+   * const [optedIn, isReachable] = await Promise.all([
+   *  isTelemetryOptedIn(),
+   *  isTelemetryServicesReachable(),
+   * ]);
+   *
+   * As it does not take into consideration the execution order and makes a redundant
+   * network call to Elastic Telemetry Services.
+   *
+   * Staging URL: https://telemetry-staging.elastic.co/ping
+   * Production URL: https://telemetry.elastic.co/ping
+   */
+  public async isTelemetryServicesReachable() {
+    try {
+      const telemetryUrl = await this.fetchTelemetryPingUrl();
+      const resp = await axios.get(telemetryUrl, { timeout: 3000 });
+      if (resp.status === 200) {
+        this.logger.debug('[Security Telemetry] elastic telemetry services are reachable');
+        return true;
+      }
+
+      return false;
+    } catch (_err) {
+      return false;
+    }
+  }
+
   public async sendIfDue(axiosInstance: AxiosInstance = axios) {
     if (this.isSending) {
       return;
@@ -173,6 +245,14 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
       this.isOptedIn = await this.isTelemetryOptedIn();
       if (!this.isOptedIn) {
         this.logger.debug(`Telemetry is not opted-in.`);
+        this.queue = [];
+        this.isSending = false;
+        return;
+      }
+
+      this.isElasticTelemetryReachable = await this.isTelemetryServicesReachable();
+      if (!this.isElasticTelemetryReachable) {
+        this.logger.debug(`Telemetry Services are not reachable.`);
         this.queue = [];
         this.isSending = false;
         return;
@@ -282,6 +362,16 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
     return url.toString();
   }
 
+  private async fetchTelemetryPingUrl(): Promise<string> {
+    const telemetryUrl = await this.telemetrySetup?.getTelemetryUrl();
+    if (!telemetryUrl) {
+      throw Error("Couldn't get telemetry URL");
+    }
+
+    telemetryUrl.pathname = `/ping`;
+    return telemetryUrl.toString();
+  }
+
   private async sendEvents(
     events: unknown[],
     telemetryUrl: string,
@@ -299,11 +389,12 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
       const resp = await axiosInstance.post(telemetryUrl, ndjson, {
         headers: {
           'Content-Type': 'application/x-ndjson',
-          'X-Elastic-Cluster-ID': clusterUuid,
-          'X-Elastic-Cluster-Name': clusterName,
+          ...(clusterUuid ? { 'X-Elastic-Cluster-ID': clusterUuid } : undefined),
+          ...(clusterName ? { 'X-Elastic-Cluster-Name': clusterName } : undefined),
           'X-Elastic-Stack-Version': clusterVersionNumber ? clusterVersionNumber : '8.0.0',
           ...(licenseId ? { 'X-Elastic-License-ID': licenseId } : {}),
         },
+        timeout: 5000,
       });
       this.telemetryUsageCounter?.incrementCounter({
         counterName: createUsageCounterLabel(usageLabelPrefix.concat(['payloads', channel])),

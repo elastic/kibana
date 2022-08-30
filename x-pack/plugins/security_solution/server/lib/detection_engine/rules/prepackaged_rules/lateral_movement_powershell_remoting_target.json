@@ -19,6 +19,48 @@
   "references": [
     "https://docs.microsoft.com/en-us/powershell/scripting/learn/remoting/running-remote-commands?view=powershell-7.1"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "destination.port",
+      "type": "long"
+    },
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "host.id",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "network.direction",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "network.protocol",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.name",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.parent.name",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "source.ip",
+      "type": "ip"
+    }
+  ],
   "risk_score": 47,
   "rule_id": "2772264c-6fb9-4d9d-9014-b416eed21254",
   "severity": "medium",
@@ -47,5 +89,5 @@
     }
   ],
   "type": "eql",
-  "version": 5
+  "version": 6
 }

@@ -11,7 +11,7 @@ import { services, pageObjects } from './ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaFunctionalConfig = await readConfigFile(
-    require.resolve('../../functional/config.js')
+    require.resolve('../../functional/config.base.js')
   );
 
   return {
@@ -33,7 +33,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
     kbnTestServer: {
       ...kibanaFunctionalConfig.get('kbnTestServer'),
-      serverArgs: [...kibanaFunctionalConfig.get('kbnTestServer.serverArgs')],
+      serverArgs: [
+        ...kibanaFunctionalConfig.get('kbnTestServer.serverArgs'),
+        `--xpack.fleet.registryUrl=http://localhost:12345`, // setting to invalid registry url to prevent installing preconfigured packages
+      ],
     },
   };
 }

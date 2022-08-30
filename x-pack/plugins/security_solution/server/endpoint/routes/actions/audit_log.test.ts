@@ -7,7 +7,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { KibanaResponseFactory, RequestHandler, RouteConfig } from '@kbn/core/server';
+import type { KibanaResponseFactory, RequestHandler, RouteConfig } from '@kbn/core/server';
 import {
   coreMock,
   elasticsearchServiceMock,
@@ -16,11 +16,11 @@ import {
   loggingSystemMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
-import {
+import type {
   EndpointActionLogRequestParams,
   EndpointActionLogRequestQuery,
-  EndpointActionLogRequestSchema,
 } from '../../../../common/endpoint/schema/actions';
+import { EndpointActionLogRequestSchema } from '../../../../common/endpoint/schema/actions';
 import { ENDPOINT_ACTION_LOG_ROUTE } from '../../../../common/endpoint/constants';
 import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
@@ -32,9 +32,10 @@ import {
 } from '../../mocks';
 import { registerActionAuditLogRoutes } from './audit_log';
 import uuid from 'uuid';
-import { mockAuditLogSearchResult, Results } from './mocks';
-import { SecuritySolutionRequestHandlerContext } from '../../../types';
-import {
+import type { Results } from './mocks';
+import { mockAuditLogSearchResult } from './mocks';
+import type { SecuritySolutionRequestHandlerContext } from '../../../types';
+import type {
   ActivityLog,
   EndpointAction,
   EndpointActionResponse,

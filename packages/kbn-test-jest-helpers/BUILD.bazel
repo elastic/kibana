@@ -8,14 +8,21 @@ PKG_REQUIRE_NAME = "@kbn/test-jest-helpers"
 
 SOURCE_FILES = glob(
   [
-    "src/**/*"
+    "**/*.ts",
+    "**/*.tsx",
   ],
   exclude = [
+    "**/*.config.js",
+    "**/*.mock.*",
     "**/*.test.*",
-    "**/*.snap",
-    "**/__fixture__/**",
-    "**/__fixtures__/**",
+    "**/*.stories.*",
     "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/mocks/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
   ]
 )
 
@@ -60,7 +67,6 @@ RUNTIME_DEPS = [
     "@npm//joi",
     "@npm//mustache",
     "@npm//normalize-path",
-    "@npm//parse-link-header",
     "@npm//prettier",
     "@npm//react",
     "@npm//react-dom",
@@ -106,11 +112,9 @@ TYPES_DEPS = [
   "@npm//@types/mustache",
   "@npm//@types/normalize-path",
   "@npm//@types/node",
-  "@npm//@types/parse-link-header",
   "@npm//@types/prettier",
   "@npm//@types/react",
   "@npm//@types/react-dom",
-  "@npm//@types/react-redux",
   "@npm//@types/react-router-dom",
   "@npm//@types/semver",
   "@npm//@types/xml2js",
@@ -137,9 +141,9 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
+  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  root_dir = "src",
   tsconfig = ":tsconfig",
 )
 

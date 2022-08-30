@@ -19,13 +19,11 @@ import {
 import classNames from 'classnames';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { Filter } from '@kbn/es-query';
-import { Query } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { IndexPatternField } from './types';
 import { FieldItem } from './field_item';
-import { DatasourceDataPanelProps } from '../types';
-import { IndexPattern } from './types';
+import type { DatasourceDataPanelProps, IndexPattern, IndexPatternField } from '../types';
 
 export interface FieldItemSharedProps {
   core: DatasourceDataPanelProps['core'];

@@ -11,7 +11,6 @@ export default function (providerContext: FtrProviderContext) {
   const { loadTestFile } = providerContext;
 
   describe('endpoint', function () {
-    this.tags('ciGroup7');
     loadTestFile(require.resolve('./agents_page'));
   });
 }

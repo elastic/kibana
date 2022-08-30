@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
@@ -20,6 +20,7 @@ import {
 } from '@kbn/vis-default-editor-plugin/public';
 import { BUCKET_TYPES } from '@kbn/data-plugin/public';
 
+import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { VisParams } from '../../../../types';
 import { GridPanel } from './grid_panel';
 import { ThresholdPanel } from './threshold_panel';
@@ -40,6 +41,10 @@ export function PointSeriesOptions(props: ValidationVisOptionsProps<VisParams>) 
       ),
     [stateParams.seriesParams, aggs.aggs]
   );
+
+  const legendSize = stateParams.legendSize;
+
+  const [hadAutoLegendSize] = useState(() => legendSize === LegendSize.AUTO);
 
   const handleLegendSizeChange = useCallback((size) => setValue('legendSize', size), [setValue]);
 
@@ -64,12 +69,13 @@ export function PointSeriesOptions(props: ValidationVisOptionsProps<VisParams>) 
           setValue={setValue}
         />
         <LegendSizeSettings
-          legendSize={stateParams.legendSize}
+          legendSize={legendSize}
           onLegendSizeChange={handleLegendSizeChange}
           isVerticalLegend={
             stateParams.legendPosition === Position.Left ||
             stateParams.legendPosition === Position.Right
           }
+          showAutoOption={hadAutoLegendSize}
         />
 
         {vis.data.aggs!.aggs.some(

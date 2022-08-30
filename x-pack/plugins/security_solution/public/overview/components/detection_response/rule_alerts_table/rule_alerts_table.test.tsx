@@ -12,8 +12,9 @@ import { render } from '@testing-library/react';
 
 import { SecurityPageName } from '../../../../../common/constants';
 import { TestProviders } from '../../../../common/mock';
-import { RuleAlertsTable, RuleAlertsTableProps } from './rule_alerts_table';
-import { RuleAlertsItem, UseRuleAlertsItems } from './use_rule_alerts_items';
+import type { RuleAlertsTableProps } from './rule_alerts_table';
+import { RuleAlertsTable } from './rule_alerts_table';
+import type { RuleAlertsItem, UseRuleAlertsItems } from './use_rule_alerts_items';
 
 const mockGetAppUrl = jest.fn();
 jest.mock('../../../../common/lib/kibana/hooks', () => {
@@ -91,7 +92,7 @@ describe('RuleAlertsTable', () => {
       </TestProviders>
     );
 
-    expect(result.getByText('Updated now')).toBeInTheDocument();
+    expect(result.getByText(/Updated/)).toBeInTheDocument();
   });
 
   it('should render the table columns', () => {

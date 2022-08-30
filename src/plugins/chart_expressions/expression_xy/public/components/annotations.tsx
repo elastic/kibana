@@ -7,7 +7,7 @@
  */
 
 import './annotations.scss';
-import './reference_lines.scss';
+import './reference_lines/reference_lines.scss';
 
 import React from 'react';
 import { snakeCase } from 'lodash';
@@ -22,6 +22,7 @@ import moment from 'moment';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type {
   ManualPointEventAnnotationArgs,
+  ManualPointEventAnnotationOutput,
   ManualRangeEventAnnotationOutput,
 } from '@kbn/event-annotation-plugin/common';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
@@ -29,7 +30,11 @@ import {
   defaultAnnotationColor,
   defaultAnnotationRangeColor,
 } from '@kbn/event-annotation-plugin/public';
-import type { AnnotationLayerArgs, AnnotationLayerConfigResult } from '../../common/types';
+import type {
+  AnnotationLayerArgs,
+  CommonXYAnnotationLayerConfig,
+  CollectiveConfig,
+} from '../../common';
 import { AnnotationIcon, hasIcon, Marker, MarkerBody } from '../helpers';
 import { mapVerticalToHorizontalPlacement, LINES_MARKER_SIZE } from '../helpers';
 
@@ -46,16 +51,10 @@ export interface AnnotationsProps {
   formatter?: FieldFormat;
   isHorizontal: boolean;
   paddingMap: Partial<Record<Position, number>>;
-  hide?: boolean;
+  simpleView?: boolean;
   minInterval?: number;
   isBarChart?: boolean;
   outsideDimension: number;
-}
-
-interface CollectiveConfig extends ManualPointEventAnnotationArgs {
-  roundedTimestamp: number;
-  axisMode: 'bottom';
-  customTooltipDetails?: AnnotationTooltipFormatter | undefined;
 }
 
 const groupVisibleConfigsByInterval = (
@@ -65,7 +64,10 @@ const groupVisibleConfigsByInterval = (
 ) => {
   return layers
     .flatMap(({ annotations }) =>
-      annotations.filter((a) => !a.isHidden && a.type === 'manual_point_event_annotation')
+      annotations.filter(
+        (a): a is ManualPointEventAnnotationOutput =>
+          !a.isHidden && a.type === 'manual_point_event_annotation'
+      )
     )
     .sort((a, b) => moment(a.time).valueOf() - moment(b.time).valueOf())
     .reduce<Record<string, ManualPointEventAnnotationArgs[]>>((acc, current) => {
@@ -131,7 +133,7 @@ const getCommonStyles = (configArr: ManualPointEventAnnotationArgs[]) => {
   };
 };
 
-export const getRangeAnnotations = (layers: AnnotationLayerConfigResult[]) => {
+export const getRangeAnnotations = (layers: CommonXYAnnotationLayerConfig[]) => {
   return layers
     .flatMap(({ annotations }) =>
       annotations.filter(
@@ -146,7 +148,7 @@ export const OUTSIDE_RECT_ANNOTATION_WIDTH = 8;
 export const OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION = 2;
 
 export const getAnnotationsGroupedByInterval = (
-  layers: AnnotationLayerConfigResult[],
+  layers: CommonXYAnnotationLayerConfig[],
   minInterval?: number,
   firstTimestamp?: number,
   formatter?: FieldFormat
@@ -157,7 +159,7 @@ export const getAnnotationsGroupedByInterval = (
     collectiveConfig = {
       ...configArr[0],
       roundedTimestamp: Number(roundedTimestamp),
-      axisMode: 'bottom',
+      position: 'bottom',
     };
     if (configArr.length > 1) {
       const commonStyles = getCommonStyles(configArr);
@@ -181,7 +183,7 @@ export const Annotations = ({
   formatter,
   isHorizontal,
   paddingMap,
-  hide,
+  simpleView,
   minInterval,
   isBarChart,
   outsideDimension,
@@ -200,7 +202,7 @@ export const Annotations = ({
         const header =
           formatter?.convert(isGrouped ? roundedTimestamp : exactTimestamp) ||
           moment(isGrouped ? roundedTimestamp : exactTimestamp).toISOString();
-        const strokeWidth = hide ? 1 : annotation.lineWidth || 1;
+        const strokeWidth = simpleView ? 1 : annotation.lineWidth || 1;
         const dataValue = isGrouped
           ? moment(
               isBarChart && minInterval ? roundedTimestamp + minInterval / 2 : roundedTimestamp
@@ -212,7 +214,7 @@ export const Annotations = ({
             key={id}
             domainType={AnnotationDomainType.XDomain}
             marker={
-              !hide ? (
+              !simpleView ? (
                 <Marker
                   {...{
                     config: annotation,
@@ -225,7 +227,7 @@ export const Annotations = ({
               ) : undefined
             }
             markerBody={
-              !hide ? (
+              !simpleView ? (
                 <MarkerBody
                   label={
                     annotation.textVisibility && !hasReducedPadding ? annotation.label : undefined

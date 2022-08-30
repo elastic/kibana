@@ -6,12 +6,13 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiTableFieldDataColumnType } from '@elastic/eui';
+import type { EuiTableFieldDataColumnType } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import * as i18n from './translations';
-import { LinkPanel, LinkPanelListItem } from '../link_panel';
-import { LinkPanelViewProps } from '../link_panel/types';
+import type { LinkPanelListItem } from '../link_panel';
+import { LinkPanel } from '../link_panel';
+import type { LinkPanelViewProps } from '../link_panel/types';
 import { shortenCountIntoString } from '../../../common/utils/shorten_count_into_string';
 import { Link } from '../link_panel/link';
 import { ID as CTIEventCountQueryId } from '../../containers/overview_cti_links/use_ti_data_sources';

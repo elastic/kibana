@@ -13,7 +13,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { ApmApiError } from '../../common/apm_api_supertest';
 
 type ServicesDetailedStatisticsReturn =
-  APIReturnType<'GET /internal/apm/services/detailed_statistics'>;
+  APIReturnType<'POST /internal/apm/services/detailed_statistics'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -31,16 +31,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       it('handles the empty state', async () => {
         const response = await apmApiClient.readUser({
-          endpoint: `GET /internal/apm/services/detailed_statistics`,
+          endpoint: `POST /internal/apm/services/detailed_statistics`,
           params: {
             query: {
               start,
               end,
-              serviceNames: JSON.stringify(serviceNames),
               environment: 'ENVIRONMENT_ALL',
               kuery: '',
               offset: '1d',
               probability: 1,
+            },
+            body: {
+              serviceNames: JSON.stringify(serviceNames),
             },
           },
         });
@@ -59,15 +61,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       let servicesDetailedStatistics: ServicesDetailedStatisticsReturn;
       before(async () => {
         const response = await apmApiClient.readUser({
-          endpoint: `GET /internal/apm/services/detailed_statistics`,
+          endpoint: `POST /internal/apm/services/detailed_statistics`,
           params: {
             query: {
               start,
               end,
-              serviceNames: JSON.stringify(serviceNames),
               environment: 'ENVIRONMENT_ALL',
               kuery: '',
               probability: 1,
+            },
+            body: {
+              serviceNames: JSON.stringify(serviceNames),
             },
           },
         });
@@ -112,15 +116,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns empty when empty service names is passed', async () => {
         try {
           await apmApiClient.readUser({
-            endpoint: `GET /internal/apm/services/detailed_statistics`,
+            endpoint: `POST /internal/apm/services/detailed_statistics`,
             params: {
               query: {
                 start,
                 end,
-                serviceNames: JSON.stringify([]),
                 environment: 'ENVIRONMENT_ALL',
                 kuery: '',
                 probability: 1,
+              },
+              body: {
+                serviceNames: JSON.stringify([]),
               },
             },
           });
@@ -135,15 +141,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('filters by environment', async () => {
         const response = await apmApiClient.readUser({
-          endpoint: `GET /internal/apm/services/detailed_statistics`,
+          endpoint: `POST /internal/apm/services/detailed_statistics`,
           params: {
             query: {
               start,
               end,
-              serviceNames: JSON.stringify(serviceNames),
               environment: 'production',
               kuery: '',
               probability: 1,
+            },
+            body: {
+              serviceNames: JSON.stringify(serviceNames),
             },
           },
         });
@@ -153,15 +161,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
       it('filters by kuery', async () => {
         const response = await apmApiClient.readUser({
-          endpoint: `GET /internal/apm/services/detailed_statistics`,
+          endpoint: `POST /internal/apm/services/detailed_statistics`,
           params: {
             query: {
               start,
               end,
-              serviceNames: JSON.stringify(serviceNames),
               environment: 'ENVIRONMENT_ALL',
               kuery: 'transaction.type : "invalid_transaction_type"',
               probability: 1,
+            },
+            body: {
+              serviceNames: JSON.stringify(serviceNames),
             },
           },
         });
@@ -178,16 +188,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       let servicesDetailedStatistics: ServicesDetailedStatisticsReturn;
       before(async () => {
         const response = await apmApiClient.readUser({
-          endpoint: `GET /internal/apm/services/detailed_statistics`,
+          endpoint: `POST /internal/apm/services/detailed_statistics`,
           params: {
             query: {
               start: moment(end).subtract(15, 'minutes').toISOString(),
               end,
-              serviceNames: JSON.stringify(serviceNames),
               offset: '15m',
               environment: 'ENVIRONMENT_ALL',
               kuery: '',
               probability: 1,
+            },
+            body: {
+              serviceNames: JSON.stringify(serviceNames),
             },
           },
         });

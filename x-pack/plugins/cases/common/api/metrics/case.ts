@@ -184,6 +184,9 @@ export const SingleCaseMetricsResponseRt = rt.partial(
 
 export const CasesMetricsResponseRt = rt.partial(
   rt.type({
-    mttr: rt.number,
+    /**
+     * The average resolve time of all cases in seconds
+     */
+    mttr: rt.union([rt.number, rt.null]),
   }).props
 );

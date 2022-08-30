@@ -73,6 +73,10 @@ describe('useUserAlertsItems', () => {
       items: [],
       isLoading: false,
       updatedAt: dateNow,
+      pagination: expect.objectContaining({
+        currentPage: 0,
+        pageCount: 0,
+      }),
     });
 
     expect(mockUseQueryAlerts).toBeCalledWith(mockQuery());
@@ -90,6 +94,10 @@ describe('useUserAlertsItems', () => {
       items: parsedVulnerableUserAlertsResult,
       isLoading: false,
       updatedAt: dateNow,
+      pagination: expect.objectContaining({
+        currentPage: 0,
+        pageCount: 1,
+      }),
     });
   });
 
@@ -109,6 +117,10 @@ describe('useUserAlertsItems', () => {
       items: parsedVulnerableUserAlertsResult,
       isLoading: false,
       updatedAt: newDateNow,
+      pagination: expect.objectContaining({
+        currentPage: 0,
+        pageCount: 1,
+      }),
     });
   });
 
@@ -121,6 +133,10 @@ describe('useUserAlertsItems', () => {
       items: [],
       isLoading: false,
       updatedAt: dateNow,
+      pagination: expect.objectContaining({
+        currentPage: 0,
+        pageCount: 0,
+      }),
     });
   });
 });

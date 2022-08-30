@@ -9,19 +9,23 @@ import {
   createStateContainer,
   createStateContainerReactHelpers,
 } from '@kbn/kibana-utils-plugin/public';
+import { RuleStatus } from '@kbn/triggers-actions-ui-plugin/public';
 
 interface RulesPageContainerState {
   lastResponse: string[];
+  status: RuleStatus[];
 }
 
 const defaultState: RulesPageContainerState = {
   lastResponse: [],
+  status: [],
 };
 
 interface RulesPageStateTransitions {
   setLastResponse: (
     state: RulesPageContainerState
   ) => (lastResponse: string[]) => RulesPageContainerState;
+  setStatus: (state: RulesPageContainerState) => (status: RuleStatus[]) => RulesPageContainerState;
 }
 
 const transitions: RulesPageStateTransitions = {
@@ -38,6 +42,20 @@ const transitions: RulesPageStateTransitions = {
       }
     });
     return { ...state, lastResponse: filteredIds };
+  },
+  setStatus: (state) => (status) => {
+    const filteredIds = status;
+    status.forEach((id) => {
+      const isPreviouslyChecked = state.status.includes(id);
+      if (!isPreviouslyChecked) {
+        filteredIds.concat(id);
+      } else {
+        filteredIds.filter((val) => {
+          return val !== id;
+        });
+      }
+    });
+    return { ...state, status: filteredIds };
   },
 };
 

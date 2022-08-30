@@ -18,6 +18,7 @@ import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { RecoveredActionGroup } from '../../../common';
 import { RegistryRuleType } from '../../rule_type_registry';
+import { fromKueryExpression, nodeTypes } from '@kbn/es-query';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -102,13 +103,24 @@ describe('aggregate()', () => {
           ],
         },
         snoozed: {
+          doc_count: 0,
+          count: {
+            doc_count: 0,
+          },
+        },
+        tags: {
           buckets: [
             {
-              key: '2022-03-21T20:22:01.501Z-*',
-              format: 'strict_date_time',
-              from: 1.647894121501e12,
-              from_as_string: '2022-03-21T20:22:01.501Z',
-              doc_count: 2,
+              key: 'a',
+              doc_count: 10,
+            },
+            {
+              key: 'b',
+              doc_count: 20,
+            },
+            {
+              key: 'c',
+              doc_count: 30,
             },
           ],
         },
@@ -158,8 +170,13 @@ describe('aggregate()', () => {
           "unmuted": 27,
         },
         "ruleSnoozedStatus": Object {
-          "snoozed": 2,
+          "snoozed": 0,
         },
+        "ruleTags": Array [
+          "a",
+          "b",
+          "c",
+        ],
       }
     `);
     expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
@@ -181,11 +198,21 @@ describe('aggregate()', () => {
             terms: { field: 'alert.attributes.muteAll' },
           },
           snoozed: {
-            date_range: {
-              field: 'alert.attributes.snoozeEndTime',
-              format: 'strict_date_time',
-              ranges: [{ from: 'now' }],
+            aggs: {
+              count: {
+                filter: {
+                  exists: {
+                    field: 'alert.attributes.snoozeSchedule.duration',
+                  },
+                },
+              },
             },
+            nested: {
+              path: 'alert.attributes.snoozeSchedule',
+            },
+          },
+          tags: {
+            terms: { field: 'alert.attributes.tags', order: { _key: 'asc' } },
           },
         },
       },
@@ -193,14 +220,25 @@ describe('aggregate()', () => {
   });
 
   test('supports filters when aggregating', async () => {
+    const authFilter = fromKueryExpression(
+      'alert.attributes.alertTypeId:myType and alert.attributes.consumer:myApp'
+    );
+    authorization.getFindAuthorizationFilter.mockResolvedValue({
+      filter: authFilter,
+      ensureRuleTypeIsAuthorized() {},
+    });
+
     const rulesClient = new RulesClient(rulesClientParams);
-    await rulesClient.aggregate({ options: { filter: 'someTerm' } });
+    await rulesClient.aggregate({ options: { filter: 'foo: someTerm' } });
 
     expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.find.mock.calls[0]).toEqual([
       {
         fields: undefined,
-        filter: 'someTerm',
+        filter: nodeTypes.function.buildNode('and', [
+          fromKueryExpression('foo: someTerm'),
+          authFilter,
+        ]),
         page: 1,
         perPage: 0,
         type: 'alert',
@@ -215,11 +253,21 @@ describe('aggregate()', () => {
             terms: { field: 'alert.attributes.muteAll' },
           },
           snoozed: {
-            date_range: {
-              field: 'alert.attributes.snoozeEndTime',
-              format: 'strict_date_time',
-              ranges: [{ from: 'now' }],
+            aggs: {
+              count: {
+                filter: {
+                  exists: {
+                    field: 'alert.attributes.snoozeSchedule.duration',
+                  },
+                },
+              },
             },
+            nested: {
+              path: 'alert.attributes.snoozeSchedule',
+            },
+          },
+          tags: {
+            terms: { field: 'alert.attributes.tags', order: { _key: 'asc' } },
           },
         },
       },

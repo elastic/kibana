@@ -6,6 +6,7 @@
  */
 
 import { isEmpty } from 'lodash/fp';
+import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { getAllConnectorTypesUrl } from '../../../common/utils/connectors_api';
 import {
   ActionConnector,
@@ -18,14 +19,9 @@ import {
 } from '../../../common/api';
 import { CASE_CONFIGURE_CONNECTORS_URL, CASE_CONFIGURE_URL } from '../../../common/constants';
 import { KibanaServices } from '../../common/lib/kibana';
-
+import { convertToCamelCase, convertArrayToCamelCase } from '../../api/utils';
 import { ApiProps } from '../types';
-import {
-  convertArrayToCamelCase,
-  convertToCamelCase,
-  decodeCaseConfigurationsResponse,
-  decodeCaseConfigureResponse,
-} from '../utils';
+import { decodeCaseConfigurationsResponse, decodeCaseConfigureResponse } from '../utils';
 import { CaseConfigure } from './types';
 
 export const fetchConnectors = async ({ signal }: ApiProps): Promise<ActionConnector[]> => {
@@ -98,7 +94,7 @@ export const patchCaseConfigure = async (
 export const fetchActionTypes = async ({ signal }: ApiProps): Promise<ActionTypeConnector[]> => {
   const response = await KibanaServices.get().http.fetch<ActionTypeConnector[]>(
     getAllConnectorTypesUrl(),
-    { method: 'GET', signal }
+    { method: 'GET', signal, query: { feature_id: CasesConnectorFeatureId } }
   );
 
   return convertArrayToCamelCase(response) as ActionTypeConnector[];

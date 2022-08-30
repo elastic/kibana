@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { apm, ApmSynthtraceEsClient, timerange } from '@elastic/apm-synthtrace';
+import { apm, ApmSynthtraceEsClient, timerange } from '@kbn/apm-synthtrace';
 import expect from '@kbn/expect';
-import { APM_STATIC_INDEX_PATTERN_ID } from '@kbn/apm-plugin/common/index_pattern_constants';
+import { APM_STATIC_DATA_VIEW_ID } from '@kbn/apm-plugin/common/data_view_constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { SupertestReturnType } from '../../common/apm_api_supertest';
 
@@ -20,19 +20,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const dataViewPattern = 'traces-apm*,apm-*,logs-apm*,apm-*,metrics-apm*,apm-*';
 
   function createDataViewViaApmApi() {
-    return apmApiClient.readUser({ endpoint: 'POST /internal/apm/data_view/static' });
+    return apmApiClient.writeUser({ endpoint: 'POST /internal/apm/data_view/static' });
   }
 
   function deleteDataView() {
-    // return supertest.delete('/api/saved_objects/<type>/<id>').set('kbn-xsrf', 'foo').expect(200)
     return supertest
-      .delete(`/api/saved_objects/index-pattern/${APM_STATIC_INDEX_PATTERN_ID}`)
+      .delete(`/api/saved_objects/index-pattern/${APM_STATIC_DATA_VIEW_ID}`)
       .set('kbn-xsrf', 'foo')
       .expect(200);
   }
 
   function getDataView() {
-    return supertest.get(`/api/saved_objects/index-pattern/${APM_STATIC_INDEX_PATTERN_ID}`);
+    return supertest.get(`/api/saved_objects/index-pattern/${APM_STATIC_DATA_VIEW_ID}`);
   }
 
   function getDataViewSuggestions(field: string) {
@@ -51,7 +50,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('does not create data view', async () => {
         expect(response.status).to.be(200);
-        expect(response.body.created).to.be(false);
+        expect(response.body.dataView).to.be(undefined);
       });
 
       it('cannot fetch data view', async () => {
@@ -60,74 +59,75 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
-  registry.when(
-    'mappings exists',
-    { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
-    () => {
-      describe('when data is generated', () => {
-        let response: SupertestReturnType<'POST /internal/apm/data_view/static'>;
+  registry.when('mappings exists', { config: 'basic', archives: [] }, () => {
+    describe('when data is generated', () => {
+      let response: SupertestReturnType<'POST /internal/apm/data_view/static'>;
+
+      before(async () => {
+        await generateApmData(synthtrace);
+        response = await createDataViewViaApmApi();
+      });
+
+      after(async () => {
+        await deleteDataView();
+        await synthtrace.clean();
+      });
+
+      it('successfully creates the apm data view', async () => {
+        expect(response.status).to.be(200);
+
+        expect(response.body.dataView!.id).to.be('apm_static_index_pattern_id');
+        expect(response.body.dataView!.name).to.be('APM');
+        expect(response.body.dataView!.title).to.be(
+          'traces-apm*,apm-*,logs-apm*,apm-*,metrics-apm*,apm-*'
+        );
+      });
+
+      describe('when fetching the data view', async () => {
+        let resBody: any;
 
         before(async () => {
-          await generateApmData(synthtrace);
-          response = await createDataViewViaApmApi();
+          const res = await getDataView().expect(200);
+          resBody = res.body;
         });
 
-        after(async () => {
-          await deleteDataView();
-          await synthtrace.clean();
+        it('has correct id', () => {
+          expect(resBody.id).to.be('apm_static_index_pattern_id');
         });
 
-        it('successfully creates the apm data view', async () => {
-          expect(response.status).to.be(200);
-          expect(response.body.created).to.be(true);
+        it('has correct title', () => {
+          expect(resBody.attributes.title).to.be(dataViewPattern);
         });
 
-        describe('when fetching the data view', async () => {
-          let resBody: any;
-
-          before(async () => {
-            const res = await getDataView().expect(200);
-            resBody = res.body;
-          });
-
-          it('has correct id', () => {
-            expect(resBody.id).to.be('apm_static_index_pattern_id');
-          });
-
-          it('has correct title', () => {
-            expect(resBody.attributes.title).to.be(dataViewPattern);
-          });
-
-          it('has correct attributes', () => {
-            expect(resBody.attributes.fieldFormatMap).to.be(
-              JSON.stringify({
-                'trace.id': {
-                  id: 'url',
-                  params: {
-                    urlTemplate: 'apm/link-to/trace/{{value}}',
-                    labelTemplate: '{{value}}',
-                  },
+        it('has correct attributes', () => {
+          expect(resBody.attributes.fieldFormatMap).to.be(
+            JSON.stringify({
+              'trace.id': {
+                id: 'url',
+                params: {
+                  urlTemplate: 'apm/link-to/trace/{{value}}',
+                  labelTemplate: '{{value}}',
                 },
-                'transaction.id': {
-                  id: 'url',
-                  params: {
-                    urlTemplate: 'apm/link-to/transaction/{{value}}',
-                    labelTemplate: '{{value}}',
-                  },
+              },
+              'transaction.id': {
+                id: 'url',
+                params: {
+                  urlTemplate: 'apm/link-to/transaction/{{value}}',
+                  labelTemplate: '{{value}}',
                 },
-              })
-            );
-          });
+              },
+            })
+          );
+        });
 
-          // this test ensures that the default APM Data View doesn't interfere with suggestions returned in the kuery bar (this has been a problem in the past)
-          it('can get suggestions for `trace.id`', async () => {
-            const suggestions = await getDataViewSuggestions('trace.id');
-            expect(suggestions.body.length).to.be(10);
-          });
+        // this test ensures that the default APM Data View doesn't interfere with suggestions returned in the kuery bar (this has been a problem in the past)
+        it('can get suggestions for `trace.id`', async () => {
+          const suggestions = await getDataViewSuggestions('trace.id');
+          expect(suggestions.body.length).to.be(10);
         });
       });
-    }
-  );
+    });
+  });
 }
 
 function generateApmData(synthtrace: ApmSynthtraceEsClient) {

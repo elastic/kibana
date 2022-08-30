@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CameraAction } from './camera';
-import { DataAction } from './data/action';
+import type { CameraAction } from './camera';
+import type { DataAction } from './data/action';
 
 /**
  * The action dispatched when the app requests related event data for one

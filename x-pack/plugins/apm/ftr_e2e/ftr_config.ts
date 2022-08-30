@@ -7,13 +7,15 @@
 
 import { FtrConfigProviderContext } from '@kbn/test';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
+import { cypressTestRunner } from './cypress_test_runner';
+import { FtrProviderContext } from './ftr_provider_context';
 
-async function config({ readConfigFile }: FtrConfigProviderContext) {
+async function ftrConfig({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaCommonTestsConfig = await readConfigFile(
     require.resolve('../../../../test/common/config.js')
   );
   const xpackFunctionalTestsConfig = await readConfigFile(
-    require.resolve('../../../test/functional/config.js')
+    require.resolve('../../../test/functional/config.base.js')
   );
 
   return {
@@ -40,8 +42,16 @@ async function config({ readConfigFile }: FtrConfigProviderContext) {
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
       ],
     },
+    testRunner: async (ftrProviderContext: FtrProviderContext) => {
+      const result = await cypressTestRunner(ftrProviderContext);
+
+      // set exit code explicitly if at least one Cypress test fails
+      if (result && (result.status === 'failed' || result.totalFailed > 0)) {
+        process.exitCode = 1;
+      }
+    },
   };
 }
 
 // eslint-disable-next-line import/no-default-export
-export default config;
+export default ftrConfig;

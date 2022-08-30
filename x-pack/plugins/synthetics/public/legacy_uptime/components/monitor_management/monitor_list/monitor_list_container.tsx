@@ -9,6 +9,8 @@ import React, { useCallback, Dispatch } from 'react';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
+import { useLocations } from '../hooks/use_locations';
+import { EmptyLocations } from '../manage_locations/empty_locations';
 import { monitorManagementListSelector } from '../../../state/selectors';
 import { MonitorAsyncError } from './monitor_async_error';
 import { useInlineErrors } from '../hooks/use_inline_errors';
@@ -39,8 +41,8 @@ export const MonitorListContainer = ({
     dispatchPageAction({ type: 'refresh' });
   }, [dispatchPageAction]);
 
-  useTrackPageview({ app: 'uptime', path: 'manage-monitors' });
-  useTrackPageview({ app: 'uptime', path: 'manage-monitors', delay: 15000 });
+  useTrackPageview({ app: 'uptime', path: 'monitors' });
+  useTrackPageview({ app: 'uptime', path: 'monitors', delay: 15000 });
 
   const monitorList = useSelector(monitorManagementListSelector);
 
@@ -53,8 +55,14 @@ export const MonitorListContainer = ({
 
   const { data: monitorSavedObjects, loading: objectsLoading } = useInvalidMonitors(errorSummaries);
 
+  const { locations } = useLocations();
+
   if (!isEnabled && monitorList.list.total === 0) {
     return null;
+  }
+
+  if (isEnabled && monitorList.list.total === 0 && locations.length === 0) {
+    return <EmptyLocations inFlyout={false} />;
   }
 
   return (

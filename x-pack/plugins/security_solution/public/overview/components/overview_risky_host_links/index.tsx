@@ -10,7 +10,7 @@ import React from 'react';
 import { RiskyHostsEnabledModule } from './risky_hosts_enabled_module';
 import { RiskyHostsDisabledModule } from './risky_hosts_disabled_module';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
-import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
+import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { useHostRiskScore, HostRiskScoreQueryId } from '../../../risk_score/containers';
 export interface RiskyHostLinksProps extends Pick<GlobalTimeArgs, 'deleteQuery' | 'setQuery'> {
   timerange: { to: string; from: string };

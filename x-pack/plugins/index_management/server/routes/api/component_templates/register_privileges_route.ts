@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Privileges } from '@kbn/es-ui-shared-plugin/public';
+import type { Privileges } from '@kbn/es-ui-shared-plugin/public';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
 

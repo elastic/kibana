@@ -15,7 +15,7 @@ import {
   NetworkUsersFields,
   RiskScoreFields,
 } from '../../../common/search_strategy';
-import { State } from '../store';
+import type { State } from '../store';
 
 import { defaultHeaders } from './header';
 import {
@@ -30,16 +30,11 @@ import {
 import { networkModel } from '../../network/store';
 import { TimelineType, TimelineStatus, TimelineTabs } from '../../../common/types/timeline';
 import { mockManagementState } from '../../management/store/reducer';
-import { ManagementState } from '../../management/types';
+import type { ManagementState } from '../../management/types';
 import { initialSourcererState, SourcererScopeName } from '../store/sourcerer/model';
 import { allowedExperimentalValues } from '../../../common/experimental_features';
 import { getScopePatternListSelection } from '../store/sourcerer/helpers';
-import {
-  mockBrowserFields,
-  mockDocValueFields,
-  mockIndexFields,
-  mockRuntimeMappings,
-} from '../containers/source/mock';
+import { mockBrowserFields, mockIndexFields, mockRuntimeMappings } from '../containers/source/mock';
 import { usersModel } from '../../users/store';
 import { UsersFields } from '../../../common/search_strategy/security_solution/users/common';
 
@@ -49,7 +44,6 @@ export const mockSourcererState = {
   defaultDataView: {
     ...initialSourcererState.defaultDataView,
     browserFields: mockBrowserFields,
-    docValueFields: mockDocValueFields,
     id: DEFAULT_DATA_VIEW_ID,
     indexFields: mockIndexFields,
     loading: false,
@@ -81,7 +75,6 @@ export const mockGlobalState: State = {
         events: { activePage: 0, limit: 10 },
         uncommonProcesses: { activePage: 0, limit: 10 },
         anomalies: null,
-        externalAlerts: { activePage: 0, limit: 10 },
         hostRisk: {
           activePage: 0,
           limit: 10,
@@ -103,7 +96,6 @@ export const mockGlobalState: State = {
         events: { activePage: 0, limit: 10 },
         uncommonProcesses: { activePage: 0, limit: 10 },
         anomalies: null,
-        externalAlerts: { activePage: 0, limit: 10 },
         hostRisk: {
           activePage: 0,
           limit: 10,
@@ -223,14 +215,12 @@ export const mockGlobalState: State = {
           severitySelection: [],
         },
         [usersModel.UsersTableType.events]: { activePage: 0, limit: 10 },
-        [usersModel.UsersTableType.alerts]: { activePage: 0, limit: 10 },
       },
     },
     details: {
       queries: {
         [usersModel.UsersTableType.anomalies]: null,
         [usersModel.UsersTableType.events]: { activePage: 0, limit: 10 },
-        [usersModel.UsersTableType.alerts]: { activePage: 0, limit: 10 },
       },
     },
   },
@@ -243,7 +233,7 @@ export const mockGlobalState: State = {
         from: '2020-07-07T08:20:18.966Z',
         to: '2020-07-08T08:20:18.966Z',
       },
-      linkTo: ['timeline'],
+      linkTo: ['timeline', 'socTrends'],
       queries: [],
       policy: { kind: DEFAULT_INTERVAL_TYPE, duration: DEFAULT_INTERVAL_VALUE },
       query: {
@@ -260,7 +250,7 @@ export const mockGlobalState: State = {
         from: '2020-07-07T08:20:18.966Z',
         to: '2020-07-08T08:20:18.966Z',
       },
-      linkTo: ['global'],
+      linkTo: ['global', 'socTrends'],
       queries: [],
       policy: { kind: DEFAULT_INTERVAL_TYPE, duration: DEFAULT_INTERVAL_VALUE },
       query: {
@@ -268,6 +258,17 @@ export const mockGlobalState: State = {
         language: 'kuery',
       },
       filters: [],
+    },
+    socTrends: {
+      timerange: {
+        kind: 'relative',
+        fromStr: DEFAULT_FROM,
+        toStr: DEFAULT_TO,
+        from: '2020-07-06T08:20:18.966Z',
+        to: '2020-07-07T08:20:18.966Z',
+      },
+      linkTo: ['global', 'timeline'],
+      policy: { kind: DEFAULT_INTERVAL_TYPE, duration: DEFAULT_INTERVAL_VALUE },
     },
   },
   dragAndDrop: { dataProviders: {} },
@@ -327,7 +328,14 @@ export const mockGlobalState: State = {
         pinnedEventIds: {},
         pinnedEventsSaveObject: {},
         itemsPerPageOptions: [5, 10, 20],
-        sort: [{ columnId: '@timestamp', columnType: 'number', sortDirection: Direction.desc }],
+        sort: [
+          {
+            columnId: '@timestamp',
+            columnType: 'date',
+            esTypes: ['date'],
+            sortDirection: Direction.desc,
+          },
+        ],
         isSaving: false,
         version: null,
         status: TimelineStatus.active,
@@ -381,6 +389,7 @@ export const mockGlobalState: State = {
       },
     },
   },
+  globalUrlParam: {},
   /**
    * These state's are wrapped in `Immutable`, but for compatibility with the overall app architecture,
    * they are cast to mutable versions here.

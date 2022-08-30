@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { NetworkDetailsStrategyResponse } from '../../../../common/search_strategy';
+import type { NetworkDetailsStrategyResponse } from '../../../../common/search_strategy';
 
 export const mockData: Readonly<Record<string, NetworkDetailsStrategyResponse['networkDetails']>> =
   {

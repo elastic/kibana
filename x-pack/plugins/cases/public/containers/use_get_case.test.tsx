@@ -5,127 +5,45 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
-import { useGetCase, UseGetCase } from './use_get_case';
-import { basicCase, basicResolvedCase } from './mock';
+import { renderHook } from '@testing-library/react-hooks';
+import { useGetCase } from './use_get_case';
 import * as api from './api';
+import { waitFor } from '@testing-library/dom';
+import React from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useToasts } from '../common/lib/kibana';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
-describe('useGetCase', () => {
-  const abortCtrl = new AbortController();
-  beforeEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+const wrapper: React.FC<string> = ({ children }) => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
+  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+};
+
+describe('Use get case hook', () => {
+  it('calls the api when invoked with the correct parameters', async () => {
+    const spy = jest.spyOn(api, 'resolveCase');
+    const { waitForNextUpdate } = renderHook(() => useGetCase('case-1'), { wrapper });
+    await waitForNextUpdate();
+    expect(spy).toHaveBeenCalledWith('case-1', true, expect.any(AbortSignal));
   });
 
-  it('init', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetCase>(() =>
-        useGetCase(basicCase.id)
-      );
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        data: null,
-        resolveOutcome: null,
-        isLoading: false,
-        isError: false,
-        fetchCase: result.current.fetchCase,
-        updateCase: result.current.updateCase,
-      });
-    });
-  });
-
-  it('calls resolveCase with correct arguments', async () => {
-    const spyOnResolveCase = jest.spyOn(api, 'resolveCase');
-    await act(async () => {
-      const { waitForNextUpdate } = renderHook<string, UseGetCase>(() => useGetCase(basicCase.id));
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-      expect(spyOnResolveCase).toBeCalledWith(basicCase.id, true, abortCtrl.signal);
-    });
-  });
-
-  it('fetch case', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetCase>(() =>
-        useGetCase(basicCase.id)
-      );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        data: basicCase,
-        resolveOutcome: basicResolvedCase.outcome,
-        resolveAliasId: basicResolvedCase.aliasTargetId,
-        isLoading: false,
-        isError: false,
-        fetchCase: result.current.fetchCase,
-        updateCase: result.current.updateCase,
-      });
-    });
-  });
-
-  it('refetch case', async () => {
-    const spyOnResolveCase = jest.spyOn(api, 'resolveCase');
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetCase>(() =>
-        useGetCase(basicCase.id)
-      );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-      result.current.fetchCase();
-      expect(spyOnResolveCase).toHaveBeenCalledTimes(2);
-    });
-  });
-
-  it('set isLoading to true when refetching case', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetCase>(() =>
-        useGetCase(basicCase.id)
-      );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-      result.current.fetchCase();
-
-      expect(result.current.isLoading).toBe(true);
-    });
-  });
-
-  it('set isLoading to false when refetching case "silent"ly', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetCase>(() =>
-        useGetCase(basicCase.id)
-      );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-      result.current.fetchCase(true);
-
-      expect(result.current.isLoading).toBe(false);
-    });
-  });
-
-  it('unhappy path', async () => {
-    const spyOnResolveCase = jest.spyOn(api, 'resolveCase');
-    spyOnResolveCase.mockImplementation(() => {
-      throw new Error('Something went wrong');
-    });
-
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetCase>(() =>
-        useGetCase(basicCase.id)
-      );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-
-      expect(result.current).toEqual({
-        data: null,
-        resolveOutcome: null,
-        isLoading: false,
-        isError: true,
-        fetchCase: result.current.fetchCase,
-        updateCase: result.current.updateCase,
-      });
+  it('shows a toast error when the api return an error', async () => {
+    const addError = jest.fn();
+    (useToasts as jest.Mock).mockReturnValue({ addError });
+    const spy = jest.spyOn(api, 'resolveCase').mockRejectedValue(new Error("C'est la vie"));
+    const { waitForNextUpdate } = renderHook(() => useGetCase('case-1'), { wrapper });
+    await waitForNextUpdate();
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalledWith('case-1', true, expect.any(AbortSignal));
+      expect(addError).toHaveBeenCalled();
     });
   });
 });

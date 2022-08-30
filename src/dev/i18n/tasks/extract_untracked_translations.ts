@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { createFailError } from '@kbn/dev-utils';
+import { createFailError } from '@kbn/dev-cli-errors';
 import {
   I18nConfig,
   matchEntriesWithExctractors,

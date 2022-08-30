@@ -15,3 +15,6 @@ export { getZeroShotClassificationInput } from './zero_shot_classification_input
 
 export { FillMaskInference } from './fill_mask_inference';
 export { getFillMaskOutputComponent } from './fill_mask_output';
+
+export { LangIdentInference } from './lang_ident_inference';
+export { getLangIdentOutputComponent } from './lang_ident_output';

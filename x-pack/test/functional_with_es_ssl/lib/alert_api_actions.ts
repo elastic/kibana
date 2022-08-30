@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import type { ObjectRemover } from './object_remover';
 import { getTestAlertData, getTestActionData } from './get_test_data';
 
@@ -83,5 +84,23 @@ export async function disableAlert({ supertest, alertId }: { supertest: any; ale
   const { body: alert } = await supertest
     .post(`/api/alerting/rule/${alertId}/_disable`)
     .set('kbn-xsrf', 'foo');
+  return alert;
+}
+
+export async function snoozeAlert({ supertest, alertId }: { supertest: any; alertId: string }) {
+  const { body: alert } = await supertest
+    .post(`/internal/alerting/rule/${alertId}/_snooze`)
+    .set('kbn-xsrf', 'foo')
+    .set('content-type', 'application/json')
+    .send({
+      snooze_schedule: {
+        duration: 100000000,
+        rRule: {
+          count: 1,
+          dtstart: moment().format(),
+          tzid: 'UTC',
+        },
+      },
+    });
   return alert;
 }

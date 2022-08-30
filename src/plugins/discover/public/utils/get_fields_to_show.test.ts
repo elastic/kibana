@@ -10,8 +10,8 @@ import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { getFieldsToShow } from './get_fields_to_show';
 
 describe('get fields to show', () => {
-  let indexPattern: DataView;
-  const indexPatternFields: Record<string, DataViewField> = {
+  let dataView: DataView;
+  const dataViewFields: Record<string, DataViewField> = {
     'machine.os': {
       name: 'machine.os',
       esTypes: ['text'],
@@ -60,23 +60,23 @@ describe('get fields to show', () => {
       filterable: true,
     } as DataViewField,
   };
-  const stubIndexPattern = {
+  const stubDataView = {
     id: 'logstash-*',
-    fields: Object.keys(indexPatternFields).map((key) => indexPatternFields[key]),
+    fields: Object.keys(dataViewFields).map((key) => dataViewFields[key]),
     title: 'logstash-*',
     timeFieldName: '@timestamp',
     getTimeField: () => ({ name: '@timestamp', type: 'date' }),
   };
 
   beforeEach(() => {
-    indexPattern = stubIndexPattern as DataView;
-    indexPattern.fields.getByName = (name) => indexPatternFields[name];
+    dataView = stubDataView as DataView;
+    dataView.fields.getByName = (name) => dataViewFields[name];
   });
 
   it('shows multifields when showMultiFields is true', () => {
     const fieldsToShow = getFieldsToShow(
       ['machine.os', 'machine.os.raw', 'clientip'],
-      indexPattern,
+      dataView,
       true
     );
     expect(fieldsToShow).toEqual(['machine.os', 'machine.os.raw', 'clientip']);
@@ -85,7 +85,7 @@ describe('get fields to show', () => {
   it('do not show multifields when showMultiFields is false', () => {
     const fieldsToShow = getFieldsToShow(
       ['machine.os', 'machine.os.raw', 'acknowledged', 'clientip'],
-      indexPattern,
+      dataView,
       false
     );
     expect(fieldsToShow).toEqual(['machine.os', 'acknowledged', 'clientip']);

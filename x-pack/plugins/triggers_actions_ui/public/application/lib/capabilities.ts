@@ -29,3 +29,5 @@ export function hasAllPrivilege(rule: InitialRule, ruleType?: RuleType): boolean
 export function hasReadPrivilege(rule: InitialRule, ruleType?: RuleType): boolean {
   return ruleType?.authorizedConsumers[rule.consumer]?.read ?? false;
 }
+export const hasManageApiKeysCapability = (capabilities: Capabilities) =>
+  capabilities?.management?.security?.api_keys;

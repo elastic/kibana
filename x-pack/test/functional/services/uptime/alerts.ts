@@ -104,7 +104,12 @@ export function UptimeAlertsProvider({ getService }: FtrProviderContext) {
       await testSubjects.click('uptimeAlertAddFilter.monitor.type');
       await testSubjects.click('uptimeCreateStatusAlert.filter_scheme');
     },
-    async clickSaveRuleButton() {
+    async clickSaveRuleButton(name: string) {
+      /* The most common cause of flakiness in this test is the absence of value for the name field,
+       * While this field is set in previous step, it is possible that component rerendering could be
+       * clearing out the value after it's filled in. To prevent this particular issue with flakiness,
+       * we should attempt to set the name again before saving the alert */
+      await testSubjects.setValue('ruleNameInput', name);
       await testSubjects.click('saveRuleButton');
     },
     async clickSaveAlertsConfirmButton() {

@@ -6,7 +6,7 @@
  */
 
 import { EndpointDocGenerator } from '../../../common/endpoint/generate_data';
-import { NodeData } from '../types';
+import type { NodeData } from '../types';
 import {
   setErrorNodes,
   setReloadedNodes,

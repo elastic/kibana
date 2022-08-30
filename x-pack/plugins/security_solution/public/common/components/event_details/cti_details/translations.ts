@@ -58,33 +58,11 @@ export const INVESTIGATION_TOOLTIP_CONTENT = i18n.translate(
   }
 );
 
-export const NO_INDICATOR_ENRICHMENTS_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.alertDetails.noIndicatorEnrichmentsDescription',
-  {
-    defaultMessage:
-      'We did not find any threat intelligence indicators with any of the indicator match rules.',
-  }
-);
-
-export const NO_INVESTIGATION_ENRICHMENTS_TITLE = i18n.translate(
-  'xpack.securitySolution.alertDetails.noInvestigationEnrichmentsTitle',
-  {
-    defaultMessage: 'No Threat Intelligence Enrichment Found',
-  }
-);
-
 export const NO_INVESTIGATION_ENRICHMENTS_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.alertDetails.noInvestigationEnrichmentsDescription',
   {
     defaultMessage:
       "We haven't found field value has additional information available from threat intelligence sources we searched in the past 30 days by default.",
-  }
-);
-
-export const NO_ENRICHMENTS_FOUND_TITLE = i18n.translate(
-  'xpack.securitySolution.alertDetails.noEnrichmentsFoundTitle',
-  {
-    defaultMessage: 'No Indicator Match or Threat Intel Enrichment Found',
   }
 );
 
@@ -103,21 +81,10 @@ export const NO_HOST_RISK_DATA_DESCRIPTION = i18n.translate(
   }
 );
 
-export const CHECK_DOCS = i18n.translate('xpack.securitySolution.alertDetails.checkDocs', {
-  defaultMessage: 'please check out our documentation',
-});
-
 export const INVESTIGATION_QUERY_TITLE = i18n.translate(
   'xpack.securitySolution.alertDetails.investigationTimeQueryTitle',
   {
     defaultMessage: 'Enrichment with Threat Intelligence',
-  }
-);
-
-export const CHANGE_ENRICHMENT_LOOKBACK = i18n.translate(
-  'xpack.securitySolution.alertDetails.changeEnrichmentQueryLookback',
-  {
-    defaultMessage: 'search a different time range',
   }
 );
 
@@ -143,5 +110,12 @@ export const ENRICHED_DATA = i18n.translate(
   'xpack.securitySolution.alertDetails.overview.enrichedDataTitle',
   {
     defaultMessage: 'Enriched data',
+  }
+);
+
+export const HOST_RISK_CLASSIFICATION = i18n.translate(
+  'xpack.securitySolution.alertDetails.hostRiskClassification',
+  {
+    defaultMessage: 'Host risk classification',
   }
 );

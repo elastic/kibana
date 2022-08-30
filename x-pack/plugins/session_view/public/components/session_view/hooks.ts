@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useEffect, useState, useMemo } from 'react';
-import { useQuery, useInfiniteQuery } from 'react-query';
+import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import { EuiSearchBarOnChangeArgs } from '@elastic/eui';
 import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -18,9 +18,12 @@ import {
   ALERTS_ROUTE,
   PROCESS_EVENTS_ROUTE,
   PROCESS_EVENTS_PER_PAGE,
+  ALERTS_PER_PAGE,
   ALERT_STATUS_ROUTE,
+  GET_TOTAL_IO_BYTES_ROUTE,
   QUERY_KEY_PROCESS_EVENTS,
   QUERY_KEY_ALERTS,
+  QUERY_KEY_GET_TOTAL_IO_BYTES,
 } from '../../../common/constants';
 
 export const useFetchSessionViewProcessEvents = (
@@ -57,12 +60,17 @@ export const useFetchSessionViewProcessEvents = (
       return { events, cursor, total: res.total };
     },
     {
-      getNextPageParam: (lastPage) => {
-        if (lastPage.events.length === PROCESS_EVENTS_PER_PAGE) {
-          return {
-            cursor: lastPage.events[lastPage.events.length - 1]['@timestamp'],
-            forward: true,
-          };
+      getNextPageParam: (lastPage, pages) => {
+        const isRefetch = pages.length === 1 && jumpToCursor;
+        if (isRefetch || lastPage.events.length >= PROCESS_EVENTS_PER_PAGE) {
+          const cursor = lastPage.events?.[lastPage.events.length - 1]?.['@timestamp'];
+
+          if (cursor) {
+            return {
+              cursor,
+              forward: true,
+            };
+          }
         }
       },
       getPreviousPageParam: (firstPage, pages) => {
@@ -95,27 +103,45 @@ export const useFetchSessionViewProcessEvents = (
   return query;
 };
 
-export const useFetchSessionViewAlerts = (sessionEntityId: string) => {
+export const useFetchSessionViewAlerts = (
+  sessionEntityId: string,
+  investigatedAlertId?: string
+) => {
   const { http } = useKibana<CoreStart>().services;
-  const cachingKeys = [QUERY_KEY_ALERTS, sessionEntityId];
-  const query = useQuery(
+  const cachingKeys = [QUERY_KEY_ALERTS, sessionEntityId, investigatedAlertId];
+
+  const query = useInfiniteQuery(
     cachingKeys,
-    async () => {
+    async ({ pageParam = {} }) => {
+      const { cursor } = pageParam;
+
       const res = await http.get<ProcessEventResults>(ALERTS_ROUTE, {
         query: {
           sessionEntityId,
+          investigatedAlertId,
+          cursor,
         },
       });
 
       const events = res.events?.map((event: any) => event._source as ProcessEvent) ?? [];
 
-      return events;
+      return {
+        events,
+        cursor,
+        total: res.total,
+      };
     },
     {
+      getNextPageParam: (lastPage) => {
+        if (lastPage.events.length >= ALERTS_PER_PAGE) {
+          return {
+            cursor: lastPage.events[lastPage.events.length - 1]['@timestamp'],
+          };
+        }
+      },
       refetchOnWindowFocus: false,
       refetchOnMount: false,
       refetchOnReconnect: false,
-      cacheTime: 0,
     }
   );
 
@@ -151,6 +177,30 @@ export const useFetchAlertStatus = (
           processEntityId: events[0]?.process?.entity_id ?? '',
         },
       };
+    },
+    {
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      cacheTime: 0,
+    }
+  );
+
+  return query;
+};
+
+// TODO: we should not load by session id, but instead a combo of process.tty.major+minor, session time range, and host.boot_id (see Rabbitholes section of epic).
+export const useFetchGetTotalIOBytes = (sessionEntityId: string) => {
+  const { http } = useKibana<CoreStart>().services;
+  const cachingKeys = [QUERY_KEY_GET_TOTAL_IO_BYTES, sessionEntityId];
+  const query = useQuery<number, Error>(
+    cachingKeys,
+    async () => {
+      return http.get<number>(GET_TOTAL_IO_BYTES_ROUTE, {
+        query: {
+          sessionEntityId,
+        },
+      });
     },
     {
       refetchOnWindowFocus: false,

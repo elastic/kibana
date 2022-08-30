@@ -369,7 +369,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('8.3.0 adding duration', () => {
+    describe('8.3.0', () => {
       before(async () => {
         await kibanaServer.importExport.load(
           'x-pack/test/functional/fixtures/kbn_archiver/cases/8.2.0/cases_duration.json'
@@ -383,34 +383,97 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         await deleteAllCaseItems(es);
       });
 
-      it('calculates the correct duration for closed cases', async () => {
-        const caseInfo = await getCase({
-          supertest,
-          caseId: '4537b380-a512-11ec-b92f-859b9e89e434',
+      describe('adding duration', () => {
+        it('calculates the correct duration for closed cases', async () => {
+          const caseInfo = await getCase({
+            supertest,
+            caseId: '4537b380-a512-11ec-b92f-859b9e89e434',
+          });
+
+          expect(caseInfo).to.have.property('duration');
+          expect(caseInfo.duration).to.be(120);
         });
 
-        expect(caseInfo).to.have.property('duration');
-        expect(caseInfo.duration).to.be(120);
+        it('sets the duration to null to open cases', async () => {
+          const caseInfo = await getCase({
+            supertest,
+            caseId: '7537b580-a512-11ec-b94f-85979e89e434',
+          });
+
+          expect(caseInfo).to.have.property('duration');
+          expect(caseInfo.duration).to.be(null);
+        });
+
+        it('sets the duration to null to in-progress cases', async () => {
+          const caseInfo = await getCase({
+            supertest,
+            caseId: '1537b580-a512-11ec-b94f-85979e89e434',
+          });
+
+          expect(caseInfo).to.have.property('duration');
+          expect(caseInfo.duration).to.be(null);
+        });
       });
 
-      it('sets the duration to null to open cases', async () => {
-        const caseInfo = await getCase({
-          supertest,
-          caseId: '7537b580-a512-11ec-b94f-85979e89e434',
-        });
+      describe('add severity', () => {
+        it('adds the severity field for existing documents', async () => {
+          const caseInfo = await getCase({
+            supertest,
+            caseId: '4537b380-a512-11ec-b92f-859b9e89e434',
+          });
 
-        expect(caseInfo).to.have.property('duration');
-        expect(caseInfo.duration).to.be(null);
+          expect(caseInfo).to.have.property('severity');
+          expect(caseInfo.severity).to.be('low');
+        });
+      });
+    });
+
+    describe('8.5.0', () => {
+      before(async () => {
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.2.0/cases_duration.json'
+        );
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.5.0/cases_assignees.json'
+        );
       });
 
-      it('sets the duration to null to in-progress cases', async () => {
-        const caseInfo = await getCase({
-          supertest,
-          caseId: '1537b580-a512-11ec-b94f-85979e89e434',
+      after(async () => {
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.2.0/cases_duration.json'
+        );
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.5.0/cases_assignees.json'
+        );
+        await deleteAllCaseItems(es);
+      });
+
+      describe('assignees', () => {
+        it('adds the assignees field for existing documents', async () => {
+          const caseInfo = await getCase({
+            supertest,
+            // This case exists in the 8.2.0 cases_duration.json file and does not contain an assignees field
+            caseId: '4537b380-a512-11ec-b92f-859b9e89e434',
+          });
+
+          expect(caseInfo).to.have.property('assignees');
+          expect(caseInfo.assignees).to.eql([]);
         });
 
-        expect(caseInfo).to.have.property('duration');
-        expect(caseInfo.duration).to.be(null);
+        it('does not overwrite the assignees field if it already exists', async () => {
+          const caseInfo = await getCase({
+            supertest,
+            // This case exists in the 8.5.0 cases_assignees.json file and does contain an assignees field
+            caseId: '063d5820-1284-11ed-81af-63a2bdfb2bf9',
+          });
+
+          expect(caseInfo).to.have.property('assignees');
+          expect(caseInfo.assignees).to.eql([
+            {
+              uid: 'abc',
+            },
+          ]);
+        });
       });
     });
   });

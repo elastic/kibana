@@ -56,17 +56,36 @@ export interface IndicesResponse {
   data_streams?: IndicesResponseItemDataStream[];
 }
 
+export interface IndicesViaSearchResponse {
+  total: number;
+}
+
 export interface HasDataViewsResponse {
   hasDataView: boolean;
   hasUserDataView: boolean;
 }
 
+/**
+ * Data views public setup dependencies
+ */
 export interface DataViewsPublicSetupDependencies {
+  /**
+   * Expressions
+   */
   expressions: ExpressionsSetup;
+  /**
+   * Field formats
+   */
   fieldFormats: FieldFormatsSetup;
 }
 
+/**
+ * Data views public start dependencies
+ */
 export interface DataViewsPublicStartDependencies {
+  /**
+   * Field formats
+   */
   fieldFormats: FieldFormatsStart;
 }
 

@@ -32,7 +32,7 @@ import { map } from 'lodash';
 
 // Patch node 16 types to be compatible with jest 26
 // https://github.com/facebook/jest/issues/11640#issuecomment-893867514
-/* eslint-disable */
+/* eslint-disable @typescript-eslint/no-namespace,@typescript-eslint/no-empty-interface,no-console */
 declare global {
   namespace NodeJS {
     interface Global {}

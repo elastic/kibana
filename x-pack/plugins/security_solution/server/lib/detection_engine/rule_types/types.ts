@@ -5,38 +5,38 @@
  * 2.0.
  */
 
-import { Moment } from 'moment';
+import type { Moment } from 'moment';
 
-import { Logger } from '@kbn/logging';
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { Logger } from '@kbn/logging';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { RuleExecutorOptions, RuleType } from '@kbn/alerting-plugin/server';
-import {
+import type { RuleExecutorOptions, RuleType } from '@kbn/alerting-plugin/server';
+import type {
   AlertInstanceContext,
   AlertInstanceState,
   RuleTypeState,
   WithoutReservedActionGroups,
 } from '@kbn/alerting-plugin/common';
-import { ListClient } from '@kbn/lists-plugin/server';
-import {
+import type { ListClient } from '@kbn/lists-plugin/server';
+import type {
   PersistenceServices,
   IRuleDataClient,
   IRuleDataReader,
 } from '@kbn/rule-registry-plugin/server';
-import { IEventLogService } from '@kbn/event-log-plugin/server';
-import { ConfigType } from '../../../config';
-import { SetupPlugins } from '../../../plugin';
-import { CompleteRule, RuleParams } from '../schemas/rule_schemas';
-import { BuildRuleMessage } from '../signals/rule_messages';
-import {
+
+import type { ConfigType } from '../../../config';
+import type { SetupPlugins } from '../../../plugin';
+import type { CompleteRule, RuleParams } from '../schemas/rule_schemas';
+import type {
   BulkCreate,
   SearchAfterAndBulkCreateReturnType,
   WrapHits,
   WrapSequences,
 } from '../signals/types';
-import { ExperimentalFeatures } from '../../../../common/experimental_features';
-import { ITelemetryEventsSender } from '../../telemetry/sender';
-import { RuleExecutionLogForExecutorsFactory } from '../rule_execution_log';
+import type { ExperimentalFeatures } from '../../../../common/experimental_features';
+import type { ITelemetryEventsSender } from '../../telemetry/sender';
+import type { IRuleExecutionLogForExecutors, IRuleExecutionLogService } from '../rule_monitoring';
 
 export interface SecurityAlertTypeReturnValue<TState extends RuleTypeState> {
   bulkCreateTimes: string[];
@@ -52,20 +52,26 @@ export interface SecurityAlertTypeReturnValue<TState extends RuleTypeState> {
 }
 
 export interface RunOpts<TParams extends RuleParams> {
-  buildRuleMessage: BuildRuleMessage;
-  bulkCreate: BulkCreate;
-  exceptionItems: ExceptionListItemSchema[];
-  listClient: ListClient;
   completeRule: CompleteRule<TParams>;
-  searchAfterSize: number;
   tuple: {
     to: Moment;
     from: Moment;
     maxSignals: number;
   };
+  exceptionItems: ExceptionListItemSchema[];
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
+  listClient: ListClient;
+  searchAfterSize: number;
+  bulkCreate: BulkCreate;
   wrapHits: WrapHits;
   wrapSequences: WrapSequences;
   ruleDataReader: IRuleDataReader;
+  inputIndex: string[];
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
+  mergeStrategy: ConfigType['alertMergeStrategy'];
+  primaryTimestamp: string;
+  secondaryTimestamp?: string;
+  aggregatableTimestampField: string;
 }
 
 export type SecurityAlertType<
@@ -96,8 +102,8 @@ export interface CreateSecurityRuleTypeWrapperProps {
   logger: Logger;
   config: ConfigType;
   ruleDataClient: IRuleDataClient;
-  eventLogService: IEventLogService;
-  ruleExecutionLoggerFactory: RuleExecutionLogForExecutorsFactory;
+  ruleExecutionLoggerFactory: IRuleExecutionLogService['createClientForExecutors'];
+  version: string;
 }
 
 export type CreateSecurityRuleTypeWrapper = (

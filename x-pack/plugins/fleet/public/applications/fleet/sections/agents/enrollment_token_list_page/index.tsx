@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n-react';
 
-import { ENROLLMENT_API_KEYS_INDEX } from '../../../constants';
+import { ENROLLMENT_API_KEYS_INDEX, SO_SEARCH_LIMIT } from '../../../constants';
 import { NewEnrollmentTokenModal } from '../../../components';
 import {
   useBreadcrumbs,
@@ -167,7 +167,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
   });
   const agentPoliciesRequest = useGetAgentPolicies({
     page: 1,
-    perPage: 1000,
+    perPage: SO_SEARCH_LIMIT,
   });
 
   const agentPolicies = agentPoliciesRequest.data ? agentPoliciesRequest.data.items : [];
@@ -305,7 +305,12 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton fill iconType="plusInCircle" onClick={() => setModalOpen(true)}>
+          <EuiButton
+            data-test-subj="createEnrollmentTokenButton"
+            fill
+            iconType="plusInCircle"
+            onClick={() => setModalOpen(true)}
+          >
             <FormattedMessage
               id="xpack.fleet.enrollmentTokensList.newKeyButton"
               defaultMessage="Create enrollment token"

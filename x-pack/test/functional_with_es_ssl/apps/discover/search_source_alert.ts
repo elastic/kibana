@@ -30,6 +30,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const supertest = getService('supertest');
   const queryBar = getService('queryBar');
   const security = getService('security');
+  const filterBar = getService('filterBar');
+  const find = getService('find');
 
   const SOURCE_DATA_INDEX = 'search-source-alert';
   const OUTPUT_DATA_INDEX = 'search-source-alert-output';
@@ -47,17 +49,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         mappings: {
           properties: {
             '@timestamp': { type: 'date' },
-            message: { type: 'text' },
+            message: { type: 'keyword' },
           },
         },
       },
     });
 
   const generateNewDocs = async (docsNumber: number) => {
-    const mockMessages = new Array(docsNumber).map((current) => `msg-${current}`);
+    const mockMessages = Array.from({ length: docsNumber }, (_, i) => `msg-${i}`);
     const dateNow = new Date().toISOString();
-    for (const message of mockMessages) {
-      await es.transport.request({
+    for await (const message of mockMessages) {
+      es.transport.request({
         path: `/${SOURCE_DATA_INDEX}/_doc`,
         method: 'POST',
         body: {
@@ -145,10 +147,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await testSubjects.click('discoverAlertsButton');
     await testSubjects.click('discoverCreateAlertButton');
 
-    await testSubjects.setValue('ruleNameInput', alertName);
+    await retry.waitFor('rule name value is correct', async () => {
+      await testSubjects.setValue('ruleNameInput', alertName);
+      const ruleName = await testSubjects.getAttribute('ruleNameInput', 'value');
+      return ruleName === alertName;
+    });
     await testSubjects.click('thresholdPopover');
     await testSubjects.setValue('alertThresholdInput', '3');
-    await testSubjects.click('.index-ActionTypeSelectOption');
+    await retry.waitFor('actions accordion to exist', async () => {
+      await testSubjects.click('.index-alerting-ActionTypeSelectOption');
+      return await testSubjects.exists('alertActionAccordion-0');
+    });
 
     await monacoEditor.setCodeEditorValue(`{
       "rule_id": "{{ruleId}}",
@@ -161,13 +170,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const getLastToast = async () => {
     const toastList = await testSubjects.find('globalToastList');
-    const titles = await toastList.findAllByCssSelector('.euiToastHeader');
+    const titles = await toastList.findAllByTestSubject('euiToastHeader');
     const lastTitleElement = last(titles)!;
     const title = await lastTitleElement.getVisibleText();
-    const messages = await toastList.findAllByCssSelector('.euiToastBody');
+    const messages = await toastList.findAllByTestSubject('euiToastBody');
     const lastMessageElement = last(messages)!;
     const message = await lastMessageElement.getVisibleText();
     return { message, title };
+  };
+
+  const getErrorToastTitle = async () => {
+    const toastList = await testSubjects.find('globalToastList');
+    const title = await (
+      await toastList.findByCssSelector(
+        '[class*="euiToast-danger"] > [data-test-subj="euiToastHeader"]'
+      )
+    ).getVisibleText();
+    return title;
   };
 
   const openOutputIndex = async () => {
@@ -212,7 +231,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await navigateToDiscover(link);
   };
 
-  const openAlertRule = async () => {
+  const openAlertRuleInManagement = async () => {
     await PageObjects.common.navigateToApp('management');
     await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -229,7 +248,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await security.testUser.setRoles(['discover_alert']);
 
-      log.debug('create source index');
+      log.debug('create source indices');
       await createSourceIndex();
 
       log.debug('generate documents');
@@ -250,8 +269,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      // delete only remaining output index
-      await es.transport.request({
+      es.transport.request({
         path: `/${OUTPUT_DATA_INDEX}`,
         method: 'DELETE',
       });
@@ -272,7 +290,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await defineSearchSourceAlert(RULE_NAME);
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await openAlertRule();
+      await openAlertRuleInManagement();
 
       await testSubjects.click('ruleDetails-viewInApp');
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -298,10 +316,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should display warning about updated alert rule', async () => {
-      await openAlertRule();
+      await openAlertRuleInManagement();
 
       // change rule configuration
       await testSubjects.click('openEditRuleFlyoutButton');
+      await queryBar.setQuery('message:msg-1');
+      await filterBar.addFilter('message.keyword', 'is', 'msg-1');
+
       await testSubjects.click('thresholdPopover');
       await testSubjects.setValue('alertThresholdInput', '1');
       await testSubjects.click('saveEditedRuleButton');
@@ -311,10 +332,49 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await navigateToResults();
 
       const { message, title } = await getLastToast();
-      expect(await dataGrid.getDocCount()).to.be(5);
+      const queryString = await queryBar.getQueryString();
+      const hasFilter = await filterBar.hasFilter('message.keyword', 'msg-1');
+
+      expect(queryString).to.be.equal('message:msg-1');
+      expect(hasFilter).to.be.equal(true);
+
+      expect(await dataGrid.getDocCount()).to.be(1);
       expect(title).to.be.equal('Alert rule has changed');
       expect(message).to.be.equal(
         'The displayed documents might not match the documents that triggered the alert because the rule configuration changed.'
+      );
+    });
+
+    it('should display warning about recently updated data view', async () => {
+      await PageObjects.common.navigateToUrlWithBrowserHistory(
+        'management',
+        `/kibana/dataViews/dataView/${sourceDataViewId}`,
+        undefined
+      );
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await testSubjects.click('tab-sourceFilters');
+      await testSubjects.click('fieldFilterInput');
+
+      await PageObjects.common.sleep(15000);
+
+      const input = await find.activeElement();
+      await input.type('message');
+
+      await testSubjects.click('addFieldFilterButton');
+
+      await openOutputIndex();
+      await navigateToResults();
+
+      await openOutputIndex();
+      await navigateToResults();
+
+      const { message, title } = await getLastToast();
+
+      expect(await dataGrid.getDocCount()).to.be(1);
+      expect(title).to.be.equal('Data View has changed');
+      expect(message).to.be.equal(
+        'Data view has been updated after the last update of the alert rule.'
       );
     });
 
@@ -331,7 +391,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await navigateToDiscover(link);
 
-      const { title } = await getLastToast();
+      const title = await getErrorToastTitle();
       expect(title).to.be.equal(
         'No matching indices found: No indices match "search-source-alert"'
       );

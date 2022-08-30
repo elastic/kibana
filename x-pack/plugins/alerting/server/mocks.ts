@@ -9,9 +9,8 @@ import {
   elasticsearchServiceMock,
   savedObjectsClientMock,
   uiSettingsServiceMock,
-  httpServerMock,
 } from '@kbn/core/server/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
+import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { rulesClientMock } from './rules_client.mock';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { Alert, AlertFactoryDoneUtils } from './alert';
@@ -105,6 +104,7 @@ const createRuleExecutorServicesMock = <
   return {
     alertFactory: {
       create: jest.fn().mockReturnValue(alertFactoryMockCreate),
+      hasReachedAlertLimit: jest.fn().mockReturnValue(false),
       done: jest.fn().mockReturnValue(alertFactoryMockDone),
     },
     savedObjectsClient: savedObjectsClientMock.create(),
@@ -113,11 +113,7 @@ const createRuleExecutorServicesMock = <
     shouldWriteAlerts: () => true,
     shouldStopExecution: () => true,
     search: createAbortableSearchServiceMock(),
-    searchSourceClient: Promise.resolve(
-      dataPluginMock
-        .createStartContract()
-        .search.searchSource.asScoped(httpServerMock.createKibanaRequest())
-    ),
+    searchSourceClient: searchSourceCommonMock,
   };
 };
 export type RuleExecutorServicesMock = ReturnType<typeof createRuleExecutorServicesMock>;

@@ -304,9 +304,41 @@ describe('#start(installPath)', () => {
         Array [
           Array [
             "action.destructive_requires_name=true",
+            "cluster.routing.allocation.disk.threshold_enabled=false",
             "ingest.geoip.downloader.enabled=false",
             "search.check_ccs_compatibility=true",
+          ],
+          undefined,
+          Object {
+            "log": <ToolingLog>,
+          },
+        ],
+      ]
+    `);
+  });
+
+  it(`allows overriding search.check_ccs_compatibility`, async () => {
+    mockEsBin({ start: true });
+
+    extractConfigFiles.mockReturnValueOnce([]);
+
+    const cluster = new Cluster({
+      log,
+      ssl: false,
+    });
+
+    await cluster.start(undefined, {
+      esArgs: ['search.check_ccs_compatibility=false'],
+    });
+
+    expect(extractConfigFiles.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Array [
+            "action.destructive_requires_name=true",
             "cluster.routing.allocation.disk.threshold_enabled=false",
+            "ingest.geoip.downloader.enabled=false",
+            "search.check_ccs_compatibility=false",
           ],
           undefined,
           Object {
@@ -384,9 +416,9 @@ describe('#run()', () => {
         Array [
           Array [
             "action.destructive_requires_name=true",
+            "cluster.routing.allocation.disk.threshold_enabled=false",
             "ingest.geoip.downloader.enabled=false",
             "search.check_ccs_compatibility=true",
-            "cluster.routing.allocation.disk.threshold_enabled=false",
           ],
           undefined,
           Object {

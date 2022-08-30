@@ -8,10 +8,13 @@
 import {
   DEFAULT_ICON,
   LABEL_BORDER_SIZES,
+  MAX_ZOOM,
+  MIN_ZOOM,
   SYMBOLIZE_AS_TYPES,
   VECTOR_STYLES,
   STYLE_TYPE,
 } from '../../../../common/constants';
+
 import {
   DEFAULT_FILL_COLORS,
   DEFAULT_LINE_COLORS,
@@ -115,6 +118,13 @@ export function getDefaultStaticProperties(
         size: DEFAULT_LABEL_SIZE,
       },
     },
+    [VECTOR_STYLES.LABEL_ZOOM_RANGE]: {
+      options: {
+        useLayerZoomRange: true,
+        minZoom: MIN_ZOOM,
+        maxZoom: MAX_ZOOM,
+      },
+    },
     [VECTOR_STYLES.LABEL_BORDER_COLOR]: {
       type: STYLE_TYPE.STATIC,
       options: {
@@ -208,6 +218,13 @@ export function getDefaultDynamicProperties(): VectorStylePropertiesDescriptor {
       type: STYLE_TYPE.DYNAMIC,
       options: {
         field: undefined,
+      },
+    },
+    [VECTOR_STYLES.LABEL_ZOOM_RANGE]: {
+      options: {
+        useLayerZoomRange: true,
+        minZoom: MIN_ZOOM,
+        maxZoom: MAX_ZOOM,
       },
     },
     [VECTOR_STYLES.LABEL_COLOR]: {

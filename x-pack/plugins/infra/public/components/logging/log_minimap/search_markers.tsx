@@ -43,7 +43,7 @@ export class SearchMarkers extends React.PureComponent<SearchMarkersProps, {}> {
           >
             <SearchMarker
               bucket={bucket}
-              height={yScale(bucket.end) - yScale(bucket.start)}
+              height={(yScale(bucket.end) ?? 0) - (yScale(bucket.start) ?? 0)}
               width={width}
               jumpToTarget={jumpToTarget}
             />

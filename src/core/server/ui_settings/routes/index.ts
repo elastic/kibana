@@ -6,14 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { IRouter } from '../..';
-
+import type { InternalUiSettingsRouter } from '../internal_types';
 import { registerDeleteRoute } from './delete';
 import { registerGetRoute } from './get';
 import { registerSetManyRoute } from './set_many';
 import { registerSetRoute } from './set';
 
-export function registerRoutes(router: IRouter) {
+export function registerRoutes(router: InternalUiSettingsRouter) {
   registerGetRoute(router);
   registerDeleteRoute(router);
   registerSetRoute(router);

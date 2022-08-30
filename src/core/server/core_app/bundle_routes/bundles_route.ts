@@ -7,7 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from '../../http';
+import type { IRouter } from '@kbn/core-http-server';
 import { createDynamicAssetHandler } from './dynamic_asset_response';
 import { FileHashCache } from './file_hash_cache';
 

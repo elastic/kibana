@@ -70,6 +70,7 @@ export const mockState: AppState = {
       total: null,
       monitors: [],
       syncErrors: null,
+      absoluteTotal: 0,
     },
     locations: [],
     loading: {
@@ -127,4 +128,5 @@ export const mockState: AppState = {
     hitCount: [],
   },
   testNowRuns: {},
+  agentPolicies: { loading: false, data: null, error: null },
 };

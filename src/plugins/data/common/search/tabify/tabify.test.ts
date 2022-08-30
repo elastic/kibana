@@ -7,7 +7,7 @@
  */
 
 import { tabifyAggResponse } from './tabify';
-import { IndexPattern } from '../..';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { AggConfigs, BucketAggParam, IAggConfig, IAggConfigs } from '../aggs';
 import { mockAggTypesRegistry } from '../aggs/test_helpers';
 import { metricOnly, threeTermBuckets } from './fixtures/fake_hierarchical_data';
@@ -30,9 +30,9 @@ describe('tabifyAggResponse Integration', () => {
       getFormatterForField: () => ({
         toJSON: () => '{}',
       }),
-    } as unknown as IndexPattern;
+    } as unknown as DataView;
 
-    return new AggConfigs(indexPattern, aggs, { typesRegistry });
+    return new AggConfigs(indexPattern, aggs, { typesRegistry }, jest.fn());
   };
 
   const mockAggConfig = (agg: any): IAggConfig => agg as unknown as IAggConfig;

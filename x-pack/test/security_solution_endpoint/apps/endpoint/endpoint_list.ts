@@ -20,7 +20,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const endpointTestResources = getService('endpointTestResources');
-  const policyTestResources = getService('policyTestResources');
 
   const expectedData = [
     [
@@ -82,7 +81,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await deleteAllDocsFromMetadataUnitedIndex(getService);
         await pageObjects.endpoint.navigateToEndpointList();
       });
-
       it('finds no data in list and prompts onboarding to add policy', async () => {
         await testSubjects.exists('emptyPolicyTable');
       });
@@ -90,8 +88,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('when there is data,', () => {
       before(async () => {
-        const endpointPackage = await policyTestResources.getEndpointPackage();
-        await endpointTestResources.setMetadataTransformFrequency('1s', endpointPackage.version);
         indexedData = await endpointTestResources.loadEndpointData({ numHosts: 3 });
         await pageObjects.endpoint.navigateToEndpointList();
         await pageObjects.endpoint.waitForTableToHaveNumberOfEntries('endpointListTable', 3, 90000);
@@ -99,7 +95,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       after(async () => {
         await deleteAllDocsFromMetadataCurrentIndex(getService);
         await deleteAllDocsFromMetadataUnitedIndex(getService);
-        await endpointTestResources.unloadEndpointData(indexedData);
+        if (indexedData) {
+          await endpointTestResources.unloadEndpointData(indexedData);
+        }
       });
 
       it('finds page title', async () => {

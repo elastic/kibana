@@ -122,9 +122,9 @@ export const fetchMonitorAlertRecords = async (): Promise<AlertsResult> => {
   return await apiService.get(API_URLS.RULES_FIND, data);
 };
 
-export const fetchAlertRecords = async ({
+export const fetchAnomalyAlertRecords = async ({
   monitorId,
-}: MonitorIdParam): Promise<Rule<NewAlertParams>> => {
+}: MonitorIdParam): Promise<Rule<NewAlertParams> | undefined> => {
   const data = {
     page: 1,
     per_page: 500,
@@ -139,10 +139,12 @@ export const fetchAlertRecords = async ({
   const monitorRule = rawRules.data.find(
     (rule) => rule.params.monitorId === monitorId
   ) as Rule<NewAlertParams> & { rule_type_id: string };
-  return {
-    ...monitorRule,
-    ruleTypeId: monitorRule.rule_type_id,
-  };
+  if (monitorRule) {
+    return {
+      ...monitorRule,
+      ruleTypeId: monitorRule.rule_type_id,
+    };
+  }
 };
 
 export const disableAlertById = async ({ alertId }: { alertId: string }) => {
@@ -150,20 +152,22 @@ export const disableAlertById = async ({ alertId }: { alertId: string }) => {
 };
 
 export const fetchActionTypes = async (): Promise<ActionType[]> => {
-  const response = (await apiService.get(API_URLS.CONNECTOR_TYPES)) as Array<
-    AsApiContract<ActionType>
-  >;
+  const response = (await apiService.get(API_URLS.CONNECTOR_TYPES, {
+    feature_id: 'uptime',
+  })) as Array<AsApiContract<ActionType>>;
   return response.map<ActionType>(
     ({
       enabled_in_config: enabledInConfig,
       enabled_in_license: enabledInLicense,
       minimum_license_required: minimumLicenseRequired,
+      supported_feature_ids: supportedFeatureIds,
       ...res
     }: AsApiContract<ActionType>) => ({
       ...res,
       enabledInConfig,
       enabledInLicense,
       minimumLicenseRequired,
+      supportedFeatureIds,
     })
   );
 };

@@ -252,11 +252,6 @@ export const Expressions: React.FC<Props> = (props) => {
     [onFilterChange]
   );
 
-  const areAllAggsRate = useMemo(
-    () => ruleParams.criteria?.every((c) => c.aggType === Aggregators.RATE),
-    [ruleParams.criteria]
-  );
-
   const hasGroupBy = useMemo(
     () => ruleParams.groupBy && ruleParams.groupBy.length > 0,
     [ruleParams.groupBy]
@@ -385,31 +380,6 @@ export const Expressions: React.FC<Props> = (props) => {
             }
             checked={ruleParams.alertOnNoData}
             onChange={(e) => setRuleParams('alertOnNoData', e.target.checked)}
-          />
-          <EuiCheckbox
-            id="metrics-alert-partial-buckets-toggle"
-            label={
-              <>
-                {i18n.translate('xpack.infra.metrics.alertFlyout.shouldDropPartialBuckets', {
-                  defaultMessage: 'Drop partial buckets when evaluating data',
-                })}{' '}
-                <EuiToolTip
-                  content={i18n.translate(
-                    'xpack.infra.metrics.alertFlyout.dropPartialBucketsHelpText',
-                    {
-                      defaultMessage:
-                        "Enable this to drop the most recent bucket of evaluation data if it's less than {timeSize}{timeUnit}.",
-                      values: { timeSize, timeUnit },
-                    }
-                  )}
-                >
-                  <EuiIcon type="questionInCircle" color="subdued" />
-                </EuiToolTip>
-              </>
-            }
-            checked={areAllAggsRate || ruleParams.shouldDropPartialBuckets}
-            disabled={areAllAggsRate}
-            onChange={(e) => setRuleParams('shouldDropPartialBuckets', e.target.checked)}
           />
         </EuiPanel>
       </EuiAccordion>

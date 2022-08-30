@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
-import { ITelemetryEventsSender } from '../sender';
+import type { ITelemetryEventsSender } from '../sender';
 import type {
   EndpointMetricsAggregation,
   EndpointPolicyResponseAggregation,
@@ -17,15 +17,17 @@ import type {
   ESClusterInfo,
   ESLicense,
 } from '../types';
-import { ITelemetryReceiver } from '../receiver';
-import { TaskExecutionPeriod } from '../task';
+import type { ITelemetryReceiver } from '../receiver';
+import type { TaskExecutionPeriod } from '../task';
 import {
+  addDefaultAdvancedPolicyConfigSettings,
   batchTelemetryRecords,
+  createUsageCounterLabel,
   extractEndpointPolicyConfig,
   getPreviousDailyTaskTimestamp,
   isPackagePolicyList,
 } from '../helpers';
-import { PolicyData } from '../../../../common/endpoint/types';
+import type { PolicyData } from '../../../../common/endpoint/types';
 import { TELEMETRY_CHANNEL_ENDPOINT_META } from '../constants';
 
 // Endpoint agent uses this Policy ID while it's installing.
@@ -37,6 +39,8 @@ const EmptyFleetAgentResponse = {
   page: 0,
   perPage: 0,
 };
+
+const usageLabelPrefix: string[] = ['security_telemetry', 'endpoint_task'];
 
 export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
   return {
@@ -97,6 +101,15 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
         logger.debug(`no endpoint metrics to report`);
         return 0;
       }
+
+      const telemetryUsageCounter = sender.getTelemetryUsageCluster();
+      telemetryUsageCounter?.incrementCounter({
+        counterName: createUsageCounterLabel(
+          usageLabelPrefix.concat(['payloads', TELEMETRY_CHANNEL_ENDPOINT_META])
+        ),
+        counterType: 'num_endpoint',
+        incrementBy: endpointMetricsResponse.aggregations.endpoint_count.value,
+      });
 
       const endpointMetrics = endpointMetricsResponse.aggregations.endpoint_agents.buckets.map(
         (epMetrics) => {
@@ -256,9 +269,14 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
             malicious_behavior_rules: maliciousBehaviorRules,
             system_impact: systemImpact,
             threads,
+            event_filter: eventFilter,
           } = endpoint.endpoint_metrics.Endpoint.metrics;
           const endpointPolicyDetail = extractEndpointPolicyConfig(policyConfig);
-
+          if (endpointPolicyDetail) {
+            endpointPolicyDetail.value = addDefaultAdvancedPolicyConfigSettings(
+              endpointPolicyDetail.value
+            );
+          }
           return {
             '@timestamp': taskExecutionPeriod.current,
             cluster_uuid: clusterInfo.cluster_uuid,
@@ -275,6 +293,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
               maliciousBehaviorRules,
               systemImpact,
               threads,
+              eventFilter,
             },
             endpoint_meta: {
               os: endpoint.endpoint_metrics.host.os,

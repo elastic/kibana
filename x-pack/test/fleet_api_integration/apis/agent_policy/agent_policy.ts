@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import { FLEET_AGENT_POLICIES_SCHEMA_VERSION } from '@kbn/fleet-plugin/server/constants';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
@@ -16,17 +17,20 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-
   describe('fleet_agent_policies', () => {
     skipIfNoDockerRegistry(providerContext);
     describe('POST /api/fleet/agent_policies', () => {
+      let systemPkgVersion: string;
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
-        await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+        await kibanaServer.savedObjects.cleanStandardList();
       });
       setupFleetAndAgents(providerContext);
-      const packagePoliciesToDeleteIds: string[] = [];
+      let packagePoliciesToDeleteIds: string[] = [];
       after(async () => {
+        if (systemPkgVersion) {
+          await supertest.delete(`/api/fleet/epm/packages/system-${systemPkgVersion}`);
+        }
         if (packagePoliciesToDeleteIds.length > 0) {
           await kibanaServer.savedObjects.bulkDelete({
             objects: packagePoliciesToDeleteIds.map((id) => ({
@@ -37,7 +41,7 @@ export default function (providerContext: FtrProviderContext) {
         }
 
         await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
-        await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
+        await kibanaServer.savedObjects.cleanStandardList();
       });
       it('should work with valid minimum required values', async () => {
         const {
@@ -173,20 +177,36 @@ export default function (providerContext: FtrProviderContext) {
 
       it('should allow to create policy with the system integration policy and increment correctly the name if there is more than 10 package policy', async () => {
         // load a bunch of fake system integration policy
-        for (let i = 0; i < 10; i++) {
-          await kibanaServer.savedObjects.create({
-            id: `package-policy-test-${i}`,
-            type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-            overwrite: true,
-            attributes: {
-              name: `system-${i + 1}`,
-              package: {
-                name: 'system',
+        const policyIds = new Array(10).fill(null).map((_, i) => `package-policy-test-${i}`);
+        packagePoliciesToDeleteIds = packagePoliciesToDeleteIds.concat(policyIds);
+        const getPkRes = await supertest
+          .get(`/api/fleet/epm/packages/system`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+        systemPkgVersion = getPkRes.body.item.version;
+        // we must first force install the system package to override package verification error on policy create
+        const installPromise = supertest
+          .post(`/api/fleet/epm/packages/system-${systemPkgVersion}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ force: true })
+          .expect(200);
+
+        await Promise.all([
+          installPromise,
+          ...policyIds.map((policyId, i) =>
+            kibanaServer.savedObjects.create({
+              id: policyId,
+              type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+              overwrite: true,
+              attributes: {
+                name: `system-${i + 1}`,
+                package: {
+                  name: 'system',
+                },
               },
-            },
-          });
-          packagePoliciesToDeleteIds.push(`package-policy-test-${i}`);
-        }
+            })
+          ),
+        ]);
 
         // first one succeeds
         const res = await supertest
@@ -293,6 +313,7 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
           monitoring_enabled: ['logs', 'metrics'],
           revision: 1,
+          schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
           updated_by: 'elastic',
           package_policies: [],
         });
@@ -473,6 +494,7 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
           is_managed: false,
           revision: 2,
+          schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
           updated_by: 'elastic',
           package_policies: [],
         });
@@ -574,6 +596,78 @@ export default function (providerContext: FtrProviderContext) {
           'Cannot update name in Fleet because the agent policy is managed by an external orchestration solution, such as Elastic Cloud, Kubernetes, etc. Please make changes using your orchestration solution.'
         );
       });
+
+      // Skipped as cannot force install the system and agent integrations as part of policy creation https://github.com/elastic/kibana/issues/137450
+      it.skip('should return a 200 if updating monitoring_enabled on a policy', async () => {
+        const fetchPackageList = async () => {
+          const response = await supertest
+            .get('/api/fleet/epm/packages')
+            .set('kbn-xsrf', 'xxx')
+            .expect(200);
+          return response.body;
+        };
+
+        const {
+          body: { item: originalPolicy },
+        } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Test_policy',
+            description: 'Initial description',
+            namespace: 'default',
+          })
+          .expect(200);
+
+        // uninstall the elastic_agent and verify that is installed after the policy update
+        await supertest
+          .delete(`/api/fleet/epm/packages/elastic_agent/1.3.3`)
+          .set('kbn-xsrf', 'xxxx');
+
+        const listResponse = await fetchPackageList();
+        const installedPackages = listResponse.items.filter(
+          (item: any) => item.status === 'installed'
+        );
+
+        expect(installedPackages.length).to.be(0);
+
+        agentPolicyId = originalPolicy.id;
+        const {
+          body: { item: updatedPolicy },
+        } = await supertest
+          .put(`/api/fleet/agent_policies/${agentPolicyId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Test_policy_with_monitoring',
+            description: 'Updated description',
+            namespace: 'default',
+            monitoring_enabled: ['logs', 'metrics'],
+          })
+          .expect(200);
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        const { id, updated_at, ...newPolicy } = updatedPolicy;
+        createdPolicyIds.push(updatedPolicy.id);
+
+        expect(newPolicy).to.eql({
+          status: 'active',
+          name: 'Test_policy_with_monitoring',
+          description: 'Updated description',
+          namespace: 'default',
+          is_managed: false,
+          revision: 2,
+          schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
+          updated_by: 'elastic',
+          package_policies: [],
+          monitoring_enabled: ['logs', 'metrics'],
+        });
+
+        const listResponseAfterUpdate = await fetchPackageList();
+
+        const installedPackagesAfterUpdate = listResponseAfterUpdate.items
+          .filter((item: any) => item.status === 'installed')
+          .map((item: any) => item.name);
+        expect(installedPackagesAfterUpdate).to.contain('elastic_agent');
+      });
     });
 
     describe('POST /api/fleet/agent_policies/delete', () => {
@@ -629,6 +723,107 @@ export default function (providerContext: FtrProviderContext) {
           id: regularPolicy.id,
           name: 'Regular policy',
         });
+      });
+    });
+
+    describe('POST /api/fleet/agent_policies/_bulk_get', () => {
+      let policyId: string;
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      });
+      setupFleetAndAgents(providerContext);
+      before(async () => {
+        const getPkRes = await supertest
+          .get(`/api/fleet/epm/packages/system`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        // we must first force install the system package to override package verification error on policy create
+        await supertest
+          .post(`/api/fleet/epm/packages/system-${getPkRes.body.item.version}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ force: true })
+          .expect(200);
+
+        const {
+          body: { item: createdPolicy },
+        } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .query({
+            sys_monitoring: true,
+          })
+          .send({
+            name: 'Bulk GET test policy',
+            namespace: 'default',
+          })
+          .expect(200);
+
+        policyId = createdPolicy.id;
+      });
+      after(async () => {
+        await supertest
+          .post('/api/fleet/agent_policies/delete')
+          .set('kbn-xsrf', 'xxx')
+          .send({ agentPolicyId: policyId });
+        await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      });
+
+      it('should allow to get valid ids', async () => {
+        const {
+          body: { items },
+        } = await supertest
+          .post(`/api/fleet/agent_policies/_bulk_get`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            ids: [policyId],
+          })
+          .expect(200);
+
+        expect(items.length).equal(1);
+      });
+
+      it('should populate package_policies if called with ?full=true', async () => {
+        const {
+          body: { items },
+        } = await supertest
+          .post(`/api/fleet/agent_policies/_bulk_get`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            ids: [policyId],
+            full: true,
+          })
+          .expect(200);
+
+        expect(items.length).equal(1);
+        expect(items[0].package_policies.length).equal(1);
+        expect(items[0].package_policies[0]).to.have.property('package');
+        expect(items[0].package_policies[0].package.name).equal('system');
+      });
+
+      it('should return a 404 with invalid ids', async () => {
+        await supertest
+          .post(`/api/fleet/agent_policies/_bulk_get`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            ids: [policyId, 'i-am-not-a-valid-policy'],
+          })
+          .expect(404);
+      });
+
+      it('should allow to get valid ids if ids is a mixed of valid and invalid ids and ignoreMissing is provided', async () => {
+        const {
+          body: { items },
+        } = await supertest
+          .post(`/api/fleet/agent_policies/_bulk_get`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            ids: [policyId, 'i-am-not-a-valid-policy'],
+            ignoreMissing: true,
+          })
+          .expect(200);
+
+        expect(items.length).equal(1);
       });
     });
   });

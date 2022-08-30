@@ -5,18 +5,26 @@
  * 2.0.
  */
 
-import { useEffect, useState, useCallback } from 'react';
-import { Unit } from '@kbn/datemath';
-import { Type, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
-import { FieldValueQueryBar } from '../query_bar';
+import { useEffect, useMemo, useState, useCallback } from 'react';
+import moment from 'moment';
+import type { Unit } from '@kbn/datemath';
+import type { Type, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { FieldValueQueryBar } from '../query_bar';
 import { usePreviewRule } from '../../../containers/detection_engine/rules/use_preview_rule';
 import { formatPreviewRule } from '../../../pages/detection_engine/rules/create/helpers';
-import { FieldValueThreshold } from '../threshold_input';
-import { RulePreviewLogs } from '../../../../../common/detection_engine/schemas/request';
+import type { FieldValueThreshold } from '../threshold_input';
+import type { RulePreviewLogs } from '../../../../../common/detection_engine/schemas/request';
+import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
+import type {
+  AdvancedPreviewOptions,
+  DataSourceType,
+} from '../../../pages/detection_engine/rules/types';
 
 interface PreviewRouteParams {
   isDisabled: boolean;
   index: string[];
+  dataViewId?: string;
+  dataSourceType: DataSourceType;
   threatIndex: string[];
   query: FieldValueQueryBar;
   threatQuery: FieldValueQueryBar;
@@ -26,10 +34,16 @@ interface PreviewRouteParams {
   threshold: FieldValueThreshold;
   machineLearningJobId: string[];
   anomalyThreshold: number;
+  eqlOptions: EqlOptionsSelected;
+  newTermsFields: string[];
+  historyWindowSize: string;
+  advancedOptions?: AdvancedPreviewOptions;
 }
 
 export const usePreviewRoute = ({
   index,
+  dataViewId,
+  dataSourceType,
   isDisabled,
   query,
   threatIndex,
@@ -40,10 +54,32 @@ export const usePreviewRoute = ({
   threshold,
   machineLearningJobId,
   anomalyThreshold,
+  eqlOptions,
+  newTermsFields,
+  historyWindowSize,
+  advancedOptions,
 }: PreviewRouteParams) => {
   const [isRequestTriggered, setIsRequestTriggered] = useState(false);
 
-  const { isLoading, response, rule, setRule } = usePreviewRule(timeFrame);
+  const [timeframeEnd, setTimeframeEnd] = useState(moment());
+  useEffect(() => {
+    if (isRequestTriggered) {
+      setTimeframeEnd(moment());
+    }
+  }, [isRequestTriggered, setTimeframeEnd]);
+
+  const quickQueryOptions = useMemo(
+    () => ({
+      timeframe: timeFrame,
+      timeframeEnd,
+    }),
+    [timeFrame, timeframeEnd]
+  );
+
+  const { isLoading, showInvocationCountWarning, response, rule, setRule } = usePreviewRule({
+    quickQueryOptions,
+    advancedOptions,
+  });
   const [logs, setLogs] = useState<RulePreviewLogs[]>(response.logs ?? []);
   const [isAborted, setIsAborted] = useState<boolean>(!!response.isAborted);
   const [hasNoiseWarning, setHasNoiseWarning] = useState<boolean>(false);
@@ -80,6 +116,10 @@ export const usePreviewRoute = ({
     threshold,
     machineLearningJobId,
     anomalyThreshold,
+    eqlOptions,
+    newTermsFields,
+    historyWindowSize,
+    advancedOptions,
   ]);
 
   useEffect(() => {
@@ -87,6 +127,8 @@ export const usePreviewRoute = ({
       setRule(
         formatPreviewRule({
           index,
+          dataViewId,
+          dataSourceType,
           query,
           ruleType,
           threatIndex,
@@ -96,11 +138,17 @@ export const usePreviewRoute = ({
           threshold,
           machineLearningJobId,
           anomalyThreshold,
+          eqlOptions,
+          newTermsFields,
+          historyWindowSize,
+          advancedOptions,
         })
       );
     }
   }, [
     index,
+    dataViewId,
+    dataSourceType,
     isRequestTriggered,
     query,
     rule,
@@ -113,6 +161,10 @@ export const usePreviewRoute = ({
     threshold,
     machineLearningJobId,
     anomalyThreshold,
+    eqlOptions,
+    newTermsFields,
+    historyWindowSize,
+    advancedOptions,
   ]);
 
   return {
@@ -124,5 +176,6 @@ export const usePreviewRoute = ({
     previewId: response.previewId ?? '',
     logs,
     isAborted,
+    showInvocationCountWarning,
   };
 };

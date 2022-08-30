@@ -202,19 +202,6 @@
         }
       }
     },
-    "search": {
-      "properties": {
-        "successCount": {
-          "type": "long"
-        },
-        "errorCount": {
-          "type": "long"
-        },
-        "averageDuration": {
-          "type": "float"
-        }
-      }
-    },
     "search-session": {
       "properties": {
         "transientCount": {
@@ -225,6 +212,19 @@
         },
         "totalCount": {
           "type": "long"
+        }
+      }
+    },
+    "search": {
+      "properties": {
+        "successCount": {
+          "type": "long"
+        },
+        "errorCount": {
+          "type": "long"
+        },
+        "averageDuration": {
+          "type": "float"
         }
       }
     },
@@ -2224,6 +2224,137 @@
           }
         },
         "enterpriseSearchContent": {
+          "properties": {
+            "appId": {
+              "type": "keyword",
+              "_meta": {
+                "description": "The application being tracked"
+              }
+            },
+            "viewId": {
+              "type": "keyword",
+              "_meta": {
+                "description": "Always `main`"
+              }
+            },
+            "clicks_total": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application since we started counting them"
+              }
+            },
+            "clicks_7_days": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application over the last 7 days"
+              }
+            },
+            "clicks_30_days": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application over the last 30 days"
+              }
+            },
+            "clicks_90_days": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application over the last 90 days"
+              }
+            },
+            "minutes_on_screen_total": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen since we started counting them."
+              }
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen over the last 7 days"
+              }
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen over the last 30 days"
+              }
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen over the last 90 days"
+              }
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The application being tracked"
+                    }
+                  },
+                  "viewId": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The application view being tracked"
+                    }
+                  },
+                  "clicks_total": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the application sub view since we started counting them"
+                    }
+                  },
+                  "clicks_7_days": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the active application sub view over the last 7 days"
+                    }
+                  },
+                  "clicks_30_days": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the active application sub view over the last 30 days"
+                    }
+                  },
+                  "clicks_90_days": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the active application sub view over the last 90 days"
+                    }
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application sub view is active and on-screen since we started counting them."
+                    }
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application is active and on-screen active application sub view over the last 7 days"
+                    }
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application is active and on-screen active application sub view over the last 30 days"
+                    }
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application is active and on-screen active application sub view over the last 90 days"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "elasticsearch": {
           "properties": {
             "appId": {
               "type": "keyword",
@@ -7614,12 +7745,6 @@
             "description": "Non-default value of setting."
           }
         },
-        "timelion:legacyChartsLibrary": {
-          "type": "boolean",
-          "_meta": {
-            "description": "Non-default value of setting."
-          }
-        },
         "timelion:target_buckets": {
           "type": "long",
           "_meta": {
@@ -7759,6 +7884,12 @@
           }
         },
         "discover:sampleSize": {
+          "type": "long",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "discover:sampleRowsPerPage": {
           "type": "long",
           "_meta": {
             "description": "Non-default value of setting."
@@ -8133,6 +8264,12 @@
             "description": "Non-default value of setting."
           }
         },
+        "observability:enableNewSyntheticsView": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
         "observability:maxSuggestions": {
           "type": "integer",
           "_meta": {
@@ -8140,12 +8277,6 @@
           }
         },
         "observability:enableComparisonByDefault": {
-          "type": "boolean",
-          "_meta": {
-            "description": "Non-default value of setting."
-          }
-        },
-        "observability:enableInfrastructureView": {
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
@@ -8228,6 +8359,96 @@
           "_meta": {
             "description": "Non-default value of setting."
           }
+        },
+        "discover:enableSql": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "discover:rowHeightOption": {
+          "type": "integer",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "hideAnnouncements": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "isDefaultIndexMigrated": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "lens:useFieldExistenceSampling": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "metrics:allowCheckingForFailedShards": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "observability:apmDefaultServiceEnvironment": {
+          "type": "keyword",
+          "_meta": {
+            "description": "Default value of the setting was changed."
+          }
+        },
+        "observability:apmOperationsTab": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "observability:apmProgressiveLoading": {
+          "type": "keyword",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "observability:apmServiceGroupMaxNumberOfServices": {
+          "type": "long",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "observability:apmServiceInventoryOptimizedSorting": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "observability:apmTraceExplorerTab": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "securitySolution:enableGroupedNav": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "securitySolution:showRelatedIntegrations": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "visualization:visualize:legacyGaugeChartsLibrary": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
         }
       }
     },
@@ -8293,6 +8514,12 @@
     },
     "saved_objects_counts": {
       "properties": {
+        "total": {
+          "type": "long",
+          "_meta": {
+            "description": "Total number of saved objects in the cluster"
+          }
+        },
         "by_type": {
           "type": "array",
           "items": {
@@ -8309,6 +8536,21 @@
                   "description": "How many SavedObjects of that type are stored in the cluster across all Spaces"
                 }
               }
+            }
+          }
+        },
+        "others": {
+          "type": "long",
+          "_meta": {
+            "description": "Number of SO objects outside the breakdown. If it is not 0, there may be an unexpected state of the deployment 0 and future migrations might fail."
+          }
+        },
+        "non_registered_types": {
+          "type": "array",
+          "items": {
+            "type": "keyword",
+            "_meta": {
+              "description": "List of SO types that showed up in the break down but are not registered in Kibana. They could be a potential cause of future migration failures."
             }
           }
         }
@@ -9604,117 +9846,137 @@
         }
       }
     },
-    "vis_type_table": {
+    "usage_collector_stats": {
       "properties": {
-        "total": {
-          "type": "long"
+        "total_duration": {
+          "type": "long",
+          "_meta": {
+            "description": "The total execution duration to grab usage stats for all collectors in milliseconds"
+          }
         },
-        "total_split": {
-          "type": "long"
+        "total_is_ready_duration": {
+          "type": "long",
+          "_meta": {
+            "description": "The total execution duration of the isReady function for all collectors in milliseconds"
+          }
         },
-        "split_columns": {
-          "properties": {
-            "total": {
-              "type": "long"
-            },
-            "enabled": {
-              "type": "long"
+        "total_fetch_duration": {
+          "type": "long",
+          "_meta": {
+            "description": "The total execution duration of the fetch function for all ready collectors in milliseconds"
+          }
+        },
+        "is_ready_duration_breakdown": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "name": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "The name of the collector"
+                }
+              },
+              "duration": {
+                "type": "long",
+                "_meta": {
+                  "description": "The execution duration of the isReady function for the collector in milliseconds"
+                }
+              }
             }
           }
         },
-        "split_rows": {
-          "properties": {
-            "total": {
-              "type": "long"
-            },
-            "enabled": {
-              "type": "long"
+        "fetch_duration_breakdown": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "name": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "The name of the collector"
+                }
+              },
+              "duration": {
+                "type": "long",
+                "_meta": {
+                  "description": "The execution duration of the fetch function for the collector in milliseconds"
+                }
+              }
             }
           }
-        }
-      }
-    },
-    "vis_type_timeseries": {
-      "properties": {
-        "timeseries_use_last_value_mode_total": {
-          "type": "long",
-          "_meta": {
-            "description": "Number of TSVB visualizations using \"last value\" as a time range"
-          }
         },
-        "timeseries_use_es_indices_total": {
-          "type": "long",
-          "_meta": {
-            "description": "Number of TSVB visualizations using elasticsearch indices"
-          }
-        },
-        "timeseries_table_use_aggregate_function": {
-          "type": "long",
-          "_meta": {
-            "description": "Number of TSVB table visualizations using aggregate function"
-          }
-        },
-        "timeseries_types": {
+        "not_ready": {
           "properties": {
-            "table": {
-              "type": "long"
+            "count": {
+              "type": "short",
+              "_meta": {
+                "description": "The number of collectors that returned false from the isReady function"
+              }
             },
-            "gauge": {
-              "type": "long"
-            },
-            "markdown": {
-              "type": "long"
-            },
-            "top_n": {
-              "type": "long"
-            },
-            "timeseries": {
-              "type": "long"
-            },
-            "metric": {
-              "type": "long"
+            "names": {
+              "type": "array",
+              "items": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "The name of the of collectors that returned false from the isReady function"
+                }
+              }
             }
           }
-        }
-      }
-    },
-    "vis_type_vega": {
-      "properties": {
-        "vega_lib_specs_total": {
-          "type": "long"
         },
-        "vega_lite_lib_specs_total": {
-          "type": "long"
-        },
-        "vega_use_map_total": {
-          "type": "long"
-        }
-      }
-    },
-    "visualization_types": {
-      "properties": {
-        "DYNAMIC_KEY": {
+        "not_ready_timeout": {
           "properties": {
-            "total": {
-              "type": "long"
+            "count": {
+              "type": "short",
+              "_meta": {
+                "description": "The number of collectors that timedout during the isReady function"
+              }
             },
-            "spaces_min": {
-              "type": "long"
+            "names": {
+              "type": "array",
+              "items": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "The name of collectors that timedout during the isReady function"
+                }
+              }
+            }
+          }
+        },
+        "succeeded": {
+          "properties": {
+            "count": {
+              "type": "short",
+              "_meta": {
+                "description": "The number of collectors that returned true from the fetch function"
+              }
             },
-            "spaces_max": {
-              "type": "long"
+            "names": {
+              "type": "array",
+              "items": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "The name of the of collectors that returned true from the fetch function"
+                }
+              }
+            }
+          }
+        },
+        "failed": {
+          "properties": {
+            "count": {
+              "type": "short",
+              "_meta": {
+                "description": "The number of collectors that threw an error from the fetch function"
+              }
             },
-            "spaces_avg": {
-              "type": "long"
-            },
-            "saved_7_days_total": {
-              "type": "long"
-            },
-            "saved_30_days_total": {
-              "type": "long"
-            },
-            "saved_90_days_total": {
-              "type": "long"
+            "names": {
+              "type": "array",
+              "items": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "The name of the of collectors that threw an error from the fetch function"
+                }
+              }
             }
           }
         }

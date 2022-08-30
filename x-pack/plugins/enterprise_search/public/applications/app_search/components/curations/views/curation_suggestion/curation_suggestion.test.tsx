@@ -90,11 +90,9 @@ describe('CurationSuggestion', () => {
       {
         id: {
           raw: '1',
-          snippet: null,
         },
         foo: {
           raw: 'foo',
-          snippet: null,
         },
         _meta: {
           id: '1',
@@ -110,11 +108,9 @@ describe('CurationSuggestion', () => {
       {
         id: {
           raw: '4',
-          snippet: null,
         },
         foo: {
           raw: 'foo',
-          snippet: null,
         },
         _meta: {
           id: '4',

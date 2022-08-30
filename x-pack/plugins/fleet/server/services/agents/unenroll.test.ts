@@ -10,8 +10,13 @@ import type { SavedObject } from '@kbn/core/server';
 
 import type { AgentPolicy } from '../../types';
 import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
+import { invalidateAPIKeys } from '../api_keys';
 
-import { unenrollAgent, unenrollAgents } from './unenroll';
+import { invalidateAPIKeysForAgents, unenrollAgent, unenrollAgents } from './unenroll';
+
+jest.mock('../api_keys');
+
+const mockedInvalidateAPIKeys = invalidateAPIKeys as jest.MockedFunction<typeof invalidateAPIKeys>;
 
 const agentInHostedDoc = {
   _id: 'agent-in-hosted-policy',
@@ -96,7 +101,7 @@ describe('unenrollAgents (plural)', () => {
     await unenrollAgents(soClient, esClient, { agentIds: idsToUnenroll });
 
     // calls ES update with correct values
-    const calledWith = esClient.bulk.mock.calls[1][0];
+    const calledWith = esClient.bulk.mock.calls[0][0];
     const ids = (calledWith as estypes.BulkRequest)?.body
       ?.filter((i: any) => i.update !== undefined)
       .map((i: any) => i.update._id);
@@ -116,7 +121,7 @@ describe('unenrollAgents (plural)', () => {
 
     // calls ES update with correct values
     const onlyRegular = [agentInRegularDoc._id, agentInRegularDoc2._id];
-    const calledWith = esClient.bulk.mock.calls[1][0];
+    const calledWith = esClient.bulk.mock.calls[0][0];
     const ids = (calledWith as estypes.BulkRequest)?.body
       ?.filter((i: any) => i.update !== undefined)
       .map((i: any) => i.update._id);
@@ -175,7 +180,7 @@ describe('unenrollAgents (plural)', () => {
     await unenrollAgents(soClient, esClient, { agentIds: idsToUnenroll, force: true });
 
     // calls ES update with correct values
-    const calledWith = esClient.bulk.mock.calls[1][0];
+    const calledWith = esClient.bulk.mock.calls[0][0];
     const ids = (calledWith as estypes.BulkRequest)?.body
       ?.filter((i: any) => i.update !== undefined)
       .map((i: any) => i.update._id);
@@ -229,20 +234,39 @@ describe('unenrollAgents (plural)', () => {
   });
 });
 
+describe('invalidateAPIKeysForAgents', () => {
+  beforeEach(() => {
+    mockedInvalidateAPIKeys.mockReset();
+  });
+  it('revoke all the agents API keys', async () => {
+    await invalidateAPIKeysForAgents([
+      {
+        id: 'agent1',
+        default_api_key_id: 'defaultApiKey1',
+        access_api_key_id: 'accessApiKey1',
+        default_api_key_history: [
+          {
+            id: 'defaultApiKeyHistory1',
+          },
+          {
+            id: 'defaultApiKeyHistory2',
+          },
+        ],
+      } as any,
+    ]);
+
+    expect(mockedInvalidateAPIKeys).toBeCalledTimes(1);
+    expect(mockedInvalidateAPIKeys).toBeCalledWith([
+      'accessApiKey1',
+      'defaultApiKey1',
+      'defaultApiKeyHistory1',
+      'defaultApiKeyHistory2',
+    ]);
+  });
+});
+
 function createClientMock() {
   const soClientMock = savedObjectsClientMock.create();
-
-  // need to mock .create & bulkCreate due to (bulk)createAgentAction(s) in unenrollAgent(s)
-  // @ts-expect-error
-  soClientMock.create.mockResolvedValue({ attributes: { agent_id: 'tata' } });
-  soClientMock.bulkCreate.mockImplementation(async ([{ type, attributes }]) => {
-    return {
-      saved_objects: [await soClientMock.create(type, attributes)],
-    };
-  });
-  soClientMock.bulkUpdate.mockResolvedValue({
-    saved_objects: [],
-  });
 
   soClientMock.get.mockImplementation(async (_, id) => {
     switch (id) {

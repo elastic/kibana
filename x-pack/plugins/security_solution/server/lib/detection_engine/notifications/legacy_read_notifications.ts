@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { RuleTypeParams, SanitizedRule } from '@kbn/alerting-plugin/common';
+import type { RuleTypeParams, SanitizedRule } from '@kbn/alerting-plugin/common';
 // eslint-disable-next-line no-restricted-imports
-import { LegacyReadNotificationParams, legacyIsAlertType } from './legacy_types';
+import type { LegacyReadNotificationParams } from './legacy_types';
+// eslint-disable-next-line no-restricted-imports
+import { legacyIsAlertType } from './legacy_types';
 // eslint-disable-next-line no-restricted-imports
 import { legacyFindNotifications } from './legacy_find_notifications';
 

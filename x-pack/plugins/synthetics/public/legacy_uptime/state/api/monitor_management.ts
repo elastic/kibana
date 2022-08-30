@@ -119,3 +119,9 @@ export const fetchEnableSynthetics = async (): Promise<void> => {
 export const fetchServiceAllowed = async (): Promise<SyntheticsServiceAllowed> => {
   return await apiService.get(API_URLS.SERVICE_ALLOWED);
 };
+
+export const fetchServiceAPIKey = async (): Promise<{
+  apiKey: { encoded: string };
+}> => {
+  return await apiService.get(API_URLS.SYNTHETICS_APIKEY);
+};

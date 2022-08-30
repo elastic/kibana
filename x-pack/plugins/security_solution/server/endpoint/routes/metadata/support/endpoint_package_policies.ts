@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '@kbn/core/server';
-import { PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
-import { PackagePolicy } from '@kbn/fleet-plugin/common/types/models';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models';
 
 export const getAllEndpointPackagePolicies = async (
   packagePolicyService: PackagePolicyServiceInterface,

@@ -268,6 +268,35 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
       )
     );
   });
+
+  test('constructs KQL filter for single rule type with no authorized consumer', async () => {
+    const result = asFiltersByRuleTypeAndConsumer(
+      new Set([
+        {
+          actionGroups: [],
+          defaultActionGroupId: 'default',
+          recoveryActionGroup: RecoveredActionGroup,
+          id: 'myAppAlertType',
+          name: 'myAppAlertType',
+          producer: 'myApp',
+          minimumLicenseRequired: 'basic',
+          isExportable: true,
+          authorizedConsumers: {},
+          enabledInLicense: true,
+        },
+      ]),
+      {
+        type: AlertingAuthorizationFilterType.KQL,
+        fieldNames: {
+          ruleTypeId: 'path.to.rule_type_id',
+          consumer: 'consumer-field',
+        },
+      },
+      'space1'
+    );
+
+    expect(result).toEqual(fromKueryExpression(`path.to.rule_type_id:myAppAlertType`));
+  });
 });
 
 describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
@@ -601,6 +630,48 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
         minimum_should_match: 1,
       },
     });
+  });
+
+  test('constructs KQL filter for single rule type with no authorized consumer', async () => {
+    const result = asFiltersByRuleTypeAndConsumer(
+      new Set([
+        {
+          actionGroups: [],
+          defaultActionGroupId: 'default',
+          recoveryActionGroup: RecoveredActionGroup,
+          id: 'myAppAlertType',
+          name: 'myAppAlertType',
+          producer: 'myApp',
+          minimumLicenseRequired: 'basic',
+          isExportable: true,
+          authorizedConsumers: {},
+          enabledInLicense: true,
+        },
+      ]),
+      {
+        type: AlertingAuthorizationFilterType.ESDSL,
+        fieldNames: {
+          ruleTypeId: 'path.to.rule_type_id',
+          consumer: 'consumer-field',
+        },
+      },
+      'space1'
+    );
+
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "bool": Object {
+          "minimum_should_match": 1,
+          "should": Array [
+            Object {
+              "match": Object {
+                "path.to.rule_type_id": "myAppAlertType",
+              },
+            },
+          ],
+        },
+      }
+    `);
   });
 });
 

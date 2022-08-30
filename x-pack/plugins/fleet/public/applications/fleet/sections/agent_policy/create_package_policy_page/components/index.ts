@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export { CreatePackagePolicyPageLayout } from './layout';
-export { PackagePolicyInputPanel } from './package_policy_input_panel';
-export { PackagePolicyInputVarField } from './package_policy_input_var_field';
-export { PostInstallAddAgentModal } from './post_install_add_agent_modal';
+export { IntegrationBreadcrumb } from './integration_breadcrumb';
+export * from './steps';
+export { PackagePolicyEditorDatastreamPipelines } from './datastream_pipelines';
+export type { PackagePolicyEditorDatastreamPipelinesProps } from './datastream_pipelines';
+export { PackagePolicyEditorDatastreamMappings } from './datastream_mappings';
+export type { PackagePolicyEditorDatastreamMappingsProps } from './datastream_mappings';

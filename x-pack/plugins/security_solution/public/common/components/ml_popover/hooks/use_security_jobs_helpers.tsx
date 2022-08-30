@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { MlSummaryJob } from '@kbn/ml-plugin/public';
-import {
+import type { MlSummaryJob } from '@kbn/ml-plugin/public';
+import type {
   AugmentedSecurityJobFields,
   Module,
   ModuleJob,
@@ -32,7 +32,7 @@ export const moduleToSecurityJob = (
     datafeedState: '',
     hasDatafeed: false,
     isSingleMetricViewerJob: false,
-    jobState: '',
+    jobState: 'closed',
     memory_status: '',
     processed_record_count: 0,
     id: moduleJob.id,

@@ -37,6 +37,7 @@ export const NewBucketButton = ({
     iconType="plusInCircle"
     onClick={onClick}
     isDisabled={isDisabled}
+    flush="left"
   >
     {label}
   </EuiButtonEmpty>
@@ -131,12 +132,14 @@ export const DragDropBuckets = ({
   onDragEnd,
   droppableId,
   children,
+  className,
 }: {
   items: any; // eslint-disable-line @typescript-eslint/no-explicit-any
   onDragStart: () => void;
   onDragEnd: (items: any) => void; // eslint-disable-line @typescript-eslint/no-explicit-any
   droppableId: string;
   children: React.ReactElement[];
+  className?: string;
 }) => {
   const handleDragEnd = ({
     source,
@@ -152,7 +155,7 @@ export const DragDropBuckets = ({
   };
   return (
     <EuiDragDropContext onDragEnd={handleDragEnd} onDragStart={onDragStart}>
-      <EuiDroppable droppableId={droppableId} spacing="none">
+      <EuiDroppable droppableId={droppableId} spacing="none" className={className}>
         {children}
       </EuiDroppable>
     </EuiDragDropContext>

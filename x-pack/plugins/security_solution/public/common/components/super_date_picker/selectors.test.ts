@@ -16,10 +16,10 @@ import {
   isLoadingSelector,
   queriesSelector,
 } from './selectors';
-import { InputsRange, AbsoluteTimeRange, RelativeTimeRange } from '../../store/inputs/model';
+import type { InputsRange, AbsoluteTimeRange, RelativeTimeRange } from '../../store/inputs/model';
 import { cloneDeep } from 'lodash/fp';
 import { mockGlobalState } from '../../mock';
-import { State } from '../../store';
+import type { State } from '../../store';
 
 describe('selectors', () => {
   let absoluteTime: AbsoluteTimeRange = {

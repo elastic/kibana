@@ -9,7 +9,6 @@
 import _ from 'lodash';
 import { merge } from 'rxjs';
 import { debounceTime, finalize, map, switchMap, tap } from 'rxjs/operators';
-
 import { setQuery } from '../state';
 import { DashboardBuildContext, DashboardState } from '../../types';
 import { DashboardSavedObject } from '../../saved_dashboards';
@@ -20,7 +19,7 @@ import {
   Filter,
   Query,
   waitUntilNextSessionCompletes$,
-  QueryState,
+  GlobalQueryStateFromUrl,
 } from '../../services/data';
 import { cleanFiltersForSerialize } from '.';
 
@@ -100,7 +99,7 @@ export const syncDashboardFilterState = ({
   // apply filters when the filter manager changes
   const filterManagerSubscription = merge(filterManager.getUpdates$(), queryString.getUpdates$())
     .pipe(debounceTime(100))
-    .subscribe(() => applyFilters(queryString.getQuery(), filterManager.getFilters()));
+    .subscribe(() => applyFilters(queryString.getQuery() as Query, filterManager.getFilters()));
 
   const timeRefreshSubscription = merge(
     timefilterService.getRefreshIntervalUpdate$(),
@@ -166,7 +165,7 @@ export const applyDashboardFilterState = ({
    * time range and refresh interval to the query service.
    */
   if (currentDashboardState.timeRestore) {
-    const globalQueryState = kbnUrlStateStorage.get<QueryState>('_g');
+    const globalQueryState = kbnUrlStateStorage.get<GlobalQueryStateFromUrl>('_g');
     if (!globalQueryState?.time) {
       if (savedDashboard.timeFrom && savedDashboard.timeTo) {
         timefilterService.setTime({

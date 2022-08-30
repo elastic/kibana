@@ -4,15 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useCallback, useState } from 'react';
+import { useCallback, useContext, useState } from 'react';
 import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
+import { BulkActionsVerbs } from '../../../../types';
+import { BulkActionsContext } from '../bulk_actions/context';
 
 type PaginationProps = RuleRegistrySearchRequestPagination & {
   onPageChange: (pagination: RuleRegistrySearchRequestPagination) => void;
-  alertsCount: number;
 };
 
-export function usePagination({ onPageChange, pageIndex, pageSize, alertsCount }: PaginationProps) {
+export type UsePagination = (props: PaginationProps) => {
+  pagination: RuleRegistrySearchRequestPagination;
+  onChangePageSize: (pageSize: number) => void;
+  onChangePageIndex: (pageIndex: number) => void;
+  onPaginateFlyoutNext: () => void;
+  onPaginateFlyoutPrevious: () => void;
+  flyoutAlertIndex: number;
+  setFlyoutAlertIndex: (alertIndex: number) => void;
+};
+
+export function usePagination({ onPageChange, pageIndex, pageSize }: PaginationProps) {
+  const [, updateBulkActionsState] = useContext(BulkActionsContext);
   const [pagination, setPagination] = useState<RuleRegistrySearchRequestPagination>({
     pageIndex,
     pageSize,
@@ -25,52 +37,49 @@ export function usePagination({ onPageChange, pageIndex, pageSize, alertsCount }
         pageSize: _pageSize,
         pageIndex: 0,
       }));
+      updateBulkActionsState({ action: BulkActionsVerbs.clear });
       onPageChange({ pageIndex: 0, pageSize: _pageSize });
     },
-    [setPagination, onPageChange]
+    [updateBulkActionsState, onPageChange]
   );
   const onChangePageIndex = useCallback(
     (_pageIndex) => {
       setPagination((state) => ({ ...state, pageIndex: _pageIndex }));
+      updateBulkActionsState({ action: BulkActionsVerbs.clear });
       onPageChange({ pageIndex: _pageIndex, pageSize: pagination.pageSize });
     },
-    [setPagination, onPageChange, pagination.pageSize]
+    [updateBulkActionsState, onPageChange, pagination.pageSize]
   );
 
-  const paginateFlyout = useCallback(
-    (newFlyoutAlertIndex: number) => {
-      const lastPage = Math.floor(alertsCount / pagination.pageSize) - 1;
-      if (newFlyoutAlertIndex < 0) {
-        setFlyoutAlertIndex(pagination.pageSize - 1);
-        onChangePageIndex(pagination.pageIndex === 0 ? lastPage : pagination.pageIndex - 1);
-        return;
-      }
+  const onPaginateFlyout = useCallback(
+    (nextPageIndex: number) => {
+      setFlyoutAlertIndex((prevFlyoutAlertIndex) => {
+        if (nextPageIndex < 0) {
+          onChangePageIndex(0);
+          return 0;
+        }
+        const actualPageIndex = pagination.pageSize * pagination.pageIndex + prevFlyoutAlertIndex;
+        if (nextPageIndex === actualPageIndex) {
+          return prevFlyoutAlertIndex;
+        }
 
-      if (newFlyoutAlertIndex >= pagination.pageSize) {
-        setFlyoutAlertIndex(0);
-        onChangePageIndex(
-          pagination.pageIndex === lastPage ? 0 : Math.min(pagination.pageIndex + 1, lastPage)
-        );
-        return;
-      }
-
-      setFlyoutAlertIndex(newFlyoutAlertIndex);
+        const newPageIndex = Math.floor(nextPageIndex / pagination.pageSize);
+        const newAlertIndex =
+          nextPageIndex >= pagination.pageSize * newPageIndex
+            ? nextPageIndex - pagination.pageSize * newPageIndex
+            : nextPageIndex;
+        onChangePageIndex(newPageIndex);
+        return newAlertIndex;
+      });
     },
-    [pagination, alertsCount, onChangePageIndex]
+    [onChangePageIndex, pagination.pageIndex, pagination.pageSize]
   );
-  const onPaginateFlyoutNext = useCallback(() => {
-    paginateFlyout(flyoutAlertIndex + 1);
-  }, [paginateFlyout, flyoutAlertIndex]);
-  const onPaginateFlyoutPrevious = useCallback(() => {
-    paginateFlyout(flyoutAlertIndex - 1);
-  }, [paginateFlyout, flyoutAlertIndex]);
 
   return {
     pagination,
     onChangePageSize,
     onChangePageIndex,
-    onPaginateFlyoutNext,
-    onPaginateFlyoutPrevious,
+    onPaginateFlyout,
     flyoutAlertIndex,
     setFlyoutAlertIndex,
   };

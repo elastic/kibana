@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import type { KibanaExecutionContext } from '@kbn/core/public';
-import type { Adapters } from '@kbn/inspector-plugin';
+import type { Adapters } from '@kbn/inspector-plugin/common';
 import { KibanaContext, handleResponse } from '@kbn/data-plugin/public';
 import { getTimezone } from './application/lib/get_timezone';
 import { getUISettings, getDataStart, getCoreStart } from './services';
@@ -87,7 +87,7 @@ export const metricsRequestHandler = async ({
             .ok({ time: query.time });
 
           if (query.response && config.get(UI_SETTINGS.ALLOW_CHECKING_FOR_FAILED_SHARDS)) {
-            handleResponse({ body: query.body }, { rawResponse: query.response }, theme);
+            handleResponse({ body: query.body }, { rawResponse: query.response }, {}, theme);
           }
         });
 

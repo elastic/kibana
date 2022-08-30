@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { run } from '@kbn/dev-utils';
+import { run } from '@kbn/dev-cli-runner';
 
 import { PROJECTS } from './projects';
 

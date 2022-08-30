@@ -43,9 +43,9 @@ export function getFunctionDefinition({
         const indexPattern = await indexPatterns.create(args.index.value, true);
         const aggConfigs = aggs.createAggConfigs(
           indexPattern,
-          args.aggs?.map((agg) => agg.value) ?? []
+          args.aggs?.map((agg) => agg.value) ?? [],
+          { hierarchical: args.metricsAtAllLevels, partialRows: args.partialRows }
         );
-        aggConfigs.hierarchical = args.metricsAtAllLevels;
 
         const { handleEsaggsRequest } = await import('../../../common/search/expressions');
 
@@ -58,7 +58,6 @@ export function getFunctionDefinition({
             filters: get(input, 'filters', undefined),
             indexPattern,
             inspectorAdapters,
-            partialRows: args.partialRows,
             query: get(input, 'query', undefined) as any,
             searchSessionId: getSearchSessionId(),
             searchSourceService: searchSource,

@@ -74,12 +74,14 @@ describe('StepList component', () => {
   });
 
   it('creates expected message for all failed', () => {
-    const { getByText } = render(<StepsList data={steps} loading={false} />);
+    const { getByText } = render(<StepsList data={steps} loading={false} allStepsLoaded={true} />);
     expect(getByText('2 Steps - all failed or skipped'));
   });
 
   it('renders a link to the step detail view', () => {
-    const { getByTitle, getByTestId } = render(<StepsList data={[steps[0]]} loading={false} />);
+    const { getByTitle, getByTestId } = render(
+      <StepsList data={[steps[0]]} loading={false} allStepsLoaded={true} />
+    );
     expect(getByTestId('step-detail-link')).toHaveAttribute('href', '/journey/fake-group/step/1');
     expect(forDesktopOnly(getByTitle, 'title')(`Failed`));
   });
@@ -91,7 +93,7 @@ describe('StepList component', () => {
   ])('supplies status badge correct status', (status, expectedStatus) => {
     const step = steps[0];
     step.synthetics!.payload!.status = status;
-    const { getByText } = render(<StepsList data={[step]} loading={false} />);
+    const { getByText } = render(<StepsList data={[step]} loading={false} allStepsLoaded={true} />);
     expect(forDesktopOnly(getByText)(expectedStatus));
   });
 
@@ -99,14 +101,14 @@ describe('StepList component', () => {
     steps[0].synthetics!.payload!.status = 'succeeded';
     steps[1].synthetics!.payload!.status = 'succeeded';
 
-    const { getByText } = render(<StepsList data={steps} loading={false} />);
+    const { getByText } = render(<StepsList data={steps} loading={false} allStepsLoaded={true} />);
     expect(getByText('2 Steps - all succeeded'));
   });
 
   it('creates appropriate message for mixed results', () => {
     steps[0].synthetics!.payload!.status = 'succeeded';
 
-    const { getByText } = render(<StepsList data={steps} loading={false} />);
+    const { getByText } = render(<StepsList data={steps} loading={false} allStepsLoaded={true} />);
     expect(getByText('2 Steps - 1 succeeded'));
   });
 
@@ -114,7 +116,7 @@ describe('StepList component', () => {
     steps[0].synthetics!.payload!.status = 'succeeded';
     steps[1].synthetics!.payload!.status = 'skipped';
 
-    const { getByText } = render(<StepsList data={steps} loading={false} />);
+    const { getByText } = render(<StepsList data={steps} loading={false} allStepsLoaded={true} />);
     expect(getByText('2 Steps - 1 succeeded'));
   });
 
@@ -141,12 +143,14 @@ describe('StepList component', () => {
       },
     });
 
-    const { getByText } = render(<StepsList data={steps} loading={false} />);
+    const { getByText } = render(<StepsList data={steps} loading={false} allStepsLoaded={true} />);
     expect(getByText('2 Steps - 1 succeeded'));
   });
 
   it('renders a row per step', () => {
-    const { getByTestId } = render(<StepsList data={steps} loading={false} />);
+    const { getByTestId } = render(
+      <StepsList data={steps} loading={false} allStepsLoaded={true} />
+    );
     expect(getByTestId('row-fake-group'));
     expect(getByTestId('row-fake-group-1'));
   });
@@ -158,13 +162,17 @@ describe('StepList component', () => {
     // rendered and its classes.
 
     it('renders the step name and index', () => {
-      const { getByText } = render(<StepsList data={steps} loading={false} />);
+      const { getByText } = render(
+        <StepsList data={steps} loading={false} allStepsLoaded={true} />
+      );
       expect(forMobileOnly(getByText)('1. load page')).toBeInTheDocument();
       expect(forMobileOnly(getByText)('2. go to login')).toBeInTheDocument();
     });
 
     it('does not render the link to view step details', async () => {
-      const { queryByText } = render(<StepsList data={steps} loading={false} />);
+      const { queryByText } = render(
+        <StepsList data={steps} loading={false} allStepsLoaded={true} />
+      );
       expect(forMobileOnly(queryByText)(VIEW_PERFORMANCE)).not.toBeInTheDocument();
     });
 
@@ -172,7 +180,9 @@ describe('StepList component', () => {
       steps[0].synthetics!.payload!.status = 'succeeded';
       steps[1].synthetics!.payload!.status = 'skipped';
 
-      const { getByText } = render(<StepsList data={steps} loading={false} />);
+      const { getByText } = render(
+        <StepsList data={steps} loading={false} allStepsLoaded={true} />
+      );
       expect(forMobileOnly(getByText)('Succeeded')).toBeInTheDocument();
       expect(forMobileOnly(getByText)('Skipped')).toBeInTheDocument();
     });

@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { createFailError, run, RunFn } from '@kbn/dev-utils';
+import { createFailError } from '@kbn/dev-cli-errors';
+import type { RunFn } from '@kbn/dev-cli-runner';
+import { run } from '@kbn/dev-cli-runner';
 import type { CreateExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
   ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_DESCRIPTION,
@@ -15,7 +17,7 @@ import {
   EXCEPTION_LIST_URL,
 } from '@kbn/securitysolution-list-constants';
 import { KbnClient } from '@kbn/test';
-import { AxiosError } from 'axios';
+import type { AxiosError } from 'axios';
 import { HostIsolationExceptionGenerator } from '../../../common/endpoint/data_generators/host_isolation_exception_generator';
 import { randomPolicyIdGenerator } from '../common/random_policy_id_generator';
 
@@ -53,7 +55,7 @@ class HostIsolationExceptionDataLoaderError extends Error {
   }
 }
 
-const handleThrowAxiosHttpError = (err: AxiosError): never => {
+const handleThrowAxiosHttpError = (err: AxiosError<{ message?: string }>): never => {
   let message = err.message;
 
   if (err.response) {

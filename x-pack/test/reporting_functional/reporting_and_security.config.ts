@@ -11,7 +11,7 @@ import { ReportingAPIProvider } from '../reporting_api_integration/services';
 import { ReportingFunctionalProvider } from './services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const functionalConfig = await readConfigFile(require.resolve('../functional/config')); // Reporting API tests need a fully working UI
+  const functionalConfig = await readConfigFile(require.resolve('../functional/config.base.js')); // Reporting API tests need a fully working UI
   const apiConfig = await readConfigFile(require.resolve('../api_integration/config'));
 
   return {

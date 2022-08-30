@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { LIST_DETECTION_RULE_EXCEPTION, TELEMETRY_CHANNEL_LISTS } from '../constants';
 import { batchTelemetryRecords, templateExceptionList } from '../helpers';
-import { ITelemetryEventsSender } from '../sender';
-import { ITelemetryReceiver } from '../receiver';
+import type { ITelemetryEventsSender } from '../sender';
+import type { ITelemetryReceiver } from '../receiver';
 import type { ExceptionListItem, ESClusterInfo, ESLicense, RuleSearchResult } from '../types';
-import { TaskExecutionPeriod } from '../task';
+import type { TaskExecutionPeriod } from '../task';
 
 export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: number) {
   return {

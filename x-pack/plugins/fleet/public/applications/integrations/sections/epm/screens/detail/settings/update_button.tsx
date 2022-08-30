@@ -30,7 +30,7 @@ import type {
   PackagePolicy,
 } from '../../../../../types';
 import { InstallStatus } from '../../../../../types';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../../../constants';
 import {
   sendGetAgentPolicies,
   useInstallPackage,
@@ -98,7 +98,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
     const fetchAgentPolicyData = async () => {
       if (packagePolicyIds && packagePolicyIds.length > 0) {
         const { data } = await sendGetAgentPolicies({
-          perPage: 1000,
+          perPage: SO_SEARCH_LIMIT,
           page: 1,
           // Fetch all agent policies that include one of the eligible package policies
           kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.package_policies:${packagePolicyIds
@@ -144,6 +144,16 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
   }, []);
 
   const navigateToNewSettingsPage = useCallback(() => {
+    // only navigate if still on old settings page (user has not navigated away)
+    if (
+      !history.location.pathname.match(
+        getPath('integration_details_settings', {
+          pkgkey: `${name}-.*`,
+        })
+      )
+    ) {
+      return;
+    }
     const settingsPath = getPath('integration_details_settings', {
       pkgkey: `${name}-${version}`,
     });

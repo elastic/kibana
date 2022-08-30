@@ -13,20 +13,23 @@ import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { CoreSetup, CoreStart, IUiSettingsClient } from '@kbn/core/public';
 import { EventAnnotationPluginSetup } from '@kbn/event-annotation-plugin/public';
+import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { ExpressionXyPluginSetup, ExpressionXyPluginStart, SetupDeps } from './types';
 import {
   xyVisFunction,
+  layeredXyVisFunction,
+  extendedDataLayerFunction,
+  dataDecorationConfigFunction,
+  xAxisConfigFunction,
   yAxisConfigFunction,
   legendConfigFunction,
-  gridlinesConfigFunction,
-  dataLayerConfigFunction,
   axisExtentConfigFunction,
-  tickLabelsConfigFunction,
-  annotationLayerConfigFunction,
-  labelsOrientationConfigFunction,
-  referenceLineLayerConfigFunction,
-  axisTitlesVisibilityConfigFunction,
-} from '../common';
+  referenceLineFunction,
+  referenceLineLayerFunction,
+  annotationLayerFunction,
+  extendedAnnotationLayerFunction,
+  referenceLineDecorationConfigFunction,
+} from '../common/expression_functions';
 import { GetStartDepsFn, getXyChartRenderer } from './expression_renderers';
 
 export interface XYPluginStartDependencies {
@@ -34,6 +37,7 @@ export interface XYPluginStartDependencies {
   fieldFormats: FieldFormatsStart;
   charts: ChartsPluginStart;
   eventAnnotation: EventAnnotationPluginSetup;
+  usageCollection?: UsageCollectionStart;
 }
 
 export function getTimeZone(uiSettings: IUiSettingsClient) {
@@ -51,21 +55,24 @@ export class ExpressionXyPlugin {
     { expressions, charts }: SetupDeps
   ): ExpressionXyPluginSetup {
     expressions.registerFunction(yAxisConfigFunction);
+    expressions.registerFunction(dataDecorationConfigFunction);
+    expressions.registerFunction(referenceLineDecorationConfigFunction);
     expressions.registerFunction(legendConfigFunction);
-    expressions.registerFunction(gridlinesConfigFunction);
-    expressions.registerFunction(dataLayerConfigFunction);
+    expressions.registerFunction(extendedDataLayerFunction);
     expressions.registerFunction(axisExtentConfigFunction);
-    expressions.registerFunction(tickLabelsConfigFunction);
-    expressions.registerFunction(annotationLayerConfigFunction);
-    expressions.registerFunction(labelsOrientationConfigFunction);
-    expressions.registerFunction(referenceLineLayerConfigFunction);
-    expressions.registerFunction(axisTitlesVisibilityConfigFunction);
+    expressions.registerFunction(xAxisConfigFunction);
+    expressions.registerFunction(annotationLayerFunction);
+    expressions.registerFunction(extendedAnnotationLayerFunction);
+    expressions.registerFunction(referenceLineFunction);
+    expressions.registerFunction(referenceLineLayerFunction);
     expressions.registerFunction(xyVisFunction);
+    expressions.registerFunction(layeredXyVisFunction);
 
     const getStartDeps: GetStartDepsFn = async () => {
       const [coreStart, deps] = await core.getStartServices();
       const {
         data,
+        usageCollection,
         fieldFormats,
         eventAnnotation,
         charts: { activeCursor, theme, palettes },
@@ -82,6 +89,7 @@ export class ExpressionXyPlugin {
         formatFactory: fieldFormats.deserialize,
         kibanaTheme,
         theme,
+        usageCollection,
         activeCursor,
         paletteService,
         useLegacyTimeAxis,

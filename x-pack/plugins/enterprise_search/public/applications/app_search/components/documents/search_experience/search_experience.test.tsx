@@ -12,7 +12,6 @@ import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
-// @ts-expect-error types are not available for this package yet
 import { SearchProvider, Facet } from '@elastic/react-search-ui';
 
 jest.mock('../../../../shared/use_local_storage', () => ({

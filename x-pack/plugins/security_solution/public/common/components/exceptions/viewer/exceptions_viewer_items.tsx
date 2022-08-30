@@ -6,13 +6,12 @@
  */
 
 import React from 'react';
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import * as i18n from '../translations';
-import { ExceptionItem } from './exception_item';
-import { AndOrBadge } from '../../and_or_badge';
+import { ExceptionItemCard } from './exception_item_card';
 import type { ExceptionListItemIdentifiers } from '../types';
 
 const MyFlexItem = styled(EuiFlexItem)`
@@ -21,11 +20,6 @@ const MyFlexItem = styled(EuiFlexItem)`
   &:first-child {
     margin: ${({ theme }) => `${theme.eui.euiSizeXS} 0 ${theme.eui.euiSize}`};
   }
-`;
-
-const MyExceptionsContainer = styled(EuiFlexGroup)`
-  height: 600px;
-  overflow: hidden;
 `;
 
 const MyExceptionItemContainer = styled(EuiFlexGroup)`
@@ -39,7 +33,6 @@ interface ExceptionsViewerItemsProps {
   disableActions: boolean;
   exceptions: ExceptionListItemSchema[];
   loadingItemIds: ExceptionListItemIdentifiers[];
-  commentsAccordionId: string;
   onDeleteException: (arg: ExceptionListItemIdentifiers) => void;
   onEditExceptionItem: (item: ExceptionListItemSchema) => void;
 }
@@ -50,12 +43,11 @@ const ExceptionsViewerItemsComponent: React.FC<ExceptionsViewerItemsProps> = ({
   isInitLoading,
   exceptions,
   loadingItemIds,
-  commentsAccordionId,
   onDeleteException,
   onEditExceptionItem,
   disableActions,
 }): JSX.Element => (
-  <MyExceptionsContainer direction="column" className="eui-yScrollWithShadows">
+  <EuiFlexGroup direction="column" className="eui-yScrollWithShadows">
     {showEmpty || showNoResults || isInitLoading ? (
       <EuiFlexItem grow={1}>
         <EuiEmptyPrompt
@@ -84,30 +76,22 @@ const ExceptionsViewerItemsComponent: React.FC<ExceptionsViewerItemsProps> = ({
         >
           {!isInitLoading &&
             exceptions.length > 0 &&
-            exceptions.map((exception, index) => (
+            exceptions.map((exception) => (
               <MyFlexItem data-test-subj="exceptionItemContainer" grow={false} key={exception.id}>
-                {index !== 0 ? (
-                  <>
-                    <AndOrBadge data-test-subj="exceptionItemOrBadge" type="or" />
-                    <EuiSpacer />
-                  </>
-                ) : (
-                  <EuiSpacer size="s" />
-                )}
-                <ExceptionItem
+                <ExceptionItemCard
                   disableActions={disableActions}
                   loadingItemIds={loadingItemIds}
-                  commentsAccordionId={commentsAccordionId}
                   exceptionItem={exception}
                   onDeleteException={onDeleteException}
                   onEditException={onEditExceptionItem}
+                  dataTestSubj={`exceptionItemCard-${exception.name}`}
                 />
               </MyFlexItem>
             ))}
         </MyExceptionItemContainer>
       </EuiFlexItem>
     )}
-  </MyExceptionsContainer>
+  </EuiFlexGroup>
 );
 
 ExceptionsViewerItemsComponent.displayName = 'ExceptionsViewerItemsComponent';

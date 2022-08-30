@@ -57,6 +57,7 @@ describe('BasicAuthenticationProvider', () => {
       ).resolves.toEqual(
         AuthenticationResult.succeeded(user, {
           authHeaders: { authorization },
+          userProfileGrant: { type: 'password', username: 'user', password: 'password' },
           state: { authorization },
         })
       );

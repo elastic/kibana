@@ -23,12 +23,12 @@ const errorDetailsPageHref = url.format({
 
 describe('Error details', () => {
   beforeEach(() => {
-    cy.loginAsReadOnlyUser();
+    cy.loginAsViewerUser();
   });
 
   describe('when data is loaded', () => {
-    before(async () => {
-      await synthtrace.index(
+    before(() => {
+      synthtrace.index(
         generateData({
           from: new Date(start).getTime(),
           to: new Date(end).getTime(),
@@ -36,12 +36,12 @@ describe('Error details', () => {
       );
     });
 
-    after(async () => {
-      await synthtrace.clean();
+    after(() => {
+      synthtrace.clean();
     });
 
     it('has no detectable a11y violations on load', () => {
-      cy.visit(errorDetailsPageHref);
+      cy.visitKibana(errorDetailsPageHref);
       cy.contains('Error group 00000');
       // set skipFailures to true to not fail the test when there are accessibility failures
       checkA11y({ skipFailures: true });
@@ -49,7 +49,7 @@ describe('Error details', () => {
 
     describe('when error has no occurrences', () => {
       it('shows an empty message', () => {
-        cy.visit(
+        cy.visitKibana(
           url.format({
             pathname:
               '/app/apm/services/opbeans-java/errors/0000000000000000000000000Error%201',
@@ -66,20 +66,29 @@ describe('Error details', () => {
 
     describe('when error has data', () => {
       it('shows errors distribution chart', () => {
-        cy.visit(errorDetailsPageHref);
+        cy.visitKibana(errorDetailsPageHref);
         cy.contains('Error group 00000');
         cy.get('[data-test-subj="errorDistribution"]').contains('Occurrences');
       });
 
+      it('shows top erroneous transactions table', () => {
+        cy.visitKibana(errorDetailsPageHref);
+        cy.contains('Top 5 affected transactions');
+        cy.get('[data-test-subj="topErroneousTransactionsTable"]')
+          .contains('a', 'GET /apple 🍎')
+          .click();
+        cy.url().should('include', 'opbeans-java/transactions/view');
+      });
+
       it('shows a Stacktrace and Metadata tabs', () => {
-        cy.visit(errorDetailsPageHref);
+        cy.visitKibana(errorDetailsPageHref);
         cy.contains('button', 'Exception stack trace');
         cy.contains('button', 'Metadata');
       });
 
       describe('when clicking on related transaction sample', () => {
         it('should redirects to the transaction details page', () => {
-          cy.visit(errorDetailsPageHref);
+          cy.visitKibana(errorDetailsPageHref);
           cy.contains('Error group 00000');
           cy.contains('a', 'GET /apple 🍎').click();
           cy.url().should('include', 'opbeans-java/transactions/view');
@@ -87,9 +96,9 @@ describe('Error details', () => {
       });
 
       describe('when clicking on View x occurences in discover', () => {
-        it('should redirects the user to discover', () => {
-          cy.visit(errorDetailsPageHref);
-          cy.contains('View 1 occurrence in Discover.').click();
+        it.skip('should redirects the user to discover', () => {
+          cy.visitKibana(errorDetailsPageHref);
+          cy.contains('View 1 occurrence in Discover').click();
           cy.url().should('include', 'app/discover');
         });
       });

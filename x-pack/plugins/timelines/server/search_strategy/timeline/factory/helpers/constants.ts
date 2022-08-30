@@ -6,9 +6,7 @@
  */
 
 import { ALERT_RULE_CONSUMER, ALERT_RISK_SCORE, ALERT_SEVERITY } from '@kbn/rule-data-utils';
-
-// TODO: share with security_solution/common/cti/constants.ts
-export const ENRICHMENT_DESTINATION_PATH = 'threat.enrichments';
+import { ENRICHMENT_DESTINATION_PATH } from '../../../../../common/constants';
 
 export const MATCHED_ATOMIC = 'matched.atomic';
 export const MATCHED_FIELD = 'matched.field';
@@ -94,6 +92,7 @@ export const TIMELINE_EVENTS_FIELDS = [
   'event.timezone',
   'event.type',
   'agent.type',
+  'agent.id',
   'auditd.result',
   'auditd.session',
   'auditd.data.acct',
@@ -131,6 +130,7 @@ export const TIMELINE_EVENTS_FIELDS = [
   'file.Ext.code_signature.trusted',
   'file.hash.sha256',
   'host.os.family',
+  'host.os.name',
   'host.id',
   'host.ip',
   'registry.key',

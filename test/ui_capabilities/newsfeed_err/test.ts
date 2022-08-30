@@ -15,8 +15,6 @@ export default function uiCapabilitiesTests({ getService, getPageObjects }: FtrP
   const PageObjects = getPageObjects(['common', 'newsfeed']);
 
   describe('Newsfeed icon button handle errors', function () {
-    this.tags('ciGroup5');
-
     before(async () => {
       await PageObjects.newsfeed.resetPage();
     });

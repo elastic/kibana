@@ -25,9 +25,9 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { DataView } from '@kbn/data-views-plugin/public';
+import { stringHash } from '@kbn/ml-string-hash';
 import { extractErrorMessage } from '../../../../common';
 import { isRuntimeMappings } from '../../../../common/util/runtime_field_utils';
-import { stringHash } from '../../../../common/util/string_utils';
 import { RuntimeMappings } from '../../../../common/types/fields';
 import type { ResultsSearchQuery } from '../../data_frame_analytics/common/analytics';
 import { getCombinedRuntimeMappings } from '../data_grid';

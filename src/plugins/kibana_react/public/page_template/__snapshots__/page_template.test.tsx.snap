@@ -22,7 +22,7 @@ exports[`KibanaPageTemplate render basic template 1`] = `
             class="euiFlexItem"
           >
             <div
-              class="euiText euiText--medium euiText--constrainedWidth"
+              class="euiText emotion-euiText-constrainedWidth-m"
             >
               <p>
                 test
@@ -46,7 +46,7 @@ exports[`KibanaPageTemplate render basic template 1`] = `
       </div>
     </header>
     <div
-      class="euiPanel euiPanel--borderRadiusNone euiPanel--plain euiPanel--noShadow euiPageContent euiPageContent--borderRadiusNone"
+      class="euiPanel euiPanel--plain euiPageContent euiPageContent--borderRadiusNone emotion-euiPanel-grow-none-plain"
       role="main"
     >
       <div
@@ -192,9 +192,197 @@ exports[`KibanaPageTemplate render solutionNav 1`] = `
 >
   <div
     class="euiPageSideBar euiPageSideBar--sticky kbnPageTemplate__pageSideBar"
-  />
+  >
+    <nav
+      aria-hidden="false"
+      aria-labelledby="euiSideNav_generated-id_heading"
+      class="euiSideNav kbnPageTemplateSolutionNav"
+    >
+      <h2
+        class="euiTitle euiSideNav__heading emotion-euiTitle-xs"
+        id="euiSideNav_generated-id_heading"
+      >
+        <div
+          aria-label="Solution"
+          class="euiAvatar euiAvatar--m euiAvatar--user kbnPageTemplateSolutionNavAvatar emotion-euiAvatar-m-user-plain"
+          role="img"
+          title="Solution"
+        >
+          <span
+            class="euiAvatar__icon"
+            data-euiicon-type="solution"
+          />
+        </div>
+        <strong>
+          Solution
+        </strong>
+      </h2>
+      <div
+        class="euiSideNav__content euiSideNav__contentMobile-xs euiSideNav__contentMobile-s"
+        id="euiSideNav_generated-id_content"
+      >
+        <div
+          class="euiSideNavItem euiSideNavItem--root euiSideNavItem--hasChildItems"
+        >
+          <div
+            class="euiSideNavItemButton"
+          >
+            <span
+              class="euiSideNavItemButton__content"
+            >
+              <span
+                class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
+              >
+                Ingest
+              </span>
+            </span>
+          </div>
+          <div
+            class="euiSideNavItem__items"
+          >
+            <div
+              class="euiSideNavItem euiSideNavItem--trunk"
+            >
+              <div
+                class="euiSideNavItemButton"
+              >
+                <span
+                  class="euiSideNavItemButton__content"
+                >
+                  <span
+                    class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
+                  >
+                    Ingest Node Pipelines
+                  </span>
+                </span>
+              </div>
+            </div>
+            <div
+              class="euiSideNavItem euiSideNavItem--trunk"
+            >
+              <div
+                class="euiSideNavItemButton"
+              >
+                <span
+                  class="euiSideNavItemButton__content"
+                >
+                  <span
+                    class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
+                  >
+                    Logstash Pipelines
+                  </span>
+                </span>
+              </div>
+            </div>
+            <div
+              class="euiSideNavItem euiSideNavItem--trunk"
+            >
+              <div
+                class="euiSideNavItemButton"
+              >
+                <span
+                  class="euiSideNavItemButton__content"
+                >
+                  <span
+                    class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
+                  >
+                    Beats Central Management
+                  </span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="euiSideNavItem euiSideNavItem--root euiSideNavItem--hasChildItems"
+        >
+          <div
+            class="euiSideNavItemButton"
+          >
+            <span
+              class="euiSideNavItemButton__content"
+            >
+              <span
+                class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
+              >
+                Data
+              </span>
+            </span>
+          </div>
+          <div
+            class="euiSideNavItem__items"
+          >
+            <div
+              class="euiSideNavItem euiSideNavItem--trunk"
+            >
+              <div
+                class="euiSideNavItemButton"
+              >
+                <span
+                  class="euiSideNavItemButton__content"
+                >
+                  <span
+                    class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
+                  >
+                    Index Management
+                  </span>
+                </span>
+              </div>
+            </div>
+            <div
+              class="euiSideNavItem euiSideNavItem--trunk"
+            >
+              <div
+                class="euiSideNavItemButton"
+              >
+                <span
+                  class="euiSideNavItemButton__content"
+                >
+                  <span
+                    class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
+                  >
+                    Index Lifecycle Policies
+                  </span>
+                </span>
+              </div>
+            </div>
+            <div
+              class="euiSideNavItem euiSideNavItem--trunk"
+            >
+              <div
+                class="euiSideNavItemButton"
+              >
+                <span
+                  class="euiSideNavItemButton__content"
+                >
+                  <span
+                    class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
+                  >
+                    Snapshot and Restore
+                  </span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+    <button
+      aria-label="Collapse side navigation"
+      class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--small kbnPageTemplateSolutionNavCollapseButton"
+      title="Collapse side navigation"
+      type="button"
+    >
+      <span
+        aria-hidden="true"
+        class="euiButtonIcon__icon"
+        color="inherit"
+        data-euiicon-type="menuLeft"
+      />
+    </button>
+  </div>
   <div
-    class="euiPanel euiPanel--borderRadiusNone euiPanel--plain euiPanel--hasShadow euiPageBody euiPageBody--borderRadiusNone"
+    class="euiPanel euiPanel--plain euiPageBody euiPageBody--borderRadiusNone emotion-euiPanel-grow-none-plain-hasShadow"
   >
     <div
       class="euiPageBody euiPageBody--borderRadiusNone euiPageBody--paddingLarge"
@@ -213,7 +401,7 @@ exports[`KibanaPageTemplate render solutionNav 1`] = `
               class="euiFlexItem"
             >
               <div
-                class="euiText euiText--medium euiText--constrainedWidth"
+                class="euiText emotion-euiText-constrainedWidth-m"
               >
                 <p>
                   test
@@ -237,7 +425,7 @@ exports[`KibanaPageTemplate render solutionNav 1`] = `
         </div>
       </header>
       <div
-        class="euiPanel euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiPageContent euiPageContent--borderRadiusNone"
+        class="euiPanel euiPanel--transparent euiPageContent euiPageContent--borderRadiusNone emotion-euiPanel-grow-none-transparent"
         role="main"
       >
         <div

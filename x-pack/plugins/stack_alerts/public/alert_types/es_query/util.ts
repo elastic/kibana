@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import { EsQueryAlertParams, SearchType } from './types';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { EsQueryAlertParams, SearchType, TriggersAndActionsUiDeps } from './types';
 
 export const isSearchSourceAlert = (
   ruleParams: EsQueryAlertParams
 ): ruleParams is EsQueryAlertParams<SearchType.searchSource> => {
   return ruleParams.searchType === 'searchSource';
 };
+
+export const useTriggersAndActionsUiDeps = () => useKibana<TriggersAndActionsUiDeps>().services;

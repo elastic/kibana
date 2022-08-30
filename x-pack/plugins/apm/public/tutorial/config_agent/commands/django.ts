@@ -31,7 +31,7 @@ ELASTIC_APM = {
     defaultMessage: 'a-z, A-Z, 0-9, -, _, and space',
   }
 )}
-'SERVICE_NAME': '',
+#'SERVICE_NAME': 'unknown-python-service',
 
 # ${i18n.translate(
   'xpack.apm.tutorial.djangoClient.configure.commands.useIfApmServerRequiresTokenComment',

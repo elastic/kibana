@@ -59,7 +59,7 @@ export const useHostIsolationStatus = ({
           return;
         }
 
-        if (isMounted && error.body.statusCode === 404) {
+        if (isMounted && error.body.statusCode === 400) {
           setAgentStatus(HostStatus.UNENROLLED);
         }
       }

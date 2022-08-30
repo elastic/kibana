@@ -227,7 +227,7 @@ export const AnomaliesMap: FC<Props> = ({ anomalies, jobIds }) => {
           id="mlAnomalyExplorerAnomaliesMapAccordionId"
           initialIsOpen={true}
           buttonContent={
-            <EuiTitle className="panel-title">
+            <EuiTitle size={'xs'}>
               <h2>
                 <FormattedMessage
                   id="xpack.ml.explorer.mapTitle"

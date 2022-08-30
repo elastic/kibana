@@ -98,6 +98,7 @@ export interface IVectorLayer extends ILayer {
   hasJoins(): boolean;
   showJoinEditor(): boolean;
   canShowTooltip(): boolean;
+  areTooltipsDisabled(): boolean;
   supportsFeatureEditing(): boolean;
   getLeftJoinFields(): Promise<IField[]>;
   addFeature(geometry: Geometry | Position[]): Promise<void>;
@@ -115,6 +116,7 @@ export const NO_RESULTS_ICON_AND_TOOLTIPCONTENT = {
 export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
   protected readonly _style: VectorStyle;
   private readonly _joins: InnerJoin[];
+  protected readonly _descriptor: VectorLayerDescriptor;
 
   static createDescriptor(
     options: Partial<VectorLayerDescriptor>,
@@ -132,6 +134,8 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
       layerDescriptor.joins = [];
     }
 
+    layerDescriptor.disableTooltips = options.disableTooltips ?? false;
+
     return layerDescriptor;
   }
 
@@ -147,6 +151,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
       source,
     });
     this._joins = joins;
+    this._descriptor = AbstractVectorLayer.createDescriptor(layerDescriptor);
     this._style = new VectorStyle(
       layerDescriptor.style,
       source,
@@ -226,15 +231,6 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
 
   getCurrentStyle(): VectorStyle {
     return this._style;
-  }
-
-  destroy() {
-    if (this.getSource()) {
-      this.getSource().destroy();
-    }
-    this.getJoins().forEach((joinSource) => {
-      joinSource.destroy();
-    });
   }
 
   getJoins() {
@@ -421,6 +417,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     stopLoading,
     onLoadError,
     registerCancelCallback,
+    inspectorAdapters,
   }: {
     dataRequestId: string;
     dynamicStyleProps: Array<IDynamicStyleProperty<DynamicStylePropertyOptions>>;
@@ -462,6 +459,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
         sourceQuery: nextMeta.sourceQuery,
         timeFilters: nextMeta.timeFilters,
         searchSessionId: dataFilters.searchSessionId,
+        inspectorAdapters,
       });
 
       stopLoading(dataRequestId, requestToken, styleMeta, nextMeta);
@@ -551,6 +549,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     dataFilters,
     isForceRefresh,
     isFeatureEditorOpenForLayer,
+    inspectorAdapters,
   }: { join: InnerJoin } & DataRequestContext): Promise<JoinState> {
     const joinSource = join.getRightJoinSource();
     const sourceDataId = join.getSourceDataRequestId();
@@ -591,7 +590,8 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
         joinRequestMeta,
         leftSourceName,
         join.getLeftField().getName(),
-        registerCancelCallback.bind(null, requestToken)
+        registerCancelCallback.bind(null, requestToken),
+        inspectorAdapters
       );
       stopLoading(sourceDataId, requestToken, propertiesMap);
       return {
@@ -741,7 +741,10 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
       }
     }
 
+    const isSourceGeoJson = !this.getSource().isMvt();
     const filterExpr = getPointFilterExpression(
+      isSourceGeoJson,
+      this.getSource().isESSource(),
       this._getJoinFilterExpression(),
       timesliceMaskConfig
     );
@@ -848,6 +851,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     const isSourceGeoJson = !this.getSource().isMvt();
     const filterExpr = getLabelFilterExpression(
       isSourceGeoJson,
+      this.getSource().isESSource(),
       this._getJoinFilterExpression(),
       timesliceMaskConfig
     );
@@ -862,7 +866,6 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     });
 
     this.syncVisibilityWithMb(mbMap, labelLayerId);
-    mbMap.setLayerZoomRange(labelLayerId, this.getMinZoom(), this.getMaxZoom());
   }
 
   _getMbPointLayerId() {
@@ -934,8 +937,21 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     return allProperties;
   }
 
+  /**
+   * Check if there are any properties we can display in a tooltip. If `false` the "Show tooltips" switch
+   * is disabled in Layer settings.
+   * @returns {boolean}
+   */
   canShowTooltip() {
     return this.getSource().hasTooltipProperties() || this.getJoins().length > 0;
+  }
+
+  /**
+   * Users can toggle tooltips on hover or click in the Layer settings. Tooltips are enabled by default.
+   * @returns {boolean}
+   */
+  areTooltipsDisabled(): boolean {
+    return this._descriptor.disableTooltips ?? false;
   }
 
   getFeatureId(feature: Feature): string | number | undefined {

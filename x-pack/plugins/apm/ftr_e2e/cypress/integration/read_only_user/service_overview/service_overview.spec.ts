@@ -86,8 +86,8 @@ const aliasNamesWithComparison = apiRequestsToInterceptWithComparison.map(
 const aliasNames = [...aliasNamesNoComparison, ...aliasNamesWithComparison];
 
 describe('Service Overview', () => {
-  before(async () => {
-    await synthtrace.index(
+  before(() => {
+    synthtrace.index(
       opbeans({
         from: new Date(start).getTime(),
         to: new Date(end).getTime(),
@@ -95,14 +95,14 @@ describe('Service Overview', () => {
     );
   });
 
-  after(async () => {
-    await synthtrace.clean();
+  after(() => {
+    synthtrace.clean();
   });
 
   describe('renders', () => {
-    before(() => {
-      cy.loginAsReadOnlyUser();
-      cy.visit(baseUrl);
+    beforeEach(() => {
+      cy.loginAsViewerUser();
+      cy.visitKibana(baseUrl);
     });
 
     it('renders all components on the page', () => {
@@ -121,8 +121,7 @@ describe('Service Overview', () => {
 
   describe('transactions', () => {
     beforeEach(() => {
-      cy.loginAsReadOnlyUser();
-      cy.visit(baseUrl);
+      cy.loginAsViewerUser();
     });
 
     it('persists transaction type selected when clicking on Transactions tab', () => {
@@ -130,6 +129,9 @@ describe('Service Overview', () => {
         'GET',
         '/internal/apm/services/opbeans-node/transaction_types?*'
       ).as('transactionTypesRequest');
+
+      cy.visitKibana(baseUrl);
+
       cy.wait('@transactionTypesRequest');
 
       cy.get('[data-test-subj="headerFilterTransactionType"]').should(
@@ -153,6 +155,9 @@ describe('Service Overview', () => {
         'GET',
         '/internal/apm/services/opbeans-node/transaction_types?*'
       ).as('transactionTypesRequest');
+
+      cy.visitKibana(baseUrl);
+
       cy.wait('@transactionTypesRequest');
       cy.get('[data-test-subj="headerFilterTransactionType"]').should(
         'have.value',
@@ -173,20 +178,20 @@ describe('Service Overview', () => {
   });
 
   describe('when RUM service', () => {
-    before(() => {
-      cy.loginAsReadOnlyUser();
-      cy.visit(
+    it('hides dependency tab when RUM service', () => {
+      cy.loginAsViewerUser();
+
+      cy.intercept('GET', '/internal/apm/services/opbeans-rum/agent?*').as(
+        'agentRequest'
+      );
+
+      cy.visitKibana(
         url.format({
           pathname: '/app/apm/services/opbeans-rum/overview',
           query: { rangeFrom: start, rangeTo: end },
         })
       );
-    });
 
-    it('hides dependency tab when RUM service', () => {
-      cy.intercept('GET', '/internal/apm/services/opbeans-rum/agent?*').as(
-        'agentRequest'
-      );
       cy.contains('Overview');
       cy.contains('Transactions');
       cy.contains('Error');
@@ -203,31 +208,36 @@ describe('Service Overview', () => {
 
   describe('Calls APIs', () => {
     beforeEach(() => {
-      cy.loginAsReadOnlyUser();
-      cy.visit(baseUrl);
+      cy.loginAsViewerUser();
+
       apiRequestsToIntercept.map(({ endpoint, aliasName }) => {
         cy.intercept('GET', endpoint).as(aliasName);
       });
       apiRequestsToInterceptWithComparison.map(({ endpoint, aliasName }) => {
         cy.intercept('GET', endpoint).as(aliasName);
       });
+      cy.visitKibana(baseUrl);
     });
 
-    it('with the correct environment when changing the environment', () => {
-      cy.wait(aliasNames, { requestTimeout: 10000 });
+    it.skip('with the correct environment when changing the environment', () => {
+      cy.wait(aliasNames);
 
       cy.intercept('GET', 'internal/apm/suggestions?*').as(
         'suggestionsRequest'
       );
 
-      cy.get('[data-test-subj="environmentFilter"]').type('pro').click();
+      cy.get('[data-test-subj="environmentFilter"]').type('production');
 
       cy.expectAPIsToHaveBeenCalledWith({
         apisIntercepted: ['@suggestionsRequest'],
-        value: 'fieldValue=pro',
+        value: 'fieldValue=production',
       });
 
-      cy.contains('button', 'production').click();
+      cy.get(
+        '[data-test-subj="comboBoxOptionsList environmentFilter-optionsList"]'
+      )
+        .contains('production')
+        .click({ force: true });
 
       cy.expectAPIsToHaveBeenCalledWith({
         apisIntercepted: aliasNames,
@@ -237,11 +247,11 @@ describe('Service Overview', () => {
 
     it('when clicking the refresh button', () => {
       cy.contains('Refresh').click();
-      cy.wait(aliasNames, { requestTimeout: 10000 });
+      cy.wait(aliasNames);
     });
 
-    it('when selecting a different time range and clicking the update button', () => {
-      cy.wait(aliasNames, { requestTimeout: 10000 });
+    it.skip('when selecting a different time range and clicking the update button', () => {
+      cy.wait(aliasNames);
 
       const timeStart = moment(start).subtract(5, 'm').toISOString();
       const timeEnd = moment(end).subtract(5, 'm').toISOString();

@@ -9,9 +9,7 @@
 export default function ({ getService, loadTestFile }) {
   const browser = getService('browser');
 
-  describe('homepage app', function () {
-    this.tags('ciGroup5');
-
+  describe('home app', function () {
     before(function () {
       return browser.setWindowSize(1200, 800);
     });

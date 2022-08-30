@@ -55,7 +55,7 @@
         ],
         "signature": [
           "(iterable: ",
-          "IterableInput",
+          "ObservableInput",
           "<T>, fn: ",
           "AsyncMapFn",
           "<T, any>) => Promise<void>"
@@ -73,7 +73,7 @@
               "Items to iterate"
             ],
             "signature": [
-              "IterableInput",
+              "ObservableInput",
               "<T>"
             ],
             "path": "packages/kbn-std/src/iteration/for_each.ts",
@@ -112,7 +112,7 @@
         ],
         "signature": [
           "(iterable: ",
-          "IterableInput",
+          "ObservableInput",
           "<T>, limit: number, fn: ",
           "AsyncMapFn",
           "<T, any>) => Promise<void>"
@@ -130,7 +130,7 @@
               "Items to iterate"
             ],
             "signature": [
-              "IterableInput",
+              "ObservableInput",
               "<T>"
             ],
             "path": "packages/kbn-std/src/iteration/for_each.ts",
@@ -185,7 +185,7 @@
         ],
         "signature": [
           "(iterable: ",
-          "IterableInput",
+          "ObservableInput",
           "<T1>, fn: ",
           "AsyncMapFn",
           "<T1, T2>) => Promise<T2[]>"
@@ -203,7 +203,7 @@
               "Items to iterate"
             ],
             "signature": [
-              "IterableInput",
+              "ObservableInput",
               "<T1>"
             ],
             "path": "packages/kbn-std/src/iteration/map.ts",
@@ -242,7 +242,7 @@
         ],
         "signature": [
           "(iterable: ",
-          "IterableInput",
+          "ObservableInput",
           "<T1>, limit: number, fn: ",
           "AsyncMapFn",
           "<T1, T2>) => Promise<T2[]>"
@@ -260,7 +260,7 @@
               "Items to iterate"
             ],
             "signature": [
-              "IterableInput",
+              "ObservableInput",
               "<T1>"
             ],
             "path": "packages/kbn-std/src/iteration/map.ts",
@@ -363,40 +363,6 @@
               "any"
             ],
             "path": "packages/kbn-std/src/ensure_no_unsafe_properties.ts",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/std",
-        "id": "def-server.firstValueFrom",
-        "type": "Function",
-        "tags": [],
-        "label": "firstValueFrom",
-        "description": [],
-        "signature": [
-          "(source: ",
-          "Observable",
-          "<T>) => Promise<T>"
-        ],
-        "path": "packages/kbn-std/src/rxjs_7.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/std",
-            "id": "def-server.firstValueFrom.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "source",
-            "description": [],
-            "signature": [
-              "Observable",
-              "<T>"
-            ],
-            "path": "packages/kbn-std/src/rxjs_7.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -808,40 +774,6 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.lastValueFrom",
-        "type": "Function",
-        "tags": [],
-        "label": "lastValueFrom",
-        "description": [],
-        "signature": [
-          "(source: ",
-          "Observable",
-          "<T>) => Promise<T>"
-        ],
-        "path": "packages/kbn-std/src/rxjs_7.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/std",
-            "id": "def-server.lastValueFrom.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "source",
-            "description": [],
-            "signature": [
-              "Observable",
-              "<T>"
-            ],
-            "path": "packages/kbn-std/src/rxjs_7.ts",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/std",
         "id": "def-server.map$",
         "type": "Function",
         "tags": [],
@@ -851,7 +783,7 @@
         ],
         "signature": [
           "(iterable: ",
-          "IterableInput",
+          "ObservableInput",
           "<T1>, fn: ",
           "AsyncMapFn",
           "<T1, T2>) => ",
@@ -871,7 +803,7 @@
               "Items to iterate"
             ],
             "signature": [
-              "IterableInput",
+              "ObservableInput",
               "<T1>"
             ],
             "path": "packages/kbn-std/src/iteration/observable.ts",
@@ -941,7 +873,7 @@
         ],
         "signature": [
           "(iterable: ",
-          "IterableInput",
+          "ObservableInput",
           "<T1>, limit: number, fn: ",
           "AsyncMapFn",
           "<T1, T2>) => ",
@@ -961,7 +893,7 @@
               "Items to iterate"
             ],
             "signature": [
-              "IterableInput",
+              "ObservableInput",
               "<T1>"
             ],
             "path": "packages/kbn-std/src/iteration/observable.ts",

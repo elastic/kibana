@@ -9,5 +9,13 @@ get:
           schema:
             $ref: ../components/schemas/get_agents_response.yaml
   operationId: get-agents
+  parameters:
+    - $ref: ../components/parameters/page_size.yaml
+    - $ref: ../components/parameters/page_index.yaml
+    - $ref: ../components/parameters/kuery.yaml
+    - $ref: ../components/parameters/show_inactive.yaml
+    - $ref: ../components/parameters/show_upgradeable.yaml
+    - $ref: ../components/parameters/sort_field.yaml
+    - $ref: ../components/parameters/sort_order.yaml
   security:
     - basicAuth: []

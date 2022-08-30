@@ -5,61 +5,74 @@
  * 2.0.
  */
 
-import { ColumnHeaderOptions, RowRendererId } from '../../../../common/types/timeline';
+import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
+import { RowRendererId } from '../../../../common/types/timeline';
 import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 import { DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
-import { SubsetTimelineModel } from '../../../timelines/store/timeline/model';
+import type { SubsetTimelineModel } from '../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
-
-// Using @timestamp as an way of getting the end time of the process. (Currently endpoint doesn't populate process.end)
-// @timestamp of an event.action with value of "end" is what we consider that to be the end time of the process
-// Current action are: 'start', 'exec', 'end', so we might have up to three events per process.
-export const MAPPED_PROCESS_END_COLUMN = '@timestamp';
+import {
+  COLUMN_SESSION_START,
+  COLUMN_EXECUTABLE,
+  COLUMN_ENTRY_USER,
+  COLUMN_INTERACTIVE,
+  COLUMN_HOST_NAME,
+  COLUMN_ENTRY_TYPE,
+  COLUMN_ENTRY_IP,
+} from './translations';
 
 export const sessionsHeaders: ColumnHeaderOptions[] = [
   {
     columnHeaderType: defaultColumnHeaderType,
-    id: 'process.start',
+    id: 'process.entry_leader.start',
     initialWidth: DEFAULT_DATE_COLUMN_MIN_WIDTH,
+    display: COLUMN_SESSION_START,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
-    id: MAPPED_PROCESS_END_COLUMN,
-    display: 'process.end',
+    id: 'process.entry_leader.executable',
+    display: COLUMN_EXECUTABLE,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
-    id: 'process.executable',
+    id: 'process.entry_leader.user.name',
+    display: COLUMN_ENTRY_USER,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
-    id: 'user.name',
-  },
-  {
-    columnHeaderType: defaultColumnHeaderType,
-    id: 'process.interactive',
-  },
-  {
-    columnHeaderType: defaultColumnHeaderType,
-    id: 'process.pid',
+    id: 'process.entry_leader.interactive',
+    display: COLUMN_INTERACTIVE,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'host.hostname',
+    display: COLUMN_HOST_NAME,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'process.entry_leader.entry_meta.type',
+    display: COLUMN_ENTRY_TYPE,
   },
   {
-    columnHeaderType: defaultColumnHeaderType,
     id: 'process.entry_leader.entry_meta.source.ip',
+    columnHeaderType: defaultColumnHeaderType,
+    display: COLUMN_ENTRY_IP,
   },
 ];
 
-export const sessionsDefaultModel: SubsetTimelineModel = {
+export const getSessionsDefaultModel = (
+  columns: ColumnHeaderOptions[],
+  defaultColumns: ColumnHeaderOptions[]
+): SubsetTimelineModel => ({
   ...timelineDefaults,
-  columns: sessionsHeaders,
-  defaultColumns: sessionsHeaders,
+  columns,
+  defaultColumns,
   excludedRowRendererIds: Object.values(RowRendererId),
-};
+  sort: [
+    {
+      columnId: 'process.entry_leader.start',
+      columnType: 'date',
+      sortDirection: 'desc',
+    },
+  ],
+});

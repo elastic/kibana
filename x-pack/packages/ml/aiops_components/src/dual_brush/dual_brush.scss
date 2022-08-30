@@ -1,0 +1,11 @@
+.aiops-dual-brush {
+  .handle {
+    fill: $euiColorDarkShade;
+  }
+
+  .brush .selection {
+    stroke: none;
+    fill: $euiColorDarkShade !important;
+    opacity: .5 !important;
+  }
+}

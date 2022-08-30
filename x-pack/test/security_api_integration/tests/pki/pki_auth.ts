@@ -72,9 +72,7 @@ export default function ({ getService }: FtrProviderContext) {
         .pfx(UNTRUSTED_CLIENT_CERT)
         .expect(401);
 
-      expect(unauthenticatedResponse.headers['content-security-policy']).to.be(
-        `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
-      );
+      expect(unauthenticatedResponse.headers['content-security-policy']).to.be.a('string');
       expect(unauthenticatedResponse.text).to.contain('We couldn&#x27;t log you in');
     });
 
@@ -157,6 +155,7 @@ export default function ({ getService }: FtrProviderContext) {
           lookup_realm: { name: 'pki1', type: 'pki' },
           authentication_provider: { name: 'pki', type: 'pki' },
           authentication_type: 'token',
+          elastic_cloud_user: false,
         });
     });
 
@@ -194,6 +193,7 @@ export default function ({ getService }: FtrProviderContext) {
           lookup_realm: { name: 'pki1', type: 'pki' },
           authentication_provider: { name: 'pki', type: 'pki' },
           authentication_type: 'realm',
+          elastic_cloud_user: false,
         });
 
       checkCookieIsSet(parseCookie(response.headers['set-cookie'][0])!);

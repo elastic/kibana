@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InfluencerInput } from '../types';
+import type { InfluencerInput } from '../types';
 import { influencersOrCriteriaToString, getThreshold } from './use_anomalies_table_data';
 
 describe('use_anomalies_table_data', () => {

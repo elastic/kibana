@@ -9,7 +9,7 @@
 # Build stage 0 `builder`:
 # Extract Kibana artifact
 ################################################################################
-FROM {{{baseOSImage}}} AS builder
+FROM {{{baseImageName}}} AS builder
 
 {{#ubi}}
 RUN {{packageManager}} install -y findutils tar gzip
@@ -54,7 +54,7 @@ RUN mkdir -p /opt/filebeat /opt/metricbeat && \
 # Copy kibana from stage 0
 # Add entrypoint
 ################################################################################
-FROM {{{baseOSImage}}}
+FROM {{{baseImageName}}}
 EXPOSE 5601
 
 {{#ubi}}
@@ -102,7 +102,7 @@ RUN set -e ; \
   chmod +x /bin/tini
 
 RUN mkdir /usr/share/fonts/local
-RUN curl -L -o /usr/share/fonts/local/NotoSansCJK-Regular.ttc https://github.com/googlefonts/noto-cjk/raw/NotoSansV2.001/NotoSansCJK-Regular.ttc
+RUN curl --retry 8 -S -L -o /usr/share/fonts/local/NotoSansCJK-Regular.ttc https://github.com/googlefonts/noto-cjk/raw/NotoSansV2.001/NotoSansCJK-Regular.ttc
 RUN echo "5dcd1c336cc9344cb77c03a0cd8982ca8a7dc97d620fd6c9c434e02dcb1ceeb3  /usr/share/fonts/local/NotoSansCJK-Regular.ttc" | sha256sum -c -
 RUN fc-cache -v
 

@@ -295,4 +295,92 @@ describe('Config Deprecations', () => {
       ]
     `);
   });
+
+  it(`warns that 'xpack.security.authc.providers.anonymous.<provider-name>.credentials.apiKey' is deprecated`, () => {
+    const config = {
+      xpack: {
+        security: {
+          authc: {
+            providers: {
+              anonymous: {
+                anonymous1: {
+                  credentials: {
+                    apiKey: 'VnVhQ2ZHY0JDZGJrUW0tZTVhT3g6dWkybHAyYXhUTm1zeWFrdzl0dk5udw==',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+    const { messages, configPaths } = applyConfigDeprecations(cloneDeep(config));
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "Support for apiKey is being removed from the 'anonymous' authentication provider. Use username and password credentials.",
+      ]
+    `);
+
+    expect(configPaths).toEqual([
+      'xpack.security.authc.providers.anonymous.anonymous1.credentials.apiKey',
+    ]);
+  });
+
+  it(`warns that 'xpack.security.authc.providers.anonymous.<provider-name>.credentials.apiKey' with id and key is deprecated`, () => {
+    const config = {
+      xpack: {
+        security: {
+          authc: {
+            providers: {
+              anonymous: {
+                anonymous1: {
+                  credentials: {
+                    apiKey: { id: 'VuaCfGcBCdbkQm-e5aOx', key: 'ui2lp2axTNmsyakw9tvNnw' },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+    const { messages, configPaths } = applyConfigDeprecations(cloneDeep(config));
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "Support for apiKey is being removed from the 'anonymous' authentication provider. Use username and password credentials.",
+      ]
+    `);
+
+    expect(configPaths).toEqual([
+      'xpack.security.authc.providers.anonymous.anonymous1.credentials.apiKey',
+    ]);
+  });
+
+  it(`warns that 'xpack.security.authc.providers.anonymous.<provider-name>.credentials' of 'elasticsearch_anonymous_user' is deprecated`, () => {
+    const config = {
+      xpack: {
+        security: {
+          authc: {
+            providers: {
+              anonymous: {
+                anonymous1: {
+                  credentials: 'elasticsearch_anonymous_user',
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+    const { messages, configPaths } = applyConfigDeprecations(cloneDeep(config));
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "Support for 'elasticsearch_anonymous_user' is being removed from the 'anonymous' authentication provider. Use username and password credentials.",
+      ]
+    `);
+
+    expect(configPaths).toEqual([
+      'xpack.security.authc.providers.anonymous.anonymous1.credentials',
+    ]);
+  });
 });

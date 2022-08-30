@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Mitre } from '../objects/rule';
+import type { Mitre } from '../objects/rule';
 
 export const formatMitreAttackDescription = (mitre: Mitre[]) => {
   return mitre

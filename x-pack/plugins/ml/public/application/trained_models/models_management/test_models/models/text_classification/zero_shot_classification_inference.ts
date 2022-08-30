@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 import { InferenceBase } from '../inference_base';
 import { processResponse } from './common';
@@ -12,20 +13,33 @@ import type { TextClassificationResponse, RawTextClassificationResponse } from '
 
 import { getZeroShotClassificationInput } from './zero_shot_classification_input';
 import { getTextClassificationOutputComponent } from './text_classification_output';
+import { SUPPORTED_PYTORCH_TASKS } from '../../../../../../../common/constants/trained_models';
 
 export class ZeroShotClassificationInference extends InferenceBase<TextClassificationResponse> {
+  protected inferenceType = SUPPORTED_PYTORCH_TASKS.ZERO_SHOT_CLASSIFICATION;
+  protected inferenceTypeLabel = i18n.translate(
+    'xpack.ml.trainedModels.testModelsFlyout.zeroShotClassification.label',
+    { defaultMessage: 'Zero shot classification' }
+  );
+  protected info = [
+    i18n.translate('xpack.ml.trainedModels.testModelsFlyout.zeroShotClassification.info1', {
+      defaultMessage:
+        'Provide a set of labels and test how well the model classifies your input text.',
+    }),
+  ];
+
   public labelsText$ = new BehaviorSubject<string>('');
 
   public async infer() {
     try {
       this.setRunning();
-      const inputText = this.inputText$.value;
+      const inputText = this.inputText$.getValue();
       const labelsText = this.labelsText$.value;
       const inputLabels = labelsText?.split(',').map((l) => l.trim());
       const payload = {
-        docs: { [this.inputField]: inputText },
+        docs: [{ [this.inputField]: inputText }],
         inference_config: {
-          zero_shot_classification: {
+          [this.inferenceType]: {
             labels: inputLabels,
             multi_label: false,
           },
@@ -53,7 +67,13 @@ export class ZeroShotClassificationInference extends InferenceBase<TextClassific
   }
 
   public getInputComponent(): JSX.Element {
-    return getZeroShotClassificationInput(this);
+    const placeholder = i18n.translate(
+      'xpack.ml.trainedModels.testModelsFlyout.zeroShotClassification.inputText',
+      {
+        defaultMessage: 'Enter a phrase to test',
+      }
+    );
+    return getZeroShotClassificationInput(this, placeholder);
   }
 
   public getOutputComponent(): JSX.Element {

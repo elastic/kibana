@@ -9,7 +9,7 @@ import { get } from 'lodash';
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { Fields } from '../../../../../../../common/search_strategy';
+import type { Fields } from '../../../../../../../common/search_strategy';
 import {
   MATCHED_ATOMIC,
   MATCHED_FIELD,

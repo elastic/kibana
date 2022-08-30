@@ -7,7 +7,7 @@
 import type { Filter } from '@kbn/es-query';
 import { Action } from '@kbn/ui-actions-plugin/public';
 import { EmbeddableContext, EmbeddableInput, IEmbeddable } from '@kbn/embeddable-plugin/public';
-import { Query, TimeRange } from '@kbn/data-plugin/public';
+import type { Query, TimeRange } from '@kbn/es-query';
 import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/public';
 import { KibanaLocation } from '@kbn/share-plugin/public';
 import * as shared from './shared';

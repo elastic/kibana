@@ -7,7 +7,7 @@
 
 import { Readable } from 'stream';
 import { createPromiseFromStreams } from '@kbn/utils';
-import { Action, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { Action, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import {
   getIdError,
@@ -22,15 +22,16 @@ import {
   migrateLegacyActionsIds,
 } from './utils';
 import { getRuleMock } from '../__mocks__/request_responses';
-import { PartialFilter } from '../../types';
-import { BulkError, createBulkErrorObject } from '../utils';
+import type { PartialFilter } from '../../types';
+import type { BulkError } from '../utils';
+import { createBulkErrorObject } from '../utils';
 import { getOutputRuleAlertForRest } from '../__mocks__/utils';
-import { PartialRule } from '@kbn/alerting-plugin/server';
+import type { PartialRule } from '@kbn/alerting-plugin/server';
 import { createRulesAndExceptionsStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
-import { RuleAlertType } from '../../rules/types';
-import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
+import type { RuleAlertType } from '../../rules/types';
+import type { ImportRulesSchema } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
 import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
-import { CreateRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request';
+import type { CreateRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request';
 import {
   getMlRuleParams,
   getQueryRuleParams,
@@ -40,13 +41,13 @@ import { internalRuleToAPIResponse } from '../../schemas/rule_converters';
 import { requestContextMock } from '../__mocks__';
 
 // eslint-disable-next-line no-restricted-imports
-import { LegacyRulesActionsSavedObject } from '../../rule_actions/legacy_get_rule_actions_saved_object';
+import type { LegacyRulesActionsSavedObject } from '../../rule_actions/legacy_get_rule_actions_saved_object';
 // eslint-disable-next-line no-restricted-imports
-import { LegacyRuleAlertAction } from '../../rule_actions/legacy_types';
-import { RuleExceptionsPromiseFromStreams } from './utils/import_rules_utils';
+import type { LegacyRuleAlertAction } from '../../rule_actions/legacy_types';
+import type { RuleExceptionsPromiseFromStreams } from './utils/import_rules_utils';
 import { partition } from 'lodash/fp';
 
-type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
+type PromiseFromStreams = ImportRulesSchema | Error;
 
 const createMockImportRule = async (rule: ReturnType<typeof getCreateRulesSchemaMock>) => {
   const ndJsonStream = new Readable({

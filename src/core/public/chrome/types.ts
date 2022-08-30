@@ -8,7 +8,7 @@
 
 import { EuiBreadcrumb, IconType } from '@elastic/eui';
 import { Observable } from 'rxjs';
-import { MountPoint } from '../types';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import { ChromeDocTitle } from './doc_title';
 import { ChromeNavControls } from './nav_controls';
 import { ChromeNavLinks, ChromeNavLink } from './nav_links';
@@ -36,6 +36,11 @@ export interface ChromeUserBanner {
 }
 
 /** @public */
+export interface ChromeHelpMenuActions {
+  hideHelpMenu: () => void;
+}
+
+/** @public */
 export interface ChromeHelpExtension {
   /**
    * Provide your plugin's name to create a header for separation
@@ -48,7 +53,7 @@ export interface ChromeHelpExtension {
   /**
    * Custom content to occur below the list of links
    */
-  content?: (element: HTMLDivElement) => () => void;
+  content?: (element: HTMLDivElement, menuActions: ChromeHelpMenuActions) => () => void;
 }
 
 /**

@@ -5,8 +5,9 @@
  * 2.0.
  */
 import React from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
 
+import { Route } from '@kbn/kibana-react-plugin/public';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import * as i18n from './translations';
 import { RULES_PATH, SecurityPageName } from '../../common/constants';
@@ -16,6 +17,7 @@ import { CreateRulePage } from '../detections/pages/detection_engine/rules/creat
 import { RuleDetailsPage } from '../detections/pages/detection_engine/rules/details';
 import { EditRulePage } from '../detections/pages/detection_engine/rules/edit';
 import { useReadonlyHeader } from '../use_readonly_header';
+import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 
 const RulesSubRoutes = [
   {
@@ -44,16 +46,22 @@ const RulesContainerComponent: React.FC = () => {
   useReadonlyHeader(i18n.READ_ONLY_BADGE_TOOLTIP);
 
   return (
-    <TrackApplicationView viewId={SecurityPageName.rules}>
-      <Switch>
-        {RulesSubRoutes.map((route, index) => (
-          <Route key={`rules-route-${route.path}`} path={route.path} exact={route?.exact ?? false}>
-            <route.main />
-          </Route>
-        ))}
-        <Route component={NotFoundPage} />
-      </Switch>
-    </TrackApplicationView>
+    <PluginTemplateWrapper>
+      <TrackApplicationView viewId={SecurityPageName.rules}>
+        <Switch>
+          {RulesSubRoutes.map((route, index) => (
+            <Route
+              key={`rules-route-${route.path}`}
+              path={route.path}
+              exact={route?.exact ?? false}
+            >
+              <route.main />
+            </Route>
+          ))}
+          <Route component={NotFoundPage} />
+        </Switch>
+      </TrackApplicationView>
+    </PluginTemplateWrapper>
   );
 };
 

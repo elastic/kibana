@@ -24,12 +24,7 @@ export type {
   ControlInput,
 } from '../common/types';
 
-export {
-  CONTROL_GROUP_TYPE,
-  OPTIONS_LIST_CONTROL,
-  RANGE_SLIDER_CONTROL,
-  TIME_SLIDER_CONTROL,
-} from '../common';
+export { CONTROL_GROUP_TYPE, OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '../common';
 
 export {
   ControlGroupContainer,
@@ -42,10 +37,13 @@ export {
   OptionsListEmbeddableFactory,
   OptionsListEmbeddable,
   type OptionsListEmbeddableInput,
+} from './options_list';
+
+export {
   RangeSliderEmbeddableFactory,
   RangeSliderEmbeddable,
   type RangeSliderEmbeddableInput,
-} from './control_types';
+} from './range_slider';
 
 export { LazyControlsCallout, type CalloutProps } from './controls_callout';
 

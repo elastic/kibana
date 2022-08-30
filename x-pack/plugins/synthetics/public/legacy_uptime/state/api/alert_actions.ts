@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { RuleAction as RuleActionOrig } from '@kbn/triggers-actions-ui-plugin/public';
-import {
+import type {
   IndexActionParams,
   PagerDutyActionParams,
   ServerLogActionParams,
@@ -15,7 +15,6 @@ import {
   JiraActionParams,
   WebhookActionParams,
   EmailActionParams,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '@kbn/actions-plugin/server';
 import { NewAlertParams } from './alerts';
 import { ACTION_GROUP_DEFINITIONS } from '../../../../common/constants/alerts';
@@ -127,11 +126,11 @@ function getIndexActionParams(selectedMonitor: Ping, recovery = false): IndexAct
     return {
       documents: [
         {
-          monitorName: '{{state.monitorName}}',
-          monitorUrl: '{{{state.monitorUrl}}}',
+          monitorName: '{{context.monitorName}}',
+          monitorUrl: '{{{context.monitorUrl}}}',
           statusMessage: getRecoveryMessage(selectedMonitor),
           latestErrorMessage: '',
-          observerLocation: '{{state.observerLocation}}',
+          observerLocation: '{{context.observerLocation}}',
         },
       ],
       indexOverride: null,
@@ -140,11 +139,11 @@ function getIndexActionParams(selectedMonitor: Ping, recovery = false): IndexAct
   return {
     documents: [
       {
-        monitorName: '{{state.monitorName}}',
-        monitorUrl: '{{{state.monitorUrl}}}',
-        statusMessage: '{{{state.statusMessage}}}',
-        latestErrorMessage: '{{{state.latestErrorMessage}}}',
-        observerLocation: '{{state.observerLocation}}',
+        monitorName: '{{context.monitorName}}',
+        monitorUrl: '{{{context.monitorUrl}}}',
+        statusMessage: '{{{context.statusMessage}}}',
+        latestErrorMessage: '{{{context.latestErrorMessage}}}',
+        observerLocation: '{{context.observerLocation}}',
       },
     ],
     indexOverride: null,

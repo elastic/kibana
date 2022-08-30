@@ -12,6 +12,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { Logger, LogMeta } from '@kbn/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 import { withoutControlCharacters } from './lib/string_utils';
+import { AlertingConnectorFeatureId, UptimeConnectorFeatureId } from '../../common';
 
 export type ServerLogActionType = ActionType<{}, {}, ActionParamsType>;
 export type ServerLogActionTypeExecutorOptions = ActionTypeExecutorOptions<
@@ -48,8 +49,11 @@ export function getActionType({ logger }: { logger: Logger }): ServerLogActionTy
     name: i18n.translate('xpack.actions.builtin.serverLogTitle', {
       defaultMessage: 'Server log',
     }),
+    supportedFeatureIds: [AlertingConnectorFeatureId, UptimeConnectorFeatureId],
     validate: {
-      params: ParamsSchema,
+      params: {
+        schema: ParamsSchema,
+      },
     },
     executor: curry(executor)({ logger }),
   };

@@ -3,7 +3,7 @@ id: kibDataPlugin
 slug: /kibana-dev-docs/key-concepts/data-plugin
 title: Data services
 image: https://source.unsplash.com/400x175/?Search
-summary: The data plugin contains services for searching, querying and filtering.
+description: The data plugin contains services for searching, querying and filtering.
 date: 2020-12-02
 tags: ['kibana', 'dev', 'contributor', 'api docs']
 ---
@@ -90,6 +90,8 @@ function searchOnChange(indexPattern: IndexPattern, aggConfigs: AggConfigs) {
 }
 
 ```
+
+You can also retrieve a snapshot of the whole `QueryState` by using `data.query.getState()`
 
 ### Timefilter
 

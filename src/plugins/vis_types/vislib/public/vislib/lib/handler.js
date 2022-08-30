@@ -95,7 +95,7 @@ export class Handler {
             });
           case 'click':
             return self.vis.emit(eventType, {
-              name: 'filterBucket',
+              name: 'filter',
               data: eventPayload,
             });
         }

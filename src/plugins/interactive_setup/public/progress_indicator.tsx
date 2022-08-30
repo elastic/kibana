@@ -13,7 +13,7 @@ import React, { useEffect, useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import useTimeoutFn from 'react-use/lib/useTimeoutFn';
 
-import type { IHttpFetchError } from '@kbn/core/public';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { StatusResponse } from '@kbn/core/types/status';
 import { i18n } from '@kbn/i18n';
 

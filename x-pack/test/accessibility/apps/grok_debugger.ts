@@ -12,8 +12,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const a11y = getService('a11y');
   const grokDebugger = getService('grokDebugger');
 
-  // this test is failing as there is a violation https://github.com/elastic/kibana/issues/62102
-  describe.skip('Dev tools grok debugger', () => {
+  // Fixes:https://github.com/elastic/kibana/issues/62102
+  describe('Dev tools grok debugger', () => {
     before(async () => {
       await PageObjects.common.navigateToApp('grokDebugger');
       await grokDebugger.assertExists();

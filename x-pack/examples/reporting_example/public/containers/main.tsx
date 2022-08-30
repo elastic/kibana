@@ -40,7 +40,6 @@ import type {
   JobParamsPNGV2,
 } from '@kbn/reporting-plugin/common/types';
 import type { ReportingStart } from '@kbn/reporting-plugin/public';
-import { LayoutTypes } from '@kbn/screenshotting-plugin/public';
 import { REPORTING_EXAMPLE_LOCATOR_ID } from '../../common';
 import { useApplicationContext } from '../application_context';
 import { ROUTES } from '../constants';
@@ -85,9 +84,7 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
 
   const getPDFJobParamsDefault = (): JobAppParamsPDF => {
     return {
-      layout: {
-        id: LayoutTypes.PRESERVE_LAYOUT,
-      },
+      layout: { id: 'preserve_layout' },
       relativeUrls: ['/app/reportingExample#/intended-visualization'],
       objectType: 'develeloperExample',
       title: 'Reporting Developer Example',
@@ -97,9 +94,7 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
   const getPDFJobParamsDefaultV2 = (): JobParamsPDFV2 => {
     return {
       version: '8.0.0',
-      layout: {
-        id: LayoutTypes.PRESERVE_LAYOUT,
-      },
+      layout: { id: 'preserve_layout' },
       locatorParams: [
         { id: REPORTING_EXAMPLE_LOCATOR_ID, version: '0.5.0', params: { myTestState: {} } },
       ],
@@ -112,9 +107,7 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
   const getPNGJobParamsDefaultV2 = (): JobParamsPNGV2 => {
     return {
       version: '8.0.0',
-      layout: {
-        id: LayoutTypes.PRESERVE_LAYOUT,
-      },
+      layout: { id: 'preserve_layout' },
       locatorParams: {
         id: REPORTING_EXAMPLE_LOCATOR_ID,
         version: '0.5.0',
@@ -129,9 +122,7 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
   const getCaptureTestPNGJobParams = (): JobParamsPNGV2 => {
     return {
       version: '8.0.0',
-      layout: {
-        id: LayoutTypes.PRESERVE_LAYOUT,
-      },
+      layout: { id: 'preserve_layout' },
       locatorParams: {
         id: REPORTING_EXAMPLE_LOCATOR_ID,
         version: '0.5.0',
@@ -147,7 +138,7 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
     return {
       version: '8.0.0',
       layout: {
-        id: print ? LayoutTypes.PRINT : LayoutTypes.PRESERVE_LAYOUT,
+        id: print ? 'print' : 'preserve_layout',
         dimensions: {
           // Magic numbers based on height of components not rendered on this screen :(
           height: 2400,

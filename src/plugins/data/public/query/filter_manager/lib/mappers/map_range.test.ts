@@ -7,7 +7,7 @@
  */
 
 import { mapRange } from './map_range';
-import { FilterMeta, RangeFilter, Filter } from '../../../../../common';
+import { FilterMeta, RangeFilter, Filter } from '@kbn/es-query';
 
 describe('filter manager utilities', () => {
   describe('mapRange()', () => {

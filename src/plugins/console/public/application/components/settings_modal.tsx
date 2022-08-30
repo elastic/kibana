@@ -59,7 +59,7 @@ const intervalOptions = PRESETS_IN_MINUTES.map((value) => ({
       : everyNMinutesTimeInterval(value),
 }));
 
-interface Props {
+export interface DevToolsSettingsModalProps {
   onSaveSettings: (newSettings: DevToolsSettings) => void;
   onClose: () => void;
   refreshAutocompleteSettings: (selectedSettings: DevToolsSettings['autocomplete']) => void;
@@ -67,7 +67,7 @@ interface Props {
   editorInstance: SenseEditor | null;
 }
 
-export function DevToolsSettingsModal(props: Props) {
+export const DevToolsSettingsModal = (props: DevToolsSettingsModalProps) => {
   const [fontSize, setFontSize] = useState(props.settings.fontSize);
   const [wrapMode, setWrapMode] = useState(props.settings.wrapMode);
   const [fields, setFields] = useState(props.settings.autocomplete.fields);
@@ -93,7 +93,7 @@ export function DevToolsSettingsModal(props: Props) {
     {
       id: 'indices',
       label: i18n.translate('console.settingsPage.indicesAndAliasesLabelText', {
-        defaultMessage: 'Indices & Aliases',
+        defaultMessage: 'Indices and aliases',
       }),
       stateSetter: setIndices,
     },
@@ -169,7 +169,7 @@ export function DevToolsSettingsModal(props: Props) {
 
   // It only makes sense to show polling options if the user needs to fetch any data.
   const pollingFields =
-    fields || indices || templates ? (
+    fields || indices || templates || dataStreams ? (
       <Fragment>
         <EuiFormRow
           label={
@@ -182,7 +182,7 @@ export function DevToolsSettingsModal(props: Props) {
             <FormattedMessage
               id="console.settingsPage.refreshingDataDescription"
               defaultMessage="Console refreshes autocomplete suggestions by querying Elasticsearch.
-              Less frequent refresh is recommended to reduce bandwidth costs."
+              Use less frequent refreshes to reduce bandwidth costs."
             />
           }
         >
@@ -222,14 +222,14 @@ export function DevToolsSettingsModal(props: Props) {
     >
       <EuiModalHeader>
         <EuiModalHeaderTitle>
-          <FormattedMessage id="console.settingsPage.pageTitle" defaultMessage="Console Settings" />
+          <FormattedMessage id="console.settingsPage.pageTitle" defaultMessage="Console settings" />
         </EuiModalHeaderTitle>
       </EuiModalHeader>
 
       <EuiModalBody>
         <EuiFormRow
           label={
-            <FormattedMessage id="console.settingsPage.fontSizeLabel" defaultMessage="Font Size" />
+            <FormattedMessage id="console.settingsPage.fontSizeLabel" defaultMessage="Font size" />
           }
         >
           <EuiFieldNumber
@@ -275,7 +275,7 @@ export function DevToolsSettingsModal(props: Props) {
             id="tripleQuotes"
             label={
               <FormattedMessage
-                defaultMessage="Use triple quotes in output pane"
+                defaultMessage="Use triple quotes in output"
                 id="console.settingsPage.tripleQuotesMessage"
               />
             }
@@ -355,4 +355,4 @@ export function DevToolsSettingsModal(props: Props) {
       </EuiModalFooter>
     </EuiModal>
   );
-}
+};

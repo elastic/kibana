@@ -137,6 +137,7 @@ describe('useFetchAlertDetail', () => {
               "kibana.version": "8.1.0",
               "tags": Array [],
             },
+            "lastUpdated": 1643653257204,
             "link": undefined,
             "reason": "Document count reported no data in the last 1 hour for all hosts",
             "start": 1643639463649,

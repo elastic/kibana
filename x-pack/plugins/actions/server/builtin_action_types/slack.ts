@@ -23,9 +23,15 @@ import {
   ActionTypeExecutorOptions,
   ActionTypeExecutorResult,
   ExecutorType,
+  ValidatorServices,
 } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { getCustomAgents } from './lib/get_custom_agents';
+import {
+  AlertingConnectorFeatureId,
+  UptimeConnectorFeatureId,
+  SecurityConnectorFeatureId,
+} from '../../common';
 
 export type SlackActionType = ActionType<{}, ActionTypeSecretsType, ActionParamsType, unknown>;
 export type SlackActionTypeExecutorOptions = ActionTypeExecutorOptions<
@@ -70,11 +76,19 @@ export function getActionType({
     name: i18n.translate('xpack.actions.builtin.slackTitle', {
       defaultMessage: 'Slack',
     }),
+    supportedFeatureIds: [
+      AlertingConnectorFeatureId,
+      UptimeConnectorFeatureId,
+      SecurityConnectorFeatureId,
+    ],
     validate: {
-      secrets: schema.object(secretsSchemaProps, {
-        validate: curry(validateActionTypeConfig)(configurationUtilities),
-      }),
-      params: ParamsSchema,
+      secrets: {
+        schema: SecretsSchema,
+        customValidator: validateActionTypeConfig,
+      },
+      params: {
+        schema: ParamsSchema,
+      },
     },
     renderParameterTemplates,
     executor,
@@ -91,27 +105,32 @@ function renderParameterTemplates(
 }
 
 function validateActionTypeConfig(
-  configurationUtilities: ActionsConfigurationUtilities,
-  secretsObject: ActionTypeSecretsType
+  secretsObject: ActionTypeSecretsType,
+  validatorServices: ValidatorServices
 ) {
+  const { configurationUtilities } = validatorServices;
   const configuredUrl = secretsObject.webhookUrl;
   try {
     new URL(configuredUrl);
   } catch (err) {
-    return i18n.translate('xpack.actions.builtin.slack.slackConfigurationErrorNoHostname', {
-      defaultMessage: 'error configuring slack action: unable to parse host name from webhookUrl',
-    });
+    throw new Error(
+      i18n.translate('xpack.actions.builtin.slack.slackConfigurationErrorNoHostname', {
+        defaultMessage: 'error configuring slack action: unable to parse host name from webhookUrl',
+      })
+    );
   }
 
   try {
     configurationUtilities.ensureUriAllowed(configuredUrl);
   } catch (allowListError) {
-    return i18n.translate('xpack.actions.builtin.slack.slackConfigurationError', {
-      defaultMessage: 'error configuring slack action: {message}',
-      values: {
-        message: allowListError.message,
-      },
-    });
+    throw new Error(
+      i18n.translate('xpack.actions.builtin.slack.slackConfigurationError', {
+        defaultMessage: 'error configuring slack action: {message}',
+        values: {
+          message: allowListError.message,
+        },
+      })
+    );
   }
 }
 

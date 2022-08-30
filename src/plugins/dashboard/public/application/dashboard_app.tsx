@@ -7,12 +7,14 @@
  */
 
 import { History } from 'history';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import { useKibana, useExecutionContext } from '@kbn/kibana-react-plugin/public';
+
 import { useDashboardSelector } from './state';
 import { useDashboardAppState } from './hooks';
 import {
+  dashboardFeatureCatalog,
   getDashboardBreadcrumb,
   getDashboardTitle,
   leaveConfirmStrings,
@@ -22,6 +24,7 @@ import { EmbeddableRenderer, ViewMode } from '../services/embeddable';
 import { DashboardTopNav, isCompleteDashboardAppState } from './top_nav/dashboard_top_nav';
 import { DashboardAppServices, DashboardEmbedSettings, DashboardRedirect } from '../types';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '../services/kibana_utils';
+import { DashboardAppNoDataPage } from './dashboard_app_no_data';
 export interface DashboardAppProps {
   history: History;
   savedDashboardId?: string;
@@ -35,8 +38,19 @@ export function DashboardApp({
   redirectTo,
   history,
 }: DashboardAppProps) {
-  const { core, chrome, embeddable, onAppLeave, uiSettings, data, spacesService } =
-    useKibana<DashboardAppServices>().services;
+  const {
+    core,
+    chrome,
+    embeddable,
+    onAppLeave,
+    uiSettings,
+    data,
+    spacesService,
+    screenshotModeService,
+  } = useKibana<DashboardAppServices>().services;
+
+  const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
+  const dashboardTitleRef = useRef<HTMLHeadingElement>(null);
 
   const kbnUrlStateStorage = useMemo(
     () =>
@@ -57,10 +71,21 @@ export function DashboardApp({
   const dashboardState = useDashboardSelector((state) => state.dashboardStateReducer);
   const dashboardAppState = useDashboardAppState({
     history,
+    showNoDataPage,
+    setShowNoDataPage,
     savedDashboardId,
     kbnUrlStateStorage,
     isEmbeddedExternally: Boolean(embedSettings),
   });
+
+  // focus on the top header when title or view mode is changed
+  useEffect(() => {
+    dashboardTitleRef.current?.focus();
+  }, [dashboardState.title, dashboardState.viewMode]);
+
+  const dashboardTitle = useMemo(() => {
+    return getDashboardTitle(dashboardState.title, dashboardState.viewMode, !savedDashboardId);
+  }, [dashboardState.title, dashboardState.viewMode, savedDashboardId]);
 
   // Build app leave handler whenever hasUnsavedChanges changes
   useEffect(() => {
@@ -94,10 +119,10 @@ export function DashboardApp({
         },
       },
       {
-        text: getDashboardTitle(dashboardState.title, dashboardState.viewMode, !savedDashboardId),
+        text: dashboardTitle,
       },
     ]);
-  }, [chrome, dashboardState.title, dashboardState.viewMode, redirectTo, savedDashboardId]);
+  }, [chrome, dashboardState.title, redirectTo, savedDashboardId, dashboardTitle]);
 
   // clear search session when leaving dashboard route
   useEffect(() => {
@@ -117,15 +142,23 @@ export function DashboardApp({
 
   return (
     <>
-      {isCompleteDashboardAppState(dashboardAppState) && (
+      <h1
+        id="dashboardTitle"
+        className="euiScreenReaderOnly"
+        ref={dashboardTitleRef}
+        tabIndex={-1}
+      >{`${dashboardFeatureCatalog.getTitle()} - ${dashboardTitle}`}</h1>
+      {showNoDataPage && (
+        <DashboardAppNoDataPage onDataViewCreated={() => setShowNoDataPage(false)} />
+      )}
+      {!showNoDataPage && isCompleteDashboardAppState(dashboardAppState) && (
         <>
-          {!printMode && (
-            <DashboardTopNav
-              redirectTo={redirectTo}
-              embedSettings={embedSettings}
-              dashboardAppState={dashboardAppState}
-            />
-          )}
+          <DashboardTopNav
+            printMode={printMode}
+            redirectTo={redirectTo}
+            embedSettings={embedSettings}
+            dashboardAppState={dashboardAppState}
+          />
 
           {dashboardAppState.savedDashboard.outcome === 'conflict' &&
           dashboardAppState.savedDashboard.id &&
@@ -138,7 +171,13 @@ export function DashboardApp({
                 )}${history.location.search}`,
               })
             : null}
-          <div className="dashboardViewport">
+          <div
+            className={`dashboardViewport ${
+              screenshotModeService && screenshotModeService.isScreenshotMode()
+                ? 'dashboardViewport--screenshotMode'
+                : ''
+            }`}
+          >
             <EmbeddableRenderer embeddable={dashboardAppState.dashboardContainer} />
           </div>
         </>

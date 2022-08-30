@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const txtChooseDestinationIndexPattern = i18n.translate(
-  'xpack.uiActionsEnhanced.components.DiscoverDrilldownConfig.chooseIndexPattern',
+  'uiActionsEnhanced.components.DiscoverDrilldownConfig.chooseIndexPattern',
   {
     defaultMessage: 'Choose destination index pattern',
   }

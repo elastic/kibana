@@ -657,7 +657,6 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
       datafeedResults: [],
       annotationResultsRect: [],
       annotationResultsLine: [],
-      modelSnapshotResultsLine: [],
     };
 
     const { getDatafeedByJobId } = datafeedsProvider(client!, mlClient);
@@ -725,7 +724,9 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
     };
 
     if (client) {
-      const { aggregations } = await client.asCurrentUser.search(esSearchRequest);
+      const { aggregations } = await client.asCurrentUser.search(esSearchRequest, {
+        maxRetries: 0,
+      });
 
       finalResults.datafeedResults =
         // @ts-expect-error incorrect search response type
@@ -737,7 +738,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
 
     const { getAnnotations } = annotationServiceProvider(client!);
 
-    const [bucketResp, annotationResp, modelSnapshotsResp] = await Promise.all([
+    const [bucketResp, annotationResp] = await Promise.all([
       mlClient.getBuckets({
         job_id: jobId,
         body: { desc: true, start: String(start), end: String(end), page: { from: 0, size: 1000 } },
@@ -747,11 +748,6 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
         earliestMs: start,
         latestMs: end,
         maxAnnotations: 1000,
-      }),
-      mlClient.getModelSnapshots({
-        job_id: jobId,
-        start: String(start),
-        end: String(end),
       }),
     ]);
 
@@ -784,18 +780,13 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
       }
     });
 
-    const modelSnapshots = modelSnapshotsResp?.model_snapshots ?? [];
-    modelSnapshots.forEach((modelSnapshot) => {
-      const timestamp = Number(modelSnapshot?.timestamp);
-
-      finalResults.modelSnapshotResultsLine.push({
-        dataValue: timestamp,
-        details: modelSnapshot.description,
-      });
-    });
-
     return finalResults;
   }
+
+  const { getAnomalyChartsData, getRecordsForCriteria } = anomalyChartsDataProvider(
+    mlClient,
+    client!
+  );
 
   return {
     getAnomaliesTableData,
@@ -807,6 +798,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
     getCategorizerStats,
     getCategoryStoppedPartitions,
     getDatafeedResultsChartData,
-    getAnomalyChartsData: anomalyChartsDataProvider(mlClient, client!),
+    getAnomalyChartsData,
+    getRecordsForCriteria,
   };
 }

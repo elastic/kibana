@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { EuiIcon, EuiLink, IconSize, IconType } from '@elastic/eui';
-import { LinkAnchorProps } from '@elastic/eui/src/components/link/link';
-import React, { ReactNode, useCallback, useMemo } from 'react';
+import type { IconSize, IconType } from '@elastic/eui';
+import { EuiIcon, EuiLink } from '@elastic/eui';
+import type { LinkAnchorProps } from '@elastic/eui/src/components/link/link';
+import type { ReactNode } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import styled, { css } from 'styled-components';
 
 interface LinkProps {

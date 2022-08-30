@@ -719,8 +719,8 @@ describe('TaskManagerRunner', () => {
       });
       expect(mockApmTrans.end).toHaveBeenCalledWith('success');
     });
-    test('makes calls to APM as expected when task fails', async () => {
-      const { runner } = await readyToRunStageSetup({
+    test('makes calls to APM and logs errors as expected when task fails', async () => {
+      const { runner, logger } = await readyToRunStageSetup({
         instance: {
           params: { a: 'b' },
           state: { hey: 'there' },
@@ -741,6 +741,11 @@ describe('TaskManagerRunner', () => {
         childOf: 'apmTraceparent',
       });
       expect(mockApmTrans.end).toHaveBeenCalledWith('failure');
+      const loggerCall = logger.error.mock.calls[0][0];
+      const loggerMeta = logger.error.mock.calls[0][1];
+      expect(loggerCall as string).toMatchInlineSnapshot(`"Task bar \\"foo\\" failed: Error: rar"`);
+      expect(loggerMeta?.tags).toEqual(['bar', 'foo', 'task-run-failed']);
+      expect(loggerMeta?.error?.stack_trace).toBeDefined();
     });
     test('provides execution context on run', async () => {
       const { runner } = await readyToRunStageSetup({
@@ -1516,6 +1521,54 @@ describe('TaskManagerRunner', () => {
       expect(logger.warn).toHaveBeenCalledWith(
         `Skipping reschedule for task bar \"${id}\" due to the task expiring`
       );
+    });
+
+    test('Prints debug logs on task start/end', async () => {
+      const { runner, logger } = await readyToRunStageSetup({
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                return { state: {} };
+              },
+            }),
+          },
+        },
+      });
+      await runner.run();
+
+      expect(logger.debug).toHaveBeenCalledTimes(2);
+      expect(logger.debug).toHaveBeenNthCalledWith(1, 'Running task bar "foo"', {
+        tags: ['task:start', 'foo', 'bar'],
+      });
+      expect(logger.debug).toHaveBeenNthCalledWith(2, 'Task bar "foo" ended', {
+        tags: ['task:end', 'foo', 'bar'],
+      });
+    });
+
+    test('Prints debug logs on task start/end even if it throws error', async () => {
+      const { runner, logger } = await readyToRunStageSetup({
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                throw new Error();
+              },
+            }),
+          },
+        },
+      });
+      await runner.run();
+
+      expect(logger.debug).toHaveBeenCalledTimes(2);
+      expect(logger.debug).toHaveBeenNthCalledWith(1, 'Running task bar "foo"', {
+        tags: ['task:start', 'foo', 'bar'],
+      });
+      expect(logger.debug).toHaveBeenNthCalledWith(2, 'Task bar "foo" ended', {
+        tags: ['task:end', 'foo', 'bar'],
+      });
     });
   });
 

@@ -194,19 +194,6 @@ export function getApmSettings(): SettingsRow[] {
             }
           ),
         },
-        {
-          key: 'expvar_enabled',
-          type: 'boolean',
-          labelAppend: OPTIONAL_LABEL,
-          rowTitle: i18n.translate(
-            'xpack.apm.fleet_integration.settings.apm.expvarEnabledTitle',
-            { defaultMessage: 'Enable APM Server Golang expvar support' }
-          ),
-          rowDescription: i18n.translate(
-            'xpack.apm.fleet_integration.settings.apm.expvarEnabledDescription',
-            { defaultMessage: 'Exposed under /debug/vars' }
-          ),
-        },
       ],
     },
   ];

@@ -13,7 +13,7 @@ import {
 } from '@kbn/presentation-util-plugin/common/lib';
 import { revealImageFunction, errors } from './reveal_image_function';
 import { Origin } from '../types';
-import { ExecutionContext } from '@kbn/expressions-plugin';
+import { ExecutionContext } from '@kbn/expressions-plugin/common';
 
 describe('revealImageFunction', () => {
   const fn = functionWrapper(revealImageFunction);

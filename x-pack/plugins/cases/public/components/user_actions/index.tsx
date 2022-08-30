@@ -27,6 +27,7 @@ import type { UserActionTreeProps } from './types';
 import { getDescriptionUserAction } from './description';
 import { useUserActionsHandler } from './use_user_actions_handler';
 import { NEW_COMMENT_ID } from './constants';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 const MyEuiFlexGroup = styled(EuiFlexGroup)`
   margin-bottom: 8px;
@@ -58,18 +59,18 @@ const MyEuiCommentList = styled(EuiCommentList)`
     & .comment-alert .euiCommentEvent {
       background-color: ${theme.eui.euiColorLightestShade};
       border: ${theme.eui.euiFlyoutBorder};
-      padding: ${theme.eui.paddingSizes.s};
-      border-radius: ${theme.eui.paddingSizes.xs};
+      padding: ${theme.eui.euiSizeS};
+      border-radius: ${theme.eui.euiSizeXS};
     }
 
     & .comment-alert .euiCommentEvent__headerData {
       flex-grow: 1;
     }
 
-    & .comment-action.empty-comment .euiCommentEvent--regular {
+    & .comment-action.empty-comment [class*="euiCommentEvent-regular] {
       box-shadow: none;
       .euiCommentEvent__header {
-        padding: ${theme.eui.euiSizeM} ${theme.eui.paddingSizes.s};
+        padding: ${theme.eui.euiSizeM} ${theme.eui.euiSizeS};
         border-bottom: 0;
       }
     }
@@ -81,7 +82,6 @@ export const UserActions = React.memo(
     caseServices,
     caseUserActions,
     data: caseData,
-    fetchUserActions,
     getRuleDetailsHref,
     actionsNavigation,
     isLoadingDescription,
@@ -90,13 +90,13 @@ export const UserActions = React.memo(
     onShowAlertDetails,
     onUpdateField,
     statusActionButton,
-    updateCase,
     useFetchAlertData,
-    userCanCrud,
   }: UserActionTreeProps) => {
     const { detailName: caseId, commentId } = useCaseViewParams();
     const [initLoading, setInitLoading] = useState(true);
     const currentUser = useCurrentUser();
+    const { externalReferenceAttachmentTypeRegistry, persistableStateAttachmentTypeRegistry } =
+      useCasesContext();
 
     const alertIdsWithoutRuleInfo = useMemo(
       () => getManualAlertIdsWithNoRuleId(caseData.comments),
@@ -116,14 +116,13 @@ export const UserActions = React.memo(
       handleManageQuote,
       handleDeleteComment,
       handleUpdate,
-    } = useUserActionsHandler({ fetchUserActions, updateCase });
+    } = useUserActionsHandler();
 
     const MarkdownNewComment = useMemo(
       () => (
         <AddComment
           id={NEW_COMMENT_ID}
           caseId={caseId}
-          userCanCrud={userCanCrud}
           ref={(element) => (commentRefs.current[NEW_COMMENT_ID] = element)}
           onCommentPosted={handleUpdate}
           onCommentSaving={handleManageMarkdownEditId.bind(null, NEW_COMMENT_ID)}
@@ -131,14 +130,7 @@ export const UserActions = React.memo(
           statusActionButton={statusActionButton}
         />
       ),
-      [
-        caseId,
-        userCanCrud,
-        handleUpdate,
-        handleManageMarkdownEditId,
-        statusActionButton,
-        commentRefs,
-      ]
+      [caseId, handleUpdate, handleManageMarkdownEditId, statusActionButton, commentRefs]
     );
 
     useEffect(() => {
@@ -157,7 +149,6 @@ export const UserActions = React.memo(
           commentRefs,
           manageMarkdownEditIds,
           isLoadingDescription,
-          userCanCrud,
           onUpdateField,
           handleManageMarkdownEditId,
           handleManageQuote,
@@ -167,7 +158,6 @@ export const UserActions = React.memo(
         commentRefs,
         manageMarkdownEditIds,
         isLoadingDescription,
-        userCanCrud,
         onUpdateField,
         handleManageMarkdownEditId,
         handleManageQuote,
@@ -190,11 +180,12 @@ export const UserActions = React.memo(
 
             const userActionBuilder = builder({
               caseData,
+              externalReferenceAttachmentTypeRegistry,
+              persistableStateAttachmentTypeRegistry,
               userAction,
               caseServices,
               comments: caseData.comments,
               index,
-              userCanCrud,
               commentRefs,
               manageMarkdownEditIds,
               selectedOutlineCommentId,
@@ -217,10 +208,11 @@ export const UserActions = React.memo(
         ),
       [
         caseUserActions,
+        externalReferenceAttachmentTypeRegistry,
+        persistableStateAttachmentTypeRegistry,
         descriptionCommentListObj,
         caseData,
         caseServices,
-        userCanCrud,
         commentRefs,
         manageMarkdownEditIds,
         selectedOutlineCommentId,
@@ -239,7 +231,9 @@ export const UserActions = React.memo(
       ]
     );
 
-    const bottomActions = userCanCrud
+    const { permissions } = useCasesContext();
+
+    const bottomActions = permissions.create
       ? [
           {
             username: (
@@ -249,7 +243,7 @@ export const UserActions = React.memo(
               />
             ),
             'data-test-subj': 'add-comment',
-            timelineIcon: (
+            timelineAvatar: (
               <UserActionAvatar username={currentUser?.username} fullName={currentUser?.fullName} />
             ),
             className: 'isEdit',

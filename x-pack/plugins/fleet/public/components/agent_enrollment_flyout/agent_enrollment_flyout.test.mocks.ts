@@ -81,9 +81,8 @@ jest.mock('./steps', () => {
   };
 });
 
-jest.mock('../../services', () => {
+jest.mock('../../services/has_fleet_server', () => {
   return {
-    ...jest.requireActual('../../services'),
     policyHasFleetServer: jest.fn().mockReturnValue(true),
   };
 });

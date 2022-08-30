@@ -12,7 +12,7 @@ import { DoubleIntegers } from '../../../../components/double_integers';
 import { Page } from '../../../../components/page';
 import { useDeps } from '../../../../hooks/use_deps';
 
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface Props {}
 
 export const PageDoubleIntegers: React.FC<Props> = () => {

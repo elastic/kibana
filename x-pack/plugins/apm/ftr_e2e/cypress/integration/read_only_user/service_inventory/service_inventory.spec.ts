@@ -9,6 +9,7 @@ import url from 'url';
 import { synthtrace } from '../../../../synthtrace';
 import { opbeans } from '../../../fixtures/synthtrace/opbeans';
 import { checkA11y } from '../../../support/commands';
+import { generateMultipleServicesData } from './generate_data';
 
 const timeRange = {
   rangeFrom: '2021-10-10T00:00:00.000Z',
@@ -43,12 +44,9 @@ const mainAliasNames = mainApiRequestsToIntercept.map(
 );
 
 describe('When navigating to the service inventory', () => {
-  before(async () => {
-    cy.loginAsReadOnlyUser();
-    cy.visit(serviceInventoryHref);
-
+  before(() => {
     const { rangeFrom, rangeTo } = timeRange;
-    await synthtrace.index(
+    synthtrace.index(
       opbeans({
         from: new Date(rangeFrom).getTime(),
         to: new Date(rangeTo).getTime(),
@@ -56,8 +54,13 @@ describe('When navigating to the service inventory', () => {
     );
   });
 
-  after(async () => {
-    await synthtrace.clean();
+  beforeEach(() => {
+    cy.loginAsViewerUser();
+    cy.visitKibana(serviceInventoryHref);
+  });
+
+  after(() => {
+    synthtrace.clean();
   });
 
   it('has no detectable a11y violations on load', () => {
@@ -90,8 +93,8 @@ describe('When navigating to the service inventory', () => {
         }
       );
 
-      cy.loginAsReadOnlyUser();
-      cy.visit(serviceInventoryHref);
+      cy.loginAsViewerUser();
+      cy.visitKibana(serviceInventoryHref);
     });
 
     it('with the correct environment when changing the environment', () => {
@@ -117,7 +120,7 @@ describe('When navigating to the service inventory', () => {
       cy.wait(mainAliasNames);
     });
 
-    it('when selecting a different time range and clicking the update button', () => {
+    it.skip('when selecting a different time range and clicking the update button', () => {
       cy.wait(mainAliasNames);
 
       cy.selectAbsoluteTimeRange(
@@ -129,6 +132,73 @@ describe('When navigating to the service inventory', () => {
 
       cy.contains('Refresh').click();
       cy.wait(mainAliasNames);
+    });
+  });
+});
+
+describe('Check detailed statistics API with multiple services', () => {
+  before(() => {
+    const { rangeFrom, rangeTo } = timeRange;
+    synthtrace.index(
+      generateMultipleServicesData({
+        from: new Date(rangeFrom).getTime(),
+        to: new Date(rangeTo).getTime(),
+      })
+    );
+  });
+
+  beforeEach(() => {
+    cy.loginAsViewerUser();
+  });
+
+  after(() => {
+    synthtrace.clean();
+  });
+
+  it('calls detailed API with visible items only', () => {
+    cy.intercept('POST', '/internal/apm/services/detailed_statistics?*').as(
+      'detailedStatisticsRequest'
+    );
+    cy.intercept('GET', '/internal/apm/services?*').as('mainStatisticsRequest');
+
+    cy.visitKibana(
+      `${serviceInventoryHref}&pageSize=10&sortField=serviceName&sortDirection=asc`
+    );
+    cy.wait('@mainStatisticsRequest');
+    cy.contains('Services');
+    cy.get('.euiPagination__list').children().should('have.length', 5);
+    cy.wait('@detailedStatisticsRequest').then((payload) => {
+      expect(payload.request.body.serviceNames).eql(
+        JSON.stringify([
+          '0',
+          '1',
+          '10',
+          '11',
+          '12',
+          '13',
+          '14',
+          '15',
+          '16',
+          '17',
+        ])
+      );
+    });
+    cy.get('[data-test-subj="pagination-button-1"]').click();
+    cy.wait('@detailedStatisticsRequest').then((payload) => {
+      expect(payload.request.body.serviceNames).eql(
+        JSON.stringify([
+          '18',
+          '19',
+          '2',
+          '20',
+          '21',
+          '22',
+          '23',
+          '24',
+          '25',
+          '26',
+        ])
+      );
     });
   });
 });

@@ -11,7 +11,7 @@ import {
   createQueryFilterClauses,
   calculateTimeSeriesInterval,
 } from '../../../../../utils/build_query';
-import { MatrixHistogramRequestOptions } from '../../../../../../common/search_strategy/security_solution/matrix_histogram';
+import type { MatrixHistogramRequestOptions } from '../../../../../../common/search_strategy/security_solution/matrix_histogram';
 
 export const buildAnomaliesHistogramQuery = ({
   filterQuery,

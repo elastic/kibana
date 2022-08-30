@@ -24,7 +24,7 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 
-import { InternalApplicationStart } from '../../../application';
+import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import { GITHUB_CREATE_ISSUE_LINK, KIBANA_FEEDBACK_LINK } from '../../constants';
 import { ChromeHelpExtension } from '../../types';
 import { HeaderExtension } from './header_extension';
@@ -331,7 +331,9 @@ export class HeaderHelpMenu extends Component<Props, State> {
         {content && (
           <>
             {customLinks && <EuiSpacer size="xs" />}
-            <HeaderExtension extension={content} />
+            <HeaderExtension
+              extension={(domNode) => content(domNode, { hideHelpMenu: this.closeMenu })}
+            />
           </>
         )}
       </>

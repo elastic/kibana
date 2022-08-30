@@ -7,29 +7,32 @@
  */
 
 // eslint-disable-next-line max-classes-per-file
-import type { Observable } from 'rxjs';
-import { BehaviorSubject, firstValueFrom, lastValueFrom, Subject } from 'rxjs';
+import { Subject, lastValueFrom, take, toArray } from 'rxjs';
+import { fakeSchedulers } from 'rxjs-marbles/jest';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { AnalyticsClient } from './analytics_client';
-import { take, toArray } from 'rxjs/operators';
 import { shippersMock } from '../shippers/mocks';
-import type { EventContext, TelemetryCounter } from '../events';
-import { TelemetryCounterType } from '../events';
-
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+import type { TelemetryCounter } from '../events';
+import { ContextService } from './context_service';
 
 describe('AnalyticsClient', () => {
   let analyticsClient: AnalyticsClient;
   let logger: MockedLogger;
 
   beforeEach(() => {
+    jest.useFakeTimers();
     logger = loggerMock.create();
     analyticsClient = new AnalyticsClient({
       logger,
       isDev: true,
       sendTo: 'staging',
     });
+  });
+
+  afterEach(() => {
+    analyticsClient.shutdown();
+    jest.useRealTimers();
   });
 
   describe('registerEventType', () => {
@@ -98,6 +101,28 @@ describe('AnalyticsClient', () => {
       ).toThrowErrorMatchingInlineSnapshot(
         `"Attempted to report event type \\"testEvent\\", before registering it. Use the \\"registerEventType\\" API to register it."`
       );
+    });
+
+    test('fails to validate the event and throws', () => {
+      analyticsClient.registerEventType({
+        eventType: 'testEvent',
+        schema: {
+          a_field: {
+            type: 'keyword',
+            _meta: {
+              description: 'description of a_field',
+            },
+          },
+        },
+      });
+      analyticsClient.optIn({ global: { enabled: true } });
+
+      expect(
+        () => analyticsClient.reportEvent('testEvent', { a_field: 100 }) // a_field is expected to be a string
+      ).toThrowErrorMatchingInlineSnapshot(`
+        "Failed to validate payload coming from \\"Event Type 'testEvent'\\":
+        	- [a_field]: {\\"expected\\":\\"string\\",\\"actual\\":\\"number\\",\\"value\\":100}"
+      `);
     });
 
     test('enqueues multiple events before specifying the optIn consent and registering a shipper', async () => {
@@ -262,7 +287,7 @@ describe('AnalyticsClient', () => {
       const counterEventPromise = lastValueFrom(analyticsClient.telemetryCounter$.pipe(take(1)));
 
       const counter: TelemetryCounter = {
-        type: TelemetryCounterType.succeeded,
+        type: 'succeeded',
         source: 'a random value',
         event_type: 'eventTypeA',
         code: '200',
@@ -281,13 +306,16 @@ describe('AnalyticsClient', () => {
       constructor({
         optInMock,
         extendContextMock,
+        shutdownMock,
       }: {
         optInMock?: jest.Mock;
         extendContextMock?: jest.Mock;
+        shutdownMock?: jest.Mock;
       }) {
         super();
         if (optInMock) this.optIn = optInMock;
         if (extendContextMock) this.extendContext = extendContextMock;
+        if (shutdownMock) this.shutdown = shutdownMock;
       }
     }
 
@@ -310,276 +338,17 @@ describe('AnalyticsClient', () => {
       expect(optIn).toHaveBeenCalledWith(true);
     });
 
-    test('Spreads the context updates to the shipper (only after opt-in)', async () => {
-      const extendContextMock = jest.fn();
-      analyticsClient.registerShipper(MockedShipper, { extendContextMock });
-      expect(extendContextMock).toHaveBeenCalledTimes(0); // Not until we have opt-in
-      analyticsClient.optIn({ global: { enabled: true } });
-      await delay(10);
-      expect(extendContextMock).toHaveBeenCalledWith({}); // The initial context
+    test(
+      'Spreads the context updates to the shipper (only after opt-in)',
+      fakeSchedulers((advance) => {
+        const extendContextMock = jest.fn();
+        analyticsClient.registerShipper(MockedShipper, { extendContextMock });
+        expect(extendContextMock).toHaveBeenCalledTimes(0); // Not until we have opt-in
+        analyticsClient.optIn({ global: { enabled: true } });
+        advance(10);
+        expect(extendContextMock).toHaveBeenCalledWith({}); // The initial context
 
-      const context$ = new Subject<{ a_field: boolean }>();
-      analyticsClient.registerContextProvider({
-        name: 'contextProviderA',
-        schema: {
-          a_field: {
-            type: 'boolean',
-            _meta: {
-              description: 'a_field description',
-            },
-          },
-        },
-        context$,
-      });
-
-      context$.next({ a_field: true });
-      expect(extendContextMock).toHaveBeenCalledWith({ a_field: true }); // After update
-    });
-
-    test('Does not spread the context if opt-in === false', async () => {
-      const extendContextMock = jest.fn();
-      analyticsClient.registerShipper(MockedShipper, { extendContextMock });
-      expect(extendContextMock).toHaveBeenCalledTimes(0); // Not until we have opt-in
-      analyticsClient.optIn({ global: { enabled: false } });
-      await delay(10);
-      expect(extendContextMock).toHaveBeenCalledTimes(0); // Not until we have opt-in
-    });
-
-    test('Handles errors in the shipper', async () => {
-      const extendContextMock = jest.fn().mockImplementation(() => {
-        throw new Error('Something went terribly wrong');
-      });
-      analyticsClient.registerShipper(MockedShipper, { extendContextMock });
-      analyticsClient.optIn({ global: { enabled: true } });
-      await delay(10);
-      expect(extendContextMock).toHaveBeenCalledWith({}); // The initial context
-      expect(logger.warn).toHaveBeenCalledWith(
-        `Shipper "${MockedShipper.shipperName}" failed to extend the context`,
-        expect.any(Error)
-      );
-    });
-  });
-
-  describe('registerContextProvider', () => {
-    let globalContext$: Observable<Partial<EventContext>>;
-
-    beforeEach(() => {
-      // eslint-disable-next-line dot-notation
-      globalContext$ = analyticsClient['context$'];
-    });
-
-    test('Registers a context provider', async () => {
-      const context$ = new Subject<{ a_field: boolean }>();
-      analyticsClient.registerContextProvider({
-        name: 'contextProviderA',
-        schema: {
-          a_field: {
-            type: 'boolean',
-            _meta: {
-              description: 'a_field description',
-            },
-          },
-        },
-        context$,
-      });
-
-      const globalContextPromise = lastValueFrom(globalContext$.pipe(take(2), toArray()));
-      context$.next({ a_field: true });
-      await expect(globalContextPromise).resolves.toEqual([
-        {}, // Original empty state
-        { a_field: true },
-      ]);
-    });
-
-    test('It does not break if context emits `undefined`', async () => {
-      const context$ = new Subject<{ a_field: boolean } | undefined | void>();
-      analyticsClient.registerContextProvider({
-        name: 'contextProviderA',
-        schema: {
-          a_field: {
-            type: 'boolean',
-            _meta: {
-              description: 'a_field description',
-            },
-          },
-        },
-        context$,
-      });
-
-      const globalContextPromise = lastValueFrom(globalContext$.pipe(take(3), toArray()));
-      context$.next();
-      context$.next(undefined);
-      await expect(globalContextPromise).resolves.toEqual([
-        {}, // Original empty state
-        {},
-        {},
-      ]);
-    });
-
-    test('It does not break for BehaviourSubjects (emitting as soon as they connect)', async () => {
-      const context$ = new BehaviorSubject<{ a_field: boolean }>({ a_field: true });
-      analyticsClient.registerContextProvider({
-        name: 'contextProviderA',
-        schema: {
-          a_field: {
-            type: 'boolean',
-            _meta: {
-              description: 'a_field description',
-            },
-          },
-        },
-        context$,
-      });
-
-      const globalContextPromise = lastValueFrom(globalContext$.pipe(take(1), toArray()));
-      await expect(globalContextPromise).resolves.toEqual([
-        { a_field: true }, // No original empty state
-      ]);
-    });
-
-    test('Merges all the contexts together', async () => {
-      const contextA$ = new Subject<{ a_field: boolean }>();
-      analyticsClient.registerContextProvider({
-        name: 'contextProviderA',
-        schema: {
-          a_field: {
-            type: 'boolean',
-            _meta: {
-              description: 'a_field description',
-            },
-          },
-        },
-        context$: contextA$,
-      });
-
-      const contextB$ = new Subject<{ a_field?: boolean; b_field: number }>();
-      analyticsClient.registerContextProvider({
-        name: 'contextProviderB',
-        schema: {
-          a_field: {
-            type: 'boolean',
-            _meta: {
-              description: 'a_field description',
-              optional: true,
-            },
-          },
-          b_field: {
-            type: 'long',
-            _meta: {
-              description: 'b_field description',
-            },
-          },
-        },
-        context$: contextB$,
-      });
-
-      const globalContextPromise = lastValueFrom(globalContext$.pipe(take(6), toArray()));
-      contextA$.next({ a_field: true });
-      contextB$.next({ b_field: 1 });
-      contextB$.next({ a_field: false, b_field: 1 });
-      contextA$.next({ a_field: true });
-      contextB$.next({ b_field: 2 });
-      await expect(globalContextPromise).resolves.toEqual([
-        {}, // Original empty state
-        { a_field: true },
-        { a_field: true, b_field: 1 }, // Merged A & B
-        { a_field: false, b_field: 1 }, // a_field updated from B
-        { a_field: false, b_field: 1 }, // a_field still from B because it was registered later.
-        // We may want to change this last behaviour in the future but, for now, it's fine.
-        { a_field: true, b_field: 2 }, // a_field is now taken from A because B is not providing it yet.
-      ]);
-    });
-
-    test('The global context is not polluted by context providers removing reported fields', async () => {
-      const context$ = new Subject<{ a_field?: boolean; b_field: number }>();
-      analyticsClient.registerContextProvider({
-        name: 'contextProviderA',
-        schema: {
-          a_field: {
-            type: 'boolean',
-            _meta: {
-              description: 'a_field description',
-              optional: true,
-            },
-          },
-          b_field: {
-            type: 'long',
-            _meta: {
-              description: 'b_field description',
-            },
-          },
-        },
-        context$,
-      });
-
-      const globalContextPromise = lastValueFrom(globalContext$.pipe(take(6), toArray()));
-      context$.next({ b_field: 1 });
-      context$.next({ a_field: false, b_field: 1 });
-      context$.next({ a_field: true, b_field: 1 });
-      context$.next({ b_field: 1 });
-      context$.next({ a_field: true, b_field: 2 });
-      await expect(globalContextPromise).resolves.toEqual([
-        {}, // Original empty state
-        { b_field: 1 },
-        { a_field: false, b_field: 1 },
-        { a_field: true, b_field: 1 },
-        { b_field: 1 }, // a_field is removed because the context provider removed it.
-        { a_field: true, b_field: 2 },
-      ]);
-    });
-
-    test('The undefined values are not forwarded to the global context', async () => {
-      const context$ = new Subject<{ a_field?: boolean; b_field: number }>();
-      analyticsClient.registerContextProvider({
-        name: 'contextProviderA',
-        schema: {
-          a_field: {
-            type: 'boolean',
-            _meta: {
-              description: 'a_field description',
-              optional: true,
-            },
-          },
-          b_field: {
-            type: 'long',
-            _meta: {
-              description: 'b_field description',
-            },
-          },
-        },
-        context$,
-      });
-
-      const globalContextPromise = firstValueFrom(globalContext$.pipe(take(6), toArray()));
-      context$.next({ b_field: 1 });
-      context$.next({ a_field: false, b_field: 1 });
-      context$.next({ a_field: true, b_field: 1 });
-      context$.next({ b_field: 1 });
-      context$.next({ a_field: undefined, b_field: 2 });
-      await expect(globalContextPromise).resolves.toEqual([
-        {}, // Original empty state
-        { b_field: 1 },
-        { a_field: false, b_field: 1 },
-        { a_field: true, b_field: 1 },
-        { b_field: 1 }, // a_field is removed because the context provider removed it.
-        { b_field: 2 }, // a_field is not forwarded because it is `undefined`
-      ]);
-    });
-
-    test('Fails to register 2 context providers with the same name', () => {
-      analyticsClient.registerContextProvider({
-        name: 'contextProviderA',
-        schema: {
-          a_field: {
-            type: 'boolean',
-            _meta: {
-              description: 'a_field description',
-            },
-          },
-        },
-        context$: new Subject<{ a_field: boolean }>(),
-      });
-      expect(() => {
+        const context$ = new Subject<{ a_field: boolean }>();
         analyticsClient.registerContextProvider({
           name: 'contextProviderA',
           schema: {
@@ -590,23 +359,68 @@ describe('AnalyticsClient', () => {
               },
             },
           },
-          context$: new Subject<{ a_field: boolean }>(),
+          context$,
         });
-      }).toThrowErrorMatchingInlineSnapshot(
-        `"Context provider with name 'contextProviderA' already registered"`
-      );
+
+        context$.next({ a_field: true });
+        expect(extendContextMock).toHaveBeenCalledWith({ a_field: true }); // After update
+      })
+    );
+
+    test(
+      'Does not spread the context if opt-in === false',
+      fakeSchedulers((advance) => {
+        const extendContextMock = jest.fn();
+        analyticsClient.registerShipper(MockedShipper, { extendContextMock });
+        expect(extendContextMock).toHaveBeenCalledTimes(0); // Not until we have opt-in
+        analyticsClient.optIn({ global: { enabled: false } });
+        advance(10);
+        expect(extendContextMock).toHaveBeenCalledTimes(0); // Not until we have opt-in
+      })
+    );
+
+    test(
+      'Handles errors in the shipper',
+      fakeSchedulers((advance) => {
+        const optInMock = jest.fn().mockImplementation(() => {
+          throw new Error('Something went terribly wrong');
+        });
+        const extendContextMock = jest.fn().mockImplementation(() => {
+          throw new Error('Something went terribly wrong');
+        });
+        const shutdownMock = jest.fn().mockImplementation(() => {
+          throw new Error('Something went terribly wrong');
+        });
+        analyticsClient.registerShipper(MockedShipper, {
+          optInMock,
+          extendContextMock,
+          shutdownMock,
+        });
+        expect(() => analyticsClient.optIn({ global: { enabled: true } })).not.toThrow();
+        advance(10);
+        expect(optInMock).toHaveBeenCalledWith(true);
+        expect(extendContextMock).toHaveBeenCalledWith({}); // The initial context
+        expect(logger.warn).toHaveBeenCalledWith(
+          `Shipper "${MockedShipper.shipperName}" failed to extend the context`,
+          expect.any(Error)
+        );
+        expect(() => analyticsClient.shutdown()).not.toThrow();
+        expect(shutdownMock).toHaveBeenCalled();
+      })
+    );
+  });
+
+  describe('ContextProvider APIs', () => {
+    let contextService: ContextService;
+
+    beforeEach(() => {
+      // eslint-disable-next-line dot-notation
+      contextService = analyticsClient['contextService'];
     });
 
-    test('Does not remove the context provider after it completes', async () => {
+    test('Registers a context provider', () => {
+      const registerContextProviderSpy = jest.spyOn(contextService, 'registerContextProvider');
       const context$ = new Subject<{ a_field: boolean }>();
-
-      const contextProvidersRegistry =
-        // eslint-disable-next-line dot-notation
-        analyticsClient['contextService']['contextProvidersRegistry'];
-
-      // The context registry is empty
-      expect(contextProvidersRegistry.size).toBe(0);
-
       analyticsClient.registerContextProvider({
         name: 'contextProviderA',
         schema: {
@@ -620,26 +434,26 @@ describe('AnalyticsClient', () => {
         context$,
       });
 
-      const globalContextPromise = lastValueFrom(globalContext$.pipe(take(4), toArray()));
-      context$.next({ a_field: true });
-      // The size of the registry grows on the first emission
-      expect(contextProvidersRegistry.size).toBe(1);
+      expect(registerContextProviderSpy).toHaveBeenCalledTimes(1);
+      expect(registerContextProviderSpy).toHaveBeenCalledWith({
+        name: 'contextProviderA',
+        schema: {
+          a_field: {
+            type: 'boolean',
+            _meta: {
+              description: 'a_field description',
+            },
+          },
+        },
+        context$,
+      });
+    });
 
-      context$.next({ a_field: true });
-      // Still in the registry
-      expect(contextProvidersRegistry.size).toBe(1);
-      context$.complete();
-      // Still in the registry
-      expect(contextProvidersRegistry.size).toBe(1);
+    test('Removes a context provider', () => {
+      const removeContextProviderSpy = jest.spyOn(contextService, 'removeContextProvider');
       analyticsClient.removeContextProvider('contextProviderA');
-      // The context provider is removed from the registry
-      expect(contextProvidersRegistry.size).toBe(0);
-      await expect(globalContextPromise).resolves.toEqual([
-        {}, // Original empty state
-        { a_field: true },
-        { a_field: true },
-        {},
-      ]);
+      expect(removeContextProviderSpy).toHaveBeenCalledTimes(1);
+      expect(removeContextProviderSpy).toHaveBeenCalledWith('contextProviderA');
     });
   });
 
@@ -718,6 +532,7 @@ describe('AnalyticsClient', () => {
       expect(optInMock1).toHaveBeenCalledWith(false); // Using global and shipper-specific
       expect(optInMock2).toHaveBeenCalledWith(false); // Using only global
     });
+
     test('Catches error in the shipper.optIn method', () => {
       optInMock1.mockImplementation(() => {
         throw new Error('Something went terribly wrong');
@@ -818,90 +633,93 @@ describe('AnalyticsClient', () => {
       ]);
     });
 
-    test('Sends events from the internal queue when there are shippers and an opt-in response is true', async () => {
-      const telemetryCounterPromise = lastValueFrom(
-        analyticsClient.telemetryCounter$.pipe(take(3 + 2), toArray()) // Waiting for 3 enqueued + 2 batch-shipped events
-      );
+    test(
+      'Sends events from the internal queue when there are shippers and an opt-in response is true',
+      fakeSchedulers(async (advance) => {
+        const telemetryCounterPromise = lastValueFrom(
+          analyticsClient.telemetryCounter$.pipe(take(3 + 2), toArray()) // Waiting for 3 enqueued + 2 batch-shipped events
+        );
 
-      // Send multiple events of 1 type to test the grouping logic as well
-      analyticsClient.reportEvent('event-type-a', { a_field: 'a' });
-      analyticsClient.reportEvent('event-type-b', { b_field: 100 });
-      analyticsClient.reportEvent('event-type-a', { a_field: 'b' });
+        // Send multiple events of 1 type to test the grouping logic as well
+        analyticsClient.reportEvent('event-type-a', { a_field: 'a' });
+        analyticsClient.reportEvent('event-type-b', { b_field: 100 });
+        analyticsClient.reportEvent('event-type-a', { a_field: 'b' });
 
-      // As proven in the previous test, the events are still enqueued.
-      // Let's register a shipper and opt-in to test the dequeue logic.
-      const reportEventsMock = jest.fn();
-      analyticsClient.registerShipper(MockedShipper1, { reportEventsMock });
-      analyticsClient.optIn({ global: { enabled: true } });
-      await delay(10);
+        // As proven in the previous test, the events are still enqueued.
+        // Let's register a shipper and opt-in to test the dequeue logic.
+        const reportEventsMock = jest.fn();
+        analyticsClient.registerShipper(MockedShipper1, { reportEventsMock });
+        analyticsClient.optIn({ global: { enabled: true } });
+        advance(10);
 
-      expect(reportEventsMock).toHaveBeenCalledTimes(2);
-      expect(reportEventsMock).toHaveBeenNthCalledWith(1, [
-        {
-          context: {},
-          event_type: 'event-type-a',
-          properties: { a_field: 'a' },
-          timestamp: expect.any(String),
-        },
-        {
-          context: {},
-          event_type: 'event-type-a',
-          properties: { a_field: 'b' },
-          timestamp: expect.any(String),
-        },
-      ]);
-      expect(reportEventsMock).toHaveBeenNthCalledWith(2, [
-        {
-          context: {},
-          event_type: 'event-type-b',
-          properties: { b_field: 100 },
-          timestamp: expect.any(String),
-        },
-      ]);
+        expect(reportEventsMock).toHaveBeenCalledTimes(2);
+        expect(reportEventsMock).toHaveBeenNthCalledWith(1, [
+          {
+            context: {},
+            event_type: 'event-type-a',
+            properties: { a_field: 'a' },
+            timestamp: expect.any(String),
+          },
+          {
+            context: {},
+            event_type: 'event-type-a',
+            properties: { a_field: 'b' },
+            timestamp: expect.any(String),
+          },
+        ]);
+        expect(reportEventsMock).toHaveBeenNthCalledWith(2, [
+          {
+            context: {},
+            event_type: 'event-type-b',
+            properties: { b_field: 100 },
+            timestamp: expect.any(String),
+          },
+        ]);
 
-      // Expect 3 enqueued events, and 2 sent_to_shipper batched requests
-      await expect(telemetryCounterPromise).resolves.toEqual([
-        {
-          type: 'enqueued',
-          source: 'client',
-          event_type: 'event-type-a',
-          code: 'enqueued',
-          count: 1,
-        },
-        {
-          type: 'enqueued',
-          source: 'client',
-          event_type: 'event-type-b',
-          code: 'enqueued',
-          count: 1,
-        },
-        {
-          type: 'enqueued',
-          source: 'client',
-          event_type: 'event-type-a',
-          code: 'enqueued',
-          count: 1,
-        },
-        {
-          type: 'sent_to_shipper',
-          source: 'client',
-          event_type: 'event-type-a',
-          code: 'OK',
-          count: 2,
-        },
-        {
-          type: 'sent_to_shipper',
-          source: 'client',
-          event_type: 'event-type-b',
-          code: 'OK',
-          count: 1,
-        },
-      ]);
-    });
+        // Expect 3 enqueued events, and 2 sent_to_shipper batched requests
+        await expect(telemetryCounterPromise).resolves.toEqual([
+          {
+            type: 'enqueued',
+            source: 'client',
+            event_type: 'event-type-a',
+            code: 'enqueued',
+            count: 1,
+          },
+          {
+            type: 'enqueued',
+            source: 'client',
+            event_type: 'event-type-b',
+            code: 'enqueued',
+            count: 1,
+          },
+          {
+            type: 'enqueued',
+            source: 'client',
+            event_type: 'event-type-a',
+            code: 'enqueued',
+            count: 1,
+          },
+          {
+            type: 'sent_to_shipper',
+            source: 'client',
+            event_type: 'event-type-a',
+            code: 'OK',
+            count: 2,
+          },
+          {
+            type: 'sent_to_shipper',
+            source: 'client',
+            event_type: 'event-type-b',
+            code: 'OK',
+            count: 1,
+          },
+        ]);
+      })
+    );
 
     test('Discards events from the internal queue when there are shippers and an opt-in response is false', async () => {
       const telemetryCounterPromise = lastValueFrom(
-        analyticsClient.telemetryCounter$.pipe(take(3), toArray()) // Waiting for 3 enqueued
+        analyticsClient.telemetryCounter$.pipe(take(4), toArray()) // Waiting for 4 enqueued
       );
 
       // Send multiple events of 1 type to test the grouping logic as well
@@ -913,9 +731,12 @@ describe('AnalyticsClient', () => {
       analyticsClient.registerShipper(MockedShipper1, { reportEventsMock });
       analyticsClient.optIn({ global: { enabled: false } });
 
+      // Report event after opted-out
+      analyticsClient.reportEvent('event-type-a', { a_field: 'c' });
+
       expect(reportEventsMock).toHaveBeenCalledTimes(0);
 
-      // Expect 2 enqueued, but not shipped
+      // Expect 4 enqueued, but not shipped
       await expect(telemetryCounterPromise).resolves.toEqual([
         {
           type: 'enqueued',
@@ -938,12 +759,22 @@ describe('AnalyticsClient', () => {
           code: 'enqueued',
           count: 1,
         },
+        {
+          type: 'enqueued',
+          source: 'client',
+          event_type: 'event-type-a',
+          code: 'enqueued',
+          count: 1,
+        },
       ]);
+
+      // eslint-disable-next-line dot-notation
+      expect(analyticsClient['internalEventQueue$'].observed).toBe(false);
     });
 
-    test('Discards only one type of the enqueued events based on event_type config', async () => {
+    test('Discards events from the internal queue when there are no shippers and an opt-in response is false', async () => {
       const telemetryCounterPromise = lastValueFrom(
-        analyticsClient.telemetryCounter$.pipe(take(3 + 1), toArray()) // Waiting for 3 enqueued + 1 batch-shipped events
+        analyticsClient.telemetryCounter$.pipe(take(4), toArray()) // Waiting for 4 enqueued
       );
 
       // Send multiple events of 1 type to test the grouping logic as well
@@ -951,25 +782,12 @@ describe('AnalyticsClient', () => {
       analyticsClient.reportEvent('event-type-b', { b_field: 100 });
       analyticsClient.reportEvent('event-type-a', { a_field: 'b' });
 
-      const reportEventsMock = jest.fn();
-      analyticsClient.registerShipper(MockedShipper1, { reportEventsMock });
-      analyticsClient.optIn({
-        global: { enabled: true },
-        event_types: { ['event-type-a']: { enabled: false } },
-      });
-      await delay(10);
+      analyticsClient.optIn({ global: { enabled: false } });
 
-      expect(reportEventsMock).toHaveBeenCalledTimes(1);
-      expect(reportEventsMock).toHaveBeenNthCalledWith(1, [
-        {
-          context: {},
-          event_type: 'event-type-b',
-          properties: { b_field: 100 },
-          timestamp: expect.any(String),
-        },
-      ]);
+      // Report event after opted-out
+      analyticsClient.reportEvent('event-type-a', { a_field: 'c' });
 
-      // Expect 3 enqueued events, and 1 sent_to_shipper batched request
+      // Expect 4 enqueued, but not shipped
       await expect(telemetryCounterPromise).resolves.toEqual([
         {
           type: 'enqueued',
@@ -993,198 +811,271 @@ describe('AnalyticsClient', () => {
           count: 1,
         },
         {
-          type: 'sent_to_shipper',
+          type: 'enqueued',
           source: 'client',
-          event_type: 'event-type-b',
-          code: 'OK',
+          event_type: 'event-type-a',
+          code: 'enqueued',
           count: 1,
         },
       ]);
+
+      // eslint-disable-next-line dot-notation
+      expect(analyticsClient['internalEventQueue$'].observed).toBe(false);
     });
 
-    test('Discards the event at the shipper level (for a specific event)', async () => {
-      const telemetryCounterPromise = lastValueFrom(
-        analyticsClient.telemetryCounter$.pipe(take(3 + 2), toArray()) // Waiting for 3 enqueued + 2 batch-shipped events
-      );
+    test(
+      'Discards only one type of the enqueued events based on event_type config',
+      fakeSchedulers(async (advance) => {
+        const telemetryCounterPromise = lastValueFrom(
+          analyticsClient.telemetryCounter$.pipe(take(3 + 1), toArray()) // Waiting for 3 enqueued + 1 batch-shipped events
+        );
 
-      // Send multiple events of 1 type to test the grouping logic as well
-      analyticsClient.reportEvent('event-type-a', { a_field: 'a' });
-      analyticsClient.reportEvent('event-type-b', { b_field: 100 });
-      analyticsClient.reportEvent('event-type-a', { a_field: 'b' });
+        // Send multiple events of 1 type to test the grouping logic as well
+        analyticsClient.reportEvent('event-type-a', { a_field: 'a' });
+        analyticsClient.reportEvent('event-type-b', { b_field: 100 });
+        analyticsClient.reportEvent('event-type-a', { a_field: 'b' });
 
-      // Register 2 shippers and set 1 of them as disabled for event-type-a
-      const reportEventsMock1 = jest.fn();
-      const reportEventsMock2 = jest.fn();
-      analyticsClient.registerShipper(MockedShipper1, { reportEventsMock: reportEventsMock1 });
-      analyticsClient.registerShipper(MockedShipper2, { reportEventsMock: reportEventsMock2 });
-      analyticsClient.optIn({
-        global: { enabled: true },
-        event_types: {
-          ['event-type-a']: { enabled: true, shippers: { [MockedShipper2.shipperName]: false } },
-        },
-      });
-      await delay(10);
+        const reportEventsMock = jest.fn();
+        analyticsClient.registerShipper(MockedShipper1, { reportEventsMock });
+        analyticsClient.optIn({
+          global: { enabled: true },
+          event_types: { ['event-type-a']: { enabled: false } },
+        });
+        advance(10);
 
-      expect(reportEventsMock1).toHaveBeenCalledTimes(2);
-      expect(reportEventsMock1).toHaveBeenNthCalledWith(1, [
-        {
-          context: {},
-          event_type: 'event-type-a',
-          properties: { a_field: 'a' },
-          timestamp: expect.any(String),
-        },
-        {
-          context: {},
-          event_type: 'event-type-a',
-          properties: { a_field: 'b' },
-          timestamp: expect.any(String),
-        },
-      ]);
-      expect(reportEventsMock1).toHaveBeenNthCalledWith(2, [
-        {
-          context: {},
-          event_type: 'event-type-b',
-          properties: { b_field: 100 },
-          timestamp: expect.any(String),
-        },
-      ]);
-      expect(reportEventsMock2).toHaveBeenCalledTimes(1);
-      expect(reportEventsMock2).toHaveBeenNthCalledWith(1, [
-        {
-          context: {},
-          event_type: 'event-type-b',
-          properties: { b_field: 100 },
-          timestamp: expect.any(String),
-        },
-      ]);
+        expect(reportEventsMock).toHaveBeenCalledTimes(1);
+        expect(reportEventsMock).toHaveBeenNthCalledWith(1, [
+          {
+            context: {},
+            event_type: 'event-type-b',
+            properties: { b_field: 100 },
+            timestamp: expect.any(String),
+          },
+        ]);
 
-      // Expect 3 enqueued events, and 2 sent_to_shipper batched requests
-      await expect(telemetryCounterPromise).resolves.toEqual([
-        {
-          type: 'enqueued',
-          source: 'client',
-          event_type: 'event-type-a',
-          code: 'enqueued',
-          count: 1,
-        },
-        {
-          type: 'enqueued',
-          source: 'client',
-          event_type: 'event-type-b',
-          code: 'enqueued',
-          count: 1,
-        },
-        {
-          type: 'enqueued',
-          source: 'client',
-          event_type: 'event-type-a',
-          code: 'enqueued',
-          count: 1,
-        },
-        {
-          type: 'sent_to_shipper',
-          source: 'client',
-          event_type: 'event-type-a',
-          code: 'OK',
-          count: 2,
-        },
-        {
-          type: 'sent_to_shipper',
-          source: 'client',
-          event_type: 'event-type-b',
-          code: 'OK',
-          count: 1,
-        },
-      ]);
-    });
+        // Expect 3 enqueued events, and 1 sent_to_shipper batched request
+        await expect(telemetryCounterPromise).resolves.toEqual([
+          {
+            type: 'enqueued',
+            source: 'client',
+            event_type: 'event-type-a',
+            code: 'enqueued',
+            count: 1,
+          },
+          {
+            type: 'enqueued',
+            source: 'client',
+            event_type: 'event-type-b',
+            code: 'enqueued',
+            count: 1,
+          },
+          {
+            type: 'enqueued',
+            source: 'client',
+            event_type: 'event-type-a',
+            code: 'enqueued',
+            count: 1,
+          },
+          {
+            type: 'sent_to_shipper',
+            source: 'client',
+            event_type: 'event-type-b',
+            code: 'OK',
+            count: 1,
+          },
+        ]);
+      })
+    );
 
-    test('Discards all the events at the shipper level (globally disabled)', async () => {
-      const telemetryCounterPromise = lastValueFrom(
-        analyticsClient.telemetryCounter$.pipe(take(3 + 2), toArray()) // Waiting for 3 enqueued + 2 batch-shipped events
-      );
+    test(
+      'Discards the event at the shipper level (for a specific event)',
+      fakeSchedulers(async (advance) => {
+        const telemetryCounterPromise = lastValueFrom(
+          analyticsClient.telemetryCounter$.pipe(take(3 + 2), toArray()) // Waiting for 3 enqueued + 2 batch-shipped events
+        );
 
-      // Send multiple events of 1 type to test the grouping logic as well
-      analyticsClient.reportEvent('event-type-a', { a_field: 'a' });
-      analyticsClient.reportEvent('event-type-b', { b_field: 100 });
-      analyticsClient.reportEvent('event-type-a', { a_field: 'b' });
+        // Send multiple events of 1 type to test the grouping logic as well
+        analyticsClient.reportEvent('event-type-a', { a_field: 'a' });
+        analyticsClient.reportEvent('event-type-b', { b_field: 100 });
+        analyticsClient.reportEvent('event-type-a', { a_field: 'b' });
 
-      // Register 2 shippers and set 1 of them as globally disabled
-      const reportEventsMock1 = jest.fn();
-      const reportEventsMock2 = jest.fn();
-      analyticsClient.registerShipper(MockedShipper1, { reportEventsMock: reportEventsMock1 });
-      analyticsClient.registerShipper(MockedShipper2, { reportEventsMock: reportEventsMock2 });
-      analyticsClient.optIn({
-        global: { enabled: true, shippers: { [MockedShipper2.shipperName]: false } },
-        event_types: {
-          ['event-type-a']: { enabled: true },
-        },
-      });
-      await delay(10);
+        // Register 2 shippers and set 1 of them as disabled for event-type-a
+        const reportEventsMock1 = jest.fn();
+        const reportEventsMock2 = jest.fn();
+        analyticsClient.registerShipper(MockedShipper1, { reportEventsMock: reportEventsMock1 });
+        analyticsClient.registerShipper(MockedShipper2, { reportEventsMock: reportEventsMock2 });
+        analyticsClient.optIn({
+          global: { enabled: true },
+          event_types: {
+            ['event-type-a']: { enabled: true, shippers: { [MockedShipper2.shipperName]: false } },
+          },
+        });
+        advance(10);
 
-      expect(reportEventsMock1).toHaveBeenCalledTimes(2);
-      expect(reportEventsMock1).toHaveBeenNthCalledWith(1, [
-        {
-          context: {},
-          event_type: 'event-type-a',
-          properties: { a_field: 'a' },
-          timestamp: expect.any(String),
-        },
-        {
-          context: {},
-          event_type: 'event-type-a',
-          properties: { a_field: 'b' },
-          timestamp: expect.any(String),
-        },
-      ]);
-      expect(reportEventsMock1).toHaveBeenNthCalledWith(2, [
-        {
-          context: {},
-          event_type: 'event-type-b',
-          properties: { b_field: 100 },
-          timestamp: expect.any(String),
-        },
-      ]);
-      expect(reportEventsMock2).toHaveBeenCalledTimes(0);
+        expect(reportEventsMock1).toHaveBeenCalledTimes(2);
+        expect(reportEventsMock1).toHaveBeenNthCalledWith(1, [
+          {
+            context: {},
+            event_type: 'event-type-a',
+            properties: { a_field: 'a' },
+            timestamp: expect.any(String),
+          },
+          {
+            context: {},
+            event_type: 'event-type-a',
+            properties: { a_field: 'b' },
+            timestamp: expect.any(String),
+          },
+        ]);
+        expect(reportEventsMock1).toHaveBeenNthCalledWith(2, [
+          {
+            context: {},
+            event_type: 'event-type-b',
+            properties: { b_field: 100 },
+            timestamp: expect.any(String),
+          },
+        ]);
+        expect(reportEventsMock2).toHaveBeenCalledTimes(1);
+        expect(reportEventsMock2).toHaveBeenNthCalledWith(1, [
+          {
+            context: {},
+            event_type: 'event-type-b',
+            properties: { b_field: 100 },
+            timestamp: expect.any(String),
+          },
+        ]);
 
-      // Expect 3 enqueued events, and 2 sent_to_shipper batched requests
-      await expect(telemetryCounterPromise).resolves.toEqual([
-        {
-          type: 'enqueued',
-          source: 'client',
-          event_type: 'event-type-a',
-          code: 'enqueued',
-          count: 1,
-        },
-        {
-          type: 'enqueued',
-          source: 'client',
-          event_type: 'event-type-b',
-          code: 'enqueued',
-          count: 1,
-        },
-        {
-          type: 'enqueued',
-          source: 'client',
-          event_type: 'event-type-a',
-          code: 'enqueued',
-          count: 1,
-        },
-        {
-          type: 'sent_to_shipper',
-          source: 'client',
-          event_type: 'event-type-a',
-          code: 'OK',
-          count: 2,
-        },
-        {
-          type: 'sent_to_shipper',
-          source: 'client',
-          event_type: 'event-type-b',
-          code: 'OK',
-          count: 1,
-        },
-      ]);
-    });
+        // Expect 3 enqueued events, and 2 sent_to_shipper batched requests
+        await expect(telemetryCounterPromise).resolves.toEqual([
+          {
+            type: 'enqueued',
+            source: 'client',
+            event_type: 'event-type-a',
+            code: 'enqueued',
+            count: 1,
+          },
+          {
+            type: 'enqueued',
+            source: 'client',
+            event_type: 'event-type-b',
+            code: 'enqueued',
+            count: 1,
+          },
+          {
+            type: 'enqueued',
+            source: 'client',
+            event_type: 'event-type-a',
+            code: 'enqueued',
+            count: 1,
+          },
+          {
+            type: 'sent_to_shipper',
+            source: 'client',
+            event_type: 'event-type-a',
+            code: 'OK',
+            count: 2,
+          },
+          {
+            type: 'sent_to_shipper',
+            source: 'client',
+            event_type: 'event-type-b',
+            code: 'OK',
+            count: 1,
+          },
+        ]);
+      })
+    );
+
+    test(
+      'Discards all the events at the shipper level (globally disabled)',
+      fakeSchedulers(async (advance) => {
+        const telemetryCounterPromise = lastValueFrom(
+          analyticsClient.telemetryCounter$.pipe(take(3 + 2), toArray()) // Waiting for 3 enqueued + 2 batch-shipped events
+        );
+
+        // Send multiple events of 1 type to test the grouping logic as well
+        analyticsClient.reportEvent('event-type-a', { a_field: 'a' });
+        analyticsClient.reportEvent('event-type-b', { b_field: 100 });
+        analyticsClient.reportEvent('event-type-a', { a_field: 'b' });
+
+        // Register 2 shippers and set 1 of them as globally disabled
+        const reportEventsMock1 = jest.fn();
+        const reportEventsMock2 = jest.fn();
+        analyticsClient.registerShipper(MockedShipper1, { reportEventsMock: reportEventsMock1 });
+        analyticsClient.registerShipper(MockedShipper2, { reportEventsMock: reportEventsMock2 });
+        analyticsClient.optIn({
+          global: { enabled: true, shippers: { [MockedShipper2.shipperName]: false } },
+          event_types: {
+            ['event-type-a']: { enabled: true },
+          },
+        });
+        advance(10);
+
+        expect(reportEventsMock1).toHaveBeenCalledTimes(2);
+        expect(reportEventsMock1).toHaveBeenNthCalledWith(1, [
+          {
+            context: {},
+            event_type: 'event-type-a',
+            properties: { a_field: 'a' },
+            timestamp: expect.any(String),
+          },
+          {
+            context: {},
+            event_type: 'event-type-a',
+            properties: { a_field: 'b' },
+            timestamp: expect.any(String),
+          },
+        ]);
+        expect(reportEventsMock1).toHaveBeenNthCalledWith(2, [
+          {
+            context: {},
+            event_type: 'event-type-b',
+            properties: { b_field: 100 },
+            timestamp: expect.any(String),
+          },
+        ]);
+        expect(reportEventsMock2).toHaveBeenCalledTimes(0);
+
+        // Expect 3 enqueued events, and 2 sent_to_shipper batched requests
+        await expect(telemetryCounterPromise).resolves.toEqual([
+          {
+            type: 'enqueued',
+            source: 'client',
+            event_type: 'event-type-a',
+            code: 'enqueued',
+            count: 1,
+          },
+          {
+            type: 'enqueued',
+            source: 'client',
+            event_type: 'event-type-b',
+            code: 'enqueued',
+            count: 1,
+          },
+          {
+            type: 'enqueued',
+            source: 'client',
+            event_type: 'event-type-a',
+            code: 'enqueued',
+            count: 1,
+          },
+          {
+            type: 'sent_to_shipper',
+            source: 'client',
+            event_type: 'event-type-a',
+            code: 'OK',
+            count: 2,
+          },
+          {
+            type: 'sent_to_shipper',
+            source: 'client',
+            event_type: 'event-type-b',
+            code: 'OK',
+            count: 1,
+          },
+        ]);
+      })
+    );
 
     test('Discards incoming events when opt-in response is false', async () => {
       // Set OptIn and shipper first to test the "once-set up" scenario

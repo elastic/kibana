@@ -168,6 +168,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const ruleType = await pageObjects.ruleDetailsUI.getRuleType();
         expect(ruleType).to.be(`Always Firing`);
 
+        const owner = await pageObjects.ruleDetailsUI.getAPIKeyOwner();
+        expect(owner).to.be('elastic');
+
         const { connectorType } = await pageObjects.ruleDetailsUI.getActionsLabels();
         expect(connectorType).to.be(`Slack`);
       });

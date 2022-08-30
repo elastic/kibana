@@ -24,3 +24,10 @@ buildkite-agent artifact upload "dependencies-$FULL_VERSION.csv"
 buildkite-agent artifact upload "dependencies-$FULL_VERSION.csv.sha512.txt"
 buildkite-agent artifact upload 'i18n/*.json'
 cd -
+
+if [ -d .beats ]; then
+  cd .beats
+  buildkite-agent artifact upload 'metricbeat-*'
+  buildkite-agent artifact upload 'filebeat-*'
+  cd -
+fi

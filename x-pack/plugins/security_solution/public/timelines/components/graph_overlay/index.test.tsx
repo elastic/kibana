@@ -203,7 +203,7 @@ describe('GraphOverlay', () => {
         </TestProviders>
       );
 
-      expect(useStateSyncingActionsMock.mock.calls[0][0].indices).toEqual(mockIndexNames);
+      expect(useStateSyncingActionsMock.mock.calls[0][0].indices).toEqual(mockIndexNames.sort());
     });
 
     test('it renders session view controls', () => {

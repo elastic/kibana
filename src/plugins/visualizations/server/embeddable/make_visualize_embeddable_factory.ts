@@ -26,6 +26,7 @@ import {
   commonAddDropLastBucketIntoTSVBModel714Above,
   commonRemoveMarkdownLessFromTSVB,
   commonUpdatePieVisApi,
+  commonPreserveOldLegendSizeDefault,
 } from '../migrations/visualization_common_migrations';
 import { SerializedVis } from '../../common';
 
@@ -97,6 +98,11 @@ const byValueUpdatePieVisApi = (state: SerializableRecord) => ({
   savedVis: commonUpdatePieVisApi(state.savedVis),
 });
 
+const byValuePreserveOldLegendSizeDefault = (state: SerializableRecord) => ({
+  ...state,
+  savedVis: commonPreserveOldLegendSizeDefault(state.savedVis),
+});
+
 const getEmbeddedVisualizationSearchSourceMigrations = (
   searchSourceMigrations: MigrateFunctionsObject
 ) =>
@@ -144,6 +150,7 @@ export const makeVisualizeEmbeddableFactory =
             '7.17.0': (state) => flow(byValueAddDropLastBucketIntoTSVBModel714Above)(state),
             '8.0.0': (state) => flow(byValueRemoveMarkdownLessFromTSVB)(state),
             '8.1.0': (state) => flow(byValueUpdatePieVisApi)(state),
+            '8.3.0': (state) => flow(byValuePreserveOldLegendSizeDefault)(state),
           }
         ),
     };

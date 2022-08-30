@@ -6,4 +6,3 @@
  */
 
 export { getEndpointAuthzInitialState, calculateEndpointAuthz } from './authz';
-export { getEndpointAuthzInitialStateMock } from './mocks';

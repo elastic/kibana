@@ -62,7 +62,6 @@ function DefaultEditor({
     if (!visRef.current) {
       return;
     }
-
     embeddableHandler.render(visRef.current).then(() => {
       setTimeout(async () => {
         eventEmitter.emit('embeddableRendered');
