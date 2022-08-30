@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { mockHttpValues, mockKibanaValues } from '../../../__mocks__/kea_logic';
+import '../../../__mocks__/kea_logic';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiBasicTable, EuiIcon } from '@elastic/eui';
+import { EuiBasicTable } from '@elastic/eui';
 
 import { AnalyticsCollection } from '../../../../../common/types/analytics';
 
@@ -20,9 +20,6 @@ import { EuiLinkTo } from '../../../shared/react_router_helpers';
 import { AnalyticsCollectionTable } from './analytics_collection_table';
 
 describe('AnalyticsCollectionTable', () => {
-  const { http } = mockHttpValues;
-  const { navigateToUrl } = mockKibanaValues;
-
   const analyticsCollections: AnalyticsCollection[] = [
     { event_retention_day_length: 180, id: '1', name: 'example' },
   ];
@@ -44,5 +41,4 @@ describe('AnalyticsCollectionTable', () => {
 
     expect(wrapper.dive().find(EuiLinkTo).first().prop('to')).toBe('/collections/example');
   });
-
 });
