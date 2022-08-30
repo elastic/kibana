@@ -42,26 +42,4 @@ describe('getValidFilters', () => {
     expect(filters[6].meta.disabled).toBe(true);
     expect(filters[7].meta.disabled).toBe(true);
   });
-
-  it('should update the data view ID for non scripted filters', () => {
-    const filters = getValidFilters(dataView, [
-      filter('123', false, false),
-      filter('123', true, false),
-      filter('123', false, true),
-      filter('123', true, true),
-      filter('321', false, false),
-      filter('321', true, false),
-      filter('321', false, true),
-      filter('321', true, true),
-    ]);
-    expect(filters.length).toBe(8);
-    expect(filters[0].meta.index).toBe('123');
-    expect(filters[1].meta.index).toBe('123');
-    expect(filters[2].meta.index).toBe('123');
-    expect(filters[3].meta.index).toBe('123');
-    expect(filters[4].meta.index).toBe('123');
-    expect(filters[5].meta.index).toBe('123');
-    expect(filters[6].meta.index).toBe('321');
-    expect(filters[7].meta.index).toBe('321');
-  });
 });
