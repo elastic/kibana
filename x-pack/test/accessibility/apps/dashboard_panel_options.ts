@@ -6,6 +6,8 @@
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
+import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
+
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const a11y = getService('a11y');
   const dashboardPanelActions = getService('dashboardPanelActions');
