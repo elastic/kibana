@@ -376,9 +376,11 @@ describe('create()', () => {
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       validate: {
-        config: schema.object({
-          param1: schema.string(),
-        }),
+        config: {
+          schema: schema.object({
+            param1: schema.string(),
+          }),
+        },
       },
       executor,
     });
@@ -1949,9 +1951,11 @@ describe('update()', () => {
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       validate: {
-        config: schema.object({
-          param1: schema.string(),
-        }),
+        config: {
+          schema: schema.object({
+            param1: schema.string(),
+          }),
+        },
       },
       executor,
     });
