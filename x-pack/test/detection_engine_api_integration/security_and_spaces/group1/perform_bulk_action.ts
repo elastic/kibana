@@ -440,13 +440,13 @@ export default ({ getService }: FtrProviderContext): void => {
             resultingTags: ['tag3'],
           },
           {
-            caseName: '3 existing tags - 2 new tags = 3 tags',
+            caseName: '3 existing tags - 2 other tags(none of them) = 3 tags',
             existingTags: ['tag1', 'tag2', 'tag3'],
             tagsToDelete: ['tag4', 'tag5'],
             resultingTags: ['tag1', 'tag2', 'tag3'],
           },
           {
-            caseName: '3 existing tags - 1 of them - 2 new tags = 2 tags',
+            caseName: '3 existing tags - 1 of them - 2 other tags(none of them) = 2 tags',
             existingTags: ['tag1', 'tag2', 'tag3'],
             tagsToDelete: ['tag3', 'tag4', 'tag5'],
             resultingTags: ['tag1', 'tag2'],
@@ -514,13 +514,13 @@ export default ({ getService }: FtrProviderContext): void => {
             resultingTags: ['tag1', 'tag2', 'tag3'],
           },
           {
-            caseName: '3 existing tags + 2 new tags = 5 tags',
+            caseName: '3 existing tags + 2 other tags(none of them) = 5 tags',
             existingTags: ['tag1', 'tag2', 'tag3'],
             addedTags: ['tag4', 'tag5'],
             resultingTags: ['tag1', 'tag2', 'tag3', 'tag4', 'tag5'],
           },
           {
-            caseName: '3 existing tags + 1 of them + 2 new tags = 5 tags',
+            caseName: '3 existing tags + 1 of them + 2 other tags(none of them) = 5 tags',
             existingTags: ['tag1', 'tag2', 'tag3'],
             addedTags: ['tag4', 'tag5', 'tag1'],
             resultingTags: ['tag1', 'tag2', 'tag3', 'tag4', 'tag5'],

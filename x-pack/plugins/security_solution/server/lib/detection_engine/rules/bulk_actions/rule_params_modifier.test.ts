@@ -62,7 +62,7 @@ describe('ruleParamsModifier', () => {
           },
         ],
         [
-          '3 existing patterns + 2 new patterns = 5 patterns',
+          '3 existing patterns + 2 other patterns(none of them) = 5 patterns',
           {
             existingIndexPatterns: ['index-1-*', 'index-2-*', 'index-3-*'],
             indexPatternsToAdd: ['index-4-*', 'index-5-*'],
@@ -76,7 +76,7 @@ describe('ruleParamsModifier', () => {
           },
         ],
         [
-          '3 existing patterns + 1 of them + 2 new patterns = 5 patterns',
+          '3 existing patterns + 1 of them + 2 other patterns(none of them) = 5 patterns',
           {
             existingIndexPatterns: ['index-1-*', 'index-2-*', 'index-3-*'],
             indexPatternsToAdd: ['index-3-*', 'index-4-*', 'index-5-*'],
@@ -125,7 +125,7 @@ describe('ruleParamsModifier', () => {
           },
         ],
         [
-          '3 existing patterns - 2 new patterns = 3 patterns',
+          '3 existing patterns - 2 other patterns(none of them) = 3 patterns',
           {
             existingIndexPatterns: ['index-1-*', 'index-2-*', 'index-3-*'],
             indexPatternsToDelete: ['index-4-*', 'index-5-*'],
@@ -133,7 +133,7 @@ describe('ruleParamsModifier', () => {
           },
         ],
         [
-          '3 existing patterns - 1 of them - 2 new patterns = 2 patterns',
+          '3 existing patterns - 1 of them - 2 other patterns(none of them) = 2 patterns',
           {
             existingIndexPatterns: ['index-1-*', 'index-2-*', 'index-3-*'],
             indexPatternsToDelete: ['index-3-*', 'index-4-*', 'index-5-*'],
