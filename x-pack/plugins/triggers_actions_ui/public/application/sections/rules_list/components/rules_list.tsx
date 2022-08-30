@@ -88,7 +88,7 @@ import { RulesListTable, convertRulesToTableItems } from './rules_list_table';
 import { RulesListAutoRefresh } from './rules_list_auto_refresh';
 import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
 import { RulesListVisibleColumns } from './rules_list_column_selector';
-
+import { BulkSnoozeModalWithApi as BulkSnoozeModal } from './bulk_snooze_modal';
 const ENTER_KEY = 13;
 
 interface RulesPageContainerState {
@@ -203,6 +203,8 @@ export const RulesList = ({
   });
 
   const [rulesToDelete, setRulesToDelete] = useState<string[]>([]);
+  const [rulesToSnooze, setRulesToSnooze] = useState<RuleTableItem[]>([]);
+  const [rulesToSchedule, setRulesToSchedule] = useState<RuleTableItem[]>([]);
 
   const hasAnyAuthorizedRuleType = useMemo(() => {
     return ruleTypesState.isInitialized && ruleTypesState.data.size > 0;
@@ -570,6 +572,8 @@ export const RulesList = ({
                 }}
                 setRulesToDelete={setRulesToDelete}
                 setRulesToUpdateAPIKey={setRulesToUpdateAPIKey}
+                setRulesToSnooze={setRulesToSnooze}
+                setRulesToSchedule={setRulesToSchedule}
               />
             </BulkOperationPopover>
           </EuiFlexItem>
@@ -866,6 +870,19 @@ export const RulesList = ({
         })}
         setIsLoadingState={(isLoading: boolean) => {
           setRulesState({ ...rulesState, isLoading });
+        }}
+      />
+      <BulkSnoozeModal
+        rulesToSnooze={rulesToSnooze}
+        rulesToSchedule={rulesToSchedule}
+        onClose={() => {
+          setRulesToSnooze([]);
+          setRulesToSchedule([]);
+        }}
+        onSave={async () => {
+          setRulesToSnooze([]);
+          setRulesToSchedule([]);
+          await loadData();
         }}
       />
       <UpdateApiKeyModalConfirmation

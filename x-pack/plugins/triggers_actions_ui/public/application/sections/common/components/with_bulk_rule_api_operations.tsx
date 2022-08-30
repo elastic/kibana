@@ -40,7 +40,9 @@ import {
   loadActionErrorLog,
   LoadActionErrorLogProps,
   snoozeRule,
+  snoozeRules,
   unsnoozeRule,
+  unsnoozeRules,
 } from '../../../lib/rule_api';
 import { useKibana } from '../../../../common/lib/kibana';
 
@@ -74,7 +76,9 @@ export interface ComponentOpts {
   getHealth: () => Promise<AlertingFrameworkHealth>;
   resolveRule: (id: Rule['id']) => Promise<ResolvedRule>;
   snoozeRule: (rule: Rule, snoozeSchedule: SnoozeSchedule) => Promise<void>;
+  snoozeRules: (rules: Rule[], snoozeSchedule: SnoozeSchedule) => Promise<void>;
   unsnoozeRule: (rule: Rule, scheduleIds?: string[]) => Promise<void>;
+  unsnoozeRules: (rules: Rule[], scheduleIds?: string[]) => Promise<void>;
 }
 
 export type PropsWithOptionalApiHandlers<T> = Omit<T, keyof ComponentOpts> & Partial<ComponentOpts>;
@@ -162,8 +166,14 @@ export function withBulkRuleOperations<T>(
         snoozeRule={async (rule: Rule, snoozeSchedule: SnoozeSchedule) => {
           return await snoozeRule({ http, id: rule.id, snoozeSchedule });
         }}
+        snoozeRules={async (rules: Rule[], snoozeSchedule: SnoozeSchedule) => {
+          return await snoozeRules({ http, ids: rules.map((item) => item.id), snoozeSchedule });
+        }}
         unsnoozeRule={async (rule: Rule, scheduleIds?: string[]) => {
           return await unsnoozeRule({ http, id: rule.id, scheduleIds });
+        }}
+        unsnoozeRules={async (rules: Rule[], scheduleIds?: string[]) => {
+          return await unsnoozeRules({ http, ids: rules.map((item) => item.id), scheduleIds });
         }}
       />
     );

@@ -34,3 +34,26 @@ export async function snoozeRule({
     }),
   });
 }
+
+export async function snoozeRules({
+  ids,
+  snoozeSchedule,
+  http,
+}: {
+  ids: string[];
+  snoozeSchedule: SnoozeSchedule;
+  http: HttpSetup;
+}): Promise<void> {
+  await http.post(`${INTERNAL_BASE_ALERTING_API_PATH}/rules/_bulk_edit`, {
+    body: JSON.stringify({
+      ids,
+      operations: [
+        {
+          operation: 'set',
+          field: 'snoozeSchedule',
+          value: rewriteSnoozeSchedule(snoozeSchedule),
+        },
+      ],
+    }),
+  });
+}

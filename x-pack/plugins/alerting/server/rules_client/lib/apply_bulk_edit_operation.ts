@@ -44,7 +44,7 @@ export const applyBulkEditOperation = <R extends object>(operation: BulkEditOper
       set(
         rule,
         operation.field,
-        deleteItemsFromArray(get(rule, operation.field) ?? [], operation.value)
+        deleteItemsFromArray(get(rule, operation.field) ?? [], operation.value || [])
       );
       break;
   }

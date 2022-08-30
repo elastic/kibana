@@ -28,6 +28,6 @@ export { unmuteAlertInstance } from './unmute_alert';
 export { unmuteRule, unmuteRules } from './unmute';
 export { updateRule } from './update';
 export { resolveRule } from './resolve_rule';
-export { snoozeRule } from './snooze';
-export { unsnoozeRule } from './unsnooze';
+export { snoozeRule, snoozeRules } from './snooze';
+export { unsnoozeRule, unsnoozeRules } from './unsnooze';
 export { updateAPIKey } from './update_api_key';

@@ -227,7 +227,7 @@ export interface FindOptions extends IndexType {
 
 export type BulkEditFields = keyof Pick<
   Rule,
-  'actions' | 'tags' | 'schedule' | 'throttle' | 'notifyWhen'
+  'actions' | 'tags' | 'schedule' | 'throttle' | 'notifyWhen' | 'snoozeSchedule'
 >;
 
 export type BulkEditOperation =
@@ -255,6 +255,16 @@ export type BulkEditOperation =
       operation: 'set';
       field: Extract<BulkEditFields, 'notifyWhen'>;
       value: Rule['notifyWhen'];
+    }
+  | {
+      operation: 'set';
+      field: Extract<BulkEditFields, 'snoozeSchedule'>;
+      value: RuleSnoozeSchedule;
+    }
+  | {
+      operation: 'delete';
+      field: Extract<BulkEditFields, 'snoozeSchedule'>;
+      value: string[] | undefined;
     };
 
 type RuleParamsModifier<Params extends RuleTypeParams> = (params: Params) => Promise<Params>;
@@ -1674,11 +1684,26 @@ export class RulesClient {
                 rule.references || []
               ),
             };
+
             for (const operation of operations) {
               switch (operation.field) {
                 case 'actions':
                   await this.validateActions(ruleType, operation.value);
                   ruleActions = applyBulkEditOperation(operation, ruleActions);
+                  break;
+                case 'snoozeSchedule':
+                  if (operation.operation === 'set') {
+                    attributes = {
+                      ...attributes,
+                      ...getSnoozeAttributes(attributes, operation.value),
+                    };
+                  }
+                  if (operation.operation === 'delete') {
+                    attributes = {
+                      ...attributes,
+                      ...getUnsnoozeAttributes(attributes, operation.value),
+                    };
+                  }
                   break;
                 default:
                   attributes = applyBulkEditOperation(operation, attributes);
@@ -2221,7 +2246,6 @@ export class RulesClient {
       'alert',
       id
     );
-    const { id: snoozeId, duration } = snoozeSchedule;
 
     try {
       await this.authorization.ensureAuthorized({
@@ -2255,20 +2279,7 @@ export class RulesClient {
 
     this.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
-    // If duration is -1, instead mute all
-    const newAttrs =
-      duration === -1
-        ? {
-            muteAll: true,
-            snoozeSchedule: clearUnscheduledSnooze(attributes),
-          }
-        : {
-            snoozeSchedule: (snoozeId
-              ? clearScheduledSnoozesById(attributes, [snoozeId])
-              : clearUnscheduledSnooze(attributes)
-            ).concat(snoozeSchedule),
-            muteAll: false,
-          };
+    const newAttrs = getSnoozeAttributes(attributes, snoozeSchedule);
 
     const updateAttributes = this.updateMeta({
       ...newAttrs,
@@ -2336,15 +2347,12 @@ export class RulesClient {
     );
 
     this.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
-    const snoozeSchedule = scheduleIds
-      ? clearScheduledSnoozesById(attributes, scheduleIds)
-      : clearCurrentActiveSnooze(attributes);
+    const newAttrs = getUnsnoozeAttributes(attributes, scheduleIds);
 
     const updateAttributes = this.updateMeta({
-      snoozeSchedule,
+      ...newAttrs,
       updatedBy: await this.getUserName(),
       updatedAt: new Date().toISOString(),
-      ...(!scheduleIds ? { muteAll: false } : {}),
     });
     const updateOptions = { version };
 
@@ -3020,20 +3028,50 @@ function parseDate(dateString: string | undefined, propertyName: string, default
   return parsedDate;
 }
 
-function clearUnscheduledSnooze(attributes: { snoozeSchedule?: RuleSnooze }) {
+function getSnoozeAttributes(attributes: RawRule, snoozeSchedule: RuleSnoozeSchedule) {
+  // If duration is -1, instead mute all
+  const { id: snoozeId, duration } = snoozeSchedule;
+
+  if (duration === -1) {
+    return {
+      muteAll: true,
+      snoozeSchedule: clearUnscheduledSnooze(attributes),
+    };
+  }
+  return {
+    snoozeSchedule: (snoozeId
+      ? clearScheduledSnoozesById(attributes, [snoozeId])
+      : clearUnscheduledSnooze(attributes)
+    ).concat(snoozeSchedule),
+    muteAll: false,
+  };
+}
+
+function getUnsnoozeAttributes(attributes: RawRule, scheduleIds?: string[]) {
+  const snoozeSchedule = scheduleIds
+    ? clearScheduledSnoozesById(attributes, scheduleIds)
+    : clearCurrentActiveSnooze(attributes);
+
+  return {
+    snoozeSchedule,
+    ...(!scheduleIds ? { muteAll: false } : {}),
+  };
+}
+
+function clearUnscheduledSnooze(attributes: RawRule) {
   // Clear any snoozes that have no ID property. These are "simple" snoozes created with the quick UI, e.g. snooze for 3 days starting now
   return attributes.snoozeSchedule
     ? attributes.snoozeSchedule.filter((s) => typeof s.id !== 'undefined')
     : [];
 }
 
-function clearScheduledSnoozesById(attributes: { snoozeSchedule?: RuleSnooze }, ids: string[]) {
+function clearScheduledSnoozesById(attributes: RawRule, ids: string[]) {
   return attributes.snoozeSchedule
     ? attributes.snoozeSchedule.filter((s) => s.id && !ids.includes(s.id))
     : [];
 }
 
-function clearCurrentActiveSnooze(attributes: { snoozeSchedule?: RuleSnooze; muteAll: boolean }) {
+function clearCurrentActiveSnooze(attributes: RawRule) {
   // First attempt to cancel a simple (unscheduled) snooze
   const clearedUnscheduledSnoozes = clearUnscheduledSnooze(attributes);
   // Now clear any scheduled snoozes that are currently active and never recur

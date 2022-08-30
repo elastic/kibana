@@ -22,3 +22,26 @@ export async function unsnoozeRule({
     }),
   });
 }
+
+export async function unsnoozeRules({
+  ids,
+  http,
+  scheduleIds,
+}: {
+  ids: string[];
+  http: HttpSetup;
+  scheduleIds?: string[];
+}): Promise<void> {
+  await http.post(`${INTERNAL_BASE_ALERTING_API_PATH}/rules/_bulk_edit`, {
+    body: JSON.stringify({
+      ids,
+      operations: [
+        {
+          operation: 'delete',
+          field: 'snoozeSchedule',
+          value: scheduleIds,
+        },
+      ],
+    }),
+  });
+}
