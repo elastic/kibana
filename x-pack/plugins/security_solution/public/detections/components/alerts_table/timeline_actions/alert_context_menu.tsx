@@ -29,6 +29,7 @@ import { inputsSelectors } from '../../../../common/store';
 import { TimelineId } from '../../../../../common/types';
 import type { AlertData, EcsHit } from '../../../../common/components/exceptions/types';
 import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
+import { ALERTS_QUERY_NAMES } from '../../../containers/detection_engine/alerts/constants';
 import { useSignalIndex } from '../../../containers/detection_engine/alerts/use_signal_index';
 import { EventFiltersFlyout } from '../../../../management/pages/event_filters/view/components/event_filters_flyout';
 import { useAlertsActions } from './use_alerts_actions';
@@ -315,6 +316,7 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
   const { loading: isLoadingAlertData, data } = useQueryAlerts<EcsHit, {}>({
     query: buildGetAlertByIdQuery(eventId),
     indexName: signalIndexName,
+    queryName: ALERTS_QUERY_NAMES.ADD_EXCEPTION_FLYOUT,
   });
 
   const enrichedAlert: AlertData | undefined = useMemo(() => {
