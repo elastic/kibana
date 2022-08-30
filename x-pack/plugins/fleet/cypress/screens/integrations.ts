@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-export const ADD_POLICY_BTN = 'addIntegrationPolicyButton';
+export const ADD_INTEGRATION_POLICY_BTN = 'addIntegrationPolicyButton';
 export const CREATE_PACKAGE_POLICY_SAVE_BTN = 'createPackagePolicySaveButton';
-export const INTEGRATIONS_CARD = '.euiCard__titleButton';
+// export const INTEGRATIONS_CARD = '.euiCard__titleButton';
 
 export const INTEGRATION_NAME_LINK = 'integrationNameLink';
 export const AGENT_POLICY_NAME_LINK = 'agentPolicyNameLink';
@@ -27,3 +27,10 @@ export const LATEST_VERSION = 'latestVersion';
 
 export const PACKAGE_VERSION = 'packageVersionText';
 export const INTEGRATIONS_SEARCHBAR_INPUT = 'epmList.searchBar';
+
+export const SETTINGS = {
+  INSTALL_ASSETS_BTN: 'installAssetsButton',
+  UNINSTALL_ASSETS_BTN: 'uninstallAssetsButton',
+};
+
+export const getIntegrationCard = (integration: string) => `integration-card:epr:${integration}`;

@@ -173,7 +173,7 @@ describe('View agents', () => {
 
       cy.get('button').contains('Healthy').click();
 
-      cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).find('tr').should('have.length', 17);
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).find('tr').should('have.length', 18);
       cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).contains('agent-1');
     });
 

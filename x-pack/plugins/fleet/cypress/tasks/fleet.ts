@@ -13,6 +13,7 @@ import {
   AGENT_FLYOUT_CLOSE_BUTTON,
   STANDALONE_TAB,
 } from '../screens/fleet';
+import { LOADING_SPINNER } from '../screens/navigation';
 
 export function createAgentPolicy() {
   cy.intercept({
@@ -34,7 +35,7 @@ export function navigateToTab(tab: string) {
 
 export function navigateToAgentPolicy(name: string) {
   cy.get('.euiLink').contains(name).click();
-  cy.get('.euiLoadingSpinner').should('not.exist');
+  cy.get(LOADING_SPINNER).should('not.exist');
 }
 
 export function navigateToEnrollmentTokens() {

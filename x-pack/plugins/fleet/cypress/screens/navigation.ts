@@ -7,3 +7,5 @@
 
 export const TOGGLE_NAVIGATION_BTN = 'toggleNavButton';
 export const NAV_APP_LINK = 'collapsibleNavAppLink';
+export const LOADING_SPINNER = '.euiLoadingSpinner';
+export const TOAST_CLOSE_BTN = 'toastCloseButton';

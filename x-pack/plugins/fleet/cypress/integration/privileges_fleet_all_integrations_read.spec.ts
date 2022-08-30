@@ -24,7 +24,7 @@ import {
   AGENT_POLICY_SAVE_INTEGRATION,
   ADD_PACKAGE_POLICY_BTN,
 } from '../screens/fleet';
-import { ADD_POLICY_BTN, AGENT_POLICY_NAME_LINK } from '../screens/integrations';
+import { ADD_INTEGRATION_POLICY_BTN, AGENT_POLICY_NAME_LINK } from '../screens/integrations';
 
 const rolesToCreate = [FleetAllIntegrReadRole];
 const usersToCreate = [FleetAllIntegrReadUser];
@@ -82,7 +82,7 @@ describe('When the user has All privilege for Fleet but Read for integrations', 
     it('are visible but cannot be added', () => {
       loginWithUserAndWaitForPage(INTEGRATIONS, FleetAllIntegrReadUser);
       cy.getBySel('integration-card:epr:apache').click();
-      cy.getBySel(ADD_POLICY_BTN).should('be.disabled');
+      cy.getBySel(ADD_INTEGRATION_POLICY_BTN).should('be.disabled');
     });
   });
 });

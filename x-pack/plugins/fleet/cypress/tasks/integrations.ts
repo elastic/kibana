@@ -6,24 +6,27 @@
  */
 
 import {
-  ADD_POLICY_BTN,
+  ADD_INTEGRATION_POLICY_BTN,
   CONFIRM_MODAL_BTN,
   CREATE_PACKAGE_POLICY_SAVE_BTN,
   FLYOUT_CLOSE_BTN_SEL,
 } from '../screens/integrations';
 
+import { AGENT_POLICY_SYSTEM_MONITORING_CHECKBOX } from '../screens/fleet';
+import { TOAST_CLOSE_BTN } from '../screens/navigation';
+
 export const addIntegration = ({ useExistingPolicy } = { useExistingPolicy: false }) => {
-  cy.getBySel(ADD_POLICY_BTN).click();
+  cy.getBySel(ADD_INTEGRATION_POLICY_BTN).click();
   if (useExistingPolicy) {
     cy.get('#existing').click();
   } else {
     // speeding up creating with unchecking system and agent integration
-    cy.getBySel('agentPolicyFormSystemMonitoringCheckbox').uncheck({ force: true });
+    cy.getBySel(AGENT_POLICY_SYSTEM_MONITORING_CHECKBOX).uncheck({ force: true });
     cy.getBySel('advancedOptionsBtn').find('.euiAccordion__button').click();
     cy.get('*[id^="logs_"]').uncheck({ force: true });
     cy.get('*[id^="metrics_"]').uncheck({ force: true });
   }
-  cy.getBySel('toastCloseButton').click();
+  cy.getBySel(TOAST_CLOSE_BTN).click();
   cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN).click();
   // sometimes agent is assigned to default policy, sometimes not
   cy.getBySel(CONFIRM_MODAL_BTN).click();

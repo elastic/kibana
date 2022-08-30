@@ -365,6 +365,7 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo, theme$ }: Prop
                     <EuiFlexItem>
                       <div>
                         <UninstallButton
+                          data-test-subj="uninstallAssetsButton"
                           {...packageInfo}
                           numOfAssets={numOfAssets}
                           latestVersion={latestVersion}

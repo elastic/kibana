@@ -6,6 +6,7 @@
  */
 
 import { CONFIRM_MODAL_BTN } from '../screens/integrations';
+import { TOAST_CLOSE_BTN } from '../screens/navigation';
 
 describe('Edit settings', () => {
   beforeEach(() => {
@@ -25,7 +26,7 @@ describe('Edit settings', () => {
     });
 
     cy.visit('/app/fleet/settings');
-    cy.getBySel('toastCloseButton').click();
+    cy.getBySel(TOAST_CLOSE_BTN).click();
   });
 
   it('should update Fleet server hosts', () => {

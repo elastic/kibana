@@ -40,6 +40,7 @@ export const AGENT_POLICY_FLYOUT_CREATE_BUTTON = 'createAgentPolicyFlyoutBtn';
 export const ENROLLMENT_TOKENS_CREATE_TOKEN_BUTTON = 'createEnrollmentTokenButton';
 export const ENROLLMENT_TOKENS_CREATE_TOKEN_NAME_FIELD = 'createEnrollmentTokenNameField';
 export const SETTINGS_FLEET_SERVER_HOST_HEADING = 'fleetServerHostHeader';
+export const AGENT_POLICY_SYSTEM_MONITORING_CHECKBOX = 'agentPolicyFormSystemMonitoringCheckbox';
 
 export const AGENT_BINARY_SOURCES_TABLE = 'AgentDownloadSourcesTable';
 export const AGENT_BINARY_SOURCES_TABLE_ACTIONS = {

@@ -16,7 +16,7 @@ import {
   AGENT_POLICY_NAME_LINK,
   CONFIRM_MODAL_BTN,
   FLYOUT_CLOSE_BTN_SEL,
-  INTEGRATIONS_CARD,
+  getIntegrationCard,
   INTEGRATION_NAME_LINK,
   LATEST_VERSION,
   PACKAGE_VERSION,
@@ -24,7 +24,9 @@ import {
   SETTINGS_TAB,
   UPDATE_PACKAGE_BTN,
   INTEGRATIONS_SEARCHBAR_INPUT,
+  SETTINGS,
 } from '../screens/integrations';
+import { LOADING_SPINNER } from '../screens/navigation';
 import { ADD_PACKAGE_POLICY_BTN } from '../screens/fleet';
 import { cleanupAgentPolicies } from '../tasks/cleanup';
 
@@ -35,19 +37,8 @@ describe('Add Integration - Real API', () => {
     cleanupAgentPolicies();
   });
 
-  it('should install integration without policy', () => {
-    cy.visit('/app/integrations/detail/tomcat/settings');
-
-    cy.get('.euiButton').contains('Install Apache Tomcat assets').click();
-    cy.get('.euiCallOut').contains('This action will install 1 assets');
-    cy.getBySel(CONFIRM_MODAL_BTN).click();
-
-    cy.get('.euiLoadingSpinner').should('not.exist');
-
-    cy.get('.euiButton').contains('Uninstall Apache Tomcat').click();
-    cy.getBySel(CONFIRM_MODAL_BTN).click();
-    cy.get('.euiLoadingSpinner').should('not.exist');
-    cy.get('.euiButton').contains('Install Apache Tomcat assets');
+  afterEach(() => {
+    deleteIntegrations(integration);
   });
 
   function addAndVerifyIntegration() {
@@ -66,27 +57,48 @@ describe('Add Integration - Real API', () => {
 
     navigateTo(INTEGRATIONS);
     cy.wait('@packages');
-    cy.get('.euiLoadingSpinner').should('not.exist');
+    cy.get(LOADING_SPINNER).should('not.exist');
     cy.get(INTEGRATIONS_SEARCHBAR_INPUT).type('Apache');
-    cy.get(INTEGRATIONS_CARD).contains(integration).click();
+    cy.get(getIntegrationCard(integration)).contains(integration).click();
     addIntegration();
     cy.getBySel(INTEGRATION_NAME_LINK).contains('apache-1');
   }
 
-  afterEach(() => {
-    deleteIntegrations(integration);
+  it('should install integration without policy', () => {
+    cy.visit('/app/integrations/detail/tomcat/settings');
+
+    cy.get(SETTINGS.INSTALL_ASSETS_BTN).click();
+    cy.get('.euiCallOut').contains('This action will install 1 assets');
+    cy.getBySel(CONFIRM_MODAL_BTN).click();
+
+    cy.get(LOADING_SPINNER).should('not.exist');
+
+    cy.get(SETTINGS.UNINSTALL_ASSETS_BTN).click();
+    cy.getBySel(CONFIRM_MODAL_BTN).click();
+    cy.get(LOADING_SPINNER).should('not.exist');
+    cy.get(SETTINGS.INSTALL_ASSETS_BTN).should('exist');
   });
+
   it('should display Apache integration in the Policies list once installed ', () => {
     addAndVerifyIntegration();
     cy.getBySel(AGENT_POLICY_NAME_LINK).contains('Agent policy 1');
   });
 
   it('should add integration to policy', () => {
-    cy.request('/api/fleet/agent_policies').then((response: any) => {
-      const agentPolicyId = response.body.items
-        .filter((policy: any) => policy.name === 'Agent policy 1')
-        .map((policy: any) => policy.id);
+    const agentPolicyId = 'policy_1';
+    cy.request({
+      method: 'POST',
+      url: `/api/fleet/agent_policies/${agentPolicyId}'`,
+      body: {
+        name: 'Agent policy 1',
+        description: 'desc',
+        namespace: 'default',
+        monitoring_enabled: ['logs', 'metrics'],
+      },
+      headers: { 'kbn-xsrf': 'kibana' },
+    });
 
+    cy.request('/api/fleet/agent_policies').then((response: any) => {
       cy.visit(`/app/fleet/policies/${agentPolicyId}`);
 
       cy.intercept(
@@ -104,9 +116,10 @@ describe('Add Integration - Real API', () => {
 
       cy.getBySel(ADD_PACKAGE_POLICY_BTN).click();
       cy.wait('@packages');
-      cy.get('.euiLoadingSpinner').should('not.exist');
+
+      cy.get(LOADING_SPINNER).should('not.exist');
       cy.get(INTEGRATIONS_SEARCHBAR_INPUT).type('Apache');
-      cy.get(INTEGRATIONS_CARD).contains(integration).click();
+      cy.get(getIntegrationCard(integration)).contains(integration).click();
       addIntegration({ useExistingPolicy: true });
       cy.get('.euiBasicTable-loading').should('not.exist');
       cy.get('.euiTitle').contains('Agent policy 1');
