@@ -68,12 +68,13 @@ export interface GlobalGraphqlQuery extends GlobalGenericQuery {
   id: string;
   refetch: null | Refetch | RefetchWithParams;
 }
+
 export interface GlobalKqlQuery extends GlobalGenericQuery {
   id: 'kql';
   refetch: RefetchKql;
 }
 
-export type GlobalQuery = GlobalGraphqlQuery | GlobalKqlQuery;
+export type GlobalQuery = GlobalKqlQuery | GlobalGraphqlQuery;
 
 export interface InputsRange {
   timerange: TimeRange;
@@ -89,10 +90,15 @@ export interface InputsRange {
 export interface LinkTo {
   linkTo: InputsModelId[];
 }
+export type InputsRangeTimeOnly = Pick<InputsRange, 'timerange' | 'linkTo' | 'policy'>;
+
+export type Inputs = InputsRange | InputsRangeTimeOnly;
 
 export interface InputsModel {
   global: InputsRange;
   timeline: InputsRange;
+  // TODO: remove ? when isSocTrendsEnabled feature flag is removed
+  socTrends?: InputsRangeTimeOnly;
 }
 export interface UrlInputsModelInputs {
   linkTo: InputsModelId[];
@@ -101,4 +107,6 @@ export interface UrlInputsModelInputs {
 export interface UrlInputsModel {
   global: UrlInputsModelInputs;
   timeline: UrlInputsModelInputs;
+  // TODO: remove ? when isSocTrendsEnabled feature flag is removed
+  socTrends?: UrlInputsModelInputs;
 }

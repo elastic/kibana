@@ -71,6 +71,12 @@ export const translations = {
         defaultMessage: 'View alert details',
       }
     ),
+    viewAlertDetailsPageButtonText: i18n.translate(
+      'xpack.observability.alertsTable.viewAlertDetailsPageButtonText',
+      {
+        defaultMessage: 'View alert page',
+      }
+    ),
   },
   alertsFlyout: {
     statusLabel: i18n.translate('xpack.observability.alertsFlyout.statusLabel', {
