@@ -62,7 +62,7 @@ export interface BfetchServerSetup {
 export interface BfetchServerStart {}
 
 const streamingHeaders = {
-  'Content-Type': 'text/event-stream'
+  'Content-Type': 'text/event-stream',
   Connection: 'keep-alive',
   'Transfer-Encoding': 'chunked',
 };
