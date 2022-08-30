@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { isDeepStrictEqual } from 'util';
 import { Agent as HttpAgent } from 'http';
 import { Agent as HttpsAgent } from 'https';
 import { ConnectionOptions, HttpAgentOptions, UndiciAgentOptions } from '@elastic/elasticsearch';
@@ -17,21 +16,30 @@ export type AgentFactory = (connectionOpts: ConnectionOptions) => NetworkAgent;
 
 /** @internal **/
 export class AgentManager {
-  // store Agent instances by protocol => type => configuration, e.g.:
-  // {
-  //   'https:': {
-  //     data: [[dataAgentConfig1, dataAgentInstance1], [dataAgentConfig2, dataAgentInstance2]]
-  //     monitoring: [[monitoringAgentConfig1, monitoringAgentInstance1]]
-  //     }
-  // }
-  private agentStore: Record<string, Record<string, Array<[HttpAgentOptions, NetworkAgent]>>>;
+  /**
+   * Store Agent instances by protocol => type => ES client creation date, e.g.:
+   * {
+   *   'https:': {
+   *     data: (1661863534353 => dataAgentInstance1, 1661863564280 => dataAgentInstance2)
+   *     monitoring: (1661863651758 => monitoringAgentInstance1)
+   *   }
+   * }
+   *
+   * Note that:
+   * - a new ES Client will be creating a new Cluster.
+   * - a Cluster will be creating a new ConnectionPool.
+   * - a ConnectionPool creates a bunch of HttpConnections (one per ES node).
+   * Even if we could reuse the Agent, new connections would established anyway,
+   * and the pool would not rely in the existing ones.
+   */
+  private agentStore: Record<string, Record<string, Map<number, NetworkAgent>>>;
   private logger: Logger;
 
   constructor(
     logger: Logger,
     private defaultAgentConfig: HttpAgentOptions = {
       keepAlive: true,
-      keepAliveMsecs: 1000,
+      keepAliveMsecs: 50000,
       maxSockets: 256,
       maxFreeSockets: 256,
       scheduling: 'lifo',
@@ -53,9 +61,8 @@ export class AgentManager {
       return agentOptions;
     }
 
+    const createdAt = Date.now();
     const validAgentConfig = assertValidAgentConfig(agentOptions);
-
-    const baseConfig = Object.assign({}, this.defaultAgentConfig, validAgentConfig);
 
     return (connectionOpts: ConnectionOptions): NetworkAgent => {
       const agentsByType = this.agentStore[connectionOpts.url.protocol];
@@ -68,33 +75,38 @@ export class AgentManager {
       const firstOfType = !agentInstances;
 
       if (firstOfType) {
-        agentInstances = [];
+        agentInstances = new Map();
         agentsByType[type] = agentInstances;
       }
 
-      const currentConfig = Object.assign({}, baseConfig, connectionOpts.tls);
-
-      const agentTuple = agentInstances.find(([config]) =>
-        isDeepStrictEqual(config, currentConfig)
+      const currentAgentConfig = Object.assign(
+        {},
+        this.defaultAgentConfig,
+        validAgentConfig,
+        connectionOpts.tls
       );
 
+      const agentTuple = agentInstances.get(createdAt);
+
       if (agentTuple) {
-        return agentTuple[1];
+        return agentTuple;
       }
 
+      // we did NOT find an agent for the same protocol, type and Client instance => create one
       if (!firstOfType) {
         this.logger.warn(
-          `Requesting HTTP Agent of type ${type} with a new configuration. This is not optimal since the existing instance cannot be reused`
+          `Requesting HTTP Agent of type ${type} for a new ES Client.
+          This is not optimal since the existing instance cannot be reused.
+          Please consider reusing the existing ES Client instance instead`
         );
       }
-      // we did NOT find an agent for the same protocol, type and configuration => create one
       const agent =
         connectionOpts.url.protocol === 'http:'
-          ? new HttpAgent(currentConfig)
-          : new HttpsAgent(currentConfig);
+          ? new HttpAgent(currentAgentConfig)
+          : new HttpsAgent(currentAgentConfig);
 
-      // add the new tuple [config, agentInstance] to the list of tuples for that type
-      agentInstances.push([currentConfig, agent]);
+      // add the new Agent instance (createdAt => instance) to the Map of instances of that type
+      agentInstances.set(createdAt, agent);
 
       return agent;
     };
