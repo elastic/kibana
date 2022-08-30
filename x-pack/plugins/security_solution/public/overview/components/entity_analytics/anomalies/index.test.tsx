@@ -9,6 +9,7 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { EntityAnalyticsAnomalies } from '.';
 import type { AnomaliesCount } from '../../../../common/components/ml/anomaly/use_anomalies_search';
+import { AnomalyJobStatus } from '../../../../common/components/ml/anomaly/use_anomalies_search';
 
 import { TestProviders } from '../../../../common/mock';
 
@@ -18,9 +19,15 @@ const mockUseNotableAnomaliesSearch = jest.fn().mockReturnValue({
   refetch: jest.fn(),
 });
 
-jest.mock('../../../../common/components/ml/anomaly/use_anomalies_search', () => ({
-  useNotableAnomaliesSearch: () => mockUseNotableAnomaliesSearch(),
-}));
+jest.mock('../../../../common/components/ml/anomaly/use_anomalies_search', () => {
+  const original = jest.requireActual(
+    '../../../../common/components/ml/anomaly/use_anomalies_search'
+  );
+  return {
+    ...original,
+    useNotableAnomaliesSearch: () => mockUseNotableAnomaliesSearch(),
+  };
+});
 
 jest.mock('@kbn/ml-plugin/public', () => {
   const original = jest.requireActual('@kbn/ml-plugin/public');
@@ -57,9 +64,9 @@ describe('EntityAnalyticsAnomalies', () => {
   it('renders enabled jobs', () => {
     const jobCount: AnomaliesCount = {
       jobId: 'v3_windows_anomalous_script',
-      name: 'test job name',
+      name: 'v3_windows_anomalous_script',
       count: 9999,
-      status: 'enabled',
+      status: AnomalyJobStatus.enabled,
     };
 
     mockUseNotableAnomaliesSearch.mockReturnValue({
@@ -83,9 +90,9 @@ describe('EntityAnalyticsAnomalies', () => {
   it('renders disabled jobs', () => {
     const jobCount: AnomaliesCount = {
       jobId: 'v3_windows_anomalous_script',
-      name: 'test job name',
+      name: 'v3_windows_anomalous_script',
       count: 0,
-      status: 'disabled',
+      status: AnomalyJobStatus.disabled,
     };
 
     mockUseNotableAnomaliesSearch.mockReturnValue({
@@ -108,9 +115,9 @@ describe('EntityAnalyticsAnomalies', () => {
   it('renders uninstalled jobs', () => {
     const jobCount: AnomaliesCount = {
       jobId: 'v3_windows_anomalous_script',
-      name: 'test job name',
+      name: 'v3_windows_anomalous_script',
       count: 0,
-      status: 'uninstalled',
+      status: AnomalyJobStatus.uninstalled,
     };
 
     mockUseNotableAnomaliesSearch.mockReturnValue({
@@ -132,9 +139,9 @@ describe('EntityAnalyticsAnomalies', () => {
   it('renders failed jobs', () => {
     const jobCount: AnomaliesCount = {
       jobId: 'v3_windows_anomalous_script',
-      name: 'test job name',
+      name: 'v3_windows_anomalous_script',
       count: 0,
-      status: 'failed',
+      status: AnomalyJobStatus.failed,
     };
 
     mockUseNotableAnomaliesSearch.mockReturnValue({
@@ -156,9 +163,9 @@ describe('EntityAnalyticsAnomalies', () => {
   it('renders empty count column while loading', () => {
     const jobCount: AnomaliesCount = {
       jobId: 'v3_windows_anomalous_script',
-      name: 'test job name',
+      name: 'v3_windows_anomalous_script',
       count: 0,
-      status: 'failed',
+      status: AnomalyJobStatus.failed,
     };
 
     mockUseNotableAnomaliesSearch.mockReturnValue({
