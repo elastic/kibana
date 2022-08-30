@@ -224,7 +224,7 @@ describe('convertMetricAggregationToColumn', () => {
       [
         SUPPORTED_METRICS.percentile,
         { series, metric: { id, field, type: TSVB_METRIC_TYPES.PERCENTILE }, dataView },
-        { metaValue: 50, window: '10m' },
+        { metaValue: 50, reducedTimeRange: '10m' },
       ],
       {
         meta: { metricId: 'some-id' },
@@ -259,7 +259,7 @@ describe('convertMetricAggregationToColumn', () => {
       [
         SUPPORTED_METRICS.percentile_rank,
         { series, metric: { id, field, type: TSVB_METRIC_TYPES.PERCENTILE_RANK }, dataView },
-        { metaValue: 50, window: '10m' },
+        { metaValue: 50, reducedTimeRange: '10m' },
       ],
       {
         meta: { metricId: 'some-id' },
