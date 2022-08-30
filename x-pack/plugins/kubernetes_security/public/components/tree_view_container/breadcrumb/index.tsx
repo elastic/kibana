@@ -7,38 +7,38 @@
 
 import React, { useCallback } from 'react';
 import { EuiButtonEmpty, EuiIcon, EuiToolTip } from '@elastic/eui';
-import { TreeNavSelection, KubernetesCollection } from '../../../types';
+import { KubernetesCollectionMap, KubernetesCollection } from '../../../types';
 import { useStyles } from './styles';
 import { TreeViewIcon } from '../tree_view_icon';
 import { KUBERNETES_COLLECTION_ICONS_PROPS } from '../helpers';
 
 interface BreadcrumbDeps {
-  treeNavSelection: TreeNavSelection;
-  onSelect: (selection: TreeNavSelection) => void;
+  treeNavSelection: Partial<KubernetesCollectionMap>;
+  onSelect: (selection: Partial<KubernetesCollectionMap>) => void;
 }
 
 export const Breadcrumb = ({ treeNavSelection, onSelect }: BreadcrumbDeps) => {
   const styles = useStyles();
   const onBreadCrumbClick = useCallback(
-    (collectionType: string) => {
+    (collectionType: KubernetesCollection) => {
       const selectionCopy = { ...treeNavSelection };
       switch (collectionType) {
-        case KubernetesCollection.clusterId: {
+        case 'clusterId': {
           onSelect({
-            [KubernetesCollection.clusterId]: treeNavSelection[KubernetesCollection.clusterId],
-            [KubernetesCollection.clusterName]: treeNavSelection[KubernetesCollection.clusterName],
+            clusterId: treeNavSelection.clusterId,
+            clusterName: treeNavSelection.clusterName,
           });
           break;
         }
-        case KubernetesCollection.namespace:
-        case KubernetesCollection.node: {
-          delete selectionCopy[KubernetesCollection.pod];
-          delete selectionCopy[KubernetesCollection.containerImage];
+        case 'namespace':
+        case 'node': {
+          delete selectionCopy.pod;
+          delete selectionCopy.containerImage;
           onSelect(selectionCopy);
           break;
         }
-        case KubernetesCollection.pod: {
-          delete selectionCopy[KubernetesCollection.containerImage];
+        case 'pod': {
+          delete selectionCopy.containerImage;
           onSelect(selectionCopy);
           break;
         }
@@ -55,9 +55,8 @@ export const Breadcrumb = ({ treeNavSelection, onSelect }: BreadcrumbDeps) => {
       hasRightArrow: boolean = true
     ) => {
       const content =
-        collectionType === KubernetesCollection.clusterId
-          ? treeNavSelection[KubernetesCollection.clusterName] ||
-            treeNavSelection[KubernetesCollection.clusterId]
+        collectionType === 'clusterId'
+          ? treeNavSelection.clusterName || treeNavSelection.clusterId
           : treeNavSelection[collectionType];
 
       return (
@@ -85,42 +84,39 @@ export const Breadcrumb = ({ treeNavSelection, onSelect }: BreadcrumbDeps) => {
     ]
   );
 
-  if (!treeNavSelection[KubernetesCollection.clusterId]) {
+  if (!treeNavSelection.clusterId) {
     return null;
   }
 
   return (
     <div css={styles.breadcrumb}>
       {renderBreadcrumbLink(
-        KubernetesCollection.clusterId,
+        'clusterId',
         <TreeViewIcon {...KUBERNETES_COLLECTION_ICONS_PROPS.clusterId} />,
-        !(
-          treeNavSelection[KubernetesCollection.namespace] ||
-          treeNavSelection[KubernetesCollection.node]
-        ),
+        !(treeNavSelection.namespace || treeNavSelection.node),
         false
       )}
-      {treeNavSelection[KubernetesCollection.namespace] &&
+      {treeNavSelection.namespace &&
         renderBreadcrumbLink(
-          KubernetesCollection.namespace,
+          'namespace',
           <TreeViewIcon {...KUBERNETES_COLLECTION_ICONS_PROPS.namespace} />,
-          !treeNavSelection[KubernetesCollection.pod]
+          !treeNavSelection.pod
         )}
-      {treeNavSelection[KubernetesCollection.node] &&
+      {treeNavSelection.node &&
         renderBreadcrumbLink(
-          KubernetesCollection.node,
+          'node',
           <TreeViewIcon {...KUBERNETES_COLLECTION_ICONS_PROPS.node} />,
-          !treeNavSelection[KubernetesCollection.pod]
+          !treeNavSelection.pod
         )}
-      {treeNavSelection[KubernetesCollection.pod] &&
+      {treeNavSelection.pod &&
         renderBreadcrumbLink(
-          KubernetesCollection.pod,
+          'pod',
           <TreeViewIcon {...KUBERNETES_COLLECTION_ICONS_PROPS.pod} />,
-          !treeNavSelection[KubernetesCollection.containerImage]
+          !treeNavSelection.containerImage
         )}
-      {treeNavSelection[KubernetesCollection.containerImage] &&
+      {treeNavSelection.containerImage &&
         renderBreadcrumbLink(
-          KubernetesCollection.containerImage,
+          'containerImage',
           <TreeViewIcon {...KUBERNETES_COLLECTION_ICONS_PROPS.containerImage} />,
           true
         )}
