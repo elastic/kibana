@@ -7,8 +7,8 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { isEqual } from 'lodash';
-import { useEsSearch, EsSearchResponse } from '@kbn/observability-plugin/public';
-import { useDispatch, useSelector } from 'react-redux';
+import { useEsSearch } from '@kbn/observability-plugin/public';
+import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { Ping, MonitorOverviewItem } from '../../../../common/runtime_types';
 import {
