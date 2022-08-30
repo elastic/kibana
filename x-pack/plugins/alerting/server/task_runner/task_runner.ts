@@ -710,7 +710,7 @@ export class TaskRunner<
       timings: this.timer.toJson(),
     });
 
-    const result = {
+    return {
       state: map<RuleTaskStateAndMetrics, ElasticsearchError, RuleTaskState>(
         stateWithMetrics,
         (ruleRunStateWithMetrics: RuleTaskStateAndMetrics) =>
@@ -754,8 +754,6 @@ export class TaskRunner<
       }),
       monitoring,
     };
-
-    return result;
   }
 
   async cancel(): Promise<void> {
