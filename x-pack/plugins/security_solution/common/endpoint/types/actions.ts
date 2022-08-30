@@ -293,6 +293,19 @@ export interface ActionDetails<TOutputContent extends object = object> {
   completedAt: string | undefined;
   /** The output data from an action stored in an object where the key is the agent id */
   outputs?: Record<string, ActionResponseOutput<TOutputContent>>;
+  /**
+   * A map by Agent ID holding information about the action for the specific agent.
+   * Helpful when action is sent to multiple agents
+   */
+  agentState: Record<
+    string,
+    {
+      isCompleted: boolean;
+      wasSuccessful: boolean;
+      errors: undefined | string[];
+      completedAt: string | undefined;
+    }
+  >;
   /** user that created the action */
   createdBy: string;
   /** comment submitted with action */
@@ -312,6 +325,11 @@ export interface ActionListApiResponse {
   endDate: string | undefined;
   userIds: string[] | undefined; // users that requested the actions
   commands: string[] | undefined; // type of actions
-  data: ActionDetails[];
+  /**
+   * The `outputs` is not currently part of the list response due to possibly large amounts of
+   * data, especially for cases (in the future) where we might support actions being sent to
+   * multiple agents
+   */
+  data: Array<Omit<ActionDetails, 'outputs'>>;
   total: number;
 }

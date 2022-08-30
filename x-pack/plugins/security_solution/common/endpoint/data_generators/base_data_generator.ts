@@ -185,10 +185,14 @@ export class BaseDataGenerator<GeneratedDoc extends {} = {}> {
   /**
    * Returns an single search hit (normally found in a `SearchResponse`) for the given document source.
    * @param hitSource
+   * @param index
    */
-  toEsSearchHit<T extends object = object>(hitSource: T): estypes.SearchHit<T> {
+  toEsSearchHit<T extends object = object>(
+    hitSource: T,
+    index: string = 'some-index'
+  ): estypes.SearchHit<T> {
     return {
-      _index: 'some-index',
+      _index: index,
       _id: this.seededUUIDv4(),
       _score: 1.0,
       _source: hitSource,
