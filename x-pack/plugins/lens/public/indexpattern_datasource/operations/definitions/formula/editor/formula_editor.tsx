@@ -540,7 +540,7 @@ export function FormulaEditor({
             (tokenInfo.ast.name !== 'kql' &&
               tokenInfo.ast.name !== 'lucene' &&
               tokenInfo.ast.name !== 'shift' &&
-              tokenInfo.ast.name !== 'timeRange') ||
+              tokenInfo.ast.name !== 'reducedTimeRange') ||
             (tokenInfo.ast.value !== 'LENS_MATH_MARKER' &&
               !isSingleQuoteCase.test(tokenInfo.ast.value))
           ) {
@@ -563,7 +563,7 @@ export function FormulaEditor({
           if (
             char === "'" &&
             tokenInfo.ast.name !== 'shift' &&
-            tokenInfo.ast.name !== 'timeRange'
+            tokenInfo.ast.name !== 'reducedTimeRange'
           ) {
             editOperation = {
               range: {
