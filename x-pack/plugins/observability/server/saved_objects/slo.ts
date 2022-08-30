@@ -8,7 +8,7 @@
 import { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { SavedObject } from '@kbn/core/server';
 
-import { SLO } from '../types/models';
+import { StoredSLO } from '../types/models';
 
 export const SO_SLO_TYPE = 'slo';
 
@@ -51,7 +51,7 @@ export const slo: SavedObjectsType = {
   management: {
     displayName: 'SLO',
     importableAndExportable: true,
-    getTitle(sloSavedObject: SavedObject<SLO>) {
+    getTitle(sloSavedObject: SavedObject<StoredSLO>) {
       return `SLO: [${sloSavedObject.attributes.name}]`;
     },
   },
