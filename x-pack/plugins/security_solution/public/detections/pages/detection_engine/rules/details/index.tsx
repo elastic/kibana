@@ -221,7 +221,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   } = useSourcererDataView(SourcererScopeName.detections);
 
   const loading = userInfoLoading || listsConfigLoading;
-  const { detailName: ruleId, tabName: pageTabName } = useParams<{
+  const { detailName: ruleId } = useParams<{
     detailName: string;
     tabName: string;
   }>();
