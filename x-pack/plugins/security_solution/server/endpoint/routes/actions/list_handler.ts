@@ -33,16 +33,7 @@ export const actionListHandler = (
 
   return async (context, req, res) => {
     const {
-      query: {
-        agentIds: elasticAgentIds,
-        page,
-        pageSize,
-        startDate,
-        endDate,
-        userIds,
-        commands,
-        showHostsInfo,
-      },
+      query: { agentIds: elasticAgentIds, page, pageSize, startDate, endDate, userIds, commands },
     } = req;
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
 
@@ -56,7 +47,6 @@ export const actionListHandler = (
         pageSize,
         startDate,
         endDate,
-        showHostsInfo,
         userIds: formatStringIds(userIds),
         logger,
       });

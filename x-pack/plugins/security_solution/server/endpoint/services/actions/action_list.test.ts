@@ -60,52 +60,6 @@ describe('When using `getActionList()', () => {
     (endpointAppContextService.getEndpointMetadataService as jest.Mock) = jest
       .fn()
       .mockReturnValue({
-        findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
-      });
-    await expect(
-      getActionList({
-        esClient,
-        logger,
-        metadataService: endpointAppContextService.getEndpointMetadataService(),
-        page: 1,
-        pageSize: 10,
-      })
-    ).resolves.toEqual({
-      page: 1,
-      pageSize: 10,
-      commands: undefined,
-      userIds: undefined,
-      startDate: undefined,
-      elasticAgentIds: undefined,
-      endDate: undefined,
-      data: [
-        {
-          agents: ['agent-a'],
-          hosts: undefined,
-          command: 'unisolate',
-          completedAt: '2022-04-30T16:08:47.449Z',
-          wasSuccessful: true,
-          errors: undefined,
-          id: '123',
-          isCompleted: true,
-          isExpired: false,
-          startedAt: '2022-04-27T16:08:47.449Z',
-          comment: doc?.EndpointActions.data.comment,
-          createdBy: doc?.user.id,
-          parameters: doc?.EndpointActions.data.parameters,
-        },
-      ],
-      showHostsInfo: false,
-      total: 1,
-    });
-  });
-
-  it('should return hosts when `showHostsInfo` is set to TRUE', async () => {
-    const doc = actionRequests.hits.hits[0]._source;
-    // mock metadataService.findHostMetadataForFleetAgents resolved value
-    (endpointAppContextService.getEndpointMetadataService as jest.Mock) = jest
-      .fn()
-      .mockReturnValue({
         findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([
           {
             agent: {
@@ -124,7 +78,6 @@ describe('When using `getActionList()', () => {
         metadataService: endpointAppContextService.getEndpointMetadataService(),
         page: 1,
         pageSize: 10,
-        showHostsInfo: true,
       })
     ).resolves.toEqual({
       page: 1,
@@ -151,7 +104,6 @@ describe('When using `getActionList()', () => {
           parameters: doc?.EndpointActions.data.parameters,
         },
       ],
-      showHostsInfo: true,
       total: 1,
     });
   });

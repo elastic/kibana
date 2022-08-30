@@ -87,7 +87,6 @@ export const EndpointActionListRequestSchema = {
     pageSize: schema.maybe(
       schema.number({ defaultValue: ENDPOINT_DEFAULT_PAGE_SIZE, min: 1, max: 10000 })
     ),
-    showHostsInfo: schema.maybe(schema.boolean({ defaultValue: false })),
     startDate: schema.maybe(schema.string()), // date ISO strings or moment date
     endDate: schema.maybe(schema.string()), // date ISO strings or moment date
     userIds: schema.maybe(

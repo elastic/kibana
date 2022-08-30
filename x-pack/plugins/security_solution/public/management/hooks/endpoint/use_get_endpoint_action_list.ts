@@ -31,7 +31,6 @@ export const useGetEndpointActionList = (
           page: query.page,
           pageSize: query.pageSize,
           startDate: query.startDate,
-          showHostsInfo: query.showHostsInfo,
           userIds: query.userIds,
         },
       });

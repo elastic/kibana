@@ -105,8 +105,8 @@ const StyledEuiCodeBlock = euiStyled(EuiCodeBlock).attrs({
 `;
 
 export const ResponseActionsLog = memo<
-  Pick<EndpointActionListRequestQuery, 'agentIds' | 'showHostsInfo'>
->(({ agentIds, showHostsInfo = false }) => {
+  Pick<EndpointActionListRequestQuery, 'agentIds'> & { showHostNames?: boolean }
+>(({ agentIds, showHostNames = false }) => {
   const getTestId = useTestIdGenerator('response-actions-list');
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<{
     [k: ActionDetails['id']]: React.ReactNode;
@@ -118,7 +118,6 @@ export const ResponseActionsLog = memo<
     agentIds,
     commands: [],
     userIds: [],
-    showHostsInfo,
   });
 
   // date range picker state and handlers
@@ -262,7 +261,7 @@ export const ResponseActionsLog = memo<
       {
         field: 'startedAt',
         name: TABLE_COLUMN_NAMES.time,
-        width: !showHostsInfo ? '21%' : '15%',
+        width: !showHostNames ? '21%' : '15%',
         truncateText: true,
         render: (startedAt: ActionDetails['startedAt']) => {
           return (
@@ -277,7 +276,7 @@ export const ResponseActionsLog = memo<
       {
         field: 'command',
         name: TABLE_COLUMN_NAMES.command,
-        width: !showHostsInfo ? '21%' : '10%',
+        width: !showHostNames ? '21%' : '10%',
         truncateText: true,
         render: (_command: ActionDetails['command']) => {
           const command = getCommand(_command);
@@ -295,7 +294,7 @@ export const ResponseActionsLog = memo<
       {
         field: 'createdBy',
         name: TABLE_COLUMN_NAMES.user,
-        width: !showHostsInfo ? '21%' : '14%',
+        width: !showHostNames ? '21%' : '14%',
         truncateText: true,
         render: (userId: ActionDetails['createdBy']) => {
           return (
@@ -321,10 +320,10 @@ export const ResponseActionsLog = memo<
           );
         },
       },
-      // conditional hostname column
+      // conditional hostnames column
       {
         field: 'hosts',
-        name: TABLE_COLUMN_NAMES.host,
+        name: TABLE_COLUMN_NAMES.hosts,
         width: '20%',
         truncateText: true,
         render: (hosts: ActionDetails['hosts']) => {
@@ -356,7 +355,7 @@ export const ResponseActionsLog = memo<
       {
         field: 'comment',
         name: TABLE_COLUMN_NAMES.comments,
-        width: !showHostsInfo ? '21%' : '30%',
+        width: !showHostNames ? '21%' : '30%',
         truncateText: true,
         render: (comment: ActionDetails['comment']) => {
           return (
@@ -375,7 +374,7 @@ export const ResponseActionsLog = memo<
       {
         field: 'isCompleted',
         name: TABLE_COLUMN_NAMES.status,
-        width: !showHostsInfo ? '15%' : '10%',
+        width: !showHostNames ? '15%' : '10%',
         render: (isCompleted: ActionDetails['isCompleted'], data: ActionDetails) => {
           const status = data.isExpired
             ? UX_MESSAGES.badge.failed
@@ -431,13 +430,13 @@ export const ResponseActionsLog = memo<
         },
       },
     ];
-    // filter out the host column
-    // if showHostsInfo is FALSE
-    if (!showHostsInfo) {
+    // filter out the `hosts` column
+    // if showHostNames is FALSE
+    if (!showHostNames) {
       return columns.filter((column) => column.field !== 'hosts');
     }
     return columns;
-  }, [showHostsInfo, getTestId, itemIdToExpandedRowMap, onClickCallback]);
+  }, [showHostNames, getTestId, itemIdToExpandedRowMap, onClickCallback]);
 
   // table pagination
   const tablePagination = useMemo(() => {

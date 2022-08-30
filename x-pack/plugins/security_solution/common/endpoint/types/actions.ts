@@ -275,7 +275,7 @@ export interface ActionDetails<TOutputContent extends object = object> {
    * The endpoint ID/fleet agent ID which was used to create the action (same as above) and the agent's name
    * Action could have been sent for multiple endpoints which is why this is an Array
    */
-  hosts?: Record<string, { name: string }>;
+  hosts: Record<string, { name: string }>;
   /**
    * The Endpoint type of action (ex. `isolate`, `release`) that is being requested to be
    * performed on the endpoint
@@ -318,6 +318,5 @@ export interface ActionListApiResponse {
   userIds: string[] | undefined; // users that requested the actions
   commands: string[] | undefined; // type of actions
   data: ActionDetails[];
-  showHostsInfo: boolean;
   total: number;
 }

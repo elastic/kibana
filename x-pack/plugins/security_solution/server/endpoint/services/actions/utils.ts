@@ -436,20 +436,20 @@ export const formatEndpointActionResults = (
 
 export const getAgentHostNamesWithIds = async ({
   esClient,
-  searchedAgentIds,
+  agentIds,
   metadataService,
 }: {
   esClient: ElasticsearchClient;
-  searchedAgentIds: string[];
+  agentIds: string[];
   metadataService: EndpointMetadataService;
 }): Promise<{ [id: string]: string }> => {
   // get host metadata docs with queried agents
   const metaDataDocs = await metadataService.findHostMetadataForFleetAgents(esClient, [
-    ...new Set(searchedAgentIds),
+    ...new Set(agentIds),
   ]);
   // agent ids and names from metadata
   // map this into an object as {id1: name1, id2: name2} etc
-  const agentsMetadataInfo = searchedAgentIds.reduce<{ [id: string]: string }>((acc, id) => {
+  const agentsMetadataInfo = agentIds.reduce<{ [id: string]: string }>((acc, id) => {
     acc[id] = metaDataDocs.find((doc) => doc.agent.id === id)?.host.hostname ?? '';
     return acc;
   }, {});

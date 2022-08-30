@@ -189,8 +189,8 @@ describe('Response Actions Log', () => {
       ).toEqual(['Time', 'Command', 'User', 'Comments', 'Status', 'Expand rows']);
     });
 
-    it('should show `Host` column when `showHostsInfo` is TRUE', async () => {
-      render({ showHostsInfo: true });
+    it('should show `Host` column when `showHostNames` is TRUE', async () => {
+      render({ showHostNames: true });
 
       expect(
         Array.from(
@@ -198,7 +198,7 @@ describe('Response Actions Log', () => {
         )
           .slice(0, 7)
           .map((col) => col.textContent)
-      ).toEqual(['Time', 'Command', 'User', 'Host', 'Comments', 'Status', 'Expand rows']);
+      ).toEqual(['Time', 'Command', 'User', 'Hosts', 'Comments', 'Status', 'Expand rows']);
     });
 
     it('should paginate table when there is data', async () => {
@@ -486,7 +486,6 @@ const getActionListMock = async ({
     commands,
     data,
     userIds,
-    showHostsInfo: true,
     total: data.length ?? 0,
   };
 };

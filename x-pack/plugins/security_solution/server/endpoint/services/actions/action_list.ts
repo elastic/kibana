@@ -28,7 +28,6 @@ interface OptionalFilterParams {
   endDate?: string;
   page?: number;
   pageSize?: number;
-  showHostsInfo?: boolean;
   startDate?: string;
   userIds?: string[];
 }
@@ -42,7 +41,6 @@ export const getActionList = async ({
   metadataService,
   page: _page,
   pageSize,
-  showHostsInfo = false,
   startDate,
   userIds,
 }: OptionalFilterParams & {
@@ -63,7 +61,6 @@ export const getActionList = async ({
     from,
     logger,
     metadataService,
-    showHostsInfo,
     size,
     startDate,
     userIds,
@@ -77,7 +74,6 @@ export const getActionList = async ({
     elasticAgentIds,
     userIds,
     commands,
-    showHostsInfo,
     data: actionDetails,
     total: totalRecords,
   };
@@ -97,7 +93,6 @@ const getActionDetailsList = async ({
   from,
   logger,
   metadataService,
-  showHostsInfo,
   size,
   startDate,
   userIds,
@@ -108,6 +103,7 @@ const getActionDetailsList = async ({
   let actionRequests;
   let actionReqIds;
   let actionResponses;
+  let agentsHostInfo: { [id: string]: string };
 
   try {
     // fetch actions with matching agent_ids if any
@@ -147,11 +143,19 @@ const getActionDetailsList = async ({
 
   try {
     // get all responses for given action Ids and agent Ids
-    actionResponses = await getActionResponses({
-      actionIds: actionReqIds,
-      elasticAgentIds,
-      esClient,
-    });
+    // and get host metadata info with queried agents
+    [actionResponses, agentsHostInfo] = await Promise.all([
+      getActionResponses({
+        actionIds: actionReqIds,
+        elasticAgentIds,
+        esClient,
+      }),
+      await getAgentHostNamesWithIds({
+        esClient,
+        metadataService,
+        agentIds: normalizedActionRequests.map((action) => action.agents).flat(),
+      }),
+    ]);
   } catch (error) {
     // all other errors
     const err = new CustomHttpRequestError(
@@ -168,17 +172,6 @@ const getActionDetailsList = async ({
     results: actionResponses?.body?.hits?.hits,
   });
 
-  let hosts: ActionDetails['hosts'];
-  let agentsHostInfo: { [id: string]: string };
-  if (showHostsInfo) {
-    // get host metadata info with queried agents
-    agentsHostInfo = await getAgentHostNamesWithIds({
-      esClient,
-      metadataService,
-      searchedAgentIds: normalizedActionRequests.map((action) => action.agents).flat(),
-    });
-  }
-
   // compute action details list for each action id
   const actionDetails: ActionDetails[] = normalizedActionRequests.map((action) => {
     // pick only those responses that match the current action id
@@ -194,16 +187,13 @@ const getActionDetailsList = async ({
       matchedResponses
     );
 
-    if (showHostsInfo) {
-      hosts = action.agents.reduce<Record<string, { name: string }>>((acc, id) => {
-        acc[id] = { name: agentsHostInfo[id] };
-        return acc;
-      }, {});
-    }
     return {
       id: action.id,
       agents: action.agents,
-      hosts,
+      hosts: action.agents.reduce<ActionDetails['hosts']>((acc, id) => {
+        acc[id] = { name: agentsHostInfo[id] };
+        return acc;
+      }, {}),
       command: action.command,
       startedAt: action.createdAt,
       isCompleted,
