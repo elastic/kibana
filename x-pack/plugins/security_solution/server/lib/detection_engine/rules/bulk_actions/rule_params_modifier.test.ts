@@ -38,7 +38,7 @@ describe('deleteItemsFromArray', () => {
 });
 
 describe('ruleParamsModifier', () => {
-  const ruleParamsMock = { index: ['initial-index-*'], version: 1 } as RuleAlertType['params'];
+  const ruleParamsMock = { index: ['my-index-*'], version: 1 } as RuleAlertType['params'];
 
   test('should increment version', () => {
     const editedRuleParams = ruleParamsModifier(ruleParamsMock, [
@@ -51,26 +51,161 @@ describe('ruleParamsModifier', () => {
   });
 
   describe('index_patterns', () => {
-    test('should add new index pattern to rule', () => {
-      const editedRuleParams = ruleParamsModifier(ruleParamsMock, [
-        {
-          type: BulkActionEditType.add_index_patterns,
-          value: ['my-index-*'],
-        },
-      ]);
-      expect(editedRuleParams).toHaveProperty('index', ['initial-index-*', 'my-index-*']);
-    });
-    test('should remove index pattern from rule', () => {
-      const editedRuleParams = ruleParamsModifier(
-        { index: ['initial-index-*', 'index-2-*'] } as RuleAlertType['params'],
+    describe('add_index_patterns action', () => {
+      test.each([
         [
+          '3 existing patterns + 2 of them = 3 patterns',
           {
-            type: BulkActionEditType.delete_index_patterns,
-            value: ['index-2-*'],
+            existingIndexPatterns: ['index-1-*', 'index-2-*', 'index-3-*'],
+            indexPatternsToAdd: ['index-2-*', 'index-3-*'],
+            resultingIndexPatterns: ['index-1-*', 'index-2-*', 'index-3-*'],
           },
-        ]
+        ],
+        [
+          '3 existing patterns + 2 other patterns(none of them) = 5 patterns',
+          {
+            existingIndexPatterns: ['index-1-*', 'index-2-*', 'index-3-*'],
+            indexPatternsToAdd: ['index-4-*', 'index-5-*'],
+            resultingIndexPatterns: [
+              'index-1-*',
+              'index-2-*',
+              'index-3-*',
+              'index-4-*',
+              'index-5-*',
+            ],
+          },
+        ],
+        [
+          '3 existing patterns + 1 of them + 2 other patterns(none of them) = 5 patterns',
+          {
+            existingIndexPatterns: ['index-1-*', 'index-2-*', 'index-3-*'],
+            indexPatternsToAdd: ['index-3-*', 'index-4-*', 'index-5-*'],
+            resultingIndexPatterns: [
+              'index-1-*',
+              'index-2-*',
+              'index-3-*',
+              'index-4-*',
+              'index-5-*',
+            ],
+          },
+        ],
+        [
+          '3 existing patterns + 0 patterns = 3 patterns',
+          {
+            existingIndexPatterns: ['index-1-*', 'index-2-*', 'index-3-*'],
+            indexPatternsToAdd: [],
+            resultingIndexPatterns: ['index-1-*', 'index-2-*', 'index-3-*'],
+          },
+        ],
+      ])(
+        'should add index patterns to rule, case:"%s"',
+        (caseName, { existingIndexPatterns, indexPatternsToAdd, resultingIndexPatterns }) => {
+          const editedRuleParams = ruleParamsModifier(
+            { ...ruleParamsMock, index: existingIndexPatterns } as RuleAlertType['params'],
+            [
+              {
+                type: BulkActionEditType.add_index_patterns,
+                value: indexPatternsToAdd,
+              },
+            ]
+          );
+          expect(editedRuleParams).toHaveProperty('index', resultingIndexPatterns);
+        }
       );
-      expect(editedRuleParams).toHaveProperty('index', ['initial-index-*']);
+    });
+
+    describe('delete_index_patterns action', () => {
+      test.each([
+        [
+          '3 existing patterns - 2 of them = 1 pattern',
+          {
+            existingIndexPatterns: ['index-1-*', 'index-2-*', 'index-3-*'],
+            indexPatternsToDelete: ['index-2-*', 'index-3-*'],
+            resultingIndexPatterns: ['index-1-*'],
+          },
+        ],
+        [
+          '3 existing patterns - 2 other patterns(none of them) = 3 patterns',
+          {
+            existingIndexPatterns: ['index-1-*', 'index-2-*', 'index-3-*'],
+            indexPatternsToDelete: ['index-4-*', 'index-5-*'],
+            resultingIndexPatterns: ['index-1-*', 'index-2-*', 'index-3-*'],
+          },
+        ],
+        [
+          '3 existing patterns - 1 of them - 2 other patterns(none of them) = 2 patterns',
+          {
+            existingIndexPatterns: ['index-1-*', 'index-2-*', 'index-3-*'],
+            indexPatternsToDelete: ['index-3-*', 'index-4-*', 'index-5-*'],
+            resultingIndexPatterns: ['index-1-*', 'index-2-*'],
+          },
+        ],
+        [
+          '3 existing patterns - 0 patterns = 3 patterns',
+          {
+            existingIndexPatterns: ['index-1-*', 'index-2-*', 'index-3-*'],
+            indexPatternsToDelete: [],
+            resultingIndexPatterns: ['index-1-*', 'index-2-*', 'index-3-*'],
+          },
+        ],
+      ])(
+        'should delete index patterns from rule, case:"%s"',
+        (caseName, { existingIndexPatterns, indexPatternsToDelete, resultingIndexPatterns }) => {
+          const editedRuleParams = ruleParamsModifier(
+            { ...ruleParamsMock, index: existingIndexPatterns } as RuleAlertType['params'],
+            [
+              {
+                type: BulkActionEditType.delete_index_patterns,
+                value: indexPatternsToDelete,
+              },
+            ]
+          );
+          expect(editedRuleParams).toHaveProperty('index', resultingIndexPatterns);
+        }
+      );
+    });
+
+    describe('set_index_patterns action', () => {
+      test.each([
+        [
+          '3 existing patterns overwritten with 2 of them = 2 existing patterns',
+          {
+            existingIndexPatterns: ['index-1-*', 'index-2-*', 'index-3-*'],
+            indexPatternsToOverwrite: ['index-2-*', 'index-3-*'],
+            resultingIndexPatterns: ['index-2-*', 'index-3-*'],
+          },
+        ],
+        [
+          '3 existing patterns overwritten with  2 other patterns = 2 other patterns',
+          {
+            existingIndexPatterns: ['index-1-*', 'index-2-*', 'index-3-*'],
+            indexPatternsToOverwrite: ['index-4-*', 'index-5-*'],
+            resultingIndexPatterns: ['index-4-*', 'index-5-*'],
+          },
+        ],
+        [
+          '3 existing patterns overwritten with  1 of them + 2 other patterns = 1 existing pattern + 2 other patterns',
+          {
+            existingIndexPatterns: ['index-1-*', 'index-2-*', 'index-3-*'],
+            indexPatternsToOverwrite: ['index-3-*', 'index-4-*', 'index-5-*'],
+            resultingIndexPatterns: ['index-3-*', 'index-4-*', 'index-5-*'],
+          },
+        ],
+      ])(
+        'should overwrite index patterns in rule, case:"%s"',
+        (caseName, { existingIndexPatterns, indexPatternsToOverwrite, resultingIndexPatterns }) => {
+          const editedRuleParams = ruleParamsModifier(
+            { ...ruleParamsMock, index: existingIndexPatterns } as RuleAlertType['params'],
+            [
+              {
+                type: BulkActionEditType.set_index_patterns,
+                value: indexPatternsToOverwrite,
+              },
+            ]
+          );
+          expect(editedRuleParams).toHaveProperty('index', resultingIndexPatterns);
+        }
+      );
     });
 
     test('should return undefined index patterns on remove action if rule has dataViewId only', () => {
@@ -86,16 +221,6 @@ describe('ruleParamsModifier', () => {
       );
       expect(editedRuleParams).toHaveProperty('index', undefined);
       expect(editedRuleParams).toHaveProperty('dataViewId', testDataViewId);
-    });
-
-    test('should rewrite index pattern in rule', () => {
-      const editedRuleParams = ruleParamsModifier(ruleParamsMock, [
-        {
-          type: BulkActionEditType.set_index_patterns,
-          value: ['index'],
-        },
-      ]);
-      expect(editedRuleParams).toHaveProperty('index', ['index']);
     });
 
     test('should set dataViewId to undefined if overwrite_data_views=true on set_index_patterns action', () => {

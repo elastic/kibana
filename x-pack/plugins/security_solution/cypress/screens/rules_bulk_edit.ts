@@ -13,6 +13,8 @@ export const ADD_INDEX_PATTERNS_RULE_BULK_MENU_ITEM =
 export const DELETE_INDEX_PATTERNS_RULE_BULK_MENU_ITEM =
   '[data-test-subj="deleteIndexPatternsBulkEditRule"]';
 
+export const APPLY_TIMELINE_RULE_BULK_MENU_ITEM = '[data-test-subj="applyTimelineTemplateBulk"]';
+
 export const TAGS_RULE_BULK_MENU_ITEM = '[data-test-subj="tagsBulkEditRule"]';
 
 export const ADD_TAGS_RULE_BULK_MENU_ITEM = '[data-test-subj="addTagsBulkEditRule"]';
@@ -37,3 +39,9 @@ export const RULES_BULK_EDIT_INDEX_PATTERNS_WARNING =
   '[data-test-subj="bulkEditRulesIndexPatternsWarning"]';
 
 export const RULES_BULK_EDIT_TAGS_WARNING = '[data-test-subj="bulkEditRulesTagsWarning"]';
+
+export const RULES_BULK_EDIT_TIMELINE_TEMPLATES_SELECTOR =
+  '[data-test-subj="bulkEditRulesTimelineTemplateSelector"]';
+
+export const RULES_BULK_EDIT_TIMELINE_TEMPLATES_WARNING =
+  '[data-test-subj="bulkEditRulesTimelineTemplateWarning"]';

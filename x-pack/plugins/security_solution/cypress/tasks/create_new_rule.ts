@@ -83,7 +83,6 @@ import {
   THREAT_MATCH_INDICATOR_INDICATOR_INDEX,
   THREAT_MATCH_OR_BUTTON,
   THREAT_MATCH_QUERY_INPUT,
-  EUI_FILTER_SELECT_ITEM,
   THRESHOLD_INPUT_AREA,
   THRESHOLD_TYPE,
   CONNECTOR_NAME_INPUT,
@@ -105,6 +104,7 @@ import { TOAST_ERROR } from '../screens/shared';
 import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
 import { TIMELINE } from '../screens/timelines';
 import { refreshPage } from './security_header';
+import { EUI_FILTER_SELECT_ITEM } from '../screens/common/controls';
 
 export const createAndEnableRule = () => {
   cy.get(SCHEDULE_CONTINUE_BUTTON).click({ force: true });
