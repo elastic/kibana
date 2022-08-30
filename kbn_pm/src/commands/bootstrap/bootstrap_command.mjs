@@ -9,7 +9,7 @@
 import { spawnSync } from '../../lib/spawn.mjs';
 import * as Bazel from '../../lib/bazel.mjs';
 import { haveNodeModulesBeenManuallyDeleted, removeYarnIntegrityFileIfExists } from './yarn.mjs';
-import { checkIfRunningNativelyOnWindows } from './windows.mjs'
+import { checkIfRunningNativelyOnWindows } from './windows.mjs';
 import { setupRemoteCache } from './setup_remote_cache.mjs';
 import { regenerateSyntheticPackageMap } from './regenerate_synthetic_package_map.mjs';
 import { sortPackageJson } from './sort_package_json.mjs';
