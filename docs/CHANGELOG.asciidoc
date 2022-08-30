@@ -77,7 +77,7 @@ Review the following information about the {kib} 8.4.0 release.
 If you have alerting rules that have been snoozed, do not upgrade {kib} to 8.4.0. Upgrade to 8.4.1 instead.
 
 To determine if you have snoozed alerting rules, open the main menu, then click
-**{stack-manage-app}** -> **rules-ui**. Filter the rule list by selecting
+**{stack-manage-app}** -> **{rules-ui}**. Filter the rule list by selecting
 **View** -> **Snoozed**. If you must upgrade to 8.4.0, for each space, cancel
 the snooze for all affected rules before you upgrade.
 
