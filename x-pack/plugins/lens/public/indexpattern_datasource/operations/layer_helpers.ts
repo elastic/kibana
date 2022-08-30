@@ -33,7 +33,7 @@ import type {
   IndexPatternLayer,
   IndexPatternPrivateState,
 } from '../types';
-import { getSortScoreByPriority } from './operations';
+import { getSortScoreByPriorityForField } from './operations';
 import { generateId } from '../../id_generator';
 import {
   GenericIndexPatternColumn,
@@ -882,17 +882,17 @@ function applyReferenceTransition({
     // Try to reuse the previous field by finding a possible operation. Because we've alredy
     // checked for an exact operation match, this is guaranteed to be different from previousColumn
     if (!hasFieldMatch && 'sourceField' in previousColumn && validation.input.includes('field')) {
+      const previousField = indexPattern.getFieldByName(previousColumn.sourceField);
       const defIgnoringfield = operationDefinitions
         .filter(
           (def) =>
             def.input === 'field' &&
             isOperationAllowedAsReference({ validation, operationType: def.type, indexPattern })
         )
-        .sort(getSortScoreByPriority);
+        .sort(getSortScoreByPriorityForField(previousField));
 
       // No exact match found, so let's determine that the current field can be reused
       const defWithField = defIgnoringfield.filter((def) => {
-        const previousField = indexPattern.getFieldByName(previousColumn.sourceField);
         if (!previousField) return;
         return isOperationAllowedAsReference({
           validation,
@@ -945,7 +945,7 @@ function applyReferenceTransition({
                   indexPattern,
                 })
             )
-            .sort(getSortScoreByPriority);
+            .sort(getSortScoreByPriorityForField(previousField));
 
           if (defWithField.length > 0) {
             layer = insertNewColumn({
@@ -1134,7 +1134,7 @@ function addMetric(
 }
 
 export function getMetricOperationTypes(field: IndexPatternField) {
-  return operationDefinitions.sort(getSortScoreByPriority).filter((definition) => {
+  return operationDefinitions.sort(getSortScoreByPriorityForField(field)).filter((definition) => {
     if (definition.input !== 'field') return;
     const metadata = definition.getPossibleOperationForField(field);
     return metadata && !metadata.isBucketed && metadata.dataType === 'number';

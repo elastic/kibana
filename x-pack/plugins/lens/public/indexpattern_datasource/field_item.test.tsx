@@ -24,6 +24,7 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { loadFieldStats } from '@kbn/unified-field-list-plugin/public';
 import { DOCUMENT_FIELD_NAME } from '../../common';
+import { LensFieldIcon } from '../shared_components';
 
 jest.mock('@kbn/unified-field-list-plugin/public/services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({}),
@@ -160,6 +161,19 @@ describe('IndexPattern Field Item', () => {
     expect(wrapper.find('[data-test-subj="lnsFieldListPanelField"]').first().text()).toContain(
       'bytesLabel'
     );
+  });
+
+  it('should show gauge icon for gauge fields', () => {
+    const wrapper = mountWithIntl(
+      <InnerFieldItemWrapper
+        {...defaultProps}
+        field={{ ...defaultProps.field, timeSeriesMetricType: 'gauge' }}
+      />
+    );
+
+    // Using .toContain over .toEqual because this element includes text from <EuiScreenReaderOnly>
+    // which can't be seen, but shows in the text content
+    expect(wrapper.find(LensFieldIcon).first().prop('type')).toEqual('gauge');
   });
 
   it('should render edit field button if callback is set', async () => {

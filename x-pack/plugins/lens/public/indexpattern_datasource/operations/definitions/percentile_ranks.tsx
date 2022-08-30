@@ -82,7 +82,11 @@ export const percentileRanksOperation: OperationDefinition<
   shiftable: true,
   canReduceTimeRange: true,
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type: fieldType }) => {
-    if (supportedFieldTypes.includes(fieldType) && aggregatable && !aggregationRestrictions) {
+    if (
+      supportedFieldTypes.includes(fieldType) &&
+      aggregatable &&
+      (!aggregationRestrictions || !aggregationRestrictions.percentile_ranks)
+    ) {
       return {
         dataType: 'number',
         isBucketed: false,
@@ -97,7 +101,7 @@ export const percentileRanksOperation: OperationDefinition<
       newField &&
         supportedFieldTypes.includes(newField.type) &&
         newField.aggregatable &&
-        !newField.aggregationRestrictions
+        (!newField.aggregationRestrictions || !newField.aggregationRestrictions.percentile_ranks)
     );
   },
   getDefaultLabel: (column, indexPattern, columns) =>

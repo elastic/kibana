@@ -16,8 +16,7 @@ import {
   EuiPopover,
   EuiCallOut,
   EuiFormControlLayout,
-  EuiSpacer,
-  EuiFilterGroup,
+  EuiIcon,
   EuiFilterButton,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
@@ -45,6 +44,7 @@ import { ChildDragDropProvider, DragContextState } from '../drag_drop';
 import type { IndexPatternPrivateState } from './types';
 import { Loader } from '../loader';
 import { LensFieldIcon } from '../shared_components/field_picker/lens_field_icon';
+import { getFieldType } from './pure_utils';
 import { FieldGroups, FieldList } from './field_list';
 import { fieldContainsData, fieldExists } from '../shared_components';
 import { IndexPatternServiceAPI } from '../indexpattern_service/service';
@@ -85,15 +85,21 @@ const supportedFieldTypes = new Set([
 ]);
 
 const fieldTypeNames: Record<DataType, string> = {
-  document: i18n.translate('xpack.lens.datatypes.record', { defaultMessage: 'record' }),
-  string: i18n.translate('xpack.lens.datatypes.string', { defaultMessage: 'string' }),
-  number: i18n.translate('xpack.lens.datatypes.number', { defaultMessage: 'number' }),
-  boolean: i18n.translate('xpack.lens.datatypes.boolean', { defaultMessage: 'boolean' }),
-  date: i18n.translate('xpack.lens.datatypes.date', { defaultMessage: 'date' }),
-  ip: i18n.translate('xpack.lens.datatypes.ipAddress', { defaultMessage: 'IP' }),
-  histogram: i18n.translate('xpack.lens.datatypes.histogram', { defaultMessage: 'histogram' }),
-  geo_point: i18n.translate('xpack.lens.datatypes.geoPoint', { defaultMessage: 'geo_point' }),
-  geo_shape: i18n.translate('xpack.lens.datatypes.geoShape', { defaultMessage: 'geo_shape' }),
+  document: i18n.translate('xpack.lens.datatypes.record', { defaultMessage: 'Record' }),
+  string: i18n.translate('xpack.lens.datatypes.string', { defaultMessage: 'Text string' }),
+  number: i18n.translate('xpack.lens.datatypes.number', { defaultMessage: 'Number' }),
+  gauge: i18n.translate('xpack.lens.datatypes.gauge', { defaultMessage: 'Gauge metric' }),
+  counter: i18n.translate('xpack.lens.datatypes.counter', { defaultMessage: 'Counter metric' }),
+  boolean: i18n.translate('xpack.lens.datatypes.boolean', { defaultMessage: 'Boolean' }),
+  date: i18n.translate('xpack.lens.datatypes.date', { defaultMessage: 'Date' }),
+  ip: i18n.translate('xpack.lens.datatypes.ipAddress', { defaultMessage: 'IP address' }),
+  histogram: i18n.translate('xpack.lens.datatypes.histogram', { defaultMessage: 'Histogram' }),
+  geo_point: i18n.translate('xpack.lens.datatypes.geoPoint', {
+    defaultMessage: 'Geographic point',
+  }),
+  geo_shape: i18n.translate('xpack.lens.datatypes.geoShape', {
+    defaultMessage: 'Geographic shape',
+  }),
   murmur3: i18n.translate('xpack.lens.datatypes.murmur3', { defaultMessage: 'murmur3' }),
 };
 
@@ -254,10 +260,6 @@ const defaultFieldGroups: {
   metaFields: [],
 };
 
-const fieldFiltersLabel = i18n.translate('xpack.lens.indexPatterns.fieldFiltersLabel', {
-  defaultMessage: 'Filter by type',
-});
-
 const htmlId = htmlIdGenerator('datapanel');
 const fieldSearchDescriptionId = htmlId();
 
@@ -317,9 +319,11 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     [currentIndexPattern.fields, currentIndexPattern.spec, visualizeGeoFieldTrigger]
   );
   const clearLocalState = () => setLocalState((s) => ({ ...s, nameFilter: '', typeFilter: [] }));
-  const availableFieldTypes = uniq(allFields.map(({ type }) => type)).filter(
-    (type) => type in fieldTypeNames
-  );
+  const availableFieldTypes = uniq([
+    ...uniq(allFields.map(getFieldType)).filter((type) => type in fieldTypeNames),
+    // always include current field type filters - there may not be any fields of the type of an existing type filter on data view switch, but we still need to include the existing filter in the list so that the user can remove it
+    ...localState.typeFilter,
+  ]);
 
   const fieldInfoUnavailable =
     existenceFetchFailed || existenceFetchTimeout || currentIndexPattern.hasRestrictions;
@@ -458,7 +462,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
           return false;
         }
         if (localState.typeFilter.length > 0) {
-          return localState.typeFilter.includes(field.type as DataType);
+          return localState.typeFilter.includes(getFieldType(field) as DataType);
         }
         return true;
       });
@@ -627,6 +631,65 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 clearLocalState();
               },
             }}
+            append={
+              <EuiPopover
+                id="dataPanelTypeFilter"
+                panelClassName="euiFilterGroup__popoverPanel"
+                panelPaddingSize="none"
+                anchorPosition="rightUp"
+                display="block"
+                isOpen={localState.isTypeFilterOpen}
+                closePopover={() =>
+                  setLocalState(() => ({ ...localState, isTypeFilterOpen: false }))
+                }
+                button={
+                  <EuiFilterButton
+                    aria-label={i18n.translate('xpack.lens.indexPatterns.filterByTypeAriaLabel', {
+                      defaultMessage: 'Filter by type',
+                    })}
+                    color="primary"
+                    isSelected={localState.isTypeFilterOpen}
+                    numFilters={localState.typeFilter.length}
+                    hasActiveFilters={!!localState.typeFilter.length}
+                    numActiveFilters={localState.typeFilter.length}
+                    data-test-subj="lnsIndexPatternFiltersToggle"
+                    className="lnsFilterButton"
+                    onClick={() => {
+                      setLocalState((s) => ({
+                        ...s,
+                        isTypeFilterOpen: !localState.isTypeFilterOpen,
+                      }));
+                    }}
+                  >
+                    <EuiIcon type="filter" />
+                  </EuiFilterButton>
+                }
+              >
+                <EuiContextMenuPanel
+                  data-test-subj="lnsIndexPatternTypeFilterOptions"
+                  items={(availableFieldTypes as DataType[]).map((type) => (
+                    <EuiContextMenuItem
+                      className="lnsInnerIndexPatternDataPanel__filterType"
+                      key={type}
+                      icon={localState.typeFilter.includes(type) ? 'check' : 'empty'}
+                      data-test-subj={`typeFilter-${type}`}
+                      onClick={() => {
+                        setLocalState((s) => ({
+                          ...s,
+                          typeFilter: localState.typeFilter.includes(type)
+                            ? localState.typeFilter.filter((t) => t !== type)
+                            : [...localState.typeFilter, type],
+                        }));
+                      }}
+                    >
+                      <span className="lnsInnerIndexPatternDataPanel__filterTypeInner">
+                        <LensFieldIcon type={type} /> {fieldTypeNames[type]}
+                      </span>
+                    </EuiContextMenuItem>
+                  ))}
+                />
+              </EuiPopover>
+            }
           >
             <input
               className="euiFieldText euiFieldText--fullWidth lnsInnerIndexPatternDataPanel__textField"
@@ -646,62 +709,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
               aria-describedby={fieldSearchDescriptionId}
             />
           </EuiFormControlLayout>
-
-          <EuiSpacer size="xs" />
-
-          <EuiFilterGroup>
-            <EuiPopover
-              id="dataPanelTypeFilter"
-              panelClassName="euiFilterGroup__popoverPanel"
-              panelPaddingSize="none"
-              anchorPosition="rightUp"
-              display="block"
-              isOpen={localState.isTypeFilterOpen}
-              closePopover={() => setLocalState(() => ({ ...localState, isTypeFilterOpen: false }))}
-              button={
-                <EuiFilterButton
-                  iconType="arrowDown"
-                  isSelected={localState.isTypeFilterOpen}
-                  numFilters={localState.typeFilter.length}
-                  hasActiveFilters={!!localState.typeFilter.length}
-                  numActiveFilters={localState.typeFilter.length}
-                  data-test-subj="lnsIndexPatternFiltersToggle"
-                  onClick={() => {
-                    setLocalState((s) => ({
-                      ...s,
-                      isTypeFilterOpen: !localState.isTypeFilterOpen,
-                    }));
-                  }}
-                >
-                  {fieldFiltersLabel}
-                </EuiFilterButton>
-              }
-            >
-              <EuiContextMenuPanel
-                data-test-subj="lnsIndexPatternTypeFilterOptions"
-                items={(availableFieldTypes as DataType[]).map((type) => (
-                  <EuiContextMenuItem
-                    className="lnsInnerIndexPatternDataPanel__filterType"
-                    key={type}
-                    icon={localState.typeFilter.includes(type) ? 'check' : 'empty'}
-                    data-test-subj={`typeFilter-${type}`}
-                    onClick={() => {
-                      setLocalState((s) => ({
-                        ...s,
-                        typeFilter: localState.typeFilter.includes(type)
-                          ? localState.typeFilter.filter((t) => t !== type)
-                          : [...localState.typeFilter, type],
-                      }));
-                    }}
-                  >
-                    <span className="lnsInnerIndexPatternDataPanel__filterTypeInner">
-                      <LensFieldIcon type={type} /> {fieldTypeNames[type]}
-                    </span>
-                  </EuiContextMenuItem>
-                ))}
-              />
-            </EuiPopover>
-          </EuiFilterGroup>
         </EuiFlexItem>
         <EuiScreenReaderOnly>
           <div aria-live="polite" id={fieldSearchDescriptionId}>
