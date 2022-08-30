@@ -51,4 +51,5 @@ export type {
   SavedObjectsClosePointInTimeOptions,
   SavedObjectsCreatePointInTimeFinderOptions,
   SavedObjectsFindOptions,
+  SavedObjectsPointInTimeFinderClient,
 } from './apis';

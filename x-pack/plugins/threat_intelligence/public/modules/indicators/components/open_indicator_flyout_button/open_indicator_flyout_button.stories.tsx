@@ -17,6 +17,12 @@ export default {
   title: 'OpenIndicatorFlyoutButton',
   argTypes: {
     onOpen: { action: 'onOpen' },
+    isOpen: {
+      options: [true, false],
+      control: {
+        type: 'radio',
+      },
+    },
   },
 };
 

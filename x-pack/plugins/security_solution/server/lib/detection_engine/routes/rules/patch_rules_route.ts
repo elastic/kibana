@@ -77,8 +77,8 @@ export const patchRulesRoute = (router: SecuritySolutionPluginRouter, ml: SetupP
 
         const rule = await patchRules({
           rulesClient,
-          rule: migratedRule,
-          params,
+          existingRule: migratedRule,
+          nextParams: params,
         });
         if (rule != null && rule.enabled != null && rule.name != null) {
           const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(rule.id);
