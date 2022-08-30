@@ -21,13 +21,12 @@ export const getEventList = async ({
   index,
   perPage,
   searchAfter,
-  exceptionItems,
   filters,
   tuple,
   primaryTimestamp,
   secondaryTimestamp,
   runtimeMappings,
-  listClient,
+  filter,
 }: EventsOptions): Promise<estypes.SearchResponse<EventDoc>> => {
   const calculatedPerPage = perPage ?? MAX_PER_PAGE;
   if (calculatedPerPage > 10000) {
@@ -38,13 +37,12 @@ export const getEventList = async ({
     `Querying the events items from the index: "${index}" with searchAfter: "${searchAfter}" for up to ${calculatedPerPage} indicator items`
   );
 
-  const { queryFilter } = await getQueryFilter({
+  const queryFilter = await getQueryFilter({
     query,
     language: language ?? 'kuery',
     filters,
     index,
-    lists: exceptionItems,
-    listClient,
+    exceptionFilter: filter,
   });
 
   const { searchResult } = await singleSearchAfter({
@@ -73,19 +71,17 @@ export const getEventCount = async ({
   language,
   filters,
   index,
-  exceptionItems,
   tuple,
   primaryTimestamp,
   secondaryTimestamp,
-  listClient,
+  filter,
 }: EventCountOptions): Promise<number> => {
-  const { queryFilter } = await getQueryFilter({
+  const queryFilter = await getQueryFilter({
     query,
     language: language ?? 'kuery',
     filters,
     index,
-    lists: exceptionItems,
-    listClient,
+    exceptionFilter: filter,
   });
   const eventSearchQueryBodyQuery = buildEventsSearchQuery({
     index,

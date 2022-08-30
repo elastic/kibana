@@ -38,6 +38,7 @@ import { withSecuritySpan } from '../../../utils/with_security_span';
 import { getInputIndex, DataViewError } from '../signals/get_input_output_index';
 import { TIMESTAMP_RUNTIME_FIELD } from './constants';
 import { buildTimestampRuntimeMapping } from './utils/build_timestamp_runtime_mapping';
+import { buildExceptionFilter } from '../exceptions/build_exception_filter';
 
 /* eslint-disable complexity */
 export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
@@ -300,6 +301,14 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               indicesToQuery: inputIndex,
             });
 
+            const { filter, unprocessedExceptions } = await buildExceptionFilter({
+              alias: null,
+              excludeExceptions: true,
+              chunkSize: 1024,
+              lists: exceptionItems,
+              listClient,
+            });
+
             if (!skipExecution) {
               for (const tuple of tuples) {
                 const runResult = await type.executor({
@@ -309,7 +318,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   runOpts: {
                     completeRule,
                     inputIndex,
-                    exceptionItems,
+                    filter,
+                    unprocessedExceptions,
                     runtimeMappings: {
                       ...runtimeMappings,
                       ...timestampRuntimeMappings,

@@ -10,10 +10,10 @@ import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import { getListClientMock } from '@kbn/lists-plugin/server/services/lists/list_client.mock';
+import { buildExceptionFilter } from '../exceptions/build_exception_filter';
 
 describe('get_filter', () => {
   let servicesMock: RuleExecutorServicesMock;
-  const listClientMock = getListClientMock();
 
   beforeAll(() => {
     jest.resetAllMocks();
@@ -39,7 +39,7 @@ describe('get_filter', () => {
 
   describe('getFilter', () => {
     test('returns a query if given a type of query', async () => {
-      const { esFilter } = await getFilter({
+      const esFilter = await getFilter({
         type: 'query',
         filters: undefined,
         language: 'kuery',
@@ -47,8 +47,7 @@ describe('get_filter', () => {
         savedId: undefined,
         services: servicesMock,
         index: ['auditbeat-*'],
-        lists: [],
-        listClient: listClientMock,
+        exceptionFilter: undefined,
       });
       expect(esFilter).toEqual({
         bool: {
@@ -83,8 +82,7 @@ describe('get_filter', () => {
           savedId: undefined,
           services: servicesMock,
           index: ['auditbeat-*'],
-          lists: [],
-          listClient: listClientMock,
+          exceptionFilter: undefined,
         })
       ).rejects.toThrow('query, filters, and index parameter should be defined');
     });
@@ -99,8 +97,7 @@ describe('get_filter', () => {
           savedId: undefined,
           services: servicesMock,
           index: ['auditbeat-*'],
-          lists: [],
-          listClient: listClientMock,
+          exceptionFilter: undefined,
         })
       ).rejects.toThrow('query, filters, and index parameter should be defined');
     });
@@ -115,14 +112,13 @@ describe('get_filter', () => {
           savedId: undefined,
           services: servicesMock,
           index: undefined,
-          lists: [],
-          listClient: listClientMock,
+          exceptionFilter: undefined,
         })
       ).rejects.toThrow('query, filters, and index parameter should be defined');
     });
 
     test('returns a saved query if given a type of query', async () => {
-      const { esFilter } = await getFilter({
+      const esFilter = await getFilter({
         type: 'saved_query',
         filters: undefined,
         language: undefined,
@@ -130,8 +126,7 @@ describe('get_filter', () => {
         savedId: 'some-id',
         services: servicesMock,
         index: ['auditbeat-*'],
-        lists: [],
-        listClient: listClientMock,
+        exceptionFilter: undefined,
       });
       expect(esFilter).toEqual({
         bool: {
@@ -146,7 +141,7 @@ describe('get_filter', () => {
     });
 
     test('returns the query persisted to the threat_match rule, despite saved_id being specified', async () => {
-      const { esFilter } = await getFilter({
+      const esFilter = await getFilter({
         type: 'threat_match',
         filters: undefined,
         language: 'kuery',
@@ -154,8 +149,7 @@ describe('get_filter', () => {
         savedId: 'some-id',
         services: servicesMock,
         index: ['auditbeat-*'],
-        lists: [],
-        listClient: listClientMock,
+        exceptionFilter: undefined,
       });
       expect(esFilter).toEqual({
         bool: {
@@ -170,7 +164,7 @@ describe('get_filter', () => {
     });
 
     test('returns the query persisted to the threshold rule, despite saved_id being specified', async () => {
-      const { esFilter } = await getFilter({
+      const esFilter = await getFilter({
         type: 'threat_match',
         filters: undefined,
         language: 'kuery',
@@ -178,8 +172,7 @@ describe('get_filter', () => {
         savedId: 'some-id',
         services: servicesMock,
         index: ['auditbeat-*'],
-        lists: [],
-        listClient: listClientMock,
+        exceptionFilter: undefined,
       });
       expect(esFilter).toEqual({
         bool: {
@@ -203,8 +196,7 @@ describe('get_filter', () => {
           savedId: undefined,
           services: servicesMock,
           index: ['auditbeat-*'],
-          lists: [],
-          listClient: listClientMock,
+          exceptionFilter: undefined,
         })
       ).rejects.toThrow('savedId parameter should be defined');
     });
@@ -219,8 +211,7 @@ describe('get_filter', () => {
           savedId: 'some-id',
           services: servicesMock,
           index: undefined,
-          lists: [],
-          listClient: listClientMock,
+          exceptionFilter: undefined,
         })
       ).rejects.toThrow('savedId parameter should be defined');
     });
@@ -235,14 +226,20 @@ describe('get_filter', () => {
           savedId: 'some-id',
           services: servicesMock,
           index: undefined,
-          lists: [],
-          listClient: listClientMock,
+          exceptionFilter: undefined,
         })
       ).rejects.toThrow('Unsupported Rule of type "machine_learning" supplied to getFilter');
     });
 
     test('returns a query when given a list', async () => {
-      const { esFilter } = await getFilter({
+      const { filter } = await buildExceptionFilter({
+        listClient: getListClientMock(),
+        lists: [getExceptionListItemSchemaMock()],
+        alias: null,
+        chunkSize: 1024,
+        excludeExceptions: true,
+      });
+      const esFilter = await getFilter({
         type: 'query',
         filters: undefined,
         language: 'kuery',
@@ -250,8 +247,7 @@ describe('get_filter', () => {
         savedId: undefined,
         services: servicesMock,
         index: ['auditbeat-*'],
-        lists: [getExceptionListItemSchemaMock()],
-        listClient: listClientMock,
+        exceptionFilter: filter,
       });
 
       expect(esFilter).toMatchInlineSnapshot(`

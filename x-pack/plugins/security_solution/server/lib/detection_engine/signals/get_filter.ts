@@ -11,13 +11,12 @@ import type {
   LanguageOrUndefined,
   Language,
 } from '@kbn/securitysolution-io-ts-alerting-types';
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type {
   AlertInstanceContext,
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
-import type { ListClient } from '@kbn/lists-plugin/server';
+import type { Filter } from '@kbn/es-query';
 import { assertUnreachable } from '../../../../common/utility_types';
 import type {
   QueryOrUndefined,
@@ -37,8 +36,7 @@ interface GetFilterArgs {
   savedId: SavedIdOrUndefined;
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   index: IndexOrUndefined;
-  lists: ExceptionListItemSchema[];
-  listClient: ListClient;
+  exceptionFilter: Filter | undefined;
 }
 
 interface QueryAttributes {
@@ -58,23 +56,17 @@ export const getFilter = async ({
   services,
   type,
   query,
-  lists,
-  listClient,
-}: GetFilterArgs): Promise<{
-  esFilter: ESBoolQuery;
-  unprocessedExceptions: ExceptionListItemSchema[];
-}> => {
+  exceptionFilter,
+}: GetFilterArgs): Promise<ESBoolQuery> => {
   const queryFilter = async () => {
     if (query != null && language != null && index != null) {
-      const { queryFilter: esFilter, unprocessedExceptions } = await getQueryFilter({
+      return getQueryFilter({
         query,
         language,
         filters: filters || [],
         index,
-        lists,
-        listClient,
+        exceptionFilter,
       });
-      return { esFilter, unprocessedExceptions };
     } else {
       throw new BadRequestError('query, filters, and index parameter should be defined');
     }
@@ -87,28 +79,24 @@ export const getFilter = async ({
         const savedObject = await withSecuritySpan('getSavedFilter', () =>
           services.savedObjectsClient.get<QueryAttributes>('query', savedId)
         );
-        const { queryFilter: esFilter, unprocessedExceptions } = await getQueryFilter({
+        return getQueryFilter({
           query: savedObject.attributes.query.query,
           language: savedObject.attributes.query.language,
           filters: savedObject.attributes.filters,
           index,
-          lists,
-          listClient,
+          exceptionFilter,
         });
-        return { esFilter, unprocessedExceptions };
       } catch (err) {
         // saved object does not exist, so try and fall back if the user pushed
         // any additional language, query, filters, etc...
         if (query != null && language != null && index != null) {
-          const { queryFilter: esFilter, unprocessedExceptions } = await getQueryFilter({
+          return getQueryFilter({
             query,
             language,
             filters: filters || [],
             index,
-            lists,
-            listClient,
+            exceptionFilter,
           });
-          return { esFilter, unprocessedExceptions };
         } else {
           // user did not give any additional fall back mechanism for generating a rule
           // rethrow error for activity monitoring

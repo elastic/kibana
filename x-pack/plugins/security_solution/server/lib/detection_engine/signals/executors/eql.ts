@@ -13,7 +13,7 @@ import type {
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ListClient } from '@kbn/lists-plugin/server';
+import type { Filter } from '@kbn/es-query';
 import { buildEqlSearchRequest } from '../build_events_query';
 
 import type {
@@ -39,7 +39,6 @@ export const eqlExecutor = async ({
   runtimeMappings,
   completeRule,
   tuple,
-  exceptionItems,
   ruleExecutionLogger,
   services,
   version,
@@ -48,13 +47,13 @@ export const eqlExecutor = async ({
   wrapSequences,
   primaryTimestamp,
   secondaryTimestamp,
-  listClient,
+  filter,
+  unprocessedExceptions,
 }: {
   inputIndex: string[];
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   completeRule: CompleteRule<EqlRuleParams>;
   tuple: RuleRangeTuple;
-  exceptionItems: ExceptionListItemSchema[];
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   version: string;
@@ -63,7 +62,8 @@ export const eqlExecutor = async ({
   wrapSequences: WrapSequences;
   primaryTimestamp: string;
   secondaryTimestamp?: string;
-  listClient: ListClient;
+  filter: Filter | undefined;
+  unprocessedExceptions: ExceptionListItemSchema[];
 }): Promise<SearchAfterAndBulkCreateReturnType> => {
   const ruleParams = completeRule.ruleParams;
 
@@ -75,16 +75,15 @@ export const eqlExecutor = async ({
       index: inputIndex,
       from: tuple.from.toISOString(),
       to: tuple.to.toISOString(),
-      size: completeRule.ruleParams.maxSignals,
+      size: ruleParams.maxSignals,
       filters: ruleParams.filters,
       primaryTimestamp,
       secondaryTimestamp,
-      exceptionLists: exceptionItems,
       runtimeMappings,
       eventCategoryOverride: ruleParams.eventCategoryOverride,
       timestampField: ruleParams.timestampField,
       tiebreakerField: ruleParams.tiebreakerField,
-      listClient,
+      filter,
     });
 
     ruleExecutionLogger.debug(`EQL query request: ${JSON.stringify(request)}`);

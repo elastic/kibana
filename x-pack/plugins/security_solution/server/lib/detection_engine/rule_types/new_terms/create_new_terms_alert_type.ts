@@ -86,7 +86,6 @@ export const createNewTermsAlertType = (
           ruleExecutionLogger,
           bulkCreate,
           completeRule,
-          exceptionItems,
           tuple,
           mergeStrategy,
           inputIndex,
@@ -94,7 +93,7 @@ export const createNewTermsAlertType = (
           primaryTimestamp,
           secondaryTimestamp,
           aggregatableTimestampField,
-          listClient,
+          filter,
         },
         services,
         params,
@@ -109,7 +108,7 @@ export const createNewTermsAlertType = (
         from: params.from,
       });
 
-      const { esFilter } = await getFilter({
+      const esFilter = await getFilter({
         filters: params.filters,
         index: inputIndex,
         language: params.language,
@@ -117,8 +116,7 @@ export const createNewTermsAlertType = (
         services,
         type: params.type,
         query: params.query,
-        lists: exceptionItems,
-        listClient,
+        exceptionFilter: filter,
       });
 
       const parsedHistoryWindowSize = parseDateString({

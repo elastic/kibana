@@ -53,11 +53,12 @@ export const createMlAlertType = (
         runOpts: {
           bulkCreate,
           completeRule,
-          exceptionItems,
           listClient,
           ruleExecutionLogger,
           tuple,
           wrapHits,
+          filter,
+          unprocessedExceptions,
         },
         services,
         state,
@@ -68,11 +69,12 @@ export const createMlAlertType = (
         tuple,
         ml,
         listClient,
-        exceptionItems,
         services,
         ruleExecutionLogger,
         bulkCreate,
         wrapHits,
+        filter,
+        unprocessedExceptions,
       });
       return { ...result, state };
     },

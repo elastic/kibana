@@ -20,7 +20,6 @@ export const createThreatSignal = async ({
   currentResult,
   currentThreatList,
   eventsTelemetry,
-  exceptionItems,
   filters,
   inputIndex,
   language,
@@ -39,6 +38,8 @@ export const createThreatSignal = async ({
   runtimeMappings,
   primaryTimestamp,
   secondaryTimestamp,
+  filter,
+  unprocessedExceptions,
 }: CreateThreatSignalOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const threatFilter = buildThreatMappingFilter({
     threatMapping,
@@ -54,7 +55,7 @@ export const createThreatSignal = async ({
     );
     return currentResult;
   } else {
-    const { esFilter } = await getFilter({
+    const esFilter = await getFilter({
       type,
       filters: [...filters, threatFilter],
       language,
@@ -62,8 +63,7 @@ export const createThreatSignal = async ({
       savedId,
       services,
       index: inputIndex,
-      lists: exceptionItems,
-      listClient,
+      exceptionFilter: filter,
     });
 
     ruleExecutionLogger.debug(
@@ -76,7 +76,7 @@ export const createThreatSignal = async ({
       completeRule,
       enrichment: threatEnrichment,
       eventsTelemetry,
-      exceptionsList: exceptionItems,
+      exceptionsList: unprocessedExceptions,
       filter: esFilter,
       inputIndexPattern: inputIndex,
       listClient,

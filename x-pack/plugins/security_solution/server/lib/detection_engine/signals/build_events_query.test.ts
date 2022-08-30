@@ -8,6 +8,7 @@
 import { buildEqlSearchRequest, buildEventsSearchQuery } from './build_events_query';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import { getListClientMock } from '@kbn/lists-plugin/server/services/lists/list_client.mock';
+import { buildExceptionFilter } from '../exceptions/build_exception_filter';
 
 const emptyFilter = {
   bool: {
@@ -565,10 +566,9 @@ describe('create_signals', () => {
         filters: undefined,
         primaryTimestamp: '@timestamp',
         secondaryTimestamp: undefined,
-        exceptionLists: [],
         runtimeMappings: undefined,
         eventCategoryOverride: undefined,
-        listClient: getListClientMock(),
+        filter: undefined,
       });
       expect(request).toEqual({
         allow_no_indices: true,
@@ -617,11 +617,10 @@ describe('create_signals', () => {
         filters: undefined,
         primaryTimestamp: 'event.ingested',
         secondaryTimestamp: '@timestamp',
-        exceptionLists: [],
         runtimeMappings: undefined,
         eventCategoryOverride: 'event.other_category',
         timestampField: undefined,
-        listClient: getListClientMock(),
+        filter: undefined,
       });
       expect(request).toEqual({
         allow_no_indices: true,
@@ -706,11 +705,10 @@ describe('create_signals', () => {
         filters: undefined,
         primaryTimestamp: 'event.ingested',
         secondaryTimestamp: undefined,
-        exceptionLists: [],
         runtimeMappings: undefined,
         eventCategoryOverride: 'event.other_category',
         timestampField: undefined,
-        listClient: getListClientMock(),
+        filter: undefined,
       });
       expect(request).toEqual({
         allow_no_indices: true,
@@ -751,6 +749,13 @@ describe('create_signals', () => {
     });
 
     test('should build a request with exceptions', async () => {
+      const { filter } = await buildExceptionFilter({
+        listClient: getListClientMock(),
+        lists: [getExceptionListItemSchemaMock()],
+        alias: null,
+        chunkSize: 1024,
+        excludeExceptions: true,
+      });
       const request = await buildEqlSearchRequest({
         query: 'process where true',
         index: ['testindex1', 'testindex2'],
@@ -760,10 +765,9 @@ describe('create_signals', () => {
         filters: undefined,
         primaryTimestamp: '@timestamp',
         secondaryTimestamp: undefined,
-        exceptionLists: [getExceptionListItemSchemaMock()],
         runtimeMappings: undefined,
         eventCategoryOverride: undefined,
-        listClient: getListClientMock(),
+        filter,
       });
       expect(request).toMatchInlineSnapshot(`
         Object {
@@ -904,9 +908,8 @@ describe('create_signals', () => {
         filters,
         primaryTimestamp: '@timestamp',
         secondaryTimestamp: undefined,
-        exceptionLists: [],
         runtimeMappings: undefined,
-        listClient: getListClientMock(),
+        filter: undefined,
       });
       expect(request).toEqual({
         allow_no_indices: true,

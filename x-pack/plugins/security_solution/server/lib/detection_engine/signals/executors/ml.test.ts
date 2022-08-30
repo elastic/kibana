@@ -9,7 +9,6 @@ import dateMath from '@kbn/datemath';
 import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { mlExecutor } from './ml';
-import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import { getCompleteRuleMock, getMlRuleParams } from '../../schemas/rule_schemas.mock';
 import { getListClientMock } from '@kbn/lists-plugin/server/services/lists/list_client.mock';
 import { findMlSignals } from '../find_ml_signals';
@@ -28,7 +27,6 @@ describe('ml_executor', () => {
   let ruleExecutionLogger: ReturnType<typeof ruleExecutionLogMock.forExecutors.create>;
   const params = getMlRuleParams();
   const mlCompleteRule = getCompleteRuleMock<MachineLearningRuleParams>(params);
-  const exceptionItems = [getExceptionListItemSchemaMock()];
   const tuple = {
     from: dateMath.parse(params.from)!,
     to: dateMath.parse(params.to)!,
@@ -73,12 +71,13 @@ describe('ml_executor', () => {
         completeRule: mlCompleteRule,
         tuple,
         ml: undefined,
-        exceptionItems,
         services: alertServices,
         ruleExecutionLogger,
         listClient,
         bulkCreate: jest.fn(),
         wrapHits: jest.fn(),
+        filter: undefined,
+        unprocessedExceptions: [],
       })
     ).rejects.toThrow('ML plugin unavailable during rule execution');
   });
@@ -89,12 +88,13 @@ describe('ml_executor', () => {
       completeRule: mlCompleteRule,
       tuple,
       ml: mlMock,
-      exceptionItems,
       services: alertServices,
       ruleExecutionLogger,
       listClient,
       bulkCreate: jest.fn(),
       wrapHits: jest.fn(),
+      filter: undefined,
+      unprocessedExceptions: [],
     });
     expect(ruleExecutionLogger.warn).toHaveBeenCalled();
     expect(ruleExecutionLogger.warn.mock.calls[0][0]).toContain(
@@ -116,12 +116,13 @@ describe('ml_executor', () => {
       completeRule: mlCompleteRule,
       tuple,
       ml: mlMock,
-      exceptionItems,
       services: alertServices,
       ruleExecutionLogger,
       listClient,
       bulkCreate: jest.fn(),
       wrapHits: jest.fn(),
+      filter: undefined,
+      unprocessedExceptions: [],
     });
     expect(ruleExecutionLogger.warn).toHaveBeenCalled();
     expect(ruleExecutionLogger.warn.mock.calls[0][0]).toContain(

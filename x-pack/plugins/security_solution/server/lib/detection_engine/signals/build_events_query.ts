@@ -5,9 +5,8 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import type { ListClient } from '@kbn/lists-plugin/server';
 import { isEmpty } from 'lodash';
+import type { Filter } from '@kbn/es-query';
 import type {
   FiltersOrUndefined,
   TimestampOverrideOrUndefined,
@@ -39,12 +38,11 @@ interface BuildEqlSearchRequestParams {
   filters: FiltersOrUndefined;
   primaryTimestamp: TimestampOverride;
   secondaryTimestamp: TimestampOverrideOrUndefined;
-  exceptionLists: ExceptionListItemSchema[];
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   eventCategoryOverride?: string;
   timestampField?: string;
   tiebreakerField?: string;
-  listClient: ListClient;
+  filter: Filter | undefined;
 }
 
 const buildTimeRangeFilter = ({
@@ -219,12 +217,11 @@ export const buildEqlSearchRequest = async ({
   filters,
   primaryTimestamp,
   secondaryTimestamp,
-  exceptionLists,
   runtimeMappings,
   eventCategoryOverride,
   timestampField,
   tiebreakerField,
-  listClient,
+  filter,
 }: BuildEqlSearchRequestParams): Promise<estypes.EqlSearchRequest> => {
   const timestamps = secondaryTimestamp
     ? [primaryTimestamp, secondaryTimestamp]
@@ -234,13 +231,12 @@ export const buildEqlSearchRequest = async ({
     format: 'strict_date_optional_time',
   }));
 
-  const { queryFilter: esFilter } = await getQueryFilter({
+  const esFilter = await getQueryFilter({
     query: '',
     language: 'eql',
     filters: filters || [],
     index,
-    lists: exceptionLists,
-    listClient,
+    exceptionFilter: filter,
   });
 
   const rangeFilter = buildTimeRangeFilter({

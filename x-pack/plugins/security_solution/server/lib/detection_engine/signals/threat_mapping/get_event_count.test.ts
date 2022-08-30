@@ -7,11 +7,9 @@
 import moment from 'moment';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { getEventCount } from './get_event_count';
-import { getListClientMock } from '@kbn/lists-plugin/server/services/lists/list_client.mock';
 
 describe('getEventCount', () => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
-  const listClient = getListClientMock();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -23,11 +21,10 @@ describe('getEventCount', () => {
       query: '*:*',
       language: 'kuery',
       filters: [],
-      exceptionItems: [],
       index: ['test-index'],
       tuple: { to: moment('2022-01-14'), from: moment('2022-01-13'), maxSignals: 1337 },
       primaryTimestamp: '@timestamp',
-      listClient,
+      filter: undefined,
     });
 
     expect(esClient.count).toHaveBeenCalledWith({
@@ -61,12 +58,11 @@ describe('getEventCount', () => {
       query: '*:*',
       language: 'kuery',
       filters: [],
-      exceptionItems: [],
       index: ['test-index'],
       tuple: { to: moment('2022-01-14'), from: moment('2022-01-13'), maxSignals: 1337 },
       primaryTimestamp: 'event.ingested',
       secondaryTimestamp: '@timestamp',
-      listClient,
+      filter: undefined,
     });
 
     expect(esClient.count).toHaveBeenCalledWith({
@@ -123,11 +119,10 @@ describe('getEventCount', () => {
       query: '*:*',
       language: 'kuery',
       filters: [],
-      exceptionItems: [],
       index: ['test-index'],
       tuple: { to: moment('2022-01-14'), from: moment('2022-01-13'), maxSignals: 1337 },
       primaryTimestamp: 'event.ingested',
-      listClient,
+      filter: undefined,
     });
 
     expect(esClient.count).toHaveBeenCalledWith({

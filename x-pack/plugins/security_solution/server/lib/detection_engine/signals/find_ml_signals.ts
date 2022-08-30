@@ -6,11 +6,9 @@
  */
 
 import dateMath from '@kbn/datemath';
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
-import type { ListClient } from '@kbn/lists-plugin/server';
+import type { Filter } from '@kbn/es-query';
 import type { AnomalyResults } from '../../machine_learning';
 import { getAnomalies } from '../../machine_learning';
 
@@ -22,8 +20,7 @@ export const findMlSignals = async ({
   anomalyThreshold,
   from,
   to,
-  exceptionItems,
-  listClient,
+  filter,
 }: {
   ml: MlPluginSetup;
   request: KibanaRequest;
@@ -32,19 +29,15 @@ export const findMlSignals = async ({
   anomalyThreshold: number;
   from: string;
   to: string;
-  exceptionItems: ExceptionListItemSchema[];
-  listClient: ListClient;
-}): Promise<{
-  anomalyResults: AnomalyResults;
-  unprocessedExceptions: ExceptionListItemSchema[];
-}> => {
+  filter: Filter | undefined;
+}): Promise<AnomalyResults> => {
   const { mlAnomalySearch } = ml.mlSystemProvider(request, savedObjectsClient);
   const params = {
     jobIds,
     threshold: anomalyThreshold,
     earliestMs: dateMath.parse(from)?.valueOf() ?? 0,
     latestMs: dateMath.parse(to)?.valueOf() ?? 0,
-    exceptionItems,
+    filter,
   };
-  return getAnomalies(params, mlAnomalySearch, listClient);
+  return getAnomalies(params, mlAnomalySearch);
 };

@@ -15,7 +15,6 @@ import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import { buildTimestampRuntimeMapping } from '../../rule_types/utils';
 import { TIMESTAMP_RUNTIME_FIELD } from '../../rule_types/constants';
 import { getQueryFilter } from '../get_query_filter';
-import { getListClientMock } from '@kbn/lists-plugin/server/services/lists/list_client.mock';
 import type { ESBoolQuery } from '../../../../../common/typed_json';
 
 const mockSingleSearchAfter = jest.fn(async () => ({
@@ -41,13 +40,12 @@ describe('findThresholdSignals', () => {
     jest.clearAllMocks();
     jest.spyOn(single_search_after, 'singleSearchAfter').mockImplementation(mockSingleSearchAfter);
     mockService = alertsMock.createRuleExecutorServices();
-    const { queryFilter } = await getQueryFilter({
+    const queryFilter = await getQueryFilter({
       query: '',
       language: 'kuery',
       filters: [],
       index: ['*'],
-      lists: [],
-      listClient: getListClientMock(),
+      exceptionFilter: undefined,
     });
     filter = queryFilter;
   });

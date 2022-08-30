@@ -15,7 +15,7 @@ import type {
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
 import type { IRuleDataReader } from '@kbn/rule-registry-plugin/server';
-import type { ListClient } from '@kbn/lists-plugin/server';
+import type { Filter } from '@kbn/es-query';
 import type { CompleteRule, ThresholdRuleParams } from '../../schemas/rule_schemas';
 import { getFilter } from '../get_filter';
 import {
@@ -41,7 +41,6 @@ export const thresholdExecutor = async ({
   runtimeMappings,
   completeRule,
   tuple,
-  exceptionItems,
   ruleExecutionLogger,
   services,
   version,
@@ -53,13 +52,13 @@ export const thresholdExecutor = async ({
   primaryTimestamp,
   secondaryTimestamp,
   aggregatableTimestampField,
-  listClient,
+  filter,
+  unprocessedExceptions,
 }: {
   inputIndex: string[];
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   completeRule: CompleteRule<ThresholdRuleParams>;
   tuple: RuleRangeTuple;
-  exceptionItems: ExceptionListItemSchema[];
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
   version: string;
@@ -71,7 +70,8 @@ export const thresholdExecutor = async ({
   primaryTimestamp: string;
   secondaryTimestamp?: string;
   aggregatableTimestampField: string;
-  listClient: ListClient;
+  filter: Filter | undefined;
+  unprocessedExceptions: ExceptionListItemSchema[];
 }): Promise<SearchAfterAndBulkCreateReturnType & { state: ThresholdAlertState }> => {
   const result = createSearchAfterReturnType();
   const ruleParams = completeRule.ruleParams;
@@ -108,7 +108,7 @@ export const thresholdExecutor = async ({
     });
 
     // Combine dupe filter with other filters
-    const { esFilter } = await getFilter({
+    const esFilter = await getFilter({
       type: ruleParams.type,
       filters: ruleParams.filters ? ruleParams.filters.concat(bucketFilters) : bucketFilters,
       language: ruleParams.language,
@@ -116,8 +116,7 @@ export const thresholdExecutor = async ({
       savedId: ruleParams.savedId,
       services,
       index: inputIndex,
-      lists: exceptionItems,
-      listClient,
+      exceptionFilter: filter,
     });
 
     // Look for new events over threshold

@@ -68,7 +68,6 @@ export const createIndicatorMatchAlertType = (
           runtimeMappings,
           completeRule,
           tuple,
-          exceptionItems,
           listClient,
           ruleExecutionLogger,
           searchAfterSize,
@@ -76,6 +75,8 @@ export const createIndicatorMatchAlertType = (
           wrapHits,
           primaryTimestamp,
           secondaryTimestamp,
+          filter,
+          unprocessedExceptions,
         },
         services,
         state,
@@ -87,7 +88,6 @@ export const createIndicatorMatchAlertType = (
         completeRule,
         tuple,
         listClient,
-        exceptionItems,
         services,
         version,
         searchAfterSize,
@@ -97,6 +97,8 @@ export const createIndicatorMatchAlertType = (
         wrapHits,
         primaryTimestamp,
         secondaryTimestamp,
+        filter,
+        unprocessedExceptions,
       });
       return { ...result, state };
     },

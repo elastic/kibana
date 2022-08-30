@@ -6,34 +6,24 @@
  */
 
 import type { Language } from '@kbn/securitysolution-io-ts-alerting-types';
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { Filter, EsQueryConfig, DataViewBase } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
-import type { ListClient } from '@kbn/lists-plugin/server';
 import type { ESBoolQuery } from '../../../../common/typed_json';
 import type { Index, Query } from '../../../../common/detection_engine/schemas/common';
-import { buildExceptionFilter } from '../exceptions/build_exception_filter';
 
 export const getQueryFilter = async ({
   query,
   language,
   filters,
   index,
-  lists,
-  listClient,
-  excludeExceptions = true,
+  exceptionFilter,
 }: {
   query: Query;
   language: Language;
   filters: unknown;
   index: Index;
-  lists: ExceptionListItemSchema[];
-  listClient: ListClient;
-  excludeExceptions?: boolean;
-}): Promise<{
-  queryFilter: ESBoolQuery;
-  unprocessedExceptions: ExceptionListItemSchema[];
-}> => {
+  exceptionFilter: Filter | undefined;
+}): Promise<ESBoolQuery> => {
   const indexPattern: DataViewBase = {
     fields: [],
     title: index.join(),
@@ -45,24 +35,11 @@ export const getQueryFilter = async ({
     ignoreFilterIfFieldNotInIndex: false,
     dateFormatTZ: 'Zulu',
   };
-  // Assume that `indices.query.bool.max_clause_count` is at least 1024 (the default value),
-  // allowing us to make 1024-item chunks of exception list items.
-  // Discussion at https://issues.apache.org/jira/browse/LUCENE-4835 indicates that 1024 is a
-  // very conservative value.
-  const { filter: exceptionFilter, unprocessedExceptions } = await buildExceptionFilter({
-    lists,
-    excludeExceptions,
-    chunkSize: 1024,
-    alias: null,
-    listClient,
-  });
+
   const initialQuery = { query, language };
   const allFilters = getAllFilters(filters as Filter[], exceptionFilter);
 
-  return {
-    queryFilter: buildEsQuery(indexPattern, initialQuery, allFilters, config),
-    unprocessedExceptions,
-  };
+  return buildEsQuery(indexPattern, initialQuery, allFilters, config);
 };
 
 export const getAllFilters = (filters: Filter[], exceptionFilter: Filter | undefined): Filter[] => {

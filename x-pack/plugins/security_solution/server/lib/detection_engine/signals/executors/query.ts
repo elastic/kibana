@@ -14,6 +14,7 @@ import type {
 import type { ListClient } from '@kbn/lists-plugin/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import type { Filter } from '@kbn/es-query';
 import { getFilter } from '../get_filter';
 import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
 import type { RuleRangeTuple, BulkCreate, WrapHits } from '../types';
@@ -33,7 +34,6 @@ export const queryExecutor = async ({
   runtimeMappings,
   completeRule,
   tuple,
-  exceptionItems,
   listClient,
   experimentalFeatures,
   ruleExecutionLogger,
@@ -45,12 +45,13 @@ export const queryExecutor = async ({
   wrapHits,
   primaryTimestamp,
   secondaryTimestamp,
+  unprocessedExceptions,
+  filter,
 }: {
   inputIndex: string[];
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   completeRule: CompleteRule<QueryRuleParams> | CompleteRule<SavedQueryRuleParams>;
   tuple: RuleRangeTuple;
-  exceptionItems: ExceptionListItemSchema[];
   listClient: ListClient;
   experimentalFeatures: ExperimentalFeatures;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
@@ -62,11 +63,13 @@ export const queryExecutor = async ({
   wrapHits: WrapHits;
   primaryTimestamp: string;
   secondaryTimestamp?: string;
+  unprocessedExceptions: ExceptionListItemSchema[];
+  filter: Filter | undefined;
 }) => {
   const ruleParams = completeRule.ruleParams;
 
   return withSecuritySpan('queryExecutor', async () => {
-    const { esFilter, unprocessedExceptions } = await getFilter({
+    const esFilter = await getFilter({
       type: ruleParams.type,
       filters: ruleParams.filters,
       language: ruleParams.language,
@@ -74,8 +77,7 @@ export const queryExecutor = async ({
       savedId: ruleParams.savedId,
       services,
       index: inputIndex,
-      lists: exceptionItems,
-      listClient,
+      exceptionFilter: filter,
     });
 
     return searchAfterAndBulkCreate({

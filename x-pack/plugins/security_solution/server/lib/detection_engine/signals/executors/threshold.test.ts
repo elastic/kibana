@@ -18,7 +18,6 @@ import { createRuleDataClientMock } from '@kbn/rule-registry-plugin/server/rule_
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
-import { getListClientMock } from '@kbn/lists-plugin/server/services/lists/list_client.mock';
 
 describe('threshold_executor', () => {
   let alertServices: RuleExecutorServicesMock;
@@ -84,7 +83,6 @@ describe('threshold_executor', () => {
       const response = await thresholdExecutor({
         completeRule: thresholdCompleteRule,
         tuple,
-        exceptionItems: [],
         services: alertServices,
         state,
         version,
@@ -103,7 +101,8 @@ describe('threshold_executor', () => {
         inputIndex: ['auditbeat-*'],
         primaryTimestamp: TIMESTAMP,
         aggregatableTimestampField: TIMESTAMP,
-        listClient: getListClientMock(),
+        filter: undefined,
+        unprocessedExceptions: [],
       });
       expect(response.state).toEqual({
         initialized: true,

@@ -7,10 +7,8 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import type { ListClient } from '@kbn/lists-plugin/server';
 import type { MlAnomalyRecordDoc as Anomaly } from '@kbn/ml-plugin/server';
-import { buildExceptionFilter } from '../detection_engine/exceptions/build_exception_filter';
+import type { Filter } from '@kbn/es-query';
 
 export type { Anomaly };
 export type AnomalyResults = estypes.SearchResponse<Anomaly>;
@@ -24,63 +22,49 @@ export interface AnomaliesSearchParams {
   threshold: number;
   earliestMs: number;
   latestMs: number;
-  exceptionItems: ExceptionListItemSchema[];
   maxRecords?: number;
+  filter: Filter | undefined;
 }
 
 export const getAnomalies = async (
   params: AnomaliesSearchParams,
-  mlAnomalySearch: MlAnomalySearch,
-  listClient: ListClient
-): Promise<{
-  anomalyResults: AnomalyResults;
-  unprocessedExceptions: ExceptionListItemSchema[];
-}> => {
+  mlAnomalySearch: MlAnomalySearch
+): Promise<AnomalyResults> => {
   const boolCriteria = buildCriteria(params);
-  const { filter, unprocessedExceptions } = await buildExceptionFilter({
-    lists: params.exceptionItems,
-    excludeExceptions: true,
-    chunkSize: 1024,
-    alias: null,
-    listClient,
-  });
-  return {
-    anomalyResults: await mlAnomalySearch(
-      {
-        size: params.maxRecords || 100,
-        body: {
-          query: {
-            bool: {
-              filter: [
-                {
-                  query_string: {
-                    query: 'result_type:record',
-                    analyze_wildcard: false,
-                  },
+  return mlAnomalySearch(
+    {
+      size: params.maxRecords || 100,
+      body: {
+        query: {
+          bool: {
+            filter: [
+              {
+                query_string: {
+                  query: 'result_type:record',
+                  analyze_wildcard: false,
                 },
-                { term: { is_interim: false } },
-                {
-                  bool: {
-                    must: boolCriteria,
-                  },
+              },
+              { term: { is_interim: false } },
+              {
+                bool: {
+                  must: boolCriteria,
                 },
-              ],
-              must_not: filter?.query,
-            },
+              },
+            ],
+            must_not: params.filter?.query,
           },
-          fields: [
-            {
-              field: '*',
-              include_unmapped: true,
-            },
-          ],
-          sort: [{ record_score: { order: 'desc' as const } }],
         },
+        fields: [
+          {
+            field: '*',
+            include_unmapped: true,
+          },
+        ],
+        sort: [{ record_score: { order: 'desc' as const } }],
       },
-      params.jobIds
-    ),
-    unprocessedExceptions,
-  };
+    },
+    params.jobIds
+  );
 };
 
 const buildCriteria = (params: AnomaliesSearchParams): object[] => {
