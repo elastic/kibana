@@ -17625,7 +17625,6 @@
     "xpack.lens.indexPattern.timeShiftPlaceholder": "カスタム値を入力（例：8w）",
     "xpack.lens.indexPattern.useAsTopLevelAgg": "最初にこのフィールドでグループ化",
     "xpack.lens.indexPatterns.clearFiltersLabel": "名前とタイプフィルターを消去",
-    "xpack.lens.indexPatterns.fieldFiltersLabel": "タイプでフィルタリング",
     "xpack.lens.indexPatterns.filterByNameLabel": "検索フィールド名",
     "xpack.lens.indexPatterns.noAvailableDataLabel": "データを含むフィールドはありません。",
     "xpack.lens.indexPatterns.noDataLabel": "フィールドがありません。",
