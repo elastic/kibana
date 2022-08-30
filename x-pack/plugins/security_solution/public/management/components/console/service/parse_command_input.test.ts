@@ -40,7 +40,7 @@ describe('when using parsed command input utils', () => {
       );
     });
 
-    it('should parse arguments that the `--` prefix', () => {
+    it('should parse arguments that have `--` prefix with no value', () => {
       const input = 'foo    --one     --two';
       const parsedCommand = parseCommandInput(input);
 
@@ -48,8 +48,8 @@ describe('when using parsed command input utils', () => {
         parsedCommandWith({
           input,
           args: {
-            one: [],
-            two: [],
+            one: [true],
+            two: [true],
           },
         })
       );

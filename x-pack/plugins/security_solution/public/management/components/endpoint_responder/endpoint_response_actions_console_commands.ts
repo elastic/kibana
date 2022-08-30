@@ -23,7 +23,7 @@ import type {
 import { getCommandAboutInfo } from './get_command_about_info';
 
 const emptyArgumentValidator = (argData: ParsedArgData): true | string => {
-  if (argData?.length > 0 && argData[0]?.trim().length > 0) {
+  if (argData?.length > 0 && typeof argData[0] === 'string' && argData[0]?.trim().length > 0) {
     return true;
   } else {
     return i18n.translate('xpack.securitySolution.endpointConsoleCommands.emptyArgumentMessage', {
