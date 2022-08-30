@@ -353,8 +353,8 @@ export async function getSimpleExamples(
 
     return {
       totalDocuments: getHitsTotal(simpleExamplesResult),
-      sampledDocuments: fieldExampleBuckets.total, // TODO: check if that's correct mapping
-      sampledValues: fieldExampleBuckets.exists, // TODO: check if that's correct mapping
+      sampledDocuments: fieldExampleBuckets.total,
+      sampledValues: fieldExampleBuckets.valuesCount,
       topValues: {
         buckets: fieldExampleBuckets.buckets,
       },

@@ -41,7 +41,7 @@ export function getFieldExampleBuckets(params: FieldValueCountsParams) {
   const allValues = getFieldValues(params.hits, params.field, params.dataView);
   const missing = countMissing(allValues);
 
-  const groups = groupValues(allValues, params);
+  const { groups, valuesCount } = groupValues(allValues, params);
   const exampleBuckets = map(
     sortBy(groups, 'count').reverse().slice(0, params.count),
     function (bucket) {
@@ -60,6 +60,7 @@ export function getFieldExampleBuckets(params: FieldValueCountsParams) {
     total: params.hits.length,
     exists: params.hits.length - missing,
     missing,
+    valuesCount,
     buckets: exampleBuckets,
   };
 }
@@ -79,7 +80,10 @@ export function countMissing(array: FieldHitValue[]): number {
   return array.length - without(array, undefined, null).length;
 }
 
-export function groupValues(allValues: FieldHitValue[], params: FieldValueCountsParams) {
+export function groupValues(
+  allValues: FieldHitValue[],
+  params: FieldValueCountsParams
+): { groups: Record<string, { count: number; value: any }>; valuesCount: number } {
   const groups: Record<string, { count: number; value: any }> = {};
   let k;
 
@@ -106,5 +110,8 @@ export function groupValues(allValues: FieldHitValue[], params: FieldValueCounts
     });
   });
 
-  return groups;
+  return {
+    groups,
+    valuesCount: Object.values(groups).reduce((sum, group) => sum + group.count, 0),
+  };
 }

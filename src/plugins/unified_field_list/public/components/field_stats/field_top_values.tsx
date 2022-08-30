@@ -61,6 +61,7 @@ export const FieldTopValues: React.FC<FieldTopValuesProps> = ({
                 digitsRequired
               )}
               progressValue={getProgressValue(bucket.count, sampledValuesCount)}
+              valuesCount={bucket.count}
               color={color}
               data-test-subj={dataTestSubject}
               onAddFilter={onAddFilter}
@@ -81,6 +82,7 @@ export const FieldTopValues: React.FC<FieldTopValuesProps> = ({
               digitsRequired
             )}
             progressValue={getProgressValue(otherCount, sampledValuesCount)}
+            valuesCount={otherCount}
             color={color}
             data-test-subj={dataTestSubject}
             onAddFilter={onAddFilter}

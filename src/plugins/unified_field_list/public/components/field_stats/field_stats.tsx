@@ -20,7 +20,14 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import DateMath from '@kbn/datemath';
-import { EuiButtonGroup, EuiLoadingSpinner, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiButtonGroup,
+  EuiLoadingSpinner,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  EuiToolTip,
+} from '@elastic/eui';
 import {
   Axis,
   Chart,
@@ -234,16 +241,34 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   let title = <></>;
 
   function combineWithTitleAndFooter(el: React.ReactElement) {
+    const percentage =
+      sampledDocuments && totalDocuments
+        ? Math.round((sampledDocuments / totalDocuments) * 100)
+        : 0;
     const countsElement = totalDocuments ? (
       <EuiText color="subdued" size="xs" data-test-subj={`${dataTestSubject}-statsFooter`}>
-        {sampledDocuments && (
+        {sampledDocuments && percentage < 100 && (
           <>
-            {i18n.translate('unifiedFieldList.fieldStats.percentageOfLabel', {
-              defaultMessage: '{percentage}% of',
-              values: {
-                percentage: Math.round((sampledDocuments / totalDocuments) * 100),
-              },
-            })}{' '}
+            <EuiToolTip
+              content={i18n.translate('unifiedFieldList.fieldStats.sampleDocumentsTooltip', {
+                defaultMessage:
+                  '{percentage}% ({sampledDocuments, plural, one {# record} other {# records}})',
+                values: {
+                  percentage,
+                  sampledDocuments,
+                },
+              })}
+              delay="long"
+            >
+              <span>
+                {i18n.translate('unifiedFieldList.fieldStats.basedOnPercentageOfLabel', {
+                  defaultMessage: 'Based on {percentage}% of',
+                  values: {
+                    percentage,
+                  },
+                })}
+              </span>
+            </EuiToolTip>{' '}
           </>
         )}
         <strong>
@@ -252,7 +277,10 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
             .convert(totalDocuments)}
         </strong>{' '}
         {i18n.translate('unifiedFieldList.fieldStats.ofRecordsLabel', {
-          defaultMessage: 'records',
+          defaultMessage: '{totalDocuments, plural, one {record} other {records}}',
+          values: {
+            totalDocuments,
+          },
         })}
       </EuiText>
     ) : (

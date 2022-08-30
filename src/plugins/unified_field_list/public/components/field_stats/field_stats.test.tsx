@@ -324,11 +324,11 @@ describe('UnifiedFieldList <FieldStats />', () => {
     ).toBe('41.5%');
 
     expect(wrapper.find('[data-test-subj="testing-statsFooter"]').first().text()).toBe(
-      '100% of 1624 records'
+      '1624 records'
     );
 
     expect(wrapper.text()).toBe(
-      'Top values"success"41.5%"info"37.1%"security"10.1%"warning"5.0%"error"3.4%"login"2.7%100% of 1624 records'
+      'Top values"success"41.5%"info"37.1%"security"10.1%"warning"5.0%"error"3.4%"login"2.7%1624 records'
     );
   });
 
@@ -402,7 +402,7 @@ describe('UnifiedFieldList <FieldStats />', () => {
     expect(loadFieldStats).toHaveBeenCalledTimes(1);
 
     expect(wrapper.text()).toBe(
-      'Examples"success"41.5%"info"37.1%"security"10.1%"warning"5.0%"error"3.4%"login"2.7%100% of 1624 records'
+      'Examples"success"41.5%"info"37.1%"security"10.1%"warning"5.0%"error"3.4%"login"2.7%1624 records'
     );
   });
 
@@ -557,7 +557,7 @@ describe('UnifiedFieldList <FieldStats />', () => {
 
     await act(async () => {
       resolveFunction!({
-        totalDocuments: 23,
+        totalDocuments: 100,
         sampledDocuments: 23,
         sampledValues: 23,
         histogram: {
@@ -594,7 +594,7 @@ describe('UnifiedFieldList <FieldStats />', () => {
     expect(loadFieldStats).toHaveBeenCalledTimes(1);
 
     expect(wrapper.text()).toBe(
-      'Toggle either theTop valuesDistribution1273.9%1326.1%100% of 23 records'
+      'Toggle either theTop valuesDistribution1273.9%1326.1%Based on 23% of 100 records'
     );
   });
 });

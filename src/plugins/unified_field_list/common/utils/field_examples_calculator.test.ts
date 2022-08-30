@@ -16,14 +16,16 @@ import {
   getFieldValues,
 } from './field_examples_calculator';
 
-const hitsAsValues: Array<Record<string, string | number>> = [
+const hitsAsValues: Array<Record<string, string | number | string[]>> = [
   {
     extension: 'html',
     bytes: 360.20000000000005,
+    '@tags': ['success', 'info'],
   },
   {
     extension: 'gif',
     bytes: 5848.700000000001,
+    '@tags': ['error'],
   },
   {
     extension: 'png',
@@ -110,7 +112,8 @@ const hits = hitsAsValues.map((value) => ({
   _score: 1,
   fields: Object.keys(value).reduce(
     (result: Record<string, Array<string | number>>, fieldName: string) => {
-      result[fieldName] = [value[fieldName]];
+      const fieldValue = value[fieldName];
+      result[fieldName] = Array.isArray(fieldValue) ? fieldValue : [fieldValue];
       return result;
     },
     {}
@@ -137,7 +140,7 @@ describe('fieldExamplesCalculator', function () {
   });
 
   describe('groupValues', function () {
-    let groups: Record<string, any>;
+    let grouped: { groups: Record<string, any>; valuesCount: number };
     let params: any;
     let values: any;
     beforeEach(function () {
@@ -156,11 +159,12 @@ describe('fieldExamplesCalculator', function () {
         undefined,
       ];
       params = {};
-      groups = groupValues(values, params);
+      grouped = groupValues(values, params);
     });
 
     it('should have a groupValues that counts values', function () {
-      expect(groups).toBeInstanceOf(Object);
+      expect(grouped.groups).toBeInstanceOf(Object);
+      expect(grouped.valuesCount).toBe(9);
     });
 
     it('should throw an error if any value is a plain object', function () {
@@ -172,45 +176,47 @@ describe('fieldExamplesCalculator', function () {
     it('should handle values with dots in them', function () {
       values = ['0', '0.........', '0.......,.....'];
       params = {};
-      groups = groupValues(values, params);
-      expect(groups[values[0]].count).toBe(1);
-      expect(groups[values[1]].count).toBe(1);
-      expect(groups[values[2]].count).toBe(1);
+      grouped = groupValues(values, params);
+      expect(grouped.groups[values[0]].count).toBe(1);
+      expect(grouped.groups[values[1]].count).toBe(1);
+      expect(grouped.groups[values[2]].count).toBe(1);
+      expect(grouped.valuesCount).toBe(3);
     });
 
     it('should have a a key for value in the array when not grouping array terms', function () {
-      expect(keys(groups).length).toBe(3);
-      expect(groups.foo).toBeInstanceOf(Object);
-      expect(groups.bar).toBeInstanceOf(Object);
-      expect(groups.baz).toBeInstanceOf(Object);
+      expect(keys(grouped.groups).length).toBe(3);
+      expect(grouped.groups.foo).toBeInstanceOf(Object);
+      expect(grouped.groups.bar).toBeInstanceOf(Object);
+      expect(grouped.groups.baz).toBeInstanceOf(Object);
     });
 
     it('should count array terms independently', function () {
-      expect(groups['foo,bar']).toBe(undefined);
-      expect(groups.foo.count).toBe(5);
-      expect(groups.bar.count).toBe(3);
-      expect(groups.baz.count).toBe(1);
+      expect(grouped.groups['foo,bar']).toBe(undefined);
+      expect(grouped.groups.foo.count).toBe(5);
+      expect(grouped.groups.bar.count).toBe(3);
+      expect(grouped.groups.baz.count).toBe(1);
+      expect(grouped.valuesCount).toBe(9);
     });
 
     describe('grouped array terms', function () {
       beforeEach(function () {
         params.grouped = true;
-        groups = groupValues(values, params);
+        grouped = groupValues(values, params);
       });
 
       it('should group array terms when passed params.grouped', function () {
-        expect(keys(groups).length).toBe(4);
-        expect(groups['foo,bar']).toBeInstanceOf(Object);
+        expect(keys(grouped.groups).length).toBe(4);
+        expect(grouped.groups['foo,bar']).toBeInstanceOf(Object);
       });
 
       it('should contain the original array as the value', function () {
-        expect(groups['foo,bar'].value).toEqual(['foo', 'bar']);
+        expect(grouped.groups['foo,bar'].value).toEqual(['foo', 'bar']);
       });
 
       it('should count the pairs separately from the values they contain', function () {
-        expect(groups['foo,bar'].count).toBe(2);
-        expect(groups.foo.count).toBe(3);
-        expect(groups.bar.count).toBe(1);
+        expect(grouped.groups['foo,bar'].count).toBe(2);
+        expect(grouped.groups.foo.count).toBe(3);
+        expect(grouped.groups.bar.count).toBe(1);
       });
     });
   });
@@ -284,6 +290,15 @@ describe('fieldExamplesCalculator', function () {
     it('counts the hits the field exists in', function () {
       params.field = dataView.fields.getByName('phpmemory');
       expect(getFieldExampleBuckets(params).exists).toBe(5);
+    });
+
+    it('counts total number of values', function () {
+      params.field = dataView.fields.getByName('@tags');
+      expect(getFieldExampleBuckets(params).valuesCount).toBe(3);
+      params.field = dataView.fields.getByName('extension');
+      expect(getFieldExampleBuckets(params).valuesCount).toBe(params.hits.length);
+      params.field = dataView.fields.getByName('phpmemory');
+      expect(getFieldExampleBuckets(params).valuesCount).toBe(5);
     });
   });
 });

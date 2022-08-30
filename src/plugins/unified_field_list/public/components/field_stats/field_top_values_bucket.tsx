@@ -28,6 +28,7 @@ export interface FieldTopValuesBucketProps {
   formattedFieldValue?: string;
   formattedPercentage: string;
   progressValue: number;
+  valuesCount: number;
   color: string;
   'data-test-subj': string;
   onAddFilter?: AddFieldFilterHandler;
@@ -40,6 +41,7 @@ export const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
   formattedFieldValue,
   formattedPercentage,
   progressValue,
+  valuesCount,
   color,
   'data-test-subj': dataTestSubject,
   onAddFilter,
@@ -85,9 +87,21 @@ export const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
             grow={false}
             data-test-subj={`${dataTestSubject}-topValues-formattedPercentage`}
           >
-            <EuiText size="xs" textAlign="left" color={color}>
-              {formattedPercentage}
-            </EuiText>
+            <EuiToolTip
+              content={i18n.translate('unifiedFieldList.fieldStats.bucketPercentageTooltip', {
+                defaultMessage:
+                  '{formattedPercentage} ({valuesCount, plural, one {# record} other {# records}})',
+                values: {
+                  formattedPercentage,
+                  valuesCount,
+                },
+              })}
+              delay="long"
+            >
+              <EuiText size="xs" textAlign="left" color={color}>
+                {formattedPercentage}
+              </EuiText>
+            </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiProgress
