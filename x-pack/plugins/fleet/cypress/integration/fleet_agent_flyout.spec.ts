@@ -6,24 +6,16 @@
  */
 
 import { ADD_AGENT_BUTTON, ADD_AGENT_FLYOUT } from '../screens/fleet';
-import { cleanupAgentPolicies } from '../tasks/cleanup';
+import { cleanupAgentPolicies, deleteFleetServerDocs, deleteAgentDocs } from '../tasks/cleanup';
 import { createAgentDoc } from '../tasks/agents';
-import { setFleetServerHost } from '../tasks/fleet';
+import { setFleetServerHost } from '../tasks/fleet_server';
 import { FLEET, navigateTo } from '../tasks/navigation';
 
 const FLEET_SERVER_POLICY_ID = 'fleet-server-policy';
 
 function cleanUp() {
-  cy.task('deleteDocsByQuery', {
-    index: '.fleet-agents',
-    query: { match_all: {} },
-    ignoreUnavailable: true,
-  });
-  cy.task('deleteDocsByQuery', {
-    index: '.fleet-servers',
-    query: { match_all: {} },
-    ignoreUnavailable: true,
-  });
+  deleteFleetServerDocs(true);
+  deleteAgentDocs(true);
   cleanupAgentPolicies();
 }
 let kibanaVersion: string;

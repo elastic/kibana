@@ -69,3 +69,13 @@ export const CONFIRM_MODAL_CANCEL_BUTTON = 'confirmModalCancelButton';
 export const AGENT_POLICY_FORM = {
   DOWNLOAD_SOURCE_SELECT: 'agentPolicyForm.downloadSource.select',
 };
+
+export const FLEET_AGENT_LIST_PAGE = {
+  TABLE: 'fleetAgentListTable',
+  STATUS_FILTER: 'agentList.statusFilter',
+  POLICY_FILTER: 'agentList.policyFilter',
+  QUERY_INPUT: 'agentList.queryInput',
+  SHOW_UPGRADEABLE: 'agentList.showUpgradeable',
+  CHECKBOX_SELECT_ALL: 'checkboxSelectAll',
+  BULK_ACTIONS_BUTTON: 'agentBulkActionsButton',
+};
