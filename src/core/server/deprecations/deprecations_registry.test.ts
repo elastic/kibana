@@ -7,7 +7,10 @@
  */
 
 /* eslint-disable dot-notation */
-import type { RegisterDeprecationsConfig, GetDeprecationsContext } from './types';
+import type {
+  RegisterDeprecationsConfig,
+  GetDeprecationsContext,
+} from '@kbn/core-deprecations-server';
 import { DeprecationsRegistry } from './deprecations_registry';
 
 describe('DeprecationsRegistry', () => {

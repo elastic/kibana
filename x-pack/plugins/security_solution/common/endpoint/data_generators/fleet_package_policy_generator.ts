@@ -30,7 +30,6 @@ export class FleetPackagePolicyGenerator extends BaseDataGenerator<PackagePolicy
       updated_by: this.randomUser(),
       policy_id: this.seededUUIDv4(), // agent policy id
       enabled: true,
-      output_id: '',
       inputs: [],
       namespace: 'default',
       package: {

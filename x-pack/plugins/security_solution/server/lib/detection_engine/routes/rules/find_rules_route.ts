@@ -11,7 +11,7 @@ import { findRuleValidateTypeDependents } from '../../../../../common/detection_
 import type { FindRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/find_rules_schema';
 import { findRulesSchema } from '../../../../../common/detection_engine/schemas/request/find_rules_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { DETECTION_ENGINE_RULES_URL_FIND } from '../../../../../common/constants';
 import { findRules } from '../../rules/find_rules';
 import { buildSiemResponse } from '../utils';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
@@ -23,7 +23,7 @@ import { legacyGetBulkRuleActionsSavedObject } from '../../rule_actions/legacy_g
 export const findRulesRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.get(
     {
-      path: `${DETECTION_ENGINE_RULES_URL}/_find`,
+      path: DETECTION_ENGINE_RULES_URL_FIND,
       validate: {
         query: buildRouteValidation<typeof findRulesSchema, FindRulesSchemaDecoded>(
           findRulesSchema

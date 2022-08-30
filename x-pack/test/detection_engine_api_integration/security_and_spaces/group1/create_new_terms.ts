@@ -89,7 +89,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(response.status).to.equal(400);
       expect(response.body.message).to.equal(
-        "params invalid: History window size too small, 'historyWindowStart' must be earlier than 'from'"
+        "params invalid: History window size is smaller than rule interval + additional lookback, 'historyWindowStart' must be earlier than 'from'"
       );
     });
 

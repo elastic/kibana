@@ -27,18 +27,17 @@ const importObjects = [
   },
 ];
 
-jest.mock('../../../../saved_objects/routes/legacy_import_export/lib/import_dashboards', () => ({
-  importDashboards: jest.fn().mockResolvedValue({ objects: importObjects }),
-}));
-
 import supertest from 'supertest';
 import { CoreUsageStatsClient } from '../../../../core_usage_data';
 import { coreUsageStatsClientMock } from '../../../../core_usage_data/core_usage_stats_client.mock';
 import { coreUsageDataServiceMock } from '../../../../core_usage_data/core_usage_data_service.mock';
-import { registerLegacyImportRoute } from '../../../../saved_objects/routes/legacy_import_export/import';
-import { setupServer } from '../../../../saved_objects/routes/test_utils';
+import { setupServer } from '../test_utils';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { InternalSavedObjectsRequestHandlerContext } from '../../../../saved_objects/internal_types';
+import { SavedObjectsBulkResponse } from '@kbn/core-saved-objects-api-server';
+import {
+  registerLegacyImportRoute,
+  type InternalSavedObjectsRequestHandlerContext,
+} from '@kbn/core-saved-objects-server-internal';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 let coreUsageStatsClient: jest.Mocked<CoreUsageStatsClient>;
@@ -46,9 +45,10 @@ let coreUsageStatsClient: jest.Mocked<CoreUsageStatsClient>;
 describe('POST /api/dashboards/import', () => {
   let server: SetupServerReturn['server'];
   let httpSetup: SetupServerReturn['httpSetup'];
+  let handlerContext: SetupServerReturn['handlerContext'];
 
   beforeEach(async () => {
-    ({ server, httpSetup } = await setupServer());
+    ({ server, httpSetup, handlerContext } = await setupServer());
 
     const router = httpSetup.createRouter<InternalSavedObjectsRequestHandlerContext>('');
 
@@ -60,6 +60,10 @@ describe('POST /api/dashboards/import', () => {
       coreUsageData,
       logger: loggerMock.create(),
     });
+
+    handlerContext.savedObjects.client.bulkCreate.mockResolvedValueOnce({
+      saved_objects: importObjects,
+    } as SavedObjectsBulkResponse);
 
     await server.start();
   });

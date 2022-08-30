@@ -414,9 +414,9 @@ export class CommonPageObject extends FtrService {
   async closeToast() {
     const toast = await this.find.byCssSelector('.euiToast', 6 * this.defaultFindTimeout);
     await toast.moveMouseTo();
-    const title = await (await this.find.byCssSelector('.euiToastHeader__title')).getVisibleText();
+    const title = await (await this.testSubjects.find('euiToastHeader__title')).getVisibleText();
 
-    await this.find.clickByCssSelector('.euiToast__closeButton');
+    await this.testSubjects.click('toastCloseButton');
     return title;
   }
 
@@ -424,7 +424,7 @@ export class CommonPageObject extends FtrService {
     const toastShown = await this.find.existsByCssSelector('.euiToast');
     if (toastShown) {
       try {
-        await this.find.clickByCssSelector('.euiToast__closeButton');
+        await this.testSubjects.click('toastCloseButton');
       } catch (err) {
         // ignore errors, toast clear themselves after timeout
       }
@@ -436,7 +436,7 @@ export class CommonPageObject extends FtrService {
     for (const toastElement of toasts) {
       try {
         await toastElement.moveMouseTo();
-        const closeBtn = await toastElement.findByCssSelector('.euiToast__closeButton');
+        const closeBtn = await toastElement.findByTestSubject('toastCloseButton');
         await closeBtn.click();
       } catch (err) {
         // ignore errors, toast clear themselves after timeout
