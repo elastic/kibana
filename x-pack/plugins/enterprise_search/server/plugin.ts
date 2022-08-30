@@ -58,6 +58,8 @@ import { appSearchTelemetryType } from './saved_objects/app_search/telemetry';
 import { enterpriseSearchTelemetryType } from './saved_objects/enterprise_search/telemetry';
 import { workplaceSearchTelemetryType } from './saved_objects/workplace_search/telemetry';
 
+import { uiSettings as enterpriseSearchUISettings } from './ui_settings';
+
 import { ConfigType } from '.';
 
 interface PluginsSetup {
@@ -91,7 +93,7 @@ export class EnterpriseSearchPlugin implements Plugin {
   }
 
   public setup(
-    { capabilities, http, savedObjects, getStartServices }: CoreSetup<PluginsStart>,
+    { capabilities, http, savedObjects, getStartServices, uiSettings }: CoreSetup<PluginsStart>,
     { usageCollection, security, features, infra, customIntegrations }: PluginsSetup
   ) {
     const config = this.config;
@@ -125,6 +127,11 @@ export class EnterpriseSearchPlugin implements Plugin {
       catalogue: PLUGIN_IDS,
       privileges: null,
     });
+
+    /**
+     * Register Enterprise Search UI Settings
+     */
+    uiSettings.register(enterpriseSearchUISettings);
 
     /**
      * Register user access to the Enterprise Search plugins
