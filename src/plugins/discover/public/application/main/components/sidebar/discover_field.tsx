@@ -300,6 +300,17 @@ function DiscoverFieldComponent({
   const [infoIsOpen, setOpen] = useState(false);
   const isDocumentRecord = !!onAddFilter;
 
+  const addFilterAndClosePopover: typeof onAddFilter | undefined = useMemo(
+    () =>
+      onAddFilter
+        ? (...params) => {
+            setOpen(false);
+            onAddFilter?.(...params);
+          }
+        : undefined,
+    [setOpen, onAddFilter]
+  );
+
   const toggleDisplay = useCallback(
     (f: DataViewField) => {
       if (selected) {
@@ -451,7 +462,7 @@ function DiscoverFieldComponent({
                 dataViewOrDataViewId={dataView}
                 field={fieldForStats}
                 data-test-subj="dscFieldListPanel"
-                onAddFilter={onAddFilter}
+                onAddFilter={addFilterAndClosePopover}
               />
             )}
           </>
