@@ -51,12 +51,13 @@ export const withSolutionNav = <P extends TemplateProps>(WrappedComponent: Compo
 
     // Default navigation to allow collapsing
     const { canBeCollapsed = true } = solutionNav;
+    const isSidebarShrunk =
+      isMediumBreakpoint || (canBeCollapsed && isLargerBreakpoint && !isSideNavOpenOnDesktop);
     const sideBarClasses = classNames(
       'kbnSolutionNav__sidebar',
       'kbnStickyMenu',
       {
-        'kbnSolutionNav__sidebar--shrink':
-          isMediumBreakpoint || (canBeCollapsed && isLargerBreakpoint && !isSideNavOpenOnDesktop),
+        'kbnSolutionNav__sidebar--shrink': isSidebarShrunk,
       },
       props.pageSideBarProps?.className
     );
@@ -72,11 +73,7 @@ export const withSolutionNav = <P extends TemplateProps>(WrappedComponent: Compo
     const pageSideBarProps: TemplateProps['pageSideBarProps'] = {
       paddingSize: 'none' as 'none',
       ...props.pageSideBarProps,
-      // TODO: `minWidth` isn't re-populating down on state change
-      minWidth:
-        isMediumBreakpoint || (canBeCollapsed && isLargerBreakpoint && !isSideNavOpenOnDesktop)
-          ? euiTheme.size.xxl
-          : undefined,
+      minWidth: isSidebarShrunk ? euiTheme.size.xxl : undefined,
       className: sideBarClasses,
     };
 
