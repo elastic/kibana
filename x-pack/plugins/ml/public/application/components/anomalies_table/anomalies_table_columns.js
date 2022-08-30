@@ -50,9 +50,10 @@ function showLinksMenuForItem(item, showViewSeriesLink, sourceIndicesWithGeoFiel
     item.entityName === 'mlcategory' ||
     item.customUrls !== undefined ||
     item.detector.includes(ML_JOB_AGGREGATION.LAT_LONG) ||
-    (item.sourceIndices && item.sourceIndices(
-      (sourceIndex) => sourceIndicesWithGeoFields[item.jobId][sourceIndex] !== undefined
-    ))
+    (item.sourceIndices &&
+      item.sourceIndices(
+        (sourceIndex) => sourceIndicesWithGeoFields[item.jobId][sourceIndex] !== undefined
+      ))
   );
 }
 
