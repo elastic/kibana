@@ -77,6 +77,14 @@ export const thresholdExecutor = async ({
   const ruleParams = completeRule.ruleParams;
 
   return withSecuritySpan('thresholdExecutor', async () => {
+    if (unprocessedExceptions.length !== 0) {
+      ruleExecutionLogger.warn(
+        `The following exceptions won't be applied to rule execution: ${JSON.stringify(
+          unprocessedExceptions
+        )}`
+      );
+    }
+
     // Get state or build initial state (on upgrade)
     const { signalHistory, searchErrors: previousSearchErrors } = state.initialized
       ? { signalHistory: state.signalHistory, searchErrors: [] }

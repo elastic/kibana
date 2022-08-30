@@ -94,6 +94,7 @@ export const createNewTermsAlertType = (
           secondaryTimestamp,
           aggregatableTimestampField,
           filter,
+          unprocessedExceptions,
         },
         services,
         params,
@@ -107,6 +108,14 @@ export const createNewTermsAlertType = (
         historyWindowStart: params.historyWindowStart,
         from: params.from,
       });
+
+      if (unprocessedExceptions.length !== 0) {
+        ruleExecutionLogger.warn(
+          `The following exceptions won't be applied to rule execution: ${JSON.stringify(
+            unprocessedExceptions
+          )}`
+        );
+      }
 
       const esFilter = await getFilter({
         filters: params.filters,

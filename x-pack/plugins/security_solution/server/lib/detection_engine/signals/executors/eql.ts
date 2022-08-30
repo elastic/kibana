@@ -87,6 +87,13 @@ export const eqlExecutor = async ({
     });
 
     ruleExecutionLogger.debug(`EQL query request: ${JSON.stringify(request)}`);
+    if (unprocessedExceptions.length !== 0) {
+      ruleExecutionLogger.warn(
+        `The following exceptions won't be applied to rule execution: ${JSON.stringify(
+          unprocessedExceptions
+        )}`
+      );
+    }
 
     const eqlSignalSearchStart = performance.now();
 
