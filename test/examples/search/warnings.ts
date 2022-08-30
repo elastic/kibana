@@ -143,8 +143,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // toasts
       const toasts = await find.allByCssSelector(toastsSelector);
-      expect(toasts.length).to.be(1);
-      expect(await toasts[0].getVisibleText()).to.eql('Query result');
+      expect(toasts.length).to.be(2);
+      const expects = ['2 of 4 shards failed', 'Query result'];
+      await asyncForEach(toasts, async (t, index) => {
+        expect(await t.getVisibleText()).to.eql(expects[index]);
+      });
+
+      // click "see full error" button in the toast
+      const [openShardModalButton] = await testSubjects.findAll('openShardFailureModalBtn');
+      await openShardModalButton.click();
+      const modalHeader = await testSubjects.find('shardFailureModalTitle');
+      expect(await modalHeader.getVisibleText()).to.be('2 of 4 shards failed');
+      // request
+      await testSubjects.click('shardFailuresModalRequestButton');
+      const requestBlock = await testSubjects.find('shardsFailedModalRequestBlock');
+      expect(await requestBlock.getVisibleText()).to.contain(testRollupField);
+      // response
+      await testSubjects.click('shardFailuresModalResponseButton');
+      const responseBlock = await testSubjects.find('shardsFailedModalResponseBlock');
+      expect(await responseBlock.getVisibleText()).to.contain(shardFailureReason);
+
+      // close things
+      await testSubjects.click('closeShardFailureModal');
       await PageObjects.common.clearAllToasts();
 
       // response tab

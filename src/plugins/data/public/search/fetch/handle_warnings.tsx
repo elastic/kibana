@@ -13,7 +13,7 @@ import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import { SearchRequest } from '..';
 import { getNotifications } from '../../services';
-import { ShardFailureOpenModalButton } from '../../shard_failure_modal';
+import { ShardFailureOpenModalButton, ShardFailureRequest } from '../../shard_failure_modal';
 import { SearchResponseWarning, WarningHandlerCallback } from '../types';
 import { extractWarnings } from './extract_warnings';
 
@@ -48,7 +48,7 @@ export function handleWarnings(
         {warning.text}
         <EuiSpacer size="s" />
         <ShardFailureOpenModalButton
-          request={request.body}
+          request={request as ShardFailureRequest}
           response={response}
           theme={theme}
           title={title}

@@ -50,6 +50,7 @@ import {
   rangeFilterFunction,
   rangeFunction,
   removeFilterFunction,
+  SearchRequest,
   SearchSourceDependencies,
   SearchSourceService,
   selectFilterFunction,
@@ -239,7 +240,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       onResponse: (request, response, options) => {
         if (!options.disableShardFailureWarning) {
           const { rawResponse } = response;
-          handleWarnings(request, rawResponse, theme);
+          handleWarnings(request.body, rawResponse, theme);
         }
         return response;
       },
@@ -283,7 +284,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
             return;
           }
 
-          handleWarnings(request, rawResponse, theme, cb);
+          handleWarnings(request.json as SearchRequest, rawResponse, theme, cb);
         });
       },
       session: this.sessionService,

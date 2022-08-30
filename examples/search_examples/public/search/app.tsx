@@ -333,7 +333,7 @@ export const SearchExamplesApp = ({
         const warnings: SearchResponseWarning[] = [];
         data.search.showWarnings(inspector.adapter, (warning) => {
           warnings.push(warning);
-          return true; // prevent or allow search service from showing this warning on its own
+          return false; // allow search service from showing this warning on its own
         });
         // click the warnings tab to see the warnings
         setWarningContents(warnings);
