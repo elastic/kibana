@@ -128,7 +128,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/92567
-    describe.skip('and the save button is clicked', () => {
+    describe('and the save button is clicked', () => {
       let policyInfo: PolicyTestResourceInfo;
 
       beforeEach(async () => {
@@ -225,6 +225,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         // Make sure the toast button closes so the save button on the sticky footer is visible
         await testSubjects.waitForHidden('toastCloseButton');
+        // await new Promise(r => setTimeout(r, 5000));
         await pageObjects.policy.confirmAndSave();
 
         await testSubjects.existOrFail('policyDetailsSuccessMessage');
