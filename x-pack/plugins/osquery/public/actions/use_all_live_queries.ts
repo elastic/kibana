@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { createFilter } from '../common/helpers';
 import { useKibana } from '../common/lib/kibana';
 import type { ActionEdges, ActionsStrategyResponse, Direction } from '../../common/search_strategy';
-import type { ESTermQuery } from '../../common/typed_json';
+import type { ESTermQuery, ESExistsQuery } from '../../common/typed_json';
 
 import { useErrorToast } from '../common/hooks/use_error_toast';
 
@@ -20,7 +20,7 @@ interface UseAllLiveQueries {
   direction: Direction;
   limit: number;
   sortField: string;
-  filterQuery?: ESTermQuery | string;
+  filterQuery?: ESTermQuery | ESExistsQuery | string;
   skip?: boolean;
 }
 
