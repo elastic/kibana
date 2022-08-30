@@ -17640,7 +17640,6 @@
     "xpack.lens.indexPattern.timeShiftPlaceholder": "Saisissez des valeurs personnalisées (par ex. 8w)",
     "xpack.lens.indexPattern.useAsTopLevelAgg": "Regrouper d'abord en fonction de ce champ",
     "xpack.lens.indexPatterns.clearFiltersLabel": "Effacer le nom et saisissez les filtres",
-    "xpack.lens.indexPatterns.fieldFiltersLabel": "Filtrer par type",
     "xpack.lens.indexPatterns.filterByNameLabel": "Rechercher les noms de champs",
     "xpack.lens.indexPatterns.noAvailableDataLabel": "Aucun champ disponible ne contient de données.",
     "xpack.lens.indexPatterns.noDataLabel": "Aucun champ.",
