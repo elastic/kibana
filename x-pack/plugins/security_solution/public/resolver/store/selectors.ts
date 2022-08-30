@@ -9,7 +9,13 @@ import { createSelector, defaultMemoize } from 'reselect';
 import * as cameraSelectors from './camera/selectors';
 import * as dataSelectors from './data/selectors';
 import * as uiSelectors from './ui/selectors';
-import type { ResolverState, IsometricTaxiLayout, DataState } from '../types';
+import type {
+  ResolverState,
+  IsometricTaxiLayout,
+  DataState,
+  VisibleEntites,
+  NodeData,
+} from '../types';
 import type { EventStats } from '../../../common/endpoint/types';
 import * as nodeModel from '../../../common/endpoint/models/node';
 
@@ -211,14 +217,9 @@ export const statsTotalForNode = composeSelectors(
 export const visibleNodesAndEdgeLines = createSelector(
   nodesAndEdgelines,
   boundingBox,
-  function (
-    /* eslint-disable @typescript-eslint/no-shadow */
-    nodesAndEdgelines,
-    boundingBox
-    /* eslint-enable @typescript-eslint/no-shadow */
-  ) {
+  function (nodesAndEdgelinesFn, boundingBoxFn) {
     // `boundingBox` and `nodesAndEdgelines` are each memoized.
-    return (time: number) => nodesAndEdgelines(boundingBox(time));
+    return (time: number) => nodesAndEdgelinesFn(boundingBoxFn(time));
   }
 );
 
@@ -240,12 +241,13 @@ export const originID: (state: ResolverState) => string | undefined = composeSel
  * Takes a nodeID (aka entity_id) and returns the node ID of the node that aria should 'flowto' or null
  * If the node has a flowto candidate that is currently visible, that will be returned, otherwise null.
  */
-export const ariaFlowtoNodeID: (
-  state: ResolverState
-) => (time: number) => (nodeID: string) => string | null = createSelector(
+export const ariaFlowtoNodeID = createSelector(
   visibleNodesAndEdgeLines,
   composeSelectors(dataStateSelector, dataSelectors.ariaFlowtoCandidate),
-  (visibleNodesAndEdgeLinesAtTime, ariaFlowtoCandidate) => {
+  function (
+    visibleNodesAndEdgeLinesAtTime: (time: number) => VisibleEntites,
+    ariaFlowtoCandidate: (nodeId: string) => string | null
+  ) {
     return defaultMemoize((time: number) => {
       // get the visible nodes at `time`
       const { processNodePositions } = visibleNodesAndEdgeLinesAtTime(time);
@@ -361,7 +363,10 @@ export const newIDsToRequest: (state: ResolverState) => (time: number) => Set<st
   createSelector(
     composeSelectors(dataStateSelector, (dataState: DataState) => dataState.nodeData),
     visibleNodesAndEdgeLines,
-    function (nodeData, visibleNodesAndEdgeLinesAtTime) {
+    function (
+      nodeData: Map<string, NodeData> | undefined,
+      visibleNodesAndEdgeLinesAtTime: (time: number) => VisibleEntites
+    ) {
       return defaultMemoize((time: number) => {
         const { processNodePositions: nodesInView } = visibleNodesAndEdgeLinesAtTime(time);
 

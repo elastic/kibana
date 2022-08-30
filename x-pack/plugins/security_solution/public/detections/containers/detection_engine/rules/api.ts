@@ -16,6 +16,7 @@ import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_PREVIEW,
   DETECTION_ENGINE_INSTALLED_INTEGRATIONS_URL,
+  DETECTION_ENGINE_RULES_URL_FIND,
 } from '../../../../../common/constants';
 import type { BulkAction } from '../../../../../common/detection_engine/schemas/common';
 import type {
@@ -151,14 +152,11 @@ export const fetchRules = async ({
     ...(filterString !== '' ? { filter: filterString } : {}),
   };
 
-  return KibanaServices.get().http.fetch<FetchRulesResponse>(
-    `${DETECTION_ENGINE_RULES_URL}/_find`,
-    {
-      method: 'GET',
-      query,
-      signal,
-    }
-  );
+  return KibanaServices.get().http.fetch<FetchRulesResponse>(DETECTION_ENGINE_RULES_URL_FIND, {
+    method: 'GET',
+    query,
+    signal,
+  });
 };
 
 /**

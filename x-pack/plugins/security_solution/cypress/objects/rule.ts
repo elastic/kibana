@@ -500,7 +500,11 @@ export const expectedExportedRule = (
     name,
     risk_score: riskScore,
     severity,
+    tags,
+    timeline_id: timelineId,
+    timeline_title: timelineTitle,
   } = ruleResponse.body;
+
   let query: string | undefined;
   if (ruleResponse.body.type === 'query') {
     query = ruleResponse.body.query;
@@ -514,7 +518,7 @@ export const expectedExportedRule = (
     created_at: createdAt,
     created_by: 'elastic',
     name,
-    tags: [],
+    tags,
     interval: '100m',
     enabled: false,
     description,
@@ -543,6 +547,8 @@ export const expectedExportedRule = (
     query,
     throttle: 'no_actions',
     actions: [],
+    timeline_id: timelineId,
+    timeline_title: timelineTitle,
   };
 
   // NOTE: Order of the properties in this object matters for the tests to work.

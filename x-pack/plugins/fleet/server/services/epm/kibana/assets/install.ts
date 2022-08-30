@@ -11,7 +11,7 @@ import type {
   SavedObject,
   SavedObjectsBulkCreateObject,
   SavedObjectsClientContract,
-  SavedObjectsImporter,
+  ISavedObjectsImporter,
   Logger,
 } from '@kbn/core/server';
 import type { SavedObjectsImportSuccess, SavedObjectsImportFailure } from '@kbn/core/server/types';
@@ -33,7 +33,7 @@ import { withPackageSpan } from '../../packages/utils';
 
 import { tagKibanaAssets } from './tag_assets';
 
-type SavedObjectsImporterContract = Pick<SavedObjectsImporter, 'import' | 'resolveImportErrors'>;
+type SavedObjectsImporterContract = Pick<ISavedObjectsImporter, 'import' | 'resolveImportErrors'>;
 const formatImportErrorsForLog = (errors: SavedObjectsImportFailure[]) =>
   JSON.stringify(
     errors.map(({ type, id, error }) => ({ type, id, error })) // discard other fields
@@ -143,7 +143,7 @@ export async function installKibanaAssetsAndReferences({
   installedPkg,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
-  savedObjectsImporter: Pick<SavedObjectsImporter, 'import' | 'resolveImportErrors'>;
+  savedObjectsImporter: Pick<ISavedObjectsImporter, 'import' | 'resolveImportErrors'>;
   savedObjectTagAssignmentService: IAssignmentService;
   savedObjectTagClient: ITagsClient;
   logger: Logger;
