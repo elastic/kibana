@@ -9,7 +9,12 @@ import { i18n } from '@kbn/i18n';
 import { curry, isString } from 'lodash';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { Logger } from '@kbn/core/server';
-import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
+import {
+  ActionType,
+  ActionTypeExecutorOptions,
+  ActionTypeExecutorResult,
+  ValidatorServices,
+} from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { postXmatters } from './lib/post_xmatters';
 import { AlertingConnectorFeatureId } from '../../common';
@@ -71,13 +76,17 @@ export function getActionType({
     }),
     supportedFeatureIds: [AlertingConnectorFeatureId],
     validate: {
-      config: schema.object(configSchemaProps, {
-        validate: curry(validateActionTypeConfig)(configurationUtilities),
-      }),
-      secrets: schema.object(secretSchemaProps, {
-        validate: curry(validateActionTypeSecrets)(configurationUtilities),
-      }),
-      params: ParamsSchema,
+      config: {
+        schema: ConfigSchema,
+        customValidator: validateActionTypeConfig,
+      },
+      secrets: {
+        schema: SecretsSchema,
+        customValidator: validateActionTypeSecrets,
+      },
+      params: {
+        schema: ParamsSchema,
+      },
       connector: validateConnector,
     },
     executor: curry(executor)({ logger, configurationUtilities }),
@@ -85,9 +94,10 @@ export function getActionType({
 }
 
 function validateActionTypeConfig(
-  configurationUtilities: ActionsConfigurationUtilities,
-  configObject: ActionTypeConfigType
-): string | undefined {
+  configObject: ActionTypeConfigType,
+  validatorServices: ValidatorServices
+) {
+  const { configurationUtilities } = validatorServices;
   const configuredUrl = configObject.configUrl;
   const usesBasic = configObject.usesBasic;
   if (!usesBasic) return;
@@ -96,12 +106,14 @@ function validateActionTypeConfig(
       new URL(configuredUrl);
     }
   } catch (err) {
-    return i18n.translate('xpack.actions.builtin.xmatters.xmattersConfigurationErrorNoHostname', {
-      defaultMessage: 'Error configuring xMatters action: unable to parse url: {err}',
-      values: {
-        err,
-      },
-    });
+    throw new Error(
+      i18n.translate('xpack.actions.builtin.xmatters.xmattersConfigurationErrorNoHostname', {
+        defaultMessage: 'Error configuring xMatters action: unable to parse url: {err}',
+        values: {
+          err,
+        },
+      })
+    );
   }
 
   try {
@@ -109,12 +121,14 @@ function validateActionTypeConfig(
       configurationUtilities.ensureUriAllowed(configuredUrl);
     }
   } catch (allowListError) {
-    return i18n.translate('xpack.actions.builtin.xmatters.xmattersConfigurationError', {
-      defaultMessage: 'Error configuring xMatters action: {message}',
-      values: {
-        message: allowListError.message,
-      },
-    });
+    throw new Error(
+      i18n.translate('xpack.actions.builtin.xmatters.xmattersConfigurationError', {
+        defaultMessage: 'Error configuring xMatters action: {message}',
+        values: {
+          message: allowListError.message,
+        },
+      })
+    );
   }
 }
 
@@ -167,23 +181,28 @@ function validateConnector(
 }
 
 function validateActionTypeSecrets(
-  configurationUtilities: ActionsConfigurationUtilities,
-  secretsObject: ActionTypeSecretsType
-): string | undefined {
+  secretsObject: ActionTypeSecretsType,
+  validatorServices: ValidatorServices
+) {
+  const { configurationUtilities } = validatorServices;
   if (!secretsObject.secretsUrl && !secretsObject.user && !secretsObject.password) {
-    return i18n.translate('xpack.actions.builtin.xmatters.noSecretsProvided', {
-      defaultMessage: 'Provide either secretsUrl link or user/password to authenticate',
-    });
+    throw new Error(
+      i18n.translate('xpack.actions.builtin.xmatters.noSecretsProvided', {
+        defaultMessage: 'Provide either secretsUrl link or user/password to authenticate',
+      })
+    );
   }
 
   // Check for secrets URL first
   if (secretsObject.secretsUrl) {
     // Neither user/password should be defined if secretsUrl is specified
     if (secretsObject.user || secretsObject.password) {
-      return i18n.translate('xpack.actions.builtin.xmatters.noUserPassWhenSecretsUrl', {
-        defaultMessage:
-          'Cannot use user/password for URL authentication. Provide valid secretsUrl or use Basic Authentication.',
-      });
+      throw new Error(
+        i18n.translate('xpack.actions.builtin.xmatters.noUserPassWhenSecretsUrl', {
+          defaultMessage:
+            'Cannot use user/password for URL authentication. Provide valid secretsUrl or use Basic Authentication.',
+        })
+      );
     }
 
     // Test that URL is valid
@@ -192,12 +211,14 @@ function validateActionTypeSecrets(
         new URL(secretsObject.secretsUrl);
       }
     } catch (err) {
-      return i18n.translate('xpack.actions.builtin.xmatters.xmattersInvalidUrlError', {
-        defaultMessage: 'Invalid secretsUrl: {err}',
-        values: {
-          err,
-        },
-      });
+      throw new Error(
+        i18n.translate('xpack.actions.builtin.xmatters.xmattersInvalidUrlError', {
+          defaultMessage: 'Invalid secretsUrl: {err}',
+          values: {
+            err,
+          },
+        })
+      );
     }
 
     // Test that hostname is allowed
@@ -206,19 +227,23 @@ function validateActionTypeSecrets(
         configurationUtilities.ensureUriAllowed(secretsObject.secretsUrl);
       }
     } catch (allowListError) {
-      return i18n.translate('xpack.actions.builtin.xmatters.xmattersHostnameNotAllowed', {
-        defaultMessage: '{message}',
-        values: {
-          message: allowListError.message,
-        },
-      });
+      throw new Error(
+        i18n.translate('xpack.actions.builtin.xmatters.xmattersHostnameNotAllowed', {
+          defaultMessage: '{message}',
+          values: {
+            message: allowListError.message,
+          },
+        })
+      );
     }
   } else {
     // Username and password must both be set
     if (!secretsObject.user || !secretsObject.password) {
-      return i18n.translate('xpack.actions.builtin.xmatters.invalidUsernamePassword', {
-        defaultMessage: 'Both user and password must be specified.',
-      });
+      throw new Error(
+        i18n.translate('xpack.actions.builtin.xmatters.invalidUsernamePassword', {
+          defaultMessage: 'Both user and password must be specified.',
+        })
+      );
     }
   }
 }

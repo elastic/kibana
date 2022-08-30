@@ -25,7 +25,7 @@ import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { useDebouncedValue } from '../../../shared_components';
 import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 import { FormRow } from './shared_components';
-import { getColumnWindowError } from '../../window_utils';
+import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
 
 export interface PercentileRanksIndexPatternColumn extends FieldBasedIndexPatternColumn {
   operationType: 'percentile_rank';
@@ -38,7 +38,7 @@ function ofName(
   name: string,
   value: number,
   timeShift: string | undefined,
-  window: string | undefined
+  reducedTimeRange: string | undefined
 ) {
   return adjustTimeScaleLabelSuffix(
     i18n.translate('xpack.lens.indexPattern.percentileRanksOf', {
@@ -50,7 +50,7 @@ function ofName(
     undefined,
     timeShift,
     undefined,
-    window
+    reducedTimeRange
   );
 }
 
@@ -80,9 +80,13 @@ export const percentileRanksOperation: OperationDefinition<
   ],
   filterable: true,
   shiftable: true,
-  windowable: true,
+  canReduceTimeRange: true,
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type: fieldType }) => {
-    if (supportedFieldTypes.includes(fieldType) && aggregatable && !aggregationRestrictions) {
+    if (
+      supportedFieldTypes.includes(fieldType) &&
+      aggregatable &&
+      (!aggregationRestrictions || !aggregationRestrictions.percentile_ranks)
+    ) {
       return {
         dataType: 'number',
         isBucketed: false,
@@ -97,7 +101,7 @@ export const percentileRanksOperation: OperationDefinition<
       newField &&
         supportedFieldTypes.includes(newField.type) &&
         newField.aggregatable &&
-        !newField.aggregationRestrictions
+        (!newField.aggregationRestrictions || !newField.aggregationRestrictions.percentile_ranks)
     );
   },
   getDefaultLabel: (column, indexPattern, columns) =>
@@ -105,7 +109,7 @@ export const percentileRanksOperation: OperationDefinition<
       getSafeName(column.sourceField, indexPattern),
       column.params.value,
       column.timeShift,
-      column.window
+      column.reducedTimeRange
     ),
   buildColumn: ({ field, previousColumn, indexPattern }, columnParams) => {
     const existingPercentileRanksParam =
@@ -119,7 +123,7 @@ export const percentileRanksOperation: OperationDefinition<
         getSafeName(field.name, indexPattern),
         newPercentileRanksParam,
         previousColumn?.timeShift,
-        previousColumn?.window
+        previousColumn?.reducedTimeRange
       ),
       dataType: 'number',
       operationType: 'percentile_rank',
@@ -128,7 +132,7 @@ export const percentileRanksOperation: OperationDefinition<
       scale: 'ratio',
       filter: getFilter(previousColumn, columnParams),
       timeShift: columnParams?.shift || previousColumn?.timeShift,
-      window: columnParams?.window || previousColumn?.window,
+      reducedTimeRange: columnParams?.reducedTimeRange || previousColumn?.reducedTimeRange,
       params: {
         value: newPercentileRanksParam,
         ...getFormatFromPreviousColumn(previousColumn),
@@ -142,7 +146,7 @@ export const percentileRanksOperation: OperationDefinition<
         field.displayName,
         oldColumn.params.value,
         oldColumn.timeShift,
-        oldColumn.window
+        oldColumn.reducedTimeRange
       ),
       sourceField: field.name,
     };
@@ -165,7 +169,7 @@ export const percentileRanksOperation: OperationDefinition<
     combineErrorMessages([
       getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
       getDisallowedPreviousShiftMessage(layer, columnId),
-      getColumnWindowError(layer, columnId, indexPattern),
+      getColumnReducedTimeRangeError(layer, columnId, indexPattern),
     ]),
   paramEditor: function PercentileParamEditor({
     paramEditorUpdater,
@@ -193,7 +197,7 @@ export const percentileRanksOperation: OperationDefinition<
                   currentColumn.sourceField,
                 Number(value),
                 currentColumn.timeShift,
-                currentColumn.window
+                currentColumn.reducedTimeRange
               ),
           params: {
             ...currentColumn.params,
