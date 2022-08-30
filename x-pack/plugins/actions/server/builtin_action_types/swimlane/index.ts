@@ -7,7 +7,6 @@
 
 import { curry } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { schema } from '@kbn/config-schema';
 import { Logger } from '@kbn/logging';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../../types';
 import { ActionsConfigurationUtilities } from '../../actions_config';
@@ -21,8 +20,8 @@ import {
 import { validate } from './validators';
 import {
   ExecutorParamsSchema,
-  SwimlaneSecretsConfiguration,
-  SwimlaneServiceConfiguration,
+  SwimlaneSecretsConfigurationSchema,
+  SwimlaneServiceConfigurationSchema,
 } from './schema';
 import { createExternalService } from './service';
 import { api } from './api';
@@ -61,13 +60,17 @@ export function getActionType(
       SecurityConnectorFeatureId,
     ],
     validate: {
-      config: schema.object(SwimlaneServiceConfiguration, {
-        validate: curry(validate.config)(configurationUtilities),
-      }),
-      secrets: schema.object(SwimlaneSecretsConfiguration, {
-        validate: curry(validate.secrets)(configurationUtilities),
-      }),
-      params: ExecutorParamsSchema,
+      config: {
+        schema: SwimlaneServiceConfigurationSchema,
+        customValidator: validate.config,
+      },
+      secrets: {
+        schema: SwimlaneSecretsConfigurationSchema,
+        customValidator: validate.secrets,
+      },
+      params: {
+        schema: ExecutorParamsSchema,
+      },
     },
     executor: curry(executor)({ logger, configurationUtilities }),
   };
