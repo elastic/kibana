@@ -209,14 +209,16 @@ export const getPushedInfo = (
 };
 
 export const getProfileUids = (userActions: CaseUserActions[]) => {
-  const uids = userActions.reduce<string[]>((acc, userAction) => {
+  const uids = userActions.reduce<Set<string>>((acc, userAction) => {
     if (userAction.type === ActionTypes.assignees) {
       const uidsFromPayload = userAction.payload.assignees.map((assignee) => assignee.uid);
-      acc.push(...uidsFromPayload);
+      for (const uid of uidsFromPayload) {
+        acc.add(uid);
+      }
     }
 
     return acc;
-  }, []);
+  }, new Set());
 
   return uids;
 };

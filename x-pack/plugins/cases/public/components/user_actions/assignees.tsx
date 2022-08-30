@@ -42,11 +42,11 @@ const FormatListItem: React.FC<{
 };
 FormatListItem.displayName = 'FormatListItem';
 
-const shouldAddComma = (index: number, arrayLength: number) => {
-  return arrayLength > 0 && index !== arrayLength - 1;
+export const shouldAddComma = (index: number, arrayLength: number) => {
+  return arrayLength > 2 && index !== arrayLength - 1;
 };
 
-const shouldAddAnd = (index: number, arrayLength: number) => {
+export const shouldAddAnd = (index: number, arrayLength: number) => {
   return arrayLength > 1 && index === arrayLength - 1;
 };
 

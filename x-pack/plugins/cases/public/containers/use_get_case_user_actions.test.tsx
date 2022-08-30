@@ -104,10 +104,38 @@ describe('useGetCaseUserActions', () => {
 
         await waitFor(() => {
           expect(result.current.data?.profileUids).toMatchInlineSnapshot(`
-            Array [
+            Set {
               "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
               "u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0",
-            ]
+            }
+          `);
+        });
+      });
+    });
+
+    it('ignores duplicate uids', async () => {
+      jest
+        .spyOn(api, 'getCaseUserActions')
+        .mockReturnValue(
+          Promise.resolve([
+            ...caseUserActions,
+            getUserAction('assignees', Actions.add),
+            getUserAction('assignees', Actions.add),
+          ])
+        );
+
+      await act(async () => {
+        const { result } = renderHook<string, UseGetCaseUserActions>(
+          () => useGetCaseUserActions(basicCase.id, basicCase.connector.id),
+          { wrapper }
+        );
+
+        await waitFor(() => {
+          expect(result.current.data?.profileUids).toMatchInlineSnapshot(`
+            Set {
+              "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+              "u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0",
+            }
           `);
         });
       });
@@ -128,10 +156,10 @@ describe('useGetCaseUserActions', () => {
 
         await waitFor(() => {
           expect(result.current.data?.profileUids).toMatchInlineSnapshot(`
-            Array [
+            Set {
               "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
               "u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0",
-            ]
+            }
           `);
         });
       });
