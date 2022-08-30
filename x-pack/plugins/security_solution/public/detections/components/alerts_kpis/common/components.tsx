@@ -7,6 +7,7 @@
 
 import { EuiPanel, EuiComboBox } from '@elastic/eui';
 import styled from 'styled-components';
+import type { LegacyRef } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { PANEL_HEIGHT, MOBILE_PANEL_HEIGHT } from './config';
 import { useStackByFields } from './hooks';
@@ -54,6 +55,7 @@ interface StackedBySelectProps {
   isDisabled?: boolean;
   prepend?: string;
   selected: string;
+  inputRef?: (inputRef: HTMLInputElement | null) => void;
   onSelect: (selected: string) => void;
   width?: number;
 }
@@ -63,48 +65,58 @@ export const StackByComboBoxWrapper = styled.div<{ width: number }>`
   width: ${({ width }) => width}px;
 `;
 
-export const StackByComboBox: React.FC<StackedBySelectProps> = ({
-  'aria-label': ariaLabel = i18n.STACK_BY_ARIA_LABEL,
-  'data-test-subj': dataTestSubj,
-  isDisabled = false,
-  onSelect,
-  prepend = i18n.STACK_BY_LABEL,
-  selected,
-  width = DEFAULT_WIDTH,
-}) => {
-  const onChange = useCallback(
-    (options) => {
-      if (options && options.length > 0) {
-        onSelect(options[0].value);
-      } else {
-        onSelect('');
-      }
-    },
-    [onSelect]
-  );
-  const selectedOptions = useMemo(() => {
-    return [{ label: selected, value: selected }];
-  }, [selected]);
-  const stackOptions = useStackByFields();
-  const singleSelection = useMemo(() => {
-    return { asPlainText: true };
-  }, []);
-  return (
-    <StackByComboBoxWrapper width={width}>
-      <EuiComboBox
-        data-test-subj={dataTestSubj}
-        aria-label={ariaLabel}
-        isDisabled={isDisabled}
-        placeholder={i18n.STACK_BY_PLACEHOLDER}
-        prepend={prepend}
-        singleSelection={singleSelection}
-        isClearable={false}
-        sortMatchesBy="startsWith"
-        options={stackOptions}
-        selectedOptions={selectedOptions}
-        compressed
-        onChange={onChange}
-      />
-    </StackByComboBoxWrapper>
-  );
-};
+export const StackByComboBox = React.forwardRef(
+  (
+    {
+      'aria-label': ariaLabel = i18n.STACK_BY_ARIA_LABEL,
+      'data-test-subj': dataTestSubj,
+      isDisabled = false,
+      onSelect,
+      prepend = i18n.STACK_BY_LABEL,
+      selected,
+      inputRef,
+      width = DEFAULT_WIDTH,
+    }: StackedBySelectProps,
+    ref
+  ) => {
+    const onChange = useCallback(
+      (options) => {
+        if (options && options.length > 0) {
+          onSelect(options[0].value);
+        } else {
+          onSelect('');
+        }
+      },
+      [onSelect]
+    );
+    const selectedOptions = useMemo(() => {
+      return [{ label: selected, value: selected }];
+    }, [selected]);
+    const stackOptions = useStackByFields();
+    const singleSelection = useMemo(() => {
+      return { asPlainText: true };
+    }, []);
+    return (
+      <StackByComboBoxWrapper width={width}>
+        <EuiComboBox
+          data-test-subj={dataTestSubj}
+          aria-label={ariaLabel}
+          inputRef={inputRef}
+          isDisabled={isDisabled}
+          placeholder={i18n.STACK_BY_PLACEHOLDER}
+          prepend={prepend}
+          ref={ref as LegacyRef<EuiComboBox<string | number | string[] | undefined>> | undefined}
+          singleSelection={singleSelection}
+          isClearable={false}
+          sortMatchesBy="startsWith"
+          options={stackOptions}
+          selectedOptions={selectedOptions}
+          compressed
+          onChange={onChange}
+        />
+      </StackByComboBoxWrapper>
+    );
+  }
+);
+
+StackByComboBox.displayName = 'StackByComboBox';

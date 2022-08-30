@@ -34,7 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
         password: 'changeme',
         roles: [`viewer`],
         full_name: 'User With Profile',
-        email: 'user_with_profile@elastic.co',
+        email: 'user_with_profile@get_current_test',
       });
     });
 
@@ -77,7 +77,7 @@ export default function ({ getService }: FtrProviderContext) {
               "name": "basic",
               "type": "basic",
             },
-            "email": "user_with_profile@elastic.co",
+            "email": "user_with_profile@get_current_test",
             "full_name": "User With Profile",
             "realm_name": "default_native",
             "roles": Array [
@@ -101,7 +101,7 @@ export default function ({ getService }: FtrProviderContext) {
               "name": "basic",
               "type": "basic",
             },
-            "email": "user_with_profile@elastic.co",
+            "email": "user_with_profile@get_current_test",
             "full_name": "User With Profile",
             "realm_name": "default_native",
             "roles": Array [
@@ -124,7 +124,7 @@ export default function ({ getService }: FtrProviderContext) {
               "name": "basic",
               "type": "basic",
             },
-            "email": "user_with_profile@elastic.co",
+            "email": "user_with_profile@get_current_test",
             "full_name": "User With Profile",
             "realm_name": "default_native",
             "roles": Array [

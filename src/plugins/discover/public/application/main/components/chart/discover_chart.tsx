@@ -18,8 +18,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { HitsCounter } from '../hits_counter';
-import { SavedSearch } from '../../../../services/saved_searches';
 import { GetStateReturn } from '../../services/discover_state';
 import { DiscoverHistogram } from './histogram';
 import { DataCharts$, DataTotalHits$ } from '../../hooks/use_saved_search';
@@ -46,6 +46,7 @@ export function DiscoverChart({
   setDiscoverViewMode,
   hideChart,
   interval,
+  isTimeBased,
 }: {
   resetSavedSearch: () => void;
   savedSearch: SavedSearch;
@@ -55,10 +56,10 @@ export function DiscoverChart({
   dataView: DataView;
   viewMode: VIEW_MODE;
   setDiscoverViewMode: (viewMode: VIEW_MODE) => void;
+  isTimeBased: boolean;
   hideChart?: boolean;
   interval?: string;
 }) {
-  const isTimeBased = dataView.isTimeBased();
   const { uiSettings, data, storage } = useDiscoverServices();
   const [showChartOptionsPopover, setShowChartOptionsPopover] = useState(false);
   const showViewModeToggle = uiSettings.get(SHOW_FIELD_STATISTICS) ?? false;

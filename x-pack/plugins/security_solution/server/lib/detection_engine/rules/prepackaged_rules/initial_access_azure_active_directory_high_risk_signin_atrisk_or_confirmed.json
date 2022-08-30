@@ -11,15 +11,40 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Azure Active Directory High Risk User Sign-in Heuristic",
-  "note": "## Config\n\nThe Azure Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "note": "## Triage and analysis\n\n### Investigating Azure Active Directory High Risk User Sign-in Heuristic\n\nMicrosoft Identity Protection is an Azure AD security tool that detects various types of identity risks and attacks.\n\nThis rule identifies events produced by the Microsoft Identity Protection with a risk state equal to `confirmedCompromised`\nor `atRisk`.\n\n#### Possible investigation steps\n\n- Identify the Risk Detection that triggered the event. A list with descriptions can be found [here](https://docs.microsoft.com/en-us/azure/active-directory/identity-protection/concept-identity-protection-risks#risk-types-and-detection).\n- Identify the user account involved and validate whether the suspicious activity is normal for that user.  \n  - Consider the source IP address and geolocation for the involved user account. Do they look normal?\n  - Consider the device used to sign in. Is it registered and compliant?\n- Investigate other alerts associated with the user account during the past 48 hours.\n- Contact the account owner and confirm whether they are aware of this activity.\n- Check if this operation was approved and performed according to the organization's change management policy.\n- If you suspect the account has been compromised, scope potentially compromised assets by tracking servers, services,\nand data accessed by the account in the last 24 hours.\n\n### False positive analysis\n\nIf this rule is noisy in your environment due to expected activity, consider adding exceptions \u2014 preferably with a\ncombination of user and device conditions.\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Disable or limit the account during the investigation and response.\n- Identify the possible impact of the incident and prioritize accordingly; the following actions can help you gain context:\n    - Identify the account role in the cloud environment.\n    - Assess the criticality of affected services and servers.\n    - Work with your IT team to identify and minimize the impact on users.\n    - Identify if the attacker is moving laterally and compromising other accounts, servers, or services.\n    - Identify any regulatory or legal ramifications related to this activity.\n- Investigate credential exposure on systems compromised or used by the attacker to ensure all compromised accounts are\nidentified. Reset passwords or delete API keys as needed to revoke the attacker's access to the environment. Work with\nyour IT teams to minimize the impact on business operations during these actions.\n- Check if unauthorized new users were created, remove unauthorized new accounts, and request password resets for other\nIAM users.\n- Consider enabling multi-factor authentication for users.\n- Follow security best practices [outlined](https://docs.microsoft.com/en-us/azure/security/fundamentals/identity-management-best-practices) by Microsoft.\n- Determine the initial vector abused by the attacker and take action to prevent reinfection via the same vector.\n- Using the incident response data, update logging and audit policies to improve the mean time to detect (MTTD) and the\nmean time to respond (MTTR).",
   "query": "event.dataset:azure.signinlogs and\n  azure.signinlogs.properties.risk_state:(\"confirmedCompromised\" or \"atRisk\") and event.outcome:(success or Success)\n",
   "references": [
     "https://docs.microsoft.com/en-us/azure/active-directory/reports-monitoring/reference-azure-monitor-sign-ins-log-schema",
     "https://docs.microsoft.com/en-us/azure/active-directory/identity-protection/overview-identity-protection",
-    "https://docs.microsoft.com/en-us/azure/active-directory/identity-protection/howto-identity-protection-investigate-risk"
+    "https://docs.microsoft.com/en-us/azure/active-directory/identity-protection/howto-identity-protection-investigate-risk",
+    "https://docs.microsoft.com/en-us/azure/active-directory/identity-protection/howto-identity-protection-investigate-risk#investigation-framework"
+  ],
+  "related_integrations": [
+    {
+      "package": "azure",
+      "version": "0.12.0"
+    }
+  ],
+  "required_fields": [
+    {
+      "ecs": false,
+      "name": "azure.signinlogs.properties.risk_state",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.dataset",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.outcome",
+      "type": "keyword"
+    }
   ],
   "risk_score": 47,
   "rule_id": "26edba02-6979-4bce-920a-70b080a7be81",
+  "setup": "The Azure Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
   "severity": "medium",
   "tags": [
     "Elastic",
@@ -48,5 +73,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 3
 }

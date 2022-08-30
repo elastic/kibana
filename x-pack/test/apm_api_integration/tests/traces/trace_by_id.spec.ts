@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, EntityArrayIterable, timerange } from '@elastic/apm-synthtrace';
+import { apm, EntityArrayIterable, timerange } from '@kbn/apm-synthtrace';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
@@ -52,7 +52,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
-  registry.when('Trace exists', { config: 'basic', archives: ['apm_mappings_only_8.0.0'] }, () => {
+  registry.when('Trace exists', { config: 'basic', archives: [] }, () => {
     let serviceATraceId: string;
     before(async () => {
       const instanceJava = apm.service('synth-apple', 'production', 'java').instance('instance-b');

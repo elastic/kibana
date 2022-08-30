@@ -246,6 +246,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
         setTab={handleSetTab}
         selectedTab={selectedTab}
         icon={actionTypeModel?.iconClass}
+        isExperimental={actionTypeModel?.isExperimental}
       />
       <EuiFlyoutBody>
         {selectedTab === EditConnectorTabs.Configuration ? (

@@ -7,7 +7,7 @@
  */
 
 const { parseKibanaPlatformPlugin } = require('./parse_kibana_platform_plugin');
-const { findKibanaJsonFiles } = require('./find_kibana_json_files');
+const { findFiles } = require('./find_files');
 
 /**
  * Helper to find the new platform plugins.
@@ -19,9 +19,9 @@ function simpleKibanaPlatformPluginDiscovery(scanDirs, pluginPaths) {
   return Array.from(
     new Set([
       // find kibana.json files up to 5 levels within each scan dir
-      ...scanDirs.flatMap((dir) => findKibanaJsonFiles(dir, 5)),
+      ...scanDirs.flatMap((dir) => findFiles(dir, 5, 'kibana.json')),
       // find kibana.json files at the root of each plugin path
-      ...pluginPaths.flatMap((path) => findKibanaJsonFiles(path, 0)),
+      ...pluginPaths.flatMap((path) => findFiles(path, 0, 'kibana.json')),
     ])
   ).map(parseKibanaPlatformPlugin);
 }

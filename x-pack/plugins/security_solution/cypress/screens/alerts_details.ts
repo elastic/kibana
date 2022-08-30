@@ -77,3 +77,7 @@ export const SUMMARY_VIEW_INVESTIGATE_IN_TIMELINE_BUTTON = `${SUMMARY_VIEW} [ari
 export const INSIGHTS_RELATED_ALERTS_BY_SESSION = `[data-test-subj='related-alerts-by-session']`;
 
 export const INSIGHTS_INVESTIGATE_IN_TIMELINE_BUTTON = `${INSIGHTS_RELATED_ALERTS_BY_SESSION} [aria-label='Investigate in timeline']`;
+
+export const INSIGHTS_RELATED_ALERTS_BY_ANCESTRY = `[data-test-subj='related-alerts-by-ancestry']`;
+
+export const INSIGHTS_INVESTIGATE_ANCESTRY_ALERTS_IN_TIMELINE_BUTTON = `[data-test-subj='investigate-ancestry-in-timeline']`;

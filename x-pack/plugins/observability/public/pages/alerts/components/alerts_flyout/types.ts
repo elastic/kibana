@@ -9,4 +9,5 @@ import { TopAlert } from '../../containers';
 
 export interface FlyoutProps {
   alert: TopAlert;
+  id?: string;
 }

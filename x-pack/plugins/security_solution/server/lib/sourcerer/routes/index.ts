@@ -16,6 +16,7 @@ import type { StartPlugins } from '../../../plugin';
 import { buildSiemResponse } from '../../detection_engine/routes/utils';
 import { findExistingIndices } from './helpers';
 import { sourcererDataViewSchema, sourcererSchema } from './schema';
+import { ensurePatternFormat } from '../../../../common/utils/sourcerer';
 
 export const createSourcererDataViewRoute = (
   router: SecuritySolutionPluginRouter,
@@ -58,8 +59,11 @@ export const createSourcererDataViewRoute = (
           allDataViews.find((dv) => dv.id === dataViewId) ?? null;
 
         const { patternList } = request.body;
-        const patternListAsTitle = patternList.sort().join();
-        const siemDataViewTitle = siemDataView ? siemDataView.title.split(',').sort().join() : '';
+        const patternListAsTitle = ensurePatternFormat(patternList).join();
+        const siemDataViewTitle = siemDataView
+          ? ensurePatternFormat(siemDataView.title.split(',')).join()
+          : '';
+
         if (siemDataView == null) {
           try {
             siemDataView = await dataViewService.createAndSave(

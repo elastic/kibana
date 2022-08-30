@@ -131,7 +131,7 @@ describe('mustache_renderer', () => {
     const summary = 'A cool good summary';
     const description = 'A cool good description';
     const tags = ['cool', 'neat', 'nice'];
-    const str = 'https://siem-kibana.atlassian.net/browse/{{{external.system.title}}}';
+    const str = 'https://coolsite.net/browse/{{{external.system.title}}}';
 
     const objStr =
       '{\n' +
@@ -177,7 +177,7 @@ describe('mustache_renderer', () => {
         },
       };
       expect(renderMustacheStringNoEscape(str, urlVariables)).toBe(
-        `https://siem-kibana.atlassian.net/browse/cool_title`
+        `https://coolsite.net/browse/cool_title`
       );
     });
     it('Inserts variables into url with quotes whens stringified', () => {
@@ -190,7 +190,7 @@ describe('mustache_renderer', () => {
         },
       };
       expect(renderMustacheStringNoEscape(str, urlVariablesStr)).toBe(
-        `https://siem-kibana.atlassian.net/browse/"cool_title"`
+        `https://coolsite.net/browse/"cool_title"`
       );
     });
     it('Inserts variables into JSON non-escaped when triple brackets and JSON.stringified variables', () => {

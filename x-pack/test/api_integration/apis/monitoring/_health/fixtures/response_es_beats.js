@@ -82,5 +82,45 @@ export const esBeatsResponse = (date = moment().format('YYYY.MM.DD')) => {
         errors: [],
       },
     },
+    metricbeatErrors: {
+      execution: {
+        errors: [],
+        timedOut: false,
+      },
+      products: {
+        beat: {
+          stats: [
+            {
+              lastSeen: '2022-05-23T22:11:52.985Z',
+              message:
+                'error making http request: Get "http://host.docker.internal:5067/stats": dial tcp 192.168.65.2:5067: connect: connection refused',
+            },
+          ],
+          state: [
+            {
+              lastSeen: '2022-05-23T22:11:51.083Z',
+              message:
+                'error making http request: Get "http://host.docker.internal:5067/state": dial tcp 192.168.65.2:5067: connect: connection refused',
+            },
+          ],
+        },
+        logstash: {
+          node: [
+            {
+              lastSeen: '2022-05-23T22:11:54.563Z',
+              message:
+                'error making http request: Get "http://host.docker.internal:9600/": dial tcp 192.168.65.2:9600: connect: connection refused',
+            },
+          ],
+          node_stats: [
+            {
+              lastSeen: '2022-05-23T22:11:54.331Z',
+              message:
+                'error making http request: Get "http://host.docker.internal:9600/": dial tcp 192.168.65.2:9600: connect: connection refused',
+            },
+          ],
+        },
+      },
+    },
   };
 };

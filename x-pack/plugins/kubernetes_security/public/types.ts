@@ -10,8 +10,9 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import type { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import type { SessionViewStart } from '@kbn/session-view-plugin/public';
-import { BoolQuery } from '@kbn/es-query';
 import { EuiIconProps } from '@elastic/eui';
+import { BoolQuery } from '@kbn/es-query';
+import { EuiVarsColors } from './hooks/use_eui_theme';
 
 export interface StartPlugins {
   data: DataPublicPluginStart;
@@ -47,26 +48,24 @@ export type QueryDslQueryContainerBool = {
   bool: BoolQuery;
 };
 
-export enum KubernetesCollection {
-  cluster = 'cluster',
-  namespace = 'namespace',
-  node = 'node',
-  pod = 'pod',
-  containerImage = 'containerImage',
-}
+export type KubernetesCollection =
+  | 'clusterId'
+  | 'clusterName'
+  | 'namespace'
+  | 'node'
+  | 'pod'
+  | 'containerImage';
 
-export interface TreeNavSelection {
-  [KubernetesCollection.cluster]?: string;
-  [KubernetesCollection.namespace]?: string;
-  [KubernetesCollection.node]?: string;
-  [KubernetesCollection.pod]?: string;
-  [KubernetesCollection.containerImage]?: string;
-}
+export type KubernetesCollectionMap<T = string> = Record<KubernetesCollection, T>;
+
+export type TreeViewIconProps = {
+  euiVarColor: keyof EuiVarsColors;
+} & EuiIconProps;
 
 export type DynamicTree = {
   key: string;
   type: KubernetesCollection;
-  iconProps: EuiIconProps;
+  iconProps: TreeViewIconProps;
   name: string;
   namePlural: string;
 };

@@ -9,6 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import Boom from '@hapi/boom';
 import { flatMap, get } from 'lodash';
 import { AggregateEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { parseDuration } from '.';
 import { IExecutionLog, IExecutionLogResult } from '../../common';
 
@@ -74,9 +75,12 @@ export interface ExecutionUuidAggResult<TBucket = IExecutionUuidAggBucket>
 
 interface ExcludeExecuteStartAggResult extends estypes.AggregationsAggregateBase {
   executionUuid: ExecutionUuidAggResult;
-  executionUuidCardinality: estypes.AggregationsCardinalityAggregate;
+  executionUuidCardinality: {
+    executionUuidCardinality: estypes.AggregationsCardinalityAggregate;
+  };
 }
 export interface IExecutionLogAggOptions {
+  filter?: string;
   page: number;
   perPage: number;
   sort: estypes.Sort;
@@ -95,7 +99,12 @@ const ExecutionLogSortFields: Record<string, string> = {
   num_new_alerts: 'ruleExecution>numNewAlerts',
 };
 
-export function getExecutionLogAggregation({ page, perPage, sort }: IExecutionLogAggOptions) {
+export function getExecutionLogAggregation({
+  filter,
+  page,
+  perPage,
+  sort,
+}: IExecutionLogAggOptions) {
   // Check if valid sort fields
   const sortFields = flatMap(sort as estypes.SortCombinations[], (s) => Object.keys(s));
   for (const field of sortFields) {
@@ -118,6 +127,13 @@ export function getExecutionLogAggregation({ page, perPage, sort }: IExecutionLo
     throw Boom.badRequest(`Invalid perPage field "${perPage}" - must be greater than 0`);
   }
 
+  let dslFilterQuery: estypes.QueryDslBoolQuery['filter'];
+  try {
+    dslFilterQuery = filter ? toElasticsearchQuery(fromKueryExpression(filter)) : undefined;
+  } catch (err) {
+    throw Boom.badRequest(`Invalid kuery syntax for filter ${filter}`);
+  }
+
   return {
     excludeExecuteStart: {
       filter: {
@@ -134,8 +150,18 @@ export function getExecutionLogAggregation({ page, perPage, sort }: IExecutionLo
       aggs: {
         // Get total number of executions
         executionUuidCardinality: {
-          cardinality: {
-            field: EXECUTION_UUID_FIELD,
+          filter: {
+            bool: {
+              ...(dslFilterQuery ? { filter: dslFilterQuery } : {}),
+              must: [getProviderAndActionFilter('alerting', 'execute')],
+            },
+          },
+          aggs: {
+            executionUuidCardinality: {
+              cardinality: {
+                field: EXECUTION_UUID_FIELD,
+              },
+            },
           },
         },
         executionUuid: {
@@ -169,7 +195,12 @@ export function getExecutionLogAggregation({ page, perPage, sort }: IExecutionLo
             },
             // Filter by rule execute doc and get information from this event
             ruleExecution: {
-              filter: getProviderAndActionFilter('alerting', 'execute'),
+              filter: {
+                bool: {
+                  ...(dslFilterQuery ? { filter: dslFilterQuery } : {}),
+                  must: [getProviderAndActionFilter('alerting', 'execute')],
+                },
+              },
               aggs: {
                 executeStartTime: {
                   min: {
@@ -234,6 +265,17 @@ export function getExecutionLogAggregation({ page, perPage, sort }: IExecutionLo
             // If there was a timeout, this filter will return non-zero doc count
             timeoutMessage: {
               filter: getProviderAndActionFilter('alerting', 'execute-timeout'),
+            },
+            // Filter out execution UUID buckets where ruleExecution doc count is 0
+            minExecutionUuidBucket: {
+              bucket_selector: {
+                buckets_path: {
+                  count: 'ruleExecution._count',
+                },
+                script: {
+                  source: 'params.count > 0',
+                },
+              },
             },
           },
         },
@@ -315,7 +357,7 @@ export function formatExecutionLogResult(
 
   const aggs = aggregations.excludeExecuteStart as ExcludeExecuteStartAggResult;
 
-  const total = aggs.executionUuidCardinality.value;
+  const total = aggs.executionUuidCardinality.executionUuidCardinality.value;
   const buckets = aggs.executionUuid.buckets;
 
   return {

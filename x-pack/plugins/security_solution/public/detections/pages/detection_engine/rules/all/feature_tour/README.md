@@ -16,12 +16,12 @@ New features and fixes to track:
 
 ## How to revive this tour for the next release (if needed)
 
-1. Update Kibana version in `RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY`.
+1. Update Kibana version in `NEW_FEATURES_TOUR_STORAGE_KEYS.RULE_MANAGEMENT_PAGE`.
   Set it to a version you're going to implement a feature tour for.
 
 2. Define the steps for your tour. See `RulesFeatureTour` and `stepsConfig`.
 
-3. Define and set an anchor `id` for every step's target HTML element. 
+3. Define and set an anchor `id` for every step's target HTML element.
 
 4. Render `RulesFeatureTour` component somewhere on the Rule Management page.
    Only one instance of that component should be present on the page.

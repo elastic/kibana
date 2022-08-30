@@ -17,6 +17,7 @@ import {
   farequoteLuceneSearchTestData,
   sampleLogTestData,
 } from './index_test_data';
+
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'settings']);
@@ -91,8 +92,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/137062
-  describe.skip('field statistics in Discover', function () {
+  describe('field statistics in Discover', function () {
     before(async function () {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/module_sample_logs');

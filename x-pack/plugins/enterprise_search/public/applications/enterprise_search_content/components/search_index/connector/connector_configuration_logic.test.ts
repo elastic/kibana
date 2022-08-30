@@ -6,13 +6,12 @@
  */
 
 import { LogicMounter, mockFlashMessageHelpers } from '../../../../__mocks__/kea_logic';
-
 import { connectorIndex } from '../../../__mocks__/view_index.mock';
 
 import { ConnectorConfigurationApiLogic } from '../../../api/connector_package/update_connector_configuration_api_logic';
 import { FetchIndexApiLogic } from '../../../api/index/fetch_index_api_logic';
 
-import '../_mocks_/index_name_logic.mock';
+import { IndexNameLogic } from '../index_name_logic';
 import { IndexViewLogic } from '../index_view_logic';
 
 import { ConnectorConfigurationLogic } from './connector_configuration_logic';
@@ -28,12 +27,14 @@ const DEFAULT_VALUES = {
 
 describe('ConnectorConfigurationLogic', () => {
   const { mount } = new LogicMounter(ConnectorConfigurationLogic);
+  const { mount: mountIndexNameLogic } = new LogicMounter(IndexNameLogic);
   const { mount: mountFetchIndexApiLogic } = new LogicMounter(FetchIndexApiLogic);
   const { mount: mountIndexViewLogic } = new LogicMounter(IndexViewLogic);
   const { clearFlashMessages, flashAPIErrors, flashSuccessToast } = mockFlashMessageHelpers;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mountIndexNameLogic({ indexName: 'index-name' }, { indexName: 'index-name' });
     mountFetchIndexApiLogic();
     mountIndexViewLogic({ index: 'index' });
     mount();

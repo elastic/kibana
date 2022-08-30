@@ -16,6 +16,7 @@ import {
 import React from 'react';
 import styled from 'styled-components';
 import { withSecuritySolutionLink } from '../../common/components/links';
+import { NavItemBetaBadge } from '../../common/components/navigation/nav_item_beta_badge';
 import type { NavLinkItem } from '../../common/components/navigation/types';
 
 interface LandingImagesProps {
@@ -43,11 +44,20 @@ const Content = styled(EuiFlexItem)`
   padding-left: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
+const FlexTitle = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+const TitleText = styled.h2`
+  display: inline;
+`;
+
 const SecuritySolutionLink = withSecuritySolutionLink(Link);
 
 export const LandingLinksImages: React.FC<LandingImagesProps> = ({ items }) => (
   <EuiFlexGroup direction="column">
-    {items.map(({ title, description, image, id }) => (
+    {items.map(({ title, description, image, id, isBeta }) => (
       <EuiFlexItem key={id} data-test-subj="LandingItem">
         <SecuritySolutionLink deepLinkId={id} tabIndex={-1}>
           {/* Empty onClick is to force hover style on `EuiPanel` */}
@@ -66,7 +76,10 @@ export const LandingLinksImages: React.FC<LandingImagesProps> = ({ items }) => (
               </StyledFlexItem>
               <Content>
                 <PrimaryEuiTitle size="s">
-                  <h2>{title}</h2>
+                  <FlexTitle>
+                    <TitleText>{title}</TitleText>
+                    {isBeta && <NavItemBetaBadge />}
+                  </FlexTitle>
                 </PrimaryEuiTitle>
                 <LandingLinksDescripton size="s" color="text">
                   {description}
@@ -101,7 +114,7 @@ const SecuritySolutionCard = withSecuritySolutionLink(PrimaryTitleCard);
 
 export const LandingImageCards: React.FC<LandingImagesProps> = React.memo(({ items }) => (
   <EuiFlexGroup direction="row" wrap>
-    {items.map(({ id, image, title, description }) => (
+    {items.map(({ id, image, title, description, isBeta }) => (
       <LandingImageCardItem key={id} data-test-subj="LandingImageCard-item" grow={false}>
         <SecuritySolutionCard
           deepLinkId={id}
@@ -121,7 +134,10 @@ export const LandingImageCards: React.FC<LandingImagesProps> = React.memo(({ ite
           }
           title={
             <PrimaryEuiTitle size="xs">
-              <h2>{title}</h2>
+              <FlexTitle>
+                <TitleText>{title}</TitleText>
+                {isBeta && <NavItemBetaBadge />}
+              </FlexTitle>
             </PrimaryEuiTitle>
           }
           description={<LandingCardDescription>{description}</LandingCardDescription>}

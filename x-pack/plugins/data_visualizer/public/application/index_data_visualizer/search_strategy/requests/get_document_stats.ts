@@ -171,7 +171,11 @@ export const getDocumentCountStats = async (
 
     // If the number of docs sampled is indicative of query with < 10 million docs
     // proceed to make a vanilla aggregation without any sampling
-    if (numSampled === 0 || newProbability === Infinity) {
+    if (
+      numSampled === 0 ||
+      newProbability === Infinity ||
+      numSampled / initialDefaultProbability < 1e7
+    ) {
       const vanillaAggResp = await search
         .search(
           {

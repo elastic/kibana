@@ -16,7 +16,6 @@ import {
   getProbabilityFromProgressiveLoadingQuality,
   ProgressiveLoadingQuality,
 } from '@kbn/observability-plugin/common';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { APMServerRouteRepository } from '../../server';
 
 import type {

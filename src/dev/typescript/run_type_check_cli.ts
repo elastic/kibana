@@ -55,7 +55,13 @@ export async function runTypeCheckCli() {
         }
       }
 
-      const concurrency = Math.min(4, Math.round((Os.cpus() || []).length / 2) || 1) || 1;
+      const concurrencyArg =
+        typeof flags.concurrency === 'string' && parseInt(flags.concurrency, 10);
+      const concurrency =
+        concurrencyArg && concurrencyArg > 0
+          ? concurrencyArg
+          : Math.min(4, Math.round((Os.cpus() || []).length / 2) || 1) || 1;
+
       log.info('running type check in', projects.length, 'projects');
 
       const tscArgs = [
@@ -115,12 +121,13 @@ export async function runTypeCheckCli() {
           node scripts/type_check --project packages/kbn-pm/tsconfig.json
       `,
       flags: {
-        string: ['project'],
+        string: ['project', 'concurrency'],
         boolean: ['skip-lib-check'],
         help: `
-          --project [path]    Path to a tsconfig.json file determines the project to check
-          --skip-lib-check    Skip type checking of all declaration files (*.d.ts). Default is false
-          --help              Show this message
+          --concurrency <number>  Number of projects to check in parallel. Defaults to 50% of available CPUs, up to 4.
+          --project [path]        Path to a tsconfig.json file determines the project to check
+          --skip-lib-check        Skip type checking of all declaration files (*.d.ts). Default is false
+          --help                  Show this message
         `,
       },
     }

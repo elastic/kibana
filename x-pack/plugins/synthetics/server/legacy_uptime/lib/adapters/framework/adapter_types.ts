@@ -11,7 +11,6 @@ import type {
   IScopedClusterClient,
   Logger,
   IBasePath,
-  KibanaRequest,
 } from '@kbn/core/server';
 import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
 import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
@@ -30,6 +29,7 @@ import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { CloudSetup } from '@kbn/cloud-plugin/server';
 import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { FleetStartContract } from '@kbn/fleet-plugin/server';
+import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
 import { UptimeESClient } from '../../lib';
 import type { TelemetryEventsSender } from '../../telemetry/sender';
 import type { UptimeRouter } from '../../../../types';
@@ -63,7 +63,6 @@ export interface UptimeServerSetup {
   uptimeEsClient: UptimeESClient;
   basePath: IBasePath;
   isDev?: boolean;
-  currentRequest?: KibanaRequest;
 }
 
 export interface UptimeCorePluginsSetup {
@@ -78,6 +77,7 @@ export interface UptimeCorePluginsSetup {
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   taskManager: TaskManagerSetupContract;
   telemetry: TelemetryPluginSetup;
+  bfetch: BfetchServerSetup;
 }
 
 export interface UptimeCorePluginsStart {

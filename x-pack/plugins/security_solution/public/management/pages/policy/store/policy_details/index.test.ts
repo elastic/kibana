@@ -38,7 +38,6 @@ describe('policy details: ', () => {
       updated_by: '',
       policy_id: '',
       enabled: true,
-      output_id: '',
       inputs: [
         {
           type: 'endpoint',
@@ -259,7 +258,6 @@ describe('policy details: ', () => {
         description: '',
         policy_id: '',
         enabled: true,
-        output_id: '',
         inputs: [
           {
             type: 'endpoint',
@@ -335,7 +333,13 @@ describe('policy details: ', () => {
                     logging: { file: 'info' },
                   },
                   linux: {
-                    events: { process: true, file: true, network: true, session_data: false },
+                    events: {
+                      process: true,
+                      file: true,
+                      network: true,
+                      session_data: false,
+                      tty_io: false,
+                    },
                     logging: { file: 'info' },
                     malware: { mode: 'prevent', blocklist: true },
                     behavior_protection: { mode: 'off', supported: false },

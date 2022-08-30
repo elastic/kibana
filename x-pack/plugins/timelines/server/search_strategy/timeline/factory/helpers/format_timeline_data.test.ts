@@ -43,7 +43,14 @@ describe('formatTimelineData', () => {
           },
           {
             field: 'threat.enrichments.matched.field',
-            value: ['matched_field', 'other_matched_field', 'matched_field_2'],
+            value: [
+              'matched_field',
+              'other_matched_field',
+              'matched_field_2',
+              'host.name',
+              'host.hostname',
+              'host.architecture',
+            ],
           },
           {
             field: 'source.geo.location',
@@ -118,6 +125,76 @@ describe('formatTimelineData', () => {
                   atomic: ['matched_atomic_2'],
                   field: ['matched_field_2'],
                   type: [],
+                },
+              },
+              {
+                feed: {
+                  name: [],
+                },
+                indicator: {
+                  provider: [],
+                  reference: [],
+                },
+                matched: {
+                  atomic: ['MacBook-Pro-de-Gloria.local'],
+                  field: ['host.name'],
+                  type: ['indicator_match_rule'],
+                },
+              },
+              {
+                feed: {
+                  name: [],
+                },
+                indicator: {
+                  provider: [],
+                  reference: [],
+                },
+                matched: {
+                  atomic: ['MacBook-Pro-de-Gloria.local'],
+                  field: ['host.hostname'],
+                  type: ['indicator_match_rule'],
+                },
+              },
+              {
+                feed: {
+                  name: [],
+                },
+                indicator: {
+                  provider: [],
+                  reference: [],
+                },
+                matched: {
+                  atomic: ['x86_64'],
+                  field: ['host.architecture'],
+                  type: ['indicator_match_rule'],
+                },
+              },
+              {
+                feed: {
+                  name: [],
+                },
+                indicator: {
+                  provider: [],
+                  reference: [],
+                },
+                matched: {
+                  atomic: ['MacBook-Pro-de-Gloria.local'],
+                  field: ['host.name'],
+                  type: ['indicator_match_rule'],
+                },
+              },
+              {
+                feed: {
+                  name: [],
+                },
+                indicator: {
+                  provider: [],
+                  reference: [],
+                },
+                matched: {
+                  atomic: ['MacBook-Pro-de-Gloria.local'],
+                  field: ['host.hostname'],
+                  type: ['indicator_match_rule'],
                 },
               },
             ],

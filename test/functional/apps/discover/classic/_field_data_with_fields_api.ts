@@ -15,11 +15,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'header', 'discover', 'visualize', 'timePicker']);
   const find = getService('find');
+  const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
 
   describe('discover tab with new fields API', function describeIndexTests() {
     before(async function () {
-      await kibanaServer.uiSettings.update({ 'doc_table:legacy': true });
+      await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await kibanaServer.uiSettings.replace({
+        defaultIndex: 'logstash-*',
+        'discover:searchFieldsFromSource': false,
+        'doc_table:legacy': true,
+      });
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
     });
 

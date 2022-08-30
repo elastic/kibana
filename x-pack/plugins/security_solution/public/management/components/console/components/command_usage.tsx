@@ -45,7 +45,7 @@ export const CommandInputUsage = memo<Pick<CommandUsageProps, 'commandDef'>>(({ 
                 })}
               </ConsoleCodeBlock>
             ),
-            description: usageHelp,
+            description: usageHelp && usageHelp.length > 0 ? usageHelp : commandDef.name,
           },
         ]}
         descriptionProps={additionalProps}

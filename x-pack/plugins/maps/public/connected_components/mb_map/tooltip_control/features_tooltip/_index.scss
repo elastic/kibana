@@ -1,10 +1,14 @@
 .mapFeatureTooltip_table {
   width: 100%;
-  max-height: calc(49vh - #{$euiSizeXL * 2});
 
   td {
     padding: $euiSizeXS;
   }
+}
+
+.mapFeatureTooltip_tableWrapper {
+  overflow: auto;
+  max-height: calc(49vh - 64px);
 }
 
 .mapFeatureTooltip_row {
@@ -20,6 +24,7 @@
 }
 
 .mapFeatureTooltip__propertyLabel {
+  min-width: $euiSizeXL * 2.5;
   max-width: $euiSizeXL * 4;
   font-weight: $euiFontWeightSemiBold;
 }

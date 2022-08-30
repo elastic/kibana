@@ -44,7 +44,9 @@ export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
         sortOrder: request.query.sortOrder ?? 'desc',
       });
 
-      const prebuiltSavedQueriesMap = await getInstalledSavedQueriesMap(osqueryContext);
+      const prebuiltSavedQueriesMap = await getInstalledSavedQueriesMap(
+        osqueryContext.service.getPackageService()?.asInternalUser
+      );
       const savedObjects = savedQueries.saved_objects.map((savedObject) => {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         const ecs_mapping = savedObject.attributes.ecs_mapping;

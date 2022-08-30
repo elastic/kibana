@@ -24,8 +24,8 @@ import type {
   ActionListApiResponse,
   ResponseActionApiResponse,
   PendingActionsResponse,
-  ProcessesEntry,
   ActionDetails,
+  GetProcessesActionOutputContent,
 } from '../../../common/endpoint/types';
 
 export type ResponseActionsHttpMocksInterface = ResponseProvidersInterface<{
@@ -43,7 +43,7 @@ export type ResponseActionsHttpMocksInterface = ResponseProvidersInterface<{
 
   agentPendingActionsSummary: (options: HttpFetchOptionsWithPath) => PendingActionsResponse;
 
-  processes: () => ActionDetailsApiResponse<ProcessesEntry>;
+  processes: () => ActionDetailsApiResponse<GetProcessesActionOutputContent>;
 }>;
 
 export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHttpMocksInterface>([
@@ -134,7 +134,7 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
     id: 'processes',
     path: GET_PROCESSES_ROUTE,
     method: 'post',
-    handler: (): ActionDetailsApiResponse<ProcessesEntry> => {
+    handler: (): ActionDetailsApiResponse<GetProcessesActionOutputContent> => {
       const generator = new EndpointActionGenerator('seed');
       const response = generator.generateActionDetails({
         outputs: {
@@ -145,7 +145,7 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
             },
           },
         },
-      }) as ActionDetails<ProcessesEntry>;
+      }) as ActionDetails<GetProcessesActionOutputContent>;
 
       return { data: response };
     },

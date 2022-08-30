@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { SavedObjectsUtils } from '@kbn/core/server/saved_objects';
+import { SavedObjectsUtils } from '@kbn/core/server';
 import { UserAtSpaceScenarios, Superuser } from '../../../scenarios';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { ESTestIndexTool, getUrlPrefix, ObjectRemover, AlertUtils } from '../../../../common/lib';

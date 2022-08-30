@@ -233,6 +233,72 @@ export default function ({ getService }: FtrProviderContext) {
       `);
     });
 
+    it('can limit the amount of returned results', async () => {
+      const allAvailableSuggestions = await supertest
+        .post('/s/space-a/internal/user_profiles_consumer/_suggest')
+        .set('kbn-xsrf', 'xxx')
+        .send({ name: 'elastic', size: 10, requiredAppPrivileges: ['dashboards'] })
+        .expect(200);
+      expect(allAvailableSuggestions.body).to.have.length(3);
+      expectSnapshot(
+        allAvailableSuggestions.body.map(({ user, data }: { user: unknown; data: unknown }) => ({
+          user,
+          data,
+        }))
+      ).toMatchInline(`
+        Array [
+          Object {
+            "data": Object {},
+            "user": Object {
+              "email": "two@elastic.co",
+              "full_name": "TWO",
+              "username": "user_two",
+            },
+          },
+          Object {
+            "data": Object {},
+            "user": Object {
+              "email": "one@elastic.co",
+              "full_name": "ONE",
+              "username": "user_one",
+            },
+          },
+          Object {
+            "data": Object {},
+            "user": Object {
+              "email": "three@elastic.co",
+              "full_name": "THREE",
+              "username": "user_three",
+            },
+          },
+        ]
+      `);
+
+      const singleSuggestion = await supertest
+        .post('/s/space-a/internal/user_profiles_consumer/_suggest')
+        .set('kbn-xsrf', 'xxx')
+        .send({ name: 'elastic', size: 1, requiredAppPrivileges: ['dashboards'] })
+        .expect(200);
+      expect(singleSuggestion.body).to.have.length(1);
+      expectSnapshot(
+        singleSuggestion.body.map(({ user, data }: { user: unknown; data: unknown }) => ({
+          user,
+          data,
+        }))
+      ).toMatchInline(`
+        Array [
+          Object {
+            "data": Object {},
+            "user": Object {
+              "email": "two@elastic.co",
+              "full_name": "TWO",
+              "username": "user_two",
+            },
+          },
+        ]
+      `);
+    });
+
     it('can get suggestions with data', async () => {
       // 1. Update user profile data.
       await supertestWithoutAuth

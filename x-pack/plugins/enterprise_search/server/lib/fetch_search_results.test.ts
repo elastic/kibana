@@ -8,8 +8,11 @@
 import { SearchResponseBody } from '@elastic/elasticsearch/lib/api/types';
 import { IScopedClusterClient } from '@kbn/core/server';
 
+import { ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT } from '../../common/constants';
+
 import { fetchSearchResults } from './fetch_search_results';
 
+const DEFAULT_FROM_VALUE = 0;
 describe('fetchSearchResults lib function', () => {
   const mockClient = {
     asCurrentUser: {
@@ -82,8 +85,26 @@ describe('fetchSearchResults lib function', () => {
     ).resolves.toEqual(regularSearchResultsResponse);
 
     expect(mockClient.asCurrentUser.search).toHaveBeenCalledWith({
+      from: DEFAULT_FROM_VALUE,
       index: indexName,
-      q: query,
+      q: JSON.stringify(query),
+      size: ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT,
+    });
+  });
+
+  it('should return search results with hits when no query is passed', async () => {
+    mockClient.asCurrentUser.search.mockImplementation(
+      () => regularSearchResultsResponse as SearchResponseBody
+    );
+
+    await expect(
+      fetchSearchResults(mockClient as unknown as IScopedClusterClient, indexName)
+    ).resolves.toEqual(regularSearchResultsResponse);
+
+    expect(mockClient.asCurrentUser.search).toHaveBeenCalledWith({
+      from: DEFAULT_FROM_VALUE,
+      index: indexName,
+      size: ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT,
     });
   });
 
@@ -97,8 +118,10 @@ describe('fetchSearchResults lib function', () => {
     ).resolves.toEqual(emptySearchResultsResponse);
 
     expect(mockClient.asCurrentUser.search).toHaveBeenCalledWith({
+      from: DEFAULT_FROM_VALUE,
       index: indexName,
-      q: query,
+      q: JSON.stringify(query),
+      size: ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT,
     });
   });
 });

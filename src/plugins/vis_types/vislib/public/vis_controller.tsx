@@ -10,7 +10,7 @@ import $ from 'jquery';
 import React, { RefObject } from 'react';
 
 import { METRIC_TYPE } from '@kbn/analytics';
-import { mountReactNode } from '@kbn/core/public/utils';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
@@ -163,7 +163,7 @@ export const createVislibVisController = (
       uiState?: PersistedState
     ) {
       const { legendPosition } = visParams;
-      this.unmountLegend = mountReactNode(
+      this.unmountLegend = toMountPoint(
         <VisLegend
           ref={this.legendRef}
           vislibVis={this.vislibVis}

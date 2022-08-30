@@ -89,7 +89,7 @@ describe('MonitoringWatch', () => {
       const actual = MonitoringWatch.fromUpstreamJson({
         id: 'id',
         watchJson: {},
-        watchStatusJson: {},
+        watchStatusJson: { state: { active: true } },
       });
 
       const expected = {

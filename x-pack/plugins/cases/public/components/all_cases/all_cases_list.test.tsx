@@ -11,6 +11,7 @@ import moment from 'moment-timezone';
 import { act, render, waitFor, screen } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 import userEvent from '@testing-library/user-event';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 import '../../common/mock/match_media';
 import {
@@ -426,9 +427,11 @@ describe('AllCasesListGeneric', () => {
     const result = appMockRenderer.render(<AllCasesList />);
     const theCase = useGetCasesMockState.data.cases[0];
     userEvent.click(result.getByTestId('case-status-filter'));
+    await waitForEuiPopoverOpen();
     userEvent.click(result.getByTestId('case-status-filter-in-progress'));
     userEvent.click(result.getByTestId(`checkboxSelectRow-${theCase.id}`));
     userEvent.click(result.getByText('Bulk actions'));
+    await waitForEuiPopoverOpen();
     userEvent.click(result.getByTestId('cases-bulk-close-button'));
     await waitFor(() => {});
     expect(updateBulkStatus).toBeCalledWith([theCase], CaseStatuses.closed);
@@ -438,9 +441,11 @@ describe('AllCasesListGeneric', () => {
     const result = appMockRenderer.render(<AllCasesList />);
     const theCase = useGetCasesMockState.data.cases[0];
     userEvent.click(result.getByTestId('case-status-filter'));
+    await waitForEuiPopoverOpen();
     userEvent.click(result.getByTestId('case-status-filter-closed'));
     userEvent.click(result.getByTestId(`checkboxSelectRow-${theCase.id}`));
     userEvent.click(result.getByText('Bulk actions'));
+    await waitForEuiPopoverOpen();
     userEvent.click(result.getByTestId('cases-bulk-open-button'));
     await waitFor(() => {});
     expect(updateBulkStatus).toBeCalledWith([theCase], CaseStatuses.open);
@@ -450,9 +455,11 @@ describe('AllCasesListGeneric', () => {
     const result = appMockRenderer.render(<AllCasesList />);
     const theCase = useGetCasesMockState.data.cases[0];
     userEvent.click(result.getByTestId('case-status-filter'));
+    await waitForEuiPopoverOpen();
     userEvent.click(result.getByTestId('case-status-filter-closed'));
     userEvent.click(result.getByTestId(`checkboxSelectRow-${theCase.id}`));
     userEvent.click(result.getByText('Bulk actions'));
+    await waitForEuiPopoverOpen();
     userEvent.click(result.getByTestId('cases-bulk-in-progress-button'));
     await waitFor(() => {});
     expect(updateBulkStatus).toBeCalledWith([theCase], CaseStatuses['in-progress']);
@@ -581,6 +588,7 @@ describe('AllCasesListGeneric', () => {
     wrapper.find('[data-test-subj="cases-table-row-select-1"]').first().simulate('click');
     await waitFor(() => {
       expect(onRowClick).toHaveBeenCalledWith({
+        assignees: [],
         closedAt: null,
         closedBy: null,
         comments: [],
@@ -643,6 +651,7 @@ describe('AllCasesListGeneric', () => {
   it('should change the status to closed', async () => {
     const result = appMockRenderer.render(<AllCasesList isSelectorView={false} />);
     userEvent.click(result.getByTestId('case-status-filter'));
+    await waitForEuiPopoverOpen();
     userEvent.click(result.getByTestId('case-status-filter-closed'));
     await waitFor(() => {
       expect(useGetCasesMock).toHaveBeenLastCalledWith(
@@ -661,6 +670,7 @@ describe('AllCasesListGeneric', () => {
   it('should change the status to in-progress', async () => {
     const result = appMockRenderer.render(<AllCasesList isSelectorView={false} />);
     userEvent.click(result.getByTestId('case-status-filter'));
+    await waitForEuiPopoverOpen();
     userEvent.click(result.getByTestId('case-status-filter-in-progress'));
     await waitFor(() => {
       expect(useGetCasesMock).toHaveBeenLastCalledWith(
@@ -679,6 +689,7 @@ describe('AllCasesListGeneric', () => {
   it('should change the status to open', async () => {
     const result = appMockRenderer.render(<AllCasesList isSelectorView={false} />);
     userEvent.click(result.getByTestId('case-status-filter'));
+    await waitForEuiPopoverOpen();
     userEvent.click(result.getByTestId('case-status-filter-in-progress'));
     await waitFor(() => {
       expect(useGetCasesMock).toHaveBeenLastCalledWith(
@@ -842,6 +853,7 @@ describe('AllCasesListGeneric', () => {
     }
 
     userEvent.click(screen.getByTestId('case-status-filter'));
+    await waitForEuiPopoverOpen();
     userEvent.click(screen.getByTestId('case-status-filter-closed'));
 
     for (const checkbox of checkboxes) {

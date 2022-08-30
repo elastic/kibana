@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { KibanaRequest } from '@kbn/core/server';
+import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import { formatSyntheticsPolicy } from '../../../common/formatters/format_synthetics_policy';
@@ -50,17 +50,18 @@ describe('SyntheticsPrivateLocation', () => {
     username: '',
   } as unknown as HeartbeatConfig;
 
+  const savedObjectsClientMock = {
+    bulkUpdate: jest.fn(),
+    get: jest.fn().mockReturnValue({
+      attributes: {
+        locations: [mockPrivateLocation],
+      },
+    }),
+  } as unknown as SavedObjectsClientContract;
+
   const serverMock: UptimeServerSetup = {
     uptimeEsClient: { search: jest.fn() },
     logger: loggerMock.create(),
-    authSavedObjectsClient: {
-      bulkUpdate: jest.fn(),
-      get: jest.fn().mockReturnValue({
-        attributes: {
-          locations: [mockPrivateLocation],
-        },
-      }),
-    },
     config: {
       service: {
         username: 'dev',
@@ -76,6 +77,11 @@ describe('SyntheticsPrivateLocation', () => {
       },
       packagePolicyService: {
         get: jest.fn().mockReturnValue({}),
+      },
+    },
+    spaces: {
+      spacesService: {
+        getSpaceId: jest.fn().mockReturnValue('nonDefaultSpace'),
       },
     },
   } as unknown as UptimeServerSetup;
@@ -101,7 +107,11 @@ describe('SyntheticsPrivateLocation', () => {
     });
 
     try {
-      await syntheticsPrivateLocation.createMonitor(testConfig, {} as unknown as KibanaRequest);
+      await syntheticsPrivateLocation.createMonitor(
+        testConfig,
+        {} as unknown as KibanaRequest,
+        savedObjectsClientMock
+      );
     } catch (e) {
       expect(e).toEqual(new Error(error));
     }
@@ -128,7 +138,11 @@ describe('SyntheticsPrivateLocation', () => {
     });
 
     try {
-      await syntheticsPrivateLocation.editMonitor(testConfig, {} as unknown as KibanaRequest);
+      await syntheticsPrivateLocation.editMonitor(
+        testConfig,
+        {} as unknown as KibanaRequest,
+        savedObjectsClientMock
+      );
     } catch (e) {
       expect(e).toEqual(new Error(error));
     }
@@ -154,7 +168,11 @@ describe('SyntheticsPrivateLocation', () => {
       },
     });
     try {
-      await syntheticsPrivateLocation.deleteMonitor(testConfig, {} as unknown as KibanaRequest);
+      await syntheticsPrivateLocation.deleteMonitor(
+        testConfig,
+        {} as unknown as KibanaRequest,
+        savedObjectsClientMock
+      );
     } catch (e) {
       expect(e).toEqual(new Error(e));
     }

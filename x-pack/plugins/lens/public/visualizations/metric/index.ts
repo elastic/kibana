@@ -20,7 +20,7 @@ export class MetricVisualization {
       const { getMetricVisualization } = await import('../../async_services');
       const palettes = await charts.palettes.getPalettes();
 
-      return getMetricVisualization({ paletteService: palettes });
+      return getMetricVisualization({ paletteService: palettes, theme: core.theme });
     });
   }
 }

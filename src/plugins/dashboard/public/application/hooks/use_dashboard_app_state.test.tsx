@@ -63,6 +63,9 @@ const createDashboardAppStateServices = () => {
   defaults.dataViews.getDefaultDataView = jest
     .fn()
     .mockImplementation(() => Promise.resolve(defaultDataView));
+  defaults.dataViews.getDefaultId = jest
+    .fn()
+    .mockImplementation(() => Promise.resolve(defaultDataView.id));
 
   defaults.dataViews.getDefault = jest
     .fn()

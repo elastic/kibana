@@ -129,7 +129,15 @@ export const AddMonitorBtn = () => {
         )}
       </EuiFlexItem>
       <EuiFlexItem style={{ alignItems: 'flex-end' }} grow={false}>
-        <EuiToolTip content={!isEnabled && !canEnable ? SYNTHETICS_DISABLED_MESSAGE : ''}>
+        <EuiToolTip
+          content={
+            !isEnabled && !canEnable
+              ? SYNTHETICS_DISABLED_MESSAGE
+              : !canSavePrivate
+              ? PRIVATE_LOCATIONS_NOT_ALLOWED_MESSAGE
+              : ''
+          }
+        >
           <EuiButton
             isLoading={loading}
             fill
@@ -149,6 +157,14 @@ export const AddMonitorBtn = () => {
     </EuiFlexGroup>
   );
 };
+
+const PRIVATE_LOCATIONS_NOT_ALLOWED_MESSAGE = i18n.translate(
+  'xpack.synthetics.monitorManagement.privateLocationsNotAllowedMessage',
+  {
+    defaultMessage:
+      'You do not have permission to add monitors to private locations. Contact your administrator to request access.',
+  }
+);
 
 const ADD_MONITOR_LABEL = i18n.translate('xpack.synthetics.monitorManagement.addMonitorLabel', {
   defaultMessage: 'Add monitor',

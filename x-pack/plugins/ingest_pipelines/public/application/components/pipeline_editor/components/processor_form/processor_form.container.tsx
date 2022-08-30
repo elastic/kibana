@@ -105,7 +105,6 @@ export const ProcessorFormContainer: FunctionComponent<Props> = ({
 
       if (isValid) {
         const { type, fields: options } = data as FormData;
-
         unsavedFormState.current = options;
 
         onSubmit({

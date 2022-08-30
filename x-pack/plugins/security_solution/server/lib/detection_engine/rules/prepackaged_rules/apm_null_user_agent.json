@@ -35,6 +35,13 @@
   "references": [
     "https://en.wikipedia.org/wiki/User_agent"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "url.path",
+      "type": "wildcard"
+    }
+  ],
   "risk_score": 47,
   "rule_id": "43303fd4-4839-4e48-b2b2-803ab060758d",
   "severity": "medium",
@@ -44,5 +51,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 7
+  "version": 8
 }

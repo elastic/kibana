@@ -28,13 +28,14 @@ import { tourConfig } from './tour_config';
 export const SECURITY_TOUR_ACTIVE_KEY = 'guidedOnboarding.security.tourActive';
 export const SECURITY_TOUR_STEP_KEY = 'guidedOnboarding.security.tourStep';
 const getIsTourActiveFromLocalStorage = (): boolean => {
-  return Boolean(localStorage.getItem(SECURITY_TOUR_ACTIVE_KEY));
+  const localStorageValue = localStorage.getItem(SECURITY_TOUR_ACTIVE_KEY);
+  return localStorageValue ? JSON.parse(localStorageValue) : false;
 };
-const saveIsTourActiveToLocalStorage = (isTourActive: boolean): void => {
+export const saveIsTourActiveToLocalStorage = (isTourActive: boolean): void => {
   localStorage.setItem(SECURITY_TOUR_ACTIVE_KEY, JSON.stringify(isTourActive));
 };
 
-const getTourStepFromLocalStorage = (): number => {
+export const getTourStepFromLocalStorage = (): number => {
   return Number(localStorage.getItem(SECURITY_TOUR_STEP_KEY) ?? 1);
 };
 const saveTourStepToLocalStorage = (step: number): void => {
@@ -96,7 +97,7 @@ const getSteps = (tourControls: {
     </EuiButtonEmpty>
   );
   return tourConfig.map((stepConfig: StepConfig) => {
-    const { content, imageConfig, ...rest } = stepConfig;
+    const { content, imageConfig, dataTestSubj, ...rest } = stepConfig;
     return (
       <EuiTourStep
         {...rest}
@@ -107,6 +108,9 @@ const getSteps = (tourControls: {
         stepsTotal={tourConfig.length}
         isStepOpen={stepConfig.step === activeStep}
         onFinish={() => resetTour()}
+        panelProps={{
+          'data-test-subj': dataTestSubj,
+        }}
         content={
           <>
             <EuiText size="xs">
@@ -128,10 +132,12 @@ const getSteps = (tourControls: {
 
 export interface TourContextValue {
   isTourShown: boolean;
+  endTour: () => void;
 }
 
 const TourContext = createContext<TourContextValue>({
   isTourShown: false,
+  endTour: () => {},
 } as TourContextValue);
 
 export const TourContextProvider = ({ children }: { children: ReactChild }) => {
@@ -163,7 +169,7 @@ export const TourContextProvider = ({ children }: { children: ReactChild }) => {
 
   const isSmallScreen = useIsWithinBreakpoints(['xs', 's']);
   const showTour = isTourActive && !isSmallScreen;
-  const context: TourContextValue = { isTourShown: showTour };
+  const context: TourContextValue = { isTourShown: showTour, endTour: resetTour };
   return (
     <TourContext.Provider value={context}>
       <>

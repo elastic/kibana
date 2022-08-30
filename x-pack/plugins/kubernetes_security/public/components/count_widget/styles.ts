@@ -25,16 +25,15 @@ export const useStyles = () => {
     };
 
     const title: CSSObject = {
-      marginBottom: size.m,
+      marginBottom: size.s,
       fontSize: size.m,
       fontWeight: font.weight.bold,
       whiteSpace: 'nowrap',
     };
 
     const dataInfo: CSSObject = {
-      marginBottom: size.xs,
-      height: '18px',
-      fontSize: size.l,
+      fontSize: `calc(${size.l} - ${size.xxs})`,
+      lineHeight: size.l,
       fontWeight: font.weight.bold,
     };
 

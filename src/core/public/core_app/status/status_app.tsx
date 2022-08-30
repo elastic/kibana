@@ -11,7 +11,7 @@ import { EuiLoadingSpinner, EuiText, EuiPage, EuiPageBody, EuiSpacer } from '@el
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { HttpSetup } from '@kbn/core-http-browser';
-import type { NotificationsSetup } from '../../notifications';
+import type { NotificationsSetup } from '@kbn/core-notifications-browser';
 import { loadStatus, type ProcessedServerResponse } from './lib';
 import { MetricTiles, ServerStatus, StatusSection, VersionHeader } from './components';
 

@@ -7,4 +7,8 @@
 
 export { accountManagementApp } from './account_management_app';
 export { UserProfileAPIClient } from './user_profile/user_profile_api_client';
-export type { UserProfileBulkGetParams, UserProfileGetCurrentParams } from './user_profile';
+export type {
+  UserProfileBulkGetParams,
+  UserProfileGetCurrentParams,
+  UserProfileSuggestParams,
+} from './user_profile';

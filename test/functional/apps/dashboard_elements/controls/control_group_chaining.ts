@@ -13,6 +13,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
+  const security = getService('security');
   const { dashboardControls, common, dashboard, timePicker } = getPageObjects([
     'dashboardControls',
     'timePicker',
@@ -32,6 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     };
 
     before(async () => {
+      await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader', 'animals']);
       await common.navigateToApp('dashboard');
       await dashboard.gotoDashboardLandingPage();
       await dashboard.clickNewDashboard();
@@ -60,6 +62,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       controlIds = await dashboardControls.getAllControlIds();
+    });
+
+    after(async () => {
+      await security.testUser.restoreDefaults();
     });
 
     it('Shows all available options in first Options List control', async () => {

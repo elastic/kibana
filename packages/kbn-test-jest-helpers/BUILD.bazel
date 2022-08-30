@@ -8,14 +8,21 @@ PKG_REQUIRE_NAME = "@kbn/test-jest-helpers"
 
 SOURCE_FILES = glob(
   [
-    "src/**/*"
+    "**/*.ts",
+    "**/*.tsx",
   ],
   exclude = [
+    "**/*.config.js",
+    "**/*.mock.*",
     "**/*.test.*",
-    "**/*.snap",
-    "**/__fixture__/**",
-    "**/__fixtures__/**",
+    "**/*.stories.*",
     "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/mocks/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
   ]
 )
 
@@ -108,7 +115,6 @@ TYPES_DEPS = [
   "@npm//@types/prettier",
   "@npm//@types/react",
   "@npm//@types/react-dom",
-  "@npm//@types/react-redux",
   "@npm//@types/react-router-dom",
   "@npm//@types/semver",
   "@npm//@types/xml2js",
@@ -138,7 +144,6 @@ ts_project(
   declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  root_dir = "src",
   tsconfig = ":tsconfig",
 )
 

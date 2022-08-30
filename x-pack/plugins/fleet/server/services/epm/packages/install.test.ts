@@ -32,6 +32,10 @@ jest.mock('../../app_context', () => {
       getSavedObjects: jest.fn(() => ({
         createImporter: jest.fn(),
       })),
+      getSavedObjectsTagging: jest.fn(() => ({
+        createInternalAssignmentService: jest.fn(),
+        createTagClient: jest.fn(),
+      })),
     },
   };
 });

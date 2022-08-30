@@ -6,8 +6,8 @@
  */
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { maybe } from '../../../common/utils/maybe';
-import { ProcessorEvent } from '../../../common/processor_event';
 import { SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../lib/helpers/setup_request';
 

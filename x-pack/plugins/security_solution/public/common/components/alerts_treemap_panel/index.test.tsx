@@ -10,6 +10,7 @@ import React from 'react';
 import { useLocation } from 'react-router-dom';
 
 import { SecurityPageName } from '../../../../common/constants';
+import { useGlobalTime } from '../../containers/use_global_time';
 import {
   DEFAULT_STACK_BY_FIELD,
   DEFAULT_STACK_BY_FIELD1,
@@ -17,10 +18,23 @@ import {
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
 import { ChartContextMenu } from '../../../detections/pages/detection_engine/chart_panels/chart_context_menu';
 import { ChartSelect } from '../../../detections/pages/detection_engine/chart_panels/chart_select';
+import { TREEMAP } from '../../../detections/pages/detection_engine/chart_panels/chart_select/translations';
 import { TestProviders } from '../../mock/test_providers';
 import type { Props } from '.';
 import { AlertsTreemapPanel } from '.';
 import { mockAlertSearchResponse } from '../alerts_treemap/lib/mocks/mock_alert_search_response';
+
+const from = '2022-07-28T08:20:18.966Z';
+const to = '2022-07-28T08:20:18.966Z';
+jest.mock('../../containers/use_global_time', () => {
+  const actual = jest.requireActual('../../containers/use_global_time');
+  return {
+    ...actual,
+    useGlobalTime: jest
+      .fn()
+      .mockReturnValue({ from, to, setQuery: jest.fn(), deleteQuery: jest.fn() }),
+  };
+});
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -51,7 +65,7 @@ const defaultProps: Props = {
       setStackByField1={jest.fn()}
     />
   ),
-
+  inspectTitle: TREEMAP,
   isPanelExpanded: true,
   filters: [
     {
@@ -111,7 +125,7 @@ const defaultProps: Props = {
 
 describe('AlertsTreemapPanel', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
 
     (useLocation as jest.Mock).mockReturnValue([
       { pageName: SecurityPageName.alerts, detailName: undefined },
@@ -135,6 +149,16 @@ describe('AlertsTreemapPanel', () => {
     );
 
     await waitFor(() => expect(screen.getByTestId('treemapPanel')).toBeInTheDocument());
+  });
+
+  it('invokes useGlobalTime() with false to prevent global queries from being deleted when the component unmounts', async () => {
+    render(
+      <TestProviders>
+        <AlertsTreemapPanel {...defaultProps} />
+      </TestProviders>
+    );
+
+    await waitFor(() => expect(useGlobalTime).toBeCalledWith(false));
   });
 
   it('renders the panel with a hidden overflow-x', async () => {
@@ -230,6 +254,25 @@ describe('AlertsTreemapPanel', () => {
     );
 
     await waitFor(() => expect(screen.getByTestId('progress')).toBeInTheDocument());
+  });
+
+  it('does NOT render the progress bar when loading is true, but the panel is collapsed', async () => {
+    (useQueryAlerts as jest.Mock).mockReturnValue({
+      loading: true, // <-- true when users click the page-level Refresh button
+      data: mockAlertSearchResponse,
+      setQuery: () => {},
+      response: '',
+      request: '',
+      refetch: () => {},
+    });
+
+    render(
+      <TestProviders>
+        <AlertsTreemapPanel {...defaultProps} isPanelExpanded={false} />
+      </TestProviders>
+    );
+
+    await waitFor(() => expect(screen.queryByTestId('progress')).not.toBeInTheDocument());
   });
 
   it('does NOT render the progress bar when data has loaded', async () => {

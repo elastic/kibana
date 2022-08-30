@@ -3447,9 +3447,7 @@
             "parentPluginId": "data",
             "id": "def-public.SearchSource.setParent",
             "type": "Function",
-            "tags": [
-              "return"
-            ],
+            "tags": [],
             "label": "setParent",
             "description": [
               "\nSet a searchSource that this source should inherit from"
@@ -3522,17 +3520,13 @@
                 "isRequired": true
               }
             ],
-            "returnComment": [
-              "- chainable"
-            ]
+            "returnComment": []
           },
           {
             "parentPluginId": "data",
             "id": "def-public.SearchSource.getParent",
             "type": "Function",
-            "tags": [
-              "return"
-            ],
+            "tags": [],
             "label": "getParent",
             "description": [
               "\nGet the parent of this SearchSource"
@@ -3563,13 +3557,13 @@
               "\nFetch this source from Elasticsearch, returning an observable over the response(s)"
             ],
             "signature": [
-              "(options?: ",
+              "<T = {}>(options?: ",
               {
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
-                "section": "def-common.ISearchOptions",
-                "text": "ISearchOptions"
+                "section": "def-common.SearchSourceSearchOptions",
+                "text": "SearchSourceSearchOptions"
               },
               ") => ",
               "Observable",
@@ -3583,7 +3577,7 @@
               },
               "<",
               "SearchResponse",
-              "<any, Record<string, ",
+              "<T, Record<string, ",
               "AggregationsAggregate",
               ">>>>"
             ],
@@ -3602,8 +3596,8 @@
                     "pluginId": "data",
                     "scope": "common",
                     "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.ISearchOptions",
-                    "text": "ISearchOptions"
+                    "section": "def-common.SearchSourceSearchOptions",
+                    "text": "SearchSourceSearchOptions"
                   }
                 ],
                 "path": "src/plugins/data/common/search/search_source/search_source.ts",
@@ -3630,12 +3624,12 @@
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
-                "section": "def-common.ISearchOptions",
-                "text": "ISearchOptions"
+                "section": "def-common.SearchSourceSearchOptions",
+                "text": "SearchSourceSearchOptions"
               },
               ") => Promise<",
               "SearchResponse",
-              "<any, Record<string, ",
+              "<unknown, Record<string, ",
               "AggregationsAggregate",
               ">>>"
             ],
@@ -3720,8 +3714,8 @@
                     "pluginId": "data",
                     "scope": "common",
                     "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.ISearchOptions",
-                    "text": "ISearchOptions"
+                    "section": "def-common.SearchSourceSearchOptions",
+                    "text": "SearchSourceSearchOptions"
                   }
                 ],
                 "path": "src/plugins/data/common/search/search_source/search_source.ts",
@@ -3735,9 +3729,7 @@
             "parentPluginId": "data",
             "id": "def-public.SearchSource.onRequestStart",
             "type": "Function",
-            "tags": [
-              "return"
-            ],
+            "tags": [],
             "label": "onRequestStart",
             "description": [
               "\n Add a handler that will be notified whenever requests start"
@@ -3756,8 +3748,8 @@
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
-                "section": "def-common.ISearchOptions",
-                "text": "ISearchOptions"
+                "section": "def-common.SearchSourceSearchOptions",
+                "text": "SearchSourceSearchOptions"
               },
               " | undefined) => Promise<unknown>) => void"
             ],
@@ -3785,8 +3777,8 @@
                     "pluginId": "data",
                     "scope": "common",
                     "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.ISearchOptions",
-                    "text": "ISearchOptions"
+                    "section": "def-common.SearchSourceSearchOptions",
+                    "text": "SearchSourceSearchOptions"
                   },
                   " | undefined) => Promise<unknown>"
                 ],
@@ -3818,9 +3810,7 @@
             "parentPluginId": "data",
             "id": "def-public.SearchSource.destroy",
             "type": "Function",
-            "tags": [
-              "return"
-            ],
+            "tags": [],
             "label": "destroy",
             "description": [
               "\nCompletely destroy the SearchSource."
@@ -3928,9 +3918,7 @@
                 "isRequired": true
               }
             ],
-            "returnComment": [
-              "The expression AST."
-            ]
+            "returnComment": []
           },
           {
             "parentPluginId": "data",
@@ -7102,13 +7090,7 @@
             "label": "savedObjects",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-public.SavedObjectsStart",
-                "text": "SavedObjectsStart"
-              }
+              "SavedObjectsStart"
             ],
             "path": "src/plugins/data/public/types.ts",
             "deprecated": false
@@ -7121,13 +7103,7 @@
             "label": "notifications",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.NotificationsStart",
-                "text": "NotificationsStart"
-              }
+              "NotificationsStart"
             ],
             "path": "src/plugins/data/public/types.ts",
             "deprecated": false
@@ -7574,6 +7550,22 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-public.ISearchOptions.executionContext",
+            "type": "Object",
+            "tags": [],
+            "label": "executionContext",
+            "description": [
+              "\nRepresents a meta-information about a Kibana entity intitating a saerch request."
+            ],
+            "signature": [
+              "KibanaExecutionContext",
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-public.ISearchOptions.indexPattern",
             "type": "Object",
             "tags": [],
@@ -7589,42 +7581,6 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              " | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.ISearchOptions.inspector",
-            "type": "Object",
-            "tags": [],
-            "label": "inspector",
-            "description": [
-              "\nInspector integration options"
-            ],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.IInspectorInfo",
-                "text": "IInspectorInfo"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.ISearchOptions.executionContext",
-            "type": "Object",
-            "tags": [],
-            "label": "executionContext",
-            "description": [],
-            "signature": [
-              "KibanaExecutionContext",
               " | undefined"
             ],
             "path": "src/plugins/data/common/search/types.ts",
@@ -8444,9 +8400,9 @@
             "section": "def-common.IAggType",
             "text": "IAggType"
           },
-          "; id?: string | undefined; enabled?: boolean | undefined; params?: {} | ",
+          "; params?: {} | ",
           "SerializableRecord",
-          " | undefined; schema?: string | undefined; }"
+          " | undefined; id?: string | undefined; enabled?: boolean | undefined; schema?: string | undefined; }"
         ],
         "path": "src/plugins/data/common/search/aggs/agg_config.ts",
         "deprecated": false,
@@ -8765,12 +8721,8 @@
           "[] | undefined; query?: ",
           "Query",
           " | ",
-          "AggregateQuery",
-          " | (",
           "Query",
-          " | ",
-          "AggregateQuery",
-          ")[] | undefined; timeRange?: ",
+          "[] | undefined; timeRange?: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -9364,13 +9316,13 @@
             "section": "def-common.SearchSource",
             "text": "SearchSource"
           },
-          " | undefined; fetch$: (options?: ",
+          " | undefined; fetch$: <T = {}>(options?: ",
           {
             "pluginId": "data",
             "scope": "common",
             "docId": "kibDataSearchPluginApi",
-            "section": "def-common.ISearchOptions",
-            "text": "ISearchOptions"
+            "section": "def-common.SearchSourceSearchOptions",
+            "text": "SearchSourceSearchOptions"
           },
           ") => ",
           "Observable",
@@ -9384,19 +9336,19 @@
           },
           "<",
           "SearchResponse",
-          "<any, Record<string, ",
+          "<T, Record<string, ",
           "AggregationsAggregate",
           ">>>>; fetch: (options?: ",
           {
             "pluginId": "data",
             "scope": "common",
             "docId": "kibDataSearchPluginApi",
-            "section": "def-common.ISearchOptions",
-            "text": "ISearchOptions"
+            "section": "def-common.SearchSourceSearchOptions",
+            "text": "SearchSourceSearchOptions"
           },
           ") => Promise<",
           "SearchResponse",
-          "<any, Record<string, ",
+          "<unknown, Record<string, ",
           "AggregationsAggregate",
           ">>>; onRequestStart: (handler: (searchSource: ",
           {
@@ -9411,8 +9363,8 @@
             "pluginId": "data",
             "scope": "common",
             "docId": "kibDataSearchPluginApi",
-            "section": "def-common.ISearchOptions",
-            "text": "ISearchOptions"
+            "section": "def-common.SearchSourceSearchOptions",
+            "text": "SearchSourceSearchOptions"
           },
           " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; destroy: () => void; getSerializedFields: (recurse?: boolean) => ",
           {
@@ -10187,7 +10139,7 @@
                 "label": "dateHistogramInterval",
                 "description": [],
                 "signature": [
-                  "(interval: string) => Interval"
+                  "(interval: string, shouldForceFixed?: boolean | undefined) => Interval"
                 ],
                 "path": "src/plugins/data/public/index.ts",
                 "deprecated": false,
@@ -10200,6 +10152,19 @@
                     "tags": [],
                     "label": "interval",
                     "description": [],
+                    "path": "src/plugins/data/common/search/aggs/utils/date_interval_utils/date_histogram_interval.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-public.search.aggs.dateHistogramInterval.$2",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "shouldForceFixed",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
                     "path": "src/plugins/data/common/search/aggs/utils/date_interval_utils/date_histogram_interval.ts",
                     "deprecated": false
                   }
@@ -10669,6 +10634,42 @@
                 ],
                 "path": "src/plugins/data/public/index.ts",
                 "deprecated": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-public.search.aggs.calcAutoIntervalLessThan",
+                "type": "Function",
+                "tags": [],
+                "label": "calcAutoIntervalLessThan",
+                "description": [],
+                "signature": [
+                  "(maxBucketCount: number, duration: number) => moment.Duration"
+                ],
+                "path": "src/plugins/data/public/index.ts",
+                "deprecated": false,
+                "returnComment": [],
+                "children": [
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-public.search.aggs.calcAutoIntervalLessThan.$1",
+                    "type": "number",
+                    "tags": [],
+                    "label": "maxBucketCount",
+                    "description": [],
+                    "path": "src/plugins/data/common/search/aggs/buckets/lib/time_buckets/calc_auto_interval.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-public.search.aggs.calcAutoIntervalLessThan.$2",
+                    "type": "number",
+                    "tags": [],
+                    "label": "duration",
+                    "description": [],
+                    "path": "src/plugins/data/common/search/aggs/buckets/lib/time_buckets/calc_auto_interval.ts",
+                    "deprecated": false
+                  }
+                ]
               }
             ]
           },
@@ -11176,28 +11177,8 @@
               "path": "src/plugins/dashboard/public/application/actions/export_csv_action.tsx"
             },
             {
-              "plugin": "lens",
-              "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/ranges/ranges.tsx"
-            },
-            {
               "plugin": "stackAlerts",
               "path": "x-pack/plugins/stack_alerts/public/alert_types/threshold/expression.tsx"
-            },
-            {
-              "plugin": "visTypeTable",
-              "path": "src/plugins/vis_types/table/public/plugin.ts"
-            },
-            {
-              "plugin": "visTypeTimeseries",
-              "path": "src/plugins/vis_types/timeseries/public/plugin.ts"
-            },
-            {
-              "plugin": "visTypeXy",
-              "path": "src/plugins/vis_types/xy/public/plugin.ts"
-            },
-            {
-              "plugin": "visTypeVislib",
-              "path": "src/plugins/vis_types/vislib/public/plugin.ts"
             },
             {
               "plugin": "expressionPartitionVis",
@@ -11874,6 +11855,19 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-server.DataView.matchedIndices",
+            "type": "Array",
+            "tags": [],
+            "label": "matchedIndices",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-server.DataView.Unnamed",
             "type": "Function",
             "tags": [],
@@ -12270,6 +12264,23 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-server.DataView.isTSDBMode",
+            "type": "Function",
+            "tags": [],
+            "label": "isTSDBMode",
+            "description": [
+              "\nreturns true if dataview contains TSDB fields"
+            ],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-server.DataView.isTimeBased",
             "type": "Function",
             "tags": [],
@@ -12447,16 +12458,16 @@
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewField",
-                "text": "DataViewField"
+                "section": "def-common.FieldSpec",
+                "text": "FieldSpec"
               },
               " | ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldSpec",
-                "text": "FieldSpec"
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
               },
               ") => ",
               {
@@ -12484,16 +12495,16 @@
                     "pluginId": "dataViews",
                     "scope": "common",
                     "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.DataViewField",
-                    "text": "DataViewField"
+                    "section": "def-common.FieldSpec",
+                    "text": "FieldSpec"
                   },
                   " | ",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
                     "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.FieldSpec",
-                    "text": "FieldSpec"
+                    "section": "def-common.DataViewField",
+                    "text": "DataViewField"
                   }
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_view.ts",
@@ -12658,7 +12669,7 @@
             "tags": [],
             "label": "getAllRuntimeFields",
             "description": [
-              "\nGet all runtime field definitions."
+              "\nGet all runtime field definitions.\nNOTE: this does not strip out runtime fields that match mapped field names"
             ],
             "signature": [
               "() => Record<string, ",
@@ -14429,7 +14440,7 @@
             "signature": [
               "(options: { pattern: string | string[]; metaFields?: string[] | undefined; fieldCapsOptions?: { allow_no_indices: boolean; } | undefined; type?: string | undefined; rollupIndex?: string | undefined; filter?: ",
               "QueryDslQueryContainer",
-              " | undefined; }) => Promise<",
+              " | undefined; }) => Promise<{ fields: ",
               {
                 "pluginId": "dataViews",
                 "scope": "server",
@@ -14437,7 +14448,7 @@
                 "section": "def-server.FieldDescriptor",
                 "text": "FieldDescriptor"
               },
-              "[]>"
+              "[]; indices: string[]; }>"
             ],
             "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
             "deprecated": false,
@@ -14893,7 +14904,61 @@
                 "label": "elasticsearchClient",
                 "description": [],
                 "signature": [
-                  "{ name: string | symbol; transform: ",
+                  "{ get: { <TDocument = unknown>(this: That, params: ",
+                  "GetRequest",
+                  " | ",
+                  "GetRequest",
+                  ", options?: ",
+                  "TransportRequestOptionsWithOutMeta",
+                  " | undefined): Promise<",
+                  "GetResponse",
+                  "<TDocument>>; <TDocument = unknown>(this: That, params: ",
+                  "GetRequest",
+                  " | ",
+                  "GetRequest",
+                  ", options?: ",
+                  "TransportRequestOptionsWithMeta",
+                  " | undefined): Promise<",
+                  "TransportResult",
+                  "<",
+                  "GetResponse",
+                  "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
+                  "GetRequest",
+                  " | ",
+                  "GetRequest",
+                  ", options?: ",
+                  "TransportRequestOptions",
+                  " | undefined): Promise<",
+                  "GetResponse",
+                  "<TDocument>>; }; delete: { (this: That, params: ",
+                  "DeleteRequest",
+                  " | ",
+                  "DeleteRequest",
+                  ", options?: ",
+                  "TransportRequestOptionsWithOutMeta",
+                  " | undefined): Promise<",
+                  "WriteResponseBase",
+                  ">; (this: That, params: ",
+                  "DeleteRequest",
+                  " | ",
+                  "DeleteRequest",
+                  ", options?: ",
+                  "TransportRequestOptionsWithMeta",
+                  " | undefined): Promise<",
+                  "TransportResult",
+                  "<",
+                  "WriteResponseBase",
+                  ", unknown>>; (this: That, params: ",
+                  "DeleteRequest",
+                  " | ",
+                  "DeleteRequest",
+                  ", options?: ",
+                  "TransportRequestOptions",
+                  " | undefined): Promise<",
+                  "WriteResponseBase",
+                  ">; }; cluster: ",
+                  "default",
+                  "; eql: ",
                   "default",
                   "; search: { <TDocument = unknown, TAggregations = Record<string, ",
                   "AggregationsAggregate",
@@ -14927,11 +14992,7 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "SearchResponse",
-                  "<TDocument, TAggregations>>; }; cluster: ",
-                  "default",
-                  "; eql: ",
-                  "default",
-                  "; create: { <TDocument = unknown>(this: That, params: ",
+                  "<TDocument, TAggregations>>; }; create: { <TDocument = unknown>(this: That, params: ",
                   "CreateRequest",
                   "<TDocument> | ",
                   "CreateRequest",
@@ -14961,7 +15022,7 @@
                   "default",
                   "; security: ",
                   "default",
-                  "; index: { <TDocument = unknown>(this: That, params: ",
+                  "; name: string | symbol; index: { <TDocument = unknown>(this: That, params: ",
                   "IndexRequest",
                   "<TDocument> | ",
                   "IndexRequest",
@@ -14987,33 +15048,7 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "WriteResponseBase",
-                  ">; }; get: { <TDocument = unknown>(this: That, params: ",
-                  "GetRequest",
-                  " | ",
-                  "GetRequest",
-                  ", options?: ",
-                  "TransportRequestOptionsWithOutMeta",
-                  " | undefined): Promise<",
-                  "GetResponse",
-                  "<TDocument>>; <TDocument = unknown>(this: That, params: ",
-                  "GetRequest",
-                  " | ",
-                  "GetRequest",
-                  ", options?: ",
-                  "TransportRequestOptionsWithMeta",
-                  " | undefined): Promise<",
-                  "TransportResult",
-                  "<",
-                  "GetResponse",
-                  "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
-                  "GetRequest",
-                  " | ",
-                  "GetRequest",
-                  ", options?: ",
-                  "TransportRequestOptions",
-                  " | undefined): Promise<",
-                  "GetResponse",
-                  "<TDocument>>; }; update: { <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
+                  ">; }; update: { <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
                   "UpdateRequest",
                   "<TDocument, TPartialDocument> | ",
                   "UpdateRequest",
@@ -15039,33 +15074,7 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "UpdateResponse",
-                  "<TDocumentR>>; }; delete: { (this: That, params: ",
-                  "DeleteRequest",
-                  " | ",
-                  "DeleteRequest",
-                  ", options?: ",
-                  "TransportRequestOptionsWithOutMeta",
-                  " | undefined): Promise<",
-                  "WriteResponseBase",
-                  ">; (this: That, params: ",
-                  "DeleteRequest",
-                  " | ",
-                  "DeleteRequest",
-                  ", options?: ",
-                  "TransportRequestOptionsWithMeta",
-                  " | undefined): Promise<",
-                  "TransportResult",
-                  "<",
-                  "WriteResponseBase",
-                  ", unknown>>; (this: That, params: ",
-                  "DeleteRequest",
-                  " | ",
-                  "DeleteRequest",
-                  ", options?: ",
-                  "TransportRequestOptions",
-                  " | undefined): Promise<",
-                  "WriteResponseBase",
-                  ">; }; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+                  "<TDocumentR>>; }; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
                   "default",
                   "; helpers: ",
                   "default",
@@ -16025,6 +16034,8 @@
                   "TermvectorsResponse",
                   ">; }; textStructure: ",
                   "default",
+                  "; transform: ",
+                  "default",
                   "; updateByQuery: { (this: That, params: ",
                   "UpdateByQueryRequest",
                   " | ",
@@ -16216,6 +16227,58 @@
             ],
             "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.FieldDescriptor.fixedInterval",
+            "type": "Array",
+            "tags": [],
+            "label": "fixedInterval",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.FieldDescriptor.timeZone",
+            "type": "Array",
+            "tags": [],
+            "label": "timeZone",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.FieldDescriptor.timeSeriesMetric",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "timeSeriesMetric",
+            "description": [],
+            "signature": [
+              "\"gauge\" | \"histogram\" | \"summary\" | \"counter\" | undefined"
+            ],
+            "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.FieldDescriptor.timeSeriesDimension",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "timeSeriesDimension",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -16374,6 +16437,22 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-server.ISearchOptions.executionContext",
+            "type": "Object",
+            "tags": [],
+            "label": "executionContext",
+            "description": [
+              "\nRepresents a meta-information about a Kibana entity intitating a saerch request."
+            ],
+            "signature": [
+              "KibanaExecutionContext",
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-server.ISearchOptions.indexPattern",
             "type": "Object",
             "tags": [],
@@ -16389,42 +16468,6 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              " | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.ISearchOptions.inspector",
-            "type": "Object",
-            "tags": [],
-            "label": "inspector",
-            "description": [
-              "\nInspector integration options"
-            ],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.IInspectorInfo",
-                "text": "IInspectorInfo"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.ISearchOptions.executionContext",
-            "type": "Object",
-            "tags": [],
-            "label": "executionContext",
-            "description": [],
-            "signature": [
-              "KibanaExecutionContext",
               " | undefined"
             ],
             "path": "src/plugins/data/common/search/types.ts",
@@ -16674,7 +16717,7 @@
                 "label": "dateHistogramInterval",
                 "description": [],
                 "signature": [
-                  "(interval: string) => Interval"
+                  "(interval: string, shouldForceFixed?: boolean | undefined) => Interval"
                 ],
                 "path": "src/plugins/data/server/index.ts",
                 "deprecated": false,
@@ -16687,6 +16730,19 @@
                     "tags": [],
                     "label": "interval",
                     "description": [],
+                    "path": "src/plugins/data/common/search/aggs/utils/date_interval_utils/date_histogram_interval.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-server.search.aggs.dateHistogramInterval.$2",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "shouldForceFixed",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
                     "path": "src/plugins/data/common/search/aggs/utils/date_interval_utils/date_histogram_interval.ts",
                     "deprecated": false
                   }
@@ -16916,12 +16972,7 @@
           ],
           "path": "src/plugins/data/server/plugin.ts",
           "deprecated": true,
-          "references": [
-            {
-              "plugin": "visTypeTimeseries",
-              "path": "src/plugins/vis_types/timeseries/server/plugin.ts"
-            }
-          ]
+          "references": []
         },
         {
           "parentPluginId": "data",
@@ -18012,6 +18063,19 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-common.DataView.matchedIndices",
+            "type": "Array",
+            "tags": [],
+            "label": "matchedIndices",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.DataView.Unnamed",
             "type": "Function",
             "tags": [],
@@ -18408,6 +18472,23 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-common.DataView.isTSDBMode",
+            "type": "Function",
+            "tags": [],
+            "label": "isTSDBMode",
+            "description": [
+              "\nreturns true if dataview contains TSDB fields"
+            ],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.DataView.isTimeBased",
             "type": "Function",
             "tags": [],
@@ -18585,16 +18666,16 @@
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewField",
-                "text": "DataViewField"
+                "section": "def-common.FieldSpec",
+                "text": "FieldSpec"
               },
               " | ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldSpec",
-                "text": "FieldSpec"
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
               },
               ") => ",
               {
@@ -18622,16 +18703,16 @@
                     "pluginId": "dataViews",
                     "scope": "common",
                     "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.DataViewField",
-                    "text": "DataViewField"
+                    "section": "def-common.FieldSpec",
+                    "text": "FieldSpec"
                   },
                   " | ",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
                     "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.FieldSpec",
-                    "text": "FieldSpec"
+                    "section": "def-common.DataViewField",
+                    "text": "DataViewField"
                   }
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_view.ts",
@@ -18796,7 +18877,7 @@
             "tags": [],
             "label": "getAllRuntimeFields",
             "description": [
-              "\nGet all runtime field definitions."
+              "\nGet all runtime field definitions.\nNOTE: this does not strip out runtime fields that match mapped field names"
             ],
             "signature": [
               "() => Record<string, ",
@@ -19349,7 +19430,7 @@
                 "section": "def-common.RuntimeFieldSpec",
                 "text": "RuntimeFieldSpec"
               },
-              " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; }"
+              " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: \"gauge\" | \"histogram\" | \"summary\" | \"counter\" | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; }"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
             "deprecated": false
@@ -19667,6 +19748,78 @@
             "label": "aggregatable",
             "description": [
               "\nReturns true if field is aggregatable"
+            ],
+            "path": "src/plugins/data_views/common/fields/data_view_field.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.DataViewField.timeSeriesDimension",
+            "type": "boolean",
+            "tags": [],
+            "label": "timeSeriesDimension",
+            "description": [
+              "\nreturns true if field is a TSDB dimension field"
+            ],
+            "path": "src/plugins/data_views/common/fields/data_view_field.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.DataViewField.timeSeriesMetric",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "timeSeriesMetric",
+            "description": [
+              "\nreturns type of TSDB metric or undefined"
+            ],
+            "signature": [
+              "\"gauge\" | \"histogram\" | \"summary\" | \"counter\" | undefined"
+            ],
+            "path": "src/plugins/data_views/common/fields/data_view_field.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.DataViewField.fixedInterval",
+            "type": "Array",
+            "tags": [],
+            "label": "fixedInterval",
+            "description": [
+              "\nreturns list of alloeed fixed intervals"
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/plugins/data_views/common/fields/data_view_field.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.DataViewField.isRolledUpField",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isRolledUpField",
+            "description": [
+              "\nreturns true if the field is of rolled up type"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data_views/common/fields/data_view_field.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.DataViewField.timeZone",
+            "type": "Array",
+            "tags": [],
+            "label": "timeZone",
+            "description": [
+              "\nreturn list of allowed time zones"
+            ],
+            "signature": [
+              "string[] | undefined"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
             "deprecated": false
@@ -22351,14 +22504,8 @@
                 "text": "GetFieldsOptions"
               },
               ") => Promise<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldSpec",
-                "text": "FieldSpec"
-              },
-              "[]>"
+              "FieldsForWildcardResponse",
+              ">"
             ],
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false,
@@ -22388,10 +22535,10 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.IDataViewsApiClient.hasUserIndexPattern",
+            "id": "def-common.IDataViewsApiClient.hasUserDataView",
             "type": "Function",
             "tags": [],
-            "label": "hasUserIndexPattern",
+            "label": "hasUserDataView",
             "description": [],
             "signature": [
               "() => Promise<boolean>"
@@ -23021,7 +23168,15 @@
           "\nData views service interface"
         ],
         "signature": [
-          "{ create: ({ id, name, title, ...restOfSpec }: ",
+          "{ get: (id: string) => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          ">; delete: (indexPatternId: string) => Promise<{}>; create: ({ id, name, title, ...restOfSpec }: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -23045,15 +23200,7 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          "[]>; get: (id: string) => Promise<",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataView",
-            "text": "DataView"
-          },
-          ">; delete: (indexPatternId: string) => Promise<{}>; getCanSave: () => Promise<boolean>; getIds: (refresh?: boolean) => Promise<string[]>; getTitles: (refresh?: boolean) => Promise<string[]>; getIdsWithTitle: (refresh?: boolean) => Promise<",
+          "[]>; getCanSave: () => Promise<boolean>; getIds: (refresh?: boolean) => Promise<string[]>; getTitles: (refresh?: boolean) => Promise<string[]>; getIdsWithTitle: (refresh?: boolean) => Promise<",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -23388,7 +23535,7 @@
             "section": "def-common.RuntimeFieldSpec",
             "text": "RuntimeFieldSpec"
           },
-          " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; }"
+          " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: \"gauge\" | \"histogram\" | \"summary\" | \"counter\" | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; }"
         ],
         "path": "src/plugins/data_views/common/types.ts",
         "deprecated": false,
@@ -23594,38 +23741,21 @@
         "tags": [],
         "label": "DEFAULT_ASSETS_TO_IGNORE",
         "description": [
-          "\nUsed to determine if the instance has some user created index patterns by filtering index patterns\nthat are created and backed only by Fleet server data\nShould be revised after https://github.com/elastic/kibana/issues/82851 is fixed\nFor more background see: https://github.com/elastic/kibana/issues/107020"
+          "\nUsed to optimize on-boarding experience to determine if the instance has some user created data views or data indices/streams by filtering data sources\nthat are created by default by elastic in ese.\nWe should somehow prevent creating initial data for the users without their explicit action\ninstead of relying on these hardcoded assets"
         ],
         "path": "src/plugins/data_views/common/constants.ts",
         "deprecated": false,
         "children": [
           {
             "parentPluginId": "data",
-            "id": "def-common.DEFAULT_ASSETS_TO_IGNORE.LOGS_INDEX_PATTERN",
-            "type": "string",
+            "id": "def-common.DEFAULT_ASSETS_TO_IGNORE.DATA_STREAMS_TO_IGNORE",
+            "type": "Array",
             "tags": [],
-            "label": "LOGS_INDEX_PATTERN",
+            "label": "DATA_STREAMS_TO_IGNORE",
             "description": [],
-            "path": "src/plugins/data_views/common/constants.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.DEFAULT_ASSETS_TO_IGNORE.LOGS_DATA_STREAM_TO_IGNORE",
-            "type": "string",
-            "tags": [],
-            "label": "LOGS_DATA_STREAM_TO_IGNORE",
-            "description": [],
-            "path": "src/plugins/data_views/common/constants.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.DEFAULT_ASSETS_TO_IGNORE.ENT_SEARCH_LOGS_DATA_STREAM_TO_IGNORE",
-            "type": "string",
-            "tags": [],
-            "label": "ENT_SEARCH_LOGS_DATA_STREAM_TO_IGNORE",
-            "description": [],
+            "signature": [
+              "string[]"
+            ],
             "path": "src/plugins/data_views/common/constants.ts",
             "deprecated": false
           }

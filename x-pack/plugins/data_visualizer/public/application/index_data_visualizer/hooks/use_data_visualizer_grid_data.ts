@@ -90,6 +90,7 @@ export const useDataVisualizerGridData = (
 
   /** Prepare required params to pass to search strategy **/
   const { searchQueryLanguage, searchString, searchQuery } = useMemo(() => {
+    const filterManager = data.query.filterManager;
     const searchData = getEsQueryFromSavedSearch({
       dataView: currentDataView,
       uiSettings,
@@ -101,7 +102,10 @@ export const useDataVisualizerGridData = (
 
     if (searchData === undefined || dataVisualizerListState.searchString !== '') {
       if (dataVisualizerListState.filters) {
-        data.query.filterManager.setFilters(dataVisualizerListState.filters);
+        const globalFilters = filterManager?.getGlobalFilters();
+
+        if (filterManager) filterManager.setFilters(dataVisualizerListState.filters);
+        if (globalFilters) filterManager?.addFilters(globalFilters);
       }
       return {
         searchQuery: dataVisualizerListState.searchQuery,

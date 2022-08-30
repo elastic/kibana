@@ -4,55 +4,34 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect } from 'react';
-import { EuiFieldText, EuiForm, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  EuiFieldText,
+  EuiForm,
+  EuiFormRow,
+  EuiSpacer,
+  EuiCallOut,
+  EuiCode,
+  EuiLink,
+} from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
+import { useFormContext, useFormState } from 'react-hook-form';
 import { AgentPolicyNeeded } from './agent_policy_needed';
-import { useFormWrapped } from '../../../../hooks/use_form_wrapped';
 import { PrivateLocation } from '../../../../../common/runtime_types';
 import { PolicyHostsField } from './policy_hosts';
 import { selectAgentPolicies } from '../../../state/private_locations';
 
 export const LocationForm = ({
-  setFormData,
   privateLocations,
 }: {
-  setFormData: (val: Partial<PrivateLocation>) => void;
   onDiscard?: () => void;
   privateLocations: PrivateLocation[];
 }) => {
   const { data } = useSelector(selectAgentPolicies);
-
-  const {
-    getValues,
-    control,
-    register,
-    formState: { errors },
-  } = useFormWrapped<PrivateLocation>({
-    mode: 'onTouched',
-    reValidateMode: 'onChange',
-    shouldFocusError: true,
-    defaultValues: {
-      label: '',
-      agentPolicyId: '',
-      id: '',
-      geo: {
-        lat: 0,
-        lon: 0,
-      },
-      concurrentMonitors: 1,
-    },
-  });
-
-  const label = getValues('label');
-  const agentPolicyId = getValues('agentPolicyId');
-
-  useEffect(() => {
-    if (label && agentPolicyId) {
-      setFormData({ label, agentPolicyId });
-    }
-  }, [label, agentPolicyId, setFormData]);
+  const { control, register } = useFormContext<PrivateLocation>();
+  const { errors } = useFormState();
 
   return (
     <>
@@ -67,7 +46,7 @@ export const LocationForm = ({
           <EuiFieldText
             fullWidth
             aria-label={LOCATION_NAME_LABEL}
-            {...register('name', {
+            {...register('label', {
               required: {
                 value: true,
                 message: NAME_REQUIRED,
@@ -82,10 +61,43 @@ export const LocationForm = ({
         </EuiFormRow>
         <EuiSpacer />
         <PolicyHostsField errors={errors} control={control} privateLocations={privateLocations} />
+        <EuiSpacer />
+        <EuiCallOut title={AGENT_CALLOUT_TITLE} size="s" style={{ textAlign: 'left' }}>
+          <p>
+            {
+              <FormattedMessage
+                id="xpack.synthetics.monitorManagement.agentCallout.content"
+                defaultMessage='If you intend to run "Browser" monitors on this private location, please ensure you are using the {code} Docker container, which contains the dependencies to run these monitors. For more information, {link}.'
+                values={{
+                  code: <EuiCode>elastic-agent-complete</EuiCode>,
+                  link: (
+                    <EuiLink
+                      target="_blank"
+                      href="https://www.elastic.co/guide/en/observability/current/uptime-set-up-choose-agent.html#private-locations"
+                      external
+                    >
+                      <FormattedMessage
+                        id="xpack.synthetics.monitorManagement.agentCallout.link"
+                        defaultMessage="read the docs"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            }
+          </p>
+        </EuiCallOut>
       </EuiForm>
     </>
   );
 };
+
+export const AGENT_CALLOUT_TITLE = i18n.translate(
+  'xpack.synthetics.monitorManagement.agentCallout.title',
+  {
+    defaultMessage: 'Requirement',
+  }
+);
 
 export const LOCATION_NAME_LABEL = i18n.translate(
   'xpack.synthetics.monitorManagement.locationName',

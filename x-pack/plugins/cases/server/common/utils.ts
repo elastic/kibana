@@ -69,6 +69,7 @@ export const transformNewCase = ({
   status: CaseStatuses.open,
   updated_at: null,
   updated_by: null,
+  assignees: newCase.assignees ?? [],
 });
 
 export const transformCases = ({

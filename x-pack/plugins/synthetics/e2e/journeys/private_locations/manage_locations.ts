@@ -33,7 +33,7 @@ journey('ManagePrivateLocation', async ({ page, params: { kibanaUrl } }) => {
     await page.click('button:has-text("Private locations")');
   });
 
-  step('Click text=Add two agent policies', async () => {
+  step('Add two agent policies', async () => {
     await page.click('text=Create agent policy');
 
     await addAgentPolicy('Fleet test policy');

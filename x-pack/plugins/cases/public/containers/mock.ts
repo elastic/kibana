@@ -228,6 +228,7 @@ export const basicCase: Case = {
   settings: {
     syncAlerts: true,
   },
+  assignees: [],
 };
 
 export const caseWithAlerts = {
@@ -329,6 +330,7 @@ export const mockCase: Case = {
   settings: {
     syncAlerts: true,
   },
+  assignees: [],
 };
 
 export const basicCasePost: Case = {
@@ -631,6 +633,7 @@ export const getUserAction = (
           tags: ['a tag'],
           settings: { syncAlerts: true },
           owner: SECURITY_SOLUTION_OWNER,
+          assignees: [],
         },
         ...overrides,
       };
@@ -858,9 +861,8 @@ export const getExternalReferenceAttachment = (
   icon: 'casesApp',
   displayName: 'Test',
   getAttachmentViewObject: () => ({
-    type: 'update',
     event: 'added a chart',
-    timelineIcon: 'casesApp',
+    timelineAvatar: 'casesApp',
     ...viewObject,
   }),
 });
@@ -889,9 +891,8 @@ export const getPersistableStateAttachment = (
   icon: 'casesApp',
   displayName: 'Test',
   getAttachmentViewObject: () => ({
-    type: 'update',
     event: 'added an embeddable',
-    timelineIcon: 'casesApp',
+    timelineAvatar: 'casesApp',
     ...viewObject,
   }),
 });

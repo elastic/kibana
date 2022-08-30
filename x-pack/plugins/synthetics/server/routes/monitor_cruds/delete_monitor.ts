@@ -113,7 +113,8 @@ export const deleteMonitor = async ({
           (normalizedMonitor.attributes as MonitorFields)[ConfigKey.CUSTOM_HEARTBEAT_ID] ||
           monitorId,
       },
-      request
+      request,
+      savedObjectsClient
     );
     await savedObjectsClient.delete(syntheticsMonitorType, monitorId);
 

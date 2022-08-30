@@ -258,6 +258,7 @@ function ErrorGroupList({
       initialSortField={initialSortField}
       initialSortDirection={initialSortDirection}
       sortItems={false}
+      initialPageSize={25}
     />
   );
 }

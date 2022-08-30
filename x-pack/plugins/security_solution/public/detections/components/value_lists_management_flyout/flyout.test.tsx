@@ -70,6 +70,22 @@ describe('ValueListsFlyout', () => {
     expect(container.find('EuiFlyout')).toHaveLength(1);
   });
 
+  it('should get value lists sorted desc by created_at', async () => {
+    const findListMock = jest.fn();
+    (useFindLists as jest.Mock).mockReturnValue({
+      start: findListMock,
+      result: getListResponseMock(),
+    });
+    mount(
+      <TestProviders>
+        <ValueListsFlyout showFlyout={true} onClose={jest.fn()} />
+      </TestProviders>
+    );
+
+    expect(findListMock).toHaveBeenCalledWith(
+      expect.objectContaining({ sortField: 'created_at', sortOrder: 'desc' })
+    );
+  });
   it('calls onClose when flyout is closed', () => {
     const onClose = jest.fn();
     const container = mount(
@@ -132,6 +148,31 @@ describe('ValueListsFlyout', () => {
       });
 
       expect(deleteListMock).toHaveBeenCalledWith(expect.objectContaining({ id: 'some-list-id' }));
+    });
+
+    it('should render the first page after importing new file', async () => {
+      const findListMock = jest.fn();
+      (useFindLists as jest.Mock).mockReturnValue({
+        start: findListMock,
+        result: { data: Array<ListSchema>(6).fill(getListResponseMock()), total: 6 },
+      });
+      const container = mount(
+        <TestProviders>
+          <ValueListsFlyout showFlyout={true} onClose={jest.fn()} />
+        </TestProviders>
+      );
+      await waitFor(() => {
+        container.find('a[data-test-subj="pagination-button-1"]').first().simulate('click');
+      });
+
+      await waitFor(() => {
+        container
+          .find('button[data-test-subj="value-lists-form-import-action"]')
+          .first()
+          .simulate('click');
+      });
+
+      expect(findListMock).toHaveBeenCalledWith(expect.objectContaining({ pageIndex: 1 }));
     });
   });
 });

@@ -10,8 +10,9 @@ import { isEqual } from 'lodash';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
+  EuiContextMenu,
+  EuiContextMenuPanelDescriptor,
+  EuiContextMenuPanelItemDescriptor,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -25,11 +26,21 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
 import useObservable from 'react-use/lib/useObservable';
-import { OVERALL_LABEL, SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from './explorer_constants';
+import { CommentType } from '@kbn/cases-plugin/common';
+import { stringHash } from '@kbn/ml-string-hash';
+import { useTimeRangeUpdates } from '../contexts/kibana/use_timefilter';
+import type { AnomalySwimlaneEmbeddableInput } from '../../embeddables';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../..';
+import {
+  OVERALL_LABEL,
+  SWIMLANE_TYPE,
+  SwimlaneType,
+  VIEW_BY_JOB_LABEL,
+} from './explorer_constants';
 import { AddSwimlaneToDashboardControl } from './dashboard_controls/add_swimlane_to_dashboard_controls';
 import { useMlKibana } from '../contexts/kibana';
 import { ExplorerState } from './reducers/explorer_reducer';
-import { ExplorerNoInfluencersFound } from './components/explorer_no_influencers_found/explorer_no_influencers_found';
+import { ExplorerNoInfluencersFound } from './components/explorer_no_influencers_found';
 import { SwimlaneContainer } from './swimlane_container';
 import { AppStateSelectedCells, OverallSwimlaneData, ViewBySwimLaneData } from './explorer_utils';
 import { NoOverallData } from './components/no_overall_data';
@@ -61,8 +72,13 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
       services: {
         application: { capabilities },
         charts: chartsService,
+        cases,
       },
     } = useMlKibana();
+
+    const globalTimeRange = useTimeRangeUpdates(true);
+
+    const selectCaseModal = cases?.hooks.getUseCasesAddToExistingCaseModal();
 
     const { anomalyExplorerCommonStateService, anomalyTimelineStateService } =
       useAnomalyExplorerContext();
@@ -87,7 +103,10 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
 
     const swimlaneLimit = useObservable(anomalyTimelineStateService.getSwimLaneCardinality$());
 
-    const selectedJobs = useObservable(anomalyExplorerCommonStateService.getSelectedJobs$());
+    const selectedJobs = useObservable(
+      anomalyExplorerCommonStateService.getSelectedJobs$(),
+      anomalyExplorerCommonStateService.getSelectedJobs()
+    );
 
     const loading = useObservable(anomalyTimelineStateService.isOverallSwimLaneLoading$(), true);
 
@@ -145,26 +164,116 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
       [severityUpdate, swimLaneSeverity]
     );
 
+    const openCasesModal = useCallback(
+      (swimLaneType: SwimlaneType) => {
+        const persistableStateAttachmentState = {
+          swimlaneType: swimLaneType,
+          ...(swimLaneType === SWIMLANE_TYPE.VIEW_BY ? { viewBy: viewBySwimlaneFieldName } : {}),
+          jobIds: selectedJobs?.map((v) => v.id),
+          timeRange: globalTimeRange,
+        } as AnomalySwimlaneEmbeddableInput;
+
+        // Creates unique id based on the input
+        persistableStateAttachmentState.id = stringHash(
+          JSON.stringify(persistableStateAttachmentState)
+        ).toString();
+
+        selectCaseModal!.open({
+          attachments: [
+            {
+              type: CommentType.persistableState,
+              persistableStateAttachmentTypeId: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+              // TODO Cases: improve type for persistableStateAttachmentState with io-ts
+              persistableStateAttachmentState: JSON.parse(
+                JSON.stringify(persistableStateAttachmentState)
+              ),
+            },
+          ],
+        });
+      },
+      [selectCaseModal, selectedJobs, globalTimeRange, viewBySwimlaneFieldName]
+    );
+
     const annotations = useMemo(() => overallAnnotations.annotationsData, [overallAnnotations]);
 
-    const menuItems = useMemo(() => {
-      const items = [];
+    const closePopoverOnAction = useCallback(
+      (actionCallback: Function) => {
+        return () => {
+          setIsMenuOpen(false);
+          actionCallback();
+        };
+      },
+      [setIsMenuOpen]
+    );
+
+    const menuPanels = useMemo<EuiContextMenuPanelDescriptor[]>(() => {
+      const rootItems: EuiContextMenuPanelItemDescriptor[] = [];
+      const panels: EuiContextMenuPanelDescriptor[] = [{ id: 0, items: rootItems }];
+
       if (canEditDashboards) {
-        items.push(
-          <EuiContextMenuItem
-            key="addToDashboard"
-            onClick={setIsAddDashboardActive.bind(null, true)}
-            data-test-subj="mlAnomalyTimelinePanelAddToDashboardButton"
-          >
+        rootItems.push({
+          name: (
             <FormattedMessage
               id="xpack.ml.explorer.addToDashboardLabel"
               defaultMessage="Add to dashboard"
             />
-          </EuiContextMenuItem>
-        );
+          ),
+          onClick: closePopoverOnAction(setIsAddDashboardActive.bind(null, true)),
+          'data-test-subj': 'mlAnomalyTimelinePanelAddToDashboardButton',
+        });
       }
-      return items;
-    }, [canEditDashboards]);
+
+      const casesPrivileges = cases?.helpers.canUseCases();
+
+      if ((!!casesPrivileges?.create || !!casesPrivileges?.update) && selectCaseModal) {
+        rootItems.push({
+          panel: 1,
+          name: (
+            <FormattedMessage
+              id="xpack.ml.explorer.attachToCaseLabel"
+              defaultMessage="Attach to case"
+            />
+          ),
+          'data-test-subj': 'mlAnomalyTimelinePanelAttachToCaseButton',
+        });
+
+        panels.push({
+          id: 1,
+          initialFocusedItemIndex: 0,
+          title: (
+            <FormattedMessage
+              id="xpack.ml.explorer.attachToCaseLabel"
+              defaultMessage="Attach to case"
+            />
+          ),
+          items: [
+            {
+              name: (
+                <FormattedMessage
+                  id="xpack.ml.explorer.attachOverallSwimLane"
+                  defaultMessage="Overall"
+                />
+              ),
+              onClick: closePopoverOnAction(openCasesModal.bind(null, 'overall')),
+              'data-test-subj': 'mlAnomalyTimelinePanelAttachOverallButton',
+            },
+            {
+              name: (
+                <FormattedMessage
+                  id="xpack.ml.explorer.attachViewBySwimLane"
+                  defaultMessage="View by {viewByField}"
+                  values={{ viewByField: viewBySwimlaneFieldName }}
+                />
+              ),
+              onClick: closePopoverOnAction(openCasesModal.bind(null, 'viewBy')),
+              'data-test-subj': 'mlAnomalyTimelinePanelAttachViewByButton',
+            },
+          ],
+        });
+      }
+
+      return panels;
+    }, [canEditDashboards, openCasesModal, viewBySwimlaneFieldName]);
 
     // If selecting a cell in the 'view by' swimlane, indicate the corresponding time in the Overall swimlane.
     const overallCellSelection: AppStateSelectedCells | undefined = useMemo(() => {
@@ -214,7 +323,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
               <AnomalyTimelineHelpPopover />
             </EuiFlexItem>
 
-            {menuItems.length > 0 && (
+            {menuPanels[0].items!.length > 0 ? (
               <EuiFlexItem
                 grow={false}
                 css={{ 'margin-left': 'auto !important', 'align-self': 'baseline' }}
@@ -237,10 +346,10 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                   panelPaddingSize="none"
                   anchorPosition="downLeft"
                 >
-                  <EuiContextMenuPanel items={menuItems} />
+                  <EuiContextMenu initialPanelId={0} panels={menuPanels} />
                 </EuiPopover>
               </EuiFlexItem>
-            )}
+            ) : null}
           </EuiFlexGroup>
 
           <EuiSpacer size="s" />

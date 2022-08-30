@@ -14,7 +14,6 @@ import { renderMustacheStringNoEscape } from '../../lib/mustache_renderer';
 import {
   createServiceError,
   getObjectValueByKeyAsString,
-  getPushedDate,
   stringifyObjValues,
   removeSlash,
   throwDescriptiveErrorIfResponseIsNotValid,
@@ -32,7 +31,7 @@ import {
 } from './types';
 
 import * as i18n from './translations';
-import { request } from '../lib/axios_utils';
+import { request } from '../../lib/axios_utils';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 
 export const createExternalService = (
@@ -49,13 +48,11 @@ export const createExternalService = (
     createIncidentMethod,
     createIncidentResponseKey,
     createIncidentUrl: createIncidentUrlConfig,
-    getIncidentResponseCreatedDateKey,
     getIncidentResponseExternalTitleKey,
-    getIncidentResponseUpdatedDateKey,
     getIncidentUrl,
     hasAuth,
     headers,
-    incidentViewUrl,
+    viewIncidentUrl,
     updateIncidentJson,
     updateIncidentMethod,
     updateIncidentUrl,
@@ -64,7 +61,7 @@ export const createExternalService = (
   if (
     !getIncidentUrl ||
     !createIncidentUrlConfig ||
-    !incidentViewUrl ||
+    !viewIncidentUrl ||
     !updateIncidentUrl ||
     (hasAuth && (!password || !user))
   ) {
@@ -107,17 +104,11 @@ export const createExternalService = (
 
       throwDescriptiveErrorIfResponseIsNotValid({
         res,
-        requiredAttributesToBeInTheResponse: [
-          getIncidentResponseCreatedDateKey,
-          getIncidentResponseExternalTitleKey,
-          getIncidentResponseUpdatedDateKey,
-        ],
+        requiredAttributesToBeInTheResponse: [getIncidentResponseExternalTitleKey],
       });
 
       const title = getObjectValueByKeyAsString(res.data, getIncidentResponseExternalTitleKey)!;
-      const createdAt = getObjectValueByKeyAsString(res.data, getIncidentResponseCreatedDateKey)!;
-      const updatedAt = getObjectValueByKeyAsString(res.data, getIncidentResponseUpdatedDateKey)!;
-      return { id, title, createdAt, updatedAt };
+      return { id, title };
     } catch (error) {
       throw createServiceError(error, `Unable to get case with id ${id}`);
     }
@@ -163,7 +154,7 @@ export const createExternalService = (
 
       logger.debug(`response from webhook action "${actionId}": [HTTP ${status}] ${statusText}`);
 
-      const viewUrl = renderMustacheStringNoEscape(incidentViewUrl, {
+      const viewUrl = renderMustacheStringNoEscape(viewIncidentUrl, {
         external: {
           system: {
             id: encodeURIComponent(externalId),
@@ -180,7 +171,7 @@ export const createExternalService = (
         id: externalId,
         title: insertedIncident.title,
         url: normalizedViewUrl,
-        pushedDate: getPushedDate(insertedIncident.createdAt),
+        pushedDate: new Date().toISOString(),
       };
     } catch (error) {
       throw createServiceError(error, 'Unable to create case');
@@ -233,7 +224,7 @@ export const createExternalService = (
         res,
       });
       const updatedIncident = await getIncident(incidentId as string);
-      const viewUrl = renderMustacheStringNoEscape(incidentViewUrl, {
+      const viewUrl = renderMustacheStringNoEscape(viewIncidentUrl, {
         external: {
           system: {
             id: encodeURIComponent(incidentId),
@@ -250,7 +241,7 @@ export const createExternalService = (
         id: incidentId,
         title: updatedIncident.title,
         url: normalizedViewUrl,
-        pushedDate: getPushedDate(updatedIncident.updatedAt),
+        pushedDate: new Date().toISOString(),
       };
     } catch (error) {
       throw createServiceError(error, `Unable to update case with id ${incidentId}`);

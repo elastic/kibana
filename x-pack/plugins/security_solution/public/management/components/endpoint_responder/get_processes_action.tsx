@@ -11,7 +11,10 @@ import { EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ActionDetails, ProcessesEntry } from '../../../../common/endpoint/types';
+import type {
+  ActionDetails,
+  GetProcessesActionOutputContent,
+} from '../../../../common/endpoint/types';
 import { useGetActionDetails } from '../../hooks/endpoint/use_get_action_details';
 import type { EndpointCommandDefinitionMeta } from './types';
 import type { CommandExecutionComponentProps } from '../console/types';
@@ -46,7 +49,7 @@ export const GetProcessesActionResult = memo<
     {
       actionId?: string;
       actionRequestSent?: boolean;
-      completedActionDetails?: ActionDetails<ProcessesEntry>;
+      completedActionDetails?: ActionDetails<GetProcessesActionOutputContent>;
       apiError?: IHttpFetchError;
     },
     EndpointCommandDefinitionMeta
@@ -66,10 +69,13 @@ export const GetProcessesActionResult = memo<
     error: processesActionRequestError,
   } = useSendGetEndpointProcessesRequest();
 
-  const { data: actionDetails } = useGetActionDetails<ProcessesEntry>(actionId ?? '-', {
-    enabled: Boolean(actionId) && isPending,
-    refetchInterval: isPending ? 3000 : false,
-  });
+  const { data: actionDetails } = useGetActionDetails<GetProcessesActionOutputContent>(
+    actionId ?? '-',
+    {
+      enabled: Boolean(actionId) && isPending,
+      refetchInterval: isPending ? 3000 : false,
+    }
+  );
 
   // Send get processes request if not yet done
   useEffect(() => {
@@ -201,7 +207,7 @@ export const GetProcessesActionResult = memo<
           { defaultMessage: 'Get processes action failed' }
         )}
         dataTestSubj={'getProcessesErrorCallout'}
-        errors={completedActionDetails?.errors}
+        action={completedActionDetails}
         ResultComponent={ResultComponent}
       />
     );

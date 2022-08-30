@@ -13,7 +13,6 @@ import type {
   SavedObjectsFindResponse,
   SavedObjectsUpdateResponse,
   SavedObjectsFindOptions,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '@kbn/core/server';
 import type { SearchSessionSavedObjectAttributes } from '../../../common';
 export type SearchSessionSavedObject = SavedObject<SearchSessionSavedObjectAttributes>;

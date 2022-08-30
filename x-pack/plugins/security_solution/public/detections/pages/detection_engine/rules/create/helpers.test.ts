@@ -50,10 +50,10 @@ describe('helpers', () => {
       expect(result).toEqual({ unit: 'm', value: 0 });
     });
 
-    test('returns timeObj with unit set to empty string if no expected time type found', () => {
+    test('returns timeObj with unit set to default unit value of "ms" if no expected time type found', () => {
       const result = getTimeTypeValue('5l');
 
-      expect(result).toEqual({ unit: '', value: 5 });
+      expect(result).toEqual({ unit: 'ms', value: 5 });
     });
 
     test('returns timeObj with unit of s and value 5 when time is 5s ', () => {
@@ -80,10 +80,10 @@ describe('helpers', () => {
       expect(result).toEqual({ unit: 'm', value: 5 });
     });
 
-    test('returns timeObj with value of 0 and unit of "" if random string passed in', () => {
+    test('returns timeObj with value of 0 and unit of "ms" if random string passed in', () => {
       const result = getTimeTypeValue('random');
 
-      expect(result).toEqual({ unit: '', value: 0 });
+      expect(result).toEqual({ unit: 'ms', value: 0 });
     });
   });
 

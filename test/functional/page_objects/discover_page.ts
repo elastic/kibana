@@ -24,8 +24,6 @@ export class DiscoverPageObject extends FtrService {
   private readonly kibanaServer = this.ctx.getService('kibanaServer');
   private readonly queryBar = this.ctx.getService('queryBar');
 
-  private readonly unifiedSearch = this.ctx.getPageObject('unifiedSearch');
-
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
 
   public async getChartTimespan() {
@@ -507,6 +505,15 @@ export class DiscoverPageObject extends FtrService {
     await this.header.waitUntilLoadingHasFinished();
   }
 
+  public async getIndexPatterns() {
+    await this.testSubjects.click('discover-dataView-switch-link');
+    const indexPatternSwitcher = await this.testSubjects.find('indexPattern-switcher');
+    const li = await indexPatternSwitcher.findAllByTagName('li');
+    const items = await Promise.all(li.map((lis) => lis.getVisibleText()));
+    await this.testSubjects.click('discover-dataView-switch-link');
+    return items;
+  }
+
   public async selectTextBaseLang(lang: 'SQL') {
     await this.testSubjects.click('discover-dataView-switch-link');
     await this.find.clickByCssSelector(
@@ -570,7 +577,6 @@ export class DiscoverPageObject extends FtrService {
     await this.retry.waitFor('Discover app on screen', async () => {
       return await this.isDiscoverAppOnScreen();
     });
-    await this.unifiedSearch.closeTourPopoverByLocalStorage();
   }
 
   public async showAllFilterActions() {

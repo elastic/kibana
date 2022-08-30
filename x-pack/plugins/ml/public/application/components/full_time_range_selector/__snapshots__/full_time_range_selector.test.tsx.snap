@@ -45,7 +45,7 @@ exports[`FullTimeRangeSelector renders the selector 1`] = `
         />
       }
       closePopover={[Function]}
-      display="inlineBlock"
+      display="inline-block"
       hasArrow={true}
       id="mlFullTimeRangeSelectorOption"
       isOpen={false}

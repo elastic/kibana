@@ -57,7 +57,7 @@ describe.skip('when navigating to integration page', () => {
     const integrationsPath = '/app/integrations/browse';
 
     cy.loginAsEditorUser();
-    cy.visit(integrationsPath);
+    cy.visitKibana(integrationsPath);
 
     // open integration policy form
     cy.get('[data-test-subj="integration-card:epr:apm:featured').click();
@@ -79,17 +79,17 @@ describe.skip('when navigating to integration page', () => {
   });
 
   it('should display Tail-based section on latest version', () => {
-    cy.visit('/app/fleet/integrations/apm/add-integration');
+    cy.visitKibana('/app/fleet/integrations/apm/add-integration');
     cy.contains('Tail-based sampling').should('exist');
   });
 
   it('should hide Tail-based section for 8.0.0 apm package', () => {
-    cy.visit('/app/fleet/integrations/apm-8.0.0/add-integration');
+    cy.visitKibana('/app/fleet/integrations/apm-8.0.0/add-integration');
     cy.contains('Tail-based sampling').should('not.exist');
   });
 
   it('should Display Debug section', () => {
-    cy.visit('/app/fleet/integrations/apm-8.0.0/add-integration');
+    cy.visitKibana('/app/fleet/integrations/apm-8.0.0/add-integration');
     cy.contains('Debug settings').should('exist');
   });
 });

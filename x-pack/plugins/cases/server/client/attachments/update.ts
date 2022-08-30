@@ -39,7 +39,12 @@ export async function update(
   { caseID, updateRequest: queryParams }: UpdateArgs,
   clientArgs: CasesClientArgs
 ): Promise<CaseResponse> {
-  const { attachmentService, unsecuredSavedObjectsClient, logger, authorization } = clientArgs;
+  const {
+    services: { attachmentService },
+    unsecuredSavedObjectsClient,
+    logger,
+    authorization,
+  } = clientArgs;
 
   try {
     const {

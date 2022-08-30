@@ -104,7 +104,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.lens.getDimensionTriggersTexts('lnsXY_splitDimensionPanel')
         ).to.eql([]);
         expect(await PageObjects.lens.getDimensionTriggersTexts('lnsXY_yDimensionPanel')).to.eql([
-          'Value count of @message.raw',
+          'Count of @message.raw',
         ]);
       });
       it('should duplicate the column when dragging to empty dimension in the same group', async () => {
@@ -117,9 +117,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           to: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         });
         expect(await PageObjects.lens.getDimensionTriggersTexts('lnsXY_yDimensionPanel')).to.eql([
-          'Value count of @message.raw',
-          'Value count of @message.raw [1]',
-          'Value count of @message.raw [2]',
+          'Count of @message.raw',
+          'Count of @message.raw [1]',
+          'Count of @message.raw [2]',
         ]);
       });
       it('should move duplicated column to non-compatible dimension group', async () => {
@@ -128,8 +128,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           to: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         });
         expect(await PageObjects.lens.getDimensionTriggersTexts('lnsXY_yDimensionPanel')).to.eql([
-          'Value count of @message.raw',
-          'Value count of @message.raw [1]',
+          'Count of @message.raw',
+          'Count of @message.raw [1]',
         ]);
         expect(await PageObjects.lens.getDimensionTriggersTexts('lnsXY_xDimensionPanel')).to.eql([
           'Top 5 values of @message.raw',
@@ -161,7 +161,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           xyChartContainer
         );
         expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
-          'Value count of @timestamp'
+          'Count of @timestamp'
         );
         expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_splitDimensionPanel')).to.eql(
           'Top 3 values of @message.raw'
@@ -303,14 +303,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.lens.dimensionKeyboardDragDrop('lnsXY_xDimensionPanel', 0, 2);
         expect(await PageObjects.lens.getDimensionTriggersTexts('lnsXY_yDimensionPanel')).to.eql([
           'Count of records',
-          'Value count of @timestamp',
+          'Count of @timestamp',
         ]);
-        await PageObjects.lens.assertFocusedDimension('Value count of @timestamp');
+        await PageObjects.lens.assertFocusedDimension('Count of @timestamp');
       });
       it('should reorder elements with keyboard', async () => {
         await PageObjects.lens.dimensionKeyboardReorder('lnsXY_yDimensionPanel', 0, 1);
         expect(await PageObjects.lens.getDimensionTriggersTexts('lnsXY_yDimensionPanel')).to.eql([
-          'Value count of @timestamp',
+          'Count of @timestamp',
           'Count of records',
         ]);
         await PageObjects.lens.assertFocusedDimension('Count of records');

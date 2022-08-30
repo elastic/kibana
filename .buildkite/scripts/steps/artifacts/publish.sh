@@ -7,8 +7,8 @@ source .buildkite/scripts/steps/artifacts/env.sh
 
 echo "--- Download and verify artifacts"
 function download {
-  buildkite-agent artifact download "$1" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
-  buildkite-agent artifact download "$1.sha512.txt" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
+  download_artifact "$1" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
+  download_artifact "$1.sha512.txt" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
   sha512sum -c "$1.sha512.txt"
   rm "$1.sha512.txt"
 }
@@ -40,7 +40,7 @@ download "kibana-$FULL_VERSION-windows-x86_64.zip"
 
 download "dependencies-$FULL_VERSION.csv"
 
-cd - 
+cd -
 
 echo "--- Set artifact permissions"
 chmod -R a+r target/*

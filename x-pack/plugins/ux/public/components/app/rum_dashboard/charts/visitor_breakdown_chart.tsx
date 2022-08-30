@@ -15,6 +15,7 @@ import {
   TypedLensByValueInput,
 } from '@kbn/lens-plugin/public';
 import { EuiText } from '@elastic/eui';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { TRANSACTION_PAGE_LOAD } from '../../../../../common/transaction_types';
 import {
   PROCESSOR_EVENT,
@@ -23,7 +24,6 @@ import {
 import { getEsFilter } from '../../../../services/data/get_es_filter';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
 import type { UxUIFilters } from '../../../../../typings/ui_filters';
-import { ProcessorEvent } from '../../../../../common/processor_event';
 
 const BUCKET_SIZE = 9;
 

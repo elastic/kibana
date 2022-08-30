@@ -9,19 +9,15 @@
 import Path from 'path';
 import fs from 'fs/promises';
 import JSON5 from 'json5';
-import { REPO_ROOT } from '@kbn/utils';
-import { Env } from '@kbn/config';
-import { getDocLinksMeta } from '@kbn/doc-links';
-import { getEnvOptions } from '@kbn/config-mocks';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import { Root } from '../../../root';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { LogRecord } from '@kbn/logging';
-import { retryAsync } from '../../../saved_objects/migrations/test_helpers/retry_async';
+import { getDocVersion } from './test_utils';
+import { retryAsync } from '@kbn/core-saved-objects-migration-server-mocks';
 
 const logFilePath = Path.join(__dirname, 'incompatible_cluster_routing_allocation.log');
-const env = Env.createDefault(REPO_ROOT, getEnvOptions());
-const docVersion = getDocLinksMeta({ kibanaBranch: env.packageInfo.branch }).version;
+const docVersion = getDocVersion();
 
 async function removeLogFile() {
   // ignore errors if it doesn't exist

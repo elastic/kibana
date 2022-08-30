@@ -7,7 +7,7 @@
 
 import { ResolvedSimpleSavedObject } from '@kbn/core/public';
 import { CanvasWorkpad, CanvasTemplate } from '../../types';
-import { CanvasRenderedWorkpad } from '../../shareable_runtime/types';
+import type { CanvasRenderedWorkpad } from '../../shareable_runtime/types';
 
 export type FoundWorkpads = Array<Pick<CanvasWorkpad, 'name' | 'id' | '@timestamp' | '@created'>>;
 export type FoundWorkpad = FoundWorkpads[number];

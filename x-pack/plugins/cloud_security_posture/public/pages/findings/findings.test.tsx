@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import Chance from 'chance';
-import type { UseQueryResult } from 'react-query';
+import type { UseQueryResult } from '@tanstack/react-query';
 import { of } from 'rxjs';
 import { useLatestFindingsDataView } from '../../common/api/use_latest_findings_data_view';
 import { Findings } from './findings';
@@ -27,6 +27,7 @@ import { NO_FINDINGS_STATUS_TEST_SUBJ } from '../../components/test_subjects';
 import { render } from '@testing-library/react';
 import { useFindingsEsPit } from './es_pit/use_findings_es_pit';
 import { expectIdsInDoc } from '../../test/utils';
+import { fleetMock } from '@kbn/fleet-plugin/public/mocks';
 
 jest.mock('../../common/api/use_latest_findings_data_view');
 jest.mock('../../common/api/use_setup_status_api');
@@ -55,6 +56,7 @@ const renderFindingsPage = () => {
         unifiedSearch: unifiedSearchPluginMock.createStartContract(),
         charts: chartPluginMock.createStartContract(),
         discover: discoverPluginMock.createStartContract(),
+        fleet: fleetMock.createStartMock(),
       }}
     >
       <Findings />

@@ -74,23 +74,43 @@ describe('ExceptionItemCardConditions', () => {
               value: 'host',
             },
             {
+              field: 'host.name',
+              operator: 'excluded',
+              type: 'match',
+              value: 'host',
+            },
+            {
+              field: 'host.name',
+              operator: 'included',
+              type: 'match_any',
+              value: ['foo', 'bar'],
+            },
+            {
+              field: 'host.name',
+              operator: 'excluded',
+              type: 'match_any',
+              value: ['foo', 'bar'],
+            },
+            {
               field: 'user.name',
               operator: 'included',
               type: 'wildcard',
               value: 'foo*',
             },
             {
-              field: 'host.name',
-              list: {
-                id: 'ips.txt',
-                type: 'keyword',
-              },
-              operator: 'included',
-              type: 'list',
+              field: 'user.name',
+              operator: 'excluded',
+              type: 'wildcard',
+              value: 'foo*',
             },
             {
               field: 'threat.indicator.port',
               operator: 'included',
+              type: 'exists',
+            },
+            {
+              field: 'threat.indicator.port',
+              operator: 'excluded',
               type: 'exists',
             },
             {
@@ -113,20 +133,79 @@ describe('ExceptionItemCardConditions', () => {
 
     // Text is gonna look a bit off unformatted
     expect(wrapper.find('[data-test-subj="exceptionItemConditions-os"]').exists()).toBeFalsy();
+    // MATCH
     expect(
       wrapper.find('[data-test-subj="exceptionItemConditions-condition"]').at(0).text()
     ).toEqual(' host.nameIS host');
     expect(
       wrapper.find('[data-test-subj="exceptionItemConditions-condition"]').at(1).text()
-    ).toEqual('AND user.nameMATCHES foo*');
+    ).toEqual('AND host.nameIS NOT host');
+
+    // MATCH_ANY
     expect(
       wrapper.find('[data-test-subj="exceptionItemConditions-condition"]').at(2).text()
-    ).toEqual('AND host.nameincluded in ips.txt');
+    ).toEqual('AND host.nameis one of foobar');
     expect(
       wrapper.find('[data-test-subj="exceptionItemConditions-condition"]').at(3).text()
-    ).toEqual('AND threat.indicator.portexists ');
+    ).toEqual('AND host.nameis not one of foobar');
+
+    // WILDCARD
     expect(
       wrapper.find('[data-test-subj="exceptionItemConditions-condition"]').at(4).text()
+    ).toEqual('AND user.nameMATCHES foo*');
+    expect(
+      wrapper.find('[data-test-subj="exceptionItemConditions-condition"]').at(5).text()
+    ).toEqual('AND user.nameDOES NOT MATCH foo*');
+
+    // EXISTS
+    expect(
+      wrapper.find('[data-test-subj="exceptionItemConditions-condition"]').at(6).text()
+    ).toEqual('AND threat.indicator.portexists ');
+    expect(
+      wrapper.find('[data-test-subj="exceptionItemConditions-condition"]').at(7).text()
+    ).toEqual('AND threat.indicator.portdoes not exist ');
+
+    // NESTED
+    expect(
+      wrapper.find('[data-test-subj="exceptionItemConditions-condition"]').at(8).text()
     ).toEqual('AND file.Ext.code_signature  validIS true');
+  });
+
+  it('it renders list conditions', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <ExceptionItemCardConditions
+          entries={[
+            {
+              field: 'host.name',
+              list: {
+                id: 'ips.txt',
+                type: 'keyword',
+              },
+              operator: 'included',
+              type: 'list',
+            },
+            {
+              field: 'host.name',
+              list: {
+                id: 'ips.txt',
+                type: 'keyword',
+              },
+              operator: 'excluded',
+              type: 'list',
+            },
+          ]}
+          dataTestSubj="exceptionItemConditions"
+        />
+      </TestProviders>
+    );
+
+    // Text is gonna look a bit off unformatted
+    expect(
+      wrapper.find('[data-test-subj="exceptionItemConditions-condition"]').at(0).text()
+    ).toEqual(' host.nameincluded in ips.txt');
+    expect(
+      wrapper.find('[data-test-subj="exceptionItemConditions-condition"]').at(1).text()
+    ).toEqual('AND host.nameis not included in ips.txt');
   });
 });

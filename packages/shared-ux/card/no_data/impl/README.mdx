@@ -1,0 +1,29 @@
+---
+id: sharedUX/Components/NoDataCard
+slug: /shared-ux/components/no-data-card
+title: No Data Card
+description: A card displayed when no data is available is available in Kibana.
+tags: ['shared-ux', 'component']
+date: 2022-06-15
+---
+
+## Description
+
+A wrapper around `EuiCard` tailored for use in Kibana solutions when no data is available.
+
+## Usage
+
+All of the `EuiCard` props are available with the exception of `layout`.  A default `description` and `button` are provided, but can be overridden in specific use cases.
+
+The `NoDataCard` connected component uses:
+
+- `navLinks.integrations` from `coreStart.application.capabilities` to determine if the user has access to the Integrations page.
+- `addBasePath` from `coreStart` to navigate to the Integrations page.
+
+## API
+| Export | Description |
+|---|---|
+| `NoDataCardProvider` | Provides contextual services to `NoDataCard`. |
+| `NoDataCardKibanaProvider` | Maps Kibana dependencies to provide contextual services to `NoDataCard`. |
+| `NoDataCard` | Uses a `Provider` to access contextual services to populate props on the `NoDataCardComponent`. |
+| `NoDataCardComponent` | The pure component, a pre-configured **EuiCard**. |

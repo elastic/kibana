@@ -7,14 +7,23 @@ PKG_REQUIRE_NAME = "@kbn/home-sample-data-card"
 
 SOURCE_FILES = glob(
   [
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "src/**/*.mdx",
-    "src/**/*.svg",
-    "src/**/*.png",
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.mdx",
+    "**/*.svg",
+    "**/*.png",
   ],
   exclude = [
+    "**/*.config.js",
+    "**/*.mock.*",
     "**/*.test.*",
+    "**/*.stories.*",
+    "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
   ],
 )
 
@@ -106,7 +115,6 @@ ts_project(
   declaration = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  root_dir = "src",
   tsconfig = ":tsconfig",
 )
 

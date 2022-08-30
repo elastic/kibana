@@ -19,8 +19,8 @@ const serviceTransactionsHref = url.format({
 });
 
 describe('Transactions Overview', () => {
-  before(async () => {
-    await synthtrace.index(
+  before(() => {
+    synthtrace.index(
       opbeans({
         from: new Date(start).getTime(),
         to: new Date(end).getTime(),
@@ -28,8 +28,8 @@ describe('Transactions Overview', () => {
     );
   });
 
-  after(async () => {
-    await synthtrace.clean();
+  after(() => {
+    synthtrace.clean();
   });
 
   beforeEach(() => {
@@ -37,7 +37,7 @@ describe('Transactions Overview', () => {
   });
 
   it('has no detectable a11y violations on load', () => {
-    cy.visit(serviceTransactionsHref);
+    cy.visitKibana(serviceTransactionsHref);
     cy.get('a:contains(Transactions)').should(
       'have.attr',
       'aria-selected',
@@ -48,7 +48,7 @@ describe('Transactions Overview', () => {
   });
 
   it('persists transaction type selected when navigating to Overview tab', () => {
-    cy.visit(serviceTransactionsHref);
+    cy.visitKibana(serviceTransactionsHref);
     cy.get('[data-test-subj="headerFilterTransactionType"]').should(
       'have.value',
       'request'

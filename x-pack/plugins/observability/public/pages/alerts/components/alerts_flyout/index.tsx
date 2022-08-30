@@ -24,7 +24,7 @@ export const useToGetInternalFlyout = (
       const alert = parseAlert(observabilityRuleTypeRegistry)(
         props.alert as unknown as Record<string, unknown>
       );
-      return <AlertsFlyoutBody alert={alert} />;
+      return <AlertsFlyoutBody alert={alert} id={props.id} />;
     },
     [observabilityRuleTypeRegistry]
   );

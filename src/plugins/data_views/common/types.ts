@@ -12,7 +12,7 @@ import type {
   SavedObjectsCreateOptions,
   SavedObjectsUpdateOptions,
 } from '@kbn/core/public';
-import type { ErrorToastOptions, ToastInputFields } from '@kbn/core/public/notifications';
+import type { ErrorToastOptions, ToastInputFields } from '@kbn/core-notifications-browser';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { RUNTIME_FIELD_TYPES } from './constants';
@@ -317,9 +317,17 @@ export interface GetFieldsOptions {
   filter?: QueryDslQueryContainer;
 }
 
+/**
+ * FieldsForWildcard response
+ */
+export interface FieldsForWildcardResponse {
+  fields: FieldSpec[];
+  indices: string[];
+}
+
 export interface IDataViewsApiClient {
-  getFieldsForWildcard: (options: GetFieldsOptions) => Promise<FieldSpec[]>;
-  hasUserIndexPattern: () => Promise<boolean>;
+  getFieldsForWildcard: (options: GetFieldsOptions) => Promise<FieldsForWildcardResponse>;
+  hasUserDataView: () => Promise<boolean>;
 }
 
 export type AggregationRestrictions = Record<
@@ -409,6 +417,26 @@ export type FieldSpec = DataViewFieldBase & {
    * Runtime field definition
    */
   runtimeField?: RuntimeFieldSpec;
+
+  /**
+   * list of allowed field intervals for the field
+   */
+  fixedInterval?: string[];
+
+  /**
+   * List of allowed timezones for the field
+   */
+  timeZone?: string[];
+
+  /**
+   * set to true if field is a TSDB dimension field
+   */
+  timeSeriesDimension?: boolean;
+
+  /**
+   * set if field is a TSDB metric field
+   */
+  timeSeriesMetric?: 'histogram' | 'summary' | 'gauge' | 'counter';
 
   // not persisted
 

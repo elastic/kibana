@@ -194,6 +194,7 @@ describe('<EditPolicy /> serialization', () => {
       await actions.rollover.setMaxSize('123', 'mb');
       await actions.rollover.setMaxDocs('123');
       await actions.rollover.setMaxAge('123', 'h');
+      await actions.rollover.setMaxPrimaryShardDocs('123');
       await actions.hot.toggleForceMerge();
       await actions.hot.setForcemergeSegmentsCount('123');
       await actions.hot.setBestCompression(true);
@@ -215,6 +216,7 @@ describe('<EditPolicy /> serialization', () => {
                   rollover: {
                     max_age: '123h',
                     max_primary_shard_size: '50gb',
+                    max_primary_shard_docs: 123,
                     max_docs: 123,
                     max_size: '123mb',
                   },

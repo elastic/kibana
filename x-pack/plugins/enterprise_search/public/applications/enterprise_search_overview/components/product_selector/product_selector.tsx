@@ -127,7 +127,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
                     defaultMessage: 'Getting started with Elasticsearch',
                   }
                 ),
-                to: '', // TODO Update docLink
+                to: docLinks.start,
               },
               {
                 label: i18n.translate(
@@ -136,7 +136,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
                     defaultMessage: 'Create a new index',
                   }
                 ),
-                to: '', // TODO Update docLink
+                to: docLinks.start,
               },
               {
                 label: i18n.translate(
@@ -145,7 +145,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
                     defaultMessage: 'Set up a language client',
                   }
                 ),
-                to: '', // TODO Update docLink
+                to: docLinks.start,
               },
               {
                 label: i18n.translate(
@@ -154,7 +154,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
                     defaultMessage: 'Search UI for Elasticsearch',
                   }
                 ),
-                to: '', // TODO Update docLink
+                to: docLinks.searchUIElasticsearch,
               },
             ]}
             url={ELASTICSEARCH_PLUGIN.URL}
@@ -196,7 +196,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
                       defaultMessage: 'Getting started with App Search',
                     }
                   ),
-                  to: '', // TODO Update docLink
+                  to: docLinks.appSearchGettingStarted,
                 },
                 {
                   label: i18n.translate(
@@ -205,7 +205,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
                       defaultMessage: 'Search UI for App Search',
                     }
                   ),
-                  to: '', // TODO Update docLink
+                  to: docLinks.searchUIAppSearch,
                 },
                 {
                   label: i18n.translate(
@@ -214,7 +214,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
                       defaultMessage: 'Tune your search relevance',
                     }
                   ),
-                  to: '', // TODO Update docLink
+                  to: docLinks.appSearchRelevance,
                 },
                 {
                   label: i18n.translate(
@@ -223,7 +223,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
                       defaultMessage: 'Automate with Adaptive Relevance',
                     }
                   ),
-                  to: '', // TODO Update docLink
+                  to: docLinks.appSearchAdaptiveRelevance,
                 },
               ]}
               url={APP_SEARCH_PLUGIN.URL}
@@ -272,7 +272,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
                       defaultMessage: 'Getting started with Workplace Search',
                     }
                   ),
-                  to: '', // TODO Update docLink
+                  to: docLinks.workplaceSearchGettingStarted,
                 },
                 {
                   label: i18n.translate(
@@ -281,7 +281,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
                       defaultMessage: 'Set up your connectors',
                     }
                   ),
-                  to: '', // TODO Update docLink
+                  to: docLinks.workplaceSearchContentSources,
                 },
                 {
                   label: i18n.translate(
@@ -290,7 +290,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
                       defaultMessage: 'Manage permissions',
                     }
                   ),
-                  to: '', // TODO Update docLink
+                  to: docLinks.workplaceSearchPermissions,
                 },
               ]}
               url={WORKPLACE_SEARCH_URL}

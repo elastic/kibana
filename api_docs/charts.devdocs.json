@@ -282,279 +282,6 @@
       },
       {
         "parentPluginId": "charts",
-        "id": "def-public.getBrushFromChartBrushEventFn",
-        "type": "Function",
-        "tags": [],
-        "label": "getBrushFromChartBrushEventFn",
-        "description": [
-          "\nHelper function to transform `@elastic/charts` brush event into brush action event"
-        ],
-        "signature": [
-          "(table: ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.Datatable",
-            "text": "Datatable"
-          },
-          ", xAccessor: ",
-          "Accessor",
-          "<D> | ",
-          "AccessorFn",
-          "<D, any>) => ({ x: selectedRange }: ",
-          "XYBrushEvent",
-          ") => ",
-          {
-            "pluginId": "charts",
-            "scope": "public",
-            "docId": "kibChartsPluginApi",
-            "section": "def-public.BrushTriggerEvent",
-            "text": "BrushTriggerEvent"
-          }
-        ],
-        "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "charts",
-            "id": "def-public.getBrushFromChartBrushEventFn.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "table",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.Datatable",
-                "text": "Datatable"
-              }
-            ],
-            "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
-            "deprecated": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "charts",
-            "id": "def-public.getBrushFromChartBrushEventFn.$2",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "xAccessor",
-            "description": [],
-            "signature": [
-              "Accessor",
-              "<D> | ",
-              "AccessorFn",
-              "<D, any>"
-            ],
-            "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "charts",
-        "id": "def-public.getFilterFromChartClickEventFn",
-        "type": "Function",
-        "tags": [],
-        "label": "getFilterFromChartClickEventFn",
-        "description": [
-          "\nHelper function to transform `@elastic/charts` click event into filter action event\n"
-        ],
-        "signature": [
-          "(table: ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.Datatable",
-            "text": "Datatable"
-          },
-          ", xAccessor: ",
-          "Accessor",
-          "<never> | ",
-          "AccessorFn",
-          "<any, any>, splitSeriesAccessorFnMap?: Map<string | number, ",
-          "AccessorFn",
-          "<any, any>> | undefined, splitChartAccessor?: ",
-          "Accessor",
-          "<never> | ",
-          "AccessorFn",
-          "<any, any> | undefined, negate?: boolean) => (points: [",
-          "GeometryValue",
-          ", ",
-          "XYChartSeriesIdentifier",
-          "<any>][]) => ",
-          {
-            "pluginId": "charts",
-            "scope": "public",
-            "docId": "kibChartsPluginApi",
-            "section": "def-public.ClickTriggerEvent",
-            "text": "ClickTriggerEvent"
-          }
-        ],
-        "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "charts",
-            "id": "def-public.getFilterFromChartClickEventFn.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "table",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.Datatable",
-                "text": "Datatable"
-              }
-            ],
-            "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
-            "deprecated": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "charts",
-            "id": "def-public.getFilterFromChartClickEventFn.$2",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "xAccessor",
-            "description": [],
-            "signature": [
-              "Accessor",
-              "<never> | ",
-              "AccessorFn",
-              "<any, any>"
-            ],
-            "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
-            "deprecated": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "charts",
-            "id": "def-public.getFilterFromChartClickEventFn.$3",
-            "type": "Object",
-            "tags": [],
-            "label": "splitSeriesAccessorFnMap",
-            "description": [
-              "needed when using `splitSeriesAccessors` as `AccessorFn`"
-            ],
-            "signature": [
-              "Map<string | number, ",
-              "AccessorFn",
-              "<any, any>> | undefined"
-            ],
-            "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
-            "deprecated": false,
-            "isRequired": false
-          },
-          {
-            "parentPluginId": "charts",
-            "id": "def-public.getFilterFromChartClickEventFn.$4",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "splitChartAccessor",
-            "description": [],
-            "signature": [
-              "Accessor",
-              "<never> | ",
-              "AccessorFn",
-              "<any, any> | undefined"
-            ],
-            "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
-            "deprecated": false,
-            "isRequired": false
-          },
-          {
-            "parentPluginId": "charts",
-            "id": "def-public.getFilterFromChartClickEventFn.$5",
-            "type": "boolean",
-            "tags": [],
-            "label": "negate",
-            "description": [],
-            "signature": [
-              "boolean"
-            ],
-            "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "charts",
-        "id": "def-public.getFilterFromSeriesFn",
-        "type": "Function",
-        "tags": [],
-        "label": "getFilterFromSeriesFn",
-        "description": [
-          "\nHelper function to get filter action event from series"
-        ],
-        "signature": [
-          "(table: ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.Datatable",
-            "text": "Datatable"
-          },
-          ") => ({ splitAccessors, ...rest }: ",
-          "XYChartSeriesIdentifier",
-          "<any>, splitSeriesAccessorFnMap?: Map<string | number, ",
-          "AccessorFn",
-          "<any, any>> | undefined, splitChartAccessor?: ",
-          "Accessor",
-          "<never> | ",
-          "AccessorFn",
-          "<any, any> | undefined, negate?: boolean) => ",
-          {
-            "pluginId": "charts",
-            "scope": "public",
-            "docId": "kibChartsPluginApi",
-            "section": "def-public.ClickTriggerEvent",
-            "text": "ClickTriggerEvent"
-          }
-        ],
-        "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "charts",
-            "id": "def-public.getFilterFromSeriesFn.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "table",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.Datatable",
-                "text": "Datatable"
-              }
-            ],
-            "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "charts",
         "id": "def-public.getHeatmapColors",
         "type": "Function",
         "tags": [],
@@ -914,7 +641,7 @@
         "tags": [],
         "label": "BrushTriggerEvent",
         "description": [],
-        "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+        "path": "src/plugins/charts/public/index.ts",
         "deprecated": false,
         "children": [
           {
@@ -927,7 +654,7 @@
             "signature": [
               "\"brush\""
             ],
-            "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+            "path": "src/plugins/charts/public/index.ts",
             "deprecated": false
           },
           {
@@ -948,7 +675,7 @@
               },
               "; column: number; range: number[]; timeFieldName?: string | undefined; }"
             ],
-            "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+            "path": "src/plugins/charts/public/index.ts",
             "deprecated": false
           }
         ],
@@ -961,7 +688,7 @@
         "tags": [],
         "label": "ClickTriggerEvent",
         "description": [],
-        "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+        "path": "src/plugins/charts/public/index.ts",
         "deprecated": false,
         "children": [
           {
@@ -974,7 +701,7 @@
             "signature": [
               "\"filter\""
             ],
-            "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+            "path": "src/plugins/charts/public/index.ts",
             "deprecated": false
           },
           {
@@ -995,7 +722,7 @@
               },
               ", \"rows\" | \"columns\">; column: number; row: number; value: any; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; }"
             ],
-            "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+            "path": "src/plugins/charts/public/index.ts",
             "deprecated": false
           }
         ],

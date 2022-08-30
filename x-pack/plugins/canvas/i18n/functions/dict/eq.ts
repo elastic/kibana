@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { eq } from '../../../canvas_plugin_src/functions/common/eq';
+import type { eq } from '../../../canvas_plugin_src/functions/common/eq';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 import { CONTEXT } from '../../constants';

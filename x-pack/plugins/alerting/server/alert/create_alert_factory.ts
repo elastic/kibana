@@ -25,6 +25,7 @@ export interface CreateAlertFactoryOpts<
 > {
   alerts: Record<string, Alert<State, Context>>;
   logger: Logger;
+  maxAlerts: number;
   canSetRecoveryContext?: boolean;
 }
 
@@ -32,21 +33,40 @@ export function createAlertFactory<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string
->({ alerts, logger, canSetRecoveryContext = false }: CreateAlertFactoryOpts<State, Context>) {
+>({
+  alerts,
+  logger,
+  maxAlerts,
+  canSetRecoveryContext = false,
+}: CreateAlertFactoryOpts<State, Context>) {
   // Keep track of which alerts we started with so we can determine which have recovered
   const originalAlerts = cloneDeep(alerts);
+
+  // Number of alerts reported
+  let numAlertsCreated = 0;
+
+  // Whether the number of alerts reported has reached max allowed
+  let hasReachedAlertLimit = false;
+
   let isDone = false;
   return {
     create: (id: string): PublicAlert<State, Context, ActionGroupIds> => {
       if (isDone) {
         throw new Error(`Can't create new alerts after calling done() in AlertsFactory.`);
       }
+
+      if (numAlertsCreated++ >= maxAlerts) {
+        hasReachedAlertLimit = true;
+        throw new Error(`Rule reported more than ${maxAlerts} alerts.`);
+      }
+
       if (!alerts[id]) {
         alerts[id] = new Alert<State, Context>(id);
       }
 
       return alerts[id];
     },
+    hasReachedAlertLimit: (): boolean => hasReachedAlertLimit,
     done: (): AlertFactoryDoneUtils<State, Context, ActionGroupIds> => {
       isDone = true;
       return {
@@ -59,8 +79,12 @@ export function createAlertFactory<
           }
 
           const { recoveredAlerts } = processAlerts<State, Context, ActionGroupIds, ActionGroupIds>(
-            alerts,
-            originalAlerts
+            {
+              alerts,
+              existingAlerts: originalAlerts,
+              hasReachedAlertLimit,
+              alertLimit: maxAlerts,
+            }
           );
           return Object.keys(recoveredAlerts ?? {}).map(
             (alertId: string) => recoveredAlerts[alertId]

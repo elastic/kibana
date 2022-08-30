@@ -11,7 +11,7 @@ import { FieldValues, useForm, UseFormProps } from 'react-hook-form';
 export function useFormWrapped<TFieldValues extends FieldValues = FieldValues, TContext = any>(
   props?: UseFormProps<TFieldValues, TContext>
 ) {
-  const { register, ...restOfForm } = useForm(props);
+  const { register, ...restOfForm } = useForm<TFieldValues>(props);
 
   const euiRegister = useCallback(
     (name, ...registerArgs) => {
@@ -19,6 +19,7 @@ export function useFormWrapped<TFieldValues extends FieldValues = FieldValues, T
 
       return {
         inputRef: ref,
+        ref,
         ...restOfRegister,
       };
     },

@@ -45,7 +45,7 @@ export const createTileMapFn = (): TileMapExpressionFunctionDefinition => ({
     },
   },
   async fn(input, args) {
-    const query = input.query as Query;
+    const query = input.query;
     return {
       type: 'render',
       as: TILE_MAP_RENDER,

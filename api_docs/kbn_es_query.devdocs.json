@@ -3690,7 +3690,7 @@
             "label": "function",
             "description": [],
             "signature": [
-              "\"nested\" | \"exists\" | \"range\" | \"is\" | \"and\" | \"or\" | \"not\""
+              "\"range\" | \"nested\" | \"exists\" | \"is\" | \"and\" | \"or\" | \"not\""
             ],
             "path": "packages/kbn-es-query/src/kuery/node_types/types.ts",
             "deprecated": false

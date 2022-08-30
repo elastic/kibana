@@ -37,6 +37,7 @@ describe('Agent status service', () => {
         _id: 'id',
         _source: {
           active: true,
+          policy_revision_idx: 1,
           last_checkin: new Date().toISOString(),
           local_metadata: {},
           user_provided_metadata: {},
@@ -92,6 +93,7 @@ describe('Agent status service', () => {
         _source: {
           active: true,
           last_checkin: new Date(Date.now() - 10 * AGENT_POLLING_THRESHOLD_MS - 1000).toISOString(),
+          policy_revision_idx: 2,
           local_metadata: {},
           user_provided_metadata: {},
         },

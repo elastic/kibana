@@ -44,7 +44,7 @@ import { DetectionEngineNoIndex } from './detection_engine_no_index';
 import { useListsConfig } from '../../containers/detection_engine/lists/use_lists_config';
 import { DetectionEngineUserUnauthenticated } from './detection_engine_user_unauthenticated';
 import * as i18n from './translations';
-import { LinkAnchor } from '../../../common/components/links';
+import { SecuritySolutionLinkButton } from '../../../common/components/links';
 import { useFormatUrl } from '../../../common/components/link_to';
 import { useGlobalFullScreen } from '../../../common/containers/use_full_screen';
 import { Display } from '../../../hosts/pages/display';
@@ -332,13 +332,14 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
           >
             <Display show={!globalFullScreen}>
               <HeaderPage title={i18n.PAGE_TITLE}>
-                <LinkAnchor
+                <SecuritySolutionLinkButton
                   onClick={goToRules}
-                  href={formatUrl(getRulesUrl())}
+                  deepLinkId={SecurityPageName.rules}
                   data-test-subj="manage-alert-detection-rules"
+                  fill
                 >
                   {i18n.BUTTON_MANAGE_RULES}
-                </LinkAnchor>
+                </SecuritySolutionLinkButton>
               </HeaderPage>
               <EuiHorizontalRule margin="m" />
               <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
@@ -375,7 +376,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
 
               <EuiSpacer size="l" />
             </Display>
-
             <AlertsTable
               timelineId={TimelineId.detectionsPage}
               loading={loading}

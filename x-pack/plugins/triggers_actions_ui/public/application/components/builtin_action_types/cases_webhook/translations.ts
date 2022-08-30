@@ -248,40 +248,14 @@ export const GET_INCIDENT_TITLE_KEY_HELP = i18n.translate(
   }
 );
 
-export const GET_INCIDENT_CREATED_KEY = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.getIncidentResponseCreatedDateKeyTextFieldLabel',
-  {
-    defaultMessage: 'Get Case Response Created Date Key',
-  }
-);
-export const GET_INCIDENT_CREATED_KEY_HELP = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.getIncidentResponseCreatedDateKeyHelp',
-  {
-    defaultMessage: 'JSON key in get case response that contains the date the case was created.',
-  }
-);
-
-export const GET_INCIDENT_UPDATED_KEY = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.getIncidentResponseUpdatedDateKeyTextFieldLabel',
-  {
-    defaultMessage: 'Get Case Response Updated Date Key',
-  }
-);
-export const GET_INCIDENT_UPDATED_KEY_HELP = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.getIncidentResponseUpdatedDateKeyHelp',
-  {
-    defaultMessage: 'JSON key in get case response that contains the date the case was updated.',
-  }
-);
-
 export const EXTERNAL_INCIDENT_VIEW_URL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.incidentViewUrlTextFieldLabel',
+  'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.viewIncidentUrlTextFieldLabel',
   {
     defaultMessage: 'External Case View URL',
   }
 );
 export const EXTERNAL_INCIDENT_VIEW_URL_HELP = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.incidentViewUrlHelp',
+  'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.viewIncidentUrlHelp',
   {
     defaultMessage:
       'URL to view case in external system. Use the variable selector to add external system id or external system title to the url.',

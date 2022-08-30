@@ -91,16 +91,6 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.trainedModelsTable.assertPipelinesTabContent(false);
       });
 
-      for (const model of trainedModels) {
-        it(`renders expanded row content correctly for imported tiny model ${model.id} without pipelines`, async () => {
-          await ml.trainedModelsTable.ensureRowIsExpanded(model.id);
-          await ml.trainedModelsTable.assertDetailsTabContent();
-          await ml.trainedModelsTable.assertInferenceConfigTabContent();
-          await ml.trainedModelsTable.assertStatsTabContent();
-          await ml.trainedModelsTable.assertPipelinesTabContent(false);
-        });
-      }
-
       it('displays the built-in model and no actions are enabled', async () => {
         await ml.testExecution.logTestStep('should display the model in the table');
         await ml.trainedModelsTable.filterWithSearchString(builtInModelData.modelId, 1);
@@ -185,6 +175,33 @@ export default function ({ getService }: FtrProviderContext) {
           modelWithoutPipelineData.modelId,
           false
         );
+      });
+
+      describe('with imported models', function () {
+        for (const model of trainedModels) {
+          it(`renders expanded row content correctly for imported tiny model ${model.id} without pipelines`, async () => {
+            await ml.trainedModelsTable.ensureRowIsExpanded(model.id);
+            await ml.trainedModelsTable.assertDetailsTabContent();
+            await ml.trainedModelsTable.assertInferenceConfigTabContent();
+            await ml.trainedModelsTable.assertStatsTabContent();
+            await ml.trainedModelsTable.assertPipelinesTabContent(false);
+          });
+
+          it(`starts deployment of the imported model ${model.id}`, async () => {
+            await ml.trainedModelsTable.startDeploymentWithParams(model.id, {
+              numOfAllocations: 1,
+              threadsPerAllocation: 2,
+            });
+          });
+
+          it(`stops deployment of the imported model ${model.id}`, async () => {
+            await ml.trainedModelsTable.stopDeployment(model.id);
+          });
+
+          it(`deletes the imported model ${model.id}`, async () => {
+            await ml.trainedModelsTable.deleteModel(model.id);
+          });
+        }
       });
     });
 

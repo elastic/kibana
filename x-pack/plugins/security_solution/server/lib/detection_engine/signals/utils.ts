@@ -61,8 +61,12 @@ import type {
 import type { BaseHit, SearchTypes } from '../../../../common/detection_engine/types';
 import type { IRuleExecutionLogForExecutors } from '../rule_monitoring';
 import { withSecuritySpan } from '../../../utils/with_security_span';
-import type { DetectionAlert } from '../../../../common/detection_engine/schemas/alerts';
+import type {
+  BaseFieldsLatest,
+  DetectionAlert,
+} from '../../../../common/detection_engine/schemas/alerts';
 import { ENABLE_CCS_READ_WARNING_SETTING } from '../../../../common/constants';
+import type { GenericBulkCreateResponse } from '../rule_types/factories';
 
 export const MAX_RULE_GAP_RATIO = 4;
 
@@ -106,7 +110,7 @@ export const hasTimestampFields = async (args: {
   timestampFieldCapsResponse: TransportResult<Record<string, any>, unknown>;
   inputIndices: string[];
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
-}): Promise<boolean> => {
+}): Promise<{ wroteWarningStatus: boolean; foundNoIndices: boolean }> => {
   const { timestampField, timestampFieldCapsResponse, inputIndices, ruleExecutionLogger } = args;
   const { ruleName } = ruleExecutionLogger.context;
 
@@ -124,7 +128,7 @@ export const hasTimestampFields = async (args: {
       message: errorString.trimEnd(),
     });
 
-    return true;
+    return { wroteWarningStatus: true, foundNoIndices: true };
   } else if (
     isEmpty(timestampFieldCapsResponse.body.fields) ||
     timestampFieldCapsResponse.body.fields[timestampField] == null ||
@@ -148,10 +152,10 @@ export const hasTimestampFields = async (args: {
       message: errorString,
     });
 
-    return true;
+    return { wroteWarningStatus: true, foundNoIndices: false };
   }
 
-  return false;
+  return { wroteWarningStatus: false, foundNoIndices: false };
 };
 
 export const checkPrivileges = async (
@@ -594,7 +598,7 @@ export const getValidDateFromDoc = ({
     if (tempMoment.isValid()) {
       return tempMoment.toDate();
     } else if (typeof timestampValue === 'string') {
-      // worse case we have a string from fields API or other areas of Elasticsearch that have given us a number as a string,
+      // worst case we have a string from fields API or other areas of Elasticsearch that have given us a number as a string,
       // so we try one last time to parse this best we can by converting from string to a number
       const maybeDate = moment(+lastTimestamp);
       if (maybeDate.isValid()) {
@@ -641,9 +645,7 @@ export interface PreviewReturnType {
   warningMessages?: string[] | undefined;
 }
 
-export const createSearchAfterReturnType = <
-  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>
->({
+export const createSearchAfterReturnType = ({
   success,
   warning,
   searchAfterTimes,
@@ -697,6 +699,23 @@ export const createSearchResultReturnType = <
       hits,
     },
   };
+};
+
+/**
+ * Merges the return values from bulk creating alerts into the appropriate fields in the combined return object.
+ */
+export const addToSearchAfterReturn = ({
+  current,
+  next,
+}: {
+  current: SearchAfterAndBulkCreateReturnType;
+  next: GenericBulkCreateResponse<BaseFieldsLatest>;
+}) => {
+  current.success = current.success && next.success;
+  current.createdSignalsCount += next.createdItemsCount;
+  current.createdSignals.push(...next.createdItems);
+  current.bulkCreateTimes.push(next.bulkCreateDuration);
+  current.errors = [...new Set([...current.errors, ...next.errors])];
 };
 
 export const mergeReturns = (

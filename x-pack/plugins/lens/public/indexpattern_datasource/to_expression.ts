@@ -22,10 +22,11 @@ import {
 } from '@kbn/expressions-plugin/public';
 import { GenericIndexPatternColumn } from './indexpattern';
 import { operationDefinitionMap } from './operations';
-import { IndexPattern, IndexPatternPrivateState, IndexPatternLayer } from './types';
+import { IndexPatternPrivateState, IndexPatternLayer } from './types';
 import { DateHistogramIndexPatternColumn, RangeIndexPatternColumn } from './operations/definitions';
 import { FormattedIndexPatternColumn } from './operations/definitions/column_types';
 import { isColumnFormatted, isColumnOfType } from './operations/definitions/helpers';
+import type { IndexPattern, IndexPatternMap } from '../types';
 
 export type OriginalColumn = { id: string } & GenericIndexPatternColumn;
 
@@ -102,6 +103,7 @@ function getExpressionForLayer(
       operationDefinitionMap[col.operationType]?.input === 'fullReference' ||
       operationDefinitionMap[col.operationType]?.input === 'managedReference'
   );
+  const hasDateHistogram = columnEntries.some(([, c]) => c.operationType === 'date_histogram');
 
   if (referenceEntries.length || esAggEntries.length) {
     let aggs: ExpressionAstExpressionBuilder[] = [];
@@ -124,6 +126,11 @@ function getExpressionForLayer(
         const aggId = String(index);
 
         const wrapInFilter = Boolean(def.filterable && col.filter);
+        const wrapInTimeFilter =
+          def.canReduceTimeRange &&
+          !hasDateHistogram &&
+          col.reducedTimeRange &&
+          indexPattern.timeFieldName;
         let aggAst = def.toEsAggsFn(
           col,
           wrapInFilter ? `${aggId}-metric` : aggId,
@@ -133,7 +140,7 @@ function getExpressionForLayer(
           orderedColumnIds,
           operationDefinitionMap
         );
-        if (wrapInFilter) {
+        if (wrapInFilter || wrapInTimeFilter) {
           aggAst = buildExpressionFunction<AggFunctionsMapping['aggFilteredMetric']>(
             'aggFilteredMetric',
             {
@@ -146,6 +153,8 @@ function getExpressionForLayer(
                   enabled: true,
                   schema: 'bucket',
                   filter: col.filter && queryToAst(col.filter),
+                  timeWindow: wrapInTimeFilter ? col.reducedTimeRange : undefined,
+                  timeShift: col.timeShift,
                 }),
               ]),
               customMetric: buildExpression({ type: 'expression', chain: [aggAst] }),
@@ -408,12 +417,13 @@ function sortedReferences(columns: Array<readonly [string, GenericIndexPatternCo
 export function toExpression(
   state: IndexPatternPrivateState,
   layerId: string,
+  indexPatterns: IndexPatternMap,
   uiSettings: IUiSettingsClient
 ) {
   if (state.layers[layerId]) {
     return getExpressionForLayer(
       state.layers[layerId],
-      state.indexPatterns[state.layers[layerId].indexPatternId],
+      indexPatterns[state.layers[layerId].indexPatternId],
       uiSettings
     );
   }

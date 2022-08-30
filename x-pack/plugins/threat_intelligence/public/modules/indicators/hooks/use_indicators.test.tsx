@@ -6,48 +6,118 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { useIndicators, RawIndicatorsResponse } from './use_indicators';
+import {
+  useIndicators,
+  RawIndicatorsResponse,
+  UseIndicatorsParams,
+  UseIndicatorsValue,
+} from './use_indicators';
 import { BehaviorSubject, throwError } from 'rxjs';
-import { IKibanaSearchResponse } from '@kbn/data-plugin/common';
-import { mockSearchService } from '../../../common/mocks/mock_kibana_search_service';
-import { DEFAULT_THREAT_INDEX_KEY } from '../../../../common/constants';
-
-jest.mock('../../../hooks/use_kibana');
+import { TestProvidersComponent, mockedSearchService } from '../../../common/mocks/test_providers';
+import { IKibanaSearchResponse } from '@kbn/data-plugin/public';
 
 const indicatorsResponse = { rawResponse: { hits: { hits: [], total: 0 } } };
 
+const useIndicatorsParams: UseIndicatorsParams = {
+  filters: [],
+  filterQuery: { query: '', language: 'kuery' },
+};
+
 describe('useIndicators()', () => {
-  let mockSearch: ReturnType<typeof mockSearchService>;
+  beforeEach(jest.clearAllMocks);
 
   describe('when mounted', () => {
     beforeEach(() => {
-      mockSearch = mockSearchService(new BehaviorSubject(indicatorsResponse));
+      mockedSearchService.search.mockReturnValue(new BehaviorSubject(indicatorsResponse));
     });
 
     beforeEach(async () => {
-      renderHook(() => useIndicators());
+      renderHook<UseIndicatorsParams, UseIndicatorsValue>(
+        () => useIndicators(useIndicatorsParams),
+        {
+          wrapper: TestProvidersComponent,
+        }
+      );
     });
 
     it('should query the database for threat indicators', async () => {
-      expect(mockSearch.search).toHaveBeenCalledTimes(1);
+      expect(mockedSearchService.search).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('when filters change', () => {
+    beforeEach(() => {
+      mockedSearchService.search.mockReturnValue(new BehaviorSubject(indicatorsResponse));
     });
 
-    it('should retrieve index patterns from settings', () => {
-      expect(mockSearch.getUiSetting).toHaveBeenCalledWith(DEFAULT_THREAT_INDEX_KEY);
+    it('should query the database again and reset page to 0', async () => {
+      const hookResult = renderHook<UseIndicatorsParams, UseIndicatorsValue>(
+        (props) => useIndicators(props),
+        {
+          initialProps: useIndicatorsParams,
+          wrapper: TestProvidersComponent,
+        }
+      );
+
+      expect(mockedSearchService.search).toHaveBeenCalledTimes(1);
+      expect(mockedSearchService.search).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({ body: expect.objectContaining({ from: 0 }) }),
+        }),
+        expect.objectContaining({
+          abortSignal: expect.any(AbortSignal),
+        })
+      );
+
+      // Change page
+      await act(async () => hookResult.result.current.onChangePage(42));
+
+      expect(mockedSearchService.search).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({ body: expect.objectContaining({ from: 42 * 25 }) }),
+        }),
+        expect.objectContaining({
+          abortSignal: expect.any(AbortSignal),
+        })
+      );
+
+      expect(mockedSearchService.search).toHaveBeenCalledTimes(2);
+
+      // Change filters
+      act(() =>
+        hookResult.rerender({
+          ...useIndicatorsParams,
+          filterQuery: { language: 'kuery', query: "threat.indicator.type: 'file'" },
+        })
+      );
+
+      // From range should be reset to 0
+      expect(mockedSearchService.search).toHaveBeenCalledTimes(3);
+      expect(mockedSearchService.search).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({ body: expect.objectContaining({ from: 0 }) }),
+        }),
+        expect.objectContaining({
+          abortSignal: expect.any(AbortSignal),
+        })
+      );
     });
   });
 
   describe('when query fails', () => {
     beforeEach(async () => {
-      mockSearch = mockSearchService(throwError(() => new Error('some random error')));
+      mockedSearchService.search.mockReturnValue(throwError(() => new Error('some random error')));
 
-      renderHook(() => useIndicators());
+      renderHook<UseIndicatorsParams, UseIndicatorsValue>((props) => useIndicators(props), {
+        initialProps: useIndicatorsParams,
+        wrapper: TestProvidersComponent,
+      });
     });
 
     it('should show an error', async () => {
-      expect(mockSearch.showError).toHaveBeenCalledTimes(1);
+      expect(mockedSearchService.showError).toHaveBeenCalledTimes(1);
 
-      expect(mockSearch.search).toHaveBeenCalledWith(
+      expect(mockedSearchService.search).toHaveBeenCalledWith(
         expect.objectContaining({
           params: expect.objectContaining({
             body: expect.objectContaining({
@@ -67,7 +137,7 @@ describe('useIndicators()', () => {
 
   describe('when query is successful', () => {
     beforeEach(async () => {
-      mockSearch = mockSearchService(
+      mockedSearchService.search.mockReturnValue(
         new BehaviorSubject<IKibanaSearchResponse<RawIndicatorsResponse>>({
           rawResponse: { hits: { hits: [{ fields: {} }], total: 1 } },
         })
@@ -75,15 +145,20 @@ describe('useIndicators()', () => {
     });
 
     it('should call mapping function on every hit', async () => {
-      const { result } = renderHook(() => useIndicators());
-
+      const { result } = renderHook<UseIndicatorsParams, UseIndicatorsValue>(
+        (props) => useIndicators(props),
+        {
+          initialProps: useIndicatorsParams,
+          wrapper: TestProvidersComponent,
+        }
+      );
       expect(result.current.indicatorCount).toEqual(1);
     });
   });
 
   describe('pagination', () => {
     beforeEach(async () => {
-      mockSearch = mockSearchService(
+      mockedSearchService.search.mockReturnValue(
         new BehaviorSubject<IKibanaSearchResponse<RawIndicatorsResponse>>({
           rawResponse: { hits: { hits: [{ fields: {} }], total: 1 } },
         })
@@ -92,15 +167,20 @@ describe('useIndicators()', () => {
 
     describe('when page changes', () => {
       it('should run the query again with pagination parameters', async () => {
-        const { result } = renderHook(() => useIndicators());
+        const { result } = renderHook<UseIndicatorsParams, UseIndicatorsValue>(
+          () => useIndicators(useIndicatorsParams),
+          {
+            wrapper: TestProvidersComponent,
+          }
+        );
 
         await act(async () => {
           result.current.onChangePage(42);
         });
 
-        expect(mockSearch.search).toHaveBeenCalledTimes(2);
+        expect(mockedSearchService.search).toHaveBeenCalledTimes(2);
 
-        expect(mockSearch.search).toHaveBeenCalledWith(
+        expect(mockedSearchService.search).toHaveBeenCalledWith(
           expect.objectContaining({
             params: expect.objectContaining({
               body: expect.objectContaining({
@@ -112,7 +192,7 @@ describe('useIndicators()', () => {
           expect.anything()
         );
 
-        expect(mockSearch.search).toHaveBeenLastCalledWith(
+        expect(mockedSearchService.search).toHaveBeenLastCalledWith(
           expect.objectContaining({
             params: expect.objectContaining({
               body: expect.objectContaining({
@@ -129,15 +209,20 @@ describe('useIndicators()', () => {
 
       describe('when page size changes', () => {
         it('should fetch the first page and update internal page size', async () => {
-          const { result } = renderHook(() => useIndicators());
+          const { result } = renderHook<UseIndicatorsParams, UseIndicatorsValue>(
+            () => useIndicators(useIndicatorsParams),
+            {
+              wrapper: TestProvidersComponent,
+            }
+          );
 
           await act(async () => {
             result.current.onChangeItemsPerPage(50);
           });
 
-          expect(mockSearch.search).toHaveBeenCalledTimes(2);
+          expect(mockedSearchService.search).toHaveBeenCalledTimes(3);
 
-          expect(mockSearch.search).toHaveBeenCalledWith(
+          expect(mockedSearchService.search).toHaveBeenCalledWith(
             expect.objectContaining({
               params: expect.objectContaining({
                 body: expect.objectContaining({
@@ -149,7 +234,7 @@ describe('useIndicators()', () => {
             expect.anything()
           );
 
-          expect(mockSearch.search).toHaveBeenLastCalledWith(
+          expect(mockedSearchService.search).toHaveBeenLastCalledWith(
             expect.objectContaining({
               params: expect.objectContaining({
                 body: expect.objectContaining({

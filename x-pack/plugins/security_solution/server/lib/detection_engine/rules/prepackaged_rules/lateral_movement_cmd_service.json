@@ -13,6 +13,38 @@
   "license": "Elastic License v2",
   "name": "Service Command Lateral Movement",
   "query": "sequence by process.entity_id with maxspan = 1m\n  [process where event.type in (\"start\", \"process_started\") and\n     (process.name : \"sc.exe\" or process.pe.original_file_name : \"sc.exe\") and\n      process.args : \"\\\\\\\\*\" and process.args : (\"binPath=*\", \"binpath=*\") and\n      process.args : (\"create\", \"config\", \"failure\", \"start\")]\n  [network where process.name : \"sc.exe\" and destination.ip != \"127.0.0.1\"]\n",
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "destination.ip",
+      "type": "ip"
+    },
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.args",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.entity_id",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.name",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.pe.original_file_name",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 21,
   "rule_id": "d61cbcf8-1bc1-4cff-85ba-e7b21c5beedc",
   "severity": "low",
@@ -85,5 +117,5 @@
     }
   ],
   "type": "eql",
-  "version": 3
+  "version": 4
 }

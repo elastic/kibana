@@ -23,10 +23,11 @@ import {
 import type { LensByReferenceInput, LensByValueInput } from './embeddable';
 import type { Document } from '../persistence';
 import type { IndexPatternPersistedState } from '../indexpattern_datasource/types';
-import type { XYState } from '../xy_visualization/types';
-import type { PieVisualizationState, MetricState } from '../../common';
-import type { DatatableVisualizationState } from '../datatable_visualization/visualization';
-import type { HeatmapVisualizationState } from '../heatmap_visualization/types';
+import type { XYState } from '../visualizations/xy/types';
+import type { PieVisualizationState, LegacyMetricState } from '../../common';
+import type { DatatableVisualizationState } from '../visualizations/datatable/visualization';
+import type { MetricVisualizationState } from '../visualizations/metric/visualization';
+import type { HeatmapVisualizationState } from '../visualizations/heatmap/types';
 import type { GaugeVisualizationState } from '../visualizations/gauge/constants';
 
 type LensAttributes<TVisType, TVisState> = Omit<
@@ -51,7 +52,8 @@ export type TypedLensByValueInput = Omit<LensByValueInput, 'attributes'> & {
     | LensAttributes<'lnsXY', XYState>
     | LensAttributes<'lnsPie', PieVisualizationState>
     | LensAttributes<'lnsDatatable', DatatableVisualizationState>
-    | LensAttributes<'lnsMetric', MetricState>
+    | LensAttributes<'lnsLegacyMetric', LegacyMetricState>
+    | LensAttributes<'lnsMetric', MetricVisualizationState>
     | LensAttributes<'lnsHeatmap', HeatmapVisualizationState>
     | LensAttributes<'lnsGauge', GaugeVisualizationState>
     | LensAttributes<string, unknown>;

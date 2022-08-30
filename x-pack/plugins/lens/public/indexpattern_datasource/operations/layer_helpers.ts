@@ -9,10 +9,13 @@ import { partition, mapValues, pickBy, isArray } from 'lodash';
 import { CoreStart } from '@kbn/core/public';
 import type { Query } from '@kbn/es-query';
 import memoizeOne from 'memoize-one';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
 import type {
   DatasourceFixAction,
   FrameDatasourceAPI,
+  IndexPattern,
+  IndexPatternField,
   OperationMetadata,
   VisualizationDimensionGroupConfig,
 } from '../../types';
@@ -27,12 +30,10 @@ import {
 } from './definitions';
 import type {
   DataViewDragDropOperation,
-  IndexPattern,
-  IndexPatternField,
   IndexPatternLayer,
   IndexPatternPrivateState,
 } from '../types';
-import { getSortScoreByPriority } from './operations';
+import { getSortScoreByPriorityForField } from './operations';
 import { generateId } from '../../id_generator';
 import {
   GenericIndexPatternColumn,
@@ -881,17 +882,17 @@ function applyReferenceTransition({
     // Try to reuse the previous field by finding a possible operation. Because we've alredy
     // checked for an exact operation match, this is guaranteed to be different from previousColumn
     if (!hasFieldMatch && 'sourceField' in previousColumn && validation.input.includes('field')) {
+      const previousField = indexPattern.getFieldByName(previousColumn.sourceField);
       const defIgnoringfield = operationDefinitions
         .filter(
           (def) =>
             def.input === 'field' &&
             isOperationAllowedAsReference({ validation, operationType: def.type, indexPattern })
         )
-        .sort(getSortScoreByPriority);
+        .sort(getSortScoreByPriorityForField(previousField));
 
       // No exact match found, so let's determine that the current field can be reused
       const defWithField = defIgnoringfield.filter((def) => {
-        const previousField = indexPattern.getFieldByName(previousColumn.sourceField);
         if (!previousField) return;
         return isOperationAllowedAsReference({
           validation,
@@ -944,7 +945,7 @@ function applyReferenceTransition({
                   indexPattern,
                 })
             )
-            .sort(getSortScoreByPriority);
+            .sort(getSortScoreByPriorityForField(previousField));
 
           if (defWithField.length > 0) {
             layer = insertNewColumn({
@@ -1133,7 +1134,7 @@ function addMetric(
 }
 
 export function getMetricOperationTypes(field: IndexPatternField) {
-  return operationDefinitions.sort(getSortScoreByPriority).filter((definition) => {
+  return operationDefinitions.sort(getSortScoreByPriorityForField(field)).filter((definition) => {
     if (definition.input !== 'field') return;
     const metadata = definition.getPossibleOperationForField(field);
     return metadata && !metadata.isBucketed && metadata.dataType === 'number';
@@ -1375,7 +1376,8 @@ export function getErrorMessages(
   indexPattern: IndexPattern,
   state: IndexPatternPrivateState,
   layerId: string,
-  core: CoreStart
+  core: CoreStart,
+  data: DataPublicPluginStart
 ):
   | Array<
       | string
@@ -1417,7 +1419,7 @@ export function getErrorMessages(
                 ...state,
                 layers: {
                   ...state.layers,
-                  [layerId]: await errorMessage.fixAction!.newState(core, frame, layerId),
+                  [layerId]: await errorMessage.fixAction!.newState(data, core, frame, layerId),
                 },
               }),
             }
@@ -1516,13 +1518,14 @@ export function isOperationAllowedAsReference({
   let hasValidMetadata = true;
   if (field && operationDefinition.input === 'field') {
     const metadata = operationDefinition.getPossibleOperationForField(field);
-    hasValidMetadata = Boolean(metadata) && validation.validateMetadata(metadata!);
+    hasValidMetadata =
+      Boolean(metadata) && validation.validateMetadata(metadata!, operationType, field.name);
   } else if (operationDefinition.input === 'none') {
     const metadata = operationDefinition.getPossibleOperation();
-    hasValidMetadata = Boolean(metadata) && validation.validateMetadata(metadata!);
+    hasValidMetadata = Boolean(metadata) && validation.validateMetadata(metadata!, operationType);
   } else if (operationDefinition.input === 'fullReference') {
     const metadata = operationDefinition.getPossibleOperation(indexPattern);
-    hasValidMetadata = Boolean(metadata) && validation.validateMetadata(metadata!);
+    hasValidMetadata = Boolean(metadata) && validation.validateMetadata(metadata!, operationType);
   } else {
     // TODO: How can we validate the metadata without a specific field?
   }
@@ -1598,7 +1601,11 @@ export function isColumnValidAsReference({
       column,
       validation,
     }) &&
-    validation.validateMetadata(column)
+    validation.validateMetadata(
+      column,
+      operationType,
+      'sourceField' in column ? column.sourceField : undefined
+    )
   );
 }
 
@@ -1646,7 +1653,9 @@ export function computeLayerFromContext(
         FormulaIndexPatternColumn,
         'managedReference'
       >;
-      const tempLayer = { indexPatternId: indexPattern.id, columns: {}, columnOrder: [] };
+      const tempLayer = isLast
+        ? { indexPatternId: indexPattern.id, columns: {}, columnOrder: [] }
+        : computeLayerFromContext(metricsArray.length === 1, metricsArray, indexPattern);
       let newColumn = operationDefinition.buildColumn({
         indexPattern,
         layer: tempLayer,
@@ -1735,7 +1744,8 @@ export function computeLayerFromContext(
 export function getSplitByTermsLayer(
   indexPattern: IndexPattern,
   splitFields: IndexPatternField[],
-  dateField: IndexPatternField | undefined,
+  xField: IndexPatternField | undefined,
+  xMode: string | undefined,
   layer: VisualizeEditorLayersContext
 ): IndexPatternLayer {
   const { termsParams, metrics, timeInterval, splitWithDateHistogram, dropPartialBuckets } = layer;
@@ -1754,18 +1764,21 @@ export function getSplitByTermsLayer(
 
   let termsLayer = insertNewColumn({
     op: splitWithDateHistogram ? 'date_histogram' : 'terms',
-    layer: insertNewColumn({
-      op: 'date_histogram',
-      layer: computedLayer,
-      columnId: generateId(),
-      field: dateField,
-      indexPattern,
-      visualizationGroups: [],
-      columnParams: {
-        interval: timeInterval,
-        dropPartials: dropPartialBuckets,
-      },
-    }),
+    layer:
+      xField && xMode
+        ? insertNewColumn({
+            op: xMode,
+            layer: computedLayer,
+            columnId: generateId(),
+            field: xField,
+            indexPattern,
+            visualizationGroups: [],
+            columnParams: {
+              interval: timeInterval,
+              dropPartials: dropPartialBuckets,
+            },
+          })
+        : computedLayer,
     columnId,
     field: baseField,
     indexPattern,
@@ -1816,7 +1829,8 @@ export function getSplitByTermsLayer(
 
 export function getSplitByFiltersLayer(
   indexPattern: IndexPattern,
-  dateField: IndexPatternField | undefined,
+  xField: IndexPatternField | undefined,
+  xMode: string | undefined,
   layer: VisualizeEditorLayersContext
 ): IndexPatternLayer {
   const { splitFilters, metrics, timeInterval, dropPartialBuckets } = layer;
@@ -1842,18 +1856,21 @@ export function getSplitByFiltersLayer(
   const columnId = generateId();
   let filtersLayer = insertNewColumn({
     op: 'filters',
-    layer: insertNewColumn({
-      op: 'date_histogram',
-      layer: computedLayer,
-      columnId: generateId(),
-      field: dateField,
-      indexPattern,
-      visualizationGroups: [],
-      columnParams: {
-        interval: timeInterval,
-        dropPartials: dropPartialBuckets,
-      },
-    }),
+    layer:
+      xField && xMode
+        ? insertNewColumn({
+            op: xMode,
+            layer: computedLayer,
+            columnId: generateId(),
+            field: xField,
+            indexPattern,
+            visualizationGroups: [],
+            columnParams: {
+              interval: timeInterval,
+              dropPartials: dropPartialBuckets,
+            },
+          })
+        : computedLayer,
     columnId,
     field: undefined,
     indexPattern,

@@ -7,4 +7,4 @@
  */
 
 require('../src/setup_node_env/no_transpilation');
-require('@kbn/dev-utils').runUpdateVscodeConfigCli();
+require('@kbn/managed-vscode-config-cli');

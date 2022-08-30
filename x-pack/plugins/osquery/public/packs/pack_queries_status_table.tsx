@@ -211,7 +211,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
 }) => {
   const lensService = useKibana().services.lens;
   const isLensAvailable = lensService?.canUseEditor();
-  const { data: logsDataView } = useLogsDataView();
+  const { data: logsDataView } = useLogsDataView({ skip: !actionId });
 
   const handleClick = useCallback(
     (event) => {
@@ -274,7 +274,7 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
   const { discover, application } = useKibana().services;
   const locator = discover?.locator;
   const discoverPermissions = application.capabilities.discover;
-  const { data: logsDataView } = useLogsDataView();
+  const { data: logsDataView } = useLogsDataView({ skip: !actionId });
 
   const [discoverUrl, setDiscoverUrl] = useState<string>('');
 
@@ -492,7 +492,7 @@ const AgentsColumnResults: React.FC<ScheduledQueryLastResultsProps> = ({ actionI
     interval,
   });
   if (isLoading) {
-    return <EuiLoadingSpinner />;
+    return <EuiLoadingSpinner data-test-subj={'docsLoading'} />;
   }
 
   if (!lastResultsData) {
@@ -531,7 +531,7 @@ const ErrorsColumnResults: React.FC<ScheduledQueryErrorsProps> = ({
   }
 
   if (!errorsData?.total) {
-    return <>{'-'}</>;
+    return <span data-test-subj="packResultsErrorsEmpty">{'-'}</span>;
   }
 
   return (

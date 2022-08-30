@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { mockEndpointProcessExecutionMalwarePreventionAlert } from '../../../../common/mock/mock_timeline_data';
+import { demoEndpointProcessExecutionMalwarePreventionAlert } from '../../../../common/demo_data/endpoint/process_execution_malware_prevention_alert';
 import { createEndpointAlertsRowRenderer } from '../../timeline/body/renderers/system/generic_row_renderer';
 import { WAS_PREVENTED_FROM_EXECUTING_A_MALICIOUS_PROCESS } from '../../timeline/body/renderers/system/translations';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../constants';
@@ -24,7 +24,7 @@ const AlertsExampleComponent: React.FC = () => {
   return (
     <>
       {alertsRowRenderer.renderRow({
-        data: mockEndpointProcessExecutionMalwarePreventionAlert,
+        data: demoEndpointProcessExecutionMalwarePreventionAlert,
         isDraggable: false,
         timelineId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,
       })}

@@ -9,6 +9,7 @@ export const ROLLING_UPGRADE_MINIMUM_SUPPORTED_VERSION = '8.3.0';
 
 // Available versions for the upgrade of the Elastic Agent
 export const FALLBACK_VERSIONS = [
+  '8.4.0',
   '8.3.2',
   '8.3.1',
   '8.3.0',

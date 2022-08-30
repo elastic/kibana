@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpResponse } from '@kbn/core/public';
+import type { HttpResponse } from '@kbn/core/public';
 
 import { ErrorCode } from './error_codes';
 

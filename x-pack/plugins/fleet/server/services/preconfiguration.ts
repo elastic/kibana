@@ -157,8 +157,8 @@ export async function ensurePreconfiguredPackagesAndPolicies(
           policy
         );
 
-        const newFields = {
-          defaultDownloadSourceId: defaultDownloadSource.id,
+        const newFields: Partial<AgentPolicy> = {
+          download_source_id: defaultDownloadSource.id,
           ...fields,
         };
         if (hasChanged) {

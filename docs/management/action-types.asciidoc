@@ -7,57 +7,61 @@ Connectors provide a central place to store connection information for services 
 [cols="2"]
 |===
 
-a| <<email-action-type, Email>>
+a| <<email-action-type,Email>>
 
 | Send email from your server.
 
-a| <<resilient-action-type, IBM Resilient>>
+a| <<resilient-action-type,{ibm-r}>>
 
-| Create an incident in IBM Resilient.
+| Create an incident in {ibm-r}.
 
-a| <<index-action-type, Index>>
+a| <<index-action-type,Index>>
 
 | Index data into Elasticsearch.
 
-a| <<jira-action-type, Jira>>
+a| <<jira-action-type,Jira>>
 
 | Create an incident in Jira.
 
-a| <<teams-action-type, Microsoft Teams>>
+a| <<teams-action-type,Microsoft Teams>>
 
 | Send a message to a Microsoft Teams channel.
 
-a| <<pagerduty-action-type, PagerDuty>>
+a| <<pagerduty-action-type,PagerDuty>>
 
 | Send an event in PagerDuty.
 
-a| <<server-log-action-type, ServerLog>>
+a| <<server-log-action-type,ServerLog>>
 
 | Add a message to a Kibana log.
 
-a| <<servicenow-action-type, ServiceNow ITSM>>
+a| <<servicenow-action-type,{sn-itsm}>>
 
-| Create an incident in ServiceNow.
+| Create an incident in {sn}.
 
-a| <<servicenow-sir-action-type, ServiceNow SecOps>>
+a| <<servicenow-sir-action-type,{sn-sir}>>
 
-| Create a security incident in ServiceNow.
+| Create a security incident in {sn}.
 
-a| <<servicenow-itom-action-type, ServiceNow ITOM>>
+a| <<servicenow-itom-action-type,{sn-itom}>>
 
-| Create an event in ServiceNow.
+| Create an event in {sn}.
 
-a| <<slack-action-type, Slack>>
+a| <<slack-action-type,Slack>>
 
 | Send a message to a Slack channel or user.
 
-a| <<swimlane-action-type, Swimlane>>
+a| <<swimlane-action-type,{swimlane}>>
 
-| Create an incident in Swimlane.
+| Create an incident in {swimlane}.
 
-a| <<webhook-action-type, Webhook>>
+a| <<webhook-action-type, {webhook}>>
 
 | Send a request to a web service.
+
+a| <<cases-webhook-action-type,{webhook-cm}>>
+
+| Send a request to a Case Management web service.
 
 a| <<xmatters-action-type,xMatters>>
 
@@ -68,7 +72,7 @@ a| <<xmatters-action-type,xMatters>>
 ==============================================
 Some connector types are paid commercial features, while others are free.
 For a comparison of the Elastic subscription levels,
-see https://www.elastic.co/subscriptions[the subscription page].
+see {subscriptions}[the subscription page].
 ==============================================
 
 [float]

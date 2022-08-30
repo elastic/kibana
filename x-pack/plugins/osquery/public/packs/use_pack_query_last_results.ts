@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import moment from 'moment-timezone';
 import { lastValueFrom } from 'rxjs';
 import { SortDirection } from '@kbn/data-plugin/common';
@@ -29,7 +29,7 @@ export const usePackQueryLastResults = ({
   skip = false,
 }: UsePackQueryLastResultsProps) => {
   const data = useKibana().services.data;
-  const { data: logsDataView } = useLogsDataView();
+  const { data: logsDataView } = useLogsDataView({ skip });
 
   return useQuery(
     ['scheduledQueryLastResults', { actionId }],

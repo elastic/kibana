@@ -124,7 +124,7 @@ describe('bulkEdit()', () => {
 
     mockCreatePointInTimeFinderAsInternalUser();
 
-    unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+    unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
       saved_objects: [existingRule],
     });
 
@@ -145,7 +145,7 @@ describe('bulkEdit()', () => {
   });
   describe('tags operations', () => {
     test('should add new tag', async () => {
-      unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
         saved_objects: [
           {
             id: '1',
@@ -184,21 +184,23 @@ describe('bulkEdit()', () => {
       expect(result.rules).toHaveLength(1);
       expect(result.rules[0]).toHaveProperty('tags', ['foo', 'test-1']);
 
-      expect(unsecuredSavedObjectsClient.bulkUpdate).toHaveBeenCalledTimes(1);
-      expect(unsecuredSavedObjectsClient.bulkUpdate.mock.calls[0]).toHaveLength(1);
-      expect(unsecuredSavedObjectsClient.bulkUpdate.mock.calls[0][0]).toEqual([
-        expect.objectContaining({
-          id: '1',
-          type: 'alert',
-          attributes: expect.objectContaining({
-            tags: ['foo', 'test-1'],
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            id: '1',
+            type: 'alert',
+            attributes: expect.objectContaining({
+              tags: ['foo', 'test-1'],
+            }),
           }),
-        }),
-      ]);
+        ],
+        { overwrite: true }
+      );
     });
 
     test('should delete tag', async () => {
-      unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
         saved_objects: [
           {
             id: '1',
@@ -234,21 +236,23 @@ describe('bulkEdit()', () => {
 
       expect(result.rules[0]).toHaveProperty('tags', []);
 
-      expect(unsecuredSavedObjectsClient.bulkUpdate).toHaveBeenCalledTimes(1);
-      expect(unsecuredSavedObjectsClient.bulkUpdate.mock.calls[0]).toHaveLength(1);
-      expect(unsecuredSavedObjectsClient.bulkUpdate.mock.calls[0][0]).toEqual([
-        expect.objectContaining({
-          id: '1',
-          type: 'alert',
-          attributes: expect.objectContaining({
-            tags: [],
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            id: '1',
+            type: 'alert',
+            attributes: expect.objectContaining({
+              tags: [],
+            }),
           }),
-        }),
-      ]);
+        ],
+        { overwrite: true }
+      );
     });
 
     test('should set tags', async () => {
-      unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
         saved_objects: [
           {
             id: '1',
@@ -284,17 +288,19 @@ describe('bulkEdit()', () => {
 
       expect(result.rules[0]).toHaveProperty('tags', ['test-1', 'test-2']);
 
-      expect(unsecuredSavedObjectsClient.bulkUpdate).toHaveBeenCalledTimes(1);
-      expect(unsecuredSavedObjectsClient.bulkUpdate.mock.calls[0]).toHaveLength(1);
-      expect(unsecuredSavedObjectsClient.bulkUpdate.mock.calls[0][0]).toEqual([
-        expect.objectContaining({
-          id: '1',
-          type: 'alert',
-          attributes: expect.objectContaining({
-            tags: ['test-1', 'test-2'],
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            id: '1',
+            type: 'alert',
+            attributes: expect.objectContaining({
+              tags: ['test-1', 'test-2'],
+            }),
           }),
-        }),
-      ]);
+        ],
+        { overwrite: true }
+      );
     });
   });
 
@@ -574,7 +580,7 @@ describe('bulkEdit()', () => {
       );
     });
 
-    test('should call bulkMarkApiKeysForInvalidation to invalidate unused keys if bulkUpdate failed', async () => {
+    test('should call bulkMarkApiKeysForInvalidation to invalidate unused keys if bulkCreate failed', async () => {
       createAPIKeyMock.mockReturnValue({ apiKeysEnabled: true, result: { api_key: '111' } });
       mockCreatePointInTimeFinderAsInternalUser({
         saved_objects: [
@@ -585,7 +591,7 @@ describe('bulkEdit()', () => {
         ],
       });
 
-      unsecuredSavedObjectsClient.bulkUpdate.mockImplementation(() => {
+      unsecuredSavedObjectsClient.bulkCreate.mockImplementation(() => {
         throw new Error('Fail');
       });
 
@@ -621,7 +627,7 @@ describe('bulkEdit()', () => {
         ],
       });
 
-      unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
         saved_objects: [
           {
             id: '1',
@@ -795,7 +801,7 @@ describe('bulkEdit()', () => {
         minimumScheduleInterval: { value: '3m', enforce: true },
       });
 
-      unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
         saved_objects: [],
       });
 
@@ -819,7 +825,7 @@ describe('bulkEdit()', () => {
 
   describe('paramsModifier', () => {
     test('should update index pattern params', async () => {
-      unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
         saved_objects: [
           {
             id: '1',
@@ -856,19 +862,21 @@ describe('bulkEdit()', () => {
       expect(result.rules).toHaveLength(1);
       expect(result.rules[0]).toHaveProperty('params.index', ['test-index-*']);
 
-      expect(unsecuredSavedObjectsClient.bulkUpdate).toHaveBeenCalledTimes(1);
-      expect(unsecuredSavedObjectsClient.bulkUpdate.mock.calls[0]).toHaveLength(1);
-      expect(unsecuredSavedObjectsClient.bulkUpdate.mock.calls[0][0]).toEqual([
-        expect.objectContaining({
-          id: '1',
-          type: 'alert',
-          attributes: expect.objectContaining({
-            params: expect.objectContaining({
-              index: ['test-index-*'],
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            id: '1',
+            type: 'alert',
+            attributes: expect.objectContaining({
+              params: expect.objectContaining({
+                index: ['test-index-*'],
+              }),
             }),
           }),
-        }),
-      ]);
+        ],
+        { overwrite: true }
+      );
     });
   });
 
@@ -893,8 +901,8 @@ describe('bulkEdit()', () => {
   });
 
   describe('task manager', () => {
-    test('should call task manager method bulkUpdateSchedules if operation set new schedules', async () => {
-      unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+    test('should call task manager method bulkCreateSchedules if operation set new schedules', async () => {
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
         saved_objects: [
           {
             id: '1',
@@ -932,8 +940,8 @@ describe('bulkEdit()', () => {
       });
     });
 
-    test('should not call task manager method bulkUpdateSchedules if operation is not set schedule', async () => {
-      unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+    test('should not call task manager method bulkCreateSchedules if operation is not set schedule', async () => {
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
         saved_objects: [
           {
             id: '1',

@@ -219,6 +219,16 @@
         "description": [
           "\nDefinition of the full event structure"
         ],
+        "signature": [
+          {
+            "pluginId": "@kbn/analytics-client",
+            "scope": "common",
+            "docId": "kibKbnAnalyticsClientPluginApi",
+            "section": "def-common.Event",
+            "text": "Event"
+          },
+          "<Properties>"
+        ],
         "path": "packages/analytics/client/src/events/types.ts",
         "deprecated": false,
         "children": [
@@ -249,14 +259,14 @@
           {
             "parentPluginId": "@kbn/analytics-client",
             "id": "def-common.Event.properties",
-            "type": "Object",
+            "type": "Uncategorized",
             "tags": [],
             "label": "properties",
             "description": [
               "\nThe specific properties of the event type."
             ],
             "signature": [
-              "{ [x: string]: unknown; }"
+              "Properties"
             ],
             "path": "packages/analytics/client/src/events/types.ts",
             "deprecated": false
@@ -547,7 +557,7 @@
               "\nReports a telemetry event."
             ],
             "signature": [
-              "<EventTypeData extends Record<string, unknown>>(eventType: string, eventData: EventTypeData) => void"
+              "<EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void"
             ],
             "path": "packages/analytics/client/src/analytics_client/types.ts",
             "deprecated": false,
@@ -945,7 +955,7 @@
                 "section": "def-common.Event",
                 "text": "Event"
               },
-              "[]) => void"
+              "<Record<string, unknown>>[]) => void"
             ],
             "path": "packages/analytics/client/src/shippers/types.ts",
             "deprecated": false,
@@ -967,7 +977,7 @@
                     "section": "def-common.Event",
                     "text": "Event"
                   },
-                  "[]"
+                  "<Record<string, unknown>>[]"
                 ],
                 "path": "packages/analytics/client/src/shippers/types.ts",
                 "deprecated": false,
@@ -1750,7 +1760,7 @@
           "Types matching string values"
         ],
         "signature": [
-          "\"text\" | \"date\" | \"keyword\""
+          "\"date\" | \"keyword\" | \"text\""
         ],
         "path": "packages/analytics/client/src/schema/types.ts",
         "deprecated": false,
@@ -1766,7 +1776,7 @@
           "\nPossible type values in the schema"
         ],
         "signature": [
-          "\"boolean\" | \"text\" | \"date\" | \"keyword\" | \"long\" | \"double\" | \"short\" | \"float\" | \"integer\" | \"byte\""
+          "\"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"short\" | \"float\" | \"integer\" | \"byte\""
         ],
         "path": "packages/analytics/client/src/schema/types.ts",
         "deprecated": false,

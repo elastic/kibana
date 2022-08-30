@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import type { AppMountParameters } from '@kbn/core/public';
 import { KibanaPageTemplate, RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
-import { createPortalNode, PortalNode } from 'react-reverse-portal';
+import { createHtmlPortalNode, HtmlPortalNode } from 'react-reverse-portal';
 import { MlPageHeaderRenderer } from '../page_header/page_header';
 import { useSideNavItems } from './side_nav';
 import * as routes from '../../routing/routes';
@@ -23,13 +23,13 @@ import { useActiveRoute } from '../../routing/use_active_route';
 import { useDocTitle } from '../../routing/use_doc_title';
 
 export const MlPageControlsContext = createContext<{
-  headerPortal: PortalNode;
+  headerPortal: HtmlPortalNode;
   setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
   setIsHeaderMounted: (v: boolean) => void;
   isHeaderMounted: boolean;
 }>({
   setHeaderActionMenu: () => {},
-  headerPortal: createPortalNode(),
+  headerPortal: createHtmlPortalNode(),
   isHeaderMounted: false,
   setIsHeaderMounted: () => {},
 });
@@ -46,7 +46,7 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
     },
   } = useMlKibana();
 
-  const headerPortalNode = useMemo(() => createPortalNode(), []);
+  const headerPortalNode = useMemo(() => createHtmlPortalNode(), []);
   const [isHeaderMounted, setIsHeaderMounted] = useState(false);
 
   const routeList = useMemo(
@@ -114,7 +114,7 @@ interface CommonPageWrapperProps {
   setIsHeaderMounted: (v: boolean) => void;
   pageDeps: PageDependencies;
   routeList: MlRoute[];
-  headerPortal: PortalNode;
+  headerPortal: HtmlPortalNode;
 }
 
 const CommonPageWrapper: FC<CommonPageWrapperProps> = React.memo(({ pageDeps, routeList }) => {

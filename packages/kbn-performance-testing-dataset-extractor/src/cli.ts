@@ -16,7 +16,8 @@ import { run } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { EsVersion, readConfigFile } from '@kbn/test';
 import path from 'path';
-import { extractor, ScalabilitySetup } from './extractor';
+import { extractor } from './extractor';
+import { ScalabilitySetup } from './types';
 
 interface Vars {
   [key: string]: string;
@@ -58,8 +59,9 @@ export async function runExtractor() {
       const scalabilitySetup: ScalabilitySetup = config.get('scalabilitySetup');
 
       if (!scalabilitySetup) {
-        log.error(`'scalabilitySetup' must be defined in config file!`);
-        return;
+        log.warning(
+          `'scalabilitySetup' is not defined in config file, output file for Kibana scalability run won't be generated`
+        );
       }
 
       const env = config.get(`kbnTestServer.env`);

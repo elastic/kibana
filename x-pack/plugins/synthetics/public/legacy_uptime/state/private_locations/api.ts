@@ -21,7 +21,14 @@ const FLEET_URLS = {
 export const fetchAgentPolicies = async (): Promise<AgentPoliciesList> => {
   return await apiService.get(
     FLEET_URLS.AGENT_POLICIES,
-    { page: 1, perPage: 10000, sortField: 'name', sortOrder: 'asc', full: true },
+    {
+      page: 1,
+      perPage: 10000,
+      sortField: 'name',
+      sortOrder: 'asc',
+      full: true,
+      kuery: 'ingest-agent-policies.is_managed : false',
+    },
     null
   );
 };

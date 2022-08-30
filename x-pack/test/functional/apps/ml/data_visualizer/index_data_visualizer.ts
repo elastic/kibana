@@ -36,8 +36,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       );
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/137016
-    it.skip(`${testData.suiteTitle} displays index details`, async () => {
+    it(`${testData.suiteTitle} displays index details`, async () => {
       await ml.testExecution.logTestStep(`${testData.suiteTitle} displays the time range step`);
       await ml.dataVisualizerIndexBased.assertTimeRangeSelectorSectionExists();
 
@@ -154,9 +153,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
     });
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/137032
-  // Failing: See https://github.com/elastic/kibana/issues/118472
-  describe.skip('index based', function () {
+  describe('index based', function () {
     this.tags(['ml']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');

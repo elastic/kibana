@@ -157,6 +157,7 @@ describe('CasesService', () => {
         } = unsecuredSavedObjectsClient.update.mock.calls[0][2] as Partial<ESCaseAttributes>;
         expect(restUpdateAttributes).toMatchInlineSnapshot(`
           Object {
+            "assignees": Array [],
             "closed_at": null,
             "closed_by": null,
             "created_at": "2019-11-25T21:54:48.952Z",
@@ -481,6 +482,7 @@ describe('CasesService', () => {
         expect(creationAttributes.external_service).not.toHaveProperty('connector_id');
         expect(creationAttributes).toMatchInlineSnapshot(`
           Object {
+            "assignees": Array [],
             "closed_at": null,
             "closed_by": null,
             "connector": Object {

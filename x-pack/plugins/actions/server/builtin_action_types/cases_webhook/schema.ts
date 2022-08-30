@@ -22,10 +22,8 @@ export const ExternalIncidentServiceConfiguration = {
   createIncidentJson: schema.string(), // stringified object
   createIncidentResponseKey: schema.string(),
   getIncidentUrl: schema.string(),
-  getIncidentResponseCreatedDateKey: schema.string(),
   getIncidentResponseExternalTitleKey: schema.string(),
-  getIncidentResponseUpdatedDateKey: schema.string(),
-  incidentViewUrl: schema.string(),
+  viewIncidentUrl: schema.string(),
   updateIncidentUrl: schema.string(),
   updateIncidentMethod: schema.oneOf(
     [

@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+import { stringHash } from '@kbn/ml-string-hash';
 import { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import { AnomalySwimlaneEmbeddableInput } from '@kbn/ml-plugin/public';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { USER } from '../../../services/ml/security_common';
 
 // @ts-expect-error not full interface
 const JOB_CONFIG: Job = {
@@ -58,15 +61,16 @@ const cellSize = 15;
 const overallSwimLaneTestSubj = 'mlAnomalyExplorerSwimlaneOverall';
 const viewBySwimLaneTestSubj = 'mlAnomalyExplorerSwimlaneViewBy';
 
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
   const elasticChart = getService('elasticChart');
   const browser = getService('browser');
+  const PageObjects = getPageObjects(['common', 'timePicker']);
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/137300
-  describe.skip('anomaly explorer', function () {
+  describe('anomaly explorer', function () {
     this.tags(['ml']);
+
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
@@ -167,11 +171,11 @@ export default function ({ getService }: FtrProviderContext) {
           ]);
           await ml.swimLane.assertAxisLabels(viewBySwimLaneTestSubj, 'y', [
             'AAL',
-            'VRD',
             'EGF',
+            'VRD',
             'SWR',
-            'AMX',
             'JZA',
+            'AMX',
             'TRS',
             'ACA',
             'BAW',
@@ -341,13 +345,13 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.swimLane.waitForSwimLanesToLoad();
 
           await ml.swimLane.assertSelection(viewBySwimLaneTestSubj, {
-            x: [1454817600000, 1454846400000],
-            y: ['AAL', 'VRD'],
+            x: [1454817600000, 1454860800000],
+            y: ['AAL', 'EGF'],
           });
 
-          await ml.anomaliesTable.assertTableRowsCount(2);
+          await ml.anomaliesTable.assertTableRowsCount(3);
           await ml.anomalyExplorer.assertInfluencerFieldListLength('airline', 2);
-          await ml.anomalyExplorer.assertAnomalyExplorerChartsCount(2);
+          await ml.anomalyExplorer.assertAnomalyExplorerChartsCount(3);
 
           await ml.testExecution.logTestStep('clears the selection');
           await ml.anomalyExplorer.clearSwimLaneSelection();
@@ -369,13 +373,79 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.anomaliesTable.assertTableRowsCount(10);
         });
 
-        it('adds swim lane embeddable to a dashboard', async () => {
-          // should be the last step because it navigates away from the Anomaly Explorer page
-          await ml.testExecution.logTestStep(
-            'should allow to attach anomaly swim lane embeddable to the dashboard'
-          );
-          await ml.anomalyExplorer.openAddToDashboardControl();
-          await ml.anomalyExplorer.addAndEditSwimlaneInDashboard('ML Test');
+        it('renders swim lanes correctly on the time bounds change', async () => {
+          const fromTime = 'Jul 7, 2012 @ 00:00:00.000';
+          const toTime = 'Feb 12, 2016 @ 23:59:54.000';
+
+          await PageObjects.timePicker.pauseAutoRefresh();
+          await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+
+          await ml.commonUI.waitForDatePickerIndicatorLoaded();
+
+          await ml.swimLane.waitForSwimLanesToLoad();
+          await ml.swimLane.assertAxisLabels(viewBySwimLaneTestSubj, 'x', [
+            '2012-06-19',
+            '2012-11-16',
+            '2013-04-15',
+            '2013-09-12',
+            '2014-02-09',
+            '2014-07-09',
+            '2014-12-06',
+            '2015-05-05',
+            '2015-10-02',
+          ]);
+        });
+
+        describe('Anomaly Swim Lane as embeddable', function () {
+          beforeEach(async () => {
+            await ml.navigation.navigateToAnomalyExplorer(testData.jobConfig.job_id, {
+              from: '2016-02-07T00%3A00%3A00.000Z',
+              to: '2016-02-11T23%3A59%3A54.000Z',
+            });
+            await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
+            await ml.commonUI.waitForDatePickerIndicatorLoaded();
+          });
+
+          it('attaches swim lane embeddable to a case', async () => {
+            await ml.anomalyExplorer.attachSwimLaneToCase('viewBy', {
+              title: 'ML Test case',
+              description: 'Case with an anomaly swim lane',
+              tag: 'ml_case',
+            });
+
+            const expectedAttachment = {
+              swimlaneType: 'viewBy',
+              viewBy: 'airline',
+              jobIds: [testData.jobConfig.job_id],
+              timeRange: {
+                from: '2016-02-07T00:00:00.000Z',
+                to: '2016-02-11T23:59:54.000Z',
+              },
+            } as AnomalySwimlaneEmbeddableInput;
+
+            expectedAttachment.id = stringHash(JSON.stringify(expectedAttachment)).toString();
+
+            await ml.cases.assertCaseWithAnomalySwimLaneAttachment(
+              {
+                title: 'ML Test case',
+                description: 'Case with an anomaly swim lane',
+                tag: 'ml_case',
+                reporter: USER.ML_POWERUSER,
+              },
+              expectedAttachment,
+              {
+                yAxisLabelCount: 10,
+              }
+            );
+          });
+
+          it('adds swim lane embeddable to a dashboard', async () => {
+            await ml.testExecution.logTestStep(
+              'should allow to attach anomaly swim lane embeddable to the dashboard'
+            );
+            await ml.anomalyExplorer.openAddToDashboardControl();
+            await ml.anomalyExplorer.addAndEditSwimlaneInDashboard('ML Test');
+          });
         });
       });
     }

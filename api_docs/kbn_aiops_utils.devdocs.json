@@ -21,6 +21,80 @@
     "functions": [
       {
         "parentPluginId": "@kbn/aiops-utils",
+        "id": "def-common.getSnappedWindowParameters",
+        "type": "Function",
+        "tags": [],
+        "label": "getSnappedWindowParameters",
+        "description": [
+          "\n\nConverts window paramaters from the brushes to “snap” the brushes to the chart histogram bar width and ensure timestamps\ncorrespond to bucket timestamps\n"
+        ],
+        "signature": [
+          "(windowParameters: ",
+          {
+            "pluginId": "@kbn/aiops-utils",
+            "scope": "common",
+            "docId": "kibKbnAiopsUtilsPluginApi",
+            "section": "def-common.WindowParameters",
+            "text": "WindowParameters"
+          },
+          ", snapTimestamps: number[]) => ",
+          {
+            "pluginId": "@kbn/aiops-utils",
+            "scope": "common",
+            "docId": "kibKbnAiopsUtilsPluginApi",
+            "section": "def-common.WindowParameters",
+            "text": "WindowParameters"
+          }
+        ],
+        "path": "x-pack/packages/ml/aiops_utils/src/get_window_parameters.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/aiops-utils",
+            "id": "def-common.getSnappedWindowParameters.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "windowParameters",
+            "description": [
+              "time range definition for baseline and deviation to be used by spike log analysis"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/aiops-utils",
+                "scope": "common",
+                "docId": "kibKbnAiopsUtilsPluginApi",
+                "section": "def-common.WindowParameters",
+                "text": "WindowParameters"
+              }
+            ],
+            "path": "x-pack/packages/ml/aiops_utils/src/get_window_parameters.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/aiops-utils",
+            "id": "def-common.getSnappedWindowParameters.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "snapTimestamps",
+            "description": [
+              "time range definition that always corresponds to histogram bucket timestamps"
+            ],
+            "signature": [
+              "number[]"
+            ],
+            "path": "x-pack/packages/ml/aiops_utils/src/get_window_parameters.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "WindowParameters"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/aiops-utils",
         "id": "def-common.getWindowParameters",
         "type": "Function",
         "tags": [],

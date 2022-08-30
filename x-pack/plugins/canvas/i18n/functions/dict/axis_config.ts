@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { axisConfig } from '../../../canvas_plugin_src/functions/common/axisConfig';
+import type { axisConfig } from '../../../canvas_plugin_src/functions/common/axisConfig';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 import { Position } from '../../../types';

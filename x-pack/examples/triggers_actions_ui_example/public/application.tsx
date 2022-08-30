@@ -13,6 +13,7 @@ import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { TriggersActionsUiExamplePublicStartDeps } from './plugin';
 
 import { Page } from './components/page';
@@ -25,6 +26,7 @@ import { RuleTagFilterSandbox } from './components/rule_tag_filter_sandbox';
 import { RuleEventLogListSandbox } from './components/rule_event_log_list_sandbox';
 import { RuleStatusDropdownSandbox } from './components/rule_status_dropdown_sandbox';
 import { RuleStatusFilterSandbox } from './components/rule_status_filter_sandbox';
+import { AlertsTableSandbox } from './components/alerts_table_sandbox';
 
 export interface TriggersActionsUiExampleComponentParams {
   http: CoreStart['http'];
@@ -114,6 +116,14 @@ const TriggersActionsUiExampleApp = ({
             </Page>
           )}
         />
+        <Route
+          path="/alerts_table"
+          render={() => (
+            <Page title="Alerts Table">
+              <AlertsTableSandbox triggersActionsUi={triggersActionsUi} />
+            </Page>
+          )}
+        />
       </EuiPage>
     </Router>
   );
@@ -136,12 +146,14 @@ export const renderApp = (
         actionTypeRegistry,
       }}
     >
-      <TriggersActionsUiExampleApp
-        basename={appBasePath}
-        http={http}
-        triggersActionsUi={deps.triggersActionsUi}
-        data={deps.data}
-      />
+      <IntlProvider locale="en">
+        <TriggersActionsUiExampleApp
+          basename={appBasePath}
+          http={http}
+          triggersActionsUi={deps.triggersActionsUi}
+          data={deps.data}
+        />
+      </IntlProvider>
     </KibanaContextProvider>,
     element
   );

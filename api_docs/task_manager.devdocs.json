@@ -1435,9 +1435,9 @@
       "signature": [
         "Pick<",
         "TaskScheduling",
-        ", \"schedule\" | \"runSoon\" | \"ephemeralRunNow\" | \"ensureScheduled\" | \"bulkUpdateSchedules\"> & Pick<",
+        ", \"schedule\" | \"runSoon\" | \"ephemeralRunNow\" | \"ensureScheduled\" | \"bulkUpdateSchedules\" | \"bulkSchedule\"> & Pick<",
         "TaskStore",
-        ", \"aggregate\" | \"fetch\" | \"get\" | \"remove\"> & { removeIfExists: (id: string) => Promise<void>; } & { supportsEphemeralTasks: () => boolean; }"
+        ", \"get\" | \"aggregate\" | \"fetch\" | \"remove\"> & { removeIfExists: (id: string) => Promise<void>; } & { supportsEphemeralTasks: () => boolean; }"
       ],
       "path": "x-pack/plugins/task_manager/server/plugin.ts",
       "deprecated": false,

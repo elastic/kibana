@@ -7,7 +7,7 @@
 
 import { getLatestMonitor } from './get_latest_monitor';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
-import { getUptimeESMockClient } from './helper';
+import { getUptimeESMockClient } from './test_helpers';
 
 describe('getLatestMonitor', () => {
   let expectedGetLatestSearchParams: any;

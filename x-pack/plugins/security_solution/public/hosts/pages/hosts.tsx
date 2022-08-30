@@ -108,7 +108,7 @@ const HostsComponent = () => {
     }
     return filters;
   }, [severitySelection, tabName, filters]);
-  const narrowDateRange = useCallback<UpdateDateRange>(
+  const updateDateRange = useCallback<UpdateDateRange>(
     ({ x }) => {
       if (!x) {
         return;
@@ -204,7 +204,7 @@ const HostsComponent = () => {
                 setQuery={setQuery}
                 to={to}
                 skip={isInitializing || !filterQuery}
-                narrowDateRange={narrowDateRange}
+                updateDateRange={updateDateRange}
               />
 
               <EuiSpacer />
@@ -225,7 +225,6 @@ const HostsComponent = () => {
               filterQuery={tabsFilterQuery || ''}
               isInitializing={isInitializing}
               indexNames={selectedPatterns}
-              setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
               setQuery={setQuery}
               from={from}
               type={hostsModel.HostsType.page}

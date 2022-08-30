@@ -6,12 +6,8 @@
  */
 import type { ExceptionListSchema, ListArray } from '@kbn/securitysolution-io-ts-list-types';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { ExceptionListQueryInfo } from '@kbn/lists-plugin/server/services/exception_lists/utils/import/find_all_exception_list_types';
-import {
-  getAllListTypes,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '@kbn/lists-plugin/server/services/exception_lists/utils/import/find_all_exception_list_types';
+import { getAllListTypes } from '@kbn/lists-plugin/server/services/exception_lists/utils/import/find_all_exception_list_types';
 import type { ImportRulesSchema } from '../../../../../../common/detection_engine/schemas/request/import_rules_schema';
 
 /**

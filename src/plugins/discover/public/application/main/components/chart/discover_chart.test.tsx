@@ -112,6 +112,7 @@ async function mountComponent(isTimeBased: boolean = false) {
     } as unknown as GetStateReturn,
     viewMode: VIEW_MODE.DOCUMENT_LEVEL,
     setDiscoverViewMode: jest.fn(),
+    isTimeBased,
   };
 
   let instance: ReactWrapper = {} as ReactWrapper;

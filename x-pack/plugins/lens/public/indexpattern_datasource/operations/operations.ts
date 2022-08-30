@@ -6,7 +6,7 @@
  */
 
 import { memoize } from 'lodash';
-import { OperationMetadata } from '../../types';
+import type { IndexPattern, IndexPatternField, OperationMetadata } from '../../types';
 import {
   operationDefinitionMap,
   operationDefinitions,
@@ -15,7 +15,6 @@ import {
   renameOperationsMapping,
   BaseIndexPatternColumn,
 } from './definitions';
-import { IndexPattern, IndexPatternField } from '../types';
 import { documentField } from '../document_field';
 import { hasField } from '../pure_utils';
 
@@ -62,6 +61,18 @@ export function getSortScoreByPriority(
 ) {
   return (b.priority || Number.NEGATIVE_INFINITY) - (a.priority || Number.NEGATIVE_INFINITY);
 }
+
+export const getSortScoreByPriorityForField =
+  (field?: IndexPatternField) => (a: GenericOperationDefinition, b: GenericOperationDefinition) => {
+    if (
+      field?.partiallyApplicableFunctions?.[a.type] !==
+      field?.partiallyApplicableFunctions?.[b.type]
+    ) {
+      if (field?.partiallyApplicableFunctions?.[a.type]) return 1;
+      return -1;
+    }
+    return (b.priority || Number.NEGATIVE_INFINITY) - (a.priority || Number.NEGATIVE_INFINITY);
+  };
 
 export function getCurrentFieldsForOperation(targetColumn: BaseIndexPatternColumn) {
   if (!hasField(targetColumn)) {
@@ -112,7 +123,7 @@ export function getOperationTypesForField(
         ? possibleOperation && filterOperations(possibleOperation)
         : possibleOperation;
     })
-    .sort(getSortScoreByPriority)
+    .sort(getSortScoreByPriorityForField(field))
     .map(({ type }) => type);
 }
 

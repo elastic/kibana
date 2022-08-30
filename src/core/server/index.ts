@@ -388,22 +388,18 @@ export type {
   ISavedObjectsSerializer,
   SavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server';
-
-export type {
-  SavedObjectsRepository,
-  SavedObjectsExporter,
-  SavedObjectsExportError,
-  SavedObjectsImporter,
-  SavedObjectsImportError,
-} from './saved_objects';
 export {
-  SavedObjectsClient,
   SavedObjectsErrorHelpers,
-  SavedObjectsSerializer,
-  SavedObjectTypeRegistry,
   SavedObjectsUtils,
   mergeSavedObjectMigrationMaps,
-} from './saved_objects';
+} from '@kbn/core-saved-objects-utils-server';
+export { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
+export type { SavedObjectsRepository } from '@kbn/core-saved-objects-api-server-internal';
+export { SavedObjectsClient } from '@kbn/core-saved-objects-api-server-internal';
+export type {
+  SavedObjectsExportError,
+  SavedObjectsImportError,
+} from '@kbn/core-saved-objects-import-export-server-internal';
 
 export type {
   IUiSettingsClient,
@@ -438,8 +434,9 @@ export type {
   DeprecationsRequestHandlerContext,
 } from './deprecations';
 export type { DeprecationsDetails } from '@kbn/core-deprecations-common';
-export type { AppCategory } from '../types';
-export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '../utils';
+
+export type { AppCategory } from '@kbn/core-application-common';
+export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '@kbn/core-application-common';
 
 export { ServiceStatusLevels } from './status';
 export type { CoreStatus, ServiceStatus, ServiceStatusLevel, StatusServiceSetup } from './status';

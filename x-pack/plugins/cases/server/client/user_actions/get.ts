@@ -20,7 +20,12 @@ export const get = async (
   { caseId }: UserActionGet,
   clientArgs: CasesClientArgs
 ): Promise<CaseUserActionsResponse> => {
-  const { unsecuredSavedObjectsClient, userActionService, logger, authorization } = clientArgs;
+  const {
+    unsecuredSavedObjectsClient,
+    services: { userActionService },
+    logger,
+    authorization,
+  } = clientArgs;
 
   try {
     const userActions = await userActionService.getAll({

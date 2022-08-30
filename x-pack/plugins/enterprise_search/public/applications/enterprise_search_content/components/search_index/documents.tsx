@@ -9,53 +9,40 @@ import React, { useEffect, ChangeEvent } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-
 import {
   EuiFieldSearch,
-  EuiTitle,
-  EuiSpacer,
-  EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { Result } from '../../../shared/result/result';
+import { DocumentList } from './components/document_list/document_list';
+import { DocumentsLogic, DEFAULT_PAGINATION } from './documents_logic';
 
-import { DocumentsLogic } from './documents_logic';
 import { IndexNameLogic } from './index_name_logic';
 
 import './documents.scss';
 
 export const SearchIndexDocuments: React.FC = () => {
   const { indexName } = useValues(IndexNameLogic);
-  const { simplifiedMapping, results } = useValues(DocumentsLogic);
+  const { simplifiedMapping } = useValues(DocumentsLogic);
   const { makeRequest, makeMappingRequest, setSearchQuery } = useActions(DocumentsLogic);
 
   useEffect(() => {
-    makeRequest({ indexName, query: '' });
+    makeRequest({
+      indexName,
+      pagination: DEFAULT_PAGINATION,
+      query: '',
+    });
     makeMappingRequest({ indexName });
   }, [indexName]);
 
-  const resultToField = (result: SearchHit) => {
-    if (simplifiedMapping && result._source && !Array.isArray(result._source)) {
-      if (typeof result._source === 'object') {
-        return Object.entries(result._source).map(([key, value]) => {
-          return {
-            fieldName: key,
-            fieldType: simplifiedMapping[key]?.type ?? 'object',
-            fieldValue: JSON.stringify(value, null, 2),
-          };
-        });
-      }
-    }
-    return [];
-  };
-
   return (
-    <EuiPanel hasBorder={false} hasShadow={false}>
+    <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none">
       <EuiSpacer />
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
@@ -91,21 +78,7 @@ export const SearchIndexDocuments: React.FC = () => {
             i18n.translate('xpack.enterpriseSearch.content.searchIndex.documents.noMappings', {
               defaultMessage: 'No mappings found for index',
             })}
-
-          {simplifiedMapping &&
-            results.map((result) => {
-              return (
-                <>
-                  <Result
-                    fields={resultToField(result)}
-                    metaData={{
-                      id: result._id,
-                    }}
-                  />
-                  <EuiSpacer size="s" />
-                </>
-              );
-            })}
+          {simplifiedMapping && <DocumentList />}
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

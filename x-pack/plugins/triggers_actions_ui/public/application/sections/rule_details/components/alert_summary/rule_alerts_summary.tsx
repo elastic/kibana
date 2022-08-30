@@ -5,11 +5,19 @@
  * 2.0.
  */
 
-import { BarSeries, Chart, ScaleType, Settings, TooltipType } from '@elastic/charts';
 import {
+  BarSeries,
+  Chart,
+  FilterPredicate,
+  LIGHT_THEME,
+  ScaleType,
+  Settings,
+  TooltipType,
+} from '@elastic/charts';
+import {
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
@@ -25,18 +33,30 @@ import {
   EUI_SPARKLINE_THEME_PARTIAL,
 } from '@elastic/eui/dist/eui_charts_theme';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import moment from 'moment';
 import { useLoadRuleAlertsAggs } from '../../../../hooks/use_load_rule_alerts_aggregations';
 import { useLoadRuleTypes } from '../../../../hooks/use_load_rule_types';
 import { formatChartAlertData, getColorSeries } from '.';
 import { RuleAlertsSummaryProps } from '.';
+import { isP1DTFormatterSetting } from './helpers';
 
 const Y_ACCESSORS = ['y'];
 const X_ACCESSORS = ['x'];
 const G_ACCESSORS = ['g'];
-
+const FALLBACK_DATE_FORMAT_SCALED_P1DT = 'YYYY-MM-DD';
 export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummaryProps) => {
   const [features, setFeatures] = useState<string>('');
   const isDarkMode = useUiSetting<boolean>('theme:darkMode');
+
+  const scaledDateFormatPreference = useUiSetting<string[][]>('dateFormat:scaled');
+  const maybeP1DTFormatter = Array.isArray(scaledDateFormatPreference)
+    ? scaledDateFormatPreference.find(isP1DTFormatterSetting)
+    : null;
+  const p1dtFormat =
+    Array.isArray(maybeP1DTFormatter) && maybeP1DTFormatter.length === 2
+      ? maybeP1DTFormatter[1]
+      : FALLBACK_DATE_FORMAT_SCALED_P1DT;
+
   const theme = useMemo(
     () => [
       EUI_SPARKLINE_THEME_PARTIAL,
@@ -57,6 +77,15 @@ export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummary
     features,
   });
   const chartData = useMemo(() => formatChartAlertData(alertsChartData), [alertsChartData]);
+  const tooltipSettings = useMemo(
+    () => ({
+      type: TooltipType.VerticalCursor,
+      headerFormatter: ({ value }: { value: number }) => {
+        return <>{moment(value).format(p1dtFormat)}</>;
+      },
+    }),
+    [p1dtFormat]
+  );
 
   useEffect(() => {
     const matchedRuleType = ruleTypes.find((type) => type.id === rule.ruleTypeId);
@@ -66,8 +95,33 @@ export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummary
   }, [rule, ruleTypes]);
 
   if (isLoadingRuleAlertsAggs) return <EuiLoadingSpinner />;
-  if (errorRuleAlertsAggs) return <EuiFlexItem>Error</EuiFlexItem>;
-
+  if (errorRuleAlertsAggs)
+    return (
+      <EuiEmptyPrompt
+        iconType="alert"
+        color="danger"
+        title={
+          <h5>
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.errorLoadingTitle"
+              defaultMessage="Unable to load the alerts summary"
+            />
+          </h5>
+        }
+        body={
+          <p>
+            {
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.errorLoadingBody"
+                defaultMessage=" There was an error loading the alerts summary. Contact your
+                administrator for help."
+              />
+            }
+          </p>
+        }
+      />
+    );
+  const isVisibleFunction: FilterPredicate = (series) => series.splitAccessors.get('g') !== 'total';
   return (
     <EuiPanel hasShadow={false} hasBorder>
       <EuiFlexGroup direction="column">
@@ -82,12 +136,20 @@ export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummary
                   />
                 </h5>
               </EuiTitle>
+              <EuiSpacer size="s" />
+              <EuiText size="s" color="subdued">
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.last30days"
+                  defaultMessage="Last 30 days"
+                />
+              </EuiText>
             </EuiFlexItem>
+
             <EuiPanel hasShadow={false}>
               <EuiFlexGroup gutterSize="s" alignItems="center">
                 <EuiFlexGroup direction="row">
                   <EuiFlexItem>
-                    <EuiText size="s" color="subdued">
+                    <EuiText size="xs" color="subdued">
                       <FormattedMessage
                         id="xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.allAlertsLabel"
                         defaultMessage="All alerts"
@@ -100,27 +162,27 @@ export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummary
                 </EuiFlexGroup>
                 <EuiFlexGroup direction="row">
                   <EuiFlexItem>
-                    <EuiText size="s" color="subdued">
+                    <EuiText size="xs" color="subdued">
                       <FormattedMessage
                         id="xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.activeLabel"
                         defaultMessage="Active"
                       />
                     </EuiText>
-                    <EuiText color="#4A7194">
+                    <EuiText color={LIGHT_THEME.colors.vizColors[2]}>
                       <h4>{active}</h4>
                     </EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiFlexGroup direction="row">
                   <EuiFlexItem>
-                    <EuiText size="s" color="subdued">
+                    <EuiText size="xs" color="subdued">
                       <FormattedMessage
                         id="xpack.triggersActionsUI.sections.ruleDetails.rule.ruleSummary.recoveredLabel"
                         defaultMessage="Recovered"
                       />
                     </EuiText>
                     <EuiFlexItem>
-                      <EuiText color="#C4407C">
+                      <EuiText color={LIGHT_THEME.colors.vizColors[1]}>
                         <h4>{recovered}</h4>
                       </EuiText>
                     </EuiFlexItem>
@@ -128,7 +190,6 @@ export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummary
                 </EuiFlexGroup>
               </EuiFlexGroup>
             </EuiPanel>
-            <EuiHorizontalRule margin="none" />
           </EuiFlexGroup>
         </EuiFlexItem>
 
@@ -145,7 +206,7 @@ export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummary
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <Chart size={{ height: 50 }}>
-        <Settings tooltip={TooltipType.None} theme={theme} />
+        <Settings tooltip={tooltipSettings} theme={theme} />
         <BarSeries
           id="bars"
           xScaleType={ScaleType.Time}
@@ -156,6 +217,7 @@ export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummary
           splitSeriesAccessors={G_ACCESSORS}
           color={getColorSeries}
           data={chartData}
+          filterSeriesInTooltip={isVisibleFunction}
         />
       </Chart>
     </EuiPanel>

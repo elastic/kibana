@@ -17,7 +17,7 @@ import { FieldBasedIndexPatternColumn } from '../column_types';
 import { updateColumnParam } from '../../layer_helpers';
 import { supportedFormats } from '../../../../../common/expressions/format_column/supported_formats';
 import { MODES, AUTO_BARS, DEFAULT_INTERVAL, MIN_HISTOGRAM_BARS, SLICES } from './constants';
-import { IndexPattern, IndexPatternField } from '../../../types';
+import { IndexPattern, IndexPatternField } from '../../../../types';
 import { getInvalidFieldMessage, isValidNumber } from '../helpers';
 
 type RangeType = Omit<Range, 'type'>;
@@ -183,7 +183,7 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
     paramEditorUpdater,
     indexPattern,
     uiSettings,
-    data,
+    fieldFormats,
   }) => {
     const currentField = indexPattern.getFieldByName(currentColumn.sourceField);
     const numberFormat = currentColumn.params.format;
@@ -192,7 +192,7 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
       supportedFormats[numberFormat.id] &&
       supportedFormats[numberFormat.id].decimalsToPattern(numberFormat.params?.decimals || 0);
 
-    const rangeFormatter = data.fieldFormats.deserialize({
+    const rangeFormatter = fieldFormats.deserialize({
       ...(currentColumn.params.parentFormat || { id: 'range' }),
       params: {
         ...currentColumn.params.parentFormat?.params,
