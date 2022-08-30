@@ -43,7 +43,7 @@ function mountWith({
         <KibanaContextProvider services={services}>
           <TableListViewKibanaProvider
             core={services.core as any}
-            savedObjectTaggingApi={services.savedObjectsTagging as any}
+            savedObjectTagging={services.savedObjectsTagging as any}
             FormattedRelative={FormattedRelative}
             toMountPoint={() => () => () => undefined}
           >

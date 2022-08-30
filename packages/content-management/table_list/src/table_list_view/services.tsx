@@ -19,8 +19,8 @@ type NotifyFn = (title: JSX.Element, text?: string) => void;
 
 export interface SavedObjectsReference {
   id: string;
-  name: string;
   type: string;
+  name?: string;
 }
 
 export type DateFormatter = (props: {
