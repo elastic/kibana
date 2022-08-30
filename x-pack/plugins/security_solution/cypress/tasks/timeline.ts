@@ -70,8 +70,11 @@ import {
   TIMESTAMP_HOVER_ACTION_OVERFLOW_BTN,
   TIMELINE_DATA_PROVIDER_FIELD_INPUT,
   ACTIVE_TIMELINE_BOTTOM_BAR,
+  EMPTY_DATA_PROVIDER_AREA,
+  EMPTY_DROPPABLE_DATA_PROVIDER_GROUP,
 } from '../screens/timeline';
 import { REFRESH_BUTTON, TIMELINE } from '../screens/timelines';
+import { drag, drop } from './common';
 
 import { closeFieldsBrowser, filterFieldsBrowser } from './fields_browser';
 
@@ -183,6 +186,23 @@ export const addDataProvider = (filter: TimelineFilter): Cypress.Chainable<JQuer
     cy.get(TIMELINE_DATA_PROVIDER_VALUE).type(`${filter.value}{enter}`);
   }
   return cy.get(SAVE_DATA_PROVIDER_BTN).click();
+};
+
+export const updateDataProviderbyDraggingField = (
+  dragTarget: Cypress.Chainable<JQuery<HTMLElement>>
+) => {
+  dragTarget.then((currentSubject) => {
+    drag(currentSubject);
+  });
+  let dropTarget: Cypress.Chainable<JQuery<HTMLElement>>;
+  if (cy.get(EMPTY_DATA_PROVIDER_AREA).first()) {
+    dropTarget = cy.get(EMPTY_DATA_PROVIDER_AREA);
+  } else {
+    dropTarget = cy.get(EMPTY_DROPPABLE_DATA_PROVIDER_GROUP);
+  }
+  dropTarget.then((currentEl) => {
+    drop(currentEl);
+  });
 };
 
 export const addNewCase = () => {
