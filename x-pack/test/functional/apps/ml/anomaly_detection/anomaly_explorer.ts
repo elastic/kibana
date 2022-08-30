@@ -426,11 +426,15 @@ export default function ({ getService }: FtrProviderContext) {
 
         describe('Anomaly Charts as embeddable', function () {
           beforeEach(async () => {
-            await ml.navigation.navigateToAnomalyExplorer(testData.jobConfig.job_id, {
-              from: '2016-02-07T00%3A00%3A00.000Z',
-              to: '2016-02-11T23%3A59%3A54.000Z',
-            });
-            await elasticChart.setNewChartUiDebugFlag(true);
+            await ml.navigation.navigateToAnomalyExplorer(
+              testData.jobConfig.job_id,
+              {
+                from: '2016-02-07T00%3A00%3A00.000Z',
+                to: '2016-02-11T23%3A59%3A54.000Z',
+              },
+              () => elasticChart.setNewChartUiDebugFlag(true)
+            );
+
             await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
             await ml.commonUI.waitForDatePickerIndicatorLoaded();
 
