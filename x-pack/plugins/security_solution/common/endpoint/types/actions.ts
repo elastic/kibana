@@ -272,8 +272,8 @@ export interface ActionDetails<TOutputContent extends object = object> {
    */
   agents: string[];
   /**
-   * The endpoint ID/fleet agent ID which was used to create the action (same as above) and the agent's name
-   * Action could have been sent for multiple endpoints which is why this is an Array
+   * A map of `Agent ID`'s to which the action was sent whose value contains more
+   * information about the host (currently the host name only).
    */
   hosts: Record<string, { name: string }>;
   /**
