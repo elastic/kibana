@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useMemo, useReducer } from 'react';
+import { ALERTS_QUERY_NAMES } from '../../../../../detections/containers/detection_engine/alerts/constants';
 import { useQueryAlerts } from '../../../../../detections/containers/detection_engine/alerts/use_query';
 import type { GlobalTimeArgs } from '../../../../../common/containers/use_global_time';
 import * as i18n from '../translations';
@@ -102,6 +103,7 @@ export const useCriticalAlerts = ({
     query: currentTimeQuery,
     indexName: signalIndexName,
     skip,
+    queryName: ALERTS_QUERY_NAMES.SOC_TRENDS,
   });
 
   const {
@@ -112,6 +114,7 @@ export const useCriticalAlerts = ({
     query: compareTimeQuery,
     indexName: signalIndexName,
     skip,
+    queryName: ALERTS_QUERY_NAMES.SOC_TRENDS,
   });
 
   useEffect(() => {

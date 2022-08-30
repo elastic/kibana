@@ -92,6 +92,8 @@ export interface LinkTo {
 }
 export type InputsRangeTimeOnly = Pick<InputsRange, 'timerange' | 'linkTo' | 'policy'>;
 
+export type Inputs = InputsRange | InputsRangeTimeOnly;
+
 export interface InputsModel {
   global: InputsRange;
   timeline: InputsRange;

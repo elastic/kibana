@@ -21,6 +21,7 @@ import { connect } from 'react-redux';
 import type { Dispatch } from 'redux';
 import deepEqual from 'fast-deep-equal';
 
+import { isQueryInput } from '../../store/inputs/helpers';
 import { DEFAULT_TIMEPICKER_QUICK_RANGES } from '../../../../common/constants';
 import { timelineActions } from '../../../timelines/store/timeline';
 import { useUiSetting$ } from '../../lib/kibana';
@@ -39,7 +40,7 @@ import {
   startSelector,
   toStrSelector,
 } from './selectors';
-import type { InputsRange, InputsRangeTimeOnly } from '../../store/inputs/model';
+import type { Inputs } from '../../store/inputs/model';
 
 const MAX_RECENTLY_USED_RANGES = 9;
 
@@ -121,6 +122,7 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
           ? formatDate(newEnd, { roundUp: true })
           : formatDate(newEnd);
         if (
+          queries &&
           !kqlHaveBeenUpdated &&
           (!isQuickSelection || (start === currentStart && end === currentEnd))
         ) {
@@ -144,7 +146,7 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
           startAutoReload({ id });
         }
 
-        if (!isPaused && (!isQuickSelection || (isQuickSelection && toStr !== 'now'))) {
+        if (queries && !isPaused && (!isQuickSelection || (isQuickSelection && toStr !== 'now'))) {
           refetchQuery(queries);
         }
       },
@@ -321,24 +323,7 @@ export const makeMapStateToProps = () => {
   const getStartSelector = startSelector();
   const getToStrSelector = toStrSelector();
   return (state: State, { id }: OwnProps) => {
-    if (id === 'socTrends') {
-      const inputsRange: InputsRangeTimeOnly = getOr({}, `inputs.${id}`, state);
-      return {
-        duration: getDurationSelector(inputsRange),
-        end: getEndSelector(inputsRange),
-        fromStr: getFromStrSelector(inputsRange),
-        kind: getKindSelector(inputsRange),
-        policy: getPolicySelector(inputsRange),
-        start: getStartSelector(inputsRange),
-        toStr: getToStrSelector(inputsRange),
-        isLoading: false,
-        // needs to be defined as undefined ¯\_(ツ)_/¯
-        kqlQuery: undefined,
-        queries: [],
-      };
-    }
-
-    const inputsRange: InputsRange = getOr({}, `inputs.${id}`, state);
+    const inputsRange: Inputs = getOr({}, `inputs.${id}`, state);
     return {
       duration: getDurationSelector(inputsRange),
       end: getEndSelector(inputsRange),
@@ -347,9 +332,13 @@ export const makeMapStateToProps = () => {
       policy: getPolicySelector(inputsRange),
       start: getStartSelector(inputsRange),
       toStr: getToStrSelector(inputsRange),
-      isLoading: getIsLoadingSelector(inputsRange),
-      kqlQuery: getKqlQuerySelector(inputsRange),
-      queries: getQueriesSelector(state, id),
+      isLoading: false,
+      ...(isQueryInput(inputsRange) &&
+        (id === 'timeline' || id === 'global') && {
+          isLoading: getIsLoadingSelector(inputsRange),
+          kqlQuery: getKqlQuerySelector(inputsRange),
+          queries: getQueriesSelector(state, id),
+        }),
     };
   };
 };

@@ -11,6 +11,7 @@ import { getFutureTimeRange, getPreviousTimeRange } from '../../utils/get_time_r
 import type { InputsModel, TimeRange, Refetch, RefetchKql, InspectQuery } from './model';
 import type { InputsModelId } from './constants';
 import { socTrendsId, timelineId } from './constants';
+import type { Inputs, InputsRange } from './model';
 
 export const updateInputFullScreen = (
   inputId: InputsModelId,
@@ -317,4 +318,11 @@ export const deleteOneQuery = ({ inputId, id, state }: DeleteOneQueryParams): In
           : [...state[inputId].queries],
     },
   };
+};
+
+export const isQueryInput = (inputs: Inputs): inputs is InputsRange => {
+  if ('queries' in inputs) {
+    return true;
+  }
+  return false;
 };

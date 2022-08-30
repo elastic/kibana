@@ -29,7 +29,7 @@ export const getFutureTimeRange = (dateRange: {
   to: string | number;
   from: string | number;
 }): AbsoluteTimeRange => {
-  const { from, to } = dateRange; // normalizeTimeRange(dateRange, uiSettings);
+  const { from, to } = dateRange;
   const duration = moment(to).diff(moment(from));
   const previousStart = moment(from).add(duration).toISOString();
   const previousEnd = moment(to).add(duration).toISOString();
