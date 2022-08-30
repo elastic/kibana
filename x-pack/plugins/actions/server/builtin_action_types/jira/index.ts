@@ -6,13 +6,13 @@
  */
 
 import { curry } from 'lodash';
-import { schema, TypeOf } from '@kbn/config-schema';
+import { TypeOf } from '@kbn/config-schema';
 
 import { Logger } from '@kbn/core/server';
 import { validate } from './validators';
 import {
-  ExternalIncidentServiceConfiguration,
-  ExternalIncidentServiceSecretConfiguration,
+  ExternalIncidentServiceConfigurationSchema,
+  ExternalIncidentServiceSecretConfigurationSchema,
   ExecutorParamsSchema,
 } from './schema';
 import { ActionsConfigurationUtilities } from '../../actions_config';
@@ -77,13 +77,17 @@ export function getActionType(
       SecurityConnectorFeatureId,
     ],
     validate: {
-      config: schema.object(ExternalIncidentServiceConfiguration, {
-        validate: curry(validate.config)(configurationUtilities),
-      }),
-      secrets: schema.object(ExternalIncidentServiceSecretConfiguration, {
-        validate: curry(validate.secrets)(configurationUtilities),
-      }),
-      params: ExecutorParamsSchema,
+      config: {
+        schema: ExternalIncidentServiceConfigurationSchema,
+        customValidator: validate.config,
+      },
+      secrets: {
+        schema: ExternalIncidentServiceSecretConfigurationSchema,
+        customValidator: validate.secrets,
+      },
+      params: {
+        schema: ExecutorParamsSchema,
+      },
     },
     executor: curry(executor)({ logger, configurationUtilities }),
   };
