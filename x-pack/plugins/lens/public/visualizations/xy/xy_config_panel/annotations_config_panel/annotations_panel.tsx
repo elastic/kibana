@@ -32,7 +32,8 @@ import { search } from '@kbn/data-plugin/public';
 import {
   defaultAnnotationColor,
   defaultAnnotationRangeColor,
-  isRangeAnnotation,
+  isRangeAnnotationConfig,
+  isManualPointAnnotationConfig,
 } from '@kbn/event-annotation-plugin/public';
 import Color from 'color';
 import { getDataLayers } from '../../visualization_helpers';
@@ -95,7 +96,7 @@ export const getEndTimestamp = (
 };
 
 const sanitizeProperties = (annotation: EventAnnotationConfig) => {
-  if (isRangeAnnotation(annotation)) {
+  if (isRangeAnnotationConfig(annotation)) {
     const rangeAnnotation: RangeEventAnnotationConfig = pick(annotation, [
       'label',
       'key',
@@ -105,7 +106,7 @@ const sanitizeProperties = (annotation: EventAnnotationConfig) => {
       'outside',
     ]);
     return rangeAnnotation;
-  } else {
+  } else if (isManualPointAnnotationConfig(annotation)) {
     const lineAnnotation: PointInTimeEventAnnotationConfig = pick(annotation, [
       'id',
       'label',
@@ -119,6 +120,7 @@ const sanitizeProperties = (annotation: EventAnnotationConfig) => {
     ]);
     return lineAnnotation;
   }
+  return annotation; // todo: sanitize for the query annotations here
 };
 
 export const AnnotationsPanel = (
@@ -143,7 +145,8 @@ export const AnnotationsPanel = (
 
   const currentAnnotation = localLayer.annotations?.find((c) => c.id === accessor);
 
-  const isRange = isRangeAnnotation(currentAnnotation);
+  const isRange = isRangeAnnotationConfig(currentAnnotation);
+  const isManualPoint = isManualPointAnnotationConfig(currentAnnotation);
 
   const setAnnotations = useCallback(
     (annotation) => {
@@ -240,7 +243,7 @@ export const AnnotationsPanel = (
               }}
             />
           </>
-        ) : (
+        ) : isManualPoint ? (
           <ConfigPanelRangeDatePicker
             dataTestSubj="lns-xyAnnotation-time"
             label={i18n.translate('xpack.lens.xyChart.annotationDate', {
@@ -258,7 +261,7 @@ export const AnnotationsPanel = (
               }
             }}
           />
-        )}
+        ) : null}
 
         <ConfigPanelApplyAsRangeSwitch
           annotation={currentAnnotation}
@@ -385,7 +388,8 @@ const ConfigPanelApplyAsRangeSwitch = ({
   frame: FramePublicAPI;
   state: XYState;
 }) => {
-  const isRange = isRangeAnnotation(annotation);
+  const isRange = isRangeAnnotationConfig(annotation);
+  const isManualPoint = isManualPointAnnotationConfig(annotation);
   return (
     <EuiFormRow display="columnCompressed" className="lnsRowCompressedMargin">
       <EuiSwitch
@@ -414,8 +418,8 @@ const ConfigPanelApplyAsRangeSwitch = ({
               isHidden: annotation.isHidden,
             };
             onChange(newPointAnnotation);
-          } else if (annotation) {
-            const fromTimestamp = moment(annotation?.key.timestamp);
+          } else if (isManualPoint) {
+            const fromTimestamp = moment(annotation?.key?.timestamp);
             const dataLayers = getDataLayers(state.layers);
             const newRangeAnnotation: RangeEventAnnotationConfig = {
               key: {
