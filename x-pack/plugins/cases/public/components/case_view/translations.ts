@@ -178,10 +178,6 @@ export const SEND_EMAIL_ARIA = (user: string) =>
     defaultMessage: 'click to send an email to {user}',
   });
 
-export const ASSIGNEES = i18n.translate('xpack.cases.caseView.editAssigneesTitle', {
-  defaultMessage: 'Assignees',
-});
-
 export const EDIT_ASSIGNEES_ARIA_LABEL = i18n.translate(
   'xpack.cases.caseView.editAssigneesAriaLabel',
   {
