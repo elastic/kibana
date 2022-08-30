@@ -40,9 +40,7 @@ export const getTTYQueryPredicates = async (
             { term: { [EVENT_ACTION]: 'exec' } },
             { term: { [EVENT_ACTION]: 'end' } },
           ],
-          must: [
-            { term: { [ENTRY_SESSION_ENTITY_ID_PROPERTY]: sessionEntityId } },
-          ],
+          must: [{ term: { [ENTRY_SESSION_ENTITY_ID_PROPERTY]: sessionEntityId } }],
         },
       },
       size: 1,
@@ -104,12 +102,14 @@ export const registerIOEventsRoute = (router: IRouter) => {
                   { term: { [TTY_CHAR_DEVICE_MINOR_PROPERTY]: ttyPredicates.ttyMinor } },
                   { term: { [HOST_BOOT_ID_PROPERTY]: ttyPredicates.bootId } },
                   { term: { [EVENT_ACTION]: 'text_output' } },
-                  { range: {
-                    [TIMESTAMP]: {
-                      gte: ttyPredicates.range[0],
-                      lte: ttyPredicates.range[1],
+                  {
+                    range: {
+                      [TIMESTAMP]: {
+                        gte: ttyPredicates.range[0],
+                        lte: ttyPredicates.range[1],
+                      },
                     },
-                  }},
+                  },
                 ],
               },
             },

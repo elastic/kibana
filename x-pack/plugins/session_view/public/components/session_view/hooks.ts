@@ -13,7 +13,6 @@ import {
   AlertStatusEventEntityIdMap,
   ProcessEvent,
   ProcessEventResults,
-  IORoutePredicates,
 } from '../../../common/types/process_tree';
 import {
   ALERTS_ROUTE,
