@@ -805,7 +805,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
             </Display>
             <StyledMinHeightTabContainer>
               <Switch>
-                <Route path={`/rules/id/${ruleId}/:tabName(${RuleDetailTabs.alerts})`}>
+                <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.alerts})`}>
                   <>
                     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
                       <EuiFlexItem grow={false}>
@@ -855,7 +855,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                     )}
                   </>
                 </Route>
-                <Route path={`/rules/id/${ruleId}/:tabName(${RuleDetailTabs.exceptions})`}>
+                <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.exceptions})`}>
                   <ExceptionsViewer
                     ruleId={ruleId ?? ''}
                     ruleName={rule?.name ?? ''}
@@ -867,10 +867,10 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                     onRuleChange={refreshRule}
                   />
                 </Route>
-                <Route path={`/rules/id/${ruleId}/:tabName(${RuleDetailTabs.executionResults})`}>
+                <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.executionResults})`}>
                   <ExecutionLogTable ruleId={ruleId} selectAlertsTab={navigateToAlertsTab} />
                 </Route>
-                <Route path={`/rules/id/${ruleId}/:tabName(${RuleDetailTabs.executionEvents})`}>
+                <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.executionEvents})`}>
                   <ExecutionEventsTable ruleId={ruleId} />
                 </Route>
               </Switch>
