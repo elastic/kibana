@@ -30,8 +30,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     let indexedData: IndexedHostsAndAlertsResponse;
 
     before(async () => {
-      const endpointPackage = await policyTestResources.getEndpointPackage();
-      await endpointTestResources.setMetadataTransformFrequency('1s', endpointPackage.version);
+      //const endpointPackage = await policyTestResources.getEndpointPackage();
+      //await endpointTestResources.setMetadataTransformFrequency('1s', endpointPackage.version);
       indexedData = await endpointTestResources.loadEndpointData();
       await browser.refresh();
     });
@@ -185,7 +185,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.policy.confirmAndSave();
 
         await testSubjects.existOrFail('policyDetailsSuccessMessage');
-        await testSubjects.waitForHidden('toastCloseButton');
+        await new Promise(r => setTimeout(r, 5000));
+        //await testSubjects.waitForHidden('toastCloseButton');
 
         const agentFullPolicy = await policyTestResources.getFullAgentPolicy(
           policyInfo.agentPolicy.id
