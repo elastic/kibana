@@ -80,8 +80,6 @@ export function ChangeDataView({
   );
   const [isTextLangTransitionModalVisible, setIsTextLangTransitionModalVisible] = useState(false);
   const [selectedDataViewId, setSelectedDataViewId] = useState(currentDataViewId);
-  const [prevHocDataViewId, setPrevDataViewId] = useState<string | null>(null);
-
   const kibana = useKibana<IDataPluginServices>();
   const { application, data, storage } = kibana.services;
   const styles = changeDataViewStyles({ fullWidth: trigger.fullWidth });

@@ -30,14 +30,17 @@ const mockDataView = {
 describe('usePersistedDataView', () => {
   it('should save data view correctly', async () => {
     mockDiscoverServices.dataViews.createAndSave = jest.fn().mockResolvedValue(mockDataView);
-    const hook = renderHook((d: DataView) => usePersistedDataView(d), {
-      initialProps: mockDataView,
-      wrapper: ({ children }) => (
-        <KibanaContextProvider services={mockDiscoverServices}>{children}</KibanaContextProvider>
-      ),
-    });
+    const hook = renderHook(
+      (d: DataView) => usePersistedDataView(() => Promise.resolve(mockDataView)),
+      {
+        initialProps: mockDataView,
+        wrapper: ({ children }) => (
+          <KibanaContextProvider services={mockDiscoverServices}>{children}</KibanaContextProvider>
+        ),
+      }
+    );
 
-    const result = await hook.result.current();
+    const result = await hook.result.current(mockDataView);
 
     expect(mockDiscoverServices.dataViews.createAndSave).toHaveBeenCalledWith({
       id: mockDataView.id,
@@ -51,29 +54,21 @@ describe('usePersistedDataView', () => {
     mockDiscoverServices.dataViews.createAndSave = jest
       .fn()
       .mockRejectedValue(new Error('failed to save'));
-    const hook = renderHook((d: DataView) => usePersistedDataView(d), {
-      initialProps: mockDataView,
-      wrapper: ({ children }) => (
-        <KibanaContextProvider services={mockDiscoverServices}>{children}</KibanaContextProvider>
-      ),
-    });
+    const hook = renderHook(
+      (d: DataView) => usePersistedDataView(() => Promise.resolve(mockDataView)),
+      {
+        initialProps: mockDataView,
+        wrapper: ({ children }) => (
+          <KibanaContextProvider services={mockDiscoverServices}>{children}</KibanaContextProvider>
+        ),
+      }
+    );
 
     try {
-      await hook.result.current();
+      await hook.result.current(mockDataView);
     } catch (e) {
       expect(mockDiscoverServices.toastNotifications.addDanger).toHaveBeenCalled();
       expect(e.message).toEqual('failed to save');
     }
-  });
-
-  it('should return true when data view persisted', async () => {
-    const hook = renderHook((d: DataView) => usePersistedDataView(d), {
-      initialProps: { ...mockDataView, isPersisted: () => true } as DataView,
-      wrapper: ({ children }) => (
-        <KibanaContextProvider services={mockDiscoverServices}>{children}</KibanaContextProvider>
-      ),
-    });
-
-    expect(await hook.result.current()).toBeTruthy();
   });
 });

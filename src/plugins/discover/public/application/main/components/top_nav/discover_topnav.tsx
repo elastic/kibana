@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
 import { DataViewType, type DataView } from '@kbn/data-views-plugin/public';
@@ -35,7 +35,7 @@ export type DiscoverTopNavProps = Pick<
   isPlainRecord: boolean;
   textBasedLanguageModeErrors?: Error;
   onFieldEdited: () => void;
-  persistDataView: () => Promise<boolean>;
+  persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
   updateHocDataViewId: (dataView: DataView) => Promise<DataView>;
 };
 
@@ -70,6 +70,12 @@ export const DiscoverTopNav = ({
 
   const closeFieldEditor = useRef<() => void | undefined>();
   const closeDataViewEditor = useRef<() => void | undefined>();
+
+  const [adHocDataViews, setAdHocDataViews] = useState<DataView[]>(
+    !dataView.isPersisted() ? [dataView] : []
+  );
+
+  useEffect(() => setAdHocDataViews(!dataView.isPersisted() ? [dataView] : []), [dataView]);
 
   const { AggregateQueryTopNavMenu } = navigation.ui;
 
@@ -201,6 +207,7 @@ export const DiscoverTopNav = ({
     onDataViewCreated: createNewDataView,
     onChangeDataView,
     textBasedLanguages: supportedTextBasedLanguages as DataViewPickerProps['textBasedLanguages'],
+    adHocDataViews,
   };
 
   const onTextBasedSavedAndExit = useCallback(

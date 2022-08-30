@@ -328,14 +328,13 @@ export function useDiscoverState({
       const createdDataView = await openConfirmSavePrompt(currentDataView);
       if (createdDataView) {
         savedSearch.searchSource.setField('index', createdDataView);
-        // needs to update data view id in url, should be changed in future
-        setState((prevState) => ({ ...prevState }));
-        return true;
+        await onChangeDataView(createdDataView.id!);
+        return createdDataView;
       }
-      return false;
+      return undefined;
     }
-    return true;
-  }, [openConfirmSavePrompt, savedSearch.searchSource]);
+    return currentDataView;
+  }, [onChangeDataView, openConfirmSavePrompt, savedSearch.searchSource]);
 
   return {
     data$,

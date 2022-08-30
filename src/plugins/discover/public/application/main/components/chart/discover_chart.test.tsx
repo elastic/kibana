@@ -26,12 +26,6 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ReactWrapper } from 'enzyme';
 
-jest.mock('../../../../hooks/use_persisted_data_view', () => {
-  return {
-    usePersistedDataView: () => () => Promise.resolve(true),
-  };
-});
-
 setHeaderActionMenuMounter(jest.fn());
 
 async function mountComponent(isTimeBased: boolean = false) {
@@ -119,6 +113,7 @@ async function mountComponent(isTimeBased: boolean = false) {
     viewMode: VIEW_MODE.DOCUMENT_LEVEL,
     setDiscoverViewMode: jest.fn(),
     isTimeBased,
+    persistDataView: () => Promise.resolve({} as DataView),
   };
 
   let instance: ReactWrapper = {} as ReactWrapper;

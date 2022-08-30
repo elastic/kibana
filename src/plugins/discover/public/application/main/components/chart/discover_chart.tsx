@@ -60,7 +60,7 @@ export function DiscoverChart({
   isTimeBased: boolean;
   hideChart?: boolean;
   interval?: string;
-  persistDataView: () => Promise<boolean>;
+  persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
 }) {
   const { uiSettings, data, storage } = useDiscoverServices();
   const [showChartOptionsPopover, setShowChartOptionsPopover] = useState(false);
@@ -75,7 +75,12 @@ export function DiscoverChart({
   const [canVisualize, setCanVisualize] = useState(false);
 
   const onUpdateDiscoverViewMode = async (newViewMode: VIEW_MODE) => {
-    if (await persistDataView()) {
+    let shouldUpdate = true;
+    if (newViewMode === VIEW_MODE.AGGREGATED_LEVEL) {
+      shouldUpdate = !!(await persistDataView(dataView));
+    }
+
+    if (shouldUpdate) {
       setDiscoverViewMode(newViewMode);
     }
   };
@@ -88,11 +93,11 @@ export function DiscoverChart({
   }, [dataView, savedSearch.columns, timeField]);
 
   const onEditVisualization = useCallback(async () => {
-    if (!timeField || !(await persistDataView())) {
+    if (!timeField) {
       return;
     }
     triggerVisualizeActions(timeField, dataView.id, savedSearch.columns || []);
-  }, [timeField, persistDataView, dataView.id, savedSearch.columns]);
+  }, [dataView.id, savedSearch.columns, timeField]);
 
   const onShowChartOptions = useCallback(() => {
     setShowChartOptionsPopover(!showChartOptionsPopover);

@@ -163,6 +163,8 @@ function mountComponent(
       },
     } as unknown as GetStateReturn,
     setExpandedDoc: jest.fn(),
+    persistDataView: jest.fn(),
+    updateHocDataViewId: jest.fn(),
   };
 
   return mountWithIntl(
