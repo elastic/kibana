@@ -57,7 +57,7 @@ export const useEnterpriseSearchNav = () => {
       }),
     },
     {
-      id: 'analytics',
+      id: 'enterpriseSearchAnalytics',
       items: [
         {
           id: 'analytics_collections',

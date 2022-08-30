@@ -45,7 +45,7 @@ describe('useEnterpriseSearchContentNav', () => {
         name: 'Content',
       },
       {
-        id: 'analytics',
+        id: 'enterpriseSearchAnalytics',
         name: 'Analytics',
         items: [
           {
