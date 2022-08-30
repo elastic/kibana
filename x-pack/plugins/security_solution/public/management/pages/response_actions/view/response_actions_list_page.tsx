@@ -13,7 +13,7 @@ import { UX_MESSAGES } from '../../../components/endpoint_response_actions_list/
 export const ResponseActionsListPage = () => {
   return (
     <AdministrationListPage data-test-subj="responseActionsPage" title={UX_MESSAGES.pageTitle}>
-      <ResponseActionsLog />
+      <ResponseActionsLog showHostNames={true} />
     </AdministrationListPage>
   );
 };
