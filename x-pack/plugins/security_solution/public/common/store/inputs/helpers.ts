@@ -8,10 +8,17 @@
 import { get } from 'lodash/fp';
 
 import { getFutureTimeRange, getPreviousTimeRange } from '../../utils/get_time_range';
-import type { InputsModel, TimeRange, Refetch, RefetchKql, InspectQuery } from './model';
+import type {
+  Inputs,
+  InputsModel,
+  InputsRange,
+  InspectQuery,
+  Refetch,
+  RefetchKql,
+  TimeRange,
+} from './model';
 import type { InputsModelId } from './constants';
 import { socTrendsId, timelineId } from './constants';
-import type { Inputs, InputsRange } from './model';
 
 export const updateInputFullScreen = (
   inputId: InputsModelId,
