@@ -48,6 +48,8 @@ describe('Overview Grid', () => {
     return hits;
   };
 
+  const perPage = 20;
+
   it('renders correctly', async () => {
     jest
       .spyOn(hooks, 'useLast50DurationChart')
@@ -57,13 +59,10 @@ describe('Overview Grid', () => {
       state: {
         overview: {
           pageState: {
-            perPage: 20,
+            perPage,
           },
           data: {
-            pages: {
-              0: getMockData().slice(0, 20),
-              1: getMockData().slice(20, 40),
-            },
+            monitors: getMockData(),
             allMonitorIds: [], // not critical for this test
             total: getMockData().length,
           },
@@ -87,9 +86,9 @@ describe('Overview Grid', () => {
       },
     });
 
-    expect(getByText(/1-20/)).toBeInTheDocument();
-    expect(getByText(/of 40/)).toBeInTheDocument();
-    expect(getByText('Rows per page: 20')).toBeInTheDocument();
-    expect(getAllByTestId('syntheticsOverviewGridItem').length).toEqual(20);
+    expect(getByText('Showing')).toBeInTheDocument();
+    expect(getByText('40')).toBeInTheDocument();
+    expect(getByText('Monitors')).toBeInTheDocument();
+    expect(getAllByTestId('syntheticsOverviewGridItem').length).toEqual(perPage);
   });
 });
