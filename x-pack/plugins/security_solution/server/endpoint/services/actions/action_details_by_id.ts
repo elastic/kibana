@@ -116,10 +116,8 @@ export const getActionDetailsById = async (
     agentIds: normalizedActionRequest.agents,
   });
 
-  const { isCompleted, completedAt, wasSuccessful, errors, outputs } = getActionCompletionInfo(
-    normalizedActionRequest.agents,
-    actionResponses
-  );
+  const { isCompleted, completedAt, wasSuccessful, errors, outputs, agentState } =
+    getActionCompletionInfo(normalizedActionRequest.agents, actionResponses);
 
   const actionDetails: ActionDetails = {
     id: actionId,
@@ -136,6 +134,7 @@ export const getActionDetailsById = async (
     errors,
     isExpired: !isCompleted && normalizedActionRequest.expiration < new Date().toISOString(),
     outputs,
+    agentState,
     createdBy: normalizedActionRequest.createdBy,
     comment: normalizedActionRequest.comment,
     parameters: normalizedActionRequest.parameters,

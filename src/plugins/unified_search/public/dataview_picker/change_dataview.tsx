@@ -60,6 +60,7 @@ export const TextBasedLanguagesList = (props: TextBasedLanguagesListProps) => (
 export function ChangeDataView({
   isMissingCurrent,
   currentDataViewId,
+  adHocDataViews,
   onChangeDataView,
   onAddField,
   onDataViewCreated,
@@ -93,10 +94,21 @@ export function ChangeDataView({
   useEffect(() => {
     const fetchDataViews = async () => {
       const dataViewsRefs = await data.dataViews.getIdsWithTitle();
+      if (adHocDataViews?.length) {
+        adHocDataViews.forEach((adHocDataView) => {
+          if (adHocDataView.id) {
+            dataViewsRefs.push({
+              title: adHocDataView.title,
+              name: adHocDataView.name,
+              id: adHocDataView.id,
+            });
+          }
+        });
+      }
       setDataViewsList(dataViewsRefs);
     };
     fetchDataViews();
-  }, [data, currentDataViewId]);
+  }, [data, currentDataViewId, adHocDataViews]);
 
   useEffect(() => {
     if (trigger.label) {
@@ -126,7 +138,7 @@ export function ChangeDataView({
         color={isMissingCurrent ? 'danger' : 'primary'}
         iconSide="right"
         iconType="arrowDown"
-        title={title}
+        title={triggerLabel}
         fullWidth={fullWidth}
         {...rest}
       >
