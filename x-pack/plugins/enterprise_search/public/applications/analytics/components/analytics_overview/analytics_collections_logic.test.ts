@@ -39,13 +39,14 @@ describe('analyticsCollectionsLogic', () => {
       it('updates to true when apiSuccess returns empty analytics collections array', () => {
         AnalyticsCollectionsLogic.actions.apiSuccess([]);
         expect(AnalyticsCollectionsLogic.values.hasNoAnalyticsCollections).toBe(true);
-        expect(AnalyticsCollectionsLogic.values).toEqual(
-          expect.objectContaining({
-            analyticsCollections: [],
-            data: [],
-            isLoading: false,
-          })
-        );
+        expect(AnalyticsCollectionsLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          analyticsCollections: [],
+          hasNoAnalyticsCollections: true,
+          data: [],
+          isLoading: false,
+          status: Status.SUCCESS,
+        });
       });
 
       it('updates to false when apiSuccess returns analytics collections array', () => {
@@ -54,13 +55,13 @@ describe('analyticsCollectionsLogic', () => {
         ];
         AnalyticsCollectionsLogic.actions.apiSuccess(collections);
         expect(AnalyticsCollectionsLogic.values.hasNoAnalyticsCollections).toBe(false);
-        expect(AnalyticsCollectionsLogic.values).toEqual(
-          expect.objectContaining({
-            analyticsCollections: collections,
-            data: collections,
-            isLoading: false,
-          })
-        );
+        expect(AnalyticsCollectionsLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          analyticsCollections: collections,
+          data: collections,
+          isLoading: false,
+          status: Status.SUCCESS,
+        });
       });
     });
   });
@@ -92,16 +93,14 @@ describe('analyticsCollectionsLogic', () => {
       it('updates when apiSuccess listener triggered', () => {
         AnalyticsCollectionsLogic.actions.apiSuccess([]);
 
-        expect(AnalyticsCollectionsLogic.values).toEqual(
-          expect.objectContaining({
-            ...DEFAULT_VALUES,
-            analyticsCollections: [],
-            data: [],
-            hasNoAnalyticsCollections: true,
-            isLoading: false,
-            status: Status.SUCCESS,
-          })
-        );
+        expect(AnalyticsCollectionsLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          analyticsCollections: [],
+          data: [],
+          hasNoAnalyticsCollections: true,
+          isLoading: false,
+          status: Status.SUCCESS,
+        });
       });
     });
   });
