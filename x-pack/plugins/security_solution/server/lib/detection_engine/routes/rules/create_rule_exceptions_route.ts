@@ -42,6 +42,7 @@ import { patchRules } from '../../rules/patch_rules';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { readRules } from '../../rules/read_rules';
 import type { RuleParams } from '../../schemas/rule_schemas';
+import { checkDefaultRuleExceptionListReferences } from './utils/check_for_default_rule_exception_list';
 
 export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) => {
   router.post(
@@ -99,12 +100,7 @@ export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) 
 
         // This should hopefully never happen, but could if we forget to add such a check to one
         // of our routes allowing the user to update the rule to have more than one default list added
-        if (ruleDefaultLists.length > 1) {
-          return siemResponse.error({
-            statusCode: 500,
-            body: `Unable to add exception to rule - rule with id:"${ruleId}" has more than one default exception list assigned.`,
-          });
-        }
+        checkDefaultRuleExceptionListReferences({ exceptionLists: rule.params.exceptionsList });
 
         const [ruleDefaultList] = ruleDefaultLists;
 

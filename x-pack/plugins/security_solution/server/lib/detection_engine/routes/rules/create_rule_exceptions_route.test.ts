@@ -114,10 +114,49 @@ describe('createRuleExceptionsRoute', () => {
 
       const response = await server.inject(request, requestContextMock.convertContext(context));
 
-      expect(response.status).toEqual(500);
       expect(response.body).toEqual({
         message:
           'Unable to add exception to rule - rule with id:"4656dc92-5832-11ea-8e2d-0242ac130003" not found',
+        status_code: 500,
+      });
+    });
+
+    test('returns 500 if rule found to have multiple default exception lists on it', async () => {
+      request = requestMock.create({
+        method: 'post',
+        path: `${DETECTION_ENGINE_RULES_URL}/exceptions`,
+        params: {
+          id: '4656dc92-5832-11ea-8e2d-0242ac130003',
+        },
+        body: {
+          items: [getMockExceptionItem()],
+        },
+      });
+
+      clients.rulesClient.resolve.mockResolvedValue(
+        resolveRuleMock({
+          ...getQueryRuleParams(),
+          exceptionsList: [
+            {
+              type: 'rule_default',
+              id: '4656dc92-5832-11ea-8e2d-0242ac130003',
+              list_id: 'my_default_list',
+              namespace_type: 'single',
+            },
+            {
+              type: 'rule_default',
+              id: '4656dc92-5832-11ea-8e2d-0242ac130044',
+              list_id: 'my_default_list_2',
+              namespace_type: 'single',
+            },
+          ],
+        })
+      );
+
+      const response = await server.inject(request, requestContextMock.convertContext(context));
+
+      expect(response.body).toEqual({
+        message: 'More than one default exception list found on rule',
         status_code: 500,
       });
     });
