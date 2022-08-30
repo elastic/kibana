@@ -111,6 +111,7 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
     viewMode: VIEW_MODE.DOCUMENT_LEVEL,
     onDataViewCreated: jest.fn(),
     useNewFieldsApi: true,
+    persistDataView: jest.fn(),
   };
 }
 
