@@ -29,7 +29,6 @@ export function registerAnomalyChartsCasesAttachment(
   cases.attachmentFramework.registerPersistableState({
     id: ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
     icon: PLUGIN_ICON,
-    // TODO check where this name is presented
     displayName: i18n.translate('xpack.ml.cases.anomalyCharts.displayName', {
       defaultMessage: 'Anomaly charts',
     }),

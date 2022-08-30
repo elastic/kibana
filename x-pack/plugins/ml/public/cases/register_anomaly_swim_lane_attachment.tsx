@@ -37,7 +37,6 @@ export function registerAnomalySwimLaneCasesAttachment(
   cases.attachmentFramework.registerPersistableState({
     id: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
     icon: PLUGIN_ICON,
-    // TODO check where this name is presented
     displayName: i18n.translate('xpack.ml.cases.anomalySwimLane.displayName', {
       defaultMessage: 'Anomaly swim lane',
     }),
