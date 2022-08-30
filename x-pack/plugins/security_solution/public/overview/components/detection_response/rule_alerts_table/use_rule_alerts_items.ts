@@ -8,10 +8,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import {
-  useQueryAlerts,
-  ALERTS_QUERY_NAMES,
-} from '../../../../detections/containers/detection_engine/alerts/use_query';
+import { useQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/use_query';
+import { ALERTS_QUERY_NAMES } from '../../../../detections/containers/detection_engine/alerts/constants';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 
 // Formatted item result
