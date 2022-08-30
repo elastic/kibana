@@ -211,7 +211,6 @@ export class AbstractGeoFileImporter extends Importer implements GeoFileImporter
 
           retries--;
         } catch (err) {
-          console.log(err);
           resp.success = false;
           resp.error = err;
           retries = 0;
