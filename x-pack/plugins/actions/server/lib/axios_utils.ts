@@ -6,10 +6,10 @@
  */
 
 import { isObjectLike, isEmpty } from 'lodash';
-import { AxiosInstance, Method, AxiosResponse, AxiosBasicCredentials } from 'axios';
+import { AxiosInstance, Method, AxiosResponse, AxiosRequestConfig } from 'axios';
 import { Logger } from '@kbn/core/server';
-import { getCustomAgents } from './get_custom_agents';
-import { ActionsConfigurationUtilities } from '../../actions_config';
+import { getCustomAgents } from '../builtin_action_types/lib/get_custom_agents';
+import { ActionsConfigurationUtilities } from '../actions_config';
 
 export const request = async <T = unknown>({
   axios,
@@ -19,24 +19,21 @@ export const request = async <T = unknown>({
   data,
   configurationUtilities,
   headers,
-  ...rest
+  ...config
 }: {
   axios: AxiosInstance;
   url: string;
   logger: Logger;
   method?: Method;
   data?: T;
-  params?: unknown;
   configurationUtilities: ActionsConfigurationUtilities;
   headers?: Record<string, string> | null;
-  validateStatus?: (status: number) => boolean;
-  auth?: AxiosBasicCredentials;
-}): Promise<AxiosResponse> => {
+} & AxiosRequestConfig): Promise<AxiosResponse> => {
   const { httpAgent, httpsAgent } = getCustomAgents(configurationUtilities, logger, url);
   const { maxContentLength, timeout } = configurationUtilities.getResponseSettings();
 
   return await axios(url, {
-    ...rest,
+    ...config,
     method,
     // Axios doesn't support `null` value for `headers` property.
     headers: headers ?? undefined,
