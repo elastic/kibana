@@ -170,12 +170,6 @@ export function getSuggestions({
     .sort((a, b) => b.score - a.score);
 }
 
-function isDataSourceWithLayers(datasourceState: object): datasourceState is {
-  layers: Record<string, unknown>;
-} {
-  return 'layers' in datasourceState;
-}
-
 export function getVisualizeFieldSuggestions({
   datasourceMap,
   datasourceStates,
@@ -205,30 +199,10 @@ export function getVisualizeFieldSuggestions({
     const allSuggestions = suggestions.filter(
       (s) => s.visualizationId === visualizeTriggerFieldContext.type
     );
-    return {
-      ...allSuggestions[0],
-      datasourceState: {
-        ...(typeof allSuggestions[0].datasourceState === 'object'
-          ? allSuggestions[0].datasourceState
-          : {}),
-        layers: allSuggestions.reduce((acc, s) => {
-          return {
-            ...acc,
-            ...(typeof s.datasourceState === 'object' &&
-            s.datasourceState !== null &&
-            isDataSourceWithLayers(s.datasourceState)
-              ? s.datasourceState.layers
-              : {}),
-          };
-        }, {}),
-      },
-      visualizationState: {
-        ...(typeof allSuggestions[0].visualizationState === 'object'
-          ? allSuggestions[0].visualizationState
-          : {}),
-        ...visualizeTriggerFieldContext.configuration,
-      },
-    };
+    return activeVisualization?.getSuggestionFromConvertToLensContext?.({
+      suggestions: allSuggestions,
+      context: visualizeTriggerFieldContext,
+    });
   }
 
   if (suggestions.length) {

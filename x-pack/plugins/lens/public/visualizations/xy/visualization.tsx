@@ -23,7 +23,14 @@ import { XyToolbar } from './xy_config_panel';
 import { DimensionEditor } from './xy_config_panel/dimension_editor';
 import { LayerHeader } from './xy_config_panel/layer_header';
 import type { Visualization, AccessorConfig, FramePublicAPI } from '../../types';
-import { State, visualizationTypes, XYLayerConfig, XYDataLayerConfig, SeriesType } from './types';
+import {
+  State,
+  visualizationTypes,
+  XYLayerConfig,
+  XYDataLayerConfig,
+  SeriesType,
+  XYSuggestion,
+} from './types';
 import { layerTypes } from '../../../common';
 import { isHorizontalChart } from './state_helpers';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
@@ -627,6 +634,27 @@ export const getXyVisualization = ({
       );
     }
     return null;
+  },
+
+  getSuggestionFromConvertToLensContext({ suggestions, context }) {
+    const allSuggestions = suggestions as XYSuggestion[];
+    return {
+      ...allSuggestions[0],
+      datasourceState: {
+        ...allSuggestions[0].datasourceState,
+        layers: allSuggestions.reduce(
+          (acc, s) => ({
+            ...acc,
+            ...s.datasourceState.layers,
+          }),
+          {}
+        ),
+      },
+      visualizationState: {
+        ...allSuggestions[0].visualizationState,
+        ...context.configuration,
+      },
+    };
   },
 });
 

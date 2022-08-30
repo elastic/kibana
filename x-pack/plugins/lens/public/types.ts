@@ -838,6 +838,11 @@ export interface VisualizationDisplayOptions {
   noPadding?: boolean;
 }
 
+interface VisualizationStateFromContextChangeProps {
+  suggestions: Suggestion[];
+  context: VisualizeEditorContext;
+}
+
 export interface Visualization<T = unknown> {
   /** Plugin ID, such as "lnsXY" */
   id: string;
@@ -1055,6 +1060,10 @@ export interface Visualization<T = unknown> {
    * Get RenderEventCounters events for telemetry
    */
   getRenderEventCounters?: (state: T) => string[];
+
+  getSuggestionFromConvertToLensContext?: (
+    props: VisualizationStateFromContextChangeProps
+  ) => Suggestion;
 }
 
 // Use same technique as TriggerContext
