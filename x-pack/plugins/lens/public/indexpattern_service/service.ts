@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { ActionExecutionContext, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import {
+  UPDATE_FILTER_REFERENCES_ACTION,
+  UPDATE_FILTER_REFERENCES_TRIGGER,
+} from '@kbn/unified-search-plugin/public';
 import type { DateRange } from '../../common';
 import type { IndexPattern, IndexPatternMap, IndexPatternRef } from '../types';
 import {
@@ -18,13 +23,20 @@ import {
   syncExistingFields,
 } from './loader';
 import type { DataViewsState } from '../state_management';
+import { generateId } from '../id_generator';
 
 export interface IndexPatternServiceProps {
   core: Pick<CoreStart, 'http' | 'notifications' | 'uiSettings'>;
   data: DataPublicPluginStart;
   dataViews: DataViewsContract;
+  uiActions: UiActionsStart;
   updateIndexPatterns: (
     newState: Partial<DataViewsState>,
+    options?: { applyImmediately: boolean }
+  ) => void;
+  replaceIndexPattern: (
+    newIndexPattern: IndexPattern,
+    oldId: string,
     options?: { applyImmediately: boolean }
   ) => void;
 }
@@ -70,6 +82,8 @@ export interface IndexPatternServiceAPI {
     indexPatternList: IndexPattern[];
     isFirstExistenceFetch: boolean;
   }) => Promise<void>;
+
+  replaceDataViewId: (newDataView: DataView) => Promise<void>;
   /**
    * Retrieves the default indexPattern from the uiSettings
    */
@@ -89,6 +103,8 @@ export function createIndexPatternService({
   dataViews,
   data,
   updateIndexPatterns,
+  replaceIndexPattern,
+  uiActions,
 }: IndexPatternServiceProps): IndexPatternServiceAPI {
   const onChangeError = (err: Error) =>
     core.notifications.toasts.addError(err, {
@@ -103,6 +119,27 @@ export function createIndexPatternService({
         dataViews,
         ...args,
       });
+    },
+    replaceDataViewId: async (dataView: DataView) => {
+      const newDataView = await dataViews.create({ ...dataView.toSpec(), id: generateId() });
+      dataViews.clearInstanceCache(dataView.id);
+      const loadedPatterns = await loadIndexPatterns({
+        dataViews,
+        patterns: [newDataView.id!],
+        cache: {},
+      });
+      replaceIndexPattern(loadedPatterns[newDataView.id!], dataView.id!, {
+        applyImmediately: true,
+      });
+      const trigger = uiActions.getTrigger(UPDATE_FILTER_REFERENCES_TRIGGER);
+      const action = uiActions.getAction(UPDATE_FILTER_REFERENCES_ACTION);
+
+      action?.execute({
+        trigger,
+        fromDataView: dataView.id,
+        toDataView: newDataView.id,
+        usedDataViews: [],
+      } as ActionExecutionContext);
     },
     ensureIndexPattern: (args) =>
       ensureIndexPattern({ onError: onChangeError, dataViews, ...args }),

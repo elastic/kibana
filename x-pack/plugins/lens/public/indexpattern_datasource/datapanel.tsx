@@ -307,9 +307,15 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   const currentIndexPattern = indexPatterns[currentIndexPatternId];
   const existingFieldsForIndexPattern = existingFields[currentIndexPattern?.title];
   const visualizeGeoFieldTrigger = uiActions.getTrigger(VISUALIZE_GEO_FIELD_TRIGGER);
-  const allFields = visualizeGeoFieldTrigger
-    ? currentIndexPattern.fields
-    : currentIndexPattern.fields.filter(({ type }) => type !== 'geo_point' && type !== 'geo_shape');
+  const allFields = useMemo(
+    () =>
+      visualizeGeoFieldTrigger && !currentIndexPattern.spec
+        ? currentIndexPattern.fields
+        : currentIndexPattern.fields.filter(
+            ({ type }) => type !== 'geo_point' && type !== 'geo_shape'
+          ),
+    [currentIndexPattern.fields, currentIndexPattern.spec, visualizeGeoFieldTrigger]
+  );
   const clearLocalState = () => setLocalState((s) => ({ ...s, nameFilter: '', typeFilter: [] }));
   const availableFieldTypes = uniq(allFields.map(({ type }) => type)).filter(
     (type) => type in fieldTypeNames
@@ -523,11 +529,24 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 dataView: indexPatternInstance,
               },
               fieldName,
-              onSave: () => refreshFieldList(),
+              onSave: () => {
+                if (indexPatternInstance.isPersisted()) {
+                  refreshFieldList();
+                } else {
+                  indexPatternService.replaceDataViewId(indexPatternInstance);
+                }
+              },
             });
           }
         : undefined,
-    [editPermission, dataViews, currentIndexPattern.id, indexPatternFieldEditor, refreshFieldList]
+    [
+      editPermission,
+      dataViews,
+      currentIndexPattern.id,
+      indexPatternFieldEditor,
+      refreshFieldList,
+      indexPatternService,
+    ]
   );
 
   const removeField = useMemo(
@@ -540,11 +559,24 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 dataView: indexPatternInstance,
               },
               fieldName,
-              onDelete: () => refreshFieldList(),
+              onDelete: () => {
+                if (indexPatternInstance.isPersisted()) {
+                  refreshFieldList();
+                } else {
+                  indexPatternService.replaceDataViewId(indexPatternInstance);
+                }
+              },
             });
           }
         : undefined,
-    [currentIndexPattern.id, dataViews, editPermission, indexPatternFieldEditor, refreshFieldList]
+    [
+      currentIndexPattern.id,
+      dataViews,
+      editPermission,
+      indexPatternFieldEditor,
+      indexPatternService,
+      refreshFieldList,
+    ]
   );
 
   const fieldProps = useMemo(

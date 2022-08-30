@@ -6,7 +6,7 @@
  */
 
 import { isNestedField } from '@kbn/data-views-plugin/common';
-import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
+import type { DataViewsContract, DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { keyBy } from 'lodash';
 import { CoreStart, HttpSetup } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -18,7 +18,7 @@ import { DateRange } from '../../common';
 import { DataViewsState } from '../state_management';
 
 type ErrorHandler = (err: Error) => void;
-type MinimalDataViewsContract = Pick<DataViewsContract, 'get' | 'getIdsWithTitle'>;
+type MinimalDataViewsContract = Pick<DataViewsContract, 'get' | 'getIdsWithTitle' | 'create'>;
 
 /**
  * All these functions will be used by the Embeddable instance too,
@@ -95,17 +95,27 @@ export function convertDataViewIntoLensIndexPattern(
     fields: newFields,
     getFieldByName: getFieldByNameFactory(newFields),
     hasRestrictions: !!typeMeta?.aggs,
+    spec: dataView.isPersisted() ? undefined : dataView.toSpec(false),
   };
 }
 
 export async function loadIndexPatternRefs(
-  dataViews: MinimalDataViewsContract
+  dataViews: MinimalDataViewsContract,
+  adHocDataViews?: Record<string, DataViewSpec>
 ): Promise<IndexPatternRef[]> {
   const indexPatterns = await dataViews.getIdsWithTitle();
 
-  return indexPatterns.sort((a, b) => {
-    return a.title.localeCompare(b.title);
-  });
+  return indexPatterns
+    .concat(
+      Object.values(adHocDataViews || {}).map((dataViewSpec) => ({
+        id: dataViewSpec.id!,
+        name: dataViewSpec.name,
+        title: dataViewSpec.title!,
+      }))
+    )
+    .sort((a, b) => {
+      return a.title.localeCompare(b.title);
+    });
 }
 
 /**
@@ -125,17 +135,20 @@ export async function loadIndexPatterns({
   patterns,
   notUsedPatterns,
   cache,
+  adHocDataViews,
   onIndexPatternRefresh,
 }: {
   dataViews: MinimalDataViewsContract;
   patterns: string[];
   notUsedPatterns?: string[];
   cache: Record<string, IndexPattern>;
+  adHocDataViews?: Record<string, DataViewSpec>;
   onIndexPatternRefresh?: () => void;
 }) {
-  const missingIds = patterns.filter((id) => !cache[id]);
+  const missingIds = patterns.filter((id) => !cache[id] && !adHocDataViews?.[id]);
+  const hasAdHocDataViews = Object.values(adHocDataViews || {}).length > 0;
 
-  if (missingIds.length === 0) {
+  if (missingIds.length === 0 && !hasAdHocDataViews) {
     return cache;
   }
 
@@ -150,7 +163,7 @@ export async function loadIndexPatterns({
     .map((response) => response.value);
 
   // if all of the used index patterns failed to load, try loading one of not used ones till one succeeds
-  if (!indexPatterns.length && notUsedPatterns) {
+  if (!indexPatterns.length && !hasAdHocDataViews && notUsedPatterns) {
     for (const notUsedPattern of notUsedPatterns) {
       const resp = await dataViews.get(notUsedPattern).catch((e) => {
         // do nothing
@@ -160,6 +173,11 @@ export async function loadIndexPatterns({
       }
     }
   }
+  indexPatterns.push(
+    ...(await Promise.all(
+      Object.values(adHocDataViews || {}).map((spec) => dataViews.create(spec))
+    ))
+  );
 
   const indexPatternsObject = indexPatterns.reduce(
     (acc, indexPattern) => ({
@@ -235,6 +253,10 @@ async function refreshExistingFields({
 
         if (pattern.timeFieldName) {
           body.timeFieldName = pattern.timeFieldName;
+        }
+
+        if (pattern.spec) {
+          body.spec = pattern.spec;
         }
 
         const dataView = await dataViews.get(pattern.id);

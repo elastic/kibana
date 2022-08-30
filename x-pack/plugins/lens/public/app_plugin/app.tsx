@@ -32,6 +32,7 @@ import { LensInspector } from '../lens_inspector_service';
 import { getEditPath } from '../../common';
 import { isLensEqual } from './lens_document_equality';
 import { IndexPatternServiceAPI, createIndexPatternService } from '../indexpattern_service/service';
+import { replaceIndexpattern } from '../state_management/lens_slice';
 
 export type SaveProps = Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
   returnToOrigin: boolean;
@@ -368,7 +369,8 @@ export function App({
   const indexPatternService = useMemo(
     () =>
       createIndexPatternService({
-        dataViews,
+        dataViews: lensAppServices.dataViews,
+        uiActions: lensAppServices.uiActions,
         core: { http, notifications, uiSettings },
         data,
         updateIndexPatterns: (newIndexPatternsState, options) => {
@@ -377,8 +379,22 @@ export function App({
             dispatch(applyChanges());
           }
         },
+        replaceIndexPattern: (newIndexPattern, oldId, options) => {
+          dispatch(replaceIndexpattern({ newIndexPattern, oldId }));
+          if (options?.applyImmediately) {
+            dispatch(applyChanges());
+          }
+        },
       }),
-    [dataViews, http, notifications, uiSettings, data, dispatch]
+    [
+      lensAppServices.dataViews,
+      lensAppServices.uiActions,
+      http,
+      notifications,
+      uiSettings,
+      data,
+      dispatch,
+    ]
   );
 
   return (
