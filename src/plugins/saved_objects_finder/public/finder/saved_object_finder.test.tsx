@@ -6,12 +6,10 @@
  * Side Public License, v 1.
  */
 
-jest.mock('lodash', () => ({
-  debounce: (fn: any) => fn,
-}));
-
 const nextTick = () => new Promise((res) => process.nextTick(res));
 
+import lodash from 'lodash';
+jest.spyOn(lodash, 'debounce').mockImplementation((fn: any) => fn);
 import { EuiInMemoryTable, EuiLink, EuiSearchBarProps, Query } from '@elastic/eui';
 import { IconType } from '@elastic/eui';
 import { mount, shallow } from 'enzyme';

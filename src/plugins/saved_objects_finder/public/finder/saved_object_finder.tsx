@@ -32,7 +32,7 @@ import type {
   IUiSettingsClient,
 } from '@kbn/core/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import { LISTING_LIMIT_SETTING } from '@kbn/saved-objects-plugin/common';
+import { LISTING_LIMIT_SETTING } from '@kbn/saved-objects-plugin/public';
 
 export interface SavedObjectMetaData<T = unknown> {
   type: string;
