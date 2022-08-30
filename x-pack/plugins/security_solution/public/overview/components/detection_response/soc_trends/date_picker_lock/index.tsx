@@ -9,25 +9,25 @@ import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { inputsActions, inputsSelectors } from '../../../../common/store/inputs';
-import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
+import { inputsActions, inputsSelectors } from '../../../../../common/store/inputs';
+import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
 import * as i18n from './translations';
 
-const TimelineDatePickerLockComponent = () => {
+const SocTrendsDatePickerLockComponent = () => {
   const dispatch = useDispatch();
   const getGlobalInput = useMemo(() => inputsSelectors.globalSelector(), []);
   const isDatePickerLocked = useShallowEqualSelector((state) =>
-    getGlobalInput(state).linkTo.includes('timeline')
+    getGlobalInput(state).linkTo.includes('socTrends')
   );
 
   const onToggleLock = useCallback(
-    () => dispatch(inputsActions.toggleTimelineLinkTo()),
+    () => dispatch(inputsActions.toggleSocTrendsLinkTo()),
     [dispatch]
   );
 
   return (
     <EuiToolTip
-      data-test-subj="timeline-date-picker-lock-tooltip"
+      data-test-subj="socTrends-date-picker-lock-tooltip"
       position="top"
       content={
         isDatePickerLocked
@@ -36,7 +36,7 @@ const TimelineDatePickerLockComponent = () => {
       }
     >
       <EuiButtonIcon
-        data-test-subj={`timeline-date-picker-${isDatePickerLocked ? 'lock' : 'unlock'}-button`}
+        data-test-subj={`socTrends-date-picker-${isDatePickerLocked ? 'lock' : 'unlock'}-button`}
         color="primary"
         onClick={onToggleLock}
         iconType={isDatePickerLocked ? 'lock' : 'lockOpen'}
@@ -50,6 +50,6 @@ const TimelineDatePickerLockComponent = () => {
   );
 };
 
-TimelineDatePickerLockComponent.displayName = 'TimelineDatePickerLockComponent';
+SocTrendsDatePickerLockComponent.displayName = 'SocTrendsDatePickerLockComponent';
 
-export const TimelineDatePickerLock = React.memo(TimelineDatePickerLockComponent);
+export const SocTrendsDatePickerLock = React.memo(SocTrendsDatePickerLockComponent);
