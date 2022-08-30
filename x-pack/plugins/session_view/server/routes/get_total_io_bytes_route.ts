@@ -4,13 +4,17 @@
  */
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
-import { EVENT_ACTION } from '@kbn/rule-data-utils';
+import { EVENT_ACTION, TIMESTAMP } from '@kbn/rule-data-utils';
 import {
   GET_TOTAL_IO_BYTES_ROUTE,
   PROCESS_EVENTS_INDEX,
   ENTRY_SESSION_ENTITY_ID_PROPERTY,
   TOTAL_BYTES_CAPTURED_PROPERTY,
+  TTY_CHAR_DEVICE_MAJOR_PROPERTY,
+  TTY_CHAR_DEVICE_MINOR_PROPERTY,
+  HOST_BOOT_ID_PROPERTY,
 } from '../../common/constants';
+import { getTTYQueryPredicates } from './io_events_route';
 
 export const registerGetTotalIOBytesRoute = (router: IRouter) => {
   router.get(
@@ -27,14 +31,28 @@ export const registerGetTotalIOBytesRoute = (router: IRouter) => {
       const { sessionEntityId } = request.query;
 
       try {
+        const ttyPredicates = await getTTYQueryPredicates(client, sessionEntityId);
+
+        if (!ttyPredicates) {
+          return response.ok({ body: 0 });
+        }
+
         const search = await client.search({
           index: [PROCESS_EVENTS_INDEX],
           body: {
             query: {
               bool: {
                 must: [
-                  { term: { [ENTRY_SESSION_ENTITY_ID_PROPERTY]: sessionEntityId } },
+                  { term: { [TTY_CHAR_DEVICE_MAJOR_PROPERTY]: ttyPredicates.ttyMajor } },
+                  { term: { [TTY_CHAR_DEVICE_MINOR_PROPERTY]: ttyPredicates.ttyMinor } },
+                  { term: { [HOST_BOOT_ID_PROPERTY]: ttyPredicates.bootId } },
                   { term: { [EVENT_ACTION]: 'text_output' } },
+                  { range: {
+                    [TIMESTAMP]: {
+                      gte: ttyPredicates.range[0],
+                      lte: ttyPredicates.range[1],
+                    },
+                  }},
                 ],
               },
             },
@@ -54,7 +72,7 @@ export const registerGetTotalIOBytesRoute = (router: IRouter) => {
         return response.ok({ body: agg?.value || 0 });
       } catch (err) {
         // unauthorized
-        if (err.meta.statusCode === 403) {
+        if (err?.meta?.statusCode === 403) {
           return response.ok();
         }
 
