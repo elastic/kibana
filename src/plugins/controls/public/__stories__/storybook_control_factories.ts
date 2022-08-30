@@ -8,10 +8,10 @@
 
 import { OptionsListEmbeddableFactory } from '../options_list';
 import { RangeSliderEmbeddableFactory } from '../range_slider';
-import { ControlsService } from '../services/controls';
+import { ControlsServiceType } from '../services/controls/types';
 import { ControlFactory } from '..';
 
-export const populateStorybookControlFactories = (controlsServiceStub: ControlsService) => {
+export const populateStorybookControlFactories = (controlsServiceStub: ControlsServiceType) => {
   const optionsListFactoryStub = new OptionsListEmbeddableFactory();
 
   // cast to unknown because the stub cannot use the embeddable start contract to transform the EmbeddableFactoryDefinition into an EmbeddableFactory
