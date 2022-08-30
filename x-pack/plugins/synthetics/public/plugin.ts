@@ -42,7 +42,7 @@ import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { PLUGIN } from '../common/constants/plugin';
-import { MONITORS_ROUTE } from '../common/constants/ui';
+import { MONITORS_ROUTE, OVERVIEW_ROUTE } from '../common/constants/ui';
 import {
   LazySyntheticsPolicyCreateExtension,
   LazySyntheticsPolicyEditExtension,
@@ -266,6 +266,15 @@ function registerSyntheticsRoutesWithNavigation(
               label: 'Synthetics',
               sortKey: 499,
               entries: [
+                {
+                  label: i18n.translate('xpack.synthetics.overview.heading', {
+                    defaultMessage: 'Overview',
+                  }),
+                  app: 'synthetics',
+                  path: OVERVIEW_ROUTE,
+                  matchFullPath: true,
+                  ignoreTrailingSlash: true,
+                },
                 {
                   label: i18n.translate('xpack.synthetics.overview.heading', {
                     defaultMessage: 'Monitors',
