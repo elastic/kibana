@@ -16,7 +16,6 @@ import {
   DryRunPackagePoliciesRequestSchema,
   DeleteOnePackagePolicyRequestSchema,
   BulkGetPackagePoliciesRequestSchema,
-  CreateSimplifiedPackagePolicyRequestSchema,
 } from '../../types';
 import type { FleetAuthzRouter } from '../security';
 
@@ -31,7 +30,6 @@ import {
   getOrphanedPackagePolicies,
   deleteOnePackagePolicyHandler,
   bulkGetPackagePoliciesHandler,
-  createSimplifiedPackagePolicyHandler,
 } from './handlers';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
@@ -91,17 +89,6 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
     },
     createPackagePolicyHandler
-  );
-
-  router.post(
-    {
-      path: PACKAGE_POLICY_API_ROUTES.CREATE_SIMPLIFIED_PATTERN,
-      validate: CreateSimplifiedPackagePolicyRequestSchema,
-      fleetAuthz: {
-        integrations: { writeIntegrationPolicies: true },
-      },
-    },
-    createSimplifiedPackagePolicyHandler
   );
 
   // Update

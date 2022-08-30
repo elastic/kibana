@@ -26,7 +26,6 @@ import type {
   PackagePolicy,
   DeleteOnePackagePolicyRequestSchema,
   BulkGetPackagePoliciesRequestSchema,
-  CreateSimplifiedPackagePolicyRequestSchema,
 } from '../../types';
 import type {
   BulkGetPackagePoliciesResponse,
@@ -41,6 +40,8 @@ import { defaultIngestErrorHandler, PackagePolicyNotFoundError } from '../../err
 import { getInstallations, getPackageInfo } from '../../services/epm/packages';
 import { PACKAGES_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../constants';
 import { simplifiedPackagePolicytoNewPackagePolicy } from '../../services/package_policies/simplified_package_policy_helper';
+
+import type { SimplifiedPackagePolicy } from '../../services/package_policies/simplified_package_policy_helper';
 
 export const getPackagePoliciesHandler: RequestHandler<
   undefined,
@@ -165,6 +166,17 @@ export const getOrphanedPackagePolicies: RequestHandler<undefined, undefined> = 
   }
 };
 
+function isSimplifiedCreatePackagePolicyRequest(
+  body: Omit<TypeOf<typeof CreatePackagePolicyRequestSchema.body>, 'force' | 'package'>
+): body is SimplifiedPackagePolicy {
+  // If inputs it's no defined or if it's a record string:{} we consider it as a simplified package policy
+  if (body.inputs && Array.isArray(body.inputs)) {
+    return false;
+  }
+
+  return true;
+}
+
 export const createPackagePolicyHandler: FleetRequestHandler<
   undefined,
   undefined,
@@ -175,71 +187,27 @@ export const createPackagePolicyHandler: FleetRequestHandler<
   const soClient = fleetContext.epm.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
-  const { force, ...newPolicy } = request.body;
-  const spaceId = fleetContext.spaceId;
-  try {
-    const newPackagePolicy = await packagePolicyService.enrichPolicyWithDefaultsFromPackage(
-      soClient,
-      newPolicy as NewPackagePolicy
-    );
-
-    const newData = await packagePolicyService.runExternalCallbacks(
-      'packagePolicyCreate',
-      newPackagePolicy,
-      context,
-      request
-    );
-
-    // Create package policy
-    const packagePolicy = await packagePolicyService.create(soClient, esClient, newData, {
-      user,
-      force,
-      spaceId,
-    });
-
-    const enrichedPackagePolicy = await packagePolicyService.runExternalCallbacks(
-      'packagePolicyPostCreate',
-      packagePolicy,
-      context,
-      request
-    );
-
-    const body: CreatePackagePolicyResponse = { item: enrichedPackagePolicy };
-
-    return response.ok({
-      body,
-    });
-  } catch (error) {
-    if (error.statusCode) {
-      return response.customError({
-        statusCode: error.statusCode,
-        body: { message: error.message },
-      });
-    }
-    return defaultIngestErrorHandler({ error, response });
-  }
-};
-
-export const createSimplifiedPackagePolicyHandler: FleetRequestHandler<
-  undefined,
-  undefined,
-  TypeOf<typeof CreateSimplifiedPackagePolicyRequestSchema.body>
-> = async (context, request, response) => {
-  const coreContext = await context.core;
-  const fleetContext = await context.fleet;
-  const soClient = fleetContext.epm.internalSoClient;
-  const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
   const { force, package: pkg, ...newPolicy } = request.body;
   const spaceId = fleetContext.spaceId;
   try {
-    const res = await getPackageInfo({
-      savedObjectsClient: soClient,
-      pkgName: pkg?.name,
-      pkgVersion: pkg?.version || '',
-      skipArchive: true,
-    });
-    const newPackagePolicy = simplifiedPackagePolicytoNewPackagePolicy(newPolicy, res);
+    let newPackagePolicy: NewPackagePolicy;
+    if (isSimplifiedCreatePackagePolicyRequest(newPolicy)) {
+      if (!pkg) {
+        throw new Error('Package is mandatory');
+      }
+      const res = await getPackageInfo({
+        savedObjectsClient: soClient,
+        pkgName: pkg?.name,
+        pkgVersion: pkg?.version || '',
+        skipArchive: true,
+      });
+      newPackagePolicy = simplifiedPackagePolicytoNewPackagePolicy(newPolicy, res);
+    } else {
+      newPackagePolicy = await packagePolicyService.enrichPolicyWithDefaultsFromPackage(soClient, {
+        ...newPolicy,
+        package: pkg,
+      } as NewPackagePolicy);
+    }
 
     const newData = await packagePolicyService.runExternalCallbacks(
       'packagePolicyCreate',

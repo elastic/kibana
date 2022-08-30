@@ -15,7 +15,7 @@ import type { NewPackagePolicy, PackageInfo } from '../../types';
 
 type SimplifiedVars = Record<string, string | string[] | boolean | number | number[]>;
 
-interface SimplifiedPackagePolicy {
+export interface SimplifiedPackagePolicy {
   id?: string;
   policy_id: string;
   namespace: string;
