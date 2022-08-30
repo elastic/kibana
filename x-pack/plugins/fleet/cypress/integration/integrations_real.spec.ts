@@ -25,7 +25,7 @@ import {
   UPDATE_PACKAGE_BTN,
   INTEGRATIONS_SEARCHBAR_INPUT,
   SETTINGS,
-  INTEGRATION_POLICIES_UPGRADE_CHECKBOX
+  INTEGRATION_POLICIES_UPGRADE_CHECKBOX,
 } from '../screens/integrations';
 import { LOADING_SPINNER } from '../screens/navigation';
 import { ADD_PACKAGE_POLICY_BTN } from '../screens/fleet';
