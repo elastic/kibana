@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import crypto from 'crypto';
 import { Stream } from 'stream';
 import * as zlib from 'zlib';
 
@@ -100,6 +101,14 @@ export function streamFactory<T = unknown>(
     // Calling .flush() on a compression stream will
     // make zlib return as much output as currently possible.
     if (isCompressed) {
+      // This is a temporary fix for response streaming with proxy configurations that buffer responses up to 4KB in size.
+      stream.write(
+        `${JSON.stringify({
+          type: 'flush',
+          payload: crypto.randomBytes(4096).toString('hex'),
+        })}${DELIMITER}`
+      );
+      crypto.randomBytes(4096).toString('hex');
       stream.flush();
     }
   }

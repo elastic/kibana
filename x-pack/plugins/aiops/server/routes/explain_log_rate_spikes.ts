@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// import crypto from 'crypto';
 import { chunk } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
@@ -72,8 +71,7 @@ export const defineExplainLogRateSpikesRoute = (
       });
 
       const { end, push, responseWithHeaders } = streamFactory<AiopsExplainLogRateSpikesApiAction>(
-        // This is a temporary fix for response streaming with proxy configurations that buffer responses up to 4KB in size.
-        {},
+        request.headers,
         logger
       );
 
@@ -96,7 +94,7 @@ export const defineExplainLogRateSpikesRoute = (
 
       // Async IIFE to run the analysis while not blocking returning `responseWithHeaders`.
       (async () => {
-        push(resetAction(''));
+        push(resetAction());
         push(
           updateLoadingStateAction({
             ccsWarning: false,

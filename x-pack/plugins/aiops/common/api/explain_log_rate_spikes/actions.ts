@@ -58,14 +58,10 @@ export function addErrorAction(payload: ApiActionAddError['payload']): ApiAction
 
 interface ApiActionReset {
   type: typeof API_ACTION_NAME.RESET;
-  // The payload is a temporary fix for response streaming with proxy configurations that buffer responses up to 4KB in size.
-  // If we send a 4KB payload along with the reset action it will trigger proper streaming.
-  // On the client side, the reset action will just ignore the payload.
-  payload: string;
 }
 
-export function resetAction(payload: string): ApiActionReset {
-  return { type: API_ACTION_NAME.RESET, payload };
+export function resetAction(): ApiActionReset {
+  return { type: API_ACTION_NAME.RESET };
 }
 
 interface ApiActionUpdateLoadingState {

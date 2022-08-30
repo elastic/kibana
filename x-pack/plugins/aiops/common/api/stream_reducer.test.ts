@@ -46,7 +46,7 @@ describe('streamReducer', () => {
 
     expect(state1.changePoints).toHaveLength(1);
 
-    const state2 = streamReducer(state1, resetAction('the-payload-string'));
+    const state2 = streamReducer(state1, resetAction());
 
     expect(state2.changePoints).toHaveLength(0);
   });
