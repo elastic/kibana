@@ -12,7 +12,7 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { SLO, StoredSLO } from '../../types/models';
 import { SO_SLO_TYPE } from '../../saved_objects';
-import { KibanaSavedObjectsSLORepository } from './slo-repository';
+import { KibanaSavedObjectsSLORepository } from './slo_repository';
 
 const anSLO: SLO = {
   id: uuid.v1(),
