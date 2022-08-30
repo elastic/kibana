@@ -46,7 +46,8 @@ export const inject = (filters: Filter[], references: SavedObjectReference[]) =>
       ...filter,
       meta: {
         ...filter.meta,
-        index: reference && reference.id,
+        // if no reference has been found, keep the current "index" property (used for adhoc data views)
+        index: reference ? reference.id : filter.meta.index,
       },
     };
   });

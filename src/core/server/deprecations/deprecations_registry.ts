@@ -8,7 +8,11 @@
 
 import { withTimeout, isPromise } from '@kbn/std';
 import type { DeprecationsDetails } from '@kbn/core-deprecations-common';
-import type { RegisterDeprecationsConfig, GetDeprecationsContext } from './types';
+import type {
+  RegisterDeprecationsConfig,
+  GetDeprecationsContext,
+} from '@kbn/core-deprecations-server';
+
 const MsInSec = 1000;
 
 export class DeprecationsRegistry {

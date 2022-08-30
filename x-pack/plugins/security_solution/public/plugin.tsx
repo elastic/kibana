@@ -125,9 +125,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
      * This is a promise because these aren't available until the `start` lifecycle phase but they are referenced
      * in the `setup` lifecycle phase.
      */
-    const startServices: Promise<StartServices> = (async () => {
+    const startServices = async (params: AppMountParameters<unknown>): Promise<StartServices> => {
       const [coreStart, startPluginsDeps] = await core.getStartServices();
       const { apm } = await import('@elastic/apm-rum');
+      const { SecuritySolutionTemplateWrapper } = await import('./app/home/template_wrapper');
 
       const { savedObjectsTaggingOss, ...startPlugins } = startPluginsDeps;
 
@@ -138,9 +139,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         savedObjectsTagging: savedObjectsTaggingOss.getTaggingApi(),
         storage: this.storage,
         security: startPluginsDeps.security,
+        onAppLeave: params.onAppLeave,
+        securityLayout: {
+          getPluginWrapper: () => SecuritySolutionTemplateWrapper,
+        },
       };
       return services;
-    })();
+    };
 
     core.application.register({
       id: APP_UI_ID,
@@ -164,7 +169,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         const { renderApp } = await this.lazyApplicationDependencies();
         return renderApp({
           ...params,
-          services: await startServices,
+          services: await startServices(params),
           store: await this.store(coreStart, startPlugins, subPlugins),
           usageCollection: plugins.usageCollection,
           subPluginRoutes: getSubPluginRoutesByCapabilities(
