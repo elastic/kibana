@@ -276,7 +276,7 @@ function registerSyntheticsRoutesWithNavigation(
                   ignoreTrailingSlash: true,
                 },
                 {
-                  label: i18n.translate('xpack.synthetics.overview.heading', {
+                  label: i18n.translate('xpack.synthetics.monitors.heading', {
                     defaultMessage: 'Monitors',
                   }),
                   app: 'synthetics',
@@ -309,7 +309,7 @@ function registerUptimeRoutesWithNavigation(
               sortKey: 500,
               entries: [
                 {
-                  label: i18n.translate('xpack.synthetics.overview.heading', {
+                  label: i18n.translate('xpack.synthetics.monitors.heading', {
                     defaultMessage: 'Monitors',
                   }),
                   app: 'uptime',
