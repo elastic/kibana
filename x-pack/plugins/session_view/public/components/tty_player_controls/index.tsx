@@ -5,9 +5,17 @@
  * 2.0.
  */
 import React, { useCallback, ChangeEvent, MouseEvent, useMemo } from 'react';
-import { EuiPanel, EuiRange, EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
+import {
+  EuiPanel,
+  EuiRange,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonIcon,
+  EuiToolTip,
+} from '@elastic/eui';
 import { ProcessEntityIdIOLine } from '../../../common/types/process_tree';
 import { useStyles } from './styles';
+import { TTY_END, TTY_NEXT, TTY_PAUSE, TTY_PLAY, TTY_PREVIOUS, TTY_START } from './translations';
 
 export interface TTYPlayerControlsDeps {
   currentProcessEntityId: string | undefined;
@@ -84,63 +92,73 @@ export const TTYPlayerControls = ({
     <EuiPanel data-test-subj="sessionView:TTYPlayerControls" hasShadow={false} borderRadius="none">
       <EuiFlexGroup alignItems="center" gutterSize="s" direction="row">
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            css={styles.controlButton}
-            data-test-subj="sessionView:TTYPlayerControlsStart"
-            iconType="arrowStart"
-            display="empty"
-            size="m"
-            aria-label="TTY Start Button"
-            onClick={seekToStart}
-            disabled={isFirstProcess}
-          />
+          <EuiToolTip content={TTY_START}>
+            <EuiButtonIcon
+              css={styles.controlButton}
+              data-test-subj="sessionView:TTYPlayerControlsStart"
+              iconType="arrowStart"
+              display="empty"
+              size="m"
+              aria-label="TTY Start Button"
+              onClick={seekToStart}
+              disabled={isFirstProcess}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            css={styles.controlButton}
-            data-test-subj="sessionView:TTYPlayerControlsPrevious"
-            iconType="arrowLeft"
-            display="empty"
-            size="m"
-            aria-label="TTY Previous Button"
-            onClick={seekToPrevProcess}
-            disabled={isFirstProcess}
-          />
+          <EuiToolTip content={TTY_PREVIOUS}>
+            <EuiButtonIcon
+              css={styles.controlButton}
+              data-test-subj="sessionView:TTYPlayerControlsPrevious"
+              iconType="arrowLeft"
+              display="empty"
+              size="m"
+              aria-label="TTY Previous Button"
+              onClick={seekToPrevProcess}
+              disabled={isFirstProcess}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            css={styles.controlButton}
-            data-test-subj="sessionView:TTYPlayerControlsPlay"
-            iconType={isPlaying ? 'pause' : 'play'}
-            display="empty"
-            size="m"
-            aria-label="TTY Play Button"
-            onClick={onTogglePlayback}
-          />
+          <EuiToolTip content={isPlaying ? TTY_PAUSE : TTY_PLAY}>
+            <EuiButtonIcon
+              css={styles.controlButton}
+              data-test-subj="sessionView:TTYPlayerControlsPlay"
+              iconType={isPlaying ? 'pause' : 'play'}
+              display="empty"
+              size="m"
+              aria-label="TTY Play Button"
+              onClick={onTogglePlayback}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            css={styles.controlButton}
-            data-test-subj="sessionView:TTYPlayerControlsNext"
-            iconType="arrowRight"
-            display="empty"
-            size="m"
-            aria-label="TTY Next Button"
-            onClick={seekToNextProcess}
-            disabled={isLastProcess}
-          />
+          <EuiToolTip content={TTY_NEXT}>
+            <EuiButtonIcon
+              css={styles.controlButton}
+              data-test-subj="sessionView:TTYPlayerControlsNext"
+              iconType="arrowRight"
+              display="empty"
+              size="m"
+              aria-label="TTY Next Button"
+              onClick={seekToNextProcess}
+              disabled={isLastProcess}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            css={styles.controlButton}
-            data-test-subj="sessionView:TTYPlayerControlsEnd"
-            iconType="arrowEnd"
-            display="empty"
-            size="m"
-            aria-label="TTY End Button"
-            onClick={seekToEnd}
-            disabled={isLastProcess}
-          />
+          <EuiToolTip content={TTY_END}>
+            <EuiButtonIcon
+              css={styles.controlButton}
+              data-test-subj="sessionView:TTYPlayerControlsEnd"
+              iconType="arrowEnd"
+              display="empty"
+              size="m"
+              aria-label="TTY End Button"
+              onClick={seekToEnd}
+              disabled={isLastProcess}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiRange

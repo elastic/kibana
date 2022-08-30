@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useCallback, useMemo } from 'react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { Teletype } from '../../../common/types/process_tree';
 import { DEFAULT_TTY_FONT_SIZE } from '../../../common/constants';
 import { ZOOM_IN, ZOOM_FIT, ZOOM_OUT } from './translations';
@@ -61,28 +61,34 @@ export const TTYTextSizer = ({
       direction="row"
     >
       <EuiFlexItem>
-        <EuiButtonIcon
-          data-test-subj="sessionView:TTYZoomIn"
-          aria-label={ZOOM_IN}
-          iconType="magnifyWithPlus"
-          onClick={onZoomIn}
-        />
+        <EuiToolTip content={ZOOM_IN}>
+          <EuiButtonIcon
+            data-test-subj="sessionView:TTYZoomIn"
+            aria-label={ZOOM_IN}
+            iconType="magnifyWithPlus"
+            onClick={onZoomIn}
+          />
+        </EuiToolTip>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiButtonIcon
-          data-test-subj="sessionView:TTYZoomFit"
-          aria-label={ZOOM_FIT}
-          iconType={onFitFontSize === fontSize ? 'expand' : 'minimize'}
-          onClick={onFit}
-        />
+        <EuiToolTip content={ZOOM_FIT}>
+          <EuiButtonIcon
+            data-test-subj="sessionView:TTYZoomFit"
+            aria-label={ZOOM_FIT}
+            iconType={onFitFontSize === fontSize ? 'expand' : 'minimize'}
+            onClick={onFit}
+          />
+        </EuiToolTip>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiButtonIcon
-          data-test-subj="sessionView:TTYZoomOut"
-          aria-label={ZOOM_OUT}
-          iconType="magnifyWithMinus"
-          onClick={onZoomOut}
-        />
+        <EuiToolTip content={ZOOM_OUT}>
+          <EuiButtonIcon
+            data-test-subj="sessionView:TTYZoomOut"
+            aria-label={ZOOM_OUT}
+            iconType="magnifyWithMinus"
+            onClick={onZoomOut}
+          />
+        </EuiToolTip>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
