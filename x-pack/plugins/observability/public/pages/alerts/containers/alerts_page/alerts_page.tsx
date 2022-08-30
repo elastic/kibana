@@ -10,14 +10,12 @@ import { EuiFlexGroup, EuiFlexItem, EuiFlyoutSize } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
 import { DataViewBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { getTime } from '@kbn/data-plugin/common';
-import { buildEsQuery } from '@kbn/es-query';
 import useAsync from 'react-use/lib/useAsync';
 import { AlertStatus } from '@kbn/rule-data-utils';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
-import { AlertConsumers, TIMESTAMP } from '@kbn/rule-data-utils';
-import { AlertsTableStateProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/alerts_table_state';
+import { AlertConsumers } from '@kbn/rule-data-utils';
+import { buildEsQuery } from './helpers';
 import { AlertStatusFilterButton } from '../../../../../common/typings';
 import { useGetUserCasesPermissions } from '../../../../hooks/use_get_user_cases_permissions';
 import { observabilityFeatureId } from '../../../../../common';
@@ -49,7 +47,7 @@ function AlertsPage() {
   const [alertFilterStatus, setAlertFilterStatus] = useState(
     ALL_ALERTS.query as AlertStatusFilterButton
   );
-  // const [refreshNow, setRefreshNow] = useState<number>();
+  const [refreshNow, setRefreshNow] = useState<number>();
   const { rangeFrom, setRangeFrom, rangeTo, setRangeTo, kuery, setKuery } =
     useAlertsPageStateContainer();
   const {
@@ -151,41 +149,15 @@ function AlertsPage() {
     to: rangeTo,
     from: rangeFrom,
   };
-  const timeFilter =
-    timeRange &&
-    getTime(undefined, timeRange, {
-      fieldName: TIMESTAMP,
-    });
-  const filtersToUse = [...(timeFilter ? [timeFilter] : [])];
-  const esFilters = buildEsQuery(undefined, { query: kuery, language: 'kuery' }, filtersToUse);
 
-  const alertStateProps: AlertsTableStateProps = {
-    alertsTableConfigurationRegistry,
-    configurationId: AlertConsumers.OBSERVABILITY,
-    id: ALERTS_TABLE_ID,
-    flyoutSize: 's' as EuiFlyoutSize,
-    featureIds: [
-      AlertConsumers.APM,
-      AlertConsumers.INFRASTRUCTURE,
-      AlertConsumers.LOGS,
-      AlertConsumers.UPTIME,
-    ],
-    query: esFilters,
-    showExpandToDetails: false,
-    pageSize: 50,
-    // refreshNow,
+  const onRefresh = () => {
+    setRefreshNow(new Date().getTime());
   };
-
-  // const onRefresh = () => {
-  //   setRefreshNow(new Date().getTime());
-  // };
 
   const onQueryChange = useCallback(
     ({ dateRange, query }) => {
       if (rangeFrom === dateRange.from && rangeTo === dateRange.to && kuery === (query ?? '')) {
-        // TODO Enable refresh after merging https://github.com/elastic/kibana/pull/139669
-        // return onRefresh();
-        return;
+        return onRefresh();
       }
       timeFilterService.setTime(dateRange);
       setRangeFrom(dateRange.from);
@@ -282,7 +254,22 @@ function AlertsPage() {
             permissions={userCasesPermissions}
             features={{ alerts: { sync: false } }}
           >
-            <AlertsStateTable {...alertStateProps} />
+            <AlertsStateTable
+              alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
+              configurationId={AlertConsumers.OBSERVABILITY}
+              id={ALERTS_TABLE_ID}
+              flyoutSize={'s' as EuiFlyoutSize}
+              featureIds={[
+                AlertConsumers.APM,
+                AlertConsumers.INFRASTRUCTURE,
+                AlertConsumers.LOGS,
+                AlertConsumers.UPTIME,
+              ]}
+              query={buildEsQuery(timeRange, kuery)}
+              showExpandToDetails={false}
+              pageSize={50}
+              refreshNow={refreshNow}
+            />
           </CasesContext>
         </EuiFlexItem>
       </EuiFlexGroup>
