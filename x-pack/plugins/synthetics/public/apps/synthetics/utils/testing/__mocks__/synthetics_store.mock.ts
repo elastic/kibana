@@ -88,7 +88,7 @@ export const mockState: SyntheticsAppState = {
     data: {
       total: 0,
       allMonitorIds: [],
-      pages: {},
+      monitors: [],
     },
     error: null,
     loaded: false,

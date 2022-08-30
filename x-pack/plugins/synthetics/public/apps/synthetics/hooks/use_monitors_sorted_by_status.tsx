@@ -23,11 +23,13 @@ import { useLocationNames } from './use_location_names';
 
 export function useMonitorsSortedByStatus(shouldUpdate: boolean) {
   const {
-    pageState: { sortOrder, sortField },
+    pageState: { sortOrder },
     data: { allMonitorIds, monitors },
   } = useSelector(selectOverviewState);
-  const [monitorsSortedByStatus, setMonitorsSortedByStatus] = useState<MonitorOverviewItem[]>([]);
-  const [downMonitors, setDownMonitors] = useState({});
+  const [monitorsSortedByStatus, setMonitorsSortedByStatus] = useState<
+    Record<string, MonitorOverviewItem[]>
+  >({ up: [], down: [], disabled: [] });
+  const [downMonitors, setDownMonitors] = useState<Record<string, string[]> | null>(null);
   const locationNames = useLocationNames();
   const { lastRefresh } = useSyntheticsRefreshContext();
 
@@ -52,7 +54,7 @@ export function useMonitorsSortedByStatus(shouldUpdate: boolean) {
             ],
           },
         },
-        sort: [{ '@timestamp': 'desc' }],
+        sort: [{ 'monitor.name': 'desc' }],
         aggs: {
           ids: {
             terms: {
@@ -65,6 +67,7 @@ export function useMonitorsSortedByStatus(shouldUpdate: boolean) {
                   field: 'observer.geo.name',
                   missing: UNNAMED_LOCATION,
                   size: 1000,
+                  order: { _key: 'asc' },
                 },
                 aggs: {
                   summary: {
@@ -79,15 +82,14 @@ export function useMonitorsSortedByStatus(shouldUpdate: boolean) {
         },
       },
     },
-    [lastRefresh, monitorId],
+    [lastRefresh, monitorId, shouldUpdate],
     { name: 'getMonitorStatusByLocation' }
   );
 
   useEffect(() => {
-    if (!data || loading) {
+    if (loading) {
       return;
     }
-    console.warn('useEffectRan');
     const downMonitorMap: Record<string, string[]> = {};
     (data.aggregations?.ids?.buckets || []).forEach((idBucket) => {
       idBucket.locations.buckets.forEach((location) => {
@@ -107,28 +109,38 @@ export function useMonitorsSortedByStatus(shouldUpdate: boolean) {
     });
 
     if (!isEqual(downMonitorMap, downMonitors)) {
-      console.warn('reordering');
-      const orderdMonitors: MonitorOverviewItem[] = [];
+      const orderedDownMonitors: MonitorOverviewItem[] = [];
+      const orderedUpMonitors: MonitorOverviewItem[] = [];
+      const orderedDisabledMonitors: MonitorOverviewItem[] = [];
       monitors.forEach((monitor) => {
         const monitorLocation = locationNames[monitor.location.id];
-        if (
+        if (!monitor.isEnabled) {
+          orderedDisabledMonitors.push(monitor);
+        } else if (
           Object.keys(downMonitorMap).includes(monitor.id) &&
           downMonitorMap[monitor.id].includes(monitorLocation)
         ) {
-          orderdMonitors.unshift(monitor);
+          orderedDownMonitors.push(monitor);
         } else {
-          orderdMonitors.push(monitor);
+          orderedUpMonitors.push(monitor);
         }
       });
       setDownMonitors(downMonitorMap);
-      setMonitorsSortedByStatus(orderdMonitors);
+      setMonitorsSortedByStatus({
+        down: orderedDownMonitors,
+        up: orderedUpMonitors,
+        disabled: orderedDisabledMonitors,
+      });
     }
   }, [data, monitors, locationNames, downMonitors, loading]);
 
   return useMemo(() => {
+    const upAndDownMonitors =
+      sortOrder === 'asc'
+        ? [...monitorsSortedByStatus.down, ...monitorsSortedByStatus.up]
+        : [...monitorsSortedByStatus.up, ...monitorsSortedByStatus.down];
     return {
-      monitorsSortedByStatus:
-        sortOrder === 'asc' ? monitorsSortedByStatus : monitorsSortedByStatus.reverse(),
+      monitorsSortedByStatus: [...upAndDownMonitors, ...monitorsSortedByStatus.disabled],
       downMonitors,
     };
   }, [downMonitors, monitorsSortedByStatus, sortOrder]);
