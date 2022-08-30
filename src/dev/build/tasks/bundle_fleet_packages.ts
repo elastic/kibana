@@ -7,7 +7,6 @@
  */
 
 import JSON5 from 'json5';
-import fetch from 'node-fetch';
 import fs from 'fs/promises';
 import { safeLoad, safeDump } from 'js-yaml';
 
@@ -18,7 +17,7 @@ const BUNDLED_PACKAGES_DIR = 'x-pack/plugins/fleet/target/bundled_packages';
 
 interface FleetPackage {
   name: string;
-  version?: string;
+  version: string;
   forceAlignStackVersion?: boolean;
 }
 
@@ -52,29 +51,20 @@ export const BundleFleetPackages: Task = {
         const stackVersion = config.getBuildVersion();
 
         let versionToWrite = fleetPackage.version;
-        let versionToDownload = versionToWrite;
 
-        // Resolve the latest version (including prerelease version) from EPR if
-        // the bundled package record opts into the `forceAlignStackVersion` behavior
+        // If `forceAlignStackVersion` is set, we will rewrite the version specified in the config
+        // to the version of the stack when writing the bundled package to disk. This allows us
+        // to support some unique package development workflows, e.g. APM.
         if (fleetPackage.forceAlignStackVersion) {
-          const searchUrl = `${eprUrl}/search?package=${fleetPackage.name}&experimental=true`;
-          const searchResponse = await (await fetch(searchUrl)).json();
-
-          if (!searchResponse?.length) {
-            log.error(`Unable to find latest version of ${fleetPackage.name} in the EPR registry`);
-            return;
-          }
-
-          versionToDownload = searchResponse[0].version;
           versionToWrite = stackVersion;
 
           log.debug(
-            `Bundling ${fleetPackage.name}-${versionToDownload} as ${fleetPackage.name}-${stackVersion} to align with stack version`
+            `Bundling ${fleetPackage.name}-${fleetPackage.version} as ${fleetPackage.name}-${stackVersion} to align with stack version`
           );
         }
 
         const archivePath = `${fleetPackage.name}-${versionToWrite}.zip`;
-        const archiveUrl = `${eprUrl}/epr/${fleetPackage.name}/${fleetPackage.name}-${versionToDownload}.zip`;
+        const archiveUrl = `${eprUrl}/epr/${fleetPackage.name}/${fleetPackage.name}-${fleetPackage.version}.zip`;
 
         const destination = build.resolvePath(BUNDLED_PACKAGES_DIR, archivePath);
 
@@ -97,7 +87,7 @@ export const BundleFleetPackages: Task = {
             const buffer = await fs.readFile(destination);
             const zipEntries = await unzipBuffer(buffer);
 
-            const manifestPath = `${fleetPackage.name}-${versionToDownload}/manifest.yml`;
+            const manifestPath = `${fleetPackage.name}-${fleetPackage.version}/manifest.yml`;
             const manifestEntry = zipEntries.find((entry) => entry.path === manifestPath);
 
             if (!manifestEntry || !manifestEntry.buffer) {
@@ -116,7 +106,7 @@ export const BundleFleetPackages: Task = {
 
             // Update all paths to use the new version
             zipEntries.forEach(
-              (entry) => (entry.path = entry.path.replace(versionToDownload!, versionToWrite!))
+              (entry) => (entry.path = entry.path.replace(fleetPackage.version, versionToWrite!))
             );
 
             await createZipFile(zipEntries, destination);
