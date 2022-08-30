@@ -65,6 +65,13 @@ describe('When using `getActionList()', () => {
           comment: doc?.EndpointActions.data.comment,
           createdBy: doc?.user.id,
           parameters: doc?.EndpointActions.data.parameters,
+          agentState: {
+            'agent-a': {
+              completedAt: '2022-04-30T16:08:47.449Z',
+              isCompleted: true,
+              wasSuccessful: true,
+            },
+          },
         },
       ],
       total: 1,

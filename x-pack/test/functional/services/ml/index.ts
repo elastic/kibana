@@ -111,7 +111,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const jobWizardCommon = MachineLearningJobWizardCommonProvider(context, commonUI, customUrls);
   const jobWizardMultiMetric = MachineLearningJobWizardMultiMetricProvider(context);
   const jobWizardPopulation = MachineLearningJobWizardPopulationProvider(context);
-  const lensVisualizations = MachineLearningLensVisualizationsProvider(context);
+  const lensVisualizations = MachineLearningLensVisualizationsProvider(context, commonUI);
   const navigation = MachineLearningNavigationProvider(context);
   const overviewPage = MachineLearningOverviewPageProvider(context);
   const securityCommon = MachineLearningSecurityCommonProvider(context);

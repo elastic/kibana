@@ -12,7 +12,7 @@ import {
   failedFleetActionErrorCode,
 } from '../../../../common/endpoint/constants';
 import type {
-  ActionResponseOutput,
+  ActionDetails,
   ActivityLogAction,
   ActivityLogActionResponse,
   ActivityLogEntry,
@@ -98,13 +98,10 @@ export const mapToNormalizedActionRequest = (
   };
 };
 
-interface ActionCompletionInfo {
-  isCompleted: boolean;
-  completedAt: undefined | string;
-  wasSuccessful: boolean;
-  errors: undefined | string[];
-  outputs: Record<string, ActionResponseOutput>;
-}
+type ActionCompletionInfo = Pick<
+  Required<ActionDetails>,
+  'isCompleted' | 'completedAt' | 'wasSuccessful' | 'errors' | 'outputs' | 'agentState'
+>;
 
 export const getActionCompletionInfo = (
   /** List of agents that the action was sent to */
@@ -116,6 +113,7 @@ export const getActionCompletionInfo = (
     completedAt: undefined,
     errors: undefined,
     outputs: {},
+    agentState: {},
     isCompleted: Boolean(agentIds.length),
     wasSuccessful: Boolean(agentIds.length),
   };
@@ -123,30 +121,50 @@ export const getActionCompletionInfo = (
   const responsesByAgentId: ActionResponseByAgentId = mapActionResponsesByAgentId(actionResponses);
 
   for (const agentId of agentIds) {
-    if (!responsesByAgentId[agentId] || !responsesByAgentId[agentId].isCompleted) {
+    const agentResponses = responsesByAgentId[agentId];
+
+    // Set the overall Action to not completed if at least
+    // one of the agent responses is not complete yet.
+    if (!agentResponses || !agentResponses.isCompleted) {
       completedInfo.isCompleted = false;
       completedInfo.wasSuccessful = false;
-      break;
+    }
+
+    // individual agent state
+    completedInfo.agentState[agentId] = {
+      isCompleted: false,
+      wasSuccessful: false,
+      errors: undefined,
+      completedAt: undefined,
+    };
+
+    // Store the outputs and agent state for any agent that has received a response
+    if (agentResponses) {
+      completedInfo.agentState[agentId].isCompleted = agentResponses.isCompleted;
+      completedInfo.agentState[agentId].wasSuccessful = agentResponses.wasSuccessful;
+      completedInfo.agentState[agentId].completedAt = agentResponses.completedAt;
+      completedInfo.agentState[agentId].errors = agentResponses.errors;
+
+      if (
+        agentResponses.endpointResponse &&
+        agentResponses.endpointResponse.item.data.EndpointActions.data.output
+      ) {
+        completedInfo.outputs[agentId] =
+          agentResponses.endpointResponse.item.data.EndpointActions.data.output;
+      }
     }
   }
 
-  // If completed, then get the completed at date and determine if action was successful or not
+  // If completed, then get the completed at date and determine if action as a whole was successful or not
   if (completedInfo.isCompleted) {
     const responseErrors: ActionCompletionInfo['errors'] = [];
-    completedInfo.outputs = {};
-    for (const [agentId, normalizedAgentResponse] of Object.entries(responsesByAgentId)) {
+
+    for (const normalizedAgentResponse of Object.values(responsesByAgentId)) {
       if (
         !completedInfo.completedAt ||
         completedInfo.completedAt < (normalizedAgentResponse.completedAt ?? '')
       ) {
         completedInfo.completedAt = normalizedAgentResponse.completedAt;
-        if (
-          normalizedAgentResponse.endpointResponse &&
-          normalizedAgentResponse.endpointResponse.item.data.EndpointActions.data.output
-        ) {
-          completedInfo.outputs[agentId] =
-            normalizedAgentResponse.endpointResponse.item.data.EndpointActions.data.output;
-        }
       }
 
       if (!normalizedAgentResponse.wasSuccessful) {
