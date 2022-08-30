@@ -90,6 +90,9 @@ export const rowsPerPageSelector = (count: number) =>
 export const pageSelector = (pageNumber: number) =>
   `[data-test-subj="pagination-button-${pageNumber - 1}"]`;
 
+export const ruleCheckboxByIdSelector = (id: string) =>
+  `[data-test-subj="checkboxSelectRow-${id}"]`;
+
 export const SELECT_ALL_RULES_BTN = '[data-test-subj="selectAllRules"]';
 
 export const RULES_EMPTY_PROMPT = '[data-test-subj="rulesEmptyPrompt"]';

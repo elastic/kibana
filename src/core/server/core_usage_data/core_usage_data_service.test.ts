@@ -21,12 +21,12 @@ import { config as RawHttpConfig } from '@kbn/core-http-server-internal';
 import { savedObjectsConfig as RawSavedObjectsConfig } from '@kbn/core-saved-objects-base-server-internal';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { metricsServiceMock } from '@kbn/core-metrics-server-mocks';
-import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 
 import { CoreUsageDataService } from './core_usage_data_service';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
-import { CORE_USAGE_STATS_TYPE } from './constants';
+import { CORE_USAGE_STATS_TYPE } from '@kbn/core-usage-data-base-server-internal';
 import { CoreUsageStatsClient } from './core_usage_stats_client';
 
 describe('CoreUsageDataService', () => {

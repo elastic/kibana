@@ -98,7 +98,13 @@
               "<object, unknown>, plugins: ",
               "CasesPluginSetup",
               ") => ",
-              "CasesUiSetup"
+              {
+                "pluginId": "cases",
+                "scope": "public",
+                "docId": "kibCasesPluginApi",
+                "section": "def-public.CasesUiSetup",
+                "text": "CasesUiSetup"
+              }
             ],
             "path": "x-pack/plugins/cases/public/plugin.ts",
             "deprecated": false,
@@ -442,7 +448,34 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "cases",
+        "id": "def-public.CasesUiSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "CasesUiSetup",
+        "description": [],
+        "path": "x-pack/plugins/cases/public/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "cases",
+            "id": "def-public.CasesUiSetup.attachmentFramework",
+            "type": "Object",
+            "tags": [],
+            "label": "attachmentFramework",
+            "description": [],
+            "signature": [
+              "AttachmentFramework"
+            ],
+            "path": "x-pack/plugins/cases/public/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [
       {
@@ -689,7 +722,17 @@
             "section": "def-common.CommentType",
             "text": "CommentType"
           },
-          ".alert; alertId: string | string[]; index: string | string[]; rule: { id: string | null; name: string | null; }; owner: string; }"
+          ".alert; alertId: string | string[]; index: string | string[]; rule: { id: string | null; name: string | null; }; owner: string; } | { type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.CommentType",
+            "text": "CommentType"
+          },
+          ".persistableState; owner: string; persistableStateAttachmentTypeId: string; persistableStateAttachmentState: { [x: string]: ",
+          "JsonValue",
+          "; }; }"
         ],
         "path": "x-pack/plugins/cases/public/types.ts",
         "deprecated": false,
