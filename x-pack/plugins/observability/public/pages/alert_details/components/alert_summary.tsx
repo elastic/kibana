@@ -32,7 +32,8 @@ export function AlertSummary({ alert }: PageHeaderProps) {
           <div>
             <FormattedMessage
               id="xpack.observability.pages.alertDetails.alertSummary"
-              defaultMessage="Alert Summary" />
+              defaultMessage="Alert Summary"
+            />
             &nbsp;&nbsp;
             <EuiToolTip content="Alert summary info here">
               <EuiIcon type="questionInCircle" color="subdued" />
@@ -47,7 +48,8 @@ export function AlertSummary({ alert }: PageHeaderProps) {
                 <h5>
                   <FormattedMessage
                     id="xpack.observability.pages.alertDetails.alertSummary.alertName"
-                    defaultMessage="Alert" />
+                    defaultMessage="Alert"
+                  />
                 </h5>
               </EuiTitle>
               <EuiSpacer size="s" />
@@ -60,7 +62,8 @@ export function AlertSummary({ alert }: PageHeaderProps) {
                 <h5>
                   <FormattedMessage
                     id="xpack.observability.pages.alertDetails.alertSummary.averageValue"
-                    defaultMessage="Average Value" />
+                    defaultMessage="Average Value"
+                  />
                 </h5>
               </EuiTitle>
               <EuiSpacer size="s" />
@@ -73,7 +76,8 @@ export function AlertSummary({ alert }: PageHeaderProps) {
                 <h5>
                   <FormattedMessage
                     id="xpack.observability.pages.alertDetails.alertSummary.duration"
-                    defaultMessage="Duration" />
+                    defaultMessage="Duration"
+                  />
                 </h5>
               </EuiTitle>
               <EuiSpacer size="s" />
@@ -86,7 +90,8 @@ export function AlertSummary({ alert }: PageHeaderProps) {
                 <h5>
                   <FormattedMessage
                     id="xpack.observability.pages.alertDetails.alertSummary.alertStatus"
-                    defaultMessage="Status" />
+                    defaultMessage="Status"
+                  />
                 </h5>
               </EuiTitle>
               <EuiSpacer size="s" />
@@ -99,7 +104,8 @@ export function AlertSummary({ alert }: PageHeaderProps) {
                 <h5>
                   <FormattedMessage
                     id="xpack.observability.pages.alertDetails.alertSummary.runbook"
-                    defaultMessage="Runbook" />
+                    defaultMessage="Runbook"
+                  />
                   &nbsp;&nbsp;
                   <EuiToolTip content="Runbook info here">
                     <EuiIcon type="questionInCircle" color="subdued" />
@@ -107,11 +113,13 @@ export function AlertSummary({ alert }: PageHeaderProps) {
                 </h5>
               </EuiTitle>
               <EuiSpacer size="s" />
-              <EuiLink>https://github.com...
+              <EuiLink>
+                https://github.com...
                 <EuiButtonEmpty
                   data-test-subj="ruleDetailsEditButton"
                   iconType={'pencil'}
-                  onClick={() => { }} />
+                  onClick={() => {}}
+                />
               </EuiLink>
             </EuiFlexItem>
             <EuiFlexItem>
@@ -119,7 +127,8 @@ export function AlertSummary({ alert }: PageHeaderProps) {
                 <h5>
                   <FormattedMessage
                     id="xpack.observability.pages.alertDetails.alertSummary.started"
-                    defaultMessage="Started" />
+                    defaultMessage="Started"
+                  />
                 </h5>
               </EuiTitle>
               <EuiSpacer size="s" />
@@ -132,7 +141,8 @@ export function AlertSummary({ alert }: PageHeaderProps) {
                 <h5>
                   <FormattedMessage
                     id="xpack.observability.pages.alertDetails.alertSummary.lastStatusUpdate"
-                    defaultMessage="Last Status Update" />
+                    defaultMessage="Last Status Update"
+                  />
                 </h5>
               </EuiTitle>
               <EuiSpacer size="s" />
@@ -145,7 +155,8 @@ export function AlertSummary({ alert }: PageHeaderProps) {
                 <h5>
                   <FormattedMessage
                     id="xpack.observability.pages.alertDetails.alertSummary.tags"
-                    defaultMessage="Tags" />
+                    defaultMessage="Tags"
+                  />
                 </h5>
               </EuiTitle>
               <EuiSpacer size="s" />
