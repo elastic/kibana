@@ -48,14 +48,14 @@ export function clickIfVisible(selector: string) {
   });
 }
 
-export const deleteIntegrations = async (integration: string) => {
+export const deleteIntegrations = async () => {
   const ids: string[] = [];
   cy.request('/api/fleet/package_policies').then((response: any) => {
     response.body.items.forEach((policy: any) => ids.push(policy.id));
     cy.request({
       url: `/api/fleet/package_policies/delete`,
       headers: { 'kbn-xsrf': 'cypress' },
-      body: `{ "packagePolicyIds": ${JSON.stringify(ids)} }`,
+      body: `{ "packagePolicyIds": ${JSON.stringify(ids)}, "force": true }`,
       method: 'POST',
     });
   });

@@ -7,6 +7,7 @@
 
 import { CONFIRM_MODAL_BTN } from '../screens/integrations';
 import { TOAST_CLOSE_BTN } from '../screens/navigation';
+import { SETTINGS_SAVE_BTN, SETTINGS_OUTPUTS } from '../screens/fleet';
 
 describe('Edit settings', () => {
   beforeEach(() => {
@@ -30,7 +31,7 @@ describe('Edit settings', () => {
   });
 
   it('should update Fleet server hosts', () => {
-    cy.getBySel('editHostsBtn').click();
+    cy.getBySel(SETTINGS_OUTPUTS.EDIT_HOSTS_BTN).click();
     cy.get('[placeholder="Specify host URL"').type('https://localhost:8220');
 
     cy.intercept('/api/fleet/settings', {
@@ -40,7 +41,7 @@ describe('Edit settings', () => {
       fleet_server_hosts: ['https://localhost:8220'],
     }).as('updateSettings');
 
-    cy.getBySel('saveApplySettingsBtn').click();
+    cy.getBySel(SETTINGS_SAVE_BTN).click();
     cy.getBySel(CONFIRM_MODAL_BTN).click();
 
     cy.wait('@updateSettings').then((interception) => {
@@ -49,8 +50,8 @@ describe('Edit settings', () => {
   });
 
   it('should update outputs', () => {
-    cy.getBySel('editOutputBtn').click();
-    cy.get('[placeholder="Specify name"').clear().type('output-1');
+    cy.getBySel(SETTINGS_OUTPUTS.EDIT_BTN).click();
+    cy.getBySel(SETTINGS_OUTPUTS.NAME_INPUT).clear().type('output-1');
     cy.get('[placeholder="Specify host URL"').clear().type('http://elasticsearch:9200');
 
     cy.intercept('/api/fleet/outputs', {
@@ -72,7 +73,7 @@ describe('Edit settings', () => {
       is_default_monitoring: true,
     }).as('updateOutputs');
 
-    cy.getBySel('saveApplySettingsBtn').click();
+    cy.getBySel(SETTINGS_SAVE_BTN).click();
     cy.getBySel(CONFIRM_MODAL_BTN).click();
 
     cy.wait('@updateOutputs').then((interception) => {
@@ -81,9 +82,9 @@ describe('Edit settings', () => {
   });
 
   it('should allow to create a logstash output', () => {
-    cy.getBySel('addOutputBtn').click();
-    cy.get('[placeholder="Specify name"]').clear().type('output-logstash-1');
-    cy.get('[placeholder="Specify type"]').select('logstash');
+    cy.getBySel(SETTINGS_OUTPUTS.ADD_BTN).click();
+    cy.getBySel(SETTINGS_OUTPUTS.NAME_INPUT).clear().type('output-logstash-1');
+    cy.getBySel(SETTINGS_OUTPUTS.TYPE_INPUT).select('logstash');
     cy.get('[placeholder="Specify host"').clear().type('logstash:5044');
     cy.get('[placeholder="Specify ssl certificate"]').clear().type('SSL CERTIFICATE');
     cy.get('[placeholder="Specify certificate key"]').clear().type('SSL KEY');
@@ -111,7 +112,7 @@ describe('Edit settings', () => {
       },
     }).as('postLogstashOutput');
 
-    cy.getBySel('saveApplySettingsBtn').click();
+    cy.getBySel(SETTINGS_SAVE_BTN).click();
 
     cy.wait('@postLogstashOutput').then((interception) => {
       expect(interception.request.body.name).to.equal('output-logstash-1');

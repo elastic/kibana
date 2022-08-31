@@ -34,16 +34,13 @@ import { cleanupAgentPolicies } from '../tasks/cleanup';
 describe('Add Integration - Real API', () => {
   const integration = 'apache';
 
-  before(() => {
-    cleanupAgentPolicies();
-  });
-
   after(() => {
-    cleanupAgentPolicies();
+    deleteIntegrations();
   });
 
   afterEach(() => {
-    deleteIntegrations(integration);
+    cleanupAgentPolicies();
+    deleteIntegrations();
   });
 
   function addAndVerifyIntegration() {
@@ -78,7 +75,7 @@ describe('Add Integration - Real API', () => {
 
     cy.getBySel(LOADING_SPINNER).should('not.exist');
 
-    cy.getBySel(SETTINGS.UNINSTALL_ASSETS_BTN, { timeout: 10000 }).click();
+    cy.getBySel(SETTINGS.UNINSTALL_ASSETS_BTN).click();
     cy.getBySel(CONFIRM_MODAL_BTN).click();
     cy.getBySel(LOADING_SPINNER).should('not.exist');
     cy.getBySel(SETTINGS.INSTALL_ASSETS_BTN).should('exist');

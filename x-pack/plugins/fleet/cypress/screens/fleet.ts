@@ -48,6 +48,8 @@ export const AGENT_POLICY_FLYOUT_CREATE_BUTTON = 'createAgentPolicyFlyoutBtn';
 export const ENROLLMENT_TOKENS_CREATE_TOKEN_BUTTON = 'createEnrollmentTokenButton';
 export const ENROLLMENT_TOKENS_CREATE_TOKEN_NAME_FIELD = 'createEnrollmentTokenNameField';
 export const SETTINGS_FLEET_SERVER_HOST_HEADING = 'fleetServerHostHeader';
+export const SETTINGS_SAVE_BTN = 'saveApplySettingsBtn';
+
 export const AGENT_POLICY_SYSTEM_MONITORING_CHECKBOX = 'agentPolicyFormSystemMonitoringCheckbox';
 export const INSTALL_INTEGRATIONS_ADVANCE_OPTIONS_BTN = 'AgentPolicyAdvancedOptions.AccordionBtn';
 export const AGENT_POLICY_CREATE_STATUS_CALLOUT = 'agentPolicyCreateStatusCallOut';
@@ -69,6 +71,14 @@ export const AGENT_BINARY_SOURCES_FLYOUT = {
   IS_DEFAULT_SWITCH: 'editDownloadSourcesFlyout.isDefaultSwitch',
   SUBMIT_BUTTON: 'editDownloadSourcesFlyout.submitBtn',
   CANCEL_BUTTON: 'editDownloadSourcesFlyout.cancelBtn',
+};
+
+export const SETTINGS_OUTPUTS = {
+  EDIT_BTN: 'editOutputBtn',
+  ADD_BTN: 'addOutputBtn',
+  EDIT_HOSTS_BTN: 'editHostsBtn',
+  NAME_INPUT: 'settingsOutputsFlyout.nameInput',
+  TYPE_INPUT: 'settingsOutputsFlyout.typeInput',
 };
 
 export const ADD_AGENT_FLYOUT = {
