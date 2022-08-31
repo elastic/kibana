@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { applicationServiceMock } from './application/application_service.mock';
+import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';
+
 export const fatalErrorMock = fatalErrorsServiceMock.createSetupContract();
 export const coreSystemMock = {
   setup: jest.fn().mockResolvedValue({

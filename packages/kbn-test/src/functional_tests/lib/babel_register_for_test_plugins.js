@@ -22,7 +22,6 @@ const transpileKbnPaths = [
   'x-pack/examples',
   // TODO: should should probably remove this link back to the source
   'x-pack/plugins/task_manager/server/config.ts',
-  'src/core/utils/default_app_categories.ts',
   'src/plugins/field_formats/common',
 ].map((path) => Path.resolve(BASE_REPO_ROOT, path));
 
