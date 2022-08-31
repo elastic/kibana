@@ -58,7 +58,7 @@ export const CaseViewActivity = ({
     [caseData.assignees]
   );
 
-  const userActionProfileUids = Array.from(userActionsData?.profileUids.values() ?? []);
+  const userActionProfileUids = Array.from(userActionsData?.profileUids?.values() ?? []);
   const uidsToRetrieve = uniq([...userActionProfileUids, ...assignees]);
 
   const { data: userProfiles, isFetching: isLoadingUserProfiles } = useBulkGetUserProfiles({

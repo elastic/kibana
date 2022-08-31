@@ -62,7 +62,7 @@ describe('useGetCaseUserActions', () => {
               caseServices: {},
               hasDataToPush: true,
               participants: [elasticUser],
-              profileUids: [],
+              profileUids: new Set(),
             },
             isError: false,
             isLoading: false,
