@@ -161,7 +161,10 @@ export class TaskScheduling {
     return await this.store.bulkSchedule(modifiedTasks);
   }
 
-  public async bulkDisable(taskIds: string[]): Promise<BulkUpdateTaskResult> {
+  public async bulkEnableDisable(
+    taskIds: string[],
+    enabled: boolean
+  ): Promise<BulkUpdateTaskResult> {
     const tasks = await pMap(
       chunk(taskIds, BULK_ACTION_SIZE),
       async (taskIdsChunk) =>
@@ -169,6 +172,9 @@ export class TaskScheduling {
           query: mustBeAllOf({
             terms: {
               _id: taskIdsChunk.map((taskId) => `task:${taskId}`),
+            },
+            term: {
+              'task.enabled': !enabled,
             },
           }),
           size: BULK_ACTION_SIZE,
@@ -180,11 +186,11 @@ export class TaskScheduling {
       .flatMap(({ docs }) => docs)
       .reduce<ConcreteTaskInstance[]>((acc, task) => {
         // if task is not enabled, no need to update it
-        if (!task.enabled) {
+        if (enabled === task.enabled) {
           return acc;
         }
 
-        acc.push({ ...task, enabled: false });
+        acc.push({ ...task, enabled });
         return acc;
       }, []);
 

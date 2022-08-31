@@ -2035,16 +2035,21 @@ export class RulesClient {
       } catch (e) {
         throw e;
       }
-      const scheduledTask = await this.scheduleRule({
-        id,
-        consumer: attributes.consumer,
-        ruleTypeId: attributes.alertTypeId,
-        schedule: attributes.schedule as IntervalSchedule,
-        throwOnConflict: false,
-      });
-      await this.unsecuredSavedObjectsClient.update('alert', id, {
-        scheduledTaskId: scheduledTask.id,
-      });
+
+      this.taskManager.bulkEnableDisable([id], true);
+      // const scheduledTask = await this.scheduleRule({
+      //   id,
+      //   consumer: attributes.consumer,
+      //   ruleTypeId: attributes.alertTypeId,
+      //   schedule: attributes.schedule as IntervalSchedule,
+      //   throwOnConflict: false,
+      // });
+
+      // if (id !== scheduledTask.id) {
+      //   await this.unsecuredSavedObjectsClient.update('alert', id, {
+      //     scheduledTaskId: scheduledTask.id,
+      //   });
+      // }
     }
   }
 
@@ -2186,7 +2191,7 @@ export class RulesClient {
         { version }
       );
       if (attributes.scheduledTaskId) {
-        await this.taskManager.removeIfExists(attributes.scheduledTaskId);
+        await this.taskManager.bulkEnableDisable([attributes.scheduledTaskId], false);
       }
     }
   }
@@ -2681,6 +2686,7 @@ export class RulesClient {
         alertInstances: {},
       },
       scope: ['alerting'],
+      enabled: true,
     };
     try {
       return await this.taskManager.schedule(taskInstance);

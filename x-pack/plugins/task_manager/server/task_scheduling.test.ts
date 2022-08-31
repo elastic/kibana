@@ -145,7 +145,7 @@ describe('TaskScheduling', () => {
     });
   });
 
-  describe('bulkDisable', () => {
+  describe('bulkEnableDisable', () => {
     const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
     beforeEach(() => {
       mockTaskStore.bulkUpdate.mockImplementation(() =>
@@ -157,7 +157,7 @@ describe('TaskScheduling', () => {
       mockTaskStore.fetch.mockResolvedValue({ docs: [] });
       const taskScheduling = new TaskScheduling(taskSchedulingOpts);
 
-      await taskScheduling.bulkDisable([id]);
+      await taskScheduling.bulkEnableDisable([id]);
 
       expect(mockTaskStore.fetch).toHaveBeenCalledTimes(1);
       expect(mockTaskStore.fetch).toHaveBeenCalledWith({
@@ -174,7 +174,7 @@ describe('TaskScheduling', () => {
       mockTaskStore.fetch.mockResolvedValue({ docs: [] });
       const taskScheduling = new TaskScheduling(taskSchedulingOpts);
 
-      await taskScheduling.bulkDisable(Array.from({ length: 1250 }));
+      await taskScheduling.bulkEnableDisable(Array.from({ length: 1250 }));
 
       expect(mockTaskStore.fetch).toHaveBeenCalledTimes(13);
     });
@@ -195,7 +195,7 @@ describe('TaskScheduling', () => {
       mockTaskStore.fetch.mockResolvedValue({ docs: [successfulTask, failedTask] });
 
       const taskScheduling = new TaskScheduling(taskSchedulingOpts);
-      const result = await taskScheduling.bulkDisable([successfulTask.id, failedTask.id]);
+      const result = await taskScheduling.bulkEnableDisable([successfulTask.id, failedTask.id]);
 
       expect(result).toEqual({
         tasks: [successfulTask],
@@ -209,7 +209,7 @@ describe('TaskScheduling', () => {
       mockTaskStore.fetch.mockResolvedValue({ docs: [task] });
 
       const taskScheduling = new TaskScheduling(taskSchedulingOpts);
-      await taskScheduling.bulkDisable([id]);
+      await taskScheduling.bulkEnableDisable([id]);
 
       const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0][0];
 
