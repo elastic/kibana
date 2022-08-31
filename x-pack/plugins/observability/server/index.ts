@@ -31,7 +31,7 @@ const configSchema = schema.object({
     slo: schema.object({
       enabled: schema.boolean({ defaultValue: false }),
     }),
-    alertDetail: schema.object({
+    alertDetails: schema.object({
       enabled: schema.boolean({ defaultValue: false }),
     }),
   }),

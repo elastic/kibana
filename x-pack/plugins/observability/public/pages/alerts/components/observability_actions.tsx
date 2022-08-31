@@ -143,7 +143,7 @@ export function ObservabilityActions({
         : []),
 
       ...[
-        config.unsafe.alertDetail.enabled && linkToAlert ? (
+        config.unsafe.alertDetails.enabled && linkToAlert ? (
           <EuiContextMenuItem
             key="viewAlertDetailsPage"
             data-test-subj="viewAlertDetailsPage"
@@ -171,7 +171,7 @@ export function ObservabilityActions({
     handleAddToExistingCaseClick,
     handleAddToNewCaseClick,
     linkToRule,
-    config.unsafe.alertDetail.enabled,
+    config.unsafe.alertDetails.enabled,
     linkToAlert,
     closeActionsPopover,
     setFlyoutAlert,

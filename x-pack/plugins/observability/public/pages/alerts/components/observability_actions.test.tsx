@@ -53,14 +53,14 @@ describe('ObservabilityActions component', () => {
     const wrapper = await setup(RULE_DETAILS_PAGE_ID);
     wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
     expect(wrapper.find('[data-test-subj~="viewRuleDetails"]').hostNodes().length).toBe(0);
-    expect(wrapper.find('[data-test-subj~="viewAlertDetails"]').hostNodes().length).toBe(1);
+    expect(wrapper.find('[data-test-subj~="viewAlertDetailsFlyout"]').hostNodes().length).toBe(1);
   });
 
   it('should show "View rule details" menu item', async () => {
     const wrapper = await setup('nothing');
     wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
     expect(wrapper.find('[data-test-subj~="viewRuleDetails"]').hostNodes().length).toBe(1);
-    expect(wrapper.find('[data-test-subj~="viewAlertDetails"]').hostNodes().length).toBe(1);
+    expect(wrapper.find('[data-test-subj~="viewAlertDetailsFlyout"]').hostNodes().length).toBe(1);
   });
 
   it('should create a valid link for rule details page', async () => {

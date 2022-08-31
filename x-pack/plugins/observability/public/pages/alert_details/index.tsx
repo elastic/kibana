@@ -37,7 +37,7 @@ export function AlertDetailsPage() {
   ]);
 
   // Redirect to the Alerts page when the feature flag is off, and the user hit the page url directly in the browser.
-  if (!config.unsafe.alertDetail.enabled) {
+  if (!config.unsafe.alertDetails.enabled) {
     navigateToUrl(http.basePath.prepend('/app/observability/alerts'));
   }
 

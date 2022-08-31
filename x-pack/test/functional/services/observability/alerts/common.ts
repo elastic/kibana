@@ -157,7 +157,7 @@ export function ObservabilityAlertsCommonProvider({
   const getViewAlertDetailsFlyoutButton = async () => {
     await openActionsMenuForRow(0);
 
-    return await testSubjects.find('viewAlertDetails');
+    return await testSubjects.find('viewAlertDetailsFlyout');
   };
 
   const openAlertsFlyout = async () => {
