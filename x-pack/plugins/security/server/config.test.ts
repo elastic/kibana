@@ -2209,25 +2209,21 @@ describe('createConfig()', () => {
     it('should require `message` for globally configured `accessAgreement`', () => {
       expect(() => {
         createConfig(
-          ConfigSchema.validate(
-            {
-              accessAgreement: {}
-            }
-          ),
+          ConfigSchema.validate({
+            accessAgreement: {},
+          }),
           loggingSystemMock.create().get(),
           { isTLSEnabled: true }
-        )}
-      ).toThrow('[accessAgreement.message]: expected value of type [string] but got [undefined]');
+        );
+      }).toThrow('[accessAgreement.message]: expected value of type [string] but got [undefined]');
     });
 
     it('should accept string `message` for globally configured `accessAgreement`', () => {
       expect(
         createConfig(
-          ConfigSchema.validate(
-            {
-              accessAgreement: { message: 'Foo'}
-            }
-          ),
+          ConfigSchema.validate({
+            accessAgreement: { message: 'Foo' },
+          }),
           loggingSystemMock.create().get(),
           { isTLSEnabled: true }
         )?.accessAgreement?.message
