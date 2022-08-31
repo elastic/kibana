@@ -20,7 +20,7 @@ describe('test useSavedSearch', () => {
   test('useSavedSearch return is valid', async () => {
     const { history, searchSessionManager } = createSearchSessionMock();
     const stateContainer = getState({
-      getStateDefaults: () => ({ index: 'the-data-view-id' }),
+      defaultState: { index: 'the-data-view-id' },
       history,
       uiSettings: uiSettingsMock,
     });
@@ -46,7 +46,7 @@ describe('test useSavedSearch', () => {
   test('refetch$ triggers a search', async () => {
     const { history, searchSessionManager } = createSearchSessionMock();
     const stateContainer = getState({
-      getStateDefaults: () => ({ index: 'the-data-view-id' }),
+      defaultState: { index: 'the-data-view-id' },
       history,
       uiSettings: uiSettingsMock,
     });
@@ -90,7 +90,7 @@ describe('test useSavedSearch', () => {
   test('reset sets back to initial state', async () => {
     const { history, searchSessionManager } = createSearchSessionMock();
     const stateContainer = getState({
-      getStateDefaults: () => ({ index: 'the-data-view-id' }),
+      defaultState: { index: 'the-data-view-id' },
       history,
       uiSettings: uiSettingsMock,
     });
@@ -134,11 +134,10 @@ describe('test useSavedSearch', () => {
   test('useSavedSearch returns plain record raw type', async () => {
     const { history, searchSessionManager } = createSearchSessionMock();
     const stateContainer = getState({
-      getStateDefaults: () =>
-        ({
-          index: 'the-index-pattern-id',
-          query: { sql: 'SELECT * FROM test' },
-        } as unknown as AppState),
+      defaultState: {
+        index: 'the-index-pattern-id',
+        query: { sql: 'SELECT * FROM test' },
+      } as unknown as AppState,
       history,
       uiSettings: uiSettingsMock,
     });

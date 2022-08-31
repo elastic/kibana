@@ -18,7 +18,7 @@ describe('test useSearchSession', () => {
   test('getting the next session id', async () => {
     const { history } = createSearchSessionMock();
     const stateContainer = getState({
-      getStateDefaults: () => ({ index: 'test' }),
+      defaultState: { index: 'test' },
       history,
       uiSettings: uiSettingsMock,
     });
