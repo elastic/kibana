@@ -5778,6 +5778,68 @@
         "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/create_point_in_time_finder.ts",
         "deprecated": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-api-server",
+        "id": "def-server.SavedObjectsPointInTimeFinderClient",
+        "type": "Type",
+        "tags": [],
+        "label": "SavedObjectsPointInTimeFinderClient",
+        "description": [],
+        "signature": [
+          "{ find: <T = unknown, A = unknown>(options: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-server.SavedObjectsFindOptions",
+            "text": "SavedObjectsFindOptions"
+          },
+          ") => Promise<",
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-server.SavedObjectsFindResponse",
+            "text": "SavedObjectsFindResponse"
+          },
+          "<T, A>>; closePointInTime: (id: string, options?: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-server.SavedObjectsBaseOptions",
+            "text": "SavedObjectsBaseOptions"
+          },
+          " | undefined) => Promise<",
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-server.SavedObjectsClosePointInTimeResponse",
+            "text": "SavedObjectsClosePointInTimeResponse"
+          },
+          ">; openPointInTimeForType: (type: string | string[], options?: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-server.SavedObjectsOpenPointInTimeOptions",
+            "text": "SavedObjectsOpenPointInTimeOptions"
+          },
+          " | undefined) => Promise<",
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-server.SavedObjectsOpenPointInTimeResponse",
+            "text": "SavedObjectsOpenPointInTimeResponse"
+          },
+          ">; }"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/create_point_in_time_finder.ts",
+        "deprecated": false,
+        "initialIsOpen": false
       }
     ],
     "objects": []
