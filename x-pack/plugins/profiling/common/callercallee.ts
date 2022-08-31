@@ -156,7 +156,7 @@ export function createCallerCalleeIntermediateRoot(
     let currentNode = clone(root);
     root.samples += samples;
 
-    for (let i = callees.length - 1; i >= 0; i--) {
+    for (let i = 0; i < callees.length; i++) {
       const callee = callees[i];
       const calleeName = createFrameGroupID(createFrameGroup(callee));
       let node = currentNode.callees.get(calleeName);
@@ -169,7 +169,7 @@ export function createCallerCalleeIntermediateRoot(
 
       node.countInclusive += samples;
 
-      if (i === 0) {
+      if (i === callees.length - 1) {
         // Leaf frame: sum up counts for exclusive CPU.
         node.countExclusive += samples;
       }
