@@ -8,3 +8,4 @@
 export * from './actions';
 export { getActionDetailsById } from './action_details_by_id';
 export { getActionList } from './action_list';
+export { getPendingActionsSummary } from './pending_actions_summary';
