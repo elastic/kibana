@@ -131,7 +131,7 @@ export const initRoutes = (
   patchTimelinesRoute(router, config, security);
   importRulesRoute(router, config, ml);
   exportRulesRoute(router, config, logger);
-  findRuleExceptionReferencesRoute(router, logger);
+  findRuleExceptionReferencesRoute(router);
 
   importTimelinesRoute(router, config, security);
   exportTimelinesRoute(router, config, security);
