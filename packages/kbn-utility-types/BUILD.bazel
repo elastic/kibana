@@ -8,6 +8,7 @@ PKG_REQUIRE_NAME = "@kbn/utility-types"
 SOURCE_FILES = glob(
   [
     "src/serializable/**",
+    "src/dot.ts",
     "index.ts"
   ],
   exclude = [
