@@ -188,8 +188,10 @@ export const createPackagePolicyHandler: FleetRequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
   const { force, package: pkg, ...newPolicy } = request.body;
-  // TODO Remove deprecated APIs https://github.com/elastic/kibana/issues/121485
-  delete newPolicy.output_id;
+  if ('output_id' in newPolicy) {
+    // TODO Remove deprecated APIs https://github.com/elastic/kibana/issues/121485
+    delete newPolicy.output_id;
+  }
   const spaceId = fleetContext.spaceId;
   try {
     let newPackagePolicy: NewPackagePolicy;
@@ -265,7 +267,10 @@ export const updatePackagePolicyHandler: RequestHandler<
 
   const { force, ...body } = request.body;
   // TODO Remove deprecated APIs https://github.com/elastic/kibana/issues/121485
-  delete body.output_id;
+  if ('output_id' in body) {
+    delete body.output_id;
+  }
+
   // removed fields not recognized by schema
   const packagePolicyInputs = packagePolicy.inputs.map((input) => {
     const newInput = {
