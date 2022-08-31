@@ -402,6 +402,7 @@ export function App({
           datasourceMap={datasourceMap}
           title={persistedDoc?.title}
           lensInspector={lensInspector}
+          currentDoc={currentDoc}
           goBackToOriginatingApp={goBackToOriginatingApp}
           contextOriginatingApp={contextOriginatingApp}
           initialContextIsEmbedded={initialContextIsEmbedded}
