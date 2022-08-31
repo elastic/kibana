@@ -19,9 +19,11 @@ type NotifyFn = (title: JSX.Element, text?: string) => void;
 
 export interface SavedObjectsReference {
   id: string;
+  name: string;
   type: string;
-  name?: string;
 }
+
+export type SavedObjectsFindOptionsReference = Omit<SavedObjectsReference, 'name'>;
 
 export type DateFormatter = (props: {
   value: number;
@@ -37,7 +39,7 @@ export interface Services {
   notifyError: NotifyFn;
   searchQueryParser?: (searchQuery: string) => {
     searchQuery: string;
-    references?: SavedObjectsReference[];
+    references?: SavedObjectsFindOptionsReference[];
   };
   getTagsColumnDefinition?: () => EuiTableFieldDataColumnType<UserContentCommonSchema> | undefined;
   getSearchBarFilters?: () => SearchFilterConfig[];
@@ -103,7 +105,7 @@ export interface TableListViewKibanaDependencies {
         }
       ) => {
         searchTerm: string;
-        tagReferences: SavedObjectsReference[];
+        tagReferences: SavedObjectsFindOptionsReference[];
         valid: boolean;
       };
       getSearchBarFilter: (options?: {

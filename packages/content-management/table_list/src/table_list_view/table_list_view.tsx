@@ -27,7 +27,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { Table, ConfirmDeleteModal, ListingLimitWarning } from './components';
 import { useServices } from './services';
-import type { SavedObjectsReference } from './services';
+import type { SavedObjectsReference, SavedObjectsFindOptionsReference } from './services';
 import type { Action } from './actions';
 import { getReducer } from './reducer';
 
@@ -49,7 +49,7 @@ export interface Props<T extends UserContentCommonSchema = UserContentCommonSche
   children?: ReactNode | undefined;
   findItems(
     searchQuery: string,
-    references?: SavedObjectsReference[]
+    references?: SavedObjectsFindOptionsReference[]
   ): Promise<{ total: number; hits: T[] }>;
   getDetailViewLink(entity: T): string;
   createItem?(): void;
