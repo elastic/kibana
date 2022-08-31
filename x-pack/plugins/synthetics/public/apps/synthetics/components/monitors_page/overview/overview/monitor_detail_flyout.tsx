@@ -40,6 +40,7 @@ import { ActionsPopover } from './actions_popover';
 import { selectOverviewState } from '../../../../state';
 import { useMonitorDetail } from '../../../../hooks/use_monitor_detail';
 import { MonitorOverviewItem } from '../types';
+import { useMonitorDetailLocator } from '../../hooks/use_monitor_detail_locator';
 
 // supplying `any` here because we're not doing anything prop-specific as it
 // relates to the `EuiBasicTable` component, and typescript requires a generic arg here
@@ -67,12 +68,14 @@ const BoldItem = styled(EuiFlexItem)`
   font-weight: bold;
 `;
 
-export function MonitorDetailFlyout(props: {
+interface Props {
   id: string;
   location: string;
   onClose: () => void;
   onEnabledChange: () => void;
-}) {
+}
+
+export function MonitorDetailFlyout(props: Props) {
   const { id } = props;
   const state = useSelector(selectOverviewState);
 
@@ -89,6 +92,9 @@ export function MonitorDetailFlyout(props: {
   const theme = useEuiTheme();
   const [location, setLocation] = useState<string>(props.location);
   const { observability } = useKibana<ClientPluginsStart>().services;
+  const detailLink = useMonitorDetailLocator({
+    monitorId: id,
+  });
   const { ExploratoryViewEmbeddable } = observability;
   const {
     data: monitorSavedObject,
@@ -102,7 +108,7 @@ export function MonitorDetailFlyout(props: {
   const locations = locationStatuses.locations?.filter((l: any) => !!l?.observer?.geo?.name) ?? [];
   return (
     <EuiFlyout onClose={props.onClose}>
-      {status === FETCH_STATUS.FAILURE && <EuiErrorBoundary>{error}</EuiErrorBoundary>}
+      {status === FETCH_STATUS.FAILURE && <EuiErrorBoundary>{error?.message}</EuiErrorBoundary>}
       {status === FETCH_STATUS.LOADING && <EuiLoadingSpinner size="xl" />}
       {status === FETCH_STATUS.SUCCESS && monitorSavedObject && (
         <>
@@ -275,7 +281,14 @@ export function MonitorDetailFlyout(props: {
                 <EuiButtonEmpty>{CLOSE_FLYOUT_TEXT}</EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton fill href="" iconType="sortRight" iconSide="right">
+                <EuiButton
+                  // `detailLink` can be undefined
+                  isDisabled={!detailLink}
+                  fill
+                  href={detailLink}
+                  iconType="sortRight"
+                  iconSide="right"
+                >
                   {GO_TO_MONITOR_LINK_TEXT}
                 </EuiButton>
               </EuiFlexItem>
@@ -297,7 +310,10 @@ function BodyInfo({ header, content }: { header: string; content: JSX.Element | 
 }
 
 function freqeuncyStr(frequency: { number: string; unit: string }) {
-  return `Every ${frequency.number} ${unitToString(frequency.unit)}`;
+  return `Every ${frequency.number} ${unitToString(
+    frequency.unit,
+    parseInt(frequency.number, 10)
+  )}`;
 }
 
 function dateFmtString(timestamp: string) {
@@ -314,36 +330,44 @@ const Time = ({ timestamp }: { timestamp: string }) => (
   <time dateTime={timestamp}>{moment(timestamp).format(dateFmtString(timestamp))}</time>
 );
 
-function unitToString(unit: string) {
+function unitToString(unit: string, n: number) {
   switch (unit) {
     case 's':
-      return SECONDS_STRING;
+      return secondsString(n);
     case 'm':
-      return MINUTES_STRING;
+      return minutesString(n);
     case 'h':
-      return HOURS_STRING;
+      return hoursString(n);
     case 'd':
-      return DAYS_STRING;
+      return daysString(n);
     default:
       return unit;
   }
 }
 
-const SECONDS_STRING = i18n.translate('xpack.synthetics.monitorDetail.seconds', {
-  defaultMessage: 'seconds',
-});
+const secondsString = (n: number) =>
+  i18n.translate('xpack.synthetics.monitorDetail.seconds', {
+    defaultMessage: '{n, plural, one {second} other {seconds}}',
+    values: { n },
+  });
 
-const MINUTES_STRING = i18n.translate('xpack.synthetics.monitorDetail.minutes', {
-  defaultMessage: 'minutes',
-});
+const minutesString = (n: number) =>
+  i18n.translate('xpack.synthetics.monitorDetail.minutes', {
+    defaultMessage: '{n, plural, one {minute} other {minutes}}',
+    values: { n },
+  });
 
-const HOURS_STRING = i18n.translate('xpack.synthetics.monitorDetail.hours', {
-  defaultMessage: 'hours',
-});
+const hoursString = (n: number) =>
+  i18n.translate('xpack.synthetics.monitorDetail.hours', {
+    defaultMessage: '{n, plural, one {hour} other {hours}}',
+    values: { n },
+  });
 
-const DAYS_STRING = i18n.translate('xpack.synthetics.monitorDetail.days', {
-  defaultMessage: 'days',
-});
+const daysString = (n: number) =>
+  i18n.translate('xpack.synthetics.monitorDetail.days', {
+    defaultMessage: '{n, plural, one {day} other {days}}',
+    values: { n },
+  });
 
 const URL_HEADER_TEXT = i18n.translate('xpack.synthetics.monitorList.urlHeaderText', {
   defaultMessage: 'URL',
