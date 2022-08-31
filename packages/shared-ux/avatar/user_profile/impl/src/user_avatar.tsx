@@ -64,7 +64,7 @@ export const UserAvatar: FunctionComponent<UserAvatarProps> = ({ user, avatar, .
   const displayName = getUserDisplayName(user);
 
   if (avatar?.imageUrl) {
-    return <EuiAvatar name={displayName} imageUrl={avatar.imageUrl} color="plain" {...rest} />;
+      return <EuiAvatar name={displayName} imageUrl={avatar.imageUrl} color="plain" {...rest} />;
   }
 
   return (
