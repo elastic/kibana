@@ -233,9 +233,6 @@
           "id": "kibCorePluginApi"
         },
         {
-          "id": "kibCoreApplicationPluginApi"
-        },
-        {
           "id": "kibCoreChromePluginApi"
         },
         {

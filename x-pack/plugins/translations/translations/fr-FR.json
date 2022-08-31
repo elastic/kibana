@@ -27148,7 +27148,6 @@
     "xpack.securitySolution.detectionEngine.ruleDetails.backToRulesButton": "Règles",
     "xpack.securitySolution.detectionEngine.ruleDetails.deletedRule": "Règle supprimée",
     "xpack.securitySolution.detectionEngine.ruleDetails.enableRuleLabel": "Activer",
-    "xpack.securitySolution.detectionEngine.ruleDetails.exceptionsTab": "Exceptions",
     "xpack.securitySolution.detectionEngine.ruleDetails.pageTitle": "Détails de la règle",
     "xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionEventsTab": "Événements d’exécution",
     "xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.actionFieldNotFoundErrorDescription": "Impossible de trouver le champ \"kibana.alert.rule.execution.uuid\" dans l'index des alertes.",
