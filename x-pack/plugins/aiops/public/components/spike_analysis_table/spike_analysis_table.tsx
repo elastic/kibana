@@ -40,6 +40,7 @@ interface SpikeAnalysisTableProps {
   selectedChangePoint?: ChangePoint;
 }
 
+// TODO: Add an actions link in the table - use AiOpsKibana context to get share.url.locator for Discover like in LinksMenu
 export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
   changePoints,
   loading,
