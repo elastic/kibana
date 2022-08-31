@@ -20,13 +20,18 @@ export default {
   },
 };
 
-type userAvatarNameParams = Pick<UserAvatarProps, 'user'>
-
+type userAvatarNameParams = Pick<UserAvatarProps, 'user'>;
 
 export const userAvatar = (params: userAvatarNameParams) => {
-  return <UserAvatar {...params.user?.username !== undefined ? userAvatar.argTypes.user : userAvatar.argTypes.user.defaultValue} {...params} />;
+  return (
+    <UserAvatar
+      {...(params.user?.username !== undefined
+        ? userAvatar.argTypes.user
+        : userAvatar.argTypes.user.defaultValue)}
+      {...params}
+    />
+  );
 };
-
 
 userAvatar.argTypes = {
   user: {
@@ -34,6 +39,3 @@ userAvatar.argTypes = {
     defaultValue: 'Peggy',
   },
 };
-
-
-
