@@ -26,6 +26,7 @@ import { capabilitiesServiceMock } from '@kbn/core-capabilities-server-mocks';
 import { typeRegistryMock as savedObjectsTypeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { deprecationsServiceMock } from '@kbn/core-deprecations-server-mocks';
 import type {
   PluginInitializerContext,
   CoreSetup,
@@ -41,7 +42,6 @@ import { SharedGlobalConfig } from './plugins';
 import { statusServiceMock } from './status/status_service.mock';
 import { coreUsageDataServiceMock } from './core_usage_data/core_usage_data_service.mock';
 import { i18nServiceMock } from './i18n/i18n_service.mock';
-import { deprecationsServiceMock } from './deprecations/deprecations_service.mock';
 
 export { configServiceMock, configDeprecationsMock } from '@kbn/config-mocks';
 export { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -61,9 +61,9 @@ export { renderingMock } from './rendering/rendering_service.mock';
 export { statusServiceMock } from './status/status_service.mock';
 export { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 export { capabilitiesServiceMock } from '@kbn/core-capabilities-server-mocks';
+export { deprecationsServiceMock } from '@kbn/core-deprecations-server-mocks';
 export { coreUsageDataServiceMock } from './core_usage_data/core_usage_data_service.mock';
 export { i18nServiceMock } from './i18n/i18n_service.mock';
-export { deprecationsServiceMock } from './deprecations/deprecations_service.mock';
 export { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 export { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 export { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';

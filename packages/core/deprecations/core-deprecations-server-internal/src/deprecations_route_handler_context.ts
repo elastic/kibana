@@ -8,15 +8,11 @@
 
 import type { CoreElasticsearchRouteHandlerContext } from '@kbn/core-elasticsearch-server-internal';
 import type { CoreSavedObjectsRouteHandlerContext } from '@kbn/core-saved-objects-server-internal';
-import type { DeprecationsClient, InternalDeprecationsServiceStart } from './deprecations_service';
-
-/**
- * Core's `deprecations` request handler context.
- * @public
- */
-export interface DeprecationsRequestHandlerContext {
-  client: DeprecationsClient;
-}
+import type {
+  DeprecationsRequestHandlerContext,
+  DeprecationsClient,
+} from '@kbn/core-deprecations-server';
+import type { InternalDeprecationsServiceStart } from './deprecations_service';
 
 /**
  * The {@link DeprecationsRequestHandlerContext} implementation.

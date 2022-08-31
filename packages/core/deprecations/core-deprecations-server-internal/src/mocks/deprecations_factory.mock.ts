@@ -7,7 +7,8 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { DeprecationsFactory } from './deprecations_factory';
+import type { DeprecationsFactory } from '../deprecations_factory';
+
 type DeprecationsFactoryContract = PublicMethodsOf<DeprecationsFactory>;
 
 const createDeprecationsFactoryMock = () => {

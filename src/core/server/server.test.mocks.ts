@@ -117,10 +117,10 @@ jest.doMock('@kbn/core-preboot-server-internal', () => ({
   PrebootService: jest.fn(() => mockPrebootService),
 }));
 
-import { deprecationsServiceMock } from './deprecations/deprecations_service.mock';
+import { deprecationsServiceMock } from '@kbn/core-deprecations-server-mocks';
 
 export const mockDeprecationService = deprecationsServiceMock.create();
-jest.doMock('./deprecations/deprecations_service', () => ({
+jest.doMock('@kbn/core-deprecations-server-internal', () => ({
   DeprecationsService: jest.fn(() => mockDeprecationService),
 }));
 

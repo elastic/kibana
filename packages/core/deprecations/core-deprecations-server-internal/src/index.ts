@@ -7,18 +7,10 @@
  */
 
 export type {
-  DeprecationsServiceSetup,
-  GetDeprecationsContext,
-  RegisterDeprecationsConfig,
-} from '@kbn/core-deprecations-server';
-
-export type {
   InternalDeprecationsServiceSetup,
   InternalDeprecationsServiceStart,
-  DeprecationsClient,
 } from './deprecations_service';
 
 export { DeprecationsService } from './deprecations_service';
 export { config } from './deprecation_config';
 export { CoreDeprecationsRouteHandlerContext } from './deprecations_route_handler_context';
-export type { DeprecationsRequestHandlerContext } from './deprecations_route_handler_context';
