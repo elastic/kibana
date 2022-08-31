@@ -381,12 +381,17 @@ const commonRuleParamsKeys = [
 const queryRuleParams = ['index', 'filters', 'language', 'query', 'saved_id'];
 const machineLearningRuleParams = ['anomaly_threshold', 'machine_learning_job_id'];
 const thresholdRuleParams = ['threshold', ...queryRuleParams];
-const allRuleParamsKeys = [
-  ...commonRuleParamsKeys,
-  ...queryRuleParams,
-  ...machineLearningRuleParams,
-  ...thresholdRuleParams,
-].sort();
+
+const getAllRuleParamsKeys = (): string[] => {
+  const allRuleParamsKeys = [
+    ...commonRuleParamsKeys,
+    ...queryRuleParams,
+    ...machineLearningRuleParams,
+    ...thresholdRuleParams,
+  ].sort();
+
+  return Array.from(new Set<string>(allRuleParamsKeys));
+};
 
 const getRuleSpecificRuleParamKeys = (ruleType: Type) => {
   switch (ruleType) {
@@ -441,7 +446,11 @@ export const getActionMessageParams = memoizeOne((ruleType: Type | undefined): A
   return transformRuleKeysToActionVariables(actionMessageRuleParams);
 });
 
-export const allActionMessageParams = transformRuleKeysToActionVariables(allRuleParamsKeys);
+/**
+ * returns action variables available for all rule types
+ */
+export const getAllActionMessageParams = () =>
+  transformRuleKeysToActionVariables(getAllRuleParamsKeys());
 
 // typed as null not undefined as the initial state for this value is null.
 export const userHasPermissions = (canUserCRUD: boolean | null): boolean =>

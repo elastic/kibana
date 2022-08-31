@@ -34,7 +34,7 @@ import {
   ThrottleSelectField,
   THROTTLE_OPTIONS,
 } from '../../../../../../components/rules/throttle_select_field';
-import { allActionMessageParams } from '../../../helpers';
+import { getAllActionMessageParams } from '../../../helpers';
 
 import { RuleActionsField } from '../../../../../../components/rules/rule_actions_field';
 import { validateRuleActionsField } from '../../../../../../containers/detection_engine/rules/validate_rule_actions_field';
@@ -127,6 +127,8 @@ const RuleActionsFormComponent = ({ rulesCount, onClose, onConfirm }: RuleAction
     []
   );
 
+  const messageVariables = useMemo(() => getAllActionMessageParams(), []);
+
   const showActionsSelect = throttle !== NOTIFICATION_THROTTLE_NO_ACTIONS;
 
   return (
@@ -179,7 +181,7 @@ const RuleActionsFormComponent = ({ rulesCount, onClose, onConfirm }: RuleAction
             path="actions"
             component={RuleActionsField}
             componentProps={{
-              messageVariables: allActionMessageParams,
+              messageVariables,
             }}
           />
           <EuiSpacer size="m" />
