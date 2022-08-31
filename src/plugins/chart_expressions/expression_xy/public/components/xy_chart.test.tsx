@@ -3045,6 +3045,7 @@ describe('XYChart component', () => {
 
   describe('annotations', () => {
     const customLineStaticAnnotation: EventAnnotationOutput = {
+      id: 'event1',
       time: '2022-03-18T08:25:00.000Z',
       label: 'Event 1',
       icon: 'triangle',
@@ -3055,11 +3056,13 @@ describe('XYChart component', () => {
     };
 
     const defaultLineStaticAnnotation = {
+      id: 'annotation',
       time: '2022-03-18T08:25:17.140Z',
       label: 'Annotation',
       type: 'manual_point_event_annotation' as const,
     };
     const defaultRangeStaticAnnotation = {
+      id: 'range_annotation',
       time: '2022-03-18T08:25:17.140Z',
       endTime: '2022-03-31T08:25:17.140Z',
       label: 'Event range',
