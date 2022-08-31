@@ -8,7 +8,7 @@
 import { createTopNFunctions } from './functions';
 
 import { events, stackTraces, stackFrames, executables } from './__fixtures__/stacktraces';
-import {sum} from "lodash";
+import { sum } from 'lodash';
 
 describe('TopN function operations', () => {
   test('1', () => {
@@ -27,6 +27,6 @@ describe('TopN function operations', () => {
     expect(topNFunctions.TopN.length).toEqual(maxTopN);
 
     const exclusiveCounts = topNFunctions.TopN.map((value) => value.CountExclusive);
-    expect(exclusiveCounts).toEqual([16, 9, 9, 5, 1]);
+    expect(exclusiveCounts).toEqual([16, 9, 7, 5, 2]);
   });
 });
