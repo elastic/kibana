@@ -2236,7 +2236,7 @@ describe('Lens migrations', () => {
     });
   });
 
-  describe('8.5.0 Add Annotation event type', () => {
+  describe('8.5.0 Add Annotation event type and dataView references', () => {
     const context = { log: { warn: () => {} } } as unknown as SavedObjectMigrationContext;
     const example = {
       type: 'lens',
@@ -2271,6 +2271,18 @@ describe('Lens migrations', () => {
         layerType: 'annotations',
         annotations: [{ id: 'annotation-id', type: 'manual' }],
       });
+    });
+
+    it('adds dataView references for annotation layers', () => {
+      const result = migrations['8.5.0'](
+        {
+          ...example,
+          references: [{ id: 'dataViewId', type: 'index-pattern', name: 'datasource1' }],
+        },
+        context
+      ) as ReturnType<SavedObjectMigrationFn<LensDocShape, LensDocShape>>;
+      // A new reference has been added for the annotation layer
+      expect(result.references).toHaveLength(2);
     });
   });
 

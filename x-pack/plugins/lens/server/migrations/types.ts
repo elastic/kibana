@@ -273,18 +273,25 @@ export type VisState830 = XYVisualizationState830;
 export interface XYVisStatePre840 {
   layers: Array<
     | {
+        layerId: string;
         layerType: Exclude<LayerType, 'annotations'>;
       }
-    | { layerType: Extract<LayerType, 'annotations'>; annotations: Array<{ id: string }> }
+    | {
+        layerId: string;
+        layerType: Extract<LayerType, 'annotations'>;
+        annotations: Array<{ id: string }>;
+      }
   >;
 }
 
 export interface XYVisState840 {
   layers: Array<
     | {
+        layerId: string;
         layerType: Exclude<LayerType, 'annotations'>;
       }
     | {
+        layerId: string;
         layerType: Extract<LayerType, 'annotations'>;
         annotations: Array<{ id: string; type: 'manual' | 'query' }>;
       }

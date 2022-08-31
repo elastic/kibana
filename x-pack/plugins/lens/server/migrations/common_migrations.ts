@@ -13,6 +13,7 @@ import {
   MigrateFunction,
   MigrateFunctionsObject,
 } from '@kbn/kibana-utils-plugin/common';
+import { SavedObjectReference } from '@kbn/core-saved-objects-common';
 import {
   LensDocShapePre712,
   OperationTypePre712,
@@ -433,6 +434,32 @@ export const commonExplicitAnnotationType = (
       },
     },
   };
+};
+
+export const commonAnnotationAddDataViewIdReferences = (
+  attributes: LensDocShape840<VisState840>,
+  references: SavedObjectReference[] | undefined
+): SavedObjectReference[] | undefined => {
+  if (
+    !references ||
+    references.every(({ type }) => type !== 'index-pattern') ||
+    attributes.visualizationType !== 'lnsXY' ||
+    attributes.state.visualization.layers.every((l) => l.layerType !== 'annotations')
+  ) {
+    return references;
+  }
+  const dataViewRef = references.find(({ type }) => type === 'index-pattern');
+  if (!dataViewRef) {
+    return references;
+  }
+  const annotationReferences: SavedObjectReference[] = attributes.state.visualization.layers
+    .filter(({ layerType }) => layerType === 'annotations')
+    .map(({ layerId }) => ({
+      type: 'index-pattern',
+      id: dataViewRef.id,
+      name: `xy-visualization-layer-${layerId}`,
+    }));
+  return [...references, ...annotationReferences];
 };
 
 export const commonMigrateMetricIds = (
