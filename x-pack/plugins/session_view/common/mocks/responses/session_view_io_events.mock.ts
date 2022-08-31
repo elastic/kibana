@@ -19,6 +19,11 @@ export const sessionViewIOEventsMock: ProcessEventResults = {
           action: 'text_output',
           id: '1',
         },
+        host: {
+          boot: {
+            id: '1234',
+          },
+        },
         process: {
           entity_id: '1',
           name: 'bash',
@@ -53,7 +58,12 @@ export const sessionViewIOEventsMock: ProcessEventResults = {
         message: 'hello world security',
         event: {
           action: 'text_output',
-          id: '1',
+          id: '2',
+        },
+        host: {
+          boot: {
+            id: '1234',
+          },
         },
         process: {
           entity_id: '2',
@@ -89,7 +99,12 @@ export const sessionViewIOEventsMock: ProcessEventResults = {
         message: 'hello world security',
         event: {
           action: 'text_output',
-          id: '1',
+          id: '3',
+        },
+        host: {
+          boot: {
+            id: '1234',
+          },
         },
         process: {
           entity_id: '2',
@@ -125,7 +140,12 @@ export const sessionViewIOEventsMock: ProcessEventResults = {
         message: 'hello world security',
         event: {
           action: 'text_output',
-          id: '1',
+          id: '4',
+        },
+        host: {
+          boot: {
+            id: '1234',
+          },
         },
         process: {
           entity_id: '2',
@@ -161,7 +181,12 @@ export const sessionViewIOEventsMock: ProcessEventResults = {
         message: 'hello world security',
         event: {
           action: 'text_output',
-          id: '1',
+          id: '5',
+        },
+        host: {
+          boot: {
+            id: '1234',
+          },
         },
         process: {
           entity_id: '2',
@@ -197,7 +222,12 @@ export const sessionViewIOEventsMock: ProcessEventResults = {
         message: 'hello world security',
         event: {
           action: 'text_output',
-          id: '1',
+          id: '6',
+        },
+        host: {
+          boot: {
+            id: '1234',
+          },
         },
         process: {
           entity_id: '2',
@@ -233,7 +263,12 @@ export const sessionViewIOEventsMock: ProcessEventResults = {
         message: 'hello world security',
         event: {
           action: 'text_output',
-          id: '1',
+          id: '7',
+        },
+        host: {
+          boot: {
+            id: '1234',
+          },
         },
         process: {
           entity_id: '2',
@@ -269,7 +304,53 @@ export const sessionViewIOEventsMock: ProcessEventResults = {
         message: 'hello world security',
         event: {
           action: 'text_output',
-          id: '1',
+          id: '8',
+        },
+        host: {
+          boot: {
+            id: '1234',
+          },
+        },
+        process: {
+          entity_id: '3',
+          name: 'wall',
+          executable: '/bin/wall',
+          entry_leader: {
+            entity_id: '2', // a different session is actually running wall command, but it writes to session 1's tty.
+          },
+          io: {
+            type: 'tty',
+            total_bytes_captured: 1024,
+            total_bytes_skipped: 0,
+            bytes_skipped: [],
+            text: 'An announcement to all TTYs! I am wall, hear me.. roar?',
+          },
+          tty: {
+            char_device: {
+              major: 4,
+              minor: 1,
+            },
+            rows: 59,
+            columns: 173,
+          },
+        },
+      },
+    },
+
+    {
+      _index: 'logs-endpoint.events.process',
+      _id: '9',
+      _source: {
+        '@timestamp': '2022-07-14T11:16:36.570Z',
+        message: 'hello world security',
+        event: {
+          action: 'text_output',
+          id: '9',
+        },
+        host: {
+          boot: {
+            id: '1234',
+          },
         },
         process: {
           entity_id: '1',
