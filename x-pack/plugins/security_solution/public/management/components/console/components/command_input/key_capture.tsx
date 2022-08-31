@@ -147,8 +147,6 @@ export const KeyCapture = memo<KeyCaptureProps>(({ onCapture, focusRef, onStateC
     (ev) => {
       const newValue = ev.key;
 
-      const controlKeys = [8, 13, 37, 39, 36, 35, 46];
-
       // @ts-expect-error
       if (!isCapturing || ev._CONSOLE_IGNORE_KEY) {
         // @ts-expect-error
@@ -173,12 +171,9 @@ export const KeyCapture = memo<KeyCaptureProps>(({ onCapture, focusRef, onStateC
       ]);
 
       onCapture({
-        value: controlKeys.includes(ev.keyCode) ? '' : newValue,
+        value: newValue.length === 1 ? newValue : '',
         eventDetails,
       });
-      /*  setLastInput((prevState) => {
-      return `${prevState || ''}${newValue}`;
-      });*/
     },
     [isCapturing, onCapture]
   );
