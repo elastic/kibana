@@ -13,6 +13,7 @@ Review important information about the {kib} 7.17.x releases.
 // Best practices:
 // * When there are changes to kibana.yml settings, include the links to the new settings.
 
+* <<release-notes-7.17.6>>
 * <<release-notes-7.17.5>>
 * <<release-notes-7.17.4>>
 * <<release-notes-7.17.3>>
@@ -76,6 +77,52 @@ Review important information about the {kib} 7.17.x releases.
 
 --
 
+[[release-notes-7.17.6]]
+== {kib} 7.17.6
+
+Review the following information about the 7.17.6 release.
+
+[float]
+[[breaking-changes-v7.17.6]]
+=== Breaking changes
+
+// tag::notable-breaking-changes[]
+There are no breaking changes in the 7.17.6 release.
+// end::notable-breaking-changes[]
+
+To review the breaking changes in previous versions, refer to the following: 
+
+{kibana-ref-all}/7.16/release-notes-7.16.0.html#breaking-changes-7.16.0[7.16] | {kibana-ref-all}/7.15/release-notes-7.15.0.html#breaking-changes-7.15.0[7.15] | {kibana-ref-all}/7.14/release-notes-7.14.0.html#breaking-changes-7.14.0[7.14] | {kibana-ref-all}/7.13/release-notes-7.13.0.html#breaking-changes-7.13.0[7.13] | 
+{kibana-ref-all}/7.12/release-notes-7.12.0.html#breaking-changes-7.12.0[7.12] | {kibana-ref-all}/7.11/breaking-changes-7.11.html[7.11] | 
+{kibana-ref-all}/7.10/breaking-changes-7.10.html[7.10] | {kibana-ref-all}/7.9/breaking-changes-7.9.html[7.9] | {kibana-ref-all}/7.8/breaking-changes-7.8.html[7.8] | 
+{kibana-ref-all}/7.7/breaking-changes-7.7.html[7.7] | {kibana-ref-all}/7.6/breaking-changes-7.6.html[7.6] | {kibana-ref-all}/7.5/breaking-changes-7.5.html[7.5] |
+{kibana-ref-all}/7.4/breaking-changes-7.4.html[7.4] | {kibana-ref-all}/7.3/breaking-changes-7.3.html[7.3] | {kibana-ref-all}/7.2/breaking-changes-7.2.html[7.2] | 
+{kibana-ref-all}/7.1/breaking-changes-7.1.html[7.1] | {kibana-ref-all}/7.0/breaking-changes-7.0.html[7.0]
+
+[float]
+[[fixes-v7.17.6]]
+=== Bug fixes
+APM::
+Upgrades package version to 7.17.0 for APM Fleet migration {kibana-pull}137104[#137104]
+
+Connectors::
+Should trim values before validation in UI and API {kibana-pull}136840[#136840]
+
+Dashboard::
+Transfer state when drilldown is opened in a new tab {kibana-pull}124770[#124770]
+
+Discover::
+Fixes objects formatting when discover:searchFieldsFromSource in Advanced settings is enabled {kibana-pull}136473[#136473]
+
+Fleet::
+Invalidate api keys in agents `default_api_key_history` on force unenroll {kibana-pull}135910[#135910]
+
+Machine Learning::
+Fixes anomaly detection module manifest queries to ignore frozen and cold data tiers {kibana-pull}136813[#136813]
+
+Security::
+Wrap long role and user names in the roles and users tables {kibana-pull}136067[#136067]
+
 [[release-notes-7.17.5]]
 == {kib} 7.17.5
 
@@ -86,9 +133,7 @@ Review the following information about the 7.17.5 release.
 [[breaking-changes-v7.17.5]]
 === Breaking changes
 
-// tag::notable-breaking-changes[]
 There are no breaking changes in the 7.17.5 release.
-// end::notable-breaking-changes[]
 
 To review the breaking changes in previous versions, refer to the following: 
 

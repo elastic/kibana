@@ -37,6 +37,7 @@ types.eslint.config.js
 /x-pack/test/*/screenshots/failure
 /x-pack/test/*/screenshots/session
 /x-pack/test/*/screenshots/visual_regression_gallery.html
+/x-pack/test/functional/apps/*/*/reporting/reports/failure
 
 /html_docs
 .eslintcache
