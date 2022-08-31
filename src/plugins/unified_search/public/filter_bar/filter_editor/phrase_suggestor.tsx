@@ -82,6 +82,7 @@ export class PhraseSuggestorUI<T extends PhraseSuggestorProps> extends React.Com
     if (field.name === '_index') {
       const suggestions = indexPattern.matchedIndices;
       this.setState({ suggestions, isLoading: false });
+      return;
     }
     this.setState({ isLoading: true });
     const suggestions = await getAutocomplete().getValueSuggestions({

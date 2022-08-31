@@ -261,6 +261,14 @@ class FilterEditorUI extends Component<Props, State> {
   private renderFieldInput() {
     const { selectedIndexPattern, selectedField } = this.state;
     const fields = selectedIndexPattern ? getFilterableFields(selectedIndexPattern) : [];
+    const indexField = fields.find((f) => f.name === '_index');
+    if (indexField) {
+      fields.splice(
+        fields.findIndex((f) => f.name === '_index'),
+        1
+      );
+      fields.unshift(indexField);
+    }
 
     return (
       <EuiFormRow
