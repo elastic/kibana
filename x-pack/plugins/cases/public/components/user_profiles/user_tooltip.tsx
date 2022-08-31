@@ -91,7 +91,7 @@ export interface UserToolTipProps {
 const UserToolTipComponent: React.FC<UserToolTipProps> = ({ children, profile }) => {
   return (
     <EuiToolTip
-      display="block"
+      display="inlineBlock"
       position="top"
       content={<UserFullRepresentationComponent profile={profile} />}
       data-test-subj="user-profile-tooltip"

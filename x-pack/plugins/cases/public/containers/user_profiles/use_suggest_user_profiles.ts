@@ -31,7 +31,7 @@ export const useSuggestUserProfiles = ({
 
   const toasts = useToasts();
 
-  return useQuery<UserProfile[], ServerError>(
+  return useQuery<UserProfile[] | null, ServerError>(
     [
       USER_PROFILES_CACHE_KEY,
       USER_PROFILES_SUGGEST_CACHE_KEY,
@@ -39,8 +39,9 @@ export const useSuggestUserProfiles = ({
     ],
     () => {
       if (isEmpty(name)) {
-        return [];
+        return null;
       }
+
       const abortCtrlRef = new AbortController();
       return suggestUserProfiles({
         http,
@@ -67,4 +68,4 @@ export const useSuggestUserProfiles = ({
   );
 };
 
-export type UseSuggestUserProfiles = UseQueryResult<UserProfile[], ServerError>;
+export type UseSuggestUserProfiles = UseQueryResult<UserProfile[] | null, ServerError>;
