@@ -129,8 +129,8 @@ describe('splitByTerms', () => {
               "order": Object {
                 "_count": "desc",
               },
-              "size": 10,
               "shard_size": 25,
+              "size": 10,
               "terms": Array [
                 Object {
                   "field": "c",
