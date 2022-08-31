@@ -60,8 +60,8 @@ curl --retry 120 \
 
 export ELASTIC_APM_ACTIVE=true
 
-for file in scalability_traces/server/*; do
-    export SCALABILITY_JOURNEY_PATH="$KIBANA_DIR/$file"
+for journey in scalability_traces/server/*; do
+    export SCALABILITY_JOURNEY_PATH="$KIBANA_DIR/$journey"
     echo "--- Run scalability file: $SCALABILITY_JOURNEY_PATH"
     node scripts/functional_tests \
       --config x-pack/test/performance/scalability/config.ts \
