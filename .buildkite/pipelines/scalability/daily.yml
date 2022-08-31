@@ -3,6 +3,7 @@ steps:
     command: .buildkite/scripts/steps/scalability/benchmarking.sh
     agents:
       queue: kb-static-scalability
+    timeout_in_minutes: 90
 
   - wait: ~
     continue_on_failure: true
