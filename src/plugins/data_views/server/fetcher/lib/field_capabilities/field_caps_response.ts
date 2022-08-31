@@ -142,8 +142,6 @@ export function readFieldCapsResponse(
         timeSeriesRollup: types.includes('aggregate_metric_double'),
         searchable: isSearchable,
         aggregatable: isAggregatable,
-        fixedInterval: capsByType[types[0]].meta?.fixed_interval,
-        timeZone: capsByType[types[0]].meta?.time_zone,
         readFromDocValues: shouldReadFieldFromDocValues(isAggregatable, esType),
         metadata_field: capsByType[types[0]].metadata_field,
         fixedInterval: capsByType[types[0]].meta?.fixed_interval,
