@@ -48,7 +48,7 @@ export function defineAccessAgreementRoutes({
       // we have it and can get a corresponding configuration.
       const sessionValue = await getSession().get(request);
 
-      let accessAgreement: string = '';
+      let accessAgreement = '';
 
       if (sessionValue) {
         const providerSpecificAccessAgreement =
