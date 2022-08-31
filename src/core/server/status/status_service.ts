@@ -27,7 +27,7 @@ import type { InternalEnvironmentServiceSetup } from '@kbn/core-environment-serv
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type { InternalElasticsearchServiceSetup } from '@kbn/core-elasticsearch-server-internal';
 import type { InternalMetricsServiceSetup } from '@kbn/core-metrics-server-internal';
-import { InternalSavedObjectsServiceSetup } from '../saved_objects';
+import type { InternalSavedObjectsServiceSetup } from '@kbn/core-saved-objects-server-internal';
 import { registerStatusRoute } from './routes';
 import type { InternalCoreUsageDataSetup } from '../core_usage_data';
 

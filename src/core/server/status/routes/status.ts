@@ -13,7 +13,7 @@ import { PackageInfo } from '@kbn/config';
 import type { PluginName } from '@kbn/core-base-common';
 import type { IRouter } from '@kbn/core-http-server';
 import type { MetricsServiceSetup } from '@kbn/core-metrics-server';
-import type { CoreIncrementUsageCounter } from '../../core_usage_data/types';
+import type { CoreIncrementUsageCounter } from '@kbn/core-usage-data-server';
 import { ServiceStatus, CoreStatus, ServiceStatusLevels } from '../types';
 import { calculateLegacyStatus, LegacyStatusInfo } from '../legacy_status';
 import { StatusResponse } from '../../../types/status';

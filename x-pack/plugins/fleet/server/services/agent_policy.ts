@@ -972,7 +972,6 @@ export async function addPackageToAgentPolicy(
   const basePackagePolicy = packageToPackagePolicy(
     packageInfo,
     agentPolicy.id,
-    defaultOutput.id,
     agentPolicy.namespace ?? 'default',
     packagePolicyName,
     packagePolicyDescription

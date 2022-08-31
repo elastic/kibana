@@ -5,13 +5,12 @@
     "declarationMap": true,
     "emitDeclarationOnly": true,
     "outDir": "./target/types",
-    "rootDir": "src",
     "types": [
       "jest",
       "node"
     ]
   },
   "include": [
-    "src/**/*"
+    "**/*.ts"
   ]
 }

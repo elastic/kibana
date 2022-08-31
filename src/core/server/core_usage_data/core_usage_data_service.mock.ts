@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { PublicMethodsOf } from '@kbn/utility-types';
 import { BehaviorSubject } from 'rxjs';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { CoreUsageData, CoreUsageDataStart } from '@kbn/core-usage-data-server';
+import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import { CoreUsageDataService } from './core_usage_data_service';
 import { coreUsageStatsClientMock } from './core_usage_stats_client.mock';
-import { CoreUsageData, InternalCoreUsageDataSetup, CoreUsageDataStart } from './types';
 
 const createSetupContractMock = (usageStatsClient = coreUsageStatsClientMock.create()) => {
   const setupContract: jest.Mocked<InternalCoreUsageDataSetup> = {
