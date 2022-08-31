@@ -5,10 +5,5 @@
  * 2.0.
  */
 
-export const enum InputsModelId {
-  global = 'global',
-  timeline = 'timeline',
-  socTrends = 'socTrends',
-}
-
-export type TimeRangeKinds = 'absolute' | 'relative';
+export const enterpriseSearchFeatureId = 'enterpriseSearch';
+export const enableIndexTransformsTab = 'enterpriseSearch:enableIndexTransformsTab';
