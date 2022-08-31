@@ -59,7 +59,9 @@ function getMockOptions({
   auditLogger = auditLoggerMock.create();
   auditService.asScoped.mockReturnValue(auditLogger);
 
-  const accessAgreementObj = accessAgreementMessage ? {accessAgreement: { message: accessAgreementMessage }} : null;
+  const accessAgreementObj = accessAgreementMessage
+    ? { accessAgreement: { message: accessAgreementMessage } }
+    : null;
 
   return {
     audit: auditService,
@@ -72,7 +74,7 @@ function getMockOptions({
     config: createConfig(
       ConfigSchema.validate({
         authc: { selector, providers, http },
-        ...accessAgreementObj
+        ...accessAgreementObj,
       }),
       loggingSystemMock.create().get(),
       { isTLSEnabled: false }
