@@ -8,6 +8,7 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { useCallback, useMemo } from 'react';
 import type { Filter, Query } from '@kbn/es-query';
+import { InputsModelId } from '../../store/inputs/constants';
 import { useKibana } from '../../lib/kibana';
 import { inputsSelectors } from '../../store';
 import { inputsActions } from '../../store/inputs';
@@ -28,7 +29,7 @@ export const useInitSearchBarFromUrlParams = () => {
       if (initialState != null) {
         dispatch(
           inputsActions.setFilterQuery({
-            id: 'global',
+            id: InputsModelId.global,
             query: initialState.query,
             language: initialState.language,
           })
@@ -44,7 +45,7 @@ export const useInitSearchBarFromUrlParams = () => {
         filterManager.setFilters(initialState);
         dispatch(
           inputsActions.setSearchBarFilter({
-            id: 'global',
+            id: InputsModelId.global,
             filters: initialState,
           })
         );
@@ -54,7 +55,7 @@ export const useInitSearchBarFromUrlParams = () => {
 
         dispatch(
           inputsActions.setSearchBarFilter({
-            id: 'global',
+            id: InputsModelId.global,
             filters: filterManager.getFilters(),
           })
         );
@@ -73,18 +74,20 @@ export const useInitSearchBarFromUrlParams = () => {
           filterManager.setFilters(filters);
           dispatch(
             inputsActions.setSearchBarFilter({
-              id: 'global',
+              id: InputsModelId.global,
               filters,
             })
           );
 
           dispatch(
             inputsActions.setFilterQuery({
-              id: 'global',
+              id: InputsModelId.global,
               ...query,
             })
           );
-          dispatch(inputsActions.setSavedQuery({ id: 'global', savedQuery: savedQueryData }));
+          dispatch(
+            inputsActions.setSavedQuery({ id: InputsModelId.global, savedQuery: savedQueryData })
+          );
         });
       }
     },

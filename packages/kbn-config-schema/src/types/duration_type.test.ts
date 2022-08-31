@@ -7,7 +7,7 @@
  */
 
 import { duration as momentDuration } from 'moment';
-import { schema } from '..';
+import { schema } from '../..';
 
 const { duration, object, contextRef, siblingRef } = schema;
 
