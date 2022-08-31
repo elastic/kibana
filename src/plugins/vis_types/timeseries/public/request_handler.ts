@@ -7,7 +7,7 @@
  */
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { Adapters } from '@kbn/inspector-plugin/common';
-import { KibanaContext, handleResponse } from '@kbn/data-plugin/public';
+import { KibanaContext } from '@kbn/data-plugin/public';
 import { getTimezone } from './application/lib/get_timezone';
 import { getUISettings, getDataStart, getCoreStart } from './services';
 import { ROUTES, UI_SETTINGS } from '../common/constants';
@@ -37,7 +37,6 @@ export const metricsRequestHandler = async ({
   if (!expressionAbortSignal.aborted) {
     const config = getUISettings();
     const data = getDataStart();
-    const theme = getCoreStart().theme;
     const abortController = new AbortController();
     const expressionAbortHandler = function () {
       abortController.abort();
@@ -84,10 +83,14 @@ export const metricsRequestHandler = async ({
           inspectorAdapters?.requests
             ?.start(query.label ?? key, { searchSessionId })
             .json(query.body)
-            .ok({ time: query.time });
+            .ok({ time: query.time, json: { rawResponse: query.response } });
 
-          if (query.response && config.get(UI_SETTINGS.ALLOW_CHECKING_FOR_FAILED_SHARDS)) {
-            handleResponse({ body: query.body }, { rawResponse: query.response }, {}, theme);
+          if (
+            query.response &&
+            inspectorAdapters?.requests &&
+            config.get(UI_SETTINGS.ALLOW_CHECKING_FOR_FAILED_SHARDS)
+          ) {
+            data.search.showWarnings(inspectorAdapters.requests);
           }
         });
 
