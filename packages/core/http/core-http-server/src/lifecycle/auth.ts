@@ -28,6 +28,7 @@ export interface AuthResultAuthenticated extends AuthResultParams {
 /** @public */
 export interface AuthResultNotHandled {
   type: AuthResultType.notHandled;
+  error?: Error;
 }
 
 /** @public */
@@ -86,7 +87,7 @@ export interface AuthToolkit {
    * Allows user to access a resource when authRequired is 'optional'
    * Rejects a request when authRequired: true
    * */
-  notHandled: () => AuthResult;
+  notHandled: (error?: Error) => AuthResult;
   /**
    * Redirects user to another location to complete authentication when authRequired: true
    * Allows user to access a resource without redirection when authRequired: 'optional'

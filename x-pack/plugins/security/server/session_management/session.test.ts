@@ -17,6 +17,7 @@ import { sessionCookieMock, sessionIndexMock, sessionMock } from './index.mock';
 import type { SessionValueContentToEncrypt } from './session';
 import { getPrintableSessionId, Session } from './session';
 import type { SessionCookie } from './session_cookie';
+import { SessionExpiredError, SessionMissingError, SessionUnexpectedError } from './session_errors';
 import type { SessionIndex } from './session_index';
 
 describe('Session', () => {
@@ -87,7 +88,9 @@ describe('Session', () => {
         })
       );
 
-      await expect(session.get(httpServerMock.createKibanaRequest())).resolves.toBeNull();
+      await expect(session.get(httpServerMock.createKibanaRequest())).resolves.toBeInstanceOf(
+        SessionMissingError
+      );
     });
 
     it('clears session value if session is expired because of idle timeout', async () => {
@@ -107,7 +110,9 @@ describe('Session', () => {
         })
       );
 
-      await expect(session.get(httpServerMock.createKibanaRequest())).resolves.toBeNull();
+      await expect(session.get(httpServerMock.createKibanaRequest())).resolves.toBeInstanceOf(
+        SessionExpiredError
+      );
       expect(mockSessionCookie.clear).toHaveBeenCalledTimes(1);
       expect(mockSessionIndex.invalidate).toHaveBeenCalledTimes(1);
     });
@@ -129,7 +134,9 @@ describe('Session', () => {
         })
       );
 
-      await expect(session.get(httpServerMock.createKibanaRequest())).resolves.toBeNull();
+      await expect(session.get(httpServerMock.createKibanaRequest())).resolves.toBeInstanceOf(
+        SessionExpiredError
+      );
       expect(mockSessionCookie.clear).toHaveBeenCalledTimes(1);
       expect(mockSessionIndex.invalidate).toHaveBeenCalledTimes(1);
     });
@@ -144,7 +151,9 @@ describe('Session', () => {
       );
       mockSessionIndex.get.mockResolvedValue(null);
 
-      await expect(session.get(httpServerMock.createKibanaRequest())).resolves.toBeNull();
+      await expect(session.get(httpServerMock.createKibanaRequest())).resolves.toBeInstanceOf(
+        SessionUnexpectedError
+      );
       expect(mockSessionCookie.clear).toHaveBeenCalledTimes(1);
     });
 
@@ -158,7 +167,9 @@ describe('Session', () => {
       );
       mockSessionIndex.get.mockResolvedValue(sessionIndexMock.createValue({ content: 'Uh! Oh!' }));
 
-      await expect(session.get(httpServerMock.createKibanaRequest())).resolves.toBeNull();
+      await expect(session.get(httpServerMock.createKibanaRequest())).resolves.toBeInstanceOf(
+        SessionUnexpectedError
+      );
       expect(mockSessionCookie.clear).toHaveBeenCalledTimes(1);
       expect(mockSessionIndex.invalidate).toHaveBeenCalledTimes(1);
     });
@@ -180,7 +191,9 @@ describe('Session', () => {
         })
       );
 
-      await expect(session.get(httpServerMock.createKibanaRequest())).resolves.toBeNull();
+      await expect(session.get(httpServerMock.createKibanaRequest())).resolves.toBeInstanceOf(
+        SessionUnexpectedError
+      );
       expect(mockSessionCookie.clear).toHaveBeenCalledTimes(1);
       expect(mockSessionIndex.invalidate).toHaveBeenCalledTimes(1);
     });

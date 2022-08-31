@@ -35,9 +35,10 @@ const authResult = {
       responseHeaders: data.responseHeaders,
     };
   },
-  notHandled(): AuthResult {
+  notHandled(error?: Error): AuthResult {
     return {
       type: AuthResultType.notHandled,
+      error,
     };
   },
   redirected(headers: { location: string } & ResponseHeaders): AuthResult {
@@ -110,7 +111,14 @@ export function adoptToHapiAuthFormat(
         if (kibanaRequest.route.options.authRequired === 'optional') {
           return responseToolkit.continue;
         }
-        return hapiResponseAdapter.handle(lifecycleResponseFactory.unauthorized());
+
+        let options;
+        if (result.error) {
+          log.error(result.error); // TODO: Maybe not log this as an actually error, but in some other form? (the stack trace is a bit noisy)
+          options = { headers: { 'kbn-session-error-reason': result.error.message } };
+        }
+
+        return hapiResponseAdapter.handle(lifecycleResponseFactory.unauthorized(options));
       }
       throw new Error(
         `Unexpected result from Authenticate. Expected AuthResult or KibanaResponse, but given: ${result}.`

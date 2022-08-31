@@ -90,8 +90,6 @@ describe('UserProfileService', () => {
     });
 
     it('returns `null` if session is not available', async () => {
-      mockStartParams.session.get.mockResolvedValue(null);
-
       const startContract = userProfileService.start(mockStartParams);
       await expect(startContract.getCurrent({ request: mockRequest })).resolves.toBeNull();
 

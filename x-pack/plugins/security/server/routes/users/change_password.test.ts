@@ -20,6 +20,7 @@ import type { InternalAuthenticationServiceStart } from '../../authentication';
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
 import { securityMock } from '../../mocks';
 import type { Session } from '../../session_management';
+import { SessionMissingError } from '../../session_management';
 import { sessionMock } from '../../session_management/session.mock';
 import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
 import { routeDefinitionParamsMock } from '../index.mock';
@@ -211,7 +212,7 @@ describe('Change password', () => {
     });
 
     it('successfully changes own password but does not re-login if current session does not exist.', async () => {
-      session.get.mockResolvedValue(null);
+      session.get.mockResolvedValue(new SessionMissingError());
       const response = await routeHandler(mockContext, mockRequest, kibanaResponseFactory);
 
       expect(response.status).toBe(204);

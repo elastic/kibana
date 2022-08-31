@@ -177,7 +177,7 @@ export class AuthenticationService {
       }
 
       this.logger.debug('Could not handle authentication attempt');
-      return t.notHandled();
+      return t.notHandled(authenticationResult.error);
     });
 
     http.registerOnPreResponse(async (request, preResponse, toolkit) => {

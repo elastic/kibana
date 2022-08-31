@@ -89,8 +89,6 @@ describe('Update profile routes', () => {
     });
 
     it('fails if session is not found.', async () => {
-      session.get.mockResolvedValue(null);
-
       await expect(
         routeHandler(
           getMockContext(),

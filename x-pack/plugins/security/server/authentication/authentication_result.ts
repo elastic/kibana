@@ -79,8 +79,8 @@ export class AuthenticationResult {
    * Produces `AuthenticationResult` for the case when user can't be authenticated with the
    * provided credentials.
    */
-  public static notHandled() {
-    return new AuthenticationResult(AuthenticationResultStatus.NotHandled);
+  public static notHandled(error?: Error) {
+    return new AuthenticationResult(AuthenticationResultStatus.NotHandled, { error });
   }
 
   /**

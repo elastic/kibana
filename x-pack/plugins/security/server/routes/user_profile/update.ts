@@ -28,7 +28,7 @@ export function defineUpdateUserProfileDataRoute({
     },
     createLicensedRouteHandler(async (context, request, response) => {
       const session = await getSession().get(request);
-      if (!session) {
+      if (session instanceof Error) {
         logger.warn('User profile requested without valid session.');
         return response.notFound();
       }

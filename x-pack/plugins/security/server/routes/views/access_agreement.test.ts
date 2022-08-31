@@ -130,8 +130,6 @@ describe('Access agreement view routes', () => {
     it('returns empty `accessAgreement` if session info is not available.', async () => {
       const request = httpServerMock.createKibanaRequest();
 
-      session.get.mockResolvedValue(null);
-
       await expect(routeHandler(mockContext, request, kibanaResponseFactory)).resolves.toEqual({
         options: { body: { accessAgreement: '' } },
         payload: { accessAgreement: '' },

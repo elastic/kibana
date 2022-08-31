@@ -50,7 +50,7 @@ export function defineAccessAgreementRoutes({
 
       let accessAgreement = '';
 
-      if (sessionValue) {
+      if (!(sessionValue instanceof Error)) {
         const providerSpecificAccessAgreement =
           config.authc.providers[
             sessionValue.provider.type as keyof ConfigType['authc']['providers']

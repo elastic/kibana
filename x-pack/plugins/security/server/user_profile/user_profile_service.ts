@@ -304,7 +304,7 @@ export class UserProfileService {
       throw error;
     }
 
-    if (!userSession) {
+    if (userSession instanceof Error) {
       return null;
     }
 

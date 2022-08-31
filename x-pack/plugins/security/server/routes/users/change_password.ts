@@ -78,7 +78,7 @@ export function defineChangeUserPasswordRoutes({
       // user with the new password and update session. We check this since it's possible to update
       // password even if user is authenticated via HTTP headers and hence doesn't have an active
       // session and in such cases we shouldn't create a new one.
-      if (isUserChangingOwnPassword && currentSession) {
+      if (isUserChangingOwnPassword && currentSession && !(currentSession instanceof Error)) {
         try {
           const authenticationResult = await getAuthenticationService().login(request, {
             provider: { name: currentSession.provider.name },

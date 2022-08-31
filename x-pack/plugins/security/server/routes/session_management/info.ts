@@ -17,7 +17,7 @@ export function defineSessionInfoRoutes({ router, getSession }: RouteDefinitionP
     { path: '/internal/security/session', validate: false },
     async (_context, request, response) => {
       const sessionValue = await getSession().get(request);
-      if (sessionValue) {
+      if (!(sessionValue instanceof Error)) {
         const expirationTime =
           sessionValue.idleTimeoutExpiration && sessionValue.lifespanExpiration
             ? Math.min(sessionValue.idleTimeoutExpiration, sessionValue.lifespanExpiration)

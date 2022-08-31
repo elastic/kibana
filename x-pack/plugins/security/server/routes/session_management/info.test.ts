@@ -151,8 +151,6 @@ describe('Info session routes', () => {
     });
 
     it('returns empty response if session is not available.', async () => {
-      session.get.mockResolvedValue(null);
-
       await expect(
         routeHandler(
           {} as unknown as SecurityRequestHandlerContext,
