@@ -112,8 +112,8 @@ export const BundleFleetPackages: Task = {
             await createZipFile(zipEntries, destination);
           }
         } catch (error) {
-          log.warning(`Failed to download bundled package archive ${archivePath}`);
-          log.warning(error);
+          log.error(`Failed to download bundled package archive ${archivePath}`);
+          throw error;
         }
       })
     );
