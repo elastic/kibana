@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import moment from 'moment';
 import type { EcsEventOutcome } from '@kbn/core/server';
 import { EuiLink } from '@elastic/eui';
@@ -36,6 +36,11 @@ export const RuleEventLogListCellRenderer = (props: RuleEventLogListCellRenderer
   const { columnId, value, version, dateFormat = DEFAULT_DATE_FORMAT, ruleId } = props;
   const history = useHistory();
 
+  const onClickRuleName = useCallback(
+    () => ruleId && history.push(routeToRuleDetails.replace(':ruleId', ruleId)),
+    [ruleId, history]
+  );
+
   if (typeof value === 'undefined') {
     return null;
   }
@@ -49,11 +54,7 @@ export const RuleEventLogListCellRenderer = (props: RuleEventLogListCellRenderer
   }
 
   if (columnId === 'rule_name' && ruleId) {
-    return (
-      <EuiLink onClick={() => history.push(routeToRuleDetails.replace(':ruleId', ruleId))}>
-        {value}
-      </EuiLink>
-    );
+    return <EuiLink onClick={onClickRuleName}>{value}</EuiLink>;
   }
 
   if (RULE_EXECUTION_LOG_ALERT_COUNT_COLUMNS.includes(columnId)) {
