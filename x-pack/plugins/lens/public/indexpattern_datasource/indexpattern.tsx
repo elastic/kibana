@@ -21,7 +21,9 @@ import { DataPublicPluginStart, ES_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { EuiCallOut, EuiLink } from '@elastic/eui';
 import type {
   DatasourceDimensionEditorProps,
   DatasourceDimensionTriggerProps,
@@ -662,6 +664,51 @@ export function getIndexPatternDatasource({
           setState
         ),
       ];
+    },
+    getDeprecationMessages: () => {
+      const deprecatedMessages: React.ReactNode[] = [];
+      const useFieldExistenceSamplingKey = 'lens:useFieldExistenceSampling';
+      const isUsingSampling = core.uiSettings.get(useFieldExistenceSamplingKey);
+
+      if (isUsingSampling) {
+        const link = (
+          <EuiLink
+            color="accent"
+            onClick={() => {
+              core.application.navigateToApp('management', {
+                path: `/kibana/settings?query=${useFieldExistenceSamplingKey}`,
+              });
+            }}
+          >
+            <FormattedMessage
+              id="xpack.lens.indexPattern.useFieldExistenceSamplingLink"
+              defaultMessage="Use field existence sampling"
+            />
+          </EuiLink>
+        );
+
+        deprecatedMessages.push(
+          <EuiCallOut
+            color="warning"
+            iconType="help"
+            title={
+              <FormattedMessage
+                id="xpack.lens.indexPattern.testDataDeprecationMessage"
+                defaultMessage="Caution: you are using deprecated {link} mode"
+                values={{ link }}
+              />
+            }
+          >
+            <FormattedMessage
+              id="xpack.lens.indexPattern.testDataDeprecationMessage"
+              defaultMessage="This setting is deprecated and will not be supported in a future version. You must disable the {link} setting."
+              values={{ link }}
+            />
+          </EuiCallOut>
+        );
+      }
+
+      return deprecatedMessages;
     },
     checkIntegrity: (state, indexPatterns) => {
       const ids = Object.values(state.layers || {}).map(({ indexPatternId }) => indexPatternId);
