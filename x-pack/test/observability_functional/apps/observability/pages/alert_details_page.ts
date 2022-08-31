@@ -14,7 +14,7 @@ export default ({ getService }: FtrProviderContext) => {
   const observability = getService('observability');
   const retry = getService('retry');
 
-  describe('Observability Alert Details page', function () {
+  describe('Observability Alert Details page - Feature flag', function () {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
       await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
@@ -42,5 +42,9 @@ export default ({ getService }: FtrProviderContext) => {
         async () => await testSubjects.exists('alertsFlyout')
       );
     });
+    /* TODO: Add more test cases regarding the feature flag for:
+     - alert details URL from the Action variable
+     - alert details button from the alert flyout.
+    */
   });
 };
