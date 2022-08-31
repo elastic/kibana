@@ -129,4 +129,20 @@ describe('UnifiedFieldList <FieldTopValues />', () => {
 
     expect(wrapper.text()).toBe('(empty)60.0%sourceA30.0%sourceB0.4%Other9.6%');
   });
+
+  it('should render correctly without floating point', async () => {
+    const wrapper = mountWithIntl(
+      <FieldTopValues
+        {...defaultProps}
+        buckets={[
+          {
+            count: 5000,
+            key: 'sourceA',
+          },
+        ]}
+      />
+    );
+
+    expect(wrapper.text()).toBe('sourceA100%');
+  });
 });

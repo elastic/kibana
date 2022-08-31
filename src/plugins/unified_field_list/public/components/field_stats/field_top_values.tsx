@@ -39,7 +39,7 @@ export const FieldTopValues: React.FC<FieldTopValuesProps> = ({
   const formatter = dataView.getFormatterForField(field);
   const otherCount = getOtherCount(getBucketsValuesCount(buckets), sampledValuesCount);
   const digitsRequired = buckets.some(
-    (topValue) => !Number.isInteger(topValue.count / sampledValuesCount)
+    (bucket) => !Number.isInteger(bucket.count / sampledValuesCount)
   );
 
   return (
