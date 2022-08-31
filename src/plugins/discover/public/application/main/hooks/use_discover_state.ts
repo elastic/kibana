@@ -253,14 +253,16 @@ export function useDiscoverState({
   );
 
   /**
-   * Trigger data fetching on dataView or savedSearch changes
+   * Reset stored columns if SQL query changes
    */
   useEffect(() => {
     if (!isEqual(state.query, prevQuery)) {
       setDocumentStateCols([]);
     }
   }, [state.query, prevQuery]);
-
+  /**
+   * Trigger data fetching on dataView or savedSearch changes
+   */
   useEffect(() => {
     if (dataView) {
       refetch$.next(undefined);
@@ -277,6 +279,9 @@ export function useDiscoverState({
     }
   }, [dataView, stateContainer]);
 
+  /**
+   * Helper to get all column / fields of the first result row of SQL request
+   */
   const getResultColumns = useCallback(() => {
     if (documentState.result?.length && documentState.fetchStatus === FetchStatus.COMPLETE) {
       const firstRow = documentState.result[0];
@@ -289,6 +294,9 @@ export function useDiscoverState({
     return [];
   }, [documentState, documentStateCols, sqlQuery, state.query]);
 
+  /**
+   * Just used by SQL mode to set the actual used data view
+   */
   useEffect(() => {
     async function fetchDataview() {
       if (state.query && isOfAggregateQueryType(state.query) && 'sql' in state.query) {
