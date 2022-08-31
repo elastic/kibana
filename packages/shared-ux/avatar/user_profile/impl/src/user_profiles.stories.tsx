@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { UserAvatar, UserAvatarProps } from './user_avatar';
-import mdx from '../README.mdx'
+import mdx from '../README.mdx';
 
 export default {
   title: 'Avatar/User Profile',
@@ -20,13 +20,9 @@ export default {
   },
 };
 
-
-
 export const userAvatar = ({ user, ...rest }: UserAvatarProps) => {
   return <UserAvatar user={{ username: userAvatar.argTypes.username.defaultValue }} {...rest} />;
 };
-
-
 
 userAvatar.argTypes = {
   username: {
@@ -35,6 +31,4 @@ userAvatar.argTypes = {
   },
 };
 
-console.log(userAvatar.argTypes.username)
-
-
+console.log(userAvatar.argTypes.username);
