@@ -86,7 +86,7 @@ describe('copyValueToClipboard', () => {
     execCommandMock.mockImplementationOnce(() => true);
     const result = copyColumnNameToClipboard({
       services: discoverServiceMock,
-      columnId: 'text_message',
+      columnDisplayName: 'text_message',
     });
 
     expect(result).toBe('"text_message"');
@@ -100,7 +100,7 @@ describe('copyValueToClipboard', () => {
     execCommandMock.mockImplementationOnce(() => false);
     const result = copyColumnNameToClipboard({
       services: discoverServiceMock,
-      columnId: 'text_message',
+      columnDisplayName: 'text_message',
     });
 
     expect(result).toBe(null);
@@ -117,16 +117,17 @@ describe('copyValueToClipboard', () => {
     const result = await copyColumnValuesToClipboard({
       services: discoverServiceMock,
       columnId: 'bool_enabled',
+      columnDisplayName: 'custom_bool_enabled',
       rowsCount: 2,
       valueToStringConverter,
     });
 
-    expect(result).toBe('"bool_enabled"\nfalse\ntrue');
+    expect(result).toBe('"custom_bool_enabled"\nfalse\ntrue');
     expect(global.window.navigator.clipboard.writeText).toHaveBeenCalledWith(
-      '"bool_enabled"\nfalse\ntrue'
+      '"custom_bool_enabled"\nfalse\ntrue'
     );
     expect(discoverServiceMock.toastNotifications.addInfo).toHaveBeenCalledWith({
-      title: 'Values of "bool_enabled" column copied to clipboard',
+      title: 'Values of "custom_bool_enabled" column copied to clipboard',
     });
   });
 
@@ -135,13 +136,14 @@ describe('copyValueToClipboard', () => {
     const result = await copyColumnValuesToClipboard({
       services: discoverServiceMock,
       columnId: 'scripted_string',
+      columnDisplayName: 'custom_scripted_string',
       rowsCount: 2,
       valueToStringConverter,
     });
 
-    expect(result).toBe('"scripted_string"\n"hi there"\n"\'=1+2"";=1+2"');
+    expect(result).toBe('"custom_scripted_string"\n"hi there"\n"\'=1+2"";=1+2"');
     expect(discoverServiceMock.toastNotifications.addWarning).toHaveBeenCalledWith({
-      title: 'Values of "scripted_string" column copied to clipboard',
+      title: 'Values of "custom_scripted_string" column copied to clipboard',
       text: 'Values may contain formulas that are escaped.',
     });
   });
