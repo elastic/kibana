@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { observabilityFeatureId as OBSERVABILITY_APP_ID } from '../../../common';
 import { AlertSummary } from './components';
 import { useKibana } from '../../utils/kibana_react';
 import { ObservabilityAppServices } from '../../application/types';
@@ -18,9 +19,12 @@ import { paths } from '../../config/paths';
 // import { AlertDetailsPathParams } from './types';
 
 export function AlertDetailsPage() {
-  const { http } = useKibana<ObservabilityAppServices>().services;
+  const {
+    http,
+    application: { navigateToApp },
+  } = useKibana<ObservabilityAppServices>().services;
 
-  const { ObservabilityPageTemplate } = usePluginContext();
+  const { ObservabilityPageTemplate, config } = usePluginContext();
   // const { alertId } = useParams<AlertDetailsPathParams>();
   const alert = {};
 
@@ -32,7 +36,9 @@ export function AlertDetailsPage() {
       }),
     },
   ]);
-
+  if (!config.unsafe.alertDetail.enabled) {
+    navigateToApp(OBSERVABILITY_APP_ID);
+  }
   return (
     <ObservabilityPageTemplate data-test-subj="alertDetails">
       <AlertSummary alert={alert} />
