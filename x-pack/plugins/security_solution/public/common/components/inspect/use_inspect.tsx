@@ -10,10 +10,9 @@ import { useDispatch } from 'react-redux';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { inputsSelectors } from '../../store';
 import { inputsActions } from '../../store/actions';
-import type { InputsModelId } from '../../store/inputs/constants';
 
 interface UseInspectModalProps {
-  inputId?: InputsModelId;
+  inputId?: 'global' | 'timeline';
   inspectIndex?: number;
   isDisabled?: boolean;
   multiple?: boolean;

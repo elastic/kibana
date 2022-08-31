@@ -1848,13 +1848,7 @@
           "<unknown>; }[]; storageKey: string; navLinkUpdater$: ",
           "BehaviorSubject",
           "<",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreApplicationPluginApi",
-            "section": "def-public.AppUpdater",
-            "text": "AppUpdater"
-          },
+          "AppUpdater",
           ">; toastNotifications: ",
           "IToasts",
           "; history?: ",
@@ -1942,13 +1936,7 @@
                 "signature": [
                   "BehaviorSubject",
                   "<",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreApplicationPluginApi",
-                    "section": "def-public.AppUpdater",
-                    "text": "AppUpdater"
-                  },
+                  "AppUpdater",
                   ">"
                 ],
                 "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_tracker.ts",
@@ -3200,13 +3188,7 @@
           "({\n  history,\n  navigateToApp,\n  basePath,\n  mapping,\n  toastNotifications,\n  onBeforeRedirect,\n  theme,\n}: { history: ",
           "History",
           "<unknown>; navigateToApp: (appId: string, options?: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreApplicationPluginApi",
-            "section": "def-public.NavigateToAppOptions",
-            "text": "NavigateToAppOptions"
-          },
+          "NavigateToAppOptions",
           " | undefined) => Promise<void>; basePath: ",
           "IBasePath",
           "; mapping: string | Mapping; toastNotifications: ",
@@ -3267,13 +3249,7 @@
                 "description": [],
                 "signature": [
                   "(appId: string, options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreApplicationPluginApi",
-                    "section": "def-public.NavigateToAppOptions",
-                    "text": "NavigateToAppOptions"
-                  },
+                  "NavigateToAppOptions",
                   " | undefined) => Promise<void>"
                 ],
                 "path": "src/plugins/kibana_utils/public/history/redirect_when_missing.tsx",
@@ -3287,7 +3263,7 @@
                     "tags": [],
                     "label": "appId",
                     "description": [],
-                    "path": "src/core/public/application/types.ts",
+                    "path": "node_modules/@types/kbn__core-application-browser/index.d.ts",
                     "deprecated": false
                   },
                   {
@@ -3298,16 +3274,10 @@
                     "label": "options",
                     "description": [],
                     "signature": [
-                      {
-                        "pluginId": "core",
-                        "scope": "public",
-                        "docId": "kibCoreApplicationPluginApi",
-                        "section": "def-public.NavigateToAppOptions",
-                        "text": "NavigateToAppOptions"
-                      },
+                      "NavigateToAppOptions",
                       " | undefined"
                     ],
-                    "path": "src/core/public/application/types.ts",
+                    "path": "node_modules/@types/kbn__core-application-browser/index.d.ts",
                     "deprecated": false
                   }
                 ]
