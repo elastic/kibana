@@ -118,6 +118,7 @@ export function streamFactory<T = unknown>(
 
   const defaultHeaders = {
     'x-accel-buffering': 'no',
+    'Transfer-Encoding': 'chunked',
   };
 
   const responseWithHeaders: StreamFactoryReturnType['responseWithHeaders'] = {
