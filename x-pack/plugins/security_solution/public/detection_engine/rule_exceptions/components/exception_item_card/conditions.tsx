@@ -28,6 +28,7 @@ import type {
 import { ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 import * as i18n from './translations';
+import { ValueWithSpaceWarning } from '../value_with_space_warning';
 
 const OS_LABELS = Object.freeze({
   linux: i18n.OS_LINUX,
@@ -110,7 +111,6 @@ export const ExceptionItemCardConditions = memo<CriteriaConditionsProps>(
           return nestedEntries.map((entry) => {
             const { field: nestedField, type: nestedType, operator: nestedOperator } = entry;
             const nestedValue = 'value' in entry ? entry.value : '';
-
             return (
               <EuiFlexGroupNested
                 data-test-subj={`${dataTestSubj}-nestedCondition`}
@@ -132,6 +132,7 @@ export const ExceptionItemCardConditions = memo<CriteriaConditionsProps>(
                     value={getEntryValue(nestedType, nestedValue)}
                   />
                 </EuiFlexItemNested>
+                <ValueWithSpaceWarning value={nestedValue} />
               </EuiFlexGroupNested>
             );
           });
@@ -177,9 +178,9 @@ export const ExceptionItemCardConditions = memo<CriteriaConditionsProps>(
         {entries.map((entry, index) => {
           const { field, type } = entry;
           const value = getValue(entry);
+
           const nestedEntries = 'entries' in entry ? entry.entries : [];
           const operator = 'operator' in entry ? entry.operator : '';
-
           return (
             <div data-test-subj={`${dataTestSubj}-condition`} key={field + type + value + index}>
               <div className="eui-xScroll">
@@ -194,6 +195,7 @@ export const ExceptionItemCardConditions = memo<CriteriaConditionsProps>(
                   description={getEntryOperator(type, operator)}
                   value={getEntryValue(type, value)}
                 />
+                <ValueWithSpaceWarning value={value} />
               </div>
               {nestedEntries != null && getNestedEntriesContent(type, nestedEntries)}
             </div>
