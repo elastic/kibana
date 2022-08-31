@@ -45,6 +45,7 @@ import {
   InternalSavedObjectsServiceSetup,
   InternalSavedObjectsServiceStart,
 } from '@kbn/core-saved-objects-server-internal';
+import { I18nServiceSetup } from '@kbn/core-i18n-server';
 import {
   InternalDeprecationsServiceSetup,
   InternalDeprecationsServiceStart,
