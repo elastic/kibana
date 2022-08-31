@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-<<<<<<< HEAD
-import type { DataType, IndexPattern } from '../types';
-=======
 import type { DataType, IndexPattern, IndexPatternField } from '../types';
->>>>>>> upstream/main
 import type { DraggedField, IndexPatternLayer } from './types';
 import type {
   BaseIndexPatternColumn,

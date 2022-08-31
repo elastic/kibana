@@ -177,7 +177,8 @@ export function getTSDBRollupWarningMessages(
 ) {
   if (state) {
     const hasTSDBRollupWarnings =
-      warning.type === 'shard_failure' && warning.reason.type === 'illegal_argument_exception';
+      warning.type === 'shard_failure' &&
+      warning.reason.type === 'unsupported_aggregation_on_rollup_index';
     if (!hasTSDBRollupWarnings) {
       return [];
     }

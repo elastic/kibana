@@ -346,9 +346,13 @@ export class VisualizeEmbeddable
       .plugins.data.search.showWarnings(this.getInspectorAdapters()!.requests!, (warning) => {
         if (
           warning.type === 'shard_failure' &&
-          warning.reason.type === 'illegal_argument_exception'
+          warning.reason.type === 'unsupported_aggregation_on_rollup_index'
         ) {
           warnings.push(warning.reason.reason || warning.message);
+          return true;
+        }
+        if (this.vis.type.suppressWarnings?.()) {
+          // if the vis type wishes to supress all warnings, return true so the default logic won't pick it up
           return true;
         }
       });

@@ -123,6 +123,7 @@ export const handleRequest = ({
             }),
           },
           executionContext,
+          disableShardFailureWarning: true,
         })
         .pipe(
           map(({ rawResponse: response }) => {
