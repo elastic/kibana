@@ -82,7 +82,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(apiResponse.body.allMonitorIds.sort()).eql(
             savedMonitors.map((monitor) => monitor.id).sort()
           );
-          expect(apiResponse.body.monitors.length).eql(20);
+          expect(apiResponse.body.monitors.length).eql(40);
         } finally {
           await Promise.all(
             savedMonitors.map((monitor) => {
