@@ -452,8 +452,7 @@ async function installPackageByUpload({
     const { packageInfo } = await generatePackageInfoFromArchiveBuffer(archiveBuffer, contentType);
 
     // Allow for overriding the version in the manifest for cases where we install
-    // stack-aligned bundled packages. In general, the version pulled from a bundled package
-    // filename and the version in the manifest will match, except for special cases around the
+    // stack-aligned bundled packages to support special cases around the
     // `forceAlignStackVersion` flag in `fleet_packages.json`.
     const pkgVersion = version || packageInfo.version;
 
