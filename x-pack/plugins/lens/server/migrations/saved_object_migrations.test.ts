@@ -28,9 +28,10 @@ import {
 } from './types';
 import { layerTypes, LegacyMetricState } from '../../common';
 import { Filter } from '@kbn/es-query';
+import { DataViewSpec } from '@kbn/data-views-plugin/common';
 
 describe('Lens migrations', () => {
-  const migrations = getAllMigrations({}, {});
+  const migrations = getAllMigrations({}, {}, {});
   describe('7.7.0 missing dimensions in XY', () => {
     const context = {} as SavedObjectMigrationContext;
 
@@ -1626,6 +1627,7 @@ describe('Lens migrations', () => {
           }));
         },
       },
+      {},
       {}
     );
 
@@ -1652,6 +1654,61 @@ describe('Lens migrations', () => {
     });
   });
 
+  test('should properly apply a data view migration within a lens visualization', () => {
+    const migrationVersion = 'some-version';
+
+    const lensVisualizationDoc = {
+      attributes: {
+        state: {
+          adHocDataViews: {
+            abc: {
+              id: 'abc',
+            },
+            def: {
+              id: 'def',
+              name: 'A name',
+            },
+          },
+        },
+      },
+    };
+
+    const migrationFunctionsObject = getAllMigrations(
+      {},
+      {
+        [migrationVersion]: (dataView: DataViewSpec) => {
+          return {
+            ...dataView,
+            name: dataView.id,
+          };
+        },
+      },
+      {}
+    );
+
+    const migratedLensDoc = migrationFunctionsObject[migrationVersion](
+      lensVisualizationDoc as SavedObjectUnsanitizedDoc,
+      {} as SavedObjectMigrationContext
+    );
+
+    expect(migratedLensDoc).toEqual({
+      attributes: {
+        state: {
+          adHocDataViews: {
+            abc: {
+              id: 'abc',
+              name: 'abc',
+            },
+            def: {
+              id: 'def',
+              name: 'def',
+            },
+          },
+        },
+      },
+    });
+  });
+
   test('should properly apply a custom visualization migration', () => {
     const migrationVersion = 'some-version';
 
@@ -1669,6 +1726,7 @@ describe('Lens migrations', () => {
     }));
 
     const migrationFunctionsObject = getAllMigrations(
+      {},
       {},
       {
         abc: () => ({

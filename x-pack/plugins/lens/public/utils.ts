@@ -93,14 +93,11 @@ export async function refreshIndexPatternsList({
     .map((datasource) => datasource?.onRefreshIndexPattern)
     .filter(Boolean);
 
-  const [newlyMappedIndexPattern, indexPatternRefs] = await Promise.all([
-    indexPatternService.loadIndexPatterns({
-      cache: {},
-      patterns: [indexPatternId],
-      onIndexPatternRefresh: () => onRefreshCallbacks.forEach((fn) => fn()),
-    }),
-    indexPatternService.loadIndexPatternRefs({ isFullEditor: true }),
-  ]);
+  const newlyMappedIndexPattern = await indexPatternService.loadIndexPatterns({
+    cache: {},
+    patterns: [indexPatternId],
+    onIndexPatternRefresh: () => onRefreshCallbacks.forEach((fn) => fn()),
+  });
   const indexPattern = newlyMappedIndexPattern[indexPatternId];
   // But what about existingFields here?
   // When the indexPatterns cache object gets updated, the data panel will
@@ -110,7 +107,6 @@ export async function refreshIndexPatternsList({
       ...indexPatternsCache,
       [indexPatternId]: indexPattern,
     },
-    indexPatternRefs,
   });
 }
 
@@ -198,3 +194,10 @@ export function inferTimeField(
     })
     .find(Boolean);
 }
+
+/**
+ * The dimension container is set up to close when it detects a click outside it.
+ * Use this CSS class to exclude particular elements from this behavior.
+ */
+export const DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS =
+  'lensDontCloseDimensionContainerOnClick';

@@ -13,8 +13,8 @@ import {
   defaultAnnotationColor,
   defaultAnnotationRangeColor,
   defaultAnnotationLabel,
-  isRangeAnnotation,
-  isQueryAnnotation,
+  isRangeAnnotationConfig,
+  isQueryAnnotationConfig,
 } from './helpers';
 
 export function hasIcon(icon: string | undefined): icon is string {
@@ -27,13 +27,13 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
       const visibleAnnotations = annotations.filter(({ isHidden }) => !isHidden);
       const [queryBasedAnnotations, manualBasedAnnotations] = partition(
         visibleAnnotations,
-        isQueryAnnotation
+        isQueryAnnotationConfig
       );
 
       const expressions = [];
 
       for (const annotation of manualBasedAnnotations) {
-        if (isRangeAnnotation(annotation)) {
+        if (isRangeAnnotationConfig(annotation)) {
           const { label, isHidden, color, key, outside } = annotation;
           const { timestamp: time, endTimestamp: endTime } = key;
           expressions.push({
@@ -86,11 +86,10 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
           lineStyle,
           lineWidth,
           icon,
-          key,
+          timeField,
           textVisibility,
           textField,
-          textSource,
-          query,
+          filter,
           extraFields,
         } = annotation;
         expressions.push({
@@ -100,16 +99,16 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
               type: 'function' as const,
               function: 'query_point_event_annotation',
               arguments: {
-                field: [key.field],
+                timeField: [timeField],
                 label: [label || defaultAnnotationLabel],
                 color: [color || defaultAnnotationColor],
                 lineWidth: [lineWidth || 1],
                 lineStyle: [lineStyle || 'solid'],
                 icon: hasIcon(icon) ? [icon] : ['triangle'],
                 textVisibility: [textVisibility || false],
-                textField: textVisibility && textSource === 'field' && textField ? [textField] : [],
+                textField: textVisibility && textField ? [textField] : [],
                 isHidden: [Boolean(isHidden)],
-                query: query ? [queryToAst(query)] : [],
+                filter: filter ? [queryToAst(filter)] : [],
                 extraFields: extraFields || [],
               },
             },

@@ -22,6 +22,7 @@ import moment from 'moment';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type {
   ManualPointEventAnnotationArgs,
+  ManualPointEventAnnotationOutput,
   ManualRangeEventAnnotationOutput,
 } from '@kbn/event-annotation-plugin/common';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
@@ -64,7 +65,10 @@ const groupVisibleConfigsByInterval = (
 ) => {
   return layers
     .flatMap(({ annotations }) =>
-      annotations.filter((a) => !a.isHidden && a.type === 'manual_point_event_annotation')
+      annotations.filter(
+        (a): a is ManualPointEventAnnotationOutput =>
+          !a.isHidden && a.type === 'manual_point_event_annotation'
+      )
     )
     .filter((a): a is ManualEventAnnotationOutput => a.type !== 'query_point_event_annotation')
     .sort((a, b) => moment(a.time).valueOf() - moment(b.time).valueOf())

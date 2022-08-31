@@ -10,20 +10,20 @@ import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSwitch, EuiSwitchEvent, EuiButtonGroup, EuiSpacer } from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';
-import type { PointInTimeQueryEventAnnotationConfig } from '@kbn/event-annotation-plugin/common/types';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import {
   defaultAnnotationColor,
   defaultAnnotationRangeColor,
-  isRangeAnnotation,
-  isQueryAnnotation,
+  isQueryAnnotationConfig,
+  isRangeAnnotationConfig,
 } from '@kbn/event-annotation-plugin/public';
+import { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
 import {
   FieldOption,
   FieldOptionValue,
   FieldPicker,
 } from '../../../../shared_components/field_picker';
-import type { FormatFactory } from '../../../../../common';
+import { FormatFactory } from '../../../../../common';
 import {
   DimensionEditorSection,
   fieldExists,
@@ -66,8 +66,8 @@ export const AnnotationsPanel = (
 
   const currentAnnotation = localLayer.annotations?.find((c) => c.id === accessor);
 
-  const isRange = isRangeAnnotation(currentAnnotation);
-  const isQueryBased = isQueryAnnotation(currentAnnotation);
+  const isQueryBased = isQueryAnnotationConfig(currentAnnotation);
+  const isRange = isRangeAnnotationConfig(currentAnnotation);
 
   const setAnnotations = useCallback(
     (annotation) => {
@@ -213,7 +213,7 @@ export const AnnotationsPanel = (
                         'data-test-subj': `lnsXY-annotation-fieldOption-${field.name}`,
                       } as FieldOption<FieldOptionValue>)
                   );
-                const selectedField = (currentAnnotation as PointInTimeQueryEventAnnotationConfig)
+                const selectedField = (currentAnnotation as QueryPointEventAnnotationConfig)
                   .textField;
                 return (
                   <>

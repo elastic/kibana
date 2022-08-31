@@ -11,14 +11,14 @@ import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import type {
   EventAnnotationConfig,
   RangeEventAnnotationConfig,
-  PointInTimeQueryEventAnnotationConfig,
   PointInTimeEventAnnotationConfig,
+  QueryPointEventAnnotationConfig,
 } from '@kbn/event-annotation-plugin/common';
 import {
   defaultAnnotationColor,
   defaultAnnotationRangeColor,
-  isRangeAnnotation,
-  isQueryAnnotation,
+  isQueryAnnotationConfig,
+  isRangeAnnotationConfig,
 } from '@kbn/event-annotation-plugin/public';
 import Color from 'color';
 import { pick } from 'lodash';
@@ -69,7 +69,7 @@ export const getEndTimestamp = (
 };
 
 export const sanitizeProperties = (annotation: EventAnnotationConfig) => {
-  if (isRangeAnnotation(annotation)) {
+  if (isRangeAnnotationConfig(annotation)) {
     const rangeAnnotation: RangeEventAnnotationConfig = pick(annotation, [
       'type',
       'label',
@@ -81,21 +81,21 @@ export const sanitizeProperties = (annotation: EventAnnotationConfig) => {
     ]);
     return rangeAnnotation;
   }
-  if (isQueryAnnotation(annotation)) {
-    const lineAnnotation: PointInTimeQueryEventAnnotationConfig = pick(annotation, [
+  if (isQueryAnnotationConfig(annotation)) {
+    const lineAnnotation: QueryPointEventAnnotationConfig = pick(annotation, [
       'type',
       'id',
       'label',
       'key',
+      'timeField',
       'isHidden',
       'lineStyle',
       'lineWidth',
       'color',
       'icon',
       'textVisibility',
-      'textSource',
       'textField',
-      'query',
+      'filter',
       'extraFields',
     ]);
     return lineAnnotation;

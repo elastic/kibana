@@ -22,6 +22,7 @@ import {
   EuiDatePicker,
 } from '@elastic/eui';
 import moment from 'moment';
+import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../../../utils';
 import type { FramePublicAPI } from '../../../../types';
 import { defaultRangeAnnotationLabel, defaultAnnotationLabel } from '../../annotations/helpers';
 import type { XYState } from '../../types';
@@ -128,6 +129,7 @@ export const ConfigPanelRangeDatePicker = ({
           }
         >
           <EuiDatePicker
+            calendarClassName={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
             fullWidth
             showTimeSelect
             selected={value}
@@ -138,6 +140,7 @@ export const ConfigPanelRangeDatePicker = ({
         </EuiFormControlLayout>
       ) : (
         <EuiDatePicker
+          calendarClassName={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
           fullWidth
           showTimeSelect
           selected={value}

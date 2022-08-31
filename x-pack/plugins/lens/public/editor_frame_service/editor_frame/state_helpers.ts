@@ -10,8 +10,9 @@ import { Ast } from '@kbn/interpreter';
 import memoizeOne from 'memoize-one';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { difference } from 'lodash';
-import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { DataViewsContract, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import {
   Datasource,
   DatasourceLayers,
@@ -43,7 +44,8 @@ import { loadIndexPatternRefs, loadIndexPatterns } from '../../indexpattern_serv
 function getIndexPatterns(
   references?: SavedObjectReference[],
   initialContext?: VisualizeFieldContext | VisualizeEditorContext,
-  initialId?: string
+  initialId?: string,
+  adHocDataviews?: string[]
 ) {
   const indexPatternIds = [];
   if (initialContext) {
@@ -67,6 +69,9 @@ function getIndexPatterns(
       }
     }
   }
+  if (adHocDataviews) {
+    indexPatternIds.push(...adHocDataviews);
+  }
   return [...new Set(indexPatternIds)];
 }
 
@@ -87,6 +92,7 @@ export async function initializeDataViews(
     defaultIndexPatternId,
     references,
     initialContext,
+    adHocDataViews: persistedAdHocDataViews,
   }: {
     dataViews: DataViewsContract;
     datasourceMap: DatasourceMap;
@@ -95,13 +101,20 @@ export async function initializeDataViews(
     storage: IStorageWrapper;
     references?: SavedObjectReference[];
     initialContext?: VisualizeFieldContext | VisualizeEditorContext;
+    adHocDataViews?: Record<string, DataViewSpec>;
   },
   options?: InitializationOptions
 ) {
+  const adHocDataViews = Object.fromEntries(
+    Object.entries(persistedAdHocDataViews || {}).map(([id, persistedSpec]) => {
+      const spec = DataViewPersistableStateService.inject(persistedSpec, references || []);
+      return [id, spec];
+    })
+  );
   const { isFullEditor } = options ?? {};
   // make it explicit or TS will infer never[] and break few lines down
   const indexPatternRefs: IndexPatternRef[] = await (isFullEditor
-    ? loadIndexPatternRefs(dataViews)
+    ? loadIndexPatternRefs(dataViews, adHocDataViews)
     : []);
 
   // if no state is available, use the fallbackId
@@ -113,7 +126,14 @@ export async function initializeDataViews(
       ? fallbackId
       : undefined;
 
-  const usedIndexPatterns = getIndexPatterns(references, initialContext, initialId);
+  const adHocDataviewsIds: string[] = Object.keys(adHocDataViews || {});
+
+  const usedIndexPatterns = getIndexPatterns(
+    references,
+    initialContext,
+    initialId,
+    adHocDataviewsIds
+  );
 
   // load them
   const availableIndexPatterns = new Set(indexPatternRefs.map(({ id }: IndexPatternRef) => id));
@@ -125,6 +145,7 @@ export async function initializeDataViews(
     patterns: usedIndexPatterns,
     notUsedPatterns,
     cache: {},
+    adHocDataViews,
   });
 
   return { indexPatternRefs, indexPatterns };
@@ -144,6 +165,7 @@ export async function initializeSources(
     defaultIndexPatternId,
     references,
     initialContext,
+    adHocDataViews,
   }: {
     dataViews: DataViewsContract;
     datasourceMap: DatasourceMap;
@@ -154,6 +176,7 @@ export async function initializeSources(
     storage: IStorageWrapper;
     references?: SavedObjectReference[];
     initialContext?: VisualizeFieldContext | VisualizeEditorContext;
+    adHocDataViews?: Record<string, DataViewSpec>;
   },
   options?: InitializationOptions
 ) {
@@ -166,6 +189,7 @@ export async function initializeSources(
       storage,
       defaultIndexPatternId,
       references,
+      adHocDataViews,
     },
     options
   );
@@ -275,7 +299,12 @@ export async function persistedStateToExpression(
   }
 ): Promise<{ ast: Ast | null; errors: ErrorMessage[] | undefined }> {
   const {
-    state: { visualization: visualizationState, datasourceStates: persistedDatasourceStates },
+    state: {
+      visualization: visualizationState,
+      datasourceStates: persistedDatasourceStates,
+      adHocDataViews,
+      internalReferences,
+    },
     visualizationType,
     references,
     title,
@@ -308,13 +337,14 @@ export async function persistedStateToExpression(
       dataViews: services.dataViews,
       storage: services.storage,
       defaultIndexPatternId: services.uiSettings.get('defaultIndex'),
+      adHocDataViews,
     },
     { isFullEditor: false }
   );
   const datasourceStates = initializeDatasources({
     datasourceMap,
     datasourceStates: datasourceStatesFromSO,
-    references,
+    references: [...references, ...(internalReferences || [])],
     indexPatterns,
     indexPatternRefs,
   });

@@ -14,12 +14,12 @@ import type { EventAnnotationOutput } from '../types';
 export interface EventAnnotationGroupOutput {
   type: 'event_annotation_group';
   annotations: EventAnnotationOutput[];
-  index?: IndexPatternExpressionType;
+  dataView: IndexPatternExpressionType;
 }
 
 export interface EventAnnotationGroupArgs {
   annotations: EventAnnotationOutput[];
-  index?: IndexPatternExpressionType;
+  dataView: IndexPatternExpressionType;
 }
 
 export function eventAnnotationGroup(): ExpressionFunctionDefinition<
@@ -37,10 +37,10 @@ export function eventAnnotationGroup(): ExpressionFunctionDefinition<
       defaultMessage: 'Event annotation group',
     }),
     args: {
-      index: {
+      dataView: {
         types: ['index_pattern'],
-        required: false,
-        help: i18n.translate('eventAnnotation.group.args.annotationConfigs.index.help', {
+        required: true,
+        help: i18n.translate('eventAnnotation.group.args.annotationConfigs.dataView.help', {
           defaultMessage: 'Data view retrieved with indexPatternLoad',
         }),
       },
@@ -53,14 +53,15 @@ export function eventAnnotationGroup(): ExpressionFunctionDefinition<
         help: i18n.translate('eventAnnotation.group.args.annotationConfigs', {
           defaultMessage: 'Annotation configs',
         }),
+        required: true,
         multi: true,
       },
     },
     fn: (input, args) => {
       return {
         type: 'event_annotation_group',
-        index: args.index,
         annotations: args.annotations,
+        dataView: args.dataView,
       };
     },
   };
