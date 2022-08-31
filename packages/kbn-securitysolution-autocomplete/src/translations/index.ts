@@ -31,3 +31,17 @@ export const DATE_ERR = i18n.translate('autocomplete.invalidDateError', {
 export const BINARY_TYPE_NOT_SUPPORTED = i18n.translate('autocomplete.invalidBinaryType', {
   defaultMessage: 'Binary fields are currently unsupported',
 });
+export const FIELD_SPACE_WARNING = i18n.translate('autocomplete.fieldSpaceWarning', {
+  defaultMessage: "Warning: Spaces at the start or end of this value aren't being displayed.",
+});
+
+// eslint-disable-next-line import/no-default-export
+export default {
+  LOADING,
+  SELECT_FIELD_FIRST,
+  FIELD_REQUIRED_ERR,
+  NUMBER_ERR,
+  DATE_ERR,
+  FIELD_SPACE_WARNING,
+  BINARY_TYPE_NOT_SUPPORTED,
+};
