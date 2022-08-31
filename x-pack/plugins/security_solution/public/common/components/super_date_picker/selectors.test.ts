@@ -20,7 +20,6 @@ import type { InputsRange, AbsoluteTimeRange, RelativeTimeRange } from '../../st
 import { cloneDeep } from 'lodash/fp';
 import { mockGlobalState } from '../../mock';
 import type { State } from '../../store';
-import { InputsModelId } from '../../store/inputs/constants';
 
 describe('selectors', () => {
   let absoluteTime: AbsoluteTimeRange = {
@@ -316,7 +315,7 @@ describe('selectors', () => {
         queries: [
           {
             loading: true,
-            id: 'kql',
+            id: '1',
             inspect: { dsl: [], response: [] },
             isInspected: false,
             refetch: null,
@@ -334,7 +333,7 @@ describe('selectors', () => {
         queries: [
           {
             loading: false,
-            id: 'kql',
+            id: '1',
             inspect: { dsl: [], response: [] },
             isInspected: false,
             refetch: null,
@@ -342,7 +341,7 @@ describe('selectors', () => {
           },
           {
             loading: false,
-            id: 'kql',
+            id: '1',
             inspect: { dsl: [], response: [] },
             isInspected: false,
             refetch: null,
@@ -360,7 +359,7 @@ describe('selectors', () => {
         queries: [
           {
             loading: false,
-            id: 'kql',
+            id: '1',
             inspect: { dsl: [], response: [] },
             isInspected: false,
             refetch: null,
@@ -368,7 +367,7 @@ describe('selectors', () => {
           },
           {
             loading: true,
-            id: 'kql',
+            id: '1',
             inspect: { dsl: [], response: [] },
             isInspected: false,
             refetch: null,
@@ -390,8 +389,8 @@ describe('selectors', () => {
           global: inputState,
         },
       };
-      const result1 = getQueriesSelector(myMock, InputsModelId.global);
-      const result2 = getQueriesSelector(myMock, InputsModelId.global);
+      const result1 = getQueriesSelector(myMock, 'global');
+      const result2 = getQueriesSelector(myMock, 'global');
       expect(result1).toBe(result2);
     });
 
@@ -404,8 +403,8 @@ describe('selectors', () => {
         },
       };
       const clone = cloneDeep(myMock);
-      const result1 = getQueriesSelector(myMock, InputsModelId.global);
-      const result2 = getQueriesSelector(clone, InputsModelId.global);
+      const result1 = getQueriesSelector(myMock, 'global');
+      const result2 = getQueriesSelector(clone, 'global');
       expect(result1).not.toBe(result2);
     });
 
@@ -417,7 +416,7 @@ describe('selectors', () => {
           global: inputState,
         },
       };
-      const result1 = getQueriesSelector(myMock, InputsModelId.global);
+      const result1 = getQueriesSelector(myMock, 'global');
       const myMockChange: State = {
         ...myMock,
         inputs: {
@@ -427,7 +426,7 @@ describe('selectors', () => {
             queries: [
               {
                 loading: false,
-                id: 'kql',
+                id: '1',
                 inspect: { dsl: [], response: [] },
                 isInspected: false,
                 refetch: null,
@@ -437,7 +436,7 @@ describe('selectors', () => {
           },
         },
       };
-      const result2 = getQueriesSelector(myMockChange, InputsModelId.global);
+      const result2 = getQueriesSelector(myMockChange, 'global');
       expect(result1).not.toBe(result2);
     });
   });

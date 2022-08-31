@@ -43,7 +43,7 @@ import { useSyncSearchBarUrlParams } from '../../hooks/search_bar/use_sync_searc
 import { useSyncTimerangeUrlParam } from '../../hooks/search_bar/use_sync_timerange_url_param';
 
 interface SiemSearchBarProps {
-  id: InputsModelId.global | InputsModelId.timeline;
+  id: 'timeline' | 'global';
   indexPattern: DataViewBase;
   pollForSignalIndex?: () => void;
   timelineId?: string;
@@ -363,7 +363,7 @@ const makeMapStateToProps = () => {
 SearchBarComponent.displayName = 'SiemSearchBar';
 
 interface UpdateReduxSearchBar extends OnTimeChangeProps {
-  id: InputsModelId.global | InputsModelId.timeline;
+  id: 'timeline' | 'global';
   filters?: Filter[];
   filterManager: FilterManager;
   query?: Query;

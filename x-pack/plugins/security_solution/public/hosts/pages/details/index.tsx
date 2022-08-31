@@ -12,7 +12,6 @@ import { useDispatch } from 'react-redux';
 
 import type { Filter } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { InputsModelId } from '../../../common/store/inputs/constants';
 import type { HostItem } from '../../../../common/search_strategy';
 import { LastEventIndexKey } from '../../../../common/search_strategy';
 import { SecurityPageName } from '../../../app/types';
@@ -92,7 +91,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
       const [min, max] = x;
       dispatch(
         setAbsoluteRangeDatePicker({
-          id: InputsModelId.global,
+          id: 'global',
           from: new Date(min).toISOString(),
           to: new Date(max).toISOString(),
         })
@@ -105,7 +104,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
       const fromTo = scoreIntervalToDateTime(score, interval);
       dispatch(
         setAbsoluteRangeDatePicker({
-          id: InputsModelId.global,
+          id: 'global',
           from: fromTo.from,
           to: fromTo.to,
         })
@@ -143,7 +142,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
         <>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
-            <SiemSearchBar indexPattern={indexPattern} id={InputsModelId.global} />
+            <SiemSearchBar indexPattern={indexPattern} id="global" />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper

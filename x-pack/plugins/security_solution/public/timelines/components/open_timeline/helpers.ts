@@ -12,7 +12,6 @@ import uuid from 'uuid';
 import type { Dispatch } from 'redux';
 import deepMerge from 'deepmerge';
 
-import { InputsModelId } from '../../../common/store/inputs/constants';
 import type {
   ColumnHeaderOptions,
   TimelineResult,
@@ -430,7 +429,7 @@ export const dispatchUpdateTimeline =
     ) {
       dispatch(
         dispatchSetRelativeRangeDatePicker({
-          id: InputsModelId.timeline,
+          id: 'timeline',
           fromStr: 'now-24h',
           toStr: 'now',
           from: DEFAULT_FROM_MOMENT.toISOString(),

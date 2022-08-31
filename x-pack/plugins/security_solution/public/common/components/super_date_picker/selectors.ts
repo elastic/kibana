@@ -7,10 +7,10 @@
 
 import { isEmpty } from 'lodash';
 import { createSelector } from 'reselect';
-import { InputsModelId } from '../../store/inputs/constants';
 import type { State } from '../../store';
 import type {
   GlobalQuery,
+  GlobalKqlQuery,
   InputsRange,
   InputsRangeTimeOnly,
   Policy,
@@ -25,14 +25,11 @@ export const getTimerange = (inputState: InputsRange | InputsRangeTimeOnly): Tim
 
 export const getQueries = (inputState: InputsRange): GlobalQuery[] => inputState.queries;
 
-export const getGlobalQueries = (
-  state: State,
-  id: InputsModelId.global | InputsModelId.timeline
-): GlobalQuery[] => {
+export const getGlobalQueries = (state: State, id: 'global' | 'timeline'): GlobalQuery[] => {
   const inputsRange = state.inputs[id];
   return !isEmpty(inputsRange.linkTo)
     ? inputsRange.linkTo.reduce<GlobalQuery[]>((acc, linkToId) => {
-        if (linkToId === InputsModelId.socTrends) {
+        if (linkToId === 'socTrends') {
           return acc;
         }
         const linkToIdInputsRange: InputsRange = state.inputs[linkToId];
@@ -62,4 +59,7 @@ export const queriesSelector = () =>
   createSelector(getGlobalQueries, (queries) => queries.filter((q) => q.id !== 'kql'));
 
 export const kqlQuerySelector = () =>
-  createSelector(getQueries, (queries) => queries.find((q) => q.id === 'kql'));
+  createSelector(
+    getQueries,
+    (queries) => queries.find((q) => q.id === 'kql') as unknown as GlobalKqlQuery | undefined
+  );
