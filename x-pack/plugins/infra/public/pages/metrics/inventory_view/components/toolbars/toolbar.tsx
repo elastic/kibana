@@ -20,8 +20,6 @@ import { PodToolbarItems } from './pod_toolbar_items';
 import { ToolbarWrapper } from './toolbar_wrapper';
 import { ToolbarProps } from './types';
 
-export { ToolbarProps };
-
 interface Props {
   nodeType: InventoryItemType;
   currentTime: number;
