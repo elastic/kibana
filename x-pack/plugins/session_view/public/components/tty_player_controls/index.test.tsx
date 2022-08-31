@@ -6,7 +6,6 @@
  */
 import React from 'react';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
-import { sessionViewIOEventsMock } from '../../../common/mocks/responses/session_view_io_events.mock';
 import { ProcessEvent } from '../../../common/types/process_tree';
 import { TTYPlayerControls, TTYPlayerControlsDeps } from '.';
 
