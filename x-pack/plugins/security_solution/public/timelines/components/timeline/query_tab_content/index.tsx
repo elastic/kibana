@@ -24,7 +24,6 @@ import { InPortal } from 'react-reverse-portal';
 
 import { FilterManager } from '@kbn/data-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import type { CellValueElementProps } from '../cell_rendering';
@@ -341,7 +340,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
       </InPortal>
       <TimelineRefetch
         id={`${timelineId}-${TimelineTabs.query}`}
-        inputId={InputsModelId.timeline}
+        inputId="timeline"
         inspect={inspect}
         loading={isQueryLoading}
         refetch={refetch}
@@ -366,7 +365,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
               )}
               <DatePicker grow={10}>
                 <SuperDatePicker
-                  id={InputsModelId.timeline}
+                  id="timeline"
                   timelineId={timelineId}
                   disabled={isDatePickerDisabled}
                 />

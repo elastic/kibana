@@ -12,7 +12,6 @@ import { useParams } from 'react-router-dom';
 
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 
-import { InputsModelId } from '../../../common/store/inputs/constants';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { LastEventIndexKey } from '../../../../common/search_strategy';
 import type { FlowTargetSourceDest } from '../../../../common/search_strategy';
@@ -75,7 +74,7 @@ const NetworkDetailsComponent: React.FC = () => {
       const fromTo = scoreIntervalToDateTime(score, interval);
       dispatch(
         setAbsoluteRangeDatePicker({
-          id: InputsModelId.global,
+          id: 'global',
           from: fromTo.from,
           to: fromTo.to,
         })
@@ -138,7 +137,7 @@ const NetworkDetailsComponent: React.FC = () => {
       {indicesExist ? (
         <>
           <FiltersGlobal>
-            <SiemSearchBar indexPattern={indexPattern} id={InputsModelId.global} />
+            <SiemSearchBar indexPattern={indexPattern} id="global" />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper>
