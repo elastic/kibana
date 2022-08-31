@@ -49,7 +49,6 @@ import {
   createEphemeralExecutionEnqueuerFunction,
   createBulkExecutionEnqueuerFunction,
 } from './create_execute_function';
-import { registerBuiltInActionTypes } from './builtin_action_types';
 import { registerActionsUsageCollector } from './usage';
 import {
   ActionExecutor,
@@ -92,7 +91,7 @@ import { getAlertHistoryEsIndex } from './preconfigured_connectors/alert_history
 import { createAlertHistoryIndexTemplate } from './preconfigured_connectors/alert_history_es_index/create_alert_history_index_template';
 import { ACTIONS_FEATURE_ID, AlertHistoryEsIndexConnectorId } from '../common';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from './constants/event_log';
-import { ConnectorTokenClient } from './builtin_action_types/lib/connector_token_client';
+import { ConnectorTokenClient } from './lib/connector_token_client';
 import { InMemoryMetrics, registerClusterCollector, registerNodeCollector } from './monitoring';
 import {
   isConnectorDeprecated,
@@ -273,13 +272,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       plugins.taskManager.index,
       this.preconfiguredActions
     );
-
-    registerBuiltInActionTypes({
-      logger: this.logger,
-      actionTypeRegistry,
-      actionsConfigUtils,
-      publicBaseUrl: core.http.basePath.publicBaseUrl,
-    });
 
     const usageCollection = plugins.usageCollection;
     if (usageCollection) {
