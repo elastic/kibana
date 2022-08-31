@@ -40,13 +40,13 @@ export function FrameLayout(props: FrameLayoutProps) {
           </section>
         </EuiFlexItem>
       ) : null}
-      <EuiFlexItem
-        grow={true}
-        className={classNames('lnsFrameLayout', {
-          'lnsFrameLayout-isFullscreen': isFullscreen,
-        })}
-      >
-        <EuiPage paddingSize="none">
+      <EuiFlexItem grow={true}>
+        <EuiPage
+          paddingSize="none"
+          className={classNames('lnsFrameLayout', {
+            'lnsFrameLayout-isFullscreen': isFullscreen,
+          })}
+        >
           <EuiPageBody
             restrictWidth={false}
             className="lnsFrameLayout__pageContent"

@@ -693,14 +693,14 @@ export function getIndexPatternDatasource({
             iconType="help"
             title={
               <FormattedMessage
-                id="xpack.lens.indexPattern.testDataDeprecationMessage"
+                id="xpack.lens.indexPattern.useFieldExistenceSamplingTitle"
                 defaultMessage="Caution: you are using deprecated {link} mode"
                 values={{ link }}
               />
             }
           >
             <FormattedMessage
-              id="xpack.lens.indexPattern.testDataDeprecationMessage"
+              id="xpack.lens.indexPattern.useFieldExistenceSamplingBody"
               defaultMessage="This setting is deprecated and will not be supported in a future version. You must disable the {link} setting."
               values={{ link }}
             />
