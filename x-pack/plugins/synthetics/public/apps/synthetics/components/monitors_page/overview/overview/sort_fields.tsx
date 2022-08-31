@@ -172,7 +172,7 @@ const SORT_STATUS_ASC = i18n.translate('xpack.synthetics.overview.sortPopover.st
   defaultMessage: 'Down first',
 });
 
-const SORT_STATUS_DESC = i18n.translate('xpack.synthetics.overview.sortPopover.lastModified.desc', {
+const SORT_STATUS_DESC = i18n.translate('xpack.synthetics.overview.sortPopover.status.desc', {
   defaultMessage: 'Up first',
 });
 
@@ -184,7 +184,7 @@ const DESCENDING_LABEL = i18n.translate('xpack.synthetics.overview.sortPopover.d
   defaultMessage: 'Descending',
 });
 
-const STATUS_LABEL = i18n.translate('xpack.synthetics.overview.sortPopover.alphabetical.label', {
+const STATUS_LABEL = i18n.translate('xpack.synthetics.overview.sortPopover.status.label', {
   defaultMessage: 'Status',
 });
 

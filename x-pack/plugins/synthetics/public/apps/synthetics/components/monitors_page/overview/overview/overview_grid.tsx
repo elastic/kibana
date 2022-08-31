@@ -5,9 +5,18 @@
  * 2.0.
  */
 import React, { useEffect, useState, useRef } from 'react';
+import { i18n } from '@kbn/i18n';
+import useDebounce from 'react-use/lib/useDebounce';
 import { useSelector } from 'react-redux';
 import useIntersection from 'react-use/lib/useIntersection';
-import { EuiFlexGroup, EuiFlexItem, EuiFlexGrid, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlexGrid,
+  EuiSpacer,
+  EuiButtonEmpty,
+  EuiText,
+} from '@elastic/eui';
 import { selectOverviewState } from '../../../../state/overview';
 import { MonitorOverviewItem } from '../../../../../../../common/runtime_types';
 import { OverviewPaginationInfo } from './overview_pagination_info';
@@ -22,11 +31,12 @@ export const OverviewGrid = () => {
     loaded,
     pageState: { perPage, sortField },
   } = useSelector(selectOverviewState);
+  const [loadNextPage, setLoadNextPage] = useState(false);
+  const [page, setPage] = useState(1);
 
   const { monitorsSortedByStatus } = useMonitorsSortedByStatus(
     sortField === 'status' && monitors.length !== 0
   );
-  const [page, setPage] = useState(1);
   const currentMonitors = getCurrentMonitors({
     monitors,
     monitorsSortedByStatus,
@@ -34,6 +44,7 @@ export const OverviewGrid = () => {
     page,
     sortField,
   });
+
   const intersectionRef = useRef(null);
   const intersection = useIntersection(intersectionRef, {
     root: null,
@@ -41,11 +52,24 @@ export const OverviewGrid = () => {
     threshold: 1,
   });
   const hasIntersected = intersection && intersection.intersectionRatio === 1;
+
+  useDebounce(
+    () => {
+      if (hasIntersected) {
+        setLoadNextPage(true);
+      } else {
+        setLoadNextPage(false);
+      }
+    },
+    500,
+    [hasIntersected]
+  );
+
   useEffect(() => {
-    if (hasIntersected) {
+    if (loadNextPage) {
       setPage((p) => p + 1);
     }
-  }, [hasIntersected]);
+  }, [loadNextPage]);
 
   return (
     <>
@@ -72,7 +96,26 @@ export const OverviewGrid = () => {
       ) : (
         <OverviewLoader />
       )}
-      <span ref={intersectionRef} />
+      {currentMonitors.length !== monitors.length && <span ref={intersectionRef} />}
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        {currentMonitors.length === monitors.length && (
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs">{SHOWING_ALL_MONITORS_LABEL}</EuiText>
+          </EuiFlexItem>
+        )}
+        {currentMonitors.length === monitors.length && currentMonitors.length > perPage && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              onClick={() => window.scrollTo(0, 0)}
+              iconType="sortUp"
+              iconSide="right"
+              size="xs"
+            >
+              {SCROLL_TO_TOP_LABEL}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
     </>
   );
 };
@@ -96,3 +139,14 @@ const getCurrentMonitors = ({
     return monitors.slice(0, perPage * page);
   }
 };
+
+const SHOWING_ALL_MONITORS_LABEL = i18n.translate(
+  'xpack.synthetics.overview.grid.showingAllMonitors.label',
+  {
+    defaultMessage: 'Showing all monitors',
+  }
+);
+
+const SCROLL_TO_TOP_LABEL = i18n.translate('xpack.synthetics.overview.grid.scrollToTop.label', {
+  defaultMessage: 'Scroll to top',
+});
