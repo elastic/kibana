@@ -12,8 +12,10 @@ import {
   CREATE_POLICY_BUTTON,
   AGENT_FLYOUT_CLOSE_BUTTON,
   STANDALONE_TAB,
+  PACKAGE_POLICY_TABLE_LINK,
 } from '../screens/fleet';
 import { LOADING_SPINNER } from '../screens/navigation';
+import { getIntegrationCard } from '../screens/integrations';
 
 export function createAgentPolicy() {
   cy.intercept({
@@ -49,7 +51,7 @@ export function verifyPolicy(name: string, integrations: string[]) {
 
   navigateToAgentPolicy(name);
   integrations.forEach((integration) => {
-    cy.get('.euiLink').contains(integration);
+    cy.getBySel(PACKAGE_POLICY_TABLE_LINK).contains(integration);
   });
 
   cy.get('.euiButtonEmpty').contains('View all agent policies').click();
@@ -61,5 +63,5 @@ export function verifyPolicy(name: string, integrations: string[]) {
 
 export function verifyAgentPackage() {
   cy.visit('/app/integrations/installed');
-  cy.getBySel('integration-card:epr:elastic_agent');
+  cy.getBySel(getIntegrationCard('elastic_agent'));
 }

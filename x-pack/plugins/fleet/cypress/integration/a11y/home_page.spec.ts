@@ -26,6 +26,7 @@ import {
   DATA_STREAMS_TAB,
   SETTINGS_TAB,
   SETTINGS_FLEET_SERVER_HOST_HEADING,
+  FLEET_SERVER_HOST_INPUT,
 } from '../../screens/fleet';
 import { AGENT_POLICY_NAME_LINK } from '../../screens/integrations';
 import { cleanupAgentPolicies, unenrollAgent } from '../../tasks/cleanup';
@@ -42,8 +43,8 @@ describe('Home page', () => {
         checkA11y({ skipFailures: false });
       });
       it('Install Fleet Server', () => {
-        cy.getBySel('fleetServerHostInput', { timeout: 15000 }).should('be.visible');
-        cy.getBySel('fleetServerHostInput').getBySel('comboBoxSearchInput').type(fleetServerHost);
+        cy.getBySel(FLEET_SERVER_HOST_INPUT, { timeout: 15000 }).should('be.visible');
+        cy.getBySel(FLEET_SERVER_HOST_INPUT).getBySel('comboBoxSearchInput').type(fleetServerHost);
         cy.getBySel(GENERATE_FLEET_SERVER_POLICY_BUTTON).click();
         cy.getBySel(PLATFORM_TYPE_LINUX_BUTTON, { timeout: 15000 }).should('be.visible');
         checkA11y({ skipFailures: false });

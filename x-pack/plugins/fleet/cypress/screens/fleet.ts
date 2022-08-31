@@ -40,6 +40,8 @@ export const AGENT_POLICIES_CREATE_AGENT_POLICY_FLYOUT = {
   COLLECT_METRICS_CHECKBOX: 'collectMetricsCheckbox',
 };
 
+export const CREATE_FLEET_SERVER_POLICY_BTN = 'createFleetServerPolicyBtn';
+export const AGENT_POLICY_DROPDOWN = 'agentPolicyDropdown';
 export const AGENT_POLICY_CREATE_AGENT_POLICY_NAME_FIELD = 'createAgentPolicyNameField';
 export const AGENT_POLICIES_FLYOUT_ADVANCED_DEFAULT_NAMESPACE_HEADER = 'defaultNamespaceHeader';
 export const AGENT_POLICY_FLYOUT_CREATE_BUTTON = 'createAgentPolicyFlyoutBtn';
@@ -48,6 +50,8 @@ export const ENROLLMENT_TOKENS_CREATE_TOKEN_NAME_FIELD = 'createEnrollmentTokenN
 export const SETTINGS_FLEET_SERVER_HOST_HEADING = 'fleetServerHostHeader';
 export const AGENT_POLICY_SYSTEM_MONITORING_CHECKBOX = 'agentPolicyFormSystemMonitoringCheckbox';
 export const INSTALL_INTEGRATIONS_ADVANCE_OPTIONS_BTN = 'AgentPolicyAdvancedOptions.AccordionBtn';
+export const AGENT_POLICY_CREATE_STATUS_CALLOUT = 'agentPolicyCreateStatusCallOut';
+export const FLEET_SERVER_HOST_INPUT = 'fleetServerHostInput';
 
 export const AGENT_BINARY_SOURCES_TABLE = 'AgentDownloadSourcesTable';
 export const AGENT_BINARY_SOURCES_TABLE_ACTIONS = {
