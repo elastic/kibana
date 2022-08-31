@@ -8,3 +8,4 @@
 export const SLO_COMPONENT_TEMPLATE_MAPPINGS_NAME = '.slo-observability.slo-mappings';
 export const SLO_COMPONENT_TEMPLATE_SETTINGS_NAME = '.slo-observability.slo-settings';
 export const SLO_INDEX_TEMPLATE_NAME = 'observability-slo-data';
+export const SLO_INGEST_PIPELINE_NAME = 'observability-slo-monthly-index-default';

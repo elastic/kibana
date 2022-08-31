@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const getSloIndexTemplate = (indexPattern: string, composedOf: string[]) => ({
+export const getSLOIndexTemplate = (indexPattern: string, composedOf: string[]) => ({
   index_patterns: [indexPattern],
   composed_of: composedOf,
   priority: 500,

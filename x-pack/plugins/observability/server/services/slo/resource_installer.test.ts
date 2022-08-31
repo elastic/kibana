@@ -11,6 +11,7 @@ import {
   SLO_COMPONENT_TEMPLATE_MAPPINGS_NAME,
   SLO_COMPONENT_TEMPLATE_SETTINGS_NAME,
   SLO_INDEX_TEMPLATE_NAME,
+  SLO_INGEST_PIPELINE_NAME,
 } from '../../assets/constants';
 import { ResourceInstaller } from './resource_installer';
 
@@ -35,6 +36,9 @@ describe('resourceInstaller', () => {
       expect(mockClusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(
         expect.objectContaining({ name: SLO_INDEX_TEMPLATE_NAME })
       );
+      expect(mockClusterClient.ingest.putPipeline).toHaveBeenCalledWith(
+        expect.objectContaining({ id: SLO_INGEST_PIPELINE_NAME })
+      );
     });
   });
 
@@ -42,12 +46,14 @@ describe('resourceInstaller', () => {
     it('does not install the common resources', async () => {
       const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
       mockClusterClient.indices.existsIndexTemplate.mockResponseOnce(true);
+      mockClusterClient.ingest.getPipeline.mockResponseOnce({});
       const installer = new ResourceInstaller(mockClusterClient, loggerMock.create());
 
       await installer.ensureCommonResourcesInstalled();
 
       expect(mockClusterClient.cluster.putComponentTemplate).not.toHaveBeenCalled();
       expect(mockClusterClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+      expect(mockClusterClient.ingest.putPipeline).not.toHaveBeenCalled();
     });
   });
 });
