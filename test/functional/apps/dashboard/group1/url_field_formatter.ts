@@ -12,7 +12,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { common, dashboard, settings, visChart, discover } = getPageObjects([
-
     'common',
     'dashboard',
     'settings',
