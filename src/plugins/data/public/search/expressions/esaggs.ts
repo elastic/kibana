@@ -36,7 +36,11 @@ export function getFunctionDefinition({
 }) {
   return (): EsaggsExpressionFunctionDefinition => ({
     ...getEsaggsMeta(),
-    fn(input, args, { inspectorAdapters, abortSignal, getSearchSessionId, getExecutionContext, getSearchContext }) {
+    fn(
+      input,
+      args,
+      { inspectorAdapters, abortSignal, getSearchSessionId, getExecutionContext, getSearchContext }
+    ) {
       return defer(async () => {
         const { aggs, indexPatterns, searchSource, getNow } = await getStartDependencies();
 
@@ -52,7 +56,6 @@ export function getFunctionDefinition({
         return { aggConfigs, indexPattern, searchSource, getNow, handleEsaggsRequest };
       }).pipe(
         switchMap(({ aggConfigs, indexPattern, searchSource, getNow, handleEsaggsRequest }) => {
-
           const { disableShardWarnings } = getSearchContext();
 
           return handleEsaggsRequest({
