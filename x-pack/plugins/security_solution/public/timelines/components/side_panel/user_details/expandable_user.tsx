@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
-import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { UserDetailsLink } from '../../../../common/components/links';
 import { UserOverview } from '../../../../overview/components/user_overview';
 import { useUserDetails } from '../../../../users/containers/users/details';
@@ -74,7 +73,7 @@ export const ExpandableUserDetails = ({
       const fromTo = scoreIntervalToDateTime(score, interval);
       dispatch(
         setAbsoluteRangeDatePicker({
-          id: InputsModelId.global,
+          id: 'global',
           from: fromTo.from,
           to: fromTo.to,
         })
