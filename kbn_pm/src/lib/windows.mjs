@@ -7,7 +7,7 @@
  */
 
 /**
- * @param {import('../../lib/log.mjs').Log} log
+ * @param {import('./lib/log.mjs').Log} log
  */
 export function checkIfRunningNativelyOnWindows(log) {
   if (process.platform !== 'win32') {

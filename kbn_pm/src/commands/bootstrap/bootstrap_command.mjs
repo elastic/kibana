@@ -9,7 +9,6 @@
 import { spawnSync } from '../../lib/spawn.mjs';
 import * as Bazel from '../../lib/bazel.mjs';
 import { haveNodeModulesBeenManuallyDeleted, removeYarnIntegrityFileIfExists } from './yarn.mjs';
-import { checkIfRunningNativelyOnWindows } from './windows.mjs';
 import { setupRemoteCache } from './setup_remote_cache.mjs';
 import { regenerateSyntheticPackageMap } from './regenerate_synthetic_package_map.mjs';
 import { sortPackageJson } from './sort_package_json.mjs';
@@ -47,8 +46,6 @@ export const command = {
     id: 'total',
   },
   async run({ args, log, time }) {
-    checkIfRunningNativelyOnWindows(log);
-
     const offline = args.getBooleanValue('offline') ?? false;
     const validate = args.getBooleanValue('validate') ?? true;
     const quiet = args.getBooleanValue('quiet') ?? false;
