@@ -904,6 +904,7 @@ export class ExceptionListClient {
    * @param options.perPage How many per page to return
    * @param options.page The page number or "undefined" if there is no page number to continue from
    * @param options.pit The Point in Time (pit) id if there is one, otherwise "undefined" can be sent in
+   * @param options.search The simple query search parameter if there is one, otherwise "undefined" can be sent in
    * @param options.searchAfter The search_after parameter if there is one, otherwise "undefined" can be sent in
    * @param options.sortField The sort field string if there is one, otherwise "undefined" can be sent in
    * @param options.sortOrder The sort order of "asc" or "desc", otherwise "undefined" can be sent in
@@ -914,6 +915,7 @@ export class ExceptionListClient {
     perPage,
     page,
     pit,
+    search,
     searchAfter,
     sortField,
     sortOrder,
@@ -928,6 +930,7 @@ export class ExceptionListClient {
       perPage,
       pit,
       savedObjectsClient,
+      search,
       searchAfter,
       sortField,
       sortOrder,

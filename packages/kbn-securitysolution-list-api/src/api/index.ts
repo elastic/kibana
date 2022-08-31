@@ -322,6 +322,7 @@ export { fetchExceptionListByIdWithValidation as fetchExceptionListById };
  * @param http Kibana http service
  * @param listIds ExceptionList list_ids (not ID)
  * @param namespaceTypes ExceptionList namespace_types
+ * @param search optional - simple search string
  * @param filter optional
  * @param pagination optional
  * @param signal to cancel request

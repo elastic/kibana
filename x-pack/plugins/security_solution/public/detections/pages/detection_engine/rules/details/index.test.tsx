@@ -317,8 +317,10 @@ describe('RuleDetailsPageComponent', () => {
       </TestProviders>
     );
     await waitFor(() => {
-      expect(wrapper.find('[data-test-subj="exceptionTab"]').exists()).toBeTruthy();
-      expect(wrapper.find('[data-test-subj="endpointExceptionsTab"]').exists()).toBeFalsy();
+      expect(wrapper.find('[data-test-subj="navigation-rule_exceptions"]').exists()).toBeTruthy();
+      expect(
+        wrapper.find('[data-test-subj="navigation-endpoint_exceptions"]').exists()
+      ).toBeFalsy();
     });
   });
 
@@ -352,8 +354,10 @@ describe('RuleDetailsPageComponent', () => {
       </TestProviders>
     );
     await waitFor(() => {
-      expect(wrapper.find('[data-test-subj="exceptionTab"]').exists()).toBeTruthy();
-      expect(wrapper.find('[data-test-subj="endpointExceptionsTab"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="navigation-rule_exceptions"]').exists()).toBeTruthy();
+      expect(
+        wrapper.find('[data-test-subj="navigation-endpoint_exceptions"]').exists()
+      ).toBeTruthy();
     });
   });
 });

@@ -8,7 +8,7 @@
 import type { Exception } from '../objects/exception';
 import { RULE_STATUS } from '../screens/create_new_rule';
 import {
-  ADD_EXCEPTIONS_BTN,
+  ADD_EXCEPTIONS_BTN_FROM_EMPTY_PROMPT_BTN,
   CLOSE_ALERTS_CHECKBOX,
   CONFIRM_BTN,
   FIELD_INPUT,
@@ -66,9 +66,12 @@ export const addsFieldsToTimeline = (search: string, fields: string[]) => {
 };
 
 export const openExceptionFlyoutFromRuleSettings = () => {
-  cy.get(ADD_EXCEPTIONS_BTN).click();
-  cy.get(LOADING_SPINNER).should('not.exist');
-  cy.get(FIELD_INPUT).should('be.visible');
+  cy.root()
+    .pipe(($el) => {
+      $el.find(ADD_EXCEPTIONS_BTN_FROM_EMPTY_PROMPT_BTN).trigger('click');
+      return $el.find(FIELD_INPUT);
+    })
+    .should('be.visible');
 };
 
 export const addsExceptionFromRuleSettings = (exception: Exception) => {

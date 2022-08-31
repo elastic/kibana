@@ -49,7 +49,7 @@ describe('findRuleExceptionReferencesRoute', () => {
     test('returns 200 when adding an exception item and rule_default exception list already exists', async () => {
       const request = requestMock.create({
         method: 'get',
-        path: `${DETECTION_ENGINE_RULES_URL}/exceptions/_find_references`,
+        path: `${DETECTION_ENGINE_RULES_URL}/exceptions/_find_references?exception_list`,
         query: {
           ids: `4656dc92-5832-11ea-8e2d-0242ac130003`,
           list_ids: `my_default_list`,
@@ -127,7 +127,7 @@ describe('findRuleExceptionReferencesRoute', () => {
       expect(response.status).toEqual(400);
       expect(response.body).toEqual({
         message:
-          '"ids", "list_ids" and "namespace_types" need to have the same comma separated number of values. Expected "ids" length: 1 to equal "namespace_types" length: 2 and "list_ids" legnth: 1.',
+          '"ids", "list_ids" and "namespace_types" need to have the same comma separated number of values. Expected "ids" length: 1 to equal "namespace_types" length: 2 and "list_ids" length: 1.',
         status_code: 400,
       });
     });

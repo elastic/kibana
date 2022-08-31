@@ -10,6 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiSearchBar } from '@elastic/eui
 
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import * as i18n from '../../utils/translations';
+import type { GetExceptionItemProps } from '.';
 
 const ITEMS_SCHEMA = {
   strict: true,
@@ -47,7 +48,7 @@ interface ExceptionsViewerSearchBarProps {
   // being created when "onAddExceptionClick" is invoked
   listType: ExceptionListTypeEnum;
   isSearching: boolean;
-  onSearch: (arg: string) => void;
+  onSearch: (arg: GetExceptionItemProps) => void;
   onAddExceptionClick: (type: ExceptionListTypeEnum) => void;
 }
 

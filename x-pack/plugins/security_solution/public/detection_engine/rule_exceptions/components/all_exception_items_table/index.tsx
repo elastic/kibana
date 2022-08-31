@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useReducer, useState } from 'react';
+import React, { useCallback, useMemo, useEffect, useReducer, useState } from 'react';
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 
 import type {
@@ -57,8 +57,13 @@ const initialState: State = {
   exceptionToEdit: null,
   currenFlyout: null,
   viewerState: 'loading',
-  exceptionLists: [],
 };
+
+export interface GetExceptionItemProps {
+  pagination?: Partial<Pagination>;
+  search?: string;
+  filters?: string;
+}
 
 interface ExceptionsViewerProps {
   rule: Rule | null;
@@ -76,14 +81,19 @@ const ExceptionsViewerComponent = ({
   const [{ canUserCRUD, hasIndexWrite }] = useUserData();
   const [isReadOnly, setReadOnly] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<null | string | number>(null);
+  const exceptionListsToQuery = useMemo(
+    () =>
+      rule != null && rule.exceptions_list != null
+        ? rule.exceptions_list.filter((list) => list.type === listType)
+        : [],
+    [listType, rule]
+  );
 
   // Reducer state
-  const [
-    { exceptions, pagination, currenFlyout, exceptionToEdit, viewerState, exceptionLists },
-    dispatch,
-  ] = useReducer(allExceptionItemsReducer(), {
-    ...initialState,
-  });
+  const [{ exceptions, pagination, currenFlyout, exceptionToEdit, viewerState }, dispatch] =
+    useReducer(allExceptionItemsReducer(), {
+      ...initialState,
+    });
 
   // Reducer actions
   const setExceptions = useCallback(
@@ -112,16 +122,6 @@ const ExceptionsViewerComponent = ({
     [dispatch]
   );
 
-  const setExceptionLists = useCallback(
-    (lists: ListArray): void => {
-      dispatch({
-        type: 'setExceptionLists',
-        lists,
-      });
-    },
-    [dispatch]
-  );
-
   const setFlyoutType = useCallback(
     (flyoutType: ViewerFlyoutName): void => {
       dispatch({
@@ -132,10 +132,10 @@ const ExceptionsViewerComponent = ({
     [dispatch]
   );
 
-  const [_, allReferences] = useFindExceptionListReferences(exceptionLists);
+  const [_, allReferences] = useFindExceptionListReferences(exceptionListsToQuery);
 
   const handleFetchItems = useCallback(
-    async (options?: { pagination?: Partial<Pagination>; search?: string; filters?: string }) => {
+    async (options?: GetExceptionItemProps) => {
       const abortCtrl = new AbortController();
 
       const newPagination =
@@ -148,6 +148,16 @@ const ExceptionsViewerComponent = ({
               page: pagination.pageIndex + 1,
               perPage: pagination.pageSize,
             };
+
+      if (exceptionListsToQuery.length === 0) {
+        return {
+          data: [],
+          pageIndex: pagination.pageIndex,
+          itemsPerPage: pagination.pageSize,
+          total: 0,
+        };
+      }
+
       const {
         page: pageIndex,
         per_page: itemsPerPage,
@@ -156,8 +166,8 @@ const ExceptionsViewerComponent = ({
       } = await fetchExceptionListsItemsByListIds({
         filter: undefined,
         http: services.http,
-        listIds: exceptionLists.map((list) => list.list_id),
-        namespaceTypes: exceptionLists.map((list) => list.namespace_type),
+        listIds: exceptionListsToQuery.map((list) => list.list_id),
+        namespaceTypes: exceptionListsToQuery.map((list) => list.namespace_type),
         search: options?.search,
         pagination: newPagination,
         signal: abortCtrl.signal,
@@ -174,20 +184,15 @@ const ExceptionsViewerComponent = ({
         total,
       };
     },
-    [pagination.pageIndex, pagination.pageSize, exceptionLists, services.http]
+    [pagination.pageIndex, pagination.pageSize, exceptionListsToQuery, services.http]
   );
 
   const handleGetExceptionListItems = useCallback(
-    async (options?: { page: number; perPage: number }) => {
+    async (options?: GetExceptionItemProps) => {
       try {
         setViewerState('loading');
 
-        const { pageIndex, itemsPerPage, total, data } = await handleFetchItems({
-          pagination: {
-            page: options?.page ?? pagination.pageIndex,
-            perPage: options?.perPage ?? pagination.pageSize,
-          },
-        });
+        const { pageIndex, itemsPerPage, total, data } = await handleFetchItems(options);
 
         setViewerState(total > 0 ? null : 'empty');
 
@@ -208,22 +213,15 @@ const ExceptionsViewerComponent = ({
         });
       }
     },
-    [
-      handleFetchItems,
-      setExceptions,
-      setViewerState,
-      pagination.pageSize,
-      pagination.pageIndex,
-      toasts,
-    ]
+    [handleFetchItems, setExceptions, setViewerState, toasts]
   );
 
   const handleSearch = useCallback(
-    async (search: string) => {
+    async (options?: GetExceptionItemProps) => {
       try {
         setViewerState('searching');
 
-        const { pageIndex, itemsPerPage, total, data } = await handleFetchItems({ search });
+        const { pageIndex, itemsPerPage, total, data } = await handleFetchItems(options);
 
         setViewerState(total > 0 ? null : 'empty_search');
 
@@ -311,26 +309,16 @@ const ExceptionsViewerComponent = ({
   }, [setReadOnly, canUserCRUD, hasIndexWrite]);
 
   useEffect(() => {
-    if (rule != null) {
-      const lists =
-        rule != null && rule.exceptions_list != null
-          ? rule.exceptions_list.filter((list) => list.type === listType)
-          : [];
-      setExceptionLists(lists);
-    } else {
-      setViewerState('loading');
-    }
-  }, [listType, rule, setViewerState, setExceptionLists]);
-
-  useEffect(() => {
-    if (exceptionLists.length > 0) {
+    if (exceptionListsToQuery.length > 0) {
       handleGetExceptionListItems();
+    } else {
+      setViewerState('empty');
     }
-  }, [exceptionLists, handleGetExceptionListItems, setViewerState]);
+  }, [exceptionListsToQuery.length, handleGetExceptionListItems, setViewerState]);
 
   return (
     <>
-      {currenFlyout === 'editException' && exceptionToEdit != null && (
+      {currenFlyout === 'editException' && exceptionToEdit != null && rule != null && (
         <EditExceptionFlyout
           ruleName={rule.name}
           ruleId={rule.id}
@@ -345,7 +333,7 @@ const ExceptionsViewerComponent = ({
         />
       )}
 
-      {currenFlyout === 'addException' && (
+      {currenFlyout === 'addException' && rule != null && (
         <AddExceptionFlyout
           ruleName={rule.name}
           ruleIndices={rule.index ?? DEFAULT_INDEX_PATTERN}

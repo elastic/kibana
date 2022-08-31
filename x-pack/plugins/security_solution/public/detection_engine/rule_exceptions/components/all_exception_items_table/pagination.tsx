@@ -10,10 +10,11 @@ import { EuiTablePagination } from '@elastic/eui';
 
 import type { ExceptionsPagination } from '../../utils/types';
 import * as i18n from './translations';
+import type { GetExceptionItemProps } from '.';
 
 interface ExceptionsViewerPaginationProps {
   pagination: ExceptionsPagination;
-  onPaginationChange: (arg: { page: number; perPage: number }) => void;
+  onPaginationChange: (arg: GetExceptionItemProps) => void;
 }
 
 const ExceptionsViewerPaginationComponent = ({
@@ -23,8 +24,10 @@ const ExceptionsViewerPaginationComponent = ({
   const handleItemsPerPageChange = useCallback(
     (pageSize: number) => {
       onPaginationChange({
-        page: pagination.pageIndex,
-        perPage: pageSize,
+        pagination: {
+          page: pagination.pageIndex,
+          perPage: pageSize,
+        },
       });
     },
     [onPaginationChange, pagination.pageIndex]
@@ -33,8 +36,10 @@ const ExceptionsViewerPaginationComponent = ({
   const handlePageIndexChange = useCallback(
     (pageIndex: number) => {
       onPaginationChange({
-        page: pageIndex,
-        perPage: pagination.pageSize,
+        pagination: {
+          page: pageIndex,
+          perPage: pagination.pageSize,
+        },
       });
     },
     [onPaginationChange, pagination.pageSize]

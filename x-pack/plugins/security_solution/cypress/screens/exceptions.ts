@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export const ADD_EXCEPTIONS_BTN = '[data-test-subj="exceptionsHeaderAddExceptionBtn"]';
+export const ADD_EXCEPTIONS_BTN_FROM_EMPTY_PROMPT_BTN =
+  '[data-test-subj="exceptionsEmptyPromptButton"]';
 
 export const CLOSE_ALERTS_CHECKBOX =
   '[data-test-subj="bulk-close-alert-on-add-add-exception-checkbox"]';

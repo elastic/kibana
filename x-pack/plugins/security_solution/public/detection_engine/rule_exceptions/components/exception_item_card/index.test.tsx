@@ -246,6 +246,7 @@ describe('ExceptionItemCard', () => {
 
     expect(mockOnDeleteException).toHaveBeenCalledWith({
       id: '1',
+      name: 'some name',
       namespaceType: 'single',
     });
   });

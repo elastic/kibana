@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type {
-  ExceptionListItemSchema,
-  Pagination,
-  ListArray,
-} from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListItemSchema, Pagination } from '@kbn/securitysolution-io-ts-list-types';
 import type { ExceptionsPagination } from '../../utils/types';
 
 export type ViewerFlyoutName = 'addException' | 'editException' | null;
@@ -31,8 +27,6 @@ export interface State {
   // Flyout to be opened (edit vs add vs none)
   currenFlyout: ViewerFlyoutName;
   viewerState: ViewerState;
-  // Exception list containers
-  exceptionLists: ListArray;
 }
 
 export type Action =
@@ -40,10 +34,6 @@ export type Action =
       type: 'setExceptions';
       exceptions: ExceptionListItemSchema[];
       pagination: Pagination;
-    }
-  | {
-      type: 'setExceptionLists';
-      lists: ListArray;
     }
   | { type: 'updateFlyoutOpen'; flyoutType: ViewerFlyoutName }
   | {
@@ -71,12 +61,6 @@ export const allExceptionItemsReducer =
             totalItemCount: pagination.total ?? 0,
           },
           exceptions,
-        };
-      }
-      case 'setExceptionLists': {
-        return {
-          ...state,
-          exceptionLists: action.lists,
         };
       }
       case 'updateExceptionToEdit': {
