@@ -82,12 +82,13 @@ export function buildSearchParams({
       fields,
       runtime_mappings: runtimeMappings,
       _source: fields?.length ? false : undefined,
+      sort:
+        fields?.length && timeFieldName
+          ? [{ [timeFieldName]: { order: 'desc', unmapped_type: 'boolean' } }]
+          : undefined,
     },
     track_total_hits: true,
     size: size ?? 0,
-    ...(fields?.length && timeFieldName
-      ? { sort: [{ [timeFieldName]: { order: 'desc', unmapped_type: 'boolean' } }] }
-      : {}),
   };
 }
 
