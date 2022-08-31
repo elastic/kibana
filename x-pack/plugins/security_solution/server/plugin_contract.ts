@@ -34,6 +34,7 @@ import type {
   TaskManagerStartContract as TaskManagerPluginStart,
 } from '@kbn/task-manager-plugin/server';
 import type { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
+import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
 
 export interface SecuritySolutionPluginSetupDependencies {
   alerting: AlertingPluginSetup;
@@ -55,6 +56,7 @@ export interface SecuritySolutionPluginSetupDependencies {
 export interface SecuritySolutionPluginStartDependencies {
   alerting: AlertingPluginStart;
   cases?: CasesPluginStart;
+  cloudExperiments?: CloudExperimentsPluginStart;
   data: DataPluginStart;
   eventLog: IEventLogClientService;
   fleet?: FleetPluginStart;
