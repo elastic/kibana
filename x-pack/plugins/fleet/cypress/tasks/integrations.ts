@@ -7,13 +7,12 @@
 
 import {
   ADD_INTEGRATION_POLICY_BTN,
-  CONFIRM_MODAL_BTN,
   CREATE_PACKAGE_POLICY_SAVE_BTN,
   FLYOUT_CLOSE_BTN_SEL,
 } from '../screens/integrations';
 
 import { AGENT_POLICY_SYSTEM_MONITORING_CHECKBOX } from '../screens/fleet';
-import { TOAST_CLOSE_BTN } from '../screens/navigation';
+import { TOAST_CLOSE_BTN, CONFIRM_MODAL } from '../screens/navigation';
 
 export const addIntegration = ({ useExistingPolicy } = { useExistingPolicy: false }) => {
   cy.getBySel(ADD_INTEGRATION_POLICY_BTN).click();
@@ -34,7 +33,7 @@ export const addIntegration = ({ useExistingPolicy } = { useExistingPolicy: fals
   cy.getBySel(TOAST_CLOSE_BTN).click();
   cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN).click();
   // sometimes agent is assigned to default policy, sometimes not
-  cy.getBySel(CONFIRM_MODAL_BTN).click();
+  cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
 
   cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN).should('not.exist');
   clickIfVisible(FLYOUT_CLOSE_BTN_SEL);
