@@ -19,8 +19,8 @@ import {
 } from './slack';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { createActionTypeRegistry } from './index.test';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { loggerMock } from '@kbn/logging-mocks';
 
 jest.mock('@slack/webhook', () => {
   return {
@@ -31,25 +31,22 @@ jest.mock('@slack/webhook', () => {
 });
 
 const services: Services = actionsMock.createServices();
+const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
 
 let connectorType: SlackConnectorType;
-let mockedLogger: jest.Mocked<Logger>;
 let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
 
-beforeAll(() => {
-  const { logger } = createActionTypeRegistry();
+beforeEach(() => {
   configurationUtilities = actionsConfigMock.create();
   connectorType = getConnectorType({
     async executor(options) {
       return { status: 'ok', actionId: options.actionId };
     },
-    logger,
+    logger: mockedLogger,
   });
-  mockedLogger = logger;
-  expect(connectorType).toBeTruthy();
 });
 
-describe('connector registeration', () => {
+describe('connector registration', () => {
   test('returns connector type', () => {
     expect(connectorType.id).toEqual(ConnectorTypeId);
     expect(connectorType.name).toEqual('Slack');
@@ -118,9 +115,6 @@ describe('validateConnectorTypeSecrets()', () => {
         expect(url).toEqual('https://api.slack.com/');
       },
     };
-    connectorType = getConnectorType({
-      logger: mockedLogger,
-    });
 
     expect(
       validateSecrets(
@@ -140,9 +134,6 @@ describe('validateConnectorTypeSecrets()', () => {
         throw new Error(`target hostname is not added to allowedHosts`);
       },
     };
-    connectorType = getConnectorType({
-      logger: mockedLogger,
-    });
 
     expect(() => {
       validateSecrets(
@@ -157,7 +148,8 @@ describe('validateConnectorTypeSecrets()', () => {
 });
 
 describe('execute()', () => {
-  beforeAll(() => {
+  beforeEach(() => {
+    jest.resetAllMocks();
     async function mockSlackExecutor(options: SlackConnectorTypeExecutorOptions) {
       const { params } = options;
       const { message } = params;
@@ -234,7 +226,7 @@ describe('execute()', () => {
       config: {},
       secrets: { webhookUrl: 'http://example.com' },
       params: { message: 'this invocation should succeed' },
-      configurationUtilities,
+      configurationUtilities: configUtils,
     });
     expect(mockedLogger.debug).toHaveBeenCalledWith(
       'IncomingWebhook was called with proxyUrl https://someproxyhost'

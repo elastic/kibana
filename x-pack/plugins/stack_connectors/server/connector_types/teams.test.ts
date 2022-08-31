@@ -9,18 +9,12 @@ import { Logger } from '@kbn/core/server';
 import { Services } from '@kbn/actions-plugin/server/types';
 import { validateParams, validateSecrets } from '@kbn/actions-plugin/server/lib';
 import axios from 'axios';
-import {
-  ActionParamsType,
-  ConnectorTypeSecretsType,
-  getConnectorType,
-  TeamsConnectorType,
-  ConnectorTypeId,
-} from './teams';
+import { getConnectorType, TeamsConnectorType, ConnectorTypeId } from './teams';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { createActionTypeRegistry } from './index.test';
 import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { loggerMock } from '@kbn/logging-mocks';
 
 jest.mock('axios');
 jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
@@ -33,21 +27,13 @@ jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
 });
 
 axios.create = jest.fn(() => axios);
-const requestMock = utils.request as jest.Mock;
 
+const requestMock = utils.request as jest.Mock;
 const services: Services = actionsMock.createServices();
+const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
 
 let connectorType: TeamsConnectorType;
-let mockedLogger: jest.Mocked<Logger>;
 let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
-
-beforeAll(() => {
-  const { logger, actionTypeRegistry } = createActionTypeRegistry();
-  connectorType = actionTypeRegistry.get<{}, ConnectorTypeSecretsType, ActionParamsType>(
-    ConnectorTypeId
-  );
-  mockedLogger = logger;
-});
 
 beforeEach(() => {
   configurationUtilities = actionsConfigMock.create();
@@ -125,9 +111,6 @@ describe('validateActionTypeSecrets()', () => {
         expect(url).toEqual('https://outlook.office.com/');
       },
     };
-    connectorType = getConnectorType({
-      logger: mockedLogger,
-    });
 
     expect(
       validateSecrets(
@@ -147,9 +130,6 @@ describe('validateActionTypeSecrets()', () => {
         throw new Error(`target hostname is not added to allowedHosts`);
       },
     };
-    connectorType = getConnectorType({
-      logger: mockedLogger,
-    });
 
     expect(() => {
       validateSecrets(
@@ -166,12 +146,10 @@ describe('validateActionTypeSecrets()', () => {
 describe('execute()', () => {
   beforeAll(() => {
     requestMock.mockReset();
-    connectorType = getConnectorType({
-      logger: mockedLogger,
-    });
   });
 
   beforeEach(() => {
+    jest.resetAllMocks();
     requestMock.mockReset();
     requestMock.mockResolvedValue({
       status: 200,

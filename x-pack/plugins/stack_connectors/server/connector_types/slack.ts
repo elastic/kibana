@@ -28,9 +28,8 @@ import {
   SecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common/connector_feature_config';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
+import { getCustomAgents } from '@kbn/actions-plugin/server/lib/get_custom_agents';
 import { getRetryAfterIntervalFromHeaders } from './lib/http_rersponse_retry_header';
-
-import { getCustomAgents } from './lib/get_custom_agents';
 
 export type SlackConnectorType = ConnectorType<
   {},
@@ -75,7 +74,7 @@ export function getConnectorType({
   return {
     id: ConnectorTypeId,
     minimumLicenseRequired: 'gold',
-    name: i18n.translate('xpack.actions.builtin.slackTitle', {
+    name: i18n.translate('xpack.stack_connectors.slack.title', {
       defaultMessage: 'Slack',
     }),
     supportedFeatureIds: [
@@ -116,7 +115,7 @@ function validateConnectorTypeConfig(
     new URL(configuredUrl);
   } catch (err) {
     throw new Error(
-      i18n.translate('xpack.actions.builtin.slack.slackConfigurationErrorNoHostname', {
+      i18n.translate('xpack.stack_connectors.slack.configurationErrorNoHostname', {
         defaultMessage: 'error configuring slack action: unable to parse host name from webhookUrl',
       })
     );
@@ -126,7 +125,7 @@ function validateConnectorTypeConfig(
     configurationUtilities.ensureUriAllowed(configuredUrl);
   } catch (allowListError) {
     throw new Error(
-      i18n.translate('xpack.actions.builtin.slack.slackConfigurationError', {
+      i18n.translate('xpack.stack_connectors.slack.configurationError', {
         defaultMessage: 'error configuring slack action: {message}',
         values: {
           message: allowListError.message,
@@ -192,7 +191,7 @@ async function slackExecutor(
     }
 
     const errMessage = i18n.translate(
-      'xpack.actions.builtin.slack.unexpectedHttpResponseErrorMessage',
+      'xpack.stack_connectors.slack.unexpectedHttpResponseErrorMessage',
       {
         defaultMessage: 'unexpected http response from slack: {httpStatus} {httpStatusText}',
         values: {
@@ -208,7 +207,7 @@ async function slackExecutor(
 
   if (result == null) {
     const errMessage = i18n.translate(
-      'xpack.actions.builtin.slack.unexpectedNullResponseErrorMessage',
+      'xpack.stack_connectors.slack.unexpectedNullResponseErrorMessage',
       {
         defaultMessage: 'unexpected null response from slack',
       }
@@ -238,7 +237,7 @@ function serviceErrorResult(
   actionId: string,
   serviceMessage: string
 ): ConnectorTypeExecutorResult<void> {
-  const errMessage = i18n.translate('xpack.actions.builtin.slack.errorPostingErrorMessage', {
+  const errMessage = i18n.translate('xpack.stack_connectors.slack.errorPostingErrorMessage', {
     defaultMessage: 'error posting slack message',
   });
   return {
@@ -251,7 +250,7 @@ function serviceErrorResult(
 
 function retryResult(actionId: string, message: string): ConnectorTypeExecutorResult<void> {
   const errMessage = i18n.translate(
-    'xpack.actions.builtin.slack.errorPostingRetryLaterErrorMessage',
+    'xpack.stack_connectors.slack.errorPostingRetryLaterErrorMessage',
     {
       defaultMessage: 'error posting a slack message, retry later',
     }
@@ -273,7 +272,7 @@ function retryResultSeconds(
   const retry = new Date(retryEpoch);
   const retryString = retry.toISOString();
   const errMessage = i18n.translate(
-    'xpack.actions.builtin.slack.errorPostingRetryDateErrorMessage',
+    'xpack.stack_connectors.slack.errorPostingRetryDateErrorMessage',
     {
       defaultMessage: 'error posting a slack message, retry at {retryString}',
       values: {
