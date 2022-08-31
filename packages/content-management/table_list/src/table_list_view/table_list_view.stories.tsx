@@ -30,7 +30,7 @@ export default {
   },
 };
 
-const createMockItems = (total: number) => {
+const createMockItems = (total: number): UserContentCommonSchema[] => {
   return [...Array(total)].map((_, i) => {
     const type = itemTypes[Math.floor(Math.random() * 4)];
 
