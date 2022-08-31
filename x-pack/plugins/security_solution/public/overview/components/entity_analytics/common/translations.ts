@@ -7,6 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const TOTAL_LABEL = i18n.translate('xpack.securitySolution.hostsRiskDashboard.totalLabel', {
+export const TOTAL_LABEL = i18n.translate('xpack.securitySolution.entityAnalytics.totalLabel', {
   defaultMessage: 'Total',
 });

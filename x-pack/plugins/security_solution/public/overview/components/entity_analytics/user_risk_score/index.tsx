@@ -5,8 +5,16 @@
  * 2.0.
  */
 import React, { useEffect, useMemo, useState } from 'react';
-import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
+  EuiPanel,
+} from '@elastic/eui';
 import { useDispatch } from 'react-redux';
+import styled from 'styled-components';
 import { SeverityFilterGroup } from '../../../../common/components/severity/severity_filter_group';
 import { LinkButton, useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
 import { LastUpdatedAt } from '../../detection_response/utils';
@@ -31,6 +39,10 @@ import { BasicTableWithoutBorderBottom } from '../common/basic_table_without_bor
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 const TABLE_QUERY_ID = 'userRiskDashboardTable';
+
+const IconWrapper = styled.span`
+  margin-left: ${({ theme }) => theme.eui.euiSizeS};
+`;
 
 export const EntityAnalyticsUserRiskScores = () => {
   const { deleteQuery, setQuery } = useGlobalTime();
@@ -90,6 +102,23 @@ export const EntityAnalyticsUserRiskScores = () => {
     return [onClick, href];
   }, [dispatch, getSecuritySolutionLinkProps]);
 
+  const headerTitle = useMemo(() => {
+    return (
+      <>
+        {i18n.USER_RISK_TITLE}
+        <IconWrapper>
+          <EuiIconTip
+            color="subdued"
+            content={i18n.USER_RISK_TABLE_TOOLTIP}
+            position="right"
+            size="l"
+            type="iInCircle"
+          />
+        </IconWrapper>
+      </>
+    );
+  }, []);
+
   if (!riskyUsersFeatureEnabled) {
     return null;
   }
@@ -102,7 +131,7 @@ export const EntityAnalyticsUserRiskScores = () => {
     <InspectButtonContainer>
       <EuiPanel hasBorder data-test-subj="entity_analytics_users">
         <HeaderSection
-          title={i18n.USER_RISK_TITLE}
+          title={headerTitle}
           titleSize="s"
           subtitle={
             <LastUpdatedAt isUpdating={isTableLoading || isKpiLoading} updatedAt={updatedAt} />
