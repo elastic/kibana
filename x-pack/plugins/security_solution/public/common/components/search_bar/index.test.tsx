@@ -14,7 +14,6 @@ import {
   TestProviders,
 } from '../../mock';
 import { render, fireEvent, waitFor } from '@testing-library/react';
-import type { InputsModelId } from '../../store/inputs/constants';
 import { SearchBarComponent } from '.';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import { FilterManager } from '@kbn/data-plugin/public';
@@ -63,7 +62,7 @@ jest.mock('../../utils/global_query_string', () => ({
 
 describe('SearchBarComponent', () => {
   const props = {
-    id: 'global' as InputsModelId,
+    id: 'global' as const,
     indexPattern: {
       fields: [],
       title: '',
@@ -300,15 +299,13 @@ describe('SearchBarComponent', () => {
         toStr: 'now',
       };
 
-      store.dispatch(
-        inputsActions.setRelativeRangeDatePicker({ id: 'global' as InputsModelId, ...newTimerange })
-      );
+      store.dispatch(inputsActions.setRelativeRangeDatePicker({ id: 'global', ...newTimerange }));
 
       await waitFor(() => {
         expect(mockUpdateUrlParam).toHaveBeenCalledWith(
           expect.objectContaining({
             global: {
-              linkTo: ['timeline'],
+              linkTo: ['timeline', 'socTrends'],
               timerange: newTimerange,
             },
           })
@@ -338,7 +335,7 @@ describe('SearchBarComponent', () => {
 
       store.dispatch(
         inputsActions.setRelativeRangeDatePicker({
-          id: 'timeline' as InputsModelId,
+          id: 'timeline',
           ...newTimerange,
         })
       );
@@ -347,7 +344,7 @@ describe('SearchBarComponent', () => {
         expect(mockUpdateUrlParam).toHaveBeenCalledWith(
           expect.objectContaining({
             timeline: {
-              linkTo: ['global'],
+              linkTo: ['global', 'socTrends'],
               timerange: newTimerange,
             },
           })

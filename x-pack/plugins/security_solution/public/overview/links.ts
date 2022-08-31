@@ -8,15 +8,22 @@
 import { i18n } from '@kbn/i18n';
 import {
   DETECTION_RESPONSE_PATH,
+  ENTITY_ANALYTICS_PATH,
   LANDING_PATH,
   OVERVIEW_PATH,
   SecurityPageName,
   SERVER_APP_ID,
 } from '../../common/constants';
-import { DETECTION_RESPONSE, GETTING_STARTED, OVERVIEW } from '../app/translations';
+import {
+  DETECTION_RESPONSE,
+  GETTING_STARTED,
+  OVERVIEW,
+  ENTITY_ANALYTICS,
+} from '../app/translations';
 import type { LinkItem } from '../common/links/types';
 import overviewPageImg from '../common/images/overview_page.png';
 import detectionResponsePageImg from '../common/images/detection_response_page.png';
+import entityAnalyticsDashboard from '../common/images/entity_analytics_dashboard.png';
 
 export const overviewLinks: LinkItem = {
   id: SecurityPageName.overview,
@@ -62,6 +69,25 @@ export const detectionResponseLinks: LinkItem = {
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.detectionAndResponse', {
       defaultMessage: 'Detection & Response',
+    }),
+  ],
+};
+
+export const entityAnalyticsLinks: LinkItem = {
+  id: SecurityPageName.entityAnalytics,
+  title: ENTITY_ANALYTICS,
+  landingImage: entityAnalyticsDashboard,
+  description: i18n.translate('xpack.securitySolution.appLinks.entityAnalyticsDescription', {
+    defaultMessage:
+      'Entity analytics, notable anomalies, and threats to narrow down the monitoring surface area.',
+  }),
+  path: ENTITY_ANALYTICS_PATH,
+  capabilities: [`${SERVER_APP_ID}.show`],
+  experimentalKey: 'entityAnalyticsDashboardEnabled',
+  licenseType: 'platinum',
+  globalSearchKeywords: [
+    i18n.translate('xpack.securitySolution.appLinks.entityAnalytics', {
+      defaultMessage: 'Entity Analytics',
     }),
   ],
 };

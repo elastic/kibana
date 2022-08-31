@@ -86,15 +86,6 @@ export function MachineLearningNavigationProvider({
       });
     },
 
-    async assertMainTabsExist() {
-      await this.assertTabsExist('mlMainTab', [
-        'anomalyDetection',
-        'dataFrames',
-        'dataFrameAnalytics',
-        'dataVisualizer',
-      ]);
-    },
-
     async assertTabEnabled(tabSubject: string, expectedValue: boolean) {
       await retry.tryForTime(10000, async () => {
         const isEnabled = await testSubjects.isEnabled(tabSubject);
@@ -157,6 +148,15 @@ export function MachineLearningNavigationProvider({
 
     async navigateToAnomalyDetection() {
       await this.navigateToArea('~mlMainTab & ~anomalyDetection', 'mlPageJobManagement');
+    },
+
+    async navigateToAnomalyExplorer(jobId: string, timeRange: { from: string; to: string }) {
+      await PageObjects.common.navigateToUrlWithBrowserHistory(
+        'ml',
+        `/explorer`,
+        `?_g=(ml%3A(jobIds%3A!(${jobId}))%2CrefreshInterval%3A(display%3AOff%2Cpause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3A'${timeRange.from}'%2Cto%3A'${timeRange.to}'))`
+      );
+      await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
     async navigateToSingleMetricViewer(jobId: string) {
