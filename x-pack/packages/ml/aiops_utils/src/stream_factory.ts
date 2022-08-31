@@ -116,15 +116,20 @@ export function streamFactory<T = unknown>(
     }
   }
 
+  const defaultHeaders = {
+    'x-accel-buffering': 'no',
+  };
+
   const responseWithHeaders: StreamFactoryReturnType['responseWithHeaders'] = {
     body: stream,
     ...(isCompressed
       ? {
           headers: {
+            ...defaultHeaders,
             'content-encoding': 'gzip',
           },
         }
-      : {}),
+      : { headers: defaultHeaders }),
   };
 
   return { DELIMITER, end, push, responseWithHeaders };
