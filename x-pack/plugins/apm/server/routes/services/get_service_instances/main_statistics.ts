@@ -53,7 +53,7 @@ export async function getServiceInstancesMainStatistics(
       getServiceInstancesSystemMetricStatistics({
         ...paramsForSubQueries,
         isComparisonSearch: false,
-        operationName: 'get_service_instances_system_metric_main_statistics'
+        operationName: 'get_service_instances_system_metric_main_statistics',
       }),
     ]);
 
