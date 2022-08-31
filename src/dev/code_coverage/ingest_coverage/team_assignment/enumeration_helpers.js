@@ -14,7 +14,7 @@ import { taMark } from '../utils';
 export const push = (xs) => (x) => xs.push(x);
 export const pathExists = (x) => tryCatch(() => statSync(x)).fold(left, right);
 export const isDir = (x) => statSync(x).isDirectory();
-export const prokGlob = (x) => globby.sync(x);
+export const prokGlob = (x) => globby.sync(x, { onlyFiles: false });
 export const trim = (ROOT) => (x) => x.replace(`${ROOT}/`, '');
 export const isFileAllowed = (x) => /.(j|t)(s|sx)$/gm.test(x);
 export const isRejectedDir = (x) =>

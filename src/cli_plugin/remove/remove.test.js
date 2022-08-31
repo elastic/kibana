@@ -82,7 +82,7 @@ describe('kibana cli', function () {
       mkdirSync(join(pluginDir, 'bar'), { recursive: true });
 
       remove(settings, logger);
-      const files = globby.sync('**/*', { cwd: pluginDir, onlyDirectories: true });
+      const files = globby.sync('**/*', { cwd: pluginDir, onlyFiles: false });
       const expected = ['bar'];
       expect(files.sort()).toEqual(expected.sort());
     });

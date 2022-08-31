@@ -33,12 +33,12 @@ describe('kibana cli', function () {
     const logger = new Logger(settings);
 
     function expectWorkingPathEmpty() {
-      const files = globby.sync('**/*', { cwd: testWorkingPath });
+      const files = globby.sync('**/*', { cwd: testWorkingPath, onlyFiles: false });
       expect(files).toEqual([]);
     }
 
     function expectWorkingPathNotEmpty() {
-      const files = globby.sync('**/*', { cwd: testWorkingPath });
+      const files = globby.sync('**/*', { cwd: testWorkingPath, onlyFiles: false });
       const expected = ['archive.part'];
 
       expect(files.sort()).toEqual(expected.sort());

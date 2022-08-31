@@ -71,14 +71,19 @@ describe('kibana cli', function () {
         await getPackData(settings, logger);
         await extract(settings, logger);
 
-        expect(globby.sync('**/*', { cwd: testWorkingPath }).sort()).toMatchInlineSnapshot(`
+        expect(globby.sync('**/*', { cwd: testWorkingPath, onlyFiles: false }).sort())
+          .toMatchInlineSnapshot(`
           Array [
             "archive.part",
+            "bin",
             "bin/executable",
             "bin/not-executable",
             "kibana.json",
+            "node_modules",
+            "node_modules/some-package",
             "node_modules/some-package/index.js",
             "node_modules/some-package/package.json",
+            "public",
             "public/index.js",
           ]
         `);

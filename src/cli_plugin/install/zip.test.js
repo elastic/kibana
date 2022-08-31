@@ -76,7 +76,7 @@ describe('kibana cli', function () {
 
         await extractArchive(archivePath, tempPath, 'kibana/test-plugin/bin');
 
-        expect(globby.sync('**/*', { cwd: tempPath })).toMatchInlineSnapshot(`
+        expect(globby.sync('**/*', { cwd: tempPath, onlyFiles: false })).toMatchInlineSnapshot(`
           Array [
             "executable",
             "not-executable",
