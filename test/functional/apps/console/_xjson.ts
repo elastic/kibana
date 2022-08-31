@@ -67,7 +67,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
     describe('multiple bodies for msearch requests', () => {
       it('should not trigger validation errors', async () => {
-        await PageObjects.console.enterRequest(
+        await executeRequest(
           '\nGET foo/_msearch \n{}\n{"query": {"match_all": {}}}\n{"index": "bar"}\n{"query": {"match_all": {}}}'
         );
         expect(await PageObjects.console.hasErrorMarker()).to.be(false);
@@ -76,9 +76,9 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
     describe('multiple JSON blocks', () => {
       it('should not trigger validation errors', async () => {
-        await PageObjects.console.enterRequest('\nPOST test/doc/1 \n{\n "foo": "bar"');
-        await PageObjects.console.enterRequest('\nPOST test/doc/1 \n{\n "foo": "bar"');
-        await PageObjects.console.enterRequest('\nPOST test/doc/1 \n{\n "foo": "bar"');
+        await executeRequest('\nPOST test/doc/1 \n{\n "foo": "bar"');
+        await executeRequest('\nPOST test/doc/2 \n{\n "foo": "baz"');
+        await executeRequest('\nPOST test/doc/3 \n{\n "foo": "qux"');
         expect(await PageObjects.console.hasErrorMarker()).to.be(false);
       });
     });
