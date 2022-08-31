@@ -13,7 +13,7 @@ export interface UsersKpiProps {
   from: string;
   to: string;
   indexNames: string[];
-  narrowDateRange: UpdateDateRange;
+  updateDateRange: UpdateDateRange;
   setQuery: GlobalTimeArgs['setQuery'];
   skip: boolean;
 }

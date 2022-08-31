@@ -24,7 +24,6 @@ const AnomaliesQueryTabBodyComponent: React.FC<AnomaliesQueryTabBodyProps> = ({
   skip,
   startDate,
   type,
-  narrowDateRange,
   filterQuery,
   anomaliesFilterQuery,
   AnomaliesTableComponent,
@@ -71,7 +70,6 @@ const AnomaliesQueryTabBodyComponent: React.FC<AnomaliesQueryTabBodyProps> = ({
         endDate={endDate}
         skip={skip}
         type={type}
-        narrowDateRange={narrowDateRange}
         flowTarget={flowTarget}
         ip={ip}
         hostName={hostName}

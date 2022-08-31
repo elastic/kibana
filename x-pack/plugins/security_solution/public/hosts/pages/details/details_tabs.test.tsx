@@ -12,7 +12,7 @@ import useResizeObserver from 'use-resize-observer/polyfilled';
 import '../../../common/mock/match_media';
 import { mockIndexPattern, TestProviders } from '../../../common/mock';
 import { HostDetailsTabs } from './details_tabs';
-import type { HostDetailsTabsProps, SetAbsoluteRangeDatePicker } from './types';
+import type { HostDetailsTabsProps } from './types';
 import { hostDetailsPagePath } from '../types';
 import { type } from './utils';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
@@ -102,7 +102,6 @@ describe('body', () => {
               isInitializing={false}
               detailName={'host-1'}
               setQuery={jest.fn()}
-              setAbsoluteRangeDatePicker={jest.fn() as unknown as SetAbsoluteRangeDatePicker}
               hostDetailsPagePath={hostDetailsPagePath}
               indexNames={[]}
               indexPattern={mockIndexPattern}
