@@ -8,16 +8,13 @@
 import { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import usePrevious from 'react-use/lib/usePrevious';
+import { InputsModelId } from '../../store/inputs/constants';
 import type { SecurityPageName } from '../../../app/types';
 import { formatDate } from '../../components/super_date_picker';
 import { isDetectionsPages } from '../../utils/global_query_string/helpers';
 import { inputsSelectors } from '../../store';
 import { inputsActions } from '../../store/inputs';
-import type { InputsModelId } from '../../store/inputs/constants';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
-
-const globalId: InputsModelId = 'global';
-const timelineId: InputsModelId = 'timeline';
 
 /**
  * Update relative time ranges when navigating between pages.
@@ -47,7 +44,7 @@ export const useUpdateTimerangeOnPageChange = () => {
             to: formatDate(timelineTimerange.toStr, {
               roundUp: true,
             }),
-            id: timelineId,
+            id: InputsModelId.timeline,
           })
         );
       }
@@ -61,7 +58,7 @@ export const useUpdateTimerangeOnPageChange = () => {
               roundUp: true,
             }),
 
-            id: globalId,
+            id: InputsModelId.global,
           })
         );
       }
