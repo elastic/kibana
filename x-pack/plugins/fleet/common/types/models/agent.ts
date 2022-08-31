@@ -284,5 +284,9 @@ export interface FleetServerAgentAction {
   data?: {
     [k: string]: unknown;
   };
+
+  /** Trace id */
+  traceparent?: string | null;
+
   [k: string]: unknown;
 }

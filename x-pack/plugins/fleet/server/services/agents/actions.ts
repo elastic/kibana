@@ -7,6 +7,7 @@
 
 import uuid from 'uuid';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import apm from 'elastic-apm-node';
 
 import type {
   Agent,
@@ -36,6 +37,7 @@ export async function createAgentAction(
     type: newAgentAction.type,
     start_time: newAgentAction.start_time,
     minimum_execution_duration: newAgentAction.minimum_execution_duration,
+    traceparent: apm.currentTraceparent,
   };
 
   await esClient.create({
@@ -80,6 +82,7 @@ export async function bulkCreateAgentActions(
         action_id: action.id,
         data: action.data,
         type: action.type,
+        traceparent: apm.currentTraceparent,
       };
 
       return [
