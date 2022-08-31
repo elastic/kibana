@@ -81,7 +81,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
           policy_id: agentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'filetest',
@@ -100,7 +99,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
           policy_id: agentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'filetest',
@@ -135,7 +133,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'updated_namespace',
           policy_id: agentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'filetest',
@@ -155,7 +152,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'updated_namespace',
           policy_id: agentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'filetest',
@@ -179,7 +175,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'updated_namespace',
           policy_id: managedAgentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'filetest',
@@ -199,7 +194,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'updated_namespace',
           policy_id: agentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'filetest',
@@ -229,7 +223,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'updated_namespace',
           policy_id: otherAgentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'filetest',
@@ -250,7 +243,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'updated_namespace',
           policy_id: agentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [
             {
               enabled: true,

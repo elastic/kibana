@@ -9,10 +9,13 @@ import { Observable, Subject } from 'rxjs';
 import { ILicense } from '@kbn/licensing-plugin/common/types';
 
 import { MlClientLicense } from './ml_client_license';
+import { applicationServiceMock } from '@kbn/core/public/application/application_service.mock';
 
 describe('MlClientLicense', () => {
+  const startApplicationContractMock = applicationServiceMock.createStartContract();
+
   test('should miss the license update when initialized without postInitFunction', () => {
-    const mlLicense = new MlClientLicense();
+    const mlLicense = new MlClientLicense(startApplicationContractMock);
 
     // upon instantiation the full license doesn't get set
     expect(mlLicense.isFullLicense()).toBe(false);
@@ -35,7 +38,7 @@ describe('MlClientLicense', () => {
   });
 
   test('should not miss the license update when initialized with postInitFunction', (done) => {
-    const mlLicense = new MlClientLicense();
+    const mlLicense = new MlClientLicense(startApplicationContractMock);
 
     // upon instantiation the full license doesn't get set
     expect(mlLicense.isFullLicense()).toBe(false);
