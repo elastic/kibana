@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-
 import type { MakeSinleFieldMathRequest } from '../types';
 import { getEventValue } from './events';
 
 export const makeSinleFieldMathRequest: MakeSinleFieldMathRequest = ({ events, mappingField }) => {
-
   const shouldClauses = events.map((event) => ({
     match: {
       [mappingField.enrichmentField]: {
