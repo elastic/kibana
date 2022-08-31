@@ -66,7 +66,7 @@ export const useStyles = (tty?: Teletype) => {
 
     const scrollPane: CSSObject = {
       width: '100%',
-      height: 'calc(100% - 142px)',
+      height: 'calc(100% - 126px)',
       border: border.thin,
       overflow: 'auto',
     };

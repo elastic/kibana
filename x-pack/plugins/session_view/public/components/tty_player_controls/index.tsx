@@ -6,6 +6,7 @@
  */
 import React, { useCallback, ChangeEvent, MouseEvent, useMemo } from 'react';
 import {
+  EuiButtonEmpty,
   EuiPanel,
   EuiRange,
   EuiFlexGroup,
@@ -13,12 +14,20 @@ import {
   EuiButtonIcon,
   EuiToolTip,
 } from '@elastic/eui';
-import { ProcessEntityIdIOLine } from '../../../common/types/process_tree';
+import { ProcessEntityIdIOLine, ProcessEvent } from '../../../common/types/process_tree';
 import { useStyles } from './styles';
-import { TTY_END, TTY_NEXT, TTY_PAUSE, TTY_PLAY, TTY_PREVIOUS, TTY_START } from './translations';
+import {
+  TTY_END,
+  TTY_NEXT,
+  TTY_PAUSE,
+  TTY_PLAY,
+  TTY_PREVIOUS,
+  TTY_START,
+  VIEW_IN_SESSION,
+} from './translations';
 
 export interface TTYPlayerControlsDeps {
-  currentProcessEntityId: string | undefined;
+  currentProcessEvent: ProcessEvent | undefined;
   processIdLineMap: Record<string, ProcessEntityIdIOLine>;
   lastProcessEntityId: string | undefined;
   isPlaying: boolean;
@@ -26,11 +35,13 @@ export interface TTYPlayerControlsDeps {
   linesLength: number;
   onSeekLine(line: number): void;
   onTogglePlayback(): void;
+  onClose(): void;
+  onJumpToEvent(event: ProcessEvent): void;
   textSizer: JSX.Element;
 }
 
 export const TTYPlayerControls = ({
-  currentProcessEntityId,
+  currentProcessEvent,
   processIdLineMap,
   lastProcessEntityId,
   isPlaying,
@@ -38,21 +49,25 @@ export const TTYPlayerControls = ({
   linesLength,
   onSeekLine,
   onTogglePlayback,
+  onClose,
+  onJumpToEvent,
   textSizer,
 }: TTYPlayerControlsDeps) => {
   const styles = useStyles();
 
   const isFirstProcess = useMemo(
     () =>
-      (currentProcessEntityId && processIdLineMap[currentProcessEntityId].previous === undefined) ||
+      (currentProcessEvent?.process?.entity_id &&
+        processIdLineMap[currentProcessEvent.process.entity_id].previous === undefined) ||
       false,
-    [currentProcessEntityId, processIdLineMap]
+    [currentProcessEvent, processIdLineMap]
   );
   const isLastProcess = useMemo(
     () =>
-      (currentProcessEntityId && processIdLineMap[currentProcessEntityId].next === undefined) ||
+      (currentProcessEvent?.process?.entity_id &&
+        processIdLineMap[currentProcessEvent.process.entity_id].next === undefined) ||
       false,
-    [currentProcessEntityId, processIdLineMap]
+    [currentProcessEvent, processIdLineMap]
   );
 
   const onLineChange = useCallback(
@@ -75,21 +90,36 @@ export const TTYPlayerControls = ({
 
   const seekToPrevProcess = useCallback(() => {
     if (
-      currentProcessEntityId &&
-      processIdLineMap[currentProcessEntityId]?.previous !== undefined
+      currentProcessEvent?.process?.entity_id &&
+      processIdLineMap[currentProcessEvent.process.entity_id]?.previous !== undefined
     ) {
-      onSeekLine(processIdLineMap[currentProcessEntityId]?.previous ?? 0);
+      onSeekLine(processIdLineMap[currentProcessEvent.process.entity_id]?.previous ?? 0);
     }
-  }, [processIdLineMap, onSeekLine, currentProcessEntityId]);
+  }, [currentProcessEvent, processIdLineMap, onSeekLine]);
 
   const seekToNextProcess = useCallback(() => {
-    if (currentProcessEntityId && processIdLineMap[currentProcessEntityId]?.next !== undefined) {
-      onSeekLine(processIdLineMap[currentProcessEntityId]?.next ?? 0);
+    if (
+      currentProcessEvent?.process?.entity_id &&
+      processIdLineMap[currentProcessEvent.process.entity_id]?.next !== undefined
+    ) {
+      onSeekLine(processIdLineMap[currentProcessEvent.process.entity_id]?.next ?? 0);
     }
-  }, [currentProcessEntityId, processIdLineMap, onSeekLine]);
+  }, [currentProcessEvent, processIdLineMap, onSeekLine]);
+
+  const handleViewInSession = useCallback(() => {
+    if (currentProcessEvent) {
+      onJumpToEvent(currentProcessEvent);
+      onClose();
+    }
+  }, [currentProcessEvent, onClose, onJumpToEvent]);
 
   return (
-    <EuiPanel data-test-subj="sessionView:TTYPlayerControls" hasShadow={false} borderRadius="none">
+    <EuiPanel
+      css={styles.controlsPanel}
+      data-test-subj="sessionView:TTYPlayerControls"
+      hasShadow={false}
+      borderRadius="none"
+    >
       <EuiFlexGroup alignItems="center" gutterSize="s" direction="row">
         <EuiFlexItem grow={false}>
           <EuiToolTip content={TTY_START}>
@@ -124,7 +154,7 @@ export const TTYPlayerControls = ({
             <EuiButtonIcon
               css={styles.controlButton}
               data-test-subj="sessionView:TTYPlayerControlsPlay"
-              iconType={isPlaying ? 'pause' : 'play'}
+              iconType={isPlaying ? 'pause' : 'playFilled'}
               display="empty"
               size="m"
               aria-label="TTY Play Button"
@@ -167,8 +197,17 @@ export const TTYPlayerControls = ({
             max={Math.max(0, linesLength - 1)}
             onChange={onLineChange}
             fullWidth
-            showInput
           />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            iconSide="right"
+            size="s"
+            onClick={handleViewInSession}
+            iconType="arrowRight"
+          >
+            {VIEW_IN_SESSION}
+          </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>{textSizer}</EuiFlexItem>
       </EuiFlexGroup>
