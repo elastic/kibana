@@ -14,7 +14,7 @@
 [
   {
     "name": "apm",
-    "version": "8.4.0-mtojek-test"
+    "version": "8.4.0"
   },
   {
     "name": "elastic_agent",
