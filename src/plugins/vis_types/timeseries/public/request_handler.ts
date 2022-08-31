@@ -83,7 +83,7 @@ export const metricsRequestHandler = async ({
           inspectorAdapters?.requests
             ?.start(query.label ?? key, { searchSessionId })
             .json(query.body)
-            .ok({ time: query.time });
+            .ok({ time: query.time, json: { rawResponse: query.response } });
 
           if (
             query.response &&
