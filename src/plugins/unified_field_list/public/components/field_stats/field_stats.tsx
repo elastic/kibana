@@ -289,7 +289,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
 
     return (
       <>
-        {title ? title : <></>}
+        {title ? <div data-test-subj={`${dataTestSubject}-title`}>{title}</div> : <></>}
 
         <EuiSpacer size="s" />
 

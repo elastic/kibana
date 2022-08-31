@@ -461,7 +461,7 @@ function DiscoverFieldComponent({
                 toDate={dateRange.to}
                 dataViewOrDataViewId={dataView}
                 field={fieldForStats}
-                data-test-subj="dscFieldListPanel"
+                data-test-subj="dscFieldStats"
                 onAddFilter={addFilterAndClosePopover}
               />
             )}
