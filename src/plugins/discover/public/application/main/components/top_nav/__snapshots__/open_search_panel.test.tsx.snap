@@ -44,7 +44,6 @@ exports[`OpenSearchPanel render 1`] = `
         Object {
           "savedObjects": undefined,
           "savedObjectsManagement": undefined,
-          "savedObjectsPlugin": undefined,
           "savedObjectsTagging": undefined,
           "uiSettings": undefined,
         }
