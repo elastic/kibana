@@ -33,7 +33,7 @@ export const registerGetTotalIOBytesRoute = (router: IRouter) => {
         const ttyPredicates = await getTTYQueryPredicates(client, sessionEntityId);
 
         if (!ttyPredicates) {
-          return response.ok({ body: '0' });
+          return response.ok({ body: { total: 0 } });
         }
 
         const search = await client.search({
@@ -70,11 +70,11 @@ export const registerGetTotalIOBytesRoute = (router: IRouter) => {
 
         const agg: any = search.aggregations?.total_bytes_captured;
 
-        return response.ok({ body: agg?.value || 0 });
+        return response.ok({ body: { total: agg?.value || 0 } });
       } catch (err) {
         // unauthorized
         if (err?.meta?.statusCode === 403) {
-          return response.ok();
+          return response.ok({ body: { total: 0 } });
         }
 
         return response.badRequest(err.message);

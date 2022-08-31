@@ -34,7 +34,7 @@ export default function getTotalIOBytesTests({ getService }: FtrProviderContext)
         sessionEntityId: MOCK_SESSION_ENTITY_ID,
       });
       expect(response.status).to.be(200);
-      expect(response.body).to.be(MOCK_TOTAL_BYTES);
+      expect(response.body.total).to.be(MOCK_TOTAL_BYTES);
     });
 
     it(`${GET_TOTAL_IO_BYTES_ROUTE} returns 0 for invalid query`, async () => {
@@ -42,7 +42,7 @@ export default function getTotalIOBytesTests({ getService }: FtrProviderContext)
         sessionEntityId: 'xyz',
       });
       expect(response.status).to.be(200);
-      expect(response.body).to.be(0);
+      expect(response.body.total).to.be(0);
     });
   });
 }
