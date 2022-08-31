@@ -146,6 +146,11 @@ export class DataView implements DataViewBase {
    */
   public name: string = '';
 
+  /*
+   * list of indices that the index pattern matched
+   */
+  public matchedIndices: string[] = [];
+
   /**
    * constructor
    * @param config - config data and dependencies
