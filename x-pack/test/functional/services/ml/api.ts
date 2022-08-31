@@ -29,6 +29,8 @@ export type MlApi = ProvidedType<typeof MachineLearningAPIProvider>;
 
 type ModelType = 'regression' | 'classification';
 
+export const INTERNAL_MODEL_IDS = ['lang_ident_model_1'];
+
 export const SUPPORTED_TRAINED_MODELS = {
   TINY_FILL_MASK: {
     name: 'pt_tiny_fill_mask',
@@ -1205,13 +1207,57 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       log.debug('> Trained model definition uploaded');
     },
 
-    async deleteTrainedModelES(modelId: string) {
-      log.debug(`Creating trained model with id "${modelId}"`);
-      const { body: model, status } = await esSupertest.delete(`/_ml/trained_models/${modelId}`);
-      this.assertResponseStatusCode(200, status, model);
+    async getTrainedModelsES() {
+      log.debug(`Getting trained models`);
+      const { body, status } = await esSupertest.get(`/_ml/trained_models`);
+      this.assertResponseStatusCode(200, status, body);
 
-      log.debug('> Trained model created');
-      return model;
+      log.debug('> Trained models fetched');
+      return body;
+    },
+
+    async deleteTrainedModelES(modelId: string) {
+      log.debug(`Deleting trained model with id "${modelId}"`);
+      const { body, status } = await esSupertest
+        .delete(`/_ml/trained_models/${modelId}`)
+        .query({ force: true });
+      this.assertResponseStatusCode(200, status, body);
+
+      log.debug('> Trained model deleted');
+    },
+
+    async deleteAllTrainedModelsES() {
+      log.debug(`Deleting all trained models`);
+      const getModelsRsp = await this.getTrainedModelsES();
+      for (const model of getModelsRsp.trained_model_configs) {
+        if (this.isInternalModelId(model.model_id)) {
+          log.debug(`> Skipping internal ${model.model_id}`);
+          continue;
+        }
+        await this.deleteTrainedModelES(model.model_id);
+      }
+    },
+
+    async stopTrainedModelDeploymentES(modelId: string) {
+      log.debug(`Stopping trained model deployment with id "${modelId}"`);
+      const { body, status } = await esSupertest.post(
+        `/_ml/trained_models/${modelId}/deployment/_stop`
+      );
+      this.assertResponseStatusCode(200, status, body);
+
+      log.debug('> Trained model deployment stopped');
+    },
+
+    async stopAllTrainedModelDeploymentsES() {
+      log.debug(`Stopping all trained model deployments`);
+      const getModelsRsp = await this.getTrainedModelsES();
+      for (const model of getModelsRsp.trained_model_configs) {
+        if (this.isInternalModelId(model.model_id)) {
+          log.debug(`> Skipping internal ${model.model_id}`);
+          continue;
+        }
+        await this.stopTrainedModelDeploymentES(model.model_id);
+      }
     },
 
     async createTestTrainedModels(
@@ -1302,6 +1348,10 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       this.assertResponseStatusCode(200, status, body);
 
       log.debug('> Model alias created');
+    },
+
+    isInternalModelId(modelId: string) {
+      return INTERNAL_MODEL_IDS.includes(modelId);
     },
 
     /**

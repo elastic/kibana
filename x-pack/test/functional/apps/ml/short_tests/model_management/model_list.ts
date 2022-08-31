@@ -27,6 +27,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
+      await ml.api.stopAllTrainedModelDeploymentsES();
+      await ml.api.deleteAllTrainedModelsES();
       await ml.api.cleanMlIndices();
     });
 
