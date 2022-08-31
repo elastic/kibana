@@ -1456,13 +1456,7 @@
         "description": [],
         "signature": [
           "(history: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreApplicationPluginApi",
-            "section": "def-public.ScopedHistory",
-            "text": "ScopedHistory"
-          },
+          "ScopedHistory",
           "<unknown> | ",
           "History",
           "<unknown>, to: string | LocationObject, onClickCallback?: Function | undefined) => { href: string; onClick: (event: React.MouseEvent<Element, MouseEvent>) => void; }"
@@ -1478,13 +1472,7 @@
             "label": "history",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreApplicationPluginApi",
-                "section": "def-public.ScopedHistory",
-                "text": "ScopedHistory"
-              },
+              "ScopedHistory",
               "<unknown> | ",
               "History",
               "<unknown>"
@@ -1534,13 +1522,7 @@
         "description": [],
         "signature": [
           "(history: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreApplicationPluginApi",
-            "section": "def-public.ScopedHistory",
-            "text": "ScopedHistory"
-          },
+          "ScopedHistory",
           "<unknown> | ",
           "History",
           "<unknown>, to: string | LocationObject, onClickCallback?: Function | undefined) => (event: React.MouseEvent<Element, MouseEvent>) => void"
@@ -1556,13 +1538,7 @@
             "label": "history",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreApplicationPluginApi",
-                "section": "def-public.ScopedHistory",
-                "text": "ScopedHistory"
-              },
+              "ScopedHistory",
               "<unknown> | ",
               "History",
               "<unknown>"
@@ -3368,13 +3344,7 @@
             "label": "application",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreApplicationPluginApi",
-                "section": "def-public.ApplicationStart",
-                "text": "ApplicationStart"
-              }
+              "ApplicationStart"
             ],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
             "deprecated": false
@@ -3988,13 +3958,7 @@
           "{ analytics?: ",
           "AnalyticsServiceStart",
           " | undefined; application?: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreApplicationPluginApi",
-            "section": "def-public.ApplicationStart",
-            "text": "ApplicationStart"
-          },
+          "ApplicationStart",
           " | undefined; chrome?: ",
           {
             "pluginId": "core",

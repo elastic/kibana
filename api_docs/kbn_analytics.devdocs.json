@@ -1048,6 +1048,59 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/analytics",
+        "id": "def-common.UserAgentMetric",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserAgentMetric",
+        "description": [],
+        "path": "packages/kbn-analytics/src/metrics/user_agent.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/analytics",
+            "id": "def-common.UserAgentMetric.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/analytics",
+                "scope": "common",
+                "docId": "kibKbnAnalyticsPluginApi",
+                "section": "def-common.METRIC_TYPE",
+                "text": "METRIC_TYPE"
+              },
+              ".USER_AGENT"
+            ],
+            "path": "packages/kbn-analytics/src/metrics/user_agent.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/analytics",
+            "id": "def-common.UserAgentMetric.appName",
+            "type": "string",
+            "tags": [],
+            "label": "appName",
+            "description": [],
+            "path": "packages/kbn-analytics/src/metrics/user_agent.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/analytics",
+            "id": "def-common.UserAgentMetric.userAgent",
+            "type": "string",
+            "tags": [],
+            "label": "userAgent",
+            "description": [],
+            "path": "packages/kbn-analytics/src/metrics/user_agent.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [
