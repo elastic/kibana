@@ -8,6 +8,7 @@ import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } fr
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
+import { InputsModelId } from '../../store/inputs/constants';
 import { useKibana } from '../../lib/kibana/kibana_react';
 import { ModalInspectQuery } from '../inspect/modal';
 
@@ -41,7 +42,7 @@ export const HISTOGRAM_ACTIONS_BUTTON_CLASS = 'histogram-actions-trigger';
 const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
   className,
   getLensAttributes,
-  inputId = 'global',
+  inputId = InputsModelId.global,
   inspectIndex = 0,
   isInspectButtonDisabled,
   isMultipleQuery,

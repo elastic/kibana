@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EntityIterable } from '../..';
+import { EntityIterable } from '../../..';
 import { apm } from '../../lib/apm';
 import { ApmFields } from '../../lib/apm/apm_fields';
 import { timerange } from '../../lib/timerange';
