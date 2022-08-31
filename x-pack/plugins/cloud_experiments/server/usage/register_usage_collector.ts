@@ -12,6 +12,9 @@ interface Usage {
   initialized: boolean;
   flags: Record<string, string>;
   flagNames: string[];
+
+  // Adding this for demo purposes. It should be removed before merging.
+  userMeta: Record<string, string | undefined>;
 }
 
 export function registerUsageCollector(
@@ -46,17 +49,28 @@ export function registerUsageCollector(
             },
           },
         },
+
+        // Adding this for demo purposes. It should be removed before merging.
+        userMeta: {
+          DYNAMIC_KEY: {
+            type: 'keyword',
+            _meta: { description: 'User property sent to the A/B testing service' },
+          },
+        },
       },
       fetch: async () => {
         const { launchDarklyUser, launchDarklyClient } = getLaunchDarklyEntities();
-        if (!launchDarklyUser) return { initialized: false, flagNames: [], flags: {} };
+        if (!launchDarklyUser)
+          return { initialized: false, flagNames: [], flags: {}, userMeta: {} };
         // According to the docs, this method does not send analytics back to LaunchDarkly, so it does not provide false results
         const flagsState = await launchDarklyClient.allFlagsState(launchDarklyUser);
         const flags = flagsState.allValues();
+        const { custom, ...userMeta } = launchDarklyUser;
         return {
           initialized: flagsState.valid,
           flags,
           flagNames: Object.keys(flags),
+          userMeta: { ...userMeta, ...custom } as unknown as Record<string, string>,
         };
       },
     })

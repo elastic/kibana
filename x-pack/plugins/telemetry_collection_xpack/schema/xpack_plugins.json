@@ -4824,6 +4824,16 @@
               "description": "Names of the flags received by the client"
             }
           }
+        },
+        "userMeta": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "keyword",
+              "_meta": {
+                "description": "User property sent to the A/B testing service"
+              }
+            }
+          }
         }
       }
     },
