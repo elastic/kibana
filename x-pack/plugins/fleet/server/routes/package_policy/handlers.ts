@@ -199,13 +199,12 @@ export const createPackagePolicyHandler: FleetRequestHandler<
       if (!pkg) {
         throw new Error('Package is mandatory');
       }
-      const res = await getPackageInfo({
+      const pkgInfo = await getPackageInfo({
         savedObjectsClient: soClient,
-        pkgName: pkg?.name,
-        pkgVersion: pkg?.version || '',
-        skipArchive: true,
+        pkgName: pkg.name,
+        pkgVersion: pkg.version,
       });
-      newPackagePolicy = simplifiedPackagePolicytoNewPackagePolicy(newPolicy, res);
+      newPackagePolicy = simplifiedPackagePolicytoNewPackagePolicy(newPolicy, pkgInfo);
     } else {
       newPackagePolicy = await packagePolicyService.enrichPolicyWithDefaultsFromPackage(soClient, {
         ...newPolicy,
@@ -265,38 +264,55 @@ export const updatePackagePolicyHandler: RequestHandler<
     throw Boom.notFound('Package policy not found');
   }
 
-  const { force, ...body } = request.body;
+  const { force, package: pkg, ...body } = request.body;
   // TODO Remove deprecated APIs https://github.com/elastic/kibana/issues/121485
   if ('output_id' in body) {
     delete body.output_id;
   }
 
-  // removed fields not recognized by schema
-  const packagePolicyInputs = packagePolicy.inputs.map((input) => {
-    const newInput = {
-      ...input,
-      streams: input.streams.map((stream) => {
-        const newStream = { ...stream };
-        delete newStream.compiled_stream;
-        return newStream;
-      }),
-    };
-    delete newInput.compiled_input;
-    return newInput;
-  });
+  let newData: NewPackagePolicy;
 
-  // listing down accepted properties, because loaded packagePolicy contains some that are not accepted in update
-  let newData = {
-    ...body,
-    name: body.name ?? packagePolicy.name,
-    description: body.description ?? packagePolicy.description,
-    namespace: body.namespace ?? packagePolicy.namespace,
-    policy_id: body.policy_id ?? packagePolicy.policy_id,
-    enabled: body.enabled ?? packagePolicy.enabled,
-    package: body.package ?? packagePolicy.package,
-    inputs: body.inputs ?? packagePolicyInputs,
-    vars: body.vars ?? packagePolicy.vars,
-  } as NewPackagePolicy;
+  // TODO improve typing here
+  if (isSimplifiedCreatePackagePolicyRequest(body as unknown as SimplifiedPackagePolicy)) {
+    if (!pkg) {
+      throw new Error('package is mandatory');
+    }
+    const pkgInfo = await getPackageInfo({
+      savedObjectsClient: soClient,
+      pkgName: pkg.name,
+      pkgVersion: pkg.version,
+    });
+    newData = simplifiedPackagePolicytoNewPackagePolicy(
+      body as unknown as SimplifiedPackagePolicy,
+      pkgInfo
+    );
+  } else {
+    // removed fields not recognized by schema
+    const packagePolicyInputs = packagePolicy.inputs.map((input) => {
+      const newInput = {
+        ...input,
+        streams: input.streams.map((stream) => {
+          const newStream = { ...stream };
+          delete newStream.compiled_stream;
+          return newStream;
+        }),
+      };
+      delete newInput.compiled_input;
+      return newInput;
+    });
+    // listing down accepted properties, because loaded packagePolicy contains some that are not accepted in update
+    newData = {
+      ...body,
+      name: body.name ?? packagePolicy.name,
+      description: body.description ?? packagePolicy.description,
+      namespace: body.namespace ?? packagePolicy.namespace,
+      policy_id: body.policy_id ?? packagePolicy.policy_id,
+      enabled: 'enabled' in body ? body.enabled ?? packagePolicy.enabled : packagePolicy.enabled,
+      package: pkg ?? packagePolicy.package,
+      inputs: body.inputs ?? packagePolicyInputs,
+      vars: body.vars ?? packagePolicy.vars,
+    } as NewPackagePolicy;
+  }
 
   try {
     newData = await packagePolicyService.runExternalCallbacks(

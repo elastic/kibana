@@ -228,7 +228,6 @@ Object {
   ],
   "name": "nginx-1",
   "namespace": "default",
-  "output_id": "TODO_REMOVE",
   "package": Object {
     "name": "nginx",
     "title": "Nginx",

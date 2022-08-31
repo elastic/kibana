@@ -38,7 +38,10 @@ export const CreatePackagePolicyRequestSchema = {
 
 export const UpdatePackagePolicyRequestSchema = {
   ...GetOnePackagePolicyRequestSchema,
-  body: UpdatePackagePolicyRequestBodySchema,
+  body: schema.oneOf([
+    UpdatePackagePolicyRequestBodySchema,
+    SimplifiedCreatePackagePolicyRequestBodySchema,
+  ]),
 };
 
 export const DeletePackagePoliciesRequestSchema = {

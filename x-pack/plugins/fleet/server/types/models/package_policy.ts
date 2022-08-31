@@ -145,6 +145,7 @@ const SimplifiedVarsSchema = schema.recordOf(
 export const SimplifiedCreatePackagePolicyRequestBodySchema = schema.object({
   id: schema.maybe(schema.string()),
   name: schema.string(),
+  description: schema.maybe(schema.string()),
   policy_id: schema.string(),
   namespace: schema.string({ defaultValue: 'default' }),
   package: schema.object({

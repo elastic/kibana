@@ -13,7 +13,7 @@ import type {
 } from '../../../common/types';
 import type { NewPackagePolicy, PackageInfo } from '../../types';
 
-type SimplifiedVars = Record<string, string | string[] | boolean | number | number[]>;
+type SimplifiedVars = Record<string, string | string[] | boolean | number | number[] | null>;
 
 export interface SimplifiedPackagePolicy {
   id?: string;
@@ -76,14 +76,7 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
     inputs = {},
     vars: packageLevelVars,
   } = data;
-  const packagePolicy = packageToPackagePolicy(
-    packageInfo,
-    policyId,
-    'TODO_REMOVE',
-    namespace,
-    name,
-    description
-  );
+  const packagePolicy = packageToPackagePolicy(packageInfo, policyId, namespace, name, description);
 
   // Build a input and streams Map to easily find package policy stream
   const inputMap: InputMap = new Map();
