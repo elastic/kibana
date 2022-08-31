@@ -6,7 +6,7 @@
  */
 
 import { escapeKuery } from '@kbn/es-query';
-import React, { FC, useEffect,useMemo, useState } from 'react';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { ChangePoint } from '@kbn/ml-agg-utils';
@@ -19,13 +19,11 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { useAiOpsKibana } from '../../kibana_context';
-import {
-  SEARCH_QUERY_LANGUAGE,
-} from '../../application/utils/search_utils';
+import { SEARCH_QUERY_LANGUAGE } from '../../application/utils/search_utils';
 
 interface LinksMenuProps {
-    changePoint: ChangePoint;
-    dataViewId?: string;
+  changePoint: ChangePoint;
+  dataViewId?: string;
 }
 
 export const LinksMenu: FC<LinksMenuProps> = ({ changePoint, dataViewId }) => {
@@ -34,7 +32,7 @@ export const LinksMenu: FC<LinksMenuProps> = ({ changePoint, dataViewId }) => {
   const closePopover = setPopoverOpen.bind(null, false);
   const [openInDiscoverUrl, setOpenInDiscoverUrl] = useState<string | undefined>();
   const [discoverUrlError, setDiscoverUrlError] = useState<string | undefined>();
-  
+
   const aiOpsKibana = useAiOpsKibana();
   const {
     services: { application, share, data },
@@ -91,7 +89,9 @@ export const LinksMenu: FC<LinksMenuProps> = ({ changePoint, dataViewId }) => {
         filters: data.query.filterManager.getFilters(),
         query: {
           language: SEARCH_QUERY_LANGUAGE.KUERY,
-          query: `${escapeKuery(changePoint.fieldName)}:${escapeKuery(String(changePoint.fieldValue))}`,
+          query: `${escapeKuery(changePoint.fieldName)}:${escapeKuery(
+            String(changePoint.fieldValue)
+          )}`,
         },
       });
 
@@ -99,7 +99,7 @@ export const LinksMenu: FC<LinksMenuProps> = ({ changePoint, dataViewId }) => {
         setOpenInDiscoverUrl(url);
       }
     };
-    
+
     generateDiscoverUrl();
 
     return () => {
@@ -162,7 +162,10 @@ export const LinksMenu: FC<LinksMenuProps> = ({ changePoint, dataViewId }) => {
         panelPaddingSize="none"
         anchorPosition="downLeft"
       >
-        <EuiContextMenuPanel items={contextMenuItems} data-test-subj="aiopsSpikeAnalysisTableRowActionsMenu" />
+        <EuiContextMenuPanel
+          items={contextMenuItems}
+          data-test-subj="aiopsSpikeAnalysisTableRowActionsMenu"
+        />
       </EuiPopover>
     </div>
   );

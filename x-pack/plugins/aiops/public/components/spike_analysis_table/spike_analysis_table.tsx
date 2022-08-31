@@ -173,14 +173,9 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
         defaultMessage: 'Actions',
       }),
       render: (changePoint: ChangePoint) => {
-          return (
-            <LinksMenu
-              changePoint={changePoint}
-              dataViewId={dataViewId}
-            />
-          );
+        return <LinksMenu changePoint={changePoint} dataViewId={dataViewId} />;
       },
-    }
+    },
   ];
 
   const onChange = useCallback((tableSettings) => {
