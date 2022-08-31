@@ -6,14 +6,6 @@
  */
 
 import type { RouteComponentProps } from 'react-router-dom';
-import type { ActionCreator } from 'typescript-fsa';
-import type { InputsModelId } from '../../common/store/inputs/constants';
-
-export type SetAbsoluteRangeDatePicker = ActionCreator<{
-  id: InputsModelId;
-  from: string;
-  to: string;
-}>;
 
 export type NetworkComponentProps = Partial<RouteComponentProps<{}>> & {
   hasMlUserPermissions: boolean;
