@@ -29,6 +29,8 @@ export type MlApi = ProvidedType<typeof MachineLearningAPIProvider>;
 
 type ModelType = 'regression' | 'classification';
 
+export const INTERNAL_MODEL_IDS = ['lang_ident_model_1'];
+
 export const SUPPORTED_TRAINED_MODELS = {
   TINY_FILL_MASK: {
     name: 'pt_tiny_fill_mask',
@@ -1228,8 +1230,8 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       log.debug(`Deleting all trained models`);
       const getModelsRsp = await this.getTrainedModelsES();
       for (const model of getModelsRsp.trained_model_configs) {
-        if (model.model_id === 'lang_ident_model_1') {
-          log.debug('> Skipping internal lang_ident_model_1');
+        if (this.isInternalModelId(model.model_id)) {
+          log.debug(`> Skipping internal ${model.model_id}`);
           continue;
         }
         await this.deleteTrainedModelES(model.model_id);
@@ -1250,8 +1252,8 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       log.debug(`Stopping all trained model deployments`);
       const getModelsRsp = await this.getTrainedModelsES();
       for (const model of getModelsRsp.trained_model_configs) {
-        if (model.model_id === 'lang_ident_model_1') {
-          log.debug('> Skipping internal lang_ident_model_1');
+        if (this.isInternalModelId(model.model_id)) {
+          log.debug(`> Skipping internal ${model.model_id}`);
           continue;
         }
         await this.stopTrainedModelDeploymentES(model.model_id);
@@ -1346,6 +1348,10 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       this.assertResponseStatusCode(200, status, body);
 
       log.debug('> Model alias created');
+    },
+
+    isInternalModelId(modelId: string) {
+      return INTERNAL_MODEL_IDS.includes(modelId);
     },
 
     /**
