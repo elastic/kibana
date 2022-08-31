@@ -335,7 +335,7 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
       : outcomeAndMessage?.message ?? '';
   const version = outcomeAndMessage ? outcomeAndMessage?.kibana?.version ?? '' : '';
 
-  const ruleId = outcomeAndMessage ? outcomeAndMessage?.rule.id ?? '' : '';
+  const ruleId = outcomeAndMessage ? outcomeAndMessage?.rule?.id ?? '' : '';
   return {
     id: bucket?.key ?? '',
     timestamp: bucket?.ruleExecution?.executeStartTime.value_as_string ?? '',

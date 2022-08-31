@@ -143,6 +143,9 @@ const aggregateResults = {
                       _id: 'S4wIZX8B8TGQpG7XQZns',
                       _score: 1.0,
                       _source: {
+                        rule: {
+                          id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
+                        },
                         event: {
                           outcome: 'success',
                         },
@@ -245,6 +248,7 @@ const aggregateResults = {
                       _id: 'a4wIZX8B8TGQpG7Xwpnz',
                       _score: 1.0,
                       _source: {
+                        rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef' },
                         event: {
                           outcome: 'success',
                         },
@@ -679,7 +683,7 @@ describe('getGlobalExecutionLogWithAuth()', () => {
       ensureRuleTypeIsAuthorized() {},
     });
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce(ruleSO);
-    eventLogClient.aggregateEventsBySavedObjectType.mockResolvedValueOnce(aggregateResults);
+    eventLogClient.aggregateEventsWithAuthFilter.mockResolvedValueOnce(aggregateResults);
 
     const result = await rulesClient.getGlobalExecutionLogWithAuth(getExecutionLogByIdParams());
     expect(result).toEqual({
