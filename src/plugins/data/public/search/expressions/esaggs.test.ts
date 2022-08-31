@@ -123,6 +123,7 @@ describe('esaggs expression function - public', () => {
       searchSessionId: 'abc123',
       searchSourceService: startDependencies.searchSource,
       timeFields: args.timeFields,
+      disableShardWarnings: false,
       timeRange: undefined,
       getNow: undefined,
     });
