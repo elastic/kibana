@@ -50,8 +50,7 @@ condition was detected. The default value is `null`.
 (Optional, boolean) The {ref}/docs-refresh.html[refresh] policy for the write
 request. The default value is `false`.
 
-For more information, refer to
-{kibana-ref}/index-action-type.html[Index connector and action].
+For more information, refer to <<index-action-type>>.
 ====
 
 .{jira} connectors
@@ -64,8 +63,160 @@ For more information, refer to
 `projectKey`::
 (Required, string) The {jira} project key.
 
-For more information, refer to
-{kibana-ref}/jira-action-type.html[{jira} connector and action].
+For more information, refer to <<jira-action-type>>.
+====
+
+.{webhook-cm} connectors
+[%collapsible%open]
+====
+
+`createCommentJson`::
+(Optional, string) A JSON payload sent to the create comment URL to create a
+case comment. You can use variables to add Kibana Cases data to the payload. The
+required variable is `case.comment`. For example:
++
+[source,json]
+----
+{
+  "body": {{{case.comment}}}
+}
+----
++
+NOTE: Due to Mustache template variables (the text enclosed in triple braces,
+for example, `{{{case.title}}}`), the JSON is not validated when you create the
+connector. The JSON is validated once the Mustache variables have been placed
+when the REST method runs. Manually ensure that the JSON is valid,
+disregarding the Mustache variables, so the later validation will pass.
+
+`createCommentMethod`::
+(Optional, string) The REST API HTTP request method to create a case comment in
+the third-party system. Valid values are either `patch`, `post`, and `put`. The
+default value is `put`.
+
+`createCommentUrl`::
+(Optional, string) The REST API URL to create a case comment by ID in the
+third-party system. You can use a variable to add the external system ID to the
+URL. If you are using the `xpack.actions.allowedHosts` setting, make sure the
+hostname is added to the allowed hosts. For example:
++
+[source,text]
+----
+https://testing-jira.atlassian.net/rest/api/2/issue/{{{external.system.id}}}/comment
+----
+
+`createIncidentJson`::
+(Required, string) A JSON payload sent to the create case URL to create a case. You
+can use variables to add case data to the payload. Required variables are
+`case.title` and `case.description`. For example:
++
+[source,json]
+----
+{
+	"fields": {
+	  "summary": {{{case.title}}},
+	  "description": {{{case.description}}},
+	  "labels": {{{case.tags}}}
+	}
+}
+----
++
+NOTE: Due to Mustache template variables (which is the text enclosed in triple
+braces, for example, `{{{case.title}}}`), the JSON is not validated when you
+create the connector. The JSON is validated after the Mustache variables have
+been placed when REST method runs. Manually ensure that the JSON is valid to
+avoid future validation errors; disregard Mustache variables during your review.
+
+`createIncidentMethod`::
+(Optional, string) The REST API HTTP request method to create a case in the
+third-party system. Valid values are `patch`, `post`, and `put`. The default
+value is `post`.
+
+`createIncidentResponseKey`::
+(Required, string) The JSON key in the create case response that contains the
+external case ID.
+
+`createIncidentUrl`::
+(Required, string) The REST API URL to create a case in the third-party system.
+If you are using the `xpack.actions.allowedHosts` setting, make sure the
+hostname is added to the allowed hosts.
+
+`getIncidentResponseExternalTitleKey`::
+(Required, string) The JSON key in get case response that contains the external
+case title.
+
+`getIncidentUrl`::
+(Required, string) The REST API URL to get the case by ID from the third-party
+system. If you are using the `xpack.actions.allowedHosts` setting, make sure the
+hostname is added to the allowed hosts. You can use a variable to add the
+external system ID to the URL. For example:
++
+[source,text]
+----
+https://testing-jira.atlassian.net/rest/api/2/issue/{{{external.system.id}}}
+----
++
+NOTE: Due to Mustache template variables (the text enclosed in triple braces,
+for example, `{{{case.title}}}`), the JSON is not validated when you create the
+connector. The JSON is validated after the Mustache variables have been placed
+when REST method runs. Manually ensure that the JSON is valid, disregarding the
+Mustache variables, so the later validation will pass.
+
+`hasAuth`::
+(Optional, boolean) If true, a username and password for login type authentication
+must be provided. The default value is `true`.
+
+`headers`::
+(Optional, string) A set of key-value pairs sent as headers with the request
+URLs for the create case, update case, get case, and create comment methods.
+
+`updateIncidentJson`::
+(Required, string) The JSON payload sent to the update case URL to update the
+case. You can use variables to add Kibana Cases data to the payload. Required
+variables are `case.title` and `case.description`. For example:
++
+[source,json]
+----
+{
+	"fields": {
+	  "summary": {{{case.title}}},
+	  "description": {{{case.description}}},
+	  "labels": {{{case.tags}}}
+	}
+}
+----
++
+NOTE: Due to Mustache template variables (which is the text enclosed in triple
+braces, for example, `{{{case.title}}}`), the JSON is not validated when you
+create the connector. The JSON is validated after the Mustache variables have
+been placed when REST method runs. Manually ensure that the JSON is valid to
+avoid future validation errors; disregard Mustache variables during your review.
+
+`updateIncidentMethod`::
+(Optional, string) The REST API HTTP request method to update the case in the
+third-party system. Valid values are `patch`, `post`, and `put`. The default
+value is `put`.
+
+`updateIncidentUrl`::
+(Required, string) The REST API URL to update the case by ID in the third-party
+system. You can use a variable to add the external system ID to the URL. If you
+are using the `xpack.actions.allowedHosts` setting, make sure the hostname is
+added to the allowed hosts. For example:
++
+[source,text]
+----
+https://testing-jira.atlassian.net/rest/api/2/issue/{{{external.system.ID}}}
+----
+     
+`viewIncidentUrl`::
+(Required, string) The URL to view the case in the external system. You can use
+variables to add the external system ID or external system title to the URL.For example:
++
+[source,text]
+----
+https://testing-jira.atlassian.net/browse/{{{external.system.title}}}
+----
+
+For more information, refer to <<cases-webhook-action-type>>.
 ====
 
 This object is not required for server log connectors.
@@ -76,7 +227,7 @@ For more configuration properties, refer to <<action-types>>.
 
 `connector_type_id`::
 (Required, string) The connector type ID for the connector. For example,
-`.index`, `.jira`, or `.server-log`.
+`.cases-webhook`, `.index`, `.jira`, or `.server-log`.
 
 `name`::
 (Required, string) The display name for the connector.
@@ -101,6 +252,16 @@ authentication.
 
 `email`::
 (Required, string) The account email for HTTP Basic authentication.
+====
+
+.{webhook-cm} connectors
+[%collapsible%open]
+====
+`password`::
+(Optional, string) The password for HTTP basic authentication.
+
+`user`::
+(Optional, string) The username for HTTP basic authentication.
 ====
 
 This object is not required for index or server log connectors.

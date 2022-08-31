@@ -16,7 +16,7 @@ import {
   OverlayModalConfirmOptions,
   OverlayRef,
 } from '@kbn/core/public';
-import { MountWrapper } from '@kbn/core/public/utils';
+import { MountWrapper } from '@kbn/core-mount-utils-browser-internal';
 import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { ControlsOverlaysService } from './types';
 
