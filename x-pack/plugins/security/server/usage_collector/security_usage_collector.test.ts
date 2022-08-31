@@ -203,7 +203,7 @@ describe('Security UsageCollector', () => {
     it('reports if the global access agreement message is configured', async () => {
       const config = createSecurityConfig(
         ConfigSchema.validate({
-          accessAgreement: { message: 'Bar'},
+          accessAgreement: { message: 'Bar' },
           authc: {
             providers: {
               saml: {
