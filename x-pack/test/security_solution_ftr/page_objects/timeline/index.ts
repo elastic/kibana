@@ -108,15 +108,17 @@ export class TimelinePageObject extends FtrService {
    * @param timeoutMs
    */
   async waitForEvents(timeoutMs?: number): Promise<void> {
-    const timeline = await this.testSubjects.find(TIMELINE_MODAL_PAGE_TEST_SUBJ);
-
     await this.retry.waitForWithTimeout(
       'waiting for events to show up on timeline',
       timeoutMs ?? this.defaultTimeoutMs,
       async (): Promise<boolean> => {
         await this.clickRefresh();
 
-        return Boolean((await this.testSubjects.findAllDescendant('event', timeline)).length);
+        const allEventRows = await this.testSubjects.findService.allByCssSelector(
+          `${testSubjSelector(TIMELINE_MODAL_PAGE_TEST_SUBJ)} ${testSubjSelector('event')}`
+        );
+
+        return Boolean(allEventRows.length);
       }
     );
   }
