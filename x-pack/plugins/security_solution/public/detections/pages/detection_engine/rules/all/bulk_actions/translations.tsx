@@ -94,3 +94,12 @@ export const bulkAddRuleActions = {
     }
   ),
 };
+
+export const bulkSetSchedule = {
+  FORM_TITLE: i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.setSchedule.formTitle',
+    {
+      defaultMessage: 'Add rule actions',
+    }
+  ),
+};
