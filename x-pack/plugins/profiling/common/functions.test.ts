@@ -8,15 +8,25 @@
 import { createTopNFunctions } from './functions';
 
 import { events, stackTraces, stackFrames, executables } from './__fixtures__/stacktraces';
+import {sum} from "lodash";
 
 describe('TopN function operations', () => {
   test('1', () => {
-    const topNFunctions = createTopNFunctions(events, stackTraces, stackFrames, executables, 0, 5);
+    const maxTopN = 5;
+    const totalSamples = sum([...events.values()]);
+    const topNFunctions = createTopNFunctions(
+      events,
+      stackTraces,
+      stackFrames,
+      executables,
+      0,
+      maxTopN
+    );
 
-    expect(topNFunctions.TotalCount).toEqual(40);
-    expect(topNFunctions.TopN.length).toEqual(5);
+    expect(topNFunctions.TotalCount).toEqual(totalSamples);
+    expect(topNFunctions.TopN.length).toEqual(maxTopN);
 
     const exclusiveCounts = topNFunctions.TopN.map((value) => value.CountExclusive);
-    expect(exclusiveCounts).toEqual([16, 9, 7, 5, 2]);
+    expect(exclusiveCounts).toEqual([16, 9, 9, 5, 1]);
   });
 });
