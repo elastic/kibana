@@ -12,6 +12,10 @@ Cloud Posture automates the identification and remediation of risks across cloud
 
 See the [kibana contributing guide](https://github.com/elastic/kibana/blob/main/CONTRIBUTING.md) for instructions setting up your development environment.
 
+### Install pre-commit hooks
+We use [pre-commit](https://docs.elastic.dev/kibana-dev-docs/getting-started/setup-dev-env#install-pre-commit-hook-optional) to run linters and tests before each commit. To install the pre-commit hooks, run the following command from the root of the repository:
+
+```bash
 ### Local checks before creating a PR
 Kibana has a pretty long CI process.
 Therefore, we suggest running the following commands locally before creating a PR:
