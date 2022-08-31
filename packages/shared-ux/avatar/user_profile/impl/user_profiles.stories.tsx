@@ -20,11 +20,17 @@ export default {
   },
 };
 
-type UserAvatarParams = Pick<UserAvatarProps, 'user'>
-
+type UserAvatarParams = Pick<UserAvatarProps, 'user'>;
 
 export const userAvatar = (params: UserAvatarParams) => {
-  return <UserAvatar {...params.user?.username !== undefined ? userAvatar.argTypes.user : userAvatar.argTypes.user.defaultValue} {...params} />;
+  return (
+    <UserAvatar
+      {...(params.user?.username !== undefined
+        ? userAvatar.argTypes.user
+        : userAvatar.argTypes.user.defaultValue)}
+      {...params}
+    />
+  );
 };
 
 userAvatar.argTypes = {
