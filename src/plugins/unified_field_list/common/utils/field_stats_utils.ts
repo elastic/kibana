@@ -44,9 +44,9 @@ export function buildSearchParams({
   toDate: string;
   dslQuery: object;
   runtimeMappings: estypes.MappingRuntimeFields;
-  aggs?: Record<string, estypes.AggregationsAggregationContainer>;
-  fields?: object[];
-  size?: number;
+  aggs?: Record<string, estypes.AggregationsAggregationContainer>; // is used for aggregatable fields
+  fields?: object[]; // is used for non-aggregatable fields
+  size?: number; // is used for non-aggregatable fields
 }) {
   const filter = timeFieldName
     ? [
@@ -85,6 +85,9 @@ export function buildSearchParams({
     },
     track_total_hits: true,
     size: size ?? 0,
+    ...(fields?.length && timeFieldName
+      ? { sort: [{ [timeFieldName]: { order: 'desc', unmapped_type: 'boolean' } }] }
+      : {}),
   };
 }
 
