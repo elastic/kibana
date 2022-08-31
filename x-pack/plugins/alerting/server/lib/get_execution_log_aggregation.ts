@@ -64,7 +64,6 @@ interface IExecutionUuidAggBucket extends estypes.AggregationsStringTermsBucketK
     numRecoveredAlerts: estypes.AggregationsMaxAggregate;
     numNewAlerts: estypes.AggregationsMaxAggregate;
     outcomeAndMessage: estypes.AggregationsTopHitsAggregate;
-    ruleId?: estypes.AggregationsTopHitsAggregate;
   };
   actionExecution: {
     actionOutcomes: IActionExecution;
@@ -206,14 +205,6 @@ export function getExecutionLogAggregation({
                 },
               },
               aggs: {
-                ruleId: {
-                  top_hits: {
-                    size: 1,
-                    _source: {
-                      includes: [RULE_ID_FIELD],
-                    },
-                  },
-                },
                 executeStartTime: {
                   min: {
                     field: START_FIELD,
@@ -344,7 +335,7 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
       : outcomeAndMessage?.message ?? '';
   const version = outcomeAndMessage ? outcomeAndMessage?.kibana?.version ?? '' : '';
 
-  const ruleId = bucket?.ruleExecution?.ruleId?.hits?.hits[0]._source.rule.id ?? '';
+  const ruleId = outcomeAndMessage ? outcomeAndMessage?.rule.id ?? '' : '';
   return {
     id: bucket?.key ?? '',
     timestamp: bucket?.ruleExecution?.executeStartTime.value_as_string ?? '',

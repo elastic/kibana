@@ -889,7 +889,13 @@ export class RulesClient {
     try {
       authorizationTuple = await this.authorization.getFindAuthorizationFilter(
         AlertingAuthorizationEntity.Alert,
-        alertingAuthorizationFilterOpts
+        {
+          type: AlertingAuthorizationFilterType.KQL,
+          fieldNames: {
+            ruleTypeId: 'kibana.alert.rule.rule_type_id',
+            consumer: 'kibana.alert.rule.consumer',
+          },
+        }
       );
     } catch (error) {
       this.auditLogger?.log(
@@ -901,16 +907,12 @@ export class RulesClient {
       throw error;
     }
 
-    // getFindAuthorizationFilter doesn't return the exact property names needed to filter event logs, so find/replace them
-    const authorizationFilter = JSON.parse(
-      JSON.stringify(authorizationTuple.filter)
-        .replace(/alert\.attributes/g, 'kibana.alert.rule')
-        .replace(/alertTypeId/g, 'rule_type_id')
-    );
-    const filterKueryNode = filter ? fromKueryExpression(filter) : null;
-    const aggFilter = filterKueryNode
-      ? nodeBuilder.and([filterKueryNode, authorizationFilter as KueryNode])
-      : authorizationFilter;
+    // // getFindAuthorizationFilter doesn't return the exact property names needed to filter event logs, so find/replace them
+    // const authFilter = JSON.parse(
+    //   JSON.stringify(authorizationTuple.filter)
+    //     .replace(/alert\.attributes/g, 'kibana.alert.rule')
+    //     .replace(/alertTypeId/g, 'rule_type_id')
+    // );
 
     this.auditLogger?.log(
       ruleAuditEvent({
@@ -926,16 +928,20 @@ export class RulesClient {
     const eventLogClient = await this.getEventLogClient();
 
     try {
-      const aggResult = await eventLogClient.aggregateEventsBySavedObjectType('alert', {
-        start: parsedDateStart.toISOString(),
-        end: parsedDateEnd.toISOString(),
-        aggs: getExecutionLogAggregation({
-          filter: aggFilter,
-          page,
-          perPage,
-          sort,
-        }),
-      });
+      const aggResult = await eventLogClient.aggregateEventsWithAuthFilter(
+        'alert',
+        authorizationTuple.filter as KueryNode,
+        {
+          start: parsedDateStart.toISOString(),
+          end: parsedDateEnd.toISOString(),
+          aggs: getExecutionLogAggregation({
+            filter,
+            page,
+            perPage,
+            sort,
+          }),
+        }
+      );
 
       const formattedResult = formatExecutionLogResult(aggResult);
       const ruleIds = [...new Set(formattedResult.data.map((l) => l.rule_id))].filter(
