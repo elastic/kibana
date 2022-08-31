@@ -45,11 +45,11 @@ import {
   InternalSavedObjectsServiceSetup,
   InternalSavedObjectsServiceStart,
 } from '@kbn/core-saved-objects-server-internal';
-import { I18nServiceSetup } from '@kbn/core-i18n-server';
 import {
   InternalDeprecationsServiceSetup,
   InternalDeprecationsServiceStart,
 } from '@kbn/core-deprecations-server-internal';
+import { I18nServiceSetup } from '@kbn/core-i18n-server';
 import {
   InternalUiSettingsServicePreboot,
   InternalUiSettingsServiceSetup,
@@ -59,7 +59,6 @@ import { InternalRenderingServiceSetup } from './rendering';
 import { InternalHttpResourcesPreboot, InternalHttpResourcesSetup } from './http_resources';
 import { InternalStatusServiceSetup } from './status';
 import { CoreUsageDataStart, InternalCoreUsageDataSetup } from './core_usage_data';
-import { I18nServiceSetup } from '@kbn/core-i18n-server';
 
 /** @internal */
 export interface InternalCorePreboot {
