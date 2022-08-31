@@ -11,6 +11,7 @@ import {
   mergeMigrationFunctionMaps,
   MigrateFunctionsObject,
 } from '@kbn/kibana-utils-plugin/common';
+import { SavedObjectReference } from '@kbn/core-saved-objects-common';
 import { DOC_TYPE } from '../../common';
 import {
   commonEnhanceTableRowHeight,
@@ -29,6 +30,7 @@ import {
   getLensFilterMigrations,
   commonExplicitAnnotationType,
   commonMigrateMetricIds,
+  commonAnnotationAddDataViewIdReferences,
 } from '../migrations/common_migrations';
 import {
   CustomVisualizationMigrations,
@@ -132,15 +134,21 @@ export const makeLensEmbeddableFactory =
             '8.5.0': (state) => {
               const lensState = state as unknown as {
                 attributes: LensDocShape840<VisState840>;
+                references: SavedObjectReference[] | undefined;
               };
 
               let migratedLensState = commonMigrateMetricIds(
                 lensState.attributes
               ) as LensDocShape840<XYVisStatePre840>;
               migratedLensState = commonExplicitAnnotationType(migratedLensState);
+              const migratedReferences = commonAnnotationAddDataViewIdReferences(
+                migratedLensState as LensDocShape840<VisState840>,
+                lensState.references
+              );
               return {
                 ...lensState,
                 attributes: migratedLensState,
+                references: migratedReferences,
               } as unknown as SerializableRecord;
             },
           }),
