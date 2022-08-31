@@ -54,6 +54,7 @@ import {
   DeprecationsService,
   config as deprecationConfig,
 } from '@kbn/core-deprecations-server-internal';
+import { CoreUsageDataService } from '@kbn/core-usage-data-base-server-internal';
 import { CoreApp } from './core_app';
 import { I18nService } from './i18n';
 import { HttpResourcesService } from './http_resources';
@@ -67,7 +68,6 @@ import { config as uiSettingsConfig } from './ui_settings';
 import { config as statusConfig } from './status';
 import { config as i18nConfig } from './i18n';
 import { InternalCorePreboot, InternalCoreSetup, InternalCoreStart } from './internal_types';
-import { CoreUsageDataService } from './core_usage_data';
 import { CoreRouteHandlerContext } from './core_route_handler_context';
 import { PrebootCoreRouteHandlerContext } from './preboot_core_route_handler_context';
 import { DiscoveredPlugins } from './plugins';
