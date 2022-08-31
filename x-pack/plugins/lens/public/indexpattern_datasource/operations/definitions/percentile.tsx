@@ -30,7 +30,7 @@ import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { useDebouncedValue } from '../../../shared_components';
 import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 import { FormRow } from './shared_components';
-import { getColumnWindowError } from '../../window_utils';
+import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
 
 export interface PercentileIndexPatternColumn extends FieldBasedIndexPatternColumn {
   operationType: 'percentile';
@@ -49,7 +49,7 @@ function ofName(
   name: string,
   percentile: number,
   timeShift: string | undefined,
-  window: string | undefined
+  reducedTimeRange: string | undefined
 ) {
   return adjustTimeScaleLabelSuffix(
     i18n.translate('xpack.lens.indexPattern.percentileOf', {
@@ -62,7 +62,7 @@ function ofName(
     undefined,
     timeShift,
     undefined,
-    window
+    reducedTimeRange
   );
 }
 
@@ -87,7 +87,7 @@ export const percentileOperation: OperationDefinition<
   ],
   filterable: true,
   shiftable: true,
-  windowable: true,
+  canReduceTimeRange: true,
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type: fieldType }) => {
     if (
       supportedFieldTypes.includes(fieldType) &&
@@ -116,7 +116,7 @@ export const percentileOperation: OperationDefinition<
       getSafeName(column.sourceField, indexPattern),
       column.params.percentile,
       column.timeShift,
-      column.window
+      column.reducedTimeRange
     ),
   buildColumn: ({ field, previousColumn, indexPattern }, columnParams) => {
     const existingPercentileParam =
@@ -130,7 +130,7 @@ export const percentileOperation: OperationDefinition<
         getSafeName(field.name, indexPattern),
         newPercentileParam,
         previousColumn?.timeShift,
-        previousColumn?.window
+        previousColumn?.reducedTimeRange
       ),
       dataType: 'number',
       operationType: 'percentile',
@@ -139,7 +139,7 @@ export const percentileOperation: OperationDefinition<
       scale: 'ratio',
       filter: getFilter(previousColumn, columnParams),
       timeShift: columnParams?.shift || previousColumn?.timeShift,
-      window: columnParams?.window || previousColumn?.window,
+      reducedTimeRange: columnParams?.reducedTimeRange || previousColumn?.reducedTimeRange,
       params: {
         percentile: newPercentileParam,
         ...getFormatFromPreviousColumn(previousColumn),
@@ -153,7 +153,7 @@ export const percentileOperation: OperationDefinition<
         field.displayName,
         oldColumn.params.percentile,
         oldColumn.timeShift,
-        oldColumn.window
+        oldColumn.reducedTimeRange
       ),
       sourceField: field.name,
     };
@@ -290,7 +290,7 @@ export const percentileOperation: OperationDefinition<
     combineErrorMessages([
       getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
       getDisallowedPreviousShiftMessage(layer, columnId),
-      getColumnWindowError(layer, columnId, indexPattern),
+      getColumnReducedTimeRangeError(layer, columnId, indexPattern),
     ]),
   paramEditor: function PercentileParamEditor({
     paramEditorUpdater,
@@ -321,7 +321,7 @@ export const percentileOperation: OperationDefinition<
                   currentColumn.sourceField,
                 Number(value),
                 currentColumn.timeShift,
-                currentColumn.window
+                currentColumn.reducedTimeRange
               ),
           params: {
             ...currentColumn.params,

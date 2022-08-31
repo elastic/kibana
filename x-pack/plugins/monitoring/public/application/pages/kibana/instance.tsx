@@ -23,7 +23,7 @@ import { ComponentProps } from '../../route_init';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { useCharts } from '../../hooks/use_charts';
 // @ts-ignore
-import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
+import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 // @ts-ignore
 import { MonitoringTimeseriesContainer } from '../../../components/chart';
 // @ts-ignore
@@ -148,7 +148,7 @@ export const KibanaInstancePage: React.FC<ComponentProps> = ({ clusters }) => {
 
   const globalState = useContext(GlobalStateContext);
   const { services } = useKibana<{ data: any }>();
-  const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
+  const { generate: generateBreadcrumbs } = useBreadcrumbContainerContext();
   const clusterUuid = globalState.cluster_uuid;
   const ccs = globalState.ccs;
   const cluster = find(clusters, {

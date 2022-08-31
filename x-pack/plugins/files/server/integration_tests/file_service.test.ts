@@ -107,9 +107,9 @@ describe('FileService', () => {
 
   it('creates file metadata awaiting upload', async () => {
     const file = await createDisposableFile({ fileKind, name: 'test' });
-    expect(file.name).toEqual('test');
-    expect(file.fileKind).toEqual(fileKind);
-    expect(file.status).toBe('AWAITING_UPLOAD' as FileStatus);
+    expect(file.data.name).toEqual('test');
+    expect(file.data.fileKind).toEqual(fileKind);
+    expect(file.data.status).toBe('AWAITING_UPLOAD' as FileStatus);
     expect(auditLogger.log).toHaveBeenCalledTimes(1);
     expect(auditLogger.log).toHaveBeenCalledWith({
       error: undefined,
@@ -123,9 +123,9 @@ describe('FileService', () => {
 
   it('uploads file content', async () => {
     const file = await createDisposableFile({ fileKind, name: 'test' });
-    expect(file.status).toBe('AWAITING_UPLOAD' as FileStatus);
+    expect(file.data.status).toBe('AWAITING_UPLOAD' as FileStatus);
     await file.uploadContent(Readable.from(['upload this']));
-    expect(file.status).toBe('READY' as FileStatus);
+    expect(file.data.status).toBe('READY' as FileStatus);
     const rs = await file.downloadContent();
     const chunks: string[] = [];
     for await (const chunk of rs) {
@@ -170,17 +170,17 @@ describe('FileService', () => {
       meta: { some: 'data' },
     };
     const updatedFile1 = await file.update(updatableFields);
-    expect(updatedFile1.meta).toEqual(expect.objectContaining(updatableFields.meta));
-    expect(updatedFile1.name).toBe(updatableFields.name);
-    expect(updatedFile1.alt).toBe(updatableFields.alt);
+    expect(updatedFile1.data.meta).toEqual(expect.objectContaining(updatableFields.meta));
+    expect(updatedFile1.data.name).toBe(updatableFields.name);
+    expect(updatedFile1.data.alt).toBe(updatableFields.alt);
 
     // Fetch the file anew to be doubly sure
     const updatedFile2 = await fileService.getById<CustomMeta>({ fileKind, id: file.id });
-    expect(updatedFile2.meta).toEqual(expect.objectContaining(updatableFields.meta));
+    expect(updatedFile2.data.meta).toEqual(expect.objectContaining(updatableFields.meta));
     // Below also tests that our meta type is work as expected by using `some` field.
-    expect(updatedFile2.meta?.some).toBe(updatableFields.meta.some);
-    expect(updatedFile2.name).toBe(updatableFields.name);
-    expect(updatedFile2.alt).toBe(updatableFields.alt);
+    expect(updatedFile2.data.meta?.some).toBe(updatableFields.meta.some);
+    expect(updatedFile2.data.name).toBe(updatableFields.name);
+    expect(updatedFile2.data.alt).toBe(updatableFields.alt);
   });
 
   it('enforces max size settings', async () => {
@@ -339,7 +339,7 @@ describe('FileService', () => {
           action: 'delete',
           outcome: 'success',
         },
-        message: expect.stringContaining('Removed share for "myfile"'),
+        message: expect.stringContaining('Removed share with'),
       });
     });
   });

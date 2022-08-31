@@ -30,17 +30,7 @@ import { NetworkRouteType } from './types';
 import { NETWORK_PATH } from '../../../../common/constants';
 
 export const NetworkRoutes = React.memo<NetworkRoutesProps>(
-  ({
-    docValueFields,
-    type,
-    to,
-    filterQuery,
-    isInitializing,
-    from,
-    indexPattern,
-    indexNames,
-    setQuery,
-  }) => {
+  ({ type, to, filterQuery, isInitializing, from, indexPattern, indexNames, setQuery }) => {
     const networkAnomaliesFilterQuery = {
       bool: {
         should: [
@@ -83,7 +73,7 @@ export const NetworkRoutes = React.memo<NetworkRoutesProps>(
     return (
       <Switch>
         <Route path={`${NETWORK_PATH}/:tabName(${NetworkRouteType.dns})`}>
-          <DnsQueryTabBody {...tabProps} docValueFields={docValueFields} />
+          <DnsQueryTabBody {...tabProps} />
         </Route>
         <Route path={`${NETWORK_PATH}/:tabName(${NetworkRouteType.flows})`}>
           <>

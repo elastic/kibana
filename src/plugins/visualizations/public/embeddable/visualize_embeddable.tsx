@@ -194,6 +194,10 @@ export class VisualizeEmbeddable
     return this.vis.description;
   }
 
+  public getVis() {
+    return this.vis;
+  }
+
   /**
    * Gets the Visualize embeddable's local filters
    * @returns Local/panel-level array of filters for Visualize embeddable

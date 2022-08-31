@@ -382,7 +382,7 @@
             "section": "def-common.UiSettingsType",
             "text": "UiSettingsType"
           },
-          " | undefined; metric?: { type: string; name: string; } | undefined; name?: string | undefined; order?: number | undefined; value?: unknown; description?: string | undefined; category?: string[] | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; deprecation?: ",
+          " | undefined; metric?: { type: string; name: string; } | undefined; value?: unknown; description?: string | undefined; name?: string | undefined; order?: number | undefined; category?: string[] | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; deprecation?: ",
           {
             "pluginId": "@kbn/core-ui-settings-common",
             "scope": "common",

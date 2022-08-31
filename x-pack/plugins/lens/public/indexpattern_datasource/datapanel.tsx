@@ -16,6 +16,7 @@ import {
   EuiPopover,
   EuiCallOut,
   EuiFormControlLayout,
+  EuiIcon,
   EuiFilterButton,
   EuiScreenReaderOnly,
   EuiIcon,
@@ -44,6 +45,7 @@ import { ChildDragDropProvider, DragContextState } from '../drag_drop';
 import type { IndexPatternPrivateState } from './types';
 import { Loader } from '../loader';
 import { LensFieldIcon } from '../shared_components/field_picker/lens_field_icon';
+import { getFieldType } from './pure_utils';
 import { FieldGroups, FieldList } from './field_list';
 import { getFieldType } from './utils';
 import { fieldContainsData, fieldExists } from '../shared_components';
@@ -309,6 +311,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   const currentIndexPattern = indexPatterns[currentIndexPatternId];
   const existingFieldsForIndexPattern = existingFields[currentIndexPattern?.title];
   const visualizeGeoFieldTrigger = uiActions.getTrigger(VISUALIZE_GEO_FIELD_TRIGGER);
+<<<<<<< HEAD
   const allFields = visualizeGeoFieldTrigger
     ? currentIndexPattern.fields
     : currentIndexPattern.fields.filter(({ type }) => type !== 'geo_point' && type !== 'geo_shape');
@@ -316,6 +319,21 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   const availableFieldTypes = uniq([
     ...uniq(allFields.map(getFieldType)).filter((type) => type in fieldTypeNames),
     // always include current selection - there might be no match for an existing type filter on data view switch
+=======
+  const allFields = useMemo(
+    () =>
+      visualizeGeoFieldTrigger && !currentIndexPattern.spec
+        ? currentIndexPattern.fields
+        : currentIndexPattern.fields.filter(
+            ({ type }) => type !== 'geo_point' && type !== 'geo_shape'
+          ),
+    [currentIndexPattern.fields, currentIndexPattern.spec, visualizeGeoFieldTrigger]
+  );
+  const clearLocalState = () => setLocalState((s) => ({ ...s, nameFilter: '', typeFilter: [] }));
+  const availableFieldTypes = uniq([
+    ...uniq(allFields.map(getFieldType)).filter((type) => type in fieldTypeNames),
+    // always include current field type filters - there may not be any fields of the type of an existing type filter on data view switch, but we still need to include the existing filter in the list so that the user can remove it
+>>>>>>> upstream/main
     ...localState.typeFilter,
   ]);
 
@@ -527,11 +545,24 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 dataView: indexPatternInstance,
               },
               fieldName,
-              onSave: () => refreshFieldList(),
+              onSave: () => {
+                if (indexPatternInstance.isPersisted()) {
+                  refreshFieldList();
+                } else {
+                  indexPatternService.replaceDataViewId(indexPatternInstance);
+                }
+              },
             });
           }
         : undefined,
-    [editPermission, dataViews, currentIndexPattern.id, indexPatternFieldEditor, refreshFieldList]
+    [
+      editPermission,
+      dataViews,
+      currentIndexPattern.id,
+      indexPatternFieldEditor,
+      refreshFieldList,
+      indexPatternService,
+    ]
   );
 
   const removeField = useMemo(
@@ -544,11 +575,24 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 dataView: indexPatternInstance,
               },
               fieldName,
-              onDelete: () => refreshFieldList(),
+              onDelete: () => {
+                if (indexPatternInstance.isPersisted()) {
+                  refreshFieldList();
+                } else {
+                  indexPatternService.replaceDataViewId(indexPatternInstance);
+                }
+              },
             });
           }
         : undefined,
-    [currentIndexPattern.id, dataViews, editPermission, indexPatternFieldEditor, refreshFieldList]
+    [
+      currentIndexPattern.id,
+      dataViews,
+      editPermission,
+      indexPatternFieldEditor,
+      indexPatternService,
+      refreshFieldList,
+    ]
   );
 
   const fieldProps = useMemo(
@@ -612,6 +656,10 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 }
                 button={
                   <EuiFilterButton
+                    aria-label={i18n.translate('xpack.lens.indexPatterns.filterByTypeAriaLabel', {
+                      defaultMessage: 'Filter by type',
+                    })}
+                    color="primary"
                     isSelected={localState.isTypeFilterOpen}
                     numFilters={localState.typeFilter.length}
                     hasActiveFilters={!!localState.typeFilter.length}

@@ -9,6 +9,7 @@ import { partition, mapValues, pickBy, isArray } from 'lodash';
 import { CoreStart } from '@kbn/core/public';
 import type { Query } from '@kbn/es-query';
 import memoizeOne from 'memoize-one';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
 import type {
   DatasourceFixAction,
@@ -1375,7 +1376,8 @@ export function getErrorMessages(
   indexPattern: IndexPattern,
   state: IndexPatternPrivateState,
   layerId: string,
-  core: CoreStart
+  core: CoreStart,
+  data: DataPublicPluginStart
 ):
   | Array<
       | string
@@ -1417,7 +1419,7 @@ export function getErrorMessages(
                 ...state,
                 layers: {
                   ...state.layers,
-                  [layerId]: await errorMessage.fixAction!.newState(core, frame, layerId),
+                  [layerId]: await errorMessage.fixAction!.newState(data, core, frame, layerId),
                 },
               }),
             }
@@ -1651,7 +1653,9 @@ export function computeLayerFromContext(
         FormulaIndexPatternColumn,
         'managedReference'
       >;
-      const tempLayer = { indexPatternId: indexPattern.id, columns: {}, columnOrder: [] };
+      const tempLayer = isLast
+        ? { indexPatternId: indexPattern.id, columns: {}, columnOrder: [] }
+        : computeLayerFromContext(metricsArray.length === 1, metricsArray, indexPattern);
       let newColumn = operationDefinition.buildColumn({
         indexPattern,
         layer: tempLayer,
@@ -1740,7 +1744,8 @@ export function computeLayerFromContext(
 export function getSplitByTermsLayer(
   indexPattern: IndexPattern,
   splitFields: IndexPatternField[],
-  dateField: IndexPatternField | undefined,
+  xField: IndexPatternField | undefined,
+  xMode: string | undefined,
   layer: VisualizeEditorLayersContext
 ): IndexPatternLayer {
   const { termsParams, metrics, timeInterval, splitWithDateHistogram, dropPartialBuckets } = layer;
@@ -1759,18 +1764,21 @@ export function getSplitByTermsLayer(
 
   let termsLayer = insertNewColumn({
     op: splitWithDateHistogram ? 'date_histogram' : 'terms',
-    layer: insertNewColumn({
-      op: 'date_histogram',
-      layer: computedLayer,
-      columnId: generateId(),
-      field: dateField,
-      indexPattern,
-      visualizationGroups: [],
-      columnParams: {
-        interval: timeInterval,
-        dropPartials: dropPartialBuckets,
-      },
-    }),
+    layer:
+      xField && xMode
+        ? insertNewColumn({
+            op: xMode,
+            layer: computedLayer,
+            columnId: generateId(),
+            field: xField,
+            indexPattern,
+            visualizationGroups: [],
+            columnParams: {
+              interval: timeInterval,
+              dropPartials: dropPartialBuckets,
+            },
+          })
+        : computedLayer,
     columnId,
     field: baseField,
     indexPattern,
@@ -1821,7 +1829,8 @@ export function getSplitByTermsLayer(
 
 export function getSplitByFiltersLayer(
   indexPattern: IndexPattern,
-  dateField: IndexPatternField | undefined,
+  xField: IndexPatternField | undefined,
+  xMode: string | undefined,
   layer: VisualizeEditorLayersContext
 ): IndexPatternLayer {
   const { splitFilters, metrics, timeInterval, dropPartialBuckets } = layer;
@@ -1847,18 +1856,21 @@ export function getSplitByFiltersLayer(
   const columnId = generateId();
   let filtersLayer = insertNewColumn({
     op: 'filters',
-    layer: insertNewColumn({
-      op: 'date_histogram',
-      layer: computedLayer,
-      columnId: generateId(),
-      field: dateField,
-      indexPattern,
-      visualizationGroups: [],
-      columnParams: {
-        interval: timeInterval,
-        dropPartials: dropPartialBuckets,
-      },
-    }),
+    layer:
+      xField && xMode
+        ? insertNewColumn({
+            op: xMode,
+            layer: computedLayer,
+            columnId: generateId(),
+            field: xField,
+            indexPattern,
+            visualizationGroups: [],
+            columnParams: {
+              interval: timeInterval,
+              dropPartials: dropPartialBuckets,
+            },
+          })
+        : computedLayer,
     columnId,
     field: undefined,
     indexPattern,

@@ -40,12 +40,7 @@ export const OverviewGrid = () => {
             key={`${monitor.id}-${monitor.location?.id}`}
             data-test-subj="syntheticsOverviewGridItem"
           >
-            <OverviewGridItem
-              monitorId={monitor.id}
-              locationId={monitor.location?.id}
-              monitorName={monitor.name}
-              isMonitorEnabled={monitor.isEnabled}
-            />
+            <OverviewGridItem monitor={monitor} />
           </EuiFlexItem>
         ))}
       </EuiFlexGrid>

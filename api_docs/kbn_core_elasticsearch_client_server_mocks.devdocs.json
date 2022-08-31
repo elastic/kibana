@@ -257,7 +257,17 @@
               "DeleteRequest",
               ", options?: ",
               "TransportRequestOptions",
-              " | undefined]>; name: string | symbol; transform: ",
+              " | undefined]>; cluster: ",
+              {
+                "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
+                "section": "def-server.DeeplyMockedApi",
+                "text": "DeeplyMockedApi"
+              },
+              "<",
+              "default",
+              ">; eql: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
                 "scope": "server",
@@ -283,27 +293,7 @@
               "SearchRequest",
               " | undefined, options?: ",
               "TransportRequestOptions",
-              " | undefined]>; cluster: ",
-              {
-                "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
-                "text": "DeeplyMockedApi"
-              },
-              "<",
-              "default",
-              ">; eql: ",
-              {
-                "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
-                "text": "DeeplyMockedApi"
-              },
-              "<",
-              "default",
-              ">; create: ",
+              " | undefined]>; create: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
                 "scope": "server",
@@ -339,7 +329,7 @@
               },
               "<",
               "default",
-              ">; index: ",
+              ">; name: string | symbol; index: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
                 "scope": "server",
@@ -1214,6 +1204,16 @@
               "<unknown>, options?: ",
               "TransportRequestOptions",
               " | undefined]>; textStructure: ",
+              {
+                "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
+                "section": "def-server.DeeplyMockedApi",
+                "text": "DeeplyMockedApi"
+              },
+              "<",
+              "default",
+              ">; transform: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
                 "scope": "server",
@@ -1365,7 +1365,17 @@
               "DeleteRequest",
               ", options?: ",
               "TransportRequestOptions",
-              " | undefined]>; name: string | symbol; transform: ",
+              " | undefined]>; cluster: ",
+              {
+                "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
+                "section": "def-server.DeeplyMockedApi",
+                "text": "DeeplyMockedApi"
+              },
+              "<",
+              "default",
+              ">; eql: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
                 "scope": "server",
@@ -1391,27 +1401,7 @@
               "SearchRequest",
               " | undefined, options?: ",
               "TransportRequestOptions",
-              " | undefined]>; cluster: ",
-              {
-                "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
-                "text": "DeeplyMockedApi"
-              },
-              "<",
-              "default",
-              ">; eql: ",
-              {
-                "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
-                "text": "DeeplyMockedApi"
-              },
-              "<",
-              "default",
-              ">; create: ",
+              " | undefined]>; create: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
                 "scope": "server",
@@ -1447,7 +1437,7 @@
               },
               "<",
               "default",
-              ">; index: ",
+              ">; name: string | symbol; index: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
                 "scope": "server",
@@ -2322,6 +2312,16 @@
               "<unknown>, options?: ",
               "TransportRequestOptions",
               " | undefined]>; textStructure: ",
+              {
+                "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
+                "section": "def-server.DeeplyMockedApi",
+                "text": "DeeplyMockedApi"
+              },
+              "<",
+              "default",
+              ">; transform: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
                 "scope": "server",
@@ -2429,7 +2429,17 @@
               "DeleteRequest",
               ", options?: ",
               "TransportRequestOptions",
-              " | undefined]>; name: string | symbol; transform: ",
+              " | undefined]>; cluster: ",
+              {
+                "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
+                "section": "def-server.DeeplyMockedApi",
+                "text": "DeeplyMockedApi"
+              },
+              "<",
+              "default",
+              ">; eql: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
                 "scope": "server",
@@ -2455,27 +2465,7 @@
               "SearchRequest",
               " | undefined, options?: ",
               "TransportRequestOptions",
-              " | undefined]>; cluster: ",
-              {
-                "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
-                "text": "DeeplyMockedApi"
-              },
-              "<",
-              "default",
-              ">; eql: ",
-              {
-                "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.DeeplyMockedApi",
-                "text": "DeeplyMockedApi"
-              },
-              "<",
-              "default",
-              ">; create: ",
+              " | undefined]>; create: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
                 "scope": "server",
@@ -2511,7 +2501,7 @@
               },
               "<",
               "default",
-              ">; index: ",
+              ">; name: string | symbol; index: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
                 "scope": "server",
@@ -3386,6 +3376,16 @@
               "<unknown>, options?: ",
               "TransportRequestOptions",
               " | undefined]>; textStructure: ",
+              {
+                "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
+                "section": "def-server.DeeplyMockedApi",
+                "text": "DeeplyMockedApi"
+              },
+              "<",
+              "default",
+              ">; transform: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
                 "scope": "server",
@@ -3558,7 +3558,17 @@
           "DeleteRequest",
           ", options?: ",
           "TransportRequestOptions",
-          " | undefined]>; name: string | symbol; transform: ",
+          " | undefined]>; cluster: ",
+          {
+            "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
+            "scope": "server",
+            "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
+            "section": "def-server.DeeplyMockedApi",
+            "text": "DeeplyMockedApi"
+          },
+          "<",
+          "default",
+          ">; eql: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
             "scope": "server",
@@ -3584,27 +3594,7 @@
           "SearchRequest",
           " | undefined, options?: ",
           "TransportRequestOptions",
-          " | undefined]>; cluster: ",
-          {
-            "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
-            "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.DeeplyMockedApi",
-            "text": "DeeplyMockedApi"
-          },
-          "<",
-          "default",
-          ">; eql: ",
-          {
-            "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
-            "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.DeeplyMockedApi",
-            "text": "DeeplyMockedApi"
-          },
-          "<",
-          "default",
-          ">; create: ",
+          " | undefined]>; create: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
             "scope": "server",
@@ -3640,7 +3630,7 @@
           },
           "<",
           "default",
-          ">; index: ",
+          ">; name: string | symbol; index: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
             "scope": "server",
@@ -4515,6 +4505,16 @@
           "<unknown>, options?: ",
           "TransportRequestOptions",
           " | undefined]>; textStructure: ",
+          {
+            "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
+            "scope": "server",
+            "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
+            "section": "def-server.DeeplyMockedApi",
+            "text": "DeeplyMockedApi"
+          },
+          "<",
+          "default",
+          ">; transform: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
             "scope": "server",

@@ -46,7 +46,7 @@ import { FormatSelector } from './format_selector';
 import { ReferenceEditor } from './reference_editor';
 import { TimeScaling } from './time_scaling';
 import { Filtering } from './filtering';
-import { Window } from './window';
+import { ReducedTimeRange } from './reduced_time_range';
 import { AdvancedOptions } from './advanced_options';
 import { TimeShift } from './time_shift';
 import type { LayerType } from '../../../common';
@@ -95,7 +95,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
     toggleFullscreen,
     isFullscreen,
     supportStaticValue,
-    supportFieldFormat = true,
+    enableFormatSelector = true,
+    formatSelectorOptions,
     layerType,
     paramEditorCustomProps,
   } = props;
@@ -338,12 +339,36 @@ export function DimensionEditor(props: DimensionEditorProps) {
           (!incompleteOperation && selectedColumn && selectedColumn.operationType === operationType)
       );
 
-      let label: EuiListGroupItemProps['label'] = operationDisplay[operationType].displayName;
+      const partialIcon = compatibleWithCurrentField &&
+        referencedField?.partiallyApplicableFunctions?.[operationType] && (
+          <>
+            {' '}
+            <EuiIconTip
+              content={i18n.translate(
+                'xpack.lens.indexPattern.helpPartiallyApplicableFunctionLabel',
+                {
+                  defaultMessage:
+                    'This function may only return partial results, as it is unable to support the full time range of rolled-up historical data.',
+                }
+              )}
+              position="left"
+              size="s"
+              type="partial"
+              color="warning"
+            />
+          </>
+        );
+      let label: EuiListGroupItemProps['label'] = (
+        <>
+          {operationDisplay[operationType].displayName}
+          {partialIcon}
+        </>
+      );
       if (isActive && disabledStatus) {
         label = (
           <EuiToolTip content={disabledStatus} display="block" position="left">
             <EuiText color="danger" size="s">
-              <strong>{operationDisplay[operationType].displayName}</strong>
+              <strong>{label}</strong>
             </EuiText>
           </EuiToolTip>
         );
@@ -589,15 +614,9 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const quickFunctions = (
     <>
       <EuiFormRow
-        label={
-          hasSoftRestrictedSideNavItems
-            ? i18n.translate('xpack.lens.indexPattern.regularFunctionsLabel', {
-                defaultMessage: 'Regular functions',
-              })
-            : i18n.translate('xpack.lens.indexPattern.functionsLabel', {
-                defaultMessage: 'Functions',
-              })
-        }
+        label={i18n.translate('xpack.lens.indexPattern.functionsLabel', {
+          defaultMessage: 'Functions',
+        })}
         fullWidth
       >
         <EuiListGroup
@@ -989,9 +1008,9 @@ export function DimensionEditor(props: DimensionEditorProps) {
               ) : null,
             },
             {
-              dataTestSubj: 'indexPattern-window-enable',
-              inlineElement: selectedOperationDefinition.windowable ? (
-                <Window
+              dataTestSubj: 'indexPattern-reducedTimeRange-enable',
+              inlineElement: selectedOperationDefinition.canReduceTimeRange ? (
+                <ReducedTimeRange
                   selectedColumn={selectedColumn}
                   columnId={columnId}
                   indexPattern={currentIndexPattern}
@@ -1047,8 +1066,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
           <>
             {!incompleteInfo && selectedColumn && temporaryState === 'none' && (
               <NameInput
-                // re-render the input from scratch to obtain new "initial value" if the underlying default label changes
-                key={defaultLabel}
                 value={selectedColumn.label}
                 defaultValue={defaultLabel}
                 onChange={(value) => {
@@ -1080,11 +1097,15 @@ export function DimensionEditor(props: DimensionEditorProps) {
               />
             )}
 
-            {supportFieldFormat &&
+            {enableFormatSelector &&
             !isFullscreen &&
             selectedColumn &&
             (selectedColumn.dataType === 'number' || selectedColumn.operationType === 'range') ? (
-              <FormatSelector selectedColumn={selectedColumn} onChange={onFormatChange} />
+              <FormatSelector
+                selectedColumn={selectedColumn}
+                onChange={onFormatChange}
+                options={formatSelectorOptions}
+              />
             ) : null}
           </>
         </div>

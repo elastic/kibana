@@ -5,7 +5,11 @@
  * 2.0.
  */
 
+<<<<<<< HEAD
 import type { DataType, IndexPattern } from '../types';
+=======
+import type { DataType, IndexPattern, IndexPatternField } from '../types';
+>>>>>>> upstream/main
 import type { DraggedField, IndexPatternLayer } from './types';
 import type {
   BaseIndexPatternColumn,
@@ -24,6 +28,13 @@ export function normalizeOperationDataType(type: DataType) {
 
 export function hasField(column: BaseIndexPatternColumn): column is FieldBasedIndexPatternColumn {
   return 'sourceField' in column;
+}
+
+export function getFieldType(field: IndexPatternField) {
+  if (field.timeSeriesMetricType) {
+    return field.timeSeriesMetricType;
+  }
+  return field.type;
 }
 
 export function getReferencedField(

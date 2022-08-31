@@ -6,9 +6,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
+
 import { i18n } from '@kbn/i18n';
 
 import { ErrorCode } from '../../../common/types/error_codes';
+import { deleteConnectorById } from '../../lib/connectors/delete_connector';
 
 import { fetchConnectorByIndexName, fetchConnectors } from '../../lib/connectors/fetch_connectors';
 import { fetchCrawlerByIndexName, fetchCrawlers } from '../../lib/crawler/fetch_crawlers';
@@ -19,6 +21,7 @@ import { fetchIndices } from '../../lib/indices/fetch_indices';
 import { generateApiKey } from '../../lib/indices/generate_api_key';
 import { RouteDependencies } from '../../plugin';
 import { createError } from '../../utils/create_error';
+import { createIndexPipelineDefinitions } from '../../utils/create_pipeline_definitions';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 import { isIndexNotFoundException } from '../../utils/identify_exceptions';
 
@@ -124,6 +127,52 @@ export function registerIndexRoutes({ router, log }: RouteDependencies) {
     })
   );
 
+  router.delete(
+    {
+      path: '/internal/enterprise_search/indices/{indexName}',
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const indexName = decodeURIComponent(request.params.indexName);
+      const { client } = (await context.core).elasticsearch;
+
+      try {
+        const connector = await fetchConnectorByIndexName(client, indexName);
+        const crawler = await fetchCrawlerByIndexName(client, indexName);
+
+        if (connector) {
+          await deleteConnectorById(client, connector.id);
+        }
+
+        if (crawler) {
+          // do nothing for now because we don't have a way to delete a crawler yet
+        }
+
+        await client.asCurrentUser.indices.delete({ index: indexName });
+
+        return response.ok({
+          body: {},
+          headers: { 'content-type': 'application/json' },
+        });
+      } catch (error) {
+        if (isIndexNotFoundException(error)) {
+          return createError({
+            errorCode: ErrorCode.INDEX_NOT_FOUND,
+            message: 'Could not find index',
+            response,
+            statusCode: 404,
+          });
+        }
+
+        throw error;
+      }
+    })
+  );
+
   router.get(
     {
       path: '/internal/enterprise_search/indices/{indexName}/exists',
@@ -179,6 +228,28 @@ export function registerIndexRoutes({ router, log }: RouteDependencies) {
 
       return response.ok({
         body: apiKey,
+        headers: { 'content-type': 'application/json' },
+      });
+    })
+  );
+
+  router.post(
+    {
+      path: '/internal/enterprise_search/indices/{indexName}/pipelines',
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const indexName = decodeURIComponent(request.params.indexName);
+      const { client } = (await context.core).elasticsearch;
+
+      const createResult = await createIndexPipelineDefinitions(indexName, client.asCurrentUser);
+
+      return response.ok({
+        body: createResult,
         headers: { 'content-type': 'application/json' },
       });
     })

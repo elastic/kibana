@@ -9,33 +9,34 @@
 import { getNoDataCardServicesMock } from '@kbn/shared-ux-card-no-data-mocks';
 import { KibanaNoDataPageServices } from '@kbn/shared-ux-page-kibana-no-data-types';
 import { getNoDataViewsPromptServicesMock } from '@kbn/shared-ux-prompt-no-data-views-mocks';
-import { mockServicesFactory, MockServicesFactoryParams } from '@kbn/shared-ux-services';
+
+interface Params {
+  hasESData: boolean;
+  hasUserDataView: boolean;
+}
+
+const defaultParams = {
+  hasESData: true,
+  hasUserDataView: true,
+};
 
 /**
  * Returns the Jest-compatible service abstractions for the `KibanaNoDataPage` Provider.
  */
-export const getServicesMock = (params?: MockServicesFactoryParams) => {
-  const { canCreateNewDataView, dataViewsDocLink, openDataViewEditor } =
-    getNoDataViewsPromptServicesMock();
+export const getServicesMock = (params?: Partial<Params>) => {
+  const hasESData =
+    params && params.hasESData !== undefined ? params.hasESData : defaultParams.hasESData;
 
-  const { addBasePath, canAccessFleet } = getNoDataCardServicesMock();
-
-  const { application, data, docLinks, editors, http, permissions, platform } =
-    mockServicesFactory(params);
+  const hasUserDataView =
+    params && params.hasUserDataView !== undefined
+      ? params.hasUserDataView
+      : defaultParams.hasUserDataView;
 
   const services: KibanaNoDataPageServices = {
-    ...application,
-    ...data,
-    ...docLinks,
-    ...editors,
-    ...http,
-    ...permissions,
-    ...platform,
-    canCreateNewDataView,
-    dataViewsDocLink,
-    openDataViewEditor,
-    addBasePath,
-    canAccessFleet,
+    ...getNoDataCardServicesMock(),
+    ...getNoDataViewsPromptServicesMock(),
+    hasESData: async () => hasESData,
+    hasUserDataView: async () => hasUserDataView,
   };
 
   return services;

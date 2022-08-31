@@ -312,7 +312,6 @@ describe('benchmarks API', () => {
       it('should build benchmark entry agent policy and package policy', async () => {
         const packagePolicy = createPackagePolicyMock();
         const agentPolicy = createMockAgentPolicy();
-        agentPolicy.agents = 3;
 
         const cspRulesStatus = {
           all: 100,
@@ -320,7 +319,11 @@ describe('benchmarks API', () => {
           disabled: 48,
         };
         const enrichAgentPolicy = await createBenchmarkEntry(
-          agentPolicy,
+          {
+            id: agentPolicy.id,
+            name: agentPolicy.name,
+            agents: 3,
+          },
           packagePolicy,
           cspRulesStatus
         );

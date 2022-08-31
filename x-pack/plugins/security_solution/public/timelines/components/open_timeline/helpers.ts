@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { set } from '@elastic/safer-lodash-set/fp';
+import { set } from '@kbn/safer-lodash-set/fp';
 import { getOr, isEmpty } from 'lodash/fp';
 import type { Action } from 'typescript-fsa';
 import uuid from 'uuid';

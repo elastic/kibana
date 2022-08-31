@@ -32,8 +32,6 @@ export class DefaultSearchStrategy extends AbstractSearchStrategy {
         panel.time_field || indexPattern.indexPattern.timeFieldName!
       );
 
-    // TODO pass in data view and check with the field from the request whether the time zone has to be switched to UTC
-
     return {
       isViable: true,
       capabilities: new DefaultSearchCapabilities({

@@ -44,7 +44,6 @@ export class DefaultSearchCapabilities {
   public timezone: SearchCapabilitiesOptions['timezone'];
   public maxBucketsLimit: SearchCapabilitiesOptions['maxBucketsLimit'];
   public forceFixedInterval: SearchCapabilitiesOptions['forceFixedInterval'];
-
   public panel?: Panel;
 
   constructor(options: SearchCapabilitiesOptions) {

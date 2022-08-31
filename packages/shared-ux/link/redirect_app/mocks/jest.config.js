@@ -7,7 +7,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test/jest_node',
+  preset: '@kbn/test',
   rootDir: '../../../../..',
   roots: ['<rootDir>/packages/shared-ux/link/redirect_app/mocks'],
 };
