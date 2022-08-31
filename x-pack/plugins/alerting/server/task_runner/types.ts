@@ -19,6 +19,7 @@ import {
   IntervalSchedule,
   RuleMonitoring,
   RuleTaskState,
+  SanitizedRule,
 } from '../../common';
 import { Alert } from '../alert';
 import { NormalizedRuleType } from '../rule_type_registry';
@@ -43,6 +44,14 @@ export type RuleRunResult = Pick<RuleTaskRunResult, 'monitoring' | 'schedule'> &
   rulesClient: RulesClientApi;
   stateWithMetrics: RuleTaskStateAndMetrics;
 };
+
+export interface RunRuleParams<Params extends RuleTypeParams> {
+  fakeRequest: KibanaRequest;
+  rulesClient: RulesClientApi;
+  rule: SanitizedRule<Params>;
+  apiKey: RawRule['apiKey'];
+  validatedParams: Params;
+}
 
 export interface RuleTaskInstance extends ConcreteTaskInstance {
   state: RuleTaskState;
