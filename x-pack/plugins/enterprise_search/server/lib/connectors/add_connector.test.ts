@@ -69,6 +69,7 @@ describe('addConnector lib function', () => {
         api_key_id: null,
         configuration: {},
         index_name: 'index_name',
+        is_native: false,
         language: 'fr',
         last_seen: null,
         last_sync_error: null,
