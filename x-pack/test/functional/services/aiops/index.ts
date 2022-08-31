@@ -8,11 +8,14 @@
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 import { ExplainLogRateSpikesProvider } from './explain_log_rate_spikes';
+import { ExplainLogRateSpikesAnalysisTableProvider } from './explain_log_rate_spikes_analysis_table';
 
 export function AiopsProvider(context: FtrProviderContext) {
   const explainLogRateSpikes = ExplainLogRateSpikesProvider(context);
+  const explainLogRateSpikesAnalysisTable = ExplainLogRateSpikesAnalysisTableProvider(context);
 
   return {
     explainLogRateSpikes,
+    explainLogRateSpikesAnalysisTable,
   };
 }

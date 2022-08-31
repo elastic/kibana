@@ -6536,7 +6536,6 @@
     "xpack.aiops.progressTitle": "進行状況：{progress}% — {progressMessage}",
     "xpack.aiops.searchPanel.totalDocCountLabel": "合計ドキュメント数：{strongTotalCount}",
     "xpack.aiops.searchPanel.totalDocCountNumber": "{totalCount, plural, other  {#}}",
-    "xpack.aiops.cancelButtonTitle": "キャンセル",
     "xpack.aiops.correlations.failedTransactions.correlationsTable.fieldNameLabel": "フィールド名",
     "xpack.aiops.correlations.failedTransactions.correlationsTable.fieldValueLabel": "フィールド値",
     "xpack.aiops.correlations.failedTransactions.correlationsTable.impactLabel": "インパクト",

@@ -6543,7 +6543,6 @@
     "xpack.aiops.progressTitle": "进度：{progress}% — {progressMessage}",
     "xpack.aiops.searchPanel.totalDocCountLabel": "文档总数：{strongTotalCount}",
     "xpack.aiops.searchPanel.totalDocCountNumber": "{totalCount, plural, other {#}}",
-    "xpack.aiops.cancelButtonTitle": "取消",
     "xpack.aiops.correlations.failedTransactions.correlationsTable.fieldNameLabel": "字段名称",
     "xpack.aiops.correlations.failedTransactions.correlationsTable.fieldValueLabel": "字段值",
     "xpack.aiops.correlations.failedTransactions.correlationsTable.impactLabel": "影响",
