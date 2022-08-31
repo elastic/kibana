@@ -75,7 +75,7 @@ describe('POST /api/saved_objects/_bulk_delete', () => {
     });
   });
 
-  it('calls upon savedObjectClient.bulkDelete', async () => {
+  it('calls upon savedObjectClient.bulkDelete with query options', async () => {
     const docs = [
       {
         id: 'abc123',

@@ -857,15 +857,9 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
               : undefined;
 
             const docFound = indexFound && isMgetDoc(actualResult) && actualResult.found;
-            // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
-            namespaces = actualResult!._source.namespaces ?? [
-              SavedObjectsUtils.namespaceIdToString(namespace),
-            ];
 
-            versionProperties = getExpectedVersionProperties(version);
             // return an error if the doc isnn't found at all or the doc doesn't exist in the namespaces
-            // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
-            if (!docFound || !this.rawDocExistsInNamespaces(actualResult, namespaces)) {
+            if (!docFound) {
               return {
                 tag: 'Left',
                 value: {
@@ -877,6 +871,26 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
                 },
               };
             }
+            // the following check should be redundant since we're retrieving the docs from elasticsearch but we check anyway
+            // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
+            if (docFound && !this.rawDocExistsInNamespace(actualResult, namespace)) {
+              return {
+                tag: 'Left',
+                value: {
+                  id,
+                  type,
+                  error: errorContent(
+                    SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)
+                  ),
+                },
+              };
+            }
+            // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
+            namespaces = actualResult!._source.namespaces ?? [
+              SavedObjectsUtils.namespaceIdToString(namespace),
+            ];
+
+            versionProperties = getExpectedVersionProperties(version);
             // the document exists but is multinamespace and there are more than one namespaces present and can only be deleted by force.
             if (!force && (namespaces.length > 1 || namespaces.includes(ALL_NAMESPACES_STRING))) {
               return {
@@ -905,7 +919,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
             type,
             id,
             namespaces,
-            esRequestIndex: bulkDeleteRequestIndexCounter++, // i think this is wrong
+            esRequestIndex: bulkDeleteRequestIndexCounter++,
           };
 
           bulkDeleteParams.push({
