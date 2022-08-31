@@ -117,17 +117,5 @@ export function CasesSingleViewServiceProvider({ getService, getPageObject }: Ft
       await testSubjects.click('case-refresh');
       await header.waitUntilLoadingHasFinished();
     },
-
-    async setSearchTextInAssigneesPopover(text: string) {
-      await (
-        await (await find.byClassName('euiContextMenuPanel')).findByClassName('euiFieldSearch')
-      ).type(text);
-      await header.waitUntilLoadingHasFinished();
-    },
-
-    async selectFirstRowInAssigneesPopover() {
-      await (await find.byClassName('euiSelectableListItem__content')).click();
-      await header.waitUntilLoadingHasFinished();
-    },
   };
 }
