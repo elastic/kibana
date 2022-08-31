@@ -9,14 +9,14 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DocLinksStart } from '@kbn/core/public';
-import type { DatatableUtilitiesService, IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { TimeRange } from '@kbn/es-query';
 import { EuiLink, EuiTextColor, EuiButton, EuiSpacer } from '@elastic/eui';
 
-import { Adapters } from '@kbn/inspector-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { groupBy, escape, uniq } from 'lodash';
 import type { Query } from '@kbn/data-plugin/common';
+import { SearchResponseWarning } from '@kbn/data-plugin/public/search/types';
 import type { FramePublicAPI, IndexPattern, IndexPatternField, StateSetter } from '../types';
 import type {
   IndexPatternLayer,
@@ -173,18 +173,11 @@ export function getFieldType(field: IndexPatternField) {
 
 export function getTSDBRollupWarningMessages(
   state: IndexPatternPersistedState,
-  adapters: Adapters
+  warning: SearchResponseWarning
 ) {
-  if (state && adapters.requests) {
+  if (state) {
     const hasTSDBRollupWarnings =
-      adapters.requests
-        .getRequests()
-        .flatMap((r) =>
-          (r.response?.json as IEsSearchResponse | undefined)?.rawResponse?._shards?.failures
-            ?.filter((failure) => failure.reason?.type === 'illegal_argument_exception')
-            .map((failure) => failure.reason.reason)
-        )
-        .filter(Boolean).length > 0;
+      warning.type === 'shard_failure' && warning.reason.type === 'illegal_argument_exception';
     if (!hasTSDBRollupWarnings) {
       return [];
     }

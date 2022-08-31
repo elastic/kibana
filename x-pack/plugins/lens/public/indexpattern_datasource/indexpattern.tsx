@@ -666,11 +666,10 @@ export function getIndexPatternDatasource({
           core.docLinks,
           setState
         ),
-        ...getTSDBRollupWarningMessages(state, adapters),
       ];
     },
-    getEmbeddedWarningMessages: (state, activeData, adapters) => {
-      return [...getTSDBRollupWarningMessages(state, adapters)];
+    getSearchWarningMessages: (state, warning) => {
+      return [...getTSDBRollupWarningMessages(state, warning)];
     },
     checkIntegrity: (state, indexPatterns) => {
       const ids = Object.values(state.layers || {}).map(({ indexPatternId }) => indexPatternId);

@@ -29,6 +29,7 @@ import type { ClickTriggerEvent, BrushTriggerEvent } from '@kbn/charts-plugin/pu
 import type { IndexPatternAggRestrictions } from '@kbn/data-plugin/public';
 import type { FieldSpec, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
+import { SearchResponseWarning } from '@kbn/data-plugin/public/search/types';
 import type { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
 import type { DateRange, LayerType, SortingHint } from '../common';
 import type {
@@ -419,10 +420,9 @@ export interface Datasource<T = unknown, P = unknown> {
   /**
    * The embeddable calls this function to display warnings about visualization on the dashboard
    */
-  getEmbeddedWarningMessages?: (
+  getSearchWarningMessages?: (
     state: P,
-    activeData: Record<string, Datatable>,
-    adapters: Adapters
+    warning: SearchResponseWarning
   ) => React.ReactNode[] | undefined;
   /**
    * Checks if the visualization created is time based, for example date histogram

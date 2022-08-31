@@ -10,6 +10,7 @@ import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { mapValues } from 'lodash';
 import { Query } from '@kbn/es-query';
 import { History } from 'history';
+import { ReactNode } from 'react';
 import { LensEmbeddableInput } from '..';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
 import type { VisualizeEditorContext, Suggestion, IndexPattern } from '../types';
@@ -88,7 +89,10 @@ export const getPreloadedState = ({
 };
 
 export const setState = createAction<Partial<LensAppState>>('lens/setState');
-export const onActiveDataChange = createAction<TableInspectorAdapter>('lens/onActiveDataChange');
+export const onActiveDataChange = createAction<{
+  activeData: TableInspectorAdapter;
+  requestWarnings?: ReactNode[];
+}>('lens/onActiveDataChange');
 export const setSaveable = createAction<boolean>('lens/setSaveable');
 export const enableAutoApply = createAction<void>('lens/enableAutoApply');
 export const disableAutoApply = createAction<void>('lens/disableAutoApply');
@@ -222,10 +226,16 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         ...payload,
       };
     },
-    [onActiveDataChange.type]: (state, { payload }: PayloadAction<TableInspectorAdapter>) => {
+    [onActiveDataChange.type]: (
+      state,
+      {
+        payload: { activeData, requestWarnings },
+      }: PayloadAction<{ activeData: TableInspectorAdapter; requestWarnings?: ReactNode[] }>
+    ) => {
       return {
         ...state,
-        activeData: payload,
+        activeData,
+        requestWarnings,
       };
     },
     [setSaveable.type]: (state, { payload }: PayloadAction<boolean>) => {

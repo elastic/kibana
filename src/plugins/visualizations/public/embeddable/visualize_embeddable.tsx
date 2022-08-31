@@ -16,7 +16,7 @@ import { Filter, onlyDisabledFiltersChanged, Query, TimeRange } from '@kbn/es-qu
 import type { KibanaExecutionContext, SavedObjectAttributes } from '@kbn/core/public';
 import type { ErrorLike } from '@kbn/expressions-plugin/common';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { IEsSearchResponse, TimefilterContract } from '@kbn/data-plugin/public';
+import { TimefilterContract } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { Warnings } from '@kbn/charts-plugin/public';
 import {
@@ -340,14 +340,18 @@ export class VisualizeEmbeddable
   };
 
   onContainerData = () => {
-    const warnings = this.getInspectorAdapters()
-      ?.requests?.getRequests()
-      .flatMap((r) =>
-        (r.response?.json as IEsSearchResponse | undefined)?.rawResponse?._shards?.failures
-          ?.filter((failure) => failure.reason?.type === 'illegal_argument_exception')
-          .map((failure) => failure.reason.reason)
-      )
-      .filter(Boolean);
+    const warnings: React.ReactNode[] = [];
+    this.deps
+      .start()
+      .plugins.data.search.showWarnings(this.getInspectorAdapters()!.requests!, (warning) => {
+        if (
+          warning.type === 'shard_failure' &&
+          warning.reason.type === 'illegal_argument_exception'
+        ) {
+          warnings.push(warning.reason.reason || warning.message);
+          return true;
+        }
+      });
     this.updateOutput({
       ...this.getOutput(),
       loading: false,

@@ -26,6 +26,7 @@ import {
   selectChangesApplied,
   applyChanges,
   selectAutoApplyEnabled,
+  selectStagedRequestWarnings,
 } from '../../../state_management';
 import { WorkspaceTitle } from './title';
 import { LensInspector } from '../../../lens_inspector_service';
@@ -59,6 +60,7 @@ export function WorkspacePanelWrapper({
 
   const changesApplied = useLensSelector(selectChangesApplied);
   const autoApplyEnabled = useLensSelector(selectAutoApplyEnabled);
+  const requestWarnings = useLensSelector(selectStagedRequestWarnings);
 
   const activeVisualization = visualizationId ? visualizationMap[visualizationId] : null;
   const setVisualizationState = useCallback(
@@ -106,6 +108,9 @@ export function WorkspacePanelWrapper({
       );
     }
   });
+  if (requestWarnings) {
+    warningMessages.push(...requestWarnings);
+  }
   return (
     <>
       {!(isFullscreen && (autoApplyEnabled || warningMessages?.length)) && (

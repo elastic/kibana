@@ -217,22 +217,32 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       if (renderDeps.current) {
         const [defaultLayerId] = Object.keys(renderDeps.current.datasourceLayers);
 
+        const requestWarnings: React.ReactNode[] = [];
+        const datasource = Object.values(renderDeps.current?.datasourceMap)[0];
+        const datasourceState = Object.values(renderDeps.current?.datasourceStates)[0].state;
+        plugins.data.search.showWarnings(adapters?.requests!, (warning) => {
+          const warningMessage = datasource.getSearchWarningMessages?.(datasourceState, warning);
+
+          requestWarnings.push(...(warningMessage || []));
+          if (warningMessage && warningMessage.length) return true;
+        });
         if (adapters && adapters.tables) {
           dispatchLens(
-            onActiveDataChange(
-              Object.entries(adapters.tables?.tables).reduce<Record<string, Datatable>>(
+            onActiveDataChange({
+              activeData: Object.entries(adapters.tables?.tables).reduce<Record<string, Datatable>>(
                 (acc, [key, value], index, tables) => ({
                   ...acc,
                   [tables.length === 1 ? defaultLayerId : key]: value,
                 }),
                 {}
-              )
-            )
+              ),
+              requestWarnings,
+            })
           );
         }
       }
     },
-    [dispatchLens]
+    [dispatchLens, plugins.data.search]
   );
 
   const shouldApplyExpression = autoApplyEnabled || !initialRenderComplete.current || triggerApply;
