@@ -122,6 +122,24 @@ Problems with your {es} cluster can prevent {kib} upgrades from succeeding. Ensu
  * a "green" cluster status
 
 [float]
+===== Unsupported routing allocation {es} cluster settings
+Kibana needs to create indices with replicas during migration and upgrade migrations can fail because routing allocation is disabled or restricted (`cluster.routing.allocation.enable: none/primaries/new_primaries`). 
+
+To prevent the issue, remove the transient and persisted routing allocation settings if they are set:
+[source,sh]
+--------------------------------------------
+PUT /_cluster/settings
+{
+  "transient": {
+    "cluster.routing.allocation.enable": null
+  },
+  "persistent": {
+    "cluster.routing.allocation.enable": null
+  }
+}
+--------------------------------------------
+
+[float]
 ===== Different versions of {kib} connected to the same {es} index
 When different versions of {kib} are attempting an upgrade migration in parallel this can lead to migration failures. Ensure that all {kib} instances are running the same version, configuration and plugins.
 
