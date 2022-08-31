@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { coreUsageDataServiceMock } from './core_usage_data_service.mock';
-export { coreUsageStatsClientMock } from './core_usage_stats_client.mock';
+export { coreUsageStatsType } from './core_usage_stats';

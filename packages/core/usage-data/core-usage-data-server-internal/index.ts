@@ -6,6 +6,5 @@
  * Side Public License, v 1.
  */
 
-export function foo() {
-  return 'hello world';
-}
+export { CoreUsageDataService, CoreUsageStatsClient } from './src';
+export type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
