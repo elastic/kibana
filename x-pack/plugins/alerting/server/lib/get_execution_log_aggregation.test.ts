@@ -271,15 +271,13 @@ describe('getExecutionLogAggregation', () => {
                     top_hits: {
                       size: 1,
                       _source: {
-                        includes: ['event.outcome', 'message', 'error.message', 'kibana.version'],
-                      },
-                    },
-                  },
-                  ruleId: {
-                    top_hits: {
-                      size: 1,
-                      _source: {
-                        includes: ['rule.id'],
+                        includes: [
+                          'event.outcome',
+                          'message',
+                          'error.message',
+                          'kibana.version',
+                          'rule.id',
+                        ],
                       },
                     },
                   },
@@ -369,6 +367,7 @@ describe('formatExecutionLogResult', () => {
                           _id: 'S4wIZX8B8TGQpG7XQZns',
                           _score: 1.0,
                           _source: {
+                            rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef' },
                             event: {
                               outcome: 'success',
                             },
@@ -397,25 +396,6 @@ describe('formatExecutionLogResult', () => {
                   executeStartTime: {
                     value: 1.646667512617e12,
                     value_as_string: '2022-03-07T15:38:32.617Z',
-                  },
-                  ruleId: {
-                    hits: {
-                      total: {
-                        value: 1,
-                        relation: 'eq',
-                      },
-                      max_score: 1.0,
-                      hits: [
-                        {
-                          _index: '.kibana-event-log-8.2.0-000001',
-                          _id: 'S4wIZX8B8TGQpG7XQZns',
-                          _score: 1.0,
-                          _source: {
-                            rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef' },
-                          },
-                        },
-                      ],
-                    },
                   },
                 },
                 actionExecution: {
@@ -471,6 +451,8 @@ describe('formatExecutionLogResult', () => {
                           _id: 'a4wIZX8B8TGQpG7Xwpnz',
                           _score: 1.0,
                           _source: {
+                            rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef' },
+
                             event: {
                               outcome: 'success',
                             },
@@ -499,25 +481,6 @@ describe('formatExecutionLogResult', () => {
                   executeStartTime: {
                     value: 1.646667545604e12,
                     value_as_string: '2022-03-07T15:39:05.604Z',
-                  },
-                  ruleId: {
-                    hits: {
-                      total: {
-                        value: 1,
-                        relation: 'eq',
-                      },
-                      max_score: 1.0,
-                      hits: [
-                        {
-                          _index: '.kibana-event-log-8.2.0-000001',
-                          _id: 'S4wIZX8B8TGQpG7XQZns',
-                          _score: 1.0,
-                          _source: {
-                            rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef' },
-                          },
-                        },
-                      ],
-                    },
                   },
                 },
                 actionExecution: {
@@ -643,6 +606,7 @@ describe('formatExecutionLogResult', () => {
                           _id: 'S4wIZX8B8TGQpG7XQZns',
                           _score: 1.0,
                           _source: {
+                            rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef' },
                             event: {
                               outcome: 'failure',
                             },
@@ -674,25 +638,6 @@ describe('formatExecutionLogResult', () => {
                   executeStartTime: {
                     value: 1.646667512617e12,
                     value_as_string: '2022-03-07T15:38:32.617Z',
-                  },
-                  ruleId: {
-                    hits: {
-                      total: {
-                        value: 1,
-                        relation: 'eq',
-                      },
-                      max_score: 1.0,
-                      hits: [
-                        {
-                          _index: '.kibana-event-log-8.2.0-000001',
-                          _id: 'S4wIZX8B8TGQpG7XQZns',
-                          _score: 1.0,
-                          _source: {
-                            rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef' },
-                          },
-                        },
-                      ],
-                    },
                   },
                 },
                 actionExecution: {
@@ -748,6 +693,7 @@ describe('formatExecutionLogResult', () => {
                           _id: 'a4wIZX8B8TGQpG7Xwpnz',
                           _score: 1.0,
                           _source: {
+                            rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef' },
                             event: {
                               outcome: 'success',
                             },
@@ -776,25 +722,6 @@ describe('formatExecutionLogResult', () => {
                   executeStartTime: {
                     value: 1.646667545604e12,
                     value_as_string: '2022-03-07T15:39:05.604Z',
-                  },
-                  ruleId: {
-                    hits: {
-                      total: {
-                        value: 1,
-                        relation: 'eq',
-                      },
-                      max_score: 1.0,
-                      hits: [
-                        {
-                          _index: '.kibana-event-log-8.2.0-000001',
-                          _id: 'S4wIZX8B8TGQpG7XQZns',
-                          _score: 1.0,
-                          _source: {
-                            rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef' },
-                          },
-                        },
-                      ],
-                    },
                   },
                 },
                 actionExecution: {
@@ -920,6 +847,7 @@ describe('formatExecutionLogResult', () => {
                           _id: 'dJkWa38B1ylB1EvsAckB',
                           _score: 1.0,
                           _source: {
+                            rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef' },
                             event: {
                               outcome: 'success',
                             },
@@ -948,25 +876,6 @@ describe('formatExecutionLogResult', () => {
                   executeStartTime: {
                     value: 1.646769067607e12,
                     value_as_string: '2022-03-08T19:51:07.607Z',
-                  },
-                  ruleId: {
-                    hits: {
-                      total: {
-                        value: 1,
-                        relation: 'eq',
-                      },
-                      max_score: 1.0,
-                      hits: [
-                        {
-                          _index: '.kibana-event-log-8.2.0-000001',
-                          _id: 'S4wIZX8B8TGQpG7XQZns',
-                          _score: 1.0,
-                          _source: {
-                            rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef' },
-                          },
-                        },
-                      ],
-                    },
                   },
                 },
                 actionExecution: {
@@ -1017,6 +926,7 @@ describe('formatExecutionLogResult', () => {
                           _id: 'a4wIZX8B8TGQpG7Xwpnz',
                           _score: 1.0,
                           _source: {
+                            rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef' },
                             event: {
                               outcome: 'success',
                             },
@@ -1045,25 +955,6 @@ describe('formatExecutionLogResult', () => {
                   executeStartTime: {
                     value: 1.646667545604e12,
                     value_as_string: '2022-03-07T15:39:05.604Z',
-                  },
-                  ruleId: {
-                    hits: {
-                      total: {
-                        value: 1,
-                        relation: 'eq',
-                      },
-                      max_score: 1.0,
-                      hits: [
-                        {
-                          _index: '.kibana-event-log-8.2.0-000001',
-                          _id: 'S4wIZX8B8TGQpG7XQZns',
-                          _score: 1.0,
-                          _source: {
-                            rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef' },
-                          },
-                        },
-                      ],
-                    },
                   },
                 },
                 actionExecution: {
@@ -1189,6 +1080,7 @@ describe('formatExecutionLogResult', () => {
                           _id: '7xKcb38BcntAq5ycFwiu',
                           _score: 1.0,
                           _source: {
+                            rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef' },
                             event: {
                               outcome: 'success',
                             },
@@ -1217,25 +1109,6 @@ describe('formatExecutionLogResult', () => {
                   executeStartTime: {
                     value: 1.646844973039e12,
                     value_as_string: '2022-03-09T16:56:13.039Z',
-                  },
-                  ruleId: {
-                    hits: {
-                      total: {
-                        value: 1,
-                        relation: 'eq',
-                      },
-                      max_score: 1.0,
-                      hits: [
-                        {
-                          _index: '.kibana-event-log-8.2.0-000001',
-                          _id: 'S4wIZX8B8TGQpG7XQZns',
-                          _score: 1.0,
-                          _source: {
-                            rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef' },
-                          },
-                        },
-                      ],
-                    },
                   },
                 },
                 actionExecution: {
@@ -1291,6 +1164,7 @@ describe('formatExecutionLogResult', () => {
                           _id: 'zRKbb38BcntAq5ycOwgk',
                           _score: 1.0,
                           _source: {
+                            rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef' },
                             event: {
                               outcome: 'success',
                             },
@@ -1319,25 +1193,6 @@ describe('formatExecutionLogResult', () => {
                   executeStartTime: {
                     value: 1.646844917518e12,
                     value_as_string: '2022-03-09T16:55:17.518Z',
-                  },
-                  ruleId: {
-                    hits: {
-                      total: {
-                        value: 1,
-                        relation: 'eq',
-                      },
-                      max_score: 1.0,
-                      hits: [
-                        {
-                          _index: '.kibana-event-log-8.2.0-000001',
-                          _id: 'S4wIZX8B8TGQpG7XQZns',
-                          _score: 1.0,
-                          _source: {
-                            rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef' },
-                          },
-                        },
-                      ],
-                    },
                   },
                 },
                 actionExecution: {
