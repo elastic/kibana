@@ -2652,6 +2652,52 @@ export class RulesClient {
     }
   }
 
+  public async runSoon({ id }: { id: string }): Promise<void> {
+    return await retryIfConflicts(
+      this.logger,
+      `rulesClient.runSoon('${id}')`,
+      async () => await this.runSoonWithOCC({ id })
+    );
+  }
+
+  private async runSoonWithOCC({ id }: { id: string }) {
+    const { attributes } = await this.unsecuredSavedObjectsClient.get<Rule>('alert', id);
+
+    try {
+      await this.authorization.ensureAuthorized({
+        ruleTypeId: attributes.alertTypeId,
+        consumer: attributes.consumer,
+        operation: ReadOperations.RunSoon,
+        entity: AlertingAuthorizationEntity.Rule,
+      });
+
+      if (attributes.actions.length) {
+        await this.actionsAuthorization.ensureAuthorized('execute');
+      }
+    } catch (error) {
+      this.auditLogger?.log(
+        ruleAuditEvent({
+          action: RuleAuditAction.RUN_SOON,
+          savedObject: { type: 'alert', id },
+          error,
+        })
+      );
+      throw error;
+    }
+
+    this.auditLogger?.log(
+      ruleAuditEvent({
+        action: RuleAuditAction.RUN_SOON,
+        outcome: 'unknown',
+        savedObject: { type: 'alert', id },
+      })
+    );
+
+    this.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
+
+    await this.taskManager.runSoon(id);
+  }
+
   public async listAlertTypes() {
     return await this.authorization.filterByRuleTypeAuthorization(
       this.ruleTypeRegistry.list(),

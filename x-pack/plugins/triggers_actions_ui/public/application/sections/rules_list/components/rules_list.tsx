@@ -66,6 +66,7 @@ import {
   unsnoozeRule,
   deleteRules,
   updateAPIKey,
+  runSoon,
 } from '../../../lib/rule_api';
 import { loadActionTypes } from '../../../lib/action_connector_api';
 import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
@@ -259,6 +260,11 @@ export const RulesList = ({
   const onRuleEdit = (ruleItem: RuleTableItem) => {
     setEditFlyoutVisibility(true);
     setCurrentRuleToEdit(ruleItem);
+  };
+
+  const onRuleRun = async (rule: RuleTableItem) => {
+    await runSoon({ http, id: rule.id });
+    await loadData();
   };
 
   const isRuleTypeEditableInContext = (ruleTypeId: string) =>
@@ -787,6 +793,7 @@ export const RulesList = ({
             setRulesToDelete={setRulesToDelete}
             onEditRule={() => onRuleEdit(rule)}
             onUpdateAPIKey={setRulesToUpdateAPIKey}
+            onRunRule={() => onRuleRun(rule)}
           />
         )}
         renderRuleError={(rule) => {
