@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await (await find.byCssSelector('[title="expired"]')).click();
 
       await retry.try(async () => {
-        await a11y.testAppSnapshot({ skipFailures: true });
+        await a11y.testAppSnapshot();
       });
       await testSubjects.click('clearSearchButton');
     });
