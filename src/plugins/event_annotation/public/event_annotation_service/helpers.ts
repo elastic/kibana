@@ -39,5 +39,5 @@ export const isManualPointAnnotationConfig = (
 export const isQueryAnnotationConfig = (
   annotation?: EventAnnotationConfig
 ): annotation is QueryPointEventAnnotationConfig => {
-  return Boolean(annotation && 'filter' in annotation);
+  return Boolean(annotation && annotation.type === 'query');
 };

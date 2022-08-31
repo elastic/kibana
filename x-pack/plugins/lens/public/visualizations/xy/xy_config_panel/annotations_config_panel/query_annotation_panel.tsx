@@ -7,7 +7,7 @@
 
 import { EuiFormRow } from '@elastic/eui';
 import type { Query } from '@kbn/data-plugin/common';
-import type { PointInTimeQueryEventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
+import type { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { QueryInput } from '../../../../indexpattern_datasource/query_input';
@@ -32,13 +32,13 @@ export const ConfigPanelQueryAnnotation = ({
   onChange,
   layer,
 }: {
-  annotation?: PointInTimeQueryEventAnnotationConfig;
-  onChange: (annotations: Partial<PointInTimeQueryEventAnnotationConfig> | undefined) => void;
+  annotation?: QueryPointEventAnnotationConfig;
+  onChange: (annotations: Partial<QueryPointEventAnnotationConfig> | undefined) => void;
   frame: FramePublicAPI;
   state: XYState;
   layer: XYAnnotationLayerConfig;
 }) => {
-  const inputQuery = annotation?.query ?? defaultQuery;
+  const inputQuery = annotation?.filter ?? defaultQuery;
   const currentIndexPattern = frame.dataViews.indexPatterns[layer.indexPatternId];
   // list only supported field by operation, remove the rest
   const options = currentIndexPattern.fields
@@ -57,7 +57,7 @@ export const ConfigPanelQueryAnnotation = ({
       } as FieldOption<FieldOptionValue>;
     });
 
-  const selectedField = annotation?.key.field;
+  const selectedField = annotation?.timeField;
   return (
     <>
       <EuiFormRow
@@ -82,7 +82,7 @@ export const ConfigPanelQueryAnnotation = ({
           }
           onChoose={function (choice: FieldOptionValue | undefined): void {
             if (choice) {
-              onChange({ key: { type: 'point_in_time', field: choice.field } });
+              onChange({ timeField: choice.field });
             }
           }}
           fieldIsInvalid={false}
@@ -100,7 +100,7 @@ export const ConfigPanelQueryAnnotation = ({
         <QueryInput
           value={inputQuery}
           onChange={function (input: Query): void {
-            onChange({ query: input });
+            onChange({ filter: { type: 'kibana_query', ...input } });
           }}
           disableAutoFocus
           indexPatternTitle={frame.dataViews.indexPatterns[layer.indexPatternId].title}

@@ -10,7 +10,7 @@ import type {
   PointInTimeEventAnnotationConfig,
   RangeEventAnnotationConfig,
 } from '@kbn/event-annotation-plugin/common';
-import { isRangeAnnotation } from '@kbn/event-annotation-plugin/public';
+import { isRangeAnnotationConfig } from '@kbn/event-annotation-plugin/public';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import {
@@ -43,7 +43,7 @@ export const ConfigPanelApplyAsRangeSwitch = ({
   frame: FramePublicAPI;
   state: XYState;
 }) => {
-  const isRange = isRangeAnnotation(annotation);
+  const isRange = isRangeAnnotationConfig(annotation);
   return (
     <EuiFormRow display="columnCompressed" className="lnsRowCompressedMargin">
       <EuiSwitch

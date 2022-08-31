@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
 import { IconPosition } from '@kbn/expression-xy-plugin/common';
@@ -77,20 +77,20 @@ export interface MarkerDecorationConfig<T extends string = string> {
   icon?: T;
   iconPosition?: IconPosition;
   textVisibility?: boolean;
-  textSource?: 'name' | 'field';
+  textField?: string;
 }
 
 function getSelectedOption(
-  { textSource, textVisibility }: MarkerDecorationConfig = {},
+  { textField, textVisibility }: MarkerDecorationConfig = {},
   isQueryBased?: boolean
 ) {
   if (!textVisibility) {
     return 'none';
   }
-  if (!isQueryBased && textSource === 'field') {
-    return 'name';
+  if (isQueryBased && textField) {
+    return 'field';
   }
-  return textSource ?? 'name';
+  return 'name';
 }
 
 export function TextDecorationSetting<Icon extends string = string>({
@@ -107,6 +107,11 @@ export function TextDecorationSetting<Icon extends string = string>({
   /** A children render function for custom sub fields on textDecoration change */
   children?: (textDecoration: 'none' | 'name' | 'field') => JSX.Element | null;
 }) {
+  // To model the temporary state for label based on field when user didn't pick up the field yet,
+  // use a local state
+  const [selectedVisibleOption, setVisibleOption] = useState<'none' | 'name' | 'field'>(
+    getSelectedOption(currentConfig, isQueryBased)
+  );
   const options = [
     {
       id: `${idPrefix}none`,
@@ -133,8 +138,6 @@ export function TextDecorationSetting<Icon extends string = string>({
     });
   }
 
-  // Override the only conflictual scenario
-  const selectedVisibleOption = getSelectedOption(currentConfig, isQueryBased);
   return (
     <EuiFormRow
       label={i18n.translate('xpack.lens.lineMarker.textVisibility', {
@@ -155,13 +158,13 @@ export function TextDecorationSetting<Icon extends string = string>({
           idSelected={
             !currentConfig?.textVisibility
               ? `${idPrefix}none`
-              : `${idPrefix}${selectedVisibleOption ?? 'name'}`
+              : `${idPrefix}${selectedVisibleOption}`
           }
           onChange={(id) => {
             setConfig({
               textVisibility: id !== `${idPrefix}none`,
-              textSource: id.replace(idPrefix, '') as 'name' | 'field',
             });
+            setVisibleOption(id.replace(idPrefix, '') as 'none' | 'name' | 'field');
           }}
           isFullWidth
         />

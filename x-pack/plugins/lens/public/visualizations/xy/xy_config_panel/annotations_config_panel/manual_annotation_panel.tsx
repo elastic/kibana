@@ -6,7 +6,7 @@
  */
 
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
-import { isRangeAnnotation } from '@kbn/event-annotation-plugin/public';
+import { isRangeAnnotationConfig } from '@kbn/event-annotation-plugin/public';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React from 'react';
@@ -31,7 +31,7 @@ export const ConfigPanelManualAnnotation = ({
   frame: FramePublicAPI;
   state: XYState;
 }) => {
-  const isRange = isRangeAnnotation(annotation);
+  const isRange = isRangeAnnotationConfig(annotation);
   return (
     <>
       {isRange ? (

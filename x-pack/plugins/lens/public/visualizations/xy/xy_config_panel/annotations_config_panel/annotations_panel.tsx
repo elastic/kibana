@@ -134,6 +134,11 @@ export const AnnotationsPanel = (
             onChange={(id) => {
               setAnnotations({
                 type: id === `lens_xyChart_annotation_query` ? 'query' : 'manual',
+                // when switching to query, reset the key value
+                key:
+                  !isQueryBased && id === `lens_xyChart_annotation_query`
+                    ? { type: 'point_in_time' }
+                    : currentAnnotation?.key,
               });
             }}
             isFullWidth

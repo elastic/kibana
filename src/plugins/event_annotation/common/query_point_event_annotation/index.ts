@@ -31,7 +31,6 @@ export const queryPointEventAnnotation: ExpressionFunctionDefinition<
       help: i18n.translate('eventAnnotation.queryAnnotation.args.filter', {
         defaultMessage: `Annotation filter`,
       }),
-      required: true,
     },
     extraFields: {
       multi: true,
