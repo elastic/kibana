@@ -7,7 +7,7 @@
  */
 
 import { expectNotType, expectType } from 'tsd';
-import { DedotObject, DotObject } from './dot';
+import { DedotObject, DotObject } from '../../dot';
 
 interface TestA {
   'my.dotted.key': string;
