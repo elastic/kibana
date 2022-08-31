@@ -59,6 +59,7 @@ describe('splitByTerms', () => {
               _count: 'desc',
             },
             size: 10,
+            shard_size: 25,
           },
         },
       },
@@ -79,6 +80,7 @@ describe('splitByTerms', () => {
               _key: 'asc',
             },
             size: 10,
+            shard_size: 25,
           },
         },
       },
@@ -95,6 +97,7 @@ describe('splitByTerms', () => {
           terms: {
             field: 'host',
             size: 10,
+            shard_size: 25,
             order: {
               'avgmetric-SORT': 'desc',
             },
@@ -127,6 +130,7 @@ describe('splitByTerms', () => {
                 "_count": "desc",
               },
               "size": 10,
+              "shard_size": 25,
               "terms": Array [
                 Object {
                   "field": "c",
