@@ -2839,6 +2839,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-deprecations-server-internal@link:bazel-bin/packages/core/deprecations/core-deprecations-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-deprecations-server-mocks@link:bazel-bin/packages/core/deprecations/core-deprecations-server-mocks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-deprecations-server@link:bazel-bin/packages/core/deprecations/core-deprecations-server":
   version "0.0.0"
   uid ""
@@ -6882,6 +6890,14 @@
   uid ""
 
 "@types/kbn__core-deprecations-common@link:bazel-bin/packages/core/deprecations/core-deprecations-common/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-deprecations-server-internal@link:bazel-bin/packages/core/deprecations/core-deprecations-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-deprecations-server-mocks@link:bazel-bin/packages/core/deprecations/core-deprecations-server-mocks/npm_module_types":
   version "0.0.0"
   uid ""
 
