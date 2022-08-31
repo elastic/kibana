@@ -58,6 +58,9 @@ function getMockOptions({
   const auditService = auditServiceMock.create();
   auditLogger = auditLoggerMock.create();
   auditService.asScoped.mockReturnValue(auditLogger);
+
+  const accessAgreementObj = accessAgreementMessage ? {accessAgreement: { message: accessAgreementMessage }} : null;
+
   return {
     audit: auditService,
     getCurrentUser: jest.fn(),
@@ -69,7 +72,7 @@ function getMockOptions({
     config: createConfig(
       ConfigSchema.validate({
         authc: { selector, providers, http },
-        accessAgreement: { message: accessAgreementMessage || undefined },
+        ...accessAgreementObj
       }),
       loggingSystemMock.create().get(),
       { isTLSEnabled: false }
