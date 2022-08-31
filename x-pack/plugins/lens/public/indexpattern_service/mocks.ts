@@ -42,6 +42,7 @@ const indexPattern1 = {
   title: 'my-fake-index-pattern',
   timeFieldName: 'timestamp',
   hasRestrictions: false,
+  isPersisted: () => true,
   fields: [
     {
       name: 'timestamp',
@@ -127,6 +128,7 @@ const indexPattern2 = {
   title: 'my-fake-restricted-pattern',
   timeFieldName: 'timestamp',
   hasRestrictions: true,
+  isPersisted: () => true,
   fieldFormatMap: { bytes: { id: 'bytes', params: { pattern: '0.0' } } },
   fields: [
     {
@@ -198,7 +200,11 @@ export const sampleIndexPatterns = {
 export function mockDataViewsService() {
   return {
     get: jest.fn(async (id: '1' | '2') => {
-      const result = { ...sampleIndexPatternsFromService[id], metaFields: [] };
+      const result = {
+        ...sampleIndexPatternsFromService[id],
+        metaFields: [],
+        isPersisted: () => true,
+      };
       if (!result.fields) {
         result.fields = [];
       }
@@ -216,5 +222,6 @@ export function mockDataViewsService() {
         },
       ];
     }),
-  } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle'>;
+    create: jest.fn(),
+  } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle' | 'create'>;
 }

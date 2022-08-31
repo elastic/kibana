@@ -282,7 +282,7 @@
         "signature": [
           "(time?: number) => Promise<unknown>"
         ],
-        "path": "packages/kbn-test-jest-helpers/src/index.ts",
+        "path": "packages/kbn-test-jest-helpers/index.ts",
         "deprecated": false,
         "children": [
           {
@@ -295,7 +295,7 @@
             "signature": [
               "number"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/index.ts",
+            "path": "packages/kbn-test-jest-helpers/index.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -758,7 +758,7 @@
         "signature": [
           "() => Promise<unknown>"
         ],
-        "path": "packages/kbn-test-jest-helpers/src/index.ts",
+        "path": "packages/kbn-test-jest-helpers/index.ts",
         "deprecated": false,
         "children": [],
         "returnComment": [],
