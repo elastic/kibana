@@ -23,6 +23,7 @@ const onUpdateAPIKey = jest.fn();
 const snoozeRule = jest.fn();
 const unsnoozeRule = jest.fn();
 const onLoading = jest.fn();
+const onRunRule = jest.fn();
 
 export const tick = (ms = 0) =>
   new Promise((resolve) => {
@@ -95,6 +96,7 @@ describe('CollapsedItemActions', () => {
       snoozeRule,
       unsnoozeRule,
       onLoading,
+      onRunRule,
     };
   };
 
