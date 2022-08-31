@@ -364,6 +364,30 @@ describe('Terms Agg', () => {
       expect(params.order).toEqual({ 'test-orderAgg.50': 'desc' });
     });
 
+    test('set shard_size to 25 if size is smaller or equal than 10', () => {
+      const aggConfigs = getAggConfigs({
+        field: 'string_field',
+        orderAgg: {
+          type: 'count',
+        },
+        size: 5,
+      });
+      const { [BUCKET_TYPES.TERMS]: params } = aggConfigs.aggs[0].toDsl();
+      expect(params.shard_size).toEqual(25);
+    });
+
+    test('do not set shard_size if size is bigger than 10', () => {
+      const aggConfigs = getAggConfigs({
+        field: 'string_field',
+        orderAgg: {
+          type: 'count',
+        },
+        size: 15,
+      });
+      const { [BUCKET_TYPES.TERMS]: params } = aggConfigs.aggs[0].toDsl();
+      expect(params.shard_size).toBeUndefined();
+    });
+
     test('optionally supports shard_size', () => {
       const aggConfigs = getAggConfigs({
         field: 'string_field',
