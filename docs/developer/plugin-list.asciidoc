@@ -633,6 +633,10 @@ the alertTypes by the Stack in the alerting plugin, register associated HTTP
 routes, etc.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/stack_connectors/README.md[stackConnectors]
+|The Kibana stack_connectors plugin provides a framework to create executable actions. You can:
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/synthetics/README.md[synthetics]
 |The purpose of this plugin is to provide users of Heartbeat more visibility of what's happening
 in their infrastructure.
