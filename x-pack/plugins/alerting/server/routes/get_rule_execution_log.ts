@@ -72,11 +72,6 @@ export const getRuleExecutionLogRoute = (
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = (await context.alerting).getRulesClient();
         const { id } = req.params;
-        if (id === '*') {
-          return res.ok({
-            body: await rulesClient.getGlobalExecutionLogWithAuth(rewriteReq({ id, ...req.query })),
-          });
-        }
         return res.ok({
           body: await rulesClient.getExecutionLogForRule(rewriteReq({ id, ...req.query })),
         });
