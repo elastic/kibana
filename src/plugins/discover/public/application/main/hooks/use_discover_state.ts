@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { useMemo, useEffect, useState, useCallback } from 'react';
-import usePrevious from 'react-use/lib/usePrevious';
+import { useMemo, useEffect, useState, useCallback, useRef } from 'react';
 import { isEqual } from 'lodash';
 import { History } from 'history';
 import { DataViewType, DataViewListItem } from '@kbn/data-views-plugin/public';
@@ -22,7 +21,7 @@ import { getState } from '../services/discover_state';
 import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../build_services';
 import { loadDataView } from '../utils/resolve_data_view';
-import { useSavedSearch as useSavedSearchData, DataDocumentsMsg } from './use_saved_search';
+import { useSavedSearch as useSavedSearchData } from './use_saved_search';
 import {
   MODIFY_COLUMNS_ON_SWITCH,
   SEARCH_FIELDS_FROM_SOURCE,
@@ -30,7 +29,6 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../../../common';
 import { useSearchSession } from './use_search_session';
-import { useDataState } from './use_data_state';
 import { FetchStatus } from '../../types';
 import { getDataViewAppState } from '../utils/get_switch_data_view_app_state';
 import { DataTableRecord } from '../../../types';
@@ -82,9 +80,6 @@ export function useDiscoverState({
   const { appStateContainer } = stateContainer;
 
   const [state, setState] = useState(appStateContainer.getState());
-  const [documentStateCols, setDocumentStateCols] = useState<string[]>([]);
-  const [sqlQuery] = useState<AggregateQuery | Query | undefined>(state.query);
-  const prevQuery = usePrevious(state.query);
 
   /**
    * Search session logic
@@ -115,7 +110,44 @@ export function useDiscoverState({
     useNewFieldsApi,
   });
 
-  const documentState: DataDocumentsMsg = useDataState(data$.documents$);
+  const queryColumns = useRef<{ query: AggregateQuery | Query | undefined; columns: string[] }>({
+    columns: [],
+    query: undefined,
+  });
+
+  useEffect(() => {
+    const subscription = data$.documents$.subscribe((next) => {
+      let columns: string[] = [];
+      if (
+        next.recordRawType === 'plain' &&
+        state.query &&
+        isOfAggregateQueryType(state.query) &&
+        'sql' in state.query
+      ) {
+        if (next.result?.length && next.fetchStatus === FetchStatus.COMPLETE) {
+          const firstRow = next.result[0];
+          const firstRowColumns = Object.keys(firstRow.raw).slice(0, MAX_NUM_OF_COLUMNS);
+          if (
+            !isEqual(firstRowColumns, queryColumns.current.columns) &&
+            !isEqual(state.query, queryColumns.current.query)
+          ) {
+            columns = firstRowColumns;
+            queryColumns.current = { columns: firstRowColumns, query: state.query };
+          }
+        }
+        const indexPatternFromQuery = getIndexPatternFromSQLQuery(state.query.sql);
+        const dataViewObj = dataViewList.find(({ title }) => title === indexPatternFromQuery);
+        if (dataViewObj) {
+          const nextState = {
+            index: dataViewObj.id,
+            ...(columns.length && { columns }),
+          };
+          stateContainer.replaceUrlAppState(nextState);
+        }
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [data$.documents$, dataViewList, state.query, stateContainer]);
 
   /**
    * Reset to display loading spinner when savedSearch is changing
@@ -252,14 +284,6 @@ export function useDiscoverState({
   );
 
   /**
-   * Reset stored columns if SQL query changes
-   */
-  useEffect(() => {
-    if (!isEqual(state.query, prevQuery)) {
-      setDocumentStateCols([]);
-    }
-  }, [state.query, prevQuery]);
-  /**
    * Trigger data fetching on dataView or savedSearch changes
    */
   useEffect(() => {
@@ -277,46 +301,6 @@ export function useDiscoverState({
       stateContainer.pauseAutoRefreshInterval();
     }
   }, [dataView, stateContainer]);
-
-  /**
-   * Helper to get all column / fields of the first result row of SQL request
-   */
-  const getResultColumns = useCallback(() => {
-    if (documentState.result?.length && documentState.fetchStatus === FetchStatus.COMPLETE) {
-      const firstRow = documentState.result[0];
-      const columns = Object.keys(firstRow.raw).slice(0, MAX_NUM_OF_COLUMNS);
-      if (!isEqual(columns, documentStateCols) && !isEqual(state.query, sqlQuery)) {
-        return columns;
-      }
-      return [];
-    }
-    return [];
-  }, [documentState, documentStateCols, sqlQuery, state.query]);
-
-  /**
-   * Just used by SQL mode to set the actual used data view
-   */
-  useEffect(() => {
-    async function fetchDataview() {
-      if (state.query && isOfAggregateQueryType(state.query) && 'sql' in state.query) {
-        const indexPatternFromQuery = getIndexPatternFromSQLQuery(state.query.sql);
-        const dataViewObj = dataViewList.find(({ title }) => title === indexPatternFromQuery);
-        if (dataViewObj) {
-          const columns = getResultColumns();
-          if (columns.length) {
-            setDocumentStateCols(columns);
-          }
-          const nextState = {
-            index: dataViewObj.id,
-            ...(columns.length && { columns }),
-          };
-          stateContainer.replaceUrlAppState(nextState);
-        }
-      }
-    }
-    fetchDataview();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [config, documentState, dataViews, dataViewList]);
 
   return {
     data$,
