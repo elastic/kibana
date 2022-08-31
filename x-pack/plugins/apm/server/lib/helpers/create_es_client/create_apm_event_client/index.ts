@@ -38,6 +38,7 @@ import {
   unpackProcessorEvents,
   processorEventsToIndex,
 } from './unpack_processor_events';
+import { fakeSyntheticSource } from './fake_synthetic_source';
 
 export type APMEventESSearchRequest = Omit<ESSearchRequest, 'index'> & {
   apm: {
@@ -162,9 +163,48 @@ export class APMEventClient {
 
     return this.callAsyncWithDebug({
       cb: (opts) =>
-        this.esClient.search(searchParams, opts) as unknown as Promise<{
-          body: TypedSearchResponse<TParams>;
-        }>,
+        (
+          this.esClient.search(searchParams, opts) as unknown as Promise<{
+            body: TypedSearchResponse<TParams>;
+          }>
+        ).then((response) => {
+          // ensure metric data is compatible with synthetic source
+          // enabled
+          const metricEventsOnly = params.apm.events.every(
+            (event) => event === ProcessorEvent.metric
+          );
+
+          if (!response.body?.hits?.hits) {
+            return response;
+          }
+
+          const hits = response.body.hits.hits.map((hit) => {
+            if (
+              metricEventsOnly ||
+              // take filter_path etc into account
+              (hit._source &&
+                'processor' in hit._source &&
+                hit._source.processor?.event === ProcessorEvent.metric)
+            ) {
+              return {
+                ...hit,
+                _source: fakeSyntheticSource(hit._source),
+              };
+            }
+            return hit;
+          });
+
+          return {
+            ...response,
+            body: {
+              ...response.body,
+              hits: {
+                ...response.body.hits,
+                hits,
+              },
+            },
+          };
+        }),
       operationName,
       params: searchParams,
       requestType: 'search',
