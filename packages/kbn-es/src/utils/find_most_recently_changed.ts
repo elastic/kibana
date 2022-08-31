@@ -21,7 +21,7 @@ export function findMostRecentlyChanged(pattern: string) {
   const ctime = (p: string) => fs.statSync(p).ctime.getTime();
 
   return globby
-    .sync(pattern)
+    .sync(pattern, { onlyFiles: false })
     .sort((a, b) => ctime(a) - ctime(b))
     .pop();
 }
