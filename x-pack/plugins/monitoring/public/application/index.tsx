@@ -10,7 +10,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Switch, Redirect, Router } from 'react-router-dom';
 import { Observable } from 'rxjs';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { LoadingPage } from './pages/loading_page';
 import { LicensePage } from './pages/license_page';
 import { ClusterOverview } from './pages/cluster/overview_page';
@@ -100,6 +100,7 @@ const MonitoringApp: React.FC<{
 
   return (
     <KibanaContextProvider services={{ ...core, ...plugins }}>
+      <KibanaThemeProvider theme$={core.theme.theme$}>
       <ExternalConfigContext.Provider value={externalConfig}>
         <GlobalStateProvider
           query={plugins.data.query}
@@ -341,6 +342,7 @@ const MonitoringApp: React.FC<{
           </HeaderActionMenuContext.Provider>
         </GlobalStateProvider>
       </ExternalConfigContext.Provider>
+      </KibanaThemeProvider>
     </KibanaContextProvider>
   );
 };
