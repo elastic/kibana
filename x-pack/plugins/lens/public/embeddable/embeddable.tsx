@@ -23,7 +23,7 @@ import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 
 import { Subscription } from 'rxjs';
 import { toExpression, Ast } from '@kbn/interpreter';
-import { ErrorLike, RenderMode } from '@kbn/expressions-plugin/common';
+import { DefaultInspectorAdapters, ErrorLike, RenderMode } from '@kbn/expressions-plugin/common';
 import { map, distinctUntilChanged, skip } from 'rxjs/operators';
 import fastIsEqual from 'fast-deep-equal';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
@@ -101,7 +101,7 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
   style?: React.CSSProperties;
   className?: string;
   onBrushEnd?: (data: BrushTriggerEvent['data']) => void;
-  onLoad?: (isLoading: boolean) => void;
+  onLoad?: (isLoading: boolean, adapters?: Partial<DefaultInspectorAdapters>) => void;
   onFilter?: (data: ClickTriggerEvent['data']) => void;
   onTableRowClick?: (data: LensTableRowContextMenuEvent['data']) => void;
 }
@@ -492,7 +492,7 @@ export class Embeddable
     this.activeDataInfo.activeData = adapters?.tables?.tables;
     if (this.input.onLoad) {
       // once onData$ is get's called from expression renderer, loading becomes false
-      this.input.onLoad(false);
+      this.input.onLoad(false, adapters);
     }
 
     const { type, error } = data as { type: string; error: ErrorLike };
@@ -758,9 +758,12 @@ export class Embeddable
   }
 
   private async loadViewUnderlyingDataArgs(): Promise<boolean> {
+    if (!this.savedVis || !this.activeDataInfo.activeData) {
+      return false;
+    }
     const mergedSearchContext = this.getMergedSearchContext();
 
-    if (!this.activeDataInfo.activeData || !mergedSearchContext.timeRange || !this.savedVis) {
+    if (!mergedSearchContext.timeRange) {
       return false;
     }
 

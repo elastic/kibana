@@ -8,11 +8,7 @@
 
 import Url from 'url';
 import expect from '@kbn/expect';
-import {
-  AppNavLinkStatus,
-  AppStatus,
-  AppUpdatableFields,
-} from '@kbn/core/public/application/types';
+import { AppNavLinkStatus, AppStatus, AppUpdatableFields } from '@kbn/core-application-browser';
 import { PluginFunctionalProviderContext } from '../../services';
 import '@kbn/core-app-status-plugin/public/types';
 
