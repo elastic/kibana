@@ -13,7 +13,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { OsqueryActionResults } from '.';
 import { queryClient } from '../../query_client';
 import { useKibana } from '../../common/lib/kibana';
-import * as useActions from '../../actions/use_all_actions';
+import * as useActions from '../../actions/use_all_live_queries';
 import { PERMISSION_DENIED } from '../osquery_action/translations';
 import * as privileges from '../../action_results/use_action_privileges';
 
@@ -33,9 +33,10 @@ const enablePrivileges = () => {
 
 const defaultProps = {
   agentIds: [TEST_AGENT],
-  ruleName: 'Test-rule',
+  ruleName: ['Test-rule'],
   ruleActions: [{ action_type_id: 'action1' }, { action_type_id: 'action2' }],
   eventDetailId: '123',
+  alertId: 'test-alert-id',
 };
 
 const defaultPermissions = {
@@ -78,7 +79,7 @@ describe('Osquery Results', () => {
     }));
     mockKibana();
     // @ts-expect-error update types
-    jest.spyOn(useActions, 'useInfiniteAllActions').mockImplementation(() => ({
+    jest.spyOn(useActions, 'useAllLiveQueries').mockImplementation(() => ({
       data: {
         pages: [
           {
