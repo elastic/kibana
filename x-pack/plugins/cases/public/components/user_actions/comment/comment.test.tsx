@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiCommentList } from '@elastic/eui';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 
 import { Actions } from '../../../../common/api';
 import {
@@ -273,8 +273,24 @@ describe('createCommentUserActionBuilder', () => {
     });
 
     it('renders correctly a persistable state attachment', async () => {
+      const MockComponent = jest.fn((props) => {
+        return <div data-test-subj="my-custom-attachment" />;
+      });
+
+      const SpyLazyFactory = jest.fn(() => {
+        return Promise.resolve().then(() => {
+          return {
+            default: MockComponent,
+          };
+        });
+      });
+
       const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
-      persistableStateAttachmentTypeRegistry.register(getPersistableStateAttachment());
+      persistableStateAttachmentTypeRegistry.register(
+        getPersistableStateAttachment({
+          children: React.lazy(SpyLazyFactory),
+        })
+      );
 
       const userAction = getPersistableStateUserAction();
       const builder = createCommentUserActionBuilder({
@@ -290,10 +306,24 @@ describe('createCommentUserActionBuilder', () => {
       const createdUserAction = builder.build();
       const result = appMockRender.render(<EuiCommentList comments={createdUserAction} />);
 
+      await waitFor(() => {
+        expect(result.getByTestId('my-custom-attachment')).toBeInTheDocument();
+        expect(MockComponent).toHaveBeenCalledTimes(1);
+        expect(SpyLazyFactory).toHaveBeenCalledTimes(1);
+      });
+
       expect(result.getByTestId('comment-persistableState-.test')).toBeInTheDocument();
       expect(result.getByTestId('copy-link-persistable-state-comment-id')).toBeInTheDocument();
       expect(result.getByTestId('user-action-username-with-avatar')).toBeInTheDocument();
       expect(screen.getByText('added an embeddable')).toBeInTheDocument();
+
+      result.rerender(<EuiCommentList comments={builder.build()} />);
+
+      await waitFor(() => {
+        expect(result.getByTestId('my-custom-attachment')).toBeInTheDocument();
+        expect(MockComponent).toHaveBeenCalledTimes(2);
+        expect(SpyLazyFactory).toHaveBeenCalledTimes(1);
+      });
     });
 
     it('renders correctly if the reference is not registered', async () => {
