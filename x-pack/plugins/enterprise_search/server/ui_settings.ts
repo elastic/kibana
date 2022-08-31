@@ -9,19 +9,19 @@ import { schema } from '@kbn/config-schema';
 import { UiSettingsParams } from '@kbn/core/types';
 import { i18n } from '@kbn/i18n';
 
-import { enterpriseSearchFeatureId, enableIndexPowerupsTab } from '../common/ui_settings_keys';
+import { enterpriseSearchFeatureId, enableIndexTransformsTab } from '../common/ui_settings_keys';
 
 /**
  * uiSettings definitions for Enterprise Search
  */
 export const uiSettings: Record<string, UiSettingsParams<boolean>> = {
-  [enableIndexPowerupsTab]: {
+  [enableIndexTransformsTab]: {
     category: [enterpriseSearchFeatureId],
-    description: i18n.translate('xpack.enterpriseSearch.uiSettings.indexPowerups.description', {
-      defaultMessage: 'Enable the new index powerups tab in Enterprise Search.',
+    description: i18n.translate('xpack.enterpriseSearch.uiSettings.indexTransforms.description', {
+      defaultMessage: 'Enable the new index transforms tab in Enterprise Search.',
     }),
-    name: i18n.translate('xpack.enterpriseSearch.uiSettings.indexPowerups.name', {
-      defaultMessage: 'Enable index powerups',
+    name: i18n.translate('xpack.enterpriseSearch.uiSettings.indexTransforms.name', {
+      defaultMessage: 'Enable index transforms',
     }),
     requiresPageReload: false,
     schema: schema.boolean(),

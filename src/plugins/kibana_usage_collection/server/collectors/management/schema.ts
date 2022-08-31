@@ -542,7 +542,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'enterpriseSearch:enableIndexPowerupsTab': {
+  'enterpriseSearch:enableIndexTransformsTab': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },

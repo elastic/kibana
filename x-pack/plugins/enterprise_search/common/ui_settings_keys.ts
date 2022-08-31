@@ -6,4 +6,4 @@
  */
 
 export const enterpriseSearchFeatureId = 'enterpriseSearch';
-export const enableIndexPowerupsTab = 'enterpriseSearch:enableIndexPowerupsTab';
+export const enableIndexTransformsTab = 'enterpriseSearch:enableIndexTransformsTab';
