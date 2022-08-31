@@ -52,13 +52,6 @@ export const searchAfterAndBulkCreate = async ({
     let sortIds: estypes.SortResults | undefined;
     let hasSortId = true; // default to true so we execute the search on initial run
 
-<<<<<<< HEAD
-=======
-    // signalsCreatedCount keeps track of how many signals we have created,
-    // to ensure we don't exceed maxSignals
-    let signalsCreatedCount = 0;
-
->>>>>>> aae880e51d0 ([CI] Auto-commit changed files from 'node scripts/eslint --no-cache --fix')
     if (tuple == null || tuple.to == null || tuple.from == null) {
       ruleExecutionLogger.error(`[-] malformed date tuple`);
       return createSearchAfterReturnType({
@@ -144,7 +137,6 @@ export const searchAfterAndBulkCreate = async ({
         // if there is a sort id to continue the search_after with.
         if (includedEvents.length !== 0) {
           // make sure we are not going to create more signals than maxSignals allows
-<<<<<<< HEAD
           const limitedEvents = includedEvents.slice(
             0,
             tuple.maxSignals - toReturn.createdSignalsCount
@@ -152,22 +144,7 @@ export const searchAfterAndBulkCreate = async ({
           const enrichedEvents = await enrichment(limitedEvents);
           const wrappedDocs = wrapHits(enrichedEvents, buildReasonMessage);
 
-          const bulkCreateResult = await bulkCreate(wrappedDocs);
-
-          addToSearchAfterReturn({ current: toReturn, next: bulkCreateResult });
-=======
-          const limitedEvents = includedEvents.slice(0, tuple.maxSignals - signalsCreatedCount);
-          // TODO: should we move those IM enrichment, after deduplication?
-          const enrichedEvents = await enrichment(limitedEvents);
-          const wrappedDocs = wrapHits(enrichedEvents, buildReasonMessage);
-
-          const {
-            bulkCreateDuration: bulkDuration,
-            createdItemsCount: createdCount,
-            createdItems,
-            success: bulkSuccess,
-            errors: bulkErrors,
-          } = await bulkCreate(
+          const bulkCreateResult = await bulkCreate(
             wrappedDocs,
             undefined,
             createEnrichEventsFunction({
@@ -176,18 +153,7 @@ export const searchAfterAndBulkCreate = async ({
             })
           );
 
-          toReturn = mergeReturns([
-            toReturn,
-            createSearchAfterReturnType({
-              success: bulkSuccess,
-              createdSignalsCount: createdCount,
-              createdSignals: createdItems,
-              bulkCreateTimes: [bulkDuration],
-              errors: bulkErrors,
-            }),
-          ]);
-          signalsCreatedCount += createdCount;
->>>>>>> aae880e51d0 ([CI] Auto-commit changed files from 'node scripts/eslint --no-cache --fix')
+          addToSearchAfterReturn({ current: toReturn, next: bulkCreateResult });
 
           ruleExecutionLogger.debug(`created ${bulkCreateResult.createdItemsCount} signals`);
           ruleExecutionLogger.debug(`signalsCreatedCount: ${toReturn.createdSignalsCount}`);

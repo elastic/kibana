@@ -141,7 +141,7 @@ export const thresholdExecutor = async ({
     });
 
     // Build and index new alerts
-<<<<<<< HEAD
+
     const createResult = await bulkCreateThresholdSignals({
       buckets,
       completeRule,
@@ -154,24 +154,8 @@ export const thresholdExecutor = async ({
       signalHistory,
       bulkCreate,
       wrapHits,
+      ruleExecutionLogger,
     });
-=======
-    const { success, bulkCreateDuration, createdItemsCount, createdItems, errors } =
-      await bulkCreateThresholdSignals({
-        buckets,
-        completeRule,
-        filter: esFilter,
-        services,
-        inputIndexPattern: inputIndex,
-        signalsIndex: ruleParams.outputIndex,
-        startedAt,
-        from: tuple.from.toDate(),
-        signalHistory,
-        bulkCreate,
-        wrapHits,
-        ruleExecutionLogger,
-      });
->>>>>>> 77b886e2fae (Add enrichmenst for other rule types)
 
     addToSearchAfterReturn({ current: result, next: createResult });
 
