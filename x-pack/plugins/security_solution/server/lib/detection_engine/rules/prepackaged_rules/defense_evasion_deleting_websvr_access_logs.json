@@ -13,10 +13,23 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "WebServer Access Logs Deleted",
-  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
-  "query": "file where event.type == \"deletion\" and\n  file.path : (\"C:\\\\inetpub\\\\logs\\\\LogFiles\\\\*.log\", \n               \"/var/log/apache*/access.log\",\n               \"/etc/httpd/logs/access_log\", \n               \"/var/log/httpd/access_log\", \n               \"/var/www/*/logs/access.log\")\n",
+  "note": "",
+  "query": "file where event.type == \"deletion\" and\n  file.path : (\"C:\\\\inetpub\\\\logs\\\\LogFiles\\\\*.log\",\n               \"/var/log/apache*/access.log\",\n               \"/etc/httpd/logs/access_log\",\n               \"/var/log/httpd/access_log\",\n               \"/var/www/*/logs/access.log\")\n",
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "file.path",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 47,
   "rule_id": "665e7a4f-c58e-4fc6-bc83-87a7572670ac",
+  "setup": "If enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.",
   "severity": "medium",
   "tags": [
     "Elastic",
@@ -46,5 +59,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 4
+  "version": 6
 }

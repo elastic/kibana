@@ -17,7 +17,7 @@ export function MachineLearningNavigationProvider({
   const browser = getService('browser');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'header']);
+  const PageObjects = getPageObjects(['common', 'header', 'discover']);
 
   return {
     async navigateToMl() {
@@ -41,6 +41,16 @@ export function MachineLearningNavigationProvider({
           await testSubjects.existOrFail('jobsListLink', { timeout: 2000 });
         } else {
           await testSubjects.missingOrFail('jobsListLink', { timeout: 2000 });
+        }
+      });
+    },
+
+    async navigateToDiscoverViaAppsMenu() {
+      await retry.tryForTime(60 * 1000, async () => {
+        await appsMenu.clickLink('Discover');
+        await testSubjects.existOrFail('discover-dataView-switch-link', { timeout: 5000 });
+        if (await testSubjects.exists('dataViewPickerTourLink', { timeout: 1000 })) {
+          await testSubjects.click('dataViewPickerTourLink');
         }
       });
     },

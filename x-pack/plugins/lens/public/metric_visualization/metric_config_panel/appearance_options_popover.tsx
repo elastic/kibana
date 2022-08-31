@@ -36,7 +36,7 @@ export const AppearanceOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
         })}
         type="visualOptions"
         groupPosition="none"
-        buttonDataTestSubj="lnsMetricAppearanceButton"
+        buttonDataTestSubj="lnsLegacyMetricAppearanceButton"
       >
         <TextFormattingOptions state={state} setState={setState} />
         <TitlePositionOptions state={state} setState={setState} />

@@ -42,7 +42,7 @@ export class ReportingPlugin
   }
 
   public setup(core: CoreSetup, plugins: ReportingSetupDeps) {
-    const { http, status } = core;
+    const { http, status, docLinks } = core;
     const reportingCore = new ReportingCore(this.logger, this.initContext);
 
     // prevent throwing errors in route handlers about async deps not being initialized
@@ -65,6 +65,7 @@ export class ReportingPlugin
       basePath: http.basePath,
       router: http.createRouter<ReportingRequestHandlerContext>(),
       usageCounter,
+      docLinks,
       ...plugins,
     });
 

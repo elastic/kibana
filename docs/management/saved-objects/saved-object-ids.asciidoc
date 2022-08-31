@@ -70,7 +70,7 @@ if you import it into the second space again, {kib} will find the second object 
 
 WARNING: When you import a saved object and it is created with a different ID, if 1. it contains weak links to other saved objects (such as
 a dashboard with a Markdown URL to navigate to another dashboard) and 2. the object's ID has changed (step 3 above), those weak links will
-be broken. For more information, refer to <<known-issue-123550,the known issue in the changelog>>.
+be broken. For more information, refer to {kibana-ref-all}/8.0/release-notes-8.0.0.html#known-issue-8.0.0[the known issue in the changelog].
 
 [[saved-object-ids-impact-when-using-apis]]
 ===== Using the saved objects APIs

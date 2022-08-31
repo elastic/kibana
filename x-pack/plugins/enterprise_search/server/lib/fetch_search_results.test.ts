@@ -87,7 +87,7 @@ describe('fetchSearchResults lib function', () => {
     expect(mockClient.asCurrentUser.search).toHaveBeenCalledWith({
       from: DEFAULT_FROM_VALUE,
       index: indexName,
-      q: query,
+      q: JSON.stringify(query),
       size: ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT,
     });
   });
@@ -120,7 +120,7 @@ describe('fetchSearchResults lib function', () => {
     expect(mockClient.asCurrentUser.search).toHaveBeenCalledWith({
       from: DEFAULT_FROM_VALUE,
       index: indexName,
-      q: query,
+      q: JSON.stringify(query),
       size: ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT,
     });
   });

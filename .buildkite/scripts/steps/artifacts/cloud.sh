@@ -4,12 +4,13 @@ set -euo pipefail
 
 .buildkite/scripts/bootstrap.sh
 
+source "$(dirname "$0")/../../common/util.sh"
 source .buildkite/scripts/steps/artifacts/env.sh
 
 echo "--- Build and publish Cloud image"
 mkdir -p target
 
-buildkite-agent artifact download "kibana-$FULL_VERSION-linux-x86_64.tar.gz" ./target --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
+download_artifact "kibana-$FULL_VERSION-linux-x86_64.tar.gz" ./target --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
 
 node scripts/build \
   --skip-initialize \

@@ -10,17 +10,7 @@ import type { SourcererDataView, SourcererModel, SourcererScopeById } from './mo
 import { SourcererScopeName } from './model';
 import type { SelectedDataViewPayload } from './actions';
 import type { sourcererModel } from '../model';
-
-export const sortWithExcludesAtEnd = (indices: string[]) => {
-  const allSorted = indices.reduce(
-    (acc: { includes: string[]; excludes: string[] }, index) =>
-      index.trim().startsWith('-')
-        ? { includes: acc.includes, excludes: [...acc.excludes, index] }
-        : { includes: [...acc.includes, index], excludes: acc.excludes },
-    { includes: [], excludes: [] }
-  );
-  return [...allSorted.includes.sort(), ...allSorted.excludes.sort()];
-};
+import { ensurePatternFormat, sortWithExcludesAtEnd } from '../../../../common/utils/sourcerer';
 
 export const getScopePatternListSelection = (
   theDataView: SourcererDataView | undefined,
@@ -45,13 +35,6 @@ export const getScopePatternListSelection = (
       return sortWithExcludesAtEnd(patternList);
   }
 };
-
-export const ensurePatternFormat = (patternList: string[]): string[] =>
-  sortWithExcludesAtEnd([
-    ...new Set(
-      patternList.reduce((acc: string[], pattern: string) => [...pattern.split(','), ...acc], [])
-    ),
-  ]);
 
 export const validateSelectedPatterns = (
   state: SourcererModel,

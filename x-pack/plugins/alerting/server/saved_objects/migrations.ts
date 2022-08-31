@@ -169,6 +169,12 @@ export function getMigrations(
     pipeMigrations(addSearchType, removeInternalTags, convertSnoozes)
   );
 
+  const migrationRules841 = createEsoMigration(
+    encryptedSavedObjects,
+    (doc: SavedObjectUnsanitizedDoc<RawRule>): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
+    pipeMigrations(removeIsSnoozedUntil)
+  );
+
   return mergeSavedObjectMigrationMaps(
     {
       '7.10.0': executeMigrationWithErrorHandling(migrationWhenRBACWasIntroduced, '7.10.0'),
@@ -182,6 +188,7 @@ export function getMigrations(
       '8.0.1': executeMigrationWithErrorHandling(migrationRules801, '8.0.1'),
       '8.2.0': executeMigrationWithErrorHandling(migrationRules820, '8.2.0'),
       '8.3.0': executeMigrationWithErrorHandling(migrationRules830, '8.3.0'),
+      '8.4.1': executeMigrationWithErrorHandling(migrationRules841, '8.4.1'),
     },
     getSearchSourceMigrations(encryptedSavedObjects, searchSourceMigrations)
   );
@@ -1012,4 +1019,15 @@ function getSearchSourceMigrations(
     }
   }
   return filteredMigrations;
+}
+
+function removeIsSnoozedUntil(
+  doc: SavedObjectUnsanitizedDoc<RawRule>
+): SavedObjectUnsanitizedDoc<RawRule> {
+  return {
+    ...doc,
+    attributes: {
+      ...(omit(doc.attributes, ['isSnoozedUntil']) as RawRule),
+    },
+  };
 }

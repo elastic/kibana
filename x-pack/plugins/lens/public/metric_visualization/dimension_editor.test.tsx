@@ -100,12 +100,12 @@ describe('metric dimension editor', () => {
 
   it('should not show the dynamic coloring option for non numeric columns', () => {
     const instance = mountWithIntl(<MetricDimensionEditor {...props} />);
-    expect(instance.find('[data-test-subj="lnsMetric_dynamicColoring_groups"]').exists()).toBe(
-      false
-    );
-    expect(instance.find('[data-test-subj="lnsMetric_dynamicColoring_palette"]').exists()).toBe(
-      false
-    );
+    expect(
+      instance.find('[data-test-subj="lnsLegacyMetric_dynamicColoring_groups"]').exists()
+    ).toBe(false);
+    expect(
+      instance.find('[data-test-subj="lnsLegacyMetric_dynamicColoring_palette"]').exists()
+    ).toBe(false);
   });
 
   it('should set the dynamic coloring default to "none"', () => {
@@ -113,14 +113,14 @@ describe('metric dimension editor', () => {
     const instance = mountWithIntl(<MetricDimensionEditor {...props} />);
     expect(
       instance
-        .find('[data-test-subj="lnsMetric_dynamicColoring_groups"]')
+        .find('[data-test-subj="lnsLegacyMetric_dynamicColoring_groups"]')
         .find(EuiButtonGroup)
         .prop('idSelected')
     ).toEqual(expect.stringContaining(ColorMode.None));
 
-    expect(instance.find('[data-test-subj="lnsMetric_dynamicColoring_palette"]').exists()).toBe(
-      false
-    );
+    expect(
+      instance.find('[data-test-subj="lnsLegacyMetric_dynamicColoring_palette"]').exists()
+    ).toBe(false);
   });
 
   it('should show the dynamic palette display ony when colorMode is different from "none"', () => {
@@ -129,14 +129,14 @@ describe('metric dimension editor', () => {
     const instance = mountWithIntl(<MetricDimensionEditor {...props} />);
     expect(
       instance
-        .find('[data-test-subj="lnsMetric_dynamicColoring_groups"]')
+        .find('[data-test-subj="lnsLegacyMetric_dynamicColoring_groups"]')
         .find(EuiButtonGroup)
         .prop('idSelected')
     ).toEqual(expect.stringContaining(ColorMode.Labels));
 
-    expect(instance.find('[data-test-subj="lnsMetric_dynamicColoring_palette"]').exists()).toBe(
-      true
-    );
+    expect(
+      instance.find('[data-test-subj="lnsLegacyMetric_dynamicColoring_palette"]').exists()
+    ).toBe(true);
   });
 
   it('should prefill the palette stops with some colors when enabling coloring', () => {
@@ -145,7 +145,7 @@ describe('metric dimension editor', () => {
 
     act(() => {
       instance
-        .find('[data-test-subj="lnsMetric_dynamicColoring_groups"]')
+        .find('[data-test-subj="lnsLegacyMetric_dynamicColoring_groups"]')
         .find(EuiButtonGroup)
         .prop('onChange')!(ColorMode.Labels);
     });
@@ -165,7 +165,7 @@ describe('metric dimension editor', () => {
 
     act(() => {
       instance
-        .find('[data-test-subj="lnsMetric_dynamicColoring_trigger"]')
+        .find('[data-test-subj="lnsLegacyMetric_dynamicColoring_trigger"]')
         .first()
         .simulate('click');
     });
@@ -182,7 +182,7 @@ describe('metric dimension editor', () => {
 
     act(() => {
       instance
-        .find('[data-test-subj="lnsMetric_dynamicColoring_trigger"]')
+        .find('[data-test-subj="lnsLegacyMetric_dynamicColoring_trigger"]')
         .first()
         .simulate('click');
     });
@@ -199,7 +199,7 @@ describe('metric dimension editor', () => {
 
     act(() => {
       instance
-        .find('[data-test-subj="lnsMetric_dynamicColoring_trigger"]')
+        .find('[data-test-subj="lnsLegacyMetric_dynamicColoring_trigger"]')
         .first()
         .simulate('click');
     });
@@ -217,7 +217,7 @@ describe('metric dimension editor', () => {
 
     act(() => {
       instance
-        .find('[data-test-subj="lnsMetric_dynamicColoring_groups"]')
+        .find('[data-test-subj="lnsLegacyMetric_dynamicColoring_groups"]')
         .find(EuiButtonGroup)
         .prop('onChange')!(ColorMode.Background);
     });

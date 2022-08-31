@@ -47,6 +47,7 @@ export type {
   ReferenceLineLayerArgs,
   CommonXYDataLayerConfig,
   ReferenceLineLayerConfig,
+  DataDecorationConfigResult,
   AvailableReferenceLineIcon,
   XYExtendedLayerConfigResult,
   CommonXYAnnotationLayerConfig,

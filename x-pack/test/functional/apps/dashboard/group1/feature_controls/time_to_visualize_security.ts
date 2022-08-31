@@ -131,7 +131,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.lens.switchToVisualization('lnsMetric');
 
         await PageObjects.lens.waitForVisualization('legacyMtrVis');
-        await PageObjects.lens.assertMetric('Average of bytes', '5,727.322');
+        await PageObjects.lens.assertLegacyMetric('Average of bytes', '5,727.322');
 
         await PageObjects.header.waitUntilLoadingHasFinished();
         await testSubjects.click('lnsApp_saveButton');
@@ -147,7 +147,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await PageObjects.dashboard.waitForRenderComplete();
 
-        await PageObjects.lens.assertMetric('Average of bytes', '5,727.322');
+        await PageObjects.lens.assertLegacyMetric('Average of bytes', '5,727.322');
         const isLinked = await PageObjects.timeToVisualize.libraryNotificationExists(
           'New Lens from Modal'
         );

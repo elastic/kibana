@@ -35,7 +35,7 @@ import {
 import { CrawlerLogic } from './crawler/crawler_logic';
 import { IndexNameLogic } from './index_name_logic';
 
-const FETCH_INDEX_POLLING_DURATION = 1000; // 1 seconds
+const FETCH_INDEX_POLLING_DURATION = 5000; // 1 seconds
 const FETCH_INDEX_POLLING_DURATION_ON_FAILURE = 30000; // 30 seconds
 
 type FetchIndexApiValues = Actions<FetchIndexApiParams, FetchIndexApiResponse>;

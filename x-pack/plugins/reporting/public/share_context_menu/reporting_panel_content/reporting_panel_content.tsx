@@ -311,9 +311,12 @@ class ReportingPanelContentUi extends Component<Props, State> {
         this.props.toasts.addError(error, {
           title: intl.formatMessage({
             id: 'xpack.reporting.panelContent.notification.reportingErrorTitle',
-            defaultMessage: 'Failed to create report',
+            defaultMessage: 'Unable to create report',
           }),
-          toastMessage: error.body.message,
+          toastMessage: (
+            // eslint-disable-next-line react/no-danger
+            <span dangerouslySetInnerHTML={{ __html: error.body.message }} />
+          ) as unknown as string,
         });
       });
   };

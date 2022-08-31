@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { EuiButton, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import { useSpaceId } from '../../../risk_score/containers/common';
+import { useSpaceId } from '../../hooks/use_space_id';
 
 interface OpenInDevConsoleButtonProps {
   enableButton: boolean;

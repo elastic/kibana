@@ -259,6 +259,7 @@ export const DETECTION_ENGINE_PREPACKAGED_URL =
 export const DETECTION_ENGINE_PRIVILEGES_URL = `${DETECTION_ENGINE_URL}/privileges` as const;
 export const DETECTION_ENGINE_INDEX_URL = `${DETECTION_ENGINE_URL}/index` as const;
 
+export const DETECTION_ENGINE_RULES_URL_FIND = `${DETECTION_ENGINE_RULES_URL}/_find` as const;
 export const DETECTION_ENGINE_TAGS_URL = `${DETECTION_ENGINE_URL}/tags` as const;
 export const DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL =
   `${DETECTION_ENGINE_RULES_URL}/prepackaged/_status` as const;
@@ -425,13 +426,19 @@ export const RULES_TABLE_MAX_PAGE_SIZE = 100;
 export const RULES_TABLE_PAGE_SIZE_OPTIONS = [5, 10, 20, 50, RULES_TABLE_MAX_PAGE_SIZE];
 
 /**
- * A local storage key we use to store the state of the feature tour UI for the Rule Management page.
+ * Local storage keys we use to store the state of our new features tours we currently show in the app.
  *
- * NOTE: As soon as we want to show a new tour for features in the current Kibana version,
- * we will need to update this constant with the corresponding version.
+ * NOTE: As soon as we want to show tours for new features in the upcoming release,
+ * we will need to update these constants with the corresponding version.
  */
+export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
+  RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v8.4',
+  RULE_CREATION_PAGE_DEFINE_STEP:
+    'securitySolution.ruleCreationPage.defineStep.newFeaturesTour.v8.4',
+};
+
 export const RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY =
-  'securitySolution.rulesManagementPage.newFeaturesTour.v8.2';
+  'securitySolution.rulesManagementPage.newFeaturesTour.v8.4';
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
   'securitySolution.ruleDetails.ruleExecutionLog.showMetrics.v8.2';

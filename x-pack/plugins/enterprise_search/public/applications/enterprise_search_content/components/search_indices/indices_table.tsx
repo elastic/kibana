@@ -7,8 +7,6 @@
 
 import React from 'react';
 
-import { generatePath } from 'react-router-dom';
-
 import {
   CriteriaWithPagination,
   EuiBasicTable,
@@ -19,6 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { Meta } from '../../../../../common/types';
+import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { EuiLinkTo, EuiButtonIconTo } from '../../../shared/react_router_helpers';
 import { EuiBadgeTo } from '../../../shared/react_router_helpers/eui_components';
 import { convertMetaToPagination } from '../../../shared/table_pagination';
@@ -47,7 +46,7 @@ const columns: Array<EuiBasicTableColumn<ElasticsearchViewIndex>> = [
     render: (name: string) => (
       <EuiLinkTo
         data-test-subj="search-index-link"
-        to={generatePath(SEARCH_INDEX_PATH, { indexName: name })}
+        to={generateEncodedPath(SEARCH_INDEX_PATH, { indexName: name })}
       >
         {name}
       </EuiLinkTo>
@@ -102,7 +101,7 @@ const columns: Array<EuiBasicTableColumn<ElasticsearchViewIndex>> = [
       }
     ),
     render: (index: ElasticsearchViewIndex) => {
-      const overviewPath = generatePath(SEARCH_INDEX_PATH, { indexName: index.name });
+      const overviewPath = generateEncodedPath(SEARCH_INDEX_PATH, { indexName: index.name });
       if (isCrawlerIndex(index)) {
         const label = crawlerStatusToText(index.crawler?.most_recent_crawl_request_status);
 
@@ -135,7 +134,7 @@ const columns: Array<EuiBasicTableColumn<ElasticsearchViewIndex>> = [
             aria-label={name}
             iconType="eye"
             data-test-subj="view-search-index-button"
-            to={generatePath(SEARCH_INDEX_PATH, {
+            to={generateEncodedPath(SEARCH_INDEX_PATH, {
               indexName: name,
             })}
           />

@@ -15,6 +15,63 @@
     "https://posts.specterops.io/revisiting-remote-desktop-lateral-movement-8fb905cb46c3",
     "https://github.com/sbousseaden/EVTX-ATTACK-SAMPLES/blob/master/Lateral%20Movement/LM_sysmon_3_12_13_1_SharpRDP.evtx"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "destination.port",
+      "type": "long"
+    },
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "host.id",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "network.direction",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "network.transport",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.args",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.name",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.parent.name",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "registry.data.strings",
+      "type": "wildcard"
+    },
+    {
+      "ecs": true,
+      "name": "registry.path",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "source.ip",
+      "type": "ip"
+    }
+  ],
   "risk_score": 73,
   "rule_id": "8c81e506-6e82-4884-9b9a-75d3d252f967",
   "severity": "high",
@@ -50,5 +107,5 @@
     }
   ],
   "type": "eql",
-  "version": 6
+  "version": 7
 }

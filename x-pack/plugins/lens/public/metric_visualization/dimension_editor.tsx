@@ -88,7 +88,7 @@ export function MetricDimensionEditor(
           legend={i18n.translate('xpack.lens.legacyMetric.dynamicColoring.label', {
             defaultMessage: 'Color by value',
           })}
-          data-test-subj="lnsMetric_dynamicColoring_groups"
+          data-test-subj="lnsLegacyMetric_dynamicColoring_groups"
           name="dynamicColoring"
           buttonSize="compressed"
           options={[
@@ -97,21 +97,21 @@ export function MetricDimensionEditor(
               label: i18n.translate('xpack.lens.legacyMetric.dynamicColoring.none', {
                 defaultMessage: 'None',
               }),
-              'data-test-subj': 'lnsMetric_dynamicColoring_groups_none',
+              'data-test-subj': 'lnsLegacyMetric_dynamicColoring_groups_none',
             },
             {
               id: `${idPrefix}Background`,
               label: i18n.translate('xpack.lens.legacyMetric.dynamicColoring.background', {
                 defaultMessage: 'Fill',
               }),
-              'data-test-subj': 'lnsMetric_dynamicColoring_groups_background',
+              'data-test-subj': 'lnsLegacyMetric_dynamicColoring_groups_background',
             },
             {
               id: `${idPrefix}Labels`,
               label: i18n.translate('xpack.lens.legacyMetric.dynamicColoring.text', {
                 defaultMessage: 'Text',
               }),
-              'data-test-subj': 'lnsMetric_dynamicColoring_groups_labels',
+              'data-test-subj': 'lnsLegacyMetric_dynamicColoring_groups_labels',
             },
           ]}
           idSelected={`${idPrefix}${currentColorMode}`}
@@ -163,7 +163,7 @@ export function MetricDimensionEditor(
           >
             <EuiFlexItem>
               <EuiColorPaletteDisplay
-                data-test-subj="lnsMetric_dynamicColoring_palette"
+                data-test-subj="lnsLegacyMetric_dynamicColoring_palette"
                 palette={displayStops.map(({ color }) => color)}
                 type={FIXED_PROGRESSION}
                 onClick={togglePalette}
@@ -171,7 +171,7 @@ export function MetricDimensionEditor(
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                data-test-subj="lnsMetric_dynamicColoring_trigger"
+                data-test-subj="lnsLegacyMetric_dynamicColoring_trigger"
                 iconType="controlsHorizontal"
                 onClick={togglePalette}
                 size="xs"

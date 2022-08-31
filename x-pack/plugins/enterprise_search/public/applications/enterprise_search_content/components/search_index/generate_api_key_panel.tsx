@@ -37,7 +37,7 @@ export const GenerateApiKeyPanel: React.FC = () => {
 
   const cloudContext = useCloudDetails();
 
-  const DEFAULT_URL = '<ELASTICSEARCH-HOST>:<ELASTICSEARCH-PORT>';
+  const DEFAULT_URL = 'https://localhost:9200';
   const searchIndexApiUrl =
     (cloudContext.cloudId && decodeCloudId(cloudContext.cloudId)?.elasticsearchUrl) || DEFAULT_URL;
 

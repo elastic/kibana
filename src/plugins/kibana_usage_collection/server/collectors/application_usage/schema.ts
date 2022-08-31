@@ -167,6 +167,5 @@ export const applicationUsageSchema = {
   siem: commonSchema,
   space_selector: commonSchema,
   uptime: commonSchema,
-  synthetics: commonSchema,
   ux: commonSchema,
 };
