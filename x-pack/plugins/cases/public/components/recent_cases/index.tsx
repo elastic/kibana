@@ -14,16 +14,16 @@ import { LinkAnchor } from '../links';
 import { RecentCasesFilters } from './filters';
 import { RecentCasesComp } from './recent_cases';
 import { FilterMode as RecentCasesFilterMode } from './types';
-import { useCurrentUser } from '../../common/lib/kibana';
 import { useAllCasesNavigation } from '../../common/navigation';
 import { casesQueryClient } from '../cases_context/query_client';
+import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
 
 export interface RecentCasesProps {
   maxCasesToShow: number;
 }
 
 const RecentCases = React.memo(({ maxCasesToShow }: RecentCasesProps) => {
-  const currentUser = useCurrentUser();
+  const { data: currentUserProfile } = useGetCurrentUserProfile();
   const { getAllCasesUrl, navigateToAllCases } = useAllCasesNavigation();
 
   const [recentCasesFilterBy, setRecentCasesFilterBy] =
@@ -39,18 +39,12 @@ const RecentCases = React.memo(({ maxCasesToShow }: RecentCasesProps) => {
 
   const recentCasesFilterOptions = useMemo(
     () =>
-      recentCasesFilterBy === 'myRecentlyReported' && currentUser != null
+      recentCasesFilterBy === 'myRecentlyReported' && currentUserProfile != null
         ? {
-            reporters: [
-              {
-                email: currentUser.email,
-                full_name: currentUser.fullName,
-                username: currentUser.username,
-              },
-            ],
+            assignees: [currentUserProfile.uid],
           }
-        : { reporters: [] },
-    [currentUser, recentCasesFilterBy]
+        : { assignees: [] },
+    [currentUserProfile, recentCasesFilterBy]
   );
 
   return (
@@ -67,7 +61,7 @@ const RecentCases = React.memo(({ maxCasesToShow }: RecentCasesProps) => {
             <RecentCasesFilters
               filterBy={recentCasesFilterBy}
               setFilterBy={setRecentCasesFilterBy}
-              showMyRecentlyReported={currentUser != null}
+              showMyRecentlyReported={currentUserProfile != null}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
