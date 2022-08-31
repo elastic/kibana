@@ -844,16 +844,21 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
           if (isLeft(expectedBulkGetResult)) {
             return { ...expectedBulkGetResult };
           }
-          const { esRequestIndex, id, type, version } = expectedBulkGetResult.value;
+          const {
+            esRequestIndex: esBulkGetRequestIndex,
+            id,
+            type,
+            version,
+          } = expectedBulkGetResult.value;
 
           let namespaces;
           let versionProperties;
 
-          if (esRequestIndex !== undefined) {
+          if (esBulkGetRequestIndex !== undefined) {
             const indexFound = bulkGetMultiNamespaceDocsResponse?.statusCode !== 404;
 
             const actualResult = indexFound
-              ? bulkGetMultiNamespaceDocsResponse?.body.docs[esRequestIndex]
+              ? bulkGetMultiNamespaceDocsResponse?.body.docs[esBulkGetRequestIndex]
               : undefined;
 
             const docFound = indexFound && isMgetDoc(actualResult) && actualResult.found;
@@ -953,13 +958,18 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
           errorResult = { ...expectedResult.value, success: false };
           return errorResult;
         }
-        const { type, id, namespaces, esRequestIndex } = expectedResult.value;
+        const {
+          type,
+          id,
+          namespaces,
+          esRequestIndex: esBulkDeleteRequestIndex,
+        } = expectedResult.value;
 
         // we assume this wouldn't happen but is needed to ensure type consistency
         if (bulkDeleteResponse === undefined) throw new Error();
 
         const rawResponse = Object.values(
-          bulkDeleteResponse.items[esRequestIndex]
+          bulkDeleteResponse.items[esBulkDeleteRequestIndex]
         )[0] as NewBulkItemResponse;
 
         const error = getBulkOperationError(type, id, rawResponse);
