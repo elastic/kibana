@@ -96,51 +96,6 @@ export const KeyCapture = memo<KeyCaptureProps>(({ onCapture, focusRef, onStateC
     [onStateChange]
   );
 
-  const handleOnKeyUp = useCallback<KeyboardEventHandler<HTMLInputElement>>(
-    (ev) => {
-      // There is a condition (still not clear how it is actually happening) where the `Enter` key
-      // event from the EuiSelectable component gets captured here by the Input. Its likely due to
-      // the sequence of events between keyup, focus and the Focus trap component having the
-      // `returnFocus` on by default.
-      // To avoid having that key Event from actually being processed, we check for this custom
-      // property on the event and skip processing it if we find it. This property is currently
-      // set by the CommandInputHistory (using EuiSelectable).
-
-      // @ts-expect-error
-      if (!isCapturing || ev._CONSOLE_IGNORE_KEY) {
-        // @ts-expect-error
-        if (ev._CONSOLE_IGNORE_KEY) {
-          // @ts-expect-error
-          ev._CONSOLE_IGNORE_KEY = false;
-        }
-
-        return;
-      }
-
-      ev.stopPropagation();
-
-      const eventDetails = pick(ev, [
-        'key',
-        'altKey',
-        'ctrlKey',
-        'keyCode',
-        'metaKey',
-        'repeat',
-        'shiftKey',
-      ]);
-
-      setLastInput((value) => {
-        onCapture({
-          value,
-          eventDetails,
-        });
-
-        return '';
-      });
-    },
-    [isCapturing, onCapture]
-  );
-
   // 1. Determine if the key press is one that we need to store ex) letters, digits, values that we see
   // 2. If the user clicks a key we don't need to store as text, but we need to do logic with ex) backspace, delete, l/r arrows, we must call onCapture
   const handleOnKeyDown = useCallback<KeyboardEventHandler>(
@@ -213,7 +168,6 @@ export const KeyCapture = memo<KeyCaptureProps>(({ onCapture, focusRef, onStateC
         value=""
         tabIndex={-1}
         onKeyDown={handleOnKeyDown}
-        // onKeyUp={handleOnKeyUp}
         onBlur={handleInputOnBlur}
         onFocus={handleInputOnFocus}
         onChange={NOOP} // this just silences Jest output warnings
