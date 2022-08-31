@@ -27,13 +27,9 @@ export const userAvatar = (params: UserAvatarParams) => {
   return <UserAvatar {...params.user?.username !== undefined ? userAvatar.argTypes.user : userAvatar.argTypes.user.defaultValue} {...params} />;
 };
 
-
 userAvatar.argTypes = {
   user: {
     control: 'text',
     defaultValue: 'Peggy',
   },
 };
-
-
-
