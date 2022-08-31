@@ -214,6 +214,7 @@ exports[`Overview renders correctly 1`] = `
   <KibanaPageTemplate
     pageHeader={
       Object {
+        "bottomBorder": true,
         "iconType": "logoKibana",
         "pageTitle": <FormattedMessage
           defaultMessage="Analytics"
@@ -223,6 +224,7 @@ exports[`Overview renders correctly 1`] = `
         "rightSideItems": Array [],
       }
     }
+    panelled={false}
   >
     <MockedKibanaPageTemplate />
   </KibanaPageTemplate>
@@ -913,6 +915,7 @@ exports[`Overview renders correctly without features 1`] = `
   <KibanaPageTemplate
     pageHeader={
       Object {
+        "bottomBorder": true,
         "iconType": "logoKibana",
         "pageTitle": <FormattedMessage
           defaultMessage="Analytics"
@@ -922,6 +925,7 @@ exports[`Overview renders correctly without features 1`] = `
         "rightSideItems": Array [],
       }
     }
+    panelled={false}
   >
     <MockedKibanaPageTemplate />
   </KibanaPageTemplate>
@@ -1107,6 +1111,7 @@ exports[`Overview renders correctly without solutions 1`] = `
   <KibanaPageTemplate
     pageHeader={
       Object {
+        "bottomBorder": true,
         "iconType": "logoKibana",
         "pageTitle": <FormattedMessage
           defaultMessage="Analytics"
@@ -1116,6 +1121,7 @@ exports[`Overview renders correctly without solutions 1`] = `
         "rightSideItems": Array [],
       }
     }
+    panelled={false}
   >
     <MockedKibanaPageTemplate />
   </KibanaPageTemplate>
