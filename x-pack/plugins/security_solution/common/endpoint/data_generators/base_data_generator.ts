@@ -153,7 +153,7 @@ export class BaseDataGenerator<GeneratedDoc extends {} = {}> {
    * @param generator
    * @protected
    */
-  protected randomArray<T>(lengthLimit: number, generator: () => T): T[] {
+  protected randomArray<T>(lengthLimit: number, generator: (n?: number) => T): T[] {
     const rand = this.randomN(lengthLimit) + 1;
     return [...Array(rand).keys()].map(generator);
   }

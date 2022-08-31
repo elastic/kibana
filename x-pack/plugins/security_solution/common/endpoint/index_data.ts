@@ -25,6 +25,7 @@ import { enableFleetServerIfNecessary } from './data_loaders/index_fleet_server'
 import { indexAlerts } from './data_loaders/index_alerts';
 import { setupFleetForEndpoint } from './data_loaders/setup_fleet_for_endpoint';
 import { mergeAndAppendArrays } from './data_loaders/utils';
+import { indexEndpointMetricsDocs } from './data_loaders/index_endpoint_metrics';
 
 export type IndexedHostsAndAlertsResponse = IndexedHostsResponse;
 
@@ -51,6 +52,7 @@ export async function indexHostsAndAlerts(
   numHosts: number,
   numDocs: number,
   metadataIndex: string,
+  metricsIndex: string,
   policyResponseIndex: string,
   eventIndex: string,
   alertIndex: string,
@@ -105,6 +107,14 @@ export async function indexHostsAndAlerts(
     });
 
     mergeAndAppendArrays(response, indexedHosts);
+
+    await indexEndpointMetricsDocs({
+      numDocs,
+      client,
+      metricsIndex,
+      generator,
+      indexedHosts,
+    });
 
     await indexAlerts({
       client,

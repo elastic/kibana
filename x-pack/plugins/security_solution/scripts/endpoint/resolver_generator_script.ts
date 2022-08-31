@@ -143,6 +143,12 @@ async function main() {
       default: 'metrics-endpoint.metadata-default',
       type: 'string',
     },
+    metricsIndex: {
+      alias: 'mti',
+      describe: 'index to store host metrics in',
+      default: 'metrics-endpoint.metrics-default',
+      type: 'string',
+    },
     policyIndex: {
       alias: 'pi',
       describe: 'index to store host policy in',
@@ -343,6 +349,7 @@ async function main() {
     argv.numHosts,
     argv.numDocs,
     argv.metadataIndex,
+    argv.metricsIndex,
     argv.policyIndex,
     argv.eventIndex,
     argv.alertIndex,

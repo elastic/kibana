@@ -526,6 +526,132 @@ export class EndpointDocGenerator extends BaseDataGenerator {
   }
 
   /**
+   * Creates a host metrics document
+   * @param ts - Timestamp to put in the event
+   * @param hostInfo - Host metadata
+   * @param metadataDataStream the values to populate the data_stream fields when generating metadata documents
+   */
+  public generateHostMetricsData(
+    ts = new Date().getTime(),
+    hostInfo: HostMetadata,
+    metricsDataStream: DataStream
+  ) {
+    return {
+      ...hostInfo,
+      data_stream: metricsDataStream,
+      '@timestamp': ts,
+      Endpoint: {
+        metrics: {
+          system_impact: this.randomArray(20, (n) => ({
+            process: {
+              executable: n,
+            },
+            malware: {
+              week_idle_ms: this.randomN(100000),
+              week_ms: this.randomN(100000),
+            },
+            process_events: {
+              week_idle_ms: this.randomN(100000),
+              week_ms: this.randomN(100000),
+            },
+            overall: {
+              week_idle_ms: this.randomN(100000),
+              week_ms: this.randomN(100000),
+            },
+            file_events: {
+              week_idle_ms: this.randomN(100000),
+              week_ms: this.randomN(100000),
+            },
+          })),
+          memory: {
+            endpoint: {
+              private: {
+                mean: this.randomN(133798527),
+                latest: this.randomN(145149952),
+              },
+            },
+          },
+          disks: [],
+          documents_volume: {
+            file_events: {
+              suppressed_count: this.randomN(100000),
+              suppressed_bytes: this.randomN(100000),
+              sent_count: this.randomN(100000),
+              sent_bytes: this.randomN(1000000),
+            },
+            process_events: {
+              suppressed_count: this.randomN(100000),
+              suppressed_bytes: this.randomN(100000),
+              sent_count: this.randomN(1000000),
+              sent_bytes: this.randomN(100000000),
+            },
+            network_events: {
+              suppressed_count: this.randomN(1000000),
+              suppressed_bytes: this.randomN(1000000),
+              sent_count: this.randomN(1000000),
+              sent_bytes: this.randomN(1000000),
+            },
+            overall: {
+              suppressed_count: this.randomN(1000000),
+              suppressed_bytes: this.randomN(1000000),
+              sent_count: this.randomN(1000000),
+              sent_bytes: this.randomN(1000000000),
+            },
+          },
+          malicious_behavior_rules: [],
+          cpu: {
+            endpoint: {
+              histogram: {
+                counts: [
+                  this.randomN(10000),
+                  this.randomN(10000),
+                  this.randomN(10000),
+                  this.randomN(10000),
+                  this.randomN(10000),
+                  this.randomN(10000),
+                  this.randomN(10000),
+                  this.randomN(10000),
+                  this.randomN(10000),
+                  this.randomN(10000),
+                  this.randomN(10000),
+                  this.randomN(10000),
+                  this.randomN(10000),
+                  this.randomN(10000),
+                  this.randomN(10000),
+                  this.randomN(10000),
+                  this.randomN(10000),
+                  this.randomN(10000),
+                  this.randomN(10000),
+                  this.randomN(10000),
+                ],
+                values: [
+                  5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100,
+                ],
+              },
+              mean: this.randomN(10),
+              latest: this.randomN(10),
+            },
+          },
+          threads: [],
+          event_filter: {},
+          uptime: {
+            endpoint: this.randomN(1000000),
+            system: this.randomN(1000000),
+          },
+        },
+      },
+      event: {
+        ...hostInfo.event,
+        kind: 'metric',
+        module: 'endpoint',
+        action: 'endpoint_metrics',
+        dataset: 'endpoint.metrics',
+      },
+      message: 'Endpoint metrics',
+    };
+  }
+
+  /**
    * Creates a malware alert from the simulated host represented by this EndpointDocGenerator
    * @param ts - Timestamp to put in the event
    * @param entityID - entityID of the originating process
