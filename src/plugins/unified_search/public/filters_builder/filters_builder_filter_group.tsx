@@ -6,12 +6,20 @@
  * Side Public License, v 1.
  */
 
-import React, { useContext } from 'react';
+import React, { useContext, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText, EuiPanel } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiText,
+  EuiPanel,
+  useEuiTheme,
+} from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
+import { cx, css } from '@emotion/css';
 import type { Path } from './filters_builder_types';
-import { ConditionTypes } from '../utils';
+import { ConditionTypes, isOrFilter } from '../utils';
 import { FilterItem } from './filters_builder_filter_item';
 import { FiltersBuilderContextType } from './filters_builder_context';
 import { getPathInArray } from './filters_builder_utils';
@@ -26,7 +34,7 @@ export interface FilterGroupProps {
 
 const Delimiter = () => (
   <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-    <EuiFlexItem grow={1}>
+    <EuiFlexItem grow={1} style={{ marginLeft: '-5px', flexGrow: 0.12 }}>
       <EuiHorizontalRule margin="s" />
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
@@ -36,11 +44,12 @@ const Delimiter = () => (
         })}
       </EuiText>
     </EuiFlexItem>
-    <EuiFlexItem grow={10}>
+    <EuiFlexItem grow={10} style={{ marginRight: '-5px' }}>
       <EuiHorizontalRule margin="s" />
     </EuiFlexItem>
   </EuiFlexGroup>
 );
+
 export const FilterGroup = ({
   filters,
   conditionType,
@@ -48,22 +57,39 @@ export const FilterGroup = ({
   timeRangeForSuggestionsOverride,
   reverseBackground = false,
 }: FilterGroupProps) => {
+  const { euiTheme } = useEuiTheme();
+
   const {
     globalParams: { maxDepth, hideOr },
   } = useContext(FiltersBuilderContextType);
+
+  const border = useMemo(
+    () =>
+      css`
+        border: ${euiTheme.border.thin};
+        border-radius: ${euiTheme.border.radius.medium};
+      `,
+    [euiTheme.border.thin, euiTheme.border.radius.medium]
+  );
 
   const pathInArray = getPathInArray(path);
   const isDepthReached = maxDepth <= pathInArray.length;
   const orDisabled = hideOr || (isDepthReached && conditionType === ConditionTypes.AND);
   const andDisabled = isDepthReached && conditionType === ConditionTypes.OR;
   const removeDisabled = pathInArray.length <= 1 && filters.length === 1;
-  const color = !reverseBackground ? 'plain' : 'subdued';
+  const color = !reverseBackground ? 'subdued' : 'plain';
+
+  const shouldDrawBorder = (filter: Filter) => Array.isArray(filter) || isOrFilter(filter);
 
   return (
     <EuiPanel color={color} paddingSize="s" hasShadow={false}>
       {filters.map((filter, index, acc) => (
-        <EuiFlexGroup direction="column" gutterSize="xs">
-          <EuiFlexItem>
+        <EuiFlexGroup direction="column" gutterSize="none">
+          <EuiFlexItem
+            className={cx({
+              [border]: shouldDrawBorder(filter),
+            })}
+          >
             <FilterItem
               filter={filter}
               path={`${path}${path ? '.' : ''}${index}`}
