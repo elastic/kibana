@@ -217,11 +217,54 @@ describe('Response Actions Log', () => {
         ...baseMockedActionList,
         data,
       };
-      render();
       render({ showHostNames: true });
 
       expect(renderResult.getByTestId(`${testPrefix}-column-hostname`)).toHaveTextContent(
         'Host-agent-a, Host-agent-b, Host-agent-d'
+      );
+    });
+
+    it('should show display host is unenrolled for a single agent action when metadata host name is empty', async () => {
+      const data = await getActionListMock({ actionCount: 1 });
+      data.data[0] = {
+        ...data.data[0],
+        hosts: {
+          ...data.data[0].hosts,
+          'agent-a': { name: '' },
+        },
+      };
+
+      mockUseGetEndpointActionList = {
+        ...baseMockedActionList,
+        data,
+      };
+      render({ showHostNames: true });
+
+      expect(renderResult.getByTestId(`${testPrefix}-column-hostname`)).toHaveTextContent(
+        'Host unenrolled'
+      );
+    });
+
+    it('should show display host is unenrolled for a single agent action when metadata host names are empty', async () => {
+      const data = await getActionListMock({ actionCount: 1 });
+      data.data[0] = {
+        ...data.data[0],
+        hosts: {
+          ...data.data[0].hosts,
+          'agent-a': { name: '' },
+          'agent-b': { name: '' },
+          'agent-c': { name: '' },
+        },
+      };
+
+      mockUseGetEndpointActionList = {
+        ...baseMockedActionList,
+        data,
+      };
+      render({ showHostNames: true });
+
+      expect(renderResult.getByTestId(`${testPrefix}-column-hostname`)).toHaveTextContent(
+        'Hosts unenrolled'
       );
     });
 
