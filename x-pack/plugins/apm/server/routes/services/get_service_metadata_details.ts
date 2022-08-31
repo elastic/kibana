@@ -93,7 +93,6 @@ export async function getServiceMetadataDetails({
     apm: {
       events: [
         getProcessorEventForTransactions(searchAggregatedTransactions),
-        ProcessorEvent.error,
         ProcessorEvent.metric,
       ],
     },
