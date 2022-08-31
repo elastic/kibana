@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ADD_AGENT_BUTTON, ADD_AGENT_FLYOUT } from '../screens/fleet';
+import { ADD_AGENT_BUTTON, AGENT_FLYOUT } from '../screens/fleet';
 import { cleanupAgentPolicies, deleteFleetServerDocs, deleteAgentDocs } from '../tasks/cleanup';
 import { createAgentDoc } from '../tasks/agents';
 import { setFleetServerHost } from '../tasks/fleet_server';
@@ -91,7 +91,7 @@ describe('Fleet add agent flyout', () => {
         });
       });
 
-      cy.getBySel(ADD_AGENT_FLYOUT.CONFIRM_AGENT_ENROLLMENT_BUTTON);
+      cy.getBySel(AGENT_FLYOUT.CONFIRM_AGENT_ENROLLMENT_BUTTON);
 
       cy.wrap(null).then(() => {
         cy.task('insertDoc', {
@@ -105,7 +105,7 @@ describe('Fleet add agent flyout', () => {
         });
       });
 
-      cy.getBySel(ADD_AGENT_FLYOUT.INCOMING_DATA_CONFIRMED_CALL_OUT);
+      cy.getBySel(AGENT_FLYOUT.INCOMING_DATA_CONFIRMED_CALL_OUT);
     });
   });
 });

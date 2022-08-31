@@ -9,10 +9,9 @@ import 'cypress-real-events/support';
 import { checkA11y } from '../../support/commands';
 import { FLEET, navigateTo } from '../../tasks/navigation';
 import {
+  AGENT_FLYOUT,
   GENERATE_FLEET_SERVER_POLICY_BUTTON,
-  AGENTS_QUICK_START_TAB_BUTTON,
   PLATFORM_TYPE_LINUX_BUTTON,
-  AGENTS_ADVANCED_TAB_BUTTON,
   ADVANCED_FLEET_SERVER_ADD_HOST_BUTTON,
   ADVANCED_FLEET_SERVER_GENERATE_SERVICE_TOKEN_BUTTON,
   AGENT_POLICIES_TAB,
@@ -33,11 +32,12 @@ import { cleanupAgentPolicies, unenrollAgent } from '../../tasks/cleanup';
 describe('Home page', () => {
   before(() => {
     navigateTo(FLEET);
-    cy.getBySel(AGENTS_QUICK_START_TAB_BUTTON, { timeout: 15000 }).should('be.visible');
+    cy.getBySel(AGENT_FLYOUT.QUICK_START_TAB_BUTTON, { timeout: 15000 }).should('be.visible');
   });
 
   describe('Agents', () => {
     const fleetServerHost = 'https://localhost:8220';
+
     describe('Quick Start', () => {
       it('Get started with fleet', () => {
         checkA11y({ skipFailures: false });
@@ -50,9 +50,10 @@ describe('Home page', () => {
         checkA11y({ skipFailures: false });
       });
     });
+
     describe('Advanced', () => {
       before(() => {
-        cy.getBySel(AGENTS_ADVANCED_TAB_BUTTON).click();
+        cy.getBySel(AGENT_FLYOUT.ADVANCED_TAB_BUTTON).click();
       });
       it('Select policy for fleet', () => {
         checkA11y({ skipFailures: false });
@@ -69,6 +70,7 @@ describe('Home page', () => {
       });
     });
   });
+
   describe('Agent Policies', () => {
     before(() => {
       cy.getBySel(AGENT_POLICIES_TAB).click();
@@ -97,6 +99,7 @@ describe('Home page', () => {
       checkA11y({ skipFailures: true });
     });
   });
+
   describe('Enrollment Tokens', () => {
     before(() => {
       cy.getBySel(ENROLLMENT_TOKENS_TAB).click();
@@ -113,6 +116,7 @@ describe('Home page', () => {
       checkA11y({ skipFailures: false });
     });
   });
+
   describe('Data Streams', () => {
     before(() => {
       cy.getBySel('confirmModalCancelButton').click();

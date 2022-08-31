@@ -15,6 +15,7 @@ import {
 import { loginWithUserAndWaitForPage, logout } from '../tasks/login';
 import { navigateToTab, createAgentPolicy } from '../tasks/fleet';
 import { cleanupAgentPolicies, unenrollAgent } from '../tasks/cleanup';
+import { getIntegrationCard } from '../screens/integrations';
 
 import {
   FLEET_SERVER_MISSING_PRIVILEGES_TITLE,
@@ -81,7 +82,7 @@ describe('When the user has All privilege for Fleet but Read for integrations', 
   describe('Integrations', () => {
     it('are visible but cannot be added', () => {
       loginWithUserAndWaitForPage(INTEGRATIONS, FleetAllIntegrReadUser);
-      cy.getBySel('integration-card:epr:apache').click();
+      cy.getBySel(getIntegrationCard('apache')).click();
       cy.getBySel(ADD_INTEGRATION_POLICY_BTN).should('be.disabled');
     });
   });

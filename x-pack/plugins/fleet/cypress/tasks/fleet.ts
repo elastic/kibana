@@ -6,12 +6,10 @@
  */
 
 import {
+  AGENT_FLYOUT,
   AGENT_POLICIES_TAB,
   ENROLLMENT_TOKENS_TAB,
   ADD_AGENT_BUTTON_TOP,
-  CREATE_POLICY_BUTTON,
-  AGENT_FLYOUT_CLOSE_BUTTON,
-  STANDALONE_TAB,
   PACKAGE_POLICY_TABLE_LINK,
 } from '../screens/fleet';
 import { LOADING_SPINNER } from '../screens/navigation';
@@ -23,11 +21,11 @@ export function createAgentPolicy() {
     method: 'POST',
   }).as('postAgentPolicy');
   cy.getBySel(ADD_AGENT_BUTTON_TOP).click();
-  cy.getBySel(STANDALONE_TAB).click();
-  cy.getBySel(CREATE_POLICY_BUTTON).click();
+  cy.getBySel(AGENT_FLYOUT.STANDALONE_TAB).click();
+  cy.getBySel(AGENT_FLYOUT.CREATE_POLICY_BUTTON).click();
 
   cy.wait('@postAgentPolicy');
-  cy.getBySel(AGENT_FLYOUT_CLOSE_BUTTON).click();
+  cy.getBySel(AGENT_FLYOUT.CLOSE_BUTTON).click();
 }
 
 export function navigateToTab(tab: string) {

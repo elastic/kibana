@@ -8,12 +8,7 @@
 import {
   AGENTS_TAB,
   ADD_AGENT_BUTTON_TOP,
-  AGENT_FLYOUT_CLOSE_BUTTON,
-  STANDALONE_TAB,
-  AGENT_POLICY_CODE_BLOCK,
-  CREATE_POLICY_BUTTON,
-  AGENT_POLICY_DROPDOWN,
-  AGENTS_ADVANCED_TAB_BUTTON,
+  AGENT_FLYOUT,
   CREATE_FLEET_SERVER_POLICY_BTN,
   AGENT_POLICY_CREATE_STATUS_CALLOUT,
   FLEET_SERVER_HOST_INPUT,
@@ -57,11 +52,11 @@ describe('Fleet startup', () => {
 
     it('should create agent policy', () => {
       cy.getBySel(ADD_AGENT_BUTTON_TOP).click();
-      cy.getBySel(STANDALONE_TAB).click();
+      cy.getBySel(AGENT_FLYOUT.STANDALONE_TAB).click();
 
       cy.intercept('POST', '/api/fleet/agent_policies?sys_monitoring=true').as('createAgentPolicy');
 
-      cy.getBySel(CREATE_POLICY_BUTTON).click();
+      cy.getBySel(AGENT_FLYOUT.CREATE_POLICY_BUTTON, { timeout: 10000 }).click();
 
       let agentPolicyId: string;
       const startTime = Date.now();
@@ -70,12 +65,12 @@ describe('Fleet startup', () => {
         agentPolicyId = xhr.response.body.item.id;
 
         // verify create button changed to dropdown
-        cy.getBySel(AGENT_POLICY_DROPDOWN);
+        cy.getBySel(AGENT_FLYOUT.POLICY_DROPDOWN);
 
         // verify agent.yml code block has new policy id
-        cy.getBySel(AGENT_POLICY_CODE_BLOCK).contains(`id: ${agentPolicyId}`);
+        cy.getBySel(AGENT_FLYOUT.AGENT_POLICY_CODE_BLOCK).contains(`id: ${agentPolicyId}`);
 
-        cy.getBySel(AGENT_FLYOUT_CLOSE_BUTTON).click();
+        cy.getBySel(AGENT_FLYOUT.CLOSE_BUTTON).click();
 
         // verify policy is created and has system package
         verifyPolicy('Agent policy 1', ['System']);
@@ -85,7 +80,7 @@ describe('Fleet startup', () => {
     });
 
     it('should create Fleet Server policy', () => {
-      cy.getBySel(AGENTS_ADVANCED_TAB_BUTTON).click();
+      cy.getBySel(AGENT_FLYOUT.ADVANCED_TAB_BUTTON).click();
       cy.getBySel(CREATE_FLEET_SERVER_POLICY_BTN).click();
 
       // Wait until the success callout is shown before navigating away
@@ -97,10 +92,10 @@ describe('Fleet startup', () => {
       verifyPolicy('Fleet Server policy 1', ['Fleet Server', 'System']);
 
       navigateToTab(AGENTS_TAB);
-      cy.getBySel(AGENTS_ADVANCED_TAB_BUTTON).click();
+      cy.getBySel(AGENT_FLYOUT.ADVANCED_TAB_BUTTON).click();
 
       // verify create button changed to dropdown
-      cy.getBySel(AGENT_POLICY_DROPDOWN);
+      cy.getBySel(AGENT_FLYOUT.POLICY_DROPDOWN);
 
       // verify fleet server enroll command contains created policy id
       cy.getBySel(FLEET_SERVER_HOST_INPUT)

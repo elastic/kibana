@@ -7,16 +7,25 @@
 
 export const ADD_AGENT_BUTTON = 'addAgentButton';
 export const ADD_AGENT_BUTTON_TOP = 'addAgentBtnTop';
-export const CREATE_POLICY_BUTTON = 'createPolicyBtn';
-export const AGENT_FLYOUT_CLOSE_BUTTON = 'euiFlyoutCloseButton';
-export const AGENT_POLICY_CODE_BLOCK = 'agentPolicyCodeBlock';
 
 export const AGENTS_TAB = 'fleet-agents-tab';
 export const AGENT_POLICIES_TAB = 'fleet-agent-policies-tab';
 export const ENROLLMENT_TOKENS_TAB = 'fleet-enrollment-tokens-tab';
 export const DATA_STREAMS_TAB = 'fleet-datastreams-tab';
 export const SETTINGS_TAB = 'fleet-settings-tab';
-export const STANDALONE_TAB = 'standaloneTab';
+
+export const AGENT_FLYOUT = {
+  CREATE_POLICY_BUTTON: 'createPolicyBtn',
+  CLOSE_BUTTON: 'euiFlyoutCloseButton',
+  POLICY_DROPDOWN: 'agentPolicyDropdown',
+  QUICK_START_TAB_BUTTON: 'fleetServerFlyoutTab-quickStart',
+  ADVANCED_TAB_BUTTON: 'fleetServerFlyoutTab-advanced',
+  AGENT_POLICY_CODE_BLOCK: 'agentPolicyCodeBlock',
+  STANDALONE_TAB: 'standaloneTab',
+  CONFIRM_AGENT_ENROLLMENT_BUTTON: 'ConfirmAgentEnrollmentButton',
+  INCOMING_DATA_CONFIRMED_CALL_OUT: 'IncomingDataConfirmedCallOut',
+};
+
 export const MISSING_PRIVILEGES_TITLE = 'missingPrivilegesPromptTitle';
 export const MISSING_PRIVILEGES_MESSAGE = 'missingPrivilegesPromptMessage';
 export const FLEET_SERVER_MISSING_PRIVILEGES_MESSAGE = 'fleetServerMissingPrivilegesMessage';
@@ -26,8 +35,7 @@ export const PACKAGE_POLICY_TABLE_LINK = 'PackagePoliciesTableLink';
 export const ADD_PACKAGE_POLICY_BTN = 'addPackagePolicyButton';
 export const GENERATE_FLEET_SERVER_POLICY_BUTTON = 'generateFleetServerPolicyButton';
 export const ADD_FLEET_SERVER_HEADER = 'addFleetServerHeader';
-export const AGENTS_QUICK_START_TAB_BUTTON = 'fleetServerFlyoutTab-quickStart';
-export const AGENTS_ADVANCED_TAB_BUTTON = 'fleetServerFlyoutTab-advanced';
+
 export const PLATFORM_TYPE_LINUX_BUTTON = 'platformTypeLinux';
 export const ADVANCED_FLEET_SERVER_ADD_HOST_BUTTON = 'fleetServerAddHostBtn';
 export const ADVANCED_FLEET_SERVER_GENERATE_SERVICE_TOKEN_BUTTON =
@@ -41,7 +49,7 @@ export const AGENT_POLICIES_CREATE_AGENT_POLICY_FLYOUT = {
 };
 
 export const CREATE_FLEET_SERVER_POLICY_BTN = 'createFleetServerPolicyBtn';
-export const AGENT_POLICY_DROPDOWN = 'agentPolicyDropdown';
+
 export const AGENT_POLICY_CREATE_AGENT_POLICY_NAME_FIELD = 'createAgentPolicyNameField';
 export const AGENT_POLICIES_FLYOUT_ADVANCED_DEFAULT_NAMESPACE_HEADER = 'defaultNamespaceHeader';
 export const AGENT_POLICY_FLYOUT_CREATE_BUTTON = 'createAgentPolicyFlyoutBtn';
@@ -81,10 +89,6 @@ export const SETTINGS_OUTPUTS = {
   TYPE_INPUT: 'settingsOutputsFlyout.typeInput',
 };
 
-export const ADD_AGENT_FLYOUT = {
-  CONFIRM_AGENT_ENROLLMENT_BUTTON: 'ConfirmAgentEnrollmentButton',
-  INCOMING_DATA_CONFIRMED_CALL_OUT: 'IncomingDataConfirmedCallOut',
-};
 export const CONFIRM_MODAL_CONFIRM_BUTTON = 'confirmModalConfirmButton';
 export const CONFIRM_MODAL_CANCEL_BUTTON = 'confirmModalCancelButton';
 
