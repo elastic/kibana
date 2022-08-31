@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { StackTrace } from '../../common/profiling';
+import { createStackFrameID, StackTrace } from '../../common/profiling';
 import {
   decodeStackTrace,
   EncodedStackTrace,
@@ -22,15 +22,25 @@ enum fileID {
   F = 'gnEsgxvvEODj6iFYMQWYlA',
 }
 
-enum frameID {
-  A = 'aQpJmTLWydNvOapSFZOwKgAAAAAAB924',
-  B = 'hz_u-HGyrN6qeIk6UIJeCAAAAAAAAAZZ',
-  C = 'AJ8qrcXSoJbl_haPhlc4ogAAAAAAAAAH',
-  D = 'lHZiv7a58px6Gumcpo-6yAAAAAAAAAAf',
-  E = 'fkbxUTZgljnk71ZMnqJnyAAAAAAAAABv',
-  F = 'gnEsgxvvEODj6iFYMQWYlAAAAAAGVDgH',
-  G = 'gnEsgxvvEODj6iFYMQWYlAAAAAAGBJv6',
+enum addressOrLine {
+  A = 515512,
+  B = 26278522,
+  C = 6712518,
+  D = 105806025,
+  E = 111,
+  F = 106182663,
+  G = 100965370,
 }
+
+const frameID: Record<string, string> = {
+  A: createStackFrameID(fileID.A, addressOrLine.A),
+  B: createStackFrameID(fileID.B, addressOrLine.B),
+  C: createStackFrameID(fileID.C, addressOrLine.C),
+  D: createStackFrameID(fileID.D, addressOrLine.D),
+  E: createStackFrameID(fileID.E, addressOrLine.E),
+  F: createStackFrameID(fileID.F, addressOrLine.F),
+  G: createStackFrameID(fileID.F, addressOrLine.G),
+};
 
 const frameTypeA = [0, 0, 0];
 const frameTypeB = [8, 8, 8, 8];
@@ -51,8 +61,9 @@ describe('Stack trace operations', () => {
           },
         } as EncodedStackTrace,
         expected: {
-          FileIDs: [fileID.C, fileID.B, fileID.A],
           FrameIDs: [frameID.C, frameID.B, frameID.A],
+          FileIDs: [fileID.C, fileID.B, fileID.A],
+          AddressOrLines: [addressOrLine.C, addressOrLine.B, addressOrLine.A],
           Types: frameTypeA,
         } as StackTrace,
       },
@@ -66,8 +77,9 @@ describe('Stack trace operations', () => {
           },
         } as EncodedStackTrace,
         expected: {
-          FileIDs: [fileID.F, fileID.F, fileID.E, fileID.D],
           FrameIDs: [frameID.G, frameID.F, frameID.E, frameID.D],
+          FileIDs: [fileID.F, fileID.F, fileID.E, fileID.D],
+          AddressOrLines: [addressOrLine.G, addressOrLine.F, addressOrLine.E, addressOrLine.D],
           Types: frameTypeB,
         } as StackTrace,
       },

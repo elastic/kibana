@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { createStackFrameID } from '../profiling';
+
 enum stackTraceID {
   A = 'yU2Oct2ct0HkxJ7-pRcPkg==',
   B = 'Xt8aKN70PDXpMDLCOmojzQ==',
@@ -24,29 +26,45 @@ enum fileID {
   G = 'ZCOCZlls7r2cbG1HchkbVg==',
   H = 'Og7kGWGe9qiCunkaXDffHQ==',
   I = 'WAE6T1TeDsjDMOuwX4Ynxg==',
+  J = 'ZNiZco1zgh0nJI6hPllMaQ==',
+  K = 'abl5r8Vvvb2Y7NaDZW1QLQ==',
 }
 
-enum frameID {
-  A = 'ZNiZco1zgh0nJI6hPllMaQAAAAABkPp6',
-  B = 'abl5r8Vvvb2Y7NaDZW1QLQAAAAAAZmzG',
-  C = 'gnEsgxvvEODj6iFYMQWYlAAAAAAGTnjJ',
-  D = 'gnEsgxvvEODj6iFYMQWYlAAAAAAGTnwG',
-  E = 'gnEsgxvvEODj6iFYMQWYlAAAAAAGYRMy',
-  F = 'gnEsgxvvEODj6iFYMQWYlAAAAAAGYV1J',
-  G = 'gnEsgxvvEODj6iFYMQWYlAAAAAAGEz_F',
-  H = 'Gf4xoLc8QuAHU49Ch_CFOAAAAAAABjhI',
-  I = 'Gf4xoLc8QuAHU49Ch_CFOAAAAAAAAcit',
-  J = 'Gf4xoLc8QuAHU49Ch_CFOAAAAAAAAfiT',
-  K = 'Gf4xoLc8QuAHU49Ch_CFOAAAAAAAAf7J',
-  L = 'ZCOCZlls7r2cbG1HchkbVgAAAAABGAwE',
-  M = 'Og7kGWGe9qiCunkaXDffHQAAAAAAAAvT',
-  N = 'WAE6T1TeDsjDMOuwX4YnxgAAAAAAABRR',
-  O = 'Gf4xoLc8QuAHU49Ch_CFOAAAAAAABloA',
-  P = 'Gf4xoLc8QuAHU49Ch_CFOAAAAAABV97Q',
-  Q = 'Gf4xoLc8QuAHU49Ch_CFOAAAAAABV9CG',
-  R = 'gnEsgxvvEODj6iFYMQWYlAAAAAAEBDLw',
-  S = 'gnEsgxvvEODj6iFYMQWYlAAAAAAD05_D',
+enum addressOrLine {
+  A = 26278522,
+  B = 6712518,
+  C = 105806025,
+  D = 105806854,
+  E = 107025202,
+  F = 107044169,
+  G = 18353156,
+  H = 3027,
+  I = 5201,
+  J = 67384048,
+  K = 8888,
 }
+
+const frameID: Record<string, string> = {
+  A: createStackFrameID(fileID.A, addressOrLine.A),
+  B: createStackFrameID(fileID.B, addressOrLine.B),
+  C: createStackFrameID(fileID.C, addressOrLine.C),
+  D: createStackFrameID(fileID.D, addressOrLine.D),
+  E: createStackFrameID(fileID.E, addressOrLine.C),
+  F: createStackFrameID(fileID.E, addressOrLine.D),
+  G: createStackFrameID(fileID.E, addressOrLine.E),
+  H: createStackFrameID(fileID.E, addressOrLine.F),
+  I: createStackFrameID(fileID.E, addressOrLine.G),
+  J: createStackFrameID(fileID.F, addressOrLine.H),
+  K: createStackFrameID(fileID.F, addressOrLine.I),
+  L: createStackFrameID(fileID.F, addressOrLine.J),
+  M: createStackFrameID(fileID.F, addressOrLine.K),
+  N: createStackFrameID(fileID.G, addressOrLine.G),
+  O: createStackFrameID(fileID.H, addressOrLine.H),
+  P: createStackFrameID(fileID.I, addressOrLine.I),
+  Q: createStackFrameID(fileID.F, addressOrLine.A),
+  R: createStackFrameID(fileID.E, addressOrLine.B),
+  S: createStackFrameID(fileID.E, addressOrLine.C),
+};
 
 export const events = new Map([
   [stackTraceID.A, 16],
@@ -62,7 +80,8 @@ export const stackTraces = new Map([
     stackTraceID.A,
     {
       FileIDs: [fileID.A, fileID.B, fileID.C, fileID.D],
-      FrameIDs: [frameID.A, frameID.A, frameID.A, frameID.B],
+      AddressOrLines: [addressOrLine.A, addressOrLine.B, addressOrLine.C, addressOrLine.D],
+      FrameIDs: [frameID.A, frameID.B, frameID.C, frameID.D],
       Types: [3, 3, 3, 3],
     },
   ],
@@ -70,7 +89,14 @@ export const stackTraces = new Map([
     stackTraceID.B,
     {
       FileIDs: [fileID.E, fileID.E, fileID.E, fileID.E, fileID.E],
-      FrameIDs: [frameID.C, frameID.D, frameID.E, frameID.F, frameID.G],
+      AddressOrLines: [
+        addressOrLine.C,
+        addressOrLine.D,
+        addressOrLine.E,
+        addressOrLine.F,
+        addressOrLine.G,
+      ],
+      FrameIDs: [frameID.E, frameID.F, frameID.G, frameID.H, frameID.I],
       Types: [3, 3, 3, 3, 3],
     },
   ],
@@ -78,7 +104,8 @@ export const stackTraces = new Map([
     stackTraceID.C,
     {
       FileIDs: [fileID.F, fileID.F, fileID.F, fileID.F],
-      FrameIDs: [frameID.H, frameID.I, frameID.J, frameID.K],
+      AddressOrLines: [addressOrLine.H, addressOrLine.I, addressOrLine.J, addressOrLine.K],
+      FrameIDs: [frameID.J, frameID.K, frameID.L, frameID.M],
       Types: [3, 3, 3, 3],
     },
   ],
@@ -86,7 +113,8 @@ export const stackTraces = new Map([
     stackTraceID.D,
     {
       FileIDs: [fileID.G, fileID.H, fileID.I],
-      FrameIDs: [frameID.L, frameID.M, frameID.N],
+      AddressOrLines: [addressOrLine.G, addressOrLine.H, addressOrLine.I],
+      FrameIDs: [frameID.N, frameID.O, frameID.P],
       Types: [3, 8, 8],
     },
   ],
@@ -94,7 +122,8 @@ export const stackTraces = new Map([
     stackTraceID.E,
     {
       FileIDs: [fileID.F, fileID.F, fileID.F],
-      FrameIDs: [frameID.O, frameID.P, frameID.Q],
+      AddressOrLines: [addressOrLine.I, addressOrLine.J, addressOrLine.K],
+      FrameIDs: [frameID.K, frameID.L, frameID.M],
       Types: [3, 3, 3],
     },
   ],
@@ -102,7 +131,8 @@ export const stackTraces = new Map([
     stackTraceID.F,
     {
       FileIDs: [fileID.E, fileID.E],
-      FrameIDs: [frameID.R, frameID.S],
+      AddressOrLines: [addressOrLine.E, addressOrLine.F],
+      FrameIDs: [frameID.G, frameID.H],
       Types: [3, 3],
     },
   ],
