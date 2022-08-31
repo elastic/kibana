@@ -38,6 +38,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await kbnServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/dashboard/feature_controls/security/security.json'
       );
+      await kbnServer.uiSettings.update({
+        defaultIndex: 'logstash-*',
+      });
 
       // ensure we're logged out so we can login as the appropriate users
       await PageObjects.security.forceLogout();

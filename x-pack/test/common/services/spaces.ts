@@ -24,7 +24,7 @@ export function SpacesServiceProvider({ getService }: FtrProviderContext) {
 
   return new (class SpacesService {
     public async create(space: any) {
-      log.debug('creating space');
+      log.debug(`creating space ${space.name}`);
       const { data, status, statusText } = await axios.post('/api/spaces/space', space);
 
       if (status !== 200) {
@@ -32,19 +32,19 @@ export function SpacesServiceProvider({ getService }: FtrProviderContext) {
           `Expected status code of 200, received ${status} ${statusText}: ${util.inspect(data)}`
         );
       }
-      log.debug('created space');
+      log.debug(`created space ${space}`);
     }
 
     public async delete(spaceId: string) {
-      log.debug(`deleting space: ${spaceId}`);
+      log.debug(`deleting space id: ${spaceId}`);
       const { data, status, statusText } = await axios.delete(`/api/spaces/space/${spaceId}`);
 
       if (status !== 204) {
-        throw new Error(
+        log.debug(
           `Expected status code of 204, received ${status} ${statusText}: ${util.inspect(data)}`
         );
       }
-      log.debug(`deleted space: ${spaceId}`);
+      log.debug(`deleted space id: ${spaceId}`);
     }
   })();
 }

@@ -1,5 +1,5 @@
-[role="xpack"]
 [[rule-type-es-query]]
+[role="xpack"]
 === {es} query
 
 The {es} query rule type runs a user-configured query, compares the number of 
@@ -27,8 +27,8 @@ the *time window*.
 Size:: Specifies the number of documents to pass to the configured actions when 
 the threshold condition is met.
 {es} query:: Specifies the ES DSL query. The number of documents that 
-match this query is evaluated against the threshold condition. Only the `query` 
-field is used, other DSL fields are not considered. 
+match this query is evaluated against the threshold condition. Only the `query`, `fields` and `runtime_mappings`
+fields are used, other DSL fields are not considered. 
 Threshold:: Defines a threshold value and a comparison operator  (`is above`, 
 `is above or equals`, `is below`, `is below or equals`, or `is between`). The 
 number of documents that match the specified query is compared to this 
@@ -74,7 +74,38 @@ over these hits to get values from the ES documents into your actions.
 +
 [role="screenshot"]
 image::images/rule-types-es-query-example-action-variable.png[Iterate over hits using Mustache template syntax]
-
++
+The documents returned by `context.hits` include the {ref}/mapping-source-field.html[`_source`] field.
+If the {es} query search API's {ref}/search-fields.html#search-fields-param[`fields`] parameter is used, documents will also return the `fields` field, 
+which can be used to access any runtime fields defined by the {ref}/runtime-search-request.html[`runtime_mappings`] parameter as the following example shows:
++
+--
+[source]
+--------------------------------------------------
+{{#context.hits}}
+timestamp: {{_source.@timestamp}}
+day of the week: {{fields.day_of_week}} <1>
+{{/context.hits}}
+--------------------------------------------------
+// NOTCONSOLE
+<1> The `fields` parameter here is used to access the `day_of_week` runtime field.
+--
++
+As the {ref}/search-fields.html#search-fields-response[`fields`] response always returns an array of values for each field, 
+the https://mustache.github.io/[Mustache] template array syntax is used to iterate over these values in your actions as the following example shows:
++
+--
+[source]
+--------------------------------------------------
+{{#context.hits}}
+Labels:
+{{#fields.labels}}
+- {{.}}
+{{/fields.labels}}
+{{/context.hits}}
+--------------------------------------------------
+// NOTCONSOLE
+--
 
 [float]
 ==== Test your query

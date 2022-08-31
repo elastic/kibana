@@ -7,7 +7,7 @@
  */
 
 import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
-import type { ISearchSource } from '@kbn/data-plugin/public';
+import type { ISearchSource, RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
 
 export enum VIEW_MODE {
   DOCUMENT_LEVEL = 'documents',
@@ -39,6 +39,11 @@ export interface SavedSearchAttributes {
   viewMode?: VIEW_MODE;
   hideAggregatedPreview?: boolean;
   rowHeight?: number;
+
+  timeRestore?: boolean;
+  timeRange?: TimeRange;
+  refreshInterval?: RefreshInterval;
+
   rowsPerPage?: number;
 }
 
@@ -67,5 +72,11 @@ export interface SavedSearch {
   hideAggregatedPreview?: boolean;
   rowHeight?: number;
   isTextBasedQuery?: boolean;
+
+  // for restoring time range with a saved search
+  timeRestore?: boolean;
+  timeRange?: TimeRange;
+  refreshInterval?: RefreshInterval;
+
   rowsPerPage?: number;
 }

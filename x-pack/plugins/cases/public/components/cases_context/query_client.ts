@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import { QueryClient } from 'react-query';
+import { QueryClient } from '@tanstack/react-query';
 
 export const casesQueryClient = new QueryClient();

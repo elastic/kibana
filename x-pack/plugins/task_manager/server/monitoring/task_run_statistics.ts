@@ -434,14 +434,12 @@ function getHealthStatus(
   if (resultFrequencySummary.Failed > executionErrorThreshold.warn_threshold) {
     if (resultFrequencySummary.Failed > executionErrorThreshold.error_threshold) {
       logger.debug(
-        `setting HealthStatus.Error because resultFrequencySummary.Failed (${resultFrequencySummary.Failed}) > error_threshold (${executionErrorThreshold.error_threshold})`
+        `Health Status error threshold has been exceeded, resultFrequencySummary.Failed (${resultFrequencySummary.Failed}) is greater than error_threshold (${executionErrorThreshold.error_threshold})`
       );
-      return HealthStatus.Error;
     } else {
       logger.debug(
-        `setting HealthStatus.Warning because resultFrequencySummary.Failed (${resultFrequencySummary.Failed}) > warn_threshold (${executionErrorThreshold.warn_threshold})`
+        `Health Status warn threshold has been exceeded, resultFrequencySummary.Failed (${resultFrequencySummary.Failed}) is greater than warn_threshold (${executionErrorThreshold.warn_threshold})`
       );
-      return HealthStatus.Warning;
     }
   }
 

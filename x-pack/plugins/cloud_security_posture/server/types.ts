@@ -54,7 +54,7 @@ export type CspServerPluginStartServices = Promise<
   [CoreStart, CspServerPluginStartDeps, CspServerPluginStart]
 >;
 
-interface CspApiRequestHandlerContext {
+export interface CspApiRequestHandlerContext {
   user: ReturnType<SecurityPluginStart['authc']['getCurrentUser']>;
   logger: Logger;
   esClient: IScopedClusterClient;

@@ -99,7 +99,7 @@ export type UpdateFileKindHttpEndpoint = HttpApiInterfaceEntryDefinition<
 export type UploadFileKindHttpEndpoint = HttpApiInterfaceEntryDefinition<
   { id: string },
   unknown,
-  any,
+  { body: unknown },
   {
     ok: true;
     size: number;

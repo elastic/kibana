@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { areValidFeatures, getConnectorFeatureName } from './connector_feature_config';
+import {
+  areValidFeatures,
+  getConnectorCompatibility,
+  getConnectorFeatureName,
+} from './connector_feature_config';
 
 describe('areValidFeatures', () => {
   it('returns true when all inputs are valid features', () => {
@@ -33,5 +37,18 @@ describe('getConnectorFeatureName', () => {
 
   it('returns the id for invalid feature ids', () => {
     expect(getConnectorFeatureName('foo')).toEqual('foo');
+  });
+});
+
+describe('getConnectorCompatibility', () => {
+  it('returns the compatibility list for valid feature ids', () => {
+    expect(getConnectorCompatibility(['alerting', 'cases', 'uptime', 'siem'])).toEqual([
+      'Alerting Rules',
+      'Cases',
+    ]);
+  });
+
+  it('skips invalid feature ids', () => {
+    expect(getConnectorCompatibility(['foo', 'bar', 'cases'])).toEqual(['Cases']);
   });
 });
