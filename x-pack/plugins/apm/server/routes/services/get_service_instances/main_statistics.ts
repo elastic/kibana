@@ -48,10 +48,12 @@ export async function getServiceInstancesMainStatistics(
       getServiceInstancesTransactionStatistics({
         ...paramsForSubQueries,
         isComparisonSearch: false,
+        operationName: 'get_service_instances_transaction_main_statistics',
       }),
       getServiceInstancesSystemMetricStatistics({
         ...paramsForSubQueries,
         isComparisonSearch: false,
+        operationName: 'get_service_instances_system_metric_main_statistics'
       }),
     ]);
 

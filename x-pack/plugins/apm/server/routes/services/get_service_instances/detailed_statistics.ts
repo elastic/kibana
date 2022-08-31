@@ -47,10 +47,13 @@ async function getServiceInstancesDetailedStatistics(
       getServiceInstancesTransactionStatistics({
         ...params,
         isComparisonSearch: true,
+        operationName: 'get_service_instances_transaction_detailed_statistics',
       }),
       getServiceInstancesSystemMetricStatistics({
         ...params,
         isComparisonSearch: true,
+        operationName:
+          'get_service_instances_system_metric_detailed_statistics',
       }),
     ]);
 

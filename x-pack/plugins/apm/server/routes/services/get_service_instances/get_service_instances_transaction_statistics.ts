@@ -65,6 +65,7 @@ export async function getServiceInstancesTransactionStatistics<
   numBuckets,
   isComparisonSearch,
   offset,
+  operationName,
 }: {
   latencyAggregationType: LatencyAggregationType;
   setup: Setup;
@@ -80,6 +81,7 @@ export async function getServiceInstancesTransactionStatistics<
   size?: number;
   numBuckets?: number;
   offset?: string;
+  operationName: string;
 }): Promise<Array<ServiceInstanceTransactionStatistics<T>>> {
   const { apmEventClient } = setup;
 
@@ -152,17 +154,12 @@ export async function getServiceInstancesTransactionStatistics<
     },
   };
 
-  const response = await apmEventClient.search(
-    'get_service_instances_transaction_statistics',
-    {
-      apm: {
-        events: [
-          getProcessorEventForTransactions(searchAggregatedTransactions),
-        ],
-      },
-      body: { size: 0, query, aggs },
-    }
-  );
+  const response = await apmEventClient.search(operationName, {
+    apm: {
+      events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
+    },
+    body: { size: 0, query, aggs },
+  });
 
   const bucketSizeInMinutes = bucketSize / 60;
 

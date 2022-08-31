@@ -57,6 +57,7 @@ export async function getServiceInstancesSystemMetricStatistics<
   numBuckets,
   isComparisonSearch,
   offset,
+  operationName,
 }: {
   setup: Setup;
   serviceName: string;
@@ -69,6 +70,7 @@ export async function getServiceInstancesSystemMetricStatistics<
   size?: number;
   isComparisonSearch: T;
   offset?: string;
+  operationName: string;
 }): Promise<Array<ServiceInstanceSystemMetricStatistics<T>>> {
   const { apmEventClient } = setup;
 
@@ -138,43 +140,40 @@ export async function getServiceInstancesSystemMetricStatistics<
     },
   };
 
-  const response = await apmEventClient.search(
-    'get_service_instances_system_metric_statistics',
-    {
-      apm: {
-        events: [ProcessorEvent.metric],
-      },
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              { term: { [SERVICE_NAME]: serviceName } },
-              ...rangeQuery(startWithOffset, endWithOffset),
-              ...environmentQuery(environment),
-              ...kqlQuery(kuery),
-              ...(isComparisonSearch && serviceNodeIds
-                ? [{ terms: { [SERVICE_NODE_NAME]: serviceNodeIds } }]
-                : []),
-            ],
-            should: [cgroupMemoryFilter, systemMemoryFilter, cpuUsageFilter],
-            minimum_should_match: 1,
-          },
-        },
-        aggs: {
-          [SERVICE_NODE_NAME]: {
-            terms: {
-              field: SERVICE_NODE_NAME,
-              missing: SERVICE_NODE_NAME_MISSING,
-              ...(size ? { size } : {}),
-              ...(isComparisonSearch ? { include: serviceNodeIds } : {}),
-            },
-            aggs: subAggs,
-          },
+  const response = await apmEventClient.search(operationName, {
+    apm: {
+      events: [ProcessorEvent.metric],
+    },
+    body: {
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            { term: { [SERVICE_NAME]: serviceName } },
+            ...rangeQuery(startWithOffset, endWithOffset),
+            ...environmentQuery(environment),
+            ...kqlQuery(kuery),
+            ...(isComparisonSearch && serviceNodeIds
+              ? [{ terms: { [SERVICE_NODE_NAME]: serviceNodeIds } }]
+              : []),
+          ],
+          should: [cgroupMemoryFilter, systemMemoryFilter, cpuUsageFilter],
+          minimum_should_match: 1,
         },
       },
-    }
-  );
+      aggs: {
+        [SERVICE_NODE_NAME]: {
+          terms: {
+            field: SERVICE_NODE_NAME,
+            missing: SERVICE_NODE_NAME_MISSING,
+            ...(size ? { size } : {}),
+            ...(isComparisonSearch ? { include: serviceNodeIds } : {}),
+          },
+          aggs: subAggs,
+        },
+      },
+    },
+  });
 
   return (
     (response.aggregations?.[SERVICE_NODE_NAME].buckets.map(
