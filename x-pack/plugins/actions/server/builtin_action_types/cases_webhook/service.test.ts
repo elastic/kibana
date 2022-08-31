@@ -8,15 +8,15 @@
 import axios, { AxiosError, AxiosResponse } from 'axios';
 
 import { createExternalService } from './service';
-import { request, createAxiosResponse } from '../lib/axios_utils';
+import { request, createAxiosResponse } from '../../lib/axios_utils';
 import { CasesWebhookMethods, CasesWebhookPublicConfigurationType, ExternalService } from './types';
 import { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '../../actions_config.mock';
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
-jest.mock('../lib/axios_utils', () => {
-  const originalUtils = jest.requireActual('../lib/axios_utils');
+jest.mock('../../lib/axios_utils', () => {
+  const originalUtils = jest.requireActual('../../lib/axios_utils');
   return {
     ...originalUtils,
     request: jest.fn(),

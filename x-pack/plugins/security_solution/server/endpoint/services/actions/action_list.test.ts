@@ -22,6 +22,11 @@ import {
   createActionResponsesEsSearchResultsMock,
 } from './mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
+import { EndpointAppContextService } from '../../endpoint_app_context_services';
+import {
+  createMockEndpointAppContextServiceSetupContract,
+  createMockEndpointAppContextServiceStartContract,
+} from '../../mocks';
 
 describe('When using `getActionList()', () => {
   let esClient: ElasticsearchClientMock;
@@ -29,11 +34,15 @@ describe('When using `getActionList()', () => {
   let endpointActionGenerator: EndpointActionGenerator;
   let actionRequests: estypes.SearchResponse<LogsEndpointAction>;
   let actionResponses: estypes.SearchResponse<EndpointActionResponse | LogsEndpointActionResponse>;
+  let endpointAppContextService: EndpointAppContextService;
 
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
     logger = loggingSystemMock.createLogger();
     endpointActionGenerator = new EndpointActionGenerator('seed');
+    endpointAppContextService = new EndpointAppContextService();
+    endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
+    endpointAppContextService.start(createMockEndpointAppContextServiceStartContract());
 
     actionRequests = createActionRequestsEsSearchResultsMock();
     actionResponses = createActionResponsesEsSearchResultsMock();
@@ -41,9 +50,36 @@ describe('When using `getActionList()', () => {
     applyActionListEsSearchMock(esClient, actionRequests, actionResponses);
   });
 
+  afterEach(() => {
+    endpointAppContextService.stop();
+  });
+
   it('should return expected output', async () => {
     const doc = actionRequests.hits.hits[0]._source;
-    await expect(getActionList({ esClient, logger, page: 1, pageSize: 10 })).resolves.toEqual({
+    // mock metadataService.findHostMetadataForFleetAgents resolved value
+    (endpointAppContextService.getEndpointMetadataService as jest.Mock) = jest
+      .fn()
+      .mockReturnValue({
+        findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([
+          {
+            agent: {
+              id: 'agent-a',
+            },
+            host: {
+              hostname: 'Host-agent-a',
+            },
+          },
+        ]),
+      });
+    await expect(
+      getActionList({
+        esClient,
+        logger,
+        metadataService: endpointAppContextService.getEndpointMetadataService(),
+        page: 1,
+        pageSize: 10,
+      })
+    ).resolves.toEqual({
       page: 1,
       pageSize: 10,
       commands: undefined,
@@ -54,6 +90,7 @@ describe('When using `getActionList()', () => {
       data: [
         {
           agents: ['agent-a'],
+          hosts: { 'agent-a': { name: 'Host-agent-a' } },
           command: 'unisolate',
           completedAt: '2022-04-30T16:08:47.449Z',
           wasSuccessful: true,
@@ -65,6 +102,13 @@ describe('When using `getActionList()', () => {
           comment: doc?.EndpointActions.data.comment,
           createdBy: doc?.user.id,
           parameters: doc?.EndpointActions.data.parameters,
+          agentState: {
+            'agent-a': {
+              completedAt: '2022-04-30T16:08:47.449Z',
+              isCompleted: true,
+              wasSuccessful: true,
+            },
+          },
         },
       ],
       total: 1,
@@ -72,9 +116,16 @@ describe('When using `getActionList()', () => {
   });
 
   it('should call query with expected filters when querying for Action Request', async () => {
+    // mock metadataService.findHostMetadataForFleetAgents resolved value
+    (endpointAppContextService.getEndpointMetadataService as jest.Mock) = jest
+      .fn()
+      .mockReturnValue({
+        findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
+      });
     await getActionList({
       esClient,
       logger,
+      metadataService: endpointAppContextService.getEndpointMetadataService(),
       elasticAgentIds: ['123'],
       pageSize: 20,
       startDate: 'now-10d',
@@ -152,12 +203,24 @@ describe('When using `getActionList()', () => {
   });
 
   it('should return an empty array if no actions are found', async () => {
+    // mock metadataService.findHostMetadataForFleetAgents resolved value
+    (endpointAppContextService.getEndpointMetadataService as jest.Mock) = jest
+      .fn()
+      .mockReturnValue({
+        findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
+      });
     actionRequests.hits.hits = [];
     (actionRequests.hits.total as estypes.SearchTotalHits).value = 0;
     (actionResponses.hits.total as estypes.SearchTotalHits).value = 0;
     actionRequests = endpointActionGenerator.toEsSearchResponse([]);
 
-    await expect(getActionList({ esClient, logger })).resolves.toEqual(
+    await expect(
+      getActionList({
+        esClient,
+        logger,
+        metadataService: endpointAppContextService.getEndpointMetadataService(),
+      })
+    ).resolves.toEqual(
       expect.objectContaining({
         commands: undefined,
         data: [],
@@ -173,6 +236,12 @@ describe('When using `getActionList()', () => {
   });
 
   it('should have `isExpired` as `true` if NOT complete and expiration is in the past', async () => {
+    // mock metadataService.findHostMetadataForFleetAgents resolved value
+    (endpointAppContextService.getEndpointMetadataService as jest.Mock) = jest
+      .fn()
+      .mockReturnValue({
+        findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
+      });
     (
       actionRequests.hits.hits[0]._source as LogsEndpointAction
     ).EndpointActions.expiration = `2021-04-30T16:08:47.449Z`;
@@ -180,7 +249,12 @@ describe('When using `getActionList()', () => {
 
     await expect(
       await (
-        await getActionList({ esClient, logger, elasticAgentIds: ['123'] })
+        await getActionList({
+          esClient,
+          logger,
+          metadataService: endpointAppContextService.getEndpointMetadataService(),
+          elasticAgentIds: ['123'],
+        })
       ).data[0]
     ).toEqual(
       expect.objectContaining({
@@ -191,13 +265,24 @@ describe('When using `getActionList()', () => {
   });
 
   it('should have `isExpired` as `false` if complete and expiration is in the past', async () => {
+    // mock metadataService.findHostMetadataForFleetAgents resolved value
+    (endpointAppContextService.getEndpointMetadataService as jest.Mock) = jest
+      .fn()
+      .mockReturnValue({
+        findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
+      });
     (
       actionRequests.hits.hits[0]._source as LogsEndpointAction
     ).EndpointActions.expiration = `2021-04-30T16:08:47.449Z`;
 
     await expect(
       await (
-        await getActionList({ esClient, logger, elasticAgentIds: ['123'] })
+        await getActionList({
+          esClient,
+          logger,
+          metadataService: endpointAppContextService.getEndpointMetadataService(),
+          elasticAgentIds: ['123'],
+        })
       ).data[0]
     ).toEqual(
       expect.objectContaining({
@@ -208,12 +293,22 @@ describe('When using `getActionList()', () => {
   });
 
   it('should throw custom errors', async () => {
+    // mock metadataService.findHostMetadataForFleetAgents resolved value
+    (endpointAppContextService.getEndpointMetadataService as jest.Mock) = jest
+      .fn()
+      .mockReturnValue({
+        findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
+      });
     const error = new Error('Some odd error!');
 
     esClient.search.mockImplementation(async () => {
       return Promise.reject(error);
     });
-    const getActionListPromise = getActionList({ esClient, logger });
+    const getActionListPromise = getActionList({
+      esClient,
+      logger,
+      metadataService: endpointAppContextService.getEndpointMetadataService(),
+    });
 
     await expect(getActionListPromise).rejects.toThrowError(
       'Unknown error while fetching action requests'

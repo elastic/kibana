@@ -400,6 +400,7 @@ export const SessionView = ({
           sessionEntityId={sessionEntityId}
           onClose={onToggleTTY}
           isFullscreen={isFullScreen}
+          onJumpToEvent={onJumpToEvent}
         />
       )}
     </div>
