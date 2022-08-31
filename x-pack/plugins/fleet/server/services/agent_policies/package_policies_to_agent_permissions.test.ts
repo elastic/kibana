@@ -323,7 +323,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
         name: 'test-policy',
         namespace: 'test',
         enabled: true,
-        package: { name: 'osquery_manager', version: '0.0.0', title: 'Test Package' },
+        package: { name: 'osquery_manager', version: '0.3.0', title: 'Test Package' },
         inputs: [
           {
             type: 'osquery_manager',
