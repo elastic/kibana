@@ -66,7 +66,7 @@ export const bulkEditRules = async ({
 
   // rulesClient bulkEdit currently doesn't support bulk mute/unmute.
   // this is a workaround to mitigate this,
-  // until https://github.com/elastic/kibana/pull/138900 is resolved
+  // until https://github.com/elastic/kibana/issues/139084 is resolved
   // if rule actions has been applied:
   // - we go through each rule
   // - mute/unmute if needed, refetch rule
