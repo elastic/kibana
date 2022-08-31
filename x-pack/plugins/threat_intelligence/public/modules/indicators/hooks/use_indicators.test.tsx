@@ -6,13 +6,15 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { useIndicators, RawIndicatorsResponse, UseIndicatorsParams } from './use_indicators';
+import {
+  useIndicators,
+  RawIndicatorsResponse,
+  UseIndicatorsParams,
+  UseIndicatorsValue,
+} from './use_indicators';
 import { BehaviorSubject, throwError } from 'rxjs';
-import { IKibanaSearchResponse } from '@kbn/data-plugin/common';
-import { mockKibanaDataService } from '../../../common/mocks/mock_kibana_data_service';
-import { DEFAULT_THREAT_INDEX_KEY } from '../../../../common/constants';
-
-jest.mock('../../../hooks/use_kibana');
+import { TestProvidersComponent, mockedSearchService } from '../../../common/mocks/test_providers';
+import { IKibanaSearchResponse } from '@kbn/data-plugin/public';
 
 const indicatorsResponse = { rawResponse: { hits: { hits: [], total: 0 } } };
 
@@ -22,40 +24,43 @@ const useIndicatorsParams: UseIndicatorsParams = {
 };
 
 describe('useIndicators()', () => {
-  let mockData: ReturnType<typeof mockKibanaDataService>;
+  beforeEach(jest.clearAllMocks);
 
   describe('when mounted', () => {
     beforeEach(() => {
-      mockData = mockKibanaDataService({ searchSubject: new BehaviorSubject(indicatorsResponse) });
+      mockedSearchService.search.mockReturnValue(new BehaviorSubject(indicatorsResponse));
     });
 
     beforeEach(async () => {
-      renderHook(() => useIndicators(useIndicatorsParams));
+      renderHook<UseIndicatorsParams, UseIndicatorsValue>(
+        () => useIndicators(useIndicatorsParams),
+        {
+          wrapper: TestProvidersComponent,
+        }
+      );
     });
 
     it('should query the database for threat indicators', async () => {
-      expect(mockData.search).toHaveBeenCalledTimes(1);
-    });
-
-    it('should retrieve index patterns from settings', () => {
-      expect(mockData.getUiSetting).toHaveBeenCalledWith(DEFAULT_THREAT_INDEX_KEY);
+      expect(mockedSearchService.search).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('when filters change', () => {
     beforeEach(() => {
-      mockData = mockKibanaDataService({
-        searchSubject: new BehaviorSubject(indicatorsResponse),
-      });
+      mockedSearchService.search.mockReturnValue(new BehaviorSubject(indicatorsResponse));
     });
 
     it('should query the database again and reset page to 0', async () => {
-      const hookResult = renderHook((props) => useIndicators(props), {
-        initialProps: useIndicatorsParams,
-      });
+      const hookResult = renderHook<UseIndicatorsParams, UseIndicatorsValue>(
+        (props) => useIndicators(props),
+        {
+          initialProps: useIndicatorsParams,
+          wrapper: TestProvidersComponent,
+        }
+      );
 
-      expect(mockData.search).toHaveBeenCalledTimes(1);
-      expect(mockData.search).toHaveBeenLastCalledWith(
+      expect(mockedSearchService.search).toHaveBeenCalledTimes(1);
+      expect(mockedSearchService.search).toHaveBeenLastCalledWith(
         expect.objectContaining({
           params: expect.objectContaining({ body: expect.objectContaining({ from: 0 }) }),
         }),
@@ -67,7 +72,7 @@ describe('useIndicators()', () => {
       // Change page
       await act(async () => hookResult.result.current.onChangePage(42));
 
-      expect(mockData.search).toHaveBeenLastCalledWith(
+      expect(mockedSearchService.search).toHaveBeenLastCalledWith(
         expect.objectContaining({
           params: expect.objectContaining({ body: expect.objectContaining({ from: 42 * 25 }) }),
         }),
@@ -76,7 +81,7 @@ describe('useIndicators()', () => {
         })
       );
 
-      expect(mockData.search).toHaveBeenCalledTimes(2);
+      expect(mockedSearchService.search).toHaveBeenCalledTimes(2);
 
       // Change filters
       act(() =>
@@ -87,8 +92,8 @@ describe('useIndicators()', () => {
       );
 
       // From range should be reset to 0
-      expect(mockData.search).toHaveBeenCalledTimes(3);
-      expect(mockData.search).toHaveBeenLastCalledWith(
+      expect(mockedSearchService.search).toHaveBeenCalledTimes(3);
+      expect(mockedSearchService.search).toHaveBeenLastCalledWith(
         expect.objectContaining({
           params: expect.objectContaining({ body: expect.objectContaining({ from: 0 }) }),
         }),
@@ -101,19 +106,18 @@ describe('useIndicators()', () => {
 
   describe('when query fails', () => {
     beforeEach(async () => {
-      mockData = mockKibanaDataService({
-        searchSubject: throwError(() => new Error('some random error')),
-      });
+      mockedSearchService.search.mockReturnValue(throwError(() => new Error('some random error')));
 
-      renderHook((props) => useIndicators(props), {
+      renderHook<UseIndicatorsParams, UseIndicatorsValue>((props) => useIndicators(props), {
         initialProps: useIndicatorsParams,
+        wrapper: TestProvidersComponent,
       });
     });
 
     it('should show an error', async () => {
-      expect(mockData.showError).toHaveBeenCalledTimes(1);
+      expect(mockedSearchService.showError).toHaveBeenCalledTimes(1);
 
-      expect(mockData.search).toHaveBeenCalledWith(
+      expect(mockedSearchService.search).toHaveBeenCalledWith(
         expect.objectContaining({
           params: expect.objectContaining({
             body: expect.objectContaining({
@@ -133,41 +137,50 @@ describe('useIndicators()', () => {
 
   describe('when query is successful', () => {
     beforeEach(async () => {
-      mockData = mockKibanaDataService({
-        searchSubject: new BehaviorSubject<IKibanaSearchResponse<RawIndicatorsResponse>>({
+      mockedSearchService.search.mockReturnValue(
+        new BehaviorSubject<IKibanaSearchResponse<RawIndicatorsResponse>>({
           rawResponse: { hits: { hits: [{ fields: {} }], total: 1 } },
-        }),
-      });
+        })
+      );
     });
 
     it('should call mapping function on every hit', async () => {
-      const { result } = renderHook((props) => useIndicators(props), {
-        initialProps: useIndicatorsParams,
-      });
+      const { result } = renderHook<UseIndicatorsParams, UseIndicatorsValue>(
+        (props) => useIndicators(props),
+        {
+          initialProps: useIndicatorsParams,
+          wrapper: TestProvidersComponent,
+        }
+      );
       expect(result.current.indicatorCount).toEqual(1);
     });
   });
 
   describe('pagination', () => {
     beforeEach(async () => {
-      mockData = mockKibanaDataService({
-        searchSubject: new BehaviorSubject<IKibanaSearchResponse<RawIndicatorsResponse>>({
+      mockedSearchService.search.mockReturnValue(
+        new BehaviorSubject<IKibanaSearchResponse<RawIndicatorsResponse>>({
           rawResponse: { hits: { hits: [{ fields: {} }], total: 1 } },
-        }),
-      });
+        })
+      );
     });
 
     describe('when page changes', () => {
       it('should run the query again with pagination parameters', async () => {
-        const { result } = renderHook(() => useIndicators(useIndicatorsParams));
+        const { result } = renderHook<UseIndicatorsParams, UseIndicatorsValue>(
+          () => useIndicators(useIndicatorsParams),
+          {
+            wrapper: TestProvidersComponent,
+          }
+        );
 
         await act(async () => {
           result.current.onChangePage(42);
         });
 
-        expect(mockData.search).toHaveBeenCalledTimes(2);
+        expect(mockedSearchService.search).toHaveBeenCalledTimes(2);
 
-        expect(mockData.search).toHaveBeenCalledWith(
+        expect(mockedSearchService.search).toHaveBeenCalledWith(
           expect.objectContaining({
             params: expect.objectContaining({
               body: expect.objectContaining({
@@ -179,7 +192,7 @@ describe('useIndicators()', () => {
           expect.anything()
         );
 
-        expect(mockData.search).toHaveBeenLastCalledWith(
+        expect(mockedSearchService.search).toHaveBeenLastCalledWith(
           expect.objectContaining({
             params: expect.objectContaining({
               body: expect.objectContaining({
@@ -196,15 +209,20 @@ describe('useIndicators()', () => {
 
       describe('when page size changes', () => {
         it('should fetch the first page and update internal page size', async () => {
-          const { result } = renderHook(() => useIndicators(useIndicatorsParams));
+          const { result } = renderHook<UseIndicatorsParams, UseIndicatorsValue>(
+            () => useIndicators(useIndicatorsParams),
+            {
+              wrapper: TestProvidersComponent,
+            }
+          );
 
           await act(async () => {
             result.current.onChangeItemsPerPage(50);
           });
 
-          expect(mockData.search).toHaveBeenCalledTimes(3);
+          expect(mockedSearchService.search).toHaveBeenCalledTimes(3);
 
-          expect(mockData.search).toHaveBeenCalledWith(
+          expect(mockedSearchService.search).toHaveBeenCalledWith(
             expect.objectContaining({
               params: expect.objectContaining({
                 body: expect.objectContaining({
@@ -216,7 +234,7 @@ describe('useIndicators()', () => {
             expect.anything()
           );
 
-          expect(mockData.search).toHaveBeenLastCalledWith(
+          expect(mockedSearchService.search).toHaveBeenLastCalledWith(
             expect.objectContaining({
               params: expect.objectContaining({
                 body: expect.objectContaining({

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { esTestConfig } from '@kbn/test';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export const ECOMMERCE_INDEX_PATTERN = 'kibana_sample_data_ecommerce';
@@ -23,7 +24,10 @@ export default function ({ getPageObject, getService, loadTestFile }: FtrProvide
       await ml.testResources.installAllKibanaSampleData();
       await ml.testResources.setKibanaTimeZoneToUTC();
       await browser.setWindowSize(1920, 1080);
-      await securityPage.login();
+      await securityPage.login(
+        esTestConfig.getUrlParts().username,
+        esTestConfig.getUrlParts().password
+      );
     });
 
     after(async () => {

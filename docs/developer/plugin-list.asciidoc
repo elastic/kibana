@@ -6,7 +6,7 @@ NOTE:
 
     node scripts/build_plugin_list_docs
 
-  You can update the template within node_modules/@kbn/dev-utils/target_node/plugin_list/generate_plugin_list.js
+  You can update the template within node_modules/@kbn/dev-utils/target_node/src/plugin_list/generate_plugin_list.js
 
 ////
 
@@ -297,6 +297,10 @@ In general this plugin provides:
 
 |{kib-repo}blob/{branch}/src/plugins/ui_actions_enhanced/README.md[uiActionsEnhanced]
 |Registers commercially licensed generic actions like per panel time range and contains some code that supports drilldown work.
+
+
+|{kib-repo}blob/{branch}/src/plugins/unified_field_list/README.md[unifiedFieldList]
+|This Kibana plugin contains components and services for field list UI (as in fields sidebar on Discover and Lens pages).
 
 
 |{kib-repo}blob/{branch}/src/plugins/unified_search/README.md[unifiedSearch]

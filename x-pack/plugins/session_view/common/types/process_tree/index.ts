@@ -60,16 +60,19 @@ export interface Teletype {
     major?: number;
     minor?: number;
   };
+  rows?: number;
+  columns?: number;
 }
 
-// used by tty_player component to split process.io.text into lines of IO
 export interface IOLine {
-  value?: string;
+  event: ProcessEvent;
+  value: string;
+}
 
-  // the following is only set client side for caching purposes
-  process_name?: string;
-  process_entity_id?: string;
-  process_entity_cursor?: string;
+export interface ProcessEntityIdIOLine {
+  previous?: number;
+  value: number;
+  next?: number;
 }
 
 export interface IOFields {

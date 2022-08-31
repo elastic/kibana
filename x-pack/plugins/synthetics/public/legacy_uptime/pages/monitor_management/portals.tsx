@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { createPortalNode } from 'react-reverse-portal';
+import { createHtmlPortalNode } from 'react-reverse-portal';
 
-export const ActionBarPortalNode = createPortalNode();
+export const ActionBarPortalNode = createHtmlPortalNode();
 
-export const APIKeysPortalNode = createPortalNode();
+export const APIKeysPortalNode = createHtmlPortalNode();
 
-export const ManageLocationsPortalNode = createPortalNode();
+export const ManageLocationsPortalNode = createHtmlPortalNode();

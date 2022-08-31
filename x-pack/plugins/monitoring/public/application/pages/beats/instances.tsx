@@ -17,13 +17,13 @@ import { BeatsTemplate } from './beats_template';
 import { Listing } from '../../../components/beats/listing';
 import { SetupModeRenderer, SetupModeProps } from '../../../components/renderers/setup_mode';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
-import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
+import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 import { BEATS_SYSTEM_ID } from '../../../../common/constants';
 
 export const BeatsInstancesPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
   const { services } = useKibana<{ data: any }>();
-  const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
+  const { generate: generateBreadcrumbs } = useBreadcrumbContainerContext();
   const { updateTotalItemCount, getPaginationTableProps } = useTable('beats.instances');
   const clusterUuid = globalState.cluster_uuid;
   const ccs = globalState.ccs;
