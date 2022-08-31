@@ -6,6 +6,18 @@
  * Side Public License, v 1.
  */
 
-export { config } from './i18n_config';
-export type { I18nConfigType } from './i18n_config';
-export { I18nService } from './i18n_service';
+/**
+ * @public
+ */
+
+ export interface I18nServiceSetup {
+  /**
+   * Return the locale currently in use.
+   */
+  getLocale(): string;
+
+  /**
+   * Return the absolute paths to translation files currently in use.
+   */
+  getTranslationFiles(): string[];
+}

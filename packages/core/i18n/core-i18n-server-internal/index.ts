@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export type { I18nConfigType, I18nServiceSetup } from './src';
+export type { I18nConfigType } from './src';
 export { config, I18nService } from './src';

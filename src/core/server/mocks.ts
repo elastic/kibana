@@ -40,7 +40,7 @@ import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 import { SharedGlobalConfig } from './plugins';
 import { statusServiceMock } from './status/status_service.mock';
 import { coreUsageDataServiceMock } from './core_usage_data/core_usage_data_service.mock';
-import { i18nServiceMock } from './i18n/i18n_service.mock';
+import { i18nServiceMock } from '@kbn/core-i18n-server-mocks';
 import { deprecationsServiceMock } from './deprecations/deprecations_service.mock';
 
 export { configServiceMock, configDeprecationsMock } from '@kbn/config-mocks';
@@ -62,7 +62,7 @@ export { statusServiceMock } from './status/status_service.mock';
 export { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 export { capabilitiesServiceMock } from '@kbn/core-capabilities-server-mocks';
 export { coreUsageDataServiceMock } from './core_usage_data/core_usage_data_service.mock';
-export { i18nServiceMock } from './i18n/i18n_service.mock';
+export { i18nServiceMock } from '@kbn/core-i18n-server-mocks';
 export { deprecationsServiceMock } from './deprecations/deprecations_service.mock';
 export { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 export { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';

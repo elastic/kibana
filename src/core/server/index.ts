@@ -70,7 +70,7 @@ import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plug
 import { UiSettingsServiceSetup, UiSettingsServiceStart } from './ui_settings';
 import { StatusServiceSetup } from './status';
 import { CoreUsageDataStart, CoreUsageDataSetup } from './core_usage_data';
-import { I18nServiceSetup } from './i18n';
+import { I18nServiceSetup } from '@kbn/core-i18n-server';
 import { DeprecationsServiceSetup } from './deprecations';
 // Because of #79265 we need to explicitly import, then export these types for
 // scripts/telemetry_check.js to work as expected
@@ -425,7 +425,7 @@ export type {
 } from '@kbn/core-metrics-server';
 export { EventLoopDelaysMonitor } from '@kbn/core-metrics-collectors-server-internal';
 
-export type { I18nServiceSetup } from './i18n';
+export type { I18nServiceSetup } from '@kbn/core-i18n-server';
 export type {
   RegisterDeprecationsConfig,
   GetDeprecationsContext,

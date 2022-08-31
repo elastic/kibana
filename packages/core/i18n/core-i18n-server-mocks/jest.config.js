@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { config } from './i18n_config';
-export type { I18nConfigType } from './i18n_config';
-export { I18nService } from './i18n_service';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/core/i18n/core-i18n-server-mocks'],
+};
