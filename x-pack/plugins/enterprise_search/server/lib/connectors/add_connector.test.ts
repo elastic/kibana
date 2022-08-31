@@ -34,6 +34,7 @@ describe('addConnector lib function', () => {
       indices: {
         create: jest.fn(),
         exists: jest.fn(),
+        getMapping: jest.fn(),
         refresh: jest.fn(),
       },
     },
@@ -49,6 +50,22 @@ describe('addConnector lib function', () => {
     jest.clearAllMocks();
   });
 
+  const connectorsIndicesMapping = {
+    '.elastic-connectors-v1': {
+      mappings: {
+        _meta: {
+          pipeline: {
+            default_extract_binary_content: true,
+            default_name: 'ent-search-generic-ingestion',
+            default_reduce_whitespace: true,
+            default_run_ml_inference: false,
+          },
+          version: '1',
+        },
+      },
+    },
+  };
+
   it('should add connector', async () => {
     mockClient.asCurrentUser.index.mockImplementation(() => ({ _id: 'fakeId' }));
     mockClient.asCurrentUser.indices.exists.mockImplementation(
@@ -56,6 +73,7 @@ describe('addConnector lib function', () => {
     );
     (fetchConnectorByIndexName as jest.Mock).mockImplementation(() => undefined);
     (fetchCrawlerByIndexName as jest.Mock).mockImplementation(() => undefined);
+    mockClient.asCurrentUser.indices.getMapping.mockImplementation(() => connectorsIndicesMapping);
 
     await expect(
       addConnector(mockClient as unknown as IScopedClusterClient, {
@@ -76,6 +94,12 @@ describe('addConnector lib function', () => {
         last_sync_status: null,
         last_synced: null,
         name: 'index_name',
+        pipeline: {
+          extract_binary_content: true,
+          name: 'ent-search-generic-ingestion',
+          reduce_whitespace: true,
+          run_ml_inference: false,
+        },
         scheduling: { enabled: false, interval: '0 0 0 * * ?' },
         service_type: null,
         status: ConnectorStatus.CREATED,
@@ -96,6 +120,7 @@ describe('addConnector lib function', () => {
     );
     (fetchConnectorByIndexName as jest.Mock).mockImplementation(() => undefined);
     (fetchCrawlerByIndexName as jest.Mock).mockImplementation(() => undefined);
+    mockClient.asCurrentUser.indices.getMapping.mockImplementation(() => connectorsIndicesMapping);
 
     await expect(
       addConnector(mockClient as unknown as IScopedClusterClient, {
@@ -114,6 +139,7 @@ describe('addConnector lib function', () => {
     );
     (fetchConnectorByIndexName as jest.Mock).mockImplementation(() => true);
     (fetchCrawlerByIndexName as jest.Mock).mockImplementation(() => undefined);
+    mockClient.asCurrentUser.indices.getMapping.mockImplementation(() => connectorsIndicesMapping);
 
     await expect(
       addConnector(mockClient as unknown as IScopedClusterClient, {
@@ -132,6 +158,7 @@ describe('addConnector lib function', () => {
     );
     (fetchConnectorByIndexName as jest.Mock).mockImplementation(() => undefined);
     (fetchCrawlerByIndexName as jest.Mock).mockImplementation(() => true);
+    mockClient.asCurrentUser.indices.getMapping.mockImplementation(() => connectorsIndicesMapping);
 
     await expect(
       addConnector(mockClient as unknown as IScopedClusterClient, {
@@ -150,6 +177,7 @@ describe('addConnector lib function', () => {
     );
     (fetchConnectorByIndexName as jest.Mock).mockImplementation(() => true);
     (fetchCrawlerByIndexName as jest.Mock).mockImplementation(() => undefined);
+    mockClient.asCurrentUser.indices.getMapping.mockImplementation(() => connectorsIndicesMapping);
 
     await expect(
       addConnector(mockClient as unknown as IScopedClusterClient, {
@@ -168,6 +196,7 @@ describe('addConnector lib function', () => {
     );
     (fetchConnectorByIndexName as jest.Mock).mockImplementation(() => ({ id: 'connectorId' }));
     (fetchCrawlerByIndexName as jest.Mock).mockImplementation(() => undefined);
+    mockClient.asCurrentUser.indices.getMapping.mockImplementation(() => connectorsIndicesMapping);
 
     await expect(
       addConnector(mockClient as unknown as IScopedClusterClient, {
@@ -193,6 +222,12 @@ describe('addConnector lib function', () => {
         last_sync_status: null,
         last_synced: null,
         name: 'index_name',
+        pipeline: {
+          extract_binary_content: true,
+          name: 'ent-search-generic-ingestion',
+          reduce_whitespace: true,
+          run_ml_inference: false,
+        },
         scheduling: { enabled: false, interval: '0 0 0 * * ?' },
         service_type: null,
         status: ConnectorStatus.CREATED,
@@ -212,6 +247,7 @@ describe('addConnector lib function', () => {
     );
     (fetchConnectorByIndexName as jest.Mock).mockImplementation(() => false);
     (fetchCrawlerByIndexName as jest.Mock).mockImplementation(() => undefined);
+    mockClient.asCurrentUser.indices.getMapping.mockImplementation(() => connectorsIndicesMapping);
     await expect(
       addConnector(mockClient as unknown as IScopedClusterClient, {
         index_name: 'search-index_name',
@@ -232,6 +268,12 @@ describe('addConnector lib function', () => {
         last_sync_status: null,
         last_synced: null,
         name: 'index_name',
+        pipeline: {
+          extract_binary_content: true,
+          name: 'ent-search-generic-ingestion',
+          reduce_whitespace: true,
+          run_ml_inference: false,
+        },
         scheduling: { enabled: false, interval: '0 0 0 * * ?' },
         service_type: null,
         status: ConnectorStatus.CREATED,
