@@ -682,6 +682,19 @@ export const getUserAction = (
         payload: { title: 'a title' },
         ...overrides,
       };
+    case ActionTypes.assignees:
+      return {
+        ...commonProperties,
+        type: ActionTypes.assignees,
+        payload: {
+          assignees: [
+            // These values map to uids in x-pack/plugins/cases/public/containers/user_profiles/api.mock.ts
+            { uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' },
+            { uid: 'u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0' },
+          ],
+        },
+        ...overrides,
+      };
 
     default:
       return {
