@@ -90,6 +90,18 @@ const applyBulkActionEditToRuleParams = (
         timelineTitle: action.value.timeline_title || undefined,
       };
       break;
+
+    // update look-back period in from and meta.from fields
+    case BulkActionEditType.set_schedule: {
+      ruleParams = {
+        ...ruleParams,
+        meta: {
+          ...ruleParams.meta,
+          from: action.value.meta.from,
+        },
+        from: action.value.from,
+      };
+    }
   }
 
   return ruleParams;

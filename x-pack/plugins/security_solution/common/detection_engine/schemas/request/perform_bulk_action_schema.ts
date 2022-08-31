@@ -114,6 +114,9 @@ const bulkActionEditPayloadSchedule = t.type({
   type: t.literal(BulkActionEditType.set_schedule),
   value: t.type({
     interval,
+    meta: t.type({
+      from: t.string,
+    }),
   }),
 });
 export type BulkActionEditPayloadSchedule = t.TypeOf<typeof bulkActionEditPayloadSchedule>;
@@ -141,7 +144,8 @@ export type BulkActionEditForRuleAttributes =
  */
 export type BulkActionEditForRuleParams =
   | BulkActionEditPayloadIndexPatterns
-  | BulkActionEditPayloadTimeline;
+  | BulkActionEditPayloadTimeline
+  | BulkActionEditPayloadSchedule;
 
 export const performBulkActionSchema = t.intersection([
   t.exact(
