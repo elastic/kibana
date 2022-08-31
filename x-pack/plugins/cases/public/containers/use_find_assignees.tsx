@@ -48,6 +48,8 @@ export const useFindAssignees = ({
       });
     },
     {
+      retry: false,
+      keepPreviousData: true,
       onError: (error: ServerError) => {
         if (error.name !== 'AbortError') {
           toasts.addError(

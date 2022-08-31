@@ -22,7 +22,6 @@ import {
 } from '@elastic/eui';
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import styled from 'styled-components';
-// import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
 import { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { Case, DeleteCase, UpdateByKey } from '../../../common/ui/types';

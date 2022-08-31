@@ -12,22 +12,18 @@ import { observabilityFeatureId as OBSERVABILITY_APP_ID } from '@kbn/observabili
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 import { deleteAllCaseItems } from '../../../cases_api_integration/common/lib/utils';
-import {
-  bulkGetUserProfiles,
-  suggestUserProfiles,
-} from '../../../cases_api_integration/common/lib/user_profiles';
+import { findAssignees } from '../../../cases_api_integration/common/lib/user_profiles';
 import {
   casesAllUser,
-  casesReadUser,
+  casesOnlyDeleteUser,
   obsCasesAllUser,
-  obsCasesReadUser,
-  secAllCasesNoneUser,
+  obsCasesOnlyDeleteUser,
+  secAllCasesReadUser,
   secAllUser,
-  secReadCasesReadUser,
 } from './common/users';
 
 export default ({ getService }: FtrProviderContext): void => {
-  describe('bulk_get_user_profiles', () => {
+  describe('find_assignees', () => {
     const es = getService('es');
     const supertestWithoutAuth = getService('supertestWithoutAuth');
 
@@ -42,19 +38,10 @@ export default ({ getService }: FtrProviderContext): void => {
     ]) {
       it(`User ${
         user.username
-      } with roles(s) ${user.roles.join()} can bulk get valid user profiles`, async () => {
-        const suggestedProfiles = await suggestUserProfiles({
+      } with roles(s) ${user.roles.join()} can retrieve assignees`, async () => {
+        const profiles = await findAssignees({
           supertest: supertestWithoutAuth,
-          req: { name: user.username, owners: [owner], size: 1 },
-          auth: { user, space: null },
-        });
-
-        const profiles = await bulkGetUserProfiles({
-          supertest: supertestWithoutAuth,
-          req: {
-            uids: suggestedProfiles.map((suggestedProfile) => suggestedProfile.uid),
-            dataPath: 'avatar',
-          },
+          req: { searchTerm: user.username, owners: [owner], size: 1 },
           auth: { user, space: null },
         });
 
@@ -63,35 +50,17 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     }
 
-    for (const { user } of [
-      { user: secReadCasesReadUser },
-      { user: casesReadUser },
-      { user: obsCasesReadUser },
+    for (const { user, owner } of [
+      { user: secAllCasesReadUser, owner: SECURITY_SOLUTION_APP_ID },
+      { user: casesOnlyDeleteUser, owner: CASES_APP_ID },
+      { user: obsCasesOnlyDeleteUser, owner: OBSERVABILITY_APP_ID },
     ]) {
       it(`User ${
         user.username
-      } with roles(s) ${user.roles.join()} can bulk get user profiles`, async () => {
-        await bulkGetUserProfiles({
+      } with role(s) ${user.roles.join()} cannot retrieve assignees because they lack privileges`, async () => {
+        await findAssignees({
           supertest: supertestWithoutAuth,
-          req: {
-            uids: ['1'],
-            dataPath: 'avatar',
-          },
-          auth: { user, space: null },
-        });
-      });
-    }
-
-    for (const { user } of [{ user: secAllCasesNoneUser }]) {
-      it(`User ${
-        user.username
-      } with roles(s) ${user.roles.join()} cannot bulk get user profiles because they lack the bulkGetUserProfiles privilege`, async () => {
-        await bulkGetUserProfiles({
-          supertest: supertestWithoutAuth,
-          req: {
-            uids: ['1'],
-            dataPath: 'avatar',
-          },
+          req: { searchTerm: user.username, owners: [owner] },
           auth: { user, space: null },
           expectedHttpCode: 403,
         });

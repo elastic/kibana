@@ -128,9 +128,3 @@ export const CLEAR_FILTERS = i18n.translate(
     defaultMessage: 'Clear filters',
   }
 );
-
-export const TOTAL_ASSIGNEES_FILTERED = (total: number) =>
-  i18n.translate('xpack.cases.userProfile.totalUsersAssigned', {
-    defaultMessage: '{total, plural, one {# assignee} other {# assignees}} filtered',
-    values: { total },
-  });

@@ -16,7 +16,7 @@ export const findAssigneesRoute = (userProfileService: UserProfileService) =>
     method: 'get',
     path: INTERNAL_FIND_ASSIGNEES_URL,
     routerOptions: {
-      tags: ['access:casesSuggestUserProfiles'],
+      tags: ['access:casesFindAssignedUsers'],
     },
     params: {
       query: schema.object({

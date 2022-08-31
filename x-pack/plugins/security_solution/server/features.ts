@@ -29,7 +29,7 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
     cases: [APP_ID],
     privileges: {
       all: {
-        api: ['casesSuggestUserProfiles', 'bulkGetUserProfiles'],
+        api: ['casesSuggestUserProfiles', 'casesFindAssignedUsers', 'bulkGetUserProfiles'],
         app: [CASES_FEATURE_ID, 'kibana'],
         catalogue: [APP_ID],
         cases: {

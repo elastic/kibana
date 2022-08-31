@@ -27,8 +27,8 @@ import { createCaseError } from '../../common/error';
 import { CasesClient } from '../../client';
 import { asArray } from '../../common/utils';
 
-const MAX_SUGGESTION_SIZE = 100;
-const MIN_SUGGESTION_SIZE = 0;
+const MAX_PROFILES_SIZE = 100;
+const MIN_PROFILES_SIZE = 0;
 
 interface UserProfileOptions {
   securityPluginSetup?: SecurityPluginSetup;
@@ -92,7 +92,7 @@ export class UserProfileService {
           dataPath: 'avatar',
         });
 
-        return assignedUserProfiles.slice(0, size ?? MAX_SUGGESTION_SIZE);
+        return assignedUserProfiles.slice(0, size ?? MAX_PROFILES_SIZE);
       }
 
       const suggestedUsers = await UserProfileService.suggestUsers({
@@ -193,7 +193,7 @@ export class UserProfileService {
     /**
      * The limit of 100 helps prevent DDoS attacks and is also enforced by the security plugin.
      */
-    if (size !== undefined && (size > MAX_SUGGESTION_SIZE || size < MIN_SUGGESTION_SIZE)) {
+    if (size !== undefined && (size > MAX_PROFILES_SIZE || size < MIN_PROFILES_SIZE)) {
       throw Boom.badRequest('size must be between 0 and 100');
     }
   }

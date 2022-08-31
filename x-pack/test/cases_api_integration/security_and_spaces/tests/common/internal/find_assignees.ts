@@ -6,11 +6,20 @@
  */
 
 import expect from '@kbn/expect';
+import { arraysToEqual } from '../../../../common/lib/validation';
 import { findAssignees, suggestUserProfiles } from '../../../../common/lib/user_profiles';
 import { createCase, deleteAllCaseItems } from '../../../../common/lib/utils';
 import { getPostCaseRequest } from '../../../../common/lib/mock';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { superUser } from '../../../../common/lib/authentication/users';
+import {
+  globalRead,
+  obsOnly,
+  obsOnlyRead,
+  obsSec,
+  secOnly,
+  secOnlyRead,
+  superUser,
+} from '../../../../common/lib/authentication/users';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
@@ -220,6 +229,97 @@ export default function ({ getService }: FtrProviderContext) {
           },
         ]
       `);
+    });
+
+    describe('rbac', () => {
+      it('should retrieve the correct assignees', async () => {
+        const [secProf, obsProf] = await Promise.all([
+          suggestUserProfiles({
+            supertest: supertestWithoutAuth,
+            req: {
+              name: 'sec_only@elastic.co',
+              owners: ['securitySolutionFixture'],
+            },
+            auth: { user: superUser, space: 'space1' },
+          }),
+          suggestUserProfiles({
+            supertest: supertestWithoutAuth,
+            req: {
+              name: 'obs_only@elastic.co',
+              owners: ['observabilityFixture'],
+              size: 1,
+            },
+            auth: { user: superUser, space: 'space1' },
+          }),
+        ]);
+
+        const secOnlyProfile = secProf.find((prof) => prof.user.username === secOnly.username)!;
+        const obsOnlyProfile = obsProf.find((prof) => prof.user.username === obsOnly.username)!;
+
+        await Promise.all([
+          createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest({
+              assignees: [{ uid: secOnlyProfile.uid }],
+              owner: 'securitySolutionFixture',
+            }),
+            200,
+            { user: superUser, space: 'space1' }
+          ),
+          createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest({
+              assignees: [{ uid: obsOnlyProfile.uid }],
+              owner: 'observabilityFixture',
+            }),
+            200,
+            { user: superUser, space: 'space1' }
+          ),
+        ]);
+
+        for (const scenario of [
+          { user: secOnly, expectedUsernames: ['sec_only'] },
+          { user: obsOnly, expectedUsernames: ['obs_only'] },
+          { user: obsSec, expectedUsernames: ['sec_only', 'obs_only'] },
+        ]) {
+          const assignees = await findAssignees({
+            supertest: supertestWithoutAuth,
+            req: {
+              searchTerm: '',
+              owners: ['securitySolutionFixture', 'observabilityFixture'],
+            },
+            auth: { user: scenario.user, space: 'space1' },
+          });
+
+          expect(
+            arraysToEqual(
+              assignees.map((assignee) => assignee.user.username),
+              scenario.expectedUsernames
+            )
+          ).to.be(true);
+        }
+      });
+
+      for (const scenario of [
+        // this user does not have access in space2
+        { user: secOnly, space: 'space2' },
+        // these users don't have the casesFindAssignedUsers permission for the _find_assignees route
+        { user: globalRead, space: 'space1' },
+        { user: secOnlyRead, space: 'space1' },
+        { user: obsOnlyRead, space: 'space1' },
+      ]) {
+        it(`User ${scenario.user.username} with role(s) ${scenario.user.roles} and space ${scenario.space} - should NOT find assignees`, async () => {
+          await findAssignees({
+            supertest: supertestWithoutAuth,
+            req: {
+              searchTerm: '',
+              owners: ['securitySolutionFixture', 'observabilityFixture'],
+            },
+            auth: { user: scenario.user, space: scenario.space },
+            expectedHttpCode: 403,
+          });
+        });
+      }
     });
   });
 }
