@@ -46,12 +46,14 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   }): Promise<any> => {
     // usually id is auto generated, but this is useful for testing
     const { id } = request.query;
+    const spaceId = server.spaces.spacesService.getSpaceId(request);
 
     const monitor: SyntheticsMonitor = request.body as SyntheticsMonitor;
     const monitorType = monitor[ConfigKey.MONITOR_TYPE];
     const monitorWithDefaults = {
       ...DEFAULT_FIELDS[monitorType],
       ...monitor,
+      [ConfigKey.NAMESPACE]: spaceId,
     };
 
     const validationResult = validateMonitor(monitorWithDefaults as MonitorFields);
