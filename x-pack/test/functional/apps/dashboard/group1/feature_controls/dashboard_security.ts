@@ -32,7 +32,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
   const kbnServer = getService('kibanaServer');
 
-  describe('dashboard feature controls security', () => {
+  describe.only('dashboard feature controls security', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await kbnServer.importExport.load(
