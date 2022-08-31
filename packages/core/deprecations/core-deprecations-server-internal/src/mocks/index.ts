@@ -6,13 +6,5 @@
  * Side Public License, v 1.
  */
 
-export type {
-  RegisterDeprecationsConfig,
-  GetDeprecationsContext,
-  DeprecationsServiceSetup,
-  DeprecationRegistryProvider,
-} from './contracts';
-export type {
-  DeprecationsClient,
-  DeprecationsRequestHandlerContext,
-} from './request_handler_context';
+export { mockDeprecationsRegistry } from './deprecations_registry.mock';
+export { mockDeprecationsFactory } from './deprecations_factory.mock';
