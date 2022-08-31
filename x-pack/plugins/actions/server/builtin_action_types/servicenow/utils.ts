@@ -17,7 +17,7 @@ import {
   ServiceNowSecretConfigurationType,
 } from './types';
 import { FIELD_PREFIX } from './config';
-import { addTimeZoneToDate, getErrorMessage } from '../lib/axios_utils';
+import { addTimeZoneToDate, getErrorMessage } from '../../lib/axios_utils';
 import * as i18n from './translations';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import { ConnectorTokenClientContract } from '../../types';

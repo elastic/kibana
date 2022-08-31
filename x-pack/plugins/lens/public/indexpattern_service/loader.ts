@@ -45,6 +45,18 @@ export function convertDataViewIntoLensIndexPattern(
         esTypes: field.esTypes,
         scripted: field.scripted,
         runtime: Boolean(field.runtimeField),
+        timeSeriesMetricType: field.timeSeriesMetric,
+        timeSeriesRollup: field.isRolledUpField,
+        partiallyApplicableFunctions: field.isRolledUpField
+          ? {
+              percentile: true,
+              percentile_rank: true,
+              median: true,
+              last_value: true,
+              unique_count: true,
+              standard_deviation: true,
+            }
+          : undefined,
       };
 
       // Simplifies tests by hiding optional properties instead of undefined
@@ -167,6 +179,7 @@ export async function loadIndexPatterns({
       });
       if (resp) {
         indexPatterns = [resp];
+        break;
       }
     }
   }

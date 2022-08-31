@@ -7,6 +7,7 @@
 
 import { EuiPageHeader, EuiPageHeaderSection, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { FC } from 'react';
+import { SecuritySolutionPageWrapper } from '../../containers/security_solution_page_wrapper';
 
 export interface LayoutProps {
   pageTitle?: string;
@@ -17,7 +18,7 @@ export const TITLE_TEST_ID = 'tiDefaultPageLayoutTitle';
 
 export const DefaultPageLayout: FC<LayoutProps> = ({ children, pageTitle, border = true }) => {
   return (
-    <>
+    <SecuritySolutionPageWrapper>
       <EuiPageHeader alignItems="center" bottomBorder={border}>
         <EuiPageHeaderSection>
           {pageTitle && (
@@ -29,6 +30,6 @@ export const DefaultPageLayout: FC<LayoutProps> = ({ children, pageTitle, border
       </EuiPageHeader>
       <EuiSpacer size="l" />
       {children}
-    </>
+    </SecuritySolutionPageWrapper>
   );
 };
