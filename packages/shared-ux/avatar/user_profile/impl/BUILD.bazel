@@ -19,10 +19,10 @@ SOURCE_FILES = glob(
 
 SRCS = SOURCE_FILES
 
-filegroup(
-  name = "srcs",
-  srcs = SRCS,
-)
+# filegroup(
+#   name = "srcs",
+#   srcs = SRCS,
+# )
 
 NPM_MODULE_EXTRA_FILES = [
   "package.json",
@@ -44,6 +44,7 @@ RUNTIME_DEPS = [
   "//packages/kbn-i18n-react",
   "//packages/kbn-i18n",
   "//packages/kbn-shared-ux-utility",
+  "//packages/kbn-ambient-ui-types",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -97,7 +98,7 @@ ts_project(
   declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  root_dir = "src",
+  root_dir = ".",
   tsconfig = ":tsconfig",
 )
 
