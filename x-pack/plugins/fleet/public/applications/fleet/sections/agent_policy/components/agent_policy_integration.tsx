@@ -92,7 +92,6 @@ export const AgentPolicyIntegrationForm: React.FunctionComponent<Props> = ({
             <FormattedMessage
               id="xpack.fleet.agentPolicyForm.advancedOptionsToggleLabel"
               defaultMessage="Advanced options"
-              data-test-subj="AgentPolicyAdvancedOptions.AccordionBtn"
             />
           }
           buttonClassName="ingest-active-button"

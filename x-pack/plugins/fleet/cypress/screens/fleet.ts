@@ -36,7 +36,6 @@ export const ADVANCED_FLEET_SERVER_GENERATE_SERVICE_TOKEN_BUTTON =
 export const AGENT_POLICIES_CREATE_AGENT_POLICY_FLYOUT = {
   TITLE: 'createAgentPolicyFlyoutTitle',
   CREATE_BUTTON: 'createAgentPolicyButton',
-  ADVANCED_BTN: 'AgentPolicyAdvancedOptions.AccordionBtn',
   COLLECT_LOGS_CHECKBOX: 'collectLogsCheckbox',
   COLLECT_METRICS_CHECKBOX: 'collectMetricsCheckbox',
 };
@@ -48,6 +47,7 @@ export const ENROLLMENT_TOKENS_CREATE_TOKEN_BUTTON = 'createEnrollmentTokenButto
 export const ENROLLMENT_TOKENS_CREATE_TOKEN_NAME_FIELD = 'createEnrollmentTokenNameField';
 export const SETTINGS_FLEET_SERVER_HOST_HEADING = 'fleetServerHostHeader';
 export const AGENT_POLICY_SYSTEM_MONITORING_CHECKBOX = 'agentPolicyFormSystemMonitoringCheckbox';
+export const INSTALL_INTEGRATIONS_ADVANCE_OPTIONS_BTN = 'AgentPolicyAdvancedOptions.AccordionBtn';
 
 export const AGENT_BINARY_SOURCES_TABLE = 'AgentDownloadSourcesTable';
 export const AGENT_BINARY_SOURCES_TABLE_ACTIONS = {

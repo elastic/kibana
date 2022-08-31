@@ -32,7 +32,6 @@ export const SETTINGS = {
   INSTALL_ASSETS_BTN: 'installAssetsButton',
   UNINSTALL_ASSETS_BTN: 'uninstallAssetsButton',
 };
-export const INSTALL_INTEGRATIONS_ADVANCE_OPTIONS_BTN = 'installIntegrationsAdvancedOptionsBtn';
 
 export const INTEGRATION_POLICIES_UPGRADE_CHECKBOX = 'epmDetails.upgradePoliciesCheckbox';
 

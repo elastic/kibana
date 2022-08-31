@@ -34,9 +34,9 @@ import { cleanupAgentPolicies } from '../tasks/cleanup';
 describe('Add Integration - Real API', () => {
   const integration = 'apache';
 
-  // before(() => {
-  //   cleanupAgentPolicies();
-  // });
+  before(() => {
+    cleanupAgentPolicies();
+  });
 
   after(() => {
     cleanupAgentPolicies();
@@ -84,7 +84,7 @@ describe('Add Integration - Real API', () => {
     cy.getBySel(SETTINGS.INSTALL_ASSETS_BTN).should('exist');
   });
 
-  it.only('should display Apache integration in the Policies list once installed ', () => {
+  it('should display Apache integration in the Policies list once installed ', () => {
     addAndVerifyIntegration();
     cy.getBySel(AGENT_POLICY_NAME_LINK).contains('Agent policy 1');
   });

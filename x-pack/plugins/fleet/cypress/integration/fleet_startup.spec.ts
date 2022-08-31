@@ -11,6 +11,7 @@ import {
   AGENT_FLYOUT_CLOSE_BUTTON,
   STANDALONE_TAB,
   AGENT_POLICY_CODE_BLOCK,
+  CREATE_POLICY_BUTTON,
 } from '../screens/fleet';
 import { cleanupAgentPolicies, unenrollAgent } from '../tasks/cleanup';
 import { verifyPolicy, verifyAgentPackage, navigateToTab } from '../tasks/fleet';
@@ -53,7 +54,7 @@ describe('Fleet startup', () => {
 
       cy.intercept('POST', '/api/fleet/agent_policies?sys_monitoring=true').as('createAgentPolicy');
 
-      cy.getBySel('createPolicyBtn').click();
+      cy.getBySel(CREATE_POLICY_BUTTON).click();
 
       let agentPolicyId: string;
       const startTime = Date.now();

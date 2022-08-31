@@ -10,7 +10,6 @@ import {
   CONFIRM_MODAL_BTN,
   CREATE_PACKAGE_POLICY_SAVE_BTN,
   FLYOUT_CLOSE_BTN_SEL,
-  INSTALL_INTEGRATIONS_ADVANCE_OPTIONS_BTN,
 } from '../screens/integrations';
 
 import { AGENT_POLICY_SYSTEM_MONITORING_CHECKBOX } from '../screens/fleet';
@@ -23,11 +22,12 @@ export const addIntegration = ({ useExistingPolicy } = { useExistingPolicy: fals
   } else {
     // speeding up creating with unchecking system and agent integration
     cy.getBySel(AGENT_POLICY_SYSTEM_MONITORING_CHECKBOX).uncheck({ force: true });
-    cy.getBySel(INSTALL_INTEGRATIONS_ADVANCE_OPTIONS_BTN).click();
-    cy.getBySel('*[id^="logs_"]').uncheck({
+    cy.get('.euiAccordion__button').click();
+
+    cy.get('*[id^="logs_"]').uncheck({
       force: true,
     });
-    cy.getBySel('*[id^="metrics_"]').uncheck({
+    cy.get('*[id^="metrics_"]').uncheck({
       force: true,
     });
   }
