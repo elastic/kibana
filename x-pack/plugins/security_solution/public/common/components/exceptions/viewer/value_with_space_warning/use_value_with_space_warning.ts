@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { paramContainsSpace, FIELD_SPACE_WARNING_TEXT } from '@kbn/securitysolution-autocomplete';
+import { paramContainsSpace, autoCompletei18n } from '@kbn/securitysolution-autocomplete';
 
 interface UseValueWithSpaceWarningResult {
   showSpaceWarningIcon: boolean;
@@ -26,6 +26,6 @@ export const useValueWithSpaceWarning = ({
 
   return {
     showSpaceWarningIcon: !!showSpaceWarningIcon,
-    warningText: tooltipIconText || FIELD_SPACE_WARNING_TEXT,
+    warningText: tooltipIconText || autoCompletei18n.FIELD_SPACE_WARNING,
   };
 };
