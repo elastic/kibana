@@ -231,19 +231,6 @@ Upon detection, each alert can trigger one or more actions. If the condition per
 
 Alerts will come and go from the list depending on whether they meet the rule conditions or not - unless they are muted. If a muted instance no longer meets the rule conditions, it will appear as inactive in the list. This prevents an alert from triggering actions if it reappears in the future.
 
-////
-TBD: Steps for creating "recovered alerts" 
-[role="screenshot"]
-image::images/rule-details-alerts-inactive.png[Rule details page with three inactive alerts]
-
-TBD: Is this now replaced by the "Snooze notifications" functionality?
-If you want to suppress actions on all current and future alerts, you can mute the entire rule. Rule checks continue to run and the alert list will update as alerts activate or deactivate, but no actions will be triggered.
-
-TBD: This toggle no longer seems to exist
-[role="screenshot"]
-image::images/rule-details-muting.png[Use the mute toggle to suppress all actions on current and future alerts,width=50%]
-////
-
 You can also disable a rule altogether. When disabled, the rule stops running checks altogether and will clear any alerts it is tracking. You may want to disable rules that are not currently needed to reduce the load on {kib} and {es}.
 
 [role="screenshot"]
