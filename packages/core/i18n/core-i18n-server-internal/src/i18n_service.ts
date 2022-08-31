@@ -62,7 +62,6 @@ export class I18nService {
     );
 
     const locale = i18nConfig.locale;
-    console.log('LOCALE::::::', locale);
     this.log.debug(`Using locale: ${locale}`);
 
     const translationFiles = await getKibanaTranslationFiles(locale, pluginPaths);
