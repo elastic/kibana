@@ -18,6 +18,11 @@ import {
 } from '@kbn/es-query';
 import { SavedSearch, getSavedSearch } from '@kbn/saved-search-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
+import {
+  UPDATE_FILTER_REFERENCES_ACTION,
+  UPDATE_FILTER_REFERENCES_TRIGGER,
+} from '@kbn/unified-search-plugin/public';
+import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { usePersistedDataView } from '../../../hooks/use_persisted_data_view';
 import { getState } from '../services/discover_state';
 import { getStateDefaults } from '../utils/get_state_defaults';
@@ -36,6 +41,7 @@ import { FetchStatus } from '../../types';
 import { getDataViewAppState } from '../utils/get_switch_data_view_app_state';
 import { DataTableRecord } from '../../../types';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
+import { getUiActions } from '../../../kibana_services';
 
 const MAX_NUM_OF_COLUMNS = 50;
 
@@ -316,6 +322,18 @@ export function useDiscoverState({
       const newDataView = await dataViews.create({ ...hocDataView.toSpec(), id: undefined });
       dataViews.clearInstanceCache(hocDataView.id);
       savedSearch.searchSource.setField('index', newDataView);
+
+      // update filters references
+      const uiActions = await getUiActions();
+      const trigger = uiActions.getTrigger(UPDATE_FILTER_REFERENCES_TRIGGER);
+      const action = uiActions.getAction(UPDATE_FILTER_REFERENCES_ACTION);
+      action?.execute({
+        trigger,
+        fromDataView: hocDataView.id,
+        toDataView: newDataView.id,
+        usedDataViews: [],
+      } as ActionExecutionContext);
+
       return newDataView;
     },
     [dataViews, savedSearch.searchSource]

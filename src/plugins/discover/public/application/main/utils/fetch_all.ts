@@ -113,7 +113,7 @@ export function fetchAll(
     // Start fetching all required requests
     const documents =
       useSql && query
-        ? fetchSql(query, services.dataViews, data, services.expressions)
+        ? fetchSql(query, services.dataViews, data, services.expressions, dataView.timeFieldName)
         : fetchDocuments(searchSource.createCopy(), fetchDeps);
     const charts =
       isChartVisible && !useSql ? fetchChart(searchSource.createCopy(), fetchDeps) : undefined;

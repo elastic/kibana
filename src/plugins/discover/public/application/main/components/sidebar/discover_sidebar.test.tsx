@@ -77,7 +77,6 @@ function getCompProps(): DiscoverSidebarProps {
     onDataViewCreated: jest.fn(),
     availableFields$,
     useNewFieldsApi: true,
-    persistDataView: jest.fn(),
   };
 }
 

@@ -226,6 +226,7 @@ export class SavedSearchEmbeddable
           this.services.dataViews,
           this.services.data,
           this.services.expressions,
+          this.searchProps?.dataView?.timeFieldName,
           this.input.filters,
           this.input.query
         );

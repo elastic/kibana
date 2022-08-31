@@ -21,11 +21,10 @@ interface Props {
   details: FieldDetails;
   multiFields?: DataViewField[];
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
-  persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
 }
 
 export const DiscoverFieldVisualize: React.FC<Props> = React.memo(
-  ({ field, dataView, details, trackUiMetric, multiFields, persistDataView }) => {
+  ({ field, dataView, details, trackUiMetric, multiFields }) => {
     const [visualizeInfo, setVisualizeInfo] = useState<VisualizeInformation>();
 
     useEffect(() => {
@@ -44,11 +43,8 @@ export const DiscoverFieldVisualize: React.FC<Props> = React.memo(
       // regular link click. let the uiActions code handle the navigation and show popup if needed
       event.preventDefault();
 
-      const updatedDataView = await persistDataView(dataView);
-      if (updatedDataView) {
-        trackUiMetric?.(METRIC_TYPE.CLICK, 'visualize_link_click');
-        triggerVisualizeActions(visualizeInfo.field, updatedDataView.id, details.columns);
-      }
+      trackUiMetric?.(METRIC_TYPE.CLICK, 'visualize_link_click');
+      triggerVisualizeActions(visualizeInfo.field, dataView.id, details.columns);
     };
 
     return (

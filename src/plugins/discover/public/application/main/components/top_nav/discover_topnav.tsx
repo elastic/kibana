@@ -211,8 +211,8 @@ export const DiscoverTopNav = ({
   };
 
   const onTextBasedSavedAndExit = useCallback(
-    async ({ onSave, onCancel }) => {
-      await onSaveSearch({
+    ({ onSave, onCancel }) => {
+      onSaveSearch({
         savedSearch,
         services,
         dataView,
@@ -220,9 +220,10 @@ export const DiscoverTopNav = ({
         state: stateContainer,
         onClose: onCancel,
         onSaveCb: onSave,
+        updateHocDataViewId,
       });
     },
-    [dataView, navigateTo, savedSearch, services, stateContainer]
+    [dataView, navigateTo, savedSearch, services, stateContainer, updateHocDataViewId]
   );
 
   return (

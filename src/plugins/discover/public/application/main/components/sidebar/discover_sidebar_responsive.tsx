@@ -107,7 +107,6 @@ export interface DiscoverSidebarResponsiveProps {
    * list of available fields fetched from ES
    */
   availableFields$: AvailableFields$;
-  persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
 }
 
 /**
@@ -279,7 +278,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
             setFieldFilter={setFieldFilter}
             editField={editField}
             createNewDataView={createNewDataView}
-            persistDataView={props.persistDataView}
           />
         </EuiHideFor>
       )}
@@ -347,7 +345,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
                   editField={editField}
                   createNewDataView={createNewDataView}
                   showDataViewPicker={true}
-                  persistDataView={props.persistDataView}
                 />
               </div>
             </EuiFlyout>
