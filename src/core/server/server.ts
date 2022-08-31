@@ -50,8 +50,9 @@ import {
   savedObjectsMigrationConfig,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObjectsService } from '@kbn/core-saved-objects-server-internal';
-import { CoreApp } from './core_app';
 import { I18nService } from '@kbn/core-i18n-server-internal';
+import { config as i18nConfig } from '@kbn/core-i18n-server-internal';
+import { CoreApp } from './core_app';
 import { HttpResourcesService } from './http_resources';
 import { RenderingService } from './rendering';
 import { UiSettingsService } from './ui_settings';
@@ -61,7 +62,6 @@ import { PluginsService, config as pluginsConfig } from './plugins';
 import { StatusService } from './status/status_service';
 import { config as uiSettingsConfig } from './ui_settings';
 import { config as statusConfig } from './status';
-import { config as i18nConfig } from '@kbn/core-i18n-server-internal';
 import { InternalCorePreboot, InternalCoreSetup, InternalCoreStart } from './internal_types';
 import { CoreUsageDataService } from './core_usage_data';
 import { DeprecationsService, config as deprecationConfig } from './deprecations';
