@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { expectNotType, expectType } from 'tsd';
+import { expectAssignable, expectNotType, expectType } from 'tsd';
 import { DedotObject, DotObject } from '../../dot';
 
 interface TestA {
@@ -59,10 +59,10 @@ const dedotted1 = {} as DedotObject<TestA>;
 
 const dotted1 = {} as DotObject<TestB>;
 
-expectType<DedotObject<TestA>>({} as Dedotted);
-expectType<DotObject<TestB>>({} as Dotted);
-expectType<Dedotted>({} as DedotObject<TestA>);
-expectType<Dotted>({} as DotObject<TestB>);
+expectAssignable<DedotObject<TestA>>({} as Dedotted);
+expectAssignable<DotObject<TestB>>({} as Dotted);
+expectAssignable<Dedotted>({} as DedotObject<TestA>);
+expectAssignable<Dotted>({} as DotObject<TestB>);
 
 expectType<string | undefined>(dedotted1.ym?.dotted?.partial?.key?.toString());
 expectType<string>(dotted1['my.undotted.key'].toString());
