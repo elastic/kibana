@@ -31,6 +31,7 @@ import { ObservabilityAppServices } from '../../../application/types';
 import { RULE_DETAILS_PAGE_ID } from '../../rule_details/types';
 import type { TopAlert } from '../containers/alerts_page/alerts_page';
 import { ObservabilityRuleTypeRegistry } from '../../..';
+import { ALERT_DETAILS_PAGE_ID } from '../../alert_details/types';
 
 export type ObservabilityActionsProps = Pick<
   ActionProps,
@@ -73,6 +74,11 @@ export function ObservabilityActions({
   const linkToRule =
     pageId !== RULE_DETAILS_PAGE_ID && ruleId
       ? http.basePath.prepend(paths.observability.ruleDetails(ruleId))
+      : null;
+  const alertId = alert.fields['kibana.alert.uuid'] ?? null;
+  const linkToAlert =
+    pageId !== ALERT_DETAILS_PAGE_ID && alertId
+      ? http.basePath.prepend(paths.observability.alertDetails(alertId))
       : null;
   const caseAttachments: CaseAttachmentsWithoutOwner = useMemo(() => {
     return ecsData?._id
@@ -146,6 +152,18 @@ export function ObservabilityActions({
           {translations.alertsTable.viewAlertDetailsButtonText}
         </EuiContextMenuItem>,
       ],
+
+      ...(linkToAlert
+        ? [
+            <EuiContextMenuItem
+              key="viewAlertDetailsPage"
+              data-test-subj="viewAlertDetailsPage"
+              href={linkToAlert}
+            >
+              {translations.alertsTable.viewAlertDetailsPageButtonText}
+            </EuiContextMenuItem>,
+          ]
+        : []),
     ];
   }, [
     userCasesPermissions.create,
@@ -154,6 +172,7 @@ export function ObservabilityActions({
     handleAddToNewCaseClick,
     linkToRule,
     alert,
+    linkToAlert,
     setFlyoutAlert,
     closeActionsPopover,
   ]);
