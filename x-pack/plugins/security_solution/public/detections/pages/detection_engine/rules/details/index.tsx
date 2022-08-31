@@ -34,7 +34,6 @@ import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { Dispatch } from 'redux';
 import { isTab } from '@kbn/timelines-plugin/public';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
-import { InputsModelId } from '../../../../../common/store/inputs/constants';
 import {
   useDeepEqualSelector,
   useShallowEqualSelector,
@@ -550,7 +549,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       const [min, max] = x;
       dispatch(
         setAbsoluteRangeDatePicker({
-          id: InputsModelId.global,
+          id: 'global',
           from: new Date(min).toISOString(),
           to: new Date(max).toISOString(),
         })
@@ -694,7 +693,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
         <EuiWindowEvent event="resize" handler={noop} />
         <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
           <SiemSearchBar
-            id={InputsModelId.global}
+            id="global"
             pollForSignalIndex={pollForSignalIndex}
             indexPattern={indexPattern}
           />

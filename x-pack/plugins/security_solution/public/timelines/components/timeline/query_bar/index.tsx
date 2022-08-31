@@ -14,7 +14,6 @@ import deepEqual from 'fast-deep-equal';
 import type { Filter, Query } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import type { FilterManager, SavedQuery, SavedQueryTimeFilter } from '@kbn/data-plugin/public';
-import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 
@@ -214,7 +213,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
           const isQuickSelection = timefilter.from.includes('now') || timefilter.to.includes('now');
 
           updateReduxTime({
-            id: InputsModelId.timeline,
+            id: 'timeline',
             end: timefilter.to,
             start: timefilter.from,
             isInvalid: false,

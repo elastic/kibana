@@ -20,7 +20,6 @@ import {
   upsertQuery,
 } from './helpers';
 import type { InputsModel, TimeRange } from './model';
-import { InputsModelId } from './constants';
 
 let state = mockGlobalState.inputs;
 
@@ -48,7 +47,7 @@ const socTrendsGlobalLinkToState: InputsModel = {
   ...state,
   global: {
     ...state.global,
-    linkTo: [InputsModelId.socTrends],
+    linkTo: ['socTrends'],
   },
   timeline: {
     ...state.timeline,
@@ -58,7 +57,7 @@ const socTrendsGlobalLinkToState: InputsModel = {
     ? {
         socTrends: {
           ...state.socTrends,
-          linkTo: [InputsModelId.global],
+          linkTo: ['global'],
         },
       }
     : {}),
@@ -67,11 +66,11 @@ const timelineGlobalLinkToState: InputsModel = {
   ...state,
   global: {
     ...state.global,
-    linkTo: [InputsModelId.timeline],
+    linkTo: ['timeline'],
   },
   timeline: {
     ...state.timeline,
-    linkTo: [InputsModelId.global],
+    linkTo: ['global'],
   },
   ...(state.socTrends
     ? {
@@ -94,8 +93,8 @@ describe('Inputs', () => {
 
     test('Add timeline Lock from inputs', () => {
       const newState: InputsModel = toggleLockTimeline(emptyLinkToState);
-      expect(newState.timeline.linkTo).toEqual([InputsModelId.global]);
-      expect(newState.global.linkTo).toEqual([InputsModelId.timeline]);
+      expect(newState.timeline.linkTo).toEqual(['global']);
+      expect(newState.global.linkTo).toEqual(['timeline']);
     });
   });
 
@@ -109,11 +108,7 @@ describe('Inputs', () => {
           from: '2020-07-06T08:00:00.000Z',
           to: '2020-07-08T08:00:00.000Z',
         };
-        const newState: InputsModel = updateInputTimerange(
-          InputsModelId.global,
-          newTimerange,
-          allLinkToState
-        );
+        const newState: InputsModel = updateInputTimerange('global', newTimerange, allLinkToState);
         expect(newState.timeline.timerange).toEqual(newState.global.timerange);
         expect(newState.socTrends?.timerange).toEqual({
           kind: 'absolute',
@@ -131,7 +126,7 @@ describe('Inputs', () => {
           to: '2020-07-08T18:00:00.000Z',
         };
         const newState: InputsModel = updateInputTimerange(
-          InputsModelId.timeline,
+          'timeline',
           newTimerange,
           allLinkToState
         );
@@ -152,7 +147,7 @@ describe('Inputs', () => {
           to: '2020-07-02T00:00:00.000Z',
         };
         const newState: InputsModel = updateInputTimerange(
-          InputsModelId.socTrends,
+          'socTrends',
           newTimerange,
           allLinkToState
         );
@@ -176,7 +171,7 @@ describe('Inputs', () => {
           to: '2020-07-08T08:00:00.000Z',
         };
         const newState: InputsModel = updateInputTimerange(
-          InputsModelId.global,
+          'global',
           newTimerange,
           emptyLinkToState
         );
@@ -194,7 +189,7 @@ describe('Inputs', () => {
           to: '2020-07-08T18:00:00.000Z',
         };
         const newState: InputsModel = updateInputTimerange(
-          InputsModelId.timeline,
+          'timeline',
           newTimerange,
           emptyLinkToState
         );
@@ -212,7 +207,7 @@ describe('Inputs', () => {
           to: '2020-07-08T08:00:00.000Z',
         };
         const newState: InputsModel = updateInputTimerange(
-          InputsModelId.socTrends,
+          'socTrends',
           newTimerange,
           emptyLinkToState
         );
@@ -232,7 +227,7 @@ describe('Inputs', () => {
           to: '2020-07-08T08:00:00.000Z',
         };
         const newState: InputsModel = updateInputTimerange(
-          InputsModelId.global,
+          'global',
           newTimerange,
           timelineGlobalLinkToState
         );
@@ -251,7 +246,7 @@ describe('Inputs', () => {
           to: '2020-07-08T18:00:00.000Z',
         };
         const newState: InputsModel = updateInputTimerange(
-          InputsModelId.timeline,
+          'timeline',
           newTimerange,
           timelineGlobalLinkToState
         );
@@ -270,7 +265,7 @@ describe('Inputs', () => {
           to: '2020-07-02T00:00:00.000Z',
         };
         const newState: InputsModel = updateInputTimerange(
-          InputsModelId.socTrends,
+          'socTrends',
           newTimerange,
           timelineGlobalLinkToState
         );
@@ -291,7 +286,7 @@ describe('Inputs', () => {
           to: '2020-07-08T08:00:00.000Z',
         };
         const newState: InputsModel = updateInputTimerange(
-          InputsModelId.global,
+          'global',
           newTimerange,
           socTrendsGlobalLinkToState
         );
@@ -313,7 +308,7 @@ describe('Inputs', () => {
           to: '2020-07-08T18:00:00.000Z',
         };
         const newState: InputsModel = updateInputTimerange(
-          InputsModelId.timeline,
+          'timeline',
           newTimerange,
           socTrendsGlobalLinkToState
         );
@@ -333,7 +328,7 @@ describe('Inputs', () => {
           to: '2020-07-02T00:00:00.000Z',
         };
         const newState: InputsModel = updateInputTimerange(
-          InputsModelId.socTrends,
+          'socTrends',
           newTimerange,
           socTrendsGlobalLinkToState
         );
@@ -353,7 +348,7 @@ describe('Inputs', () => {
     test('make sure you can add a query', () => {
       const refetch = jest.fn();
       const newQuery: UpdateQueryParams = {
-        inputId: InputsModelId.global,
+        inputId: 'global',
         id: 'myQuery',
         inspect: null,
         loading: false,
@@ -375,7 +370,7 @@ describe('Inputs', () => {
     test('make sure you can update a query', () => {
       const refetch = jest.fn();
       const newQuery: UpdateQueryParams = {
-        inputId: InputsModelId.global,
+        inputId: 'global',
         id: 'myQuery',
         inspect: null,
         loading: false,
@@ -404,7 +399,7 @@ describe('Inputs', () => {
     beforeEach(() => {
       state = cloneDeep(mockGlobalState.inputs);
       const newQuery: UpdateQueryParams = {
-        inputId: InputsModelId.global,
+        inputId: 'global',
         id: 'myQuery',
         inspect: null,
         loading: false,
@@ -415,7 +410,7 @@ describe('Inputs', () => {
     });
     test('make sure you can set isInspected with a positive value', () => {
       const newQuery: SetIsInspectedParams = {
-        inputId: InputsModelId.global,
+        inputId: 'global',
         id: 'myQuery',
         isInspected: true,
         selectedInspectIndex: 0,
@@ -435,7 +430,7 @@ describe('Inputs', () => {
 
     test('make sure you can set isInspected with a negative value', () => {
       const newQuery: SetIsInspectedParams = {
-        inputId: InputsModelId.global,
+        inputId: 'global',
         id: 'myQuery',
         isInspected: false,
         selectedInspectIndex: 0,
@@ -457,57 +452,43 @@ describe('Inputs', () => {
   describe('#addInputLink', () => {
     describe(`does not allow bad values`, () => {
       test('More than 2 linkToIds passed', () => {
-        expect(() =>
-          addInputLink(
-            [InputsModelId.global, InputsModelId.timeline, InputsModelId.socTrends],
-            state
-          )
-        ).toThrow('Only link 2 input states at a time');
-      });
-      test('Less than 2 linkToIds passed', () => {
-        expect(() => addInputLink([InputsModelId.global], state)).toThrow(
+        expect(() => addInputLink(['global', 'timeline', 'socTrends'], state)).toThrow(
           'Only link 2 input states at a time'
         );
       });
+      test('Less than 2 linkToIds passed', () => {
+        expect(() => addInputLink(['global'], state)).toThrow('Only link 2 input states at a time');
+      });
       test('Identical linkToIds passed', () => {
-        expect(() => addInputLink([InputsModelId.global, InputsModelId.global], state)).toThrow(
+        expect(() => addInputLink(['global', 'global'], state)).toThrow(
           'Input linkTo cannot link to itself'
         );
       });
       test('Do not link timeline and socTrends', () => {
-        expect(() =>
-          addInputLink([InputsModelId.timeline, InputsModelId.socTrends], state)
-        ).toThrow('Do not link socTrends to timeline. Only link socTrends to global');
+        expect(() => addInputLink(['timeline', 'socTrends'], state)).toThrow(
+          'Do not link socTrends to timeline. Only link socTrends to global'
+        );
       });
     });
     describe(`linkToIds === ["global", "timeline"]`, () => {
       test('no inputs linked, add timeline to global, add global to timeline', () => {
-        const newState: InputsModel = addInputLink(
-          [InputsModelId.global, InputsModelId.timeline],
-          emptyLinkToState
-        );
-        expect(newState.global.linkTo).toEqual([InputsModelId.timeline]);
-        expect(newState.timeline.linkTo).toEqual([InputsModelId.global]);
+        const newState: InputsModel = addInputLink(['global', 'timeline'], emptyLinkToState);
+        expect(newState.global.linkTo).toEqual(['timeline']);
+        expect(newState.timeline.linkTo).toEqual(['global']);
         expect(newState.socTrends?.linkTo).toEqual([]);
       });
       test('socTends and global linked, add timeline and socTrends to global, add global and socTrends to timeline', () => {
         const newState: InputsModel = addInputLink(
-          [InputsModelId.global, InputsModelId.timeline],
+          ['global', 'timeline'],
           socTrendsGlobalLinkToState
         );
-        expect(newState.global.linkTo.sort()).toEqual(
-          [InputsModelId.socTrends, InputsModelId.timeline].sort()
-        );
-        expect(newState.timeline.linkTo.sort()).toEqual(
-          [InputsModelId.global, InputsModelId.socTrends].sort()
-        );
-        expect(newState.socTrends?.linkTo.sort()).toEqual(
-          [InputsModelId.global, InputsModelId.timeline].sort()
-        );
+        expect(newState.global.linkTo.sort()).toEqual(['socTrends', 'timeline'].sort());
+        expect(newState.timeline.linkTo.sort()).toEqual(['global', 'socTrends'].sort());
+        expect(newState.socTrends?.linkTo.sort()).toEqual(['global', 'timeline'].sort());
       });
       test('timeline and global linked, do not update state', () => {
         const newState: InputsModel = addInputLink(
-          [InputsModelId.global, InputsModelId.timeline],
+          ['global', 'timeline'],
           timelineGlobalLinkToState
         );
         expect(newState.global.linkTo.sort()).toEqual(
@@ -521,10 +502,7 @@ describe('Inputs', () => {
         );
       });
       test('socTends, timeline, and global linked, do not update state', () => {
-        const newState: InputsModel = addInputLink(
-          [InputsModelId.global, InputsModelId.timeline],
-          allLinkToState
-        );
+        const newState: InputsModel = addInputLink(['global', 'timeline'], allLinkToState);
         expect(newState.global.linkTo.sort()).toEqual(allLinkToState.global.linkTo.sort());
         expect(newState.timeline.linkTo.sort()).toEqual(allLinkToState.timeline.linkTo.sort());
         expect(newState.socTrends?.linkTo.sort()).toEqual(allLinkToState.socTrends?.linkTo.sort());
@@ -532,32 +510,23 @@ describe('Inputs', () => {
     });
     describe(`linkToIds === ["global", "socTrends"]`, () => {
       test('no inputs linked, add socTrends to global, add global to socTrends', () => {
-        const newState: InputsModel = addInputLink(
-          [InputsModelId.global, InputsModelId.socTrends],
-          emptyLinkToState
-        );
-        expect(newState.global.linkTo).toEqual([InputsModelId.socTrends]);
+        const newState: InputsModel = addInputLink(['global', 'socTrends'], emptyLinkToState);
+        expect(newState.global.linkTo).toEqual(['socTrends']);
         expect(newState.timeline.linkTo).toEqual([]);
-        expect(newState.socTrends?.linkTo).toEqual([InputsModelId.global]);
+        expect(newState.socTrends?.linkTo).toEqual(['global']);
       });
       test('timeline and global linked, add timeline and socTrends to global, add global and timeline to socTrends', () => {
         const newState: InputsModel = addInputLink(
-          [InputsModelId.global, InputsModelId.socTrends],
+          ['global', 'socTrends'],
           timelineGlobalLinkToState
         );
-        expect(newState.global.linkTo.sort()).toEqual(
-          [InputsModelId.socTrends, InputsModelId.timeline].sort()
-        );
-        expect(newState.timeline.linkTo.sort()).toEqual(
-          [InputsModelId.global, InputsModelId.socTrends].sort()
-        );
-        expect(newState.socTrends?.linkTo.sort()).toEqual(
-          [InputsModelId.global, InputsModelId.timeline].sort()
-        );
+        expect(newState.global.linkTo.sort()).toEqual(['socTrends', 'timeline'].sort());
+        expect(newState.timeline.linkTo.sort()).toEqual(['global', 'socTrends'].sort());
+        expect(newState.socTrends?.linkTo.sort()).toEqual(['global', 'timeline'].sort());
       });
       test('socTends and global linked, do not update state', () => {
         const newState: InputsModel = addInputLink(
-          [InputsModelId.global, InputsModelId.socTrends],
+          ['global', 'socTrends'],
           socTrendsGlobalLinkToState
         );
         expect(newState.global.linkTo.sort()).toEqual(
@@ -572,10 +541,7 @@ describe('Inputs', () => {
       });
       test('socTrends, timeline, and global linked, do not update state', () => {
         const inputState: InputsModel = allLinkToState;
-        const newState: InputsModel = addInputLink(
-          [InputsModelId.global, InputsModelId.socTrends],
-          inputState
-        );
+        const newState: InputsModel = addInputLink(['global', 'socTrends'], inputState);
         expect(newState.global.linkTo.sort()).toEqual(inputState.global.linkTo.sort());
         expect(newState.timeline.linkTo.sort()).toEqual(inputState.timeline.linkTo.sort());
         expect(newState.socTrends?.linkTo.sort()).toEqual(inputState.socTrends?.linkTo.sort());
@@ -586,42 +552,36 @@ describe('Inputs', () => {
   describe('#removeInputLink', () => {
     describe(`does not allow bad values`, () => {
       test('More than 2 linkToIds passed', () => {
-        expect(() =>
-          removeInputLink(
-            [InputsModelId.global, InputsModelId.timeline, InputsModelId.socTrends],
-            state
-          )
-        ).toThrow('Only remove linkTo from 2 input states at a time');
+        expect(() => removeInputLink(['global', 'timeline', 'socTrends'], state)).toThrow(
+          'Only remove linkTo from 2 input states at a time'
+        );
       });
       test('Less than 2 linkToIds passed', () => {
-        expect(() => removeInputLink([InputsModelId.global], state)).toThrow(
+        expect(() => removeInputLink(['global'], state)).toThrow(
           'Only remove linkTo from 2 input states at a time'
         );
       });
       test('Identical linkToIds passed', () => {
-        expect(() => removeInputLink([InputsModelId.global, InputsModelId.global], state)).toThrow(
+        expect(() => removeInputLink(['global', 'global'], state)).toThrow(
           'Input linkTo cannot remove link to itself'
         );
       });
       test('Do not link timeline and socTrends', () => {
-        expect(() =>
-          removeInputLink([InputsModelId.timeline, InputsModelId.socTrends], state)
-        ).toThrow('Do not remove link socTrends to timeline. Only remove link socTrends to global');
+        expect(() => removeInputLink(['timeline', 'socTrends'], state)).toThrow(
+          'Do not remove link socTrends to timeline. Only remove link socTrends to global'
+        );
       });
     });
     describe(`linkToIds === ["global", "timeline"]`, () => {
       test('no inputs linked, do nothing', () => {
-        const newState: InputsModel = removeInputLink(
-          [InputsModelId.global, InputsModelId.timeline],
-          emptyLinkToState
-        );
+        const newState: InputsModel = removeInputLink(['global', 'timeline'], emptyLinkToState);
         expect(newState.global.linkTo).toEqual(emptyLinkToState.global.linkTo);
         expect(newState.timeline.linkTo).toEqual(emptyLinkToState.timeline.linkTo);
         expect(newState.socTrends?.linkTo).toEqual(emptyLinkToState.socTrends?.linkTo);
       });
       test('socTrends and global linked, do nothing', () => {
         const newState: InputsModel = removeInputLink(
-          [InputsModelId.global, InputsModelId.timeline],
+          ['global', 'timeline'],
           socTrendsGlobalLinkToState
         );
         expect(newState.global.linkTo).toEqual(socTrendsGlobalLinkToState.global.linkTo);
@@ -630,7 +590,7 @@ describe('Inputs', () => {
       });
       test('timeline and global linked, remove link', () => {
         const newState: InputsModel = removeInputLink(
-          [InputsModelId.global, InputsModelId.timeline],
+          ['global', 'timeline'],
           timelineGlobalLinkToState
         );
         expect(newState.global.linkTo).toEqual([]);
@@ -638,28 +598,22 @@ describe('Inputs', () => {
         expect(newState.socTrends?.linkTo).toEqual([]);
       });
       test('socTrends, timeline, and global linked, unlink timeline/global only', () => {
-        const newState: InputsModel = removeInputLink(
-          [InputsModelId.global, InputsModelId.timeline],
-          allLinkToState
-        );
-        expect(newState.global.linkTo).toEqual([InputsModelId.socTrends]);
+        const newState: InputsModel = removeInputLink(['global', 'timeline'], allLinkToState);
+        expect(newState.global.linkTo).toEqual(['socTrends']);
         expect(newState.timeline.linkTo).toEqual([]);
-        expect(newState.socTrends?.linkTo).toEqual([InputsModelId.global]);
+        expect(newState.socTrends?.linkTo).toEqual(['global']);
       });
     });
     describe(`linkToIds === ["global", "socTrends"]`, () => {
       test('no inputs linked, do nothing', () => {
-        const newState: InputsModel = removeInputLink(
-          [InputsModelId.global, InputsModelId.socTrends],
-          emptyLinkToState
-        );
+        const newState: InputsModel = removeInputLink(['global', 'socTrends'], emptyLinkToState);
         expect(newState.global.linkTo).toEqual(emptyLinkToState.global.linkTo);
         expect(newState.timeline.linkTo).toEqual(emptyLinkToState.timeline.linkTo);
         expect(newState.socTrends?.linkTo).toEqual(emptyLinkToState.socTrends?.linkTo);
       });
       test('timeline and global linked, do nothing', () => {
         const newState: InputsModel = removeInputLink(
-          [InputsModelId.global, InputsModelId.socTrends],
+          ['global', 'socTrends'],
           timelineGlobalLinkToState
         );
         expect(newState.global.linkTo).toEqual(timelineGlobalLinkToState.global.linkTo);
@@ -668,7 +622,7 @@ describe('Inputs', () => {
       });
       test('socTrends and global linked, remove link', () => {
         const newState: InputsModel = removeInputLink(
-          [InputsModelId.global, InputsModelId.socTrends],
+          ['global', 'socTrends'],
           socTrendsGlobalLinkToState
         );
         expect(newState.global.linkTo).toEqual([]);
@@ -676,12 +630,9 @@ describe('Inputs', () => {
         expect(newState.socTrends?.linkTo).toEqual([]);
       });
       test('socTrends, timeline, and global linked, unlink timeline/global only', () => {
-        const newState: InputsModel = removeInputLink(
-          [InputsModelId.global, InputsModelId.socTrends],
-          allLinkToState
-        );
-        expect(newState.global.linkTo).toEqual([InputsModelId.timeline]);
-        expect(newState.timeline.linkTo).toEqual([InputsModelId.global]);
+        const newState: InputsModel = removeInputLink(['global', 'socTrends'], allLinkToState);
+        expect(newState.global.linkTo).toEqual(['timeline']);
+        expect(newState.timeline.linkTo).toEqual(['global']);
         expect(newState.socTrends?.linkTo).toEqual([]);
       });
     });
@@ -691,7 +642,7 @@ describe('Inputs', () => {
     test('make sure that we only delete one query', () => {
       const refetch = jest.fn();
       const newQuery: UpdateQueryParams = {
-        inputId: InputsModelId.global,
+        inputId: 'global',
         id: 'myQuery',
         inspect: null,
         loading: false,
@@ -700,7 +651,7 @@ describe('Inputs', () => {
       };
       let newState: InputsModel = upsertQuery(newQuery);
       const deleteQuery: UpdateQueryParams = {
-        inputId: InputsModelId.global,
+        inputId: 'global',
         id: 'deleteQuery',
         inspect: null,
         loading: false,
@@ -710,13 +661,13 @@ describe('Inputs', () => {
       newState = upsertQuery(deleteQuery);
       expect(
         deleteOneQuery({
-          inputId: InputsModelId.global,
+          inputId: 'global',
           id: 'deleteQuery',
           state: newState,
         })
       ).toEqual({
         global: {
-          linkTo: [InputsModelId.timeline, InputsModelId.socTrends],
+          linkTo: ['timeline', 'socTrends'],
           policy: {
             duration: 300000,
             kind: 'manual',
@@ -742,7 +693,7 @@ describe('Inputs', () => {
           filters: [],
         },
         timeline: {
-          linkTo: [InputsModelId.global, InputsModelId.socTrends],
+          linkTo: ['global', 'socTrends'],
           policy: {
             duration: 300000,
             kind: 'manual',

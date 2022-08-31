@@ -10,7 +10,6 @@ import memoizeOne from 'memoize-one';
 import { useCallback, useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { InputsModelId } from '../../../common/store/inputs/constants';
 import type { OpenTimelineResult } from '../../components/open_timeline/types';
 import { errorToToaster, useStateToaster } from '../../../common/components/toasters';
 import { inputsActions } from '../../../common/store/inputs';
@@ -150,7 +149,7 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
           if (!didCancel) {
             dispatch(
               inputsActions.setQuery({
-                inputId: InputsModelId.global,
+                inputId: 'global',
                 id: ALL_TIMELINE_QUERY_ID,
                 loading: false,
                 refetch: fetchData,
@@ -199,9 +198,7 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
 
   useEffect(
     () => () => {
-      dispatch(
-        inputsActions.deleteOneQuery({ inputId: InputsModelId.global, id: ALL_TIMELINE_QUERY_ID })
-      );
+      dispatch(inputsActions.deleteOneQuery({ inputId: 'global', id: ALL_TIMELINE_QUERY_ID }));
     },
     [dispatch]
   );
