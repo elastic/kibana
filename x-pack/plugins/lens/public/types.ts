@@ -47,6 +47,7 @@ import type { LensInspector } from './lens_inspector_service';
 import type { FormatSelectorOptions } from './indexpattern_datasource/dimension_panel/format_selector';
 import type { DataViewsState } from './state_management/types';
 import type { IndexPatternServiceAPI } from './indexpattern_service/service';
+import type { Document } from './persistence/saved_object_store';
 
 export interface IndexPatternRef {
   id: string;
@@ -75,6 +76,12 @@ export interface IndexPattern {
 export type IndexPatternField = FieldSpec & {
   displayName: string;
   aggregationRestrictions?: Partial<IndexPatternAggRestrictions>;
+  /**
+   * Map of fields which can be used, but may fail partially (ranked lower than others)
+   */
+  partiallyApplicableFunctions?: Partial<Record<string, boolean>>;
+  timeSeriesMetricType?: 'histogram' | 'summary' | 'gauge' | 'counter';
+  timeSeriesRollup?: boolean;
   meta?: boolean;
   runtime?: boolean;
 };
@@ -603,6 +610,8 @@ export type FieldOnlyDataType =
   | 'histogram'
   | 'geo_point'
   | 'geo_shape'
+  | 'counter'
+  | 'gauge'
   | 'murmur3';
 export type DataType = 'string' | 'number' | 'date' | 'boolean' | FieldOnlyDataType;
 
@@ -1183,4 +1192,5 @@ export type LensTopNavMenuEntryGenerator = (props: {
   query: Query;
   filters: Filter[];
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
+  currentDoc: Document | undefined;
 }) => undefined | TopNavMenuData;

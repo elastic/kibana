@@ -23,10 +23,10 @@ import React, { Fragment, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import * as Rx from 'rxjs';
 import type { HttpStart } from '@kbn/core-http-browser';
+import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
+import type { AppCategory } from '@kbn/core-application-common';
 
 import type { ChromeNavLink, ChromeRecentlyAccessedHistoryItem } from '../..';
-import type { AppCategory } from '../../../../types';
-import type { InternalApplicationStart } from '../../../application/types';
 import type { OnIsLockedUpdate } from '.';
 import {
   createEuiListItem,

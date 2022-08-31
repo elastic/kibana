@@ -2973,7 +2973,7 @@
           },
           "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
           "IFieldSubType",
-          " | undefined; type?: string | undefined; })[]; title: string; id: string; filters?: ",
+          " | undefined; type?: string | undefined; })[]; id: string; title: string; filters?: ",
           "Filter",
           "[] | undefined; dataViewId: string | null; sort: ",
           "SortColumnTimeline",
