@@ -5,6 +5,7 @@
   "ui": true,
   "requiredPlugins": [
     "data",
+    "charts",
     "expressions",
     "fieldFormats",
     "uiActions",
