@@ -7,13 +7,12 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { DeprecationsServiceSetup } from '@kbn/core-deprecations-server';
-import {
+import type { DeprecationsServiceSetup, DeprecationsClient } from '@kbn/core-deprecations-server';
+import type {
   DeprecationsService,
   InternalDeprecationsServiceSetup,
   InternalDeprecationsServiceStart,
-  DeprecationsClient,
-} from './deprecations_service';
+} from '@kbn/core-deprecations-server-internal';
 
 type DeprecationsServiceContract = PublicMethodsOf<DeprecationsService>;
 

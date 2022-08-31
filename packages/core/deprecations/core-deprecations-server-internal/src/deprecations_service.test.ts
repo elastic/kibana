@@ -10,12 +10,13 @@ import { DeprecationsFactoryMock } from './deprecations_service.test.mocks';
 
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
-/* eslint-disable dot-notation */
+import { configServiceMock } from '@kbn/config-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { DeprecationsService, DeprecationsSetupDeps } from './deprecations_service';
-import { savedObjectsClientMock, elasticsearchServiceMock, configServiceMock } from '../mocks';
-import { mockDeprecationsFactory } from './deprecations_factory.mock';
-import { mockDeprecationsRegistry } from './deprecations_registry.mock';
+import { mockDeprecationsRegistry, mockDeprecationsFactory } from './mocks';
 
+/* eslint-disable dot-notation */
 describe('DeprecationsService', () => {
   let coreContext: ReturnType<typeof mockCoreContext.create>;
   let http: ReturnType<typeof httpServiceMock.createInternalSetupContract>;
