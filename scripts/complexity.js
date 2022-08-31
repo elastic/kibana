@@ -6,7 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { generateComplexityReport } from './complexity';
-export { pickFilesToLint } from './pick_files_to_lint';
-export { lintFiles } from './lint_files';
-export { runEslintWithTypes } from './run_eslint_with_types';
+require('../src/setup_node_env');
+require('../src/dev/eslint').generateComplexityReport().then(console.log);
