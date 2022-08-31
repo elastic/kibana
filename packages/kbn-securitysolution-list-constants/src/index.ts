@@ -24,7 +24,7 @@ export const EXCEPTION_LIST_ITEM_URL = '/api/exception_lists/items';
  * Internal exception list routes
  */
 export const INTERNAL_EXCEPTION_LIST_URL = `/internal${EXCEPTION_LIST_URL}`;
-export const INTERNAL_EXCEPTIONS_LIST_ENSURE_CREATED_URL = `${INTERNAL_EXCEPTION_LIST_URL}/_ensure_created`;
+export const INTERNAL_EXCEPTIONS_LIST_ENSURE_CREATED_URL = `${INTERNAL_EXCEPTION_LIST_URL}/_create`;
 
 /**
  * Exception list spaces

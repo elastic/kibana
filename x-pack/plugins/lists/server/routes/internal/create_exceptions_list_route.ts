@@ -7,8 +7,8 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
-  CreateExceptionListSchemaDecoded,
-  createExceptionListSchema,
+  InternalCreateExceptionListSchemaDecoded,
+  internalCreateExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { INTERNAL_EXCEPTIONS_LIST_ENSURE_CREATED_URL } from '@kbn/securitysolution-list-constants';
 
@@ -25,9 +25,9 @@ export const internalCreateExceptionListRoute = (router: ListsPluginRouter): voi
       path: INTERNAL_EXCEPTIONS_LIST_ENSURE_CREATED_URL,
       validate: {
         body: buildRouteValidation<
-          typeof createExceptionListSchema,
-          CreateExceptionListSchemaDecoded
-        >(createExceptionListSchema),
+          typeof internalCreateExceptionListSchema,
+          InternalCreateExceptionListSchemaDecoded
+        >(internalCreateExceptionListSchema),
       },
     },
     async (context, request, response) => {
