@@ -551,7 +551,7 @@ describe('#bulkUpdate', () => {
   test(`checks privileges for user, actions, and namespace`, async () => {
     const objects = [obj1, obj2];
     const options = { namespace };
-    const namespaces = [options.namespace]; // the bulkDelete function always checks privileges as an array??
+    const namespaces = [options.namespace];
     await expectPrivilegeCheck(client.bulkUpdate, { objects, options }, namespaces);
   });
 

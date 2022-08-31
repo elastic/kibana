@@ -601,7 +601,9 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
         const expectedReturnValue = { statuses: [{ id: 'id', type: 'type', success: true }] };
         baseClient.bulkDelete.mockReturnValue(Promise.resolve(expectedReturnValue));
 
-        const actualReturnValue = await client.bulkDelete([{ id: 'id', type: 'foo' }]);
+        const actualReturnValue = await client.bulkDelete([{ id: 'id', type: 'foo' }], {
+          force: true,
+        });
 
         expect(actualReturnValue).toBe(expectedReturnValue);
         expect(baseClient.bulkDelete).toHaveBeenCalledWith(
@@ -611,7 +613,10 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
               type: 'foo',
             },
           ],
-          { namespace: currentSpace.expectedNamespace }
+          {
+            namespace: currentSpace.expectedNamespace,
+            force: true,
+          }
         );
       });
     });

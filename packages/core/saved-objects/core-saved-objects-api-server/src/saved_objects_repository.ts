@@ -116,7 +116,7 @@ export interface ISavedObjectsRepository {
    */
   bulkDelete(
     objects: SavedObjectsBulkDeleteObject[],
-    options: SavedObjectsBulkDeleteOptions
+    options?: SavedObjectsBulkDeleteOptions
   ): Promise<SavedObjectsBulkDeleteResponse>;
 
   /**

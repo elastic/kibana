@@ -231,7 +231,6 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     objects: SavedObjectsBulkDeleteObject[],
     options: SavedObjectsBulkDeleteOptions
   ): Promise<SavedObjectsBulkDeleteResponse> {
-    // check if the user is authorized to bulk_delete the object types, exit early if not allowed to
     try {
       const args = { objects, options };
       await this.legacyEnsureAuthorized(
@@ -254,25 +253,19 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       );
       throw error;
     }
-    // call the core saved objects client
     const response = await this.baseClient.bulkDelete(objects, options);
-    // log the result of each object's delete outcome
     response?.statuses.forEach(({ id, type, success, error }) => {
-      if (!error) {
-        const auditEventOutcome = success === true ? 'success' : 'failure';
-        this.auditLogger.log(
-          savedObjectEvent({
-            action: SavedObjectAction.DELETE,
-            savedObject: { type, id },
-            outcome: auditEventOutcome,
-            error: error ? error : undefined,
-          })
-        );
-      }
+      const auditEventOutcome = success === true ? 'success' : 'failure';
+      const auditEventOutcomeError = error ? (error as unknown as Error) : undefined;
+      this.auditLogger.log(
+        savedObjectEvent({
+          action: SavedObjectAction.DELETE,
+          savedObject: { type, id },
+          outcome: auditEventOutcome,
+          error: auditEventOutcomeError,
+        })
+      );
     });
-    // the response only contains saved objects' type and id and there's no direct object namespace to delete.
-    // However, the id might contain a reference to a space and we may need to redact that.
-    // FOLLOW UP: figure out how to remove the saved object space from the id
     return response;
   }
 

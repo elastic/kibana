@@ -13,6 +13,7 @@ import type {
   SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkDeleteObject,
+  SavedObjectsBulkDeleteOptions,
   SavedObjectsBulkGetObject,
   SavedObjectsBulkResolveObject,
   SavedObjectsBulkUpdateObject,
@@ -142,7 +143,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
 
   async bulkDelete<T = unknown>(
     objects: SavedObjectsBulkDeleteObject[] = [],
-    options: SavedObjectsBaseOptions = {}
+    options: SavedObjectsBulkDeleteOptions = {}
   ) {
     throwErrorIfNamespaceSpecified(options);
     return await this.client.bulkDelete(objects, {
@@ -285,7 +286,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
 
   async bulkUpdate<T = unknown>(
     objects: Array<SavedObjectsBulkUpdateObject<T>> = [],
-    options: SavedObjectsBaseOptions = {}
+    options: SavedObjectsBulkDeleteOptions = {}
   ) {
     throwErrorIfNamespaceSpecified(options);
     return await this.client.bulkUpdate(objects, {

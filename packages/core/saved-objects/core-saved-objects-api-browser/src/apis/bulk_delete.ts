@@ -14,7 +14,7 @@ export interface SavedObjectsBulkDeleteOptions {
 }
 
 /** @public */
-export interface SavedObjectsBulkDeleteItemResponse {
+export interface SavedObjectsBulkDeleteResponseItem {
   id: string;
   type: string;
   success: boolean;
@@ -23,5 +23,5 @@ export interface SavedObjectsBulkDeleteItemResponse {
 
 /** @public */
 export interface SavedObjectsBulkDeleteResponse {
-  statuses: SavedObjectsBulkDeleteItemResponse[];
+  statuses: SavedObjectsBulkDeleteResponseItem[];
 }

@@ -21,6 +21,6 @@ export type { ResolvedSimpleSavedObject } from './resolve';
 export type { SavedObjectsUpdateOptions } from './update';
 export type {
   SavedObjectsBulkDeleteOptions,
-  SavedObjectsBulkDeleteItemResponse,
+  SavedObjectsBulkDeleteResponseItem,
   SavedObjectsBulkDeleteResponse,
 } from './bulk_delete';
