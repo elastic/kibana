@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CasesUiSetup } from '@kbn/cases-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '../embeddables';
+import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE, getEmbeddableComponent } from '../embeddables';
 import type { MlStartDependencies } from '../plugin';
 import { PLUGIN_ICON } from '../../common/constants/app';
 
@@ -19,6 +19,12 @@ export function registerAnomalyChartsCasesAttachment(
   coreStart: CoreStart,
   pluginStart: MlStartDependencies
 ) {
+  const EmbeddableComponent = getEmbeddableComponent(
+    ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
+    coreStart,
+    pluginStart
+  );
+
   cases.attachmentFramework.registerPersistableState({
     id: ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
     icon: PLUGIN_ICON,
@@ -36,7 +42,7 @@ export function registerAnomalyChartsCasesAttachment(
       children: React.lazy(async () => {
         const { initComponent } = await import('./anomaly_charts_attachments');
         return {
-          default: initComponent(coreStart, pluginStart),
+          default: initComponent(pluginStart.fieldFormats, EmbeddableComponent),
         };
       }),
     }),

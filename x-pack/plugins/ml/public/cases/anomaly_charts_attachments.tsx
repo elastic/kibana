@@ -5,65 +5,67 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC } from 'react';
+import { memoize } from 'lodash';
+import deepEqual from 'fast-deep-equal';
+
 import { FormattedMessage } from '@kbn/i18n-react';
-import { PersistableStateAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
+import type { PersistableStateAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { EuiDescriptionList } from '@elastic/eui';
-import { CoreStart } from '@kbn/core/public';
-import { MlStartDependencies } from '../plugin';
-import {
-  ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
-  AnomalyChartsEmbeddableInput,
-  getEmbeddableComponent,
-} from '../embeddables';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { AnomalyChartsEmbeddableInput } from '../embeddables';
 
-export function initComponent(coreStart: CoreStart, pluginStart: MlStartDependencies) {
-  const EmbeddableComponent = getEmbeddableComponent(
-    ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
-    coreStart,
-    pluginStart
-  );
+export const initComponent = memoize(
+  (fieldFormats: FieldFormatsStart, EmbeddableComponent: FC<AnomalyChartsEmbeddableInput>) => {
+    return React.memo(
+      (props: PersistableStateAttachmentViewProps) => {
+        const { persistableStateAttachmentState } = props;
 
-  return React.memo((props: PersistableStateAttachmentViewProps) => {
-    const { persistableStateAttachmentState } = props;
+        const dataFormatter = fieldFormats.deserialize({
+          id: FIELD_FORMAT_IDS.DATE,
+        });
 
-    const dataFormatter = pluginStart.fieldFormats.deserialize({
-      id: FIELD_FORMAT_IDS.DATE,
-    });
+        const inputProps =
+          persistableStateAttachmentState as unknown as AnomalyChartsEmbeddableInput;
 
-    const inputProps = persistableStateAttachmentState as unknown as AnomalyChartsEmbeddableInput;
-
-    return (
-      <>
-        <EuiDescriptionList
-          compressed
-          type={'inline'}
-          listItems={[
-            {
-              title: (
-                <FormattedMessage
-                  id="xpack.ml.cases.anomalyCharts.description.jobIdsLabel"
-                  defaultMessage="Job IDs"
-                />
-              ),
-              description: inputProps.jobIds.join(', '),
-            },
-            {
-              title: (
-                <FormattedMessage
-                  id="xpack.ml.cases.anomalyCharts.description.timeRangeLabel"
-                  defaultMessage="Time range"
-                />
-              ),
-              description: `${dataFormatter.convert(
-                inputProps.timeRange.from
-              )} - ${dataFormatter.convert(inputProps.timeRange.to)}`,
-            },
-          ]}
-        />
-        <EmbeddableComponent {...inputProps} />
-      </>
+        return (
+          <>
+            <EuiDescriptionList
+              compressed
+              type={'inline'}
+              listItems={[
+                {
+                  title: (
+                    <FormattedMessage
+                      id="xpack.ml.cases.anomalyCharts.description.jobIdsLabel"
+                      defaultMessage="Job IDs"
+                    />
+                  ),
+                  description: inputProps.jobIds.join(', '),
+                },
+                {
+                  title: (
+                    <FormattedMessage
+                      id="xpack.ml.cases.anomalyCharts.description.timeRangeLabel"
+                      defaultMessage="Time range"
+                    />
+                  ),
+                  description: `${dataFormatter.convert(
+                    inputProps.timeRange.from
+                  )} - ${dataFormatter.convert(inputProps.timeRange.to)}`,
+                },
+              ]}
+            />
+            <EmbeddableComponent {...inputProps} />
+          </>
+        );
+      },
+      (prevProps, nextProps) =>
+        deepEqual(
+          prevProps.persistableStateAttachmentState,
+          nextProps.persistableStateAttachmentState
+        )
     );
-  });
-}
+  }
+);
