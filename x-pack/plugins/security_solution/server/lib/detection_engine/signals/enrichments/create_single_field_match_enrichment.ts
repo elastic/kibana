@@ -67,6 +67,8 @@ export const createSingleFieldMatchEnrichment: CreateFieldsMatchEnrichment = asy
     return acc;
   }, {});
 
-  logger.debug(`Enrichment ${name}: finished with ${Object.keys(eventsMapById).length} events to enrich`)
+  logger.debug(
+    `Enrichment ${name}: return ${Object.keys(eventsMapById).length} events ready to be enriched`
+  );
   return eventsMapById;
 };
