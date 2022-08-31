@@ -118,6 +118,21 @@ The Lens embeddable is handling data fetching internally, this means as soon as 
 * When refreshing, simply call `session.start` again and update your state - Lens will discard the existing cache and re-fetch even if the query doesn't change at all
 * When unmounting your app, call `session.clear` to end the current session
 
+## Getting data tables and requests/responses
+
+The Lens embeddable is handling both data fetching and rendering - all the user has to do is to supply the configuration. However in some cases the resulting values are necessary for other parts of the UI - to access them pass supply an `onLoad` callback prop to the component. It will be called with an `adapters` object which allows you to access the current data tables and requests/responses:
+
+```tsx
+<EmbeddableComponent
+  // ...
+  onLoad={(isLoading, adapters) => {
+    if (adapters?.tables) {
+      // use the current data table, e.g. putting it into the react state of the consuming application.
+    }
+  }}
+/>
+```
+
 # Lens Development
 
 The following sections are concerned with developing the Lens plugin itself.
