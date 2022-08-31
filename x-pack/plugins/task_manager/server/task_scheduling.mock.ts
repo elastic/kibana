@@ -9,6 +9,7 @@ import { TaskScheduling } from './task_scheduling';
 
 const createTaskSchedulingMock = () => {
   return {
+    bulkDisable: jest.fn(),
     ensureScheduled: jest.fn(),
     schedule: jest.fn(),
     runSoon: jest.fn(),

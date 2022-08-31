@@ -226,6 +226,20 @@ describe('successful migrations', () => {
       expect(migration820(taskInstance, migrationContext)).toEqual(taskInstance);
     });
   });
+
+  describe('8.5.0', () => {
+    test('adds enabled: true to all tasks', () => {
+      const migration850 = getMigrations()['8.5.0'];
+      const taskInstance = getMockData({});
+      expect(migration850(taskInstance, migrationContext)).toEqual({
+        ...taskInstance,
+        attributes: {
+          ...taskInstance.attributes,
+          enabled: true,
+        },
+      });
+    });
+  });
 });
 
 describe('handles errors during migrations', () => {
