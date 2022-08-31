@@ -80,9 +80,11 @@ export type RuleEventLogListCommonProps = {
   localStorageKey?: string;
   refreshToken?: number;
   initialPageSize?: number;
+  // Duplicating these properties is extremely silly but it's the only way to get Jest to cooperate with the way this component is structured
   overrideLoadExecutionLogAggregations?: RuleApis['loadExecutionLogAggregations'];
+  overrideLoadGlobalExecutionLogAggregations?: RuleApis['loadGlobalExecutionLogAggregations'];
   hasRuleNames?: boolean;
-} & Pick<RuleApis, 'loadExecutionLogAggregations'>;
+} & Pick<RuleApis, 'loadExecutionLogAggregations' | 'loadGlobalExecutionLogAggregations'>;
 
 export type RuleEventLogListTableProps<T extends RuleEventLogListOptions = 'default'> =
   T extends 'default'
@@ -98,7 +100,9 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
     ruleId,
     localStorageKey = RULE_EVENT_LOG_LIST_STORAGE_KEY,
     refreshToken,
+    loadGlobalExecutionLogAggregations,
     loadExecutionLogAggregations,
+    overrideLoadGlobalExecutionLogAggregations,
     overrideLoadExecutionLogAggregations,
     initialPageSize = 10,
     hasRuleNames = false,
@@ -162,14 +166,26 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
     }));
   }, [sortingColumns]);
 
+  const loadLogsFn = useMemo(() => {
+    if (ruleId === '*') {
+      return overrideLoadGlobalExecutionLogAggregations ?? loadGlobalExecutionLogAggregations;
+    }
+    return overrideLoadExecutionLogAggregations ?? loadExecutionLogAggregations;
+  }, [
+    ruleId,
+    overrideLoadExecutionLogAggregations,
+    overrideLoadGlobalExecutionLogAggregations,
+    loadExecutionLogAggregations,
+    loadGlobalExecutionLogAggregations,
+  ]);
+
   const loadEventLogs = async () => {
-    // Duplicating this property is extremely silly but it's the only way to get Jest to cooperate with the way this component is structured
-    if (!loadExecutionLogAggregations && !overrideLoadExecutionLogAggregations) {
+    if (!loadLogsFn) {
       return;
     }
     setIsLoading(true);
     try {
-      const result = await (overrideLoadExecutionLogAggregations ?? loadExecutionLogAggregations)({
+      const result = await loadLogsFn({
         id: ruleId,
         sort: formattedSort as LoadExecutionLogAggregationsProps['sort'],
         outcomeFilter: filter,

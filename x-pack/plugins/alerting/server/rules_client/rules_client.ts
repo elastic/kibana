@@ -365,6 +365,15 @@ export interface GetExecutionLogByIdParams {
   sort: estypes.Sort;
 }
 
+export interface GetGlobalExecutionLogParams {
+  dateStart: string;
+  dateEnd?: string;
+  filter?: string;
+  page: number;
+  perPage: number;
+  sort: estypes.Sort;
+}
+
 export interface GetActionErrorLogByIdParams {
   id: string;
   dateStart: string;
@@ -882,7 +891,7 @@ export class RulesClient {
     page,
     perPage,
     sort,
-  }: GetExecutionLogByIdParams): Promise<IExecutionLogResult> {
+  }: GetGlobalExecutionLogParams): Promise<IExecutionLogResult> {
     this.logger.debug(`getExecutionLogForRule(): getting global execution log`);
 
     let authorizationTuple;
