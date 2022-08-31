@@ -5,48 +5,46 @@
  * 2.0.
  */
 import { Logger } from '@kbn/core/server';
-import { ActionsConfigurationUtilities } from '../../actions_config';
-import { ConnectorToken, ConnectorTokenClientContract } from '../../types';
-import { createJWTAssertion } from './create_jwt_assertion';
-import { requestOAuthJWTToken } from './request_oauth_jwt_token';
+import { ActionsConfigurationUtilities } from '../actions_config';
+import { ConnectorToken, ConnectorTokenClientContract } from '../types';
+import { requestOAuthClientCredentialsToken } from './request_oauth_client_credentials_token';
 
-export interface GetOAuthJwtConfig {
+export interface GetOAuthClientCredentialsConfig {
   clientId: string;
-  jwtKeyId: string;
-  userIdentifierValue: string;
+  tenantId: string;
 }
 
-export interface GetOAuthJwtSecrets {
+export interface GetOAuthClientCredentialsSecrets {
   clientSecret: string;
-  privateKey: string;
-  privateKeyPassword: string | null;
 }
 
-interface GetOAuthJwtAccessTokenOpts {
+interface GetOAuthClientCredentialsAccessTokenOpts {
   connectorId?: string;
   tokenUrl: string;
+  oAuthScope: string;
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
   credentials: {
-    config: GetOAuthJwtConfig;
-    secrets: GetOAuthJwtSecrets;
+    config: GetOAuthClientCredentialsConfig;
+    secrets: GetOAuthClientCredentialsSecrets;
   };
   connectorTokenClient?: ConnectorTokenClientContract;
 }
 
-export const getOAuthJwtAccessToken = async ({
+export const getOAuthClientCredentialsAccessToken = async ({
   connectorId,
   logger,
   tokenUrl,
+  oAuthScope,
   configurationUtilities,
   credentials,
   connectorTokenClient,
-}: GetOAuthJwtAccessTokenOpts) => {
-  const { clientId, jwtKeyId, userIdentifierValue } = credentials.config;
-  const { clientSecret, privateKey, privateKeyPassword } = credentials.secrets;
+}: GetOAuthClientCredentialsAccessTokenOpts) => {
+  const { clientId, tenantId } = credentials.config;
+  const { clientSecret } = credentials.secrets;
 
-  if (!clientId || !clientSecret || !jwtKeyId || !privateKey || !userIdentifierValue) {
-    logger.warn(`Missing required fields for requesting OAuth JWT access token`);
+  if (!clientId || !clientSecret || !tenantId) {
+    logger.warn(`Missing required fields for requesting OAuth Client Credentials access token`);
     return null;
   }
 
@@ -64,26 +62,18 @@ export const getOAuthJwtAccessToken = async ({
   }
 
   if (connectorToken === null || Date.parse(connectorToken.expiresAt) <= Date.now()) {
-    // generate a new assertion
-    const assertion = createJWTAssertion(logger, privateKey, privateKeyPassword, {
-      audience: clientId,
-      issuer: clientId,
-      subject: userIdentifierValue,
-      keyId: jwtKeyId,
-    });
-
     // Save the time before requesting token so we can use it to calculate expiration
     const requestTokenStart = Date.now();
 
     // request access token with jwt assertion
-    const tokenResult = await requestOAuthJWTToken(
+    const tokenResult = await requestOAuthClientCredentialsToken(
       tokenUrl,
+      logger,
       {
+        scope: oAuthScope,
         clientId,
         clientSecret,
-        assertion,
       },
-      logger,
       configurationUtilities
     );
     accessToken = `${tokenResult.tokenType} ${tokenResult.accessToken}`;

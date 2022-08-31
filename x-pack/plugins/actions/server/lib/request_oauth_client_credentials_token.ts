@@ -5,9 +5,9 @@
  * 2.0.
  */
 import { Logger } from '@kbn/core/server';
-import { ActionsConfigurationUtilities } from '../../actions_config';
+import { ActionsConfigurationUtilities } from '../actions_config';
 import { OAuthTokenResponse, requestOAuthToken } from './request_oauth_token';
-import { RewriteResponseCase } from '../../../common';
+import { RewriteResponseCase } from '../../common';
 
 export const OAUTH_CLIENT_CREDENTIALS_GRANT_TYPE = 'client_credentials';
 

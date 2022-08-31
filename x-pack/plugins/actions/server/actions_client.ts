@@ -66,12 +66,12 @@ import {
   getOAuthJwtAccessToken,
   GetOAuthJwtConfig,
   GetOAuthJwtSecrets,
-} from './builtin_action_types/lib/get_oauth_jwt_access_token';
+} from './lib/get_oauth_jwt_access_token';
 import {
   getOAuthClientCredentialsAccessToken,
   GetOAuthClientCredentialsConfig,
   GetOAuthClientCredentialsSecrets,
-} from './builtin_action_types/lib/get_oauth_client_credentials_access_token';
+} from './lib/get_oauth_client_credentials_access_token';
 
 // We are assuming there won't be many actions. This is why we will load
 // all the actions in advance and assume the total count to not go over 10000.

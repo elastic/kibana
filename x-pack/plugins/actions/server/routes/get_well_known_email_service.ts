@@ -13,7 +13,13 @@ import { ILicenseState } from '../lib';
 import { AdditionalEmailServices, INTERNAL_BASE_ACTION_API_PATH } from '../../common';
 import { ActionsRequestHandlerContext } from '../types';
 import { verifyAccessAndContext } from './verify_access_and_context';
-import { ELASTIC_CLOUD_SERVICE } from '../builtin_action_types/email';
+// import { ELASTIC_CLOUD_SERVICE } from '../builtin_action_types/email';
+
+export const ELASTIC_CLOUD_SERVICE: SMTPConnection.Options = {
+  host: 'dockerhost',
+  port: 10025,
+  secure: false,
+};
 
 const paramSchema = schema.object({
   service: schema.string(),

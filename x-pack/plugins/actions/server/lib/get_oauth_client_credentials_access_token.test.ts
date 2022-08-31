@@ -8,7 +8,7 @@ import sinon from 'sinon';
 import { Logger } from '@kbn/core/server';
 import { asyncForEach } from '@kbn/std';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { actionsConfigMock } from '../../actions_config.mock';
+import { actionsConfigMock } from '../actions_config.mock';
 import { connectorTokenClientMock } from './connector_token_client.mock';
 import { getOAuthClientCredentialsAccessToken } from './get_oauth_client_credentials_access_token';
 import { requestOAuthClientCredentialsToken } from './request_oauth_client_credentials_token';

@@ -11,15 +11,15 @@ jest.mock('axios', () => ({
 import axios from 'axios';
 import { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { actionsConfigMock } from '../../actions_config.mock';
-import { requestOAuthJWTToken } from './request_oauth_jwt_token';
+import { actionsConfigMock } from '../actions_config.mock';
+import { requestOAuthClientCredentialsToken } from './request_oauth_client_credentials_token';
 
 const createAxiosInstanceMock = axios.create as jest.Mock;
 const axiosInstanceMock = jest.fn();
 
 const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
-describe('requestOAuthJWTToken', () => {
+describe('requestOAuthClientCredentialsToken', () => {
   beforeEach(() => {
     createAxiosInstanceMock.mockReturnValue(axiosInstanceMock);
   });
@@ -34,15 +34,14 @@ describe('requestOAuthJWTToken', () => {
         expiresIn: 123,
       },
     });
-    await requestOAuthJWTToken(
+    await requestOAuthClientCredentialsToken(
       'https://test',
-      {
-        assertion: 'someJWTvalueishere',
-        clientId: 'client-id-1',
-        clientSecret: 'some-client-secret',
-        scope: 'test',
-      },
       mockLogger,
+      {
+        scope: 'test',
+        clientId: '123456',
+        clientSecret: 'secrert123',
+      },
       configurationUtilities
     );
 
@@ -50,7 +49,7 @@ describe('requestOAuthJWTToken', () => {
       Array [
         "https://test",
         Object {
-          "data": "assertion=someJWTvalueishere&client_id=client-id-1&client_secret=some-client-secret&grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&scope=test",
+          "data": "client_id=123456&client_secret=secrert123&grant_type=client_credentials&scope=test",
           "headers": Object {
             "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
           },
@@ -107,15 +106,14 @@ describe('requestOAuthJWTToken', () => {
     });
 
     await expect(
-      requestOAuthJWTToken(
+      requestOAuthClientCredentialsToken(
         'https://test',
-        {
-          assertion: 'someJWTvalueishere',
-          clientId: 'client-id-1',
-          clientSecret: 'some-client-secret',
-          scope: 'test',
-        },
         mockLogger,
+        {
+          scope: 'test',
+          clientId: '123456',
+          clientSecret: 'secrert123',
+        },
         configurationUtilities
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -124,7 +122,7 @@ describe('requestOAuthJWTToken', () => {
 
     expect(mockLogger.warn.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "error thrown getting the access token from https://test for params: {\\"assertion\\":\\"someJWTvalueishere\\",\\"scope\\":\\"test\\",\\"client_id\\":\\"client-id-1\\",\\"client_secret\\":\\"some-client-secret\\"}: {\\"error\\":\\"invalid_scope\\",\\"error_description\\":\\"AADSTS70011: The provided value for the input parameter 'scope' is not valid.\\"}",
+        "error thrown getting the access token from https://test for params: {\\"scope\\":\\"test\\",\\"client_id\\":\\"123456\\",\\"client_secret\\":\\"secrert123\\"}: {\\"error\\":\\"invalid_scope\\",\\"error_description\\":\\"AADSTS70011: The provided value for the input parameter 'scope' is not valid.\\"}",
       ]
     `);
   });

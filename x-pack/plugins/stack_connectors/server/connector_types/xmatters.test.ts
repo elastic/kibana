@@ -10,11 +10,8 @@ jest.mock('./lib/post_xmatters', () => ({
 }));
 
 import { postXmatters } from './lib/post_xmatters';
-import { createActionTypeRegistry } from './index.test';
 import { Logger } from '@kbn/core/server';
 import {
-  ActionParamsType,
-  ConnectorTypeId,
   ConnectorTypeConfigType,
   ConnectorTypeSecretsType,
   getConnectorType,
@@ -30,24 +27,14 @@ import {
 } from '@kbn/actions-plugin/server/lib';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { loggerMock } from '@kbn/logging-mocks';
 
 const postxMattersMock = postXmatters as jest.Mock;
-
 const services: Services = actionsMock.createServices();
+const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
 
 let connectorType: XmattersConnectorType;
-let mockedLogger: jest.Mocked<Logger>;
 let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
-
-beforeAll(() => {
-  const { logger, actionTypeRegistry } = createActionTypeRegistry();
-  connectorType = actionTypeRegistry.get<
-    ConnectorTypeConfigType,
-    ConnectorTypeSecretsType,
-    ActionParamsType
-  >(ConnectorTypeId);
-  mockedLogger = logger;
-});
 
 beforeEach(() => {
   configurationUtilities = actionsConfigMock.create();
@@ -165,9 +152,6 @@ describe('secrets validation', () => {
         throw new Error(`target url is not present in allowedHosts`);
       },
     };
-    connectorType = getConnectorType({
-      logger: mockedLogger,
-    });
     const secrets: Record<string, string> = {
       secretsUrl: 'http://mylisteningserver.com:9200/endpoint',
     };
@@ -208,10 +192,6 @@ describe('config validation', () => {
         throw new Error(`target url is not present in allowedHosts`);
       },
     };
-    connectorType = getConnectorType({
-      logger: mockedLogger,
-    });
-
     const config: Record<string, string | boolean> = {
       configUrl: 'http://mylisteningserver.com:9200/endpoint',
       usesBasic: true,

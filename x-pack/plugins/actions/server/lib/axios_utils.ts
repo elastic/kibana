@@ -8,7 +8,7 @@
 import { isObjectLike, isEmpty } from 'lodash';
 import { AxiosInstance, Method, AxiosResponse, AxiosRequestConfig } from 'axios';
 import { Logger } from '@kbn/core/server';
-import { getCustomAgents } from '../builtin_action_types/lib/get_custom_agents';
+import { getCustomAgents } from './get_custom_agents';
 import { ActionsConfigurationUtilities } from '../actions_config';
 
 export const request = async <T = unknown>({
