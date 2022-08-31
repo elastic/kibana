@@ -11,9 +11,9 @@ import { nextTick } from '@kbn/test-jest-helpers';
 
 import { KibanaLogic } from '../../../../shared/kibana';
 
-import { AddConnectorPackageApiLogic } from '../../../api/connector_package/add_connector_package_api_logic';
+import { AddConnectorApiLogic } from '../../../api/connector/add_connector_api_logic';
 
-import { AddConnectorPackageLogic, AddConnectorValues } from './add_connector_package_logic';
+import { AddConnectorLogic, AddConnectorValues } from './add_connector_logic';
 
 jest.mock('../../../../shared/kibana', () => ({
   KibanaLogic: { values: { navigateToUrl: jest.fn() } },
@@ -23,20 +23,20 @@ const DEFAULT_VALUES: AddConnectorValues = {
   isModalVisible: false,
 };
 
-describe('AddConnectorPackageLogic', () => {
-  const { mount } = new LogicMounter(AddConnectorPackageLogic);
+describe('AddConnectorLogic', () => {
+  const { mount } = new LogicMounter(AddConnectorLogic);
   const { flashAPIErrors } = mockFlashMessageHelpers;
 
   it('has expected default values', () => {
     mount();
-    expect(AddConnectorPackageLogic.values).toEqual(DEFAULT_VALUES);
+    expect(AddConnectorLogic.values).toEqual(DEFAULT_VALUES);
   });
 
   describe('actions', () => {
     describe('setIsModalVisible', () => {
       it('sets modal to visible', () => {
-        AddConnectorPackageLogic.actions.setIsModalVisible(true);
-        expect(AddConnectorPackageLogic.values).toEqual({
+        AddConnectorLogic.actions.setIsModalVisible(true);
+        expect(AddConnectorLogic.values).toEqual({
           ...DEFAULT_VALUES,
           isModalVisible: true,
         });
@@ -45,7 +45,7 @@ describe('AddConnectorPackageLogic', () => {
 
     describe('apiError', () => {
       it('flashes error', async () => {
-        AddConnectorPackageApiLogic.actions.apiError('error' as any);
+        AddConnectorApiLogic.actions.apiError('error' as any);
         await nextTick();
         expect(flashAPIErrors).toHaveBeenCalledWith('error');
       });
@@ -54,7 +54,7 @@ describe('AddConnectorPackageLogic', () => {
     describe('apiSuccess', () => {
       it('navigates to correct spot and flashes success toast', async () => {
         jest.useFakeTimers();
-        AddConnectorPackageApiLogic.actions.apiSuccess({ indexName: 'success' } as any);
+        AddConnectorApiLogic.actions.apiSuccess({ indexName: 'success' } as any);
         await nextTick();
         jest.advanceTimersByTime(1001);
         await nextTick();
