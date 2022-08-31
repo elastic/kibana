@@ -24,6 +24,8 @@ import { useEuiTheme } from '../../hooks/use_eui_theme';
 
 import { MiniHistogram } from '../mini_histogram';
 
+import { LinksMenu } from './links_menu';
+
 import { getFailedTransactionsCorrelationImpactLabel } from './get_failed_transactions_correlation_impact_label';
 
 const NARROW_COLUMN_WIDTH = '120px';
@@ -34,15 +36,16 @@ const DEFAULT_SORT_DIRECTION = 'asc';
 
 interface SpikeAnalysisTableProps {
   changePoints: ChangePoint[];
+  dataViewId?: string;
   loading: boolean;
   onPinnedChangePoint?: (changePoint: ChangePoint | null) => void;
   onSelectedChangePoint?: (changePoint: ChangePoint | null) => void;
   selectedChangePoint?: ChangePoint;
 }
 
-// TODO: Add an actions link in the table - use AiOpsKibana context to get share.url.locator for Discover like in LinksMenu
 export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
   changePoints,
+  dataViewId,
   loading,
   onPinnedChangePoint,
   onSelectedChangePoint,
@@ -164,6 +167,20 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
       },
       sortable: true,
     },
+    {
+      'data-test-subj': 'mlAnomaliesListColumnAction',
+      name: i18n.translate('xpack.ml.anomaliesTable.actionsColumnName', {
+        defaultMessage: 'Actions',
+      }),
+      render: (changePoint: ChangePoint) => {
+          return (
+            <LinksMenu
+              changePoint={changePoint}
+              dataViewId={dataViewId}
+            />
+          );
+      },
+    }
   ];
 
   const onChange = useCallback((tableSettings) => {
