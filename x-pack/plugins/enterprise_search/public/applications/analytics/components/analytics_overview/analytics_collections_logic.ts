@@ -38,7 +38,7 @@ export const AnalyticsCollectionsLogic = kea<
   },
   listeners: ({ actions }) => ({
     apiError: (e) => flashAPIErrors(e),
-    fetchAnalyticsCollections: async () => {
+    fetchAnalyticsCollections: () => {
       actions.makeRequest({});
     },
     makeRequest: () => clearFlashMessages(),
