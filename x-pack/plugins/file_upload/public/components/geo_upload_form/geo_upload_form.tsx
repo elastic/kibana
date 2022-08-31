@@ -6,14 +6,7 @@
  */
 
 import React, { ChangeEvent, Component } from 'react';
-import {
-  EuiForm,
-  EuiFormRow,
-  EuiIcon,
-  EuiSpacer,
-  EuiSelect,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiForm, EuiFormRow, EuiIcon, EuiSpacer, EuiSelect, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { GeoFilePicker, OnFileSelectParameters } from './geo_file_picker';
@@ -34,7 +27,7 @@ const UPLOAD_SIZE_OPTIONS = [
     }),
     value: UPLOAD_SIZE.SMALL,
   },
-]
+];
 
 const GEO_FIELD_TYPE_OPTIONS = [
   {
@@ -122,9 +115,7 @@ export class GeoUploadForm extends Component<Props, State> {
   };
 
   _onUploadSizeChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    return this.props.onUploadSizeChange(
-      event.target.value as UPLOAD_SIZE
-    );
+    return this.props.onUploadSizeChange(event.target.value as UPLOAD_SIZE);
   };
 
   _renderGeoFieldTypeSelect() {

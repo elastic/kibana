@@ -94,7 +94,8 @@ export class AbstractGeoFileImporter extends Importer implements GeoFileImporter
       };
     }
 
-    const maxChunkCharCount = this._uploadSize === UPLOAD_SIZE.SMALL ? MAX_CHUNK_CHAR_COUNT / 10 : MAX_CHUNK_CHAR_COUNT;
+    const maxChunkCharCount =
+      this._uploadSize === UPLOAD_SIZE.SMALL ? MAX_CHUNK_CHAR_COUNT / 10 : MAX_CHUNK_CHAR_COUNT;
     let success = true;
     const failures: ImportFailure[] = [...this._invalidFeatures];
     let error;
