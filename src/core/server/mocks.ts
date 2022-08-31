@@ -26,6 +26,7 @@ import { capabilitiesServiceMock } from '@kbn/core-capabilities-server-mocks';
 import { typeRegistryMock as savedObjectsTypeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { i18nServiceMock } from '@kbn/core-i18n-server-mocks';
 import type {
   PluginInitializerContext,
   CoreSetup,
@@ -40,7 +41,6 @@ import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 import { SharedGlobalConfig } from './plugins';
 import { statusServiceMock } from './status/status_service.mock';
 import { coreUsageDataServiceMock } from './core_usage_data/core_usage_data_service.mock';
-import { i18nServiceMock } from '@kbn/core-i18n-server-mocks';
 import { deprecationsServiceMock } from './deprecations/deprecations_service.mock';
 
 export { configServiceMock, configDeprecationsMock } from '@kbn/config-mocks';

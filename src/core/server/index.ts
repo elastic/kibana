@@ -65,12 +65,12 @@ import type {
   SavedObjectsServiceStart,
 } from '@kbn/core-saved-objects-server';
 
+import { I18nServiceSetup } from '@kbn/core-i18n-server';
 import { HttpResources } from './http_resources';
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
 import { UiSettingsServiceSetup, UiSettingsServiceStart } from './ui_settings';
 import { StatusServiceSetup } from './status';
 import { CoreUsageDataStart, CoreUsageDataSetup } from './core_usage_data';
-import { I18nServiceSetup } from '@kbn/core-i18n-server';
 import { DeprecationsServiceSetup } from './deprecations';
 // Because of #79265 we need to explicitly import, then export these types for
 // scripts/telemetry_check.js to work as expected

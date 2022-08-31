@@ -14,11 +14,11 @@ import type {
   InternalHttpServicePreboot,
   InternalHttpServiceSetup,
 } from '@kbn/core-http-server-internal';
+import type { I18nServiceSetup } from '@kbn/core-i18n-server';
 import { config as i18nConfigDef, I18nConfigType } from './i18n_config';
 import { getKibanaTranslationFiles } from './get_kibana_translation_files';
 import { initTranslations } from './init_translations';
 import { registerRoutes } from './routes';
-import type { I18nServiceSetup } from '@kbn/core-i18n-server';
 
 export interface PrebootDeps {
   http: InternalHttpServicePreboot;
