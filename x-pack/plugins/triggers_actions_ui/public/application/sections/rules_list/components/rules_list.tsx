@@ -265,6 +265,22 @@ export const RulesList = ({
   const onRuleRun = async (rule: RuleTableItem) => {
     await runSoon({ http, id: rule.id });
     await loadData();
+
+    try {
+      await runSoon({ http, id: rule.id });
+      toasts.addSuccess({
+        title: i18n.translate('xpack.triggersActionsUI.sections.rulesList.ableToRunRuleSoon', {
+          defaultMessage: 'Your rule is scheduled to run soon',
+        }),
+      });
+      await loadData();
+    } catch (e) {
+      toasts.addError(e, {
+        title: i18n.translate('xpack.triggersActionsUI.sections.rulesList.unableToRunRuleSoon', {
+          defaultMessage: 'Unable to schedule your rule to run',
+        }),
+      });
+    }
   };
 
   const isRuleTypeEditableInContext = (ruleTypeId: string) =>
