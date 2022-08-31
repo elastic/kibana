@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { safeAct as act } from '@kbn/test-jest-helpers';
+import { act } from 'react-dom/test-utils';
 
 import { getDefaultHotPhasePolicy } from '../edit_policy/constants';
 import { setupEnvironment } from '../helpers';

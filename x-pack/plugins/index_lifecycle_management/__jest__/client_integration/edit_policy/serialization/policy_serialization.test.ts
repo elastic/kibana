@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { safeAct as act } from '@kbn/test-jest-helpers';
+import { act } from 'react-dom/test-utils';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { HttpFetchOptionsWithPath } from '@kbn/core/public';
 import { setupEnvironment } from '../../helpers';
@@ -33,6 +33,16 @@ describe('<EditPolicy /> serialization', () => {
   });
 
   describe('top level form', () => {
+    afterAll(async () => {
+      await act(async () => {
+        testBed = await setupSerializationTestBed(httpSetup, {
+          appServicesContext: {
+            license: licensingMock.createLicense({ license: { type: 'enterprise' } }),
+          },
+        });
+      });
+    });
+
     /**
      * We assume that policies that populate this form are loaded directly from ES and so
      * are valid according to ES. There may be settings in the policy created through the ILM
@@ -166,15 +176,6 @@ describe('<EditPolicy /> serialization', () => {
 
   describe('hot phase', () => {
     beforeEach(async () => {
-      await act(async () => {
-        // this used to be in an afterAll hook in the previous suite... it seems to mutate something that is required for the following tests to work...
-        testBed = await setupSerializationTestBed(httpSetup, {
-          appServicesContext: {
-            license: licensingMock.createLicense({ license: { type: 'enterprise' } }),
-          },
-        });
-      });
-
       httpRequestsMockHelpers.setDefaultResponses();
 
       await act(async () => {

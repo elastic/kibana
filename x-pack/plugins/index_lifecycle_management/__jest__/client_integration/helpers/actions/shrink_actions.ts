@@ -6,7 +6,7 @@
  */
 
 import { TestBed } from '@kbn/test-jest-helpers';
-import { safeAct as act } from '@kbn/test-jest-helpers';
+import { act } from 'react-dom/test-utils';
 import { Phase } from '../../../../common/types';
 import { createFormSetValueAction } from './form_set_value_action';
 

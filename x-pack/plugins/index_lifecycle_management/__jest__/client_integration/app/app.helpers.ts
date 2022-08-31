@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { safeAct as act } from '@kbn/test-jest-helpers';
+import { act } from 'react-dom/test-utils';
 import { HttpSetup } from '@kbn/core/public';
 import { registerTestBed, TestBed, TestBedConfig } from '@kbn/test-jest-helpers';
 import { App } from '../../../public/application/app';

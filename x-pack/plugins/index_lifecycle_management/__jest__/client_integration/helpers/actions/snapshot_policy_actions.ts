@@ -6,7 +6,7 @@
  */
 
 import type { TestBed } from '@kbn/test-jest-helpers';
-import { safeAct as act } from '@kbn/test-jest-helpers';
+import { act } from 'react-dom/test-utils';
 
 const createSetWaitForSnapshotAction = (testBed: TestBed) => async (snapshotPolicyName: string) => {
   const { find, component } = testBed;

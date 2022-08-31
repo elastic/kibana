@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { safeAct as act } from '@kbn/test-jest-helpers';
+import { act } from 'react-dom/test-utils';
 import { i18nTexts } from '../../../../public/application/sections/edit_policy/i18n_texts';
 
 import { PhaseWithTiming } from '../../../../common/types';
@@ -132,5 +132,5 @@ describe('<EditPolicy /> timing validation', () => {
     await actions.delete.setMinAgeValue('9');
     // No more error for the delete phase
     actions.errors.expectMessages([], 'delete');
-  });
+  }, 30_000);
 });

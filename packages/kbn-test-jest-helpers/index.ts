@@ -28,8 +28,6 @@ export * from './src/testbed';
 
 export * from './src/axe_helpers';
 
-export { safeAct } from './src/safe_act';
-
 export const nextTick = () => new Promise((res) => process.nextTick(res));
 
-export { setTimeout as delay } from 'timers/promises';
+export const delay = (time = 0) => new Promise((resolve) => setTimeout(resolve, time));

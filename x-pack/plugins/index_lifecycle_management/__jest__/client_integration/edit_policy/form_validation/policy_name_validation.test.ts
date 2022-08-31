@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { safeAct as act } from '@kbn/test-jest-helpers';
+import { act } from 'react-dom/test-utils';
 import { i18nTexts } from '../../../../public/application/sections/edit_policy/i18n_texts';
 import { setupEnvironment } from '../../helpers';
 import { getGeneratedPolicies } from '../constants';

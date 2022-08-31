@@ -89,7 +89,6 @@ TYPES_DEPS = [
   "@npm//@elastic/elasticsearch",
   "@npm//axios",
   "@npm//axe-core",
-  "@npm//chalk",
   "@npm//elastic-apm-node",
   "@npm//del",
   "@npm//exit-hook",

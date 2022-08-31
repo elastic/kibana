@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { safeAct as act } from '@kbn/test-jest-helpers';
+import { act } from 'react-dom/test-utils';
 import { TestBed } from '@kbn/test-jest-helpers';
 import { createFormToggleAction } from './form_toggle_action';
 import { createFormSetValueAction } from './form_set_value_action';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { safeAct as act } from '@kbn/test-jest-helpers';
+import { act } from 'react-dom/test-utils';
 import { API_BASE_PATH } from '../../../../common/constants';
 import { setupEnvironment } from '../../helpers';
 import {
