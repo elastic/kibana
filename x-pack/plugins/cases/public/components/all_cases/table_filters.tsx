@@ -22,7 +22,6 @@ import { useGetTags } from '../../containers/use_get_tags';
 import { CASE_LIST_CACHE_KEY } from '../../containers/constants';
 import { DEFAULT_FILTER_OPTIONS } from '../../containers/use_get_cases';
 import { AssigneesFilterPopover } from './assignees_filter';
-import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
 
 interface CasesTableFiltersProps {
   countClosedCases: number | null;
@@ -35,6 +34,8 @@ interface CasesTableFiltersProps {
   availableSolutions: string[];
   displayCreateCaseButton?: boolean;
   onCreateCasePressed?: () => void;
+  isLoading: boolean;
+  currentUserProfile?: UserProfileWithAvatar;
 }
 
 // Fix the width of the status dropdown to prevent hiding long text items
@@ -61,6 +62,8 @@ const CasesTableFiltersComponent = ({
   availableSolutions,
   displayCreateCaseButton,
   onCreateCasePressed,
+  isLoading,
+  currentUserProfile,
 }: CasesTableFiltersProps) => {
   const [search, setSearch] = useState(initial.search);
   const [selectedTags, setSelectedTags] = useState(initial.tags);
@@ -68,10 +71,6 @@ const CasesTableFiltersComponent = ({
   const [selectedAssignees, setSelectedAssignees] = useState<UserProfileWithAvatar[]>([]);
   const fetchAssignees = useRef<() => void>();
   const { data: tags = [], refetch: fetchTags } = useGetTags(CASE_LIST_CACHE_KEY);
-
-  // TODO: should I move this up into the all cases component above this one?
-  const { data: currentUserProfile, isLoading: isLoadingCurrentUserProfile } =
-    useGetCurrentUserProfile();
 
   const setFetchAssignees = useCallback((refetchAssignees: () => void) => {
     fetchAssignees.current = refetchAssignees;
@@ -205,7 +204,7 @@ const CasesTableFiltersComponent = ({
           <AssigneesFilterPopover
             selectedAssignees={selectedAssignees}
             currentUserProfile={currentUserProfile}
-            isLoading={isLoadingCurrentUserProfile}
+            isLoading={isLoading}
             onSelectionChange={handleSelectedAssignees}
             setFetchAssignees={setFetchAssignees}
           />

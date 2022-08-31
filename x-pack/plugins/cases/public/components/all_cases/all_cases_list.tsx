@@ -105,7 +105,8 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       uids: assigneesFromCases,
     });
 
-    const { data: currentUserProfile } = useGetCurrentUserProfile();
+    const { data: currentUserProfile, isLoading: isLoadingUserProfileData } =
+      useGetCurrentUserProfile();
 
     const { data: connectors = [] } = useGetConnectors();
 
@@ -276,6 +277,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           hiddenStatuses={hiddenStatuses}
           displayCreateCaseButton={isSelectorView}
           onCreateCasePressed={onRowClick}
+          isLoading={isLoadingUserProfileData}
         />
         <CasesTable
           columns={columns}

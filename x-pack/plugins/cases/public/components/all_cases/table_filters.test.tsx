@@ -19,10 +19,8 @@ import { CasesTableFilters } from './table_filters';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useFindAssignees } from '../../containers/use_find_assignees';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
-import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
 
 jest.mock('../../containers/use_find_assignees');
-jest.mock('../../containers/user_profiles/use_get_current_user_profile');
 jest.mock('../../containers/use_get_tags');
 
 const onFilterChanged = jest.fn();
@@ -37,6 +35,7 @@ const props = {
   initial: DEFAULT_FILTER_OPTIONS,
   setFilterRefetch,
   availableSolutions: [],
+  isLoading: false,
 };
 
 describe('CasesTableFilters ', () => {
@@ -48,10 +47,6 @@ describe('CasesTableFilters ', () => {
     (useFindAssignees as jest.Mock).mockReturnValue({
       data: userProfiles,
       refetch,
-      isLoading: false,
-    });
-    (useGetCurrentUserProfile as jest.Mock).mockReturnValue({
-      data: userProfiles[0],
       isLoading: false,
     });
   });

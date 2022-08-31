@@ -48,6 +48,7 @@ import { useCasesContext } from '../cases_context/use_cases_context';
 import { UserToolTip } from '../user_profiles/user_tooltip';
 import { CaseUserAvatar } from '../user_profiles/user_avatar';
 import { useAssignees } from '../../containers/user_profiles/use_assignees';
+import { getUsernameDataTestSubj } from '../user_profiles/data_test_subject';
 
 export type CasesColumns =
   | EuiTableActionsColumnType<Case>
@@ -79,8 +80,7 @@ const AssigneesColumn: React.FC<{
   return (
     <EuiFlexGroup gutterSize="none" data-test-subj="case-table-column-assignee" wrap>
       {allAssignees.map((assignee) => {
-        // TODO: use function from other PR
-        const dataTestSubjName = assignee.profile?.user.username ?? assignee.uid;
+        const dataTestSubjName = getUsernameDataTestSubj(assignee);
         return (
           <EuiFlexItem
             grow={false}
