@@ -8,33 +8,32 @@
 
 import React from 'react';
 import { UserAvatar, UserAvatarProps } from './user_avatar';
-import mdx from '../README.mdx'
+// import mdx from '../README.mdx'
 
 export default {
   title: 'Avatar/User Profile',
   description: '',
   parameters: {
-    docs: {
-      page: mdx,
-    },
+    // docs: {
+    //   page: mdx,
+    // },
   },
 };
 
+type userAvatarNameParams = Pick<UserAvatarProps, 'user'>
 
 
-export const userAvatar = ({ user, ...rest }: UserAvatarProps) => {
-  return <UserAvatar user={{ username: userAvatar.argTypes.username.defaultValue }} {...rest} />;
+export const userAvatar = (params: userAvatarNameParams) => {
+  return <UserAvatar {...params.user?.username !== undefined ? userAvatar.argTypes.user : userAvatar.argTypes.user.defaultValue} {...params} />;
 };
 
 
-
 userAvatar.argTypes = {
-  username: {
+  user: {
     control: 'text',
     defaultValue: 'Peggy',
   },
 };
 
-console.log(userAvatar.argTypes.username)
 
 
