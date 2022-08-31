@@ -28755,7 +28755,6 @@
     "xpack.securitySolution.responseActionsList.list.command": "コマンド",
     "xpack.securitySolution.responseActionsList.list.comments": "コメント",
     "xpack.securitySolution.responseActionsList.list.errorMessage": "応答アクションの取得エラー",
-    "xpack.securitySolution.responseActionsList.list.host": "ホスト",
     "xpack.securitySolution.responseActionsList.list.item.badge.completed": "完了",
     "xpack.securitySolution.responseActionsList.list.item.badge.failed": "失敗",
     "xpack.securitySolution.responseActionsList.list.item.badge.pending": "保留中",
