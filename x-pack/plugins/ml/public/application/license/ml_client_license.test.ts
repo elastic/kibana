@@ -9,7 +9,7 @@ import { Observable, Subject } from 'rxjs';
 import { ILicense } from '@kbn/licensing-plugin/common/types';
 
 import { MlClientLicense } from './ml_client_license';
-import { applicationServiceMock } from '@kbn/core/public/application/application_service.mock';
+import { applicationServiceMock } from '@kbn/core/public/mocks';
 
 describe('MlClientLicense', () => {
   const startApplicationContractMock = applicationServiceMock.createStartContract();
