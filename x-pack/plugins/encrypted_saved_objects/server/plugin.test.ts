@@ -41,6 +41,9 @@ describe('EncryptedSavedObjects Plugin', () => {
           "registerType": [Function],
         }
       `);
+
+      expect(plugin.logger.info).toHaveBeenCalledTimes(1);
+      expect(plugin.logger.info).toHaveBeenCalledWith(`Hashed 'encryptionKey' for this instance: WLbjNGKEm7aA4NfJHYyW88jHUkHtyF7ENHcF0obYGBU=`);
     });
   });
 

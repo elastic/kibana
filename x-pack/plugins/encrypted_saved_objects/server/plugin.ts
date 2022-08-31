@@ -22,6 +22,7 @@ import {
 import { defineRoutes } from './routes';
 import type { ClientInstanciator } from './saved_objects';
 import { setupSavedObjects } from './saved_objects';
+import {createHash} from "crypto";
 
 export interface PluginsSetup {
   security?: SecurityPluginSetup;
@@ -63,6 +64,12 @@ export class EncryptedSavedObjectsPlugin
         'Saved objects encryption key is not set. This will severely limit Kibana functionality. ' +
           'Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
       );
+    } else {
+      const hashedEncryptionKey = createHash('sha3-256')
+        .update(config.encryptionKey)
+        .digest('base64');
+
+      this.logger.info(`Hashed 'encryptionKey' for this instance: ${hashedEncryptionKey}`);
     }
 
     const primaryCrypto = config.encryptionKey
