@@ -112,6 +112,8 @@ For {swimlane} connectors, specify:
 
 `caseId`:::
 (Required, string) The identifier for the case.
+
+For {webhook-cm} connectors, specify `null`.
 =======
 
 `id`::
@@ -123,9 +125,9 @@ use `none`. To retrieve connector IDs, use <<cases-api-find-connectors>>).
 `none`.
 
 `type`::
-(Required, string) The type of the connector. Valid values are: `.jira`, `.none`,
-`.resilient`,`.servicenow`, `.servicenow-sir`, and `.swimlane`. To remove the
-connector, use `.none`.
+(Required, string) The type of the connector. Valid values are: `.cases-webhook`,
+`.jira`, `.none`, `.resilient`,`.servicenow`, `.servicenow-sir`, and `.swimlane`.
+To remove the connector, use `.none`.
 
 =====
 

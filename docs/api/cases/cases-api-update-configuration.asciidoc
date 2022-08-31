@@ -70,8 +70,8 @@ use <<cases-api-find-connectors>>.
 (Required, string) The name of the connector.
 
 `type`::
-(Required, string) The type of the connector. Valid values are: `.servicenow`,
-`.servicenow-sir`, `.jira`, `.resilient`, `.swimlane`, and `.none`.
+(Required, string) The type of the connector. Valid values are: `.cases-webhook`,
+`.jira`, `.none`, `.resilient`,`.servicenow`, `.servicenow-sir`, and `.swimlane`.
 ====
 
 `version`::
