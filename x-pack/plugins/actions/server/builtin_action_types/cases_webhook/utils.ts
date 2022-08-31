@@ -7,7 +7,7 @@
 
 import { AxiosResponse, AxiosError } from 'axios';
 import { isEmpty, isObjectLike, get } from 'lodash';
-import { getErrorMessage } from '../lib/axios_utils';
+import { getErrorMessage } from '../../lib/axios_utils';
 import * as i18n from './translations';
 
 export const createServiceError = (error: AxiosError, message: string) => {

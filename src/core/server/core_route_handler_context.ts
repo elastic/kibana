@@ -10,7 +10,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ElasticsearchRequestHandlerContext } from '@kbn/core-elasticsearch-server';
 import { CoreElasticsearchRouteHandlerContext } from '@kbn/core-elasticsearch-server-internal';
 import type { SavedObjectsRequestHandlerContext } from '@kbn/core-saved-objects-server';
-import { CoreSavedObjectsRouteHandlerContext } from './saved_objects';
+import { CoreSavedObjectsRouteHandlerContext } from '@kbn/core-saved-objects-server-internal';
 import { CoreUiSettingsRouteHandlerContext, UiSettingsRequestHandlerContext } from './ui_settings';
 import {
   CoreDeprecationsRouteHandlerContext,

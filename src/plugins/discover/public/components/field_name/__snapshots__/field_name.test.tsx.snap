@@ -6,7 +6,7 @@ Array [
     class="euiFlexItem euiFlexItem--flexGrowZero kbnDocViewer__fieldIcon"
   >
     <span
-      class="euiToken euiToken--euiColorVis5 euiToken--square euiToken--light euiToken--small kbnFieldIcon"
+      class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis5"
     >
       <span
         data-euiicon-type="tokenGeo"
@@ -40,7 +40,7 @@ Array [
     class="euiFlexItem euiFlexItem--flexGrowZero kbnDocViewer__fieldIcon"
   >
     <span
-      class="euiToken euiToken--euiColorVis0 euiToken--square euiToken--light euiToken--small kbnFieldIcon"
+      class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis0"
     >
       <span
         data-euiicon-type="tokenNumber"
@@ -74,7 +74,7 @@ Array [
     class="euiFlexItem euiFlexItem--flexGrowZero kbnDocViewer__fieldIcon"
   >
     <span
-      class="euiToken euiToken--euiColorVis1 euiToken--square euiToken--light euiToken--small kbnFieldIcon"
+      class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis1"
     >
       <span
         data-euiicon-type="tokenString"
@@ -108,7 +108,7 @@ Array [
     class="euiFlexItem euiFlexItem--flexGrowZero kbnDocViewer__fieldIcon"
   >
     <span
-      class="euiToken euiToken--gray euiToken--circle euiToken--light euiToken--small kbnFieldIcon"
+      class="euiToken kbnFieldIcon emotion-euiToken-circle-light-s-gray"
     >
       <span
         data-euiicon-type="questionInCircle"
