@@ -30,13 +30,6 @@ export const OPERATING_SYSTEM_LABEL = i18n.translate(
   }
 );
 
-export const SEARCH_DEFAULT = i18n.translate(
-  'xpack.securitySolution.exceptions.viewer.searchDefaultPlaceholder',
-  {
-    defaultMessage: 'Search field (ex: host.name)',
-  }
-);
-
 export const ADD_TO_ENDPOINT_LIST = i18n.translate(
   'xpack.securitySolution.exceptions.viewer.addToEndpointListLabel',
   {
@@ -51,32 +44,6 @@ export const ADD_TO_DETECTIONS_LIST = i18n.translate(
   }
 );
 
-export const FETCH_LIST_ERROR = i18n.translate(
-  'xpack.securitySolution.exceptions.viewer.fetchingListError',
-  {
-    defaultMessage: 'Error fetching exceptions',
-  }
-);
-
-export const DELETE_EXCEPTION_ERROR = i18n.translate(
-  'xpack.securitySolution.exceptions.viewer.deleteExceptionError',
-  {
-    defaultMessage: 'Error deleting exception',
-  }
-);
-
-export const ITEMS_PER_PAGE = (items: number) =>
-  i18n.translate('xpack.securitySolution.exceptions.exceptionItemsPaginationLabel', {
-    values: { items },
-    defaultMessage: 'Rows per page: {items}',
-  });
-
-export const NUMBER_OF_ITEMS = (items: number) =>
-  i18n.translate('xpack.securitySolution.exceptions.paginationNumberOfItemsLabel', {
-    values: { items },
-    defaultMessage: '{items} items',
-  });
-
 export const ADD_COMMENT_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.exceptions.viewer.addCommentPlaceholder',
   {
@@ -88,13 +55,6 @@ export const ADD_TO_CLIPBOARD = i18n.translate(
   'xpack.securitySolution.exceptions.viewer.addToClipboard',
   {
     defaultMessage: 'Comment',
-  }
-);
-
-export const TOTAL_ITEMS_FETCH_ERROR = i18n.translate(
-  'xpack.securitySolution.exceptions.viewer.fetchTotalsError',
-  {
-    defaultMessage: 'Error getting exception item totals',
   }
 );
 

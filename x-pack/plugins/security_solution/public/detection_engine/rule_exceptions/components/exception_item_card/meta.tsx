@@ -23,12 +23,11 @@ import styled from 'styled-components';
 
 import * as i18n from './translations';
 import { FormattedDate } from '../../../../common/components/formatted_date';
-import { LinkAnchor } from '../../../../common/components/links';
-import { APP_UI_ID, SecurityPageName } from '../../../../../common/constants';
-import { useKibana } from '../../../../common/lib/kibana';
-import { getRuleDetailsUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
-import { useGetSecuritySolutionUrl } from '../../../../common/components/link_to';
+import { SecurityPageName } from '../../../../../common/constants';
 import type { RuleReferenceSchema } from '../../../../../common/detection_engine/schemas/response';
+import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
+import { RuleDetailTabs } from '../../../../detections/pages/detection_engine/rules/details';
+import { getRuleDetailsTabUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
 
 const StyledFlexItem = styled(EuiFlexItem)`
   border-right: 1px solid #d3dae6;
@@ -43,9 +42,6 @@ export interface ExceptionItemCardMetaInfoProps {
 
 export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
   ({ item, references, dataTestSubj }) => {
-    const { navigateToApp } = useKibana().services.application;
-    const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
-
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
     const onAffectedRulesClick = () => setIsPopoverOpen((isOpen) => !isOpen);
@@ -61,26 +57,17 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
           key={reference.id}
         >
           <EuiToolTip content={reference.name} anchorClassName="eui-textTruncate">
-            <LinkAnchor
+            <SecuritySolutionLinkAnchor
               data-test-subj="ruleName"
-              onClick={(ev: { preventDefault: () => void }) => {
-                ev.preventDefault();
-                navigateToApp(APP_UI_ID, {
-                  deepLinkId: SecurityPageName.rules,
-                  path: getRuleDetailsUrl(reference.id),
-                });
-              }}
-              href={getSecuritySolutionUrl({
-                deepLinkId: SecurityPageName.rules,
-                path: getRuleDetailsUrl(reference.id),
-              })}
+              deepLinkId={SecurityPageName.rules}
+              path={getRuleDetailsTabUrl(reference.id, RuleDetailTabs.alerts)}
             >
               {reference.name}
-            </LinkAnchor>
+            </SecuritySolutionLinkAnchor>
           </EuiToolTip>
         </EuiContextMenuItem>
       ));
-    }, [references, dataTestSubj, getSecuritySolutionUrl, navigateToApp]);
+    }, [references, dataTestSubj]);
 
     return (
       <EuiFlexGroup
