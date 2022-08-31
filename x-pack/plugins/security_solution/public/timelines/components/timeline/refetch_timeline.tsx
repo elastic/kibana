@@ -8,12 +8,13 @@
 import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
+import type { InputsModelId } from '../../../common/store/inputs/constants';
 import type { inputsModel } from '../../../common/store';
 import { inputsActions } from '../../../common/store/actions';
 
 export interface TimelineRefetchProps {
   id: string;
-  inputId: 'global' | 'timeline';
+  inputId: InputsModelId.global | InputsModelId.timeline;
   inspect: inputsModel.InspectQuery | null;
   loading: boolean;
   refetch: inputsModel.Refetch;

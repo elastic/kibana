@@ -16,6 +16,7 @@ import {
 import { euiThemeVars } from '@kbn/ui-theme';
 import { useDispatch } from 'react-redux';
 import styled, { css } from 'styled-components';
+import { InputsModelId } from '../../../common/store/inputs/constants';
 import {
   useGlobalFullScreen,
   useTimelineFullScreen,
@@ -98,9 +99,9 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
   useEffect(() => {
     return () => {
       if (timelineId === TimelineId.active) {
-        dispatch(inputsActions.setFullScreen({ id: 'timeline', fullScreen: false }));
+        dispatch(inputsActions.setFullScreen({ id: InputsModelId.timeline, fullScreen: false }));
       } else {
-        dispatch(inputsActions.setFullScreen({ id: 'global', fullScreen: false }));
+        dispatch(inputsActions.setFullScreen({ id: InputsModelId.global, fullScreen: false }));
       }
     };
   }, [dispatch, timelineId]);

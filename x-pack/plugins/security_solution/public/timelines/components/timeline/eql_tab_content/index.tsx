@@ -22,6 +22,7 @@ import { connect, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import { InPortal } from 'react-reverse-portal';
 
+import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import type { CellValueElementProps } from '../cell_rendering';
 import type { TimelineItem } from '../../../../../common/search_strategy';
@@ -261,7 +262,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
       </InPortal>
       <TimelineRefetch
         id={`${timelineId}-${TimelineTabs.eql}`}
-        inputId="timeline"
+        inputId={InputsModelId.timeline}
         inspect={inspect}
         loading={isQueryLoading}
         refetch={refetch}
@@ -284,7 +285,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
                 />
               )}
               <DatePicker grow={10}>
-                <SuperDatePicker id="timeline" timelineId={timelineId} />
+                <SuperDatePicker id={InputsModelId.timeline} timelineId={timelineId} />
               </DatePicker>
               <EuiFlexItem grow={false}>
                 <TimelineDatePickerLock />
