@@ -6,14 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { i18n } from '@kbn/i18n';
-
-import { ErrorCode } from '../../../../common/types/error_codes';
-import { fetchConnectorByIndexName } from '../../../lib/connectors/fetch_connectors';
-import { fetchCrawlerByIndexName } from '../../../lib/crawler/fetch_crawlers';
 
 import { RouteDependencies } from '../../../plugin';
-import { createError } from '../../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../../utils/elasticsearch_error_handler';
 
 import { registerCrawlerCrawlRulesRoutes } from './crawler_crawl_rules';
@@ -27,31 +21,15 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
     {
       path: '/internal/enterprise_search/crawler/{indexName}',
       validate: {
+        params: schema.object({
+          indexName: schema.string(),
+        }),
         body: schema.object({
-          index_name: schema.string(),
           language: schema.oneOf([schema.string(), schema.literal(null)]),
         }),
       },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
-      const { client } = (await context.core).elasticsearch;
-
-      const crawler = await fetchCrawlerByIndexName(client, request.body.index_name);
-
-      if (crawler) {
-        return createError({
-          errorCode: ErrorCode.CRAWLER_ALREADY_EXISTS,
-          message: i18n.translate(
-            'xpack.enterpriseSearch.server.routes.addCrawler.crawlerExistsError',
-            {
-              defaultMessage: 'A crawler for this index already exists',
-            }
-          ),
-          response,
-          statusCode: 409,
-        });
-      }
-
       return enterpriseSearchRequestHandler.createRequest({
         path: '/api/ent/v1/internal/indices/:indexName',
       })(context, request, response);

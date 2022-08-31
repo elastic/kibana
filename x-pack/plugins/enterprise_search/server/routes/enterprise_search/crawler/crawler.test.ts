@@ -10,14 +10,14 @@ import { MockRouter, mockDependencies, mockRequestHandler } from '../../../__moc
 import { registerCrawlerRoutes } from './crawler';
 
 describe('crawler routes', () => {
-  describe('POST /internal/enterprise_search/crawler', () => {
+  describe('PUT /internal/enterprise_search/crawler/{indexName}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
-        method: 'post',
-        path: '/internal/enterprise_search/crawler',
+        method: 'put',
+        path: '/internal/enterprise_search/crawler/{indexName}',
       });
 
       registerCrawlerRoutes({
@@ -27,22 +27,22 @@ describe('crawler routes', () => {
     });
 
     it('validates correctly with name and language', () => {
-      const request = { body: { index_name: 'index-name', language: 'en' } };
+      const request = { params: { indexName: 'index-name' }, body: { language: 'en' } };
       mockRouter.shouldValidate(request);
     });
 
     it('validates correctly when language is null', () => {
-      const request = { body: { index_name: 'index-name', language: null } };
+      const request = { params: { indexName: 'index-name' }, body: { language: null } };
       mockRouter.shouldValidate(request);
     });
 
     it('fails validation without name', () => {
-      const request = { body: { language: 'en' } };
+      const request = { params: {}, body: { language: 'en' } };
       mockRouter.shouldThrow(request);
     });
 
     it('fails validation without language', () => {
-      const request = { body: { index_name: 'index-ame' } };
+      const request = { params: { indexName: 'index-name' }, body: {} };
       mockRouter.shouldThrow(request);
     });
   });

@@ -34,10 +34,10 @@ export const MethodCrawlerLogic = kea<MakeLogicType<{}, MethodCrawlerActions>>({
     apiError: (error) => {
       flashAPIErrors(error);
     },
-    apiSuccess: ({ created }) => {
+    apiSuccess: ({ updated }) => {
       KibanaLogic.values.navigateToUrl(
         generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
-          indexName: created,
+          indexName: updated,
           tabId: SearchIndexTabId.DOMAIN_MANAGEMENT,
         })
       );

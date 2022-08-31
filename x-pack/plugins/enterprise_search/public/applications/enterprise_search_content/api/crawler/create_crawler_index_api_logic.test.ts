@@ -10,6 +10,7 @@ import { mockHttpValues } from '../../../__mocks__/kea_logic';
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { createCrawlerIndex } from './create_crawler_index_api_logic';
+import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '@kbn/enterprise-search-plugin/common/constants';
 
 describe('CreateCrawlerIndexApiLogic', () => {
   const { http } = mockHttpValues;
@@ -20,16 +21,25 @@ describe('CreateCrawlerIndexApiLogic', () => {
     it('calls correct api', async () => {
       const indexName = 'elastic-co-crawler';
       const language = 'Universal';
-      const promise = Promise.resolve({ created: true });
-      http.post.mockReturnValue(promise);
+      const promise = Promise.resolve({ updated: indexName });
+      http.post.mockReturnValue(Promise.resolve());
+      http.put.mockReturnValue(promise);
 
       const result = createCrawlerIndex({ indexName, language });
       await nextTick();
 
-      expect(http.post).toHaveBeenCalledWith('/internal/enterprise_search/crawler', {
-        body: JSON.stringify({ index_name: indexName, language }),
+      expect(http.post).toHaveBeenCalledWith('/internal/enterprise_search/connectors', {
+        body: JSON.stringify({
+          delete_existing_connector: true,
+          index_name: indexName,
+          service_type: ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE,
+          language,
+        }),
       });
-      await expect(result).resolves.toEqual({ created: true });
+      expect(http.put).toHaveBeenCalledWith(`/internal/enterprise_search/crawler/${indexName}`, {
+        body: JSON.stringify({ language }),
+      });
+      await expect(result).resolves.toEqual({ updated: indexName });
     });
   });
 });
