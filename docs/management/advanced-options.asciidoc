@@ -528,7 +528,7 @@ of buckets to try to represent.
 
 [horizontal]
 [[visualization-colormapping]]`visualization:colorMapping`::
-**This setting is deprecated and will not be supported as of 8.0.**
+**This setting is deprecated and will not be supported in a future version.**
 Maps values to specific colors in charts using the *Compatibility* palette.
 
 [[visualization-uselegacytimeaxis]]`visualization:useLegacyTimeAxis`::
