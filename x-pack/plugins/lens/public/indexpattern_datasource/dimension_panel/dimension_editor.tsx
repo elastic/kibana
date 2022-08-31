@@ -332,7 +332,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     temporaryState === 'none' ||
     (selectedColumn?.operationType != null && isQuickFunction(selectedColumn?.operationType));
 
-  let sideNavItems: EuiListGroupItemProps[] = operationsWithCompatibility.map(
+  const sideNavItems: EuiListGroupItemProps[] = operationsWithCompatibility.map(
     ({ operationType, compatibleWithCurrentField, disabledStatus }) => {
       const isActive = Boolean(
         incompleteOperation === operationType ||
@@ -545,21 +545,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
       };
     }
   );
-  const softRestrictedSideNavItems = sideNavItems.filter(
-    (navItem) =>
-      referencedField &&
-      referencedField.softRestrictions &&
-      referencedField.softRestrictions[navItem.id!]
-  );
-  if (softRestrictedSideNavItems.length > 0) {
-    sideNavItems = sideNavItems.filter(
-      (navItem) =>
-        !referencedField ||
-        !referencedField.softRestrictions ||
-        !referencedField.softRestrictions[navItem.id!]
-    );
-  }
-  const hasSoftRestrictedSideNavItems = softRestrictedSideNavItems.length > 0;
 
   const shouldDisplayExtraOptions =
     !currentFieldIsInvalid &&
@@ -631,49 +616,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
           maxWidth={false}
         />
       </EuiFormRow>
-      {hasSoftRestrictedSideNavItems && (
-        <>
-          <EuiSpacer size="s" />
-          <EuiFormRow
-            fullWidth
-            label={
-              <>
-                {i18n.translate('xpack.lens.indexPattern.softRestrictedFunctionsLabel', {
-                  defaultMessage: 'Partially applicable functions',
-                })}
-                <EuiIconTip
-                  content={i18n.translate(
-                    'xpack.lens.indexPattern.softRestrictedFunctionsLabel.hint',
-                    {
-                      defaultMessage:
-                        "These functions can't be applied to the full time range of your data. This happens if you are rolling up historical data. You can stil use these functions - if the results are partial, a warning is shown on the chart",
-                    }
-                  )}
-                  position="right"
-                />
-              </>
-            }
-          >
-            <EuiListGroup
-              className={
-                softRestrictedSideNavItems.length > 3
-                  ? 'lnsIndexPatternDimensionEditor__columns'
-                  : ''
-              }
-              gutterSize="none"
-              color="primary"
-              listItems={
-                // add a padding item containing a non breakable space if the number of operations is not even
-                // otherwise the column layout will break within an element
-                softRestrictedSideNavItems.length % 2 === 1
-                  ? [...softRestrictedSideNavItems, { label: '\u00a0' }]
-                  : softRestrictedSideNavItems
-              }
-              maxWidth={false}
-            />
-          </EuiFormRow>
-        </>
-      )}
 
       {shouldDisplayReferenceEditor ? (
         <>
