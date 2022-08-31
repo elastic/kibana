@@ -165,7 +165,7 @@ describe('EventDetails', () => {
   });
 
   // TODO adjust to response_actions
-  describe.skip('osquery tab', () => {
+  describe.only('osquery tab', () => {
     it('should not be rendered if not provided with specific raw data', () => {
       expect(alertsWrapper.find('[data-test-subj="osqueryViewTab"]').exists()).toEqual(false);
     });
@@ -175,14 +175,15 @@ describe('EventDetails', () => {
         ...defaultProps,
         rawEventData: {
           ...rawEventData,
-          _source: {
-            ...rawEventData._source,
-            'kibana.alert.rule.name': 'test-rule',
-            'kibana.alert.rule.actions': [{ action_type_id: '.osquery' }],
-          },
           fields: {
             ...rawEventData.fields,
             'agent.id': ['testAgent'],
+            'kibana.alert.rule.name': ['test-rule'],
+            'kibana.alert.rule.parameters': [
+              {
+                response_actions: [{ action_type_id: '.osquery' }],
+              },
+            ],
           },
         },
       };
@@ -198,7 +199,7 @@ describe('EventDetails', () => {
       ) as ReactWrapper;
       await waitFor(() => wrapper.update());
 
-      expect(alertsWrapper.find('[data-test-subj="osqueryViewTab"]').exists());
+      expect(alertsWrapper.find('[data-test-subj="osqueryViewTab"]').exists()).toEqual(true);
     });
   });
 });

@@ -32,13 +32,14 @@ export const useOsqueryTab = ({
   } = useKibana();
   const handleAddToTimeline = useHandleAddToTimeline();
 
+  console.log({ rawEventData });
   if (!osquery || !rawEventData) {
     return;
   }
 
   const { OsqueryResults } = osquery;
   const parameters = rawEventData.fields['kibana.alert.rule.parameters'];
-  const responseActions = parameters[0].response_actions;
+  const responseActions = parameters?.[0].response_actions;
 
   const osqueryActionsLength = responseActions?.filter(
     (action: { action_type_id: string }) => action.action_type_id === RESPONSE_ACTION_TYPES.OSQUERY
