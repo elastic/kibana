@@ -23,14 +23,14 @@ export const Analytics: React.FC<InitialAppData> = (props) => {
   return (
     <Switch>
       <Route exact path={ROOT_PATH}>
-        {
-        incompatibleVersions 
-        ? <VersionMismatchPage
+        {incompatibleVersions ? (
+          <VersionMismatchPage
             enterpriseSearchVersion={enterpriseSearchVersion}
             kibanaVersion={kibanaVersion}
-          /> 
-        : <AnalyticsOverview />
-        }
+          />
+        ) : (
+          <AnalyticsOverview />
+        )}
       </Route>
     </Switch>
   );
