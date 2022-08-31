@@ -162,7 +162,7 @@ export function ObservabilityPageTemplate({
                   : undefined
               }
             >
-              <KibanaPageTemplate.Section {...pageSectionProps}>
+              <KibanaPageTemplate.Section component="div" {...pageSectionProps}>
                 {children}
               </KibanaPageTemplate.Section>
               {bottomBar && (

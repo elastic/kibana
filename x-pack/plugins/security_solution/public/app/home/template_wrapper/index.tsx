@@ -95,6 +95,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplatePr
           data-test-subj="pageContainer"
           paddingSize="l"
           alignment={showEmptyState ? 'center' : 'top'}
+          component="div"
         >
           {children}
         </KibanaPageTemplate.Section>
