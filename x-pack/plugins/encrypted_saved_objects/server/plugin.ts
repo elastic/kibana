@@ -6,6 +6,7 @@
  */
 
 import nodeCrypto from '@elastic/node-crypto';
+import { createHash } from 'crypto';
 
 import type { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
@@ -22,7 +23,6 @@ import {
 import { defineRoutes } from './routes';
 import type { ClientInstanciator } from './saved_objects';
 import { setupSavedObjects } from './saved_objects';
-import {createHash} from "crypto";
 
 export interface PluginsSetup {
   security?: SecurityPluginSetup;
