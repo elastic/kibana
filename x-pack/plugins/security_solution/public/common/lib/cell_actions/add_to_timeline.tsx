@@ -94,7 +94,7 @@ export const getAddToTimelineCellAction = ({
           dispatch(
             addProvider({
               id: TimelineId.active,
-              provider: dataProvider[0],
+              providers: dataProvider,
             })
           );
         }, [dataProvider, dispatch]);

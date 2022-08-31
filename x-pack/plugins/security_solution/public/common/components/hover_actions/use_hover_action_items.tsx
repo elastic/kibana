@@ -119,19 +119,17 @@ export const useHoverActionItems = ({
   const OnAddToTimeline = useCallback(() => {
     if (!dataProvider || isEmpty(dataProvider)) return;
     if (dataProvider instanceof Array) {
-      dataProvider.forEach((provider) => {
-        dispatch(
-          addProvider({
-            id: TimelineId.active,
-            provider,
-          })
-        );
-      });
+      dispatch(
+        addProvider({
+          id: TimelineId.active,
+          providers: dataProvider,
+        })
+      );
     } else {
       dispatch(
         addProvider({
           id: TimelineId.active,
-          provider: dataProvider,
+          providers: [dataProvider],
         })
       );
     }
