@@ -14,7 +14,7 @@ import { GeoUploadForm, OnFileSelectParameters } from './geo_upload_form';
 import { ImportCompleteView } from './import_complete_view';
 import type { FileUploadComponentProps, FileUploadGeoResults } from '../lazy_load_bundle';
 import { ImportResults } from '../importer';
-import { GeoFileImporter } from '../importer/geo';
+import { GeoFileImporter, UPLOAD_SIZE } from '../importer/geo';
 import type { Settings } from '../../common/types';
 import { hasImportPermission } from '../api';
 
@@ -40,7 +40,7 @@ interface State {
   indexNameError?: string;
   dataViewResp?: object;
   phase: PHASE;
-  slowConnection: boolean;
+  uploadSize: UPLOAD_SIZE;
 }
 
 export class GeoUploadWizard extends Component<FileUploadComponentProps, State> {
@@ -53,7 +53,7 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
     importStatus: '',
     indexName: '',
     phase: PHASE.CONFIGURE,
-    slowConnection: false,
+    uploadSize: UPLOAD_SIZE.NORMAL,
   };
 
   componentDidMount() {
@@ -148,6 +148,7 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
     this.setState({
       importStatus: getWritingToIndexMsg(0),
     });
+    this._geoFileImporter.setUploadSize(this.state.uploadSize);
     const importResults = await this._geoFileImporter.import(
       initializeImportResp.id,
       this.state.indexName,
@@ -158,8 +159,7 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
             importStatus: getWritingToIndexMsg(progress),
           });
         }
-      },
-      this.state.slowConnection
+      }
     );
     if (!this._isMounted) {
       return;
@@ -284,8 +284,8 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
     }
   };
 
-  _onSlowConnectionChange = (slowConnection: boolean) => {
-    this.setState({ slowConnection });
+  _onUploadSizeChange = (uploadSize: UPLOAD_SIZE) => {
+    this.setState({ uploadSize });
   };
 
   render() {
@@ -318,12 +318,12 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
         indexNameError={this.state.indexNameError}
         onFileClear={this._onFileClear}
         onFileSelect={this._onFileSelect}
-        slowConnection={this.state.slowConnection}
+        uploadSize={this.state.uploadSize}
         onGeoFieldTypeSelect={this._onGeoFieldTypeSelect}
         onIndexNameChange={this._onIndexNameChange}
         onIndexNameValidationStart={this.props.disableImportBtn}
         onIndexNameValidationEnd={this.props.enableImportBtn}
-        onSlowConnectionChange={this._onSlowConnectionChange}
+        onUploadSizeChange={this._onUploadSizeChange}
       />
     );
   }

@@ -9,7 +9,7 @@ import { ReactNode } from 'react';
 import { Feature } from 'geojson';
 import { i18n } from '@kbn/i18n';
 import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
-import { GeoFileImporter, GeoFilePreview } from './types';
+import { GeoFileImporter, GeoFilePreview, UPLOAD_SIZE } from './types';
 import { CreateDocsResponse, ImportResults } from '../types';
 import { callImportRoute, Importer, IMPORT_RETRIES, MAX_CHUNK_CHAR_COUNT } from '../importer';
 import { MB } from '../../../common/constants';
@@ -34,6 +34,7 @@ export class AbstractGeoFileImporter extends Importer implements GeoFileImporter
   private _invalidFeatures: ImportFailure[] = [];
   private _geoFieldType: ES_FIELD_TYPES.GEO_POINT | ES_FIELD_TYPES.GEO_SHAPE =
     ES_FIELD_TYPES.GEO_SHAPE;
+  private _uploadSize = UPLOAD_SIZE.NORMAL;
 
   constructor(file: File) {
     super();
@@ -74,12 +75,15 @@ export class AbstractGeoFileImporter extends Importer implements GeoFileImporter
     this._geoFieldType = geoFieldType;
   }
 
+  public setUploadSize(uploadSize: UPLOAD_SIZE) {
+    this._uploadSize = uploadSize;
+  }
+
   public async import(
     id: string,
     index: string,
     pipelineId: string | undefined,
-    setImportProgress: (progress: number) => void,
-    slowConnection: boolean
+    setImportProgress: (progress: number) => void
   ): Promise<ImportResults> {
     if (!id || !index) {
       return {
@@ -90,7 +94,7 @@ export class AbstractGeoFileImporter extends Importer implements GeoFileImporter
       };
     }
 
-    const maxChunkCharCount = slowConnection ? MAX_CHUNK_CHAR_COUNT / 10 : MAX_CHUNK_CHAR_COUNT;
+    const maxChunkCharCount = this._uploadSize === UPLOAD_SIZE.SMALL ? MAX_CHUNK_CHAR_COUNT / 10 : MAX_CHUNK_CHAR_COUNT;
     let success = true;
     const failures: ImportFailure[] = [...this._invalidFeatures];
     let error;

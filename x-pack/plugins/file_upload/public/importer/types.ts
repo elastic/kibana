@@ -52,7 +52,6 @@ export interface IImporter {
     id: string,
     index: string,
     pipelineId: string | undefined,
-    setImportProgress: (progress: number) => void,
-    slowConnection: boolean
+    setImportProgress: (progress: number) => void
   ): Promise<ImportResults>;
 }

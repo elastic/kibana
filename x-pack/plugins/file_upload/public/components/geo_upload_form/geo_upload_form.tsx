@@ -9,9 +9,9 @@ import React, { ChangeEvent, Component } from 'react';
 import {
   EuiForm,
   EuiFormRow,
+  EuiIcon,
+  EuiSpacer,
   EuiSelect,
-  EuiSwitch,
-  EuiSwitchEvent,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -19,6 +19,22 @@ import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { GeoFilePicker, OnFileSelectParameters } from './geo_file_picker';
 import { IndexNameForm } from './index_name_form';
 import { validateIndexName } from '../../validate_index_name';
+import { UPLOAD_SIZE } from '../../importer/geo';
+
+const UPLOAD_SIZE_OPTIONS = [
+  {
+    text: i18n.translate('xpack.fileUpload.uploadSize.normalLabel', {
+      defaultMessage: 'Normal',
+    }),
+    value: UPLOAD_SIZE.NORMAL,
+  },
+  {
+    text: i18n.translate('xpack.fileUpload.uploadSize.smallLabel', {
+      defaultMessage: 'Small',
+    }),
+    value: UPLOAD_SIZE.SMALL,
+  },
+]
 
 const GEO_FIELD_TYPE_OPTIONS = [
   {
@@ -35,14 +51,14 @@ interface Props {
   geoFieldType: ES_FIELD_TYPES.GEO_POINT | ES_FIELD_TYPES.GEO_SHAPE;
   indexName: string;
   indexNameError?: string;
-  slowConnection: boolean;
+  uploadSize: UPLOAD_SIZE;
   onFileClear: () => void;
   onFileSelect: (onFileSelectParameters: OnFileSelectParameters) => void;
   onGeoFieldTypeSelect: (geoFieldType: ES_FIELD_TYPES.GEO_POINT | ES_FIELD_TYPES.GEO_SHAPE) => void;
   onIndexNameChange: (name: string, error?: string) => void;
   onIndexNameValidationStart: () => void;
   onIndexNameValidationEnd: () => void;
-  onSlowConnectionChange: (slowConnection: boolean) => void;
+  onUploadSizeChange: (uploadSize: UPLOAD_SIZE) => void;
 }
 
 interface State {
@@ -105,8 +121,10 @@ export class GeoUploadForm extends Component<Props, State> {
     );
   };
 
-  _onSlowConnectionChange = (event: EuiSwitchEvent) => {
-    this.props.onSlowConnectionChange(event.target.checked);
+  _onUploadSizeChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    return this.props.onUploadSizeChange(
+      event.target.value as UPLOAD_SIZE
+    );
   };
 
   _renderGeoFieldTypeSelect() {
@@ -140,22 +158,29 @@ export class GeoUploadForm extends Component<Props, State> {
               onIndexNameValidationStart={this.props.onIndexNameValidationStart}
               onIndexNameValidationEnd={this.props.onIndexNameValidationEnd}
             />
-            <EuiFormRow display="columnCompressedSwitch">
-              <EuiToolTip
-                position="top"
-                content={i18n.translate('xpack.fileUpload.slowConnection.tooltip', {
-                  defaultMessage: 'Enable to upload file in smaller chunks.',
-                })}
-              >
-                <EuiSwitch
-                  label={i18n.translate('xpack.fileUpload.slowConnection.switchLabel', {
-                    defaultMessage: 'Slow connection',
+            <EuiSpacer size="m" />
+            <EuiFormRow
+              label={
+                <EuiToolTip
+                  anchorClassName="eui-alignMiddle"
+                  content={i18n.translate('xpack.fileUpload.uploadSize.tooltip', {
+                    defaultMessage: 'Use small upload size to alleviate request timeout failures.',
                   })}
-                  checked={this.props.slowConnection}
-                  onChange={this._onSlowConnectionChange}
-                  compressed
-                />
-              </EuiToolTip>
+                >
+                  <span>
+                    {i18n.translate('xpack.fileUpload.uploadSize.label', {
+                      defaultMessage: 'Upload size',
+                    })}{' '}
+                    <EuiIcon type="questionInCircle" color="subdued" />
+                  </span>
+                </EuiToolTip>
+              }
+            >
+              <EuiSelect
+                options={UPLOAD_SIZE_OPTIONS}
+                value={this.props.uploadSize}
+                onChange={this._onUploadSizeChange}
+              />
             </EuiFormRow>
           </>
         ) : null}
