@@ -100,7 +100,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
       );
     }
     return items;
-  }, [canEditDashboards]);
+  }, [canEditDashboards, globalTimeRange, closePopoverOnAction, selectedJobs]);
 
   const jobIds = selectedJobs.map(({ id }) => id);
 
