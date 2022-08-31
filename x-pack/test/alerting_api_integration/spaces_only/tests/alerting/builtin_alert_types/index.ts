@@ -14,5 +14,6 @@ export default function alertingTests({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./es_query'));
     loadTestFile(require.resolve('./long_running'));
     loadTestFile(require.resolve('./cancellable'));
+    loadTestFile(require.resolve('./circuit_breaker'));
   });
 }

@@ -30,8 +30,9 @@ import {
   LensDocShape810,
   LensDocShape830,
   VisStatePre830,
+  LensDocShape840,
 } from './types';
-import { DOCUMENT_FIELD_NAME, layerTypes, MetricState } from '../../common';
+import { DOCUMENT_FIELD_NAME, layerTypes, LegacyMetricState } from '../../common';
 import { LensDocShape } from './saved_object_migrations';
 
 export const commonRenameOperationsForFormula = (
@@ -248,7 +249,7 @@ export const commonLockOldMetricVisSettings = (
     return newAttributes as LensDocShape830<VisState830>;
   }
 
-  const visState = newAttributes.state.visualization as MetricState;
+  const visState = newAttributes.state.visualization as LegacyMetricState;
   visState.textAlign = visState.textAlign ?? 'center';
   visState.titlePosition = visState.titlePosition ?? 'bottom';
   visState.size = visState.size ?? 'xl';
@@ -346,6 +347,27 @@ export const getLensFilterMigrations = (
     },
   }));
 
+export const getLensDataViewMigrations = (
+  dataViewMigrations: MigrateFunctionsObject
+): MigrateFunctionsObject =>
+  mapValues(dataViewMigrations, (migrate) => (lensDoc: { attributes: LensDocShape }) => ({
+    ...lensDoc,
+    attributes: {
+      ...lensDoc.attributes,
+      state: {
+        ...lensDoc.attributes.state,
+        adHocDataViews: !lensDoc.attributes.state.adHocDataViews
+          ? undefined
+          : Object.fromEntries(
+              Object.entries(lensDoc.attributes.state.adHocDataViews).map(([id, spec]) => [
+                id,
+                migrate(spec),
+              ])
+            ),
+      },
+    },
+  }));
+
 export const fixLensTopValuesCustomFormatting = (attributes: LensDocShape810): LensDocShape810 => {
   const newAttributes = cloneDeep(attributes);
   const datasourceLayers = newAttributes.state.datasourceStates.indexpattern.layers || {};
@@ -397,4 +419,22 @@ export const commonFixValueLabelsInXY = (
       },
     },
   };
+};
+
+export const commonMigrateMetricIds = (
+  attributes: LensDocShape840<unknown>
+): LensDocShape840<unknown> => {
+  const typeMappings = {
+    lnsMetric: 'lnsLegacyMetric',
+    lnsMetricNew: 'lnsMetric',
+  } as Record<string, string>;
+
+  if (!attributes.visualizationType || !(attributes.visualizationType in typeMappings)) {
+    return attributes as LensDocShape840<unknown>;
+  }
+
+  const newAttributes = cloneDeep(attributes);
+  newAttributes.visualizationType = typeMappings[attributes.visualizationType];
+
+  return newAttributes;
 };

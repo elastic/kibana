@@ -7116,13 +7116,7 @@
             "label": "application",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreApplicationPluginApi",
-                "section": "def-public.ApplicationStart",
-                "text": "ApplicationStart"
-              }
+              "ApplicationStart"
             ],
             "path": "src/plugins/data/public/types.ts",
             "deprecated": false
@@ -8400,9 +8394,9 @@
             "section": "def-common.IAggType",
             "text": "IAggType"
           },
-          "; id?: string | undefined; enabled?: boolean | undefined; params?: {} | ",
+          "; params?: {} | ",
           "SerializableRecord",
-          " | undefined; schema?: string | undefined; }"
+          " | undefined; id?: string | undefined; enabled?: boolean | undefined; schema?: string | undefined; }"
         ],
         "path": "src/plugins/data/common/search/aggs/agg_config.ts",
         "deprecated": false,
@@ -10139,7 +10133,7 @@
                 "label": "dateHistogramInterval",
                 "description": [],
                 "signature": [
-                  "(interval: string) => Interval"
+                  "(interval: string, shouldForceFixed?: boolean | undefined) => Interval"
                 ],
                 "path": "src/plugins/data/public/index.ts",
                 "deprecated": false,
@@ -10152,6 +10146,19 @@
                     "tags": [],
                     "label": "interval",
                     "description": [],
+                    "path": "src/plugins/data/common/search/aggs/utils/date_interval_utils/date_histogram_interval.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-public.search.aggs.dateHistogramInterval.$2",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "shouldForceFixed",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
                     "path": "src/plugins/data/common/search/aggs/utils/date_interval_utils/date_histogram_interval.ts",
                     "deprecated": false
                   }
@@ -10621,6 +10628,42 @@
                 ],
                 "path": "src/plugins/data/public/index.ts",
                 "deprecated": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-public.search.aggs.calcAutoIntervalLessThan",
+                "type": "Function",
+                "tags": [],
+                "label": "calcAutoIntervalLessThan",
+                "description": [],
+                "signature": [
+                  "(maxBucketCount: number, duration: number) => moment.Duration"
+                ],
+                "path": "src/plugins/data/public/index.ts",
+                "deprecated": false,
+                "returnComment": [],
+                "children": [
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-public.search.aggs.calcAutoIntervalLessThan.$1",
+                    "type": "number",
+                    "tags": [],
+                    "label": "maxBucketCount",
+                    "description": [],
+                    "path": "src/plugins/data/common/search/aggs/buckets/lib/time_buckets/calc_auto_interval.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-public.search.aggs.calcAutoIntervalLessThan.$2",
+                    "type": "number",
+                    "tags": [],
+                    "label": "duration",
+                    "description": [],
+                    "path": "src/plugins/data/common/search/aggs/buckets/lib/time_buckets/calc_auto_interval.ts",
+                    "deprecated": false
+                  }
+                ]
               }
             ]
           },
@@ -11806,6 +11849,19 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-server.DataView.matchedIndices",
+            "type": "Array",
+            "tags": [],
+            "label": "matchedIndices",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-server.DataView.Unnamed",
             "type": "Function",
             "tags": [],
@@ -12202,6 +12258,23 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-server.DataView.isTSDBMode",
+            "type": "Function",
+            "tags": [],
+            "label": "isTSDBMode",
+            "description": [
+              "\nreturns true if dataview contains TSDB fields"
+            ],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-server.DataView.isTimeBased",
             "type": "Function",
             "tags": [],
@@ -12590,7 +12663,7 @@
             "tags": [],
             "label": "getAllRuntimeFields",
             "description": [
-              "\nGet all runtime field definitions."
+              "\nGet all runtime field definitions.\nNOTE: this does not strip out runtime fields that match mapped field names"
             ],
             "signature": [
               "() => Record<string, ",
@@ -14361,7 +14434,7 @@
             "signature": [
               "(options: { pattern: string | string[]; metaFields?: string[] | undefined; fieldCapsOptions?: { allow_no_indices: boolean; } | undefined; type?: string | undefined; rollupIndex?: string | undefined; filter?: ",
               "QueryDslQueryContainer",
-              " | undefined; }) => Promise<",
+              " | undefined; }) => Promise<{ fields: ",
               {
                 "pluginId": "dataViews",
                 "scope": "server",
@@ -14369,7 +14442,7 @@
                 "section": "def-server.FieldDescriptor",
                 "text": "FieldDescriptor"
               },
-              "[]>"
+              "[]; indices: string[]; }>"
             ],
             "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
             "deprecated": false,
@@ -14825,7 +14898,61 @@
                 "label": "elasticsearchClient",
                 "description": [],
                 "signature": [
-                  "{ name: string | symbol; transform: ",
+                  "{ get: { <TDocument = unknown>(this: That, params: ",
+                  "GetRequest",
+                  " | ",
+                  "GetRequest",
+                  ", options?: ",
+                  "TransportRequestOptionsWithOutMeta",
+                  " | undefined): Promise<",
+                  "GetResponse",
+                  "<TDocument>>; <TDocument = unknown>(this: That, params: ",
+                  "GetRequest",
+                  " | ",
+                  "GetRequest",
+                  ", options?: ",
+                  "TransportRequestOptionsWithMeta",
+                  " | undefined): Promise<",
+                  "TransportResult",
+                  "<",
+                  "GetResponse",
+                  "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
+                  "GetRequest",
+                  " | ",
+                  "GetRequest",
+                  ", options?: ",
+                  "TransportRequestOptions",
+                  " | undefined): Promise<",
+                  "GetResponse",
+                  "<TDocument>>; }; delete: { (this: That, params: ",
+                  "DeleteRequest",
+                  " | ",
+                  "DeleteRequest",
+                  ", options?: ",
+                  "TransportRequestOptionsWithOutMeta",
+                  " | undefined): Promise<",
+                  "WriteResponseBase",
+                  ">; (this: That, params: ",
+                  "DeleteRequest",
+                  " | ",
+                  "DeleteRequest",
+                  ", options?: ",
+                  "TransportRequestOptionsWithMeta",
+                  " | undefined): Promise<",
+                  "TransportResult",
+                  "<",
+                  "WriteResponseBase",
+                  ", unknown>>; (this: That, params: ",
+                  "DeleteRequest",
+                  " | ",
+                  "DeleteRequest",
+                  ", options?: ",
+                  "TransportRequestOptions",
+                  " | undefined): Promise<",
+                  "WriteResponseBase",
+                  ">; }; cluster: ",
+                  "default",
+                  "; eql: ",
                   "default",
                   "; search: { <TDocument = unknown, TAggregations = Record<string, ",
                   "AggregationsAggregate",
@@ -14859,11 +14986,7 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "SearchResponse",
-                  "<TDocument, TAggregations>>; }; cluster: ",
-                  "default",
-                  "; eql: ",
-                  "default",
-                  "; create: { <TDocument = unknown>(this: That, params: ",
+                  "<TDocument, TAggregations>>; }; create: { <TDocument = unknown>(this: That, params: ",
                   "CreateRequest",
                   "<TDocument> | ",
                   "CreateRequest",
@@ -14893,7 +15016,7 @@
                   "default",
                   "; security: ",
                   "default",
-                  "; index: { <TDocument = unknown>(this: That, params: ",
+                  "; name: string | symbol; index: { <TDocument = unknown>(this: That, params: ",
                   "IndexRequest",
                   "<TDocument> | ",
                   "IndexRequest",
@@ -14919,33 +15042,7 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "WriteResponseBase",
-                  ">; }; get: { <TDocument = unknown>(this: That, params: ",
-                  "GetRequest",
-                  " | ",
-                  "GetRequest",
-                  ", options?: ",
-                  "TransportRequestOptionsWithOutMeta",
-                  " | undefined): Promise<",
-                  "GetResponse",
-                  "<TDocument>>; <TDocument = unknown>(this: That, params: ",
-                  "GetRequest",
-                  " | ",
-                  "GetRequest",
-                  ", options?: ",
-                  "TransportRequestOptionsWithMeta",
-                  " | undefined): Promise<",
-                  "TransportResult",
-                  "<",
-                  "GetResponse",
-                  "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
-                  "GetRequest",
-                  " | ",
-                  "GetRequest",
-                  ", options?: ",
-                  "TransportRequestOptions",
-                  " | undefined): Promise<",
-                  "GetResponse",
-                  "<TDocument>>; }; update: { <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
+                  ">; }; update: { <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
                   "UpdateRequest",
                   "<TDocument, TPartialDocument> | ",
                   "UpdateRequest",
@@ -14971,33 +15068,7 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "UpdateResponse",
-                  "<TDocumentR>>; }; delete: { (this: That, params: ",
-                  "DeleteRequest",
-                  " | ",
-                  "DeleteRequest",
-                  ", options?: ",
-                  "TransportRequestOptionsWithOutMeta",
-                  " | undefined): Promise<",
-                  "WriteResponseBase",
-                  ">; (this: That, params: ",
-                  "DeleteRequest",
-                  " | ",
-                  "DeleteRequest",
-                  ", options?: ",
-                  "TransportRequestOptionsWithMeta",
-                  " | undefined): Promise<",
-                  "TransportResult",
-                  "<",
-                  "WriteResponseBase",
-                  ", unknown>>; (this: That, params: ",
-                  "DeleteRequest",
-                  " | ",
-                  "DeleteRequest",
-                  ", options?: ",
-                  "TransportRequestOptions",
-                  " | undefined): Promise<",
-                  "WriteResponseBase",
-                  ">; }; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+                  "<TDocumentR>>; }; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
                   "default",
                   "; helpers: ",
                   "default",
@@ -15957,6 +16028,8 @@
                   "TermvectorsResponse",
                   ">; }; textStructure: ",
                   "default",
+                  "; transform: ",
+                  "default",
                   "; updateByQuery: { (this: That, params: ",
                   "UpdateByQueryRequest",
                   " | ",
@@ -16142,6 +16215,58 @@
             "type": "CompoundType",
             "tags": [],
             "label": "metadata_field",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.FieldDescriptor.fixedInterval",
+            "type": "Array",
+            "tags": [],
+            "label": "fixedInterval",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.FieldDescriptor.timeZone",
+            "type": "Array",
+            "tags": [],
+            "label": "timeZone",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.FieldDescriptor.timeSeriesMetric",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "timeSeriesMetric",
+            "description": [],
+            "signature": [
+              "\"gauge\" | \"histogram\" | \"summary\" | \"counter\" | undefined"
+            ],
+            "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.FieldDescriptor.timeSeriesDimension",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "timeSeriesDimension",
             "description": [],
             "signature": [
               "boolean | undefined"
@@ -16586,7 +16711,7 @@
                 "label": "dateHistogramInterval",
                 "description": [],
                 "signature": [
-                  "(interval: string) => Interval"
+                  "(interval: string, shouldForceFixed?: boolean | undefined) => Interval"
                 ],
                 "path": "src/plugins/data/server/index.ts",
                 "deprecated": false,
@@ -16599,6 +16724,19 @@
                     "tags": [],
                     "label": "interval",
                     "description": [],
+                    "path": "src/plugins/data/common/search/aggs/utils/date_interval_utils/date_histogram_interval.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-server.search.aggs.dateHistogramInterval.$2",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "shouldForceFixed",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
                     "path": "src/plugins/data/common/search/aggs/utils/date_interval_utils/date_histogram_interval.ts",
                     "deprecated": false
                   }
@@ -17919,6 +18057,19 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-common.DataView.matchedIndices",
+            "type": "Array",
+            "tags": [],
+            "label": "matchedIndices",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.DataView.Unnamed",
             "type": "Function",
             "tags": [],
@@ -18315,6 +18466,23 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-common.DataView.isTSDBMode",
+            "type": "Function",
+            "tags": [],
+            "label": "isTSDBMode",
+            "description": [
+              "\nreturns true if dataview contains TSDB fields"
+            ],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.DataView.isTimeBased",
             "type": "Function",
             "tags": [],
@@ -18703,7 +18871,7 @@
             "tags": [],
             "label": "getAllRuntimeFields",
             "description": [
-              "\nGet all runtime field definitions."
+              "\nGet all runtime field definitions.\nNOTE: this does not strip out runtime fields that match mapped field names"
             ],
             "signature": [
               "() => Record<string, ",
@@ -19256,7 +19424,7 @@
                 "section": "def-common.RuntimeFieldSpec",
                 "text": "RuntimeFieldSpec"
               },
-              " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; }"
+              " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: \"gauge\" | \"histogram\" | \"summary\" | \"counter\" | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; }"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
             "deprecated": false
@@ -19574,6 +19742,78 @@
             "label": "aggregatable",
             "description": [
               "\nReturns true if field is aggregatable"
+            ],
+            "path": "src/plugins/data_views/common/fields/data_view_field.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.DataViewField.timeSeriesDimension",
+            "type": "boolean",
+            "tags": [],
+            "label": "timeSeriesDimension",
+            "description": [
+              "\nreturns true if field is a TSDB dimension field"
+            ],
+            "path": "src/plugins/data_views/common/fields/data_view_field.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.DataViewField.timeSeriesMetric",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "timeSeriesMetric",
+            "description": [
+              "\nreturns type of TSDB metric or undefined"
+            ],
+            "signature": [
+              "\"gauge\" | \"histogram\" | \"summary\" | \"counter\" | undefined"
+            ],
+            "path": "src/plugins/data_views/common/fields/data_view_field.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.DataViewField.fixedInterval",
+            "type": "Array",
+            "tags": [],
+            "label": "fixedInterval",
+            "description": [
+              "\nreturns list of alloeed fixed intervals"
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/plugins/data_views/common/fields/data_view_field.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.DataViewField.isRolledUpField",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isRolledUpField",
+            "description": [
+              "\nreturns true if the field is of rolled up type"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data_views/common/fields/data_view_field.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.DataViewField.timeZone",
+            "type": "Array",
+            "tags": [],
+            "label": "timeZone",
+            "description": [
+              "\nreturn list of allowed time zones"
+            ],
+            "signature": [
+              "string[] | undefined"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
             "deprecated": false
@@ -22258,14 +22498,8 @@
                 "text": "GetFieldsOptions"
               },
               ") => Promise<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldSpec",
-                "text": "FieldSpec"
-              },
-              "[]>"
+              "FieldsForWildcardResponse",
+              ">"
             ],
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false,
@@ -22928,7 +23162,15 @@
           "\nData views service interface"
         ],
         "signature": [
-          "{ create: ({ id, name, title, ...restOfSpec }: ",
+          "{ get: (id: string) => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          ">; delete: (indexPatternId: string) => Promise<{}>; create: ({ id, name, title, ...restOfSpec }: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -22952,15 +23194,7 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          "[]>; get: (id: string) => Promise<",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataView",
-            "text": "DataView"
-          },
-          ">; delete: (indexPatternId: string) => Promise<{}>; getCanSave: () => Promise<boolean>; getIds: (refresh?: boolean) => Promise<string[]>; getTitles: (refresh?: boolean) => Promise<string[]>; getIdsWithTitle: (refresh?: boolean) => Promise<",
+          "[]>; getCanSave: () => Promise<boolean>; getIds: (refresh?: boolean) => Promise<string[]>; getTitles: (refresh?: boolean) => Promise<string[]>; getIdsWithTitle: (refresh?: boolean) => Promise<",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -23295,7 +23529,7 @@
             "section": "def-common.RuntimeFieldSpec",
             "text": "RuntimeFieldSpec"
           },
-          " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; }"
+          " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: \"gauge\" | \"histogram\" | \"summary\" | \"counter\" | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; }"
         ],
         "path": "src/plugins/data_views/common/types.ts",
         "deprecated": false,

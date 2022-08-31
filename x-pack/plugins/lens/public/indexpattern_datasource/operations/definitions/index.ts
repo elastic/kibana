@@ -49,19 +49,20 @@ import { countOperation } from './count';
 import { mathOperation, formulaOperation } from './formula';
 import { staticValueOperation } from './static_value';
 import { lastValueOperation } from './last_value';
-import { FrameDatasourceAPI, OperationMetadata, ParamEditorCustomProps } from '../../../types';
+import {
+  FrameDatasourceAPI,
+  IndexPattern,
+  IndexPatternField,
+  OperationMetadata,
+  ParamEditorCustomProps,
+} from '../../../types';
 import type {
   BaseIndexPatternColumn,
   IncompleteColumn,
   GenericIndexPatternColumn,
   ReferenceBasedIndexPatternColumn,
 } from './column_types';
-import {
-  DataViewDragDropOperation,
-  IndexPattern,
-  IndexPatternField,
-  IndexPatternLayer,
-} from '../../types';
+import { DataViewDragDropOperation, IndexPatternLayer } from '../../types';
 import { DateRange, LayerType } from '../../../../common';
 import { rangeOperation } from './ranges';
 import { IndexPatternDimensionEditorProps, OperationSupportMatrix } from '../../dimension_panel';
@@ -324,6 +325,7 @@ interface BaseOperationDefinitionProps<
             fixAction?: {
               label: string;
               newState: (
+                data: DataPublicPluginStart,
                 core: CoreStart,
                 frame: FrameDatasourceAPI,
                 layerId: string
@@ -347,9 +349,9 @@ interface BaseOperationDefinitionProps<
    */
   filterable?: boolean | { helpMessage: string };
   /**
-   * Windowable operations can have a time window defined at the dimension level - under the hood this will be translated into a filter on the defined time field
+   * Time range reducable operations can have a reduced time range defined at the dimension level - under the hood this will be translated into a filter on the defined time field
    */
-  windowable?: boolean;
+  canReduceTimeRange?: boolean;
   shiftable?: boolean;
 
   getHelpMessage?: (props: HelpProps<C>) => React.ReactNode;
@@ -498,7 +500,7 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn, P = {}
       kql?: string;
       lucene?: string;
       shift?: string;
-      window?: string;
+      reducedTimeRange?: string;
       usedInMath?: boolean;
     }
   ) => C;
@@ -551,6 +553,7 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn, P = {}
             fixAction?: {
               label: string;
               newState: (
+                data: DataPublicPluginStart,
                 core: CoreStart,
                 frame: FrameDatasourceAPI,
                 layerId: string

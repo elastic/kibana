@@ -605,6 +605,8 @@
               "ES_FIELD_TYPES",
               ".UNSIGNED_LONG | ",
               "ES_FIELD_TYPES",
+              ".AGGREGATE_METRIC_DOUBLE | ",
+              "ES_FIELD_TYPES",
               ".FLOAT_RANGE | ",
               "ES_FIELD_TYPES",
               ".DOUBLE_RANGE | ",

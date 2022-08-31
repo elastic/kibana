@@ -9,6 +9,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { render, waitFor, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 import { EditConnector, EditConnectorProps } from '.';
 import {
@@ -267,6 +268,7 @@ describe('EditConnector ', () => {
 
     // simulate changing the connector
     userEvent.click(result.getByTestId('dropdown-connectors'));
+    await waitForEuiPopoverOpen();
     userEvent.click(result.getAllByTestId('dropdown-connector-no-connector')[0]);
     expect(result.getByTestId('edit-connectors-submit')).toBeEnabled();
 
@@ -300,6 +302,7 @@ describe('EditConnector ', () => {
 
     // simulate changing the connector
     userEvent.click(result.getByTestId('dropdown-connectors'));
+    await waitForEuiPopoverOpen();
     userEvent.click(result.getAllByTestId('dropdown-connector-resilient-2')[0]);
     expect(result.getByTestId('edit-connectors-submit')).toBeEnabled();
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { File, FileJSON, FilesMetrics } from '../../common';
+import type { FileJSON, FilesMetrics, File } from '../../common';
 import type { FileShareServiceStart } from '../file_share_service/types';
 import type {
   CreateFileArgs,
@@ -34,7 +34,7 @@ export interface FileServiceStart {
    *
    * @param args - update file args
    */
-  update<M>(args: UpdateFileArgs): Promise<File<M>>;
+  update(args: UpdateFileArgs): Promise<void>;
 
   /**
    * Delete a file.

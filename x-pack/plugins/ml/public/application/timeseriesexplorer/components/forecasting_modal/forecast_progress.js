@@ -32,13 +32,11 @@ export function ForecastProgress({ forecastProgress, jobOpeningState, jobClosing
         <React.Fragment>
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiText size="xs">
-                <h3>
-                  <FormattedMessage
-                    id="xpack.ml.timeSeriesExplorer.forecastingModal.openingJobTitle"
-                    defaultMessage="Opening job…"
-                  />
-                </h3>
+              <EuiText size="m">
+                <FormattedMessage
+                  id="xpack.ml.timeSeriesExplorer.forecastingModal.openingJobTitle"
+                  defaultMessage="Opening job…"
+                />
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -52,13 +50,11 @@ export function ForecastProgress({ forecastProgress, jobOpeningState, jobClosing
         <React.Fragment>
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiText size="xs">
-                <h3>
-                  <FormattedMessage
-                    id="xpack.ml.timeSeriesExplorer.forecastingModal.runningForecastTitle"
-                    defaultMessage="Running forecast…"
-                  />
-                </h3>
+              <EuiText size="m">
+                <FormattedMessage
+                  id="xpack.ml.timeSeriesExplorer.forecastingModal.runningForecastTitle"
+                  defaultMessage="Running forecast…"
+                />
               </EuiText>
             </EuiFlexItem>
             {forecastProgress >= 0 && (
@@ -81,13 +77,11 @@ export function ForecastProgress({ forecastProgress, jobOpeningState, jobClosing
         <React.Fragment>
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiText size="xs">
-                <h3>
-                  <FormattedMessage
-                    id="xpack.ml.timeSeriesExplorer.forecastingModal.closingJobTitle"
-                    defaultMessage="Closing job…"
-                  />
-                </h3>
+              <EuiText size="m">
+                <FormattedMessage
+                  id="xpack.ml.timeSeriesExplorer.forecastingModal.closingJobTitle"
+                  defaultMessage="Closing job…"
+                />
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

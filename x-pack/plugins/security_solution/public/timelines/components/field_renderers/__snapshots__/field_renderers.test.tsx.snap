@@ -24,10 +24,10 @@ exports[`Field Renderers #autonomousSystemRenderer it renders correctly against 
         class=""
       >
         <div
-          class="euiPopover euiPopover--anchorDownCenter c0"
+          class="euiPopover c0 emotion-euiPopover"
         >
           <div
-            class="euiPopover__anchor"
+            class="euiPopover__anchor css-16vtueo-render"
           >
             <div
               data-test-subj="withHoverActionsButton"
@@ -64,10 +64,10 @@ exports[`Field Renderers #autonomousSystemRenderer it renders correctly against 
         class=""
       >
         <div
-          class="euiPopover euiPopover--anchorDownCenter c0"
+          class="euiPopover c0 emotion-euiPopover"
         >
           <div
-            class="euiPopover__anchor"
+            class="euiPopover__anchor css-16vtueo-render"
           >
             <div
               data-test-subj="withHoverActionsButton"
@@ -124,10 +124,10 @@ exports[`Field Renderers #hostIdRenderer it renders correctly against snapshot 1
     class=""
   >
     <div
-      class="euiPopover euiPopover--anchorDownCenter c0"
+      class="euiPopover c0 emotion-euiPopover"
     >
       <div
-        class="euiPopover__anchor"
+        class="euiPopover__anchor css-16vtueo-render"
       >
         <div
           data-test-subj="withHoverActionsButton"
@@ -179,10 +179,10 @@ exports[`Field Renderers #hostNameRenderer it renders correctly against snapshot
     class=""
   >
     <div
-      class="euiPopover euiPopover--anchorDownCenter c0"
+      class="euiPopover c0 emotion-euiPopover"
     >
       <div
-        class="euiPopover__anchor"
+        class="euiPopover__anchor css-16vtueo-render"
       >
         <div
           data-test-subj="withHoverActionsButton"
@@ -240,10 +240,10 @@ exports[`Field Renderers #locationRenderer it renders correctly against snapshot
         class=""
       >
         <div
-          class="euiPopover euiPopover--anchorDownCenter c0"
+          class="euiPopover c0 emotion-euiPopover"
         >
           <div
-            class="euiPopover__anchor"
+            class="euiPopover__anchor css-16vtueo-render"
           >
             <div
               data-test-subj="withHoverActionsButton"
@@ -276,10 +276,10 @@ exports[`Field Renderers #locationRenderer it renders correctly against snapshot
         class=""
       >
         <div
-          class="euiPopover euiPopover--anchorDownCenter c0"
+          class="euiPopover c0 emotion-euiPopover"
         >
           <div
-            class="euiPopover__anchor"
+            class="euiPopover__anchor css-16vtueo-render"
           >
             <div
               data-test-subj="withHoverActionsButton"

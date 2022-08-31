@@ -6,3 +6,4 @@
  */
 
 export * from './getting_started.journey';
+export * from './add_monitor.journey';

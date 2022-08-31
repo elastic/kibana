@@ -131,7 +131,9 @@ export class BaseValidator {
         return;
       }
 
-      const policiesFromFleet = await packagePolicy.getByIDs(internalReadonlySoClient, policyIds);
+      const policiesFromFleet = await packagePolicy.getByIDs(internalReadonlySoClient, policyIds, {
+        ignoreMissing: true,
+      });
 
       if (!policiesFromFleet) {
         throw new EndpointArtifactExceptionValidationError(
@@ -139,9 +141,9 @@ export class BaseValidator {
         );
       }
 
-      const invalidPolicyIds = policiesFromFleet
-        .filter((policy) => policy.version === undefined)
-        .map((policy) => policy.id);
+      const invalidPolicyIds = policyIds.filter(
+        (policyId) => !policiesFromFleet.some((policy) => policyId === policy.id)
+      );
 
       if (invalidPolicyIds.length) {
         throw new EndpointArtifactExceptionValidationError(

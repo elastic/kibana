@@ -46,7 +46,7 @@
             "text": "IAnalyticsClient"
           }
         ],
-        "path": "packages/analytics/client/src/index.ts",
+        "path": "packages/analytics/client/index.ts",
         "deprecated": false,
         "children": [
           {
@@ -67,7 +67,7 @@
                 "text": "AnalyticsClientInitContext"
               }
             ],
-            "path": "packages/analytics/client/src/index.ts",
+            "path": "packages/analytics/client/index.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -1760,7 +1760,7 @@
           "Types matching string values"
         ],
         "signature": [
-          "\"text\" | \"date\" | \"keyword\""
+          "\"date\" | \"keyword\" | \"text\""
         ],
         "path": "packages/analytics/client/src/schema/types.ts",
         "deprecated": false,
@@ -1776,7 +1776,7 @@
           "\nPossible type values in the schema"
         ],
         "signature": [
-          "\"boolean\" | \"text\" | \"date\" | \"keyword\" | \"long\" | \"double\" | \"short\" | \"float\" | \"integer\" | \"byte\""
+          "\"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"short\" | \"float\" | \"integer\" | \"byte\""
         ],
         "path": "packages/analytics/client/src/schema/types.ts",
         "deprecated": false,

@@ -11,14 +11,38 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Azure Privilege Identity Management Role Modified",
-  "note": "## Config\n\nThe Azure Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "note": "## Triage and analysis\n\n### Investigating Azure Privilege Identity Management Role Modified\n\nAzure Active Directory (AD) Privileged Identity Management (PIM) is a service that enables you to manage, control, and\nmonitor access to important resources in an organization. PIM can be used to manage the built-in Azure resource roles\nsuch as Global Administrator and Application Administrator. \n\nThis rule identifies the update of PIM role settings, which can indicate that an attacker has already gained enough\naccess to modify role assignment settings. \n\n#### Possible investigation steps\n\n- Identify the user account that performed the action and whether it should perform this kind of action.\n- Investigate other alerts associated with the user account during the past 48 hours.\n- Consider the source IP address and geolocation for the user who issued the command. Do they look normal for the user?\n- Consider the time of day. If the user is a human, not a program or script, did the activity take place during a normal\ntime of day?\n- Check if this operation was approved and performed according to the organization's change management policy.\n- Contact the account owner and confirm whether they are aware of this activity.\n- Examine the account's commands, API calls, and data management actions in the last 24 hours.\n- If you suspect the account has been compromised, scope potentially compromised assets by tracking servers, services,\nand data accessed by the account in the last 24 hours.\n\n### False positive analysis\n\n- If this activity didn't follow your organization's change management policies, it should be reviewed by the security team.\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Disable or limit the account during the investigation and response.\n- Identify the possible impact of the incident and prioritize accordingly; the following actions can help you gain context:\n    - Identify the account role in the cloud environment.\n    - Assess the criticality of affected services and servers.\n    - Work with your IT team to identify and minimize the impact on users.\n    - Identify if the attacker is moving laterally and compromising other accounts, servers, or services.\n    - Identify any regulatory or legal ramifications related to this activity.\n- Investigate credential exposure on systems compromised or used by the attacker to ensure all compromised accounts are\nidentified. Reset passwords or delete API keys as needed to revoke the attacker's access to the environment. Work with\nyour IT teams to minimize the impact on business operations during these actions.\n- Check if unauthorized new users were created, remove unauthorized new accounts, and request password resets for other\nIAM users.\n- Restore the PIM roles to the desired state.\n- Consider enabling multi-factor authentication for users.\n- Follow security best practices [outlined](https://docs.microsoft.com/en-us/azure/security/fundamentals/identity-management-best-practices) by Microsoft.\n- Determine the initial vector abused by the attacker and take action to prevent reinfection via the same vector.\n- Using the incident response data, update logging and audit policies to improve the mean time to detect (MTTD) and the\nmean time to respond (MTTR).",
   "query": "event.dataset:azure.auditlogs and azure.auditlogs.operation_name:\"Update role setting in PIM\" and event.outcome:(Success or success)\n",
   "references": [
     "https://docs.microsoft.com/en-us/azure/active-directory/privileged-identity-management/pim-resource-roles-assign-roles",
     "https://docs.microsoft.com/en-us/azure/active-directory/privileged-identity-management/pim-configure"
   ],
+  "related_integrations": [
+    {
+      "package": "azure",
+      "version": "0.12.0"
+    }
+  ],
+  "required_fields": [
+    {
+      "ecs": false,
+      "name": "azure.auditlogs.operation_name",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.dataset",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.outcome",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 47,
   "rule_id": "7882cebf-6cf1-4de3-9662-213aa13e8b80",
+  "setup": "The Azure Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
   "severity": "medium",
   "tags": [
     "Elastic",
@@ -62,5 +86,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 5
+  "version": 7
 }

@@ -15,6 +15,28 @@
     "https://taomm.org/PDFs/vol1/CH%200x02%20Persistence.pdf",
     "https://theevilbit.github.io/beyond/beyond_0004/"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "file.path",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.executable",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.name",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 47,
   "rule_id": "530178da-92ea-43ce-94c2-8877a826783d",
   "severity": "medium",
@@ -51,5 +73,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 2
 }

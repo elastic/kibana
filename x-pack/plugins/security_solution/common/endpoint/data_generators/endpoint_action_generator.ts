@@ -111,6 +111,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       agents: ['agent-a'],
       command: 'isolate',
       completedAt: '2022-04-30T16:08:47.449Z',
+      hosts: { 'agent-a': { name: 'Host-agent-a' } },
       id: '123',
       isCompleted: true,
       isExpired: false,
@@ -121,6 +122,14 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       createdBy: 'auserid',
       parameters: undefined,
       outputs: {},
+      agentState: {
+        'agent-a': {
+          errors: undefined,
+          isCompleted: true,
+          completedAt: '2022-04-30T16:08:47.449Z',
+          wasSuccessful: true,
+        },
+      },
     };
 
     return merge(details, overrides);

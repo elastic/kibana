@@ -22,10 +22,11 @@ import {
 } from '@kbn/expressions-plugin/public';
 import { GenericIndexPatternColumn } from './indexpattern';
 import { operationDefinitionMap } from './operations';
-import { IndexPattern, IndexPatternPrivateState, IndexPatternLayer } from './types';
+import { IndexPatternPrivateState, IndexPatternLayer } from './types';
 import { DateHistogramIndexPatternColumn, RangeIndexPatternColumn } from './operations/definitions';
 import { FormattedIndexPatternColumn } from './operations/definitions/column_types';
 import { isColumnFormatted, isColumnOfType } from './operations/definitions/helpers';
+import type { IndexPattern, IndexPatternMap } from '../types';
 
 export type OriginalColumn = { id: string } & GenericIndexPatternColumn;
 
@@ -126,7 +127,10 @@ function getExpressionForLayer(
 
         const wrapInFilter = Boolean(def.filterable && col.filter);
         const wrapInTimeFilter =
-          def.windowable && !hasDateHistogram && col.window && indexPattern.timeFieldName;
+          def.canReduceTimeRange &&
+          !hasDateHistogram &&
+          col.reducedTimeRange &&
+          indexPattern.timeFieldName;
         let aggAst = def.toEsAggsFn(
           col,
           wrapInFilter ? `${aggId}-metric` : aggId,
@@ -149,7 +153,7 @@ function getExpressionForLayer(
                   enabled: true,
                   schema: 'bucket',
                   filter: col.filter && queryToAst(col.filter),
-                  timeWindow: wrapInTimeFilter ? col.window : undefined,
+                  timeWindow: wrapInTimeFilter ? col.reducedTimeRange : undefined,
                   timeShift: col.timeShift,
                 }),
               ]),
@@ -413,12 +417,13 @@ function sortedReferences(columns: Array<readonly [string, GenericIndexPatternCo
 export function toExpression(
   state: IndexPatternPrivateState,
   layerId: string,
+  indexPatterns: IndexPatternMap,
   uiSettings: IUiSettingsClient
 ) {
   if (state.layers[layerId]) {
     return getExpressionForLayer(
       state.layers[layerId],
-      state.indexPatterns[state.layers[layerId].indexPatternId],
+      indexPatterns[state.layers[layerId].indexPatternId],
       uiSettings
     );
   }

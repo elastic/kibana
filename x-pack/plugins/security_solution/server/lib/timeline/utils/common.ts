@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type * as rt from 'io-ts';
-import { set } from '@elastic/safer-lodash-set/fp';
+import { set } from '@kbn/safer-lodash-set/fp';
 import readline from 'readline';
 import fs from 'fs';
 import type { Readable } from 'stream';

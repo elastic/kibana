@@ -15,7 +15,6 @@ export {
   enableInspectEsQueries,
   maxSuggestions,
   enableComparisonByDefault,
-  enableInfrastructureView,
   defaultApmServiceEnvironment,
   apmServiceInventoryOptimizedSorting,
   apmProgressiveLoading,

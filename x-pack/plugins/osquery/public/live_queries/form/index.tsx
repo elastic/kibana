@@ -19,27 +19,47 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
+import { useForm as useHookForm, FormProvider } from 'react-hook-form';
 
-import { pickBy, isEmpty, map, find } from 'lodash';
+import { isEmpty, map, find, pickBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import type { SavedQuerySOFormData } from '../../saved_queries/form/use_saved_query_form';
+import type {
+  EcsMappingFormField,
+  EcsMappingSerialized,
+} from '../../packs/queries/ecs_mapping_editor_field';
+import { defaultEcsFormData } from '../../packs/queries/ecs_mapping_editor_field';
 import { convertECSMappingToObject } from '../../../common/schemas/common/utils';
-import type { FormData } from '../../shared_imports';
-import { UseField, Form, useForm, useFormData } from '../../shared_imports';
-import { AgentsTableField } from './agents_table_field';
-import { LiveQueryQueryField } from './live_query_query_field';
 import { useKibana } from '../../common/lib/kibana';
 import { ResultTabs } from '../../routes/saved_queries/edit/tabs';
 import { SavedQueryFlyout } from '../../saved_queries';
 import { ECSMappingEditorField } from '../../packs/queries/lazy_ecs_mapping_editor_field';
 import { SavedQueriesDropdown } from '../../saved_queries/saved_queries_dropdown';
-import { liveQueryFormSchema } from './schema';
 import { usePacks } from '../../packs/use_packs';
 import { PackQueriesStatusTable } from './pack_queries_status_table';
 import { useCreateLiveQuery } from '../use_create_live_query_action';
 import { useLiveQueryDetails } from '../../actions/use_live_query_details';
+import type { AgentSelection } from '../../agents/types';
+import { LiveQueryQueryField } from './live_query_query_field';
+import { AgentsTableField } from './agents_table_field';
 import { PacksComboBoxField } from './packs_combobox_field';
+import { savedQueryDataSerializer } from '../../saved_queries/form/use_saved_query_form';
 
-const FORM_ID = 'liveQueryForm';
+export interface LiveQueryFormFields {
+  query?: string;
+  agentSelection: AgentSelection;
+  savedQueryId?: string | null;
+  ecs_mapping: EcsMappingFormField[];
+  packId: string[];
+}
+
+interface DefaultLiveQueryFormFields {
+  query?: string;
+  agentSelection?: AgentSelection;
+  savedQueryId?: string | null;
+  ecs_mapping?: EcsMappingSerialized;
+  packId?: string;
+}
 
 const StyledEuiCard = styled(EuiCard)`
   padding: 16px 92px 16px 16px !important;
@@ -86,12 +106,10 @@ const StyledEuiAccordion = styled(EuiAccordion)`
   }
 `;
 
-const GhostFormField = () => <></>;
-
 type FormType = 'simple' | 'steps';
 
 interface LiveQueryFormProps {
-  defaultValue?: Partial<FormData>;
+  defaultValue?: DefaultLiveQueryFormFields;
   onSuccess?: () => void;
   queryField?: boolean;
   ecsMappingField?: boolean;
@@ -118,6 +136,22 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     [permissions]
   );
 
+  const hooksForm = useHookForm<LiveQueryFormFields>({
+    defaultValues: {
+      ecs_mapping: [defaultEcsFormData],
+    },
+  });
+  const {
+    handleSubmit,
+    watch,
+    setValue,
+    resetField,
+    clearErrors,
+    getFieldState,
+    register,
+    formState: { isSubmitting, errors },
+  } = hooksForm;
+
   const canRunSingleQuery = useMemo(
     () =>
       !!(
@@ -133,6 +167,8 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   const [queryType, setQueryType] = useState<string>('query');
   const [isLive, setIsLive] = useState(false);
 
+  const queryState = getFieldState('query');
+  const watchedValues = watch();
   const handleShowSaveQueryFlyout = useCallback(() => setShowSavedQueryFlyout(true), []);
   const handleCloseSaveQueryFlyout = useCallback(() => setShowSavedQueryFlyout(false), []);
 
@@ -150,75 +186,22 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     isLive,
   });
 
-  const { form } = useForm({
-    id: FORM_ID,
-    schema: liveQueryFormSchema,
-    onSubmit: async (formData, isValid) => {
-      if (isValid) {
-        try {
-          // @ts-expect-error update types
-          await mutateAsync(formData);
-          // eslint-disable-next-line no-empty
-        } catch (e) {}
-      }
-    },
-    options: {
-      stripEmptyFields: false,
-    },
-    serializer: ({
-      savedQueryId,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      ecs_mapping,
-      packId,
-      ...formData
-    }) =>
-      pickBy(
-        {
-          ...formData,
-          pack_id: packId?.length ? packId[0] : undefined,
-          saved_query_id: savedQueryId,
-          ecs_mapping: convertECSMappingToObject(ecs_mapping),
-        },
-        (value) => !isEmpty(value)
-      ),
-  });
-
-  const { updateFieldValues, setFieldValue, submit, isSubmitting } = form;
-
   const actionId = useMemo(() => liveQueryDetails?.action_id, [liveQueryDetails?.action_id]);
   const agentIds = useMemo(() => liveQueryDetails?.agents, [liveQueryDetails?.agents]);
-  const [
-    { agentSelection, ecs_mapping: ecsMapping, query, savedQueryId, packId },
-    formDataSerializer,
-  ] = useFormData({
-    form,
-  });
 
-  /* recalculate the form data when ecs_mapping changes */
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const serializedFormData = useMemo(() => formDataSerializer(), [ecsMapping, formDataSerializer]);
+  useEffect(() => {
+    register('savedQueryId');
+  }, [register]);
 
-  const agentSelected = useMemo(
-    () =>
-      agentSelection &&
-      !!(
-        agentSelection.allAgentsSelected ||
-        agentSelection.agents?.length ||
-        agentSelection.platformsSelected?.length ||
-        agentSelection.policiesSelected?.length
-      ),
-    [agentSelection]
-  );
-
-  const queryValueProvided = useMemo(() => !!query?.length, [query]);
+  const { packId } = watchedValues;
 
   const queryStatus = useMemo(() => {
-    if (isError || !form.getFields().query?.isValid) return 'danger';
+    if (isError || queryState.invalid) return 'danger';
     if (isLoading) return 'loading';
     if (isSuccess) return 'complete';
 
     return 'incomplete';
-  }, [isError, isLoading, isSuccess, form]);
+  }, [isError, isLoading, isSuccess, queryState]);
 
   const resultsStatus = useMemo(
     () => (queryStatus === 'complete' ? 'incomplete' : 'disabled'),
@@ -228,39 +211,66 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   const handleSavedQueryChange = useCallback(
     (savedQuery) => {
       if (savedQuery) {
-        updateFieldValues({
-          query: savedQuery.query,
-          savedQueryId: savedQuery.savedQueryId,
-          ecs_mapping: savedQuery.ecs_mapping
+        setValue('query', savedQuery.query);
+        setValue('savedQueryId', savedQuery.savedQueryId);
+        setValue(
+          'ecs_mapping',
+          !isEmpty(savedQuery.ecs_mapping)
             ? map(savedQuery.ecs_mapping, (value, key) => ({
                 key,
                 result: {
                   type: Object.keys(value)[0],
-                  value: Object.values(value)[0],
+                  value: Object.values(value)[0] as string,
                 },
               }))
-            : [],
-        });
+            : [defaultEcsFormData]
+        );
 
         if (!isEmpty(savedQuery.ecs_mapping)) {
           setAdvancedContentState('open');
         }
       } else {
-        setFieldValue('savedQueryId', null);
+        setValue('savedQueryId', null);
       }
     },
-    [setFieldValue, updateFieldValues]
+    [setValue]
   );
 
+  const onSubmit = useCallback(
+    // not sure why, but submitOnCmdEnter doesn't have proper form values so I am passing them in manually
+    async (values: LiveQueryFormFields = watchedValues) => {
+      const serializedData = pickBy(
+        {
+          agentSelection: values.agentSelection,
+          saved_query_id: values.savedQueryId,
+          query: values.query,
+          pack_id: packId?.length ? packId[0] : undefined,
+          ...(values.ecs_mapping
+            ? { ecs_mapping: convertECSMappingToObject(values.ecs_mapping) }
+            : {}),
+        },
+        (value) => !isEmpty(value)
+      );
+      if (isEmpty(errors)) {
+        try {
+          // @ts-expect-error update types
+          await mutateAsync(serializedData);
+          // eslint-disable-next-line no-empty
+        } catch (e) {}
+      }
+    },
+    [errors, mutateAsync, packId, watchedValues]
+  );
   const commands = useMemo(
     () => [
       {
         name: 'submitOnCmdEnter',
         bindKey: { win: 'ctrl+enter', mac: 'cmd+enter' },
-        exec: () => submit(),
+        // @ts-expect-error update types - explanation in onSubmit()
+        exec: () => handleSubmit(onSubmit)(watchedValues),
       },
     ],
-    [submit]
+    [handleSubmit, onSubmit, watchedValues]
   );
 
   const queryComponentProps = useMemo(
@@ -270,9 +280,9 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     [commands]
   );
 
-  const flyoutFormDefaultValue = useMemo(
-    () => ({ savedQueryId, query, ecs_mapping: serializedFormData.ecs_mapping }),
-    [savedQueryId, serializedFormData.ecs_mapping, query]
+  const serializedData: SavedQuerySOFormData = useMemo(
+    () => savedQueryDataSerializer(watchedValues),
+    [watchedValues]
   );
 
   const handleToggle = useCallback((isOpen) => {
@@ -306,12 +316,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           {formType === 'steps' && queryType !== 'pack' && (
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                disabled={
-                  !permissions.writeSavedQueries ||
-                  !agentSelected ||
-                  !queryValueProvided ||
-                  resultsStatus === 'disabled'
-                }
+                disabled={!permissions.writeSavedQueries || resultsStatus === 'disabled'}
                 onClick={handleShowSaveQueryFlyout}
               >
                 <FormattedMessage
@@ -324,15 +329,8 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           <EuiFlexItem grow={false}>
             <EuiButton
               id="submit-button"
-              disabled={
-                !enabled ||
-                !agentSelected ||
-                (queryType === 'query' && !queryValueProvided) ||
-                (queryType === 'pack' &&
-                  (!packId || !selectedPackData?.attributes.queries.length)) ||
-                isSubmitting
-              }
-              onClick={submit}
+              disabled={!enabled || isSubmitting}
+              onClick={handleSubmit(onSubmit)}
             >
               <FormattedMessage
                 id="xpack.osquery.liveQueryForm.form.submitButtonLabel"
@@ -344,25 +342,22 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       </EuiFlexItem>
     ),
     [
-      agentSelected,
-      enabled,
       formType,
-      handleShowSaveQueryFlyout,
-      isSubmitting,
-      packId,
-      permissions.writeSavedQueries,
       queryType,
-      queryValueProvided,
+      permissions.writeSavedQueries,
       resultsStatus,
-      selectedPackData,
-      submit,
+      handleShowSaveQueryFlyout,
+      enabled,
+      isSubmitting,
+      handleSubmit,
+      onSubmit,
     ]
   );
 
   const queryFieldStepContent = useMemo(
     () => (
       <>
-        {queryField ? (
+        {queryField && (
           <>
             {!isSavedQueryDisabled && (
               <>
@@ -372,20 +367,10 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
                 />
               </>
             )}
-            <UseField path="savedQueryId" component={GhostFormField} />
-            <UseField
-              path="query"
-              component={LiveQueryQueryField}
-              componentProps={queryComponentProps}
-            />
-          </>
-        ) : (
-          <>
-            <UseField path="savedQueryId" component={GhostFormField} />
-            <UseField path="query" component={GhostFormField} />
+            <LiveQueryQueryField {...queryComponentProps} queryType={queryType} />
           </>
         )}
-        {ecsMappingField ? (
+        {ecsMappingField && (
           <>
             <EuiSpacer size="m" />
             <StyledEuiAccordion
@@ -398,20 +383,19 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
               <ECSMappingEditorField euiFieldProps={ecsFieldProps} />
             </StyledEuiAccordion>
           </>
-        ) : (
-          <UseField path="ecs_mapping" component={GhostFormField} />
         )}
       </>
     ),
     [
       queryField,
-      queryComponentProps,
+      isSavedQueryDisabled,
       handleSavedQueryChange,
+      queryComponentProps,
+      queryType,
       ecsMappingField,
       advancedContentState,
       handleToggle,
       ecsFieldProps,
-      isSavedQueryDisabled,
     ]
   );
 
@@ -422,7 +406,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       singleQueryDetails?.action_id ? (
         <ResultTabs
           actionId={singleQueryDetails?.action_id}
-          ecsMapping={serializedFormData.ecs_mapping}
+          ecsMapping={serializedData.ecs_mapping}
           endDate={singleQueryDetails?.expiration}
           agentIds={singleQueryDetails?.agents}
           addToTimeline={addToTimeline}
@@ -432,7 +416,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       singleQueryDetails?.action_id,
       singleQueryDetails?.expiration,
       singleQueryDetails?.agents,
-      serializedFormData.ecs_mapping,
+      serializedData.ecs_mapping,
       addToTimeline,
     ]
   );
@@ -440,9 +424,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   useEffect(() => {
     if (defaultValue) {
       if (defaultValue.agentSelection) {
-        updateFieldValues({
-          agentSelection: defaultValue.agentSelection,
-        });
+        setValue('agentSelection', defaultValue.agentSelection);
       }
 
       if (defaultValue?.packId && canRunPacks) {
@@ -451,19 +433,18 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
         if (!isPackDataFetched) return;
         const selectedPackOption = find(packsData?.data, ['id', defaultValue.packId]);
         if (selectedPackOption) {
-          updateFieldValues({
-            packId: [defaultValue.packId],
-          });
+          setValue('packId', [defaultValue.packId]);
         }
 
         return;
       }
 
       if (defaultValue?.query && canRunSingleQuery) {
-        updateFieldValues({
-          query: defaultValue.query,
-          savedQueryId: defaultValue.savedQueryId,
-          ecs_mapping: defaultValue.ecs_mapping
+        setValue('query', defaultValue.query);
+        setValue('savedQueryId', defaultValue.savedQueryId);
+        setValue(
+          'ecs_mapping',
+          !isEmpty(defaultValue.ecs_mapping)
             ? map(defaultValue.ecs_mapping, (value, key) => ({
                 key,
                 result: {
@@ -471,8 +452,8 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
                   value: Object.values(value)[0],
                 },
               }))
-            : undefined,
-        });
+            : [defaultEcsFormData]
+        );
 
         return;
       }
@@ -485,14 +466,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
         return setQueryType('pack');
       }
     }
-  }, [
-    canRunPacks,
-    canRunSingleQuery,
-    defaultValue,
-    isPackDataFetched,
-    packsData?.data,
-    updateFieldValues,
-  ]);
+  }, [canRunPacks, canRunSingleQuery, defaultValue, isPackDataFetched, packsData?.data, setValue]);
 
   const queryCardSelectable = useMemo(
     () => ({
@@ -516,11 +490,20 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     setIsLive(() => !(liveQueryDetails?.status === 'completed'));
   }, [liveQueryDetails?.status]);
 
-  useEffect(() => cleanupLiveQuery(), [queryType, packId, cleanupLiveQuery]);
+  useEffect(() => {
+    cleanupLiveQuery();
+    if (!defaultValue) {
+      resetField('packId');
+      resetField('query');
+      resetField('ecs_mapping');
+      resetField('savedQueryId');
+      clearErrors();
+    }
+  }, [queryType, cleanupLiveQuery, resetField, setValue, clearErrors, defaultValue]);
 
   return (
     <>
-      <Form form={form}>
+      <FormProvider {...hooksForm}>
         <EuiFlexGroup direction="column">
           {queryField && (
             <EuiFlexItem>
@@ -572,25 +555,23 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
               </EuiFormRow>
             </EuiFlexItem>
           )}
-          {!hideAgentsField ? (
+          {!hideAgentsField && (
             <EuiFlexItem>
-              <UseField path="agentSelection" component={AgentsTableField} />
+              <AgentsTableField />
             </EuiFlexItem>
-          ) : (
-            <UseField path="agentSelection" component={GhostFormField} />
           )}
           {queryType === 'pack' ? (
             <>
               <EuiFlexItem>
-                <UseField
-                  path="packId"
-                  component={PacksComboBoxField}
+                <PacksComboBoxField
                   // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-                  euiFieldProps={{ packsData: packsData?.data }}
+                  fieldProps={{ packsData: packsData?.data }}
+                  queryType={queryType}
                 />
               </EuiFlexItem>
               {submitButtonContent}
               <EuiSpacer />
+
               {liveQueryDetails?.queries?.length ||
               selectedPackData?.attributes?.queries?.length ? (
                 <>
@@ -598,6 +579,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
                     <PackQueriesStatusTable
                       actionId={actionId}
                       agentIds={agentIds}
+                      // @ts-expect-error version string !+ string[]
                       data={liveQueryDetails?.queries ?? selectedPackData?.attributes?.queries}
                       addToTimeline={addToTimeline}
                     />
@@ -613,12 +595,13 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
             </>
           )}
         </EuiFlexGroup>
-      </Form>
+      </FormProvider>
+
       {showSavedQueryFlyout ? (
         <SavedQueryFlyout
           isExternal={!!addToTimeline}
           onClose={handleCloseSaveQueryFlyout}
-          defaultValue={flyoutFormDefaultValue}
+          defaultValue={serializedData}
         />
       ) : null}
     </>

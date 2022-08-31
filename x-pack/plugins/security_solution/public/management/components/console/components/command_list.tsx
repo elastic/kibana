@@ -57,7 +57,12 @@ const StyledEuiFlexGroup = styled(EuiFlexGroup)`
 `;
 
 const StyledEuiFlexGrid = styled(EuiFlexGrid)`
-  max-width: 50%;
+  @media only screen and (min-width: ${(props) => props.theme.eui.euiBreakpoints.l}) {
+    max-width: 75%;
+  }
+  @media only screen and (min-width: ${(props) => props.theme.eui.euiBreakpoints.xl}) {
+    max-width: 50%;
+  }
 `;
 
 const StyledEuiBadge = styled(EuiBadge)`
@@ -150,7 +155,7 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
     (
       commandsByGroup: CommandDefinition[]
     ): Array<{
-      [key: string]: { name: string; about: React.ElementType | string };
+      [key: string]: { name: string; about: React.ReactNode | string };
     }> => {
       if (commandsByGroup[0].helpGroupLabel === HELP_GROUPS.supporting.label) {
         return [...COMMON_ARGS, ...commandsByGroup].map((command) => ({
@@ -196,15 +201,23 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
                   command.RenderComponent && (
                     <EuiFlexItem grow={false}>
                       <EuiToolTip
-                        content={i18n.translate(
-                          'xpack.securitySolution.console.commandList.addButtonTooltip',
-                          { defaultMessage: 'Add to text bar' }
-                        )}
+                        content={
+                          command.helpDisabled === true
+                            ? i18n.translate(
+                                'xpack.securitySolution.console.commandList.disabledButtonTooltip',
+                                { defaultMessage: 'Unsupported command' }
+                              )
+                            : i18n.translate(
+                                'xpack.securitySolution.console.commandList.addButtonTooltip',
+                                { defaultMessage: 'Add to text bar' }
+                              )
+                        }
                       >
                         <EuiButtonIcon
                           iconType="plusInCircle"
                           aria-label={`updateTextInputCommand-${command.name}`}
                           onClick={updateInputText(`${commandNameWithArgs} `)}
+                          isDisabled={command.helpDisabled === true}
                         />
                       </EuiToolTip>
                     </EuiFlexItem>
@@ -290,6 +303,11 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
       {commandsByGroups.map((commandsByGroup) => {
         const groupLabel = commandsByGroup[0].helpGroupLabel;
         const filteredCommands = getFilteredCommands(commandsByGroup);
+
+        if (filteredCommands.length === 0) {
+          return null;
+        }
+
         return (
           <StyledEuiFlexGrid
             columns={3}
@@ -299,6 +317,7 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
             direction="column"
           >
             {filteredCommands.map((command) => {
+              const commandNameWithArgs = getCommandNameWithArgs(command);
               return (
                 <EuiFlexItem key={command.name}>
                   <EuiDescriptionList
@@ -306,11 +325,13 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
                     listItems={[
                       {
                         title: (
-                          <StyledEuiBadge>
-                            <ConsoleCodeBlock inline bold>
-                              {getCommandNameWithArgs(command)}{' '}
-                            </ConsoleCodeBlock>
-                          </StyledEuiBadge>
+                          <EuiToolTip content={commandNameWithArgs}>
+                            <StyledEuiBadge>
+                              <ConsoleCodeBlock inline bold>
+                                {commandNameWithArgs}
+                              </ConsoleCodeBlock>
+                            </StyledEuiBadge>
+                          </EuiToolTip>
                         ),
                         description: (
                           <EuiText color="subdued" size="xs">

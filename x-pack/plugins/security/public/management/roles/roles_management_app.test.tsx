@@ -88,7 +88,9 @@ describe('rolesManagementApp', () => {
       </div>
     `);
 
-    unmount();
+    act(() => {
+      unmount();
+    });
 
     expect(docTitle.reset).toHaveBeenCalledTimes(1);
 
@@ -108,7 +110,9 @@ describe('rolesManagementApp', () => {
       </div>
     `);
 
-    unmount();
+    act(() => {
+      unmount();
+    });
 
     expect(docTitle.reset).toHaveBeenCalledTimes(1);
 
@@ -133,7 +137,9 @@ describe('rolesManagementApp', () => {
       </div>
     `);
 
-    unmount();
+    act(() => {
+      unmount();
+    });
 
     expect(docTitle.reset).toHaveBeenCalledTimes(1);
 
@@ -158,7 +164,9 @@ describe('rolesManagementApp', () => {
       </div>
     `);
 
-    unmount();
+    act(() => {
+      unmount();
+    });
 
     expect(docTitle.reset).toHaveBeenCalledTimes(1);
 

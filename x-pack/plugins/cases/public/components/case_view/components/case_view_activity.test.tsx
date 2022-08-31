@@ -30,7 +30,9 @@ import { useGetTags } from '../../../containers/use_get_tags';
 jest.mock('../../../containers/use_get_case_user_actions');
 jest.mock('../../../containers/configure/use_connectors');
 jest.mock('../../../containers/use_post_push_to_service');
-jest.mock('../../user_actions/timestamp');
+jest.mock('../../user_actions/timestamp', () => ({
+  UserActionTimestamp: () => <></>,
+}));
 jest.mock('../../../common/navigation/hooks');
 jest.mock('../../../containers/use_get_action_license');
 jest.mock('../../../containers/use_get_tags');

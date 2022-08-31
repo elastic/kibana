@@ -69,12 +69,7 @@ export const AgentPoliciesPopover = ({ agentPolicyIds = [] }: { agentPolicyIds?:
   }
 
   return (
-    <EuiPopover
-      button={button}
-      isOpen={isPopoverOpen}
-      closePopover={closePopover}
-      initialFocus={false}
-    >
+    <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
       <EuiText size="s">
         {agentPolicyIds?.map((policyId) => (
           <div key={policyId}>

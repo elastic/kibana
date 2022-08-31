@@ -7,7 +7,8 @@
 
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { ElasticsearchBlobStorageClient } from '../blob_storage_service';
-import { FileClientImpl, FileClient } from './file_client';
+import { FileClientImpl } from './file_client';
+import type { FileClient } from './types';
 import { EsIndexFilesMetadataClient } from './file_metadata_client';
 
 const NO_FILE_KIND = 'none';
@@ -55,6 +56,9 @@ export function createEsFileClient(arg: CreateEsFileClientArgs): FileClient {
       maxSizeBytes,
     },
     new EsIndexFilesMetadataClient(metadataIndex, elasticsearchClient, logger),
-    new ElasticsearchBlobStorageClient(elasticsearchClient, blobStorageIndex, undefined, logger)
+    new ElasticsearchBlobStorageClient(elasticsearchClient, blobStorageIndex, undefined, logger),
+    undefined,
+    undefined,
+    logger
   );
 }

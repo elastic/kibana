@@ -25,6 +25,7 @@ Object {
         },
       },
       "name": "Fleet Server",
+      "package_policy_id": "elastic-cloud-fleet-server",
       "revision": 1,
       "server": Object {
         "host": "0.0.0.0",
@@ -122,6 +123,7 @@ Object {
         },
       },
       "name": "Elastic APM",
+      "package_policy_id": "elastic-cloud-apm",
       "revision": 1,
       "type": "apm",
       "use_output": "es-containerhost",

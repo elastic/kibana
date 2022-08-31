@@ -9,6 +9,9 @@ import { schema } from '@kbn/config-schema';
 
 export const createPrebuiltSavedObjectsSchema = {
   params: schema.object({
-    template_name: schema.oneOf([schema.literal('hostRiskScoreDashboards')]),
+    template_name: schema.oneOf([
+      schema.literal('hostRiskScoreDashboards'),
+      schema.literal('userRiskScoreDashboards'),
+    ]),
   }),
 };

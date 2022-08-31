@@ -5,15 +5,23 @@
  * 2.0.
  */
 
+import { FileJSON } from '../common';
 import type {
-  HttpApiInterfaceEntryDefinition,
-  CreateFileKindHttpEndpoint,
-  DeleteFileKindHttpEndpoint,
-  DownloadFileKindHttpEndpoint,
-  GetByIdFileKindHttpEndpoint,
+  FindFilesHttpEndpoint,
+  FileShareHttpEndpoint,
+  FileUnshareHttpEndpoint,
+  FileGetShareHttpEndpoint,
+  FilesMetricsHttpEndpoint,
   ListFileKindHttpEndpoint,
+  CreateFileKindHttpEndpoint,
+  FileListSharesHttpEndpoint,
   UpdateFileKindHttpEndpoint,
   UploadFileKindHttpEndpoint,
+  DeleteFileKindHttpEndpoint,
+  GetByIdFileKindHttpEndpoint,
+  DownloadFileKindHttpEndpoint,
+  FilePublicDownloadHttpEndpoint,
+  HttpApiInterfaceEntryDefinition,
 } from '../common/api_routes';
 
 /**
@@ -21,6 +29,10 @@ import type {
  */
 type ClientMethodFrom<E extends HttpApiInterfaceEntryDefinition> = (
   args: E['inputs']['body'] & E['inputs']['params'] & E['inputs']['query']
+) => Promise<E['output']>;
+
+type ClientMethodOptionalArgsFrom<E extends HttpApiInterfaceEntryDefinition> = (
+  args?: E['inputs']['body'] & E['inputs']['params'] & E['inputs']['query']
 ) => Promise<E['output']>;
 
 /**
@@ -50,7 +62,13 @@ export interface FilesClient {
    *
    * @param args - list files args
    */
-  list: ClientMethodFrom<ListFileKindHttpEndpoint>;
+  list: ClientMethodOptionalArgsFrom<ListFileKindHttpEndpoint>;
+  /**
+   * Find a set of files given some filters.
+   *
+   * @param args - File filters
+   */
+  find: ClientMethodFrom<FindFilesHttpEndpoint>;
   /**
    * Update a set of of metadata values of the file object.
    *
@@ -69,7 +87,58 @@ export interface FilesClient {
    * @param args - download file args
    */
   download: ClientMethodFrom<DownloadFileKindHttpEndpoint>;
+  /**
+   * Share a file by creating a new file share instance.
+   *
+   * @note This returns the secret token that can be used
+   * to access a file via the public download enpoint.
+   *
+   * @param args - File share arguments
+   */
+  share: ClientMethodFrom<FileShareHttpEndpoint>;
+  /**
+   * Delete a file share instance.
+   *
+   * @param args - File unshare arguments
+   */
+  unshare: ClientMethodFrom<FileUnshareHttpEndpoint>;
+  /**
+   * Get a file share instance.
+   *
+   * @param args - Get file share arguments
+   */
+  getShare: ClientMethodFrom<FileGetShareHttpEndpoint>;
+  /**
+   * List all file shares. Optionally scoping to a specific
+   * file.
+   *
+   * @param args - Get file share arguments
+   */
+  listShares: ClientMethodFrom<FileListSharesHttpEndpoint>;
+  /**
+   * Get metrics of file system, like storage usage.
+   *
+   * @param args - Get metrics arguments
+   */
+  getMetrics: ClientMethodFrom<FilesMetricsHttpEndpoint>;
+  /**
+   * Download a file, bypassing regular security by way of a
+   * secret share token.
+   *
+   * @param args - Get public download arguments.
+   */
+  publicDownload: ClientMethodFrom<FilePublicDownloadHttpEndpoint>;
+
+  /**
+   * Get a string for downloading a file that can be passed to a button element's
+   * href for download.
+   */
+  getDownloadHref: (file: FileJSON) => string;
 }
+
+export type FilesClientResponses = {
+  [K in keyof FilesClient]: Awaited<ReturnType<FilesClient[K]>>;
+};
 
 /**
  * A factory for creating a {@link FilesClient}
