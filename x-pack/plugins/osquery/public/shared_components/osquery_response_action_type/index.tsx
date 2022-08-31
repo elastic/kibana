@@ -14,7 +14,7 @@ import { EuiSpacer } from '@elastic/eui';
 import uuid from 'uuid';
 import { useForm as useHookForm } from 'react-hook-form';
 import { FormProvider } from 'react-hook-form';
-import { get, isEmpty } from 'lodash';
+import { get, isEmpty, map } from 'lodash';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { QueryPackSelectable } from '../../live_queries/form/QueryPackSelectable';
 import type { EcsMappingFormField } from '../../packs/queries/ecs_mapping_editor_field';
@@ -53,8 +53,9 @@ export const OsqueryResponseActionParamsForm: React.FunctionComponent<IProps> = 
         ecs_mapping: [defaultEcsFormData],
         id: uniqueId,
       },
+      mode: 'onChange',
     });
-    const { watch, setValue, register } = hooksForm;
+    const { watch, setValue, register, clearErrors } = hooksForm;
     const context = useFormContext();
     const data = context.getFormData();
     const { params: defaultParams } = get(data, item.path);
@@ -84,32 +85,55 @@ export const OsqueryResponseActionParamsForm: React.FunctionComponent<IProps> = 
 
     useEffectOnce(() => {
       if (defaultParams) {
-        setValue('savedQueryId', defaultParams.savedQueryId);
-        setValue('query', defaultParams.query);
-        setValue('id', defaultParams.id);
-        if (defaultParams?.packId) {
-          setValue('packId', [defaultParams.packId]);
-        }
-
-        if (!isEmpty(defaultParams.ecs_mapping)) {
-          setValue('ecs_mapping', defaultParams.ecs_mapping);
+        const { packId, ...restParams } = defaultParams;
+        map(restParams, (value, key: keyof OsqueryResponseActionsParamsFormFields) => {
+          if (!isEmpty(value)) {
+            setValue(key, value);
+          }
+        });
+        if (packId) {
+          setValue('packId', [packId]);
         }
       }
     });
 
+    const resetFormFields = useCallback(() => {
+      setValue('packId', []);
+      setValue('savedQueryId', '');
+      setValue('query', '');
+      setValue('ecs_mapping', [defaultEcsFormData]);
+      clearErrors();
+    }, [clearErrors, setValue]);
+
     useEffect(() => {
-      context.updateFieldValues({
-        [item.path]: {
-          actionTypeId: '.osquery',
-          params: {
-            savedQueryId: watchedValues.savedQueryId,
-            query: watchedValues.query,
-            packId: watchedValues?.packId?.length ? watchedValues?.packId[0] : undefined,
-            ecs_mapping: watchedValues.ecs_mapping,
+      if (queryType === 'query') {
+        context.updateFieldValues({
+          [item.path]: {
+            actionTypeId: '.osquery',
+            params: {
+              id: watchedValues.id,
+              savedQueryId: watchedValues.savedQueryId,
+              query: watchedValues.query,
+              ecs_mapping: watchedValues.ecs_mapping,
+              packId: '',
+            },
           },
-        },
-      });
-    }, [context, item.path, watchedValues]);
+        });
+      } else {
+        context.updateFieldValues({
+          [item.path]: {
+            actionTypeId: '.osquery',
+            params: {
+              id: watchedValues.id,
+              packId: watchedValues?.packId?.length ? watchedValues?.packId[0] : undefined,
+              savedQueryId: '',
+              query: '',
+              ecs_mapping: '',
+            },
+          },
+        });
+      }
+    }, [context, item.path, queryType, watchedValues]);
 
     const handleSavedQueryChange = useCallback(
       (savedQuery) => {
@@ -138,6 +162,7 @@ export const OsqueryResponseActionParamsForm: React.FunctionComponent<IProps> = 
             // TODO check permissions
             canRunPacks={true}
             canRunSingleQuery={true}
+            resetFormFields={resetFormFields}
           />
           {queryType === 'query' && (
             <>

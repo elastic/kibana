@@ -6,7 +6,7 @@
  */
 
 import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 
@@ -53,6 +53,7 @@ interface QueryPackSelectableProps {
   setQueryType: (type: string) => void;
   canRunSingleQuery: boolean;
   canRunPacks: boolean;
+  resetFormFields?: () => void;
 }
 
 export const QueryPackSelectable = ({
@@ -60,23 +61,33 @@ export const QueryPackSelectable = ({
   setQueryType,
   canRunSingleQuery,
   canRunPacks,
+  resetFormFields,
 }: QueryPackSelectableProps) => {
+  const handleChange = useCallback(
+    (type) => {
+      setQueryType(type);
+      if (resetFormFields) {
+        resetFormFields();
+      }
+    },
+    [resetFormFields, setQueryType]
+  );
   const queryCardSelectable = useMemo(
     () => ({
-      onClick: () => setQueryType('query'),
+      onClick: () => handleChange('query'),
       isSelected: queryType === 'query',
       iconType: 'check',
     }),
-    [queryType, setQueryType]
+    [queryType, handleChange]
   );
 
   const packCardSelectable = useMemo(
     () => ({
-      onClick: () => setQueryType('pack'),
+      onClick: () => handleChange('pack'),
       isSelected: queryType === 'pack',
       iconType: 'check',
     }),
-    [queryType, setQueryType]
+    [queryType, handleChange]
   );
 
   return (

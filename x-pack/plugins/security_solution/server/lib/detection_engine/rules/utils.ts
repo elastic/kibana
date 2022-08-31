@@ -102,7 +102,9 @@ export const transformFromAlertThrottle = (
   legacyRuleActions: LegacyRuleActions | null | undefined
 ): string => {
   if (legacyRuleActions == null || (rule.actions != null && rule.actions.length > 0)) {
-    if (rule.muteAll || rule.actions.length === 0) {
+    // TODO FIX TYPES
+    // @ts-expect-error update types
+    if (rule.muteAll || (rule.actions.length === 0 && rule.params?.responseActions?.length === 0)) {
       return NOTIFICATION_THROTTLE_NO_ACTIONS;
     } else if (
       rule.notifyWhen === 'onActiveAlert' ||
