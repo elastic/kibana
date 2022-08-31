@@ -5,20 +5,16 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
+
 import type { MakeSinleFieldMathRequest } from '../types';
+import { getEventValue } from './events';
 
 export const makeSinleFieldMathRequest: MakeSinleFieldMathRequest = ({ events, mappingField }) => {
-  const eventsWithField = events.filter((event) =>
-    get(event, `_source.${mappingField.eventField}`)
-  );
 
-  // TODO make it unique set of events by field?
-
-  const shouldClauses = eventsWithField.map((event) => ({
+  const shouldClauses = events.map((event) => ({
     match: {
       [mappingField.enrichmentField]: {
-        query: get(event._source, mappingField.eventField) as string,
+        query: getEventValue(event, mappingField.eventField),
         minimum_should_match: 1,
       },
     },

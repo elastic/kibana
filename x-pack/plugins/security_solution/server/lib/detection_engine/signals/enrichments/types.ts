@@ -51,6 +51,12 @@ interface SingleMappingField {
   eventField: string;
   enrichmentField: string;
 }
+
+export type GetEventValue = <T extends BaseFieldsLatest>(
+  events: EventsForEnrichment<T>,
+  path: string
+) => string | undefined;
+
 export type MakeSinleFieldMathRequest = <T extends BaseFieldsLatest>(params: {
   events: Array<EventsForEnrichment<T>>;
   mappingField: SingleMappingField;

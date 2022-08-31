@@ -8,6 +8,7 @@
 import { get } from 'lodash';
 import { searchEnrichments } from './search_enrichments';
 import { makeSinleFieldMathRequest } from './utils/requests';
+import { getEventValue } from './utils/events';
 import type { CreateFieldsMatchEnrichment, EventsMapByEnrichments } from './types';
 
 export const createSingleFieldMatchEnrichment: CreateFieldsMatchEnrichment = async ({
@@ -21,23 +22,22 @@ export const createSingleFieldMatchEnrichment: CreateFieldsMatchEnrichment = asy
 }) => {
   logger.debug(`Enrichment ${name}: started`);
 
-  const eventsWithField = events.filter((event) =>
-    get(event, `_source.${mappingField.eventField}`)
-  );
+  const eventsWithField = events.filter((event) => getEventValue(event, mappingField.eventField));
   const eventsMapByFieldValue = eventsWithField.reduce((acc, event) => {
-    const eventFieldValue = get(event, `_source.${mappingField.eventField}`);
+    const eventFieldValue = getEventValue(event, mappingField.eventField);
+
+    if (!eventFieldValue) return {};
 
     acc[eventFieldValue] ??= [];
     acc[eventFieldValue].push(event);
 
     return acc;
   }, {} as { [key: string]: typeof events });
-
   const queryResult = makeSinleFieldMathRequest({
-    events,
+    events: eventsWithField,
     mappingField,
   });
-
+  logger.debug(`Enrichment ${name}: ${JSON.stringify(events)}`);
   if (queryResult.query?.bool?.should?.length === 0) {
     logger.debug(`Enrichment ${name}: events doesn't have any field to enrich`);
     return {};
@@ -67,8 +67,6 @@ export const createSingleFieldMatchEnrichment: CreateFieldsMatchEnrichment = asy
     return acc;
   }, {});
 
-  logger.debug(
-    `Enrichment ${name}: finished with ${Object.keys(eventsMapById).length} events to enrich`
-  );
+  logger.debug(`Enrichment ${name}: finished with ${Object.keys(eventsMapById).length} events to enrich`)
   return eventsMapById;
 };
