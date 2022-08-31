@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { observabilityFeatureId as OBSERVABILITY_APP_ID } from '../../../common';
 import { AlertSummary } from './components';
 import { useKibana } from '../../utils/kibana_react';
 import { ObservabilityAppServices } from '../../application/types';
@@ -21,7 +20,7 @@ import { paths } from '../../config/paths';
 export function AlertDetailsPage() {
   const {
     http,
-    application: { navigateToApp },
+    application: { navigateToUrl },
   } = useKibana<ObservabilityAppServices>().services;
 
   const { ObservabilityPageTemplate, config } = usePluginContext();
@@ -36,9 +35,12 @@ export function AlertDetailsPage() {
       }),
     },
   ]);
+
+  // Redirect to the Alerts page when the feature flag is off, and the user hit the page url directly in the browser.
   if (!config.unsafe.alertDetail.enabled) {
-    navigateToApp(OBSERVABILITY_APP_ID);
+    navigateToUrl(http.basePath.prepend('/app/observability/alerts'));
   }
+
   return (
     <ObservabilityPageTemplate data-test-subj="alertDetails">
       <AlertSummary alert={alert} />
