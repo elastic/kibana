@@ -47,10 +47,6 @@ export const SortMenu = ({ sortOptions, orderOptions, sortField }: Props) => {
     setPopover(false);
   };
 
-  const getIconType = (checked: boolean) => {
-    return checked ? 'check' : 'empty';
-  };
-
   const button = (
     <EuiButtonEmpty size="xs" iconType="arrowDown" iconSide="right" onClick={onButtonClick}>
       {sortField}
@@ -64,16 +60,7 @@ export const SortMenu = ({ sortOptions, orderOptions, sortField }: Props) => {
       </EuiText>
     </EuiPanel>,
     ...sortOptions.map((option) => (
-      <EuiContextMenuItem
-        key={option.value}
-        icon={getIconType(option.checked)}
-        onClick={() => {
-          closePopover();
-          option.onClick();
-        }}
-      >
-        {option.label}
-      </EuiContextMenuItem>
+      <ContextMenuItem option={option} onClosePopover={closePopover} />
     )),
     <EuiHorizontalRule key="hr" margin="none" />,
 
@@ -84,16 +71,7 @@ export const SortMenu = ({ sortOptions, orderOptions, sortField }: Props) => {
     </EuiPanel>,
 
     ...orderOptions.map((option) => (
-      <EuiContextMenuItem
-        key={option.value}
-        icon={getIconType(option.checked)}
-        onClick={() => {
-          closePopover();
-          option.onClick();
-        }}
-      >
-        {option.label}
-      </EuiContextMenuItem>
+      <ContextMenuItem option={option} onClosePopover={closePopover} />
     )),
   ];
 
@@ -108,6 +86,34 @@ export const SortMenu = ({ sortOptions, orderOptions, sortField }: Props) => {
     >
       <EuiContextMenuPanel size="s" items={items} />
     </EuiPopover>
+  );
+};
+
+const ContextMenuItem = ({
+  option,
+  onClosePopover,
+}: {
+  option: Option;
+  onClosePopover: () => void;
+}) => {
+  const getIconType = (checked: boolean) => {
+    return checked ? 'check' : 'empty';
+  };
+
+  return (
+    <EuiContextMenuItem
+      key={option.value}
+      icon={getIconType(option.checked)}
+      onClick={() => {
+        onClosePopover();
+        option.onClick();
+      }}
+      style={{
+        marginRight: 24,
+      }}
+    >
+      {option.label}
+    </EuiContextMenuItem>
   );
 };
 

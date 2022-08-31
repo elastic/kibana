@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import { isEqual } from 'lodash';
 import { useEsSearch } from '@kbn/observability-plugin/public';
 import { useSelector } from 'react-redux';
@@ -29,7 +29,8 @@ export function useMonitorsSortedByStatus(shouldUpdate: boolean) {
   const [monitorsSortedByStatus, setMonitorsSortedByStatus] = useState<
     Record<string, MonitorOverviewItem[]>
   >({ up: [], down: [], disabled: [] });
-  const [downMonitors, setDownMonitors] = useState<Record<string, string[]> | null>(null);
+  const downMonitors = useRef<Record<string, string[]> | null>(null);
+  const currentMonitors = useRef<MonitorOverviewItem[] | null>(monitors);
   const locationNames = useLocationNames();
   const { lastRefresh } = useSyntheticsRefreshContext();
 
@@ -82,7 +83,7 @@ export function useMonitorsSortedByStatus(shouldUpdate: boolean) {
         },
       },
     },
-    [lastRefresh, monitorId, shouldUpdate],
+    [lastRefresh, monitorId, shouldUpdate, currentMonitors.current],
     { name: 'getMonitorStatusByLocation' }
   );
 
@@ -108,7 +109,11 @@ export function useMonitorsSortedByStatus(shouldUpdate: boolean) {
       });
     });
 
-    if (!isEqual(downMonitorMap, downMonitors)) {
+    if (
+      !isEqual(downMonitorMap, downMonitors.current) ||
+      !isEqual(monitors, currentMonitors.current)
+    ) {
+      console.warn('reordering');
       const orderedDownMonitors: MonitorOverviewItem[] = [];
       const orderedUpMonitors: MonitorOverviewItem[] = [];
       const orderedDisabledMonitors: MonitorOverviewItem[] = [];
@@ -125,7 +130,8 @@ export function useMonitorsSortedByStatus(shouldUpdate: boolean) {
           orderedUpMonitors.push(monitor);
         }
       });
-      setDownMonitors(downMonitorMap);
+      downMonitors.current = downMonitorMap;
+      currentMonitors.current = monitors;
       setMonitorsSortedByStatus({
         down: orderedDownMonitors,
         up: orderedUpMonitors,
@@ -139,6 +145,7 @@ export function useMonitorsSortedByStatus(shouldUpdate: boolean) {
       sortOrder === 'asc'
         ? [...monitorsSortedByStatus.down, ...monitorsSortedByStatus.up]
         : [...monitorsSortedByStatus.up, ...monitorsSortedByStatus.down];
+
     return {
       monitorsSortedByStatus: [...upAndDownMonitors, ...monitorsSortedByStatus.disabled],
       downMonitors,

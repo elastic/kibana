@@ -44,11 +44,12 @@ export const OverviewGrid = () => {
     page,
     sortField,
   });
+  console.warn('currentMonitors', currentMonitors);
 
   const intersectionRef = useRef(null);
   const intersection = useIntersection(intersectionRef, {
     root: null,
-    rootMargin: '0px',
+    rootMargin: '400px',
     threshold: 1,
   });
   const hasIntersected = intersection && intersection.intersectionRatio === 1;
@@ -73,7 +74,7 @@ export const OverviewGrid = () => {
 
   return (
     <>
-      <EuiFlexGroup justifyContent="spaceBetween">
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
           <OverviewPaginationInfo page={page} loading={!loaded} />
         </EuiFlexItem>
@@ -97,6 +98,7 @@ export const OverviewGrid = () => {
         <OverviewLoader />
       )}
       {currentMonitors.length !== monitors.length && <span ref={intersectionRef} />}
+      <EuiSpacer size="l" />
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         {currentMonitors.length === monitors.length && (
           <EuiFlexItem grow={false}>
@@ -148,5 +150,5 @@ const SHOWING_ALL_MONITORS_LABEL = i18n.translate(
 );
 
 const SCROLL_TO_TOP_LABEL = i18n.translate('xpack.synthetics.overview.grid.scrollToTop.label', {
-  defaultMessage: 'Scroll to top',
+  defaultMessage: 'Back to top',
 });
