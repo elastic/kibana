@@ -63,6 +63,7 @@ export const selectExecutionContextSearch = createSelector(selectExecutionContex
     to: res.dateRange.toDate,
   },
   filters: res.filters,
+  disableShardWarnings: true,
 }));
 
 const selectInjectedDependencies = (_state: LensState, dependencies: unknown) => dependencies;

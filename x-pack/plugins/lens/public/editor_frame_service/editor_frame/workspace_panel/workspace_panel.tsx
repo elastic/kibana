@@ -667,6 +667,7 @@ export const VisualizationWrapper = ({
         to: context.dateRange.toDate,
       },
       filters: context.filters,
+      disableShardWarnings: true,
     }),
     [context]
   );

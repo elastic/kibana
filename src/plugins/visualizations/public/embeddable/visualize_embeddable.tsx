@@ -550,6 +550,7 @@ export class VisualizeEmbeddable
         timeRange: this.timeRange,
         query: this.input.query,
         filters: this.input.filters,
+        disableShardWarnings: true,
       },
       variables: {
         embeddableTitle: this.getTitle(),
