@@ -178,7 +178,7 @@ describe('Response Actions Log', () => {
     });
 
     it('should show expected column names on the table', async () => {
-      render();
+      render({ agentIds: 'agent-a' });
 
       expect(
         Array.from(
@@ -186,7 +186,19 @@ describe('Response Actions Log', () => {
         )
           .slice(0, 6)
           .map((col) => col.textContent)
-      ).toEqual(['Time', 'Command', 'User', 'Host', 'Comments', 'Status']);
+      ).toEqual(['Time', 'Command', 'User', 'Comments', 'Status', 'Expand rows']);
+    });
+
+    it('should show `Host` column when `showHostNames` is TRUE', async () => {
+      render({ showHostNames: true });
+
+      expect(
+        Array.from(
+          renderResult.getByTestId(`${testPrefix}-table-view`).querySelectorAll('thead th')
+        )
+          .slice(0, 7)
+          .map((col) => col.textContent)
+      ).toEqual(['Time', 'Command', 'User', 'Hosts', 'Comments', 'Status', 'Expand rows']);
     });
 
     it('should paginate table when there is data', async () => {
@@ -379,42 +391,6 @@ describe('Response Actions Log', () => {
       expect(
         renderResult.getAllByTestId(`${testPrefix}-column-status`).map((n) => n.textContent)
       ).toEqual(['Pending', 'Pending']);
-    });
-  });
-
-  describe('With agentIds filter', () => {
-    it('should NOT show a host column when a single agentId', async () => {
-      const agentIds = uuid.v4();
-      mockUseGetEndpointActionList = {
-        ...baseMockedActionList,
-        data: await getActionListMock({ actionCount: 2, agentIds: [agentIds] }),
-      };
-      render({ agentIds });
-
-      expect(
-        Array.from(
-          renderResult.getByTestId(`${testPrefix}-table-view`).querySelectorAll('thead th')
-        )
-          .slice(0, 5)
-          .map((col) => col.textContent)
-      ).toEqual(['Time', 'Command', 'User', 'Comments', 'Status']);
-    });
-
-    it('should show a host column when multiple agentIds', async () => {
-      const agentIds = [uuid.v4(), uuid.v4()];
-      mockUseGetEndpointActionList = {
-        ...baseMockedActionList,
-        data: await getActionListMock({ actionCount: 2, agentIds }),
-      };
-      render({ agentIds });
-
-      expect(
-        Array.from(
-          renderResult.getByTestId(`${testPrefix}-table-view`).querySelectorAll('thead th')
-        )
-          .slice(0, 6)
-          .map((col) => col.textContent)
-      ).toEqual(['Time', 'Command', 'User', 'Host', 'Comments', 'Status']);
     });
   });
 

@@ -8,14 +8,13 @@
 
 import type { IBasePath } from '@kbn/core-http-browser';
 import {
-  type PublicAppInfo,
   AppNavLinkStatus,
   AppStatus,
+  type PublicAppInfo,
   type PublicAppDeepLinkInfo,
-} from '../../application';
-
+} from '@kbn/core-application-browser';
+import { appendAppPath } from '@kbn/core-application-browser-internal';
 import { NavLinkWrapper } from './nav_link';
-import { appendAppPath } from '../../application/utils';
 
 export function toNavLink(
   app: PublicAppInfo,
