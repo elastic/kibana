@@ -236,7 +236,7 @@ export const ConfigSchema = schema.object({
     hostname: schema.maybe(schema.string({ hostname: true })),
     port: schema.maybe(schema.number({ min: 0, max: 65535 })),
   }),
-  accessAgreement: schema.maybe(schema.object({ message: schema.maybe(schema.string()) })),
+  accessAgreement: schema.maybe(schema.object({ message: schema.string() })),
   authc: schema.object({
     selector: schema.object({ enabled: schema.maybe(schema.boolean()) }),
     providers: schema.oneOf([schema.arrayOf(schema.string()), providersConfigSchema], {
@@ -354,14 +354,10 @@ export function createConfig(
 
   for (const [type, providerGroup] of Object.entries(providers)) {
     for (const [name, { enabled, order, accessAgreement }] of Object.entries(providerGroup ?? {})) {
-      const hasProviderSpecificAccessAgreement: boolean = !!accessAgreement?.message;
-      const hasGlobalAccessAgreement: boolean = !!config.accessAgreement?.message;
-
       if (!enabled) {
         delete providerGroup![name];
       } else {
-        const hasAccessAgreement: boolean =
-          hasProviderSpecificAccessAgreement || hasGlobalAccessAgreement;
+        const hasAccessAgreement: boolean = !!accessAgreement?.message;
 
         sortedProviders.push({
           type: type as any,
