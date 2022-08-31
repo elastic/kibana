@@ -8,6 +8,7 @@
 import { get } from 'lodash/fp';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
+import { socTrendsId } from './constants';
 import { getIntervalSettings, getTimeRangeSettings } from '../../utils/default_date_settings';
 import {
   deleteAllQuery,
@@ -21,36 +22,36 @@ import {
   startAutoReload,
   stopAutoReload,
   toggleTimelineLinkTo,
-  removeTimelineLinkTo,
-  removeGlobalLinkTo,
-  addGlobalLinkTo,
-  addTimelineLinkTo,
   deleteOneQuery,
   setFilterQuery,
   setSavedQuery,
   setSearchBarFilter,
+  removeLinkTo,
+  addLinkTo,
+  toggleSocTrendsLinkTo,
 } from './actions';
 import {
   setIsInspected,
   toggleLockTimeline,
   updateInputTimerange,
   upsertQuery,
-  removeGlobalLink,
-  addGlobalLink,
-  removeTimelineLink,
-  addTimelineLink,
+  addInputLink,
+  removeInputLink,
   deleteOneQuery as helperDeleteOneQuery,
   updateInputFullScreen,
+  toggleLockSocTrends,
 } from './helpers';
 import type { InputsModel, TimeRange } from './model';
 
 export type InputsState = InputsModel;
 
+const { socTrends: socTrendsUnused, ...timeRangeSettings } = getTimeRangeSettings(false);
+
 export const initialInputsState: InputsState = {
   global: {
     timerange: {
       kind: 'relative',
-      ...getTimeRangeSettings(false),
+      ...timeRangeSettings,
     },
     queries: [],
     policy: getIntervalSettings(false),
@@ -65,7 +66,7 @@ export const initialInputsState: InputsState = {
   timeline: {
     timerange: {
       kind: 'relative',
-      ...getTimeRangeSettings(false),
+      ...timeRangeSettings,
     },
     queries: [],
     policy: getIntervalSettings(false),
@@ -79,10 +80,9 @@ export const initialInputsState: InputsState = {
   },
 };
 
-export const createInitialInputsState = (): InputsState => {
-  const { from, fromStr, to, toStr } = getTimeRangeSettings();
+export const createInitialInputsState = (socTrendsEnabled: boolean): InputsState => {
+  const { from, fromStr, to, toStr, socTrends } = getTimeRangeSettings();
   const { kind, duration } = getIntervalSettings();
-
   return {
     global: {
       timerange: {
@@ -97,7 +97,7 @@ export const createInitialInputsState = (): InputsState => {
         kind,
         duration,
       },
-      linkTo: ['timeline'],
+      linkTo: ['timeline', ...(socTrendsEnabled ? [socTrendsId] : [])],
       query: {
         query: '',
         language: 'kuery',
@@ -126,6 +126,18 @@ export const createInitialInputsState = (): InputsState => {
       filters: [],
       fullScreen: false,
     },
+    ...(socTrendsEnabled
+      ? {
+          socTrends: {
+            timerange: socTrends,
+            linkTo: ['global'],
+            policy: {
+              kind,
+              duration,
+            },
+          },
+        }
+      : {}),
   };
 };
 
@@ -135,7 +147,8 @@ export const inputsReducer = reducerWithInitialState(initialInputsState)
       ...state,
       global: {
         ...state.global,
-        linkTo: [],
+        // needs to be emptied, but socTrends should remain if defined
+        linkTo: state.global.linkTo.filter((i) => i !== 'timeline'),
       },
       timeline: {
         ...state.timeline,
@@ -217,14 +230,13 @@ export const inputsReducer = reducerWithInitialState(initialInputsState)
       },
     },
   }))
-  .case(toggleTimelineLinkTo, (state, { linkToId }) => toggleLockTimeline(linkToId, state))
+  .case(toggleTimelineLinkTo, (state) => toggleLockTimeline(state))
+  .case(toggleSocTrendsLinkTo, (state) => toggleLockSocTrends(state))
   .case(setInspectionParameter, (state, { id, inputId, isInspected, selectedInspectIndex }) =>
     setIsInspected({ id, inputId, isInspected, selectedInspectIndex, state })
   )
-  .case(removeGlobalLinkTo, (state) => removeGlobalLink(state))
-  .case(addGlobalLinkTo, (state, { linkToId }) => addGlobalLink(linkToId, state))
-  .case(removeTimelineLinkTo, (state) => removeTimelineLink(state))
-  .case(addTimelineLinkTo, (state, { linkToId }) => addTimelineLink(linkToId, state))
+  .case(removeLinkTo, (state, linkToIds) => removeInputLink(linkToIds, state))
+  .case(addLinkTo, (state, linkToIds) => addInputLink(linkToIds, state))
   .case(setFilterQuery, (state, { id, query, language }) => ({
     ...state,
     [id]: {

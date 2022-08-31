@@ -27,21 +27,24 @@ import {
   LEGACY_URL_ALIAS_TYPE,
   type SavedObjectsConfigType,
 } from '@kbn/core-saved-objects-base-server-internal';
-
-import { SavedObjectsServiceStart, SavedObjectTypeRegistry } from '..';
 import type {
   CoreServicesUsageData,
   CoreUsageData,
   CoreUsageDataStart,
-  InternalCoreUsageDataSetup,
+  CoreIncrementUsageCounter,
   ConfigUsageData,
   CoreConfigUsageData,
-} from './types';
+} from '@kbn/core-usage-data-server';
+import {
+  CORE_USAGE_STATS_TYPE,
+  type InternalCoreUsageDataSetup,
+} from '@kbn/core-usage-data-base-server-internal';
+import type { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
+import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
+
 import { isConfigured } from './is_configured';
 import { coreUsageStatsType } from './core_usage_stats';
-import { CORE_USAGE_STATS_TYPE } from './constants';
 import { CoreUsageStatsClient } from './core_usage_stats_client';
-import { CoreIncrementUsageCounter } from './types';
 
 export type ExposedConfigsToUsage = Map<string, Record<string, boolean>>;
 

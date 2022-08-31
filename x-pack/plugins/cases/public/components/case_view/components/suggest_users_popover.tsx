@@ -137,7 +137,7 @@ const SuggestUsersPopoverComponent: React.FC<SuggestUsersPopoverProps> = ({
     []
   );
 
-  const { data: userProfiles, isLoading: isLoadingSuggest } = useSuggestUserProfiles({
+  const { data: userProfiles, isFetching: isLoadingSuggest } = useSuggestUserProfiles({
     name: searchTerm,
     owners: owner,
   });
@@ -173,7 +173,7 @@ const SuggestUsersPopoverComponent: React.FC<SuggestUsersPopoverProps> = ({
         searchPlaceholder: i18n.SEARCH_USERS,
         clearButtonLabel: i18n.REMOVE_ASSIGNEES,
         emptyMessage: <EmptyMessage />,
-        noMatchesMessage: <NoMatches />,
+        noMatchesMessage: searchResultProfiles ? <NoMatches /> : <EmptyMessage />,
       }}
     />
   );
@@ -183,7 +183,7 @@ SuggestUsersPopoverComponent.displayName = 'SuggestUsersPopover';
 
 export const SuggestUsersPopover = React.memo(SuggestUsersPopoverComponent);
 
-const sortProfiles = (profiles?: UserProfileWithAvatar[]) => {
+const sortProfiles = (profiles?: UserProfileWithAvatar[] | null) => {
   if (!profiles) {
     return;
   }
