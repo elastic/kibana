@@ -944,7 +944,6 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       ? await this.client.bulk({
           refresh,
           body: bulkDeleteParams,
-          _source_includes: ['originId'],
           require_alias: true,
         })
       : undefined;
@@ -966,7 +965,11 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
         } = expectedResult.value;
 
         // we assume this wouldn't happen but is needed to ensure type consistency
-        if (bulkDeleteResponse === undefined) throw new Error();
+        if (bulkDeleteResponse === undefined) {
+          throw new Error(
+            `Unexpected error in bulkDelete saved objects: bulkDeleteResponse is undefined`
+          );
+        }
 
         const rawResponse = Object.values(
           bulkDeleteResponse.items[esBulkDeleteRequestIndex]

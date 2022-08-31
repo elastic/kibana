@@ -77,5 +77,38 @@ export default function ({ getService }: FtrProviderContext) {
             ],
           });
         }));
+
+    it('should return the result of deleting valid and invalid objects in the same request', async () =>
+      await supertest
+        .post(`/api/saved_objects/_bulk_delete`)
+        .send([
+          { type: 'visualization', id: 'not-a-real-vis-id' },
+          {
+            type: 'index-pattern',
+            id: '91200a00-9efd-11e7-acb3-3dab96693fab',
+          },
+        ])
+        .expect(200)
+        .then((resp) => {
+          expect(resp.body).to.eql({
+            statuses: [
+              {
+                error: {
+                  error: 'Not Found',
+                  message: 'Saved object [visualization/not-a-real-vis-id] not found',
+                  statusCode: 404,
+                },
+                id: 'not-a-real-vis-id',
+                type: 'visualization',
+                success: false,
+              },
+              {
+                success: true,
+                type: 'index-pattern',
+                id: '91200a00-9efd-11e7-acb3-3dab96693fab',
+              },
+            ],
+          });
+        }));
   });
 }
