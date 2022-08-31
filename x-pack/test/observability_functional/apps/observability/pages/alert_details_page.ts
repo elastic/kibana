@@ -33,18 +33,23 @@ export default ({ getService }: FtrProviderContext) => {
       );
     });
 
-    it('should open the flyout instead the alert of the alerts page when clicking on "View alert details" from the... (3 dots) button when the feature flag is disabled', async () => {
-      await observability.alerts.common.navigateToTimeWithData();
-      await observability.alerts.common.openActionsMenuForRow(0);
-      await testSubjects.click('viewAlertDetailsFlyout');
-      await retry.waitFor(
-        'Alert flyout to be visible',
-        async () => await testSubjects.exists('alertsFlyout')
-      );
+    describe('Alert Detail / Alert Flyout', () => {
+      before(async () => {
+        await observability.alerts.common.navigateToTimeWithData();
+      });
+
+      it('should open the flyout instead the alert of the alerts page when clicking on "View alert details" from the... (3 dots) button when the feature flag is disabled', async () => {
+        await observability.alerts.common.openActionsMenuForRow(0);
+        await testSubjects.click('viewAlertDetailsFlyout');
+        await retry.waitFor(
+          'Alert flyout to be visible',
+          async () => await testSubjects.exists('alertsFlyout')
+        );
+      });
+      /* TODO: Add more test cases regarding the feature flag for:
+       - alert details URL from the Action variable
+       - alert details button from the alert flyout.
+      */
     });
-    /* TODO: Add more test cases regarding the feature flag for:
-     - alert details URL from the Action variable
-     - alert details button from the alert flyout.
-    */
   });
 };
