@@ -83,7 +83,7 @@ export class AccessibilityService extends FtrService {
     // Log to the console only when skipping failures
     if (skipFailures && errorMsgs.length) {
       // eslint-disable-next-line no-console
-      console.log(`
+      console.info(`
 ========================================
 * A11Y REPORT MODE ONLY
 ========================================
