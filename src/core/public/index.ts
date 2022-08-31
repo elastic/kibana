@@ -48,6 +48,7 @@ import type { Capabilities } from '@kbn/core-capabilities-common';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { SavedObjectsStart } from '@kbn/core-saved-objects-browser';
 import type { NotificationsSetup, NotificationsStart } from '@kbn/core-notifications-browser';
+import type { ApplicationSetup, ApplicationStart } from '@kbn/core-application-browser';
 import type {
   ChromeBadge,
   ChromeBreadcrumb,
@@ -76,13 +77,12 @@ import type {
   PluginInitializerContext,
   PluginOpaqueId,
 } from './plugins';
-import type { ApplicationSetup, ApplicationStart } from './application';
 
 export type { PackageInfo, EnvironmentMode } from '@kbn/config';
 export type { DomainDeprecationDetails } from '@kbn/core-deprecations-common';
 export type { CoreContext } from '@kbn/core-base-browser-internal';
+export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '@kbn/core-application-common';
 export type { CoreSystem } from './core_system';
-export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '../utils';
 export type { AppCategory } from '../types';
 export type {
   UiSettingsParams,
@@ -106,7 +106,7 @@ export type {
   TelemetryCounterType,
 } from '@kbn/analytics-client';
 
-export { AppNavLinkStatus, AppStatus, ScopedHistory } from './application';
+export { AppNavLinkStatus, AppStatus } from '@kbn/core-application-browser';
 export type {
   ApplicationSetup,
   ApplicationStart,
@@ -127,7 +127,10 @@ export type {
   PublicAppDeepLinkInfo,
   NavigateToAppOptions,
   NavigateToUrlOptions,
-} from './application';
+  ScopedHistory,
+} from '@kbn/core-application-browser';
+export { CoreScopedHistory } from '@kbn/core-application-browser-internal';
+
 export type {
   SavedObjectsClientContract,
   SimpleSavedObject,
