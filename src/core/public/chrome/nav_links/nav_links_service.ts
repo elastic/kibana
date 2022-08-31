@@ -10,12 +10,9 @@ import { sortBy } from 'lodash';
 import { BehaviorSubject, type Observable, ReplaySubject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import type { HttpStart, IBasePath } from '@kbn/core-http-browser';
+import type { PublicAppDeepLinkInfo, PublicAppInfo } from '@kbn/core-application-browser';
+import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 
-import type {
-  InternalApplicationStart,
-  PublicAppDeepLinkInfo,
-  PublicAppInfo,
-} from '../../application';
 import type { ChromeNavLink, NavLinkWrapper } from './nav_link';
 import { toNavLink } from './to_nav_link';
 
