@@ -17,6 +17,6 @@ describe('TopN function operations', () => {
     expect(topNFunctions.TopN.length).toEqual(5);
 
     const exclusiveCounts = topNFunctions.TopN.map((value) => value.CountExclusive);
-    expect(exclusiveCounts).toEqual([16, 10, 9, 5, 0]);
+    expect(exclusiveCounts).toEqual([16, 9, 7, 5, 2]);
   });
 });
