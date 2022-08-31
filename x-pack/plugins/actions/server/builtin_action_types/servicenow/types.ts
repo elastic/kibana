@@ -27,6 +27,7 @@ import {
 } from './schema';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import { SNProductsConfigValue } from '../../../common';
+import { ValidatorServices } from '../../types';
 
 export type { SNProductsConfigValue, SNProductsConfig } from '../../../common';
 
@@ -76,8 +77,8 @@ export interface ExternalServiceCredentials {
 }
 
 export interface ExternalServiceValidation {
-  config: (configurationUtilities: ActionsConfigurationUtilities, configObject: any) => void;
-  secrets: (configurationUtilities: ActionsConfigurationUtilities, secrets: any) => void;
+  config: (configObject: any, validatorServices: ValidatorServices) => void;
+  secrets: (secrets: any, validatorServices: ValidatorServices) => void;
   connector: (config: any, secrets: any) => string | null;
 }
 
