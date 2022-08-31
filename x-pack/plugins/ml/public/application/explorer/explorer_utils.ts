@@ -42,7 +42,6 @@ import {
   VIEW_BY_JOB_LABEL,
 } from './explorer_constants';
 import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
-import { isCombinedJob } from '../../../common/types/anomaly_detection_jobs/combined_job';
 import { MlResultsService } from '../services/results_service';
 import { InfluencersFilterQuery } from '../../../common/types/es_client';
 import { TimeRangeBounds } from '../util/time_buckets';
@@ -56,6 +55,12 @@ export interface ExplorerJob {
   bucketSpanSeconds: number;
   isSingleMetricViewerJob?: boolean;
   sourceIndices?: string[];
+}
+
+export function isExplorerJob(arg: any): arg is ExplorerJob {
+  return (
+    typeof arg.id === 'string' && arg.selected !== undefined && arg.bucketSpanSeconds !== undefined
+  );
 }
 
 interface ClearedSelectedAnomaliesState {
@@ -626,12 +631,12 @@ export async function getSourceIndicesWithGeoFields(
     await asyncForEach(selectedJobs, async (job) => {
       let sourceIndices;
       let jobId: string;
-      if (isCombinedJob(job)) {
-        sourceIndices = job.datafeed_config.indices;
-        jobId = job.job_id;
-      } else {
+      if (isExplorerJob(job)) {
         sourceIndices = job.sourceIndices;
         jobId = job.id;
+      } else {
+        sourceIndices = job.datafeed_config.indices;
+        jobId = job.job_id;
       }
 
       if (Array.isArray(sourceIndices)) {

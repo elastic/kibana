@@ -29,7 +29,3 @@ export interface CombinedJobWithStats extends JobWithStats {
 export function isCombinedJobWithStats(arg: any): arg is CombinedJobWithStats {
   return typeof arg.job_id === 'string';
 }
-
-export function isCombinedJob(arg: any): arg is CombinedJob {
-  return typeof arg.job_id === 'string' && arg.datafeed_config !== undefined;
-}
