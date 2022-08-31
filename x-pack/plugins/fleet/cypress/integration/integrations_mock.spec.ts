@@ -9,6 +9,7 @@ import { navigateTo } from '../tasks/navigation';
 import { UPDATE_PACKAGE_BTN } from '../screens/integrations';
 import { LOADING_SPINNER, TOAST_CLOSE_BTN } from '../screens/navigation';
 import { AGENT_POLICY_SAVE_INTEGRATION } from '../screens/fleet';
+import { INSTALLED_VERSION, INTEGRATION_POLICIES_UPGRADE_CHECKBOX } from '../screens/integrations';
 
 describe('Add Integration - Mock API', () => {
   describe('upgrade package and upgrade package policy', () => {
@@ -93,10 +94,10 @@ describe('Add Integration - Mock API', () => {
 
     it('should upgrade policies without integration update', () => {
       navigateTo(`app/integrations/detail/apache-${oldVersion}/settings`);
-      cy.get(LOADING_SPINNER).should('not.exist');
-      cy.getBySel('installedVersion').contains(oldVersion);
+      cy.getBySel(LOADING_SPINNER).should('not.exist');
+      cy.getBySel(INSTALLED_VERSION).contains(oldVersion);
 
-      cy.get('#upgradePoliciesCheckbox').uncheck({ force: true });
+      cy.getBySel(INTEGRATION_POLICIES_UPGRADE_CHECKBOX).uncheck({ force: true });
 
       cy.intercept(`/api/fleet/epm/packages/apache/${newVersion}`, {
         item: {
@@ -110,8 +111,8 @@ describe('Add Integration - Mock API', () => {
       }).as('updatePackage');
       cy.getBySel(UPDATE_PACKAGE_BTN).click();
       cy.wait('@updatePackage');
-      cy.get('#upgradePoliciesCheckbox').should('not.exist');
-      cy.getBySel('installedVersion').contains(newVersion);
+      cy.getBySel(INTEGRATION_POLICIES_UPGRADE_CHECKBOX).should('not.exist');
+      cy.getBySel(INSTALLED_VERSION).contains(newVersion);
     });
 
     it('should upgrade integration policy', () => {

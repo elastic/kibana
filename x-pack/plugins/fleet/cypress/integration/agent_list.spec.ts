@@ -19,7 +19,7 @@ const createAgentDocs = (kibanaVersion: string) => [
 
 let docs: any[] = [];
 
-describe('View agents', () => {
+describe('View agents list', () => {
   before(() => {
     deleteFleetServerDocs(true);
     deleteAgentDocs(true);

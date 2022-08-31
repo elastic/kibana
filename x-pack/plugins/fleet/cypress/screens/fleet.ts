@@ -89,9 +89,6 @@ export const SETTINGS_OUTPUTS = {
   TYPE_INPUT: 'settingsOutputsFlyout.typeInput',
 };
 
-export const CONFIRM_MODAL_CONFIRM_BUTTON = 'confirmModalConfirmButton';
-export const CONFIRM_MODAL_CANCEL_BUTTON = 'confirmModalCancelButton';
-
 export const AGENT_POLICY_FORM = {
   DOWNLOAD_SOURCE_SELECT: 'agentPolicyForm.downloadSource.select',
 };

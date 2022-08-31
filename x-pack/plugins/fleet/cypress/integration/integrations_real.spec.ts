@@ -14,7 +14,6 @@ import {
 } from '../tasks/integrations';
 import {
   AGENT_POLICY_NAME_LINK,
-  CONFIRM_MODAL_BTN,
   FLYOUT_CLOSE_BTN_SEL,
   getIntegrationCard,
   INTEGRATION_NAME_LINK,
@@ -27,7 +26,7 @@ import {
   SETTINGS,
   INTEGRATION_POLICIES_UPGRADE_CHECKBOX,
 } from '../screens/integrations';
-import { LOADING_SPINNER } from '../screens/navigation';
+import { LOADING_SPINNER, CONFIRM_MODAL } from '../screens/navigation';
 import { ADD_PACKAGE_POLICY_BTN } from '../screens/fleet';
 import { cleanupAgentPolicies } from '../tasks/cleanup';
 
@@ -71,12 +70,12 @@ describe('Add Integration - Real API', () => {
 
     cy.getBySel(SETTINGS.INSTALL_ASSETS_BTN).click();
     cy.get('.euiCallOut').contains('This action will install 1 assets');
-    cy.getBySel(CONFIRM_MODAL_BTN).click();
+    cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
 
     cy.getBySel(LOADING_SPINNER).should('not.exist');
 
     cy.getBySel(SETTINGS.UNINSTALL_ASSETS_BTN).click();
-    cy.getBySel(CONFIRM_MODAL_BTN).click();
+    cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
     cy.getBySel(LOADING_SPINNER).should('not.exist');
     cy.getBySel(SETTINGS.INSTALL_ASSETS_BTN).should('exist');
   });
@@ -144,7 +143,7 @@ describe('Add Integration - Real API', () => {
 
     cy.getBySel(SETTINGS_TAB).click();
     cy.getBySel(UPDATE_PACKAGE_BTN).click();
-    cy.getBySel(CONFIRM_MODAL_BTN).click();
+    cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
 
     cy.getBySel(LATEST_VERSION).then(($title) => {
       const newVersion = $title.text();

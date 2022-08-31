@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { CONFIRM_MODAL_BTN } from '../screens/integrations';
-import { TOAST_CLOSE_BTN } from '../screens/navigation';
+import { TOAST_CLOSE_BTN, CONFIRM_MODAL } from '../screens/navigation';
 import { SETTINGS_SAVE_BTN, SETTINGS_OUTPUTS } from '../screens/fleet';
 
 describe('Edit settings', () => {
@@ -42,7 +41,7 @@ describe('Edit settings', () => {
     }).as('updateSettings');
 
     cy.getBySel(SETTINGS_SAVE_BTN).click();
-    cy.getBySel(CONFIRM_MODAL_BTN).click();
+    cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
 
     cy.wait('@updateSettings').then((interception) => {
       expect(interception.request.body.fleet_server_hosts[0]).to.equal('https://localhost:8220');
@@ -74,7 +73,7 @@ describe('Edit settings', () => {
     }).as('updateOutputs');
 
     cy.getBySel(SETTINGS_SAVE_BTN).click();
-    cy.getBySel(CONFIRM_MODAL_BTN).click();
+    cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
 
     cy.wait('@updateOutputs').then((interception) => {
       expect(interception.request.body.name).to.equal('output-1');
