@@ -72,6 +72,7 @@ import {
   ACTIVE_TIMELINE_BOTTOM_BAR,
   EMPTY_DATA_PROVIDER_AREA,
   EMPTY_DROPPABLE_DATA_PROVIDER_GROUP,
+  GET_TIMELINE_GRID_CELL,
 } from '../screens/timeline';
 import { REFRESH_BUTTON, TIMELINE } from '../screens/timelines';
 import { drag, drop } from './common';
@@ -188,21 +189,30 @@ export const addDataProvider = (filter: TimelineFilter): Cypress.Chainable<JQuer
   return cy.get(SAVE_DATA_PROVIDER_BTN).click();
 };
 
-export const updateDataProviderbyDraggingField = (
-  dragTarget: Cypress.Chainable<JQuery<HTMLElement>>
-) => {
-  dragTarget.then((currentSubject) => {
+export const updateDataProviderbyDraggingField = (fieldName: string, rowNumber: number) => {
+  const dragTargetSelector = GET_TIMELINE_GRID_CELL(fieldName);
+  const dragTarget = cy.get(dragTargetSelector);
+  dragTarget.eq(rowNumber).then((currentSubject) => {
     drag(currentSubject);
   });
   let dropTarget: Cypress.Chainable<JQuery<HTMLElement>>;
-  if (cy.get(EMPTY_DATA_PROVIDER_AREA).first()) {
-    dropTarget = cy.get(EMPTY_DATA_PROVIDER_AREA);
-  } else {
-    dropTarget = cy.get(EMPTY_DROPPABLE_DATA_PROVIDER_GROUP);
-  }
-  dropTarget.then((currentEl) => {
-    drop(currentEl);
+
+  cy.get('body').then((body) => {
+    if (body.find(EMPTY_DATA_PROVIDER_AREA).length > 0) {
+      dropTarget = cy.get(EMPTY_DATA_PROVIDER_AREA);
+    } else {
+      dropTarget = cy.get(EMPTY_DROPPABLE_DATA_PROVIDER_GROUP);
+    }
+
+    dropTarget.then((currentEl) => {
+      drop(currentEl);
+    });
   });
+};
+
+export const updateDataProviderByFieldHoverAction = (fieldName: string, rowNumber: number) => {
+  const fieldSelector = GET_TIMELINE_GRID_CELL(fieldName);
+  cy.get(fieldSelector).eq(rowNumber).trigger('mouseover', { force: true });
 };
 
 export const addNewCase = () => {

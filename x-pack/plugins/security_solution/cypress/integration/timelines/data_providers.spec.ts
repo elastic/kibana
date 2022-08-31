@@ -11,18 +11,21 @@ import {
   TIMELINE_FLYOUT_HEADER,
   GET_TIMELINE_GRID_CELL,
   TIMELINE_DATA_PROVIDERS_CONTAINER,
+  HOVER_ACTIONS,
 } from '../../screens/timeline';
 
 import { waitForAllHostsToBeLoaded } from '../../tasks/hosts/all_hosts';
 
 import { login, visit } from '../../tasks/login';
-import { openTimelineUsingToggle } from '../../tasks/security_main';
 import {
   addDataProvider,
   updateDataProviderbyDraggingField,
   addNameAndDescriptionToTimeline,
   populateTimeline,
   waitForTimelineChanges,
+  closeTimeline,
+  createNewTimeline,
+  updateDataProviderByFieldHoverAction,
 } from '../../tasks/timeline';
 import { getTimeline } from '../../objects/timeline';
 import { HOSTS_URL } from '../../urls/navigation';
@@ -37,8 +40,17 @@ describe('timeline data providers', () => {
     scrollToBottom();
   });
 
+  beforeEach(() => {
+    createNewTimeline();
+    addNameAndDescriptionToTimeline(getTimeline());
+    populateTimeline();
+  });
+
+  afterEach(() => {
+    closeTimeline();
+  });
+
   it('displays the data provider action menu when Enter is pressed', (done) => {
-    openTimelineUsingToggle();
     addDataProvider({ field: 'host.name', operator: 'exists' }).then(() => {
       cy.get(TIMELINE_DATA_PROVIDERS_ACTION_MENU).should('not.exist');
       cy.get(`${TIMELINE_FLYOUT_HEADER} ${TIMELINE_DROPPED_DATA_PROVIDERS}`)
@@ -55,10 +67,7 @@ describe('timeline data providers', () => {
   });
 
   it('persists timeline when data provider is updated by dragging a field from data grid', () => {
-    openTimelineUsingToggle();
-    addNameAndDescriptionToTimeline(getTimeline());
-    populateTimeline();
-    updateDataProviderbyDraggingField(cy.get(`${GET_TIMELINE_GRID_CELL('host.name')}`).first());
+    updateDataProviderbyDraggingField('host.name', 0);
     waitForTimelineChanges();
     cy.wait(1000);
     cy.reload();
@@ -66,6 +75,19 @@ describe('timeline data providers', () => {
       .first()
       .then((hostname) => {
         cy.get(TIMELINE_DATA_PROVIDERS_CONTAINER).contains(`host.name: "${hostname.text()}"`);
+      });
+  });
+
+  it('presists timeline when a field is added by hover action "Add To Timeline" in data provider ', () => {
+    updateDataProviderByFieldHoverAction('host.name', 0);
+    cy.get(HOVER_ACTIONS.ADD_TO_TIMELINE).should('be.visible');
+    cy.get(HOVER_ACTIONS.ADD_TO_TIMELINE).trigger('click', { force: true });
+    cy.get(`${GET_TIMELINE_GRID_CELL('host.name')}`)
+      .first()
+      .then((hostname) => {
+        cy.get(TIMELINE_DATA_PROVIDERS_CONTAINER).should((dataProviderContainer) => {
+          expect(dataProviderContainer).to.contain(`host.name: "${hostname.text()}"`);
+        });
       });
   });
 });
