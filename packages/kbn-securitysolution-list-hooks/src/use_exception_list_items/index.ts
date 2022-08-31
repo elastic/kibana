@@ -74,6 +74,7 @@ export const useExceptionListItems = ({
 
   useEffect(
     () => {
+      console.error('USE EFFECT WAS CALLED');
       let isSubscribed = true;
       const abortCtrl = new AbortController();
 

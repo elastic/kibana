@@ -41,6 +41,7 @@ import { useListsConfig } from '../../../../../containers/detection_engine/lists
 import type { ExceptionsTableItem } from './types';
 import { MissingPrivilegesCallOut } from '../../../../../components/callouts/missing_privileges_callout';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../../../../../common/endpoint/service/artifacts/constants';
+import { ExceptionsListCard } from './exceptions_list_card';
 
 export type Func = () => Promise<void>;
 
@@ -90,6 +91,7 @@ export const ExceptionListsTable = React.memo(() => {
   const [loadingTableInfo, exceptionListsWithRuleRefs, exceptionsListsRef] = useAllExceptionLists({
     exceptionLists: exceptions ?? [],
   });
+
   const [initLoading, setInitLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState(Date.now());
   const [deletingListIds, setDeletingListIds] = useState<string[]>([]);
@@ -374,7 +376,7 @@ export const ExceptionListsTable = React.memo(() => {
           <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
         )}
 
-        {initLoading ? (
+        {initLoading || loadingTableInfo ? (
           <EuiLoadingContent data-test-subj="initialLoadingPanelAllRulesTable" lines={10} />
         ) : (
           <>
@@ -382,16 +384,9 @@ export const ExceptionListsTable = React.memo(() => {
               totalExceptionLists={exceptionListsWithRuleRefs.length}
               onRefresh={handleRefresh}
             />
-            <EuiBasicTable<ExceptionsTableItem>
-              data-test-subj="exceptions-table"
-              columns={exceptionsColumns}
-              isSelectable={hasPermissions}
-              itemId="id"
-              items={tableItems}
-              noItemsMessage={emptyPrompt}
-              onChange={handlePaginationChange}
-              pagination={paginationMemo}
-            />
+            {exceptionListsWithRuleRefs.map((excList) => (
+              <ExceptionsListCard http={http} exceptionsList={excList} />
+            ))}
           </>
         )}
 
