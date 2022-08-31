@@ -235,7 +235,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
         },
         {
           disabled: !item.isEditable,
-          'data-test-subj': 'updateApiKey',
+          'data-test-subj': 'runRule',
           onClick: () => {
             setIsPopoverOpen(!isPopoverOpen);
             onRunRule(item);
