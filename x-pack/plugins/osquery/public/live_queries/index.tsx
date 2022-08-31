@@ -34,7 +34,6 @@ interface LiveQueryProps {
   packId?: string;
   agentSelection?: AgentSelection;
   addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
-  hideSubmitButton?: boolean;
 }
 
 const LiveQueryComponent: React.FC<LiveQueryProps> = ({
@@ -54,7 +53,6 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
   packId,
   agentSelection,
   addToTimeline,
-  hideSubmitButton,
 }) => {
   const { data: hasActionResultsPrivileges, isLoading } = useActionResultsPrivileges();
 
@@ -130,7 +128,6 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
       formType={formType}
       enabled={enabled}
       hideAgentsField={hideAgentsField}
-      hideSubmitButton={hideSubmitButton}
       addToTimeline={addToTimeline}
     />
   );

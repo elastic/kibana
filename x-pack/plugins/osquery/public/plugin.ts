@@ -107,12 +107,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
         storage: this.storage,
         kibanaVersion: this.kibanaVersion,
       }),
-      OsqueryResponseActionTypeForm: getLazyOsqueryResponseActionTypeForm({
-        ...core,
-        ...plugins,
-        storage: this.storage,
-        kibanaVersion: this.kibanaVersion,
-      }),
+      OsqueryResponseActionTypeForm: getLazyOsqueryResponseActionTypeForm(),
       fetchInstallationStatus: useFetchStatus,
       isOsqueryAvailable: useIsOsqueryAvailableSimple,
     };

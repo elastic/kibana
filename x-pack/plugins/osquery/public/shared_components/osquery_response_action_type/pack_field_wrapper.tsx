@@ -14,7 +14,7 @@ import { usePacks } from '../../packs/use_packs';
 import { PacksComboBoxField } from '../../live_queries/form/packs_combobox_field';
 import type { LiveQueryDetailsItem } from '../../actions/use_live_query_details';
 
-interface Pack_field_wrapper {
+interface PackFieldWrapperProps {
   liveQueryDetails?: LiveQueryDetailsItem;
   addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
   submitButtonContent?: React.ReactNode;
@@ -24,7 +24,7 @@ export const PackFieldWrapper = ({
   liveQueryDetails,
   addToTimeline,
   submitButtonContent,
-}: Pack_field_wrapper) => {
+}: PackFieldWrapperProps) => {
   const { data: packsData } = usePacks({});
   const { packId } = useWatch() as unknown as { packId: string[] };
 

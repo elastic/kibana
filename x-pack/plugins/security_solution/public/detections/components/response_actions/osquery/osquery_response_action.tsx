@@ -16,7 +16,8 @@ interface IProps {
   item: ArrayItem;
 }
 
-export const OsqueryResponseAction = (props: IProps) => {
+// eslint-disable-next-line react/display-name
+export const OsqueryResponseAction = React.memo((props: IProps) => {
   // IT SHOULD BE MOVED INTO OSQUERY PLUGIN
   const { osquery } = useKibana().services;
   const OsqueryForm = useMemo(
@@ -66,4 +67,4 @@ export const OsqueryResponseAction = (props: IProps) => {
   }
 
   return null;
-};
+});

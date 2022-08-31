@@ -5,10 +5,51 @@
  * 2.0.
  */
 
-import React from 'react';
-import { OsqueryResponseActionParamsForm } from './osquery_response_action_type';
+import React, { lazy, Suspense } from 'react';
+import type { ArrayItem } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
-// @ts-expect-error update types
-// eslint-disable-next-line react/display-name
-export const getLazyOsqueryResponseActionTypeForm = () => (props) =>
-  <OsqueryResponseActionParamsForm {...props} />;
+interface LazyOsqueryActionParamsFormProps {
+  item: ArrayItem;
+}
+
+const GhostFormField = () => <></>;
+
+export const getLazyOsqueryResponseActionTypeForm =
+  () => (props: LazyOsqueryActionParamsFormProps) => {
+    const { item } = props;
+    const OsqueryResponseActionParamsForm = lazy(() => import('./osquery_response_action_type'));
+
+    return (
+      <>
+        <UseField
+          path={`${item.path}.params.query`}
+          component={GhostFormField}
+          readDefaultValueOnForm={!item.isNew}
+        />
+        <UseField
+          path={`${item.path}.params.savedQueryId`}
+          component={GhostFormField}
+          readDefaultValueOnForm={!item.isNew}
+        />
+        <UseField
+          path={`${item.path}.params.id`}
+          component={GhostFormField}
+          readDefaultValueOnForm={!item.isNew}
+        />
+        <UseField
+          path={`${item.path}.params.ecs_mapping`}
+          component={GhostFormField}
+          readDefaultValueOnForm={!item.isNew}
+        />
+        <UseField
+          path={`${item.path}.params.packId`}
+          component={GhostFormField}
+          readDefaultValueOnForm={!item.isNew}
+        />
+        <Suspense fallback={null}>
+          <OsqueryResponseActionParamsForm item={item} />
+        </Suspense>
+      </>
+    );
+  };

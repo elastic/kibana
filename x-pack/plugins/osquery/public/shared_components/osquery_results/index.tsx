@@ -49,8 +49,6 @@ const OsqueryActionResultsComponent: React.FC<OsqueryActionResultsProps> = ({
     direction: Direction.desc,
     sortField: '@timestamp',
   });
-  console.log({ actionsData });
-
   const agentsList = useMemo(
     () => (
       <StyledScrolledEuiFlexItem>
@@ -116,8 +114,6 @@ const OsqueryActionResultsComponent: React.FC<OsqueryActionResultsProps> = ({
           </EuiComment>
         );
       })}
-
-      {/* <div ref={ref}>{isFetchingNextPage && <EuiLoadingContent lines={5} />}</div>*/}
     </div>
   );
 };

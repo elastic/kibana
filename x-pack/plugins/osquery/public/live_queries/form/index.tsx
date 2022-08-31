@@ -74,7 +74,6 @@ interface LiveQueryFormProps {
   enabled?: boolean;
   hideAgentsField?: boolean;
   addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
-  hideSubmitButton?: boolean;
 }
 
 const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
@@ -86,7 +85,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   enabled = true,
   hideAgentsField = false,
   addToTimeline,
-  hideSubmitButton,
 }) => {
   const permissions = useKibana().services.application.capabilities.osquery;
   const canRunPacks = useMemo(
@@ -193,10 +191,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   const onSubmit = useCallback(
     // not sure why, but submitOnCmdEnter doesn't have proper form values so I am passing them in manually
     async (values: LiveQueryFormFields = watchedValues) => {
-      if (hideSubmitButton) {
-        return;
-      }
-
       const serializedData = liveQueryFormSerializer(values);
       if (isEmpty(errors)) {
         try {
@@ -206,7 +200,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
         } catch (e) {}
       }
     },
-    [errors, mutateAsync, watchedValues, hideSubmitButton]
+    [errors, mutateAsync, watchedValues]
   );
   const commands = useMemo(
     () => [
@@ -465,7 +459,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           ) : (
             <>
               <EuiFlexItem>{queryFieldStepContent}</EuiFlexItem>
-              {!hideSubmitButton && submitButtonContent}
+              {submitButtonContent}
               <EuiFlexItem>{resultsStepContent}</EuiFlexItem>
             </>
           )}
