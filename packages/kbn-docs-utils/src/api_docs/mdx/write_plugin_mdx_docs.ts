@@ -42,7 +42,7 @@ export function writePluginDocs(
   }
 }
 
-function hasPublicApi(doc: PluginApi): boolean {
+export function hasPublicApi(doc: PluginApi): boolean {
   return doc.client.length > 0 || doc.server.length > 0 || doc.common.length > 0;
 }
 
