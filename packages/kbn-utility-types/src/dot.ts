@@ -7,7 +7,7 @@
  */
 
 import { DeepPartial, ValuesType } from 'utility-types';
-import { UnionToIntersection } from '.';
+import { UnionToIntersection } from '..';
 
 type DedotKey<
   TObject extends Record<string, any>,

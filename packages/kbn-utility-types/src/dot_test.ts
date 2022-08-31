@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { expectNotType, expectType } from 'tsd';
 import { DedotObject, DotObject } from './dot';
 
 interface TestA {
@@ -54,32 +55,24 @@ interface Dedotted {
   };
 }
 
-const dedotted1: DedotObject<TestA> = {} as Dedotted;
+const dedotted1 = {} as DedotObject<TestA>;
 
-const dotted1: DotObject<TestB> = {} as Dotted;
+const dotted1 = {} as DotObject<TestB>;
 
-const dedotted2: Dedotted = {} as DedotObject<TestA>;
+expectType<DedotObject<TestA>>({} as Dedotted);
+expectType<DotObject<TestB>>({} as Dotted);
+expectType<Dedotted>({} as DedotObject<TestA>);
+expectType<Dotted>({} as DotObject<TestB>);
 
-const dotted2: Dotted = {} as DotObject<TestB>;
-
-const foo: string | undefined = dedotted1.ym?.dotted?.partial?.key?.toString();
-
-const bar: string = dotted1['my.undotted.key'].toString();
-
-// @ts-expect-error
-const baz: string = dotted1['my.partial.key'].toString();
-
-const qux: string | undefined = dotted1['my.partial.key']?.toString();
-
-// @ts-expect-error
-const foo1: { baz: string } = {} as DedotObject<TestA>;
-
-// @ts-expect-error
-const foo2: { baz: string } = {} as DotObject<TestB>;
-
-// @ts-expect-error
-const foo3: { my: { dotted: { key: string }; partial: { key: number } } } =
-  {} as DedotObject<TestA>;
+expectType<string | undefined>(dedotted1.ym?.dotted?.partial?.key?.toString());
+expectType<string>(dotted1['my.undotted.key'].toString());
+expectNotType<string>(dotted1['my.partial.key']);
+expectType<string | undefined>(dotted1['my.partial.key']?.toString());
+expectNotType<{ baz: string }>({} as DedotObject<TestA>);
+expectNotType<{ baz: string }>({} as DotObject<TestB>);
+expectNotType<{ my: { dotted: { key: string }; partial: { key: number } } }>(
+  {} as DedotObject<TestA>
+);
 
 interface ObjectWithArray {
   span: {
@@ -94,23 +87,7 @@ interface ObjectWithArray {
   };
 }
 
-const objectWithArray: DotObject<ObjectWithArray> = {
+expectType<DotObject<ObjectWithArray>>({
   'span.links.span.id': [''],
   'span.links.trace.id': [''],
-};
-
-// eslint-disable-next-line no-console
-console.log({
-  dotted1,
-  dedotted1,
-  dotted2,
-  dedotted2,
-  foo1,
-  foo2,
-  foo3,
-  foo,
-  bar,
-  baz,
-  qux,
-  objectWithArray,
 });
