@@ -56,7 +56,7 @@ describe('esaggs expression function - public', () => {
     jest.clearAllMocks();
     mockHandlers = {
       abortSignal: jest.fn() as unknown as jest.Mocked<AbortSignal>,
-      getSearchContext: jest.fn(),
+      getSearchContext: jest.fn().mockReturnValue({}),
       getSearchSessionId: jest.fn().mockReturnValue('abc123'),
       getExecutionContext: jest.fn(),
       inspectorAdapters: jest.fn(),

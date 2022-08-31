@@ -52,7 +52,6 @@ export function getFunctionDefinition({
         return { aggConfigs, indexPattern, searchSource, getNow, handleEsaggsRequest };
       }).pipe(
         switchMap(({ aggConfigs, indexPattern, searchSource, getNow, handleEsaggsRequest }) => {
-
           const { disableShardWarnings } = getSearchContext();
 
           return handleEsaggsRequest({
