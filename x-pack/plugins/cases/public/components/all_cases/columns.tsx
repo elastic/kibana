@@ -78,13 +78,21 @@ const AssigneesColumn: React.FC<{
 
   return (
     <EuiFlexGroup gutterSize="none" data-test-subj="case-table-column-assignee" wrap>
-      {allAssignees.map((assignee, index) => (
-        <EuiFlexItem grow={false} key={assignee.uid}>
-          <UserToolTip profile={assignee.profile}>
-            <CaseUserAvatar size="s" profile={assignee.profile} />
-          </UserToolTip>
-        </EuiFlexItem>
-      ))}
+      {allAssignees.map((assignee) => {
+        // TODO: use function from other PR
+        const dataTestSubjName = assignee.profile?.user.username ?? assignee.uid;
+        return (
+          <EuiFlexItem
+            grow={false}
+            key={assignee.uid}
+            data-test-subj={`case-table-column-assignee-${dataTestSubjName}`}
+          >
+            <UserToolTip profile={assignee.profile}>
+              <CaseUserAvatar size="s" profile={assignee.profile} />
+            </UserToolTip>
+          </EuiFlexItem>
+        );
+      })}
     </EuiFlexGroup>
   );
 };

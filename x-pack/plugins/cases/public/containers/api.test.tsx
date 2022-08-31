@@ -200,7 +200,7 @@ describe('Cases API', () => {
         query: {
           ...DEFAULT_QUERY_PARAMS,
           searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
-          reporters: [],
+          assignees: [],
           tags: [],
           owner: [SECURITY_SOLUTION_OWNER],
         },
@@ -250,7 +250,7 @@ describe('Cases API', () => {
         query: {
           ...DEFAULT_QUERY_PARAMS,
           searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
-          reporters: [],
+          assignees: [],
           tags: [],
           severity: CaseSeverity.HIGH,
         },
@@ -272,7 +272,7 @@ describe('Cases API', () => {
         query: {
           ...DEFAULT_QUERY_PARAMS,
           searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
-          reporters: [],
+          assignees: [],
           tags: [],
         },
         signal: abortCtrl.signal,

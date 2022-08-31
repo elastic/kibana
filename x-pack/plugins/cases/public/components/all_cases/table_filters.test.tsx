@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
+import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
@@ -18,8 +19,10 @@ import { CasesTableFilters } from './table_filters';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useFindAssignees } from '../../containers/use_find_assignees';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
+import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
 
 jest.mock('../../containers/use_find_assignees');
+jest.mock('../../containers/user_profiles/use_get_current_user_profile');
 jest.mock('../../containers/use_get_tags');
 
 const onFilterChanged = jest.fn();
@@ -42,7 +45,15 @@ describe('CasesTableFilters ', () => {
     appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
     (useGetTags as jest.Mock).mockReturnValue({ data: ['coke', 'pepsi'], refetch });
-    (useFindAssignees as jest.Mock).mockReturnValue(userProfiles);
+    (useFindAssignees as jest.Mock).mockReturnValue({
+      data: userProfiles,
+      refetch,
+      isLoading: false,
+    });
+    (useGetCurrentUserProfile as jest.Mock).mockReturnValue({
+      data: userProfiles[0],
+      isLoading: false,
+    });
   });
 
   it('should render the case status filter dropdown', () => {
@@ -81,33 +92,20 @@ describe('CasesTableFilters ', () => {
     expect(onFilterChanged).toBeCalledWith({ tags: ['coke'] });
   });
 
-  it.only('should call onFilterChange when selected assignees change', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <CasesTableFilters {...props} />
-      </TestProviders>
-    );
+  it('should call onFilterChange when selected assignees change', async () => {
+    const { getByTestId, getByText } = appMockRender.render(<CasesTableFilters {...props} />);
+    userEvent.click(getByTestId('options-filter-popover-button-assignees'));
+    await waitForEuiPopoverOpen();
 
-    // appMockRender.render(<CasesTableFilters {...props} />);
+    userEvent.click(getByText('Physical Dinosaur'));
 
-    // fireEvent.click(screen.getByTestId('options-filter-popover-button-assignees'));
-
-    // fireEvent.click(screen.getByText('Physical Dinosaur'));
-
-    wrapper
-      .find(`[data-test-subj="options-filter-popover-button-assignees"]`)
-      .last()
-      .simulate('click');
-    // await waitForEuiPopoverOpen();
-
-    console.log(wrapper.debug());
-    wrapper
-      .findWhere((node) => {
-        return node.type() != null && node.name() != null && node.text() === 'Physical Dinosaur';
-      })
-      .simulate('click');
-
-    expect(onFilterChanged.mock.calls[0][0]).toMatchInlineSnapshot();
+    expect(onFilterChanged.mock.calls[0][0]).toMatchInlineSnapshot(`
+      Object {
+        "assignees": Array [
+          "u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0",
+        ],
+      }
+    `);
   });
 
   it('should call onFilterChange when search changes', () => {
@@ -161,23 +159,32 @@ describe('CasesTableFilters ', () => {
     expect(onFilterChanged).toHaveBeenCalledWith({ tags: ['pepsi'] });
   });
 
-  it('should remove reporter from selected reporters when reporter no longer exists', () => {
-    const ourProps = {
+  it('should remove assignee from selected assignees when assignee no longer exists', async () => {
+    const overrideProps = {
       ...props,
       initial: {
         ...DEFAULT_FILTER_OPTIONS,
-        reporters: [
-          { username: 'casetester', full_name: null, email: null },
-          { username: 'batman', full_name: null, email: null },
+        assignees: [
+          // invalid profile uid
+          '123',
+          'u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0',
         ],
       },
     };
-    mount(
-      <TestProviders>
-        <CasesTableFilters {...ourProps} />
-      </TestProviders>
-    );
-    expect(onFilterChanged).toHaveBeenCalledWith({ reporters: [{ username: 'casetester' }] });
+
+    appMockRender.render(<CasesTableFilters {...overrideProps} />);
+    userEvent.click(screen.getByTestId('options-filter-popover-button-assignees'));
+    await waitForEuiPopoverOpen();
+
+    userEvent.click(screen.getByText('Physical Dinosaur'));
+
+    expect(onFilterChanged.mock.calls[0][0]).toMatchInlineSnapshot(`
+      Object {
+        "assignees": Array [
+          "u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0",
+        ],
+      }
+    `);
   });
 
   it('StatusFilterWrapper should have a fixed width of 180px', () => {
