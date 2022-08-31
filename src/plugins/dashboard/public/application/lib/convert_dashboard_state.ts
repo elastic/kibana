@@ -34,7 +34,6 @@ import { deserializeControlGroupFromDashboardSavedObject } from './dashboard_con
 import { pluginServices } from '../../services/plugin_services';
 
 interface SavedObjectToDashboardStateProps {
-  version: string;
   savedDashboard: DashboardSavedObject;
   savedObjectsTagging: DashboardAppServices['savedObjectsTagging'];
 }
@@ -49,7 +48,6 @@ interface StateToDashboardContainerInputProps {
 }
 
 interface StateToRawDashboardStateProps {
-  version: string;
   state: DashboardState;
 }
 /**
@@ -58,12 +56,12 @@ interface StateToRawDashboardStateProps {
  * dashboard panel to a panel state.
  */
 export const savedObjectToDashboardState = ({
-  version,
   savedDashboard,
   savedObjectsTagging,
 }: SavedObjectToDashboardStateProps): DashboardState => {
   const {
     dashboardCapabilities: { showWriteControls },
+    initializerContext: { kibanaVersion },
   } = pluginServices.getServices();
 
   const rawState = migrateAppState(
@@ -79,7 +77,7 @@ export const savedObjectToDashboardState = ({
       viewMode: savedDashboard.id || showWriteControls ? ViewMode.EDIT : ViewMode.VIEW,
       options: savedDashboard.optionsJSON ? JSON.parse(savedDashboard.optionsJSON) : {},
     },
-    version
+    kibanaVersion
   );
   if (rawState.timeRestore) {
     rawState.timeRange = { from: savedDashboard.timeFrom, to: savedDashboard.timeTo } as TimeRange;
@@ -161,11 +159,14 @@ const filtersAreEqual = (first: Filter, second: Filter) =>
  * they require panels to be formatted as an array.
  */
 export const stateToRawDashboardState = ({
-  version,
   state,
 }: StateToRawDashboardStateProps): RawDashboardState => {
+  const {
+    initializerContext: { kibanaVersion },
+  } = pluginServices.getServices();
+
   const savedDashboardPanels = Object.values(state.panels).map((panel) =>
-    convertPanelStateToSavedDashboardPanel(panel, version)
+    convertPanelStateToSavedDashboardPanel(panel, kibanaVersion)
   );
   return { ..._.omit(state, 'panels'), panels: savedDashboardPanels };
 };

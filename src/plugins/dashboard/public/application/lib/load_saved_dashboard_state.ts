@@ -27,7 +27,6 @@ export const loadSavedDashboardState = async ({
   history,
   savedDashboards,
   savedDashboardId,
-  initializerContext,
   savedObjectsTagging,
 }: DashboardBuildContext & { savedDashboardId?: string }): Promise<
   LoadSavedDashboardStateReturn | undefined
@@ -58,7 +57,6 @@ export const loadSavedDashboardState = async ({
     const savedDashboardState = savedObjectToDashboardState({
       savedDashboard,
       savedObjectsTagging,
-      version: initializerContext.env.packageInfo.version,
     });
 
     const isViewMode = !showWriteControls || Boolean(savedDashboard.id);

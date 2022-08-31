@@ -10,6 +10,7 @@ import {
   convertSavedDashboardPanelToPanelState,
   convertPanelStateToSavedDashboardPanel,
 } from '../../../common/embeddable/embeddable_saved_object_converters';
+import { pluginServices } from '../../services/plugin_services';
 import type { SavedDashboardPanel, DashboardPanelMap } from '../../types';
 
 export const convertSavedPanelsToPanelMap = (panels?: SavedDashboardPanel[]): DashboardPanelMap => {
@@ -20,8 +21,12 @@ export const convertSavedPanelsToPanelMap = (panels?: SavedDashboardPanel[]): Da
   return panelsMap;
 };
 
-export const convertPanelMapToSavedPanels = (panels: DashboardPanelMap, version: string) => {
+export const convertPanelMapToSavedPanels = (panels: DashboardPanelMap) => {
+  const {
+    initializerContext: { kibanaVersion },
+  } = pluginServices.getServices();
+
   return Object.values(panels).map((panel) =>
-    convertPanelStateToSavedDashboardPanel(panel, version)
+    convertPanelStateToSavedDashboardPanel(panel, kibanaVersion)
   );
 };

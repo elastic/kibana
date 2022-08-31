@@ -149,10 +149,11 @@ export class DashboardPlugin
 
   private async startDashboardKibanaServices(
     coreStart: CoreStart,
-    startPlugins: DashboardStartDependencies
+    startPlugins: DashboardStartDependencies,
+    initContext: PluginInitializerContext
   ) {
     const { registry, pluginServices } = await import('./services/plugin_services');
-    pluginServices.setRegistry(registry.start({ coreStart, startPlugins }));
+    pluginServices.setRegistry(registry.start({ coreStart, startPlugins, initContext }));
   }
 
   public setup(
@@ -279,7 +280,6 @@ export class DashboardPlugin
           element: params.element,
           onAppLeave: params.onAppLeave,
           scopedHistory: this.currentHistory!,
-          initializerContext: this.initializerContext,
           setHeaderActionMenu: params.setHeaderActionMenu,
         });
       },
@@ -336,7 +336,7 @@ export class DashboardPlugin
   public start(core: CoreStart, plugins: DashboardStartDependencies): DashboardStart {
     const { notifications, overlays, application, theme, uiSettings } = core;
     const { uiActions, data, share, presentationUtil, embeddable } = plugins;
-    this.startDashboardKibanaServices(core, plugins);
+    this.startDashboardKibanaServices(core, plugins, this.initializerContext);
 
     const dashboardCapabilities: Readonly<DashboardCapabilities> = application.capabilities
       .dashboard as DashboardCapabilities;

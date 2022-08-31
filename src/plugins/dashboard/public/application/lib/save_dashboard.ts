@@ -26,7 +26,6 @@ import { pluginServices } from '../../services/plugin_services';
 export type SavedDashboardSaveOpts = SavedObjectSaveOpts & { stayInEditMode?: boolean };
 
 interface SaveDashboardProps {
-  version: string;
   redirectTo: DashboardRedirect;
   currentState: DashboardState;
   saveOptions: SavedDashboardSaveOpts;
@@ -36,7 +35,6 @@ interface SaveDashboardProps {
 }
 
 export const saveDashboard = async ({
-  version,
   redirectTo,
   saveOptions,
   currentState,
@@ -44,13 +42,17 @@ export const saveDashboard = async ({
   savedObjectsTagging,
   dashboardSessionStorage,
 }: SaveDashboardProps): Promise<{ id?: string; redirected?: boolean; error?: any }> => {
+  const {
+    initializerContext: { kibanaVersion },
+  } = pluginServices.getServices();
+
   const lastDashboardId = savedDashboard.id;
   const hasTaggingCapabilities = getHasTaggingCapabilitiesGuard(savedObjectsTagging);
 
   const { panels, title, tags, description, timeRestore, options } = currentState;
 
   const savedDashboardPanels = Object.values(panels).map((panel) =>
-    convertPanelStateToSavedDashboardPanel(panel, version)
+    convertPanelStateToSavedDashboardPanel(panel, kibanaVersion)
   );
 
   savedDashboard.title = title;

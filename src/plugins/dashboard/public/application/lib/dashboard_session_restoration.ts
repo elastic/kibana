@@ -31,7 +31,6 @@ export const getSessionURLObservable = (history: History) =>
   createQueryParamObservable<string>(history, DashboardConstants.SEARCH_SESSION_ID);
 
 export function createSessionRestorationDataProvider(deps: {
-  kibanaVersion: string;
   getAppState: () => DashboardState;
   getDashboardTitle: () => string;
   getDashboardId: () => string;
@@ -54,9 +53,7 @@ export function enableDashboardSearchSessions({
   initialDashboardState,
   getLatestDashboardState,
   savedDashboard,
-  kibanaVersion,
 }: {
-  kibanaVersion: string;
   canStoreSearchSession: boolean;
   savedDashboard: DashboardSavedObject;
   initialDashboardState: DashboardState;
@@ -71,7 +68,6 @@ export function enableDashboardSearchSessions({
 
   data.search.session.enableStorage(
     createSessionRestorationDataProvider({
-      kibanaVersion,
       getDashboardTitle: () => dashboardTitle,
       getDashboardId: () => savedDashboard?.id || '',
       getAppState: getLatestDashboardState,
@@ -94,18 +90,16 @@ export function enableDashboardSearchSessions({
  */
 function getLocatorParams({
   getAppState,
-  kibanaVersion,
   getDashboardId,
   shouldRestoreSearchSession,
 }: {
-  kibanaVersion: string;
   getAppState: () => DashboardState;
   getDashboardId: () => string;
   shouldRestoreSearchSession: boolean;
 }): DashboardAppLocatorParams {
   const { data } = pluginServices.getServices();
 
-  const appState = stateToRawDashboardState({ state: getAppState(), version: kibanaVersion });
+  const appState = stateToRawDashboardState({ state: getAppState() });
   const { filterManager, queryString } = data.query;
   const { timefilter } = data.query.timefilter;
 

@@ -20,6 +20,7 @@ import { dataServiceFactory } from './data/data.stub';
 import { dataViewEditorServiceFactory } from './data_view_editor/data_view_editor.stub';
 import { embeddableServiceFactory } from './embeddable/embeddable.stub';
 import { httpServiceFactory } from './http/http.stub';
+import { initializerContextServiceFactory } from './initializer_context/initializer_context.stub';
 import { navigationServiceFactory } from './navigation/navigation.stub';
 import { notificationsServiceFactory } from './notifications/notifications.stub';
 import { overlaysServiceFactory } from './overlays/overlays.stub';
@@ -34,9 +35,11 @@ import { visualizationsServiceFactory } from './visualizations/visualizations.st
 export const providers: PluginServiceProviders<DashboardServices> = {
   chrome: new PluginServiceProvider(chromeServiceFactory),
   data: new PluginServiceProvider(dataServiceFactory),
+  dashboardCapabilities: new PluginServiceProvider(dashboardCapabilitiesServiceFactory),
   dataViewEditor: new PluginServiceProvider(dataViewEditorServiceFactory),
   embeddable: new PluginServiceProvider(embeddableServiceFactory),
   http: new PluginServiceProvider(httpServiceFactory),
+  initializerContext: new PluginServiceProvider(initializerContextServiceFactory),
   navigation: new PluginServiceProvider(navigationServiceFactory),
   notifications: new PluginServiceProvider(notificationsServiceFactory),
   overlays: new PluginServiceProvider(overlaysServiceFactory),
@@ -47,8 +50,6 @@ export const providers: PluginServiceProviders<DashboardServices> = {
   urlForwarding: new PluginServiceProvider(urlForwardingServiceFactory),
   usageCollection: new PluginServiceProvider(usageCollectionServiceFactory),
   visualizations: new PluginServiceProvider(visualizationsServiceFactory),
-
-  dashboardCapabilities: new PluginServiceProvider(dashboardCapabilitiesServiceFactory),
 };
 
 export const registry = new PluginServiceRegistry<DashboardServices>(providers);

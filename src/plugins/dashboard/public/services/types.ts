@@ -6,12 +6,17 @@
  * Side Public License, v 1.
  */
 
+import { PluginInitializerContext } from '@kbn/core/public';
+import { KibanaPluginServiceParams } from '@kbn/presentation-util-plugin/public';
+
+import { DashboardStartDependencies } from '../plugin';
 import { DashboardChromeService } from './chrome/types';
 import { DashboardCapabilitiesService } from './dashboard_capabilities/types';
 import { DashboardDataService } from './data/types';
 import { DashboardDataViewEditorService } from './data_view_editor/types';
 import { DashboardEmbeddableService } from './embeddable/types';
 import { DashboardHTTPService } from './http/types';
+import { DashboardInitializerContextServiceType } from './initializer_context/types';
 import { DashboardNavigationService } from './navigation/types';
 import { DashboardNotificationsService } from './notifications/types';
 import { DashboardOverlaysService } from './overlays/types';
@@ -23,13 +28,17 @@ import { DashboardUrlForwardingService } from './url_forwarding/types';
 import { DashboardUsageCollectionService } from './usage_collection/types';
 import { DashboardVisualizationsService } from './visualizations/types';
 
+export type DashboardPluginServiceParams = KibanaPluginServiceParams<DashboardStartDependencies> & {
+  initContext: PluginInitializerContext;
+};
 export interface DashboardServices {
-  // dependency services
   chrome: DashboardChromeService;
   data: DashboardDataService;
+  dashboardCapabilities: DashboardCapabilitiesService;
   dataViewEditor: DashboardDataViewEditorService; // used only for no data state
   embeddable: DashboardEmbeddableService;
   http: DashboardHTTPService;
+  initializerContext: DashboardInitializerContextServiceType;
   navigation: DashboardNavigationService;
   notifications: DashboardNotificationsService;
   overlays: DashboardOverlaysService;
@@ -40,7 +49,4 @@ export interface DashboardServices {
   urlForwarding: DashboardUrlForwardingService;
   usageCollection: DashboardUsageCollectionService; // TODO: make this optional in follow up
   visualizations: DashboardVisualizationsService;
-
-  // dashboard plugin's own services
-  dashboardCapabilities: DashboardCapabilitiesService;
 }

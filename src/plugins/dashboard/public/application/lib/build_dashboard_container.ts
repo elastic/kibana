@@ -42,7 +42,6 @@ export const buildDashboardContainer = async ({
   isEmbeddedExternally,
   incomingEmbeddable,
   savedDashboard,
-  kibanaVersion,
   history,
   executionContext,
 }: BuildDashboardContainerProps) => {
@@ -56,7 +55,6 @@ export const buildDashboardContainer = async ({
 
   // set up search session
   enableDashboardSearchSessions({
-    kibanaVersion,
     savedDashboard,
     initialDashboardState,
     getLatestDashboardState,

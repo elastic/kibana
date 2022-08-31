@@ -23,6 +23,7 @@ import type {
   RawDashboardState,
 } from '../../types';
 import { convertSavedPanelsToPanelMap } from './convert_dashboard_panels';
+import { pluginServices } from '../../services/plugin_services';
 
 type SyncDashboardUrlStateProps = DashboardBuildContext & { savedDashboard: DashboardSavedObject };
 
@@ -31,11 +32,15 @@ export const syncDashboardUrlState = ({
   getLatestDashboardState,
   kbnUrlStateStorage,
   savedDashboard,
-  kibanaVersion,
 }: SyncDashboardUrlStateProps) => {
   /**
    * Loads any dashboard state from the URL, and removes the state from the URL.
    */
+
+  const {
+    initializerContext: { kibanaVersion },
+  } = pluginServices.getServices();
+
   const loadAndRemoveDashboardState = (): Partial<DashboardState> => {
     const rawAppStateInUrl = kbnUrlStateStorage.get<RawDashboardState>(DASHBOARD_STATE_STORAGE_KEY);
     if (!rawAppStateInUrl) return {};

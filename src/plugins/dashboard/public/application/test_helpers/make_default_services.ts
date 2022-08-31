@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext, ScopedHistory } from '@kbn/core/public';
+import { ScopedHistory } from '@kbn/core/public';
 import { savedObjectsPluginMock } from '@kbn/saved-objects-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 
@@ -47,20 +47,14 @@ export function makeDefaultServices(): DashboardAppServices {
   } as unknown as DashboardSessionStorage;
   dashboardSessionStorage.clearState = jest.fn();
 
-  const initializerContext = {
-    env: { packageInfo: { version: '8.0.0' } },
-  } as PluginInitializerContext;
-
   return {
     savedObjects: savedObjectsPluginMock.createStartContract(),
     savedObjectsClient: core.savedObjects.client,
     scopedHistory: () => ({} as ScopedHistory),
     setHeaderActionMenu: (mountPoint) => {},
-    allowByValueEmbeddables: true,
     restorePreviousUrl: () => {},
     onAppLeave: (handler) => {},
     dashboardSessionStorage,
-    initializerContext,
     savedDashboards,
     core,
   };

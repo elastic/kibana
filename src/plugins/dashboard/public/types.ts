@@ -15,7 +15,6 @@ import type {
   CoreStart,
   SavedObjectsClientContract,
   ScopedHistory,
-  PluginInitializerContext,
   KibanaExecutionContext,
 } from '@kbn/core/public';
 import type { Filter } from '@kbn/es-query';
@@ -118,11 +117,10 @@ export interface DashboardAppState {
 // TODO: Delete this maybe?
 export type DashboardBuildContext = Pick<
   DashboardAppServices,
-  'savedDashboards' | 'initializerContext' | 'savedObjectsTagging'
+  'savedDashboards' | 'savedObjectsTagging'
 > & {
   locatorState?: DashboardAppLocatorParams;
   history: History;
-  kibanaVersion: string;
   isEmbeddedExternally: boolean;
   kbnUrlStateStorage: IKbnUrlStateStorage;
   $checkForUnsavedChanges: Subject<unknown>;
@@ -167,10 +165,8 @@ export interface DashboardAppServices {
   core: CoreStart;
   restorePreviousUrl: () => void;
   savedObjects: SavedObjectsStart;
-  allowByValueEmbeddables: boolean;
   savedDashboards: SavedObjectLoader;
   scopedHistory: () => ScopedHistory;
-  initializerContext: PluginInitializerContext;
   onAppLeave: AppMountParameters['onAppLeave'];
   savedObjectsTagging?: SavedObjectsTaggingApi;
   savedObjectsClient: SavedObjectsClientContract;

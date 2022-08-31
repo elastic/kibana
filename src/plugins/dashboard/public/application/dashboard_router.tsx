@@ -18,12 +18,7 @@ import { Switch, Route, RouteComponentProps, HashRouter, Redirect } from 'react-
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
-import {
-  AppMountParameters,
-  CoreSetup,
-  PluginInitializerContext,
-  ScopedHistory,
-} from '@kbn/core/public';
+import { AppMountParameters, CoreSetup, ScopedHistory } from '@kbn/core/public';
 
 import { DashboardListing } from './listing';
 import { dashboardStateStore } from './state';
@@ -34,7 +29,7 @@ import { createDashboardListingFilterUrl } from '../dashboard_constants';
 import { createDashboardEditUrl, DashboardConstants } from '../dashboard_constants';
 import { dashboardReadonlyBadge, getDashboardPageTitle } from '../dashboard_strings';
 import { DashboardAppServices, DashboardEmbedSettings, RedirectToProps } from '../types';
-import { DashboardFeatureFlagConfig, DashboardStart, DashboardStartDependencies } from '../plugin';
+import { DashboardStart, DashboardStartDependencies } from '../plugin';
 import { pluginServices } from '../services/plugin_services';
 
 export const dashboardUrlParams = {
@@ -50,7 +45,6 @@ export interface DashboardMountProps {
 
   scopedHistory: ScopedHistory<unknown>;
   element: AppMountParameters['element'];
-  initializerContext: PluginInitializerContext;
   onAppLeave: AppMountParameters['onAppLeave'];
   core: CoreSetup<DashboardStartDependencies, DashboardStart>;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
@@ -62,7 +56,6 @@ export async function mountApp({
   onAppLeave,
   appUnMounted,
   scopedHistory,
-  initializerContext,
   restorePreviousUrl,
   setHeaderActionMenu,
 }: DashboardMountProps) {
@@ -85,15 +78,12 @@ export async function mountApp({
     onAppLeave,
     savedObjects,
     core: coreStart,
-    initializerContext,
     restorePreviousUrl,
     setHeaderActionMenu,
     scopedHistory: () => scopedHistory,
     savedObjectsClient: coreStart.savedObjects.client,
     savedDashboards: dashboardStart.getSavedDashboardLoader(),
     savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
-    allowByValueEmbeddables:
-      initializerContext.config.get<DashboardFeatureFlagConfig>().allowByValueEmbeddables,
     dashboardSessionStorage: new DashboardSessionStorage(
       core.notifications.toasts,
       activeSpaceId || 'default'

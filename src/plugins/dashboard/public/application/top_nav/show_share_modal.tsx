@@ -30,7 +30,6 @@ const showFilterBarId = 'showFilterBar';
 
 export interface ShowShareModalProps {
   isDirty: boolean;
-  kibanaVersion: string;
   anchorElement: HTMLElement;
   savedDashboard: DashboardSavedObject;
   currentDashboardState: DashboardState;
@@ -47,7 +46,6 @@ export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => 
 
 export function ShowShareModal({
   isDirty,
-  kibanaVersion,
   anchorElement,
   savedDashboard,
   currentDashboardState,
@@ -137,7 +135,7 @@ export function ShowShareModal({
       savedQuery: unsavedDashboardState.savedQuery,
       controlGroupInput: unsavedDashboardState.controlGroupInput as SerializableControlGroupInput,
       panels: unsavedDashboardState.panels
-        ? convertPanelMapToSavedPanels(unsavedDashboardState.panels, kibanaVersion)
+        ? convertPanelMapToSavedPanels(unsavedDashboardState.panels)
         : undefined,
     };
   }
@@ -161,7 +159,6 @@ export function ShowShareModal({
       '_a',
       stateToRawDashboardState({
         state: currentDashboardState,
-        version: kibanaVersion,
       }),
       { useHash: false, storeInHashQuery: true },
       unhashUrl(window.location.href)
@@ -177,7 +174,6 @@ export function ShowShareModal({
         }),
       locatorParams: {
         id: DASHBOARD_APP_LOCATOR,
-        version: kibanaVersion,
         params: locatorParams,
       },
     },

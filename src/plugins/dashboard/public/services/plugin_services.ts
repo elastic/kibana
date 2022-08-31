@@ -8,14 +8,12 @@
 
 import {
   PluginServiceProviders,
-  KibanaPluginServiceParams,
   PluginServiceProvider,
   PluginServiceRegistry,
   PluginServices,
 } from '@kbn/presentation-util-plugin/public';
 
-import { DashboardServices } from './types';
-import { DashboardStartDependencies } from '../plugin';
+import { DashboardPluginServiceParams, DashboardServices } from './types';
 
 import { chromeServiceFactory } from './chrome/chrome_service';
 import { dashboardCapabilitiesServiceFactory } from './dashboard_capabilities/dashboard_capabilities_service';
@@ -23,6 +21,7 @@ import { dataServiceFactory } from './data/data_service';
 import { dataViewEditorServiceFactory } from './data_view_editor/data_view_editor_service';
 import { embeddableServiceFactory } from './embeddable/embeddable_service';
 import { httpServiceFactory } from './http/http_service';
+import { initializerContextServiceFactory } from './initializer_context/initializer_context_service';
 import { navigationServiceFactory } from './navigation/navigation_service';
 import { notificationsServiceFactory } from './notifications/notifications_service';
 import { overlaysServiceFactory } from './overlays/overlays_service';
@@ -34,15 +33,14 @@ import { urlForwardingServiceFactory } from './url_forwarding/url_forwarding_ser
 import { visualizationsServiceFactory } from './visualizations/visualizations_service';
 import { usageCollectionServiceFactory } from './usage_collection/usage_collection_service';
 
-const providers: PluginServiceProviders<
-  DashboardServices,
-  KibanaPluginServiceParams<DashboardStartDependencies>
-> = {
+const providers: PluginServiceProviders<DashboardServices, DashboardPluginServiceParams> = {
   chrome: new PluginServiceProvider(chromeServiceFactory),
   data: new PluginServiceProvider(dataServiceFactory),
+  dashboardCapabilities: new PluginServiceProvider(dashboardCapabilitiesServiceFactory),
   dataViewEditor: new PluginServiceProvider(dataViewEditorServiceFactory),
   embeddable: new PluginServiceProvider(embeddableServiceFactory),
   http: new PluginServiceProvider(httpServiceFactory),
+  initializerContext: new PluginServiceProvider(initializerContextServiceFactory),
   navigation: new PluginServiceProvider(navigationServiceFactory),
   notifications: new PluginServiceProvider(notificationsServiceFactory),
   overlays: new PluginServiceProvider(overlaysServiceFactory),
@@ -53,13 +51,10 @@ const providers: PluginServiceProviders<
   urlForwarding: new PluginServiceProvider(urlForwardingServiceFactory),
   usageCollection: new PluginServiceProvider(usageCollectionServiceFactory),
   visualizations: new PluginServiceProvider(visualizationsServiceFactory),
-
-  dashboardCapabilities: new PluginServiceProvider(dashboardCapabilitiesServiceFactory),
 };
 
 export const pluginServices = new PluginServices<DashboardServices>();
 
-export const registry = new PluginServiceRegistry<
-  DashboardServices,
-  KibanaPluginServiceParams<DashboardStartDependencies>
->(providers);
+export const registry = new PluginServiceRegistry<DashboardServices, DashboardPluginServiceParams>(
+  providers
+);

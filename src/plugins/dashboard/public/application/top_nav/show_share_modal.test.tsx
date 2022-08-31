@@ -74,7 +74,6 @@ describe('ShowShareModal', () => {
     services.dashboardSessionStorage.getState = jest.fn().mockReturnValue(unsavedState);
     return {
       isDirty: true,
-      kibanaVersion: 'testKibanaVersion',
       savedDashboard: getSavedDashboardMock(),
       anchorElement: document.createElement('div'),
       currentDashboardState: { panels: {} } as unknown as DashboardState,
@@ -137,7 +136,6 @@ describe('ShowShareModal', () => {
     ).locatorParams.params;
     const rawDashboardState = stateToRawDashboardState({
       state: unsavedDashboardState,
-      version: 'testKibanaVersion',
     });
     unsavedStateKeys.forEach((key) => {
       expect(shareLocatorParams[key]).toStrictEqual(

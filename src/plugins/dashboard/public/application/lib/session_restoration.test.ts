@@ -11,12 +11,9 @@ import { createSessionRestorationDataProvider, savedObjectToDashboardState } fro
 import { pluginServices } from '../../services/plugin_services';
 
 describe('createSessionRestorationDataProvider', () => {
-  const version = '8.0.0';
   const searchSessionInfoProvider = createSessionRestorationDataProvider({
-    kibanaVersion: version,
     getAppState: () =>
       savedObjectToDashboardState({
-        version,
         savedObjectsTagging: undefined,
         savedDashboard: getSavedDashboardMock(),
       }),

@@ -82,20 +82,14 @@ export const useDashboardAppState = ({
    * Unpack services
    */
   const services = useKibana<DashboardAppServices>().services;
-  const {
-    savedDashboards,
-    initializerContext,
-    savedObjectsTagging,
-    dashboardSessionStorage,
-    scopedHistory,
-  } = services;
-  const { version: kibanaVersion } = initializerContext.env.packageInfo;
+  const { savedDashboards, savedObjectsTagging, dashboardSessionStorage, scopedHistory } = services;
 
   const {
     chrome: { docTitle },
     dashboardCapabilities,
     data: { query, search, dataViews },
     embeddable,
+    initializerContext: { kibanaVersion },
     screenshotMode: { isScreenshotMode, getScreenshotContext },
     spaces: { redirectLegacyUrl },
     notifications,
@@ -122,10 +116,8 @@ export const useDashboardAppState = ({
      */
     const dashboardBuildContext: DashboardBuildContext = {
       history,
-      kibanaVersion,
       savedDashboards,
       kbnUrlStateStorage,
-      initializerContext,
       savedObjectsTagging,
       isEmbeddedExternally,
       dispatchDashboardStateChange,
@@ -326,7 +318,6 @@ export const useDashboardAppState = ({
       const updateLastSavedState = () => {
         setLastSavedState(
           savedObjectToDashboardState({
-            version: dashboardBuildContext.kibanaVersion,
             savedObjectsTagging,
             savedDashboard,
           })
@@ -373,7 +364,6 @@ export const useDashboardAppState = ({
     isEmbeddedExternally,
     kbnUrlStateStorage,
     savedObjectsTagging,
-    initializerContext,
     savedDashboardId,
     getStateTransfer,
     savedDashboards,
