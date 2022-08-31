@@ -92,7 +92,7 @@ describe('core lifecycle handlers', () => {
     const serverSetup = await server.setup(setupDeps);
     router = serverSetup.createRouter('/');
     innerServer = serverSetup.server;
-  }, 30000);
+  });
 
   afterEach(async () => {
     await server.stop();

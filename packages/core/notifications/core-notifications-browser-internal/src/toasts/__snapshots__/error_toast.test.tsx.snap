@@ -12,6 +12,7 @@ exports[`renders matching snapshot 1`] = `
   >
     <EuiButton
       color="danger"
+      data-test-subj="errorToastBtn"
       onClick={[Function]}
       size="s"
     >
