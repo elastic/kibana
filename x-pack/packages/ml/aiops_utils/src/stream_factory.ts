@@ -103,10 +103,12 @@ export function streamFactory<T = unknown>(
     if (isCompressed) {
       // This is a temporary fix for response streaming with proxy configurations that buffer responses up to 4KB in size.
       if (streamType === 'ndjson') {
+        const buffer = crypto.randomBytes(4096);
+
         stream.write(
           `${JSON.stringify({
             type: 'flush',
-            payload: crypto.randomBytes(4096).toString('hex'),
+            payload: buffer.toString('hex'),
           })}${DELIMITER}`
         );
       }

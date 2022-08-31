@@ -144,9 +144,9 @@ describe('streamFactory', () => {
         const parsedItems = streamItems.map((d) => JSON.parse(d));
 
         expect(responseWithHeaders.headers).toStrictEqual({ 'content-encoding': 'gzip' });
-        expect(parsedItems).toHaveLength(2);
+        expect(parsedItems).toHaveLength(4);
         expect(parsedItems[0]).toStrictEqual(mockItem1);
-        expect(parsedItems[1]).toStrictEqual(mockItem2);
+        expect(parsedItems[2]).toStrictEqual(mockItem2);
         expect(lastItem).toBe('');
 
         done();
