@@ -16,7 +16,7 @@ import { REPO_ROOT } from './paths.mjs';
 import { cleanPaths } from './clean.mjs';
 import { indent } from './indent.mjs';
 
-const BAZEL_RUNNER_SRC = '../../../packages/kbn-bazel-runner/src/index.js';
+const BAZEL_RUNNER_SRC = '../../../packages/kbn-bazel-runner/index.js';
 
 async function getBazelRunner() {
   /* eslint-disable no-unsanitized/method */
