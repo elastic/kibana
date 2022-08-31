@@ -42,16 +42,16 @@ describe('TTYPlayer/hooks', () => {
         initialProps: { pages: initial },
       });
 
-      expect(result.current.length).toBeGreaterThan(0);
-      expect(typeof result.current[0].value).toBe('string');
+      expect(result.current.lines.length).toBeGreaterThan(0);
+      expect(typeof result.current.lines[0].value).toBe('string');
 
       // test memoization
-      let last = result.current;
+      let last = result.current.lines;
       rerender();
-      expect(result.current === last).toBeTruthy();
-      last = result.current;
+      expect(result.current.lines === last).toBeTruthy();
+      last = result.current.lines;
       rerender({ pages: [...initial] });
-      expect(result.current === last).toBeFalsy();
+      expect(result.current.lines === last).toBeFalsy();
     });
   });
 
@@ -62,7 +62,7 @@ describe('TTYPlayer/hooks', () => {
       const events = sessionViewIOEventsMock?.events?.map((event) => event._source);
       const pages: ProcessEventsPage[] = [{ events, total: events?.length }];
       const { result } = renderHook(() => useIOLines(pages));
-      const lines = result.current;
+      const lines = result.current.lines;
       const div = document.createElement('div');
       const mockRef = { current: div };
       initialProps = {
