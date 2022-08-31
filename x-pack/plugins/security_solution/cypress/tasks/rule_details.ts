@@ -89,12 +89,7 @@ export const goToAlertsTab = () => {
 };
 
 export const goToExceptionsTab = () => {
-  cy.root()
-    .pipe(($el) => {
-      $el.find(EXCEPTIONS_TAB).trigger('click');
-      return $el.find(ADD_EXCEPTIONS_BTN);
-    })
-    .should('be.visible');
+  cy.get(EXCEPTIONS_TAB).click();
 };
 
 export const editException = () => {

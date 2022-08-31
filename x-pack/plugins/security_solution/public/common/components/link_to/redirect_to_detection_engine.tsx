@@ -14,5 +14,8 @@ export const getRulesUrl = (search?: string) => `${appendSearch(search)}`;
 export const getRuleDetailsUrl = (detailName: string, search?: string) =>
   `/id/${detailName}${appendSearch(search)}`;
 
+export const getRuleDetailsTabUrl = (detailName: string, tabName: string, search?: string) =>
+  `/id/${detailName}/${tabName}${appendSearch(search)}`;
+
 export const getEditRuleUrl = (detailName: string, search?: string) =>
   `/id/${detailName}/edit${appendSearch(search)}`;
