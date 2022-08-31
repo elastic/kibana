@@ -54,7 +54,7 @@ import {
   DeprecationsService,
   config as deprecationConfig,
 } from '@kbn/core-deprecations-server-internal';
-import { CoreUsageDataService } from '@kbn/core-usage-data-base-server-internal';
+import { CoreUsageDataService } from '@kbn/core-usage-data-server-internal';
 import { CoreApp } from './core_app';
 import { I18nService } from './i18n';
 import { HttpResourcesService } from './http_resources';
