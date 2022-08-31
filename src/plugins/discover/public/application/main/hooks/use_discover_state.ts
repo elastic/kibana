@@ -5,16 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { useMemo, useEffect, useState, useCallback, useRef } from 'react';
+import { useMemo, useEffect, useState, useCallback } from 'react';
 import { isEqual } from 'lodash';
 import { History } from 'history';
 import { DataViewType, DataViewListItem } from '@kbn/data-views-plugin/public';
-import {
-  isOfAggregateQueryType,
-  getIndexPatternFromSQLQuery,
-  AggregateQuery,
-  Query,
-} from '@kbn/es-query';
 import { SavedSearch, getSavedSearch } from '@kbn/saved-search-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { getState } from '../services/discover_state';
@@ -33,8 +27,7 @@ import { FetchStatus } from '../../types';
 import { getDataViewAppState } from '../utils/get_switch_data_view_app_state';
 import { DataTableRecord } from '../../../types';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
-
-const MAX_NUM_OF_COLUMNS = 50;
+import { useTextBasedQueryLanguage } from './use_text_based_query_language';
 
 export function useDiscoverState({
   services,
@@ -109,45 +102,15 @@ export function useDiscoverState({
     stateContainer,
     useNewFieldsApi,
   });
-
-  const queryColumns = useRef<{ query: AggregateQuery | Query | undefined; columns: string[] }>({
-    columns: [],
-    query: undefined,
+  /**
+   * State changes (data view, columns), when a text base query result is returned
+   */
+  useTextBasedQueryLanguage({
+    documents$: data$.documents$,
+    dataViewList,
+    stateContainer,
+    query: state.query,
   });
-
-  useEffect(() => {
-    const subscription = data$.documents$.subscribe((next) => {
-      let columns: string[] = [];
-      if (
-        next.recordRawType === 'plain' &&
-        state.query &&
-        isOfAggregateQueryType(state.query) &&
-        'sql' in state.query
-      ) {
-        if (next.result?.length && next.fetchStatus === FetchStatus.COMPLETE) {
-          const firstRow = next.result[0];
-          const firstRowColumns = Object.keys(firstRow.raw).slice(0, MAX_NUM_OF_COLUMNS);
-          if (
-            !isEqual(firstRowColumns, queryColumns.current.columns) &&
-            !isEqual(state.query, queryColumns.current.query)
-          ) {
-            columns = firstRowColumns;
-            queryColumns.current = { columns: firstRowColumns, query: state.query };
-          }
-        }
-        const indexPatternFromQuery = getIndexPatternFromSQLQuery(state.query.sql);
-        const dataViewObj = dataViewList.find(({ title }) => title === indexPatternFromQuery);
-        if (dataViewObj) {
-          const nextState = {
-            index: dataViewObj.id,
-            ...(columns.length && { columns }),
-          };
-          stateContainer.replaceUrlAppState(nextState);
-        }
-      }
-    });
-    return () => subscription.unsubscribe();
-  }, [data$.documents$, dataViewList, state.query, stateContainer]);
 
   /**
    * Reset to display loading spinner when savedSearch is changing
