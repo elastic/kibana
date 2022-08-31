@@ -62,12 +62,6 @@ export const ICONS = [
     label: i18n.translate('visTypeTimeseries.iconSelect.bugLabel', { defaultMessage: 'Bug' }),
   },
   {
-    value: 'fa-exclamation-circle',
-    label: i18n.translate('visTypeTimeseries.iconSelect.exclamationCircleLabel', {
-      defaultMessage: 'Exclamation Circle',
-    }),
-  },
-  {
     value: 'fa-exclamation-triangle',
     label: i18n.translate('visTypeTimeseries.iconSelect.exclamationTriangleLabel', {
       defaultMessage: 'Exclamation Triangle',

@@ -47,8 +47,8 @@ export function setTimeShift(
         currentColumn.timeScale,
         currentColumn.timeShift,
         trimmedTimeShift,
-        currentColumn.window,
-        currentColumn.window
+        currentColumn.reducedTimeRange,
+        currentColumn.reducedTimeRange
       );
   return {
     ...layer,

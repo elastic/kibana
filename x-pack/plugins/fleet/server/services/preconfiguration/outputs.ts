@@ -9,7 +9,7 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 import { isEqual } from 'lodash';
 import { safeDump } from 'js-yaml';
 
-import type { PreconfiguredOutput, Output } from '../../../common/types';
+import type { PreconfiguredOutput, Output, NewOutput } from '../../../common/types';
 import { normalizeHostsForAgents } from '../../../common/services';
 import type { FleetConfigType } from '../../config';
 import { DEFAULT_OUTPUT_ID, DEFAULT_OUTPUT } from '../../constants';
@@ -72,10 +72,14 @@ export async function createOrUpdatePreconfiguredOutputs(
 
       const configYaml = config ? safeDump(config) : undefined;
 
-      const data = {
+      const data: NewOutput = {
         ...outputData,
-        config_yaml: configYaml,
         is_preconfigured: true,
+        config_yaml: configYaml ?? null,
+        // Set value to null to update these fields on update
+        ca_sha256: outputData.ca_sha256 ?? null,
+        ca_trusted_fingerprint: outputData.ca_sha256 ?? null,
+        ssl: outputData.ssl ?? null,
       };
 
       if (!data.hosts || data.hosts.length === 0) {
@@ -147,16 +151,27 @@ export async function cleanPreconfiguredOutputs(
   }
 }
 
+function isDifferent(val1: any, val2: any) {
+  if (
+    (val1 === null || typeof val1 === 'undefined') &&
+    (val2 === null || typeof val2 === 'undefined')
+  ) {
+    return false;
+  }
+
+  return !isEqual(val1, val2);
+}
+
 function isPreconfiguredOutputDifferentFromCurrent(
   existingOutput: Output,
   preconfiguredOutput: Partial<Output>
 ): boolean {
   return (
     !existingOutput.is_preconfigured ||
-    existingOutput.is_default !== preconfiguredOutput.is_default ||
-    existingOutput.is_default_monitoring !== preconfiguredOutput.is_default_monitoring ||
-    existingOutput.name !== preconfiguredOutput.name ||
-    existingOutput.type !== preconfiguredOutput.type ||
+    isDifferent(existingOutput.is_default, preconfiguredOutput.is_default) ||
+    isDifferent(existingOutput.is_default_monitoring, preconfiguredOutput.is_default_monitoring) ||
+    isDifferent(existingOutput.name, preconfiguredOutput.name) ||
+    isDifferent(existingOutput.type, preconfiguredOutput.type) ||
     (preconfiguredOutput.hosts &&
       !isEqual(
         existingOutput?.type === 'elasticsearch'
@@ -166,9 +181,12 @@ function isPreconfiguredOutputDifferentFromCurrent(
           ? preconfiguredOutput.hosts.map(normalizeHostsForAgents)
           : preconfiguredOutput.hosts
       )) ||
-    (preconfiguredOutput.ssl && !isEqual(preconfiguredOutput.ssl, existingOutput.ssl)) ||
-    existingOutput.ca_sha256 !== preconfiguredOutput.ca_sha256 ||
-    existingOutput.ca_trusted_fingerprint !== preconfiguredOutput.ca_trusted_fingerprint ||
-    existingOutput.config_yaml !== preconfiguredOutput.config_yaml
+    isDifferent(preconfiguredOutput.ssl, existingOutput.ssl) ||
+    isDifferent(existingOutput.ca_sha256, preconfiguredOutput.ca_sha256) ||
+    isDifferent(
+      existingOutput.ca_trusted_fingerprint,
+      preconfiguredOutput.ca_trusted_fingerprint
+    ) ||
+    isDifferent(existingOutput.config_yaml, preconfiguredOutput.config_yaml)
   );
 }
