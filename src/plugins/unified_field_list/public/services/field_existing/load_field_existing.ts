@@ -38,23 +38,19 @@ export async function loadFieldExisting({
   const useSampling = uiSettingsClient.get(FIELD_EXISTENCE_SETTING);
   const metaFields = uiSettingsClient.get(UI_SETTINGS.META_FIELDS);
 
-  try {
-    return await fetchFieldExistence({
-      dslQuery,
-      fromDate,
-      toDate,
-      timeFieldName,
-      dataViewsService,
-      includeFrozen,
-      useSampling,
-      metaFields,
-      dataView,
-      search: async (params) => {
-        const response = await lastValueFrom(data.search.search({ params }));
-        return response.rawResponse;
-      },
-    });
-  } catch (error) {
-    throw new Error('Could not provide field existence', { cause: error });
-  }
+  return await fetchFieldExistence({
+    dslQuery,
+    fromDate,
+    toDate,
+    timeFieldName,
+    dataViewsService,
+    includeFrozen,
+    useSampling,
+    metaFields,
+    dataView,
+    search: async (params) => {
+      const response = await lastValueFrom(data.search.search({ params }));
+      return response.rawResponse;
+    },
+  });
 }

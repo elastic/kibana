@@ -146,7 +146,6 @@ export function createIndexPatternService({
     refreshExistingFields: (args) =>
       syncExistingFields({
         updateIndexPatterns,
-        fetchJson: core.http.post,
         ...args,
         data,
         dataViews,
