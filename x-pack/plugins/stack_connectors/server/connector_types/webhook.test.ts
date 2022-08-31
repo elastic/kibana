@@ -9,13 +9,10 @@ import { Services } from '@kbn/actions-plugin/server/types';
 import { validateConfig, validateParams, validateSecrets } from '@kbn/actions-plugin/server/lib';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
-import { createActionTypeRegistry } from './index.test';
 import { Logger } from '@kbn/core/server';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import axios from 'axios';
 import {
-  ActionParamsType,
-  ConnectorTypeId,
   ConnectorTypeConfigType,
   ConnectorTypeSecretsType,
   getConnectorType,
@@ -24,6 +21,7 @@ import {
 } from './webhook';
 
 import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';
+import { loggerMock } from '@kbn/logging-mocks';
 
 jest.mock('axios');
 jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
@@ -41,20 +39,10 @@ const requestMock = utils.request as jest.Mock;
 axios.create = jest.fn(() => axios);
 
 const services: Services = actionsMock.createServices();
+const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
 
 let connectorType: WebhookConnectorType;
-let mockedLogger: jest.Mocked<Logger>;
 let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
-
-beforeAll(() => {
-  const { logger, actionTypeRegistry } = createActionTypeRegistry();
-  connectorType = actionTypeRegistry.get<
-    ConnectorTypeConfigType,
-    ConnectorTypeSecretsType,
-    ActionParamsType
-  >(ConnectorTypeId);
-  mockedLogger = logger;
-});
 
 beforeEach(() => {
   configurationUtilities = actionsConfigMock.create();
@@ -216,9 +204,6 @@ describe('config validation', () => {
         throw new Error(`target url is not present in allowedHosts`);
       },
     };
-    connectorType = getConnectorType({
-      logger: mockedLogger,
-    });
 
     // any for testing
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -256,12 +241,10 @@ describe('params validation', () => {
 describe('execute()', () => {
   beforeAll(() => {
     requestMock.mockReset();
-    connectorType = getConnectorType({
-      logger: mockedLogger,
-    });
   });
 
   beforeEach(() => {
+    jest.resetAllMocks();
     requestMock.mockReset();
     requestMock.mockResolvedValue({
       status: 200,

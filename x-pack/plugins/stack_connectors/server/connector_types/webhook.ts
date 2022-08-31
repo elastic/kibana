@@ -70,7 +70,7 @@ const SecretsSchema = schema.object(secretSchemaProps, {
     // user and password must be set together (or not at all)
     if (!secrets.password && !secrets.user) return;
     if (secrets.password && secrets.user) return;
-    return i18n.translate('xpack.actions.builtin.webhook.invalidUsernamePassword', {
+    return i18n.translate('xpack.stack_connectors.webhook.invalidUsernamePassword', {
       defaultMessage: 'both user and password must be specified',
     });
   },
@@ -88,7 +88,7 @@ export function getConnectorType({ logger }: { logger: Logger }): WebhookConnect
   return {
     id: ConnectorTypeId,
     minimumLicenseRequired: 'gold',
-    name: i18n.translate('xpack.actions.builtin.webhookTitle', {
+    name: i18n.translate('xpack.stack_connectors.webhook.title', {
       defaultMessage: 'Webhook',
     }),
     supportedFeatureIds: [
@@ -133,7 +133,7 @@ function validateConnectorTypeConfig(
     new URL(configuredUrl);
   } catch (err) {
     throw new Error(
-      i18n.translate('xpack.actions.builtin.webhook.webhookConfigurationErrorNoHostname', {
+      i18n.translate('xpack.stack_connectors.webhook.configurationErrorNoHostname', {
         defaultMessage: 'error configuring webhook action: unable to parse url: {err}',
         values: {
           err,
@@ -146,7 +146,7 @@ function validateConnectorTypeConfig(
     configurationUtilities.ensureUriAllowed(configuredUrl);
   } catch (allowListError) {
     throw new Error(
-      i18n.translate('xpack.actions.builtin.webhook.webhookConfigurationError', {
+      i18n.translate('xpack.stack_connectors.webhook.configurationError', {
         defaultMessage: 'error configuring webhook action: {message}',
         values: {
           message: allowListError.message,
@@ -246,7 +246,7 @@ function errorResultInvalid(
   actionId: string,
   serviceMessage: string
 ): ConnectorTypeExecutorResult<void> {
-  const errMessage = i18n.translate('xpack.actions.builtin.webhook.invalidResponseErrorMessage', {
+  const errMessage = i18n.translate('xpack.stack_connectors.webhook.invalidResponseErrorMessage', {
     defaultMessage: 'error calling webhook, invalid response',
   });
   return {
@@ -261,7 +261,7 @@ function errorResultRequestFailed(
   actionId: string,
   serviceMessage: string
 ): ConnectorTypeExecutorResult<unknown> {
-  const errMessage = i18n.translate('xpack.actions.builtin.webhook.requestFailedErrorMessage', {
+  const errMessage = i18n.translate('xpack.stack_connectors.webhook.requestFailedErrorMessage', {
     defaultMessage: 'error calling webhook, request failed',
   });
   return {
@@ -273,7 +273,7 @@ function errorResultRequestFailed(
 }
 
 function errorResultUnexpectedError(actionId: string): ConnectorTypeExecutorResult<void> {
-  const errMessage = i18n.translate('xpack.actions.builtin.webhook.unreachableErrorMessage', {
+  const errMessage = i18n.translate('xpack.stack_connectors.webhook.unreachableErrorMessage', {
     defaultMessage: 'error calling webhook, unexpected error',
   });
   return {
@@ -285,7 +285,7 @@ function errorResultUnexpectedError(actionId: string): ConnectorTypeExecutorResu
 
 function retryResult(actionId: string, serviceMessage: string): ConnectorTypeExecutorResult<void> {
   const errMessage = i18n.translate(
-    'xpack.actions.builtin.webhook.invalidResponseRetryLaterErrorMessage',
+    'xpack.stack_connectors.webhook.invalidResponseRetryLaterErrorMessage',
     {
       defaultMessage: 'error calling webhook, retry later',
     }
@@ -309,7 +309,7 @@ function retryResultSeconds(
   const retry = new Date(retryEpoch);
   const retryString = retry.toISOString();
   const errMessage = i18n.translate(
-    'xpack.actions.builtin.webhook.invalidResponseRetryDateErrorMessage',
+    'xpack.stack_connectors.webhook.invalidResponseRetryDateErrorMessage',
     {
       defaultMessage: 'error calling webhook, retry at {retryString}',
       values: {
