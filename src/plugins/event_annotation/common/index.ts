@@ -11,6 +11,8 @@ export type {
   ManualPointEventAnnotationOutput,
   ManualRangeEventAnnotationArgs,
   ManualRangeEventAnnotationOutput,
+  ManualRangeEventAnnotationRow,
+  ManualPointEventAnnotationRow,
 } from './manual_event_annotation/types';
 export type {
   QueryPointEventAnnotationArgs,

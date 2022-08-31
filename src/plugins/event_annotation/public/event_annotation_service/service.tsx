@@ -34,7 +34,7 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
 
       for (const annotation of manualBasedAnnotations) {
         if (isRangeAnnotationConfig(annotation)) {
-          const { label, isHidden, color, key, outside } = annotation;
+          const { label, isHidden, color, key, outside, id } = annotation;
           const { timestamp: time, endTimestamp: endTime } = key;
           expressions.push({
             type: 'expression' as const,
@@ -43,6 +43,7 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
                 type: 'function' as const,
                 function: 'manual_range_event_annotation',
                 arguments: {
+                  id: [id],
                   time: [time],
                   endTime: [endTime],
                   label: [label || defaultAnnotationLabel],
@@ -54,7 +55,7 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
             ],
           });
         } else {
-          const { label, isHidden, color, lineStyle, lineWidth, icon, key, textVisibility } =
+          const { label, isHidden, color, lineStyle, lineWidth, icon, key, textVisibility, id } =
             annotation;
           expressions.push({
             type: 'expression' as const,
@@ -63,6 +64,7 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
                 type: 'function' as const,
                 function: 'manual_point_event_annotation',
                 arguments: {
+                  id: [id],
                   time: [key.timestamp],
                   label: [label || defaultAnnotationLabel],
                   color: [color || defaultAnnotationColor],
@@ -80,6 +82,7 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
 
       for (const annotation of queryBasedAnnotations) {
         const {
+          id,
           label,
           isHidden,
           color,
@@ -99,6 +102,7 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
               type: 'function' as const,
               function: 'query_point_event_annotation',
               arguments: {
+                id: [id],
                 timeField: [timeField],
                 label: [label || defaultAnnotationLabel],
                 color: [color || defaultAnnotationColor],
