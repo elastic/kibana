@@ -20,23 +20,17 @@ export const Analytics: React.FC<InitialAppData> = (props) => {
   const { enterpriseSearchVersion, kibanaVersion } = props;
   const incompatibleVersions = isVersionMismatch(enterpriseSearchVersion, kibanaVersion);
 
-  const showView = () => {
-    if (incompatibleVersions) {
-      return (
-        <VersionMismatchPage
-          enterpriseSearchVersion={enterpriseSearchVersion}
-          kibanaVersion={kibanaVersion}
-        />
-      );
-    }
-
-    return <AnalyticsOverview />;
-  };
-
   return (
     <Switch>
       <Route exact path={ROOT_PATH}>
-        {showView()}
+        {
+        incompatibleVersions 
+        ? <VersionMismatchPage
+            enterpriseSearchVersion={enterpriseSearchVersion}
+            kibanaVersion={kibanaVersion}
+          /> 
+        : <AnalyticsOverview />
+        }
       </Route>
     </Switch>
   );
