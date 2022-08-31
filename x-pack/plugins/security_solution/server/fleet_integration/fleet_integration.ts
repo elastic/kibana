@@ -24,10 +24,13 @@ import { installPrepackagedRules } from './handlers/install_prepackaged_rules';
 import { createPolicyArtifactManifest } from './handlers/create_policy_artifact_manifest';
 import { createDefaultPolicy } from './handlers/create_default_policy';
 import { validatePolicyAgainstLicense } from './handlers/validate_policy_against_license';
+import { validateIntegrationConfig } from './handlers/validate_integration_config';
 import { removePolicyFromArtifacts } from './handlers/remove_policy_from_artifacts';
 import type { FeatureUsageService } from '../endpoint/services/feature_usage/service';
 import type { EndpointMetadataService } from '../endpoint/services/metadata';
 import { notifyProtectionFeatureUsage } from './notify_protection_feature_usage';
+import type { Config } from './types';
+import { ENDPOINT_INTEGRATION_CONFIG_KEY } from './constants';
 
 const isEndpointPackagePolicy = <T extends { package?: { name: string } }>(
   packagePolicy: T
@@ -56,6 +59,23 @@ export const getPackagePolicyCreateCallback = (
       return newPackagePolicy;
     }
 
+    // Optional endpoint integration configuration
+    let endpointIntegrationConfig;
+
+    // Check if has endpoint integration configuration input
+    const integrationConfigInput = newPackagePolicy?.inputs?.find(
+      (input) => input.type === ENDPOINT_INTEGRATION_CONFIG_KEY
+    )?.config?._config;
+
+    if (integrationConfigInput !== undefined) {
+      // The cast below is needed in order to ensure proper typing for the
+      // Endpoint and Cloud Security integration configuration
+      endpointIntegrationConfig = integrationConfigInput.value as Config;
+
+      // Validate that the Endpoint and Cloud Security integration config is valid
+      validateIntegrationConfig(endpointIntegrationConfig, logger);
+    }
+
     // In this callback we are handling an HTTP request to the fleet plugin. Since we use
     // code from the security_solution plugin to handle it (installPrepackagedRules),
     // we need to build the context that is native to security_solution and pass it there.
@@ -81,7 +101,7 @@ export const getPackagePolicyCreateCallback = (
     ]);
 
     // Add the default endpoint security policy
-    const defaultPolicyValue = createDefaultPolicy(licenseService);
+    const defaultPolicyValue = createDefaultPolicy(licenseService, endpointIntegrationConfig);
 
     return {
       // We cast the type here so that any changes to the Endpoint
