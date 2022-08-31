@@ -32,7 +32,7 @@ describe('Test discover state', () => {
     history = createBrowserHistory();
     history.push('/');
     state = getState({
-      getStateDefaults: () => ({ index: 'test' }),
+      defaultState: { index: 'test' },
       history,
       uiSettings: uiSettingsMock,
     });
@@ -94,7 +94,7 @@ describe('Test discover initial state sort handling', () => {
     history.push('/#?_a=(sort:!(!(order_date,desc)))');
 
     state = getState({
-      getStateDefaults: () => ({ sort: [['fallback', 'desc']] }),
+      defaultState: { sort: [['fallback', 'desc']] },
       history,
       uiSettings: uiSettingsMock,
     });
@@ -115,7 +115,7 @@ describe('Test discover initial state sort handling', () => {
     history.push('/#?_a=(sort:!())');
 
     state = getState({
-      getStateDefaults: () => ({ sort: [['fallback', 'desc']] }),
+      defaultState: { sort: [['fallback', 'desc']] },
       history,
       uiSettings: uiSettingsMock,
     });
@@ -140,7 +140,7 @@ describe('Test discover state with legacy migration', () => {
       "/#?_a=(query:(query_string:(analyze_wildcard:!t,query:'type:nice%20name:%22yeah%22')))"
     );
     state = getState({
-      getStateDefaults: () => ({ index: 'test' }),
+      defaultState: { index: 'test' },
       history,
       uiSettings: uiSettingsMock,
     });

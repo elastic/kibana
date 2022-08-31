@@ -65,13 +65,12 @@ export function useDiscoverState({
   const stateContainer = useMemo(
     () =>
       getState({
-        getStateDefaults: () =>
-          getStateDefaults({
-            config,
-            data,
-            savedSearch,
-            storage,
-          }),
+        defaultState: getStateDefaults({
+          config,
+          data,
+          savedSearch,
+          storage,
+        }),
         storeInSessionStorage: config.get('state:storeInSessionStorage'),
         history,
         toasts: services.core.notifications.toasts,
