@@ -6,15 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { Key } from 'selenium-webdriver';
-import { asyncForEach } from '@kbn/std';
-import { FtrService } from '../ftr_provider_context';
-import { WebElementWrapper } from '../services/lib/web_element_wrapper';
+import {Key} from 'selenium-webdriver';
+import {asyncForEach} from '@kbn/std';
+import {FtrService} from '../ftr_provider_context';
+import {WebElementWrapper} from '../services/lib/web_element_wrapper';
 
 export class ConsolePageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly retry = this.ctx.getService('retry');
   private readonly find = this.ctx.getService('find');
+  log = this.ctx.getService('log');
 
   public async getVisibleTextFromAceEditor(editor: WebElementWrapper) {
     const lines = await editor.findAllByClassName('ace_line_group');
@@ -123,7 +124,7 @@ export class ConsolePageObject extends FtrService {
     return this.testSubjects.find('console-application');
   }
 
-  // Prompt autocomplete window and provide a initial letter of properties to narrow down the results. E.g. 'b' = 'bool'
+  // Prompt autocomplete window and provide an initial letter of properties to narrow down the results. E.g. 'b' = 'bool'
   public async promptAutocomplete(letter = 'b') {
     const textArea = await this.testSubjects.find('console-textarea');
     await textArea.clickMouseButton();
@@ -137,6 +138,32 @@ export class ConsolePageObject extends FtrService {
 
     const attribute = await element.getAttribute('style');
     return !attribute.includes('display: none;');
+  }
+
+  public async getAutocompleteSuggestions() {
+    const autocomplete = await this.find.byCssSelector('.ace_autocomplete');
+    const suggestions = await autocomplete.findAllByCssSelector('.ace_line');
+
+    const suggestionTexts = await Promise.all(
+      suggestions.map(async (suggestion) => await suggestion.getVisibleText())
+    );
+
+    this.log.debug(`Autocomplete suggestions: ${suggestionTexts.join(', ')}`);
+
+    return suggestionTexts
+      .map((suggestion) => suggestion.replace(/(\nmethod|\nendpoint|\nAPI|\nindex)/, ''))
+      .filter((suggestion) => suggestion !== '');
+  }
+
+  public async triggerAutocomplete() {
+    const editor = await this.getEditorTextArea();
+    await editor.pressKeys([Key.CONTROL, Key.SPACE]);
+  }
+
+  public async moveMouseToText(text: string) {
+    const editor = await this.getEditor();
+    const element = await editor.findByXpath(`//span[contains(text(), '${text}')]`);
+    await element.doubleClick();
   }
 
   public async enterRequest(request: string = '\nGET _search') {

@@ -13,10 +13,10 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common', 'console']);
+  const PageObjects = getPageObjects(['common', 'console', 'header']);
   const find = getService('find');
 
-  describe('console autocomplete feature', function describeIndexTests() {
+  describe("Console's autocomplete", function describeIndexTests() {
     this.tags('includeFirefox');
     before(async () => {
       log.debug('navigateTo console');
@@ -123,6 +123,92 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             log.debug(request);
             expect(request).to.contain(`${template}`);
           });
+        });
+      });
+    });
+
+    describe('Autocomplete behavior', () => {
+      beforeEach(async () => {
+        await PageObjects.console.clearTextArea();
+      });
+
+      it('should suggest HTTP methods POST, GET, etc', async () => {
+        await PageObjects.console.triggerAutocomplete();
+        await retry.waitFor('autocomplete to be visible', () =>
+          PageObjects.console.isAutocompleteVisible()
+        );
+        await retry.waitFor('autocomplete to be visible', () =>
+          PageObjects.console.isAutocompleteVisible()
+        );
+        expect(await PageObjects.console.getAutocompleteSuggestions()).to.eql([
+          'GET',
+          'PUT',
+          'POST',
+          'DELETE',
+          'HEAD',
+        ]);
+      });
+
+      it('should suggest ES API endpoints', async () => {
+        await PageObjects.console.enterRequest('\nGET _cat');
+        await PageObjects.console.triggerAutocomplete();
+        const suggestions = await PageObjects.console.getAutocompleteSuggestions();
+        expect(suggestions.sort()).to.be.eql([
+          '_cat',
+          '_cat/aliases',
+          '_cat/allocation',
+          '_cat/count',
+          '_cat/fielddata',
+          '_cat/health',
+          '_cat/indices',
+          '_cat/master',
+        ]);
+      });
+
+      it('should suggest JSON autocompletion with placeholder fields', async () => {
+        await PageObjects.console.enterRequest('\nGET _search\n {\n\t\t "');
+        await PageObjects.console.promptAutocomplete('agg');
+        await PageObjects.console.pressEnter();
+        await PageObjects.console.moveMouseToText('AGG_TYPE');
+        await PageObjects.console.enterText('term');
+        await retry.waitFor('autocomplete to be visible', () =>
+          PageObjects.console.isAutocompleteVisible()
+        );
+        expect(await PageObjects.console.getAutocompleteSuggestions()).to.eql([
+          'terms',
+          'date_histogram',
+          'significant_terms',
+        ]);
+
+        await PageObjects.console.pressEnter();
+        const request = await PageObjects.console.getRequest();
+        expect(request).to.contain(
+          `"terms": {\n             "field": "",\n             "size": 10\n           }`
+        );
+      });
+
+      describe('with dynamic autocomplete', () => {
+        const executeRequest = async (request: string) => {
+          await PageObjects.console.enterRequest(request);
+          await PageObjects.console.clickPlay();
+          await PageObjects.header.waitUntilLoadingHasFinished();
+        };
+
+        it('should suggest indices that the user has created', async () => {
+          // Create an index
+          await executeRequest('\nPUT test_index');
+          expect(await PageObjects.console.getResponse()).to.contain('acknowledged');
+
+          await PageObjects.console.enterRequest('\nGET test_ind');
+          await PageObjects.console.triggerAutocomplete();
+          await retry.waitFor('autocomplete to be visible', () =>
+            PageObjects.console.isAutocompleteVisible()
+          );
+          expect(await PageObjects.console.getAutocompleteSuggestions()).to.eql(['test_index']);
+
+          // Delete the index
+          await executeRequest('\nDELETE test_index');
+          expect(await PageObjects.console.getResponse()).to.contain('acknowledged');
         });
       });
     });
