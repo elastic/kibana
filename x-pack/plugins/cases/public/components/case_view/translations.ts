@@ -200,3 +200,9 @@ export const SPACED_OR = i18n.translate('xpack.cases.caseView.spacedOrText', {
 export const ASSIGN_YOURSELF = i18n.translate('xpack.cases.caseView.assignYourself', {
   defaultMessage: 'assign yourself',
 });
+
+export const TOTAL_USERS_ASSIGNED = (total: number) =>
+  i18n.translate('xpack.cases.caseView.totalUsersAssigned', {
+    defaultMessage: '{total} assigned',
+    values: { total },
+  });

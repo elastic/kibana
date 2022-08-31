@@ -39,18 +39,6 @@ export const REMOVE_ASSIGNEES = i18n.translate(
   }
 );
 
-export const TOTAL_USERS = (total: number) =>
-  i18n.translate('xpack.cases.userProfile.totalUsers', {
-    defaultMessage: '{total, plural, one {# user} other {# users}}',
-    values: { total },
-  });
-
-export const TOTAL_USERS_ASSIGNED = (total: number) =>
-  i18n.translate('xpack.cases.userProfile.totalUsersAssigned', {
-    defaultMessage: '{total} assigned',
-    values: { total },
-  });
-
 export const ASSIGNEES = i18n.translate('xpack.cases.assigneesTitle', {
   defaultMessage: 'Assignees',
 });
