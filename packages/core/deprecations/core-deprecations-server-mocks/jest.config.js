@@ -6,13 +6,8 @@
  * Side Public License, v 1.
  */
 
-export type {
-  RegisterDeprecationsConfig,
-  GetDeprecationsContext,
-  DeprecationsServiceSetup,
-  DeprecationRegistryProvider,
-} from './contracts';
-export type {
-  DeprecationsClient,
-  DeprecationsRequestHandlerContext,
-} from './request_handler_context';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/core/deprecations/core-deprecations-server-mocks'],
+};

@@ -7,7 +7,7 @@
  */
 
 import type { IRouter, RequestHandlerContextBase } from '@kbn/core-http-server';
-import type { DeprecationsRequestHandlerContext } from './deprecations_route_handler_context';
+import type { DeprecationsRequestHandlerContext } from '@kbn/core-deprecations-server';
 
 /**
  * Request handler context used by core's deprecations routes.
