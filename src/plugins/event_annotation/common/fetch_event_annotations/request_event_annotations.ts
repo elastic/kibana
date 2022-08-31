@@ -22,6 +22,7 @@ import moment from 'moment';
 import { ESCalendarInterval, ESFixedInterval, roundDateToESInterval } from '@elastic/charts';
 import { Adapters } from '@kbn/inspector-plugin/common';
 import { SerializableRecord } from '@kbn/utility-types';
+import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { handleRequest } from './handle_request';
 import {
   ANNOTATIONS_PER_BUCKET,
@@ -49,6 +50,15 @@ interface QueryGroup {
   timeField: string;
 }
 
+export function getTimeZone(uiSettings: IUiSettingsClient) {
+  const configuredTimeZone = uiSettings.get('dateFormat:tz');
+  if (configuredTimeZone === 'Browser') {
+    return moment.tz.guess();
+  }
+
+  return configuredTimeZone;
+}
+
 export const requestEventAnnotations = (
   input: ExpressionValueSearchContext | null,
   args: FetchEventAnnotationsArgs,
@@ -61,21 +71,21 @@ export const requestEventAnnotations = (
   getStartDependencies: () => Promise<FetchEventAnnotationsStartDependencies>
 ) => {
   return defer(async () => {
+    const { aggs, dataViews, searchSource, getNow, uiSettings } = await getStartDependencies();
+
     const [manualGroups, queryGroups] = partition(
       regroupForRequestOptimization(args, input),
       isManualSubGroup
     );
 
     const manualAnnotationDatatableRows = manualGroups.length
-      ? convertManualToDatatableRows(manualGroups[0], args.interval, args.timezone)
+      ? convertManualToDatatableRows(manualGroups[0], args.interval, getTimeZone(uiSettings))
       : [];
     if (!queryGroups.length) {
       return manualAnnotationDatatableRows.length
         ? wrapRowsInDatatable(manualAnnotationDatatableRows)
         : null;
     }
-
-    const { aggs, dataViews, searchSource, getNow } = await getStartDependencies();
 
     const createEsaggsSingleRequest = async ({
       dataView,

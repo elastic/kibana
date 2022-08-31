@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart } from '@kbn/core/public';
+import { CoreStart, IUiSettingsClient } from '@kbn/core/public';
 
 import {
   AggsStart,
@@ -77,17 +77,6 @@ jest.mock('../../common/fetch_event_annotations/handle_request', () => {
     ),
   };
 });
-// import { adaptEsaggsResponseToAnnotations } from '../../common/fetch_event_annotations/utils';
-
-// jest.mock('../../common/fetch_event_annotations/utils', () => {
-//   const original = jest.requireActual('../../common/fetch_event_annotations/utils');
-//   return {
-//     ...original,
-//     adaptEsaggsResponseToAnnotations: jest.fn(),
-//   };
-// });
-
-// test postprocess and preprocess separately?
 
 const dataView1 = {
   type: 'index_pattern',
@@ -118,7 +107,7 @@ const mockHandlers = {
 };
 
 const startServices = [
-  {},
+  { uiSettings: { get: jest.fn(() => {}) } as unknown as IUiSettingsClient },
   {
     data: {
       ...dataMock,
@@ -300,14 +289,12 @@ describe('getFetchEventAnnotations', () => {
     const result = await runGetFetchEventAnnotations({
       interval: '2h',
       groups: [],
-      timezone: 'Europe/Madrid',
     });
     expect(result).toEqual(null);
   });
 
   describe('Manual annotations', () => {
     const manualOnlyArgs = {
-      timezone: 'Europe/Madrid',
       interval: '30m',
       groups: [
         {
@@ -348,7 +335,6 @@ describe('getFetchEventAnnotations', () => {
   describe('Query annotations', () => {
     test('runs handleRequest only for query annotations when manual and query are defined', async () => {
       const sampleArgs = {
-        timezone: 'Europe/Madrid',
         interval: '3d',
         groups: [
           {
@@ -384,7 +370,6 @@ describe('getFetchEventAnnotations', () => {
     });
     test('runs single handleRequest for query annotations with the same data view and timeField and creates aggregation for each extraField', async () => {
       const sampleArgs = {
-        timezone: 'Europe/Madrid',
         interval: '3d',
         groups: [
           {
@@ -406,7 +391,6 @@ describe('getFetchEventAnnotations', () => {
     });
     test('runs two separate handleRequests if timeField is different', async () => {
       const sampleArgs = {
-        timezone: 'Europe/Madrid',
         interval: '3d',
         groups: [
           {

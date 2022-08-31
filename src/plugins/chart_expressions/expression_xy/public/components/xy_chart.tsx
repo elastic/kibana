@@ -28,12 +28,20 @@ import {
   Direction,
   XYChartElementEvent,
 } from '@elastic/charts';
+import { partition } from 'lodash';
+import moment from 'moment';
 import { IconType } from '@elastic/eui';
 import { PaletteRegistry } from '@kbn/coloring';
-import { Datatable, RenderMode } from '@kbn/expressions-plugin/common';
+import { Datatable, DatatableRow, RenderMode } from '@kbn/expressions-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { EmptyPlaceholder, LegendToggle } from '@kbn/charts-plugin/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import {
+  ManualPointEventAnnotationRow,
+  ManualRangeEventAnnotationOutput,
+  ManualPointEventAnnotationOutput,
+  ManualRangeEventAnnotationRow,
+} from '@kbn/event-annotation-plugin/common';
 import { ChartsPluginSetup, ChartsPluginStart, useActiveCursor } from '@kbn/charts-plugin/public';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 import {
@@ -53,6 +61,7 @@ import type {
   ExtendedReferenceLineDecorationConfig,
   XYChartProps,
   AxisExtentConfigResult,
+  CommonXYAnnotationLayerConfig,
 } from '../../common/types';
 import {
   isHorizontalChart,
@@ -87,7 +96,7 @@ import { SplitChart } from './split_chart';
 import {
   Annotations,
   getAnnotationsGroupedByInterval,
-  getRangeAnnotations,
+  isRangeAnnotation,
   OUTSIDE_RECT_ANNOTATION_WIDTH,
   OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION,
 } from './annotations';
@@ -182,6 +191,49 @@ function createSplitPoint(
 }
 
 export const XYChartReportable = React.memo(XYChart);
+
+// TODO: remove this function when we start using fetch_event_annotation expression
+const convertToAnnotationsTable = (
+  layers: CommonXYAnnotationLayerConfig[],
+  minInterval?: number,
+  firstTimestamp?: number
+) => {
+  return layers
+    .flatMap(({ annotations }) =>
+      annotations.filter(
+        (a): a is ManualPointEventAnnotationOutput | ManualRangeEventAnnotationOutput =>
+          !a.isHidden && 'time' in a
+      )
+    )
+    .sort((a, b) => moment(a.time).valueOf() - moment(b.time).valueOf())
+    .map((a) => {
+      const timebucket = getRoundedTimestamp(moment(a.time).valueOf(), firstTimestamp, minInterval);
+      if (a.type === 'manual_point_event_annotation') {
+        const pointRow: ManualPointEventAnnotationRow = {
+          ...a,
+          type: 'point',
+          timebucket: moment(timebucket).toISOString(),
+        };
+        return pointRow;
+      }
+      const rangeRow: ManualRangeEventAnnotationRow = {
+        ...a,
+        type: 'range',
+      };
+      return rangeRow;
+    });
+};
+
+export const sortByTime = (a: DatatableRow, b: DatatableRow) => {
+  return 'time' in a && 'time' in b ? a.time.localeCompare(b.time) : 0;
+};
+
+const getRoundedTimestamp = (timestamp: number, firstTimestamp?: number, minInterval?: number) => {
+  if (!firstTimestamp || !minInterval) {
+    return timestamp;
+  }
+  return timestamp - ((timestamp - firstTimestamp) % minInterval);
+};
 
 export function XYChart({
   args,
@@ -403,13 +455,18 @@ export function XYChart({
     ? getColumnByAccessor(dataLayers[0]?.xAccessor, firstTable.columns)?.id
     : null;
 
-  const groupedLineAnnotations = getAnnotationsGroupedByInterval(
+  const annotations = convertToAnnotationsTable(
     annotationsLayers,
     minInterval,
-    columnId ? firstTable.rows[0]?.[columnId] : undefined,
+    columnId ? firstTable.rows[0]?.[columnId] : undefined
+  );
+
+  const [rangeAnnotations, lineAnnotations] = partition(annotations, isRangeAnnotation);
+
+  const groupedLineAnnotations = getAnnotationsGroupedByInterval(
+    lineAnnotations as ManualPointEventAnnotationRow[],
     xAxisFormatter
   );
-  const rangeAnnotations = getRangeAnnotations(annotationsLayers);
 
   const visualConfigs = [
     ...referenceLineLayers
@@ -965,7 +1022,7 @@ export function XYChart({
               paddingMap={linesPaddings}
               isBarChart={filteredBarLayers.length > 0}
               minInterval={minInterval}
-              simpleView={annotationsLayers?.[0].simpleView}
+              simpleView={shouldHideDetails}
               outsideDimension={
                 rangeAnnotations.length && shouldHideDetails
                   ? OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION

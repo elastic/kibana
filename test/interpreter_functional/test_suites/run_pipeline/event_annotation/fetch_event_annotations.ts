@@ -31,7 +31,7 @@ export default function ({
     it(`manual annotations from different groups`, async () => {
       const expression = `
       kibana_context timeRange={timerange from='${timeRange.from}' to='${timeRange.to}'}
-      | fetch_event_annotations timezone="Australia/Darwin"
+      | fetch_event_annotations
         interval="1w" 
         groups={event_annotation_group   dataView={indexPatternLoad id="logstash-*"}  annotations={
           manual_point_event_annotation id="ann1" label="Manual1" color="red" icon="bolt" time="2015-09-21T12:15:00Z" lineWidth="3" lineStyle="solid" textVisibility=true
@@ -77,7 +77,7 @@ export default function ({
       it('calculates correct timebuckets, counts skippedCount, passes fields and styles for single group with only query annotations', async () => {
         const expression = `
         kibana_context timeRange={timerange from='${timeRange.from}' to='${timeRange.to}'}
-        | fetch_event_annotations interval="1d" timezone="Australia/Darwin" groups={event_annotation_group  
+        | fetch_event_annotations interval="1d" groups={event_annotation_group  
           dataView={indexPatternLoad id="logstash-*"} 
           annotations={query_point_event_annotation id="server_errors" filter={kql q="response.raw === 503"}  extraFields='response.raw'  extraFields='extension.raw'   extraFields='bytes' timeField="@timestamp" label="503" color="red"}
           annotations={query_point_event_annotation id="client_errors" filter={kql q="response.raw === 404"}  extraFields='response.raw' textField="ip"  timeField="@timestamp" label="404" color="orange"}}
@@ -89,7 +89,7 @@ export default function ({
       it('calculates correct timebuckets, counts skippedCount, passes fields and styles for multiple groups with only query annotations', async () => {
         const expression = `
         kibana_context timeRange={timerange from='${timeRange.from}' to='${timeRange.to}'}
-        | fetch_event_annotations interval="1d" timezone="Australia/Darwin" groups={event_annotation_group  
+        | fetch_event_annotations interval="1d" groups={event_annotation_group  
           dataView={indexPatternLoad id="logstash-*"} 
           annotations={query_point_event_annotation id="server_errors" filter={kql q="response.raw === 503"}  extraFields='response.raw'  extraFields='extension.raw'   extraFields='bytes' timeField="@timestamp" label="503" color="red"}}
           groups={event_annotation_group  
@@ -103,7 +103,7 @@ export default function ({
       it('calculates correct timebuckets, counts skippedCount, passes fields and styles for multiple groups with query and manual annotations', async () => {
         const expression = `
         kibana_context timeRange={timerange from='${timeRange.from}' to='${timeRange.to}'}
-        | fetch_event_annotations interval="1d" timezone="Australia/Darwin" groups={event_annotation_group  
+        | fetch_event_annotations interval="1d" groups={event_annotation_group  
           dataView={indexPatternLoad id="logstash-*"} 
           annotations={query_point_event_annotation id="server_errors" filter={kql q="response.raw === 503"}  extraFields='response.raw'  extraFields='extension.raw'   extraFields='bytes' timeField="@timestamp" label="503" color="red"}}
           groups={event_annotation_group  

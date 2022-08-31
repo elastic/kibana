@@ -17,10 +17,25 @@ export type ManualPointEventAnnotationOutput = ManualPointEventAnnotationArgs & 
   type: 'manual_point_event_annotation';
 };
 
+export type ManualPointEventAnnotationRow = {
+  id: string;
+  time: string;
+  type: 'point';
+  timebucket: string;
+  skippedCount?: string;
+} & PointStyleProps;
+
 export type ManualRangeEventAnnotationArgs = {
   id: string;
   time: string;
   endTime: string;
+} & RangeStyleProps;
+
+export type ManualRangeEventAnnotationRow = {
+  id: string;
+  time: string;
+  endTime: string;
+  type: 'range';
 } & RangeStyleProps;
 
 export type ManualRangeEventAnnotationOutput = ManualRangeEventAnnotationArgs & {
