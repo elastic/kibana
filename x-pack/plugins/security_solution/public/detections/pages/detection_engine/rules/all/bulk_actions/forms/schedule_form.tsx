@@ -86,7 +86,7 @@ export const ScheduleForm = ({ rulesCount, onClose, onConfirm }: ScheduleFormCom
         componentProps={{
           idAria: 'bulkEditRulesScheduleIntervalSelector',
           dataTestSubj: 'bulkEditRulesScheduleIntervalSelector',
-          placeholder: "test",
+          placeholder: 'test',
         }}
       />
       <UseField
@@ -95,7 +95,7 @@ export const ScheduleForm = ({ rulesCount, onClose, onConfirm }: ScheduleFormCom
         componentProps={{
           idAria: 'bulkEditRulesScheduleLookbackSelector',
           dataTestSubj: 'bulkEditRulesScheduleLookbackSelector',
-          placeholder: "test",
+          placeholder: 'test',
         }}
       />
     </BulkEditFormWrapper>
