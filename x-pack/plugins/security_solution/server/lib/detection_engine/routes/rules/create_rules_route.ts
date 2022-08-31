@@ -79,15 +79,12 @@ export const createRulesRoute = (
 
         // This will create the endpoint list if it does not exist yet
         await ctx.lists?.getExceptionListClient().createEndpointList();
-        const exceptionLists = checkDefaultRuleExceptionListReferences({
+        checkDefaultRuleExceptionListReferences({
           exceptionLists: request.body.exceptions_list,
         });
         const createdRule = await createRules({
           rulesClient,
-          params: {
-            ...request.body,
-            exceptions_list: exceptionLists,
-          },
+          params: request.body,
         });
 
         const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(createdRule.id);
