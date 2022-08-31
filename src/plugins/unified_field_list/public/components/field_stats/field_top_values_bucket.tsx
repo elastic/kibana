@@ -46,8 +46,7 @@ export const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
   'data-test-subj': dataTestSubject,
   onAddFilter,
 }) => {
-  const isFilterButtonHidden = type === 'other';
-  const testSubjFieldName = (field?.subType as IFieldSubTypeMulti)?.multi?.parent ?? field.name;
+  const fieldLabel = (field?.subType as IFieldSubTypeMulti)?.multi?.parent ?? field.name;
 
   return (
     <EuiFlexGroup alignItems="stretch" gutterSize="s" responsive={false}>
@@ -114,57 +113,58 @@ export const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
       </EuiFlexItem>
       {onAddFilter && field.filterable && (
         <EuiFlexItem grow={false}>
-          <div
-            css={
-              isFilterButtonHidden
-                ? css`
-                    visibility: hidden;
-                  `
-                : undefined
-            }
-          >
-            <EuiButtonIcon
-              disabled={isFilterButtonHidden}
-              iconSize="s"
-              iconType="plusInCircle"
-              onClick={() => onAddFilter(field, fieldValue, '+')}
-              aria-label={i18n.translate('unifiedFieldList.fieldStats.filterValueButtonAriaLabel', {
-                defaultMessage: 'Filter for {field}: "{value}"',
-                values: { value: formattedFieldValue, field: testSubjFieldName },
-              })}
-              data-test-subj={`plus-${testSubjFieldName}-${fieldValue}`}
-              style={{
-                minHeight: 'auto',
-                minWidth: 'auto',
-                paddingRight: 2,
-                paddingLeft: 2,
-                paddingTop: 0,
-                paddingBottom: 0,
-              }}
+          {type === 'other' ? (
+            <div
+              css={css`
+                width: 48px;
+              `}
             />
-            <EuiButtonIcon
-              disabled={isFilterButtonHidden}
-              iconSize="s"
-              iconType="minusInCircle"
-              onClick={() => onAddFilter(field, fieldValue, '-')}
-              aria-label={i18n.translate(
-                'unifiedFieldList.fieldStats.filterOutValueButtonAriaLabel',
-                {
-                  defaultMessage: 'Filter out {field}: "{value}"',
-                  values: { value: formattedFieldValue, field: testSubjFieldName },
-                }
-              )}
-              data-test-subj={`minus-${testSubjFieldName}-${fieldValue}`}
-              style={{
-                minHeight: 'auto',
-                minWidth: 'auto',
-                paddingTop: 0,
-                paddingBottom: 0,
-                paddingRight: 2,
-                paddingLeft: 2,
-              }}
-            />
-          </div>
+          ) : (
+            <div>
+              <EuiButtonIcon
+                iconSize="s"
+                iconType="plusInCircle"
+                onClick={() => onAddFilter(field, fieldValue, '+')}
+                aria-label={i18n.translate(
+                  'unifiedFieldList.fieldStats.filterValueButtonAriaLabel',
+                  {
+                    defaultMessage: 'Filter for {field}: "{value}"',
+                    values: { value: formattedFieldValue, field: fieldLabel },
+                  }
+                )}
+                data-test-subj={`plus-${fieldLabel}-${fieldValue}`}
+                style={{
+                  minHeight: 'auto',
+                  minWidth: 'auto',
+                  paddingRight: 2,
+                  paddingLeft: 2,
+                  paddingTop: 0,
+                  paddingBottom: 0,
+                }}
+              />
+              <EuiButtonIcon
+                iconSize="s"
+                iconType="minusInCircle"
+                onClick={() => onAddFilter(field, fieldValue, '-')}
+                aria-label={i18n.translate(
+                  'unifiedFieldList.fieldStats.filterOutValueButtonAriaLabel',
+                  {
+                    defaultMessage: 'Filter out {field}: "{value}"',
+                    values: { value: formattedFieldValue, field: fieldLabel },
+                  }
+                )}
+                data-test-subj={`minus-${fieldLabel}-${fieldValue}`}
+                style={{
+                  minHeight: 'auto',
+                  minWidth: 'auto',
+                  paddingTop: 0,
+                  paddingBottom: 0,
+                  paddingRight: 2,
+                  paddingLeft: 2,
+                }}
+              />
+            </div>
+          )}
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
