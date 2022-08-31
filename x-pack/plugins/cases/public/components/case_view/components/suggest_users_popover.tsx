@@ -8,37 +8,16 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { UserProfilesPopover, UserProfileWithAvatar } from '@kbn/user-profile-components';
 
-import {
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiSpacer,
-  EuiText,
-  EuiTextAlign,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import { useSuggestUserProfiles } from '../../../containers/user_profiles/use_suggest_user_profiles';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { AssigneeWithProfile } from '../../user_profiles/types';
 import * as i18n from '../translations';
-import { bringCurrentUserToFrontAndSort, sortProfiles } from '../../user_profiles/sort';
-
-const SelectedStatusMessageComponent: React.FC<{
-  selectedCount: number;
-}> = ({ selectedCount }) => {
-  if (selectedCount <= 0) {
-    return null;
-  }
-
-  return (
-    <EuiFlexGroup gutterSize="none" data-test-subj="case-view-assignees-popover-totals">
-      <EuiFlexItem grow={false}>{i18n.TOTAL_USERS_ASSIGNED(selectedCount)}</EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
-SelectedStatusMessageComponent.displayName = 'SelectedStatusMessage';
+import { bringCurrentUserToFrontAndSort } from '../../user_profiles/sort';
+import { SelectedStatusMessage } from '../../user_profiles/selected_status_message';
+import { EmptyMessage } from '../../user_profiles/empty_message';
+import { NoMatches } from '../../user_profiles/no_matches';
 
 const PopoverButton: React.FC<{ togglePopover: () => void; isLoading: boolean }> = ({
   togglePopover,
@@ -55,38 +34,6 @@ const PopoverButton: React.FC<{ togglePopover: () => void; isLoading: boolean }>
   </EuiToolTip>
 );
 PopoverButton.displayName = 'PopoverButton';
-
-const EmptyMessage: React.FC = () => null;
-EmptyMessage.displayName = 'EmptyMessage';
-
-const NoMatches: React.FC = () => {
-  return (
-    <EuiFlexGroup
-      alignItems="center"
-      gutterSize="none"
-      direction="column"
-      justifyContent="spaceAround"
-      data-test-subj="case-view-assignees-popover-no-matches"
-    >
-      <EuiFlexItem grow={false}>
-        <EuiIcon type="userAvatar" size="xl" />
-        <EuiSpacer size="xs" />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiTextAlign textAlign="center">
-          <EuiText size="s" color="default">
-            <strong>{i18n.NO_MATCHING_USERS}</strong>
-            <br />
-          </EuiText>
-          <EuiText size="s" color="subdued">
-            {i18n.TRY_MODIFYING_SEARCH}
-          </EuiText>
-        </EuiTextAlign>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
-NoMatches.displayName = 'NoMatches';
 
 export interface SuggestUsersPopoverProps {
   assignedUsersWithProfiles: AssigneeWithProfile[];
@@ -133,7 +80,12 @@ const SuggestUsersPopoverComponent: React.FC<SuggestUsersPopoverProps> = ({
   );
 
   const selectedStatusMessage = useCallback(
-    (selectedCount: number) => <SelectedStatusMessageComponent selectedCount={selectedCount} />,
+    (selectedCount: number) => (
+      <SelectedStatusMessage
+        selectedCount={selectedCount}
+        createMessage={i18n.TOTAL_USERS_ASSIGNED}
+      />
+    ),
     []
   );
 
@@ -145,13 +97,13 @@ const SuggestUsersPopoverComponent: React.FC<SuggestUsersPopoverProps> = ({
   const isLoadingData = isLoadingSuggest || isLoading;
 
   useEffect(() => {
-    const sortedUserProfiles = sortProfiles(userProfiles);
+    const sortedUserProfiles = bringCurrentUserToFrontAndSort(currentUserProfile, userProfiles);
     if (!isEmpty(searchTerm)) {
       setSearchResultProfiles(sortedUserProfiles);
     } else {
       setSearchResultProfiles(undefined);
     }
-  }, [searchTerm, userProfiles]);
+  }, [currentUserProfile, searchTerm, userProfiles]);
 
   return (
     <UserProfilesPopover

@@ -40,10 +40,10 @@ export const moveCurrentUserToBeginning = <T extends { uid: string }>(
 
 export const bringCurrentUserToFrontAndSort = (
   currentUserProfile?: UserProfileWithAvatar,
-  profiles?: UserProfileWithAvatar[]
+  profiles?: UserProfileWithAvatar[] | null
 ) => moveCurrentUserToBeginning(currentUserProfile, sortProfiles(profiles));
 
-export const sortProfiles = (profiles?: UserProfileWithAvatar[]) => {
+export const sortProfiles = (profiles?: UserProfileWithAvatar[] | null) => {
   if (!profiles) {
     return;
   }

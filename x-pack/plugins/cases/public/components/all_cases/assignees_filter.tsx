@@ -11,21 +11,13 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { CASE_LIST_CACHE_KEY } from '../../containers/constants';
 import { useFindAssignees } from '../../containers/use_find_assignees';
 import { useCasesContext } from '../cases_context/use_cases_context';
+import { EmptyMessage } from '../user_profiles/empty_message';
+import { NoMatches } from '../user_profiles/no_matches';
+import { SelectedStatusMessage } from '../user_profiles/selected_status_message';
 import { bringCurrentUserToFrontAndSort } from '../user_profiles/sort';
 import * as i18n from './translations';
 
-const SelectedStatusMessageComponent: React.FC<{
-  selectedCount: number;
-}> = ({ selectedCount }) => {
-  if (selectedCount <= 0) {
-    return null;
-  }
-
-  return <>{i18n.TOTAL_ASSIGNEES_FILTERED(selectedCount)}</>;
-};
-SelectedStatusMessageComponent.displayName = 'SelectedStatusMessage';
-
-interface AssigneesFilterPopoverProps {
+export interface AssigneesFilterPopoverProps {
   selectedAssignees: UserProfileWithAvatar[];
   currentUserProfile?: UserProfileWithAvatar;
   isLoading: boolean;
@@ -58,7 +50,12 @@ const AssigneesFilterPopoverComponent: React.FC<AssigneesFilterPopoverProps> = (
   );
 
   const selectedStatusMessage = useCallback(
-    (selectedCount: number) => <SelectedStatusMessageComponent selectedCount={selectedCount} />,
+    (selectedCount: number) => (
+      <SelectedStatusMessage
+        selectedCount={selectedCount}
+        createMessage={i18n.TOTAL_ASSIGNEES_FILTERED}
+      />
+    ),
     []
   );
 
@@ -118,6 +115,9 @@ const AssigneesFilterPopoverComponent: React.FC<AssigneesFilterPopoverProps> = (
         height: 'full',
         searchPlaceholder: i18n.SEARCH_USERS,
         clearButtonLabel: i18n.CLEAR_FILTERS,
+        emptyMessage: <EmptyMessage />,
+        noMatchesMessage: <NoMatches />,
+        singleSelection: true,
       }}
     />
   );

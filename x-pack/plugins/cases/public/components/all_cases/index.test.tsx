@@ -27,7 +27,6 @@ import { userProfiles, userProfilesMap } from '../../containers/user_profiles/ap
 import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
 import { useFindAssignees } from '../../containers/use_find_assignees';
 
-jest.mock('../../containers/use_get_reporters');
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/use_get_action_license', () => {
   return {

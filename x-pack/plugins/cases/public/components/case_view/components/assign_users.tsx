@@ -177,6 +177,7 @@ const AssignUsersComponent: React.FC<AssignUsersProps> = ({
           <EuiFlexItem data-test-subj="case-view-assignees-edit" grow={false}>
             <SuggestUsersPopover
               assignedUsersWithProfiles={assigneesWithProfiles}
+              currentUserProfile={currentUserProfile}
               isLoading={isLoading}
               isPopoverOpen={isPopoverOpen}
               onUsersChange={onUsersChange}

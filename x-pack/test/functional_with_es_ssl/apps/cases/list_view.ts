@@ -198,12 +198,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.casesTable.validateCasesTableHasNthRows(1);
       });
 
-      it.only('filters cases by the first cases all user assignee', async () => {
+      it('filters cases by the first cases all user assignee', async () => {
         await cases.casesTable.filterByAssignee('all');
         await cases.casesTable.validateCasesTableHasNthRows(1);
       });
 
-      it.only('filters cases by the casesAllUser2 assignee', async () => {
+      it('filters cases by the casesAllUser2 assignee', async () => {
         await cases.casesTable.filterByAssignee('2');
         await cases.casesTable.validateCasesTableHasNthRows(1);
       });

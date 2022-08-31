@@ -200,11 +200,3 @@ export const SPACED_OR = i18n.translate('xpack.cases.caseView.spacedOrText', {
 export const ASSIGN_YOURSELF = i18n.translate('xpack.cases.caseView.assignYourself', {
   defaultMessage: 'assign yourself',
 });
-
-export const NO_MATCHING_USERS = i18n.translate('xpack.cases.caseView.noMatchingUsers', {
-  defaultMessage: 'No matching users with required access.',
-});
-
-export const TRY_MODIFYING_SEARCH = i18n.translate('xpack.cases.caseView.tryModifyingSearch', {
-  defaultMessage: 'Try modifying your search.',
-});

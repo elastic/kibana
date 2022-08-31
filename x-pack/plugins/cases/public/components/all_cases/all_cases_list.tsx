@@ -267,7 +267,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           initial={{
             search: filterOptions.search,
             searchFields: filterOptions.searchFields,
-            assignees: [],
+            assignees: filterOptions.assignees,
             tags: filterOptions.tags,
             status: filterOptions.status,
             owner: filterOptions.owner,
@@ -278,6 +278,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           displayCreateCaseButton={isSelectorView}
           onCreateCasePressed={onRowClick}
           isLoading={isLoadingUserProfileData}
+          currentUserProfile={currentUserProfile}
         />
         <CasesTable
           columns={columns}

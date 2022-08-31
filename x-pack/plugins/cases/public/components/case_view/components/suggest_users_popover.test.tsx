@@ -157,12 +157,23 @@ describe('SuggestUsersPopover', () => {
 
     await waitForEuiPopoverOpen();
 
-    expect(screen.queryByTestId('case-view-assignees-popover-totals')).not.toBeInTheDocument();
+    expect(screen.queryByText('assigned')).not.toBeInTheDocument();
     fireEvent.change(screen.getByPlaceholderText('Search users'), { target: { value: 'dingo' } });
     fireEvent.click(screen.getByText('wet_dingo@elastic.co'));
   });
 
-  it('shows the 1 assigned total', async () => {
+  it('shows the 1 assigned total after clicking on a user', async () => {
+    appMockRender.render(<SuggestUsersPopover {...defaultProps} />);
+
+    await waitForEuiPopoverOpen();
+
+    expect(screen.queryByText('assigned')).not.toBeInTheDocument();
+    fireEvent.change(screen.getByPlaceholderText('Search users'), { target: { value: 'dingo' } });
+    fireEvent.click(screen.getByText('wet_dingo@elastic.co'));
+    expect(screen.getByText('1 assigned')).toBeInTheDocument();
+  });
+
+  it('shows the 1 assigned total when the users are passed in', async () => {
     const props = {
       ...defaultProps,
       assignedUsersWithProfiles: [{ uid: userProfiles[0].uid, profile: userProfiles[0] }],
@@ -171,7 +182,6 @@ describe('SuggestUsersPopover', () => {
 
     await waitForEuiPopoverOpen();
 
-    expect(screen.getByTestId('case-view-assignees-popover-totals')).toBeInTheDocument();
     expect(screen.getByText('1 assigned')).toBeInTheDocument();
     expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
   });
@@ -197,9 +207,9 @@ describe('SuggestUsersPopover', () => {
 
     await waitForEuiPopoverOpen();
 
-    fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
-
-    expect(screen.queryByTestId('case-view-assignees-popover-no-matches')).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('case-user-profiles-assignees-popover-no-matches')
+    ).not.toBeInTheDocument();
   });
 
   it('shows the no matches component', async () => {
@@ -208,10 +218,11 @@ describe('SuggestUsersPopover', () => {
 
     await waitForEuiPopoverOpen();
 
-    fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
     fireEvent.change(screen.getByPlaceholderText('Search users'), { target: { value: 'bananas' } });
 
-    expect(screen.getAllByTestId('case-view-assignees-popover-no-matches')[0]).toBeInTheDocument();
+    expect(
+      screen.getAllByTestId('case-user-profiles-assignees-popover-no-matches')[0]
+    ).toBeInTheDocument();
   });
 });
 
