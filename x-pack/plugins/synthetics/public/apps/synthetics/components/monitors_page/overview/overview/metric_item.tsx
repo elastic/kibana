@@ -46,6 +46,7 @@ export const MetricItem = ({
 
   return (
     <div
+      data-test-subj={`${monitor.name}-metric-item`}
       style={{
         height: '160px',
       }}
