@@ -44,7 +44,7 @@ const getAttachmentRenderer = memoize((attachmentType: AttachmentType<unknown>) 
     if (!attachmentViewObject.children) return;
 
     if (!AttachmentElement) {
-      AttachmentElement = React.createElement(attachmentViewObject.children, props, {});
+      AttachmentElement = React.createElement(attachmentViewObject.children, props);
     } else {
       AttachmentElement = React.cloneElement(AttachmentElement, props);
     }
