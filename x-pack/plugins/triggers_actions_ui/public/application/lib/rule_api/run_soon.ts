@@ -8,5 +8,5 @@ import { HttpSetup } from '@kbn/core/public';
 import { BASE_ALERTING_API_PATH } from '../../constants';
 
 export async function runSoon({ id, http }: { id: string; http: HttpSetup }): Promise<void> {
-  await http.post(`${BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(id)}/_run_soon`);
+  return http.post(`${BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(id)}/_run_soon`);
 }

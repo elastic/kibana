@@ -263,9 +263,6 @@ export const RulesList = ({
   };
 
   const onRuleRun = async (rule: RuleTableItem) => {
-    await runSoon({ http, id: rule.id });
-    await loadData();
-
     try {
       await runSoon({ http, id: rule.id });
       toasts.addSuccess({
