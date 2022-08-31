@@ -21,7 +21,6 @@ import {
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { EuiComboBoxProps, EuiComboBoxOptionOption } from '@elastic/eui';
 import {
-  EuiFormLabel,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -263,6 +262,7 @@ const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
 
   return (
     <EuiFormRow
+      label="ECS field"
       helpText={helpText}
       error={error}
       isInvalid={!!error}
@@ -534,6 +534,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
 
   return (
     <EuiFormRow
+      label="Value"
       helpText={selectedOptions[0]?.value?.description}
       error={resultFieldState.error?.message}
       isInvalid={!!resultFieldState.error?.message?.length}
@@ -1014,25 +1015,6 @@ export const ECSMappingEditorField = React.memo(
                 defaultMessage="Use the fields below to map results from this query to ECS fields."
               />
             </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        <EuiFlexGroup gutterSize="s">
-          <EuiFlexItem>
-            <EuiFormLabel>
-              <FormattedMessage
-                id="xpack.osquery.pack.queryFlyoutForm.mappingEcsFieldLabel"
-                defaultMessage="ECS field"
-              />
-            </EuiFormLabel>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFormLabel>
-              <FormattedMessage
-                id="xpack.osquery.pack.queryFlyoutForm.mappingValueFieldLabel"
-                defaultMessage="Value"
-              />
-            </EuiFormLabel>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />
