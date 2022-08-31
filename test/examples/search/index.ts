@@ -6,4 +6,11 @@
  * Side Public License, v 1.
  */
 
-export { handleWarnings } from './handle_warnings';
+import { FtrProviderContext } from '../../functional/ftr_provider_context';
+
+// eslint-disable-next-line import/no-default-export
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('Search examples', () => {
+    loadTestFile(require.resolve('./warnings'));
+  });
+}
