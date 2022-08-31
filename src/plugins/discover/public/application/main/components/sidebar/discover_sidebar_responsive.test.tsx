@@ -87,9 +87,6 @@ const mockServices = {
       if (key === 'fields:popularLimit') {
         return 5;
       }
-      if (key === 'discover:showLegacyFieldTopValues') {
-        return true;
-      }
     },
   },
   docLinks: { links: { discover: { fieldTypeHelp: '' } } },
@@ -187,11 +184,14 @@ describe('discover responsive sidebar', function () {
 
   beforeAll(async () => {
     props = getCompProps();
-    comp = await mountWithIntl(
-      <KibanaContextProvider services={mockServices}>
-        <DiscoverSidebarResponsive {...props} />
-      </KibanaContextProvider>
-    );
+    await act(async () => {
+      comp = await mountWithIntl(
+        <KibanaContextProvider services={mockServices}>
+          <DiscoverSidebarResponsive {...props} />
+        </KibanaContextProvider>
+      );
+      comp.update();
+    });
   });
 
   it('should have Selected Fields and Available Fields with Popular Fields sections', function () {
@@ -211,8 +211,14 @@ describe('discover responsive sidebar', function () {
     findTestSubject(comp, 'fieldToggle-extension').simulate('click');
     expect(props.onRemoveField).toHaveBeenCalledWith('extension');
   });
-  it('should allow adding filters', function () {
-    findTestSubject(comp, 'field-extension-showDetails').simulate('click');
+  it('should allow adding filters', async function () {
+    await act(async () => {
+      const button = findTestSubject(comp, 'field-extension-showDetails');
+      await button.simulate('click');
+      await comp.update();
+    });
+
+    await comp.update();
     findTestSubject(comp, 'plus-extension-gif').simulate('click');
     expect(props.onAddFilter).toHaveBeenCalled();
   });
