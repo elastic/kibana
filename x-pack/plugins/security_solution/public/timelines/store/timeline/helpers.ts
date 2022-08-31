@@ -316,6 +316,7 @@ const addAndToProvidersInTimeline = (
   timeline: TimelineModel,
   timelineById: TimelineById
 ): TimelineById => {
+  if (providers.length === 0) return timelineById;
   let localDataProviders: DataProvider[] = cloneDeep(timeline.dataProviders);
 
   providers.forEach((provider) => {
