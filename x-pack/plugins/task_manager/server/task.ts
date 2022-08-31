@@ -281,7 +281,7 @@ export interface TaskInstance {
   /**
    * Indicates whether the task is currently enabled. Disabled tasks will not be claimed.
    */
-  enabled: boolean;
+  enabled?: boolean;
 }
 
 /**

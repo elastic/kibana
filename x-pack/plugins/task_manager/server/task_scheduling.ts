@@ -126,7 +126,7 @@ export class TaskScheduling {
     return await this.store.schedule({
       ...modifiedTask,
       traceparent: traceparent || '',
-      enabled: true,
+      enabled: modifiedTask.enabled ?? true,
     });
   }
 
@@ -150,7 +150,11 @@ export class TaskScheduling {
           ...options,
           taskInstance: ensureDeprecatedFieldsAreCorrected(taskInstance, this.logger),
         });
-        return { ...modifiedTask, traceparent: traceparent || '', enabled: true };
+        return {
+          ...modifiedTask,
+          traceparent: traceparent || '',
+          enabled: modifiedTask.enabled ?? true,
+        };
       })
     );
 
