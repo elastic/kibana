@@ -6,10 +6,5 @@
  * Side Public License, v 1.
  */
 
-export const globbyMock = jest.fn();
-jest.doMock('globby', () => globbyMock);
-
-export const readFileMock = jest.fn();
-jest.doMock('./fs', () => ({
-  readFile: readFileMock,
-}));
+export type { I18nConfigType, I18nServiceSetup } from './src';
+export { config, I18nService } from './src';

@@ -2995,6 +2995,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-i18n-server-internal@link:bazel-bin/packages/core/i18n/core-i18n-server-internal":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-injected-metadata-browser-internal@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-browser-internal":
   version "0.0.0"
   uid ""
@@ -7038,6 +7042,10 @@
   uid ""
 
 "@types/kbn__core-i18n-browser@link:bazel-bin/packages/core/i18n/core-i18n-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-i18n-server-internal@link:bazel-bin/packages/core/i18n/core-i18n-server-internal/npm_module_types":
   version "0.0.0"
   uid ""
 
