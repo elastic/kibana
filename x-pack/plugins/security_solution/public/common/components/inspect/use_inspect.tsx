@@ -7,12 +7,13 @@
 
 import { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
+import { InputsModelId } from '../../store/inputs/constants';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { inputsSelectors } from '../../store';
 import { inputsActions } from '../../store/actions';
 
 interface UseInspectModalProps {
-  inputId?: 'global' | 'timeline';
+  inputId?: InputsModelId.global | InputsModelId.timeline;
   inspectIndex?: number;
   isDisabled?: boolean;
   multiple?: boolean;
@@ -22,7 +23,7 @@ interface UseInspectModalProps {
 }
 
 export const useInspect = ({
-  inputId = 'global',
+  inputId = InputsModelId.global,
   inspectIndex = 0,
   isDisabled,
   multiple = false, // If multiple = true we ignore the inspectIndex and pass all requests and responses to the inspect modal
@@ -35,7 +36,9 @@ export const useInspect = ({
   const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();
   const getTimelineQuery = inputsSelectors.timelineQueryByIdSelector();
   const { loading, inspect, selectedInspectIndex, isInspected } = useDeepEqualSelector((state) =>
-    inputId === 'global' ? getGlobalQuery(state, queryId) : getTimelineQuery(state, queryId)
+    inputId === InputsModelId.global
+      ? getGlobalQuery(state, queryId)
+      : getTimelineQuery(state, queryId)
   );
 
   const handleClick = useCallback(() => {

@@ -25,6 +25,7 @@ import { connect, useDispatch } from 'react-redux';
 import type { Dispatch } from 'redux';
 
 import { isTab } from '@kbn/timelines-plugin/public';
+import { InputsModelId } from '../../../common/store/inputs/constants';
 import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { SecurityPageName } from '../../../app/types';
@@ -176,7 +177,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
       const [min, max] = x;
       dispatch(
         setAbsoluteRangeDatePicker({
-          id: 'global',
+          id: InputsModelId.global,
           from: new Date(min).toISOString(),
           to: new Date(max).toISOString(),
         })
@@ -321,7 +322,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
             <SiemSearchBar
-              id="global"
+              id={InputsModelId.global}
               pollForSignalIndex={pollForSignalIndex}
               indexPattern={indexPattern}
             />

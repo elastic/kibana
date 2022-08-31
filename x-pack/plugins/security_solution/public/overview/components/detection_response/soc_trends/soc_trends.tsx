@@ -18,6 +18,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import styled from 'styled-components';
+import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { SocTrendsDatePickerLock } from './date_picker_lock';
 import { SuperDatePicker } from '../../../../common/components/super_date_picker';
 import { LastUpdatedAt } from '../utils';
@@ -87,7 +88,12 @@ const SocTrendsComponent = ({ signalIndexName }: Props) => {
       >
         <StyledEuiFlexGroup gutterSize="s">
           <EuiFlexItem>
-            <SuperDatePicker id="socTrends" showUpdateButton="iconOnly" width="auto" compressed />
+            <SuperDatePicker
+              id={InputsModelId.socTrends}
+              showUpdateButton="iconOnly"
+              width="auto"
+              compressed
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <SocTrendsDatePickerLock />

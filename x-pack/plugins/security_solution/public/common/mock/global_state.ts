@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { InputsModelId } from '../store/inputs/constants';
 import {
   Direction,
   FlowTarget,
@@ -233,7 +234,7 @@ export const mockGlobalState: State = {
         from: '2020-07-07T08:20:18.966Z',
         to: '2020-07-08T08:20:18.966Z',
       },
-      linkTo: ['timeline', 'socTrends'],
+      linkTo: [InputsModelId.timeline, InputsModelId.socTrends],
       queries: [],
       policy: { kind: DEFAULT_INTERVAL_TYPE, duration: DEFAULT_INTERVAL_VALUE },
       query: {
@@ -250,7 +251,7 @@ export const mockGlobalState: State = {
         from: '2020-07-07T08:20:18.966Z',
         to: '2020-07-08T08:20:18.966Z',
       },
-      linkTo: ['global', 'socTrends'],
+      linkTo: [InputsModelId.global, InputsModelId.socTrends],
       queries: [],
       policy: { kind: DEFAULT_INTERVAL_TYPE, duration: DEFAULT_INTERVAL_VALUE },
       query: {
@@ -267,7 +268,7 @@ export const mockGlobalState: State = {
         from: '2020-07-06T08:20:18.966Z',
         to: '2020-07-07T08:20:18.966Z',
       },
-      linkTo: ['global', 'timeline'],
+      linkTo: [InputsModelId.global, InputsModelId.timeline],
       policy: { kind: DEFAULT_INTERVAL_TYPE, duration: DEFAULT_INTERVAL_VALUE },
     },
   },

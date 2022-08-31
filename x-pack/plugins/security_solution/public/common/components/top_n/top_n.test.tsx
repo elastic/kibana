@@ -17,6 +17,7 @@ import { TestProviders, mockIndexPattern } from '../../mock';
 import { allEvents, defaultOptions } from './helpers';
 import type { Props as TopNProps } from './top_n';
 import { TopN } from './top_n';
+import { InputsModelId } from '../../store/inputs/constants';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -111,7 +112,7 @@ describe('TopN', () => {
     indexPattern: mockIndexPattern,
     options: defaultOptions,
     query,
-    setAbsoluteRangeDatePickerTarget: 'global',
+    setAbsoluteRangeDatePickerTarget: InputsModelId.global,
     setQuery: jest.fn(),
     to: '2020-04-15T00:31:47.695Z',
     toggleTopN,

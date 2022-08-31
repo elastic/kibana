@@ -12,6 +12,7 @@ import { useDispatch } from 'react-redux';
 
 import type { Filter } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { InputsModelId } from '../../../common/store/inputs/constants';
 import { SecurityPageName } from '../../../app/types';
 import { FiltersGlobal } from '../../../common/components/filters_global';
 import { HeaderPage } from '../../../common/components/header_page';
@@ -123,7 +124,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
       const fromTo = scoreIntervalToDateTime(score, interval);
       dispatch(
         setAbsoluteRangeDatePicker({
-          id: 'global',
+          id: InputsModelId.global,
           from: fromTo.from,
           to: fromTo.to,
         })
@@ -138,7 +139,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
         <>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
-            <SiemSearchBar indexPattern={indexPattern} id="global" />
+            <SiemSearchBar indexPattern={indexPattern} id={InputsModelId.global} />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper noPadding={globalFullScreen}>

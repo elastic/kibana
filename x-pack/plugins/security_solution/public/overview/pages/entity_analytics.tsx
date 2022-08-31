@@ -20,6 +20,7 @@ import { EntityAnalyticsHeader } from '../components/entity_analytics/header';
 import { EntityAnalyticsUserRiskScores } from '../components/entity_analytics/user_risk_score';
 import { EntityAnalyticsAnomalies } from '../components/entity_analytics/anomalies';
 import { SiemSearchBar } from '../../common/components/search_bar';
+import { InputsModelId } from '../../common/store/inputs/constants';
 
 const EntityAnalyticsComponent = () => {
   const { indicesExist, loading: isSourcererLoading, indexPattern } = useSourcererDataView();
@@ -29,7 +30,12 @@ const EntityAnalyticsComponent = () => {
         <>
           <SecuritySolutionPageWrapper data-test-subj="entityAnalyticsPage">
             <HeaderPage title={i18n.ENTITY_ANALYTICS_TITLE}>
-              <SiemSearchBar id="global" indexPattern={indexPattern} hideFilterBar hideQueryInput />
+              <SiemSearchBar
+                id={InputsModelId.global}
+                indexPattern={indexPattern}
+                hideFilterBar
+                hideQueryInput
+              />
             </HeaderPage>
 
             {isSourcererLoading ? (

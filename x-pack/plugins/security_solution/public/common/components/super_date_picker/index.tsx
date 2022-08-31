@@ -27,7 +27,7 @@ import { timelineActions } from '../../../timelines/store/timeline';
 import { useUiSetting$ } from '../../lib/kibana';
 import type { inputsModel, State } from '../../store';
 import { inputsActions } from '../../store/actions';
-import type { InputsModelId } from '../../store/inputs/constants';
+import { InputsModelId } from '../../store/inputs/constants';
 import {
   durationSelector,
   endSelector,
@@ -300,9 +300,9 @@ export const dispatchUpdateReduxTime =
         })
       );
     }
-    if (kql) {
+    if (kql && kql.refetch) {
       return {
-        kqlHaveBeenUpdated: kql.refetch(dispatch),
+        kqlHaveBeenUpdated: kql.refetch(dispatch) ?? false,
       };
     }
 
@@ -334,7 +334,7 @@ export const makeMapStateToProps = () => {
       toStr: getToStrSelector(inputsRange),
       isLoading: false,
       ...(isQueryInput(inputsRange) &&
-        (id === 'timeline' || id === 'global') && {
+        (id === InputsModelId.timeline || id === InputsModelId.global) && {
           isLoading: getIsLoadingSelector(inputsRange),
           kqlQuery: getKqlQuerySelector(inputsRange),
           queries: getQueriesSelector(state, id),
