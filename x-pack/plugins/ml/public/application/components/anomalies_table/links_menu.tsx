@@ -53,25 +53,7 @@ import { useMlKibana } from '../../contexts/kibana';
 // @ts-ignore
 import { getFieldTypeFromMapping } from '../../services/mapping_service';
 import type { AnomaliesTableRecord } from '../../../../common/types/anomalies';
-
-function getQueryStringForInfluencers(
-  influencers: AnomaliesTableRecord['influencers'] = [],
-  entityName?: string
-) {
-  const influencersToFilter: string[] = [];
-  if (influencers.length) {
-    influencers.forEach((influencer, index) => {
-      for (const influencerFieldName in influencer) {
-        if (!(influencerFieldName === entityName)) {
-          influencersToFilter.push(`${influencerFieldName}: ${influencer[influencerFieldName]}`);
-        }
-      }
-    });
-  }
-
-  return `${influencersToFilter.join(' or ')}`;
-}
-
+import { getQueryStringForInfluencers } from './get_query_string_for_influencers';
 interface LinksMenuProps {
   anomaly: AnomaliesTableRecord;
   bounds: TimeRangeBounds;
