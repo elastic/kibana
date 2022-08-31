@@ -14,7 +14,7 @@
 [
   {
     "name": "apm",
-    "version": "8.4.0"
+    "version": "8.5.0-preview-1661950351"
   },
   {
     "name": "elastic_agent",
@@ -22,7 +22,7 @@
   },
   {
     "name": "endpoint",
-    "version": "8.4.1"
+    "version": "8.5.0-dev.0"
   },
   {
     "name": "fleet_server",
