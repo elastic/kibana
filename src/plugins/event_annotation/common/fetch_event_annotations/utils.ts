@@ -119,15 +119,26 @@ export const postprocessAnnotations = (
           throw new Error(`Could not find annotation config for id: ${row['col-0-1']}`);
         }
 
+        let extraFields: Record<string, string | number | string[] | number[]> = {};
+        if (annotationConfig?.extraFields?.length) {
+          extraFields = annotationConfig.extraFields.reduce(
+            (acc, field) => ({ ...acc, [`field:${field}`]: row[fieldsColIdMap[field]] }),
+            {}
+          );
+        }
+        if (annotationConfig?.textField) {
+          extraFields[`field:${annotationConfig.textField}`] =
+            row[fieldsColIdMap[annotationConfig.textField]];
+        }
+
         let modifiedRow: TimebucketRow = {
           ...passStylesFromAnnotationConfig(annotationConfig),
           id: row['col-0-1'],
           timebucket: moment(row['col-1-2']).toISOString(),
           time: row['col-3-4'],
           type: 'point',
-          label: annotationConfig.textField
-            ? row[fieldsColIdMap[annotationConfig.textField]]
-            : annotationConfig.label,
+          label: annotationConfig.label,
+          extraFields,
         };
         const countRow = row['col-2-3'];
         if (countRow > ANNOTATIONS_PER_BUCKET) {
@@ -135,13 +146,6 @@ export const postprocessAnnotations = (
             skippedCount: countRow - ANNOTATIONS_PER_BUCKET,
             ...modifiedRow,
           };
-        }
-
-        if (annotationConfig?.extraFields?.length) {
-          modifiedRow.extraFields = annotationConfig.extraFields.reduce(
-            (acc, field) => ({ ...acc, [`field:${field}`]: row[fieldsColIdMap[field]] }),
-            {}
-          );
         }
 
         return modifiedRow;
