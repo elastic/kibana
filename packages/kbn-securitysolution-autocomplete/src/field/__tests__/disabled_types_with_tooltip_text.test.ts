@@ -9,11 +9,11 @@
 import { disabledTypesWithTooltipText } from '../disabled_types_with_tooltip_text';
 
 jest.mock('../../translations', () => ({
-  BINARY_TYPE_NOT_SUPPORTED: 'Binary field is unsupported at the moment',
+  BINARY_TYPE_NOT_SUPPORTED: 'Binary fields are currently unsupported',
 }));
 describe('disabledTypesWithTooltipText', () => {
-  it('should return Binary field is unsupported at the moment for binary type', () => {
+  it('should return Binary fields are currently unsupported for binary type', () => {
     const type = 'binary';
-    expect(disabledTypesWithTooltipText[type]).toEqual('Binary field is unsupported at the moment');
+    expect(disabledTypesWithTooltipText[type]).toEqual('Binary fields are currently unsupported');
   });
 });

@@ -18,7 +18,7 @@ import { fields } from '../../fields/index.mock';
 import { useField } from '../use_field';
 
 jest.mock('../../translations', () => ({
-  BINARY_TYPE_NOT_SUPPORTED: 'Binary field is unsupported at the moment',
+  BINARY_TYPE_NOT_SUPPORTED: 'Binary fields are currently unsupported',
 }));
 
 const indexPattern = { fields, title: 'title' };
@@ -184,7 +184,7 @@ describe('useField', () => {
       ]);
       act(() => {
         const label = renderFields({ label: 'blob' }, '', '') as ReactElement;
-        expect(label?.props.content).toEqual('Binary field is unsupported at the moment');
+        expect(label?.props.content).toEqual('Binary fields are currently unsupported');
       });
     });
     it('should return label as component and disable the binary field type if field.type is one of the disabled types', () => {
@@ -239,7 +239,7 @@ describe('useField', () => {
       ]);
       act(() => {
         const label = renderFields({ label: 'blob' }, '', '') as ReactElement;
-        expect(label?.props.content).toEqual('Binary field is unsupported at the moment');
+        expect(label?.props.content).toEqual('Binary fields are currently unsupported');
       });
     });
     it('should return label as string', () => {
