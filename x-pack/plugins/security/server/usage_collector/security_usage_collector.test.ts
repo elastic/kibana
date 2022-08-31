@@ -200,7 +200,7 @@ describe('Security UsageCollector', () => {
   });
 
   describe('access agreement', () => {
-    it.only('reports if the global access agreement message is configured', async () => {
+    it('reports if the global access agreement message is configured', async () => {
       const config = createSecurityConfig(
         ConfigSchema.validate({
           accessAgreement: { message: 'Bar'},
