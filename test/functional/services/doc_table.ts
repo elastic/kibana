@@ -167,7 +167,7 @@ export class DocTableService extends FtrService {
     return await this.retry.try(async () => {
       const row = isAnchorRow ? await this.getAnchorRow() : (await this.getBodyRows())[rowIndex];
       const detailsRow = await row.findByXpath(
-        '::*[@data-test-subj="docTableDetailsRow"]'
+        './following-sibling::*[@data-test-subj="docTableDetailsRow"]'
       );
       return detailsRow.findByTestSubject('~docViewer');
     });
