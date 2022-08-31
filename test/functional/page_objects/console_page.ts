@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import {Key} from 'selenium-webdriver';
-import {asyncForEach} from '@kbn/std';
-import {FtrService} from '../ftr_provider_context';
-import {WebElementWrapper} from '../services/lib/web_element_wrapper';
+import { Key } from 'selenium-webdriver';
+import { asyncForEach } from '@kbn/std';
+import { FtrService } from '../ftr_provider_context';
+import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
 export class ConsolePageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
