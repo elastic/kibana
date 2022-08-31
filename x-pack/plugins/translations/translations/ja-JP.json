@@ -10123,7 +10123,7 @@
     "xpack.enterpriseSearch.appSearch.settings.logRetention.modal.crawler.subheading": "現在、Webクローラーログは{minAgeDays}日間保存されています。",
     "xpack.enterpriseSearch.appSearch.settings.logRetention.modal.prompt": "確認する「{target}」を入力します。",
     "xpack.enterpriseSearch.appSearch.sourceEngines.removeEngineConfirmDialogue.description": "エンジン'{engineName}'はこのメタエンジンから削除されます。すべての既存の設定は失われます。よろしいですか？",
-    "xpack.enterpriseSearch.content..newIndex.steps.buildConnector.confirmModal.description": "削除されたインデックス{indexName}は、既存のコネクター構成に関連付けられていました。既存のコネクター構成を新しいコネクター構成で置き換えますか?",
+    "xpack.enterpriseSearch.content.newIndex.steps.buildConnector.confirmModal.description": "削除されたインデックス{indexName}は、既存のコネクター構成に関連付けられていました。既存のコネクター構成を新しいコネクター構成で置き換えますか?",
     "xpack.enterpriseSearch.content.indices.callout.text": "Elasticsearchインデックスは、現在、エンタープライズ サーチの中心です。直接そのインデックスを使用して、新しいインデックスを作成し、検索エクスペリエンスを構築できます。エンタープライズ サーチでのElasticsearchの使用方法の詳細については、{docLink}をご覧ください",
     "xpack.enterpriseSearch.content.indices.configurationConnector.apiKey.description": "まず、Elasticsearch APIキーを生成します。この{apiKeyName}は、コネクターがドキュメントを作成された{indexName}インデックスにインデックスするための読み書き権限を有効にします。キーは安全な場所に保管してください。コネクターを構成するときに必要になります。",
     "xpack.enterpriseSearch.content.indices.configurationConnector.config.description.firstParagraph": "コネクターがデプロイされたので、カスタムデータソースのデプロイ済みコネクタークライアントを強化します。{link}を参照して、データソース固有の実装ロジックを追加してください。",
