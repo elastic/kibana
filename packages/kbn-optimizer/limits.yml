@@ -101,7 +101,7 @@ pageLoadAssetSize:
   visTypeMetric: 23332
   bfetch: 22837
   kibanaUtils: 79713
-  dataViews: 43532
+  dataViews: 44532
   expressions: 140958
   fieldFormats: 65209
   kibanaReact: 74422

@@ -763,7 +763,6 @@ Object {
   ],
   "name": "aws-1",
   "namespace": "default",
-  "output_id": "some-output-id",
   "package": Object {
     "name": "aws",
     "title": "AWS",
