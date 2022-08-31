@@ -8,6 +8,8 @@
 import { MappingKeywordProperty, MappingTextProperty } from '@elastic/elasticsearch/lib/api/types';
 import { IScopedClusterClient } from '@kbn/core/server';
 
+import { addConnector } from '../connectors/add_connector';
+
 import { textAnalysisSettings } from './text_analysis';
 
 const prefixMapping: MappingTextProperty = {
@@ -64,8 +66,9 @@ const defaultMappings = {
 export const createApiIndex = async (
   client: IScopedClusterClient,
   indexName: string,
-  language: string | undefined | null
+  language: string | null
 ) => {
+  await addConnector(client, { index_name: indexName, language });
   return await client.asCurrentUser.indices.create({
     body: {
       mappings: defaultMappings,
