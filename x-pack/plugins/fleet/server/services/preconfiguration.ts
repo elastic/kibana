@@ -9,6 +9,8 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 import { i18n } from '@kbn/i18n';
 import { groupBy, omit, pick, isEqual } from 'lodash';
 
+import apm from 'elastic-apm-node';
+
 import type {
   NewPackagePolicy,
   AgentPolicy,
@@ -254,6 +256,10 @@ export async function ensurePreconfiguredPackagesAndPolicies(
         );
       });
 
+      apm.startTransaction(
+        'fleet.preconfiguration.addPackagePolicies.improved.prReview.50',
+        'fleet'
+      );
       await addPreconfiguredPolicyPackages(
         soClient,
         esClient,
@@ -262,6 +268,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
         defaultOutput,
         true
       );
+      apm.endTransaction('fleet.preconfiguration.addPackagePolicies.improved.prReview.50');
 
       // Add the is_managed flag after configuring package policies to avoid errors
       if (shouldAddIsManagedFlag) {

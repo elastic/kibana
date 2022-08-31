@@ -25,6 +25,7 @@ import { DEFAULT_OUTPUT } from '../../constants';
 import { getSourceUriForAgentPolicy } from '../../routes/agent/source_uri_utils';
 
 import { getPackageInfo } from '../epm/packages';
+import { pkgToPkgKey, splitPkgKey } from '../epm/registry';
 
 import { getMonitoringPermissions } from './monitoring_permissions';
 import { storedPackagePoliciesToAgentInputs } from '.';
@@ -86,18 +87,29 @@ export async function getFullAgentPolicy(
   // call `getPackageInfo` for every single policy, which incurs performance costs
   const packageInfoCache = new Map<string, PackageInfo>();
   for (const policy of agentPolicy.package_policies as PackagePolicy[]) {
-    if (!policy.package || packageInfoCache.has(policy.package.name)) {
+    if (!policy.package || packageInfoCache.has(pkgToPkgKey(policy.package))) {
       continue;
     }
 
-    const packageInfo = await getPackageInfo({
-      savedObjectsClient: soClient,
-      pkgName: policy.package.name,
-      pkgVersion: policy.package.version,
-    });
-
-    packageInfoCache.set(policy.package.name, packageInfo);
+    // Prime the cache w/ just the package key - we'll fetch all the package
+    // info concurrently below
+    packageInfoCache.set(pkgToPkgKey(policy.package), {} as PackageInfo);
   }
+
+  // Fetch all package info concurrently
+  await Promise.all(
+    Array.from(packageInfoCache.keys()).map(async (pkgKey) => {
+      const { pkgName, pkgVersion } = splitPkgKey(pkgKey);
+
+      const packageInfo = await getPackageInfo({
+        savedObjectsClient: soClient,
+        pkgName,
+        pkgVersion,
+      });
+
+      packageInfoCache.set(pkgKey, packageInfo);
+    })
+  );
 
   const fullAgentPolicy: FullAgentPolicy = {
     id: agentPolicy.id,

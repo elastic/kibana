@@ -15,8 +15,8 @@ import {
 } from './package_policies_to_agent_permissions';
 
 const packageInfoCache = new Map();
-packageInfoCache.set('test-package', {
-  name: 'test-package',
+packageInfoCache.set('test_package-0.0.0', {
+  name: 'test_package',
   version: '0.0.0',
   latestVersion: '0.0.0',
   release: 'experimental',
@@ -57,7 +57,7 @@ packageInfoCache.set('test-package', {
       dataset: 'some-logs',
       title: '',
       release: '',
-      package: 'test-package',
+      package: 'test_package',
       path: '',
       ingest_pipeline: '',
       streams: [{ input: 'test-logs', title: 'Test Logs', template_path: '' }],
@@ -67,14 +67,14 @@ packageInfoCache.set('test-package', {
       dataset: 'some-metrics',
       title: '',
       release: '',
-      package: 'test-package',
+      package: 'test_package',
       path: '',
       ingest_pipeline: '',
       streams: [{ input: 'test-metrics', title: 'Test Logs', template_path: '' }],
     },
   ],
 });
-packageInfoCache.set('osquery_manager', {
+packageInfoCache.set('osquery_manager-0.3.0', {
   format_version: '1.0.0',
   name: 'osquery_manager',
   title: 'Osquery Manager',
@@ -166,7 +166,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
         name: 'test-policy',
         namespace: 'test',
         enabled: true,
-        package: { name: 'test-package', version: '0.0.0', title: 'Test Package' },
+        package: { name: 'test_package', version: '0.0.0', title: 'Test Package' },
         inputs: [
           {
             type: 'test-logs',
@@ -223,7 +223,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
         name: 'test-policy',
         namespace: 'test',
         enabled: true,
-        package: { name: 'test-package', version: '0.0.0', title: 'Test Package' },
+        package: { name: 'test_package', version: '0.0.0', title: 'Test Package' },
         inputs: [
           {
             type: 'test-logs',
@@ -270,7 +270,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
         name: 'test-policy',
         namespace: 'test',
         enabled: true,
-        package: { name: 'test-package', version: '0.0.0', title: 'Test Package' },
+        package: { name: 'test_package', version: '0.0.0', title: 'Test Package' },
         elasticsearch: {
           privileges: {
             cluster: ['monitor'],

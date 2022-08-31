@@ -14,6 +14,7 @@ import type {
   PackageInfo,
 } from '../../types';
 import { DEFAULT_OUTPUT } from '../../constants';
+import { pkgToPkgKey } from '../epm/registry';
 
 const isPolicyEnabled = (packagePolicy: PackagePolicy) => {
   return packagePolicy.enabled && packagePolicy.inputs && packagePolicy.inputs.length;
@@ -113,7 +114,7 @@ export const storedPackagePoliciesToAgentInputs = async (
     }
 
     const packageInfo = packagePolicy.package
-      ? packageInfoCache.get(packagePolicy.package.name)
+      ? packageInfoCache.get(pkgToPkgKey(packagePolicy.package))
       : undefined;
 
     fullInputs.push(...storedPackagePolicyToAgentInputs(packagePolicy, packageInfo, outputId));

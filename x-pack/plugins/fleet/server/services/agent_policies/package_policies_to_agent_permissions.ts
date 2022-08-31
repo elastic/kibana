@@ -13,6 +13,7 @@ import type {
 import { PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES } from '../../constants';
 
 import type { PackagePolicy } from '../../types';
+import { pkgToPkgKey } from '../epm/registry';
 
 export const DEFAULT_CLUSTER_PERMISSIONS = ['monitor'];
 
@@ -37,7 +38,7 @@ export async function storedPackagePoliciesToAgentPermissions(
         throw new Error(`No package for package policy ${packagePolicy.name}`);
       }
 
-      const pkg = packageInfoCache.get(packagePolicy.package.name)!;
+      const pkg = packageInfoCache.get(pkgToPkgKey(packagePolicy.package))!;
 
       if (!pkg.data_streams || pkg.data_streams.length === 0) {
         return [packagePolicy.name, undefined];

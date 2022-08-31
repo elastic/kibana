@@ -10,8 +10,8 @@ import type { PackagePolicy, PackagePolicyInput } from '../../types';
 import { storedPackagePoliciesToAgentInputs } from './package_policies_to_agent_inputs';
 
 const packageInfoCache = new Map();
-packageInfoCache.set('mock-package', {
-  name: 'mock-package',
+packageInfoCache.set('mock_package-0.0.0', {
+  name: 'mock_package',
   version: '0.0.0',
   policy_templates: [
     {
@@ -19,8 +19,8 @@ packageInfoCache.set('mock-package', {
     },
   ],
 });
-packageInfoCache.set('limited-package', {
-  name: 'limited-package',
+packageInfoCache.set('limited_package-0.0.0', {
+  name: 'limited_package',
   version: '0.0.0',
   policy_templates: [
     {
@@ -32,7 +32,7 @@ packageInfoCache.set('limited-package', {
 describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
   const mockPackagePolicy: PackagePolicy = {
     id: 'some-uuid',
-    name: 'mock-package-policy',
+    name: 'mock_package-policy',
     description: '',
     created_at: '',
     created_by: '',
@@ -137,7 +137,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
           {
             ...mockPackagePolicy,
             package: {
-              name: 'mock-package',
+              name: 'mock_package',
               title: 'Mock package',
               version: '0.0.0',
             },
@@ -167,7 +167,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
           {
             ...mockPackagePolicy,
             package: {
-              name: 'mock-package',
+              name: 'mock_package',
               title: 'Mock package',
               version: '0.0.0',
             },
@@ -179,7 +179,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
     ).toEqual([
       {
         id: 'test-logs-some-uuid',
-        name: 'mock-package-policy',
+        name: 'mock_package-policy',
         package_policy_id: 'some-uuid',
         revision: 1,
         type: 'test-logs',
@@ -187,7 +187,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
         use_output: 'default',
         meta: {
           package: {
-            name: 'mock-package',
+            name: 'mock_package',
             version: '0.0.0',
           },
         },
@@ -214,7 +214,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
           {
             ...mockPackagePolicy,
             package: {
-              name: 'mock-package',
+              name: 'mock_package',
               title: 'Mock package',
               version: '0.0.0',
             },
@@ -223,7 +223,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
           {
             ...mockPackagePolicy,
             package: {
-              name: 'limited-package',
+              name: 'limited_package',
               title: 'Limited package',
               version: '0.0.0',
             },
@@ -235,7 +235,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
     ).toEqual([
       {
         id: 'test-logs-some-uuid',
-        name: 'mock-package-policy',
+        name: 'mock_package-policy',
         package_policy_id: 'some-uuid',
         revision: 1,
         type: 'test-logs',
@@ -243,7 +243,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
         use_output: 'default',
         meta: {
           package: {
-            name: 'mock-package',
+            name: 'mock_package',
             version: '0.0.0',
           },
         },
@@ -262,7 +262,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
       },
       {
         id: 'test-metrics-some-template-some-uuid',
-        name: 'mock-package-policy',
+        name: 'mock_package-policy',
         package_policy_id: 'some-uuid',
         revision: 1,
         type: 'test-metrics',
@@ -270,7 +270,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
         use_output: 'default',
         meta: {
           package: {
-            name: 'mock-package',
+            name: 'mock_package',
             version: '0.0.0',
           },
         },
@@ -285,7 +285,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
       },
       {
         id: 'some-uuid',
-        name: 'mock-package-policy',
+        name: 'mock_package-policy',
         package_policy_id: 'some-uuid',
         revision: 1,
         type: 'test-metrics',
@@ -293,7 +293,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
         use_output: 'default',
         meta: {
           package: {
-            name: 'limited-package',
+            name: 'limited_package',
             version: '0.0.0',
           },
         },
@@ -316,7 +316,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
           {
             ...mockPackagePolicy,
             package: {
-              name: 'mock-package',
+              name: 'mock_package',
               title: 'Mock package',
               version: '0.0.0',
             },
@@ -336,7 +336,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
     ).toEqual([
       {
         id: 'test-logs-some-uuid',
-        name: 'mock-package-policy',
+        name: 'mock_package-policy',
         package_policy_id: 'some-uuid',
         revision: 1,
         type: 'test-logs',
@@ -344,7 +344,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
         use_output: 'default',
         meta: {
           package: {
-            name: 'mock-package',
+            name: 'mock_package',
             version: '0.0.0',
           },
         },
@@ -372,7 +372,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
     ).toEqual([
       {
         id: 'test-logs-some-uuid',
-        name: 'mock-package-policy',
+        name: 'mock_package-policy',
         package_policy_id: 'some-uuid',
         revision: 1,
         type: 'test-logs',
@@ -439,7 +439,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
       {
         id: 'test-logs-some-uuid',
         revision: 1,
-        name: 'mock-package-policy',
+        name: 'mock_package-policy',
         package_policy_id: 'some-uuid',
         type: 'test-logs',
         data_stream: { namespace: 'default' },
