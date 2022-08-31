@@ -2004,13 +2004,7 @@
                 "label": "application",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreApplicationPluginApi",
-                    "section": "def-public.ApplicationStart",
-                    "text": "ApplicationStart"
-                  }
+                  "ApplicationStart"
                 ],
                 "path": "src/plugins/embeddable/public/lib/actions/edit_panel_action.ts",
                 "deprecated": false,
@@ -3654,13 +3648,7 @@
                 "description": [],
                 "signature": [
                   "(appId: string, options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreApplicationPluginApi",
-                    "section": "def-public.NavigateToAppOptions",
-                    "text": "NavigateToAppOptions"
-                  },
+                  "NavigateToAppOptions",
                   " | undefined) => Promise<void>"
                 ],
                 "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
@@ -3691,13 +3679,7 @@
                 "description": [],
                 "signature": [
                   "ReadonlyMap<string, ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreApplicationPluginApi",
-                    "section": "def-public.PublicAppInfo",
-                    "text": "PublicAppInfo"
-                  },
+                  "PublicAppInfo",
                   "> | undefined"
                 ],
                 "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",

@@ -46,7 +46,7 @@
             "text": "IAnalyticsClient"
           }
         ],
-        "path": "packages/analytics/client/src/index.ts",
+        "path": "packages/analytics/client/index.ts",
         "deprecated": false,
         "children": [
           {
@@ -67,7 +67,7 @@
                 "text": "AnalyticsClientInitContext"
               }
             ],
-            "path": "packages/analytics/client/src/index.ts",
+            "path": "packages/analytics/client/index.ts",
             "deprecated": false,
             "isRequired": true
           }

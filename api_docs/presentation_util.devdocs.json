@@ -1961,13 +1961,7 @@
             "signature": [
               "BehaviorSubject",
               "<",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreApplicationPluginApi",
-                "section": "def-public.AppUpdater",
-                "text": "AppUpdater"
-              },
+              "AppUpdater",
               "> | undefined"
             ],
             "path": "src/plugins/presentation_util/public/services/create/factory.ts",

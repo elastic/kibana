@@ -39,7 +39,7 @@
           },
           " & typeof Handlebars"
         ],
-        "path": "packages/kbn-handlebars/src/index.ts",
+        "path": "packages/kbn-handlebars/index.ts",
         "deprecated": false,
         "children": [],
         "returnComment": [
@@ -63,7 +63,7 @@
         "signature": [
           "\"compile\" | \"compileAST\""
         ],
-        "path": "packages/kbn-handlebars/src/index.ts",
+        "path": "packages/kbn-handlebars/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -79,7 +79,7 @@
         "signature": [
           "{ data?: boolean | undefined; strict?: boolean | undefined; knownHelpers?: KnownHelpers | undefined; knownHelpersOnly?: boolean | undefined; assumeObjects?: boolean | undefined; noEscape?: boolean | undefined; }"
         ],
-        "path": "packages/kbn-handlebars/src/index.ts",
+        "path": "packages/kbn-handlebars/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -95,7 +95,7 @@
         "signature": [
           "{ data?: any; helpers?: { [name: string]: Function; } | undefined; blockParams?: any[] | undefined; }"
         ],
-        "path": "packages/kbn-handlebars/src/index.ts",
+        "path": "packages/kbn-handlebars/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -119,7 +119,7 @@
           },
           " & typeof Handlebars"
         ],
-        "path": "packages/kbn-handlebars/src/index.ts",
+        "path": "packages/kbn-handlebars/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -144,7 +144,7 @@
             "text": "ExtendedHandlebars"
           }
         ],
-        "path": "packages/kbn-handlebars/src/index.ts",
+        "path": "packages/kbn-handlebars/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       }

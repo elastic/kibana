@@ -524,13 +524,7 @@
             "label": "history",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreApplicationPluginApi",
-                "section": "def-public.ScopedHistory",
-                "text": "ScopedHistory"
-              },
+              "ScopedHistory",
               "<unknown>"
             ],
             "path": "src/plugins/management/public/types.ts",
