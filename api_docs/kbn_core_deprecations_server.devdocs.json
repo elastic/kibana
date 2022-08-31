@@ -1,0 +1,237 @@
+{
+  "id": "@kbn/core-deprecations-server",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-deprecations-server",
+        "id": "def-server.DeprecationRegistryProvider",
+        "type": "Interface",
+        "tags": [],
+        "label": "DeprecationRegistryProvider",
+        "description": [],
+        "path": "packages/core/deprecations/core-deprecations-server/src/contracts.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-deprecations-server",
+            "id": "def-server.DeprecationRegistryProvider.getRegistry",
+            "type": "Function",
+            "tags": [],
+            "label": "getRegistry",
+            "description": [],
+            "signature": [
+              "(domainId: string) => ",
+              {
+                "pluginId": "@kbn/core-deprecations-server",
+                "scope": "server",
+                "docId": "kibKbnCoreDeprecationsServerPluginApi",
+                "section": "def-server.DeprecationsServiceSetup",
+                "text": "DeprecationsServiceSetup"
+              }
+            ],
+            "path": "packages/core/deprecations/core-deprecations-server/src/contracts.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-deprecations-server",
+                "id": "def-server.DeprecationRegistryProvider.getRegistry.$1",
+                "type": "string",
+                "tags": [],
+                "label": "domainId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/deprecations/core-deprecations-server/src/contracts.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-deprecations-server",
+        "id": "def-server.DeprecationsServiceSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "DeprecationsServiceSetup",
+        "description": [
+          "\nThe deprecations service provides a way for the Kibana platform to communicate deprecated\nfeatures and configs with its users. These deprecations are only communicated\nif the deployment is using these features. Allowing for a user tailored experience\nfor upgrading the stack version.\n\nThe Deprecation service is consumed by the upgrade assistant to assist with the upgrade\nexperience.\n\nIf a deprecated feature can be resolved without manual user intervention.\nUsing correctiveActions.api allows the Upgrade Assistant to use this api to correct the\ndeprecation upon a user trigger.\n"
+        ],
+        "path": "packages/core/deprecations/core-deprecations-server/src/contracts.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-deprecations-server",
+            "id": "def-server.DeprecationsServiceSetup.registerDeprecations",
+            "type": "Function",
+            "tags": [],
+            "label": "registerDeprecations",
+            "description": [],
+            "signature": [
+              "(deprecationContext: ",
+              {
+                "pluginId": "@kbn/core-deprecations-server",
+                "scope": "server",
+                "docId": "kibKbnCoreDeprecationsServerPluginApi",
+                "section": "def-server.RegisterDeprecationsConfig",
+                "text": "RegisterDeprecationsConfig"
+              },
+              ") => void"
+            ],
+            "path": "packages/core/deprecations/core-deprecations-server/src/contracts.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-deprecations-server",
+                "id": "def-server.DeprecationsServiceSetup.registerDeprecations.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "deprecationContext",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-deprecations-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreDeprecationsServerPluginApi",
+                    "section": "def-server.RegisterDeprecationsConfig",
+                    "text": "RegisterDeprecationsConfig"
+                  }
+                ],
+                "path": "packages/core/deprecations/core-deprecations-server/src/contracts.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-deprecations-server",
+        "id": "def-server.GetDeprecationsContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "GetDeprecationsContext",
+        "description": [],
+        "path": "packages/core/deprecations/core-deprecations-server/src/contracts.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-deprecations-server",
+            "id": "def-server.GetDeprecationsContext.esClient",
+            "type": "Object",
+            "tags": [],
+            "label": "esClient",
+            "description": [],
+            "signature": [
+              "IScopedClusterClient"
+            ],
+            "path": "packages/core/deprecations/core-deprecations-server/src/contracts.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/core-deprecations-server",
+            "id": "def-server.GetDeprecationsContext.savedObjectsClient",
+            "type": "Object",
+            "tags": [],
+            "label": "savedObjectsClient",
+            "description": [],
+            "signature": [
+              "SavedObjectsClientContract"
+            ],
+            "path": "packages/core/deprecations/core-deprecations-server/src/contracts.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-deprecations-server",
+        "id": "def-server.RegisterDeprecationsConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "RegisterDeprecationsConfig",
+        "description": [],
+        "path": "packages/core/deprecations/core-deprecations-server/src/contracts.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-deprecations-server",
+            "id": "def-server.RegisterDeprecationsConfig.getDeprecations",
+            "type": "Function",
+            "tags": [],
+            "label": "getDeprecations",
+            "description": [],
+            "signature": [
+              "(context: ",
+              {
+                "pluginId": "@kbn/core-deprecations-server",
+                "scope": "server",
+                "docId": "kibKbnCoreDeprecationsServerPluginApi",
+                "section": "def-server.GetDeprecationsContext",
+                "text": "GetDeprecationsContext"
+              },
+              ") => ",
+              "MaybePromise",
+              "<",
+              "DeprecationsDetails",
+              "[]>"
+            ],
+            "path": "packages/core/deprecations/core-deprecations-server/src/contracts.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-deprecations-server",
+                "id": "def-server.RegisterDeprecationsConfig.getDeprecations.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-deprecations-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreDeprecationsServerPluginApi",
+                    "section": "def-server.GetDeprecationsContext",
+                    "text": "GetDeprecationsContext"
+                  }
+                ],
+                "path": "packages/core/deprecations/core-deprecations-server/src/contracts.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}
