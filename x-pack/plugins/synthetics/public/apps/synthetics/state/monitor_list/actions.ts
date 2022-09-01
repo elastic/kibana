@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IHttpFetchError } from '@kbn/core-http-browser';
+import { ErrorToastOptions } from '@kbn/core-notifications-browser';
 import { createAction } from '@reduxjs/toolkit';
 import {
   EncryptedSyntheticsMonitor,
@@ -24,13 +24,29 @@ export const fetchMonitorListAction = createAsyncAction<
 export interface UpsertMonitorRequest {
   id: string;
   monitor: EncryptedSyntheticsMonitor | MonitorOverviewItem;
+  success: {
+    message: string;
+    lifetimeMs: number;
+    testAttribute?: string;
+  };
+  error: {
+    message: ErrorToastOptions;
+    lifetimeMs: number;
+    testAttribute?: string;
+  };
+  /**
+   * The effect will perform a quiet refresh of the overview state
+   * after a successful upsert. The default behavior is to perform the fetch.
+   */
+  shouldQuietFetchAfterSuccess?: boolean;
 }
+
 export const fetchUpsertMonitorAction = createAction<UpsertMonitorRequest>('fetchUpsertMonitor');
 export const fetchUpsertSuccessAction = createAction<{
   id: string;
   attributes: { enabled: boolean };
 }>('fetchUpsertMonitorSuccess');
-export const fetchUpsertFailureAction = createAction<{ id: string; error: IHttpFetchError }>(
+export const fetchUpsertFailureAction = createAction<{ id: string; error: string }>(
   'fetchUpsertMonitorFailure'
 );
 export const clearMonitorUpsertStatus = createAction<string>('clearMonitorUpsertStatus');

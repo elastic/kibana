@@ -9,13 +9,12 @@ import { i18n } from '@kbn/i18n';
 import { EuiPopover, EuiButtonIcon, EuiContextMenu, useEuiShadow } from '@elastic/eui';
 import { FETCH_STATUS } from '@kbn/observability-plugin/public';
 import { useTheme } from '@kbn/observability-plugin/public';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import { MonitorOverviewItem } from '../../../../../../../common/runtime_types';
 import { useMonitorEnableHandler } from '../../../../hooks/use_monitor_enable_handler';
-import { quietFetchOverviewAction, setFlyoutConfig } from '../../../../state/overview/actions';
-import { selectOverviewState } from '../../../../state/overview/selectors';
+import { setFlyoutConfig } from '../../../../state/overview/actions';
 import { useEditMonitorLocator } from '../../hooks/use_edit_monitor_locator';
 import { useMonitorDetailLocator } from '../../hooks/use_monitor_detail_locator';
 import { useLocationName } from '../../../../hooks';
@@ -63,7 +62,6 @@ export function ActionsPopover({
   const theme = useTheme();
   const euiShadow = useEuiShadow('l');
   const dispatch = useDispatch();
-  const { pageState } = useSelector(selectOverviewState);
   const locationName = useLocationName({ locationId: monitor.location.id });
 
   const detailUrl = useMonitorDetailLocator({
@@ -82,10 +80,7 @@ export function ActionsPopover({
   );
   const { status, isEnabled, updateMonitorEnabledState } = useMonitorEnableHandler({
     id: monitor.id,
-    reloadPage: useCallback(() => {
-      dispatch(quietFetchOverviewAction.get(pageState));
-      setIsPopoverOpen(false);
-    }, [dispatch, pageState, setIsPopoverOpen]),
+    isEnabled: monitor.isEnabled,
     labels,
   });
 
@@ -95,11 +90,12 @@ export function ActionsPopover({
 
   useEffect(() => {
     if (status === FETCH_STATUS.LOADING) {
-      setEnableLabel(enableLabelLoading);
+      setEnableLabel(loadingLabel(monitor.isEnabled));
     } else if (status === FETCH_STATUS.SUCCESS) {
       setEnableLabel(isEnabled ? disableMonitorLabel : enableMonitorLabel);
+      if (isPopoverOpen) setIsPopoverOpen(false);
     }
-  }, [setEnableLabel, status, isEnabled, monitor.isEnabled]);
+  }, [setEnableLabel, status, isEnabled, monitor.isEnabled, isPopoverOpen, setIsPopoverOpen]);
 
   const quickInspectPopoverItem = {
     name: quickInspectName,
@@ -212,9 +208,14 @@ const actionsMenuEditMonitorName = i18n.translate(
   }
 );
 
-const enableLabelLoading = i18n.translate('xpack.synthetics.overview.actions.enableLabel', {
-  defaultMessage: 'Loading...',
-});
+const loadingLabel = (isEnabled: boolean) =>
+  isEnabled
+    ? i18n.translate('xpack.synthetics.overview.actions.disablingLabel', {
+        defaultMessage: 'Disabling monitor',
+      })
+    : i18n.translate('xpack.synthetics.overview.actions.enablingLabel', {
+        defaultMessage: 'Enabling monitor',
+      });
 
 const enableMonitorLabel = i18n.translate(
   'xpack.synthetics.overview.actions.enableLabelEnableMonitor',
