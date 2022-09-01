@@ -347,7 +347,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
                 ),
                 statusCode: 403,
               });
-              // Ensure task still exists and is stil enabled
+              // Ensure task still exists and is still enabled
               const taskRecord1 = await getScheduledTask(createdAlert.scheduled_task_id);
               expect(taskRecord1.type).to.eql('task');
               expect(taskRecord1.task.taskType).to.eql('alerting:test.noop');
@@ -356,7 +356,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
                 spaceId: space.id,
                 consumer: 'alertsFixture',
               });
-              expect(taskRecord1.task.enabled).to.eql(false);
+              expect(taskRecord1.task.enabled).to.eql(true);
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':

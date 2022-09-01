@@ -122,7 +122,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
               const alertId = response.body.id;
               await alertUtils.disable(alertId);
-              await taskManagerUtils.waitForEmpty(testStart);
+              await taskManagerUtils.waitForDisabled(testStart);
 
               // Ensure only 1 alert executed with proper params
               const alertSearchResult = await esTestIndexTool.search(

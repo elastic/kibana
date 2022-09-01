@@ -141,9 +141,9 @@ async function enable(success: boolean) {
     return expectConflict(success, err);
   }
 
-  // a successful enable call makes 2 calls to update, so that's 3 total,
+  // a successful enable call makes 1 calls to update, so that's 3 total,
   // 1 with conflict + 2 on success
-  expectSuccess(success, 3);
+  expectSuccess(success, 2);
 }
 
 async function disable(success: boolean) {
