@@ -110,15 +110,21 @@ const bulkActionEditPayloadRuleActions = t.type({
 
 export type BulkActionEditPayloadRuleActions = t.TypeOf<typeof bulkActionEditPayloadRuleActions>;
 
-const bulkActionEditPayloadSchedule = t.type({
-  type: t.literal(BulkActionEditType.set_schedule),
-  value: t.type({
-    interval,
-    meta: t.type({
-      from: t.string,
+const bulkActionEditPayloadSchedule = t.intersection([
+  t.type({
+    type: t.literal(BulkActionEditType.set_schedule),
+    value: t.type({
+      interval,
     }),
   }),
-});
+  t.partial({
+    value: t.type({
+      meta: t.type({
+        from: t.string,
+      }),
+    }),
+  }),
+]);
 export type BulkActionEditPayloadSchedule = t.TypeOf<typeof bulkActionEditPayloadSchedule>;
 
 export const bulkActionEditPayload = t.union([
