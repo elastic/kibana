@@ -11,13 +11,18 @@ import {
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiCheckbox,
+  EuiContextMenu,
+  EuiContextMenuPanelDescriptor,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiPopover,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
@@ -45,8 +50,6 @@ const getButtonCopy = (
   canBeRemoved?: boolean,
   isOnlyLayer?: boolean
 ) => {
-  let ariaLabel;
-
   const layerTypeCopy =
     layerType === layerTypes.DATA
       ? i18n.translate('xpack.lens.modalTitle.layerType.data', {
@@ -80,6 +83,7 @@ const getButtonCopy = (
     modalDesc = modalDescRefLine;
   }
 
+  let ariaLabel;
   if (!canBeRemoved) {
     ariaLabel = i18n.translate('xpack.lens.resetVisualizationAriaLabel', {
       defaultMessage: 'Reset visualization',
@@ -96,14 +100,31 @@ const getButtonCopy = (
     });
   }
 
+  let optionLabel;
+  if (!canBeRemoved) {
+    optionLabel = i18n.translate('xpack.lens.resetVisualizationOptionLabel', {
+      defaultMessage: 'Reset visualization',
+    });
+  } else if (isOnlyLayer) {
+    optionLabel = i18n.translate('xpack.lens.resetLayerOptionLabel', {
+      defaultMessage: 'Reset layer',
+    });
+  } else {
+    optionLabel = i18n.translate('xpack.lens.deleteLayerOptionLabel', {
+      defaultMessage: `Delete layer`,
+    });
+  }
+
   return {
+    optionLabel,
     ariaLabel,
     modalTitle,
     modalDesc,
   };
 };
 
-export function RemoveLayerButton({
+// TODO - clean up remove option generation logic
+export function LayerContextMenu({
   onRemoveLayer,
   layerIndex,
   isOnlyLayer,
@@ -116,12 +137,43 @@ export function RemoveLayerButton({
   activeVisualization: Visualization;
   layerType?: LayerType;
 }) {
-  const { ariaLabel, modalTitle, modalDesc } = getButtonCopy(
+  const contextMenuPopoverId = useGeneratedHtmlId({
+    prefix: 'lnsLayerContextMenuPopover',
+  });
+
+  const [contextMenuOpen, setContextMenuOpen] = useState(false);
+
+  const closeContextMenu = () => {
+    setContextMenuOpen(false);
+  };
+
+  const { optionLabel, ariaLabel, modalTitle, modalDesc } = getButtonCopy(
     layerIndex,
     layerType || layerTypes.DATA,
     !!activeVisualization.removeLayer,
     isOnlyLayer
   );
+
+  const panels: EuiContextMenuPanelDescriptor[] = [
+    {
+      id: 0,
+      items: [
+        {
+          name: optionLabel,
+          icon: <EuiIcon type={isOnlyLayer ? 'eraser' : 'trash'} color="danger" />,
+          onClick: () => {
+            closeContextMenu();
+            if (lensLocalStorage?.skipDeleteModal) {
+              return onRemoveLayer();
+            }
+            return showModal();
+          },
+          'data-test-subj': 'lnsLayerRemove',
+          'aria-label': ariaLabel,
+        },
+      ],
+    },
+  ];
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [lensLocalStorage, setLensLocalStorage] = useLocalStorage<LocalStorageLens>(
@@ -138,36 +190,26 @@ export function RemoveLayerButton({
   const closeModal = () => setIsModalVisible(false);
   const showModal = () => setIsModalVisible(true);
 
-  const removeLayer = () => {
-    // If we don't blur the remove / clear button, it remains focused
-    // which is a strange UX in this case. e.target.blur doesn't work
-    // due to who knows what, but probably event re-writing. Additionally,
-    // activeElement does not have blur so, we need to do some casting + safeguards.
-    const el = document.activeElement as unknown as { blur: () => void };
-
-    if (el?.blur) {
-      el.blur();
-    }
-
-    onRemoveLayer();
-  };
-
   return (
     <>
-      <EuiButtonIcon
-        size="xs"
-        iconType={isOnlyLayer ? 'eraser' : 'trash'}
-        color="danger"
-        data-test-subj="lnsLayerRemove"
-        aria-label={ariaLabel}
-        title={ariaLabel}
-        onClick={() => {
-          if (lensLocalStorage?.skipDeleteModal) {
-            return removeLayer();
-          }
-          return showModal();
-        }}
-      />
+      <EuiPopover
+        id={contextMenuPopoverId}
+        button={
+          <EuiButtonIcon
+            iconType={'boxesHorizontal'}
+            aria-label={i18n.translate('xpack.lens.layerContextMenu', {
+              defaultMessage: 'Layer options',
+            })}
+            onClick={() => setContextMenuOpen(!contextMenuOpen)}
+          />
+        }
+        isOpen={contextMenuOpen}
+        closePopover={closeContextMenu}
+        panelPaddingSize="none"
+        anchorPosition="downLeft"
+      >
+        <EuiContextMenu initialPanelId={0} panels={panels} />
+      </EuiPopover>
       {isModalVisible ? (
         <RemoveConfirmModal
           modalTitle={modalTitle}
@@ -176,7 +218,7 @@ export function RemoveLayerButton({
           closeModal={closeModal}
           skipDeleteModal={lensLocalStorage?.skipDeleteModal}
           onChangeShouldShowModal={onChangeShouldShowModal}
-          removeLayer={removeLayer}
+          removeLayer={onRemoveLayer}
         />
       ) : null}
     </>

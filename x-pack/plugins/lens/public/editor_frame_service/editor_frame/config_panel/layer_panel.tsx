@@ -31,7 +31,7 @@ import { DragDropIdentifier, ReorderProvider } from '../../../drag_drop';
 import { LayerSettings } from './layer_settings';
 import { LayerPanelProps, ActiveDimensionState } from './types';
 import { DimensionContainer } from './dimension_container';
-import { RemoveLayerButton } from './remove_layer_button';
+import { LayerContextMenu } from './layer_context_menu';
 import { EmptyDimensionButton } from './buttons/empty_dimension_button';
 import { DimensionButton } from './buttons/dimension_button';
 import { DraggableDimensionButton } from './buttons/draggable_dimension_button';
@@ -327,7 +327,7 @@ export function LayerPanel(
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <RemoveLayerButton
+                <LayerContextMenu
                   onRemoveLayer={onRemoveLayer}
                   layerIndex={layerIndex}
                   isOnlyLayer={isOnlyLayer}
