@@ -79,6 +79,7 @@ describe('UserProfilesPopover', () => {
         closePopover={[MockFunction]}
         display="inline-block"
         hasArrow={true}
+        initialFocus="#searchInput_generated-id"
         isOpen={false}
         ownFocus={true}
         panelPaddingSize="none"
@@ -102,6 +103,7 @@ describe('UserProfilesPopover', () => {
                 },
               ]
             }
+            searchInputId="searchInput_generated-id"
             selectedOptions={
               Array [
                 Object {
@@ -120,5 +122,26 @@ describe('UserProfilesPopover', () => {
         </EuiContextMenuPanel>
       </EuiPopover>
     `);
+  });
+
+  it('should set `initialFocus` and `searchInputId` props correctly', async () => {
+    const [firstOption, secondOption] = userProfiles;
+    const wrapper = shallow(
+      <UserProfilesPopover
+        title="Title"
+        button={<button>Toggle</button>}
+        closePopover={jest.fn()}
+        selectableProps={{
+          selectedOptions: [firstOption],
+          defaultOptions: [secondOption],
+        }}
+        isOpen
+      />
+    );
+
+    expect(wrapper.find('EuiPopover').prop('initialFocus')).toBe('#searchInput_generated-id');
+    expect(wrapper.find('UserProfilesSelectable').prop('searchInputId')).toBe(
+      'searchInput_generated-id'
+    );
   });
 });

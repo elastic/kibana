@@ -29,7 +29,10 @@ export const AgentPolicyNeeded = () => {
           <EuiTitle size="xxs">
             <h3>{LEARN_MORE}</h3>
           </EuiTitle>
-          <EuiLink href="#" target="_blank">
+          <EuiLink
+            target="_blank"
+            href="https://www.elastic.co/guide/en/observability/current/uptime-set-up-choose-agent.html#private-locations"
+          >
             {READ_DOCS}
           </EuiLink>
         </>
