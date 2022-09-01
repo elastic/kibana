@@ -68,7 +68,7 @@ size of the file that you can import.
 
 Export objects by selection or type.
 
-* To export specific objects, select their checkboxes in the table, and then click *Export*.
+* To export specific objects, select them in the table, and then click *Export*.
 * To export objects by type, click *Export x objects* in the toolbar.
 
 {kib} creates an NDJSON with all your saved objects. By default, the NDJSON includes child objects related to the saved
