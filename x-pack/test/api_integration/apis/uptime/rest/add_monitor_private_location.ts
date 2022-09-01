@@ -277,7 +277,10 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(packagePolicy.policy_id).eql(testFleetPolicyID);
         expect(packagePolicy.name).eql(`${monitor.name}-Test private location 0-${SPACE_ID}`);
-        comparePolicies(packagePolicy, getTestSyntheticsPolicy(monitor.name, monitorId));
+        comparePolicies(
+          packagePolicy,
+          getTestSyntheticsPolicy(monitor.name, monitorId, undefined, SPACE_ID)
+        );
       } finally {
         await security.user.delete(username);
         await security.role.delete(roleName);
