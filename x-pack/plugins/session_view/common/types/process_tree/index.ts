@@ -69,6 +69,12 @@ export interface IOLine {
   value: string;
 }
 
+export interface ProcessEntityIdIOLine {
+  previous?: number;
+  value: number;
+  next?: number;
+}
+
 export interface IOFields {
   text?: string;
 }
@@ -119,6 +125,9 @@ export interface ProcessEventHost {
     name?: string;
     platform?: string;
     version?: string;
+  };
+  boot?: {
+    id?: string;
   };
 }
 
