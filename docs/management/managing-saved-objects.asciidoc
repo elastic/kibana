@@ -38,7 +38,6 @@ and select *Relationships*.
 
 When you have multiple environments for development and production, you can import and export saved objects between
 {kib} instances.
-have multiple environments for development and production.
 Import and export also work well when you have a large number
 of objects to update and want to batch the process.
 
