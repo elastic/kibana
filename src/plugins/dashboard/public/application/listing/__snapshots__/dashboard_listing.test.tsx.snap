@@ -75,6 +75,7 @@ exports[`after fetch When given a title that matches multiple dashboards, filter
     findItems={[Function]}
     getDetailViewLink={[Function]}
     headingId="dashboardListingHeading"
+    id="dashboard"
     initialFilter="\\"search by title\\""
     tableListTitle="Dashboards"
   >
@@ -162,6 +163,7 @@ exports[`after fetch initialFilter 1`] = `
     findItems={[Function]}
     getDetailViewLink={[Function]}
     headingId="dashboardListingHeading"
+    id="dashboard"
     initialFilter="testFilter"
     tableListTitle="Dashboards"
   >
@@ -248,6 +250,7 @@ exports[`after fetch renders all table rows 1`] = `
     findItems={[Function]}
     getDetailViewLink={[Function]}
     headingId="dashboardListingHeading"
+    id="dashboard"
     initialFilter=""
     tableListTitle="Dashboards"
   >
@@ -334,6 +337,7 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
     findItems={[Function]}
     getDetailViewLink={[Function]}
     headingId="dashboardListingHeading"
+    id="dashboard"
     initialFilter=""
     tableListTitle="Dashboards"
   >
@@ -431,6 +435,7 @@ exports[`after fetch renders call to action with continue when no dashboards exi
     findItems={[Function]}
     getDetailViewLink={[Function]}
     headingId="dashboardListingHeading"
+    id="dashboard"
     initialFilter=""
     tableListTitle="Dashboards"
   >
@@ -521,6 +526,7 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
     findItems={[Function]}
     getDetailViewLink={[Function]}
     headingId="dashboardListingHeading"
+    id="dashboard"
     initialFilter=""
     tableListTitle="Dashboards"
   >
@@ -577,6 +583,7 @@ exports[`after fetch showWriteControls 1`] = `
     findItems={[Function]}
     getDetailViewLink={[Function]}
     headingId="dashboardListingHeading"
+    id="dashboard"
     initialFilter=""
     tableListTitle="Dashboards"
   >

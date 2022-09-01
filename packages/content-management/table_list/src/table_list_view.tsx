@@ -46,6 +46,8 @@ export interface Props<T extends UserContentCommonSchema = UserContentCommonSche
    * If the table is not empty, this component renders its own h1 element using the same id.
    */
   headingId?: string;
+  /** An optional id for the listing. Used to generate unique data-test-subj. Default: "userContent" */
+  id?: string;
   children?: ReactNode | undefined;
   findItems(
     searchQuery: string,
@@ -101,6 +103,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   editItem,
   deleteItems,
   getDetailViewLink,
+  id = 'userContent',
   children,
 }: Props<T>) {
   const isMounted = useRef(false);
@@ -137,9 +140,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
         render: (field: keyof T, record: T) => (
           <EuiLink
             href={getDetailViewLink(record)}
-            data-test-subj={`userContentListingTitleLink-${record.attributes.title
-              .split(' ')
-              .join('-')}`}
+            data-test-subj={`${id}ListingTitleLink-${record.attributes.title.split(' ').join('-')}`}
           >
             {record.attributes.title}
           </EuiLink>
@@ -228,11 +229,13 @@ function TableListViewComp<T extends UserContentCommonSchema>({
 
     return columns;
   }, [stateTableColumns, customTableColumn, getTagsColumnDefinition, editItem]);
+
   const itemsById = useMemo(() => {
     return keyBy(items, 'id');
   }, [items]);
+
   const selectedItems = useMemo(() => {
-    return selectedIds.map((id) => itemsById[id]);
+    return selectedIds.map((selectedId) => itemsById[selectedId]);
   }, [selectedIds, itemsById]);
 
   // ------------

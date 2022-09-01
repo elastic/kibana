@@ -311,6 +311,7 @@ export const DashboardListing = ({
             emptyPrompt,
             listingLimit,
           }}
+          id="dashboard"
           getDetailViewLink={({ id, attributes: { timeRestore } }) =>
             getDashboardListItemLink(
               core.application,
