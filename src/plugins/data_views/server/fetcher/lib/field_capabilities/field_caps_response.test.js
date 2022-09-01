@@ -53,8 +53,6 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
               'name',
               'type',
               'esTypes',
-              'timeSeriesMetricType',
-              'timeSeriesRollup',
               'searchable',
               'aggregatable',
               'readFromDocValues',

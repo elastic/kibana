@@ -100,7 +100,6 @@ export default new Datasource('es', {
       index: tlConfig.settings['timelion:es.default_index'],
       timefield: tlConfig.settings['timelion:es.timefield'],
       interval: tlConfig.time.interval,
-      timezone: tlConfig.time.timezone,
       kibana: true,
       fit: 'nearest',
     });
@@ -121,7 +120,6 @@ export default new Datasource('es', {
     const esShardTimeout = tlConfig.esShardTimeout;
 
     const body = buildRequest(config, tlConfig, scriptFields, runtimeFields, esShardTimeout);
-    console.log(JSON.stringify(body, null, 2));
 
     // User may abort the request without waiting for the results
     // we need to handle this scenario by aborting underlying server requests

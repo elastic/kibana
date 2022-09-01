@@ -13,8 +13,8 @@ import { last, map } from 'lodash';
 import { stubbedSavedObjectIndexPattern } from '../data_view.stub';
 import { stubLogstashFields } from '../field.stub';
 import { DataViewField } from '../fields';
-import { DataView } from './data_view';
 import { FieldSpec, RuntimeField, RuntimeTypeExceptComposite } from '../types';
+import { DataView } from './data_view';
 
 class MockFieldFormatter {}
 

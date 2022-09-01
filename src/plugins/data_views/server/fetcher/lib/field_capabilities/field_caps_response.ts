@@ -138,8 +138,6 @@ export function readFieldCapsResponse(
         name: fieldName,
         type: castEsToKbnFieldTypeName(esType),
         esTypes: types,
-        timeSeriesMetricType,
-        timeSeriesRollup: types.includes('aggregate_metric_double'),
         searchable: isSearchable,
         aggregatable: isAggregatable,
         readFromDocValues: shouldReadFieldFromDocValues(isAggregatable, esType),

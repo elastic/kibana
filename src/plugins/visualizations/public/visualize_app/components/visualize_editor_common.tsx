@@ -7,10 +7,10 @@
  */
 
 import './visualize_editor.scss';
-import React, { RefObject, useCallback, useEffect, useState } from 'react';
+import React, { RefObject, useCallback, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon, EuiPopover, EuiScreenReaderOnly } from '@elastic/eui';
+import { EuiScreenReaderOnly } from '@elastic/eui';
 import { AppMountParameters } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { VisualizeTopNav } from './visualize_top_nav';
@@ -68,7 +68,6 @@ export const VisualizeEditorCommon = ({
   visEditorRef,
 }: VisualizeEditorCommonProps) => {
   const { services } = useKibana<VisualizeServices>();
-  const [warningsOpen, setWarningsOpen] = useState(false);
 
   useEffect(() => {
     async function aliasMatchRedirect() {
@@ -195,29 +194,6 @@ export const VisualizeEditorCommon = ({
         </EuiScreenReaderOnly>
       )}
       <div className={isChromeVisible ? 'visEditor__content' : 'visualize'} ref={visEditorRef} />
-      {appState?.getState().warnings && (
-        <EuiPopover
-          isOpen={warningsOpen}
-          anchorClassName="embPanel__warnings"
-          closePopover={() => setWarningsOpen(false)}
-          button={
-            <EuiButtonIcon
-              onClick={() => setWarningsOpen(!warningsOpen)}
-              color="warning"
-              iconType="alert"
-            />
-          }
-        >
-          <div style={{ maxWidth: 512 }}>
-            {appState?.getState().warnings?.map((w, i) => (
-              <React.Fragment key={i}>
-                {w}
-                <br />
-              </React.Fragment>
-            ))}
-          </div>
-        </EuiPopover>
-      )}
     </div>
   );
 };
