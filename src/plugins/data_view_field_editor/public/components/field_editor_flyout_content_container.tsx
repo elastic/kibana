@@ -11,6 +11,7 @@ import { DocLinksStart, NotificationsStart, CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 
+import { BehaviorSubject } from 'rxjs';
 import {
   DataViewField,
   DataView,
@@ -252,6 +253,7 @@ export const FieldEditorFlyoutContentContainer = ({
       fieldFormats={fieldFormats}
       namesNotAllowed={namesNotAllowed}
       existingConcreteFields={existingConcreteFields}
+      fieldName$={new BehaviorSubject(fieldToEdit?.name || '')}
     >
       <FieldPreviewProvider>
         <FieldEditorFlyoutContent

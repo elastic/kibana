@@ -106,7 +106,7 @@ const formSerializer = (field: FieldFormInternal): Field => {
 };
 
 const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) => {
-  const { namesNotAllowed, fieldTypeToProcess } = useFieldEditorContext();
+  const { namesNotAllowed, fieldTypeToProcess, fieldName$ } = useFieldEditorContext();
   const {
     params: { update: updatePreviewParams },
     fieldPreview$,
@@ -132,6 +132,19 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
       '__meta__.isPopularityVisible',
     ],
   });
+
+  // use observable to sidestep react state
+  useEffect(() => {
+    const sub = form.subscribe(({ data }) => {
+      if (data.internal.name !== fieldName$.getValue()) {
+        fieldName$.next(data.internal.name);
+      }
+    });
+
+    return () => {
+      sub.unsubscribe();
+    };
+  }, [form, fieldName$]);
 
   const {
     name: updatedName,

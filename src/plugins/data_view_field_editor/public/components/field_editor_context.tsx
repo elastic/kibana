@@ -8,6 +8,7 @@
 
 import React, { createContext, useContext, FunctionComponent, useMemo } from 'react';
 import { NotificationsStart, CoreStart } from '@kbn/core/public';
+import type { BehaviorSubject } from 'rxjs';
 import type { DataView, DataPublicPluginStart, FieldFormatsStart } from '../shared_imports';
 import { ApiService } from '../lib/api';
 import type { InternalFieldType, PluginStart } from '../types';
@@ -42,6 +43,7 @@ export interface Context {
    * It is also used to provide the list of field autocomplete suggestions to the code editor.
    */
   existingConcreteFields: Array<{ name: string; type: string }>;
+  fieldName$: BehaviorSubject<string>;
 }
 
 const fieldEditorContext = createContext<Context | undefined>(undefined);
@@ -57,6 +59,7 @@ export const FieldEditorProvider: FunctionComponent<Context> = ({
   namesNotAllowed,
   existingConcreteFields,
   children,
+  fieldName$,
 }) => {
   const ctx = useMemo<Context>(
     () => ({
@@ -69,6 +72,7 @@ export const FieldEditorProvider: FunctionComponent<Context> = ({
       fieldFormatEditors,
       namesNotAllowed,
       existingConcreteFields,
+      fieldName$,
     }),
     [
       dataView,
@@ -80,6 +84,7 @@ export const FieldEditorProvider: FunctionComponent<Context> = ({
       fieldFormatEditors,
       namesNotAllowed,
       existingConcreteFields,
+      fieldName$,
     ]
   );
 

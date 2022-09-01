@@ -87,6 +87,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       api: { getFieldPreview },
     },
     fieldFormats,
+    fieldName$,
   } = useFieldEditorContext();
 
   const fieldPreview$ = useRef(new Subject<FieldPreview[]>());
@@ -344,7 +345,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   );
 
   const updateCompositeFieldPreview = useCallback(
-    (compositeName: string | null, compositeValues: Record<string, unknown[]>) => {
+    (compositeValues: Record<string, unknown[]>) => {
       const updatedFieldsInScript: string[] = [];
       // if we're displaying a composite subfield, filter results
       const filterSubfield = parentName ? (field: FieldPreview) => field.key === name : () => true;
@@ -362,7 +363,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
           return {
             key: parentName
               ? `${parentName ?? ''}.${fieldName}`
-              : `${compositeName ?? ''}.${fieldName}`,
+              : `${fieldName$.getValue() ?? ''}.${fieldName}`,
             value,
             formattedValue,
             type: valueTypeToSelectedType(value),
@@ -378,7 +379,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
         error: null,
       });
     },
-    [valueFormatter, parentName, name, fieldPreview$]
+    [valueFormatter, parentName, name, fieldPreview$, fieldName$]
   );
 
   const updatePreview = useCallback(async () => {
@@ -447,7 +448,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
         });
       } else {
         if (!Array.isArray(values)) {
-          updateCompositeFieldPreview(name, values);
+          updateCompositeFieldPreview(values);
         } else {
           updateSingleFieldPreview(name!, values);
         }

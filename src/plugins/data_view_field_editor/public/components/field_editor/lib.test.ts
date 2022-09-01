@@ -20,8 +20,6 @@ describe('getFieldPreviewChanges', () => {
     });
     subj.next([]);
     subj.next([{ key: 'hello', value: 'world', type: 'keyword' }]);
-
-    // expect(changes.length).toBe(0);
   });
 
   it('should return updated type', (done) => {
