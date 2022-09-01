@@ -17,7 +17,7 @@ import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { groupBy, escape, uniq } from 'lodash';
 import type { Query } from '@kbn/data-plugin/common';
 import { SearchResponseWarning } from '@kbn/data-plugin/public/search/types';
-import type { FramePublicAPI, IndexPattern, IndexPatternField, StateSetter } from '../types';
+import type { FramePublicAPI, IndexPattern, StateSetter } from '../types';
 import type {
   IndexPatternLayer,
   IndexPatternPersistedState,
@@ -163,13 +163,6 @@ const accuracyModeEnabledWarning = (columnName: string, docLink: string) => (
     }}
   />
 );
-
-export function getFieldType(field: IndexPatternField) {
-  if (field.timeSeriesMetricType) {
-    return field.timeSeriesMetricType;
-  }
-  return field.type;
-}
 
 export function getTSDBRollupWarningMessages(
   state: IndexPatternPersistedState,
