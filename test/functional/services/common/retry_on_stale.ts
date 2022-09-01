@@ -10,6 +10,9 @@ import { ToolingLog } from '@kbn/tooling-log';
 
 const MAX_ATTEMPTS = 10;
 
+const isObj = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null;
+const errMsg = (err: unknown) => (isObj(err) && typeof err.message === 'string' ? err.message : '');
+
 export async function retryOnStale<T>(log: ToolingLog, fn: () => Promise<T>): Promise<T> {
   let attempt = 0;
   while (true) {
@@ -17,7 +20,7 @@ export async function retryOnStale<T>(log: ToolingLog, fn: () => Promise<T>): Pr
     try {
       return await fn();
     } catch (error) {
-      if (error.message.includes('stale element reference')) {
+      if (errMsg(error).includes('stale element reference')) {
         if (attempt >= MAX_ATTEMPTS) {
           throw new Error(`retryOnStale ran out of attempts after ${attempt} tries`);
         }
